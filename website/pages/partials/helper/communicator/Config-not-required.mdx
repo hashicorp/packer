@@ -1,0 +1,36 @@
+<!-- Code generated from the comments of the Config struct in helper/communicator/config.go; DO NOT EDIT MANUALLY -->
+
+-   `communicator` (string) - Packer currently supports three kinds of communicators:
+    
+    -   `none` - No communicator will be used. If this is set, most
+        provisioners also can't be used.
+    
+    -   `ssh` - An SSH connection will be established to the machine. This
+        is usually the default.
+    
+    -   `winrm` - A WinRM connection will be established.
+    
+    In addition to the above, some builders have custom communicators they
+    can use. For example, the Docker builder has a "docker" communicator
+    that uses `docker exec` and `docker cp` to execute scripts and copy
+    files.
+    
+-   `pause_before_connecting` (duration string | ex: "1h5m2s") - We recommend that you enable SSH or WinRM as the very last step in your
+    guest's bootstrap script, but sometimes you may have a race condition where
+    you need Packer to wait before attempting to connect to your guest.
+    
+    If you end up in this situation, you can use the template option
+    `pause_before_connecting`. By default, there is no pause. For example:
+    
+    ```json
+    {
+      "communicator": "ssh",
+      "ssh_username": "myuser",
+      "pause_before_connecting": "10m"
+    }
+    ```
+    
+    In this example, Packer will check whether it can connect, as normal. But once
+    a connection attempt is successful, it will disconnect and then wait 10 minutes
+    before connecting to the guest and beginning provisioning.
+    

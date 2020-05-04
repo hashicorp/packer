@@ -1,9 +1,14 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Core Services API
 //
-// APIs for Networking Service, Compute Service, and Block Volume Service.
+// API covering the Networking (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/overview.htm),
+// Compute (https://docs.cloud.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm), and
+// Block Volume (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/overview.htm) services. Use this API
+// to manage resources such as virtual cloud networks (VCNs), compute instances, and
+// block storage volumes.
 //
 
 package core
@@ -15,7 +20,7 @@ import (
 // CrossConnect For use with Oracle Cloud Infrastructure FastConnect. A cross-connect represents a
 // physical connection between an existing network and Oracle. Customers who are colocated
 // with Oracle in a FastConnect location create and use cross-connects. For more
-// information, see FastConnect Overview (https://docs.us-phoenix-1.oraclecloud.com/Content/Network/Concepts/fastconnect.htm).
+// information, see FastConnect Overview (https://docs.cloud.oracle.com/Content/Network/Concepts/fastconnect.htm).
 // Oracle recommends you create each cross-connect in a
 // CrossConnectGroup so you can use link aggregation
 // with the connection.
@@ -24,7 +29,9 @@ import (
 // same way as a colocated customer's (with `CrossConnect` and `CrossConnectGroup` objects, and so on).
 // To use any of the API operations, you must be authorized in an IAM policy. If you're not authorized,
 // talk to an administrator. If you're an administrator who needs to write policies to give users access, see
-// Getting Started with Policies (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Concepts/policygetstarted.htm).
+// Getting Started with Policies (https://docs.cloud.oracle.com/Content/Identity/Concepts/policygetstarted.htm).
+// **Warning:** Oracle recommends that you avoid using any confidential information when you
+// supply string values using the API.
 type CrossConnect struct {
 
 	// The OCID of the compartment containing the cross-connect group.
@@ -33,9 +40,19 @@ type CrossConnect struct {
 	// The OCID of the cross-connect group this cross-connect belongs to (if any).
 	CrossConnectGroupId *string `mandatory:"false" json:"crossConnectGroupId"`
 
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
 	// A user-friendly name. Does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
 	DisplayName *string `mandatory:"false" json:"displayName"`
+
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// The cross-connect's Oracle ID (OCID).
 	Id *string `mandatory:"false" json:"id"`
@@ -53,6 +70,10 @@ type CrossConnect struct {
 	// Example: `10 Gbps`
 	PortSpeedShapeName *string `mandatory:"false" json:"portSpeedShapeName"`
 
+	// A reference name or identifier for the physical fiber connection that this cross-connect
+	// uses.
+	CustomerReferenceName *string `mandatory:"false" json:"customerReferenceName"`
+
 	// The date and time the cross-connect was created, in the format defined by RFC3339.
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
@@ -65,7 +86,7 @@ func (m CrossConnect) String() string {
 // CrossConnectLifecycleStateEnum Enum with underlying type: string
 type CrossConnectLifecycleStateEnum string
 
-// Set of constants representing the allowable values for CrossConnectLifecycleState
+// Set of constants representing the allowable values for CrossConnectLifecycleStateEnum
 const (
 	CrossConnectLifecycleStatePendingCustomer CrossConnectLifecycleStateEnum = "PENDING_CUSTOMER"
 	CrossConnectLifecycleStateProvisioning    CrossConnectLifecycleStateEnum = "PROVISIONING"
@@ -84,7 +105,7 @@ var mappingCrossConnectLifecycleState = map[string]CrossConnectLifecycleStateEnu
 	"TERMINATED":       CrossConnectLifecycleStateTerminated,
 }
 
-// GetCrossConnectLifecycleStateEnumValues Enumerates the set of values for CrossConnectLifecycleState
+// GetCrossConnectLifecycleStateEnumValues Enumerates the set of values for CrossConnectLifecycleStateEnum
 func GetCrossConnectLifecycleStateEnumValues() []CrossConnectLifecycleStateEnum {
 	values := make([]CrossConnectLifecycleStateEnum, 0)
 	for _, v := range mappingCrossConnectLifecycleState {

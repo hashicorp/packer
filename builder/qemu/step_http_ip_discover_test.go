@@ -2,9 +2,10 @@ package qemu
 
 import (
 	"context"
+	"testing"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
-	"testing"
 )
 
 func TestStepHTTPIPDiscover_Run(t *testing.T) {

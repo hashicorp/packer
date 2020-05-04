@@ -2,10 +2,11 @@ package interpolate
 
 import (
 	"bytes"
-	"github.com/google/uuid"
 	"regexp"
 	"strings"
 	"text/template"
+
+	"github.com/google/uuid"
 )
 
 // Context is the context that an interpolation is done in. This defines
@@ -44,7 +45,12 @@ func NewContext() *Context {
 	return &Context{}
 }
 
-// Render is shorthand for constructing an I and calling Render.
+// RenderOnce is shorthand for constructing an I and calling Render one time.
+func RenderOnce(v string, ctx *Context) (string, error) {
+	return (&I{Value: v}).Render(ctx)
+}
+
+// Render is shorthand for constructing an I and calling Render until all variables are rendered.
 func Render(v string, ctx *Context) (rendered string, err error) {
 	// Keep interpolating until all variables are done
 	// Sometimes a variable can been inside another one

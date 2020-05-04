@@ -14,11 +14,11 @@ build {
         bool     = "true"
         trilean  = true
         duration = "${9 + 1}s"
-        map_string_string {
+        map_string_string = {
             a = "b"
             c = "d"
         }
-        slice_string = var.availability_zone_names
+        slice_string = [for s in var.availability_zone_names : lower(s)]
         slice_slice_string = [
             ["a","b"],
             ["c","d"]
@@ -31,11 +31,11 @@ build {
             bool     = true
             trilean  = true
             duration = "10s"
-            map_string_string {
+            map_string_string = {
                 a = "b"
                 c = "d"
             }
-            slice_string = var.availability_zone_names
+            slice_string = [for s in var.availability_zone_names : lower(s)]
             slice_slice_string = [
                 ["a","b"],
                 ["c","d"]
@@ -43,6 +43,17 @@ build {
         }
 
         nested_slice {
+            tag {
+                key = "first_tag_key"
+                value = "first_tag_value"
+            }
+            dynamic "tag" {
+                for_each = local.standard_tags
+                content {
+                    key                 = tag.key
+                    value               = tag.value
+                }
+            }
         }
     }
 
@@ -54,15 +65,11 @@ build {
         bool     = true
         trilean  = true
         duration = "10s"
-        map_string_string {
+        map_string_string = {
             a = "b"
             c = "d"
         }
-        slice_string = [
-            "a",
-            "b",
-            "c",
-        ]
+        slice_string = local.abc_map[*].id
         slice_slice_string = [
             ["a","b"],
             ["c","d"]
@@ -75,7 +82,7 @@ build {
             bool     = true
             trilean  = true
             duration = "10s"
-            map_string_string {
+            map_string_string = {
                 a = "b"
                 c = "d"
             }
@@ -91,6 +98,17 @@ build {
         }
 
         nested_slice {
+            tag {
+                key = "first_tag_key"
+                value = "first_tag_value"
+            }
+            dynamic "tag" {
+                for_each = local.standard_tags
+                content {
+                    key                 = tag.key
+                    value               = tag.value
+                }
+            }
         }
     }
 
@@ -102,7 +120,7 @@ build {
         bool     = true
         trilean  = true
         duration = "10s"
-        map_string_string {
+        map_string_string = {
             a = "b"
             c = "d"
         }
@@ -123,7 +141,7 @@ build {
             bool     = true
             trilean  = true
             duration = "10s"
-            map_string_string {
+            map_string_string = {
                 a = "b"
                 c = "d"
             }
@@ -149,7 +167,7 @@ build {
         bool     = true
         trilean  = true
         duration = "10s"
-        map_string_string {
+        map_string_string = {
             a = "b"
             c = "d"
         }
@@ -170,7 +188,7 @@ build {
             bool     = true
             trilean  = true
             duration = "10s"
-            map_string_string {
+            map_string_string = {
                 a = "b"
                 c = "d"
             }

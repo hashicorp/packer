@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/hashicorp/hcl/v2/hcldec"
 	"path/filepath"
 	"sync"
 	"testing"
+
+	"github.com/hashicorp/hcl/v2/hcldec"
 
 	"golang.org/x/sync/errgroup"
 
@@ -46,7 +47,9 @@ type LockedBuilder struct{ unlock chan interface{} }
 
 func (b *LockedBuilder) ConfigSpec() hcldec.ObjectSpec { return nil }
 
-func (b *LockedBuilder) Prepare(raws ...interface{}) ([]string, []string, error) { return nil, nil, nil }
+func (b *LockedBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	return nil, nil, nil
+}
 
 func (b *LockedBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	ui.Say("locking build")

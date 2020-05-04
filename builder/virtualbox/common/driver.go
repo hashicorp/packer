@@ -25,6 +25,9 @@ type Driver interface {
 	// Create an NVME controller
 	CreateNVMeController(vm string, controller string, portcount int) error
 
+	// Delete all floppy controllers
+	RemoveFloppyControllers(vm string) error
+
 	// Delete a VM by name
 	Delete(string) error
 

@@ -8,8 +8,8 @@ Issues on GitHub are intended to be related to bugs or feature requests, so we
 recommend using our other community resources instead of asking here if you
 have a question.
 
-- Packer Guides: https://www.packer.io/guides/index.html
+- Packer Guides: https://www.packer.io/guides
 - Discussion List: https://groups.google.com/group/packer-tool
 - Any other questions can be sent to the packer section of the HashiCorp
   forum: https://discuss.hashicorp.com/c/packer
-- Packer community links: https://www.packer.io/community.html
+- Packer community links: https://www.packer.io/community

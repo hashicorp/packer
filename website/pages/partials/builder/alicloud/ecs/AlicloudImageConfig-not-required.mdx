@@ -1,0 +1,59 @@
+<!-- Code generated from the comments of the AlicloudImageConfig struct in builder/alicloud/ecs/image_config.go; DO NOT EDIT MANUALLY -->
+
+-   `image_version` (string) - The version number of the image, with a length
+    limit of 1 to 40 English characters.
+    
+-   `image_description` (string) - The description of the image, with a length
+    limit of 0 to 256 characters. Leaving it blank means null, which is the
+    default value. It cannot begin with `http://` or `https://`.
+    
+-   `image_share_account` ([]string) - The IDs of to-be-added Aliyun
+    accounts to which the image is shared. The number of accounts is 1 to 10.
+    If number of accounts is greater than 10, this parameter is ignored.
+    
+-   `image_unshare_account` ([]string) - Alicloud Image UN Share Accounts
+-   `image_copy_regions` ([]string) - Copy to the destination regionIds.
+    
+-   `image_copy_names` ([]string) - The name of the destination image,
+    [2, 128] English or Chinese characters. It must begin with an
+    uppercase/lowercase letter or a Chinese character, and may contain numbers,
+    _ or -. It cannot begin with `http://` or `https://`.
+    
+-   `image_encrypted` (boolean) - Whether or not to encrypt the target images,            including those copied if image_copy_regions is specified. If this option
+    is set to true, a temporary image will be created from the provisioned
+    instance in the main region and an encrypted copy will be generated in the
+    same region. By default, Packer will keep the encryption setting to what
+    it was in the source image.
+    
+-   `image_force_delete` (bool) - If this value is true, when the target image names including those
+    copied are duplicated with existing images, it will delete the existing
+    images and then create the target images, otherwise, the creation will
+    fail. The default value is false. Check `image_name` and
+    `image_copy_names` options for names of target images. If
+    [-force](/docs/commands/build#force) option is
+    provided in `build` command, this option can be omitted and taken as
+    true.
+    
+-   `image_force_delete_snapshots` (bool) - If this value is true, when delete the duplicated existing images, the
+    source snapshots of those images will be delete either. If
+    [-force](/docs/commands/build#force) option is
+    provided in `build` command, this option can be omitted and taken as
+    true.
+    
+-   `image_force_delete_instances` (bool) - Alicloud Image Force Delete Instances
+-   `image_ignore_data_disks` (bool) - If this value is true, the image
+    created will not include any snapshot of data disks. This option would be
+    useful for any circumstance that default data disks with instance types are
+    not concerned. The default value is false.
+    
+-   `skip_region_validation` (bool) - The region validation can be skipped
+    if this value is true, the default value is false.
+    
+-   `tags` (map[string]string) - Key/value pair tags applied to the destination image and relevant
+    snapshots.
+    
+-   `tag` ([]{key string, value string}) - Same as [`tags`](#tags) but defined as a singular repeatable block
+    containing a `key` and a `value` field. In HCL2 mode the
+    [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+    will allow you to create those programatically.
+    

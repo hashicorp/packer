@@ -57,8 +57,23 @@ type Config struct {
 	// Type of disk used to back your instance, like pd-ssd or pd-standard.
 	// Defaults to pd-standard.
 	DiskType string `mapstructure:"disk_type" required:"false"`
+	// Create a Shielded VM image with Secure Boot enabled. It helps ensure that
+	// the system only runs authentic software by verifying the digital signature
+	// of all boot components, and halting the boot process if signature verification
+	// fails. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
+	EnableSecureBoot bool `mapstructure:"enable_secure_boot" required:"false"`
+	// Create a Shielded VM image with virtual trusted platform module
+	// Measured Boot enabled. A vTPM is a virtualized trusted platform module,
+	// which is a specialized computer chip you can use to protect objects,
+	// like keys and certificates, that you use to authenticate access to your
+	// system. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
+	EnableVtpm bool `mapstructure:"enable_vtpm" required:"false"`
+	// Integrity monitoring helps you understand and make decisions about the
+	// state of your VM instances. Note: integrity monitoring relies on having
+	// vTPM enabled. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
+	EnableIntegrityMonitoring bool `mapstructure:"enable_integrity_monitoring" required:"false"`
 	// The unique name of the resulting image. Defaults to
-	// "packer-{{timestamp}}".
+	// `packer-{{timestamp}}`.
 	ImageName string `mapstructure:"image_name" required:"false"`
 	// The description of the resulting image.
 	ImageDescription string `mapstructure:"image_description" required:"false"`
@@ -68,7 +83,7 @@ type Config struct {
 	//
 	// example:
 	//
-	//  ``` json
+	//  ```json
 	//  {
 	//     "kmsKeyName": "projects/${project}/locations/${region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
 	//  }
@@ -84,7 +99,7 @@ type Config struct {
 	// Licenses to apply to the created image.
 	ImageLicenses []string `mapstructure:"image_licenses" required:"false"`
 	// A name to give the launched instance. Beware that this must be unique.
-	// Defaults to "packer-{{uuid}}".
+	// Defaults to `packer-{{uuid}}`.
 	InstanceName string `mapstructure:"instance_name" required:"false"`
 	// Key/value pair labels to apply to the launched instance.
 	Labels map[string]string `mapstructure:"labels" required:"false"`
@@ -128,7 +143,7 @@ type Config struct {
 	// The service account scopes for launched
 	// instance. Defaults to:
 	//
-	// ``` json
+	// ```json
 	// [
 	//   "https://www.googleapis.com/auth/userinfo.email",
 	//   "https://www.googleapis.com/auth/compute",
@@ -149,8 +164,9 @@ type Config struct {
 	// family always returns its latest image that is not deprecated. Example:
 	// "debian-8".
 	SourceImageFamily string `mapstructure:"source_image_family" required:"true"`
-	// The project ID of the project containing the source image.
-	SourceImageProjectId string `mapstructure:"source_image_project_id" required:"false"`
+	// A list of project IDs to search for the source image. Packer will search the first
+	// project ID in the list first, and fall back to the next in the list, until it finds the source image.
+	SourceImageProjectId []string `mapstructure:"source_image_project_id" required:"false"`
 	// The path to a startup script to run on the VM from which the image will
 	// be made.
 	StartupScriptFile string `mapstructure:"startup_script_file" required:"false"`
@@ -171,7 +187,7 @@ type Config struct {
 	// Google's cloud. The value should be the path of the token generator
 	// within vault.
 	// For information on how to configure your Vault + GCP engine to produce
-	// Oauth tokens, see https://www.vaultproject.io/docs/auth/gcp.html
+	// Oauth tokens, see https://www.vaultproject.io/docs/auth/gcp
 	// You must have the environment variables VAULT_ADDR and VAULT_TOKEN set,
 	// along with any other relevant variables for accessing your vault
 	// instance. For more information, see the Vault docs:
@@ -219,6 +235,15 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	if c.DiskType == "" {
 		c.DiskType = "pd-standard"
+	}
+
+	// Disabling the vTPM also disables integrity monitoring, because integrity
+	// monitoring relies on data gathered by Measured Boot.
+	if !c.EnableVtpm {
+		if c.EnableIntegrityMonitoring {
+			errs = packer.MultiErrorAppend(errs,
+				errors.New("You cannot enable Integrity Monitoring when vTPM is disabled."))
+		}
 	}
 
 	if c.ImageDescription == "" {

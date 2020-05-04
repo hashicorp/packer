@@ -43,7 +43,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":               &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":               &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":      &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"output_image":               &hcldec.AttrSpec{Name: "output_image", Type: cty.String, Required: false},
 		"container_name":             &hcldec.AttrSpec{Name: "container_name", Type: cty.String, Required: false},
@@ -51,8 +51,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"image":                      &hcldec.AttrSpec{Name: "image", Type: cty.String, Required: false},
 		"profile":                    &hcldec.AttrSpec{Name: "profile", Type: cty.String, Required: false},
 		"init_sleep":                 &hcldec.AttrSpec{Name: "init_sleep", Type: cty.String, Required: false},
-		"publish_properties":         &hcldec.BlockAttrsSpec{TypeName: "publish_properties", ElementType: cty.String, Required: false},
-		"launch_config":              &hcldec.BlockAttrsSpec{TypeName: "launch_config", ElementType: cty.String, Required: false},
+		"publish_properties":         &hcldec.AttrSpec{Name: "publish_properties", Type: cty.Map(cty.String), Required: false},
+		"launch_config":              &hcldec.AttrSpec{Name: "launch_config", Type: cty.Map(cty.String), Required: false},
 	}
 	return s
 }

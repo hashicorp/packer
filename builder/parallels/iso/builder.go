@@ -65,7 +65,7 @@ type Config struct {
 	HardDriveInterface string `mapstructure:"hard_drive_interface" required:"false"`
 	// A list of which interfaces on the
 	// host should be searched for a IP address. The first IP address found on one
-	// of these will be used as {{ .HTTPIP }} in the boot_command. Defaults to
+	// of these will be used as `{{ .HTTPIP }}` in the boot_command. Defaults to
 	// ["en0", "en1", "en2", "en3", "en4", "en5", "en6", "en7", "en8", "en9",
 	// "ppp0", "ppp1", "ppp2"].
 	HostInterfaces []string `mapstructure:"host_interfaces" required:"false"`

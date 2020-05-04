@@ -1,0 +1,66 @@
+## Building on a Remote vSphere Hypervisor
+
+In addition to using the desktop products of VMware locally to build virtual
+machines, Packer can use a remote VMware Hypervisor to build the virtual
+machine.
+
+-> **Note:** Packer supports ESXi 5.1 and above.
+
+Before using a remote vSphere Hypervisor, you need to enable GuestIPHack by
+running the following command:
+
+```text
+esxcli system settings advanced set -o /Net/GuestIPHack -i 1
+```
+
+When using a remote VMware Hypervisor, the builder still downloads the ISO and
+various files locally, and uploads these to the remote machine. Packer currently
+uses SSH to communicate to the ESXi machine rather than the vSphere API. 
+If you want to use vSphere API, see the [vsphere-iso](/docs/builders/vsphere-iso) builder.
+
+Packer also requires VNC to issue boot commands during a build, which may be
+disabled on some remote VMware Hypervisors. Please consult the appropriate
+documentation on how to update VMware Hypervisor's firewall to allow these
+connections. VNC can be disabled by not setting a `boot_command` and setting
+`disable_vnc` to `true`.
+
+Please note that you should disable vMotion for the host you intend to run
+Packer builds on; a vMotion event will cause the Packer build to fail.
+
+To use a remote VMware vSphere Hypervisor to build your virtual machine, fill in
+the required `remote_*` configurations:
+
+- `remote_type` - This must be set to "esx5".
+
+- `remote_host` - The host of the remote machine.
+
+Additionally, there are some optional configurations that you'll likely have to
+modify as well:
+
+- `remote_port` - The SSH port of the remote machine
+
+- `remote_datastore` - The path to the datastore where the VM will be stored
+  on the ESXi machine.
+
+- `remote_cache_datastore` - The path to the datastore where supporting files
+  will be stored during the build on the remote machine.
+
+- `remote_cache_directory` - The path where the ISO and/or floppy files will
+  be stored during the build on the remote machine. The path is relative to
+  the `remote_cache_datastore` on the remote machine.
+
+- `remote_username` - The SSH username used to access the remote machine.
+
+- `remote_password` - The SSH password for access to the remote machine.
+
+- `remote_private_key_file` - The SSH key for access to the remote machine.
+
+- `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
+  format of the exported virtual machine. This defaults to "ovf".
+  Before using this option, you need to install `ovftool`. This option
+  currently only works when option remote_type is set to "esx5".
+  Since ovftool is only capable of password based authentication
+  `remote_password` must be set when exporting the VM.
+
+- `vnc_disable_password` - This must be set to "true" when using VNC with
+  ESXi 6.5 or 6.7.

@@ -41,7 +41,7 @@ func (*FlatBlockDevice) HCL2Spec() map[string]hcldec.Spec {
 		"virtual_name":          &hcldec.AttrSpec{Name: "virtual_name", Type: cty.String, Required: false},
 		"volume_type":           &hcldec.AttrSpec{Name: "volume_type", Type: cty.String, Required: false},
 		"volume_size":           &hcldec.AttrSpec{Name: "volume_size", Type: cty.Number, Required: false},
-		"tags":                  &hcldec.BlockAttrsSpec{TypeName: "tags", ElementType: cty.String, Required: false},
+		"tags":                  &hcldec.AttrSpec{Name: "tags", Type: cty.Map(cty.String), Required: false},
 	}
 	return s
 }
@@ -112,6 +112,7 @@ type FlatConfig struct {
 	SSHBastionAgentAuth         *bool                                  `mapstructure:"ssh_bastion_agent_auth" cty:"ssh_bastion_agent_auth"`
 	SSHBastionUsername          *string                                `mapstructure:"ssh_bastion_username" cty:"ssh_bastion_username"`
 	SSHBastionPassword          *string                                `mapstructure:"ssh_bastion_password" cty:"ssh_bastion_password"`
+	SSHBastionInteractive       *bool                                  `mapstructure:"ssh_bastion_interactive" cty:"ssh_bastion_interactive"`
 	SSHBastionPrivateKeyFile    *string                                `mapstructure:"ssh_bastion_private_key_file" cty:"ssh_bastion_private_key_file"`
 	SSHFileTransferMethod       *string                                `mapstructure:"ssh_file_transfer_method" cty:"ssh_file_transfer_method"`
 	SSHProxyHost                *string                                `mapstructure:"ssh_proxy_host" cty:"ssh_proxy_host"`
@@ -153,7 +154,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":                         &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                         &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":                      &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":                &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":                &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables":           &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"access_key":                           &hcldec.AttrSpec{Name: "access_key", Type: cty.String, Required: false},
 		"custom_endpoint_oapi":                 &hcldec.AttrSpec{Name: "custom_endpoint_oapi", Type: cty.String, Required: false},
@@ -175,14 +176,14 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"shutdown_behavior":                    &hcldec.AttrSpec{Name: "shutdown_behavior", Type: cty.String, Required: false},
 		"vm_type":                              &hcldec.AttrSpec{Name: "vm_type", Type: cty.String, Required: false},
 		"security_group_filter":                &hcldec.BlockSpec{TypeName: "security_group_filter", Nested: hcldec.ObjectSpec((*common.FlatSecurityGroupFilterOptions)(nil).HCL2Spec())},
-		"run_tags":                             &hcldec.BlockAttrsSpec{TypeName: "run_tags", ElementType: cty.String, Required: false},
+		"run_tags":                             &hcldec.AttrSpec{Name: "run_tags", Type: cty.Map(cty.String), Required: false},
 		"security_group_id":                    &hcldec.AttrSpec{Name: "security_group_id", Type: cty.String, Required: false},
 		"security_group_ids":                   &hcldec.AttrSpec{Name: "security_group_ids", Type: cty.List(cty.String), Required: false},
 		"source_omi":                           &hcldec.AttrSpec{Name: "source_omi", Type: cty.String, Required: false},
 		"source_omi_filter":                    &hcldec.BlockSpec{TypeName: "source_omi_filter", Nested: hcldec.ObjectSpec((*common.FlatOmiFilterOptions)(nil).HCL2Spec())},
 		"spot_price":                           &hcldec.AttrSpec{Name: "spot_price", Type: cty.String, Required: false},
 		"spot_price_auto_product":              &hcldec.AttrSpec{Name: "spot_price_auto_product", Type: cty.String, Required: false},
-		"spot_tags":                            &hcldec.BlockAttrsSpec{TypeName: "spot_tags", ElementType: cty.String, Required: false},
+		"spot_tags":                            &hcldec.AttrSpec{Name: "spot_tags", Type: cty.Map(cty.String), Required: false},
 		"subnet_filter":                        &hcldec.BlockSpec{TypeName: "subnet_filter", Nested: hcldec.ObjectSpec((*common.FlatSubnetFilterOptions)(nil).HCL2Spec())},
 		"subnet_id":                            &hcldec.AttrSpec{Name: "subnet_id", Type: cty.String, Required: false},
 		"temporary_key_pair_name":              &hcldec.AttrSpec{Name: "temporary_key_pair_name", Type: cty.String, Required: false},
@@ -211,6 +212,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_bastion_agent_auth":               &hcldec.AttrSpec{Name: "ssh_bastion_agent_auth", Type: cty.Bool, Required: false},
 		"ssh_bastion_username":                 &hcldec.AttrSpec{Name: "ssh_bastion_username", Type: cty.String, Required: false},
 		"ssh_bastion_password":                 &hcldec.AttrSpec{Name: "ssh_bastion_password", Type: cty.String, Required: false},
+		"ssh_bastion_interactive":              &hcldec.AttrSpec{Name: "ssh_bastion_interactive", Type: cty.Bool, Required: false},
 		"ssh_bastion_private_key_file":         &hcldec.AttrSpec{Name: "ssh_bastion_private_key_file", Type: cty.String, Required: false},
 		"ssh_file_transfer_method":             &hcldec.AttrSpec{Name: "ssh_file_transfer_method", Type: cty.String, Required: false},
 		"ssh_proxy_host":                       &hcldec.AttrSpec{Name: "ssh_proxy_host", Type: cty.String, Required: false},

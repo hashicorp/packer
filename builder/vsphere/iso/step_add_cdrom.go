@@ -6,6 +6,7 @@ package iso
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -48,19 +49,19 @@ func (s *StepAddCDRom) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	ui.Say("Mounting ISO images...")
+	if path, ok := state.GetOk("iso_remote_path"); ok {
+		if err := vm.AddCdrom(s.Config.CdromType, path.(string)); err != nil {
+			state.Put("error", fmt.Errorf("error mounting an image '%v': %v", path, err))
+			return multistep.ActionHalt
+		}
+	}
+
 	if len(s.Config.ISOPaths) > 0 {
 		for _, path := range s.Config.ISOPaths {
 			if err := vm.AddCdrom(s.Config.CdromType, path); err != nil {
 				state.Put("error", fmt.Errorf("error mounting an image '%v': %v", path, err))
 				return multistep.ActionHalt
 			}
-		}
-	}
-
-	if path, ok := state.GetOk("iso_remote_path"); ok {
-		if err := vm.AddCdrom(s.Config.CdromType, path.(string)); err != nil {
-			state.Put("error", fmt.Errorf("error mounting an image '%v': %v", path, err))
-			return multistep.ActionHalt
 		}
 	}
 	return multistep.ActionContinue

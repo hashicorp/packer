@@ -1,0 +1,15 @@
+<!-- Code generated from the comments of the ShutdownConfig struct in builder/vsphere/common/step_shutdown.go; DO NOT EDIT MANUALLY -->
+
+-   `shutdown_command` (string) - Specify a VM guest shutdown command. VMware guest tools are used by
+    default.
+    
+-   `shutdown_timeout` (duration string | ex: "1h5m2s") - Amount of time to wait for graceful VM shutdown.
+    Defaults to 5m or five minutes.
+    
+-   `disable_shutdown` (bool) - Packer normally halts the virtual machine after all provisioners have
+    run when no `shutdown_command` is defined. If this is set to `true`, Packer
+    *will not* halt the virtual machine but will assume that you will send the stop
+    signal yourself through the preseed.cfg or your final provisioner.
+    Packer will wait for a default of five minutes until the virtual machine is shutdown.
+    The timeout can be changed using `shutdown_timeout` option.
+    

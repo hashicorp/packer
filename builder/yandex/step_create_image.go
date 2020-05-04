@@ -26,7 +26,7 @@ func (stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multis
 	defer cancel()
 
 	op, err := sdk.WrapOperation(sdk.Compute().Image().Create(ctx, &compute.CreateImageRequest{
-		FolderId:    c.FolderID,
+		FolderId:    c.TargetImageFolderID,
 		Name:        c.ImageName,
 		Family:      c.ImageFamily,
 		Description: c.ImageDescription,

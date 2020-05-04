@@ -1,0 +1,13 @@
+{
+  "type": "powershell",
+  "remote_path": "c:/Windows/Temp/packer-acc-test-script-test.ps1",
+  "remote_env_var_path": "C:/Windows/Temp/packer-acc-test-vars.ps1",
+  "inline": [
+    "Write-Host \"Total files found in Temp directory\" ( dir C:/Windows/Temp/packer-*.ps1 | measure).Count;"
+  ]
+},
+{
+  "type": "windows-shell",
+  "inline": ["dir C:\\Windows\\Temp\\packer-*.ps1"],
+  "valid_exit_codes": ["1"]
+}

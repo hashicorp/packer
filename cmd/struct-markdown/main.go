@@ -60,21 +60,22 @@ func main() {
 		}
 
 		fields := structDecl.Fields.List
+		sourcePath := filepath.ToSlash(paths[1])
 		header := Struct{
-			SourcePath: paths[1],
+			SourcePath: sourcePath,
 			Name:       typeSpec.Name.Name,
-			Filename:   "_" + typeSpec.Name.Name + ".html.md",
+			Filename:   typeSpec.Name.Name + ".mdx",
 			Header:     typeDecl.Doc.Text(),
 		}
 		required := Struct{
-			SourcePath: paths[1],
+			SourcePath: sourcePath,
 			Name:       typeSpec.Name.Name,
-			Filename:   "_" + typeSpec.Name.Name + "-required.html.md",
+			Filename:   typeSpec.Name.Name + "-required.mdx",
 		}
 		notRequired := Struct{
-			SourcePath: paths[1],
+			SourcePath: sourcePath,
 			Name:       typeSpec.Name.Name,
-			Filename:   "_" + typeSpec.Name.Name + "-not-required.html.md",
+			Filename:   typeSpec.Name.Name + "-not-required.mdx",
 		}
 
 		for _, field := range fields {
@@ -116,6 +117,10 @@ func main() {
 				fieldType = `duration string | ex: "1h5m2s"`
 			case "config.Trilean":
 				fieldType = `boolean`
+			case "hcl2template.NameValues":
+				fieldType = `[]{name string, value string}`
+			case "hcl2template.KeyValues":
+				fieldType = `[]{key string, value string}`
 			}
 
 			field := Field{
@@ -130,7 +135,7 @@ func main() {
 			}
 		}
 
-		dir := filepath.Join(packerDir, "website", "source", "partials", builderName)
+		dir := filepath.Join(packerDir, "website", "pages", "partials", builderName)
 		os.MkdirAll(dir, 0755)
 
 		for _, str := range []Struct{header, required, notRequired} {

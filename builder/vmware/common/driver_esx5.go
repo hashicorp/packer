@@ -495,6 +495,15 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 		if record["IPAddress"] == "0.0.0.0" {
 			continue
 		}
+
+		// if ssh is going through a bastion, we can't easily check if the nic is reachable on the network
+		// so just pick the first one that is not 0.0.0.0
+		if sshc.SSHBastionHost != "" {
+			address := record["IPAddress"]
+			state.Put("vm_address", address)
+			return address, nil
+		}
+
 		// When multiple NICs are connected to the same network, choose
 		// one that has a route back. This Dial should ensure that.
 		conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", record["IPAddress"], port), 2*time.Second)

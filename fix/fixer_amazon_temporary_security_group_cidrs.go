@@ -1,8 +1,9 @@
 package fix
 
 import (
-	"github.com/mitchellh/mapstructure"
 	"strings"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 type FixerAmazonTemporarySecurityCIDRs struct{}

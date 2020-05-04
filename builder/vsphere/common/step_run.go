@@ -5,10 +5,11 @@ package common
 
 import (
 	"context"
+	"strings"
+
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"strings"
 )
 
 type RunConfig struct {

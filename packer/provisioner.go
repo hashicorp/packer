@@ -80,6 +80,13 @@ func BasicPlaceholderData() map[string]string {
 }
 
 func CastDataToMap(data interface{}) map[string]interface{} {
+
+	if interMap, ok := data.(map[string]interface{}); ok {
+		// null and file builder sometimes don't use a communicator and
+		// therefore don't go through RPC
+		return interMap
+	}
+
 	// Provisioners expect a map[string]interface{} in their data field, but
 	// it gets converted into a map[interface]interface on the way over the
 	// RPC. Check that data can be cast into such a form, and cast it.
@@ -153,6 +160,48 @@ func (p *PausedProvisioner) Provision(ctx context.Context, ui Ui, comm Communica
 	}
 
 	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
+}
+
+// RetriedProvisioner is a Provisioner implementation that retries
+// the provisioner whenever there's an error.
+type RetriedProvisioner struct {
+	MaxRetries  int
+	Provisioner Provisioner
+}
+
+func (r *RetriedProvisioner) ConfigSpec() hcldec.ObjectSpec { return r.ConfigSpec() }
+func (r *RetriedProvisioner) FlatConfig() interface{}       { return r.FlatConfig() }
+func (r *RetriedProvisioner) Prepare(raws ...interface{}) error {
+	return r.Provisioner.Prepare(raws...)
+}
+
+func (r *RetriedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
+	if ctx.Err() != nil { // context was cancelled
+		return ctx.Err()
+	}
+
+	err := r.Provisioner.Provision(ctx, ui, comm, generatedData)
+	if err == nil {
+		return nil
+	}
+
+	leftTries := r.MaxRetries
+	for ; leftTries > 0; leftTries-- {
+		if ctx.Err() != nil { // context was cancelled
+			return ctx.Err()
+		}
+
+		ui.Say(fmt.Sprintf("Provisioner failed with %q, retrying with %d trie(s) left", err, leftTries))
+
+		err := r.Provisioner.Provision(ctx, ui, comm, generatedData)
+		if err == nil {
+			return nil
+		}
+
+	}
+	ui.Say("retry limit reached.")
+
+	return err
 }
 
 // DebuggedProvisioner is a Provisioner implementation that waits until a key

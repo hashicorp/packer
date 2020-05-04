@@ -210,8 +210,8 @@ func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
 	go waitForState(errCh, "DONE", d.refreshZoneOp(zone, op))
 	return errCh, nil
 }
-
 func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
+
 	projects := []string{
 		d.projectId,
 		// Public projects, drawn from
@@ -234,6 +234,9 @@ func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
 		"google-containers",
 		"opensuse-cloud",
 	}
+	return d.GetImageFromProjects(projects, name, fromFamily)
+}
+func (d *driverGCE) GetImageFromProjects(projects []string, name string, fromFamily bool) (*Image, error) {
 	var errs error
 	for _, project := range projects {
 		image, err := d.GetImageFromProject(project, name, fromFamily)
@@ -268,11 +271,12 @@ func (d *driverGCE) GetImageFromProject(project, name string, fromFamily bool) (
 		return nil, fmt.Errorf("Image, %s, could not be found in project: %s", name, project)
 	} else {
 		return &Image{
-			Licenses:  image.Licenses,
-			Name:      image.Name,
-			ProjectId: project,
-			SelfLink:  image.SelfLink,
-			SizeGb:    image.DiskSizeGb,
+			GuestOsFeatures: image.GuestOsFeatures,
+			Licenses:        image.Licenses,
+			Name:            image.Name,
+			ProjectId:       project,
+			SelfLink:        image.SelfLink,
+			SizeGb:          image.DiskSizeGb,
 		}, nil
 	}
 }
@@ -463,7 +467,23 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		},
 	}
 
-	d.ui.Message("Requesting instance creation...")
+	// Shielded VMs configuration. If the user has set at least one of the
+	// options, the shielded VM configuration will reflect that. If they
+	// don't set any of the options the settings will default to the ones
+	// of the source compute image which is used for creating the virtual
+	// machine.
+	shieldedInstanceConfig := &compute.ShieldedInstanceConfig{
+		EnableSecureBoot:          c.EnableSecureBoot,
+		EnableVtpm:                c.EnableVtpm,
+		EnableIntegrityMonitoring: c.EnableIntegrityMonitoring,
+	}
+	shieldedUiMessage := ""
+	if c.EnableSecureBoot || c.EnableVtpm || c.EnableIntegrityMonitoring {
+		instance.ShieldedInstanceConfig = shieldedInstanceConfig
+		shieldedUiMessage = " Shielded VM"
+	}
+
+	d.ui.Message(fmt.Sprintf("Requesting%s instance creation...", shieldedUiMessage))
 	op, err := d.service.Instances.Insert(d.projectId, zone.Name, &instance).Do()
 	if err != nil {
 		return nil, err

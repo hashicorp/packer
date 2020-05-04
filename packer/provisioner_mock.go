@@ -14,6 +14,7 @@ type MockProvisioner struct {
 	PrepCalled       bool
 	PrepConfigs      []interface{}
 	ProvCalled       bool
+	ProvRetried      bool
 	ProvCommunicator Communicator
 	ProvUi           Ui
 }
@@ -29,6 +30,11 @@ func (t *MockProvisioner) Prepare(configs ...interface{}) error {
 }
 
 func (t *MockProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
+	if t.ProvCalled {
+		t.ProvRetried = true
+		return nil
+	}
+
 	t.ProvCalled = true
 	t.ProvCommunicator = comm
 	t.ProvUi = ui

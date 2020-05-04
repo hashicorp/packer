@@ -10,14 +10,15 @@ package chroot
 import (
 	"context"
 	"errors"
-	"github.com/hashicorp/packer/builder"
 	"runtime"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/chroot"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -47,11 +48,11 @@ type Config struct {
 	// in the Chroot Mounts section. Please read that section for more
 	// information on how to use this.
 	ChrootMounts [][]string `mapstructure:"chroot_mounts" required:"false"`
-	// How to run shell commands. This defaults to {{.Command}}. This may be
+	// How to run shell commands. This defaults to `{{.Command}}`. This may be
 	// useful to set if you want to set environmental variables or perhaps run
 	// it with sudo or so on. This is a configuration template where the
 	// .Command variable is replaced with the command to be run. Defaults to
-	// {{.Command}}.
+	// `{{.Command}}`.
 	CommandWrapper string `mapstructure:"command_wrapper" required:"false"`
 	// Paths to files on the running EC2 instance that will be copied into the
 	// chroot environment prior to provisioning. Defaults to /etc/resolv.conf
@@ -89,18 +90,18 @@ type Config struct {
 	MountPartition string `mapstructure:"mount_partition" required:"false"`
 	// The path where the volume will be mounted. This is where the chroot
 	// environment will be. This defaults to
-	// /mnt/packer-amazon-chroot-volumes/{{.Device}}. This is a configuration
+	// `/mnt/packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration
 	// template where the .Device variable is replaced with the name of the
 	// device where the volume is attached.
 	MountPath string `mapstructure:"mount_path" required:"false"`
 	// As pre_mount_commands, but the commands are executed after mounting the
 	// root device and before the extra mount and copy steps. The device and
-	// mount path are provided by {{.Device}} and {{.MountPath}}.
+	// mount path are provided by `{{.Device}}` and `{{.MountPath}}`.
 	PostMountCommands []string `mapstructure:"post_mount_commands" required:"false"`
 	// A series of commands to execute after attaching the root volume and
 	// before mounting the chroot. This is not required unless using
 	// from_scratch. If so, this should include any partitioning and filesystem
-	// creation commands. The path to the device is provided by {{.Device}}.
+	// creation commands. The path to the device is provided by `{{.Device}}`.
 	PreMountCommands []string `mapstructure:"pre_mount_commands" required:"false"`
 	// The root device name. For example, xvda.
 	RootDeviceName string `mapstructure:"root_device_name" required:"false"`
@@ -120,50 +121,54 @@ type Config struct {
 	SourceAmi string `mapstructure:"source_ami" required:"true"`
 	// Filters used to populate the source_ami field. Example:
 	//
+	//```json
+	//{
+	//	 "source_ami_filter": {
+	//	 "filters": {
+	//	  "virtualization-type": "hvm",
+	//	  "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+	//	  "root-device-type": "ebs"
+	//	},
+	//	"owners": ["099720109477"],
+	//	"most_recent": true
+	//	 }
+	//}
+	//```
 	//
-	//     ``` json
-	//     {
-	//       "source_ami_filter": {
-	//       "filters": {
-	//        "virtualization-type": "hvm",
-	//        "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
-	//        "root-device-type": "ebs"
-	//      },
-	//      "owners": ["099720109477"],
-	//      "most_recent": true
-	//       }
-	//     }
-	//     ```
+	//This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
+	//This will fail unless *exactly* one AMI is returned. In the above example,
+	//`most_recent` will cause this to succeed by selecting the newest image.
 	//
-	//     This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
-	//     This will fail unless *exactly* one AMI is returned. In the above example,
-	//     `most_recent` will cause this to succeed by selecting the newest image.
+	//-   `filters` (map of strings) - filters used to select a `source_ami`.
+	//	NOTE: This will fail unless *exactly* one AMI is returned. Any filter
+	//	described in the docs for
+	//	[DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
+	//	is valid.
 	//
-	//     -   `filters` (map of strings) - filters used to select a `source_ami`.
-	//         NOTE: This will fail unless *exactly* one AMI is returned. Any filter
-	//         described in the docs for
-	//         [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
-	//         is valid.
+	//-   `owners` (array of strings) - Filters the images by their owner. You
+	//	may specify one or more AWS account IDs, "self" (which will use the
+	//	account whose credentials you are using to run Packer), or an AWS owner
+	//	alias: for example, "amazon", "aws-marketplace", or "microsoft". This
+	//	option is required for security reasons.
 	//
-	//     -   `owners` (array of strings) - Filters the images by their owner. You
-	//         may specify one or more AWS account IDs, "self" (which will use the
-	//         account whose credentials you are using to run Packer), or an AWS owner
-	//         alias: for example, "amazon", "aws-marketplace", or "microsoft". This
-	//         option is required for security reasons.
+	//-   `most_recent` (boolean) - Selects the newest created image when true.
+	//	This is most useful for selecting a daily distro build.
 	//
-	//     -   `most_recent` (boolean) - Selects the newest created image when true.
-	//         This is most useful for selecting a daily distro build.
-	//
-	//     You may set this in place of `source_ami` or in conjunction with it. If you
-	//     set this in conjunction with `source_ami`, the `source_ami` will be added
-	//     to the filter. The provided `source_ami` must meet all of the filtering
-	//     criteria provided in `source_ami_filter`; this pins the AMI returned by the
-	//     filter, but will cause Packer to fail if the `source_ami` does not exist.
+	//You may set this in place of `source_ami` or in conjunction with it. If you
+	//set this in conjunction with `source_ami`, the `source_ami` will be added
+	//to the filter. The provided `source_ami` must meet all of the filtering
+	//criteria provided in `source_ami_filter`; this pins the AMI returned by the
+	//filter, but will cause Packer to fail if the `source_ami` does not exist.
 	SourceAmiFilter awscommon.AmiFilterOptions `mapstructure:"source_ami_filter" required:"false"`
-	// Tags to apply to the volumes that are *launched*. This is a [template
-	// engine](/docs/templates/engine.html), see [Build template
+	// Key/value pair tags to apply to the volumes that are *launched*. This is
+	// a [template engine](/docs/templates/engine), see [Build template
 	// data](#build-template-data) for more information.
-	RootVolumeTags awscommon.TagMap `mapstructure:"root_volume_tags" required:"false"`
+	RootVolumeTags map[string]string `mapstructure:"root_volume_tags" required:"false"`
+	// Same as [`root_volume_tags`](#root_volume_tags) but defined as a
+	// singular block containing a `key` and a `value` field. In HCL2 mode the
+	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// will allow you to create those programatically.
+	RootVolumeTag hcl2template.KeyValues `mapstructure:"root_volume_tag" required:"false"`
 	// what architecture to use when registering the final AMI; valid options
 	// are "x86_64" or "arm64". Defaults to "x86_64".
 	Architecture string `mapstructure:"ami_architecture" required:"false"`
@@ -253,6 +258,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	// Accumulate any errors or warnings
 	var errs *packer.MultiError
 	var warns []string
+
+	errs = packer.MultiErrorAppend(errs, b.config.RootVolumeTag.CopyOn(&b.config.RootVolumeTags)...)
+	errs = packer.MultiErrorAppend(errs, b.config.SourceAmiFilter.Prepare()...)
 
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs,

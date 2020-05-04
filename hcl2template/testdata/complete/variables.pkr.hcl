@@ -17,9 +17,23 @@ variable "port" {
 
 variable "availability_zone_names" {
   type    = list(string)
-  default = ["a", "b", "c"]
+  default = ["A", "B", "C"]
 }
 
 locals {
   feefoo = "${var.foo}_${var.image_id}"
+}
+
+
+locals {
+  standard_tags = {
+    Component   = "user-service"
+    Environment = "production"
+  }
+
+  abc_map = [
+    {id = "a"},
+    {id = "b"},
+    {id = "c"},
+  ]
 }

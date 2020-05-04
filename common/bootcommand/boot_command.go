@@ -99,6 +99,7 @@ var g = &grammar{
 							pos:        position{line: 14, col: 18, offset: 167},
 							val:        "wait",
 							ignoreCase: false,
+							want:       "\"wait\"",
 						},
 						&labeledExpr{
 							pos:   position{line: 14, col: 25, offset: 174},
@@ -238,6 +239,7 @@ var g = &grammar{
 								pos:        position{line: 39, col: 10, offset: 819},
 								val:        "-",
 								ignoreCase: false,
+								want:       "\"-\"",
 							},
 						},
 						&ruleRefExpr{
@@ -253,6 +255,7 @@ var g = &grammar{
 										pos:        position{line: 39, col: 25, offset: 834},
 										val:        ".",
 										ignoreCase: false,
+										want:       "\".\"",
 									},
 									&oneOrMoreExpr{
 										pos: position{line: 39, col: 29, offset: 838},
@@ -278,6 +281,7 @@ var g = &grammar{
 						pos:        position{line: 43, col: 11, offset: 894},
 						val:        "0",
 						ignoreCase: false,
+						want:       "\"0\"",
 					},
 					&actionExpr{
 						pos: position{line: 43, col: 17, offset: 900},
@@ -336,6 +340,7 @@ var g = &grammar{
 					pos:        position{line: 51, col: 6, offset: 1065},
 					val:        "on",
 					ignoreCase: true,
+					want:       "\"on\"i",
 				},
 			},
 		},
@@ -349,6 +354,7 @@ var g = &grammar{
 					pos:        position{line: 55, col: 7, offset: 1104},
 					val:        "off",
 					ignoreCase: true,
+					want:       "\"off\"i",
 				},
 			},
 		},
@@ -370,6 +376,7 @@ var g = &grammar{
 				pos:        position{line: 64, col: 11, offset: 1240},
 				val:        ">",
 				ignoreCase: false,
+				want:       "\">\"",
 			},
 		},
 		{
@@ -379,6 +386,7 @@ var g = &grammar{
 				pos:        position{line: 65, col: 13, offset: 1256},
 				val:        "<",
 				ignoreCase: false,
+				want:       "\"<\"",
 			},
 		},
 		{
@@ -391,181 +399,217 @@ var g = &grammar{
 						pos:        position{line: 66, col: 14, offset: 1273},
 						val:        "bs",
 						ignoreCase: true,
+						want:       "\"bs\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 66, col: 22, offset: 1281},
 						val:        "del",
 						ignoreCase: true,
+						want:       "\"del\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 66, col: 31, offset: 1290},
 						val:        "enter",
 						ignoreCase: true,
+						want:       "\"enter\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 66, col: 42, offset: 1301},
 						val:        "esc",
 						ignoreCase: true,
+						want:       "\"esc\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 66, col: 51, offset: 1310},
 						val:        "f10",
 						ignoreCase: true,
+						want:       "\"f10\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 66, col: 60, offset: 1319},
 						val:        "f11",
 						ignoreCase: true,
+						want:       "\"f11\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 66, col: 69, offset: 1328},
 						val:        "f12",
 						ignoreCase: true,
+						want:       "\"f12\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 67, col: 11, offset: 1345},
 						val:        "f1",
 						ignoreCase: true,
+						want:       "\"f1\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 67, col: 19, offset: 1353},
 						val:        "f2",
 						ignoreCase: true,
+						want:       "\"f2\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 67, col: 27, offset: 1361},
 						val:        "f3",
 						ignoreCase: true,
+						want:       "\"f3\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 67, col: 35, offset: 1369},
 						val:        "f4",
 						ignoreCase: true,
+						want:       "\"f4\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 67, col: 43, offset: 1377},
 						val:        "f5",
 						ignoreCase: true,
+						want:       "\"f5\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 67, col: 51, offset: 1385},
 						val:        "f6",
 						ignoreCase: true,
+						want:       "\"f6\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 67, col: 59, offset: 1393},
 						val:        "f7",
 						ignoreCase: true,
+						want:       "\"f7\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 67, col: 67, offset: 1401},
 						val:        "f8",
 						ignoreCase: true,
+						want:       "\"f8\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 67, col: 75, offset: 1409},
 						val:        "f9",
 						ignoreCase: true,
+						want:       "\"f9\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 68, col: 12, offset: 1426},
 						val:        "return",
 						ignoreCase: true,
+						want:       "\"return\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 68, col: 24, offset: 1438},
 						val:        "tab",
 						ignoreCase: true,
+						want:       "\"tab\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 68, col: 33, offset: 1447},
 						val:        "up",
 						ignoreCase: true,
+						want:       "\"up\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 68, col: 41, offset: 1455},
 						val:        "down",
 						ignoreCase: true,
+						want:       "\"down\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 68, col: 51, offset: 1465},
 						val:        "spacebar",
 						ignoreCase: true,
+						want:       "\"spacebar\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 68, col: 65, offset: 1479},
 						val:        "insert",
 						ignoreCase: true,
+						want:       "\"insert\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 68, col: 77, offset: 1491},
 						val:        "home",
 						ignoreCase: true,
+						want:       "\"home\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 69, col: 11, offset: 1509},
 						val:        "end",
 						ignoreCase: true,
+						want:       "\"end\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 69, col: 20, offset: 1518},
 						val:        "pageup",
 						ignoreCase: true,
+						want:       "\"pageUp\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 69, col: 32, offset: 1530},
 						val:        "pagedown",
 						ignoreCase: true,
+						want:       "\"pageDown\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 69, col: 46, offset: 1544},
 						val:        "leftalt",
 						ignoreCase: true,
+						want:       "\"leftAlt\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 69, col: 59, offset: 1557},
 						val:        "leftctrl",
 						ignoreCase: true,
+						want:       "\"leftCtrl\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 69, col: 73, offset: 1571},
 						val:        "leftshift",
 						ignoreCase: true,
+						want:       "\"leftShift\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 70, col: 11, offset: 1594},
 						val:        "rightalt",
 						ignoreCase: true,
+						want:       "\"rightAlt\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 70, col: 25, offset: 1608},
 						val:        "rightctrl",
 						ignoreCase: true,
+						want:       "\"rightCtrl\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 70, col: 40, offset: 1623},
 						val:        "rightshift",
 						ignoreCase: true,
+						want:       "\"rightShift\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 70, col: 56, offset: 1639},
 						val:        "leftsuper",
 						ignoreCase: true,
+						want:       "\"leftSuper\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 70, col: 71, offset: 1654},
 						val:        "rightsuper",
 						ignoreCase: true,
+						want:       "\"rightSuper\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 71, col: 11, offset: 1678},
 						val:        "left",
 						ignoreCase: true,
+						want:       "\"left\"i",
 					},
 					&litMatcher{
 						pos:        position{line: 71, col: 21, offset: 1688},
 						val:        "right",
 						ignoreCase: true,
+						want:       "\"right\"i",
 					},
 				},
 			},
@@ -602,36 +646,43 @@ var g = &grammar{
 						pos:        position{line: 75, col: 13, offset: 1745},
 						val:        "ns",
 						ignoreCase: false,
+						want:       "\"ns\"",
 					},
 					&litMatcher{
 						pos:        position{line: 75, col: 20, offset: 1752},
 						val:        "us",
 						ignoreCase: false,
+						want:       "\"us\"",
 					},
 					&litMatcher{
 						pos:        position{line: 75, col: 27, offset: 1759},
 						val:        "µs",
 						ignoreCase: false,
+						want:       "\"µs\"",
 					},
 					&litMatcher{
 						pos:        position{line: 75, col: 34, offset: 1767},
 						val:        "ms",
 						ignoreCase: false,
+						want:       "\"ms\"",
 					},
 					&litMatcher{
 						pos:        position{line: 75, col: 41, offset: 1774},
 						val:        "s",
 						ignoreCase: false,
+						want:       "\"s\"",
 					},
 					&litMatcher{
 						pos:        position{line: 75, col: 47, offset: 1780},
 						val:        "m",
 						ignoreCase: false,
+						want:       "\"m\"",
 					},
 					&litMatcher{
 						pos:        position{line: 75, col: 53, offset: 1786},
 						val:        "h",
 						ignoreCase: false,
+						want:       "\"h\"",
 					},
 				},
 			},
@@ -1095,6 +1146,7 @@ type litMatcher struct {
 	pos        position
 	val        string
 	ignoreCase bool
+	want       string
 }
 
 type charClassMatcher struct {
@@ -1889,11 +1941,6 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 		defer p.out(p.in("parseLitMatcher"))
 	}
 
-	ignoreCase := ""
-	if lit.ignoreCase {
-		ignoreCase = "i"
-	}
-	val := string(strconv.AppendQuote([]byte{}, lit.val)) + ignoreCase // wrap 'lit.val' with double quotes
 	start := p.pt
 	for _, want := range lit.val {
 		cur := p.pt.rn
@@ -1901,13 +1948,13 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 			cur = unicode.ToLower(cur)
 		}
 		if cur != want {
-			p.failAt(false, start.position, val)
+			p.failAt(false, start.position, lit.want)
 			p.restore(start)
 			return nil, false
 		}
 		p.read()
 	}
-	p.failAt(true, start.position, val)
+	p.failAt(true, start.position, lit.want)
 	return p.sliceFrom(start), true
 }
 

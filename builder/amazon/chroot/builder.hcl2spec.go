@@ -4,6 +4,7 @@ package chroot
 import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -25,7 +26,8 @@ type FlatConfig struct {
 	AMIProductCodes         []string                          `mapstructure:"ami_product_codes" required:"false" cty:"ami_product_codes"`
 	AMIRegions              []string                          `mapstructure:"ami_regions" required:"false" cty:"ami_regions"`
 	AMISkipRegionValidation *bool                             `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation"`
-	AMITags                 common.TagMap                     `mapstructure:"tags" required:"false" cty:"tags"`
+	AMITags                 map[string]string                 `mapstructure:"tags" required:"false" cty:"tags"`
+	AMITag                  []hcl2template.FlatKeyValue       `mapstructure:"tag" required:"false" cty:"tag"`
 	AMIENASupport           *bool                             `mapstructure:"ena_support" required:"false" cty:"ena_support"`
 	AMISriovNetSupport      *bool                             `mapstructure:"sriov_support" required:"false" cty:"sriov_support"`
 	AMIForceDeregister      *bool                             `mapstructure:"force_deregister" required:"false" cty:"force_deregister"`
@@ -34,13 +36,15 @@ type FlatConfig struct {
 	AMIKmsKeyId             *string                           `mapstructure:"kms_key_id" required:"false" cty:"kms_key_id"`
 	AMIRegionKMSKeyIDs      map[string]string                 `mapstructure:"region_kms_key_ids" required:"false" cty:"region_kms_key_ids"`
 	AMISkipBuildRegion      *bool                             `mapstructure:"skip_save_build_region" cty:"skip_save_build_region"`
-	SnapshotTags            common.TagMap                     `mapstructure:"snapshot_tags" required:"false" cty:"snapshot_tags"`
+	SnapshotTags            map[string]string                 `mapstructure:"snapshot_tags" required:"false" cty:"snapshot_tags"`
+	SnapshotTag             []hcl2template.FlatKeyValue       `mapstructure:"snapshot_tag" required:"false" cty:"snapshot_tag"`
 	SnapshotUsers           []string                          `mapstructure:"snapshot_users" required:"false" cty:"snapshot_users"`
 	SnapshotGroups          []string                          `mapstructure:"snapshot_groups" required:"false" cty:"snapshot_groups"`
 	AccessKey               *string                           `mapstructure:"access_key" required:"true" cty:"access_key"`
 	CustomEndpointEc2       *string                           `mapstructure:"custom_endpoint_ec2" required:"false" cty:"custom_endpoint_ec2"`
 	DecodeAuthZMessages     *bool                             `mapstructure:"decode_authorization_messages" required:"false" cty:"decode_authorization_messages"`
 	InsecureSkipTLSVerify   *bool                             `mapstructure:"insecure_skip_tls_verify" required:"false" cty:"insecure_skip_tls_verify"`
+	MaxRetries              *int                              `mapstructure:"max_retries" required:"false" cty:"max_retries"`
 	MFACode                 *string                           `mapstructure:"mfa_code" required:"false" cty:"mfa_code"`
 	ProfileName             *string                           `mapstructure:"profile" required:"false" cty:"profile"`
 	RawRegion               *string                           `mapstructure:"region" required:"true" cty:"region"`
@@ -65,7 +69,8 @@ type FlatConfig struct {
 	RootVolumeType          *string                           `mapstructure:"root_volume_type" required:"false" cty:"root_volume_type"`
 	SourceAmi               *string                           `mapstructure:"source_ami" required:"true" cty:"source_ami"`
 	SourceAmiFilter         *common.FlatAmiFilterOptions      `mapstructure:"source_ami_filter" required:"false" cty:"source_ami_filter"`
-	RootVolumeTags          common.TagMap                     `mapstructure:"root_volume_tags" required:"false" cty:"root_volume_tags"`
+	RootVolumeTags          map[string]string                 `mapstructure:"root_volume_tags" required:"false" cty:"root_volume_tags"`
+	RootVolumeTag           []hcl2template.FlatKeyValue       `mapstructure:"root_volume_tag" required:"false" cty:"root_volume_tag"`
 	Architecture            *string                           `mapstructure:"ami_architecture" required:"false" cty:"ami_architecture"`
 }
 
@@ -86,7 +91,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":                  &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                  &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":               &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":         &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":         &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables":    &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"ami_name":                      &hcldec.AttrSpec{Name: "ami_name", Type: cty.String, Required: false},
 		"ami_description":               &hcldec.AttrSpec{Name: "ami_description", Type: cty.String, Required: false},
@@ -96,22 +101,25 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ami_product_codes":             &hcldec.AttrSpec{Name: "ami_product_codes", Type: cty.List(cty.String), Required: false},
 		"ami_regions":                   &hcldec.AttrSpec{Name: "ami_regions", Type: cty.List(cty.String), Required: false},
 		"skip_region_validation":        &hcldec.AttrSpec{Name: "skip_region_validation", Type: cty.Bool, Required: false},
-		"tags":                          &hcldec.BlockAttrsSpec{TypeName: "tags", ElementType: cty.String, Required: false},
+		"tags":                          &hcldec.AttrSpec{Name: "tags", Type: cty.Map(cty.String), Required: false},
+		"tag":                           &hcldec.BlockListSpec{TypeName: "tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
 		"ena_support":                   &hcldec.AttrSpec{Name: "ena_support", Type: cty.Bool, Required: false},
 		"sriov_support":                 &hcldec.AttrSpec{Name: "sriov_support", Type: cty.Bool, Required: false},
 		"force_deregister":              &hcldec.AttrSpec{Name: "force_deregister", Type: cty.Bool, Required: false},
 		"force_delete_snapshot":         &hcldec.AttrSpec{Name: "force_delete_snapshot", Type: cty.Bool, Required: false},
 		"encrypt_boot":                  &hcldec.AttrSpec{Name: "encrypt_boot", Type: cty.Bool, Required: false},
 		"kms_key_id":                    &hcldec.AttrSpec{Name: "kms_key_id", Type: cty.String, Required: false},
-		"region_kms_key_ids":            &hcldec.BlockAttrsSpec{TypeName: "region_kms_key_ids", ElementType: cty.String, Required: false},
+		"region_kms_key_ids":            &hcldec.AttrSpec{Name: "region_kms_key_ids", Type: cty.Map(cty.String), Required: false},
 		"skip_save_build_region":        &hcldec.AttrSpec{Name: "skip_save_build_region", Type: cty.Bool, Required: false},
-		"snapshot_tags":                 &hcldec.BlockAttrsSpec{TypeName: "snapshot_tags", ElementType: cty.String, Required: false},
+		"snapshot_tags":                 &hcldec.AttrSpec{Name: "snapshot_tags", Type: cty.Map(cty.String), Required: false},
+		"snapshot_tag":                  &hcldec.BlockListSpec{TypeName: "snapshot_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
 		"snapshot_users":                &hcldec.AttrSpec{Name: "snapshot_users", Type: cty.List(cty.String), Required: false},
 		"snapshot_groups":               &hcldec.AttrSpec{Name: "snapshot_groups", Type: cty.List(cty.String), Required: false},
 		"access_key":                    &hcldec.AttrSpec{Name: "access_key", Type: cty.String, Required: false},
 		"custom_endpoint_ec2":           &hcldec.AttrSpec{Name: "custom_endpoint_ec2", Type: cty.String, Required: false},
 		"decode_authorization_messages": &hcldec.AttrSpec{Name: "decode_authorization_messages", Type: cty.Bool, Required: false},
 		"insecure_skip_tls_verify":      &hcldec.AttrSpec{Name: "insecure_skip_tls_verify", Type: cty.Bool, Required: false},
+		"max_retries":                   &hcldec.AttrSpec{Name: "max_retries", Type: cty.Number, Required: false},
 		"mfa_code":                      &hcldec.AttrSpec{Name: "mfa_code", Type: cty.String, Required: false},
 		"profile":                       &hcldec.AttrSpec{Name: "profile", Type: cty.String, Required: false},
 		"region":                        &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
@@ -136,7 +144,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"root_volume_type":              &hcldec.AttrSpec{Name: "root_volume_type", Type: cty.String, Required: false},
 		"source_ami":                    &hcldec.AttrSpec{Name: "source_ami", Type: cty.String, Required: false},
 		"source_ami_filter":             &hcldec.BlockSpec{TypeName: "source_ami_filter", Nested: hcldec.ObjectSpec((*common.FlatAmiFilterOptions)(nil).HCL2Spec())},
-		"root_volume_tags":              &hcldec.BlockAttrsSpec{TypeName: "root_volume_tags", ElementType: cty.String, Required: false},
+		"root_volume_tags":              &hcldec.AttrSpec{Name: "root_volume_tags", Type: cty.Map(cty.String), Required: false},
+		"root_volume_tag":               &hcldec.BlockListSpec{TypeName: "root_volume_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
 		"ami_architecture":              &hcldec.AttrSpec{Name: "ami_architecture", Type: cty.String, Required: false},
 	}
 	return s

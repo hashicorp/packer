@@ -18,7 +18,7 @@ func (s *stepCopyDisk) Run(ctx context.Context, state multistep.StateBag) multis
 	driver := state.Get("driver").(Driver)
 	isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)
-	path := filepath.Join(config.OutputDir, fmt.Sprintf("%s", config.VMName))
+	path := filepath.Join(config.OutputDir, config.VMName)
 
 	command := []string{
 		"convert",

@@ -1,0 +1,44 @@
+<!-- Code generated from the comments of the Config struct in builder/amazon/ebsvolume/builder.go; DO NOT EDIT MANUALLY -->
+
+-   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport) on
+    HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your
+    AWS IAM policy. Note: you must make sure enhanced networking is enabled
+    on your instance. See [Amazon's documentation on enabling enhanced
+    networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+    
+-   `sriov_support` (bool) - Enable enhanced networking (SriovNetSupport but not ENA) on
+    HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your
+    AWS IAM policy. Note: you must make sure enhanced networking is enabled
+    on your instance. See [Amazon's documentation on enabling enhanced
+    networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+    Default `false`.
+    
+-   `ebs_volumes` (BlockDevices) - Add the block device mappings to the AMI. If you add instance store
+    volumes or EBS volumes in addition to the root device volume, the
+    created AMI will contain block device mapping information for those
+    volumes. Amazon creates snapshots of the source instance's root volume
+    and any other EBS volumes described here. When you launch an instance
+    from this new AMI, the instance automatically launches with these
+    additional volumes, and will restore them from snapshots taken from the
+    source instance. See the [BlockDevices](#block-devices-configuration)
+    documentation for fields.
+    
+-   `run_volume_tags` (map[string]string) - Key/value pair tags to apply to the volumes of the instance that is
+    *launched* to create EBS Volumes. These tags will *not* appear in the
+    tags of the resulting EBS volumes unless they're duplicated under `tags`
+    in the `ebs_volumes` setting. This is a [template
+    engine](/docs/templates/engine), see [Build template
+    data](#build-template-data) for more information.
+    
+     Note: The tags specified here will be *temporarily* applied to volumes
+    specified in `ebs_volumes` - but only while the instance is being
+    created. Packer will replace all tags on the volume with the tags
+    configured in the `ebs_volumes` section as soon as the instance is
+    reported as 'ready'.
+    
+-   `run_volume_tag` ([]{key string, value string}) - Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular
+    repeatable block containing a `key` and a `value` field. In HCL2 mode
+    the
+    [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+    will allow you to create those programatically.
+    

@@ -1,0 +1,39 @@
+<!-- Code generated from the comments of the Config struct in builder/amazon/instance/builder.go; DO NOT EDIT MANUALLY -->
+
+-   `ami_block_device_mappings` (awscommon.BlockDevices) - Add one or more block device mappings to the AMI. These will be attached
+    when booting a new instance from your AMI. To add a block device during
+    the Packer build see `launch_block_device_mappings` below. Your options
+    here may vary depending on the type of VM you use. See the
+    [BlockDevices](#block-devices-configuration) documentation for fields.
+    
+-   `launch_block_device_mappings` (awscommon.BlockDevices) - Add one or more block devices before the Packer build starts. If you add
+    instance store volumes or EBS volumes in addition to the root device
+    volume, the created AMI will contain block device mapping information
+    for those volumes. Amazon creates snapshots of the source instance's
+    root volume and any other EBS volumes described here. When you launch an
+    instance from this new AMI, the instance automatically launches with
+    these additional volumes, and will restore them from snapshots taken
+    from the source instance. See the
+    [BlockDevices](#block-devices-configuration) documentation for fields.
+    
+-   `bundle_destination` (string) - The directory on the running instance where the bundled AMI will be
+    saved prior to uploading. By default this is /tmp. This directory must
+    exist and be writable.
+    
+-   `bundle_prefix` (string) - The prefix for files created from bundling the root volume. By default
+    this is `image-{{timestamp}}`. The timestamp variable should be used to
+    make sure this is unique, otherwise it can collide with other created
+    AMIs by Packer in your account.
+    
+-   `bundle_upload_command` (string) - The command to use to upload the bundled volume. See the "custom bundle
+    commands" section below for more information.
+    
+-   `bundle_vol_command` (string) - The command to use to bundle the volume. See the "custom bundle
+    commands" section below for more information.
+    
+-   `x509_upload_path` (string) - The path on the remote machine where the X509 certificate will be
+    uploaded. This path must already exist and be writable. X509
+    certificates are uploaded after provisioning is run, so it is perfectly
+    okay to create this directory as part of the provisioning process.
+    Defaults to /tmp.
+    

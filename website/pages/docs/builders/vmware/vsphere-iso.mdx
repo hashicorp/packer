@@ -1,0 +1,232 @@
+---
+modeline: |
+  vim: set ft=pandoc:
+description: |
+  This VMware Packer builder starts from an ISO and creates a vm using the
+  vSphere API to build on a remote VMWare machine.
+layout: docs
+page_title: VSphere ISO - Builders
+sidebar_title: VSphere ISO
+---
+
+# Packer Builder for VMware vSphere
+
+Type: `vsphere-iso`
+
+This builder uses the vSphere API, and creates virtual machines remotely. It
+starts from an ISO file and creates new VMs from scratch.
+
+- VMware Player is not required.
+- It uses the official vCenter API, and does not require ESXi host [modification](/docs/builders/vmware-iso#building-on-a-remote-vsphere-hypervisor)
+
+## Examples
+
+See complete Ubuntu, Windows, and macOS templates in the [examples folder](https://github.com/hashicorp/packer/tree/master/builder/vsphere/examples/).
+
+# Configuration Reference
+
+There are many configuration options available for this builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [HTTP](#http-directory-configuration),
+[Floppy](#floppy-configuration),
+[Boot](#boot-configuration),
+[Driver](#driver-configuration),
+[Hardware](#hardware-configuration),
+[Output](#output-configuration),
+[Run](#run-configuration),
+[Shutdown](#shutdown-configuration),
+[Communicator](#communicator-configuration),
+[Tools](#tools-configuration),
+[vmx](#vmx-configuration),
+[Export](#export-configuration),
+configuration references, which are
+necessary for this build to succeed and can be found further down the page.
+
+@include 'builder/vsphere/iso/Config-not-required.mdx'
+
+### Connection Configuration
+
+@include 'builder/vsphere/common/ConnectConfig-not-required.mdx'
+
+### Hardware Configuration
+
+@include 'builder/vsphere/common/HardwareConfig-not-required.mdx'
+
+### Location Configuration
+
+@include 'builder/vsphere/common/LocationConfig-not-required.mdx'
+
+### Run Configuration
+
+@include 'builder/vsphere/common/RunConfig-not-required.mdx'
+
+### Shutdown Configuration
+
+@include 'builder/vsphere/common/ShutdownConfig-not-required.mdx'
+
+### Wait Configuration
+
+@include 'builder/vsphere/common/WaitIpConfig-not-required.mdx'
+
+### ISO Configuration
+
+@include 'common/ISOConfig.mdx'
+
+#### Required:
+
+@include 'common/ISOConfig-required.mdx'
+
+#### Optional:
+
+@include 'common/ISOConfig-not-required.mdx'
+
+### CDRom Configuration
+
+Each iso defined in the CDRom Configuration adds a new drive. If the "iso_url" is defined in
+addition to the "iso_paths", the "iso_url" is added to the VM first. This keeps the "iso_url" first in
+the boot order by default allowing the boot iso being defined by the iso_url and the vmware tools iso added
+from the datastore. Example:
+
+```json
+"iso_urls": [
+  "win10.iso",
+  "http://example.org/isos/win10.iso"
+],
+"iso_paths": [
+    "[] /usr/lib/vmware/isoimages/windows.iso"
+],
+```
+
+@include 'builder/vsphere/iso/CDRomConfig-not-required.mdx'
+
+### Create Configuration
+
+@include 'builder/vsphere/iso/CreateConfig-not-required.mdx'
+
+### Network Adapter Configuration
+
+@include 'builder/vsphere/iso/NIC.mdx'
+
+@include 'builder/vsphere/iso/NIC-required.mdx'
+
+#### Optional
+
+@include 'builder/vsphere/iso/NIC-not-required.mdx'
+
+### Storage Configuration
+
+@include 'builder/vsphere/iso/DiskConfig.mdx'
+
+@include 'builder/vsphere/iso/DiskConfig-required.mdx'
+
+#### Optional
+
+@include 'builder/vsphere/iso/DiskConfig-not-required.mdx'
+
+### Floppy Configuration
+
+@include 'builder/vsphere/iso/FloppyConfig-not-required.mdx'
+
+### Export Configuration
+
+@include 'builder/vsphere/common/ExportConfig.mdx'
+
+#### Optional:
+
+@include 'builder/vsphere/common/ExportConfig-not-required.mdx'
+
+#### Output Configuration:
+
+@include 'builder/vsphere/common/OutputConfig-not-required.mdx'
+
+### Extra Configuration Parameters
+
+@include 'builder/vsphere/common/ConfigParamsConfig-not-required.mdx'
+
+### Communicator configuration
+
+#### Optional common fields:
+
+@include 'helper/communicator/Config-not-required.mdx'
+
+#### Optional SSH fields:
+
+@include 'helper/communicator/SSH-not-required.mdx'
+
+#### Optional WinRM fields:
+
+@include 'helper/communicator/WinRM-not-required.mdx'
+
+## Working with Clusters
+
+#### Standalone Hosts
+
+Only use the `host` option. Optionally specify a `resource_pool`:
+
+```json
+"host": "esxi-1.vsphere65.test",
+"resource_pool": "pool1",
+```
+
+#### Clusters Without DRS
+
+Use the `cluster` and `host`parameters:
+
+```json
+"cluster": "cluster1",
+"host": "esxi-2.vsphere65.test",
+```
+
+#### Clusters With DRS
+
+Only use the `cluster` option. Optionally specify a `resource_pool`:
+
+```json
+"cluster": "cluster2",
+"resource_pool": "pool1",
+```
+
+## Required vSphere Permissions
+
+- VM folder (this object and children):
+  ```text
+  Virtual machine -> Inventory
+  Virtual machine -> Configuration
+  Virtual machine -> Interaction
+  Virtual machine -> Snapshot management
+  Virtual machine -> Provisioning
+  ```
+  Individual privileges are listed in https://github.com/jetbrains-infra/packer-builder-vsphere/issues/97#issuecomment-436063235.
+- Resource pool, host, or cluster (this object):
+  ```text
+  Resource -> Assign virtual machine to resource pool
+  ```
+- Host in clusters without DRS (this object):
+  ```text
+  Read-only
+  ```
+- Datastore (this object):
+  ```text
+  Datastore -> Allocate space
+  Datastore -> Browse datastore
+  Datastore -> Low level file operations
+  ```
+- Network (this object):
+  ```text
+  Network -> Assign network
+  ```
+- Distributed switch (this object):
+  ```text
+  Read-only
+  ```
+
+For floppy image upload:
+
+- Datacenter (this object):
+  ```text
+  Datastore -> Low level file operations
+  ```
+- Host (this object):
+  ```text
+  Host -> Configuration -> System Management
+  ```

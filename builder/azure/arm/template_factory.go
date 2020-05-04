@@ -17,6 +17,7 @@ type templateFactoryFunc func(*Config) (*resources.Deployment, error)
 func GetKeyVaultDeployment(config *Config) (*resources.Deployment, error) {
 	params := &template.TemplateParameters{
 		KeyVaultName:        &template.TemplateParameter{Value: config.tmpKeyVaultName},
+		KeyVaultSKU:         &template.TemplateParameter{Value: config.BuildKeyVaultSKU},
 		KeyVaultSecretValue: &template.TemplateParameter{Value: config.winrmCertificate},
 		ObjectId:            &template.TemplateParameter{Value: config.ClientConfig.ObjectID},
 		TenantId:            &template.TemplateParameter{Value: config.ClientConfig.TenantID},
@@ -36,6 +37,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		DnsNameForPublicIP:         &template.TemplateParameter{Value: config.tmpComputeName},
 		NicName:                    &template.TemplateParameter{Value: config.tmpNicName},
 		OSDiskName:                 &template.TemplateParameter{Value: config.tmpOSDiskName},
+		DataDiskName:               &template.TemplateParameter{Value: config.tmpDataDiskName},
 		PublicIPAddressName:        &template.TemplateParameter{Value: config.tmpPublicIPAddressName},
 		SubnetName:                 &template.TemplateParameter{Value: config.tmpSubnetName},
 		StorageAccountBlobEndpoint: &template.TemplateParameter{Value: config.storageAccountBlobEndpoint},
@@ -94,8 +96,8 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 	}
 
 	if len(config.AdditionalDiskSize) > 0 {
-		isManaged := config.CustomManagedImageName != "" || (config.ManagedImageName != "" && config.ImagePublisher != "")
-		builder.SetAdditionalDisks(config.AdditionalDiskSize, isManaged, config.diskCachingType)
+		isManaged := config.CustomManagedImageName != "" || (config.ManagedImageName != "" && config.ImagePublisher != "") || config.SharedGallery.Subscription != ""
+		builder.SetAdditionalDisks(config.AdditionalDiskSize, config.tmpDataDiskName, isManaged, config.diskCachingType)
 	}
 
 	if config.customData != "" {
@@ -120,6 +122,13 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 
 	if config.AllowedInboundIpAddresses != nil && len(config.AllowedInboundIpAddresses) >= 1 && config.Comm.Port() != 0 {
 		err = builder.SetNetworkSecurityGroup(config.AllowedInboundIpAddresses, config.Comm.Port())
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if config.BootDiagSTGAccount != "" {
+		err = builder.SetBootDiagnostics(config.BootDiagSTGAccount)
 		if err != nil {
 			return nil, err
 		}

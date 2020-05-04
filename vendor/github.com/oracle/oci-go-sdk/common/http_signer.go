@@ -1,4 +1,5 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 
 package common
 
@@ -50,6 +51,16 @@ var (
 	}
 )
 
+// DefaultGenericHeaders list of default generic headers that is used in signing
+func DefaultGenericHeaders() []string {
+	return makeACopy(defaultGenericHeaders)
+}
+
+// DefaultBodyHeaders list of default body headers that is used in signing
+func DefaultBodyHeaders() []string {
+	return makeACopy(defaultBodyHeaders)
+}
+
 // DefaultRequestSigner creates a signer with default parameters.
 func DefaultRequestSigner(provider KeyProvider) HTTPRequestSigner {
 	return RequestSigner(provider, defaultGenericHeaders, defaultBodyHeaders)
@@ -62,6 +73,22 @@ func RequestSignerExcludeBody(provider KeyProvider) HTTPRequestSigner {
 		return false
 	}
 	return RequestSignerWithBodyHashingPredicate(provider, defaultGenericHeaders, defaultBodyHeaders, bodyHashPredicate)
+}
+
+// NewSignerFromOCIRequestSigner creates a copy of the request signer and attaches the new SignerBodyHashPredicate
+// returns an error if the passed signer is not of type ociRequestSigner
+func NewSignerFromOCIRequestSigner(oldSigner HTTPRequestSigner, predicate SignerBodyHashPredicate) (HTTPRequestSigner, error) {
+	if oldS, ok := oldSigner.(ociRequestSigner); ok {
+		s := ociRequestSigner{
+			KeyProvider:    oldS.KeyProvider,
+			GenericHeaders: oldS.GenericHeaders,
+			BodyHeaders:    oldS.BodyHeaders,
+			ShouldHashBody: predicate,
+		}
+		return s, nil
+
+	}
+	return nil, fmt.Errorf("can not create a signer, input signer needs to be of type ociRequestSigner")
 }
 
 // RequestSigner creates a signer that utilizes the specified headers for signing
@@ -100,6 +127,7 @@ func (signer ociRequestSigner) getSigningString(request *http.Request) string {
 	signingParts := make([]string, len(signingHeaders))
 	for i, part := range signingHeaders {
 		var value string
+		part = strings.ToLower(part)
 		switch part {
 		case "(request-target)":
 			value = getRequestTarget(request)
@@ -126,13 +154,9 @@ func getRequestTarget(request *http.Request) string {
 
 func calculateHashOfBody(request *http.Request) (err error) {
 	var hash string
-	if request.ContentLength > 0 {
-		hash, err = GetBodyHash(request)
-		if err != nil {
-			return
-		}
-	} else {
-		hash = hashAndEncode([]byte(""))
+	hash, err = GetBodyHash(request)
+	if err != nil {
+		return
 	}
 	request.Header.Set(requestHeaderXContentSHA256, hash)
 	return
@@ -167,7 +191,9 @@ func hashAndEncode(data []byte) string {
 // GetBodyHash creates a base64 string from the hash of body the request
 func GetBodyHash(request *http.Request) (hashString string, err error) {
 	if request.Body == nil {
-		return "", fmt.Errorf("can not read body of request while calculating body hash, nil body?")
+		request.ContentLength = 0
+		request.Header.Set(requestHeaderContentLength, fmt.Sprintf("%v", request.ContentLength))
+		return hashAndEncode([]byte("")), nil
 	}
 
 	var data []byte
@@ -181,6 +207,11 @@ func GetBodyHash(request *http.Request) (hashString string, err error) {
 	if err != nil {
 		return "", fmt.Errorf("can not read body of request while calculating body hash: %s", err.Error())
 	}
+
+	// Since the request can be coming from a binary body. Make an attempt to set the body length
+	request.ContentLength = int64(len(data))
+	request.Header.Set(requestHeaderContentLength, fmt.Sprintf("%v", request.ContentLength))
+
 	hashString = hashAndEncode(data)
 	return
 }

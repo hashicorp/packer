@@ -21,6 +21,7 @@ type FlatConfig struct {
 	CustomEndpointEc2     *string                           `mapstructure:"custom_endpoint_ec2" required:"false" cty:"custom_endpoint_ec2"`
 	DecodeAuthZMessages   *bool                             `mapstructure:"decode_authorization_messages" required:"false" cty:"decode_authorization_messages"`
 	InsecureSkipTLSVerify *bool                             `mapstructure:"insecure_skip_tls_verify" required:"false" cty:"insecure_skip_tls_verify"`
+	MaxRetries            *int                              `mapstructure:"max_retries" required:"false" cty:"max_retries"`
 	MFACode               *string                           `mapstructure:"mfa_code" required:"false" cty:"mfa_code"`
 	ProfileName           *string                           `mapstructure:"profile" required:"false" cty:"profile"`
 	RawRegion             *string                           `mapstructure:"region" required:"true" cty:"region"`
@@ -63,12 +64,13 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":                  &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                  &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":               &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":         &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":         &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables":    &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"access_key":                    &hcldec.AttrSpec{Name: "access_key", Type: cty.String, Required: false},
 		"custom_endpoint_ec2":           &hcldec.AttrSpec{Name: "custom_endpoint_ec2", Type: cty.String, Required: false},
 		"decode_authorization_messages": &hcldec.AttrSpec{Name: "decode_authorization_messages", Type: cty.Bool, Required: false},
 		"insecure_skip_tls_verify":      &hcldec.AttrSpec{Name: "insecure_skip_tls_verify", Type: cty.Bool, Required: false},
+		"max_retries":                   &hcldec.AttrSpec{Name: "max_retries", Type: cty.Number, Required: false},
 		"mfa_code":                      &hcldec.AttrSpec{Name: "mfa_code", Type: cty.String, Required: false},
 		"profile":                       &hcldec.AttrSpec{Name: "profile", Type: cty.String, Required: false},
 		"region":                        &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
@@ -82,7 +84,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"s3_encryption":                 &hcldec.AttrSpec{Name: "s3_encryption", Type: cty.String, Required: false},
 		"s3_encryption_key":             &hcldec.AttrSpec{Name: "s3_encryption_key", Type: cty.String, Required: false},
 		"skip_clean":                    &hcldec.AttrSpec{Name: "skip_clean", Type: cty.Bool, Required: false},
-		"tags":                          &hcldec.BlockAttrsSpec{TypeName: "tags", ElementType: cty.String, Required: false},
+		"tags":                          &hcldec.AttrSpec{Name: "tags", Type: cty.Map(cty.String), Required: false},
 		"ami_name":                      &hcldec.AttrSpec{Name: "ami_name", Type: cty.String, Required: false},
 		"ami_description":               &hcldec.AttrSpec{Name: "ami_description", Type: cty.String, Required: false},
 		"ami_users":                     &hcldec.AttrSpec{Name: "ami_users", Type: cty.List(cty.String), Required: false},

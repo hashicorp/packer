@@ -1,4 +1,5 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 package core
@@ -11,17 +12,21 @@ import (
 // ListVolumeGroupBackupsRequest wrapper for the ListVolumeGroupBackups operation
 type ListVolumeGroupBackupsRequest struct {
 
-	// The OCID of the compartment.
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the compartment.
 	CompartmentId *string `mandatory:"true" contributesTo:"query" name:"compartmentId"`
 
 	// The OCID of the volume group.
 	VolumeGroupId *string `mandatory:"false" contributesTo:"query" name:"volumeGroupId"`
 
-	// The maximum number of items to return in a paginated "List" call.
-	// Example: `500`
+	// For list pagination. The maximum number of results per page, or items to return in a paginated
+	// "List" call. For important details about how pagination works, see
+	// List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+	// Example: `50`
 	Limit *int `mandatory:"false" contributesTo:"query" name:"limit"`
 
-	// The value of the `opc-next-page` response header from the previous "List" call.
+	// For list pagination. The value of the `opc-next-page` response header from the previous "List"
+	// call. For important details about how pagination works, see
+	// List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	Page *string `mandatory:"false" contributesTo:"query" name:"page"`
 
 	// A filter to return only resources that match the given display name exactly.
@@ -31,9 +36,9 @@ type ListVolumeGroupBackupsRequest struct {
 	// TIMECREATED is descending. Default order for DISPLAYNAME is ascending. The DISPLAYNAME
 	// sort order is case sensitive.
 	// **Note:** In general, some "List" operations (for example, `ListInstances`) let you
-	// optionally filter by Availability Domain if the scope of the resource type is within a
-	// single Availability Domain. If you call one of these "List" operations without specifying
-	// an Availability Domain, the resources are grouped by Availability Domain, then sorted.
+	// optionally filter by availability domain if the scope of the resource type is within a
+	// single availability domain. If you call one of these "List" operations without specifying
+	// an availability domain, the resources are grouped by availability domain, then sorted.
 	SortBy ListVolumeGroupBackupsSortByEnum `mandatory:"false" contributesTo:"query" name:"sortBy" omitEmpty:"true"`
 
 	// The sort order to use, either ascending (`ASC`) or descending (`DESC`). The DISPLAYNAME sort order
@@ -72,13 +77,13 @@ type ListVolumeGroupBackupsResponse struct {
 	// A list of []VolumeGroupBackup instances
 	Items []VolumeGroupBackup `presentIn:"body"`
 
-	// For pagination of a list of items. When paging through a list, if this header appears in the response,
-	// then a partial list might have been returned. Include this value as the `page` parameter for the
-	// subsequent GET request to get the next batch of items.
+	// For list pagination. When this header appears in the response, additional pages
+	// of results remain. For important details about how pagination works, see
+	// List Pagination (https://docs.cloud.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
 	OpcNextPage *string `presentIn:"header" name:"opc-next-page"`
 
-	// Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
-	// a particular request, please provide the request ID.
+	// Unique Oracle-assigned identifier for the request. If you need to contact
+	// Oracle about a particular request, please provide the request ID.
 	OpcRequestId *string `presentIn:"header" name:"opc-request-id"`
 }
 
@@ -94,7 +99,7 @@ func (response ListVolumeGroupBackupsResponse) HTTPResponse() *http.Response {
 // ListVolumeGroupBackupsSortByEnum Enum with underlying type: string
 type ListVolumeGroupBackupsSortByEnum string
 
-// Set of constants representing the allowable values for ListVolumeGroupBackupsSortBy
+// Set of constants representing the allowable values for ListVolumeGroupBackupsSortByEnum
 const (
 	ListVolumeGroupBackupsSortByTimecreated ListVolumeGroupBackupsSortByEnum = "TIMECREATED"
 	ListVolumeGroupBackupsSortByDisplayname ListVolumeGroupBackupsSortByEnum = "DISPLAYNAME"
@@ -105,7 +110,7 @@ var mappingListVolumeGroupBackupsSortBy = map[string]ListVolumeGroupBackupsSortB
 	"DISPLAYNAME": ListVolumeGroupBackupsSortByDisplayname,
 }
 
-// GetListVolumeGroupBackupsSortByEnumValues Enumerates the set of values for ListVolumeGroupBackupsSortBy
+// GetListVolumeGroupBackupsSortByEnumValues Enumerates the set of values for ListVolumeGroupBackupsSortByEnum
 func GetListVolumeGroupBackupsSortByEnumValues() []ListVolumeGroupBackupsSortByEnum {
 	values := make([]ListVolumeGroupBackupsSortByEnum, 0)
 	for _, v := range mappingListVolumeGroupBackupsSortBy {
@@ -117,7 +122,7 @@ func GetListVolumeGroupBackupsSortByEnumValues() []ListVolumeGroupBackupsSortByE
 // ListVolumeGroupBackupsSortOrderEnum Enum with underlying type: string
 type ListVolumeGroupBackupsSortOrderEnum string
 
-// Set of constants representing the allowable values for ListVolumeGroupBackupsSortOrder
+// Set of constants representing the allowable values for ListVolumeGroupBackupsSortOrderEnum
 const (
 	ListVolumeGroupBackupsSortOrderAsc  ListVolumeGroupBackupsSortOrderEnum = "ASC"
 	ListVolumeGroupBackupsSortOrderDesc ListVolumeGroupBackupsSortOrderEnum = "DESC"
@@ -128,7 +133,7 @@ var mappingListVolumeGroupBackupsSortOrder = map[string]ListVolumeGroupBackupsSo
 	"DESC": ListVolumeGroupBackupsSortOrderDesc,
 }
 
-// GetListVolumeGroupBackupsSortOrderEnumValues Enumerates the set of values for ListVolumeGroupBackupsSortOrder
+// GetListVolumeGroupBackupsSortOrderEnumValues Enumerates the set of values for ListVolumeGroupBackupsSortOrderEnum
 func GetListVolumeGroupBackupsSortOrderEnumValues() []ListVolumeGroupBackupsSortOrderEnum {
 	values := make([]ListVolumeGroupBackupsSortOrderEnum, 0)
 	for _, v := range mappingListVolumeGroupBackupsSortOrder {

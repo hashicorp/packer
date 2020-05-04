@@ -5,22 +5,25 @@ require (
 	cloud.google.com/go/bigquery v1.3.0 // indirect
 	cloud.google.com/go/pubsub v1.1.0 // indirect
 	cloud.google.com/go/storage v1.4.0 // indirect
-	contrib.go.opencensus.io/exporter/ocagent v0.5.0 // indirect
 	github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1
-	github.com/Azure/azure-sdk-for-go v30.0.0+incompatible
-	github.com/Azure/go-autorest v12.0.0+incompatible
+	github.com/Azure/azure-sdk-for-go v40.5.0+incompatible
+	github.com/Azure/go-autorest/autorest v0.10.0
+	github.com/Azure/go-autorest/autorest/adal v0.8.2
+	github.com/Azure/go-autorest/autorest/azure/auth v0.4.2
+	github.com/Azure/go-autorest/autorest/date v0.2.0
+	github.com/Azure/go-autorest/autorest/to v0.3.0
+	github.com/Azure/go-autorest/autorest/validation v0.2.0 // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20191115201650-bad6df29494a // indirect
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290
 	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0
 	github.com/PuerkitoBio/goquery v1.5.0 // indirect
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
-	github.com/Telmate/proxmox-api-go v0.0.0-20200116224409-320525bf3340
+	github.com/Telmate/proxmox-api-go v0.0.0-20200225212220-a29566462efd
 	github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 	github.com/antchfx/htmlquery v1.0.0 // indirect
 	github.com/antchfx/xmlquery v1.0.0 // indirect
-
 	github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd // indirect
 	github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607 // indirect
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
@@ -37,7 +40,6 @@ require (
 	github.com/digitalocean/go-libvirt v0.0.0-20190626172931-4d226dd6c437 // indirect
 	github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
 	github.com/digitalocean/godo v1.11.1
-	github.com/dimchansky/utfbom v1.1.0 // indirect
 	github.com/dnaeon/go-vcr v1.0.0 // indirect
 	github.com/docker/docker v0.0.0-20180422163414-57142e89befe // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
@@ -46,13 +48,15 @@ require (
 	github.com/exoscale/egoscale v0.18.1
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structtag v1.0.0
+	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.25.4
 	github.com/go-ole/go-ole v1.2.4 // indirect
-	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/gobwas/glob v0.2.3
 	github.com/gocolly/colly v1.2.0
 	github.com/gofrs/flock v0.7.1
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
-	github.com/golang/groupcache v0.0.0-20191027212112-611e8accdfc9 // indirect
+	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
+	github.com/golang/protobuf v1.3.5 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.3.1
 	github.com/google/go-querystring v1.0.0 // indirect
@@ -72,7 +76,8 @@ require (
 	github.com/hashicorp/go-cty-funcs/encoding v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-cty-funcs/filesystem v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-cty-funcs/uuid v0.0.0-20200203151509-c92509f48b18
-	github.com/hashicorp/go-getter v1.3.1-0.20190906090232-a0f878cb75da
+	github.com/hashicorp/go-getter v1.3.1-0.20190906090232-a0f878cb75da // indirect
+	github.com/hashicorp/go-getter/v2 v2.0.0-20200318090939-0b1d527d9793
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79
 	github.com/hashicorp/go-retryablehttp v0.5.2 // indirect
@@ -122,8 +127,9 @@ require (
 	github.com/moul/gotty-client v0.0.0-20180327180212-b26a57ebc215 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
-	github.com/oracle/oci-go-sdk v1.8.0
+	github.com/oracle/oci-go-sdk v18.0.0+incompatible
 	github.com/outscale/osc-go v0.0.1
+	github.com/overdrive3000/secretsmanager v0.0.0-20200421092817-bcdff577c37a
 	github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
 	github.com/pierrec/lz4 v2.0.5+incompatible
 	github.com/pkg/errors v0.8.1
@@ -142,7 +148,7 @@ require (
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/temoto/robotstxt v1.1.1 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go v3.0.97+incompatible
+	github.com/tencentcloud/tencentcloud-sdk-go v3.0.155+incompatible
 	github.com/ucloud/ucloud-sdk-go v0.12.0
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
 	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
@@ -151,33 +157,32 @@ require (
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20190916101622-7617782d381e
 	github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829
-	github.com/zclconf/go-cty v1.2.1
+	github.com/zclconf/go-cty v1.3.2-0.20200309235747-0b5d9cf50df7
 	github.com/zclconf/go-cty-yaml v1.0.1
-	go.opencensus.io v0.22.2 // indirect
+	go.opencensus.io v0.22.3 // indirect
 	golang.org/x/crypto v0.0.0-20200117160349-530e935923ad
 	golang.org/x/exp v0.0.0-20191129062945-2f5052295587 // indirect
 	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
 	golang.org/x/mobile v0.0.0-20191130191448-5c0e7e404af8
-	golang.org/x/net v0.0.0-20191126235420-ef20fe5d7933
+	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9
+	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
+	golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
-	golang.org/x/tools v0.0.0-20191203051722-db047d72ee39
-	google.golang.org/api v0.14.0
+	golang.org/x/tools v0.0.0-20200207183749-b753a1ba74fa
+	google.golang.org/api v0.20.0
 	google.golang.org/appengine v1.6.5 // indirect
-	google.golang.org/genproto v0.0.0-20191115221424-83cc0476cb11 // indirect
-	google.golang.org/grpc v1.25.1
+	google.golang.org/genproto v0.0.0-20200325114520-5b2d0af7952b // indirect
+	google.golang.org/grpc v1.28.0
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 // indirect
+	gopkg.in/resty.v1 v1.12.0 // indirect
 	gopkg.in/yaml.v2 v2.2.7 // indirect
 )
 
 replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999
 
 replace github.com/gofrs/flock => github.com/azr/flock v0.0.0-20190823144736-958d66434653
-
-replace github.com/zclconf/go-cty => github.com/azr/go-cty v1.1.1-0.20200203143058-28fcda2fe0cc
 
 go 1.13

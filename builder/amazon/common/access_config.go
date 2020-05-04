@@ -44,7 +44,7 @@ func (v *VaultAWSEngineOptions) Empty() bool {
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
 	// The access key used to communicate with AWS. [Learn how  to set this]
-	// (/docs/builders/amazon.html#specifying-amazon-credentials). On EBS, this
+	// (/docs/builders/amazon#specifying-amazon-credentials). On EBS, this
 	// is not required if you are using `use_vault_aws_engine` for
 	// authentication instead.
 	AccessKey string `mapstructure:"access_key" required:"true"`
@@ -60,6 +60,10 @@ type AccessConfig struct {
 	// This allows skipping TLS
 	// verification of the AWS EC2 endpoint. The default is false.
 	InsecureSkipTLSVerify bool `mapstructure:"insecure_skip_tls_verify" required:"false"`
+	// This is the maximum number of times an API call is retried, in the case
+	// where requests are being throttled or experiencing transient failures.
+	// The delay between the subsequent API calls increases exponentially.
+	MaxRetries int `mapstructure:"max_retries" required:"false"`
 	// The MFA
 	// [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
 	// code. This should probably be a user variable since it changes all the
@@ -75,7 +79,7 @@ type AccessConfig struct {
 	// When chroot building, this value is guessed from environment.
 	RawRegion string `mapstructure:"region" required:"true"`
 	// The secret key used to communicate with AWS. [Learn how to set
-	// this](amazon.html#specifying-amazon-credentials). This is not required
+	// this](/docs/builders/amazon#specifying-amazon-credentials). This is not required
 	// if you are using `use_vault_aws_engine` for authentication instead.
 	SecretKey string `mapstructure:"secret_key" required:"true"`
 	// Set to true if you want to skip
@@ -91,7 +95,7 @@ type AccessConfig struct {
 	// Get credentials from Hashicorp Vault's aws secrets engine. You must
 	// already have created a role to use. For more information about
 	// generating credentials via the Vault engine, see the [Vault
-	// docs.](https://www.vaultproject.io/api/secret/aws/index.html#generate-credentials)
+	// docs.](https://www.vaultproject.io/api/secret/aws#generate-credentials)
 	// If you set this flag, you must also set the below options:
 	// -   `name` (string) - Required. Specifies the name of the role to generate
 	//     credentials against. This is part of the request URL.
@@ -112,7 +116,7 @@ type AccessConfig struct {
 	//     credential types) and GetFederationToken (for federation\_token
 	//     credential types) for more details.
 	//
-	// ``` json
+	// ```json
 	// {
 	//     "vault_aws_engine": {
 	//         "name": "myrole",
@@ -134,6 +138,9 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	}
 
 	config := aws.NewConfig().WithCredentialsChainVerboseErrors(true)
+	if c.MaxRetries > 0 {
+		config = config.WithMaxRetries(c.MaxRetries)
+	}
 
 	staticCreds := credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.Token)
 	if _, err := staticCreds.Get(); err != credentials.ErrStaticCredentialsEmpty {
@@ -183,7 +190,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 
 	if isAWSErr(err, "NoCredentialProviders", "") {
 		return nil, fmt.Errorf("No valid credential sources found for AWS Builder. " +
-			"Please see https://www.packer.io/docs/builders/amazon.html#specifying-amazon-credentials " +
+			"Please see https://www.packer.io/docs/builders/amazon#specifying-amazon-credentials " +
 			"for more information on providing credentials for the AWS Builder.")
 	}
 

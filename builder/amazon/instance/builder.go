@@ -9,13 +9,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/packer/builder"
 	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -61,7 +61,7 @@ type Config struct {
 	// exist and be writable.
 	BundleDestination string `mapstructure:"bundle_destination" required:"false"`
 	// The prefix for files created from bundling the root volume. By default
-	// this is image-{{timestamp}}. The timestamp variable should be used to
+	// this is `image-{{timestamp}}`. The timestamp variable should be used to
 	// make sure this is unique, otherwise it can collide with other created
 	// AMIs by Packer in your account.
 	BundlePrefix string `mapstructure:"bundle_prefix" required:"false"`
@@ -296,7 +296,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			ForceDeregister: b.config.AMIForceDeregister,
 			VpcId:           b.config.VpcId,
 			SubnetId:        b.config.SubnetId,
-			HasSubnetFilter: len(b.config.SubnetFilter.Filters) > 0,
+			HasSubnetFilter: !b.config.SubnetFilter.Empty(),
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:                b.config.SourceAmi,

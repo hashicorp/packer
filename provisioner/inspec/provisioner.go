@@ -42,8 +42,8 @@ type Config struct {
 	ctx                 interpolate.Context
 
 	// The command to run inspec
-	Command    string
-	SubCommand string
+	Command    string `mapstructure-to-hcl2:",skip"`
+	SubCommand string `mapstructure-to-hcl2:",skip"`
 
 	// Extra options to pass to the inspec command
 	ExtraArguments []string `mapstructure:"extra_arguments"`

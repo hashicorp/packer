@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -30,8 +31,9 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 	// supplied public key. This is possible if a private_key_file was
 	// specified.
 	if sshPublicKey != "" {
-		sshMetaKey := "sshKeys"
-		sshKeys := fmt.Sprintf("%s:%s", c.Comm.SSHUsername, sshPublicKey)
+		sshMetaKey := "ssh-keys"
+		sshPublicKey = strings.TrimSuffix(sshPublicKey, "\n")
+		sshKeys := fmt.Sprintf("%s:%s %s", c.Comm.SSHUsername, sshPublicKey, c.Comm.SSHUsername)
 		if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
 			sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
 		}
@@ -83,10 +85,10 @@ func getImage(c *Config, d Driver) (*Image, error) {
 		name = c.SourceImage
 		fromFamily = false
 	}
-	if c.SourceImageProjectId == "" {
+	if len(c.SourceImageProjectId) == 0 {
 		return d.GetImage(name, fromFamily)
 	} else {
-		return d.GetImageFromProject(c.SourceImageProjectId, name, fromFamily)
+		return d.GetImageFromProjects(c.SourceImageProjectId, name, fromFamily)
 	}
 }
 
@@ -100,6 +102,13 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	sourceImage, err := getImage(c, d)
 	if err != nil {
 		err := fmt.Errorf("Error getting source image for instance creation: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	if c.EnableSecureBoot && !sourceImage.IsSecureBootCompatible() {
+		err := fmt.Errorf("Image: %s is not secure boot compatible. Please set 'enable_secure_boot' to false or choose another source image.", sourceImage.Name)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -131,6 +140,9 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		DisableDefaultServiceAccount: c.DisableDefaultServiceAccount,
 		DiskSizeGb:                   c.DiskSizeGb,
 		DiskType:                     c.DiskType,
+		EnableSecureBoot:             c.EnableSecureBoot,
+		EnableVtpm:                   c.EnableVtpm,
+		EnableIntegrityMonitoring:    c.EnableIntegrityMonitoring,
 		Image:                        sourceImage,
 		Labels:                       c.Labels,
 		MachineType:                  c.MachineType,

@@ -6,6 +6,7 @@ package common
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -33,8 +34,13 @@ type HardwareConfig struct {
 	MemoryHotAddEnabled bool `mapstructure:"RAM_hot_plug"`
 	// Amount of video memory in MB.
 	VideoRAM int64 `mapstructure:"video_ram"`
+	// vGPU profile for accelerated graphics. See [NVIDIA GRID vGPU documentation](https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#configure-vmware-vsphere-vm-with-vgpu)
+	// for examples of profile names. Defaults to none.
+	VGPUProfile string `mapstructure:"vgpu_profile"`
 	// Enable nested hardware virtualization for VM. Defaults to `false`.
 	NestedHV bool `mapstructure:"NestedHV"`
+	// Set the Firmware for virtual machine. Supported values: `bios`, `efi`, `efi-secure` or empty string to keep as in template. Defaults to empty string.
+	Firmware string `mapstructure:"firmware"`
 }
 
 func (c *HardwareConfig) Prepare() []error {
@@ -42,6 +48,10 @@ func (c *HardwareConfig) Prepare() []error {
 
 	if c.RAMReservation > 0 && c.RAMReserveAll != false {
 		errs = append(errs, fmt.Errorf("'RAM_reservation' and 'RAM_reserve_all' cannot be used together"))
+	}
+
+	if c.Firmware != "" && c.Firmware != "bios" && c.Firmware != "efi" && c.Firmware != "efi-secure" {
+		errs = append(errs, fmt.Errorf("'firmware' must be '', 'bios', 'efi' or 'efi-secure'"))
 	}
 
 	return errs
@@ -70,6 +80,8 @@ func (s *StepConfigureHardware) Run(_ context.Context, state multistep.StateBag)
 			CpuHotAddEnabled:    s.Config.CpuHotAddEnabled,
 			MemoryHotAddEnabled: s.Config.MemoryHotAddEnabled,
 			VideoRAM:            s.Config.VideoRAM,
+			VGPUProfile:         s.Config.VGPUProfile,
+			Firmware:            s.Config.Firmware,
 		})
 		if err != nil {
 			state.Put("error", err)

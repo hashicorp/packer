@@ -36,11 +36,15 @@ type Config struct {
 	Endpoint string `mapstructure:"endpoint" required:"false"`
 	// The folder ID that will be used to launch instances and store images.
 	// Alternatively you may set value by environment variable YC_FOLDER_ID.
+	// To use a different folder for looking up the source image or saving the target image to
+	// check options 'source_image_folder_id' and 'target_image_folder_id'.
 	FolderID string `mapstructure:"folder_id" required:"true"`
 	// Path to file with Service Account key in json format. This
 	// is an alternative method to authenticate to Yandex.Cloud. Alternatively you may set environment variable
 	// YC_SERVICE_ACCOUNT_KEY_FILE.
 	ServiceAccountKeyFile string `mapstructure:"service_account_key_file" required:"false"`
+	// Service account identifier to assign to instance
+	ServiceAccountID string `mapstructure:"service_account_id" required:"false"`
 	// OAuth token to use to authenticate to Yandex.Cloud. Alternatively you may set
 	// value by environment variable YC_TOKEN.
 	Token string `mapstructure:"token" required:"true"`
@@ -102,6 +106,9 @@ type Config struct {
 	// the launched instance. Note, the zone of the subnet must match the
 	// zone in which the VM is launched.
 	SubnetID string `mapstructure:"subnet_id" required:"false"`
+	// The ID of the folder to save built image in.
+	// This defaults to value of 'folder_id'.
+	TargetImageFolderID string `mapstructure:"target_image_folder_id" required:"false"`
 	// If set to true, then launched instance will have external internet
 	// access.
 	UseIPv4Nat bool `mapstructure:"use_ipv4_nat" required:"false"`
@@ -270,6 +277,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	if c.FolderID == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a folder_id must be specified"))
+	}
+
+	if c.TargetImageFolderID == "" {
+		c.TargetImageFolderID = c.FolderID
 	}
 
 	for key, file := range c.MetadataFromFile {

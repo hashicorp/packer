@@ -148,6 +148,31 @@ func (c *Client) AllocateAddresses(request *AllocateAddressesRequest) (response 
     return
 }
 
+func NewAllocateIp6AddressesBandwidthRequest() (request *AllocateIp6AddressesBandwidthRequest) {
+    request = &AllocateIp6AddressesBandwidthRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "AllocateIp6AddressesBandwidth")
+    return
+}
+
+func NewAllocateIp6AddressesBandwidthResponse() (response *AllocateIp6AddressesBandwidthResponse) {
+    response = &AllocateIp6AddressesBandwidthResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 该接口用于给IPv6地址初次分配公网带宽
+func (c *Client) AllocateIp6AddressesBandwidth(request *AllocateIp6AddressesBandwidthRequest) (response *AllocateIp6AddressesBandwidthResponse, err error) {
+    if request == nil {
+        request = NewAllocateIp6AddressesBandwidthRequest()
+    }
+    response = NewAllocateIp6AddressesBandwidthResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewAssignIpv6AddressesRequest() (request *AssignIpv6AddressesRequest) {
     request = &AssignIpv6AddressesRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -194,7 +219,7 @@ func NewAssignIpv6CidrBlockResponse() (response *AssignIpv6CidrBlockResponse) {
 }
 
 // 本接口（AssignIpv6CidrBlock）用于分配IPv6网段。
-// * 使用本接口前，你需要已有VPC实例，如果没有可通过接口<a href="https://cloud.tencent.com/document/api/215/15774" title="CreateVpc" target="_blank">CreateVpc</a>创建。
+// * 使用本接口前，您需要已有VPC实例，如果没有可通过接口<a href="https://cloud.tencent.com/document/api/215/15774" title="CreateVpc" target="_blank">CreateVpc</a>创建。
 // * 每个VPC只能申请一个IPv6网段
 func (c *Client) AssignIpv6CidrBlock(request *AssignIpv6CidrBlockRequest) (response *AssignIpv6CidrBlockResponse, err error) {
     if request == nil {
@@ -316,6 +341,56 @@ func (c *Client) AssociateNatGatewayAddress(request *AssociateNatGatewayAddressR
     return
 }
 
+func NewAssociateNetworkAclSubnetsRequest() (request *AssociateNetworkAclSubnetsRequest) {
+    request = &AssociateNetworkAclSubnetsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "AssociateNetworkAclSubnets")
+    return
+}
+
+func NewAssociateNetworkAclSubnetsResponse() (response *AssociateNetworkAclSubnetsResponse) {
+    response = &AssociateNetworkAclSubnetsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（AssociateNetworkAclSubnets）用于网络ACL关联vpc下的子网。
+func (c *Client) AssociateNetworkAclSubnets(request *AssociateNetworkAclSubnetsRequest) (response *AssociateNetworkAclSubnetsResponse, err error) {
+    if request == nil {
+        request = NewAssociateNetworkAclSubnetsRequest()
+    }
+    response = NewAssociateNetworkAclSubnetsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewAssociateNetworkInterfaceSecurityGroupsRequest() (request *AssociateNetworkInterfaceSecurityGroupsRequest) {
+    request = &AssociateNetworkInterfaceSecurityGroupsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "AssociateNetworkInterfaceSecurityGroups")
+    return
+}
+
+func NewAssociateNetworkInterfaceSecurityGroupsResponse() (response *AssociateNetworkInterfaceSecurityGroupsResponse) {
+    response = &AssociateNetworkInterfaceSecurityGroupsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（AssociateNetworkInterfaceSecurityGroups）用于弹性网卡绑定安全组（SecurityGroup）。
+func (c *Client) AssociateNetworkInterfaceSecurityGroups(request *AssociateNetworkInterfaceSecurityGroupsRequest) (response *AssociateNetworkInterfaceSecurityGroupsResponse, err error) {
+    if request == nil {
+        request = NewAssociateNetworkInterfaceSecurityGroupsRequest()
+    }
+    response = NewAssociateNetworkInterfaceSecurityGroupsResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewAttachCcnInstancesRequest() (request *AttachCcnInstancesRequest) {
     request = &AttachCcnInstancesRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -359,7 +434,7 @@ func NewAttachClassicLinkVpcResponse() (response *AttachClassicLinkVpcResponse) 
 
 // 本接口(AttachClassicLinkVpc)用于创建私有网络和基础网络设备互通。
 // * 私有网络和基础网络设备必须在同一个地域。
-// * 私有网络和基础网络的区别详见vpc产品文档-<a href="https://cloud.tencent.com/document/product/215/535#2.-.E7.A7.81.E6.9C.89.E7.BD.91.E7.BB.9C.E4.B8.8E.E5.9F.BA.E7.A1.80.E7.BD.91.E7.BB.9C">私有网络与基础网络</a>。
+// * 私有网络和基础网络的区别详见vpc产品文档-<a href="https://cloud.tencent.com/document/product/215/30720">私有网络与基础网络</a>。
 func (c *Client) AttachClassicLinkVpc(request *AttachClassicLinkVpcRequest) (response *AttachClassicLinkVpcResponse, err error) {
     if request == nil {
         request = NewAttachClassicLinkVpcRequest()
@@ -385,15 +460,68 @@ func NewAttachNetworkInterfaceResponse() (response *AttachNetworkInterfaceRespon
 }
 
 // 本接口（AttachNetworkInterface）用于弹性网卡绑定云主机。
-// * 一个云主机可以绑定多个弹性网卡，但只能绑定一个主网卡。更多限制信息详见<a href="https://cloud.tencent.com/document/product/215/6513">弹性网卡使用限制</a>。
+// * 一个云主机可以绑定多个弹性网卡，但只能绑定一个主网卡。更多限制信息详见<a href="https://cloud.tencent.com/document/product/576/18527">弹性网卡使用限制</a>。
 // * 一个弹性网卡只能同时绑定一个云主机。
-// * 只有运行中或者已关机状态的云主机才能绑定弹性网卡，查看云主机状态详见<a href="https://cloud.tencent.com/document/api/213/9452#instance_state">腾讯云主机信息</a>。
+// * 只有运行中或者已关机状态的云主机才能绑定弹性网卡，查看云主机状态详见<a href="https://cloud.tencent.com/document/api/213/9452#InstanceStatus">腾讯云主机信息</a>。
 // * 弹性网卡绑定的云主机必须是私有网络的，而且云主机所在可用区必须和弹性网卡子网的可用区相同。
 func (c *Client) AttachNetworkInterface(request *AttachNetworkInterfaceRequest) (response *AttachNetworkInterfaceResponse, err error) {
     if request == nil {
         request = NewAttachNetworkInterfaceRequest()
     }
     response = NewAttachNetworkInterfaceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCheckAssistantCidrRequest() (request *CheckAssistantCidrRequest) {
+    request = &CheckAssistantCidrRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "CheckAssistantCidr")
+    return
+}
+
+func NewCheckAssistantCidrResponse() (response *CheckAssistantCidrResponse) {
+    response = &CheckAssistantCidrResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(CheckAssistantCidr)用于检查辅助CIDR是否与存量路由、对等连接（对端VPC的CIDR）等资源存在冲突。如果存在重叠，则返回重叠的资源。（接口灰度中，如需使用请提工单。）
+// * 检测辅助CIDR是否与当前VPC的主CIDR和辅助CIDR存在重叠。
+// * 检测辅助CIDR是否与当前VPC的路由的目的端存在重叠。
+// * 检测辅助CIDR是否与当前VPC的对等连接，对端VPC下的主CIDR或辅助CIDR存在重叠。
+func (c *Client) CheckAssistantCidr(request *CheckAssistantCidrRequest) (response *CheckAssistantCidrResponse, err error) {
+    if request == nil {
+        request = NewCheckAssistantCidrRequest()
+    }
+    response = NewCheckAssistantCidrResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCheckDefaultSubnetRequest() (request *CheckDefaultSubnetRequest) {
+    request = &CheckDefaultSubnetRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "CheckDefaultSubnet")
+    return
+}
+
+func NewCheckDefaultSubnetResponse() (response *CheckDefaultSubnetResponse) {
+    response = &CheckDefaultSubnetResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（CheckDefaultSubnet）用于预判是否可建默认子网。
+func (c *Client) CheckDefaultSubnet(request *CheckDefaultSubnetRequest) (response *CheckDefaultSubnetResponse, err error) {
+    if request == nil {
+        request = NewCheckDefaultSubnetRequest()
+    }
+    response = NewCheckDefaultSubnetResponse()
     err = c.Send(request, response)
     return
 }
@@ -473,6 +601,61 @@ func (c *Client) CreateAddressTemplateGroup(request *CreateAddressTemplateGroupR
     return
 }
 
+func NewCreateAndAttachNetworkInterfaceRequest() (request *CreateAndAttachNetworkInterfaceRequest) {
+    request = &CreateAndAttachNetworkInterfaceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "CreateAndAttachNetworkInterface")
+    return
+}
+
+func NewCreateAndAttachNetworkInterfaceResponse() (response *CreateAndAttachNetworkInterfaceResponse) {
+    response = &CreateAndAttachNetworkInterfaceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（CreateAndAttachNetworkInterface）用于创建弹性网卡并绑定云主机。
+// * 创建弹性网卡时可以指定内网IP，并且可以指定一个主IP，指定的内网IP必须在弹性网卡所在子网内，而且不能被占用。
+// * 创建弹性网卡时可以指定需要申请的内网IP数量，系统会随机生成内网IP地址。
+// * 一个弹性网卡支持绑定的IP地址是有限制的，更多资源限制信息详见<a href="/document/product/576/18527">弹性网卡使用限制</a>。
+// * 创建弹性网卡同时可以绑定已有安全组。
+// * 创建弹性网卡同时可以绑定标签, 应答里的标签列表代表添加成功的标签。
+func (c *Client) CreateAndAttachNetworkInterface(request *CreateAndAttachNetworkInterfaceRequest) (response *CreateAndAttachNetworkInterfaceResponse, err error) {
+    if request == nil {
+        request = NewCreateAndAttachNetworkInterfaceRequest()
+    }
+    response = NewCreateAndAttachNetworkInterfaceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateAssistantCidrRequest() (request *CreateAssistantCidrRequest) {
+    request = &CreateAssistantCidrRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "CreateAssistantCidr")
+    return
+}
+
+func NewCreateAssistantCidrResponse() (response *CreateAssistantCidrResponse) {
+    response = &CreateAssistantCidrResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(CreateAssistantCidr)用于批量创建辅助CIDR。（接口灰度中，如需使用请提工单。）
+func (c *Client) CreateAssistantCidr(request *CreateAssistantCidrRequest) (response *CreateAssistantCidrResponse, err error) {
+    if request == nil {
+        request = NewCreateAssistantCidrRequest()
+    }
+    response = NewCreateAssistantCidrResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewCreateBandwidthPackageRequest() (request *CreateBandwidthPackageRequest) {
     request = &CreateBandwidthPackageRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -488,7 +671,7 @@ func NewCreateBandwidthPackageResponse() (response *CreateBandwidthPackageRespon
     return
 }
 
-// 接口支持创建[设备带宽包](https://cloud.tencent.com/document/product/684/15246#.E8.AE.BE.E5.A4.87.E5.B8.A6.E5.AE.BD.E5.8C.85)和[ip带宽包](https://cloud.tencent.com/document/product/684/15246#ip-.E5.B8.A6.E5.AE.BD.E5.8C.85)
+// 接口支持创建[设备带宽包](https://cloud.tencent.com/document/product/684/15246#.E8.AE.BE.E5.A4.87.E5.B8.A6.E5.AE.BD.E5.8C.85)和[IP带宽包](https://cloud.tencent.com/document/product/684/15246#ip-.E5.B8.A6.E5.AE.BD.E5.8C.85)
 func (c *Client) CreateBandwidthPackage(request *CreateBandwidthPackageRequest) (response *CreateBandwidthPackageResponse, err error) {
     if request == nil {
         request = NewCreateBandwidthPackageRequest()
@@ -514,6 +697,7 @@ func NewCreateCcnResponse() (response *CreateCcnResponse) {
 }
 
 // 本接口（CreateCcn）用于创建云联网（CCN）。<br />
+// * 创建云联网同时可以绑定标签, 应答里的标签列表代表添加成功的标签。
 // 每个账号能创建的云联网实例个数是有限的，详请参考产品文档。如果需要扩充请联系在线客服。
 func (c *Client) CreateCcn(request *CreateCcnRequest) (response *CreateCcnResponse, err error) {
     if request == nil {
@@ -549,6 +733,34 @@ func (c *Client) CreateCustomerGateway(request *CreateCustomerGatewayRequest) (r
     return
 }
 
+func NewCreateDefaultSecurityGroupRequest() (request *CreateDefaultSecurityGroupRequest) {
+    request = &CreateDefaultSecurityGroupRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "CreateDefaultSecurityGroup")
+    return
+}
+
+func NewCreateDefaultSecurityGroupResponse() (response *CreateDefaultSecurityGroupResponse) {
+    response = &CreateDefaultSecurityGroupResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（CreateDefaultSecurityGroup）用于创建（如果项目下未存在默认安全组，则创建；已存在则获取。）默认安全组（SecurityGroup）。
+// * 每个账户下每个地域的每个项目的<a href="https://cloud.tencent.com/document/product/213/12453">安全组数量限制</a>。
+// * 新建的安全组的入站和出站规则默认都是全部拒绝，在创建后通常您需要再调用CreateSecurityGroupPolicies将安全组的规则设置为需要的规则。
+// * 创建安全组同时可以绑定标签, 应答里的标签列表代表添加成功的标签。
+func (c *Client) CreateDefaultSecurityGroup(request *CreateDefaultSecurityGroupRequest) (response *CreateDefaultSecurityGroupResponse, err error) {
+    if request == nil {
+        request = NewCreateDefaultSecurityGroupRequest()
+    }
+    response = NewCreateDefaultSecurityGroupResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewCreateDefaultVpcRequest() (request *CreateDefaultVpcRequest) {
     request = &CreateDefaultVpcRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -566,13 +778,13 @@ func NewCreateDefaultVpcResponse() (response *CreateDefaultVpcResponse) {
 
 // 本接口（CreateDefaultVpc）用于创建默认私有网络(VPC）。
 // 
-// 默认VPC适用于快速入门和启动公共实例，您可以像使用任何其他VPC一样使用默认VPC。如果你想创建标准VPC，即指定VPC名称、VPC网段、子网网段、子网可用区，请使用常规创建VPC接口（CreateVpc）
+// 默认VPC适用于快速入门和启动公共实例，您可以像使用任何其他VPC一样使用默认VPC。如果您想创建标准VPC，即指定VPC名称、VPC网段、子网网段、子网可用区，请使用常规创建VPC接口（CreateVpc）
 // 
 // 正常情况，本接口并不一定生产默认VPC，而是根据用户账号的网络属性（DescribeAccountAttributes）来决定的
 // * 支持基础网络、VPC，返回VpcId为0
 // * 只支持VPC，返回默认VPC信息
 // 
-// 你也可以通过 Force 参数，强制返回默认VPC
+// 您也可以通过 Force 参数，强制返回默认VPC
 func (c *Client) CreateDefaultVpc(request *CreateDefaultVpcRequest) (response *CreateDefaultVpcResponse, err error) {
     if request == nil {
         request = NewCreateDefaultVpcRequest()
@@ -698,7 +910,7 @@ func NewCreateIp6TranslatorsResponse() (response *CreateIp6TranslatorsResponse) 
 }
 
 // 1. 该接口用于创建IPV6转换IPV4实例，支持批量
-// 2. 同一个账户在在一个地域最多允许创建10个转换实例
+// 2. 同一个账户在一个地域最多允许创建10个转换实例
 func (c *Client) CreateIp6Translators(request *CreateIp6TranslatorsRequest) (response *CreateIp6TranslatorsResponse, err error) {
     if request == nil {
         request = NewCreateIp6TranslatorsRequest()
@@ -783,6 +995,32 @@ func (c *Client) CreateNetDetect(request *CreateNetDetectRequest) (response *Cre
     return
 }
 
+func NewCreateNetworkAclRequest() (request *CreateNetworkAclRequest) {
+    request = &CreateNetworkAclRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "CreateNetworkAcl")
+    return
+}
+
+func NewCreateNetworkAclResponse() (response *CreateNetworkAclResponse) {
+    response = &CreateNetworkAclResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（CreateNetworkAcl）用于创建新的<a href="https://cloud.tencent.com/document/product/215/20088">网络ACL</a>。
+// * 新建的网络ACL的入站和出站规则默认都是全部拒绝，在创建后通常您需要再调用ModifyNetworkAclEntries将网络ACL的规则设置为需要的规则。
+func (c *Client) CreateNetworkAcl(request *CreateNetworkAclRequest) (response *CreateNetworkAclResponse, err error) {
+    if request == nil {
+        request = NewCreateNetworkAclRequest()
+    }
+    response = NewCreateNetworkAclResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewCreateNetworkInterfaceRequest() (request *CreateNetworkInterfaceRequest) {
     request = &CreateNetworkInterfaceRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -803,6 +1041,7 @@ func NewCreateNetworkInterfaceResponse() (response *CreateNetworkInterfaceRespon
 // * 创建弹性网卡时可以指定需要申请的内网IP数量，系统会随机生成内网IP地址。
 // * 一个弹性网卡支持绑定的IP地址是有限制的，更多资源限制信息详见<a href="/document/product/576/18527">弹性网卡使用限制</a>。
 // * 创建弹性网卡同时可以绑定已有安全组。
+// * 创建弹性网卡同时可以绑定标签, 应答里的标签列表代表添加成功的标签。
 func (c *Client) CreateNetworkInterface(request *CreateNetworkInterfaceRequest) (response *CreateNetworkInterfaceResponse, err error) {
     if request == nil {
         request = NewCreateNetworkInterfaceRequest()
@@ -829,6 +1068,7 @@ func NewCreateRouteTableResponse() (response *CreateRouteTableResponse) {
 
 // 本接口(CreateRouteTable)用于创建路由表。
 // * 创建了VPC后，系统会创建一个默认路由表，所有新建的子网都会关联到默认路由表。默认情况下您可以直接使用默认路由表来管理您的路由策略。当您的路由策略较多时，您可以调用创建路由表接口创建更多路由表管理您的路由策略。
+// * 创建路由表同时可以绑定标签, 应答里的标签列表代表添加成功的标签。
 func (c *Client) CreateRouteTable(request *CreateRouteTableRequest) (response *CreateRouteTableResponse, err error) {
     if request == nil {
         request = NewCreateRouteTableRequest()
@@ -880,8 +1120,9 @@ func NewCreateSecurityGroupResponse() (response *CreateSecurityGroupResponse) {
 }
 
 // 本接口（CreateSecurityGroup）用于创建新的安全组（SecurityGroup）。
-// * 每个账户下每个地域的每个项目的<a href="https://cloud.tencent.com/document/product/213/500#2.-.E5.AE.89.E5.85.A8.E7.BB.84.E7.9A.84.E9.99.90.E5.88.B6">安全组数量限制</a>。
+// * 每个账户下每个地域的每个项目的<a href="https://cloud.tencent.com/document/product/213/12453">安全组数量限制</a>。
 // * 新建的安全组的入站和出站规则默认都是全部拒绝，在创建后通常您需要再调用CreateSecurityGroupPolicies将安全组的规则设置为需要的规则。
+// * 创建安全组同时可以绑定标签, 应答里的标签列表代表添加成功的标签。
 func (c *Client) CreateSecurityGroup(request *CreateSecurityGroupRequest) (response *CreateSecurityGroupResponse, err error) {
     if request == nil {
         request = NewCreateSecurityGroupRequest()
@@ -908,19 +1149,58 @@ func NewCreateSecurityGroupPoliciesResponse() (response *CreateSecurityGroupPoli
 
 // 本接口（CreateSecurityGroupPolicies）用于创建安全组规则（SecurityGroupPolicy）。
 // 
-// * Version安全组规则版本号，用户每次更新安全规则版本会自动加1，防止你更新的路由规则已过期，不填不考虑冲突。
-// * Protocol字段支持输入TCP, UDP, ICMP, GRE, ALL。
+// * Version安全组规则版本号，用户每次更新安全规则版本会自动加1，防止您更新的路由规则已过期，不填不考虑冲突。
+// * Protocol字段支持输入TCP, UDP, ICMP, ICMPV6, GRE, ALL。
 // * CidrBlock字段允许输入符合cidr格式标准的任意字符串。(展开)在基础网络中，如果CidrBlock包含您的账户内的云服务器之外的设备在腾讯云的内网IP，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。
+// * Ipv6CidrBlock字段允许输入符合IPv6 cidr格式标准的任意字符串。(展开)在基础网络中，如果Ipv6CidrBlock包含您的账户内的云服务器之外的设备在腾讯云的内网IPv6，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。
 // * SecurityGroupId字段允许输入与待修改的安全组位于相同项目中的安全组ID，包括这个安全组ID本身，代表安全组下所有云服务器的内网IP。使用这个字段时，这条规则用来匹配网络报文的过程中会随着被使用的这个ID所关联的云服务器变化而变化，不需要重新修改。
 // * Port字段允许输入一个单独端口号，或者用减号分隔的两个端口号代表端口范围，例如80或8000-8010。只有当Protocol字段是TCP或UDP时，Port字段才被接受，即Protocol字段不是TCP或UDP时，Protocol和Port排他关系，不允许同时输入，否则会接口报错。
 // * Action字段只允许输入ACCEPT或DROP。
-// * CidrBlock, SecurityGroupId, AddressTemplate三者是排他关系，不允许同时输入，Protocol + Port和ServiceTemplate二者是排他关系，不允许同时输入。
+// * CidrBlock, Ipv6CidrBlock, SecurityGroupId, AddressTemplate四者是排他关系，不允许同时输入，Protocol + Port和ServiceTemplate二者是排他关系，不允许同时输入。
 // * 一次请求中只能创建单个方向的规则, 如果需要指定索引（PolicyIndex）参数, 多条规则的索引必须一致。
 func (c *Client) CreateSecurityGroupPolicies(request *CreateSecurityGroupPoliciesRequest) (response *CreateSecurityGroupPoliciesResponse, err error) {
     if request == nil {
         request = NewCreateSecurityGroupPoliciesRequest()
     }
     response = NewCreateSecurityGroupPoliciesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateSecurityGroupWithPoliciesRequest() (request *CreateSecurityGroupWithPoliciesRequest) {
+    request = &CreateSecurityGroupWithPoliciesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "CreateSecurityGroupWithPolicies")
+    return
+}
+
+func NewCreateSecurityGroupWithPoliciesResponse() (response *CreateSecurityGroupWithPoliciesResponse) {
+    response = &CreateSecurityGroupWithPoliciesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（CreateSecurityGroupWithPolicies）用于创建新的安全组（SecurityGroup），并且可以同时添加安全组规则（SecurityGroupPolicy）。
+// * 每个账户下每个地域的每个项目的<a href="https://cloud.tencent.com/document/product/213/12453">安全组数量限制</a>。
+// * 新建的安全组的入站和出站规则默认都是全部拒绝，在创建后通常您需要再调用CreateSecurityGroupPolicies将安全组的规则设置为需要的规则。
+// 
+// 安全组规则说明：
+// * Version安全组规则版本号，用户每次更新安全规则版本会自动加1，防止您更新的路由规则已过期，不填不考虑冲突。
+// * Protocol字段支持输入TCP, UDP, ICMP, ICMPV6, GRE, ALL。
+// * CidrBlock字段允许输入符合cidr格式标准的任意字符串。(展开)在基础网络中，如果CidrBlock包含您的账户内的云服务器之外的设备在腾讯云的内网IP，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。
+// * Ipv6CidrBlock字段允许输入符合IPv6 cidr格式标准的任意字符串。(展开)在基础网络中，如果Ipv6CidrBlock包含您的账户内的云服务器之外的设备在腾讯云的内网IPv6，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。
+// * SecurityGroupId字段允许输入与待修改的安全组位于相同项目中的安全组ID，包括这个安全组ID本身，代表安全组下所有云服务器的内网IP。使用这个字段时，这条规则用来匹配网络报文的过程中会随着被使用的这个ID所关联的云服务器变化而变化，不需要重新修改。
+// * Port字段允许输入一个单独端口号，或者用减号分隔的两个端口号代表端口范围，例如80或8000-8010。只有当Protocol字段是TCP或UDP时，Port字段才被接受，即Protocol字段不是TCP或UDP时，Protocol和Port排他关系，不允许同时输入，否则会接口报错。
+// * Action字段只允许输入ACCEPT或DROP。
+// * CidrBlock, Ipv6CidrBlock, SecurityGroupId, AddressTemplate四者是排他关系，不允许同时输入，Protocol + Port和ServiceTemplate二者是排他关系，不允许同时输入。
+// * 一次请求中只能创建单个方向的规则, 如果需要指定索引（PolicyIndex）参数, 多条规则的索引必须一致。
+func (c *Client) CreateSecurityGroupWithPolicies(request *CreateSecurityGroupWithPoliciesRequest) (response *CreateSecurityGroupWithPoliciesResponse, err error) {
+    if request == nil {
+        request = NewCreateSecurityGroupWithPoliciesRequest()
+    }
+    response = NewCreateSecurityGroupWithPoliciesResponse()
     err = c.Send(request, response)
     return
 }
@@ -993,9 +1273,10 @@ func NewCreateSubnetResponse() (response *CreateSubnetResponse) {
 // 本接口(CreateSubnet)用于创建子网。
 // * 创建子网前必须创建好 VPC。
 // * 子网创建成功后，子网网段不能修改。子网网段必须在VPC网段内，可以和VPC网段相同（VPC有且只有一个子网时），建议子网网段在VPC网段内，预留网段给其他子网使用。
-// * 你可以创建的最小网段子网掩码为28（有16个IP地址），最大网段子网掩码为16（65,536个IP地址）。
+// * 您可以创建的最小网段子网掩码为28（有16个IP地址），最大网段子网掩码为16（65,536个IP地址）。
 // * 同一个VPC内，多个子网的网段不能重叠。
 // * 子网创建后会自动关联到默认路由表。
+// * 创建子网同时可以绑定标签, 应答里的标签列表代表添加成功的标签。
 func (c *Client) CreateSubnet(request *CreateSubnetRequest) (response *CreateSubnetResponse, err error) {
     if request == nil {
         request = NewCreateSubnetRequest()
@@ -1023,9 +1304,10 @@ func NewCreateSubnetsResponse() (response *CreateSubnetsResponse) {
 // 本接口(CreateSubnets)用于批量创建子网。
 // * 创建子网前必须创建好 VPC。
 // * 子网创建成功后，子网网段不能修改。子网网段必须在VPC网段内，可以和VPC网段相同（VPC有且只有一个子网时），建议子网网段在VPC网段内，预留网段给其他子网使用。
-// * 你可以创建的最小网段子网掩码为28（有16个IP地址），最大网段子网掩码为16（65,536个IP地址）。
+// * 您可以创建的最小网段子网掩码为28（有16个IP地址），最大网段子网掩码为16（65,536个IP地址）。
 // * 同一个VPC内，多个子网的网段不能重叠。
 // * 子网创建后会自动关联到默认路由表。
+// * 创建子网同时可以绑定标签, 应答里的标签列表代表添加成功的标签。
 func (c *Client) CreateSubnets(request *CreateSubnetsRequest) (response *CreateSubnetsResponse, err error) {
     if request == nil {
         request = NewCreateSubnetsRequest()
@@ -1053,6 +1335,7 @@ func NewCreateVpcResponse() (response *CreateVpcResponse) {
 // 本接口(CreateVpc)用于创建私有网络(VPC)。
 // * 用户可以创建的最小网段子网掩码为28（有16个IP地址），最大网段子网掩码为16（65,536个IP地址）,如果规划VPC网段请参见VPC网段规划说明。
 // * 同一个地域能创建的VPC资源个数也是有限制的，详见 <a href="https://cloud.tencent.com/doc/product/215/537" title="VPC使用限制">VPC使用限制</a>,如果需要扩充请联系在线客服。
+// * 创建VPC同时可以绑定标签, 应答里的标签列表代表添加成功的标签。
 func (c *Client) CreateVpc(request *CreateVpcRequest) (response *CreateVpcResponse, err error) {
     if request == nil {
         request = NewCreateVpcRequest()
@@ -1162,6 +1445,31 @@ func (c *Client) DeleteAddressTemplateGroup(request *DeleteAddressTemplateGroupR
     return
 }
 
+func NewDeleteAssistantCidrRequest() (request *DeleteAssistantCidrRequest) {
+    request = &DeleteAssistantCidrRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DeleteAssistantCidr")
+    return
+}
+
+func NewDeleteAssistantCidrResponse() (response *DeleteAssistantCidrResponse) {
+    response = &DeleteAssistantCidrResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(DeleteAssistantCidr)用于删除辅助CIDR。（接口灰度中，如需使用请提工单。）
+func (c *Client) DeleteAssistantCidr(request *DeleteAssistantCidrRequest) (response *DeleteAssistantCidrResponse, err error) {
+    if request == nil {
+        request = NewDeleteAssistantCidrRequest()
+    }
+    response = NewDeleteAssistantCidrResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewDeleteBandwidthPackageRequest() (request *DeleteBandwidthPackageRequest) {
     request = &DeleteBandwidthPackageRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -1177,7 +1485,7 @@ func NewDeleteBandwidthPackageResponse() (response *DeleteBandwidthPackageRespon
     return
 }
 
-// 接口支持删除共享带宽包，包括[设备带宽包](https://cloud.tencent.com/document/product/684/15246#.E8.AE.BE.E5.A4.87.E5.B8.A6.E5.AE.BD.E5.8C.85)和[ip带宽包](https://cloud.tencent.com/document/product/684/15246#ip-.E5.B8.A6.E5.AE.BD.E5.8C.85)
+// 接口支持删除共享带宽包，包括[设备带宽包](https://cloud.tencent.com/document/product/684/15246#.E8.AE.BE.E5.A4.87.E5.B8.A6.E5.AE.BD.E5.8C.85)和[IP带宽包](https://cloud.tencent.com/document/product/684/15246#ip-.E5.B8.A6.E5.AE.BD.E5.8C.85)
 func (c *Client) DeleteBandwidthPackage(request *DeleteBandwidthPackageRequest) (response *DeleteBandwidthPackageResponse, err error) {
     if request == nil {
         request = NewDeleteBandwidthPackageRequest()
@@ -1445,6 +1753,31 @@ func (c *Client) DeleteNetDetect(request *DeleteNetDetectRequest) (response *Del
     return
 }
 
+func NewDeleteNetworkAclRequest() (request *DeleteNetworkAclRequest) {
+    request = &DeleteNetworkAclRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DeleteNetworkAcl")
+    return
+}
+
+func NewDeleteNetworkAclResponse() (response *DeleteNetworkAclResponse) {
+    response = &DeleteNetworkAclResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DeleteNetworkAcl）用于删除网络ACL。
+func (c *Client) DeleteNetworkAcl(request *DeleteNetworkAclRequest) (response *DeleteNetworkAclResponse, err error) {
+    if request == nil {
+        request = NewDeleteNetworkAclRequest()
+    }
+    response = NewDeleteNetworkAclResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewDeleteNetworkInterfaceRequest() (request *DeleteNetworkInterfaceRequest) {
     request = &DeleteNetworkInterfaceRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -1461,7 +1794,7 @@ func NewDeleteNetworkInterfaceResponse() (response *DeleteNetworkInterfaceRespon
 }
 
 // 本接口（DeleteNetworkInterface）用于删除弹性网卡。
-// * 弹性网卡上绑定了云主机时，不能被删除。
+// * 弹性网卡上绑定了云服务器时，不能被删除。
 // * 删除指定弹性网卡，弹性网卡必须先和子机解绑才能删除。删除之后弹性网卡上所有内网IP都将被退还。
 func (c *Client) DeleteNetworkInterface(request *DeleteNetworkInterfaceRequest) (response *DeleteNetworkInterfaceResponse, err error) {
     if request == nil {
@@ -1642,7 +1975,7 @@ func NewDeleteSubnetResponse() (response *DeleteSubnetResponse) {
 }
 
 // 本接口（DeleteSubnet）用于用于删除子网(Subnet)。
-// * 删除子网前，请清理该子网下所有资源，包括云主机、负载均衡、云数据、noSql、弹性网卡等资源。
+// * 删除子网前，请清理该子网下所有资源，包括云服务器、负载均衡、云数据、noSql、弹性网卡等资源。
 func (c *Client) DeleteSubnet(request *DeleteSubnetRequest) (response *DeleteSubnetResponse, err error) {
     if request == nil {
         request = NewDeleteSubnetRequest()
@@ -1668,7 +2001,7 @@ func NewDeleteVpcResponse() (response *DeleteVpcResponse) {
 }
 
 // 本接口（DeleteVpc）用于删除私有网络。
-// * 删除前请确保 VPC 内已经没有相关资源，例如云主机、云数据库、NoSQL、VPN网关、专线网关、负载均衡、对等连接、与之互通的基础网络设备等。
+// * 删除前请确保 VPC 内已经没有相关资源，例如云服务器、云数据库、NoSQL、VPN网关、专线网关、负载均衡、对等连接、与之互通的基础网络设备等。
 // * 删除私有网络是不可逆的操作，请谨慎处理。
 func (c *Client) DeleteVpc(request *DeleteVpcRequest) (response *DeleteVpcResponse, err error) {
     if request == nil {
@@ -1851,6 +2184,31 @@ func (c *Client) DescribeAddresses(request *DescribeAddressesRequest) (response 
         request = NewDescribeAddressesRequest()
     }
     response = NewDescribeAddressesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeAssistantCidrRequest() (request *DescribeAssistantCidrRequest) {
+    request = &DescribeAssistantCidrRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeAssistantCidr")
+    return
+}
+
+func NewDescribeAssistantCidrResponse() (response *DescribeAssistantCidrResponse) {
+    response = &DescribeAssistantCidrResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DescribeAssistantCidr）用于查询辅助CIDR列表。（接口灰度中，如需使用请提工单。）
+func (c *Client) DescribeAssistantCidr(request *DescribeAssistantCidrRequest) (response *DescribeAssistantCidrResponse, err error) {
+    if request == nil {
+        request = NewDescribeAssistantCidrRequest()
+    }
+    response = NewDescribeAssistantCidrResponse()
     err = c.Send(request, response)
     return
 }
@@ -2207,6 +2565,31 @@ func (c *Client) DescribeGatewayFlowMonitorDetail(request *DescribeGatewayFlowMo
     return
 }
 
+func NewDescribeGatewayFlowQosRequest() (request *DescribeGatewayFlowQosRequest) {
+    request = &DescribeGatewayFlowQosRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeGatewayFlowQos")
+    return
+}
+
+func NewDescribeGatewayFlowQosResponse() (response *DescribeGatewayFlowQosResponse) {
+    response = &DescribeGatewayFlowQosResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DescribeGatewayFlowQos）用于查询网关来访IP流控带宽。
+func (c *Client) DescribeGatewayFlowQos(request *DescribeGatewayFlowQosRequest) (response *DescribeGatewayFlowQosResponse, err error) {
+    if request == nil {
+        request = NewDescribeGatewayFlowQosRequest()
+    }
+    response = NewDescribeGatewayFlowQosResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewDescribeHaVipsRequest() (request *DescribeHaVipsRequest) {
     request = &DescribeHaVipsRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -2228,6 +2611,31 @@ func (c *Client) DescribeHaVips(request *DescribeHaVipsRequest) (response *Descr
         request = NewDescribeHaVipsRequest()
     }
     response = NewDescribeHaVipsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeIp6AddressesRequest() (request *DescribeIp6AddressesRequest) {
+    request = &DescribeIp6AddressesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeIp6Addresses")
+    return
+}
+
+func NewDescribeIp6AddressesResponse() (response *DescribeIp6AddressesResponse) {
+    response = &DescribeIp6AddressesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 该接口用于查询IPV6地址信息
+func (c *Client) DescribeIp6Addresses(request *DescribeIp6AddressesRequest) (response *DescribeIp6AddressesResponse, err error) {
+    if request == nil {
+        request = NewDescribeIp6AddressesRequest()
+    }
+    response = NewDescribeIp6AddressesResponse()
     err = c.Send(request, response)
     return
 }
@@ -2383,6 +2791,31 @@ func (c *Client) DescribeNetDetects(request *DescribeNetDetectsRequest) (respons
     return
 }
 
+func NewDescribeNetworkAclsRequest() (request *DescribeNetworkAclsRequest) {
+    request = &DescribeNetworkAclsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeNetworkAcls")
+    return
+}
+
+func NewDescribeNetworkAclsResponse() (response *DescribeNetworkAclsResponse) {
+    response = &DescribeNetworkAclsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DescribeNetworkAcls）用于查询网络ACL列表。
+func (c *Client) DescribeNetworkAcls(request *DescribeNetworkAclsRequest) (response *DescribeNetworkAclsResponse, err error) {
+    if request == nil {
+        request = NewDescribeNetworkAclsRequest()
+    }
+    response = NewDescribeNetworkAclsResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewDescribeNetworkInterfaceLimitRequest() (request *DescribeNetworkInterfaceLimitRequest) {
     request = &DescribeNetworkInterfaceLimitRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -2398,7 +2831,7 @@ func NewDescribeNetworkInterfaceLimitResponse() (response *DescribeNetworkInterf
     return
 }
 
-// 本接口（DescribeNetworkInterfaceLimit）根据CVM实例ID查询弹性网卡配额，返回该CVM实例能绑定的弹性网卡配额，以及每个弹性网卡可以分配的ip配额
+// 本接口（DescribeNetworkInterfaceLimit）根据CVM实例ID或弹性网卡ID查询弹性网卡配额，返回该CVM实例或弹性网卡能绑定的弹性网卡配额，以及弹性网卡可以分配的IP配额
 func (c *Client) DescribeNetworkInterfaceLimit(request *DescribeNetworkInterfaceLimitRequest) (response *DescribeNetworkInterfaceLimitResponse, err error) {
     if request == nil {
         request = NewDescribeNetworkInterfaceLimitRequest()
@@ -2508,6 +2941,31 @@ func (c *Client) DescribeSecurityGroupAssociationStatistics(request *DescribeSec
     return
 }
 
+func NewDescribeSecurityGroupLimitsRequest() (request *DescribeSecurityGroupLimitsRequest) {
+    request = &DescribeSecurityGroupLimitsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeSecurityGroupLimits")
+    return
+}
+
+func NewDescribeSecurityGroupLimitsResponse() (response *DescribeSecurityGroupLimitsResponse) {
+    response = &DescribeSecurityGroupLimitsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(DescribeSecurityGroupLimits)用于查询用户安全组配额。
+func (c *Client) DescribeSecurityGroupLimits(request *DescribeSecurityGroupLimitsRequest) (response *DescribeSecurityGroupLimitsResponse, err error) {
+    if request == nil {
+        request = NewDescribeSecurityGroupLimitsRequest()
+    }
+    response = NewDescribeSecurityGroupLimitsResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewDescribeSecurityGroupPoliciesRequest() (request *DescribeSecurityGroupPoliciesRequest) {
     request = &DescribeSecurityGroupPoliciesRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -2529,6 +2987,31 @@ func (c *Client) DescribeSecurityGroupPolicies(request *DescribeSecurityGroupPol
         request = NewDescribeSecurityGroupPoliciesRequest()
     }
     response = NewDescribeSecurityGroupPoliciesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeSecurityGroupReferencesRequest() (request *DescribeSecurityGroupReferencesRequest) {
+    request = &DescribeSecurityGroupReferencesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeSecurityGroupReferences")
+    return
+}
+
+func NewDescribeSecurityGroupReferencesResponse() (response *DescribeSecurityGroupReferencesResponse) {
+    response = &DescribeSecurityGroupReferencesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DescribeSecurityGroupReferences）用于查询安全组被引用信息。
+func (c *Client) DescribeSecurityGroupReferences(request *DescribeSecurityGroupReferencesRequest) (response *DescribeSecurityGroupReferencesResponse, err error) {
+    if request == nil {
+        request = NewDescribeSecurityGroupReferencesRequest()
+    }
+    response = NewDescribeSecurityGroupReferencesResponse()
     err = c.Send(request, response)
     return
 }
@@ -2658,6 +3141,56 @@ func (c *Client) DescribeTaskResult(request *DescribeTaskResultRequest) (respons
     return
 }
 
+func NewDescribeTemplateLimitsRequest() (request *DescribeTemplateLimitsRequest) {
+    request = &DescribeTemplateLimitsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeTemplateLimits")
+    return
+}
+
+func NewDescribeTemplateLimitsResponse() (response *DescribeTemplateLimitsResponse) {
+    response = &DescribeTemplateLimitsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DescribeTemplateLimits）用于查询参数模板配额列表。
+func (c *Client) DescribeTemplateLimits(request *DescribeTemplateLimitsRequest) (response *DescribeTemplateLimitsResponse, err error) {
+    if request == nil {
+        request = NewDescribeTemplateLimitsRequest()
+    }
+    response = NewDescribeTemplateLimitsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeVpcInstancesRequest() (request *DescribeVpcInstancesRequest) {
+    request = &DescribeVpcInstancesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeVpcInstances")
+    return
+}
+
+func NewDescribeVpcInstancesResponse() (response *DescribeVpcInstancesResponse) {
+    response = &DescribeVpcInstancesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+//  本接口（DescribeVpcInstances）用于查询VPC下的云主机实例列表。
+func (c *Client) DescribeVpcInstances(request *DescribeVpcInstancesRequest) (response *DescribeVpcInstancesResponse, err error) {
+    if request == nil {
+        request = NewDescribeVpcInstancesRequest()
+    }
+    response = NewDescribeVpcInstancesResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewDescribeVpcIpv6AddressesRequest() (request *DescribeVpcIpv6AddressesRequest) {
     request = &DescribeVpcIpv6AddressesRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -2684,6 +3217,60 @@ func (c *Client) DescribeVpcIpv6Addresses(request *DescribeVpcIpv6AddressesReque
     return
 }
 
+func NewDescribeVpcLimitsRequest() (request *DescribeVpcLimitsRequest) {
+    request = &DescribeVpcLimitsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeVpcLimits")
+    return
+}
+
+func NewDescribeVpcLimitsResponse() (response *DescribeVpcLimitsResponse) {
+    response = &DescribeVpcLimitsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 获取私有网络配额，部分私有网络的配额有地域属性。
+// LimitTypes取值范围：
+// * appid-max-vpcs （每个开发商每个地域可创建的VPC数）
+// * vpc-max-subnets（每个VPC可创建的子网数）
+// * vpc-max-route-tables（每个VPC可创建的路由表数）
+// * route-table-max-policies（每个路由表可添加的策略数）
+// * vpc-max-vpn-gateways（每个VPC可创建的VPN网关数）
+// * appid-max-custom-gateways（每个开发商可创建的对端网关数）
+// * appid-max-vpn-connections（每个开发商可创建的VPN通道数）
+// * custom-gateway-max-vpn-connections（每个对端网关可创建的VPN通道数）
+// * vpn-gateway-max-custom-gateways（每个VPNGW可以创建的通道数）
+// * vpc-max-network-acls（每个VPC可创建的网络ACL数）
+// * network-acl-max-inbound-policies（每个网络ACL可添加的入站规则数）
+// * network-acl-max-outbound-policies（每个网络ACL可添加的出站规则数）
+// * vpc-max-vpcpeers（每个VPC可创建的对等连接数）
+// * vpc-max-available-vpcpeers（每个VPC可创建的有效对等连接数）
+// * vpc-max-basic-network-interconnections（每个VPC可创建的基础网络云主机与VPC互通数）
+// * direct-connection-max-snats（每个专线网关可创建的SNAT数）
+// * direct-connection-max-dnats（每个专线网关可创建的DNAT数）
+// * direct-connection-max-snapts（每个专线网关可创建的SNAPT数）
+// * direct-connection-max-dnapts（每个专线网关可创建的DNAPT数）
+// * vpc-max-nat-gateways（每个VPC可创建的NAT网关数）
+// * nat-gateway-max-eips（每个NAT可以购买的外网IP数量）
+// * vpc-max-enis（每个VPC可创建弹性网卡数）
+// * vpc-max-havips（每个VPC可创建HAVIP数）
+// * eni-max-private-ips（每个ENI可以绑定的内网IP数（ENI未绑定子机））
+// * nat-gateway-max-dnapts（每个NAT网关可创建的DNAPT数）
+// * vpc-max-ipv6s（每个VPC可分配的IPv6地址数）
+// * eni-max-ipv6s（每个ENI可分配的IPv6地址数）
+// * vpc-max-assistant_cidrs（每个VPC可分配的辅助CIDR数）
+func (c *Client) DescribeVpcLimits(request *DescribeVpcLimitsRequest) (response *DescribeVpcLimitsResponse, err error) {
+    if request == nil {
+        request = NewDescribeVpcLimitsRequest()
+    }
+    response = NewDescribeVpcLimitsResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewDescribeVpcPrivateIpAddressesRequest() (request *DescribeVpcPrivateIpAddressesRequest) {
     request = &DescribeVpcPrivateIpAddressesRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -2706,6 +3293,31 @@ func (c *Client) DescribeVpcPrivateIpAddresses(request *DescribeVpcPrivateIpAddr
         request = NewDescribeVpcPrivateIpAddressesRequest()
     }
     response = NewDescribeVpcPrivateIpAddressesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeVpcResourceDashboardRequest() (request *DescribeVpcResourceDashboardRequest) {
+    request = &DescribeVpcResourceDashboardRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeVpcResourceDashboard")
+    return
+}
+
+func NewDescribeVpcResourceDashboardResponse() (response *DescribeVpcResourceDashboardResponse) {
+    response = &DescribeVpcResourceDashboardResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 查看VPC资源
+func (c *Client) DescribeVpcResourceDashboard(request *DescribeVpcResourceDashboardRequest) (response *DescribeVpcResourceDashboardResponse, err error) {
+    if request == nil {
+        request = NewDescribeVpcResourceDashboardRequest()
+    }
+    response = NewDescribeVpcResourceDashboardResponse()
     err = c.Send(request, response)
     return
 }
@@ -2886,6 +3498,31 @@ func (c *Client) DisableCcnRoutes(request *DisableCcnRoutesRequest) (response *D
     return
 }
 
+func NewDisableGatewayFlowMonitorRequest() (request *DisableGatewayFlowMonitorRequest) {
+    request = &DisableGatewayFlowMonitorRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DisableGatewayFlowMonitor")
+    return
+}
+
+func NewDisableGatewayFlowMonitorResponse() (response *DisableGatewayFlowMonitorResponse) {
+    response = &DisableGatewayFlowMonitorResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DisableGatewayFlowMonitor）用于关闭网关流量监控。
+func (c *Client) DisableGatewayFlowMonitor(request *DisableGatewayFlowMonitorRequest) (response *DisableGatewayFlowMonitorResponse, err error) {
+    if request == nil {
+        request = NewDisableGatewayFlowMonitorRequest()
+    }
+    response = NewDisableGatewayFlowMonitorResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewDisableRoutesRequest() (request *DisableRoutesRequest) {
     request = &DisableRoutesRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -2965,6 +3602,56 @@ func (c *Client) DisassociateNatGatewayAddress(request *DisassociateNatGatewayAd
     return
 }
 
+func NewDisassociateNetworkAclSubnetsRequest() (request *DisassociateNetworkAclSubnetsRequest) {
+    request = &DisassociateNetworkAclSubnetsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DisassociateNetworkAclSubnets")
+    return
+}
+
+func NewDisassociateNetworkAclSubnetsResponse() (response *DisassociateNetworkAclSubnetsResponse) {
+    response = &DisassociateNetworkAclSubnetsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DisassociateNetworkAclSubnets）用于网络ACL解关联vpc下的子网。
+func (c *Client) DisassociateNetworkAclSubnets(request *DisassociateNetworkAclSubnetsRequest) (response *DisassociateNetworkAclSubnetsResponse, err error) {
+    if request == nil {
+        request = NewDisassociateNetworkAclSubnetsRequest()
+    }
+    response = NewDisassociateNetworkAclSubnetsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDisassociateNetworkInterfaceSecurityGroupsRequest() (request *DisassociateNetworkInterfaceSecurityGroupsRequest) {
+    request = &DisassociateNetworkInterfaceSecurityGroupsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DisassociateNetworkInterfaceSecurityGroups")
+    return
+}
+
+func NewDisassociateNetworkInterfaceSecurityGroupsResponse() (response *DisassociateNetworkInterfaceSecurityGroupsResponse) {
+    response = &DisassociateNetworkInterfaceSecurityGroupsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DisassociateNetworkInterfaceSecurityGroups）用于弹性网卡解绑安全组。支持弹性网卡完全解绑安全组。
+func (c *Client) DisassociateNetworkInterfaceSecurityGroups(request *DisassociateNetworkInterfaceSecurityGroupsRequest) (response *DisassociateNetworkInterfaceSecurityGroupsResponse, err error) {
+    if request == nil {
+        request = NewDisassociateNetworkInterfaceSecurityGroupsRequest()
+    }
+    response = NewDisassociateNetworkInterfaceSecurityGroupsResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewDownloadCustomerGatewayConfigurationRequest() (request *DownloadCustomerGatewayConfigurationRequest) {
     request = &DownloadCustomerGatewayConfigurationRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -3012,6 +3699,31 @@ func (c *Client) EnableCcnRoutes(request *EnableCcnRoutesRequest) (response *Ena
         request = NewEnableCcnRoutesRequest()
     }
     response = NewEnableCcnRoutesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewEnableGatewayFlowMonitorRequest() (request *EnableGatewayFlowMonitorRequest) {
+    request = &EnableGatewayFlowMonitorRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "EnableGatewayFlowMonitor")
+    return
+}
+
+func NewEnableGatewayFlowMonitorResponse() (response *EnableGatewayFlowMonitorResponse) {
+    response = &EnableGatewayFlowMonitorResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（EnableGatewayFlowMonitor）用于开启网关流量监控。
+func (c *Client) EnableGatewayFlowMonitor(request *EnableGatewayFlowMonitorRequest) (response *EnableGatewayFlowMonitorResponse, err error) {
+    if request == nil {
+        request = NewEnableGatewayFlowMonitorRequest()
+    }
+    response = NewEnableGatewayFlowMonitorResponse()
     err = c.Send(request, response)
     return
 }
@@ -3322,6 +4034,31 @@ func (c *Client) ModifyAddressesBandwidth(request *ModifyAddressesBandwidthReque
     return
 }
 
+func NewModifyAssistantCidrRequest() (request *ModifyAssistantCidrRequest) {
+    request = &ModifyAssistantCidrRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "ModifyAssistantCidr")
+    return
+}
+
+func NewModifyAssistantCidrResponse() (response *ModifyAssistantCidrResponse) {
+    response = &ModifyAssistantCidrResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口(ModifyAssistantCidr)用于批量修改辅助CIDR，支持新增和删除。（接口灰度中，如需使用请提工单。）
+func (c *Client) ModifyAssistantCidr(request *ModifyAssistantCidrRequest) (response *ModifyAssistantCidrResponse, err error) {
+    if request == nil {
+        request = NewModifyAssistantCidrRequest()
+    }
+    response = NewModifyAssistantCidrResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewModifyBandwidthPackageAttributeRequest() (request *ModifyBandwidthPackageAttributeRequest) {
     request = &ModifyBandwidthPackageAttributeRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -3368,6 +4105,31 @@ func (c *Client) ModifyCcnAttribute(request *ModifyCcnAttributeRequest) (respons
         request = NewModifyCcnAttributeRequest()
     }
     response = NewModifyCcnAttributeResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyCcnRegionBandwidthLimitsTypeRequest() (request *ModifyCcnRegionBandwidthLimitsTypeRequest) {
+    request = &ModifyCcnRegionBandwidthLimitsTypeRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "ModifyCcnRegionBandwidthLimitsType")
+    return
+}
+
+func NewModifyCcnRegionBandwidthLimitsTypeResponse() (response *ModifyCcnRegionBandwidthLimitsTypeResponse) {
+    response = &ModifyCcnRegionBandwidthLimitsTypeResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（ModifyCcnRegionBandwidthLimitsType）用于修改后付费云联网实例修改带宽限速策略。
+func (c *Client) ModifyCcnRegionBandwidthLimitsType(request *ModifyCcnRegionBandwidthLimitsTypeRequest) (response *ModifyCcnRegionBandwidthLimitsTypeResponse, err error) {
+    if request == nil {
+        request = NewModifyCcnRegionBandwidthLimitsTypeRequest()
+    }
+    response = NewModifyCcnRegionBandwidthLimitsTypeResponse()
     err = c.Send(request, response)
     return
 }
@@ -3447,6 +4209,31 @@ func (c *Client) ModifyFlowLogAttribute(request *ModifyFlowLogAttributeRequest) 
     return
 }
 
+func NewModifyGatewayFlowQosRequest() (request *ModifyGatewayFlowQosRequest) {
+    request = &ModifyGatewayFlowQosRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "ModifyGatewayFlowQos")
+    return
+}
+
+func NewModifyGatewayFlowQosResponse() (response *ModifyGatewayFlowQosResponse) {
+    response = &ModifyGatewayFlowQosResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（ModifyGatewayFlowQos）用于调整网关流控带宽。
+func (c *Client) ModifyGatewayFlowQos(request *ModifyGatewayFlowQosRequest) (response *ModifyGatewayFlowQosResponse, err error) {
+    if request == nil {
+        request = NewModifyGatewayFlowQosRequest()
+    }
+    response = NewModifyGatewayFlowQosResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewModifyHaVipAttributeRequest() (request *ModifyHaVipAttributeRequest) {
     request = &ModifyHaVipAttributeRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -3468,6 +4255,31 @@ func (c *Client) ModifyHaVipAttribute(request *ModifyHaVipAttributeRequest) (res
         request = NewModifyHaVipAttributeRequest()
     }
     response = NewModifyHaVipAttributeResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyIp6AddressesBandwidthRequest() (request *ModifyIp6AddressesBandwidthRequest) {
+    request = &ModifyIp6AddressesBandwidthRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "ModifyIp6AddressesBandwidth")
+    return
+}
+
+func NewModifyIp6AddressesBandwidthResponse() (response *ModifyIp6AddressesBandwidthResponse) {
+    response = &ModifyIp6AddressesBandwidthResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 该接口用于修改IPV6地址访问internet的带宽
+func (c *Client) ModifyIp6AddressesBandwidth(request *ModifyIp6AddressesBandwidthRequest) (response *ModifyIp6AddressesBandwidthResponse, err error) {
+    if request == nil {
+        request = NewModifyIp6AddressesBandwidthRequest()
+    }
+    response = NewModifyIp6AddressesBandwidthResponse()
     err = c.Send(request, response)
     return
 }
@@ -3622,6 +4434,56 @@ func (c *Client) ModifyNetDetect(request *ModifyNetDetectRequest) (response *Mod
     return
 }
 
+func NewModifyNetworkAclAttributeRequest() (request *ModifyNetworkAclAttributeRequest) {
+    request = &ModifyNetworkAclAttributeRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "ModifyNetworkAclAttribute")
+    return
+}
+
+func NewModifyNetworkAclAttributeResponse() (response *ModifyNetworkAclAttributeResponse) {
+    response = &ModifyNetworkAclAttributeResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（ModifyNetworkAclAttribute）用于修改网络ACL属性。
+func (c *Client) ModifyNetworkAclAttribute(request *ModifyNetworkAclAttributeRequest) (response *ModifyNetworkAclAttributeResponse, err error) {
+    if request == nil {
+        request = NewModifyNetworkAclAttributeRequest()
+    }
+    response = NewModifyNetworkAclAttributeResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyNetworkAclEntriesRequest() (request *ModifyNetworkAclEntriesRequest) {
+    request = &ModifyNetworkAclEntriesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "ModifyNetworkAclEntries")
+    return
+}
+
+func NewModifyNetworkAclEntriesResponse() (response *ModifyNetworkAclEntriesResponse) {
+    response = &ModifyNetworkAclEntriesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（ModifyNetworkAclEntries）用于修改（包括添加和删除）网络ACL的入站规则和出站规则。
+func (c *Client) ModifyNetworkAclEntries(request *ModifyNetworkAclEntriesRequest) (response *ModifyNetworkAclEntriesResponse, err error) {
+    if request == nil {
+        request = NewModifyNetworkAclEntriesRequest()
+    }
+    response = NewModifyNetworkAclEntriesResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewModifyNetworkInterfaceAttributeRequest() (request *ModifyNetworkInterfaceAttributeRequest) {
     request = &ModifyNetworkInterfaceAttributeRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -3741,12 +4603,13 @@ func NewModifySecurityGroupPoliciesResponse() (response *ModifySecurityGroupPoli
 // 
 // * 接口是先删除当前所有的出入站规则，然后再添加 Egress 和 Ingress 规则，不支持自定义索引 PolicyIndex 。
 // * 如果指定 SecurityGroupPolicySet.Version 为0, 表示清空所有规则，并忽略Egress和Ingress。
-// * Protocol字段支持输入TCP, UDP, ICMP, GRE, ALL。
+// * Protocol字段支持输入TCP, UDP, ICMP, ICMPV6, GRE, ALL。
 // * CidrBlock字段允许输入符合cidr格式标准的任意字符串。(展开)在基础网络中，如果CidrBlock包含您的账户内的云服务器之外的设备在腾讯云的内网IP，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。
+// * Ipv6CidrBlock字段允许输入符合IPv6 cidr格式标准的任意字符串。(展开)在基础网络中，如果Ipv6CidrBlock包含您的账户内的云服务器之外的设备在腾讯云的内网IPv6，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。
 // * SecurityGroupId字段允许输入与待修改的安全组位于相同项目中的安全组ID，包括这个安全组ID本身，代表安全组下所有云服务器的内网IP。使用这个字段时，这条规则用来匹配网络报文的过程中会随着被使用的这个ID所关联的云服务器变化而变化，不需要重新修改。
 // * Port字段允许输入一个单独端口号，或者用减号分隔的两个端口号代表端口范围，例如80或8000-8010。只有当Protocol字段是TCP或UDP时，Port字段才被接受。
 // * Action字段只允许输入ACCEPT或DROP。
-// * CidrBlock, SecurityGroupId, AddressTemplate三者是排他关系，不允许同时输入，Protocol + Port和ServiceTemplate二者是排他关系，不允许同时输入。
+// * CidrBlock, Ipv6CidrBlock, SecurityGroupId, AddressTemplate四者是排他关系，不允许同时输入，Protocol + Port和ServiceTemplate二者是排他关系，不允许同时输入。
 func (c *Client) ModifySecurityGroupPolicies(request *ModifySecurityGroupPoliciesRequest) (response *ModifySecurityGroupPoliciesResponse, err error) {
     if request == nil {
         request = NewModifySecurityGroupPoliciesRequest()
@@ -3954,6 +4817,31 @@ func (c *Client) ReleaseAddresses(request *ReleaseAddressesRequest) (response *R
         request = NewReleaseAddressesRequest()
     }
     response = NewReleaseAddressesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewReleaseIp6AddressesBandwidthRequest() (request *ReleaseIp6AddressesBandwidthRequest) {
+    request = &ReleaseIp6AddressesBandwidthRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "ReleaseIp6AddressesBandwidth")
+    return
+}
+
+func NewReleaseIp6AddressesBandwidthResponse() (response *ReleaseIp6AddressesBandwidthResponse) {
+    response = &ReleaseIp6AddressesBandwidthResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 该接口用于给弹性公网IPv6地址释放带宽。
+func (c *Client) ReleaseIp6AddressesBandwidth(request *ReleaseIp6AddressesBandwidthRequest) (response *ReleaseIp6AddressesBandwidthResponse, err error) {
+    if request == nil {
+        request = NewReleaseIp6AddressesBandwidthRequest()
+    }
+    response = NewReleaseIp6AddressesBandwidthResponse()
     err = c.Send(request, response)
     return
 }

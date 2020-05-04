@@ -5,14 +5,15 @@ DO_PR_CHECK=1
 
 set -o pipefail
 
-is_doc_pr(){
+is_doc_or_tech_debt_pr(){
     if ! (($+commands[jq])); then
         DO_PR_CHECK=0
         echo "jq not found"
         return 1
     fi
     PR_NUM=$1
-    out=$(curl -fsS "https://api.github.com/repos/hashicorp/packer/issues/${PR_NUM}" | jq '[.labels[].name == "docs"] | any')
+    out=$(curl -fsS "https://api.github.com/repos/hashicorp/packer/issues/${PR_NUM}" \
+      | jq '[.labels[].name == "docs" or .labels[].name == "tech-debt"] | any')
     exy="$?"
     if [ $exy -ne 0 ]; then
         echo "bad response from github"
@@ -28,9 +29,9 @@ if [ -z $LAST_RELEASE ]; then
 fi
 
 get_prs(){
-    # git log --merges v0.10.2...c3861d167533fb797b0fae0c380806625712e5f7 |
-    git log --merges HEAD...${LAST_RELEASE} |
-    grep -o "Merge pull request #\([0-9]\+\)" | awk -F\# '{print $2}' | while read line
+    # git log v0.10.2...c3861d167533fb797b0fae0c380806625712e5f7 |
+    git log HEAD...${LAST_RELEASE} --first-parent --oneline --grep="Merge pull request #[0-9]\+" --grep="(#[0-9]\+)$" |
+    grep -o "#\([0-9]\+\)" | awk -F\# '{print $2}' | while read line
     do
         grep -q "GH-${line}" CHANGELOG.md
         if [ $? -ne 0 ]; then
@@ -38,16 +39,16 @@ get_prs(){
         fi
     done | while read PR_NUM
     do
-        if (($DO_PR_CHECK)) && is_doc_pr $PR_NUM; then
+        if (($DO_PR_CHECK)) && is_doc_or_tech_debt_pr $PR_NUM; then
             continue
         fi
         echo "https://github.com/hashicorp/packer/pull/${PR_NUM}"
     done
 }
 
-#is_doc_pr 52061111
-# is_doc_pr 5206 # non-doc pr
-#is_doc_pr 5434 # doc pr
+#is_doc_or_tech_debt_pr 52061111
+# is_doc_or_tech_debt_pr 5206 # non-doc pr
+#is_doc_or_tech_debt_pr 5434 # doc pr
 #echo $?
 #exit
 

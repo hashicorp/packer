@@ -17,7 +17,7 @@ package main
 import (
 	"github.com/hashicorp/packer/builder/amazon/chroot"
 	"github.com/hashicorp/packer/packer/plugin"
-	"github.com/hashicorp/packer/post-processor/docker-push"
+	dockerpush "github.com/hashicorp/packer/post-processor/docker-push"
 	"github.com/hashicorp/packer/provisioner/powershell"
 )
 

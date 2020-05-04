@@ -76,12 +76,12 @@ import (
 //     `http_directory` configuration parameter. If `http_directory` isn't
 //     specified, these will be blank!
 //
-// -   `Name` - The name of the VM.
+// -   `{{ .Name }}` - The name of the VM.
 //
 // Example boot command. This is actually a working boot command used to start an
 // CentOS 6.4 installer:
 //
-// ``` json
+// ```json
 // "boot_command": [
 //     "<tab><wait>",
 //     " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
@@ -91,7 +91,7 @@ import (
 // The example shown below is a working boot command used to start an Ubuntu
 // 12.04 installer:
 //
-// ``` json
+// ```json
 // [
 //   "<esc><esc><enter><wait>",
 //   "/install/vmlinuz noapic ",
@@ -105,7 +105,7 @@ import (
 // ]
 // ```
 // For more examples of various boot commands, see the sample projects from our
-// [community templates page](/community-tools.html#templates).
+// [community templates page](/community-tools#templates).
 type BootConfig struct {
 	// Time to wait after sending a group of key pressses. The value of this
 	// should be a duration. Examples are `5s` and `1m30s` which will cause
@@ -117,7 +117,8 @@ type BootConfig struct {
 	// the `boot_command`. The value of this should be a duration. Examples are
 	// `5s` and `1m30s` which will cause Packer to wait five seconds and one
 	// minute 30 seconds, respectively. If this isn't specified, the default is
-	// `10s` or 10 seconds.
+	// `10s` or 10 seconds. To set boot_wait to 0s, use a negative number, such
+	// as "-1s"
 	BootWait time.Duration `mapstructure:"boot_wait"`
 	// This is an array of commands to type when the virtual machine is first
 	// booted. The goal of these commands should be to type just enough to

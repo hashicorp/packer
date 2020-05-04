@@ -23,38 +23,31 @@ import (
 // * HTTP
 // * Amazon S3
 //
-//
-// \~&gt; On windows - when referencing a local iso - if packer is running
-// without symlinking rights, the iso will be copied to the cache folder. Read
-// [Symlinks in Windows 10
-// !](https://blogs.windows.com/buildingapps/2016/12/02/symlinks-windows-10/)
-// for more info.
-//
 // Examples:
 // go-getter can guess the checksum type based on `iso_checksum` len.
 //
-// ``` json
+// ```json
 // {
 //   "iso_checksum": "946a6077af6f5f95a51f82fdc44051c7aa19f9cfc5f737954845a6050543d7c2",
 //   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
 // }
 // ```
 //
-// ``` json
+// ```json
 // {
 //   "iso_checksum": "file:ubuntu.org/..../ubuntu-14.04.1-server-amd64.iso.sum",
 //   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
 // }
 // ```
 //
-// ``` json
+// ```json
 // {
 //   "iso_checksum": "file://./shasums.txt",
 //   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
 // }
 // ```
 //
-// ``` json
+// ```json
 // {
 //   "iso_checksum": "file:./shasums.txt",
 //   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
@@ -89,7 +82,7 @@ type ISOConfig struct {
 	TargetExtension string `mapstructure:"iso_target_extension"`
 }
 
-func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs []error) {
+func (c *ISOConfig) Prepare(*interpolate.Context) (warnings []string, errs []error) {
 	if len(c.ISOUrls) != 0 && c.RawSingleISOUrl != "" {
 		errs = append(
 			errs, errors.New("Only one of iso_url or iso_urls must be specified"))

@@ -3,10 +3,10 @@ package chroot
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/packer/builder"
 	"log"
 	"os"
 
+	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )

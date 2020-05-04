@@ -4,12 +4,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/types"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
+
+	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/nfc"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/ovf"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type VirtualMachine struct {
@@ -41,12 +48,19 @@ type HardwareConfig struct {
 	CpuHotAddEnabled    bool
 	MemoryHotAddEnabled bool
 	VideoRAM            int64
+	VGPUProfile         string
+	Firmware            string
+}
+
+type NIC struct {
+	Network     string // "" for default network
+	NetworkCard string // example: vmxnet3
+	MacAddress  string // set mac if want specific address
+	Passthrough *bool  // direct path i/o
 }
 
 type CreateConfig struct {
-	DiskThinProvisioned bool
-	DiskControllerType  string // example: "scsi", "pvscsi"
-	DiskSize            int64
+	DiskControllerType string // example: "scsi", "pvscsi"
 
 	Annotation    string
 	Name          string
@@ -56,11 +70,17 @@ type CreateConfig struct {
 	ResourcePool  string
 	Datastore     string
 	GuestOS       string // example: otherGuest
-	Network       string // "" for default network
-	NetworkCard   string // example: vmxnet3
+	NICs          []NIC
 	USBController bool
 	Version       uint   // example: 10
-	Firmware      string // efi or bios
+	Firmware      string // efi-secure, efi or bios
+	Storage       []Disk
+}
+
+type Disk struct {
+	DiskSize            int64
+	DiskEagerlyScrub    bool
+	DiskThinProvisioned bool
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
@@ -81,6 +101,31 @@ func (d *Driver) FindVM(name string) (*VirtualMachine, error) {
 	}, nil
 }
 
+func (d *Driver) PreCleanVM(ui packer.Ui, vmPath string, force bool) error {
+	vm, err := d.FindVM(vmPath)
+	if err != nil {
+		if _, ok := err.(*find.NotFoundError); !ok {
+			return fmt.Errorf("error looking up old vm: %v", err)
+		}
+	}
+	if force && vm != nil {
+		ui.Say(fmt.Sprintf("the vm/template %s already exists, but deleting it due to -force flag", vmPath))
+
+		// power off just in case it is still on
+		vm.PowerOff()
+
+		err := vm.Destroy()
+		if err != nil {
+			return fmt.Errorf("error destroying %s: %v", vmPath, err)
+		}
+	}
+	if !force && vm != nil {
+		return fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", vmPath, err)
+	}
+
+	return nil
+}
+
 func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 	createSpec := types.VirtualMachineConfigSpec{
 		Name:       config.Name,
@@ -90,7 +135,12 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 	if config.Version != 0 {
 		createSpec.Version = fmt.Sprintf("%s%d", "vmx-", config.Version)
 	}
-	if config.Firmware != "" {
+	if config.Firmware == "efi-secure" {
+		createSpec.Firmware = "efi"
+		createSpec.BootOptions = &types.VirtualMachineBootOptions{
+			EfiSecureBootEnabled: types.NewBool(true),
+		}
+	} else if config.Firmware != "" {
 		createSpec.Firmware = config.Firmware
 	}
 
@@ -332,6 +382,40 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 		}
 		confSpec.DeviceChange = append(confSpec.DeviceChange, spec)
 	}
+	if config.VGPUProfile != "" {
+		devices, err := vm.vm.Device(vm.driver.ctx)
+		if err != nil {
+			return err
+		}
+
+		pciDevices := devices.SelectByType((*types.VirtualPCIPassthrough)(nil))
+		vGPUDevices := pciDevices.SelectByBackingInfo((*types.VirtualPCIPassthroughVmiopBackingInfo)(nil))
+		var operation types.VirtualDeviceConfigSpecOperation
+		if len(vGPUDevices) > 1 {
+			return err
+		} else if len(pciDevices) == 1 {
+			operation = types.VirtualDeviceConfigSpecOperationEdit
+		} else if len(pciDevices) == 0 {
+			operation = types.VirtualDeviceConfigSpecOperationAdd
+		}
+
+		vGPUProfile := newVGPUProfile(config.VGPUProfile)
+		spec := &types.VirtualDeviceConfigSpec{
+			Device:    &vGPUProfile,
+			Operation: operation,
+		}
+		log.Printf("Adding vGPU device with profile '%s'", config.VGPUProfile)
+		confSpec.DeviceChange = append(confSpec.DeviceChange, spec)
+	}
+
+	if config.Firmware == "efi-secure" || config.Firmware == "efi" {
+		confSpec.Firmware = "efi"
+		confSpec.BootOptions = &types.VirtualMachineBootOptions{
+			EfiSecureBootEnabled: types.NewBool(config.Firmware == "efi-secure"),
+		}
+	} else if config.Firmware != "" {
+		confSpec.Firmware = config.Firmware
+	}
 
 	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
 	if err != nil {
@@ -422,6 +506,15 @@ func (vm *VirtualMachine) PowerOff() error {
 	return err
 }
 
+func (vm *VirtualMachine) IsPoweredOff() (bool, error) {
+	state, err := vm.vm.PowerState(vm.driver.ctx)
+	if err != nil {
+		return false, err
+	}
+
+	return state == types.VirtualMachinePowerStatePoweredOff, nil
+}
+
 func (vm *VirtualMachine) StartShutdown() error {
 	err := vm.vm.ShutdownGuest(vm.driver.ctx)
 	return err
@@ -430,11 +523,11 @@ func (vm *VirtualMachine) StartShutdown() error {
 func (vm *VirtualMachine) WaitForShutdown(ctx context.Context, timeout time.Duration) error {
 	shutdownTimer := time.After(timeout)
 	for {
-		powerState, err := vm.vm.PowerState(vm.driver.ctx)
+		off, err := vm.IsPoweredOff()
 		if err != nil {
 			return err
 		}
-		if powerState == "poweredOff" {
+		if off {
 			break
 		}
 
@@ -480,6 +573,10 @@ func (vm *VirtualMachine) GetDir() (string, error) {
 }
 
 func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
+	if len(config.Storage) == 0 {
+		return nil, errors.New("no storage devices have been defined")
+	}
+
 	device, err := devices.CreateSCSIController(config.DiskControllerType)
 	if err != nil {
 		return nil, err
@@ -490,60 +587,91 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 		return nil, err
 	}
 
-	disk := &types.VirtualDisk{
-		VirtualDevice: types.VirtualDevice{
-			Key: devices.NewKey(),
-			Backing: &types.VirtualDiskFlatVer2BackingInfo{
-				DiskMode:        string(types.VirtualDiskModePersistent),
-				ThinProvisioned: types.NewBool(config.DiskThinProvisioned),
+	for _, dc := range config.Storage {
+		disk := &types.VirtualDisk{
+			VirtualDevice: types.VirtualDevice{
+				Key: devices.NewKey(),
+				Backing: &types.VirtualDiskFlatVer2BackingInfo{
+					DiskMode:        string(types.VirtualDiskModePersistent),
+					ThinProvisioned: types.NewBool(dc.DiskThinProvisioned),
+					EagerlyScrub:    types.NewBool(dc.DiskEagerlyScrub),
+				},
 			},
-		},
-		CapacityInKB: config.DiskSize * 1024,
-	}
+			CapacityInKB: dc.DiskSize * 1024,
+		}
 
-	devices.AssignController(disk, controller)
-	devices = append(devices, disk)
+		devices.AssignController(disk, controller)
+		devices = append(devices, disk)
+	}
 
 	return devices, nil
 }
 
 func addNetwork(d *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
+	if len(config.NICs) == 0 {
+		return nil, errors.New("no network adapters have been defined")
+	}
+
 	var network object.NetworkReference
-	if config.Network == "" {
-		h, err := d.FindHost(config.Host)
+	for _, nic := range config.NICs {
+		if nic.Network == "" {
+			h, err := d.FindHost(config.Host)
+			if err != nil {
+				return nil, err
+			}
+
+			i, err := h.Info("network")
+			if err != nil {
+				return nil, err
+			}
+
+			if len(i.Network) > 1 {
+				return nil, fmt.Errorf("Host has multiple networks. Specify it explicitly")
+			}
+
+			network = object.NewNetwork(d.client.Client, i.Network[0])
+		} else {
+			var err error
+			network, err = d.finder.Network(d.ctx, nic.Network)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		backing, err := network.EthernetCardBackingInfo(d.ctx)
 		if err != nil {
 			return nil, err
 		}
 
-		i, err := h.Info("network")
+		device, err := object.EthernetCardTypes().CreateEthernetCard(nic.NetworkCard, backing)
 		if err != nil {
 			return nil, err
 		}
 
-		if len(i.Network) > 1 {
-			return nil, fmt.Errorf("Host has multiple networks. Specify it explicitly")
+		card := device.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
+		if nic.MacAddress != "" {
+			card.AddressType = string(types.VirtualEthernetCardMacTypeManual)
+			card.MacAddress = nic.MacAddress
 		}
+		card.UptCompatibilityEnabled = nic.Passthrough
 
-		network = object.NewNetwork(d.client.Client, i.Network[0])
-	} else {
-		var err error
-		network, err = d.finder.Network(d.ctx, config.Network)
-		if err != nil {
-			return nil, err
-		}
+		devices = append(devices, device)
 	}
+	return devices, nil
+}
 
-	backing, err := network.EthernetCardBackingInfo(d.ctx)
-	if err != nil {
-		return nil, err
+func newVGPUProfile(vGPUProfile string) types.VirtualPCIPassthrough {
+	return types.VirtualPCIPassthrough{
+		VirtualDevice: types.VirtualDevice{
+			DeviceInfo: &types.Description{
+				Summary: "",
+				Label:   fmt.Sprintf("New vGPU %v PCI device", vGPUProfile),
+			},
+			Backing: &types.VirtualPCIPassthroughVmiopBackingInfo{
+				Vgpu: vGPUProfile,
+			},
+		},
 	}
-
-	device, err := object.EthernetCardTypes().CreateEthernetCard(config.NetworkCard, backing)
-	if err != nil {
-		return nil, err
-	}
-
-	return append(devices, device), nil
 }
 
 func (vm *VirtualMachine) AddCdrom(controllerType string, isoPath string) error {
@@ -653,6 +781,27 @@ func (vm *VirtualMachine) AddConfigParams(params map[string]string) error {
 
 	_, err = task.WaitForResult(vm.driver.ctx, nil)
 	return err
+}
+
+func (vm *VirtualMachine) Export() (*nfc.Lease, error) {
+	return vm.vm.Export(vm.driver.ctx)
+}
+
+func (vm *VirtualMachine) CreateDescriptor(m *ovf.Manager, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error) {
+	return m.CreateDescriptor(vm.driver.ctx, vm.vm, cdp)
+}
+
+func (vm *VirtualMachine) NewOvfManager() *ovf.Manager {
+	return ovf.NewManager(vm.vm.Client())
+}
+
+func (vm *VirtualMachine) GetOvfExportOptions(m *ovf.Manager) ([]types.OvfOptionInfo, error) {
+	var mgr mo.OvfManager
+	err := property.DefaultCollector(vm.vm.Client()).RetrieveOne(vm.driver.ctx, m.Reference(), nil, &mgr)
+	if err != nil {
+		return nil, err
+	}
+	return mgr.OvfExportOption, nil
 }
 
 func findNetworkAdapter(l object.VirtualDeviceList) (types.BaseVirtualEthernetCard, error) {

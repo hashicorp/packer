@@ -384,6 +384,13 @@ func TestFuncPackerBuild(t *testing.T) {
 			Template:    "{{ build `MissingVar` }}",
 			OutVal:      "",
 		},
+		// Data map is a map[string]interface and contains value
+		{
+			DataMap:     map[string]interface{}{"PartyVar": "PartyVal"},
+			ErrExpected: false,
+			Template:    "{{ build `PartyVar` }}",
+			OutVal:      "PartyVal",
+		},
 	}
 
 	for _, tc := range testCases {

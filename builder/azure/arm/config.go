@@ -18,6 +18,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/common/random"
+
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/masterzen/winrm"
@@ -27,6 +29,7 @@ import (
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/pkcs12"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -40,6 +43,7 @@ const (
 	DefaultUserName                          = "packer"
 	DefaultPrivateVirtualNetworkWithPublicIp = false
 	DefaultVMSize                            = "Standard_A1"
+	DefaultKeyVaultSKU                       = "standard"
 )
 
 const (
@@ -52,15 +56,17 @@ const (
 	// This is not an exhaustive match, but it should be extremely close.
 	validResourceGroupNameRe = "^[^_\\W][\\w-._\\(\\)]{0,89}$"
 	validManagedDiskName     = "^[^_\\W][\\w-._)]{0,79}$"
+	validResourceNamePrefix  = "^[^_\\W][\\w-._)]{0,10}$"
 )
 
 var (
-	reCaptureContainerName = regexp.MustCompile("^[a-z0-9][a-z0-9\\-]{2,62}$")
-	reCaptureNamePrefix    = regexp.MustCompile("^[A-Za-z0-9][A-Za-z0-9_\\-\\.]{0,23}$")
+	reCaptureContainerName = regexp.MustCompile(`^[a-z0-9][a-z0-9\-]{2,62}$`)
+	reCaptureNamePrefix    = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_\-\.]{0,23}$`)
 	reManagedDiskName      = regexp.MustCompile(validManagedDiskName)
 	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
-	reSnapshotName         = regexp.MustCompile("^[A-Za-z0-9_]{1,79}$")
-	reSnapshotPrefix       = regexp.MustCompile("^[A-Za-z0-9_]{1,59}$")
+	reSnapshotName         = regexp.MustCompile(`^[A-Za-z0-9_]{1,79}$`)
+	reSnapshotPrefix       = regexp.MustCompile(`^[A-Za-z0-9_]{1,59}$`)
+	reResourceNamePrefix   = regexp.MustCompile(validResourceNamePrefix)
 )
 
 type PlanInformation struct {
@@ -97,8 +103,9 @@ type Config struct {
 	// Authentication via OAUTH
 	ClientConfig client.Config `mapstructure:",squash"`
 
-	// Capture
-	CaptureNamePrefix    string `mapstructure:"capture_name_prefix"`
+	// VHD prefix.
+	CaptureNamePrefix string `mapstructure:"capture_name_prefix"`
+	// Destination container name.
 	CaptureContainerName string `mapstructure:"capture_container_name"`
 	// Use a [Shared Gallery
 	// image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
@@ -147,20 +154,20 @@ type Config struct {
 	// If set to true, Virtual Machines deployed from the latest version of the
 	// Image Definition won't use this Image Version.
 	SharedGalleryImageVersionExcludeFromLatest bool `mapstructure:"shared_gallery_image_version_exclude_from_latest" required:"false"`
-	// PublisherName for your base image. See
+	// Name of the publisher to use for your base image (Azure Marketplace Images only). See
 	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
 	//
 	// CLI example `az vm image list-publishers --location westus`
 	ImagePublisher string `mapstructure:"image_publisher" required:"true"`
-	// Offer for your base image. See
+	// Name of the publisher's offer to use for your base image (Azure Marketplace Images only). See
 	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
 	//
 	// CLI example
 	// `az vm image list-offers --location westus --publisher Canonical`
 	ImageOffer string `mapstructure:"image_offer" required:"true"`
-	// SKU for your base image. See
+	// SKU of the image offer to use for your base image (Azure Marketplace Images only). See
 	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
 	// for details.
 	//
@@ -176,25 +183,26 @@ type Config struct {
 	// CLI example
 	// `az vm image list --location westus --publisher Canonical --offer UbuntuServer --sku 16.04.0-LTS --all`
 	ImageVersion string `mapstructure:"image_version" required:"false"`
-	// Specify a custom VHD to use. If this value is set, do
+	// URL to a custom VHD to use for your base image. If this value is set, do
 	// not set image_publisher, image_offer, image_sku, or image_version.
-	ImageUrl string `mapstructure:"image_url" required:"false"`
-	// Specify the source managed image's resource group used to use. If this
-	// value is set, do not set image\_publisher, image\_offer, image\_sku, or
-	// image\_version. If this value is set, the value
-	// `custom_managed_image_name` must also be set. See
-	// [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
-	// to learn more about managed images.
-	CustomManagedImageResourceGroupName string `mapstructure:"custom_managed_image_resource_group_name" required:"false"`
-	// Specify the source managed image's name to use. If this value is set, do
-	// not set image\_publisher, image\_offer, image\_sku, or image\_version.
+	ImageUrl string `mapstructure:"image_url" required:"true"`
+	// Name of a custom managed image to use for your base image. If this value is set, do
+	// not set image_publisher, image_offer, image_sku, or image_version.
 	// If this value is set, the value
 	// `custom_managed_image_resource_group_name` must also be set. See
 	// [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
 	// to learn more about managed images.
-	CustomManagedImageName string `mapstructure:"custom_managed_image_name" required:"false"`
-	customManagedImageID   string
+	CustomManagedImageName string `mapstructure:"custom_managed_image_name" required:"true"`
 
+	// Name of a custom managed image's resource group to use for your base image. If this
+	// value is set, image_publisher, image_offer, image_sku, or image_version.
+	// `custom_managed_image_name` must also be set. See
+	// [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+	// to learn more about managed images.
+	CustomManagedImageResourceGroupName string `mapstructure:"custom_managed_image_resource_group_name" required:"true"`
+	customManagedImageID                string
+
+	// Azure datacenter in which your VM will build.
 	Location string `mapstructure:"location"`
 	// Size of the VM used for building. This can be changed when you deploy a
 	// VM from your VHD. See
@@ -229,16 +237,20 @@ type Config struct {
 	// disk(s) is created with the same prefix as this value before the VM is
 	// captured.
 	ManagedImageDataDiskSnapshotPrefix string `mapstructure:"managed_image_data_disk_snapshot_prefix" required:"false"`
-	manageImageLocation                string
 	// Store the image in zone-resilient storage. You need to create it in a
 	// region that supports [availability
 	// zones](https://docs.microsoft.com/en-us/azure/availability-zones/az-overview).
 	ManagedImageZoneResilient bool `mapstructure:"managed_image_zone_resilient" required:"false"`
-	// the user can define up to 15
-	// tags. Tag names cannot exceed 512 characters, and tag values cannot exceed
-	// 256 characters. Tags are applied to every resource deployed by a Packer
-	// build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
+	// Name/value pair tags to apply to every resource deployed i.e. Resource
+	// Group, VM, NIC, VNET, Public IP, KeyVault, etc. The user can define up
+	// to 15 tags. Tag names cannot exceed 512 characters, and tag values
+	// cannot exceed 256 characters.
 	AzureTags map[string]*string `mapstructure:"azure_tags" required:"false"`
+	// Same as [`azure_tags`](#azure_tags) but defined as a singular repeatable block
+	// containing a `name` and a `value` field. In HCL2 mode the
+	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// will allow you to create those programatically.
+	AzureTag hcl2template.NameValues `mapstructure:"azure_tag" required:"false"`
 	// Resource group under which the final artifact will be stored.
 	ResourceGroupName string `mapstructure:"resource_group_name"`
 	// Storage account under which the final artifact will be stored.
@@ -253,7 +265,13 @@ type Config struct {
 	// group is deleted at the end of the build.
 	TempResourceGroupName string `mapstructure:"temp_resource_group_name"`
 	// Specify an existing resource group to run the build in.
-	BuildResourceGroupName     string `mapstructure:"build_resource_group_name"`
+	BuildResourceGroupName string `mapstructure:"build_resource_group_name"`
+	// Specify an existing key vault to use for uploading certificates to the
+	// instance to connect.
+	BuildKeyVaultName string `mapstructure:"build_key_vault_name"`
+	// Specify the KeyVault SKU to create during the build. Valid values are
+	// standard or premium. The default value is standard.
+	BuildKeyVaultSKU           string `mapstructure:"build_key_vault_sku"`
 	storageAccountBlobEndpoint string
 	// This value allows you to
 	// set a virtual_network_name and obtain a public IP. If this value is not
@@ -294,7 +312,7 @@ type Config struct {
 	//
 	// An example plan\_info object is defined below.
 	//
-	// ``` json
+	// ```json
 	// {
 	//   "plan_info": {
 	//       "plan_name": "rabbitmq",
@@ -314,10 +332,12 @@ type Config struct {
 	// tags to the image to ensure this information is not lost. The following
 	// tags are added.
 	//
+	// ```
 	// 1.  PlanName
 	// 2.  PlanProduct
 	// 3.  PlanPublisher
 	// 4.  PlanPromotionCode
+	// ```
 	//
 	PlanInfo PlanInformation `mapstructure:"plan_info" required:"false"`
 	// The default PollingDuration for azure is 15mins, this property will override
@@ -367,9 +387,20 @@ type Config struct {
 	// `virtual_network_name` is not allowed.
 	AllowedInboundIpAddresses []string `mapstructure:"allowed_inbound_ip_addresses"`
 
+	// Specify storage to store Boot Diagnostics -- Enabling this option
+	// will create 2 Files in the specified storage account. (serial console log & screehshot file)
+	// once the build is completed, it has to be removed manually.
+	// see [here](https://docs.microsoft.com/en-us/azure/virtual-machines/troubleshooting/boot-diagnostics) for more info
+	BootDiagSTGAccount string `mapstructure:"boot_diag_storage_account" required:"false"`
+
+	// specify custom azure resource names during build limited to max 10 charcters
+	// this will set the prefix for the resources. The actuall resource names will be
+	// `custom_resource_build_prefix` + resourcetype + 5 character random alphanumeric string
+	CustomResourcePrefix string `mapstructure:"custom_resource_build_prefix" required:"false"`
+
 	// Runtime Values
-	UserName               string
-	Password               string
+	UserName               string `mapstructure-to-hcl2:",skip"`
+	Password               string `mapstructure-to-hcl2:",skip"`
 	tmpAdminPassword       string
 	tmpCertificatePassword string
 	tmpResourceGroupName   string
@@ -379,6 +410,7 @@ type Config struct {
 	tmpDeploymentName      string
 	tmpKeyVaultName        string
 	tmpOSDiskName          string
+	tmpDataDiskName        string
 	tmpSubnetName          string
 	tmpVirtualNetworkName  string
 	tmpNsgName             string
@@ -515,7 +547,17 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	provideDefaultValues(c)
 	setRuntimeValues(c)
-	setUserNamePassword(c)
+	err = setUserNamePassword(c)
+	if err != nil {
+		return nil, err
+	}
+
+	// copy singular blocks
+	for _, kv := range c.AzureTag {
+		v := kv.Value
+		c.AzureTags[kv.Name] = &v
+	}
+
 	err = c.ClientConfig.SetDefaultValues()
 	if err != nil {
 		return nil, err
@@ -603,7 +645,7 @@ func setWinRMCertificate(c *Config) error {
 }
 
 func setRuntimeValues(c *Config) {
-	var tempName = NewTempName()
+	var tempName = NewTempName(c.CustomResourcePrefix)
 
 	c.tmpAdminPassword = tempName.AdminPassword
 	// store so that we can access this later during provisioning
@@ -625,29 +667,54 @@ func setRuntimeValues(c *Config) {
 	c.tmpNicName = tempName.NicName
 	c.tmpPublicIPAddressName = tempName.PublicIPAddressName
 	c.tmpOSDiskName = tempName.OSDiskName
+	c.tmpDataDiskName = tempName.DataDiskname
 	c.tmpSubnetName = tempName.SubnetName
 	c.tmpVirtualNetworkName = tempName.VirtualNetworkName
 	c.tmpNsgName = tempName.NsgName
 	c.tmpKeyVaultName = tempName.KeyVaultName
 }
 
-func setUserNamePassword(c *Config) {
-	if c.Comm.SSHUsername == "" {
-		c.Comm.SSHUsername = DefaultUserName
-	}
+func setUserNamePassword(c *Config) error {
+	// Set default credentials generated by the builder
+	c.UserName = DefaultUserName
+	c.Password = c.tmpAdminPassword
 
+	// Set communicator specific credentials and update defaults if different.
+	// Communicator specific credentials need to be updated as the standard Packer
+	// SSHConfigFunc and WinRMConfigFunc use communicator specific credentials, unless overwritten.
+
+	// SSH comm
+	if c.Comm.SSHUsername == "" {
+		c.Comm.SSHUsername = c.UserName
+	}
 	c.UserName = c.Comm.SSHUsername
 
-	if c.Comm.SSHPassword != "" {
-		c.Password = c.Comm.SSHPassword
-		return
+	if c.Comm.SSHPassword == "" {
+		c.Comm.SSHPassword = c.Password
+	}
+	c.Password = c.Comm.SSHPassword
+
+	if c.Comm.Type == "ssh" {
+		return nil
 	}
 
-	// Configure password settings using Azure generated credentials
-	c.Password = c.tmpAdminPassword
+	// WinRM comm
+	if c.Comm.WinRMUser == "" {
+		c.Comm.WinRMUser = c.UserName
+	}
+	c.UserName = c.Comm.WinRMUser
+
 	if c.Comm.WinRMPassword == "" {
+		// Configure password settings using Azure generated credentials
 		c.Comm.WinRMPassword = c.Password
 	}
+
+	if !isValidPassword(c.Comm.WinRMPassword) {
+		return fmt.Errorf("The supplied \"winrm_password\" must be between 8-123 characters long and must satisfy at least 3 from the following: \n1) Contains an uppercase character \n2) Contains a lowercase character\n3) Contains a numeric digit\n4) Contains a special character\n5) Control characters are not allowed")
+	}
+	c.Password = c.Comm.WinRMPassword
+
+	return nil
 }
 
 func setCustomData(c *Config) error {
@@ -679,6 +746,10 @@ func provideDefaultValues(c *Config) {
 
 	if c.ImagePublisher != "" && c.ImageVersion == "" {
 		c.ImageVersion = DefaultImageVersion
+	}
+
+	if c.BuildKeyVaultSKU == "" {
+		c.BuildKeyVaultSKU = DefaultKeyVaultSKU
 	}
 
 	c.ClientConfig.SetDefaultValues()
@@ -894,6 +965,12 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		}
 	}
 
+	if c.CustomResourcePrefix != "" {
+		if ok, err := assertResourceNamePrefix(c.CustomResourcePrefix, "custom_resource_build_prefix"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
 	if c.VirtualNetworkName == "" && c.VirtualNetworkResourceGroupName != "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_resource_group_name is specified, so must virtual_network_name"))
 	}
@@ -989,6 +1066,13 @@ func assertManagedImageDataDiskSnapshotName(name, setting string) (bool, error) 
 	return true, nil
 }
 
+func assertResourceNamePrefix(name, setting string) (bool, error) {
+	if !isValidAzureName(reResourceNamePrefix, name) {
+		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length is 10 characters", setting)
+	}
+	return true, nil
+}
+
 func assertAllowedInboundIpAddresses(ipAddresses []string, setting string) (bool, error) {
 	for _, ipAddress := range ipAddresses {
 		if net.ParseIP(ipAddress) == nil {
@@ -1011,6 +1095,34 @@ func isValidAzureName(re *regexp.Regexp, rgn string) bool {
 	return re.Match([]byte(rgn)) &&
 		!strings.HasSuffix(rgn, ".") &&
 		!strings.HasSuffix(rgn, "-")
+}
+
+// The supplied password must be between 8-123 characters long and must satisfy at least 3 of password complexity requirements from the following:
+// 1) Contains an uppercase character
+// 2) Contains a lowercase character
+// 3) Contains a numeric digit
+// 4) Contains a special character
+// 5) Control characters are not allowed (a very specific case - not included in this validation)
+func isValidPassword(password string) bool {
+	if !(len(password) >= 8 && len(password) <= 123) {
+		return false
+	}
+
+	requirements := 0
+	if strings.ContainsAny(password, random.PossibleNumbers) {
+		requirements++
+	}
+	if strings.ContainsAny(password, random.PossibleLowerCase) {
+		requirements++
+	}
+	if strings.ContainsAny(password, random.PossibleUpperCase) {
+		requirements++
+	}
+	if strings.ContainsAny(password, random.PossibleSpecialCharacter) {
+		requirements++
+	}
+
+	return requirements >= 3
 }
 
 func (c *Config) validateLocationZoneResiliency(say func(s string)) {

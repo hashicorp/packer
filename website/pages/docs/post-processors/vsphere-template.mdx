@@ -1,0 +1,120 @@
+---
+description: >
+  The Packer vSphere Template post-processor takes an artifact from the
+  VMware-iso builder, built on ESXi (i.e. remote) or an artifact from the
+  [vSphere](/docs/post-processors/vsphere) post-processor, marks the VM as a
+  template, and leaves it in the path of your choice.
+layout: docs
+page_title: vSphere Template - Post-Processors
+sidebar_title: vSphere Template
+---
+
+# vSphere Template Post-Processor
+
+Type: `vsphere-template`
+
+The Packer vSphere Template post-processor takes an artifact from the
+VMware-iso builder, built on ESXi (i.e. remote) or an artifact from the
+[vSphere](/docs/post-processors/vsphere) post-processor, marks the VM as a
+template, and leaves it in the path of your choice.
+
+## Example
+
+An example is shown below, showing only the post-processor configuration:
+
+```json
+{
+  "type": "vsphere-template",
+  "host": "vcenter.local",
+  "insecure": true,
+  "username": "root",
+  "password": "secret",
+  "datacenter": "mydatacenter",
+  "folder": "/packer-templates/os/distro-7"
+}
+```
+
+## Configuration
+
+There are many configuration options available for the post-processor. They are
+segmented below into two categories: required and optional parameters. Within
+each category, the available configuration keys are alphabetized.
+
+Required:
+
+- `host` (string) - The vSphere host that contains the VM built by the
+  vmware-iso.
+
+- `password` (string) - Password to use to authenticate to the vSphere
+  endpoint.
+
+- `username` (string) - The username to use to authenticate to the vSphere
+  endpoint.
+
+Optional:
+
+- `datacenter` (string) - If you have more than one, you will need to specify
+  which one the ESXi used.
+
+- `folder` (string) - Target path where the template will be created.
+
+- `insecure` (boolean) - If it's true skip verification of server
+  certificate. Default is false
+
+- `keep_input_artifact` (boolean) - Unlike most post-processors, this option
+  has no effect for vsphere-template. This is because in order for a template
+  to work, you can't delete the vm that you generate the template from. The
+  vsphere template post-processor will therefore always preserve the original
+  vm.
+
+- `snapshot_enable` (boolean) - Create a snapshot before marking as a
+  template. Default is false
+
+- `snapshot_name` (string) - Name for the snapshot. Required when
+  `snapshot_enable` is `true`
+
+- `snapshot_description` (string) - Description for the snapshot. Required
+  when `snapshot_enable` is `true`
+
+- `reregister_vm` (boolean) - Use the method of unregister VM and reregister
+  as a template, rather than using the markAsTemplate method in vmWare.
+  NOTE: If you are getting permission denied errors when trying to mark as a
+  template, but it works fine in the vSphere UI, try setting this to false.
+  Default is true.
+
+## Using the vSphere Template with local builders
+
+Once the [vSphere](/docs/post-processors/vsphere) takes an artifact from
+the VMware builder and uploads it to a vSphere endpoint, you will likely want
+to mark that VM as template. Packer can do this for you automatically using a
+sequence definition (a collection of post-processors that are treated as as
+single pipeline, see [Post-Processors](/docs/templates/post-processors)
+for more information):
+
+```json
+{
+  "post-processors": [
+    [
+      {
+        "type": "vsphere",
+         ...
+      },
+      {
+        "type": "vsphere-template",
+         ...
+      }
+    ],
+    {
+      "type": "...",
+      ...
+    }
+  ]
+}
+```
+
+In the example above, the result of each builder is passed through the defined
+sequence of post-processors starting with the `vsphere` post-processor which
+will upload the artifact to a vSphere endpoint. The resulting artifact is then
+passed on to the `vsphere-template` post-processor which handles marking a VM
+as a template. Note that the `vsphere` and `vsphere-template` post-processors
+are paired together in their own JSON array.

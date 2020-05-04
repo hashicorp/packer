@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -52,11 +53,11 @@ type Config struct {
 	// source instance. See the [BlockDevices](#block-devices-configuration)
 	// documentation for fields.
 	VolumeMappings BlockDevices `mapstructure:"ebs_volumes" required:"false"`
-	// Tags to apply to the volumes of the instance that is *launched* to
-	// create EBS Volumes. These tags will *not* appear in the tags of the
-	// resulting EBS volumes unless they're duplicated under `tags` in the
-	// `ebs_volumes` setting. This is a [template
-	// engine](/docs/templates/engine.html), see [Build template
+	// Key/value pair tags to apply to the volumes of the instance that is
+	// *launched* to create EBS Volumes. These tags will *not* appear in the
+	// tags of the resulting EBS volumes unless they're duplicated under `tags`
+	// in the `ebs_volumes` setting. This is a [template
+	// engine](/docs/templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	//
 	//  Note: The tags specified here will be *temporarily* applied to volumes
@@ -64,7 +65,13 @@ type Config struct {
 	// created. Packer will replace all tags on the volume with the tags
 	// configured in the `ebs_volumes` section as soon as the instance is
 	// reported as 'ready'.
-	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
+	VolumeRunTags map[string]string `mapstructure:"run_volume_tags"`
+	// Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular
+	// repeatable block containing a `key` and a `value` field. In HCL2 mode
+	// the
+	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// will allow you to create those programatically.
+	VolumeRunTag hcl2template.KeyValues `mapstructure:"run_volume_tag"`
 
 	launchBlockDevices BlockDevices
 
@@ -102,6 +109,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	// Accumulate any errors
 	var errs *packer.MultiError
 	var warns []string
+	errs = packer.MultiErrorAppend(errs, b.config.VolumeRunTag.CopyOn(&b.config.VolumeRunTags)...)
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.launchBlockDevices.Prepare(&b.config.ctx)...)

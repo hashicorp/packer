@@ -29,6 +29,11 @@ type Driver interface {
 	// particular image.
 	GetImage(name string, fromFamily bool) (*Image, error)
 
+	// GetImageFromProject gets an image from a specific projects.
+	// Returns the image from the first project in slice it can find one
+	// If fromFamily is true, name designates an image family instead of a particular image.
+	GetImageFromProjects(project []string, name string, fromFamily bool) (*Image, error)
+
 	// GetImageFromProject gets an image from a specific project. If fromFamily
 	// is true, name designates an image family instead of a particular image.
 	GetImageFromProject(project, name string, fromFamily bool) (*Image, error)
@@ -67,6 +72,9 @@ type InstanceConfig struct {
 	DisableDefaultServiceAccount bool
 	DiskSizeGb                   int64
 	DiskType                     string
+	EnableSecureBoot             bool
+	EnableVtpm                   bool
+	EnableIntegrityMonitoring    bool
 	Image                        *Image
 	Labels                       map[string]string
 	MachineType                  string

@@ -2,17 +2,20 @@ package hcl2template
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
-	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 )
 
 // ProvisionerBlock references a detected but unparsed provisioner
 type ProvisionerBlock struct {
-	PType string
-	PName string
+	PType       string
+	PName       string
+	PauseBefore time.Duration
+	MaxRetries  int
+	Timeout     time.Duration
 	HCL2Ref
 }
 
@@ -22,17 +25,44 @@ func (p *ProvisionerBlock) String() string {
 
 func (p *Parser) decodeProvisioner(block *hcl.Block) (*ProvisionerBlock, hcl.Diagnostics) {
 	var b struct {
-		Name string   `hcl:"name,optional"`
-		Rest hcl.Body `hcl:",remain"`
+		Name        string   `hcl:"name,optional"`
+		PauseBefore string   `hcl:"pause_before,optional"`
+		MaxRetries  int      `hcl:"max_retries,optional"`
+		Timeout     string   `hcl:"timeout,optional"`
+		Rest        hcl.Body `hcl:",remain"`
 	}
 	diags := gohcl.DecodeBody(block.Body, nil, &b)
 	if diags.HasErrors() {
 		return nil, diags
 	}
+
 	provisioner := &ProvisionerBlock{
-		PType:   block.Labels[0],
-		PName:   b.Name,
-		HCL2Ref: newHCL2Ref(block, b.Rest),
+		PType:      block.Labels[0],
+		PName:      b.Name,
+		MaxRetries: b.MaxRetries,
+		HCL2Ref:    newHCL2Ref(block, b.Rest),
+	}
+
+	if b.PauseBefore != "" {
+		pauseBefore, err := time.ParseDuration(b.PauseBefore)
+		if err != nil {
+			return nil, append(diags, &hcl.Diagnostic{
+				Summary: "Failed to parse pause_before duration",
+				Detail:  err.Error(),
+			})
+		}
+		provisioner.PauseBefore = pauseBefore
+	}
+
+	if b.Timeout != "" {
+		timeout, err := time.ParseDuration(b.Timeout)
+		if err != nil {
+			return nil, append(diags, &hcl.Diagnostic{
+				Summary: "Failed to parse timeout duration",
+				Detail:  err.Error(),
+			})
+		}
+		provisioner.Timeout = timeout
 	}
 
 	if !p.ProvisionersSchemas.Has(provisioner.PType) {
@@ -47,7 +77,7 @@ func (p *Parser) decodeProvisioner(block *hcl.Block) (*ProvisionerBlock, hcl.Dia
 	return provisioner, diags
 }
 
-func (p *Parser) startProvisioner(pb *ProvisionerBlock, ectx *hcl.EvalContext, generatedVars []string) (packer.Provisioner, hcl.Diagnostics) {
+func (p *Parser) startProvisioner(source *SourceBlock, pb *ProvisionerBlock, ectx *hcl.EvalContext, generatedVars map[string]string) (packer.Provisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	provisioner, err := p.ProvisionersSchemas.Start(pb.PType)
@@ -67,22 +97,10 @@ func (p *Parser) startProvisioner(pb *ProvisionerBlock, ectx *hcl.EvalContext, g
 	// manipulate generatedVars from builder to add to the interfaces being
 	// passed to the provisioner Prepare()
 
-	// If the builder has provided a list of to-be-generated variables that
-	// should be made accessible to provisioners, pass that list into
-	// the provisioner prepare() so that the provisioner can appropriately
-	// validate user input against what will become available. Otherwise,
-	// only pass the default variables, using the basic placeholder data.
-	generatedPlaceholderMap := packer.BasicPlaceholderData()
-	if generatedVars != nil {
-		for _, k := range generatedVars {
-			generatedPlaceholderMap[k] = fmt.Sprintf("Generated_%s. "+
-				common.PlaceholderMsg, k)
-		}
-	}
 	// configs := make([]interface{}, 2)
 	// configs = append(, flatProvisionerCfg)
-	// configs = append(configs, generatedPlaceholderMap)
-	err = provisioner.Prepare(flatProvisionerCfg, generatedPlaceholderMap)
+	// configs = append(configs, generatedVars)
+	err = provisioner.Prepare(source.builderVariables(), flatProvisionerCfg, generatedVars)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,

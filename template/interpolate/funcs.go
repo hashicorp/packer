@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/packer/version"
 	vaultapi "github.com/hashicorp/vault/api"
 	strftime "github.com/jehiah/go-strftime"
+	awssmapi "github.com/overdrive3000/secretsmanager"
 )
 
 // InitTime is the UTC time when this package was initialized. It is
@@ -29,22 +30,23 @@ func init() {
 
 // Funcs are the interpolation funcs that are available within interpolations.
 var FuncGens = map[string]interface{}{
-	"build_name":     funcGenBuildName,
-	"build_type":     funcGenBuildType,
-	"env":            funcGenEnv,
-	"isotime":        funcGenIsotime,
-	"strftime":       funcGenStrftime,
-	"pwd":            funcGenPwd,
-	"split":          funcGenSplitter,
-	"template_dir":   funcGenTemplateDir,
-	"timestamp":      funcGenTimestamp,
-	"uuid":           funcGenUuid,
-	"user":           funcGenUser,
-	"packer_version": funcGenPackerVersion,
-	"consul_key":     funcGenConsul,
-	"vault":          funcGenVault,
-	"sed":            funcGenSed,
-	"build":          funcGenBuild,
+	"build_name":         funcGenBuildName,
+	"build_type":         funcGenBuildType,
+	"env":                funcGenEnv,
+	"isotime":            funcGenIsotime,
+	"strftime":           funcGenStrftime,
+	"pwd":                funcGenPwd,
+	"split":              funcGenSplitter,
+	"template_dir":       funcGenTemplateDir,
+	"timestamp":          funcGenTimestamp,
+	"uuid":               funcGenUuid,
+	"user":               funcGenUser,
+	"packer_version":     funcGenPackerVersion,
+	"consul_key":         funcGenConsul,
+	"vault":              funcGenVault,
+	"sed":                funcGenSed,
+	"build":              funcGenBuild,
+	"aws_secretsmanager": funcGenAwsSecrets,
 
 	"replace":     replace,
 	"replace_all": replace_all,
@@ -164,41 +166,50 @@ func funcGenTemplateDir(ctx *Context) interface{} {
 	}
 }
 
-func funcGenBuild(ctx *Context) interface{} {
-	return func(s string) (string, error) {
-		if data, ok := ctx.Data.(map[string]string); ok {
-			if heldPlace, ok := data[s]; ok {
-				// If we're in the first interpolation pass, the goal is to
-				// make sure that we pass the value through.
-				// TODO match against an actual string constant
-				if strings.Contains(heldPlace, common.PlaceholderMsg) {
-					return fmt.Sprintf("{{.%s}}", s), nil
-				} else {
-					return heldPlace, nil
-				}
+func passthroughOrInterpolate(data map[interface{}]interface{}, s string) (string, error) {
+	if heldPlace, ok := data[s]; ok {
+		if hp, ok := heldPlace.(string); ok {
+			// If we're in the first interpolation pass, the goal is to
+			// make sure that we pass the value through.
+			// TODO match against an actual string constant
+			if strings.Contains(hp, common.PlaceholderMsg) {
+				return fmt.Sprintf("{{.%s}}", s), nil
+			} else {
+				return hp, nil
 			}
-			return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
 		}
-		if data, ok := ctx.Data.(map[interface{}]interface{}); ok {
-			// PlaceholderData has been passed into generator, so if the given
-			// key already exists in data, then we know it's an "allowed" key
-			if heldPlace, ok := data[s]; ok {
-				if hp, ok := heldPlace.(string); ok {
-					// If we're in the first interpolation pass, the goal is to
-					// make sure that we pass the value through.
-					// TODO match against an actual string constant
-					if strings.Contains(hp, common.PlaceholderMsg) {
-						return fmt.Sprintf("{{.%s}}", s), nil
-					} else {
-						return hp, nil
-					}
-				}
-			}
-			return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
-		}
+	}
+	return "", fmt.Errorf("loaded data, but couldnt find %s in it.", s)
 
-		return "", fmt.Errorf("Error validating build variable: the given "+
-			"variable %s will not be passed into your plugin.", s)
+}
+func funcGenBuild(ctx *Context) interface{} {
+	// Depending on where the context data is coming from, it could take a few
+	// different map types. The following switch standardizes the map types
+	// so we can act on them correctly.
+	return func(s string) (string, error) {
+		switch data := ctx.Data.(type) {
+		case map[interface{}]interface{}:
+			return passthroughOrInterpolate(data, s)
+		case map[string]interface{}:
+			// convert to a map[interface{}]interface{} so we can use same
+			// parsing on it
+			passed := make(map[interface{}]interface{}, len(data))
+			for k, v := range data {
+				passed[k] = v
+			}
+			return passthroughOrInterpolate(passed, s)
+		case map[string]string:
+			// convert to a map[interface{}]interface{} so we can use same
+			// parsing on it
+			passed := make(map[interface{}]interface{}, len(data))
+			for k, v := range data {
+				passed[k] = v
+			}
+			return passthroughOrInterpolate(passed, s)
+		default:
+			return "", fmt.Errorf("Error validating build variable: the given "+
+				"variable %s will not be passed into your plugin.", s)
+		}
 	}
 }
 
@@ -287,14 +298,14 @@ func funcGenVault(ctx *Context) interface{} {
 		vaultConfig := vaultapi.DefaultConfig()
 		cli, err := vaultapi.NewClient(vaultConfig)
 		if err != nil {
-			return "", errors.New(fmt.Sprintf("Error getting Vault client: %s", err))
+			return "", fmt.Errorf("Error getting Vault client: %s", err)
 		}
 		secret, err := cli.Logical().Read(path)
 		if err != nil {
-			return "", errors.New(fmt.Sprintf("Error reading vault secret: %s", err))
+			return "", fmt.Errorf("Error reading vault secret: %s", err)
 		}
 		if secret == nil {
-			return "", errors.New(fmt.Sprintf("Vault Secret does not exist at the given path."))
+			return "", errors.New("Vault Secret does not exist at the given path")
 		}
 
 		data, ok := secret.Data["data"]
@@ -306,8 +317,8 @@ func funcGenVault(ctx *Context) interface{} {
 			}
 
 			// neither v1 nor v2 proudced a valid value
-			return "", errors.New(fmt.Sprintf("Vault data was empty at the "+
-				"given path. Warnings: %s", strings.Join(secret.Warnings, "; ")))
+			return "", fmt.Errorf("Vault data was empty at the "+
+				"given path. Warnings: %s", strings.Join(secret.Warnings, "; "))
 		}
 
 		value := data.(map[string]interface{})[key].(string)
@@ -315,11 +326,33 @@ func funcGenVault(ctx *Context) interface{} {
 	}
 }
 
+func funcGenAwsSecrets(ctx *Context) interface{} {
+	return func(name string) (string, error) {
+		if !ctx.EnableEnv {
+			// The error message doesn't have to be that detailed since
+			// semantic checks should catch this.
+			return "", errors.New("AWS Secrets Manager vars are only allowed in the variables section")
+		}
+		// client uses AWS SDK CredentialChain method. So,credentials can
+		// be loaded from credential file, environment variables, or IAM
+		// roles.
+		client, err := awssmapi.New()
+		if err != nil {
+			return "", fmt.Errorf("Error getting AWS Secrets Manager client: %s", err)
+		}
+		secret, err := client.GetSecret(name)
+		if err != nil {
+			return "", fmt.Errorf("Error getting secret: %s", err)
+		}
+		return secret, nil
+	}
+}
+
 func funcGenSed(ctx *Context) interface{} {
 	return func(expression string, inputString string) (string, error) {
 		return "", errors.New("template function `sed` is deprecated " +
 			"use `replace` or `replace_all` instead." +
-			"Documentation: https://www.packer.io/docs/templates/engine.html")
+			"Documentation: https://www.packer.io/docs/templates/engine")
 	}
 }
 

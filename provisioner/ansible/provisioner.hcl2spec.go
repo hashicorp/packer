@@ -32,10 +32,12 @@ type FlatConfig struct {
 	UseSFTP              *bool             `mapstructure:"use_sftp" cty:"use_sftp"`
 	InventoryDirectory   *string           `mapstructure:"inventory_directory" cty:"inventory_directory"`
 	InventoryFile        *string           `mapstructure:"inventory_file" cty:"inventory_file"`
+	KeepInventoryFile    *bool             `mapstructure:"keep_inventory_file" cty:"keep_inventory_file"`
 	GalaxyFile           *string           `mapstructure:"galaxy_file" cty:"galaxy_file"`
 	GalaxyCommand        *string           `mapstructure:"galaxy_command" cty:"galaxy_command"`
 	GalaxyForceInstall   *bool             `mapstructure:"galaxy_force_install" cty:"galaxy_force_install"`
 	RolesPath            *string           `mapstructure:"roles_path" cty:"roles_path"`
+	UseProxy             *bool             `mapstructure:"use_proxy" cty:"use_proxy"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -55,7 +57,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":               &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":               &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":      &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"command":                    &hcldec.AttrSpec{Name: "command", Type: cty.String, Required: false},
 		"extra_arguments":            &hcldec.AttrSpec{Name: "extra_arguments", Type: cty.List(cty.String), Required: false},
@@ -73,10 +75,12 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"use_sftp":                   &hcldec.AttrSpec{Name: "use_sftp", Type: cty.Bool, Required: false},
 		"inventory_directory":        &hcldec.AttrSpec{Name: "inventory_directory", Type: cty.String, Required: false},
 		"inventory_file":             &hcldec.AttrSpec{Name: "inventory_file", Type: cty.String, Required: false},
+		"keep_inventory_file":        &hcldec.AttrSpec{Name: "keep_inventory_file", Type: cty.Bool, Required: false},
 		"galaxy_file":                &hcldec.AttrSpec{Name: "galaxy_file", Type: cty.String, Required: false},
 		"galaxy_command":             &hcldec.AttrSpec{Name: "galaxy_command", Type: cty.String, Required: false},
 		"galaxy_force_install":       &hcldec.AttrSpec{Name: "galaxy_force_install", Type: cty.Bool, Required: false},
 		"roles_path":                 &hcldec.AttrSpec{Name: "roles_path", Type: cty.String, Required: false},
+		"use_proxy":                  &hcldec.AttrSpec{Name: "use_proxy", Type: cty.Bool, Required: false},
 	}
 	return s
 }

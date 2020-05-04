@@ -1,4 +1,5 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 
 package common
 
@@ -9,6 +10,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -20,6 +22,11 @@ func String(value string) *string {
 
 // Int returns a pointer to the provided int
 func Int(value int) *int {
+	return &value
+}
+
+// Int64 returns a pointer to the provided int64
+func Int64(value int64) *int64 {
 	return &value
 }
 
@@ -76,13 +83,31 @@ func PointerString(datastruct interface{}) (representation string) {
 	return
 }
 
-// SDKTime a time struct, which renders to/from json using RFC339
+// SDKTime a struct that parses/renders to/from json using RFC339 date-time information
 type SDKTime struct {
 	time.Time
 }
 
+// SDKDate a struct that parses/renders to/from json using only date information
+type SDKDate struct {
+	//Date date information
+	Date time.Time
+}
+
 func sdkTimeFromTime(t time.Time) SDKTime {
 	return SDKTime{t}
+}
+
+func sdkDateFromTime(t time.Time) SDKDate {
+	return SDKDate{Date: t}
+}
+
+func formatTime(t SDKTime) string {
+	return t.Format(sdkTimeFormat)
+}
+
+func formatDate(t SDKDate) string {
+	return t.Date.Format(sdkDateFormat)
 }
 
 func now() *SDKTime {
@@ -93,19 +118,19 @@ func now() *SDKTime {
 var timeType = reflect.TypeOf(SDKTime{})
 var timeTypePtr = reflect.TypeOf(&SDKTime{})
 
-const sdkTimeFormat = time.RFC3339
+var sdkDateType = reflect.TypeOf(SDKDate{})
+var sdkDateTypePtr = reflect.TypeOf(&SDKDate{})
 
+//Formats for sdk supported time representations
+const sdkTimeFormat = time.RFC3339Nano
 const rfc1123OptionalLeadingDigitsInDay = "Mon, _2 Jan 2006 15:04:05 MST"
-
-func formatTime(t SDKTime) string {
-	return t.Format(sdkTimeFormat)
-}
+const sdkDateFormat = "2006-01-02"
 
 func tryParsingTimeWithValidFormatsForHeaders(data []byte, headerName string) (t time.Time, err error) {
 	header := strings.ToLower(headerName)
 	switch header {
 	case "lastmodified", "date":
-		t, err = tryParsing(data, time.RFC3339, time.RFC1123, rfc1123OptionalLeadingDigitsInDay, time.RFC850, time.ANSIC)
+		t, err = tryParsing(data, time.RFC3339Nano, time.RFC3339, time.RFC1123, rfc1123OptionalLeadingDigitsInDay, time.RFC850, time.ANSIC)
 		return
 	default: //By default we parse with RFC3339
 		t, err = time.Parse(sdkTimeFormat, string(data))
@@ -123,6 +148,21 @@ func tryParsing(data []byte, layouts ...string) (tm time.Time, err error) {
 	}
 	err = fmt.Errorf("Could not parse time: %s with formats: %s", datestring, layouts[:])
 	return
+}
+
+// String returns string representation of SDKDate
+func (t *SDKDate) String() string {
+	return t.Date.Format(sdkDateFormat)
+}
+
+// NewSDKDateFromString parses the dateString into SDKDate
+func NewSDKDateFromString(dateString string) (*SDKDate, error) {
+	parsedTime, err := time.Parse(sdkDateFormat, dateString)
+	if err != nil {
+		return nil, err
+	}
+
+	return &SDKDate{Date: parsedTime}, nil
 }
 
 // UnmarshalJSON unmarshals from json
@@ -144,17 +184,48 @@ func (t *SDKTime) MarshalJSON() (buff []byte, e error) {
 	return
 }
 
+// UnmarshalJSON unmarshals from json
+func (t *SDKDate) UnmarshalJSON(data []byte) (e error) {
+	if string(data) == `"null"` {
+		t.Date = time.Time{}
+		return
+	}
+
+	t.Date, e = tryParsing(data,
+		strconv.Quote(sdkDateFormat),
+	)
+	return
+}
+
+// MarshalJSON marshals to JSON
+func (t *SDKDate) MarshalJSON() (buff []byte, e error) {
+	s := t.Date.Format(sdkDateFormat)
+	buff = []byte(strconv.Quote(s))
+	return
+}
+
 // PrivateKeyFromBytes is a helper function that will produce a RSA private
-// key from bytes.
+// key from bytes. This function is deprecated in favour of PrivateKeyFromBytesWithPassword
+// Deprecated
 func PrivateKeyFromBytes(pemData []byte, password *string) (key *rsa.PrivateKey, e error) {
+	if password == nil {
+		return PrivateKeyFromBytesWithPassword(pemData, nil)
+	}
+
+	return PrivateKeyFromBytesWithPassword(pemData, []byte(*password))
+}
+
+// PrivateKeyFromBytesWithPassword is a helper function that will produce a RSA private
+// key from bytes and a password.
+func PrivateKeyFromBytesWithPassword(pemData, password []byte) (key *rsa.PrivateKey, e error) {
 	if pemBlock, _ := pem.Decode(pemData); pemBlock != nil {
 		decrypted := pemBlock.Bytes
 		if x509.IsEncryptedPEMBlock(pemBlock) {
 			if password == nil {
-				e = fmt.Errorf("private_key_password is required for encrypted private keys")
+				e = fmt.Errorf("private key password is required for encrypted private keys")
 				return
 			}
-			if decrypted, e = x509.DecryptPEMBlock(pemBlock, []byte(*password)); e != nil {
+			if decrypted, e = x509.DecryptPEMBlock(pemBlock, password); e != nil {
 				return
 			}
 		}
@@ -177,4 +248,10 @@ func generateRandUUID() (string, error) {
 	uuid := fmt.Sprintf("%x%x%x%x%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
 
 	return uuid, nil
+}
+
+func makeACopy(original []string) []string {
+	tmp := make([]string, len(original))
+	copy(tmp, original)
+	return tmp
 }

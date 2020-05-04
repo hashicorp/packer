@@ -1,0 +1,394 @@
+---
+description: |
+  User variables allow your templates to be further configured with variables
+  from the command-line, environment variables, or files. This lets you
+  parameterize your templates so that you can keep secret tokens,
+  environment-specific data, and other types of information out of your
+  templates. This maximizes the portability and shareability of the template.
+layout: docs
+page_title: User Variables - Templates
+sidebar_title: User Variables
+---
+
+# Template User Variables
+
+User variables allow your templates to be further configured with variables
+from the command-line, environment variables, Vault, or files. This lets you
+parameterize your templates so that you can keep secret tokens,
+environment-specific data, and other types of information out of your
+templates. This maximizes the portability of the template.
+
+Using user variables expects you to know how [configuration
+templates](/docs/templates/engine) work. If you don't know how
+configuration templates work yet, please read that page first.
+
+## Usage
+
+In order to set a user variable, you must define it either within the
+`variables` section within your template, or using the command-line `-var` or
+`-var-file` flags.
+
+Even if you want a user variable to default to an empty string, it is best to
+explicitly define it. This explicitness helps reduce the time it takes for
+newcomers to understand what can be modified using variables in your template.
+
+The `variables` section is a key/value mapping of the user variable name to a
+default value. A default value can be the empty string. An example is shown
+below:
+
+```json
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
+
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}"
+      // ...
+    }
+  ]
+}
+```
+
+In the above example, the template defines two user variables: `aws_access_key`
+and `aws_secret_key`. They default to empty values. Later, the variables are
+used within the builder we defined in order to configure the actual keys for
+the Amazon builder.
+
+If the default value is `null`, then the user variable will be _required_. This
+means that the user must specify a value for this variable or template
+validation will fail.
+
+User variables are used by calling the `{{user}}` function in the form of
+`{{user 'variable'}}`. This function can be used in _any value_ but `type`
+within the template: in builders, provisioners, _anywhere outside the `variables` section_.
+User variables are available globally within the rest of the template.
+
+## Environment Variables
+
+Environment variables can be used within your template using user variables.
+The `env` function is available _only_ within the default value of a user
+variable, allowing you to default a user variable to an environment variable.
+An example is shown below:
+
+```json
+{
+  "variables": {
+    "my_secret": "{{env `MY_SECRET`}}"
+  }
+}
+```
+
+This will default "my_secret" to be the value of the "MY_SECRET" environment
+variable (or an empty string if it does not exist).
+
+-> **Why can't I use environment variables elsewhere?** User variables are
+the single source of configurable input to a template. We felt that having
+environment variables used _anywhere_ in a template would confuse the user
+about the possible inputs to a template. By allowing environment variables only
+within default values for user variables, user variables remain as the single
+source of input to a template that a user can easily discover using
+`packer inspect`.
+
+-> **Why can't I use `~` for home variable?** `~` is an special variable
+that is evaluated by shell during a variable expansion. As Packer doesn't run
+inside a shell, it won't expand `~`.
+
+## Consul keys
+
+Consul keys can be used within your template using the `consul_key` function.
+This function is available _only_ within the default value of a user variable,
+for reasons similar to environment variables above.
+
+```json
+{
+  "variables": {
+    "soft_versions": "{{ consul_key `my_image/softs_versions/next` }}"
+  }
+}
+```
+
+This will default `soft_versions` to the value of the key
+`my_image/softs_versions/next` in consul.
+
+The configuration for consul (address, tokens, ...) must be specified as
+environment variables, as specified in the
+[Documentation](https://www.consul.io/docs/commands/index#environment-variables).
+
+## Vault Variables
+
+Secrets can be read from [Vault](https://www.vaultproject.io/) and used within
+your template as user variables. the `vault` function is available _only_
+within the default value of a user variable, allowing you to default a user
+variable to a vault secret.
+
+An example of using a v2 kv engine:
+
+If you store a value in vault using `vault kv put secret/hello foo=world`, you
+can access it using the following template engine:
+
+```json
+{
+  "variables": {
+    "my_secret": "{{ vault `/secret/data/hello` `foo`}}"
+  }
+}
+```
+
+which will assign "my_secret": "world"
+
+An example of using a v1 kv engine:
+
+If you store a value in vault using:
+
+    vault secrets enable -version=1 -path=secrets kv
+    vault kv put secrets/hello foo=world
+
+You can access it using the following template engine:
+
+    {
+      "variables": {
+        "VAULT_SECRETY_SECRET": "{{ vault `secrets/hello` `foo`}}"
+      }
+    }
+
+This example accesses the Vault path `secret/data/foo` and returns the value
+stored at the key `bar`, storing it as "my_secret".
+
+In order for this to work, you must set the environment variables `VAULT_TOKEN`
+and `VAULT_ADDR` to valid values.
+
+The api tool we use allows for more custom configuration of the Vault client via
+environment variables.
+
+The full list of available environment variables is:
+
+```text
+"VAULT_ADDR"
+"VAULT_AGENT_ADDR"
+"VAULT_CACERT"
+"VAULT_CAPATH"
+"VAULT_CLIENT_CERT"
+"VAULT_CLIENT_KEY"
+"VAULT_CLIENT_TIMEOUT"
+"VAULT_SKIP_VERIFY"
+"VAULT_NAMESPACE"
+"VAULT_TLS_SERVER_NAME"
+"VAULT_WRAP_TTL"
+"VAULT_MAX_RETRIES"
+"VAULT_TOKEN"
+"VAULT_MFA"
+"VAULT_RATE_LIMIT"
+```
+
+and detailed documentation for usage of each of those variables can be found
+[here](https://www.vaultproject.io/docs/commands/#environment-variables).
+
+## AWS Secrets Manager Variables
+
+Secrets can be read from [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/)
+and used within your template as user variables. the `aws_secretsmanager` function is
+available _only_ within the default value of a user variable, allowing you to default
+a user variable to an AWS Secrets Manager secret.
+
+```json
+{
+  "variables": {
+    "password": "{{ aws_secretsmanager `sample/app/password` }}"
+  }
+}
+```
+
+This will default `password` to the secret value stored at AWS Secrets Manager.
+
+In order to use this function you have to configure valid AWS credentials using
+one of the following methods:
+
+* [Environment Variables](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)
+* [CLI Configuration Files](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
+* [Container Credentials](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html)
+* [Instance Profile Credentials](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
+
+## Using array values
+
+Some templates call for array values. You can use template variables for these,
+too. For example, the `amazon-ebs` builder has a configuration parameter called
+`ami_regions`, which takes an array of regions that it will copy the AMI to.
+You can parameterize this by using a variable that is a list of regions, joined
+by a `,`. For example:
+
+```json
+{
+  "variables": {
+    "destination_regions": "us-west-1,us-west-2"
+  },
+  "builders": [
+    {
+      "ami_name": "packer-qs-{{timestamp}}",
+      "instance_type": "t2.micro",
+      "region": "us-east-1",
+      "source_ami_filter": {
+        "filters": {
+          "name": "*ubuntu-xenial-16.04-amd64-server-*",
+          "root-device-type": "ebs",
+          "virtualization-type": "hvm"
+        },
+        "most_recent": true,
+        "owners": ["099720109477"]
+      },
+      "ami_regions": "{{user `destination_regions`}}",
+      "ssh_username": "ubuntu",
+      "type": "amazon-ebs"
+    }
+  ]
+}
+```
+
+## Setting Variables
+
+Now that we covered how to define and use user variables within a template, the
+next important point is how to actually set these variables. Packer exposes two
+methods for setting user variables: from the command line or from a file.
+
+### From the Command Line
+
+To set user variables from the command line, the `-var` flag is used as a
+parameter to `packer build` (and some other commands). Continuing our example
+above, we could build our template using the command below. The command is
+split across multiple lines for readability, but can of course be a single
+line.
+
+```text
+$ packer build \
+    -var 'aws_access_key=foo' \
+    -var 'aws_secret_key=bar' \
+    template.json
+```
+
+As you can see, the `-var` flag can be specified multiple times in order to set
+multiple variables. Also, variables set later on the command-line override any
+earlier set variable of the same name.
+
+**warning** If you are calling Packer from cmd.exe, you should double-quote
+your variables rather than single-quoting them. For example:
+
+`packer build -var "aws_secret_key=foo" template.json`
+
+### From a File
+
+Variables can also be set from an external JSON file. The `-var-file` flag
+reads a file containing a key/value mapping of variables to values and sets
+those variables. An example JSON file may look like this:
+
+```json
+{
+  "aws_access_key": "foo",
+  "aws_secret_key": "bar"
+}
+```
+
+It is a single JSON object where the keys are variables and the values are the
+variable values. Assuming this file is in `variables.json`, we can build our
+template using the following command:
+
+```text
+On Linux :
+$ packer build -var-file=variables.json template.json
+On Windows :
+packer build -var-file variables.json template.json
+```
+
+The `-var-file` flag can be specified multiple times and variables from
+multiple files will be read and applied. As you'd expect, variables read from
+files specified later override a variable set earlier.
+
+Combining the `-var` and `-var-file` flags together also works how you'd
+expect. Variables set later in the command override variables set earlier. So,
+for example, in the following command with the above `variables.json` file:
+
+```text
+$ packer build \
+    -var 'aws_access_key=bar' \
+    -var-file=variables.json \
+    -var 'aws_secret_key=baz' \
+    template.json
+```
+
+Results in the following variables:
+
+| Variable       | Value |
+| -------------- | ----- |
+| aws_access_key | foo   |
+| aws_secret_key | baz   |
+
+# Sensitive Variables
+
+If you use the environment to set a variable that is sensitive, you probably
+don't want that variable printed to the Packer logs. You can make sure that
+sensitive variables won't get printed to the logs by adding them to the
+"sensitive-variables" list within the Packer template:
+
+```json
+{
+  "variables": {
+    "my_secret": "{{env `MY_SECRET`}}",
+    "not_a_secret": "plaintext",
+    "foo": "bar"
+  },
+
+  "sensitive-variables": ["my_secret", "foo"],
+  ...
+}
+```
+
+The above snippet of code will function exactly the same as if you did not set
+"sensitive-variables", except that the Packer UI and logs will replace all
+instances of "bar" and of whatever the value of "my_secret" is with
+`<sensitive>`. This allows you to be confident that you are not printing
+secrets in plaintext to our logs by accident.
+
+# Recipes
+
+## Making a provisioner step conditional on the value of a variable
+
+There is no specific syntax in Packer templates for making a provisioner step
+conditional, depending on the value of a variable. However, you may be able to
+do this by referencing the variable within a command that you execute. For
+example, here is how to make a `shell-local` provisioner only run if the
+`do_nexpose_scan` variable is non-empty.
+
+```json
+{
+  "type": "shell-local",
+  "command": "if [ ! -z \"{{user `do_nexpose_scan`}}\" ]; then python -u trigger_nexpose_scan.py; fi"
+}
+```
+
+## Using HOME Variable
+
+In order to use `$HOME` variable, you can create a `home` variable in Packer:
+
+```json
+{
+  "variables": {
+    "home": "{{env `HOME`}}"
+  }
+}
+```
+
+And this will be available to be used in the rest of the template, i.e.:
+
+```json
+{
+  "builders": [
+    {
+      "type": "google",
+      "account_file": "{{ user `home` }}/.secrets/gcp-{{ user `env` }}.json"
+    }
+  ]
+}
+```

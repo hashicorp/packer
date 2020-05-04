@@ -46,39 +46,39 @@ type HWConfig struct {
 	// * `FILE:path(,yield)` - Specifies the path to the local file to be used
 	//   as the serial port.
 	//
-	//     * `yield` (bool) - This is an optional boolean that specifies
-	//       whether the vm should yield the cpu when polling the port. By
-	//       default, the builder will assume this as `FALSE`.
+	//   * `yield` (bool) - This is an optional boolean that specifies
+	//     whether the vm should yield the cpu when polling the port. By
+	//     default, the builder will assume this as `FALSE`.
 	//
 	// * `DEVICE:path(,yield)` - Specifies the path to the local device to be
 	//   used as the serial port. If `path` is empty, then default to the first
 	//   serial port.
 	//
-	//     * `yield` (bool) - This is an optional boolean that specifies
-	//       whether the vm should yield the cpu when polling the port. By
-	//       default, the builder will assume this as `FALSE`.
+	//   * `yield` (bool) - This is an optional boolean that specifies
+	//     whether the vm should yield the cpu when polling the port. By
+	//     default, the builder will assume this as `FALSE`.
 	//
 	// * `PIPE:path,endpoint,host(,yield)` - Specifies to use the named-pipe
 	//   "path" as a serial port. This has a few options that determine how the
 	//   VM should use the named-pipe.
 	//
-	//     * `endpoint` (string) - Chooses the type of the VM-end, which can be
-	//       either a `client` or `server`.
+	//   * `endpoint` (string) - Chooses the type of the VM-end, which can be
+	//     either a `client` or `server`.
 	//
-	//     * `host` (string)     - Chooses the type of the host-end, which can
-	//       be either `app` (application) or `vm` (another virtual-machine).
+	//   * `host` (string)     - Chooses the type of the host-end, which can
+	//     be either `app` (application) or `vm` (another virtual-machine).
 	//
-	//     * `yield` (bool)      - This is an optional boolean that specifies
-	//       whether the vm should yield the cpu when polling the port. By
-	//       default, the builder will assume this as `FALSE`.
+	//   * `yield` (bool)      - This is an optional boolean that specifies
+	//     whether the vm should yield the cpu when polling the port. By
+	//     default, the builder will assume this as `FALSE`.
 	//
 	// * `AUTO:(yield)` - Specifies to use auto-detection to determine the
 	//   serial port to use. This has one option to determine how the VM should
 	//   support the serial port.
 	//
-	//     * `yield` (bool) - This is an optional boolean that specifies
-	//       whether the vm should yield the cpu when polling the port. By
-	//       default, the builder will assume this as `FALSE`.
+	//   * `yield` (bool) - This is an optional boolean that specifies
+	//     whether the vm should yield the cpu when polling the port. By
+	//     default, the builder will assume this as `FALSE`.
 	//
 	// * `NONE` - Specifies to not use a serial port. (default)
 	//

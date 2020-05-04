@@ -35,7 +35,8 @@ type RunConfig struct {
 	SourceImageName string `mapstructure:"source_image_name" required:"true"`
 	// Filters used to populate filter options. Example:
 	//
-	// ``` json {
+	// ```json
+	//{
 	//     "source_image_filter": {
 	//         "filters": {
 	//             "name": "ubuntu-16.04",
@@ -65,13 +66,9 @@ type RunConfig struct {
 	//     following are valid:
 	//
 	//     -   name (string)
-	//
 	//     -   owner (string)
-	//
 	//     -   tags (array of strings)
-	//
 	//     -   visibility (string)
-	//
 	//     -   properties (map of strings to strings) (fields that can be set
 	//         with `openstack image set --property key=value`)
 	//

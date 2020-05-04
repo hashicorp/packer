@@ -11,50 +11,46 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
 var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
 
+// docs at
+// https://wiki.outscale.net/display/EN/Getting+Information+About+Your+OMIs
 type OmiFilterOptions struct {
-	Filters    map[string]string
-	Owners     []string
-	MostRecent bool `mapstructure:"most_recent"`
+	hcl2template.NameValueFilter `mapstructure:",squash"`
+	Owners                       []string
+	MostRecent                   bool `mapstructure:"most_recent"`
 }
 
 func (d *OmiFilterOptions) Empty() bool {
-	return len(d.Owners) == 0 && len(d.Filters) == 0
+	return len(d.Owners) == 0 && d.NameValueFilter.Empty()
 }
 
 func (d *OmiFilterOptions) NoOwner() bool {
 	return len(d.Owners) == 0
 }
 
+// docs at
+// https://wiki.outscale.net/display/EN/Getting+Information+About+Your+Subnets
 type SubnetFilterOptions struct {
-	Filters  map[string]string
-	MostFree bool `mapstructure:"most_free"`
-	Random   bool `mapstructure:"random"`
+	hcl2template.NameValueFilter `mapstructure:",squash"`
+	MostFree                     bool `mapstructure:"most_free"`
+	Random                       bool `mapstructure:"random"`
 }
 
-func (d *SubnetFilterOptions) Empty() bool {
-	return len(d.Filters) == 0
-}
-
+// docs at https://docs.outscale.com/api#tocsfiltersnet
 type NetFilterOptions struct {
-	Filters map[string]string
+	hcl2template.NameValueFilter `mapstructure:",squash"`
 }
 
-func (d *NetFilterOptions) Empty() bool {
-	return len(d.Filters) == 0
-}
-
+// docs at
+// https://wiki.outscale.net/display/EN/Getting+Information+About+Your+Security+Groups
 type SecurityGroupFilterOptions struct {
-	Filters map[string]string
-}
-
-func (d *SecurityGroupFilterOptions) Empty() bool {
-	return len(d.Filters) == 0
+	hcl2template.NameValueFilter `mapstructure:",squash"`
 }
 
 // RunConfig contains configuration for running an vm from a source
@@ -114,6 +110,15 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	errs := c.Comm.Prepare(ctx)
+
+	for _, preparer := range []interface{ Prepare() []error }{
+		&c.SourceOmiFilter,
+		&c.SecurityGroupFilter,
+		&c.SubnetFilter,
+		&c.NetFilter,
+	} {
+		errs = append(errs, preparer.Prepare()...)
+	}
 
 	// Validating ssh_interface
 	if c.SSHInterface != "public_ip" &&

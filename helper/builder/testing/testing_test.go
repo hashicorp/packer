@@ -70,19 +70,3 @@ func (t *mockT) Skip(args ...interface{}) {
 	t.SkipArgs = args
 	t.f = true
 }
-
-func (t *mockT) failed() bool {
-	return t.f
-}
-
-func (t *mockT) failMessage() string {
-	if t.FatalCalled {
-		return t.FatalArgs[0].(string)
-	} else if t.ErrorCalled {
-		return t.ErrorArgs[0].(string)
-	} else if t.SkipCalled {
-		return t.SkipArgs[0].(string)
-	}
-
-	return "unknown"
-}

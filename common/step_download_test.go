@@ -15,7 +15,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	urlhelper "github.com/hashicorp/go-getter/helper/url"
+	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
@@ -73,7 +73,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Url: []string{abs(t, "./test-fixtures/root/another.txt")}},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(abs(t, "./test-fixtures/root/another.txt")),
 				toSha1(abs(t, "./test-fixtures/root/another.txt")) + ".lock",
 			},
 		},
@@ -81,7 +80,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Url: []string{abs(t, "./test-fixtures/root//another.txt")}},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(abs(t, "./test-fixtures/root//another.txt")),
 				toSha1(abs(t, "./test-fixtures/root//another.txt")) + ".lock",
 			},
 		},
@@ -89,7 +87,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Url: []string{abs(t, "./test-fixtures/root/another.txt")}, Checksum: "none"},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(abs(t, "./test-fixtures/root/another.txt")),
 				toSha1(abs(t, "./test-fixtures/root/another.txt")) + ".lock",
 			},
 		},
@@ -158,7 +155,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Extension: "txt", Url: []string{"./test-fixtures/root/another.txt?checksum=" + cs["/root/another.txt"]}},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt",
 				toSha1(cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
@@ -166,7 +162,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Extension: "txt", Url: []string{"./test-fixtures/root/another.txt?"}, Checksum: cs["/root/another.txt"]},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt",
 				toSha1(cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
@@ -182,7 +177,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Extension: "txt", Url: []string{abs(t, "./test-fixtures/root/another.txt") + "?checksum=" + cs["/root/another.txt"]}},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt",
 				toSha1(cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
@@ -190,7 +184,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Extension: "txt", Url: []string{abs(t, "./test-fixtures/root/another.txt") + "?"}, Checksum: cs["/root/another.txt"]},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt",
 				toSha1(cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
@@ -213,7 +206,6 @@ func TestStepDownload_Run(t *testing.T) {
 			},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/basic.txt"]),
 				toSha1(cs["/root/basic.txt"]) + ".lock",
 			},
 		},
@@ -265,36 +257,33 @@ func TestStepDownload_download(t *testing.T) {
 	// Abs path with extension provided
 	step.TargetPath = "./packer"
 	step.Extension = "ova"
-	path, err := step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
+	_, err := step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
 	if err != nil {
 		t.Fatalf("Bad: non expected error %s", err.Error())
 	}
-	if filepath.Ext(path) != "."+step.Extension {
-		t.Fatalf("bad: path should contain extension %s but it was %s", step.Extension, filepath.Ext(path))
-	}
+	// because of the inplace option; the result file will not be renamed
+	// sha.ova.
 	os.RemoveAll(step.TargetPath)
 
 	// Abs path with no extension provided
 	step.TargetPath = "./packer"
 	step.Extension = ""
-	path, err = step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
+	_, err = step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
 	if err != nil {
 		t.Fatalf("Bad: non expected error %s", err.Error())
 	}
-	if filepath.Ext(path) != ".iso" {
-		t.Fatalf("bad: path should contain extension %s but it was .iso", step.Extension)
-	}
+	// because of the inplace option; the result file will not be renamed
+	// sha.ova.
 	os.RemoveAll(step.TargetPath)
 
 	// Path with file
 	step.TargetPath = "./packer/file.iso"
-	path, err = step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
+	_, err = step.download(context.TODO(), ui, "./test-fixtures/root/basic.txt")
 	if err != nil {
 		t.Fatalf("Bad: non expected error %s", err.Error())
 	}
-	if path != "./packer/file.iso" {
-		t.Fatalf("bad: path should be ./packer/file.iso but it was %s", path)
-	}
+	// because of the inplace option; the result file will not be renamed
+	// sha.ova.
 	os.RemoveAll(step.TargetPath)
 }
 

@@ -111,12 +111,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	if b.config.isManagedImage() {
-		group, err := azureClient.GroupsClient.Get(ctx, b.config.ManagedImageResourceGroupName)
+		_, err := azureClient.GroupsClient.Get(ctx, b.config.ManagedImageResourceGroupName)
 		if err != nil {
 			return nil, fmt.Errorf("Cannot locate the managed image resource group %s.", b.config.ManagedImageResourceGroupName)
 		}
-
-		b.config.manageImageLocation = *group.Location
 
 		// If a managed image already exists it cannot be overwritten.
 		_, err = azureClient.ImagesClient.Get(ctx, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, "")
@@ -228,11 +226,19 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			NewStepDeleteAdditionalDisks(azureClient, ui),
 		}
 	} else if b.config.OSType == constants.Target_Windows {
-		keyVaultDeploymentName := b.stateBag.Get(constants.ArmKeyVaultDeploymentName).(string)
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
-			NewStepValidateTemplate(azureClient, ui, &b.config, GetKeyVaultDeployment),
-			NewStepDeployTemplate(azureClient, ui, &b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
+		}
+		if b.config.BuildKeyVaultName == "" {
+			keyVaultDeploymentName := b.stateBag.Get(constants.ArmKeyVaultDeploymentName).(string)
+			steps = append(steps,
+				NewStepValidateTemplate(azureClient, ui, &b.config, GetKeyVaultDeployment),
+				NewStepDeployTemplate(azureClient, ui, &b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
+			)
+		} else {
+			steps = append(steps, NewStepCertificateInKeyVault(&azureClient.VaultClient, ui, &b.config))
+		}
+		steps = append(steps,
 			NewStepGetCertificate(azureClient, ui),
 			NewStepSetCertificate(&b.config, ui),
 			NewStepValidateTemplate(azureClient, ui, &b.config, GetVirtualMachineDeployment),
@@ -246,7 +252,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				WinRMConfig: func(multistep.StateBag) (*communicator.WinRMConfig, error) {
 					return &communicator.WinRMConfig{
 						Username: b.config.UserName,
-						Password: b.config.Comm.WinRMPassword,
+						Password: b.config.Password,
 					}, nil
 				},
 			},
@@ -261,7 +267,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
 			NewStepDeleteAdditionalDisks(azureClient, ui),
-		}
+		)
 	} else {
 		return nil, fmt.Errorf("Builder does not support the os_type '%s'", b.config.OSType)
 	}
@@ -303,7 +309,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			return NewManagedImageArtifactWithSIGAsDestination(b.config.OSType,
 				b.config.ManagedImageResourceGroupName,
 				b.config.ManagedImageName,
-				b.config.manageImageLocation,
+				b.config.Location,
 				managedImageID,
 				b.config.ManagedImageOSDiskSnapshotName,
 				b.config.ManagedImageDataDiskSnapshotPrefix,
@@ -313,7 +319,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return NewManagedImageArtifact(b.config.OSType,
 			b.config.ManagedImageResourceGroupName,
 			b.config.ManagedImageName,
-			b.config.manageImageLocation,
+			b.config.Location,
 			managedImageID,
 			b.config.ManagedImageOSDiskSnapshotName,
 			b.config.ManagedImageDataDiskSnapshotPrefix,
@@ -391,11 +397,18 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmComputeName, b.config.tmpComputeName)
 	stateBag.Put(constants.ArmDeploymentName, b.config.tmpDeploymentName)
 
-	if b.config.OSType == constants.Target_Windows {
+	if b.config.OSType == constants.Target_Windows && b.config.BuildKeyVaultName == "" {
 		stateBag.Put(constants.ArmKeyVaultDeploymentName, fmt.Sprintf("kv%s", b.config.tmpDeploymentName))
 	}
 
 	stateBag.Put(constants.ArmKeyVaultName, b.config.tmpKeyVaultName)
+	stateBag.Put(constants.ArmIsExistingKeyVault, false)
+	if b.config.BuildKeyVaultName != "" {
+		stateBag.Put(constants.ArmKeyVaultName, b.config.BuildKeyVaultName)
+		b.config.tmpKeyVaultName = b.config.BuildKeyVaultName
+		stateBag.Put(constants.ArmIsExistingKeyVault, true)
+	}
+
 	stateBag.Put(constants.ArmNicName, b.config.tmpNicName)
 	stateBag.Put(constants.ArmPublicIPAddressName, b.config.tmpPublicIPAddressName)
 	stateBag.Put(constants.ArmResourceGroupName, b.config.BuildResourceGroupName)
@@ -433,7 +446,6 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 // Parameters that are only known at runtime after querying Azure.
 func (b *Builder) setRuntimeParameters(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmLocation, b.config.Location)
-	stateBag.Put(constants.ArmManagedImageLocation, b.config.manageImageLocation)
 }
 
 func (b *Builder) setTemplateParameters(stateBag multistep.StateBag) {

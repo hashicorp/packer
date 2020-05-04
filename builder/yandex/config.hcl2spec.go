@@ -36,6 +36,7 @@ type FlatConfig struct {
 	SSHBastionAgentAuth       *bool             `mapstructure:"ssh_bastion_agent_auth" cty:"ssh_bastion_agent_auth"`
 	SSHBastionUsername        *string           `mapstructure:"ssh_bastion_username" cty:"ssh_bastion_username"`
 	SSHBastionPassword        *string           `mapstructure:"ssh_bastion_password" cty:"ssh_bastion_password"`
+	SSHBastionInteractive     *bool             `mapstructure:"ssh_bastion_interactive" cty:"ssh_bastion_interactive"`
 	SSHBastionPrivateKeyFile  *string           `mapstructure:"ssh_bastion_private_key_file" cty:"ssh_bastion_private_key_file"`
 	SSHFileTransferMethod     *string           `mapstructure:"ssh_file_transfer_method" cty:"ssh_file_transfer_method"`
 	SSHProxyHost              *string           `mapstructure:"ssh_proxy_host" cty:"ssh_proxy_host"`
@@ -59,6 +60,7 @@ type FlatConfig struct {
 	Endpoint                  *string           `mapstructure:"endpoint" required:"false" cty:"endpoint"`
 	FolderID                  *string           `mapstructure:"folder_id" required:"true" cty:"folder_id"`
 	ServiceAccountKeyFile     *string           `mapstructure:"service_account_key_file" required:"false" cty:"service_account_key_file"`
+	ServiceAccountID          *string           `mapstructure:"service_account_id" required:"false" cty:"service_account_id"`
 	Token                     *string           `mapstructure:"token" required:"true" cty:"token"`
 	DiskName                  *string           `mapstructure:"disk_name" required:"false" cty:"disk_name"`
 	DiskSizeGb                *int              `mapstructure:"disk_size_gb" required:"false" cty:"disk_size_gb"`
@@ -84,6 +86,7 @@ type FlatConfig struct {
 	SourceImageID             *string           `mapstructure:"source_image_id" required:"false" cty:"source_image_id"`
 	SourceImageName           *string           `mapstructure:"source_image_name" cty:"source_image_name"`
 	SubnetID                  *string           `mapstructure:"subnet_id" required:"false" cty:"subnet_id"`
+	TargetImageFolderID       *string           `mapstructure:"target_image_folder_id" required:"false" cty:"target_image_folder_id"`
 	UseIPv4Nat                *bool             `mapstructure:"use_ipv4_nat" required:"false" cty:"use_ipv4_nat"`
 	UseIPv6                   *bool             `mapstructure:"use_ipv6" required:"false" cty:"use_ipv6"`
 	UseInternalIP             *bool             `mapstructure:"use_internal_ip" required:"false" cty:"use_internal_ip"`
@@ -108,7 +111,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":                 &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                 &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":              &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":        &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":        &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables":   &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"communicator":                 &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
 		"pause_before_connecting":      &hcldec.AttrSpec{Name: "pause_before_connecting", Type: cty.String, Required: false},
@@ -130,6 +133,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_bastion_agent_auth":       &hcldec.AttrSpec{Name: "ssh_bastion_agent_auth", Type: cty.Bool, Required: false},
 		"ssh_bastion_username":         &hcldec.AttrSpec{Name: "ssh_bastion_username", Type: cty.String, Required: false},
 		"ssh_bastion_password":         &hcldec.AttrSpec{Name: "ssh_bastion_password", Type: cty.String, Required: false},
+		"ssh_bastion_interactive":      &hcldec.AttrSpec{Name: "ssh_bastion_interactive", Type: cty.Bool, Required: false},
 		"ssh_bastion_private_key_file": &hcldec.AttrSpec{Name: "ssh_bastion_private_key_file", Type: cty.String, Required: false},
 		"ssh_file_transfer_method":     &hcldec.AttrSpec{Name: "ssh_file_transfer_method", Type: cty.String, Required: false},
 		"ssh_proxy_host":               &hcldec.AttrSpec{Name: "ssh_proxy_host", Type: cty.String, Required: false},
@@ -153,24 +157,25 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"endpoint":                     &hcldec.AttrSpec{Name: "endpoint", Type: cty.String, Required: false},
 		"folder_id":                    &hcldec.AttrSpec{Name: "folder_id", Type: cty.String, Required: false},
 		"service_account_key_file":     &hcldec.AttrSpec{Name: "service_account_key_file", Type: cty.String, Required: false},
+		"service_account_id":           &hcldec.AttrSpec{Name: "service_account_id", Type: cty.String, Required: false},
 		"token":                        &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"disk_name":                    &hcldec.AttrSpec{Name: "disk_name", Type: cty.String, Required: false},
 		"disk_size_gb":                 &hcldec.AttrSpec{Name: "disk_size_gb", Type: cty.Number, Required: false},
 		"disk_type":                    &hcldec.AttrSpec{Name: "disk_type", Type: cty.String, Required: false},
 		"image_description":            &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
 		"image_family":                 &hcldec.AttrSpec{Name: "image_family", Type: cty.String, Required: false},
-		"image_labels":                 &hcldec.BlockAttrsSpec{TypeName: "image_labels", ElementType: cty.String, Required: false},
+		"image_labels":                 &hcldec.AttrSpec{Name: "image_labels", Type: cty.Map(cty.String), Required: false},
 		"image_name":                   &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"image_product_ids":            &hcldec.AttrSpec{Name: "image_product_ids", Type: cty.List(cty.String), Required: false},
 		"instance_cores":               &hcldec.AttrSpec{Name: "instance_cores", Type: cty.Number, Required: false},
 		"instance_gpus":                &hcldec.AttrSpec{Name: "instance_gpus", Type: cty.Number, Required: false},
 		"instance_mem_gb":              &hcldec.AttrSpec{Name: "instance_mem_gb", Type: cty.Number, Required: false},
 		"instance_name":                &hcldec.AttrSpec{Name: "instance_name", Type: cty.String, Required: false},
-		"labels":                       &hcldec.BlockAttrsSpec{TypeName: "labels", ElementType: cty.String, Required: false},
+		"labels":                       &hcldec.AttrSpec{Name: "labels", Type: cty.Map(cty.String), Required: false},
 		"platform_id":                  &hcldec.AttrSpec{Name: "platform_id", Type: cty.String, Required: false},
 		"max_retries":                  &hcldec.AttrSpec{Name: "max_retries", Type: cty.Number, Required: false},
-		"metadata":                     &hcldec.BlockAttrsSpec{TypeName: "metadata", ElementType: cty.String, Required: false},
-		"metadata_from_file":           &hcldec.BlockAttrsSpec{TypeName: "metadata_from_file", ElementType: cty.String, Required: false},
+		"metadata":                     &hcldec.AttrSpec{Name: "metadata", Type: cty.Map(cty.String), Required: false},
+		"metadata_from_file":           &hcldec.AttrSpec{Name: "metadata_from_file", Type: cty.Map(cty.String), Required: false},
 		"preemptible":                  &hcldec.AttrSpec{Name: "preemptible", Type: cty.Bool, Required: false},
 		"serial_log_file":              &hcldec.AttrSpec{Name: "serial_log_file", Type: cty.String, Required: false},
 		"source_image_family":          &hcldec.AttrSpec{Name: "source_image_family", Type: cty.String, Required: false},
@@ -178,6 +183,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"source_image_id":              &hcldec.AttrSpec{Name: "source_image_id", Type: cty.String, Required: false},
 		"source_image_name":            &hcldec.AttrSpec{Name: "source_image_name", Type: cty.String, Required: false},
 		"subnet_id":                    &hcldec.AttrSpec{Name: "subnet_id", Type: cty.String, Required: false},
+		"target_image_folder_id":       &hcldec.AttrSpec{Name: "target_image_folder_id", Type: cty.String, Required: false},
 		"use_ipv4_nat":                 &hcldec.AttrSpec{Name: "use_ipv4_nat", Type: cty.Bool, Required: false},
 		"use_ipv6":                     &hcldec.AttrSpec{Name: "use_ipv6", Type: cty.Bool, Required: false},
 		"use_internal_ip":              &hcldec.AttrSpec{Name: "use_internal_ip", Type: cty.Bool, Required: false},

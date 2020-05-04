@@ -1,9 +1,14 @@
-// Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2016, 2018, 2020, Oracle and/or its affiliates.  All rights reserved.
+// This software is dual-licensed to you under the Universal Permissive License (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl or Apache License 2.0 as shown at http://www.apache.org/licenses/LICENSE-2.0. You may choose either license.
 // Code generated. DO NOT EDIT.
 
 // Core Services API
 //
-// APIs for Networking Service, Compute Service, and Block Volume Service.
+// API covering the Networking (https://docs.cloud.oracle.com/iaas/Content/Network/Concepts/overview.htm),
+// Compute (https://docs.cloud.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm), and
+// Block Volume (https://docs.cloud.oracle.com/iaas/Content/Block/Concepts/overview.htm) services. Use this API
+// to manage resources such as virtual cloud networks (VCNs), compute instances, and
+// block storage volumes.
 //
 
 package core
@@ -12,8 +17,9 @@ import (
 	"github.com/oracle/oci-go-sdk/common"
 )
 
-// PrivateIp A *private IP* is a conceptual term that refers to a private IP address and related properties.
+// PrivateIp A *private IP* is a conceptual term that refers to an IPv4 private IP address and related properties.
 // The `privateIp` object is the API representation of a private IP.
+// **Note:** For information about IPv6 addresses, see Ipv6.
 // Each instance has a *primary private IP* that is automatically created and
 // assigned to the primary VNIC during instance launch. If you add a secondary
 // VNIC to the instance, it also automatically gets a primary private IP. You
@@ -21,7 +27,7 @@ import (
 // automatically deleted when the VNIC is terminated.
 // You can add *secondary private IPs* to a VNIC after it's created. For more
 // information, see the `privateIp` operations and also
-// IP Addresses (https://docs.us-phoenix-1.oraclecloud.com/Content/Network/Tasks/managingIPaddresses.htm).
+// IP Addresses (https://docs.cloud.oracle.com/Content/Network/Tasks/managingIPaddresses.htm).
 // **Note:** Only
 // ListPrivateIps and
 // GetPrivateIp work with
@@ -34,18 +40,21 @@ import (
 // for a primary private IP, you use UpdateVnic.
 // To use any of the API operations, you must be authorized in an IAM policy. If you're not authorized,
 // talk to an administrator. If you're an administrator who needs to write policies to give users access, see
-// Getting Started with Policies (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Concepts/policygetstarted.htm).
+// Getting Started with Policies (https://docs.cloud.oracle.com/Content/Identity/Concepts/policygetstarted.htm).
+// **Warning:** Oracle recommends that you avoid using any confidential information when you
+// supply string values using the API.
 type PrivateIp struct {
 
-	// The private IP's Availability Domain.
+	// The private IP's availability domain. This attribute will be null if this is a *secondary*
+	// private IP assigned to a VNIC that is in a *regional* subnet.
 	// Example: `Uocm:PHX-AD-1`
 	AvailabilityDomain *string `mandatory:"false" json:"availabilityDomain"`
 
 	// The OCID of the compartment containing the private IP.
 	CompartmentId *string `mandatory:"false" json:"compartmentId"`
 
-	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
-	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Defined tags for this resource. Each key is predefined and scoped to a
+	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
 	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
@@ -54,8 +63,7 @@ type PrivateIp struct {
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
 	// Free-form tags for this resource. Each tag is a simple key-value pair with no
-	// predefined name, type, or namespace. For more information, see
-	// Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// predefined name, type, or namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Department": "Finance"}`
 	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
@@ -66,7 +74,7 @@ type PrivateIp struct {
 	// RFC 952 (https://tools.ietf.org/html/rfc952) and
 	// RFC 1123 (https://tools.ietf.org/html/rfc1123).
 	// For more information, see
-	// DNS in Your Virtual Cloud Network (https://docs.us-phoenix-1.oraclecloud.com/Content/Network/Concepts/dns.htm).
+	// DNS in Your Virtual Cloud Network (https://docs.cloud.oracle.com/Content/Network/Concepts/dns.htm).
 	// Example: `bminstance-1`
 	HostnameLabel *string `mandatory:"false" json:"hostnameLabel"`
 

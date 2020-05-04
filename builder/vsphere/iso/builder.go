@@ -120,7 +120,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	steps = append(steps,
-		&StepRemoveCDRom{},
+		&StepRemoveCDRom{
+			Config: &b.config.RemoveCDRomConfig,
+		},
 		&common.StepCreateSnapshot{
 			CreateSnapshot: b.config.CreateSnapshot,
 		},
@@ -128,6 +130,17 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			ConvertToTemplate: b.config.ConvertToTemplate,
 		},
 	)
+
+	if b.config.Export != nil {
+		steps = append(steps, &common.StepExport{
+			Name:      b.config.Export.Name,
+			Force:     b.config.Export.Force,
+			Images:    b.config.Export.Images,
+			Manifest:  b.config.Export.Manifest,
+			OutputDir: b.config.Export.OutputDir.OutputDir,
+			Options:   b.config.Export.Options,
+		})
+	}
 
 	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
@@ -139,10 +152,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if _, ok := state.GetOk("vm"); !ok {
 		return nil, nil
 	}
+
 	artifact := &common.Artifact{
 		Name:      b.config.VMName,
 		VM:        state.Get("vm").(*driver.VirtualMachine),
 		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
+
+	if b.config.Export != nil {
+		artifact.Outconfig = &b.config.Export.OutputDir
+	}
+
 	return artifact, nil
 }

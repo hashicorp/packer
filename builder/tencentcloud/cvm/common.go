@@ -10,16 +10,18 @@ import (
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
+	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
 )
 
 // DefaultWaitForInterval is sleep interval when wait statue
 const DefaultWaitForInterval = 5
 
 // WaitForInstance wait for instance reaches statue
-func WaitForInstance(client *cvm.Client, instanceId string, status string, timeout int) error {
-	ctx := context.TODO()
+func WaitForInstance(ctx context.Context, client *cvm.Client, instanceId string, status string, timeout int) error {
 	req := cvm.NewDescribeInstancesRequest()
 	req.InstanceIds = []*string{&instanceId}
 
@@ -36,7 +38,8 @@ func WaitForInstance(client *cvm.Client, instanceId string, status string, timeo
 		if *resp.Response.TotalCount == 0 {
 			return fmt.Errorf("instance(%s) not exist", instanceId)
 		}
-		if *resp.Response.InstanceSet[0].InstanceState == status {
+		if *resp.Response.InstanceSet[0].InstanceState == status &&
+			(resp.Response.InstanceSet[0].LatestOperationState == nil || *resp.Response.InstanceSet[0].LatestOperationState != "OPERATING") {
 			break
 		}
 		time.Sleep(DefaultWaitForInterval * time.Second)
@@ -50,54 +53,86 @@ func WaitForInstance(client *cvm.Client, instanceId string, status string, timeo
 }
 
 // WaitForImageReady wait for image reaches statue
-func WaitForImageReady(client *cvm.Client, imageName string, status string, timeout int) error {
-	ctx := context.TODO()
-	req := cvm.NewDescribeImagesRequest()
-	FILTER_IMAGE_NAME := "image-name"
-	req.Filters = []*cvm.Filter{
-		{
-			Name:   &FILTER_IMAGE_NAME,
-			Values: []*string{&imageName},
-		},
-	}
-
+func WaitForImageReady(ctx context.Context, client *cvm.Client, imageName string, status string, timeout int) error {
 	for {
-		var resp *cvm.DescribeImagesResponse
-		err := Retry(ctx, func(ctx context.Context) error {
-			var e error
-			resp, e = client.DescribeImages(req)
-			return e
-		})
+		image, err := GetImageByName(ctx, client, imageName)
 		if err != nil {
 			return err
 		}
-		find := false
-		for _, image := range resp.Response.ImageSet {
-			if *image.ImageName == imageName && *image.ImageState == status {
-				find = true
-				break
-			}
+
+		if image != nil && *image.ImageState == status {
+			return nil
 		}
-		if find {
-			break
-		}
+
 		time.Sleep(DefaultWaitForInterval * time.Second)
 		timeout = timeout - DefaultWaitForInterval
 		if timeout <= 0 {
 			return fmt.Errorf("wait image(%s) status(%s) timeout", imageName, status)
 		}
 	}
+}
 
-	return nil
+// GetImageByName get image by image name
+func GetImageByName(ctx context.Context, client *cvm.Client, imageName string) (*cvm.Image, error) {
+	req := cvm.NewDescribeImagesRequest()
+	req.Filters = []*cvm.Filter{
+		{
+			Name:   common.StringPtr("image-name"),
+			Values: []*string{&imageName},
+		},
+	}
+
+	var resp *cvm.DescribeImagesResponse
+	err := Retry(ctx, func(ctx context.Context) error {
+		var e error
+		resp, e = client.DescribeImages(req)
+		return e
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if *resp.Response.TotalCount > 0 {
+		for _, image := range resp.Response.ImageSet {
+			if *image.ImageName == imageName {
+				return image, nil
+			}
+		}
+	}
+
+	return nil, nil
+}
+
+// NewCvmClient returns a new cvm client
+func NewCvmClient(secretId, secretKey, region string) (client *cvm.Client, err error) {
+	cpf := profile.NewClientProfile()
+	cpf.HttpProfile.ReqMethod = "POST"
+	cpf.HttpProfile.ReqTimeout = 300
+	cpf.Language = "en-US"
+
+	credential := common.NewCredential(secretId, secretKey)
+	client, err = cvm.NewClient(credential, region, cpf)
+
+	return
+}
+
+// NewVpcClient returns a new vpc client
+func NewVpcClient(secretId, secretKey, region string) (client *vpc.Client, err error) {
+	cpf := profile.NewClientProfile()
+	cpf.HttpProfile.ReqMethod = "POST"
+	cpf.HttpProfile.ReqTimeout = 300
+	cpf.Language = "en-US"
+
+	credential := common.NewCredential(secretId, secretKey)
+	client, err = vpc.NewClient(credential, region, cpf)
+
+	return
 }
 
 // CheckResourceIdFormat check resource id format
 func CheckResourceIdFormat(resource string, id string) bool {
 	regex := regexp.MustCompile(fmt.Sprintf("%s-[0-9a-z]{8}$", resource))
-	if !regex.MatchString(id) {
-		return false
-	}
-	return true
+	return regex.MatchString(id)
 }
 
 // SSHHost returns a function that can be given to the SSH communicator
@@ -115,14 +150,15 @@ func SSHHost(pubilcIp bool) func(multistep.StateBag) (string, error) {
 // Retry do retry on api request
 func Retry(ctx context.Context, fn func(context.Context) error) error {
 	return retry.Config{
-		Tries: 30,
+		Tries: 60,
 		ShouldRetry: func(err error) bool {
 			e, ok := err.(*errors.TencentCloudSDKError)
 			if !ok {
 				return false
 			}
 			if e.Code == "ClientError.NetworkError" || e.Code == "ClientError.HttpStatusCodeError" ||
-				e.Code == "InvalidKeyPair.NotSupported" || e.Code == "InvalidInstance.NotSupported" ||
+				e.Code == "InvalidKeyPair.NotSupported" || e.Code == "InvalidParameterValue.KeyPairNotSupported" ||
+				e.Code == "InvalidInstance.NotSupported" || e.Code == "OperationDenied.InstanceOperationInProgress" ||
 				strings.Contains(e.Code, "RequestLimitExceeded") || strings.Contains(e.Code, "InternalError") ||
 				strings.Contains(e.Code, "ResourceInUse") || strings.Contains(e.Code, "ResourceBusy") {
 				return true

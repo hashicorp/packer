@@ -1,0 +1,80 @@
+---
+layout: docs
+page_title: Configuration Language
+sidebar_title: v1.5 Configuration Language
+description: |-
+  Packer uses text files to describe infrastructure and to set variables.
+  These text files are called Packer _configurations_ and are
+  written in the HCL language.
+---
+
+# HCL Configuration Language
+
+-> **Note:** This page is about HCL2 in Packer 1.5 and later. HCL2 support for
+Packer is still in Beta. For the old-style stable configuration language see
+[template docs](/docs/templates).
+
+Packer uses the Hashicorp Configuration Language - HCL - designed to allow
+concise descriptions of the required steps to get to a build file. This page
+describes the features of HCL2 exhaustively, if you would like to give a quick
+try to HCL2, you can also read the quicker [HCL2 getting started
+guide](/guides/hcl).
+
+## Builds
+
+The main purpose of the HCL language is defining builds and sources. All other
+language features exist only to make the definition of builds more flexible and
+convenient.
+
+`packer build` takes one argument. When a directory is passed, all files in the
+folder with a name ending with ".pkr.hcl" or ".pkr.json" will be parsed using
+the HCL2 format. When a file ending with ".pkr.hcl" or ".pkr.json" is passed it
+will be parsed using the HCL2 schema. For every other case; the _JSON only_ old
+packer schema will be used.
+
+## Arguments, Blocks, and Expressions
+
+The syntax of the HCL language consists of only a few basic elements:
+
+```hcl
+source "amazon-ebs" "main" {
+  ami_name = "main-ami"
+}
+
+<BLOCK TYPE> "<BLOCK LABEL>" "<BLOCK LABEL>" {
+  # Block body
+  <IDENTIFIER> = <EXPRESSION> # Argument
+}
+```
+
+- _Blocks_ are containers for other content and usually represent the
+  configuration of some kind of object, like a source. Blocks have a
+  _block type,_ can have zero or more _labels,_ and have a _body_ that contains
+  any number of arguments and nested blocks. Most of Packer's features are
+  controlled by top-level blocks in a configuration file.
+- _Arguments_ assign a value to a name. They appear within blocks.
+- _Expressions_ represent a value, either literally or by referencing and
+  combining other values. They appear as values for arguments, or within other
+  expressions.
+
+For full details about Packer's syntax, see:
+
+- [Configuration Syntax](/docs/from-1.5/syntax)
+- [Expressions](/docs/from-1.5/expressions)
+
+## Code Organization
+
+The HCL language uses configuration files that are named with the `.pkr.hcl`
+file extension. There is also [a JSON-based variant of the
+language](/docs/from-1.5/syntax-json) that is named with the `.pkr.json` file
+extension.
+
+Configuration files must always use UTF-8 encoding, and by convention are
+usually maintained with Unix-style line endings (LF) rather than Windows-style
+line endings (CRLF), though both are accepted.
+
+## Configuration Ordering
+
+The ordering of root blocks is not significant. The order of `provisioner` or
+`post-processor` blocks within a `build` is the only major feature where block
+order matters.

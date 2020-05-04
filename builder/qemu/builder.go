@@ -39,31 +39,6 @@ var accels = map[string]struct{}{
 	"whpx": {},
 }
 
-var netDevice = map[string]bool{
-	"ne2k_pci":       true,
-	"i82551":         true,
-	"i82557b":        true,
-	"i82559er":       true,
-	"rtl8139":        true,
-	"e1000":          true,
-	"pcnet":          true,
-	"virtio":         true,
-	"virtio-net":     true,
-	"virtio-net-pci": true,
-	"usb-net":        true,
-	"i82559a":        true,
-	"i82559b":        true,
-	"i82559c":        true,
-	"i82550":         true,
-	"i82562":         true,
-	"i82557a":        true,
-	"i82557c":        true,
-	"i82801":         true,
-	"vmxnet3":        true,
-	"i82558a":        true,
-	"i82558b":        true,
-}
-
 var diskInterface = map[string]bool{
 	"ide":         true,
 	"scsi":        true,
@@ -234,7 +209,8 @@ type Config struct {
 	//
 	// The following shows a sample usage:
 	//
-	// ``` json {
+	// ```json
+	//{
 	//   "qemuargs": [
 	//     [ "-m", "1024M" ],
 	//     [ "--no-acpi", "" ],
@@ -252,9 +228,11 @@ type Config struct {
 	// would produce the following (not including other defaults supplied by
 	// the builder and not otherwise conflicting with the qemuargs):
 	//
-	// ``` text qemu-system-x86 -m 1024m --no-acpi -netdev
+	// ```text
+	// qemu-system-x86 -m 1024m --no-acpi -netdev
 	// user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device
-	// virtio-net,netdev=mynet0" ```
+	// virtio-net,netdev=mynet0"
+	// ```
 	//
 	// ~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/)
 	// builds are available though an environmental variable does need to be
@@ -264,23 +242,31 @@ type Config struct {
 	// The following shows the environment variable that needs to be set for
 	// Windows QEMU support:
 	//
-	// ``` text setx SDL_STDIO_REDIRECT=0 ```
+	// ```text
+	// setx SDL_STDIO_REDIRECT=0
+	// ```
 	//
 	// You can also use the `SSHHostPort` template variable to produce a packer
 	// template that can be invoked by `make` in parallel:
 	//
-	// ``` json {
+	// ```json
+	//{
 	//   "qemuargs": [
 	//     [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
 	//     [ "-device", "virtio-net,netdev=forward,id=net0"]
 	//   ]
-	// } ```
+	// }
+	// ```
 	//
 	// `make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each
 	// of which will bind to their own SSH port as determined by each process.
 	// This will also work with WinRM, just change the port forward in
 	// `qemuargs` to map to WinRM's default port of `5985` or whatever value
 	// you have the service set to listen on.
+	//
+	// This is a template engine and allows access to the following variables:
+	// `{{ .HTTPIP }}`, `{{ .HTTPPort }}`, `{{ .HTTPDir }}`,
+	// `{{ .OutputDir }}`, `{{ .Name }}`, and `{{ .SSHHostPort }}`
 	QemuArgs [][]string `mapstructure:"qemuargs" required:"false"`
 	// The name of the Qemu binary to look for. This
 	// defaults to qemu-system-x86_64, but may need to be changed for
@@ -513,11 +499,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	if _, ok := accels[b.config.Accelerator]; !ok {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', 'hax', 'hvf', 'whpx', or 'none' are allowed"))
-	}
-
-	if _, ok := netDevice[b.config.NetDevice]; !ok {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("unrecognized network device type"))
 	}
 
 	if _, ok := diskInterface[b.config.DiskInterface]; !ok {

@@ -180,6 +180,11 @@ func TestConfigDefaults(t *testing.T) {
 			func(c *Config) interface{} { return c.Communicator.SSHPort },
 			22,
 		},
+
+		{
+			func(c *Config) interface{} { return c.TargetImageFolderID },
+			"hashicorp",
+		},
 	}
 
 	for _, tc := range cases {

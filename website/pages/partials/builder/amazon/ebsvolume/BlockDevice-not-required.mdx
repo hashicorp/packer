@@ -1,0 +1,11 @@
+<!-- Code generated from the comments of the BlockDevice struct in builder/amazon/ebsvolume/block_device.go; DO NOT EDIT MANUALLY -->
+
+-   `tags` (map[string]string) - Key/value pair tags to apply to the volume. These are retained after the builder
+    completes. This is a [template engine](/docs/templates/engine), see
+    [Build template data](#build-template-data) for more information.
+    
+-   `tag` ([]{key string, value string}) - Same as [`tags`](#tags) but defined as a singular repeatable block
+    containing a `key` and a `value` field. In HCL2 mode the
+    [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+    will allow you to create those programatically.
+    

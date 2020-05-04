@@ -113,6 +113,10 @@ type Driver interface {
 
 	SetBootDvdDrive(string, uint, uint, uint) error
 
+	SetFirstBootDevice(string, string, uint, uint, uint) error
+
+	SetBootOrder(string, []string) error
+
 	UnmountDvdDrive(string, uint, uint) error
 
 	DeleteDvdDrive(string, uint, uint) error

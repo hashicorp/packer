@@ -272,11 +272,6 @@ func testUi() *packer.BasicUi {
 	}
 }
 
-func testObjects() (packer.Ui, packer.Communicator) {
-	ui := testUi()
-	return ui, new(packer.MockCommunicator)
-}
-
 func TestProvisionerProvision_Inline(t *testing.T) {
 	config := testConfig()
 	delete(config, "inline")

@@ -1,0 +1,55 @@
+<!-- Code generated from the comments of the Config struct in builder/azure/chroot/builder.go; DO NOT EDIT MANUALLY -->
+
+-   `from_scratch` (bool) - When set to `true`, starts with an empty, unpartitioned disk. Defaults to `false`.
+    
+-   `command_wrapper` (string) - How to run shell commands. This may be useful to set environment variables or perhaps run
+    a command with sudo or so on. This is a configuration template where the `.Command` variable
+    is replaced with the command to be run. Defaults to `{{.Command}}`.
+    
+-   `pre_mount_commands` ([]string) - A series of commands to execute after attaching the root volume and before mounting the chroot.
+    This is not required unless using `from_scratch`. If so, this should include any partitioning
+    and filesystem creation commands. The path to the device is provided by `{{.Device}}`.
+    
+-   `mount_options` ([]string) - Options to supply the `mount` command when mounting devices. Each option will be prefixed with
+    `-o` and supplied to the `mount` command ran by Packer. Because this command is ran in a shell,
+    user discretion is advised. See this manual page for the `mount` command for valid file system specific options.
+    
+-   `mount_partition` (string) - The partition number containing the / partition. By default this is the first partition of the volume.
+    
+-   `mount_path` (string) - The path where the volume will be mounted. This is where the chroot environment will be. This defaults
+    to `/mnt/packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration template where the `.Device`
+    variable is replaced with the name of the device where the volume is attached.
+    
+-   `post_mount_commands` ([]string) - As `pre_mount_commands`, but the commands are executed after mounting the root device and before the
+    extra mount and copy steps. The device and mount path are provided by `{{.Device}}` and `{{.MountPath}}`.
+    
+-   `chroot_mounts` ([][]string) - This is a list of devices to mount into the chroot environment. This configuration parameter requires
+    some additional documentation which is in the "Chroot Mounts" section below. Please read that section
+    for more information on how to use this.
+    
+-   `copy_files` ([]string) - Paths to files on the running Azure instance that will be copied into the chroot environment prior to
+    provisioning. Defaults to `/etc/resolv.conf` so that DNS lookups work. Pass an empty list to skip copying
+    `/etc/resolv.conf`. You may need to do this if you're building an image that uses systemd.
+    
+-   `os_disk_size_gb` (int32) - Try to resize the OS disk to this size on the first copy. Disks can only be englarged. If not specified,
+    the disk will keep its original size. Required when using `from_scratch`
+    
+-   `os_disk_storage_account_type` (string) - The [storage SKU](https://docs.microsoft.com/en-us/rest/api/compute/disks/createorupdate#diskstorageaccounttypes)
+    to use for the OS Disk. Defaults to `Standard_LRS`.
+    
+-   `os_disk_cache_type` (string) - The [cache type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#cachingtypes)
+    specified in the resulting image and for attaching it to the Packer VM. Defaults to `ReadOnly`
+    
+-   `image_hyperv_generation` (string) - The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes) for Managed Image output.
+    Defaults to `V1`.
+    
+-   `temporary_os_disk_id` (string) - The id of the temporary disk that will be created. Will be generated if not set.
+    
+-   `temporary_os_disk_snapshot_id` (string) - The id of the temporary snapshot that will be created. Will be generated if not set.
+    
+-   `skip_cleanup` (bool) - If set to `true`, leaves the temporary disks and snapshots behind in the Packer VM resource group. Defaults to `false`
+    
+-   `image_resource_id` (string) - The managed image to create using this build.
+    
+-   `shared_image_destination` (SharedImageGalleryDestination) - The shared image to create using this build.
+    

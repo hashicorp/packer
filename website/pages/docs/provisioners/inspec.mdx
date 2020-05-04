@@ -1,0 +1,133 @@
+---
+description: |
+  The inspec Packer provisioner allows inspec profiles to be run to test the
+  machine.
+layout: docs
+page_title: InSpec - Provisioners
+sidebar_title: InSpec
+---
+
+# InSpec Provisioner
+
+Type: `inspec`
+
+The `inspec` Packer provisioner runs InSpec profiles. It dynamically creates a
+target configured to use SSH, runs an SSH server, executes `inspec exec`, and
+marshals InSpec tests through the SSH server to the machine being provisioned
+by Packer.
+
+## Basic Example
+
+This is a fully functional template that will test an image on DigitalOcean.
+Replace the mock `api_token` value with your own.
+
+```json
+{
+  "provisioners": [
+    {
+      "type": "inspec",
+      "profile": "https://github.com/dev-sec/linux-baseline"
+    }
+  ],
+
+  "builders": [
+    {
+      "type": "digitalocean",
+      "api_token": "<digital ocean api token>",
+      "image": "ubuntu-14-04-x64",
+      "region": "sfo1"
+    }
+  ]
+}
+```
+
+## Configuration Reference
+
+Required Parameters:
+
+- `profile` (string) - The profile to be executed by InSpec.
+
+Optional Parameters:
+
+- `inspec_env_vars` (array of strings) - Environment variables to set before
+  running InSpec. Usage example:
+
+  ```json
+    "inspec_env_vars": [ "FOO=bar" ]
+  ```
+
+- `command` (string) - The command to invoke InSpec. Defaults to `inspec`.
+
+- `extra_arguments` (array of strings) - Extra arguments to pass to InSpec.
+  These arguments _will not_ be passed through a shell and arguments should
+  not be quoted. Usage example:
+
+  ```json
+    "extra_arguments": [ "--sudo", "--reporter", "json" ]
+  ```
+
+- `attributes` (array of strings) - Attribute Files used by InSpec which will
+  be passed to the `--input-file` argument of the `inspec` command when this
+  provisioner runs InSpec. Specify this if you want a different location.
+  Note using also `"--input-file"` in `extra_arguments` will override this
+  setting.
+
+- `attributes_directory` (string) - The directory in which to place the
+  temporary generated InSpec Attributes file. By default, this is the
+  system-specific temporary file location. The fully-qualified name of this
+  temporary file will be passed to the `--input-file` argument of the `inspec`
+  command when this provisioner runs InSpec. Specify this if you want a
+  different location.
+
+- `backend` (string) - Backend used by InSpec for connection. Defaults to
+  SSH.
+
+- `host` (string) - Host used for by InSpec for connection. Defaults to
+  localhost.
+
+- `local_port` (uint) - The port on which to attempt to listen for SSH
+  connections. This value is a starting point. The provisioner will attempt to
+  listen for SSH connections on the first available of ten ports, starting at
+  `local_port`. A system-chosen port is used when `local_port` is missing or
+  empty.
+
+- `ssh_host_key_file` (string) - The SSH key that will be used to run the SSH
+  server on the host machine to forward commands to the target machine.
+  InSpec connects to this server and will validate the identity of the server
+  using the system known_hosts. The default behavior is to generate and use
+  a onetime key.
+
+- `ssh_authorized_key_file` (string) - The SSH public key of the InSpec
+  `ssh_user`. The default behavior is to generate and use a onetime key. If
+  this key is generated, the corresponding private key is passed to `inspec`
+  command with the `-i inspec_ssh_private_key_file` option.
+
+- `user` (string) - The `--user` to use. Defaults to the user running Packer.
+
+@include 'provisioners/common-config.mdx'
+
+## Default Extra Variables
+
+In addition to being able to specify extra arguments using the
+`extra_arguments` configuration, the provisioner automatically defines certain
+commonly useful InSpec Attributes:
+
+- `packer_build_name` is set to the name of the build that Packer is running.
+  This is most useful when Packer is making multiple builds and you want to
+  distinguish them slightly when using a common profile.
+
+- `packer_builder_type` is the type of the builder that was used to create
+  the machine that the script is running on. This is useful if you want to
+  run only certain parts of the profile on systems built with certain
+  builders.
+
+## Debugging
+
+To debug underlying issues with InSpec, add `"-l"` to `"extra_arguments"` to
+enable verbose logging.
+
+```json
+{
+  "extra_arguments": ["-l", "debug"]
+}
+```

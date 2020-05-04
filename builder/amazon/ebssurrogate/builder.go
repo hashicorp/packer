@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -57,7 +58,7 @@ type Config struct {
 	// Tags to apply to the volumes that are *launched* to create the AMI.
 	// These tags are *not* applied to the resulting AMI unless they're
 	// duplicated in `tags`. This is a [template
-	// engine](/docs/templates/engine.html), see [Build template
+	// engine](/docs/templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
 	// what architecture to use when registering the
@@ -233,7 +234,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			ForceDeregister: b.config.AMIForceDeregister,
 			VpcId:           b.config.VpcId,
 			SubnetId:        b.config.SubnetId,
-			HasSubnetFilter: len(b.config.SubnetFilter.Filters) > 0,
+			HasSubnetFilter: !b.config.SubnetFilter.Empty(),
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:                b.config.SourceAmi,

@@ -1,0 +1,41 @@
+<!-- Code generated from the comments of the DriverConfig struct in builder/vmware/common/driver_config.go; DO NOT EDIT MANUALLY -->
+
+-   `cleanup_remote_cache` (bool) - When set to true, Packer will cleanup the cache folder where the ISO file is stored during the build on the remote machine.
+    By default, this is set to false.
+    
+-   `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this is
+    /Applications/VMware Fusion.app but this setting allows you to
+    customize this.
+    
+-   `remote_type` (string) - The type of remote machine that will be used to
+    build this VM rather than a local desktop product. The only value accepted
+    for this currently is esx5. If this is not set, a desktop product will
+    be used. By default, this is not set.
+    
+-   `remote_datastore` (string) - The path to the datastore where the VM will be stored
+    on the ESXi machine.
+    
+-   `remote_cache_datastore` (string) - The path to the datastore where supporting files
+    will be stored during the build on the remote machine.
+    
+-   `remote_cache_directory` (string) - The path where the ISO and/or floppy files will
+    be stored during the build on the remote machine. The path is relative to
+    the remote_cache_datastore on the remote machine.
+    
+-   `remote_host` (string) - The host of the remote machine used for access.
+    This is only required if remote_type is enabled.
+    
+-   `remote_port` (int) - The SSH port of the remote machine
+    
+-   `remote_username` (string) - The SSH username used to access the remote machine.
+    
+-   `remote_password` (string) - The SSH password for access to the remote machine.
+    
+-   `remote_private_key_file` (string) - The SSH key for access to the remote machine.
+    
+-   `skip_validate_credentials` (bool) - When Packer is preparing to run a
+    remote esxi build, and export is not disable, by default it runs a no-op
+    ovftool command to make sure that the remote_username and remote_password
+    given are valid. If you set this flag to true, Packer will skip this
+    validation. Default: false.
+    

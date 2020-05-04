@@ -9,6 +9,7 @@ import (
 
 	"github.com/chzyer/readline"
 	"github.com/hashicorp/packer/helper/wrappedreadline"
+	"github.com/hashicorp/packer/helper/wrappedstreams"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -92,7 +93,7 @@ Usage: packer console [options] [TEMPLATE]
 
 Options:
   -var 'key=value'       Variable for templates, can be used multiple times.
-  -var-file=path         JSON file containing user variables.
+  -var-file=path         JSON file containing user variables. [ Note that even in HCL mode this expects file to contain JSON, a fix is comming soon ]
 `
 
 	return strings.TrimSpace(helpText)
@@ -115,7 +116,7 @@ func (*ConsoleCommand) AutocompleteFlags() complete.Flags {
 
 func (c *ConsoleCommand) modePiped(session *REPLSession) int {
 	var lastResult string
-	scanner := bufio.NewScanner(wrappedreadline.Stdin())
+	scanner := bufio.NewScanner(wrappedstreams.Stdin())
 	for scanner.Scan() {
 		result, err := session.Handle(strings.TrimSpace(scanner.Text()))
 		if err != nil {

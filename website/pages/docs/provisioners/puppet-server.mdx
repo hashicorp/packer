@@ -1,0 +1,176 @@
+---
+description: |
+  The puppet-server Packer provisioner provisions Packer machines with Puppet by
+  connecting to a Puppet master.
+layout: docs
+page_title: Puppet Server - Provisioners
+sidebar_title: Puppet Server
+---
+
+# Puppet Server Provisioner
+
+Type: `puppet-server`
+
+The `puppet-server` Packer provisioner provisions Packer machines with Puppet
+by connecting to a Puppet master.
+
+-> **Note:** Puppet will _not_ be installed automatically by this
+provisioner. This provisioner expects that Puppet is already installed on the
+machine. It is common practice to use the [shell
+provisioner](/docs/provisioners/shell) before the Puppet provisioner to do
+this.
+
+## Basic Example
+
+The example below is fully functional and expects a Puppet server to be
+accessible from your network.
+
+```json
+{
+  "type": "puppet-server",
+  "extra_arguments": "--test --pluginsync",
+  "facter": {
+    "server_role": "webserver"
+  }
+}
+```
+
+## Configuration Reference
+
+The reference of available configuration options is listed below.
+
+The provisioner takes various options. None are strictly required. They are
+listed below:
+
+- `client_cert_path` (string) - Path to the directory on your disk that
+  contains the client certificate for the node. This defaults to nothing, in
+  which case a client cert won't be uploaded.
+
+- `client_private_key_path` (string) - Path to the directory on your disk
+  that contains the client private key for the node. This defaults to
+  nothing, in which case a client private key won't be uploaded.
+
+- `execute_command` (string) - The command-line to execute Puppet. This is a
+  [template engine](/docs/templates/engine). Therefore, you
+  may use user variables and template functions in this field. In addition,
+  you may use the following extra variables:
+  - ClientCertPath: The value set in the template option
+    `client_cert_path`.
+  - ClientPrivateKeyPath: The value set in the template option
+    `client_private_key_path`.
+  - FacterVars: Additional facts to set when executing Puppet, joined for
+    use in a command. This is internal and not settable by the user.
+  - PuppetNode: The hostname of the Puppet node, set in `puppet_node`.
+  - PuppetServer: The hostname of the Puppet server, set in `puppet_server`
+  - PuppetBinDir: The directory that the Puppet binary is in.
+  - Sudo: Returns false when PreventSudo is set, and true when it is not.
+  - WorkingDir: The value provided in the `working_directory` option.
+    See below for `execute_command`'s default value.
+
+* `extra_arguments` (array of strings) - Additional options to pass to the
+  Puppet command. This allows for customization of `execute_command` without
+  having to completely replace or subsume its contents, making
+  forward-compatible customizations much easier to maintain.
+
+  This string is lazy-evaluated so one can incorporate logic driven by
+  template variables as well as private elements of ExecuteTemplate (see
+  source: provisioner/puppet-server/provisioner.go).
+
+  ```text
+  [
+    {{if ne "{{user environment}}" ""}}--environment={{user environment}}{{end}}
+  ]
+  ```
+
+* `facter` (object of key/value strings) - Additional
+  [facts](https://puppetlabs.com/facter) to make available to the Puppet run.
+
+* `guest_os_type` (string) - The remote host's OS type ('windows' or 'unix')
+  to tailor command-line and path separators. (default: unix).
+
+* `ignore_exit_codes` (boolean) - If true, Packer will ignore failures.
+
+* `prevent_sudo` (boolean) - On Unix platforms Puppet is typically invoked
+  with `sudo`. If true, it will be omitted. (default: false)
+
+* `puppet_bin_dir` (string) - Path to the Puppet binary. Ideally the program
+  should be on the system (unix: `$PATH`, windows: `%PATH%`), but some
+  builders (eg. Docker) do not run profile-setup scripts and therefore PATH
+  might be empty or minimal. On Windows, spaces should be `^`-escaped, i.e.
+  `c:/program^ files/puppet^ labs/puppet/bin`.
+
+* `puppet_node` (string) - The name of the node. If this isn't set, the fully
+  qualified domain name will be used.
+
+* `puppet_server` (string) - Hostname of the Puppet server. By default
+  "puppet" will be used.
+
+* `staging_dir` (string) - Directory to where uploaded files will be placed
+  (unix: "/tmp/packer-puppet-masterless", windows:
+  "%SYSTEMROOT%/Temp/packer-puppet-masterless"). It doesn't need to
+  pre-exist, but the parent must have permissions sufficient for the account
+  Packer connects as to create directories and write files. Use a Shell
+  provisioner to prepare the way if needed.
+
+* `working_directory` (string) - Directory from which `execute_command` will
+  be run. If using Hiera files with relative paths, this option can be
+  helpful. (default: `staging_directory`)
+
+* `elevated_user` and `elevated_password` (string) - If specified, Puppet
+  will be run with elevated privileges using the given Windows user. See the
+  [powershell](/docs/provisioners/powershell) provisioner for the full
+  details. This is a [template engine](/docs/templates/engine).
+  Therefore, you may use user variables and template functions in this
+  field, including `` {{ build `Password`}} `` to use the password being used
+  by the communicator to connect to your instance.
+
+@include 'provisioners/common-config.mdx'
+
+## Execute Command
+
+By default, Packer uses the following command (broken across multiple lines for
+readability) to execute Puppet:
+
+```shell
+cd {{.WorkingDir}} &&
+    {{if ne .FacterVars ""}}{{.FacterVars}} {{end}}
+    {{if .Sudo}}sudo -E {{end}}
+    {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
+  puppet agent --onetime --no-daemonize --detailed-exitcodes
+    {{if .Debug}}--debug {{end}}
+    {{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
+    {{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}
+    {{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
+    {{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
+    {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+```
+
+The following command is used if guest OS type is windows:
+
+```shell
+cd {{.WorkingDir}} &&
+    {{if ne .FacterVars ""}}{{.FacterVars}} && {{end}}
+    {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
+  puppet agent --onetime --no-daemonize --detailed-exitcodes
+    {{if .Debug}}--debug {{end}}
+    {{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
+    {{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}
+    {{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
+    {{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
+    {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+```
+
+## Default Facts
+
+In addition to being able to specify custom Facter facts using the `facter`
+configuration, the provisioner automatically defines certain commonly useful
+facts:
+
+- `packer_build_name` is set to the name of the build that Packer is running.
+  This is most useful when Packer is making multiple builds and you want to
+  distinguish them in your Hiera hierarchy.
+
+- `packer_builder_type` is the type of the builder that was used to create
+  the machine that Puppet is running on. This is useful if you want to run
+  only certain parts of your Puppet code on systems built with certain
+  builders.

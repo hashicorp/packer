@@ -57,10 +57,17 @@ func (p *Parser) startBuilder(source *SourceBlock, ectx *hcl.EvalContext) (packe
 		return nil, diags, nil
 	}
 
-	generatedVars, warning, err := builder.Prepare(decoded)
+	generatedVars, warning, err := builder.Prepare(source.builderVariables(), decoded)
 	moreDiags = warningErrorsToDiags(source.block, warning, err)
 	diags = append(diags, moreDiags...)
 	return builder, diags, generatedVars
+}
+
+func (source *SourceBlock) builderVariables() map[string]string {
+	return map[string]string{
+		"packer_build_name":   source.Name,
+		"packer_builder_type": source.Type,
+	}
 }
 
 func (source *SourceBlock) Ref() SourceRef {

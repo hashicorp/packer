@@ -27,11 +27,13 @@ type FlatConfig struct {
 	ExecuteCommand         *string           `mapstructure:"execute_command" cty:"execute_command"`
 	RemoteEnvVarPath       *string           `mapstructure:"remote_env_var_path" cty:"remote_env_var_path"`
 	ElevatedExecuteCommand *string           `mapstructure:"elevated_execute_command" cty:"elevated_execute_command"`
+	SkipClean              *bool             `mapstructure:"skip_clean" cty:"skip_clean"`
 	StartRetryTimeout      *string           `mapstructure:"start_retry_timeout" cty:"start_retry_timeout"`
 	ElevatedEnvVarFormat   *string           `mapstructure:"elevated_env_var_format" cty:"elevated_env_var_format"`
 	ElevatedUser           *string           `mapstructure:"elevated_user" cty:"elevated_user"`
 	ElevatedPassword       *string           `mapstructure:"elevated_password" cty:"elevated_password"`
 	ExecutionPolicy        *string           `mapstructure:"execution_policy" cty:"execution_policy"`
+	DebugMode              *int              `mapstructure:"debug_mode" cty:"debug_mode"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -51,7 +53,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":               &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":               &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":      &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"inline":                     &hcldec.AttrSpec{Name: "inline", Type: cty.List(cty.String), Required: false},
 		"script":                     &hcldec.AttrSpec{Name: "script", Type: cty.String, Required: false},
@@ -64,11 +66,13 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"execute_command":            &hcldec.AttrSpec{Name: "execute_command", Type: cty.String, Required: false},
 		"remote_env_var_path":        &hcldec.AttrSpec{Name: "remote_env_var_path", Type: cty.String, Required: false},
 		"elevated_execute_command":   &hcldec.AttrSpec{Name: "elevated_execute_command", Type: cty.String, Required: false},
+		"skip_clean":                 &hcldec.AttrSpec{Name: "skip_clean", Type: cty.Bool, Required: false},
 		"start_retry_timeout":        &hcldec.AttrSpec{Name: "start_retry_timeout", Type: cty.String, Required: false},
 		"elevated_env_var_format":    &hcldec.AttrSpec{Name: "elevated_env_var_format", Type: cty.String, Required: false},
 		"elevated_user":              &hcldec.AttrSpec{Name: "elevated_user", Type: cty.String, Required: false},
 		"elevated_password":          &hcldec.AttrSpec{Name: "elevated_password", Type: cty.String, Required: false},
 		"execution_policy":           &hcldec.AttrSpec{Name: "execution_policy", Type: cty.String, Required: false},
+		"debug_mode":                 &hcldec.AttrSpec{Name: "debug_mode", Type: cty.Number, Required: false},
 	}
 	return s
 }

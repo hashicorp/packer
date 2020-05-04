@@ -4,6 +4,7 @@
 [![Windows Build Status][appveyor-badge]][appveyor]
 [![GoDoc][godoc-badge]][godoc]
 [![GoReportCard][report-badge]][report]
+[![codecov](https://codecov.io/gh/hashicorp/packer/branch/master/graph/badge.svg)](https://codecov.io/gh/hashicorp/packer)
 
 [travis-badge]: https://travis-ci.org/hashicorp/packer.svg?branch=master
 [travis]: https://travis-ci.org/hashicorp/packer

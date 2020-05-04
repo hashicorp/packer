@@ -1,0 +1,21 @@
+{
+    "builders": [
+        {
+            "name": "test",
+            "communicator": "none",
+            "type": "null"
+        },
+        {
+            "name": "potato",
+            "communicator": "none",
+            "type": "null"
+        }
+    ],
+    "post-processors": [
+        {
+            "type": "manifest",
+            "output": "manifest.json",
+            "strip_time": true
+        }
+    ]
+}

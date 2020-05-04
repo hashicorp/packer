@@ -1,0 +1,12 @@
+{
+  "type": "shell",
+  "inline": [
+    "echo {{ build `ID`}} > provisioner.{{ build `PackerRunUUID`}}.txt"
+  ]
+},
+{
+    "type": "file",
+    "source": "provisioner.{{ build `PackerRunUUID`}}.txt",
+    "destination": "provisioner.shell.{{ build `PackerRunUUID`}}.txt",
+    "direction": "download"
+}

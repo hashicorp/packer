@@ -4,6 +4,7 @@ package alicloudimport
 import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/alicloud/ecs"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -38,6 +39,7 @@ type FlatConfig struct {
 	AlicloudImageForceDeleteInstances *bool                        `mapstructure:"image_force_delete_instances" cty:"image_force_delete_instances"`
 	AlicloudImageIgnoreDataDisks      *bool                        `mapstructure:"image_ignore_data_disks" required:"false" cty:"image_ignore_data_disks"`
 	AlicloudImageTags                 map[string]string            `mapstructure:"tags" required:"false" cty:"tags"`
+	AlicloudImageTag                  []hcl2template.FlatKeyValue  `mapstructure:"tag" required:"false" cty:"tag"`
 	ECSSystemDiskMapping              *ecs.FlatAlicloudDiskDevice  `mapstructure:"system_disk_mapping" required:"false" cty:"system_disk_mapping"`
 	ECSImagesDiskMappings             []ecs.FlatAlicloudDiskDevice `mapstructure:"image_disk_mappings" required:"false" cty:"image_disk_mappings"`
 	AssociatePublicIpAddress          *bool                        `mapstructure:"associate_public_ip_address" cty:"associate_public_ip_address"`
@@ -81,6 +83,7 @@ type FlatConfig struct {
 	SSHBastionAgentAuth               *bool                        `mapstructure:"ssh_bastion_agent_auth" cty:"ssh_bastion_agent_auth"`
 	SSHBastionUsername                *string                      `mapstructure:"ssh_bastion_username" cty:"ssh_bastion_username"`
 	SSHBastionPassword                *string                      `mapstructure:"ssh_bastion_password" cty:"ssh_bastion_password"`
+	SSHBastionInteractive             *bool                        `mapstructure:"ssh_bastion_interactive" cty:"ssh_bastion_interactive"`
 	SSHBastionPrivateKeyFile          *string                      `mapstructure:"ssh_bastion_private_key_file" cty:"ssh_bastion_private_key_file"`
 	SSHFileTransferMethod             *string                      `mapstructure:"ssh_file_transfer_method" cty:"ssh_file_transfer_method"`
 	SSHProxyHost                      *string                      `mapstructure:"ssh_proxy_host" cty:"ssh_proxy_host"`
@@ -129,7 +132,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_debug":                 &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                 &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":              &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":        &hcldec.BlockAttrsSpec{TypeName: "packer_user_variables", ElementType: cty.String, Required: false},
+		"packer_user_variables":        &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables":   &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"access_key":                   &hcldec.AttrSpec{Name: "access_key", Type: cty.String, Required: false},
 		"secret_key":                   &hcldec.AttrSpec{Name: "secret_key", Type: cty.String, Required: false},
@@ -151,7 +154,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"image_force_delete_snapshots": &hcldec.AttrSpec{Name: "image_force_delete_snapshots", Type: cty.Bool, Required: false},
 		"image_force_delete_instances": &hcldec.AttrSpec{Name: "image_force_delete_instances", Type: cty.Bool, Required: false},
 		"image_ignore_data_disks":      &hcldec.AttrSpec{Name: "image_ignore_data_disks", Type: cty.Bool, Required: false},
-		"tags":                         &hcldec.BlockAttrsSpec{TypeName: "tags", ElementType: cty.String, Required: false},
+		"tags":                         &hcldec.AttrSpec{Name: "tags", Type: cty.Map(cty.String), Required: false},
+		"tag":                          &hcldec.BlockListSpec{TypeName: "tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
 		"system_disk_mapping":          &hcldec.BlockSpec{TypeName: "system_disk_mapping", Nested: hcldec.ObjectSpec((*ecs.FlatAlicloudDiskDevice)(nil).HCL2Spec())},
 		"image_disk_mappings":          &hcldec.BlockListSpec{TypeName: "image_disk_mappings", Nested: hcldec.ObjectSpec((*ecs.FlatAlicloudDiskDevice)(nil).HCL2Spec())},
 		"associate_public_ip_address":  &hcldec.AttrSpec{Name: "associate_public_ip_address", Type: cty.Bool, Required: false},
@@ -195,6 +199,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_bastion_agent_auth":       &hcldec.AttrSpec{Name: "ssh_bastion_agent_auth", Type: cty.Bool, Required: false},
 		"ssh_bastion_username":         &hcldec.AttrSpec{Name: "ssh_bastion_username", Type: cty.String, Required: false},
 		"ssh_bastion_password":         &hcldec.AttrSpec{Name: "ssh_bastion_password", Type: cty.String, Required: false},
+		"ssh_bastion_interactive":      &hcldec.AttrSpec{Name: "ssh_bastion_interactive", Type: cty.Bool, Required: false},
 		"ssh_bastion_private_key_file": &hcldec.AttrSpec{Name: "ssh_bastion_private_key_file", Type: cty.String, Required: false},
 		"ssh_file_transfer_method":     &hcldec.AttrSpec{Name: "ssh_file_transfer_method", Type: cty.String, Required: false},
 		"ssh_proxy_host":               &hcldec.AttrSpec{Name: "ssh_proxy_host", Type: cty.String, Required: false},

@@ -1,0 +1,254 @@
+---
+description: |
+  The googlecompute Packer builder is able to create images for use with Google
+  Cloud Compute Engine (GCE) based on existing images.
+layout: docs
+page_title: Google Compute - Builders
+sidebar_title: Google Cloud
+---
+
+# Google Compute Builder
+
+Type: `googlecompute`
+
+The `googlecompute` Packer builder is able to create
+[images](https://developers.google.com/compute/docs/images) for use with
+[Google Compute Engine](https://cloud.google.com/products/compute-engine) (GCE)
+based on existing images.
+
+It is possible to build images from scratch, but not with the `googlecompute`
+Packer builder. The process is recommended only for advanced users, please see
+[Building GCE Images from Scratch](https://cloud.google.com/compute/docs/tutorials/building-images)
+and the [Google Compute Import
+Post-Processor](/docs/post-processors/googlecompute-import) for more
+information.
+
+## Authentication
+
+Authenticating with Google Cloud services requires at most one JSON file,
+called the _account file_. The _account file_ is **not** required if you are
+running the `googlecompute` Packer builder from a GCE instance with a
+properly-configured [Compute Engine Service
+Account](https://cloud.google.com/compute/docs/authentication).
+
+### Running With a Compute Engine Service Account
+
+If you run the `googlecompute` Packer builder from a GCE instance, you can
+configure that instance to use a [Compute Engine Service
+Account](https://cloud.google.com/compute/docs/authentication). This will allow
+Packer to authenticate to Google Cloud without having to bake in a separate
+credential/authentication file.
+
+To create a GCE instance that uses a service account, provide the required
+scopes when launching the instance.
+
+For `gcloud`, do this via the `--scopes` parameter:
+
+```shell
+$ gcloud compute instances create INSTANCE-NAME \
+  --project YOUR_GCP_PROJECT \
+  --image-family ubuntu-1804-lts \
+  --image-project gce-uefi-images \
+  --network YOUR_GCP_NETWORK \
+  --zone YOUR_GCP_ZONE \
+  --scopes "https://www.googleapis.com/auth/compute,https://www.googleapis.com/auth/devstorage.full_control"
+```
+
+For the [Google Developers Console](https://console.developers.google.com):
+
+1.  Choose "Show advanced options"
+2.  Tick "Enable Compute Engine service account"
+3.  Choose "Read Write" for Compute
+4.  Choose "Full" for "Storage"
+
+**The service account will be used automatically by Packer as long as there is
+no _account file_ specified in the Packer configuration file.**
+
+### Running Without a Compute Engine Service Account
+
+The [Google Developers Console](https://console.developers.google.com) allows
+you to create and download a credential file that will let you use the
+`googlecompute` Packer builder anywhere. To make the process more
+straightforwarded, it is documented here.
+
+1.  Log into the [Google Developers
+    Console](https://console.developers.google.com) and select a project.
+
+2.  Under the "API Manager" section, click "Credentials."
+
+3.  Click the "Create credentials" button, select "Service account key"
+
+4.  Create a new service account that at least has
+    `Compute Engine Instance Admin (v1)` and `Service Account User` roles.
+
+5.  Choose `JSON` as the Key type and click "Create". A JSON file will be
+    downloaded automatically. This is your _account file_.
+
+### Precedence of Authentication Methods
+
+Packer looks for credentials in the following places, preferring the first
+location found:
+
+1.  An `account_file` option in your packer file.
+
+2.  A JSON file (Service Account) whose path is specified by the
+    `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+
+3.  A JSON file in a location known to the `gcloud` command-line tool.
+    (`gcloud auth application-default login` creates it)
+
+    On Windows, this is:
+
+        %APPDATA%/gcloud/application_default_credentials.json
+
+    On other systems:
+
+        $HOME/.config/gcloud/application_default_credentials.json
+
+4.  On Google Compute Engine and Google App Engine Managed VMs, it fetches
+    credentials from the metadata server. (Needs a correct VM authentication
+    scope configuration, see above.)
+
+## Examples
+
+### Basic Example
+
+Below is a fully functioning example. It doesn't do anything useful since no
+provisioners or startup-script metadata are defined, but it will effectively
+repackage an existing GCE image. The account_file is obtained in the previous
+section. If it parses as JSON it is assumed to be the file itself, otherwise,
+it is assumed to be the path to the file containing the JSON.
+
+```json
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "account_file": "account.json",
+      "project_id": "my project",
+      "source_image": "debian-7-wheezy-v20150127",
+      "ssh_username": "packer",
+      "zone": "us-central1-a"
+    }
+  ]
+}
+```
+
+### Windows Example
+
+Before you can provision using the winrm communicator, you need to allow
+traffic through google's firewall on the winrm port (tcp:5986). You can do so
+using the gcloud command.
+
+    gcloud compute firewall-rules create allow-winrm --allow tcp:5986
+
+Or alternatively by navigating to [https://console.cloud.google.com/networking/firewalls/list](https://console.cloud.google.com/networking/firewalls/list).
+
+Once this is set up, the following is a complete working packer config after
+setting a valid `account_file` and `project_id`:
+
+```json
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "account_file": "account.json",
+      "project_id": "my project",
+      "source_image": "windows-server-2016-dc-v20170227",
+      "disk_size": "50",
+      "machine_type": "n1-standard-1",
+      "communicator": "winrm",
+      "winrm_username": "packer_user",
+      "winrm_insecure": true,
+      "winrm_use_ssl": true,
+      "metadata": {
+        "windows-startup-script-cmd": "winrm quickconfig -quiet & net user /add packer_user & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
+      },
+      "zone": "us-central1-a"
+    }
+  ]
+}
+```
+
+-> **Warning:** Please note that if you're setting up WinRM for provisioning, you'll probably want to turn it off or restrict its permissions as part of a shutdown script at the end of Packer's provisioning process. For more details on the why/how, check out this useful blog post and the associated code:
+https://cloudywindows.io/post/winrm-for-provisioning-close-the-door-on-the-way-out-eh/
+
+This build can take up to 15 min.
+
+### Nested Hypervisor Example
+
+This is an example of using the `image_licenses` configuration option to create
+a GCE image that has nested virtualization enabled. See [Enabling Nested
+Virtualization for VM
+Instances](https://cloud.google.com/compute/docs/instances/enable-nested-virtualization-vm-instances)
+for details.
+
+```json
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "account_file": "account.json",
+      "project_id": "my project",
+      "source_image_family": "centos-7",
+      "ssh_username": "packer",
+      "zone": "us-central1-a",
+      "image_licenses": ["projects/vm-options/global/licenses/enable-vmx"]
+    }
+  ]
+}
+```
+
+## Configuration Reference
+
+Configuration options are organized below into two categories: required and
+optional. Within each category, the available options are alphabetized and
+described.
+
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator) can be configured for this
+builder.
+
+### Required:
+
+@include 'builder/googlecompute/Config-required.mdx'
+
+### Optional:
+
+@include 'builder/googlecompute/Config-not-required.mdx'
+
+## Startup Scripts
+
+Startup scripts can be a powerful tool for configuring the instance from which
+the image is made. The builder will wait for a startup script to terminate. A
+startup script can be provided via the `startup_script_file` or
+`startup-script` instance creation `metadata` field. Therefore, the build time
+will vary depending on the duration of the startup script. If
+`startup_script_file` is set, the `startup-script` `metadata` field will be
+overwritten. In other words, `startup_script_file` takes precedence.
+
+The builder does not check for a pass/fail/error signal from the startup
+script, at this time. Until such support is implemented, startup scripts should
+be robust, as an image will still be built even when a startup script fails.
+
+### Windows
+
+A Windows startup script can only be provided via the
+`windows-startup-script-cmd` instance creation `metadata` field. The builder
+will _not_ wait for a Windows startup script to terminate. You have to ensure
+that it finishes before the instance shuts down.
+
+### Logging
+
+Startup script logs can be copied to a Google Cloud Storage (GCS) location
+specified via the `startup-script-log-dest` instance creation `metadata` field.
+The GCS location must be writeable by the credentials provided in the builder
+config's `account_file`.
+
+## Gotchas
+
+CentOS and recent Debian images have root ssh access disabled by default. Set
+`ssh_username` to any user, which will be created by packer with sudo access.
+
+The machine type must have a scratch disk, which means you can't use an
+`f1-micro` or `g1-small` to build images.

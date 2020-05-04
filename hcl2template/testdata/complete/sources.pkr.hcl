@@ -5,7 +5,8 @@ source "virtualbox-iso" "ubuntu-1204" {
     bool     = true
     trilean  = true
     duration = "10s"
-    map_string_string {
+
+    map_string_string = {
         a = "b"
         c = "d"
     }
@@ -26,7 +27,7 @@ source "virtualbox-iso" "ubuntu-1204" {
         bool     = true
         trilean  = true
         duration = "10s"
-        map_string_string {
+        map_string_string = {
             a = "b"
             c = "d"
         }
@@ -48,7 +49,7 @@ source "virtualbox-iso" "ubuntu-1204" {
         bool     = true
         trilean  = true
         duration = "10s"
-        map_string_string {
+        map_string_string = {
             a = "b"
             c = "d"
         }
@@ -70,7 +71,7 @@ source "virtualbox-iso" "ubuntu-1204" {
         bool     = true
         trilean  = true
         duration = "10s"
-        map_string_string {
+        map_string_string = {
             a = "b"
             c = "d"
         }

@@ -107,6 +107,19 @@ func TestParse(t *testing.T) {
 		},
 
 		{
+			"parse-provisioner-retry.json",
+			&Template{
+				Provisioners: []*Provisioner{
+					{
+						Type:       "something",
+						MaxRetries: 5,
+					},
+				},
+			},
+			false,
+		},
+
+		{
 			"parse-provisioner-timeout.json",
 			&Template{
 				Provisioners: []*Provisioner{
@@ -549,6 +562,25 @@ func TestParse_bad(t *testing.T) {
 		{"error-middle.json", "line 5, column 6 (offset 50)"},
 		{"error-end.json", "line 1, column 30 (offset 30)"},
 		{"malformed.json", "line 16, column 3 (offset 433)"},
+	}
+	for _, tc := range cases {
+		_, err := ParseFile(fixtureDir(tc.File))
+		if err == nil {
+			t.Fatalf("expected error")
+		}
+		if !strings.Contains(err.Error(), tc.Expected) {
+			t.Fatalf("file: %s\nExpected: %s\n%s\n", tc.File, tc.Expected, err.Error())
+		}
+	}
+}
+
+func TestParse_checkForDuplicateFields(t *testing.T) {
+	cases := []struct {
+		File     string
+		Expected string
+	}{
+		{"error-duplicate-variables.json", "template has duplicate field: variables"},
+		{"error-duplicate-config.json", "template has duplicate field: foo"},
 	}
 	for _, tc := range cases {
 		_, err := ParseFile(fixtureDir(tc.File))

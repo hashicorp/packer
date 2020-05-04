@@ -1,19 +1,199 @@
-## 1.5.2 (Upcoming)
-** New Builder ** The vsphere-iso builder, previously maintained by JetBrains,
+## 1.5.6 (Upcoming)
+
+### BACKWARDS INCOMPATIBILITIES:
+* core/hcl2: Maps are now treated as settable arguments as opposed to blocks.
+    For example `tags = {}` instead of `tags {}` [GH-9035]
+
+### FEATURES:
+* **New Builder** azure-dtl allows creation of devtestlabs images in Azure
+    [GH-8987]
+
+* **New Core Feature** provisioners now support a `max_retries` option that can
+    be used for retrying a provisioner on error [GH-9061]
+
+### IMPROVEMENTS:
+* builder/azure-arm: Add `boot_diag_storage_account` option for enabling boot
+    diagnostics on a virtual machine [GH-9053]
+* builder/azure-arm: Add support for setting custom resource names [GH-9028]
+* builder/azure-arm: Data disk names are now randomly generated [GH-8986]
+* builder/azure: Add shared image destination for azure-chroot [GH-9021]
+* builder/azure: Add shared image source for chroot builder [GH-9070]
+* builder/google: Add support for custom shielded images [GH-8970]
+* builder/google: Allow `source_image_project_id` to be a list of several
+    projects to search. [GH-8679]
+* builder/hyperv: Add `boot_order` option to override the default boot order
+    [GH-9046]
+* builder/oracle-oci: Allow Instance Principal Auth for Oracle OCI builder
+    [GH-8893]
+* builder/oracle-oci: Update Oracle SDK. [GH-9104]
+* builder/proxmox: Add ability to add a cloud-init drive [GH-9045]
+* builder/vsphere: Add `disable_shutdown` option to support manual vm shutdown
+    over the default automatic shutdown step [GH-9095]
+* builder/vsphere: Add `vgpu_profile` option for specifying vGPU profiles
+    [GH-8946]
+* builder/vsphere: Add support for EFI Secure Boot [GH-9018]
+* builder/yandex: Add `target_image_folder_id ` option for changing the folder
+    where a built image will be saved to [GH-9080]
+* core/hcl2: HCL mode builds now honor -only and -except options [GH-8947]
+* core/hcl2: Set `packer_build_name` and `packer_builder_type` variables for
+    builder provisioners and post-processors [GH-8956]
+* core: New template function: aws_secretsmanager [GH-9099]
+* provisioner/ansible: Add option to not use localhost proxy adapter. Removes
+    need for ansible connection_plugin when using WinRM. [GH-8625]
+* provisioner/powershell: Add `debug_mode` option to help with debugging
+    generated scripts [GH-8996]
+* provisioner/powershell: Add cleanup step to remove temporarily created
+    scripts; cleanup can be skipped by setting the `skip_clean` option
+    [GH-8908]
+
+### BUG FIXES:
+* builder/amazon: Fix bug with `launch_block_device_mappings` in spot instances.
+    [GH-8945]
+* builder/azure-arm: Fix issue where managed image builds were using a
+    different `location` then what was specified in the build configuration
+    [GH-9068]
+* builder/azure: Allow Managed Data Disks to be used with Azure Shared Image
+    Gallery  [GH-8912]
+* builder/azure: Fix SSH connection for temporary admin users specified in
+    `ssh_username` [GH-9103]
+* builder/osc: Make compliant with oAPI spec for Outscale osc-bsu builder
+    [GH-9093]
+* builder/qemu: Remove `net_device` pre-validation [GH-8979]
+* builder/tencentcloud: Update builder to handle the
+    InstanceOperationInProgress error [GH-9069]
+* builder/vsphere-iso: disk_size is no longer required if storage is defined
+    [GH-8975]
+* builder/vsphere: Add exported files to VSphere artifact [GH-9020]
+* builder/vsphere: Fix issue where -force is not working with vsphere builders
+    [GH-9039]
+* core: Fix crash in wrapperreadline helper when calling `os.NewFile` on
+    unknown file descriptor [GH-9037]
+* core: Make sure CLI variables supersede variables from var files [GH-8964]
+* provisioner/powershell: Fix integer decoding issue in the execution policy
+    parser [GH-8997]
+
+## 1.5.5 (March 25,2020)
+
+### IMPROVEMENTS:
+* builder/azure: Add support for configurable KeyVault SKU [GH-8879]
+* builder/hyperv: Add `first_boot_device` setting to allow the selection of the
+    initial device or device class used for booting the VM. [GH-8714]
+* builder/hyperv: Fix Hyper-V compacted disk size comparison [GH-8811]
+* builder/openstack: Add new `image_auto_accept_members` option [GH-8931]
+* builder/proxmox: Add ability to specify vga adapter [GH-8892]
+* builder/proxmox: Add onboot directive support [GH-8935]
+* builder/tencentcloud: Show tencentcloud image id after copy to desination
+    region. [GH-8763]
+* builder/vmware-iso: Add `cleanup_remote_cache` config option to [GH-8917]
+* builder/vmware-iso: Do not perform dial test of NIC when ssh bastion is
+    required [GH-8877]
+* builder/vsphere-clone: Add ability to export VM to OVF file [GH-8764]
+* builder/vsphere-iso: Add ability to define multiple disks. [GH-8787]
+* builder/vsphere-iso: Add ability to export VM to OVF file [GH-8764]
+* builder/vsphere-iso: Add support for eagerly zeroed / scrubbed disks.
+    [GH-8756]
+* builder/vsphere-iso: Add the remote iso first so that it is first in boot
+    order, and clarify boot behavior. [GH-8732]
+* communicator/ssh: Add flag to enable support for keyboard-interactive auth to
+    connect bastion [GH-8847]
+* core/hcl2: Add support for singular blocks [GH-8889]
+* core/hcl2: Add support in HCL2 configs for dynamic blocks, document for loops
+    and splat expressions [GH-8720]
+* core/hcl2: Fix HCL2 local variables decoding to allow local usage within
+    another local in the same locals block [GH-8755]
+* core/hcl2: Import new replace and regex_replace funcs from go-cty +
+    documentation [GH-8863]
+* core: Enable hcl files as var files in HCL mode [GH-8882]
+* core: Make "build" engine template variables SSHPublicKey and SSHPrivateKey
+    strings [GH-8829]
+
+### Bug Fixes:
+* bilder/proxmox: Bump proxmox-api-go to fix upstream bug where users hit open
+    file limit. [GH-8800]
+* builder/azure: Fix `winrm_password` attribution and allow users to set
+    `winrm_username` [GH-8928]
+* builder/azure: Fix azure key vault cleanup failure [GH-8905]
+* builder/azure: Fix HCL2 bug that prevented Azure and other builders from
+    loading properly. [GH-8785]
+* builder/googlecompute: Fix WinRMPassword template engine. [GH-8890]
+* builder/googlecompute: Replace deprecated "sshKeys" metadata with "ssh-keys"
+    to fix SSH authentication issue [GH-8942]
+* builder/proxmox: Add new validation to catch that template_name cannot
+    contain spaces. [GH-8799]
+* builder/vagrant: Fix path validation in ssh config step. [GH-8826]
+* builder/virtualbox-vm: Fix crash when VM has no snapshots. [GH-8906]
+* builder/virtualbox: Remove all floppy controllers before adding a new one.
+    [GH-8828]
+* builder/vsphere-clone: Fix issue preventing the cloning of VMs with the same
+    name in different folders [GH-8938]
+* builder/vsphere-iso: Fix issue preventing the creation of VMs with the same
+    name in different folders [GH-8938]
+* builder/vsphere: Fix network object interface panic. [GH-8753]
+* core/hcl2: Fix crash when an unset variable is used [GH-8837]
+* core/hcl2: Fix logic for parsing literal value variables [GH-8834]
+* core/hcl2: Make sure locals are evaluated only after variables are. [GH-8918]
+* core: Fix "build" template engine interpolation for certain fields in certain
+    provisioners. [GH-8771]
+* core: Fix bug where user var recursion could fail intermittently when used
+    with env vars [GH-8875]
+* plugins: Make plugin discovery stricter with respect to periods so that users
+    can disable plugins by renaming the extension [GH-8735]
+* provisioner/shell: "inline" config option is now a template engine. [GH-8883]
+* provisioner/salt: Fix `no_exit_on_failure` config to work correctly as expected. [GH-9119]
+
+## 1.5.4 (February 14, 2020)
+no-change release to fix code-signing on OSX binaries. Since checksums for these
+binaries has changed, we are releasing a second time to prevent confusion.
+
+## 1.5.3 (February 14, 2020)
+
+### IMPROVEMENTS:
+* builder/vsphere: Add ability to define multiple NICs for vsphere-iso
+    [GH-8739]
+* builder/vsphere: Add option to remove CD-ROM drives. [GH-8690]
+* core: Add validation to catch when users accidentally add duplicate fields to
+    template [GH-8725]
+
+### Bug Fixes:
+* core/hcl2: Fix template prepare/validation for HCL2 templates [GH-8742]
+* core: Fix `build` template function interpolation [GH-8727]
+
+## 1.5.2 (February 12, 2020)
+**New Builder** The vsphere-iso builder, previously maintained by JetBrains,
 has been merged with the Packer core. It will be officially supported by the
 Packer team at HashiCorp moving forward. [GH-8480]
 
+**HCL2 variables & functions** HCL2 configurations can now use `variable`,
+`variables`, `locals`, and functions [GH-8588].
+
 ### IMPROVEMENTS:
 * builder/alicloud: Add AlicloudProfile option. [GH-8560]
+* builder/amazon: Add max_retries option to aws builders [GH-8709]
 * builder/amazon: Add source AMI owner ID/name to template engines [GH-8550]
+* builder/amazon: Update instance waiters to use global waiter settings set by
+    `AWS_POLL_DELAY_SECONDS` and `AWS_TIMEOUT_SECONDS` [GH-8699]
+* builder/azure: Allow users to use custom key vault for storing Windows
+    certificates [GH-8704]
 * builder/azure: Set expiry for image versions in SIG [GH-8561]
 * builder/proxmox: Add option to upload the boot ISO rather than pointing out a
     previously manually uploaded one. [GH-8624]
 * builder/vagrant: Fix a crash in the Vagrant driver [GH-8607]
+* builder/yandex: Add service account ID to config [GH-8717]
+* communicator/winrm: Users can now override winrm_host with a static IP even
+    when using cloud builders. [GH-8675]
+* core/hcl2: Fix bug preventing reading slices within other slices [GH-8669]
+* core:  Interpolation within post-processors can now access build-specific
+    values like Host IP, communicator password, and more [GH-8632]
+* core: Add `PACKER_PLUGIN_PATH` to list of supported paths for plugin
+    discovery [GH-8616]
 * core: clean up messy log line in plugin execution. [GH-8542]
+* core: Ensure `PACKER_HTTP_ADDR` is always set for any builder that provides a
+    HTTP server for file transfer [GH-8654]
 * core: Fix loading external plugins defined in PACKER_CONFIG [GH-8582]
 * core: Log name of postprocessor running to disambiguate long chains of post-
     processors. [GH-8613]
+* core: Packer can use isos in-place on Windows again, instead of copying them
+    into its cache. [GH-7627]
 * core: step_download: return without error if Urls is empty [GH-8579]
 * post-processor/vsphere-template] Simplify method to use vm.MarkAsTemplate
     (optionally) [GH-8511]
@@ -26,6 +206,9 @@ Packer team at HashiCorp moving forward. [GH-8480]
 * builder/amazon: Allow AWS builder pre-validation to pass when subnet filters
     are present [GH-8622]
 * builder/azure: Fix bug where deployments were not being cleaned up: [GH-8496]
+* builder/azure: Fix issue where WinRMPassword was being left unset [GH-8670]
+* builder/lxd: Fix file uploading issue when using the file provisioner
+    [GH-8636]
 * builder/null: Fix crash when configuring builder using HCL2. [GH-8612]
 * builder/osc: Fix ssh host detection in Public Cloud and Nets [GH-8414]
 * builder/vagrant: Fix bug with reading key from a path with spaces [GH-8605]
@@ -33,6 +216,7 @@ Packer team at HashiCorp moving forward. [GH-8480]
 * builder/virtualbox-vm: use config as a non pointer to avoid a panic [GH-8576]
 * core: Fix crash when build.sources is set to an invalid name [GH-8569]
 * core: Fix error loading .packerconfig [GH-8623]
+* core: Fix loading local ISO files when using `iso_target_path` [GH-8689]
 * core: Fix loading of external plugins. GH-8543]
 * post-processor/docker-tag: Fix regression if no tags were specified.
     [GH-8593]
@@ -205,7 +389,7 @@ making changes for HCL2.
 ## 1.4.4 (October 1, 2019)
 
 ### IMPROVEMENTS:
-** new core feature** Error cleanup provisioner [GH-8155]
+**New Core Feature** Error cleanup provisioner [GH-8155]
 * builder/amazon: Add ability to set `run_volume_tags` [GH-8051]
 * builder/amazon: Add AWS API call reties on AMI prevalidation [GH-8034]
 * builder/azure: Refactor client config [GH-8121]

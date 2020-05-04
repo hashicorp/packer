@@ -1,0 +1,180 @@
+---
+layout: guides
+page_title: Transforming Packer v1 files for Packer v1.5.0
+sidebar_title: From JSON v1
+description: |-
+  Learn how to manually move from a Packer v1 working JSON build file to a
+  working v1.5.0 HCL file.
+---
+
+# Transforming Packer v1 config files to HCL2 for Packer v1.5
+
+-> **Note:** Starting from version **1.5.0** Packer can read HCL2 files.
+
+@include 'guides/hcl2-beta-note.mdx'
+
+We will soon provide a programatic way to transpose a v1 buildfile to a v1.5
+HCL file. In the meantime we will show how to manually do it.
+
+The following file :
+
+```json
+{
+  "builders": [
+    {
+      "ami_name": "packer-test",
+      "region": "us-east-1",
+      "instance_type": "t2.micro",
+
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+          "root-device-type": "ebs"
+        },
+        "owners": ["amazon"],
+        "most_recent": true
+      },
+
+      "ssh_username": "ubuntu",
+      "type": "amazon-ebs"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["sleep 5"]
+    }
+  ]
+}
+```
+
+Becomes:
+
+```hcl
+# the source block is what was defined in the builders section and represents a
+# reusable way to start a machine. You build your images from that source. All
+# sources have a 1:1 correspondance to what currently is a builder. The
+# argument name (ie: ami_name) must be unquoted and can be set using the equal
+# sign operator (=).
+source "amazon-ebs" "example" {
+    ami_name = "packer-test"
+    region = "us-east-1"
+    instance_type = "t2.micro"
+
+    source_ami_filter {
+        filters {
+          virtualization-type = "hvm"
+          name =  "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*"
+          root-device-type = "ebs"
+        }
+        owners = ["amazon"]
+        most_recent = true
+    }
+
+    communicator = "ssh"
+    ssh_username = "ubuntu"
+}
+
+# A build starts sources and runs provisioning steps on those sources.
+build {
+  sources = [
+    # there can be multiple sources per build
+    "source.amazon-ebs.example"
+  ]
+
+  # All provisioners and post-processors have a 1:1 correspondence to their
+  # current layout. The argument name (ie: inline) must to be unquoted
+  # and can be set using the equal sign operator (=).
+  provisioner "shell" {
+    inline = ["sleep 5"]
+  }
+
+  # post-processors work too, example: `post-processor "shell-local" {}`.
+}
+
+```
+
+### 1:1 correspondence of components ... except :
+
+All fields of builders, provisioners and post-processors have a 1:1
+correspondance except for the following:
+
+- builders:
+
+  - aws ami_block_device_mappings
+  - aws launch_block_device_mappings
+  - aws run_volume_tags
+  - alicloud image_disk_mappings
+  - osc omi_block_device_mappings
+  - osc launch_block_device_mappings
+  - proxmox network_adapters
+  - proxmox disks
+  - tencentcloud data_disks
+  - ucloud image_copy_to_mappings
+
+- provisioner:
+
+  - converge module_dirs
+
+- post-processor:
+  - alicloud-import image_disk_mappings
+
+One could think that these are defined as "arrays of blocks" - they are in fact
+repeatable blocks with the same identifier. For example:
+
+```json
+"builders": [
+    {
+      "type": "amazon-ebs",
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/xvda",
+          "volume_size": "20",
+          "volume_type": "gp2",
+          "delete_on_termination": "true"
+        },
+        {
+          "device_name": "/dev/xvdf",
+          "volume_size": "500",
+          "volume_type": "gp2",
+          "delete_on_termination": "true",
+          "encrypted": true
+        }
+      ],
+    }
+```
+
+Becomes:
+
+```hcl
+source "amazon-ebs" "example" {
+    launch_block_device_mappings {
+        device_name = "/dev/xvda"
+        volume_size = 20
+        volume_type = "gp2"
+        delete_on_termination = true
+    }
+    launch_block_device_mappings {
+        device_name = "/dev/xvdf"
+        volume_size = 500
+        volume_type = "gp2"
+        delete_on_termination = true
+        encrypted = true
+    }
+```
+
+There is soon going to be a PR to drop the `s` at the end of these fields.
+
+### Deprecation
+
+The current layout of buildfiles will be supported until we and the community
+love the new format. Only then the v1 format will be carefully deprecated.
+
+-> **Note:** The HCL parsing library can read JSON and if it is your
+configuration format of predilection, you will still be able to do it. You will
+have to tweak a few things in order to use future versions of Packer that have
+deprecated the current format. Sorry about that! Because the HCL reading code
+is generated from the JSON parsing settings; every builder, provisioner and
+post-processor setting should look and work the same. A config file transposer
+is currently in the making.

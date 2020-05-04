@@ -3,6 +3,7 @@ package powershell
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -11,17 +12,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/stretchr/testify/assert"
 )
-
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{
-		"inline": []interface{}{"foo", "bar"},
-	}
-}
-
-func init() {
-	//log.SetOutput(ioutil.Discard)
-}
 
 func TestProvisionerPrepare_extractScript(t *testing.T) {
 	config := testConfig()
@@ -112,7 +104,38 @@ func TestProvisionerPrepare_Config(t *testing.T) {
 	if p.config.ElevatedPassword != "mypassword" {
 		t.Fatalf("Expected 'mypassword' for key `elevated_password`: %s", p.config.ElevatedPassword)
 	}
+}
 
+func TestProvisionerPrepare_DebugMode(t *testing.T) {
+	config := testConfig()
+	config["debug_mode"] = 1
+
+	var p Provisioner
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	command := `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};Set-PsDebug -Trace 1;. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
+	if p.config.ExecuteCommand != command {
+		t.Fatalf(fmt.Sprintf(`Expected command should be '%s' but got '%s'`, command, p.config.ExecuteCommand))
+	}
+}
+
+func TestProvisionerPrepare_InvalidDebugMode(t *testing.T) {
+	config := testConfig()
+	config["debug_mode"] = -1
+
+	var p Provisioner
+	err := p.Prepare(config)
+	if err == nil {
+		t.Fatalf("should have error")
+	}
+
+	message := "invalid Trace level for `debug_mode`; valid values are 0, 1, and 2"
+	if !strings.Contains(err.Error(), message) {
+		t.Fatalf("expected Prepare() error %q to contain %q", err.Error(), message)
+	}
 }
 
 func TestProvisionerPrepare_InvalidKey(t *testing.T) {
@@ -333,11 +356,6 @@ func testUi() *packer.BasicUi {
 	}
 }
 
-func testObjects() (packer.Ui, packer.Communicator) {
-	ui := testUi()
-	return ui, new(packer.MockCommunicator)
-}
-
 func TestProvisionerProvision_ValidExitCodes(t *testing.T) {
 	config := testConfig()
 	delete(config, "inline")
@@ -385,7 +403,8 @@ func TestProvisionerProvision_InvalidExitCodes(t *testing.T) {
 }
 
 func TestProvisionerProvision_Inline(t *testing.T) {
-	config := testConfig()
+	// skip_clean is set to true otherwise the last command executed by the provisioner is the cleanup.
+	config := testConfigWithSkipClean()
 	delete(config, "inline")
 
 	// Defaults provided by Packer
@@ -398,7 +417,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	p.config.PackerBuildName = "vmware"
 	p.config.PackerBuilderType = "iso"
 	comm := new(packer.MockCommunicator)
-	p.Prepare(config)
+	_ = p.Prepare(config)
 	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatal("should not have error")
@@ -437,7 +456,8 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	defer os.Remove(tempFile.Name())
 	defer tempFile.Close()
 
-	config := testConfig()
+	// skip_clean is set to true otherwise the last command executed by the provisioner is the cleanup.
+	config := testConfigWithSkipClean()
 	delete(config, "inline")
 	config["scripts"] = []string{tempFile.Name()}
 	config["packer_build_name"] = "foobuild"
@@ -463,11 +483,12 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 
 func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	tempFile, _ := ioutil.TempFile("", "packer")
-	config := testConfig()
 	ui := testUi()
 	defer os.Remove(tempFile.Name())
 	defer tempFile.Close()
 
+	// skip_clean is set to true otherwise the last command executed by the provisioner is the cleanup.
+	config := testConfigWithSkipClean()
 	delete(config, "inline")
 
 	config["scripts"] = []string{tempFile.Name()}
@@ -497,10 +518,56 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	}
 }
 
-func TestProvisionerProvision_UISlurp(t *testing.T) {
-	// UI should be called n times
+func TestProvisionerProvision_SkipClean(t *testing.T) {
+	tempFile, _ := ioutil.TempFile("", "packer")
+	defer func() {
+		tempFile.Close()
+		os.Remove(tempFile.Name())
+	}()
 
-	// UI should receive following messages / output
+	config := map[string]interface{}{
+		"scripts":     []string{tempFile.Name()},
+		"remote_path": "c:/Windows/Temp/script.ps1",
+	}
+
+	tt := []struct {
+		SkipClean                bool
+		LastExecutedCommandRegex string
+	}{
+		{
+			SkipClean:                true,
+			LastExecutedCommandRegex: `powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1'; exit \$LastExitCode }"`,
+		},
+		{
+			SkipClean:                false,
+			LastExecutedCommandRegex: `powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/packer-cleanup-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1'; exit \$LastExitCode }"`,
+		},
+	}
+
+	for _, tc := range tt {
+		tc := tc
+		p := new(Provisioner)
+		ui := testUi()
+		comm := new(packer.MockCommunicator)
+
+		config["skip_clean"] = tc.SkipClean
+		if err := p.Prepare(config); err != nil {
+			t.Fatalf("failed to prepare config when SkipClean is %t: %s", tc.SkipClean, err)
+		}
+		err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+		if err != nil {
+			t.Fatal("should not have error")
+		}
+
+		// When SkipClean is false the last executed command should be the clean up command;
+		// otherwise it will be the execution command for the provisioning script.
+		cmd := comm.StartCmd.Command
+		re := regexp.MustCompile(tc.LastExecutedCommandRegex)
+		matched := re.MatchString(cmd)
+		if !matched {
+			t.Fatalf(`Got unexpected command when SkipClean is %t: %s`, tc.SkipClean, cmd)
+		}
+	}
 }
 
 func TestProvisionerProvision_UploadFails(t *testing.T) {
@@ -560,6 +627,113 @@ func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
 		flattenedEnvVars = p.createFlattenedEnvVars(true)
 		if flattenedEnvVars != expectedValue {
 			t.Fatalf("expected flattened env vars to be: %s, got %s.", expectedValue, flattenedEnvVars)
+		}
+	}
+}
+
+func TestProvisionerCorrectlyInterpolatesValidExitCodes(t *testing.T) {
+	type testCases struct {
+		Input    interface{}
+		Expected []int
+	}
+	validExitCodeTests := []testCases{
+		{"0", []int{0}},
+		{[]string{"0"}, []int{0}},
+		{[]int{0, 12345}, []int{0, 12345}},
+		{[]string{"0", "12345"}, []int{0, 12345}},
+		{"0,12345", []int{0, 12345}},
+	}
+
+	for _, tc := range validExitCodeTests {
+		p := new(Provisioner)
+		config := testConfig()
+		config["valid_exit_codes"] = tc.Input
+		err := p.Prepare(config)
+
+		if err != nil {
+			t.Fatalf("Shouldn't have had error interpolating exit codes")
+		}
+		assert.ElementsMatchf(t, p.config.ValidExitCodes, tc.Expected,
+			fmt.Sprintf("expected exit codes to be: %#v, got %#v.", p.config.ValidExitCodes, tc.Expected))
+	}
+}
+
+func TestProvisionerCorrectlyInterpolatesExecutionPolicy(t *testing.T) {
+	type testCases struct {
+		Input       interface{}
+		Expected    ExecutionPolicy
+		ErrExpected bool
+	}
+	tests := []testCases{
+		{
+			Input:       "bypass",
+			Expected:    ExecutionPolicy(0),
+			ErrExpected: false,
+		},
+		{
+			Input:       "allsigned",
+			Expected:    ExecutionPolicy(1),
+			ErrExpected: false,
+		},
+		{
+			Input:       "default",
+			Expected:    ExecutionPolicy(2),
+			ErrExpected: false,
+		},
+		{
+			Input:       "remotesigned",
+			Expected:    ExecutionPolicy(3),
+			ErrExpected: false,
+		},
+		{
+			Input:       "restricted",
+			Expected:    ExecutionPolicy(4),
+			ErrExpected: false,
+		},
+		{
+			Input:       "undefined",
+			Expected:    ExecutionPolicy(5),
+			ErrExpected: false,
+		},
+		{
+			Input:       "unrestricted",
+			Expected:    ExecutionPolicy(6),
+			ErrExpected: false,
+		},
+		{
+			Input:       "none",
+			Expected:    ExecutionPolicy(7),
+			ErrExpected: false,
+		},
+		{
+			Input:       "0", // User can supply a valid number for policy, too
+			Expected:    0,
+			ErrExpected: false,
+		},
+		{
+			Input:       "invalid",
+			Expected:    0,
+			ErrExpected: true,
+		},
+		{
+			Input:       "100", // If number is invalid policy, reject.
+			Expected:    100,
+			ErrExpected: true,
+		},
+	}
+
+	for _, tc := range tests {
+		p := new(Provisioner)
+		config := testConfig()
+		config["execution_policy"] = tc.Input
+		err := p.Prepare(config)
+
+		if (err != nil) != tc.ErrExpected {
+			t.Fatalf("Either err was expected, or shouldn't have happened: %#v", tc)
+		}
+		if err == nil {
+			assert.Equal(t, p.config.ExecutionPolicy, tc.Expected,
+				fmt.Sprintf("expected %#v, got %#v.", p.config.ExecutionPolicy, tc.Expected))
 		}
 	}
 }
@@ -661,4 +835,17 @@ func TestProvision_uploadEnvVars(t *testing.T) {
 func TestCancel(t *testing.T) {
 	// Don't actually call Cancel() as it performs an os.Exit(0)
 	// which kills the 'go test' tool
+}
+
+func testConfig() map[string]interface{} {
+	return map[string]interface{}{
+		"inline": []interface{}{"foo", "bar"},
+	}
+}
+
+func testConfigWithSkipClean() map[string]interface{} {
+	return map[string]interface{}{
+		"inline":     []interface{}{"foo", "bar"},
+		"skip_clean": true,
+	}
 }

@@ -1,0 +1,199 @@
+---
+description: |
+  Communicators are the mechanism Packer uses to upload files, execute scripts,
+  etc. with the machine being created.
+layout: docs
+page_title: Communicators - Templates
+sidebar_title: WINRM
+---
+
+# WinRM Communicator
+
+Communicators are the mechanism Packer uses to upload files, execute scripts,
+etc. with the machine being created. The WinRM communicator uses the
+Windows Remote Management protocol to do this.
+
+## Getting Ready to Use the WinRM Communicator
+
+The WinRM communicator is not the default communicator, so you will always have
+to set the `"communicator": "winrm",` template option explicitly. In addition,
+you will almost always have to provide a pre-run script that enables and
+configures WinRM on the guest machine. This will generally be in the form of a
+powershell script or a batch file.
+
+If you are building from a brand-new and unconfigured operating system
+image, you will need to provide this pre-run script as part of your
+Autounattend.xml file, required by Windows for automatic operating system
+installation. If you are building in a cloud or from a pre-installed image, your
+method for providing this pre-run script will vary based on the builder. Please
+refer to each builder's documentation for more information on how to supply the
+winrm configuration script.
+
+If you are unfamiliar with how to use an autounattend file, take a look at our
+[quick guides](/guides/automatic-operating-system-installs); knowing
+how to automatically initalize your operating system is critical for being able
+to successfully use Packer to build from an iso.
+
+## WinRM Communicator Options
+
+@include "helper/communicator/WinRM-not-required.mdx"
+
+## Examples
+
+### Basics of WinRM Connection
+
+Please note that WinRM is not a Packer-specific protocol. Microsoft has a great
+deal of documentation about WinRM. If you find after reading this guide that
+you are still not able to connect via WinRM, check the
+[Microsoft documentation](https://docs.microsoft.com/en-us/windows/win32/winrm/installation-and-configuration-for-windows-remote-management)
+to make sure there isn't anything you're missing.
+
+There are some steps that you will normally need to take in order for Packer
+to be able to connect via WinRM
+
+1. Set up a username and password that Packer to connect with.
+2. Make any necesary registry edits to enable remote execution
+   (and remote execution with elevated privileges, if needed)
+3. Start WinRM, setting any config needed for allowing basic auth
+4. Open ports 5985 and/or 5986 depending on how you're connecting
+5. launch WinRM and set it to automatically launch when the computer restarts
+6. If necessary, generate a self-signed certificate or provide a real certificate
+   to the WinRM listener.
+
+#### Configuring WinRM in VMWare
+
+If you are configuring WinRM using an Autounattend.xml, the simplest way to set
+up WinRM is to put the configuration commands directly into the Autounattend
+file as shown [here](https://github.com/StefanScherer/packer-windows/blob/6e603e904e9b280eeb97f7eb542940a043954112/answer_files/2008_r2_core/Autounattend.xml#L157-L234)
+
+Instead of entering each line individually, you can also add a batch file to
+your autounattend that contains the commands for configuring winrm. Depending
+on your winrm setup, this could be a complex batch file, or a very simple one.
+
+Below is an example of how we would call a batch file from inside the
+Autounattend file.
+
+```xml
+<FirstLogonCommands>
+  ...
+  <SynchronousCommand wcm:action="add">
+      <CommandLine>cmd.exe /c a:\winrmConfig.bat</CommandLine>
+      <Description>Configure WinRM</Description>
+      <Order>3</Order>
+      <RequiresUserInput>true</RequiresUserInput>
+  </SynchronousCommand>
+  ...
+</FirstLogonCommands>
+```
+
+It is also possible to call powershell scripts in a similar manner.
+
+The winrmConfig.bat referenced above can be as simple as
+
+```powershell
+rem basic config for winrm
+cmd.exe /c winrm quickconfig -q
+
+rem allow unencrypted traffic, and configure auth to use basic username/password auth
+cmd.exe /c winrm set winrm/config/service @{AllowUnencrypted="true"}
+cmd.exe /c winrm set winrm/config/service/auth @{Basic="true"}
+
+rem update firewall rules to open the right port and to allow remote administration
+cmd.exe /c netsh advfirewall firewall set rule group="remote administration" new enable=yes
+
+rem restart winrm
+cmd.exe /c net stop winrm
+cmd.exe /c net start winrm
+```
+
+Please note that the above batch file is _extremely_ simplistic, and not secure.
+It is intended to be an example of the bare minimum configuration. Below, you'll
+find a more complicated example of a more secure WinRM configuration process.
+
+This batch file will only work for http connections, not https, but will enable
+you to connect using only the username and password created earlier in the
+Autounattend file. The above batchfile will allow you to connect using a very
+simple Packer config:
+
+```json
+        "communicator": "winrm",
+        "winrm_username": "packeruser",
+        "winrm_password": "SecretPassword"
+```
+
+A more complex example of a powershell script used for configuration can be seen
+below.
+
+```powershell
+# A Packer config that works with this example would be:
+#
+#
+#    "winrm_username": "Administrator",
+#    "winrm_password": "SuperS3cr3t!!!",
+#    "winrm_insecure": true,
+#    "winrm_use_ssl": true
+#
+#
+
+# Create username and password
+net user Administrator SuperS3cr3t!!!
+wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE
+
+Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force -ErrorAction Ignore
+
+# Don't set this before Set-ExecutionPolicy as it throws an error
+$ErrorActionPreference = "stop"
+
+# Remove HTTP listener
+Remove-Item -Path WSMan:\Localhost\listener\listener* -Recurse
+
+# Create a self-signed certificate to let ssl work
+$Cert = New-SelfSignedCertificate -CertstoreLocation Cert:\LocalMachine\My -DnsName "packer"
+New-Item -Path WSMan:\LocalHost\Listener -Transport HTTPS -Address * -CertificateThumbPrint $Cert.Thumbprint -Force
+
+# WinRM
+write-output "Setting up WinRM"
+write-host "(host) setting up WinRM"
+
+# Configure WinRM to allow unencrypted communication, and provide the
+# self-signed cert to the WinRM listener.
+cmd.exe /c winrm quickconfig -q
+cmd.exe /c winrm set "winrm/config/service" '@{AllowUnencrypted="true"}'
+cmd.exe /c winrm set "winrm/config/client" '@{AllowUnencrypted="true"}'
+cmd.exe /c winrm set "winrm/config/service/auth" '@{Basic="true"}'
+cmd.exe /c winrm set "winrm/config/client/auth" '@{Basic="true"}'
+cmd.exe /c winrm set "winrm/config/service/auth" '@{CredSSP="true"}'
+cmd.exe /c winrm set "winrm/config/listener?Address=*+Transport=HTTPS" "@{Port=`"5986`";Hostname=`"packer`";CertificateThumbprint=`"$($Cert.Thumbprint)`"}"
+
+# Make sure appropriate firewall port openings exist
+cmd.exe /c netsh advfirewall firewall set rule group="remote administration" new enable=yes
+cmd.exe /c netsh firewall add portopening TCP 5986 "Port 5986"
+
+# Restart WinRM, and set it so that it auto-launches on startup.
+cmd.exe /c net stop winrm
+cmd.exe /c sc config winrm start= auto
+cmd.exe /c net start winrm
+```
+
+Please note that having WinRM auto-launch on all start ups may not be the right
+choice for you, if you don't need the server to recieve WinRM connections in the
+future. Clean up after yourself and close unnecesary firewall ports at a final
+provisioning step to make sure your image is secure.
+
+#### Configuring WinRM in the Cloud
+
+Most clouds allow you to provide a configuration script that runs when the
+instance is launched. In AWS, this is the
+[user_data_file](/docs/builders/amazon-ebs#user_data_file). In Google
+Cloud, this is provided using the `windows-startup-script-cmd`
+[metadata](/docs/builders/googlecompute#metadata) tag.
+[Example](/docs/builders/googlecompute#windows-example)
+
+Essentially, these files are powershell or cmd scripts that configure winrm,
+without having to be wrapped in an Autounattend. Provide the script in the
+format requested by each cloud, and make sure you manually configure any
+firewall rules that the cloud doesn't allow you to manage internally. More
+specific details for each cloud can be found in the builder sections.
+
+The above examples will work in cloud prep too, but may be overkill depending on
+how much preconfiguration the cloud has done for you.

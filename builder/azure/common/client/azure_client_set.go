@@ -5,21 +5,30 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute"
-	"github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute/computeapi"
-	"github.com/Azure/go-autorest/autorest"
 	"github.com/hashicorp/packer/helper/useragent"
+
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute/computeapi"
+	"github.com/Azure/go-autorest/autorest"
 )
 
 type AzureClientSet interface {
 	MetadataClient() MetadataClientAPI
 
 	DisksClient() computeapi.DisksClientAPI
+	SnapshotsClient() computeapi.SnapshotsClientAPI
 	ImagesClient() computeapi.ImagesClientAPI
+
+	GalleryImagesClient() computeapi.GalleryImagesClientAPI
+	GalleryImageVersionsClient() computeapi.GalleryImageVersionsClientAPI
+
 	VirtualMachinesClient() computeapi.VirtualMachinesClientAPI
 	VirtualMachineImagesClient() VirtualMachineImagesClientAPI
 
 	PollClient() autorest.Client
+
+	// SubscriptionID returns the subscription ID that this client set was created for
+	SubscriptionID() string
 }
 
 var subscriptionPathRegex = regexp.MustCompile(`/subscriptions/([[:xdigit:]]{8}(-[[:xdigit:]]{4}){3}-[[:xdigit:]]{12})`)
@@ -50,6 +59,10 @@ func new(c Config, say func(string)) (*azureClientSet, error) {
 	}, nil
 }
 
+func (s azureClientSet) SubscriptionID() string {
+	return s.subscriptionID
+}
+
 func (s azureClientSet) configureAutorestClient(c *autorest.Client) {
 	c.AddToUserAgent(useragent.String())
 	c.Authorizer = s.authorizer
@@ -65,6 +78,13 @@ func (s azureClientSet) MetadataClient() MetadataClientAPI {
 
 func (s azureClientSet) DisksClient() computeapi.DisksClientAPI {
 	c := compute.NewDisksClient(s.subscriptionID)
+	s.configureAutorestClient(&c.Client)
+	c.PollingDelay = s.PollingDelay
+	return c
+}
+
+func (s azureClientSet) SnapshotsClient() computeapi.SnapshotsClientAPI {
+	c := compute.NewSnapshotsClient(s.subscriptionID)
 	s.configureAutorestClient(&c.Client)
 	c.PollingDelay = s.PollingDelay
 	return c
@@ -88,12 +108,26 @@ func (s azureClientSet) VirtualMachineImagesClient() VirtualMachineImagesClientA
 	c := compute.NewVirtualMachineImagesClient(s.subscriptionID)
 	s.configureAutorestClient(&c.Client)
 	c.PollingDelay = s.PollingDelay
-	return virtualMachineImagesClientAPI{c}
+	return VirtualMachineImagesClient{c}
+}
+
+func (s azureClientSet) GalleryImagesClient() computeapi.GalleryImagesClientAPI {
+	c := compute.NewGalleryImagesClient(s.subscriptionID)
+	s.configureAutorestClient(&c.Client)
+	c.PollingDelay = s.PollingDelay
+	return c
+}
+
+func (s azureClientSet) GalleryImageVersionsClient() computeapi.GalleryImageVersionsClientAPI {
+	c := compute.NewGalleryImageVersionsClient(s.subscriptionID)
+	s.configureAutorestClient(&c.Client)
+	c.PollingDelay = s.PollingDelay
+	return c
 }
 
 func (s azureClientSet) PollClient() autorest.Client {
 	c := autorest.NewClientWithUserAgent("Packer-Azure-ClientSet")
 	s.configureAutorestClient(&c)
-	c.PollingDelay = time.Second / 3
+	c.PollingDelay = time.Second * 5
 	return c
 }

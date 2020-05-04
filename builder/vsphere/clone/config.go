@@ -32,6 +32,8 @@ type Config struct {
 	// Convert VM to a template. Defaults to `false`.
 	ConvertToTemplate bool `mapstructure:"convert_to_template"`
 
+	Export *common.ExportConfig `mapstructure:"export"`
+
 	ctx interpolate.Context
 }
 
@@ -53,6 +55,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.WaitIpConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare()...)
+	if c.Export != nil {
+		errs = packer.MultiErrorAppend(errs, c.Export.Prepare(&c.ctx, &c.LocationConfig, &c.PackerConfig)...)
+	}
 
 	if len(errs.Errors) > 0 {
 		return nil, errs

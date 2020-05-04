@@ -1,0 +1,315 @@
+---
+description: |
+  The PowerShell Packer provisioner runs PowerShell scripts on Windows machines.
+  It assumes that the communicator in use is WinRM.
+layout: docs
+page_title: PowerShell - Provisioners
+sidebar_title: PowerShell
+---
+
+# PowerShell Provisioner
+
+Type: `powershell`
+
+The PowerShell Packer provisioner runs PowerShell scripts on Windows machines.
+It assumes that the communicator in use is WinRM. However, the provisioner can
+work equally well (with a few caveats) when combined with the SSH communicator.
+See the [section
+below](/docs/provisioners/powershell#combining-the-powershell-provisioner-with-the-ssh-communicator)
+for details.
+
+## Basic Example
+
+The example below is fully functional.
+
+```json
+{
+  "type": "powershell",
+  "inline": ["dir c:\\"]
+}
+```
+
+## Configuration Reference
+
+@include 'provisioners/shell-config.mdx'
+
+- `debug_mode` - If set, sets PowerShell's [PSDebug mode](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/set-psdebug?view=powershell-7)
+   in order to make script debugging easier. For instance, setting the value to 1 results in adding this to the execute command:
+
+     ``` powershell
+     Set-PSDebug -Trace 1
+     ```
+
+- `elevated_execute_command` (string) - The command to use to execute the
+  elevated script. By default this is as follows:
+
+  ```powershell
+  powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
+  ```
+
+  This is a [template engine](/docs/templates/engine). Therefore, you
+  may use user variables and template functions in this field. In addition,
+  you may use two extra variables:
+
+  - `Path`: The path to the script to run
+  - `Vars`: The location of a temp file containing the list of
+    `environment_vars`, if configured.
+
+- `environment_vars` (array of strings) - An array of key/value pairs to
+  inject prior to the execute_command. The format should be `key=value`.
+  Packer injects some environmental variables by default into the
+  environment, as well, which are covered in the section below.
+
+  This is a [template engine](/docs/templates/engine). Therefore, you
+  may use user variables and template functions in this field. If you are
+  running on AWS, Azure, Google Compute, or OpenStack and would like to access
+  the generated password that Packer uses to connect to the instance via WinRM,
+  you can use the template variable `{{.WinRMPassword}}` to set this as an
+  environment variable. For example:
+
+  ```json
+    {
+      "type": "powershell",
+      "environment_vars": "WINRMPASS={{.WinRMPassword}}",
+      "inline": ["Write-Host \"Automatically generated aws password is: $Env:WINRMPASS\""]
+    },
+  ```
+
+- `execute_command` (string) - The command to use to execute the script. By
+  default this is as follows:
+
+  ```powershell
+  powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
+  ```
+
+  This is a [template engine](/docs/templates/engine). Therefore, you
+  may use user variables and template functions in this field. In addition,
+  you may use two extra variables:
+
+  - `Path`: The path to the script to run
+  - `Vars`: The location of a temp file containing the list of
+    `environment_vars`, if configured.
+    The value of both `Path` and `Vars` can be manually configured by setting
+    the values for `remote_path` and `remote_env_var_path` respectively.
+
+  If you use the SSH communicator and have changed your default shell, you
+  may need to modify your `execute_command` to make sure that the command is
+  valid and properly escaped; the default assumes that you have not changed
+  the default shell away from cmd.
+
+- `elevated_user` and `elevated_password` (string) - If specified, the
+  PowerShell script will be run with elevated privileges using the given
+  Windows user.
+
+  This is a [template engine](/docs/templates/engine). Therefore, you
+  may use user variables and template functions in this field. If you are
+  running a build on AWS, Azure, Google Compute,
+  or OpenStack and would like to run using the generated password that Packer
+  uses to connect to the instance via WinRM, you may do so by using the
+  template variable {{.WinRMPassword}}. For example:
+
+  ```json
+  "elevated_user": "Administrator",
+  "elevated_password": "{{.WinRMPassword}}",
+  ```
+
+  If you specify an empty `elevated_password` value then the PowerShell
+  script is run as a service account. For example:
+
+  ```json
+  "elevated_user": "SYSTEM",
+  "elevated_password": "",
+  ```
+
+- `execution_policy` - To run ps scripts on windows packer defaults this to
+  "bypass" and wraps the command to run. Setting this to "none" will prevent
+  wrapping, allowing to see exit codes on docker for windows. Possible values
+  are "bypass", "allsigned", "default", "remotesigned", "restricted",
+  "undefined", "unrestricted", "none".
+
+- `remote_path` (string) - The path where the PowerShell script will be
+  uploaded to within the target build machine. This defaults to
+  `C:/Windows/Temp/script-UUID.ps1` where UUID is replaced with a dynamically
+  generated string that uniquely identifies the script.
+
+  This setting allows users to override the default upload location. The
+  value must be a writable location and any parent directories must already
+  exist.
+
+- `remote_env_var_path` (string) - Environment variables required within the
+  remote environment are uploaded within a PowerShell script and then enabled
+  by 'dot sourcing' the script immediately prior to execution of the main
+  command or script.
+
+  The path the environment variables script will be uploaded to defaults to
+  `C:/Windows/Temp/packer-ps-env-vars-UUID.ps1` where UUID is replaced with a
+  dynamically generated string that uniquely identifies the script.
+
+  This setting allows users to override the location the environment variable
+  script is uploaded to. The value must be a writable location and any parent
+  directories must already exist.
+
+- `skip_clean` (bool) - Whether to clean scripts up after executing the provisioner.
+	Defaults to false. When true any script created by a non-elevated Powershell
+	provisioner will be removed from the remote machine. Elevated scripts,
+	along with the scheduled tasks, will always be removed regardless of the
+	value set for `skip_clean`.
+
+- `start_retry_timeout` (string) - The amount of time to attempt to _start_
+  the remote process. By default this is "5m" or 5 minutes. This setting
+  exists in order to deal with times when SSH may restart, such as a system
+  reboot. Set this to a higher value if reboots take a longer amount of time.
+
+@include 'provisioners/common-config.mdx'
+
+## Default Environmental Variables
+
+In addition to being able to specify custom environmental variables using the
+`environment_vars` configuration, the provisioner automatically defines certain
+commonly useful environmental variables:
+
+- `PACKER_BUILD_NAME` is set to the [name of the
+  build](/docs/templates/builders#named-builds) that Packer is running.
+  This is most useful when Packer is making multiple builds and you want to
+  distinguish them slightly from a common provisioning script.
+
+- `PACKER_BUILDER_TYPE` is the type of the builder that was used to create
+  the machine that the script is running on. This is useful if you want to
+  run only certain parts of the script on systems built with certain
+  builders.
+
+- `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
+  transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+  will be set to the address. You can use this address in your provisioner to
+  download large files over http. This may be useful if you're experiencing
+  slower speeds using the default file provisioner. A file provisioner using
+  the `winrm` communicator may experience these types of difficulties.
+
+## Combining the PowerShell Provisioner with the SSH Communicator
+
+The good news first. If you are using the [Microsoft port of
+OpenSSH](https://github.com/PowerShell/Win32-OpenSSH/wiki) then the provisioner
+should just work as expected - no extra configuration effort is required.
+
+Now the caveats. If you are using an alternative configuration, and your SSH
+connection lands you in a \*nix shell on the remote host, then you will most
+likely need to manually set the `execute_command`; The default
+`execute_command` used by Packer will not work for you. When configuring the
+command you will need to ensure that any dollar signs or other characters that
+may be incorrectly interpreted by the remote shell are escaped accordingly.
+
+The following example shows how the standard `execute_command` can be
+reconfigured to work on a remote system with
+[Cygwin/OpenSSH](https://cygwin.com/) installed. The `execute_command` has each
+dollar sign backslash escaped so that it is not interpreted by the remote Bash
+shell - Bash being the default shell for Cygwin environments.
+
+```json
+  "provisioners": [
+    {
+      "type": "powershell",
+      "execute_command": "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit \\$LastExitCode }\"",
+      "inline": [
+        "Write-Host \"Hello from PowerShell\"",
+      ]
+    }
+  ]
+```
+
+## Packer's Handling of Characters Special to PowerShell
+
+The escape character in PowerShell is the `backtick`, also sometimes referred
+to as the `grave accent`. When, and when not, to escape characters special to
+PowerShell is probably best demonstrated with a series of examples.
+
+### When To Escape...
+
+Users need to deal with escaping characters special to PowerShell when they
+appear _directly_ in commands used in the `inline` PowerShell provisioner and
+when they appear _directly_ in the users own scripts. Note that where double
+quotes appear within double quotes, the addition of a backslash escape is
+required for the JSON template to be parsed correctly.
+
+```json
+  "provisioners": [
+    {
+      "type": "powershell",
+      "inline": [
+          "Write-Host \"A literal dollar `$ must be escaped\"",
+          "Write-Host \"A literal backtick `` must be escaped\"",
+          "Write-Host \"Here `\"double quotes`\" must be escaped\"",
+          "Write-Host \"Here `'single quotes`' don`'t really need to be\"",
+          "Write-Host \"escaped... but it doesn`'t hurt to do so.\"",
+      ]
+    },
+```
+
+The above snippet should result in the following output on the Packer console:
+
+```shell
+==> amazon-ebs: Provisioning with Powershell...
+==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner508190439
+    amazon-ebs: A literal dollar $ must be escaped
+    amazon-ebs: A literal backtick ` must be escaped
+    amazon-ebs: Here "double quotes" must be escaped
+    amazon-ebs: Here 'single quotes' don't really need to be
+    amazon-ebs: escaped... but it doesn't hurt to do so.
+```
+
+### When Not To Escape...
+
+Special characters appearing in user environment variable values and in the
+`elevated_user` and `elevated_password` fields will be automatically dealt with
+for the user. There is no need to use escapes in these instances.
+
+```json
+{
+  "variables": {
+    "psvar": "My$tring"
+  },
+  ...
+  "provisioners": [
+    {
+      "type": "powershell",
+      "elevated_user": "Administrator",
+      "elevated_password": "Super$3cr3t!",
+      "inline": "Write-Output \"The dollar in the elevated_password is interpreted correctly\""
+    },
+    {
+      "type": "powershell",
+      "environment_vars": [
+        "VAR1=A$Dollar",
+        "VAR2=A`Backtick",
+        "VAR3=A'SingleQuote",
+        "VAR4=A\"DoubleQuote",
+        "VAR5={{user `psvar`}}"
+      ],
+      "inline": [
+        "Write-Output \"In the following examples the special character is interpreted correctly:\"",
+        "Write-Output \"The dollar in VAR1:                            $Env:VAR1\"",
+        "Write-Output \"The backtick in VAR2:                          $Env:VAR2\"",
+        "Write-Output \"The single quote in VAR3:                      $Env:VAR3\"",
+        "Write-Output \"The double quote in VAR4:                      $Env:VAR4\"",
+        "Write-Output \"The dollar in VAR5 (expanded from a user var): $Env:VAR5\""
+      ]
+    }
+  ]
+  ...
+}
+```
+
+The above snippet should result in the following output on the Packer console:
+
+```shell
+==> amazon-ebs: Provisioning with Powershell...
+==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner961728919
+    amazon-ebs: The dollar in the elevated_password is interpreted correctly
+==> amazon-ebs: Provisioning with Powershell...
+==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner142826554
+    amazon-ebs: In the following examples the special character is interpreted correctly:
+    amazon-ebs: The dollar in VAR1:                            A$Dollar
+    amazon-ebs: The backtick in VAR2:                          A`Backtick
+    amazon-ebs: The single quote in VAR3:                      A'SingleQuote
+    amazon-ebs: The double quote in VAR4:                      A"DoubleQuote
+    amazon-ebs: The dollar in VAR5 (expanded from a user var): My$tring
+```

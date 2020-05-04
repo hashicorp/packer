@@ -1,0 +1,8 @@
+{
+    "provisioners": [
+        {
+            "type": "something",
+            "max_retries": 5
+        }
+    ]
+}
