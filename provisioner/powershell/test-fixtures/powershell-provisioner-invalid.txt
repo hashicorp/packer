@@ -1,5 +1,0 @@
-{
-  "type": "powershell",
-  "inline": ["invalid-cmdlet"],
-  "valid_exit_codes": ["1"]
-}

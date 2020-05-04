@@ -44,7 +44,7 @@ func TestAccPowershellProvisioner_Invalid(t *testing.T) {
 
 	// This provisioner should fail with an exit code of 1. To assert the failure the fixture
 	// uses the valid_exit_codes option to confirm a non-zero exit code
-	testProvisioner := PowershellProvisionerAccTest{"powershell-provisioner-invalid.txt"}
+	testProvisioner := PowershellProvisionerAccTest{"powershell-exit_codes-provisioner.txt"}
 	acc.TestProvisionersAgainstBuilders(&testProvisioner, t)
 }
 
