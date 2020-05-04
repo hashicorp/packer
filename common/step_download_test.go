@@ -169,7 +169,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Extension: "txt", Url: []string{"./test-fixtures/root/another.txt?"}, Checksum: "sha1:" + cs["/root/another.txt"]},
 			multistep.ActionContinue,
 			[]string{
-				toSha1("sha1:"+cs["/root/another.txt"]) + ".txt",
 				toSha1("sha1:"+cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
@@ -191,7 +190,6 @@ func TestStepDownload_Run(t *testing.T) {
 			fields{Extension: "txt", Url: []string{abs(t, "./test-fixtures/root/another.txt") + "?"}, Checksum: "sha1:" + cs["/root/another.txt"]},
 			multistep.ActionContinue,
 			[]string{
-				toSha1("sha1:"+cs["/root/another.txt"]) + ".txt",
 				toSha1("sha1:"+cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
