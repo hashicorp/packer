@@ -60,7 +60,7 @@ type ISOConfig struct {
 	// "md5:{$checksum}". The type of the checksum can also be omitted and
 	// Packer will try to infer it based on string length. Valid values are
 	// "none", "{$checksum}", "{$path}" "md5:{$checksum}", "sha1:{$checksum}",
-	// "sha256:{$checksum}", "sha512:{$checksum}" or "file:{$checksum}".
+	// "sha256:{$checksum}", "sha512:{$checksum}" or "file:{$path}".
 	// Although the checksum will not be verified when it is set to "none",
 	// this is not recommended since these files can be very large and
 	// corruption does happen from time to time.
