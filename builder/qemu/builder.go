@@ -41,6 +41,7 @@ var accels = map[string]struct{}{
 var diskInterface = map[string]bool{
 	"ide":         true,
 	"scsi":        true,
+	"sata":        true,
 	"virtio":      true,
 	"virtio-scsi": true,
 }
