@@ -1,3 +1,16 @@
+## 1.6.0 (Upcoming)
+
+### BACKWARDS INCOMPATIBILITIES:
+
+### FEATURES:
+* ** New post-processor** Yandex Export [GH-9124]
+
+### IMPROVEMENTS:
+
+### BUG FIXES:
+* post-processor/vsphere-template: Add VSphere builder's artifact to
+    vsphere-template's supported types [GH-9146]
+
 ## 1.5.6 (May 1, 2020)
 
 ### BACKWARDS INCOMPATIBILITIES:
