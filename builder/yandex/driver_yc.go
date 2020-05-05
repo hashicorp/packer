@@ -232,5 +232,22 @@ func (d *driverYC) DeleteDisk(ctx context.Context, diskID string) error {
 
 	_, err = op.Response()
 	return err
+}
 
+func (d *driverYC) GetInstanceMetadata(ctx context.Context, instanceID string, key string) (string, error) {
+	instance, err := d.sdk.Compute().Instance().Get(ctx, &compute.GetInstanceRequest{
+		InstanceId: instanceID,
+		View:       compute.InstanceView_FULL,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	for k, v := range instance.GetMetadata() {
+		if k == key {
+			return v, nil
+		}
+	}
+
+	return "", fmt.Errorf("Instance metadata key, %s, not found.", key)
 }

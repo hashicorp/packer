@@ -13,6 +13,8 @@
 * **New Core Feature** provisioners now support a `max_retries` option that can
     be used for retrying a provisioner on error [GH-9061]
 
+* **New Post-Processor**: `yandex-export` Upload built image in Yandex Object Storage.
+
 ### IMPROVEMENTS:
 * builder/azure-arm: Add `boot_diag_storage_account` option for enabling boot
     diagnostics on a virtual machine [GH-9053]

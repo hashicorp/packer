@@ -11,9 +11,9 @@ import (
 	ycsdk "github.com/yandex-cloud/go-sdk"
 )
 
-type stepTeardownInstance struct{}
+type StepTeardownInstance struct{}
 
-func (s *stepTeardownInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepTeardownInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
@@ -52,6 +52,6 @@ func (s *stepTeardownInstance) Run(ctx context.Context, state multistep.StateBag
 	return multistep.ActionContinue
 }
 
-func (s *stepTeardownInstance) Cleanup(state multistep.StateBag) {
+func (s *StepTeardownInstance) Cleanup(state multistep.StateBag) {
 	// no cleanup
 }
