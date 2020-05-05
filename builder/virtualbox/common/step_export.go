@@ -19,6 +19,7 @@ import (
 type StepExport struct {
 	Format         string
 	OutputDir      string
+	OutputFilename string
 	ExportOpts     []string
 	Bundling       VBoxBundleConfig
 	SkipNatMapping bool
@@ -37,6 +38,9 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
+	if s.OutputFilename == "" {
+		s.OutputFilename = vmName
+	}
 
 	// Skip export if requested
 	if s.SkipExport {
@@ -61,7 +65,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 	}
 
 	// Export the VM to an OVF
-	outputPath := filepath.Join(s.OutputDir, vmName+"."+s.Format)
+	outputPath := filepath.Join(s.OutputDir, s.OutputFilename+"."+s.Format)
 
 	command := []string{
 		"export",
