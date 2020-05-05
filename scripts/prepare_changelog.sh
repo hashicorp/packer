@@ -16,8 +16,8 @@ is_doc_or_tech_debt_pr(){
       | jq '[.labels[].name == "docs" or .labels[].name == "tech-debt"] | any')
     exy="$?"
     if [ $exy -ne 0 ]; then
-        echo "bad response from github"
-        exit $exy
+        echo "bad response from github: manually check PR ${PR_NUM}"
+        return $exy
     fi
     grep -q true <<< $out
     return $?
@@ -40,6 +40,7 @@ get_prs(){
     done | while read PR_NUM
     do
         if (($DO_PR_CHECK)) && is_doc_or_tech_debt_pr $PR_NUM; then
+            echo "Skipping PR ${PR_NUM}: labeled as tech debt or docs. (aiting a second so we don't get rate-limited...)"
             continue
         fi
         echo "https://github.com/hashicorp/packer/pull/${PR_NUM}"
@@ -59,6 +60,9 @@ get_prs | while read line; do
     echo $line
     if [[ "$line" =~ "bad" ]]; then
         exit 1
+    elif [[ "$line" =~ "Skipping" ]]; then
+        sleep 1 # GH will rate limit us if we have several in a row
+        continue
     fi
     vared -ch ok
 done
