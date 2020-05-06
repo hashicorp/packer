@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -401,8 +402,14 @@ func TestConfigPrepareIAP(t *testing.T) {
 	if c.IAPHashBang != "/bin/sh" {
 		t.Fatalf("IAP hashbang didn't default correctly to /bin/sh.")
 	}
-	if c.IAPExt != ".sh" {
-		t.Fatalf("IAP tempfile extension didn't default correctly to .sh")
+	if runtime.GOOS == "windows" {
+		if c.IAPExt != ".cmd" {
+			t.Fatalf("IAP tempfile extension didn't default correctly to .cmd")
+		}
+	} else {
+		if c.IAPExt != "" {
+			t.Fatalf("IAP tempfile extension should default to empty on unix mahcines")
+		}
 	}
 	if c.Comm.SSHHost != "localhost" {
 		t.Fatalf("Didn't correctly override the ssh host.")

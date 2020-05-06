@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"testing"
 
 	"github.com/hashicorp/packer/helper/communicator"
@@ -38,6 +39,7 @@ func getTestStepStartTunnel() *StepStartTunnel {
 			},
 		},
 		AccountFile: "/path/to/account_file.json",
+		ProjectId:   "fake-project-123",
 	}
 }
 
@@ -57,10 +59,20 @@ func TestStepStartTunnel_CreateTempScript(t *testing.T) {
 	if err != nil {
 		t.Fatalf("couldn't read created inventoryfile: %s", err)
 	}
+
 	expected := `#!/bin/bash
+
 gcloud auth activate-service-account --key-file='/path/to/account_file.json'
+gcloud config set project fake-project-123
 gcloud compute start-iap-tunnel fakeinstance-12345 1234 --local-host-port=localhost:8774 --zone us-central-b
 `
+	if runtime.GOOS == "windows" {
+		expected = `
+call gcloud auth activate-service-account --key-file /path/to/account_file.json
+call gcloud config set project fake-project-123
+call gcloud compute start-iap-tunnel fakeinstance-12345 1234 --local-host-port=localhost:8774 --zone us-central-b
+`
+	}
 	if fmt.Sprintf("%s", f) != expected {
 		t.Fatalf("script didn't match expected:\n\n expected: \n%s\n; recieved: \n%s\n", expected, f)
 	}
