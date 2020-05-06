@@ -5,6 +5,7 @@ package dockerpush
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/docker"
@@ -103,18 +104,30 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		}()
 	}
 
-	// Get the name.
-	name := artifact.Id()
+	names := []string{artifact.Id()}
+	tags := artifact.State("docker_tags")
+	if tags != nil {
+		cast := tags.([]interface{})
+		for _, name := range cast {
+			if n, ok := name.(string); ok {
+				names = append(names, n)
+			}
+		}
+	}
 
-	ui.Message("Pushing: " + name)
-	if err := driver.Push(name); err != nil {
-		return nil, false, false, err
+	// Get the name.
+	for _, name := range names {
+		ui.Message("Pushing: " + name)
+		if err := driver.Push(name); err != nil {
+			return nil, false, false, err
+		}
 	}
 
 	artifact = &docker.ImportArtifact{
 		BuilderIdValue: BuilderIdImport,
 		Driver:         driver,
-		IdValue:        name,
+		IdValue:        names[0],
+		StateData:      map[string]interface{}{"docker_tags": tags},
 	}
 
 	return artifact, true, false, nil

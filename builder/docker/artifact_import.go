@@ -2,6 +2,7 @@ package docker
 
 import (
 	"fmt"
+	"strings"
 )
 
 // ImportArtifact is an Artifact implementation for when a container is
@@ -29,7 +30,20 @@ func (a *ImportArtifact) Id() string {
 }
 
 func (a *ImportArtifact) String() string {
-	return fmt.Sprintf("Imported Docker image: %s", a.Id())
+	tags := a.StateData["docker_tags"]
+	if tags == nil {
+		return fmt.Sprintf("Imported Docker image: %s", a.Id())
+	} else {
+		cast := tags.([]interface{})
+		names := []string{}
+		for _, name := range cast {
+			if n, ok := name.(string); ok {
+				names = append(names, n)
+			}
+		}
+		return fmt.Sprintf("Imported Docker image: %s with tags %s",
+			a.Id(), strings.Join(names, " "))
+	}
 }
 
 func (a *ImportArtifact) State(name string) interface{} {
