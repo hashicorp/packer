@@ -399,16 +399,19 @@ func TestConfigPrepareIAP(t *testing.T) {
 		t.Fatalf("Shouldn't have errors. Err = %s", err)
 	}
 
-	if c.IAPHashBang != "/bin/sh" {
-		t.Fatalf("IAP hashbang didn't default correctly to /bin/sh.")
-	}
 	if runtime.GOOS == "windows" {
 		if c.IAPExt != ".cmd" {
 			t.Fatalf("IAP tempfile extension didn't default correctly to .cmd")
 		}
+		if c.IAPHashBang != "" {
+			t.Fatalf("IAP hashbang didn't default correctly to nothing.")
+		}
 	} else {
 		if c.IAPExt != "" {
 			t.Fatalf("IAP tempfile extension should default to empty on unix mahcines")
+		}
+		if c.IAPHashBang != "/bin/sh" {
+			t.Fatalf("IAP hashbang didn't default correctly to /bin/sh.")
 		}
 	}
 	if c.Comm.SSHHost != "localhost" {
