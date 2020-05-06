@@ -191,7 +191,7 @@ gcloud config set project {{.ProjectID}}
 `
 	if runtime.GOOS == "windows" {
 		launchTemplate = `
-call gcloud auth activate-service-account --key-file {{.AccountFile}}
+call gcloud auth activate-service-account --key-file "{{.AccountFile}}"
 call gcloud config set project {{.ProjectID}}
 call {{.Args}}
 `
