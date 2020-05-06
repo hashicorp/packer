@@ -281,7 +281,7 @@ type RunConfig struct {
 	// best spot price. This must be one of: Linux/UNIX, SUSE Linux,
 	// Windows, Linux/UNIX (Amazon VPC), SUSE Linux (Amazon VPC),
 	// Windows (Amazon VPC)
-	SpotPriceAutoProduct string `mapstructure:"spot_price_auto_product" required:"false"`
+	SpotPriceAutoProduct string `mapstructure:"spot_price_auto_product" required:"false" undocumented:"true"`
 	// Requires spot_price to be set. Key/value pair tags to apply tags to the
 	// spot request that is issued.
 	SpotTags map[string]string `mapstructure:"spot_tags" required:"false"`

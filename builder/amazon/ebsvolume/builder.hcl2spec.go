@@ -96,7 +96,7 @@ type FlatConfig struct {
 	SourceAmiFilter                           *common.FlatAmiFilterOptions           `mapstructure:"source_ami_filter" required:"false" cty:"source_ami_filter"`
 	SpotInstanceTypes                         []string                               `mapstructure:"spot_instance_types" required:"false" cty:"spot_instance_types"`
 	SpotPrice                                 *string                                `mapstructure:"spot_price" required:"false" cty:"spot_price"`
-	SpotPriceAutoProduct                      *string                                `mapstructure:"spot_price_auto_product" required:"false" cty:"spot_price_auto_product"`
+	SpotPriceAutoProduct                      *string                                `mapstructure:"spot_price_auto_product" required:"false" undocumented:"true" cty:"spot_price_auto_product"`
 	SpotTags                                  map[string]string                      `mapstructure:"spot_tags" required:"false" cty:"spot_tags"`
 	SpotTag                                   []hcl2template.FlatKeyValue            `mapstructure:"spot_tag" required:"false" cty:"spot_tag"`
 	SubnetFilter                              *common.FlatSubnetFilterOptions        `mapstructure:"subnet_filter" required:"false" cty:"subnet_filter"`
