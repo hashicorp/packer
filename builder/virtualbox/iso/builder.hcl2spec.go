@@ -35,6 +35,7 @@ type FlatConfig struct {
 	Format                    *string           `mapstructure:"format" required:"false" cty:"format"`
 	ExportOpts                []string          `mapstructure:"export_opts" required:"false" cty:"export_opts"`
 	OutputDir                 *string           `mapstructure:"output_directory" required:"false" cty:"output_directory"`
+	OutputFilename            *string           `mapstructure:"output_filename" required:"false" cty:"output_filename"`
 	Headless                  *bool             `mapstructure:"headless" required:"false" cty:"headless"`
 	VRDPBindAddress           *string           `mapstructure:"vrdp_bind_address" required:"false" cty:"vrdp_bind_address"`
 	VRDPPortMin               *int              `mapstructure:"vrdp_port_min" required:"false" cty:"vrdp_port_min"`
@@ -156,6 +157,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"format":                       &hcldec.AttrSpec{Name: "format", Type: cty.String, Required: false},
 		"export_opts":                  &hcldec.AttrSpec{Name: "export_opts", Type: cty.List(cty.String), Required: false},
 		"output_directory":             &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
+		"output_filename":              &hcldec.AttrSpec{Name: "output_filename", Type: cty.String, Required: false},
 		"headless":                     &hcldec.AttrSpec{Name: "headless", Type: cty.Bool, Required: false},
 		"vrdp_bind_address":            &hcldec.AttrSpec{Name: "vrdp_bind_address", Type: cty.String, Required: false},
 		"vrdp_port_min":                &hcldec.AttrSpec{Name: "vrdp_port_min", Type: cty.Number, Required: false},
