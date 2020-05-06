@@ -40,7 +40,7 @@ get_prs(){
     done | while read PR_NUM
     do
         if (($DO_PR_CHECK)) && is_doc_or_tech_debt_pr $PR_NUM; then
-            echo "Skipping PR ${PR_NUM}: labeled as tech debt or docs. (aiting a second so we don't get rate-limited...)"
+            echo "Skipping PR ${PR_NUM}: labeled as tech debt or docs. (waiting a second so we don't get rate-limited...)"
             continue
         fi
         echo "https://github.com/hashicorp/packer/pull/${PR_NUM}"
