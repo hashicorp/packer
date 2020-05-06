@@ -402,6 +402,10 @@ type RunConfig struct {
 	//    When using `session_manager` the machine running Packer must have
 	//	  the AWS Session Manager Plugin installed and within the users' or system path.
 	//    https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
+	//    Remote connections via the `session_manager` interface establishes a secure tunnel
+	//    between the local host and the remote host on an available local port to the specified `ssh_port`.
+	//    Upon termination the secure tunnel will be terminated automatically, if however there is a failure in
+	//    terminating the tunnel it will automatically terminate itself after 20 minutes of inactivity.
 	SSHInterface string `mapstructure:"ssh_interface"`
 }
 
