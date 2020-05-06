@@ -5,12 +5,15 @@ package googlecompute
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/hashicorp/packer/common/net"
@@ -65,6 +68,7 @@ type StepStartTunnel struct {
 	IAPConf     *IAPConfig
 	CommConf    *communicator.Config
 	AccountFile string
+	ProjectId   string
 
 	tunnelDriver TunnelDriver
 }
@@ -116,17 +120,37 @@ func (s *StepStartTunnel) createTempGcloudScript(args []string) (string, error) 
 
 	}
 
-	// authenticate to gcloud
-	_, err = writer.WriteString(
-		fmt.Sprintf("gcloud auth activate-service-account --key-file='%s'\n",
-			s.AccountFile))
-	if err != nil {
-		return "", fmt.Errorf("Error preparing gcloud shell script: %s", err)
+	launchTemplate := `
+gcloud auth activate-service-account --key-file='{{.AccountFile}}'
+gcloud config set project {{.ProjectID}}
+{{.Args}}
+`
+	if runtime.GOOS == "windows" {
+		launchTemplate = `
+call gcloud auth activate-service-account --key-file {{.AccountFile}}
+call gcloud config set project {{.ProjectID}}
+call {{.Args}}
+`
 	}
 	// call command
 	args = append([]string{"gcloud"}, args...)
 	argString := strings.Join(args, " ")
-	if _, err := writer.WriteString(argString + "\n"); err != nil {
+
+	var tpl = template.Must(template.New("createTunnel").Parse(launchTemplate))
+	var b bytes.Buffer
+
+	opts := map[string]string{
+		"AccountFile": s.AccountFile,
+		"ProjectID":   s.ProjectId,
+		"Args":        argString,
+	}
+
+	err = tpl.Execute(&b, opts)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if _, err := writer.WriteString(b.String()); err != nil {
 		return "", fmt.Errorf("Error preparing gcloud shell script: %s", err)
 	}
 

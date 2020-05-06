@@ -70,6 +70,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			IAPConf:     &b.config.IAPConfig,
 			CommConf:    &b.config.Comm,
 			AccountFile: b.config.AccountFile,
+			ProjectId:   b.config.ProjectId,
 		},
 		&communicator.StepConnect{
 			Config:      &b.config.Comm,

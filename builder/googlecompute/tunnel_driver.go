@@ -75,7 +75,8 @@ func (t *TunnelDriverLinux) StartTunnel(cancelCtx context.Context, tempScriptFil
 			// "not authorized" and "failed to connect to backend," but after
 			// about a minute of retries this goes away and we're able to
 			// connect.
-			if strings.Contains(lineStderr, "4033") {
+			// 4003: "failed to connect to backend". Network blip.
+			if strings.Contains(lineStderr, "4033") || strings.Contains(lineStderr, "4003") {
 				return RetryableTunnelError{lineStderr}
 			} else {
 				log.Printf("NOT RETRYABLE: %s", lineStderr)
