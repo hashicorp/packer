@@ -1,17 +1,12 @@
 package googlecompute
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"runtime"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
 )
@@ -73,7 +68,7 @@ gcloud compute start-iap-tunnel fakeinstance-12345 1234 --local-host-port=localh
 `
 	if runtime.GOOS == "windows" {
 		expected = `
-call gcloud auth activate-service-account --key-file /path/to/account_file.json
+call gcloud auth activate-service-account --key-file "/path/to/account_file.json"
 call gcloud config set project fake-project-123
 call gcloud compute start-iap-tunnel fakeinstance-12345 1234 --local-host-port=localhost:8774 --zone us-central-b
 `
