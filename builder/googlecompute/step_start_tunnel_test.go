@@ -1,12 +1,17 @@
 package googlecompute
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"runtime"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
 )
