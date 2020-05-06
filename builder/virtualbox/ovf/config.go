@@ -30,14 +30,23 @@ type Config struct {
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 	vboxcommon.GuestAdditionsConfig `mapstructure:",squash"`
 	// The checksum for the source_path file. The type of the checksum is
-	// specified within the checksum as a prefix, ex: "md5:{$checksum}". The
-	// type of the checksum can also be omitted and Packer will try to infer it
-	// based on string length. Valid values are "none", "{$checksum}",
-	// "{$path}" "md5:{$checksum}", "sha1:{$checksum}", "sha256:{$checksum}",
-	// "sha512:{$checksum}" or "file:{$path}". Although the checksum will
-	// not be verified when it is set to "none", this is not recommended since
-	// these files can be very large and corruption does happen from time to
-	// time.
+	// specified within the checksum field as a prefix, ex: "md5:{$checksum}".
+	// The type of the checksum can also be omitted and Packer will try to
+	// infer it based on string length. Valid values are "none", "{$checksum}",
+	// "md5:{$checksum}", "sha1:{$checksum}", "sha256:{$checksum}",
+	// "sha512:{$checksum}" or "file:{$path}". Here is a list of valid checksum
+	// values:
+	//  * md5:090992ba9fd140077b0661cb75f7ce13
+	//  * 090992ba9fd140077b0661cb75f7ce13
+	//  * sha1:ebfb681885ddf1234c18094a45bbeafd91467911
+	//  * ebfb681885ddf1234c18094a45bbeafd91467911
+	//  * sha256:ed363350696a726b7932db864dda019bd2017365c9e299627830f06954643f93
+	//  * ed363350696a726b7932db864dda019bd2017365c9e299627830f06954643f93
+	//  * file:http://releases.ubuntu.com/20.04/MD5SUMS
+	//  * none
+	// Although the checksum will not be verified when it is set to "none",
+	// this is not recommended since these files can be very large and
+	// corruption does happen from time to time.
 	Checksum string `mapstructure:"checksum" required:"true"`
 	// The method by which guest additions are
 	// made available to the guest for installation. Valid options are upload,
