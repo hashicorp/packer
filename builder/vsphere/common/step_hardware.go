@@ -32,7 +32,7 @@ type HardwareConfig struct {
 	RAMReserveAll bool `mapstructure:"RAM_reserve_all"`
 	// Enable RAM hot plug setting for virtual machine. Defaults to `false`.
 	MemoryHotAddEnabled bool `mapstructure:"RAM_hot_plug"`
-	// Amount of video memory in MB.
+	// Amount of video memory in KB.
 	VideoRAM int64 `mapstructure:"video_ram"`
 	// vGPU profile for accelerated graphics. See [NVIDIA GRID vGPU documentation](https://docs.nvidia.com/grid/latest/grid-vgpu-user-guide/index.html#configure-vmware-vsphere-vm-with-vgpu)
 	// for examples of profile names. Defaults to none.
