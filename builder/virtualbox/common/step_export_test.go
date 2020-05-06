@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -57,7 +58,7 @@ func TestStepExport_OutputPath(t *testing.T) {
 				OutputDir:      "output-dir",
 				OutputFilename: "output-filename",
 			},
-			Expected: "output-dir/output-filename.ova",
+			Expected: filepath.Join("output-dir", "output-filename.ova"),
 			Reason:   "output_filename should not be vmName if set.",
 		},
 		{
@@ -66,7 +67,7 @@ func TestStepExport_OutputPath(t *testing.T) {
 				OutputDir:      "output-dir",
 				OutputFilename: "",
 			},
-			Expected: "output-dir/foo.ovf",
+			Expected: filepath.Join("output-dir", "foo.ovf"),
 			Reason:   "output_filename should default to vmName.",
 		},
 	}
