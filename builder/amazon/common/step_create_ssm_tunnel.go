@@ -50,15 +50,14 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 	}
 	s.instanceId = aws.StringValue(instance.InstanceId)
 
-	log.Printf("Starting PortForwarding session to instance %q on local port %q to remote port %q", s.instanceId, s.LocalPortNumber, s.RemotePortNumber)
+	log.Printf("Starting PortForwarding session to instance %q on local port %d to remote port %d", s.instanceId, s.LocalPortNumber, s.RemotePortNumber)
 	input := s.BuildTunnelInputForInstance(s.instanceId)
 	ssmconn := ssm.New(s.AWSSession)
-	var output *ssm.StartSessionOutput
 	err := retry.Config{
 		ShouldRetry: func(err error) bool { return isAWSErr(err, "TargetNotConnected", "") },
 		RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 60 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) (err error) {
-		output, err = ssmconn.StartSessionWithContext(ctx, &input)
+		s.session, err = ssmconn.StartSessionWithContext(ctx, &input)
 		return err
 	})
 
@@ -71,7 +70,7 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 
 	driver := SSMDriver{
 		Region:          s.Region,
-		Session:         output,
+		Session:         s.session,
 		SessionParams:   input,
 		SessionEndpoint: ssmconn.Endpoint,
 	}
@@ -83,27 +82,21 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 		return multistep.ActionHalt
 	}
 
-	ui.Message(fmt.Sprintf("PortForwarding session tunnel to instance %q established!", s.instanceId))
+	ui.Message(fmt.Sprintf("PortForwarding session %q to instance %q has been started", aws.StringValue(s.session.SessionId), s.instanceId))
 	state.Put("sessionPort", s.LocalPortNumber)
-
 	return multistep.ActionContinue
 }
 
 // Cleanup terminates an active session on AWS, which in turn terminates the associated tunnel process running on the local machine.
 func (s *StepCreateSSMTunnel) Cleanup(state multistep.StateBag) {
-	if s.session == nil {
-		return
-	}
-
 	ui := state.Get("ui").(packer.Ui)
+
 	ssmconn := ssm.New(s.AWSSession)
 	_, err := ssmconn.TerminateSession(&ssm.TerminateSessionInput{SessionId: s.session.SessionId})
 	if err != nil {
-		msg := fmt.Sprintf("Error terminating SSM Session %q. Please terminate the session manually: %s",
-			aws.StringValue(s.session.SessionId), err)
+		msg := fmt.Sprintf("Error terminating SSM Session %q. Please terminate the session manually: %s", aws.StringValue(s.session.SessionId), err)
 		ui.Error(msg)
 	}
-
 }
 
 // ConfigureLocalHostPort finds an available port on the localhost that can be used for the remote tunnel.
