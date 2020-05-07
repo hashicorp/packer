@@ -68,6 +68,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	importRepo := p.config.Repository
 	var lastTaggedRepo = importRepo
+	RepoTags := []string{}
 	if len(p.config.Tag) > 0 {
 		for _, tag := range p.config.Tag {
 			local := importRepo + ":" + tag
@@ -79,6 +80,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 				return nil, false, true, err
 			}
 
+			RepoTags = append(RepoTags, local)
 			lastTaggedRepo = local
 		}
 	} else {
@@ -95,6 +97,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		BuilderIdValue: BuilderId,
 		Driver:         driver,
 		IdValue:        lastTaggedRepo,
+		StateData:      map[string]interface{}{"docker_tags": RepoTags},
 	}
 
 	// If we tag an image and then delete it, there was no point in creating the
