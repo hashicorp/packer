@@ -6,6 +6,8 @@
 * ** New post-processor** Yandex Export [GH-9124]
 
 ### IMPROVEMENTS:
+* builder/virtualbox: Add `output_filename` config option to allow to set a custom filename 
+ instead of forcing to be the same as vm_name. [GH-9174]
 
 ### BUG FIXES:
 * post-processor/vsphere-template: Add VSphere builder's artifact to
