@@ -33,17 +33,16 @@ func (a *ImportArtifact) String() string {
 	tags := a.StateData["docker_tags"]
 	if tags == nil {
 		return fmt.Sprintf("Imported Docker image: %s", a.Id())
-	} else {
-		cast := tags.([]interface{})
-		names := []string{}
-		for _, name := range cast {
-			if n, ok := name.(string); ok {
-				names = append(names, n)
-			}
-		}
-		return fmt.Sprintf("Imported Docker image: %s with tags %s",
-			a.Id(), strings.Join(names, " "))
 	}
+	cast := tags.([]interface{})
+	names := []string{}
+	for _, name := range cast {
+		if n, ok := name.(string); ok {
+			names = append(names, n)
+		}
+	}
+	return fmt.Sprintf("Imported Docker image: %s with tags %s",
+		a.Id(), strings.Join(names, " "))
 }
 
 func (a *ImportArtifact) State(name string) interface{} {
