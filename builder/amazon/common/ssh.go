@@ -29,7 +29,7 @@ func SSHHost(e ec2Describer, sshInterface string, host string) func(multistep.St
 		}
 
 		if sshInterface == "session_manager" {
-			return "127.0.0.1", nil
+			return "localhost", nil
 		}
 
 		const tries = 2

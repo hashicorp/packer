@@ -13,7 +13,7 @@ const (
 	publicIP        = "192.168.1.1"
 	privateDNS      = "private.dns.test"
 	publicDNS       = "public.dns.test"
-	localhost       = "127.0.0.1"
+	localhost       = "localhost"
 	sshHostTemplate = "custom.host.value"
 )
 
