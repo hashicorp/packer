@@ -467,7 +467,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 
 		if c.IamInstanceProfile == "" && c.TemporaryIamInstanceProfilePolicyDocument == nil {
-			msg := fmt.Errorf(`no iam_instance_profile defined; when using %q a valid instance profile with AmazonSSMManagedInstanceCore permissions is required`, c.SSHInterface)
+			msg := fmt.Errorf(`no iam_instance_profile defined; when using %q a valid instance profile with AmazonSSMManagedInstanceCore permissions is required. Alternatively a temporary_iam_instance_profile_policy_document can be used.`, c.SSHInterface)
 			errs = append(errs, msg)
 		}
 	}

@@ -7,6 +7,10 @@ To use the session manager as the connection interface for the SSH communicator 
  * `ssh_interface`: The ssh interface must be set to "session_manager", when using this option the builder will no to create an SSM tunnel to the configured `ssh_port` (defaults to 22) on the remote host.
  * `iam_instance_profile`: A valid instance profile granting Systems Manger permissions to manage the remote instance is required in order for the aws ssm-agent to start and stop session connections. See below for more details on IAM instance profile for Systems Manager(#iam-instance-profile-for-systems-manager).
 
+#### Optional
+ * `temporary_iam_instance_profile_policy_document`: A temporary instance profile policy document can be used of an existing `iam_instance_profile`.
+ * `session_manager_port`: A local port on the host machine that should be used as the local end of the session tunnel to the remote host. If not specified Packer will find an available port to use.
+
 ```json
 {
   "builders": [
