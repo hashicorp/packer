@@ -407,6 +407,11 @@ type RunConfig struct {
 	//    Upon termination the secure tunnel will be terminated automatically, if however there is a failure in
 	//    terminating the tunnel it will automatically terminate itself after 20 minutes of inactivity.
 	SSHInterface string `mapstructure:"ssh_interface"`
+
+	// Which port to connect the local end of the session tunnel to. If
+	// left blank, Packer will choose a port for you from available ports.
+	// This option is on used when `ssh_interface` is set `session_manager`.
+	SessionManagerPort int `mapstructure:"session_manager_port"`
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {

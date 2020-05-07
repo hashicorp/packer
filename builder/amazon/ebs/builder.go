@@ -259,6 +259,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&awscommon.StepCreateSSMTunnel{
 			AWSSession:       session,
 			Region:           *ec2conn.Config.Region,
+			LocalPortNumber:  b.config.SessionManagerPort,
 			RemotePortNumber: b.config.Comm.Port(),
 			SSMAgentEnabled:  b.config.SSMAgentEnabled(),
 		},
