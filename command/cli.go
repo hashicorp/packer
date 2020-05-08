@@ -41,6 +41,9 @@ func ConfigType(args ...string) (string, error) {
 
 // NewMetaArgs parses cli args and put possible values
 func (ma *MetaArgs) AddFlagSets(fs *flag.FlagSet) {
+	if ma == nil {
+		ma = &MetaArgs{}
+	}
 	fs.Var((*sliceflag.StringFlag)(&ma.Only), "only", "")
 	fs.Var((*sliceflag.StringFlag)(&ma.Except), "except", "")
 	fs.Var((*kvflag.Flag)(&ma.Vars), "var", "")
@@ -57,6 +60,9 @@ type MetaArgs struct {
 }
 
 func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
+	if ba == nil {
+		ba = &BuildArgs{}
+	}
 	flags.BoolVar(&ba.Color, "color", true, "")
 	flags.BoolVar(&ba.Debug, "debug", false, "")
 	flags.BoolVar(&ba.Force, "force", false, "")
@@ -83,6 +89,9 @@ type BuildArgs struct {
 type ConsoleArgs struct{ MetaArgs }
 
 func (fa *FixArgs) AddFlagSets(flags *flag.FlagSet) {
+	if fa == nil {
+		fa = &FixArgs{}
+	}
 	flags.BoolVar(&fa.Validate, "validate", true, "")
 
 	fa.MetaArgs.AddFlagSets(flags)
@@ -95,6 +104,9 @@ type FixArgs struct {
 }
 
 func (va *ValidateArgs) AddFlagSets(flags *flag.FlagSet) {
+	if va == nil {
+		va = &ValidateArgs{}
+	}
 	flags.BoolVar(&va.SyntaxOnly, "syntax-only", true, "")
 
 	va.MetaArgs.AddFlagSets(flags)

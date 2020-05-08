@@ -8,7 +8,6 @@ import (
 	"os"
 
 	kvflag "github.com/hashicorp/packer/helper/flag-kv"
-	sliceflag "github.com/hashicorp/packer/helper/flag-slice"
 	"github.com/hashicorp/packer/helper/wrappedstreams"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
@@ -79,19 +78,6 @@ func (m *Meta) Core(tpl *template.Template) (*packer.Core, error) {
 // build settings on the commands that don't handle builds.
 func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 	f := flag.NewFlagSet(n, flag.ContinueOnError)
-
-	// FlagSetBuildFilter tells us to enable the settings for selecting
-	// builds we care about.
-	if fs&FlagSetBuildFilter != 0 {
-		f.Var((*sliceflag.StringFlag)(&m.CoreConfig.Except), "except", "")
-		f.Var((*sliceflag.StringFlag)(&m.CoreConfig.Only), "only", "")
-	}
-
-	// FlagSetVars tells us what variables to use
-	if fs&FlagSetVars != 0 {
-		f.Var((*kvflag.Flag)(&m.flagVars), "var", "")
-		f.Var((*kvflag.StringSlice)(&m.varFiles), "var-file", "")
-	}
 
 	// Create an io.Writer that writes to our Ui properly for errors.
 	// This is kind of a hack, but it does the job. Basically: create
