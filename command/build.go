@@ -6,12 +6,9 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"os"
-	"os/signal"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
@@ -29,30 +26,15 @@ type BuildCommand struct {
 }
 
 func (c *BuildCommand) Run(args []string) int {
-	buildCtx, cancelBuildCtx := context.WithCancel(context.Background())
-	// Handle interrupts for this build
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
-	defer func() {
-		cancelBuildCtx()
-		signal.Stop(sigCh)
-		close(sigCh)
-	}()
-	go func() {
-		select {
-		case sig := <-sigCh:
-			if sig == nil {
-				// context got cancelled and this closed chan probably
-				// triggered first
-				return
-			}
-			c.Ui.Error(fmt.Sprintf("Cancelling build after receiving %s", sig))
-			cancelBuildCtx()
-		case <-buildCtx.Done():
-		}
-	}()
+	buildCtx, cleanup := handleTermInterrupt(c.Ui)
+	defer cleanup()
 
-	return c.RunContext(buildCtx, args)
+	cfg, ret := c.ParseArgs(args)
+	if ret != 0 {
+		return ret
+	}
+
+	return c.RunContext(buildCtx, cfg)
 }
 
 // Config is the command-configuration parsed from the command line.
@@ -207,11 +189,7 @@ func (m *Meta) GetConfigFromJSON(path string) (BuildStarter, int) {
 	}, ret
 }
 
-func (c *BuildCommand) RunContext(buildCtx context.Context, args []string) int {
-	cfg, ret := c.ParseArgs(args)
-	if ret != 0 {
-		return ret
-	}
+func (c *BuildCommand) RunContext(buildCtx context.Context, cfg Config) int {
 
 	packerStarter, ret := c.GetConfig(cfg.Path)
 	if ret != 0 {

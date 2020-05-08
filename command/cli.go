@@ -71,7 +71,7 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 
 func (ba *BuildArgs) ParseArgvs(args []string) int {
 	flags := flag.NewFlagSet("build", flag.ContinueOnError)
-	flags.Usage = func() { ba.Ui.Say(ba.Help()) }
+	// flags.Usage = func() { ba.Ui.Say(ba.Help()) }
 	ba.AddFlagSets(flags)
 	err := flags.Parse(args)
 	if err != nil {
@@ -96,7 +96,7 @@ type BuildArgs struct {
 
 func (ca *ConsoleArgs) ParseArgvs(args []string) int {
 	flags := flag.NewFlagSet("console", flag.ContinueOnError)
-	flags.Usage = func() { ca.Ui.Say(ca.Help()) }
+	// flags.Usage = func() { ca.Ui.Say(ca.Help()) }
 	ca.AddFlagSets(flags)
 	err := flags.Parse(args)
 	if err != nil {
@@ -118,7 +118,7 @@ func (fa *FixArgs) AddFlagSets(flags *flag.FlagSet) {
 
 func (fa *FixArgs) ParseArgvs(args []string) int {
 	flags := flag.NewFlagSet("fix", flag.ContinueOnError)
-	flags.Usage = func() { fa.Ui.Say(fa.Help()) }
+	// flags.Usage = func() { fa.Ui.Say(fa.Help()) }
 	fa.AddFlagSets(flags)
 	err := flags.Parse(args)
 	if err != nil {
@@ -143,7 +143,7 @@ func (va *ValidateArgs) AddFlagSets(flags *flag.FlagSet) {
 
 func (va *ValidateArgs) ParseArgvs(args []string) int {
 	flags := flag.NewFlagSet("validate", flag.ContinueOnError)
-	flags.Usage = func() { va.Ui.Say(va.Help()) }
+	// flags.Usage = func() { va.Ui.Say(va.Help()) }
 	va.AddFlagSets(flags)
 	err := flags.Parse(args)
 	if err != nil {
