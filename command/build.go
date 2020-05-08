@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/hashicorp/packer/hcl2template"
-	"github.com/hashicorp/packer/helper/enumflag"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
 	"golang.org/x/sync/semaphore"
@@ -37,34 +36,15 @@ func (c *BuildCommand) Run(args []string) int {
 	return c.RunContext(buildCtx, cfg)
 }
 
-// Config is the command-configuration parsed from the command line.
-type Config struct {
-	Color, Debug, Force, Timestamp bool
-	ParallelBuilds                 int64
-	OnError                        string
-	Path                           string
-}
-
-func (c *BuildCommand) ParseArgs(args []string) (Config, int) {
-	var cfg Config
-	var parallel bool
+func (c *BuildCommand) ParseArgs(args []string) (*BuildArgs, int) {
+	var cfg *BuildArgs
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
-	flags.BoolVar(&cfg.Color, "color", true, "")
-	flags.BoolVar(&cfg.Debug, "debug", false, "")
-	flags.BoolVar(&cfg.Force, "force", false, "")
-	flags.BoolVar(&cfg.Timestamp, "timestamp-ui", false, "")
-	flagOnError := enumflag.New(&cfg.OnError, "cleanup", "abort", "ask")
-	flags.Var(flagOnError, "on-error", "")
-	flags.BoolVar(&parallel, "parallel", true, "")
-	flags.Int64Var(&cfg.ParallelBuilds, "parallel-builds", 0, "")
+	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
 		return cfg, 1
 	}
 
-	if parallel == false && cfg.ParallelBuilds == 0 {
-		cfg.ParallelBuilds = 1
-	}
 	if cfg.ParallelBuilds < 1 {
 		cfg.ParallelBuilds = math.MaxInt64
 	}
@@ -78,7 +58,7 @@ func (c *BuildCommand) ParseArgs(args []string) (Config, int) {
 	return cfg, 0
 }
 
-func (m *Meta) GetConfigFromHCL(path string) (BuildStarter, int) {
+func (m *Meta) GetConfigFromHCL(path string) (packer.BuildGetter, int) {
 	parser := &hcl2template.Parser{
 		Parser:                hclparse.NewParser(),
 		BuilderSchemas:        m.CoreConfig.Components.BuilderStore,
@@ -87,74 +67,50 @@ func (m *Meta) GetConfigFromHCL(path string) (BuildStarter, int) {
 	}
 
 	cfg, diags := parser.Parse(path, m.varFiles, m.flagVars)
-	{
-		// write HCL errors/diagnostics if any.
-		b := bytes.NewBuffer(nil)
-		err := hcl.NewDiagnosticTextWriter(b, parser.Files(), 80, false).WriteDiagnostics(diags)
-		if err != nil {
-			m.Ui.Error("could not write diagnostic: " + err.Error())
-			return nil, 1
-		}
-		if b.Len() != 0 {
-			m.Ui.Message(b.String())
-		}
-	}
-	ret := 0
-	if diags.HasErrors() {
-		ret = 1
-	}
+	return cfg, writeDiags(m.Ui, parser.Files(), diags)
+}
 
-	return func(opts buildStarterOptions) ([]packer.Build, int) {
-		builds, diags := cfg.GetBuilds(opts.only, opts.except)
-		{
-			// write HCL errors/diagnostics if any.
-			b := bytes.NewBuffer(nil)
-			err := hcl.NewDiagnosticTextWriter(b, parser.Files(), 80, false).WriteDiagnostics(diags)
-			if err != nil {
-				m.Ui.Error("could not write diagnostic: " + err.Error())
-				return nil, 1
-			}
-			if b.Len() != 0 {
-				m.Ui.Message(b.String())
-			}
-		}
+func writeDiags(ui packer.Ui, files map[string]*hcl.File, diags hcl.Diagnostics) int {
+	// write HCL errors/diagnostics if any.
+	b := bytes.NewBuffer(nil)
+	err := hcl.NewDiagnosticTextWriter(b, files, 80, false).WriteDiagnostics(diags)
+	if err != nil {
+		ui.Error("could not write diagnostic: " + err.Error())
+		return 1
+	}
+	if b.Len() != 0 {
 		if diags.HasErrors() {
-			ret = 1
+			ui.Error(b.String())
+			return 1
 		}
-
-		return builds, ret
-	}, ret
+		ui.Say(b.String())
+	}
+	return 0
 }
 
-// GetBuilds will start all packer plugins ( builder, provisioner and
-// post-processor ) referenced in the config. These plugins will be in a
-// waiting to execute mode. Upon error a non nil error will be returned.
-type BuildStarter func(buildStarterOptions) ([]packer.Build, int)
-
-type buildStarterOptions struct {
-	except, only []string
-}
-
-func (m *Meta) GetConfig(path string) (BuildStarter, int) {
-	isHCLLoaded, err := isHCLLoaded(path)
-	if path != "-" && err != nil {
-		m.Ui.Error(fmt.Sprintf("could not tell whether %s is hcl enabled: %s", path, err))
+func (m *Meta) GetConfig(path ...string) (packer.BuildGetter, int) {
+	cfgType, err := ConfigType(path...)
+	if err != nil {
+		m.Ui.Error(fmt.Sprintf("could not tell config type: %s", err))
 		return nil, 1
 	}
-	if isHCLLoaded {
-		return m.GetConfigFromHCL(path)
-	}
 
-	// TODO: uncomment once we've polished HCL a bit more.
-	// c.Ui.Say(`Legacy JSON Configuration Will Be Used.
-	// The template will be parsed in the legacy configuration style. This style
-	// will continue to work but users are encouraged to move to the new style.
-	// See: https://packer.io/guides/hcl
-	// `)
-	return m.GetConfigFromJSON(path)
+	switch cfgType {
+	case "hcl":
+		// TODO(azr): allow to pass a slice of files here.
+		return m.GetConfigFromHCL(path[0])
+	default:
+		// TODO: uncomment once we've polished HCL a bit more.
+		// c.Ui.Say(`Legacy JSON Configuration Will Be Used.
+		// The template will be parsed in the legacy configuration style. This style
+		// will continue to work but users are encouraged to move to the new style.
+		// See: https://packer.io/guides/hcl
+		// `)
+		return m.GetConfigFromJSON(path[0])
+	}
 }
 
-func (m *Meta) GetConfigFromJSON(path string) (BuildStarter, int) {
+func (m *Meta) GetConfigFromJSON(path string) (packer.BuildGetter, int) {
 	// Parse the template
 	tpl, err := template.ParseFile(path)
 	if err != nil {
@@ -169,37 +125,23 @@ func (m *Meta) GetConfigFromJSON(path string) (BuildStarter, int) {
 		m.Ui.Error(err.Error())
 		ret = 1
 	}
-	return func(opts buildStarterOptions) ([]packer.Build, int) {
-		ret := 0
-		buildNames := core.BuildNames(opts.only, opts.except)
-		builds := make([]packer.Build, 0, len(buildNames))
-		for _, n := range buildNames {
-			b, err := core.Build(n)
-			if err != nil {
-				m.Ui.Error(fmt.Sprintf(
-					"Failed to initialize build '%s': %s",
-					n, err))
-				ret = 1
-				continue
-			}
-
-			builds = append(builds, b)
-		}
-		return builds, ret
-	}, ret
+	return core, ret
 }
 
-func (c *BuildCommand) RunContext(buildCtx context.Context, cfg Config) int {
-
+func (c *BuildCommand) RunContext(buildCtx context.Context, cfg *BuildArgs) int {
 	packerStarter, ret := c.GetConfig(cfg.Path)
 	if ret != 0 {
 		return ret
 	}
 
-	builds, ret := packerStarter(buildStarterOptions{
-		except: c.CoreConfig.Except,
-		only:   c.CoreConfig.Only,
+	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
+		Only:   cfg.Only,
+		Except: cfg.Except,
 	})
+
+	if ret := writeDiags(c.Ui, nil, diags); ret != 0 {
+		return ret
+	}
 
 	if cfg.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
@@ -230,7 +172,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cfg Config) int {
 			}
 		}
 		// Now add timestamps if requested
-		if cfg.Timestamp {
+		if cfg.TimestampUi {
 			ui = &packer.TimestampedUi{
 				Ui: ui,
 			}

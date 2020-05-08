@@ -12,6 +12,8 @@ import (
 // PackerConfig represents a loaded Packer HCL config. It will contain
 // references to all possible blocks of the allowed configuration.
 type PackerConfig struct {
+	parser *Parser
+
 	// Directory where the config files are defined
 	Basedir string
 
@@ -254,7 +256,7 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source *SourceBlock, blocks 
 // GetBuilds returns a list of packer Build based on the HCL2 parsed build
 // blocks. All Builders, Provisioners and Post Processors will be started and
 // configured.
-func (cfg *PackerConfig) GetBuilds(only, except []string) ([]packer.Build, hcl.Diagnostics) {
+func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build, hcl.Diagnostics) {
 	res := []packer.Build{}
 	var diags hcl.Diagnostics
 
@@ -274,8 +276,8 @@ func (cfg *PackerConfig) GetBuilds(only, except []string) ([]packer.Build, hcl.D
 			buildName := fmt.Sprintf("%s.%s", src.Type, src.Name)
 
 			// -only
-			if len(only) > 0 {
-				onlyGlobs, diags := convertFilterOption(only, "only")
+			if len(opts.Only) > 0 {
+				onlyGlobs, diags := convertFilterOption(opts.Only, "only")
 				if diags.HasErrors() {
 					return nil, diags
 				}
@@ -292,8 +294,8 @@ func (cfg *PackerConfig) GetBuilds(only, except []string) ([]packer.Build, hcl.D
 			}
 
 			// -except
-			if len(except) > 0 {
-				exceptGlobs, diags := convertFilterOption(except, "except")
+			if len(opts.Except) > 0 {
+				exceptGlobs, diags := convertFilterOption(opts.Except, "except")
 				if diags.HasErrors() {
 					return nil, diags
 				}

@@ -11,6 +11,7 @@ import (
 
 	multierror "github.com/hashicorp/go-multierror"
 	version "github.com/hashicorp/go-version"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/template"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -196,6 +197,25 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 	}
 
 	return cbp, nil
+}
+
+func (c *Core) GetBuilds(opts GetBuildsOptions) ([]Build, hcl.Diagnostics) {
+	buildNames := c.BuildNames(opts.Only, opts.Except)
+	builds := []Build{}
+	diags := hcl.Diagnostics{}
+	for _, n := range buildNames {
+		b, err := c.Build(n)
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  fmt.Sprintf("Failed to initialize build %q", n),
+				Detail:   err.Error(),
+			})
+			continue
+		}
+		builds = append(builds, b)
+	}
+	return builds, diags
 }
 
 // Build returns the Build object for the given name.
