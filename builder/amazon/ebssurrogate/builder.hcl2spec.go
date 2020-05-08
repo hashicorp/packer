@@ -148,6 +148,7 @@ type FlatConfig struct {
 	WinRMInsecure                             *bool                                  `mapstructure:"winrm_insecure" cty:"winrm_insecure"`
 	WinRMUseNTLM                              *bool                                  `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm"`
 	SSHInterface                              *string                                `mapstructure:"ssh_interface" cty:"ssh_interface"`
+	SessionManagerPort                        *int                                   `mapstructure:"session_manager_port" cty:"session_manager_port"`
 	AMIName                                   *string                                `mapstructure:"ami_name" required:"true" cty:"ami_name"`
 	AMIDescription                            *string                                `mapstructure:"ami_description" required:"false" cty:"ami_description"`
 	AMIVirtType                               *string                                `mapstructure:"ami_virtualization_type" required:"false" cty:"ami_virtualization_type"`
@@ -282,6 +283,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_insecure":                        &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":                        &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
 		"ssh_interface":                         &hcldec.AttrSpec{Name: "ssh_interface", Type: cty.String, Required: false},
+		"session_manager_port":                  &hcldec.AttrSpec{Name: "session_manager_port", Type: cty.Number, Required: false},
 		"ami_name":                              &hcldec.AttrSpec{Name: "ami_name", Type: cty.String, Required: false},
 		"ami_description":                       &hcldec.AttrSpec{Name: "ami_description", Type: cty.String, Required: false},
 		"ami_virtualization_type":               &hcldec.AttrSpec{Name: "ami_virtualization_type", Type: cty.String, Required: false},

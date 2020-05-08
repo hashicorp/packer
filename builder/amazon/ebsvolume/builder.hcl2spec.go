@@ -150,6 +150,7 @@ type FlatConfig struct {
 	WinRMInsecure                             *bool                                  `mapstructure:"winrm_insecure" cty:"winrm_insecure"`
 	WinRMUseNTLM                              *bool                                  `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm"`
 	SSHInterface                              *string                                `mapstructure:"ssh_interface" cty:"ssh_interface"`
+	SessionManagerPort                        *int                                   `mapstructure:"session_manager_port" cty:"session_manager_port"`
 	AMIENASupport                             *bool                                  `mapstructure:"ena_support" required:"false" cty:"ena_support"`
 	AMISriovNetSupport                        *bool                                  `mapstructure:"sriov_support" required:"false" cty:"sriov_support"`
 	VolumeMappings                            []FlatBlockDevice                      `mapstructure:"ebs_volumes" required:"false" cty:"ebs_volumes"`
@@ -263,6 +264,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_insecure":                        &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":                        &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
 		"ssh_interface":                         &hcldec.AttrSpec{Name: "ssh_interface", Type: cty.String, Required: false},
+		"session_manager_port":                  &hcldec.AttrSpec{Name: "session_manager_port", Type: cty.Number, Required: false},
 		"ena_support":                           &hcldec.AttrSpec{Name: "ena_support", Type: cty.Bool, Required: false},
 		"sriov_support":                         &hcldec.AttrSpec{Name: "sriov_support", Type: cty.Bool, Required: false},
 		"ebs_volumes":                           &hcldec.BlockListSpec{TypeName: "ebs_volumes", Nested: hcldec.ObjectSpec((*FlatBlockDevice)(nil).HCL2Spec())},
