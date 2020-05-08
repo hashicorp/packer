@@ -14,13 +14,13 @@ type BuildGetter interface {
 	GetBuilds(GetBuildsOptions) ([]Build, hcl.Diagnostics)
 }
 
-//go:generate enumer -type FixMode
+//go:generate enumer -type FixConfigMode
 type FixConfigMode int
 
 const (
-	Stdout  FixConfigMode = 0
-	Inplace FixConfigMode = 1
-	Diff    FixConfigMode = 2
+	Stdout FixConfigMode = iota
+	Inplace
+	Diff
 )
 
 type FixConfigOptions struct {
