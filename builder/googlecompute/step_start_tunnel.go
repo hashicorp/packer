@@ -138,25 +138,33 @@ type StepStartTunnel struct {
 }
 
 func (s *StepStartTunnel) ConfigureLocalHostPort(ctx context.Context) error {
+	minPortNumber, maxPortNumber := 8000, 9000
+
 	if s.IAPConf.IAPLocalhostPort == 0 {
+		minPortNumber = s.IAPConf.IAPLocalhostPort
+		maxPortNumber = minPortNumber
+		log.Printf("Using TCP port for %d IAP proxy", s.IAPConf.IAPLocalhostPort)
+	} else {
 		log.Printf("Finding an available TCP port for IAP proxy")
-		l, err := net.ListenRangeConfig{
-			Min:     8000,
-			Max:     9000,
-			Addr:    "0.0.0.0",
-			Network: "tcp",
-		}.Listen(ctx)
-
-		if err != nil {
-			err := fmt.Errorf("error finding an available port to initiate a session tunnel: %s", err)
-			return err
-		}
-
-		s.IAPConf.IAPLocalhostPort = l.Port
-		l.Close()
-		log.Printf("Setting up proxy to listen on localhost at %d",
-			s.IAPConf.IAPLocalhostPort)
 	}
+
+	l, err := net.ListenRangeConfig{
+		Min:     minPortNumber,
+		Max:     maxPortNumber,
+		Addr:    "0.0.0.0",
+		Network: "tcp",
+	}.Listen(ctx)
+
+	if err != nil {
+		err := fmt.Errorf("error finding an available port to initiate a session tunnel: %s", err)
+		return err
+	}
+
+	s.IAPConf.IAPLocalhostPort = l.Port
+	l.Close()
+	log.Printf("Setting up proxy to listen on localhost at %d",
+		s.IAPConf.IAPLocalhostPort)
+
 	return nil
 }
 
