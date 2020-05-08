@@ -12,7 +12,7 @@ import (
 // PackerConfig represents a loaded Packer HCL config. It will contain
 // references to all possible blocks of the allowed configuration.
 type PackerConfig struct {
-	parser *Parser
+	// parser *Parser
 
 	// Directory where the config files are defined
 	Basedir string
