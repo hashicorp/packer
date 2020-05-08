@@ -62,7 +62,11 @@ func TestBuildCommand_RunContext_CtxCancel(t *testing.T) {
 			codeC := make(chan int)
 			go func() {
 				defer close(codeC)
-				codeC <- c.RunContext(ctx, tt.args)
+				cfg, ret := c.ParseArgs(tt.args)
+				if ret != 0 {
+					t.Fatal("ParseArgs failed.")
+				}
+				codeC <- c.RunContext(ctx, cfg)
 			}()
 			t.Logf("waiting for passing tests if any")
 			b.wg.Wait() // ran `tt.parallelPassingTests` times
