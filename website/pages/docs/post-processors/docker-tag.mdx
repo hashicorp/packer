@@ -30,7 +30,9 @@ settings are optional.
 
 - `repository` (string) - The repository of the image.
 
-- `tag` (array of strings) - The tag for the image. By default this is not set.
+- `tags` (array of strings) - A list of tags for the image. By default this is
+  not set. Valid examples include: `"tags": "mytag"` or
+  `"tags": ["mytag-1", "mytag-2"]`
 
 - `force` (boolean) - If true, this post-processor forcibly tag the image
   even if tag name is collided. Default to `false`. But it will be ignored if
