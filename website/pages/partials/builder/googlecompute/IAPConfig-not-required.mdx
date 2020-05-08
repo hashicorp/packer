@@ -1,0 +1,25 @@
+<!-- Code generated from the comments of the IAPConfig struct in builder/googlecompute/step_start_tunnel.go; DO NOT EDIT MANUALLY -->
+
+-   `use_iap` (bool) - Whether to use an IAP proxy.
+    Prerequisites and limitations for using IAP:
+    - You must manually enable the IAP API in the Google Cloud console.
+    - You must have the gcloud sdk installed on the computer running Packer.
+    - You must be using a Service Account with a credentials file (using the
+    	 account_file option in the Packer template)
+    - This is currently only implemented for the SSH communicator, not the
+      WinRM Communicator.
+    - You must add the given service account to project level IAP permissions
+      in https://console.cloud.google.com/security/iap. To do so, click
+      "project" > "SSH and TCP resoures" > "All Tunnel Resources" >
+      "Add Member". Then add your service account and choose the role
+      "IAP-secured Tunnel User" and add any conditions you may care about.
+    
+-   `iap_localhost_port` (int) - Which port to connect the local end of the IAM localhost proxy to. If
+    left blank, Packer will choose a port for you from available ports.
+    
+-   `iap_hashbang` (string) - What "hashbang" to use to invoke script that sets up gcloud.
+    Default: "/bin/sh"
+    
+-   `iap_ext` (string) - What file extension to use for script that sets up gcloud.
+    Default: ".sh"
+    

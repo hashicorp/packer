@@ -18,6 +18,7 @@ type FlatConfig struct {
 	PackerSensitiveVars  []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
 	AccountFile          *string           `mapstructure:"account_file" cty:"account_file"`
 	ProjectId            *string           `mapstructure:"project_id" cty:"project_id"`
+	IAP                  *bool             `mapstructure:"iap" cty:"iap"`
 	Bucket               *string           `mapstructure:"bucket" cty:"bucket"`
 	GCSObjectName        *string           `mapstructure:"gcs_object_name" cty:"gcs_object_name"`
 	ImageDescription     *string           `mapstructure:"image_description" cty:"image_description"`
@@ -50,6 +51,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"account_file":               &hcldec.AttrSpec{Name: "account_file", Type: cty.String, Required: false},
 		"project_id":                 &hcldec.AttrSpec{Name: "project_id", Type: cty.String, Required: false},
+		"iap":                        &hcldec.AttrSpec{Name: "iap", Type: cty.Bool, Required: false},
 		"bucket":                     &hcldec.AttrSpec{Name: "bucket", Type: cty.String, Required: false},
 		"gcs_object_name":            &hcldec.AttrSpec{Name: "gcs_object_name", Type: cty.String, Required: false},
 		"image_description":          &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},

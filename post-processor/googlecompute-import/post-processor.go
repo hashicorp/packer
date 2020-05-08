@@ -28,6 +28,7 @@ type Config struct {
 
 	AccountFile string `mapstructure:"account_file"`
 	ProjectId   string `mapstructure:"project_id"`
+	IAP         bool   `mapstructure:"iap"`
 
 	Bucket               string            `mapstructure:"bucket"`
 	GCSObjectName        string            `mapstructure:"gcs_object_name"`

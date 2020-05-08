@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"runtime"
 	"time"
 
 	"github.com/hashicorp/packer/common"
@@ -72,6 +73,8 @@ type Config struct {
 	// state of your VM instances. Note: integrity monitoring relies on having
 	// vTPM enabled. [Details](https://cloud.google.com/security/shielded-cloud/shielded-vm)
 	EnableIntegrityMonitoring bool `mapstructure:"enable_integrity_monitoring" required:"false"`
+	// Whether to use an IAP proxy.
+	IAPConfig `mapstructure:",squash"`
 	// The unique name of the resulting image. Defaults to
 	// `packer-{{timestamp}}`.
 	ImageName string `mapstructure:"image_name" required:"false"`
@@ -320,8 +323,34 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		c.StateTimeout = 5 * time.Minute
 	}
 
+	// Set up communicator
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
+	}
+
+	// set defaults for IAP
+	if c.IAPConfig.IAPHashBang == "" {
+		if runtime.GOOS == "windows" {
+			c.IAPConfig.IAPHashBang = ""
+		} else {
+			c.IAPConfig.IAPHashBang = "/bin/sh"
+		}
+	}
+	if c.IAPConfig.IAPExt == "" {
+		if runtime.GOOS == "windows" {
+			c.IAPConfig.IAPExt = ".cmd"
+		}
+	}
+
+	// Configure IAP: Update SSH config to use localhost proxy instead
+	if c.IAPConfig.IAP {
+		if c.Comm.Type == "ssh" {
+			c.Comm.SSHHost = "localhost"
+		} else {
+			err := fmt.Errorf("Error: IAP tunnel currently only implemnted for" +
+				" SSH communicator")
+			errs = packer.MultiErrorAppend(errs, err)
+		}
 	}
 
 	// Process required parameters.
