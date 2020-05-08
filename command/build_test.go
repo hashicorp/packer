@@ -224,7 +224,7 @@ func TestBuildOnlyFileCommaFlags(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel=false",
+		"-parallel-builds=1",
 		"-only=chocolate,vanilla",
 		filepath.Join(testFixture("build-only"), "template.json"),
 	}
@@ -266,7 +266,7 @@ func TestBuildStdin(t *testing.T) {
 	defer func() { os.Stdin = stdin }()
 
 	defer cleanup()
-	if code := c.Run([]string{"-parallel=false", "-"}); code != 0 {
+	if code := c.Run([]string{"-parallel-builds=1", "-"}); code != 0 {
 		fatalCommand(t, c.Meta)
 	}
 
@@ -284,7 +284,7 @@ func TestBuildOnlyFileMultipleFlags(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel=false",
+		"-parallel-builds=1",
 		"-only=chocolate",
 		"-only=cherry",
 		"-only=apple", // ignored
@@ -345,7 +345,7 @@ func TestBuildEverything(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel=false",
+		"-parallel-builds=1",
 		`-except=`,
 		filepath.Join(testFixture("build-only"), "template.json"),
 	}
@@ -370,7 +370,7 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel=false",
+		"-parallel-builds=1",
 		"-except=chocolate,vanilla",
 		filepath.Join(testFixture("build-only"), "template.json"),
 	}
@@ -401,7 +401,7 @@ func testHCLOnlyExceptFlags(t *testing.T, args, present, notPresent []string) {
 
 	defer cleanup()
 
-	finalArgs := []string{"-parallel=false"}
+	finalArgs := []string{"-parallel-builds=1"}
 	finalArgs = append(finalArgs, args...)
 	finalArgs = append(finalArgs, testFixture("hcl-only-except"))
 
@@ -482,7 +482,7 @@ func TestBuildWithNonExistingBuilder(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel=false",
+		"-parallel-builds=1",
 		`-except=`,
 		filepath.Join(testFixture("build-only"), "not-found.json"),
 	}
@@ -643,7 +643,7 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 			0,
 		},
 		{fields{defaultMeta},
-			args{[]string{"-parallel=true", "file.json"}},
+			args{[]string{"-parallel-builds=10", "file.json"}},
 			BuildArgs{
 				MetaArgs:       MetaArgs{Path: "file.json"},
 				ParallelBuilds: math.MaxInt64,
@@ -652,7 +652,7 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 			0,
 		},
 		{fields{defaultMeta},
-			args{[]string{"-parallel=false", "file.json"}},
+			args{[]string{"-parallel-builds=1", "file.json"}},
 			BuildArgs{
 				MetaArgs:       MetaArgs{Path: "file.json"},
 				ParallelBuilds: 1,
@@ -670,7 +670,7 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 			0,
 		},
 		{fields{defaultMeta},
-			args{[]string{"-parallel=false", "-parallel-builds=5", "otherfile.json"}},
+			args{[]string{"-parallel-builds=1", "-parallel-builds=5", "otherfile.json"}},
 			BuildArgs{
 				MetaArgs:       MetaArgs{Path: "otherfile.json"},
 				ParallelBuilds: 5,

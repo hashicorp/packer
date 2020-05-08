@@ -37,12 +37,12 @@ func (c *BuildCommand) Run(args []string) int {
 }
 
 func (c *BuildCommand) ParseArgs(args []string) (*BuildArgs, int) {
-	var cfg *BuildArgs
+	var cfg BuildArgs
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
-		return cfg, 1
+		return &cfg, 1
 	}
 
 	if cfg.ParallelBuilds < 1 {
@@ -52,10 +52,10 @@ func (c *BuildCommand) ParseArgs(args []string) (*BuildArgs, int) {
 	args = flags.Args()
 	if len(args) != 1 {
 		flags.Usage()
-		return cfg, 1
+		return &cfg, 1
 	}
 	cfg.Path = args[0]
-	return cfg, 0
+	return &cfg, 0
 }
 
 func (m *Meta) GetConfigFromHCL(path string) (packer.BuildGetter, int) {
@@ -374,7 +374,7 @@ Options:
   -force                        Force a build to continue if artifacts exist, deletes existing artifacts.
   -machine-readable             Produce machine-readable output.
   -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask.
-  -parallel=false               Disable parallelization. (Default: true)
+  -parallel-builds=1               Disable parallelization. (Default: true)
   -parallel-builds=1            Number of builds to run in parallel. 0 means no limit (Default: 0)
   -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.
   -var 'key=value'              Variable for templates, can be used multiple times.
