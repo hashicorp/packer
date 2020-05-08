@@ -47,6 +47,7 @@ func TestFixerDockerTags_Fix(t *testing.T) {
 
 	output, err := f.Fix(input)
 	assert.NoError(t, err)
-
-	assert.Equalf(t, expected, output, "should have removed tag from template")
+	for k, v := range expected {
+		assert.EqualValues(t, v, output[k])
+	}
 }
