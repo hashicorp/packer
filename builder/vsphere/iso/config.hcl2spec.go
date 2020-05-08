@@ -70,6 +70,7 @@ type FlatConfig struct {
 	FloppyIMGPath             *string                  `mapstructure:"floppy_img_path" cty:"floppy_img_path"`
 	FloppyFiles               []string                 `mapstructure:"floppy_files" cty:"floppy_files"`
 	FloppyDirectories         []string                 `mapstructure:"floppy_dirs" cty:"floppy_dirs"`
+	FloppyLabel               *string                  `mapstructure:"floppy_label" cty:"floppy_label"`
 	BootOrder                 *string                  `mapstructure:"boot_order" cty:"boot_order"`
 	BootCommand               []string                 `mapstructure:"boot_command" cty:"boot_command"`
 	BootWait                  *string                  `mapstructure:"boot_wait" cty:"boot_wait"`
@@ -198,6 +199,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"floppy_img_path":              &hcldec.AttrSpec{Name: "floppy_img_path", Type: cty.String, Required: false},
 		"floppy_files":                 &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
 		"floppy_dirs":                  &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
+		"floppy_label":                 &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},
 		"boot_order":                   &hcldec.AttrSpec{Name: "boot_order", Type: cty.String, Required: false},
 		"boot_command":                 &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
 		"boot_wait":                    &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
