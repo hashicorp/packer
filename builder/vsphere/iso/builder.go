@@ -81,6 +81,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			&packerCommon.StepCreateFloppy{
 				Files:       b.config.FloppyFiles,
 				Directories: b.config.FloppyDirectories,
+				Label:       b.config.FloppyLabel,
 			},
 			&StepAddFloppy{
 				Config:    &b.config.FloppyConfig,

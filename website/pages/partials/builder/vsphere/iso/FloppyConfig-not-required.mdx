@@ -8,3 +8,8 @@
     
 -   `floppy_dirs` ([]string) - List of directories to copy files from.
     
+-   `floppy_label` (string) - The label to use for the floppy disk that
+    is attached when the VM is booted. This is most useful for cloud-init,
+    Kickstart or other early initialization tools, which can benefit from labelled floppy disks.
+    By default, the floppy label will be 'packer'.
+    

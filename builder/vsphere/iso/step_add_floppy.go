@@ -21,6 +21,11 @@ type FloppyConfig struct {
 	FloppyFiles []string `mapstructure:"floppy_files"`
 	// List of directories to copy files from.
 	FloppyDirectories []string `mapstructure:"floppy_dirs"`
+	// The label to use for the floppy disk that
+	// is attached when the VM is booted. This is most useful for cloud-init,
+	// Kickstart or other early initialization tools, which can benefit from labelled floppy disks.
+	// By default, the floppy label will be 'packer'.
+	FloppyLabel string `mapstructure:"floppy_label"`
 }
 
 type StepAddFloppy struct {
