@@ -140,7 +140,7 @@ type StepStartTunnel struct {
 func (s *StepStartTunnel) ConfigureLocalHostPort(ctx context.Context) error {
 	minPortNumber, maxPortNumber := 8000, 9000
 
-	if s.IAPConf.IAPLocalhostPort == 0 {
+	if s.IAPConf.IAPLocalhostPort != 0 {
 		minPortNumber = s.IAPConf.IAPLocalhostPort
 		maxPortNumber = minPortNumber
 		log.Printf("Using TCP port for %d IAP proxy", s.IAPConf.IAPLocalhostPort)
