@@ -630,12 +630,12 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 	tests := []struct {
 		fields       fields
 		args         args
-		wantCfg      BuildArgs
+		wantCfg      *BuildArgs
 		wantExitCode int
 	}{
 		{fields{defaultMeta},
 			args{[]string{"file.json"}},
-			BuildArgs{
+			&BuildArgs{
 				MetaArgs:       MetaArgs{Path: "file.json"},
 				ParallelBuilds: math.MaxInt64,
 				Color:          true,
@@ -644,16 +644,16 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 		},
 		{fields{defaultMeta},
 			args{[]string{"-parallel-builds=10", "file.json"}},
-			BuildArgs{
+			&BuildArgs{
 				MetaArgs:       MetaArgs{Path: "file.json"},
-				ParallelBuilds: math.MaxInt64,
+				ParallelBuilds: 10,
 				Color:          true,
 			},
 			0,
 		},
 		{fields{defaultMeta},
 			args{[]string{"-parallel-builds=1", "file.json"}},
-			BuildArgs{
+			&BuildArgs{
 				MetaArgs:       MetaArgs{Path: "file.json"},
 				ParallelBuilds: 1,
 				Color:          true,
@@ -662,7 +662,7 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 		},
 		{fields{defaultMeta},
 			args{[]string{"-parallel-builds=5", "file.json"}},
-			BuildArgs{
+			&BuildArgs{
 				MetaArgs:       MetaArgs{Path: "file.json"},
 				ParallelBuilds: 5,
 				Color:          true,
@@ -671,7 +671,7 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 		},
 		{fields{defaultMeta},
 			args{[]string{"-parallel-builds=1", "-parallel-builds=5", "otherfile.json"}},
-			BuildArgs{
+			&BuildArgs{
 				MetaArgs:       MetaArgs{Path: "otherfile.json"},
 				ParallelBuilds: 5,
 				Color:          true,
