@@ -410,7 +410,7 @@ type RunConfig struct {
 
 	// Which port to connect the local end of the session tunnel to. If
 	// left blank, Packer will choose a port for you from available ports.
-	// This option is on used when `ssh_interface` is set `session_manager`.
+	// This option is only used when `ssh_interface` is set `session_manager`.
 	SessionManagerPort int `mapstructure:"session_manager_port"`
 }
 
@@ -462,12 +462,12 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// Connectivity via Session Manager has a few requirements
 	if c.SSHInterface == "session_manager" {
 		if c.Comm.Type == "winrm" {
-			msg := fmt.Errorf(`connectivity via %q is not currently supported with the %q communicator; please use "ssh"`, c.SSHInterface, c.Comm.Type)
+			msg := fmt.Errorf(`session_manager connectivity is not supported with the "winrm" communicator; please use "ssh"`)
 			errs = append(errs, msg)
 		}
 
 		if c.IamInstanceProfile == "" && c.TemporaryIamInstanceProfilePolicyDocument == nil {
-			msg := fmt.Errorf(`no iam_instance_profile defined; when using %q a valid instance profile with AmazonSSMManagedInstanceCore permissions is required. Alternatively a temporary_iam_instance_profile_policy_document can be used.`, c.SSHInterface)
+			msg := fmt.Errorf(`no iam_instance_profile defined; session_manager connectivity requires a valid instance profile with AmazonSSMManagedInstanceCore permissions. Alternatively a temporary_iam_instance_profile_policy_document can be used.`)
 			errs = append(errs, msg)
 		}
 	}

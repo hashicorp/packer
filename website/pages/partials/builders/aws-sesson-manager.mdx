@@ -4,7 +4,7 @@ Support for the AWS Systems Manager session manager capability lets users manage
 
 To use the session manager as the connection interface for the SSH communicator you need to add the following configuration options to the Amazon builder options:
 
- * `ssh_interface`: The ssh interface must be set to "session_manager", when using this option the builder will no to create an SSM tunnel to the configured `ssh_port` (defaults to 22) on the remote host.
+ * `ssh_interface`: The ssh interface must be set to "session_manager".  When using this option the builder will create an SSM tunnel to the configured `ssh_port` (defaults to 22) on the remote host.
  * `iam_instance_profile`: A valid instance profile granting Systems Manger permissions to manage the remote instance is required in order for the aws ssm-agent to start and stop session connections. See below for more details on IAM instance profile for Systems Manager(#iam-instance-profile-for-systems-manager).
 
 #### Optional

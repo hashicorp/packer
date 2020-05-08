@@ -297,10 +297,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				b.config.SSHInterface,
 				b.config.Comm.Port(),
 			),
-			WinRMPort: awscommon.Port(
-				b.config.SSHInterface,
-				b.config.Comm.Port(),
-			),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},

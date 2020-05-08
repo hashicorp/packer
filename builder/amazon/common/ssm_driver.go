@@ -54,7 +54,15 @@ func (d *SSMDriver) StartSession(ctx context.Context) error {
 	stdoutCh := iochan.DelimReader(stdout, '\n')
 	stderrCh := iochan.DelimReader(stderr, '\n')
 
-	// Loop and get all our output
+	/* Loop and get all our output
+	This particular logger will continue to run through an entire Packer run.
+	The decision to continue logging is due to the fact that session-manager-plugin
+	doesn't give a good way of knowing if the command failed or was successful other
+	than looking at the logs. Seeing as the plugin is updated frequently and that the
+	log information is a bit sparse this logger will indefinitely relying on other
+	steps to fail if the tunnel is unable to be created. If successful then the user
+	will get more information on the tunnel connection when running in a debug mode.
+	*/
 	go func(ctx context.Context, prefix string) {
 		for {
 			select {
@@ -81,6 +89,7 @@ func (d *SSMDriver) StartSession(ctx context.Context) error {
 	return nil
 }
 
+// Args validates the driver inputs before returning an ordered set of arguments to pass to the driver command.
 func (d *SSMDriver) Args() ([]string, error) {
 	if d.Session == nil {
 		return nil, fmt.Errorf("an active Amazon SSM Session is required before trying to open a session tunnel")

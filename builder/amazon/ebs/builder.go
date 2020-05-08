@@ -264,8 +264,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SSMAgentEnabled:  b.config.SSMAgentEnabled(),
 		},
 		&communicator.StepConnect{
-			// StepConnect is provided settings for WinRM and SSH, but
-			// the communicator will ultimately determine which port to use.
 			Config: &b.config.RunConfig.Comm,
 			Host: awscommon.SSHHost(
 				ec2conn,
@@ -273,10 +271,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				b.config.Comm.Host(),
 			),
 			SSHPort: awscommon.Port(
-				b.config.SSHInterface,
-				b.config.Comm.Port(),
-			),
-			WinRMPort: awscommon.Port(
 				b.config.SSHInterface,
 				b.config.Comm.Port(),
 			),
