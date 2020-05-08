@@ -4,7 +4,7 @@ import "github.com/hashicorp/hcl/v2"
 
 type GetBuildsOptions struct {
 	// Get builds except the ones that match with except and with only the ones
-	// that match with. When those are empty everything matches.
+	// that match with Only. When those are empty everything matches.
 	Except, Only []string
 }
 
