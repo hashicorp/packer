@@ -92,13 +92,13 @@ type FlatConfig struct {
 	GuestAdditionsMode        *string           `mapstructure:"guest_additions_mode" cty:"guest_additions_mode"`
 	GuestAdditionsPath        *string           `mapstructure:"guest_additions_path" cty:"guest_additions_path"`
 	GuestAdditionsSHA256      *string           `mapstructure:"guest_additions_sha256" cty:"guest_additions_sha256"`
-	GuestAdditionsURL         *string           `mapstructure:"guest_additions_url" cty:"guest_additions_url"`
-	VMName                    *string           `mapstructure:"vm_name" cty:"vm_name"`
-	AttachSnapshot            *string           `mapstructure:"attach_snapshot" cty:"attach_snapshot"`
-	TargetSnapshot            *string           `mapstructure:"target_snapshot" cty:"target_snapshot"`
-	DeleteTargetSnapshot      *bool             `mapstructure:"force_delete_snapshot" cty:"force_delete_snapshot"`
-	KeepRegistered            *bool             `mapstructure:"keep_registered" cty:"keep_registered"`
-	SkipExport                *bool             `mapstructure:"skip_export" cty:"skip_export"`
+	GuestAdditionsURL         *string           `mapstructure:"guest_additions_url" required:"false" cty:"guest_additions_url"`
+	VMName                    *string           `mapstructure:"vm_name" required:"true" cty:"vm_name"`
+	AttachSnapshot            *string           `mapstructure:"attach_snapshot" required:"false" cty:"attach_snapshot"`
+	TargetSnapshot            *string           `mapstructure:"target_snapshot" required:"false" cty:"target_snapshot"`
+	DeleteTargetSnapshot      *bool             `mapstructure:"force_delete_snapshot" required:"false" cty:"force_delete_snapshot"`
+	KeepRegistered            *bool             `mapstructure:"keep_registered" required:"false" cty:"keep_registered"`
+	SkipExport                *bool             `mapstructure:"skip_export" required:"false" cty:"skip_export"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
