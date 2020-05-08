@@ -230,7 +230,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.DiskSizeGb == 0 {
-		c.DiskSizeGb = 10
+		c.DiskSizeGb = 20
 	}
 
 	if c.DiskType == "" {
