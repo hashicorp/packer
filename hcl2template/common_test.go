@@ -116,7 +116,7 @@ func testParse(t *testing.T, tests []parseTest) {
 				return
 			}
 
-			gotBuilds, gotDiags := gotCfg.GetBuilds(nil, nil)
+			gotBuilds, gotDiags := gotCfg.GetBuilds(packer.GetBuildsOptions{})
 			if tt.getBuildsWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.getBuilds() unexpected diagnostics. %s", gotDiags)
 			}
