@@ -3,8 +3,10 @@
 package common
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -276,6 +278,39 @@ func TestISOConfigPrepare_ISOChecksumURLMyTest(t *testing.T) {
 	}
 	if len(err) > 0 {
 		t.Fatalf("Bad; should not have errored.")
+	}
+}
+
+func TestISOConfigPrepare_ISOChecksumLocalFile(t *testing.T) {
+	// Creates checksum file in local dir
+	p := filepath.Join(fixtureDir, "root/subfolder.sum")
+	source, err := os.Open(p)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer source.Close()
+	destination, err := os.Create("local.sum")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	defer os.Remove("local.sum")
+	defer destination.Close()
+	if _, err := io.Copy(destination, source); err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	i := ISOConfig{
+		ISOChecksumURL:  "./local.sum",
+		ISOChecksumType: "sha256",
+		ISOUrls:         []string{"http://hashicorp.com/ubuntu/dists/bionic-updates/main/installer-amd64/current/images/netboot/mini.iso"},
+	}
+
+	warns, errs := i.Prepare(nil)
+	if len(warns) > 0 {
+		t.Fatalf("Bad: should not have warnings")
+	}
+	if len(errs) > 0 {
+		t.Fatalf("Bad; should not have errored. %v", errs)
 	}
 }
 

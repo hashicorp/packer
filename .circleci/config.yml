@@ -158,7 +158,7 @@ jobs:
       - attach_workspace:
           at: .
       - run: |
-          ghr -prerelease -t ${GITHUB_TOKEN_AZR} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./pkg/
+          ghr -prerelease -t ${CI_GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./pkg/
   build-website-docker-image:
     docker:
       - image: circleci/buildpack-deps

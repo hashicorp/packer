@@ -7,7 +7,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
+	"os"
 	"strings"
+
+	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
+
+	"github.com/hashicorp/go-getter/v2"
 
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -151,11 +157,41 @@ func (c *ISOConfig) Prepare(*interpolate.Context) (warnings []string, errs []err
 		errs = append(errs, fmt.Errorf("A checksum must be specified"))
 	}
 	if c.ISOChecksumType == "file" {
-		url := c.ISOChecksum
 		if c.ISOChecksumURL != "" {
-			url = c.ISOChecksumURL
+			c.ISOChecksum = c.ISOChecksumURL
 		}
-		cksum, err := defaultGetterClient.ChecksumFromFile(context.TODO(), url, c.ISOUrls[0])
+
+		u, err := urlhelper.Parse(c.ISOUrls[0])
+		if err != nil {
+			return warnings, append(errs, fmt.Errorf("url parse: %s", err))
+		}
+
+		if cs := u.Query().Get("checksum"); cs != "" {
+			c.ISOChecksum = cs
+		}
+		if c.ISOChecksumType != "" && c.ISOChecksumType != "none" {
+			// add checksum to url query params as go getter will checksum for us
+			q := u.Query()
+			q.Set("checksum", c.ISOChecksumType+":"+c.ISOChecksum)
+			u.RawQuery = q.Encode()
+		} else if c.ISOChecksum != "" {
+			q := u.Query()
+			q.Set("checksum", c.ISOChecksum)
+			u.RawQuery = q.Encode()
+		}
+
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Printf("get working directory: %v", err)
+			// here we ignore the error in case the
+			// working directory is not needed.
+		}
+
+		req := &getter.Request{
+			Src: u.String(),
+			Pwd: wd,
+		}
+		cksum, err := defaultGetterClient.GetChecksum(context.TODO(), req)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file: %v", err))
 		} else {

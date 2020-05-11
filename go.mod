@@ -75,8 +75,7 @@ require (
 	github.com/hashicorp/go-cty-funcs/encoding v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-cty-funcs/filesystem v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-cty-funcs/uuid v0.0.0-20200203151509-c92509f48b18
-	github.com/hashicorp/go-getter v1.3.1-0.20190906090232-a0f878cb75da // indirect
-	github.com/hashicorp/go-getter/v2 v2.0.0-20200318090939-0b1d527d9793
+	github.com/hashicorp/go-getter/v2 v2.0.0-20200511085045-ad575698c524
 	github.com/hashicorp/go-immutable-radix v1.1.0 // indirect
 	github.com/hashicorp/go-msgpack v0.5.5 // indirect
 	github.com/hashicorp/go-multierror v1.1.0
