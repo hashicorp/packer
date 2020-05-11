@@ -76,7 +76,7 @@ require (
 	github.com/hashicorp/go-cty-funcs/encoding v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-cty-funcs/filesystem v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-cty-funcs/uuid v0.0.0-20200203151509-c92509f48b18
-	github.com/hashicorp/go-getter/v2 v2.0.0-20200428131008-7ca0077af588
+	github.com/hashicorp/go-getter/v2 v2.0.0-20200511085045-ad575698c524
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79
 	github.com/hashicorp/go-retryablehttp v0.5.2 // indirect
