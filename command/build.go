@@ -58,7 +58,7 @@ func (c *BuildCommand) ParseArgs(args []string) (*BuildArgs, int) {
 	return &cfg, 0
 }
 
-func (m *Meta) GetConfigFromHCL(path string) (packer.BuildGetter, int) {
+func (m *Meta) GetConfigFromHCL(cla *MetaArgs) (packer.BuildGetter, int) {
 	parser := &hcl2template.Parser{
 		Parser:                hclparse.NewParser(),
 		BuilderSchemas:        m.CoreConfig.Components.BuilderStore,
@@ -66,7 +66,7 @@ func (m *Meta) GetConfigFromHCL(path string) (packer.BuildGetter, int) {
 		PostProcessorsSchemas: m.CoreConfig.Components.PostProcessorStore,
 	}
 
-	cfg, diags := parser.Parse(path, m.varFiles, m.flagVars)
+	cfg, diags := parser.Parse(cla.Path, cla.VarFiles, cla.Vars)
 	return cfg, writeDiags(m.Ui, parser.Files(), diags)
 }
 
@@ -88,8 +88,8 @@ func writeDiags(ui packer.Ui, files map[string]*hcl.File, diags hcl.Diagnostics)
 	return 0
 }
 
-func (m *Meta) GetConfig(path ...string) (packer.BuildGetter, int) {
-	cfgType, err := ConfigType(path...)
+func (m *Meta) GetConfig(cla *MetaArgs) (packer.BuildGetter, int) {
+	cfgType, err := ConfigType(cla.Path)
 	if err != nil {
 		m.Ui.Error(fmt.Sprintf("could not tell config type: %s", err))
 		return nil, 1
@@ -98,7 +98,7 @@ func (m *Meta) GetConfig(path ...string) (packer.BuildGetter, int) {
 	switch cfgType {
 	case "hcl":
 		// TODO(azr): allow to pass a slice of files here.
-		return m.GetConfigFromHCL(path[0])
+		return m.GetConfigFromHCL(cla)
 	default:
 		// TODO: uncomment once we've polished HCL a bit more.
 		// c.Ui.Say(`Legacy JSON Configuration Will Be Used.
@@ -106,7 +106,7 @@ func (m *Meta) GetConfig(path ...string) (packer.BuildGetter, int) {
 		// will continue to work but users are encouraged to move to the new style.
 		// See: https://packer.io/guides/hcl
 		// `)
-		return m.GetConfigFromJSON(path[0])
+		return m.GetConfigFromJSON(cla.Path)
 	}
 }
 
@@ -128,22 +128,22 @@ func (m *Meta) GetConfigFromJSON(path string) (packer.BuildGetter, int) {
 	return core, ret
 }
 
-func (c *BuildCommand) RunContext(buildCtx context.Context, cfg *BuildArgs) int {
-	packerStarter, ret := c.GetConfig(cfg.Path)
+func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int {
+	packerStarter, ret := c.GetConfig(&cla.MetaArgs)
 	if ret != 0 {
 		return ret
 	}
 
 	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
-		Only:   cfg.Only,
-		Except: cfg.Except,
+		Only:   cla.Only,
+		Except: cla.Except,
 	})
 
 	// here, something could have gone wrong but we still want to run valid
 	// builds.
 	ret = writeDiags(c.Ui, nil, diags)
 
-	if cfg.Debug {
+	if cla.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
 	}
 
@@ -158,7 +158,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cfg *BuildArgs) int 
 	buildUis := make(map[packer.Build]packer.Ui)
 	for i := range builds {
 		ui := c.Ui
-		if cfg.Color {
+		if cla.Color {
 			ui = &packer.ColoredUi{
 				Color: colors[i%len(colors)],
 				Ui:    ui,
@@ -172,7 +172,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cfg *BuildArgs) int 
 			}
 		}
 		// Now add timestamps if requested
-		if cfg.TimestampUi {
+		if cla.TimestampUi {
 			ui = &packer.TimestampedUi{
 				Ui: ui,
 			}
@@ -181,17 +181,17 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cfg *BuildArgs) int 
 		buildUis[builds[i]] = ui
 	}
 
-	log.Printf("Build debug mode: %v", cfg.Debug)
-	log.Printf("Force build: %v", cfg.Force)
-	log.Printf("On error: %v", cfg.OnError)
+	log.Printf("Build debug mode: %v", cla.Debug)
+	log.Printf("Force build: %v", cla.Force)
+	log.Printf("On error: %v", cla.OnError)
 
 	// Set the debug and force mode and prepare all the builds
 	for i := range builds {
 		b := builds[i]
 		log.Printf("Preparing build: %s", b.Name())
-		b.SetDebug(cfg.Debug)
-		b.SetForce(cfg.Force)
-		b.SetOnError(cfg.OnError)
+		b.SetDebug(cla.Debug)
+		b.SetForce(cla.Force)
+		b.SetOnError(cla.OnError)
 
 		warnings, err := b.Prepare()
 		if err != nil {
@@ -219,7 +219,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cfg *BuildArgs) int 
 		sync.RWMutex
 		m map[string]error
 	}{m: make(map[string]error)}
-	limitParallel := semaphore.NewWeighted(cfg.ParallelBuilds)
+	limitParallel := semaphore.NewWeighted(cla.ParallelBuilds)
 	for i := range builds {
 		if err := buildCtx.Err(); err != nil {
 			log.Println("Interrupted, not going to start any more builds.")
@@ -263,12 +263,12 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cfg *BuildArgs) int 
 			}
 		}()
 
-		if cfg.Debug {
+		if cla.Debug {
 			log.Printf("Debug enabled, so waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
 
-		if cfg.ParallelBuilds == 1 {
+		if cla.ParallelBuilds == 1 {
 			log.Printf("Parallelization disabled, waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
