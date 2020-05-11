@@ -27,8 +27,8 @@ require (
 	github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd // indirect
 	github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607 // indirect
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
-	github.com/armon/go-radix v1.0.0 // indirect
-	github.com/aws/aws-sdk-go v1.24.1
+	github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878 // indirect
+	github.com/aws/aws-sdk-go v1.25.41
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
 	github.com/cheggaaa/pb v1.0.27
@@ -40,7 +40,7 @@ require (
 	github.com/digitalocean/go-libvirt v0.0.0-20190626172931-4d226dd6c437 // indirect
 	github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
 	github.com/digitalocean/godo v1.11.1
-	github.com/dnaeon/go-vcr v1.0.0 // indirect
+	github.com/dnaeon/go-vcr v1.0.1 // indirect
 	github.com/docker/docker v0.0.0-20180422163414-57142e89befe // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
@@ -57,7 +57,6 @@ require (
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.3.5 // indirect
-	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.3.1
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
@@ -67,33 +66,32 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/gorilla/websocket v0.0.0-20170319172727-a91eba7f9777 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
-	github.com/hashicorp/consul v1.4.0
+	github.com/hashicorp/consul/api v1.4.0
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
-	github.com/hashicorp/go-cleanhttp v0.5.0
+	github.com/hashicorp/go-cleanhttp v0.5.1
 	github.com/hashicorp/go-cty-funcs/cidr v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-cty-funcs/crypto v0.0.0-20200124154056-476681ae9d62
 	github.com/hashicorp/go-cty-funcs/encoding v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-cty-funcs/filesystem v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-cty-funcs/uuid v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-getter/v2 v2.0.0-20200511085045-ad575698c524
-	github.com/hashicorp/go-multierror v1.0.0
+	github.com/hashicorp/go-immutable-radix v1.1.0 // indirect
+	github.com/hashicorp/go-msgpack v0.5.5 // indirect
+	github.com/hashicorp/go-multierror v1.1.0
 	github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79
-	github.com/hashicorp/go-retryablehttp v0.5.2 // indirect
-	github.com/hashicorp/go-rootcerts v0.0.0-20160503143440-6bb64b370b90 // indirect
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
-	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.3.0
-	github.com/hashicorp/serf v0.8.2 // indirect
-	github.com/hashicorp/vault v1.1.0
+	github.com/hashicorp/serf v0.9.2 // indirect
+	github.com/hashicorp/vault/api v1.0.4
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
 	github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
-	github.com/joyent/triton-go v0.0.0-20180116165742-545edbe0d564
+	github.com/joyent/triton-go v0.0.0-20180628001255-830d2b111e62
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
@@ -108,16 +106,14 @@ require (
 	github.com/masterzen/azure-sdk-for-go v0.0.0-20161014135628-ee4f0065d00c // indirect
 	github.com/masterzen/simplexml v0.0.0-20190410153822-31eea3082786 // indirect
 	github.com/masterzen/winrm v0.0.0-20180224160350-7e40f93ae939
-	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
-	github.com/miekg/dns v1.1.1 // indirect
-	github.com/mitchellh/cli v1.0.0
+	github.com/mitchellh/cli v1.1.0
 	github.com/mitchellh/go-fs v0.0.0-20180402234041-7b48fa161ea7
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/mitchellh/go-testing-interface v1.0.3 // indirect
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
-	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0
-	github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc
+	github.com/mitchellh/mapstructure v1.2.3
 	github.com/mitchellh/panicwrap v0.0.0-20170106182340-fce601fe5557
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/mitchellh/reflectwalk v1.0.0
@@ -134,10 +130,9 @@ require (
 	github.com/pierrec/lz4 v2.0.5+incompatible
 	github.com/pkg/errors v0.8.1
 	github.com/pkg/sftp v0.0.0-20160118190721-e84cc8c755ca
-	github.com/posener/complete v1.1.1
+	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 	github.com/renstrom/fuzzysearch v0.0.0-20160331204855-2d205ac6ec17 // indirect
-	github.com/ryanuber/go-glob v0.0.0-20170128012129-256dc444b735 // indirect
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/scaleway/scaleway-cli v0.0.0-20180921094345-7b12c9699d70
@@ -174,11 +169,9 @@ require (
 	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/genproto v0.0.0-20200325114520-5b2d0af7952b // indirect
 	google.golang.org/grpc v1.28.0
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 // indirect
 	gopkg.in/resty.v1 v1.12.0 // indirect
-	gopkg.in/yaml.v2 v2.2.7 // indirect
 )
 
 replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999

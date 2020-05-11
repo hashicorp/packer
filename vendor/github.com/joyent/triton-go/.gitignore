@@ -15,3 +15,5 @@ pkg/
 *.iml
 Notes.md
 coverage.txt
+cmd/triton/triton
+cmd/triton/docs/

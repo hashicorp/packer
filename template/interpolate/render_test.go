@@ -86,6 +86,10 @@ func TestRenderMap(t *testing.T) {
 			nil,
 		},
 
+		// this test fails if you get github.com/mitchellh/reflectwalk@v1.0.1
+		// the fail is caused by
+		// https://github.com/mitchellh/reflectwalk/pull/22/commits/51d4c99fad9e9aa269e874bc3ad60313a574799f
+		// TODO: open a PR to fix it.
 		"nested value keys": {
 			map[string]interface{}{
 				"foo": map[string]string{

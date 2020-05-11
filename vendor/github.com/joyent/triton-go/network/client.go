@@ -9,6 +9,8 @@
 package network
 
 import (
+	"net/http"
+
 	triton "github.com/joyent/triton-go"
 	"github.com/joyent/triton-go/client"
 )
@@ -27,11 +29,22 @@ func newNetworkClient(client *client.Client) *NetworkClient {
 // resources within CloudAPI
 func NewClient(config *triton.ClientConfig) (*NetworkClient, error) {
 	// TODO: Utilize config interface within the function itself
-	client, err := client.New(config.TritonURL, config.MantaURL, config.AccountName, config.Signers...)
+	client, err := client.New(
+		config.TritonURL,
+		config.MantaURL,
+		config.AccountName,
+		config.Signers...,
+	)
 	if err != nil {
 		return nil, err
 	}
 	return newNetworkClient(client), nil
+}
+
+// SetHeaders allows a consumer of the current client to set custom headers for
+// the next backend HTTP request sent to CloudAPI
+func (c *NetworkClient) SetHeader(header *http.Header) {
+	c.Client.RequestHeader = header
 }
 
 // Fabrics returns a FabricsClient used for accessing functions pertaining to

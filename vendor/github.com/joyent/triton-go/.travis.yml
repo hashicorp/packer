@@ -2,13 +2,13 @@ dist: trusty
 sudo: false
 language: go
 go:
-- 1.9.1
+- "1.10"
 
 install:
 - go get github.com/golang/dep/cmd/dep
 
 script:
-- make default
+- make tools default
 
 branches:
   only:

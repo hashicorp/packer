@@ -614,6 +614,13 @@ const (
 	// A sync configuration with the same name already exists.
 	ErrCodeResourceDataSyncAlreadyExistsException = "ResourceDataSyncAlreadyExistsException"
 
+	// ErrCodeResourceDataSyncConflictException for service response error code
+	// "ResourceDataSyncConflictException".
+	//
+	// Another UpdateResourceDataSync request is being processed. Wait a few minutes
+	// and try again.
+	ErrCodeResourceDataSyncConflictException = "ResourceDataSyncConflictException"
+
 	// ErrCodeResourceDataSyncCountExceededException for service response error code
 	// "ResourceDataSyncCountExceededException".
 	//

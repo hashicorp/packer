@@ -11,7 +11,9 @@ package compute
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"net/url"
 	"path"
 
 	"github.com/joyent/triton-go/client"
@@ -49,10 +51,37 @@ type ListPackagesInput struct {
 
 func (c *PackagesClient) List(ctx context.Context, input *ListPackagesInput) ([]*Package, error) {
 	fullPath := path.Join("/", c.client.AccountName, "packages")
+
+	query := &url.Values{}
+	if input.Name != "" {
+		query.Set("name", input.Name)
+	}
+	if input.Memory != 0 {
+		query.Set("memory", fmt.Sprintf("%d", input.Memory))
+	}
+	if input.Disk != 0 {
+		query.Set("disk", fmt.Sprintf("%d", input.Disk))
+	}
+	if input.Swap != 0 {
+		query.Set("swap", fmt.Sprintf("%d", input.Swap))
+	}
+	if input.LWPs != 0 {
+		query.Set("lwps", fmt.Sprintf("%d", input.LWPs))
+	}
+	if input.VCPUs != 0 {
+		query.Set("vcpus", fmt.Sprintf("%d", input.VCPUs))
+	}
+	if input.Version != "" {
+		query.Set("version", input.Version)
+	}
+	if input.Group != "" {
+		query.Set("group", input.Group)
+	}
+
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
 		Path:   fullPath,
-		Body:   input,
+		Query:  query,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
