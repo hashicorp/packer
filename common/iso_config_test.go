@@ -281,7 +281,7 @@ func TestISOConfigPrepare_ISOChecksumURLMyTest(t *testing.T) {
 	}
 }
 
-func TestISOConfigPrepare_ISOChecksumLocalFie(t *testing.T) {
+func TestISOConfigPrepare_ISOChecksumLocalFile(t *testing.T) {
 	// Creates checksum file in local dir
 	p := filepath.Join(fixtureDir, "root/subfolder.sum")
 	source, err := os.Open(p)
