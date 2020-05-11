@@ -89,7 +89,17 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 
 // Cleanup terminates an active session on AWS, which in turn terminates the associated tunnel process running on the local machine.
 func (s *StepCreateSSMTunnel) Cleanup(state multistep.StateBag) {
+	if !s.SSMAgentEnabled {
+		return
+	}
+
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.session == nil || s.session.SessionId == nil {
+		msg := fmt.Sprintf("Unable to find a valid session to instance %q; skipping the termination step", s.instanceId)
+		ui.Error(msg)
+		return
+	}
 
 	ssmconn := ssm.New(s.AWSSession)
 	_, err := ssmconn.TerminateSession(&ssm.TerminateSessionInput{SessionId: s.session.SessionId})
