@@ -442,7 +442,10 @@ func (c *ECR) CreateRepositoryRequest(input *CreateRepositoryInput) (req *reques
 
 // CreateRepository API operation for Amazon EC2 Container Registry.
 //
-// Creates an image repository.
+// Creates an Amazon Elastic Container Registry (Amazon ECR) repository, where
+// users can push and pull Docker images. For more information, see Amazon ECR
+// Repositories (https://docs.aws.amazon.com/AmazonECR/latest/userguide/Repositories.html)
+// in the Amazon Elastic Container Registry User Guide.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -772,6 +775,158 @@ func (c *ECR) DeleteRepositoryPolicyWithContext(ctx aws.Context, input *DeleteRe
 	return out, req.Send()
 }
 
+const opDescribeImageScanFindings = "DescribeImageScanFindings"
+
+// DescribeImageScanFindingsRequest generates a "aws/request.Request" representing the
+// client's request for the DescribeImageScanFindings operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See DescribeImageScanFindings for more information on using the DescribeImageScanFindings
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the DescribeImageScanFindingsRequest method.
+//    req, resp := client.DescribeImageScanFindingsRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ecr-2015-09-21/DescribeImageScanFindings
+func (c *ECR) DescribeImageScanFindingsRequest(input *DescribeImageScanFindingsInput) (req *request.Request, output *DescribeImageScanFindingsOutput) {
+	op := &request.Operation{
+		Name:       opDescribeImageScanFindings,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+		Paginator: &request.Paginator{
+			InputTokens:     []string{"nextToken"},
+			OutputTokens:    []string{"nextToken"},
+			LimitToken:      "maxResults",
+			TruncationToken: "",
+		},
+	}
+
+	if input == nil {
+		input = &DescribeImageScanFindingsInput{}
+	}
+
+	output = &DescribeImageScanFindingsOutput{}
+	req = c.newRequest(op, input, output)
+	return
+}
+
+// DescribeImageScanFindings API operation for Amazon EC2 Container Registry.
+//
+// Describes the image scan findings for the specified image.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for Amazon EC2 Container Registry's
+// API operation DescribeImageScanFindings for usage and error information.
+//
+// Returned Error Codes:
+//   * ErrCodeServerException "ServerException"
+//   These errors are usually caused by a server-side issue.
+//
+//   * ErrCodeInvalidParameterException "InvalidParameterException"
+//   The specified parameter is invalid. Review the available parameters for the
+//   API request.
+//
+//   * ErrCodeRepositoryNotFoundException "RepositoryNotFoundException"
+//   The specified repository could not be found. Check the spelling of the specified
+//   repository and ensure that you are performing operations on the correct registry.
+//
+//   * ErrCodeImageNotFoundException "ImageNotFoundException"
+//   The image requested does not exist in the specified repository.
+//
+//   * ErrCodeScanNotFoundException "ScanNotFoundException"
+//   The specified image scan could not be found. Ensure that image scanning is
+//   enabled on the repository and try again.
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ecr-2015-09-21/DescribeImageScanFindings
+func (c *ECR) DescribeImageScanFindings(input *DescribeImageScanFindingsInput) (*DescribeImageScanFindingsOutput, error) {
+	req, out := c.DescribeImageScanFindingsRequest(input)
+	return out, req.Send()
+}
+
+// DescribeImageScanFindingsWithContext is the same as DescribeImageScanFindings with the addition of
+// the ability to pass a context and additional request options.
+//
+// See DescribeImageScanFindings for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *ECR) DescribeImageScanFindingsWithContext(ctx aws.Context, input *DescribeImageScanFindingsInput, opts ...request.Option) (*DescribeImageScanFindingsOutput, error) {
+	req, out := c.DescribeImageScanFindingsRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
+// DescribeImageScanFindingsPages iterates over the pages of a DescribeImageScanFindings operation,
+// calling the "fn" function with the response data for each page. To stop
+// iterating, return false from the fn function.
+//
+// See DescribeImageScanFindings method for more information on how to use this operation.
+//
+// Note: This operation can generate multiple requests to a service.
+//
+//    // Example iterating over at most 3 pages of a DescribeImageScanFindings operation.
+//    pageNum := 0
+//    err := client.DescribeImageScanFindingsPages(params,
+//        func(page *ecr.DescribeImageScanFindingsOutput, lastPage bool) bool {
+//            pageNum++
+//            fmt.Println(page)
+//            return pageNum <= 3
+//        })
+//
+func (c *ECR) DescribeImageScanFindingsPages(input *DescribeImageScanFindingsInput, fn func(*DescribeImageScanFindingsOutput, bool) bool) error {
+	return c.DescribeImageScanFindingsPagesWithContext(aws.BackgroundContext(), input, fn)
+}
+
+// DescribeImageScanFindingsPagesWithContext same as DescribeImageScanFindingsPages except
+// it takes a Context and allows setting request options on the pages.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *ECR) DescribeImageScanFindingsPagesWithContext(ctx aws.Context, input *DescribeImageScanFindingsInput, fn func(*DescribeImageScanFindingsOutput, bool) bool, opts ...request.Option) error {
+	p := request.Pagination{
+		NewRequest: func() (*request.Request, error) {
+			var inCpy *DescribeImageScanFindingsInput
+			if input != nil {
+				tmp := *input
+				inCpy = &tmp
+			}
+			req, _ := c.DescribeImageScanFindingsRequest(inCpy)
+			req.SetContext(ctx)
+			req.ApplyOptions(opts...)
+			return req, nil
+		},
+	}
+
+	for p.Next() {
+		if !fn(p.Page().(*DescribeImageScanFindingsOutput), !p.HasNextPage()) {
+			break
+		}
+	}
+
+	return p.Err()
+}
+
 const opDescribeImages = "DescribeImages"
 
 // DescribeImagesRequest generates a "aws/request.Request" representing the
@@ -917,10 +1072,12 @@ func (c *ECR) DescribeImagesPagesWithContext(ctx aws.Context, input *DescribeIma
 		},
 	}
 
-	cont := true
-	for p.Next() && cont {
-		cont = fn(p.Page().(*DescribeImagesOutput), !p.HasNextPage())
+	for p.Next() {
+		if !fn(p.Page().(*DescribeImagesOutput), !p.HasNextPage()) {
+			break
+		}
 	}
+
 	return p.Err()
 }
 
@@ -1060,10 +1217,12 @@ func (c *ECR) DescribeRepositoriesPagesWithContext(ctx aws.Context, input *Descr
 		},
 	}
 
-	cont := true
-	for p.Next() && cont {
-		cont = fn(p.Page().(*DescribeRepositoriesOutput), !p.HasNextPage())
+	for p.Next() {
+		if !fn(p.Page().(*DescribeRepositoriesOutput), !p.HasNextPage()) {
+			break
+		}
 	}
+
 	return p.Err()
 }
 
@@ -1378,6 +1537,12 @@ func (c *ECR) GetLifecyclePolicyPreviewRequest(input *GetLifecyclePolicyPreviewI
 		Name:       opGetLifecyclePolicyPreview,
 		HTTPMethod: "POST",
 		HTTPPath:   "/",
+		Paginator: &request.Paginator{
+			InputTokens:     []string{"nextToken"},
+			OutputTokens:    []string{"nextToken"},
+			LimitToken:      "maxResults",
+			TruncationToken: "",
+		},
 	}
 
 	if input == nil {
@@ -1435,6 +1600,58 @@ func (c *ECR) GetLifecyclePolicyPreviewWithContext(ctx aws.Context, input *GetLi
 	req.SetContext(ctx)
 	req.ApplyOptions(opts...)
 	return out, req.Send()
+}
+
+// GetLifecyclePolicyPreviewPages iterates over the pages of a GetLifecyclePolicyPreview operation,
+// calling the "fn" function with the response data for each page. To stop
+// iterating, return false from the fn function.
+//
+// See GetLifecyclePolicyPreview method for more information on how to use this operation.
+//
+// Note: This operation can generate multiple requests to a service.
+//
+//    // Example iterating over at most 3 pages of a GetLifecyclePolicyPreview operation.
+//    pageNum := 0
+//    err := client.GetLifecyclePolicyPreviewPages(params,
+//        func(page *ecr.GetLifecyclePolicyPreviewOutput, lastPage bool) bool {
+//            pageNum++
+//            fmt.Println(page)
+//            return pageNum <= 3
+//        })
+//
+func (c *ECR) GetLifecyclePolicyPreviewPages(input *GetLifecyclePolicyPreviewInput, fn func(*GetLifecyclePolicyPreviewOutput, bool) bool) error {
+	return c.GetLifecyclePolicyPreviewPagesWithContext(aws.BackgroundContext(), input, fn)
+}
+
+// GetLifecyclePolicyPreviewPagesWithContext same as GetLifecyclePolicyPreviewPages except
+// it takes a Context and allows setting request options on the pages.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *ECR) GetLifecyclePolicyPreviewPagesWithContext(ctx aws.Context, input *GetLifecyclePolicyPreviewInput, fn func(*GetLifecyclePolicyPreviewOutput, bool) bool, opts ...request.Option) error {
+	p := request.Pagination{
+		NewRequest: func() (*request.Request, error) {
+			var inCpy *GetLifecyclePolicyPreviewInput
+			if input != nil {
+				tmp := *input
+				inCpy = &tmp
+			}
+			req, _ := c.GetLifecyclePolicyPreviewRequest(inCpy)
+			req.SetContext(ctx)
+			req.ApplyOptions(opts...)
+			return req, nil
+		},
+	}
+
+	for p.Next() {
+		if !fn(p.Page().(*GetLifecyclePolicyPreviewOutput), !p.HasNextPage()) {
+			break
+		}
+	}
+
+	return p.Err()
 }
 
 const opGetRepositoryPolicy = "GetRepositoryPolicy"
@@ -1761,10 +1978,12 @@ func (c *ECR) ListImagesPagesWithContext(ctx aws.Context, input *ListImagesInput
 		},
 	}
 
-	cont := true
-	for p.Next() && cont {
-		cont = fn(p.Page().(*ListImagesOutput), !p.HasNextPage())
+	for p.Next() {
+		if !fn(p.Page().(*ListImagesOutput), !p.HasNextPage()) {
+			break
+		}
 	}
+
 	return p.Err()
 }
 
@@ -1964,6 +2183,93 @@ func (c *ECR) PutImageWithContext(ctx aws.Context, input *PutImageInput, opts ..
 	return out, req.Send()
 }
 
+const opPutImageScanningConfiguration = "PutImageScanningConfiguration"
+
+// PutImageScanningConfigurationRequest generates a "aws/request.Request" representing the
+// client's request for the PutImageScanningConfiguration operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See PutImageScanningConfiguration for more information on using the PutImageScanningConfiguration
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the PutImageScanningConfigurationRequest method.
+//    req, resp := client.PutImageScanningConfigurationRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ecr-2015-09-21/PutImageScanningConfiguration
+func (c *ECR) PutImageScanningConfigurationRequest(input *PutImageScanningConfigurationInput) (req *request.Request, output *PutImageScanningConfigurationOutput) {
+	op := &request.Operation{
+		Name:       opPutImageScanningConfiguration,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &PutImageScanningConfigurationInput{}
+	}
+
+	output = &PutImageScanningConfigurationOutput{}
+	req = c.newRequest(op, input, output)
+	return
+}
+
+// PutImageScanningConfiguration API operation for Amazon EC2 Container Registry.
+//
+// Updates the image scanning configuration for a repository.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for Amazon EC2 Container Registry's
+// API operation PutImageScanningConfiguration for usage and error information.
+//
+// Returned Error Codes:
+//   * ErrCodeServerException "ServerException"
+//   These errors are usually caused by a server-side issue.
+//
+//   * ErrCodeInvalidParameterException "InvalidParameterException"
+//   The specified parameter is invalid. Review the available parameters for the
+//   API request.
+//
+//   * ErrCodeRepositoryNotFoundException "RepositoryNotFoundException"
+//   The specified repository could not be found. Check the spelling of the specified
+//   repository and ensure that you are performing operations on the correct registry.
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ecr-2015-09-21/PutImageScanningConfiguration
+func (c *ECR) PutImageScanningConfiguration(input *PutImageScanningConfigurationInput) (*PutImageScanningConfigurationOutput, error) {
+	req, out := c.PutImageScanningConfigurationRequest(input)
+	return out, req.Send()
+}
+
+// PutImageScanningConfigurationWithContext is the same as PutImageScanningConfiguration with the addition of
+// the ability to pass a context and additional request options.
+//
+// See PutImageScanningConfiguration for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *ECR) PutImageScanningConfigurationWithContext(ctx aws.Context, input *PutImageScanningConfigurationInput, opts ...request.Option) (*PutImageScanningConfigurationOutput, error) {
+	req, out := c.PutImageScanningConfigurationRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
 const opPutImageTagMutability = "PutImageTagMutability"
 
 // PutImageTagMutabilityRequest generates a "aws/request.Request" representing the
@@ -2008,7 +2314,11 @@ func (c *ECR) PutImageTagMutabilityRequest(input *PutImageTagMutabilityInput) (r
 
 // PutImageTagMutability API operation for Amazon EC2 Container Registry.
 //
-// Updates the image tag mutability settings for a repository.
+// Updates the image tag mutability settings for a repository. When a repository
+// is configured with tag immutability, all image tags within the repository
+// will be prevented them from being overwritten. For more information, see
+// Image Tag Mutability (https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-tag-mutability.html)
+// in the Amazon Elastic Container Registry User Guide.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -2223,6 +2533,99 @@ func (c *ECR) SetRepositoryPolicy(input *SetRepositoryPolicyInput) (*SetReposito
 // for more information on using Contexts.
 func (c *ECR) SetRepositoryPolicyWithContext(ctx aws.Context, input *SetRepositoryPolicyInput, opts ...request.Option) (*SetRepositoryPolicyOutput, error) {
 	req, out := c.SetRepositoryPolicyRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
+const opStartImageScan = "StartImageScan"
+
+// StartImageScanRequest generates a "aws/request.Request" representing the
+// client's request for the StartImageScan operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See StartImageScan for more information on using the StartImageScan
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the StartImageScanRequest method.
+//    req, resp := client.StartImageScanRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ecr-2015-09-21/StartImageScan
+func (c *ECR) StartImageScanRequest(input *StartImageScanInput) (req *request.Request, output *StartImageScanOutput) {
+	op := &request.Operation{
+		Name:       opStartImageScan,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &StartImageScanInput{}
+	}
+
+	output = &StartImageScanOutput{}
+	req = c.newRequest(op, input, output)
+	return
+}
+
+// StartImageScan API operation for Amazon EC2 Container Registry.
+//
+// Starts an image vulnerability scan. An image scan can only be started once
+// per day on an individual image. This limit includes if an image was scanned
+// on initial push. For more information, see Image Scanning (https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html)
+// in the Amazon Elastic Container Registry User Guide.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for Amazon EC2 Container Registry's
+// API operation StartImageScan for usage and error information.
+//
+// Returned Error Codes:
+//   * ErrCodeServerException "ServerException"
+//   These errors are usually caused by a server-side issue.
+//
+//   * ErrCodeInvalidParameterException "InvalidParameterException"
+//   The specified parameter is invalid. Review the available parameters for the
+//   API request.
+//
+//   * ErrCodeRepositoryNotFoundException "RepositoryNotFoundException"
+//   The specified repository could not be found. Check the spelling of the specified
+//   repository and ensure that you are performing operations on the correct registry.
+//
+//   * ErrCodeImageNotFoundException "ImageNotFoundException"
+//   The image requested does not exist in the specified repository.
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ecr-2015-09-21/StartImageScan
+func (c *ECR) StartImageScan(input *StartImageScanInput) (*StartImageScanOutput, error) {
+	req, out := c.StartImageScanRequest(input)
+	return out, req.Send()
+}
+
+// StartImageScanWithContext is the same as StartImageScan with the addition of
+// the ability to pass a context and additional request options.
+//
+// See StartImageScan for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *ECR) StartImageScanWithContext(ctx aws.Context, input *StartImageScanInput, opts ...request.Option) (*StartImageScanOutput, error) {
+	req, out := c.StartImageScanRequest(input)
 	req.SetContext(ctx)
 	req.ApplyOptions(opts...)
 	return out, req.Send()
@@ -2621,6 +3024,41 @@ func (c *ECR) UploadLayerPartWithContext(ctx aws.Context, input *UploadLayerPart
 	req.SetContext(ctx)
 	req.ApplyOptions(opts...)
 	return out, req.Send()
+}
+
+// This data type is used in the ImageScanFinding data type.
+type Attribute struct {
+	_ struct{} `type:"structure"`
+
+	// The attribute key.
+	//
+	// Key is a required field
+	Key *string `locationName:"key" min:"1" type:"string" required:"true"`
+
+	// The value assigned to the attribute key.
+	Value *string `locationName:"value" min:"1" type:"string"`
+}
+
+// String returns the string representation
+func (s Attribute) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s Attribute) GoString() string {
+	return s.String()
+}
+
+// SetKey sets the Key field's value.
+func (s *Attribute) SetKey(v string) *Attribute {
+	s.Key = &v
+	return s
+}
+
+// SetValue sets the Value field's value.
+func (s *Attribute) SetValue(v string) *Attribute {
+	s.Value = &v
+	return s
 }
 
 // An object representing authorization data for an Amazon ECR registry.
@@ -3146,6 +3584,11 @@ func (s *CompleteLayerUploadOutput) SetUploadId(v string) *CompleteLayerUploadOu
 type CreateRepositoryInput struct {
 	_ struct{} `type:"structure"`
 
+	// The image scanning configuration for the repository. This setting determines
+	// whether images are scanned for known vulnerabilities after being pushed to
+	// the repository.
+	ImageScanningConfiguration *ImageScanningConfiguration `locationName:"imageScanningConfiguration" type:"structure"`
+
 	// The tag mutability setting for the repository. If this parameter is omitted,
 	// the default setting of MUTABLE will be used which will allow image tags to
 	// be overwritten. If IMMUTABLE is specified, all image tags within the repository
@@ -3190,6 +3633,12 @@ func (s *CreateRepositoryInput) Validate() error {
 		return invalidParams
 	}
 	return nil
+}
+
+// SetImageScanningConfiguration sets the ImageScanningConfiguration field's value.
+func (s *CreateRepositoryInput) SetImageScanningConfiguration(v *ImageScanningConfiguration) *CreateRepositoryInput {
+	s.ImageScanningConfiguration = v
+	return s
 }
 
 // SetImageTagMutability sets the ImageTagMutability field's value.
@@ -3507,6 +3956,180 @@ func (s *DeleteRepositoryPolicyOutput) SetRegistryId(v string) *DeleteRepository
 
 // SetRepositoryName sets the RepositoryName field's value.
 func (s *DeleteRepositoryPolicyOutput) SetRepositoryName(v string) *DeleteRepositoryPolicyOutput {
+	s.RepositoryName = &v
+	return s
+}
+
+type DescribeImageScanFindingsInput struct {
+	_ struct{} `type:"structure"`
+
+	// An object with identifying information for an Amazon ECR image.
+	//
+	// ImageId is a required field
+	ImageId *ImageIdentifier `locationName:"imageId" type:"structure" required:"true"`
+
+	// The maximum number of image scan results returned by DescribeImageScanFindings
+	// in paginated output. When this parameter is used, DescribeImageScanFindings
+	// only returns maxResults results in a single page along with a nextToken response
+	// element. The remaining results of the initial request can be seen by sending
+	// another DescribeImageScanFindings request with the returned nextToken value.
+	// This value can be between 1 and 1000. If this parameter is not used, then
+	// DescribeImageScanFindings returns up to 100 results and a nextToken value,
+	// if applicable.
+	MaxResults *int64 `locationName:"maxResults" min:"1" type:"integer"`
+
+	// The nextToken value returned from a previous paginated DescribeImageScanFindings
+	// request where maxResults was used and the results exceeded the value of that
+	// parameter. Pagination continues from the end of the previous results that
+	// returned the nextToken value. This value is null when there are no more results
+	// to return.
+	NextToken *string `locationName:"nextToken" type:"string"`
+
+	// The AWS account ID associated with the registry that contains the repository
+	// in which to describe the image scan findings for. If you do not specify a
+	// registry, the default registry is assumed.
+	RegistryId *string `locationName:"registryId" type:"string"`
+
+	// The repository for the image for which to describe the scan findings.
+	//
+	// RepositoryName is a required field
+	RepositoryName *string `locationName:"repositoryName" min:"2" type:"string" required:"true"`
+}
+
+// String returns the string representation
+func (s DescribeImageScanFindingsInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s DescribeImageScanFindingsInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *DescribeImageScanFindingsInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "DescribeImageScanFindingsInput"}
+	if s.ImageId == nil {
+		invalidParams.Add(request.NewErrParamRequired("ImageId"))
+	}
+	if s.MaxResults != nil && *s.MaxResults < 1 {
+		invalidParams.Add(request.NewErrParamMinValue("MaxResults", 1))
+	}
+	if s.RepositoryName == nil {
+		invalidParams.Add(request.NewErrParamRequired("RepositoryName"))
+	}
+	if s.RepositoryName != nil && len(*s.RepositoryName) < 2 {
+		invalidParams.Add(request.NewErrParamMinLen("RepositoryName", 2))
+	}
+	if s.ImageId != nil {
+		if err := s.ImageId.Validate(); err != nil {
+			invalidParams.AddNested("ImageId", err.(request.ErrInvalidParams))
+		}
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetImageId sets the ImageId field's value.
+func (s *DescribeImageScanFindingsInput) SetImageId(v *ImageIdentifier) *DescribeImageScanFindingsInput {
+	s.ImageId = v
+	return s
+}
+
+// SetMaxResults sets the MaxResults field's value.
+func (s *DescribeImageScanFindingsInput) SetMaxResults(v int64) *DescribeImageScanFindingsInput {
+	s.MaxResults = &v
+	return s
+}
+
+// SetNextToken sets the NextToken field's value.
+func (s *DescribeImageScanFindingsInput) SetNextToken(v string) *DescribeImageScanFindingsInput {
+	s.NextToken = &v
+	return s
+}
+
+// SetRegistryId sets the RegistryId field's value.
+func (s *DescribeImageScanFindingsInput) SetRegistryId(v string) *DescribeImageScanFindingsInput {
+	s.RegistryId = &v
+	return s
+}
+
+// SetRepositoryName sets the RepositoryName field's value.
+func (s *DescribeImageScanFindingsInput) SetRepositoryName(v string) *DescribeImageScanFindingsInput {
+	s.RepositoryName = &v
+	return s
+}
+
+type DescribeImageScanFindingsOutput struct {
+	_ struct{} `type:"structure"`
+
+	// An object with identifying information for an Amazon ECR image.
+	ImageId *ImageIdentifier `locationName:"imageId" type:"structure"`
+
+	// The information contained in the image scan findings.
+	ImageScanFindings *ImageScanFindings `locationName:"imageScanFindings" type:"structure"`
+
+	// The current state of the scan.
+	ImageScanStatus *ImageScanStatus `locationName:"imageScanStatus" type:"structure"`
+
+	// The nextToken value to include in a future DescribeImageScanFindings request.
+	// When the results of a DescribeImageScanFindings request exceed maxResults,
+	// this value can be used to retrieve the next page of results. This value is
+	// null when there are no more results to return.
+	NextToken *string `locationName:"nextToken" type:"string"`
+
+	// The registry ID associated with the request.
+	RegistryId *string `locationName:"registryId" type:"string"`
+
+	// The repository name associated with the request.
+	RepositoryName *string `locationName:"repositoryName" min:"2" type:"string"`
+}
+
+// String returns the string representation
+func (s DescribeImageScanFindingsOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s DescribeImageScanFindingsOutput) GoString() string {
+	return s.String()
+}
+
+// SetImageId sets the ImageId field's value.
+func (s *DescribeImageScanFindingsOutput) SetImageId(v *ImageIdentifier) *DescribeImageScanFindingsOutput {
+	s.ImageId = v
+	return s
+}
+
+// SetImageScanFindings sets the ImageScanFindings field's value.
+func (s *DescribeImageScanFindingsOutput) SetImageScanFindings(v *ImageScanFindings) *DescribeImageScanFindingsOutput {
+	s.ImageScanFindings = v
+	return s
+}
+
+// SetImageScanStatus sets the ImageScanStatus field's value.
+func (s *DescribeImageScanFindingsOutput) SetImageScanStatus(v *ImageScanStatus) *DescribeImageScanFindingsOutput {
+	s.ImageScanStatus = v
+	return s
+}
+
+// SetNextToken sets the NextToken field's value.
+func (s *DescribeImageScanFindingsOutput) SetNextToken(v string) *DescribeImageScanFindingsOutput {
+	s.NextToken = &v
+	return s
+}
+
+// SetRegistryId sets the RegistryId field's value.
+func (s *DescribeImageScanFindingsOutput) SetRegistryId(v string) *DescribeImageScanFindingsOutput {
+	s.RegistryId = &v
+	return s
+}
+
+// SetRepositoryName sets the RepositoryName field's value.
+func (s *DescribeImageScanFindingsOutput) SetRepositoryName(v string) *DescribeImageScanFindingsOutput {
 	s.RepositoryName = &v
 	return s
 }
@@ -4361,7 +4984,7 @@ type Image struct {
 	ImageId *ImageIdentifier `locationName:"imageId" type:"structure"`
 
 	// The image manifest associated with the image.
-	ImageManifest *string `locationName:"imageManifest" type:"string"`
+	ImageManifest *string `locationName:"imageManifest" min:"1" type:"string"`
 
 	// The AWS account ID associated with the registry containing the image.
 	RegistryId *string `locationName:"registryId" type:"string"`
@@ -4415,6 +5038,12 @@ type ImageDetail struct {
 	// the current image was pushed to the repository.
 	ImagePushedAt *time.Time `locationName:"imagePushedAt" type:"timestamp"`
 
+	// A summary of the last completed image scan.
+	ImageScanFindingsSummary *ImageScanFindingsSummary `locationName:"imageScanFindingsSummary" type:"structure"`
+
+	// The current state of the scan.
+	ImageScanStatus *ImageScanStatus `locationName:"imageScanStatus" type:"structure"`
+
 	// The size, in bytes, of the image in the repository.
 	//
 	// Beginning with Docker version 1.9, the Docker client compresses image layers
@@ -4452,6 +5081,18 @@ func (s *ImageDetail) SetImageDigest(v string) *ImageDetail {
 // SetImagePushedAt sets the ImagePushedAt field's value.
 func (s *ImageDetail) SetImagePushedAt(v time.Time) *ImageDetail {
 	s.ImagePushedAt = &v
+	return s
+}
+
+// SetImageScanFindingsSummary sets the ImageScanFindingsSummary field's value.
+func (s *ImageDetail) SetImageScanFindingsSummary(v *ImageScanFindingsSummary) *ImageDetail {
+	s.ImageScanFindingsSummary = v
+	return s
+}
+
+// SetImageScanStatus sets the ImageScanStatus field's value.
+func (s *ImageDetail) SetImageScanStatus(v *ImageScanStatus) *ImageDetail {
+	s.ImageScanStatus = v
 	return s
 }
 
@@ -4564,6 +5205,220 @@ func (s *ImageIdentifier) SetImageDigest(v string) *ImageIdentifier {
 // SetImageTag sets the ImageTag field's value.
 func (s *ImageIdentifier) SetImageTag(v string) *ImageIdentifier {
 	s.ImageTag = &v
+	return s
+}
+
+// Contains information about an image scan finding.
+type ImageScanFinding struct {
+	_ struct{} `type:"structure"`
+
+	// A collection of attributes of the host from which the finding is generated.
+	Attributes []*Attribute `locationName:"attributes" type:"list"`
+
+	// The description of the finding.
+	Description *string `locationName:"description" type:"string"`
+
+	// The name associated with the finding, usually a CVE number.
+	Name *string `locationName:"name" type:"string"`
+
+	// The finding severity.
+	Severity *string `locationName:"severity" type:"string" enum:"FindingSeverity"`
+
+	// A link containing additional details about the security vulnerability.
+	Uri *string `locationName:"uri" type:"string"`
+}
+
+// String returns the string representation
+func (s ImageScanFinding) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s ImageScanFinding) GoString() string {
+	return s.String()
+}
+
+// SetAttributes sets the Attributes field's value.
+func (s *ImageScanFinding) SetAttributes(v []*Attribute) *ImageScanFinding {
+	s.Attributes = v
+	return s
+}
+
+// SetDescription sets the Description field's value.
+func (s *ImageScanFinding) SetDescription(v string) *ImageScanFinding {
+	s.Description = &v
+	return s
+}
+
+// SetName sets the Name field's value.
+func (s *ImageScanFinding) SetName(v string) *ImageScanFinding {
+	s.Name = &v
+	return s
+}
+
+// SetSeverity sets the Severity field's value.
+func (s *ImageScanFinding) SetSeverity(v string) *ImageScanFinding {
+	s.Severity = &v
+	return s
+}
+
+// SetUri sets the Uri field's value.
+func (s *ImageScanFinding) SetUri(v string) *ImageScanFinding {
+	s.Uri = &v
+	return s
+}
+
+// The details of an image scan.
+type ImageScanFindings struct {
+	_ struct{} `type:"structure"`
+
+	// The image vulnerability counts, sorted by severity.
+	FindingSeverityCounts map[string]*int64 `locationName:"findingSeverityCounts" type:"map"`
+
+	// The findings from the image scan.
+	Findings []*ImageScanFinding `locationName:"findings" type:"list"`
+
+	// The time of the last completed image scan.
+	ImageScanCompletedAt *time.Time `locationName:"imageScanCompletedAt" type:"timestamp"`
+
+	// The time when the vulnerability data was last scanned.
+	VulnerabilitySourceUpdatedAt *time.Time `locationName:"vulnerabilitySourceUpdatedAt" type:"timestamp"`
+}
+
+// String returns the string representation
+func (s ImageScanFindings) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s ImageScanFindings) GoString() string {
+	return s.String()
+}
+
+// SetFindingSeverityCounts sets the FindingSeverityCounts field's value.
+func (s *ImageScanFindings) SetFindingSeverityCounts(v map[string]*int64) *ImageScanFindings {
+	s.FindingSeverityCounts = v
+	return s
+}
+
+// SetFindings sets the Findings field's value.
+func (s *ImageScanFindings) SetFindings(v []*ImageScanFinding) *ImageScanFindings {
+	s.Findings = v
+	return s
+}
+
+// SetImageScanCompletedAt sets the ImageScanCompletedAt field's value.
+func (s *ImageScanFindings) SetImageScanCompletedAt(v time.Time) *ImageScanFindings {
+	s.ImageScanCompletedAt = &v
+	return s
+}
+
+// SetVulnerabilitySourceUpdatedAt sets the VulnerabilitySourceUpdatedAt field's value.
+func (s *ImageScanFindings) SetVulnerabilitySourceUpdatedAt(v time.Time) *ImageScanFindings {
+	s.VulnerabilitySourceUpdatedAt = &v
+	return s
+}
+
+// A summary of the last completed image scan.
+type ImageScanFindingsSummary struct {
+	_ struct{} `type:"structure"`
+
+	// The image vulnerability counts, sorted by severity.
+	FindingSeverityCounts map[string]*int64 `locationName:"findingSeverityCounts" type:"map"`
+
+	// The time of the last completed image scan.
+	ImageScanCompletedAt *time.Time `locationName:"imageScanCompletedAt" type:"timestamp"`
+
+	// The time when the vulnerability data was last scanned.
+	VulnerabilitySourceUpdatedAt *time.Time `locationName:"vulnerabilitySourceUpdatedAt" type:"timestamp"`
+}
+
+// String returns the string representation
+func (s ImageScanFindingsSummary) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s ImageScanFindingsSummary) GoString() string {
+	return s.String()
+}
+
+// SetFindingSeverityCounts sets the FindingSeverityCounts field's value.
+func (s *ImageScanFindingsSummary) SetFindingSeverityCounts(v map[string]*int64) *ImageScanFindingsSummary {
+	s.FindingSeverityCounts = v
+	return s
+}
+
+// SetImageScanCompletedAt sets the ImageScanCompletedAt field's value.
+func (s *ImageScanFindingsSummary) SetImageScanCompletedAt(v time.Time) *ImageScanFindingsSummary {
+	s.ImageScanCompletedAt = &v
+	return s
+}
+
+// SetVulnerabilitySourceUpdatedAt sets the VulnerabilitySourceUpdatedAt field's value.
+func (s *ImageScanFindingsSummary) SetVulnerabilitySourceUpdatedAt(v time.Time) *ImageScanFindingsSummary {
+	s.VulnerabilitySourceUpdatedAt = &v
+	return s
+}
+
+// The current status of an image scan.
+type ImageScanStatus struct {
+	_ struct{} `type:"structure"`
+
+	// The description of the image scan status.
+	Description *string `locationName:"description" type:"string"`
+
+	// The current state of an image scan.
+	Status *string `locationName:"status" type:"string" enum:"ScanStatus"`
+}
+
+// String returns the string representation
+func (s ImageScanStatus) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s ImageScanStatus) GoString() string {
+	return s.String()
+}
+
+// SetDescription sets the Description field's value.
+func (s *ImageScanStatus) SetDescription(v string) *ImageScanStatus {
+	s.Description = &v
+	return s
+}
+
+// SetStatus sets the Status field's value.
+func (s *ImageScanStatus) SetStatus(v string) *ImageScanStatus {
+	s.Status = &v
+	return s
+}
+
+// The image scanning configuration for a repository.
+type ImageScanningConfiguration struct {
+	_ struct{} `type:"structure"`
+
+	// The setting that determines whether images are scanned after being pushed
+	// to a repository. If set to true, images will be scanned after being pushed.
+	// If this parameter is not specified, it will default to false and images will
+	// not be scanned unless a scan is manually started with the StartImageScan
+	// API.
+	ScanOnPush *bool `locationName:"scanOnPush" type:"boolean"`
+}
+
+// String returns the string representation
+func (s ImageScanningConfiguration) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s ImageScanningConfiguration) GoString() string {
+	return s.String()
+}
+
+// SetScanOnPush sets the ScanOnPush field's value.
+func (s *ImageScanningConfiguration) SetScanOnPush(v bool) *ImageScanningConfiguration {
+	s.ScanOnPush = &v
 	return s
 }
 
@@ -5101,7 +5956,7 @@ type PutImageInput struct {
 	// The image manifest corresponding to the image to be uploaded.
 	//
 	// ImageManifest is a required field
-	ImageManifest *string `locationName:"imageManifest" type:"string" required:"true"`
+	ImageManifest *string `locationName:"imageManifest" min:"1" type:"string" required:"true"`
 
 	// The tag to associate with the image. This parameter is required for images
 	// that use the Docker Image Manifest V2 Schema 2 or OCI formats.
@@ -5133,6 +5988,9 @@ func (s *PutImageInput) Validate() error {
 	invalidParams := request.ErrInvalidParams{Context: "PutImageInput"}
 	if s.ImageManifest == nil {
 		invalidParams.Add(request.NewErrParamRequired("ImageManifest"))
+	}
+	if s.ImageManifest != nil && len(*s.ImageManifest) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("ImageManifest", 1))
 	}
 	if s.ImageTag != nil && len(*s.ImageTag) < 1 {
 		invalidParams.Add(request.NewErrParamMinLen("ImageTag", 1))
@@ -5194,6 +6052,116 @@ func (s PutImageOutput) GoString() string {
 // SetImage sets the Image field's value.
 func (s *PutImageOutput) SetImage(v *Image) *PutImageOutput {
 	s.Image = v
+	return s
+}
+
+type PutImageScanningConfigurationInput struct {
+	_ struct{} `type:"structure"`
+
+	// The image scanning configuration for the repository. This setting determines
+	// whether images are scanned for known vulnerabilities after being pushed to
+	// the repository.
+	//
+	// ImageScanningConfiguration is a required field
+	ImageScanningConfiguration *ImageScanningConfiguration `locationName:"imageScanningConfiguration" type:"structure" required:"true"`
+
+	// The AWS account ID associated with the registry that contains the repository
+	// in which to update the image scanning configuration setting. If you do not
+	// specify a registry, the default registry is assumed.
+	RegistryId *string `locationName:"registryId" type:"string"`
+
+	// The name of the repository in which to update the image scanning configuration
+	// setting.
+	//
+	// RepositoryName is a required field
+	RepositoryName *string `locationName:"repositoryName" min:"2" type:"string" required:"true"`
+}
+
+// String returns the string representation
+func (s PutImageScanningConfigurationInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s PutImageScanningConfigurationInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *PutImageScanningConfigurationInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "PutImageScanningConfigurationInput"}
+	if s.ImageScanningConfiguration == nil {
+		invalidParams.Add(request.NewErrParamRequired("ImageScanningConfiguration"))
+	}
+	if s.RepositoryName == nil {
+		invalidParams.Add(request.NewErrParamRequired("RepositoryName"))
+	}
+	if s.RepositoryName != nil && len(*s.RepositoryName) < 2 {
+		invalidParams.Add(request.NewErrParamMinLen("RepositoryName", 2))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetImageScanningConfiguration sets the ImageScanningConfiguration field's value.
+func (s *PutImageScanningConfigurationInput) SetImageScanningConfiguration(v *ImageScanningConfiguration) *PutImageScanningConfigurationInput {
+	s.ImageScanningConfiguration = v
+	return s
+}
+
+// SetRegistryId sets the RegistryId field's value.
+func (s *PutImageScanningConfigurationInput) SetRegistryId(v string) *PutImageScanningConfigurationInput {
+	s.RegistryId = &v
+	return s
+}
+
+// SetRepositoryName sets the RepositoryName field's value.
+func (s *PutImageScanningConfigurationInput) SetRepositoryName(v string) *PutImageScanningConfigurationInput {
+	s.RepositoryName = &v
+	return s
+}
+
+type PutImageScanningConfigurationOutput struct {
+	_ struct{} `type:"structure"`
+
+	// The image scanning configuration setting for the repository.
+	ImageScanningConfiguration *ImageScanningConfiguration `locationName:"imageScanningConfiguration" type:"structure"`
+
+	// The registry ID associated with the request.
+	RegistryId *string `locationName:"registryId" type:"string"`
+
+	// The repository name associated with the request.
+	RepositoryName *string `locationName:"repositoryName" min:"2" type:"string"`
+}
+
+// String returns the string representation
+func (s PutImageScanningConfigurationOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s PutImageScanningConfigurationOutput) GoString() string {
+	return s.String()
+}
+
+// SetImageScanningConfiguration sets the ImageScanningConfiguration field's value.
+func (s *PutImageScanningConfigurationOutput) SetImageScanningConfiguration(v *ImageScanningConfiguration) *PutImageScanningConfigurationOutput {
+	s.ImageScanningConfiguration = v
+	return s
+}
+
+// SetRegistryId sets the RegistryId field's value.
+func (s *PutImageScanningConfigurationOutput) SetRegistryId(v string) *PutImageScanningConfigurationOutput {
+	s.RegistryId = &v
+	return s
+}
+
+// SetRepositoryName sets the RepositoryName field's value.
+func (s *PutImageScanningConfigurationOutput) SetRepositoryName(v string) *PutImageScanningConfigurationOutput {
+	s.RepositoryName = &v
 	return s
 }
 
@@ -5422,6 +6390,9 @@ type Repository struct {
 	// The date and time, in JavaScript date format, when the repository was created.
 	CreatedAt *time.Time `locationName:"createdAt" type:"timestamp"`
 
+	// The image scanning configuration for a repository.
+	ImageScanningConfiguration *ImageScanningConfiguration `locationName:"imageScanningConfiguration" type:"structure"`
+
 	// The tag mutability setting for the repository.
 	ImageTagMutability *string `locationName:"imageTagMutability" type:"string" enum:"ImageTagMutability"`
 
@@ -5455,6 +6426,12 @@ func (s Repository) GoString() string {
 // SetCreatedAt sets the CreatedAt field's value.
 func (s *Repository) SetCreatedAt(v time.Time) *Repository {
 	s.CreatedAt = &v
+	return s
+}
+
+// SetImageScanningConfiguration sets the ImageScanningConfiguration field's value.
+func (s *Repository) SetImageScanningConfiguration(v *ImageScanningConfiguration) *Repository {
+	s.ImageScanningConfiguration = v
 	return s
 }
 
@@ -5603,6 +6580,127 @@ func (s *SetRepositoryPolicyOutput) SetRegistryId(v string) *SetRepositoryPolicy
 
 // SetRepositoryName sets the RepositoryName field's value.
 func (s *SetRepositoryPolicyOutput) SetRepositoryName(v string) *SetRepositoryPolicyOutput {
+	s.RepositoryName = &v
+	return s
+}
+
+type StartImageScanInput struct {
+	_ struct{} `type:"structure"`
+
+	// An object with identifying information for an Amazon ECR image.
+	//
+	// ImageId is a required field
+	ImageId *ImageIdentifier `locationName:"imageId" type:"structure" required:"true"`
+
+	// The AWS account ID associated with the registry that contains the repository
+	// in which to start an image scan request. If you do not specify a registry,
+	// the default registry is assumed.
+	RegistryId *string `locationName:"registryId" type:"string"`
+
+	// The name of the repository that contains the images to scan.
+	//
+	// RepositoryName is a required field
+	RepositoryName *string `locationName:"repositoryName" min:"2" type:"string" required:"true"`
+}
+
+// String returns the string representation
+func (s StartImageScanInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s StartImageScanInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *StartImageScanInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "StartImageScanInput"}
+	if s.ImageId == nil {
+		invalidParams.Add(request.NewErrParamRequired("ImageId"))
+	}
+	if s.RepositoryName == nil {
+		invalidParams.Add(request.NewErrParamRequired("RepositoryName"))
+	}
+	if s.RepositoryName != nil && len(*s.RepositoryName) < 2 {
+		invalidParams.Add(request.NewErrParamMinLen("RepositoryName", 2))
+	}
+	if s.ImageId != nil {
+		if err := s.ImageId.Validate(); err != nil {
+			invalidParams.AddNested("ImageId", err.(request.ErrInvalidParams))
+		}
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetImageId sets the ImageId field's value.
+func (s *StartImageScanInput) SetImageId(v *ImageIdentifier) *StartImageScanInput {
+	s.ImageId = v
+	return s
+}
+
+// SetRegistryId sets the RegistryId field's value.
+func (s *StartImageScanInput) SetRegistryId(v string) *StartImageScanInput {
+	s.RegistryId = &v
+	return s
+}
+
+// SetRepositoryName sets the RepositoryName field's value.
+func (s *StartImageScanInput) SetRepositoryName(v string) *StartImageScanInput {
+	s.RepositoryName = &v
+	return s
+}
+
+type StartImageScanOutput struct {
+	_ struct{} `type:"structure"`
+
+	// An object with identifying information for an Amazon ECR image.
+	ImageId *ImageIdentifier `locationName:"imageId" type:"structure"`
+
+	// The current state of the scan.
+	ImageScanStatus *ImageScanStatus `locationName:"imageScanStatus" type:"structure"`
+
+	// The registry ID associated with the request.
+	RegistryId *string `locationName:"registryId" type:"string"`
+
+	// The repository name associated with the request.
+	RepositoryName *string `locationName:"repositoryName" min:"2" type:"string"`
+}
+
+// String returns the string representation
+func (s StartImageScanOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s StartImageScanOutput) GoString() string {
+	return s.String()
+}
+
+// SetImageId sets the ImageId field's value.
+func (s *StartImageScanOutput) SetImageId(v *ImageIdentifier) *StartImageScanOutput {
+	s.ImageId = v
+	return s
+}
+
+// SetImageScanStatus sets the ImageScanStatus field's value.
+func (s *StartImageScanOutput) SetImageScanStatus(v *ImageScanStatus) *StartImageScanOutput {
+	s.ImageScanStatus = v
+	return s
+}
+
+// SetRegistryId sets the RegistryId field's value.
+func (s *StartImageScanOutput) SetRegistryId(v string) *StartImageScanOutput {
+	s.RegistryId = &v
+	return s
+}
+
+// SetRepositoryName sets the RepositoryName field's value.
+func (s *StartImageScanOutput) SetRepositoryName(v string) *StartImageScanOutput {
 	s.RepositoryName = &v
 	return s
 }
@@ -6056,6 +7154,26 @@ func (s *UploadLayerPartOutput) SetUploadId(v string) *UploadLayerPartOutput {
 }
 
 const (
+	// FindingSeverityInformational is a FindingSeverity enum value
+	FindingSeverityInformational = "INFORMATIONAL"
+
+	// FindingSeverityLow is a FindingSeverity enum value
+	FindingSeverityLow = "LOW"
+
+	// FindingSeverityMedium is a FindingSeverity enum value
+	FindingSeverityMedium = "MEDIUM"
+
+	// FindingSeverityHigh is a FindingSeverity enum value
+	FindingSeverityHigh = "HIGH"
+
+	// FindingSeverityCritical is a FindingSeverity enum value
+	FindingSeverityCritical = "CRITICAL"
+
+	// FindingSeverityUndefined is a FindingSeverity enum value
+	FindingSeverityUndefined = "UNDEFINED"
+)
+
+const (
 	// ImageActionTypeExpire is a ImageActionType enum value
 	ImageActionTypeExpire = "EXPIRE"
 )
@@ -6113,6 +7231,17 @@ const (
 
 	// LifecyclePolicyPreviewStatusFailed is a LifecyclePolicyPreviewStatus enum value
 	LifecyclePolicyPreviewStatusFailed = "FAILED"
+)
+
+const (
+	// ScanStatusInProgress is a ScanStatus enum value
+	ScanStatusInProgress = "IN_PROGRESS"
+
+	// ScanStatusComplete is a ScanStatus enum value
+	ScanStatusComplete = "COMPLETE"
+
+	// ScanStatusFailed is a ScanStatus enum value
+	ScanStatusFailed = "FAILED"
 )
 
 const (

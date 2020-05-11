@@ -110,11 +110,11 @@ github.com/apparentlymart/go-textseg/v12/textseg
 github.com/approvals/go-approval-tests
 github.com/approvals/go-approval-tests/reporters
 github.com/approvals/go-approval-tests/utils
-# github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da
+# github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878
 github.com/armon/go-metrics
 # github.com/armon/go-radix v1.0.0
 github.com/armon/go-radix
-# github.com/aws/aws-sdk-go v1.24.1
+# github.com/aws/aws-sdk-go v1.25.41
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/awserr
 github.com/aws/aws-sdk-go/aws/awsutil
@@ -205,7 +205,7 @@ github.com/dylanmei/winrmtest
 github.com/exoscale/egoscale
 # github.com/fatih/camelcase v1.0.0
 github.com/fatih/camelcase
-# github.com/fatih/color v1.7.0
+# github.com/fatih/color v1.9.0
 github.com/fatih/color
 # github.com/fatih/structtag v1.0.0
 github.com/fatih/structtag
@@ -253,7 +253,7 @@ github.com/golang/protobuf/ptypes/empty
 github.com/golang/protobuf/ptypes/struct
 github.com/golang/protobuf/ptypes/timestamp
 github.com/golang/protobuf/ptypes/wrappers
-# github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db
+# github.com/golang/snappy v0.0.1
 github.com/golang/snappy
 # github.com/google/go-cmp v0.3.1
 github.com/google/go-cmp/cmp
@@ -300,13 +300,13 @@ github.com/gophercloud/utils/openstack/clientconfig
 github.com/gorilla/websocket
 # github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 github.com/grpc-ecosystem/go-grpc-middleware
-# github.com/hashicorp/consul v1.4.0
+# github.com/hashicorp/consul/api v1.4.0
 github.com/hashicorp/consul/api
 # github.com/hashicorp/errwrap v1.0.0
 github.com/hashicorp/errwrap
 # github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 github.com/hashicorp/go-checkpoint
-# github.com/hashicorp/go-cleanhttp v0.5.0
+# github.com/hashicorp/go-cleanhttp v0.5.1
 github.com/hashicorp/go-cleanhttp
 # github.com/hashicorp/go-cty-funcs/cidr v0.0.0-20200203151509-c92509f48b18
 github.com/hashicorp/go-cty-funcs/cidr
@@ -323,21 +323,23 @@ github.com/hashicorp/go-getter/helper/url
 # github.com/hashicorp/go-getter/v2 v2.0.0-20200318090939-0b1d527d9793
 github.com/hashicorp/go-getter/v2
 github.com/hashicorp/go-getter/v2/helper/url
-# github.com/hashicorp/go-immutable-radix v1.0.0
+# github.com/hashicorp/go-hclog v0.12.0
+github.com/hashicorp/go-hclog
+# github.com/hashicorp/go-immutable-radix v1.1.0
 github.com/hashicorp/go-immutable-radix
-# github.com/hashicorp/go-multierror v1.0.0
+# github.com/hashicorp/go-multierror v1.1.0
 github.com/hashicorp/go-multierror
 # github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79
 github.com/hashicorp/go-oracle-terraform/client
 github.com/hashicorp/go-oracle-terraform/compute
 github.com/hashicorp/go-oracle-terraform/opc
-# github.com/hashicorp/go-retryablehttp v0.5.2
+# github.com/hashicorp/go-retryablehttp v0.5.4
 github.com/hashicorp/go-retryablehttp
-# github.com/hashicorp/go-rootcerts v0.0.0-20160503143440-6bb64b370b90
+# github.com/hashicorp/go-rootcerts v1.0.2
 github.com/hashicorp/go-rootcerts
 # github.com/hashicorp/go-safetemp v1.0.0
 github.com/hashicorp/go-safetemp
-# github.com/hashicorp/go-sockaddr v1.0.0
+# github.com/hashicorp/go-sockaddr v1.0.2
 github.com/hashicorp/go-sockaddr
 # github.com/hashicorp/go-uuid v1.0.2
 github.com/hashicorp/go-uuid
@@ -367,16 +369,17 @@ github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
-# github.com/hashicorp/serf v0.8.2
+# github.com/hashicorp/serf v0.9.2
 github.com/hashicorp/serf/coordinate
-# github.com/hashicorp/vault v1.1.0
+# github.com/hashicorp/vault/api v1.0.4
 github.com/hashicorp/vault/api
-github.com/hashicorp/vault/helper/compressutil
-github.com/hashicorp/vault/helper/consts
-github.com/hashicorp/vault/helper/hclutil
-github.com/hashicorp/vault/helper/jsonutil
-github.com/hashicorp/vault/helper/parseutil
-github.com/hashicorp/vault/helper/strutil
+# github.com/hashicorp/vault/sdk v0.1.13
+github.com/hashicorp/vault/sdk/helper/compressutil
+github.com/hashicorp/vault/sdk/helper/consts
+github.com/hashicorp/vault/sdk/helper/hclutil
+github.com/hashicorp/vault/sdk/helper/jsonutil
+github.com/hashicorp/vault/sdk/helper/parseutil
+github.com/hashicorp/vault/sdk/helper/strutil
 # github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
 github.com/hashicorp/yamux
 # github.com/hetznercloud/hcloud-go v1.15.1
@@ -399,7 +402,7 @@ github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models
 github.com/jehiah/go-strftime
 # github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
 github.com/jmespath/go-jmespath
-# github.com/joyent/triton-go v0.0.0-20180116165742-545edbe0d564
+# github.com/joyent/triton-go v0.0.0-20180628001255-830d2b111e62
 github.com/joyent/triton-go
 github.com/joyent/triton-go/authentication
 github.com/joyent/triton-go/client
@@ -438,36 +441,36 @@ github.com/masterzen/simplexml/dom
 # github.com/masterzen/winrm v0.0.0-20180224160350-7e40f93ae939
 github.com/masterzen/winrm
 github.com/masterzen/winrm/soap
-# github.com/mattn/go-colorable v0.0.9
+# github.com/mattn/go-colorable v0.1.6
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.10
+# github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.4
 github.com/mattn/go-runewidth
 # github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
 github.com/mattn/go-tty
-# github.com/mitchellh/cli v1.0.0
+# github.com/mitchellh/cli v1.1.0
 github.com/mitchellh/cli
 # github.com/mitchellh/go-fs v0.0.0-20180402234041-7b48fa161ea7
 github.com/mitchellh/go-fs
 github.com/mitchellh/go-fs/fat
 # github.com/mitchellh/go-homedir v1.1.0
 github.com/mitchellh/go-homedir
-# github.com/mitchellh/go-testing-interface v1.0.0
+# github.com/mitchellh/go-testing-interface v1.0.3
 github.com/mitchellh/go-testing-interface
 # github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
 github.com/mitchellh/go-vnc
-# github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7
+# github.com/mitchellh/go-wordwrap v1.0.0
 github.com/mitchellh/go-wordwrap
 # github.com/mitchellh/iochan v1.0.0
 github.com/mitchellh/iochan
-# github.com/mitchellh/mapstructure v0.0.0-20180111000720-b4575eea38cc
+# github.com/mitchellh/mapstructure v1.2.3
 github.com/mitchellh/mapstructure
 # github.com/mitchellh/panicwrap v0.0.0-20170106182340-fce601fe5557
 github.com/mitchellh/panicwrap
 # github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 github.com/mitchellh/prefixedio
-# github.com/mitchellh/reflectwalk v1.0.0
+# github.com/mitchellh/reflectwalk v1.0.1
 github.com/mitchellh/reflectwalk
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 github.com/modern-go/concurrent
@@ -501,16 +504,15 @@ github.com/pkg/errors
 github.com/pkg/sftp
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/posener/complete v1.1.1
+# github.com/posener/complete v1.2.3
 github.com/posener/complete
 github.com/posener/complete/cmd
 github.com/posener/complete/cmd/install
-github.com/posener/complete/match
 # github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 github.com/profitbricks/profitbricks-sdk-go
 # github.com/renstrom/fuzzysearch v0.0.0-20160331204855-2d205ac6ec17
 github.com/renstrom/fuzzysearch/fuzzy
-# github.com/ryanuber/go-glob v0.0.0-20170128012129-256dc444b735
+# github.com/ryanuber/go-glob v1.0.0
 github.com/ryanuber/go-glob
 # github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca
 github.com/saintfish/chardet
@@ -679,6 +681,7 @@ golang.org/x/crypto/ed25519
 golang.org/x/crypto/ed25519/internal/edwards25519
 golang.org/x/crypto/internal/subtle
 golang.org/x/crypto/md4
+golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/pkcs12
 golang.org/x/crypto/pkcs12/internal/rc2
 golang.org/x/crypto/poly1305
@@ -841,7 +844,12 @@ google.golang.org/grpc/tap
 gopkg.in/ini.v1
 # gopkg.in/resty.v1 v1.12.0
 gopkg.in/resty.v1
-# gopkg.in/yaml.v2 v2.2.7
+# gopkg.in/square/go-jose.v2 v2.3.1
+gopkg.in/square/go-jose.v2
+gopkg.in/square/go-jose.v2/cipher
+gopkg.in/square/go-jose.v2/json
+gopkg.in/square/go-jose.v2/jwt
+# gopkg.in/yaml.v2 v2.2.8
 gopkg.in/yaml.v2
 # honnef.co/go/tools v0.0.1-2019.2.3
 honnef.co/go/tools/arg

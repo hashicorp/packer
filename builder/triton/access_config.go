@@ -100,7 +100,7 @@ func (c *AccessConfig) createSSHAgentSigner() (authentication.Signer, error) {
 	}
 
 	// Ensure we can sign a request
-	_, err = signer.Sign("Wed, 26 Apr 2017 16:01:11 UTC")
+	_, err = signer.SignRaw("Wed, 26 Apr 2017 16:01:11 UTC")
 	if err != nil {
 		return nil, fmt.Errorf("Error signing test request: %s", err)
 	}
@@ -136,7 +136,7 @@ func (c *AccessConfig) createPrivateKeySigner() (authentication.Signer, error) {
 	}
 
 	// Ensure we can sign a request
-	_, err = signer.Sign("Wed, 26 Apr 2017 16:01:11 UTC")
+	_, err = signer.SignRaw("Wed, 26 Apr 2017 16:01:11 UTC")
 	if err != nil {
 		return nil, fmt.Errorf("Error signing test request: %s", err)
 	}
