@@ -83,15 +83,13 @@ func (FixerDockerTagtoTags) Fix(input map[string]interface{}) (map[string]interf
 		// Now deduplicate the tags in the list so we don't tag the same thing
 		// multiple times.
 		deduplicater := map[string]bool{}
-		for _, tag := range allTags {
-			if ok := deduplicater[tag]; !ok {
-				deduplicater[tag] = true
-			}
-		}
-
 		finalTags := []string{}
-		for k := range deduplicater {
-			finalTags = append(finalTags, k)
+		for _, tag := range allTags {
+			if found := deduplicater[tag]; found {
+				continue
+			}
+			deduplicater[tag] = true
+			finalTags = append(finalTags, tag)
 		}
 
 		// Delete tag key, and set tags key to the final deduplicated list.
