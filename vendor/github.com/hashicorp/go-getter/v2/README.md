@@ -1,12 +1,10 @@
 # go-getter
 
 [![CircleCI](https://circleci.com/gh/hashicorp/go-getter/tree/master.svg?style=svg)][circleci]
-[![Build status](https://ci.appveyor.com/api/projects/status/ulq3qr43n62croyq/branch/master?svg=true)][appveyor]
 [![Go Documentation](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][godocs]
 
 [circleci]: https://circleci.com/gh/hashicorp/go-getter/tree/master
 [godocs]: http://godoc.org/github.com/hashicorp/go-getter
-[appveyor]: https://ci.appveyor.com/project/hashicorp/go-getter/branch/master
 
 go-getter is a library for Go (golang) for downloading files or directories
 from various sources using a URL as the primary form of input.
@@ -139,8 +137,8 @@ If you downloaded this to the `/tmp` directory, then the file
 directory in this repository, but because we specified a subdirectory,
 go-getter automatically copied only that directory contents.
 
-Subdirectory paths may contain may also use filesystem glob patterns.
-The path must match _exactly one_ entry or go-getter will return an error.
+Subdirectory paths may also use filesystem glob patterns. The path must
+match _exactly one_ entry or go-getter will return an error.
 This is useful if you're not sure the exact directory name but it follows
 a predictable naming structure.
 

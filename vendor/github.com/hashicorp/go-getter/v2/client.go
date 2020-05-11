@@ -142,7 +142,7 @@ func (c *Client) Get(ctx context.Context, req *Request) (*GetResult, error) {
 	}
 
 	// Determine checksum if we have one
-	checksum, err := c.extractChecksum(ctx, req.u)
+	checksum, err := c.GetChecksum(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("invalid checksum: %s", err)
 	}
