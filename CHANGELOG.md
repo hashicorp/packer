@@ -6,12 +6,26 @@
 * **New post-processor** Yandex Export [GH-9124]
 
 ### IMPROVEMENTS:
-* builder/virtualbox: Add `output_filename` config option to allow to set a custom filename 
- instead of forcing to be the same as vm_name. [GH-9174]
+* builder/amazon: Add SSM Session Manager as a SSH interface connection
+    [GH-9082]
+* builder/google: Implement iap proxy for googlecompute [GH-9105]
+* builder/googlecompute: Changed default disk size. [GH-9071]
+* builder/virtualbox: Add `output_filename` config option to allow to set a
+    custom filename instead of forcing to be the same as vm_name. [GH-9174]
+* builder/vsphere: floppy_label Parameter for vsphere-iso Builder [GH-9187]
+* core: Update vendored "go-getter" library with checksum fixes.
+* post-processor/docker-push: Support pushing multiple tags [GH-9182]
+* post-processor/docker-tag: Change field name of docker tag to "tags" instead
+    of "tag" since it's a list. Keep "tag" for backwards compatability.
+    [GH-9183]
+* update consul and vault dependencies [GH-9205]
 
 ### BUG FIXES:
-* post-processor/vsphere-template: Add VSphere builder's artifact to
-    vsphere-template's supported types [GH-9146]
+* builder/virtualbox: Fix bug using checksum files. [GH-9101]
+* builder/vsphere: Fix iso config prepare being called incorrectly, which
+    caused `iso_url` field to fail. [GH-9197]
+* post-processor/vsphere-template: Add VSphere builder's artifact to vsphere-
+    template's supported types [GH-9146]
 
 ## 1.5.6 (May 1, 2020)
 
