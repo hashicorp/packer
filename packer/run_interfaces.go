@@ -19,14 +19,13 @@ type BuildGetter interface {
 type FixConfigMode int
 
 const (
+	// Stdout will make FixConfig simply print what the config should be; it
+	// will only work when a single file is passed.
 	Stdout FixConfigMode = iota
 	// Inplace fixes your files on the spot.
 	Inplace
 	// Diff shows a full diff.
 	Diff
-	// SimpleOutput will simply print what the config should be; it will only
-	// work when a single file is passed.
-	SimpleOutput
 )
 
 type FixConfigOptions struct {

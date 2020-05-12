@@ -374,8 +374,7 @@ Options:
   -force                        Force a build to continue if artifacts exist, deletes existing artifacts.
   -machine-readable             Produce machine-readable output.
   -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask.
-  -parallel-builds=1               Disable parallelization. (Default: true)
-  -parallel-builds=1            Number of builds to run in parallel. 0 means no limit (Default: 0)
+  -parallel-builds=1            Number of builds to run in parallel. 1 disables parallelization. 0 means no limit (Default: 0)
   -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.
   -var 'key=value'              Variable for templates, can be used multiple times.
   -var-file=path                JSON file containing user variables. [ Note that even in HCL mode this expects file to contain JSON, a fix is comming soon ]
