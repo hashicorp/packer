@@ -3,6 +3,7 @@ package digitalocean
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 
 	"io/ioutil"
@@ -43,7 +44,7 @@ func (s *stepCreateDroplet) Run(ctx context.Context, state multistep.StateBag) m
 		createImage = godo.DropletCreateImage{ID: imageId}
 	}
 
-	droplet, _, err := client.Droplets.Create(context.TODO(), &godo.DropletCreateRequest{
+	dropletCreateReq := &godo.DropletCreateRequest{
 		Name:   c.DropletName,
 		Region: c.Region,
 		Size:   c.Size,
@@ -56,7 +57,11 @@ func (s *stepCreateDroplet) Run(ctx context.Context, state multistep.StateBag) m
 		IPv6:              c.IPv6,
 		UserData:          userData,
 		Tags:              c.Tags,
-	})
+	}
+
+	log.Printf("[DEBUG] Droplet create paramaters: %s", godo.Stringify(dropletCreateReq))
+
+	droplet, _, err := client.Droplets.Create(context.TODO(), dropletCreateReq)
 	if err != nil {
 		err := fmt.Errorf("Error creating droplet: %s", err)
 		state.Put("error", err)
