@@ -31,8 +31,7 @@ type ConsoleCommand struct {
 }
 
 func (c *ConsoleCommand) Run(args []string) int {
-	ctx, cleanup := handleTermInterrupt(c.Ui)
-	defer cleanup()
+	ctx := context.Background()
 
 	cfg, ret := c.ParseArgs(args)
 	if ret != 0 {
