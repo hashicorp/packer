@@ -26,10 +26,11 @@ const testBuilderAccBasic = `
 	"builders": [{
 		"type": "test",
 		"region": "nyc2",
-		"size": "512mb",
-		"image": "ubuntu-12-04-x64",
-		"user_date": "",
-		"user_date_file": ""
+		"size": "s-1vcpu-1gb",
+		"image": "ubuntu-20-04-x64",
+		"ssh_username": "root",
+		"user_data": "",
+		"user_data_file": ""
 	}]
 }
 `
