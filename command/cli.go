@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/packer/helper/enumflag"
 	kvflag "github.com/hashicorp/packer/helper/flag-kv"
 	sliceflag "github.com/hashicorp/packer/helper/flag-slice"
-	"github.com/hashicorp/packer/packer"
 )
 
 // ConfigType tells what type of config we should use, it can return values
@@ -53,7 +52,6 @@ type MetaArgs struct {
 	Only, Except []string
 	Vars         map[string]string
 	VarFiles     []string
-	Ui           packer.Ui
 }
 
 func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
