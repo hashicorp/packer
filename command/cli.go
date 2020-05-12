@@ -95,7 +95,7 @@ type FixArgs struct {
 }
 
 func (va *ValidateArgs) AddFlagSets(flags *flag.FlagSet) {
-	flags.BoolVar(&va.SyntaxOnly, "syntax-only", true, "")
+	flags.BoolVar(&va.SyntaxOnly, "syntax-only", false, "check syntax only")
 
 	va.MetaArgs.AddFlagSets(flags)
 }
