@@ -3,7 +3,7 @@
 ### BACKWARDS INCOMPATIBILITIES:
 
 ### FEATURES:
-* ** New post-processor** Yandex Export [GH-9124]
+* **New post-processor** Yandex Export [GH-9124]
 
 ### IMPROVEMENTS:
 * builder/virtualbox: Add `output_filename` config option to allow to set a custom filename 
