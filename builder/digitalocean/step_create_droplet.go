@@ -3,6 +3,7 @@ package digitalocean
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"io/ioutil"
 
@@ -35,13 +36,18 @@ func (s *stepCreateDroplet) Run(ctx context.Context, state multistep.StateBag) m
 		userData = string(contents)
 	}
 
+	createImage := godo.DropletCreateImage{Slug: c.Image}
+
+	imageId, err := strconv.Atoi(c.Image)
+	if err == nil {
+		createImage = godo.DropletCreateImage{ID: imageId}
+	}
+
 	droplet, _, err := client.Droplets.Create(context.TODO(), &godo.DropletCreateRequest{
 		Name:   c.DropletName,
 		Region: c.Region,
 		Size:   c.Size,
-		Image: godo.DropletCreateImage{
-			Slug: c.Image,
-		},
+		Image:  createImage,
 		SSHKeys: []godo.DropletCreateSSHKey{
 			{ID: sshKeyId},
 		},
