@@ -29,22 +29,18 @@ type Meta struct {
 	CoreConfig *packer.CoreConfig
 	Ui         packer.Ui
 	Version    string
-
-	// These are set by command-line flags
-	varFiles []string
-	flagVars map[string]string
 }
 
 // Core returns the core for the given template given the configured
 // CoreConfig and user variables on this Meta.
-func (m *Meta) Core(tpl *template.Template) (*packer.Core, error) {
+func (m *Meta) Core(tpl *template.Template, cla *MetaArgs) (*packer.Core, error) {
 	// Copy the config so we don't modify it
 	config := *m.CoreConfig
 	config.Template = tpl
 
 	fj := &kvflag.FlagJSON{}
 	// First populate fj with contents from var files
-	for _, file := range m.varFiles {
+	for _, file := range cla.VarFiles {
 		err := fj.Set(file)
 		if err != nil {
 			return nil, err
@@ -53,15 +49,15 @@ func (m *Meta) Core(tpl *template.Template) (*packer.Core, error) {
 	// Now read fj values back into flagvars and set as config.Variables. Only
 	// add to flagVars if the key doesn't already exist, because flagVars comes
 	// from the command line and should not be overridden by variable files.
-	if m.flagVars == nil {
-		m.flagVars = map[string]string{}
+	if cla.Vars == nil {
+		cla.Vars = map[string]string{}
 	}
 	for k, v := range *fj {
-		if _, exists := m.flagVars[k]; !exists {
-			m.flagVars[k] = v
+		if _, exists := cla.Vars[k]; !exists {
+			cla.Vars[k] = v
 		}
 	}
-	config.Variables = m.flagVars
+	config.Variables = cla.Vars
 
 	// Init the core
 	core, err := packer.NewCore(&config)

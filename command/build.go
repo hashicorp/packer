@@ -25,7 +25,7 @@ type BuildCommand struct {
 }
 
 func (c *BuildCommand) Run(args []string) int {
-	buildCtx, cleanup := handleTermInterrupt(c.Ui)
+	ctx, cleanup := handleTermInterrupt(c.Ui)
 	defer cleanup()
 
 	cfg, ret := c.ParseArgs(args)
@@ -33,7 +33,7 @@ func (c *BuildCommand) Run(args []string) int {
 		return ret
 	}
 
-	return c.RunContext(buildCtx, cfg)
+	return c.RunContext(ctx, cfg)
 }
 
 func (c *BuildCommand) ParseArgs(args []string) (*BuildArgs, int) {
@@ -106,20 +106,20 @@ func (m *Meta) GetConfig(cla *MetaArgs) (packer.BuildGetter, int) {
 		// will continue to work but users are encouraged to move to the new style.
 		// See: https://packer.io/guides/hcl
 		// `)
-		return m.GetConfigFromJSON(cla.Path)
+		return m.GetConfigFromJSON(cla)
 	}
 }
 
-func (m *Meta) GetConfigFromJSON(path string) (packer.BuildGetter, int) {
+func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (packer.BuildGetter, int) {
 	// Parse the template
-	tpl, err := template.ParseFile(path)
+	tpl, err := template.ParseFile(cla.Path)
 	if err != nil {
 		m.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return nil, 1
 	}
 
 	// Get the core
-	core, err := m.Core(tpl)
+	core, err := m.Core(tpl, cla)
 	ret := 0
 	if err != nil {
 		m.Ui.Error(err.Error())
