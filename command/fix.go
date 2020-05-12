@@ -2,6 +2,7 @@ package command
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -19,22 +20,38 @@ type FixCommand struct {
 }
 
 func (c *FixCommand) Run(args []string) int {
-	var flagValidate bool
+	ctx, cleanup := handleTermInterrupt(c.Ui)
+	defer cleanup()
+
+	cfg, ret := c.ParseArgs(args)
+	if ret != 0 {
+		return ret
+	}
+
+	return c.RunContext(ctx, cfg)
+}
+
+func (c *FixCommand) ParseArgs(args []string) (*FixArgs, int) {
+	var cfg FixArgs
 	flags := c.Meta.FlagSet("fix", FlagSetNone)
-	flags.BoolVar(&flagValidate, "validate", true, "")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
+	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
-		return 1
+		return &cfg, 1
 	}
 
 	args = flags.Args()
 	if len(args) != 1 {
 		flags.Usage()
-		return 1
+		return &cfg, 1
 	}
+	cfg.Path = args[0]
+	return &cfg, 0
+}
 
+func (c *FixCommand) RunContext(ctx context.Context, cla *FixArgs) int {
 	// Read the file for decoding
-	tplF, err := os.Open(args[0])
+	tplF, err := os.Open(cla.Path)
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf("Error opening template: %s", err))
 		return 1
@@ -86,25 +103,27 @@ func (c *FixCommand) Run(args []string) int {
 	result = strings.Replace(result, `\u003e`, ">", -1)
 	c.Ui.Say(result)
 
-	if flagValidate {
-		// Attempt to parse and validate the template
-		tpl, err := template.Parse(strings.NewReader(result))
-		if err != nil {
-			c.Ui.Error(fmt.Sprintf(
-				"Error! Fixed template fails to parse: %s\n\n"+
-					"This is usually caused by an error in the input template.\n"+
-					"Please fix the error and try again.",
-				err))
-			return 1
-		}
-		if err := tpl.Validate(); err != nil {
-			c.Ui.Error(fmt.Sprintf(
-				"Error! Fixed template failed to validate: %s\n\n"+
-					"This is usually caused by an error in the input template.\n"+
-					"Please fix the error and try again.",
-				err))
-			return 1
-		}
+	if cla.Validate == false {
+		return 0
+	}
+
+	// Attempt to parse and validate the template
+	tpl, err := template.Parse(strings.NewReader(result))
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error! Fixed template fails to parse: %s\n\n"+
+				"This is usually caused by an error in the input template.\n"+
+				"Please fix the error and try again.",
+			err))
+		return 1
+	}
+	if err := tpl.Validate(); err != nil {
+		c.Ui.Error(fmt.Sprintf(
+			"Error! Fixed template failed to validate: %s\n\n"+
+				"This is usually caused by an error in the input template.\n"+
+				"Please fix the error and try again.",
+			err))
+		return 1
 	}
 
 	return 0
