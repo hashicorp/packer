@@ -9,7 +9,8 @@ type GetBuildsOptions struct {
 }
 
 type BuildGetter interface {
-	// GetBuilds return all possible builds for a config. It also starts them.
+	// GetBuilds return all possible builds for a config. It also starts all
+	// builders.
 	// TODO(azr): rename to builder starter ?
 	GetBuilds(GetBuildsOptions) ([]Build, hcl.Diagnostics)
 }
@@ -19,15 +20,20 @@ type FixConfigMode int
 
 const (
 	Stdout FixConfigMode = iota
+	// Inplace fixes your files on the spot.
 	Inplace
+	// Diff shows a full diff.
 	Diff
+	// SimpleOutput will simply print what the config should be; it will only
+	// work when a single file is passed.
+	SimpleOutput
 )
 
 type FixConfigOptions struct {
 	DiffOnly bool
 }
 
-type OtherInterfaceyMacOtherInterfaceFace interface {
+type ConfigFixer interface {
 	// FixConfig will output the config in a fixed manner.
 	FixConfig(FixConfigOptions) hcl.Diagnostics
 }
