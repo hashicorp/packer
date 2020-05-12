@@ -63,7 +63,6 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 			}).ExtractErr()
 			if err != nil {
 				err := fmt.Errorf("Error setting image metadata: %s", err)
-				state.Put("error", err)
 				ui.Error(err.Error())
 			}
 		}
