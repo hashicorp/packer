@@ -59,7 +59,7 @@ type Config struct {
 	packerecs.Config `mapstructure:",squash"`
 
 	// The name of the OSS bucket where the RAW or VHD file will be copied to
-	// for import. If the Bucket isn't exist, post-process will create it for
+	// for import. If the Bucket doesn't exist, the post-process will create it for
 	// you.
 	OSSBucket string `mapstructure:"oss_bucket_name" required:"true"`
 	// The name of the object key in `oss_bucket_name` where the RAW or VHD
