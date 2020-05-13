@@ -20,10 +20,6 @@ func TestBuilderAcc_basic(t *testing.T) {
 }
 
 func TestBuilderAcc_imageId(t *testing.T) {
-	if os.Getenv("PACKER_ACC") == "" {
-		t.Skip("Acceptance tests skipped unless env 'PACKER_ACC' set")
-	}
-
 	builderT.Test(t, builderT.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 		Builder:  &Builder{},
@@ -38,16 +34,20 @@ func testAccPreCheck(t *testing.T) {
 }
 
 func makeTemplateWithImageId(t *testing.T) string {
-	token := os.Getenv("DIGITALOCEAN_API_TOKEN")
-	client := godo.NewClient(oauth2.NewClient(context.TODO(), &apiTokenSource{
-		AccessToken: token,
-	}))
-	image, _, err := client.Images.GetBySlug(context.TODO(), "ubuntu-20-04-x64")
-	if err != nil {
-		t.Fatalf("failed to retrieve image ID: %s", err)
+	if os.Getenv(builderT.TestEnvVar) != "" {
+		token := os.Getenv("DIGITALOCEAN_API_TOKEN")
+		client := godo.NewClient(oauth2.NewClient(context.TODO(), &apiTokenSource{
+			AccessToken: token,
+		}))
+		image, _, err := client.Images.GetBySlug(context.TODO(), "ubuntu-20-04-x64")
+		if err != nil {
+			t.Fatalf("failed to retrieve image ID: %s", err)
+		}
+
+		return fmt.Sprintf(testBuilderAccBasic, image.ID)
 	}
 
-	return fmt.Sprintf(testBuilderAccBasic, image.ID)
+	return ""
 }
 
 const testBuilderAccBasic = `
