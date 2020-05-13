@@ -37,12 +37,7 @@ func (s *stepCreateDroplet) Run(ctx context.Context, state multistep.StateBag) m
 		userData = string(contents)
 	}
 
-	createImage := godo.DropletCreateImage{Slug: c.Image}
-
-	imageId, err := strconv.Atoi(c.Image)
-	if err == nil {
-		createImage = godo.DropletCreateImage{ID: imageId}
-	}
+	createImage := getImageType(c.Image)
 
 	dropletCreateReq := &godo.DropletCreateRequest{
 		Name:   c.DropletName,
@@ -97,4 +92,15 @@ func (s *stepCreateDroplet) Cleanup(state multistep.StateBag) {
 		ui.Error(fmt.Sprintf(
 			"Error destroying droplet. Please destroy it manually: %s", err))
 	}
+}
+
+func getImageType(image string) godo.DropletCreateImage {
+	createImage := godo.DropletCreateImage{Slug: image}
+
+	imageId, err := strconv.Atoi(image)
+	if err == nil {
+		createImage = godo.DropletCreateImage{ID: imageId}
+	}
+
+	return createImage
 }
