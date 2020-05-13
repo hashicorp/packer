@@ -136,59 +136,58 @@ type AlicloudDiskDevices struct {
 }
 
 type AlicloudImageConfig struct {
-	// The name of the user-defined image, [2, 128]
-	// English or Chinese characters. It must begin with an uppercase/lowercase
-	// letter or a Chinese character, and may contain numbers, _ or -. It
-	// cannot begin with `http://` or `https://`.
+	// The name of the user-defined image, [2, 128] English or Chinese
+	// characters. It must begin with an uppercase/lowercase letter or a
+	// Chinese character, and may contain numbers, `_` or `-`. It cannot begin
+	// with `http://` or `https://`.
 	AlicloudImageName string `mapstructure:"image_name" required:"true"`
-	// The version number of the image, with a length
-	// limit of 1 to 40 English characters.
+	// The version number of the image, with a length limit of 1 to 40 English
+	// characters.
 	AlicloudImageVersion string `mapstructure:"image_version" required:"false"`
-	// The description of the image, with a length
-	// limit of 0 to 256 characters. Leaving it blank means null, which is the
-	// default value. It cannot begin with `http://` or `https://`.
+	// The description of the image, with a length limit of 0 to 256
+	// characters. Leaving it blank means null, which is the default value. It
+	// cannot begin with `http://` or `https://`.
 	AlicloudImageDescription string `mapstructure:"image_description" required:"false"`
-	// The IDs of to-be-added Aliyun
-	// accounts to which the image is shared. The number of accounts is 1 to 10.
-	// If number of accounts is greater than 10, this parameter is ignored.
+	// The IDs of to-be-added Aliyun accounts to which the image is shared. The
+	// number of accounts is 1 to 10. If number of accounts is greater than 10,
+	// this parameter is ignored.
 	AlicloudImageShareAccounts   []string `mapstructure:"image_share_account" required:"false"`
 	AlicloudImageUNShareAccounts []string `mapstructure:"image_unshare_account"`
 	// Copy to the destination regionIds.
 	AlicloudImageDestinationRegions []string `mapstructure:"image_copy_regions" required:"false"`
-	// The name of the destination image,
-	// [2, 128] English or Chinese characters. It must begin with an
-	// uppercase/lowercase letter or a Chinese character, and may contain numbers,
-	// _ or -. It cannot begin with `http://` or `https://`.
+	// The name of the destination image, [2, 128] English or Chinese
+	// characters. It must begin with an uppercase/lowercase letter or a
+	// Chinese character, and may contain numbers, _ or -. It cannot begin with
+	// `http://` or `https://`.
 	AlicloudImageDestinationNames []string `mapstructure:"image_copy_names" required:"false"`
-	// Whether or not to encrypt the target images,            including those copied if image_copy_regions is specified. If this option
-	// is set to true, a temporary image will be created from the provisioned
-	// instance in the main region and an encrypted copy will be generated in the
-	// same region. By default, Packer will keep the encryption setting to what
-	// it was in the source image.
+	// Whether or not to encrypt the target images,            including those
+	// copied if image_copy_regions is specified. If this option is set to
+	// true, a temporary image will be created from the provisioned instance in
+	// the main region and an encrypted copy will be generated in the same
+	// region. By default, Packer will keep the encryption setting to what it
+	// was in the source image.
 	ImageEncrypted config.Trilean `mapstructure:"image_encrypted" required:"false"`
 	// If this value is true, when the target image names including those
 	// copied are duplicated with existing images, it will delete the existing
 	// images and then create the target images, otherwise, the creation will
 	// fail. The default value is false. Check `image_name` and
 	// `image_copy_names` options for names of target images. If
-	// [-force](/docs/commands/build#force) option is
-	// provided in `build` command, this option can be omitted and taken as
-	// true.
+	// [-force](/docs/commands/build#force) option is provided in `build`
+	// command, this option can be omitted and taken as true.
 	AlicloudImageForceDelete bool `mapstructure:"image_force_delete" required:"false"`
 	// If this value is true, when delete the duplicated existing images, the
 	// source snapshots of those images will be delete either. If
-	// [-force](/docs/commands/build#force) option is
-	// provided in `build` command, this option can be omitted and taken as
-	// true.
+	// [-force](/docs/commands/build#force) option is provided in `build`
+	// command, this option can be omitted and taken as true.
 	AlicloudImageForceDeleteSnapshots bool `mapstructure:"image_force_delete_snapshots" required:"false"`
 	AlicloudImageForceDeleteInstances bool `mapstructure:"image_force_delete_instances"`
-	// If this value is true, the image
-	// created will not include any snapshot of data disks. This option would be
-	// useful for any circumstance that default data disks with instance types are
-	// not concerned. The default value is false.
+	// If this value is true, the image created will not include any snapshot
+	// of data disks. This option would be useful for any circumstance that
+	// default data disks with instance types are not concerned. The default
+	// value is false.
 	AlicloudImageIgnoreDataDisks bool `mapstructure:"image_ignore_data_disks" required:"false"`
-	// The region validation can be skipped
-	// if this value is true, the default value is false.
+	// The region validation can be skipped if this value is true, the default
+	// value is false.
 	AlicloudImageSkipRegionValidation bool `mapstructure:"skip_region_validation" required:"false"`
 	// Key/value pair tags applied to the destination image and relevant
 	// snapshots.
