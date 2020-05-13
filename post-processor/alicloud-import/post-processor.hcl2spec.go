@@ -18,9 +18,9 @@ type FlatConfig struct {
 	PackerOnError                     *string                      `mapstructure:"packer_on_error" cty:"packer_on_error"`
 	PackerUserVars                    map[string]string            `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
 	PackerSensitiveVars               []string                     `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	AlicloudAccessKey                 *string                      `mapstructure:"access_key" required:"false" cty:"access_key"`
-	AlicloudSecretKey                 *string                      `mapstructure:"secret_key" required:"false" cty:"secret_key"`
-	AlicloudRegion                    *string                      `mapstructure:"region" required:"false" cty:"region"`
+	AlicloudAccessKey                 *string                      `mapstructure:"access_key" required:"true" cty:"access_key"`
+	AlicloudSecretKey                 *string                      `mapstructure:"secret_key" required:"true" cty:"secret_key"`
+	AlicloudRegion                    *string                      `mapstructure:"region" required:"true" cty:"region"`
 	AlicloudSkipValidation            *bool                        `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation"`
 	AlicloudSkipImageValidation       *bool                        `mapstructure:"skip_image_validation" required:"false" cty:"skip_image_validation"`
 	AlicloudProfile                   *string                      `mapstructure:"profile" required:"false" cty:"profile"`
@@ -106,14 +106,14 @@ type FlatConfig struct {
 	WinRMInsecure                     *bool                        `mapstructure:"winrm_insecure" cty:"winrm_insecure"`
 	WinRMUseNTLM                      *bool                        `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm"`
 	SSHPrivateIp                      *bool                        `mapstructure:"ssh_private_ip" required:"false" cty:"ssh_private_ip"`
-	OSSBucket                         *string                      `mapstructure:"oss_bucket_name" cty:"oss_bucket_name"`
+	OSSBucket                         *string                      `mapstructure:"oss_bucket_name" required:"true" cty:"oss_bucket_name"`
 	OSSKey                            *string                      `mapstructure:"oss_key_name" cty:"oss_key_name"`
 	SkipClean                         *bool                        `mapstructure:"skip_clean" cty:"skip_clean"`
-	OSType                            *string                      `mapstructure:"image_os_type" cty:"image_os_type"`
-	Platform                          *string                      `mapstructure:"image_platform" cty:"image_platform"`
-	Architecture                      *string                      `mapstructure:"image_architecture" cty:"image_architecture"`
+	OSType                            *string                      `mapstructure:"image_os_type" required:"true" cty:"image_os_type"`
+	Platform                          *string                      `mapstructure:"image_platform" required:"true" cty:"image_platform"`
+	Architecture                      *string                      `mapstructure:"image_architecture" required:"true" cty:"image_architecture"`
 	Size                              *string                      `mapstructure:"image_system_size" cty:"image_system_size"`
-	Format                            *string                      `mapstructure:"format" cty:"format"`
+	Format                            *string                      `mapstructure:"format" required:"true" cty:"format"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

@@ -1,4 +1,5 @@
 //go:generate mapstructure-to-hcl2 -type Config
+//go:generate struct-markdown
 
 package alicloudimport
 
@@ -57,20 +58,48 @@ const (
 type Config struct {
 	packerecs.Config `mapstructure:",squash"`
 
-	// Variables specific to this post processor
-	OSSBucket                       string            `mapstructure:"oss_bucket_name"`
-	OSSKey                          string            `mapstructure:"oss_key_name"`
-	SkipClean                       bool              `mapstructure:"skip_clean"`
-	Tags                            map[string]string `mapstructure:"tags"`
-	AlicloudImageDescription        string            `mapstructure:"image_description"`
-	AlicloudImageShareAccounts      []string          `mapstructure:"image_share_account"`
-	AlicloudImageDestinationRegions []string          `mapstructure:"image_copy_regions"`
-	OSType                          string            `mapstructure:"image_os_type"`
-	Platform                        string            `mapstructure:"image_platform"`
-	Architecture                    string            `mapstructure:"image_architecture"`
-	Size                            string            `mapstructure:"image_system_size"`
-	Format                          string            `mapstructure:"format"`
-	AlicloudImageForceDelete        bool              `mapstructure:"image_force_delete"`
+	// The name of the OSS bucket where the RAW or VHD file will be copied to
+	// for import. If the Bucket isn't exist, post-process will create it for
+	// you.
+	OSSBucket string `mapstructure:"oss_bucket_name" required:"true"`
+	// The name of the object key in `oss_bucket_name` where the RAW or VHD
+	// file will be copied to for import. This is treated as a [template
+	// engine](/docs/templates/engine), and you may access any of the variables
+	// stored in the generated data using the [build](/docs/templates/engine)
+	// template function.
+	OSSKey string `mapstructure:"oss_key_name"`
+	// Whether we should skip removing the RAW or VHD file uploaded to OSS
+	// after the import process has completed. `true` means that we should
+	// leave it in the OSS bucket, `false` means to clean it out. Defaults to
+	// `false`.
+	SkipClean bool              `mapstructure:"skip_clean"`
+	Tags      map[string]string `mapstructure:"tags"`
+	// The description of the image, with a length limit of `0` to `256`
+	// characters. Leaving it blank means null, which is the default value. It
+	// cannot begin with `http://` or `https://`.
+	AlicloudImageDescription        string   `mapstructure:"image_description"`
+	AlicloudImageShareAccounts      []string `mapstructure:"image_share_account"`
+	AlicloudImageDestinationRegions []string `mapstructure:"image_copy_regions"`
+	// Type of the OS, like linux/windows
+	OSType string `mapstructure:"image_os_type" required:"true"`
+	// Platform such as `CentOS`
+	Platform string `mapstructure:"image_platform" required:"true"`
+	// Platform type of the image system: `i386` or `x86_64`
+	Architecture string `mapstructure:"image_architecture" required:"true"`
+	// Size of the system disk, in GB, values
+	//  range:
+	//   - cloud - 5 \~ 2000
+	//   - cloud_efficiency - 20 \~ 2048
+	//   - cloud_ssd - 20 \~ 2048
+	Size string `mapstructure:"image_system_size"`
+	// The format of the image for import, now alicloud only support RAW and
+	// VHD.
+	Format string `mapstructure:"format" required:"true"`
+	// If this value is true, when the target image name is duplicated with an
+	// existing image, it will delete the existing image and then create the
+	// target image, otherwise, the creation will fail. The default value is
+	// false.
+	AlicloudImageForceDelete bool `mapstructure:"image_force_delete"`
 
 	ctx interpolate.Context
 }

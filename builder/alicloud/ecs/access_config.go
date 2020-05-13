@@ -18,26 +18,26 @@ import (
 
 // Config of alicloud
 type AlicloudAccessConfig struct {
-	// This is the Alicloud access key. It must be provided when profile not exist, but it can also be
-	// sourced from the ALICLOUD_ACCESS_KEY environment variable.
-	AlicloudAccessKey string `mapstructure:"access_key" required:"false"`
-	// This is the Alicloud secret key. It must be provided when profile not exist, but it can also be
-	// sourced from the ALICLOUD_SECRET_KEY environment variable.
-	AlicloudSecretKey string `mapstructure:"secret_key" required:"false"`
-	// This is the Alicloud region. It must be provided when profile not exist, but it can also be
-	// sourced from the ALICLOUD_REGION environment variables.
-	AlicloudRegion string `mapstructure:"region" required:"false"`
+	// Alicloud access key must be provided unless `profile` is set, but it can
+	// also be sourced from the ```ALICLOUD_ACCESS_KEY``` environment variable.
+	AlicloudAccessKey string `mapstructure:"access_key" required:"true"`
+	// Alicloud secret key must be provided unless `profile` is set, but it can
+	// also be sourced from the ```ALICLOUD_SECRET_KEY``` environment variable.
+	AlicloudSecretKey string `mapstructure:"secret_key" required:"true"`
+	// Alicloud region must be provided unless `profile` is set, but it can
+	// also be sourced from the ```ALICLOUD_REGION``` environment variable.
+	AlicloudRegion string `mapstructure:"region" required:"true"`
 	// The region validation can be skipped if this value is true, the default
 	// value is false.
 	AlicloudSkipValidation bool `mapstructure:"skip_region_validation" required:"false"`
 	// The image validation can be skipped if this value is true, the default
 	// value is false.
 	AlicloudSkipImageValidation bool `mapstructure:"skip_image_validation" required:"false"`
-	// This is th Alicloud profile. If access_key not exist, is must be provided, but it can also be
-	// sourced from the ALICLOUD_PROFILE environment variables.
+	// Alicloud profile must be set unless `access_key` is set; it can also be
+	// sourced from the ```ALICLOUD_PROFILE``` environment variable.
 	AlicloudProfile string `mapstructure:"profile" required:"false"`
-	// This is the Alicloud shared credentials file path. If this file path exist, os will read access key
-	// and secret key from this file.
+	// Alicloud shared credentials file path. If this file exists, access and
+	// secret keys will be read from this file.
 	AlicloudSharedCredentialsFile string `mapstructure:"shared_credentials_file" required:"false"`
 	// STS access token, can be set through template or by exporting as
 	// environment variable such as `export SECURITY_TOKEN=value`.
