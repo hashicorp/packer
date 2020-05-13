@@ -16,7 +16,7 @@ import (
 
 // Config allows for various ways to authenticate Azure clients.
 // When `client_id` and `subscription_id` are specified, Packer will use the
-// specified Azure Active Directoty (AAD) Service Principal (SP).
+// specified Azure Active Directory (AAD) Service Principal (SP).
 // If only `subscription_id` is specified, Packer will try to interactively
 // log on the current user (tokens will be cached).
 // If none of these options are specified, Packer will attempt to use the
