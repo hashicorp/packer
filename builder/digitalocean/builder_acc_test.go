@@ -20,6 +20,10 @@ func TestBuilderAcc_basic(t *testing.T) {
 }
 
 func TestBuilderAcc_imageId(t *testing.T) {
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("Acceptance tests skipped unless env 'PACKER_ACC' set")
+	}
+
 	builderT.Test(t, builderT.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 		Builder:  &Builder{},
