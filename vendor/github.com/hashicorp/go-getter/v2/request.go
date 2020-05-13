@@ -18,6 +18,10 @@ type Request struct {
 	Dst string
 	Pwd string
 
+	// Forced getter detected in Src during Getter detection phase
+	// This is currently for internal use only
+	Forced string
+
 	// Mode is the method of download the client will use. See Mode
 	// for documentation.
 	Mode Mode

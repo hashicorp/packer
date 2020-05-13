@@ -125,6 +125,62 @@ func (g *HgGetter) update(ctx context.Context, dst string, u *url.URL, rev strin
 	return getRunCommand(cmd)
 }
 
+func (g *HgGetter) Detect(req *Request) (bool, error) {
+	src := req.Src
+	if len(src) == 0 {
+		return false, nil
+	}
+
+	if req.Forced != "" {
+		// There's a getter being Forced
+		if !g.validScheme(req.Forced) {
+			// Current getter is not the Forced one
+			// Don't use it to try to download the artifact
+			return false, nil
+		}
+	}
+	isForcedGetter := req.Forced != "" && g.validScheme(req.Forced)
+
+	u, err := url.Parse(src)
+	if err == nil && u.Scheme != "" {
+		if isForcedGetter {
+			// Is the Forced getter and source is a valid url
+			return true, nil
+		}
+		if g.validScheme(u.Scheme) {
+			return true, nil
+		}
+		// Valid url with a scheme that is not valid for current getter
+		return false, nil
+	}
+
+	result, u, err := detectBitBucket(src)
+	if err != nil {
+		return true, err
+	}
+	if result == "hg" {
+		req.Src = u.String()
+		return true, nil
+	}
+
+	if isForcedGetter {
+		// Is the Forced getter and should be used to download the artifact
+		if req.Pwd != "" && !filepath.IsAbs(src) {
+			// Make sure to add pwd to relative paths
+			src = filepath.Join(req.Pwd, src)
+		}
+		// Make sure we're using "/" on Windows. URLs are "/"-based.
+		req.Src = filepath.ToSlash(src)
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (g *HgGetter) validScheme(scheme string) bool {
+	return scheme == "hg"
+}
+
 func fixWindowsDrivePath(u *url.URL) bool {
 	// hg assumes a file:/// prefix for Windows drive letter file paths.
 	// (e.g. file:///c:/foo/bar)

@@ -364,22 +364,30 @@ The tests for `get_gcs.go` require you to have GCP credentials set in your envir
 
 ### SMB (smb)
 
-The SMB getter will try to get files from samba when a url is prefixed with `smb://`, for example `smb://foo/bar/dir`.   
-   
-The go-getter will try for a local mount of the path such as `/foo/bar/dir` (Unix) or `//foo/bar/dir` (Windows), 
-and will fallback to using the [`smbclient`](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html) command to download the file/dir.   
+On Unix, the SMB getter will try to get files from samba using the [`smbclient`](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html) when a url is prefixed with `smb://`, for example `smb://foo/bar/dir`. 
+For a local mount, the FileGetter must be used instead.      
+⚠️ The [`smbclient`](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html) needs to be installed for this to work on Unix.
 
-⚠️ On Unix when the smb share is not mounted, [`smbclient`](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html) needs to be installed for this to work.
+On Windows, the SMB getter will try to get files using the windows file system when the url is prefixed with `smb://`, `//`, or `\\`. This will be done by using the existing FileGetter.   
+⚠️ A FileGetter is necessary for this to work on Windows.
 
-Some examples for addressing the scheme:    
+The following examples work for Windows and Unix:  
+- smb://host/shared/dir (downloads directory content)
+- smb://host/shared/dir/file (downloads file) 
+
+The following examples work for Unix:  
 - smb://username:password@host/shared/dir (downloads directory content)
 - smb://username@host/shared/dir
-- smb://host/shared/dir 
 - smb://username:password@host/shared/dir/file (downloads file)
 - smb://username@host/shared/dir/file
-- smb://host/shared/dir/file
+
+⚠️ The above examples also work on Windows but the authentication is not use to access the file system.
+
+These examples only work for Windows:
 - //host/shared/dir (downloads directory content)
 - //host/shared/dir/file (downloads file)
+- \\\host\shared\dir (downloads directory content)
+- \\\host\shared\dir\file (downloads file)
    
         
 #### SMB Testing

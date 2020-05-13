@@ -9,46 +9,29 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 	"syscall"
-
-	"github.com/hashicorp/go-multierror"
 )
 
-// SmbGetter is a Getter implementation that will download a module from
-// a shared folder using smbclient cli or looking for local mount.
-type SmbGetter struct {
-	getter
+// SmbClientGetter is a Getter implementation that will download a module from
+// a shared folder using smbclient cli.
+type SmbClientGetter struct {
 }
 
-func (g *SmbGetter) Mode(ctx context.Context, u *url.URL) (Mode, error) {
+func (g *SmbClientGetter) Mode(ctx context.Context, u *url.URL) (Mode, error) {
 	if u.Host == "" || u.Path == "" {
 		return 0, new(smbPathError)
 	}
 
-	// Look in a possible local mount of shared folder
-	path := "/" + u.Host + u.Path
-	if runtime.GOOS == "windows" {
-		path = "/" + path
-	}
-	f := new(FileGetter)
-	mode, result := f.mode(path)
-	if result == nil {
-		return mode, nil
-	}
-
-	// If not mounted, use smbclient cli to verify mode
+	// Use smbclient cli to verify mode
 	mode, err := g.smbClientMode(u)
 	if err == nil {
 		return mode, nil
 	}
-
-	result = multierror.Append(result, err)
-	return 0, &smbGeneralError{result}
+	return 0, &smbGeneralError{err}
 }
 
-func (g *SmbGetter) smbClientMode(u *url.URL) (Mode, error) {
+func (g *SmbClientGetter) smbClientMode(u *url.URL) (Mode, error) {
 	hostPath, filePath, err := g.findHostAndFilePath(u)
 	if err != nil {
 		return 0, err
@@ -64,9 +47,9 @@ func (g *SmbGetter) smbClientMode(u *url.URL) (Mode, error) {
 		filePath = "."
 	}
 
-	baseCmd := g.smbclientBaseCmd(u.User, hostPath, filePath)
+	cmdArgs := g.smbclientCmdArgs(u.User, hostPath, filePath)
 	// check if file exists in the smb shared folder and check the mode
-	isDir, err := g.isDirectory(baseCmd, file)
+	isDir, err := g.isDirectory(cmdArgs, file)
 	if err != nil {
 		return 0, err
 	}
@@ -76,7 +59,7 @@ func (g *SmbGetter) smbClientMode(u *url.URL) (Mode, error) {
 	return ModeFile, nil
 }
 
-func (g *SmbGetter) Get(ctx context.Context, req *Request) error {
+func (g *SmbClientGetter) Get(ctx context.Context, req *Request) error {
 	if req.u.Host == "" || req.u.Path == "" {
 		return new(smbPathError)
 	}
@@ -89,42 +72,29 @@ func (g *SmbGetter) Get(ctx context.Context, req *Request) error {
 		}
 	}
 
-	// First look in a possible local mount of the shared folder
-	path := "/" + req.u.Host + req.u.Path
-	if runtime.GOOS == "windows" {
-		path = "/" + path
-	}
-	f := new(FileGetter)
-	result := f.get(path, req)
-	if result == nil {
-		return nil
-	}
-
-	// If not mounted, try downloading the directory content using smbclient cli
+	// Download the directory content using smbclient cli
 	err := g.smbclientGet(req)
 	if err == nil {
 		return nil
 	}
-
-	result = multierror.Append(result, err)
 
 	if !dstExisted {
 		// Remove the destination created for smbclient
 		os.Remove(req.Dst)
 	}
 
-	return &smbGeneralError{result}
+	return &smbGeneralError{err}
 }
 
-func (g *SmbGetter) smbclientGet(req *Request) error {
+func (g *SmbClientGetter) smbclientGet(req *Request) error {
 	hostPath, directory, err := g.findHostAndFilePath(req.u)
 	if err != nil {
 		return err
 	}
 
-	baseCmd := g.smbclientBaseCmd(req.u.User, hostPath, ".")
+	cmdArgs := g.smbclientCmdArgs(req.u.User, hostPath, ".")
 	// check directory exists in the smb shared folder and is a directory
-	isDir, err := g.isDirectory(baseCmd, directory)
+	isDir, err := g.isDirectory(cmdArgs, directory)
 	if err != nil {
 		return err
 	}
@@ -133,7 +103,8 @@ func (g *SmbGetter) smbclientGet(req *Request) error {
 	}
 
 	// download everything that's inside the directory (files and subdirectories)
-	smbclientCmd := baseCmd + " --command 'prompt OFF;recurse ON; mget *'"
+	cmdArgs = append(cmdArgs, "-c")
+	cmdArgs = append(cmdArgs, "prompt OFF;recurse ON; mget *")
 
 	if req.Dst != "" {
 		_, err := os.Lstat(req.Dst)
@@ -149,11 +120,11 @@ func (g *SmbGetter) smbclientGet(req *Request) error {
 		}
 	}
 
-	_, err = g.runSmbClientCommand(smbclientCmd, req.Dst)
+	_, err = g.runSmbClientCommand(req.Dst, cmdArgs)
 	return err
 }
 
-func (g *SmbGetter) GetFile(ctx context.Context, req *Request) error {
+func (g *SmbClientGetter) GetFile(ctx context.Context, req *Request) error {
 	if req.u.Host == "" || req.u.Path == "" {
 		return new(smbPathError)
 	}
@@ -166,34 +137,21 @@ func (g *SmbGetter) GetFile(ctx context.Context, req *Request) error {
 		}
 	}
 
-	// First look in a possible local mount of the shared folder
-	path := "/" + req.u.Host + req.u.Path
-	if runtime.GOOS == "windows" {
-		path = "/" + path
-	}
-	f := new(FileGetter)
-	result := f.getFile(path, req, ctx)
-	if result == nil {
-		return nil
-	}
-
 	// If not mounted, try downloading the file using smbclient cli
 	err := g.smbclientGetFile(req)
 	if err == nil {
 		return nil
 	}
 
-	result = multierror.Append(result, err)
-
 	if !dstExisted {
 		// Remove the destination created for smbclient
 		os.Remove(req.Dst)
 	}
 
-	return &smbGeneralError{result}
+	return &smbGeneralError{err}
 }
 
-func (g *SmbGetter) smbclientGetFile(req *Request) error {
+func (g *SmbClientGetter) smbclientGetFile(req *Request) error {
 	hostPath, filePath, err := g.findHostAndFilePath(req.u)
 	if err != nil {
 		return err
@@ -210,9 +168,9 @@ func (g *SmbGetter) smbclientGetFile(req *Request) error {
 		filePath = "."
 	}
 
-	baseCmd := g.smbclientBaseCmd(req.u.User, hostPath, filePath)
+	cmdArgs := g.smbclientCmdArgs(req.u.User, hostPath, filePath)
 	// check file exists in the smb shared folder and is not a directory
-	isDir, err := g.isDirectory(baseCmd, file)
+	isDir, err := g.isDirectory(cmdArgs, file)
 	if err != nil {
 		return err
 	}
@@ -221,7 +179,7 @@ func (g *SmbGetter) smbclientGetFile(req *Request) error {
 	}
 
 	// download file
-	smbclientCmd := baseCmd + " --command " + fmt.Sprintf("'get %s'", file)
+	cmdArgs = append(cmdArgs, "-c")
 	if req.Dst != "" {
 		_, err := os.Lstat(req.Dst)
 		if err != nil {
@@ -234,14 +192,17 @@ func (g *SmbGetter) smbclientGetFile(req *Request) error {
 				return err
 			}
 		}
-		smbclientCmd = baseCmd + " --command " + fmt.Sprintf("'get %s %s'", file, req.Dst)
+		cmdArgs = append(cmdArgs, fmt.Sprintf("get %s %s", file, req.Dst))
+	} else {
+		cmdArgs = append(cmdArgs, fmt.Sprintf("get %s", file))
 	}
-	_, err = g.runSmbClientCommand(smbclientCmd, "")
+
+	_, err = g.runSmbClientCommand("", cmdArgs)
 	return err
 }
 
-func (g *SmbGetter) smbclientBaseCmd(used *url.Userinfo, hostPath string, fileDir string) string {
-	baseCmd := "smbclient -N"
+func (g *SmbClientGetter) smbclientCmdArgs(used *url.Userinfo, hostPath string, fileDir string) (baseCmd []string) {
+	baseCmd = append(baseCmd, "-N")
 
 	// Append auth user and password to baseCmd
 	auth := used.Username()
@@ -249,14 +210,17 @@ func (g *SmbGetter) smbclientBaseCmd(used *url.Userinfo, hostPath string, fileDi
 		if password, ok := used.Password(); ok {
 			auth = auth + "%" + password
 		}
-		baseCmd = baseCmd + " -U " + auth
+		baseCmd = append(baseCmd, "-U")
+		baseCmd = append(baseCmd, auth)
 	}
 
-	baseCmd = baseCmd + " " + hostPath + " --directory " + fileDir
+	baseCmd = append(baseCmd, hostPath)
+	baseCmd = append(baseCmd, "--directory")
+	baseCmd = append(baseCmd, fileDir)
 	return baseCmd
 }
 
-func (g *SmbGetter) findHostAndFilePath(u *url.URL) (string, string, error) {
+func (g *SmbClientGetter) findHostAndFilePath(u *url.URL) (string, string, error) {
 	// Host path
 	hostPath := "//" + u.Host
 
@@ -277,9 +241,10 @@ func (g *SmbGetter) findHostAndFilePath(u *url.URL) (string, string, error) {
 	return hostPath, directories[1], nil
 }
 
-func (g *SmbGetter) isDirectory(baseCmd string, object string) (bool, error) {
-	objectInfoCmd := baseCmd + " --command " + fmt.Sprintf("'allinfo %s'", object)
-	output, err := g.runSmbClientCommand(objectInfoCmd, "")
+func (g *SmbClientGetter) isDirectory(args []string, object string) (bool, error) {
+	args = append(args, "-c")
+	args = append(args, fmt.Sprintf("allinfo %s", object))
+	output, err := g.runSmbClientCommand("", args)
 	if err != nil {
 		return false, err
 	}
@@ -289,8 +254,8 @@ func (g *SmbGetter) isDirectory(baseCmd string, object string) (bool, error) {
 	return strings.Contains(output, "attributes: D"), nil
 }
 
-func (g *SmbGetter) runSmbClientCommand(smbclientCmd string, dst string) (string, error) {
-	cmd := exec.Command("bash", "-c", smbclientCmd)
+func (g *SmbClientGetter) runSmbClientCommand(dst string, args []string) (string, error) {
+	cmd := exec.Command("smbclient", args...)
 
 	if dst != "" {
 		cmd.Dir = dst
@@ -317,6 +282,41 @@ func (g *SmbGetter) runSmbClientCommand(smbclientCmd string, dst string) (string
 	return buf.String(), fmt.Errorf("error running %s: %s", cmd.Path, buf.String())
 }
 
+func (g *SmbClientGetter) Detect(req *Request) (bool, error) {
+	if len(req.Src) == 0 {
+		return false, nil
+	}
+
+	if req.Forced != "" {
+		// There's a getter being Forced
+		if !g.validScheme(req.Forced) {
+			// Current getter is not the Forced one
+			// Don't use it to try to download the artifact
+			return false, nil
+		}
+	}
+	isForcedGetter := req.Forced != "" && g.validScheme(req.Forced)
+
+	u, err := url.Parse(req.Src)
+	if err == nil && u.Scheme != "" {
+		if isForcedGetter {
+			// Is the Forced getter and source is a valid url
+			return true, nil
+		}
+		if g.validScheme(u.Scheme) {
+			return true, nil
+		}
+		// Valid url with a scheme that is not valid for current getter
+		return false, nil
+	}
+
+	return false, nil
+}
+
+func (g *SmbClientGetter) validScheme(scheme string) bool {
+	return scheme == "smb"
+}
+
 type smbPathError struct {
 	Path string
 }
@@ -334,7 +334,7 @@ type smbGeneralError struct {
 
 func (e *smbGeneralError) Error() string {
 	if e != nil {
-		return fmt.Sprintf("one of the options should be available: \n 1. local mount of the smb shared folder or; \n 2. smbclient cli installed (provice credentials when necessary). \n err: %s", e.err.Error())
+		return fmt.Sprintf("smbclient cli needs to be installed and credentials provided when necessary. \n err: %s", e.err.Error())
 	}
-	return "one of the options should be available: \n 1. local mount of the smb shared folder or; \n 2. smbclient cli installed (provice credentials when necessary)."
+	return "smbclient cli needs to be installed and credentials provided when necessary."
 }
