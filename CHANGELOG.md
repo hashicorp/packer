@@ -21,9 +21,14 @@
 * update consul and vault dependencies [GH-9205]
 
 ### BUG FIXES:
+* builder/digitalocean: Use correct image type for Droplet creates. [GH-9212]
+* builder/openstack: Don't error if metadata can't be set. Old versions of
+    openstack don't support that API call. [GH-9198]
 * builder/virtualbox: Fix bug using checksum files. [GH-9101]
 * builder/vsphere: Fix iso config prepare being called incorrectly, which
     caused `iso_url` field to fail. [GH-9197]
+* core: fix regression that broke use of pwd when retrieving the checksum from
+    a file [GH-9129].
 * post-processor/vsphere-template: Add VSphere builder's artifact to vsphere-
     template's supported types [GH-9146]
 
