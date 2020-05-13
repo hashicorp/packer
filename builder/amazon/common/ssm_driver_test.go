@@ -3,61 +3,143 @@ package common
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
-
-	"github.com/aws/aws-sdk-go/service/ssm"
 )
 
+func NewSSMDriverWithMockSvc(svc *MockSSMSvc) *SSMDriver {
+	config := SSMDriverConfig{
+		SvcClient:   svc,
+		Region:      "east",
+		ProfileName: "default",
+		SvcEndpoint: "example.com",
+	}
+
+	driver := SSMDriver{
+		SSMDriverConfig: config,
+		pluginCmdFunc:   func(ctx context.Context) error { return nil },
+	}
+
+	return &driver
+}
 func TestSSMDriver_StartSession(t *testing.T) {
-	tt := []struct {
-		Name          string
-		PluginName    string
-		ErrorExpected bool
-	}{
-		{"NonExistingPlugin", "boguspluginname", true},
+	mockSvc := MockSSMSvc{}
+	driver := NewSSMDriverWithMockSvc(&mockSvc)
+
+	if driver.SvcClient == nil {
+		t.Fatalf("SvcClient for driver should not be nil")
 	}
 
-	for _, tc := range tt {
-		tc := tc
-		t.Run(tc.Name, func(t *testing.T) {
-			driver := SSMDriver{
-				Region:          "region",
-				Session:         new(ssm.StartSessionOutput),
-				SessionParams:   ssm.StartSessionInput{},
-				SessionEndpoint: "endpoint",
-				PluginName:      tc.PluginName}
-
-			ctx := context.TODO()
-			err := driver.StartSession(ctx)
-
-			if tc.ErrorExpected && err == nil {
-				t.Fatalf("Executing %q should have failed but instead no error was returned", tc.PluginName)
-			}
-
-		})
+	session, err := driver.StartSession(context.TODO(), MockStartSessionInput("fakeinstance"))
+	if err != nil {
+		t.Fatalf("calling StartSession should not error but got %v", err)
 	}
+
+	if !mockSvc.StartSessionCalled {
+		t.Fatalf("expected test to call ssm mocks but didn't")
+	}
+
+	if session == nil {
+		t.Errorf("expected session to be set after a successful call to StartSession")
+	}
+
+	if !reflect.DeepEqual(session, MockStartSessionOutput()) {
+		t.Errorf("expected session to be %v but got %v", MockStartSessionOutput(), session)
+	}
+}
+
+func TestSSMDriver_StartSessionWithError(t *testing.T) {
+	mockSvc := MockSSMSvc{StartSessionError: fmt.Errorf("bogus error")}
+	driver := NewSSMDriverWithMockSvc(&mockSvc)
+
+	if driver.SvcClient == nil {
+		t.Fatalf("SvcClient for driver should not be nil")
+	}
+
+	session, err := driver.StartSession(context.TODO(), MockStartSessionInput("fakeinstance"))
+	if err == nil {
+		t.Fatalf("StartSession should have thrown an error but didn't")
+	}
+
+	if !mockSvc.StartSessionCalled {
+		t.Errorf("expected test to call StartSession mock but didn't")
+	}
+
+	if session != nil {
+		t.Errorf("expected session to be nil after a bad StartSession call, but got %v", session)
+	}
+}
+
+func TestSSMDriver_StopSession(t *testing.T) {
+	mockSvc := MockSSMSvc{}
+	driver := NewSSMDriverWithMockSvc(&mockSvc)
+
+	if driver.SvcClient == nil {
+		t.Fatalf("SvcClient for driver should not be nil")
+	}
+
+	// Calling StopSession before StartSession should fail
+	err := driver.StopSession()
+	if err == nil {
+		t.Fatalf("calling StopSession() on a driver that has no started session should fail")
+	}
+
+	if driver.session != nil {
+		t.Errorf("expected session to be default to nil")
+	}
+
+	if mockSvc.TerminateSessionCalled {
+		t.Fatalf("a call to TerminateSession should not occur when there is no valid SSM session")
+	}
+
+	// Lets try calling start session, then stopping to see what happens.
+	session, err := driver.StartSession(context.TODO(), MockStartSessionInput("fakeinstance"))
+	if err != nil {
+		t.Fatalf("calling StartSession should not error but got %v", err)
+	}
+
+	if !mockSvc.StartSessionCalled {
+		t.Fatalf("expected test to call StartSession mock but didn't")
+	}
+
+	if session == nil || driver.session != session {
+		t.Errorf("expected session to be set after a successful call to StartSession")
+	}
+
+	if !reflect.DeepEqual(session, MockStartSessionOutput()) {
+		t.Errorf("expected session to be %v but got %v", MockStartSessionOutput(), session)
+	}
+
+	err = driver.StopSession()
+	if err != nil {
+		t.Errorf("calling StopSession() on a driver on a started session should not fail")
+	}
+
+	if !mockSvc.TerminateSessionCalled {
+		t.Fatalf("expected test to call StopSession mock but didn't")
+	}
+
 }
 
 func TestSSMDriver_Args(t *testing.T) {
 	tt := []struct {
-		Name          string
-		Session       *ssm.StartSessionOutput
-		ProfileName   string
-		ErrorExpected bool
+		Name             string
+		ProfileName      string
+		SkipStartSession bool
+		ErrorExpected    bool
 	}{
 		{
-			Name:          "NilSession",
-			ErrorExpected: true,
+			Name:             "NilSession",
+			SkipStartSession: true,
+			ErrorExpected:    true,
 		},
 		{
 			Name:          "NonNilSession",
-			Session:       new(ssm.StartSessionOutput),
 			ErrorExpected: false,
 		},
 		{
 			Name:          "SessionWithProfileName",
-			Session:       new(ssm.StartSessionOutput),
 			ProfileName:   "default",
 			ErrorExpected: false,
 		},
@@ -66,25 +148,36 @@ func TestSSMDriver_Args(t *testing.T) {
 	for _, tc := range tt {
 		tc := tc
 		t.Run(tc.Name, func(t *testing.T) {
-			driver := SSMDriver{
-				Region:          "region",
-				ProfileName:     tc.ProfileName,
-				Session:         tc.Session,
-				SessionParams:   ssm.StartSessionInput{},
-				SessionEndpoint: "amazon.com/sessions",
+			mockSvc := MockSSMSvc{}
+			driver := NewSSMDriverWithMockSvc(&mockSvc)
+			driver.ProfileName = tc.ProfileName
+
+			if driver.SvcClient == nil {
+				t.Fatalf("svcclient for driver should not be nil")
+			}
+
+			if !tc.SkipStartSession {
+				_, err := driver.StartSession(context.TODO(), MockStartSessionInput("fakeinstance"))
+				if err != nil {
+					t.Fatalf("got an error when calling StartSession %v", err)
+				}
 			}
 
 			args, err := driver.Args()
 			if tc.ErrorExpected && err == nil {
-				t.Fatalf("SSMDriver.Args with a %q should have failed but instead no error was returned", tc.Name)
+				t.Fatalf("Driver.Args with a %q should have failed but instead no error was returned", tc.Name)
 			}
 
 			if tc.ErrorExpected {
 				return
 			}
 
+			if err != nil {
+				t.Fatalf("got an error when it should've worked %v", err)
+			}
+
 			// validate launch script
-			expectedArgString := fmt.Sprintf(`{"SessionId":null,"StreamUrl":null,"TokenValue":null} %s StartSession %s {"DocumentName":null,"Parameters":null,"Target":null} %s`, driver.Region, driver.ProfileName, driver.SessionEndpoint)
+			expectedArgString := fmt.Sprintf(`{"SessionId":"packerid","StreamUrl":"http://packer.io","TokenValue":"packer-token"} east StartSession %s {"DocumentName":"AWS-StartPortForwardingSession","Parameters":{"localPortNumber":["8001"],"portNumber":["22"]},"Target":"fakeinstance"} example.com`, tc.ProfileName)
 			argString := strings.Join(args, " ")
 			if argString != expectedArgString {
 				t.Errorf("Expected launch script to be %q but got %q", expectedArgString, argString)

@@ -6,39 +6,81 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go/service/ssm/ssmiface"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/mitchellh/iochan"
 )
 
-const sessionManagerPluginName string = "session-manager-plugin"
+const (
+	sessionManagerPluginName string = "session-manager-plugin"
 
-//sessionCommand is the AWS-SDK equivalent to the command you would specify to `aws ssm ...`
-const sessionCommand string = "StartSession"
+	//sessionCommand is the AWS-SDK equivalent to the command you would specify to `aws ssm ...`
+	sessionCommand string = "StartSession"
+)
+
+type SSMDriverConfig struct {
+	SvcClient   ssmiface.SSMAPI
+	Region      string
+	ProfileName string
+	SvcEndpoint string
+}
 
 type SSMDriver struct {
-	Region          string
-	ProfileName     string
-	Session         *ssm.StartSessionOutput
-	SessionParams   ssm.StartSessionInput
-	SessionEndpoint string
-	PluginName      string
+	SSMDriverConfig
+	session       *ssm.StartSessionOutput
+	sessionParams ssm.StartSessionInput
+	pluginCmdFunc func(context.Context) error
+}
+
+func NewSSMDriver(config SSMDriverConfig) *SSMDriver {
+	d := SSMDriver{SSMDriverConfig: config}
+	return &d
 }
 
 // StartSession starts an interactive Systems Manager session with a remote instance via the AWS session-manager-plugin
-func (d *SSMDriver) StartSession(ctx context.Context) error {
-	if d.PluginName == "" {
-		d.PluginName = sessionManagerPluginName
+// This ssm.StartSessionOutput returned by this function can be used for terminating the session manually. If you do
+// not wish to manage the session manually calling StopSession on a instance of this driver will terminate the active session
+// created from calling StartSession.
+func (d *SSMDriver) StartSession(ctx context.Context, input ssm.StartSessionInput) (*ssm.StartSessionOutput, error) {
+	log.Printf("Starting PortForwarding session to instance %q with following params %v", aws.StringValue(input.Target), input.Parameters)
+
+	var output *ssm.StartSessionOutput
+	err := retry.Config{
+		ShouldRetry: func(err error) bool { return isAWSErr(err, "TargetNotConnected", "") },
+		RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 60 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) (err error) {
+		output, err = d.SvcClient.StartSessionWithContext(ctx, &input)
+		return err
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error encountered in starting session for instance %q: %s", aws.StringValue(input.Target), err)
 	}
 
+	d.session = output
+	d.sessionParams = input
+
+	if d.pluginCmdFunc == nil {
+		d.pluginCmdFunc = d.openTunnelForSession
+	}
+
+	if err := d.pluginCmdFunc(ctx); err != nil {
+		return nil, fmt.Errorf("error encountered in starting session for instance %q: %s", aws.StringValue(input.Target), err)
+	}
+
+	return d.session, nil
+}
+
+func (d *SSMDriver) openTunnelForSession(ctx context.Context) error {
 	args, err := d.Args()
 	if err != nil {
-		err = fmt.Errorf("error encountered validating session details: %s", err)
-		return err
+		return fmt.Errorf("error encountered validating session details: %s", err)
 	}
 
-	cmd := exec.CommandContext(ctx, d.PluginName, args...)
+	cmd := exec.CommandContext(ctx, sessionManagerPluginName, args...)
 
 	// Let's build up our logging
 	stdout, err := cmd.StdoutPipe()
@@ -78,31 +120,50 @@ func (d *SSMDriver) StartSession(ctx context.Context) error {
 				}
 			}
 		}
-	}(ctx, d.PluginName)
+	}(ctx, sessionManagerPluginName)
 
-	log.Printf("[DEBUG %s] opening session tunnel to instance %q for session %q", d.PluginName, aws.StringValue(d.SessionParams.Target), aws.StringValue(d.Session.SessionId))
+	log.Printf("[DEBUG %s] opening session tunnel to instance %q for session %q", sessionManagerPluginName,
+		aws.StringValue(d.sessionParams.Target),
+		aws.StringValue(d.session.SessionId),
+	)
+
 	if err := cmd.Start(); err != nil {
-		err = fmt.Errorf("error encountered when calling %s: %s\n", d.PluginName, err)
+		err = fmt.Errorf("error encountered when calling %s: %s\n", sessionManagerPluginName, err)
 		return err
 	}
 
 	return nil
 }
 
+// StopSession terminates an active Session Manager session
+func (d *SSMDriver) StopSession() error {
+
+	if d.session == nil || d.session.SessionId == nil {
+		return fmt.Errorf("Unable to find a valid session to instance %q; skipping the termination step",
+			aws.StringValue(d.sessionParams.Target))
+	}
+
+	_, err := d.SvcClient.TerminateSession(&ssm.TerminateSessionInput{SessionId: d.session.SessionId})
+	if err != nil {
+		err = fmt.Errorf("Error terminating SSM Session %q. Please terminate the session manually: %s", aws.StringValue(d.session.SessionId), err)
+	}
+	return err
+}
+
 // Args validates the driver inputs before returning an ordered set of arguments to pass to the driver command.
 func (d *SSMDriver) Args() ([]string, error) {
-	if d.Session == nil {
+	if d.session == nil {
 		return nil, fmt.Errorf("an active Amazon SSM Session is required before trying to open a session tunnel")
 	}
 
 	// AWS session-manager-plugin requires a valid session be passed in JSON.
-	sessionDetails, err := json.Marshal(d.Session)
+	sessionDetails, err := json.Marshal(d.session)
 	if err != nil {
 		return nil, fmt.Errorf("error encountered in reading session details %s", err)
 	}
 
 	// AWS session-manager-plugin requires the parameters used in the session to be passed in JSON as well.
-	sessionParameters, err := json.Marshal(d.SessionParams)
+	sessionParameters, err := json.Marshal(d.sessionParams)
 	if err != nil {
 		return nil, fmt.Errorf("error encountered in reading session parameter details %s", err)
 	}
@@ -114,7 +175,7 @@ func (d *SSMDriver) Args() ([]string, error) {
 		sessionCommand,
 		d.ProfileName,
 		string(sessionParameters),
-		d.SessionEndpoint,
+		d.SvcEndpoint,
 	}
 
 	return args, nil

@@ -6,7 +6,86 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/packer"
 )
+
+func TestStepCreateSSMTunnel_Run(t *testing.T) {
+	mockSvc := MockSSMSvc{}
+	config := SSMDriverConfig{
+		SvcClient:   &mockSvc,
+		SvcEndpoint: "example.com",
+	}
+
+	mockDriver := NewSSMDriver(config)
+	mockDriver.pluginCmdFunc = MockPluginCmdFunc
+
+	state := testState()
+	state.Put("ui", &packer.NoopUi{})
+	state.Put("instance", &ec2.Instance{InstanceId: aws.String("i-something")})
+
+	step := StepCreateSSMTunnel{
+		driver: mockDriver,
+	}
+
+	step.Run(context.Background(), state)
+
+	err := state.Get("error")
+	if err != nil {
+		err = err.(error)
+		t.Fatalf("the call to Run failed with an error when it should've executed: %v", err)
+	}
+
+	if mockSvc.StartSessionCalled {
+		t.Errorf("StartSession should not be called when SSMAgentEnabled is false")
+	}
+
+	// Run when SSMAgentEnabled is true
+	step.SSMAgentEnabled = true
+	step.Run(context.Background(), state)
+
+	err = state.Get("error")
+	if err != nil {
+		err = err.(error)
+		t.Fatalf("the call to Run failed with an error when it should've executed: %v", err)
+	}
+
+	if !mockSvc.StartSessionCalled {
+		t.Errorf("calling run with the correct inputs should call StartSession")
+	}
+
+	step.Cleanup(state)
+	if !mockSvc.TerminateSessionCalled {
+		t.Errorf("calling cleanup on a successful run should call TerminateSession")
+	}
+}
+
+func TestStepCreateSSMTunnel_Cleanup(t *testing.T) {
+	mockSvc := MockSSMSvc{}
+	config := SSMDriverConfig{
+		SvcClient:   &mockSvc,
+		SvcEndpoint: "example.com",
+	}
+
+	mockDriver := NewSSMDriver(config)
+	mockDriver.pluginCmdFunc = MockPluginCmdFunc
+
+	step := StepCreateSSMTunnel{
+		SSMAgentEnabled: true,
+		driver:          mockDriver,
+	}
+
+	state := testState()
+	state.Put("ui", &packer.NoopUi{})
+	state.Put("instance", &ec2.Instance{InstanceId: aws.String("i-something")})
+
+	step.Cleanup(state)
+
+	if mockSvc.TerminateSessionCalled {
+		t.Fatalf("calling cleanup on a non started session should not call TerminateSession")
+	}
+
+}
 
 func TestStepCreateSSMTunnel_BuildTunnelInputForInstance(t *testing.T) {
 	step := StepCreateSSMTunnel{
