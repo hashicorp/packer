@@ -19,13 +19,13 @@ import (
 // Config of alicloud
 type AlicloudAccessConfig struct {
 	// Alicloud access key must be provided unless `profile` is set, but it can
-	// also be sourced from the ```ALICLOUD_ACCESS_KEY``` environment variable.
+	// also be sourced from the `ALICLOUD_ACCESS_KEY` environment variable.
 	AlicloudAccessKey string `mapstructure:"access_key" required:"true"`
 	// Alicloud secret key must be provided unless `profile` is set, but it can
-	// also be sourced from the ```ALICLOUD_SECRET_KEY``` environment variable.
+	// also be sourced from the `ALICLOUD_SECRET_KEY` environment variable.
 	AlicloudSecretKey string `mapstructure:"secret_key" required:"true"`
 	// Alicloud region must be provided unless `profile` is set, but it can
-	// also be sourced from the ```ALICLOUD_REGION``` environment variable.
+	// also be sourced from the `ALICLOUD_REGION` environment variable.
 	AlicloudRegion string `mapstructure:"region" required:"true"`
 	// The region validation can be skipped if this value is true, the default
 	// value is false.
@@ -34,7 +34,7 @@ type AlicloudAccessConfig struct {
 	// value is false.
 	AlicloudSkipImageValidation bool `mapstructure:"skip_image_validation" required:"false"`
 	// Alicloud profile must be set unless `access_key` is set; it can also be
-	// sourced from the ```ALICLOUD_PROFILE``` environment variable.
+	// sourced from the `ALICLOUD_PROFILE` environment variable.
 	AlicloudProfile string `mapstructure:"profile" required:"false"`
 	// Alicloud shared credentials file path. If this file exists, access and
 	// secret keys will be read from this file.
