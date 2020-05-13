@@ -8,6 +8,9 @@
 /builder/azure/                      @paulmey
 /website/pages/docs/builders/azure* @paulmey
 
+/builder/digitalocean/                     @andrewsomething
+/website/pages/docs/builders/digitalocean* @andrewsomething
+
 /builder/hyperv/                      @taliesins
 /website/pages/docs/builders/hyperv* @taliesins
 
