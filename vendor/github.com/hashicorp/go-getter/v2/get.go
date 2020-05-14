@@ -3,7 +3,7 @@
 //
 // getter is unique in its ability to download both directories and files.
 // It also detects certain source strings to be protocol-specific URLs. For
-// example, "github.com/hashicorp/go-getter" would turn into a Git URL and
+// example, "github.com/hashicorp/go-getter/v2" would turn into a Git URL and
 // use the Git protocol.
 //
 // Protocols and detectors are extensible.
@@ -42,11 +42,6 @@ type Getter interface {
 	// Mode returns the mode based on the given URL. This is used to
 	// allow clients to let the getters decide which mode to use.
 	Mode(context.Context, *url.URL) (Mode, error)
-
-	// SetClient allows a getter to know it's client
-	// in order to access client's Get functions or
-	// progress tracking.
-	SetClient(*Client)
 }
 
 // Getters is the mapping of scheme to the Getter implementation that will
@@ -74,9 +69,7 @@ func init() {
 	Getters = map[string]Getter{
 		"file":  new(FileGetter),
 		"git":   new(GitGetter),
-		"gcs":   new(GCSGetter),
 		"hg":    new(HgGetter),
-		"s3":    new(S3Getter),
 		"http":  httpGetter,
 		"https": httpGetter,
 	}
@@ -148,6 +141,7 @@ func getRunCommand(cmd *exec.Cmd) error {
 
 // getForcedGetter takes a source and returns the tuple of the forced
 // getter and the raw URL (without the force syntax).
+// For example "git::https://...". returns "git" "https://".
 func getForcedGetter(src string) (string, string) {
 	var forced string
 	if ms := forcedRegexp.FindStringSubmatch(src); ms != nil {
