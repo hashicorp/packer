@@ -10,10 +10,8 @@ comment:
 
 coverage:
   status:
-    project:
-      default:
-        target: auto
-        threshold: "0.5%"
+    project: off
+    patch: off
 
 ignore:  # ignore hcl2spec generated code for coverage
   - "**/*.hcl2spec.go"
