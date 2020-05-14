@@ -11,8 +11,11 @@ import (
 	"runtime"
 	"strings"
 
+	gcs "github.com/hashicorp/go-getter/gcs/v2"
+	s3 "github.com/hashicorp/go-getter/s3/v2"
 	getter "github.com/hashicorp/go-getter/v2"
 	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
+
 	"github.com/hashicorp/packer/common/filelock"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -51,7 +54,14 @@ type StepDownload struct {
 	Extension string
 }
 
-var defaultGetterClient = getter.Client{}
+var defaultGetterClient = getter.Client{
+	Getters: getter.Getters,
+}
+
+func init() {
+	defaultGetterClient.Getters["gcs"] = &gcs.Getter{}
+	defaultGetterClient.Getters["s3"] = &s3.Getter{}
+}
 
 func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	if len(s.Url) == 0 {
