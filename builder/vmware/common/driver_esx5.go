@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -687,23 +688,19 @@ func (d *ESX5Driver) VerifyChecksum(hash string, file string) bool {
 		return true
 	}
 
-	// TODO(azr): this will not work with checksums from files
-	vs := strings.SplitN(hash, ":", 2)
-	var ctype string
-	switch len(vs) {
-	case 2:
-		ctype, hash = vs[0], vs[1]
-	default:
-		return false
+	req := &getter.Request{
+		Src: file + "checksum=" + hash,
 	}
-
-	stdin := bytes.NewBufferString(fmt.Sprintf("%s  %s", hash, file))
-	_, err := d.run(stdin, fmt.Sprintf("%ssum", ctype), "-c")
+	fcksum, err := getter.DefaultClient.GetChecksum(context.TODO(), req)
 	if err != nil {
+		log.Printf("coulnd't get the checksum: %v", err)
 		return false
 	}
-
-	return true
+	err = fcksum.Checksum(file)
+	if err != nil {
+		log.Printf("%v", err)
+	}
+	return err == nil
 }
 
 func (d *ESX5Driver) ssh(command string, stdin io.Reader) (*bytes.Buffer, error) {
