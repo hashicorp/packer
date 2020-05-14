@@ -50,12 +50,6 @@ func (c *ConsoleCommand) ParseArgs(args []string) (*ConsoleArgs, int) {
 		return &cfg, 1
 	}
 
-	if len(args) > 1 {
-		// User provided too many arguments
-		flags.Usage()
-		return &cfg, 1
-	}
-
 	args = flags.Args()
 	return &cfg, 0
 }
