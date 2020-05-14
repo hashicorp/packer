@@ -1,6 +1,7 @@
 package command
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -19,35 +20,52 @@ type ValidateCommand struct {
 }
 
 func (c *ValidateCommand) Run(args []string) int {
-	var cfgSyntaxOnly bool
+	ctx, cleanup := handleTermInterrupt(c.Ui)
+	defer cleanup()
+
+	cfg, ret := c.ParseArgs(args)
+	if ret != 0 {
+		return ret
+	}
+
+	return c.RunContext(ctx, cfg)
+}
+
+func (c *ValidateCommand) ParseArgs(args []string) (*ValidateArgs, int) {
+	var cfg ValidateArgs
+
 	flags := c.Meta.FlagSet("validate", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
-	flags.BoolVar(&cfgSyntaxOnly, "syntax-only", false, "check syntax only")
+	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
-		return 1
+		return &cfg, 1
 	}
 
 	args = flags.Args()
 	if len(args) != 1 {
 		flags.Usage()
-		return 1
+		return &cfg, 1
 	}
+	cfg.Path = args[0]
+	return &cfg, 0
+}
 
+func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int {
 	// Parse the template
-	tpl, err := template.ParseFile(args[0])
+	tpl, err := template.ParseFile(cla.Path)
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1
 	}
 
 	// If we're only checking syntax, then we're done already
-	if cfgSyntaxOnly {
+	if cla.SyntaxOnly {
 		c.Ui.Say("Syntax-only check passed. Everything looks okay.")
 		return 0
 	}
 
 	// Get the core
-	core, err := c.Meta.Core(tpl)
+	core, err := c.Meta.Core(tpl, &cla.MetaArgs)
 	if err != nil {
 		c.Ui.Error(err.Error())
 		return 1
@@ -57,7 +75,7 @@ func (c *ValidateCommand) Run(args []string) int {
 	warnings := make(map[string][]string)
 
 	// Get the builds we care about
-	buildNames := c.Meta.BuildNames(core)
+	buildNames := core.BuildNames(c.CoreConfig.Only, c.CoreConfig.Except)
 	builds := make([]packer.Build, 0, len(buildNames))
 	for _, n := range buildNames {
 		b, err := core.Build(n)

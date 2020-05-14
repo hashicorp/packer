@@ -39,6 +39,8 @@
     the service names things [GH-9078]
 * core/hcl2: Maps are now treated as settable arguments as opposed to blocks.
     For example `tags = {}` instead of `tags {}` [GH-9035]
+* `packer build` command: removed option to set `parallel=false`, use
+    `-parallel-builds=1` for this.
 
 ### FEATURES:
 * **New Builder** azure-dtl allows creation of devtestlabs images in Azure

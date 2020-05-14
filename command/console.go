@@ -2,6 +2,7 @@ package command
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -30,16 +31,33 @@ type ConsoleCommand struct {
 }
 
 func (c *ConsoleCommand) Run(args []string) int {
-	flags := c.Meta.FlagSet("console", FlagSetVars)
-	flags.Usage = func() { c.Ui.Say(c.Help()) }
-	if err := flags.Parse(args); err != nil {
-		return 1
+	ctx := context.Background()
+
+	cfg, ret := c.ParseArgs(args)
+	if ret != 0 {
+		return ret
 	}
 
-	var templ *template.Template
+	return c.RunContext(ctx, cfg)
+}
+
+func (c *ConsoleCommand) ParseArgs(args []string) (*ConsoleArgs, int) {
+	var cfg ConsoleArgs
+	flags := c.Meta.FlagSet("console", FlagSetVars)
+	flags.Usage = func() { c.Ui.Say(c.Help()) }
+	cfg.AddFlagSets(flags)
+	if err := flags.Parse(args); err != nil {
+		return &cfg, 1
+	}
 
 	args = flags.Args()
-	if len(args) < 1 {
+	return &cfg, 0
+}
+
+func (c *ConsoleCommand) RunContext(ctx context.Context, cla *ConsoleArgs) int {
+
+	var templ *template.Template
+	if cla.Path == "" {
 		// If user has not defined a builder, create a tiny null placeholder
 		// builder so that we can properly initialize the core
 		tpl, err := template.Parse(strings.NewReader(TiniestBuilder))
@@ -48,22 +66,18 @@ func (c *ConsoleCommand) Run(args []string) int {
 			return 1
 		}
 		templ = tpl
-	} else if len(args) == 1 {
+	} else {
 		// Parse the provided template
-		tpl, err := template.ParseFile(args[0])
+		tpl, err := template.ParseFile(cla.Path)
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 			return 1
 		}
 		templ = tpl
-	} else {
-		// User provided too many arguments
-		flags.Usage()
-		return 1
 	}
 
 	// Get the core
-	core, err := c.Meta.Core(templ)
+	core, err := c.Meta.Core(templ, &cla.MetaArgs)
 	if err != nil {
 		c.Ui.Error(err.Error())
 		return 1

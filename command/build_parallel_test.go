@@ -95,7 +95,7 @@ func TestBuildParallel_1(t *testing.T) {
 	}
 
 	args := []string{
-		fmt.Sprintf("-parallel=true"),
+		fmt.Sprintf("-parallel-builds=10"),
 		filepath.Join(testFixture("parallel"), "1lock-5wg.json"),
 	}
 

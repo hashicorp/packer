@@ -49,11 +49,11 @@ func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl
 	return postProcessor, diags
 }
 
-func (p *Parser) startPostProcessor(source *SourceBlock, pp *PostProcessorBlock, ectx *hcl.EvalContext, generatedVars map[string]string) (packer.PostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) startPostProcessor(source *SourceBlock, pp *PostProcessorBlock, ectx *hcl.EvalContext, generatedVars map[string]string) (packer.PostProcessor, hcl.Diagnostics) {
 	// ProvisionerBlock represents a detected but unparsed provisioner
 	var diags hcl.Diagnostics
 
-	postProcessor, err := p.PostProcessorsSchemas.Start(pp.PType)
+	postProcessor, err := cfg.postProcessorsSchemas.Start(pp.PType)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary: fmt.Sprintf("Failed loading %s", pp.PType),
