@@ -3,10 +3,15 @@
 package common
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"log"
+	"os"
 	"strings"
 
+	getter "github.com/hashicorp/go-getter/v2"
+	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -124,6 +129,41 @@ func (c *ISOConfig) Prepare(*interpolate.Context) (warnings []string, errs []err
 		return warnings, errs
 	} else if c.ISOChecksum == "" {
 		errs = append(errs, fmt.Errorf("A checksum must be specified"))
+	} else {
+		// ESX5Driver.VerifyChecksum is ran remotely but should not download a
+		// checksum file, therefore in case it is a file, we need to download
+		// it now and compute the checksum now, we transform it back to a
+		// checksum string so that it can be simply read in the VerifyChecksum.
+		//
+		// Doing this also has the added benefit of failing early if a checksum
+		// is incorrect or if getting it should fail.
+		u, err := urlhelper.Parse(c.ISOUrls[0])
+		if err != nil {
+			return warnings, append(errs, fmt.Errorf("url parse: %s", err))
+		}
+
+		q := u.Query()
+		if c.ISOChecksum != "" {
+			q.Set("checksum", c.ISOChecksum)
+		}
+		u.RawQuery = q.Encode()
+
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Printf("Getwd: %v", err)
+			// here we ignore the error in case the
+			// working directory is not needed.
+		}
+
+		req := &getter.Request{
+			Src: u.String(),
+			Pwd: wd,
+		}
+		cksum, err := defaultGetterClient.GetChecksum(context.TODO(), req)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file: %v", err))
+		}
+		c.ISOChecksum = cksum.String()
 	}
 
 	if strings.HasSuffix(strings.ToLower(c.ISOChecksum), ".iso") {
