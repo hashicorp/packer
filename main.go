@@ -146,6 +146,11 @@ func wrappedMain() int {
 		runtime.Version(),
 		runtime.GOOS, runtime.GOARCH)
 
+	// The config being loaded here is the Packer config -- it defines
+	// the location of third party builder plugins, plugin ports to use, and
+	// whether to disable telemetry. It is a global config.
+	// Do not confuse this config with the .json Packer template which gets
+	// passed into commands like `packer build`
 	config, err := loadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)
@@ -328,6 +333,7 @@ func loadConfig() (*config, error) {
 	}
 	defer f.Close()
 
+	// This loads a json config, defined in packer/config.go
 	if err := decodeConfig(f, &config); err != nil {
 		return nil, err
 	}

@@ -135,8 +135,11 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	}
 
 	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
-		Only:   cla.Only,
-		Except: cla.Except,
+		Only:    cla.Only,
+		Except:  cla.Except,
+		Debug:   cla.Debug,
+		Force:   cla.Force,
+		OnError: cla.OnError,
 	})
 
 	// here, something could have gone wrong but we still want to run valid
@@ -186,6 +189,8 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	log.Printf("On error: %v", cla.OnError)
 
 	// Set the debug and force mode and prepare all the builds
+	// This is only affects json templates, because HCL2
+	// templates have already been prepared in GetBuilds() above.
 	for i := range builds {
 		b := builds[i]
 		log.Printf("Preparing build: %s", b.Name())

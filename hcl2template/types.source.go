@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/packer"
@@ -38,7 +39,7 @@ func (p *Parser) decodeSource(block *hcl.Block) (*SourceBlock, hcl.Diagnostics) 
 	return source, diags
 }
 
-func (cfg *PackerConfig) startBuilder(source *SourceBlock, ectx *hcl.EvalContext) (packer.Builder, hcl.Diagnostics, []string) {
+func (cfg *PackerConfig) startBuilder(source *SourceBlock, ectx *hcl.EvalContext, opts packer.GetBuildsOptions) (packer.Builder, hcl.Diagnostics, []string) {
 	var diags hcl.Diagnostics
 
 	builder, err := cfg.builderSchemas.Start(source.Type)
@@ -57,12 +58,23 @@ func (cfg *PackerConfig) startBuilder(source *SourceBlock, ectx *hcl.EvalContext
 		return nil, diags, nil
 	}
 
-	generatedVars, warning, err := builder.Prepare(source.builderVariables(), decoded)
+	// Note: HCL prepares inside of the Start func, but Json does not. Json
+	// builds are instead prepared only in command/build.go
+	// TODO: either make json prepare when plugins are loaded, or make HCL
+	// prepare at a later step, to make builds from different template types
+	// easier to reason about.
+	builderVars := source.builderVariables()
+	builderVars["packer_debug"] = strconv.FormatBool(opts.Debug)
+	builderVars["packer_force"] = strconv.FormatBool(opts.Force)
+	builderVars["packer_on_error"] = opts.OnError
+
+	generatedVars, warning, err := builder.Prepare(builderVars, decoded)
 	moreDiags = warningErrorsToDiags(source.block, warning, err)
 	diags = append(diags, moreDiags...)
 	return builder, diags, generatedVars
 }
 
+// These variables will populate the PackerConfig inside of the builders.
 func (source *SourceBlock) builderVariables() map[string]string {
 	return map[string]string{
 		"packer_build_name":   source.Name,
