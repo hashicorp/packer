@@ -335,10 +335,10 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		return nil
 	}
 
-	err := retry.Config{StartTimeout: p.config.StartRetryTimeout}.Run(ctx, func(ctx context.Context) error {
+	err := retry.Config{StartTimeout: time.Minute, RetryDelay: func() time.Duration { return 10 * time.Second }}.Run(ctx, func(ctx context.Context) error {
 		command, err := p.createRemoteCleanUpCommand(uploadedScripts)
 		if err != nil {
-			log.Printf("failed to create a remote cleanup script: %s", err)
+			log.Printf("failed to upload the remote cleanup script: %q", err)
 			return err
 		}
 
@@ -346,7 +346,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		return cmd.RunWithUi(ctx, comm, ui)
 	})
 	if err != nil {
-		log.Printf("failed to clean up temporary files: %s", strings.Join(uploadedScripts, ","))
+		log.Printf("remote cleanup script failed to upload; skipping the removal of temporary files: %s; ", strings.Join(uploadedScripts, ","))
 	}
 
 	return nil
@@ -364,7 +364,7 @@ func (p *Provisioner) createRemoteCleanUpCommand(remoteFiles []string) (string, 
 	remotePath := p.config.remoteCleanUpScriptPath
 	remoteFiles = append(remoteFiles, remotePath)
 	for _, filename := range remoteFiles {
-		fmt.Fprintf(&b, "Remove-Item %s\n", filename)
+		fmt.Fprintf(&b, "if (Test-Path %[1]s) {Remove-Item %[1]s}\n", filename)
 	}
 
 	if err := p.communicator.Upload(remotePath, strings.NewReader(b.String()), nil); err != nil {
