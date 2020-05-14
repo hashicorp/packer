@@ -48,6 +48,7 @@ func init() {
 		"galaxy-command":             new(FixerGalaxyCommand),
 		"comm-config":                new(FixerCommConfig),
 		"ssh-wait-timeout":           new(FixerSSHTimout),
+		"docker-tag-tags":            new(FixerDockerTagtoTags),
 	}
 
 	FixerOrder = []string{
@@ -68,6 +69,7 @@ func init() {
 		"amazon-private-ip",
 		"amazon-temp-sec-cidrs",
 		"docker-email",
+		"docker-tag-tags",
 		"powershell-escapes",
 		"vmware-compaction",
 		"hyperv-deprecations",

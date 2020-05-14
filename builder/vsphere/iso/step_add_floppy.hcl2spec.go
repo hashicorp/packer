@@ -12,6 +12,7 @@ type FlatFloppyConfig struct {
 	FloppyIMGPath     *string  `mapstructure:"floppy_img_path" cty:"floppy_img_path"`
 	FloppyFiles       []string `mapstructure:"floppy_files" cty:"floppy_files"`
 	FloppyDirectories []string `mapstructure:"floppy_dirs" cty:"floppy_dirs"`
+	FloppyLabel       *string  `mapstructure:"floppy_label" cty:"floppy_label"`
 }
 
 // FlatMapstructure returns a new FlatFloppyConfig.
@@ -29,6 +30,7 @@ func (*FlatFloppyConfig) HCL2Spec() map[string]hcldec.Spec {
 		"floppy_img_path": &hcldec.AttrSpec{Name: "floppy_img_path", Type: cty.String, Required: false},
 		"floppy_files":    &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
 		"floppy_dirs":     &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
+		"floppy_label":    &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},
 	}
 	return s
 }

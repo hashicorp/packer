@@ -28,6 +28,7 @@ type FlatConfig struct {
 	Format                    *string           `mapstructure:"format" required:"false" cty:"format"`
 	ExportOpts                []string          `mapstructure:"export_opts" required:"false" cty:"export_opts"`
 	OutputDir                 *string           `mapstructure:"output_directory" required:"false" cty:"output_directory"`
+	OutputFilename            *string           `mapstructure:"output_filename" required:"false" cty:"output_filename"`
 	Headless                  *bool             `mapstructure:"headless" required:"false" cty:"headless"`
 	VRDPBindAddress           *string           `mapstructure:"vrdp_bind_address" required:"false" cty:"vrdp_bind_address"`
 	VRDPPortMin               *int              `mapstructure:"vrdp_port_min" required:"false" cty:"vrdp_port_min"`
@@ -44,6 +45,7 @@ type FlatConfig struct {
 	SSHPrivateKeyFile         *string           `mapstructure:"ssh_private_key_file" cty:"ssh_private_key_file"`
 	SSHPty                    *bool             `mapstructure:"ssh_pty" cty:"ssh_pty"`
 	SSHTimeout                *string           `mapstructure:"ssh_timeout" cty:"ssh_timeout"`
+	SSHWaitTimeout            *string           `mapstructure:"ssh_wait_timeout" undocumented:"true" cty:"ssh_wait_timeout"`
 	SSHAgentAuth              *bool             `mapstructure:"ssh_agent_auth" cty:"ssh_agent_auth"`
 	SSHDisableAgentForwarding *bool             `mapstructure:"ssh_disable_agent_forwarding" cty:"ssh_disable_agent_forwarding"`
 	SSHHandshakeAttempts      *int              `mapstructure:"ssh_handshake_attempts" cty:"ssh_handshake_attempts"`
@@ -79,7 +81,6 @@ type FlatConfig struct {
 	SSHHostPortMin            *int              `mapstructure:"ssh_host_port_min" required:"false" cty:"ssh_host_port_min"`
 	SSHHostPortMax            *int              `mapstructure:"ssh_host_port_max" cty:"ssh_host_port_max"`
 	SSHSkipNatMapping         *bool             `mapstructure:"ssh_skip_nat_mapping" required:"false" cty:"ssh_skip_nat_mapping"`
-	SSHWaitTimeout            *string           `mapstructure:"ssh_wait_timeout" required:"false" cty:"ssh_wait_timeout"`
 	ShutdownCommand           *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command"`
 	ShutdownTimeout           *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout"`
 	PostShutdownDelay         *string           `mapstructure:"post_shutdown_delay" required:"false" cty:"post_shutdown_delay"`
@@ -91,13 +92,13 @@ type FlatConfig struct {
 	GuestAdditionsMode        *string           `mapstructure:"guest_additions_mode" cty:"guest_additions_mode"`
 	GuestAdditionsPath        *string           `mapstructure:"guest_additions_path" cty:"guest_additions_path"`
 	GuestAdditionsSHA256      *string           `mapstructure:"guest_additions_sha256" cty:"guest_additions_sha256"`
-	GuestAdditionsURL         *string           `mapstructure:"guest_additions_url" cty:"guest_additions_url"`
-	VMName                    *string           `mapstructure:"vm_name" cty:"vm_name"`
-	AttachSnapshot            *string           `mapstructure:"attach_snapshot" cty:"attach_snapshot"`
-	TargetSnapshot            *string           `mapstructure:"target_snapshot" cty:"target_snapshot"`
-	DeleteTargetSnapshot      *bool             `mapstructure:"force_delete_snapshot" cty:"force_delete_snapshot"`
-	KeepRegistered            *bool             `mapstructure:"keep_registered" cty:"keep_registered"`
-	SkipExport                *bool             `mapstructure:"skip_export" cty:"skip_export"`
+	GuestAdditionsURL         *string           `mapstructure:"guest_additions_url" required:"false" cty:"guest_additions_url"`
+	VMName                    *string           `mapstructure:"vm_name" required:"true" cty:"vm_name"`
+	AttachSnapshot            *string           `mapstructure:"attach_snapshot" required:"false" cty:"attach_snapshot"`
+	TargetSnapshot            *string           `mapstructure:"target_snapshot" required:"false" cty:"target_snapshot"`
+	DeleteTargetSnapshot      *bool             `mapstructure:"force_delete_snapshot" required:"false" cty:"force_delete_snapshot"`
+	KeepRegistered            *bool             `mapstructure:"keep_registered" required:"false" cty:"keep_registered"`
+	SkipExport                *bool             `mapstructure:"skip_export" required:"false" cty:"skip_export"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -131,6 +132,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"format":                       &hcldec.AttrSpec{Name: "format", Type: cty.String, Required: false},
 		"export_opts":                  &hcldec.AttrSpec{Name: "export_opts", Type: cty.List(cty.String), Required: false},
 		"output_directory":             &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
+		"output_filename":              &hcldec.AttrSpec{Name: "output_filename", Type: cty.String, Required: false},
 		"headless":                     &hcldec.AttrSpec{Name: "headless", Type: cty.Bool, Required: false},
 		"vrdp_bind_address":            &hcldec.AttrSpec{Name: "vrdp_bind_address", Type: cty.String, Required: false},
 		"vrdp_port_min":                &hcldec.AttrSpec{Name: "vrdp_port_min", Type: cty.Number, Required: false},
@@ -147,6 +149,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_private_key_file":         &hcldec.AttrSpec{Name: "ssh_private_key_file", Type: cty.String, Required: false},
 		"ssh_pty":                      &hcldec.AttrSpec{Name: "ssh_pty", Type: cty.Bool, Required: false},
 		"ssh_timeout":                  &hcldec.AttrSpec{Name: "ssh_timeout", Type: cty.String, Required: false},
+		"ssh_wait_timeout":             &hcldec.AttrSpec{Name: "ssh_wait_timeout", Type: cty.String, Required: false},
 		"ssh_agent_auth":               &hcldec.AttrSpec{Name: "ssh_agent_auth", Type: cty.Bool, Required: false},
 		"ssh_disable_agent_forwarding": &hcldec.AttrSpec{Name: "ssh_disable_agent_forwarding", Type: cty.Bool, Required: false},
 		"ssh_handshake_attempts":       &hcldec.AttrSpec{Name: "ssh_handshake_attempts", Type: cty.Number, Required: false},
@@ -182,7 +185,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_host_port_min":            &hcldec.AttrSpec{Name: "ssh_host_port_min", Type: cty.Number, Required: false},
 		"ssh_host_port_max":            &hcldec.AttrSpec{Name: "ssh_host_port_max", Type: cty.Number, Required: false},
 		"ssh_skip_nat_mapping":         &hcldec.AttrSpec{Name: "ssh_skip_nat_mapping", Type: cty.Bool, Required: false},
-		"ssh_wait_timeout":             &hcldec.AttrSpec{Name: "ssh_wait_timeout", Type: cty.String, Required: false},
 		"shutdown_command":             &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
 		"shutdown_timeout":             &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
 		"post_shutdown_delay":          &hcldec.AttrSpec{Name: "post_shutdown_delay", Type: cty.String, Required: false},

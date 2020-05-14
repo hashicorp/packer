@@ -20,9 +20,11 @@ const BuilderId = "packer.post-processor.docker-tag"
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Repository string   `mapstructure:"repository"`
-	Tag        []string `mapstructure:"tag"`
-	Force      bool
+	Repository string `mapstructure:"repository"`
+	// Kept for backwards compatability
+	Tag   []string `mapstructure:"tag"`
+	Tags  []string `mapstructure:"tags"`
+	Force bool
 
 	ctx interpolate.Context
 }
@@ -47,11 +49,23 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
+	// combine Tag and Tags fields
+	allTags := p.config.Tags
+	allTags = append(allTags, p.config.Tag...)
+
+	p.config.Tags = allTags
+
 	return nil
 
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+	if len(p.config.Tag) > 0 {
+		ui.Say("Deprecation warning: \"tag\" option has been replaced with " +
+			"\"tags\". In future versions of Packer, this configuration may " +
+			"not work. Please call `packer fix` on your template to update.")
+	}
+
 	if artifact.BuilderId() != BuilderId &&
 		artifact.BuilderId() != dockerimport.BuilderId {
 		err := fmt.Errorf(
@@ -68,8 +82,10 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	importRepo := p.config.Repository
 	var lastTaggedRepo = importRepo
-	if len(p.config.Tag) > 0 {
-		for _, tag := range p.config.Tag {
+	RepoTags := []string{}
+
+	if len(p.config.Tags) > 0 {
+		for _, tag := range p.config.Tags {
 			local := importRepo + ":" + tag
 			ui.Message("Tagging image: " + artifact.Id())
 			ui.Message("Repository: " + local)
@@ -79,6 +95,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 				return nil, false, true, err
 			}
 
+			RepoTags = append(RepoTags, local)
 			lastTaggedRepo = local
 		}
 	} else {
@@ -95,6 +112,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		BuilderIdValue: BuilderId,
 		Driver:         driver,
 		IdValue:        lastTaggedRepo,
+		StateData:      map[string]interface{}{"docker_tags": RepoTags},
 	}
 
 	// If we tag an image and then delete it, there was no point in creating the

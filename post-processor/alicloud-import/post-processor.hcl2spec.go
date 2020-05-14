@@ -18,9 +18,9 @@ type FlatConfig struct {
 	PackerOnError                     *string                      `mapstructure:"packer_on_error" cty:"packer_on_error"`
 	PackerUserVars                    map[string]string            `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
 	PackerSensitiveVars               []string                     `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	AlicloudAccessKey                 *string                      `mapstructure:"access_key" required:"false" cty:"access_key"`
-	AlicloudSecretKey                 *string                      `mapstructure:"secret_key" required:"false" cty:"secret_key"`
-	AlicloudRegion                    *string                      `mapstructure:"region" required:"false" cty:"region"`
+	AlicloudAccessKey                 *string                      `mapstructure:"access_key" required:"true" cty:"access_key"`
+	AlicloudSecretKey                 *string                      `mapstructure:"secret_key" required:"true" cty:"secret_key"`
+	AlicloudRegion                    *string                      `mapstructure:"region" required:"true" cty:"region"`
 	AlicloudSkipValidation            *bool                        `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation"`
 	AlicloudSkipImageValidation       *bool                        `mapstructure:"skip_image_validation" required:"false" cty:"skip_image_validation"`
 	AlicloudProfile                   *string                      `mapstructure:"profile" required:"false" cty:"profile"`
@@ -75,6 +75,7 @@ type FlatConfig struct {
 	SSHPrivateKeyFile                 *string                      `mapstructure:"ssh_private_key_file" cty:"ssh_private_key_file"`
 	SSHPty                            *bool                        `mapstructure:"ssh_pty" cty:"ssh_pty"`
 	SSHTimeout                        *string                      `mapstructure:"ssh_timeout" cty:"ssh_timeout"`
+	SSHWaitTimeout                    *string                      `mapstructure:"ssh_wait_timeout" undocumented:"true" cty:"ssh_wait_timeout"`
 	SSHAgentAuth                      *bool                        `mapstructure:"ssh_agent_auth" cty:"ssh_agent_auth"`
 	SSHDisableAgentForwarding         *bool                        `mapstructure:"ssh_disable_agent_forwarding" cty:"ssh_disable_agent_forwarding"`
 	SSHHandshakeAttempts              *int                         `mapstructure:"ssh_handshake_attempts" cty:"ssh_handshake_attempts"`
@@ -105,14 +106,14 @@ type FlatConfig struct {
 	WinRMInsecure                     *bool                        `mapstructure:"winrm_insecure" cty:"winrm_insecure"`
 	WinRMUseNTLM                      *bool                        `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm"`
 	SSHPrivateIp                      *bool                        `mapstructure:"ssh_private_ip" required:"false" cty:"ssh_private_ip"`
-	OSSBucket                         *string                      `mapstructure:"oss_bucket_name" cty:"oss_bucket_name"`
+	OSSBucket                         *string                      `mapstructure:"oss_bucket_name" required:"true" cty:"oss_bucket_name"`
 	OSSKey                            *string                      `mapstructure:"oss_key_name" cty:"oss_key_name"`
 	SkipClean                         *bool                        `mapstructure:"skip_clean" cty:"skip_clean"`
-	OSType                            *string                      `mapstructure:"image_os_type" cty:"image_os_type"`
-	Platform                          *string                      `mapstructure:"image_platform" cty:"image_platform"`
-	Architecture                      *string                      `mapstructure:"image_architecture" cty:"image_architecture"`
+	OSType                            *string                      `mapstructure:"image_os_type" required:"true" cty:"image_os_type"`
+	Platform                          *string                      `mapstructure:"image_platform" required:"true" cty:"image_platform"`
+	Architecture                      *string                      `mapstructure:"image_architecture" required:"true" cty:"image_architecture"`
 	Size                              *string                      `mapstructure:"image_system_size" cty:"image_system_size"`
-	Format                            *string                      `mapstructure:"format" cty:"format"`
+	Format                            *string                      `mapstructure:"format" required:"true" cty:"format"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -191,6 +192,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_private_key_file":         &hcldec.AttrSpec{Name: "ssh_private_key_file", Type: cty.String, Required: false},
 		"ssh_pty":                      &hcldec.AttrSpec{Name: "ssh_pty", Type: cty.Bool, Required: false},
 		"ssh_timeout":                  &hcldec.AttrSpec{Name: "ssh_timeout", Type: cty.String, Required: false},
+		"ssh_wait_timeout":             &hcldec.AttrSpec{Name: "ssh_wait_timeout", Type: cty.String, Required: false},
 		"ssh_agent_auth":               &hcldec.AttrSpec{Name: "ssh_agent_auth", Type: cty.Bool, Required: false},
 		"ssh_disable_agent_forwarding": &hcldec.AttrSpec{Name: "ssh_disable_agent_forwarding", Type: cty.Bool, Required: false},
 		"ssh_handshake_attempts":       &hcldec.AttrSpec{Name: "ssh_handshake_attempts", Type: cty.Number, Required: false},

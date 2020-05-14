@@ -1,6 +1,42 @@
-## 1.5.6 (Upcoming)
+## 1.6.0 (Upcoming)
 
 ### BACKWARDS INCOMPATIBILITIES:
+
+### FEATURES:
+* **New post-processor** Yandex Export [GH-9124]
+
+### IMPROVEMENTS:
+* builder/amazon: Add SSM Session Manager as a SSH interface connection
+    [GH-9082]
+* builder/google: Implement iap proxy for googlecompute [GH-9105]
+* builder/googlecompute: Changed default disk size. [GH-9071]
+* builder/virtualbox: Add `output_filename` config option to allow to set a
+    custom filename instead of forcing to be the same as vm_name. [GH-9174]
+* builder/vsphere: floppy_label Parameter for vsphere-iso Builder [GH-9187]
+* core: Update vendored "go-getter" library with checksum fixes.
+* post-processor/docker-push: Support pushing multiple tags [GH-9182]
+* post-processor/docker-tag: Change field name of docker tag to "tags" instead
+    of "tag" since it's a list. Keep "tag" for backwards compatability.
+    [GH-9183]
+* update consul and vault dependencies [GH-9205]
+
+### BUG FIXES:
+* builder/digitalocean: Use correct image type for Droplet creates. [GH-9212]
+* builder/openstack: Don't error if metadata can't be set. Old versions of
+    openstack don't support that API call. [GH-9198]
+* builder/virtualbox: Fix bug using checksum files. [GH-9101]
+* builder/vsphere: Fix iso config prepare being called incorrectly, which
+    caused `iso_url` field to fail. [GH-9197]
+* core: fix regression that broke use of pwd when retrieving the checksum from
+    a file [GH-9129].
+* post-processor/vsphere-template: Add VSphere builder's artifact to vsphere-
+    template's supported types [GH-9146]
+
+## 1.5.6 (May 1, 2020)
+
+### BACKWARDS INCOMPATIBILITIES:
+* core/hcl2: HCL2 singular blocks: use key/value or name/value depending on how
+    the service names things [GH-9078]
 * core/hcl2: Maps are now treated as settable arguments as opposed to blocks.
     For example `tags = {}` instead of `tags {}` [GH-9035]
 
@@ -10,6 +46,8 @@
 
 * **New Core Feature** provisioners now support a `max_retries` option that can
     be used for retrying a provisioner on error [GH-9061]
+
+* **New Post-Processor**: `yandex-export` Upload built image in Yandex Object Storage.
 
 ### IMPROVEMENTS:
 * builder/azure-arm: Add `boot_diag_storage_account` option for enabling boot
@@ -32,11 +70,13 @@
 * builder/vsphere: Add `vgpu_profile` option for specifying vGPU profiles
     [GH-8946]
 * builder/vsphere: Add support for EFI Secure Boot [GH-9018]
+* builder/vsphere: Add support for specifying vGPU profiles [GH-8946]
 * builder/yandex: Add `target_image_folder_id ` option for changing the folder
     where a built image will be saved to [GH-9080]
 * core/hcl2: HCL mode builds now honor -only and -except options [GH-8947]
 * core/hcl2: Set `packer_build_name` and `packer_builder_type` variables for
     builder provisioners and post-processors [GH-8956]
+* core/HCL: HCL mode now honors -only and -except options. [GH-8947]
 * core: New template function: aws_secretsmanager [GH-9099]
 * provisioner/ansible: Add option to not use localhost proxy adapter. Removes
     need for ansible connection_plugin when using WinRM. [GH-8625]
@@ -47,8 +87,8 @@
     [GH-8908]
 
 ### BUG FIXES:
-* builder/amazon: Fix bug with `launch_block_device_mappings` in spot instances.
-    [GH-8945]
+* builder/amazon: Fix bug with `launch_block_device_mappings` in spot
+    instances. [GH-8945]
 * builder/azure-arm: Fix issue where managed image builds were using a
     different `location` then what was specified in the build configuration
     [GH-9068]

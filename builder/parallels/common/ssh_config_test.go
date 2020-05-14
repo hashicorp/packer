@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -78,22 +77,6 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 	errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
-	}
-}
-
-func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
-	var c *SSHConfig
-	sshTimeout := 2 * time.Minute
-
-	c = testSSHConfig()
-	c.SSHWaitTimeout = sshTimeout
-
-	err := c.Prepare(interpolate.NewContext())
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	if c.Comm.SSHTimeout != sshTimeout {
-		t.Fatalf("SSHTimeout should be %s for backwards compatibility, but it was %s", sshTimeout.String(), c.Comm.SSHTimeout.String())
 	}
 }
 

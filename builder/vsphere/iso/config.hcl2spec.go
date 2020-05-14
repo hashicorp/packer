@@ -68,6 +68,7 @@ type FlatConfig struct {
 	FloppyIMGPath             *string                  `mapstructure:"floppy_img_path" cty:"floppy_img_path"`
 	FloppyFiles               []string                 `mapstructure:"floppy_files" cty:"floppy_files"`
 	FloppyDirectories         []string                 `mapstructure:"floppy_dirs" cty:"floppy_dirs"`
+	FloppyLabel               *string                  `mapstructure:"floppy_label" cty:"floppy_label"`
 	BootOrder                 *string                  `mapstructure:"boot_order" cty:"boot_order"`
 	BootCommand               []string                 `mapstructure:"boot_command" cty:"boot_command"`
 	BootWait                  *string                  `mapstructure:"boot_wait" cty:"boot_wait"`
@@ -86,6 +87,7 @@ type FlatConfig struct {
 	SSHPrivateKeyFile         *string                  `mapstructure:"ssh_private_key_file" cty:"ssh_private_key_file"`
 	SSHPty                    *bool                    `mapstructure:"ssh_pty" cty:"ssh_pty"`
 	SSHTimeout                *string                  `mapstructure:"ssh_timeout" cty:"ssh_timeout"`
+	SSHWaitTimeout            *string                  `mapstructure:"ssh_wait_timeout" undocumented:"true" cty:"ssh_wait_timeout"`
 	SSHAgentAuth              *bool                    `mapstructure:"ssh_agent_auth" cty:"ssh_agent_auth"`
 	SSHDisableAgentForwarding *bool                    `mapstructure:"ssh_disable_agent_forwarding" cty:"ssh_disable_agent_forwarding"`
 	SSHHandshakeAttempts      *int                     `mapstructure:"ssh_handshake_attempts" cty:"ssh_handshake_attempts"`
@@ -193,6 +195,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"floppy_img_path":              &hcldec.AttrSpec{Name: "floppy_img_path", Type: cty.String, Required: false},
 		"floppy_files":                 &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
 		"floppy_dirs":                  &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
+		"floppy_label":                 &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},
 		"boot_order":                   &hcldec.AttrSpec{Name: "boot_order", Type: cty.String, Required: false},
 		"boot_command":                 &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
 		"boot_wait":                    &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
@@ -211,6 +214,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_private_key_file":         &hcldec.AttrSpec{Name: "ssh_private_key_file", Type: cty.String, Required: false},
 		"ssh_pty":                      &hcldec.AttrSpec{Name: "ssh_pty", Type: cty.Bool, Required: false},
 		"ssh_timeout":                  &hcldec.AttrSpec{Name: "ssh_timeout", Type: cty.String, Required: false},
+		"ssh_wait_timeout":             &hcldec.AttrSpec{Name: "ssh_wait_timeout", Type: cty.String, Required: false},
 		"ssh_agent_auth":               &hcldec.AttrSpec{Name: "ssh_agent_auth", Type: cty.Bool, Required: false},
 		"ssh_disable_agent_forwarding": &hcldec.AttrSpec{Name: "ssh_disable_agent_forwarding", Type: cty.Bool, Required: false},
 		"ssh_handshake_attempts":       &hcldec.AttrSpec{Name: "ssh_handshake_attempts", Type: cty.Number, Required: false},

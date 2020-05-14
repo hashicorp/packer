@@ -140,6 +140,13 @@ const (
 	// repository policy.
 	ErrCodeRepositoryPolicyNotFoundException = "RepositoryPolicyNotFoundException"
 
+	// ErrCodeScanNotFoundException for service response error code
+	// "ScanNotFoundException".
+	//
+	// The specified image scan could not be found. Ensure that image scanning is
+	// enabled on the repository and try again.
+	ErrCodeScanNotFoundException = "ScanNotFoundException"
+
 	// ErrCodeServerException for service response error code
 	// "ServerException".
 	//

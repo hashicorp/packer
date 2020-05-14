@@ -141,6 +141,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&vboxcommon.StepExport{
 			Format:         b.config.Format,
 			OutputDir:      b.config.OutputDir,
+			OutputFilename: b.config.OutputFilename,
 			ExportOpts:     b.config.ExportOpts,
 			SkipNatMapping: b.config.SkipNatMapping,
 			SkipExport:     b.config.SkipExport,

@@ -22,6 +22,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	AccountFile string `mapstructure:"account_file"`
+	IAP         bool   `mapstructure:"iap"`
 
 	DiskSizeGb          int64    `mapstructure:"disk_size"`
 	DiskType            string   `mapstructure:"disk_type"`

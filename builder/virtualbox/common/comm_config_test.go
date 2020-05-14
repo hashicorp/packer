@@ -123,7 +123,7 @@ func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
 	c.SSHHostPortMin = hostPortMin
 	c.SSHHostPortMax = hostPortMax
 	c.SSHSkipNatMapping = skipNatMapping
-	c.SSHWaitTimeout = sshTimeout
+	c.Comm.SSHWaitTimeout = sshTimeout
 
 	err := c.Prepare(interpolate.NewContext())
 	if err != nil {

@@ -3,6 +3,8 @@ package digitalocean
 import (
 	"context"
 	"fmt"
+	"log"
+	"strconv"
 
 	"io/ioutil"
 
@@ -35,13 +37,13 @@ func (s *stepCreateDroplet) Run(ctx context.Context, state multistep.StateBag) m
 		userData = string(contents)
 	}
 
-	droplet, _, err := client.Droplets.Create(context.TODO(), &godo.DropletCreateRequest{
+	createImage := getImageType(c.Image)
+
+	dropletCreateReq := &godo.DropletCreateRequest{
 		Name:   c.DropletName,
 		Region: c.Region,
 		Size:   c.Size,
-		Image: godo.DropletCreateImage{
-			Slug: c.Image,
-		},
+		Image:  createImage,
 		SSHKeys: []godo.DropletCreateSSHKey{
 			{ID: sshKeyId},
 		},
@@ -50,7 +52,11 @@ func (s *stepCreateDroplet) Run(ctx context.Context, state multistep.StateBag) m
 		IPv6:              c.IPv6,
 		UserData:          userData,
 		Tags:              c.Tags,
-	})
+	}
+
+	log.Printf("[DEBUG] Droplet create paramaters: %s", godo.Stringify(dropletCreateReq))
+
+	droplet, _, err := client.Droplets.Create(context.TODO(), dropletCreateReq)
 	if err != nil {
 		err := fmt.Errorf("Error creating droplet: %s", err)
 		state.Put("error", err)
@@ -86,4 +92,15 @@ func (s *stepCreateDroplet) Cleanup(state multistep.StateBag) {
 		ui.Error(fmt.Sprintf(
 			"Error destroying droplet. Please destroy it manually: %s", err))
 	}
+}
+
+func getImageType(image string) godo.DropletCreateImage {
+	createImage := godo.DropletCreateImage{Slug: image}
+
+	imageId, err := strconv.Atoi(image)
+	if err == nil {
+		createImage = godo.DropletCreateImage{ID: imageId}
+	}
+
+	return createImage
 }

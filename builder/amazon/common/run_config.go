@@ -281,7 +281,7 @@ type RunConfig struct {
 	// best spot price. This must be one of: Linux/UNIX, SUSE Linux,
 	// Windows, Linux/UNIX (Amazon VPC), SUSE Linux (Amazon VPC),
 	// Windows (Amazon VPC)
-	SpotPriceAutoProduct string `mapstructure:"spot_price_auto_product" required:"false"`
+	SpotPriceAutoProduct string `mapstructure:"spot_price_auto_product" required:"false" undocumented:"true"`
 	// Requires spot_price to be set. Key/value pair tags to apply tags to the
 	// spot request that is issued.
 	SpotTags map[string]string `mapstructure:"spot_tags" required:"false"`
@@ -387,8 +387,8 @@ type RunConfig struct {
 	// Communicator settings
 	Comm communicator.Config `mapstructure:",squash"`
 
-	// One of `public_ip`, `private_ip`, `public_dns`, or `private_dns`. If
-	//    set, either the public IP address, private IP address, public DNS name
+	// One of `public_ip`, `private_ip`, `public_dns`, `private_dns` or `session_manager`.
+	//    If set, either the public IP address, private IP address, public DNS name
 	//    or private DNS name will be used as the host for SSH. The default behaviour
 	//    if inside a VPC is to use the public IP address if available, otherwise
 	//    the private IP address will be used. If not in a VPC the public DNS name
@@ -398,7 +398,20 @@ type RunConfig struct {
 	//    should be direct, `ssh_interface` must be set to `private_dns` and
 	//    `<region>.compute.internal` included in the `NO_PROXY` environment
 	//    variable.
+	//
+	//    When using `session_manager` the machine running Packer must have
+	//	  the AWS Session Manager Plugin installed and within the users' or system path.
+	//    https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
+	//    Remote connections via the `session_manager` interface establishes a secure tunnel
+	//    between the local host and the remote host on an available local port to the specified `ssh_port`.
+	//    Upon termination the secure tunnel will be terminated automatically, if however there is a failure in
+	//    terminating the tunnel it will automatically terminate itself after 20 minutes of inactivity.
 	SSHInterface string `mapstructure:"ssh_interface"`
+
+	// Which port to connect the local end of the session tunnel to. If
+	// left blank, Packer will choose a port for you from available ports.
+	// This option is only used when `ssh_interface` is set `session_manager`.
+	SessionManagerPort int `mapstructure:"session_manager_port"`
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
@@ -441,8 +454,22 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.SSHInterface != "private_ip" &&
 		c.SSHInterface != "public_dns" &&
 		c.SSHInterface != "private_dns" &&
+		c.SSHInterface != "session_manager" &&
 		c.SSHInterface != "" {
 		errs = append(errs, fmt.Errorf("Unknown interface type: %s", c.SSHInterface))
+	}
+
+	// Connectivity via Session Manager has a few requirements
+	if c.SSHInterface == "session_manager" {
+		if c.Comm.Type == "winrm" {
+			msg := fmt.Errorf(`session_manager connectivity is not supported with the "winrm" communicator; please use "ssh"`)
+			errs = append(errs, msg)
+		}
+
+		if c.IamInstanceProfile == "" && c.TemporaryIamInstanceProfilePolicyDocument == nil {
+			msg := fmt.Errorf(`no iam_instance_profile defined; session_manager connectivity requires a valid instance profile with AmazonSSMManagedInstanceCore permissions. Alternatively a temporary_iam_instance_profile_policy_document can be used.`)
+			errs = append(errs, msg)
+		}
 	}
 
 	if c.Comm.SSHKeyPairName != "" {
@@ -518,7 +545,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.EnableT2Unlimited {
 		if c.SpotPrice != "" {
-			errs = append(errs, fmt.Errorf("Error: T2 Unlimited cannot be used in conjuction with Spot Instances"))
+			errs = append(errs, fmt.Errorf("Error: T2 Unlimited cannot be used in conjunction with Spot Instances"))
 		}
 		firstDotIndex := strings.Index(c.InstanceType, ".")
 		if firstDotIndex == -1 {
@@ -533,4 +560,9 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 func (c *RunConfig) IsSpotInstance() bool {
 	return c.SpotPrice != "" && c.SpotPrice != "0"
+}
+
+func (c *RunConfig) SSMAgentEnabled() bool {
+	hasIamInstanceProfile := c.IamInstanceProfile != "" || c.TemporaryIamInstanceProfilePolicyDocument != nil
+	return c.SSHInterface == "session_manager" && hasIamInstanceProfile
 }

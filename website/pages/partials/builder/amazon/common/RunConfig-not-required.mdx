@@ -197,12 +197,6 @@
     For more information, see the Amazon docs on
     [spot pricing](https://aws.amazon.com/ec2/spot/pricing/).
     
--   `spot_price_auto_product` (string) - Required if spot_price is set to
-    auto. This tells Packer what sort of AMI you're launching to find the
-    best spot price. This must be one of: Linux/UNIX, SUSE Linux,
-    Windows, Linux/UNIX (Amazon VPC), SUSE Linux (Amazon VPC),
-    Windows (Amazon VPC)
-    
 -   `spot_tags` (map[string]string) - Requires spot_price to be set. Key/value pair tags to apply tags to the
     spot request that is issued.
     
@@ -304,8 +298,8 @@
     password for Windows instances. Defaults to 20 minutes. Example value:
     10m
     
--   `ssh_interface` (string) - One of `public_ip`, `private_ip`, `public_dns`, or `private_dns`. If
-       set, either the public IP address, private IP address, public DNS name
+-   `ssh_interface` (string) - One of `public_ip`, `private_ip`, `public_dns`, `private_dns` or `session_manager`.
+       If set, either the public IP address, private IP address, public DNS name
        or private DNS name will be used as the host for SSH. The default behaviour
        if inside a VPC is to use the public IP address if available, otherwise
        the private IP address will be used. If not in a VPC the public DNS name
@@ -315,4 +309,16 @@
        should be direct, `ssh_interface` must be set to `private_dns` and
        `<region>.compute.internal` included in the `NO_PROXY` environment
        variable.
+    
+       When using `session_manager` the machine running Packer must have
+    	  the AWS Session Manager Plugin installed and within the users' or system path.
+       https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
+       Remote connections via the `session_manager` interface establishes a secure tunnel
+       between the local host and the remote host on an available local port to the specified `ssh_port`.
+       Upon termination the secure tunnel will be terminated automatically, if however there is a failure in
+       terminating the tunnel it will automatically terminate itself after 20 minutes of inactivity.
+    
+-   `session_manager_port` (int) - Which port to connect the local end of the session tunnel to. If
+    left blank, Packer will choose a port for you from available ports.
+    This option is only used when `ssh_interface` is set `session_manager`.
     

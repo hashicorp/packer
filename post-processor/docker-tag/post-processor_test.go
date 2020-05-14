@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/packer"
 	dockerimport "github.com/hashicorp/packer/post-processor/docker-import"
+	"github.com/stretchr/testify/assert"
 )
 
 func testConfig() map[string]interface{} {
@@ -164,5 +165,32 @@ func TestPostProcessor_PostProcess_NoTag(t *testing.T) {
 	}
 	if driver.TagImageForce {
 		t.Fatal("bad force")
+	}
+}
+
+func TestPostProcessor_PostProcess_Tag_vs_Tags(t *testing.T) {
+	testCases := []map[string]interface{}{
+		{
+			"tag":  "bar,buzz",
+			"tags": []string{"bang"},
+		},
+		{
+			"tag":  []string{"bar", "buzz"},
+			"tags": []string{"bang"},
+		},
+		{
+			"tag":  []string{"bar"},
+			"tags": []string{"buzz", "bang"},
+		},
+	}
+
+	for _, tc := range testCases {
+		var p PostProcessor
+		if err := p.Configure(tc); err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		assert.ElementsMatchf(t, p.config.Tags, []string{"bar", "buzz", "bang"},
+			"tag and tags fields should be combined into tags fields. Recieved: %#v",
+			p.config.Tags)
 	}
 }

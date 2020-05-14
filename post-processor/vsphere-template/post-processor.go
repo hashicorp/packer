@@ -10,20 +10,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/hcl/v2/hcldec"
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	vsphere "github.com/hashicorp/packer/builder/vsphere/common"
+	vspherepost "github.com/hashicorp/packer/post-processor/vsphere"
+
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/post-processor/vsphere"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/vmware/govmomi"
 )
 
 var builtins = map[string]string{
-	vsphere.BuilderId:      "vmware",
+	vspherepost.BuilderId:  "vmware",
 	vmwcommon.BuilderIdESX: "vmware",
+	vsphere.BuilderId:      "vsphere",
 }
 
 type Config struct {

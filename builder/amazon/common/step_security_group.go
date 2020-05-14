@@ -21,6 +21,7 @@ type StepSecurityGroup struct {
 	SecurityGroupFilter    SecurityGroupFilterOptions
 	SecurityGroupIds       []string
 	TemporarySGSourceCidrs []string
+	SkipSSHRuleCreation    bool
 
 	createdGroupId string
 }
@@ -76,13 +77,6 @@ func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) m
 		return multistep.ActionContinue
 	}
 
-	port := s.CommConfig.Port()
-	if port == 0 {
-		if s.CommConfig.Type != "none" {
-			panic("port must be set to a non-zero value.")
-		}
-	}
-
 	// Create the group
 	groupName := fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	ui.Say(fmt.Sprintf("Creating temporary security group for this instance: %s", groupName))
@@ -110,14 +104,14 @@ func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) m
 			GroupIds: []*string{aws.String(s.createdGroupId)},
 		},
 	)
-	if err == nil {
-		log.Printf("[DEBUG] Found security group %s", s.createdGroupId)
-	} else {
+	if err != nil {
 		err := fmt.Errorf("Timed out waiting for security group %s: %s", s.createdGroupId, err)
 		log.Printf("[DEBUG] %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
+
+	log.Printf("[DEBUG] Found security group %s", s.createdGroupId)
 
 	// map the list of temporary security group CIDRs bundled with config to
 	// types expected by EC2.
@@ -129,7 +123,15 @@ func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) m
 		groupIpRanges = append(groupIpRanges, &ipRange)
 	}
 
-	// Authorize the SSH access for the security group
+	// Set some state data for use in future steps
+	state.Put("securityGroupIds", []string{s.createdGroupId})
+
+	if s.SkipSSHRuleCreation {
+		return multistep.ActionContinue
+	}
+
+	port := s.CommConfig.Port()
+	// Authorize access for the provided port within the security group
 	groupRules := &ec2.AuthorizeSecurityGroupIngressInput{
 		GroupId: groupResp.GroupId,
 		IpPermissions: []*ec2.IpPermission{
@@ -153,9 +155,6 @@ func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) m
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	// Set some state data for use in future steps
-	state.Put("securityGroupIds", []string{s.createdGroupId})
 
 	return multistep.ActionContinue
 }

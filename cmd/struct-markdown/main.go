@@ -90,6 +90,15 @@ func main() {
 				os.Exit(1)
 			}
 
+			// Leave undocumented tags out of markdown. This is useful for
+			// fields which exist for backwards compatability, or internal-use
+			// only fields
+			undocumented, _ := tags.Get("undocumented")
+			if undocumented != nil {
+				if undocumented.Name == "true" {
+					continue
+				}
+			}
 			mstr, err := tags.Get("mapstructure")
 			if err != nil {
 				continue

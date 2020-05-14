@@ -54,11 +54,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// Build the steps
 	steps := []multistep.Step{
-		&stepCreateSSHKey{
+		&StepCreateSSHKey{
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("yc_%s.pem", b.config.PackerBuildName),
 		},
-		&stepCreateInstance{
+		&StepCreateInstance{
 			Debug:         b.config.PackerDebug,
 			SerialLogFile: b.config.SerialLogFile,
 		},
@@ -72,7 +72,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepCleanupTempKeys{
 			Comm: &b.config.Communicator,
 		},
-		&stepTeardownInstance{},
+		&StepTeardownInstance{},
 		&stepCreateImage{},
 	}
 
@@ -93,6 +93,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	artifact := &Artifact{
 		image:     image.(*compute.Image),
 		config:    &b.config,
+		driver:    driver,
 		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 	return artifact, nil

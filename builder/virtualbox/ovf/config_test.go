@@ -110,3 +110,40 @@ func TestNewConfig_shutdown_timeout(t *testing.T) {
 		t.Fatalf("bad: %s", err)
 	}
 }
+
+// TestChecksumFileNameMixedCaseBug reproduces Github issue #9049:
+//	https://github.com/hashicorp/packer/issues/9049
+func TestChecksumFileNameMixedCaseBug(t *testing.T) {
+	tt := []struct {
+		Name         string
+		ChecksumPath string
+	}{
+		{"Lowercase", "/tmp/random/file.md5"},
+		{"MiXeDcAsE", "/tmp/RaNdOm/FiLe.Md5"},
+	}
+
+	for _, tc := range tt {
+
+		cfg := testConfig(t)
+		cfg["source_path"] = "bug.ovf"
+		cfg["checksum_type"] = "file"
+		cfg["checksum"] = tc.ChecksumPath
+		cfg["type"] = "virtualbox-ovf"
+		cfg["guest_additions_mode"] = "disable"
+		cfg["headless"] = false
+
+		var c Config
+		warns, err := c.Prepare(cfg)
+		if err != nil {
+			t.Errorf("config failed to Prepare, %s", err.Error())
+		}
+
+		if len(warns) != 0 {
+			t.Errorf("Encountered warnings during config preparation: %s", warns)
+		}
+
+		if c.Checksum != tc.ChecksumPath {
+			t.Errorf("%s test failed, Checksum and ChecksumPath are expected to be equal, expected: %s, got: %s", tc.Name, tc.ChecksumPath, c.Checksum)
+		}
+	}
+}

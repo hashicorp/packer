@@ -18,7 +18,7 @@ import (
 
 const StandardImagesFolderID = "standard-images"
 
-type stepCreateInstance struct {
+type StepCreateInstance struct {
 	Debug         bool
 	SerialLogFile string
 }
@@ -106,7 +106,7 @@ func getImage(ctx context.Context, c *Config, d Driver) (*Image, error) {
 	return &Image{}, errors.New("neither source_image_name nor source_image_family defined in config")
 }
 
-func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
@@ -265,7 +265,7 @@ runcmd:
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
+func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -339,7 +339,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	}
 }
 
-func (s *stepCreateInstance) writeSerialLogFile(ctx context.Context, state multistep.StateBag) error {
+func (s *StepCreateInstance) writeSerialLogFile(ctx context.Context, state multistep.StateBag) error {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
 	ui := state.Get("ui").(packer.Ui)
 

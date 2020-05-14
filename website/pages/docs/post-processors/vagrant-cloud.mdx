@@ -47,6 +47,12 @@ Here is an example workflow:
 7.  The upload is verified
 8.  The version is released and available to users of the box
 
+~> The Vagrant Cloud box (`hashicorp/foobar` in this example) must already
+exist. Packer will not create the box automatically. If running Packer in
+automation, consider using the
+[Vagrant Cloud API](https://www.vagrantup.com/docs/vagrant-cloud/api.html)
+to create the Vagrant Cloud box if it doesn't already exist.
+
 ## Configuration
 
 The configuration allows you to specify the target box that you have access to
@@ -56,7 +62,8 @@ on Vagrant Cloud, as well as authentication and version information.
 
 - `box_tag` (string) - The shorthand tag for your box that maps to Vagrant
   Cloud, for example `hashicorp/precise64`, which is short for
-  `vagrantcloud.com/hashicorp/precise64`.
+  `vagrantcloud.com/hashicorp/precise64`. This box must already exist in
+  Vagrant Cloud. Packer will not create the box automatically.
 
 - `version` (string) - The version number, typically incrementing a previous
   version. The version string is validated based on [Semantic

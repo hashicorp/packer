@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -379,6 +380,67 @@ func TestConfigPrepareStartupScriptFile(t *testing.T) {
 
 	if errs == nil || !strings.Contains(errs.Error(), "startup_script_file") {
 		t.Fatalf("should error: startup_script_file")
+	}
+}
+
+func TestConfigPrepareIAP(t *testing.T) {
+	config := map[string]interface{}{
+		"project_id":   "project",
+		"source_image": "foo",
+		"ssh_username": "packer",
+		"zone":         "us-central1-a",
+		"communicator": "ssh",
+		"use_iap":      true,
+	}
+
+	var c Config
+	_, err := c.Prepare(config)
+	if err != nil {
+		t.Fatalf("Shouldn't have errors. Err = %s", err)
+	}
+
+	if runtime.GOOS == "windows" {
+		if c.IAPExt != ".cmd" {
+			t.Fatalf("IAP tempfile extension didn't default correctly to .cmd")
+		}
+		if c.IAPHashBang != "" {
+			t.Fatalf("IAP hashbang didn't default correctly to nothing.")
+		}
+	} else {
+		if c.IAPExt != "" {
+			t.Fatalf("IAP tempfile extension should default to empty on unix mahcines")
+		}
+		if c.IAPHashBang != "/bin/sh" {
+			t.Fatalf("IAP hashbang didn't default correctly to /bin/sh.")
+		}
+	}
+	if c.Comm.SSHHost != "localhost" {
+		t.Fatalf("Didn't correctly override the ssh host.")
+	}
+}
+
+func TestConfigPrepareIAP_failures(t *testing.T) {
+	config := map[string]interface{}{
+		"project_id":     "project",
+		"source_image":   "foo",
+		"winrm_username": "packer",
+		"zone":           "us-central1-a",
+		"communicator":   "winrm",
+		"iap_hashbang":   "/bin/bash",
+		"iap_ext":        ".ps1",
+		"use_iap":        true,
+	}
+
+	var c Config
+	_, errs := c.Prepare(config)
+	if errs == nil {
+		t.Fatalf("Should have errored because we're using winrm.")
+	}
+	if c.IAPHashBang != "/bin/bash" {
+		t.Fatalf("IAP hashbang defaulted even though set.")
+	}
+	if c.IAPExt != ".ps1" {
+		t.Fatalf("IAP tempfile defaulted even though set.")
 	}
 }
 
