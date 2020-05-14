@@ -162,8 +162,9 @@ func (c *ISOConfig) Prepare(*interpolate.Context) (warnings []string, errs []err
 		cksum, err := defaultGetterClient.GetChecksum(context.TODO(), req)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file: %v", err))
+		} else {
+			c.ISOChecksum = cksum.String()
 		}
-		c.ISOChecksum = cksum.String()
 	}
 
 	if strings.HasSuffix(strings.ToLower(c.ISOChecksum), ".iso") {
