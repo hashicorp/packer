@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
@@ -53,14 +54,14 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 
 	httpPort, okPort := state.GetOk("http_port")
 	if okPort {
-		hookData["PackerHTTPPort"] = httpPort.(string)
+		hookData["PackerHTTPPort"] = strconv.Itoa(httpPort.(int))
 	}
 	httIP, okIP := state.GetOk("http_ip")
 	if okIP {
 		hookData["PackerHTTPIP"] = httIP.(string)
 	}
 	if okPort && okIP {
-		hookData["PackerHTTPAddr"] = fmt.Sprintf("%s:%s", httIP.(string), httpPort.(string))
+		hookData["PackerHTTPAddr"] = fmt.Sprintf("%s:%s", hookData["PackerHTTPIP"], hookData["PackerHTTPPort"])
 	}
 
 	// Read communicator data into hook data

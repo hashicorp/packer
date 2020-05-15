@@ -61,7 +61,7 @@ func (s *StepHTTPServer) Run(ctx context.Context, state multistep.StateBag) mult
 	go server.Serve(s.l)
 
 	// Save the address into the state so it can be accessed in the future
-	state.Put("http_port", fmt.Sprintf("%d", s.l.Port))
+	state.Put("http_port", s.l.Port)
 
 	return multistep.ActionContinue
 }
