@@ -17,7 +17,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/common/shell"
 	"github.com/hashicorp/packer/common/uuid"
@@ -404,17 +403,17 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 	envVars["PACKER_BUILDER_TYPE"] = p.config.PackerBuilderType
 
 	// expose ip address variables
-	httpAddr := common.GetHTTPAddr()
-	if httpAddr != "" {
-		envVars["PACKER_HTTP_ADDR"] = httpAddr
+	httpAddr := p.generatedData["PackerHTTPAddr"]
+	if httpAddr != nil && httpAddr != "" {
+		envVars["PACKER_HTTP_ADDR"] = httpAddr.(string)
 	}
-	httpIP := common.GetHTTPIP()
-	if httpIP != "" {
-		envVars["PACKER_HTTP_IP"] = httpIP
+	httpIP := p.generatedData["PackerHTTPIP"]
+	if httpIP != nil && httpIP != "" {
+		envVars["PACKER_HTTP_IP"] = httpIP.(string)
 	}
-	httpPort := common.GetHTTPPort()
-	if httpPort != "" {
-		envVars["PACKER_HTTP_PORT"] = httpPort
+	httpPort := p.generatedData["PackerHTTPPort"]
+	if httpPort != nil && httpPort != "" {
+		envVars["PACKER_HTTP_PORT"] = httpPort.(string)
 	}
 
 	// interpolate environment variables

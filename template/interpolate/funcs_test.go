@@ -1,6 +1,7 @@
 package interpolate
 
 import (
+	"github.com/hashicorp/packer/packer"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/version"
 )
 
@@ -351,7 +351,7 @@ func TestFuncPackerBuild(t *testing.T) {
 		},
 		// Data map is a map[string]string and contains value with placeholder.
 		{
-			DataMap:     map[string]string{"PartyVar": "PartyVal" + common.PlaceholderMsg},
+			DataMap:     map[string]string{"PartyVar": "PartyVal" + packer.PlaceholderMsg},
 			ErrExpected: false,
 			Template:    "{{ build `PartyVar` }}",
 			OutVal:      "{{.PartyVar}}",
@@ -372,14 +372,14 @@ func TestFuncPackerBuild(t *testing.T) {
 		},
 		// Data map is a map[interface{}]interface{} and contains value with placeholder.
 		{
-			DataMap:     map[interface{}]interface{}{"PartyVar": "PartyVal" + common.PlaceholderMsg},
+			DataMap:     map[interface{}]interface{}{"PartyVar": "PartyVal" + packer.PlaceholderMsg},
 			ErrExpected: false,
 			Template:    "{{ build `PartyVar` }}",
 			OutVal:      "{{.PartyVar}}",
 		},
 		// Data map is a map[interface{}]interface{} and doesn't have value.
 		{
-			DataMap:     map[interface{}]interface{}{"BadVar": "PartyVal" + common.PlaceholderMsg},
+			DataMap:     map[interface{}]interface{}{"BadVar": "PartyVal" + packer.PlaceholderMsg},
 			ErrExpected: true,
 			Template:    "{{ build `MissingVar` }}",
 			OutVal:      "",

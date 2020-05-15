@@ -48,8 +48,8 @@ func TestPopulateProvisionHookData(t *testing.T) {
 	state.Put("communicator_config", commConfig)
 
 	os.Setenv("PACKER_RUN_UUID", packerRunUUID)
-	SetHTTPIP(httpIP)
-	SetHTTPPort(httpPort)
+	state.Put("http_ip", httpIP)
+	state.Put("http_port", httpPort)
 
 	hookData := PopulateProvisionHookData(state)
 

@@ -287,7 +287,13 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	p.config.PackerBuilderType = "iso"
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+
+	generatedData := map[string]interface{}{
+		"PackerHTTPAddr": "",
+		"PackerHTTPIP":   "",
+		"PackerHTTPPort": "",
+	}
+	err := p.Provision(context.Background(), ui, comm, generatedData)
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -306,7 +312,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	config["remote_path"] = "c:/Windows/Temp/inlineScript.bat"
 
 	p.Prepare(config)
-	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err = p.Provision(context.Background(), ui, comm, generatedData)
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -337,7 +343,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err = p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -349,6 +355,15 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	if comm.StartCmd.Command != expectedCommand {
 		t.Fatalf("Expect command to be %s NOT %s", expectedCommand, comm.StartCmd.Command)
 	}
+}
+
+func generatedData() map[string]interface{} {
+	generatedData := map[string]interface{}{
+		"PackerHTTPAddr": "",
+		"PackerHTTPIP":   "",
+		"PackerHTTPPort": "",
+	}
+	return generatedData
 }
 
 func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
@@ -376,7 +391,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err = p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -409,6 +424,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 	}
 
 	p := new(Provisioner)
+	p.generatedData = generatedData()
 	p.Prepare(config)
 
 	// Defaults provided by Packer

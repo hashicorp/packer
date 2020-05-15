@@ -75,6 +75,7 @@ type Provisioner struct {
 	config Config
 
 	playbookFiles []string
+	generatedData map[string]interface{}
 }
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
@@ -191,8 +192,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Ansible...")
+	p.generatedData = generatedData
 
 	if len(p.config.PlaybookDir) > 0 {
 		ui.Message("Uploading Playbook directory to Ansible staging directory...")
@@ -378,7 +380,7 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 	inventory := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile)))
 
 	extraArgs := fmt.Sprintf(" --extra-vars \"packer_build_name=%s packer_builder_type=%s packer_http_addr=%s -o IdentitiesOnly=yes\" ",
-		p.config.PackerBuildName, p.config.PackerBuilderType, common.GetHTTPAddr())
+		p.config.PackerBuildName, p.config.PackerBuilderType, p.generatedData["PackerHTTPAddr"])
 	if len(p.config.ExtraArguments) > 0 {
 		extraArgs = extraArgs + strings.Join(p.config.ExtraArguments, " ")
 	}

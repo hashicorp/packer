@@ -5,7 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
@@ -14,7 +13,6 @@ func TestStepHTTPIPDiscover_Run(t *testing.T) {
 	step := new(StepHTTPIPDiscover)
 	driverMock := state.Get("driver").(Driver)
 	hostIp, _ := driverMock.HostIP(state)
-	previousHttpIp := common.GetHTTPIP()
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
@@ -23,7 +21,7 @@ func TestStepHTTPIPDiscover_Run(t *testing.T) {
 	if _, ok := state.GetOk("error"); ok {
 		t.Fatal("should NOT have error")
 	}
-	httpIp := common.GetHTTPIP()
+	httpIp := state.Get("http_ip").(string)
 	if httpIp != hostIp {
 		t.Fatalf("bad: Http ip is %s but was supposed to be %s", httpIp, hostIp)
 	}
@@ -33,6 +31,4 @@ func TestStepHTTPIPDiscover_Run(t *testing.T) {
 	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: step was supposed to fail %#v", action)
 	}
-
-	common.SetHTTPIP(previousHttpIp)
 }

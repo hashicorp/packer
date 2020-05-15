@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -32,7 +31,7 @@ func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 	}
 
 	ui.Say(fmt.Sprintf("Host IP for the HyperV machine: %s", hostIp))
-	common.SetHTTPIP(hostIp)
+	state.Put("http_ip", hostIp)
 
 	if !s.Headless {
 		ui.Say("Attempting to connect with vmconnect...")

@@ -31,6 +31,9 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 		hookData = hd.(map[string]interface{})
 	}
 
+	// Warn user that the id isn't implemented
+	hookData["ID"] = "ERR_ID_NOT_IMPLEMENTED_BY_BUILDER"
+
 	// instance_id is placed in state by the builders.
 	// Not yet implemented in Chroot, lxc/lxd, Azure, Qemu.
 	// Implemented in most others including digitalOcean (droplet id),
@@ -39,13 +42,26 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 	id, ok := state.GetOk("instance_id")
 	if ok {
 		hookData["ID"] = id
-	} else {
-		// Warn user that the id isn't implemented
-		hookData["ID"] = "ERR_ID_NOT_IMPLEMENTED_BY_BUILDER"
 	}
 
 	hookData["PackerRunUUID"] = os.Getenv("PACKER_RUN_UUID")
-	hookData["PackerHTTPAddr"] = GetHTTPAddr()
+
+	// Packer HTTP info
+	hookData["PackerHTTPIP"] = "ERR_HTTP_IP_NOT_IMPLEMENTED_BY_BUILDER"
+	hookData["PackerHTTPPort"] = "ERR_HTTP_PORT_NOT_IMPLEMENTED_BY_BUILDER"
+	hookData["PackerHTTPAddr"] = "ERR_HTTP_ADDR_NOT_IMPLEMENTED_BY_BUILDER"
+
+	httpPort, okPort := state.GetOk("http_port")
+	if okPort {
+		hookData["PackerHTTPPort"] = httpPort.(string)
+	}
+	httIP, okIP := state.GetOk("http_ip")
+	if okIP {
+		hookData["PackerHTTPIP"] = httIP.(string)
+	}
+	if okPort && okIP {
+		hookData["PackerHTTPAddr"] = fmt.Sprintf("%s:%s", httIP.(string), httpPort.(string))
+	}
 
 	// Read communicator data into hook data
 	comm, ok := state.GetOk("communicator_config")

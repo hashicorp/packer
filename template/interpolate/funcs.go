@@ -3,6 +3,7 @@ package interpolate
 import (
 	"errors"
 	"fmt"
+	"github.com/hashicorp/packer/packer"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -12,7 +13,6 @@ import (
 
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/hashicorp/packer/common/uuid"
-	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/version"
 	vaultapi "github.com/hashicorp/vault/api"
 	strftime "github.com/jehiah/go-strftime"
@@ -172,7 +172,7 @@ func passthroughOrInterpolate(data map[interface{}]interface{}, s string) (strin
 			// If we're in the first interpolation pass, the goal is to
 			// make sure that we pass the value through.
 			// TODO match against an actual string constant
-			if strings.Contains(hp, common.PlaceholderMsg) {
+			if strings.Contains(hp, packer.PlaceholderMsg) {
 				return fmt.Sprintf("{{.%s}}", s), nil
 			} else {
 				return hp, nil

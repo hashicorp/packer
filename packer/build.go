@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 	"sync"
-
-	"github.com/hashicorp/packer/helper/common"
 )
 
 const (
@@ -176,7 +174,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 	if generatedVars != nil {
 		for _, k := range generatedVars {
 			generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
-				common.PlaceholderMsg, k)
+				PlaceholderMsg, k)
 		}
 	}
 

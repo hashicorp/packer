@@ -4,8 +4,6 @@ import (
 	"context"
 	"reflect"
 	"testing"
-
-	"github.com/hashicorp/packer/helper/common"
 )
 
 func boolPointer(tf bool) *bool {
@@ -214,7 +212,7 @@ func TestBuildPrepare_ProvisionerGetsGeneratedMap(t *testing.T) {
 	}
 
 	generated := BasicPlaceholderData()
-	generated["PartyVar"] = "Build_PartyVar. " + common.PlaceholderMsg
+	generated["PartyVar"] = "Build_PartyVar. " + PlaceholderMsg
 	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig, generated}) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}

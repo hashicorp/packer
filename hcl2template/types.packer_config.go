@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 
@@ -319,7 +318,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig, onlyGlobs []glob.Glob, exceptGlobs
 			if generatedVars != nil {
 				for _, k := range generatedVars {
 					generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
-						common.PlaceholderMsg, k)
+						packer.PlaceholderMsg, k)
 				}
 			}
 

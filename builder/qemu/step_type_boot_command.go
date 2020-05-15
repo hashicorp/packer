@@ -7,7 +7,6 @@ import (
 	"net"
 	"time"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -96,7 +95,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 	log.Printf("Connected to VNC desktop: %s", c.DesktopName)
 
-	hostIP := common.GetHTTPIP()
+	hostIP := state.Get("http_ip").(string)
 	configCtx := config.ctx
 	configCtx.Data = &bootCommandTemplateData{
 		hostIP,

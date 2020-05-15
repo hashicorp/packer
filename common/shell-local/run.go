@@ -10,7 +10,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -169,17 +168,17 @@ func createFlattenedEnvVars(config *Config) (string, error) {
 	envVars["PACKER_BUILDER_TYPE"] = config.PackerBuilderType
 
 	// expose ip address variables
-	httpAddr := common.GetHTTPAddr()
-	if httpAddr != "" {
-		envVars["PACKER_HTTP_ADDR"] = httpAddr
+	httpAddr := config.generatedData["PackerHTTPAddr"]
+	if httpAddr != nil && httpAddr != "" {
+		envVars["PACKER_HTTP_ADDR"] = httpAddr.(string)
 	}
-	httpIP := common.GetHTTPIP()
-	if httpIP != "" {
-		envVars["PACKER_HTTP_IP"] = httpIP
+	httpIP := config.generatedData["PackerHTTPIP"]
+	if httpIP != nil && httpIP != "" {
+		envVars["PACKER_HTTP_IP"] = httpIP.(string)
 	}
-	httpPort := common.GetHTTPPort()
-	if httpPort != "" {
-		envVars["PACKER_HTTP_PORT"] = httpPort
+	httpPort := config.generatedData["PackerHTTPPort"]
+	if httpPort != nil && httpPort != "" {
+		envVars["PACKER_HTTP_PORT"] = httpPort.(string)
 	}
 
 	// Split vars into key/value components

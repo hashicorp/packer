@@ -271,6 +271,11 @@ func TestProvisioner_createFlattenedEnvVars(t *testing.T) {
 	}
 
 	p := new(Provisioner)
+	p.generatedData = map[string]interface{}{
+		"PackerHTTPAddr": "",
+		"PackerHTTPIP":   "",
+		"PackerHTTPPort": "",
+	}
 	p.Prepare(config)
 
 	// Defaults provided by Packer
@@ -308,7 +313,11 @@ func TestProvisioner_createFlattenedEnvVars_withEnvVarFormat(t *testing.T) {
 	}
 
 	p := new(Provisioner)
-
+	p.generatedData = map[string]interface{}{
+		"PackerHTTPAddr": "",
+		"PackerHTTPIP":   "",
+		"PackerHTTPPort": "",
+	}
 	p.config.EnvVarFormat = "%s=%s "
 	p.Prepare(config)
 
@@ -365,6 +374,11 @@ export PACKER_BUILD_NAME='vmware'
 	}
 
 	p := new(Provisioner)
+	p.generatedData = map[string]interface{}{
+		"PackerHTTPAddr": "",
+		"PackerHTTPIP":   "",
+		"PackerHTTPPort": "",
+	}
 	p.config.UseEnvVarFile = true
 	p.Prepare(config)
 
@@ -411,7 +425,11 @@ PACKER_BUILD_NAME=vmware
 	}
 
 	p := new(Provisioner)
-
+	p.generatedData = map[string]interface{}{
+		"PackerHTTPAddr": "",
+		"PackerHTTPIP":   "",
+		"PackerHTTPPort": "",
+	}
 	p.config.UseEnvVarFile = true
 	//User provided env_var_format without export prefix
 	p.config.EnvVarFormat = "%s=%s\n"
