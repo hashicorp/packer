@@ -31,6 +31,8 @@
     a file [GH-9129].
 * post-processor/vsphere-template: Add VSphere builder's artifact to vsphere-
     template's supported types [GH-9146]
+* provisioner/powershell: Fix long-wait retry loop caused by cleanup logic
+    [GH-9226]
 
 ## 1.5.6 (May 1, 2020)
 
