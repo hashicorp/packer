@@ -3,6 +3,7 @@ package packer
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/helper/common"
 	"log"
 	"sync"
 	"time"
@@ -41,11 +42,6 @@ type ProvisionHook struct {
 	Provisioners []*HookedProvisioner
 }
 
-// This is used in the BasicPlaceholderData() func
-// To force users to access generated data via the "generated" func.
-const PlaceholderMsg = "To set this dynamically in the Packer template, " +
-	"you must use the `build` function"
-
 // Provisioners interpolate most of their fields in the prepare stage; this
 // placeholder map helps keep fields that are only generated at build time from
 // accidentally being interpolated into empty strings at prepare time.
@@ -57,7 +53,7 @@ const PlaceholderMsg = "To set this dynamically in the Packer template, " +
 // data.
 func BasicPlaceholderData() map[string]string {
 	placeholderData := map[string]string{}
-	msg := "Build_%s. " + PlaceholderMsg
+	msg := "Build_%s. " + common.PlaceholderMsg
 	placeholderData["ID"] = fmt.Sprintf(msg, "ID")
 	// The following correspond to communicator-agnostic functions that are
 	// part of the SSH and WinRM communicator implementations. These functions

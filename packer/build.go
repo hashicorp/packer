@@ -3,6 +3,7 @@ package packer
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/helper/common"
 	"log"
 	"sync"
 )
@@ -174,7 +175,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 	if generatedVars != nil {
 		for _, k := range generatedVars {
 			generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
-				PlaceholderMsg, k)
+				common.PlaceholderMsg, k)
 		}
 	}
 

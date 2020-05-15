@@ -3,7 +3,7 @@ package interpolate
 import (
 	"errors"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/helper/common"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -172,7 +172,7 @@ func passthroughOrInterpolate(data map[interface{}]interface{}, s string) (strin
 			// If we're in the first interpolation pass, the goal is to
 			// make sure that we pass the value through.
 			// TODO match against an actual string constant
-			if strings.Contains(hp, packer.PlaceholderMsg) {
+			if strings.Contains(hp, common.PlaceholderMsg) {
 				return fmt.Sprintf("{{.%s}}", s), nil
 			} else {
 				return hp, nil

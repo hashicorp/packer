@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"github.com/hashicorp/packer/helper/common"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/packer"
@@ -318,7 +319,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig, onlyGlobs []glob.Glob, exceptGlobs
 			if generatedVars != nil {
 				for _, k := range generatedVars {
 					generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
-						packer.PlaceholderMsg, k)
+						common.PlaceholderMsg, k)
 				}
 			}
 

@@ -2,6 +2,7 @@ package packer
 
 import (
 	"context"
+	"github.com/hashicorp/packer/helper/common"
 	"reflect"
 	"testing"
 )
@@ -212,7 +213,7 @@ func TestBuildPrepare_ProvisionerGetsGeneratedMap(t *testing.T) {
 	}
 
 	generated := BasicPlaceholderData()
-	generated["PartyVar"] = "Build_PartyVar. " + PlaceholderMsg
+	generated["PartyVar"] = "Build_PartyVar. " + common.PlaceholderMsg
 	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig, generated}) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
