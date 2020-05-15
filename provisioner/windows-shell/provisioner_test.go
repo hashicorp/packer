@@ -288,12 +288,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
 
-	generatedData := map[string]interface{}{
-		"PackerHTTPAddr": "",
-		"PackerHTTPIP":   "",
-		"PackerHTTPPort": "",
-	}
-	err := p.Provision(context.Background(), ui, comm, generatedData)
+	err := p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -312,7 +307,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	config["remote_path"] = "c:/Windows/Temp/inlineScript.bat"
 
 	p.Prepare(config)
-	err = p.Provision(context.Background(), ui, comm, generatedData)
+	err = p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -355,15 +350,6 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	if comm.StartCmd.Command != expectedCommand {
 		t.Fatalf("Expect command to be %s NOT %s", expectedCommand, comm.StartCmd.Command)
 	}
-}
-
-func generatedData() map[string]interface{} {
-	generatedData := map[string]interface{}{
-		"PackerHTTPAddr": "",
-		"PackerHTTPIP":   "",
-		"PackerHTTPPort": "",
-	}
-	return generatedData
 }
 
 func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
@@ -439,7 +425,16 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		}
 	}
 }
+
 func TestCancel(t *testing.T) {
 	// Don't actually call Cancel() as it performs an os.Exit(0)
 	// which kills the 'go test' tool
+}
+func generatedData() map[string]interface{} {
+	generatedData := map[string]interface{}{
+		"PackerHTTPAddr": "",
+		"PackerHTTPIP":   "",
+		"PackerHTTPPort": "",
+	}
+	return generatedData
 }

@@ -519,15 +519,6 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	}
 }
 
-func generatedData() map[string]interface{} {
-	generatedData := map[string]interface{}{
-		"PackerHTTPAddr": "",
-		"PackerHTTPIP":   "",
-		"PackerHTTPPort": "",
-	}
-	return generatedData
-}
-
 func TestProvisionerProvision_SkipClean(t *testing.T) {
 	tempFile, _ := ioutil.TempFile("", "packer")
 	defer func() {
@@ -860,4 +851,13 @@ func testConfigWithSkipClean() map[string]interface{} {
 		"inline":     []interface{}{"foo", "bar"},
 		"skip_clean": true,
 	}
+}
+
+func generatedData() map[string]interface{} {
+	generatedData := map[string]interface{}{
+		"PackerHTTPAddr": "",
+		"PackerHTTPIP":   "",
+		"PackerHTTPPort": "",
+	}
+	return generatedData
 }

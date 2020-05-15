@@ -1,7 +1,6 @@
 package interpolate
 
 import (
-	"github.com/hashicorp/packer/helper/common"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/version"
 )
 

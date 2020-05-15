@@ -3,12 +3,12 @@ package packer
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/packer/helper/common"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/helper/common"
 )
 
 // A provisioner is responsible for installing and configuring software

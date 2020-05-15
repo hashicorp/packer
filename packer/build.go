@@ -3,9 +3,10 @@ package packer
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/packer/helper/common"
 	"log"
 	"sync"
+
+	"github.com/hashicorp/packer/helper/common"
 )
 
 const (

@@ -2,9 +2,10 @@ package packer
 
 import (
 	"context"
-	"github.com/hashicorp/packer/helper/common"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/common"
 )
 
 func boolPointer(tf bool) *bool {

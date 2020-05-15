@@ -3,7 +3,6 @@ package interpolate
 import (
 	"errors"
 	"fmt"
-	"github.com/hashicorp/packer/helper/common"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -13,6 +12,7 @@ import (
 
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/version"
 	vaultapi "github.com/hashicorp/vault/api"
 	strftime "github.com/jehiah/go-strftime"
