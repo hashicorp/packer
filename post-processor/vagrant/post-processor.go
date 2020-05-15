@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
+	"github.com/hashicorp/packer/post-processor/artifice"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
 )
@@ -40,6 +41,7 @@ var builtins = map[string]string{
 	"packer.post-processor.docker-import": "docker",
 	"packer.post-processor.docker-tag":    "docker",
 	"packer.post-processor.docker-push":   "docker",
+	artifice.BuilderId:                    "artifice",
 }
 
 type Config struct {

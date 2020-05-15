@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/post-processor/artifice"
 	"github.com/hashicorp/packer/template/interpolate"
 	"golang.org/x/oauth2/jwt"
 )
@@ -92,9 +93,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
-	if artifact.BuilderId() != googlecompute.BuilderId {
+	switch artifact.BuilderId() {
+	case googlecompute.BuilderId, artifice.BuilderId:
+		break
+	default:
 		err := fmt.Errorf(
-			"Unknown artifact type: %s\nCan only export from Google Compute Engine builder artifacts.",
+			"Unknown artifact type: %s\nCan only export from Google Compute Engine builder and Artifice post-processor artifacts.",
 			artifact.BuilderId())
 		return nil, false, false, err
 	}
