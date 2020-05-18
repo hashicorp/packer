@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/hashicorp/packer/common"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -12,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/stretchr/testify/assert"
 )

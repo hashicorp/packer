@@ -1,13 +1,13 @@
 package shell
 
 import (
-	"github.com/hashicorp/packer/common"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 )
 

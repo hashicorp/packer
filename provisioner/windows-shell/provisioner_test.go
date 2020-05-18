@@ -3,13 +3,13 @@ package shell
 import (
 	"bytes"
 	"context"
-	"github.com/hashicorp/packer/common"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 )
 
