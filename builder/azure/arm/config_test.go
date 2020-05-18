@@ -596,6 +596,10 @@ func TestSystemShouldDefineRuntimeValues(t *testing.T) {
 		t.Errorf("Expected tmpOSDiskName to not be empty, but it was '%s'!", c.tmpOSDiskName)
 	}
 
+	if c.tmpDataDiskName == "" {
+		t.Errorf("Expected tmpDataDiskName to not be empty, but it was '%s'!", c.tmpDataDiskName)
+	}
+
 	if c.tmpNsgName == "" {
 		t.Errorf("Expected tmpNsgName to not be empty, but it was '%s'!", c.tmpNsgName)
 	}
