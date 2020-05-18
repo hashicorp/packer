@@ -353,6 +353,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			}
 
 			pcb := &packer.CoreBuild{
+				BuildName:      build.Name,
 				Type:           src.Type,
 				Builder:        builder,
 				Provisioners:   provisioners,
