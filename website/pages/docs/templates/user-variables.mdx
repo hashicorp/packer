@@ -203,7 +203,16 @@ a user variable to an AWS Secrets Manager secret.
 }
 ```
 
-This will default `password` to the secret value stored at AWS Secrets Manager.
+In the example above it is assumed that only one key is stored in `sample/app/password` if there are multiple keys stored in it then you need to indicate the specific key you want to fetch as shown below.
+
+```json
+{
+  "variables": {
+    "db_password": "{{ aws_secretsmanager `sample/app/passwords` `db` }}",
+    "api_key": "{{ aws_secretsmanager `sample/app/passwords` `api_key` }}"
+  }
+}
+```
 
 In order to use this function you have to configure valid AWS credentials using
 one of the following methods:

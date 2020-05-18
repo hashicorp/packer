@@ -10,11 +10,10 @@ import (
 	"text/template"
 	"time"
 
-	awssmapi "github.com/hashicorp/packer/template/interpolate/aws/secretsmanager"
-
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/common"
+	awssmapi "github.com/hashicorp/packer/template/interpolate/aws/secretsmanager"
 	"github.com/hashicorp/packer/version"
 	vaultapi "github.com/hashicorp/vault/api"
 	strftime "github.com/jehiah/go-strftime"
@@ -335,7 +334,7 @@ func funcGenAwsSecrets(ctx *Context) interface{} {
 			return "", errors.New("AWS Secrets Manager vars are only allowed in the variables section")
 		}
 
-		// Check if at leas 1 parameter has been used
+		// Check if at least 1 parameter has been used
 		if len(secret) == 0 {
 			return "", errors.New("At least one parameter must be used")
 		}
@@ -349,7 +348,7 @@ func funcGenAwsSecrets(ctx *Context) interface{} {
 		var name, key string
 		name = secret[0]
 		// key is optional if not used we fetch the first
-		// value stored in given secret. If more that two parameters
+		// value stored in given secret. If more than two parameters
 		// are passed we take second param and ignore the others
 		if len(secret) > 1 {
 			key = secret[1]

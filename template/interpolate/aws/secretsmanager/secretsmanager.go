@@ -12,9 +12,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/secretsmanager/secretsmanageriface"
 )
 
-// SecretsManager returns a representation of the Secrets Manager API
-func (c *Client) SecretsManager() secretsmanageriface.SecretsManagerAPI {
-	return c.api
+// Client represents an AWS Secrets Manager client
+type Client struct {
+	config *AWSConfig
+	api    secretsmanageriface.SecretsManagerAPI
 }
 
 // New creates an AWS Session Manager Client
