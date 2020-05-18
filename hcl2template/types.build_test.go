@@ -100,6 +100,28 @@ func TestParse_build(t *testing.T) {
 			[]packer.Build{},
 			false,
 		},
+		{"named build",
+			defaultParser,
+			parseTestArgs{"testdata/build/named.pkr.hcl", nil, nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "build"),
+				Builds: Builds{
+					&BuildBlock{
+						Name: "somebuild",
+						Sources: []SourceRef{
+							{
+								Type: "amazon-ebs",
+								Name: "ubuntu-1604",
+							},
+							refVBIsoUbuntu1204,
+						},
+					},
+				},
+			},
+			false, false,
+			[]packer.Build{},
+			true,
+		},
 	}
 	testParse(t, tests)
 }
