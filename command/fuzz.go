@@ -2,8 +2,9 @@ package command
 
 import (
 	"bytes"
-	"github.com/hashicorp/packer/packer"
 	"os"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func FuzzBuild(data []byte) int {
