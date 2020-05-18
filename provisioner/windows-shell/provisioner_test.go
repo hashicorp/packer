@@ -3,6 +3,7 @@ package shell
 import (
 	"bytes"
 	"context"
+	"github.com/hashicorp/packer/common"
 	"io/ioutil"
 	"log"
 	"os"
@@ -431,10 +432,9 @@ func TestCancel(t *testing.T) {
 	// which kills the 'go test' tool
 }
 func generatedData() map[string]interface{} {
-	generatedData := map[string]interface{}{
-		"PackerHTTPAddr": "",
-		"PackerHTTPIP":   "",
-		"PackerHTTPPort": "",
+	return map[string]interface{}{
+		"PackerHTTPAddr": common.HttpAddrNotImplemented,
+		"PackerHTTPIP":   common.HttpIPNotImplemented,
+		"PackerHTTPPort": common.HttpPortNotImplemented,
 	}
-	return generatedData
 }

@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/packer/common"
 	"io"
 	"log"
 	"math/rand"
@@ -416,15 +417,15 @@ func (p *Provisioner) escapeEnvVars() ([]string, map[string]string) {
 
 	// expose ip address variables
 	httpAddr := p.generatedData["PackerHTTPAddr"]
-	if httpAddr != nil && httpAddr != "" {
+	if httpAddr != nil && httpAddr != common.HttpAddrNotImplemented {
 		envVars["PACKER_HTTP_ADDR"] = httpAddr.(string)
 	}
 	httpIP := p.generatedData["PackerHTTPIP"]
-	if httpIP != nil && httpIP != "" {
+	if httpIP != nil && httpIP != common.HttpIPNotImplemented {
 		envVars["PACKER_HTTP_IP"] = httpIP.(string)
 	}
 	httpPort := p.generatedData["PackerHTTPPort"]
-	if httpPort != nil && httpPort != "" {
+	if httpPort != nil && httpPort != common.HttpPortNotImplemented {
 		envVars["PACKER_HTTP_PORT"] = httpPort.(string)
 	}
 

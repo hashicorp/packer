@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/common"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -854,10 +855,9 @@ func testConfigWithSkipClean() map[string]interface{} {
 }
 
 func generatedData() map[string]interface{} {
-	generatedData := map[string]interface{}{
-		"PackerHTTPAddr": "",
-		"PackerHTTPIP":   "",
-		"PackerHTTPPort": "",
+	return map[string]interface{}{
+		"PackerHTTPAddr": common.HttpAddrNotImplemented,
+		"PackerHTTPIP":   common.HttpIPNotImplemented,
+		"PackerHTTPPort": common.HttpPortNotImplemented,
 	}
-	return generatedData
 }

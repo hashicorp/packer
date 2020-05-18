@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"github.com/hashicorp/packer/common"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -562,8 +563,8 @@ func TestProvisionerRemotePathDefaultsSuccessfully(t *testing.T) {
 
 func generatedData() map[string]interface{} {
 	return map[string]interface{}{
-		"PackerHTTPAddr": "",
-		"PackerHTTPIP":   "",
-		"PackerHTTPPort": "",
+		"PackerHTTPAddr": common.HttpAddrNotImplemented,
+		"PackerHTTPIP":   common.HttpIPNotImplemented,
+		"PackerHTTPPort": common.HttpPortNotImplemented,
 	}
 }

@@ -23,6 +23,10 @@ import (
 // Produces:
 //   <nothing>
 
+const HttpIPNotImplemented = "ERR_HTTP_IP_NOT_IMPLEMENTED_BY_BUILDER"
+const HttpPortNotImplemented = "ERR_HTTP_PORT_NOT_IMPLEMENTED_BY_BUILDER"
+const HttpAddrNotImplemented = "ERR_HTTP_ADDR_NOT_IMPLEMENTED_BY_BUILDER"
+
 func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} {
 	hookData := make(map[string]interface{})
 
@@ -48,9 +52,9 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 	hookData["PackerRunUUID"] = os.Getenv("PACKER_RUN_UUID")
 
 	// Packer HTTP info
-	hookData["PackerHTTPIP"] = "ERR_HTTP_IP_NOT_IMPLEMENTED_BY_BUILDER"
-	hookData["PackerHTTPPort"] = "ERR_HTTP_PORT_NOT_IMPLEMENTED_BY_BUILDER"
-	hookData["PackerHTTPAddr"] = "ERR_HTTP_ADDR_NOT_IMPLEMENTED_BY_BUILDER"
+	hookData["PackerHTTPIP"] = HttpIPNotImplemented
+	hookData["PackerHTTPPort"] = HttpPortNotImplemented
+	hookData["PackerHTTPAddr"] = HttpAddrNotImplemented
 
 	httpPort, okPort := state.GetOk("http_port")
 	if okPort {
