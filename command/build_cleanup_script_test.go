@@ -11,7 +11,7 @@ func TestBuildWithCleanupScript(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel=false",
+		"-parallel-builds=1",
 		filepath.Join(testFixture("cleanup-script"), "template.json"),
 	}
 

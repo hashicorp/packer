@@ -31,6 +31,8 @@
     a file [GH-9129].
 * post-processor/vsphere-template: Add VSphere builder's artifact to vsphere-
     template's supported types [GH-9146]
+* provisioner/powershell: Fix long-wait retry loop caused by cleanup logic
+    [GH-9226]
 
 ## 1.5.6 (May 1, 2020)
 
@@ -39,6 +41,8 @@
     the service names things [GH-9078]
 * core/hcl2: Maps are now treated as settable arguments as opposed to blocks.
     For example `tags = {}` instead of `tags {}` [GH-9035]
+* `packer build` command: removed option to set `parallel=false`, use
+    `-parallel-builds=1` for this.
 
 ### FEATURES:
 * **New Builder** azure-dtl allows creation of devtestlabs images in Azure

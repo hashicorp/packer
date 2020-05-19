@@ -7,13 +7,13 @@ import (
 	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
-
-	"github.com/gobwas/glob"
 )
 
 // PackerConfig represents a loaded Packer HCL config. It will contain
 // references to all possible blocks of the allowed configuration.
 type PackerConfig struct {
+	// parser *Parser
+
 	// Directory where the config files are defined
 	Basedir string
 
@@ -31,6 +31,12 @@ type PackerConfig struct {
 
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
+
+	builderSchemas packer.BuilderStore
+
+	provisionersSchemas packer.ProvisionerStore
+
+	postProcessorsSchemas packer.PostProcessorStore
 }
 
 type ValidationOptions struct {
@@ -188,11 +194,11 @@ func (c *PackerConfig) evaluateLocalVariable(local *Local) hcl.Diagnostics {
 
 // getCoreBuildProvisioners takes a list of provisioner block, starts according
 // provisioners and sends parsed HCL2 over to it.
-func (p *Parser) getCoreBuildProvisioners(source *SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildProvisioners(source *SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
-		provisioner, moreDiags := p.startProvisioner(source, pb, ectx, generatedVars)
+		provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx, generatedVars)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -228,11 +234,11 @@ func (p *Parser) getCoreBuildProvisioners(source *SourceBlock, blocks []*Provisi
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
 // according provisioners and sends parsed HCL2 over to it.
-func (p *Parser) getCoreBuildPostProcessors(source *SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildPostProcessors(source *SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildPostProcessor{}
 	for _, ppb := range blocks {
-		postProcessor, moreDiags := p.startPostProcessor(source, ppb, ectx, generatedVars)
+		postProcessor, moreDiags := cfg.startPostProcessor(source, ppb, ectx, generatedVars)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -247,10 +253,10 @@ func (p *Parser) getCoreBuildPostProcessors(source *SourceBlock, blocks []*PostP
 	return res, diags
 }
 
-// getBuilds will return a list of packer Build based on the HCL2 parsed build
+// GetBuilds returns a list of packer Build based on the HCL2 parsed build
 // blocks. All Builders, Provisioners and Post Processors will be started and
 // configured.
-func (p *Parser) getBuilds(cfg *PackerConfig, onlyGlobs []glob.Glob, exceptGlobs []glob.Glob) ([]packer.Build, hcl.Diagnostics) {
+func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build, hcl.Diagnostics) {
 	res := []packer.Build{}
 	var diags hcl.Diagnostics
 
@@ -270,7 +276,11 @@ func (p *Parser) getBuilds(cfg *PackerConfig, onlyGlobs []glob.Glob, exceptGlobs
 			buildName := fmt.Sprintf("%s.%s", src.Type, src.Name)
 
 			// -only
-			if len(onlyGlobs) > 0 {
+			if len(opts.Only) > 0 {
+				onlyGlobs, diags := convertFilterOption(opts.Only, "only")
+				if diags.HasErrors() {
+					return nil, diags
+				}
 				include := false
 				for _, onlyGlob := range onlyGlobs {
 					if onlyGlob.Match(buildName) {
@@ -284,7 +294,11 @@ func (p *Parser) getBuilds(cfg *PackerConfig, onlyGlobs []glob.Glob, exceptGlobs
 			}
 
 			// -except
-			if len(exceptGlobs) > 0 {
+			if len(opts.Except) > 0 {
+				exceptGlobs, diags := convertFilterOption(opts.Except, "except")
+				if diags.HasErrors() {
+					return nil, diags
+				}
 				exclude := false
 				for _, exceptGlob := range exceptGlobs {
 					if exceptGlob.Match(buildName) {
@@ -297,7 +311,7 @@ func (p *Parser) getBuilds(cfg *PackerConfig, onlyGlobs []glob.Glob, exceptGlobs
 				}
 			}
 
-			builder, moreDiags, generatedVars := p.startBuilder(src, cfg.EvalContext(nil))
+			builder, moreDiags, generatedVars := cfg.startBuilder(src, cfg.EvalContext(nil))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -323,12 +337,12 @@ func (p *Parser) getBuilds(cfg *PackerConfig, onlyGlobs []glob.Glob, exceptGlobs
 				}
 			}
 
-			provisioners, moreDiags := p.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables), generatedPlaceholderMap)
+			provisioners, moreDiags := cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables), generatedPlaceholderMap)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			postProcessors, moreDiags := p.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables), generatedPlaceholderMap)
+			postProcessors, moreDiags := cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables), generatedPlaceholderMap)
 			pps := [][]packer.CoreBuildPostProcessor{}
 			if len(postProcessors) > 0 {
 				pps = [][]packer.CoreBuildPostProcessor{postProcessors}
@@ -349,61 +363,4 @@ func (p *Parser) getBuilds(cfg *PackerConfig, onlyGlobs []glob.Glob, exceptGlobs
 		}
 	}
 	return res, diags
-}
-
-// Convert -only and -except globs to glob.Glob instances.
-func convertFilterOption(patterns []string, optionName string) ([]glob.Glob, hcl.Diagnostics) {
-	var globs []glob.Glob
-	var diags hcl.Diagnostics
-
-	for _, pattern := range patterns {
-		g, err := glob.Compile(pattern)
-		if err != nil {
-			diags = append(diags, &hcl.Diagnostic{
-				Summary:  fmt.Sprintf("Invalid -%s pattern %s: %s", optionName, pattern, err),
-				Severity: hcl.DiagError,
-			})
-		}
-		globs = append(globs, g)
-	}
-
-	return globs, diags
-}
-
-// Parse will parse HCL file(s) in path. Path can be a folder or a file.
-//
-// Parse will first parse variables and then the rest; so that interpolation
-// can happen.
-//
-// For each build block a packer.Build will be started, and for each builder,
-// all provisioners and post-processors will be started.
-//
-// Parse then return a slice of packer.Builds; which are what packer core uses
-// to run builds.
-func (p *Parser) Parse(path string, varFiles []string, argVars map[string]string, onlyBuilds []string, exceptBuilds []string) ([]packer.Build, hcl.Diagnostics) {
-	var onlyGlobs []glob.Glob
-	if len(onlyBuilds) > 0 {
-		og, diags := convertFilterOption(onlyBuilds, "only")
-		if diags.HasErrors() {
-			return nil, diags
-		}
-		onlyGlobs = og
-	}
-
-	var exceptGlobs []glob.Glob
-	if len(exceptBuilds) > 0 {
-		eg, diags := convertFilterOption(exceptBuilds, "except")
-		if diags.HasErrors() {
-			return nil, diags
-		}
-		exceptGlobs = eg
-	}
-
-	cfg, diags := p.parse(path, varFiles, argVars)
-	if diags.HasErrors() {
-		return nil, diags
-	}
-
-	builds, moreDiags := p.getBuilds(cfg, onlyGlobs, exceptGlobs)
-	return builds, append(diags, moreDiags...)
 }

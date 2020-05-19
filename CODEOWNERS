@@ -2,9 +2,11 @@
 
 # builders
 
+/examples/alicloud/                     @chhaj5236 @alexyueer
 /builder/alicloud/                      @chhaj5236 @alexyueer
 /website/pages/docs/builders/alicloud* @chhaj5236 @alexyueer
 
+/examples/azure/                     @paulmey
 /builder/azure/                      @paulmey
 /website/pages/docs/builders/azure* @paulmey
 
@@ -14,6 +16,7 @@
 /builder/hyperv/                      @taliesins
 /website/pages/docs/builders/hyperv* @taliesins
 
+/examples/jdcloud/                     @XiaohanLiang @remrain
 /builder/jdcloud/                      @XiaohanLiang @remrain
 /website/pages/docs/builders/jdcloud* @XiaohanLiang @remrain
 
@@ -50,9 +53,11 @@
 /builder/hcloud/                      @LKaemmerling
 /website/pages/docs/builders/hcloud* @LKaemmerling
 
+/examples/hyperone/                    @m110 @gregorybrzeski @ad-m
 /builder/hyperone/                      @m110 @gregorybrzeski @ad-m
 /website/pages/docs/builders/hyperone* @m110 @gregorybrzeski @ad-m
 
+/examples/ucloud/                     @shawnmssu
 /builder/ucloud/                      @shawnmssu
 /website/pages/docs/builders/ucloud* @shawnmssu
 
@@ -62,6 +67,7 @@
 /builder/osc/                      @marinsalinas @Hakujou
 /website/pages/docs/builders/osc* @marinsalinas @Hakujou
 
+/examples/tencentcloud/                      @likexian
 /builder/tencentcloud/                      @likexian
 /website/pages/docs/builders/tencentcloud* @likexian
 
@@ -69,6 +75,7 @@
 
 # provisioners
 
+/examples/ansible/                      @bhcleek
 /provisioner/ansible/                   @bhcleek
 /provisioner/converge/                  @stevendborrelli
 

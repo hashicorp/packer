@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -63,7 +62,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		pauseFn = state.Get("pauseFn").(multistep.DebugPauseFn)
 	}
 
-	hostIP := common.GetHTTPIP()
+	hostIP := state.Get("http_ip").(string)
 	s.Ctx.Data = &bootCommandTemplateData{
 		HTTPIP:       hostIP,
 		HTTPPort:     httpPort,

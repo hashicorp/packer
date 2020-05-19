@@ -183,19 +183,20 @@ type Config struct {
 	// CLI example
 	// `az vm image list --location westus --publisher Canonical --offer UbuntuServer --sku 16.04.0-LTS --all`
 	ImageVersion string `mapstructure:"image_version" required:"false"`
-	// URL to a custom VHD to use for your base image. If this value is set, do
-	// not set image_publisher, image_offer, image_sku, or image_version.
+	// URL to a custom VHD to use for your base image. If this value is set,
+	// image_publisher, image_offer, image_sku, or image_version should not be set.
 	ImageUrl string `mapstructure:"image_url" required:"true"`
 	// Name of a custom managed image to use for your base image. If this value is set, do
 	// not set image_publisher, image_offer, image_sku, or image_version.
-	// If this value is set, the value
+	// If this value is set, the option
 	// `custom_managed_image_resource_group_name` must also be set. See
 	// [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
 	// to learn more about managed images.
 	CustomManagedImageName string `mapstructure:"custom_managed_image_name" required:"true"`
 
 	// Name of a custom managed image's resource group to use for your base image. If this
-	// value is set, image_publisher, image_offer, image_sku, or image_version.
+	// value is set, image_publisher, image_offer, image_sku, or image_version should not be set.
+	// If this value is set, the option
 	// `custom_managed_image_name` must also be set. See
 	// [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
 	// to learn more about managed images.

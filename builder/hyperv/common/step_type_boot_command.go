@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -33,7 +32,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	ui := state.Get("ui").(packer.Ui)
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
-	hostIp := common.GetHTTPIP()
+	hostIp := state.Get("http_ip").(string)
 
 	// Wait the for the vm to boot.
 	if int64(s.BootWait) > 0 {

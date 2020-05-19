@@ -8,7 +8,6 @@ import (
 	"os"
 
 	kvflag "github.com/hashicorp/packer/helper/flag-kv"
-	sliceflag "github.com/hashicorp/packer/helper/flag-slice"
 	"github.com/hashicorp/packer/helper/wrappedstreams"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
@@ -30,22 +29,18 @@ type Meta struct {
 	CoreConfig *packer.CoreConfig
 	Ui         packer.Ui
 	Version    string
-
-	// These are set by command-line flags
-	varFiles []string
-	flagVars map[string]string
 }
 
 // Core returns the core for the given template given the configured
 // CoreConfig and user variables on this Meta.
-func (m *Meta) Core(tpl *template.Template) (*packer.Core, error) {
+func (m *Meta) Core(tpl *template.Template, cla *MetaArgs) (*packer.Core, error) {
 	// Copy the config so we don't modify it
 	config := *m.CoreConfig
 	config.Template = tpl
 
 	fj := &kvflag.FlagJSON{}
 	// First populate fj with contents from var files
-	for _, file := range m.varFiles {
+	for _, file := range cla.VarFiles {
 		err := fj.Set(file)
 		if err != nil {
 			return nil, err
@@ -54,15 +49,15 @@ func (m *Meta) Core(tpl *template.Template) (*packer.Core, error) {
 	// Now read fj values back into flagvars and set as config.Variables. Only
 	// add to flagVars if the key doesn't already exist, because flagVars comes
 	// from the command line and should not be overridden by variable files.
-	if m.flagVars == nil {
-		m.flagVars = map[string]string{}
+	if cla.Vars == nil {
+		cla.Vars = map[string]string{}
 	}
 	for k, v := range *fj {
-		if _, exists := m.flagVars[k]; !exists {
-			m.flagVars[k] = v
+		if _, exists := cla.Vars[k]; !exists {
+			cla.Vars[k] = v
 		}
 	}
-	config.Variables = m.flagVars
+	config.Variables = cla.Vars
 
 	// Init the core
 	core, err := packer.NewCore(&config)
@@ -73,73 +68,12 @@ func (m *Meta) Core(tpl *template.Template) (*packer.Core, error) {
 	return core, nil
 }
 
-// BuildNames returns the list of builds that are in the given core
-// that we care about taking into account the only and except flags.
-func (m *Meta) BuildNames(c *packer.Core) []string {
-	// TODO: test
-
-	// Filter the "only"
-	if len(m.CoreConfig.Only) > 0 {
-		// Build a set of all the available names
-		nameSet := make(map[string]struct{})
-		for _, n := range c.BuildNames() {
-			nameSet[n] = struct{}{}
-		}
-
-		// Build our result set which we pre-allocate some sane number
-		result := make([]string, 0, len(m.CoreConfig.Only))
-		for _, n := range m.CoreConfig.Only {
-			if _, ok := nameSet[n]; ok {
-				result = append(result, n)
-			}
-		}
-
-		return result
-	}
-
-	// Filter the "except"
-	if len(m.CoreConfig.Except) > 0 {
-		// Build a set of the things we don't want
-		nameSet := make(map[string]struct{})
-		for _, n := range m.CoreConfig.Except {
-			nameSet[n] = struct{}{}
-		}
-
-		// Build our result set which is the names of all builds except
-		// those in the given set.
-		names := c.BuildNames()
-		result := make([]string, 0, len(names))
-		for _, n := range names {
-			if _, ok := nameSet[n]; !ok {
-				result = append(result, n)
-			}
-		}
-		return result
-	}
-
-	// We care about everything
-	return c.BuildNames()
-}
-
 // FlagSet returns a FlagSet with the common flags that every
 // command implements. The exact behavior of FlagSet can be configured
 // using the flags as the second parameter, for example to disable
 // build settings on the commands that don't handle builds.
 func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 	f := flag.NewFlagSet(n, flag.ContinueOnError)
-
-	// FlagSetBuildFilter tells us to enable the settings for selecting
-	// builds we care about.
-	if fs&FlagSetBuildFilter != 0 {
-		f.Var((*sliceflag.StringFlag)(&m.CoreConfig.Except), "except", "")
-		f.Var((*sliceflag.StringFlag)(&m.CoreConfig.Only), "only", "")
-	}
-
-	// FlagSetVars tells us what variables to use
-	if fs&FlagSetVars != 0 {
-		f.Var((*kvflag.Flag)(&m.flagVars), "var", "")
-		f.Var((*kvflag.StringSlice)(&m.varFiles), "var-file", "")
-	}
 
 	// Create an io.Writer that writes to our Ui properly for errors.
 	// This is kind of a hack, but it does the job. Basically: create

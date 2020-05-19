@@ -59,7 +59,7 @@ func testParse(t *testing.T, tests []parseTest) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCfg, gotDiags := tt.parser.parse(tt.args.filename, tt.args.varFiles, tt.args.vars)
+			gotCfg, gotDiags := tt.parser.Parse(tt.args.filename, tt.args.varFiles, tt.args.vars)
 			if tt.parseWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.parse() unexpected %q diagnostics.", gotDiags)
 			}
@@ -68,6 +68,7 @@ func testParse(t *testing.T, tests []parseTest) {
 			}
 			if diff := cmp.Diff(tt.parseWantCfg, gotCfg,
 				cmpopts.IgnoreUnexported(
+					PackerConfig{},
 					cty.Value{},
 					cty.Type{},
 					Variable{},
@@ -115,7 +116,7 @@ func testParse(t *testing.T, tests []parseTest) {
 				return
 			}
 
-			gotBuilds, gotDiags := tt.parser.getBuilds(gotCfg, nil, nil)
+			gotBuilds, gotDiags := gotCfg.GetBuilds(packer.GetBuildsOptions{})
 			if tt.getBuildsWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.getBuilds() unexpected diagnostics. %s", gotDiags)
 			}

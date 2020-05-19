@@ -84,7 +84,7 @@ Here is a full list of the available functions for reference.
 
   - **PackerRunUUID**: Current build's unique id. Can be used to specify build artifacts.
 
-  - **PackerHTTPAddr**: HTTP address of the file server Packer creates to serve items in the "http" dir to the vm, displayed in the format `IP:PORT`.
+  - **PackerHTTPIP**, **PackerHTTPPort**, and **PackerHTTPAddr**: HTTP IP, port, and address of the file server Packer creates to serve items in the "http" dir to the vm. The HTTP address is displayed in the format `IP:PORT`.
 
   - **SSHPublicKey** and **SSHPrivateKey**: The public and private key that Packer uses to connect to the instance.
     These are unique to the SSH communicator and are unset when using other communicators.
@@ -173,7 +173,7 @@ Here is a full list of the available functions for reference.
   This engine does not guarantee that the final image name will match the
   regex; it will not truncate your name if it exceeds 63 characters, and it
   will not validate that the beginning and end of the engine's output are
-  valid. For example, `"image_name": {{isotime | clean_image_name}}"` will
+  valid. For example, `"image_name": {{isotime | clean_resource_name}}"` will
   cause your build to fail because the image name will start with a number,
   which is why in the above example we prepend the isotime with "mybuild".
 

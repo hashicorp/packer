@@ -3,7 +3,6 @@ package qemu
 import (
 	"context"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
@@ -13,8 +12,7 @@ import (
 type stepHTTPIPDiscover struct{}
 
 func (s *stepHTTPIPDiscover) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	hostIP := "10.0.2.2"
-	common.SetHTTPIP(hostIP)
+	state.Put("http_ip", "10.0.2.2")
 
 	return multistep.ActionContinue
 }

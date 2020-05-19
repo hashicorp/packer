@@ -592,7 +592,7 @@ func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile s
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
 	inventory := p.config.InventoryFile
-	httpAddr := common.GetHTTPAddr()
+	httpAddr := p.generatedData["PackerHTTPAddr"].(string)
 
 	// Fetch external dependencies
 	if len(p.config.GalaxyFile) > 0 {

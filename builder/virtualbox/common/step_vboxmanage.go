@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/packer/common"
 	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -44,7 +43,7 @@ func (s *StepVBoxManage) Run(ctx context.Context, state multistep.StateBag) mult
 		ui.Say("Executing custom VBoxManage commands...")
 	}
 
-	hostIP := common.GetHTTPIP()
+	hostIP := state.Get("http_ip").(string)
 	httpPort := state.Get("http_port").(int)
 
 	s.Ctx.Data = &commandTemplate{

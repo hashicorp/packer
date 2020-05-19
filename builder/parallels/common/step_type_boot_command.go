@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	packer_common "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -70,7 +69,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 	ui.Say(fmt.Sprintf("Host IP for the Parallels machine: %s", hostIP))
 
-	packer_common.SetHTTPIP(hostIP)
+	state.Put("http_ip", hostIP)
 	s.Ctx.Data = &bootCommandTemplateData{
 		hostIP,
 		httpPort,

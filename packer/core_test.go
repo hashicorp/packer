@@ -45,7 +45,7 @@ func TestCoreBuildNames(t *testing.T) {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
 
-		names := core.BuildNames()
+		names := core.BuildNames(nil, nil)
 		if !reflect.DeepEqual(names, tc.Result) {
 			t.Fatalf("err: %s\n\n%#v", tc.File, names)
 		}

@@ -112,12 +112,7 @@ WAITLOOP:
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
-		err = packerCommon.SetHTTPIP(ip)
-		if err != nil {
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
-
+		state.Put("http_ip", ip)
 		s.Ctx.Data = &bootCommandTemplateData{
 			ip,
 			port,

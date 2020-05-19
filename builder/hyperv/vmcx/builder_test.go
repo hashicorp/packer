@@ -504,6 +504,7 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("http_port", 0)
+	state.Put("http_ip", "0.0.0.0")
 	state.Put("ui", ui)
 	state.Put("vmName", "packer-foo")
 

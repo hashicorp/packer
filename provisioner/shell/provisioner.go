@@ -67,7 +67,8 @@ type Config struct {
 }
 
 type Provisioner struct {
-	config Config
+	config        Config
+	generatedData map[string]interface{}
 }
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
@@ -179,6 +180,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	if generatedData == nil {
 		generatedData = make(map[string]interface{})
 	}
+	p.generatedData = generatedData
 
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
@@ -414,17 +416,17 @@ func (p *Provisioner) escapeEnvVars() ([]string, map[string]string) {
 	envVars["PACKER_BUILDER_TYPE"] = p.config.PackerBuilderType
 
 	// expose ip address variables
-	httpAddr := common.GetHTTPAddr()
-	if httpAddr != "" {
-		envVars["PACKER_HTTP_ADDR"] = httpAddr
+	httpAddr := p.generatedData["PackerHTTPAddr"]
+	if httpAddr != nil && httpAddr != common.HttpAddrNotImplemented {
+		envVars["PACKER_HTTP_ADDR"] = httpAddr.(string)
 	}
-	httpIP := common.GetHTTPIP()
-	if httpIP != "" {
-		envVars["PACKER_HTTP_IP"] = httpIP
+	httpIP := p.generatedData["PackerHTTPIP"]
+	if httpIP != nil && httpIP != common.HttpIPNotImplemented {
+		envVars["PACKER_HTTP_IP"] = httpIP.(string)
 	}
-	httpPort := common.GetHTTPPort()
-	if httpPort != "" {
-		envVars["PACKER_HTTP_PORT"] = httpPort
+	httpPort := p.generatedData["PackerHTTPPort"]
+	if httpPort != nil && httpPort != common.HttpPortNotImplemented {
+		envVars["PACKER_HTTP_PORT"] = httpPort.(string)
 	}
 
 	// Split vars into key/value components

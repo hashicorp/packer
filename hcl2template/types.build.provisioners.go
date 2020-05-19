@@ -77,10 +77,10 @@ func (p *Parser) decodeProvisioner(block *hcl.Block) (*ProvisionerBlock, hcl.Dia
 	return provisioner, diags
 }
 
-func (p *Parser) startProvisioner(source *SourceBlock, pb *ProvisionerBlock, ectx *hcl.EvalContext, generatedVars map[string]string) (packer.Provisioner, hcl.Diagnostics) {
+func (cfg *PackerConfig) startProvisioner(source *SourceBlock, pb *ProvisionerBlock, ectx *hcl.EvalContext, generatedVars map[string]string) (packer.Provisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
-	provisioner, err := p.ProvisionersSchemas.Start(pb.PType)
+	provisioner, err := cfg.provisionersSchemas.Start(pb.PType)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary: fmt.Sprintf("failed loading %s", pb.PType),
