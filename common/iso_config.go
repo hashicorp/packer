@@ -161,7 +161,7 @@ func (c *ISOConfig) Prepare(*interpolate.Context) (warnings []string, errs []err
 		}
 		cksum, err := defaultGetterClient.GetChecksum(context.TODO(), req)
 		if err != nil {
-			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file: %v", err))
+			errs = append(errs, fmt.Errorf("%v in %q", err, req.URL().Query().Get("checksum")))
 		} else {
 			c.ISOChecksum = cksum.String()
 		}
