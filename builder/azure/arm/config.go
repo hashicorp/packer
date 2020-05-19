@@ -394,7 +394,7 @@ type Config struct {
 	// see [here](https://docs.microsoft.com/en-us/azure/virtual-machines/troubleshooting/boot-diagnostics) for more info
 	BootDiagSTGAccount string `mapstructure:"boot_diag_storage_account" required:"false"`
 
-	// specify custom azure resource names during build limited to max 10 charcters
+	// specify custom azure resource names during build limited to max 10 characters
 	// this will set the prefix for the resources. The actuall resource names will be
 	// `custom_resource_build_prefix` + resourcetype + 5 character random alphanumeric string
 	CustomResourcePrefix string `mapstructure:"custom_resource_build_prefix" required:"false"`
@@ -668,7 +668,7 @@ func setRuntimeValues(c *Config) {
 	c.tmpNicName = tempName.NicName
 	c.tmpPublicIPAddressName = tempName.PublicIPAddressName
 	c.tmpOSDiskName = tempName.OSDiskName
-	c.tmpDataDiskName = tempName.DataDiskname
+	c.tmpDataDiskName = tempName.DataDiskName
 	c.tmpSubnetName = tempName.SubnetName
 	c.tmpVirtualNetworkName = tempName.VirtualNetworkName
 	c.tmpNsgName = tempName.NsgName
