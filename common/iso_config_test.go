@@ -251,9 +251,8 @@ func TestISOConfigPrepare_ISOChecksumLocalFile(t *testing.T) {
 	}
 
 	i := ISOConfig{
-		ISOChecksumURL:  "./local.sum",
-		ISOChecksumType: "sha256",
-		ISOUrls:         []string{"http://hashicorp.com/ubuntu/dists/bionic-updates/main/installer-amd64/current/images/netboot/mini.iso"},
+		ISOChecksum: "file:./local.sum",
+		ISOUrls:     []string{"http://hashicorp.com/ubuntu/dists/bionic-updates/main/installer-amd64/current/images/netboot/mini.iso"},
 	}
 
 	warns, errs := i.Prepare(nil)
