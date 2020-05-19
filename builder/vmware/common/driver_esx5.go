@@ -689,7 +689,7 @@ func (d *ESX5Driver) VerifyChecksum(hash string, file string) bool {
 	}
 
 	req := &getter.Request{
-		Src: file + "checksum=" + hash,
+		Src: file + "?checksum=" + hash,
 		// Here we don't want to set the PWD to avoid causing any security
 		// concerns. In case the checksum is in a file, the caller, ( mainly
 		// ISOConfig.Prepare ) step should have downloaded it and made it a
