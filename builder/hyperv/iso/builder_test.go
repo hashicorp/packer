@@ -302,7 +302,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	config := testConfig()
 
 	// Test bad
-	config["iso_checksum"] = "foo"
+	config["iso_checksum"] = "0B0F137F17AC10944716020B018F8126"
 	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
@@ -312,7 +312,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	}
 
 	// Test good
-	config["iso_checksum"] = "mD5:foo"
+	config["iso_checksum"] = "mD5:0B0F137F17AC10944716020B018F8126"
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
