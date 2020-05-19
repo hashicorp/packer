@@ -16,7 +16,7 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"iso_checksum":            "md5:foo",
+		"iso_checksum":            "md5:0B0F137F17AC10944716020B018F8126",
 		"iso_url":                 "http://www.packer.io",
 		"shutdown_command":        "yes",
 		"ssh_username":            "foo",
