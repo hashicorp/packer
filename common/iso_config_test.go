@@ -62,7 +62,7 @@ func TestISOConfigPrepare_ISOChecksum(t *testing.T) {
 
 	// Test good
 	i = testISOConfig()
-	i.ISOChecksum = "FOo"
+	i.ISOChecksum = "0b0F137F17AC10944716020B018F8126"
 	warns, err = i.Prepare(nil)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
