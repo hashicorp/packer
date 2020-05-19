@@ -1,9 +1,9 @@
 ## 1.6.0 (Upcoming)
 
 ### BACKWARDS INCOMPATIBILITIES:
-* `builder/vsphere-iso`  The deprecated fields `network`, `network_card`,
+* builder/vsphere-iso: The deprecated fields `network`, `network_card`,
     `disk_size`, `disk_thin_provisioned`, and `disk_eagerly_scrub` have been
-    removed. Run "packer fix template.json" to migrate an existig template
+    removed. Run `packer fix template.json` to migrate an existig template
     [GH-9149]
 
 ### FEATURES:
