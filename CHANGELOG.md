@@ -2,6 +2,13 @@
 
 ### BACKWARDS INCOMPATIBILITIES:
 
+* The `iso_checksum_type` and `iso_checksum_url` fields have be removed in
+  favor of simply setting the checksum field. Use the [packer
+  fix](https://www.packer.io/docs/commands/fix/) command to update a config
+  file. See any [iso_checksum field
+  docs](https://www.packer.io/docs/builders/virtualbox/iso/#iso_checksum)
+  to read more about this[GH-8437]
+
 ### FEATURES:
 * **New post-processor** Yandex Export [GH-9124]
 
