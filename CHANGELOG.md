@@ -17,9 +17,6 @@
 * builder/virtualbox: Add `output_filename` config option to allow to set a
     custom filename instead of forcing to be the same as vm_name. [GH-9174]
 * builder/vsphere: floppy_label Parameter for vsphere-iso Builder [GH-9187]
-* core: Make HTTP server information `PackerHTTPIP`, `PackerHTTPPort`, and
-    `PackerHTTPAddr` available via the `build` template engine for all
-    supported builders [GH-9238]
 * core: Update vendored "go-getter" library with checksum fixes.
 * post-processor/docker-push: Support pushing multiple tags [GH-9182]
 * post-processor/docker-tag: Change field name of docker tag to "tags" instead
@@ -36,6 +33,9 @@
     caused `iso_url` field to fail. [GH-9197]
 * core: fix regression that broke use of pwd when retrieving the checksum from
     a file [GH-9129].
+* core: Ensure HTTP server information `PackerHTTPIP`, `PackerHTTPPort`, and
+    `PackerHTTPAddr` are available via the `build` template engine for all
+    supported builders [GH-9238]
 * post-processor/vsphere-template: Add VSphere builder's artifact to vsphere-
     template's supported types [GH-9146]
 * provisioner/powershell: Fix long-wait retry loop caused by cleanup logic
