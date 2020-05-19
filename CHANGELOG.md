@@ -1,6 +1,10 @@
 ## 1.6.0 (Upcoming)
 
 ### BACKWARDS INCOMPATIBILITIES:
+* `builder/vsphere-iso`  The deprecated fields `network`, `network_card`,
+    `disk_size`, `disk_thin_provisioned`, and `disk_eagerly_scrub` have been
+    removed. Run "packer fix template.json" to migrate an existig template
+    [GH-9149]
 
 ### FEATURES:
 * **New post-processor** Yandex Export [GH-9124]
@@ -13,6 +17,9 @@
 * builder/virtualbox: Add `output_filename` config option to allow to set a
     custom filename instead of forcing to be the same as vm_name. [GH-9174]
 * builder/vsphere: floppy_label Parameter for vsphere-iso Builder [GH-9187]
+* core: Make HTTP server information `PackerHTTPIP`, `PackerHTTPPort`, and
+    `PackerHTTPAddr` available via the `build` template engine for all
+    supported builders [GH-9238]
 * core: Update vendored "go-getter" library with checksum fixes.
 * post-processor/docker-push: Support pushing multiple tags [GH-9182]
 * post-processor/docker-tag: Change field name of docker tag to "tags" instead
