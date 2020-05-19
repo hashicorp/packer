@@ -275,7 +275,7 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 	}
 
 	// Test invalid checksum
-	config["iso_checksum"] = "0B0F137F17AC10944716020B018F8126"
+	config["iso_checksum"] = "FOo"
 	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
