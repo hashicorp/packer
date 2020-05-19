@@ -301,7 +301,6 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	// Test bad
 	config["iso_checksum"] = "0B0F137F17AC10944716020B018F8126"
 	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
