@@ -274,8 +274,18 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	// Test good
+	// Test invalid checksum
 	config["iso_checksum"] = "FOo"
+	_, warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test good
+	config["iso_checksum"] = "md5:0B0F137F17AC10944716020B018F8126"
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
