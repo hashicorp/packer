@@ -70,7 +70,7 @@ require (
 	github.com/hashicorp/go-cty-funcs/uuid v0.0.0-20200203151509-c92509f48b18
 	github.com/hashicorp/go-getter/gcs/v2 v2.0.0-20200514151440-7b188cad6b7d
 	github.com/hashicorp/go-getter/s3/v2 v2.0.0-20200514151440-7b188cad6b7d
-	github.com/hashicorp/go-getter/v2 v2.0.0-20200514142349-eacc0bb898b3
+	github.com/hashicorp/go-getter/v2 v2.0.0-20200518081638-5b5e57151574
 	github.com/hashicorp/go-immutable-radix v1.1.0 // indirect
 	github.com/hashicorp/go-msgpack v0.5.5 // indirect
 	github.com/hashicorp/go-multierror v1.1.0

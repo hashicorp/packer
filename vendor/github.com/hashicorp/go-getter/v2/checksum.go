@@ -55,11 +55,11 @@ func (cerr *ChecksumError) Error() string {
 	)
 }
 
-// Checksum computes the Checksum for file using the hashing algorithm from
+// Checksum computes the Checksum for filePath using the hashing algorithm from
 // c.Hash and compares it to c.Value. If those values differ a ChecksumError
 // will be returned.
-func (c *FileChecksum) Checksum(file string) error {
-	f, err := os.Open(file)
+func (c *FileChecksum) Checksum(filePath string) error {
+	f, err := os.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("Failed to open file for checksum: %s", err)
 	}
@@ -75,7 +75,7 @@ func (c *FileChecksum) Checksum(file string) error {
 			Hash:     c.Hash,
 			Actual:   actual,
 			Expected: c.Value,
-			File:     file,
+			File:     filePath,
 		}
 	}
 
