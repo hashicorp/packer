@@ -182,7 +182,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		}
 		if strings.HasSuffix(b.config.SourceBox, ".box") {
 			if _, err := os.Stat(b.config.SourceBox); err != nil {
-				packer.MultiErrorAppend(errs,
+				errs = packer.MultiErrorAppend(errs,
 					fmt.Errorf("Source box '%s' needs to exist at time of config validation! %v", b.config.SourceBox, err))
 			}
 		}
@@ -191,7 +191,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	if b.config.OutputVagrantfile != "" {
 		b.config.OutputVagrantfile, err = filepath.Abs(b.config.OutputVagrantfile)
 		if err != nil {
-			packer.MultiErrorAppend(errs,
+			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("unable to determine absolute path for output vagrantfile: %s", err))
 		}
 	}
@@ -201,7 +201,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		for _, rawFile := range b.config.PackageInclude {
 			inclFile, err := filepath.Abs(rawFile)
 			if err != nil {
-				packer.MultiErrorAppend(errs,
+				errs = packer.MultiErrorAppend(errs,
 					fmt.Errorf("unable to determine absolute path for file to be included: %s", rawFile))
 			}
 			include = append(include, inclFile)
