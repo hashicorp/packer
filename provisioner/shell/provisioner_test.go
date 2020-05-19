@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -271,6 +272,7 @@ func TestProvisioner_createFlattenedEnvVars(t *testing.T) {
 	}
 
 	p := new(Provisioner)
+	p.generatedData = generatedData()
 	p.Prepare(config)
 
 	// Defaults provided by Packer
@@ -308,7 +310,7 @@ func TestProvisioner_createFlattenedEnvVars_withEnvVarFormat(t *testing.T) {
 	}
 
 	p := new(Provisioner)
-
+	p.generatedData = generatedData()
 	p.config.EnvVarFormat = "%s=%s "
 	p.Prepare(config)
 
@@ -365,6 +367,7 @@ export PACKER_BUILD_NAME='vmware'
 	}
 
 	p := new(Provisioner)
+	p.generatedData = generatedData()
 	p.config.UseEnvVarFile = true
 	p.Prepare(config)
 
@@ -411,7 +414,7 @@ PACKER_BUILD_NAME=vmware
 	}
 
 	p := new(Provisioner)
-
+	p.generatedData = generatedData()
 	p.config.UseEnvVarFile = true
 	//User provided env_var_format without export prefix
 	p.config.EnvVarFormat = "%s=%s\n"
@@ -555,5 +558,13 @@ func TestProvisionerRemotePathDefaultsSuccessfully(t *testing.T) {
 
 	if !remotePathRegex.MatchString(p.config.RemotePath) {
 		t.Fatalf("remote path does not match the expected default regex: %q", p.config.RemotePath)
+	}
+}
+
+func generatedData() map[string]interface{} {
+	return map[string]interface{}{
+		"PackerHTTPAddr": common.HttpAddrNotImplemented,
+		"PackerHTTPIP":   common.HttpIPNotImplemented,
+		"PackerHTTPPort": common.HttpPortNotImplemented,
 	}
 }

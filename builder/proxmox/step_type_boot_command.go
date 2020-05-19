@@ -9,9 +9,7 @@ import (
 	"time"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -63,7 +61,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	common.SetHTTPIP(httpIP)
+	state.Put("http_ip", httpIP)
 	s.Ctx.Data = &bootCommandTemplateData{
 		HTTPIP:   httpIP,
 		HTTPPort: state.Get("http_port").(int),
@@ -97,9 +95,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	return multistep.ActionContinue
 }
 
-func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {
-	commonhelper.RemoveSharedStateFile("ip", "")
-}
+func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
 func hostIP() (string, error) {
 	addrs, err := net.InterfaceAddrs()

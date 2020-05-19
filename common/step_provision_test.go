@@ -40,16 +40,16 @@ func TestPopulateProvisionHookData(t *testing.T) {
 	instanceId := 11111
 	packerRunUUID := "1fa225b8-27d1-42d1-9117-221772213962"
 	httpIP := "10.0.2.2"
-	httpPort := "2222"
-	httpAddr := fmt.Sprintf("%s:%s", httpIP, httpPort)
+	httpPort := 2222
+	httpAddr := fmt.Sprintf("%s:%d", httpIP, httpPort)
 
 	state.Put("generated_data", generatedData)
 	state.Put("instance_id", instanceId)
 	state.Put("communicator_config", commConfig)
 
 	os.Setenv("PACKER_RUN_UUID", packerRunUUID)
-	SetHTTPIP(httpIP)
-	SetHTTPPort(httpPort)
+	state.Put("http_ip", httpIP)
+	state.Put("http_port", httpPort)
 
 	hookData := PopulateProvisionHookData(state)
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -29,7 +28,7 @@ func (s *StepHTTPIPDiscover) Run(ctx context.Context, state multistep.StateBag) 
 	}
 
 	log.Printf("Host IP for the VMware machine: %s", hostIP)
-	common.SetHTTPIP(hostIP)
+	state.Put("http_ip", hostIP)
 
 	return multistep.ActionContinue
 }

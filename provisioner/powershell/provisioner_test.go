@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/stretchr/testify/assert"
 )
@@ -373,7 +374,7 @@ func TestProvisionerProvision_ValidExitCodes(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	comm.StartExitStatus = 200
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err := p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -396,7 +397,7 @@ func TestProvisionerProvision_InvalidExitCodes(t *testing.T) {
 	comm := new(packer.MockCommunicator)
 	comm.StartExitStatus = 201 // Invalid!
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err := p.Provision(context.Background(), ui, comm, generatedData())
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -418,7 +419,8 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	p.config.PackerBuilderType = "iso"
 	comm := new(packer.MockCommunicator)
 	_ = p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+
+	err := p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -438,7 +440,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	config["remote_path"] = "c:/Windows/Temp/inlineScript.ps1"
 
 	p.Prepare(config)
-	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err = p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -468,7 +470,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err := p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -505,7 +507,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err := p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -554,7 +556,7 @@ func TestProvisionerProvision_SkipClean(t *testing.T) {
 		if err := p.Prepare(config); err != nil {
 			t.Fatalf("failed to prepare config when SkipClean is %t: %s", tc.SkipClean, err)
 		}
-		err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+		err := p.Provision(context.Background(), ui, comm, generatedData())
 		if err != nil {
 			t.Fatal("should not have error")
 		}
@@ -578,7 +580,7 @@ func TestProvisionerProvision_UploadFails(t *testing.T) {
 	comm := new(packer.ScriptUploadErrorMockCommunicator)
 	p.Prepare(config)
 	p.config.StartRetryTimeout = 1 * time.Second
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err := p.Provision(context.Background(), ui, comm, generatedData())
 	if !strings.Contains(err.Error(), packer.ScriptUploadErrorMockCommunicatorError.Error()) {
 		t.Fatalf("expected Provision() error %q to contain %q",
 			err.Error(),
@@ -616,6 +618,7 @@ func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
 	}
 
 	p := new(Provisioner)
+	p.generatedData = generatedData()
 	p.Prepare(config)
 
 	// Defaults provided by Packer
@@ -767,6 +770,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 	}
 
 	p := new(Provisioner)
+	p.generatedData = generatedData()
 	p.Prepare(config)
 
 	// Defaults provided by Packer
@@ -847,5 +851,13 @@ func testConfigWithSkipClean() map[string]interface{} {
 	return map[string]interface{}{
 		"inline":     []interface{}{"foo", "bar"},
 		"skip_clean": true,
+	}
+}
+
+func generatedData() map[string]interface{} {
+	return map[string]interface{}{
+		"PackerHTTPAddr": common.HttpAddrNotImplemented,
+		"PackerHTTPIP":   common.HttpIPNotImplemented,
+		"PackerHTTPPort": common.HttpPortNotImplemented,
 	}
 }

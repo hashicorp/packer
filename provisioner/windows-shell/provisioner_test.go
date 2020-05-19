@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -287,7 +288,8 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	p.config.PackerBuilderType = "iso"
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+
+	err := p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -306,7 +308,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	config["remote_path"] = "c:/Windows/Temp/inlineScript.bat"
 
 	p.Prepare(config)
-	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err = p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -337,7 +339,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err = p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -376,7 +378,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err = p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -409,6 +411,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 	}
 
 	p := new(Provisioner)
+	p.generatedData = generatedData()
 	p.Prepare(config)
 
 	// Defaults provided by Packer
@@ -423,7 +426,15 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		}
 	}
 }
+
 func TestCancel(t *testing.T) {
 	// Don't actually call Cancel() as it performs an os.Exit(0)
 	// which kills the 'go test' tool
+}
+func generatedData() map[string]interface{} {
+	return map[string]interface{}{
+		"PackerHTTPAddr": common.HttpAddrNotImplemented,
+		"PackerHTTPIP":   common.HttpIPNotImplemented,
+		"PackerHTTPPort": common.HttpPortNotImplemented,
+	}
 }
