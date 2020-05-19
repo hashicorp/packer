@@ -198,11 +198,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	if len(b.config.PackageInclude) > 0 {
 		include := []string{}
-		for i, inclFile := range b.config.PackageInclude {
-			b.config.PackageInclude, err = filepath.Abs(b.config.PackageInclude)
+		for _, rawFile := range b.config.PackageInclude {
+			inclFile, err := filepath.Abs(rawFile)
 			if err != nil {
 				packer.MultiErrorAppend(errs,
-					fmt.Errorf("unable to determine absolute path for file to be included: %s", inclFile))
+					fmt.Errorf("unable to determine absolute path for file to be included: %s", rawFile))
 			}
 			include = append(include, inclFile)
 		}
