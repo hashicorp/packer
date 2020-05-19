@@ -216,7 +216,6 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	defer os.RemoveAll(td)
 	config["clone_from_vmcx_path"] = td
 
-	// Test bad
 	config["iso_checksum"] = "0B0F137F17AC10944716020B018F8126"
 	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
