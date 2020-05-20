@@ -38,6 +38,7 @@
     supported builders [GH-9238]
 * post-processor/vsphere-template: Add VSphere builder's artifact to vsphere-
     template's supported types [GH-9146]
+* provisioner/inspec: Fix build variables interpolation [GH-9262]
 * provisioner/powershell: Fix long-wait retry loop caused by cleanup logic
     [GH-9226]
 
