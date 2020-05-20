@@ -347,11 +347,14 @@ func (p *Provisioner) executeInspec(ui packer.Ui, comm packer.Communicator, priv
 	args = append(args, "--backend", p.config.Backend)
 	args = append(args, "--host", p.config.Host)
 
+	if p.config.User != "" {
+		args = append(args, "--user", p.config.User)
+	}
+
 	if p.config.Backend == "ssh" {
 		if len(privKeyFile) > 0 {
 			args = append(args, "--key-files", privKeyFile)
 		}
-		args = append(args, "--user", p.config.User)
 		args = append(args, "--port", strconv.Itoa(p.config.LocalPort))
 	}
 
