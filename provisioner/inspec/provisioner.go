@@ -191,7 +191,7 @@ func (p *Provisioner) getVersion() error {
 
 func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Inspec...")
-	p.config.ctx.Data = generateData
+	p.config.ctx.Data = generatedData
 
 	userp, err := interpolate.Render(p.config.User, &p.config.ctx)
 	if err != nil {
