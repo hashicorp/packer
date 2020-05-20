@@ -189,7 +189,7 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generateData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Inspec...")
 	p.config.ctx.Data = generateData
 
