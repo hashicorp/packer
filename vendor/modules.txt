@@ -309,15 +309,11 @@ github.com/hashicorp/errwrap
 github.com/hashicorp/go-checkpoint
 # github.com/hashicorp/go-cleanhttp v0.5.1
 github.com/hashicorp/go-cleanhttp
-# github.com/hashicorp/go-cty-funcs/cidr v0.0.0-20200203151509-c92509f48b18
+# github.com/hashicorp/go-cty-funcs v0.0.0-20200520133146-0d04eb807361
 github.com/hashicorp/go-cty-funcs/cidr
-# github.com/hashicorp/go-cty-funcs/crypto v0.0.0-20200124154056-476681ae9d62
 github.com/hashicorp/go-cty-funcs/crypto
-# github.com/hashicorp/go-cty-funcs/encoding v0.0.0-20200203151509-c92509f48b18
 github.com/hashicorp/go-cty-funcs/encoding
-# github.com/hashicorp/go-cty-funcs/filesystem v0.0.0-20200203151509-c92509f48b18
 github.com/hashicorp/go-cty-funcs/filesystem
-# github.com/hashicorp/go-cty-funcs/uuid v0.0.0-20200203151509-c92509f48b18
 github.com/hashicorp/go-cty-funcs/uuid
 # github.com/hashicorp/go-getter v1.4.1
 github.com/hashicorp/go-getter/helper/url
@@ -646,7 +642,7 @@ github.com/yandex-cloud/go-sdk/pkg/retry
 github.com/yandex-cloud/go-sdk/pkg/sdkerrors
 github.com/yandex-cloud/go-sdk/pkg/singleflight
 github.com/yandex-cloud/go-sdk/sdkresolvers
-# github.com/zclconf/go-cty v1.3.2-0.20200309235747-0b5d9cf50df7
+# github.com/zclconf/go-cty v1.4.0
 github.com/zclconf/go-cty/cty
 github.com/zclconf/go-cty/cty/convert
 github.com/zclconf/go-cty/cty/function
@@ -673,7 +669,7 @@ go.opencensus.io/trace
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/propagation
 go.opencensus.io/trace/tracestate
-# golang.org/x/crypto v0.0.0-20200117160349-530e935923ad
+# golang.org/x/crypto v0.0.0-20200422194213-44a606286825
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/chacha20
@@ -688,6 +684,7 @@ golang.org/x/crypto/pkcs12/internal/rc2
 golang.org/x/crypto/poly1305
 golang.org/x/crypto/ssh
 golang.org/x/crypto/ssh/agent
+golang.org/x/crypto/ssh/internal/bcrypt_pbkdf
 golang.org/x/crypto/ssh/terminal
 # golang.org/x/exp v0.0.0-20191129062945-2f5052295587
 golang.org/x/exp/apidiff
