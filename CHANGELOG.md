@@ -10,8 +10,6 @@
 * **New post-processor** Yandex Export [GH-9124]
 
 ### IMPROVEMENTS:
-* core: HCL logs now display source type and source name (`type.name`) in logs
-    to differentiate more easily who says what. [GH-9257]
 * builder/amazon: Add SSM Session Manager as a SSH interface connection
     [GH-9082]
 * builder/google: Implement iap proxy for googlecompute [GH-9105]
@@ -19,6 +17,12 @@
 * builder/virtualbox: Add `output_filename` config option to allow to set a
     custom filename instead of forcing to be the same as vm_name. [GH-9174]
 * builder/vsphere: floppy_label Parameter for vsphere-iso Builder [GH-9187]
+* core/hcl: Enable force, debug, and on-error command line flags for hcl2
+    builds. [GH-9234]
+* core/interpolation: Add support for specifying a particular key to fetch from
+    the AWS Secrets Manager [GH-9202]
+* core: HCL logs now display source type and source name (`type.name`) in logs
+    to differentiate more easily who says what. [GH-9257]
 * core: Update vendored "go-getter" library with checksum fixes.
 * post-processor/docker-push: Support pushing multiple tags [GH-9182]
 * post-processor/docker-tag: Change field name of docker tag to "tags" instead
@@ -27,19 +31,25 @@
 * update consul and vault dependencies [GH-9205]
 
 ### BUG FIXES:
+* builder/azure-arm: Update runtime constants with a valid DataDiskName
+    [GH-9251]
 * builder/digitalocean: Use correct image type for Droplet creates. [GH-9212]
 * builder/openstack: Don't error if metadata can't be set. Old versions of
     openstack don't support that API call. [GH-9198]
 * builder/virtualbox: Fix bug using checksum files. [GH-9101]
 * builder/vsphere: Fix iso config prepare being called incorrectly, which
     caused `iso_url` field to fail. [GH-9197]
-* core: fix regression that broke use of pwd when retrieving the checksum from
-    a file [GH-9129].
 * core: Ensure HTTP server information `PackerHTTPIP`, `PackerHTTPPort`, and
     `PackerHTTPAddr` are available via the `build` template engine for all
     supported builders [GH-9238]
+* core: fix regression that broke use of pwd when retrieving the checksum from
+    a file [GH-9129].
+* post-processor/vagrant: Add "provider_override" template option to allow
+    artifacts from the Artifice post-processor [GH-9239]
 * post-processor/vsphere-template: Add VSphere builder's artifact to vsphere-
     template's supported types [GH-9146]
+* postprocessor/artifice: Update various core post-processors to accept
+    artifacts from the Artifice post-processor [GH-9239]
 * provisioner/inspec: Fix build variables interpolation [GH-9262]
 * provisioner/powershell: Fix long-wait retry loop caused by cleanup logic
     [GH-9226]
