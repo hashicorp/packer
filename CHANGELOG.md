@@ -10,6 +10,8 @@
 * **New post-processor** Yandex Export [GH-9124]
 
 ### IMPROVEMENTS:
+* core: HCL logs now display source type and source name (`type.name`) in logs
+    to differentiate more easily who says what.
 * builder/amazon: Add SSM Session Manager as a SSH interface connection
     [GH-9082]
 * builder/google: Implement iap proxy for googlecompute [GH-9105]
