@@ -39,7 +39,7 @@ func TestAccPowershellProvisioner_Script(t *testing.T) {
 	acc.TestProvisionersAgainstBuilders(&testProvisioner, t)
 }
 
-func TestAccPowershellProvisioner_Invalid(t *testing.T) {
+func TestAccPowershellProvisioner_ExitCodes(t *testing.T) {
 	acc.TestProvisionersPreCheck(TestProvisionerName, t)
 
 	// This provisioner should fail with an exit code of 1. To assert the failure the fixture

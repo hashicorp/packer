@@ -10,7 +10,15 @@
 },
 {
   "type": "powershell",
-  "script": "../../provisioner/powershell/test-fixtures/scripts/set_version_latest.ps1"
+  "script": "../../provisioner/powershell/test-fixtures/scripts/set_version_latest.ps1",
+  "valid_exit_codes": ["0"]
+},
+{
+  "type": "powershell",
+  "elevated_user": "Administrator",
+  "elevated_password": "{{.WinRMPassword}}",
+  "inline": "Get-ItemProperty -Path HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion",
+  "valid_exit_codes": ["0"]
 },
 {
   "type": "powershell",
