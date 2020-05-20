@@ -18,7 +18,7 @@ USER_VARS="${USER_VARS} -var token=${HYPERONE_TOKEN}"
 USER_VARS="${USER_VARS} -var project=${HYPERONE_PROJECT}"
 
 hyperone_has_image() {
-    h1 image list --project-select=${HYPERONE_PROJECT} --query "[?tag.${2}=='${3}']"  --output=tsv | grep $1 | wc -l
+    h1 image list --project-select=${HYPERONE_PROJECT} --query "[?tag.${2}=='${3}']"  --output=tsv | grep $1 -c
 }
 
 teardown() {
@@ -33,6 +33,13 @@ teardown() {
     [ "$status" -eq 0 ]
     [ "$(hyperone_has_image "packerbats-minimal" "key" "value")" -eq 1 ]
 }
+
+@test "hyperone: build new-syntax.pkr.hcl" {
+    run packer build ${USER_VARS} $FIXTURE_ROOT/new-syntax.pkr.hcl
+    [ "$status" -eq 0 ]
+    [ "$(hyperone_has_image "packerbats-hcl" "key" "value")" -eq 1 ]
+}
+
 
 @test "hyperone: build chroot.json" {
     run packer build ${USER_VARS} $FIXTURE_ROOT/chroot.json
