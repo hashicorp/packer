@@ -121,7 +121,6 @@ require (
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
 	github.com/oracle/oci-go-sdk v18.0.0+incompatible
 	github.com/outscale/osc-go v0.0.1
-	github.com/overdrive3000/secretsmanager v0.0.0-20200421092817-bcdff577c37a
 	github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
 	github.com/pierrec/lz4 v2.0.5+incompatible
 	github.com/pkg/errors v0.8.1

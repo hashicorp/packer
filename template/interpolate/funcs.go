@@ -13,10 +13,10 @@ import (
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/common"
+	awssmapi "github.com/hashicorp/packer/template/interpolate/aws/secretsmanager"
 	"github.com/hashicorp/packer/version"
 	vaultapi "github.com/hashicorp/vault/api"
 	strftime "github.com/jehiah/go-strftime"
-	awssmapi "github.com/overdrive3000/secretsmanager"
 )
 
 // InitTime is the UTC time when this package was initialized. It is
@@ -327,24 +327,43 @@ func funcGenVault(ctx *Context) interface{} {
 }
 
 func funcGenAwsSecrets(ctx *Context) interface{} {
-	return func(name string) (string, error) {
+	return func(secret ...string) (string, error) {
 		if !ctx.EnableEnv {
 			// The error message doesn't have to be that detailed since
 			// semantic checks should catch this.
 			return "", errors.New("AWS Secrets Manager vars are only allowed in the variables section")
 		}
+
+		// Check if at least 1 parameter has been used
+		if len(secret) == 0 {
+			return "", errors.New("At least one parameter must be used")
+		}
 		// client uses AWS SDK CredentialChain method. So,credentials can
 		// be loaded from credential file, environment variables, or IAM
 		// roles.
-		client, err := awssmapi.New()
-		if err != nil {
-			return "", fmt.Errorf("Error getting AWS Secrets Manager client: %s", err)
+		client := awssmapi.New(
+			&awssmapi.AWSConfig{},
+		)
+
+		var name, key string
+		name = secret[0]
+		// key is optional if not used we fetch the first
+		// value stored in given secret. If more than two parameters
+		// are passed we take second param and ignore the others
+		if len(secret) > 1 {
+			key = secret[1]
 		}
-		secret, err := client.GetSecret(name)
+
+		spec := &awssmapi.SecretSpec{
+			Name: name,
+			Key:  key,
+		}
+
+		s, err := client.GetSecret(spec)
 		if err != nil {
 			return "", fmt.Errorf("Error getting secret: %s", err)
 		}
-		return secret, nil
+		return s, nil
 	}
 }
 
