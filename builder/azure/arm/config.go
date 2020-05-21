@@ -782,6 +782,23 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	c.ClientConfig.Validate(errs)
 
 	/////////////////////////////////////////////
+	// Identity
+	if len(c.UserAssignedManagedIdentities) != 0 {
+		for _, rid := range c.UserAssignedManagedIdentities {
+			r, err := client.ParseResourceID(rid)
+			if err != nil {
+				errs = packer.MultiErrorAppend(errs, err)
+			}
+			if r.Provider != "" && !strings.EqualFold(r.Provider, "Microsoft.ManagedIdentity") {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("A valid user assigned managed identity resource id must have a correct resource provider"))
+			}
+			if r.ResourceType.String() != "" && !strings.EqualFold(r.ResourceType.String(), "userAssignedIdentities") {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("A valid user assigned managed identity resource id must have a correct resource type"))
+			}
+		}
+	}
+
+	/////////////////////////////////////////////
 	// Capture
 	if c.CaptureContainerName == "" && c.ManagedImageName == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name or managed_image_name must be specified"))
