@@ -34,6 +34,7 @@ type Resource struct {
 	Properties *Properties         `json:"properties,omitempty"`
 	Tags       *map[string]*string `json:"tags,omitempty"`
 	Resources  *[]Resource         `json:"resources,omitempty"`
+	Identity   *Identity           `json:"identity,omitempty"`
 }
 
 type Plan struct {
@@ -96,6 +97,17 @@ type Properties struct {
 	SecurityRules  *[]network.SecurityRule `json:"securityRules,omitempty"`
 	TenantId       *string                 `json:"tenantId,omitempty"`
 	Value          *string                 `json:"value,omitempty"`
+}
+
+// Template > Resource > Identity
+type Identity struct {
+	Type                   *string                                 `json:"type,omitempty"`
+	UserAssignedIdentities map[string]*UserAssignedIdentitiesValue `json:"userAssignedIdentities"`
+}
+
+type UserAssignedIdentitiesValue struct {
+	PrincipalId *string `json:"principalId,omitempty"`
+	ClientId    *string `json:"clientId,omitempty"`
 }
 
 type AccessPolicies struct {
