@@ -103,6 +103,28 @@ func (s *TemplateBuilder) BuildWindows(keyVaultName, winRMCertificateUrl string)
 	return nil
 }
 
+func (s *TemplateBuilder) SetIdentity(userAssignedManagedIdentities []string) error {
+	resource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	var id *Identity
+
+	if len(userAssignedManagedIdentities) != 0 {
+		id = &Identity{
+			Type:                   to.StringPtr("UserAssigned"),
+			UserAssignedIdentities: make(map[string]*UserAssignedIdentitiesValue),
+		}
+		for _, uid := range userAssignedManagedIdentities {
+			id.UserAssignedIdentities[uid] = &UserAssignedIdentitiesValue{}
+		}
+	}
+
+	resource.Identity = id
+	return nil
+}
+
 func (s *TemplateBuilder) SetManagedDiskUrl(managedImageId string, storageAccountType compute.StorageAccountTypes, cachingType compute.CachingTypes) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
