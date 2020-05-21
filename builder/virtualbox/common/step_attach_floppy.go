@@ -88,6 +88,8 @@ func (s *StepAttachFloppy) Run(ctx context.Context, state multistep.StateBag) mu
 }
 
 func (s *StepAttachFloppy) Cleanup(state multistep.StateBag) {
+	ui := state.Get("ui").(packer.Ui)
+	ui.Say("Cleaning up floppy disk...")
 	if s.floppyPath == "" {
 		return
 	}
@@ -107,7 +109,8 @@ func (s *StepAttachFloppy) Cleanup(state multistep.StateBag) {
 	}
 
 	if err := driver.VBoxManage(command...); err != nil {
-		log.Printf("Error unregistering floppy: %s", err)
+		ui.Error(fmt.Sprintf("Error unregistering floppy: %s. "+
+			"Not considering this a critical failure; build will continue.", err))
 	}
 }
 
