@@ -103,6 +103,13 @@ type Config struct {
 	// Authentication via OAUTH
 	ClientConfig client.Config `mapstructure:",squash"`
 
+	// If set with one or more resource ids of user assigned managed identities, they will be configured on the VM.
+	// See [documentation](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token)
+	// for how to acquire tokens within the VM.
+	// To assign a user assigned managed identity to a VM, the provided account or service principal must have [Managed Identity Operator](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#managed-identity-operator)
+	// and [Virtual Machine Contributor](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#virtual-machine-contributor) role assignments.
+	UserAssignedManagedIdentities []string `mapstructure:"user_assigned_managed_identities" required:"false"`
+
 	// VHD prefix.
 	CaptureNamePrefix string `mapstructure:"capture_name_prefix"`
 	// Destination container name.
