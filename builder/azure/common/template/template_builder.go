@@ -112,6 +112,7 @@ func (s *TemplateBuilder) SetIdentity(userAssignedManagedIdentities []string) er
 	var id *Identity
 
 	if len(userAssignedManagedIdentities) != 0 {
+		s.setVariable("apiVersion", "2018-06-01") // Required for user assigned managed identity
 		id = &Identity{
 			Type:                   to.StringPtr("UserAssigned"),
 			UserAssignedIdentities: make(map[string]*UserAssignedIdentitiesValue),
