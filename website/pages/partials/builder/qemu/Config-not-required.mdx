@@ -108,6 +108,16 @@
     `vmxnet3`, `i82558a` or `i82558b`. The Qemu builder uses `virtio-net` by
     default.
     
+-   `net_bridge` (string) - Connects the network to this bridge instead of using the user mode
+    networking.
+    
+    **NB** This bridge must already exist. You can use the `virbr0` bridge
+    as created by vagrant-libvirt.
+    
+    **NB** This will automatically enable the QMP socket (see QMPEnable).
+    
+    **NB** This only works in Linux based OSes.
+    
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
     If relative, the path is relative to the working directory when packer

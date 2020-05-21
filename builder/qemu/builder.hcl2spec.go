@@ -96,6 +96,7 @@ type FlatConfig struct {
 	MachineType               *string           `mapstructure:"machine_type" required:"false" cty:"machine_type"`
 	MemorySize                *int              `mapstructure:"memory" required:"false" cty:"memory"`
 	NetDevice                 *string           `mapstructure:"net_device" required:"false" cty:"net_device"`
+	NetBridge                 *string           `mapstructure:"net_bridge" required:"false" cty:"net_bridge"`
 	OutputDir                 *string           `mapstructure:"output_directory" required:"false" cty:"output_directory"`
 	QemuArgs                  [][]string        `mapstructure:"qemuargs" required:"false" cty:"qemuargs"`
 	QemuBinary                *string           `mapstructure:"qemu_binary" required:"false" cty:"qemu_binary"`
@@ -212,6 +213,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"machine_type":                 &hcldec.AttrSpec{Name: "machine_type", Type: cty.String, Required: false},
 		"memory":                       &hcldec.AttrSpec{Name: "memory", Type: cty.Number, Required: false},
 		"net_device":                   &hcldec.AttrSpec{Name: "net_device", Type: cty.String, Required: false},
+		"net_bridge":                   &hcldec.AttrSpec{Name: "net_bridge", Type: cty.String, Required: false},
 		"output_directory":             &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
 		"qemuargs":                     &hcldec.AttrSpec{Name: "qemuargs", Type: cty.List(cty.List(cty.String)), Required: false},
 		"qemu_binary":                  &hcldec.AttrSpec{Name: "qemu_binary", Type: cty.String, Required: false},
