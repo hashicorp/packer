@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -224,7 +223,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	if len(config.QemuArgs) > 0 {
 		ui.Say("Overriding defaults Qemu arguments with QemuArgs...")
 
-		httpIp := common.GetHTTPIP()
+		httpIp := state.Get("http_ip").(string)
 		httpPort := state.Get("http_port").(int)
 		ictx := config.ctx
 		if config.Comm.Type != "none" {
