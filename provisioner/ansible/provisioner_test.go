@@ -597,8 +597,8 @@ func TestCreateCmdArgs(t *testing.T) {
 		assert.ElementsMatch(t, args, tc.ExpectedArgs,
 			"Args didn't match expected:\n\n expected: \n%s\n; recieved: \n%s\n", tc.ExpectedArgs, args)
 		assert.ElementsMatch(t, envVars, tc.ExpectedEnvVars, "EnvVars didn't match expected:\n\n expected: \n%s\n; recieved: \n%s\n", tc.ExpectedEnvVars, envVars)
-		assert.EqualValues(t, args[len(args)-1], tc.callArgs[2],
-			"PlayBook File Not Returned as last element: \nexpected: %s\nrecieved: %s\n", args[len(args)-1], tc.callArgs[2])
+		assert.EqualValues(t, tc.callArgs[2], args[len(args)-1],
+			"PlayBook File Not Returned as last element: \nexpected: %s\nrecieved: %s\n", tc.callArgs[2], args[len(args)-1])
 	}
 }
 
