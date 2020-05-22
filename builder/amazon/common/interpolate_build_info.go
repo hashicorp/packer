@@ -8,12 +8,13 @@ import (
 )
 
 type BuildInfoTemplate struct {
-	BuildRegion        string
-	SourceAMI          string
-	SourceAMIName      string
-	SourceAMIOwner     string
-	SourceAMIOwnerName string
-	SourceAMITags      map[string]string
+	BuildRegion           string
+	SourceAMI             string
+	SourceAMICreationDate string
+	SourceAMIName         string
+	SourceAMIOwner        string
+	SourceAMIOwnerName    string
+	SourceAMITags         map[string]string
 }
 
 func extractBuildInfo(region string, state multistep.StateBag, generatedData *builder.GeneratedData) *BuildInfoTemplate {
@@ -31,12 +32,13 @@ func extractBuildInfo(region string, state multistep.StateBag, generatedData *bu
 	}
 
 	buildInfoTemplate := &BuildInfoTemplate{
-		BuildRegion:        region,
-		SourceAMI:          aws.StringValue(sourceAMI.ImageId),
-		SourceAMIName:      aws.StringValue(sourceAMI.Name),
-		SourceAMIOwner:     aws.StringValue(sourceAMI.OwnerId),
-		SourceAMIOwnerName: aws.StringValue(sourceAMI.ImageOwnerAlias),
-		SourceAMITags:      sourceAMITags,
+		BuildRegion:           region,
+		SourceAMI:             aws.StringValue(sourceAMI.ImageId),
+		SourceAMICreationDate: aws.StringValue(sourceAMI.CreationDate),
+		SourceAMIName:         aws.StringValue(sourceAMI.Name),
+		SourceAMIOwner:        aws.StringValue(sourceAMI.OwnerId),
+		SourceAMIOwnerName:    aws.StringValue(sourceAMI.ImageOwnerAlias),
+		SourceAMITags:         sourceAMITags,
 	}
 	generatedData.Put("SourceAMIName", buildInfoTemplate.SourceAMIName)
 	return buildInfoTemplate
