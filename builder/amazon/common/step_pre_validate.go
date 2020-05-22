@@ -84,14 +84,17 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 	// Validate the AMI Key Ids if provided
 	// Note: Per docs, if region-specific keys are set they override and we
 	// silently ignore the default kms_key_id options.
+	// FIXME: Assume the user wants to use the default KMS key, by setting kms_key_id="".
+	// Do we still need permissions to encrypt with it? In other words, should we 
+	// expect we can perform a kms.DescribeKey(`alias/aws/ebs`) operation successfully?
 	if len(s.AMIRegionKMSKeyIDs) != 0 {
 		// Check each key and region exists.v
 		sess := state.Get("awsSession").(*session.Session)
 		for region, keyID := range s.AMIRegionKMSKeyIDs {
 			ui.Say(fmt.Sprintf("Prevalidating KMS key for region %s: %s", region, keyID))
 			if keyID == "" {
-				// Default region is always Ok.
-				continue
+				// Default keyID is an alias, let's make sure we can read it.
+				keyID = "alias/aws/ebs"
 			}
 			kmsConn := kms.New(sess, aws.NewConfig().WithRegion(region))
 			_, err := kmsConn.DescribeKey(&kms.DescribeKeyInput{
@@ -107,8 +110,13 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 		ui.Say(fmt.Sprintf("Prevalidating KMS key: %s", s.AMIKmsKeyId))
 		sess := state.Get("awsSession").(*session.Session)
 		kmsConn := kms.New(sess)
+		keyID := s.AMIKmsKeyId
+		if keyID == "" {
+			// Default keyID is an alias, let's make sure we can read it.
+			keyID = "alias/aws/ebs"
+		}
 		_, err := kmsConn.DescribeKey(&kms.DescribeKeyInput{
-			KeyId: aws.String(s.AMIKmsKeyId),
+			KeyId: aws.String(keyID),
 		})
 		if err != nil {
 			state.Put("error", err)
