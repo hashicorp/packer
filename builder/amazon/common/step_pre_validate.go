@@ -7,8 +7,10 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
+	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -18,12 +20,15 @@ import (
 // the build before actually doing any time consuming work
 //
 type StepPreValidate struct {
-	DestAmiName        string
-	ForceDeregister    bool
-	AMISkipBuildRegion bool
-	VpcId              string
-	SubnetId           string
-	HasSubnetFilter    bool
+	DestAmiName          string
+	ForceDeregister      bool
+	AMISkipBuildRegion   bool
+	VpcId                string
+	SubnetId             string
+	HasSubnetFilter      bool
+	AMIEncryptBootVolume bool
+	AMIKmsKeyId          string
+	AMIRegionKMSKeyIDs   map[string]string
 }
 
 func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -73,6 +78,42 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 					return multistep.ActionHalt
 				}
 			}
+		}
+	}
+
+	// Validate the AMI Key Ids if provided
+	// Note: Per docs, if region-specific keys are set they override and we
+	// silently ignore the default kms_key_id options.
+	if len(s.AMIRegionKMSKeyIDs) != 0 {
+		// Check each key and region exists.v
+		sess := state.Get("awsSession").(*session.Session)
+		for region, keyID := range s.AMIRegionKMSKeyIDs {
+			ui.Say(fmt.Sprintf("Prevalidating KMS key for region %s: %s", region, keyID))
+			if keyID == "" {
+				// Default region is always Ok.
+				continue
+			}
+			kmsConn := kms.New(sess, aws.NewConfig().WithRegion(region))
+			_, err := kmsConn.DescribeKey(&kms.DescribeKeyInput{
+				KeyId: aws.String(keyID),
+			})
+			if err != nil {
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
+	} else if s.AMIEncryptBootVolume {
+		ui.Say(fmt.Sprintf("Prevalidating KMS key: %s", s.AMIKmsKeyId))
+		sess := state.Get("awsSession").(*session.Session)
+		kmsConn := kms.New(sess)
+		_, err := kmsConn.DescribeKey(&kms.DescribeKeyInput{
+			KeyId: aws.String(s.AMIKmsKeyId),
+		})
+		if err != nil {
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
 	}
 
