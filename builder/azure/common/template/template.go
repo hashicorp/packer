@@ -100,14 +100,10 @@ type Properties struct {
 }
 
 // Template > Resource > Identity
+// The map values are simplified to struct{} since they are read-only and cannot be set
 type Identity struct {
-	Type                   *string                                 `json:"type,omitempty"`
-	UserAssignedIdentities map[string]*UserAssignedIdentitiesValue `json:"userAssignedIdentities"`
-}
-
-type UserAssignedIdentitiesValue struct {
-	PrincipalId *string `json:"principalId,omitempty"`
-	ClientId    *string `json:"clientId,omitempty"`
+	Type                   *string             `json:"type,omitempty"`
+	UserAssignedIdentities map[string]struct{} `json:"userAssignedIdentities,omitempty"`
 }
 
 type AccessPolicies struct {
