@@ -12,7 +12,7 @@ type Template struct {
 	ContentVersion *string                `json:"contentVersion"`
 	Parameters     *map[string]Parameters `json:"parameters"`
 	Variables      *map[string]string     `json:"variables"`
-	Resources      *[]Resource            `json:"resources"`
+	Resources      []*Resource            `json:"resources"`
 }
 
 /////////////////////////////////////////////////

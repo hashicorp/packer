@@ -228,9 +228,9 @@ func (s *TemplateBuilder) SetPlanInfo(name, product, publisher, promotionCode st
 		promotionCodeVal = to.StringPtr(promotionCode)
 	}
 
-	for i, x := range *s.template.Resources {
+	for i, x := range s.template.Resources {
 		if strings.EqualFold(*x.Type, resourceVirtualMachine) {
-			(*s.template.Resources)[i].Plan = &Plan{
+			s.template.Resources[i].Plan = &Plan{
 				Name:          to.StringPtr(name),
 				Product:       to.StringPtr(product),
 				Publisher:     to.StringPtr(publisher),
@@ -374,8 +374,8 @@ func (s *TemplateBuilder) SetTags(tags *map[string]*string) error {
 		return nil
 	}
 
-	for i := range *s.template.Resources {
-		(*s.template.Resources)[i].Tags = tags
+	for i := range s.template.Resources {
+		s.template.Resources[i].Tags = tags
 	}
 	return nil
 }
@@ -406,9 +406,9 @@ func (s *TemplateBuilder) ToJSON() (*string, error) {
 }
 
 func (s *TemplateBuilder) getResourceByType(t string) (*Resource, error) {
-	for _, x := range *s.template.Resources {
+	for _, x := range s.template.Resources {
 		if strings.EqualFold(*x.Type, t) {
-			return &x, nil
+			return x, nil
 		}
 	}
 
@@ -428,28 +428,28 @@ func (s *TemplateBuilder) toVariable(name string) string {
 }
 
 func (s *TemplateBuilder) addResource(newResource *Resource) error {
-	for _, resource := range *s.template.Resources {
+	for _, resource := range s.template.Resources {
 		if *resource.Type == *newResource.Type {
 			return fmt.Errorf("template: found an existing resource of type %s", *resource.Type)
 		}
 	}
 
-	resources := append(*s.template.Resources, *newResource)
-	s.template.Resources = &resources
+	resources := append(s.template.Resources, newResource)
+	s.template.Resources = resources
 	return nil
 }
 
 func (s *TemplateBuilder) deleteResourceByType(resourceType string) {
-	resources := make([]Resource, 0)
+	resources := make([]*Resource, 0)
 
-	for _, resource := range *s.template.Resources {
+	for _, resource := range s.template.Resources {
 		if *resource.Type == resourceType {
 			continue
 		}
 		resources = append(resources, resource)
 	}
 
-	s.template.Resources = &resources
+	s.template.Resources = resources
 }
 
 func (s *TemplateBuilder) addResourceDependency(resource *Resource, dep string) {
