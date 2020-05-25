@@ -19,6 +19,7 @@ const (
 var buildSchema = &hcl.BodySchema{
 	Blocks: []hcl.BlockHeaderSchema{
 		{Type: buildFromLabel, LabelNames: []string{"type"}},
+		{Type: sourceLabel, LabelNames: []string{"reference"}},
 		{Type: buildProvisionerLabel, LabelNames: []string{"type"}},
 		{Type: buildPostProcessorLabel, LabelNames: []string{"type"}},
 	},
@@ -92,6 +93,13 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 	}
 	for _, block := range content.Blocks {
 		switch block.Type {
+		case sourceLabel:
+			ref, moreDiags := p.decodeBuildSource(block)
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
+			build.Sources = append(build.Sources, ref)
 		case buildProvisionerLabel:
 			p, moreDiags := p.decodeProvisioner(block)
 			diags = append(diags, moreDiags...)

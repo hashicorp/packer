@@ -5,6 +5,10 @@ build {
         "source.virtualbox-iso.ubuntu-1204",
     ]
 
+    source "source.amazon-ebs.ubuntu-1604" {
+        string = "setting from build section"
+    }
+
     provisioner "shell" {
         name     = "provisioner that does something"
         not_squashed = var.foo

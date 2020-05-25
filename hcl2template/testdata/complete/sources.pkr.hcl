@@ -1,3 +1,9 @@
+
+source "amazon-ebs" "ubuntu-1604" {
+    int = 42
+}
+
+
 source "virtualbox-iso" "ubuntu-1204" {
     string   = "string"
     int      = 42
