@@ -62,7 +62,9 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 	}
 
 	if len(config.UserAssignedManagedIdentities) != 0 {
-		builder.SetIdentity(config.UserAssignedManagedIdentities)
+		if err := builder.SetIdentity(config.UserAssignedManagedIdentities); err != nil {
+			return nil, err
+		}
 	}
 
 	if config.ImageUrl != "" {
