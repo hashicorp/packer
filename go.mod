@@ -63,10 +63,10 @@ require (
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cleanhttp v0.5.1
+	github.com/hashicorp/go-cty-funcs v0.0.0-20200520133146-0d04eb807361
 	github.com/hashicorp/go-getter/gcs/v2 v2.0.0-20200514151440-7b188cad6b7d
 	github.com/hashicorp/go-getter/s3/v2 v2.0.0-20200514151440-7b188cad6b7d
 	github.com/hashicorp/go-getter/v2 v2.0.0-20200518081638-5b5e57151574
-	github.com/hashicorp/go-cty-funcs v0.0.0-20200520133146-0d04eb807361
 	github.com/hashicorp/go-immutable-radix v1.1.0 // indirect
 	github.com/hashicorp/go-msgpack v0.5.5 // indirect
 	github.com/hashicorp/go-multierror v1.1.0
@@ -145,8 +145,6 @@ require (
 	github.com/zclconf/go-cty-yaml v1.0.1
 	go.opencensus.io v0.22.3 // indirect
 	golang.org/x/crypto v0.0.0-20200422194213-44a606286825
-	golang.org/x/exp v0.0.0-20191129062945-2f5052295587 // indirect
-	golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f // indirect
 	golang.org/x/mobile v0.0.0-20191130191448-5c0e7e404af8
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
