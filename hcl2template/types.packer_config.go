@@ -311,7 +311,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				}
 			}
 
-			builder, moreDiags, generatedVars := cfg.startBuilder(src, cfg.EvalContext(nil))
+			builder, moreDiags, generatedVars := cfg.startBuilder(src, cfg.EvalContext(nil), opts)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -353,7 +353,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			}
 
 			pcb := &packer.CoreBuild{
-				Type:           src.Type,
+				Type:           src.Ref().String(),
 				Builder:        builder,
 				Provisioners:   provisioners,
 				PostProcessors: pps,

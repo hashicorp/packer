@@ -106,6 +106,23 @@ Optional Parameters:
 
 @include 'provisioners/common-config.mdx'
 
+## Accepting the InSpec license
+
+Chef InSpec requires accepting the license before starting to use the tool.
+This can be done via `inspec_env_vars` in the template:
+
+```
+"provisioners": [
+    {
+      "type": "inspec",
+      "inspec_env_vars": [ "CHEF_LICENSE=accept"],
+      "profile": "https://github.com/dev-sec/linux-baseline"
+    }
+  ],
+```
+
+See their [official docs](https://docs.chef.io/chef_license_accept/) to learn other ways to accept the license.
+
 ## Default Extra Variables
 
 In addition to being able to specify extra arguments using the

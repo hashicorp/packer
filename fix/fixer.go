@@ -49,6 +49,7 @@ func init() {
 		"comm-config":                new(FixerCommConfig),
 		"ssh-wait-timeout":           new(FixerSSHTimout),
 		"docker-tag-tags":            new(FixerDockerTagtoTags),
+		"vsphere-iso-net-disk":       new(FixerVSphereNetworkDisk),
 	}
 
 	FixerOrder = []string{
@@ -81,5 +82,6 @@ func init() {
 		"galaxy-command",
 		"comm-config",
 		"ssh-wait-timeout",
+		"vsphere-iso-net-disk",
 	}
 }

@@ -6,6 +6,8 @@ type GetBuildsOptions struct {
 	// Get builds except the ones that match with except and with only the ones
 	// that match with Only. When those are empty everything matches.
 	Except, Only []string
+	Debug, Force bool
+	OnError      string
 }
 
 type BuildGetter interface {

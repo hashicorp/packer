@@ -84,8 +84,8 @@ builder.
   sets the hostname of the machine to this value.
 
 - `snapshot_name` (string) - The name of the resulting snapshot that will
-  appear in your account. Defaults to `packer-{{timestamp}}` (see
-  [configuration templates](/docs/templates/engine) for more info).
+  appear in your account as image description. Defaults to `packer-{{timestamp}}` (see
+  [configuration templates](/docs/templates/engine) for more info). If you want to reference the image as a sample in your terraform configuration please use the image id or the `snapshot_labels`.
 
 - `snapshot_labels` (map of key/value strings) - Key/value pair labels to
   apply to the created image.

@@ -13,11 +13,18 @@ func commHost(host string) func(multistep.StateBag) (string, error) {
 			return host, nil
 		}
 
+		if guestAddress, ok := state.Get("guestAddress").(string); ok {
+			return guestAddress, nil
+		}
+
 		return "127.0.0.1", nil
 	}
 }
 
 func commPort(state multistep.StateBag) (int, error) {
-	sshHostPort := state.Get("sshHostPort").(int)
+	sshHostPort, ok := state.Get("sshHostPort").(int)
+	if !ok {
+		sshHostPort = 22
+	}
 	return int(sshHostPort), nil
 }

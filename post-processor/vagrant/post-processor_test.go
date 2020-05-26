@@ -164,6 +164,24 @@ func TestPostProcessorPrepare_vagrantfileTemplateExists(t *testing.T) {
 	}
 }
 
+func TestPostProcessorPrepare_ProviderOverrideExists(t *testing.T) {
+	c := testConfig()
+	c["provider_override"] = "foo"
+
+	var p PostProcessor
+
+	if err := p.Configure(c); err == nil {
+		t.Fatal("Should have errored since foo is not a valid vagrant provider")
+	}
+
+	c = testConfig()
+	c["provider_override"] = "aws"
+
+	if err := p.Configure(c); err != nil {
+		t.Fatal("Should not have errored since aws is a valid vagrant provider")
+	}
+}
+
 func TestPostProcessorPostProcess_badId(t *testing.T) {
 	artifact := &packer.MockArtifact{
 		BuilderIdValue: "invalid.packer",

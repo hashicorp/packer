@@ -199,6 +199,8 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 	return cbp, nil
 }
 
+// This is used for json templates to launch the build plugins.
+// They will be prepared via b.Prepare() later.
 func (c *Core) GetBuilds(opts GetBuildsOptions) ([]Build, hcl.Diagnostics) {
 	buildNames := c.BuildNames(opts.Only, opts.Except)
 	builds := []Build{}
@@ -225,6 +227,12 @@ func (c *Core) Build(n string) (Build, error) {
 	if !ok {
 		return nil, fmt.Errorf("no such build found: %s", n)
 	}
+	// BuilderStore = config.Builders, gathered in loadConfig() in main.go
+	// For reference, the builtin BuilderStore is generated in
+	// packer/config.go in the Discover() func.
+
+	// the Start command launches the builder plugin of the given type without
+	// calling Prepare() or passing any build-specific details.
 	builder, err := c.components.BuilderStore.Start(configBuilder.Type)
 	if err != nil {
 		return nil, fmt.Errorf(
@@ -315,6 +323,8 @@ func (c *Core) Build(n string) (Build, error) {
 
 	// TODO hooks one day
 
+	// Return a structure that contains the plugins, their types, variables, and
+	// the raw builder config loaded from the json template
 	return &CoreBuild{
 		Type:               n,
 		Builder:            builder,

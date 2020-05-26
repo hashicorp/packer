@@ -189,8 +189,21 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Inspec...")
+	p.config.ctx.Data = generatedData
+
+	userp, err := interpolate.Render(p.config.User, &p.config.ctx)
+	if err != nil {
+		return fmt.Errorf("Could not interpolate inspec user: %s", err)
+	}
+	p.config.User = userp
+
+	host, err := interpolate.Render(p.config.Host, &p.config.ctx)
+	if err != nil {
+		return fmt.Errorf("Could not interpolate inspec user: %s", err)
+	}
+	p.config.Host = host
 
 	for i, envVar := range p.config.InspecEnvVars {
 		envVar, err := interpolate.Render(envVar, &p.config.ctx)
@@ -334,11 +347,14 @@ func (p *Provisioner) executeInspec(ui packer.Ui, comm packer.Communicator, priv
 	args = append(args, "--backend", p.config.Backend)
 	args = append(args, "--host", p.config.Host)
 
+	if p.config.User != "" {
+		args = append(args, "--user", p.config.User)
+	}
+
 	if p.config.Backend == "ssh" {
 		if len(privKeyFile) > 0 {
 			args = append(args, "--key-files", privKeyFile)
 		}
-		args = append(args, "--user", p.config.User)
 		args = append(args, "--port", strconv.Itoa(p.config.LocalPort))
 	}
 

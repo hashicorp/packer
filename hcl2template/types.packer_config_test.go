@@ -100,7 +100,7 @@ func TestParser_complete(t *testing.T) {
 			false, false,
 			[]packer.Build{
 				&packer.CoreBuild{
-					Type:     "virtualbox-iso",
+					Type:     "virtualbox-iso.ubuntu-1204",
 					Prepared: true,
 					Builder:  basicMockBuilder,
 					Provisioners: []packer.CoreBuildProvisioner{
@@ -199,7 +199,7 @@ func TestParser_complete(t *testing.T) {
 			false, false,
 			[]packer.Build{
 				&packer.CoreBuild{
-					Type:     "virtualbox-iso",
+					Type:     "virtualbox-iso.ubuntu-1204",
 					Prepared: true,
 					Builder:  emptyMockBuilder,
 					Provisioners: []packer.CoreBuildProvisioner{
@@ -242,7 +242,7 @@ func TestParser_complete(t *testing.T) {
 			false, false,
 			[]packer.Build{
 				&packer.CoreBuild{
-					Type:     "virtualbox-iso",
+					Type:     "virtualbox-iso.ubuntu-1204",
 					Prepared: true,
 					Builder:  emptyMockBuilder,
 					Provisioners: []packer.CoreBuildProvisioner{

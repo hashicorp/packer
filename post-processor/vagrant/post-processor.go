@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -19,6 +20,7 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
+	"github.com/hashicorp/packer/post-processor/artifice"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
 )
@@ -42,6 +44,21 @@ var builtins = map[string]string{
 	"packer.post-processor.docker-push":   "docker",
 }
 
+func availableProviders() []string {
+	dedupedProvidersMap := map[string]string{}
+
+	for _, v := range builtins {
+		dedupedProvidersMap[v] = v
+	}
+
+	dedupedProviders := []string{}
+	for k := range dedupedProvidersMap {
+		dedupedProviders = append(dedupedProviders, k)
+	}
+
+	return dedupedProviders
+}
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -51,6 +68,7 @@ type Config struct {
 	Override                     map[string]interface{}
 	VagrantfileTemplate          string `mapstructure:"vagrantfile_template"`
 	VagrantfileTemplateGenerated bool   `mapstructure:"vagrantfile_template_generated"`
+	ProviderOverride             string `mapstructure:"provider_override"`
 
 	ctx interpolate.Context
 }
@@ -66,6 +84,22 @@ func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec {
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if err := p.configureSingle(&p.config, raws...); err != nil {
 		return err
+	}
+
+	if p.config.ProviderOverride != "" {
+		validOverride := false
+		providers := availableProviders()
+		for _, prov := range providers {
+			if prov == p.config.ProviderOverride {
+				validOverride = true
+				break
+			}
+		}
+		if !validOverride {
+			return fmt.Errorf("The given provider_override %s is not valid. "+
+				"Please choose from one of %s", p.config.ProviderOverride,
+				strings.Join(providers, ", "))
+		}
 	}
 	return nil
 }
@@ -168,17 +202,27 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
-
-	name, ok := builtins[artifact.BuilderId()]
-	if !ok {
-		return nil, false, false, fmt.Errorf(
-			"Unknown artifact type, can't build box: %s", artifact.BuilderId())
+	name := p.config.ProviderOverride
+	if name == "" {
+		n, ok := builtins[artifact.BuilderId()]
+		if !ok {
+			return nil, false, false, fmt.Errorf(
+				"Unknown artifact type, can't build box: %s", artifact.BuilderId())
+		}
+		name = n
 	}
 
 	provider := providerForName(name)
 	if provider == nil {
-		// This shouldn't happen since we hard code all of these ourselves
-		panic(fmt.Sprintf("bad provider name: %s", name))
+		if artifact.BuilderId() == artifice.BuilderId {
+			return nil, false, false, fmt.Errorf(
+				"Unknown provider type: When using an artifact created by " +
+					"the artifice post-processor, you need to set the " +
+					"provider_override option.")
+		} else {
+			// This shouldn't happen since we hard code all of these ourselves
+			panic(fmt.Sprintf("bad provider name: %s", name))
+		}
 	}
 
 	artifact, keep, err := p.PostProcessProvider(name, provider, ui, artifact)
