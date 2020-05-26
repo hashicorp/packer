@@ -31,7 +31,6 @@ type FlatConfig struct {
 	LogLevel            *string           `mapstructure:"log_level" cty:"log_level"`
 	SaltCallArgs        *string           `mapstructure:"salt_call_args" cty:"salt_call_args"`
 	SaltBinDir          *string           `mapstructure:"salt_bin_dir" cty:"salt_bin_dir"`
-	CmdArgs             *string           `cty:"cmd_args"`
 	GuestOSType         *string           `mapstructure:"guest_os_type" cty:"guest_os_type"`
 }
 
@@ -69,7 +68,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"log_level":                  &hcldec.AttrSpec{Name: "log_level", Type: cty.String, Required: false},
 		"salt_call_args":             &hcldec.AttrSpec{Name: "salt_call_args", Type: cty.String, Required: false},
 		"salt_bin_dir":               &hcldec.AttrSpec{Name: "salt_bin_dir", Type: cty.String, Required: false},
-		"cmd_args":                   &hcldec.AttrSpec{Name: "cmd_args", Type: cty.String, Required: false},
 		"guest_os_type":              &hcldec.AttrSpec{Name: "guest_os_type", Type: cty.String, Required: false},
 	}
 	return s
