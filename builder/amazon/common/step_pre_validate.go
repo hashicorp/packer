@@ -85,7 +85,7 @@ func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 	// Note: Per docs, if region-specific keys are set they override and we
 	// silently ignore the default kms_key_id options.
 	// FIXME: Assume the user wants to use the default KMS key, by setting kms_key_id="".
-	// Do we still need permissions to encrypt with it? In other words, should we 
+	// Do we still need permissions to encrypt with it? In other words, should we
 	// expect we can perform a kms.DescribeKey(`alias/aws/ebs`) operation successfully?
 	if len(s.AMIRegionKMSKeyIDs) != 0 {
 		// Check each key and region exists.v
