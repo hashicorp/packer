@@ -1,0 +1,27 @@
+---
+description: >
+  Something
+
+  Something
+layout: docs
+page_title: build - Blocks
+sidebar_title: <tt>build</tt>
+---
+
+# The `build` block
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+The `build` block defines what builders are started and what they will do.
+
+`@include 'from-1.5/builds/example-block.mdx'`
+
+The list of available builders can be found in the [builders](/docs/builders)
+section.
+
+It is also possible to create and use [custom
+builders](/docs/extending/custom-builders). There is also a list of [community
+builders](/community-tools#community-builders).
+
+Note that it is possible to set fields of a build block directly from the
+build block of a [`build` block](/docs/from-1.5/blocks/build).

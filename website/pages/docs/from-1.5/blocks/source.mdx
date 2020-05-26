@@ -1,0 +1,34 @@
+---
+description: >
+  Something
+
+  Something
+layout: docs
+page_title: source - Blocks
+sidebar_title: <tt>source</tt>
+---
+
+# The `source` block
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+The `source` block defines reusable [builders](/docs/builders) configuration
+blocks:
+
+`@include 'from-1.5/sources/example-block.mdx'`
+
+The list of available builders can be found in the [builders](/docs/builders)
+section.
+
+It is also possible to create and use [custom
+builders](/docs/extending/custom-builders). There is also a list of [community
+builders](/community-tools#community-builders).
+
+Note that it is possible to set source fields at the moment of using them in the
+source block of a [`build` block](/docs/from-1.5/blocks/build).
+
+# More on variables
+
+- Read the [full variables](/docs/from-1.5/variables) description for a more
+  thorough read.
+- Read the [variables guide](/guides/hcl/variables) for more examples.

@@ -1,0 +1,27 @@
+```hcl
+# build.pkr.hcl
+build {
+
+    sources = [
+        # use the plural `sources` block to simply use sources
+        # without changing any field.
+        "source.amazon-ebs.example",
+    ]
+
+    source "source.amazon-ebs.example" {
+        # Use the singular `source` block set
+        # specific fields.
+        # Note that values cannot be overwritten.
+        output = "different value"
+        name = var.foo
+    }
+
+    provisioner "shell-local" {
+        inline = ["echo Hello World"]
+    }
+
+    post-processor "shell-local" {
+        inline = ["echo Hello World"]
+    }
+}
+```

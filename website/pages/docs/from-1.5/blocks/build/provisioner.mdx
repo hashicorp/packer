@@ -1,0 +1,35 @@
+---
+description: >
+  Something
+
+  Something
+layout: docs
+page_title: provisioner - build - Blocks
+sidebar_title: <tt>provisioner</tt>
+---
+
+# The `provisioner` block
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+The `provisioner` block defines how a provisioner is configured.
+
+```hcl
+# builds.pkr.hcl
+build {
+  # ...
+  provisioner "shell" {
+    inline = [
+      "echo provisioning all the things",
+      "echo the value of 'foo' is '${var.foo}'",
+    ]
+  }
+}
+```
+
+Provisioners use builtin and third-party software to install and configure the
+machine image after booting. Provisioners prepare the system for use.
+
+
+The list of available provisioners can be found in the
+[provisioners](/docs/provisioners) section.
