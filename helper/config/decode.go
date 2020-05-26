@@ -144,7 +144,7 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		for _, unused := range md.Unused {
 			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
 				err = multierror.Append(err, fmt.Errorf(
-					"unknown configuration key: %q; raws is %#v \n\n and ctx data is %#v", unused, raws, ctxData))
+					"unknown configuration key: %q", unused))
 			}
 		}
 		if err != nil {
