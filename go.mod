@@ -143,7 +143,6 @@ require (
 	github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829
 	github.com/zclconf/go-cty v1.4.0
 	github.com/zclconf/go-cty-yaml v1.0.1
-	go.opencensus.io v0.22.3 // indirect
 	golang.org/x/crypto v0.0.0-20200422194213-44a606286825
 	golang.org/x/mobile v0.0.0-20191130191448-5c0e7e404af8
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
