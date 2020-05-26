@@ -23,7 +23,7 @@ export default function CommunityPage() {
           {
             header: 'Discussion List',
             body:
-              '[Packer Google Group](https://groups.google.com/group/packer-tool',
+              '[Packer Google Group](https://groups.google.com/group/packer-tool)',
           },
           {
             header: 'Announcement List',
