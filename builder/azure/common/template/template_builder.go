@@ -177,7 +177,7 @@ func (s *TemplateBuilder) SetSharedGalleryImage(location, imageID string, cachin
 		return err
 	}
 
-	s.setVariable("apiVersion", "2018-04-01") // Required for Shared Image Gallery
+	s.setVariable("apiVersion", "2018-06-01") // Required for Shared Image Gallery
 	profile := resource.Properties.StorageProfile
 	profile.ImageReference = &compute.ImageReference{ID: &imageID}
 	profile.OsDisk.OsType = s.osType
