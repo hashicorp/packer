@@ -20,13 +20,15 @@ func (m mockedSecret) GetSecretValue(in *secretsmanager.GetSecretValueInput) (*s
 
 func TestGetSecret(t *testing.T) {
 	testCases := []struct {
-		arg  *SecretSpec
-		mock secretsmanager.GetSecretValueOutput
-		want string
-		ok   bool
+		description string
+		arg         *SecretSpec
+		mock        secretsmanager.GetSecretValueOutput
+		want        string
+		ok          bool
 	}{
 		{
-			arg: &SecretSpec{Name: "test/secret"},
+			description: "input has valid secret name, secret has single key",
+			arg:         &SecretSpec{Name: "test/secret"},
 			mock: secretsmanager.GetSecretValueOutput{
 				Name:         aws.String("test/secret"),
 				SecretString: aws.String(`{"key": "test"}`),
@@ -35,6 +37,7 @@ func TestGetSecret(t *testing.T) {
 			ok:   true,
 		},
 		{
+			description: "input has valid secret name and key, secret has single key",
 			arg: &SecretSpec{
 				Name: "test/secret",
 				Key:  "key",
@@ -47,6 +50,7 @@ func TestGetSecret(t *testing.T) {
 			ok:   true,
 		},
 		{
+			description: "input has valid secret name and key, secret has multiple keys",
 			arg: &SecretSpec{
 				Name: "test/secret",
 				Key:  "second_key",
@@ -59,6 +63,7 @@ func TestGetSecret(t *testing.T) {
 			ok:   true,
 		},
 		{
+			description: "input has valid secret name and no key, secret has multiple keys",
 			arg: &SecretSpec{
 				Name: "test/secret",
 			},
@@ -66,10 +71,10 @@ func TestGetSecret(t *testing.T) {
 				Name:         aws.String("test/secret"),
 				SecretString: aws.String(`{"first_key": "first_val", "second_key": "second_val"}`),
 			},
-			want: "first_val",
-			ok:   true,
+			ok: false,
 		},
 		{
+			description: "input has valid secret name and invalid key, secret has single key",
 			arg: &SecretSpec{
 				Name: "test/secret",
 				Key:  "nonexistent",
@@ -81,6 +86,7 @@ func TestGetSecret(t *testing.T) {
 			ok: false,
 		},
 		{
+			description: "input has valid secret name and invalid key, secret has multiple keys",
 			arg: &SecretSpec{
 				Name: "test/secret",
 				Key:  "nonexistent",
@@ -92,6 +98,7 @@ func TestGetSecret(t *testing.T) {
 			ok: false,
 		},
 		{
+			description: "input has secret and key, secret is empty",
 			arg: &SecretSpec{
 				Name: "test/secret",
 				Key:  "nonexistent",
