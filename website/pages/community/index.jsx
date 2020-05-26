@@ -21,6 +21,11 @@ export default function CommunityPage() {
               '[Packer Community Forum](https://discuss.hashicorp.com/c/packer)',
           },
           {
+            header: 'Discussion List',
+            body:
+              '[Packer Google Group](https://groups.google.com/group/packer-tool',
+          },
+          {
             header: 'Announcement List',
             body:
               '[HashiCorp Announcement Google Group](https://groups.google.com/group/hashicorp-announce)',
