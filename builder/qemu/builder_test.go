@@ -75,16 +75,16 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Errorf("bad output dir: %s", b.config.OutputDir)
 	}
 
-	if b.config.SSHHostPortMin != 2222 {
-		t.Errorf("bad min ssh host port: %d", b.config.SSHHostPortMin)
+	if b.config.CommConfig.HostPortMin != 2222 {
+		t.Errorf("bad min ssh host port: %d", b.config.CommConfig.HostPortMin)
 	}
 
-	if b.config.SSHHostPortMax != 4444 {
-		t.Errorf("bad max ssh host port: %d", b.config.SSHHostPortMax)
+	if b.config.CommConfig.HostPortMax != 4444 {
+		t.Errorf("bad max ssh host port: %d", b.config.CommConfig.HostPortMax)
 	}
 
-	if b.config.Comm.SSHPort != 22 {
-		t.Errorf("bad ssh port: %d", b.config.Comm.SSHPort)
+	if b.config.CommConfig.Comm.SSHPort != 22 {
+		t.Errorf("bad ssh port: %d", b.config.CommConfig.Comm.SSHPort)
 	}
 
 	if b.config.VMName != "packer-foo" {
@@ -640,7 +640,7 @@ func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.Comm.SSHTimeout != sshTimeout {
-		t.Fatalf("SSHTimeout should be %s for backwards compatibility, but it was %s", sshTimeout.String(), b.config.Comm.SSHTimeout.String())
+	if b.config.CommConfig.Comm.SSHTimeout != sshTimeout {
+		t.Fatalf("SSHTimeout should be %s for backwards compatibility, but it was %s", sshTimeout.String(), b.config.CommConfig.Comm.SSHTimeout.String())
 	}
 }

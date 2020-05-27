@@ -211,12 +211,6 @@
 -   `qmp_socket_path` (string) - QMP Socket Path when `qmp_enable` is true. Defaults to
     `output_directory`/`vm_name`.monitor.
     
--   `ssh_host_port_min` (int) - The minimum and maximum port to use for the SSH port on the host machine
-    which is forwarded to the SSH port on the guest machine. Because Packer
-    often runs in parallel, Packer will choose a randomly available port in
-    this range to use as the host port. By default this is 2222 to 4444.
-    
--   `ssh_host_port_max` (int) - SSH Host Port Max
 -   `use_default_display` (bool) - If true, do not pass a -display option
     to qemu, allowing it to choose the default. This may be needed when running
     under macOS, and getting errors about sdl not being available.
