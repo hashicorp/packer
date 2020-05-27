@@ -31,6 +31,9 @@ type HTTPConfig struct {
 	// are `8000` and `9000`, respectively.
 	HTTPPortMin int `mapstructure:"http_port_min"`
 	HTTPPortMax int `mapstructure:"http_port_max"`
+	// This is the bind address for the HTTP server. Defaults to 0.0.0.0 so that
+	// it will work with any network interface.
+	HTTPAddress string `mapstructure:"http_bind_address"`
 }
 
 func (c *HTTPConfig) Prepare(ctx *interpolate.Context) []error {
@@ -43,6 +46,10 @@ func (c *HTTPConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.HTTPPortMax == 0 {
 		c.HTTPPortMax = 9000
+	}
+
+	if c.HTTPAddress == "" {
+		c.HTTPAddress = "0.0.0.0"
 	}
 
 	if c.HTTPPortMin > c.HTTPPortMax {
