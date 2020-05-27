@@ -9,23 +9,23 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	Inline              []string          `cty:"inline"`
-	Script              *string           `cty:"script"`
-	Scripts             []string          `cty:"scripts"`
-	ValidExitCodes      []int             `mapstructure:"valid_exit_codes" cty:"valid_exit_codes"`
-	Vars                []string          `mapstructure:"environment_vars" cty:"environment_vars"`
-	EnvVarFormat        *string           `mapstructure:"env_var_format" cty:"env_var_format"`
-	Binary              *bool             `cty:"binary"`
-	RemotePath          *string           `mapstructure:"remote_path" cty:"remote_path"`
-	ExecuteCommand      *string           `mapstructure:"execute_command" cty:"execute_command"`
-	StartRetryTimeout   *string           `mapstructure:"start_retry_timeout" cty:"start_retry_timeout"`
+	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	Inline              []string          `cty:"inline" hcl:"inline"`
+	Script              *string           `cty:"script" hcl:"script"`
+	Scripts             []string          `cty:"scripts" hcl:"scripts"`
+	ValidExitCodes      []int             `mapstructure:"valid_exit_codes" cty:"valid_exit_codes" hcl:"valid_exit_codes"`
+	Vars                []string          `mapstructure:"environment_vars" cty:"environment_vars" hcl:"environment_vars"`
+	EnvVarFormat        *string           `mapstructure:"env_var_format" cty:"env_var_format" hcl:"env_var_format"`
+	Binary              *bool             `cty:"binary" hcl:"binary"`
+	RemotePath          *string           `mapstructure:"remote_path" cty:"remote_path" hcl:"remote_path"`
+	ExecuteCommand      *string           `mapstructure:"execute_command" cty:"execute_command" hcl:"execute_command"`
+	StartRetryTimeout   *string           `mapstructure:"start_retry_timeout" cty:"start_retry_timeout" hcl:"start_retry_timeout"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

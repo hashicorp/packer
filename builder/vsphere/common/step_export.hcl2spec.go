@@ -9,12 +9,12 @@ import (
 // FlatExportConfig is an auto-generated flat version of ExportConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatExportConfig struct {
-	Name      *string  `mapstructure:"name" cty:"name"`
-	Force     *bool    `mapstructure:"force" cty:"force"`
-	Images    *bool    `mapstructure:"images" cty:"images"`
-	Manifest  *string  `mapstructure:"manifest" cty:"manifest"`
-	OutputDir *string  `mapstructure:"output_directory" required:"false" cty:"output_directory"`
-	Options   []string `mapstructure:"options" cty:"options"`
+	Name      *string  `mapstructure:"name" cty:"name" hcl:"name"`
+	Force     *bool    `mapstructure:"force" cty:"force" hcl:"force"`
+	Images    *bool    `mapstructure:"images" cty:"images" hcl:"images"`
+	Manifest  *string  `mapstructure:"manifest" cty:"manifest" hcl:"manifest"`
+	OutputDir *string  `mapstructure:"output_directory" required:"false" cty:"output_directory" hcl:"output_directory"`
+	Options   []string `mapstructure:"options" cty:"options" hcl:"options"`
 }
 
 // FlatMapstructure returns a new FlatExportConfig.

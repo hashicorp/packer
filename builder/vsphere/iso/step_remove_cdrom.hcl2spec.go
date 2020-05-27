@@ -9,7 +9,7 @@ import (
 // FlatRemoveCDRomConfig is an auto-generated flat version of RemoveCDRomConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatRemoveCDRomConfig struct {
-	RemoveCdrom *bool `mapstructure:"remove_cdrom" cty:"remove_cdrom"`
+	RemoveCdrom *bool `mapstructure:"remove_cdrom" cty:"remove_cdrom" hcl:"remove_cdrom"`
 }
 
 // FlatMapstructure returns a new FlatRemoveCDRomConfig.

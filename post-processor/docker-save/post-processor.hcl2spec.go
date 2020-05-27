@@ -9,14 +9,14 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	Path                *string           `mapstructure:"path" cty:"path"`
+	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	Path                *string           `mapstructure:"path" cty:"path" hcl:"path"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

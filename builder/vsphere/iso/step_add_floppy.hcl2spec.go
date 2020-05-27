@@ -9,10 +9,10 @@ import (
 // FlatFloppyConfig is an auto-generated flat version of FloppyConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatFloppyConfig struct {
-	FloppyIMGPath     *string  `mapstructure:"floppy_img_path" cty:"floppy_img_path"`
-	FloppyFiles       []string `mapstructure:"floppy_files" cty:"floppy_files"`
-	FloppyDirectories []string `mapstructure:"floppy_dirs" cty:"floppy_dirs"`
-	FloppyLabel       *string  `mapstructure:"floppy_label" cty:"floppy_label"`
+	FloppyIMGPath     *string  `mapstructure:"floppy_img_path" cty:"floppy_img_path" hcl:"floppy_img_path"`
+	FloppyFiles       []string `mapstructure:"floppy_files" cty:"floppy_files" hcl:"floppy_files"`
+	FloppyDirectories []string `mapstructure:"floppy_dirs" cty:"floppy_dirs" hcl:"floppy_dirs"`
+	FloppyLabel       *string  `mapstructure:"floppy_label" cty:"floppy_label" hcl:"floppy_label"`
 }
 
 // FlatMapstructure returns a new FlatFloppyConfig.

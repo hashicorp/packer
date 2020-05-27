@@ -9,7 +9,7 @@ import (
 // FlatConfigParamsConfig is an auto-generated flat version of ConfigParamsConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfigParamsConfig struct {
-	ConfigParams map[string]string `mapstructure:"configuration_parameters" cty:"configuration_parameters"`
+	ConfigParams map[string]string `mapstructure:"configuration_parameters" cty:"configuration_parameters" hcl:"configuration_parameters"`
 }
 
 // FlatMapstructure returns a new FlatConfigParamsConfig.

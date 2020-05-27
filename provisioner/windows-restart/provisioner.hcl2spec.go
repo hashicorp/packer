@@ -9,18 +9,18 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	RestartCommand      *string           `mapstructure:"restart_command" cty:"restart_command"`
-	RestartCheckCommand *string           `mapstructure:"restart_check_command" cty:"restart_check_command"`
-	RestartTimeout      *string           `mapstructure:"restart_timeout" cty:"restart_timeout"`
-	CheckKey            *bool             `mapstructure:"check_registry" cty:"check_registry"`
-	RegistryKeys        []string          `mapstructure:"registry_keys" cty:"registry_keys"`
+	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	RestartCommand      *string           `mapstructure:"restart_command" cty:"restart_command" hcl:"restart_command"`
+	RestartCheckCommand *string           `mapstructure:"restart_check_command" cty:"restart_check_command" hcl:"restart_check_command"`
+	RestartTimeout      *string           `mapstructure:"restart_timeout" cty:"restart_timeout" hcl:"restart_timeout"`
+	CheckKey            *bool             `mapstructure:"check_registry" cty:"check_registry" hcl:"check_registry"`
+	RegistryKeys        []string          `mapstructure:"registry_keys" cty:"registry_keys" hcl:"registry_keys"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

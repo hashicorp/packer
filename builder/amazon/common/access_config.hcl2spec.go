@@ -9,10 +9,10 @@ import (
 // FlatVaultAWSEngineOptions is an auto-generated flat version of VaultAWSEngineOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatVaultAWSEngineOptions struct {
-	Name       *string `mapstructure:"name" cty:"name"`
-	RoleARN    *string `mapstructure:"role_arn" cty:"role_arn"`
-	TTL        *string `mapstructure:"ttl" required:"false" cty:"ttl"`
-	EngineName *string `mapstructure:"engine_name" cty:"engine_name"`
+	Name       *string `mapstructure:"name" cty:"name" hcl:"name"`
+	RoleARN    *string `mapstructure:"role_arn" cty:"role_arn" hcl:"role_arn"`
+	TTL        *string `mapstructure:"ttl" required:"false" cty:"ttl" hcl:"ttl"`
+	EngineName *string `mapstructure:"engine_name" cty:"engine_name" hcl:"engine_name"`
 }
 
 // FlatMapstructure returns a new FlatVaultAWSEngineOptions.

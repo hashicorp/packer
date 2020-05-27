@@ -9,10 +9,10 @@ import (
 // FlatIAPConfig is an auto-generated flat version of IAPConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatIAPConfig struct {
-	IAP              *bool   `mapstructure:"use_iap" required:"false" cty:"use_iap"`
-	IAPLocalhostPort *int    `mapstructure:"iap_localhost_port" cty:"iap_localhost_port"`
-	IAPHashBang      *string `mapstructure:"iap_hashbang" required:"false" cty:"iap_hashbang"`
-	IAPExt           *string `mapstructure:"iap_ext" required:"false" cty:"iap_ext"`
+	IAP              *bool   `mapstructure:"use_iap" required:"false" cty:"use_iap" hcl:"use_iap"`
+	IAPLocalhostPort *int    `mapstructure:"iap_localhost_port" cty:"iap_localhost_port" hcl:"iap_localhost_port"`
+	IAPHashBang      *string `mapstructure:"iap_hashbang" required:"false" cty:"iap_hashbang" hcl:"iap_hashbang"`
+	IAPExt           *string `mapstructure:"iap_ext" required:"false" cty:"iap_ext" hcl:"iap_ext"`
 }
 
 // FlatMapstructure returns a new FlatIAPConfig.

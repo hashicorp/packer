@@ -9,12 +9,12 @@ import (
 // FlatLocationConfig is an auto-generated flat version of LocationConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatLocationConfig struct {
-	VMName       *string `mapstructure:"vm_name" cty:"vm_name"`
-	Folder       *string `mapstructure:"folder" cty:"folder"`
-	Cluster      *string `mapstructure:"cluster" cty:"cluster"`
-	Host         *string `mapstructure:"host" cty:"host"`
-	ResourcePool *string `mapstructure:"resource_pool" cty:"resource_pool"`
-	Datastore    *string `mapstructure:"datastore" cty:"datastore"`
+	VMName       *string `mapstructure:"vm_name" cty:"vm_name" hcl:"vm_name"`
+	Folder       *string `mapstructure:"folder" cty:"folder" hcl:"folder"`
+	Cluster      *string `mapstructure:"cluster" cty:"cluster" hcl:"cluster"`
+	Host         *string `mapstructure:"host" cty:"host" hcl:"host"`
+	ResourcePool *string `mapstructure:"resource_pool" cty:"resource_pool" hcl:"resource_pool"`
+	Datastore    *string `mapstructure:"datastore" cty:"datastore" hcl:"datastore"`
 }
 
 // FlatMapstructure returns a new FlatLocationConfig.
