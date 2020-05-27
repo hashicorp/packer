@@ -143,15 +143,15 @@ subnet 127.0.0.0 netmask 255.255.255.252 {
 	}
 	result := tokenizeDhcpConfigFromString(test_1)
 
-	t.Logf("testing for: %#v", expected)
-	t.Logf("checking out: %#v", result)
+	t.Logf("testing for: %v", expected)
+	t.Logf("checking out: %v", result)
 	if len(result) != len(expected) {
 		t.Fatalf("length of token lists do not match (%d != %d)", len(result), len(expected))
 	}
 
 	for index := range expected {
 		if string(expected[index]) != string(result[index]) {
-			t.Errorf("unexpected token at index %d: %s != %s", index, expected[index], result[index])
+			t.Errorf("unexpected token at index %d: %v != %v", index, expected[index], result[index])
 		}
 	}
 }
@@ -387,6 +387,125 @@ parameters : map[default-lease-time:1800 max-lease-time:7200]
 			t.Errorf("Parsing of declaration %d did not match what was expected", index)
 			t.Logf("Result from parsing:\n%s", item.repr())
 			t.Logf("Expected to parse:\n%s", expected[index])
+		}
+	}
+}
+
+func TestParserTokenizeNetworkMap(t *testing.T) {
+
+	test_1 := "group.attribute = \"string\""
+	expected := []string{
+		"group.attribute", "=", "\"string\"",
+	}
+	result := tokenizeDhcpConfigFromString(test_1)
+	if len(result) != len(expected) {
+		t.Fatalf("length of token lists do not match (%d != %d)", len(result), len(expected))
+	}
+
+	for index := range expected {
+		if string(expected[index]) != string(result[index]) {
+			t.Errorf("unexpected token at index %d: %v != %v", index, expected[index], result[index])
+		}
+	}
+
+	test_2 := "attribute == \""
+	expected = []string{
+		"attribute", "==", "\"",
+	}
+	result = tokenizeDhcpConfigFromString(test_2)
+	if len(result) != len(expected) {
+		t.Fatalf("length of token lists do not match (%d != %d)", len(result), len(expected))
+	}
+
+	test_3 := "attribute ....... ======\nnew lines should make no difference"
+	expected = []string{
+		"attribute", ".......", "======", "new", "lines", "should", "make", "no", "difference",
+	}
+	result = tokenizeDhcpConfigFromString(test_3)
+	if len(result) != len(expected) {
+		t.Fatalf("length of token lists do not match (%d != %d)", len(result), len(expected))
+	}
+
+	test_4 := "\t\t\t\t    thishadwhitespacebeforebeingparsed\t \t \t \t\n\n"
+	expected = []string{
+		"thishadwhitespacebeforebeingparsed",
+	}
+	result = tokenizeDhcpConfigFromString(test_4)
+	if len(result) != len(expected) {
+		t.Fatalf("length of token lists do not match (%d != %d)", len(result), len(expected))
+	}
+}
+
+func TestParserReadNetworkMap(t *testing.T) {
+	f, err := os.Open(filepath.Join("testdata", "netmap-example.conf"))
+	if err != nil {
+		t.Fatalf("Unable to open netmap.conf sample: %s", err)
+	}
+	defer f.Close()
+
+	netmap, err := ReadNetworkMap(f)
+	if err != nil {
+		t.Fatalf("Unable to read netmap.conf samplpe: %s", err)
+	}
+
+	expected_keys := []string{"device", "name"}
+	for _, item := range netmap {
+		for _, name := range expected_keys {
+			_, ok := item[name]
+			if !ok {
+				t.Errorf("unable to find expected key %v in map: %v", name, item)
+			}
+		}
+	}
+
+	expected_vmnet0 := [][]string{
+		[]string{"device", "vmnet0"},
+		[]string{"name", "Bridged"},
+	}
+	for _, item := range netmap {
+		if item["device"] != "vmnet0" {
+			continue
+		}
+		for _, expectpair := range expected_vmnet0 {
+			name := expectpair[0]
+			value := expectpair[1]
+			if item[name] != value {
+				t.Errorf("expected value %v for attribute %v, got %v", value, name, item[name])
+			}
+		}
+	}
+
+	expected_vmnet1 := [][]string{
+		[]string{"device", "vmnet1"},
+		[]string{"name", "HostOnly"},
+	}
+	for _, item := range netmap {
+		if item["device"] != "vmnet1" {
+			continue
+		}
+		for _, expectpair := range expected_vmnet1 {
+			name := expectpair[0]
+			value := expectpair[1]
+			if item[name] != value {
+				t.Errorf("expected value %v for attribute %v, got %v", value, name, item[name])
+			}
+		}
+	}
+
+	expected_vmnet8 := [][]string{
+		[]string{"device", "vmnet8"},
+		[]string{"name", "NAT"},
+	}
+	for _, item := range netmap {
+		if item["device"] != "vmnet8" {
+			continue
+		}
+		for _, expectpair := range expected_vmnet8 {
+			name := expectpair[0]
+			value := expectpair[1]
+			if item[name] != value {
+				t.Errorf("expected value %v for attribute %v, got %v", value, name, item[name])
+			}
 		}
 	}
 }
