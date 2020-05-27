@@ -361,7 +361,10 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			}
 			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
 			// we did all the prep here.
-			pcb.Prepare()
+			_, err := pcb.Prepare()
+			if err != nil {
+				continue
+			}
 
 			res = append(res, pcb)
 		}
