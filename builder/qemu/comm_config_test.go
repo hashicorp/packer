@@ -1,11 +1,12 @@
 package qemu
 
 import (
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/template/interpolate"
 	"io/ioutil"
 	"os"
 	"testing"
+	
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func testCommConfig() *CommConfig {

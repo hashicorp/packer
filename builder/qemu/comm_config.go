@@ -60,7 +60,7 @@ func (c *CommConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if c.HostPortMin < 0 {
-		errs =  append(errs, errors.New("host_port_min must be positive"))
+		errs = append(errs, errors.New("host_port_min must be positive"))
 	}
 
 	return errs
