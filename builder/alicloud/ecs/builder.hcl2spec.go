@@ -11,7 +11,7 @@ import (
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatAlicloudDiskDevice struct {
 	DiskName           *string `mapstructure:"disk_name" required:"false" cty:"disk_name" hcl:"disk_name"`
-	DiskCategory       *string `mapstructure:"disk_category" required:"false" cty:"disk_category" hcl:"disk_category,optional"`
+	DiskCategory       *string `mapstructure:"disk_category" required:"false" cty:"disk_category" hcl:"disk_category"`
 	DiskSize           *int    `mapstructure:"disk_size" required:"false" cty:"disk_size" hcl:"disk_size"`
 	SnapshotId         *string `mapstructure:"disk_snapshot_id" required:"false" cty:"disk_snapshot_id" hcl:"disk_snapshot_id"`
 	Description        *string `mapstructure:"disk_description" required:"false" cty:"disk_description" hcl:"disk_description"`
