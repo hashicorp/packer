@@ -10,17 +10,17 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// This step adds a NAT port forwarding definition so that SSH is available
+// This step adds a NAT port forwarding definition so that SSH or Winrm is available
 // on the guest machine.
 //
 // Uses:
 //
 // Produces:
-type stepForwardSSH struct {
+type stepPortForward struct {
 	l *net.Listener
 }
 
-func (s *stepForwardSSH) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepPortForward) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -45,6 +45,8 @@ func (s *stepForwardSSH) Run(ctx context.Context, state multistep.StateBag) mult
 		commHostPort = s.l.Port
 		ui.Say(fmt.Sprintf("Found port for communicator (SSH, WinRM, etc): %d.", commHostPort))
 
+	} else {
+		log.Printf("Skipping NAT port forwarding. Using communicator (SSH, WinRM, etc) port %d", commHostPort)
 	}
 	// Save the port we're using so that future steps can use it
 	state.Put("sshHostPort", commHostPort)
@@ -52,7 +54,7 @@ func (s *stepForwardSSH) Run(ctx context.Context, state multistep.StateBag) mult
 	return multistep.ActionContinue
 }
 
-func (s *stepForwardSSH) Cleanup(state multistep.StateBag) {
+func (s *stepPortForward) Cleanup(state multistep.StateBag) {
 	if s.l != nil {
 		err := s.l.Close()
 		if err != nil {
