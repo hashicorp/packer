@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	newCompute "github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/mgmt/2018-02-14/keyvault"
-	"github.com/Azure/azure-sdk-for-go/services/msi/mgmt/2018-11-30/msi"
 	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	armStorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage"
@@ -48,7 +47,6 @@ type AzureClient struct {
 	compute.SnapshotsClient
 	newCompute.GalleryImageVersionsClient
 	newCompute.GalleryImagesClient
-	msi.UserAssignedIdentitiesClient
 
 	InspectorMaxLength int
 	Template           *CaptureTemplate
@@ -241,13 +239,6 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.GalleryImagesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.GalleryImagesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.GalleryImagesClient.UserAgent)
 	azureClient.GalleryImagesClient.Client.PollingDuration = PollingDuration
-
-	azureClient.UserAssignedIdentitiesClient = msi.NewUserAssignedIdentitiesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.UserAssignedIdentitiesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
-	azureClient.UserAssignedIdentitiesClient.RequestInspector = withInspection(maxlen)
-	azureClient.UserAssignedIdentitiesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
-	azureClient.UserAssignedIdentitiesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.UserAssignedIdentitiesClient.UserAgent)
-	azureClient.UserAssignedIdentitiesClient.Client.PollingDuration = PollingDuration
 
 	keyVaultURL, err := url.Parse(cloud.KeyVaultEndpoint)
 	if err != nil {

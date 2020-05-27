@@ -16,7 +16,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
-	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
 	packerCommon "github.com/hashicorp/packer/common"
@@ -109,18 +108,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	if b.config.ClientConfig.ObjectID == "" && b.config.OSType != constants.Target_Linux {
 		return nil, fmt.Errorf("could not determine the ObjectID for the user, which is required for Windows builds")
-	}
-
-	if len(b.config.UserAssignedManagedIdentities) != 0 {
-		for _, rid := range b.config.UserAssignedManagedIdentities {
-			r, err := client.ParseResourceID(rid)
-			if err != nil {
-				return nil, err
-			}
-			if _, err = azureClient.UserAssignedIdentitiesClient.Get(ctx, r.ResourceGroup, r.ResourceName.String()); err != nil {
-				return nil, fmt.Errorf("Cannot locate user assigned managed identity %s", rid)
-			}
-		}
 	}
 
 	if b.config.isManagedImage() {
