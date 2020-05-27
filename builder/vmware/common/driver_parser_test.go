@@ -7,35 +7,29 @@ import (
 	"path/filepath"
 )
 
-func consumeString(s string) (out chan byte, eos sentinelSignaller) {
-	eos = make(sentinelSignaller)
+func consumeString(s string) (out chan byte) {
 	out = make(chan byte)
 	go func() {
 		for _, ch := range s {
 			out <- byte(ch)
 		}
-		close(eos)
 		close(out)
 	}()
 	return
 }
 
 func uncommentFromString(s string) string {
-	inCh, eos := consumeString(s)
-	out, eoc := uncomment(eos, inCh)
+	inCh := consumeString(s)
+	out := uncomment(inCh)
 
 	result := ""
 	for reading := true; reading; {
-		select {
-		case <-eoc:
-			reading = false
-		case item, ok := <-out:
-			if ok {
-				result += string(item)
-			}
+		if item, ok := <-out; !ok {
+			break
+		} else {
+			result += string(item)
 		}
 	}
-	close(out)
 	return result
 }
 
@@ -107,21 +101,17 @@ func TestParserUncomment(t *testing.T) {
 }
 
 func tokenizeDhcpConfigFromString(s string) []string {
-	inCh, eos := consumeString(s)
-	out, eoc := tokenizeDhcpConfig(eos, inCh)
+	inCh := consumeString(s)
+	out := tokenizeDhcpConfig(inCh)
 
 	result := make([]string, 0)
-	for reading := true; reading; {
-		select {
-		case <-eoc:
-			reading = false
-		case item, ok := <-out:
-			if ok {
-				result = append(result, item)
-			}
+	for {
+		if item, ok := <-out; !ok {
+			break
+		} else {
+			result = append(result, item)
 		}
 	}
-	close(out)
 	return result
 }
 
@@ -224,16 +214,14 @@ func consumeDhcpConfig(items []string) (tkGroup, error) {
 	out := make(chan string)
 	tch := consumeTokens(items)
 
-	end := make(sentinelSignaller)
 	go func() {
 		for item := range tch {
 			out <- item
 		}
-		close(end)
 		close(out)
 	}()
 
-	return parseDhcpConfig(end, out)
+	return parseDhcpConfig(out)
 }
 
 func compareSlice(a, b []string) bool {

@@ -12,111 +12,118 @@ import (
 	"strings"
 )
 
-type sentinelSignaller chan struct{}
-
 /** low-level parsing */
 // strip the comments and extraneous newlines from a byte channel
-func uncomment(eof sentinelSignaller, in <-chan byte) (chan byte, sentinelSignaller) {
+func uncomment(in <-chan byte) chan byte {
 	out := make(chan byte)
-	eoc := make(sentinelSignaller)
 
 	go func(in <-chan byte, out chan byte) {
 		var endofline bool
-		for stillReading := true; stillReading; {
-			select {
-			case <-eof:
-				stillReading = false
-			case ch, ok := <-in:
-				if !ok {
-					break
-				}
-				switch ch {
-				case '#':
-					endofline = true
-				case '\n':
-					if endofline {
-						endofline = false
-					}
-				}
-				if !endofline {
-					out <- ch
-				}
+
+		for {
+			by, ok := <-in
+			if !ok {
+				break
+			}
+
+			// If we find a comment, then everything until the end of line
+			// needs to be culled. We keep track of that using the `endofline`
+			// flag.
+			if by == '#' {
+				endofline = true
+
+			} else if by == '\n' && endofline {
+				endofline = false
+			}
+
+			// If we're not in the processing of culling bytes, then write what
+			// we've read into our output chan.
+			if !endofline {
+				out <- by
 			}
 		}
-		close(eoc)
+		close(out)
 	}(in, out)
-	return out, eoc
+	return out
 }
 
 // convert a byte channel into a channel of pseudo-tokens
-func tokenizeDhcpConfig(eof sentinelSignaller, in chan byte) (chan string, sentinelSignaller) {
+func tokenizeDhcpConfig(in chan byte) chan string {
 	var state string
 	var quote bool
 
-	eot := make(sentinelSignaller)
-
 	out := make(chan string)
 	go func(out chan string) {
-		for stillReading := true; stillReading; {
-			select {
-			case <-eof:
-				stillReading = false
+		for {
+			by, ok := <-in
+			if !ok {
+				break
+			}
 
-			case ch, ok := <-in:
-				if !ok {
-					break
-				}
-				if quote {
-					if ch == '"' {
-						out <- state + string(ch)
-						state, quote = "", false
-						continue
-					}
-					state += string(ch)
+			// If we're in a quote, then we continue until we're not in a quote
+			// before we start looing for tokens
+			if quote {
+				if by == '"' {
+					out <- state + string(by)
+					state, quote = "", false
 					continue
 				}
+				state += string(by)
+				continue
+			}
 
-				switch ch {
-				case '"':
-					quote = true
-					state += string(ch)
+			switch by {
+			case '"':
+				// Otherwise we're outside any quotes and can process bytes normaly
+				quote = true
+				state += string(by)
+				continue
+
+			case '\r':
+				fallthrough
+			case '\n':
+				fallthrough
+			case '\t':
+				fallthrough
+			case ' ':
+				// Whitespace is a separator, so we check to see if there's any state.
+				// If so, then write our state prior to resetting.
+
+				if len(state) == 0 {
 					continue
+				}
+				out <- state
+				state = ""
 
-				case '\r':
-					fallthrough
-				case '\n':
-					fallthrough
-				case '\t':
-					fallthrough
-				case ' ':
-					if len(state) == 0 {
-						continue
-					}
+			case '{':
+				fallthrough
+			case '}':
+				fallthrough
+			case ';':
+				// If we encounter a brace or a semicolon, then we need to emit our
+				// state and then the byte because it can be part of the token.
+
+				if len(state) > 0 {
 					out <- state
-					state = ""
-
-				case '{':
-					fallthrough
-				case '}':
-					fallthrough
-				case ';':
-					if len(state) > 0 {
-						out <- state
-					}
-					out <- string(ch)
-					state = ""
-
-				default:
-					state += string(ch)
 				}
+				out <- string(by)
+				state = ""
+
+			default:
+				// Just a byte which needs to be aggregated into our state
+				state += string(by)
 			}
 		}
+
+		// If we still have any data left, then make sure to emit that
 		if len(state) > 0 {
 			out <- state
 		}
-		close(eot)
+
+		// Close our channel since we're responsible for it.
+		close(out)
 	}(out)
-	return out, eot
+	return out
 }
 
 /** mid-level parsing */
@@ -162,33 +169,34 @@ func parseTokenParameter(in chan string) tkParameter {
 	for {
 		token, ok := <-in
 		if !ok {
-			goto leave
+			break
 		}
 
+		// If there's no name for this parameter yet, then the first token
+		// is our name. Snag it into our struct, and grab the next one.
 		if result.name == "" {
 			result.name = token
 			continue
 		}
-		switch token {
-		case "{":
-			fallthrough
-		case "}":
-			fallthrough
-		case ";":
-			goto leave
-		default:
+
+		// If encounter any braces or line-terminators, then we're done parsing.
+		// Anything else we find are just operands we need to keep track of.
+		if strings.ContainsAny("{};", token) {
+			break
+		} else {
 			result.operand = append(result.operand, token)
 		}
 	}
-leave:
 	return result
 }
 
 // convert a channel of pseudo-tokens into an tkGroup tree */
-func parseDhcpConfig(eof sentinelSignaller, in chan string) (tkGroup, error) {
+func parseDhcpConfig(in chan string) (tkGroup, error) {
 	var tokens []string
 	var result tkGroup
 
+	// This utility function takes a list of tokens and line-terminates them
+	// before sending them to parseTokenParameter().
 	toParameter := func(tokens []string) tkParameter {
 		out := make(chan string)
 		go func(out chan string) {
@@ -201,121 +209,173 @@ func parseDhcpConfig(eof sentinelSignaller, in chan string) (tkGroup, error) {
 		return parseTokenParameter(out)
 	}
 
-	for stillReading, currentgroup := true, &result; stillReading; {
-		select {
-		case <-eof:
-			stillReading = false
+	// Start building our tree using result as our root node
+	node := &result
+	for {
+		tk, ok := <-in
+		if !ok {
+			break
+		}
 
-		case tk := <-in:
-			switch tk {
-			case "{":
-				grp := &tkGroup{parent: currentgroup}
-				grp.id = toParameter(tokens)
-				currentgroup.groups = append(currentgroup.groups, grp)
-				currentgroup = grp
-			case "}":
-				if currentgroup.parent == nil {
-					return tkGroup{}, fmt.Errorf("Unable to close the global declaration")
-				}
-				if len(tokens) > 0 {
-					return tkGroup{}, fmt.Errorf("List of tokens was left unterminated : %v", tokens)
-				}
-				currentgroup = currentgroup.parent
-			case ";":
-				arg := toParameter(tokens)
-				currentgroup.params = append(currentgroup.params, arg)
-			default:
-				tokens = append(tokens, tk)
-				continue
-			}
+		switch tk {
+		case "{":
+			// If our next token is an opening brace, then we need to collect our
+			// current aggregated tokens to parse, push our current node onto the
+			// tree, and then pivot into it. Then we can reset our tokens for the child.
+
+			grp := &tkGroup{parent: node}
+			grp.id = toParameter(tokens)
+
+			node.groups = append(node.groups, grp)
+			node = grp
+
 			tokens = []string{}
+
+		case "}":
+			// Otherwise if it's a closing brace, then we need to pop back up to
+			// the parent node and resume parsing. If we have any tokens, then
+			// that was because they were unterminated. Raise an error in that case.
+
+			if node.parent == nil {
+				return tkGroup{}, fmt.Errorf("Refusing to close the global declaration")
+			}
+			if len(tokens) > 0 {
+				return tkGroup{}, fmt.Errorf("List of tokens was left unterminated : %v", tokens)
+			}
+			node = node.parent
+
+			tokens = []string{}
+
+		case ";":
+			// If we encounter a line-terminator, then the list of tokens we've been
+			// aggregating are ready to be parsed. Afterwards, we can write them
+			// to our current tree node.
+
+			arg := toParameter(tokens)
+			node.params = append(node.params, arg)
+			tokens = []string{}
+
+		default:
+			// Anything else requires us to aggregate our token into our list, and
+			// try grabbing the next one.
+
+			tokens = append(tokens, tk)
 		}
 	}
 	return result, nil
 }
 
-func tokenizeNetworkMapConfig(eof sentinelSignaller, in chan byte) (chan string, sentinelSignaller) {
-	var ch byte
+func tokenizeNetworkMapConfig(in chan byte) chan string {
 	var state string
 	var quote bool
 	var lastnewline bool
 
-	eot := make(sentinelSignaller)
+	// This logic is very similar to tokenizeDhcpConfig except she needs to handle
+	// braces, and we don't. This is the only major difference from us.
 
 	out := make(chan string)
 	go func(out chan string) {
-		for stillReading := true; stillReading; {
-			select {
-			case <-eof:
-				stillReading = false
-
-			case ch = <-in:
-				if quote {
-					if ch == '"' {
-						out <- state + string(ch)
-						state, quote = "", false
-						continue
-					}
-					state += string(ch)
-					continue
-				}
-
-				switch ch {
-				case '"':
-					quote = true
-					state += string(ch)
-					continue
-
-				case '\r':
-					fallthrough
-				case '\t':
-					fallthrough
-				case ' ':
-					if len(state) == 0 {
-						continue
-					}
-					out <- state
-					state = ""
-
-				case '\n':
-					if lastnewline {
-						continue
-					}
-					if len(state) > 0 {
-						out <- state
-					}
-					out <- string(ch)
-					state = ""
-					lastnewline = true
-					continue
-
-				case '.':
-					fallthrough
-				case '=':
-					if len(state) > 0 {
-						out <- state
-					}
-					out <- string(ch)
-					state = ""
-
-				default:
-					state += string(ch)
-				}
-				lastnewline = false
+		for {
+			by, ok := <-in
+			if !ok {
+				break
 			}
+
+			// If we're currently inide a quote, then we need to continue until
+			// we encounter the closing quote. We'll keep collecting our state
+			// in the meantime.
+			if quote {
+				if by == '"' {
+					out <- state + string(by)
+					state, quote = "", false
+					continue
+				}
+				state += string(by)
+				continue
+			}
+
+			switch by {
+			case '"':
+				// If we encounter a quote, then we need to transition into our
+				// quote-parsing state that keeps collecting data until the closing
+				// quote is encountered.
+
+				quote = true
+				state += string(by)
+				continue
+
+			case '\r':
+				fallthrough
+			case '\t':
+				fallthrough
+			case ' ':
+				// Whitespace is considered a separator, so if we encounter this
+				// then we can write our current state, and then reset.
+
+				if len(state) == 0 {
+					continue
+				}
+				out <- state
+				state = ""
+
+			case '\n':
+				// Newlines are a somewhat special case because they separate each
+				// attribute/line-item, and they can repeat. We need to preserve
+				// this token, so we write our current state, then the newline.
+				// We also maintain a flag so that we can consolidate multiple
+				// newlines together.
+
+				if lastnewline {
+					continue
+				}
+				if len(state) > 0 {
+					out <- state
+				}
+				out <- string(by)
+				state = ""
+				lastnewline = true
+				continue
+
+			case '.':
+				fallthrough
+			case '=':
+				// These characters separate attributes or tokens from one another,
+				// so they result in writing the state, the character, and then reset.
+
+				if len(state) > 0 {
+					out <- state
+				}
+				out <- string(by)
+				state = ""
+
+			default:
+				// Any byte we couldn't parse just gets aggregated for the next pass.
+				state += string(by)
+			}
+
+			// If we made it here, then we can guarantee that the we didn't just
+			// process a newline. Clear this flag for the next one we find.
+			lastnewline = false
 		}
+
+		// If there's anything left in our state, then the last line was just not
+		// newline-terminated. This is a common occurrence, so write our current
+		// state before we finish.
 		if len(state) > 0 {
 			out <- state
 		}
-		close(eot)
+		close(out)
 	}(out)
-	return out, eot
+	return out
 }
 
-func parseNetworkMapConfig(eof sentinelSignaller, in chan string) (NetworkMap, error) {
-	var unsorted map[string]map[string]string
+func parseNetworkMapConfig(in chan string) (NetworkMap, error) {
 	var state []string
+	unsorted := make(map[string]map[string]string)
 
+	// A network map has the following syntax "network.attribute = value". This
+	// closure is responsible for using the "network" as a key into the `unsorted`
+	// mapping, and then assigning the "value" into it keyed by the "attribute".
 	addResult := func(network string, attribute string, value string) error {
 		_, ok := unsorted[network]
 		if !ok {
@@ -332,53 +392,67 @@ func parseNetworkMapConfig(eof sentinelSignaller, in chan string) (NetworkMap, e
 		return nil
 	}
 
-	stillReading := true
-	for unsorted = make(map[string]map[string]string); stillReading; {
-		select {
-		case <-eof:
+	// Loop through all of our tokens making sure to update our unsorted map.
+	for {
+		tk, ok := <-in
+		if !ok {
+			// If our token channel is closed, then check to see if we've
+			// collected 3 items in our state. If so, then we can add this
+			// final attribute/value before we leave.
 			if len(state) == 3 {
 				err := addResult(state[0], state[1], state[2])
 				if err != nil {
 					return nil, err
 				}
 			}
-			stillReading = false
-		case tk := <-in:
-			switch tk {
-			case ".":
-				if len(state) != 1 {
-					return nil, fmt.Errorf("Missing network index")
-				}
-			case "=":
-				if len(state) != 2 {
-					return nil, fmt.Errorf("Assignment to empty attribute")
-				}
-			case "\n":
-				if len(state) == 0 {
-					continue
-				}
-				if len(state) != 3 {
-					return nil, fmt.Errorf("Invalid attribute assignment : %v", state)
-				}
-				err := addResult(state[0], state[1], state[2])
-				if err != nil {
-					return nil, err
-				}
-				state = make([]string, 0)
-			default:
-				state = append(state, tk)
+			break
+		}
+
+		// This switch makes sure we encounter these tokens in the correct order.
+		switch tk {
+		case ".":
+			if len(state) != 1 {
+				return nil, fmt.Errorf("Missing network index")
 			}
+
+		case "=":
+			if len(state) != 2 {
+				return nil, fmt.Errorf("Assignment to empty attribute")
+			}
+
+		case "\n":
+			if len(state) == 0 {
+				continue
+			}
+			if len(state) != 3 {
+				return nil, fmt.Errorf("Invalid attribute assignment : %v", state)
+			}
+			err := addResult(state[0], state[1], state[2])
+			if err != nil {
+				return nil, err
+			}
+			state = make([]string, 0)
+
+		default:
+			state = append(state, tk)
 		}
 	}
+
+	// Go through our unsorted map, and collect all of the keys for "network".
 	result := make([]map[string]string, 0)
 	var keys []string
 	for k := range unsorted {
 		keys = append(keys, k)
 	}
+
+	// This way we can sort them.
 	sort.Strings(keys)
+
+	// And then collect all of them into a list to return to the caller.
 	for _, k := range keys {
 		result = append(result, unsorted[k])
 	}
+
 	return result, nil
 }
 
@@ -429,9 +503,11 @@ type pParameterHardware struct {
 
 func (e pParameterHardware) repr() string {
 	res := make([]string, 0)
+
 	for _, v := range e.address {
 		res = append(res, fmt.Sprintf("%02x", v))
 	}
+
 	return fmt.Sprintf("hardware-address:%s[%s]", e.class, strings.Join(res, ":"))
 }
 
@@ -528,6 +604,7 @@ func (e *pDeclaration) repr() string {
 	if e.parent != nil {
 		res = fmt.Sprintf("%s parent:%s", res, e.parent.short())
 	}
+
 	return fmt.Sprintf("%s\n%s\n%s\n", res, strings.Join(parameters, "\n"), strings.Join(groups, "\n"))
 }
 
@@ -570,6 +647,7 @@ func parseParameter(val tkParameter) (pParameter, error) {
 		if len(val.operand) != 2 {
 			return nil, fmt.Errorf("Invalid number of parameters for pParameterInclude : %v", val.operand)
 		}
+
 		name := val.operand[0]
 		return pParameterInclude{filename: name}, nil
 
@@ -577,6 +655,7 @@ func parseParameter(val tkParameter) (pParameter, error) {
 		if len(val.operand) != 2 {
 			return nil, fmt.Errorf("Invalid number of parameters for pParameterOption : %v", val.operand)
 		}
+
 		name, value := val.operand[0], val.operand[1]
 		return pParameterOption{name: name, value: value}, nil
 
@@ -588,6 +667,7 @@ func parseParameter(val tkParameter) (pParameter, error) {
 		if len(val.operand) < 1 {
 			return nil, fmt.Errorf("Invalid number of parameters for pParameterGrant : %v", val.operand)
 		}
+
 		attribute := strings.Join(val.operand, " ")
 		return pParameterGrant{verb: strings.ToLower(val.name), attribute: attribute}, nil
 
@@ -595,14 +675,17 @@ func parseParameter(val tkParameter) (pParameter, error) {
 		if len(val.operand) < 1 {
 			return nil, fmt.Errorf("Invalid number of parameters for pParameterRange4 : %v", val.operand)
 		}
+
 		idxAddress := map[bool]int{true: 1, false: 0}[strings.ToLower(val.operand[0]) == "bootp"]
 		if len(val.operand) > 2+idxAddress {
 			return nil, fmt.Errorf("Invalid number of parameters for pParameterRange : %v", val.operand)
 		}
+
 		if idxAddress+1 > len(val.operand) {
 			res := net.ParseIP(val.operand[idxAddress])
 			return pParameterRange4{min: res, max: res}, nil
 		}
+
 		addr1 := net.ParseIP(val.operand[idxAddress])
 		addr2 := net.ParseIP(val.operand[idxAddress+1])
 		return pParameterRange4{min: addr1, max: addr2}, nil
@@ -615,6 +698,7 @@ func parseParameter(val tkParameter) (pParameter, error) {
 				if len(cidr) != 2 {
 					return nil, fmt.Errorf("Unknown ipv6 format : %v", address)
 				}
+
 				address := net.ParseIP(cidr[0])
 				bits, err := strconv.Atoi(cidr[1])
 				if err != nil {
@@ -632,6 +716,7 @@ func parseParameter(val tkParameter) (pParameter, error) {
 				for i := networkSize / 8; i < totalSize/8; i++ {
 					broadcast[i] = byte(0xff)
 				}
+
 				octetIndex := network[networkSize/8]
 				bitsLeft := (uint32)(hostSize % 8)
 				broadcast[octetIndex] = network[octetIndex] | ((1 << bitsLeft) - 1)
@@ -642,11 +727,13 @@ func parseParameter(val tkParameter) (pParameter, error) {
 			res := net.ParseIP(address)
 			return pParameterRange6{min: res, max: res}, nil
 		}
+
 		if len(val.operand) == 2 {
 			addr := net.ParseIP(val.operand[0])
 			if strings.ToLower(val.operand[1]) == "temporary" {
 				return pParameterRange6{min: addr, max: addr}, nil
 			}
+
 			other := net.ParseIP(val.operand[1])
 			return pParameterRange6{min: addr, max: other}, nil
 		}
@@ -656,10 +743,12 @@ func parseParameter(val tkParameter) (pParameter, error) {
 		if len(val.operand) != 3 {
 			return nil, fmt.Errorf("Invalid number of parameters for pParameterRange6 : %v", val.operand)
 		}
+
 		bits, err := strconv.Atoi(val.operand[2])
 		if err != nil {
 			return nil, fmt.Errorf("Invalid bits for pParameterPrefix6 : %v", val.operand[2])
 		}
+
 		minaddr := net.ParseIP(val.operand[0])
 		maxaddr := net.ParseIP(val.operand[1])
 		return pParameterPrefix6{min: minaddr, max: maxaddr, bits: bits}, nil
@@ -668,6 +757,7 @@ func parseParameter(val tkParameter) (pParameter, error) {
 		if len(val.operand) != 2 {
 			return nil, fmt.Errorf("Invalid number of parameters for pParameterHardware : %v", val.operand)
 		}
+
 		class := val.operand[0]
 		octets := strings.Split(val.operand[1], ":")
 		address := make([]byte, 0)
@@ -678,6 +768,7 @@ func parseParameter(val tkParameter) (pParameter, error) {
 			}
 			address = append(address, byte(b))
 		}
+
 		return pParameterHardware{class: class, address: address}, nil
 
 	case "fixed-address":
@@ -694,34 +785,42 @@ func parseParameter(val tkParameter) (pParameter, error) {
 		if len(val.operand) != 3 {
 			return nil, fmt.Errorf("Invalid number of parameters for pParameterClientMatch : %v", val.operand)
 		}
+
 		if val.operand[0] != "option" {
 			return nil, fmt.Errorf("Invalid match parameter : %v", val.operand[0])
 		}
+
 		optionName := val.operand[1]
 		optionData := val.operand[2]
 		return pParameterClientMatch{name: optionName, data: optionData}, nil
 
 	default:
 		length := len(val.operand)
+
 		if length < 1 {
 			return pParameterBoolean{parameter: val.name, truancy: true}, nil
+
 		} else if length > 1 {
 			if val.operand[0] == "=" {
 				return pParameterExpression{parameter: val.name, expression: strings.Join(val.operand[1:], "")}, nil
 			}
 		}
+
 		if length != 1 {
 			return nil, fmt.Errorf("Invalid number of parameters for pParameterOther : %v", val.operand)
 		}
+
 		if strings.ToLower(val.name) == "not" {
 			return pParameterBoolean{parameter: val.operand[0], truancy: false}, nil
 		}
+
 		return pParameterOther{parameter: val.name, value: val.operand[0]}, nil
 	}
 }
 
 func parseTokenGroup(val tkGroup) (*pDeclaration, error) {
 	params := val.id.operand
+
 	switch val.id.name {
 	case "group":
 		return &pDeclaration{id: pDeclarationGroup{}}, nil
@@ -749,6 +848,7 @@ func parseTokenGroup(val tkGroup) (*pDeclaration, error) {
 				return &pDeclaration{id: pDeclarationSubnet4{net.IPNet{IP: subnet, Mask: mask}}}, nil
 			}
 		}
+
 	case "subnet6":
 		if len(params) == 1 {
 			ip6 := strings.SplitN(params[0], "/", 2)
@@ -761,10 +861,12 @@ func parseTokenGroup(val tkGroup) (*pDeclaration, error) {
 				return &pDeclaration{id: pDeclarationSubnet6{net.IPNet{IP: address, Mask: net.CIDRMask(prefix, net.IPv6len*8)}}}, nil
 			}
 		}
+
 	case "shared-network":
 		if len(params) == 1 {
 			return &pDeclaration{id: pDeclarationShared{name: params[0]}}, nil
 		}
+
 	case "":
 		return &pDeclaration{id: pDeclarationGlobal{}}, nil
 	}
@@ -772,8 +874,8 @@ func parseTokenGroup(val tkGroup) (*pDeclaration, error) {
 }
 
 func flattenDhcpConfig(root tkGroup) (*pDeclaration, error) {
-	var result *pDeclaration
 	result, err := parseTokenGroup(root)
+
 	if err != nil {
 		return nil, err
 	}
@@ -785,6 +887,7 @@ func flattenDhcpConfig(root tkGroup) (*pDeclaration, error) {
 		}
 		result.parameters = append(result.parameters, param)
 	}
+
 	for _, p := range root.groups {
 		group, err := flattenDhcpConfig(*p)
 		if err != nil {
@@ -793,6 +896,7 @@ func flattenDhcpConfig(root tkGroup) (*pDeclaration, error) {
 		group.parent = result
 		result.declarations = append(result.declarations, *group)
 	}
+
 	return result, nil
 }
 
@@ -870,16 +974,14 @@ func createDeclaration(node pDeclaration) configDeclaration {
 func (e *configDeclaration) repr() string {
 	var result []string
 
-	var res []string
-
-	res = make([]string, 0)
+	res := make([]string, 0)
 	for _, v := range e.id {
 		res = append(res, v.repr())
 	}
 	result = append(result, strings.Join(res, ","))
 
 	if len(e.address) > 0 {
-		res = make([]string, 0)
+		res := make([]string, 0)
 		for _, v := range e.address {
 			res = append(res, v.repr())
 		}
@@ -903,17 +1005,19 @@ func (e *configDeclaration) repr() string {
 	}
 
 	if len(e.hostid) > 0 {
-		res = make([]string, 0)
+		res := make([]string, 0)
 		for _, v := range e.hostid {
 			res = append(res, v.repr())
 		}
 		result = append(result, fmt.Sprintf("hostid : %v", strings.Join(res, " ")))
 	}
+
 	return strings.Join(result, "\n") + "\n"
 }
 
 func (e *configDeclaration) IP4() (net.IP, error) {
 	var result []string
+
 	for _, entry := range e.address {
 		switch entry.(type) {
 		case pParameterAddress4:
@@ -922,8 +1026,10 @@ func (e *configDeclaration) IP4() (net.IP, error) {
 			}
 		}
 	}
+
 	if len(result) > 1 {
 		return nil, fmt.Errorf("More than one address4 returned : %v", result)
+
 	} else if len(result) == 0 {
 		return nil, fmt.Errorf("No IP4 addresses found")
 	}
@@ -931,14 +1037,18 @@ func (e *configDeclaration) IP4() (net.IP, error) {
 	if res := net.ParseIP(result[0]); res != nil {
 		return res, nil
 	}
+
 	res, err := net.ResolveIPAddr("ip4", result[0])
 	if err != nil {
 		return nil, err
 	}
+
 	return res.IP, nil
 }
+
 func (e *configDeclaration) IP6() (net.IP, error) {
 	var result []string
+
 	for _, entry := range e.address {
 		switch entry.(type) {
 		case pParameterAddress6:
@@ -947,8 +1057,10 @@ func (e *configDeclaration) IP6() (net.IP, error) {
 			}
 		}
 	}
+
 	if len(result) > 1 {
 		return nil, fmt.Errorf("More than one address6 returned : %v", result)
+
 	} else if len(result) == 0 {
 		return nil, fmt.Errorf("No IP6 addresses found")
 	}
@@ -956,23 +1068,28 @@ func (e *configDeclaration) IP6() (net.IP, error) {
 	if res := net.ParseIP(result[0]); res != nil {
 		return res, nil
 	}
+
 	res, err := net.ResolveIPAddr("ip6", result[0])
 	if err != nil {
 		return nil, err
 	}
 	return res.IP, nil
 }
+
 func (e *configDeclaration) Hardware() (net.HardwareAddr, error) {
 	var result []pParameterHardware
+
 	for _, addr := range e.address {
 		switch addr.(type) {
 		case pParameterHardware:
 			result = append(result, addr.(pParameterHardware))
 		}
 	}
+
 	if len(result) > 0 {
 		return nil, fmt.Errorf("More than one hardware address returned : %v", result)
 	}
+
 	res := make(net.HardwareAddr, 0)
 	for _, by := range result[0].address {
 		res = append(res, by)
@@ -984,20 +1101,29 @@ func (e *configDeclaration) Hardware() (net.HardwareAddr, error) {
 type DhcpConfiguration []configDeclaration
 
 func ReadDhcpConfiguration(fd *os.File) (DhcpConfiguration, error) {
-	fromfile, eof := consumeFile(fd)
-	uncommented, eoc := uncomment(eof, fromfile)
-	tokenized, eot := tokenizeDhcpConfig(eoc, uncommented)
-	parsetree, err := parseDhcpConfig(eot, tokenized)
+	fromfile := consumeFile(fd)
+	uncommented := uncomment(fromfile)
+	tokenized := tokenizeDhcpConfig(uncommented)
+
+	// Parse the tokenized DHCP configuration into a tree. We need it as a tree
+	// because DHCP declarations can inherit options from their parent
+	parsetree, err := parseDhcpConfig(tokenized)
 	if err != nil {
 		return nil, err
 	}
 
+	// Flatten the tree into a list of pDeclaration objects. This is responsible
+	// for actually propagating options from the parent pDeclaration into all of
+	// its children.
 	global, err := flattenDhcpConfig(parsetree)
 	if err != nil {
 		return nil, err
 	}
 
+	// This closure is just to the goro that follows it in recursively walking
+	// through all of the declarations and writing them individually to a chan.
 	var walkDeclarations func(root pDeclaration, out chan *configDeclaration)
+
 	walkDeclarations = func(root pDeclaration, out chan *configDeclaration) {
 		res := createDeclaration(root)
 		out <- &res
@@ -1006,12 +1132,15 @@ func ReadDhcpConfiguration(fd *os.File) (DhcpConfiguration, error) {
 		}
 	}
 
+	// That way this goro can take each individual declaration and write it to
+	// a channel.
 	each := make(chan *configDeclaration)
 	go func(out chan *configDeclaration) {
 		walkDeclarations(*global, out)
 		out <- nil
 	}(each)
 
+	// For this loop to convert it into a itemized list.
 	var result DhcpConfiguration
 	for decl := <-each; decl != nil; decl = <-each {
 		result = append(result, *decl)
@@ -1081,28 +1210,33 @@ type NetworkNameMapper interface {
 }
 
 func ReadNetworkMap(fd *os.File) (NetworkMap, error) {
+	fromfile := consumeFile(fd)
+	uncommented := uncomment(fromfile)
+	tokenized := tokenizeNetworkMapConfig(uncommented)
 
-	fromfile, eof := consumeFile(fd)
-	uncommented, eoc := uncomment(eof, fromfile)
-	tokenized, eot := tokenizeNetworkMapConfig(eoc, uncommented)
-
-	result, err := parseNetworkMapConfig(eot, tokenized)
+	// Now that we've tokenized the network map, we just need to parse it into
+	// a list of maps.
+	result, err := parseNetworkMapConfig(tokenized)
 	if err != nil {
 		return nil, err
 	}
+
 	return result, nil
 }
 
 func (e NetworkMap) NameIntoDevices(name string) ([]string, error) {
 	var devices []string
+
 	for _, val := range e {
 		if strings.ToLower(val["name"]) == strings.ToLower(name) {
 			devices = append(devices, val["device"])
 		}
 	}
+
 	if len(devices) > 0 {
 		return devices, nil
 	}
+
 	return make([]string, 0), fmt.Errorf("Network name not found : %v", name)
 }
 func (e NetworkMap) DeviceIntoName(device string) (string, error) {
@@ -1111,100 +1245,114 @@ func (e NetworkMap) DeviceIntoName(device string) (string, error) {
 			return val["name"], nil
 		}
 	}
+
 	return "", fmt.Errorf("Device name not found : %v", device)
 }
 func (e *NetworkMap) repr() string {
 	var result []string
+
 	for idx, val := range *e {
 		result = append(result, fmt.Sprintf("network%d.name = \"%s\"", idx, val["name"]))
 		result = append(result, fmt.Sprintf("network%d.device = \"%s\"", idx, val["device"]))
 	}
+
 	return strings.Join(result, "\n")
 }
 
 /*** parser for VMware Fusion's networking file */
-func tokenizeNetworkingConfig(eof sentinelSignaller, in chan byte) (chan string, sentinelSignaller) {
-	var ch byte
+func tokenizeNetworkingConfig(in chan byte) chan string {
 	var state string
 	var repeat_newline bool
 
-	eot := make(sentinelSignaller)
-
 	out := make(chan string)
 	go func(out chan string) {
-		for reading := true; reading; {
-			select {
-			case <-eof:
-				reading = false
-
-			case ch = <-in:
-				switch ch {
-				case '\r':
-					fallthrough
-				case '\t':
-					fallthrough
-				case ' ':
-					if len(state) == 0 {
-						continue
-					}
-					out <- state
-					state = ""
-				case '\n':
-					if repeat_newline {
-						continue
-					}
-					if len(state) > 0 {
-						out <- state
-					}
-					out <- string(ch)
-					state = ""
-					repeat_newline = true
-					continue
-				default:
-					state += string(ch)
-				}
-				repeat_newline = false
+		for {
+			by, ok := <-in
+			if !ok {
+				break
 			}
+
+			switch by {
+			case '\r':
+				fallthrough
+			case '\t':
+				fallthrough
+			case ' ':
+				// If we receive whitespace, then this is just a write to our
+				// state and then we reset.
+				if len(state) == 0 {
+					continue
+				}
+				out <- state
+				state = ""
+
+			case '\n':
+				// Newlines can repeat, so this case is responsible for writing
+				// to the chan, and consolidating multiple newlines into singles.
+				if repeat_newline {
+					continue
+				}
+				if len(state) > 0 {
+					out <- state
+				}
+				out <- string(by)
+				state = ""
+				repeat_newline = true
+				continue
+
+			default:
+				// Anything other bytes just need to be aggregated into a string.
+				state += string(by)
+			}
+			repeat_newline = false
 		}
+
+		// If there's anything left in our state after the chan has been closed,
+		// then the input just wasn't terminated properly. It's still valid, so
+		// write we have to the channel.
 		if len(state) > 0 {
 			out <- state
 		}
-		close(eot)
 	}(out)
-	return out, eot
+	return out
 }
 
-func splitNetworkingConfig(eof sentinelSignaller, in chan string) (chan []string, sentinelSignaller) {
-	var out chan []string
+func splitNetworkingConfig(in chan string) chan []string {
+	out := make(chan []string)
 
-	eos := make(sentinelSignaller)
+	// This goroutine is simple in that it takes a chan of tokens, and splits
+	// them across the newlines.
 
-	out = make(chan []string)
 	go func(out chan []string) {
 		row := make([]string, 0)
-		for reading := true; reading; {
-			select {
-			case <-eof:
-				reading = false
+		for {
+			tk, ok := <-in
+			if !ok {
+				break
+			}
 
-			case tk := <-in:
-				switch tk {
-				case "\n":
-					if len(row) > 0 {
-						out <- row
-					}
-					row = make([]string, 0)
-				default:
-					row = append(row, tk)
+			if tk == "\n" {
+				// If we received a newline token, then we need to write our
+				// aggregated list of tokens and reset our "splitting" state.
+
+				if len(row) > 0 {
+					out <- row
 				}
+
+				row = make([]string, 0)
+
+			} else {
+				// Anything else just requires us to aggregate the token into
+				// our list.
+				row = append(row, tk)
 			}
 		}
+
 		if len(row) > 0 {
 			out <- row
 		}
-		close(eos)
 	}(out)
-	return out, eos
+	return out
 }
 
 /// All token types in networking file.
@@ -1437,8 +1585,7 @@ func (e networkingCommandEntry) Entry() reflect.Value {
 }
 
 func (e networkingCommandEntry) Repr() string {
-	var result map[string]interface{}
-	result = make(map[string]interface{})
+	result := make(map[string]interface{})
 
 	entryN, entry := e.Name(), e.Entry()
 	entryT := entry.Type()
@@ -1454,13 +1601,13 @@ func parseNetworkingCommand_answer(row []string) (*networkingCommandEntry, error
 	if len(row) != 2 {
 		return nil, fmt.Errorf("Expected %d arguments. Received only %d.", 2, len(row))
 	}
+
 	vnet := networkingVNET{value: row[0]}
 	if !vnet.Valid() {
 		return nil, fmt.Errorf("Invalid format for VNET.")
 	}
-	value := row[1]
 
-	result := networkingCommandEntry_answer{vnet: vnet, value: value}
+	result := networkingCommandEntry_answer{vnet: vnet, value: row[1]}
 	return &networkingCommandEntry{entry: result, answer: &result}, nil
 }
 func parseNetworkingCommand_remove_answer(row []string) (*networkingCommandEntry, error) {
@@ -1635,6 +1782,7 @@ func parseNetworkingCommand_remove_nat_prefix(row []string) (*networkingCommandE
 	if !strings.HasPrefix(row[1], "/") {
 		return nil, fmt.Errorf("Expected second argument to begin with \"/\". : %v", row[1])
 	}
+
 	prefix, err := strconv.Atoi(row[1][1:])
 	if err != nil {
 		return nil, fmt.Errorf("Unable to parse prefix out of second argument. : %v", row[1])
@@ -1671,37 +1819,35 @@ func NetworkingParserByCommand(command string) *func([]string) (*networkingComma
 	return nil
 }
 
-func parseNetworkingConfig(eof sentinelSignaller, rows chan []string) (chan networkingCommandEntry, sentinelSignaller) {
-	var out chan networkingCommandEntry
+func parseNetworkingConfig(rows chan []string) chan networkingCommandEntry {
+	out := make(chan networkingCommandEntry)
 
-	eop := make(sentinelSignaller)
-
-	out = make(chan networkingCommandEntry)
 	go func(in chan []string, out chan networkingCommandEntry) {
-		for reading := true; reading; {
-			select {
-			case <-eof:
-				reading = false
-			case row := <-in:
-				if len(row) >= 1 {
-					parser := NetworkingParserByCommand(row[0])
-					if parser == nil {
-						log.Printf("Invalid command : %v", row)
-						continue
-					}
-					callback := *parser
-					entry, err := callback(row[1:])
-					if err != nil {
-						log.Printf("Unable to parse command : %v %v", err, row)
-						continue
-					}
-					out <- *entry
+		for {
+			row, ok := <-in
+			if !ok {
+				break
+			}
+
+			if len(row) >= 1 {
+				parser := NetworkingParserByCommand(row[0])
+				if parser == nil {
+					log.Printf("Invalid command : %v", row)
+					continue
 				}
+
+				callback := *parser
+
+				entry, err := callback(row[1:])
+				if err != nil {
+					log.Printf("Unable to parse command : %v %v", err, row)
+					continue
+				}
+				out <- *entry
 			}
 		}
-		close(eop)
 	}(rows, out)
-	return out, eop
+	return out
 }
 
 type NetworkingConfig struct {
@@ -1717,7 +1863,7 @@ func (c NetworkingConfig) repr() string {
 	return fmt.Sprintf("answer -> %v\nnat_portfwd -> %v\ndhcp_mac_to_ip -> %v\nbridge_mapping -> %v\nnat_prefix -> %v", c.answer, c.nat_portfwd, c.dhcp_mac_to_ip, c.bridge_mapping, c.nat_prefix)
 }
 
-func flattenNetworkingConfig(eof sentinelSignaller, in chan networkingCommandEntry) NetworkingConfig {
+func flattenNetworkingConfig(in chan networkingCommandEntry) NetworkingConfig {
 	var result NetworkingConfig
 	var vmnet int
 
@@ -1727,96 +1873,106 @@ func flattenNetworkingConfig(eof sentinelSignaller, in chan networkingCommandEnt
 	result.bridge_mapping = make(map[string]int)
 	result.nat_prefix = make(map[int][]int)
 
-	for reading := true; reading; {
-		select {
-		case <-eof:
-			reading = false
-		case e := <-in:
-			switch e.entry.(type) {
-			case networkingCommandEntry_answer:
-				vnet := e.answer.vnet
-				answers, exists := result.answer[vnet.Number()]
-				if !exists {
-					answers = make(map[string]string)
-					result.answer[vnet.Number()] = answers
-				}
-				answers[vnet.Option()] = e.answer.value
-			case networkingCommandEntry_remove_answer:
-				vnet := e.remove_answer.vnet
-				answers, exists := result.answer[vnet.Number()]
-				if exists {
-					delete(answers, vnet.Option())
-				} else {
-					log.Printf("Unable to remove answer %s as specified by `remove_answer`.\n", vnet.Repr())
-				}
-			case networkingCommandEntry_add_nat_portfwd:
-				vmnet = e.add_nat_portfwd.vnet
-				protoport := fmt.Sprintf("%s/%d", e.add_nat_portfwd.protocol, e.add_nat_portfwd.port)
-				target := fmt.Sprintf("%s:%d", e.add_nat_portfwd.target_host, e.add_nat_portfwd.target_port)
-				portfwds, exists := result.nat_portfwd[vmnet]
-				if !exists {
-					portfwds = make(map[string]string)
-					result.nat_portfwd[vmnet] = portfwds
-				}
-				portfwds[protoport] = target
-			case networkingCommandEntry_remove_nat_portfwd:
-				vmnet = e.remove_nat_portfwd.vnet
-				protoport := fmt.Sprintf("%s/%d", e.remove_nat_portfwd.protocol, e.remove_nat_portfwd.port)
-				portfwds, exists := result.nat_portfwd[vmnet]
-				if exists {
-					delete(portfwds, protoport)
-				} else {
-					log.Printf("Unable to remove nat port-forward %s from interface %s%d as requested by `remove_nat_portfwd`.\n", protoport, NetworkingInterfacePrefix, vmnet)
-				}
-			case networkingCommandEntry_add_dhcp_mac_to_ip:
-				vmnet = e.add_dhcp_mac_to_ip.vnet
-				dhcpmacs, exists := result.dhcp_mac_to_ip[vmnet]
-				if !exists {
-					dhcpmacs = make(map[string]net.IP)
-					result.dhcp_mac_to_ip[vmnet] = dhcpmacs
-				}
-				dhcpmacs[e.add_dhcp_mac_to_ip.mac.String()] = e.add_dhcp_mac_to_ip.ip
-			case networkingCommandEntry_remove_dhcp_mac_to_ip:
-				vmnet = e.remove_dhcp_mac_to_ip.vnet
-				dhcpmacs, exists := result.dhcp_mac_to_ip[vmnet]
-				if exists {
-					delete(dhcpmacs, e.remove_dhcp_mac_to_ip.mac.String())
-				} else {
-					log.Printf("Unable to remove dhcp_mac_to_ip entry %v from interface %s%d as specified by `remove_dhcp_mac_to_ip`.\n", e.remove_dhcp_mac_to_ip, NetworkingInterfacePrefix, vmnet)
-				}
-			case networkingCommandEntry_add_bridge_mapping:
-				intf := e.add_bridge_mapping.intf
-				if _, err := intf.Interface(); err != nil {
-					log.Printf("Interface \"%s\" as specified by `add_bridge_mapping` was not found on the current platform. This is a non-critical error. Ignoring.", intf.name)
-				}
-				result.bridge_mapping[intf.name] = e.add_bridge_mapping.vnet
-			case networkingCommandEntry_remove_bridge_mapping:
-				intf := e.remove_bridge_mapping.intf
-				if _, err := intf.Interface(); err != nil {
-					log.Printf("Interface \"%s\" as specified by `remove_bridge_mapping` was not found on the current platform. This is a non-critical error. Ignoring.", intf.name)
-				}
-				delete(result.bridge_mapping, intf.name)
-			case networkingCommandEntry_add_nat_prefix:
-				vmnet = e.add_nat_prefix.vnet
-				_, exists := result.nat_prefix[vmnet]
-				if exists {
-					result.nat_prefix[vmnet] = append(result.nat_prefix[vmnet], e.add_nat_prefix.prefix)
-				} else {
-					result.nat_prefix[vmnet] = []int{e.add_nat_prefix.prefix}
-				}
-			case networkingCommandEntry_remove_nat_prefix:
-				vmnet = e.remove_nat_prefix.vnet
-				prefixes, exists := result.nat_prefix[vmnet]
-				if exists {
-					for index := 0; index < len(prefixes); index++ {
-						if prefixes[index] == e.remove_nat_prefix.prefix {
-							result.nat_prefix[vmnet] = append(prefixes[:index], prefixes[index+1:]...)
-							break
-						}
+	for {
+		e, ok := <-in
+		if !ok {
+			break
+		}
+
+		switch e.entry.(type) {
+		case networkingCommandEntry_answer:
+			vnet := e.answer.vnet
+			answers, exists := result.answer[vnet.Number()]
+			if !exists {
+				answers = make(map[string]string)
+				result.answer[vnet.Number()] = answers
+			}
+			answers[vnet.Option()] = e.answer.value
+
+		case networkingCommandEntry_remove_answer:
+			vnet := e.remove_answer.vnet
+			answers, exists := result.answer[vnet.Number()]
+			if exists {
+				delete(answers, vnet.Option())
+			} else {
+				log.Printf("Unable to remove answer %s as specified by `remove_answer`.\n", vnet.Repr())
+			}
+
+		case networkingCommandEntry_add_nat_portfwd:
+			vmnet = e.add_nat_portfwd.vnet
+			protoport := fmt.Sprintf("%s/%d", e.add_nat_portfwd.protocol, e.add_nat_portfwd.port)
+			target := fmt.Sprintf("%s:%d", e.add_nat_portfwd.target_host, e.add_nat_portfwd.target_port)
+			portfwds, exists := result.nat_portfwd[vmnet]
+			if !exists {
+				portfwds = make(map[string]string)
+				result.nat_portfwd[vmnet] = portfwds
+			}
+			portfwds[protoport] = target
+
+		case networkingCommandEntry_remove_nat_portfwd:
+			vmnet = e.remove_nat_portfwd.vnet
+			protoport := fmt.Sprintf("%s/%d", e.remove_nat_portfwd.protocol, e.remove_nat_portfwd.port)
+			portfwds, exists := result.nat_portfwd[vmnet]
+			if exists {
+				delete(portfwds, protoport)
+			} else {
+				log.Printf("Unable to remove nat port-forward %s from interface %s%d as requested by `remove_nat_portfwd`.\n", protoport, NetworkingInterfacePrefix, vmnet)
+			}
+
+		case networkingCommandEntry_add_dhcp_mac_to_ip:
+			vmnet = e.add_dhcp_mac_to_ip.vnet
+			dhcpmacs, exists := result.dhcp_mac_to_ip[vmnet]
+			if !exists {
+				dhcpmacs = make(map[string]net.IP)
+				result.dhcp_mac_to_ip[vmnet] = dhcpmacs
+			}
+			dhcpmacs[e.add_dhcp_mac_to_ip.mac.String()] = e.add_dhcp_mac_to_ip.ip
+
+		case networkingCommandEntry_remove_dhcp_mac_to_ip:
+			vmnet = e.remove_dhcp_mac_to_ip.vnet
+			dhcpmacs, exists := result.dhcp_mac_to_ip[vmnet]
+			if exists {
+				delete(dhcpmacs, e.remove_dhcp_mac_to_ip.mac.String())
+			} else {
+				log.Printf("Unable to remove dhcp_mac_to_ip entry %v from interface %s%d as specified by `remove_dhcp_mac_to_ip`.\n", e.remove_dhcp_mac_to_ip, NetworkingInterfacePrefix, vmnet)
+			}
+
+		case networkingCommandEntry_add_bridge_mapping:
+			intf := e.add_bridge_mapping.intf
+			if _, err := intf.Interface(); err != nil {
+				log.Printf("Interface \"%s\" as specified by `add_bridge_mapping` was not found on the current platform. This is a non-critical error. Ignoring.", intf.name)
+			}
+			result.bridge_mapping[intf.name] = e.add_bridge_mapping.vnet
+
+		case networkingCommandEntry_remove_bridge_mapping:
+			intf := e.remove_bridge_mapping.intf
+			if _, err := intf.Interface(); err != nil {
+				log.Printf("Interface \"%s\" as specified by `remove_bridge_mapping` was not found on the current platform. This is a non-critical error. Ignoring.", intf.name)
+			}
+			delete(result.bridge_mapping, intf.name)
+
+		case networkingCommandEntry_add_nat_prefix:
+			vmnet = e.add_nat_prefix.vnet
+			_, exists := result.nat_prefix[vmnet]
+			if exists {
+				result.nat_prefix[vmnet] = append(result.nat_prefix[vmnet], e.add_nat_prefix.prefix)
+			} else {
+				result.nat_prefix[vmnet] = []int{e.add_nat_prefix.prefix}
+			}
+
+		case networkingCommandEntry_remove_nat_prefix:
+			vmnet = e.remove_nat_prefix.vnet
+			prefixes, exists := result.nat_prefix[vmnet]
+			if exists {
+				for index := 0; index < len(prefixes); index++ {
+					if prefixes[index] == e.remove_nat_prefix.prefix {
+						result.nat_prefix[vmnet] = append(prefixes[:index], prefixes[index+1:]...)
+						break
 					}
-				} else {
-					log.Printf("Unable to remove nat prefix /%d from interface %s%d as specified by `remove_nat_prefix`.\n", e.remove_nat_prefix.prefix, NetworkingInterfacePrefix, vmnet)
 				}
+
+			} else {
+				log.Printf("Unable to remove nat prefix /%d from interface %s%d as specified by `remove_nat_prefix`.\n", e.remove_nat_prefix.prefix, NetworkingInterfacePrefix, vmnet)
 			}
 		}
 	}
@@ -1825,11 +1981,12 @@ func flattenNetworkingConfig(eof sentinelSignaller, in chan networkingCommandEnt
 
 // Constructor for networking file
 func ReadNetworkingConfig(fd *os.File) (NetworkingConfig, error) {
+
 	// start piecing together different parts of the file
-	fromfile, eof := consumeFile(fd)
-	tokenized, eot := tokenizeNetworkingConfig(eof, fromfile)
-	rows, eos := splitNetworkingConfig(eot, tokenized)
-	entries, eop := parseNetworkingConfig(eos, rows)
+	fromfile := consumeFile(fd)
+	tokenized := tokenizeNetworkingConfig(fromfile)
+	rows := splitNetworkingConfig(tokenized)
+	entries := parseNetworkingConfig(rows)
 
 	// parse the version
 	parsed_version, err := networkingReadVersion(<-rows)
@@ -1844,7 +2001,7 @@ func ReadNetworkingConfig(fd *os.File) (NetworkingConfig, error) {
 	}
 
 	// convert to a configuration
-	result := flattenNetworkingConfig(eop, entries)
+	result := flattenNetworkingConfig(entries)
 	return result, nil
 }
 
@@ -1858,8 +2015,7 @@ const (
 )
 
 func networkingConfig_InterfaceTypes(config NetworkingConfig) map[int]NetworkingType {
-	var result map[int]NetworkingType
-	result = make(map[int]NetworkingType)
+	result := make(map[int]NetworkingType)
 
 	// defaults
 	result[0] = NetworkingType_BRIDGED
@@ -1873,6 +2029,7 @@ func networkingConfig_InterfaceTypes(config NetworkingConfig) map[int]Networking
 
 	// walk through answers finding out which ones are nat versus hostonly
 	for vmnet, table := range config.answer {
+
 		// everything should be defined as a virtual adapter...
 		if table["VIRTUAL_ADAPTER"] == "yes" {
 
@@ -1886,12 +2043,13 @@ func networkingConfig_InterfaceTypes(config NetworkingConfig) map[int]Networking
 			// distinguish between nat or hostonly
 			if table["NAT"] == "yes" {
 				result[vmnet] = NetworkingType_NAT
+
 			} else {
 				result[vmnet] = NetworkingType_HOSTONLY
 			}
 
-			// if it's not a virtual_adapter, then it must be an alias (really a bridge).
 		} else {
+			// if it's not a virtual_adapter, then it must be an alias (really a bridge).
 			result[vmnet] = NetworkingType_BRIDGED
 		}
 	}
@@ -1909,8 +2067,8 @@ func networkingConfig_NamesToVmnet(config NetworkingConfig) map[NetworkingType][
 	sort.Ints(keys)
 
 	// build result dictionary
-	var result map[NetworkingType][]int
-	result = make(map[NetworkingType][]int)
+	result := make(map[NetworkingType][]int)
+
 	for i := 0; i < len(keys); i++ {
 		t := types[keys[i]]
 		result[t] = append(result[t], keys[i])
@@ -1928,10 +2086,13 @@ func (e NetworkingConfig) NameIntoDevices(name string) ([]string, error) {
 	var networkingType NetworkingType
 	if name == "hostonly" && len(netmapper[NetworkingType_HOSTONLY]) > 0 {
 		networkingType = NetworkingType_HOSTONLY
+
 	} else if name == "nat" && len(netmapper[NetworkingType_NAT]) > 0 {
 		networkingType = NetworkingType_NAT
+
 	} else if name == "bridged" && len(netmapper[NetworkingType_BRIDGED]) > 0 {
 		networkingType = NetworkingType_BRIDGED
+
 	} else {
 		return make([]string, 0), fmt.Errorf("Network name not found: %v", name)
 	}
@@ -1957,8 +2118,10 @@ func (e NetworkingConfig) DeviceIntoName(device string) (string, error) {
 	switch network {
 	case NetworkingType_HOSTONLY:
 		return "hostonly", nil
+
 	case NetworkingType_NAT:
 		return "nat", nil
+
 	case NetworkingType_BRIDGED:
 		return "bridged", nil
 	}
@@ -1966,9 +2129,8 @@ func (e NetworkingConfig) DeviceIntoName(device string) (string, error) {
 }
 
 /** generic async file reader */
-func consumeFile(fd *os.File) (chan byte, sentinelSignaller) {
-	fromfile := make(chan byte)
-	eof := make(sentinelSignaller)
+func consumeFile(fd *os.File) chan byte {
+	fromFile := make(chan byte)
 	go func() {
 		b := make([]byte, 1)
 		for {
@@ -1978,9 +2140,9 @@ func consumeFile(fd *os.File) (chan byte, sentinelSignaller) {
 				// ErrClosed may appear since file is closed and this goroutine still left running
 				break
 			}
-			fromfile <- b[0]
+			fromFile <- b[0]
 		}
-		close(eof)
+		close(fromFile)
 	}()
-	return fromfile, eof
+	return fromFile
 }
