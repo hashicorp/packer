@@ -629,8 +629,13 @@ func TestBuilderPrepare_VNCPassword(t *testing.T) {
 func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
 	var b Builder
 	config := testConfig()
+	hostPortMin := 1234
+	hostPortMax := 4321
 	sshTimeout := 2 * time.Minute
+
 	config["ssh_wait_timeout"] = sshTimeout
+	config["ssh_host_port_min"] = hostPortMin
+	config["ssh_host_port_max"] = hostPortMax
 
 	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
@@ -642,5 +647,13 @@ func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
 
 	if b.config.CommConfig.Comm.SSHTimeout != sshTimeout {
 		t.Fatalf("SSHTimeout should be %s for backwards compatibility, but it was %s", sshTimeout.String(), b.config.CommConfig.Comm.SSHTimeout.String())
+	}
+
+	if b.config.CommConfig.HostPortMin != hostPortMin {
+		t.Fatalf("HostPortMin should be %d for backwards compatibility, but it was %d", hostPortMin, b.config.CommConfig.HostPortMin)
+	}
+
+	if b.config.CommConfig.HostPortMax != hostPortMax {
+		t.Fatalf("HostPortMax should be %d for backwards compatibility, but it was %d", hostPortMax, b.config.CommConfig.HostPortMax)
 	}
 }

@@ -343,7 +343,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	var errs *packer.MultiError
 	warnings := make([]string, 0)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.CommConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.DiskSize == "" || b.config.DiskSize == "0" {
 		b.config.DiskSize = "40960M"
@@ -514,16 +513,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 				errs,
 				fmt.Errorf("Output directory '%s' already exists. It must not exist.", b.config.OutputDir))
 		}
-	}
-
-	if b.config.CommConfig.HostPortMin > b.config.CommConfig.HostPortMax {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
-	}
-
-	if b.config.CommConfig.HostPortMin < 0 {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("ssh_host_port_min must be positive"))
 	}
 
 	if b.config.VNCPortMin > b.config.VNCPortMax {

@@ -3,7 +3,6 @@ package qemu
 
 import (
 	"errors"
-
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -58,6 +57,10 @@ func (c *CommConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.HostPortMin > c.HostPortMax {
 		errs = append(errs,
 			errors.New("host_port_min must be less than host_port_max"))
+	}
+
+	if c.HostPortMin < 0 {
+		errs =  append(errs, errors.New("host_port_min must be positive"))
 	}
 
 	return errs
