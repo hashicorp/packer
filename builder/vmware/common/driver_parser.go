@@ -2146,3 +2146,90 @@ func consumeFile(fd *os.File) chan byte {
 	}()
 	return fromFile
 }
+
+/** Consume a byte channel until a terminal byte is reached, and write each list of bytes to a channel */
+func consumeUntilSentinel(sentinel byte, in chan byte) (result []byte, ok bool) {
+
+	// This is a simple utility that will consume from a channel until a sentinel
+	// byte has been reached. Consumed data is returned in `result, and if
+	// there's no more data to read, then `ok` will be false.
+	for ok = true; ; {
+		if by, success := <-in; !success {
+			ok = false
+			break
+
+		} else if by == sentinel {
+			break
+
+		} else {
+			result = append(result, by)
+
+		}
+	}
+	return
+}
+
+/** Simple utility to ignore chars when consuming a channel */
+func filterOutCharacters(ignore []byte, in chan byte) chan byte {
+	out := make(chan byte)
+
+	go func(ignore_s string) {
+		for {
+			if by, ok := <-in; !ok {
+				break
+
+			} else if !strings.ContainsAny(ignore_s, string(by)) {
+				out <- by
+			}
+		}
+		close(out)
+	}(string(ignore))
+
+	return out
+}
+
+/**
+This consumes bytes within a pair of some bytes, like parentheses, brackets, braces...
+
+We start by reading bytes until we encounter openByte. These will be returned as
+the first parameter. Then we can enter a goro and consume bytes until we get to
+closeByte. At that point we're done, and suicide.
+**/
+func consumeOpenClosePair(openByte, closeByte byte, in chan byte) ([]byte, chan byte) {
+	result := make([]byte, 0)
+
+	// Consume until we get to openByte. We'll return what we consumed because
+	// it isn't actually relevant to what we're trying to accomplish.
+	for by := range in {
+		if by == openByte {
+			break
+		}
+		result = append(result, by)
+	}
+
+	// Now we can feed input to our goro and a consumer can see what's contained
+	// between their requested pairs
+	out := make(chan byte)
+	go func(out chan byte) {
+		by := openByte
+
+		// We only made it here because we received an openByte, so let's make
+		// sure we send it down the channel.
+		out <- by
+
+		// Now just spin in a loop shipping bytes down the channel until we hit
+		// closeByte, or we're at the very end...whichever comes first.
+		for ok := true; by != closeByte; {
+			by, ok = <-in
+			if !ok {
+				by = closeByte
+			}
+			out <- by
+		}
+		close(out)
+	}(out)
+
+	// Return what we consumed, and a channel that yields everything in between
+	// the openByte and closeByte pair.
+	return result, out
+}

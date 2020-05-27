@@ -3,6 +3,7 @@ package common
 import (
 	"testing"
 
+	"bytes"
 	"os"
 	"path/filepath"
 )
@@ -477,6 +478,159 @@ func TestParserReadNetworkMap(t *testing.T) {
 			if item[name] != value {
 				t.Errorf("expected value %v for attribute %v, got %v", value, name, item[name])
 			}
+		}
+	}
+}
+
+func collectIntoString(in chan byte) string {
+	result := ""
+	for item := range in {
+		result += string(item)
+	}
+	return result
+}
+
+func TestParserConsumeUntilSentinel(t *testing.T) {
+
+	test_1 := "consume until a semicolon; yeh?"
+	expected_1 := "consume until a semicolon"
+
+	ch := consumeString(test_1)
+	resultch, _ := consumeUntilSentinel(';', ch)
+	result := string(resultch)
+	if expected_1 != result {
+		t.Errorf("expected %#v, got %#v", expected_1, result)
+	}
+
+	test_2 := "; this is only a semi"
+	expected_2 := ""
+
+	ch = consumeString(test_2)
+	resultch, _ = consumeUntilSentinel(';', ch)
+	result = string(resultch)
+	if expected_2 != result {
+		t.Errorf("expected %#v, got %#v", expected_2, result)
+	}
+}
+
+func TestParserFilterCharacters(t *testing.T) {
+
+	test_1 := []string{" ", "ignore all spaces"}
+	expected_1 := "ignoreallspaces"
+
+	ch := consumeString(test_1[1])
+	outch := filterOutCharacters(bytes.NewBufferString(test_1[0]).Bytes(), ch)
+	result := collectIntoString(outch)
+	if result != expected_1 {
+		t.Errorf("expected %#v, got %#v", expected_1, result)
+	}
+
+	test_2 := []string{"\n\v\t\r ", "ignore\nall\rwhite\v\v space                "}
+	expected_2 := "ignoreallwhitespace"
+
+	ch = consumeString(test_2[1])
+	outch = filterOutCharacters(bytes.NewBufferString(test_2[0]).Bytes(), ch)
+	result = collectIntoString(outch)
+	if result != expected_2 {
+		t.Errorf("expected %#v, got %#v", expected_2, result)
+	}
+}
+
+func TestParserConsumeOpenClosePair(t *testing.T) {
+	test_1 := "(everything)"
+	expected_1 := []string{"", test_1}
+
+	testch := consumeString(test_1)
+	prefix, ch := consumeOpenClosePair('(', ')', testch)
+	if string(prefix) != expected_1[0] {
+		t.Errorf("expected prefix %#v, got %#v", expected_1[0], prefix)
+	}
+	result := collectIntoString(ch)
+	if result != expected_1[1] {
+		t.Errorf("expected %#v, got %#v", expected_1[1], test_1)
+	}
+
+	test_2 := "prefixed (everything)"
+	expected_2 := []string{"prefixed ", "(everything)"}
+
+	testch = consumeString(test_2)
+	prefix, ch = consumeOpenClosePair('(', ')', testch)
+	if string(prefix) != expected_2[0] {
+		t.Errorf("expected prefix %#v, got %#v", expected_2[0], prefix)
+	}
+	result = collectIntoString(ch)
+	if result != expected_2[1] {
+		t.Errorf("expected %#v, got %#v", expected_2[1], test_2)
+	}
+
+	test_3 := "this(is()suffixed"
+	expected_3 := []string{"this", "(is()"}
+
+	testch = consumeString(test_3)
+	prefix, ch = consumeOpenClosePair('(', ')', testch)
+	if string(prefix) != expected_3[0] {
+		t.Errorf("expected prefix %#v, got %#v", expected_3[0], prefix)
+	}
+	result = collectIntoString(ch)
+	if result != expected_3[1] {
+		t.Errorf("expected %#v, got %#v", expected_3[1], test_2)
+	}
+}
+
+func TestParserCombinators(t *testing.T) {
+
+	test_1 := "across # ignore\nmultiple lines;"
+	expected_1 := "across multiple lines"
+
+	ch := consumeString(test_1)
+	inch := uncomment(ch)
+	whch := filterOutCharacters([]byte{'\n'}, inch)
+	resultch, _ := consumeUntilSentinel(';', whch)
+	result := string(resultch)
+	if expected_1 != result {
+		t.Errorf("expected %#v, got %#v", expected_1, result)
+	}
+
+	test_2 := "lease blah {\n    blah\r\n# skipping this line\nblahblah  # ignore semicolon;\n last item;\n\n };;;;;;"
+	expected_2 := []string{"lease blah ", "{    blahblahblah   last item; }"}
+
+	ch = consumeString(test_2)
+	inch = uncomment(ch)
+	whch = filterOutCharacters([]byte{'\n', '\v', '\r'}, inch)
+	prefix, pairch := consumeOpenClosePair('{', '}', whch)
+
+	result = collectIntoString(pairch)
+	if string(prefix) != expected_2[0] {
+		t.Errorf("expected prefix %#v, got %#v", expected_2[0], prefix)
+	}
+	if result != expected_2[1] {
+		t.Errorf("expected %#v, got %#v", expected_2[1], result)
+	}
+
+	test_3 := "lease blah { # comment\n item 1;\n item 2;\n } not imortant"
+	expected_3_prefix := "lease blah "
+	expected_3 := []string{"{  item 1", " item 2", " }"}
+
+	sch := consumeString(test_3)
+	inch = uncomment(sch)
+	wch := filterOutCharacters([]byte{'\n', '\v', '\r'}, inch)
+	lease, itemch := consumeOpenClosePair('{', '}', wch)
+	if string(lease) != expected_3_prefix {
+		t.Errorf("expected %#v, got %#v", expected_3_prefix, string(lease))
+	}
+
+	result_3 := []string{}
+	for reading := true; reading; {
+		item, ok := consumeUntilSentinel(';', itemch)
+		result_3 = append(result_3, string(item))
+		if !ok {
+			reading = false
+		}
+	}
+
+	for index := range expected_3 {
+		if expected_3[index] != result_3[index] {
+			t.Errorf("expected index %d as %#v, got %#v", index, expected_3[index], result_3[index])
 		}
 	}
 }
