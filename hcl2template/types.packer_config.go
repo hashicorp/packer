@@ -359,6 +359,10 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				PostProcessors: pps,
 				Prepared:       true,
 			}
+			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
+			// we did all the prep here.
+			pcb.Prepare()
+
 			res = append(res, pcb)
 		}
 	}
