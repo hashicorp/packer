@@ -2278,7 +2278,7 @@ type dhcpLeaseEntry struct {
 	extra                        []string
 }
 
-func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry) {
+func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry, err error) {
 
 	// Build the regexes we'll use to legitimately parse each item
 	ipLineRe := regexp.MustCompile(`lease\s+(.+?)\s*$`)
@@ -2292,7 +2292,8 @@ func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry) {
 
 	matches := ipLineRe.FindStringSubmatch(string(lease))
 	if matches == nil {
-		return nil
+		res := strings.TrimSpace(string(lease))
+		return &dhcpLeaseEntry{extra: []string{res}}, fmt.Errorf("Unable to parse lease entry (%#v)", string(lease))
 	}
 
 	if by, ok := <-ch; ok && by == '{' {
@@ -2300,9 +2301,14 @@ func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry) {
 		// entry, then create our storage.
 		entry = &dhcpLeaseEntry{address: matches[1]}
 
-	} else {
-		// Otherwise we bail.
-		return nil
+	} else if ok {
+		// If we didn't see a begin brace, then this entry is mangled which
+		// means that we should probably ail
+		return &dhcpLeaseEntry{address: matches[1]}, fmt.Errorf("Missing parameters for lease entry %v", matches[1])
+
+	} else if !ok {
+		// If our channel is closed, so we bail "cleanly".
+		return nil, nil
 	}
 
 	/// Now we can parse the inside of the block.
@@ -2317,30 +2323,42 @@ func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry) {
 		// Parse out the start time
 		matches = startTimeLineRe.FindStringSubmatch(item_s)
 		if matches != nil {
-			entry.starts, _ = time.Parse("2006/01/02 15:04:05", matches[2])
-			entry.starts_weekday, _ = strconv.Atoi(matches[1])
+			if entry.starts, err = time.Parse("2006/01/02 15:04:05", matches[2]); err != nil {
+				log.Printf("Error trying to parse start time (%v) for entry %v", matches[2], entry.address)
+			}
+			if entry.starts_weekday, err = strconv.Atoi(matches[1]); err != nil {
+				log.Printf("Error trying to parse start weekday (%v) for entry %v", matches[1], entry.address)
+			}
 			continue
 		}
 
 		// Parse out the end time
 		matches = endTimeLineRe.FindStringSubmatch(item_s)
 		if matches != nil {
-			entry.ends, _ = time.Parse("2006/01/02 15:04:05", matches[2])
-			entry.ends_weekday, _ = strconv.Atoi(matches[1])
+			if entry.ends, err = time.Parse("2006/01/02 15:04:05", matches[2]); err != nil {
+				log.Printf("Error trying to parse end time (%v) for entry %v", matches[2], entry.address)
+			}
+			if entry.ends_weekday, err = strconv.Atoi(matches[1]); err != nil {
+				log.Printf("Error trying to parse end weekday (%v) for entry %v", matches[1], entry.address)
+			}
 			continue
 		}
 
 		// Parse out the hardware ethernet
 		matches = macLineRe.FindStringSubmatch(item_s)
 		if matches != nil {
-			entry.ether, _ = decodeDhcpdLeaseBytes(matches[1])
+			if entry.ether, err = decodeDhcpdLeaseBytes(matches[1]); err != nil {
+				log.Printf("Error trying to parse hardware ethernet address (%v) for entry %v", matches[1], entry.address)
+			}
 			continue
 		}
 
 		// Parse out the uid
 		matches = uidLineRe.FindStringSubmatch(item_s)
 		if matches != nil {
-			entry.uid, _ = decodeDhcpdLeaseBytes(matches[1])
+			if entry.uid, err = decodeDhcpdLeaseBytes(matches[1]); err != nil {
+				log.Printf("Error trying to parse uid (%v) for entry %v", matches[1], entry.address)
+			}
 			continue
 		}
 
@@ -2354,7 +2372,7 @@ func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry) {
 		entry.extra = append(entry.extra, strings.TrimSpace(item_s))
 	}
 
-	return entry
+	return entry, nil
 }
 
 func ReadDhcpdLeases(fd *os.File) ([]dhcpLeaseEntry, error) {

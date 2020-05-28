@@ -698,7 +698,10 @@ func TestParserReadDhcpdLeaseEntry(t *testing.T) {
 		"uid":     "0011",
 	}
 
-	result := readDhcpdLeaseEntry(consumeLeaseString(test_1))
+	result, err := readDhcpdLeaseEntry(consumeLeaseString(test_1))
+	if err != nil {
+		t.Errorf("error parsing entry: %v", err)
+	}
 	if result.address != expected_1["address"] {
 		t.Errorf("expected address %v, got %v", expected_1["address"], result.address)
 	}
@@ -717,7 +720,10 @@ func TestParserReadDhcpdLeaseEntry(t *testing.T) {
 		"starts":  "2006-01-02 15:04:05 +0000 UTC",
 		"ends":    "2006-01-03 15:04:05 +0000 UTC",
 	}
-	result = readDhcpdLeaseEntry(consumeLeaseString(test_2))
+	result, err = readDhcpdLeaseEntry(consumeLeaseString(test_2))
+	if err != nil {
+		t.Errorf("error parsing entry: %v", err)
+	}
 	if result.address != expected_2["address"] {
 		t.Errorf("expected address %v, got %v", expected_2["address"], result.address)
 	}
