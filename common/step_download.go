@@ -11,8 +11,11 @@ import (
 	"runtime"
 	"strings"
 
+	gcs "github.com/hashicorp/go-getter/gcs/v2"
+	s3 "github.com/hashicorp/go-getter/s3/v2"
 	getter "github.com/hashicorp/go-getter/v2"
 	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
+
 	"github.com/hashicorp/packer/common/filelock"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -27,8 +30,7 @@ import (
 //   ui    packer.Ui
 type StepDownload struct {
 	// The checksum and the type of the checksum for the download
-	Checksum     string
-	ChecksumType string
+	Checksum string
 
 	// A short description of the type of download being done. Example:
 	// "ISO" or "Guest Additions"
@@ -52,7 +54,14 @@ type StepDownload struct {
 	Extension string
 }
 
-var defaultGetterClient = getter.Client{}
+var defaultGetterClient = getter.Client{
+	Getters: getter.Getters,
+}
+
+func init() {
+	defaultGetterClient.Getters["gcs"] = &gcs.Getter{}
+	defaultGetterClient.Getters["s3"] = &s3.Getter{}
+}
 
 func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	if len(s.Url) == 0 {
@@ -114,12 +123,8 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 	if checksum := u.Query().Get("checksum"); checksum != "" {
 		s.Checksum = checksum
 	}
-	if s.ChecksumType != "" && s.ChecksumType != "none" {
+	if s.Checksum != "" && s.Checksum != "none" {
 		// add checksum to url query params as go getter will checksum for us
-		q := u.Query()
-		q.Set("checksum", s.ChecksumType+":"+s.Checksum)
-		u.RawQuery = q.Encode()
-	} else if s.Checksum != "" {
 		q := u.Query()
 		q.Set("checksum", s.Checksum)
 		u.RawQuery = q.Encode()
@@ -129,7 +134,7 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 	// hash can sometimes be a checksum url
 	// otherwise, use sha1(source_url)
 	var shaSum [20]byte
-	if s.Checksum != "" {
+	if s.Checksum != "" && s.Checksum != "none" {
 		shaSum = sha1.Sum([]byte(s.Checksum))
 	} else {
 		shaSum = sha1.Sum([]byte(u.String()))

@@ -297,6 +297,10 @@ type SSMAPI interface {
 	GetAutomationExecutionWithContext(aws.Context, *ssm.GetAutomationExecutionInput, ...request.Option) (*ssm.GetAutomationExecutionOutput, error)
 	GetAutomationExecutionRequest(*ssm.GetAutomationExecutionInput) (*request.Request, *ssm.GetAutomationExecutionOutput)
 
+	GetCalendarState(*ssm.GetCalendarStateInput) (*ssm.GetCalendarStateOutput, error)
+	GetCalendarStateWithContext(aws.Context, *ssm.GetCalendarStateInput, ...request.Option) (*ssm.GetCalendarStateOutput, error)
+	GetCalendarStateRequest(*ssm.GetCalendarStateInput) (*request.Request, *ssm.GetCalendarStateOutput)
+
 	GetCommandInvocation(*ssm.GetCommandInvocationInput) (*ssm.GetCommandInvocationOutput, error)
 	GetCommandInvocationWithContext(aws.Context, *ssm.GetCommandInvocationInput, ...request.Option) (*ssm.GetCommandInvocationOutput, error)
 	GetCommandInvocationRequest(*ssm.GetCommandInvocationInput) (*request.Request, *ssm.GetCommandInvocationOutput)

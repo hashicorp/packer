@@ -107,17 +107,17 @@ func (c *SecretsManager) CancelRotateSecretRequest(input *CancelRotateSecretInpu
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation CancelRotateSecret for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+// Returned Error Types:
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -276,11 +276,11 @@ func (c *SecretsManager) CreateSecretRequest(input *CreateSecretInput) (req *req
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation CreateSecret for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+// Returned Error Types:
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -293,29 +293,29 @@ func (c *SecretsManager) CreateSecretRequest(input *CreateSecretInput) (req *req
 //      Lambda function ARN configured and you didn't include such an ARN as a
 //      parameter in this call.
 //
-//   * ErrCodeLimitExceededException "LimitExceededException"
+//   * LimitExceededException
 //   The request failed because it would exceed one of the Secrets Manager internal
 //   limits.
 //
-//   * ErrCodeEncryptionFailure "EncryptionFailure"
+//   * EncryptionFailure
 //   Secrets Manager can't encrypt the protected secret text using the provided
 //   KMS key. Check that the customer master key (CMK) is available, enabled,
 //   and not in an invalid state. For more information, see How Key State Affects
 //   Use of a Customer Master Key (http://docs.aws.amazon.com/kms/latest/developerguide/key-state.html).
 //
-//   * ErrCodeResourceExistsException "ResourceExistsException"
+//   * ResourceExistsException
 //   A resource with the ID you requested already exists.
 //
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeMalformedPolicyDocumentException "MalformedPolicyDocumentException"
+//   * MalformedPolicyDocumentException
 //   The policy document that you provided isn't valid.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
-//   * ErrCodePreconditionNotMetException "PreconditionNotMetException"
+//   * PreconditionNotMetException
 //   The request failed because you did not complete all the prerequisite steps.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/CreateSecret
@@ -408,14 +408,14 @@ func (c *SecretsManager) DeleteResourcePolicyRequest(input *DeleteResourcePolicy
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation DeleteResourcePolicy for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+// Returned Error Types:
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -538,14 +538,14 @@ func (c *SecretsManager) DeleteSecretRequest(input *DeleteSecretInput) (req *req
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation DeleteSecret for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+// Returned Error Types:
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -558,7 +558,7 @@ func (c *SecretsManager) DeleteSecretRequest(input *DeleteSecretInput) (req *req
 //      Lambda function ARN configured and you didn't include such an ARN as a
 //      parameter in this call.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/DeleteSecret
@@ -654,11 +654,11 @@ func (c *SecretsManager) DescribeSecretRequest(input *DescribeSecretInput) (req 
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation DescribeSecret for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+// Returned Error Types:
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/DescribeSecret
@@ -745,11 +745,11 @@ func (c *SecretsManager) GetRandomPasswordRequest(input *GetRandomPasswordInput)
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation GetRandomPassword for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+// Returned Error Types:
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -762,7 +762,7 @@ func (c *SecretsManager) GetRandomPasswordRequest(input *GetRandomPasswordInput)
 //      Lambda function ARN configured and you didn't include such an ARN as a
 //      parameter in this call.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/GetRandomPassword
@@ -858,14 +858,14 @@ func (c *SecretsManager) GetResourcePolicyRequest(input *GetResourcePolicyInput)
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation GetResourcePolicy for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+// Returned Error Types:
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -971,14 +971,14 @@ func (c *SecretsManager) GetSecretValueRequest(input *GetSecretValueInput) (req 
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation GetSecretValue for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+// Returned Error Types:
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -991,11 +991,11 @@ func (c *SecretsManager) GetSecretValueRequest(input *GetSecretValueInput) (req 
 //      Lambda function ARN configured and you didn't include such an ARN as a
 //      parameter in this call.
 //
-//   * ErrCodeDecryptionFailure "DecryptionFailure"
+//   * DecryptionFailure
 //   Secrets Manager can't decrypt the protected secret text using the provided
 //   KMS key.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/GetSecretValue
@@ -1098,14 +1098,14 @@ func (c *SecretsManager) ListSecretVersionIdsRequest(input *ListSecretVersionIds
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation ListSecretVersionIds for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeInvalidNextTokenException "InvalidNextTokenException"
+// Returned Error Types:
+//   * InvalidNextTokenException
 //   You provided an invalid NextToken value.
 //
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/ListSecretVersionIds
@@ -1260,14 +1260,14 @@ func (c *SecretsManager) ListSecretsRequest(input *ListSecretsInput) (req *reque
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation ListSecrets for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+// Returned Error Types:
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInvalidNextTokenException "InvalidNextTokenException"
+//   * InvalidNextTokenException
 //   You provided an invalid NextToken value.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/ListSecrets
@@ -1422,20 +1422,20 @@ func (c *SecretsManager) PutResourcePolicyRequest(input *PutResourcePolicyInput)
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation PutResourcePolicy for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeMalformedPolicyDocumentException "MalformedPolicyDocumentException"
+// Returned Error Types:
+//   * MalformedPolicyDocumentException
 //   The policy document that you provided isn't valid.
 //
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -1592,11 +1592,11 @@ func (c *SecretsManager) PutSecretValueRequest(input *PutSecretValueInput) (req 
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation PutSecretValue for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+// Returned Error Types:
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -1609,23 +1609,23 @@ func (c *SecretsManager) PutSecretValueRequest(input *PutSecretValueInput) (req 
 //      Lambda function ARN configured and you didn't include such an ARN as a
 //      parameter in this call.
 //
-//   * ErrCodeLimitExceededException "LimitExceededException"
+//   * LimitExceededException
 //   The request failed because it would exceed one of the Secrets Manager internal
 //   limits.
 //
-//   * ErrCodeEncryptionFailure "EncryptionFailure"
+//   * EncryptionFailure
 //   Secrets Manager can't encrypt the protected secret text using the provided
 //   KMS key. Check that the customer master key (CMK) is available, enabled,
 //   and not in an invalid state. For more information, see How Key State Affects
 //   Use of a Customer Master Key (http://docs.aws.amazon.com/kms/latest/developerguide/key-state.html).
 //
-//   * ErrCodeResourceExistsException "ResourceExistsException"
+//   * ResourceExistsException
 //   A resource with the ID you requested already exists.
 //
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/PutSecretValue
@@ -1714,14 +1714,14 @@ func (c *SecretsManager) RestoreSecretRequest(input *RestoreSecretInput) (req *r
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation RestoreSecret for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+// Returned Error Types:
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -1734,7 +1734,7 @@ func (c *SecretsManager) RestoreSecretRequest(input *RestoreSecretInput) (req *r
 //      Lambda function ARN configured and you didn't include such an ARN as a
 //      parameter in this call.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/RestoreSecret
@@ -1867,17 +1867,17 @@ func (c *SecretsManager) RotateSecretRequest(input *RotateSecretInput) (req *req
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation RotateSecret for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+// Returned Error Types:
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -2008,11 +2008,11 @@ func (c *SecretsManager) TagResourceRequest(input *TagResourceInput) (req *reque
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation TagResource for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+// Returned Error Types:
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -2025,10 +2025,10 @@ func (c *SecretsManager) TagResourceRequest(input *TagResourceInput) (req *reque
 //      Lambda function ARN configured and you didn't include such an ARN as a
 //      parameter in this call.
 //
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/TagResource
@@ -2128,11 +2128,11 @@ func (c *SecretsManager) UntagResourceRequest(input *UntagResourceInput) (req *r
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation UntagResource for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+// Returned Error Types:
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -2145,10 +2145,10 @@ func (c *SecretsManager) UntagResourceRequest(input *UntagResourceInput) (req *r
 //      Lambda function ARN configured and you didn't include such an ARN as a
 //      parameter in this call.
 //
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/UntagResource
@@ -2289,11 +2289,11 @@ func (c *SecretsManager) UpdateSecretRequest(input *UpdateSecretInput) (req *req
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation UpdateSecret for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+// Returned Error Types:
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -2306,29 +2306,29 @@ func (c *SecretsManager) UpdateSecretRequest(input *UpdateSecretInput) (req *req
 //      Lambda function ARN configured and you didn't include such an ARN as a
 //      parameter in this call.
 //
-//   * ErrCodeLimitExceededException "LimitExceededException"
+//   * LimitExceededException
 //   The request failed because it would exceed one of the Secrets Manager internal
 //   limits.
 //
-//   * ErrCodeEncryptionFailure "EncryptionFailure"
+//   * EncryptionFailure
 //   Secrets Manager can't encrypt the protected secret text using the provided
 //   KMS key. Check that the customer master key (CMK) is available, enabled,
 //   and not in an invalid state. For more information, see How Key State Affects
 //   Use of a Customer Master Key (http://docs.aws.amazon.com/kms/latest/developerguide/key-state.html).
 //
-//   * ErrCodeResourceExistsException "ResourceExistsException"
+//   * ResourceExistsException
 //   A resource with the ID you requested already exists.
 //
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeMalformedPolicyDocumentException "MalformedPolicyDocumentException"
+//   * MalformedPolicyDocumentException
 //   The policy document that you provided isn't valid.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
-//   * ErrCodePreconditionNotMetException "PreconditionNotMetException"
+//   * PreconditionNotMetException
 //   The request failed because you did not complete all the prerequisite steps.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/UpdateSecret
@@ -2438,14 +2438,14 @@ func (c *SecretsManager) UpdateSecretVersionStageRequest(input *UpdateSecretVers
 // See the AWS API reference guide for AWS Secrets Manager's
 // API operation UpdateSecretVersionStage for usage and error information.
 //
-// Returned Error Codes:
-//   * ErrCodeResourceNotFoundException "ResourceNotFoundException"
+// Returned Error Types:
+//   * ResourceNotFoundException
 //   We can't find the resource that you asked for.
 //
-//   * ErrCodeInvalidParameterException "InvalidParameterException"
+//   * InvalidParameterException
 //   You provided an invalid value for a parameter.
 //
-//   * ErrCodeInvalidRequestException "InvalidRequestException"
+//   * InvalidRequestException
 //   You provided a parameter value that is not valid for the current state of
 //   the resource.
 //
@@ -2458,11 +2458,11 @@ func (c *SecretsManager) UpdateSecretVersionStageRequest(input *UpdateSecretVers
 //      Lambda function ARN configured and you didn't include such an ARN as a
 //      parameter in this call.
 //
-//   * ErrCodeLimitExceededException "LimitExceededException"
+//   * LimitExceededException
 //   The request failed because it would exceed one of the Secrets Manager internal
 //   limits.
 //
-//   * ErrCodeInternalServiceError "InternalServiceError"
+//   * InternalServiceError
 //   An error occurred on the server side.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/secretsmanager-2017-10-17/UpdateSecretVersionStage
@@ -2871,6 +2871,63 @@ func (s *CreateSecretOutput) SetVersionId(v string) *CreateSecretOutput {
 	return s
 }
 
+// Secrets Manager can't decrypt the protected secret text using the provided
+// KMS key.
+type DecryptionFailure struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"Message" type:"string"`
+}
+
+// String returns the string representation
+func (s DecryptionFailure) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s DecryptionFailure) GoString() string {
+	return s.String()
+}
+
+func newErrorDecryptionFailure(v protocol.ResponseMetadata) error {
+	return &DecryptionFailure{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *DecryptionFailure) Code() string {
+	return "DecryptionFailure"
+}
+
+// Message returns the exception's message.
+func (s *DecryptionFailure) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *DecryptionFailure) OrigErr() error {
+	return nil
+}
+
+func (s *DecryptionFailure) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *DecryptionFailure) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *DecryptionFailure) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
 type DeleteResourcePolicyInput struct {
 	_ struct{} `type:"structure"`
 
@@ -3185,6 +3242,7 @@ type DescribeSecretOutput struct {
 	// The user-provided friendly name of the secret.
 	Name *string `min:"1" type:"string"`
 
+	// Returns the name of the service that created this secret.
 	OwningService *string `min:"1" type:"string"`
 
 	// Specifies whether automatic rotation is enabled for this secret.
@@ -3306,6 +3364,65 @@ func (s *DescribeSecretOutput) SetTags(v []*Tag) *DescribeSecretOutput {
 func (s *DescribeSecretOutput) SetVersionIdsToStages(v map[string][]*string) *DescribeSecretOutput {
 	s.VersionIdsToStages = v
 	return s
+}
+
+// Secrets Manager can't encrypt the protected secret text using the provided
+// KMS key. Check that the customer master key (CMK) is available, enabled,
+// and not in an invalid state. For more information, see How Key State Affects
+// Use of a Customer Master Key (http://docs.aws.amazon.com/kms/latest/developerguide/key-state.html).
+type EncryptionFailure struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"Message" type:"string"`
+}
+
+// String returns the string representation
+func (s EncryptionFailure) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s EncryptionFailure) GoString() string {
+	return s.String()
+}
+
+func newErrorEncryptionFailure(v protocol.ResponseMetadata) error {
+	return &EncryptionFailure{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *EncryptionFailure) Code() string {
+	return "EncryptionFailure"
+}
+
+// Message returns the exception's message.
+func (s *EncryptionFailure) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *EncryptionFailure) OrigErr() error {
+	return nil
+}
+
+func (s *EncryptionFailure) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *EncryptionFailure) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *EncryptionFailure) RequestID() string {
+	return s.RespMetadata.RequestID
 }
 
 type GetRandomPasswordInput struct {
@@ -3746,6 +3863,297 @@ func (s *GetSecretValueOutput) SetVersionStages(v []*string) *GetSecretValueOutp
 	return s
 }
 
+// An error occurred on the server side.
+type InternalServiceError struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"Message" type:"string"`
+}
+
+// String returns the string representation
+func (s InternalServiceError) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s InternalServiceError) GoString() string {
+	return s.String()
+}
+
+func newErrorInternalServiceError(v protocol.ResponseMetadata) error {
+	return &InternalServiceError{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *InternalServiceError) Code() string {
+	return "InternalServiceError"
+}
+
+// Message returns the exception's message.
+func (s *InternalServiceError) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *InternalServiceError) OrigErr() error {
+	return nil
+}
+
+func (s *InternalServiceError) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *InternalServiceError) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *InternalServiceError) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
+// You provided an invalid NextToken value.
+type InvalidNextTokenException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"Message" type:"string"`
+}
+
+// String returns the string representation
+func (s InvalidNextTokenException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s InvalidNextTokenException) GoString() string {
+	return s.String()
+}
+
+func newErrorInvalidNextTokenException(v protocol.ResponseMetadata) error {
+	return &InvalidNextTokenException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *InvalidNextTokenException) Code() string {
+	return "InvalidNextTokenException"
+}
+
+// Message returns the exception's message.
+func (s *InvalidNextTokenException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *InvalidNextTokenException) OrigErr() error {
+	return nil
+}
+
+func (s *InvalidNextTokenException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *InvalidNextTokenException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *InvalidNextTokenException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
+// You provided an invalid value for a parameter.
+type InvalidParameterException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"Message" type:"string"`
+}
+
+// String returns the string representation
+func (s InvalidParameterException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s InvalidParameterException) GoString() string {
+	return s.String()
+}
+
+func newErrorInvalidParameterException(v protocol.ResponseMetadata) error {
+	return &InvalidParameterException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *InvalidParameterException) Code() string {
+	return "InvalidParameterException"
+}
+
+// Message returns the exception's message.
+func (s *InvalidParameterException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *InvalidParameterException) OrigErr() error {
+	return nil
+}
+
+func (s *InvalidParameterException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *InvalidParameterException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *InvalidParameterException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
+// You provided a parameter value that is not valid for the current state of
+// the resource.
+//
+// Possible causes:
+//
+//    * You tried to perform the operation on a secret that's currently marked
+//    deleted.
+//
+//    * You tried to enable rotation on a secret that doesn't already have a
+//    Lambda function ARN configured and you didn't include such an ARN as a
+//    parameter in this call.
+type InvalidRequestException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"Message" type:"string"`
+}
+
+// String returns the string representation
+func (s InvalidRequestException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s InvalidRequestException) GoString() string {
+	return s.String()
+}
+
+func newErrorInvalidRequestException(v protocol.ResponseMetadata) error {
+	return &InvalidRequestException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *InvalidRequestException) Code() string {
+	return "InvalidRequestException"
+}
+
+// Message returns the exception's message.
+func (s *InvalidRequestException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *InvalidRequestException) OrigErr() error {
+	return nil
+}
+
+func (s *InvalidRequestException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *InvalidRequestException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *InvalidRequestException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
+// The request failed because it would exceed one of the Secrets Manager internal
+// limits.
+type LimitExceededException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"Message" type:"string"`
+}
+
+// String returns the string representation
+func (s LimitExceededException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s LimitExceededException) GoString() string {
+	return s.String()
+}
+
+func newErrorLimitExceededException(v protocol.ResponseMetadata) error {
+	return &LimitExceededException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *LimitExceededException) Code() string {
+	return "LimitExceededException"
+}
+
+// Message returns the exception's message.
+func (s *LimitExceededException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *LimitExceededException) OrigErr() error {
+	return nil
+}
+
+func (s *LimitExceededException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *LimitExceededException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *LimitExceededException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
 type ListSecretVersionIdsInput struct {
 	_ struct{} `type:"structure"`
 
@@ -4005,6 +4413,118 @@ func (s *ListSecretsOutput) SetNextToken(v string) *ListSecretsOutput {
 func (s *ListSecretsOutput) SetSecretList(v []*SecretListEntry) *ListSecretsOutput {
 	s.SecretList = v
 	return s
+}
+
+// The policy document that you provided isn't valid.
+type MalformedPolicyDocumentException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"Message" type:"string"`
+}
+
+// String returns the string representation
+func (s MalformedPolicyDocumentException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s MalformedPolicyDocumentException) GoString() string {
+	return s.String()
+}
+
+func newErrorMalformedPolicyDocumentException(v protocol.ResponseMetadata) error {
+	return &MalformedPolicyDocumentException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *MalformedPolicyDocumentException) Code() string {
+	return "MalformedPolicyDocumentException"
+}
+
+// Message returns the exception's message.
+func (s *MalformedPolicyDocumentException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *MalformedPolicyDocumentException) OrigErr() error {
+	return nil
+}
+
+func (s *MalformedPolicyDocumentException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *MalformedPolicyDocumentException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *MalformedPolicyDocumentException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
+// The request failed because you did not complete all the prerequisite steps.
+type PreconditionNotMetException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"Message" type:"string"`
+}
+
+// String returns the string representation
+func (s PreconditionNotMetException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s PreconditionNotMetException) GoString() string {
+	return s.String()
+}
+
+func newErrorPreconditionNotMetException(v protocol.ResponseMetadata) error {
+	return &PreconditionNotMetException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *PreconditionNotMetException) Code() string {
+	return "PreconditionNotMetException"
+}
+
+// Message returns the exception's message.
+func (s *PreconditionNotMetException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *PreconditionNotMetException) OrigErr() error {
+	return nil
+}
+
+func (s *PreconditionNotMetException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *PreconditionNotMetException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *PreconditionNotMetException) RequestID() string {
+	return s.RespMetadata.RequestID
 }
 
 type PutResourcePolicyInput struct {
@@ -4334,6 +4854,118 @@ func (s *PutSecretValueOutput) SetVersionStages(v []*string) *PutSecretValueOutp
 	return s
 }
 
+// A resource with the ID you requested already exists.
+type ResourceExistsException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"Message" type:"string"`
+}
+
+// String returns the string representation
+func (s ResourceExistsException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s ResourceExistsException) GoString() string {
+	return s.String()
+}
+
+func newErrorResourceExistsException(v protocol.ResponseMetadata) error {
+	return &ResourceExistsException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *ResourceExistsException) Code() string {
+	return "ResourceExistsException"
+}
+
+// Message returns the exception's message.
+func (s *ResourceExistsException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *ResourceExistsException) OrigErr() error {
+	return nil
+}
+
+func (s *ResourceExistsException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *ResourceExistsException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *ResourceExistsException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
+// We can't find the resource that you asked for.
+type ResourceNotFoundException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"Message" type:"string"`
+}
+
+// String returns the string representation
+func (s ResourceNotFoundException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s ResourceNotFoundException) GoString() string {
+	return s.String()
+}
+
+func newErrorResourceNotFoundException(v protocol.ResponseMetadata) error {
+	return &ResourceNotFoundException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *ResourceNotFoundException) Code() string {
+	return "ResourceNotFoundException"
+}
+
+// Message returns the exception's message.
+func (s *ResourceNotFoundException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *ResourceNotFoundException) OrigErr() error {
+	return nil
+}
+
+func (s *ResourceNotFoundException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *ResourceNotFoundException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *ResourceNotFoundException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
 type RestoreSecretInput struct {
 	_ struct{} `type:"structure"`
 
@@ -4659,9 +5291,10 @@ type SecretListEntry struct {
 	// in the folder prod.
 	Name *string `min:"1" type:"string"`
 
+	// Returns the name of the service that created the secret.
 	OwningService *string `min:"1" type:"string"`
 
-	// Indicated whether automatic, scheduled rotation is enabled for this secret.
+	// Indicates whether automatic, scheduled rotation is enabled for this secret.
 	RotationEnabled *bool `type:"boolean"`
 
 	// The ARN of an AWS Lambda function that's invoked by Secrets Manager to rotate

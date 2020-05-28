@@ -122,12 +122,11 @@ func (s *StepDownloadGuestAdditions) Run(ctx context.Context, state multistep.St
 
 	// We're good, so let's go ahead and download this thing..
 	downStep := &common.StepDownload{
-		Checksum:     checksum,
-		ChecksumType: checksumType,
-		Description:  "Guest additions",
-		ResultKey:    "guest_additions_path",
-		Url:          []string{url},
-		Extension:    "iso",
+		Checksum:    checksum,
+		Description: "Guest additions",
+		ResultKey:   "guest_additions_path",
+		Url:         []string{url},
+		Extension:   "iso",
 	}
 
 	return downStep.Run(ctx, state)

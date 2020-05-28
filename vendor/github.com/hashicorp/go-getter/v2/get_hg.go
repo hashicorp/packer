@@ -9,14 +9,13 @@ import (
 	"path/filepath"
 	"runtime"
 
-	urlhelper "github.com/hashicorp/go-getter/helper/url"
+	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
 	safetemp "github.com/hashicorp/go-safetemp"
 )
 
 // HgGetter is a Getter implementation that will download a module from
 // a Mercurial repository.
 type HgGetter struct {
-	getter
 }
 
 func (g *HgGetter) Mode(ctx context.Context, _ *url.URL) (Mode, error) {

@@ -34,8 +34,7 @@
       ],
 
       "iso_urls": ["{{template_dir}}/setup/out/setup.iso"],
-      "iso_checksum_type": "sha256",
-      "iso_checksum_url": "file:///{{template_dir}}/setup/out/sha256sums",
+      "iso_checksum": "file:///{{template_dir}}/setup/out/sha256sums",
 
       "boot_wait": "4m",
       "boot_command": [

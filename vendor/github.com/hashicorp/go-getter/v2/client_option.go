@@ -15,8 +15,5 @@ func (c *Client) configure() error {
 		c.Getters = Getters
 	}
 
-	for _, getter := range c.Getters {
-		getter.SetClient(c)
-	}
 	return nil
 }
