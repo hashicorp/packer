@@ -27,7 +27,9 @@ func (FixerISOChecksumTypeAndURL) Fix(input map[string]interface{}) (map[string]
 		checksum := stringValue(builder["iso_checksum"])
 		delete(builder, "iso_checksum_url")
 		delete(builder, "iso_checksum_type")
-
+		if checksum == "" && checksumUrl == "" {
+			continue
+		}
 		if checksumUrl != "" {
 			checksum = "file:" + checksumUrl
 		} else if checksumType != "" {
