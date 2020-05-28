@@ -20,7 +20,8 @@ var DeprecatedOptions = []string{
 {{- range .DeprecatedOpts}}
 	"{{.}}",
 {{- end}}
-}`))
+}
+`))
 
 type executeOpts struct {
 	DeprecatedOpts []string

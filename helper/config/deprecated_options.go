@@ -32,6 +32,4 @@ var DeprecatedOptions = []string{
 	"network_card",
 	"network",
 	"networkCard",
-	"iso_checksum_url",
-	"iso_checksum_type",
 }
