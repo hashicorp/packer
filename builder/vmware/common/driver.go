@@ -70,7 +70,7 @@ type Driver interface {
 	GuestAddress(multistep.StateBag) (string, error)
 
 	// Get the guest ip address for the vm
-	GuestIP(multistep.StateBag) (string, error)
+	PotentialGuestIP(multistep.StateBag) ([]string, error)
 
 	// Get the host hw address for the vm
 	HostAddress(multistep.StateBag) (string, error)
@@ -327,12 +327,12 @@ func (d *VmwareDriver) GuestAddress(state multistep.StateBag) (string, error) {
 	return res.String(), nil
 }
 
-func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
+func (d *VmwareDriver) PotentialGuestIP(state multistep.StateBag) ([]string, error) {
 
 	// grab network mapper
 	netmap, err := d.NetworkMapper()
 	if err != nil {
-		return "", err
+		return []string{}, err
 	}
 
 	// convert the stashed network to a device
@@ -350,14 +350,14 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 		vmxPath := state.Get("vmx_path").(string)
 		vmxData, err := readVMXConfig(vmxPath)
 		if err != nil {
-			return "", err
+			return []string{}, err
 		}
 
 		var device string
 		device, err = readCustomDeviceName(vmxData)
 		devices = append(devices, device)
 		if err != nil {
-			return "", err
+			return []string{}, err
 		}
 		log.Printf("GuestIP discovered custom device matching %s: %s", network, device)
 	}
@@ -365,15 +365,19 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 	// figure out our MAC address for looking up the guest address
 	MACAddress, err := d.GuestAddress(state)
 	if err != nil {
-		return "", err
+		return []string{}, err
 	}
+
+	// iterate through all of the devices and collect all the dhcp lease entries
+	// that we possibly cacn.
+	var available_lease_entries []dhcpLeaseEntry
 
 	for _, device := range devices {
 		// figure out the correct dhcp leases
 		dhcpLeasesPath := d.DhcpLeasesPath(device)
 		log.Printf("Trying DHCP leases path: %s", dhcpLeasesPath)
 		if dhcpLeasesPath == "" {
-			return "", fmt.Errorf("no DHCP leases path found for device %s", device)
+			return []string{}, fmt.Errorf("no DHCP leases path found for device %s", device)
 		}
 
 		// open up the path to the dhcpd leases
@@ -387,39 +391,69 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 		// and then read its contents
 		leaseEntries, err := ReadDhcpdLeaseEntries(fh)
 		if err != nil {
-			return "", err
+			return []string{}, err
 		}
 
 		// Parse our MAC address again. There's no need to check for an
 		// error because we've already parsed this successfully.
 		hwaddr, _ := net.ParseMAC(MACAddress)
 
-		// start grepping through the file looking for fields that we care about
-		var lastIp string
-		var lastLeaseEnd time.Time
-
-		var curIp string
-		var curLeaseEnd time.Time
-
+		// Go through our available lease entries and see which ones are within
+		// scope, and that match to our hardware address.
+		results := make([]dhcpLeaseEntry, 0)
 		for _, entry := range leaseEntries {
 
-			lastIp = entry.address
-			lastLeaseEnd = entry.ends
+			// First check for leases that are still valid. The timestamp for
+			// each lease should be in UTC according to the documentation at
+			// the top of VMWare's dhcpd.leases file.
+			now := time.Now().UTC()
+			if !(now.After(entry.starts) && now.Before(entry.ends)) {
+				continue
+			}
 
-			// If the mac address matches and this lease ends farther in the
-			// future than the last match we might have, then choose it.
-			if bytes.Equal(hwaddr, entry.ether) && curLeaseEnd.Before(lastLeaseEnd) {
-				curIp = lastIp
-				curLeaseEnd = lastLeaseEnd
+			// Next check for any where the hardware address matches.
+			if !bytes.Equal(hwaddr, entry.ether) {
+				continue
+			}
+
+			// This entry fits within our constraints, so store it so we can
+			// check it out later.
+			results = append(results, entry)
+		}
+
+		// If we weren't able to grab any results, then we'll do a "loose"-match
+		// where we only look for anything where the hardware address matches.
+		if len(results) == 0 {
+			log.Printf("Unable to find an exact match for DHCP lease. Falling back to a loose match for hw address %v", MACAddress)
+			for _, entry := range leaseEntries {
+				if bytes.Equal(hwaddr, entry.ether) {
+					results = append(results, entry)
+				}
 			}
 		}
 
-		if curIp != "" {
-			return curIp, nil
+		// If we found something, then we need to add it to our current list
+		// of lease entries.
+		if len(results) > 0 {
+			available_lease_entries = append(available_lease_entries, results...)
 		}
+
+		// Now we need to map our results to get the address so we can return it.iterate through our results and figure out which one
+		// is actually up...and should be relevant.
 	}
 
-	return "", fmt.Errorf("None of the found device(s) %v has a DHCP lease for MAC %s", devices, MACAddress)
+	// Check if we found any lease entries that correspond to us. If so, then we
+	// need to map() them in order to extract the address field to return to the
+	// caller.
+	if len(available_lease_entries) > 0 {
+		addrs := make([]string, 0)
+		for _, entry := range available_lease_entries {
+			addrs = append(addrs, entry.address)
+		}
+		return addrs, nil
+	}
+
+	return []string{}, fmt.Errorf("None of the found device(s) %v has a DHCP lease for MAC %s", devices, MACAddress)
 }
 
 func (d *VmwareDriver) HostAddress(state multistep.StateBag) (string, error) {
