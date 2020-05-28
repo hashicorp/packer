@@ -197,16 +197,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	if len(b.config.PackageInclude) > 0 {
-		include := []string{}
-		for _, rawFile := range b.config.PackageInclude {
+		for i, rawFile := range b.config.PackageInclude {
 			inclFile, err := filepath.Abs(rawFile)
 			if err != nil {
 				errs = packer.MultiErrorAppend(errs,
 					fmt.Errorf("unable to determine absolute path for file to be included: %s", rawFile))
 			}
-			include = append(include, inclFile)
+			b.config.PackageInclude[i] = inclFile
 		}
-		b.config.PackageInclude = include
 	}
 
 	if b.config.TeardownMethod == "" {
