@@ -9,26 +9,26 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	APIToken            *string           `mapstructure:"api_token" cty:"api_token"`
-	SpacesKey           *string           `mapstructure:"spaces_key" cty:"spaces_key"`
-	SpacesSecret        *string           `mapstructure:"spaces_secret" cty:"spaces_secret"`
-	SpacesRegion        *string           `mapstructure:"spaces_region" cty:"spaces_region"`
-	SpaceName           *string           `mapstructure:"space_name" cty:"space_name"`
-	ObjectName          *string           `mapstructure:"space_object_name" cty:"space_object_name"`
-	SkipClean           *bool             `mapstructure:"skip_clean" cty:"skip_clean"`
-	Tags                []string          `mapstructure:"image_tags" cty:"image_tags"`
-	Name                *string           `mapstructure:"image_name" cty:"image_name"`
-	Description         *string           `mapstructure:"image_description" cty:"image_description"`
-	Distribution        *string           `mapstructure:"image_distribution" cty:"image_distribution"`
-	ImageRegions        []string          `mapstructure:"image_regions" cty:"image_regions"`
-	Timeout             *string           `mapstructure:"timeout" cty:"timeout"`
+	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	APIToken            *string           `mapstructure:"api_token" cty:"api_token" hcl:"api_token"`
+	SpacesKey           *string           `mapstructure:"spaces_key" cty:"spaces_key" hcl:"spaces_key"`
+	SpacesSecret        *string           `mapstructure:"spaces_secret" cty:"spaces_secret" hcl:"spaces_secret"`
+	SpacesRegion        *string           `mapstructure:"spaces_region" cty:"spaces_region" hcl:"spaces_region"`
+	SpaceName           *string           `mapstructure:"space_name" cty:"space_name" hcl:"space_name"`
+	ObjectName          *string           `mapstructure:"space_object_name" cty:"space_object_name" hcl:"space_object_name"`
+	SkipClean           *bool             `mapstructure:"skip_clean" cty:"skip_clean" hcl:"skip_clean"`
+	Tags                []string          `mapstructure:"image_tags" cty:"image_tags" hcl:"image_tags"`
+	Name                *string           `mapstructure:"image_name" cty:"image_name" hcl:"image_name"`
+	Description         *string           `mapstructure:"image_description" cty:"image_description" hcl:"image_description"`
+	Distribution        *string           `mapstructure:"image_distribution" cty:"image_distribution" hcl:"image_distribution"`
+	ImageRegions        []string          `mapstructure:"image_regions" cty:"image_regions" hcl:"image_regions"`
+	Timeout             *string           `mapstructure:"timeout" cty:"timeout" hcl:"timeout"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

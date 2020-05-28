@@ -9,40 +9,40 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName               *string                            `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType             *string                            `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug                   *bool                              `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce                   *bool                              `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError                 *string                            `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars                map[string]string                  `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars           []string                           `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	CloudEnvironmentName          *string                            `mapstructure:"cloud_environment_name" required:"false" cty:"cloud_environment_name"`
-	ClientID                      *string                            `mapstructure:"client_id" cty:"client_id"`
-	ClientSecret                  *string                            `mapstructure:"client_secret" cty:"client_secret"`
-	ClientCertPath                *string                            `mapstructure:"client_cert_path" cty:"client_cert_path"`
-	ClientJWT                     *string                            `mapstructure:"client_jwt" cty:"client_jwt"`
-	ObjectID                      *string                            `mapstructure:"object_id" cty:"object_id"`
-	TenantID                      *string                            `mapstructure:"tenant_id" required:"false" cty:"tenant_id"`
-	SubscriptionID                *string                            `mapstructure:"subscription_id" cty:"subscription_id"`
-	FromScratch                   *bool                              `mapstructure:"from_scratch" cty:"from_scratch"`
-	Source                        *string                            `mapstructure:"source" required:"true" cty:"source"`
-	CommandWrapper                *string                            `mapstructure:"command_wrapper" cty:"command_wrapper"`
-	PreMountCommands              []string                           `mapstructure:"pre_mount_commands" cty:"pre_mount_commands"`
-	MountOptions                  []string                           `mapstructure:"mount_options" cty:"mount_options"`
-	MountPartition                *string                            `mapstructure:"mount_partition" cty:"mount_partition"`
-	MountPath                     *string                            `mapstructure:"mount_path" cty:"mount_path"`
-	PostMountCommands             []string                           `mapstructure:"post_mount_commands" cty:"post_mount_commands"`
-	ChrootMounts                  [][]string                         `mapstructure:"chroot_mounts" cty:"chroot_mounts"`
-	CopyFiles                     []string                           `mapstructure:"copy_files" cty:"copy_files"`
-	OSDiskSizeGB                  *int32                             `mapstructure:"os_disk_size_gb" cty:"os_disk_size_gb"`
-	OSDiskStorageAccountType      *string                            `mapstructure:"os_disk_storage_account_type" cty:"os_disk_storage_account_type"`
-	OSDiskCacheType               *string                            `mapstructure:"os_disk_cache_type" cty:"os_disk_cache_type"`
-	ImageHyperVGeneration         *string                            `mapstructure:"image_hyperv_generation" cty:"image_hyperv_generation"`
-	TemporaryOSDiskID             *string                            `mapstructure:"temporary_os_disk_id" cty:"temporary_os_disk_id"`
-	TemporaryOSDiskSnapshotID     *string                            `mapstructure:"temporary_os_disk_snapshot_id" cty:"temporary_os_disk_snapshot_id"`
-	SkipCleanup                   *bool                              `mapstructure:"skip_cleanup" cty:"skip_cleanup"`
-	ImageResourceID               *string                            `mapstructure:"image_resource_id" cty:"image_resource_id"`
-	SharedImageGalleryDestination *FlatSharedImageGalleryDestination `mapstructure:"shared_image_destination" cty:"shared_image_destination"`
+	PackerBuildName               *string                            `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType             *string                            `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug                   *bool                              `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce                   *bool                              `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError                 *string                            `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars                map[string]string                  `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars           []string                           `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	CloudEnvironmentName          *string                            `mapstructure:"cloud_environment_name" required:"false" cty:"cloud_environment_name" hcl:"cloud_environment_name"`
+	ClientID                      *string                            `mapstructure:"client_id" cty:"client_id" hcl:"client_id"`
+	ClientSecret                  *string                            `mapstructure:"client_secret" cty:"client_secret" hcl:"client_secret"`
+	ClientCertPath                *string                            `mapstructure:"client_cert_path" cty:"client_cert_path" hcl:"client_cert_path"`
+	ClientJWT                     *string                            `mapstructure:"client_jwt" cty:"client_jwt" hcl:"client_jwt"`
+	ObjectID                      *string                            `mapstructure:"object_id" cty:"object_id" hcl:"object_id"`
+	TenantID                      *string                            `mapstructure:"tenant_id" required:"false" cty:"tenant_id" hcl:"tenant_id"`
+	SubscriptionID                *string                            `mapstructure:"subscription_id" cty:"subscription_id" hcl:"subscription_id"`
+	FromScratch                   *bool                              `mapstructure:"from_scratch" cty:"from_scratch" hcl:"from_scratch"`
+	Source                        *string                            `mapstructure:"source" required:"true" cty:"source" hcl:"source"`
+	CommandWrapper                *string                            `mapstructure:"command_wrapper" cty:"command_wrapper" hcl:"command_wrapper"`
+	PreMountCommands              []string                           `mapstructure:"pre_mount_commands" cty:"pre_mount_commands" hcl:"pre_mount_commands"`
+	MountOptions                  []string                           `mapstructure:"mount_options" cty:"mount_options" hcl:"mount_options"`
+	MountPartition                *string                            `mapstructure:"mount_partition" cty:"mount_partition" hcl:"mount_partition"`
+	MountPath                     *string                            `mapstructure:"mount_path" cty:"mount_path" hcl:"mount_path"`
+	PostMountCommands             []string                           `mapstructure:"post_mount_commands" cty:"post_mount_commands" hcl:"post_mount_commands"`
+	ChrootMounts                  [][]string                         `mapstructure:"chroot_mounts" cty:"chroot_mounts" hcl:"chroot_mounts"`
+	CopyFiles                     []string                           `mapstructure:"copy_files" cty:"copy_files" hcl:"copy_files"`
+	OSDiskSizeGB                  *int32                             `mapstructure:"os_disk_size_gb" cty:"os_disk_size_gb" hcl:"os_disk_size_gb"`
+	OSDiskStorageAccountType      *string                            `mapstructure:"os_disk_storage_account_type" cty:"os_disk_storage_account_type" hcl:"os_disk_storage_account_type"`
+	OSDiskCacheType               *string                            `mapstructure:"os_disk_cache_type" cty:"os_disk_cache_type" hcl:"os_disk_cache_type"`
+	ImageHyperVGeneration         *string                            `mapstructure:"image_hyperv_generation" cty:"image_hyperv_generation" hcl:"image_hyperv_generation"`
+	TemporaryOSDiskID             *string                            `mapstructure:"temporary_os_disk_id" cty:"temporary_os_disk_id" hcl:"temporary_os_disk_id"`
+	TemporaryOSDiskSnapshotID     *string                            `mapstructure:"temporary_os_disk_snapshot_id" cty:"temporary_os_disk_snapshot_id" hcl:"temporary_os_disk_snapshot_id"`
+	SkipCleanup                   *bool                              `mapstructure:"skip_cleanup" cty:"skip_cleanup" hcl:"skip_cleanup"`
+	ImageResourceID               *string                            `mapstructure:"image_resource_id" cty:"image_resource_id" hcl:"image_resource_id"`
+	SharedImageGalleryDestination *FlatSharedImageGalleryDestination `mapstructure:"shared_image_destination" cty:"shared_image_destination" hcl:"shared_image_destination"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

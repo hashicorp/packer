@@ -9,25 +9,25 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName         *string           `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType       *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug             *bool             `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce             *bool             `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError           *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars          map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars     []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	SkipClean               *bool             `mapstructure:"skip_clean" cty:"skip_clean"`
-	SOSEndpoint             *string           `mapstructure:"sos_endpoint" cty:"sos_endpoint"`
-	APIEndpoint             *string           `mapstructure:"api_endpoint" cty:"api_endpoint"`
-	APIKey                  *string           `mapstructure:"api_key" cty:"api_key"`
-	APISecret               *string           `mapstructure:"api_secret" cty:"api_secret"`
-	ImageBucket             *string           `mapstructure:"image_bucket" cty:"image_bucket"`
-	TemplateZone            *string           `mapstructure:"template_zone" cty:"template_zone"`
-	TemplateName            *string           `mapstructure:"template_name" cty:"template_name"`
-	TemplateDescription     *string           `mapstructure:"template_description" cty:"template_description"`
-	TemplateUsername        *string           `mapstructure:"template_username" cty:"template_username"`
-	TemplateDisablePassword *bool             `mapstructure:"template_disable_password" cty:"template_disable_password"`
-	TemplateDisableSSHKey   *bool             `mapstructure:"template_disable_sshkey" cty:"template_disable_sshkey"`
+	PackerBuildName         *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType       *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug             *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce             *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError           *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars          map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars     []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	SkipClean               *bool             `mapstructure:"skip_clean" cty:"skip_clean" hcl:"skip_clean"`
+	SOSEndpoint             *string           `mapstructure:"sos_endpoint" cty:"sos_endpoint" hcl:"sos_endpoint"`
+	APIEndpoint             *string           `mapstructure:"api_endpoint" cty:"api_endpoint" hcl:"api_endpoint"`
+	APIKey                  *string           `mapstructure:"api_key" cty:"api_key" hcl:"api_key"`
+	APISecret               *string           `mapstructure:"api_secret" cty:"api_secret" hcl:"api_secret"`
+	ImageBucket             *string           `mapstructure:"image_bucket" cty:"image_bucket" hcl:"image_bucket"`
+	TemplateZone            *string           `mapstructure:"template_zone" cty:"template_zone" hcl:"template_zone"`
+	TemplateName            *string           `mapstructure:"template_name" cty:"template_name" hcl:"template_name"`
+	TemplateDescription     *string           `mapstructure:"template_description" cty:"template_description" hcl:"template_description"`
+	TemplateUsername        *string           `mapstructure:"template_username" cty:"template_username" hcl:"template_username"`
+	TemplateDisablePassword *bool             `mapstructure:"template_disable_password" cty:"template_disable_password" hcl:"template_disable_password"`
+	TemplateDisableSSHKey   *bool             `mapstructure:"template_disable_sshkey" cty:"template_disable_sshkey" hcl:"template_disable_sshkey"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

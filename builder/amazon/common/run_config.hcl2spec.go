@@ -10,10 +10,10 @@ import (
 // FlatAmiFilterOptions is an auto-generated flat version of AmiFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatAmiFilterOptions struct {
-	Filters    map[string]string           `cty:"filters"`
-	Filter     []hcl2template.FlatKeyValue `cty:"filter"`
-	Owners     []string                    `cty:"owners"`
-	MostRecent *bool                       `mapstructure:"most_recent" cty:"most_recent"`
+	Filters    map[string]string           `cty:"filters" hcl:"filters"`
+	Filter     []hcl2template.FlatKeyValue `cty:"filter" hcl:"filter"`
+	Owners     []string                    `cty:"owners" hcl:"owners"`
+	MostRecent *bool                       `mapstructure:"most_recent" cty:"most_recent" hcl:"most_recent"`
 }
 
 // FlatMapstructure returns a new FlatAmiFilterOptions.
@@ -39,8 +39,8 @@ func (*FlatAmiFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 // FlatPolicyDocument is an auto-generated flat version of PolicyDocument.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatPolicyDocument struct {
-	Version   *string         `cty:"version"`
-	Statement []FlatStatement `cty:"statement"`
+	Version   *string         `cty:"version" hcl:"version"`
+	Statement []FlatStatement `cty:"statement" hcl:"statement"`
 }
 
 // FlatMapstructure returns a new FlatPolicyDocument.
@@ -64,8 +64,8 @@ func (*FlatPolicyDocument) HCL2Spec() map[string]hcldec.Spec {
 // FlatSecurityGroupFilterOptions is an auto-generated flat version of SecurityGroupFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatSecurityGroupFilterOptions struct {
-	Filters map[string]string            `cty:"filters"`
-	Filter  []hcl2template.FlatNameValue `cty:"filter"`
+	Filters map[string]string            `cty:"filters" hcl:"filters"`
+	Filter  []hcl2template.FlatNameValue `cty:"filter" hcl:"filter"`
 }
 
 // FlatMapstructure returns a new FlatSecurityGroupFilterOptions.
@@ -89,9 +89,9 @@ func (*FlatSecurityGroupFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 // FlatStatement is an auto-generated flat version of Statement.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatStatement struct {
-	Effect   *string  `cty:"effect"`
-	Action   []string `cty:"action"`
-	Resource *string  `cty:"resource"`
+	Effect   *string  `cty:"effect" hcl:"effect"`
+	Action   []string `cty:"action" hcl:"action"`
+	Resource *string  `cty:"resource" hcl:"resource"`
 }
 
 // FlatMapstructure returns a new FlatStatement.
@@ -116,10 +116,10 @@ func (*FlatStatement) HCL2Spec() map[string]hcldec.Spec {
 // FlatSubnetFilterOptions is an auto-generated flat version of SubnetFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatSubnetFilterOptions struct {
-	Filters  map[string]string            `cty:"filters"`
-	Filter   []hcl2template.FlatNameValue `cty:"filter"`
-	MostFree *bool                        `mapstructure:"most_free" cty:"most_free"`
-	Random   *bool                        `mapstructure:"random" cty:"random"`
+	Filters  map[string]string            `cty:"filters" hcl:"filters"`
+	Filter   []hcl2template.FlatNameValue `cty:"filter" hcl:"filter"`
+	MostFree *bool                        `mapstructure:"most_free" cty:"most_free" hcl:"most_free"`
+	Random   *bool                        `mapstructure:"random" cty:"random" hcl:"random"`
 }
 
 // FlatMapstructure returns a new FlatSubnetFilterOptions.
@@ -145,8 +145,8 @@ func (*FlatSubnetFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 // FlatVpcFilterOptions is an auto-generated flat version of VpcFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatVpcFilterOptions struct {
-	Filters map[string]string            `cty:"filters"`
-	Filter  []hcl2template.FlatNameValue `cty:"filter"`
+	Filters map[string]string            `cty:"filters" hcl:"filters"`
+	Filter  []hcl2template.FlatNameValue `cty:"filter" hcl:"filter"`
 }
 
 // FlatMapstructure returns a new FlatVpcFilterOptions.

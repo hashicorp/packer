@@ -9,12 +9,12 @@ import (
 // FlatSharedImageGalleryDestination is an auto-generated flat version of SharedImageGalleryDestination.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatSharedImageGalleryDestination struct {
-	ResourceGroup     *string            `mapstructure:"resource_group" required:"true" cty:"resource_group"`
-	GalleryName       *string            `mapstructure:"gallery_name" required:"true" cty:"gallery_name"`
-	ImageName         *string            `mapstructure:"image_name" required:"true" cty:"image_name"`
-	ImageVersion      *string            `mapstructure:"image_version" required:"true" cty:"image_version"`
-	TargetRegions     []FlatTargetRegion `mapstructure:"target_regions" cty:"target_regions"`
-	ExcludeFromLatest *bool              `mapstructure:"exlude_from_latest" cty:"exlude_from_latest"`
+	ResourceGroup     *string            `mapstructure:"resource_group" required:"true" cty:"resource_group" hcl:"resource_group"`
+	GalleryName       *string            `mapstructure:"gallery_name" required:"true" cty:"gallery_name" hcl:"gallery_name"`
+	ImageName         *string            `mapstructure:"image_name" required:"true" cty:"image_name" hcl:"image_name"`
+	ImageVersion      *string            `mapstructure:"image_version" required:"true" cty:"image_version" hcl:"image_version"`
+	TargetRegions     []FlatTargetRegion `mapstructure:"target_regions" cty:"target_regions" hcl:"target_regions"`
+	ExcludeFromLatest *bool              `mapstructure:"exlude_from_latest" cty:"exlude_from_latest" hcl:"exlude_from_latest"`
 }
 
 // FlatMapstructure returns a new FlatSharedImageGalleryDestination.
@@ -42,9 +42,9 @@ func (*FlatSharedImageGalleryDestination) HCL2Spec() map[string]hcldec.Spec {
 // FlatTargetRegion is an auto-generated flat version of TargetRegion.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatTargetRegion struct {
-	Name               *string `mapstructure:"name" required:"true" cty:"name"`
-	ReplicaCount       *int32  `mapstructure:"replicas" cty:"replicas"`
-	StorageAccountType *string `mapstructure:"storage_account_type" cty:"storage_account_type"`
+	Name               *string `mapstructure:"name" required:"true" cty:"name" hcl:"name"`
+	ReplicaCount       *int32  `mapstructure:"replicas" cty:"replicas" hcl:"replicas"`
+	StorageAccountType *string `mapstructure:"storage_account_type" cty:"storage_account_type" hcl:"storage_account_type"`
 }
 
 // FlatMapstructure returns a new FlatTargetRegion.
