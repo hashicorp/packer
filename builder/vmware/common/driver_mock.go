@@ -52,10 +52,10 @@ type DriverMock struct {
 	GuestAddressResult string
 	GuestAddressErr    error
 
-	GuestIPCalled bool
-	GuestIPState  multistep.StateBag
-	GuestIPResult string
-	GuestIPErr    error
+	PotentialGuestIPCalled bool
+	PotentialGuestIPState  multistep.StateBag
+	PotentialGuestIPResult []string
+	PotentialGuestIPErr    error
 
 	StartCalled   bool
 	StartPath     string
@@ -192,10 +192,10 @@ func (d *DriverMock) GuestAddress(state multistep.StateBag) (string, error) {
 	return d.GuestAddressResult, d.GuestAddressErr
 }
 
-func (d *DriverMock) GuestIP(state multistep.StateBag) (string, error) {
-	d.GuestIPCalled = true
-	d.GuestIPState = state
-	return d.GuestIPResult, d.GuestIPErr
+func (d *DriverMock) PotentialGuestIP(state multistep.StateBag) ([]string, error) {
+	d.PotentialGuestIPCalled = true
+	d.PotentialGuestIPState = state
+	return d.PotentialGuestIPResult, d.PotentialGuestIPErr
 }
 
 func (d *DriverMock) Start(path string, headless bool) error {
