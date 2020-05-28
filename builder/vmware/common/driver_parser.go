@@ -2225,7 +2225,8 @@ func consumeOpenClosePair(openByte, closeByte byte, in chan byte) ([]byte, chan 
 
 		// Now just spin in a loop shipping bytes down the channel until we hit
 		// closeByte, or we're at the very end...whichever comes first.
-		for ok := true; by != closeByte; {
+		var ok bool
+		for by != closeByte {
 			by, ok = <-in
 			if !ok {
 				by = closeByte

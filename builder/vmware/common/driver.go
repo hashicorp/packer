@@ -408,7 +408,7 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 
 			// If the mac address matches and this lease ends farther in the
 			// future than the last match we might have, then choose it.
-			if bytes.Compare(hwaddr, entry.ether) == 0 && curLeaseEnd.Before(lastLeaseEnd) {
+			if bytes.Equal(hwaddr, entry.ether) && curLeaseEnd.Before(lastLeaseEnd) {
 				curIp = lastIp
 				curLeaseEnd = lastLeaseEnd
 			}

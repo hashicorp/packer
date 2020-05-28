@@ -644,7 +644,7 @@ func TestParserDhcpdLeaseBytesDecoder(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to decode address: %s", err)
 	}
-	if bytes.Compare(result, expected_1) != 0 {
+	if !bytes.Equal(result, expected_1) {
 		t.Errorf("expected %v, got %v", expected_1, result)
 	}
 
@@ -655,30 +655,30 @@ func TestParserDhcpdLeaseBytesDecoder(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to decode address: %s", err)
 	}
-	if bytes.Compare(result, expected_2) != 0 {
+	if !bytes.Equal(result, expected_2) {
 		t.Errorf("expected %v, got %v", expected_2, result)
 	}
 
 	failtest_1 := ""
-	result, err = decodeDhcpdLeaseBytes(failtest_1)
+	_, err = decodeDhcpdLeaseBytes(failtest_1)
 	if err == nil {
 		t.Errorf("expected decoding error: %s", err)
 	}
 
 	failtest_2 := "000000"
-	result, err = decodeDhcpdLeaseBytes(failtest_2)
+	_, err = decodeDhcpdLeaseBytes(failtest_2)
 	if err == nil {
 		t.Errorf("expected decoding error: %s", err)
 	}
 
 	failtest_3 := "000:00"
-	result, err = decodeDhcpdLeaseBytes(failtest_3)
+	_, err = decodeDhcpdLeaseBytes(failtest_3)
 	if err == nil {
 		t.Errorf("expected decoding error: %s", err)
 	}
 
 	failtest_4 := "00:00:"
-	result, err = decodeDhcpdLeaseBytes(failtest_4)
+	_, err = decodeDhcpdLeaseBytes(failtest_4)
 	if err == nil {
 		t.Errorf("expected decoding error: %s", err)
 	}
