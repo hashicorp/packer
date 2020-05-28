@@ -8,6 +8,10 @@ import (
 // changes the disk_size, disk_thin_provisioned, and disk_eagerly_scrub into a storage adapter
 type FixerVSphereNetworkDisk struct{}
 
+func (FixerVSphereNetworkDisk) DeprecatedOptions() []string {
+	return []string{"network_card", "network", "networkCard"}
+}
+
 func (FixerVSphereNetworkDisk) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// The type we'll decode into; we only care about builders
 	type template struct {

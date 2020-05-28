@@ -8,6 +8,10 @@ import (
 
 type FixerAmazonTemporarySecurityCIDRs struct{}
 
+func (FixerAmazonTemporarySecurityCIDRs) DeprecatedOptions() []string {
+	return []string{}
+}
+
 func (FixerAmazonTemporarySecurityCIDRs) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// Our template type we'll use for this fixer only
 	type template struct {
