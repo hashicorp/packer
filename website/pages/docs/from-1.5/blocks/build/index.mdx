@@ -12,12 +12,13 @@ sidebar_title: <tt>build</tt>
 
 `@include 'from-1.5/beta-hcl2-note.mdx'`
 
-The `build` block defines what builders are started and what they will do.
+The `build` block defines what builders are started, how to `provision` them
+and if necessary what to do with their artifacts using `post-process`.
 
 `@include 'from-1.5/builds/example-block.mdx'`
 
 
-Define [top-level `source` block](/docs/from-1.5/blocks/source) to configure
+Define [top-level `source` blocks](/docs/from-1.5/blocks/source) to configure
 your builders. The list of available builders can be found in the
 [builders](/docs/builders) section.
 

@@ -12,8 +12,8 @@ sidebar_title: <tt>source</tt>
 
 `@include 'from-1.5/beta-hcl2-note.mdx'`
 
-The `source` block in a `build` block allows to use an already defined source
-and to set build fields of a source.
+A `source` block nested in a `build` block allows to use an already defined
+source and to set specific fields.
 
 ```hcl
 # builds.pkr.hcl
@@ -26,5 +26,5 @@ build {
 ```
 
 -> **Note:** If any top-level attribute is re-defined with the same name an
-error will be displayed. In other words you cannot define the `output` field in
+error will be displayed. For example: you cannot define the `output` field in
 the source declaration **and** in the source usage.
