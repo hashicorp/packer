@@ -363,6 +363,12 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			// we did all the prep here.
 			_, err := pcb.Prepare()
 			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  fmt.Sprintf("Preparing packer core build %s failed", src.Ref().String()),
+					Detail:   err.Error(),
+					Subject:  build.HCL2Ref.DefRange.Ptr(),
+				})
 				continue
 			}
 
