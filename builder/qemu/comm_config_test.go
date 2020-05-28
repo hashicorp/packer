@@ -112,7 +112,7 @@ func TestCommConfigPrepare_SSHPrivateKey(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	
+
 	c = testCommConfig()
 	c.Comm.SSHPrivateKeyFile = tf.Name()
 	errs = c.Prepare(interpolate.NewContext())
