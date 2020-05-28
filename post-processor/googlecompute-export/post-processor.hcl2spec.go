@@ -9,24 +9,24 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	AccountFile         *string           `mapstructure:"account_file" cty:"account_file"`
-	IAP                 *bool             `mapstructure:"iap" cty:"iap"`
-	DiskSizeGb          *int64            `mapstructure:"disk_size" cty:"disk_size"`
-	DiskType            *string           `mapstructure:"disk_type" cty:"disk_type"`
-	MachineType         *string           `mapstructure:"machine_type" cty:"machine_type"`
-	Network             *string           `mapstructure:"network" cty:"network"`
-	Paths               []string          `mapstructure:"paths" cty:"paths"`
-	Subnetwork          *string           `mapstructure:"subnetwork" cty:"subnetwork"`
-	VaultGCPOauthEngine *string           `mapstructure:"vault_gcp_oauth_engine" cty:"vault_gcp_oauth_engine"`
-	Zone                *string           `mapstructure:"zone" cty:"zone"`
-	ServiceAccountEmail *string           `mapstructure:"service_account_email" cty:"service_account_email"`
+	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	AccountFile         *string           `mapstructure:"account_file" cty:"account_file" hcl:"account_file"`
+	IAP                 *bool             `mapstructure:"iap" cty:"iap" hcl:"iap"`
+	DiskSizeGb          *int64            `mapstructure:"disk_size" cty:"disk_size" hcl:"disk_size"`
+	DiskType            *string           `mapstructure:"disk_type" cty:"disk_type" hcl:"disk_type"`
+	MachineType         *string           `mapstructure:"machine_type" cty:"machine_type" hcl:"machine_type"`
+	Network             *string           `mapstructure:"network" cty:"network" hcl:"network"`
+	Paths               []string          `mapstructure:"paths" cty:"paths" hcl:"paths"`
+	Subnetwork          *string           `mapstructure:"subnetwork" cty:"subnetwork" hcl:"subnetwork"`
+	VaultGCPOauthEngine *string           `mapstructure:"vault_gcp_oauth_engine" cty:"vault_gcp_oauth_engine" hcl:"vault_gcp_oauth_engine"`
+	Zone                *string           `mapstructure:"zone" cty:"zone" hcl:"zone"`
+	ServiceAccountEmail *string           `mapstructure:"service_account_email" cty:"service_account_email" hcl:"service_account_email"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

@@ -9,8 +9,8 @@ import (
 // FlatWaitIpConfig is an auto-generated flat version of WaitIpConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatWaitIpConfig struct {
-	WaitTimeout   *string `mapstructure:"ip_wait_timeout" cty:"ip_wait_timeout"`
-	SettleTimeout *string `mapstructure:"ip_settle_timeout" cty:"ip_settle_timeout"`
+	WaitTimeout   *string `mapstructure:"ip_wait_timeout" cty:"ip_wait_timeout" hcl:"ip_wait_timeout"`
+	SettleTimeout *string `mapstructure:"ip_settle_timeout" cty:"ip_settle_timeout" hcl:"ip_settle_timeout"`
 }
 
 // FlatMapstructure returns a new FlatWaitIpConfig.

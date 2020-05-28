@@ -23,6 +23,9 @@ type LocationConfig struct {
 	// VMWare datastore. Required if `host` is a cluster, or if `host` has
 	// multiple datastores.
 	Datastore string `mapstructure:"datastore"`
+	// Set this to true if packer should the host for uploading files
+	// to the datastore. Defaults to false.
+	SetHostForDatastoreUploads bool `mapstructure:"set_host_for_datastore_uploads"`
 }
 
 func (c *LocationConfig) Prepare() []error {

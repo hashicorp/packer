@@ -29,19 +29,27 @@ type Config struct {
 	vboxcommon.VBoxManageConfig     `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 	vboxcommon.GuestAdditionsConfig `mapstructure:",squash"`
-	// The checksum for the source_path file. The
-	// algorithm to use when computing the checksum can be optionally specified
-	// with checksum_type. When checksum_type is not set packer will guess the
-	// checksumming type based on checksum length. checksum can be also be a
-	// file or an URL, in which case checksum_type must be set to file; the
-	// go-getter will download it and use the first hash found.
+	// The checksum for the source_path file. The type of the checksum is
+	// specified within the checksum field as a prefix, ex: "md5:{$checksum}".
+	// The type of the checksum can also be omitted and Packer will try to
+	// infer it based on string length. Valid values are "none", "{$checksum}",
+	// "md5:{$checksum}", "sha1:{$checksum}", "sha256:{$checksum}",
+	// "sha512:{$checksum}" or "file:{$path}". Here is a list of valid checksum
+	// values:
+	//  * md5:090992ba9fd140077b0661cb75f7ce13
+	//  * 090992ba9fd140077b0661cb75f7ce13
+	//  * sha1:ebfb681885ddf1234c18094a45bbeafd91467911
+	//  * ebfb681885ddf1234c18094a45bbeafd91467911
+	//  * sha256:ed363350696a726b7932db864dda019bd2017365c9e299627830f06954643f93
+	//  * ed363350696a726b7932db864dda019bd2017365c9e299627830f06954643f93
+	//  * file:http://releases.ubuntu.com/20.04/MD5SUMS
+	//  * file:file://./local/path/file.sum
+	//  * file:./local/path/file.sum
+	//  * none
+	// Although the checksum will not be verified when it is set to "none",
+	// this is not recommended since these files can be very large and
+	// corruption does happen from time to time.
 	Checksum string `mapstructure:"checksum" required:"true"`
-	// The type of the checksum specified in checksum.
-	// Valid values are none, md5, sha1, sha256, or sha512. Although the
-	// checksum will not be verified when checksum_type is set to "none", this is
-	// not recommended since OVA files can be very large and corruption does happen
-	// from time to time.
-	ChecksumType string `mapstructure:"checksum_type" required:"false"`
 	// The method by which guest additions are
 	// made available to the guest for installation. Valid options are upload,
 	// attach, or disable. If the mode is attach the guest additions ISO will
@@ -154,7 +162,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.GuestAdditionsConfig.Prepare(&c.ctx)...)
 
-	c.ChecksumType = strings.ToLower(c.ChecksumType)
 	if c.SourcePath == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
 	}

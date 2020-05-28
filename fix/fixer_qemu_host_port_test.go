@@ -16,23 +16,23 @@ func TestFixerQEMUHostPort(t *testing.T) {
 	}{
 		{
 			Input: map[string]interface{}{
-				"type":      "qemu",
+				"type":              "qemu",
 				"ssh_host_port_min": 2222,
 			},
 
 			Expected: map[string]interface{}{
-				"type":      "qemu",
+				"type":          "qemu",
 				"host_port_min": 2222,
 			},
 		},
 		{
 			Input: map[string]interface{}{
-				"type":      "qemu",
+				"type":              "qemu",
 				"ssh_host_port_max": 4444,
 			},
 
 			Expected: map[string]interface{}{
-				"type":      "qemu",
+				"type":          "qemu",
 				"host_port_max": 4444,
 			},
 		},

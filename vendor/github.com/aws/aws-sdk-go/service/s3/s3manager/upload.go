@@ -167,7 +167,7 @@ type Uploader struct {
 	BufferProvider ReadSeekerWriteToProvider
 
 	// partPool allows for the re-usage of streaming payload part buffers between upload calls
-	partPool *partPool
+	partPool byteSlicePool
 }
 
 // NewUploader creates a new Uploader instance to upload objects to S3. Pass In
@@ -204,7 +204,7 @@ func newUploader(client s3iface.S3API, options ...func(*Uploader)) *Uploader {
 		option(u)
 	}
 
-	u.partPool = newPartPool(u.PartSize)
+	u.partPool = newByteSlicePool(u.PartSize)
 
 	return u
 }
@@ -366,6 +366,7 @@ func (u *uploader) upload() (*UploadOutput, error) {
 	if err := u.init(); err != nil {
 		return nil, awserr.New("ReadRequestBody", "unable to initialize upload", err)
 	}
+	defer u.cfg.partPool.Close()
 
 	if u.cfg.PartSize < MinUploadPartSize {
 		msg := fmt.Sprintf("part size must be at least %d bytes", MinUploadPartSize)
@@ -397,14 +398,23 @@ func (u *uploader) init() error {
 		u.cfg.MaxUploadParts = MaxUploadParts
 	}
 
-	// If PartSize was changed or partPool was never setup then we need to allocated a new pool
-	// so that we return []byte slices of the correct size
-	if u.cfg.partPool == nil || u.cfg.partPool.partSize != u.cfg.PartSize {
-		u.cfg.partPool = newPartPool(u.cfg.PartSize)
+	// Try to get the total size for some optimizations
+	if err := u.initSize(); err != nil {
+		return err
 	}
 
-	// Try to get the total size for some optimizations
-	return u.initSize()
+	// If PartSize was changed or partPool was never setup then we need to allocated a new pool
+	// so that we return []byte slices of the correct size
+	poolCap := u.cfg.Concurrency + 1
+	if u.cfg.partPool == nil || u.cfg.partPool.SliceSize() != u.cfg.PartSize {
+		u.cfg.partPool = newByteSlicePool(u.cfg.PartSize)
+		u.cfg.partPool.ModifyCapacity(poolCap)
+	} else {
+		u.cfg.partPool = &returnCapacityPoolCloser{byteSlicePool: u.cfg.partPool}
+		u.cfg.partPool.ModifyCapacity(poolCap)
+	}
+
+	return nil
 }
 
 // initSize tries to detect the total stream size, setting u.totalSize. If
@@ -437,10 +447,6 @@ func (u *uploader) initSize() error {
 // does not need to be wrapped in a mutex because nextReader is only called
 // from the main thread.
 func (u *uploader) nextReader() (io.ReadSeeker, int, func(), error) {
-	type readerAtSeeker interface {
-		io.ReaderAt
-		io.ReadSeeker
-	}
 	switch r := u.in.Body.(type) {
 	case readerAtSeeker:
 		var err error
@@ -472,15 +478,19 @@ func (u *uploader) nextReader() (io.ReadSeeker, int, func(), error) {
 		return reader, int(n), cleanup, err
 
 	default:
-		part := u.cfg.partPool.Get().([]byte)
-		n, err := readFillBuf(r, part)
+		part, err := u.cfg.partPool.Get(u.ctx)
+		if err != nil {
+			return nil, 0, func() {}, err
+		}
+
+		n, err := readFillBuf(r, *part)
 		u.readerPos += int64(n)
 
 		cleanup := func() {
 			u.cfg.partPool.Put(part)
 		}
 
-		return bytes.NewReader(part[0:n]), n, cleanup, err
+		return bytes.NewReader((*part)[0:n]), n, cleanup, err
 	}
 }
 
@@ -554,6 +564,7 @@ func (u *multiuploader) upload(firstBuf io.ReadSeeker, cleanup func()) (*UploadO
 	// Create the multipart
 	resp, err := u.cfg.S3.CreateMultipartUploadWithContext(u.ctx, params, u.cfg.RequestOptions...)
 	if err != nil {
+		cleanup()
 		return nil, err
 	}
 	u.uploadID = *resp.UploadId
@@ -614,6 +625,7 @@ func (u *multiuploader) upload(firstBuf io.ReadSeeker, cleanup func()) (*UploadO
 		Key:    u.in.Key,
 	})
 	getReq.Config.Credentials = credentials.AnonymousCredentials
+	getReq.SetContext(u.ctx)
 	uploadLocation, _, _ := getReq.PresignRequest(1)
 
 	return &UploadOutput{
@@ -668,6 +680,8 @@ func (u *multiuploader) readChunk(ch chan chunk) {
 				u.seterr(err)
 			}
 		}
+
+		data.cleanup()
 	}
 }
 
@@ -685,7 +699,6 @@ func (u *multiuploader) send(c chunk) error {
 	}
 
 	resp, err := u.cfg.S3.UploadPartWithContext(u.ctx, params, u.cfg.RequestOptions...)
-	c.cleanup()
 	if err != nil {
 		return err
 	}
@@ -758,17 +771,7 @@ func (u *multiuploader) complete() *s3.CompleteMultipartUploadOutput {
 	return resp
 }
 
-type partPool struct {
-	partSize int64
-	sync.Pool
-}
-
-func newPartPool(partSize int64) *partPool {
-	p := &partPool{partSize: partSize}
-
-	p.New = func() interface{} {
-		return make([]byte, p.partSize)
-	}
-
-	return p
+type readerAtSeeker interface {
+	io.ReaderAt
+	io.ReadSeeker
 }

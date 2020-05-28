@@ -45,7 +45,7 @@ func (s *stepPortForward) Run(ctx context.Context, state multistep.StateBag) mul
 		log.Printf("Skipping NAT port forwarding. Using communicator (SSH, WinRM, etc) port %d", commHostPort)
 	}
 	// Save the port we're using so that future steps can use it
-	state.Put("sshHostPort", commHostPort)
+	state.Put("commHostPort", commHostPort)
 
 	return multistep.ActionContinue
 }

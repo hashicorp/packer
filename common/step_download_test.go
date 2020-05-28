@@ -50,13 +50,12 @@ func TestStepDownload_Run(t *testing.T) {
 	}
 
 	type fields struct {
-		Checksum     string
-		ChecksumType string
-		Description  string
-		ResultKey    string
-		TargetPath   string
-		Url          []string
-		Extension    string
+		Checksum    string
+		Description string
+		ResultKey   string
+		TargetPath  string
+		Url         []string
+		Extension   string
 	}
 
 	tests := []struct {
@@ -84,8 +83,8 @@ func TestStepDownload_Run(t *testing.T) {
 				toSha1(abs(t, "./test-fixtures/root//another.txt")) + ".lock",
 			},
 		},
-		{"none checksum works, without a checksum",
-			fields{Url: []string{abs(t, "./test-fixtures/root/another.txt")}, ChecksumType: "none"},
+		{"none checksum works",
+			fields{Url: []string{abs(t, "./test-fixtures/root/another.txt")}, Checksum: "none"},
 			multistep.ActionContinue,
 			[]string{
 				toSha1(abs(t, "./test-fixtures/root/another.txt")) + ".lock",
@@ -99,25 +98,25 @@ func TestStepDownload_Run(t *testing.T) {
 			},
 		},
 		{"bad checksum removes file - checksum from string - Checksum Type",
-			fields{Extension: "txt", Url: []string{abs(t, "./test-fixtures/root/another.txt")}, ChecksumType: "sha1", Checksum: cs["/root/basic.txt"]},
+			fields{Extension: "txt", Url: []string{abs(t, "./test-fixtures/root/another.txt")}, Checksum: "sha1:" + cs["/root/basic.txt"]},
 			multistep.ActionHalt,
 			[]string{
-				toSha1(cs["/root/basic.txt"]) + ".txt.lock",
+				toSha1("sha1:"+cs["/root/basic.txt"]) + ".txt.lock",
 			},
 		},
 		{"bad checksum removes file - checksum from url - Checksum Type",
-			fields{Extension: "txt", Url: []string{abs(t, "./test-fixtures/root/basic.txt")}, Checksum: srvr.URL + "/root/another.txt.sha1sum", ChecksumType: "file"},
+			fields{Extension: "txt", Url: []string{abs(t, "./test-fixtures/root/basic.txt")}, Checksum: "file:" + srvr.URL + "/root/another.txt.sha1sum"},
 			multistep.ActionHalt,
 			[]string{
-				toSha1(srvr.URL+"/root/another.txt.sha1sum") + ".txt.lock",
+				toSha1("file:"+srvr.URL+"/root/another.txt.sha1sum") + ".txt.lock",
 			},
 		},
 		{"successfull http dl - checksum from http file - parameter",
-			fields{Extension: "txt", Url: []string{srvr.URL + "/root/another.txt"}, Checksum: srvr.URL + "/root/another.txt.sha1sum", ChecksumType: "file"},
+			fields{Extension: "txt", Url: []string{srvr.URL + "/root/another.txt"}, Checksum: "file:" + srvr.URL + "/root/another.txt.sha1sum"},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(srvr.URL+"/root/another.txt.sha1sum") + ".txt",
-				toSha1(srvr.URL+"/root/another.txt.sha1sum") + ".txt.lock",
+				toSha1("file:"+srvr.URL+"/root/another.txt.sha1sum") + ".txt",
+				toSha1("file:"+srvr.URL+"/root/another.txt.sha1sum") + ".txt.lock",
 			},
 		},
 		{"successfull http dl - checksum from http file - url",
@@ -145,11 +144,11 @@ func TestStepDownload_Run(t *testing.T) {
 			},
 		},
 		{"successfull http dl - checksum from parameter - checksum type",
-			fields{Extension: "txt", Url: []string{srvr.URL + "/root/another.txt?"}, ChecksumType: "sha1", Checksum: cs["/root/another.txt"]},
+			fields{Extension: "txt", Url: []string{srvr.URL + "/root/another.txt?"}, Checksum: "sha1:" + cs["/root/another.txt"]},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt",
-				toSha1(cs["/root/another.txt"]) + ".txt.lock",
+				toSha1("sha1:"+cs["/root/another.txt"]) + ".txt",
+				toSha1("sha1:"+cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
 		{"successfull relative symlink - checksum from url",
@@ -167,10 +166,10 @@ func TestStepDownload_Run(t *testing.T) {
 			},
 		},
 		{"successfull relative symlink - checksum from parameter -  checksum type",
-			fields{Extension: "txt", Url: []string{"./test-fixtures/root/another.txt?"}, ChecksumType: "sha1", Checksum: cs["/root/another.txt"]},
+			fields{Extension: "txt", Url: []string{"./test-fixtures/root/another.txt?"}, Checksum: "sha1:" + cs["/root/another.txt"]},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt.lock",
+				toSha1("sha1:"+cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
 		{"successfull absolute symlink - checksum from url",
@@ -188,10 +187,10 @@ func TestStepDownload_Run(t *testing.T) {
 			},
 		},
 		{"successfull absolute symlink - checksum from parameter - checksum type",
-			fields{Extension: "txt", Url: []string{abs(t, "./test-fixtures/root/another.txt") + "?"}, ChecksumType: "sha1", Checksum: cs["/root/another.txt"]},
+			fields{Extension: "txt", Url: []string{abs(t, "./test-fixtures/root/another.txt") + "?"}, Checksum: "sha1:" + cs["/root/another.txt"]},
 			multistep.ActionContinue,
 			[]string{
-				toSha1(cs["/root/another.txt"]) + ".txt.lock",
+				toSha1("sha1:"+cs["/root/another.txt"]) + ".txt.lock",
 			},
 		},
 		{"wrong first 2 urls - absolute urls - checksum from parameter - no checksum type",
@@ -214,13 +213,12 @@ func TestStepDownload_Run(t *testing.T) {
 			dir := createTempDir(t)
 			defer os.RemoveAll(dir)
 			s := &StepDownload{
-				TargetPath:   tt.fields.TargetPath,
-				Checksum:     tt.fields.Checksum,
-				ChecksumType: tt.fields.ChecksumType,
-				ResultKey:    tt.fields.ResultKey,
-				Url:          tt.fields.Url,
-				Extension:    tt.fields.Extension,
-				Description:  tt.name,
+				TargetPath:  tt.fields.TargetPath,
+				Checksum:    tt.fields.Checksum,
+				ResultKey:   tt.fields.ResultKey,
+				Url:         tt.fields.Url,
+				Extension:   tt.fields.Extension,
+				Description: tt.name,
 			}
 			defer os.Setenv("PACKER_CACHE_DIR", os.Getenv("PACKER_CACHE_DIR"))
 			os.Setenv("PACKER_CACHE_DIR", dir)
@@ -238,11 +236,10 @@ func TestStepDownload_Run(t *testing.T) {
 
 func TestStepDownload_download(t *testing.T) {
 	step := &StepDownload{
-		Checksum:     "f572d396fae9206628714fb2ce00f72e94f2258f",
-		ChecksumType: "sha1",
-		Description:  "ISO",
-		ResultKey:    "iso_path",
-		Url:          nil,
+		Checksum:    "sha1:f572d396fae9206628714fb2ce00f72e94f2258f",
+		Description: "ISO",
+		ResultKey:   "iso_path",
+		Url:         nil,
 	}
 	ui := &packer.BasicUi{
 		Reader: new(bytes.Buffer),

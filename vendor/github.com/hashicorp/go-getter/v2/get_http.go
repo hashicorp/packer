@@ -35,7 +35,6 @@ import (
 // formed URL. The shorthand syntax of "github.com/foo/bar" or relative
 // paths are not allowed.
 type HttpGetter struct {
-	getter
 
 	// Netrc, if true, will lookup and use auth information found
 	// in the user's netrc file if available.

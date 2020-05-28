@@ -72,7 +72,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	defaultArgs := make(map[string]interface{})
 	var deviceArgs []string
 	var driveArgs []string
-	var sshHostPort int
+	var commHostPort int
 	var vnc string
 
 	if !config.VNCUsePassword {
@@ -90,8 +90,8 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 	if config.NetBridge == "" {
 		if config.CommConfig.Comm.Type != "none" {
-			sshHostPort = state.Get("sshHostPort").(int)
-			defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:%d", sshHostPort, config.CommConfig.Comm.Port())
+			commHostPort = state.Get("commHostPort").(int)
+			defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:%d", commHostPort, config.CommConfig.Comm.Port())
 		} else {
 			defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0")
 		}
@@ -233,7 +233,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 				config.HTTPDir,
 				config.OutputDir,
 				config.VMName,
-				sshHostPort,
+				commHostPort,
 			}
 		} else {
 			ictx.Data = qemuArgsTemplateData{

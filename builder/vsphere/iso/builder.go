@@ -44,17 +44,17 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if b.config.ISOUrls != nil {
 		steps = append(steps,
 			&packerCommon.StepDownload{
-				Checksum:     b.config.ISOChecksum,
-				ChecksumType: b.config.ISOChecksumType,
-				Description:  "ISO",
-				Extension:    b.config.TargetExtension,
-				ResultKey:    "iso_path",
-				TargetPath:   b.config.TargetPath,
-				Url:          b.config.ISOUrls,
+				Checksum:    b.config.ISOChecksum,
+				Description: "ISO",
+				Extension:   b.config.TargetExtension,
+				ResultKey:   "iso_path",
+				TargetPath:  b.config.TargetPath,
+				Url:         b.config.ISOUrls,
 			},
 			&StepRemoteUpload{
-				Datastore: b.config.Datastore,
-				Host:      b.config.Host,
+				Datastore:                  b.config.Datastore,
+				Host:                       b.config.Host,
+				SetHostForDatastoreUploads: b.config.SetHostForDatastoreUploads,
 			},
 		)
 	}
@@ -84,9 +84,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Label:       b.config.FloppyLabel,
 			},
 			&StepAddFloppy{
-				Config:    &b.config.FloppyConfig,
-				Datastore: b.config.Datastore,
-				Host:      b.config.Host,
+				Config:                     &b.config.FloppyConfig,
+				Datastore:                  b.config.Datastore,
+				Host:                       b.config.Host,
+				SetHostForDatastoreUploads: b.config.SetHostForDatastoreUploads,
 			},
 			&packerCommon.StepHTTPServer{
 				HTTPDir:     b.config.HTTPDir,

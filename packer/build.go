@@ -135,8 +135,8 @@ func (b *CoreBuild) Name() string {
 // and any hooks. This _must_ be called prior to Run. The parameter is the
 // overrides for the variables within the template (if any).
 func (b *CoreBuild) Prepare() (warn []string, err error) {
-	// For HCL2 templates, the builder and hooks are initialized when the template is parsed.
-	// Calling Prepare(...) is not necessary
+	// For HCL2 templates, the builder and hooks are initialized when the
+	// template is parsed. Calling Prepare(...) is not necessary
 	if b.Prepared {
 		b.prepareCalled = true
 		return
@@ -149,6 +149,8 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 		panic("prepare already called")
 	}
 
+	// Templates loaded from HCL2 will never get here. TODO: move this code into
+	// a custom json area instead of just aborting early for HCL.
 	b.prepareCalled = true
 
 	packerConfig := map[string]interface{}{

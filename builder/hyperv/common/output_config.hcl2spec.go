@@ -9,7 +9,7 @@ import (
 // FlatOutputConfig is an auto-generated flat version of OutputConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatOutputConfig struct {
-	OutputDir *string `mapstructure:"output_directory" required:"false" cty:"output_directory"`
+	OutputDir *string `mapstructure:"output_directory" required:"false" cty:"output_directory" hcl:"output_directory"`
 }
 
 // FlatMapstructure returns a new FlatOutputConfig.

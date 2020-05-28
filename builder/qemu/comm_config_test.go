@@ -100,9 +100,19 @@ func TestCommConfigPrepare_SSHPrivateKey(t *testing.T) {
 	}
 
 	// Test good contents
-	tf.Seek(0, 0)
-	tf.Truncate(0)
-	tf.Write([]byte(testPem))
+	_, err = tf.Seek(0, 0)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	err = tf.Truncate(0)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	_, err = tf.Write([]byte(testPem))
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	
 	c = testCommConfig()
 	c.Comm.SSHPrivateKeyFile = tf.Name()
 	errs = c.Prepare(interpolate.NewContext())

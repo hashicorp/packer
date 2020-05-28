@@ -9,28 +9,28 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	Command             *string           `cty:"command"`
-	ExtraArguments      []string          `mapstructure:"extra_arguments" cty:"extra_arguments"`
-	GroupVars           *string           `mapstructure:"group_vars" cty:"group_vars"`
-	HostVars            *string           `mapstructure:"host_vars" cty:"host_vars"`
-	PlaybookDir         *string           `mapstructure:"playbook_dir" cty:"playbook_dir"`
-	PlaybookFile        *string           `mapstructure:"playbook_file" cty:"playbook_file"`
-	PlaybookFiles       []string          `mapstructure:"playbook_files" cty:"playbook_files"`
-	PlaybookPaths       []string          `mapstructure:"playbook_paths" cty:"playbook_paths"`
-	RolePaths           []string          `mapstructure:"role_paths" cty:"role_paths"`
-	StagingDir          *string           `mapstructure:"staging_directory" cty:"staging_directory"`
-	CleanStagingDir     *bool             `mapstructure:"clean_staging_directory" cty:"clean_staging_directory"`
-	InventoryFile       *string           `mapstructure:"inventory_file" cty:"inventory_file"`
-	InventoryGroups     []string          `mapstructure:"inventory_groups" cty:"inventory_groups"`
-	GalaxyFile          *string           `mapstructure:"galaxy_file" cty:"galaxy_file"`
-	GalaxyCommand       *string           `mapstructure:"galaxy_command" cty:"galaxy_command"`
+	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	Command             *string           `cty:"command" hcl:"command"`
+	ExtraArguments      []string          `mapstructure:"extra_arguments" cty:"extra_arguments" hcl:"extra_arguments"`
+	GroupVars           *string           `mapstructure:"group_vars" cty:"group_vars" hcl:"group_vars"`
+	HostVars            *string           `mapstructure:"host_vars" cty:"host_vars" hcl:"host_vars"`
+	PlaybookDir         *string           `mapstructure:"playbook_dir" cty:"playbook_dir" hcl:"playbook_dir"`
+	PlaybookFile        *string           `mapstructure:"playbook_file" cty:"playbook_file" hcl:"playbook_file"`
+	PlaybookFiles       []string          `mapstructure:"playbook_files" cty:"playbook_files" hcl:"playbook_files"`
+	PlaybookPaths       []string          `mapstructure:"playbook_paths" cty:"playbook_paths" hcl:"playbook_paths"`
+	RolePaths           []string          `mapstructure:"role_paths" cty:"role_paths" hcl:"role_paths"`
+	StagingDir          *string           `mapstructure:"staging_directory" cty:"staging_directory" hcl:"staging_directory"`
+	CleanStagingDir     *bool             `mapstructure:"clean_staging_directory" cty:"clean_staging_directory" hcl:"clean_staging_directory"`
+	InventoryFile       *string           `mapstructure:"inventory_file" cty:"inventory_file" hcl:"inventory_file"`
+	InventoryGroups     []string          `mapstructure:"inventory_groups" cty:"inventory_groups" hcl:"inventory_groups"`
+	GalaxyFile          *string           `mapstructure:"galaxy_file" cty:"galaxy_file" hcl:"galaxy_file"`
+	GalaxyCommand       *string           `mapstructure:"galaxy_command" cty:"galaxy_command" hcl:"galaxy_command"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
