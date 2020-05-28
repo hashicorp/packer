@@ -12,17 +12,20 @@ sidebar_title: <tt>source</tt>
 
 `@include 'from-1.5/beta-hcl2-note.mdx'`
 
-The `source` block defines reusable [builders](/docs/builders) configuration
-blocks:
+The top-level `source` block defines reusable builders configuration blocks:
 
 `@include 'from-1.5/sources/example-block.mdx'`
 
-The list of available builders can be found in the [builders](/docs/builders)
-section.
+Build-level [`source` blocks](/docs/from-1.5/blocks/build/source) allow to
+specifically set source fields at the moment of using them in 
 
-It is also possible to create and use [custom
-builders](/docs/extending/custom-builders). There is also a list of [community
-builders](/community-tools#community-builders).
+## Related
 
-Note that it is possible to set source fields at the moment of using them in the
-source block of a [`build` block](/docs/from-1.5/blocks/build).
+* The list of available builders can be found in the [builders](/docs/builders)
+  section.
+
+
+* A list of [community
+builders](/community-tools#community-builders) is available.
+
+* Create your own [custom builder](/docs/extending/custom-builders) !
