@@ -52,8 +52,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Url:         b.config.ISOUrls,
 			},
 			&StepRemoteUpload{
-				Datastore: b.config.Datastore,
-				Host:      b.config.Host,
+				Datastore:                  b.config.Datastore,
+				Host:                       b.config.Host,
+				SetHostForDatastoreUploads: b.config.SetHostForDatastoreUploads,
 			},
 		)
 	}
@@ -83,9 +84,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Label:       b.config.FloppyLabel,
 			},
 			&StepAddFloppy{
-				Config:    &b.config.FloppyConfig,
-				Datastore: b.config.Datastore,
-				Host:      b.config.Host,
+				Config:                     &b.config.FloppyConfig,
+				Datastore:                  b.config.Datastore,
+				Host:                       b.config.Host,
+				SetHostForDatastoreUploads: b.config.SetHostForDatastoreUploads,
 			},
 			&packerCommon.StepHTTPServer{
 				HTTPDir:     b.config.HTTPDir,

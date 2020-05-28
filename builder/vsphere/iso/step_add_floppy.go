@@ -29,9 +29,10 @@ type FloppyConfig struct {
 }
 
 type StepAddFloppy struct {
-	Config    *FloppyConfig
-	Datastore string
-	Host      string
+	Config                     *FloppyConfig
+	Datastore                  string
+	Host                       string
+	SetHostForDatastoreUploads bool
 }
 
 func (s *StepAddFloppy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -54,7 +55,7 @@ func (s *StepAddFloppy) Run(_ context.Context, state multistep.StateBag) multist
 		}
 
 		uploadPath := fmt.Sprintf("%v/packer-tmp-created-floppy.flp", vmDir)
-		if err := ds.UploadFile(floppyPath.(string), uploadPath, s.Host); err != nil {
+		if err := ds.UploadFile(floppyPath.(string), uploadPath, s.Host, s.SetHostForDatastoreUploads); err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}

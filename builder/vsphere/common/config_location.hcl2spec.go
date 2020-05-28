@@ -9,12 +9,13 @@ import (
 // FlatLocationConfig is an auto-generated flat version of LocationConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatLocationConfig struct {
-	VMName       *string `mapstructure:"vm_name" cty:"vm_name"`
-	Folder       *string `mapstructure:"folder" cty:"folder"`
-	Cluster      *string `mapstructure:"cluster" cty:"cluster"`
-	Host         *string `mapstructure:"host" cty:"host"`
-	ResourcePool *string `mapstructure:"resource_pool" cty:"resource_pool"`
-	Datastore    *string `mapstructure:"datastore" cty:"datastore"`
+	VMName                     *string `mapstructure:"vm_name" cty:"vm_name"`
+	Folder                     *string `mapstructure:"folder" cty:"folder"`
+	Cluster                    *string `mapstructure:"cluster" cty:"cluster"`
+	Host                       *string `mapstructure:"host" cty:"host"`
+	ResourcePool               *string `mapstructure:"resource_pool" cty:"resource_pool"`
+	Datastore                  *string `mapstructure:"datastore" cty:"datastore"`
+	SetHostForDatastoreUploads *bool   `mapstructure:"set_host_for_datastore_uploads" cty:"set_host_for_datastore_uploads"`
 }
 
 // FlatMapstructure returns a new FlatLocationConfig.
@@ -29,12 +30,13 @@ func (*LocationConfig) FlatMapstructure() interface{ HCL2Spec() map[string]hclde
 // The decoded values from this spec will then be applied to a FlatLocationConfig.
 func (*FlatLocationConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"vm_name":       &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
-		"folder":        &hcldec.AttrSpec{Name: "folder", Type: cty.String, Required: false},
-		"cluster":       &hcldec.AttrSpec{Name: "cluster", Type: cty.String, Required: false},
-		"host":          &hcldec.AttrSpec{Name: "host", Type: cty.String, Required: false},
-		"resource_pool": &hcldec.AttrSpec{Name: "resource_pool", Type: cty.String, Required: false},
-		"datastore":     &hcldec.AttrSpec{Name: "datastore", Type: cty.String, Required: false},
+		"vm_name":                        &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
+		"folder":                         &hcldec.AttrSpec{Name: "folder", Type: cty.String, Required: false},
+		"cluster":                        &hcldec.AttrSpec{Name: "cluster", Type: cty.String, Required: false},
+		"host":                           &hcldec.AttrSpec{Name: "host", Type: cty.String, Required: false},
+		"resource_pool":                  &hcldec.AttrSpec{Name: "resource_pool", Type: cty.String, Required: false},
+		"datastore":                      &hcldec.AttrSpec{Name: "datastore", Type: cty.String, Required: false},
+		"set_host_for_datastore_uploads": &hcldec.AttrSpec{Name: "set_host_for_datastore_uploads", Type: cty.Bool, Required: false},
 	}
 	return s
 }
