@@ -2290,6 +2290,12 @@ func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry, err error) {
 	/// Read up to the lease item and validate that it actually matches
 	lease, ch := consumeOpenClosePair('{', '}', in)
 
+	// If we couldn't read the lease, then this item is busted and we're prolly
+	// done reading the channel.
+	if len(lease) == 0 {
+		return nil, nil
+	}
+
 	matches := ipLineRe.FindStringSubmatch(string(lease))
 	if matches == nil {
 		res := strings.TrimSpace(string(lease))
@@ -2303,7 +2309,7 @@ func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry, err error) {
 
 	} else if ok {
 		// If we didn't see a begin brace, then this entry is mangled which
-		// means that we should probably ail
+		// means that we should probably bail
 		return &dhcpLeaseEntry{address: matches[1]}, fmt.Errorf("Missing parameters for lease entry %v", matches[1])
 
 	} else if !ok {
@@ -2375,11 +2381,37 @@ func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry, err error) {
 	return entry, nil
 }
 
-func ReadDhcpdLeases(fd *os.File) ([]dhcpLeaseEntry, error) {
+func ReadDhcpdLeaseEntries(fd *os.File) ([]dhcpLeaseEntry, error) {
 	fch := consumeFile(fd)
 	uncommentedch := uncomment(fch)
 	wch := filterOutCharacters([]byte{'\n', '\r', '\v'}, uncommentedch)
-	close(wch)
 
-	return []dhcpLeaseEntry{}, fmt.Errorf("Not implemented yet!")
+	result := make([]dhcpLeaseEntry, 0)
+	errors := make([]error, 0)
+
+	// Consume dhcpd lease entries from the channel until we just plain run out.
+	for i := 0; ; i += 1 {
+		if entry, err := readDhcpdLeaseEntry(wch); entry == nil {
+			// If our entry is nil, then we've run out of input and finished
+			// parsing the file to completion.
+			break
+
+		} else if err != nil {
+			// If we received an error, then log it and keep track of it. This
+			// way we can warn the user later which entries we had issues with.
+			log.Printf("Error parsing dhcpd lease entry #%d: %s", 1+i, err)
+			errors = append(errors, err)
+
+		} else {
+			// If we've parsed an entry successfully, then aggregate it to
+			// our slice of results.
+			result = append(result, *entry)
+		}
+	}
+
+	// If we received any errors then include alongside our results.
+	if len(errors) > 0 {
+		return result, fmt.Errorf("Errors found while parsing dhcpd lease entries: %v", errors)
+	}
+	return result, nil
 }

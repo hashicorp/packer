@@ -1,0 +1,32 @@
+# This entry is normal
+lease 127.0.0.17 {
+    starts 3 2020/05/13 12:00:37;
+    ends 3 2020/05/13 12:30:37;
+    hardware ethernet 0d:ea:d0:66:77:88;
+    uid 01:0d:ea:d0:00:11:22;
+}
+
+# This entry has tabs
+lease 127.0.0.17 {
+	starts 6 2020/06/12 22:28:54;
+	ends 6 2020/06/12 22:58:54;
+	hardware ethernet 0d:ea:d0:66:77:88;
+    uid 01:0d:ea:d0:33:44:55;
+}
+
+# These next two entries have the same address, but different uids
+lease 127.0.0.19 {
+    starts 4 2020/05/28 11:35:06;
+    ends 4 2020/05/28 12:05:06;
+    hardware ethernet 0d:ea:d0:66:77:88;
+    uid 01:0d:ea:d0:66:77:88;
+    client-hostname "VAGRANT-ADA-LUZ";
+}
+
+lease 127.0.0.19 {
+    starts 5 2020/08/20 20:32:03;
+    ends 5 2020/08/20 21:02:03;
+    hardware ethernet 0d:ea:d0:99:aa:bb;
+    uid 01:0d:ea:d0:99:aa:bb;
+    client-hostname "WINDOWS-SQABBAS";
+}

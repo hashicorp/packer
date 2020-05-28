@@ -746,3 +746,113 @@ func TestParserReadDhcpdLeaseEntry(t *testing.T) {
 		t.Errorf("expected ends weekday %v, got %v", 57005, result.ends_weekday)
 	}
 }
+
+func TestParserReadDhcpdLeases(t *testing.T) {
+	f, err := os.Open(filepath.Join("testdata", "dhcpd-example.leases"))
+	if err != nil {
+		t.Fatalf("Unable to open dhcpd.leases sample: %s", err)
+	}
+	defer f.Close()
+
+	results, err := ReadDhcpdLeaseEntries(f)
+	if err != nil {
+		t.Fatalf("Error reading lease: %s", err)
+	}
+
+	// some simple utilities
+	filter_address := func(address string, items []dhcpLeaseEntry) (result []dhcpLeaseEntry) {
+		for _, item := range items {
+			if item.address == address {
+				result = append(result, item)
+			}
+		}
+		return
+	}
+
+	find_uid := func(uid string, items []dhcpLeaseEntry) *dhcpLeaseEntry {
+		for _, item := range items {
+			if uid == hex.EncodeToString(item.uid) {
+				return &item
+			}
+		}
+		return nil
+	}
+
+	find_ether := func(ether string, items []dhcpLeaseEntry) *dhcpLeaseEntry {
+		for _, item := range items {
+			if ether == hex.EncodeToString(item.ether) {
+				return &item
+			}
+		}
+		return nil
+	}
+
+	// actual unit tests
+	test_1 := map[string]string{
+		"address": "127.0.0.19",
+		"uid":     "010dead099aabb",
+		"ether":   "0dead099aabb",
+	}
+	test_1_findings := filter_address(test_1["address"], results)
+	if len(test_1_findings) != 2 {
+		t.Errorf("expected %d matching entries, got %d", 2, len(test_1_findings))
+	} else {
+		res := find_ether(test_1["ether"], test_1_findings)
+		if res == nil {
+			t.Errorf("unable to find item with ether %v", test_1["ether"])
+		} else if hex.EncodeToString(res.uid) != test_1["uid"] {
+			t.Errorf("expected uid %s, got %s", test_1["uid"], hex.EncodeToString(res.uid))
+		}
+	}
+
+	test_2 := map[string]string{
+		"address": "127.0.0.19",
+		"uid":     "010dead0667788",
+		"ether":   "0dead0667788",
+	}
+	test_2_findings := filter_address(test_2["address"], results)
+	if len(test_2_findings) != 2 {
+		t.Errorf("expected %d matching entries, got %d", 2, len(test_2_findings))
+	} else {
+		res := find_ether(test_2["ether"], test_2_findings)
+		if res == nil {
+			t.Errorf("unable to find item with ether %v", test_2["ether"])
+		} else if hex.EncodeToString(res.uid) != test_2["uid"] {
+			t.Errorf("expected uid %s, got %s", test_2["uid"], hex.EncodeToString(res.uid))
+		}
+	}
+
+	test_3 := map[string]string{
+		"address": "127.0.0.17",
+		"uid":     "010dead0334455",
+		"ether":   "0dead0667788",
+	}
+	test_3_findings := filter_address(test_3["address"], results)
+	if len(test_3_findings) != 2 {
+		t.Errorf("expected %d matching entries, got %d", 2, len(test_3_findings))
+	} else {
+		res := find_uid(test_3["uid"], test_3_findings)
+		if res == nil {
+			t.Errorf("unable to find item with uid %v", test_3["uid"])
+		} else if hex.EncodeToString(res.ether) != test_3["ether"] {
+			t.Errorf("expected ethernet hardware %s, got %s", test_3["ether"], hex.EncodeToString(res.ether))
+		}
+	}
+
+	test_4 := map[string]string{
+		"address": "127.0.0.17",
+		"uid":     "010dead0001122",
+		"ether":   "0dead0667788",
+	}
+	test_4_findings := filter_address(test_4["address"], results)
+	if len(test_4_findings) != 2 {
+		t.Errorf("expected %d matching entries, got %d", 2, len(test_4_findings))
+	} else {
+		res := find_uid(test_4["uid"], test_4_findings)
+		if res == nil {
+			t.Errorf("unable to find item with uid %v", test_4["uid"])
+		} else if hex.EncodeToString(res.ether) != test_4["ether"] {
+			t.Errorf("expected ethernet hardware %s, got %s", test_4["ether"], hex.EncodeToString(res.ether))
+		}
+	}
+}
