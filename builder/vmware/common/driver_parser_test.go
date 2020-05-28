@@ -150,7 +150,7 @@ subnet 127.0.0.0 netmask 255.255.255.252 {
 	}
 
 	for index := range expected {
-		if string(expected[index]) != result[index] {
+		if expected[index] != result[index] {
 			t.Errorf("unexpected token at index %d: %v != %v", index, expected[index], result[index])
 		}
 	}
@@ -386,7 +386,7 @@ func TestParserTokenizeNetworkMap(t *testing.T) {
 	}
 
 	for index := range expected {
-		if expected[index] != string(result[index]) {
+		if expected[index] != result[index] {
 			t.Errorf("unexpected token at index %d: %v != %v", index, expected[index], result[index])
 		}
 	}
