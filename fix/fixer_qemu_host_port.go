@@ -4,7 +4,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// FixerQEMUDiskSize updates disk_size from a string to int for QEMU builders
+// FixerQEMUHostPort updates ssh_host_port_min and ssh_host_port_max to host_port_min and host_port_max for QEMU builders
 type FixerQEMUHostPort struct{}
 
 func (FixerQEMUHostPort) Fix(input map[string]interface{}) (map[string]interface{}, error) {
