@@ -232,7 +232,7 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 
 			ds := state.Get(stateBagKey_Diskset)
 			if tt.verifyDiskset != nil && !reflect.DeepEqual(*tt.verifyDiskset, ds) {
-				t.Errorf("Error verifying diskset after Run(), got %v, want %v", ds, *&tt.verifyDiskset)
+				t.Errorf("Error verifying diskset after Run(), got %v, want %v", ds, *tt.verifyDiskset)
 			}
 		})
 	}
