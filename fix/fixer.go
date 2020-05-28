@@ -50,6 +50,7 @@ func init() {
 		"ssh-wait-timeout":           new(FixerSSHTimout),
 		"docker-tag-tags":            new(FixerDockerTagtoTags),
 		"vsphere-iso-net-disk":       new(FixerVSphereNetworkDisk),
+		"iso-checksum-type-and-url":  new(FixerISOChecksumTypeAndURL),
 	}
 
 	FixerOrder = []string{
@@ -83,5 +84,6 @@ func init() {
 		"comm-config",
 		"ssh-wait-timeout",
 		"vsphere-iso-net-disk",
+		"iso-checksum-type-and-url",
 	}
 }
