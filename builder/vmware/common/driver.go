@@ -376,7 +376,7 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 			return "", fmt.Errorf("no DHCP leases path found for device %s", device)
 		}
 
-		// open up the lease and read its contents
+		// open up the path to the dhcpd leases
 		fh, err := os.Open(dhcpLeasesPath)
 		if err != nil {
 			log.Printf("Error while reading DHCP lease path file %s: %s", dhcpLeasesPath, err.Error())
@@ -384,10 +384,15 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 		}
 		defer fh.Close()
 
-		dhcpBytes, err := ioutil.ReadAll(fh)
+		// and then read its contents
+		leaseEntries, err := ReadDhcpdLeaseEntries(fh)
 		if err != nil {
 			return "", err
 		}
+
+		// Parse our MAC address again. There's no need to check for an
+		// error because we've already parsed this successfully.
+		hwaddr, _ := net.ParseMAC(MACAddress)
 
 		// start grepping through the file looking for fields that we care about
 		var lastIp string
@@ -396,34 +401,19 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 		var curIp string
 		var curLeaseEnd time.Time
 
-		ipLineRe := regexp.MustCompile(`^lease (.+?) {$`)
-		endTimeLineRe := regexp.MustCompile(`^\s*ends \d (.+?);$`)
-		macLineRe := regexp.MustCompile(`^\s*hardware ethernet (.+?);$`)
+		for _, entry := range leaseEntries {
 
-		for _, line := range strings.Split(string(dhcpBytes), "\n") {
-			// Need to trim off CR character when running in windows
-			line = strings.TrimRight(line, "\r")
-
-			matches := ipLineRe.FindStringSubmatch(line)
-			if matches != nil {
-				lastIp = matches[1]
-				continue
-			}
-
-			matches = endTimeLineRe.FindStringSubmatch(line)
-			if matches != nil {
-				lastLeaseEnd, _ = time.Parse("2006/01/02 15:04:05", matches[1])
-				continue
-			}
+			lastIp = entry.address
+			lastLeaseEnd = entry.ends
 
 			// If the mac address matches and this lease ends farther in the
 			// future than the last match we might have, then choose it.
-			matches = macLineRe.FindStringSubmatch(line)
-			if matches != nil && strings.EqualFold(matches[1], MACAddress) && curLeaseEnd.Before(lastLeaseEnd) {
+			if bytes.Compare(hwaddr, entry.ether) == 0 && curLeaseEnd.Before(lastLeaseEnd) {
 				curIp = lastIp
 				curLeaseEnd = lastLeaseEnd
 			}
 		}
+
 		if curIp != "" {
 			return curIp, nil
 		}
