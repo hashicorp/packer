@@ -150,7 +150,7 @@ subnet 127.0.0.0 netmask 255.255.255.252 {
 	}
 
 	for index := range expected {
-		if string(expected[index]) != string(result[index]) {
+		if string(expected[index]) != result[index] {
 			t.Errorf("unexpected token at index %d: %v != %v", index, expected[index], result[index])
 		}
 	}
@@ -218,23 +218,6 @@ func TestParserDhcpParameters(t *testing.T) {
 	} else {
 		t.Errorf("expected %d operands, got %d", 1, len(result.operand))
 	}
-}
-
-func consumeTokensWithSignal(items []string) (chan string, sentinelSignaller) {
-	end := make(sentinelSignaller)
-	out := make(chan string)
-
-	inch := consumeTokens(items)
-
-	go func() {
-		for item := range inch {
-			out <- item
-		}
-		close(out)
-		close(end)
-	}()
-
-	return out, end
 }
 
 func consumeDhcpConfig(items []string) (tkGroup, error) {
@@ -403,7 +386,7 @@ func TestParserTokenizeNetworkMap(t *testing.T) {
 	}
 
 	for index := range expected {
-		if string(expected[index]) != string(result[index]) {
+		if expected[index] != string(result[index]) {
 			t.Errorf("unexpected token at index %d: %v != %v", index, expected[index], result[index])
 		}
 	}
