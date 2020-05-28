@@ -52,9 +52,7 @@ func main() {
 		}
 
 		deprecated := fixer.DeprecatedOptions()
-		for _, dep := range deprecated {
-			allDeprecatedOpts = append(allDeprecatedOpts, dep)
-		}
+		allDeprecatedOpts = append(allDeprecatedOpts, deprecated...)
 	}
 
 	deprecated_path := filepath.Join(packerDir, "helper", "config",
