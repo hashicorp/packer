@@ -2,7 +2,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -209,7 +208,6 @@ func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 				cfg.Sources = map[SourceRef]SourceBlock{}
 			}
 			cfg.Sources[ref] = source
-			log.Printf("adding %s source to Available sources", ref)
 
 		case buildLabel:
 			build, moreDiags := p.decodeBuildConfig(block)
