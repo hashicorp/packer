@@ -1,15 +1,19 @@
 package common
 
 import (
+	"bytes"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"math"
 	"net"
 	"os"
 	"reflect"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 /** low-level parsing */
@@ -2232,4 +2236,120 @@ func consumeOpenClosePair(openByte, closeByte byte, in chan byte) ([]byte, chan 
 	// Return what we consumed, and a channel that yields everything in between
 	// the openByte and closeByte pair.
 	return result, out
+}
+
+// Basic decoding of a dhcpd lease address
+func decodeDhcpdLeaseBytes(input string) ([]byte, error) {
+	processed := &bytes.Buffer{}
+
+	// Split the string into pieces as we'll need to validate it.
+	for _, item := range strings.Split(input, ":") {
+		if len(item) != 2 {
+			return []byte{}, fmt.Errorf("bytes are not well-formed (%v)", input)
+		}
+		processed.WriteString(item)
+	}
+
+	length := hex.DecodedLen(processed.Len())
+
+	// Decode the processed data into the result...
+	result := make([]byte, length)
+	if n, err := hex.Decode(result, processed.Bytes()); err != nil {
+		return []byte{}, err
+
+		// Check that our decode length corresponds to what was intended
+	} else if n != length {
+		return []byte{}, fmt.Errorf("expected to decode %d bytes, got %d instead", length, n)
+	}
+
+	// ...and then return it.
+	return result, nil
+}
+
+/*** Dhcp Leases */
+type dhcpLeaseEntry struct {
+	address      string
+	starts, ends time.Time
+	ether, uid   []byte
+	extra        []string
+}
+
+func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry) {
+
+	// Build the regexes we'll use to legitimately parse each item
+	ipLineRe := regexp.MustCompile(`^lease (.+?) {$`)
+	startTimeLineRe := regexp.MustCompile(`^\s*starts \d (.+?);$`)
+	endTimeLineRe := regexp.MustCompile(`^\s*ends \d (.+?);$`)
+	macLineRe := regexp.MustCompile(`^\s*hardware ethernet (.+?);$`)
+	uidLineRe := regexp.MustCompile(`^\s*uid (.+?);$`)
+
+	/// Read up to the lease item and validate that it actually matches
+	lease, ch := consumeOpenClosePair('{', '}', in)
+
+	matches := ipLineRe.FindStringSubmatch(string(lease))
+	if matches == nil {
+		return nil
+	}
+
+	// If we found a lease match and we're definitely beginning a lease
+	// entry, then create our storage.
+	if by, ok := <-ch; ok && by == '{' {
+		entry = &dhcpLeaseEntry{address: matches[1]}
+
+		// Otherwise we bail.
+	} else {
+		return nil
+	}
+
+	/// Now we can parse the inside of the block.
+	for insideBraces := true; insideBraces; {
+		item, ok := consumeUntilSentinel(';', in)
+		item_s := string(item)
+
+		if !ok {
+			insideBraces = false
+		}
+
+		// Parse out the start time
+		matches = startTimeLineRe.FindStringSubmatch(item_s)
+		if matches != nil {
+			entry.starts, _ = time.Parse("2006/01/02 15:04:05", matches[1])
+			continue
+		}
+
+		// Parse out the end time
+		matches = endTimeLineRe.FindStringSubmatch(item_s)
+		if matches != nil {
+			entry.ends, _ = time.Parse("2006/01/02 15:04:05", matches[1])
+			continue
+		}
+
+		// Parse out the hardware ethernet
+		matches = macLineRe.FindStringSubmatch(item_s)
+		if matches != nil {
+			entry.ether, _ = decodeDhcpdLeaseBytes(item_s)
+			continue
+		}
+
+		// Parse out the uid
+		matches = uidLineRe.FindStringSubmatch(item_s)
+		if matches != nil {
+			entry.uid, _ = decodeDhcpdLeaseBytes(item_s)
+			continue
+		}
+
+		// Just stash it for now because we have no idea what it is.
+		entry.extra = append(entry.extra, strings.TrimSpace(item_s))
+	}
+
+	return entry
+}
+
+func ReadDhcpdLeases(fd *os.File) ([]dhcpLeaseEntry, error) {
+	fch := consumeFile(fd)
+	uncommentedch := uncomment(fch)
+	wch := filterOutCharacters([]byte{'\n', '\r', '\v'}, uncommentedch)
+	close(wch)
+
+	return []dhcpLeaseEntry{}, fmt.Errorf("Not implemented yet!")
 }
