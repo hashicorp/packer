@@ -10,12 +10,8 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// This step adds a NAT port forwarding definition so that SSH or Winrm is available
+// This step adds a NAT port forwarding definition so that SSH or WinRM is available
 // on the guest machine.
-//
-// Uses:
-//
-// Produces:
 type stepPortForward struct {
 	l *net.Listener
 }
