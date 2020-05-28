@@ -22,6 +22,9 @@
 * builder/google: Implement iap proxy for googlecompute [GH-9105]
 * builder/googlecompute: Changed default disk size. [GH-9071]
 * builder/qemu: add support for using a network bridge [GH-9159]
+* builder/qemu: Added `skip_nat_mapping` option to skip the
+    communicator (SSH or WinRM) automatic port forward and use the guest port directly. [GH-9307]
+* builder/qemu: Replace deprecated `ssh_host_port_min` and `ssh_host_port_max` by `host_port_min` and `host_port_max`. [GH-9307]    
 * builder/virtualbox: Add `output_filename` config option to allow to set a
     custom filename instead of forcing to be the same as vm_name. [GH-9174]
 * builder/vsphere: floppy_label Parameter for vsphere-iso Builder [GH-9187]
