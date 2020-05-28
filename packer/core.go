@@ -216,6 +216,32 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]Build, hcl.Diagnostics) {
 			continue
 		}
 		builds = append(builds, b)
+
+		// Now that build plugin has been launched, call Prepare()
+		log.Printf("Preparing build: %s", b.Name())
+		b.SetDebug(opts.Debug)
+		b.SetForce(opts.Force)
+		b.SetOnError(opts.OnError)
+
+		warnings, err := b.Prepare()
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  fmt.Sprintf("Failed to prepare build: %q", n),
+				Detail:   err.Error(),
+			})
+			continue
+		}
+
+		if len(warnings) > 0 {
+			for _, warning := range warnings {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagWarning,
+					Summary:  fmt.Sprintf("Warning when preparing build: %q", n),
+					Detail:   warning,
+				})
+			}
+		}
 	}
 	return builds, diags
 }

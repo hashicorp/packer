@@ -188,31 +188,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	log.Printf("Force build: %v", cla.Force)
 	log.Printf("On error: %v", cla.OnError)
 
-	// Set the debug and force mode and prepare all the builds
-	// This is only affects json templates, because HCL2
-	// templates have already been prepared in GetBuilds() above.
-	for i := range builds {
-		b := builds[i]
-		log.Printf("Preparing build: %s", b.Name())
-		b.SetDebug(cla.Debug)
-		b.SetForce(cla.Force)
-		b.SetOnError(cla.OnError)
-
-		warnings, err := b.Prepare()
-		if err != nil {
-			c.Ui.Error(err.Error())
-			return 1
-		}
-		if len(warnings) > 0 {
-			ui := buildUis[b]
-			ui.Say(fmt.Sprintf("Warnings for build '%s':\n", b.Name()))
-			for _, warning := range warnings {
-				ui.Say(fmt.Sprintf("* %s", warning))
-			}
-			ui.Say("")
-		}
-	}
-
 	// Run all the builds in parallel and wait for them to complete
 	var wg sync.WaitGroup
 	var artifacts = struct {
