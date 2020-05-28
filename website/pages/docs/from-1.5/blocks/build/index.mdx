@@ -16,12 +16,21 @@ The `build` block defines what builders are started and what they will do.
 
 `@include 'from-1.5/builds/example-block.mdx'`
 
-The list of available builders can be found in the [builders](/docs/builders)
-section.
 
-It is also possible to create and use [custom
-builders](/docs/extending/custom-builders). There is also a list of [community
-builders](/community-tools#community-builders).
+Define [top-level `source` block](/docs/from-1.5/blocks/source) to configure
+your builders. The list of available builders can be found in the
+[builders](/docs/builders) section.
 
-Note that it is possible to set fields of a build block directly from the
-build block of a [`build` block](/docs/from-1.5/blocks/build).
+To use builders in a `build` block you can either: 
+
+* Set the `sources` array of string with references to defined sources.
+
+* Define [build-level `source` blocks](/docs/from-1.5/blocks/build/source) or
+`sources` to use builders. This also allow to set specific fields.
+
+## Related
+
+* A list of [community
+builders](/community-tools#community-builders) is available.
+
+* Create your own [custom builder](/docs/extending/custom-builders) !
