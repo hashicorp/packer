@@ -46,10 +46,19 @@ func (FixerVSphereNetworkDisk) Fix(input map[string]interface{}) (map[string]int
 			hasNetwork = true
 		}
 
+		// legacy syntax from when VSphere was 3rd party
 		networkCardRaw, ok := builder["networkCard"]
 		if ok {
-			nic["networkCard"] = networkCardRaw
+			nic["network_card"] = networkCardRaw
 			delete(builder, "networkCard")
+			hasNetwork = true
+		}
+
+		// underscored syntax used when Packer merged vSphere
+		networkCardRaw, ok = builder["network_card"]
+		if ok {
+			nic["network_card"] = networkCardRaw
+			delete(builder, "network_card")
 			hasNetwork = true
 		}
 
