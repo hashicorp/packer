@@ -32,7 +32,7 @@ type RemoteDriverMock struct {
 	ReloadVMErr error
 }
 
-func (d *RemoteDriverMock) UploadISO(path string, checksum string, checksumType string) (string, error) {
+func (d *RemoteDriverMock) UploadISO(path string, checksum string) (string, error) {
 	d.UploadISOCalled = true
 	d.UploadISOPath = path
 	return d.UploadISOResult, d.UploadISOErr

@@ -20,8 +20,6 @@ type FlatConfig struct {
 	HTTPPortMin               *int              `mapstructure:"http_port_min" cty:"http_port_min"`
 	HTTPPortMax               *int              `mapstructure:"http_port_max" cty:"http_port_max"`
 	ISOChecksum               *string           `mapstructure:"iso_checksum" required:"true" cty:"iso_checksum"`
-	ISOChecksumURL            *string           `mapstructure:"iso_checksum_url" cty:"iso_checksum_url"`
-	ISOChecksumType           *string           `mapstructure:"iso_checksum_type" cty:"iso_checksum_type"`
 	RawSingleISOUrl           *string           `mapstructure:"iso_url" required:"true" cty:"iso_url"`
 	ISOUrls                   []string          `mapstructure:"iso_urls" cty:"iso_urls"`
 	TargetPath                *string           `mapstructure:"iso_target_path" cty:"iso_target_path"`
@@ -78,7 +76,6 @@ type FlatConfig struct {
 	SourceBox                 *string           `mapstructure:"source_path" required:"true" cty:"source_path"`
 	GlobalID                  *string           `mapstructure:"global_id" required:"true" cty:"global_id"`
 	Checksum                  *string           `mapstructure:"checksum" required:"false" cty:"checksum"`
-	ChecksumType              *string           `mapstructure:"checksum_type" required:"false" cty:"checksum_type"`
 	BoxName                   *string           `mapstructure:"box_name" required:"false" cty:"box_name"`
 	InsertKey                 *bool             `mapstructure:"insert_key" required:"false" cty:"insert_key"`
 	Provider                  *string           `mapstructure:"provider" required:"false" cty:"provider"`
@@ -122,8 +119,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"http_port_min":                &hcldec.AttrSpec{Name: "http_port_min", Type: cty.Number, Required: false},
 		"http_port_max":                &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
 		"iso_checksum":                 &hcldec.AttrSpec{Name: "iso_checksum", Type: cty.String, Required: false},
-		"iso_checksum_url":             &hcldec.AttrSpec{Name: "iso_checksum_url", Type: cty.String, Required: false},
-		"iso_checksum_type":            &hcldec.AttrSpec{Name: "iso_checksum_type", Type: cty.String, Required: false},
 		"iso_url":                      &hcldec.AttrSpec{Name: "iso_url", Type: cty.String, Required: false},
 		"iso_urls":                     &hcldec.AttrSpec{Name: "iso_urls", Type: cty.List(cty.String), Required: false},
 		"iso_target_path":              &hcldec.AttrSpec{Name: "iso_target_path", Type: cty.String, Required: false},
@@ -180,7 +175,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"source_path":                  &hcldec.AttrSpec{Name: "source_path", Type: cty.String, Required: false},
 		"global_id":                    &hcldec.AttrSpec{Name: "global_id", Type: cty.String, Required: false},
 		"checksum":                     &hcldec.AttrSpec{Name: "checksum", Type: cty.String, Required: false},
-		"checksum_type":                &hcldec.AttrSpec{Name: "checksum_type", Type: cty.String, Required: false},
 		"box_name":                     &hcldec.AttrSpec{Name: "box_name", Type: cty.String, Required: false},
 		"insert_key":                   &hcldec.AttrSpec{Name: "insert_key", Type: cty.Bool, Required: false},
 		"provider":                     &hcldec.AttrSpec{Name: "provider", Type: cty.String, Required: false},

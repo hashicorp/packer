@@ -44,13 +44,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if b.config.ISOUrls != nil {
 		steps = append(steps,
 			&packerCommon.StepDownload{
-				Checksum:     b.config.ISOChecksum,
-				ChecksumType: b.config.ISOChecksumType,
-				Description:  "ISO",
-				Extension:    b.config.TargetExtension,
-				ResultKey:    "iso_path",
-				TargetPath:   b.config.TargetPath,
-				Url:          b.config.ISOUrls,
+				Checksum:    b.config.ISOChecksum,
+				Description: "ISO",
+				Extension:   b.config.TargetExtension,
+				ResultKey:   "iso_path",
+				TargetPath:  b.config.TargetPath,
+				Url:         b.config.ISOUrls,
 			},
 			&StepRemoteUpload{
 				Datastore:                  b.config.Datastore,

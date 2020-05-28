@@ -91,7 +91,6 @@ type FlatConfig struct {
 	VBoxVersionFile           *string           `mapstructure:"virtualbox_version_file" required:"false" cty:"virtualbox_version_file"`
 	GuestAdditionsMode        *string           `mapstructure:"guest_additions_mode" required:"false" cty:"guest_additions_mode"`
 	Checksum                  *string           `mapstructure:"checksum" required:"true" cty:"checksum"`
-	ChecksumType              *string           `mapstructure:"checksum_type" required:"false" cty:"checksum_type"`
 	GuestAdditionsPath        *string           `mapstructure:"guest_additions_path" required:"false" cty:"guest_additions_path"`
 	GuestAdditionsInterface   *string           `mapstructure:"guest_additions_interface" required:"false" cty:"guest_additions_interface"`
 	GuestAdditionsSHA256      *string           `mapstructure:"guest_additions_sha256" required:"false" cty:"guest_additions_sha256"`
@@ -199,7 +198,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"virtualbox_version_file":      &hcldec.AttrSpec{Name: "virtualbox_version_file", Type: cty.String, Required: false},
 		"guest_additions_mode":         &hcldec.AttrSpec{Name: "guest_additions_mode", Type: cty.String, Required: false},
 		"checksum":                     &hcldec.AttrSpec{Name: "checksum", Type: cty.String, Required: false},
-		"checksum_type":                &hcldec.AttrSpec{Name: "checksum_type", Type: cty.String, Required: false},
 		"guest_additions_path":         &hcldec.AttrSpec{Name: "guest_additions_path", Type: cty.String, Required: false},
 		"guest_additions_interface":    &hcldec.AttrSpec{Name: "guest_additions_interface", Type: cty.String, Required: false},
 		"guest_additions_sha256":       &hcldec.AttrSpec{Name: "guest_additions_sha256", Type: cty.String, Required: false},

@@ -4,17 +4,14 @@ package common
 
 import (
 	"context"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
+	getter "github.com/hashicorp/go-getter/v2"
 	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
-
-	"github.com/hashicorp/go-getter/v2"
-
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -43,50 +40,47 @@ import (
 //
 // ```json
 // {
-//   "iso_checksum_type": "file",
-//   "iso_checksum": "ubuntu.org/..../ubuntu-14.04.1-server-amd64.iso.sum",
+//   "iso_checksum": "file:ubuntu.org/..../ubuntu-14.04.1-server-amd64.iso.sum",
 //   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
 // }
 // ```
 //
 // ```json
 // {
-//   "iso_checksum_url": "./shasums.txt",
+//   "iso_checksum": "file://./shasums.txt",
 //   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
 // }
 // ```
 //
 // ```json
 // {
-//   "iso_checksum_type": "sha256",
-//   "iso_checksum_url": "./shasums.txt",
+//   "iso_checksum": "file:./shasums.txt",
 //   "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
 // }
 // ```
 //
 type ISOConfig struct {
-	// The checksum for the ISO file or virtual hard drive file. The algorithm
-	// to use when computing the checksum can be optionally specified with
-	// `iso_checksum_type`. When `iso_checksum_type` is not set packer will
-	// guess the checksumming type based on `iso_checksum` length.
-	// `iso_checksum` can be also be a file or an URL, in which case
-	// `iso_checksum_type` must be set to `file`; the go-getter will download
-	// it and use the first hash found.
+	// The checksum for the ISO file or virtual hard drive file. The type of
+	// the checksum is specified within the checksum field as a prefix, ex:
+	// "md5:{$checksum}". The type of the checksum can also be omitted and
+	// Packer will try to infer it based on string length. Valid values are
+	// "none", "{$checksum}", "md5:{$checksum}", "sha1:{$checksum}",
+	// "sha256:{$checksum}", "sha512:{$checksum}" or "file:{$path}". Here is a
+	// list of valid checksum values:
+	//  * md5:090992ba9fd140077b0661cb75f7ce13
+	//  * 090992ba9fd140077b0661cb75f7ce13
+	//  * sha1:ebfb681885ddf1234c18094a45bbeafd91467911
+	//  * ebfb681885ddf1234c18094a45bbeafd91467911
+	//  * sha256:ed363350696a726b7932db864dda019bd2017365c9e299627830f06954643f93
+	//  * ed363350696a726b7932db864dda019bd2017365c9e299627830f06954643f93
+	//  * file:http://releases.ubuntu.com/20.04/MD5SUMS
+	//  * file:file://./local/path/file.sum
+	//  * file:./local/path/file.sum
+	//  * none
+	// Although the checksum will not be verified when it is set to "none",
+	// this is not recommended since these files can be very large and
+	// corruption does happen from time to time.
 	ISOChecksum string `mapstructure:"iso_checksum" required:"true"`
-	// An URL to a checksum file containing a checksum for the ISO file. At
-	// least one of `iso_checksum` and `iso_checksum_url` must be defined.
-	// `iso_checksum_url` will be ignored if `iso_checksum` is non empty.
-	ISOChecksumURL string `mapstructure:"iso_checksum_url"`
-	// The algorithm to be used when computing the checksum of the file
-	// specified in `iso_checksum`. Currently, valid values are "", "none",
-	// "md5", "sha1", "sha256", "sha512" or "file". Since the validity of ISO
-	// and virtual disk files are typically crucial to a successful build,
-	// Packer performs a check of any supplied media by default. While setting
-	// "none" will cause Packer to skip this check, corruption of large files
-	// such as ISOs and virtual hard drives can occur from time to time. As
-	// such, skipping this check is not recommended. `iso_checksum_type` must
-	// be set to `file` when `iso_checksum` is an url.
-	ISOChecksumType string `mapstructure:"iso_checksum_type"`
 	// A URL to the ISO containing the installation image or virtual hard drive
 	// (VHD or VHDX) file to clone.
 	RawSingleISOUrl string `mapstructure:"iso_url" required:"true"`
@@ -116,73 +110,47 @@ func (c *ISOConfig) Prepare(*interpolate.Context) (warnings []string, errs []err
 		c.ISOUrls = append([]string{c.RawSingleISOUrl}, c.ISOUrls...)
 		c.RawSingleISOUrl = ""
 	}
+
 	if len(c.ISOUrls) == 0 {
 		errs = append(
 			errs, errors.New("One of iso_url or iso_urls must be specified"))
 		return
 	}
-
-	c.ISOChecksumType = strings.ToLower(c.ISOChecksumType)
-
 	if c.TargetExtension == "" {
 		c.TargetExtension = "iso"
 	}
 	c.TargetExtension = strings.ToLower(c.TargetExtension)
 
 	// Warnings
-	if c.ISOChecksumType == "none" {
+	if c.ISOChecksum == "none" {
 		warnings = append(warnings,
-			"A checksum type of 'none' was specified. Since ISO files are so big,\n"+
+			"A checksum of 'none' was specified. Since ISO files are so big,\n"+
 				"a checksum is highly recommended.")
 		return warnings, errs
-	}
-
-	if c.ISOChecksumURL != "" {
-		if c.ISOChecksum != "" {
-			warnings = append(warnings, "You have provided both an "+
-				"iso_checksum and an iso_checksum_url. Discarding the "+
-				"iso_checksum_url and using the checksum.")
-		} else {
-			if strings.HasSuffix(strings.ToLower(c.ISOChecksumURL), ".iso") {
-				errs = append(errs, fmt.Errorf("Error parsing checksum:"+
-					" .iso is not a valid checksum extension"))
-			}
-			// go-getter auto-parses checksum files
-			c.ISOChecksumType = "file"
-			c.ISOChecksum = c.ISOChecksumURL
-		}
-	}
-
-	if c.ISOChecksum == "" {
+	} else if c.ISOChecksum == "" {
 		errs = append(errs, fmt.Errorf("A checksum must be specified"))
-	}
-	if c.ISOChecksumType == "file" {
-		if c.ISOChecksumURL != "" {
-			c.ISOChecksum = c.ISOChecksumURL
-		}
-
+	} else {
+		// ESX5Driver.VerifyChecksum is ran remotely but should not download a
+		// checksum file, therefore in case it is a file, we need to download
+		// it now and compute the checksum now, we transform it back to a
+		// checksum string so that it can be simply read in the VerifyChecksum.
+		//
+		// Doing this also has the added benefit of failing early if a checksum
+		// is incorrect or if getting it should fail.
 		u, err := urlhelper.Parse(c.ISOUrls[0])
 		if err != nil {
 			return warnings, append(errs, fmt.Errorf("url parse: %s", err))
 		}
 
-		if cs := u.Query().Get("checksum"); cs != "" {
-			c.ISOChecksum = cs
-		}
-		if c.ISOChecksumType != "" && c.ISOChecksumType != "none" {
-			// add checksum to url query params as go getter will checksum for us
-			q := u.Query()
-			q.Set("checksum", c.ISOChecksumType+":"+c.ISOChecksum)
-			u.RawQuery = q.Encode()
-		} else if c.ISOChecksum != "" {
-			q := u.Query()
+		q := u.Query()
+		if c.ISOChecksum != "" {
 			q.Set("checksum", c.ISOChecksum)
-			u.RawQuery = q.Encode()
 		}
+		u.RawQuery = q.Encode()
 
 		wd, err := os.Getwd()
 		if err != nil {
-			log.Printf("get working directory: %v", err)
+			log.Printf("Getwd: %v", err)
 			// here we ignore the error in case the
 			// working directory is not needed.
 		}
@@ -193,11 +161,15 @@ func (c *ISOConfig) Prepare(*interpolate.Context) (warnings []string, errs []err
 		}
 		cksum, err := defaultGetterClient.GetChecksum(context.TODO(), req)
 		if err != nil {
-			errs = append(errs, fmt.Errorf("Couldn't extract checksum from checksum file: %v", err))
+			errs = append(errs, fmt.Errorf("%v in %q", err, req.URL().Query().Get("checksum")))
 		} else {
-			c.ISOChecksumType = cksum.Type
-			c.ISOChecksum = hex.EncodeToString(cksum.Value)
+			c.ISOChecksum = cksum.String()
 		}
+	}
+
+	if strings.HasSuffix(strings.ToLower(c.ISOChecksum), ".iso") {
+		errs = append(errs, fmt.Errorf("Error parsing checksum:"+
+			" .iso is not a valid checksum ending"))
 	}
 
 	return warnings, errs

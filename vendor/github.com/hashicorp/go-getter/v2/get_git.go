@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	urlhelper "github.com/hashicorp/go-getter/helper/url"
+	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
 	safetemp "github.com/hashicorp/go-safetemp"
 	version "github.com/hashicorp/go-version"
 )
@@ -23,7 +23,6 @@ import (
 // GitGetter is a Getter implementation that will download a module from
 // a git repository.
 type GitGetter struct {
-	getter
 }
 
 var defaultBranchRegexp = regexp.MustCompile(`\s->\sorigin/(.*)`)

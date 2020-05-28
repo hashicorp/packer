@@ -6,16 +6,16 @@ type RemoteDriver interface {
 	// UploadISO uploads a local ISO to the remote side and returns the
 	// new path that should be used in the VMX along with an error if it
 	// exists.
-	UploadISO(string, string, string) (string, error)
+	UploadISO(path string, checksum string) (string, error)
 
 	// RemoveCache deletes localPath from the remote cache.
 	RemoveCache(localPath string) error
 
 	// Adds a VM to inventory specified by the path to the VMX given.
-	Register(string) error
+	Register(path string) error
 
 	// Removes a VM from inventory specified by the path to the VMX given.
-	Unregister(string) error
+	Unregister(path string) error
 
 	// Destroys a VM
 	Destroy() error

@@ -12,11 +12,10 @@ import (
 // stepRemoteUpload uploads some thing from the state bag to a remote driver
 // (if it can) and stores that new remote path into the state bag.
 type StepRemoteUpload struct {
-	Key          string
-	Message      string
-	DoCleanup    bool
-	Checksum     string
-	ChecksumType string
+	Key       string
+	Message   string
+	DoCleanup bool
+	Checksum  string
 }
 
 func (s *StepRemoteUpload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -36,7 +35,7 @@ func (s *StepRemoteUpload) Run(ctx context.Context, state multistep.StateBag) mu
 	if esx5, ok := remote.(*ESX5Driver); ok {
 		remotePath := esx5.CachePath(path)
 
-		if esx5.VerifyChecksum(s.ChecksumType, s.Checksum, remotePath) {
+		if esx5.VerifyChecksum(s.Checksum, remotePath) {
 			ui.Say("Remote cache was verified skipping remote upload...")
 			state.Put(s.Key, remotePath)
 			return multistep.ActionContinue
@@ -46,7 +45,7 @@ func (s *StepRemoteUpload) Run(ctx context.Context, state multistep.StateBag) mu
 
 	ui.Say(s.Message)
 	log.Printf("Remote uploading: %s", path)
-	newPath, err := remote.UploadISO(path, s.Checksum, s.ChecksumType)
+	newPath, err := remote.UploadISO(path, s.Checksum)
 	if err != nil {
 		err := fmt.Errorf("Error uploading file: %s", err)
 		state.Put("error", err)
