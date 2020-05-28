@@ -2207,8 +2207,10 @@ func consumeOpenClosePair(openByte, closeByte byte, in chan byte) ([]byte, chan 
 	for by := range in {
 		if by == openByte {
 			break
+
+		} else {
+			result = append(result, by)
 		}
-		result = append(result, by)
 	}
 
 	// Now we can feed input to our goro and a consumer can see what's contained
@@ -2228,6 +2230,7 @@ func consumeOpenClosePair(openByte, closeByte byte, in chan byte) ([]byte, chan 
 			if !ok {
 				by = closeByte
 			}
+
 			out <- by
 		}
 		close(out)
@@ -2268,20 +2271,21 @@ func decodeDhcpdLeaseBytes(input string) ([]byte, error) {
 
 /*** Dhcp Leases */
 type dhcpLeaseEntry struct {
-	address      string
-	starts, ends time.Time
-	ether, uid   []byte
-	extra        []string
+	address                      string
+	starts, ends                 time.Time
+	starts_weekday, ends_weekday int
+	ether, uid                   []byte
+	extra                        []string
 }
 
 func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry) {
 
 	// Build the regexes we'll use to legitimately parse each item
-	ipLineRe := regexp.MustCompile(`^lease (.+?) {$`)
-	startTimeLineRe := regexp.MustCompile(`^\s*starts \d (.+?);$`)
-	endTimeLineRe := regexp.MustCompile(`^\s*ends \d (.+?);$`)
-	macLineRe := regexp.MustCompile(`^\s*hardware ethernet (.+?);$`)
-	uidLineRe := regexp.MustCompile(`^\s*uid (.+?);$`)
+	ipLineRe := regexp.MustCompile(`lease\s+(.+?)\s*$`)
+	startTimeLineRe := regexp.MustCompile(`starts\s+(\d+)\s+(.+?)\s*$`)
+	endTimeLineRe := regexp.MustCompile(`ends\s+(\d+)\s+(.+?)\s*$`)
+	macLineRe := regexp.MustCompile(`hardware\s+ethernet\s+(.+?)\s*$`)
+	uidLineRe := regexp.MustCompile(`uid\s+(.+?)\s*$`)
 
 	/// Read up to the lease item and validate that it actually matches
 	lease, ch := consumeOpenClosePair('{', '}', in)
@@ -2291,19 +2295,19 @@ func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry) {
 		return nil
 	}
 
-	// If we found a lease match and we're definitely beginning a lease
-	// entry, then create our storage.
 	if by, ok := <-ch; ok && by == '{' {
+		// If we found a lease match and we're definitely beginning a lease
+		// entry, then create our storage.
 		entry = &dhcpLeaseEntry{address: matches[1]}
 
-		// Otherwise we bail.
 	} else {
+		// Otherwise we bail.
 		return nil
 	}
 
 	/// Now we can parse the inside of the block.
 	for insideBraces := true; insideBraces; {
-		item, ok := consumeUntilSentinel(';', in)
+		item, ok := consumeUntilSentinel(';', ch)
 		item_s := string(item)
 
 		if !ok {
@@ -2313,28 +2317,36 @@ func readDhcpdLeaseEntry(in chan byte) (entry *dhcpLeaseEntry) {
 		// Parse out the start time
 		matches = startTimeLineRe.FindStringSubmatch(item_s)
 		if matches != nil {
-			entry.starts, _ = time.Parse("2006/01/02 15:04:05", matches[1])
+			entry.starts, _ = time.Parse("2006/01/02 15:04:05", matches[2])
+			entry.starts_weekday, _ = strconv.Atoi(matches[1])
 			continue
 		}
 
 		// Parse out the end time
 		matches = endTimeLineRe.FindStringSubmatch(item_s)
 		if matches != nil {
-			entry.ends, _ = time.Parse("2006/01/02 15:04:05", matches[1])
+			entry.ends, _ = time.Parse("2006/01/02 15:04:05", matches[2])
+			entry.ends_weekday, _ = strconv.Atoi(matches[1])
 			continue
 		}
 
 		// Parse out the hardware ethernet
 		matches = macLineRe.FindStringSubmatch(item_s)
 		if matches != nil {
-			entry.ether, _ = decodeDhcpdLeaseBytes(item_s)
+			entry.ether, _ = decodeDhcpdLeaseBytes(matches[1])
 			continue
 		}
 
 		// Parse out the uid
 		matches = uidLineRe.FindStringSubmatch(item_s)
 		if matches != nil {
-			entry.uid, _ = decodeDhcpdLeaseBytes(item_s)
+			entry.uid, _ = decodeDhcpdLeaseBytes(matches[1])
+			continue
+		}
+
+		// Check to see if we're terminating the brace, so we can skip
+		// to the next iteration.
+		if strings.HasSuffix(item_s, "}") {
 			continue
 		}
 

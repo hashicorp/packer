@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"bytes"
+	"encoding/hex"
 	"os"
 	"path/filepath"
 )
@@ -680,5 +681,62 @@ func TestParserDhcpdLeaseBytesDecoder(t *testing.T) {
 	result, err = decodeDhcpdLeaseBytes(failtest_4)
 	if err == nil {
 		t.Errorf("expected decoding error: %s", err)
+	}
+}
+
+func consumeLeaseString(s string) chan byte {
+	sch := consumeString(s)
+	uncommentedch := uncomment(sch)
+	return filterOutCharacters([]byte{'\n', '\r', '\v'}, uncommentedch)
+}
+
+func TestParserReadDhcpdLeaseEntry(t *testing.T) {
+	test_1 := "lease 127.0.0.1 {\nhardware ethernet 00:11:22:33  ;\nuid 00:11  ;\n }"
+	expected_1 := map[string]string{
+		"address": "127.0.0.1",
+		"ether":   "00112233",
+		"uid":     "0011",
+	}
+
+	result := readDhcpdLeaseEntry(consumeLeaseString(test_1))
+	if result.address != expected_1["address"] {
+		t.Errorf("expected address %v, got %v", expected_1["address"], result.address)
+	}
+	if hex.EncodeToString(result.ether) != expected_1["ether"] {
+		t.Errorf("expected ether %v, got %v", expected_1["ether"], hex.EncodeToString(result.ether))
+	}
+	if hex.EncodeToString(result.uid) != expected_1["uid"] {
+		t.Errorf("expected uid %v, got %v", expected_1["uid"], hex.EncodeToString(result.uid))
+	}
+
+	test_2 := "  \n\t lease 192.168.21.254{ hardware\n   ethernet 44:55:66:77:88:99;uid 00:1\n1:22:3\r3:44;\n starts 57005 2006/01/02 15:04:05;ends 57005 2006/01/03 15:04:05;\tunknown item1; unknown item2;  }     "
+	expected_2 := map[string]string{
+		"address": "192.168.21.254",
+		"ether":   "445566778899",
+		"uid":     "0011223344",
+		"starts":  "2006-01-02 15:04:05 +0000 UTC",
+		"ends":    "2006-01-03 15:04:05 +0000 UTC",
+	}
+	result = readDhcpdLeaseEntry(consumeLeaseString(test_2))
+	if result.address != expected_2["address"] {
+		t.Errorf("expected address %v, got %v", expected_2["address"], result.address)
+	}
+	if hex.EncodeToString(result.ether) != expected_2["ether"] {
+		t.Errorf("expected ether %v, got %v", expected_2["ether"], hex.EncodeToString(result.ether))
+	}
+	if hex.EncodeToString(result.uid) != expected_2["uid"] {
+		t.Errorf("expected uid %v, got %v", expected_2["uid"], hex.EncodeToString(result.uid))
+	}
+	if result.starts.String() != expected_2["starts"] {
+		t.Errorf("expected starts %v, got %v", expected_2["starts"], result.starts)
+	}
+	if result.ends.String() != expected_2["ends"] {
+		t.Errorf("expected ends %v, got %v", expected_2["ends"], result.ends)
+	}
+	if result.starts_weekday != 57005 {
+		t.Errorf("expected starts weekday %v, got %v", 57005, result.starts_weekday)
+	}
+	if result.ends_weekday != 57005 {
+		t.Errorf("expected ends weekday %v, got %v", 57005, result.ends_weekday)
 	}
 }
