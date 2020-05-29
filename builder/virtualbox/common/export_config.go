@@ -39,7 +39,7 @@ type ExportConfig struct {
 	// packer call like this (shell `>` continuation character snipped for easier
 	// copy & paste):
 	//
-	// ``` shell
+	// ```shell
 	// vm_description='some
 	// multiline
 	// description'
