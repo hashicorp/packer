@@ -71,6 +71,7 @@ type Config struct {
 	//TODO: change default to false in v1.6.0.
 	UseProxy     config.Trilean `mapstructure:"use_proxy"`
 	userWasEmpty bool
+	UsePassword  bool `mapstructure:"use_password"`
 }
 
 type Provisioner struct {
@@ -557,21 +558,10 @@ func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile s
 	}
 
 	args = append(args, "-e", fmt.Sprintf("packer_builder_type=%s", p.config.PackerBuilderType))
-	if len(privKeyFile) > 0 {
-		// "-e ansible_ssh_private_key_file" is preferable to "--private-key"
-		// because it is a higher priority variable and therefore won't get
-		// overridden by dynamic variables. See #5852 for more details.
-		args = append(args, "-e", fmt.Sprintf("ansible_ssh_private_key_file=%s", privKeyFile))
-	}
 
 	// expose packer_http_addr extra variable
 	if httpAddr != "" {
 		args = append(args, "-e", fmt.Sprintf("packer_http_addr=%s", httpAddr))
-	}
-
-	// Add password to ansible call.
-	if p.config.UseProxy.False() && p.generatedData["ConnType"] == "winrm" {
-		args = append(args, "-e", fmt.Sprintf("ansible_password=%s", p.generatedData["Password"]))
 	}
 
 	if p.generatedData["ConnType"] == "ssh" {
@@ -580,6 +570,24 @@ func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile s
 	}
 
 	args = append(args, p.config.ExtraArguments...)
+
+	passwordFound := checkPassword(args)
+
+	// Add password to ansible call.
+	if !passwordFound && p.config.UseProxy.False() && p.generatedData["ConnType"] == "winrm" {
+		args = append(args, "-e", fmt.Sprintf("ansible_password=%s", p.generatedData["Password"]))
+	}
+
+	if !passwordFound && len(privKeyFile) > 0 {
+		// "-e ansible_ssh_private_key_file" is preferable to "--private-key"
+		// because it is a higher priority variable and therefore won't get
+		// overridden by dynamic variables. See #5852 for more details.
+		args = append(args, "-e", fmt.Sprintf("ansible_ssh_private_key_file=%s", privKeyFile))
+	}
+
+	if p.generatedData["ConnType"] != "ssh" && len(privKeyFile) > 0 {
+		args = append(args, "-e", fmt.Sprintf("ansible_ssh_private_key_file=%s", privKeyFile))
+	}
 
 	if len(p.config.AnsibleEnvVars) > 0 {
 		envVars = append(envVars, p.config.AnsibleEnvVars...)
@@ -601,7 +609,6 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 			return fmt.Errorf("Error executing Ansible Galaxy: %s", err)
 		}
 	}
-
 	args, envvars := p.createCmdArgs(httpAddr, inventory, playbook, privKeyFile)
 
 	cmd := exec.Command(p.config.Command, args...)
@@ -651,6 +658,12 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	if ok && winRMPass != "" {
 		sanitized = strings.Replace(sanitized,
 			winRMPass.(string), "*****", -1)
+	}
+	if checkPassword(args) {
+		usePass, ok := p.generatedData["Password"]
+		if ok && usePass != "" {
+			sanitized = strings.Replace(sanitized, usePass.(string), "*****", -1)
+		}
 	}
 	ui.Say(fmt.Sprintf("Executing Ansible: %s", sanitized))
 
@@ -778,4 +791,16 @@ func newSigner(privKeyFile string) (*signer, error) {
 	}
 
 	return signer, nil
+}
+
+//checkPassword Evaluates if ansible_password is in args
+func checkPassword(args []string) bool {
+	for _, arg := range args {
+		for _, ansibleArg := range strings.Split(arg, "=") {
+			if ansibleArg == "ansible_password" {
+				return true
+			}
+		}
+	}
+	return false
 }

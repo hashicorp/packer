@@ -215,7 +215,6 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]Build, hcl.Diagnostics) {
 			})
 			continue
 		}
-		builds = append(builds, b)
 
 		// Now that build plugin has been launched, call Prepare()
 		log.Printf("Preparing build: %s", b.Name())
@@ -232,6 +231,9 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]Build, hcl.Diagnostics) {
 			})
 			continue
 		}
+
+		// Only append builds to list if the Prepare() is successful.
+		builds = append(builds, b)
 
 		if len(warnings) > 0 {
 			for _, warning := range warnings {

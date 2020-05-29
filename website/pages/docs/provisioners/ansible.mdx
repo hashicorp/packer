@@ -191,6 +191,10 @@ Optional Parameters:
   user as the communicator, you will need to manually set it again in this
   field.
 
+- `use_password` (boolean) - When `true`, will use ansible_password instead of
+  ansible_ssh_private_key_file. Allows user to use password for Ansible connection.
+  Defaults to `false`.
+
 - `use_proxy` (boolean) - When `true`, set up a localhost proxy adapter
   so that Ansible has an IP address to connect to, even if your guest does not
   have an IP address. For example, the adapter is necessary for Docker builds
