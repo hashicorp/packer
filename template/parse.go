@@ -377,8 +377,6 @@ func Parse(r io.Reader) (*Template, error) {
 				rawTpl.Comments = append(rawTpl.Comments, comment)
 				continue
 			}
-			// Check for whether any of these keys are handled in a packer fix
-			// call.
 
 			err = multierror.Append(err, fmt.Errorf(
 				"Unknown root level key in template: '%s'", unused))
