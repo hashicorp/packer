@@ -8,6 +8,10 @@ import (
 // "iso_checksum_type" to put everything in the checksum field.
 type FixerISOChecksumTypeAndURL struct{}
 
+func (FixerISOChecksumTypeAndURL) DeprecatedOptions() []string {
+	return []string{"iso_checksum_url", "iso_checksum_type"}
+}
+
 func (FixerISOChecksumTypeAndURL) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// Our template type we'll use for this fixer only
 	type template struct {

@@ -7,6 +7,10 @@ import (
 // FixerSSHTimout replaces ssh_wait_timeout with ssh_timeout
 type FixerSSHTimout struct{}
 
+func (FixerSSHTimout) DeprecatedOptions() []string {
+	return []string{"ssh_wait_timeout"}
+}
+
 func (FixerSSHTimout) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	type template struct {
 		Builders []interface{}

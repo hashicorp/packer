@@ -10,6 +10,10 @@ import (
 // calls with "{{timestamp}"
 type FixerCreateTime struct{}
 
+func (FixerCreateTime) DeprecatedOptions() []string {
+	return []string{}
+}
+
 func (FixerCreateTime) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// Our template type we'll use for this fixer only
 	type template struct {

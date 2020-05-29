@@ -8,6 +8,10 @@ import (
 // to "guest_additions_mode".
 type FixerVirtualBoxGAAttach struct{}
 
+func (FixerVirtualBoxGAAttach) DeprecatedOptions() []string {
+	return []string{"guest_additions_attach"}
+}
+
 func (FixerVirtualBoxGAAttach) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// The type we'll decode into; we only care about builders
 	type template struct {

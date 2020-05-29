@@ -7,6 +7,10 @@ import "github.com/mitchellh/mapstructure"
 // as part of Packer 0.5.0.
 type FixerVagrantPPOverride struct{}
 
+func (FixerVagrantPPOverride) DeprecatedOptions() []string {
+	return []string{}
+}
+
 func (FixerVagrantPPOverride) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	if input["post-processors"] == nil {
 		return input, nil

@@ -143,8 +143,29 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		sort.Strings(md.Unused)
 		for _, unused := range md.Unused {
 			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
-				err = multierror.Append(err, fmt.Errorf(
-					"unknown configuration key: %q", unused))
+				// Check for whether the key is handled in a packer fix
+				// call.
+				fixable := false
+				for _, deprecatedOption := range DeprecatedOptions {
+					if unused == deprecatedOption {
+						fixable = true
+						break
+					}
+				}
+
+				unusedErr := fmt.Errorf("unknown configuration key: '%q'",
+					unused)
+
+				if fixable {
+					unusedErr = fmt.Errorf("Deprecated configuration key: '%s'."+
+						" Please call `packer fix` against your template to "+
+						"update your template to be compatable with the current "+
+						"version of Packer. Visit "+
+						"https://www.packer.io/docs/commands/fix/ for more detail.",
+						unused)
+				}
+
+				err = multierror.Append(err, unusedErr)
 			}
 		}
 		if err != nil {
