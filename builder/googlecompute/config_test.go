@@ -518,6 +518,9 @@ func testConfig(t *testing.T) (config map[string]interface{}, tempAccountFile st
 		"image_licenses": []string{
 			"test-license",
 		},
+		"image_storage_locations": []string{
+			"us-east1",
+		},
 		"metadata_files": map[string]string{},
 		"zone":           "us-east1-a",
 	}
