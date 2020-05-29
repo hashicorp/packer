@@ -359,6 +359,19 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				PostProcessors: pps,
 				Prepared:       true,
 			}
+			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
+			// we did all the prep here.
+			_, err := pcb.Prepare()
+			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  fmt.Sprintf("Preparing packer core build %s failed", src.Ref().String()),
+					Detail:   err.Error(),
+					Subject:  build.HCL2Ref.DefRange.Ptr(),
+				})
+				continue
+			}
+
 			res = append(res, pcb)
 		}
 	}

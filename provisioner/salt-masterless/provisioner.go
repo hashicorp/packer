@@ -67,7 +67,7 @@ type Config struct {
 	SaltBinDir string `mapstructure:"salt_bin_dir"`
 
 	// Command line args passed onto salt-call
-	CmdArgs string ""
+	CmdArgs string `mapstructure-to-hcl2:",skip"`
 
 	// The Guest OS Type (unix or windows)
 	GuestOSType string `mapstructure:"guest_os_type"`

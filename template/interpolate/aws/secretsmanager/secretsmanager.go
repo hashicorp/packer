@@ -83,7 +83,11 @@ func getSecretValue(s *SecretString, spec *SecretSpec) (string, error) {
 		return "", err
 	}
 
-	// If key is not set then return first value stored in secret
+	// If key is not set and secret has multiple keys, return error
+	if spec.Key == "" && len(secretValue) > 1 {
+		return "", errors.New("Secret has multiple values and no key was set")
+	}
+
 	if spec.Key == "" {
 		for _, v := range secretValue {
 			return v, nil

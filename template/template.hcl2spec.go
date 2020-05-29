@@ -9,14 +9,14 @@ import (
 // FlatProvisioner is an auto-generated flat version of Provisioner.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatProvisioner struct {
-	Only        []string               `json:"only,omitempty" cty:"only"`
-	Except      []string               `json:"except,omitempty" cty:"except"`
-	Type        *string                `json:"type" cty:"type"`
-	Config      map[string]interface{} `json:"config,omitempty" cty:"config"`
-	Override    map[string]interface{} `json:"override,omitempty" cty:"override"`
-	PauseBefore *string                `mapstructure:"pause_before" json:"pause_before,omitempty" cty:"pause_before"`
-	MaxRetries  *int                   `mapstructure:"max_retries" json:"max_retries,omitempty" cty:"max_retries"`
-	Timeout     *string                `mapstructure:"timeout" json:"timeout,omitempty" cty:"timeout"`
+	Only        []string               `json:"only,omitempty" cty:"only" hcl:"only"`
+	Except      []string               `json:"except,omitempty" cty:"except" hcl:"except"`
+	Type        *string                `json:"type" cty:"type" hcl:"type"`
+	Config      map[string]interface{} `json:"config,omitempty" cty:"config" hcl:"config"`
+	Override    map[string]interface{} `json:"override,omitempty" cty:"override" hcl:"override"`
+	PauseBefore *string                `mapstructure:"pause_before" json:"pause_before,omitempty" cty:"pause_before" hcl:"pause_before"`
+	MaxRetries  *int                   `mapstructure:"max_retries" json:"max_retries,omitempty" cty:"max_retries" hcl:"max_retries"`
+	Timeout     *string                `mapstructure:"timeout" json:"timeout,omitempty" cty:"timeout" hcl:"timeout"`
 }
 
 // FlatMapstructure returns a new FlatProvisioner.

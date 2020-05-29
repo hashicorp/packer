@@ -9,9 +9,9 @@ import (
 // FlatArtifactParameter is an auto-generated flat version of ArtifactParameter.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatArtifactParameter struct {
-	Name  *string `mapstructure:"name" cty:"name"`
-	Value *string `mapstructure:"value" cty:"value"`
-	Type  *string `mapstructure:"type" cty:"type"`
+	Name  *string `mapstructure:"name" cty:"name" hcl:"name"`
+	Value *string `mapstructure:"value" cty:"value" hcl:"value"`
+	Type  *string `mapstructure:"type" cty:"type" hcl:"type"`
 }
 
 // FlatMapstructure returns a new FlatArtifactParameter.
@@ -36,28 +36,28 @@ func (*FlatArtifactParameter) HCL2Spec() map[string]hcldec.Spec {
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName        *string                `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType      *string                `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug            *bool                  `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce            *bool                  `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError          *string                `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars         map[string]string      `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars    []string               `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	CloudEnvironmentName   *string                `mapstructure:"cloud_environment_name" required:"false" cty:"cloud_environment_name"`
-	ClientID               *string                `mapstructure:"client_id" cty:"client_id"`
-	ClientSecret           *string                `mapstructure:"client_secret" cty:"client_secret"`
-	ClientCertPath         *string                `mapstructure:"client_cert_path" cty:"client_cert_path"`
-	ClientJWT              *string                `mapstructure:"client_jwt" cty:"client_jwt"`
-	ObjectID               *string                `mapstructure:"object_id" cty:"object_id"`
-	TenantID               *string                `mapstructure:"tenant_id" required:"false" cty:"tenant_id"`
-	SubscriptionID         *string                `mapstructure:"subscription_id" cty:"subscription_id"`
-	DtlArtifacts           []FlatDtlArtifact      `mapstructure:"dtl_artifacts" cty:"dtl_artifacts"`
-	LabName                *string                `mapstructure:"lab_name" cty:"lab_name"`
-	ResourceGroupName      *string                `mapstructure:"lab_resource_group_name" cty:"lab_resource_group_name"`
-	VMName                 *string                `mapstructure:"vm_name" cty:"vm_name"`
-	PollingDurationTimeout *string                `mapstructure:"polling_duration_timeout" required:"false" cty:"polling_duration_timeout"`
-	AzureTags              map[string]*string     `mapstructure:"azure_tags" cty:"azure_tags"`
-	Json                   map[string]interface{} `cty:"json"`
+	PackerBuildName        *string                `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType      *string                `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug            *bool                  `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce            *bool                  `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError          *string                `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars         map[string]string      `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars    []string               `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	CloudEnvironmentName   *string                `mapstructure:"cloud_environment_name" required:"false" cty:"cloud_environment_name" hcl:"cloud_environment_name"`
+	ClientID               *string                `mapstructure:"client_id" cty:"client_id" hcl:"client_id"`
+	ClientSecret           *string                `mapstructure:"client_secret" cty:"client_secret" hcl:"client_secret"`
+	ClientCertPath         *string                `mapstructure:"client_cert_path" cty:"client_cert_path" hcl:"client_cert_path"`
+	ClientJWT              *string                `mapstructure:"client_jwt" cty:"client_jwt" hcl:"client_jwt"`
+	ObjectID               *string                `mapstructure:"object_id" cty:"object_id" hcl:"object_id"`
+	TenantID               *string                `mapstructure:"tenant_id" required:"false" cty:"tenant_id" hcl:"tenant_id"`
+	SubscriptionID         *string                `mapstructure:"subscription_id" cty:"subscription_id" hcl:"subscription_id"`
+	DtlArtifacts           []FlatDtlArtifact      `mapstructure:"dtl_artifacts" cty:"dtl_artifacts" hcl:"dtl_artifacts"`
+	LabName                *string                `mapstructure:"lab_name" cty:"lab_name" hcl:"lab_name"`
+	ResourceGroupName      *string                `mapstructure:"lab_resource_group_name" cty:"lab_resource_group_name" hcl:"lab_resource_group_name"`
+	VMName                 *string                `mapstructure:"vm_name" cty:"vm_name" hcl:"vm_name"`
+	PollingDurationTimeout *string                `mapstructure:"polling_duration_timeout" required:"false" cty:"polling_duration_timeout" hcl:"polling_duration_timeout"`
+	AzureTags              map[string]*string     `mapstructure:"azure_tags" cty:"azure_tags" hcl:"azure_tags"`
+	Json                   map[string]interface{} `cty:"json" hcl:"json"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -101,9 +101,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 // FlatDtlArtifact is an auto-generated flat version of DtlArtifact.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatDtlArtifact struct {
-	ArtifactName *string                 `mapstructure:"artifact_name" cty:"artifact_name"`
-	ArtifactId   *string                 `mapstructure:"artifact_id" cty:"artifact_id"`
-	Parameters   []FlatArtifactParameter `mapstructure:"parameters" cty:"parameters"`
+	ArtifactName *string                 `mapstructure:"artifact_name" cty:"artifact_name" hcl:"artifact_name"`
+	ArtifactId   *string                 `mapstructure:"artifact_id" cty:"artifact_id" hcl:"artifact_id"`
+	Parameters   []FlatArtifactParameter `mapstructure:"parameters" cty:"parameters" hcl:"parameters"`
 }
 
 // FlatMapstructure returns a new FlatDtlArtifact.

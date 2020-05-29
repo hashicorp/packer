@@ -9,27 +9,27 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName       *string           `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType     *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug           *bool             `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce           *bool             `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError         *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars        map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars   []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	PublicKey             *string           `mapstructure:"public_key" cty:"public_key"`
-	PrivateKey            *string           `mapstructure:"private_key" cty:"private_key"`
-	Region                *string           `mapstructure:"region" cty:"region"`
-	ProjectId             *string           `mapstructure:"project_id" cty:"project_id"`
-	BaseUrl               *string           `mapstructure:"base_url" cty:"base_url"`
-	UFileBucket           *string           `mapstructure:"ufile_bucket_name" cty:"ufile_bucket_name"`
-	UFileKey              *string           `mapstructure:"ufile_key_name" cty:"ufile_key_name"`
-	SkipClean             *bool             `mapstructure:"skip_clean" cty:"skip_clean"`
-	ImageName             *string           `mapstructure:"image_name" cty:"image_name"`
-	ImageDescription      *string           `mapstructure:"image_description" cty:"image_description"`
-	OSType                *string           `mapstructure:"image_os_type" cty:"image_os_type"`
-	OSName                *string           `mapstructure:"image_os_name" cty:"image_os_name"`
-	Format                *string           `mapstructure:"format" cty:"format"`
-	WaitImageReadyTimeout *int              `mapstructure:"wait_image_ready_timeout" cty:"wait_image_ready_timeout"`
+	PackerBuildName       *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType     *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug           *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce           *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError         *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars        map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars   []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	PublicKey             *string           `mapstructure:"public_key" cty:"public_key" hcl:"public_key"`
+	PrivateKey            *string           `mapstructure:"private_key" cty:"private_key" hcl:"private_key"`
+	Region                *string           `mapstructure:"region" cty:"region" hcl:"region"`
+	ProjectId             *string           `mapstructure:"project_id" cty:"project_id" hcl:"project_id"`
+	BaseUrl               *string           `mapstructure:"base_url" cty:"base_url" hcl:"base_url"`
+	UFileBucket           *string           `mapstructure:"ufile_bucket_name" cty:"ufile_bucket_name" hcl:"ufile_bucket_name"`
+	UFileKey              *string           `mapstructure:"ufile_key_name" cty:"ufile_key_name" hcl:"ufile_key_name"`
+	SkipClean             *bool             `mapstructure:"skip_clean" cty:"skip_clean" hcl:"skip_clean"`
+	ImageName             *string           `mapstructure:"image_name" cty:"image_name" hcl:"image_name"`
+	ImageDescription      *string           `mapstructure:"image_description" cty:"image_description" hcl:"image_description"`
+	OSType                *string           `mapstructure:"image_os_type" cty:"image_os_type" hcl:"image_os_type"`
+	OSName                *string           `mapstructure:"image_os_name" cty:"image_os_name" hcl:"image_os_name"`
+	Format                *string           `mapstructure:"format" cty:"format" hcl:"format"`
+	WaitImageReadyTimeout *int              `mapstructure:"wait_image_ready_timeout" cty:"wait_image_ready_timeout" hcl:"wait_image_ready_timeout"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

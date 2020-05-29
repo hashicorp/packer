@@ -9,11 +9,11 @@ import (
 // FlatCloneConfig is an auto-generated flat version of CloneConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatCloneConfig struct {
-	Template    *string `mapstructure:"template" cty:"template"`
-	DiskSize    *int64  `mapstructure:"disk_size" cty:"disk_size"`
-	LinkedClone *bool   `mapstructure:"linked_clone" cty:"linked_clone"`
-	Network     *string `mapstructure:"network" cty:"network"`
-	Notes       *string `mapstructure:"notes" cty:"notes"`
+	Template    *string `mapstructure:"template" cty:"template" hcl:"template"`
+	DiskSize    *int64  `mapstructure:"disk_size" cty:"disk_size" hcl:"disk_size"`
+	LinkedClone *bool   `mapstructure:"linked_clone" cty:"linked_clone" hcl:"linked_clone"`
+	Network     *string `mapstructure:"network" cty:"network" hcl:"network"`
+	Notes       *string `mapstructure:"notes" cty:"notes" hcl:"notes"`
 }
 
 // FlatMapstructure returns a new FlatCloneConfig.

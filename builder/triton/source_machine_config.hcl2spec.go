@@ -9,14 +9,14 @@ import (
 // FlatMachineImageFilter is an auto-generated flat version of MachineImageFilter.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatMachineImageFilter struct {
-	MostRecent *bool   `mapstructure:"most_recent" cty:"most_recent"`
-	Name       *string `cty:"name"`
-	OS         *string `cty:"os"`
-	Version    *string `cty:"version"`
-	Public     *bool   `cty:"public"`
-	State      *string `cty:"state"`
-	Owner      *string `cty:"owner"`
-	Type       *string `cty:"type"`
+	MostRecent *bool   `mapstructure:"most_recent" cty:"most_recent" hcl:"most_recent"`
+	Name       *string `cty:"name" hcl:"name"`
+	OS         *string `cty:"os" hcl:"os"`
+	Version    *string `cty:"version" hcl:"version"`
+	Public     *bool   `cty:"public" hcl:"public"`
+	State      *string `cty:"state" hcl:"state"`
+	Owner      *string `cty:"owner" hcl:"owner"`
+	Type       *string `cty:"type" hcl:"type"`
 }
 
 // FlatMapstructure returns a new FlatMachineImageFilter.

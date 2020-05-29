@@ -371,10 +371,11 @@ func (p *Provisioner) createRemoteCleanUpCommand(remoteFiles []string) (string, 
 		return "", fmt.Errorf("clean up script %q failed to upload: %s", remotePath, err)
 	}
 
-	data := map[string]string{
-		"Path": remotePath,
-		"Vars": p.config.RemoteEnvVarPath,
-	}
+	data := p.generatedData
+	data["Path"] = remotePath
+	data["Vars"] = p.config.RemoteEnvVarPath
+	p.config.ctx.Data = data
+
 	p.config.ctx.Data = data
 	return interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 }

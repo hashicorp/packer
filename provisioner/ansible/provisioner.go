@@ -579,13 +579,14 @@ func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile s
 		args = append(args, "--ssh-extra-args", "-o IdentitiesOnly=yes")
 	}
 
-	args = append(args, "-i", inventory, playbook)
-
 	args = append(args, p.config.ExtraArguments...)
+
 	if len(p.config.AnsibleEnvVars) > 0 {
 		envVars = append(envVars, p.config.AnsibleEnvVars...)
 	}
 
+	// This must be the last arg appended to args
+	args = append(args, "-i", inventory, playbook)
 	return args, envVars
 }
 

@@ -26,8 +26,31 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 				"type": "vsphere-iso",
 				"network_adapters": []interface{}{
 					map[string]interface{}{
-						"network":     "",
-						"networkCard": "vmxnet3",
+						"network":      "",
+						"network_card": "vmxnet3",
+					},
+				},
+				"storage": []interface{}{
+					map[string]interface{}{
+						"disk_size": 5000,
+					},
+				},
+			},
+		},
+		{
+			Input: map[string]interface{}{
+				"type":         "vsphere-iso",
+				"network":      "",
+				"network_card": "vmxnet3",
+				"disk_size":    5000,
+			},
+
+			Expected: map[string]interface{}{
+				"type": "vsphere-iso",
+				"network_adapters": []interface{}{
+					map[string]interface{}{
+						"network":      "",
+						"network_card": "vmxnet3",
 					},
 				},
 				"storage": []interface{}{
@@ -51,8 +74,8 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 				"type": "vsphere-iso",
 				"network_adapters": []interface{}{
 					map[string]interface{}{
-						"network":     "myNetwork",
-						"networkCard": "vmxnet3",
+						"network":      "myNetwork",
+						"network_card": "vmxnet3",
 					},
 				},
 				"storage": []interface{}{
@@ -74,8 +97,8 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 				"disk_eagerly_scrub":    true,
 				"network_adapters": []interface{}{
 					map[string]interface{}{
-						"network":     "net1",
-						"networkCard": "vmxnet3",
+						"network":      "net1",
+						"network_card": "vmxnet3",
 					},
 				},
 				"storage": []interface{}{
@@ -91,12 +114,12 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 				"type": "vsphere-iso",
 				"network_adapters": []interface{}{
 					map[string]interface{}{
-						"network":     "myNetwork",
-						"networkCard": "vmxnet3",
+						"network":      "myNetwork",
+						"network_card": "vmxnet3",
 					},
 					map[string]interface{}{
-						"network":     "net1",
-						"networkCard": "vmxnet3",
+						"network":      "net1",
+						"network_card": "vmxnet3",
 					},
 				},
 				"storage": []interface{}{

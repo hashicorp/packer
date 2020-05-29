@@ -16,13 +16,9 @@ export default function CommunityPage() {
       <VerticalTextBlockList
         data={[
           {
-            header: 'IRC',
-            body: '`#packer-tool` on Freenode',
-          },
-          {
-            header: 'Announcement List',
+            header: 'Community Forum',
             body:
-              '[HashiCorp Announcement Google Group](https://groups.google.com/group/hashicorp-announce)',
+              '[Packer Community Forum](https://discuss.hashicorp.com/c/packer)',
           },
           {
             header: 'Discussion List',
@@ -30,14 +26,14 @@ export default function CommunityPage() {
               '[Packer Google Group](https://groups.google.com/group/packer-tool)',
           },
           {
-            header: 'Community Forum',
+            header: 'Announcement List',
             body:
-              '[Packer Community Forum](https://discuss.hashicorp.com/c/packer)',
+              '[HashiCorp Announcement Google Group](https://groups.google.com/group/hashicorp-announce)',
           },
           {
             header: 'Bug Tracker',
             body:
-              '[Issue tracker on GitHub](https://github.com/hashicorp/packer/issues). Please only use this for reporting bugs. Do not ask for general help here. Use IRC or the mailing list for that.',
+              '[Issue tracker on GitHub](https://github.com/hashicorp/packer/issues). Please only use this for reporting bugs. For general help, please use the Community Forum.',
           },
           {
             header: 'Training',

@@ -11,8 +11,9 @@ import (
 )
 
 type StepRemoteUpload struct {
-	Datastore string
-	Host      string
+	Datastore                  string
+	Host                       string
+	SetHostForDatastoreUploads bool
 }
 
 func (s *StepRemoteUpload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -45,7 +46,7 @@ func (s *StepRemoteUpload) Run(_ context.Context, state multistep.StateBag) mult
 			return multistep.ActionHalt
 		}
 
-		if err := ds.UploadFile(path.(string), remotePath, s.Host); err != nil {
+		if err := ds.UploadFile(path.(string), remotePath, s.Host, s.SetHostForDatastoreUploads); err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}

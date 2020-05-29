@@ -9,21 +9,21 @@ import (
 // FlatMockConfig is an auto-generated flat version of MockConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatMockConfig struct {
-	NotSquashed          *string                `mapstructure:"not_squashed" cty:"not_squashed"`
-	String               *string                `mapstructure:"string" cty:"string"`
-	Int                  *int                   `mapstructure:"int" cty:"int"`
-	Int64                *int64                 `mapstructure:"int64" cty:"int64"`
-	Bool                 *bool                  `mapstructure:"bool" cty:"bool"`
-	Trilean              *bool                  `mapstructure:"trilean" cty:"trilean"`
-	Duration             *string                `mapstructure:"duration" cty:"duration"`
-	MapStringString      map[string]string      `mapstructure:"map_string_string" cty:"map_string_string"`
-	SliceString          []string               `mapstructure:"slice_string" cty:"slice_string"`
-	SliceSliceString     [][]string             `mapstructure:"slice_slice_string" cty:"slice_slice_string"`
-	NamedMapStringString NamedMapStringString   `mapstructure:"named_map_string_string" cty:"named_map_string_string"`
-	NamedString          *NamedString           `mapstructure:"named_string" cty:"named_string"`
-	Tags                 []FlatMockTag          `mapstructure:"tag" cty:"tag"`
-	Nested               *FlatNestedMockConfig  `mapstructure:"nested" cty:"nested"`
-	NestedSlice          []FlatNestedMockConfig `mapstructure:"nested_slice" cty:"nested_slice"`
+	NotSquashed          *string                `mapstructure:"not_squashed" cty:"not_squashed" hcl:"not_squashed"`
+	String               *string                `mapstructure:"string" cty:"string" hcl:"string"`
+	Int                  *int                   `mapstructure:"int" cty:"int" hcl:"int"`
+	Int64                *int64                 `mapstructure:"int64" cty:"int64" hcl:"int64"`
+	Bool                 *bool                  `mapstructure:"bool" cty:"bool" hcl:"bool"`
+	Trilean              *bool                  `mapstructure:"trilean" cty:"trilean" hcl:"trilean"`
+	Duration             *string                `mapstructure:"duration" cty:"duration" hcl:"duration"`
+	MapStringString      map[string]string      `mapstructure:"map_string_string" cty:"map_string_string" hcl:"map_string_string"`
+	SliceString          []string               `mapstructure:"slice_string" cty:"slice_string" hcl:"slice_string"`
+	SliceSliceString     [][]string             `mapstructure:"slice_slice_string" cty:"slice_slice_string" hcl:"slice_slice_string"`
+	NamedMapStringString NamedMapStringString   `mapstructure:"named_map_string_string" cty:"named_map_string_string" hcl:"named_map_string_string"`
+	NamedString          *NamedString           `mapstructure:"named_string" cty:"named_string" hcl:"named_string"`
+	Tags                 []FlatMockTag          `mapstructure:"tag" cty:"tag" hcl:"tag"`
+	Nested               *FlatNestedMockConfig  `mapstructure:"nested" cty:"nested" hcl:"nested"`
+	NestedSlice          []FlatNestedMockConfig `mapstructure:"nested_slice" cty:"nested_slice" hcl:"nested_slice"`
 }
 
 // FlatMapstructure returns a new FlatMockConfig.
@@ -60,8 +60,8 @@ func (*FlatMockConfig) HCL2Spec() map[string]hcldec.Spec {
 // FlatMockTag is an auto-generated flat version of MockTag.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatMockTag struct {
-	Key   *string `mapstructure:"key" cty:"key"`
-	Value *string `mapstructure:"value" cty:"value"`
+	Key   *string `mapstructure:"key" cty:"key" hcl:"key"`
+	Value *string `mapstructure:"value" cty:"value" hcl:"value"`
 }
 
 // FlatMapstructure returns a new FlatMockTag.
@@ -85,18 +85,18 @@ func (*FlatMockTag) HCL2Spec() map[string]hcldec.Spec {
 // FlatNestedMockConfig is an auto-generated flat version of NestedMockConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatNestedMockConfig struct {
-	String               *string              `mapstructure:"string" cty:"string"`
-	Int                  *int                 `mapstructure:"int" cty:"int"`
-	Int64                *int64               `mapstructure:"int64" cty:"int64"`
-	Bool                 *bool                `mapstructure:"bool" cty:"bool"`
-	Trilean              *bool                `mapstructure:"trilean" cty:"trilean"`
-	Duration             *string              `mapstructure:"duration" cty:"duration"`
-	MapStringString      map[string]string    `mapstructure:"map_string_string" cty:"map_string_string"`
-	SliceString          []string             `mapstructure:"slice_string" cty:"slice_string"`
-	SliceSliceString     [][]string           `mapstructure:"slice_slice_string" cty:"slice_slice_string"`
-	NamedMapStringString NamedMapStringString `mapstructure:"named_map_string_string" cty:"named_map_string_string"`
-	NamedString          *NamedString         `mapstructure:"named_string" cty:"named_string"`
-	Tags                 []FlatMockTag        `mapstructure:"tag" cty:"tag"`
+	String               *string              `mapstructure:"string" cty:"string" hcl:"string"`
+	Int                  *int                 `mapstructure:"int" cty:"int" hcl:"int"`
+	Int64                *int64               `mapstructure:"int64" cty:"int64" hcl:"int64"`
+	Bool                 *bool                `mapstructure:"bool" cty:"bool" hcl:"bool"`
+	Trilean              *bool                `mapstructure:"trilean" cty:"trilean" hcl:"trilean"`
+	Duration             *string              `mapstructure:"duration" cty:"duration" hcl:"duration"`
+	MapStringString      map[string]string    `mapstructure:"map_string_string" cty:"map_string_string" hcl:"map_string_string"`
+	SliceString          []string             `mapstructure:"slice_string" cty:"slice_string" hcl:"slice_string"`
+	SliceSliceString     [][]string           `mapstructure:"slice_slice_string" cty:"slice_slice_string" hcl:"slice_slice_string"`
+	NamedMapStringString NamedMapStringString `mapstructure:"named_map_string_string" cty:"named_map_string_string" hcl:"named_map_string_string"`
+	NamedString          *NamedString         `mapstructure:"named_string" cty:"named_string" hcl:"named_string"`
+	Tags                 []FlatMockTag        `mapstructure:"tag" cty:"tag" hcl:"tag"`
 }
 
 // FlatMapstructure returns a new FlatNestedMockConfig.

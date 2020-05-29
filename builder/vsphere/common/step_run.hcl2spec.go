@@ -9,7 +9,7 @@ import (
 // FlatRunConfig is an auto-generated flat version of RunConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatRunConfig struct {
-	BootOrder *string `mapstructure:"boot_order" cty:"boot_order"`
+	BootOrder *string `mapstructure:"boot_order" cty:"boot_order" hcl:"boot_order"`
 }
 
 // FlatMapstructure returns a new FlatRunConfig.

@@ -57,13 +57,26 @@ type Config struct {
 	// simply launch the box directly using the global id.
 	GlobalID string `mapstructure:"global_id" required:"true"`
 	// The checksum for the .box file. The type of the checksum is specified
-	// with checksum_type, documented below.
+	// within the checksum field as a prefix, ex: "md5:{$checksum}". The type
+	// of the checksum can also be omitted and Packer will try to infer it
+	// based on string length. Valid values are "none", "{$checksum}",
+	// "md5:{$checksum}", "sha1:{$checksum}", "sha256:{$checksum}",
+	// "sha512:{$checksum}" or "file:{$path}". Here is a list of valid checksum
+	// values:
+	//  * md5:090992ba9fd140077b0661cb75f7ce13
+	//  * 090992ba9fd140077b0661cb75f7ce13
+	//  * sha1:ebfb681885ddf1234c18094a45bbeafd91467911
+	//  * ebfb681885ddf1234c18094a45bbeafd91467911
+	//  * sha256:ed363350696a726b7932db864dda019bd2017365c9e299627830f06954643f93
+	//  * ed363350696a726b7932db864dda019bd2017365c9e299627830f06954643f93
+	//  * file:http://releases.ubuntu.com/20.04/MD5SUMS
+	//  * file:file://./local/path/file.sum
+	//  * file:./local/path/file.sum
+	//  * none
+	// Although the checksum will not be verified when it is set to "none",
+	// this is not recommended since these files can be very large and
+	// corruption does happen from time to time.
 	Checksum string `mapstructure:"checksum" required:"false"`
-	// The type of the checksum specified in checksum. Valid values are none,
-	// md5, sha1, sha256, or sha512. Although the checksum will not be verified
-	// when checksum_type is set to "none", this is not recommended since OVA
-	// files can be very large and corruption does happen from time to time.
-	ChecksumType string `mapstructure:"checksum_type" required:"false"`
 	// if your source_box is a boxfile that we need to add to Vagrant, this is
 	// the name to give it. If left blank, will default to "packer_" plus your
 	// buildname.
@@ -248,12 +261,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Download if source box isn't from vagrant cloud.
 	if strings.HasSuffix(b.config.SourceBox, ".box") {
 		steps = append(steps, &common.StepDownload{
-			Checksum:     b.config.Checksum,
-			ChecksumType: b.config.ChecksumType,
-			Description:  "Box",
-			Extension:    "box",
-			ResultKey:    "box_path",
-			Url:          []string{b.config.SourceBox},
+			Checksum:    b.config.Checksum,
+			Description: "Box",
+			Extension:   "box",
+			ResultKey:   "box_path",
+			Url:         []string{b.config.SourceBox},
 		})
 	}
 	steps = append(steps,
