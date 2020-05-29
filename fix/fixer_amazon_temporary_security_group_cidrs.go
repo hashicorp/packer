@@ -9,7 +9,7 @@ import (
 type FixerAmazonTemporarySecurityCIDRs struct{}
 
 func (FixerAmazonTemporarySecurityCIDRs) DeprecatedOptions() []string {
-	return []string{}
+	return []string{"temporary_security_group_source_cidr"}
 }
 
 func (FixerAmazonTemporarySecurityCIDRs) Fix(input map[string]interface{}) (map[string]interface{}, error) {
