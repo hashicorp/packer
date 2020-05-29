@@ -15,6 +15,7 @@ var DeprecatedOptions = []string{
 	"shutdown_behaviour",
 	"enhanced_networking",
 	"ssh_private_ip",
+	"temporary_security_group_source_cidr",
 	"login_email",
 	"tag",
 	"vhd_temp_path",
@@ -32,4 +33,9 @@ var DeprecatedOptions = []string{
 	"network_card",
 	"network",
 	"networkCard",
+	"disk_size",
+	"disk_thin_provisioned",
+	"disk_eagerly_scrub",
+	"iso_checksum_url",
+	"iso_checksum_type",
 }
