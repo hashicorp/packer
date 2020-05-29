@@ -20,7 +20,7 @@ this syntax.
 
 ## Examples
 
-```shell
+```shell-session
 > formatdate("DD MMM YYYY hh:mm ZZZ", "2018-01-02T23:12:01Z")
 02 Jan 2018 23:12 UTC
 > formatdate("EEEE, DD-MMM-YY hh:mm:ss ZZZ", "2018-01-02T23:12:01Z")
@@ -75,7 +75,7 @@ Any non-letter characters, such as punctuation, are reproduced verbatim in the
 output. To include literal letters in the format string, enclose them in single
 quotes `'`. To include a literal quote, escape it by doubling the quotes.
 
-```text
+```shell-session
 > formatdate("h'h'mm", "2018-01-02T23:12:01-08:00")
 23h12
 > formatdate("H 'o''clock'", "2018-01-02T23:12:01-08:00")

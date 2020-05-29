@@ -34,11 +34,11 @@ The example below is fully functional.
 @include 'provisioners/shell-config.mdx'
 
 - `debug_mode` - If set, sets PowerShell's [PSDebug mode](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/set-psdebug?view=powershell-7)
-   in order to make script debugging easier. For instance, setting the value to 1 results in adding this to the execute command:
+  in order to make script debugging easier. For instance, setting the value to 1 results in adding this to the execute command:
 
-     ``` powershell
-     Set-PSDebug -Trace 1
-     ```
+  ```powershell
+  Set-PSDebug -Trace 1
+  ```
 
 - `elevated_execute_command` (string) - The command to use to execute the
   elevated script. By default this is as follows:
@@ -150,10 +150,10 @@ The example below is fully functional.
   directories must already exist.
 
 - `skip_clean` (bool) - Whether to clean scripts up after executing the provisioner.
-	Defaults to false. When true any script created by a non-elevated Powershell
-	provisioner will be removed from the remote machine. Elevated scripts,
-	along with the scheduled tasks, will always be removed regardless of the
-	value set for `skip_clean`.
+  Defaults to false. When true any script created by a non-elevated Powershell
+  provisioner will be removed from the remote machine. Elevated scripts,
+  along with the scheduled tasks, will always be removed regardless of the
+  value set for `skip_clean`.
 
 - `start_retry_timeout` (string) - The amount of time to attempt to _start_
   the remote process. By default this is "5m" or 5 minutes. This setting
@@ -246,7 +246,7 @@ required for the JSON template to be parsed correctly.
 
 The above snippet should result in the following output on the Packer console:
 
-```shell
+```shell-session
 ==> amazon-ebs: Provisioning with Powershell...
 ==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner508190439
     amazon-ebs: A literal dollar $ must be escaped
@@ -300,7 +300,7 @@ for the user. There is no need to use escapes in these instances.
 
 The above snippet should result in the following output on the Packer console:
 
-```shell
+```shell-session
 ==> amazon-ebs: Provisioning with Powershell...
 ==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner961728919
     amazon-ebs: The dollar in the elevated_password is interpreted correctly

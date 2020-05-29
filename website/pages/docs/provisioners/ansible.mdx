@@ -298,13 +298,13 @@ extra_arguments.
 
 Below is a fully functioning Ansible example using WinRM:
 
-```
+```json
 {
   "builders": [
-  {
-    "type": "amazon-ebs",
-    "region": "us-east-1",
-    "instance_type": "t2.micro",
+    {
+      "type": "amazon-ebs",
+      "region": "us-east-1",
+      "instance_type": "t2.micro",
       "source_ami_filter": {
         "filters": {
           "virtualization-type": "hvm",
@@ -314,23 +314,22 @@ Below is a fully functioning Ansible example using WinRM:
         "most_recent": true,
         "owners": "amazon"
       },
-    "ami_name": "default-packer",
-    "user_data_file": "windows_bootstrap.txt",
-    "communicator": "winrm",
-    "force_deregister": true,
-    "winrm_insecure": true,
-    "winrm_username": "Administrator",
-    "winrm_use_ssl": true
-  }],
+      "ami_name": "default-packer",
+      "user_data_file": "windows_bootstrap.txt",
+      "communicator": "winrm",
+      "force_deregister": true,
+      "winrm_insecure": true,
+      "winrm_username": "Administrator",
+      "winrm_use_ssl": true
+    }
+  ],
   "provisioners": [
     {
-      "type":  "ansible",
+      "type": "ansible",
       "playbook_file": "./playbook.yml",
       "user": "Administrator",
       "use_proxy": false,
-      "extra_arguments": [
-        "-e", "ansible_winrm_server_cert_validation=ignore"
-      ]
+      "extra_arguments": ["-e", "ansible_winrm_server_cert_validation=ignore"]
     }
   ]
 }
@@ -343,7 +342,7 @@ windows_bootstrap.txt, see the winrm docs for the amazon-ebs communicator.
 
 When running from OSX, you may see an error like:
 
-```
+```text
     amazon-ebs: objc[9752]: +[__NSCFConstantString initialize] may have been in progress in another thread when fork() was called.
     amazon-ebs: objc[9752]: +[__NSCFConstantString initialize] may have been in progress in another thread when fork() was called. We cannot safely call it or ignore it in the fork() child process. Crashing instead. Set a breakpoint on objc_initializeAfterForkError to debug.
     amazon-ebs: ERROR! A worker was found in a dead state
@@ -352,7 +351,7 @@ When running from OSX, you may see an error like:
 If you see this, you may be able to work around the issue by telling Ansible to
 explicitly not use any proxying; you can do this by setting the template option
 
-```
+```json
 "ansible_env_vars": ["no_proxy=\"*\""],
 ```
 
@@ -490,7 +489,7 @@ provisioner may fail authentication with a message similar to this:
 
 To unload all keys from your `ssh-agent`, run:
 
-```shell
+```shell-session
 $ ssh-add -D
 ```
 
@@ -507,7 +506,7 @@ using that bash script in your "command" in place of the default
 "ansible-playbook". For example, you may need to launch a Python virtualenv
 before calling ansible. To do this, you'd want to create a bash script like
 
-```sh
+```shell
 #!/bin/bash
 source /tmp/venv/bin/activate && ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 /tmp/venv/bin/ansible-playbook "$@"
 ```

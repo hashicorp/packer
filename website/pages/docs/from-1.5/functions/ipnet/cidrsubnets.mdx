@@ -40,7 +40,7 @@ the same addressing scheme as the given prefix.
 
 ## Examples
 
-```text
+```shell-session
 > cidrsubnets("10.1.0.0/16", 4, 4, 8, 4)
 [
   "10.1.0.0/20",
@@ -62,7 +62,7 @@ You can use nested `cidrsubnets` calls with
 [`for` expressions](/docs/from-1.5/expressions#for-expressions)
 to concisely allocate groups of network address blocks:
 
-```text
+```shell-session
 > [for cidr_block in cidrsubnets("10.0.0.0/8", 8, 8, 8, 8) : cidrsubnets(cidr_block, 4, 4)]
 [
   [

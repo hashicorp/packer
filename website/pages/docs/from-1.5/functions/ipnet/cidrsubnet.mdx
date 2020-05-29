@@ -36,7 +36,7 @@ with zero.
 
 ## Examples
 
-```text
+```shell-session
 > cidrsubnet("172.16.0.0/12", 4, 2)
 172.18.0.0/16
 > cidrsubnet("10.1.2.0/24", 4, 15)
@@ -73,7 +73,7 @@ The CLI tool [`ipcalc`](https://gitlab.com/ipcalc/ipcalc) is useful for
 visualizing CIDR prefixes as binary numbers. We can confirm the conversion
 above by providing the same prefix string to `ipcalc`:
 
-```shell
+```shell-session
 $ ipcalc 10.1.2.0/24
 Address:   10.1.2.0             00001010.00000001.00000010. 00000000
 Netmask:   255.255.255.0 = 24   11111111.11111111.11111111. 00000000
@@ -129,7 +129,7 @@ gives 240, which can then be combined with our new prefix length of 28 to
 produce the result `10.1.2.240/28`. Again we can pass this prefix string to
 `ipcalc` to visualize it:
 
-```shell
+```shell-session
 $ ipcalc 10.1.2.240/28
 Address:   10.1.2.240           00001010.00000001.00000010.1111 0000
 Netmask:   255.255.255.240 = 28 11111111.11111111.11111111.1111 0000
@@ -148,7 +148,7 @@ the network's own address and the broadcast address. You can thus use
 [`cidrhost`](/docs/from-1.5/functions/ipnet/cidrhost) function to calculate those host addresses by
 providing it a value between 1 and 14:
 
-```shell
+```shell-session
 > cidrhost("10.1.2.240/28", 1)
 10.1.2.241
 > cidrhost("10.1.2.240/28", 14)

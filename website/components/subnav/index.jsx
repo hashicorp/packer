@@ -1,5 +1,5 @@
 import Subnav from '@hashicorp/react-subnav'
-import subnavItems from '../../data/subnav'
+import subnavItems from 'data/subnav'
 import { useRouter } from 'next/router'
 
 export default function PackerSubnav() {

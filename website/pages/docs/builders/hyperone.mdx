@@ -56,8 +56,8 @@ machine, HyperOne builder can use your credentials saved in a config file.
 
 All you have to do is login within the tool:
 
-```bash
-h1 login --username your.user@example.com
+```shell-session
+$ h1 login --username your.user@example.com
 ```
 
 You don't have to set `token` or `project` fields at all using this method.
@@ -66,8 +66,8 @@ You don't have to set `token` or `project` fields at all using this method.
 
 Using `h1`, you can create a new token associated with chosen project.
 
-```bash
-h1 project token add --name packer-builder --project PROJECT_ID
+```shell-session
+$ h1 project token add --name packer-builder --project PROJECT_ID
 ```
 
 Set the `token` field to the generated token or save it in the `HYPERONE_TOKEN`

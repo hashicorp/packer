@@ -14,7 +14,7 @@ that isn't null or an empty string.
 
 ## Examples
 
-```shell
+```shell-session
 > coalesce("a", "b")
 a
 > coalesce("", "b")
@@ -26,7 +26,7 @@ b
 To perform the `coalesce` operation with a list of strings, use the `...`
 symbol to expand the list as arguments:
 
-```shell
+```shell-session
 > coalesce(["", "b"]...)
 b
 ```
