@@ -788,12 +788,13 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 			r, err := client.ParseResourceID(rid)
 			if err != nil {
 				errs = packer.MultiErrorAppend(errs, err)
-			}
-			if r.Provider != "" && !strings.EqualFold(r.Provider, "Microsoft.ManagedIdentity") {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("A valid user assigned managed identity resource id must have a correct resource provider"))
-			}
-			if r.ResourceType.String() != "" && !strings.EqualFold(r.ResourceType.String(), "userAssignedIdentities") {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("A valid user assigned managed identity resource id must have a correct resource type"))
+			} else {
+				if !strings.EqualFold(r.Provider, "Microsoft.ManagedIdentity") {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("A valid user assigned managed identity resource id must have a correct resource provider"))
+				}
+				if !strings.EqualFold(r.ResourceType.String(), "userAssignedIdentities") {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("A valid user assigned managed identity resource id must have a correct resource type"))
+				}
 			}
 		}
 	}
