@@ -4,12 +4,14 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// FixerVSphereNetworkDisk changes vsphere-iso network and networkCard fields into a network adapter and
-// changes the disk_size, disk_thin_provisioned, and disk_eagerly_scrub into a storage adapter
+// FixerVSphereNetworkDisk changes vsphere-iso network and networkCard fields
+// into a network adapter and changes the disk_size, disk_thin_provisioned, and
+// disk_eagerly_scrub into a storage adapter
 type FixerVSphereNetworkDisk struct{}
 
 func (FixerVSphereNetworkDisk) DeprecatedOptions() []string {
-	return []string{"network_card", "network", "networkCard"}
+	return []string{"network_card", "network", "networkCard", "disk_size",
+		"disk_thin_provisioned", "disk_eagerly_scrub"}
 }
 
 func (FixerVSphereNetworkDisk) Fix(input map[string]interface{}) (map[string]interface{}, error) {
