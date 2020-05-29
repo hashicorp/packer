@@ -13,7 +13,7 @@ import (
 type Driver interface {
 	// CreateImage creates an image from the given disk in Google Compute
 	// Engine.
-	CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string, image_encryption_key *compute.CustomerEncryptionKey) (<-chan *Image, <-chan error)
+	CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string, image_encryption_key *compute.CustomerEncryptionKey, imageStorageLocation []string) (<-chan *Image, <-chan error)
 
 	// DeleteImage deletes the image with the given name.
 	DeleteImage(name string) <-chan error

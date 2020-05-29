@@ -101,6 +101,8 @@ type Config struct {
 	ImageLabels map[string]string `mapstructure:"image_labels" required:"false"`
 	// Licenses to apply to the created image.
 	ImageLicenses []string `mapstructure:"image_licenses" required:"false"`
+	// Storage locations for the created image.
+	ImageStorageLocations []string `mapstructure:"image_storage_locations" required:"false"`
 	// A name to give the launched instance. Beware that this must be unique.
 	// Defaults to `packer-{{uuid}}`.
 	InstanceName string `mapstructure:"instance_name" required:"false"`
