@@ -1,5 +1,11 @@
 <!-- Code generated from the comments of the Config struct in builder/azure/arm/config.go; DO NOT EDIT MANUALLY -->
 
+-   `user_assigned_managed_identities` ([]string) - If set with one or more resource ids of user assigned managed identities, they will be configured on the VM.
+    See [documentation](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token)
+    for how to acquire tokens within the VM.
+    To assign a user assigned managed identity to a VM, the provided account or service principal must have [Managed Identity Operator](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#managed-identity-operator)
+    and [Virtual Machine Contributor](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#virtual-machine-contributor) role assignments.
+    
 -   `capture_name_prefix` (string) - VHD prefix.
     
 -   `capture_container_name` (string) - Destination container name.

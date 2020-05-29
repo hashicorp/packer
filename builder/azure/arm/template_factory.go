@@ -61,6 +61,12 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		builder.BuildWindows(config.tmpKeyVaultName, config.tmpWinRMCertificateUrl)
 	}
 
+	if len(config.UserAssignedManagedIdentities) != 0 {
+		if err := builder.SetIdentity(config.UserAssignedManagedIdentities); err != nil {
+			return nil, err
+		}
+	}
+
 	if config.ImageUrl != "" {
 		builder.SetImageUrl(config.ImageUrl, osType, config.diskCachingType)
 	} else if config.CustomManagedImageName != "" {
