@@ -63,7 +63,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	warnings := make([]string, 0)
 	errs := new(packer.MultiError)
 
-	if (c.ISOUrls != nil || c.RawSingleISOUrl != "") {
+	if c.ISOUrls != nil || c.RawSingleISOUrl != "" {
 		isoWarnings, isoErrs := c.ISOConfig.Prepare(&c.ctx)
 		warnings = append(warnings, isoWarnings...)
 		errs = packer.MultiErrorAppend(errs, isoErrs...)
