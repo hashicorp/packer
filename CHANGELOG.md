@@ -19,6 +19,7 @@
 ### IMPROVEMENTS:
 * builder/amazon: Add SSM Session Manager as a SSH interface connection
     [GH-9082]
+* builder/azure-arm: Support User Assigned Managed Identity [GH-9293]
 * builder/google: Implement iap proxy for googlecompute [GH-9105]
 * builder/googlecompute: Changed default disk size. [GH-9071]
 * builder/qemu: add support for using a network bridge [GH-9159]
