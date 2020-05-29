@@ -103,7 +103,7 @@ type Config struct {
 	// The id of the temporary OS disk that will be created. Will be generated if not set.
 	TemporaryOSDiskID string `mapstructure:"temporary_os_disk_id"`
 
-	// The id of the temporary OS isk snapshot that will be created. Will be generated if not set.
+	// The id of the temporary OS disk snapshot that will be created. Will be generated if not set.
 	TemporaryOSDiskSnapshotID string `mapstructure:"temporary_os_disk_snapshot_id"`
 
 	// The prefix for the resource ids of the temporary data disks that will be created. The disks will be suffixed with a number. Will be generated if not set.
