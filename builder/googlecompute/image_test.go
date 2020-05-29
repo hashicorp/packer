@@ -14,7 +14,6 @@ func StubImage(name, project string, licenses []string, sizeGb int64) *Image {
 		ProjectId: project,
 		SelfLink:  fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/images/%s", project, name),
 		SizeGb:    sizeGb,
-
 	}
 }
 

@@ -115,13 +115,12 @@ func (d *DriverMock) CreateImage(name, description, family, zone, disk string, i
 	if resultCh == nil {
 		ch := make(chan *Image, 1)
 		ch <- &Image{
-			Labels:           d.CreateImageLabels,
-			Licenses:         d.CreateImageLicenses,
-			Name:             name,
-			ProjectId:        d.CreateImageResultProjectId,
-			SelfLink:         d.CreateImageResultSelfLink,
-			SizeGb:           d.CreateImageResultSizeGb,
-			StorageLocations: d.CreateImageStorageLocations,
+			Labels:    d.CreateImageLabels,
+			Licenses:  d.CreateImageLicenses,
+			Name:      name,
+			ProjectId: d.CreateImageResultProjectId,
+			SelfLink:  d.CreateImageResultSelfLink,
+			SizeGb:    d.CreateImageResultSizeGb,
 		}
 		close(ch)
 		resultCh = ch

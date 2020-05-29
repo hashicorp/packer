@@ -7,14 +7,13 @@ import (
 )
 
 type Image struct {
-	GuestOsFeatures  []*compute.GuestOsFeature
-	Labels           map[string]string
-	Licenses         []string
-	Name             string
-	ProjectId        string
-	SelfLink         string
-	SizeGb           int64
-	StorageLocations []string
+	GuestOsFeatures []*compute.GuestOsFeature
+	Labels          map[string]string
+	Licenses        []string
+	Name            string
+	ProjectId       string
+	SelfLink        string
+	SizeGb          int64
 }
 
 func (i *Image) IsWindows() bool {
