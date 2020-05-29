@@ -488,7 +488,6 @@ func TestCreateCmdArgs(t *testing.T) {
 		TestName          string
 		PackerBuildName   string
 		PackerBuilderType string
-		UsePassword       bool
 		UseProxy          confighelper.Trilean
 		generatedData     map[string]interface{}
 		ExtraArguments    []string
@@ -596,7 +595,6 @@ func TestCreateCmdArgs(t *testing.T) {
 			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas"},
 		},
 		{
-			// UsePassword False
 			TestName:        "Use PrivateKey",
 			PackerBuildName: "packerparty",
 			UseProxy:        confighelper.TriTrue,
@@ -623,7 +621,6 @@ func TestCreateCmdArgs(t *testing.T) {
 		p.config.UseProxy = tc.UseProxy
 		p.config.PackerBuilderType = "fakebuilder"
 		p.config.PackerBuildName = tc.PackerBuildName
-		p.config.UsePassword = tc.UsePassword
 		p.generatedData = tc.generatedData
 		p.config.ExtraArguments = tc.ExtraArguments
 		p.config.AnsibleEnvVars = tc.AnsibleEnvVars

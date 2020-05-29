@@ -71,7 +71,6 @@ type Config struct {
 	//TODO: change default to false in v1.6.0.
 	UseProxy     config.Trilean `mapstructure:"use_proxy"`
 	userWasEmpty bool
-	UsePassword  bool `mapstructure:"use_password"`
 }
 
 type Provisioner struct {
