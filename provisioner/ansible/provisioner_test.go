@@ -485,6 +485,7 @@ func basicGenData(input map[string]interface{}) map[string]interface{} {
 
 func TestCreateCmdArgs(t *testing.T) {
 	type testcase struct {
+		TestName          string
 		PackerBuildName   string
 		PackerBuilderType string
 		UseProxy          confighelper.Trilean
@@ -498,25 +499,28 @@ func TestCreateCmdArgs(t *testing.T) {
 	TestCases := []testcase{
 		{
 			// SSH with private key and an extra argument.
+			TestName:        "SSH with private key and an extra argument",
 			PackerBuildName: "packerparty",
 			generatedData:   basicGenData(nil),
 			ExtraArguments:  []string{"-e", "hello-world"},
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas"},
 			callArgs:        []string{"", "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
-			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "--ssh-extra-args", "-o IdentitiesOnly=yes", "-i", "/var/inventory", "test-playbook.yml", "-e", "hello-world"},
+			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas"},
 		},
 		{
+			TestName:        "SSH with private key and an extra argument and UseProxy",
 			PackerBuildName: "packerparty",
 			UseProxy:        confighelper.TriTrue,
 			generatedData:   basicGenData(nil),
 			ExtraArguments:  []string{"-e", "hello-world"},
 			callArgs:        []string{"", "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
-			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "--ssh-extra-args", "-o IdentitiesOnly=yes", "-i", "/var/inventory", "test-playbook.yml", "-e", "hello-world"},
+			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{},
 		},
 		{
 			// Winrm, but no_proxy is unset so we don't do anything with ansible_password.
+			TestName:        "Winrm, but no_proxy is unset so we don't do anything with ansible_password",
 			PackerBuildName: "packerparty",
 			generatedData: basicGenData(map[string]interface{}{
 				"ConnType": "winrm",
@@ -524,20 +528,22 @@ func TestCreateCmdArgs(t *testing.T) {
 			ExtraArguments:  []string{"-e", "hello-world"},
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas"},
 			callArgs:        []string{"", "/var/inventory", "test-playbook.yml", ""},
-			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-i", "/var/inventory", "test-playbook.yml", "-e", "hello-world"},
+			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas"},
 		},
 		{
 			// HTTPAddr should be set. No env vars.
+			TestName:        "HTTPAddr should be set. No env vars",
 			PackerBuildName: "packerparty",
 			ExtraArguments:  []string{"-e", "hello-world"},
 			generatedData:   basicGenData(nil),
 			callArgs:        []string{"123.45.67.89", "/var/inventory", "test-playbook.yml", ""},
-			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "--ssh-extra-args", "-o IdentitiesOnly=yes", "-i", "/var/inventory", "test-playbook.yml", "-e", "hello-world"},
+			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{},
 		},
 		{
 			// Add ansible_password for proxyless winrm connection.
+			TestName: "Add ansible_password for proxyless winrm connection.",
 			UseProxy: confighelper.TriFalse,
 			generatedData: basicGenData(map[string]interface{}{
 				"ConnType": "winrm",
@@ -550,6 +556,7 @@ func TestCreateCmdArgs(t *testing.T) {
 		},
 		{
 			// Neither special ssh stuff, nor special windows stuff. This is docker!
+			TestName:        "Neither special ssh stuff, nor special windows stuff. This is docker!",
 			PackerBuildName: "packerparty",
 			generatedData: basicGenData(map[string]interface{}{
 				"ConnType": "docker",
@@ -557,11 +564,12 @@ func TestCreateCmdArgs(t *testing.T) {
 			ExtraArguments:  []string{"-e", "hello-world"},
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas"},
 			callArgs:        []string{"", "/var/inventory", "test-playbook.yml", ""},
-			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-i", "/var/inventory", "test-playbook.yml", "-e", "hello-world"},
+			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas"},
 		},
 		{
 			// Windows, no proxy, with extra vars.
+			TestName: "Windows, no proxy, with extra vars.",
 			UseProxy: confighelper.TriFalse,
 			generatedData: basicGenData(map[string]interface{}{
 				"ConnType": "winrm",
@@ -570,14 +578,51 @@ func TestCreateCmdArgs(t *testing.T) {
 			ExtraArguments:  []string{"-e", "hello-world"},
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas"},
 			callArgs:        []string{"123.45.67.89", "/var/inventory", "test-playbook.yml", ""},
-			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "-e", "ansible_password=ilovebananapancakes", "-i", "/var/inventory", "test-playbook.yml", "-e", "hello-world"},
+			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "-e", "ansible_password=ilovebananapancakes", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas"},
 		},
 		{
+			// SSH, use Password.
+			TestName: "SSH, use ansible_password.",
+			generatedData: basicGenData(map[string]interface{}{
+				"ConnType": "ssh",
+				"Password": "ilovebananapancakes",
+			}),
+			ExtraArguments:  []string{"-e", "hello-world", "-e", "ansible_password=ilovebananapancakes"},
+			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas"},
+			callArgs:        []string{"123.45.67.89", "/var/inventory", "test-playbook.yml", ""},
+			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-e", "ansible_password=ilovebananapancakes", "-e", "ansible_host_key_checking=False", "-i", "/var/inventory", "test-playbook.yml"},
+			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas"},
+		},
+		{
+			// SSH, use Password .
+			TestName: "SSH, already in ENV ansible_host_key_checking.",
+			generatedData: basicGenData(map[string]interface{}{
+				"ConnType": "ssh",
+				"Password": "ilovebananapancakes",
+			}),
+			ExtraArguments:  []string{"-e", "hello-world", "-e", "ansible_password=ilovebananapancakes"},
+			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas", "ANSIBLE_HOST_KEY_CHECKING=False"},
+			callArgs:        []string{"123.45.67.89", "/var/inventory", "test-playbook.yml", ""},
+			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-e", "ansible_password=ilovebananapancakes", "-i", "/var/inventory", "test-playbook.yml"},
+			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas", "ANSIBLE_HOST_KEY_CHECKING=False"},
+		},
+		{
+			TestName:        "Use PrivateKey",
+			PackerBuildName: "packerparty",
+			UseProxy:        confighelper.TriTrue,
+			generatedData:   basicGenData(nil),
+			ExtraArguments:  []string{"-e", "hello-world"},
+			callArgs:        []string{"", "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
+			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
+			ExpectedEnvVars: []string{},
+		},
+		{
 			// No builder name. This shouldn't cause an error, it just shouldn't be set. HCL, yo.
+			TestName:        "No builder name. This shouldn't cause an error, it just shouldn't be set. HCL, yo.",
 			generatedData:   basicGenData(nil),
 			callArgs:        []string{"", "/var/inventory", "test-playbook.yml", ""},
-			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "--ssh-extra-args", "-o IdentitiesOnly=yes", "-i", "/var/inventory", "test-playbook.yml"},
+			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{},
 		},
 	}
@@ -595,10 +640,11 @@ func TestCreateCmdArgs(t *testing.T) {
 
 		args, envVars := p.createCmdArgs(tc.callArgs[0], tc.callArgs[1], tc.callArgs[2], tc.callArgs[3])
 		assert.ElementsMatch(t, args, tc.ExpectedArgs,
-			"Args didn't match expected:\n\n expected: \n%s\n; recieved: \n%s\n", tc.ExpectedArgs, args)
-		assert.ElementsMatch(t, envVars, tc.ExpectedEnvVars, "EnvVars didn't match expected:\n\n expected: \n%s\n; recieved: \n%s\n", tc.ExpectedEnvVars, envVars)
+			"TestName: %s\nArgs didn't match expected:\nexpected: \n%s\n; recieved: \n%s\n", tc.TestName, tc.ExpectedArgs, args)
+		assert.ElementsMatch(t, envVars, tc.ExpectedEnvVars,
+			"TestName: %s\nArgs didn't match expected:\n\nEnvVars didn't match expected:\n\n expected: \n%s\n; recieved: \n%s\n", tc.TestName, tc.ExpectedEnvVars, envVars)
 		assert.EqualValues(t, tc.callArgs[2], args[len(args)-1],
-			"PlayBook File Not Returned as last element: \nexpected: %s\nrecieved: %s\n", tc.callArgs[2], args[len(args)-1])
+			"TestName: %s\nPlayBook File Not Returned as last element: \nexpected: %s\nrecieved: %s\n", tc.TestName, tc.callArgs[2], args[len(args)-1])
 	}
 }
 
