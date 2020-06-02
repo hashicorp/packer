@@ -13,7 +13,8 @@ import (
 )
 
 type ConfigParamsConfig struct {
-	// Custom parameters.
+	// configuration_parameters is a direct passthrough to the VSphere API's
+	// ConfigSpec: https://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.vm.ConfigSpec.html
 	ConfigParams map[string]string `mapstructure:"configuration_parameters"`
 }
 

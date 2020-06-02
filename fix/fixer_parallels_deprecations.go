@@ -9,6 +9,10 @@ import (
 // "guest_os_type", possibly overwriting any existing "guest_os_type"
 type FixerParallelsDeprecations struct{}
 
+func (FixerParallelsDeprecations) DeprecatedOptions() []string {
+	return []string{"parallels_tools_host_path", "guest_os_distribution"}
+}
+
 func (FixerParallelsDeprecations) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// The type we'll decode into; we only care about builders
 	type template struct {

@@ -11,67 +11,67 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName         *string                           `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType       *string                           `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug             *bool                             `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce             *bool                             `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError           *string                           `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars          map[string]string                 `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars     []string                          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	AMIName                 *string                           `mapstructure:"ami_name" required:"true" cty:"ami_name"`
-	AMIDescription          *string                           `mapstructure:"ami_description" required:"false" cty:"ami_description"`
-	AMIVirtType             *string                           `mapstructure:"ami_virtualization_type" required:"false" cty:"ami_virtualization_type"`
-	AMIUsers                []string                          `mapstructure:"ami_users" required:"false" cty:"ami_users"`
-	AMIGroups               []string                          `mapstructure:"ami_groups" required:"false" cty:"ami_groups"`
-	AMIProductCodes         []string                          `mapstructure:"ami_product_codes" required:"false" cty:"ami_product_codes"`
-	AMIRegions              []string                          `mapstructure:"ami_regions" required:"false" cty:"ami_regions"`
-	AMISkipRegionValidation *bool                             `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation"`
-	AMITags                 map[string]string                 `mapstructure:"tags" required:"false" cty:"tags"`
-	AMITag                  []hcl2template.FlatKeyValue       `mapstructure:"tag" required:"false" cty:"tag"`
-	AMIENASupport           *bool                             `mapstructure:"ena_support" required:"false" cty:"ena_support"`
-	AMISriovNetSupport      *bool                             `mapstructure:"sriov_support" required:"false" cty:"sriov_support"`
-	AMIForceDeregister      *bool                             `mapstructure:"force_deregister" required:"false" cty:"force_deregister"`
-	AMIForceDeleteSnapshot  *bool                             `mapstructure:"force_delete_snapshot" required:"false" cty:"force_delete_snapshot"`
-	AMIEncryptBootVolume    *bool                             `mapstructure:"encrypt_boot" required:"false" cty:"encrypt_boot"`
-	AMIKmsKeyId             *string                           `mapstructure:"kms_key_id" required:"false" cty:"kms_key_id"`
-	AMIRegionKMSKeyIDs      map[string]string                 `mapstructure:"region_kms_key_ids" required:"false" cty:"region_kms_key_ids"`
-	AMISkipBuildRegion      *bool                             `mapstructure:"skip_save_build_region" cty:"skip_save_build_region"`
-	SnapshotTags            map[string]string                 `mapstructure:"snapshot_tags" required:"false" cty:"snapshot_tags"`
-	SnapshotTag             []hcl2template.FlatKeyValue       `mapstructure:"snapshot_tag" required:"false" cty:"snapshot_tag"`
-	SnapshotUsers           []string                          `mapstructure:"snapshot_users" required:"false" cty:"snapshot_users"`
-	SnapshotGroups          []string                          `mapstructure:"snapshot_groups" required:"false" cty:"snapshot_groups"`
-	AccessKey               *string                           `mapstructure:"access_key" required:"true" cty:"access_key"`
-	CustomEndpointEc2       *string                           `mapstructure:"custom_endpoint_ec2" required:"false" cty:"custom_endpoint_ec2"`
-	DecodeAuthZMessages     *bool                             `mapstructure:"decode_authorization_messages" required:"false" cty:"decode_authorization_messages"`
-	InsecureSkipTLSVerify   *bool                             `mapstructure:"insecure_skip_tls_verify" required:"false" cty:"insecure_skip_tls_verify"`
-	MaxRetries              *int                              `mapstructure:"max_retries" required:"false" cty:"max_retries"`
-	MFACode                 *string                           `mapstructure:"mfa_code" required:"false" cty:"mfa_code"`
-	ProfileName             *string                           `mapstructure:"profile" required:"false" cty:"profile"`
-	RawRegion               *string                           `mapstructure:"region" required:"true" cty:"region"`
-	SecretKey               *string                           `mapstructure:"secret_key" required:"true" cty:"secret_key"`
-	SkipMetadataApiCheck    *bool                             `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check"`
-	Token                   *string                           `mapstructure:"token" required:"false" cty:"token"`
-	VaultAWSEngine          *common.FlatVaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false" cty:"vault_aws_engine"`
-	AMIMappings             []common.FlatBlockDevice          `mapstructure:"ami_block_device_mappings" hcl2-schema-generator:"ami_block_device_mappings,direct" required:"false" cty:"ami_block_device_mappings"`
-	ChrootMounts            [][]string                        `mapstructure:"chroot_mounts" required:"false" cty:"chroot_mounts"`
-	CommandWrapper          *string                           `mapstructure:"command_wrapper" required:"false" cty:"command_wrapper"`
-	CopyFiles               []string                          `mapstructure:"copy_files" required:"false" cty:"copy_files"`
-	DevicePath              *string                           `mapstructure:"device_path" required:"false" cty:"device_path"`
-	NVMEDevicePath          *string                           `mapstructure:"nvme_device_path" required:"false" cty:"nvme_device_path"`
-	FromScratch             *bool                             `mapstructure:"from_scratch" required:"false" cty:"from_scratch"`
-	MountOptions            []string                          `mapstructure:"mount_options" required:"false" cty:"mount_options"`
-	MountPartition          *string                           `mapstructure:"mount_partition" required:"false" cty:"mount_partition"`
-	MountPath               *string                           `mapstructure:"mount_path" required:"false" cty:"mount_path"`
-	PostMountCommands       []string                          `mapstructure:"post_mount_commands" required:"false" cty:"post_mount_commands"`
-	PreMountCommands        []string                          `mapstructure:"pre_mount_commands" required:"false" cty:"pre_mount_commands"`
-	RootDeviceName          *string                           `mapstructure:"root_device_name" required:"false" cty:"root_device_name"`
-	RootVolumeSize          *int64                            `mapstructure:"root_volume_size" required:"false" cty:"root_volume_size"`
-	RootVolumeType          *string                           `mapstructure:"root_volume_type" required:"false" cty:"root_volume_type"`
-	SourceAmi               *string                           `mapstructure:"source_ami" required:"true" cty:"source_ami"`
-	SourceAmiFilter         *common.FlatAmiFilterOptions      `mapstructure:"source_ami_filter" required:"false" cty:"source_ami_filter"`
-	RootVolumeTags          map[string]string                 `mapstructure:"root_volume_tags" required:"false" cty:"root_volume_tags"`
-	RootVolumeTag           []hcl2template.FlatKeyValue       `mapstructure:"root_volume_tag" required:"false" cty:"root_volume_tag"`
-	Architecture            *string                           `mapstructure:"ami_architecture" required:"false" cty:"ami_architecture"`
+	PackerBuildName         *string                           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType       *string                           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug             *bool                             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce             *bool                             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError           *string                           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars          map[string]string                 `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars     []string                          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	AMIName                 *string                           `mapstructure:"ami_name" required:"true" cty:"ami_name" hcl:"ami_name"`
+	AMIDescription          *string                           `mapstructure:"ami_description" required:"false" cty:"ami_description" hcl:"ami_description"`
+	AMIVirtType             *string                           `mapstructure:"ami_virtualization_type" required:"false" cty:"ami_virtualization_type" hcl:"ami_virtualization_type"`
+	AMIUsers                []string                          `mapstructure:"ami_users" required:"false" cty:"ami_users" hcl:"ami_users"`
+	AMIGroups               []string                          `mapstructure:"ami_groups" required:"false" cty:"ami_groups" hcl:"ami_groups"`
+	AMIProductCodes         []string                          `mapstructure:"ami_product_codes" required:"false" cty:"ami_product_codes" hcl:"ami_product_codes"`
+	AMIRegions              []string                          `mapstructure:"ami_regions" required:"false" cty:"ami_regions" hcl:"ami_regions"`
+	AMISkipRegionValidation *bool                             `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation" hcl:"skip_region_validation"`
+	AMITags                 map[string]string                 `mapstructure:"tags" required:"false" cty:"tags" hcl:"tags"`
+	AMITag                  []hcl2template.FlatKeyValue       `mapstructure:"tag" required:"false" cty:"tag" hcl:"tag"`
+	AMIENASupport           *bool                             `mapstructure:"ena_support" required:"false" cty:"ena_support" hcl:"ena_support"`
+	AMISriovNetSupport      *bool                             `mapstructure:"sriov_support" required:"false" cty:"sriov_support" hcl:"sriov_support"`
+	AMIForceDeregister      *bool                             `mapstructure:"force_deregister" required:"false" cty:"force_deregister" hcl:"force_deregister"`
+	AMIForceDeleteSnapshot  *bool                             `mapstructure:"force_delete_snapshot" required:"false" cty:"force_delete_snapshot" hcl:"force_delete_snapshot"`
+	AMIEncryptBootVolume    *bool                             `mapstructure:"encrypt_boot" required:"false" cty:"encrypt_boot" hcl:"encrypt_boot"`
+	AMIKmsKeyId             *string                           `mapstructure:"kms_key_id" required:"false" cty:"kms_key_id" hcl:"kms_key_id"`
+	AMIRegionKMSKeyIDs      map[string]string                 `mapstructure:"region_kms_key_ids" required:"false" cty:"region_kms_key_ids" hcl:"region_kms_key_ids"`
+	AMISkipBuildRegion      *bool                             `mapstructure:"skip_save_build_region" cty:"skip_save_build_region" hcl:"skip_save_build_region"`
+	SnapshotTags            map[string]string                 `mapstructure:"snapshot_tags" required:"false" cty:"snapshot_tags" hcl:"snapshot_tags"`
+	SnapshotTag             []hcl2template.FlatKeyValue       `mapstructure:"snapshot_tag" required:"false" cty:"snapshot_tag" hcl:"snapshot_tag"`
+	SnapshotUsers           []string                          `mapstructure:"snapshot_users" required:"false" cty:"snapshot_users" hcl:"snapshot_users"`
+	SnapshotGroups          []string                          `mapstructure:"snapshot_groups" required:"false" cty:"snapshot_groups" hcl:"snapshot_groups"`
+	AccessKey               *string                           `mapstructure:"access_key" required:"true" cty:"access_key" hcl:"access_key"`
+	CustomEndpointEc2       *string                           `mapstructure:"custom_endpoint_ec2" required:"false" cty:"custom_endpoint_ec2" hcl:"custom_endpoint_ec2"`
+	DecodeAuthZMessages     *bool                             `mapstructure:"decode_authorization_messages" required:"false" cty:"decode_authorization_messages" hcl:"decode_authorization_messages"`
+	InsecureSkipTLSVerify   *bool                             `mapstructure:"insecure_skip_tls_verify" required:"false" cty:"insecure_skip_tls_verify" hcl:"insecure_skip_tls_verify"`
+	MaxRetries              *int                              `mapstructure:"max_retries" required:"false" cty:"max_retries" hcl:"max_retries"`
+	MFACode                 *string                           `mapstructure:"mfa_code" required:"false" cty:"mfa_code" hcl:"mfa_code"`
+	ProfileName             *string                           `mapstructure:"profile" required:"false" cty:"profile" hcl:"profile"`
+	RawRegion               *string                           `mapstructure:"region" required:"true" cty:"region" hcl:"region"`
+	SecretKey               *string                           `mapstructure:"secret_key" required:"true" cty:"secret_key" hcl:"secret_key"`
+	SkipMetadataApiCheck    *bool                             `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check" hcl:"skip_metadata_api_check"`
+	Token                   *string                           `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
+	VaultAWSEngine          *common.FlatVaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false" cty:"vault_aws_engine" hcl:"vault_aws_engine"`
+	AMIMappings             []common.FlatBlockDevice          `mapstructure:"ami_block_device_mappings" hcl2-schema-generator:"ami_block_device_mappings,direct" required:"false" cty:"ami_block_device_mappings" hcl:"ami_block_device_mappings"`
+	ChrootMounts            [][]string                        `mapstructure:"chroot_mounts" required:"false" cty:"chroot_mounts" hcl:"chroot_mounts"`
+	CommandWrapper          *string                           `mapstructure:"command_wrapper" required:"false" cty:"command_wrapper" hcl:"command_wrapper"`
+	CopyFiles               []string                          `mapstructure:"copy_files" required:"false" cty:"copy_files" hcl:"copy_files"`
+	DevicePath              *string                           `mapstructure:"device_path" required:"false" cty:"device_path" hcl:"device_path"`
+	NVMEDevicePath          *string                           `mapstructure:"nvme_device_path" required:"false" cty:"nvme_device_path" hcl:"nvme_device_path"`
+	FromScratch             *bool                             `mapstructure:"from_scratch" required:"false" cty:"from_scratch" hcl:"from_scratch"`
+	MountOptions            []string                          `mapstructure:"mount_options" required:"false" cty:"mount_options" hcl:"mount_options"`
+	MountPartition          *string                           `mapstructure:"mount_partition" required:"false" cty:"mount_partition" hcl:"mount_partition"`
+	MountPath               *string                           `mapstructure:"mount_path" required:"false" cty:"mount_path" hcl:"mount_path"`
+	PostMountCommands       []string                          `mapstructure:"post_mount_commands" required:"false" cty:"post_mount_commands" hcl:"post_mount_commands"`
+	PreMountCommands        []string                          `mapstructure:"pre_mount_commands" required:"false" cty:"pre_mount_commands" hcl:"pre_mount_commands"`
+	RootDeviceName          *string                           `mapstructure:"root_device_name" required:"false" cty:"root_device_name" hcl:"root_device_name"`
+	RootVolumeSize          *int64                            `mapstructure:"root_volume_size" required:"false" cty:"root_volume_size" hcl:"root_volume_size"`
+	RootVolumeType          *string                           `mapstructure:"root_volume_type" required:"false" cty:"root_volume_type" hcl:"root_volume_type"`
+	SourceAmi               *string                           `mapstructure:"source_ami" required:"true" cty:"source_ami" hcl:"source_ami"`
+	SourceAmiFilter         *common.FlatAmiFilterOptions      `mapstructure:"source_ami_filter" required:"false" cty:"source_ami_filter" hcl:"source_ami_filter"`
+	RootVolumeTags          map[string]string                 `mapstructure:"root_volume_tags" required:"false" cty:"root_volume_tags" hcl:"root_volume_tags"`
+	RootVolumeTag           []hcl2template.FlatKeyValue       `mapstructure:"root_volume_tag" required:"false" cty:"root_volume_tag" hcl:"root_volume_tag"`
+	Architecture            *string                           `mapstructure:"ami_architecture" required:"false" cty:"ami_architecture" hcl:"ami_architecture"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

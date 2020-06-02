@@ -9,9 +9,9 @@ import (
 // FlattencentCloudDataDisk is an auto-generated flat version of tencentCloudDataDisk.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlattencentCloudDataDisk struct {
-	DiskType   *string `mapstructure:"disk_type" cty:"disk_type"`
-	DiskSize   *int64  `mapstructure:"disk_size" cty:"disk_size"`
-	SnapshotId *string `mapstructure:"disk_snapshot_id" cty:"disk_snapshot_id"`
+	DiskType   *string `mapstructure:"disk_type" cty:"disk_type" hcl:"disk_type"`
+	DiskSize   *int64  `mapstructure:"disk_size" cty:"disk_size" hcl:"disk_size"`
+	SnapshotId *string `mapstructure:"disk_snapshot_id" cty:"disk_snapshot_id" hcl:"disk_snapshot_id"`
 }
 
 // FlatMapstructure returns a new FlattencentCloudDataDisk.

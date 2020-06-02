@@ -10,41 +10,41 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName       *string                           `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType     *string                           `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug           *bool                             `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce           *bool                             `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError         *string                           `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars        map[string]string                 `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars   []string                          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	AccessKey             *string                           `mapstructure:"access_key" required:"true" cty:"access_key"`
-	CustomEndpointEc2     *string                           `mapstructure:"custom_endpoint_ec2" required:"false" cty:"custom_endpoint_ec2"`
-	DecodeAuthZMessages   *bool                             `mapstructure:"decode_authorization_messages" required:"false" cty:"decode_authorization_messages"`
-	InsecureSkipTLSVerify *bool                             `mapstructure:"insecure_skip_tls_verify" required:"false" cty:"insecure_skip_tls_verify"`
-	MaxRetries            *int                              `mapstructure:"max_retries" required:"false" cty:"max_retries"`
-	MFACode               *string                           `mapstructure:"mfa_code" required:"false" cty:"mfa_code"`
-	ProfileName           *string                           `mapstructure:"profile" required:"false" cty:"profile"`
-	RawRegion             *string                           `mapstructure:"region" required:"true" cty:"region"`
-	SecretKey             *string                           `mapstructure:"secret_key" required:"true" cty:"secret_key"`
-	SkipValidation        *bool                             `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation"`
-	SkipMetadataApiCheck  *bool                             `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check"`
-	Token                 *string                           `mapstructure:"token" required:"false" cty:"token"`
-	VaultAWSEngine        *common.FlatVaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false" cty:"vault_aws_engine"`
-	S3Bucket              *string                           `mapstructure:"s3_bucket_name" cty:"s3_bucket_name"`
-	S3Key                 *string                           `mapstructure:"s3_key_name" cty:"s3_key_name"`
-	S3Encryption          *string                           `mapstructure:"s3_encryption" cty:"s3_encryption"`
-	S3EncryptionKey       *string                           `mapstructure:"s3_encryption_key" cty:"s3_encryption_key"`
-	SkipClean             *bool                             `mapstructure:"skip_clean" cty:"skip_clean"`
-	Tags                  map[string]string                 `mapstructure:"tags" cty:"tags"`
-	Name                  *string                           `mapstructure:"ami_name" cty:"ami_name"`
-	Description           *string                           `mapstructure:"ami_description" cty:"ami_description"`
-	Users                 []string                          `mapstructure:"ami_users" cty:"ami_users"`
-	Groups                []string                          `mapstructure:"ami_groups" cty:"ami_groups"`
-	Encrypt               *bool                             `mapstructure:"ami_encrypt" cty:"ami_encrypt"`
-	KMSKey                *string                           `mapstructure:"ami_kms_key" cty:"ami_kms_key"`
-	LicenseType           *string                           `mapstructure:"license_type" cty:"license_type"`
-	RoleName              *string                           `mapstructure:"role_name" cty:"role_name"`
-	Format                *string                           `mapstructure:"format" cty:"format"`
+	PackerBuildName       *string                           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType     *string                           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug           *bool                             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce           *bool                             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError         *string                           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars        map[string]string                 `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars   []string                          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	AccessKey             *string                           `mapstructure:"access_key" required:"true" cty:"access_key" hcl:"access_key"`
+	CustomEndpointEc2     *string                           `mapstructure:"custom_endpoint_ec2" required:"false" cty:"custom_endpoint_ec2" hcl:"custom_endpoint_ec2"`
+	DecodeAuthZMessages   *bool                             `mapstructure:"decode_authorization_messages" required:"false" cty:"decode_authorization_messages" hcl:"decode_authorization_messages"`
+	InsecureSkipTLSVerify *bool                             `mapstructure:"insecure_skip_tls_verify" required:"false" cty:"insecure_skip_tls_verify" hcl:"insecure_skip_tls_verify"`
+	MaxRetries            *int                              `mapstructure:"max_retries" required:"false" cty:"max_retries" hcl:"max_retries"`
+	MFACode               *string                           `mapstructure:"mfa_code" required:"false" cty:"mfa_code" hcl:"mfa_code"`
+	ProfileName           *string                           `mapstructure:"profile" required:"false" cty:"profile" hcl:"profile"`
+	RawRegion             *string                           `mapstructure:"region" required:"true" cty:"region" hcl:"region"`
+	SecretKey             *string                           `mapstructure:"secret_key" required:"true" cty:"secret_key" hcl:"secret_key"`
+	SkipValidation        *bool                             `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation" hcl:"skip_region_validation"`
+	SkipMetadataApiCheck  *bool                             `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check" hcl:"skip_metadata_api_check"`
+	Token                 *string                           `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
+	VaultAWSEngine        *common.FlatVaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false" cty:"vault_aws_engine" hcl:"vault_aws_engine"`
+	S3Bucket              *string                           `mapstructure:"s3_bucket_name" cty:"s3_bucket_name" hcl:"s3_bucket_name"`
+	S3Key                 *string                           `mapstructure:"s3_key_name" cty:"s3_key_name" hcl:"s3_key_name"`
+	S3Encryption          *string                           `mapstructure:"s3_encryption" cty:"s3_encryption" hcl:"s3_encryption"`
+	S3EncryptionKey       *string                           `mapstructure:"s3_encryption_key" cty:"s3_encryption_key" hcl:"s3_encryption_key"`
+	SkipClean             *bool                             `mapstructure:"skip_clean" cty:"skip_clean" hcl:"skip_clean"`
+	Tags                  map[string]string                 `mapstructure:"tags" cty:"tags" hcl:"tags"`
+	Name                  *string                           `mapstructure:"ami_name" cty:"ami_name" hcl:"ami_name"`
+	Description           *string                           `mapstructure:"ami_description" cty:"ami_description" hcl:"ami_description"`
+	Users                 []string                          `mapstructure:"ami_users" cty:"ami_users" hcl:"ami_users"`
+	Groups                []string                          `mapstructure:"ami_groups" cty:"ami_groups" hcl:"ami_groups"`
+	Encrypt               *bool                             `mapstructure:"ami_encrypt" cty:"ami_encrypt" hcl:"ami_encrypt"`
+	KMSKey                *string                           `mapstructure:"ami_kms_key" cty:"ami_kms_key" hcl:"ami_kms_key"`
+	LicenseType           *string                           `mapstructure:"license_type" cty:"license_type" hcl:"license_type"`
+	RoleName              *string                           `mapstructure:"role_name" cty:"role_name" hcl:"role_name"`
+	Format                *string                           `mapstructure:"format" cty:"format" hcl:"format"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

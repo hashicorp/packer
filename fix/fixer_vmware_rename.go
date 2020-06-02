@@ -4,8 +4,12 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// FixerVMwareRename changes "virtualbox" builders to "virtualbox-iso"
+// FixerVMwareRename changes "vmware" builders to "vmware-iso"
 type FixerVMwareRename struct{}
+
+func (FixerVMwareRename) DeprecatedOptions() []string {
+	return []string{}
+}
 
 func (FixerVMwareRename) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// The type we'll decode into; we only care about builders

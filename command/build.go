@@ -135,8 +135,11 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	}
 
 	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
-		Only:   cla.Only,
-		Except: cla.Except,
+		Only:    cla.Only,
+		Except:  cla.Except,
+		Debug:   cla.Debug,
+		Force:   cla.Force,
+		OnError: cla.OnError,
 	})
 
 	// here, something could have gone wrong but we still want to run valid
@@ -184,29 +187,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	log.Printf("Build debug mode: %v", cla.Debug)
 	log.Printf("Force build: %v", cla.Force)
 	log.Printf("On error: %v", cla.OnError)
-
-	// Set the debug and force mode and prepare all the builds
-	for i := range builds {
-		b := builds[i]
-		log.Printf("Preparing build: %s", b.Name())
-		b.SetDebug(cla.Debug)
-		b.SetForce(cla.Force)
-		b.SetOnError(cla.OnError)
-
-		warnings, err := b.Prepare()
-		if err != nil {
-			c.Ui.Error(err.Error())
-			return 1
-		}
-		if len(warnings) > 0 {
-			ui := buildUis[b]
-			ui.Say(fmt.Sprintf("Warnings for build '%s':\n", b.Name()))
-			for _, warning := range warnings {
-				ui.Say(fmt.Sprintf("* %s", warning))
-			}
-			ui.Say("")
-		}
-	}
 
 	// Run all the builds in parallel and wait for them to complete
 	var wg sync.WaitGroup

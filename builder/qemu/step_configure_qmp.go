@@ -20,15 +20,15 @@ import (
 //
 // Produces:
 type stepConfigureQMP struct {
-	monitor        *qmp.SocketMonitor
-	VNCUsePassword bool
-	QMPSocketPath  string
+	monitor       *qmp.SocketMonitor
+	QMPSocketPath string
 }
 
 func (s *stepConfigureQMP) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	if !s.VNCUsePassword {
+	if !config.QMPEnable {
 		return multistep.ActionContinue
 	}
 
@@ -46,12 +46,10 @@ func (s *stepConfigureQMP) Run(ctx context.Context, state multistep.StateBag) mu
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	QMPMonitor := s.monitor
-	vncPassword := state.Get("vnc_password")
 
 	// Connect to QMP
 	// function automatically calls capabilities so is immediately ready for commands
-	err = QMPMonitor.Connect()
+	err = s.monitor.Connect()
 	if err != nil {
 		err := fmt.Errorf("Error connecting to QMP socket: %s", err)
 		state.Put("error", err)
@@ -60,21 +58,22 @@ func (s *stepConfigureQMP) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 	log.Printf("QMP socket open SUCCESS")
 
-	cmd = []byte(fmt.Sprintf("{ \"execute\": \"change-vnc-password\", \"arguments\": { \"password\": \"%s\" } }",
-		vncPassword))
-	result, err = QMPMonitor.Run(cmd)
-	if err != nil {
-		err := fmt.Errorf("Error connecting to QMP socket: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	vncPassword := state.Get("vnc_password")
+	if vncPassword != "" {
+		cmd = []byte(fmt.Sprintf("{ \"execute\": \"change-vnc-password\", \"arguments\": { \"password\": \"%s\" } }",
+			vncPassword))
+		result, err = s.monitor.Run(cmd)
+		if err != nil {
+			err := fmt.Errorf("Error connecting to QMP socket: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		log.Printf("QMP Command: %s\nResult: %s", cmd, result)
 	}
 
-	log.Printf("QMP Command: %s\nResult: %s", cmd, result)
-
-	// Put QMP monitor in statebag in case there is a use in a following step
-	// Uncomment for future case as it is unused for now
-	//state.Put("qmp_monitor", QMPMonitor)
+	// make the qmp_monitor available to other steps.
+	state.Put("qmp_monitor", s.monitor)
 
 	return multistep.ActionContinue
 }

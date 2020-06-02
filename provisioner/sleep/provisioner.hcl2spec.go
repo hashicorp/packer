@@ -9,7 +9,7 @@ import (
 // FlatProvisioner is an auto-generated flat version of Provisioner.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatProvisioner struct {
-	Duration *string `cty:"duration"`
+	Duration *string `cty:"duration" hcl:"duration"`
 }
 
 // FlatMapstructure returns a new FlatProvisioner.

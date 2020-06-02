@@ -23,16 +23,18 @@ Type: `artifice`
 
 The artifice post-processor overrides the artifact list from an upstream
 builder or post-processor. All downstream post-processors will see the new
-artifacts you specify. The primary use-case is to build artifacts inside a
-packer builder -- for example, spinning up an EC2 instance to build a docker
-container -- and then extracting the docker container and throwing away the EC2
-instance.
+artifacts you specify.
 
 After overriding the artifact with artifice, you can use it with other
-post-processors like
-[compress](/docs/post-processors/compress),
-[docker-push](/docs/post-processors/docker-push), or
-a third-party post-processor.
+post-processors, including most of the core post-processors and third-party
+post-processors.
+
+A major benefit of this is that you can modify builder
+artifacts using shell-local and pass those modified artifacts into
+post-processors that may not have worked with the original builder.
+For example, maybe you want to export a docker container from an amazon-ebs
+builder and then use Docker-push to put that Docker container into your Docker
+Hub account.
 
 Artifice allows you to use the familiar packer workflow to create a fresh,
 stateless build environment for each build on the infrastructure of your

@@ -199,6 +199,8 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 	return cbp, nil
 }
 
+// This is used for json templates to launch the build plugins.
+// They will be prepared via b.Prepare() later.
 func (c *Core) GetBuilds(opts GetBuildsOptions) ([]Build, hcl.Diagnostics) {
 	buildNames := c.BuildNames(opts.Only, opts.Except)
 	builds := []Build{}
@@ -213,7 +215,35 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]Build, hcl.Diagnostics) {
 			})
 			continue
 		}
+
+		// Now that build plugin has been launched, call Prepare()
+		log.Printf("Preparing build: %s", b.Name())
+		b.SetDebug(opts.Debug)
+		b.SetForce(opts.Force)
+		b.SetOnError(opts.OnError)
+
+		warnings, err := b.Prepare()
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  fmt.Sprintf("Failed to prepare build: %q", n),
+				Detail:   err.Error(),
+			})
+			continue
+		}
+
+		// Only append builds to list if the Prepare() is successful.
 		builds = append(builds, b)
+
+		if len(warnings) > 0 {
+			for _, warning := range warnings {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagWarning,
+					Summary:  fmt.Sprintf("Warning when preparing build: %q", n),
+					Detail:   warning,
+				})
+			}
+		}
 	}
 	return builds, diags
 }
@@ -225,6 +255,12 @@ func (c *Core) Build(n string) (Build, error) {
 	if !ok {
 		return nil, fmt.Errorf("no such build found: %s", n)
 	}
+	// BuilderStore = config.Builders, gathered in loadConfig() in main.go
+	// For reference, the builtin BuilderStore is generated in
+	// packer/config.go in the Discover() func.
+
+	// the Start command launches the builder plugin of the given type without
+	// calling Prepare() or passing any build-specific details.
 	builder, err := c.components.BuilderStore.Start(configBuilder.Type)
 	if err != nil {
 		return nil, fmt.Errorf(
@@ -315,6 +351,8 @@ func (c *Core) Build(n string) (Build, error) {
 
 	// TODO hooks one day
 
+	// Return a structure that contains the plugins, their types, variables, and
+	// the raw builder config loaded from the json template
 	return &CoreBuild{
 		Type:               n,
 		Builder:            builder,

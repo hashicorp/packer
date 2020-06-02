@@ -1,7 +1,7 @@
 package uuid
 
 import (
-	uuid "github.com/hashicorp/go-uuid"
+	"github.com/google/uuid"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/function"
 )
@@ -10,11 +10,11 @@ var V4Func = function.New(&function.Spec{
 	Params: []function.Parameter{},
 	Type:   function.StaticReturnType(cty.String),
 	Impl: func(args []cty.Value, retType cty.Type) (ret cty.Value, err error) {
-		result, err := uuid.GenerateUUID()
+		uuid, err := uuid.NewRandom()
 		if err != nil {
 			return cty.UnknownVal(cty.String), err
 		}
-		return cty.StringVal(result), nil
+		return cty.StringVal(uuid.String()), nil
 	},
 })
 

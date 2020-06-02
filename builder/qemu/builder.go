@@ -185,6 +185,16 @@ type Config struct {
 	// `vmxnet3`, `i82558a` or `i82558b`. The Qemu builder uses `virtio-net` by
 	// default.
 	NetDevice string `mapstructure:"net_device" required:"false"`
+	// Connects the network to this bridge instead of using the user mode
+	// networking.
+	//
+	// **NB** This bridge must already exist. You can use the `virbr0` bridge
+	// as created by vagrant-libvirt.
+	//
+	// **NB** This will automatically enable the QMP socket (see QMPEnable).
+	//
+	// **NB** This only works in Linux based OSes.
+	NetBridge string `mapstructure:"net_bridge" required:"false"`
 	// This is the path to the directory where the
 	// resulting virtual machine will be created. This may be relative or absolute.
 	// If relative, the path is relative to the working directory when packer
@@ -455,7 +465,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	if b.config.ISOSkipCache {
-		b.config.ISOChecksumType = "none"
+		b.config.ISOChecksum = "none"
 	}
 	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
 	warnings = append(warnings, isoWarnings...)
@@ -534,7 +544,16 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
 	}
 
-	if b.config.VNCUsePassword && b.config.QMPSocketPath == "" {
+	if b.config.NetBridge != "" && runtime.GOOS != "linux" {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("net_bridge is only supported in Linux based OSes"))
+	}
+
+	if b.config.NetBridge != "" || b.config.VNCUsePassword {
+		b.config.QMPEnable = true
+	}
+
+	if b.config.QMPEnable && b.config.QMPSocketPath == "" {
 		socketName := fmt.Sprintf("%s.monitor", b.config.VMName)
 		b.config.QMPSocketPath = filepath.Join(b.config.OutputDir, socketName)
 	}
@@ -569,13 +588,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	steps := []multistep.Step{}
 	if !b.config.ISOSkipCache {
 		steps = append(steps, &common.StepDownload{
-			Checksum:     b.config.ISOChecksum,
-			ChecksumType: b.config.ISOChecksumType,
-			Description:  "ISO",
-			Extension:    b.config.TargetExtension,
-			ResultKey:    "iso_path",
-			TargetPath:   b.config.TargetPath,
-			Url:          b.config.ISOUrls,
+			Checksum:    b.config.ISOChecksum,
+			Description: "ISO",
+			Extension:   b.config.TargetExtension,
+			ResultKey:   "iso_path",
+			TargetPath:  b.config.TargetPath,
+			Url:         b.config.ISOUrls,
 		},
 		)
 	} else {
@@ -603,7 +621,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 	)
 
-	if b.config.Comm.Type != "none" {
+	if b.config.Comm.Type != "none" && b.config.NetBridge == "" {
 		steps = append(steps,
 			new(stepForwardSSH),
 		)
@@ -613,11 +631,18 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		new(stepConfigureVNC),
 		steprun,
 		&stepConfigureQMP{
-			VNCUsePassword: b.config.VNCUsePassword,
-			QMPSocketPath:  b.config.QMPSocketPath,
+			QMPSocketPath: b.config.QMPSocketPath,
 		},
 		&stepTypeBootCommand{},
 	)
+
+	if b.config.Comm.Type != "none" && b.config.NetBridge != "" {
+		steps = append(steps,
+			&stepWaitGuestAddress{
+				timeout: b.config.Comm.SSHTimeout,
+			},
+		)
+	}
 
 	if b.config.Comm.Type != "none" {
 		steps = append(steps,

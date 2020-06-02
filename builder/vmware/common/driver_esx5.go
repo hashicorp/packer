@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -183,14 +184,14 @@ func (d *ESX5Driver) IsDestroyed() (bool, error) {
 	return true, err
 }
 
-func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType string) (string, error) {
+func (d *ESX5Driver) UploadISO(localPath string, checksum string) (string, error) {
 	finalPath := d.CachePath(localPath)
 	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
 	}
 
 	log.Printf("Verifying checksum of %s", finalPath)
-	if d.VerifyChecksum(checksumType, checksum, finalPath) {
+	if d.VerifyChecksum(checksum, finalPath) {
 		log.Println("Initial checksum matched, no upload needed.")
 		return finalPath, nil
 	}
@@ -679,20 +680,31 @@ func (d *ESX5Driver) Download(src, dst string) error {
 	return d.comm.Download(d.datastorePath(src), file)
 }
 
-func (d *ESX5Driver) VerifyChecksum(ctype string, hash string, file string) bool {
-	if ctype == "none" {
+func (d *ESX5Driver) VerifyChecksum(hash string, file string) bool {
+	if hash == "none" {
 		if err := d.sh("stat", strconv.Quote(file)); err != nil {
 			return false
 		}
-	} else {
-		stdin := bytes.NewBufferString(fmt.Sprintf("%s  %s", hash, file))
-		_, err := d.run(stdin, fmt.Sprintf("%ssum", ctype), "-c")
-		if err != nil {
-			return false
-		}
+		return true
 	}
 
-	return true
+	req := &getter.Request{
+		Src: file + "?checksum=" + hash,
+		// Here we don't want to set the PWD to avoid causing any security
+		// concerns. In case the checksum is in a file, the caller, ( mainly
+		// ISOConfig.Prepare ) step should have downloaded it and made it a
+		// simple string.
+	}
+	fcksum, err := getter.DefaultClient.GetChecksum(context.TODO(), req)
+	if err != nil {
+		log.Printf("coulnd't get the checksum: %v", err)
+		return false
+	}
+	err = fcksum.Checksum(file)
+	if err != nil {
+		log.Printf("%v", err)
+	}
+	return err == nil
 }
 
 func (d *ESX5Driver) ssh(command string, stdin io.Reader) (*bytes.Buffer, error) {

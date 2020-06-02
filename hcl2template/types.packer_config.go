@@ -311,7 +311,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				}
 			}
 
-			builder, moreDiags, generatedVars := cfg.startBuilder(src, cfg.EvalContext(nil))
+			builder, moreDiags, generatedVars := cfg.startBuilder(src, cfg.EvalContext(nil), opts)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -354,12 +354,25 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 
 			pcb := &packer.CoreBuild{
 				BuildName:      build.Name,
-				Type:           src.Type,
+				Type:           src.Ref().String(),
 				Builder:        builder,
 				Provisioners:   provisioners,
 				PostProcessors: pps,
 				Prepared:       true,
 			}
+			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
+			// we did all the prep here.
+			_, err := pcb.Prepare()
+			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  fmt.Sprintf("Preparing packer core build %s failed", src.Ref().String()),
+					Detail:   err.Error(),
+					Subject:  build.HCL2Ref.DefRange.Ptr(),
+				})
+				continue
+			}
+
 			res = append(res, pcb)
 		}
 	}

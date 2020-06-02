@@ -94,6 +94,13 @@ more details about certain options in following sections.
   By default, the value of this config is
   `packer_{{.BuildName}}_{{.Provider}}.box`.
 
+- `provider_override` (string) - this option will override the internal logic
+  that decides which Vagrant provider to set for a particular Packer builder's
+  or post-processor's artifact. It is required when the artifact comes from the
+  Artifice post-processor, but is otherwise optional. Valid options are:
+  `digitalocean`, `virtualbox`, `azure`, `vmware`, `libvirt`, `docker`,
+  `lxc`, `scaleway`, `hyperv`, `parallels`, `aws`, or `google`.
+
 - `vagrantfile_template` (string) - Path to a template to use for the
   Vagrantfile that is packaged with the box.
 
@@ -179,3 +186,10 @@ accelerators: none, kvm, tcg, or hvf.
 If you are using the Vagrant post-processor with the `vmware-esxi` builder, you
 must export the builder artifact locally; the Vagrant post-processor will
 not work on remote artifacts.
+
+### Artifice
+
+If you are using this post-processor after defining an artifact using the
+Artifice post-processor, then you must set the "provider_override" template
+option so that the Vagrant post-processor knows what provider to use to create
+the Vagrant box.

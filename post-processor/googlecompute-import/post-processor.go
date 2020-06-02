@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/post-processor/artifice"
 	"github.com/hashicorp/packer/post-processor/compress"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -123,9 +124,12 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, err
 	}
 
-	if artifact.BuilderId() != compress.BuilderId {
-		err = fmt.Errorf(
-			"incompatible artifact type: %s\nCan only import from Compress post-processor artifacts",
+	switch artifact.BuilderId() {
+	case compress.BuilderId, artifice.BuilderId:
+		break
+	default:
+		err := fmt.Errorf(
+			"Unknown artifact type: %s\nCan only import from Compress post-processor and Artifice post-processor artifacts.",
 			artifact.BuilderId())
 		return nil, false, false, err
 	}

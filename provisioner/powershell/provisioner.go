@@ -98,13 +98,13 @@ type Provisioner struct {
 
 func (p *Provisioner) defaultExecuteCommand() string {
 	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
-		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
+		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};` +
+		`{set-variable -name variable:global:ErrorActionPreference -value 'Continue'};`
 
 	if p.config.DebugMode != 0 {
 		baseCmd += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
 	}
-
-	baseCmd += `. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
+	baseCmd += `. {{.Vars}};try { & '{{.Path}}' } catch { Write-Error $Error[0]; exit 1 }; if ($LastExitCode) { exit $LastExitCode }}`
 
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
 		return baseCmd
@@ -371,10 +371,11 @@ func (p *Provisioner) createRemoteCleanUpCommand(remoteFiles []string) (string, 
 		return "", fmt.Errorf("clean up script %q failed to upload: %s", remotePath, err)
 	}
 
-	data := map[string]string{
-		"Path": remotePath,
-		"Vars": p.config.RemoteEnvVarPath,
-	}
+	data := p.generatedData
+	data["Path"] = remotePath
+	data["Vars"] = p.config.RemoteEnvVarPath
+	p.config.ctx.Data = data
+
 	p.config.ctx.Data = data
 	return interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 }
@@ -404,17 +405,17 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 	envVars["PACKER_BUILDER_TYPE"] = p.config.PackerBuilderType
 
 	// expose ip address variables
-	httpAddr := common.GetHTTPAddr()
-	if httpAddr != "" {
-		envVars["PACKER_HTTP_ADDR"] = httpAddr
+	httpAddr := p.generatedData["PackerHTTPAddr"]
+	if httpAddr != nil && httpAddr != common.HttpAddrNotImplemented {
+		envVars["PACKER_HTTP_ADDR"] = httpAddr.(string)
 	}
-	httpIP := common.GetHTTPIP()
-	if httpIP != "" {
-		envVars["PACKER_HTTP_IP"] = httpIP
+	httpIP := p.generatedData["PackerHTTPIP"]
+	if httpIP != nil && httpIP != common.HttpIPNotImplemented {
+		envVars["PACKER_HTTP_IP"] = httpIP.(string)
 	}
-	httpPort := common.GetHTTPPort()
-	if httpPort != "" {
-		envVars["PACKER_HTTP_PORT"] = httpPort
+	httpPort := p.generatedData["PackerHTTPPort"]
+	if httpPort != nil && httpPort != common.HttpPortNotImplemented {
+		envVars["PACKER_HTTP_PORT"] = httpPort.(string)
 	}
 
 	// interpolate environment variables

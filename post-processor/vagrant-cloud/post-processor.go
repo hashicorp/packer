@@ -130,7 +130,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
 		return nil, false, false, fmt.Errorf(
-			"Unknown artifact type, requires box from vagrant post-processor or vagrant builder: %s", artifact.BuilderId())
+			"Unknown artifact type: this post-processor requires an input artifact from the artifice post-processor, vagrant post-processor, or vagrant builder: %s", artifact.BuilderId())
 	}
 
 	// We assume that there is only one .box file to upload

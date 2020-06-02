@@ -79,18 +79,8 @@ type CreateConfig struct {
 	Firmware string `mapstructure:"firmware"`
 	// Set VM disk controller type. Example `pvscsi`.
 	DiskControllerType string `mapstructure:"disk_controller_type"`
-	// The size of the disk in MB.
-	DiskSize int64 `mapstructure:"disk_size"`
-	// Enable VMDK thin provisioning for VM. Defaults to `false`.
-	DiskThinProvisioned bool `mapstructure:"disk_thin_provisioned"`
-	// Enable VMDK eager scrubbing for VM. Defaults to `false`.
-	DiskEagerlyScrub bool `mapstructure:"disk_eagerly_scrub"`
 	// A collection of one or more disks to be provisioned along with the VM.
 	Storage []DiskConfig `mapstructure:"storage"`
-	// Set network VM will be connected to.
-	Network string `mapstructure:"network"`
-	// Set VM network card type. Example `vmxnet3`.
-	NetworkCard string `mapstructure:"network_card"`
 	// Network adapters
 	NICs []NIC `mapstructure:"network_adapters"`
 	// Create USB controller for virtual machine. Defaults to `false`.
@@ -108,8 +98,6 @@ func (c *CreateConfig) Prepare() []error {
 				errs = append(errs, fmt.Errorf("storage[%d].'disk_size' is required", i))
 			}
 		}
-	} else if c.DiskSize == 0 {
-		errs = append(errs, fmt.Errorf("'disk_size' or 'storage' is required"))
 	}
 
 	if c.GuestOSType == "" {
@@ -144,11 +132,6 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 
 	// add network/network card an the first nic for backwards compatibility in the type is defined
 	var networkCards []driver.NIC
-	if s.Config.NetworkCard != "" {
-		networkCards = append(networkCards, driver.NIC{
-			NetworkCard: s.Config.NetworkCard,
-			Network:     s.Config.Network})
-	}
 	for _, nic := range s.Config.NICs {
 		networkCards = append(networkCards, driver.NIC{
 			Network:     nic.Network,
@@ -160,13 +143,6 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 
 	// add disk as the first drive for backwards compatibility if the type is defined
 	var disks []driver.Disk
-	if s.Config.DiskSize != 0 {
-		disks = append(disks, driver.Disk{
-			DiskSize:            s.Config.DiskSize,
-			DiskEagerlyScrub:    s.Config.DiskEagerlyScrub,
-			DiskThinProvisioned: s.Config.DiskThinProvisioned,
-		})
-	}
 	for _, disk := range s.Config.Storage {
 		disks = append(disks, driver.Disk{
 			DiskSize:            disk.DiskSize,

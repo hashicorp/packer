@@ -10,14 +10,14 @@ import (
 // FlatBlockDevice is an auto-generated flat version of BlockDevice.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatBlockDevice struct {
-	DeleteOnVmDeletion *bool   `mapstructure:"delete_on_vm_deletion" cty:"delete_on_vm_deletion"`
-	DeviceName         *string `mapstructure:"device_name" cty:"device_name"`
-	IOPS               *int64  `mapstructure:"iops" cty:"iops"`
-	NoDevice           *bool   `mapstructure:"no_device" cty:"no_device"`
-	SnapshotId         *string `mapstructure:"snapshot_id" cty:"snapshot_id"`
-	VirtualName        *string `mapstructure:"virtual_name" cty:"virtual_name"`
-	VolumeType         *string `mapstructure:"volume_type" cty:"volume_type"`
-	VolumeSize         *int64  `mapstructure:"volume_size" cty:"volume_size"`
+	DeleteOnVmDeletion *bool   `mapstructure:"delete_on_vm_deletion" cty:"delete_on_vm_deletion" hcl:"delete_on_vm_deletion"`
+	DeviceName         *string `mapstructure:"device_name" cty:"device_name" hcl:"device_name"`
+	IOPS               *int64  `mapstructure:"iops" cty:"iops" hcl:"iops"`
+	NoDevice           *bool   `mapstructure:"no_device" cty:"no_device" hcl:"no_device"`
+	SnapshotId         *string `mapstructure:"snapshot_id" cty:"snapshot_id" hcl:"snapshot_id"`
+	VirtualName        *string `mapstructure:"virtual_name" cty:"virtual_name" hcl:"virtual_name"`
+	VolumeType         *string `mapstructure:"volume_type" cty:"volume_type" hcl:"volume_type"`
+	VolumeSize         *int64  `mapstructure:"volume_size" cty:"volume_size" hcl:"volume_size"`
 }
 
 // FlatMapstructure returns a new FlatBlockDevice.
@@ -47,8 +47,8 @@ func (*FlatBlockDevice) HCL2Spec() map[string]hcldec.Spec {
 // FlatNetFilterOptions is an auto-generated flat version of NetFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatNetFilterOptions struct {
-	Filters map[string]string            `cty:"filters"`
-	Filter  []hcl2template.FlatNameValue `cty:"filter"`
+	Filters map[string]string            `cty:"filters" hcl:"filters"`
+	Filter  []hcl2template.FlatNameValue `cty:"filter" hcl:"filter"`
 }
 
 // FlatMapstructure returns a new FlatNetFilterOptions.
@@ -72,10 +72,10 @@ func (*FlatNetFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 // FlatOmiFilterOptions is an auto-generated flat version of OmiFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatOmiFilterOptions struct {
-	Filters    map[string]string            `cty:"filters"`
-	Filter     []hcl2template.FlatNameValue `cty:"filter"`
-	Owners     []string                     `cty:"owners"`
-	MostRecent *bool                        `mapstructure:"most_recent" cty:"most_recent"`
+	Filters    map[string]string            `cty:"filters" hcl:"filters"`
+	Filter     []hcl2template.FlatNameValue `cty:"filter" hcl:"filter"`
+	Owners     []string                     `cty:"owners" hcl:"owners"`
+	MostRecent *bool                        `mapstructure:"most_recent" cty:"most_recent" hcl:"most_recent"`
 }
 
 // FlatMapstructure returns a new FlatOmiFilterOptions.
@@ -101,8 +101,8 @@ func (*FlatOmiFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 // FlatSecurityGroupFilterOptions is an auto-generated flat version of SecurityGroupFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatSecurityGroupFilterOptions struct {
-	Filters map[string]string            `cty:"filters"`
-	Filter  []hcl2template.FlatNameValue `cty:"filter"`
+	Filters map[string]string            `cty:"filters" hcl:"filters"`
+	Filter  []hcl2template.FlatNameValue `cty:"filter" hcl:"filter"`
 }
 
 // FlatMapstructure returns a new FlatSecurityGroupFilterOptions.
@@ -126,10 +126,10 @@ func (*FlatSecurityGroupFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 // FlatSubnetFilterOptions is an auto-generated flat version of SubnetFilterOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatSubnetFilterOptions struct {
-	Filters  map[string]string            `cty:"filters"`
-	Filter   []hcl2template.FlatNameValue `cty:"filter"`
-	MostFree *bool                        `mapstructure:"most_free" cty:"most_free"`
-	Random   *bool                        `mapstructure:"random" cty:"random"`
+	Filters  map[string]string            `cty:"filters" hcl:"filters"`
+	Filter   []hcl2template.FlatNameValue `cty:"filter" hcl:"filter"`
+	MostFree *bool                        `mapstructure:"most_free" cty:"most_free" hcl:"most_free"`
+	Random   *bool                        `mapstructure:"random" cty:"random" hcl:"random"`
 }
 
 // FlatMapstructure returns a new FlatSubnetFilterOptions.

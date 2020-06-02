@@ -118,15 +118,14 @@ func TestChecksumFileNameMixedCaseBug(t *testing.T) {
 		Name         string
 		ChecksumPath string
 	}{
-		{"Lowercase", "/tmp/random/file.md5"},
-		{"MiXeDcAsE", "/tmp/RaNdOm/FiLe.Md5"},
+		{"Lowercase", "file:/tmp/random/file.md5"},
+		{"MiXeDcAsE", "file:/tmp/RaNdOm/FiLe.Md5"},
 	}
 
 	for _, tc := range tt {
 
 		cfg := testConfig(t)
 		cfg["source_path"] = "bug.ovf"
-		cfg["checksum_type"] = "file"
 		cfg["checksum"] = tc.ChecksumPath
 		cfg["type"] = "virtualbox-ovf"
 		cfg["guest_additions_mode"] = "disable"

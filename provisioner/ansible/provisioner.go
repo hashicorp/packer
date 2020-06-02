@@ -579,20 +579,21 @@ func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile s
 		args = append(args, "--ssh-extra-args", "-o IdentitiesOnly=yes")
 	}
 
-	args = append(args, "-i", inventory, playbook)
-
 	args = append(args, p.config.ExtraArguments...)
+
 	if len(p.config.AnsibleEnvVars) > 0 {
 		envVars = append(envVars, p.config.AnsibleEnvVars...)
 	}
 
+	// This must be the last arg appended to args
+	args = append(args, "-i", inventory, playbook)
 	return args, envVars
 }
 
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
 	inventory := p.config.InventoryFile
-	httpAddr := common.GetHTTPAddr()
+	httpAddr := p.generatedData["PackerHTTPAddr"].(string)
 
 	// Fetch external dependencies
 	if len(p.config.GalaxyFile) > 0 {

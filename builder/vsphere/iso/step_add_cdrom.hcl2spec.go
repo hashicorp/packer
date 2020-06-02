@@ -9,8 +9,8 @@ import (
 // FlatCDRomConfig is an auto-generated flat version of CDRomConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatCDRomConfig struct {
-	CdromType *string  `mapstructure:"cdrom_type" cty:"cdrom_type"`
-	ISOPaths  []string `mapstructure:"iso_paths" cty:"iso_paths"`
+	CdromType *string  `mapstructure:"cdrom_type" cty:"cdrom_type" hcl:"cdrom_type"`
+	ISOPaths  []string `mapstructure:"iso_paths" cty:"iso_paths" hcl:"iso_paths"`
 }
 
 // FlatMapstructure returns a new FlatCDRomConfig.

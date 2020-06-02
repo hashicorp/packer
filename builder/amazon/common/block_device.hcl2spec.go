@@ -9,16 +9,16 @@ import (
 // FlatBlockDevice is an auto-generated flat version of BlockDevice.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatBlockDevice struct {
-	DeleteOnTermination *bool   `mapstructure:"delete_on_termination" required:"false" cty:"delete_on_termination"`
-	DeviceName          *string `mapstructure:"device_name" required:"false" cty:"device_name"`
-	Encrypted           *bool   `mapstructure:"encrypted" required:"false" cty:"encrypted"`
-	IOPS                *int64  `mapstructure:"iops" required:"false" cty:"iops"`
-	NoDevice            *bool   `mapstructure:"no_device" required:"false" cty:"no_device"`
-	SnapshotId          *string `mapstructure:"snapshot_id" required:"false" cty:"snapshot_id"`
-	VirtualName         *string `mapstructure:"virtual_name" required:"false" cty:"virtual_name"`
-	VolumeType          *string `mapstructure:"volume_type" required:"false" cty:"volume_type"`
-	VolumeSize          *int64  `mapstructure:"volume_size" required:"false" cty:"volume_size"`
-	KmsKeyId            *string `mapstructure:"kms_key_id" required:"false" cty:"kms_key_id"`
+	DeleteOnTermination *bool   `mapstructure:"delete_on_termination" required:"false" cty:"delete_on_termination" hcl:"delete_on_termination"`
+	DeviceName          *string `mapstructure:"device_name" required:"false" cty:"device_name" hcl:"device_name"`
+	Encrypted           *bool   `mapstructure:"encrypted" required:"false" cty:"encrypted" hcl:"encrypted"`
+	IOPS                *int64  `mapstructure:"iops" required:"false" cty:"iops" hcl:"iops"`
+	NoDevice            *bool   `mapstructure:"no_device" required:"false" cty:"no_device" hcl:"no_device"`
+	SnapshotId          *string `mapstructure:"snapshot_id" required:"false" cty:"snapshot_id" hcl:"snapshot_id"`
+	VirtualName         *string `mapstructure:"virtual_name" required:"false" cty:"virtual_name" hcl:"virtual_name"`
+	VolumeType          *string `mapstructure:"volume_type" required:"false" cty:"volume_type" hcl:"volume_type"`
+	VolumeSize          *int64  `mapstructure:"volume_size" required:"false" cty:"volume_size" hcl:"volume_size"`
+	KmsKeyId            *string `mapstructure:"kms_key_id" required:"false" cty:"kms_key_id" hcl:"kms_key_id"`
 }
 
 // FlatMapstructure returns a new FlatBlockDevice.

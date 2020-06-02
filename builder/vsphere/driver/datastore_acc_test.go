@@ -44,7 +44,7 @@ func TestFileUpload(t *testing.T) {
 		t.Fatalf("Cannot find datastore '%v': %v", dsName, err)
 	}
 
-	err = ds.UploadFile(tmpFile.Name(), fileName, hostName)
+	err = ds.UploadFile(tmpFile.Name(), fileName, hostName, true)
 	if err != nil {
 		t.Fatalf("Cannot upload file: %v", err)
 	}
@@ -80,7 +80,7 @@ func TestFileUploadDRS(t *testing.T) {
 		t.Fatalf("Cannot find datastore '%v': %v", dsName, err)
 	}
 
-	err = ds.UploadFile(tmpFile.Name(), fileName, hostName)
+	err = ds.UploadFile(tmpFile.Name(), fileName, hostName, false)
 	if err != nil {
 		t.Fatalf("Cannot upload file: %v", err)
 	}

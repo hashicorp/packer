@@ -9,8 +9,8 @@ import (
 // FlatKeyValue is an auto-generated flat version of KeyValue.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatKeyValue struct {
-	Key   *string `cty:"key"`
-	Value *string `cty:"value"`
+	Key   *string `cty:"key" hcl:"key"`
+	Value *string `cty:"value" hcl:"value"`
 }
 
 // FlatMapstructure returns a new FlatKeyValue.
@@ -34,8 +34,8 @@ func (*FlatKeyValue) HCL2Spec() map[string]hcldec.Spec {
 // FlatKeyValueFilter is an auto-generated flat version of KeyValueFilter.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatKeyValueFilter struct {
-	Filters map[string]string `cty:"filters"`
-	Filter  []FlatKeyValue    `cty:"filter"`
+	Filters map[string]string `cty:"filters" hcl:"filters"`
+	Filter  []FlatKeyValue    `cty:"filter" hcl:"filter"`
 }
 
 // FlatMapstructure returns a new FlatKeyValueFilter.
@@ -59,8 +59,8 @@ func (*FlatKeyValueFilter) HCL2Spec() map[string]hcldec.Spec {
 // FlatNameValue is an auto-generated flat version of NameValue.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatNameValue struct {
-	Name  *string `cty:"name"`
-	Value *string `cty:"value"`
+	Name  *string `cty:"name" hcl:"name"`
+	Value *string `cty:"value" hcl:"value"`
 }
 
 // FlatMapstructure returns a new FlatNameValue.
@@ -84,8 +84,8 @@ func (*FlatNameValue) HCL2Spec() map[string]hcldec.Spec {
 // FlatNameValueFilter is an auto-generated flat version of NameValueFilter.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatNameValueFilter struct {
-	Filters map[string]string `cty:"filters"`
-	Filter  []FlatNameValue   `cty:"filter"`
+	Filters map[string]string `cty:"filters" hcl:"filters"`
+	Filter  []FlatNameValue   `cty:"filter" hcl:"filter"`
 }
 
 // FlatMapstructure returns a new FlatNameValueFilter.

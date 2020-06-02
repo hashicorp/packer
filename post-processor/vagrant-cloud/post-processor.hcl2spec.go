@@ -9,21 +9,21 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName       *string           `mapstructure:"packer_build_name" cty:"packer_build_name"`
-	PackerBuilderType     *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type"`
-	PackerDebug           *bool             `mapstructure:"packer_debug" cty:"packer_debug"`
-	PackerForce           *bool             `mapstructure:"packer_force" cty:"packer_force"`
-	PackerOnError         *string           `mapstructure:"packer_on_error" cty:"packer_on_error"`
-	PackerUserVars        map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables"`
-	PackerSensitiveVars   []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables"`
-	Tag                   *string           `mapstructure:"box_tag" cty:"box_tag"`
-	Version               *string           `mapstructure:"version" cty:"version"`
-	VersionDescription    *string           `mapstructure:"version_description" cty:"version_description"`
-	NoRelease             *bool             `mapstructure:"no_release" cty:"no_release"`
-	AccessToken           *string           `mapstructure:"access_token" cty:"access_token"`
-	VagrantCloudUrl       *string           `mapstructure:"vagrant_cloud_url" cty:"vagrant_cloud_url"`
-	InsecureSkipTLSVerify *bool             `mapstructure:"insecure_skip_tls_verify" cty:"insecure_skip_tls_verify"`
-	BoxDownloadUrl        *string           `mapstructure:"box_download_url" cty:"box_download_url"`
+	PackerBuildName       *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType     *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug           *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce           *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError         *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars        map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars   []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	Tag                   *string           `mapstructure:"box_tag" cty:"box_tag" hcl:"box_tag"`
+	Version               *string           `mapstructure:"version" cty:"version" hcl:"version"`
+	VersionDescription    *string           `mapstructure:"version_description" cty:"version_description" hcl:"version_description"`
+	NoRelease             *bool             `mapstructure:"no_release" cty:"no_release" hcl:"no_release"`
+	AccessToken           *string           `mapstructure:"access_token" cty:"access_token" hcl:"access_token"`
+	VagrantCloudUrl       *string           `mapstructure:"vagrant_cloud_url" cty:"vagrant_cloud_url" hcl:"vagrant_cloud_url"`
+	InsecureSkipTLSVerify *bool             `mapstructure:"insecure_skip_tls_verify" cty:"insecure_skip_tls_verify" hcl:"insecure_skip_tls_verify"`
+	BoxDownloadUrl        *string           `mapstructure:"box_download_url" cty:"box_download_url" hcl:"box_download_url"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

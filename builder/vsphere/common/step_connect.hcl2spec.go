@@ -9,11 +9,11 @@ import (
 // FlatConnectConfig is an auto-generated flat version of ConnectConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConnectConfig struct {
-	VCenterServer      *string `mapstructure:"vcenter_server" cty:"vcenter_server"`
-	Username           *string `mapstructure:"username" cty:"username"`
-	Password           *string `mapstructure:"password" cty:"password"`
-	InsecureConnection *bool   `mapstructure:"insecure_connection" cty:"insecure_connection"`
-	Datacenter         *string `mapstructure:"datacenter" cty:"datacenter"`
+	VCenterServer      *string `mapstructure:"vcenter_server" cty:"vcenter_server" hcl:"vcenter_server"`
+	Username           *string `mapstructure:"username" cty:"username" hcl:"username"`
+	Password           *string `mapstructure:"password" cty:"password" hcl:"password"`
+	InsecureConnection *bool   `mapstructure:"insecure_connection" cty:"insecure_connection" hcl:"insecure_connection"`
+	Datacenter         *string `mapstructure:"datacenter" cty:"datacenter" hcl:"datacenter"`
 }
 
 // FlatMapstructure returns a new FlatConnectConfig.

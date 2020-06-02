@@ -8,7 +8,6 @@ import (
 	"net"
 	"strings"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -94,7 +93,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		common.SetHTTPIP(httpIP)
+		state.Put("http_ip", httpIP)
 
 		s.Ctx.Data = &userDataTemplateData{
 			httpIP,

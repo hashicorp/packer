@@ -103,6 +103,13 @@ type Config struct {
 	// Authentication via OAUTH
 	ClientConfig client.Config `mapstructure:",squash"`
 
+	// If set with one or more resource ids of user assigned managed identities, they will be configured on the VM.
+	// See [documentation](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token)
+	// for how to acquire tokens within the VM.
+	// To assign a user assigned managed identity to a VM, the provided account or service principal must have [Managed Identity Operator](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#managed-identity-operator)
+	// and [Virtual Machine Contributor](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#virtual-machine-contributor) role assignments.
+	UserAssignedManagedIdentities []string `mapstructure:"user_assigned_managed_identities" required:"false"`
+
 	// VHD prefix.
 	CaptureNamePrefix string `mapstructure:"capture_name_prefix"`
 	// Destination container name.
@@ -394,7 +401,7 @@ type Config struct {
 	// see [here](https://docs.microsoft.com/en-us/azure/virtual-machines/troubleshooting/boot-diagnostics) for more info
 	BootDiagSTGAccount string `mapstructure:"boot_diag_storage_account" required:"false"`
 
-	// specify custom azure resource names during build limited to max 10 charcters
+	// specify custom azure resource names during build limited to max 10 characters
 	// this will set the prefix for the resources. The actuall resource names will be
 	// `custom_resource_build_prefix` + resourcetype + 5 character random alphanumeric string
 	CustomResourcePrefix string `mapstructure:"custom_resource_build_prefix" required:"false"`
@@ -668,7 +675,7 @@ func setRuntimeValues(c *Config) {
 	c.tmpNicName = tempName.NicName
 	c.tmpPublicIPAddressName = tempName.PublicIPAddressName
 	c.tmpOSDiskName = tempName.OSDiskName
-	c.tmpDataDiskName = tempName.DataDiskname
+	c.tmpDataDiskName = tempName.DataDiskName
 	c.tmpSubnetName = tempName.SubnetName
 	c.tmpVirtualNetworkName = tempName.VirtualNetworkName
 	c.tmpNsgName = tempName.NsgName
@@ -773,6 +780,24 @@ func assertTagProperties(c *Config, errs *packer.MultiError) {
 
 func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	c.ClientConfig.Validate(errs)
+
+	/////////////////////////////////////////////
+	// Identity
+	if len(c.UserAssignedManagedIdentities) != 0 {
+		for _, rid := range c.UserAssignedManagedIdentities {
+			r, err := client.ParseResourceID(rid)
+			if err != nil {
+				errs = packer.MultiErrorAppend(errs, err)
+			} else {
+				if !strings.EqualFold(r.Provider, "Microsoft.ManagedIdentity") {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("A valid user assigned managed identity resource id must have a correct resource provider"))
+				}
+				if !strings.EqualFold(r.ResourceType.String(), "userAssignedIdentities") {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("A valid user assigned managed identity resource id must have a correct resource type"))
+				}
+			}
+		}
+	}
 
 	/////////////////////////////////////////////
 	// Capture

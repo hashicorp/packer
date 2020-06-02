@@ -11,17 +11,17 @@ import (
 // FlatMockBuilder is an auto-generated flat version of MockBuilder.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatMockBuilder struct {
-	ArtifactId      *string       `cty:"artifact_id"`
-	PrepareWarnings []string      `cty:"prepare_warnings"`
-	RunErrResult    *bool         `cty:"run_err_result"`
-	RunNilResult    *bool         `cty:"run_nil_result"`
-	PrepareCalled   *bool         `cty:"prepare_called"`
-	PrepareConfig   []interface{} `cty:"prepare_config"`
-	RunCalled       *bool         `cty:"run_called"`
-	RunHook         Hook          `cty:"run_hook"`
-	RunUi           Ui            `cty:"run_ui"`
-	CancelCalled    *bool         `cty:"cancel_called"`
-	GeneratedVars   []string      `cty:"generated_vars"`
+	ArtifactId      *string       `cty:"artifact_id" hcl:"artifact_id"`
+	PrepareWarnings []string      `cty:"prepare_warnings" hcl:"prepare_warnings"`
+	RunErrResult    *bool         `cty:"run_err_result" hcl:"run_err_result"`
+	RunNilResult    *bool         `cty:"run_nil_result" hcl:"run_nil_result"`
+	PrepareCalled   *bool         `cty:"prepare_called" hcl:"prepare_called"`
+	PrepareConfig   []interface{} `cty:"prepare_config" hcl:"prepare_config"`
+	RunCalled       *bool         `cty:"run_called" hcl:"run_called"`
+	RunHook         Hook          `cty:"run_hook" hcl:"run_hook"`
+	RunUi           Ui            `cty:"run_ui" hcl:"run_ui"`
+	CancelCalled    *bool         `cty:"cancel_called" hcl:"cancel_called"`
+	GeneratedVars   []string      `cty:"generated_vars" hcl:"generated_vars"`
 }
 
 // FlatMapstructure returns a new FlatMockBuilder.
@@ -54,24 +54,24 @@ func (*FlatMockBuilder) HCL2Spec() map[string]hcldec.Spec {
 // FlatMockCommunicator is an auto-generated flat version of MockCommunicator.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatMockCommunicator struct {
-	StartCalled        *bool          `cty:"start_called"`
-	StartCmd           *FlatRemoteCmd `cty:"start_cmd"`
-	StartStderr        *string        `cty:"start_stderr"`
-	StartStdout        *string        `cty:"start_stdout"`
-	StartStdin         *string        `cty:"start_stdin"`
-	StartExitStatus    *int           `cty:"start_exit_status"`
-	UploadCalled       *bool          `cty:"upload_called"`
-	UploadPath         *string        `cty:"upload_path"`
-	UploadData         *string        `cty:"upload_data"`
-	UploadDirDst       *string        `cty:"upload_dir_dst"`
-	UploadDirSrc       *string        `cty:"upload_dir_src"`
-	UploadDirExclude   []string       `cty:"upload_dir_exclude"`
-	DownloadDirDst     *string        `cty:"download_dir_dst"`
-	DownloadDirSrc     *string        `cty:"download_dir_src"`
-	DownloadDirExclude []string       `cty:"download_dir_exclude"`
-	DownloadCalled     *bool          `cty:"download_called"`
-	DownloadPath       *string        `cty:"download_path"`
-	DownloadData       *string        `cty:"download_data"`
+	StartCalled        *bool          `cty:"start_called" hcl:"start_called"`
+	StartCmd           *FlatRemoteCmd `cty:"start_cmd" hcl:"start_cmd"`
+	StartStderr        *string        `cty:"start_stderr" hcl:"start_stderr"`
+	StartStdout        *string        `cty:"start_stdout" hcl:"start_stdout"`
+	StartStdin         *string        `cty:"start_stdin" hcl:"start_stdin"`
+	StartExitStatus    *int           `cty:"start_exit_status" hcl:"start_exit_status"`
+	UploadCalled       *bool          `cty:"upload_called" hcl:"upload_called"`
+	UploadPath         *string        `cty:"upload_path" hcl:"upload_path"`
+	UploadData         *string        `cty:"upload_data" hcl:"upload_data"`
+	UploadDirDst       *string        `cty:"upload_dir_dst" hcl:"upload_dir_dst"`
+	UploadDirSrc       *string        `cty:"upload_dir_src" hcl:"upload_dir_src"`
+	UploadDirExclude   []string       `cty:"upload_dir_exclude" hcl:"upload_dir_exclude"`
+	DownloadDirDst     *string        `cty:"download_dir_dst" hcl:"download_dir_dst"`
+	DownloadDirSrc     *string        `cty:"download_dir_src" hcl:"download_dir_src"`
+	DownloadDirExclude []string       `cty:"download_dir_exclude" hcl:"download_dir_exclude"`
+	DownloadCalled     *bool          `cty:"download_called" hcl:"download_called"`
+	DownloadPath       *string        `cty:"download_path" hcl:"download_path"`
+	DownloadData       *string        `cty:"download_data" hcl:"download_data"`
 }
 
 // FlatMapstructure returns a new FlatMockCommunicator.
@@ -111,16 +111,16 @@ func (*FlatMockCommunicator) HCL2Spec() map[string]hcldec.Spec {
 // FlatMockPostProcessor is an auto-generated flat version of MockPostProcessor.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatMockPostProcessor struct {
-	ArtifactId          *string       `cty:"artifact_id"`
-	Keep                *bool         `cty:"keep"`
-	ForceOverride       *bool         `cty:"force_override"`
-	Error               error         `cty:"error"`
-	ConfigureCalled     *bool         `cty:"configure_called"`
-	ConfigureConfigs    []interface{} `cty:"configure_configs"`
-	ConfigureError      error         `cty:"configure_error"`
-	PostProcessCalled   *bool         `cty:"post_process_called"`
-	PostProcessArtifact Artifact      `cty:"post_process_artifact"`
-	PostProcessUi       Ui            `cty:"post_process_ui"`
+	ArtifactId          *string       `cty:"artifact_id" hcl:"artifact_id"`
+	Keep                *bool         `cty:"keep" hcl:"keep"`
+	ForceOverride       *bool         `cty:"force_override" hcl:"force_override"`
+	Error               error         `cty:"error" hcl:"error"`
+	ConfigureCalled     *bool         `cty:"configure_called" hcl:"configure_called"`
+	ConfigureConfigs    []interface{} `cty:"configure_configs" hcl:"configure_configs"`
+	ConfigureError      error         `cty:"configure_error" hcl:"configure_error"`
+	PostProcessCalled   *bool         `cty:"post_process_called" hcl:"post_process_called"`
+	PostProcessArtifact Artifact      `cty:"post_process_artifact" hcl:"post_process_artifact"`
+	PostProcessUi       Ui            `cty:"post_process_ui" hcl:"post_process_ui"`
 }
 
 // FlatMapstructure returns a new FlatMockPostProcessor.
@@ -152,12 +152,12 @@ func (*FlatMockPostProcessor) HCL2Spec() map[string]hcldec.Spec {
 // FlatMockProvisioner is an auto-generated flat version of MockProvisioner.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatMockProvisioner struct {
-	PrepCalled       *bool         `cty:"prep_called"`
-	PrepConfigs      []interface{} `cty:"prep_configs"`
-	ProvCalled       *bool         `cty:"prov_called"`
-	ProvRetried      *bool         `cty:"prov_retried"`
-	ProvCommunicator Communicator  `cty:"prov_communicator"`
-	ProvUi           Ui            `cty:"prov_ui"`
+	PrepCalled       *bool         `cty:"prep_called" hcl:"prep_called"`
+	PrepConfigs      []interface{} `cty:"prep_configs" hcl:"prep_configs"`
+	ProvCalled       *bool         `cty:"prov_called" hcl:"prov_called"`
+	ProvRetried      *bool         `cty:"prov_retried" hcl:"prov_retried"`
+	ProvCommunicator Communicator  `cty:"prov_communicator" hcl:"prov_communicator"`
+	ProvUi           Ui            `cty:"prov_ui" hcl:"prov_ui"`
 }
 
 // FlatMapstructure returns a new FlatMockProvisioner.
@@ -185,10 +185,10 @@ func (*FlatMockProvisioner) HCL2Spec() map[string]hcldec.Spec {
 // FlatRemoteCmd is an auto-generated flat version of RemoteCmd.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatRemoteCmd struct {
-	Command *string   `cty:"command"`
-	Stdin   io.Reader `cty:"stdin"`
-	Stdout  io.Writer `cty:"stdout"`
-	Stderr  io.Writer `cty:"stderr"`
+	Command *string   `cty:"command" hcl:"command"`
+	Stdin   io.Reader `cty:"stdin" hcl:"stdin"`
+	Stdout  io.Writer `cty:"stdout" hcl:"stdout"`
+	Stderr  io.Writer `cty:"stderr" hcl:"stderr"`
 }
 
 // FlatMapstructure returns a new FlatRemoteCmd.

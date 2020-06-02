@@ -9,19 +9,19 @@ import (
 // FlatHardwareConfig is an auto-generated flat version of HardwareConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatHardwareConfig struct {
-	CPUs                *int32  `mapstructure:"CPUs" cty:"CPUs"`
-	CpuCores            *int32  `mapstructure:"cpu_cores" cty:"cpu_cores"`
-	CPUReservation      *int64  `mapstructure:"CPU_reservation" cty:"CPU_reservation"`
-	CPULimit            *int64  `mapstructure:"CPU_limit" cty:"CPU_limit"`
-	CpuHotAddEnabled    *bool   `mapstructure:"CPU_hot_plug" cty:"CPU_hot_plug"`
-	RAM                 *int64  `mapstructure:"RAM" cty:"RAM"`
-	RAMReservation      *int64  `mapstructure:"RAM_reservation" cty:"RAM_reservation"`
-	RAMReserveAll       *bool   `mapstructure:"RAM_reserve_all" cty:"RAM_reserve_all"`
-	MemoryHotAddEnabled *bool   `mapstructure:"RAM_hot_plug" cty:"RAM_hot_plug"`
-	VideoRAM            *int64  `mapstructure:"video_ram" cty:"video_ram"`
-	VGPUProfile         *string `mapstructure:"vgpu_profile" cty:"vgpu_profile"`
-	NestedHV            *bool   `mapstructure:"NestedHV" cty:"NestedHV"`
-	Firmware            *string `mapstructure:"firmware" cty:"firmware"`
+	CPUs                *int32  `mapstructure:"CPUs" cty:"CPUs" hcl:"CPUs"`
+	CpuCores            *int32  `mapstructure:"cpu_cores" cty:"cpu_cores" hcl:"cpu_cores"`
+	CPUReservation      *int64  `mapstructure:"CPU_reservation" cty:"CPU_reservation" hcl:"CPU_reservation"`
+	CPULimit            *int64  `mapstructure:"CPU_limit" cty:"CPU_limit" hcl:"CPU_limit"`
+	CpuHotAddEnabled    *bool   `mapstructure:"CPU_hot_plug" cty:"CPU_hot_plug" hcl:"CPU_hot_plug"`
+	RAM                 *int64  `mapstructure:"RAM" cty:"RAM" hcl:"RAM"`
+	RAMReservation      *int64  `mapstructure:"RAM_reservation" cty:"RAM_reservation" hcl:"RAM_reservation"`
+	RAMReserveAll       *bool   `mapstructure:"RAM_reserve_all" cty:"RAM_reserve_all" hcl:"RAM_reserve_all"`
+	MemoryHotAddEnabled *bool   `mapstructure:"RAM_hot_plug" cty:"RAM_hot_plug" hcl:"RAM_hot_plug"`
+	VideoRAM            *int64  `mapstructure:"video_ram" cty:"video_ram" hcl:"video_ram"`
+	VGPUProfile         *string `mapstructure:"vgpu_profile" cty:"vgpu_profile" hcl:"vgpu_profile"`
+	NestedHV            *bool   `mapstructure:"NestedHV" cty:"NestedHV" hcl:"NestedHV"`
+	Firmware            *string `mapstructure:"firmware" cty:"firmware" hcl:"firmware"`
 }
 
 // FlatMapstructure returns a new FlatHardwareConfig.

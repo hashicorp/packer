@@ -84,7 +84,7 @@ Here is a full list of the available functions for reference.
 
   - **PackerRunUUID**: Current build's unique id. Can be used to specify build artifacts.
 
-  - **PackerHTTPAddr**: HTTP address of the file server Packer creates to serve items in the "http" dir to the vm, displayed in the format `IP:PORT`.
+  - **PackerHTTPIP**, **PackerHTTPPort**, and **PackerHTTPAddr**: HTTP IP, port, and address of the file server Packer creates to serve items in the "http" dir to the vm. The HTTP address is displayed in the format `IP:PORT`.
 
   - **SSHPublicKey** and **SSHPrivateKey**: The public and private key that Packer uses to connect to the instance.
     These are unique to the SSH communicator and are unset when using other communicators.

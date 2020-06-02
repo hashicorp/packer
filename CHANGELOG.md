@@ -1,6 +1,17 @@
 ## 1.6.0 (Upcoming)
 
 ### BACKWARDS INCOMPATIBILITIES:
+* builder/vsphere-iso: The deprecated fields `network`, `network_card`,
+    `disk_size`, `disk_thin_provisioned`, and `disk_eagerly_scrub` have been
+    removed. Run `packer fix template.json` to migrate an existig template
+    [GH-9149]
+
+* For all iso based builders, the `iso_checksum_type` and `iso_checksum_url`
+    fields have been removed in favor of simply setting the `iso_checksum`
+    field. Use the [packer fix](https://www.packer.io/docs/commands/fix/)
+    command to update a config file. See any [iso_checksum field
+    docs](https://www.packer.io/docs/builders/virtualbox/iso/#iso_checksum) to
+    read more about this[GH-8437]
 
 ### FEATURES:
 * **New post-processor** Yandex Export [GH-9124]
@@ -8,31 +19,63 @@
 ### IMPROVEMENTS:
 * builder/amazon: Add SSM Session Manager as a SSH interface connection
     [GH-9082]
+* builder/amazon: Added new `build` template function field:
+    SourceAMICreationDate [GH-9277]
+* builder/azure-arm: Support User Assigned Managed Identity [GH-9293]
 * builder/google: Implement iap proxy for googlecompute [GH-9105]
 * builder/googlecompute: Changed default disk size. [GH-9071]
+* builder/qemu: add support for using a network bridge [GH-9159]
 * builder/virtualbox: Add `output_filename` config option to allow to set a
     custom filename instead of forcing to be the same as vm_name. [GH-9174]
 * builder/vsphere: floppy_label Parameter for vsphere-iso Builder [GH-9187]
+* core/hcl: Enable force, debug, and on-error command line flags for hcl2
+    builds. [GH-9234]
+* core/interpolation: Add support for specifying a particular key to fetch from
+    the AWS Secrets Manager [GH-9202] [GH-9286]
+* core: HCL logs now display source type and source name (`type.name`) in logs
+    to differentiate more easily who says what. [GH-9257]
+* core: update consul and vault dependencies [GH-9205]
 * core: Update vendored "go-getter" library with checksum fixes.
+* core: When a template contains a deprecated option, Packer will now encourage
+    the user to call `packer fix`. [GH-9325]
 * post-processor/docker-push: Support pushing multiple tags [GH-9182]
 * post-processor/docker-tag: Change field name of docker tag to "tags" instead
     of "tag" since it's a list. Keep "tag" for backwards compatability.
     [GH-9183]
-* update consul and vault dependencies [GH-9205]
+* provisioner/powershell: Update default execute command to handle script
+    errors [GH-9040]
 
 ### BUG FIXES:
+* builder/azure-arm: Update runtime constants with a valid DataDiskName
+    [GH-9251]
 * builder/digitalocean: Use correct image type for Droplet creates. [GH-9212]
 * builder/openstack: Don't error if metadata can't be set. Old versions of
     openstack don't support that API call. [GH-9198]
+* builder/vagrant: Use absolute path for package_include files to prevent them
+    from having to be relative to the output vagrant directory. [GH-9260]
 * builder/virtualbox: Fix bug using checksum files. [GH-9101]
+* builder/vSphere: Add option not to set host during datastore upload. [GH-9100
 * builder/vsphere: Fix iso config prepare being called incorrectly, which
     caused `iso_url` field to fail. [GH-9197]
+* core: Ensure HTTP server information `PackerHTTPIP`, `PackerHTTPPort`, and
+    `PackerHTTPAddr` are available via the `build` template engine for all
+    supported builders [GH-9238]
 * core: fix regression that broke use of pwd when retrieving the checksum from
     a file [GH-9129].
+* post-processor/vagrant: Add "provider_override" template option to allow
+    artifacts from the Artifice post-processor [GH-9239]
 * post-processor/vsphere-template: Add VSphere builder's artifact to vsphere-
     template's supported types [GH-9146]
+* postprocessor/artifice: Update various core post-processors to accept
+    artifacts from the Artifice post-processor [GH-9239]
+* provisioner/ansible-remote: Fix the arg order to make sure that the playbook
+    file is the last item in the call [GH-9279]
+* provisioner/inspec: Fix build variables interpolation [GH-9262]
+* provisioner/powershell: fix interpolation of execute_command in cleanup
+    script call. [GH-9275]
 * provisioner/powershell: Fix long-wait retry loop caused by cleanup logic
     [GH-9226]
+* provisioner/salt-masterless: Ignore the CmdArgs field in hcl2 [GH-9290]
 
 ## 1.5.6 (May 1, 2020)
 

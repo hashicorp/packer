@@ -68,6 +68,8 @@ func BasicPlaceholderData() map[string]string {
 	placeholderData["Password"] = fmt.Sprintf(msg, "Password")
 	placeholderData["ConnType"] = fmt.Sprintf(msg, "Type")
 	placeholderData["PackerRunUUID"] = fmt.Sprintf(msg, "PackerRunUUID")
+	placeholderData["PackerHTTPPort"] = fmt.Sprintf(msg, "PackerHTTPPort")
+	placeholderData["PackerHTTPIP"] = fmt.Sprintf(msg, "PackerHTTPIP")
 	placeholderData["PackerHTTPAddr"] = fmt.Sprintf(msg, "PackerHTTPAddr")
 	placeholderData["SSHPublicKey"] = fmt.Sprintf(msg, "SSHPublicKey")
 	placeholderData["SSHPrivateKey"] = fmt.Sprintf(msg, "SSHPrivateKey")
