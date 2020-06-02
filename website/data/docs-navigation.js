@@ -15,6 +15,15 @@ export default [
       'expressions',
       'syntax-json',
       {
+        category: 'blocks',
+        content: [ 
+          {
+            category: 'build',
+            content: [ 'source', 'provisioner', 'post-processor' ],
+          },
+          'locals', 'source', 'variable' ],
+      },
+      {
         category: 'functions',
         content: [
           {

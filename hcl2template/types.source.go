@@ -16,10 +16,24 @@ type SourceBlock struct {
 	Name string
 
 	block *hcl.Block
+
+	// addition will be merged into block to allow user to override builder settings
+	// per build.source block.
+	addition hcl.Body
 }
 
-func (p *Parser) decodeSource(block *hcl.Block) (*SourceBlock, hcl.Diagnostics) {
-	source := &SourceBlock{
+// decodeBuildSource reads a used source block from a build:
+//  build {
+//   source "type.example" {}
+//  }
+func (p *Parser) decodeBuildSource(block *hcl.Block) (SourceRef, hcl.Diagnostics) {
+	ref := sourceRefFromString(block.Labels[0])
+	ref.addition = block.Body
+	return ref, nil
+}
+
+func (p *Parser) decodeSource(block *hcl.Block) (SourceBlock, hcl.Diagnostics) {
+	source := SourceBlock{
 		Type:  block.Labels[0],
 		Name:  block.Labels[1],
 		block: block,
@@ -33,13 +47,13 @@ func (p *Parser) decodeSource(block *hcl.Block) (*SourceBlock, hcl.Diagnostics) 
 			Detail:   fmt.Sprintf("known builders: %v", p.BuilderSchemas.List()),
 			Severity: hcl.DiagError,
 		})
-		return nil, diags
+		return source, diags
 	}
 
 	return source, diags
 }
 
-func (cfg *PackerConfig) startBuilder(source *SourceBlock, ectx *hcl.EvalContext, opts packer.GetBuildsOptions) (packer.Builder, hcl.Diagnostics, []string) {
+func (cfg *PackerConfig) startBuilder(source SourceBlock, ectx *hcl.EvalContext, opts packer.GetBuildsOptions) (packer.Builder, hcl.Diagnostics, []string) {
 	var diags hcl.Diagnostics
 
 	builder, err := cfg.builderSchemas.Start(source.Type)
@@ -52,7 +66,12 @@ func (cfg *PackerConfig) startBuilder(source *SourceBlock, ectx *hcl.EvalContext
 		return builder, diags, nil
 	}
 
-	decoded, moreDiags := decodeHCL2Spec(source.block.Body, ectx, builder)
+	body := source.block.Body
+	if source.addition != nil {
+		body = hcl.MergeBodies([]hcl.Body{source.block.Body, source.addition})
+	}
+
+	decoded, moreDiags := decodeHCL2Spec(body, ectx, builder)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return nil, diags, nil
@@ -92,6 +111,19 @@ func (source *SourceBlock) Ref() SourceRef {
 type SourceRef struct {
 	Type string
 	Name string
+
+	// The content of this body will be merged into a new block to allow to
+	// override builder settings per build section.
+	addition hcl.Body
+}
+
+// the 'addition' field makes of ref a different entry in the sources map, so
+// Ref is here to make sure only one is returned.
+func (r *SourceRef) Ref() SourceRef {
+	return SourceRef{
+		Type: r.Type,
+		Name: r.Name,
+	}
 }
 
 // NoSource is the zero value of sourceRef, representing the absense of an

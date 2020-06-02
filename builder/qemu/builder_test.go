@@ -74,16 +74,16 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 		t.Errorf("bad output dir: %s", b.config.OutputDir)
 	}
 
-	if b.config.SSHHostPortMin != 2222 {
-		t.Errorf("bad min ssh host port: %d", b.config.SSHHostPortMin)
+	if b.config.CommConfig.HostPortMin != 2222 {
+		t.Errorf("bad min ssh host port: %d", b.config.CommConfig.HostPortMin)
 	}
 
-	if b.config.SSHHostPortMax != 4444 {
-		t.Errorf("bad max ssh host port: %d", b.config.SSHHostPortMax)
+	if b.config.CommConfig.HostPortMax != 4444 {
+		t.Errorf("bad max ssh host port: %d", b.config.CommConfig.HostPortMax)
 	}
 
-	if b.config.Comm.SSHPort != 22 {
-		t.Errorf("bad ssh port: %d", b.config.Comm.SSHPort)
+	if b.config.CommConfig.Comm.SSHPort != 22 {
+		t.Errorf("bad ssh port: %d", b.config.CommConfig.Comm.SSHPort)
 	}
 
 	if b.config.VMName != "packer-foo" {
@@ -430,8 +430,8 @@ func TestBuilderPrepare_SSHHostPort(t *testing.T) {
 	config := testConfig()
 
 	// Bad
-	config["ssh_host_port_min"] = 1000
-	config["ssh_host_port_max"] = 500
+	config["host_port_min"] = 1000
+	config["host_port_max"] = 500
 	b = Builder{}
 	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
@@ -442,7 +442,7 @@ func TestBuilderPrepare_SSHHostPort(t *testing.T) {
 	}
 
 	// Bad
-	config["ssh_host_port_min"] = -500
+	config["host_port_min"] = -500
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -453,8 +453,8 @@ func TestBuilderPrepare_SSHHostPort(t *testing.T) {
 	}
 
 	// Good
-	config["ssh_host_port_min"] = 500
-	config["ssh_host_port_max"] = 1000
+	config["host_port_min"] = 500
+	config["host_port_max"] = 1000
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -628,18 +628,31 @@ func TestBuilderPrepare_VNCPassword(t *testing.T) {
 func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
 	var b Builder
 	config := testConfig()
+	hostPortMin := 1234
+	hostPortMax := 4321
 	sshTimeout := 2 * time.Minute
+
 	config["ssh_wait_timeout"] = sshTimeout
+	config["ssh_host_port_min"] = hostPortMin
+	config["ssh_host_port_max"] = hostPortMax
 
 	_, warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
+	if len(warns) == 0 {
+		t.Fatalf("should have deprecation warn")
 	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.Comm.SSHTimeout != sshTimeout {
-		t.Fatalf("SSHTimeout should be %s for backwards compatibility, but it was %s", sshTimeout.String(), b.config.Comm.SSHTimeout.String())
+	if b.config.CommConfig.Comm.SSHTimeout != sshTimeout {
+		t.Fatalf("SSHTimeout should be %s for backwards compatibility, but it was %s", sshTimeout.String(), b.config.CommConfig.Comm.SSHTimeout.String())
+	}
+
+	if b.config.CommConfig.HostPortMin != hostPortMin {
+		t.Fatalf("HostPortMin should be %d for backwards compatibility, but it was %d", hostPortMin, b.config.CommConfig.HostPortMin)
+	}
+
+	if b.config.CommConfig.HostPortMax != hostPortMax {
+		t.Fatalf("HostPortMax should be %d for backwards compatibility, but it was %d", hostPortMax, b.config.CommConfig.HostPortMax)
 	}
 }

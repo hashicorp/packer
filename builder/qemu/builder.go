@@ -75,7 +75,7 @@ type Config struct {
 	common.ISOConfig               `mapstructure:",squash"`
 	bootcommand.VNCConfig          `mapstructure:",squash"`
 	shutdowncommand.ShutdownConfig `mapstructure:",squash"`
-	Comm                           communicator.Config `mapstructure:",squash"`
+	CommConfig                     CommConfig `mapstructure:",squash"`
 	common.FloppyConfig            `mapstructure:",squash"`
 	// Use iso from provided url. Qemu must support
 	// curl block device. This defaults to `false`.
@@ -288,12 +288,6 @@ type Config struct {
 	// QMP Socket Path when `qmp_enable` is true. Defaults to
 	// `output_directory`/`vm_name`.monitor.
 	QMPSocketPath string `mapstructure:"qmp_socket_path" required:"false"`
-	// The minimum and maximum port to use for the SSH port on the host machine
-	// which is forwarded to the SSH port on the guest machine. Because Packer
-	// often runs in parallel, Packer will choose a randomly available port in
-	// this range to use as the host port. By default this is 2222 to 4444.
-	SSHHostPortMin int `mapstructure:"ssh_host_port_min" required:"false"`
-	SSHHostPortMax int `mapstructure:"ssh_host_port_max" required:"false"`
 	// If true, do not pass a -display option
 	// to qemu, allowing it to choose the default. This may be needed when running
 	// under macOS, and getting errors about sdl not being available.
@@ -425,14 +419,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		b.config.CpuCount = 1
 	}
 
-	if b.config.SSHHostPortMin == 0 {
-		b.config.SSHHostPortMin = 2222
-	}
-
-	if b.config.SSHHostPortMax == 0 {
-		b.config.SSHHostPortMax = 4444
-	}
-
 	if b.config.VNCBindAddress == "" {
 		b.config.VNCBindAddress = "127.0.0.1"
 	}
@@ -472,9 +458,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
 
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
-	if es := b.config.Comm.Prepare(&b.config.ctx); len(es) > 0 {
+	commConfigWarnings, es := b.config.CommConfig.Prepare(&b.config.ctx)
+	if len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
+	warnings = append(warnings, commConfigWarnings...)
 
 	if !(b.config.Format == "qcow2" || b.config.Format == "raw") {
 		errs = packer.MultiErrorAppend(
@@ -527,16 +515,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 				errs,
 				fmt.Errorf("Output directory '%s' already exists. It must not exist.", b.config.OutputDir))
 		}
-	}
-
-	if b.config.SSHHostPortMin > b.config.SSHHostPortMax {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("ssh_host_port_min must be less than ssh_host_port_max"))
-	}
-
-	if b.config.SSHHostPortMin < 0 {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("ssh_host_port_min must be positive"))
 	}
 
 	if b.config.VNCPortMin > b.config.VNCPortMax {
@@ -621,9 +599,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 	)
 
-	if b.config.Comm.Type != "none" && b.config.NetBridge == "" {
+	if b.config.CommConfig.Comm.Type != "none" && b.config.NetBridge == "" {
 		steps = append(steps,
-			new(stepForwardSSH),
+			new(stepPortForward),
 		)
 	}
 
@@ -636,20 +614,20 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&stepTypeBootCommand{},
 	)
 
-	if b.config.Comm.Type != "none" && b.config.NetBridge != "" {
+	if b.config.CommConfig.Comm.Type != "none" && b.config.NetBridge != "" {
 		steps = append(steps,
 			&stepWaitGuestAddress{
-				timeout: b.config.Comm.SSHTimeout,
+				timeout: b.config.CommConfig.Comm.SSHTimeout,
 			},
 		)
 	}
 
-	if b.config.Comm.Type != "none" {
+	if b.config.CommConfig.Comm.Type != "none" {
 		steps = append(steps,
 			&communicator.StepConnect{
-				Config:    &b.config.Comm,
-				Host:      commHost(b.config.Comm.Host()),
-				SSHConfig: b.config.Comm.SSHConfigFunc(),
+				Config:    &b.config.CommConfig.Comm,
+				Host:      commHost(b.config.CommConfig.Comm.Host()),
+				SSHConfig: b.config.CommConfig.Comm.SSHConfigFunc(),
 				SSHPort:   commPort,
 				WinRMPort: commPort,
 			},
@@ -662,7 +640,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	steps = append(steps,
 		&common.StepCleanupTempKeys{
-			Comm: &b.config.Comm,
+			Comm: &b.config.CommConfig.Comm,
 		},
 	)
 	steps = append(steps,

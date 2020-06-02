@@ -1,10 +1,9 @@
 package hcl2template
 
 import (
-	"path/filepath"
 	"testing"
-	"time"
 
+	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -72,12 +71,16 @@ func TestParser_complete(t *testing.T) {
 						}),
 					},
 				},
-				Sources: map[SourceRef]*SourceBlock{
-					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204:  {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+					refAWSEBSUbuntu1204: {Type: "amazon-ebs", Name: "ubuntu-1604"},
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Sources: []SourceRef{refVBIsoUbuntu1204},
+						Sources: []SourceRef{
+							refVBIsoUbuntu1204,
+							refAWSEBSUbuntu1204,
+						},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
 								PType: "shell",
@@ -125,136 +128,40 @@ func TestParser_complete(t *testing.T) {
 						},
 					},
 				},
-			},
-			false,
-		},
-		{"dir with no config files",
-			defaultParser,
-			parseTestArgs{"testdata/empty", nil, nil},
-			nil,
-			true, true,
-			nil,
-			false,
-		},
-		{name: "inexistent dir",
-			parser:                 defaultParser,
-			args:                   parseTestArgs{"testdata/inexistent", nil, nil},
-			parseWantCfg:           nil,
-			parseWantDiags:         true,
-			parseWantDiagHasErrors: true,
-		},
-		{name: "folder named build.pkr.hcl with an unknown src",
-			parser: defaultParser,
-			args:   parseTestArgs{"testdata/build.pkr.hcl", nil, nil},
-			parseWantCfg: &PackerConfig{
-				Basedir: "testdata/build.pkr.hcl",
-				Builds: Builds{
-					&BuildBlock{
-						Sources: []SourceRef{refAWSEBSUbuntu1204, refVBIsoUbuntu1204},
-						ProvisionerBlocks: []*ProvisionerBlock{
-							{PType: "shell"},
-							{PType: "file"},
-						},
-						PostProcessors: []*PostProcessorBlock{
-							{PType: "amazon-import"},
-						},
-					},
-				},
-			},
-			parseWantDiags:         false,
-			parseWantDiagHasErrors: false,
-			getBuildsWantBuilds:    []packer.Build{},
-			getBuildsWantDiags:     true,
-		},
-		{name: "unknown block type",
-			parser: defaultParser,
-			args:   parseTestArgs{"testdata/unknown", nil, nil},
-			parseWantCfg: &PackerConfig{
-				Basedir: "testdata/unknown",
-			},
-			parseWantDiags:         true,
-			parseWantDiagHasErrors: true,
-		},
-		{"provisioner with wrappers pause_before and max_retriers",
-			defaultParser,
-			parseTestArgs{"testdata/build/provisioner_paused_before_retry.pkr.hcl", nil, nil},
-			&PackerConfig{
-				Basedir: filepath.Join("testdata", "build"),
-				Sources: map[SourceRef]*SourceBlock{
-					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
-				},
-				Builds: Builds{
-					&BuildBlock{
-						Sources: []SourceRef{refVBIsoUbuntu1204},
-						ProvisionerBlocks: []*ProvisionerBlock{
-							{
-								PType:       "shell",
-								PauseBefore: time.Second * 10,
-								MaxRetries:  5,
-							},
-						},
-					},
-				},
-			},
-			false, false,
-			[]packer.Build{
 				&packer.CoreBuild{
-					Type:     "virtualbox-iso.ubuntu-1204",
+					Type:     "amazon-ebs.ubuntu-1604",
 					Prepared: true,
-					Builder:  emptyMockBuilder,
+					Builder: &MockBuilder{
+						Config: MockConfig{
+							NestedMockConfig: NestedMockConfig{
+								String: "setting from build section",
+								Int:    42,
+								Tags:   []MockTag{},
+							},
+							NestedSlice: []NestedMockConfig{},
+						},
+					},
 					Provisioners: []packer.CoreBuildProvisioner{
 						{
-							PType: "shell",
-							Provisioner: &packer.RetriedProvisioner{
-								MaxRetries: 5,
-								Provisioner: &packer.PausedProvisioner{
-									PauseBefore: time.Second * 10,
-									Provisioner: emptyMockProvisioner,
-								},
-							},
+							PType:       "shell",
+							PName:       "provisioner that does something",
+							Provisioner: basicMockProvisioner,
 						},
+						{PType: "file", Provisioner: basicMockProvisioner},
 					},
-					PostProcessors: [][]packer.CoreBuildPostProcessor{},
-				},
-			},
-			false,
-		},
-		{"provisioner with wrappers timeout",
-			defaultParser,
-			parseTestArgs{"testdata/build/provisioner_timeout.pkr.hcl", nil, nil},
-			&PackerConfig{
-				Basedir: filepath.Join("testdata", "build"),
-				Sources: map[SourceRef]*SourceBlock{
-					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
-				},
-				Builds: Builds{
-					&BuildBlock{
-						Sources: []SourceRef{refVBIsoUbuntu1204},
-						ProvisionerBlocks: []*ProvisionerBlock{
-							{
-								PType:   "shell",
-								Timeout: time.Second * 10,
-							},
-						},
-					},
-				},
-			},
-			false, false,
-			[]packer.Build{
-				&packer.CoreBuild{
-					Type:     "virtualbox-iso.ubuntu-1204",
-					Prepared: true,
-					Builder:  emptyMockBuilder,
-					Provisioners: []packer.CoreBuildProvisioner{
+					PostProcessors: [][]packer.CoreBuildPostProcessor{
 						{
-							PType: "shell",
-							Provisioner: &packer.TimeoutProvisioner{
-								Timeout:     time.Second * 10,
-								Provisioner: emptyMockProvisioner,
+							{
+								PType:         "amazon-import",
+								PName:         "something",
+								PostProcessor: basicMockPostProcessor,
+							},
+							{
+								PType:         "amazon-import",
+								PostProcessor: basicMockPostProcessor,
 							},
 						},
 					},
-					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
 			},
 			false,

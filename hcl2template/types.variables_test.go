@@ -162,15 +162,17 @@ func TestParse_variables(t *testing.T) {
 						Name: "foo",
 					},
 				},
-				Sources: map[SourceRef]*SourceBlock{
-					SourceRef{"null", "null-builder"}: &SourceBlock{
+				Sources: map[SourceRef]SourceBlock{
+					SourceRef{"null", "null-builder", nil}: SourceBlock{
 						Name: "null-builder",
 						Type: "null",
 					},
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Sources: []SourceRef{SourceRef{"null", "null-builder"}},
+						Sources: []SourceRef{
+							{"null", "null-builder", nil},
+						},
 					},
 				},
 			},
