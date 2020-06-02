@@ -38,4 +38,6 @@ var DeprecatedOptions = []string{
 	"disk_eagerly_scrub",
 	"iso_checksum_url",
 	"iso_checksum_type",
+	"ssh_host_port_max",
+	"ssh_host_port_min",
 }

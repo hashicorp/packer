@@ -73,6 +73,11 @@ type FlatConfig struct {
 	WinRMUseSSL               *bool             `mapstructure:"winrm_use_ssl" cty:"winrm_use_ssl" hcl:"winrm_use_ssl"`
 	WinRMInsecure             *bool             `mapstructure:"winrm_insecure" cty:"winrm_insecure" hcl:"winrm_insecure"`
 	WinRMUseNTLM              *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm" hcl:"winrm_use_ntlm"`
+	HostPortMin               *int              `mapstructure:"host_port_min" required:"false" cty:"host_port_min" hcl:"host_port_min"`
+	HostPortMax               *int              `mapstructure:"host_port_max" required:"false" cty:"host_port_max" hcl:"host_port_max"`
+	SkipNatMapping            *bool             `mapstructure:"skip_nat_mapping" required:"false" cty:"skip_nat_mapping" hcl:"skip_nat_mapping"`
+	SSHHostPortMin            *int              `mapstructure:"ssh_host_port_min" required:"false" cty:"ssh_host_port_min" hcl:"ssh_host_port_min"`
+	SSHHostPortMax            *int              `mapstructure:"ssh_host_port_max" cty:"ssh_host_port_max" hcl:"ssh_host_port_max"`
 	FloppyFiles               []string          `mapstructure:"floppy_files" cty:"floppy_files" hcl:"floppy_files"`
 	FloppyDirectories         []string          `mapstructure:"floppy_dirs" cty:"floppy_dirs" hcl:"floppy_dirs"`
 	FloppyLabel               *string           `mapstructure:"floppy_label" cty:"floppy_label" hcl:"floppy_label"`
@@ -100,8 +105,6 @@ type FlatConfig struct {
 	QemuBinary                *string           `mapstructure:"qemu_binary" required:"false" cty:"qemu_binary" hcl:"qemu_binary"`
 	QMPEnable                 *bool             `mapstructure:"qmp_enable" required:"false" cty:"qmp_enable" hcl:"qmp_enable"`
 	QMPSocketPath             *string           `mapstructure:"qmp_socket_path" required:"false" cty:"qmp_socket_path" hcl:"qmp_socket_path"`
-	SSHHostPortMin            *int              `mapstructure:"ssh_host_port_min" required:"false" cty:"ssh_host_port_min" hcl:"ssh_host_port_min"`
-	SSHHostPortMax            *int              `mapstructure:"ssh_host_port_max" required:"false" cty:"ssh_host_port_max" hcl:"ssh_host_port_max"`
 	UseDefaultDisplay         *bool             `mapstructure:"use_default_display" required:"false" cty:"use_default_display" hcl:"use_default_display"`
 	Display                   *string           `mapstructure:"display" required:"false" cty:"display" hcl:"display"`
 	VNCBindAddress            *string           `mapstructure:"vnc_bind_address" required:"false" cty:"vnc_bind_address" hcl:"vnc_bind_address"`
@@ -188,6 +191,11 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_use_ssl":                &hcldec.AttrSpec{Name: "winrm_use_ssl", Type: cty.Bool, Required: false},
 		"winrm_insecure":               &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":               &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
+		"host_port_min":                &hcldec.AttrSpec{Name: "host_port_min", Type: cty.Number, Required: false},
+		"host_port_max":                &hcldec.AttrSpec{Name: "host_port_max", Type: cty.Number, Required: false},
+		"skip_nat_mapping":             &hcldec.AttrSpec{Name: "skip_nat_mapping", Type: cty.Bool, Required: false},
+		"ssh_host_port_min":            &hcldec.AttrSpec{Name: "ssh_host_port_min", Type: cty.Number, Required: false},
+		"ssh_host_port_max":            &hcldec.AttrSpec{Name: "ssh_host_port_max", Type: cty.Number, Required: false},
 		"floppy_files":                 &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
 		"floppy_dirs":                  &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
 		"floppy_label":                 &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},
@@ -215,8 +223,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"qemu_binary":                  &hcldec.AttrSpec{Name: "qemu_binary", Type: cty.String, Required: false},
 		"qmp_enable":                   &hcldec.AttrSpec{Name: "qmp_enable", Type: cty.Bool, Required: false},
 		"qmp_socket_path":              &hcldec.AttrSpec{Name: "qmp_socket_path", Type: cty.String, Required: false},
-		"ssh_host_port_min":            &hcldec.AttrSpec{Name: "ssh_host_port_min", Type: cty.Number, Required: false},
-		"ssh_host_port_max":            &hcldec.AttrSpec{Name: "ssh_host_port_max", Type: cty.Number, Required: false},
 		"use_default_display":          &hcldec.AttrSpec{Name: "use_default_display", Type: cty.Bool, Required: false},
 		"display":                      &hcldec.AttrSpec{Name: "display", Type: cty.String, Required: false},
 		"vnc_bind_address":             &hcldec.AttrSpec{Name: "vnc_bind_address", Type: cty.String, Required: false},

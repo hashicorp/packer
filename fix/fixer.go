@@ -57,6 +57,7 @@ func init() {
 		"docker-tag-tags":            new(FixerDockerTagtoTags),
 		"vsphere-iso-net-disk":       new(FixerVSphereNetworkDisk),
 		"iso-checksum-type-and-url":  new(FixerISOChecksumTypeAndURL),
+		"qemu-host-port":             new(FixerQEMUHostPort),
 	}
 
 	FixerOrder = []string{
@@ -91,5 +92,6 @@ func init() {
 		"ssh-wait-timeout",
 		"vsphere-iso-net-disk",
 		"iso-checksum-type-and-url",
+		"qemu-host-port",
 	}
 }

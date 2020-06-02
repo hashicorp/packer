@@ -22,9 +22,9 @@ func commHost(host string) func(multistep.StateBag) (string, error) {
 }
 
 func commPort(state multistep.StateBag) (int, error) {
-	sshHostPort, ok := state.Get("sshHostPort").(int)
+	commHostPort, ok := state.Get("commHostPort").(int)
 	if !ok {
-		sshHostPort = 22
+		commHostPort = 22
 	}
-	return int(sshHostPort), nil
+	return commHostPort, nil
 }
