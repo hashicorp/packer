@@ -23,7 +23,7 @@ import (
 )
 
 var DefaultRestartCommand = `shutdown /r /f /t 0 /c "packer restart"`
-var DefaultRestartCheckCommand = winrm.Powershell(`echo "${env:COMPUTERNAME} restarted."`)
+var DefaultRestartCheckCommand = winrm.Powershell(`echo ("{0} restarted." -f [System.Net.Dns]::GetHostName())`)
 var retryableSleep = 5 * time.Second
 var TryCheckReboot = `shutdown /r /f /t 60 /c "packer restart test"`
 var AbortReboot = `shutdown /a`
