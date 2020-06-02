@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"regexp"
@@ -9,6 +10,7 @@ import (
 
 	ttmp "text/template"
 
+	"github.com/google/go-cmp/cmp"
 	multierror "github.com/hashicorp/go-multierror"
 	version "github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
@@ -418,6 +420,66 @@ func (c *Core) EvaluateExpression(line string) (string, bool, hcl.Diagnostics) {
 		}
 		return rendered, false, diags
 	}
+}
+
+func (c *Core) FixConfig(opts FixConfigOptions) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	// Remove once we have support for the Inplace FixConfigMode
+	if opts.Mode != Diff {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("FixConfig only supports template diff; FixConfigMode %d not supported", opts.Mode),
+		})
+
+		return diags
+	}
+
+	var rawTemplateData map[string]interface{}
+	input := make(map[string]interface{})
+	templateData := make(map[string]interface{})
+	if err := json.Unmarshal(c.Template.RawContents, &rawTemplateData); err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("unable to read the contents of the JSON configuration file: %s", err),
+			Detail:   err.Error(),
+		})
+		return diags
+	}
+	// Hold off on Diff for now - need to think about displaying to user.
+	// delete empty top-level keys since the fixers seem to add them
+	// willy-nilly
+	for k := range input {
+		ml, ok := input[k].([]map[string]interface{})
+		if !ok {
+			continue
+		}
+		if len(ml) == 0 {
+			delete(input, k)
+		}
+	}
+	// marshal/unmarshal to make comparable to templateData
+	var fixedData map[string]interface{}
+	// Guaranteed to be valid json, so we can ignore errors
+	j, _ := json.Marshal(input)
+	if err := json.Unmarshal(j, &fixedData); err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("unable to read the contents of the JSON configuration file: %s", err),
+			Detail:   err.Error(),
+		})
+
+		return diags
+	}
+
+	if diff := cmp.Diff(templateData, fixedData); diff != "" {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Fixable configuration found.\nPlease run `packer fix` to get your build to run correctly.\nSee debug log for more information.",
+			Detail:   diff,
+		})
+	}
+	return diags
 }
 
 // validate does a full validation of the template.
