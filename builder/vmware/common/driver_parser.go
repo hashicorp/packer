@@ -26,7 +26,10 @@ func uncomment(eof sentinelSignaller, in <-chan byte) (chan byte, sentinelSignal
 			select {
 			case <-eof:
 				stillReading = false
-			case ch := <-in:
+			case ch, ok := <-in:
+				if !ok {
+					break
+				}
 				switch ch {
 				case '#':
 					endofline = true
@@ -47,7 +50,6 @@ func uncomment(eof sentinelSignaller, in <-chan byte) (chan byte, sentinelSignal
 
 // convert a byte channel into a channel of pseudo-tokens
 func tokenizeDhcpConfig(eof sentinelSignaller, in chan byte) (chan string, sentinelSignaller) {
-	var ch byte
 	var state string
 	var quote bool
 
@@ -60,7 +62,10 @@ func tokenizeDhcpConfig(eof sentinelSignaller, in chan byte) (chan string, senti
 			case <-eof:
 				stillReading = false
 
-			case ch = <-in:
+			case ch, ok := <-in:
+				if !ok {
+					break
+				}
 				if quote {
 					if ch == '"' {
 						out <- state + string(ch)
@@ -155,7 +160,11 @@ func (e *tkGroup) String() string {
 func parseTokenParameter(in chan string) tkParameter {
 	var result tkParameter
 	for {
-		token := <-in
+		token, ok := <-in
+		if !ok {
+			goto leave
+		}
+
 		if result.name == "" {
 			result.name = token
 			continue
@@ -187,6 +196,7 @@ func parseDhcpConfig(eof sentinelSignaller, in chan string) (tkGroup, error) {
 				out <- v
 			}
 			out <- ";"
+			close(out)
 		}(out)
 		return parseTokenParameter(out)
 	}
