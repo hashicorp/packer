@@ -35,6 +35,9 @@ var buildSchema = &hcl.BodySchema{
 //		post-processor "" { ... }
 //	}
 type BuildBlock struct {
+	// Name is a string representing the named build to show in the logs
+	Name string
+
 	// Sources is the list of sources that we want to start in this build block.
 	Sources []SourceRef
 
@@ -57,6 +60,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 	build := &BuildBlock{}
 
 	var b struct {
+		Name        string   `hcl:"name,optional"`
 		FromSources []string `hcl:"sources,optional"`
 		Config      hcl.Body `hcl:",remain"`
 	}
@@ -64,6 +68,8 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 	if diags.HasErrors() {
 		return nil, diags
 	}
+
+	build.Name = b.Name
 
 	for _, buildFrom := range b.FromSources {
 		ref := sourceRefFromString(buildFrom)

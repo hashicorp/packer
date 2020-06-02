@@ -86,6 +86,7 @@ type Build interface {
 // multiple files, of course, but it should be for only a single provider (such
 // as VirtualBox, EC2, etc.).
 type CoreBuild struct {
+	BuildName          string
 	Type               string
 	Builder            Builder
 	BuilderConfig      interface{}
@@ -128,6 +129,9 @@ type CoreBuildProvisioner struct {
 
 // Returns the name of the build.
 func (b *CoreBuild) Name() string {
+	if b.BuildName != "" {
+		return b.BuildName + "." + b.Type
+	}
 	return b.Type
 }
 
