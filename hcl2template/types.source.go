@@ -117,7 +117,7 @@ type SourceRef struct {
 	addition hcl.Body
 }
 
-// the 'addition' field makes of ref a different entry in the soruces map, so
+// the 'addition' field makes of ref a different entry in the sources map, so
 // Ref is here to make sure only one is returned.
 func (r *SourceRef) Ref() SourceRef {
 	return SourceRef{
