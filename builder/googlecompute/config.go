@@ -120,7 +120,7 @@ type Config struct {
 	// The Google Compute network id or URL to use for the launched instance.
 	// Defaults to "default". If the value is not a URL, it will be
 	// interpolated to
-	// projects/((network_project_id))/global/networks/((network)). This value
+	// `projects/((network_project_id))/global/networks/((network))`. This value
 	// is not required if a subnet is specified.
 	Network string `mapstructure:"network" required:"false"`
 	// The project ID for the network and subnetwork to use for launched
@@ -178,7 +178,7 @@ type Config struct {
 	// subnetting. Note, the region of the subnetwork must match the region or
 	// zone in which the VM is launched. If the value is not a URL, it will be
 	// interpolated to
-	// projects/((network_project_id))/regions/((region))/subnetworks/((subnetwork))
+	// `projects/((network_project_id))/regions/((region))/subnetworks/((subnetwork))`
 	Subnetwork string `mapstructure:"subnetwork" required:"false"`
 	// Assign network tags to apply firewall rules to VM instance.
 	Tags []string `mapstructure:"tags" required:"false"`
