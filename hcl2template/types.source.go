@@ -17,7 +17,7 @@ type SourceBlock struct {
 
 	block *hcl.Block
 
-	// addition will be merged into block to allow to override builder settings
+	// addition will be merged into block to allow user to override builder settings
 	// per build.source block.
 	addition hcl.Body
 }
