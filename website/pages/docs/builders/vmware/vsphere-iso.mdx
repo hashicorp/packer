@@ -30,19 +30,28 @@ the items listed here, you will want to look at the general configuration
 references for [HTTP](#http-directory-configuration),
 [Floppy](#floppy-configuration),
 [Boot](#boot-configuration),
-[Driver](#driver-configuration),
 [Hardware](#hardware-configuration),
 [Output](#output-configuration),
 [Run](#run-configuration),
 [Shutdown](#shutdown-configuration),
 [Communicator](#communicator-configuration),
-[Tools](#tools-configuration),
-[vmx](#vmx-configuration),
 [Export](#export-configuration),
 configuration references, which are
 necessary for this build to succeed and can be found further down the page.
 
 @include 'builder/vsphere/iso/Config-not-required.mdx'
+
+### Http directory configuration
+
+@include 'common/HTTPConfig.mdx'
+
+#### Optional:
+
+@include 'common/HTTPConfig-not-required.mdx'
+
+### Floppy configuration
+
+@include 'builder/vsphere/iso/FloppyConfig-not-required.mdx'
 
 ### Connection Configuration
 
@@ -122,10 +131,6 @@ from the datastore. Example:
 #### Optional
 
 @include 'builder/vsphere/iso/DiskConfig-not-required.mdx'
-
-### Floppy Configuration
-
-@include 'builder/vsphere/iso/FloppyConfig-not-required.mdx'
 
 ### Export Configuration
 
