@@ -2,16 +2,10 @@ package command
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"log"
 	"strings"
 
-	"github.com/hashicorp/packer/fix"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/posener/complete"
 )
 
@@ -51,137 +45,27 @@ func (c *ValidateCommand) ParseArgs(args []string) (*ValidateArgs, int) {
 }
 
 func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int {
-	// Parse the template
-	tpl, err := template.ParseFile(cla.Path)
-	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
+	packerStarter, ret := c.GetConfig(&cla.MetaArgs)
+	if ret != 0 {
 		return 1
 	}
 
 	// If we're only checking syntax, then we're done already
 	if cla.SyntaxOnly {
-		c.Ui.Say("Syntax-only check passed. Everything looks okay.")
 		return 0
 	}
 
-	// Get the core
-	core, err := c.Meta.Core(tpl, &cla.MetaArgs)
-	if err != nil {
-		c.Ui.Error(err.Error())
-		return 1
-	}
+	_, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
+		Only:   cla.Only,
+		Except: cla.Except,
+	})
 
-	errs := make([]error, 0)
-	warnings := make(map[string][]string)
+	fixerDiags := packerStarter.FixConfig(packer.FixConfigOptions{
+		Mode: packer.Diff,
+	})
+	diags = append(diags, fixerDiags...)
 
-	// Get the builds we care about
-	buildNames := core.BuildNames(c.CoreConfig.Only, c.CoreConfig.Except)
-	builds := make([]packer.Build, 0, len(buildNames))
-	for _, n := range buildNames {
-		b, err := core.Build(n)
-		if err != nil {
-			c.Ui.Error(fmt.Sprintf(
-				"Failed to initialize build '%s': %s",
-				n, err))
-			return 1
-		}
-
-		builds = append(builds, b)
-	}
-
-	// Check the configuration of all builds
-	for _, b := range builds {
-		log.Printf("Preparing build: %s", b.Name())
-		warns, err := b.Prepare()
-		if len(warns) > 0 {
-			warnings[b.Name()] = warns
-		}
-		if err != nil {
-			errs = append(errs, fmt.Errorf("Errors validating build '%s'. %s", b.Name(), err))
-		}
-	}
-
-	// Check if any of the configuration is fixable
-	var rawTemplateData map[string]interface{}
-	input := make(map[string]interface{})
-	templateData := make(map[string]interface{})
-	json.Unmarshal(tpl.RawContents, &rawTemplateData)
-	for k, v := range rawTemplateData {
-		if vals, ok := v.([]interface{}); ok {
-			if len(vals) == 0 {
-				continue
-			}
-		}
-		templateData[strings.ToLower(k)] = v
-		input[strings.ToLower(k)] = v
-	}
-
-	// fix rawTemplateData into input
-	for _, name := range fix.FixerOrder {
-		var err error
-		fixer, ok := fix.Fixers[name]
-		if !ok {
-			panic("fixer not found: " + name)
-		}
-		input, err = fixer.Fix(input)
-		if err != nil {
-			c.Ui.Error(fmt.Sprintf("Error checking against fixers: %s", err))
-			return 1
-		}
-	}
-	// delete empty top-level keys since the fixers seem to add them
-	// willy-nilly
-	for k := range input {
-		ml, ok := input[k].([]map[string]interface{})
-		if !ok {
-			continue
-		}
-		if len(ml) == 0 {
-			delete(input, k)
-		}
-	}
-	// marshal/unmarshal to make comparable to templateData
-	var fixedData map[string]interface{}
-	// Guaranteed to be valid json, so we can ignore errors
-	j, _ := json.Marshal(input)
-	json.Unmarshal(j, &fixedData)
-
-	if diff := cmp.Diff(templateData, fixedData); diff != "" {
-		c.Ui.Say("[warning] Fixable configuration found.")
-		c.Ui.Say("You may need to run `packer fix` to get your build to run")
-		c.Ui.Say("correctly. See debug log for more information.\n")
-		log.Printf("Fixable config differences:\n%s", diff)
-	}
-
-	if len(errs) > 0 {
-		c.Ui.Error("Template validation failed. Errors are shown below.\n")
-		for i, err := range errs {
-			c.Ui.Error(err.Error())
-
-			if (i + 1) < len(errs) {
-				c.Ui.Error("")
-			}
-		}
-		return 1
-	}
-
-	if len(warnings) > 0 {
-		c.Ui.Say("Template validation succeeded, but there were some warnings.")
-		c.Ui.Say("These are ONLY WARNINGS, and Packer will attempt to build the")
-		c.Ui.Say("template despite them, but they should be paid attention to.\n")
-
-		for build, warns := range warnings {
-			c.Ui.Say(fmt.Sprintf("Warnings for build '%s':\n", build))
-			for _, warning := range warns {
-				c.Ui.Say(fmt.Sprintf("* %s", warning))
-			}
-		}
-
-		return 0
-	}
-
-	c.Ui.Say("Template validated successfully.")
-	return 0
+	return writeDiags(c.Ui, nil, diags)
 }
 
 func (*ValidateCommand) Help() string {

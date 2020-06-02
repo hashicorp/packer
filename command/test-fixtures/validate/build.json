@@ -1,0 +1,9 @@
+{
+  "builders":[
+    {
+      "type":"file",
+      "target":"chocolate.txt",
+      "content":"chocolate"
+    }
+  ]
+}
