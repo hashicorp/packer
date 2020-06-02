@@ -20,30 +20,32 @@ func (s *stepPortForward) Run(ctx context.Context, state multistep.StateBag) mul
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	guestPort := config.CommConfig.Comm.Port()
-	commHostPort := guestPort
-	if !config.CommConfig.SkipNatMapping {
-		log.Printf("Looking for available communicator (SSH, WinRM, etc) port between %d and %d", config.CommConfig.HostPortMin, config.CommConfig.HostPortMax)
-		var err error
-		s.l, err = net.ListenRangeConfig{
-			Addr:    config.VNCBindAddress,
-			Min:     config.CommConfig.HostPortMin,
-			Max:     config.CommConfig.HostPortMax,
-			Network: "tcp",
-		}.Listen(ctx)
-		if err != nil {
-			err := fmt.Errorf("Error finding port: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		s.l.Listener.Close() // free port, but don't unlock lock file
-		commHostPort = s.l.Port
-		ui.Say(fmt.Sprintf("Found port for communicator (SSH, WinRM, etc): %d.", commHostPort))
+	commHostPort := config.CommConfig.Comm.Port()
 
-	} else {
+	if config.CommConfig.SkipNatMapping {
 		log.Printf("Skipping NAT port forwarding. Using communicator (SSH, WinRM, etc) port %d", commHostPort)
+		state.Put("commHostPort", commHostPort)
+		return multistep.ActionContinue
 	}
+
+	log.Printf("Looking for available communicator (SSH, WinRM, etc) port between %d and %d", config.CommConfig.HostPortMin, config.CommConfig.HostPortMax)
+	var err error
+	s.l, err = net.ListenRangeConfig{
+		Addr:    config.VNCBindAddress,
+		Min:     config.CommConfig.HostPortMin,
+		Max:     config.CommConfig.HostPortMax,
+		Network: "tcp",
+	}.Listen(ctx)
+	if err != nil {
+		err := fmt.Errorf("Error finding port: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	s.l.Listener.Close() // free port, but don't unlock lock file
+	commHostPort = s.l.Port
+	ui.Say(fmt.Sprintf("Found port for communicator (SSH, WinRM, etc): %d.", commHostPort))
+
 	// Save the port we're using so that future steps can use it
 	state.Put("commHostPort", commHostPort)
 

@@ -55,3 +55,7 @@ func (FixerQEMUHostPort) Fix(input map[string]interface{}) (map[string]interface
 func (FixerQEMUHostPort) Synopsis() string {
 	return `Updates ssh_host_port_min and ssh_host_port_max to host_port_min and host_port_max`
 }
+
+func (FixerQEMUHostPort) DeprecatedOptions() []string {
+	return []string{"ssh_host_port_max", "ssh_host_port_min"}
+}

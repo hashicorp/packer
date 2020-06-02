@@ -458,9 +458,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
 
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
-	if es := b.config.CommConfig.Prepare(&b.config.ctx); len(es) > 0 {
+	commConfigWarnings, es := b.config.CommConfig.Prepare(&b.config.ctx)
+	if len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
+	warnings = append(warnings, commConfigWarnings...)
 
 	if !(b.config.Format == "qcow2" || b.config.Format == "raw") {
 		errs = packer.MultiErrorAppend(
@@ -615,7 +617,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if b.config.CommConfig.Comm.Type != "none" && b.config.NetBridge != "" {
 		steps = append(steps,
 			&stepWaitGuestAddress{
-				timeout: b.config.Comm.SSHTimeout,
+				timeout: b.config.CommConfig.Comm.SSHTimeout,
 			},
 		)
 	}

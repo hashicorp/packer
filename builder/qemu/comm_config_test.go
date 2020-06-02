@@ -21,9 +21,12 @@ func testCommConfig() *CommConfig {
 
 func TestCommConfigPrepare(t *testing.T) {
 	c := testCommConfig()
-	errs := c.Prepare(interpolate.NewContext())
+	warns, errs := c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
+	}
+	if len(warns) != 0 {
+		t.Fatal("should not have any warnings")
 	}
 
 	if c.HostPortMin != 2222 {
@@ -42,42 +45,56 @@ func TestCommConfigPrepare(t *testing.T) {
 func TestCommConfigPrepare_SSHHostPort(t *testing.T) {
 	var c *CommConfig
 	var errs []error
+	var warns []string
 
 	// Bad
 	c = testCommConfig()
 	c.HostPortMin = 1000
 	c.HostPortMax = 500
-	errs = c.Prepare(interpolate.NewContext())
+	warns, errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatalf("bad: %#v", errs)
+	}
+	if len(warns) != 0 {
+		t.Fatal("should not have any warnings")
 	}
 
 	// Good
 	c = testCommConfig()
 	c.HostPortMin = 50
 	c.HostPortMax = 500
-	errs = c.Prepare(interpolate.NewContext())
+	warns, errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %s", errs)
+	}
+	if len(warns) != 0 {
+		t.Fatal("should not have any warnings")
 	}
 }
 
 func TestCommConfigPrepare_SSHPrivateKey(t *testing.T) {
 	var c *CommConfig
 	var errs []error
+	var warns []string
 
 	c = testCommConfig()
 	c.Comm.SSHPrivateKeyFile = ""
-	errs = c.Prepare(interpolate.NewContext())
+	warns, errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
+	}
+	if len(warns) != 0 {
+		t.Fatal("should not have any warnings")
 	}
 
 	c = testCommConfig()
 	c.Comm.SSHPrivateKeyFile = "/i/dont/exist"
-	errs = c.Prepare(interpolate.NewContext())
+	warns, errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatal("should have error")
+	}
+	if len(warns) != 0 {
+		t.Fatal("should not have any warnings")
 	}
 
 	// Test bad contents
@@ -94,9 +111,12 @@ func TestCommConfigPrepare_SSHPrivateKey(t *testing.T) {
 
 	c = testCommConfig()
 	c.Comm.SSHPrivateKeyFile = tf.Name()
-	errs = c.Prepare(interpolate.NewContext())
+	warns, errs = c.Prepare(interpolate.NewContext())
 	if len(errs) == 0 {
 		t.Fatal("should have error")
+	}
+	if len(warns) != 0 {
+		t.Fatal("should not have any warnings")
 	}
 
 	// Test good contents
@@ -115,8 +135,11 @@ func TestCommConfigPrepare_SSHPrivateKey(t *testing.T) {
 
 	c = testCommConfig()
 	c.Comm.SSHPrivateKeyFile = tf.Name()
-	errs = c.Prepare(interpolate.NewContext())
+	warns, errs = c.Prepare(interpolate.NewContext())
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
+	}
+	if len(warns) != 0 {
+		t.Fatal("should not have any warnings")
 	}
 }

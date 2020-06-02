@@ -430,8 +430,8 @@ func TestBuilderPrepare_SSHHostPort(t *testing.T) {
 	config := testConfig()
 
 	// Bad
-	config["ssh_host_port_min"] = 1000
-	config["ssh_host_port_max"] = 500
+	config["host_port_min"] = 1000
+	config["host_port_max"] = 500
 	b = Builder{}
 	_, warns, err := b.Prepare(config)
 	if len(warns) > 0 {
@@ -442,7 +442,7 @@ func TestBuilderPrepare_SSHHostPort(t *testing.T) {
 	}
 
 	// Bad
-	config["ssh_host_port_min"] = -500
+	config["host_port_min"] = -500
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -453,8 +453,8 @@ func TestBuilderPrepare_SSHHostPort(t *testing.T) {
 	}
 
 	// Good
-	config["ssh_host_port_min"] = 500
-	config["ssh_host_port_max"] = 1000
+	config["host_port_min"] = 500
+	config["host_port_max"] = 1000
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -637,8 +637,8 @@ func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
 	config["ssh_host_port_max"] = hostPortMax
 
 	_, warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
+	if len(warns) == 0 {
+		t.Fatalf("should have deprecation warn")
 	}
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)

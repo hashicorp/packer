@@ -30,15 +30,19 @@ type CommConfig struct {
 	SSHHostPortMax int `mapstructure:"ssh_host_port_max"`
 }
 
-func (c *CommConfig) Prepare(ctx *interpolate.Context) []error {
+func (c *CommConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs []error) {
 
 	// Backwards compatibility
 	if c.SSHHostPortMin != 0 {
+		warnings = append(warnings, "ssh_host_port_min is deprecated and is being replaced by host_port_min. "+
+			"Please, update your template to use host_port_min. In future versions of Packer, inclusion of ssh_host_port_min will error your builds.")
 		c.HostPortMin = c.SSHHostPortMin
 	}
 
 	// Backwards compatibility
 	if c.SSHHostPortMax != 0 {
+		warnings = append(warnings, "ssh_host_port_max is deprecated and is being replaced by host_port_max. "+
+			"Please, update your template to use host_port_max. In future versions of Packer, inclusion of ssh_host_port_max will error your builds.")
 		c.HostPortMax = c.SSHHostPortMax
 	}
 
@@ -54,7 +58,7 @@ func (c *CommConfig) Prepare(ctx *interpolate.Context) []error {
 		c.HostPortMax = 4444
 	}
 
-	errs := c.Comm.Prepare(ctx)
+	errs = c.Comm.Prepare(ctx)
 	if c.HostPortMin > c.HostPortMax {
 		errs = append(errs,
 			errors.New("host_port_min must be less than host_port_max"))
@@ -64,5 +68,5 @@ func (c *CommConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, errors.New("host_port_min must be positive"))
 	}
 
-	return errs
+	return
 }
