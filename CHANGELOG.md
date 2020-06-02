@@ -14,6 +14,8 @@
     read more about this[GH-8437]
 
 ### FEATURES:
+* HCL2/core: it is now possible to set source fields from the `build` block
+    [GH-9291]
 * **New post-processor** Yandex Export [GH-9124]
 
 ### IMPROVEMENTS:

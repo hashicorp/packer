@@ -191,7 +191,7 @@ func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 			}
 
 			ref := source.Ref()
-			if existing := cfg.Sources[ref]; existing != nil {
+			if existing, found := cfg.Sources[ref]; found {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Duplicate " + sourceLabel + " block",
@@ -205,7 +205,7 @@ func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 			}
 
 			if cfg.Sources == nil {
-				cfg.Sources = map[SourceRef]*SourceBlock{}
+				cfg.Sources = map[SourceRef]SourceBlock{}
 			}
 			cfg.Sources[ref] = source
 

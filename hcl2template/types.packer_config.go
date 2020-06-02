@@ -18,7 +18,7 @@ type PackerConfig struct {
 	Basedir string
 
 	// Available Source blocks
-	Sources map[SourceRef]*SourceBlock
+	Sources map[SourceRef]SourceBlock
 
 	// InputVariables and LocalVariables are the list of defined input and
 	// local variables. They are of the same type but are not used in the same
@@ -194,7 +194,7 @@ func (c *PackerConfig) evaluateLocalVariable(local *Local) hcl.Diagnostics {
 
 // getCoreBuildProvisioners takes a list of provisioner block, starts according
 // provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildProvisioners(source *SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
@@ -234,7 +234,7 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source *SourceBlock, blocks []
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
 // according provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildPostProcessors(source *SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildPostProcessor{}
 	for _, ppb := range blocks {
@@ -262,15 +262,17 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 
 	for _, build := range cfg.Builds {
 		for _, from := range build.Sources {
-			src, found := cfg.Sources[from]
+			src, found := cfg.Sources[from.Ref()]
 			if !found {
 				diags = append(diags, &hcl.Diagnostic{
 					Summary:  "Unknown " + sourceLabel + " " + from.String(),
 					Subject:  build.HCL2Ref.DefRange.Ptr(),
 					Severity: hcl.DiagError,
+					Detail:   fmt.Sprintf("Known: %v", cfg.Sources),
 				})
 				continue
 			}
+			src.addition = from.addition
 
 			// Apply the -only and -except command-line options to exclude matching builds.
 			buildName := fmt.Sprintf("%s.%s", src.Type, src.Name)
