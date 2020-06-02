@@ -2092,3 +2092,41 @@ func getPackerCommunicatorConfiguration() map[string]string {
 
 	return config
 }
+
+func TestConfigShouldRejectMalformedUserAssignedManagedIdentities(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	config["user_assigned_managed_identities"] = []string{"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id"}
+	var c Config
+	if _, err := c.Prepare(config, getPackerConfiguration()); err != nil {
+		t.Error("Expected test to pass, but it failed with the well-formed user_assigned_managed_identities.")
+	}
+
+	malformedUserAssignedManagedIdentityResourceIds := []string{
+		"not_a_resource_id",
+		"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/",
+		"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Compute/images/im",
+		"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.ManagedIdentity/userAssignedIdentitie/id",
+	}
+
+	for _, x := range malformedUserAssignedManagedIdentityResourceIds {
+		config["user_assigned_managed_identities"] = x
+		var c Config
+		if _, err := c.Prepare(config, getPackerConfiguration()); err == nil {
+			t.Errorf("Expected test to fail, but it succeeded with the malformed user_assigned_managed_identities set to %q.", x)
+		}
+	}
+}

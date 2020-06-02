@@ -614,7 +614,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	if b.config.CommConfig.Comm.Type != "none" && b.config.NetBridge != "" {
 		steps = append(steps,
-			new(stepWaitGuestAddress),
+			&stepWaitGuestAddress{
+				timeout: b.config.Comm.SSHTimeout,
+			},
 		)
 	}
 

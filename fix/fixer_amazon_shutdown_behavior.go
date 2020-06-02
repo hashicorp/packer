@@ -10,6 +10,10 @@ import (
 // template in a Amazon builder
 type FixerAmazonShutdownBehavior struct{}
 
+func (FixerAmazonShutdownBehavior) DeprecatedOptions() []string {
+	return []string{"shutdown_behaviour"}
+}
+
 func (FixerAmazonShutdownBehavior) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// The type we'll decode into; we only care about builders
 	type template struct {

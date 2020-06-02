@@ -4,9 +4,13 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// FixerAmazonSpotPriceProductDeprecation removes the deprecated "vhd_temp_path" setting
+// FixerAmazonSpotPriceProductDeprecation removes the deprecated "spot_price_auto_product" setting
 // from Amazon builder templates
 type FixerAmazonSpotPriceProductDeprecation struct{}
+
+func (FixerAmazonSpotPriceProductDeprecation) DeprecatedOptions() []string {
+	return []string{"spot_price_auto_product"}
+}
 
 func (FixerAmazonSpotPriceProductDeprecation) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// The type we'll decode into; we only care about builders

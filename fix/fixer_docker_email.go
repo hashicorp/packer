@@ -4,6 +4,10 @@ import "github.com/mitchellh/mapstructure"
 
 type FixerDockerEmail struct{}
 
+func (FixerDockerEmail) DeprecatedOptions() []string {
+	return []string{"login_email"}
+}
+
 func (FixerDockerEmail) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	if input["post-processors"] == nil {
 		return input, nil

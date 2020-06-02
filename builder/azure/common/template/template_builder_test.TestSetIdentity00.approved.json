@@ -107,6 +107,12 @@
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', parameters('nicName'))]"
       ],
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id": {}
+        }
+      },
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
       "properties": {
@@ -142,13 +148,18 @@
         },
         "storageProfile": {
           "imageReference": {
-            "id": "/subscriptions/ignore/resourceGroups/ignore/providers/Microsoft.Compute/galleries/ignore/images/ignore"
+            "offer": "UbuntuServer",
+            "publisher": "Canonical",
+            "sku": "16.04",
+            "version": "latest"
           },
           "osDisk": {
-            "caching": "ReadOnly",
+            "caching": "ReadWrite",
             "createOption": "FromImage",
             "name": "[parameters('osDiskName')]",
-            "osType": "Linux"
+            "vhd": {
+              "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/', parameters('osDiskName'),'.vhd')]"
+            }
           }
         }
       },

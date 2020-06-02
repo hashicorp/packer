@@ -8,6 +8,10 @@ import (
 // "iso_checksum_type" to put everything in the checksum field.
 type FixerISOChecksumTypeAndURL struct{}
 
+func (FixerISOChecksumTypeAndURL) DeprecatedOptions() []string {
+	return []string{"iso_checksum_url", "iso_checksum_type"}
+}
+
 func (FixerISOChecksumTypeAndURL) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// Our template type we'll use for this fixer only
 	type template struct {
@@ -27,7 +31,9 @@ func (FixerISOChecksumTypeAndURL) Fix(input map[string]interface{}) (map[string]
 		checksum := stringValue(builder["iso_checksum"])
 		delete(builder, "iso_checksum_url")
 		delete(builder, "iso_checksum_type")
-
+		if checksum == "" && checksumUrl == "" {
+			continue
+		}
 		if checksumUrl != "" {
 			checksum = "file:" + checksumUrl
 		} else if checksumType != "" {

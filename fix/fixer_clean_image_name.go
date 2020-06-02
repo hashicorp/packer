@@ -11,6 +11,10 @@ import (
 // calls with "clean_resource_name"
 type FixerCleanImageName struct{}
 
+func (FixerCleanImageName) DeprecatedOptions() []string {
+	return []string{"clean_image_name", "clean_ami_name"}
+}
+
 func (FixerCleanImageName) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// Our template type we'll use for this fixer only
 	type template struct {

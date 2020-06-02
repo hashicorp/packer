@@ -8,6 +8,10 @@ import (
 // environment variables and replace galaxycommand with galaxy_command
 type FixerGalaxyCommand struct{}
 
+func (FixerGalaxyCommand) DeprecatedOptions() []string {
+	return []string{"galaxycommand"}
+}
+
 func (FixerGalaxyCommand) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	type template struct {
 		Provisioners []interface{}

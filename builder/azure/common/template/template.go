@@ -12,7 +12,7 @@ type Template struct {
 	ContentVersion *string                `json:"contentVersion"`
 	Parameters     *map[string]Parameters `json:"parameters"`
 	Variables      *map[string]string     `json:"variables"`
-	Resources      *[]Resource            `json:"resources"`
+	Resources      []*Resource            `json:"resources"`
 }
 
 /////////////////////////////////////////////////
@@ -34,6 +34,7 @@ type Resource struct {
 	Properties *Properties         `json:"properties,omitempty"`
 	Tags       *map[string]*string `json:"tags,omitempty"`
 	Resources  *[]Resource         `json:"resources,omitempty"`
+	Identity   *Identity           `json:"identity,omitempty"`
 }
 
 type Plan struct {
@@ -96,6 +97,13 @@ type Properties struct {
 	SecurityRules  *[]network.SecurityRule `json:"securityRules,omitempty"`
 	TenantId       *string                 `json:"tenantId,omitempty"`
 	Value          *string                 `json:"value,omitempty"`
+}
+
+// Template > Resource > Identity
+// The map values are simplified to struct{} since they are read-only and cannot be set
+type Identity struct {
+	Type                   *string             `json:"type,omitempty"`
+	UserAssignedIdentities map[string]struct{} `json:"userAssignedIdentities,omitempty"`
 }
 
 type AccessPolicies struct {

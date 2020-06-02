@@ -18,12 +18,16 @@ import (
 
 // This step waits for the guest address to become available in the network
 // bridge, then it sets the guestAddress state property.
-type stepWaitGuestAddress struct{}
+type stepWaitGuestAddress struct {
+	timeout time.Duration
+}
 
 func (s *stepWaitGuestAddress) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	qmpMonitor := state.Get("qmp_monitor").(*qmp.SocketMonitor)
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
 
 	ui.Say(fmt.Sprintf("Waiting for the guest address to become available in the %s network bridge...", config.NetBridge))
 	for {
@@ -31,7 +35,7 @@ func (s *stepWaitGuestAddress) Run(ctx context.Context, state multistep.StateBag
 		if guestAddress != "" {
 			log.Printf("Found guest address %s", guestAddress)
 			state.Put("guestAddress", guestAddress)
-			break
+			return multistep.ActionContinue
 		}
 		select {
 		case <-time.After(10 * time.Second):
@@ -40,8 +44,6 @@ func (s *stepWaitGuestAddress) Run(ctx context.Context, state multistep.StateBag
 			return multistep.ActionHalt
 		}
 	}
-
-	return multistep.ActionContinue
 }
 
 func (s *stepWaitGuestAddress) Cleanup(state multistep.StateBag) {
