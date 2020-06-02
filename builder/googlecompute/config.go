@@ -101,6 +101,25 @@ type Config struct {
 	ImageLabels map[string]string `mapstructure:"image_labels" required:"false"`
 	// Licenses to apply to the created image.
 	ImageLicenses []string `mapstructure:"image_licenses" required:"false"`
+	// Storage location, either regional or multi-regional, where snapshot
+	// content is to be stored and only accepts 1 value. Always defaults to a nearby regional or multi-regional
+	// location.
+	//
+	// multi-regional example:
+	//
+	//  ```json
+	//  {
+	//     "image_storage_locations": ["us"]
+	//  }
+	//  ```
+	// regional example:
+	//
+	//  ```json
+	//  {
+	//     "image_storage_locations": ["us-east1"]
+	//  }
+	//  ```
+	ImageStorageLocations []string `mapstructure:"image_storage_locations" required:"false"`
 	// A name to give the launched instance. Beware that this must be unique.
 	// Defaults to `packer-{{uuid}}`.
 	InstanceName string `mapstructure:"instance_name" required:"false"`
@@ -305,6 +324,11 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		if !validImageName.MatchString(c.ImageFamily) {
 			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "family", c.ImageFamily)))
 		}
+	}
+
+	if len(c.ImageStorageLocations) > 1 {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("Invalid image storage locations: Must not have more than 1 region"))
 	}
 
 	if c.InstanceName == "" {

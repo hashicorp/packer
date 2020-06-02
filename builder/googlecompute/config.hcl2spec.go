@@ -80,6 +80,7 @@ type FlatConfig struct {
 	ImageFamily                  *string                    `mapstructure:"image_family" required:"false" cty:"image_family" hcl:"image_family"`
 	ImageLabels                  map[string]string          `mapstructure:"image_labels" required:"false" cty:"image_labels" hcl:"image_labels"`
 	ImageLicenses                []string                   `mapstructure:"image_licenses" required:"false" cty:"image_licenses" hcl:"image_licenses"`
+	ImageStorageLocations        []string                   `mapstructure:"image_storage_locations" required:"false" cty:"image_storage_locations" hcl:"image_storage_locations"`
 	InstanceName                 *string                    `mapstructure:"instance_name" required:"false" cty:"instance_name" hcl:"instance_name"`
 	Labels                       map[string]string          `mapstructure:"labels" required:"false" cty:"labels" hcl:"labels"`
 	MachineType                  *string                    `mapstructure:"machine_type" required:"false" cty:"machine_type" hcl:"machine_type"`
@@ -189,6 +190,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"image_family":                    &hcldec.AttrSpec{Name: "image_family", Type: cty.String, Required: false},
 		"image_labels":                    &hcldec.AttrSpec{Name: "image_labels", Type: cty.Map(cty.String), Required: false},
 		"image_licenses":                  &hcldec.AttrSpec{Name: "image_licenses", Type: cty.List(cty.String), Required: false},
+		"image_storage_locations":         &hcldec.AttrSpec{Name: "image_storage_locations", Type: cty.List(cty.String), Required: false},
 		"instance_name":                   &hcldec.AttrSpec{Name: "instance_name", Type: cty.String, Required: false},
 		"labels":                          &hcldec.AttrSpec{Name: "labels", Type: cty.Map(cty.String), Required: false},
 		"machine_type":                    &hcldec.AttrSpec{Name: "machine_type", Type: cty.String, Required: false},

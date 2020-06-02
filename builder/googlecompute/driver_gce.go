@@ -137,7 +137,7 @@ func NewDriverGCE(ui packer.Ui, p string, conf *jwt.Config, vaultOauth string) (
 	}, nil
 }
 
-func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string, image_encryption_key *compute.CustomerEncryptionKey) (<-chan *Image, <-chan error) {
+func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string, image_encryption_key *compute.CustomerEncryptionKey, imageStorageLocations []string) (<-chan *Image, <-chan error) {
 	gce_image := &compute.Image{
 		Description:        description,
 		Name:               name,
@@ -147,6 +147,7 @@ func (d *driverGCE) CreateImage(name, description, family, zone, disk string, im
 		ImageEncryptionKey: image_encryption_key,
 		SourceDisk:         fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
 		SourceType:         "RAW",
+		StorageLocations:   imageStorageLocations,
 	}
 
 	imageCh := make(chan *Image, 1)

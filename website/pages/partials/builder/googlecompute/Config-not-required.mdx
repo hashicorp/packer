@@ -66,6 +66,25 @@
     
 -   `image_licenses` ([]string) - Licenses to apply to the created image.
     
+-   `image_storage_locations` ([]string) - Storage location, either regional or multi-regional, where snapshot
+    content is to be stored and only accepts 1 value. Always defaults to a nearby regional or multi-regional
+    location.
+    
+    multi-regional example:
+    
+     ```json
+     {
+        "image_storage_locations": ["us"]
+     }
+     ```
+    regional example:
+    
+     ```json
+     {
+        "image_storage_locations": ["us-east1"]
+     }
+     ```
+    
 -   `instance_name` (string) - A name to give the launched instance. Beware that this must be unique.
     Defaults to `packer-{{uuid}}`.
     
