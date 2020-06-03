@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sort"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
@@ -16,26 +17,26 @@ import (
 var _ multistep.Step = &StepCreateImage{}
 
 type StepCreateImage struct {
-	ImageResourceID          string
-	ImageOSState             string
-	OSDiskStorageAccountType string
-	OSDiskCacheType          string
-	Location                 string
-
-	imageResource azure.Resource
+	ImageResourceID            string
+	ImageOSState               string
+	OSDiskStorageAccountType   string
+	OSDiskCacheType            string
+	DataDiskStorageAccountType string
+	DataDiskCacheType          string
+	Location                   string
 }
 
 func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
-	diskResourceID := state.Get(stateBagKey_OSDiskResourceID).(string)
+	diskset := state.Get(stateBagKey_Diskset).(Diskset)
+	diskResourceID := diskset.OS().String()
 
 	ui.Say(fmt.Sprintf("Creating image %s\n   using %s for os disk.",
 		s.ImageResourceID,
 		diskResourceID))
 
-	var err error
-	s.imageResource, err = azure.ParseResourceID(s.ImageResourceID)
+	imageResource, err := azure.ParseResourceID(s.ImageResourceID)
 
 	if err != nil {
 		log.Printf("StepCreateImage.Run: error: %+v", err)
@@ -65,10 +66,31 @@ func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		},
 		//		Tags:            nil,
 	}
+
+	var datadisks []compute.ImageDataDisk
+	for lun, resource := range diskset {
+		if lun != -1 {
+			ui.Say(fmt.Sprintf("   using %q for data disk (lun %d).", resource, lun))
+
+			datadisks = append(datadisks, compute.ImageDataDisk{
+				Lun:                to.Int32Ptr(lun),
+				ManagedDisk:        &compute.SubResource{ID: to.StringPtr(resource.String())},
+				StorageAccountType: compute.StorageAccountTypes(s.DataDiskStorageAccountType),
+				Caching:            compute.CachingTypes(s.DataDiskCacheType),
+			})
+		}
+	}
+	if datadisks != nil {
+		sort.Slice(datadisks, func(i, j int) bool {
+			return *datadisks[i].Lun < *datadisks[j].Lun
+		})
+		image.ImageProperties.StorageProfile.DataDisks = &datadisks
+	}
+
 	f, err := azcli.ImagesClient().CreateOrUpdate(
 		ctx,
-		s.imageResource.ResourceGroup,
-		s.imageResource.ResourceName,
+		imageResource.ResourceGroup,
+		imageResource.ResourceName,
 		image)
 	if err == nil {
 		log.Println("Image creation in process...")

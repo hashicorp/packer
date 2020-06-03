@@ -18,13 +18,15 @@ import (
 
 func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 	type fields struct {
-		Destination     SharedImageGalleryDestination
-		OSDiskCacheType string
-		Location        string
+		Destination       SharedImageGalleryDestination
+		OSDiskCacheType   string
+		DataDiskCacheType string
+		Location          string
 	}
 	tests := []struct {
 		name            string
 		fields          fields
+		snapshotset     Diskset
 		want            multistep.StepAction
 		expectedPutBody string
 	}{
@@ -37,7 +39,7 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 					ImageName:     "ImageName",
 					ImageVersion:  "0.1.2",
 					TargetRegions: []TargetRegion{
-						TargetRegion{
+						{
 							Name:               "region1",
 							ReplicaCount:       5,
 							StorageAccountType: "Standard_ZRS",
@@ -45,8 +47,15 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 					},
 					ExcludeFromLatest: true,
 				},
-				Location: "region2",
+				OSDiskCacheType:   "ReadWrite",
+				DataDiskCacheType: "None",
+				Location:          "region2",
 			},
+			snapshotset: diskset(
+				"/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/osdisksnapshot",
+				"/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot0",
+				"/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot1",
+				"/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot2"),
 			expectedPutBody: `{
 				"location": "region2",
 				"properties": {
@@ -62,10 +71,34 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 					},
 					"storageProfile": {
 						"osDiskImage": {
+							"hostCaching": "ReadWrite",
 							"source": {
-								"id": "osdisksnapshotresourceid"
+								"id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/osdisksnapshot"
 							}
-						}
+						},
+						"dataDiskImages": [
+							{
+								"lun": 0,
+								"hostCaching": "None",
+								"source": {
+									"id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot0"
+								}
+							},
+							{
+								"lun": 1,
+								"hostCaching": "None",
+								"source": {
+									"id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot1"
+								}
+							},
+							{
+								"lun": 2,
+								"hostCaching": "None",
+								"source": {
+									"id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot2"
+								}
+							}
+						]
 					}
 				}
 			}`,
@@ -94,13 +127,14 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 			GalleryImageVersionsClientMock: m,
 		})
 		state.Put("ui", packer.TestUi(t))
-		state.Put(stateBagKey_OSDiskSnapshotResourceID, "osdisksnapshotresourceid")
+		state.Put(stateBagKey_Snapshotset, tt.snapshotset)
 
 		t.Run(tt.name, func(t *testing.T) {
 			s := &StepCreateSharedImageVersion{
-				Destination:     tt.fields.Destination,
-				OSDiskCacheType: tt.fields.OSDiskCacheType,
-				Location:        tt.fields.Location,
+				Destination:       tt.fields.Destination,
+				OSDiskCacheType:   tt.fields.OSDiskCacheType,
+				DataDiskCacheType: tt.fields.DataDiskCacheType,
+				Location:          tt.fields.Location,
 			}
 			if got := s.Run(context.TODO(), state); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("StepCreateSharedImageVersion.Run() = %v, want %v", got, tt.want)

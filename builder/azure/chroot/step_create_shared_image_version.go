@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sort"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
@@ -14,19 +15,20 @@ import (
 )
 
 type StepCreateSharedImageVersion struct {
-	Destination     SharedImageGalleryDestination
-	OSDiskCacheType string
-	Location        string
+	Destination       SharedImageGalleryDestination
+	OSDiskCacheType   string
+	DataDiskCacheType string
+	Location          string
 }
 
 func (s *StepCreateSharedImageVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
 	ui := state.Get("ui").(packer.Ui)
-	osDiskSnapshotResourceID := state.Get(stateBagKey_OSDiskSnapshotResourceID).(string)
+	snapshotset := state.Get(stateBagKey_Snapshotset).(Diskset)
 
-	ui.Say(fmt.Sprintf("Creating image version %s\n   using %s for os disk.",
+	ui.Say(fmt.Sprintf("Creating image version %s\n   using %q for os disk.",
 		s.Destination.ResourceID(azcli.SubscriptionID()),
-		osDiskSnapshotResourceID))
+		snapshotset.OS()))
 
 	var targetRegions []compute.TargetRegion
 	// transform target regions to API objects
@@ -44,7 +46,7 @@ func (s *StepCreateSharedImageVersion) Run(ctx context.Context, state multistep.
 		GalleryImageVersionProperties: &compute.GalleryImageVersionProperties{
 			StorageProfile: &compute.GalleryImageVersionStorageProfile{
 				OsDiskImage: &compute.GalleryOSDiskImage{
-					Source:      &compute.GalleryArtifactVersionSource{ID: &osDiskSnapshotResourceID},
+					Source:      &compute.GalleryArtifactVersionSource{ID: to.StringPtr(snapshotset.OS().String())},
 					HostCaching: compute.HostCaching(s.OSDiskCacheType),
 				},
 			},
@@ -53,6 +55,26 @@ func (s *StepCreateSharedImageVersion) Run(ctx context.Context, state multistep.
 				ExcludeFromLatest: to.BoolPtr(s.Destination.ExcludeFromLatest),
 			},
 		},
+	}
+
+	var datadisks []compute.GalleryDataDiskImage
+	for lun, resource := range snapshotset {
+		if lun != -1 {
+			ui.Say(fmt.Sprintf("   using %q for data disk (lun %d).", resource, lun))
+
+			datadisks = append(datadisks, compute.GalleryDataDiskImage{
+				Lun:         to.Int32Ptr(lun),
+				Source:      &compute.GalleryArtifactVersionSource{ID: to.StringPtr(resource.String())},
+				HostCaching: compute.HostCaching(s.DataDiskCacheType),
+			})
+		}
+	}
+	if datadisks != nil {
+		// sort by lun
+		sort.Slice(datadisks, func(i, j int) bool {
+			return *datadisks[i].Lun < *datadisks[j].Lun
+		})
+		imageVersion.GalleryImageVersionProperties.StorageProfile.DataDiskImages = &datadisks
 	}
 
 	f, err := azcli.GalleryImageVersionsClient().CreateOrUpdate(

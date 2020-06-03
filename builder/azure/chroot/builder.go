@@ -88,15 +88,29 @@ type Config struct {
 	// The [cache type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#cachingtypes)
 	// specified in the resulting image and for attaching it to the Packer VM. Defaults to `ReadOnly`
 	OSDiskCacheType string `mapstructure:"os_disk_cache_type"`
+
+	// The [storage SKU](https://docs.microsoft.com/en-us/rest/api/compute/disks/createorupdate#diskstorageaccounttypes)
+	// to use for datadisks. Defaults to `Standard_LRS`.
+	DataDiskStorageAccountType string `mapstructure:"data_disk_storage_account_type"`
+	// The [cache type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#cachingtypes)
+	// specified in the resulting image and for attaching it to the Packer VM. Defaults to `ReadOnly`
+	DataDiskCacheType string `mapstructure:"data_disk_cache_type"`
+
 	// The [Hyper-V generation type](https://docs.microsoft.com/en-us/rest/api/compute/images/createorupdate#hypervgenerationtypes) for Managed Image output.
 	// Defaults to `V1`.
 	ImageHyperVGeneration string `mapstructure:"image_hyperv_generation"`
 
-	// The id of the temporary disk that will be created. Will be generated if not set.
+	// The id of the temporary OS disk that will be created. Will be generated if not set.
 	TemporaryOSDiskID string `mapstructure:"temporary_os_disk_id"`
 
-	// The id of the temporary snapshot that will be created. Will be generated if not set.
+	// The id of the temporary OS disk snapshot that will be created. Will be generated if not set.
 	TemporaryOSDiskSnapshotID string `mapstructure:"temporary_os_disk_snapshot_id"`
+
+	// The prefix for the resource ids of the temporary data disks that will be created. The disks will be suffixed with a number. Will be generated if not set.
+	TemporaryDataDiskIDPrefix string `mapstructure:"temporary_data_disk_id_prefix"`
+
+	// The prefix for the resource ids of the temporary data disk snapshots that will be created. The snapshots will be suffixed with a number. Will be generated if not set.
+	TemporaryDataDiskSnapshotIDPrefix string `mapstructure:"temporary_data_disk_snapshot_id"`
 
 	// If set to `true`, leaves the temporary disks and snapshots behind in the Packer VM resource group. Defaults to `false`
 	SkipCleanup bool `mapstructure:"skip_cleanup"`
@@ -219,12 +233,40 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		}
 	}
 
+	if b.config.TemporaryDataDiskIDPrefix == "" {
+		if def, err := interpolate.Render(
+			"/subscriptions/{{ vm `subscription_id` }}/resourceGroups/{{ vm `resource_group` }}/providers/Microsoft.Compute/disks/PackerTemp-datadisk-{{timestamp}}-",
+			&b.config.ctx); err == nil {
+			b.config.TemporaryDataDiskIDPrefix = def
+		} else {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("unable to render temporary data disk id prefix: %s", err))
+		}
+	}
+
+	if b.config.TemporaryDataDiskSnapshotIDPrefix == "" {
+		if def, err := interpolate.Render(
+			"/subscriptions/{{ vm `subscription_id` }}/resourceGroups/{{ vm `resource_group` }}/providers/Microsoft.Compute/snapshots/PackerTemp-datadisk-snapshot-{{timestamp}}-",
+			&b.config.ctx); err == nil {
+			b.config.TemporaryDataDiskSnapshotIDPrefix = def
+		} else {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("unable to render temporary data disk snapshot id prefix: %s", err))
+		}
+	}
+
 	if b.config.OSDiskStorageAccountType == "" {
 		b.config.OSDiskStorageAccountType = string(compute.PremiumLRS)
 	}
 
 	if b.config.OSDiskCacheType == "" {
 		b.config.OSDiskCacheType = string(compute.CachingTypesReadOnly)
+	}
+
+	if b.config.DataDiskStorageAccountType == "" {
+		b.config.DataDiskStorageAccountType = string(compute.PremiumLRS)
+	}
+
+	if b.config.DataDiskCacheType == "" {
+		b.config.DataDiskCacheType = string(compute.CachingTypesReadOnly)
 	}
 
 	if b.config.ImageHyperVGeneration == "" {
@@ -272,6 +314,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	if err := checkStorageAccountType(b.config.OSDiskStorageAccountType); err != nil {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("os_disk_storage_account_type: %v", err))
+	}
+
+	if err := checkDiskCacheType(b.config.DataDiskCacheType); err != nil {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("data_disk_cache_type: %v", err))
+	}
+
+	if err := checkStorageAccountType(b.config.DataDiskStorageAccountType); err != nil {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("data_disk_storage_account_type: %v", err))
 	}
 
 	if b.config.ImageResourceID != "" {
@@ -406,11 +456,15 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		artifact.Resources = append(artifact.Resources, b.config.SharedImageGalleryDestination.ResourceID(info.SubscriptionID))
 	}
 	if b.config.SkipCleanup {
-		if d, ok := state.GetOk(stateBagKey_OSDiskResourceID); ok {
-			artifact.Resources = append(artifact.Resources, d.(string))
+		if d, ok := state.GetOk(stateBagKey_Diskset); ok {
+			for _, disk := range d.(Diskset) {
+				artifact.Resources = append(artifact.Resources, disk.String())
+			}
 		}
-		if d, ok := state.GetOk(stateBagKey_OSDiskSnapshotResourceID); ok {
-			artifact.Resources = append(artifact.Resources, d.(string))
+		if d, ok := state.GetOk(stateBagKey_Snapshotset); ok {
+			for _, snapshot := range d.(Diskset) {
+				artifact.Resources = append(artifact.Resources, snapshot.String())
+			}
 		}
 	}
 
@@ -438,12 +492,12 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 	}
 
 	if config.FromScratch {
-		addSteps(&StepCreateNewDisk{
-			ResourceID:             config.TemporaryOSDiskID,
-			DiskSizeGB:             config.OSDiskSizeGB,
-			DiskStorageAccountType: config.OSDiskStorageAccountType,
-			HyperVGeneration:       config.ImageHyperVGeneration,
-			Location:               info.Location})
+		addSteps(&StepCreateNewDiskset{
+			OSDiskID:                 config.TemporaryOSDiskID,
+			OSDiskSizeGB:             config.OSDiskSizeGB,
+			OSDiskStorageAccountType: config.OSDiskStorageAccountType,
+			HyperVGeneration:         config.ImageHyperVGeneration,
+			Location:                 info.Location})
 	} else {
 		switch config.sourceType {
 		case sourcePlatformImage:
@@ -456,13 +510,13 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 						})
 				}
 				addSteps(
-					&StepCreateNewDisk{
-						ResourceID:             config.TemporaryOSDiskID,
-						DiskSizeGB:             config.OSDiskSizeGB,
-						DiskStorageAccountType: config.OSDiskStorageAccountType,
-						HyperVGeneration:       config.ImageHyperVGeneration,
-						Location:               info.Location,
-						PlatformImage:          pi,
+					&StepCreateNewDiskset{
+						OSDiskID:                 config.TemporaryOSDiskID,
+						OSDiskSizeGB:             config.OSDiskSizeGB,
+						OSDiskStorageAccountType: config.OSDiskStorageAccountType,
+						HyperVGeneration:         config.ImageHyperVGeneration,
+						Location:                 info.Location,
+						SourcePlatformImage:      pi,
 
 						SkipCleanup: config.SkipCleanup,
 					})
@@ -476,13 +530,13 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 					SourceDiskResourceID: config.Source,
 					Location:             info.Location,
 				},
-				&StepCreateNewDisk{
-					ResourceID:             config.TemporaryOSDiskID,
-					DiskSizeGB:             config.OSDiskSizeGB,
-					DiskStorageAccountType: config.OSDiskStorageAccountType,
-					HyperVGeneration:       config.ImageHyperVGeneration,
-					SourceDiskResourceID:   config.Source,
-					Location:               info.Location,
+				&StepCreateNewDiskset{
+					OSDiskID:                 config.TemporaryOSDiskID,
+					OSDiskSizeGB:             config.OSDiskSizeGB,
+					OSDiskStorageAccountType: config.OSDiskStorageAccountType,
+					HyperVGeneration:         config.ImageHyperVGeneration,
+					SourceOSDiskResourceID:   config.Source,
+					Location:                 info.Location,
 
 					SkipCleanup: config.SkipCleanup,
 				})
@@ -494,11 +548,14 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 					SubscriptionID: info.SubscriptionID,
 					Location:       info.Location,
 				},
-				&StepCreateNewDisk{
-					ResourceID:            config.TemporaryOSDiskID,
-					DiskSizeGB:            config.OSDiskSizeGB,
-					SourceImageResourceID: config.Source,
-					Location:              info.Location,
+				&StepCreateNewDiskset{
+					OSDiskID:                   config.TemporaryOSDiskID,
+					DataDiskIDPrefix:           config.TemporaryDataDiskIDPrefix,
+					OSDiskSizeGB:               config.OSDiskSizeGB,
+					OSDiskStorageAccountType:   config.OSDiskStorageAccountType,
+					DataDiskStorageAccountType: config.DataDiskStorageAccountType,
+					SourceImageResourceID:      config.Source,
+					Location:                   info.Location,
 
 					SkipCleanup: config.SkipCleanup,
 				})
@@ -542,10 +599,11 @@ func buildsteps(config Config, info *client.ComputeInfo) []multistep.Step {
 	}
 	if hasValidSharedImage {
 		addSteps(
-			&StepCreateSnapshot{
-				ResourceID:  config.TemporaryOSDiskSnapshotID,
-				Location:    info.Location,
-				SkipCleanup: config.SkipCleanup,
+			&StepCreateSnapshotset{
+				OSDiskSnapshotID:         config.TemporaryOSDiskSnapshotID,
+				DataDiskSnapshotIDPrefix: config.TemporaryDataDiskSnapshotIDPrefix,
+				Location:                 info.Location,
+				SkipCleanup:              config.SkipCleanup,
 			},
 			&StepCreateSharedImageVersion{
 				Destination:     config.SharedImageGalleryDestination,

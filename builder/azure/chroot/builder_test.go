@@ -151,9 +151,9 @@ func Test_buildsteps(t *testing.T) {
 			config: Config{FromScratch: true},
 			verify: func(steps []multistep.Step, _ *testing.T) {
 				for _, s := range steps {
-					if s, ok := s.(*StepCreateNewDisk); ok {
-						if s.SourceDiskResourceID == "" &&
-							s.PlatformImage == nil {
+					if s, ok := s.(*StepCreateNewDiskset); ok {
+						if s.SourceOSDiskResourceID == "" &&
+							s.SourcePlatformImage == nil {
 							return
 						}
 						t.Errorf("found misconfigured StepCreateNewDisk: %+v", s)
@@ -166,10 +166,10 @@ func Test_buildsteps(t *testing.T) {
 			config: Config{Source: "publisher:offer:sku:version", sourceType: sourcePlatformImage},
 			verify: func(steps []multistep.Step, _ *testing.T) {
 				for _, s := range steps {
-					if s, ok := s.(*StepCreateNewDisk); ok {
-						if s.SourceDiskResourceID == "" &&
-							s.PlatformImage != nil &&
-							s.PlatformImage.Publisher == "publisher" {
+					if s, ok := s.(*StepCreateNewDiskset); ok {
+						if s.SourceOSDiskResourceID == "" &&
+							s.SourcePlatformImage != nil &&
+							s.SourcePlatformImage.Publisher == "publisher" {
 							return
 						}
 						t.Errorf("found misconfigured StepCreateNewDisk: %+v", s)
@@ -197,9 +197,9 @@ func Test_buildsteps(t *testing.T) {
 			config: Config{Source: "diskresourceid", sourceType: sourceDisk},
 			verify: func(steps []multistep.Step, _ *testing.T) {
 				for _, s := range steps {
-					if s, ok := s.(*StepCreateNewDisk); ok {
-						if s.SourceDiskResourceID == "diskresourceid" &&
-							s.PlatformImage == nil {
+					if s, ok := s.(*StepCreateNewDiskset); ok {
+						if s.SourceOSDiskResourceID == "diskresourceid" &&
+							s.SourcePlatformImage == nil {
 							return
 						}
 						t.Errorf("found misconfigured StepCreateNewDisk: %+v", s)
