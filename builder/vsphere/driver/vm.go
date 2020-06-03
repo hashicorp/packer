@@ -205,7 +205,10 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 		return nil, err
 	}
 
-	vmRef := taskInfo.Result.(types.ManagedObjectReference)
+	vmRef, ok := taskInfo.Result.(types.ManagedObjectReference)
+	if !ok {
+		return nil, fmt.Errorf("something went wrong when creating the VM")
+	}
 
 	return d.NewVM(&vmRef), nil
 }
@@ -326,7 +329,11 @@ func (vm *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) (*Virt
 		return nil, err
 	}
 
-	vmRef := info.Result.(types.ManagedObjectReference)
+	vmRef, ok := info.Result.(types.ManagedObjectReference)
+	if !ok {
+		return nil, fmt.Errorf("something went wrong when cloning the VM")
+	}
+
 	created := vm.driver.NewVM(&vmRef)
 	return created, nil
 }

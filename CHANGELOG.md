@@ -59,9 +59,10 @@
 * builder/vagrant: Use absolute path for package_include files to prevent them
     from having to be relative to the output vagrant directory. [GH-9260]
 * builder/virtualbox: Fix bug using checksum files. [GH-9101]
-* builder/vSphere: Add option not to set host during datastore upload. [GH-9100
+* builder/vsphere: Add option not to set host during datastore upload. [GH-9100
 * builder/vsphere: Fix iso config prepare being called incorrectly, which
     caused `iso_url` field to fail. [GH-9197]
+* builder/vsphere: Fix crash in the driver for an interface conversion of types.AnyType nil to types.ManagedObjectReference. [GH-9354]
 * core: Ensure HTTP server information `PackerHTTPIP`, `PackerHTTPPort`, and
     `PackerHTTPAddr` are available via the `build` template engine for all
     supported builders [GH-9238]
