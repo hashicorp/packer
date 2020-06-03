@@ -235,16 +235,6 @@ func TestGpuDefaultPlatformID(t *testing.T) {
 	}
 }
 
-func TestGpuWrongPlatformID(t *testing.T) {
-	raw := testConfig(t)
-	raw["instance_gpus"] = 1
-	raw["platform_id"] = "standard-v1"
-
-	var c Config
-	warns, errs := c.Prepare(raw)
-	testConfigErr(t, warns, errs, "incompatible GPU platform_id")
-}
-
 // Helper stuff below
 
 func testConfig(t *testing.T) (config map[string]interface{}) {
