@@ -191,7 +191,7 @@ curl -L https://omnitruck.chef.io/install.sh | \
 When guest_os_type is set to "windows", Packer uses the following command to
 install the latest version of Chef:
 
-```text
+```powershell
 powershell.exe -Command \". { iwr -useb https://omnitruck.chef.io/install.ps1 } | iex; install\"
 ```
 

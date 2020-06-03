@@ -7,7 +7,6 @@ module.exports = withHashicorp({
   mdx: { resolveIncludes: path.join(__dirname, 'pages/partials') },
 })({
   experimental: {
-    css: true,
     modern: true,
     rewrites: () => [
       {
@@ -17,7 +16,11 @@ module.exports = withHashicorp({
     ],
   },
   exportTrailingSlash: true,
+  // Note: These are meant to be public, it's not a mistake that they are here
   env: {
     HASHI_ENV: process.env.HASHI_ENV,
+    SEGMENT_WRITE_KEY: 'AjXdfmTTk1I9q9dfyePuDFHBrz1tCO3l',
+    BUGSNAG_CLIENT_KEY: 'de0b822b269aa57b620efd8927e03744',
+    BUGSNAG_SERVER_KEY: 'b6c57b27a37e531a5de94f065dd98bc0',
   },
 })

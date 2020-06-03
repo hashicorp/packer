@@ -25,7 +25,7 @@ Since Veewee itself is a Ruby project, so too is the veewee-to-packer
 application so that it can read the Veewee configurations. Install it using
 RubyGems:
 
-```text
+```shell-session
 $ gem install veewee-to-packer
 # ...
 ```
@@ -34,7 +34,7 @@ Once installed, just point `veewee-to-packer` at the `definition.rb` file of any
 template. The converter will output any warnings or messages about the conversion.
 The example below converts a CentOS template:
 
-```text
+```shell-session
 $ veewee-to-packer templates/CentOS-6.4/definition.rb
 Success! Your Veewee definition was converted to a Packer
 template! The template can be found in the `template.json` file

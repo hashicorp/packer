@@ -35,8 +35,8 @@ Let's say we have a file named `commented_template.json`
 }
 ```
 
-```sh
-jq 'walk(if type == "object" then del(._comment) else . end)' commented_template.json > uncommented_template.json
+```shell-session
+$ jq 'walk(if type == "object" then del(._comment) else . end)' commented_template.json > uncommented_template.json
 ```
 
 will produce a new file containing:
@@ -65,7 +65,7 @@ you normally would.
 
 If your install of jq does not have the walk function and you get an error like
 
-```shell
+```text
 jq: error: walk/1 is not defined at <top-level>,
 ```
 

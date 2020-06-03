@@ -217,10 +217,10 @@ In the example above it is assumed that only one key is stored in `sample/app/pa
 In order to use this function you have to configure valid AWS credentials using
 one of the following methods:
 
-* [Environment Variables](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)
-* [CLI Configuration Files](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
-* [Container Credentials](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html)
-* [Instance Profile Credentials](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
+- [Environment Variables](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html)
+- [CLI Configuration Files](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
+- [Container Credentials](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html)
+- [Instance Profile Credentials](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
 
 ## Using array values
 
@@ -271,7 +271,7 @@ above, we could build our template using the command below. The command is
 split across multiple lines for readability, but can of course be a single
 line.
 
-```text
+```shell-session
 $ packer build \
     -var 'aws_access_key=foo' \
     -var 'aws_secret_key=bar' \
@@ -319,7 +319,7 @@ Combining the `-var` and `-var-file` flags together also works how you'd
 expect. Variables set later in the command override variables set earlier. So,
 for example, in the following command with the above `variables.json` file:
 
-```text
+```shell-session
 $ packer build \
     -var 'aws_access_key=bar' \
     -var-file=variables.json \

@@ -73,18 +73,24 @@ information.
 @include 'builder/azure/chroot/Config-not-required.mdx'
 
 #### Output options:
+
 At least one of these options needs to be specified:
--   `image_resource_id` (string) - The managed image to create using this build.
-    
--   `shared_image_destination` (object) - The shared image to create using this build.
+
+- `image_resource_id` (string) - The managed image to create using this build.
+
+- `shared_image_destination` (object) - The shared image to create using this build.
 
 Where `shared_image_destination` is an object with the following properties:
-@include 'builder/azure/chroot/_SharedImageGalleryDestination-required.mdx
-@include 'builder/azure/chroot/_SharedImageGalleryDestination-not-required.mdx
+
+@include 'builder/azure/chroot/SharedImageGalleryDestination-required.mdx'
+
+@include 'builder/azure/chroot/SharedImageGalleryDestination-not-required.mdx'
 
 And `target_regions` is an array of objects with the following properties:
-@include 'builder/azure/chroot/_TargetRegion-required.mdx
-@include 'builder/azure/chroot/_TargetRegion-not-required.mdx
+
+@include 'builder/azure/chroot/TargetRegion-required.mdx'
+
+@include 'builder/azure/chroot/TargetRegion-not-required.mdx'
 
 ## Chroot Mounts
 
@@ -148,8 +154,8 @@ This builder requires privileged actions, such as mounting disks, running
 `chroot` and other admin commands. Usually it needs to be run with root
 permissions, for example:
 
-```shell
-sudo -E packer build example.json
+```shell-session
+$ sudo -E packer build example.json
 ```
 
 ### Using a VM with a Managed Identity

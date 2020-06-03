@@ -1,5 +1,5 @@
 import Button from '@hashicorp/react-button'
-import VERSION from '../../data/version'
+import VERSION from 'data/version'
 
 export default function Homepage() {
   return (

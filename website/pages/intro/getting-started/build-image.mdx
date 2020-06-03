@@ -101,7 +101,7 @@ syntax as well as the configuration values to verify they look valid. The output
 should look similar to below, because the template should be valid. If there are
 any errors, this command will tell you.
 
-```text
+```shell-session
 $ packer validate example.json
 Template validated successfully.
 ```
@@ -121,7 +121,7 @@ other ways to [specify Amazon credentials](/docs/builders/amazon#specifying-amaz
 -> **Note:** When using packer on Windows, replace the single-quotes in the
 command below with double-quotes.
 
-```text
+```shell-session
 $ packer build \
     -var 'aws_access_key=YOUR ACCESS KEY' \
     -var 'aws_secret_key=YOUR SECRET KEY' \
@@ -270,7 +270,7 @@ it might look something like this: `"source_ami": "ami-fce3c696"`.
 
 Your output will look like this:
 
-```shell
+```text
 amazon-ebs output will be in this color.
 
 ==> amazon-ebs: Prevalidating AMI Name: packer-linux-aws-demo-1507231105
@@ -548,7 +548,7 @@ Finally, we can create our new AMI by running `packer build firstrun.json`
 
 You should see output like this:
 
-```shell
+```text
 amazon-ebs output will be in this color.
 
 ==> amazon-ebs: Prevalidating AMI Name: packer-demo-1518111383

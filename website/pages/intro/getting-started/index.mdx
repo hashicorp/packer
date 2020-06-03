@@ -54,7 +54,7 @@ in your `PATH`.
 
 1.  Clone the Packer repository from GitHub into your `GOPATH`:
 
-    ```shell
+    ```shell-session
     $ mkdir -p $(go env GOPATH)/src/github.com/hashicorp && cd $_
     $ git clone https://github.com/hashicorp/packer.git
     $ cd packer
@@ -65,7 +65,7 @@ in your `PATH`.
     just a shortcut that builds `packer` for only your local build environment (no
     cross-compiled targets).
 
-    ```shell
+    ```shell-session
     $ make dev
     ```
 
@@ -74,7 +74,7 @@ in your `PATH`.
 After installing Packer, verify the installation worked by opening a new command
 prompt or console, and checking that `packer` is available:
 
-```text
+```shell-session
 $ packer
 usage: packer [--version] [--help] <command> [<args>]
 

@@ -340,7 +340,7 @@ type Config struct {
 	// tags to the image to ensure this information is not lost. The following
 	// tags are added.
 	//
-	// ```
+	// ```text
 	// 1.  PlanName
 	// 2.  PlanProduct
 	// 3.  PlanPublisher

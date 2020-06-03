@@ -1,5 +1,4 @@
-import fetch from 'isomorphic-unfetch'
-import VERSION from '../../data/version.js'
+import VERSION from 'data/version.js'
 import ProductDownloader from '@hashicorp/react-product-downloader'
 import Head from 'next/head'
 import HashiHead from '@hashicorp/react-head'

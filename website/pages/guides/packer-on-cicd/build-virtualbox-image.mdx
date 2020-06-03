@@ -60,16 +60,16 @@ may need to adjust these commands for your distribution of choice.
 
 **Install Teamcity Dependencies**
 
-```shell
-apt-get upgrade
-apt-get install -y zip linux-headers-generic linux-headers-4.13.0-16-generic build-essential openjdk-8-jdk
+```shell-session
+$ apt-get upgrade
+$ apt-get install -y zip linux-headers-generic linux-headers-4.13.0-16-generic build-essential openjdk-8-jdk
 ```
 
 **Install VirtualBox**
 
-```shell
-curl -OL "https://download.virtualbox.org/virtualbox/5.2.2/virtualbox-5.2_5.2.2-119230~Ubuntu~xenial_amd64.deb"
-dpkg -i virtualbox-5.2_5.2.2-119230~Ubuntu~xenial_amd64.deb
+```shell-session
+$ curl -OL "https://download.virtualbox.org/virtualbox/5.2.2/virtualbox-5.2_5.2.2-119230~Ubuntu~xenial_amd64.deb"
+$ dpkg -i virtualbox-5.2_5.2.2-119230~Ubuntu~xenial_amd64.deb
 ```
 
 You can also use the [`remote-exec`
@@ -83,9 +83,9 @@ The TeamCity Agent machine will also need Packer Installed. You can find the
 latest download link from the [Packer
 Download](/downloads) page.
 
-```shell
-curl -OL "https://releases.hashicorp.com/packer/1.1.2/packer_1.1.2_linux_amd64.zip"
-unzip ./packer_1.1.2_linux_amd64.zip
+```shell-session
+$ curl -OL "https://releases.hashicorp.com/packer/1.1.2/packer_1.1.2_linux_amd64.zip"
+$ unzip ./packer_1.1.2_linux_amd64.zip
 ```
 
 Packer is installed at the `/root/packer` path which is used in subsequent

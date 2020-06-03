@@ -20,7 +20,7 @@ Type in the interpolation to test and hit \<enter\> to see the result.
 
 To exit the console, type "exit" and hit \<enter\>, or use Control-C.
 
-```shell
+```shell-session
 $ packer console my_template.json
 ```
 
@@ -49,7 +49,7 @@ help output, which can be seen via `packer console -h`.
 
 Let's say you launch a console using a Packer template `example_template.json`:
 
-```shell
+```shell-session
 $ packer console example_template.json
 ```
 
@@ -67,29 +67,29 @@ your example_template's variable section:
 and you enter `` {{user `myvar`}} `` in the Packer console, you'll see the value of
 myvar:
 
-```shell
+```shell-session
 > {{user `myvar`}}
 > asdfasdf
 ```
 
 From there you can test more complicated interpolations:
 
-```shell
+```shell-session
 > {{user `myvar`}}-{{timestamp}}
 > asdfasdf-1559854396
 ```
 
 And when you're done using the console, just type "exit" or CTRL-C
 
-```shell
+```shell-session
 > exit
 $
 ```
 
 If you'd like to provide a variable or variable files, you'd do this:
 
-```shell
-packer console -var "myvar=fdsafdsa" -var-file myvars.json example_template.json
+```shell-session
+$ packer console -var "myvar=fdsafdsa" -var-file myvars.json example_template.json
 ```
 
 If you don't have specific variables or var files you want to test, and just
@@ -100,7 +100,7 @@ If you'd like to just see a specific single interpolation without launching
 the REPL, you can do so by echoing and piping the string into the console
 command:
 
-```shell
+```shell-session
 $ echo {{timestamp}} | packer console
 1559855090
 ```

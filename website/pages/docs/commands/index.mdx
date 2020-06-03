@@ -46,7 +46,7 @@ The machine-readable output format can be enabled by passing the
 output to become machine-readable on stdout. Logging, if enabled, continues to
 appear on stderr. An example of the output is shown below:
 
-```text
+```shell-session
 $ packer -machine-readable version
 1498365963,,version,1.0.2
 1498365963,,version-prelease,
@@ -127,7 +127,7 @@ You'll see these data types when you run `packer build`:
 
   For example:
 
-  ```shell
+  ```text
     1539967803,,ui,say,\n==> Builds finished. The artifacts of successful builds are:
     1539967803,amazon-ebs,artifact-count,2
     1539967803,amazon-ebs,artifact,0,builder-id,mitchellh.amazonebs
@@ -162,7 +162,7 @@ can invoke a new shell and use the feature.
 
 For example, assume a tab is typed at the end of each prompt line:
 
-```shell
+```shell-session
 $ packer p
 plugin  build
 $ packer build -
