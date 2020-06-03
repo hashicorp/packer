@@ -213,6 +213,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
+			HTTPAddress: b.config.HTTPAddress,
 		},
 		&hypervcommon.StepCreateSwitch{
 			SwitchName: b.config.SwitchName,

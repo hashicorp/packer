@@ -24,6 +24,7 @@ type StepHTTPServer struct {
 	HTTPDir     string
 	HTTPPortMin int
 	HTTPPortMax int
+	HTTPAddress string
 
 	l *net.Listener
 }
@@ -42,7 +43,7 @@ func (s *StepHTTPServer) Run(ctx context.Context, state multistep.StateBag) mult
 	s.l, err = net.ListenRangeConfig{
 		Min:     s.HTTPPortMin,
 		Max:     s.HTTPPortMax,
-		Addr:    "0.0.0.0",
+		Addr:    s.HTTPAddress,
 		Network: "tcp",
 	}.Listen(ctx)
 
