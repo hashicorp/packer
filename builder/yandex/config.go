@@ -248,11 +248,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		c.FolderID = os.Getenv("YC_FOLDER_ID")
 	}
 
-	if c.PlatformID != defaultGpuPlatformID && c.InstanceGpus != 0 {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("for instances with gpu platform_id must be specified as `%s`", defaultGpuPlatformID))
-	}
-
 	if c.Token == "" && c.ServiceAccountKeyFile == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a token or service account key file must be specified"))

@@ -231,7 +231,7 @@ func TestGpuDefaultPlatformID(t *testing.T) {
 	var c Config
 	c.Prepare(raw)
 	if c.PlatformID != "gpu-standard-v1" {
-		t.Fatalf("expected 'gpu-standard-v1', but got '%s'", c.PlatformID)
+		t.Fatalf("expected 'gpu-standard-v1' as default platform_id for instance with GPU(s), but got '%s'", c.PlatformID)
 	}
 }
 
