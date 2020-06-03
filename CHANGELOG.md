@@ -24,6 +24,7 @@
 * builder/amazon: Added new `build` template function field:
     SourceAMICreationDate [GH-9277]
 * builder/azure-arm: Support User Assigned Managed Identity [GH-9293]
+* builder/azure-chroot: Copy data disks between shared image galleries [GH-9323]
 * builder/google: Implement iap proxy for googlecompute [GH-9105]
 * builder/googlecompute: Changed default disk size. [GH-9071]
 * builder/qemu: add support for using a network bridge [GH-9159]
