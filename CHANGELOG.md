@@ -3,7 +3,7 @@
 ### BACKWARDS INCOMPATIBILITIES:
 * builder/vsphere-iso: The deprecated fields `network`, `network_card`,
     `disk_size`, `disk_thin_provisioned`, and `disk_eagerly_scrub` have been
-    removed. Run `packer fix template.json` to migrate an existig template
+    removed. Run `packer fix template.json` to migrate an existing template
     [GH-9149]
 
 * For all iso based builders, the `iso_checksum_type` and `iso_checksum_url`
@@ -45,7 +45,7 @@
     the user to call `packer fix`. [GH-9325]
 * post-processor/docker-push: Support pushing multiple tags [GH-9182]
 * post-processor/docker-tag: Change field name of docker tag to "tags" instead
-    of "tag" since it's a list. Keep "tag" for backwards compatability.
+    of "tag" since it's a list. Keep "tag" for backwards compatibility.
     [GH-9183]
 * provisioner/powershell: Update default execute command to handle script
     errors [GH-9040]
@@ -174,7 +174,7 @@
 * builder/openstack: Add new `image_auto_accept_members` option [GH-8931]
 * builder/proxmox: Add ability to specify vga adapter [GH-8892]
 * builder/proxmox: Add onboot directive support [GH-8935]
-* builder/tencentcloud: Show tencentcloud image id after copy to desination
+* builder/tencentcloud: Show tencentcloud image id after copy to destination
     region. [GH-8763]
 * builder/vmware-iso: Add `cleanup_remote_cache` config option to [GH-8917]
 * builder/vmware-iso: Do not perform dial test of NIC when ssh bastion is
@@ -387,7 +387,7 @@ making changes for HCL2.
 
 ### BUG FIXES:
 * builder/amazon: Fix request retry mechanism to launch aws instance [GH-8430]
-* builder/azure: Fix PollDuration option which was overriden in some clients.
+* builder/azure: Fix PollDuration option which was overridden in some clients.
     [GH-8490]
 * builder/hyperv: Fix bug in checking VM name that could cause flakiness if
     many VMs are defined. [GH-8357]
@@ -511,7 +511,7 @@ making changes for HCL2.
 * post-processor/vagrant-cloud: Allow use of the Artifice post-processor with
     the Vagrant Cloud post-processor [GH-8018] [GH-8027]
 * post-processor/vsphere: Removed redundant whitelist check for builders,
-    allowing users to use post-processor withough the VMWare builder [GH-8064]
+    allowing users to use post-processor without the VMWare builder [GH-8064]
 
 ### BUG FIXES:
 * builder/amazon: Fix FleetID crash. [GH-8013]
@@ -544,7 +544,7 @@ making changes for HCL2.
 * builder/virtualbox: LoadSnapshots succeeds even if machine has no snapshots
     [GH-8096]
 * builder/vmware: fix dropped test errors [GH-8170]
-* core: Fix bug where sensitive variables contianing commas were not being
+* core: Fix bug where sensitive variables containing commas were not being
     properly sanitized in UI calls. [GH-7997]
 * core: Fix handling of booleans where "unset" is a value distinct from
     "false". [GH-8021]
@@ -559,7 +559,7 @@ making changes for HCL2.
 
 ### BACKWARDS INCOMPATIBILITIES:
 * core: "sed" template function has been deprecated in favor of "replace" and
-    "replace_all" functins [GH-8119]
+    "replace_all" functions [GH-8119]
 
 ## 1.4.3 (August 14, 2019)
 
@@ -695,14 +695,14 @@ making changes for HCL2.
     build region. [GH-7691]
 * builder/amazon: Fix failure that happened when spot_tags was set but ami_tags
     wasn't [GH-7712]
-* builder/cloudstack: Update go-cloudstack sdk, fixing compatability with
+* builder/cloudstack: Update go-cloudstack sdk, fixing compatibility with
     CloudStack v 4.12 [GH-7694]
 * builder/proxmox: Update proxmox-api-go dependency, fixing issue calculating
     VMIDs. [GH-7755]
 * builder/tencent: Correctly remove tencentcloud temporary keypair. [GH-7787]
 * core: Allow timestamped AND colorless ui messages [GH-7769]
 * core: Apply logSecretFilter to output from ui.Say [GH-7739]
-* core: Fix "make bin" command to use reasonbale defaults. [GH-7752]
+* core: Fix "make bin" command to use reasonable defaults. [GH-7752]
 * core: Fix user var interpolation for variables set via -var-file and from
     command line [GH-7733]
 * core: machine-readable UI now writes UI calls to logs. [GH-7745]
@@ -939,7 +939,7 @@ making changes for HCL2.
 * core: make packer inspect not print sensitive variables [GH-7084]
 * post-processor/google: Add new `guest-os-features` option. [GH-7218]
 * postprocessor/docker-import: Added `change` support [GH-7127]
-* provisioner/ansible-remote: add `-o IdentitiesOnly=yes`as a default flag
+* provisioner/ansible-remote: add `-o IdentitiesOnly=yes` as a default flag
     [GH-7115]
 * provisioner/chef-client: Elevated support for chef-client provisioner
     [GH-7078]
@@ -1117,7 +1117,7 @@ making changes for HCL2.
 * builder/amazon: fix bugs relating to spot instances provisioning [GH-6697]
     [GH-6693]
 * builder/openstack: fix ssh keypair not attached [GH-6701]
-* core: progressbar: fix deadlock locking builds afer first display [GH-6698]
+* core: progressbar: fix deadlock locking builds after first display [GH-6698]
 
 ## 1.3.0 (September 11, 2018)
 
@@ -1190,7 +1190,7 @@ making changes for HCL2.
     waiters. [GH-6649]
 * builder/azure: Generated password satisfies Azure password requirements
     [GH-6480]
-* builder/hyper-v: Buider no longer errors if skip_compaction isn't true when
+* builder/hyper-v: Builder no longer errors if skip_compaction isn't true when
     skip_export is true, and compaction efficiency is improved [GH-6393]
 * builder/lxc: Correctly pass "config" option to "lxc launch". [GH-6563]
 * builder/lxc: Determine lxc root according to the running user [GH-6543]
@@ -1211,7 +1211,7 @@ making changes for HCL2.
     `execute_command`s [GH-6636]
 * provisioner/shell-local: Windows inline scripts now default to being appended
     with ".cmd", fixing a backwards incompatibility in v1.2.5 [GH-6626]
-* provisioner/windows-restart: Provisioner now works when used in conjuction
+* provisioner/windows-restart: Provisioner now works when used in conjunction
     with SSH communicator [GH-6606]
 
 ### BACKWARDS INCOMPATIBILITIES:
@@ -1353,7 +1353,7 @@ making changes for HCL2.
 * builder/virtualbox: Fix broken scancodes in boot_command. [GH-6067]
 * builder/vmware-iso: Fail in validation if user gives wrong remote_type value.
     [GH-4563]
-* builder/vmware: Fixed a case-sensitivity issue when determing the network
+* builder/vmware: Fixed a case-sensitivity issue when determining the network
     type during the cloning step in the vmware-vmx builder. [GH-6057]
 * builder/vmware: Fixes the DHCP lease and configuration pathfinders for VMware
     Player. [GH-6096]
@@ -3474,7 +3474,7 @@ making changes for HCL2.
 ### BUG FIXES:
 
 * core: default user variable values don't need to be strings. [GH-456]
-* builder/amazon-chroot: Fix errors with waitin for state change. [GH-459]
+* builder/amazon-chroot: Fix errors with waiting for state change. [GH-459]
 * builder/digitalocean: Use proper error message JSON key (DO API change).
 * communicator/ssh: SCP uploads now work properly when directories
     contain symlinks. [GH-449]
