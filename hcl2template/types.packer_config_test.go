@@ -10,7 +10,7 @@ import (
 
 var (
 	refVBIsoUbuntu1204  = SourceRef{Type: "virtualbox-iso", Name: "ubuntu-1204"}
-	refAWSEBSUbuntu1204 = SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604"}
+	refAWSEBSUbuntu1604 = SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604"}
 )
 
 func TestParser_complete(t *testing.T) {
@@ -73,13 +73,13 @@ func TestParser_complete(t *testing.T) {
 				},
 				Sources: map[SourceRef]SourceBlock{
 					refVBIsoUbuntu1204:  {Type: "virtualbox-iso", Name: "ubuntu-1204"},
-					refAWSEBSUbuntu1204: {Type: "amazon-ebs", Name: "ubuntu-1604"},
+					refAWSEBSUbuntu1604: {Type: "amazon-ebs", Name: "ubuntu-1604"},
 				},
 				Builds: Builds{
 					&BuildBlock{
 						Sources: []SourceRef{
 							refVBIsoUbuntu1204,
-							refAWSEBSUbuntu1204,
+							refAWSEBSUbuntu1604,
 						},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
