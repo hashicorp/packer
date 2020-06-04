@@ -11,8 +11,7 @@ import (
 
 // FileGetter is a Getter implementation that will download a module from
 // a file scheme.
-type FileGetter struct {
-}
+type FileGetter struct{}
 
 func (g *FileGetter) Mode(ctx context.Context, u *url.URL) (Mode, error) {
 	path := u.Path
@@ -185,52 +184,18 @@ func (g *FileGetter) Detect(req *Request) (bool, error) {
 		// e.g. C:/foo/bar for other cases a prefix file:// is necessary
 	}
 
-	if !filepath.IsAbs(src) {
-		if pwd == "" {
-			return true, fmt.Errorf(
-				"relative paths require a module with a pwd")
-		}
-
-		// Stat the pwd to determine if its a symbolic link. If it is,
-		// then the pwd becomes the original directory. Otherwise,
-		// `filepath.Join` below does some weird stuff.
-		//
-		// We just ignore if the pwd doesn't exist. That error will be
-		// caught later when we try to use the URL.
-		if fi, err := os.Lstat(pwd); !os.IsNotExist(err) {
-			if err != nil {
-				return true, err
-			}
-			if fi.Mode()&os.ModeSymlink != 0 {
-				pwd, err = filepath.EvalSymlinks(pwd)
-				if err != nil {
-					return true, err
-				}
-
-				// The symlink itself might be a relative path, so we have to
-				// resolve this to have a correctly rooted URL.
-				pwd, err = filepath.Abs(pwd)
-				if err != nil {
-					return true, err
-				}
-			}
-		}
-
-		src = filepath.Join(pwd, src)
+	src, ok, err := new(FileDetector).Detect(src, pwd)
+	if err != nil {
+		return ok, err
+	}
+	if ok {
+		req.Src = src
+		return ok, nil
 	}
 
-	req.Src = fmtFileURL(src)
 	return true, nil
 }
 
 func (g *FileGetter) validScheme(scheme string) bool {
 	return scheme == "file"
-}
-
-func fmtFileURL(path string) string {
-	if runtime.GOOS == "windows" {
-		// Make sure we're using "/" on Windows. URLs are "/"-based.
-		path = filepath.ToSlash(path)
-	}
-	return path
 }

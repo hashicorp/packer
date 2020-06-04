@@ -15,8 +15,7 @@ import (
 
 // SmbClientGetter is a Getter implementation that will download a module from
 // a shared folder using smbclient cli.
-type SmbClientGetter struct {
-}
+type SmbClientGetter struct{}
 
 func (g *SmbClientGetter) Mode(ctx context.Context, u *url.URL) (Mode, error) {
 	if u.Host == "" || u.Path == "" {

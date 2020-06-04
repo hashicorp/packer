@@ -2,21 +2,18 @@ package getter
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 )
 
-// SmbMountGetter is a Getter implementation that will download a module from
+// SmbMountGetter is a Getter implementation that will download an artifact from
 // a shared folder using the file system using FileGetter implementation.
 // For Unix and MacOS users, the Getter will look for usual system specific mount paths such as:
 // /Volumes/ for MacOS
-// /run/user/1000/gvfs/smb-share:server=<host>,share=<path> for Unix
-type SmbMountGetter struct {
-}
+// /run/user/1000/gvfs/smb-share:server=<hostIP>,share=<path> for Unix
+type SmbMountGetter struct{}
 
 func (g *SmbMountGetter) Mode(ctx context.Context, u *url.URL) (Mode, error) {
 	if u.Host == "" || u.Path == "" {
@@ -60,14 +57,16 @@ func (g *SmbMountGetter) findPrefixAndPath(u *url.URL) (string, string) {
 	case "darwin":
 		prefix = string(os.PathSeparator)
 		path = filepath.Join("Volumes", u.Path)
-	case "linux":
-		prefix = string(os.PathSeparator)
-		path = fmt.Sprintf("run/user/1000/gvfs/smb-share:server=%s,share=%s", u.Host, strings.TrimPrefix(u.Path, prefix))
 	}
 	return prefix, path
 }
 
 func (g *SmbMountGetter) Detect(req *Request) (bool, error) {
+	if runtime.GOOS == "linux" {
+		// Linux has the smbclient command which is a safer approach to retrieve an artifact from a samba shared folder.
+		// Therefore, this should be used instead of looking in the file system.
+		return false, nil
+	}
 	if len(req.Src) == 0 {
 		return false, nil
 	}

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
+	"github.com/hashicorp/go-multierror"
 	safetemp "github.com/hashicorp/go-safetemp"
 )
 
@@ -19,18 +20,13 @@ import (
 // Using a client directly allows more fine-grained control over how downloading
 // is done, as well as customizing the protocols supported.
 type Client struct {
-
-	// Detectors is the list of detectors that are tried on the source.
-	// If this is nil, then the default Detectors will be used.
-	Detectors []Detector
-
 	// Decompressors is the map of decompressors supported by this client.
 	// If this is nil, then the default value is the Decompressors global.
 	Decompressors map[string]Decompressor
 
-	// Getters is the map of protocols supported by this client. If this
+	// Getters is the list of protocols supported by this client. If this
 	// is nil, then the default Getters variable will be used.
-	Getters map[string]Getter
+	Getters []Getter
 }
 
 // GetResult is the result of a Client.Get
@@ -50,43 +46,75 @@ func (c *Client) Get(ctx context.Context, req *Request) (*GetResult, error) {
 		req.Mode = ModeAny
 	}
 
-	var err error
-	req.Src, err = Detect(req.Src, req.Pwd, c.Detectors)
-	if err != nil {
-		return nil, err
-	}
-
-	var force string
-	// Determine if we have a forced protocol, i.e. "git::http://..."
-	force, req.Src = getForcedGetter(req.Src)
-
 	// If there is a subdir component, then we download the root separately
 	// and then copy over the proper subdir.
-	var realDst, subDir string
-	req.Src, subDir = SourceDirSubdir(req.Src)
-	if subDir != "" {
+	req.Src, req.subDir = SourceDirSubdir(req.Src)
+	if req.subDir != "" {
 		td, tdcloser, err := safetemp.Dir("", "getter")
 		if err != nil {
 			return nil, err
 		}
 		defer tdcloser.Close()
 
-		realDst = req.Dst
+		req.realDst = req.Dst
 		req.Dst = td
 	}
 
-	req.u, err = urlhelper.Parse(req.Src)
-	if err != nil {
-		return nil, err
-	}
-	if force == "" {
-		force = req.u.Scheme
+	var multierr []error
+	for _, g := range c.Getters {
+		shouldDownload, err := Detect(req, g)
+		if err != nil {
+			return nil, err
+		}
+		if !shouldDownload {
+			// the request should not be processed by that getter
+			continue
+		}
+
+		result, getErr := c.get(ctx, req, g)
+		if getErr != nil {
+			if getErr.Fatal {
+				return nil, getErr.Err
+			}
+			multierr = append(multierr, getErr.Err)
+			continue
+		}
+
+		return result, nil
 	}
 
-	g, ok := c.Getters[force]
-	if !ok {
-		return nil, fmt.Errorf(
-			"download not supported for scheme '%s'", force)
+	if len(multierr) == 1 {
+		// This is for keeping the error original format
+		return nil, multierr[0]
+	}
+
+	if multierr != nil {
+		var result *multierror.Error
+		result = multierror.Append(result, multierr...)
+		return nil, fmt.Errorf("error downloading '%s': %s", req.Src, result.Error())
+	}
+
+	return nil, fmt.Errorf("error downloading '%s'", req.Src)
+}
+
+// getError is the Error response object returned by get(context.Context, *Request, Getter)
+// to tell the client whether to halt (Fatal) Get or to keep trying to get an artifact.
+type getError struct {
+	// When Fatal is true something went wrong with get(context.Context, *Request, Getter)
+	// and the client should halt and return the Err.
+	Fatal bool
+	Err   error
+}
+
+func (ge *getError) Error() string {
+	return ge.Err.Error()
+}
+
+func (c *Client) get(ctx context.Context, req *Request, g Getter) (*GetResult, *getError) {
+	u, err := urlhelper.Parse(req.Src)
+	req.u = u
+	if err != nil {
+		return nil, &getError{true, err}
 	}
 
 	// We have magic query parameters that we use to signal different features
@@ -105,8 +133,7 @@ func (c *Client) Get(ctx context.Context, req *Request) (*GetResult, error) {
 		if b, err := strconv.ParseBool(archiveV); err == nil && !b {
 			archiveV = "-"
 		}
-	}
-	if archiveV == "" {
+	} else {
 		// We don't appear to... but is it part of the filename?
 		matchingLen := 0
 		for k := range c.Decompressors {
@@ -128,8 +155,8 @@ func (c *Client) Get(ctx context.Context, req *Request) (*GetResult, error) {
 		// this at the end of everything.
 		td, err := ioutil.TempDir("", "getter")
 		if err != nil {
-			return nil, fmt.Errorf(
-				"Error creating temporary directory for archive: %s", err)
+			return nil, &getError{true, fmt.Errorf(
+				"Error creating temporary directory for archive: %s", err)}
 		}
 		defer os.RemoveAll(td)
 
@@ -144,7 +171,7 @@ func (c *Client) Get(ctx context.Context, req *Request) (*GetResult, error) {
 	// Determine checksum if we have one
 	checksum, err := c.GetChecksum(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("invalid checksum: %s", err)
+		return nil, &getError{true, fmt.Errorf("invalid checksum: %s", err)}
 	}
 
 	// Delete the query parameter if we have it.
@@ -155,7 +182,7 @@ func (c *Client) Get(ctx context.Context, req *Request) (*GetResult, error) {
 		// Ask the getter which client mode to use
 		req.Mode, err = g.Mode(ctx, req.u)
 		if err != nil {
-			return nil, err
+			return nil, &getError{false, err}
 		}
 
 		// Destination is the base name of the URL path in "any" mode when
@@ -187,14 +214,13 @@ func (c *Client) Get(ctx context.Context, req *Request) (*GetResult, error) {
 			}
 		}
 		if getFile {
-			err := g.GetFile(ctx, req)
-			if err != nil {
-				return nil, err
+			if err := g.GetFile(ctx, req); err != nil {
+				return nil, &getError{false, err}
 			}
 
 			if checksum != nil {
 				if err := checksum.Checksum(req.Dst); err != nil {
-					return nil, err
+					return nil, &getError{true, err}
 				}
 			}
 		}
@@ -204,7 +230,7 @@ func (c *Client) Get(ctx context.Context, req *Request) (*GetResult, error) {
 			// into the final destination with the proper mode.
 			err := decompressor.Decompress(decompressDst, req.Dst, decompressDir)
 			if err != nil {
-				return nil, err
+				return nil, &getError{true, err}
 			}
 
 			// Swap the information back
@@ -232,36 +258,67 @@ func (c *Client) Get(ctx context.Context, req *Request) (*GetResult, error) {
 		// If we're getting a directory, then this is an error. You cannot
 		// checksum a directory. TODO: test
 		if checksum != nil {
-			return nil, fmt.Errorf(
-				"checksum cannot be specified for directory download")
+			return nil, &getError{true, fmt.Errorf(
+				"checksum cannot be specified for directory download")}
 		}
 
 		// We're downloading a directory, which might require a bit more work
 		// if we're specifying a subdir.
-		err := g.Get(ctx, req)
-		if err != nil {
-			err = fmt.Errorf("error downloading '%s': %s", req.Src, err)
-			return nil, err
+		if err := g.Get(ctx, req); err != nil {
+			return nil, &getError{false, err}
 		}
 	}
 
 	// If we have a subdir, copy that over
-	if subDir != "" {
-		if err := os.RemoveAll(realDst); err != nil {
-			return nil, err
+	if req.subDir != "" {
+		if err := os.RemoveAll(req.realDst); err != nil {
+			return nil, &getError{true, err}
 		}
-		if err := os.MkdirAll(realDst, 0755); err != nil {
-			return nil, err
+		if err := os.MkdirAll(req.realDst, 0755); err != nil {
+			return nil, &getError{true, err}
 		}
 
 		// Process any globs
-		subDir, err := SubdirGlob(req.Dst, subDir)
+		subDir, err := SubdirGlob(req.Dst, req.subDir)
 		if err != nil {
-			return nil, err
+			return nil, &getError{true, err}
 		}
 
-		return &GetResult{realDst}, copyDir(ctx, realDst, subDir, false)
+		err = copyDir(ctx, req.realDst, subDir, false)
+		if err != nil {
+			return nil, &getError{false, err}
+		}
+		return &GetResult{req.realDst}, nil
 	}
 
 	return &GetResult{req.Dst}, nil
+
+}
+
+func (c *Client) checkArchive(req *Request) string {
+	q := req.u.Query()
+	archiveV := q.Get("archive")
+	if archiveV != "" {
+		// Delete the paramter since it is a magic parameter we don't
+		// want to pass on to the Getter
+		q.Del("archive")
+		req.u.RawQuery = q.Encode()
+
+		// If we can parse the value as a bool and it is false, then
+		// set the archive to "-" which should never map to a decompressor
+		if b, err := strconv.ParseBool(archiveV); err == nil && !b {
+			archiveV = "-"
+		}
+	}
+	if archiveV == "" {
+		// We don't appear to... but is it part of the filename?
+		matchingLen := 0
+		for k := range c.Decompressors {
+			if strings.HasSuffix(req.u.Path, "."+k) && len(k) > matchingLen {
+				archiveV = k
+				matchingLen = len(k)
+			}
+		}
+	}
+	return archiveV
 }

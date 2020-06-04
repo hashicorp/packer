@@ -364,30 +364,35 @@ The tests for `get_gcs.go` require you to have GCP credentials set in your envir
 
 ### SMB (smb)
 
-On Unix, the SMB getter will try to get files from samba using the [`smbclient`](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html) when a url is prefixed with `smb://`, for example `smb://foo/bar/dir`. 
-For a local mount, the FileGetter must be used instead.      
-⚠️ The [`smbclient`](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html) needs to be installed for this to work on Unix.
+There are two options that go-getter will use to download a file in a smb shared folder. The first option uses
+[`smbclient`](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html) and the second one uses the file system
+to look for a file in a local mount of the shared folder in the OS specific volume folder. go-getter will try to download
+files from a smb shared folder whenever the url is prefixed with `smb://`.
 
-On Windows, the SMB getter will try to get files using the windows file system when the url is prefixed with `smb://`, `//`, or `\\`. This will be done by using the existing FileGetter.   
-⚠️ A FileGetter is necessary for this to work on Windows.
+⚠️ The [`smbclient`](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html) command is available only for Linux.
+This is the ONLY option for a Linux user and therefore the client must be installed.
+    
+The `smbclient` cli is not available for Windows and MacOS. The go-getter
+will try to get files using the file system, when this happens the getter uses the FileGetter implementation.
 
-The following examples work for Windows and Unix:  
+When connecting to a smb server, the OS creates a local mount in a system specific volume folder, and go-getter will 
+try to access the following folders when looking for local mounts.
+
+- MacOS: /Volumes/<shared_path>
+- Windows: \\\\\<host>\\\<shared_path>
+
+The following examples work for all the OSes:  
 - smb://host/shared/dir (downloads directory content)
 - smb://host/shared/dir/file (downloads file) 
 
-The following examples work for Unix:  
+The following examples work for Linux:  
 - smb://username:password@host/shared/dir (downloads directory content)
 - smb://username@host/shared/dir
 - smb://username:password@host/shared/dir/file (downloads file)
 - smb://username@host/shared/dir/file
 
-⚠️ The above examples also work on Windows but the authentication is not use to access the file system.
+⚠️ The above examples also work on the other OSes but the authentication is not used to access the file system.
 
-These examples only work for Windows:
-- //host/shared/dir (downloads directory content)
-- //host/shared/dir/file (downloads file)
-- \\\host\shared\dir (downloads directory content)
-- \\\host\shared\dir\file (downloads file)
    
         
 #### SMB Testing

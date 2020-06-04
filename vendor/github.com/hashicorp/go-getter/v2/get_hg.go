@@ -15,8 +15,7 @@ import (
 
 // HgGetter is a Getter implementation that will download a module from
 // a Mercurial repository.
-type HgGetter struct {
-}
+type HgGetter struct{}
 
 func (g *HgGetter) Mode(ctx context.Context, _ *url.URL) (Mode, error) {
 	return ModeDir, nil
@@ -154,13 +153,14 @@ func (g *HgGetter) Detect(req *Request) (bool, error) {
 		return false, nil
 	}
 
-	result, u, err := detectBitBucket(src)
+	src, ok, err := new(BitBucketDetector).Detect(src, req.Pwd)
 	if err != nil {
-		return true, err
+		return ok, err
 	}
-	if result == "hg" {
-		req.Src = u.String()
-		return true, nil
+	forced, src := getForcedGetter(src)
+	if ok && g.validScheme(forced) {
+		req.Src = src
+		return ok, nil
 	}
 
 	if isForcedGetter {

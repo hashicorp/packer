@@ -60,8 +60,8 @@ var defaultGetterClient = getter.Client{
 }
 
 func init() {
-	defaultGetterClient.Getters["gcs"] = &gcs.Getter{}
-	defaultGetterClient.Getters["s3"] = &s3.Getter{}
+	defaultGetterClient.Getters = append(defaultGetterClient.Getters, new(gcs.Getter))
+	defaultGetterClient.Getters = append(defaultGetterClient.Getters, new(s3.Getter))
 }
 
 func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {

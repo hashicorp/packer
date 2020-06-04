@@ -15,8 +15,7 @@ import (
 
 // Getter is a Getter implementation that will download a module from
 // a GCS bucket.
-type Getter struct {
-}
+type Getter struct {}
 
 func (g *Getter) Mode(ctx context.Context, u *url.URL) (getter.Mode, error) {
 
@@ -164,4 +163,49 @@ func (g *Getter) parseURL(u *url.URL) (bucket, path string, err error) {
 		path = pathParts[4]
 	}
 	return
+}
+
+func (g *Getter) Detect(req *getter.Request) (bool, error) {
+	src := req.Src
+	if len(src) == 0 {
+		return false, nil
+	}
+
+	if req.Forced != "" {
+		// There's a getter being forced
+		if !g.validScheme(req.Forced) {
+			// Current getter is not the forced one
+			// Don't use it to try to download the artifact
+			return false, nil
+		}
+	}
+	isForcedGetter := req.Forced != "" && g.validScheme(req.Forced)
+
+	u, err := url.Parse(src)
+	if err == nil && u.Scheme != "" {
+		if isForcedGetter {
+			// Is the forced getter and source is a valid url
+			return true, nil
+		}
+		if g.validScheme(u.Scheme) {
+			return true, nil
+		}
+		// Valid url with a scheme that is not valid for current getter
+		return false, nil
+	}
+
+	src, ok, err := new(Detector).Detect(src, req.Pwd)
+	if err != nil {
+		return ok, err
+	}
+	if ok {
+		req.Src = src
+		return ok, nil
+	}
+
+	return false, nil
+}
+
+func (g *Getter) validScheme(scheme string) bool {
+	return scheme == "gcs"
 }

@@ -11,6 +11,7 @@ require (
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/mitchellh/go-testing-interface v1.0.0
 	github.com/ulikunitz/xz v0.5.5
+	google.golang.org/api v0.9.0
 )
 
 go 1.13
