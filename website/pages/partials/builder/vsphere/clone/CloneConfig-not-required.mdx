@@ -6,7 +6,8 @@
     
 -   `linked_clone` (bool) - Create VM as a linked clone from latest snapshot. Defaults to `false`.
     
--   `network` (string) - Set network VM will be connected to.
+-   `network` (string) - Set the network in which VM will be connected to. If no network is specified, `host`
+    must be specified to allow Packer to look for the available network.
     
 -   `notes` (string) - VM notes.
     
