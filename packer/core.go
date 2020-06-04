@@ -1,7 +1,6 @@
 package packer
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"regexp"
@@ -375,9 +374,14 @@ func (c *Core) Context() *interpolate.Context {
 	}
 }
 
-// ErrSessionExit is a special error result that should be checked for
-// from Handle to signal a graceful exit.
-var ErrSessionExit = errors.New("Session exit")
+var ConsoleHelpMessage = strings.TrimSpace(`
+The Packer console allows you to experiment with Packer interpolations.
+You may access variables in the Packer config you called the console with.
+
+Type in the interpolation to test and hit <enter> to see the result.
+
+To exit the console, type "exit" and hit <enter>, or use Control-C.
+`)
 
 func (c *Core) EvaluateExpression(line string) (string, bool, hcl.Diagnostics) {
 	switch {
@@ -386,15 +390,7 @@ func (c *Core) EvaluateExpression(line string) (string, bool, hcl.Diagnostics) {
 	case line == "exit":
 		return "", true, nil
 	case line == "help":
-		help := `
-			The Packer console allows you to experiment with Packer interpolations.
-			You may access variables in the Packer config you called the console with.
-			
-			Type in the interpolation to test and hit <enter> to see the result.
-			
-			To exit the console, type "exit" and hit <enter>, or use Control-C.
-			`
-		return strings.TrimSpace(help), false, nil
+		return ConsoleHelpMessage, false, nil
 	case line == "variables":
 		varsstring := "\n"
 		for k, v := range c.Context().UserVariables {
