@@ -65,7 +65,6 @@ func (m *Meta) GetConfigFromHCL(cla *MetaArgs) (*hcl2template.PackerConfig, int)
 		ProvisionersSchemas:   m.CoreConfig.Components.ProvisionerStore,
 		PostProcessorsSchemas: m.CoreConfig.Components.PostProcessorStore,
 	}
-
 	cfg, diags := parser.Parse(cla.Path, cla.VarFiles, cla.Vars)
 	return cfg, writeDiags(m.Ui, parser.Files(), diags)
 }
@@ -89,14 +88,14 @@ func writeDiags(ui packer.Ui, files map[string]*hcl.File, diags hcl.Diagnostics)
 }
 
 func (m *Meta) GetConfig(cla *MetaArgs) (packer.Handler, int) {
-	cfgType, err := ConfigType(cla.Path)
+	cfgType, err := cla.GetConfigType()
 	if err != nil {
 		m.Ui.Error(fmt.Sprintf("%q: %s", cla.Path, err))
 		return nil, 1
 	}
 
 	switch cfgType {
-	case "hcl":
+	case ConfigTypeHCL2:
 		// TODO(azr): allow to pass a slice of files here.
 		return m.GetConfigFromHCL(cla)
 	default:
@@ -112,7 +111,14 @@ func (m *Meta) GetConfig(cla *MetaArgs) (packer.Handler, int) {
 
 func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (*packer.Core, int) {
 	// Parse the template
-	tpl, err := template.ParseFile(cla.Path)
+	var tpl *template.Template
+	var err error
+	if cla.Path == "" {
+		tpl, err = template.Parse(TiniestBuilder)
+	} else {
+		tpl, err = template.ParseFile(cla.Path)
+	}
+
 	if err != nil {
 		m.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return nil, 1

@@ -14,14 +14,14 @@ import (
 	"github.com/posener/complete"
 )
 
-const TiniestBuilder = `{
+var TiniestBuilder = strings.NewReader(`{
 	"builders": [
 		{
 			"type":"null",
 			"communicator": "none"
 		}
 	]
-}`
+}`)
 
 type ConsoleCommand struct {
 	Meta
