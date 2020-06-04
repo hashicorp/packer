@@ -47,6 +47,9 @@ func isDir(name string) (bool, error) {
 // returned. Otherwise if filename references a file and filename matches one
 // of the suffixes it is returned in the according slice.
 func GetHCL2Files(filename, hclSuffix, jsonSuffix string) (hclFiles, jsonFiles []string, diags hcl.Diagnostics) {
+	if filename == "" {
+		return
+	}
 	isDir, err := isDir(filename)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{

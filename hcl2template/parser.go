@@ -66,7 +66,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	var diags hcl.Diagnostics
 
 	// parse config files
-	{
+	if filename != "" {
 		hclFiles, jsonFiles, moreDiags := GetHCL2Files(filename, hcl2FileExt, hcl2JsonFileExt)
 		diags = append(diags, moreDiags...)
 		if len(hclFiles)+len(jsonFiles) == 0 {
