@@ -9,6 +9,52 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
+// OnlyExcept is a struct that is meant to be embedded that contains the
+// logic required for "only" and "except" meta-parameters.
+type OnlyExcept struct {
+	Only   []string `json:"only,omitempty"`
+	Except []string `json:"except,omitempty"`
+}
+
+// Skip says whether or not to skip the build with the given name.
+func (o *OnlyExcept) Skip(n string) bool {
+	if len(o.Only) > 0 {
+		for _, v := range o.Only {
+			if v == n {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	if len(o.Except) > 0 {
+		for _, v := range o.Except {
+			if v == n {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	return false
+}
+
+// Validate validates that the OnlyExcept settings are correct for a thing.
+func (o *OnlyExcept) Validate() hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	if len(o.Only) > 0 && len(o.Except) > 0 {
+		diags = diags.Append(&hcl.Diagnostic{
+			Summary:  "only one of 'only' or 'except' may be specified",
+			Severity: hcl.DiagError,
+		})
+	}
+
+	return diags
+}
+
 // ProvisionerBlock references a detected but unparsed provisioner
 type ProvisionerBlock struct {
 	PType       string
@@ -16,6 +62,7 @@ type ProvisionerBlock struct {
 	PauseBefore time.Duration
 	MaxRetries  int
 	Timeout     time.Duration
+	OnlyExcept  OnlyExcept
 	HCL2Ref
 }
 
@@ -29,6 +76,8 @@ func (p *Parser) decodeProvisioner(block *hcl.Block) (*ProvisionerBlock, hcl.Dia
 		PauseBefore string   `hcl:"pause_before,optional"`
 		MaxRetries  int      `hcl:"max_retries,optional"`
 		Timeout     string   `hcl:"timeout,optional"`
+		Only        []string `hcl:"only,optional"`
+		Except      []string `hcl:"except,optional"`
 		Rest        hcl.Body `hcl:",remain"`
 	}
 	diags := gohcl.DecodeBody(block.Body, nil, &b)
@@ -40,7 +89,13 @@ func (p *Parser) decodeProvisioner(block *hcl.Block) (*ProvisionerBlock, hcl.Dia
 		PType:      block.Labels[0],
 		PName:      b.Name,
 		MaxRetries: b.MaxRetries,
+		OnlyExcept: OnlyExcept{Only: b.Only, Except: b.Except},
 		HCL2Ref:    newHCL2Ref(block, b.Rest),
+	}
+
+	diags = diags.Extend(provisioner.OnlyExcept.Validate())
+	if diags.HasErrors() {
+		return nil, diags
 	}
 
 	if b.PauseBefore != "" {
