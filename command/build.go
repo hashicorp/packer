@@ -114,6 +114,8 @@ func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (*packer.Core, int) {
 	var tpl *template.Template
 	var err error
 	if cla.Path == "" {
+		// here cla validation passed so this means we want a default builder
+		// and we probably are in the console command
 		tpl, err = template.Parse(TiniestBuilder)
 	} else {
 		tpl, err = template.ParseFile(cla.Path)
