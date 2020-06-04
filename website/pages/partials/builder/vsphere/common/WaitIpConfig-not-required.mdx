@@ -1,7 +1,7 @@
 <!-- Code generated from the comments of the WaitIpConfig struct in builder/vsphere/common/step_wait_for_ip.go; DO NOT EDIT MANUALLY -->
 
 -   `ip_wait_timeout` (duration string | ex: "1h5m2s") - Amount of time to wait for VM's IP, similar to 'ssh_timeout'.
-    Defaults to 30m (30 minutes). See the Goang
+    Defaults to 30m (30 minutes). See the Golang
     [ParseDuration](https://golang.org/pkg/time/#ParseDuration) documentation
     for full details.
     
@@ -11,4 +11,7 @@
     5s(5 seconds). See the Golang
     [ParseDuration](https://golang.org/pkg/time/#ParseDuration) documentation
      for full details.
+    
+-   `ip_wait_address` (string) - Set this to a CIDR address. This will cause the service to wait for an address that is contained in
+    this network. Example: "192.168.0.0/24" would look at the address if it was "192.168.0.1".
     

@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"time"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
@@ -16,7 +17,7 @@ import (
 
 type WaitIpConfig struct {
 	// Amount of time to wait for VM's IP, similar to 'ssh_timeout'.
-	// Defaults to 30m (30 minutes). See the Goang
+	// Defaults to 30m (30 minutes). See the Golang
 	// [ParseDuration](https://golang.org/pkg/time/#ParseDuration) documentation
 	// for full details.
 	WaitTimeout time.Duration `mapstructure:"ip_wait_timeout"`
@@ -27,6 +28,10 @@ type WaitIpConfig struct {
 	// [ParseDuration](https://golang.org/pkg/time/#ParseDuration) documentation
 	//  for full details.
 	SettleTimeout time.Duration `mapstructure:"ip_settle_timeout"`
+	// Set this to a CIDR address. This will cause the service to wait for an address that is contained in
+	// this network. Example: "192.168.0.0/24" would look at the address if it was "192.168.0.1".
+	WaitAddress string `mapstructure:"ip_wait_address"`
+	ipnet       *net.IPNet
 
 	// WaitTimeout is a total timeout, so even if VM changes IP frequently and it doesn't settle down we will end waiting.
 }
@@ -43,6 +48,14 @@ func (c *WaitIpConfig) Prepare() []error {
 	}
 	if c.WaitTimeout == 0 {
 		c.WaitTimeout = 30 * time.Minute
+	}
+
+	if c.WaitAddress != "" {
+		var err error
+		_, c.ipnet, err = net.ParseCIDR(c.WaitAddress)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("unable to parse \"ip_wait_address\": %w", err))
+		}
 	}
 
 	return errs
@@ -111,7 +124,7 @@ func doGetIp(vm *driver.VirtualMachine, ctx context.Context, c *WaitIpConfig) (s
 		interval = 1 * time.Second
 	}
 loop:
-	ip, err := vm.WaitForIP(ctx)
+	ip, err := vm.WaitForIP(ctx, c.ipnet)
 	if err != nil {
 		return "", err
 	}
