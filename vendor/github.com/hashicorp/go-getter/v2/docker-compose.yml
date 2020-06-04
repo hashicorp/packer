@@ -1,0 +1,34 @@
+version: '3.2'
+
+services:
+  samba:
+    build:
+      dockerfile: Dockerfile-smbserver
+      context: .
+    container_name: samba
+    environment:
+      USERID: "0"
+      GROUPID: "0"
+    networks:
+      - default
+    ports:
+      - "139:139/tcp" # default smb port
+      - "445:445/tcp" # default smb port
+    volumes:
+      - /mnt:/mnt:z
+    command: '-s "public;/public" -s "private;/private;yes;no;no;user" -u "user;password" -p'
+
+  gogetter:
+    build:
+      context: .
+    container_name: gogetter
+    depends_on:
+      - samba
+    networks:
+      - default
+    volumes:
+      - /mnt:/mnt
+    command: tail -f /dev/null
+
+networks:
+  default:

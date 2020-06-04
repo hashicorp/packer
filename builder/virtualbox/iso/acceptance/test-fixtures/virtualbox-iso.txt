@@ -1,7 +1,6 @@
 {
   "type": "virtualbox-iso",
-  "iso_checksum": "946a6077af6f5f95a51f82fdc44051c7aa19f9cfc5f737954845a6050543d7c2",
-  "iso_checksum_type": "sha256",
+  "iso_checksum": "sha256:946a6077af6f5f95a51f82fdc44051c7aa19f9cfc5f737954845a6050543d7c2",
   "iso_url": "http://old-releases.ubuntu.com/releases/14.04.1/ubuntu-14.04.1-server-amd64.iso",
   "disk_size": "40960",
   "guest_os_type": "Ubuntu_64",

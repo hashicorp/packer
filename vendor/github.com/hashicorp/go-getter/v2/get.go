@@ -42,13 +42,21 @@ type Getter interface {
 	// Mode returns the mode based on the given URL. This is used to
 	// allow clients to let the getters decide which mode to use.
 	Mode(context.Context, *url.URL) (Mode, error)
+
+	// Detect detects whether the Request.Src matches a known pattern to
+	// turn it into a proper URL, and also transforms and update Request.Src
+	// when necessary.
+	// The Getter must validate if the Request.Src is a valid URL
+	// with a valid scheme for the Getter, and also check if the
+	// current Getter is the forced one and return true if that's the case.
+	Detect(*Request) (bool, error)
 }
 
 // Getters is the mapping of scheme to the Getter implementation that will
 // be used to get a dependency.
-var Getters map[string]Getter
+var Getters []Getter
 
-// forcedRegexp is the regular expression that finds forced getters. This
+// forcedRegexp is the regular expression that finds Forced getters. This
 // syntax is schema::url, example: git::https://foo.com
 var forcedRegexp = regexp.MustCompile(`^([A-Za-z0-9]+)::(.+)$`)
 
@@ -57,7 +65,6 @@ var httpClient = cleanhttp.DefaultClient()
 
 var DefaultClient = &Client{
 	Getters:       Getters,
-	Detectors:     Detectors,
 	Decompressors: Decompressors,
 }
 
@@ -66,12 +73,20 @@ func init() {
 		Netrc: true,
 	}
 
-	Getters = map[string]Getter{
-		"file":  new(FileGetter),
-		"git":   new(GitGetter),
-		"hg":    new(HgGetter),
-		"http":  httpGetter,
-		"https": httpGetter,
+	// The order of the Getters in the list may affect the result
+	// depending if the Request.Src is detected as valid by multiple getters
+	Getters = []Getter{
+		&GitGetter{[]Detector{
+			new(GitHubDetector),
+			new(GitDetector),
+			new(BitBucketDetector),
+		},
+		},
+		new(HgGetter),
+		new(SmbClientGetter),
+		new(SmbMountGetter),
+		httpGetter,
+		new(FileGetter),
 	}
 }
 

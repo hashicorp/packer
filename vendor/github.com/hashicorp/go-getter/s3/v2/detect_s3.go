@@ -1,4 +1,4 @@
-package getter
+package s3
 
 import (
 	"fmt"
@@ -6,11 +6,11 @@ import (
 	"strings"
 )
 
-// S3Detector implements Detector to detect S3 URLs and turn
+// Detector implements Detector to detect S3 URLs and turn
 // them into URLs that the S3 getter can understand.
-type S3Detector struct{}
+type Detector struct{}
 
-func (d *S3Detector) Detect(src, _ string) (string, bool, error) {
+func (d *Detector) Detect(src, _ string) (string, bool, error) {
 	if len(src) == 0 {
 		return "", false, nil
 	}
@@ -22,7 +22,7 @@ func (d *S3Detector) Detect(src, _ string) (string, bool, error) {
 	return "", false, nil
 }
 
-func (d *S3Detector) detectHTTP(src string) (string, bool, error) {
+func (d *Detector) detectHTTP(src string) (string, bool, error) {
 	parts := strings.Split(src, "/")
 	if len(parts) < 2 {
 		return "", false, fmt.Errorf(
@@ -40,22 +40,22 @@ func (d *S3Detector) detectHTTP(src string) (string, bool, error) {
 	}
 }
 
-func (d *S3Detector) detectPathStyle(region string, parts []string) (string, bool, error) {
+func (d *Detector) detectPathStyle(region string, parts []string) (string, bool, error) {
 	urlStr := fmt.Sprintf("https://%s.amazonaws.com/%s", region, strings.Join(parts, "/"))
 	url, err := url.Parse(urlStr)
 	if err != nil {
 		return "", false, fmt.Errorf("error parsing S3 URL: %s", err)
 	}
 
-	return "s3::" + url.String(), true, nil
+	return url.String(), true, nil
 }
 
-func (d *S3Detector) detectVhostStyle(region, bucket string, parts []string) (string, bool, error) {
+func (d *Detector) detectVhostStyle(region, bucket string, parts []string) (string, bool, error) {
 	urlStr := fmt.Sprintf("https://%s.amazonaws.com/%s/%s", region, bucket, strings.Join(parts, "/"))
 	url, err := url.Parse(urlStr)
 	if err != nil {
 		return "", false, fmt.Errorf("error parsing S3 URL: %s", err)
 	}
 
-	return "s3::" + url.String(), true, nil
+	return url.String(), true, nil
 }

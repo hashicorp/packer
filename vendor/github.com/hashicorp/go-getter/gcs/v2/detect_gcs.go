@@ -1,4 +1,4 @@
-package getter
+package gcs
 
 import (
 	"fmt"
@@ -6,11 +6,11 @@ import (
 	"strings"
 )
 
-// GCSDetector implements Detector to detect GCS URLs and turn
+// Detector implements Detector to detect GCS URLs and turn
 // them into URLs that the GCSGetter can understand.
-type GCSDetector struct{}
+type Detector struct{}
 
-func (d *GCSDetector) Detect(src, _ string) (string, bool, error) {
+func (d *Detector) Detect(src, _ string) (string, bool, error) {
 	if len(src) == 0 {
 		return "", false, nil
 	}
@@ -22,7 +22,7 @@ func (d *GCSDetector) Detect(src, _ string) (string, bool, error) {
 	return "", false, nil
 }
 
-func (d *GCSDetector) detectHTTP(src string) (string, bool, error) {
+func (d *Detector) detectHTTP(src string) (string, bool, error) {
 
 	parts := strings.Split(src, "/")
 	if len(parts) < 5 {
@@ -39,5 +39,5 @@ func (d *GCSDetector) detectHTTP(src string) (string, bool, error) {
 		return "", false, fmt.Errorf("error parsing GCS URL: %s", err)
 	}
 
-	return "gcs::" + url.String(), true, nil
+	return url.String(), true, nil
 }

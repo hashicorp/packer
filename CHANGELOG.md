@@ -67,8 +67,9 @@
 * core: Ensure HTTP server information `PackerHTTPIP`, `PackerHTTPPort`, and
     `PackerHTTPAddr` are available via the `build` template engine for all
     supported builders [GH-9238]
-* core: fix regression that broke use of pwd when retrieving the checksum from
+* core: Fix regression that broke use of pwd when retrieving the checksum from
     a file [GH-9129].
+* core: Fix `iso_url` to accept SMB shared files UNC and windows network paths. [GH-8954]
 * post-processor/vagrant: Add "provider_override" template option to allow
     artifacts from the Artifice post-processor [GH-9239]
 * post-processor/vsphere-template: Add VSphere builder's artifact to vsphere-

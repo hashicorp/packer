@@ -6,12 +6,12 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 // FileGetter is a Getter implementation that will download a module from
 // a file scheme.
-type FileGetter struct {
-}
+type FileGetter struct{}
 
 func (g *FileGetter) Mode(ctx context.Context, u *url.URL) (Mode, error) {
 	path := u.Path
@@ -147,4 +147,55 @@ func (g *FileGetter) GetFile(ctx context.Context, req *Request) error {
 
 	_, err = Copy(ctx, dstF, srcF)
 	return err
+}
+
+func (g *FileGetter) Detect(req *Request) (bool, error) {
+	var src, pwd string
+	src = req.Src
+	pwd = req.Pwd
+	if len(src) == 0 {
+		return false, nil
+	}
+
+	if req.Forced != "" {
+		// There's a getter being Forced
+		if !g.validScheme(req.Forced) {
+			// Current getter is not the Forced one
+			// Don't use it to try to download the artifact
+			return false, nil
+		}
+	}
+	isForcedGetter := req.Forced != "" && g.validScheme(req.Forced)
+
+	u, err := url.Parse(src)
+	if err == nil && u.Scheme != "" {
+		if isForcedGetter {
+			// Is the Forced getter and source is a valid url
+			return true, nil
+		}
+		if g.validScheme(u.Scheme) {
+			return true, nil
+		}
+		if !(runtime.GOOS == "windows" && len(u.Scheme) == 1) {
+			return false, nil
+		}
+		// For windows, we try to get the artifact
+		// if it has a non valid scheme with 1 char
+		// e.g. C:/foo/bar for other cases a prefix file:// is necessary
+	}
+
+	src, ok, err := new(FileDetector).Detect(src, pwd)
+	if err != nil {
+		return ok, err
+	}
+	if ok {
+		req.Src = src
+		return ok, nil
+	}
+
+	return true, nil
+}
+
+func (g *FileGetter) validScheme(scheme string) bool {
+	return scheme == "file"
 }

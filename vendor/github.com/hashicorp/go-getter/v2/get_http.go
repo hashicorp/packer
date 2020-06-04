@@ -319,3 +319,38 @@ func charsetReader(charset string, input io.Reader) (io.Reader, error) {
 		return nil, fmt.Errorf("can't decode XML document using charset %q", charset)
 	}
 }
+
+func (g *HttpGetter) Detect(req *Request) (bool, error) {
+	if len(req.Src) == 0 {
+		return false, nil
+	}
+
+	if req.Forced != "" {
+		// There's a getter being Forced
+		if !g.validScheme(req.Forced) {
+			// Current getter is not the Forced one
+			// Don't use it to try to download the artifact
+			return false, nil
+		}
+	}
+	isForcedGetter := req.Forced != "" && g.validScheme(req.Forced)
+
+	u, err := url.Parse(req.Src)
+	if err == nil && u.Scheme != "" {
+		if isForcedGetter {
+			// Is the Forced getter and source is a valid url
+			return true, nil
+		}
+		if g.validScheme(u.Scheme) {
+			return true, nil
+		}
+		// Valid url with a scheme that is not valid for current getter
+		return false, nil
+	}
+
+	return false, nil
+}
+
+func (g *HttpGetter) validScheme(scheme string) bool {
+	return scheme == "http" || scheme == "https"
+}

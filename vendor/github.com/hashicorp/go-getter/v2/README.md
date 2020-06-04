@@ -72,6 +72,7 @@ can be augmented at runtime by implementing the `Getter` interface.
   * HTTP
   * Amazon S3
   * Google GCP
+  * SMB
 
 In addition to the above protocols, go-getter has what are called "detectors."
 These take a URL and attempt to automatically choose the best protocol for
@@ -360,3 +361,45 @@ In order to access to GCS, authentication credentials should be provided. More i
 #### GCS Testing
 
 The tests for `get_gcs.go` require you to have GCP credentials set in your environment.  These credentials can have any level of permissions to any project, they just need to exist.  This means setting `GOOGLE_APPLICATION_CREDENTIALS="~/path/to/credentials.json"` or `GOOGLE_CREDENTIALS="{stringified-credentials-json}"`.  Due to this configuration, `get_gcs_test.go` will fail for external contributors in CircleCI.
+
+### SMB (smb)
+
+There are two options that go-getter will use to download a file in a smb shared folder. The first option uses
+[`smbclient`](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html) and the second one uses the file system
+to look for a file in a local mount of the shared folder in the OS specific volume folder. go-getter will try to download
+files from a smb shared folder whenever the url is prefixed with `smb://`.
+
+⚠️ The [`smbclient`](https://www.samba.org/samba/docs/current/man-html/smbclient.1.html) command is available only for Linux.
+This is the ONLY option for a Linux user and therefore the client must be installed.
+    
+The `smbclient` cli is not available for Windows and MacOS. The go-getter
+will try to get files using the file system, when this happens the getter uses the FileGetter implementation.
+
+When connecting to a smb server, the OS creates a local mount in a system specific volume folder, and go-getter will 
+try to access the following folders when looking for local mounts.
+
+- MacOS: /Volumes/<shared_path>
+- Windows: \\\\\<host>\\\<shared_path>
+
+The following examples work for all the OSes:  
+- smb://host/shared/dir (downloads directory content)
+- smb://host/shared/dir/file (downloads file) 
+
+The following examples work for Linux:  
+- smb://username:password@host/shared/dir (downloads directory content)
+- smb://username@host/shared/dir
+- smb://username:password@host/shared/dir/file (downloads file)
+- smb://username@host/shared/dir/file
+
+⚠️ The above examples also work on the other OSes but the authentication is not used to access the file system.
+
+   
+        
+#### SMB Testing
+The test for `get_smb.go` requires a smb server running which can be started inside a docker container by
+running `make start-smb`. Once the container is up the shared folder can be accessed via `smb://<ip|name>/public/<dir|file>` or 
+`smb://user:password@<ip|name>/private/<dir|file>` by another container or machine in the same network. 
+
+To run the tests inside `get_smb_test.go` and `client_test.go`, prepare the environment with `make smbtests-prepare`. On prepare some 
+mock files and directories will be added to the shared folder and a go-getter container will start together with the samba server.
+Once the environment for testing is prepared, run `make smbtests` to run the tests. 

@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -259,8 +260,6 @@ func TestStepDownload_download(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bad: non expected error %s", err.Error())
 	}
-	// because of the inplace option; the result file will not be renamed
-	// sha.ova.
 	os.RemoveAll(step.TargetPath)
 
 	// Abs path with no extension provided
@@ -270,8 +269,6 @@ func TestStepDownload_download(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bad: non expected error %s", err.Error())
 	}
-	// because of the inplace option; the result file will not be renamed
-	// sha.ova.
 	os.RemoveAll(step.TargetPath)
 
 	// Path with file
@@ -280,9 +277,36 @@ func TestStepDownload_download(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Bad: non expected error %s", err.Error())
 	}
-	// because of the inplace option; the result file will not be renamed
-	// sha.ova.
 	os.RemoveAll(step.TargetPath)
+}
+
+func TestStepDownload_WindowsParseSourceURL(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("skip windows specific tests")
+	}
+
+	source := "\\\\hostname\\dir\\filename.txt"
+	url, err := parseSourceURL(source)
+	if err != nil {
+		t.Fatalf("bad: parsing source url failed: %s", err.Error())
+	}
+	if url.Scheme != "smb" {
+		t.Fatalf("bad: url should contain smb scheme but contains: %s", url.Scheme)
+	}
+}
+
+func TestStepDownload_ParseSourceSmbURL(t *testing.T) {
+	source := "smb://hostname/dir/filename.txt"
+	url, err := parseSourceURL(source)
+	if err != nil {
+		t.Fatalf("bad: parsing source url failed: %s", err.Error())
+	}
+	if url.Scheme != "smb" {
+		t.Fatalf("bad: url should contain smb scheme but contains: %s", url.Scheme)
+	}
+	if url.String() != "smb://hostname/dir/filename.txt" {
+		t.Fatalf("bad: url should contain smb scheme but contains: %s", url.String())
+	}
 }
 
 func createTempDir(t *testing.T) string {
