@@ -2,8 +2,10 @@ package hcl2template
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
@@ -12,8 +14,6 @@ import (
 // PackerConfig represents a loaded Packer HCL config. It will contain
 // references to all possible blocks of the allowed configuration.
 type PackerConfig struct {
-	// parser *Parser
-
 	// Directory where the config files are defined
 	Basedir string
 
@@ -378,4 +378,57 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 		}
 	}
 	return res, diags
+}
+
+func (p *PackerConfig) EvaluateExpression(line string) (out string, exit bool, diags hcl.Diagnostics) {
+	switch {
+	case line == "":
+		return "", false, nil
+	case line == "exit":
+		return "", true, nil
+	case line == "help":
+		help := strings.TrimSpace(`
+			The Packer console allows you to experiment with Packer interpolations.
+			You may access variables in the Packer config you called the console with.
+			
+			Type in the interpolation to test and hit <enter> to see the result.
+			
+			To exit the console, type "exit" and hit <enter>, or use Control-C.
+			`)
+		return help, false, nil
+	case line == "variables":
+		out := &strings.Builder{}
+		out.WriteString("> input-variables:\n\n")
+		for _, v := range p.InputVariables {
+			val, _ := v.Value()
+			fmt.Fprintf(out, "var.%s: %q [debug: %#v]\n", v.Name, val.AsString(), v)
+		}
+		out.WriteString("\n> local-variables:\n\n")
+		for _, v := range p.LocalVariables {
+			val, _ := v.Value()
+			fmt.Fprintf(out, "local.%s: %q\n", v.Name, val.AsString())
+		}
+
+		return out.String(), false, nil
+	default:
+		return p.handleEval(line)
+	}
+}
+
+func (p *PackerConfig) handleEval(line string) (out string, exit bool, diags hcl.Diagnostics) {
+
+	// Parse the given line as an expression
+	expr, parseDiags := hclsyntax.ParseExpression([]byte(line), "<console-input>", hcl.Pos{Line: 1, Column: 1})
+	diags = append(diags, parseDiags...)
+	if parseDiags.HasErrors() {
+		return "", false, diags
+	}
+
+	val, valueDiags := expr.Value(p.EvalContext(nil))
+	diags = append(diags, valueDiags...)
+	if valueDiags.HasErrors() {
+		return "", false, diags
+	}
+
+	return val.AsString(), false, diags
 }

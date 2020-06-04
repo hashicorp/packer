@@ -58,7 +58,7 @@ func (c *BuildCommand) ParseArgs(args []string) (*BuildArgs, int) {
 	return &cfg, 0
 }
 
-func (m *Meta) GetConfigFromHCL(cla *MetaArgs) (packer.BuildGetter, int) {
+func (m *Meta) GetConfigFromHCL(cla *MetaArgs) (*hcl2template.PackerConfig, int) {
 	parser := &hcl2template.Parser{
 		Parser:                hclparse.NewParser(),
 		BuilderSchemas:        m.CoreConfig.Components.BuilderStore,
@@ -88,10 +88,10 @@ func writeDiags(ui packer.Ui, files map[string]*hcl.File, diags hcl.Diagnostics)
 	return 0
 }
 
-func (m *Meta) GetConfig(cla *MetaArgs) (packer.BuildGetter, int) {
+func (m *Meta) GetConfig(cla *MetaArgs) (packer.Handler, int) {
 	cfgType, err := ConfigType(cla.Path)
 	if err != nil {
-		m.Ui.Error(fmt.Sprintf("could not tell config type: %s", err))
+		m.Ui.Error(fmt.Sprintf("%q: %s", cla.Path, err))
 		return nil, 1
 	}
 
@@ -110,7 +110,7 @@ func (m *Meta) GetConfig(cla *MetaArgs) (packer.BuildGetter, int) {
 	}
 }
 
-func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (packer.BuildGetter, int) {
+func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (*packer.Core, int) {
 	// Parse the template
 	tpl, err := template.ParseFile(cla.Path)
 	if err != nil {

@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"regexp"
@@ -371,6 +372,47 @@ func (c *Core) Context() *interpolate.Context {
 	return &interpolate.Context{
 		TemplatePath:  c.Template.Path,
 		UserVariables: c.variables,
+	}
+}
+
+// ErrSessionExit is a special error result that should be checked for
+// from Handle to signal a graceful exit.
+var ErrSessionExit = errors.New("Session exit")
+
+func (c *Core) EvaluateExpression(line string) (string, bool, hcl.Diagnostics) {
+	switch {
+	case line == "":
+		return "", false, nil
+	case line == "exit":
+		return "", true, nil
+	case line == "help":
+		help := `
+			The Packer console allows you to experiment with Packer interpolations.
+			You may access variables in the Packer config you called the console with.
+			
+			Type in the interpolation to test and hit <enter> to see the result.
+			
+			To exit the console, type "exit" and hit <enter>, or use Control-C.
+			`
+		return strings.TrimSpace(help), false, nil
+	case line == "variables":
+		varsstring := "\n"
+		for k, v := range c.Context().UserVariables {
+			varsstring += fmt.Sprintf("%s: %+v,\n", k, v)
+		}
+
+		return varsstring, false, nil
+	default:
+		ctx := c.Context()
+		rendered, err := interpolate.Render(line, ctx)
+		var diags hcl.Diagnostics
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary: "Interpolation error",
+				Detail:  err.Error(),
+			})
+		}
+		return rendered, false, diags
 	}
 }
 

@@ -17,6 +17,19 @@ type BuildGetter interface {
 	GetBuilds(GetBuildsOptions) ([]Build, hcl.Diagnostics)
 }
 
+type Evaluator interface {
+	// EvaluateExpression is meant to be used in the `packer console` command.
+	// It parses the input string and returns what needs to be displayed. In
+	// case of an error the error should be displayed.
+	EvaluateExpression(expr string) (output string, exit bool, diags hcl.Diagnostics)
+}
+
+// The packer.Handler handles all Packer things.
+type Handler interface {
+	Evaluator
+	BuildGetter
+}
+
 //go:generate enumer -type FixConfigMode
 type FixConfigMode int
 
