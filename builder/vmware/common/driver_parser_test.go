@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func consumeString(s string) (out chan byte) {
@@ -17,6 +18,13 @@ func consumeString(s string) (out chan byte) {
 		}
 		close(out)
 	}()
+	return
+}
+
+func collectIntoStringList(in chan string) (result []string) {
+	for item := range in {
+		result = append(result, item)
+	}
 	return
 }
 
@@ -854,5 +862,225 @@ func TestParserReadDhcpdLeases(t *testing.T) {
 		} else if hex.EncodeToString(res.ether) != test_4["ether"] {
 			t.Errorf("expected ethernet hardware %s, got %s", test_4["ether"], hex.EncodeToString(res.ether))
 		}
+	}
+}
+
+func TestParserTokenizeNetworkingConfig(t *testing.T) {
+	tests := []string{
+		"words       words       words",
+		"newlines\n\n\n\n\n\n\n\nnewlines\r\r\r\r\r\r\r\rnewlines\n\n\n\n",
+		"       newline-less",
+	}
+	expects := [][]string{
+		[]string{"words", "words", "words"},
+		[]string{"newlines", "\n", "newlines", "\n", "newlines", "\n"},
+		[]string{"newline-less"},
+	}
+
+	for testnum := 0; testnum < len(tests); testnum += 1 {
+		inCh := consumeString(tests[testnum])
+		outCh := tokenizeNetworkingConfig(inCh)
+		result := collectIntoStringList(outCh)
+
+		expected := expects[testnum]
+		if len(result) != len(expected) {
+			t.Errorf("test %d expected %d items, got %d instead", 1+testnum, len(expected), len(result))
+			continue
+		}
+
+		ok := true
+		for index := 0; index < len(expected); index += 1 {
+			if result[index] != expected[index] {
+				ok = false
+			}
+		}
+		if !ok {
+			t.Errorf("test %d expected %#v, got %#v", 1+testnum, expects[testnum], result)
+		}
+	}
+}
+
+func TestParserSplitNetworkingConfig(t *testing.T) {
+	tests := []string{
+		"this is a story\n\n\nabout some newlines",
+		"\n\n\nthat can begin and end with newlines\n\n\n",
+		"   in\n\n\nsome\ncases\nit\ncan\nend\nwith\nan\nempty\nstring\n\n\n\n",
+		"\n\n\nand\nbegin\nwith\nan\nempty\nstring   ",
+	}
+	expects := [][]string{
+		[]string{"this is a story", "about some newlines"},
+		[]string{"that can begin and end with newlines"},
+		[]string{"in", "some", "cases", "it", "can", "end", "with", "an", "empty", "string"},
+		[]string{"and", "begin", "with", "an", "empty", "string"},
+	}
+
+	for testnum := 0; testnum < len(tests); testnum += 1 {
+		inCh := consumeString(tests[testnum])
+		stringCh := tokenizeNetworkingConfig(inCh)
+		outCh := splitNetworkingConfig(stringCh)
+
+		result := make([]string, 0)
+		for item := range outCh {
+			result = append(result, strings.Join(item, " "))
+		}
+
+		expected := expects[testnum]
+		if len(result) != len(expected) {
+			t.Errorf("test %d expected %d items, got %d instead", 1+testnum, len(expected), len(result))
+			continue
+		}
+
+		ok := true
+		for index := 0; index < len(expected); index += 1 {
+			if result[index] != expected[index] {
+				ok = false
+			}
+		}
+		if !ok {
+			t.Errorf("test %d expected %#v, got %#v", 1+testnum, expects[testnum], result)
+		}
+	}
+}
+
+func TestParserParseNetworkingConfigVersion(t *testing.T) {
+	success_tests := []string{"VERSION=4,2"}
+	failure_tests := []string{
+		"VERSION=1=2",
+		"VERSION=3,4,5",
+		"VERSION=a,b",
+	}
+
+	for testnum := 0; testnum < len(success_tests); testnum += 1 {
+		test := []string{success_tests[testnum]}
+		if _, err := networkingReadVersion(test); err != nil {
+			t.Errorf("success-test %d parsing failed: %v", 1+testnum, err)
+		}
+	}
+
+	for testnum := 0; testnum < len(success_tests); testnum += 1 {
+		test := []string{failure_tests[testnum]}
+		if _, err := networkingReadVersion(test); err == nil {
+			t.Errorf("failure-test %d should have failed", 1+testnum)
+		}
+	}
+}
+
+func TestParserParseNetworkingConfigEntries(t *testing.T) {
+	tests := []string{
+		"answer VNET_999_ANYTHING option",
+		"remove_answer VNET_123_ALSOANYTHING",
+		"add_nat_portfwd 24 udp 42 127.0.0.1 24",
+		"remove_nat_portfwd 42 tcp 2502",
+		"add_dhcp_mac_to_ip 57005 00:0d:0e:0a:0d:00 127.0.0.2",
+		"remove_dhcp_mac_to_ip 57005 00:0d:0e:0a:0d:00",
+		"add_bridge_mapping string 51",
+		"remove_bridge_mapping string",
+		"add_nat_prefix 57005 /24",
+		"remove_nat_prefix 57005 /31",
+	}
+
+	for testnum := 0; testnum < len(tests); testnum += 1 {
+		test := strings.Split(tests[testnum], " ")
+		parser := NetworkingParserByCommand(test[0])
+		if parser == nil {
+			t.Errorf("test %d unable to parse command: %#v", 1+testnum, test)
+			continue
+		}
+		operand_parser := *parser
+
+		_, err := operand_parser(test[1:])
+		if err != nil {
+			t.Errorf("test %d unable to parse command parameters %#v: %v", 1+testnum, test, err)
+		}
+	}
+}
+
+func TestParserReadNetworingConfig(t *testing.T) {
+	expected_answer_vnet_1 := map[string]string{
+		"DHCP":             "yes",
+		"DHCP_CFG_HASH":    "01F4CE0D79A1599698B6E5814CCB68058BB0ED5E",
+		"HOSTONLY_NETMASK": "255.255.255.0",
+		"HOSTONLY_SUBNET":  "192.168.70.0",
+		"NAT":              "no",
+		"VIRTUAL_ADAPTER":  "yes",
+	}
+
+	f, err := os.Open(filepath.Join("testdata", "networking-example"))
+	if err != nil {
+		t.Fatalf("Unable to open networking-example sample: %v", err)
+	}
+	defer f.Close()
+
+	config, err := ReadNetworkingConfig(f)
+	if err != nil {
+		t.Fatalf("error parsing networking-example: %v", err)
+	}
+
+	if vnet, ok := config.answer[1]; ok {
+		for ans_key := range expected_answer_vnet_1 {
+			result, ok := vnet[ans_key]
+			if !ok {
+				t.Errorf("unable to find key %s in VNET_%d answer", ans_key, 1)
+				continue
+			}
+
+			if result != expected_answer_vnet_1[ans_key] {
+				t.Errorf("expected key %s for VNET_%d to be %v, got %v", ans_key, 1, expected_answer_vnet_1[ans_key], result)
+			}
+		}
+
+	} else {
+		t.Errorf("unable to find VNET_%d answer", 1)
+	}
+
+	expected_answer_vnet_8 := map[string]string{
+		"DHCP":             "yes",
+		"DHCP_CFG_HASH":    "C30F14F65A0FE4B5DCC6C67497D7A8A33E5E538C",
+		"HOSTONLY_NETMASK": "255.255.255.0",
+		"HOSTONLY_SUBNET":  "172.16.41.0",
+		"NAT":              "yes",
+		"VIRTUAL_ADAPTER":  "yes",
+	}
+
+	if vnet, ok := config.answer[8]; ok {
+		for ans_key := range expected_answer_vnet_8 {
+			result, ok := vnet[ans_key]
+			if !ok {
+				t.Errorf("unable to find key %s in VNET_%d answer", ans_key, 8)
+				continue
+			}
+
+			if result != expected_answer_vnet_8[ans_key] {
+				t.Errorf("expected key %s for VNET_%d to be %v, got %v", ans_key, 8, expected_answer_vnet_8[ans_key], result)
+			}
+		}
+
+	} else {
+		t.Errorf("unable to find VNET_%d answer", 8)
+	}
+
+	expected_nat_portfwd_8 := map[string]string{
+		"tcp/2200":  "172.16.41.129:3389",
+		"tcp/2201":  "172.16.41.129:3389",
+		"tcp/2222":  "172.16.41.129:22",
+		"tcp/3389":  "172.16.41.131:3389",
+		"tcp/55985": "172.16.41.129:5985",
+		"tcp/55986": "172.16.41.129:5986",
+	}
+
+	if vnet, ok := config.nat_portfwd[8-1]; ok {
+		for nat_key := range expected_nat_portfwd_8 {
+			result, ok := vnet[nat_key]
+			if !ok {
+				t.Errorf("unable to find key %s in VNET_%d nat_portfwd", nat_key, 8)
+				continue
+			}
+
+			if result != expected_nat_portfwd_8[nat_key] {
+				t.Errorf("expected key %s for VNET_%d to be %v, got %v", nat_key, 8, expected_nat_portfwd_8[nat_key], result)
+			}
+		}
+	} else {
+		t.Errorf("unable to find VNET_%d answer", 8-1)
 	}
 }

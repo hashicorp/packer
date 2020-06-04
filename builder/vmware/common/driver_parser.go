@@ -704,6 +704,7 @@ func parseParameter(val tkParameter) (pParameter, error) {
 				}
 
 				address := net.ParseIP(cidr[0])
+
 				bits, err := strconv.Atoi(cidr[1])
 				if err != nil {
 					return nil, err
@@ -1038,10 +1039,12 @@ func (e *configDeclaration) IP4() (net.IP, error) {
 		return nil, fmt.Errorf("No IP4 addresses found")
 	}
 
+	// Try and parse it as an IP4. If so, then it's good to return it as-is.
 	if res := net.ParseIP(result[0]); res != nil {
 		return res, nil
 	}
 
+	// Otherwise make an attempt to resolve it to an address.
 	res, err := net.ResolveIPAddr("ip4", result[0])
 	if err != nil {
 		return nil, err
@@ -1069,10 +1072,12 @@ func (e *configDeclaration) IP6() (net.IP, error) {
 		return nil, fmt.Errorf("No IP6 addresses found")
 	}
 
+	// If we were able to parse it into an IP, then we can just return it.
 	if res := net.ParseIP(result[0]); res != nil {
 		return res, nil
 	}
 
+	// Otherwise, try to resolve it into an address.
 	res, err := net.ResolveIPAddr("ip6", result[0])
 	if err != nil {
 		return nil, err
@@ -1277,8 +1282,6 @@ func tokenizeNetworkingConfig(in chan byte) chan string {
 			}
 
 			switch by {
-			case '\r':
-				fallthrough
 			case '\t':
 				fallthrough
 			case ' ':
@@ -1290,16 +1293,20 @@ func tokenizeNetworkingConfig(in chan byte) chan string {
 				out <- state
 				state = ""
 
+			case '\r':
+				// If windows has tampered with our newlines, then we normalize
+				// things by converting its value from 0x0d to 0x0a.
+				fallthrough
 			case '\n':
 				// Newlines can repeat, so this case is responsible for writing
-				// to the chan, and consolidating multiple newlines into singles.
+				// to the chan, and consolidating multiple newlines into a single.
 				if repeat_newline {
 					continue
 				}
 				if len(state) > 0 {
 					out <- state
 				}
-				out <- string(by)
+				out <- "\n"
 				state = ""
 				repeat_newline = true
 				continue
@@ -1317,6 +1324,7 @@ func tokenizeNetworkingConfig(in chan byte) chan string {
 		if len(state) > 0 {
 			out <- state
 		}
+		close(out)
 	}(out)
 	return out
 }
@@ -1355,6 +1363,7 @@ func splitNetworkingConfig(in chan string) chan []string {
 		if len(row) > 0 {
 			out <- row
 		}
+		close(out)
 	}(out)
 	return out
 }
@@ -1698,7 +1707,7 @@ func parseNetworkingCommand_add_dhcp_mac_to_ip(row []string) (*networkingCommand
 	}
 
 	ip := net.ParseIP(row[2])
-	if ip != nil {
+	if ip == nil {
 		return nil, fmt.Errorf("Unable to parse third argument as ipv4. : %v", row[2])
 	}
 
@@ -1850,6 +1859,7 @@ func parseNetworkingConfig(rows chan []string) chan networkingCommandEntry {
 				out <- *entry
 			}
 		}
+		close(out)
 	}(rows, out)
 	return out
 }
@@ -2197,7 +2207,7 @@ This consumes bytes within a pair of some bytes, like parentheses, brackets, bra
 
 We start by reading bytes until we encounter openByte. These will be returned as
 the first parameter. Then we can enter a goro and consume bytes until we get to
-closeByte. At that point we're done, and suicide.
+closeByte. At that point we're done, and we can exit.
 **/
 func consumeOpenClosePair(openByte, closeByte byte, in chan byte) ([]byte, chan byte) {
 	result := make([]byte, 0)
