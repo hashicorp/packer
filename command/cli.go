@@ -29,28 +29,24 @@ func (c *configType) Set(value string) error {
 // like "hcl" or "json".
 // Make sure Args was correctly set before.
 func (ma *MetaArgs) GetConfigType() (configType, error) {
-	switch len(ma.Path) {
-	// TODO(azr): in the future, I want to allow passing multiple arguments to
-	// merge HCL confs together; but this will probably need an RFC first.
-	case 1:
-		name := ma.Path
-		if name == "-" {
-			// TODO(azr): To allow piping HCL2 confs (when args is "-"), we probably
-			// will need to add a setting that says "this is an HCL config".
-			return ma.ConfigType, nil
-		}
-		if strings.HasSuffix(name, ".pkr.hcl") ||
-			strings.HasSuffix(name, ".pkr.json") {
-			return ConfigTypeHCL2, nil
-		}
-		isDir, err := isDir(name)
-		if isDir {
-			return ConfigTypeHCL2, err
-		}
-		return ConfigTypeJSON, err
-	default:
+	if ma.Path == "" {
 		return ma.ConfigType, nil
 	}
+	name := ma.Path
+	if name == "-" {
+		// TODO(azr): To allow piping HCL2 confs (when args is "-"), we probably
+		// will need to add a setting that says "this is an HCL config".
+		return ma.ConfigType, nil
+	}
+	if strings.HasSuffix(name, ".pkr.hcl") ||
+		strings.HasSuffix(name, ".pkr.json") {
+		return ConfigTypeHCL2, nil
+	}
+	isDir, err := isDir(name)
+	if isDir {
+		return ConfigTypeHCL2, err
+	}
+	return ma.ConfigType, err
 }
 
 // NewMetaArgs parses cli args and put possible values
@@ -64,6 +60,8 @@ func (ma *MetaArgs) AddFlagSets(fs *flag.FlagSet) {
 
 // MetaArgs defines commonalities between all comands
 type MetaArgs struct {
+	// TODO(azr): in the future, I want to allow passing multiple path to
+	// merge HCL confs together; but this will probably need an RFC first.
 	Path         string
 	Only, Except []string
 	Vars         map[string]string
