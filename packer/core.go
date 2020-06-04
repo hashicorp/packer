@@ -374,7 +374,7 @@ func (c *Core) Context() *interpolate.Context {
 	}
 }
 
-var ConsoleHelpMessage = strings.TrimSpace(`
+var ConsoleHelp = strings.TrimSpace(`
 The Packer console allows you to experiment with Packer interpolations.
 You may access variables in the Packer config you called the console with.
 
@@ -390,7 +390,7 @@ func (c *Core) EvaluateExpression(line string) (string, bool, hcl.Diagnostics) {
 	case line == "exit":
 		return "", true, nil
 	case line == "help":
-		return ConsoleHelpMessage, false, nil
+		return ConsoleHelp, false, nil
 	case line == "variables":
 		varsstring := "\n"
 		for k, v := range c.Context().UserVariables {

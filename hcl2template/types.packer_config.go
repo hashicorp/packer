@@ -380,6 +380,15 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 	return res, diags
 }
 
+var PackerConsoleHelp = strings.TrimSpace(`
+The Packer console allows you to experiment with Packer interpolations.
+You may access variables in the Packer config you called the console with.
+
+Type in the interpolation to test and hit <enter> to see the result.
+
+To exit the console, type "exit" and hit <enter>, or use Control-C.
+`)
+
 func (p *PackerConfig) EvaluateExpression(line string) (out string, exit bool, diags hcl.Diagnostics) {
 	switch {
 	case line == "":
@@ -387,15 +396,7 @@ func (p *PackerConfig) EvaluateExpression(line string) (out string, exit bool, d
 	case line == "exit":
 		return "", true, nil
 	case line == "help":
-		help := strings.TrimSpace(`
-			The Packer console allows you to experiment with Packer interpolations.
-			You may access variables in the Packer config you called the console with.
-			
-			Type in the interpolation to test and hit <enter> to see the result.
-			
-			To exit the console, type "exit" and hit <enter>, or use Control-C.
-			`)
-		return help, false, nil
+		return PackerConsoleHelp, false, nil
 	case line == "variables":
 		out := &strings.Builder{}
 		out.WriteString("> input-variables:\n\n")
