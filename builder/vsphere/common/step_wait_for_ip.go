@@ -29,7 +29,7 @@ type WaitIpConfig struct {
 	//  for full details.
 	SettleTimeout time.Duration `mapstructure:"ip_settle_timeout"`
 	// Set this to a CIDR address. This will cause the service to wait for an address that is contained in
-	// this network. Example: "192.168.0.0/24" would look at the address if it was "192.168.0.1".
+	// this network. Use "0.0.0.0/0" to wait for any ipv4 address.
 	WaitAddress string `mapstructure:"ip_wait_address"`
 	ipnet       *net.IPNet
 
