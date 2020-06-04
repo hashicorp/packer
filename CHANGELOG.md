@@ -24,24 +24,31 @@
 * builder/amazon: Added new `build` template function field:
     SourceAMICreationDate [GH-9277]
 * builder/azure-arm: Support User Assigned Managed Identity [GH-9293]
-* builder/azure-chroot: Copy data disks between shared image galleries [GH-9323]
+* builder/azure-chroot: Copy data disks between shared image galleries
+    [GH-9323]
 * builder/google: Implement iap proxy for googlecompute [GH-9105]
 * builder/googlecompute: Changed default disk size. [GH-9071]
+* builder/googlecompute: New option to specify storage location for GCP images
+    [GH-9326]
 * builder/qemu: add support for using a network bridge [GH-9159]
-* builder/qemu: Added `skip_nat_mapping` option to skip the
-    communicator (SSH or WinRM) automatic port forward and use the guest port directly. [GH-9307]
-* builder/qemu: Replace deprecated `ssh_host_port_min` and `ssh_host_port_max` by `host_port_min` and `host_port_max`. [GH-9307]    
+* builder/qemu: Added `skip_nat_mapping` option to skip the communicator (SSH
+    or WinRM) automatic port forward and use the guest port directly. [GH-9307]
+* builder/qemu: Replace deprecated `ssh_host_port_min` and `ssh_host_port_max`
+    by `host_port_min` and `host_port_max`. [GH-9307]
 * builder/virtualbox: Add `output_filename` config option to allow to set a
     custom filename instead of forcing to be the same as vm_name. [GH-9174]
 * builder/vsphere: floppy_label Parameter for vsphere-iso Builder [GH-9187]
 * core/hcl: Enable force, debug, and on-error command line flags for hcl2
     builds. [GH-9234]
+* core/hcl: Support named builds in HCL2 templates [GH-9245]
 * core/interpolation: Add support for specifying a particular key to fetch from
     the AWS Secrets Manager [GH-9202] [GH-9286]
 * core: HCL logs now display source type and source name (`type.name`) in logs
     to differentiate more easily who says what. [GH-9257]
 * core: update consul and vault dependencies [GH-9205]
 * core: Update vendored "go-getter" library with checksum fixes.
+* core: Users can now configure the http bind address of the server launched to
+    serve files from http_directory [GH-9313]
 * core: When a template contains a deprecated option, Packer will now encourage
     the user to call `packer fix`. [GH-9325]
 * post-processor/docker-push: Support pushing multiple tags [GH-9182]
@@ -50,8 +57,11 @@
     [GH-9183]
 * provisioner/powershell: Update default execute command to handle script
     errors [GH-9040]
+* provisioner/windows-restart: Display full hostname, instead of just the
+    NetBIOS name [GH-9335]
 
 ### BUG FIXES:
+* buidler/vsphere-iso: Fix bug validating iso_urls [GH-9321]
 * builder/azure-arm: Update runtime constants with a valid DataDiskName
     [GH-9251]
 * builder/digitalocean: Use correct image type for Droplet creates. [GH-9212]
@@ -60,16 +70,22 @@
 * builder/vagrant: Use absolute path for package_include files to prevent them
     from having to be relative to the output vagrant directory. [GH-9260]
 * builder/virtualbox: Fix bug using checksum files. [GH-9101]
+* builder/vsphere-iso: Use the Datacenter's VmFolder call instead of manually
+    generating folder path [GH-9342]
 * builder/vsphere: Add option not to set host during datastore upload. [GH-9100
+* builder/vsphere: Fix crash in the driver for an interface conversion of
+    types.AnyType nil to types.ManagedObjectReference. [GH-9354]
 * builder/vsphere: Fix iso config prepare being called incorrectly, which
     caused `iso_url` field to fail. [GH-9197]
-* builder/vsphere: Fix crash in the driver for an interface conversion of types.AnyType nil to types.ManagedObjectReference. [GH-9354]
+* builder/yandex: Do not require 'gpu-standard-v1' platform_id for any GPU-
+    based config. [GH-9356]
 * core: Ensure HTTP server information `PackerHTTPIP`, `PackerHTTPPort`, and
     `PackerHTTPAddr` are available via the `build` template engine for all
     supported builders [GH-9238]
+* core: Fix `iso_url` to accept SMB shared files UNC and windows network paths.
+    [GH-8954]
 * core: Fix regression that broke use of pwd when retrieving the checksum from
     a file [GH-9129].
-* core: Fix `iso_url` to accept SMB shared files UNC and windows network paths. [GH-8954]
 * post-processor/vagrant: Add "provider_override" template option to allow
     artifacts from the Artifice post-processor [GH-9239]
 * post-processor/vsphere-template: Add VSphere builder's artifact to vsphere-
@@ -78,6 +94,8 @@
     artifacts from the Artifice post-processor [GH-9239]
 * provisioner/ansible-remote: Fix the arg order to make sure that the playbook
     file is the last item in the call [GH-9279]
+* provisioner/ansible: Ansible provisioner doesn't force ssh key checking if
+    user wants to use password to connect instead. [GH-9350]
 * provisioner/inspec: Fix build variables interpolation [GH-9262]
 * provisioner/powershell: fix interpolation of execute_command in cleanup
     script call. [GH-9275]
