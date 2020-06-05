@@ -112,6 +112,7 @@ export default [
               'fileexists',
               'fileset',
               'pathexpand',
+              'pwd',
             ],
           },
           {
