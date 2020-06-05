@@ -28,9 +28,13 @@ type WaitIpConfig struct {
 	// [ParseDuration](https://golang.org/pkg/time/#ParseDuration) documentation
 	//  for full details.
 	SettleTimeout time.Duration `mapstructure:"ip_settle_timeout"`
-	// Set this to a CIDR address. This will cause the service to wait for an address that is contained in
-	// this network. Use "0.0.0.0/0" to wait for any ipv4 address.
-	WaitAddress string `mapstructure:"ip_wait_address"`
+	// Set this to a CIDR address to cause the service to wait for an address that is contained in
+	// this network range. Defaults to "0.0.0.0/0" for any ipv4 address. Examples include:
+	//
+	// * empty string ("") - remove all filters
+	// * "0:0:0:0:0:0:0:0/0" - allow only ipv6 addresses
+	// * "192.168.1.0/24 - only allow ipv4 addresses from 192.168.1.1 to 192.168.1.254
+	WaitAddress *string `mapstructure:"ip_wait_address"`
 	ipnet       *net.IPNet
 
 	// WaitTimeout is a total timeout, so even if VM changes IP frequently and it doesn't settle down we will end waiting.
@@ -49,10 +53,14 @@ func (c *WaitIpConfig) Prepare() []error {
 	if c.WaitTimeout == 0 {
 		c.WaitTimeout = 30 * time.Minute
 	}
+	if c.WaitAddress == nil {
+		addr := "0.0.0.0/0"
+		c.WaitAddress = &addr
+	}
 
-	if c.WaitAddress != "" {
+	if *c.WaitAddress != "" {
 		var err error
-		_, c.ipnet, err = net.ParseCIDR(c.WaitAddress)
+		_, c.ipnet, err = net.ParseCIDR(*c.WaitAddress)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("unable to parse \"ip_wait_address\": %w", err))
 		}
