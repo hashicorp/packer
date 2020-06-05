@@ -9,6 +9,9 @@ import (
 
 	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/packer/hcl2template/repl"
+	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
+	"github.com/zclconf/go-cty/cty"
 )
 
 func warningErrorsToDiags(block *hcl.Block, warnings []string, err error) hcl.Diagnostics {
@@ -47,6 +50,9 @@ func isDir(name string) (bool, error) {
 // returned. Otherwise if filename references a file and filename matches one
 // of the suffixes it is returned in the according slice.
 func GetHCL2Files(filename, hclSuffix, jsonSuffix string) (hclFiles, jsonFiles []string, diags hcl.Diagnostics) {
+	if filename == "" {
+		return
+	}
 	isDir, err := isDir(filename)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
@@ -108,4 +114,13 @@ func convertFilterOption(patterns []string, optionName string) ([]glob.Glob, hcl
 	}
 
 	return globs, diags
+}
+
+func PrintableCtyValue(v cty.Value) string {
+	if !v.IsWhollyKnown() {
+		return "<unknown>"
+	}
+	gval := hcl2shim.ConfigValueFromHCL2(v)
+	str := repl.FormatResult(gval)
+	return str
 }

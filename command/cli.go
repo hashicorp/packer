@@ -2,7 +2,6 @@ package command
 
 import (
 	"flag"
-	"fmt"
 	"strings"
 
 	"github.com/hashicorp/packer/helper/enumflag"
@@ -10,32 +9,44 @@ import (
 	sliceflag "github.com/hashicorp/packer/helper/flag-slice"
 )
 
+//go:generate enumer -type configType -trimprefix ConfigType -transform snake
+type configType int
+
+const (
+	ConfigTypeJSON configType = iota // default config type
+	ConfigTypeHCL2
+)
+
+func (c *configType) Set(value string) error {
+	v, err := configTypeString(value)
+	if err == nil {
+		*c = v
+	}
+	return err
+}
+
 // ConfigType tells what type of config we should use, it can return values
 // like "hcl" or "json".
 // Make sure Args was correctly set before.
-func ConfigType(args ...string) (string, error) {
-	switch len(args) {
-	// TODO(azr): in the future, I want to allow passing multiple arguments to
-	// merge HCL confs together; but this will probably need an RFC first.
-	case 1:
-		name := args[0]
-		if name == "-" {
-			// TODO(azr): To allow piping HCL2 confs (when args is "-"), we probably
-			// will need to add a setting that says "this is an HCL config".
-			return "json", nil
-		}
-		if strings.HasSuffix(name, ".pkr.hcl") ||
-			strings.HasSuffix(name, ".pkr.json") {
-			return "hcl", nil
-		}
-		isDir, err := isDir(name)
-		if isDir {
-			return "hcl", err
-		}
-		return "json", err
-	default:
-		return "", fmt.Errorf("packer only takes one argument: %q", args)
+func (ma *MetaArgs) GetConfigType() (configType, error) {
+	if ma.Path == "" {
+		return ma.ConfigType, nil
 	}
+	name := ma.Path
+	if name == "-" {
+		// TODO(azr): To allow piping HCL2 confs (when args is "-"), we probably
+		// will need to add a setting that says "this is an HCL config".
+		return ma.ConfigType, nil
+	}
+	if strings.HasSuffix(name, ".pkr.hcl") ||
+		strings.HasSuffix(name, ".pkr.json") {
+		return ConfigTypeHCL2, nil
+	}
+	isDir, err := isDir(name)
+	if isDir {
+		return ConfigTypeHCL2, err
+	}
+	return ma.ConfigType, err
 }
 
 // NewMetaArgs parses cli args and put possible values
@@ -44,14 +55,19 @@ func (ma *MetaArgs) AddFlagSets(fs *flag.FlagSet) {
 	fs.Var((*sliceflag.StringFlag)(&ma.Except), "except", "")
 	fs.Var((*kvflag.Flag)(&ma.Vars), "var", "")
 	fs.Var((*kvflag.StringSlice)(&ma.VarFiles), "var-file", "")
+	fs.Var(&ma.ConfigType, "config-type", "set to 'hcl2' to run in hcl2 mode when no file is passed.")
 }
 
 // MetaArgs defines commonalities between all comands
 type MetaArgs struct {
+	// TODO(azr): in the future, I want to allow passing multiple path to
+	// merge HCL confs together; but this will probably need an RFC first.
 	Path         string
 	Only, Except []string
 	Vars         map[string]string
 	VarFiles     []string
+	// set to "hcl2" to force hcl2 mode
+	ConfigType configType
 }
 
 func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
@@ -78,7 +94,9 @@ type BuildArgs struct {
 }
 
 // ConsoleArgs represents a parsed cli line for a `packer console`
-type ConsoleArgs struct{ MetaArgs }
+type ConsoleArgs struct {
+	MetaArgs
+}
 
 func (fa *FixArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&fa.Validate, "validate", true, "")
