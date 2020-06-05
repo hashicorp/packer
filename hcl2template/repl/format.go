@@ -66,7 +66,7 @@ func formatListResult(value []interface{}) string {
 
 func formatMapResult(value map[string]interface{}) string {
 	ks := make([]string, 0, len(value))
-	for k, _ := range value {
+	for k := range value {
 		ks = append(ks, k)
 	}
 	sort.Strings(ks)
