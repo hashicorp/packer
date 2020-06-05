@@ -50,7 +50,7 @@ export default [
               'join',
               'lower',
               'replace',
-              'regexreplace',
+              'regex_replace',
               'split',
               'strrev',
               'substr',
@@ -112,6 +112,8 @@ export default [
               'fileexists',
               'fileset',
               'pathexpand',
+              'pwd',
+              'template_dir',
             ],
           },
           {
