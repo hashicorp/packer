@@ -76,6 +76,7 @@ func Functions(basedir string) map[string]function.Function {
 		"parseint":        stdlib.ParseIntFunc,
 		"pathexpand":      filesystem.PathExpandFunc,
 		"pow":             stdlib.PowFunc,
+		"pwd":             pkrfunction.MakePwdFunc(),
 		"range":           stdlib.RangeFunc,
 		"reverse":         stdlib.ReverseFunc,
 		"replace":         stdlib.ReplaceFunc,
