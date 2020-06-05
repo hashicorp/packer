@@ -106,7 +106,7 @@ func (c *ConsoleCommand) modePiped(cfg packer.Evaluator) int {
 	ret := 0
 	for scanner.Scan() {
 		result, _, diags := cfg.EvaluateExpression(strings.TrimSpace(scanner.Text()))
-		if len(diags) > 1 {
+		if len(diags) > 0 {
 			ret = writeDiags(c.Ui, nil, diags)
 		}
 		// Store the last result
