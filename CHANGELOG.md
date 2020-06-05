@@ -41,6 +41,7 @@
 * core/hcl: Enable force, debug, and on-error command line flags for hcl2
     builds. [GH-9234]
 * core/hcl: Support named builds in HCL2 templates [GH-9245]
+* core/hcl: Enable only/except for provisioners and post-processors [GH-9357]
 * core/interpolation: Add support for specifying a particular key to fetch from
     the AWS Secrets Manager [GH-9202] [GH-9286]
 * core: HCL logs now display source type and source name (`type.name`) in logs
