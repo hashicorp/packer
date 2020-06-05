@@ -619,30 +619,10 @@ func addNetwork(d *Driver, devices object.VirtualDeviceList, config *CreateConfi
 		return nil, errors.New("no network adapters have been defined")
 	}
 
-	var network object.NetworkReference
 	for _, nic := range config.NICs {
-		if nic.Network == "" {
-			h, err := d.FindHost(config.Host)
-			if err != nil {
-				return nil, err
-			}
-
-			i, err := h.Info("network")
-			if err != nil {
-				return nil, err
-			}
-
-			if len(i.Network) > 1 {
-				return nil, fmt.Errorf("Host has multiple networks. Specify it explicitly")
-			}
-
-			network = object.NewNetwork(d.client.Client, i.Network[0])
-		} else {
-			var err error
-			network, err = d.finder.Network(d.ctx, nic.Network)
-			if err != nil {
-				return nil, err
-			}
+		network, err := findNetwork(nic.Network, config.Host, d)
+		if err != nil {
+			return nil, err
 		}
 
 		backing, err := network.EthernetCardBackingInfo(d.ctx)
@@ -665,6 +645,37 @@ func addNetwork(d *Driver, devices object.VirtualDeviceList, config *CreateConfi
 		devices = append(devices, device)
 	}
 	return devices, nil
+}
+
+func findNetwork(network string, host string, d *Driver) (object.NetworkReference, error) {
+	if network != "" {
+		var err error
+		network, err := d.finder.Network(d.ctx, network)
+		if err != nil {
+			return nil, err
+		}
+		return network, nil
+	}
+
+	if host != "" {
+		h, err := d.FindHost(host)
+		if err != nil {
+			return nil, err
+		}
+
+		i, err := h.Info("network")
+		if err != nil {
+			return nil, err
+		}
+
+		if len(i.Network) > 1 {
+			return nil, fmt.Errorf("Host has multiple networks. Specify it explicitly")
+		}
+
+		return object.NewNetwork(d.client.Client, i.Network[0]), nil
+	}
+
+	return nil, fmt.Errorf("Couldn't find network; 'host' and 'network' not specified. At least one of the two must be specified.")
 }
 
 func newVGPUProfile(vGPUProfile string) types.VirtualPCIPassthrough {
