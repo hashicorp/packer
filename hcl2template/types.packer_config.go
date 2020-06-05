@@ -198,6 +198,9 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
+		if pb.OnlyExcept.Skip(source.Type + "." + source.Name) {
+			continue
+		}
 		provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx, generatedVars)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
@@ -238,6 +241,9 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildPostProcessor{}
 	for _, ppb := range blocks {
+		if ppb.OnlyExcept.Skip(source.Type + "." + source.Name) {
+			continue
+		}
 		postProcessor, moreDiags := cfg.startPostProcessor(source, ppb, ectx, generatedVars)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {

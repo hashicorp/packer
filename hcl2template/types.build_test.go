@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -121,6 +122,139 @@ func TestParse_build(t *testing.T) {
 			false, false,
 			[]packer.Build{},
 			true,
+		},
+		{"post-processor with only and except",
+			defaultParser,
+			parseTestArgs{"testdata/build/post-processor_onlyexcept.pkr.hcl", nil, nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "build"),
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204:  {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+					refAWSEBSUbuntu1604: {Type: "amazon-ebs", Name: "ubuntu-1604"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources:           []SourceRef{refVBIsoUbuntu1204, refAWSEBSUbuntu1604},
+						ProvisionerBlocks: nil,
+						PostProcessors: []*PostProcessorBlock{
+							{
+								PType:      "amazon-import",
+								OnlyExcept: OnlyExcept{Only: []string{"virtualbox-iso.ubuntu-1204"}, Except: nil},
+							},
+							{
+								PType:      "manifest",
+								OnlyExcept: OnlyExcept{Only: nil, Except: []string{"virtualbox-iso.ubuntu-1204"}},
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packer.Build{
+				&packer.CoreBuild{
+					Type:         "virtualbox-iso.ubuntu-1204",
+					Prepared:     true,
+					Builder:      emptyMockBuilder,
+					Provisioners: []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{
+						{
+							{
+								PType: "amazon-import",
+								PostProcessor: &MockPostProcessor{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+										NestedSlice:      []NestedMockConfig{},
+									},
+								},
+							},
+						},
+					},
+				},
+				&packer.CoreBuild{
+					Type:         "amazon-ebs.ubuntu-1604",
+					Prepared:     true,
+					Builder:      emptyMockBuilder,
+					Provisioners: []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{
+						{
+							{
+								PType: "manifest",
+								PostProcessor: &MockPostProcessor{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+										NestedSlice:      []NestedMockConfig{},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+		{"provisioner with only and except",
+			defaultParser,
+			parseTestArgs{"testdata/build/provisioner_onlyexcept.pkr.hcl", nil, nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "build"),
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204:  {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+					refAWSEBSUbuntu1604: {Type: "amazon-ebs", Name: "ubuntu-1604"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources: []SourceRef{refVBIsoUbuntu1204, refAWSEBSUbuntu1604},
+						ProvisionerBlocks: []*ProvisionerBlock{
+							{
+								PType:      "shell",
+								OnlyExcept: OnlyExcept{Only: []string{"virtualbox-iso.ubuntu-1204"}, Except: nil},
+							},
+							{
+								PType:      "file",
+								OnlyExcept: OnlyExcept{Only: nil, Except: []string{"virtualbox-iso.ubuntu-1204"}},
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packer.Build{
+				&packer.CoreBuild{
+					Type:     "virtualbox-iso.ubuntu-1204",
+					Prepared: true,
+					Builder:  emptyMockBuilder,
+					Provisioners: []packer.CoreBuildProvisioner{
+						{
+							PType: "shell",
+							Provisioner: &MockProvisioner{
+								Config: MockConfig{
+									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+									NestedSlice:      []NestedMockConfig{},
+								},
+							},
+						},
+					},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+				},
+				&packer.CoreBuild{
+					Type:     "amazon-ebs.ubuntu-1604",
+					Prepared: true,
+					Builder:  emptyMockBuilder,
+					Provisioners: []packer.CoreBuildProvisioner{
+						{
+							PType: "file",
+							Provisioner: &MockProvisioner{
+								Config: MockConfig{
+									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+									NestedSlice:      []NestedMockConfig{},
+								},
+							},
+						},
+					},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+				},
+			},
+			false,
 		},
 	}
 	testParse(t, tests)
