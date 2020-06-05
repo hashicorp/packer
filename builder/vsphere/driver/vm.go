@@ -509,7 +509,7 @@ func (vm *VirtualMachine) WaitForIP(ctx context.Context, ipNet *net.IPNet) (stri
 			}
 
 			i := c.Val.(string)
-			if ipNet != nil && ipNet.Contains(net.ParseIP(i)) {
+			if ipNet != nil && !ipNet.Contains(net.ParseIP(i)) {
 				// ip address is not in range
 				continue
 			}
