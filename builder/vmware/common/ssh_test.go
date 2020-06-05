@@ -10,6 +10,7 @@ func TestCommHost(t *testing.T) {
 	state := testState(t)
 	config := SSHConfig{
 		Comm: communicator.Config{
+			Type: "ssh",
 			SSH: communicator.SSH{
 				SSHHost: "127.0.0.1",
 			},
