@@ -14,6 +14,11 @@ func CommHost(config *SSHConfig) func(multistep.StateBag) (string, error) {
 		driver := state.Get("driver").(Driver)
 		comm := config.Comm
 
+		host := comm.Host()
+		if host != "" {
+			return host, nil
+		}
+
 		// Snag the port from the communicator config. This way we can use it
 		// to perform a 3-way handshake with all of the hosts we suspect in
 		// order to determine which one of the hosts is the correct one.
