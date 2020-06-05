@@ -235,7 +235,7 @@ func startAndStopCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 	stopper := startVM(t, vm, config.Name)
 	defer stopper()
 
-	switch ip, err := vm.WaitForIP(context.TODO()); {
+	switch ip, err := vm.WaitForIP(context.TODO(), nil); {
 	case err != nil:
 		t.Errorf("Cannot obtain IP address from created vm '%v': %v", config.Name, err)
 	case net.ParseIP(ip) == nil:

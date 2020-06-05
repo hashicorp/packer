@@ -51,6 +51,7 @@ type FlatConfig struct {
 	BootOrder                  *string                  `mapstructure:"boot_order" cty:"boot_order" hcl:"boot_order"`
 	WaitTimeout                *string                  `mapstructure:"ip_wait_timeout" cty:"ip_wait_timeout" hcl:"ip_wait_timeout"`
 	SettleTimeout              *string                  `mapstructure:"ip_settle_timeout" cty:"ip_settle_timeout" hcl:"ip_settle_timeout"`
+	WaitAddress                *string                  `mapstructure:"ip_wait_address" cty:"ip_wait_address" hcl:"ip_wait_address"`
 	Type                       *string                  `mapstructure:"communicator" cty:"communicator" hcl:"communicator"`
 	PauseBeforeConnect         *string                  `mapstructure:"pause_before_connecting" cty:"pause_before_connecting" hcl:"pause_before_connecting"`
 	SSHHost                    *string                  `mapstructure:"ssh_host" cty:"ssh_host" hcl:"ssh_host"`
@@ -154,6 +155,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"boot_order":                     &hcldec.AttrSpec{Name: "boot_order", Type: cty.String, Required: false},
 		"ip_wait_timeout":                &hcldec.AttrSpec{Name: "ip_wait_timeout", Type: cty.String, Required: false},
 		"ip_settle_timeout":              &hcldec.AttrSpec{Name: "ip_settle_timeout", Type: cty.String, Required: false},
+		"ip_wait_address":                &hcldec.AttrSpec{Name: "ip_wait_address", Type: cty.String, Required: false},
 		"communicator":                   &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
 		"pause_before_connecting":        &hcldec.AttrSpec{Name: "pause_before_connecting", Type: cty.String, Required: false},
 		"ssh_host":                       &hcldec.AttrSpec{Name: "ssh_host", Type: cty.String, Required: false},
