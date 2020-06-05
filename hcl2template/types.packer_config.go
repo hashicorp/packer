@@ -402,12 +402,12 @@ func (p *PackerConfig) EvaluateExpression(line string) (out string, exit bool, d
 		out.WriteString("> input-variables:\n\n")
 		for _, v := range p.InputVariables {
 			val, _ := v.Value()
-			fmt.Fprintf(out, "var.%s: %q [debug: %#v]\n", v.Name, val.AsString(), v)
+			fmt.Fprintf(out, "var.%s: %q [debug: %#v]\n", v.Name, PrintableCtyValue(val), v)
 		}
 		out.WriteString("\n> local-variables:\n\n")
 		for _, v := range p.LocalVariables {
 			val, _ := v.Value()
-			fmt.Fprintf(out, "local.%s: %q\n", v.Name, val.AsString())
+			fmt.Fprintf(out, "local.%s: %q\n", v.Name, PrintableCtyValue(val))
 		}
 
 		return out.String(), false, nil
@@ -431,5 +431,5 @@ func (p *PackerConfig) handleEval(line string) (out string, exit bool, diags hcl
 		return "", false, diags
 	}
 
-	return val.AsString(), false, diags
+	return PrintableCtyValue(val), false, diags
 }

@@ -9,6 +9,9 @@ import (
 
 	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/packer/hcl2template/repl"
+	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
+	"github.com/zclconf/go-cty/cty"
 )
 
 func warningErrorsToDiags(block *hcl.Block, warnings []string, err error) hcl.Diagnostics {
@@ -111,4 +114,13 @@ func convertFilterOption(patterns []string, optionName string) ([]glob.Glob, hcl
 	}
 
 	return globs, diags
+}
+
+func PrintableCtyValue(v cty.Value) string {
+	if !v.IsWhollyKnown() {
+		return "<unknown>"
+	}
+	gval := hcl2shim.ConfigValueFromHCL2(v)
+	str := repl.FormatResult(gval)
+	return str
 }
