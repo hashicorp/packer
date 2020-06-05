@@ -375,10 +375,15 @@ func (c *Core) Context() *interpolate.Context {
 }
 
 var ConsoleHelp = strings.TrimSpace(`
+Packer console JSON Mode.
 The Packer console allows you to experiment with Packer interpolations.
 You may access variables in the Packer config you called the console with.
 
 Type in the interpolation to test and hit <enter> to see the result.
+
+"variables" will dump all available variables and their values.
+
+"{{timestamp}}" will output the timestamp, for example "1559855090".
 
 To exit the console, type "exit" and hit <enter>, or use Control-C.
 `)

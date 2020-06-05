@@ -382,7 +382,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 
 var PackerConsoleHelp = strings.TrimSpace(`
 Packer console HCL2 Mode.
-The console allows you to experiment with Packer interpolations.
+The Packer console allows you to experiment with Packer interpolations.
 You may access variables and functions in the Packer config you called the
 console with.
 
@@ -394,6 +394,9 @@ exists in your config file.
 "variables" will dump all available variables and their values.
 
 To exit the console, type "exit" and hit <enter>, or use Control-C.
+
+/!\ It is not possible to use go templating interpolation like {{timestampe}} 
+with console.
 `)
 
 func (p *PackerConfig) EvaluateExpression(line string) (out string, exit bool, diags hcl.Diagnostics) {
