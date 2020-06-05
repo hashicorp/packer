@@ -14,6 +14,8 @@
     read more about this[GH-8437]
 
 ### FEATURES:
+* builder/vsphere-clone: Add boot_command support to vsphere-clone builder,
+    including support for starting an HTTP server
 * HCL2/core: it is now possible to set source fields from the `build` block
     [GH-9291]
 * **New post-processor** Yandex Export [GH-9124]
@@ -62,6 +64,7 @@
     NetBIOS name [GH-9335]
 
 ### BUG FIXES:
+* core: Fix problems in Makefile when trying to remove non-existing files
 * buidler/vsphere-iso: Fix bug validating iso_urls [GH-9321]
 * builder/azure-arm: Update runtime constants with a valid DataDiskName
     [GH-9251]
