@@ -108,39 +108,21 @@ When creating a managed image the following additional options are required:
   [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
   to learn more about managed images.
 
-#### Shared Image Gallery
-
-Managed images can optionally be published to a [Shared Image Gallery](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
-as a Shared Gallery Image version. Publishing to a Shared Image Gallery **only** works with Managed Images. **A VHD cannot be published to
-a Shared Image Gallery**.
-
-When publishing to a Shared Image Gallery the following options are required.
-
-- `shared_image_gallery_destination` (object) - The name of the Shared Image Gallery under which the managed image will be published as an image version.
+Creating a managed image using a [Shared Gallery image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/) as the source can be achieved by specifying the `shared_image_gallery` configuration option.
+When using shared_image_gallery as a source, image_publisher, image_offer, image_sku, image_version, and
+custom_managed_image_name should not be set.
 
 The following is an example.
 
-    "shared_image_gallery_destination": {
-        "resource_group": "ResourceGroup",
-        "gallery_name": "GalleryName",
-        "image_name": "ImageName",
-        "image_version": "1.0.0",
-        "replication_regions": ["regionA", "regionB", "regionC"]
-    }
-    "managed_image_name": "TargetImageName",
-    "managed_image_resource_group_name": "TargetResourceGroup"
-
-The `shared_image_gallery_destination` object expects the following attributes.
-
-- `resource_group` (string) - The resource group where the Shared Image Gallery is located.
-
-- `gallery_name` (string) - The name of the Shared Image Gallery where the managed image will be published.
-
-- `image_name` (string) - The name of the image definition within the Shared Image Gallery where the managed image will be published. This image definition must already exist.
-
-- `image_version` (string) - The version of the managed image to publish within the Shared Image Gallery.
-
-- `replication_regions` ([]string) - The regions where the published Share Image Gallery managed image should be replicated to.
+      "shared_image_gallery": {
+          "subscription": "00000000-0000-0000-0000-00000000000",
+          "resource_group": "ResourceGroup",
+          "gallery_name": "GalleryName",
+          "image_name": "ImageName",
+          "image_version": "1.0.0"
+      }
+      "managed_image_name": "TargetImageName",
+      "managed_image_resource_group_name": "TargetResourceGroup"
 
 #### Resource Group Usage
 
