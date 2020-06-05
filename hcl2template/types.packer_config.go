@@ -381,10 +381,17 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 }
 
 var PackerConsoleHelp = strings.TrimSpace(`
-The Packer console allows you to experiment with Packer interpolations.
-You may access variables in the Packer config you called the console with.
+Packer console HCL2 Mode.
+The console allows you to experiment with Packer interpolations.
+You may access variables and functions in the Packer config you called the
+console with.
 
 Type in the interpolation to test and hit <enter> to see the result.
+
+"upper(var.foo.id)" would evaluate to the ID of "foo" and uppercase is, if it
+exists in your config file.
+
+"variables" will dump all available variables and their values.
 
 To exit the console, type "exit" and hit <enter>, or use Control-C.
 `)
