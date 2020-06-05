@@ -395,7 +395,7 @@ exists in your config file.
 
 To exit the console, type "exit" and hit <enter>, or use Control-C.
 
-/!\ It is not possible to use go templating interpolation like {{timestampe}} 
+/!\ It is not possible to use go templating interpolation like {{timestamp}} 
 with console.
 `)
 
