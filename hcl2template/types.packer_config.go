@@ -395,8 +395,8 @@ exists in your config file.
 
 To exit the console, type "exit" and hit <enter>, or use Control-C.
 
-/!\ It is not possible to use go templating interpolation like {{timestamp}} 
-with console.
+/!\ It is not possible to use go templating interpolation like "{{timestamp}}"
+with in HCL2 mode.
 `)
 
 func (p *PackerConfig) EvaluateExpression(line string) (out string, exit bool, diags hcl.Diagnostics) {
