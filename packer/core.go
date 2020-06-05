@@ -386,6 +386,9 @@ Type in the interpolation to test and hit <enter> to see the result.
 "{{timestamp}}" will output the timestamp, for example "1559855090".
 
 To exit the console, type "exit" and hit <enter>, or use Control-C.
+
+/!\ If you would like to start console in hcl2 mode without a config you can
+use the --config-type=hcl2 option.
 `)
 
 func (c *Core) EvaluateExpression(line string) (string, bool, hcl.Diagnostics) {
