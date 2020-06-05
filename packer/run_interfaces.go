@@ -28,6 +28,7 @@ type Evaluator interface {
 type Handler interface {
 	Evaluator
 	BuildGetter
+	ConfigFixer
 }
 
 //go:generate enumer -type FixConfigMode
@@ -44,7 +45,7 @@ const (
 )
 
 type FixConfigOptions struct {
-	DiffOnly bool
+	Mode FixConfigMode
 }
 
 type ConfigFixer interface {

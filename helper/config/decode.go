@@ -159,7 +159,7 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 				if fixable {
 					unusedErr = fmt.Errorf("Deprecated configuration key: '%s'."+
 						" Please call `packer fix` against your template to "+
-						"update your template to be compatable with the current "+
+						"update your template to be compatible with the current "+
 						"version of Packer. Visit "+
 						"https://www.packer.io/docs/commands/fix/ for more detail.",
 						unused)

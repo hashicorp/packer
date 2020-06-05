@@ -450,3 +450,8 @@ func (p *PackerConfig) handleEval(line string) (out string, exit bool, diags hcl
 
 	return PrintableCtyValue(val), false, diags
 }
+
+func (p *PackerConfig) FixConfig(_ packer.FixConfigOptions) (diags hcl.Diagnostics) {
+	// No Fixers exist for HCL2 configs so there is nothing to do here for now.
+	return
+}

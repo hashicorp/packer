@@ -5,6 +5,62 @@ import (
 	"testing"
 )
 
+func TestValidateCommand(t *testing.T) {
+	tt := []struct {
+		path     string
+		exitCode int
+	}{
+		{path: filepath.Join(testFixture("validate"), "build.json")},
+		{path: filepath.Join(testFixture("validate"), "build.pkr.hcl")},
+		{path: filepath.Join(testFixture("validate"), "build_with_vars.pkr.hcl")},
+		{path: filepath.Join(testFixture("validate-invalid"), "bad_provisioner.json"), exitCode: 1},
+		{path: filepath.Join(testFixture("validate-invalid"), "missing_build_block.pkr.hcl"), exitCode: 1},
+	}
+
+	c := &ValidateCommand{
+		Meta: testMetaFile(t),
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.path, func(t *testing.T) {
+			tc := tc
+			args := []string{tc.path}
+			if code := c.Run(args); code != tc.exitCode {
+				fatalCommand(t, c.Meta)
+			}
+		})
+	}
+}
+
+func TestValidateCommand_SyntaxOnly(t *testing.T) {
+	tt := []struct {
+		path     string
+		exitCode int
+	}{
+		{path: filepath.Join(testFixture("validate"), "build.json")},
+		{path: filepath.Join(testFixture("validate"), "build.pkr.hcl")},
+		{path: filepath.Join(testFixture("validate"), "build_with_vars.pkr.hcl")},
+		{path: filepath.Join(testFixture("validate-invalid"), "bad_provisioner.json")},
+		{path: filepath.Join(testFixture("validate-invalid"), "missing_build_block.pkr.hcl")},
+		{path: filepath.Join(testFixture("validate-invalid"), "broken.json"), exitCode: 1},
+	}
+
+	c := &ValidateCommand{
+		Meta: testMetaFile(t),
+	}
+	c.CoreConfig.Version = "102.0.0"
+
+	for _, tc := range tt {
+		t.Run(tc.path, func(t *testing.T) {
+			tc := tc
+			args := []string{"-syntax-only", tc.path}
+			if code := c.Run(args); code != tc.exitCode {
+				fatalCommand(t, c.Meta)
+			}
+		})
+	}
+}
+
 func TestValidateCommandOKVersion(t *testing.T) {
 	c := &ValidateCommand{
 		Meta: testMetaFile(t),
