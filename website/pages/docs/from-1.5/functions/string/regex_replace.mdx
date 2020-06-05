@@ -1,21 +1,21 @@
 ---
 layout: docs
-page_title: regexreplace - Functions - Configuration Language
-sidebar_title: regexreplace
+page_title: regex_replace - Functions - Configuration Language
+sidebar_title: regex_replace
 description: |-
-  The regexreplace function searches a given string for another given substring,
+  The regex_replace function searches a given string for another given substring,
   and replaces all occurrences with a given replacement string. The substring
   argument can be a valid regular expression or a string.
 ---
 
-# `regexreplace` Function
+# `regex_replace` Function
 
-`regexreplace` searches a given string for another given substring, and
+`regex_replace` searches a given string for another given substring, and
 replaces each occurrence with a given replacement string. The substring
 argument can be a valid regular expression or a string.
 
 ```hcl
-regexreplace(string, substring, replacement)
+regex_replace(string, substring, replacement)
 ```
 
 `substring` should not be wrapped in forward slashes, it is always treated as a
@@ -26,17 +26,17 @@ name of a capture group.
 ## Examples
 
 ```shell-session
-> regexreplace("hello world", "world", "everybody")
+> regex_replace("hello world", "world", "everybody")
 hello everybody
 
 
-> regexreplace("hello world", "w.*d", "everybody")
+> regex_replace("hello world", "w.*d", "everybody")
 hello everybody
 
-> regexreplace("-ab-axxb-", "a(x*)b", "$1W)
+> regex_replace("-ab-axxb-", "a(x*)b", "$1W)
 ---
 
-> regexreplace("-ab-axxb-", "a(x*)b", "${1}W")
+> regex_replace("-ab-axxb-", "a(x*)b", "${1}W")
 -W-xxW-
 ```
 

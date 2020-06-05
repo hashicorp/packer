@@ -50,7 +50,7 @@ export default [
               'join',
               'lower',
               'replace',
-              'regexreplace',
+              'regex_replace',
               'split',
               'strrev',
               'substr',
