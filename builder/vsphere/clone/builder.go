@@ -54,9 +54,20 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	if b.config.Comm.Type != "none" {
 		steps = append(steps,
+			&packerCommon.StepHTTPServer{
+				HTTPDir:     b.config.HTTPDir,
+				HTTPPortMin: b.config.HTTPPortMin,
+				HTTPPortMax: b.config.HTTPPortMax,
+				HTTPAddress: b.config.HTTPAddress,
+			},
 			&common.StepRun{
 				Config:   &b.config.RunConfig,
 				SetOrder: false,
+			},
+			&common.StepBootCommand{
+				Config: &b.config.BootConfig,
+				Ctx:    b.config.ctx,
+				VMName: b.config.VMName,
 			},
 			&common.StepWaitForIp{
 				Config: &b.config.WaitIpConfig,
