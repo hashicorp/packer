@@ -16,9 +16,13 @@ console with, or provide variables when you call console using the -var or
 
 ~> **Note:** `console` is available from version 1.4.2 and above.
 
-Type in the interpolation to test and hit \<enter\> to see the result.
+~> **Note:** For HCL2 `console` is available from version 1.6.0 and above, use
+`packer console --config-type=hcl2` to try it without a config file. Go
+templating ( or `{{..}}` calls ) will not work in HCL2 mode.
 
-To exit the console, type "exit" and hit \<enter\>, or use Control-C.
+Type in the interpolation to test and hit `<enter>` to see the result.
+
+To exit the console, type "exit" and hit `<enter>`, or use Control-C.
 
 ```shell
 $ packer console my_template.json
@@ -45,7 +49,7 @@ help output, which can be seen via `packer console -h`.
 - `variables` - prints a list of all variables read into the console from the
   `-var` option, `-var-files` option, and template.
 
-## Usage Examples
+## Usage Examples - repl session ( JSON )
 
 Let's say you launch a console using a Packer template `example_template.json`:
 
@@ -69,14 +73,14 @@ myvar:
 
 ```shell
 > {{user `myvar`}}
-> asdfasdf
+asdfasdf
 ```
 
 From there you can test more complicated interpolations:
 
 ```shell
 > {{user `myvar`}}-{{timestamp}}
-> asdfasdf-1559854396
+asdfasdf-1559854396
 ```
 
 And when you're done using the console, just type "exit" or CTRL-C
@@ -96,6 +100,8 @@ If you don't have specific variables or var files you want to test, and just
 want to experiment with a particular template engine, you can do so by simply
 calling `packer console` without a template file.
 
+## Usage Examples - piped commands ( JSON )
+
 If you'd like to just see a specific single interpolation without launching
 the REPL, you can do so by echoing and piping the string into the console
 command:
@@ -103,4 +109,50 @@ command:
 ```shell
 $ echo {{timestamp}} | packer console
 1559855090
+```
+
+## Usage Examples - repl session ( HCL2 )
+
+~> **Note:** For HCL2 `console` is available from version 1.6.0 and above, use
+`packer console --config-type=hcl2` to try it without a config file. Go
+templating ( or `{{..}}` calls ) will not work in HCL2 mode.
+
+Without a config file, `packer console` can be used to experiment with the
+expression syntax and [built-in functions](/docs/from-1.5/functions).
+
+### Starting
+
+To start a session on a folder containing HCL2 config files, run:
+
+```shell-session
+packer console folder/
+```
+
+Because `folder/` is a folder Packer will start in HCL2 mode, you can also
+directly pass an HCL2 formatted config file: 
+
+```shell-session
+packer console file.pkr.hcl
+```
+
+Because the file is suffixed with `.pkr.hcl` Packer will start in HCL2 mode.
+
+When you just want to play arround without a config file you can set the
+`--config-type=hcl2` option and Packer will start in HCL2 mode:
+
+```shell-session
+packer console --config-type=hcl2
+```
+
+### Scripting
+
+The `packer console` command can be used in non-interactive scripts by piping
+newline-separated commands to it. Only the output from the final command is
+printed unless an error occurs earlier.
+
+For example:
+
+```shell-session
+$ echo "1 + 5" | terraform console
+6
 ```
