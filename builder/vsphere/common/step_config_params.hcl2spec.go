@@ -9,7 +9,9 @@ import (
 // FlatConfigParamsConfig is an auto-generated flat version of ConfigParamsConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfigParamsConfig struct {
-	ConfigParams map[string]string `mapstructure:"configuration_parameters" cty:"configuration_parameters" hcl:"configuration_parameters"`
+	ConfigParams       map[string]string `mapstructure:"configuration_parameters" cty:"configuration_parameters" hcl:"configuration_parameters"`
+	ToolsSyncTime      *bool             `mapstructure:"tools_sync_time" cty:"tools_sync_time" hcl:"tools_sync_time"`
+	ToolsUpgradePolicy *bool             `mapstructure:"tools_upgrade_policy" cty:"tools_upgrade_policy" hcl:"tools_upgrade_policy"`
 }
 
 // FlatMapstructure returns a new FlatConfigParamsConfig.
@@ -25,6 +27,8 @@ func (*ConfigParamsConfig) FlatMapstructure() interface{ HCL2Spec() map[string]h
 func (*FlatConfigParamsConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"configuration_parameters": &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
+		"tools_sync_time":          &hcldec.AttrSpec{Name: "tools_sync_time", Type: cty.Bool, Required: false},
+		"tools_upgrade_policy":     &hcldec.AttrSpec{Name: "tools_upgrade_policy", Type: cty.Bool, Required: false},
 	}
 	return s
 }

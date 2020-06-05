@@ -48,6 +48,8 @@ type FlatConfig struct {
 	NestedHV                   *bool                    `mapstructure:"NestedHV" cty:"NestedHV" hcl:"NestedHV"`
 	Firmware                   *string                  `mapstructure:"firmware" cty:"firmware" hcl:"firmware"`
 	ConfigParams               map[string]string        `mapstructure:"configuration_parameters" cty:"configuration_parameters" hcl:"configuration_parameters"`
+	ToolsSyncTime              *bool                    `mapstructure:"tools_sync_time" cty:"tools_sync_time" hcl:"tools_sync_time"`
+	ToolsUpgradePolicy         *bool                    `mapstructure:"tools_upgrade_policy" cty:"tools_upgrade_policy" hcl:"tools_upgrade_policy"`
 	BootOrder                  *string                  `mapstructure:"boot_order" cty:"boot_order" hcl:"boot_order"`
 	WaitTimeout                *string                  `mapstructure:"ip_wait_timeout" cty:"ip_wait_timeout" hcl:"ip_wait_timeout"`
 	SettleTimeout              *string                  `mapstructure:"ip_settle_timeout" cty:"ip_settle_timeout" hcl:"ip_settle_timeout"`
@@ -151,6 +153,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"NestedHV":                       &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
 		"firmware":                       &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
 		"configuration_parameters":       &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
+		"tools_sync_time":                &hcldec.AttrSpec{Name: "tools_sync_time", Type: cty.Bool, Required: false},
+		"tools_upgrade_policy":           &hcldec.AttrSpec{Name: "tools_upgrade_policy", Type: cty.Bool, Required: false},
 		"boot_order":                     &hcldec.AttrSpec{Name: "boot_order", Type: cty.String, Required: false},
 		"ip_wait_timeout":                &hcldec.AttrSpec{Name: "ip_wait_timeout", Type: cty.String, Required: false},
 		"ip_settle_timeout":              &hcldec.AttrSpec{Name: "ip_settle_timeout", Type: cty.String, Required: false},
