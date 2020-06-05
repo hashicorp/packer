@@ -146,7 +146,7 @@ func (c *ConsoleCommand) modeInteractive(cfg packer.Evaluator) int {
 		}
 		out, exit, diags := cfg.EvaluateExpression(line)
 		ret := writeDiags(c.Ui, nil, diags)
-		if ret != 0 {
+		if exit {
 			return ret
 		}
 		c.Ui.Say(out)
