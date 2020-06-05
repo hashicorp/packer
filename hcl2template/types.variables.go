@@ -51,8 +51,13 @@ type Variable struct {
 }
 
 func (v *Variable) GoString() string {
-	return fmt.Sprintf("{Type:%q,CmdValue:%q,VarfileValue:%q,EnvValue:%q,DefaultValue:%q}",
-		v.Type.GoString(), v.CmdValue.GoString(), v.VarfileValue.GoString(), v.EnvValue.GoString(), v.DefaultValue.GoString())
+	return fmt.Sprintf("{Type:%s,CmdValue:%s,VarfileValue:%s,EnvValue:%s,DefaultValue:%s}",
+		v.Type.GoString(),
+		PrintableCtyValue(v.CmdValue),
+		PrintableCtyValue(v.VarfileValue),
+		PrintableCtyValue(v.EnvValue),
+		PrintableCtyValue(v.DefaultValue),
+	)
 }
 
 func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {

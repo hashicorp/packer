@@ -374,6 +374,52 @@ func (c *Core) Context() *interpolate.Context {
 	}
 }
 
+var ConsoleHelp = strings.TrimSpace(`
+Packer console JSON Mode.
+The Packer console allows you to experiment with Packer interpolations.
+You may access variables in the Packer config you called the console with.
+
+Type in the interpolation to test and hit <enter> to see the result.
+
+"variables" will dump all available variables and their values.
+
+"{{timestamp}}" will output the timestamp, for example "1559855090".
+
+To exit the console, type "exit" and hit <enter>, or use Control-C.
+
+/!\ If you would like to start console in hcl2 mode without a config you can
+use the --config-type=hcl2 option.
+`)
+
+func (c *Core) EvaluateExpression(line string) (string, bool, hcl.Diagnostics) {
+	switch {
+	case line == "":
+		return "", false, nil
+	case line == "exit":
+		return "", true, nil
+	case line == "help":
+		return ConsoleHelp, false, nil
+	case line == "variables":
+		varsstring := "\n"
+		for k, v := range c.Context().UserVariables {
+			varsstring += fmt.Sprintf("%s: %+v,\n", k, v)
+		}
+
+		return varsstring, false, nil
+	default:
+		ctx := c.Context()
+		rendered, err := interpolate.Render(line, ctx)
+		var diags hcl.Diagnostics
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary: "Interpolation error",
+				Detail:  err.Error(),
+			})
+		}
+		return rendered, false, diags
+	}
+}
+
 // validate does a full validation of the template.
 //
 // This will automatically call template.validate() in addition to doing
