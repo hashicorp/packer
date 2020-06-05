@@ -439,10 +439,7 @@ func (ESX5Driver) UpdateVMX(_, password string, port int, data map[string]string
 
 func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 	sshc := state.Get("sshConfig").(*SSHConfig).Comm
-	port := sshc.SSHPort
-	if sshc.Type == "winrm" {
-		port = sshc.WinRMPort
-	}
+	port := sshc.Port()
 
 	if address, ok := state.GetOk("vm_address"); ok {
 		return address.(string), nil
