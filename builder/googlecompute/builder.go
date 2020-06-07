@@ -56,6 +56,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
 		},
+		&StepImportOSLoginSSHKey{
+			Debug: b.config.PackerDebug,
+		},
 		&StepCreateInstance{
 			Debug: b.config.PackerDebug,
 		},

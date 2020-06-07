@@ -176,6 +176,9 @@
 -   `use_internal_ip` (bool) - If true, use the instance's internal IP instead of its external IP
     during building.
     
+-   `use_os_login` (bool) - If true, OSLogin will be used instead and `enable-oslogin` will be set to `TRUE` in
+    metadata.
+    
 -   `vault_gcp_oauth_engine` (string) - Can be set instead of account_file. If set, this builder will use
     HashiCorp Vault to generate an Oauth token for authenticating against
     Google's cloud. The value should be the path of the token generator
