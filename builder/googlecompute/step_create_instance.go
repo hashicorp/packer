@@ -72,6 +72,12 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusNotDone
 	}
 
+	// If UseOSLogin is true, force `enable-oslogin` in metadata
+	// In the event that `enable-oslogin` is not enabled at project level
+	if c.UseOSLogin {
+		instanceMetadata[EnableOSLoginKey] = "TRUE"
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return instanceMetadata, errs
 	}
