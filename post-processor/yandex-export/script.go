@@ -123,7 +123,7 @@ fi
 
 echo "Set metadata key to 'cloud-init-status' to 'cloud-init-done' value"
 if ! yc compute instance update ${INSTANCE_ID} --metadata cloud-init-status=cloud-init-done ; then
-  echo "Failed to attach disk."
+  echo "Failed to update metadata key to 'cloud-init-status'."
   Exit 1
 fi
 
