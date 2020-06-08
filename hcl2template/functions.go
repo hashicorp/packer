@@ -94,6 +94,7 @@ func Functions(basedir string) map[string]function.Function {
 		"split":           stdlib.SplitFunc,
 		"strrev":          stdlib.ReverseFunc,
 		"substr":          stdlib.SubstrFunc,
+		"template_dir":    pkrfunction.MakeTemplateDirFunc(basedir),
 		"timestamp":       pkrfunction.TimestampFunc,
 		"timeadd":         stdlib.TimeAddFunc,
 		"title":           stdlib.TitleFunc,
