@@ -27,7 +27,7 @@ func (i *Image) IsWindows() bool {
 
 func (i *Image) IsSecureBootCompatible() bool {
 	for _, osFeature := range i.GuestOsFeatures {
-		if osFeature.Type == "SECURE_BOOT" {
+		if osFeature.Type == "UEFI_COMPATIBLE" {
 			return true
 		}
 	}
