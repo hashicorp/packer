@@ -11,7 +11,7 @@ export default function Homepage() {
           <Button
             title="Get Started"
             theme={{ brand: 'packer' }}
-            url="/intro"
+            url="https://learn.hashicorp.com/packer"
           />
           <Button
             title={`Download ${VERSION}`}
