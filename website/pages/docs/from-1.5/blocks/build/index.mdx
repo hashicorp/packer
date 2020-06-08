@@ -27,6 +27,53 @@ Define [top-level `source` blocks](/docs/from-1.5/blocks/source) to configure
 your builders. The list of available builders can be found in the
 [builders](/docs/builders) section.
 
+## Naming your builds
+
+The optional `name` field of the `build` block allow to set the name of a
+build. Doing this will suffix the log lines in your build with the name of the
+build block. For example:
+
+```hcl
+source "null" "first-example" {
+    communicator = "none"
+}
+
+source "null" "second-example" {
+    communicator = "none"
+}
+
+build {
+    name = "a"
+
+    sources = [
+        "sources.null.first-example",
+        "sources.null.second-example",
+    ]
+
+}
+
+
+build {
+    sources = [
+        "sources.null.second-example",
+    ]
+}
+```
+
+Will output:
+
+```shell-session
+> packer build ./folder
+Build 'a.null.first-example' finished.
+Build 'a.null.second-example' finished.
+Build 'null.second-example' finished.
+
+==> Builds finished. The artifacts of successful builds are:
+--> a.null.first-example: Did not export anything. This is the null builder
+--> a.null.second-example: Did not export anything. This is the null builder
+--> null.second-example: Did not export anything. This is the null builder
+```
+
 
 ## Related
 
