@@ -112,8 +112,6 @@ export default [
               'fileexists',
               'fileset',
               'pathexpand',
-              'pwd',
-              'template_dir',
             ],
           },
           {
