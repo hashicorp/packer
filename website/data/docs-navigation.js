@@ -113,7 +113,6 @@ export default [
               'fileset',
               'pathexpand',
               'pwd',
-              'template_dir',
             ],
           },
           {
