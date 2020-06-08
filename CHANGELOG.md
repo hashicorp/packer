@@ -38,6 +38,10 @@
 * builder/virtualbox: Add `output_filename` config option to allow to set a
     custom filename instead of forcing to be the same as vm_name. [GH-9174]
 * builder/vsphere: floppy_label Parameter for vsphere-iso Builder [GH-9187]
+* builder/vsphere: Add `ip_wait_address` to allow packer to wait for an ip address that 
+fits within the range (cidr address).  [GH-9358]
+* builder/vsphere: Add `tools_sync_time` and `tools_upgrade_policy` options to set time
+synchronization and automatic VMware Tools upgrade.
 * core/hcl: Enable force, debug, and on-error command line flags for hcl2
     builds. [GH-9234]
 * core/hcl: Support named builds in HCL2 templates [GH-9245]
