@@ -29,9 +29,9 @@ your builders. The list of available builders can be found in the
 
 ## Naming your builds
 
-The optional `name` field of the `build` block allow to set the name of a
-build. Doing this will suffix the log lines in your build with the name of the
-build block. For example:
+The optional `name` field of the `build` block allows to set the name of a
+build. Doing this will prefix the log lines in a `packer build` with the name
+of the build block. For example:
 
 ```hcl
 source "null" "first-example" {
@@ -49,14 +49,11 @@ build {
         "sources.null.first-example",
         "sources.null.second-example",
     ]
-
 }
 
 
 build {
-    sources = [
-        "sources.null.second-example",
-    ]
+    sources = ["sources.null.second-example"]
 }
 ```
 
