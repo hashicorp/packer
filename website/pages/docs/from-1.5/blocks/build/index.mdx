@@ -71,6 +71,27 @@ Build 'null.second-example' finished.
 --> null.second-example: Did not export anything. This is the null builder
 ```
 
+### Running only specific builds
+
+The `-only`/`-except` flags will match a source's `type.name` and run 'only'
+matching **builders** (source) or all referenced builders 'except' the matching
+ones, for example with the same config file:
+
+```shell-session
+> packer build -only "*.second" ./folder
+Build 'null.second-example' finished.
+Build 'a.null.second-example' finished.
+
+==> Builds finished. The artifacts of successful builds are:
+--> a.null.second-example: Did not export anything. This is the null builder
+--> null.second-example: Did not export anything. This is the null builder
+```
+
+Here `'a.null.first-example'` was skipped.
+
+-> Note: It is not yet possible to match a named `build` block to do this, but
+this is soon going to be possible. So here "a.*" will match nothing.
+
 
 ## Related
 
