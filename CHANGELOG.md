@@ -16,9 +16,11 @@
 ### FEATURES:
 * builder/vsphere-clone: Add boot_command support to vsphere-clone builder,
     including support for starting an HTTP server
+* **New post-processor** Yandex Export [GH-9124]
+* HCL2/core: Add command/console support for HCL2 config files [GH-9359]
+* HCL2/core: Add command/validate support for HCL2 config files [GH-9346]
 * HCL2/core: it is now possible to set source fields from the `build` block
     [GH-9291]
-* **New post-processor** Yandex Export [GH-9124]
 
 ### IMPROVEMENTS:
 * builder/amazon: Add SSM Session Manager as a SSH interface connection
@@ -39,11 +41,11 @@
     by `host_port_min` and `host_port_max`. [GH-9307]
 * builder/virtualbox: Add `output_filename` config option to allow to set a
     custom filename instead of forcing to be the same as vm_name. [GH-9174]
-* builder/vsphere: floppy_label Parameter for vsphere-iso Builder [GH-9187]
+* builder/vsphere: Add `floppy_label` option. [GH-9187]
 * builder/vsphere: Add `ip_wait_address` to allow packer to wait for an ip address that 
 fits within the range (cidr address).  [GH-9358]
 * builder/vsphere: Add `tools_sync_time` and `tools_upgrade_policy` options to set time
-synchronization and automatic VMware Tools upgrade.
+synchronization and automatic VMware Tools upgrade. [GH-9366]
 * core/hcl: Enable force, debug, and on-error command line flags for hcl2
     builds. [GH-9234]
 * core/hcl: Support named builds in HCL2 templates [GH-9245]
@@ -78,6 +80,8 @@ synchronization and automatic VMware Tools upgrade.
 * builder/vagrant: Use absolute path for package_include files to prevent them
     from having to be relative to the output vagrant directory. [GH-9260]
 * builder/virtualbox: Fix bug using checksum files. [GH-9101]
+* builder/vmware: Fix ssh connection when the guest platform's dhcpcd switches
+    the IP address in-between a build. [GH-9322]
 * builder/vsphere-iso: Use the Datacenter's VmFolder call instead of manually
     generating folder path [GH-9342]
 * builder/vsphere: Add option not to set host during datastore upload. [GH-9100
