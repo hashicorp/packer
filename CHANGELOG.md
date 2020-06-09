@@ -1,4 +1,4 @@
-## 1.6.0 (Upcoming)
+## 1.6.0 (June 09, 2020)
 
 ### BACKWARDS INCOMPATIBILITIES:
 * builder/vsphere-iso: The deprecated fields `network`, `network_card`,
