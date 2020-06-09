@@ -368,29 +368,61 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 	c := &BuildCommand{
 		Meta: testMetaFile(t),
 	}
-
-	args := []string{
-		"-parallel-builds=1",
-		"-except=chocolate,vanilla",
-		filepath.Join(testFixture("build-only"), "template.json"),
+	tc := []struct {
+		name                     string
+		args                     []string
+		expectedFiles            []string
+		buildNotExpectedFiles    []string
+		postProcNotExpectedFiles []string
+	}{
+		{
+			name: "JSON: except build and post-processor",
+			args: []string{
+				"-parallel-builds=1",
+				"-except=chocolate,vanilla,pear",
+				filepath.Join(testFixture("build-only"), "template.json"),
+			},
+			expectedFiles:            []string{"apple.txt", "cherry.txt", "peach.txt"},
+			buildNotExpectedFiles:    []string{"chocolate.txt", "vanilla.txt", "tomato.txt", "unnamed.txt"},
+			postProcNotExpectedFiles: []string{"pear.txt"},
+		},
+		{
+			name: "HCL2: except build and post-processor",
+			args: []string{
+				"-parallel-builds=1",
+				"-except=file.chocolate,file.vanilla,pear",
+				filepath.Join(testFixture("build-only"), "template.pkr.hcl"),
+			},
+			expectedFiles:            []string{"apple.txt", "cherry.txt", "peach.txt"},
+			buildNotExpectedFiles:    []string{"chocolate.txt", "vanilla.txt", "tomato.txt", "unnamed.txt"},
+			postProcNotExpectedFiles: []string{"pear.txt"},
+		},
 	}
 
-	defer cleanup()
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			defer cleanup()
 
-	if code := c.Run(args); code != 0 {
-		fatalCommand(t, c.Meta)
-	}
+			if code := c.Run(tt.args); code != 0 {
+				fatalCommand(t, c.Meta)
+			}
 
-	for _, f := range []string{"chocolate.txt", "vanilla.txt", "tomato.txt",
-		"unnamed.txt"} {
-		if fileExists(f) {
-			t.Errorf("Expected NOT to find %s", f)
-		}
-	}
-	for _, f := range []string{"apple.txt", "cherry.txt", "pear.txt", "peach.txt"} {
-		if !fileExists(f) {
-			t.Errorf("Expected to find %s", f)
-		}
+			for _, f := range tt.buildNotExpectedFiles {
+				if fileExists(f) {
+					t.Errorf("build not skipped: Expected NOT to find %s", f)
+				}
+			}
+			for _, f := range tt.postProcNotExpectedFiles {
+				if fileExists(f) {
+					t.Errorf("post-processor not skipped: Expected NOT to find %s", f)
+				}
+			}
+			for _, f := range tt.expectedFiles {
+				if !fileExists(f) {
+					t.Errorf("Expected to find %s", f)
+				}
+			}
+		})
 	}
 }
 

@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"github.com/gobwas/glob"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
@@ -37,6 +38,9 @@ type PackerConfig struct {
 	provisionersSchemas packer.ProvisionerStore
 
 	postProcessorsSchemas packer.PostProcessorStore
+
+	except []glob.Glob
+	only   []glob.Glob
 }
 
 type ValidationOptions struct {
@@ -244,6 +248,23 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 		if ppb.OnlyExcept.Skip(source.Type + "." + source.Name) {
 			continue
 		}
+
+		name := ppb.PName
+		if name == "" {
+			name = ppb.PType
+		}
+		// -except
+		exclude := false
+		for _, exceptGlob := range cfg.except {
+			if exceptGlob.Match(name) {
+				exclude = true
+				break
+			}
+		}
+		if exclude {
+			continue
+		}
+
 		postProcessor, moreDiags := cfg.startPostProcessor(source, ppb, ectx, generatedVars)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
@@ -289,6 +310,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				if diags.HasErrors() {
 					return nil, diags
 				}
+				cfg.only = onlyGlobs
 				include := false
 				for _, onlyGlob := range onlyGlobs {
 					if onlyGlob.Match(buildName) {
@@ -307,6 +329,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				if diags.HasErrors() {
 					return nil, diags
 				}
+				cfg.except = exceptGlobs
 				exclude := false
 				for _, exceptGlob := range exceptGlobs {
 					if exceptGlob.Match(buildName) {
