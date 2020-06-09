@@ -20,7 +20,7 @@ build {
         name = var.foo
     }
 
-    provisioner "shell-local" {
+    provisioner "shell" {
         scripts = fileset(".", "scripts/{install,secure}.sh")
     }
 
