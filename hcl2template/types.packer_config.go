@@ -2,9 +2,9 @@ package hcl2template
 
 import (
 	"fmt"
-	"github.com/gobwas/glob"
 	"strings"
 
+	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/packer/helper/common"
