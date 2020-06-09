@@ -208,3 +208,16 @@ func TestProvisionDownloadMkdirAll(t *testing.T) {
 		}
 	}
 }
+
+func TestPathEndsWithSeperator(t *testing.T) {
+
+	path := "abc" + string(os.PathSeparator)
+	if pathEndsWithSeperator(path) == false {
+		t.Fatalf("pathEndsWithSeperator should be true for path: %s", path)
+	}
+
+	path = "abc"
+	if pathEndsWithSeperator(path) == true {
+		t.Fatalf("pathEndsWithSeperator should be false for path: %s", path)
+	}
+}
