@@ -379,23 +379,23 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 			name: "JSON: except build and post-processor",
 			args: []string{
 				"-parallel-builds=1",
-				"-except=chocolate,vanilla,pear",
+				"-except=chocolate,vanilla,tomato",
 				filepath.Join(testFixture("build-only"), "template.json"),
 			},
 			expectedFiles:            []string{"apple.txt", "cherry.txt", "peach.txt"},
 			buildNotExpectedFiles:    []string{"chocolate.txt", "vanilla.txt", "tomato.txt", "unnamed.txt"},
-			postProcNotExpectedFiles: []string{"pear.txt"},
+			postProcNotExpectedFiles: []string{"pear.txt, banana.txt"},
 		},
 		{
 			name: "HCL2: except build and post-processor",
 			args: []string{
 				"-parallel-builds=1",
-				"-except=file.chocolate,file.vanilla,pear",
+				"-except=file.chocolate,file.vanilla,tomato",
 				filepath.Join(testFixture("build-only"), "template.pkr.hcl"),
 			},
 			expectedFiles:            []string{"apple.txt", "cherry.txt", "peach.txt"},
 			buildNotExpectedFiles:    []string{"chocolate.txt", "vanilla.txt", "tomato.txt", "unnamed.txt"},
-			postProcNotExpectedFiles: []string{"pear.txt"},
+			postProcNotExpectedFiles: []string{"pear.txt, banana.txt"},
 		},
 	}
 
@@ -637,6 +637,7 @@ func cleanup(moreFiles ...string) {
 	os.RemoveAll("cherry.txt")
 	os.RemoveAll("apple.txt")
 	os.RemoveAll("peach.txt")
+	os.RemoveAll("banana.txt")
 	os.RemoveAll("pear.txt")
 	os.RemoveAll("tomato.txt")
 	os.RemoveAll("unnamed.txt")

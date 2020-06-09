@@ -37,6 +37,11 @@
                 "name": "pear",
                 "type": "shell-local",
                 "inline": [ "echo pear > pear.txt" ]
+            },
+            {
+                "name": "banana",
+                "type": "shell-local",
+                "inline": [ "echo pear > banana.txt" ]
             }
         ],
         [

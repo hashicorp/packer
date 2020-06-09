@@ -262,7 +262,7 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 			}
 		}
 		if exclude {
-			continue
+			break
 		}
 
 		postProcessor, moreDiags := cfg.startPostProcessor(source, ppb, ectx, generatedVars)

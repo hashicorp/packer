@@ -37,6 +37,11 @@ build {
   }
 
   post-processor "shell-local" {
+    name = "banana"
+    inline = [ "echo apple > banana.txt" ]
+  }
+
+  post-processor "shell-local" {
     only = ["vanilla"]
     name = "tomato"
     inline = [ "echo apple > tomato.txt" ]

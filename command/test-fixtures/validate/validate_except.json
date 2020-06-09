@@ -1,26 +1,39 @@
 {
-  "builders":[
+  "builders": [
     {
       "name": "chocolate",
-      "type":"file",
-      "target":"chocolate.txt",
-      "content":"chocolate"
+      "type": "file",
+      "target": "chocolate.txt",
+      "content": "chocolate"
     },
     {
-      "type":"file",
+      "type": "file",
       "name": "vanilla"
     }
   ],
   "post-processors": [
-    {
-      "name": "apple",
-      "type": "shell-local",
-      "inline": [ "echo apple 'hello'" ]
-    },
-    {
-      "name": "pear",
-      "type": "shell-local"
-    }
+    [
+      {
+        "name": "apple",
+        "type": "shell-local",
+        "inline": [
+          "echo apple 'apple'"
+        ]
+      }
+    ],
+    [
+      {
+        "name": "pear",
+        "type": "shell-local",
+        "inline": [
+          "echo apple 'pear'"
+        ]
+      },
+      {
+        "name": "banana",
+        "type": "shell-local"
+      }
+    ]
   ],
-  "min_packer_version":"101.0.0"
+  "min_packer_version": "101.0.0"
 }

@@ -144,6 +144,8 @@ func TestValidateCommandExcept(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
+			defer cleanup()
+
 			tc := tc
 			if code := c.Run(tc.args); code != tc.exitCode {
 				fatalCommand(t, c.Meta)

@@ -14,10 +14,15 @@ build {
 
   post-processor "shell-local" {
     name = "apple"
-    inline = [ "echo apple 'hello'" ]
+    inline = [ "echo apple 'apple'" ]
   }
 
   post-processor "shell-local" {
     name = "pear"
+    inline = [ "echo apple 'pear'" ]
+  }
+
+  post-processor "shell-local" {
+    name = "banana"
   }
 }

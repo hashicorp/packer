@@ -321,7 +321,7 @@ func (c *Core) Build(n string) (Build, error) {
 				}
 			}
 			if foundExcept {
-				continue
+				break
 			}
 
 			// Get the post-processor
