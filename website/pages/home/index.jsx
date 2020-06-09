@@ -91,12 +91,12 @@ export default function Homepage() {
           <div className="tag g-type-label">Infrastructure as Code</div>
           <h2 className="g-type-display-2">Modern, Automated</h2>
           <p className="g-type-body">
-            HashiCorp Packer is easy to use and automates the creation of any
-            type of machine image. It embraces modern configuration management
-            by encouraging you to use automated scripts to install and configure
-            the software within your Packer-made images. Packer brings machine
-            images into the modern age, unlocking untapped potential and opening
-            new opportunities.
+            HashiCorp Packer automates the creation of any type of machine
+            image. It embraces modern configuration management by encouraging
+            you to use automated scripts to install and configure the software
+            within your Packer-made images. Packer brings machine images into
+            the modern age, unlocking untapped potential and opening new
+            opportunities.
           </p>
         </div>
       </section>
