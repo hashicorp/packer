@@ -43,14 +43,34 @@ effectively the same:
 
 ```hcl
 # builds.pkr.hcl
+
+source "amazon-ebs" "first-example" {
+  #...
+}
+
+source "amazon-ebs" "second-example" {
+  #...
+}
+
 build {
-  # ...
+  source = [
+    "source.amazon-ebs.first-example",
+    "source.amazon-ebs.second-example",
+  ]
   provisioner "shell" {
-      inline = [
-        "echo provisioning all the things",
-        "echo the value of 'foo' is '${var.foo}'",
+    # This provisioner only runs for the 'first-example' source.
+    only = ["source.amazon-ebs.first-example"] 
+
+    inline = [
+      "echo provisioning all the things",
+      "echo the value of 'foo' is '${var.foo}'",
+    ]
+  }
+  provisioner "shell" {
+    # This runs with all sources.
+    inline = [
+        "echo Hi World!"
       ]
-      only = ["source.amazon-ebs.example"]
   }
 }
 ```

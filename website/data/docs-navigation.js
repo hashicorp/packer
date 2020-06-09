@@ -9,11 +9,6 @@ export default [
   {
     category: 'from-1.5',
     content: [
-      'variables',
-      'locals',
-      'syntax',
-      'expressions',
-      'syntax-json',
       {
         category: 'blocks',
         content: [ 
@@ -143,6 +138,11 @@ export default [
           },
         ],
       },
+      'variables',
+      'locals',
+      'syntax',
+      'expressions',
+      'syntax-json',
     ],
   },
   '--------',
