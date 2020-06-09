@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -123,9 +124,9 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 		// ensure destination dir exists.  p.config.Destination may either be a file or a dir.
 		dir := dst
 		// if it doesn't end with a /, set dir as the parent dir
-		if !strings.HasSuffix(dst, "/") {
+		if !pathEndsWithSeperator(dst) {
 			dir = filepath.Dir(dir)
-		} else if !strings.HasSuffix(src, "/") && !strings.HasSuffix(src, "*") {
+		} else if !pathEndsWithSeperator(src) && !strings.HasSuffix(src, "*") {
 			dst = filepath.Join(dst, filepath.Base(src))
 		}
 		if dir != "" {
@@ -135,7 +136,7 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 			}
 		}
 		// if the src was a dir, download the dir
-		if strings.HasSuffix(src, "/") || strings.ContainsAny(src, "*?[") {
+		if pathEndsWithSeperator(src) || strings.ContainsAny(src, "*?[") {
 			return comm.DownloadDir(src, dst, nil)
 		}
 
@@ -193,7 +194,7 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 			return err
 		}
 
-		if strings.HasSuffix(dst, "/") {
+		if pathEndsWithSeperator(dst) {
 			dst = dst + filepath.Base(src)
 		}
 
@@ -212,4 +213,15 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 		}
 	}
 	return nil
+}
+
+func pathEndsWithSeperator(path string) bool {
+
+	if runtime.GOOS == "windows" {
+		// modern windows operation systems may use "\" or "/" as folder seperator
+		return strings.HasSuffix(path, "/") || strings.HasSuffix(path, "\\")
+	} else {
+		// Non windows operating systems only know one seperator, so we can use the one defined by the OS package
+		return strings.HasSuffix(path, string(os.PathSeparator))
+	}
 }
