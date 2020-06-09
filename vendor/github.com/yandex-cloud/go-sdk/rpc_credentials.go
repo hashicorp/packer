@@ -10,8 +10,10 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/grpclog"
+	"google.golang.org/grpc/status"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
 	"github.com/yandex-cloud/go-sdk/pkg/sdkerrors"
@@ -69,7 +71,11 @@ func (c *rpcCredentials) GetRequestMetadata(ctx context.Context, uri ...string) 
 	if expired {
 		token, err = c.updateToken(ctx, state)
 		if err != nil {
-			return nil, err
+			st, ok := status.FromError(err)
+			if ok && st.Code() == codes.Unauthenticated {
+				return nil, err
+			}
+			return nil, status.Errorf(codes.Unauthenticated, "%v", err)
 		}
 	}
 
@@ -97,7 +103,7 @@ func (c *rpcCredentials) updateToken(ctx context.Context, currentState rpcCreden
 	}
 	expiresAt, expiresAtErr := ptypes.Timestamp(resp.ExpiresAt)
 	if expiresAtErr != nil {
-		grpclog.Errorf("invalid IAM Token expires_at: %s", expiresAtErr)
+		grpclog.Warningf("invalid IAM Token expires_at: %s", expiresAtErr)
 		// Fallback to short term caching.
 		expiresAt = time.Now().Add(time.Minute)
 	}

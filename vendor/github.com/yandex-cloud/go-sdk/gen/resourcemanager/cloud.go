@@ -10,7 +10,7 @@ import (
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/access"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/resourcemanager/v1"
+	resourcemanager "github.com/yandex-cloud/go-genproto/yandex/cloud/resourcemanager/v1"
 )
 
 //revive:disable
@@ -20,8 +20,6 @@ import (
 type CloudServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ resourcemanager.CloudServiceClient = &CloudServiceClient{}
 
 // Get implements resourcemanager.CloudServiceClient
 func (c *CloudServiceClient) Get(ctx context.Context, in *resourcemanager.GetCloudRequest, opts ...grpc.CallOption) (*resourcemanager.Cloud, error) {
@@ -41,6 +39,68 @@ func (c *CloudServiceClient) List(ctx context.Context, in *resourcemanager.ListC
 	return resourcemanager.NewCloudServiceClient(conn).List(ctx, in, opts...)
 }
 
+type CloudIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *CloudServiceClient
+	request *resourcemanager.ListCloudsRequest
+
+	items []*resourcemanager.Cloud
+}
+
+func (c *CloudServiceClient) CloudIterator(ctx context.Context, opts ...grpc.CallOption) *CloudIterator {
+	return &CloudIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &resourcemanager.ListCloudsRequest{
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *CloudIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Clouds
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *CloudIterator) Value() *resourcemanager.Cloud {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *CloudIterator) Error() error {
+	return it.err
+}
+
 // ListAccessBindings implements resourcemanager.CloudServiceClient
 func (c *CloudServiceClient) ListAccessBindings(ctx context.Context, in *access.ListAccessBindingsRequest, opts ...grpc.CallOption) (*access.ListAccessBindingsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -50,6 +110,69 @@ func (c *CloudServiceClient) ListAccessBindings(ctx context.Context, in *access.
 	return resourcemanager.NewCloudServiceClient(conn).ListAccessBindings(ctx, in, opts...)
 }
 
+type CloudAccessBindingsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *CloudServiceClient
+	request *access.ListAccessBindingsRequest
+
+	items []*access.AccessBinding
+}
+
+func (c *CloudServiceClient) CloudAccessBindingsIterator(ctx context.Context, resourceId string, opts ...grpc.CallOption) *CloudAccessBindingsIterator {
+	return &CloudAccessBindingsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &access.ListAccessBindingsRequest{
+			ResourceId: resourceId,
+			PageSize:   1000,
+		},
+	}
+}
+
+func (it *CloudAccessBindingsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListAccessBindings(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.AccessBindings
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *CloudAccessBindingsIterator) Value() *access.AccessBinding {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *CloudAccessBindingsIterator) Error() error {
+	return it.err
+}
+
 // ListOperations implements resourcemanager.CloudServiceClient
 func (c *CloudServiceClient) ListOperations(ctx context.Context, in *resourcemanager.ListCloudOperationsRequest, opts ...grpc.CallOption) (*resourcemanager.ListCloudOperationsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -57,6 +180,69 @@ func (c *CloudServiceClient) ListOperations(ctx context.Context, in *resourceman
 		return nil, err
 	}
 	return resourcemanager.NewCloudServiceClient(conn).ListOperations(ctx, in, opts...)
+}
+
+type CloudOperationsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *CloudServiceClient
+	request *resourcemanager.ListCloudOperationsRequest
+
+	items []*operation.Operation
+}
+
+func (c *CloudServiceClient) CloudOperationsIterator(ctx context.Context, cloudId string, opts ...grpc.CallOption) *CloudOperationsIterator {
+	return &CloudOperationsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &resourcemanager.ListCloudOperationsRequest{
+			CloudId:  cloudId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *CloudOperationsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListOperations(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Operations
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *CloudOperationsIterator) Value() *operation.Operation {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *CloudOperationsIterator) Error() error {
+	return it.err
 }
 
 // SetAccessBindings implements resourcemanager.CloudServiceClient

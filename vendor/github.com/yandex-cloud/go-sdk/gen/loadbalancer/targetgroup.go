@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/loadbalancer/v1"
+	loadbalancer "github.com/yandex-cloud/go-genproto/yandex/cloud/loadbalancer/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
@@ -19,8 +19,6 @@ import (
 type TargetGroupServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ loadbalancer.TargetGroupServiceClient = &TargetGroupServiceClient{}
 
 // AddTargets implements loadbalancer.TargetGroupServiceClient
 func (c *TargetGroupServiceClient) AddTargets(ctx context.Context, in *loadbalancer.AddTargetsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
@@ -67,6 +65,69 @@ func (c *TargetGroupServiceClient) List(ctx context.Context, in *loadbalancer.Li
 	return loadbalancer.NewTargetGroupServiceClient(conn).List(ctx, in, opts...)
 }
 
+type TargetGroupIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *TargetGroupServiceClient
+	request *loadbalancer.ListTargetGroupsRequest
+
+	items []*loadbalancer.TargetGroup
+}
+
+func (c *TargetGroupServiceClient) TargetGroupIterator(ctx context.Context, folderId string, opts ...grpc.CallOption) *TargetGroupIterator {
+	return &TargetGroupIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &loadbalancer.ListTargetGroupsRequest{
+			FolderId: folderId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *TargetGroupIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.TargetGroups
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *TargetGroupIterator) Value() *loadbalancer.TargetGroup {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *TargetGroupIterator) Error() error {
+	return it.err
+}
+
 // ListOperations implements loadbalancer.TargetGroupServiceClient
 func (c *TargetGroupServiceClient) ListOperations(ctx context.Context, in *loadbalancer.ListTargetGroupOperationsRequest, opts ...grpc.CallOption) (*loadbalancer.ListTargetGroupOperationsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -74,6 +135,69 @@ func (c *TargetGroupServiceClient) ListOperations(ctx context.Context, in *loadb
 		return nil, err
 	}
 	return loadbalancer.NewTargetGroupServiceClient(conn).ListOperations(ctx, in, opts...)
+}
+
+type TargetGroupOperationsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *TargetGroupServiceClient
+	request *loadbalancer.ListTargetGroupOperationsRequest
+
+	items []*operation.Operation
+}
+
+func (c *TargetGroupServiceClient) TargetGroupOperationsIterator(ctx context.Context, targetGroupId string, opts ...grpc.CallOption) *TargetGroupOperationsIterator {
+	return &TargetGroupOperationsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &loadbalancer.ListTargetGroupOperationsRequest{
+			TargetGroupId: targetGroupId,
+			PageSize:      1000,
+		},
+	}
+}
+
+func (it *TargetGroupOperationsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListOperations(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Operations
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *TargetGroupOperationsIterator) Value() *operation.Operation {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *TargetGroupOperationsIterator) Error() error {
+	return it.err
 }
 
 // RemoveTargets implements loadbalancer.TargetGroupServiceClient

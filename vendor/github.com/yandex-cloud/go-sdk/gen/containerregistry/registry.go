@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/access"
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/containerregistry/v1"
+	containerregistry "github.com/yandex-cloud/go-genproto/yandex/cloud/containerregistry/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
@@ -20,8 +20,6 @@ import (
 type RegistryServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ containerregistry.RegistryServiceClient = &RegistryServiceClient{}
 
 // Create implements containerregistry.RegistryServiceClient
 func (c *RegistryServiceClient) Create(ctx context.Context, in *containerregistry.CreateRegistryRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
@@ -59,6 +57,69 @@ func (c *RegistryServiceClient) List(ctx context.Context, in *containerregistry.
 	return containerregistry.NewRegistryServiceClient(conn).List(ctx, in, opts...)
 }
 
+type RegistryIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *RegistryServiceClient
+	request *containerregistry.ListRegistriesRequest
+
+	items []*containerregistry.Registry
+}
+
+func (c *RegistryServiceClient) RegistryIterator(ctx context.Context, folderId string, opts ...grpc.CallOption) *RegistryIterator {
+	return &RegistryIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &containerregistry.ListRegistriesRequest{
+			FolderId: folderId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *RegistryIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Registries
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *RegistryIterator) Value() *containerregistry.Registry {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *RegistryIterator) Error() error {
+	return it.err
+}
+
 // ListAccessBindings implements containerregistry.RegistryServiceClient
 func (c *RegistryServiceClient) ListAccessBindings(ctx context.Context, in *access.ListAccessBindingsRequest, opts ...grpc.CallOption) (*access.ListAccessBindingsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -66,6 +127,69 @@ func (c *RegistryServiceClient) ListAccessBindings(ctx context.Context, in *acce
 		return nil, err
 	}
 	return containerregistry.NewRegistryServiceClient(conn).ListAccessBindings(ctx, in, opts...)
+}
+
+type RegistryAccessBindingsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *RegistryServiceClient
+	request *access.ListAccessBindingsRequest
+
+	items []*access.AccessBinding
+}
+
+func (c *RegistryServiceClient) RegistryAccessBindingsIterator(ctx context.Context, resourceId string, opts ...grpc.CallOption) *RegistryAccessBindingsIterator {
+	return &RegistryAccessBindingsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &access.ListAccessBindingsRequest{
+			ResourceId: resourceId,
+			PageSize:   1000,
+		},
+	}
+}
+
+func (it *RegistryAccessBindingsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListAccessBindings(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.AccessBindings
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *RegistryAccessBindingsIterator) Value() *access.AccessBinding {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *RegistryAccessBindingsIterator) Error() error {
+	return it.err
 }
 
 // SetAccessBindings implements containerregistry.RegistryServiceClient

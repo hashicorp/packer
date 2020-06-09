@@ -28,7 +28,7 @@ func (r *functionResolver) Run(ctx context.Context, sdk *ycsdk.SDK, opts ...grpc
 		return err
 	}
 
-	resp, err := sdk.Functions().Function().List(ctx, &functions.ListFunctionsRequest{
+	resp, err := sdk.Serverless().Functions().Function().List(ctx, &functions.ListFunctionsRequest{
 		FolderId: r.FolderID(),
 		Filter:   CreateResolverFilter("name", r.Name),
 		PageSize: DefaultResolverPageSize,

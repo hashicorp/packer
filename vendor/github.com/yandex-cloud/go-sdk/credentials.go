@@ -12,11 +12,13 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/status"
 
 	iampb "github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
@@ -163,7 +165,7 @@ func newInstanceServiceAccountCredentials(metadataServiceAddr string) NonExchang
 			Transport: &http.Transport{
 				DialContext: (&net.Dialer{
 					Timeout:   time.Second, // One second should be enough for localhost connection.
-					KeepAlive: 0,           // No keep alive. Near token per hour requested.
+					KeepAlive: -1,          // No keep alive. Near token per hour requested.
 				}).DialContext,
 			},
 		},
@@ -180,43 +182,56 @@ func (c *instanceServiceAccountCredentials) YandexCloudAPICredentials() {}
 func (c *instanceServiceAccountCredentials) IAMToken(ctx context.Context) (*iampb.CreateIamTokenResponse, error) {
 	token, err := c.iamToken(ctx)
 	if err != nil {
-		return nil, sdkerrors.WithMessage(err, "instance service account token")
+		return nil, sdkerrors.WithMessagef(err, "failed to get compute instance service account token from instance metadata service: GET %s", c.url())
 	}
 	return token, nil
 }
 
 func (c *instanceServiceAccountCredentials) iamToken(ctx context.Context) (*iampb.CreateIamTokenResponse, error) {
-	URL := fmt.Sprintf("http://%s/computeMetadata/v1/instance/service-accounts/default/token", c.metadataServiceAddr)
-	req, err := http.NewRequest("GET", URL, nil)
+	req, err := http.NewRequest("GET", c.url(), nil)
 	if err != nil {
 		return nil, sdkerrors.WithMessage(err, "request make failed")
 	}
 	req.Header.Set("Metadata-Flavor", "Google")
+	reqDump, _ := httputil.DumpRequestOut(req, false)
+	grpclog.Infof("Going to request instance SA token in metadata service:\n%s", reqDump)
 	resp, err := c.client.Do(req.WithContext(ctx))
 	if err != nil {
-		return nil, sdkerrors.WithMessage(err, "compute instance metadata service call failed.\n"+
-			"Are you inside compute instance?\n"+
-			"Details")
-	}
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, errors.New("compute instance metadata service token resource is not found.\n" +
-			"Is this compute instance running using Service Account? That is, Instance.service_account_id should not be empty.")
+		return nil, fmt.Errorf("%s.\n"+
+			"Are you inside compute instance?",
+			err)
 	}
 	defer resp.Body.Close()
+	respDump, _ := httputil.DumpResponse(resp, false)
+	grpclog.Infof("Metadata service instance SA token response (without body, because contains sensitive token):\n%s", respDump)
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("%s.\n"+
+			"Is this compute instance running using Service Account? That is, Instance.service_account_id should not be empty.",
+			resp.Status)
+	}
 	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, sdkerrors.WithMessage(err, "response body read failed")
-	}
+
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected token get status: %s: %s", resp.Status, body)
+		if err != nil {
+			body = []byte(fmt.Sprintf("Failed response body read failed: %s", err.Error()))
+		}
+		grpclog.Errorf("Metadata service instance SA token get failed: %s. Body:\n%s", resp.Status, body)
+		return nil, fmt.Errorf("%s", resp.Status)
 	}
+	if err != nil {
+		return nil, fmt.Errorf("reponse read failed: %s", err)
+	}
+
 	var tokenResponse struct {
 		AccessToken string `json:"access_token"`
 		ExpiresIn   int64  `json:"expires_in"`
 		TokenType   string `json:"token_type"`
 	}
+
 	err = json.Unmarshal(body, &tokenResponse)
 	if err != nil {
+		grpclog.Errorf("Failed to unmarshal instance metadata service SA token response body.\nError: %s\nBody:\n%s", err, body)
 		return nil, sdkerrors.WithMessage(err, "body unmarshal failed")
 	}
 	expiresAt := ptypes.TimestampNow()
@@ -226,6 +241,10 @@ func (c *instanceServiceAccountCredentials) iamToken(ctx context.Context) (*iamp
 		IamToken:  tokenResponse.AccessToken,
 		ExpiresAt: expiresAt,
 	}, nil
+}
+
+func (c *instanceServiceAccountCredentials) url() string {
+	return fmt.Sprintf("http://%s/computeMetadata/v1/instance/service-accounts/default/token", c.metadataServiceAddr)
 }
 
 // NoCredentials implements Credentials, it allows to create unauthenticated connections

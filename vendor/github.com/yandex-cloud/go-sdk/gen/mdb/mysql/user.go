@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/mysql/v1"
+	mysql "github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/mysql/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
@@ -19,8 +19,6 @@ import (
 type UserServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ mysql.UserServiceClient = &UserServiceClient{}
 
 // Create implements mysql.UserServiceClient
 func (c *UserServiceClient) Create(ctx context.Context, in *mysql.CreateUserRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
@@ -65,6 +63,69 @@ func (c *UserServiceClient) List(ctx context.Context, in *mysql.ListUsersRequest
 		return nil, err
 	}
 	return mysql.NewUserServiceClient(conn).List(ctx, in, opts...)
+}
+
+type UserIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *UserServiceClient
+	request *mysql.ListUsersRequest
+
+	items []*mysql.User
+}
+
+func (c *UserServiceClient) UserIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *UserIterator {
+	return &UserIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &mysql.ListUsersRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *UserIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Users
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *UserIterator) Value() *mysql.User {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *UserIterator) Error() error {
+	return it.err
 }
 
 // RevokePermission implements mysql.UserServiceClient

@@ -55,6 +55,9 @@ func (e *errorWithRequestIDs) Error() (msg string) {
 	if e.ids.ServerRequestID != "" {
 		msg += fmt.Sprintf("server-request-id = %s ", e.ids.ServerRequestID)
 	}
+	if e.ids.ServerTraceID != "" {
+		msg += fmt.Sprintf("server-trace-id = %s ", e.ids.ServerTraceID)
+	}
 	if e.ids.ClientRequestID != "" {
 		msg += fmt.Sprintf("client-request-id = %s ", e.ids.ClientRequestID)
 	}

@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/postgresql/v1"
+	postgresql "github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/postgresql/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
@@ -19,8 +19,6 @@ import (
 type DatabaseServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ postgresql.DatabaseServiceClient = &DatabaseServiceClient{}
 
 // Create implements postgresql.DatabaseServiceClient
 func (c *DatabaseServiceClient) Create(ctx context.Context, in *postgresql.CreateDatabaseRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
@@ -56,6 +54,69 @@ func (c *DatabaseServiceClient) List(ctx context.Context, in *postgresql.ListDat
 		return nil, err
 	}
 	return postgresql.NewDatabaseServiceClient(conn).List(ctx, in, opts...)
+}
+
+type DatabaseIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *DatabaseServiceClient
+	request *postgresql.ListDatabasesRequest
+
+	items []*postgresql.Database
+}
+
+func (c *DatabaseServiceClient) DatabaseIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *DatabaseIterator {
+	return &DatabaseIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &postgresql.ListDatabasesRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *DatabaseIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Databases
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *DatabaseIterator) Value() *postgresql.Database {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *DatabaseIterator) Error() error {
+	return it.err
 }
 
 // Update implements postgresql.DatabaseServiceClient

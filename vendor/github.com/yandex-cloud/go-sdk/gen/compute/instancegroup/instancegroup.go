@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1/instancegroup"
+	instancegroup "github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1/instancegroup"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
@@ -19,8 +19,6 @@ import (
 type InstanceGroupServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ instancegroup.InstanceGroupServiceClient = &InstanceGroupServiceClient{}
 
 // Create implements instancegroup.InstanceGroupServiceClient
 func (c *InstanceGroupServiceClient) Create(ctx context.Context, in *instancegroup.CreateInstanceGroupRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
@@ -67,6 +65,69 @@ func (c *InstanceGroupServiceClient) List(ctx context.Context, in *instancegroup
 	return instancegroup.NewInstanceGroupServiceClient(conn).List(ctx, in, opts...)
 }
 
+type InstanceGroupIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *InstanceGroupServiceClient
+	request *instancegroup.ListInstanceGroupsRequest
+
+	items []*instancegroup.InstanceGroup
+}
+
+func (c *InstanceGroupServiceClient) InstanceGroupIterator(ctx context.Context, folderId string, opts ...grpc.CallOption) *InstanceGroupIterator {
+	return &InstanceGroupIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &instancegroup.ListInstanceGroupsRequest{
+			FolderId: folderId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *InstanceGroupIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.InstanceGroups
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *InstanceGroupIterator) Value() *instancegroup.InstanceGroup {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *InstanceGroupIterator) Error() error {
+	return it.err
+}
+
 // ListInstances implements instancegroup.InstanceGroupServiceClient
 func (c *InstanceGroupServiceClient) ListInstances(ctx context.Context, in *instancegroup.ListInstanceGroupInstancesRequest, opts ...grpc.CallOption) (*instancegroup.ListInstanceGroupInstancesResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -74,6 +135,69 @@ func (c *InstanceGroupServiceClient) ListInstances(ctx context.Context, in *inst
 		return nil, err
 	}
 	return instancegroup.NewInstanceGroupServiceClient(conn).ListInstances(ctx, in, opts...)
+}
+
+type InstanceGroupInstancesIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *InstanceGroupServiceClient
+	request *instancegroup.ListInstanceGroupInstancesRequest
+
+	items []*instancegroup.ManagedInstance
+}
+
+func (c *InstanceGroupServiceClient) InstanceGroupInstancesIterator(ctx context.Context, instanceGroupId string, opts ...grpc.CallOption) *InstanceGroupInstancesIterator {
+	return &InstanceGroupInstancesIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &instancegroup.ListInstanceGroupInstancesRequest{
+			InstanceGroupId: instanceGroupId,
+			PageSize:        1000,
+		},
+	}
+}
+
+func (it *InstanceGroupInstancesIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListInstances(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Instances
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *InstanceGroupInstancesIterator) Value() *instancegroup.ManagedInstance {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *InstanceGroupInstancesIterator) Error() error {
+	return it.err
 }
 
 // ListLogRecords implements instancegroup.InstanceGroupServiceClient
@@ -85,6 +209,69 @@ func (c *InstanceGroupServiceClient) ListLogRecords(ctx context.Context, in *ins
 	return instancegroup.NewInstanceGroupServiceClient(conn).ListLogRecords(ctx, in, opts...)
 }
 
+type InstanceGroupLogRecordsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *InstanceGroupServiceClient
+	request *instancegroup.ListInstanceGroupLogRecordsRequest
+
+	items []*instancegroup.LogRecord
+}
+
+func (c *InstanceGroupServiceClient) InstanceGroupLogRecordsIterator(ctx context.Context, instanceGroupId string, opts ...grpc.CallOption) *InstanceGroupLogRecordsIterator {
+	return &InstanceGroupLogRecordsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &instancegroup.ListInstanceGroupLogRecordsRequest{
+			InstanceGroupId: instanceGroupId,
+			PageSize:        1000,
+		},
+	}
+}
+
+func (it *InstanceGroupLogRecordsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListLogRecords(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.LogRecords
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *InstanceGroupLogRecordsIterator) Value() *instancegroup.LogRecord {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *InstanceGroupLogRecordsIterator) Error() error {
+	return it.err
+}
+
 // ListOperations implements instancegroup.InstanceGroupServiceClient
 func (c *InstanceGroupServiceClient) ListOperations(ctx context.Context, in *instancegroup.ListInstanceGroupOperationsRequest, opts ...grpc.CallOption) (*instancegroup.ListInstanceGroupOperationsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -92,6 +279,87 @@ func (c *InstanceGroupServiceClient) ListOperations(ctx context.Context, in *ins
 		return nil, err
 	}
 	return instancegroup.NewInstanceGroupServiceClient(conn).ListOperations(ctx, in, opts...)
+}
+
+type InstanceGroupOperationsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *InstanceGroupServiceClient
+	request *instancegroup.ListInstanceGroupOperationsRequest
+
+	items []*operation.Operation
+}
+
+func (c *InstanceGroupServiceClient) InstanceGroupOperationsIterator(ctx context.Context, instanceGroupId string, opts ...grpc.CallOption) *InstanceGroupOperationsIterator {
+	return &InstanceGroupOperationsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &instancegroup.ListInstanceGroupOperationsRequest{
+			InstanceGroupId: instanceGroupId,
+			PageSize:        1000,
+		},
+	}
+}
+
+func (it *InstanceGroupOperationsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListOperations(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Operations
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *InstanceGroupOperationsIterator) Value() *operation.Operation {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *InstanceGroupOperationsIterator) Error() error {
+	return it.err
+}
+
+// Start implements instancegroup.InstanceGroupServiceClient
+func (c *InstanceGroupServiceClient) Start(ctx context.Context, in *instancegroup.StartInstanceGroupRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return instancegroup.NewInstanceGroupServiceClient(conn).Start(ctx, in, opts...)
+}
+
+// Stop implements instancegroup.InstanceGroupServiceClient
+func (c *InstanceGroupServiceClient) Stop(ctx context.Context, in *instancegroup.StopInstanceGroupRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return instancegroup.NewInstanceGroupServiceClient(conn).Stop(ctx, in, opts...)
 }
 
 // Update implements instancegroup.InstanceGroupServiceClient

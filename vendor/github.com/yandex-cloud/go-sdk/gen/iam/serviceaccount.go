@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/access"
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
+	iam "github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
@@ -20,8 +20,6 @@ import (
 type ServiceAccountServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ iam.ServiceAccountServiceClient = &ServiceAccountServiceClient{}
 
 // Create implements iam.ServiceAccountServiceClient
 func (c *ServiceAccountServiceClient) Create(ctx context.Context, in *iam.CreateServiceAccountRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
@@ -59,6 +57,69 @@ func (c *ServiceAccountServiceClient) List(ctx context.Context, in *iam.ListServ
 	return iam.NewServiceAccountServiceClient(conn).List(ctx, in, opts...)
 }
 
+type ServiceAccountIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ServiceAccountServiceClient
+	request *iam.ListServiceAccountsRequest
+
+	items []*iam.ServiceAccount
+}
+
+func (c *ServiceAccountServiceClient) ServiceAccountIterator(ctx context.Context, folderId string, opts ...grpc.CallOption) *ServiceAccountIterator {
+	return &ServiceAccountIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &iam.ListServiceAccountsRequest{
+			FolderId: folderId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *ServiceAccountIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.ServiceAccounts
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ServiceAccountIterator) Value() *iam.ServiceAccount {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ServiceAccountIterator) Error() error {
+	return it.err
+}
+
 // ListAccessBindings implements iam.ServiceAccountServiceClient
 func (c *ServiceAccountServiceClient) ListAccessBindings(ctx context.Context, in *access.ListAccessBindingsRequest, opts ...grpc.CallOption) (*access.ListAccessBindingsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -68,6 +129,69 @@ func (c *ServiceAccountServiceClient) ListAccessBindings(ctx context.Context, in
 	return iam.NewServiceAccountServiceClient(conn).ListAccessBindings(ctx, in, opts...)
 }
 
+type ServiceAccountAccessBindingsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ServiceAccountServiceClient
+	request *access.ListAccessBindingsRequest
+
+	items []*access.AccessBinding
+}
+
+func (c *ServiceAccountServiceClient) ServiceAccountAccessBindingsIterator(ctx context.Context, resourceId string, opts ...grpc.CallOption) *ServiceAccountAccessBindingsIterator {
+	return &ServiceAccountAccessBindingsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &access.ListAccessBindingsRequest{
+			ResourceId: resourceId,
+			PageSize:   1000,
+		},
+	}
+}
+
+func (it *ServiceAccountAccessBindingsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListAccessBindings(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.AccessBindings
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ServiceAccountAccessBindingsIterator) Value() *access.AccessBinding {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ServiceAccountAccessBindingsIterator) Error() error {
+	return it.err
+}
+
 // ListOperations implements iam.ServiceAccountServiceClient
 func (c *ServiceAccountServiceClient) ListOperations(ctx context.Context, in *iam.ListServiceAccountOperationsRequest, opts ...grpc.CallOption) (*iam.ListServiceAccountOperationsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -75,6 +199,69 @@ func (c *ServiceAccountServiceClient) ListOperations(ctx context.Context, in *ia
 		return nil, err
 	}
 	return iam.NewServiceAccountServiceClient(conn).ListOperations(ctx, in, opts...)
+}
+
+type ServiceAccountOperationsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ServiceAccountServiceClient
+	request *iam.ListServiceAccountOperationsRequest
+
+	items []*operation.Operation
+}
+
+func (c *ServiceAccountServiceClient) ServiceAccountOperationsIterator(ctx context.Context, serviceAccountId string, opts ...grpc.CallOption) *ServiceAccountOperationsIterator {
+	return &ServiceAccountOperationsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &iam.ListServiceAccountOperationsRequest{
+			ServiceAccountId: serviceAccountId,
+			PageSize:         1000,
+		},
+	}
+}
+
+func (it *ServiceAccountOperationsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListOperations(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Operations
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ServiceAccountOperationsIterator) Value() *operation.Operation {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ServiceAccountOperationsIterator) Error() error {
+	return it.err
 }
 
 // SetAccessBindings implements iam.ServiceAccountServiceClient
