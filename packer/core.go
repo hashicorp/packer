@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"regexp"
@@ -9,6 +10,7 @@ import (
 
 	ttmp "text/template"
 
+	"github.com/google/go-cmp/cmp"
 	multierror "github.com/hashicorp/go-multierror"
 	version "github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
@@ -372,6 +374,112 @@ func (c *Core) Context() *interpolate.Context {
 		TemplatePath:  c.Template.Path,
 		UserVariables: c.variables,
 	}
+}
+
+var ConsoleHelp = strings.TrimSpace(`
+Packer console JSON Mode.
+The Packer console allows you to experiment with Packer interpolations.
+You may access variables in the Packer config you called the console with.
+
+Type in the interpolation to test and hit <enter> to see the result.
+
+"variables" will dump all available variables and their values.
+
+"{{timestamp}}" will output the timestamp, for example "1559855090".
+
+To exit the console, type "exit" and hit <enter>, or use Control-C.
+
+/!\ If you would like to start console in hcl2 mode without a config you can
+use the --config-type=hcl2 option.
+`)
+
+func (c *Core) EvaluateExpression(line string) (string, bool, hcl.Diagnostics) {
+	switch {
+	case line == "":
+		return "", false, nil
+	case line == "exit":
+		return "", true, nil
+	case line == "help":
+		return ConsoleHelp, false, nil
+	case line == "variables":
+		varsstring := "\n"
+		for k, v := range c.Context().UserVariables {
+			varsstring += fmt.Sprintf("%s: %+v,\n", k, v)
+		}
+
+		return varsstring, false, nil
+	default:
+		ctx := c.Context()
+		rendered, err := interpolate.Render(line, ctx)
+		var diags hcl.Diagnostics
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary: "Interpolation error",
+				Detail:  err.Error(),
+			})
+		}
+		return rendered, false, diags
+	}
+}
+
+func (c *Core) FixConfig(opts FixConfigOptions) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	// Remove once we have support for the Inplace FixConfigMode
+	if opts.Mode != Diff {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("FixConfig only supports template diff; FixConfigMode %d not supported", opts.Mode),
+		})
+
+		return diags
+	}
+
+	var rawTemplateData map[string]interface{}
+	input := make(map[string]interface{})
+	templateData := make(map[string]interface{})
+	if err := json.Unmarshal(c.Template.RawContents, &rawTemplateData); err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("unable to read the contents of the JSON configuration file: %s", err),
+			Detail:   err.Error(),
+		})
+		return diags
+	}
+	// Hold off on Diff for now - need to think about displaying to user.
+	// delete empty top-level keys since the fixers seem to add them
+	// willy-nilly
+	for k := range input {
+		ml, ok := input[k].([]map[string]interface{})
+		if !ok {
+			continue
+		}
+		if len(ml) == 0 {
+			delete(input, k)
+		}
+	}
+	// marshal/unmarshal to make comparable to templateData
+	var fixedData map[string]interface{}
+	// Guaranteed to be valid json, so we can ignore errors
+	j, _ := json.Marshal(input)
+	if err := json.Unmarshal(j, &fixedData); err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("unable to read the contents of the JSON configuration file: %s", err),
+			Detail:   err.Error(),
+		})
+
+		return diags
+	}
+
+	if diff := cmp.Diff(templateData, fixedData); diff != "" {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Fixable configuration found.\nPlease run `packer fix` to get your build to run correctly.\nSee debug log for more information.",
+			Detail:   diff,
+		})
+	}
+	return diags
 }
 
 // validate does a full validation of the template.

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"strings"
 	"time"
 
@@ -491,8 +492,38 @@ func (vm *VirtualMachine) PowerOn() error {
 	return err
 }
 
-func (vm *VirtualMachine) WaitForIP(ctx context.Context) (string, error) {
-	return vm.vm.WaitForIP(ctx)
+func (vm *VirtualMachine) WaitForIP(ctx context.Context, ipNet *net.IPNet) (string, error) {
+	var ip string
+
+	p := property.DefaultCollector(vm.vm.Client())
+	err := property.Wait(ctx, p, vm.vm.Reference(), []string{"guest.ipAddress"}, func(pc []types.PropertyChange) bool {
+		for _, c := range pc {
+			if c.Name != "guest.ipAddress" {
+				continue
+			}
+			if c.Op != types.PropertyChangeOpAssign {
+				continue
+			}
+			if c.Val == nil {
+				continue
+			}
+
+			ip = c.Val.(string)
+			if ipNet != nil && !ipNet.Contains(net.ParseIP(ip)) {
+				// ip address is not in range
+				return false
+			}
+			return true
+		}
+
+		return false
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return ip, nil
 }
 
 func (vm *VirtualMachine) PowerOff() error {

@@ -54,6 +54,8 @@ type FlatConfig struct {
 	VGPUProfile                *string                  `mapstructure:"vgpu_profile" cty:"vgpu_profile" hcl:"vgpu_profile"`
 	NestedHV                   *bool                    `mapstructure:"NestedHV" cty:"NestedHV" hcl:"NestedHV"`
 	ConfigParams               map[string]string        `mapstructure:"configuration_parameters" cty:"configuration_parameters" hcl:"configuration_parameters"`
+	ToolsSyncTime              *bool                    `mapstructure:"tools_sync_time" cty:"tools_sync_time" hcl:"tools_sync_time"`
+	ToolsUpgradePolicy         *bool                    `mapstructure:"tools_upgrade_policy" cty:"tools_upgrade_policy" hcl:"tools_upgrade_policy"`
 	ISOChecksum                *string                  `mapstructure:"iso_checksum" required:"true" cty:"iso_checksum" hcl:"iso_checksum"`
 	RawSingleISOUrl            *string                  `mapstructure:"iso_url" required:"true" cty:"iso_url" hcl:"iso_url"`
 	ISOUrls                    []string                 `mapstructure:"iso_urls" cty:"iso_urls" hcl:"iso_urls"`
@@ -72,6 +74,7 @@ type FlatConfig struct {
 	HTTPIP                     *string                  `mapstructure:"http_ip" cty:"http_ip" hcl:"http_ip"`
 	WaitTimeout                *string                  `mapstructure:"ip_wait_timeout" cty:"ip_wait_timeout" hcl:"ip_wait_timeout"`
 	SettleTimeout              *string                  `mapstructure:"ip_settle_timeout" cty:"ip_settle_timeout" hcl:"ip_settle_timeout"`
+	WaitAddress                *string                  `mapstructure:"ip_wait_address" cty:"ip_wait_address" hcl:"ip_wait_address"`
 	Type                       *string                  `mapstructure:"communicator" cty:"communicator" hcl:"communicator"`
 	PauseBeforeConnect         *string                  `mapstructure:"pause_before_connecting" cty:"pause_before_connecting" hcl:"pause_before_connecting"`
 	SSHHost                    *string                  `mapstructure:"ssh_host" cty:"ssh_host" hcl:"ssh_host"`
@@ -178,6 +181,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vgpu_profile":                   &hcldec.AttrSpec{Name: "vgpu_profile", Type: cty.String, Required: false},
 		"NestedHV":                       &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
 		"configuration_parameters":       &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
+		"tools_sync_time":                &hcldec.AttrSpec{Name: "tools_sync_time", Type: cty.Bool, Required: false},
+		"tools_upgrade_policy":           &hcldec.AttrSpec{Name: "tools_upgrade_policy", Type: cty.Bool, Required: false},
 		"iso_checksum":                   &hcldec.AttrSpec{Name: "iso_checksum", Type: cty.String, Required: false},
 		"iso_url":                        &hcldec.AttrSpec{Name: "iso_url", Type: cty.String, Required: false},
 		"iso_urls":                       &hcldec.AttrSpec{Name: "iso_urls", Type: cty.List(cty.String), Required: false},
@@ -196,6 +201,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"http_ip":                        &hcldec.AttrSpec{Name: "http_ip", Type: cty.String, Required: false},
 		"ip_wait_timeout":                &hcldec.AttrSpec{Name: "ip_wait_timeout", Type: cty.String, Required: false},
 		"ip_settle_timeout":              &hcldec.AttrSpec{Name: "ip_settle_timeout", Type: cty.String, Required: false},
+		"ip_wait_address":                &hcldec.AttrSpec{Name: "ip_wait_address", Type: cty.String, Required: false},
 		"communicator":                   &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
 		"pause_before_connecting":        &hcldec.AttrSpec{Name: "pause_before_connecting", Type: cty.String, Required: false},
 		"ssh_host":                       &hcldec.AttrSpec{Name: "ssh_host", Type: cty.String, Required: false},

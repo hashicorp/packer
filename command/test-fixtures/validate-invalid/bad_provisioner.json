@@ -1,0 +1,15 @@
+{
+  "builders":[
+    {
+      "type":"file",
+      "target":"chocolate.txt",
+      "content":"chocolate"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "comment": "unknown field"
+    }
+  ]
+}
