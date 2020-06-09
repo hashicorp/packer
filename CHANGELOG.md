@@ -40,7 +40,7 @@
 * builder/virtualbox: Add `output_filename` config option to allow to set a
     custom filename instead of forcing to be the same as vm_name. [GH-9174]
 * builder/vsphere: Add `floppy_label` option. [GH-9187]
-* builder/vsphere: Add `ip_wait_address` to allow packer to wait for an ip address that 
+* builder/vsphere: Add `ip_wait_address` to allow packer to wait for an ip address that
 fits within the range (cidr address).  [GH-9358]
 * builder/vsphere: Add `tools_sync_time` and `tools_upgrade_policy` options to set time
 synchronization and automatic VMware Tools upgrade. [GH-9366]
@@ -62,8 +62,6 @@ synchronization and automatic VMware Tools upgrade. [GH-9366]
 * post-processor/docker-tag: Change field name of docker tag to "tags" instead
     of "tag" since it's a list. Keep "tag" for backwards compatibility.
     [GH-9183]
-* provisioner/powershell: Update default execute command to handle script
-    errors [GH-9040]
 * provisioner/windows-restart: Display full hostname, instead of just the
     NetBIOS name [GH-9335]
 
