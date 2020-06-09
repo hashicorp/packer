@@ -13,29 +13,28 @@ export default [
     name: 'Getting Started',
     content: [
       {
-        title: 'Overview',
-        href: 'https://learn.hashicorp.com/packer/getting-started/install',
+        title: 'Install',
+        href: '/intro/getting-started/install',
       },
       {
         title: 'Build An Image',
-        href: 'https://learn.hashicorp.com/packer/getting-started/build-image',
+        href: '/intro/getting-started/build-image',
       },
       {
         title: 'Provision',
-        href: 'https://learn.hashicorp.com/packer/getting-started/provision',
+        href: '/intro/getting-started/provision',
       },
       {
         title: 'Parallel Builds',
-        href:
-          'https://learn.hashicorp.com/packer/getting-started/parallel-builds',
+        href: '/intro/getting-started/parallel-builds',
       },
       {
         title: 'Vagrant Boxes',
-        href: 'https://learn.hashicorp.com/packer/getting-started/vagrant',
+        href: '/intro/getting-started/vagrant',
       },
       {
         title: 'Next Steps',
-        href: 'https://learn.hashicorp.com/packer/getting-started/next',
+        href: '/intro/getting-started/next',
       },
     ],
   },
