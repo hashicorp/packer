@@ -98,3 +98,58 @@ func TestValidateCommandBadVersion(t *testing.T) {
 	}
 	t.Log(stdout)
 }
+
+func TestValidateCommandExcept(t *testing.T) {
+	tt := []struct {
+		name     string
+		args     []string
+		exitCode int
+	}{
+		{
+			name: "JSON: validate except build and post-processor",
+			args: []string{
+				"-except=vanilla,pear",
+				filepath.Join(testFixture("validate"), "validate_except.json"),
+			},
+		},
+		{
+			name: "JSON: fail validate except build and post-processor",
+			args: []string{
+				"-except=chocolate,apple",
+				filepath.Join(testFixture("validate"), "validate_except.json"),
+			},
+			exitCode: 1,
+		},
+		{
+			name: "HCL2: validate except build and post-processor",
+			args: []string{
+				"-except=file.vanilla,pear",
+				filepath.Join(testFixture("validate"), "validate_except.pkr.hcl"),
+			},
+		},
+		{
+			name: "HCL2: fail validation except build and post-processor",
+			args: []string{
+				"-except=file.chocolate,apple",
+				filepath.Join(testFixture("validate"), "validate_except.pkr.hcl"),
+			},
+			exitCode: 1,
+		},
+	}
+
+	c := &ValidateCommand{
+		Meta: testMetaFile(t),
+	}
+	c.CoreConfig.Version = "102.0.0"
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			defer cleanup()
+
+			tc := tc
+			if code := c.Run(tc.args); code != tc.exitCode {
+				fatalCommand(t, c.Meta)
+			}
+		})
+	}
+}

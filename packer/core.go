@@ -133,6 +133,8 @@ func (c *Core) BuildNames(only, except []string) []string {
 
 	sort.Strings(only)
 	sort.Strings(except)
+	c.except = except
+	c.only = only
 
 	r := make([]string, 0, len(c.builds))
 	for n := range c.builds {
@@ -319,7 +321,7 @@ func (c *Core) Build(n string) (Build, error) {
 				}
 			}
 			if foundExcept {
-				continue
+				break
 			}
 
 			// Get the post-processor
