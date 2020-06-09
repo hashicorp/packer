@@ -21,7 +21,7 @@ build {
     }
 
     provisioner "shell-local" {
-        inline = ["echo Hello World"]
+        scripts = fileset(".", "scripts/{install,secure}.sh")
     }
 
     post-processor "shell-local" {
