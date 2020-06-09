@@ -9,22 +9,23 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
-	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
-	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
-	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
-	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
-	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
-	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	Paths               []string          `mapstructure:"paths" required:"true" cty:"paths" hcl:"paths"`
-	FolderID            *string           `mapstructure:"folder_id" required:"true" cty:"folder_id" hcl:"folder_id"`
-	ServiceAccountID    *string           `mapstructure:"service_account_id" required:"true" cty:"service_account_id" hcl:"service_account_id"`
-	DiskSizeGb          *int              `mapstructure:"disk_size" required:"false" cty:"disk_size" hcl:"disk_size"`
-	DiskType            *string           `mapstructure:"disk_type" required:"false" cty:"disk_type" hcl:"disk_type"`
-	PlatformID          *string           `mapstructure:"platform_id" required:"false" cty:"platform_id" hcl:"platform_id"`
-	SubnetID            *string           `mapstructure:"subnet_id" required:"false" cty:"subnet_id" hcl:"subnet_id"`
-	Zone                *string           `mapstructure:"zone" required:"false" cty:"zone" hcl:"zone"`
-	Token               *string           `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
+	PackerBuildName       *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType     *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug           *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce           *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError         *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars        map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars   []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	Paths                 []string          `mapstructure:"paths" required:"true" cty:"paths" hcl:"paths"`
+	FolderID              *string           `mapstructure:"folder_id" required:"true" cty:"folder_id" hcl:"folder_id"`
+	ServiceAccountID      *string           `mapstructure:"service_account_id" required:"true" cty:"service_account_id" hcl:"service_account_id"`
+	DiskSizeGb            *int              `mapstructure:"disk_size" required:"false" cty:"disk_size" hcl:"disk_size"`
+	DiskType              *string           `mapstructure:"disk_type" required:"false" cty:"disk_type" hcl:"disk_type"`
+	PlatformID            *string           `mapstructure:"platform_id" required:"false" cty:"platform_id" hcl:"platform_id"`
+	SubnetID              *string           `mapstructure:"subnet_id" required:"false" cty:"subnet_id" hcl:"subnet_id"`
+	Zone                  *string           `mapstructure:"zone" required:"false" cty:"zone" hcl:"zone"`
+	Token                 *string           `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
+	ServiceAccountKeyFile *string           `mapstructure:"service_account_key_file" required:"false" cty:"service_account_key_file" hcl:"service_account_key_file"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -55,6 +56,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"subnet_id":                  &hcldec.AttrSpec{Name: "subnet_id", Type: cty.String, Required: false},
 		"zone":                       &hcldec.AttrSpec{Name: "zone", Type: cty.String, Required: false},
 		"token":                      &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
+		"service_account_key_file":   &hcldec.AttrSpec{Name: "service_account_key_file", Type: cty.String, Required: false},
 	}
 	return s
 }
