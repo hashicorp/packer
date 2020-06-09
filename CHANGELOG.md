@@ -6,48 +6,49 @@
     removed. Run `packer fix template.json` to migrate an existing template
     [GH-9149]
 
-* For all iso based builders, the `iso_checksum_type` and `iso_checksum_url`
+* For all iso-based builders, the `iso_checksum_type` and `iso_checksum_url`
     fields have been removed in favor of simply setting the `iso_checksum`
     field. Use the [packer fix](https://www.packer.io/docs/commands/fix/)
-    command to update a config file. See any [iso_checksum field
+    command to update a config file. See the [iso_checksum field
     docs](https://www.packer.io/docs/builders/virtualbox/iso/#iso_checksum) to
-    read more about this[GH-8437]
+    read more about this. [GH-8437]
 
 ### FEATURES:
 * **New post-processor** Yandex Export [GH-9124]
+* builder/amazon: Add SSM Session Manager as a SSH interface connection
+    [GH-9082]
+* builder/google: Implement iap proxy for googlecompute [GH-9105]
 * HCL2/core: Add command/console support for HCL2 config files [GH-9359]
 * HCL2/core: Add command/validate support for HCL2 config files [GH-9346]
 * HCL2/core: it is now possible to set source fields from the `build` block
     [GH-9291]
 
 ### IMPROVEMENTS:
-* builder/amazon: Add SSM Session Manager as a SSH interface connection
-    [GH-9082]
 * builder/amazon: Added new `build` template function field:
     SourceAMICreationDate [GH-9277]
 * builder/azure-arm: Support User Assigned Managed Identity [GH-9293]
 * builder/azure-chroot: Copy data disks between shared image galleries
     [GH-9323]
-* builder/google: Implement iap proxy for googlecompute [GH-9105]
 * builder/googlecompute: Changed default disk size. [GH-9071]
 * builder/googlecompute: New option to specify storage location for GCP images
     [GH-9326]
-* builder/qemu: add support for using a network bridge [GH-9159]
+* builder/qemu: Add support for using a network bridge [GH-9159]
 * builder/qemu: Added `skip_nat_mapping` option to skip the communicator (SSH
     or WinRM) automatic port forward and use the guest port directly. [GH-9307]
 * builder/qemu: Replace deprecated `ssh_host_port_min` and `ssh_host_port_max`
     by `host_port_min` and `host_port_max`. [GH-9307]
-* builder/virtualbox: Add `output_filename` config option to allow to set a
-    custom filename instead of forcing to be the same as vm_name. [GH-9174]
+* builder/virtualbox: Add `output_filename` config option to allow user to set
+    a custom filename instead of forcing it to be the same as vm_name.
+    [GH-9174]
 * builder/vsphere: Add `floppy_label` option. [GH-9187]
-* builder/vsphere: Add `ip_wait_address` to allow packer to wait for an ip address that
-fits within the range (cidr address).  [GH-9358]
-* builder/vsphere: Add `tools_sync_time` and `tools_upgrade_policy` options to set time
-synchronization and automatic VMware Tools upgrade. [GH-9366]
-* core/hcl: Enable force, debug, and on-error command line flags for hcl2
+* builder/vsphere: Add `ip_wait_address` to allow packer to wait for an ip
+    address that fits within the range (cidr address).  [GH-9358]
+* builder/vsphere: Add `tools_sync_time` and `tools_upgrade_policy` options to
+    set time synchronization and automatic VMware Tools upgrade. [GH-9366]
+* core/hcl: Enable "force", "debug", and "on-error" command line flags for hcl2
     builds. [GH-9234]
-* core/hcl: Support named builds in HCL2 templates [GH-9245]
 * core/hcl: Enable only/except for provisioners and post-processors [GH-9357]
+* core/hcl: Support named builds in HCL2 templates [GH-9245]
 * core/interpolation: Add support for specifying a particular key to fetch from
     the AWS Secrets Manager [GH-9202] [GH-9286]
 * core: HCL logs now display source type and source name (`type.name`) in logs
