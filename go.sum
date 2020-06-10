@@ -607,6 +607,11 @@ github.com/vmihailenco/msgpack v3.3.3+incompatible h1:wapg9xDUZDzGCNFlwc5SqI1rvc
 github.com/vmihailenco/msgpack v3.3.3+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
 github.com/vmware/govmomi v0.21.0 h1:jc8uMuxpcV2xMAA/cnEDlnsIjvqcMra5Y8onh/U3VuY=
 github.com/vmware/govmomi v0.21.0/go.mod h1:zbnFoBQ9GIjs2RVETy8CNEpb+L+Lwkjs3XZUL0B3/m0=
+github.com/vmware/govmomi v0.22.0 h1:fIg5KkUxu4b/y1BmmtNFO9pyN10CkVzvriaJyynAdE8=
+github.com/vmware/govmomi v0.22.0/go.mod h1:Y+Wq4lst78L85Ge/F8+ORXIWiKYqaro1vhAulACy9Lc=
+github.com/vmware/govmomi v0.22.1/go.mod h1:Y+Wq4lst78L85Ge/F8+ORXIWiKYqaro1vhAulACy9Lc=
+github.com/vmware/govmomi v0.22.2 h1:hmLv4f+RMTTseqtJRijjOWzwELiaLMIoHv2D6H3bF4I=
+github.com/vmware/govmomi v0.22.2/go.mod h1:Y+Wq4lst78L85Ge/F8+ORXIWiKYqaro1vhAulACy9Lc=
 github.com/vmware/vmw-guestinfo v0.0.0-20170707015358-25eff159a728/go.mod h1:x9oS4Wk2s2u4tS29nEaDLdzvuHdB19CvSGJjPgkZJNk=
 github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0 h1:NJrcIkdzq0C3I8ypAZwFE9RHtGbfp+mJvqIcoFATZuk=
 github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0/go.mod h1:sBh287mCRwCz6zyXHMmw7sSZGPohVpnx+o+OY4M+i3A=

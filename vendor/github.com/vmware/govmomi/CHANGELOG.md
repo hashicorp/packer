@@ -1,5 +1,57 @@
 # changelog
 
+### 0.22.1 (2020-01-13)
+
+* Fix SAML token auth using Holder-of-Key with delegated Bearer identity against 6.7 U3b+
+
+### 0.22.0 (2020-01-10)
+
+* Add OVF properties to library.Deploy method
+
+* Add retry support for HTTP status codes
+
+* Use cs.identity service type for sts endpoint lookups
+
+* Add Content Library VM template APIs
+
+* Add SearchIndex FindAllByDnsName and FindAllByIp methods
+
+* Fix HostSystem.ManagementIPs to use SelectedVnic
+
+* Change generated ResourceReductionToToleratePercent to pointer type
+
+* Add DistributedVirtualSwitch.ReconfigureDVPort method
+
+* Add VirtualMachine.IsTemplate method
+
+* Add GetInventoryPath to NetworkReference interface
+
+* Support HoK tokens with Interactive Users
+
+* Replace mo.LoadRetrievePropertiesResponse with mo.LoadObjectContent
+
+* Add VirtualHardwareSection.StorageItem
+
+* Add ResourcePool.Owner method
+
+* Add VirtualMachine.QueryChangedDiskAreas method
+
+* Update generated code to vSphere 6.7u3
+
+* Add option to propagate MissingSet faults in property.WaitForUpdates
+
+* Add content library subscription support
+
+* Fix deadlock for keep alive handlers that attempt log in
+
+* Add CNS API bindings
+
+* Add FetchCapabilityMetadata method to Pbm client
+
+* Add v4 option to VirtualMachine.WaitForIP
+
+* Add VirtualHardwareSection.StorageItem
+
 ### 0.21.0 (2019-07-24)
 
 * Add vsan package

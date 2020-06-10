@@ -12,7 +12,7 @@ services:       false
 
 # Set the version of Go.
 language:       go
-go:             1.12
+go:             1.13
 
 # Always set the project's Go import path to ensure that forked
 # builds get cloned to the correct location.
@@ -35,7 +35,7 @@ jobs:
     - <<:            *lint-stage
       env:           LINTER=goimports
 
-    # The "build" stage verifies the program can be built against the 
+    # The "build" stage verifies the program can be built against the
     # various GOOS and GOARCH combinations found in the Go releaser
     # config file, ".goreleaser.yml".
     - &build-stage

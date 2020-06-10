@@ -28,7 +28,7 @@ The code in the `govmomi` package is a wrapper for the code that is generated fr
 It primarily provides convenience functions for working with the vSphere API.
 See [godoc.org][godoc] for documentation.
 
-[apiref]:http://pubs.vmware.com/vsphere-6-5/index.jsp#com.vmware.wssdk.apiref.doc/right-pane.html
+[apiref]:https://code.vmware.com/apis/196/vsphere
 [godoc]:http://godoc.org/github.com/vmware/govmomi
 
 ## Installation

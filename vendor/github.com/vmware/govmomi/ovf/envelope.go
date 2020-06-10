@@ -154,8 +154,9 @@ type VirtualHardwareSection struct {
 	ID        *string `xml:"id,attr"`
 	Transport *string `xml:"transport,attr"`
 
-	System *VirtualSystemSettingData       `xml:"System"`
-	Item   []ResourceAllocationSettingData `xml:"Item"`
+	System      *VirtualSystemSettingData       `xml:"System"`
+	Item        []ResourceAllocationSettingData `xml:"Item"`
+	StorageItem []StorageAllocationSettingData  `xml:"StorageItem"`
 }
 
 type VirtualSystemSettingData struct {
@@ -164,6 +165,14 @@ type VirtualSystemSettingData struct {
 
 type ResourceAllocationSettingData struct {
 	CIMResourceAllocationSettingData
+
+	Required      *bool   `xml:"required,attr"`
+	Configuration *string `xml:"configuration,attr"`
+	Bound         *string `xml:"bound,attr"`
+}
+
+type StorageAllocationSettingData struct {
+	CIMStorageAllocationSettingData
 
 	Required      *bool   `xml:"required,attr"`
 	Configuration *string `xml:"configuration,attr"`

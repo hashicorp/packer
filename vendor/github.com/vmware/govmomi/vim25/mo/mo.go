@@ -79,12 +79,13 @@ func init() {
 type ClusterComputeResource struct {
 	ComputeResource
 
-	Configuration     types.ClusterConfigInfo          `mo:"configuration"`
-	Recommendation    []types.ClusterRecommendation    `mo:"recommendation"`
-	DrsRecommendation []types.ClusterDrsRecommendation `mo:"drsRecommendation"`
-	MigrationHistory  []types.ClusterDrsMigration      `mo:"migrationHistory"`
-	ActionHistory     []types.ClusterActionHistory     `mo:"actionHistory"`
-	DrsFault          []types.ClusterDrsFaults         `mo:"drsFault"`
+	Configuration     types.ClusterConfigInfo                    `mo:"configuration"`
+	Recommendation    []types.ClusterRecommendation              `mo:"recommendation"`
+	DrsRecommendation []types.ClusterDrsRecommendation           `mo:"drsRecommendation"`
+	HciConfig         *types.ClusterComputeResourceHCIConfigInfo `mo:"hciConfig"`
+	MigrationHistory  []types.ClusterDrsMigration                `mo:"migrationHistory"`
+	ActionHistory     []types.ClusterActionHistory               `mo:"actionHistory"`
+	DrsFault          []types.ClusterDrsFaults                   `mo:"drsFault"`
 }
 
 func init() {
