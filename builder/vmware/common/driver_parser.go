@@ -1996,27 +1996,31 @@ func flattenNetworkingConfig(in chan networkingCommandEntry) NetworkingConfig {
 // Constructor for networking file
 func ReadNetworkingConfig(fd *os.File) (NetworkingConfig, error) {
 
-	// start piecing together different parts of the file
+	// start piecing together all of the differents parts of the file and split
+	// it into its individual rows.
 	fromfile := consumeFile(fd)
 	tokenized := tokenizeNetworkingConfig(fromfile)
 	rows := splitNetworkingConfig(tokenized)
-	entries := parseNetworkingConfig(rows)
 
-	// parse the version
+	// consume the version _first_. this is important because if the version is
+	// wrong, then there's likely tokens that we won't know how to interpret.
 	parsed_version, err := networkingReadVersion(<-rows)
 	if err != nil {
 		return NetworkingConfig{}, err
 	}
 
-	// verify that it's 1.0 since that's all we support.
-	version := parsed_version.Number()
-	if version != 1.0 {
+	// verify that it's 1.0 since that's all we support for now.
+	if version := parsed_version.Number(); version != 1.0 {
 		return NetworkingConfig{}, fmt.Errorf("Expected version %f of networking file. Received version %f.", 1.0, version)
 	}
 
-	// convert to a configuration
-	result := flattenNetworkingConfig(entries)
-	return result, nil
+	// now that our version has been confirmed, we can proceed to parse the
+	// rest of the file and parseNetworkingConfig is free to consume rows as
+	// much as it wants to.
+	entries := parseNetworkingConfig(rows)
+
+	// convert what we've parsed into a configuration that's easy to interpret
+	return flattenNetworkingConfig(entries), nil
 }
 
 // netmapper interface
