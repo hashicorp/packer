@@ -46,14 +46,6 @@ type Config struct {
 	// The size, in megabytes, of the hard disk to create for the VM. By
 	// default, this is 40000 (about 40 GB).
 	DiskSize uint `mapstructure:"disk_size" required:"false"`
-	// The method by which guest additions are made available to the guest for
-	// installation. Valid options are upload, attach, or disable. If the mode
-	// is attach the guest additions ISO will be attached as a CD device to the
-	// virtual machine. If the mode is upload the guest additions ISO will be
-	// uploaded to the path specified by guest_additions_path. The default
-	// value is upload. If disable is used, guest additions won't be
-	// downloaded, either.
-	GuestAdditionsMode string `mapstructure:"guest_additions_mode" required:"false"`
 	// The path on the guest virtual machine where the VirtualBox guest
 	// additions ISO will be uploaded. By default this is
 	// VBoxGuestAdditions.iso which should upload into the login directory of
