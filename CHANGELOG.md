@@ -1,5 +1,9 @@
 ## 1.6.1 (Upcoming)
 
+### FEATURES:
+* builder/vsphere-clone: Add `boot_command` support to vsphere-clone builder,
+    including support for starting an HTTP server
+
 ## 1.6.0 (June 09, 2020)
 
 ### BACKWARDS INCOMPATIBILITIES:
