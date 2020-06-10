@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yandex-cloud/go-sdk/iamkey"
+
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/hashicorp/packer/common"
@@ -46,6 +48,10 @@ type Config struct {
 	// OAuth token to use to authenticate to Yandex.Cloud. Alternatively you may set
 	// value by environment variable YC_TOKEN.
 	Token string `mapstructure:"token" required:"false"`
+	// Path to file with Service Account key in json format. This
+	// is an alternative method to authenticate to Yandex.Cloud. Alternatively you may set environment variable
+	// YC_SERVICE_ACCOUNT_KEY_FILE.
+	ServiceAccountKeyFile string `mapstructure:"service_account_key_file" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -76,6 +82,31 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// provision config by OS environment variables
 	if p.config.Token == "" {
 		p.config.Token = os.Getenv("YC_TOKEN")
+	}
+
+	if p.config.ServiceAccountKeyFile == "" {
+		p.config.ServiceAccountKeyFile = os.Getenv("YC_SERVICE_ACCOUNT_KEY_FILE")
+	}
+
+	if p.config.Token == "" && p.config.ServiceAccountKeyFile == "" {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("a token or service account key file must be specified"))
+	}
+
+	if p.config.Token != "" && p.config.ServiceAccountKeyFile != "" {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("one of token or service account key file must be specified, not both"))
+	}
+
+	if p.config.Token != "" {
+		packer.LogSecretFilter.Set(p.config.Token)
+	}
+
+	if p.config.ServiceAccountKeyFile != "" {
+		if _, err := iamkey.ReadFromJSONFile(p.config.ServiceAccountKeyFile); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("fail to read service account key file: %s", err))
+		}
 	}
 
 	if p.config.FolderID == "" {
@@ -133,6 +164,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	yandexConfig := ycSaneDefaults()
 	yandexConfig.Token = p.config.Token
+	yandexConfig.ServiceAccountKeyFile = p.config.ServiceAccountKeyFile
 	yandexConfig.DiskName = exporterName
 	yandexConfig.InstanceName = exporterName
 	yandexConfig.DiskSizeGb = p.config.DiskSizeGb
@@ -144,8 +176,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	if p.config.ServiceAccountID != "" {
 		yandexConfig.ServiceAccountID = p.config.ServiceAccountID
 	}
+
 	if p.config.PlatformID != "" {
-		yandexConfig.ServiceAccountID = p.config.ServiceAccountID
+		yandexConfig.PlatformID = p.config.PlatformID
 	}
 
 	driver, err := yandex.NewDriverYC(ui, &yandexConfig)
