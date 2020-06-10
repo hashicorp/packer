@@ -11,3 +11,5 @@ require (
 	github.com/kr/text v0.1.0 // indirect
 	github.com/vmware/vmw-guestinfo v0.0.0-20170707015358-25eff159a728
 )
+
+go 1.13

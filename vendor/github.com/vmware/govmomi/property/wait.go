@@ -20,13 +20,15 @@ import (
 	"context"
 
 	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 // WaitFilter provides helpers to construct a types.CreateFilter for use with property.Wait
 type WaitFilter struct {
 	types.CreateFilter
-	Options *types.WaitOptions
+	Options          *types.WaitOptions
+	PropagateMissing bool
 }
 
 // Add a new ObjectSpec and PropertySpec to the WaitFilter
@@ -81,6 +83,8 @@ func Wait(ctx context.Context, c *Collector, obj types.ManagedObjectReference, p
 // The newly created collector is destroyed before this function returns (both
 // in case of success or error).
 //
+// By default, ObjectUpdate.MissingSet faults are not propagated to the returned error,
+// set WaitFilter.PropagateMissing=true to enable MissingSet fault propagation.
 func WaitForUpdates(ctx context.Context, c *Collector, filter *WaitFilter, f func([]types.ObjectUpdate) bool) error {
 	p, err := c.Create(ctx)
 	if err != nil {
@@ -125,6 +129,15 @@ func WaitForUpdates(ctx context.Context, c *Collector, filter *WaitFilter, f fun
 		req.Version = set.Version
 
 		for _, fs := range set.FilterSet {
+			if filter.PropagateMissing {
+				for i := range fs.ObjectSet {
+					for _, p := range fs.ObjectSet[i].MissingSet {
+						// Same behavior as mo.ObjectContentToType()
+						return soap.WrapVimFault(p.Fault.Fault)
+					}
+				}
+			}
+
 			if f(fs.ObjectSet) {
 				return nil
 			}

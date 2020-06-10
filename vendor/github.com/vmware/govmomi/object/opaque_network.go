@@ -35,6 +35,10 @@ func NewOpaqueNetwork(c *vim25.Client, ref types.ManagedObjectReference) *Opaque
 	}
 }
 
+func (n OpaqueNetwork) GetInventoryPath() string {
+	return n.InventoryPath
+}
+
 // EthernetCardBackingInfo returns the VirtualDeviceBackingInfo for this Network
 func (n OpaqueNetwork) EthernetCardBackingInfo(ctx context.Context) (types.BaseVirtualDeviceBackingInfo, error) {
 	var net mo.OpaqueNetwork

@@ -123,7 +123,18 @@ func Wait(ctx context.Context, ref types.ManagedObjectReference, pc *property.Co
 		defer close(cb.ch)
 	}
 
-	err := property.Wait(ctx, pc, ref, []string{"info"}, cb.fn)
+	filter := &property.WaitFilter{PropagateMissing: true}
+	filter.Add(ref, ref.Type, []string{"info"})
+
+	err := property.WaitForUpdates(ctx, pc, filter, func(updates []types.ObjectUpdate) bool {
+		for _, update := range updates {
+			if cb.fn(update.ChangeSet) {
+				return true
+			}
+		}
+
+		return false
+	})
 	if err != nil {
 		return nil, err
 	}

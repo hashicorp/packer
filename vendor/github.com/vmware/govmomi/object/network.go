@@ -34,6 +34,10 @@ func NewNetwork(c *vim25.Client, ref types.ManagedObjectReference) *Network {
 	}
 }
 
+func (n Network) GetInventoryPath() string {
+	return n.InventoryPath
+}
+
 // EthernetCardBackingInfo returns the VirtualDeviceBackingInfo for this Network
 func (n Network) EthernetCardBackingInfo(ctx context.Context) (types.BaseVirtualDeviceBackingInfo, error) {
 	var e mo.Network
