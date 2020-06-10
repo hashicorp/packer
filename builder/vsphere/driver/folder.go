@@ -2,6 +2,7 @@ package driver
 
 import (
 	"fmt"
+	"path"
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -21,7 +22,7 @@ func (d *Driver) NewFolder(ref *types.ManagedObjectReference) *Folder {
 }
 
 func (d *Driver) FindFolder(name string) (*Folder, error) {
-	f, err := d.finder.Folder(d.ctx, fmt.Sprintf("%v/vm/%v", d.datacenter.InventoryPath, name))
+	f, err := d.finder.Folder(d.ctx, path.Join(d.datacenter.InventoryPath, "vm", name))
 	if err != nil {
 		return nil, err
 	}
