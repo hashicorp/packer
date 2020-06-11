@@ -221,3 +221,15 @@ func TestPathEndsWithSeperator(t *testing.T) {
 		t.Fatalf("pathEndsWithSeperator should be false for path: %s", path)
 	}
 }
+
+func TestGuessPathEndsWithSeperator(t *testing.T) {
+	path := "abc" + string(os.PathSeparator)
+	if guessPathEndsWithSeperator(path) == false {
+		t.Fatalf("guessPathEndsWithSeperator should be true for path: %s", path)
+	}
+
+	path = "abc"
+	if guessPathEndsWithSeperator(path) == true {
+		t.Fatalf("guessPathEndsWithSeperator should be false for path: %s", path)
+	}
+}

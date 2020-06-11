@@ -126,7 +126,7 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 		// if it doesn't end with a /, set dir as the parent dir
 		if !pathEndsWithSeperator(dst) {
 			dir = filepath.Dir(dir)
-		} else if !pathEndsWithSeperator(src) && !strings.HasSuffix(src, "*") {
+		} else if !guessPathEndsWithSeperator(src) && !strings.HasSuffix(src, "*") {
 			dst = filepath.Join(dst, filepath.Base(src))
 		}
 		if dir != "" {
@@ -136,7 +136,7 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 			}
 		}
 		// if the src was a dir, download the dir
-		if pathEndsWithSeperator(src) || strings.ContainsAny(src, "*?[") {
+		if guessPathEndsWithSeperator(src) || strings.ContainsAny(src, "*?[") {
 			return comm.DownloadDir(src, dst, nil)
 		}
 
@@ -194,7 +194,7 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 			return err
 		}
 
-		if pathEndsWithSeperator(dst) {
+		if guessPathEndsWithSeperator(dst) {
 			dst = dst + filepath.Base(src)
 		}
 
@@ -224,4 +224,9 @@ func pathEndsWithSeperator(path string) bool {
 		// Non windows operating systems only know one seperator, so we can use the one defined by the OS package
 		return strings.HasSuffix(path, string(os.PathSeparator))
 	}
+}
+
+func guessPathEndsWithSeperator(path string) bool {
+	// When we don't know the type of the OS since it is remote, we search for the two most common seperators
+	return strings.HasSuffix(path, "/") || strings.HasSuffix(path, "\\")
 }
