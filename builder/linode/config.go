@@ -34,8 +34,6 @@ type Config struct {
 	RootSSHKey   string   `mapstructure:"root_ssh_key"`
 	ImageLabel   string   `mapstructure:"image_label"`
 	Description  string   `mapstructure:"image_description"`
-
-	interCtx interpolate.Context
 }
 
 func createRandomRootPassword() (string, error) {
@@ -130,7 +128,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	for _, t := range c.Tags {
 		if !tagRe.MatchString(t) {
-			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("invalid tag: %s", t)))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("invalid tag: %s", t))
 		}
 	}
 
