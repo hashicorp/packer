@@ -6,7 +6,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 gazelle(
     name = "gazelle",
     command = "fix",
-    prefix = "gopkg.in/resty.v1",
+    prefix = "github.com/go-resty/resty/v2",
 )
 
 go_library(
@@ -15,7 +15,7 @@ go_library(
         ["*.go"],
         exclude = ["*_test.go"],
     ),
-    importpath = "gopkg.in/resty.v1",
+    importpath = "github.com/go-resty/resty/v2",
     visibility = ["//visibility:public"],
     deps = ["@org_golang_x_net//publicsuffix:go_default_library"],
 )
@@ -29,7 +29,7 @@ go_test(
         ),
     data = glob([".testdata/*"]),
     embed = [":go_default_library"],
-    importpath = "gopkg.in/resty.v1",
+    importpath = "github.com/go-resty/resty/v2",
     deps = [
         "@org_golang_x_net//proxy:go_default_library",
     ],

@@ -222,6 +222,8 @@ github.com/go-ini/ini
 # github.com/go-ole/go-ole v1.2.4
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
+# github.com/go-resty/resty/v2 v2.3.0
+github.com/go-resty/resty/v2
 # github.com/gobwas/glob v0.2.3
 github.com/gobwas/glob
 github.com/gobwas/glob/compiler
@@ -435,8 +437,10 @@ github.com/klauspost/pgzip
 github.com/konsorten/go-windows-terminal-sequences
 # github.com/kr/fs v0.0.0-20131111012553-2788f0dbd169
 github.com/kr/fs
-# github.com/linode/linodego v0.7.1
+# github.com/linode/linodego v0.14.0
 github.com/linode/linodego
+github.com/linode/linodego/internal/duration
+github.com/linode/linodego/internal/parseabletime
 # github.com/masterzen/azure-sdk-for-go v0.0.0-20161014135628-ee4f0065d00c
 github.com/masterzen/azure-sdk-for-go/core/http
 github.com/masterzen/azure-sdk-for-go/core/tls
@@ -702,7 +706,7 @@ golang.org/x/mobile/event/key
 # golang.org/x/mod v0.2.0
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
+# golang.org/x/net v0.0.0-20200602114024-627f9648deb9
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/html
@@ -851,8 +855,6 @@ google.golang.org/grpc/status
 google.golang.org/grpc/tap
 # gopkg.in/ini.v1 v1.42.0
 gopkg.in/ini.v1
-# gopkg.in/resty.v1 v1.12.0
-gopkg.in/resty.v1
 # gopkg.in/square/go-jose.v2 v2.3.1
 gopkg.in/square/go-jose.v2
 gopkg.in/square/go-jose.v2/cipher
