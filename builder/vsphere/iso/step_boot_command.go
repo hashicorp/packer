@@ -3,25 +3,19 @@ package iso
 import (
 	"context"
 	"fmt"
-	"log"
-	"net"
-	"os"
-	"strings"
-	"time"
-	"unicode/utf8"
-
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	packerCommon "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/mobile/event/key"
+	"time"
 )
 
 type BootConfig struct {
-	BootCommand []string      `mapstructure:"boot_command"`
-	BootWait    time.Duration `mapstructure:"boot_wait"` // example: "1m30s"; default: "10s"
-	HTTPIP      string        `mapstructure:"http_ip"`
+	bootcommand.BootConfig `mapstructure:",squash"`
+	HTTPIP                 string `mapstructure:"http_ip"`
 }
 
 type bootCommandTemplateData struct {
@@ -30,12 +24,14 @@ type bootCommandTemplateData struct {
 	Name     string
 }
 
-func (c *BootConfig) Prepare() []error {
+func (c *BootConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
 
 	if c.BootWait == 0 {
 		c.BootWait = 10 * time.Second
 	}
+
+	c.BootConfig.Prepare(ctx)
 
 	return errs
 }
@@ -46,44 +42,8 @@ type StepBootCommand struct {
 	Ctx    interpolate.Context
 }
 
-var special = map[string]key.Code{
-	"<enter>":    key.CodeReturnEnter,
-	"<esc>":      key.CodeEscape,
-	"<bs>":       key.CodeDeleteBackspace,
-	"<del>":      key.CodeDeleteForward,
-	"<tab>":      key.CodeTab,
-	"<f1>":       key.CodeF1,
-	"<f2>":       key.CodeF2,
-	"<f3>":       key.CodeF3,
-	"<f4>":       key.CodeF4,
-	"<f5>":       key.CodeF5,
-	"<f6>":       key.CodeF6,
-	"<f7>":       key.CodeF7,
-	"<f8>":       key.CodeF8,
-	"<f9>":       key.CodeF9,
-	"<f10>":      key.CodeF10,
-	"<f11>":      key.CodeF11,
-	"<f12>":      key.CodeF12,
-	"<insert>":   key.CodeInsert,
-	"<home>":     key.CodeHome,
-	"<end>":      key.CodeEnd,
-	"<pageUp>":   key.CodePageUp,
-	"<pageDown>": key.CodePageDown,
-	"<left>":     key.CodeLeftArrow,
-	"<right>":    key.CodeRightArrow,
-	"<up>":       key.CodeUpArrow,
-	"<down>":     key.CodeDownArrow,
-}
-
-var keyInterval = packerCommon.PackerKeyDefault
-
-func init() {
-	if delay, err := time.ParseDuration(os.Getenv(packerCommon.PackerKeyEnv)); err == nil {
-		keyInterval = delay
-	}
-}
-
-func (s *StepBootCommand) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	debug := state.Get("debug").(bool)
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
@@ -91,28 +51,25 @@ func (s *StepBootCommand) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionContinue
 	}
 
-	ui.Say(fmt.Sprintf("Waiting %s for boot...", s.Config.BootWait))
-	wait := time.After(s.Config.BootWait)
-WAITLOOP:
-	for {
+	// Wait the for the vm to boot.
+	if int64(s.Config.BootWait) > 0 {
+		ui.Say(fmt.Sprintf("Waiting %s for boot...", s.Config.BootWait.String()))
 		select {
-		case <-wait:
-			break WAITLOOP
-		case <-time.After(1 * time.Second):
-			if _, ok := state.GetOk(multistep.StateCancelled); ok {
-				return multistep.ActionHalt
-			}
+		case <-time.After(s.Config.BootWait):
+			break
+		case <-ctx.Done():
+			return multistep.ActionHalt
 		}
+	}
+
+	var pauseFn multistep.DebugPauseFn
+	if debug {
+		pauseFn = state.Get("pauseFn").(multistep.DebugPauseFn)
 	}
 
 	port := state.Get("http_port").(int)
 	if port > 0 {
-		ip, err := getHostIP(s.Config.HTTPIP)
-		if err != nil {
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
-		state.Put("http_ip", ip)
+		ip := state.Get("http_ip").(string)
 		s.Ctx.Data = &bootCommandTemplateData{
 			ip,
 			port,
@@ -121,136 +78,72 @@ WAITLOOP:
 		ui.Say(fmt.Sprintf("HTTP server is working at http://%v:%v/", ip, port))
 	}
 
-	ui.Say("Typing boot command...")
-	var keyAlt bool
-	var keyCtrl bool
-	var keyShift bool
-	for _, command := range s.Config.BootCommand {
-		message, err := interpolate.Render(command, &s.Ctx)
-		if err != nil {
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
+	sendCodes := func(codes []key.Code, downs []bool) error {
+		var spec types.UsbScanCodeSpec
 
-		for len(message) > 0 {
-			if _, ok := state.GetOk(multistep.StateCancelled); ok {
-				return multistep.ActionHalt
+		for i, code := range codes {
+			var keyAlt, keyCtrl, keyShift bool
+
+			switch code {
+			case key.CodeLeftAlt:
+				// <leftAltOn>
+				keyAlt = downs[i]
+			case key.CodeLeftControl:
+				// <leftCtrlOn>
+				keyCtrl = downs[i]
+			case key.CodeLeftShift:
+				// <leftShiftOn>
+				keyShift = downs[i]
 			}
 
-			if strings.HasPrefix(message, "<wait>") {
-				log.Printf("Waiting 1 second")
-				time.Sleep(1 * time.Second)
-				message = message[len("<wait>"):]
-				continue
-			}
-
-			if strings.HasPrefix(message, "<wait5>") {
-				log.Printf("Waiting 5 seconds")
-				time.Sleep(5 * time.Second)
-				message = message[len("<wait5>"):]
-				continue
-			}
-
-			if strings.HasPrefix(message, "<wait10>") {
-				log.Printf("Waiting 10 seconds")
-				time.Sleep(10 * time.Second)
-				message = message[len("<wait10>"):]
-				continue
-			}
-
-			if strings.HasPrefix(message, "<leftAltOn>") {
-				keyAlt = true
-				message = message[len("<leftAltOn>"):]
-				continue
-			}
-
-			if strings.HasPrefix(message, "<leftAltOff>") {
-				keyAlt = false
-				message = message[len("<leftAltOff>"):]
-				continue
-			}
-
-			if strings.HasPrefix(message, "<leftCtrlOn>") {
-				keyCtrl = true
-				message = message[len("<leftCtrlOn>"):]
-				continue
-			}
-
-			if strings.HasPrefix(message, "<leftCtrlOff>") {
-				keyCtrl = false
-				message = message[len("<leftCtrlOff>"):]
-				continue
-			}
-
-			if strings.HasPrefix(message, "<leftShiftOn>") {
-				keyShift = true
-				message = message[len("<leftShiftOn>"):]
-				continue
-			}
-
-			if strings.HasPrefix(message, "<leftShiftOff>") {
-				keyShift = false
-				message = message[len("<leftShiftOff>"):]
-				continue
-			}
-
-			var scancode key.Code
-			for specialCode, specialValue := range special {
-				if strings.HasPrefix(message, specialCode) {
-					scancode = specialValue
-					log.Printf("Special code '%s' found, replacing with: %s", specialCode, specialValue)
-					message = message[len(specialCode):]
-				}
-			}
-
-			var char rune
-			if scancode == 0 {
-				var size int
-				char, size = utf8.DecodeRuneInString(message)
-				message = message[size:]
-			}
-
-			_, err := vm.TypeOnKeyboard(driver.KeyInput{
-				Message:  string(char),
-				Scancode: scancode,
-				Ctrl:     keyCtrl,
-				Alt:      keyAlt,
-				Shift:    keyShift,
+			spec.KeyEvents = append(spec.KeyEvents, types.UsbScanCodeSpecKeyEvent{
+				UsbHidCode: int32(code)<<16 | 7,
+				Modifiers: &types.UsbScanCodeSpecModifierType{
+					LeftControl: &keyCtrl,
+					LeftAlt:     &keyAlt,
+					LeftShift:   &keyShift,
+				},
 			})
-			if err != nil {
-				state.Put("error", fmt.Errorf("error typing a boot command: %v", err))
-				return multistep.ActionHalt
-			}
-			time.Sleep(keyInterval)
 		}
+
+		_, err := vm.TypeOnKeyboard(spec)
+		if err != nil {
+			return fmt.Errorf("error typing a boot command: %v", err)
+		}
+		return nil
+	}
+	d := bootcommand.NewUSBDriver(sendCodes, s.Config.BootGroupInterval)
+
+	ui.Say("Typing boot command...")
+	flatBootCommand := s.Config.FlatBootCommand()
+	command, err := interpolate.Render(flatBootCommand, &s.Ctx)
+	if err != nil {
+		err := fmt.Errorf("Error preparing boot command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	seq, err := bootcommand.GenerateExpressionSequence(command)
+	if err != nil {
+		err := fmt.Errorf("Error generating boot command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	if err := seq.Do(ctx, d); err != nil {
+		err := fmt.Errorf("Error running boot command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	if pauseFn != nil {
+		pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command: %s", command), state)
 	}
 
 	return multistep.ActionContinue
 }
 
-func (s *StepBootCommand) Cleanup(state multistep.StateBag) {}
-
-func getHostIP(s string) (string, error) {
-	if s != "" {
-		if net.ParseIP(s) != nil {
-			return s, nil
-		} else {
-			return "", fmt.Errorf("invalid IP address")
-		}
-	}
-
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "", err
-	}
-
-	for _, a := range addrs {
-		ipnet, ok := a.(*net.IPNet)
-		if ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String(), nil
-			}
-		}
-	}
-	return "", fmt.Errorf("IP not found")
-}
+func (s *StepBootCommand) Cleanup(_ multistep.StateBag) {}
