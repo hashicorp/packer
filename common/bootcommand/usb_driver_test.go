@@ -30,6 +30,21 @@ func TestUSBDriver(t *testing.T) {
 			true,
 		},
 		{
+			"<leftsuper>",
+			key.CodeLeftGUI,
+			false,
+		},
+		{
+			"<spacebar>",
+			key.CodeSpacebar,
+			false,
+		},
+		{
+			"<return>",
+			key.CodeReturnEnter,
+			false,
+		},
+		{
 			"a",
 			key.CodeA,
 			false,

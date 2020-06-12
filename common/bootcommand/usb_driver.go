@@ -36,6 +36,7 @@ func NewUSBDriver(send SendUsbScanCodes, interval time.Duration) *usbDriver {
 
 	special := map[string]key.Code{
 		"enter":      key.CodeReturnEnter,
+		"return":     key.CodeReturnEnter,
 		"esc":        key.CodeEscape,
 		"bs":         key.CodeDeleteBackspace,
 		"del":        key.CodeDeleteForward,
@@ -67,6 +68,9 @@ func NewUSBDriver(send SendUsbScanCodes, interval time.Duration) *usbDriver {
 		"rightalt":   key.CodeRightAlt,
 		"rightctrl":  key.CodeRightControl,
 		"rightshift": key.CodeRightShift,
+		"leftsuper":  key.CodeLeftGUI,
+		"rightsuper": key.CodeRightGUI,
+		"spacebar":   key.CodeSpacebar,
 	}
 
 	scancodeIndex := make(map[string]key.Code)
