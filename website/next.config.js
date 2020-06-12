@@ -15,7 +15,6 @@ module.exports = withHashicorp({
       },
     ],
   },
-  exportTrailingSlash: true,
   // Note: These are meant to be public, it's not a mistake that they are here
   env: {
     HASHI_ENV: process.env.HASHI_ENV,
