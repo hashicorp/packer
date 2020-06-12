@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2019 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
+// Copyright (c) 2015-2020 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
 // resty source code and usage is governed by a MIT style
 // license that can be found in the LICENSE file.
 
@@ -13,7 +13,11 @@ import (
 	"time"
 )
 
-// Response is an object represents executed request and its values.
+//‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+// Response struct and methods
+//_______________________________________________________________________
+
+// Response struct holds response values of executed request.
 type Response struct {
 	Request     *Request
 	RawResponse *http.Response
@@ -24,6 +28,7 @@ type Response struct {
 }
 
 // Body method returns HTTP response as []byte array for the executed request.
+//
 // Note: `Response.Body` might be nil, if `Request.SetOutput` is used.
 func (r *Response) Body() []byte {
 	if r.RawResponse == nil {
@@ -38,7 +43,6 @@ func (r *Response) Status() string {
 	if r.RawResponse == nil {
 		return ""
 	}
-
 	return r.RawResponse.Status
 }
 
@@ -48,8 +52,15 @@ func (r *Response) StatusCode() int {
 	if r.RawResponse == nil {
 		return 0
 	}
-
 	return r.RawResponse.StatusCode
+}
+
+// Proto method returns the HTTP response protocol used for the request.
+func (r *Response) Proto() string {
+	if r.RawResponse == nil {
+		return ""
+	}
+	return r.RawResponse.Proto
 }
 
 // Result method returns the response value as an object if it has one
@@ -67,7 +78,6 @@ func (r *Response) Header() http.Header {
 	if r.RawResponse == nil {
 		return http.Header{}
 	}
-
 	return r.RawResponse.Header
 }
 
@@ -76,7 +86,6 @@ func (r *Response) Cookies() []*http.Cookie {
 	if r.RawResponse == nil {
 		return make([]*http.Cookie, 0)
 	}
-
 	return r.RawResponse.Cookies()
 }
 
@@ -85,14 +94,17 @@ func (r *Response) String() string {
 	if r.body == nil {
 		return ""
 	}
-
 	return strings.TrimSpace(string(r.body))
 }
 
 // Time method returns the time of HTTP response time that from request we sent and received a request.
-// See `response.ReceivedAt` to know when client recevied response and see `response.Request.Time` to know
+//
+// See `Response.ReceivedAt` to know when client recevied response and see `Response.Request.Time` to know
 // when client sent a request.
 func (r *Response) Time() time.Duration {
+	if r.Request.clientTrace != nil {
+		return r.Request.TraceInfo().TotalTime
+	}
 	return r.receivedAt.Sub(r.Request.Time)
 }
 
@@ -120,14 +132,25 @@ func (r *Response) RawBody() io.ReadCloser {
 	return r.RawResponse.Body
 }
 
-// IsSuccess method returns true if HTTP status code >= 200 and <= 299 otherwise false.
+// IsSuccess method returns true if HTTP status `code >= 200 and <= 299` otherwise false.
 func (r *Response) IsSuccess() bool {
 	return r.StatusCode() > 199 && r.StatusCode() < 300
 }
 
-// IsError method returns true if HTTP status code >= 400 otherwise false.
+// IsError method returns true if HTTP status `code >= 400` otherwise false.
 func (r *Response) IsError() bool {
 	return r.StatusCode() > 399
+}
+
+//‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+// Response Unexported methods
+//_______________________________________________________________________
+
+func (r *Response) setReceivedAt() {
+	r.receivedAt = time.Now()
+	if r.Request.clientTrace != nil {
+		r.Request.clientTrace.endTime = r.receivedAt
+	}
 }
 
 func (r *Response) fmtBodyString(sl int64) string {
@@ -139,9 +162,11 @@ func (r *Response) fmtBodyString(sl int64) string {
 		if IsJSONType(ct) {
 			out := acquireBuffer()
 			defer releaseBuffer(out)
-			if err := json.Indent(out, r.body, "", "   "); err == nil {
-				return out.String()
+			err := json.Indent(out, r.body, "", "   ")
+			if err != nil {
+				return fmt.Sprintf("*** Error: Unable to format response body - \"%s\" ***\n\nLog Body as-is:\n%s", err, r.String())
 			}
+			return out.String()
 		}
 		return r.String()
 	}

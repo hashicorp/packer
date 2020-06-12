@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2019 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
+// Copyright (c) 2015-2020 Jeevanandam M (jeeva@myjeeva.com), All rights reserved.
 // resty source code and usage is governed by a MIT style
 // license that can be found in the LICENSE file.
 
@@ -47,9 +47,7 @@ func FlexibleRedirectPolicy(noOfRedirect int) RedirectPolicy {
 		if len(via) >= noOfRedirect {
 			return fmt.Errorf("stopped after %d redirects", noOfRedirect)
 		}
-
 		checkHostAndAddHeaders(req, via[0])
-
 		return nil
 	})
 }
@@ -74,6 +72,10 @@ func DomainCheckRedirectPolicy(hostnames ...string) RedirectPolicy {
 	return fn
 }
 
+//‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+// Package Unexported methods
+//_______________________________________________________________________
+
 func getHostname(host string) (hostname string) {
 	if strings.Index(host, ":") > 0 {
 		host, _, _ = net.SplitHostPort(host)
@@ -85,7 +87,7 @@ func getHostname(host string) (hostname string) {
 // By default Golang will not redirect request headers
 // after go throughing various discussion comments from thread
 // https://github.com/golang/go/issues/4800
-// go-resty will add all the headers during a redirect for the same host
+// Resty will add all the headers during a redirect for the same host
 func checkHostAndAddHeaders(cur *http.Request, pre *http.Request) {
 	curHostname := getHostname(cur.URL.Host)
 	preHostname := getHostname(pre.URL.Host)
@@ -94,6 +96,6 @@ func checkHostAndAddHeaders(cur *http.Request, pre *http.Request) {
 			cur.Header[key] = val
 		}
 	} else { // only library User-Agent header is added
-		cur.Header.Set(hdrUserAgentKey, fmt.Sprintf(hdrUserAgentValue, Version))
+		cur.Header.Set(hdrUserAgentKey, hdrUserAgentValue)
 	}
 }
