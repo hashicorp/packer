@@ -155,7 +155,6 @@ require (
 	google.golang.org/grpc v1.28.0
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 // indirect
-	gopkg.in/resty.v1 v1.12.0 // indirect
 )
 
 replace github.com/gofrs/flock => github.com/azr/flock v0.0.0-20190823144736-958d66434653
