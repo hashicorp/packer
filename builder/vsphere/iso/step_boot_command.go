@@ -25,15 +25,10 @@ type bootCommandTemplateData struct {
 }
 
 func (c *BootConfig) Prepare(ctx *interpolate.Context) []error {
-	var errs []error
-
 	if c.BootWait == 0 {
 		c.BootWait = 10 * time.Second
 	}
-
-	c.BootConfig.Prepare(ctx)
-
-	return errs
+	return c.BootConfig.Prepare(ctx)
 }
 
 type StepBootCommand struct {
