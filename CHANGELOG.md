@@ -1,9 +1,5 @@
 ## 1.6.1 (Upcoming)
 
-### BUG FIXES:
-* builder/core: Fix problem in Makefile with removing possibly empty list of
-    files
-
 ## 1.6.0 (June 09, 2020)
 
 ### BACKWARDS INCOMPATIBILITIES:
