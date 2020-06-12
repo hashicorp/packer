@@ -8,7 +8,6 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/common"
 	"golang.org/x/mobile/event/key"
 )
@@ -17,15 +16,10 @@ import (
 type SendUsbScanCodes func(k key.Code, down bool) error
 
 type usbDriver struct {
-	vm *driver.VirtualMachine
-
 	sendImpl    SendUsbScanCodes
 	interval    time.Duration
 	specialMap  map[string]key.Code
 	scancodeMap map[rune]key.Code
-
-	// keyEvent can set this error which will prevent it from continuing
-	err error
 }
 
 func NewUSBDriver(send SendUsbScanCodes, interval time.Duration) *usbDriver {
@@ -102,11 +96,7 @@ func NewUSBDriver(send SendUsbScanCodes, interval time.Duration) *usbDriver {
 }
 
 func (d *usbDriver) keyEvent(k key.Code, down bool) error {
-	if d.err != nil {
-		return d.err
-	}
 	if err := d.sendImpl(k, down); err != nil {
-		d.err = err
 		return err
 	}
 	time.Sleep(d.interval)
@@ -124,7 +114,7 @@ func (d *usbDriver) SendKey(k rune, action KeyAction) error {
 	return d.keyEvent(keyCode, keyShift)
 }
 
-func (d *usbDriver) SendSpecial(special string, action KeyAction) error {
+func (d *usbDriver) SendSpecial(special string, action KeyAction) (err error) {
 	keyCode, ok := d.specialMap[special]
 	if !ok {
 		return fmt.Errorf("special %s not found.", special)
@@ -133,10 +123,10 @@ func (d *usbDriver) SendSpecial(special string, action KeyAction) error {
 
 	switch action {
 	case KeyOn:
-		d.keyEvent(keyCode, true)
+		err = d.keyEvent(keyCode, true)
 	case KeyOff, KeyPress:
-		d.keyEvent(keyCode, false)
+		err = d.keyEvent(keyCode, false)
 	}
 
-	return d.err
+	return err
 }
