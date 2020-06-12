@@ -2,18 +2,19 @@ package bootcommand
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/common"
-	"golang.org/x/mobile/event/key"
 	"log"
 	"os"
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/hashicorp/packer/builder/vsphere/driver"
+	"github.com/hashicorp/packer/common"
+	"golang.org/x/mobile/event/key"
 )
 
 // SendUsbScanCodes will be called to send codes to the VM
-type SendUsbScanCodes func([]key.Code, []bool) error
+type SendUsbScanCodes func(k key.Code, down bool) error
 
 type usbDriver struct {
 	vm *driver.VirtualMachine
@@ -22,9 +23,6 @@ type usbDriver struct {
 	interval    time.Duration
 	specialMap  map[string]key.Code
 	scancodeMap map[rune]key.Code
-
-	codeBuffer []key.Code
-	downBuffer []bool
 
 	// keyEvent can set this error which will prevent it from continuing
 	err error
@@ -103,16 +101,19 @@ func NewUSBDriver(send SendUsbScanCodes, interval time.Duration) *usbDriver {
 	}
 }
 
-// Flush sends codes to the vm
-func (d *usbDriver) Flush() error {
-	defer func() {
-		d.codeBuffer = nil
-	}()
-
-	if err := d.sendImpl(d.codeBuffer, d.downBuffer); err != nil {
+func (d *usbDriver) keyEvent(k key.Code, down bool) error {
+	if d.err != nil {
+		return d.err
+	}
+	if err := d.sendImpl(k, down); err != nil {
+		d.err = err
 		return err
 	}
 	time.Sleep(d.interval)
+	return nil
+}
+
+func (d *usbDriver) Flush() error {
 	return nil
 }
 
@@ -120,8 +121,7 @@ func (d *usbDriver) SendKey(k rune, action KeyAction) error {
 	keyShift := unicode.IsUpper(k) || strings.ContainsRune(shiftedChars, k)
 	keyCode := d.scancodeMap[k]
 	log.Printf("Sending char '%c', code %s, shift %v", k, keyCode, keyShift)
-	d.send(keyCode, keyShift)
-	return d.err
+	return d.keyEvent(keyCode, keyShift)
 }
 
 func (d *usbDriver) SendSpecial(special string, action KeyAction) error {
@@ -133,18 +133,10 @@ func (d *usbDriver) SendSpecial(special string, action KeyAction) error {
 
 	switch action {
 	case KeyOn:
-		d.send(keyCode, true)
+		d.keyEvent(keyCode, true)
 	case KeyOff, KeyPress:
-		d.send(keyCode, false)
+		d.keyEvent(keyCode, false)
 	}
 
 	return d.err
-}
-
-// send stores the codes in an internal buffer. Use Flush to send them.
-func (d *usbDriver) send(code key.Code, down bool) {
-	// slices to keep the input order
-	d.codeBuffer = append(d.codeBuffer, code)
-	d.downBuffer = append(d.downBuffer, down)
-
 }

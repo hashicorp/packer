@@ -8,9 +8,7 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/mobile/event/key"
-	"log"
 	"time"
 )
 
@@ -79,35 +77,26 @@ func (s *StepBootCommand) Run(ctx context.Context, state multistep.StateBag) mul
 		ui.Say(fmt.Sprintf("HTTP server is working at http://%v:%v/", ip, port))
 	}
 
-	sendCodes := func(codes []key.Code, downs []bool) error {
-		var spec types.UsbScanCodeSpec
+	sendCodes := func(code key.Code, down bool) error {
+		var keyAlt, keyCtrl, keyShift bool
 
-		for i, code := range codes {
-			var keyAlt, keyCtrl, keyShift bool
-
-			switch code {
-			case key.CodeLeftAlt:
-				// <leftAltOn>
-				keyAlt = downs[i]
-			case key.CodeLeftControl:
-				// <leftCtrlOn>
-				keyCtrl = downs[i]
-			default:
-				keyShift = downs[i]
-			}
-
-			log.Printf("Sending code %s, shift %v", code, downs[i])
-			spec.KeyEvents = append(spec.KeyEvents, types.UsbScanCodeSpecKeyEvent{
-				UsbHidCode: int32(code)<<16 | 7,
-				Modifiers: &types.UsbScanCodeSpecModifierType{
-					LeftControl: &keyCtrl,
-					LeftAlt:     &keyAlt,
-					LeftShift:   &keyShift,
-				},
-			})
+		switch code {
+		case key.CodeLeftAlt:
+			// <leftAltOn>
+			keyAlt = down
+		case key.CodeLeftControl:
+			// <leftCtrlOn>
+			keyCtrl = down
+		default:
+			keyShift = down
 		}
 
-		_, err := vm.TypeOnKeyboard(spec)
+		_, err := vm.TypeOnKeyboard(driver.KeyInput{
+			Scancode: code,
+			Ctrl:     keyCtrl,
+			Alt:      keyAlt,
+			Shift:    keyShift,
+		})
 		if err != nil {
 			return fmt.Errorf("error typing a boot command: %v", err)
 		}

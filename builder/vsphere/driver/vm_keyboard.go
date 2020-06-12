@@ -7,14 +7,24 @@ import (
 )
 
 type KeyInput struct {
-	Message  string
 	Scancode key.Code
 	Alt      bool
 	Ctrl     bool
 	Shift    bool
 }
 
-func (vm *VirtualMachine) TypeOnKeyboard(spec types.UsbScanCodeSpec) (int32, error) {
+func (vm *VirtualMachine) TypeOnKeyboard(input KeyInput) (int32, error) {
+	var spec types.UsbScanCodeSpec
+
+	spec.KeyEvents = append(spec.KeyEvents, types.UsbScanCodeSpecKeyEvent{
+		UsbHidCode: int32(input.Scancode)<<16 | 7,
+		Modifiers: &types.UsbScanCodeSpecModifierType{
+			LeftControl: &input.Ctrl,
+			LeftAlt:     &input.Alt,
+			LeftShift:   &input.Shift,
+		},
+	})
+
 	req := &types.PutUsbScanCodes{
 		This: vm.vm.Reference(),
 		Spec: spec,
