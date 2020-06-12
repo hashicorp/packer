@@ -3,7 +3,9 @@ package driver
 import (
 	"fmt"
 	"path"
+	"strings"
 
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -22,10 +24,32 @@ func (d *Driver) NewFolder(ref *types.ManagedObjectReference) *Folder {
 }
 
 func (d *Driver) FindFolder(name string) (*Folder, error) {
+	if name != "" {
+		// create folders if they don't exist
+		parent := ""
+		parentFolder, err := d.finder.Folder(d.ctx, path.Join(d.datacenter.InventoryPath, "vm"))
+		if err != nil {
+			return nil, err
+		}
+		folders := strings.Split(name, "/")
+		for _, folder := range folders {
+			parent = path.Join(parent, folder)
+			f, err := d.finder.Folder(d.ctx, path.Join(d.datacenter.InventoryPath, "vm", parent))
+			if _, ok := err.(*find.NotFoundError); ok {
+				f, err = parentFolder.CreateFolder(d.ctx, folder)
+			}
+			if err != nil {
+				return nil, err
+			}
+			parentFolder = f
+		}
+	}
+
 	f, err := d.finder.Folder(d.ctx, path.Join(d.datacenter.InventoryPath, "vm", name))
 	if err != nil {
 		return nil, err
 	}
+
 	return &Folder{
 		folder: f,
 		driver: d,

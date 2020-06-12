@@ -10,6 +10,32 @@ export default [
   'use-cases',
   {
     category: 'getting-started',
-    content: ['build-image', 'provision', 'parallel-builds', 'vagrant', 'next']
-  }
+    name: 'Getting Started',
+    content: [
+      {
+        title: 'Install',
+        href: '/intro/getting-started/install',
+      },
+      {
+        title: 'Build An Image',
+        href: '/intro/getting-started/build-image',
+      },
+      {
+        title: 'Provision',
+        href: '/intro/getting-started/provision',
+      },
+      {
+        title: 'Parallel Builds',
+        href: '/intro/getting-started/parallel-builds',
+      },
+      {
+        title: 'Vagrant Boxes',
+        href: '/intro/getting-started/vagrant',
+      },
+      {
+        title: 'Next Steps',
+        href: '/intro/getting-started/next',
+      },
+    ],
+  },
 ]
