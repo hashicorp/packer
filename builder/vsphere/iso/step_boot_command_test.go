@@ -26,7 +26,6 @@ func TestStepBootCommand_Run(t *testing.T) {
 		Config: &BootConfig{
 			BootConfig: bootcommand.BootConfig{
 				BootCommand: []string{
-					" initrd=/install/initrd.gz",
 					"<leftShiftOn><enter><wait><f6><wait><esc><wait>",
 					"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
 					"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",

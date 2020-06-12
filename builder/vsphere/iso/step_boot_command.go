@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/mobile/event/key"
+	"log"
 	"time"
 )
 
@@ -91,11 +92,11 @@ func (s *StepBootCommand) Run(ctx context.Context, state multistep.StateBag) mul
 			case key.CodeLeftControl:
 				// <leftCtrlOn>
 				keyCtrl = downs[i]
-			case key.CodeLeftShift:
-				// <leftShiftOn>
+			default:
 				keyShift = downs[i]
 			}
 
+			log.Printf("Sending code %s, shift %v", code, downs[i])
 			spec.KeyEvents = append(spec.KeyEvents, types.UsbScanCodeSpecKeyEvent{
 				UsbHidCode: int32(code)<<16 | 7,
 				Modifiers: &types.UsbScanCodeSpecModifierType{

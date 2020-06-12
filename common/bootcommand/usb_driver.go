@@ -103,19 +103,7 @@ func NewUSBDriver(send SendUsbScanCodes, interval time.Duration) *usbDriver {
 	}
 }
 
-//func (d *usbDriver) keyEvent(k key.Code, down bool) error {
-//	if d.err != nil {
-//		return nil
-//	}
-//	if err := d.sendImpl(k, down); err != nil {
-//		d.err = err
-//		return err
-//	}
-//	//time.Sleep(d.interval)
-//	return nil
-//}
-
-// Flush does nothing here
+// Flush sends codes to the vm
 func (d *usbDriver) Flush() error {
 	defer func() {
 		d.codeBuffer = nil
@@ -132,28 +120,7 @@ func (d *usbDriver) SendKey(k rune, action KeyAction) error {
 	keyShift := unicode.IsUpper(k) || strings.ContainsRune(shiftedChars, k)
 	keyCode := d.scancodeMap[k]
 	log.Printf("Sending char '%c', code %s, shift %v", k, keyCode, keyShift)
-
-	switch action {
-	case KeyOn:
-		if keyShift {
-			d.send(key.CodeLeftShift, true)
-		}
-		d.send(keyCode, true)
-	case KeyOff:
-		if keyShift {
-			d.send(key.CodeLeftShift, false)
-		}
-		d.send(keyCode, false)
-	case KeyPress:
-		if keyShift {
-			d.send(key.CodeLeftShift, true)
-		}
-		d.send(keyCode, true)
-		d.send(keyCode, false)
-		if keyShift {
-			d.send(key.CodeLeftShift, false)
-		}
-	}
+	d.send(keyCode, keyShift)
 	return d.err
 }
 
@@ -167,10 +134,7 @@ func (d *usbDriver) SendSpecial(special string, action KeyAction) error {
 	switch action {
 	case KeyOn:
 		d.send(keyCode, true)
-	case KeyOff:
-		d.send(keyCode, false)
-	case KeyPress:
-		d.send(keyCode, true)
+	case KeyOff, KeyPress:
 		d.send(keyCode, false)
 	}
 
