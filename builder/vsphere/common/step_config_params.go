@@ -18,7 +18,7 @@ type ConfigParamsConfig struct {
 	ConfigParams map[string]string `mapstructure:"configuration_parameters"`
 
 	// Enables time synchronization with the host. If set to true will set `tools.syncTime` to `TRUE`.
-	// Defaults fo FALSE.
+	// Defaults to FALSE.
 	ToolsSyncTime bool `mapstructure:"tools_sync_time"`
 
 	// If sets to true, vSphere will automatically check and upgrade VMware Tools upon a system power cycle.
