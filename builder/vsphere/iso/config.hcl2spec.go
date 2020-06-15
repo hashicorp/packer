@@ -69,8 +69,9 @@ type FlatConfig struct {
 	FloppyDirectories          []string                 `mapstructure:"floppy_dirs" cty:"floppy_dirs" hcl:"floppy_dirs"`
 	FloppyLabel                *string                  `mapstructure:"floppy_label" cty:"floppy_label" hcl:"floppy_label"`
 	BootOrder                  *string                  `mapstructure:"boot_order" cty:"boot_order" hcl:"boot_order"`
-	BootCommand                []string                 `mapstructure:"boot_command" cty:"boot_command" hcl:"boot_command"`
+	BootGroupInterval          *string                  `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval" hcl:"boot_keygroup_interval"`
 	BootWait                   *string                  `mapstructure:"boot_wait" cty:"boot_wait" hcl:"boot_wait"`
+	BootCommand                []string                 `mapstructure:"boot_command" cty:"boot_command" hcl:"boot_command"`
 	HTTPIP                     *string                  `mapstructure:"http_ip" cty:"http_ip" hcl:"http_ip"`
 	WaitTimeout                *string                  `mapstructure:"ip_wait_timeout" cty:"ip_wait_timeout" hcl:"ip_wait_timeout"`
 	SettleTimeout              *string                  `mapstructure:"ip_settle_timeout" cty:"ip_settle_timeout" hcl:"ip_settle_timeout"`
@@ -196,8 +197,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"floppy_dirs":                    &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
 		"floppy_label":                   &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},
 		"boot_order":                     &hcldec.AttrSpec{Name: "boot_order", Type: cty.String, Required: false},
-		"boot_command":                   &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
+		"boot_keygroup_interval":         &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                      &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
+		"boot_command":                   &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
 		"http_ip":                        &hcldec.AttrSpec{Name: "http_ip", Type: cty.String, Required: false},
 		"ip_wait_timeout":                &hcldec.AttrSpec{Name: "ip_wait_timeout", Type: cty.String, Required: false},
 		"ip_settle_timeout":              &hcldec.AttrSpec{Name: "ip_settle_timeout", Type: cty.String, Required: false},

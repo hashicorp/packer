@@ -30,6 +30,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
+	state.Put("debug", b.config.PackerDebug)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -88,6 +89,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Datastore:                  b.config.Datastore,
 				Host:                       b.config.Host,
 				SetHostForDatastoreUploads: b.config.SetHostForDatastoreUploads,
+			},
+			&common.StepHTTPIPDiscover{
+				HTTPIP: b.config.BootConfig.HTTPIP,
 			},
 			&packerCommon.StepHTTPServer{
 				HTTPDir:     b.config.HTTPDir,

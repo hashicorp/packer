@@ -154,6 +154,11 @@ necessary for this build to succeed and can be found further down the page.
 
 @include 'common/bootcommand/BootConfig.mdx'
 
+Please note that for the Virtuabox builder, the IP address of the HTTP server
+Packer launches for you to access files like the preseed file in the example
+above (`{{ .HTTPIP }}`) is hardcoded to 10.0.2.2. If you change the network
+of your VM you must guarantee that you can still access this HTTP server.
+
 The boot command is sent to the VM through the `VBoxManage` utility in as few
 invocations as possible. We send each character in groups of 25, with a default
 delay of 100ms between groups. The delay alleviates issues with latency and CPU
@@ -176,34 +181,7 @@ contention. If you notice missing keys, you can tune this delay by specifying
 
 @include 'common/bootcommand/BootConfig-not-required.mdx'
 
-@include 'builders/boot-command.mdx'
-
 @include 'builders/virtualbox-ssh-key-pair.mdx'
-
-Example boot command. This is actually a working boot command used to start an
-Ubuntu 12.04 installer:
-
-```text
-[
-  "<esc><esc><enter><wait>",
-  "/install/vmlinuz noapic ",
-  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
-  "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-  "hostname={{ .Name }} ",
-  "fb=false debconf/frontend=noninteractive ",
-  "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-  "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-  "initrd=/install/initrd.gz -- <enter>"
-]
-```
-
-Please note that for the Virtuabox builder, the IP address of the HTTP server
-Packer launches for you to access files like the preseed file in the example
-above (`{{ .HTTPIP }}`) is hardcoded to 10.0.2.2. If you change the network
-of your VM you must guarantee that you can still access this HTTP server.
-
-For more examples of various boot commands, see the sample projects from our
-[community templates page](/community-tools#templates).
 
 ## Guest Additions
 
