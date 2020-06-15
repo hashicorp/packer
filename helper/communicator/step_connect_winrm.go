@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
+	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -14,6 +17,7 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	winrmcmd "github.com/masterzen/winrm"
+	"golang.org/x/net/http/httpproxy"
 )
 
 // StepConnectWinRM is a multistep Step implementation that waits for WinRM
@@ -135,6 +139,13 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, ctx context.Co
 			}
 		}
 
+		if s.Config.WinRMNoProxy {
+			if err := setNoProxy(host, port); err != nil {
+				return nil, fmt.Errorf("Error setting no_proxy: %s", err)
+			}
+			s.Config.WinRMTransportDecorator = ProxyTransportDecorator
+		}
+
 		log.Println("[INFO] Attempting WinRM connection...")
 		comm, err = winrm.New(&winrm.Config{
 			Host:               host,
@@ -188,4 +199,41 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, ctx context.Co
 	}
 
 	return comm, nil
+}
+
+// setNoProxy configures the $NO_PROXY env var
+func setNoProxy(host string, port int) error {
+	current := os.Getenv("NO_PROXY")
+	p := fmt.Sprintf("%s:%d", host, port)
+	// not set
+	//	set
+	// is set and not contains
+	//	set
+	// is set and contains
+	if current == "" {
+		return os.Setenv("NO_PROXY", p)
+	}
+	if !strings.Contains(current, p) {
+		return os.Setenv("NO_PROXY", strings.Join([]string{current, p}, ","))
+	}
+	return nil
+}
+
+// The net/http ProxyFromEnvironment only loads the environment once, when the
+// code is initialized rather than when it's executed. This means that if your
+// wrapping code sets the NO_PROXY env var (as Packer does!), it will be
+// ignored. Re-loading the environment vars is more expensive, but it is the
+// easiest way to work around this limitation.
+func RefreshProxyFromEnvironment(req *http.Request) (*url.URL, error) {
+	return envProxyFunc()(req.URL)
+}
+
+func envProxyFunc() func(*url.URL) (*url.URL, error) {
+	envProxyFuncValue := httpproxy.FromEnvironment().ProxyFunc()
+	return envProxyFuncValue
+}
+
+// c.WinRMTransportDecorator = func() winrm.Transporter { return &winrm.ClientNTLM{} }
+func ProxyTransportDecorator() winrmcmd.Transporter {
+	return winrmcmd.NewClientWithProxyFunc(RefreshProxyFromEnvironment)
 }

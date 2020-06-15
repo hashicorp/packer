@@ -46,21 +46,21 @@ github.com/Azure/go-autorest/tracing
 github.com/Azure/go-ntlmssp
 # github.com/BurntSushi/toml v0.3.1
 github.com/BurntSushi/toml
-# github.com/ChrisTrenkamp/goxpath v0.0.0-20170625215350-4fe035839290
+# github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022
 github.com/ChrisTrenkamp/goxpath
 github.com/ChrisTrenkamp/goxpath/internal/execxp
-github.com/ChrisTrenkamp/goxpath/internal/lexer
-github.com/ChrisTrenkamp/goxpath/internal/parser
-github.com/ChrisTrenkamp/goxpath/internal/parser/findutil
-github.com/ChrisTrenkamp/goxpath/internal/parser/intfns
-github.com/ChrisTrenkamp/goxpath/internal/parser/pathexpr
-github.com/ChrisTrenkamp/goxpath/internal/xconst
+github.com/ChrisTrenkamp/goxpath/internal/execxp/findutil
+github.com/ChrisTrenkamp/goxpath/internal/execxp/intfns
 github.com/ChrisTrenkamp/goxpath/internal/xsort
+github.com/ChrisTrenkamp/goxpath/lexer
+github.com/ChrisTrenkamp/goxpath/parser
+github.com/ChrisTrenkamp/goxpath/parser/pathexpr
 github.com/ChrisTrenkamp/goxpath/tree
 github.com/ChrisTrenkamp/goxpath/tree/xmltree
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlbuilder
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlele
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlnode
+github.com/ChrisTrenkamp/goxpath/xconst
 # github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2/hmac
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud
@@ -441,12 +441,9 @@ github.com/kr/fs
 github.com/linode/linodego
 github.com/linode/linodego/internal/duration
 github.com/linode/linodego/internal/parseabletime
-# github.com/masterzen/azure-sdk-for-go v0.0.0-20161014135628-ee4f0065d00c
-github.com/masterzen/azure-sdk-for-go/core/http
-github.com/masterzen/azure-sdk-for-go/core/tls
 # github.com/masterzen/simplexml v0.0.0-20190410153822-31eea3082786
 github.com/masterzen/simplexml/dom
-# github.com/masterzen/winrm v0.0.0-20180224160350-7e40f93ae939
+# github.com/masterzen/winrm v0.0.0-20200615185753-c42b5136ff88
 github.com/masterzen/winrm
 github.com/masterzen/winrm/soap
 # github.com/mattn/go-colorable v0.1.6
@@ -713,6 +710,7 @@ golang.org/x/net/html
 golang.org/x/net/html/atom
 golang.org/x/net/html/charset
 golang.org/x/net/http/httpguts
+golang.org/x/net/http/httpproxy
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
