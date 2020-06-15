@@ -12,7 +12,7 @@ is_doc_or_tech_debt_pr(){
         return 1
     fi
     out=$(cat pull.json | python -m json.tool \
-    | jq '[.labels[].name == "docs" or .labels[].name == "tech-debt"] | any')
+    | jq '[.labels[].name == "docs" or .labels[].name == "tech-debt" or .labels[].name == "website"] | any')
     grep -q true <<< $out
     return $?
 }
@@ -46,11 +46,10 @@ get_prs(){
         fi
 
         if (($DO_PR_CHECK)) && is_doc_or_tech_debt_pr; then
-            echo "Skipping PR ${PR_NUM}: labeled as tech debt or docs. (waiting a second so we don't get rate-limited...)"
+            echo "Skipping PR ${PR_NUM}: labeled as tech debt, docs or website. (waiting a second so we don't get rate-limited...)"
             continue
         fi
         echo "$(cat pull.json | python -m json.tool | jq '.title') - https://github.com/hashicorp/packer/pull/${PR_NUM}"
-        rm pull.json
     done
 }
 
@@ -71,6 +70,7 @@ get_prs | while read line; do
         sleep 1 # GH will rate limit us if we have several in a row
         continue
     fi
+    rm -f pull.json
     vared -ch ok
 done
 
