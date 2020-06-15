@@ -70,6 +70,12 @@ func (s abortStep) Run(ctx context.Context, state multistep.StateBag) multistep.
 }
 
 func (s abortStep) Cleanup(state multistep.StateBag) {
+	if s.InnerStepName() == "StepProvision" {
+		// call "error-cleanup-provisioner" if defined.
+		s.step.Cleanup(state)
+		return
+	}
+
 	shouldCleanup := handleAbortsAndInterupts(state, s.ui, typeName(s.step))
 	if !shouldCleanup {
 		return
