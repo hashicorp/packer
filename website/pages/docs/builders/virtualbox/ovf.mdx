@@ -40,6 +40,9 @@ build.
 Here is a basic example. This example is functional if you have an OVF matching
 the settings here.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "virtualbox-ovf",
@@ -49,6 +52,25 @@ the settings here.
   "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "virtualbox-ovf" "basic-example" {
+  source_path = "source.ovf"
+  ssh_username = "packer"
+  ssh_password = "packer"
+  shutdown_command = "echo 'packer' | sudo -S shutdown -P now"
+}
+
+build {
+  sources = ["sources.virtualbox-ovf.basic-example"]
+}
+```
+
+</Tab>
+</Tabs>
 
 It is important to add a `shutdown_command`. By default Packer halts the virtual
 machine and the file system may not be sync'd. Thus, changes made in a

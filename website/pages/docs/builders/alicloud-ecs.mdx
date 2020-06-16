@@ -49,6 +49,9 @@ builder.
 
 Here is a basic example for Alicloud.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "variables": {
@@ -78,6 +81,45 @@ Here is a basic example for Alicloud.
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+variable "access_key" {
+  type = string
+}
+
+variable "secret_key" {
+  type = string
+}
+
+source "alicloud-ecs" "basic-example" {
+      access_key = var.access_key
+      secret_key = var.secret_key
+      region = "cn-beijing"
+      image_name = "packer_test2"
+      source_image = "centos_7_04_64_20G_alibase_201701015.vhd"
+      ssh_username = "root"
+      instance_type = "ecs.n1.tiny"
+      io_optimized = true
+      internet_charge_type = "PayByTraffic"
+      image_force_delete = true
+}
+
+build {
+  sources = ["sources.alicloud-ecs.basic-example"]
+
+  provisioner "shell" {
+    inline = [
+      "sleep 30", "yum install redis.x86_64 -y",
+    ]
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 ~> Note: Images can become deprecated after a while; run
 `aliyun ecs DescribeImages` to find one that exists.

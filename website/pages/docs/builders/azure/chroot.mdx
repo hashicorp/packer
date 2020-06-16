@@ -194,6 +194,9 @@ to update your VM.
 Set the `ARM_IMAGE_RESOURCEGROUP_ID` variable to an existing resource group in the
 subscription where the resulting image will be created.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "variables": {
@@ -224,3 +227,43 @@ subscription where the resulting image will be created.
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+variable "client_id" {
+  type = string
+}
+variable "client_secret" {
+  type = string
+}
+variable "subscription_id" {
+  type = string
+}
+variable "resource_group" {
+  type = string
+}
+
+source "azure-chroot" "basic-example" {
+  client_id = var.client_id
+  client_secret = var.client_secret
+  subscription_id = var.subscription_id
+
+  image_resource_id = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group}/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}"
+
+  source = "credativ:Debian:9:latest"
+}
+
+build {
+  sources = ["sources.azure-chroot.basic-example"]
+
+  provisioner "shell" {
+    inline = ["apt-get update", "apt-get upgrade -y"]
+    inline_shebang = "/bin/sh -x"
+  }
+}
+```
+
+</Tab>
+</Tabs>
