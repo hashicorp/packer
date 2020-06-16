@@ -179,7 +179,7 @@ type WinRM struct {
 	// [`ssh_interface`](/docs/builders/amazon-ebs#ssh_interface)
 	WinRMHost string `mapstructure:"winrm_host"`
 	// Setting this to `true` adds the remote
-	// `host:post` to the `NO_PROXY` environment variable. This has the effect of
+	// `host:port` to the `NO_PROXY` environment variable. This has the effect of
 	// bypassing any configured proxies when connecting to the remote host.
 	// Default to `false`.
 	WinRMNoProxy bool `mapstructure:"winrm_no_proxy"`
