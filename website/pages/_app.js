@@ -30,12 +30,6 @@ export default function App({ Component, pageProps }) {
         description="Packer is a free and open source tool for creating golden images for multiple
         platforms from a single source configuration."
         image="https://www.packer.io/img/og-image.png"
-        stylesheet={[
-          {
-            href:
-              'https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap',
-          },
-        ]}
         icon={[{ href: '/favicon.ico' }]}
         preload={[
           { href: '/fonts/klavika/medium.woff2', as: 'font' },
