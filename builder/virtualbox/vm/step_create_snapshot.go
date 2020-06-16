@@ -40,18 +40,22 @@ func (s *StepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) mu
 			return multistep.ActionHalt
 		}
 
-		currentSnapshot := snapshotTree.GetCurrentSnapshot()
-		targetSnapshot := currentSnapshot.GetChildWithName(s.TargetSnapshot)
-		if nil != targetSnapshot {
-			log.Printf("Deleting existing target snapshot %s", s.TargetSnapshot)
-			err = driver.DeleteSnapshot(s.Name, targetSnapshot)
-			if nil != err {
-				err = fmt.Errorf("Unable to delete snapshot %s from VM %s: %s", s.TargetSnapshot, s.Name, err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
+		// Remove any snapshot with the target's name, if present.
+		if snapshotTree != nil {
+			currentSnapshot := snapshotTree.GetCurrentSnapshot()
+			targetSnapshot := currentSnapshot.GetChildWithName(s.TargetSnapshot)
+			if nil != targetSnapshot {
+				log.Printf("Deleting existing target snapshot %s", s.TargetSnapshot)
+				err = driver.DeleteSnapshot(s.Name, targetSnapshot)
+				if nil != err {
+					err = fmt.Errorf("Unable to delete snapshot %s from VM %s: %s", s.TargetSnapshot, s.Name, err)
+					state.Put("error", err)
+					ui.Error(err.Error())
+					return multistep.ActionHalt
+				}
 			}
 		}
+
 		err = driver.CreateSnapshot(s.Name, s.TargetSnapshot)
 		if err != nil {
 			err := fmt.Errorf("Error creating snaphot VM: %s", err)
