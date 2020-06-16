@@ -34,6 +34,9 @@ VMware virtual machine.
 Here is an example. This example is fully functional as long as the source path
 points to a real VMX file with the proper settings:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "vmware-vmx",
@@ -43,6 +46,25 @@ points to a real VMX file with the proper settings:
   "shutdown_command": "shutdown -P now"
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "vmware-vmx" "basic-example" {
+  source_path = "/path/to/a/vm.vmx"
+  ssh_username = "root"
+  ssh_password = "root"
+  shutdown_command = "shutdown -P now"
+}
+
+build {
+  sources = ["sources.vmware-vmx.basic-example"]
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Configuration Reference
 
