@@ -76,7 +76,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 
 	errs = packer.MultiErrorAppend(errs, c.CDRomConfig.Prepare()...)
-	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare()...)
+	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.WaitIpConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare()...)

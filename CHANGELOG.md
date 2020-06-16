@@ -1,8 +1,23 @@
 ## 1.6.1 (Upcoming)
 
-### FEATURES:
+### IMPROVEMENTS:
 * builder/vsphere-clone: Add `boot_command` support to vsphere-clone builder,
     including support for starting an HTTP server
+* builder/proxmox: Update Proxmox storagePoolTypes [GH-9418]
+* builder/vsphere: Create vm output folders if they don't exist [GH-9402]
+* builder/vsphere: Update vsphere boot_command to bring it in line with other
+    builders' boot_command functionality. [GH-9406]
+* builder/vsphere: Use datacenter inventory path for find folder [GH-9390]
+* post-processor/yandex-export: Support Authentication by Service Account Key
+    file [GH-9379]
+
+### BUG FIXES:
+* builder/google: Fix the "secure boot" validation for uefi_compatible images.
+    [GH-9371]
+* builder/vmware: Fix a race that occurred when parsing the network config.
+    [GH-9387]
+* builder/vmware: update vendor library, enabling retries on 502 errors
+    [GH-9391]
 
 ## 1.6.0 (June 09, 2020)
 

@@ -11,14 +11,8 @@ is_doc_or_tech_debt_pr(){
         echo "jq not found"
         return 1
     fi
-    PR_NUM=$1
-    out=$(curl -fsS "https://api.github.com/repos/hashicorp/packer/issues/${PR_NUM}" \
-      | jq '[.labels[].name == "docs" or .labels[].name == "tech-debt"] | any')
-    exy="$?"
-    if [ $exy -ne 0 ]; then
-        echo "bad response from github: manually check PR ${PR_NUM}"
-        return $exy
-    fi
+    out=$(cat pull.json | python -m json.tool \
+    | jq '[.labels[].name == "docs" or .labels[].name == "tech-debt" or .labels[].name == "website"] | any')
     grep -q true <<< $out
     return $?
 }
@@ -39,11 +33,23 @@ get_prs(){
         fi
     done | while read PR_NUM
     do
-        if (($DO_PR_CHECK)) && is_doc_or_tech_debt_pr $PR_NUM; then
-            echo "Skipping PR ${PR_NUM}: labeled as tech debt or docs. (waiting a second so we don't get rate-limited...)"
+        if [[ -z "${GITHUB_TOKEN}" ]] || [[ -z "${GITHUB_USERNAME}" ]] ; then
+          out=$(curl -fsS "https://api.github.com/repos/hashicorp/packer/issues/${PR_NUM}" -o pull.json)
+        else
+          # authenticated call
+          out=$(curl -u ${GITHUB_USERNAME}:${GITHUB_TOKEN} -fsS "https://api.github.com/repos/hashicorp/packer/issues/${PR_NUM}" -o pull.json)
+        fi
+        exy="$?"
+        if [ $exy -ne 0 ]; then
+            echo "bad response from github: manually check PR ${PR_NUM}"
             continue
         fi
-        echo "https://github.com/hashicorp/packer/pull/${PR_NUM}"
+
+        if (($DO_PR_CHECK)) && is_doc_or_tech_debt_pr; then
+            echo "Skipping PR ${PR_NUM}: labeled as tech debt, docs or website. (waiting a second so we don't get rate-limited...)"
+            continue
+        fi
+        echo "$(cat pull.json | python -m json.tool | jq '.title') - https://github.com/hashicorp/packer/pull/${PR_NUM}"
     done
 }
 
@@ -64,6 +70,7 @@ get_prs | while read line; do
         sleep 1 # GH will rate limit us if we have several in a row
         continue
     fi
+    rm -f pull.json
     vared -ch ok
 done
 
