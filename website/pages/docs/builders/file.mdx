@@ -21,6 +21,9 @@ wait times.
 Below is a fully functioning example. It create a file at `target` with the
 specified `content`.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "file",
@@ -28,6 +31,24 @@ specified `content`.
   "target": "dummy_artifact"
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "file" "basic-example" {
+  content =  "Lorem ipsum dolor sit amet"
+  target =  "dummy_artifact"
+}
+
+build {
+  sources = ["sources.file.basic-example"]
+}
+```
+
+</Tab>
+</Tabs>
+
 
 ## Configuration Reference
 

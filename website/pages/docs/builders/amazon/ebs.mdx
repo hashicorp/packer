@@ -107,6 +107,9 @@ Here is a basic example. You will need to provide access keys, and may need to
 change the AMI IDs according to what images exist at the time the template is
 run:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "variables": {
@@ -127,6 +130,37 @@ run:
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+variable "aws_access_key" {
+  type = string
+}
+
+variable "aws_secret_key" {
+  type = string
+}
+
+source "amazon-ebs" "basic-example" {
+  access_key = var.aws_access_key
+  secret_key =  var.aws_secret_key
+  region =  "us-east-1"
+  source_ami =  "ami-fce3c696"
+  instance_type =  "t2.micro"
+  ssh_username =  "ubuntu"
+}
+
+build {
+  source "sources.amazon-ebs.basic-example" {
+    ami_name =  "packer_AWS {{timestamp}}"
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 -> **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above

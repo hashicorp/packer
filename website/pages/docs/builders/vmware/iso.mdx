@@ -37,17 +37,39 @@ Here is a basic example. This example is not functional. It will start the OS
 installer but then fail because we don't provide the preseed file for Ubuntu to
 self-install. Still, the example serves to show the basic configuration:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "vmware-iso",
   "iso_url": "http://old-releases.ubuntu.com/releases/precise/ubuntu-12.04.2-server-amd64.iso",
-  "iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
-  "iso_checksum_type": "md5",
+  "iso_checksum": "md5:af5f788aee1b32c4b2634734309cc9e9",
   "ssh_username": "packer",
   "ssh_password": "packer",
   "shutdown_command": "shutdown -P now"
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "vmware-iso" "basic-example" {
+  iso_url = "http://old-releases.ubuntu.com/releases/precise/ubuntu-12.04.2-server-amd64.iso"
+  iso_checksum = "md5:af5f788aee1b32c4b2634734309cc9e9"
+  ssh_username = "packer"
+  ssh_password = "packer"
+  shutdown_command = "shutdown -P now"
+}
+
+build {
+  sources = ["sources.vmware-iso.basic-example"]
+}
+```
+
+</Tab>
+</Tabs>
 
 ## VMware-ISO Builder Configuration Reference
 
