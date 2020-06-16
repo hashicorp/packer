@@ -79,7 +79,7 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 
 	flags.Int64Var(&ba.ParallelBuilds, "parallel-builds", 0, "")
 
-	flagOnError := enumflag.New(&ba.OnError, "cleanup", "abort", "ask")
+	flagOnError := enumflag.New(&ba.OnError, "cleanup", "abort", "ask", "run-cleanup-provisioner")
 	flags.Var(flagOnError, "on-error", "")
 
 	ba.MetaArgs.AddFlagSets(flags)
