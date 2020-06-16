@@ -1,4 +1,5 @@
 //go:generate mapstructure-to-hcl2 -type Config
+//go:generate struct-markdown
 
 package ansible
 
@@ -40,35 +41,147 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	ctx                 interpolate.Context
-
-	// The command to run ansible
+	// The command to invoke ansible. Defaults to
+	//  `ansible-playbook`. If you would like to provide a more complex command,
+	//  for example, something that sets up a virtual environment before calling
+	//  ansible, take a look at the ansible wrapper guide below for inspiration.
 	Command string
-
-	// Extra options to pass to the ansible command
+	// Extra arguments to pass to Ansible.
+	// These arguments _will not_ be passed through a shell and arguments should
+	// not be quoted. Usage example:
+	//
+	// ```json
+	//   "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
+	// ```
+	//
+	// If you are running a Windows build on AWS, Azure, Google Compute, or OpenStack
+	// and would like to access the auto-generated password that Packer uses to
+	// connect to a Windows instance via WinRM, you can use the template variable
+	// `{{.WinRMPassword}}` in this option. For example:
+	//
+	// ```json
+	//   "extra_arguments": [
+	//     "--extra-vars", "winrm_password={{ .WinRMPassword }}"
+	//   ]
+	// ```
 	ExtraArguments []string `mapstructure:"extra_arguments"`
-
+	// Environment variables to set before
+	//   running Ansible. Usage example:
+	//
+	//   ```json
+	//     "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
+	//   ```
+	//
+	//   This is a [template engine](/docs/templates/engine). Therefore, you
+	//   may use user variables and template functions in this field.
+	//
+	//   For example, if you are running a Windows build on AWS, Azure,
+	//   Google Compute, or OpenStack and would like to access the auto-generated
+	//   password that Packer uses to connect to a Windows instance via WinRM, you
+	//   can use the template variable `{{.WinRMPassword}}` in this option. Example:
+	//
+	//   ```json
+	//   "ansible_env_vars": [ "WINRM_PASSWORD={{.WinRMPassword}}" ],
+	//   ```
 	AnsibleEnvVars []string `mapstructure:"ansible_env_vars"`
-
-	// The main playbook file to execute.
-	PlaybookFile         string   `mapstructure:"playbook_file"`
-	Groups               []string `mapstructure:"groups"`
-	EmptyGroups          []string `mapstructure:"empty_groups"`
-	HostAlias            string   `mapstructure:"host_alias"`
-	User                 string   `mapstructure:"user"`
-	LocalPort            int      `mapstructure:"local_port"`
-	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
-	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
-	SFTPCmd              string   `mapstructure:"sftp_command"`
-	SkipVersionCheck     bool     `mapstructure:"skip_version_check"`
-	UseSFTP              bool     `mapstructure:"use_sftp"`
-	InventoryDirectory   string   `mapstructure:"inventory_directory"`
-	InventoryFile        string   `mapstructure:"inventory_file"`
-	KeepInventoryFile    bool     `mapstructure:"keep_inventory_file"`
-	GalaxyFile           string   `mapstructure:"galaxy_file"`
-	GalaxyCommand        string   `mapstructure:"galaxy_command"`
-	GalaxyForceInstall   bool     `mapstructure:"galaxy_force_install"`
-	RolesPath            string   `mapstructure:"roles_path"`
-	//TODO: change default to false in v1.6.0.
+	// The playbook to be run by Ansible.
+	PlaybookFile string `mapstructure:"playbook_file" required:"true"`
+	// The groups into which the Ansible host should
+	//  be placed. When unspecified, the host is not associated with any groups.
+	Groups []string `mapstructure:"groups"`
+	// The groups which should be present in
+	//  inventory file but remain empty.
+	EmptyGroups []string `mapstructure:"empty_groups"`
+	//  The alias by which the Ansible host should be
+	// known. Defaults to `default`. This setting is ignored when using a custom
+	// inventory file.
+	HostAlias string `mapstructure:"host_alias"`
+	// The `ansible_user` to use. Defaults to the user running
+	//  packer, NOT the user set for your communicator. If you want to use the same
+	//  user as the communicator, you will need to manually set it again in this
+	//  field.
+	User string `mapstructure:"user"`
+	// The port on which to attempt to listen for SSH
+	//  connections. This value is a starting point. The provisioner will attempt
+	//  listen for SSH connections on the first available of ten ports, starting at
+	//  `local_port`. A system-chosen port is used when `local_port` is missing or
+	//  empty.
+	LocalPort int `mapstructure:"local_port"`
+	// The SSH key that will be used to run the SSH
+	//  server on the host machine to forward commands to the target machine.
+	//  Ansible connects to this server and will validate the identity of the
+	//  server using the system known_hosts. The default behavior is to generate
+	//  and use a onetime key. Host key checking is disabled via the
+	//  `ANSIBLE_HOST_KEY_CHECKING` environment variable if the key is generated.
+	SSHHostKeyFile string `mapstructure:"ssh_host_key_file"`
+	// The SSH public key of the Ansible
+	//  `ssh_user`. The default behavior is to generate and use a onetime key. If
+	//  this key is generated, the corresponding private key is passed to
+	//  `ansible-playbook` with the `-e ansible_ssh_private_key_file` option.
+	SSHAuthorizedKeyFile string `mapstructure:"ssh_authorized_key_file"`
+	// The command to run on the machine being
+	//  provisioned by Packer to handle the SFTP protocol that Ansible will use to
+	//  transfer files. The command should read and write on stdin and stdout,
+	//  respectively. Defaults to `/usr/lib/sftp-server -e`.
+	SFTPCmd string `mapstructure:"sftp_command"`
+	// Check if ansible is installed prior to
+	//  running. Set this to `true`, for example, if you're going to install
+	//  ansible during the packer run.
+	SkipVersionCheck bool `mapstructure:"skip_version_check"`
+	UseSFTP          bool `mapstructure:"use_sftp"`
+	// The directory in which to place the
+	//  temporary generated Ansible inventory file. By default, this is the
+	//  system-specific temporary file location. The fully-qualified name of this
+	//  temporary file will be passed to the `-i` argument of the `ansible` command
+	//  when this provisioner runs ansible. Specify this if you have an existing
+	//  inventory directory with `host_vars` `group_vars` that you would like to
+	//  use in the playbook that this provisioner will run.
+	InventoryDirectory string `mapstructure:"inventory_directory"`
+	// The inventory file to use during provisioning.
+	//  When unspecified, Packer will create a temporary inventory file and will
+	//  use the `host_alias`.
+	InventoryFile string `mapstructure:"inventory_file"`
+	// If `true`, the Ansible provisioner will
+	//  not delete the temporary inventory file it creates in order to connect to
+	//  the instance. This is useful if you are trying to debug your ansible run
+	//  and using "--on-error=ask" in order to leave your instance running while you
+	//  test your playbook. this option is not used if you set an `inventory_file`.
+	KeepInventoryFile bool `mapstructure:"keep_inventory_file"`
+	// A requirements file which provides a way to
+	//  install roles with the [ansible-galaxy
+	//  cli](http://docs.ansible.com/ansible/galaxy.html#the-ansible-galaxy-command-line-tool)
+	//  on the local machine before executing `ansible-playbook`. By default, this is empty.
+	GalaxyFile string `mapstructure:"galaxy_file"`
+	// The command to invoke ansible-galaxy. By default, this is
+	// `ansible-galaxy`.
+	GalaxyCommand string `mapstructure:"galaxy_command"`
+	// Force overwriting an existing role.
+	//  Adds `--force` option to `ansible-galaxy` command. By default, this is
+	//  `false`.
+	GalaxyForceInstall bool `mapstructure:"galaxy_force_install"`
+	// The path to the directory on your local system to
+	//   install the roles in. Adds `--roles-path /path/to/your/roles` to
+	//   `ansible-galaxy` command. By default, this is empty, and thus `--roles-path`
+	//   option is not added to the command.
+	RolesPath string `mapstructure:"roles_path"`
+	// When `true`, set up a localhost proxy adapter
+	// so that Ansible has an IP address to connect to, even if your guest does not
+	// have an IP address. For example, the adapter is necessary for Docker builds
+	// to use the Ansible provisioner. If you set this option to `false`, but
+	// Packer cannot find an IP address to connect Ansible to, it will
+	// automatically set up the adapter anyway.
+	//
+	//  In order for Ansible to connect properly even when use_proxy is false, you
+	// need to make sure that you are either providing a valid username and ssh key
+	// to the ansible provisioner directly, or that the username and ssh key
+	// being used by the ssh communicator will work for your needs. If you do not
+	// provide a user to ansible, it will use the user associated with your
+	// builder, not the user running Packer.
+	//  use_proxy=false is currently only supported for SSH and WinRM.
+	//
+	// Currently, this defaults to `true` for all connection types. In the future,
+	// this option will be changed to default to `false` for SSH and WinRM
+	// connections where the provisioner has access to a host IP.
 	UseProxy     config.Trilean `mapstructure:"use_proxy"`
 	userWasEmpty bool
 }

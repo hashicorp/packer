@@ -19,7 +19,7 @@ type FlatConfig struct {
 	Command              *string           `cty:"command" hcl:"command"`
 	ExtraArguments       []string          `mapstructure:"extra_arguments" cty:"extra_arguments" hcl:"extra_arguments"`
 	AnsibleEnvVars       []string          `mapstructure:"ansible_env_vars" cty:"ansible_env_vars" hcl:"ansible_env_vars"`
-	PlaybookFile         *string           `mapstructure:"playbook_file" cty:"playbook_file" hcl:"playbook_file"`
+	PlaybookFile         *string           `mapstructure:"playbook_file" required:"true" cty:"playbook_file" hcl:"playbook_file"`
 	Groups               []string          `mapstructure:"groups" cty:"groups" hcl:"groups"`
 	EmptyGroups          []string          `mapstructure:"empty_groups" cty:"empty_groups" hcl:"empty_groups"`
 	HostAlias            *string           `mapstructure:"host_alias" cty:"host_alias" hcl:"host_alias"`
