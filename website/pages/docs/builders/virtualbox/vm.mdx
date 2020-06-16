@@ -29,6 +29,9 @@ from the applied provisioners.
 
 Here is a basic example. which serves to show the basic configuration:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "virtualbox-vm",
@@ -48,6 +51,35 @@ Here is a basic example. which serves to show the basic configuration:
   "skip_export": "false"
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "virtualbox-vm" "basic-example" {
+  communicator = "winrm"
+  headless = "{{user `headless`}}"
+  winrm_username = "vagrant"
+  winrm_password = "vagrant"
+  winrm_timeout = "2h"
+  shutdown_command = "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\""
+  guest_additions_mode = "disable"
+  output_directory = "./builds-vm"
+  vm_name = "target-vm"
+  attach_snapshot = "Snapshot"
+  target_snapshot = "Target-Snapshot"
+  force_delete_snapshot = true
+  keep_registered = false
+  skip_export = false
+}
+
+build {
+  sources = ["sources.virtualbox-vm.basic-example"]
+}
+```
+
+</Tab>
+</Tabs>
 
 It is important to add a `shutdown_command`. By default Packer halts the virtual
 machine and the file system may not be sync'd. Thus, changes made in a
