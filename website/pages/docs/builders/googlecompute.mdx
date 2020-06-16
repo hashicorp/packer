@@ -119,6 +119,9 @@ repackage an existing GCE image. The account_file is obtained in the previous
 section. If it parses as JSON it is assumed to be the file itself, otherwise,
 it is assumed to be the path to the file containing the JSON.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "builders": [
@@ -133,6 +136,26 @@ it is assumed to be the path to the file containing the JSON.
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "googlecompute" "basic-example" {
+  account_file = "account.json"
+  project_id = "my project"
+  source_image = "debian-7-wheezy-v20150127"
+  ssh_username = "packer"
+  zone = "us-central1-a"
+}
+
+build {
+  sources = ["sources.googlecompute.basic-example"]
+}
+```
+
+</Tab>
+</Tabs>
 
 ### Windows Example
 
