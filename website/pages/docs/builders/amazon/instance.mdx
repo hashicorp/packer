@@ -121,6 +121,9 @@ Block devices can be nested in the
 
 Here is a basic example. It is completely valid except for the access keys:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "amazon-instance",
@@ -140,6 +143,33 @@ Here is a basic example. It is completely valid except for the access keys:
   "ami_name": "packer-quick-start {{timestamp}}"
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-instance" "basic-example" {
+  region = "us-east-1"
+  source_ami = "ami-d9d6a6b0"
+  instance_type = "m1.small"
+  ssh_username = "ubuntu"
+
+  account_id = "0123-4567-0890"
+  s3_bucket = "packer-images"
+  x509_cert_path = "x509.cert"
+  x509_key_path = "x509.key"
+  x509_upload_path = "/tmp"
+}
+
+build {
+  source "sources.amazon-instance.basic-example" {
+    ami_name = "packer-quick-start {{timestamp}}"
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 -> **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above

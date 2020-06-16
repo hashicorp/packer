@@ -110,6 +110,11 @@ Block devices can be nested in the
 
 Here is a basic example. It is completely valid except for the access keys:
 
+
+
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "amazon-chroot",
@@ -119,6 +124,34 @@ Here is a basic example. It is completely valid except for the access keys:
   "ami_name": "packer-amazon-chroot {{timestamp}}"
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+variable "aws_access_key" {
+  type = string
+}
+
+variable "aws_secret_key" {
+  type = string
+}
+
+source "amazon-chroot" "basic-example" {
+  access_key = var.aws_access_key
+  secret_key =  var.aws_secret_key
+  source_ami = "ami-e81d5881"
+}
+
+build {
+  source "sources.amazon-chroot.basic-example" {
+    ami_name = "packer-amazon-chroot {{timestamp}}"
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Chroot Mounts
 
