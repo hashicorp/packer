@@ -43,7 +43,7 @@ func TestStepHTTPIPDiscover_Run(t *testing.T) {
 		t.Fatalf("bad: Http ip is %s but was supposed to be %s", httpIp, ip)
 	}
 
-	_, ipNet, err := net.ParseCIDR("0.0.0.0/24")
+	_, ipNet, err := net.ParseCIDR("0.0.0.0/0")
 	if err != nil {
 		t.Fatal("error getting ipNet", err)
 	}
