@@ -44,11 +44,13 @@ func getHostIP(s string, network *net.IPNet) (string, error) {
 	}
 
 	// look for an IP that is contained in the ip_wait_address range
-	for _, a := range addrs {
-		ipnet, ok := a.(*net.IPNet)
-		if ok && !ipnet.IP.IsLoopback() {
-			if network.Contains(ipnet.IP) {
-				return ipnet.IP.String(), nil
+	if network != nil {
+		for _, a := range addrs {
+			ipnet, ok := a.(*net.IPNet)
+			if ok && !ipnet.IP.IsLoopback() {
+				if network.Contains(ipnet.IP) {
+					return ipnet.IP.String(), nil
+				}
 			}
 		}
 	}
