@@ -2,12 +2,12 @@ package hcl2template
 
 import (
 	"fmt"
+	"github.com/hashicorp/packer/helper/common"
 	"strings"
 
 	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
-	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -27,6 +27,9 @@ type PackerConfig struct {
 	// or ect. Like the Input variables will.
 	InputVariables Variables
 	LocalVariables Variables
+
+	// TODO @sylviamoss write description
+	BuildVariables Variables
 
 	ValidationOptions
 
@@ -51,12 +54,14 @@ const (
 	inputVariablesAccessor = "var"
 	localsAccessor         = "local"
 	sourcesAccessor        = "source"
+	buildAccessor        = "build"
 )
 
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
 // decoder in order to tell what is the actual value of a var or a local and
 // the list of defined functions.
 func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalContext {
+	buildVariables, _ := cfg.BuildVariables.Values()
 	inputVariables, _ := cfg.InputVariables.Values()
 	localVariables, _ := cfg.LocalVariables.Values()
 	ectx := &hcl.EvalContext{
@@ -64,6 +69,7 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 		Variables: map[string]cty.Value{
 			inputVariablesAccessor: cty.ObjectVal(inputVariables),
 			localsAccessor:         cty.ObjectVal(localVariables),
+			buildAccessor: 			cty.ObjectVal(buildVariables),
 			sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
 				"type": cty.UnknownVal(cty.String),
 				"name": cty.UnknownVal(cty.String),
@@ -368,6 +374,8 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				}
 			}
 
+			cfg.BuildVariables = setBuildVariables(generatedVars)
+
 			provisioners, moreDiags := cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables), generatedPlaceholderMap)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
@@ -408,6 +416,74 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 		}
 	}
 	return res, diags
+}
+
+func setBuildVariables(generatedVars []string) Variables {
+	variables := Variables{
+		"id": &Variable{
+			DefaultValue: cty.StringVal("{{ build `ID`}}"),
+			Type:         cty.String,
+		},
+		"host": &Variable{
+			DefaultValue: cty.StringVal("{{ build `Host`}}"),
+			Type:         cty.String,
+		},
+		"port": &Variable{
+			DefaultValue: cty.StringVal("{{ build `Port`}}"),
+			Type:         cty.String,
+		},
+		"user": &Variable{
+			DefaultValue: cty.StringVal("{{ build `User`}}"),
+			Type:         cty.String,
+		},
+		"password": &Variable{
+			DefaultValue: cty.StringVal("{{ build `Password`}}"),
+			Type:         cty.String,
+		},
+		"connType": &Variable{
+			DefaultValue: cty.StringVal("{{ build `Password`}}"),
+			Type:         cty.String,
+		},
+		"packerRunUUID": &Variable{
+			DefaultValue: cty.StringVal("{{ build `Password`}}"),
+			Type:         cty.String,
+		},
+		"packerHTTPPort": &Variable{
+			DefaultValue: cty.StringVal("{{ build `Password`}}"),
+			Type:         cty.String,
+		},
+		"packerHTTPIP": &Variable{
+			DefaultValue: cty.StringVal("{{ build `Password`}}"),
+			Type:         cty.String,
+		},
+		"packerHTTPAddr": &Variable{
+			DefaultValue: cty.StringVal("{{ build `Password`}}"),
+			Type:         cty.String,
+		},
+		"sshPublicKey": &Variable{
+			DefaultValue: cty.StringVal("{{ build `Password`}}"),
+			Type:         cty.String,
+		},
+		"sshPrivateKey": &Variable{
+			DefaultValue: cty.StringVal("{{ build `Password`}}"),
+			Type:         cty.String,
+		},
+		"winRMPassword": &Variable{
+			DefaultValue: cty.StringVal("{{ build `Password`}}"),
+			Type:         cty.String,
+		},
+	}
+
+	if generatedVars != nil {
+		for _, k := range generatedVars {
+			variables[k] = &Variable{
+				DefaultValue: cty.StringVal(fmt.Sprintf("{{ build `%s`}}", k)),
+				Type:         cty.String,
+			}
+		}
+	}
+
+	return variables
 }
 
 var PackerConsoleHelp = strings.TrimSpace(`
