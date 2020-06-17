@@ -18,6 +18,8 @@ _Note_: this library doesn't support domain users (it doesn't support GSSAPI nor
 ## Getting Started
 WinRM is available on Windows Server 2008 and up. This project natively supports basic authentication for local accounts, see the steps in the next section on how to prepare the remote Windows machine for this scenario. The authentication model is pluggable, see below for an example on using Negotiate/NTLM authentication (e.g. for connecting to vanilla Azure VMs).
 
+_Note_: This library only supports Golang 1.7+
+
 ### Preparing the remote Windows machine for Basic authentication
 This project supports only basic authentication for local accounts (domain users are not supported). The remote windows system must be prepared for winrm:
 
@@ -132,6 +134,44 @@ if err != nil {
 
 ```
 
+By passing a Dial in the Parameters struct it is possible to use different dialer (e.g. tunnel through SSH)
+
+```go
+package main
+     
+ import (
+    "github.com/masterzen/winrm"
+    "golang.org/x/crypto/ssh"
+    "os"
+ )
+ 
+ func main() {
+ 
+    sshClient, err := ssh.Dial("tcp","localhost:22", &ssh.ClientConfig{
+        User:"ubuntu",
+        Auth: []ssh.AuthMethod{ssh.Password("ubuntu")},
+        HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+    })
+ 
+    endpoint := winrm.NewEndpoint("other-host", 5985, false, false, nil, nil, nil, 0)
+ 
+    params := winrm.DefaultParameters
+    params.Dial = sshClient.Dial
+ 
+    client, err := winrm.NewClientWithParameters(endpoint, "test", "test", params)
+    if err != nil {
+        panic(err)
+    }
+ 
+    _, err = client.RunWithInput("ipconfig", os.Stdout, os.Stderr, os.Stdin)
+    if err != nil {
+        panic(err)
+    }
+ }
+
+```
+
+
 For a more complex example, it is possible to call the various functions directly:
 
 ```go
@@ -170,35 +210,50 @@ shell.Close()
 
 For using HTTPS authentication with x 509 cert without checking the CA
 ```go
-	package main
+package main
 
-	import (
-		"github.com/masterzen/winrm"
-		"os"
-		"io/ioutil"
-	)
+import (
+    "github.com/masterzen/winrm"
+    "io/ioutil"
+    "log"
+    "os"
+)
 
-	clientCert, err := ioutil.ReadFile("path/to/cert")
-	if err != nil {
-		panic(err)
-	}
+func main() {
+    clientCert, err := ioutil.ReadFile("/home/example/winrm_client_cert.pem")
+    if err != nil {
+        log.Fatalf("failed to read client certificate: %q", err)
+    }
 
-	clientKey, err := ioutil.ReadFile("path/to/key")
-	if err != nil {
-		panic(err)
-	}
+    clientKey, err := ioutil.ReadFile("/home/example/winrm_client_key.pem")
+    if err != nil {
+        log.Fatalf("failed to read client key: %q", err)
+    }
 
-	winrm.DefaultParameters.TransportDecorator = func() winrm.Transporter {
-		// winrm https module
-		return &winrm.ClientAuthRequest{}
-	}
+    winrm.DefaultParameters.TransportDecorator = func() winrm.Transporter {
+        // winrm https module
+        return &winrm.ClientAuthRequest{}
+    }
 
-	endpoint := winrm.NewEndpoint(host, 5986, false, false, clientCert, clientKey, nil, 0)
-	client, err := winrm.NewClient(endpoint, "Administrator", ""
-	if err != nil {
-		panic(err)
-	}
-	client.Run("ipconfig /all", os.Stdout, os.Stderr)
+    endpoint := winrm.NewEndpoint(
+        "192.168.100.2", // host to connect to
+        5986,            // winrm port
+        true,            // use TLS
+        true,            // Allow insecure connection
+        nil,             // CA certificate
+        clientCert,      // Client Certificate
+        clientKey,       // Client Key
+        0,               // Timeout
+    )
+    client, err := winrm.NewClient(endpoint, "Administrator", "")
+    if err != nil {
+        log.Fatalf("failed to create client: %q", err)
+    }
+    _, err = client.Run("whoami", os.Stdout, os.Stderr)
+    if err != nil {
+        log.Fatalf("failed to run command: %q", err)
+    }
+}
 ```
 
 ## Developing on WinRM

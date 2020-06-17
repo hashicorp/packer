@@ -31,7 +31,7 @@ func NewDialer() DialFunc {
 			grpclog.Warningf("Dial %s failed: %s", target, err)
 			return nil, err
 		}
-		grpclog.Warningf("Dial %s successfully connected to: %s", target, conn.RemoteAddr())
+		grpclog.Infof("Dial %s successfully connected to: %s", target, conn.RemoteAddr())
 		return conn, nil
 	}
 }

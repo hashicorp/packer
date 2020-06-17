@@ -10,7 +10,7 @@ import (
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/access"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/resourcemanager/v1"
+	resourcemanager "github.com/yandex-cloud/go-genproto/yandex/cloud/resourcemanager/v1"
 )
 
 //revive:disable
@@ -20,8 +20,6 @@ import (
 type FolderServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ resourcemanager.FolderServiceClient = &FolderServiceClient{}
 
 // Create implements resourcemanager.FolderServiceClient
 func (c *FolderServiceClient) Create(ctx context.Context, in *resourcemanager.CreateFolderRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
@@ -59,6 +57,69 @@ func (c *FolderServiceClient) List(ctx context.Context, in *resourcemanager.List
 	return resourcemanager.NewFolderServiceClient(conn).List(ctx, in, opts...)
 }
 
+type FolderIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *FolderServiceClient
+	request *resourcemanager.ListFoldersRequest
+
+	items []*resourcemanager.Folder
+}
+
+func (c *FolderServiceClient) FolderIterator(ctx context.Context, cloudId string, opts ...grpc.CallOption) *FolderIterator {
+	return &FolderIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &resourcemanager.ListFoldersRequest{
+			CloudId:  cloudId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *FolderIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Folders
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *FolderIterator) Value() *resourcemanager.Folder {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *FolderIterator) Error() error {
+	return it.err
+}
+
 // ListAccessBindings implements resourcemanager.FolderServiceClient
 func (c *FolderServiceClient) ListAccessBindings(ctx context.Context, in *access.ListAccessBindingsRequest, opts ...grpc.CallOption) (*access.ListAccessBindingsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -68,6 +129,69 @@ func (c *FolderServiceClient) ListAccessBindings(ctx context.Context, in *access
 	return resourcemanager.NewFolderServiceClient(conn).ListAccessBindings(ctx, in, opts...)
 }
 
+type FolderAccessBindingsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *FolderServiceClient
+	request *access.ListAccessBindingsRequest
+
+	items []*access.AccessBinding
+}
+
+func (c *FolderServiceClient) FolderAccessBindingsIterator(ctx context.Context, resourceId string, opts ...grpc.CallOption) *FolderAccessBindingsIterator {
+	return &FolderAccessBindingsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &access.ListAccessBindingsRequest{
+			ResourceId: resourceId,
+			PageSize:   1000,
+		},
+	}
+}
+
+func (it *FolderAccessBindingsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListAccessBindings(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.AccessBindings
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *FolderAccessBindingsIterator) Value() *access.AccessBinding {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *FolderAccessBindingsIterator) Error() error {
+	return it.err
+}
+
 // ListOperations implements resourcemanager.FolderServiceClient
 func (c *FolderServiceClient) ListOperations(ctx context.Context, in *resourcemanager.ListFolderOperationsRequest, opts ...grpc.CallOption) (*resourcemanager.ListFolderOperationsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -75,6 +199,69 @@ func (c *FolderServiceClient) ListOperations(ctx context.Context, in *resourcema
 		return nil, err
 	}
 	return resourcemanager.NewFolderServiceClient(conn).ListOperations(ctx, in, opts...)
+}
+
+type FolderOperationsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *FolderServiceClient
+	request *resourcemanager.ListFolderOperationsRequest
+
+	items []*operation.Operation
+}
+
+func (c *FolderServiceClient) FolderOperationsIterator(ctx context.Context, folderId string, opts ...grpc.CallOption) *FolderOperationsIterator {
+	return &FolderOperationsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &resourcemanager.ListFolderOperationsRequest{
+			FolderId: folderId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *FolderOperationsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListOperations(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Operations
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *FolderOperationsIterator) Value() *operation.Operation {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *FolderOperationsIterator) Error() error {
+	return it.err
 }
 
 // SetAccessBindings implements resourcemanager.FolderServiceClient

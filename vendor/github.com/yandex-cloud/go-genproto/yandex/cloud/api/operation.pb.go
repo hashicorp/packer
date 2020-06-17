@@ -89,7 +89,9 @@ func init() {
 	proto.RegisterExtension(E_Operation)
 }
 
-func init() { proto.RegisterFile("yandex/cloud/api/operation.proto", fileDescriptor_6f0479639ad85daa) }
+func init() {
+	proto.RegisterFile("yandex/cloud/api/operation.proto", fileDescriptor_6f0479639ad85daa)
+}
 
 var fileDescriptor_6f0479639ad85daa = []byte{
 	// 222 bytes of a gzipped FileDescriptorProto

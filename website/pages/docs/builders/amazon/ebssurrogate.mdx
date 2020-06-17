@@ -102,6 +102,10 @@ Block devices can be nested in the
 
 ## Basic Example
 
+
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "amazon-ebssurrogate",
@@ -128,6 +132,46 @@ Block devices can be nested in the
   }
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebssurrogate" "basic-example" {
+  region = "us-east-1"
+  ssh_username = "ubuntu"
+  instance_type = "t2.medium"
+  source_ami = "ami-40d28157"
+  ami_name = "packer-test-adrien"
+  ami_virtualization_type = "paravirtual"
+
+  launch_block_device_mappings {
+      volume_type = "gp2"
+      device_name = "/dev/xvdf"
+      delete_on_termination = false
+      volume_size = 10
+  }
+
+  ami_root_device {
+    source_device_name = "/dev/xvdf"
+    device_name = "/dev/xvda"
+    delete_on_termination = true
+    volume_size = 16
+    volume_type = "gp2"
+  }
+}
+
+build {
+  sources = ["sources.amazon-ebssurrogate.basic-example"]
+
+  provisioner "shell" {
+      inline = ["..."]
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 -> **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above

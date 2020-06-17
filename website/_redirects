@@ -24,6 +24,7 @@
 /docs/command-line/*                              /docs/commands/:splat                       200
 /docs/extend/*                                    /docs/extending/:splat                      200
 
+/intro/getting-started                            https://learn.hashicorp.com/packer/getting-started/install                      301!
 /intro/getting-started/install                    https://learn.hashicorp.com/packer/getting-started/install                      301!
 /intro/getting-started/install.html               https://learn.hashicorp.com/packer/getting-started/install                      301!
 /intro/getting-started/build-image                https://learn.hashicorp.com/packer/getting-started/build-image                  301!

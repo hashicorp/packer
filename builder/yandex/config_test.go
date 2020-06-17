@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const TestServiceAccountKeyFile = "./test_data/fake-sa-key.json"
+const TestServiceAccountKeyFile = "./testdata/fake-sa-key.json"
 
 func TestConfigPrepare(t *testing.T) {
 	tf, err := ioutil.TempFile("", "packer")

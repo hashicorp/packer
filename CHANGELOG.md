@@ -180,7 +180,7 @@
     builder provisioners and post-processors [GH-8956]
 * core/HCL: HCL mode now honors -only and -except options. [GH-8947]
 * core: New template function: aws_secretsmanager [GH-9099]
-* provisioner/ansible: Add option to not use localhost proxy adapter. Removes
+* provisioner/ansible: Add `use_proxy` option to not use localhost proxy adapter. Removes
     need for ansible connection_plugin when using WinRM. [GH-8625]
 * provisioner/powershell: Add `debug_mode` option to help with debugging
     generated scripts [GH-8996]

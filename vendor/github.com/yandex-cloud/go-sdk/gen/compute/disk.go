@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
+	compute "github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
@@ -19,8 +19,6 @@ import (
 type DiskServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ compute.DiskServiceClient = &DiskServiceClient{}
 
 // Create implements compute.DiskServiceClient
 func (c *DiskServiceClient) Create(ctx context.Context, in *compute.CreateDiskRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
@@ -58,6 +56,69 @@ func (c *DiskServiceClient) List(ctx context.Context, in *compute.ListDisksReque
 	return compute.NewDiskServiceClient(conn).List(ctx, in, opts...)
 }
 
+type DiskIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *DiskServiceClient
+	request *compute.ListDisksRequest
+
+	items []*compute.Disk
+}
+
+func (c *DiskServiceClient) DiskIterator(ctx context.Context, folderId string, opts ...grpc.CallOption) *DiskIterator {
+	return &DiskIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &compute.ListDisksRequest{
+			FolderId: folderId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *DiskIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Disks
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *DiskIterator) Value() *compute.Disk {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *DiskIterator) Error() error {
+	return it.err
+}
+
 // ListOperations implements compute.DiskServiceClient
 func (c *DiskServiceClient) ListOperations(ctx context.Context, in *compute.ListDiskOperationsRequest, opts ...grpc.CallOption) (*compute.ListDiskOperationsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -65,6 +126,69 @@ func (c *DiskServiceClient) ListOperations(ctx context.Context, in *compute.List
 		return nil, err
 	}
 	return compute.NewDiskServiceClient(conn).ListOperations(ctx, in, opts...)
+}
+
+type DiskOperationsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *DiskServiceClient
+	request *compute.ListDiskOperationsRequest
+
+	items []*operation.Operation
+}
+
+func (c *DiskServiceClient) DiskOperationsIterator(ctx context.Context, diskId string, opts ...grpc.CallOption) *DiskOperationsIterator {
+	return &DiskOperationsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &compute.ListDiskOperationsRequest{
+			DiskId:   diskId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *DiskOperationsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListOperations(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Operations
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *DiskOperationsIterator) Value() *operation.Operation {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *DiskOperationsIterator) Error() error {
+	return it.err
 }
 
 // Update implements compute.DiskServiceClient

@@ -22,6 +22,7 @@ import (
 	apiendpoint "github.com/yandex-cloud/go-sdk/gen/apiendpoint"
 	"github.com/yandex-cloud/go-sdk/gen/compute"
 	"github.com/yandex-cloud/go-sdk/gen/iam"
+	k8s "github.com/yandex-cloud/go-sdk/gen/kubernetes"
 	gen_operation "github.com/yandex-cloud/go-sdk/gen/operation"
 	"github.com/yandex-cloud/go-sdk/gen/resourcemanager"
 	"github.com/yandex-cloud/go-sdk/gen/vpc"
@@ -34,6 +35,8 @@ import (
 type Endpoint string
 
 const (
+	DefaultPageSize int64 = 1000
+
 	ComputeServiceID            Endpoint = "compute"
 	IAMServiceID                Endpoint = "iam"
 	OperationServiceID          Endpoint = "operation"
@@ -43,7 +46,8 @@ const (
 	// revive:disable:var-naming
 	ApiEndpointServiceID Endpoint = "endpoint"
 	// revive:enable:var-naming
-	VpcServiceID Endpoint = "vpc"
+	VpcServiceID        Endpoint = "vpc"
+	KubernetesServiceID Endpoint = "managed-kubernetes"
 )
 
 // Config is a config that is used to create SDK instance.
@@ -161,6 +165,14 @@ func (sdk *SDK) MDB() *MDB {
 	return &MDB{sdk: sdk}
 }
 
+func (sdk *SDK) Serverless() *Serverless {
+	return &Serverless{sdk: sdk}
+}
+
+func (sdk *SDK) Marketplace() *Marketplace {
+	return &Marketplace{sdk: sdk}
+}
+
 // Operation gets OperationService client
 func (sdk *SDK) Operation() *gen_operation.OperationServiceClient {
 	group := gen_operation.NewOperation(sdk.getConn(OperationServiceID))
@@ -180,6 +192,16 @@ func (sdk *SDK) ApiEndpoint() *apiendpoint.APIEndpoint {
 }
 
 // revive:enable:var-naming
+
+// Kubernetes returns Kubernetes object that is used to operate on Yandex Managed Kubernetes
+func (sdk *SDK) Kubernetes() *k8s.Kubernetes {
+	return k8s.NewKubernetes(sdk.getConn(KubernetesServiceID))
+}
+
+// AI returns AI object that is used to do AI stuff.
+func (sdk *SDK) AI() *AI {
+	return &AI{sdk: sdk}
+}
 
 func (sdk *SDK) Resolve(ctx context.Context, r ...Resolver) error {
 	args := make([]func() error, len(r))

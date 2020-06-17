@@ -17,11 +17,23 @@ func newRunner(steps []multistep.Step, config PackerConfig, ui packer.Ui) (multi
 	case "", "cleanup":
 	case "abort":
 		for i, step := range steps {
-			steps[i] = abortStep{step, ui}
+			steps[i] = abortStep{
+				step:        step,
+				cleanupProv: false,
+				ui:          ui,
+			}
 		}
 	case "ask":
 		for i, step := range steps {
 			steps[i] = askStep{step, ui}
+		}
+	case "run-cleanup-provisioner":
+		for i, step := range steps {
+			steps[i] = abortStep{
+				step:        step,
+				cleanupProv: true,
+				ui:          ui,
+			}
 		}
 	}
 
@@ -57,8 +69,9 @@ func typeName(i interface{}) string {
 }
 
 type abortStep struct {
-	step multistep.Step
-	ui   packer.Ui
+	step        multistep.Step
+	cleanupProv bool
+	ui          packer.Ui
 }
 
 func (s abortStep) InnerStepName() string {
@@ -70,6 +83,11 @@ func (s abortStep) Run(ctx context.Context, state multistep.StateBag) multistep.
 }
 
 func (s abortStep) Cleanup(state multistep.StateBag) {
+	if s.InnerStepName() == typeName(StepProvision{}) && s.cleanupProv {
+		s.step.Cleanup(state)
+		return
+	}
+
 	shouldCleanup := handleAbortsAndInterupts(state, s.ui, typeName(s.step))
 	if !shouldCleanup {
 		return

@@ -47,3 +47,8 @@ func (c *Compute) Snapshot() *SnapshotServiceClient {
 func (c *Compute) Zone() *ZoneServiceClient {
 	return &ZoneServiceClient{getConn: c.getConn}
 }
+
+// PlacementGroup gets PlacementGroupService client
+func (c *Compute) PlacementGroup() *PlacementGroupServiceClient {
+	return &PlacementGroupServiceClient{getConn: c.getConn}
+}
