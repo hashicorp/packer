@@ -170,11 +170,12 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	for i := range builds {
 		ui := c.Ui
 		if cla.Color {
-			ui = &packer.ColoredUi{
-				Color: colors[i%len(colors)],
-				Ui:    ui,
-			}
+			// Only set up UI colors if -machine-readable isn't set.
 			if _, ok := c.Ui.(*packer.MachineReadableUi); !ok {
+				ui = &packer.ColoredUi{
+					Color: colors[i%len(colors)],
+					Ui:    ui,
+				}
 				ui.Say(fmt.Sprintf("%s: output will be in this color.", builds[i].Name()))
 				if i+1 == len(builds) {
 					// Add a newline between the color output and the actual output
