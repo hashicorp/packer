@@ -68,20 +68,12 @@ both sending the password. In other words Packer will not work with _sshd_
 configured with more than one configured authentication method using
 `AuthenticationMethods`.
 
-Packer supports the following ciphers:
-
-- aes128-ctr
-- aes192-ctr
-- aes256-ctr
-- arcfour128
-- arcfour256
-- arcfour
-- `es128-gcm@openssh.com`
-- `acha20-poly1305@openssh.com`
-
-And the following MACs:
+Packer supports the following MACs:
 
 - hmac-sha1
 - hmac-sha1-96
 - hmac-sha2-256
 - `hmac-sha2-256-etm@openssh.com`
+
+For more information on the ciphers that Packer supports, check the docs for
+the ssh_ciphers template option.
