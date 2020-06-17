@@ -42,7 +42,7 @@ func testAccPreCheckInstanceSA(t *testing.T) {
 
 	_, err := client.R().SetHeader("Metadata-Flavor", "Google").Get(tokenUrl())
 	if err != nil {
-		t.Fatalf("error get Service Account token assignment", err)
+		t.Fatalf("error get Service Account token assignment: %s", err)
 	}
 
 	if v := os.Getenv("YC_FOLDER_ID"); v == "" {
