@@ -89,6 +89,15 @@
      inventory directory with `host_vars` `group_vars` that you would like to
      use in the playbook that this provisioner will run.
     
+-   `inventory_file_template` (string) - This template represents the format for the lines added to the temporary
+    inventory file that Packer will create to run Ansible against your image.
+    The default for recent versions of Ansible is:
+    "{{ .HostAlias }} ansible_host={{ .Host }} ansible_user={{ .User }} ansible_port={{ .Port }}\n"
+    Available template engines are: This option is a template engine;
+    variables available to you include the examples in the default (Host,
+    HostAlias, User, Port) as well as any variables available to you via the
+    "build" template engine.
+    
 -   `inventory_file` (string) - The inventory file to use during provisioning.
      When unspecified, Packer will create a temporary inventory file and will
      use the `host_alias`.
