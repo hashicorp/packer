@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/access"
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/containerregistry/v1"
+	containerregistry "github.com/yandex-cloud/go-genproto/yandex/cloud/containerregistry/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
@@ -20,8 +20,6 @@ import (
 type RepositoryServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ containerregistry.RepositoryServiceClient = &RepositoryServiceClient{}
 
 // Get implements containerregistry.RepositoryServiceClient
 func (c *RepositoryServiceClient) Get(ctx context.Context, in *containerregistry.GetRepositoryRequest, opts ...grpc.CallOption) (*containerregistry.Repository, error) {
@@ -50,6 +48,69 @@ func (c *RepositoryServiceClient) List(ctx context.Context, in *containerregistr
 	return containerregistry.NewRepositoryServiceClient(conn).List(ctx, in, opts...)
 }
 
+type RepositoryIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *RepositoryServiceClient
+	request *containerregistry.ListRepositoriesRequest
+
+	items []*containerregistry.Repository
+}
+
+func (c *RepositoryServiceClient) RepositoryIterator(ctx context.Context, folderId string, opts ...grpc.CallOption) *RepositoryIterator {
+	return &RepositoryIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &containerregistry.ListRepositoriesRequest{
+			FolderId: folderId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *RepositoryIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Repositories
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *RepositoryIterator) Value() *containerregistry.Repository {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *RepositoryIterator) Error() error {
+	return it.err
+}
+
 // ListAccessBindings implements containerregistry.RepositoryServiceClient
 func (c *RepositoryServiceClient) ListAccessBindings(ctx context.Context, in *access.ListAccessBindingsRequest, opts ...grpc.CallOption) (*access.ListAccessBindingsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -57,6 +118,69 @@ func (c *RepositoryServiceClient) ListAccessBindings(ctx context.Context, in *ac
 		return nil, err
 	}
 	return containerregistry.NewRepositoryServiceClient(conn).ListAccessBindings(ctx, in, opts...)
+}
+
+type RepositoryAccessBindingsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *RepositoryServiceClient
+	request *access.ListAccessBindingsRequest
+
+	items []*access.AccessBinding
+}
+
+func (c *RepositoryServiceClient) RepositoryAccessBindingsIterator(ctx context.Context, resourceId string, opts ...grpc.CallOption) *RepositoryAccessBindingsIterator {
+	return &RepositoryAccessBindingsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &access.ListAccessBindingsRequest{
+			ResourceId: resourceId,
+			PageSize:   1000,
+		},
+	}
+}
+
+func (it *RepositoryAccessBindingsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListAccessBindings(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.AccessBindings
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *RepositoryAccessBindingsIterator) Value() *access.AccessBinding {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *RepositoryAccessBindingsIterator) Error() error {
+	return it.err
 }
 
 // SetAccessBindings implements containerregistry.RepositoryServiceClient

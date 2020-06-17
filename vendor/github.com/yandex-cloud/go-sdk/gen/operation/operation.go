@@ -19,8 +19,6 @@ type OperationServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
 
-var _ operation.OperationServiceClient = &OperationServiceClient{}
-
 // Cancel implements operation.OperationServiceClient
 func (c *OperationServiceClient) Cancel(ctx context.Context, in *operation.CancelOperationRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)

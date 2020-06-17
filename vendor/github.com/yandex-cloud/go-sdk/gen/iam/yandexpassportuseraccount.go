@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
+	iam "github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
 )
 
 //revive:disable
@@ -18,8 +18,6 @@ import (
 type YandexPassportUserAccountServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ iam.YandexPassportUserAccountServiceClient = &YandexPassportUserAccountServiceClient{}
 
 // GetByLogin implements iam.YandexPassportUserAccountServiceClient
 func (c *YandexPassportUserAccountServiceClient) GetByLogin(ctx context.Context, in *iam.GetUserAccountByLoginRequest, opts ...grpc.CallOption) (*iam.UserAccount, error) {

@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/mysql/v1"
+	mysql "github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/mysql/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
@@ -19,8 +19,6 @@ import (
 type ClusterServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ mysql.ClusterServiceClient = &ClusterServiceClient{}
 
 // AddHosts implements mysql.ClusterServiceClient
 func (c *ClusterServiceClient) AddHosts(ctx context.Context, in *mysql.AddClusterHostsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
@@ -85,6 +83,69 @@ func (c *ClusterServiceClient) List(ctx context.Context, in *mysql.ListClustersR
 	return mysql.NewClusterServiceClient(conn).List(ctx, in, opts...)
 }
 
+type ClusterIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *mysql.ListClustersRequest
+
+	items []*mysql.Cluster
+}
+
+func (c *ClusterServiceClient) ClusterIterator(ctx context.Context, folderId string, opts ...grpc.CallOption) *ClusterIterator {
+	return &ClusterIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &mysql.ListClustersRequest{
+			FolderId: folderId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *ClusterIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Clusters
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterIterator) Value() *mysql.Cluster {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterIterator) Error() error {
+	return it.err
+}
+
 // ListBackups implements mysql.ClusterServiceClient
 func (c *ClusterServiceClient) ListBackups(ctx context.Context, in *mysql.ListClusterBackupsRequest, opts ...grpc.CallOption) (*mysql.ListClusterBackupsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -92,6 +153,69 @@ func (c *ClusterServiceClient) ListBackups(ctx context.Context, in *mysql.ListCl
 		return nil, err
 	}
 	return mysql.NewClusterServiceClient(conn).ListBackups(ctx, in, opts...)
+}
+
+type ClusterBackupsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *mysql.ListClusterBackupsRequest
+
+	items []*mysql.Backup
+}
+
+func (c *ClusterServiceClient) ClusterBackupsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterBackupsIterator {
+	return &ClusterBackupsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &mysql.ListClusterBackupsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterBackupsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListBackups(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Backups
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterBackupsIterator) Value() *mysql.Backup {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterBackupsIterator) Error() error {
+	return it.err
 }
 
 // ListHosts implements mysql.ClusterServiceClient
@@ -103,6 +227,69 @@ func (c *ClusterServiceClient) ListHosts(ctx context.Context, in *mysql.ListClus
 	return mysql.NewClusterServiceClient(conn).ListHosts(ctx, in, opts...)
 }
 
+type ClusterHostsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *mysql.ListClusterHostsRequest
+
+	items []*mysql.Host
+}
+
+func (c *ClusterServiceClient) ClusterHostsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterHostsIterator {
+	return &ClusterHostsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &mysql.ListClusterHostsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterHostsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListHosts(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Hosts
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterHostsIterator) Value() *mysql.Host {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterHostsIterator) Error() error {
+	return it.err
+}
+
 // ListLogs implements mysql.ClusterServiceClient
 func (c *ClusterServiceClient) ListLogs(ctx context.Context, in *mysql.ListClusterLogsRequest, opts ...grpc.CallOption) (*mysql.ListClusterLogsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -112,6 +299,69 @@ func (c *ClusterServiceClient) ListLogs(ctx context.Context, in *mysql.ListClust
 	return mysql.NewClusterServiceClient(conn).ListLogs(ctx, in, opts...)
 }
 
+type ClusterLogsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *mysql.ListClusterLogsRequest
+
+	items []*mysql.LogRecord
+}
+
+func (c *ClusterServiceClient) ClusterLogsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterLogsIterator {
+	return &ClusterLogsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &mysql.ListClusterLogsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterLogsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListLogs(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Logs
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterLogsIterator) Value() *mysql.LogRecord {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterLogsIterator) Error() error {
+	return it.err
+}
+
 // ListOperations implements mysql.ClusterServiceClient
 func (c *ClusterServiceClient) ListOperations(ctx context.Context, in *mysql.ListClusterOperationsRequest, opts ...grpc.CallOption) (*mysql.ListClusterOperationsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -119,6 +369,69 @@ func (c *ClusterServiceClient) ListOperations(ctx context.Context, in *mysql.Lis
 		return nil, err
 	}
 	return mysql.NewClusterServiceClient(conn).ListOperations(ctx, in, opts...)
+}
+
+type ClusterOperationsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *mysql.ListClusterOperationsRequest
+
+	items []*operation.Operation
+}
+
+func (c *ClusterServiceClient) ClusterOperationsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterOperationsIterator {
+	return &ClusterOperationsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &mysql.ListClusterOperationsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterOperationsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListOperations(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Operations
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterOperationsIterator) Value() *operation.Operation {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterOperationsIterator) Error() error {
+	return it.err
 }
 
 // Move implements mysql.ClusterServiceClient
@@ -164,6 +477,15 @@ func (c *ClusterServiceClient) Stop(ctx context.Context, in *mysql.StopClusterRe
 		return nil, err
 	}
 	return mysql.NewClusterServiceClient(conn).Stop(ctx, in, opts...)
+}
+
+// StreamLogs implements mysql.ClusterServiceClient
+func (c *ClusterServiceClient) StreamLogs(ctx context.Context, in *mysql.StreamClusterLogsRequest, opts ...grpc.CallOption) (mysql.ClusterService_StreamLogsClient, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mysql.NewClusterServiceClient(conn).StreamLogs(ctx, in, opts...)
 }
 
 // Update implements mysql.ClusterServiceClient

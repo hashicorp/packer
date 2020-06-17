@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
+	iam "github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
 )
 
 //revive:disable
@@ -18,8 +18,6 @@ import (
 type IamTokenServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ iam.IamTokenServiceClient = &IamTokenServiceClient{}
 
 // Create implements iam.IamTokenServiceClient
 func (c *IamTokenServiceClient) Create(ctx context.Context, in *iam.CreateIamTokenRequest, opts ...grpc.CallOption) (*iam.CreateIamTokenResponse, error) {

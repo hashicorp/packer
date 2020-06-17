@@ -30,6 +30,9 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type GetDeviceRequest struct {
+	// ID of the device to return.
+	//
+	// To get a device ID make a [DeviceService.List] request.
 	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -72,12 +75,18 @@ type ListDevicesRequest struct {
 	// Types that are valid to be assigned to Id:
 	//	*ListDevicesRequest_RegistryId
 	//	*ListDevicesRequest_FolderId
-	Id                   isListDevicesRequest_Id `protobuf_oneof:"id"`
-	PageSize             int64                   `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken            string                  `protobuf:"bytes,4,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
-	XXX_unrecognized     []byte                  `json:"-"`
-	XXX_sizecache        int32                   `json:"-"`
+	Id isListDevicesRequest_Id `protobuf_oneof:"id"`
+	// The maximum number of results per page to return. If the number of available
+	// results is larger than `page_size`, the service returns a [ListDevicesResponse.next_page_token]
+	// that can be used to get the next page of results in subsequent list requests.
+	// Default value: 100.
+	PageSize int64 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Page token. To get the next page of results, set `page_token` to the
+	// [ListDevicesResponse.next_page_token] returned by a previous list request.
+	PageToken            string   `protobuf:"bytes,4,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *ListDevicesRequest) Reset()         { *m = ListDevicesRequest{} }
@@ -165,11 +174,17 @@ func (*ListDevicesRequest) XXX_OneofWrappers() []interface{} {
 }
 
 type ListDevicesResponse struct {
-	Devices              []*Device `protobuf:"bytes,1,rep,name=devices,proto3" json:"devices,omitempty"`
-	NextPageToken        string    `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
-	XXX_unrecognized     []byte    `json:"-"`
-	XXX_sizecache        int32     `json:"-"`
+	// List of devices.
+	Devices []*Device `protobuf:"bytes,1,rep,name=devices,proto3" json:"devices,omitempty"`
+	// Token for getting the next page of the list. If the number of results is greater than
+	// the specified [ListDevicesRequest.page_size], use `next_page_token` as the value
+	// for the [ListDevicesRequest.page_token] parameter in the next list request.
+	//
+	// Each subsequent page will have its own `next_page_token` to continue paging through the results.
+	NextPageToken        string   `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *ListDevicesResponse) Reset()         { *m = ListDevicesResponse{} }
@@ -212,15 +227,27 @@ func (m *ListDevicesResponse) GetNextPageToken() string {
 }
 
 type CreateDeviceRequest struct {
-	RegistryId   string                             `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
-	Name         string                             `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description  string                             `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// ID of the registry to create a device in.
+	//
+	// To get a registry ID, make a [yandex.cloud.iot.devices.v1.RegistryService.List] request.
+	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// Name of the device. The name must be unique within the registry.
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// Description of the device.
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// Device certificate.
 	Certificates []*CreateDeviceRequest_Certificate `protobuf:"bytes,4,rep,name=certificates,proto3" json:"certificates,omitempty"`
-	// map from alias to canonical topic name prefix, e.g. my/custom/alias -> $device/{id}/events
-	TopicAliases         map[string]string `protobuf:"bytes,5,rep,name=topic_aliases,json=topicAliases,proto3" json:"topic_aliases,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
-	XXX_unrecognized     []byte            `json:"-"`
-	XXX_sizecache        int32             `json:"-"`
+	// Alias of a device topic.
+	//
+	// Alias is an alternate name of a device topic assigned by the user. Map alias to canonical topic name prefix, e.g. `my/custom/alias` match to `$device/{id}/events`.
+	TopicAliases map[string]string `protobuf:"bytes,5,rep,name=topic_aliases,json=topicAliases,proto3" json:"topic_aliases,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// Device password.
+	//
+	// The password must contain at least three character categories among the following: upper case latin, lower case latin, numbers and special symbols.
+	Password             string   `protobuf:"bytes,6,opt,name=password,proto3" json:"password,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *CreateDeviceRequest) Reset()         { *m = CreateDeviceRequest{} }
@@ -283,7 +310,16 @@ func (m *CreateDeviceRequest) GetTopicAliases() map[string]string {
 	return nil
 }
 
+func (m *CreateDeviceRequest) GetPassword() string {
+	if m != nil {
+		return m.Password
+	}
+	return ""
+}
+
+// Specification of a device certificate.
 type CreateDeviceRequest_Certificate struct {
+	// Public part of the device certificate.
 	CertificateData      string   `protobuf:"bytes,1,opt,name=certificate_data,json=certificateData,proto3" json:"certificate_data,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -323,6 +359,7 @@ func (m *CreateDeviceRequest_Certificate) GetCertificateData() string {
 }
 
 type CreateDeviceMetadata struct {
+	// ID of the device that is being created.
 	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -362,11 +399,19 @@ func (m *CreateDeviceMetadata) GetDeviceId() string {
 }
 
 type UpdateDeviceRequest struct {
-	DeviceId    string                `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	UpdateMask  *field_mask.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
-	Name        string                `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Description string                `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	// map from alias to canonical topic name prefix, e.g. my/custom/alias -> $device/abcdef/events
+	// ID of the device to update.
+	//
+	// To get a device ID make a [DeviceService.List] request.
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// Field mask that specifies which fields of the device are going to be updated.
+	UpdateMask *field_mask.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// Name of the device. The name must be unique within the registry.
+	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	// Description of the device.
+	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	// Alias of a device topic.
+	//
+	// Alias is an alternate name of a device topic assigned by the user. Map alias to canonical topic name prefix, e.g. `my/custom/alias` match to `$device/{id}/events`.
 	TopicAliases         map[string]string `protobuf:"bytes,5,rep,name=topic_aliases,json=topicAliases,proto3" json:"topic_aliases,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
 	XXX_unrecognized     []byte            `json:"-"`
@@ -434,6 +479,7 @@ func (m *UpdateDeviceRequest) GetTopicAliases() map[string]string {
 }
 
 type UpdateDeviceMetadata struct {
+	// ID of the device that is being updated.
 	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -473,6 +519,9 @@ func (m *UpdateDeviceMetadata) GetDeviceId() string {
 }
 
 type DeleteDeviceRequest struct {
+	// ID of the device to delete.
+	//
+	// To get a device ID make a [DeviceService.List] request.
 	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -512,6 +561,7 @@ func (m *DeleteDeviceRequest) GetDeviceId() string {
 }
 
 type DeleteDeviceMetadata struct {
+	// ID of the device that is being deleted.
 	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -551,6 +601,7 @@ func (m *DeleteDeviceMetadata) GetDeviceId() string {
 }
 
 type ListDeviceCertificatesRequest struct {
+	// ID of the device to list certificates for.
 	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -590,6 +641,7 @@ func (m *ListDeviceCertificatesRequest) GetDeviceId() string {
 }
 
 type ListDeviceCertificatesResponse struct {
+	// List of certificates for the specified device.
 	Certificates         []*DeviceCertificate `protobuf:"bytes,1,rep,name=certificates,proto3" json:"certificates,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
@@ -629,7 +681,11 @@ func (m *ListDeviceCertificatesResponse) GetCertificates() []*DeviceCertificate 
 }
 
 type AddDeviceCertificateRequest struct {
-	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// ID of the device for which the certificate is being added.
+	//
+	// To get a device ID make a [DeviceService.List] request.
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// Public part of the certificate.
 	CertificateData      string   `protobuf:"bytes,3,opt,name=certificate_data,json=certificateData,proto3" json:"certificate_data,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -676,7 +732,9 @@ func (m *AddDeviceCertificateRequest) GetCertificateData() string {
 }
 
 type AddDeviceCertificateMetadata struct {
-	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// ID of the device certificate that is being added.
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// Fingerprint of the certificate that is being added.
 	Fingerprint          string   `protobuf:"bytes,2,opt,name=fingerprint,proto3" json:"fingerprint,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -723,7 +781,11 @@ func (m *AddDeviceCertificateMetadata) GetFingerprint() string {
 }
 
 type DeleteDeviceCertificateRequest struct {
-	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// ID of the device to delete a certificate for.
+	//
+	// To get a device ID make a [DeviceService.List] request.
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// Fingerprint of the certificate to delete.
 	Fingerprint          string   `protobuf:"bytes,2,opt,name=fingerprint,proto3" json:"fingerprint,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -770,7 +832,9 @@ func (m *DeleteDeviceCertificateRequest) GetFingerprint() string {
 }
 
 type DeleteDeviceCertificateMetadata struct {
-	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// ID of the device certificate that is being deleted.
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// Fingerprint of the certificate that is being deleted.
 	Fingerprint          string   `protobuf:"bytes,2,opt,name=fingerprint,proto3" json:"fingerprint,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -816,10 +880,307 @@ func (m *DeleteDeviceCertificateMetadata) GetFingerprint() string {
 	return ""
 }
 
-type ListDeviceOperationsRequest struct {
+type ListDevicePasswordsRequest struct {
+	// ID of the registry to list passwords in.
+	//
+	// To get a registry ID make a [RegistryService.List] request.
 	DeviceId             string   `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	PageSize             int64    `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken            string   `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ListDevicePasswordsRequest) Reset()         { *m = ListDevicePasswordsRequest{} }
+func (m *ListDevicePasswordsRequest) String() string { return proto.CompactTextString(m) }
+func (*ListDevicePasswordsRequest) ProtoMessage()    {}
+func (*ListDevicePasswordsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4f9432a8c0088851, []int{15}
+}
+
+func (m *ListDevicePasswordsRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListDevicePasswordsRequest.Unmarshal(m, b)
+}
+func (m *ListDevicePasswordsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListDevicePasswordsRequest.Marshal(b, m, deterministic)
+}
+func (m *ListDevicePasswordsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListDevicePasswordsRequest.Merge(m, src)
+}
+func (m *ListDevicePasswordsRequest) XXX_Size() int {
+	return xxx_messageInfo_ListDevicePasswordsRequest.Size(m)
+}
+func (m *ListDevicePasswordsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListDevicePasswordsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListDevicePasswordsRequest proto.InternalMessageInfo
+
+func (m *ListDevicePasswordsRequest) GetDeviceId() string {
+	if m != nil {
+		return m.DeviceId
+	}
+	return ""
+}
+
+type ListDevicePasswordsResponse struct {
+	// List of passwords for the specified device.
+	Passwords            []*DevicePassword `protobuf:"bytes,1,rep,name=passwords,proto3" json:"passwords,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
+}
+
+func (m *ListDevicePasswordsResponse) Reset()         { *m = ListDevicePasswordsResponse{} }
+func (m *ListDevicePasswordsResponse) String() string { return proto.CompactTextString(m) }
+func (*ListDevicePasswordsResponse) ProtoMessage()    {}
+func (*ListDevicePasswordsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4f9432a8c0088851, []int{16}
+}
+
+func (m *ListDevicePasswordsResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListDevicePasswordsResponse.Unmarshal(m, b)
+}
+func (m *ListDevicePasswordsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListDevicePasswordsResponse.Marshal(b, m, deterministic)
+}
+func (m *ListDevicePasswordsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListDevicePasswordsResponse.Merge(m, src)
+}
+func (m *ListDevicePasswordsResponse) XXX_Size() int {
+	return xxx_messageInfo_ListDevicePasswordsResponse.Size(m)
+}
+func (m *ListDevicePasswordsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListDevicePasswordsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListDevicePasswordsResponse proto.InternalMessageInfo
+
+func (m *ListDevicePasswordsResponse) GetPasswords() []*DevicePassword {
+	if m != nil {
+		return m.Passwords
+	}
+	return nil
+}
+
+type AddDevicePasswordRequest struct {
+	// ID of the device to add a password for.
+	//
+	// To get a device ID make a [DeviceService.List] request.
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// Passwords for the device.
+	//
+	// The password must contain at least three character categories among the following: upper case latin, lower case latin, numbers and special symbols.
+	Password             string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AddDevicePasswordRequest) Reset()         { *m = AddDevicePasswordRequest{} }
+func (m *AddDevicePasswordRequest) String() string { return proto.CompactTextString(m) }
+func (*AddDevicePasswordRequest) ProtoMessage()    {}
+func (*AddDevicePasswordRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4f9432a8c0088851, []int{17}
+}
+
+func (m *AddDevicePasswordRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddDevicePasswordRequest.Unmarshal(m, b)
+}
+func (m *AddDevicePasswordRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddDevicePasswordRequest.Marshal(b, m, deterministic)
+}
+func (m *AddDevicePasswordRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddDevicePasswordRequest.Merge(m, src)
+}
+func (m *AddDevicePasswordRequest) XXX_Size() int {
+	return xxx_messageInfo_AddDevicePasswordRequest.Size(m)
+}
+func (m *AddDevicePasswordRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddDevicePasswordRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddDevicePasswordRequest proto.InternalMessageInfo
+
+func (m *AddDevicePasswordRequest) GetDeviceId() string {
+	if m != nil {
+		return m.DeviceId
+	}
+	return ""
+}
+
+func (m *AddDevicePasswordRequest) GetPassword() string {
+	if m != nil {
+		return m.Password
+	}
+	return ""
+}
+
+type AddDevicePasswordMetadata struct {
+	// ID of the device for which the password is being added.
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// ID of the password that is being added.
+	PasswordId           string   `protobuf:"bytes,2,opt,name=password_id,json=passwordId,proto3" json:"password_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AddDevicePasswordMetadata) Reset()         { *m = AddDevicePasswordMetadata{} }
+func (m *AddDevicePasswordMetadata) String() string { return proto.CompactTextString(m) }
+func (*AddDevicePasswordMetadata) ProtoMessage()    {}
+func (*AddDevicePasswordMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4f9432a8c0088851, []int{18}
+}
+
+func (m *AddDevicePasswordMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddDevicePasswordMetadata.Unmarshal(m, b)
+}
+func (m *AddDevicePasswordMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddDevicePasswordMetadata.Marshal(b, m, deterministic)
+}
+func (m *AddDevicePasswordMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddDevicePasswordMetadata.Merge(m, src)
+}
+func (m *AddDevicePasswordMetadata) XXX_Size() int {
+	return xxx_messageInfo_AddDevicePasswordMetadata.Size(m)
+}
+func (m *AddDevicePasswordMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddDevicePasswordMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddDevicePasswordMetadata proto.InternalMessageInfo
+
+func (m *AddDevicePasswordMetadata) GetDeviceId() string {
+	if m != nil {
+		return m.DeviceId
+	}
+	return ""
+}
+
+func (m *AddDevicePasswordMetadata) GetPasswordId() string {
+	if m != nil {
+		return m.PasswordId
+	}
+	return ""
+}
+
+type DeleteDevicePasswordRequest struct {
+	// ID of the device to delete a password for.
+	//
+	// To get a device ID make a [DeviceService.List] request.
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// ID of the password to delete.
+	//
+	// To get a password ID make a [DeviceService.ListPasswords] request.
+	PasswordId           string   `protobuf:"bytes,2,opt,name=password_id,json=passwordId,proto3" json:"password_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteDevicePasswordRequest) Reset()         { *m = DeleteDevicePasswordRequest{} }
+func (m *DeleteDevicePasswordRequest) String() string { return proto.CompactTextString(m) }
+func (*DeleteDevicePasswordRequest) ProtoMessage()    {}
+func (*DeleteDevicePasswordRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4f9432a8c0088851, []int{19}
+}
+
+func (m *DeleteDevicePasswordRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteDevicePasswordRequest.Unmarshal(m, b)
+}
+func (m *DeleteDevicePasswordRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteDevicePasswordRequest.Marshal(b, m, deterministic)
+}
+func (m *DeleteDevicePasswordRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteDevicePasswordRequest.Merge(m, src)
+}
+func (m *DeleteDevicePasswordRequest) XXX_Size() int {
+	return xxx_messageInfo_DeleteDevicePasswordRequest.Size(m)
+}
+func (m *DeleteDevicePasswordRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteDevicePasswordRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteDevicePasswordRequest proto.InternalMessageInfo
+
+func (m *DeleteDevicePasswordRequest) GetDeviceId() string {
+	if m != nil {
+		return m.DeviceId
+	}
+	return ""
+}
+
+func (m *DeleteDevicePasswordRequest) GetPasswordId() string {
+	if m != nil {
+		return m.PasswordId
+	}
+	return ""
+}
+
+type DeleteDevicePasswordMetadata struct {
+	// ID of the device for which the password is being deleted.
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// ID of the password that is being deleted.
+	PasswordId           string   `protobuf:"bytes,2,opt,name=password_id,json=passwordId,proto3" json:"password_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteDevicePasswordMetadata) Reset()         { *m = DeleteDevicePasswordMetadata{} }
+func (m *DeleteDevicePasswordMetadata) String() string { return proto.CompactTextString(m) }
+func (*DeleteDevicePasswordMetadata) ProtoMessage()    {}
+func (*DeleteDevicePasswordMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4f9432a8c0088851, []int{20}
+}
+
+func (m *DeleteDevicePasswordMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteDevicePasswordMetadata.Unmarshal(m, b)
+}
+func (m *DeleteDevicePasswordMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteDevicePasswordMetadata.Marshal(b, m, deterministic)
+}
+func (m *DeleteDevicePasswordMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteDevicePasswordMetadata.Merge(m, src)
+}
+func (m *DeleteDevicePasswordMetadata) XXX_Size() int {
+	return xxx_messageInfo_DeleteDevicePasswordMetadata.Size(m)
+}
+func (m *DeleteDevicePasswordMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteDevicePasswordMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteDevicePasswordMetadata proto.InternalMessageInfo
+
+func (m *DeleteDevicePasswordMetadata) GetDeviceId() string {
+	if m != nil {
+		return m.DeviceId
+	}
+	return ""
+}
+
+func (m *DeleteDevicePasswordMetadata) GetPasswordId() string {
+	if m != nil {
+		return m.PasswordId
+	}
+	return ""
+}
+
+type ListDeviceOperationsRequest struct {
+	// ID of the device to list operations for.
+	//
+	// To get a device ID make a [DeviceService.List] request.
+	DeviceId string `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// The maximum number of results per page that should be returned. If the number of available
+	// results is larger than `page_size`, the service returns a [ListDeviceOperationsResponse.next_page_token]
+	// that can be used to get the next page of results in subsequent list requests.
+	// Default value: 100.
+	PageSize int64 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Page token. To get the next page of results, set `page_token` to the
+	// [ListDeviceOperationsResponse.next_page_token] returned by a previous list request.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// A filter expression that filters resources listed in the response.
+	// Currently you can use filtering only on [Device.name] field.
 	Filter               string   `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -830,7 +1191,7 @@ func (m *ListDeviceOperationsRequest) Reset()         { *m = ListDeviceOperation
 func (m *ListDeviceOperationsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListDeviceOperationsRequest) ProtoMessage()    {}
 func (*ListDeviceOperationsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4f9432a8c0088851, []int{15}
+	return fileDescriptor_4f9432a8c0088851, []int{21}
 }
 
 func (m *ListDeviceOperationsRequest) XXX_Unmarshal(b []byte) error {
@@ -880,18 +1241,24 @@ func (m *ListDeviceOperationsRequest) GetFilter() string {
 }
 
 type ListDeviceOperationsResponse struct {
-	Operations           []*operation.Operation `protobuf:"bytes,1,rep,name=operations,proto3" json:"operations,omitempty"`
-	NextPageToken        string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
-	XXX_unrecognized     []byte                 `json:"-"`
-	XXX_sizecache        int32                  `json:"-"`
+	// List of operations for the specified device certificate.
+	Operations []*operation.Operation `protobuf:"bytes,1,rep,name=operations,proto3" json:"operations,omitempty"`
+	// Token for getting the next page of the list. If the number of results is greater than
+	// the specified [ListDeviceOperationsRequest.page_size], use `next_page_token` as the value
+	// for the [ListDeviceOperationsRequest.page_token] parameter in the next list request.
+	//
+	// Each subsequent page will have its own `next_page_token` to continue paging through the results.
+	NextPageToken        string   `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *ListDeviceOperationsResponse) Reset()         { *m = ListDeviceOperationsResponse{} }
 func (m *ListDeviceOperationsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListDeviceOperationsResponse) ProtoMessage()    {}
 func (*ListDeviceOperationsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4f9432a8c0088851, []int{16}
+	return fileDescriptor_4f9432a8c0088851, []int{22}
 }
 
 func (m *ListDeviceOperationsResponse) XXX_Unmarshal(b []byte) error {
@@ -945,6 +1312,12 @@ func init() {
 	proto.RegisterType((*AddDeviceCertificateMetadata)(nil), "yandex.cloud.iot.devices.v1.AddDeviceCertificateMetadata")
 	proto.RegisterType((*DeleteDeviceCertificateRequest)(nil), "yandex.cloud.iot.devices.v1.DeleteDeviceCertificateRequest")
 	proto.RegisterType((*DeleteDeviceCertificateMetadata)(nil), "yandex.cloud.iot.devices.v1.DeleteDeviceCertificateMetadata")
+	proto.RegisterType((*ListDevicePasswordsRequest)(nil), "yandex.cloud.iot.devices.v1.ListDevicePasswordsRequest")
+	proto.RegisterType((*ListDevicePasswordsResponse)(nil), "yandex.cloud.iot.devices.v1.ListDevicePasswordsResponse")
+	proto.RegisterType((*AddDevicePasswordRequest)(nil), "yandex.cloud.iot.devices.v1.AddDevicePasswordRequest")
+	proto.RegisterType((*AddDevicePasswordMetadata)(nil), "yandex.cloud.iot.devices.v1.AddDevicePasswordMetadata")
+	proto.RegisterType((*DeleteDevicePasswordRequest)(nil), "yandex.cloud.iot.devices.v1.DeleteDevicePasswordRequest")
+	proto.RegisterType((*DeleteDevicePasswordMetadata)(nil), "yandex.cloud.iot.devices.v1.DeleteDevicePasswordMetadata")
 	proto.RegisterType((*ListDeviceOperationsRequest)(nil), "yandex.cloud.iot.devices.v1.ListDeviceOperationsRequest")
 	proto.RegisterType((*ListDeviceOperationsResponse)(nil), "yandex.cloud.iot.devices.v1.ListDeviceOperationsResponse")
 }
@@ -954,115 +1327,147 @@ func init() {
 }
 
 var fileDescriptor_4f9432a8c0088851 = []byte{
-	// 1248 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x58, 0x4f, 0x6f, 0x1b, 0x45,
-	0x14, 0x67, 0x63, 0xc7, 0x24, 0xcf, 0x49, 0x9a, 0x4c, 0x8a, 0x30, 0x4e, 0x9a, 0xa6, 0x5b, 0x51,
-	0x5c, 0x57, 0xde, 0x3f, 0xae, 0x52, 0xa5, 0xf9, 0x03, 0x4d, 0x9a, 0x12, 0x82, 0xa8, 0xa8, 0xb6,
-	0xe5, 0x52, 0xa8, 0xcc, 0xc6, 0x3b, 0x36, 0xab, 0x38, 0xbb, 0x66, 0x77, 0x1c, 0x35, 0x49, 0x7b,
-	0xa9, 0x10, 0x12, 0xb9, 0xf2, 0x05, 0x90, 0xf8, 0x00, 0x48, 0xb9, 0x70, 0x40, 0x48, 0x70, 0x40,
-	0x09, 0xd7, 0xf0, 0x01, 0xb8, 0x70, 0x40, 0xe2, 0xc6, 0x09, 0x71, 0x42, 0x33, 0xb3, 0xb6, 0xc7,
-	0xf1, 0xda, 0x5e, 0x1b, 0xf5, 0xe4, 0xdd, 0x9d, 0xf7, 0xe7, 0xf7, 0xde, 0xfb, 0xcd, 0x7b, 0x4f,
-	0x06, 0x6d, 0xdf, 0x74, 0x2c, 0xfc, 0x54, 0x2d, 0x56, 0xdc, 0x9a, 0xa5, 0xda, 0x2e, 0x51, 0x2d,
-	0xbc, 0x67, 0x17, 0xb1, 0xaf, 0xee, 0xe9, 0xc1, 0x63, 0xc1, 0xc7, 0x1e, 0xfd, 0x55, 0xaa, 0x9e,
-	0x4b, 0x5c, 0x34, 0xc3, 0x35, 0x14, 0xa6, 0xa1, 0xd8, 0x2e, 0x51, 0x02, 0x0d, 0x65, 0x4f, 0x4f,
-	0xcf, 0x96, 0x5d, 0xb7, 0x5c, 0xc1, 0xaa, 0x59, 0xb5, 0x55, 0xd3, 0x71, 0x5c, 0x62, 0x12, 0xdb,
-	0x75, 0x7c, 0xae, 0x9a, 0x9e, 0x0f, 0x4e, 0xd9, 0xdb, 0x76, 0xad, 0xa4, 0x96, 0x6c, 0x5c, 0xb1,
-	0x0a, 0xbb, 0xa6, 0xbf, 0x13, 0x48, 0x5c, 0x6a, 0x81, 0xb3, 0x67, 0x56, 0x6c, 0x8b, 0x59, 0xa8,
-	0x1b, 0x68, 0x39, 0xa6, 0x4e, 0xdc, 0x2a, 0xf6, 0x44, 0x89, 0x6b, 0x2d, 0x12, 0x8d, 0xd3, 0x36,
-	0xb9, 0x4c, 0xef, 0xb8, 0xb9, 0xa4, 0xbc, 0x0a, 0x93, 0x9b, 0x98, 0x6c, 0xb0, 0x4f, 0x06, 0xfe,
-	0xbc, 0x86, 0x7d, 0x82, 0xae, 0xc3, 0x68, 0x90, 0x1b, 0xdb, 0x4a, 0x49, 0xf3, 0x52, 0x66, 0x74,
-	0x7d, 0xec, 0xcf, 0x13, 0x5d, 0x3a, 0x3a, 0xd5, 0xe3, 0x2b, 0xab, 0x0b, 0x9a, 0x31, 0xc2, 0x8f,
-	0xb7, 0x2c, 0xf9, 0x57, 0x09, 0xd0, 0x07, 0xb6, 0x1f, 0x18, 0xf0, 0xeb, 0x16, 0x6e, 0x40, 0xd2,
-	0xc3, 0x65, 0xdb, 0x27, 0xde, 0x7e, 0xd3, 0xc6, 0x48, 0x5d, 0xff, 0xbd, 0x57, 0x0c, 0xa8, 0x1f,
-	0x6f, 0x59, 0xe8, 0x2d, 0x18, 0x2d, 0xb9, 0x15, 0x0b, 0x7b, 0x54, 0x74, 0xa8, 0x4d, 0x74, 0x84,
-	0x1f, 0x72, 0xc1, 0xaa, 0x59, 0xc6, 0x05, 0xdf, 0x3e, 0xc0, 0xa9, 0xd8, 0xbc, 0x94, 0x89, 0xad,
-	0xc3, 0xbf, 0x27, 0x7a, 0x42, 0xcb, 0xe9, 0x9a, 0xa6, 0x19, 0x23, 0xf4, 0xf0, 0xa1, 0x7d, 0x80,
-	0x51, 0x06, 0x80, 0x09, 0x12, 0x77, 0x07, 0x3b, 0xa9, 0x38, 0x33, 0x39, 0x7a, 0x74, 0xaa, 0x0f,
-	0xaf, 0xac, 0xea, 0x9a, 0x66, 0x30, 0x2b, 0x8f, 0xe8, 0xd9, 0x3a, 0xc0, 0x90, 0x6d, 0xa1, 0xf8,
-	0x4f, 0x3f, 0xeb, 0x92, 0xfc, 0x0c, 0xa6, 0x5b, 0x42, 0xf1, 0xab, 0xae, 0xe3, 0x63, 0xb4, 0x0a,
-	0xaf, 0x06, 0xc9, 0x4b, 0x49, 0xf3, 0xb1, 0x4c, 0x32, 0x7f, 0x55, 0xe9, 0xc2, 0x11, 0x25, 0x48,
-	0x65, 0x5d, 0x07, 0x5d, 0x83, 0x0b, 0x0e, 0x7e, 0x4a, 0x0a, 0x02, 0x20, 0x16, 0xa3, 0x31, 0x4e,
-	0x3f, 0x3f, 0xa8, 0x23, 0x91, 0xff, 0x8a, 0xc1, 0xf4, 0x5d, 0x0f, 0x9b, 0x04, 0xb7, 0x16, 0x23,
-	0x17, 0x96, 0xca, 0xd6, 0x72, 0x88, 0xc9, 0xcc, 0x43, 0xdc, 0x31, 0x77, 0x71, 0x90, 0xc7, 0x39,
-	0x2a, 0xf7, 0xf7, 0x89, 0x3e, 0xf1, 0xb1, 0x99, 0x3b, 0x58, 0xcb, 0x3d, 0xd6, 0x72, 0xb7, 0x0b,
-	0xb9, 0x27, 0xd9, 0x86, 0x26, 0x93, 0xa5, 0xd5, 0xb2, 0xb0, 0x5f, 0xf4, 0xec, 0x2a, 0xa5, 0x10,
-	0xcb, 0x6c, 0x23, 0x5f, 0xf9, 0x85, 0x5b, 0x86, 0x78, 0x8a, 0x3e, 0x85, 0xb1, 0x22, 0xf6, 0x88,
-	0x5d, 0xb2, 0x8b, 0x26, 0xc1, 0x7e, 0x2a, 0xce, 0x72, 0xb2, 0xd2, 0x35, 0x27, 0x21, 0x71, 0x29,
-	0x77, 0x9b, 0x46, 0x8c, 0x16, 0x8b, 0xa8, 0x0c, 0xe3, 0xc4, 0xad, 0xda, 0xc5, 0x82, 0x59, 0xb1,
-	0x4d, 0x1f, 0xfb, 0xa9, 0x61, 0xe6, 0x62, 0xbd, 0x6f, 0x17, 0x8f, 0xa8, 0x95, 0x35, 0x6e, 0xe4,
-	0x9e, 0x43, 0xbc, 0x7d, 0x63, 0x8c, 0x08, 0x9f, 0xd2, 0xef, 0xc0, 0x54, 0x9b, 0x08, 0x9a, 0x84,
-	0xd8, 0x0e, 0xde, 0xe7, 0x79, 0x36, 0xe8, 0x23, 0xba, 0x08, 0xc3, 0x7b, 0x66, 0xa5, 0x16, 0xe4,
-	0xd4, 0xe0, 0x2f, 0x4b, 0x43, 0x8b, 0x52, 0x7a, 0x11, 0x92, 0x42, 0x18, 0xe8, 0x3a, 0x4c, 0x0a,
-	0x81, 0x14, 0x2c, 0x93, 0x98, 0x81, 0x9d, 0x0b, 0xc2, 0xf7, 0x0d, 0x93, 0x98, 0xf2, 0x4d, 0xb8,
-	0x28, 0x22, 0xbe, 0x8f, 0x89, 0x49, 0xc5, 0xd1, 0x4c, 0xdb, 0xd5, 0x13, 0x2e, 0xdb, 0x17, 0x31,
-	0x98, 0xfe, 0xa8, 0x6a, 0xb5, 0x51, 0x24, 0xfa, 0x7d, 0x45, 0xcb, 0x90, 0xac, 0x31, 0x0b, 0xac,
-	0x2d, 0xb1, 0x88, 0x92, 0xf9, 0xb4, 0xc2, 0x3b, 0x97, 0x52, 0xef, 0x5c, 0xca, 0xbb, 0xb4, 0x73,
-	0xdd, 0x37, 0xfd, 0x1d, 0x03, 0xb8, 0x38, 0x7d, 0x46, 0x4a, 0xc0, 0x2d, 0x4e, 0x90, 0x74, 0xbf,
-	0xbc, 0x8a, 0x77, 0xe5, 0xd5, 0x40, 0x55, 0x0f, 0xc9, 0xc6, 0x4b, 0xaf, 0x3a, 0xad, 0x9d, 0xe8,
-	0x37, 0x5a, 0xed, 0xee, 0xc0, 0xf4, 0x06, 0xae, 0xe0, 0xc1, 0x4b, 0x47, 0xdd, 0x8a, 0x16, 0xa2,
-	0xb9, 0x7d, 0x1f, 0x2e, 0x35, 0x7b, 0x9a, 0xc0, 0x55, 0x7f, 0x00, 0x00, 0x04, 0xe6, 0x3a, 0xd9,
-	0x0a, 0x5a, 0xa5, 0x71, 0xae, 0x37, 0xf0, 0x7e, 0xa9, 0x44, 0xe8, 0x97, 0x1d, 0xbb, 0x81, 0xec,
-	0xc3, 0xcc, 0x9a, 0x65, 0xb5, 0x4b, 0xf5, 0xcf, 0xfd, 0xb0, 0xeb, 0x19, 0x0b, 0xbf, 0x9e, 0x4f,
-	0x60, 0x36, 0xcc, 0x69, 0xa4, 0x9c, 0xa3, 0x79, 0x48, 0x96, 0x6c, 0xa7, 0x8c, 0xbd, 0xaa, 0x67,
-	0x3b, 0x24, 0xe0, 0x8f, 0xf8, 0x49, 0x3e, 0x84, 0x39, 0xb1, 0x94, 0xff, 0x2f, 0x2c, 0x25, 0xc4,
-	0xdd, 0x39, 0xe1, 0x16, 0xe7, 0xcf, 0xe0, 0x72, 0x07, 0xe7, 0x8d, 0xf0, 0x5e, 0xa2, 0xf7, 0xef,
-	0x25, 0x98, 0x69, 0xb2, 0xe8, 0xc3, 0xfa, 0xde, 0xd2, 0xe0, 0xe3, 0x95, 0x76, 0xd7, 0x71, 0x6a,
-	0x4d, 0x70, 0xd9, 0xb2, 0x06, 0x0c, 0x45, 0x5e, 0x03, 0x62, 0x9d, 0xd7, 0x00, 0x24, 0x43, 0xa2,
-	0x64, 0x57, 0x08, 0xf6, 0x82, 0x26, 0x05, 0x47, 0xa7, 0x7a, 0x82, 0x49, 0x69, 0x46, 0x70, 0x22,
-	0x7f, 0x25, 0xc1, 0x6c, 0x38, 0xf2, 0x80, 0xfd, 0x6b, 0x00, 0x8d, 0x3d, 0xac, 0xce, 0xfd, 0x2b,
-	0xad, 0xdc, 0x6f, 0xee, 0x69, 0x0d, 0x7d, 0x43, 0x50, 0x8a, 0xba, 0x2c, 0xe4, 0xbf, 0x19, 0x87,
-	0x71, 0x8e, 0xe3, 0x21, 0xdf, 0x5e, 0xd1, 0x97, 0x12, 0xc4, 0x36, 0x31, 0x41, 0xb9, 0xae, 0x97,
-	0xed, 0xfc, 0xaa, 0x97, 0x8e, 0xb2, 0xcb, 0xc8, 0x37, 0x5e, 0xfc, 0xf6, 0xc7, 0xd7, 0x43, 0x6f,
-	0xa2, 0xab, 0x74, 0x93, 0xcc, 0xb5, 0x6d, 0x92, 0xbe, 0x7a, 0xd8, 0x28, 0xd9, 0x73, 0x74, 0x24,
-	0x41, 0x9c, 0xa6, 0x09, 0xa9, 0x5d, 0x4d, 0xb7, 0x2f, 0x8d, 0x69, 0x2d, 0xba, 0x02, 0xcf, 0xb8,
-	0x7c, 0x99, 0x01, 0x7b, 0x03, 0xbd, 0xde, 0x01, 0x18, 0xfa, 0x56, 0x82, 0x04, 0x9f, 0xb3, 0x48,
-	0xeb, 0x77, 0x7d, 0x48, 0xf7, 0xae, 0x9d, 0xbc, 0x71, 0x7c, 0x96, 0x9d, 0xeb, 0x30, 0xca, 0x13,
-	0xfc, 0x9d, 0x41, 0x9c, 0x95, 0x3b, 0x41, 0x5c, 0x92, 0xb2, 0xe8, 0x3b, 0x09, 0x12, 0x7c, 0xa2,
-	0xf4, 0x40, 0x19, 0x32, 0xee, 0xa2, 0xa0, 0x7c, 0xc0, 0x51, 0x86, 0x0e, 0x2d, 0x11, 0x65, 0x26,
-	0x1f, 0xa5, 0xc2, 0x14, 0xf1, 0x0f, 0x12, 0x24, 0x78, 0x13, 0xe9, 0x81, 0x38, 0x64, 0xe6, 0x45,
-	0x41, 0xfc, 0xc9, 0xf1, 0x59, 0x36, 0xd7, 0x61, 0xde, 0xbd, 0x76, 0x7e, 0x59, 0xb9, 0xb7, 0x5b,
-	0x25, 0xfb, 0x9c, 0xa2, 0xd9, 0x48, 0x14, 0xfd, 0x45, 0x82, 0x49, 0x4a, 0x27, 0x71, 0x86, 0xa1,
-	0xa5, 0x88, 0xec, 0x0b, 0x19, 0xa2, 0xe9, 0xe5, 0x81, 0x74, 0x03, 0x12, 0x2f, 0x32, 0xe8, 0x79,
-	0xa4, 0x45, 0x80, 0xae, 0xb6, 0x2c, 0xca, 0xbf, 0x4b, 0x30, 0xb1, 0x66, 0x59, 0xe2, 0x0a, 0xba,
-	0xd8, 0x15, 0x49, 0x97, 0x41, 0x1a, 0xa5, 0x2a, 0xd5, 0xe3, 0xb3, 0xac, 0xde, 0x63, 0x32, 0x4e,
-	0xb5, 0x1d, 0xb1, 0xf0, 0x16, 0xe4, 0xbe, 0xc3, 0xa3, 0x3c, 0xfb, 0x47, 0x82, 0x29, 0x4e, 0x02,
-	0x31, 0xc8, 0xe5, 0xc8, 0x94, 0x1b, 0x2c, 0xce, 0x17, 0xd2, 0xf1, 0x59, 0x76, 0xb1, 0xf7, 0x98,
-	0xec, 0xc2, 0xc4, 0x3b, 0xd9, 0xb7, 0xfb, 0x8d, 0x57, 0x3d, 0x14, 0xe6, 0xe4, 0x73, 0xf4, 0xa3,
-	0x04, 0x13, 0x94, 0x39, 0xcd, 0x41, 0xd3, 0xa3, 0xb8, 0x5d, 0xa6, 0x6a, 0xfa, 0xf6, 0x00, 0x9a,
-	0x01, 0x3d, 0x6f, 0xb1, 0x78, 0x34, 0xa4, 0x44, 0x89, 0xa7, 0x39, 0xca, 0xd6, 0xb7, 0x1e, 0x6f,
-	0x96, 0x6d, 0xf2, 0x59, 0x6d, 0x5b, 0x29, 0xba, 0xbb, 0x2a, 0x77, 0x9f, 0xe3, 0xff, 0x47, 0x94,
-	0xdd, 0x5c, 0x19, 0x3b, 0x2c, 0x6b, 0x6a, 0x97, 0x3f, 0x2a, 0x96, 0x83, 0xc7, 0xed, 0x04, 0x13,
-	0xbd, 0xf9, 0x5f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x60, 0xf8, 0x9f, 0x2f, 0xce, 0x11, 0x00, 0x00,
+	// 1482 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x58, 0xcf, 0x73, 0xdb, 0xc4,
+	0x1e, 0x7f, 0x8a, 0x5d, 0xbf, 0xe4, 0xeb, 0x26, 0x4d, 0x37, 0x7d, 0xf3, 0x5c, 0x25, 0x4d, 0x52,
+	0xf5, 0xbd, 0x92, 0x3a, 0x63, 0x49, 0x76, 0x49, 0x71, 0x9b, 0xa6, 0x34, 0x69, 0x4a, 0x08, 0x43,
+	0x87, 0x8e, 0x5a, 0x0e, 0x14, 0x3a, 0x46, 0xb5, 0x36, 0xae, 0x88, 0x63, 0x09, 0x49, 0x49, 0x9b,
+	0xa6, 0xbd, 0x74, 0x18, 0x18, 0x72, 0xe5, 0xcc, 0x89, 0x3f, 0x80, 0x99, 0x5c, 0x18, 0x86, 0x61,
+	0x06, 0x0e, 0x4c, 0xcb, 0x8d, 0x09, 0x7f, 0x00, 0x17, 0x0e, 0xcc, 0x70, 0xe3, 0xc4, 0x70, 0x62,
+	0x56, 0x2b, 0xc9, 0x2b, 0x5b, 0xb6, 0xd7, 0xee, 0x70, 0xb2, 0xb4, 0xfb, 0xfd, 0xfd, 0xfd, 0xec,
+	0x57, 0x9f, 0x35, 0xa8, 0xbb, 0x7a, 0xc3, 0xc0, 0x0f, 0x95, 0x6a, 0xdd, 0xda, 0x36, 0x14, 0xd3,
+	0xf2, 0x14, 0x03, 0xef, 0x98, 0x55, 0xec, 0x2a, 0x3b, 0xc5, 0xe0, 0xb1, 0xe2, 0x62, 0x87, 0xfc,
+	0xca, 0xb6, 0x63, 0x79, 0x16, 0x9a, 0xa4, 0x1a, 0xb2, 0xaf, 0x21, 0x9b, 0x96, 0x27, 0x07, 0x1a,
+	0xf2, 0x4e, 0x51, 0x9c, 0xaa, 0x59, 0x56, 0xad, 0x8e, 0x15, 0xdd, 0x36, 0x15, 0xbd, 0xd1, 0xb0,
+	0x3c, 0xdd, 0x33, 0xad, 0x86, 0x4b, 0x55, 0xc5, 0xd9, 0x60, 0xd7, 0x7f, 0xbb, 0xb7, 0xbd, 0xa1,
+	0x6c, 0x98, 0xb8, 0x6e, 0x54, 0xb6, 0x74, 0x77, 0x33, 0x90, 0x38, 0x15, 0x0b, 0x67, 0x47, 0xaf,
+	0x9b, 0x86, 0x6f, 0x21, 0x34, 0x10, 0xdb, 0x26, 0x4e, 0x2c, 0x1b, 0x3b, 0xac, 0xc4, 0xd9, 0x98,
+	0x44, 0xb4, 0xdb, 0x26, 0x37, 0xd7, 0x3b, 0x6f, 0x2a, 0x29, 0x2d, 0xc1, 0xf8, 0x1a, 0xf6, 0x56,
+	0xfd, 0x25, 0x0d, 0x7f, 0xb8, 0x8d, 0x5d, 0x0f, 0x9d, 0x83, 0x91, 0xa0, 0x36, 0xa6, 0x91, 0x13,
+	0x66, 0x85, 0xb9, 0x91, 0x95, 0xa3, 0xbf, 0x3d, 0x2b, 0x0a, 0xfb, 0xcf, 0x8b, 0xe9, 0xcb, 0x4b,
+	0x0b, 0xaa, 0x36, 0x4c, 0xb7, 0xd7, 0x0d, 0xe9, 0x47, 0x01, 0xd0, 0x9b, 0xa6, 0x1b, 0x18, 0x70,
+	0x43, 0x0b, 0xf3, 0x90, 0x75, 0x70, 0xcd, 0x74, 0x3d, 0x67, 0xb7, 0x69, 0x63, 0x38, 0xd4, 0x7f,
+	0xfd, 0x5f, 0x1a, 0x84, 0xdb, 0xeb, 0x06, 0x7a, 0x09, 0x46, 0x36, 0xac, 0xba, 0x81, 0x1d, 0x22,
+	0x3a, 0xd4, 0x26, 0x3a, 0x4c, 0x37, 0xa9, 0xa0, 0xad, 0xd7, 0x70, 0xc5, 0x35, 0x1f, 0xe1, 0x5c,
+	0x6a, 0x56, 0x98, 0x4b, 0xad, 0xc0, 0x5f, 0xcf, 0x8a, 0x19, 0xb5, 0x50, 0x54, 0x55, 0x55, 0x1b,
+	0x26, 0x9b, 0xb7, 0xcc, 0x47, 0x18, 0xcd, 0x01, 0xf8, 0x82, 0x9e, 0xb5, 0x89, 0x1b, 0xb9, 0xb4,
+	0x6f, 0x72, 0x64, 0xff, 0x79, 0xf1, 0xc8, 0xe5, 0xa5, 0xa2, 0xaa, 0x6a, 0xbe, 0x95, 0xdb, 0x64,
+	0x6f, 0x05, 0x60, 0xc8, 0x34, 0x50, 0xfa, 0xbb, 0xef, 0x8b, 0x82, 0xf4, 0x18, 0x26, 0x62, 0xa9,
+	0xb8, 0xb6, 0xd5, 0x70, 0x31, 0x5a, 0x82, 0x7f, 0x07, 0xc5, 0xcb, 0x09, 0xb3, 0xa9, 0xb9, 0x6c,
+	0xe9, 0x8c, 0xdc, 0x05, 0x23, 0x72, 0x50, 0xca, 0x50, 0x07, 0x9d, 0x85, 0x63, 0x0d, 0xfc, 0xd0,
+	0xab, 0x30, 0x01, 0xf9, 0x39, 0x6a, 0xa3, 0x64, 0xf9, 0x66, 0x18, 0x89, 0xf4, 0x49, 0x1a, 0x26,
+	0xae, 0x39, 0x58, 0xf7, 0x70, 0xbc, 0x19, 0x85, 0xa4, 0x52, 0xc6, 0xdb, 0xc1, 0x16, 0xb3, 0x04,
+	0xe9, 0x86, 0xbe, 0x85, 0x83, 0x3a, 0x4e, 0x13, 0xb9, 0x3f, 0x9e, 0x15, 0xc7, 0xde, 0xd5, 0x0b,
+	0x8f, 0x96, 0x0b, 0x77, 0xd4, 0xc2, 0xc5, 0x4a, 0xe1, 0x6e, 0x3e, 0xd2, 0xf4, 0x65, 0x49, 0xb7,
+	0x0c, 0xec, 0x56, 0x1d, 0xd3, 0x26, 0x10, 0xf2, 0x2b, 0x1b, 0xd5, 0xab, 0xb4, 0x70, 0x41, 0x63,
+	0x77, 0xd1, 0xfb, 0x70, 0xb4, 0x8a, 0x1d, 0xcf, 0xdc, 0x30, 0xab, 0xba, 0x87, 0xdd, 0x5c, 0xda,
+	0xaf, 0xc9, 0xe5, 0xae, 0x35, 0x49, 0xc8, 0x4b, 0xbe, 0xd6, 0x34, 0xa2, 0xc5, 0x2c, 0xa2, 0x1a,
+	0x8c, 0x7a, 0x96, 0x6d, 0x56, 0x2b, 0x7a, 0xdd, 0xd4, 0x5d, 0xec, 0xe6, 0x8e, 0xf8, 0x2e, 0x56,
+	0xfa, 0x76, 0x71, 0x9b, 0x58, 0x59, 0xa6, 0x46, 0xae, 0x37, 0x3c, 0x67, 0x57, 0x3b, 0xea, 0x31,
+	0x4b, 0x48, 0x84, 0x61, 0x5b, 0x77, 0xdd, 0x07, 0x96, 0x63, 0xe4, 0x32, 0x7e, 0x4f, 0xa2, 0x77,
+	0xf1, 0x55, 0x38, 0xde, 0xa6, 0x8e, 0xc6, 0x21, 0xb5, 0x89, 0x77, 0x69, 0x0f, 0x34, 0xf2, 0x88,
+	0x4e, 0xc0, 0x91, 0x1d, 0xbd, 0xbe, 0x1d, 0xd4, 0x5b, 0xa3, 0x2f, 0x97, 0x86, 0xca, 0x82, 0x58,
+	0x86, 0x2c, 0x93, 0x22, 0x3a, 0x07, 0xe3, 0x4c, 0x92, 0x15, 0x43, 0xf7, 0xf4, 0xc0, 0xce, 0x31,
+	0x66, 0x7d, 0x55, 0xf7, 0x74, 0xe9, 0x3c, 0x9c, 0x60, 0xb3, 0xb9, 0x81, 0x3d, 0x9d, 0x88, 0xa3,
+	0xc9, 0xb6, 0x63, 0xc9, 0x1c, 0xc4, 0x8f, 0x52, 0x30, 0xf1, 0xb6, 0x6d, 0xb4, 0xc1, 0x87, 0xff,
+	0x2c, 0xa3, 0x45, 0xc8, 0x6e, 0xfb, 0x16, 0xfc, 0x91, 0xe5, 0x67, 0x94, 0x2d, 0x89, 0x32, 0x9d,
+	0x6a, 0x72, 0x38, 0xd5, 0xe4, 0xd7, 0xc8, 0x54, 0xbb, 0xa1, 0xbb, 0x9b, 0x1a, 0x50, 0x71, 0xf2,
+	0x8c, 0xe4, 0x00, 0x77, 0x14, 0x3c, 0x62, 0xbf, 0x98, 0x4b, 0x77, 0xc5, 0xdc, 0x40, 0x88, 0x48,
+	0xa8, 0x46, 0x2f, 0x44, 0xbc, 0x70, 0xd7, 0x49, 0xef, 0x58, 0xbf, 0x7c, 0xbd, 0xbb, 0x0a, 0x13,
+	0xab, 0xb8, 0x8e, 0x07, 0x6f, 0x1d, 0x71, 0xcb, 0x5a, 0xe0, 0x73, 0xfb, 0x06, 0x9c, 0x6a, 0xce,
+	0x3b, 0x06, 0xab, 0xee, 0x00, 0x01, 0x78, 0x30, 0xdd, 0xc9, 0x56, 0x30, 0x46, 0xb5, 0x96, 0xb9,
+	0x41, 0x67, 0xa9, 0xcc, 0x31, 0x4b, 0x3b, 0x4e, 0x0a, 0xc9, 0x85, 0xc9, 0x65, 0xc3, 0x68, 0x97,
+	0xea, 0x1f, 0xfb, 0x49, 0xc7, 0x33, 0x95, 0x7c, 0x3c, 0xef, 0xc2, 0x54, 0x92, 0x53, 0xae, 0x9a,
+	0xa3, 0x59, 0xc8, 0x6e, 0x98, 0x8d, 0x1a, 0x76, 0x6c, 0xc7, 0x6c, 0x78, 0x01, 0x7e, 0xd8, 0x25,
+	0x69, 0x0f, 0xa6, 0xd9, 0x56, 0xbe, 0x58, 0x5a, 0x72, 0x82, 0xbb, 0x16, 0xe1, 0x98, 0xf3, 0xc7,
+	0x30, 0xd3, 0xc1, 0x79, 0x94, 0xde, 0x3f, 0xe8, 0x7d, 0x0d, 0xc4, 0x26, 0x88, 0x6e, 0x06, 0x93,
+	0x78, 0x10, 0x34, 0xde, 0x87, 0xc9, 0x44, 0x43, 0x01, 0x14, 0xd7, 0x09, 0x8f, 0x08, 0x16, 0x03,
+	0x1c, 0xce, 0x73, 0xe0, 0x30, 0x34, 0xa4, 0x35, 0xb5, 0xa5, 0x4d, 0xc8, 0x45, 0x60, 0x88, 0xf6,
+	0xfb, 0xef, 0xd3, 0xff, 0x98, 0x2f, 0x11, 0xc3, 0x80, 0xae, 0x2c, 0x15, 0x5f, 0x6e, 0x7e, 0x93,
+	0xa4, 0x77, 0xe0, 0x64, 0x9b, 0x33, 0x3e, 0xd8, 0xcd, 0x40, 0x36, 0xb4, 0x12, 0x91, 0x2c, 0x0d,
+	0xc2, 0xa5, 0x75, 0x43, 0x7a, 0x00, 0x93, 0x6c, 0xe3, 0x5f, 0x20, 0x95, 0x42, 0x82, 0xab, 0x56,
+	0xbe, 0xc2, 0x38, 0x7e, 0x08, 0x53, 0x49, 0x8e, 0x07, 0x81, 0x5b, 0x9f, 0x9e, 0xbf, 0x12, 0x58,
+	0x94, 0xbc, 0x15, 0x32, 0xe8, 0x08, 0x6f, 0xa7, 0xdb, 0x3d, 0xa7, 0x89, 0x31, 0xc6, 0x63, 0x8c,
+	0x90, 0x0e, 0x71, 0x13, 0xd2, 0x54, 0x67, 0x42, 0x8a, 0x24, 0xc8, 0x6c, 0x98, 0x75, 0x0f, 0x3b,
+	0xc1, 0x27, 0x11, 0xf6, 0x9f, 0x17, 0x33, 0xbe, 0x94, 0xaa, 0x05, 0x3b, 0xd2, 0xa7, 0x02, 0x4c,
+	0x25, 0x47, 0x1e, 0x00, 0x7c, 0x19, 0x20, 0xba, 0x11, 0x84, 0x08, 0x3f, 0x1d, 0x47, 0x78, 0xf3,
+	0xc6, 0x10, 0xe9, 0x6b, 0x8c, 0x12, 0x2f, 0x6d, 0x2d, 0x7d, 0x8e, 0x60, 0x94, 0xc6, 0x71, 0x8b,
+	0xde, 0xa3, 0xd0, 0xc7, 0x02, 0xa4, 0xd6, 0xb0, 0x87, 0x0a, 0x5d, 0x8f, 0x54, 0xeb, 0xa5, 0x43,
+	0xe4, 0x61, 0xd5, 0xd2, 0xfc, 0xd3, 0x9f, 0x7f, 0xfd, 0x6c, 0xe8, 0xff, 0xe8, 0x0c, 0xb9, 0xd3,
+	0x14, 0xda, 0xee, 0x34, 0xae, 0xb2, 0x17, 0xb5, 0xec, 0x09, 0xda, 0x17, 0x20, 0x4d, 0xca, 0x84,
+	0x94, 0xae, 0xa6, 0xdb, 0xaf, 0x2f, 0xa2, 0xca, 0xaf, 0x40, 0x2b, 0x2e, 0xcd, 0xf8, 0x81, 0x9d,
+	0x44, 0xff, 0xed, 0x10, 0x18, 0xfa, 0x42, 0x80, 0x0c, 0x65, 0x75, 0x48, 0xed, 0x97, 0xc8, 0x8a,
+	0xbd, 0x7b, 0x27, 0xad, 0x1e, 0x1c, 0xe6, 0xa7, 0x3b, 0x10, 0xc7, 0x0c, 0x7d, 0xf7, 0x43, 0x9c,
+	0x92, 0x3a, 0x85, 0x78, 0x49, 0xc8, 0xa3, 0x2f, 0x05, 0xc8, 0x50, 0xfe, 0xd2, 0x23, 0xca, 0x04,
+	0x72, 0xc5, 0x13, 0xe5, 0x4d, 0x1a, 0x65, 0x22, 0x45, 0x62, 0xa3, 0x9c, 0x2b, 0xf1, 0x74, 0x98,
+	0x44, 0xfc, 0x8d, 0x00, 0x19, 0x3a, 0x40, 0x7a, 0x44, 0x9c, 0xc0, 0xb0, 0x78, 0x22, 0x7e, 0xef,
+	0xe0, 0x30, 0x5f, 0xe8, 0xc0, 0xae, 0xfe, 0xd3, 0x4a, 0x8d, 0xaf, 0x6f, 0xd9, 0xde, 0x2e, 0x85,
+	0x68, 0x9e, 0x0b, 0xa2, 0x3f, 0x08, 0x30, 0x4e, 0xe0, 0xc4, 0x32, 0x26, 0x74, 0x89, 0x13, 0x7d,
+	0x09, 0x94, 0x4d, 0x5c, 0x1c, 0x48, 0x37, 0x00, 0x71, 0xd9, 0x0f, 0xbd, 0x84, 0x54, 0x8e, 0xd0,
+	0x95, 0xd8, 0x95, 0xed, 0x17, 0x01, 0xc6, 0x96, 0x0d, 0x83, 0xbd, 0xf0, 0x94, 0xbb, 0x46, 0xd2,
+	0x85, 0xb6, 0xf1, 0x74, 0xc5, 0x3e, 0x38, 0xcc, 0x17, 0x7b, 0xf0, 0xb0, 0xe3, 0x6d, 0x5b, 0x7e,
+	0x7a, 0x0b, 0x52, 0xdf, 0xe9, 0x11, 0x9c, 0xfd, 0x29, 0xc0, 0x71, 0x0a, 0x02, 0x36, 0xc9, 0x45,
+	0x6e, 0xc8, 0x0d, 0x96, 0xe7, 0x53, 0xe1, 0xe0, 0x30, 0x5f, 0xee, 0x4d, 0xca, 0xba, 0x20, 0xf1,
+	0x6a, 0xfe, 0x4a, 0xbf, 0xf9, 0x2a, 0x7b, 0x0c, 0x2b, 0x7b, 0x82, 0xbe, 0x16, 0x60, 0x94, 0x20,
+	0x27, 0x22, 0x52, 0xe8, 0x15, 0x4e, 0x94, 0xb5, 0x72, 0x38, 0xb1, 0xdc, 0xbf, 0x62, 0x80, 0xcd,
+	0x05, 0x3f, 0x19, 0x05, 0x15, 0x78, 0x92, 0x89, 0xf8, 0x19, 0xfa, 0x49, 0x80, 0xec, 0xb2, 0x61,
+	0x84, 0xf6, 0xd0, 0x02, 0x1f, 0x2a, 0x5b, 0xf8, 0x0f, 0x4f, 0xab, 0x6a, 0x07, 0x87, 0xf9, 0xf9,
+	0x6e, 0x04, 0x6d, 0x2c, 0xbe, 0x4e, 0xcf, 0x9a, 0xd4, 0x5f, 0x3e, 0x04, 0x89, 0xbf, 0x0b, 0x30,
+	0x46, 0xf1, 0x10, 0x65, 0x55, 0xe6, 0x86, 0xe1, 0x00, 0x89, 0x3d, 0x3e, 0x38, 0xcc, 0x2f, 0xf4,
+	0x60, 0x69, 0x5d, 0xf0, 0xb7, 0x94, 0x5f, 0xec, 0x2b, 0x45, 0x65, 0x8f, 0x21, 0x71, 0x4f, 0xd0,
+	0xb7, 0x02, 0x8c, 0x11, 0x5c, 0x34, 0x59, 0x0e, 0xe2, 0x05, 0x51, 0x1b, 0xa5, 0x13, 0x2f, 0x0e,
+	0xa0, 0x19, 0xe0, 0xef, 0x82, 0x9f, 0x8c, 0x8a, 0x64, 0x9e, 0x64, 0x9a, 0x3c, 0x6a, 0xe5, 0x03,
+	0x98, 0x89, 0xf9, 0xd4, 0x6d, 0xb3, 0xc5, 0xef, 0x9d, 0xb5, 0x9a, 0xe9, 0xdd, 0xdf, 0xbe, 0x27,
+	0x57, 0xad, 0x2d, 0x85, 0xca, 0x16, 0xe8, 0xff, 0xb6, 0x35, 0xab, 0x50, 0xc3, 0x0d, 0xbf, 0xa6,
+	0x4a, 0x97, 0x3f, 0x74, 0x17, 0x83, 0xc7, 0x7b, 0x19, 0x5f, 0xf4, 0xfc, 0xdf, 0x01, 0x00, 0x00,
+	0xff, 0xff, 0xd9, 0xda, 0x51, 0x72, 0xf6, 0x16, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // DeviceServiceClient is the client API for DeviceService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type DeviceServiceClient interface {
+	// Returns the specified device.
+	//
+	// To get the list of available devices, make a [List] request.
 	Get(ctx context.Context, in *GetDeviceRequest, opts ...grpc.CallOption) (*Device, error)
+	// Retrieves the list of devices in the specified registry.
 	List(ctx context.Context, in *ListDevicesRequest, opts ...grpc.CallOption) (*ListDevicesResponse, error)
+	// Creates a device in the specified registry.
 	Create(ctx context.Context, in *CreateDeviceRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Updates the specified device.
 	Update(ctx context.Context, in *UpdateDeviceRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Deletes the specified device.
 	Delete(ctx context.Context, in *DeleteDeviceRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Retrieves the list of device certificates for the specified device.
 	ListCertificates(ctx context.Context, in *ListDeviceCertificatesRequest, opts ...grpc.CallOption) (*ListDeviceCertificatesResponse, error)
+	// Adds a certificate.
 	AddCertificate(ctx context.Context, in *AddDeviceCertificateRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Deletes the specified device certificate.
 	DeleteCertificate(ctx context.Context, in *DeleteDeviceCertificateRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Retrieves the list of passwords for the specified device.
+	ListPasswords(ctx context.Context, in *ListDevicePasswordsRequest, opts ...grpc.CallOption) (*ListDevicePasswordsResponse, error)
+	// Adds password for the specified device.
+	AddPassword(ctx context.Context, in *AddDevicePasswordRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Deletes the specified password.
+	DeletePassword(ctx context.Context, in *DeleteDevicePasswordRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Lists operations for the specified device.
 	ListOperations(ctx context.Context, in *ListDeviceOperationsRequest, opts ...grpc.CallOption) (*ListDeviceOperationsResponse, error)
 }
 
 type deviceServiceClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewDeviceServiceClient(cc *grpc.ClientConn) DeviceServiceClient {
+func NewDeviceServiceClient(cc grpc.ClientConnInterface) DeviceServiceClient {
 	return &deviceServiceClient{cc}
 }
 
@@ -1138,6 +1543,33 @@ func (c *deviceServiceClient) DeleteCertificate(ctx context.Context, in *DeleteD
 	return out, nil
 }
 
+func (c *deviceServiceClient) ListPasswords(ctx context.Context, in *ListDevicePasswordsRequest, opts ...grpc.CallOption) (*ListDevicePasswordsResponse, error) {
+	out := new(ListDevicePasswordsResponse)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.iot.devices.v1.DeviceService/ListPasswords", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deviceServiceClient) AddPassword(ctx context.Context, in *AddDevicePasswordRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	out := new(operation.Operation)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.iot.devices.v1.DeviceService/AddPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deviceServiceClient) DeletePassword(ctx context.Context, in *DeleteDevicePasswordRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	out := new(operation.Operation)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.iot.devices.v1.DeviceService/DeletePassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *deviceServiceClient) ListOperations(ctx context.Context, in *ListDeviceOperationsRequest, opts ...grpc.CallOption) (*ListDeviceOperationsResponse, error) {
 	out := new(ListDeviceOperationsResponse)
 	err := c.cc.Invoke(ctx, "/yandex.cloud.iot.devices.v1.DeviceService/ListOperations", in, out, opts...)
@@ -1149,14 +1581,31 @@ func (c *deviceServiceClient) ListOperations(ctx context.Context, in *ListDevice
 
 // DeviceServiceServer is the server API for DeviceService service.
 type DeviceServiceServer interface {
+	// Returns the specified device.
+	//
+	// To get the list of available devices, make a [List] request.
 	Get(context.Context, *GetDeviceRequest) (*Device, error)
+	// Retrieves the list of devices in the specified registry.
 	List(context.Context, *ListDevicesRequest) (*ListDevicesResponse, error)
+	// Creates a device in the specified registry.
 	Create(context.Context, *CreateDeviceRequest) (*operation.Operation, error)
+	// Updates the specified device.
 	Update(context.Context, *UpdateDeviceRequest) (*operation.Operation, error)
+	// Deletes the specified device.
 	Delete(context.Context, *DeleteDeviceRequest) (*operation.Operation, error)
+	// Retrieves the list of device certificates for the specified device.
 	ListCertificates(context.Context, *ListDeviceCertificatesRequest) (*ListDeviceCertificatesResponse, error)
+	// Adds a certificate.
 	AddCertificate(context.Context, *AddDeviceCertificateRequest) (*operation.Operation, error)
+	// Deletes the specified device certificate.
 	DeleteCertificate(context.Context, *DeleteDeviceCertificateRequest) (*operation.Operation, error)
+	// Retrieves the list of passwords for the specified device.
+	ListPasswords(context.Context, *ListDevicePasswordsRequest) (*ListDevicePasswordsResponse, error)
+	// Adds password for the specified device.
+	AddPassword(context.Context, *AddDevicePasswordRequest) (*operation.Operation, error)
+	// Deletes the specified password.
+	DeletePassword(context.Context, *DeleteDevicePasswordRequest) (*operation.Operation, error)
+	// Lists operations for the specified device.
 	ListOperations(context.Context, *ListDeviceOperationsRequest) (*ListDeviceOperationsResponse, error)
 }
 
@@ -1187,6 +1636,15 @@ func (*UnimplementedDeviceServiceServer) AddCertificate(ctx context.Context, req
 }
 func (*UnimplementedDeviceServiceServer) DeleteCertificate(ctx context.Context, req *DeleteDeviceCertificateRequest) (*operation.Operation, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCertificate not implemented")
+}
+func (*UnimplementedDeviceServiceServer) ListPasswords(ctx context.Context, req *ListDevicePasswordsRequest) (*ListDevicePasswordsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPasswords not implemented")
+}
+func (*UnimplementedDeviceServiceServer) AddPassword(ctx context.Context, req *AddDevicePasswordRequest) (*operation.Operation, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddPassword not implemented")
+}
+func (*UnimplementedDeviceServiceServer) DeletePassword(ctx context.Context, req *DeleteDevicePasswordRequest) (*operation.Operation, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePassword not implemented")
 }
 func (*UnimplementedDeviceServiceServer) ListOperations(ctx context.Context, req *ListDeviceOperationsRequest) (*ListDeviceOperationsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListOperations not implemented")
@@ -1340,6 +1798,60 @@ func _DeviceService_DeleteCertificate_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeviceService_ListPasswords_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDevicePasswordsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeviceServiceServer).ListPasswords(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.iot.devices.v1.DeviceService/ListPasswords",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeviceServiceServer).ListPasswords(ctx, req.(*ListDevicePasswordsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeviceService_AddPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddDevicePasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeviceServiceServer).AddPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.iot.devices.v1.DeviceService/AddPassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeviceServiceServer).AddPassword(ctx, req.(*AddDevicePasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeviceService_DeletePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDevicePasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeviceServiceServer).DeletePassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.iot.devices.v1.DeviceService/DeletePassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeviceServiceServer).DeletePassword(ctx, req.(*DeleteDevicePasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DeviceService_ListOperations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListDeviceOperationsRequest)
 	if err := dec(in); err != nil {
@@ -1393,6 +1905,18 @@ var _DeviceService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteCertificate",
 			Handler:    _DeviceService_DeleteCertificate_Handler,
+		},
+		{
+			MethodName: "ListPasswords",
+			Handler:    _DeviceService_ListPasswords_Handler,
+		},
+		{
+			MethodName: "AddPassword",
+			Handler:    _DeviceService_AddPassword_Handler,
+		},
+		{
+			MethodName: "DeletePassword",
+			Handler:    _DeviceService_DeletePassword_Handler,
 		},
 		{
 			MethodName: "ListOperations",

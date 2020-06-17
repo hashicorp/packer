@@ -248,11 +248,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		c.FolderID = os.Getenv("YC_FOLDER_ID")
 	}
 
-	if c.Token == "" && c.ServiceAccountKeyFile == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("a token or service account key file must be specified"))
-	}
-
 	if c.Token != "" && c.ServiceAccountKeyFile != "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("one of token or service account key file must be specified, not both"))

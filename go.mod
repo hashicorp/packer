@@ -26,7 +26,7 @@ require (
 	github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878 // indirect
 	github.com/aws/aws-sdk-go v1.30.8
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
-	github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
+	github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/creack/goselect v0.1.0 // indirect
@@ -41,15 +41,14 @@ require (
 	github.com/exoscale/egoscale v0.18.1
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structtag v1.0.0
-	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.25.4
 	github.com/go-ole/go-ole v1.2.4 // indirect
-	github.com/go-resty/resty/v2 v2.3.0 // indirect
+	github.com/go-resty/resty/v2 v2.3.0
 	github.com/gobwas/glob v0.2.3
 	github.com/gocolly/colly v1.2.0
 	github.com/gofrs/flock v0.7.1
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
-	github.com/golang/protobuf v1.3.5 // indirect
+	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/go-cmp v0.4.0
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
@@ -139,8 +138,8 @@ require (
 	github.com/ulikunitz/xz v0.5.5
 	github.com/vmware/govmomi v0.22.2
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
-	github.com/yandex-cloud/go-genproto v0.0.0-20190916101622-7617782d381e
-	github.com/yandex-cloud/go-sdk v0.0.0-20190916101744-c781afa45829
+	github.com/yandex-cloud/go-genproto v0.0.0-20200608085315-d6e7ef5ceb97
+	github.com/yandex-cloud/go-sdk v0.0.0-20200610100221-ae86895efb97
 	github.com/zclconf/go-cty v1.4.0
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20200422194213-44a606286825
@@ -148,13 +147,15 @@ require (
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
-	golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd
+	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1
+	golang.org/x/text v0.3.3 // indirect
 	golang.org/x/tools v0.0.0-20200224181240-023911ca70b2
 	google.golang.org/api v0.21.0
-	google.golang.org/genproto v0.0.0-20200325114520-5b2d0af7952b // indirect
-	google.golang.org/grpc v1.28.0
+	google.golang.org/genproto v0.0.0-20200617032506-f1bdc9086088 // indirect
+	google.golang.org/grpc v1.29.1
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
 replace github.com/gofrs/flock => github.com/azr/flock v0.0.0-20190823144736-958d66434653

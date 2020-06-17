@@ -42,3 +42,13 @@ func (c *Clickhouse) ResourcePreset() *ResourcePresetServiceClient {
 func (c *Clickhouse) User() *UserServiceClient {
 	return &UserServiceClient{getConn: c.getConn}
 }
+
+// MlModel gets MlModelService client
+func (c *Clickhouse) MlModel() *MlModelServiceClient {
+	return &MlModelServiceClient{getConn: c.getConn}
+}
+
+// FormatSchema gets FormatSchemaService client
+func (c *Clickhouse) FormatSchema() *FormatSchemaServiceClient {
+	return &FormatSchemaServiceClient{getConn: c.getConn}
+}

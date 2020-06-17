@@ -30,6 +30,9 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type GetRegistryRequest struct {
+	// ID of the registry to return.
+	//
+	// To get a registry ID make a [RegistryService.List] request.
 	RegistryId           string   `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -69,8 +72,17 @@ func (m *GetRegistryRequest) GetRegistryId() string {
 }
 
 type ListRegistriesRequest struct {
-	FolderId             string   `protobuf:"bytes,1,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
-	PageSize             int64    `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// ID of the folder to list registries in.
+	//
+	// To get a folder ID make a [yandex.cloud.resourcemanager.v1.FolderService.List] request.
+	FolderId string `protobuf:"bytes,1,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	// The maximum number of results per page that should be returned. If the number of available
+	// results is larger than `page_size`, the service returns a [ListRegistriesResponse.next_page_token]
+	// that can be used to get the next page of results in subsequent list requests.
+	// Default value: 100.
+	PageSize int64 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Page token. To get the next page of results, set `page_token` to the
+	// [ListRegistriesResponse.next_page_token] returned by a previous list request.
 	PageToken            string   `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -124,11 +136,17 @@ func (m *ListRegistriesRequest) GetPageToken() string {
 }
 
 type ListRegistriesResponse struct {
-	Registries           []*Registry `protobuf:"bytes,1,rep,name=registries,proto3" json:"registries,omitempty"`
-	NextPageToken        string      `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
+	// List of registries.
+	Registries []*Registry `protobuf:"bytes,1,rep,name=registries,proto3" json:"registries,omitempty"`
+	// Token for getting the next page of the list. If the number of results is greater than
+	// the specified [ListRegistriesRequest.page_size], use `next_page_token` as the value
+	// for the [ListRegistriesRequest.page_token] parameter in the next list request.
+	//
+	// Each subsequent page will have its own `next_page_token` to continue paging through the results.
+	NextPageToken        string   `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *ListRegistriesResponse) Reset()         { *m = ListRegistriesResponse{} }
@@ -171,14 +189,25 @@ func (m *ListRegistriesResponse) GetNextPageToken() string {
 }
 
 type CreateRegistryRequest struct {
-	FolderId             string                               `protobuf:"bytes,1,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
-	Name                 string                               `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description          string                               `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Labels               map[string]string                    `protobuf:"bytes,4,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	Certificates         []*CreateRegistryRequest_Certificate `protobuf:"bytes,5,rep,name=certificates,proto3" json:"certificates,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                             `json:"-"`
-	XXX_unrecognized     []byte                               `json:"-"`
-	XXX_sizecache        int32                                `json:"-"`
+	// ID of the folder to create a registry in.
+	//
+	// To get a folder ID, make a [yandex.cloud.resourcemanager.v1.FolderService.List] request.
+	FolderId string `protobuf:"bytes,1,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	// Name of the registry. The name must be unique within the folder.
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// Description of the registry.
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// Resource labels as `key:value` pairs.
+	Labels map[string]string `protobuf:"bytes,4,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	// Registry certificates.
+	Certificates []*CreateRegistryRequest_Certificate `protobuf:"bytes,5,rep,name=certificates,proto3" json:"certificates,omitempty"`
+	// Registry passwords.
+	//
+	// The password must contain at least three character categories among the following: upper case latin, lower case latin, numbers and special symbols.
+	Password             string   `protobuf:"bytes,6,opt,name=password,proto3" json:"password,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *CreateRegistryRequest) Reset()         { *m = CreateRegistryRequest{} }
@@ -241,7 +270,16 @@ func (m *CreateRegistryRequest) GetCertificates() []*CreateRegistryRequest_Certi
 	return nil
 }
 
+func (m *CreateRegistryRequest) GetPassword() string {
+	if m != nil {
+		return m.Password
+	}
+	return ""
+}
+
+// Specification of a registry certificate.
 type CreateRegistryRequest_Certificate struct {
+	// Public part of the registry certificate.
 	CertificateData      string   `protobuf:"bytes,1,opt,name=certificate_data,json=certificateData,proto3" json:"certificate_data,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -281,6 +319,7 @@ func (m *CreateRegistryRequest_Certificate) GetCertificateData() string {
 }
 
 type CreateRegistryMetadata struct {
+	// ID of the registry that is being created.
 	RegistryId           string   `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -320,14 +359,23 @@ func (m *CreateRegistryMetadata) GetRegistryId() string {
 }
 
 type UpdateRegistryRequest struct {
-	RegistryId           string                `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
-	UpdateMask           *field_mask.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
-	Name                 string                `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Description          string                `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	Labels               map[string]string     `protobuf:"bytes,5,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
-	XXX_unrecognized     []byte                `json:"-"`
-	XXX_sizecache        int32                 `json:"-"`
+	// ID of the registry to update.
+	//
+	// To get a registry ID make a [RegistryService.List] request.
+	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// Field mask that specifies which fields of the registry are going to be updated.
+	UpdateMask *field_mask.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// Name of the registry. The name must be unique within the folder.
+	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	// Description of the registry.
+	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	// Resource labels as `key:value` pairs.
+	//
+	// Existing set of `labels` is completely replaced by the provided set.
+	Labels               map[string]string `protobuf:"bytes,5,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
 }
 
 func (m *UpdateRegistryRequest) Reset()         { *m = UpdateRegistryRequest{} }
@@ -391,6 +439,7 @@ func (m *UpdateRegistryRequest) GetLabels() map[string]string {
 }
 
 type UpdateRegistryMetadata struct {
+	// ID of the registry that is being updated.
 	RegistryId           string   `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -430,6 +479,9 @@ func (m *UpdateRegistryMetadata) GetRegistryId() string {
 }
 
 type DeleteRegistryRequest struct {
+	// ID of the registry to delete.
+	//
+	// To get a registry ID make a [RegistryService.List] request.
 	RegistryId           string   `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -469,6 +521,7 @@ func (m *DeleteRegistryRequest) GetRegistryId() string {
 }
 
 type DeleteRegistryMetadata struct {
+	// ID of the registry that is being deleted.
 	RegistryId           string   `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -508,6 +561,7 @@ func (m *DeleteRegistryMetadata) GetRegistryId() string {
 }
 
 type ListRegistryCertificatesRequest struct {
+	// ID of the registry to list certificates for.
 	RegistryId           string   `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -547,6 +601,7 @@ func (m *ListRegistryCertificatesRequest) GetRegistryId() string {
 }
 
 type ListRegistryCertificatesResponse struct {
+	// List of certificates for the specified registry.
 	Certificates         []*RegistryCertificate `protobuf:"bytes,1,rep,name=certificates,proto3" json:"certificates,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
 	XXX_unrecognized     []byte                 `json:"-"`
@@ -586,7 +641,11 @@ func (m *ListRegistryCertificatesResponse) GetCertificates() []*RegistryCertific
 }
 
 type AddRegistryCertificateRequest struct {
-	RegistryId           string   `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// ID of the registry for which the certificate is being added.
+	//
+	// To get a registry ID make a [RegistryService.List] request.
+	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// Public part of the certificate that is being added.
 	CertificateData      string   `protobuf:"bytes,3,opt,name=certificate_data,json=certificateData,proto3" json:"certificate_data,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -633,7 +692,9 @@ func (m *AddRegistryCertificateRequest) GetCertificateData() string {
 }
 
 type AddRegistryCertificateMetadata struct {
-	RegistryId           string   `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// ID of the registry certificate that is being added.
+	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// Fingerprint of the certificate that is being added.
 	Fingerprint          string   `protobuf:"bytes,2,opt,name=fingerprint,proto3" json:"fingerprint,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -680,7 +741,11 @@ func (m *AddRegistryCertificateMetadata) GetFingerprint() string {
 }
 
 type DeleteRegistryCertificateRequest struct {
-	RegistryId           string   `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// ID of the registry to delete a certificate for.
+	//
+	// To get a registry ID make a [RegistryService.List] request.
+	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// Fingerprint of the certificate that is being deleted.
 	Fingerprint          string   `protobuf:"bytes,2,opt,name=fingerprint,proto3" json:"fingerprint,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -727,7 +792,9 @@ func (m *DeleteRegistryCertificateRequest) GetFingerprint() string {
 }
 
 type DeleteRegistryCertificateMetadata struct {
-	RegistryId           string   `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// ID of a registry for which the certificate is being delete.
+	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// Fingerprint of the certificate to deleted.
 	Fingerprint          string   `protobuf:"bytes,2,opt,name=fingerprint,proto3" json:"fingerprint,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -773,9 +840,306 @@ func (m *DeleteRegistryCertificateMetadata) GetFingerprint() string {
 	return ""
 }
 
-type ListDeviceTopicAliasesRequest struct {
+type ListRegistryPasswordsRequest struct {
+	// ID of the registry to list passwords in.
+	//
+	// To get a registry ID make a [RegistryService.List] request.
 	RegistryId           string   `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
-	PageSize             int64    `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ListRegistryPasswordsRequest) Reset()         { *m = ListRegistryPasswordsRequest{} }
+func (m *ListRegistryPasswordsRequest) String() string { return proto.CompactTextString(m) }
+func (*ListRegistryPasswordsRequest) ProtoMessage()    {}
+func (*ListRegistryPasswordsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_481ff402e1676179, []int{15}
+}
+
+func (m *ListRegistryPasswordsRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListRegistryPasswordsRequest.Unmarshal(m, b)
+}
+func (m *ListRegistryPasswordsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListRegistryPasswordsRequest.Marshal(b, m, deterministic)
+}
+func (m *ListRegistryPasswordsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListRegistryPasswordsRequest.Merge(m, src)
+}
+func (m *ListRegistryPasswordsRequest) XXX_Size() int {
+	return xxx_messageInfo_ListRegistryPasswordsRequest.Size(m)
+}
+func (m *ListRegistryPasswordsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListRegistryPasswordsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListRegistryPasswordsRequest proto.InternalMessageInfo
+
+func (m *ListRegistryPasswordsRequest) GetRegistryId() string {
+	if m != nil {
+		return m.RegistryId
+	}
+	return ""
+}
+
+type ListRegistryPasswordsResponse struct {
+	// List of passwords for the specified registry.
+	Passwords            []*RegistryPassword `protobuf:"bytes,1,rep,name=passwords,proto3" json:"passwords,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
+}
+
+func (m *ListRegistryPasswordsResponse) Reset()         { *m = ListRegistryPasswordsResponse{} }
+func (m *ListRegistryPasswordsResponse) String() string { return proto.CompactTextString(m) }
+func (*ListRegistryPasswordsResponse) ProtoMessage()    {}
+func (*ListRegistryPasswordsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_481ff402e1676179, []int{16}
+}
+
+func (m *ListRegistryPasswordsResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListRegistryPasswordsResponse.Unmarshal(m, b)
+}
+func (m *ListRegistryPasswordsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListRegistryPasswordsResponse.Marshal(b, m, deterministic)
+}
+func (m *ListRegistryPasswordsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListRegistryPasswordsResponse.Merge(m, src)
+}
+func (m *ListRegistryPasswordsResponse) XXX_Size() int {
+	return xxx_messageInfo_ListRegistryPasswordsResponse.Size(m)
+}
+func (m *ListRegistryPasswordsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListRegistryPasswordsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListRegistryPasswordsResponse proto.InternalMessageInfo
+
+func (m *ListRegistryPasswordsResponse) GetPasswords() []*RegistryPassword {
+	if m != nil {
+		return m.Passwords
+	}
+	return nil
+}
+
+type AddRegistryPasswordRequest struct {
+	// ID of the registry to add a password for.
+	//
+	// To get a registry ID make a [RegistryService.List] request.
+	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// Passwords for the registry.
+	//
+	// The password must contain at least three character categories among the following: upper case latin, lower case latin, numbers and special symbols.
+	Password             string   `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AddRegistryPasswordRequest) Reset()         { *m = AddRegistryPasswordRequest{} }
+func (m *AddRegistryPasswordRequest) String() string { return proto.CompactTextString(m) }
+func (*AddRegistryPasswordRequest) ProtoMessage()    {}
+func (*AddRegistryPasswordRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_481ff402e1676179, []int{17}
+}
+
+func (m *AddRegistryPasswordRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddRegistryPasswordRequest.Unmarshal(m, b)
+}
+func (m *AddRegistryPasswordRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddRegistryPasswordRequest.Marshal(b, m, deterministic)
+}
+func (m *AddRegistryPasswordRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddRegistryPasswordRequest.Merge(m, src)
+}
+func (m *AddRegistryPasswordRequest) XXX_Size() int {
+	return xxx_messageInfo_AddRegistryPasswordRequest.Size(m)
+}
+func (m *AddRegistryPasswordRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddRegistryPasswordRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddRegistryPasswordRequest proto.InternalMessageInfo
+
+func (m *AddRegistryPasswordRequest) GetRegistryId() string {
+	if m != nil {
+		return m.RegistryId
+	}
+	return ""
+}
+
+func (m *AddRegistryPasswordRequest) GetPassword() string {
+	if m != nil {
+		return m.Password
+	}
+	return ""
+}
+
+type AddRegistryPasswordMetadata struct {
+	// ID of the registry for which the password is being added.
+	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// ID of a password that is being added.
+	PasswordId           string   `protobuf:"bytes,2,opt,name=password_id,json=passwordId,proto3" json:"password_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AddRegistryPasswordMetadata) Reset()         { *m = AddRegistryPasswordMetadata{} }
+func (m *AddRegistryPasswordMetadata) String() string { return proto.CompactTextString(m) }
+func (*AddRegistryPasswordMetadata) ProtoMessage()    {}
+func (*AddRegistryPasswordMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_481ff402e1676179, []int{18}
+}
+
+func (m *AddRegistryPasswordMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddRegistryPasswordMetadata.Unmarshal(m, b)
+}
+func (m *AddRegistryPasswordMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddRegistryPasswordMetadata.Marshal(b, m, deterministic)
+}
+func (m *AddRegistryPasswordMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddRegistryPasswordMetadata.Merge(m, src)
+}
+func (m *AddRegistryPasswordMetadata) XXX_Size() int {
+	return xxx_messageInfo_AddRegistryPasswordMetadata.Size(m)
+}
+func (m *AddRegistryPasswordMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddRegistryPasswordMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddRegistryPasswordMetadata proto.InternalMessageInfo
+
+func (m *AddRegistryPasswordMetadata) GetRegistryId() string {
+	if m != nil {
+		return m.RegistryId
+	}
+	return ""
+}
+
+func (m *AddRegistryPasswordMetadata) GetPasswordId() string {
+	if m != nil {
+		return m.PasswordId
+	}
+	return ""
+}
+
+type DeleteRegistryPasswordRequest struct {
+	// ID of the registry to delete a password for.
+	//
+	// To get a registry ID make a [DeviceService.List] request.
+	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// ID of the password to delete.
+	//
+	// To get a password ID make a [RegistryService.ListPasswords] request.
+	PasswordId           string   `protobuf:"bytes,2,opt,name=password_id,json=passwordId,proto3" json:"password_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteRegistryPasswordRequest) Reset()         { *m = DeleteRegistryPasswordRequest{} }
+func (m *DeleteRegistryPasswordRequest) String() string { return proto.CompactTextString(m) }
+func (*DeleteRegistryPasswordRequest) ProtoMessage()    {}
+func (*DeleteRegistryPasswordRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_481ff402e1676179, []int{19}
+}
+
+func (m *DeleteRegistryPasswordRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteRegistryPasswordRequest.Unmarshal(m, b)
+}
+func (m *DeleteRegistryPasswordRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteRegistryPasswordRequest.Marshal(b, m, deterministic)
+}
+func (m *DeleteRegistryPasswordRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteRegistryPasswordRequest.Merge(m, src)
+}
+func (m *DeleteRegistryPasswordRequest) XXX_Size() int {
+	return xxx_messageInfo_DeleteRegistryPasswordRequest.Size(m)
+}
+func (m *DeleteRegistryPasswordRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteRegistryPasswordRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteRegistryPasswordRequest proto.InternalMessageInfo
+
+func (m *DeleteRegistryPasswordRequest) GetRegistryId() string {
+	if m != nil {
+		return m.RegistryId
+	}
+	return ""
+}
+
+func (m *DeleteRegistryPasswordRequest) GetPasswordId() string {
+	if m != nil {
+		return m.PasswordId
+	}
+	return ""
+}
+
+type DeleteRegistryPasswordMetadata struct {
+	// ID of a registry for which the password is being delete.
+	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// ID of the password to delete.
+	//
+	// To get a password ID make a [RegistryService.ListPasswords] request.
+	PasswordId           string   `protobuf:"bytes,2,opt,name=password_id,json=passwordId,proto3" json:"password_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteRegistryPasswordMetadata) Reset()         { *m = DeleteRegistryPasswordMetadata{} }
+func (m *DeleteRegistryPasswordMetadata) String() string { return proto.CompactTextString(m) }
+func (*DeleteRegistryPasswordMetadata) ProtoMessage()    {}
+func (*DeleteRegistryPasswordMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_481ff402e1676179, []int{20}
+}
+
+func (m *DeleteRegistryPasswordMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteRegistryPasswordMetadata.Unmarshal(m, b)
+}
+func (m *DeleteRegistryPasswordMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteRegistryPasswordMetadata.Marshal(b, m, deterministic)
+}
+func (m *DeleteRegistryPasswordMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteRegistryPasswordMetadata.Merge(m, src)
+}
+func (m *DeleteRegistryPasswordMetadata) XXX_Size() int {
+	return xxx_messageInfo_DeleteRegistryPasswordMetadata.Size(m)
+}
+func (m *DeleteRegistryPasswordMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteRegistryPasswordMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteRegistryPasswordMetadata proto.InternalMessageInfo
+
+func (m *DeleteRegistryPasswordMetadata) GetRegistryId() string {
+	if m != nil {
+		return m.RegistryId
+	}
+	return ""
+}
+
+func (m *DeleteRegistryPasswordMetadata) GetPasswordId() string {
+	if m != nil {
+		return m.PasswordId
+	}
+	return ""
+}
+
+type ListDeviceTopicAliasesRequest struct {
+	// ID of the registry to list aliases for device topic.
+	//
+	// To get a registry ID make a [RegistryService.List] request.
+	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// The maximum number of results per page that should be returned. If the number of available
+	// results is larger than `page_size`, the service returns a [ListDeviceTopicAliasesResponse.next_page_token]
+	// that can be used to get the next page of results in subsequent list requests.
+	// Default value: 100.
+	PageSize int64 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Page token. To get the next page of results, set `page_token` to the
+	// [ListDeviceTopicAliasesResponse.next_page_token] returned by a previous list request.
 	PageToken            string   `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -786,7 +1150,7 @@ func (m *ListDeviceTopicAliasesRequest) Reset()         { *m = ListDeviceTopicAl
 func (m *ListDeviceTopicAliasesRequest) String() string { return proto.CompactTextString(m) }
 func (*ListDeviceTopicAliasesRequest) ProtoMessage()    {}
 func (*ListDeviceTopicAliasesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_481ff402e1676179, []int{15}
+	return fileDescriptor_481ff402e1676179, []int{21}
 }
 
 func (m *ListDeviceTopicAliasesRequest) XXX_Unmarshal(b []byte) error {
@@ -829,18 +1193,24 @@ func (m *ListDeviceTopicAliasesRequest) GetPageToken() string {
 }
 
 type ListDeviceTopicAliasesResponse struct {
-	Aliases              []*DeviceAlias `protobuf:"bytes,1,rep,name=aliases,proto3" json:"aliases,omitempty"`
-	NextPageToken        string         `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
+	// List of device aliases for the specified registry.
+	Aliases []*DeviceAlias `protobuf:"bytes,1,rep,name=aliases,proto3" json:"aliases,omitempty"`
+	// Token for getting the next page of the list. If the number of results is greater than
+	// the specified [ListDeviceTopicAliasesRequest.page_size], use `next_page_token` as the value
+	// for the [ListDeviceTopicAliasesRequest.page_token] parameter in the next list request.
+	//
+	// Each subsequent page will have its own `next_page_token` to continue paging through the results.
+	NextPageToken        string   `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *ListDeviceTopicAliasesResponse) Reset()         { *m = ListDeviceTopicAliasesResponse{} }
 func (m *ListDeviceTopicAliasesResponse) String() string { return proto.CompactTextString(m) }
 func (*ListDeviceTopicAliasesResponse) ProtoMessage()    {}
 func (*ListDeviceTopicAliasesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_481ff402e1676179, []int{16}
+	return fileDescriptor_481ff402e1676179, []int{22}
 }
 
 func (m *ListDeviceTopicAliasesResponse) XXX_Unmarshal(b []byte) error {
@@ -876,9 +1246,18 @@ func (m *ListDeviceTopicAliasesResponse) GetNextPageToken() string {
 }
 
 type ListRegistryOperationsRequest struct {
-	RegistryId           string   `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
-	PageSize             int64    `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken            string   `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// ID of the registry to list operations for.
+	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// The maximum number of results per page that should be returned. If the number of available
+	// results is larger than `page_size`, the service returns a [ListRegistryOperationsResponse.next_page_token]
+	// that can be used to get the next page of results in subsequent list requests.
+	// Default value: 100.
+	PageSize int64 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Page token. To get the next page of results, set `page_token` to the
+	// [ListRegistryOperationsResponse.next_page_token] returned by a previous list request.
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	// A filter expression that filters resources listed in the response.
+	// Currently you can use filtering only on [Registry.name] field.
 	Filter               string   `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -889,7 +1268,7 @@ func (m *ListRegistryOperationsRequest) Reset()         { *m = ListRegistryOpera
 func (m *ListRegistryOperationsRequest) String() string { return proto.CompactTextString(m) }
 func (*ListRegistryOperationsRequest) ProtoMessage()    {}
 func (*ListRegistryOperationsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_481ff402e1676179, []int{17}
+	return fileDescriptor_481ff402e1676179, []int{23}
 }
 
 func (m *ListRegistryOperationsRequest) XXX_Unmarshal(b []byte) error {
@@ -939,18 +1318,24 @@ func (m *ListRegistryOperationsRequest) GetFilter() string {
 }
 
 type ListRegistryOperationsResponse struct {
-	Operations           []*operation.Operation `protobuf:"bytes,1,rep,name=operations,proto3" json:"operations,omitempty"`
-	NextPageToken        string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
-	XXX_unrecognized     []byte                 `json:"-"`
-	XXX_sizecache        int32                  `json:"-"`
+	// List of operations for the specified registry.
+	Operations []*operation.Operation `protobuf:"bytes,1,rep,name=operations,proto3" json:"operations,omitempty"`
+	// Token for getting the next page of the list. If the number of results is greater than
+	// the specified [ListRegistryOperationsRequest.page_size], use `next_page_token` as the value
+	// for the [ListRegistryOperationsRequest.page_token] parameter in the next list request.
+	//
+	// Each subsequent page will have its own `next_page_token` to continue paging through the results.
+	NextPageToken        string   `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *ListRegistryOperationsResponse) Reset()         { *m = ListRegistryOperationsResponse{} }
 func (m *ListRegistryOperationsResponse) String() string { return proto.CompactTextString(m) }
 func (*ListRegistryOperationsResponse) ProtoMessage()    {}
 func (*ListRegistryOperationsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_481ff402e1676179, []int{18}
+	return fileDescriptor_481ff402e1676179, []int{24}
 }
 
 func (m *ListRegistryOperationsResponse) XXX_Unmarshal(b []byte) error {
@@ -1004,6 +1389,12 @@ func init() {
 	proto.RegisterType((*AddRegistryCertificateMetadata)(nil), "yandex.cloud.iot.devices.v1.AddRegistryCertificateMetadata")
 	proto.RegisterType((*DeleteRegistryCertificateRequest)(nil), "yandex.cloud.iot.devices.v1.DeleteRegistryCertificateRequest")
 	proto.RegisterType((*DeleteRegistryCertificateMetadata)(nil), "yandex.cloud.iot.devices.v1.DeleteRegistryCertificateMetadata")
+	proto.RegisterType((*ListRegistryPasswordsRequest)(nil), "yandex.cloud.iot.devices.v1.ListRegistryPasswordsRequest")
+	proto.RegisterType((*ListRegistryPasswordsResponse)(nil), "yandex.cloud.iot.devices.v1.ListRegistryPasswordsResponse")
+	proto.RegisterType((*AddRegistryPasswordRequest)(nil), "yandex.cloud.iot.devices.v1.AddRegistryPasswordRequest")
+	proto.RegisterType((*AddRegistryPasswordMetadata)(nil), "yandex.cloud.iot.devices.v1.AddRegistryPasswordMetadata")
+	proto.RegisterType((*DeleteRegistryPasswordRequest)(nil), "yandex.cloud.iot.devices.v1.DeleteRegistryPasswordRequest")
+	proto.RegisterType((*DeleteRegistryPasswordMetadata)(nil), "yandex.cloud.iot.devices.v1.DeleteRegistryPasswordMetadata")
 	proto.RegisterType((*ListDeviceTopicAliasesRequest)(nil), "yandex.cloud.iot.devices.v1.ListDeviceTopicAliasesRequest")
 	proto.RegisterType((*ListDeviceTopicAliasesResponse)(nil), "yandex.cloud.iot.devices.v1.ListDeviceTopicAliasesResponse")
 	proto.RegisterType((*ListRegistryOperationsRequest)(nil), "yandex.cloud.iot.devices.v1.ListRegistryOperationsRequest")
@@ -1015,121 +1406,154 @@ func init() {
 }
 
 var fileDescriptor_481ff402e1676179 = []byte{
-	// 1322 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x58, 0x3d, 0x6c, 0xdb, 0xc6,
-	0x17, 0x07, 0x23, 0x45, 0xff, 0xe8, 0x29, 0xff, 0xd8, 0xbd, 0xd6, 0x81, 0xc0, 0xe6, 0x43, 0x21,
-	0x90, 0x54, 0x61, 0xc1, 0x2f, 0xb9, 0x4e, 0x62, 0x3b, 0x6e, 0x20, 0xe5, 0xc3, 0x08, 0x9a, 0xa0,
-	0x01, 0x93, 0x0e, 0x4d, 0x10, 0x08, 0xb4, 0x78, 0x52, 0x0f, 0xa6, 0x49, 0x95, 0xa4, 0x8c, 0xc8,
-	0x41, 0x87, 0x66, 0x29, 0x90, 0x16, 0xe8, 0x10, 0xb4, 0x9d, 0xbb, 0x77, 0x32, 0xd0, 0xa5, 0x40,
-	0xb7, 0xb6, 0xf6, 0xd4, 0xc1, 0xdd, 0x3a, 0x77, 0x28, 0x3a, 0x66, 0xec, 0x54, 0xf0, 0x8e, 0x94,
-	0x49, 0x9b, 0x92, 0x68, 0x19, 0xde, 0xa8, 0xbb, 0xf7, 0x1e, 0x7f, 0xef, 0xbd, 0xdf, 0xbb, 0xfb,
-	0x51, 0x50, 0xeb, 0x1b, 0xb6, 0x89, 0x9f, 0x29, 0x2d, 0xcb, 0xe9, 0x99, 0x0a, 0x71, 0x7c, 0xc5,
-	0xc4, 0xeb, 0xa4, 0x85, 0x3d, 0x65, 0x5d, 0x53, 0x5c, 0xdc, 0x21, 0x9e, 0xef, 0xf6, 0x9b, 0x1e,
-	0x76, 0x83, 0x45, 0xb9, 0xeb, 0x3a, 0xbe, 0x83, 0xde, 0x66, 0x3e, 0x32, 0xf5, 0x91, 0x89, 0xe3,
-	0xcb, 0xa1, 0x8f, 0xbc, 0xae, 0xf1, 0x67, 0x3a, 0x8e, 0xd3, 0xb1, 0xb0, 0x62, 0x74, 0x89, 0x62,
-	0xd8, 0xb6, 0xe3, 0x1b, 0x3e, 0x71, 0x6c, 0x8f, 0xb9, 0xf2, 0x95, 0x70, 0x97, 0xfe, 0x5a, 0xe9,
-	0xb5, 0x95, 0x36, 0xc1, 0x96, 0xd9, 0x5c, 0x33, 0xbc, 0xd5, 0xd0, 0xe2, 0x6c, 0x02, 0xd0, 0xba,
-	0x61, 0x11, 0x93, 0x46, 0x88, 0x02, 0x24, 0xb6, 0x83, 0x97, 0x38, 0x5d, 0xec, 0xc6, 0x2d, 0x2e,
-	0x25, 0x2c, 0x06, 0xbb, 0xfb, 0xec, 0xc4, 0x2c, 0x99, 0x33, 0x5b, 0xe1, 0x26, 0xa0, 0x65, 0xec,
-	0xeb, 0xe1, 0xa2, 0x8e, 0x3f, 0xed, 0x61, 0xcf, 0x47, 0x12, 0x94, 0x06, 0x15, 0x22, 0x66, 0x99,
-	0xab, 0x70, 0xd5, 0x62, 0xe3, 0xe4, 0xdf, 0x5b, 0x1a, 0xf7, 0x72, 0x5b, 0xcb, 0x5f, 0x5f, 0x9a,
-	0x53, 0x75, 0x88, 0x0c, 0xee, 0x9a, 0xc2, 0x37, 0x1c, 0xcc, 0xdc, 0x23, 0x5e, 0x14, 0x86, 0x60,
-	0x2f, 0x0a, 0x74, 0x19, 0x8a, 0x6d, 0xc7, 0x32, 0xb1, 0x3b, 0x2c, 0xcc, 0x09, 0xb6, 0x7d, 0xd7,
-	0x44, 0xef, 0x40, 0xb1, 0x6b, 0x74, 0x70, 0xd3, 0x23, 0x1b, 0xb8, 0x7c, 0xac, 0xc2, 0x55, 0x73,
-	0x0d, 0xf8, 0x77, 0x4b, 0x2b, 0xa8, 0x92, 0xa6, 0xaa, 0xaa, 0x7e, 0x22, 0xd8, 0x7c, 0x48, 0x36,
-	0x30, 0xaa, 0x02, 0x50, 0x43, 0xdf, 0x59, 0xc5, 0x76, 0x39, 0x47, 0x83, 0x16, 0x5f, 0x6e, 0x6b,
-	0xc7, 0xaf, 0x2f, 0x69, 0xaa, 0xaa, 0xd3, 0x28, 0x8f, 0x82, 0x3d, 0xe1, 0x0b, 0x0e, 0x4e, 0xef,
-	0xc5, 0xe5, 0x75, 0x1d, 0xdb, 0xc3, 0xe8, 0x36, 0x44, 0x09, 0x10, 0xec, 0x95, 0xb9, 0x4a, 0xae,
-	0x5a, 0xaa, 0x5d, 0x94, 0x47, 0xb4, 0x5f, 0x1e, 0xd4, 0x28, 0xe6, 0x88, 0x2e, 0xc1, 0x94, 0x8d,
-	0x9f, 0xf9, 0xcd, 0x18, 0xa0, 0x00, 0x7a, 0x51, 0xff, 0x7f, 0xb0, 0xfc, 0x60, 0x80, 0xe4, 0xdb,
-	0x3c, 0xcc, 0xdc, 0x74, 0xb1, 0xe1, 0xe3, 0xbd, 0xa5, 0x3e, 0x40, 0x85, 0x6a, 0x90, 0xb7, 0x8d,
-	0x35, 0x56, 0x9c, 0x62, 0xe3, 0x5c, 0x60, 0xf5, 0x7a, 0x4b, 0x3b, 0xf5, 0xc4, 0x90, 0x36, 0xea,
-	0xd2, 0x63, 0x55, 0x9a, 0x6f, 0x4a, 0x4f, 0xc5, 0x81, 0x1f, 0xb5, 0x45, 0xef, 0x42, 0xc9, 0xc4,
-	0x5e, 0xcb, 0x25, 0xdd, 0x80, 0x20, 0xc9, 0x6a, 0xd5, 0xe6, 0xae, 0xe8, 0xf1, 0x5d, 0xf4, 0x1d,
-	0x07, 0x05, 0xcb, 0x58, 0xc1, 0x96, 0x57, 0xce, 0xd3, 0x8a, 0xbc, 0x3f, 0xb2, 0x22, 0xa9, 0x09,
-	0xc9, 0xf7, 0x68, 0x80, 0xdb, 0xb6, 0xef, 0xf6, 0x1b, 0x37, 0x5e, 0x6f, 0x69, 0xa5, 0x27, 0x52,
-	0x53, 0x95, 0xe6, 0x0d, 0x69, 0xe3, 0xa9, 0xf8, 0x82, 0x82, 0xbb, 0xf2, 0x1e, 0x03, 0x79, 0x65,
-	0x76, 0x73, 0x5b, 0x2b, 0xf0, 0x79, 0x4d, 0xa2, 0x4f, 0x08, 0x4d, 0x07, 0xa9, 0x3c, 0x8d, 0xd9,
-	0xeb, 0x21, 0x1c, 0xb4, 0x02, 0x27, 0x5b, 0xd8, 0xf5, 0x49, 0x9b, 0xb4, 0x0c, 0x1f, 0x7b, 0xe5,
-	0xe3, 0x13, 0xc3, 0xbb, 0xb9, 0x1b, 0x46, 0x4f, 0xc4, 0xe4, 0xe7, 0xa1, 0x14, 0xc3, 0x8e, 0xa6,
-	0x21, 0xb7, 0x8a, 0xfb, 0xac, 0x25, 0x7a, 0xf0, 0x88, 0xde, 0x82, 0xe3, 0xeb, 0x86, 0xd5, 0x0b,
-	0x1b, 0xa0, 0xb3, 0x1f, 0x0b, 0xc7, 0xae, 0x71, 0xfc, 0x35, 0x28, 0xc5, 0xe2, 0xa2, 0xcb, 0x30,
-	0x1d, 0x8b, 0xdc, 0x34, 0x0d, 0xdf, 0x08, 0xe3, 0x4c, 0xc5, 0xd6, 0x6f, 0x19, 0xbe, 0x21, 0xcc,
-	0xc3, 0xe9, 0x24, 0xce, 0xfb, 0xd8, 0x37, 0x02, 0x07, 0x74, 0x3e, 0x65, 0x06, 0x13, 0x53, 0xf7,
-	0x63, 0x0e, 0x66, 0x3e, 0xea, 0x9a, 0x29, 0x9c, 0x3a, 0xd8, 0xf8, 0xa2, 0x45, 0x28, 0xf5, 0x68,
-	0x1c, 0x7a, 0x5a, 0xd1, 0xec, 0x4a, 0x35, 0x5e, 0x66, 0x07, 0x9a, 0x1c, 0x1d, 0x68, 0xf2, 0x9d,
-	0xe0, 0x40, 0xbb, 0x6f, 0x78, 0xab, 0x3a, 0x30, 0xf3, 0xe0, 0x19, 0xc9, 0x21, 0x29, 0x19, 0xb3,
-	0xf8, 0x83, 0x12, 0x32, 0x9f, 0x95, 0x90, 0x59, 0x3a, 0x9e, 0x5a, 0x8d, 0x23, 0x21, 0xe4, 0x21,
-	0xc8, 0x12, 0xb4, 0x3c, 0x09, 0x34, 0x7b, 0xcb, 0xef, 0xc0, 0xcc, 0x2d, 0x6c, 0xe1, 0xc3, 0x76,
-	0x3c, 0x80, 0x90, 0x8c, 0x93, 0x1d, 0xc2, 0x03, 0x38, 0x1f, 0x3b, 0x52, 0xfb, 0x31, 0xda, 0x7b,
-	0x13, 0x82, 0x79, 0x06, 0x95, 0xe1, 0x11, 0xc3, 0xe3, 0xfa, 0xd1, 0x9e, 0xf9, 0x67, 0x07, 0xb6,
-	0x9a, 0xe9, 0xc0, 0x1e, 0x3a, 0xf1, 0x42, 0x1f, 0xce, 0xd6, 0x4d, 0x33, 0xcd, 0x6e, 0xb2, 0x41,
-	0x4a, 0x9b, 0xfb, 0x5c, 0xfa, 0xdc, 0xb7, 0xe0, 0x5c, 0xfa, 0xab, 0x33, 0x77, 0x02, 0x55, 0xa0,
-	0xd4, 0x26, 0x76, 0x07, 0xbb, 0x5d, 0x97, 0xd8, 0x7e, 0xc8, 0xb3, 0xf8, 0x92, 0xf0, 0x39, 0x07,
-	0x95, 0x64, 0x9f, 0x0f, 0x9f, 0xa3, 0x9c, 0xf2, 0xd6, 0x3d, 0xe6, 0x09, 0x0c, 0x2f, 0x38, 0xb8,
-	0x30, 0x14, 0xc3, 0x20, 0xd9, 0x23, 0x06, 0xf1, 0x3d, 0x07, 0x67, 0x03, 0x8e, 0xdd, 0xa2, 0xec,
-	0x78, 0xe4, 0x74, 0x49, 0xab, 0x6e, 0x11, 0xc3, 0x9b, 0x94, 0xb3, 0x47, 0x21, 0x56, 0xbe, 0xe2,
-	0xe0, 0xdc, 0x30, 0x8c, 0xe1, 0x14, 0x34, 0xe0, 0x7f, 0x06, 0x5b, 0x0a, 0x07, 0xa0, 0x3a, 0x72,
-	0x00, 0x58, 0x24, 0x1a, 0x44, 0x8f, 0x1c, 0x33, 0x2b, 0x96, 0x9f, 0xc3, 0x92, 0x45, 0x5d, 0xfb,
-	0x30, 0x12, 0x99, 0x83, 0x92, 0x5d, 0x4c, 0x2b, 0x59, 0x3e, 0x28, 0xd9, 0x11, 0x97, 0x0a, 0x09,
-	0x50, 0x68, 0x13, 0xcb, 0xc7, 0x6e, 0x78, 0x7d, 0xc0, 0xcb, 0x6d, 0xad, 0x40, 0xad, 0x54, 0x3d,
-	0xdc, 0x11, 0xbe, 0x0c, 0xcb, 0x99, 0x86, 0x3f, 0x2c, 0x67, 0x1d, 0x60, 0x20, 0x9d, 0xa3, 0x8a,
-	0x5e, 0x48, 0x56, 0x74, 0x57, 0x5a, 0x0f, 0xfc, 0xf5, 0x98, 0x53, 0xd6, 0x6a, 0xd6, 0x7e, 0x9d,
-	0x82, 0xa9, 0x08, 0xc9, 0x43, 0xf6, 0xc9, 0x81, 0xbe, 0xe6, 0x20, 0xb7, 0x8c, 0x7d, 0xa4, 0x8c,
-	0x6c, 0xe2, 0x7e, 0x75, 0xce, 0x67, 0xd3, 0xa9, 0x82, 0xfa, 0xe2, 0x8f, 0xbf, 0x5e, 0x1d, 0x13,
-	0x51, 0x35, 0xf8, 0x04, 0x90, 0xf6, 0x7f, 0x02, 0x10, 0xec, 0x29, 0xcf, 0x63, 0x1d, 0xfc, 0x0c,
-	0xbd, 0xe2, 0x20, 0x1f, 0xd4, 0x0c, 0xd5, 0x46, 0xbe, 0x21, 0x55, 0xea, 0xf3, 0xb3, 0x07, 0xf2,
-	0x61, 0x2d, 0x10, 0x04, 0x8a, 0xf1, 0x0c, 0xe2, 0x87, 0x63, 0x44, 0x3f, 0x70, 0x50, 0x60, 0x1a,
-	0x69, 0x0c, 0xae, 0x54, 0xc1, 0xc7, 0x8f, 0xef, 0xa8, 0xf0, 0xc1, 0xe6, 0x8e, 0x28, 0x0c, 0x15,
-	0x62, 0x27, 0xa2, 0x15, 0x8a, 0xf5, 0xbc, 0x30, 0x02, 0xeb, 0x02, 0x27, 0xa2, 0x9f, 0x38, 0x28,
-	0xb0, 0xfb, 0x7d, 0x0c, 0xdc, 0x54, 0xb5, 0x92, 0x05, 0xee, 0xc7, 0x0c, 0xee, 0x10, 0x11, 0x91,
-	0x84, 0x2b, 0xd5, 0x32, 0xb7, 0x3f, 0x00, 0xff, 0x0b, 0x07, 0x05, 0x76, 0x5a, 0x8f, 0x01, 0x9f,
-	0x2a, 0x43, 0xb2, 0x80, 0x6f, 0x6d, 0xee, 0x88, 0xca, 0x50, 0xf9, 0x31, 0xb3, 0x57, 0x74, 0xde,
-	0x5e, 0xeb, 0xfa, 0x2c, 0x13, 0x51, 0xcc, 0x4e, 0xe4, 0xdf, 0x39, 0x98, 0x0e, 0x18, 0x17, 0xd7,
-	0x12, 0xe8, 0x7a, 0x56, 0x82, 0xa6, 0x89, 0x1a, 0x7e, 0x69, 0x42, 0xef, 0x90, 0xe8, 0x4b, 0x34,
-	0x87, 0xab, 0x68, 0x2e, 0x6b, 0x0e, 0x4a, 0x5c, 0xa9, 0xa0, 0x7f, 0x38, 0x38, 0x55, 0x37, 0xcd,
-	0xf8, 0x47, 0xc6, 0xc2, 0x48, 0x40, 0x23, 0x75, 0x4d, 0x96, 0x3e, 0xf5, 0x37, 0x77, 0xc4, 0xb9,
-	0xb1, 0x22, 0xe5, 0xcd, 0x94, 0x4d, 0x9a, 0xe9, 0x82, 0x30, 0x59, 0xa6, 0x01, 0x09, 0x5f, 0x73,
-	0xf0, 0x06, 0xe3, 0x47, 0x3c, 0xdf, 0xa5, 0x03, 0xf0, 0x71, 0xb2, 0x94, 0x9f, 0x6f, 0xee, 0x88,
-	0x0b, 0x59, 0xd4, 0xca, 0x08, 0x96, 0x5e, 0x15, 0x27, 0xec, 0xf0, 0x9f, 0xe1, 0x7f, 0x15, 0xfb,
-	0xaf, 0xff, 0x31, 0x9d, 0x1e, 0xa9, 0x6b, 0xf8, 0xc5, 0x89, 0x7c, 0x43, 0xd2, 0x2e, 0xd3, 0x94,
-	0xea, 0xe8, 0x46, 0xe6, 0x23, 0xc4, 0x4a, 0xcf, 0xe0, 0x37, 0x0e, 0x4e, 0x05, 0xef, 0xda, 0xbd,
-	0x84, 0x33, 0x24, 0x35, 0x54, 0x79, 0x64, 0x48, 0x6a, 0xf8, 0xad, 0x2f, 0x2c, 0xd2, 0xa4, 0xe6,
-	0xd0, 0x6c, 0xe6, 0x3e, 0xed, 0xde, 0xf7, 0x8d, 0xbb, 0x8f, 0x97, 0x3b, 0xc4, 0xff, 0xa4, 0xb7,
-	0x22, 0xb7, 0x9c, 0x35, 0x85, 0xa1, 0x90, 0xd8, 0xff, 0x6c, 0x1d, 0x47, 0xea, 0x60, 0x9b, 0x52,
-	0x42, 0x19, 0xf1, 0x07, 0xdc, 0x62, 0xf8, 0xb8, 0x52, 0xa0, 0xa6, 0xb3, 0xff, 0x05, 0x00, 0x00,
-	0xff, 0xff, 0x4f, 0x76, 0xb6, 0x31, 0xa8, 0x14, 0x00, 0x00,
+	// 1567 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x59, 0x4f, 0x4c, 0xdc, 0x46,
+	0x17, 0x97, 0x61, 0xb3, 0x1f, 0xbc, 0x4d, 0x08, 0xdf, 0x7c, 0x21, 0x42, 0x4e, 0xf8, 0x13, 0xeb,
+	0x4b, 0x3e, 0xb2, 0x9f, 0x6c, 0xaf, 0x97, 0x90, 0x84, 0x25, 0x24, 0x05, 0x42, 0x50, 0x94, 0x44,
+	0x8d, 0x9c, 0xf4, 0xd0, 0x44, 0xd1, 0xca, 0xac, 0x87, 0xad, 0xcb, 0xb2, 0xde, 0xd8, 0x86, 0x06,
+	0x22, 0x2a, 0x25, 0x3d, 0x54, 0x4d, 0x2b, 0xf5, 0x10, 0x55, 0x3d, 0xf7, 0xde, 0x13, 0x52, 0x2f,
+	0x95, 0x7a, 0xa9, 0xaa, 0xc2, 0xa9, 0x07, 0x7a, 0x6b, 0xaf, 0x3d, 0x54, 0xbd, 0x54, 0x8a, 0xd4,
+	0x4b, 0x4f, 0xd5, 0xcc, 0xd8, 0xc6, 0x5e, 0xbc, 0xcb, 0xac, 0x11, 0xb7, 0xdd, 0x99, 0xf7, 0xde,
+	0xfc, 0xde, 0x7b, 0xbf, 0x99, 0xfd, 0x3d, 0x80, 0xe2, 0xba, 0x51, 0x37, 0xf1, 0x33, 0xb5, 0x52,
+	0xb3, 0x57, 0x4d, 0xd5, 0xb2, 0x3d, 0xd5, 0xc4, 0x6b, 0x56, 0x05, 0xbb, 0xea, 0x9a, 0xa6, 0x3a,
+	0xb8, 0x6a, 0xb9, 0x9e, 0xb3, 0x5e, 0x76, 0xb1, 0x43, 0x16, 0x95, 0x86, 0x63, 0x7b, 0x36, 0x3a,
+	0xc3, 0x7c, 0x14, 0xea, 0xa3, 0x58, 0xb6, 0xa7, 0xf8, 0x3e, 0xca, 0x9a, 0x26, 0x9e, 0xad, 0xda,
+	0x76, 0xb5, 0x86, 0x55, 0xa3, 0x61, 0xa9, 0x46, 0xbd, 0x6e, 0x7b, 0x86, 0x67, 0xd9, 0x75, 0x97,
+	0xb9, 0x8a, 0xa3, 0xfe, 0x2e, 0xfd, 0xb6, 0xb8, 0xba, 0xa4, 0x2e, 0x59, 0xb8, 0x66, 0x96, 0x57,
+	0x0c, 0x77, 0xd9, 0xb7, 0x18, 0x8a, 0x01, 0x5a, 0x33, 0x6a, 0x96, 0x49, 0x23, 0x04, 0x01, 0x62,
+	0xdb, 0xe4, 0x10, 0xbb, 0x81, 0x9d, 0xa8, 0xc5, 0x85, 0x98, 0x45, 0xb8, 0xbb, 0xcf, 0x2e, 0xcf,
+	0x93, 0x39, 0xb3, 0x95, 0xe6, 0x00, 0x2d, 0x60, 0x4f, 0xf7, 0x17, 0x75, 0xfc, 0x74, 0x15, 0xbb,
+	0x1e, 0x92, 0x21, 0x17, 0x56, 0xc8, 0x32, 0x07, 0x85, 0x51, 0x61, 0xac, 0x77, 0xf6, 0xf8, 0xef,
+	0xdb, 0x9a, 0xf0, 0x6a, 0x47, 0xcb, 0x5c, 0x9b, 0x9e, 0x28, 0xe8, 0x10, 0x18, 0xdc, 0x36, 0xa5,
+	0x2f, 0x04, 0x18, 0xb8, 0x6b, 0xb9, 0x41, 0x18, 0x0b, 0xbb, 0x41, 0xa0, 0x8b, 0xd0, 0xbb, 0x64,
+	0xd7, 0x4c, 0xec, 0xb4, 0x0a, 0xd3, 0xc3, 0xb6, 0x6f, 0x9b, 0xe8, 0x7f, 0xd0, 0xdb, 0x30, 0xaa,
+	0xb8, 0xec, 0x5a, 0x1b, 0x78, 0xb0, 0x6b, 0x54, 0x18, 0xeb, 0x9e, 0x85, 0xbf, 0xb7, 0xb5, 0x6c,
+	0x41, 0xd6, 0x0a, 0x85, 0x82, 0xde, 0x43, 0x36, 0x1f, 0x58, 0x1b, 0x18, 0x8d, 0x01, 0x50, 0x43,
+	0xcf, 0x5e, 0xc6, 0xf5, 0xc1, 0x6e, 0x1a, 0xb4, 0xf7, 0xd5, 0x8e, 0x76, 0xec, 0xda, 0xb4, 0x56,
+	0x28, 0xe8, 0x34, 0xca, 0x43, 0xb2, 0x27, 0x7d, 0x2c, 0xc0, 0xe9, 0x66, 0x5c, 0x6e, 0xc3, 0xae,
+	0xbb, 0x18, 0xcd, 0x43, 0x90, 0x80, 0x85, 0xdd, 0x41, 0x61, 0xb4, 0x7b, 0x2c, 0x57, 0x3c, 0xaf,
+	0xb4, 0x69, 0xbf, 0x12, 0xd6, 0x28, 0xe2, 0x88, 0x2e, 0xc0, 0xc9, 0x3a, 0x7e, 0xe6, 0x95, 0x23,
+	0x80, 0x08, 0xf4, 0x5e, 0xfd, 0x04, 0x59, 0xbe, 0x1f, 0x22, 0xd9, 0xca, 0xc0, 0xc0, 0x9c, 0x83,
+	0x0d, 0x0f, 0x37, 0x97, 0xba, 0x83, 0x0a, 0x15, 0x21, 0x53, 0x37, 0x56, 0x58, 0x71, 0x7a, 0x67,
+	0x87, 0x89, 0xd5, 0x9b, 0x6d, 0xad, 0xef, 0xb1, 0x21, 0x6f, 0xcc, 0xc8, 0x8f, 0x0a, 0xf2, 0x64,
+	0x59, 0x7e, 0x92, 0x0f, 0xfd, 0xa8, 0x2d, 0xfa, 0x3f, 0xe4, 0x4c, 0xec, 0x56, 0x1c, 0xab, 0x41,
+	0x08, 0x12, 0xaf, 0x56, 0x71, 0xe2, 0xb2, 0x1e, 0xdd, 0x45, 0x5f, 0x0a, 0x90, 0xad, 0x19, 0x8b,
+	0xb8, 0xe6, 0x0e, 0x66, 0x68, 0x45, 0xae, 0xb7, 0xad, 0x48, 0x62, 0x42, 0xca, 0x5d, 0x1a, 0x60,
+	0xbe, 0xee, 0x39, 0xeb, 0xb3, 0x37, 0xde, 0x6c, 0x6b, 0xb9, 0xc7, 0x72, 0xb9, 0x20, 0x4f, 0x1a,
+	0xf2, 0xc6, 0x93, 0xfc, 0x4b, 0x0a, 0xee, 0xf2, 0x25, 0x06, 0xf2, 0xf2, 0xf8, 0xd6, 0x8e, 0x96,
+	0x15, 0x33, 0x9a, 0x4c, 0x3f, 0x21, 0xd4, 0x4f, 0x52, 0x79, 0x12, 0xb1, 0xd7, 0x7d, 0x38, 0x68,
+	0x11, 0x8e, 0x57, 0xb0, 0xe3, 0x59, 0x4b, 0x56, 0xc5, 0xf0, 0xb0, 0x3b, 0x78, 0x2c, 0x35, 0xbc,
+	0xb9, 0xbd, 0x30, 0x7a, 0x2c, 0x26, 0x12, 0xa1, 0xa7, 0x61, 0xb8, 0xee, 0x07, 0xb6, 0x63, 0x0e,
+	0x66, 0x69, 0x13, 0xc3, 0xef, 0xe2, 0x24, 0xe4, 0x22, 0x79, 0xa1, 0x7e, 0xe8, 0x5e, 0xc6, 0xeb,
+	0xac, 0x5d, 0x3a, 0xf9, 0x88, 0x4e, 0xc1, 0xb1, 0x35, 0xa3, 0xb6, 0xea, 0x37, 0x47, 0x67, 0x5f,
+	0x4a, 0x5d, 0x57, 0x05, 0xf1, 0x2a, 0xe4, 0x22, 0x67, 0xa2, 0x8b, 0xd0, 0x1f, 0x39, 0xb5, 0x6c,
+	0x1a, 0x9e, 0xe1, 0xc7, 0x39, 0x19, 0x59, 0xbf, 0x69, 0x78, 0x86, 0x34, 0x09, 0xa7, 0xe3, 0x39,
+	0xdc, 0xc3, 0x9e, 0x41, 0x1c, 0xd0, 0x48, 0xc2, 0xfd, 0x8c, 0xdd, 0xc8, 0x6f, 0xba, 0x61, 0xe0,
+	0x9d, 0x86, 0x99, 0xc0, 0xb7, 0xce, 0xae, 0x36, 0x9a, 0x82, 0xdc, 0x2a, 0x8d, 0x43, 0x5f, 0x32,
+	0x9a, 0x5d, 0xae, 0x28, 0x2a, 0xec, 0xb1, 0x53, 0x82, 0xc7, 0x4e, 0xb9, 0x45, 0x1e, 0xbb, 0x7b,
+	0x86, 0xbb, 0xac, 0x03, 0x33, 0x27, 0x9f, 0x91, 0xe2, 0x13, 0x96, 0xb1, 0x4e, 0xec, 0x94, 0xac,
+	0x19, 0x5e, 0xb2, 0xf2, 0xb0, 0x21, 0xb1, 0x1a, 0x47, 0x42, 0xd6, 0x43, 0x90, 0x85, 0xb4, 0x3c,
+	0x0e, 0x94, 0xbf, 0xe5, 0xb7, 0x60, 0xe0, 0x26, 0xae, 0xe1, 0xc3, 0x76, 0x9c, 0x40, 0x88, 0xc7,
+	0xe1, 0x87, 0x70, 0x1f, 0x46, 0x22, 0xcf, 0xed, 0x7a, 0x84, 0xf6, 0x6e, 0x4a, 0x30, 0xcf, 0x60,
+	0xb4, 0x75, 0x44, 0xff, 0x29, 0x7f, 0xd8, 0xf4, 0x36, 0xb0, 0xc7, 0xbc, 0xc0, 0xf5, 0x98, 0xb7,
+	0x7c, 0x0d, 0xa4, 0x75, 0x18, 0x9a, 0x31, 0xcd, 0x24, 0xbb, 0x74, 0x17, 0x29, 0xe9, 0xde, 0x77,
+	0x27, 0xdf, 0xfb, 0x0a, 0x0c, 0x27, 0x1f, 0xcd, 0xdd, 0x09, 0x34, 0x0a, 0xb9, 0x25, 0xab, 0x5e,
+	0xc5, 0x4e, 0xc3, 0xb1, 0xea, 0x9e, 0xcf, 0xb3, 0xe8, 0x92, 0xf4, 0x42, 0x80, 0xd1, 0x78, 0x9f,
+	0x0f, 0x9f, 0xa3, 0x92, 0x70, 0x6a, 0x93, 0x79, 0x0c, 0xc3, 0x4b, 0x01, 0xce, 0xb5, 0xc4, 0x10,
+	0x26, 0x7b, 0xc4, 0x20, 0xee, 0xc1, 0xd9, 0x28, 0xc5, 0xee, 0xfb, 0x4f, 0x7e, 0x5a, 0xc6, 0xd6,
+	0x60, 0xa8, 0x45, 0x38, 0x9f, 0xae, 0x77, 0x88, 0xce, 0xf1, 0x17, 0x7d, 0xae, 0xca, 0x5c, 0x5c,
+	0x0d, 0x42, 0xe9, 0x7b, 0xfe, 0xd2, 0x53, 0x10, 0x23, 0x54, 0x09, 0x2d, 0xd2, 0xb5, 0xef, 0xbf,
+	0x91, 0x1f, 0x40, 0x56, 0xb6, 0x1e, 0x62, 0x77, 0x7d, 0x5a, 0xbb, 0xb4, 0xf7, 0x53, 0x28, 0x95,
+	0xe1, 0x4c, 0xc2, 0x91, 0xfc, 0xd4, 0x1c, 0x81, 0x5c, 0x10, 0x8b, 0x18, 0x30, 0x6a, 0x42, 0xb0,
+	0x74, 0xdb, 0x94, 0x36, 0x61, 0x28, 0x4e, 0x8a, 0x43, 0xa6, 0x25, 0x27, 0x1c, 0xd8, 0x6c, 0x1e,
+	0x39, 0xfe, 0x43, 0x18, 0x4e, 0x3e, 0x3e, 0x2d, 0x21, 0x3b, 0x3c, 0xff, 0x2b, 0x81, 0x31, 0xe8,
+	0x26, 0x65, 0xc0, 0x43, 0xbb, 0x61, 0x55, 0x66, 0x6a, 0x96, 0xe1, 0xa6, 0x7d, 0x43, 0x8f, 0x42,
+	0x58, 0x7f, 0x26, 0xc0, 0x70, 0x2b, 0x8c, 0x3e, 0xcd, 0x67, 0xe1, 0x5f, 0x06, 0x5b, 0xf2, 0x49,
+	0x3e, 0xd6, 0x96, 0xe4, 0x2c, 0x12, 0x0d, 0xa2, 0x07, 0x8e, 0xdc, 0xea, 0xfa, 0x3b, 0x21, 0x7e,
+	0xe9, 0xde, 0x0e, 0x06, 0xa2, 0xb0, 0x64, 0xe7, 0x93, 0x4a, 0x96, 0x21, 0x25, 0x3b, 0xe2, 0x52,
+	0x21, 0x09, 0xb2, 0x4b, 0x56, 0xcd, 0xc3, 0x8e, 0x2f, 0x67, 0xe0, 0xd5, 0x8e, 0x96, 0xa5, 0x56,
+	0x05, 0xdd, 0xdf, 0x91, 0x3e, 0xf5, 0xcb, 0x99, 0x84, 0xdf, 0x2f, 0xe7, 0x0c, 0x40, 0x38, 0xe6,
+	0x05, 0x15, 0x3d, 0x17, 0xaf, 0xe8, 0xde, 0x18, 0x18, 0xfa, 0xeb, 0x11, 0x27, 0xde, 0x6a, 0x16,
+	0xff, 0x3c, 0x05, 0x27, 0x03, 0x24, 0x0f, 0xd8, 0x78, 0x8c, 0x3e, 0x17, 0xa0, 0x7b, 0x01, 0x7b,
+	0x48, 0x6d, 0xdb, 0xc4, 0xfd, 0x93, 0xa4, 0xc8, 0x37, 0x53, 0x49, 0x85, 0x97, 0x3f, 0xff, 0xf6,
+	0xba, 0x2b, 0x8f, 0xc6, 0xc8, 0xb8, 0x2a, 0xef, 0x1f, 0x57, 0x2d, 0xec, 0xaa, 0xcf, 0x23, 0x1d,
+	0xdc, 0x44, 0xaf, 0x05, 0xc8, 0x90, 0x9a, 0xa1, 0x62, 0xdb, 0x13, 0x12, 0xc7, 0x52, 0x71, 0xbc,
+	0x23, 0x1f, 0xd6, 0x02, 0x49, 0xa2, 0x18, 0xcf, 0x22, 0xb1, 0x35, 0x46, 0xf4, 0xb5, 0x00, 0x59,
+	0xa6, 0xd9, 0x0f, 0xc0, 0x95, 0x38, 0x9c, 0x88, 0x07, 0x77, 0x54, 0xba, 0xb3, 0xb5, 0x9b, 0x97,
+	0x5a, 0x0e, 0x06, 0x3d, 0xc1, 0x0a, 0xc5, 0x3a, 0x22, 0xb5, 0xc1, 0x5a, 0x12, 0xf2, 0xe8, 0x5b,
+	0x01, 0xb2, 0x4c, 0x6f, 0x1e, 0x00, 0x37, 0x51, 0x3d, 0xf3, 0xc0, 0x7d, 0x97, 0xc1, 0x6d, 0x21,
+	0x6a, 0xe3, 0x70, 0xe5, 0x22, 0x77, 0xfb, 0x09, 0xf8, 0x1f, 0x04, 0xc8, 0xb2, 0x97, 0xfa, 0x00,
+	0xf0, 0x89, 0xb2, 0x98, 0x07, 0x7c, 0x65, 0x6b, 0x37, 0xaf, 0xb6, 0x94, 0xc3, 0x03, 0xcd, 0x43,
+	0xd0, 0xfc, 0x4a, 0xc3, 0x63, 0x99, 0xe4, 0xf3, 0xfc, 0x44, 0xfe, 0x49, 0x80, 0x7e, 0xc2, 0xb8,
+	0xa8, 0xb6, 0x45, 0xd7, 0x78, 0x09, 0x9a, 0x24, 0xb2, 0xc5, 0xe9, 0x94, 0xde, 0x3e, 0xd1, 0xa7,
+	0x69, 0x0e, 0x57, 0xd0, 0x04, 0x6f, 0x0e, 0x6a, 0x6c, 0x8e, 0xfe, 0x43, 0x80, 0xbe, 0x19, 0xd3,
+	0x8c, 0x0e, 0xbd, 0xa5, 0xb6, 0x80, 0xda, 0xea, 0x6c, 0x9e, 0x3e, 0xad, 0x6f, 0xed, 0xe6, 0x27,
+	0x0e, 0x14, 0xcd, 0xff, 0x49, 0xd8, 0xa4, 0x99, 0x96, 0xa4, 0x74, 0x99, 0x12, 0x12, 0xbe, 0xe8,
+	0x82, 0x7f, 0x33, 0x7e, 0x44, 0xf3, 0x9d, 0xee, 0x80, 0x8f, 0xe9, 0x52, 0xfe, 0x44, 0xd8, 0xda,
+	0xcd, 0x97, 0x78, 0xe4, 0x73, 0x1b, 0x9a, 0xce, 0xe7, 0xe7, 0x52, 0x25, 0xae, 0x3e, 0x8f, 0x08,
+	0xe8, 0x4d, 0xf4, 0xbd, 0x00, 0x27, 0x08, 0xa9, 0x42, 0xad, 0x8b, 0x26, 0xb9, 0x09, 0xd8, 0x2c,
+	0xb7, 0xc5, 0x52, 0x1a, 0x57, 0x9f, 0xb8, 0x25, 0x9a, 0xd5, 0x25, 0x54, 0xe4, 0xce, 0x2a, 0x54,
+	0xd2, 0xe8, 0x57, 0x01, 0x72, 0x33, 0xa6, 0x19, 0x04, 0x45, 0x57, 0x78, 0x29, 0xdb, 0xa4, 0x4e,
+	0x79, 0x9a, 0xd7, 0xa0, 0xef, 0x4a, 0x5b, 0x19, 0xdd, 0xdf, 0xbc, 0xc3, 0xee, 0xa4, 0x94, 0x22,
+	0x35, 0x42, 0xd3, 0xbf, 0x04, 0xe8, 0x63, 0x54, 0x09, 0x13, 0x2c, 0x75, 0xc0, 0xd1, 0x14, 0x39,
+	0x7e, 0x44, 0x08, 0x7a, 0xe5, 0x40, 0x2d, 0xdd, 0x86, 0x9d, 0xb3, 0xf9, 0xb7, 0x3a, 0x4f, 0x56,
+	0x7d, 0x1e, 0xd1, 0xda, 0x9b, 0xe8, 0x17, 0xff, 0x2f, 0xc0, 0xfb, 0x85, 0x2a, 0x3a, 0x98, 0x68,
+	0x2d, 0x15, 0xb8, 0x38, 0x95, 0xca, 0xd7, 0x67, 0xe9, 0x02, 0xcd, 0x6e, 0x06, 0xdd, 0xe0, 0xfe,
+	0xb1, 0xab, 0x25, 0x67, 0xf0, 0xa3, 0x00, 0x7d, 0xe4, 0xac, 0x3d, 0xb9, 0x88, 0xf8, 0x6f, 0xcf,
+	0x3e, 0x8d, 0xcc, 0x91, 0x54, 0x6b, 0x7d, 0x2a, 0x4d, 0xd1, 0xa4, 0x26, 0xd0, 0x38, 0x77, 0xcb,
+	0xf6, 0x94, 0xe9, 0xec, 0xfb, 0x30, 0x12, 0x3b, 0xda, 0x68, 0x58, 0x4d, 0xc7, 0x3f, 0x5a, 0xa8,
+	0x5a, 0xde, 0x7b, 0xab, 0x8b, 0x4a, 0xc5, 0x5e, 0x51, 0x99, 0xad, 0xcc, 0xfe, 0xbd, 0x51, 0xb5,
+	0xe5, 0x2a, 0xae, 0x53, 0xfa, 0xa8, 0x6d, 0xfe, 0xef, 0x31, 0xe5, 0x7f, 0x5c, 0xcc, 0x52, 0xd3,
+	0xf1, 0x7f, 0x02, 0x00, 0x00, 0xff, 0xff, 0xb7, 0x69, 0x03, 0xcf, 0x1f, 0x1a, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // RegistryServiceClient is the client API for RegistryService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type RegistryServiceClient interface {
+	// Returns the specified registry.
+	//
+	// To get the list of available registries, make a [List] request.
 	Get(ctx context.Context, in *GetRegistryRequest, opts ...grpc.CallOption) (*Registry, error)
+	// Retrieves the list of registries in the specified folder.
 	List(ctx context.Context, in *ListRegistriesRequest, opts ...grpc.CallOption) (*ListRegistriesResponse, error)
+	// Creates a registry in the specified folder.
 	Create(ctx context.Context, in *CreateRegistryRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Updates the specified registry.
 	Update(ctx context.Context, in *UpdateRegistryRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Deletes the specified registry.
 	Delete(ctx context.Context, in *DeleteRegistryRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Retrieves the list of registry certificates for the specified registry.
 	ListCertificates(ctx context.Context, in *ListRegistryCertificatesRequest, opts ...grpc.CallOption) (*ListRegistryCertificatesResponse, error)
+	// Adds a certificate.
 	AddCertificate(ctx context.Context, in *AddRegistryCertificateRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Deletes the specified registry certificate.
 	DeleteCertificate(ctx context.Context, in *DeleteRegistryCertificateRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Retrieves the list of passwords for the specified registry.
+	ListPasswords(ctx context.Context, in *ListRegistryPasswordsRequest, opts ...grpc.CallOption) (*ListRegistryPasswordsResponse, error)
+	// Adds password for the specified registry.
+	AddPassword(ctx context.Context, in *AddRegistryPasswordRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Deletes the specified password.
+	DeletePassword(ctx context.Context, in *DeleteRegistryPasswordRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Retrieves the list of device topic aliases for the specified registry.
 	ListDeviceTopicAliases(ctx context.Context, in *ListDeviceTopicAliasesRequest, opts ...grpc.CallOption) (*ListDeviceTopicAliasesResponse, error)
+	// Lists operations for the specified registry.
 	ListOperations(ctx context.Context, in *ListRegistryOperationsRequest, opts ...grpc.CallOption) (*ListRegistryOperationsResponse, error)
 }
 
 type registryServiceClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewRegistryServiceClient(cc *grpc.ClientConn) RegistryServiceClient {
+func NewRegistryServiceClient(cc grpc.ClientConnInterface) RegistryServiceClient {
 	return &registryServiceClient{cc}
 }
 
@@ -1205,6 +1629,33 @@ func (c *registryServiceClient) DeleteCertificate(ctx context.Context, in *Delet
 	return out, nil
 }
 
+func (c *registryServiceClient) ListPasswords(ctx context.Context, in *ListRegistryPasswordsRequest, opts ...grpc.CallOption) (*ListRegistryPasswordsResponse, error) {
+	out := new(ListRegistryPasswordsResponse)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.iot.devices.v1.RegistryService/ListPasswords", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *registryServiceClient) AddPassword(ctx context.Context, in *AddRegistryPasswordRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	out := new(operation.Operation)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.iot.devices.v1.RegistryService/AddPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *registryServiceClient) DeletePassword(ctx context.Context, in *DeleteRegistryPasswordRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	out := new(operation.Operation)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.iot.devices.v1.RegistryService/DeletePassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *registryServiceClient) ListDeviceTopicAliases(ctx context.Context, in *ListDeviceTopicAliasesRequest, opts ...grpc.CallOption) (*ListDeviceTopicAliasesResponse, error) {
 	out := new(ListDeviceTopicAliasesResponse)
 	err := c.cc.Invoke(ctx, "/yandex.cloud.iot.devices.v1.RegistryService/ListDeviceTopicAliases", in, out, opts...)
@@ -1225,15 +1676,33 @@ func (c *registryServiceClient) ListOperations(ctx context.Context, in *ListRegi
 
 // RegistryServiceServer is the server API for RegistryService service.
 type RegistryServiceServer interface {
+	// Returns the specified registry.
+	//
+	// To get the list of available registries, make a [List] request.
 	Get(context.Context, *GetRegistryRequest) (*Registry, error)
+	// Retrieves the list of registries in the specified folder.
 	List(context.Context, *ListRegistriesRequest) (*ListRegistriesResponse, error)
+	// Creates a registry in the specified folder.
 	Create(context.Context, *CreateRegistryRequest) (*operation.Operation, error)
+	// Updates the specified registry.
 	Update(context.Context, *UpdateRegistryRequest) (*operation.Operation, error)
+	// Deletes the specified registry.
 	Delete(context.Context, *DeleteRegistryRequest) (*operation.Operation, error)
+	// Retrieves the list of registry certificates for the specified registry.
 	ListCertificates(context.Context, *ListRegistryCertificatesRequest) (*ListRegistryCertificatesResponse, error)
+	// Adds a certificate.
 	AddCertificate(context.Context, *AddRegistryCertificateRequest) (*operation.Operation, error)
+	// Deletes the specified registry certificate.
 	DeleteCertificate(context.Context, *DeleteRegistryCertificateRequest) (*operation.Operation, error)
+	// Retrieves the list of passwords for the specified registry.
+	ListPasswords(context.Context, *ListRegistryPasswordsRequest) (*ListRegistryPasswordsResponse, error)
+	// Adds password for the specified registry.
+	AddPassword(context.Context, *AddRegistryPasswordRequest) (*operation.Operation, error)
+	// Deletes the specified password.
+	DeletePassword(context.Context, *DeleteRegistryPasswordRequest) (*operation.Operation, error)
+	// Retrieves the list of device topic aliases for the specified registry.
 	ListDeviceTopicAliases(context.Context, *ListDeviceTopicAliasesRequest) (*ListDeviceTopicAliasesResponse, error)
+	// Lists operations for the specified registry.
 	ListOperations(context.Context, *ListRegistryOperationsRequest) (*ListRegistryOperationsResponse, error)
 }
 
@@ -1264,6 +1733,15 @@ func (*UnimplementedRegistryServiceServer) AddCertificate(ctx context.Context, r
 }
 func (*UnimplementedRegistryServiceServer) DeleteCertificate(ctx context.Context, req *DeleteRegistryCertificateRequest) (*operation.Operation, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCertificate not implemented")
+}
+func (*UnimplementedRegistryServiceServer) ListPasswords(ctx context.Context, req *ListRegistryPasswordsRequest) (*ListRegistryPasswordsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPasswords not implemented")
+}
+func (*UnimplementedRegistryServiceServer) AddPassword(ctx context.Context, req *AddRegistryPasswordRequest) (*operation.Operation, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddPassword not implemented")
+}
+func (*UnimplementedRegistryServiceServer) DeletePassword(ctx context.Context, req *DeleteRegistryPasswordRequest) (*operation.Operation, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePassword not implemented")
 }
 func (*UnimplementedRegistryServiceServer) ListDeviceTopicAliases(ctx context.Context, req *ListDeviceTopicAliasesRequest) (*ListDeviceTopicAliasesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDeviceTopicAliases not implemented")
@@ -1420,6 +1898,60 @@ func _RegistryService_DeleteCertificate_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RegistryService_ListPasswords_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRegistryPasswordsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistryServiceServer).ListPasswords(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.iot.devices.v1.RegistryService/ListPasswords",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistryServiceServer).ListPasswords(ctx, req.(*ListRegistryPasswordsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RegistryService_AddPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddRegistryPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistryServiceServer).AddPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.iot.devices.v1.RegistryService/AddPassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistryServiceServer).AddPassword(ctx, req.(*AddRegistryPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RegistryService_DeletePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRegistryPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RegistryServiceServer).DeletePassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.iot.devices.v1.RegistryService/DeletePassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RegistryServiceServer).DeletePassword(ctx, req.(*DeleteRegistryPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _RegistryService_ListDeviceTopicAliases_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListDeviceTopicAliasesRequest)
 	if err := dec(in); err != nil {
@@ -1491,6 +2023,18 @@ var _RegistryService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteCertificate",
 			Handler:    _RegistryService_DeleteCertificate_Handler,
+		},
+		{
+			MethodName: "ListPasswords",
+			Handler:    _RegistryService_ListPasswords_Handler,
+		},
+		{
+			MethodName: "AddPassword",
+			Handler:    _RegistryService_AddPassword_Handler,
+		},
+		{
+			MethodName: "DeletePassword",
+			Handler:    _RegistryService_DeletePassword_Handler,
 		},
 		{
 			MethodName: "ListDeviceTopicAliases",
