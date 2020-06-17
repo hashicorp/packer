@@ -88,6 +88,18 @@ type SSH struct {
 	// generates a name that looks like `packer_<UUID>`, where &lt;UUID&gt; is
 	// a 36 character unique identifier.
 	SSHTemporaryKeyPairName string `mapstructure:"temporary_key_pair_name"`
+	// This overrides the value of ciphers supported by default by golang.
+	// The default value is [
+	//   "aes128-gcm@openssh.com",
+	//   "chacha20-poly1305@openssh.com",
+	//   "aes128-ctr", "aes192-ctr", "aes256-ctr",
+	// ]
+	//
+	// Valid options for ciphers include:
+	// "aes128-ctr", "aes192-ctr", "aes256-ctr", "aes128-gcm@openssh.com",
+	// "chacha20-poly1305@openssh.com",
+	// "arcfour256", "arcfour128", "arcfour", "aes128-cbc", "3des-cbc",
+	SSHCiphers []string `mapstructure:"ssh_ciphers"`
 	// If true, Packer will attempt to remove its temporary key from
 	// `~/.ssh/authorized_keys` and `/root/.ssh/authorized_keys`. This is a
 	// mostly cosmetic option, since Packer will delete the temporary private
@@ -267,6 +279,9 @@ func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, er
 		sshConfig := &ssh.ClientConfig{
 			User:            c.SSHUsername,
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		}
+		if len(c.SSHCiphers) != 0 {
+			sshConfig.Config.Ciphers = c.SSHCiphers
 		}
 
 		if c.SSHAgentAuth {
