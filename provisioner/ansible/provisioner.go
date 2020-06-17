@@ -137,6 +137,15 @@ type Config struct {
 	//  inventory directory with `host_vars` `group_vars` that you would like to
 	//  use in the playbook that this provisioner will run.
 	InventoryDirectory string `mapstructure:"inventory_directory"`
+	// This template represents the format for the lines added to the temporary
+	// inventory file that Packer will create to run Ansible against your image.
+	// The default for recent versions of Ansible is:
+	// "{{ .HostAlias }} ansible_host={{ .Host }} ansible_user={{ .User }} ansible_port={{ .Port }}\n"
+	// Available template engines are: This option is a template engine;
+	// variables available to you include the examples in the default (Host,
+	// HostAlias, User, Port) as well as any variables available to you via the
+	// "build" template engine.
+	InventoryFileTemplate string `mapstructure:"inventory_file_template"`
 	// The inventory file to use during provisioning.
 	//  When unspecified, Packer will create a temporary inventory file and will
 	//  use the `host_alias`.
@@ -207,7 +216,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
-			Exclude: []string{},
+			Exclude: []string{
+				"inventory_file_template",
+			},
 		},
 	}, raws...)
 	if err != nil {
@@ -429,13 +440,17 @@ func (p *Provisioner) createInventoryFile() error {
 		return fmt.Errorf("Error preparing inventory file: %s", err)
 	}
 
-	// figure out which inventory line template to use
-	hostTemplate := DefaultSSHInventoryFilev2
-	if p.ansibleMajVersion < 2 {
-		hostTemplate = DefaultSSHInventoryFilev1
-	}
-	if p.config.UseProxy.False() && p.generatedData["ConnType"] == "winrm" {
-		hostTemplate = DefaultWinRMInventoryFilev2
+	// If user has defiend their own inventory template, use it.
+	hostTemplate := p.config.InventoryFileTemplate
+	if hostTemplate == "" {
+		// figure out which inventory line template to use
+		hostTemplate = DefaultSSHInventoryFilev2
+		if p.ansibleMajVersion < 2 {
+			hostTemplate = DefaultSSHInventoryFilev1
+		}
+		if p.config.UseProxy.False() && p.generatedData["ConnType"] == "winrm" {
+			hostTemplate = DefaultWinRMInventoryFilev2
+		}
 	}
 
 	// interpolate template to generate host with necessary vars.
@@ -449,7 +464,6 @@ func (p *Provisioner) createInventoryFile() error {
 	p.config.ctx.Data = ctxData
 
 	host, err := interpolate.Render(hostTemplate, &p.config.ctx)
-
 	if err != nil {
 		return fmt.Errorf("Error generating inventory file from template: %s", err)
 	}
