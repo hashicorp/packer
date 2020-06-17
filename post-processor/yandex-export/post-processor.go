@@ -88,11 +88,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.ServiceAccountKeyFile = os.Getenv("YC_SERVICE_ACCOUNT_KEY_FILE")
 	}
 
-	if p.config.Token == "" && p.config.ServiceAccountKeyFile == "" {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("a token or service account key file must be specified"))
-	}
-
 	if p.config.Token != "" && p.config.ServiceAccountKeyFile != "" {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("one of token or service account key file must be specified, not both"))
