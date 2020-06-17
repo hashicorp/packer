@@ -12,11 +12,12 @@ import (
 // which guests use to reach the vm host
 // To make sure the IP is set before boot command and http server steps
 type StepHTTPIPDiscover struct {
-	HTTPIP string
+	HTTPIP  string
+	Network *net.IPNet
 }
 
 func (s *StepHTTPIPDiscover) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ip, err := getHostIP(s.HTTPIP)
+	ip, err := getHostIP(s.HTTPIP, s.Network)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
@@ -28,7 +29,7 @@ func (s *StepHTTPIPDiscover) Run(ctx context.Context, state multistep.StateBag) 
 
 func (s *StepHTTPIPDiscover) Cleanup(state multistep.StateBag) {}
 
-func getHostIP(s string) (string, error) {
+func getHostIP(s string, network *net.IPNet) (string, error) {
 	if s != "" {
 		if net.ParseIP(s) != nil {
 			return s, nil
@@ -45,7 +46,7 @@ func getHostIP(s string) (string, error) {
 	for _, a := range addrs {
 		ipnet, ok := a.(*net.IPNet)
 		if ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
+			if network.Contains(ipnet.IP) {
 				return ipnet.IP.String(), nil
 			}
 		}
