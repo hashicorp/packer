@@ -28,8 +28,9 @@ export default [
     content: [
       'build-image-in-cicd',
       'build-virtualbox-image',
-      'upload-images-to-artifact',
-      'trigger-tfe'
+      'pipelineing-builds',
+      'trigger-tfe',
+      'upload-images-to-artifact'
     ]
   }
 ]
