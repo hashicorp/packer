@@ -32,8 +32,8 @@ type WaitIpConfig struct {
 	// this network range. Defaults to "0.0.0.0/0" for any ipv4 address. Examples include:
 	//
 	// * empty string ("") - remove all filters
-	// * "0:0:0:0:0:0:0:0/0" - allow only ipv6 addresses
-	// * "192.168.1.0/24 - only allow ipv4 addresses from 192.168.1.1 to 192.168.1.254
+	// * `0:0:0:0:0:0:0:0/0` - allow only ipv6 addresses
+	// * `192.168.1.0/24` - only allow ipv4 addresses from 192.168.1.1 to 192.168.1.254
 	WaitAddress *string `mapstructure:"ip_wait_address"`
 	ipnet       *net.IPNet
 
@@ -67,6 +67,10 @@ func (c *WaitIpConfig) Prepare() []error {
 	}
 
 	return errs
+}
+
+func (c *WaitIpConfig) GetIPNet() *net.IPNet {
+	return c.ipnet
 }
 
 func (s *StepWaitForIp) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {

@@ -91,7 +91,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				SetHostForDatastoreUploads: b.config.SetHostForDatastoreUploads,
 			},
 			&common.StepHTTPIPDiscover{
-				HTTPIP: b.config.BootConfig.HTTPIP,
+				HTTPIP:  b.config.BootConfig.HTTPIP,
+				Network: b.config.WaitIpConfig.GetIPNet(),
 			},
 			&packerCommon.StepHTTPServer{
 				HTTPDir:     b.config.HTTPDir,
