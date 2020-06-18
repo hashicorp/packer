@@ -178,12 +178,11 @@ func TestParse_variables(t *testing.T) {
 			},
 			true, true,
 			[]packer.Build{
-				&packer.CoreBuild{
+				&CoreHCL2Build{
 					Type:           "null",
 					Builder:        &null.Builder{},
-					Provisioners:   []packer.CoreBuildProvisioner{},
-					PostProcessors: [][]packer.CoreBuildPostProcessor{},
-					Prepared:       true,
+					Provisioners:   []CoreHCL2BuildProvisioner{},
+					PostProcessors: [][]CoreHCL2BuildPostProcessor{},
 				},
 			},
 			false,

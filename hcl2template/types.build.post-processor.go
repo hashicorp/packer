@@ -58,7 +58,7 @@ func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl
 	return postProcessor, diags
 }
 
-func (cfg *PackerConfig) startPostProcessor(source SourceBlock, pp *PostProcessorBlock, ectx *hcl.EvalContext, generatedVars map[string]string) (packer.PostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) startPostProcessor(source SourceBlock, pp *PostProcessorBlock, ectx *hcl.EvalContext) (packer.PostProcessor, hcl.Diagnostics) {
 	// ProvisionerBlock represents a detected but unparsed provisioner
 	var diags hcl.Diagnostics
 
@@ -73,7 +73,7 @@ func (cfg *PackerConfig) startPostProcessor(source SourceBlock, pp *PostProcesso
 	}
 	flatProvisinerCfg, moreDiags := decodeHCL2Spec(pp.Rest, ectx, postProcessor)
 	diags = append(diags, moreDiags...)
-	err = postProcessor.Configure(source.builderVariables(), flatProvisinerCfg, generatedVars)
+	err = postProcessor.Configure(source.builderVariables(), flatProvisinerCfg, nil)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,

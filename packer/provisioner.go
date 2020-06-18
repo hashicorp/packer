@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/hcl/v2"
+
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/common"
 )
@@ -40,6 +42,8 @@ type ProvisionHook struct {
 	// The provisioners to run as part of the hook. These should already
 	// be prepared (by calling Prepare) at some earlier stage.
 	Provisioners []*HookedProvisioner
+
+	HCL2Prepare func(typeName string, data map[string]interface{}) (Provisioner, hcl.Diagnostics)
 }
 
 // Provisioners interpolate most of their fields in the prepare stage; this
@@ -127,6 +131,15 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Commun
 		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
 
 		cast := CastDataToMap(data)
+
+		if h.HCL2Prepare != nil {
+			provisioner, diags := h.HCL2Prepare(p.TypeName, cast)
+			if diags.HasErrors() {
+				return diags
+			}
+			p.Provisioner = provisioner
+		}
+
 		err := p.Provisioner.Provision(ctx, ui, comm, cast)
 
 		ts.End(err)

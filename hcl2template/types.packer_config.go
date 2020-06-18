@@ -2,7 +2,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/helper/common"
 	"strings"
 
 	"github.com/gobwas/glob"
@@ -28,9 +27,6 @@ type PackerConfig struct {
 	InputVariables Variables
 	LocalVariables Variables
 
-	// TODO @sylviamoss write description
-	BuildVariables Variables
-
 	ValidationOptions
 
 	// Builds is the list of Build blocks defined in the config files.
@@ -54,14 +50,13 @@ const (
 	inputVariablesAccessor = "var"
 	localsAccessor         = "local"
 	sourcesAccessor        = "source"
-	buildAccessor        = "build"
+	buildAccessor          = "build"
 )
 
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
 // decoder in order to tell what is the actual value of a var or a local and
 // the list of defined functions.
 func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalContext {
-	buildVariables, _ := cfg.BuildVariables.Values()
 	inputVariables, _ := cfg.InputVariables.Values()
 	localVariables, _ := cfg.LocalVariables.Values()
 	ectx := &hcl.EvalContext{
@@ -69,7 +64,6 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 		Variables: map[string]cty.Value{
 			inputVariablesAccessor: cty.ObjectVal(inputVariables),
 			localsAccessor:         cty.ObjectVal(localVariables),
-			buildAccessor: 			cty.ObjectVal(buildVariables),
 			sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
 				"type": cty.UnknownVal(cty.String),
 				"name": cty.UnknownVal(cty.String),
@@ -204,39 +198,18 @@ func (c *PackerConfig) evaluateLocalVariable(local *Local) hcl.Diagnostics {
 
 // getCoreBuildProvisioners takes a list of provisioner block, starts according
 // provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext) ([]CoreHCL2BuildProvisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	res := []packer.CoreBuildProvisioner{}
+	res := []CoreHCL2BuildProvisioner{}
 	for _, pb := range blocks {
 		if pb.OnlyExcept.Skip(source.Type + "." + source.Name) {
 			continue
 		}
-		provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx, generatedVars)
-		diags = append(diags, moreDiags...)
+		provisioner, moreDiags := cfg.getProvisioner(source, pb, ectx)
 		if moreDiags.HasErrors() {
 			continue
 		}
-
-		// If we're pausing, we wrap the provisioner in a special pauser.
-		if pb.PauseBefore != 0 {
-			provisioner = &packer.PausedProvisioner{
-				PauseBefore: pb.PauseBefore,
-				Provisioner: provisioner,
-			}
-		} else if pb.Timeout != 0 {
-			provisioner = &packer.TimeoutProvisioner{
-				Timeout:     pb.Timeout,
-				Provisioner: provisioner,
-			}
-		}
-		if pb.MaxRetries != 0 {
-			provisioner = &packer.RetriedProvisioner{
-				MaxRetries:  pb.MaxRetries,
-				Provisioner: provisioner,
-			}
-		}
-
-		res = append(res, packer.CoreBuildProvisioner{
+		res = append(res, CoreHCL2BuildProvisioner{
 			PType:       pb.PType,
 			PName:       pb.PName,
 			Provisioner: provisioner,
@@ -245,11 +218,37 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 	return res, diags
 }
 
+func (cfg *PackerConfig) getProvisioner(source SourceBlock, pb *ProvisionerBlock, ectx *hcl.EvalContext) (packer.Provisioner, hcl.Diagnostics) {
+	provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx)
+	if moreDiags.HasErrors() {
+		return nil, moreDiags
+	}
+	// If we're pausing, we wrap the provisioner in a special pauser.
+	if pb.PauseBefore != 0 {
+		provisioner = &packer.PausedProvisioner{
+			PauseBefore: pb.PauseBefore,
+			Provisioner: provisioner,
+		}
+	} else if pb.Timeout != 0 {
+		provisioner = &packer.TimeoutProvisioner{
+			Timeout:     pb.Timeout,
+			Provisioner: provisioner,
+		}
+	}
+	if pb.MaxRetries != 0 {
+		provisioner = &packer.RetriedProvisioner{
+			MaxRetries:  pb.MaxRetries,
+			Provisioner: provisioner,
+		}
+	}
+	return provisioner, nil
+}
+
 // getCoreBuildProvisioners takes a list of post processor block, starts
 // according provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext) ([]CoreHCL2BuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	res := []packer.CoreBuildPostProcessor{}
+	res := []CoreHCL2BuildPostProcessor{}
 	for _, ppb := range blocks {
 		if ppb.OnlyExcept.Skip(source.Type + "." + source.Name) {
 			continue
@@ -271,12 +270,12 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 			break
 		}
 
-		postProcessor, moreDiags := cfg.startPostProcessor(source, ppb, ectx, generatedVars)
+		postProcessor, moreDiags := cfg.startPostProcessor(source, ppb, ectx)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
 		}
-		res = append(res, packer.CoreBuildPostProcessor{
+		res = append(res, CoreHCL2BuildPostProcessor{
 			PostProcessor: postProcessor,
 			PName:         ppb.PName,
 			PType:         ppb.PType,
@@ -354,13 +353,6 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				continue
 			}
 
-			variables := map[string]cty.Value{
-				sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
-					"type": cty.StringVal(src.Type),
-					"name": cty.StringVal(src.Name),
-				}),
-			}
-
 			// If the builder has provided a list of to-be-generated variables that
 			// should be made accessible to provisioners, pass that list into
 			// the provisioner prepare() so that the provisioner can appropriately
@@ -369,120 +361,57 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			generatedPlaceholderMap := packer.BasicPlaceholderData()
 			if generatedVars != nil {
 				for _, k := range generatedVars {
-					generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
-						common.PlaceholderMsg, k)
+					generatedPlaceholderMap[k] = ""
 				}
 			}
+			buildVariables, _ := setBuildVariables(generatedPlaceholderMap).Values()
 
-			cfg.BuildVariables = setBuildVariables(generatedVars)
+			variables := map[string]cty.Value{
+				sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
+					"type": cty.StringVal(src.Type),
+					"name": cty.StringVal(src.Name),
+				}),
+				buildAccessor: cty.ObjectVal(buildVariables),
+			}
 
-			provisioners, moreDiags := cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables), generatedPlaceholderMap)
+			provisioners, moreDiags := cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			postProcessors, moreDiags := cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables), generatedPlaceholderMap)
-			pps := [][]packer.CoreBuildPostProcessor{}
+			postProcessors, moreDiags := cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables))
+			pps := [][]CoreHCL2BuildPostProcessor{}
 			if len(postProcessors) > 0 {
-				pps = [][]packer.CoreBuildPostProcessor{postProcessors}
+				pps = [][]CoreHCL2BuildPostProcessor{postProcessors}
 			}
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
 
-			pcb := &packer.CoreBuild{
+			pcb := &CoreHCL2Build{
 				BuildName:      build.Name,
 				Type:           src.Ref().String(),
 				Builder:        builder,
 				Provisioners:   provisioners,
 				PostProcessors: pps,
-				Prepared:       true,
+				cfg:            cfg,
+				prepareCalled:  true,
 			}
-			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
-			// we did all the prep here.
-			_, err := pcb.Prepare()
-			if err != nil {
-				diags = append(diags, &hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  fmt.Sprintf("Preparing packer core build %s failed", src.Ref().String()),
-					Detail:   err.Error(),
-					Subject:  build.HCL2Ref.DefRange.Ptr(),
-				})
-				continue
-			}
-
 			res = append(res, pcb)
 		}
 	}
 	return res, diags
 }
 
-func setBuildVariables(generatedVars []string) Variables {
-	variables := Variables{
-		"id": &Variable{
-			DefaultValue: cty.StringVal("{{ build `ID`}}"),
+func setBuildVariables(generatedVars map[string]string) Variables {
+	variables := make(Variables)
+	for k := range generatedVars {
+		variables[k] = &Variable{
+			DefaultValue: cty.StringVal("unknown"),
 			Type:         cty.String,
-		},
-		"host": &Variable{
-			DefaultValue: cty.StringVal("{{ build `Host`}}"),
-			Type:         cty.String,
-		},
-		"port": &Variable{
-			DefaultValue: cty.StringVal("{{ build `Port`}}"),
-			Type:         cty.String,
-		},
-		"user": &Variable{
-			DefaultValue: cty.StringVal("{{ build `User`}}"),
-			Type:         cty.String,
-		},
-		"password": &Variable{
-			DefaultValue: cty.StringVal("{{ build `Password`}}"),
-			Type:         cty.String,
-		},
-		"connType": &Variable{
-			DefaultValue: cty.StringVal("{{ build `Password`}}"),
-			Type:         cty.String,
-		},
-		"packerRunUUID": &Variable{
-			DefaultValue: cty.StringVal("{{ build `Password`}}"),
-			Type:         cty.String,
-		},
-		"packerHTTPPort": &Variable{
-			DefaultValue: cty.StringVal("{{ build `Password`}}"),
-			Type:         cty.String,
-		},
-		"packerHTTPIP": &Variable{
-			DefaultValue: cty.StringVal("{{ build `Password`}}"),
-			Type:         cty.String,
-		},
-		"packerHTTPAddr": &Variable{
-			DefaultValue: cty.StringVal("{{ build `Password`}}"),
-			Type:         cty.String,
-		},
-		"sshPublicKey": &Variable{
-			DefaultValue: cty.StringVal("{{ build `Password`}}"),
-			Type:         cty.String,
-		},
-		"sshPrivateKey": &Variable{
-			DefaultValue: cty.StringVal("{{ build `Password`}}"),
-			Type:         cty.String,
-		},
-		"winRMPassword": &Variable{
-			DefaultValue: cty.StringVal("{{ build `Password`}}"),
-			Type:         cty.String,
-		},
-	}
-
-	if generatedVars != nil {
-		for _, k := range generatedVars {
-			variables[k] = &Variable{
-				DefaultValue: cty.StringVal(fmt.Sprintf("{{ build `%s`}}", k)),
-				Type:         cty.String,
-			}
 		}
 	}
-
 	return variables
 }
 
