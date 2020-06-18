@@ -14,9 +14,9 @@ source "file" "cherry" {
 }
 
 build {
-  sources = [
-    "file.cherry",
-  ]
+  source "file.cherry" {
+
+  }
 }
 
 build {
