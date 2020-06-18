@@ -16,11 +16,16 @@
     from the source instance. See the
     [BlockDevices](#block-devices-configuration) documentation for fields.
     
--   `run_volume_tags` (awscommon.TagMap) - Tags to apply to the volumes that are *launched* to create the AMI.
+-   `run_volume_tags` (map[string]string) - Tags to apply to the volumes that are *launched* to create the AMI.
     These tags are *not* applied to the resulting AMI unless they're
     duplicated in `tags`. This is a [template
     engine](/docs/templates/engine), see [Build template
     data](#build-template-data) for more information.
+    
+-   `run_volume_tag` ([]{name string, value string}) - Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular
+    block containing a `name` and a `value` field. In HCL2 mode the
+    [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+    will allow you to create those programatically.
     
 -   `ami_architecture` (string) - what architecture to use when registering the
     final AMI; valid options are "x86_64" or "arm64". Defaults to "x86_64".
