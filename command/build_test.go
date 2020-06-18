@@ -222,7 +222,7 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
-			name: "hcl - 'except' a build block",
+			name: "hcl - 'only' a build block",
 			args: []string{
 				"-only=my_build.*",
 				testFixture("hcl-only-except"),
