@@ -160,8 +160,8 @@
 -   `use_internal_ip` (bool) - If true, use the instance's internal IP instead of its external IP
     during building.
     
--   `use_os_login` (bool) - If true, OSLogin will be used instead and `enable-oslogin` will be set to `TRUE` in
-    metadata.
+-   `use_os_login` (bool) - If true, OSLogin will be used to manage SSH access to the compute instance.
+    Enabling this option will set `enable-oslogin` to `TRUE` in the instance metadata.
     
 -   `vault_gcp_oauth_engine` (string) - Can be set instead of account_file. If set, this builder will use
     HashiCorp Vault to generate an Oauth token for authenticating against
