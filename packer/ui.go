@@ -131,7 +131,6 @@ func (u *ColoredUi) supportsColors() bool {
 type TargetedUI struct {
 	Target string
 	Ui     Ui
-	*uiProgressBar
 }
 
 var _ Ui = new(TargetedUI)
@@ -170,6 +169,10 @@ func (u *TargetedUI) prefixLines(arrow bool, message string) string {
 	}
 
 	return strings.TrimRightFunc(result.String(), unicode.IsSpace)
+}
+
+func (u *TargetedUI) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser {
+	return u.Ui.TrackProgress(src, currentSize, totalSize, stream)
 }
 
 // The BasicUI is a UI that reads and writes from a standard Go reader
