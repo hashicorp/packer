@@ -128,6 +128,9 @@ type Config struct {
 	// The machine type. Defaults to "n1-standard-1".
 	MachineType string `mapstructure:"machine_type" required:"false"`
 	// Metadata applied to the launched instance.
+	// All metadata configuration values are expected to be of type string.
+	// Google metadata options that take a value of `TRUE` or `FALSE` should be
+	// set as a string (i.e  `"TRUE"` `"FALSE"` or `"true"` `"false"`).
 	Metadata map[string]string `mapstructure:"metadata" required:"false"`
 	// Metadata applied to the launched instance. Values are files.
 	MetadataFiles map[string]string `mapstructure:"metadata_files"`
