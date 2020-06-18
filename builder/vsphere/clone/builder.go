@@ -109,7 +109,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		})
 	}
 
-	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = packerCommon.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(ctx, state)
 
 	if rawErr, ok := state.GetOk("error"); ok {
