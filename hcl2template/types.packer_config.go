@@ -301,9 +301,13 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			}
 			src.addition = from.addition
 
-			// Apply the -only and -except command-line options to exclude matching builds.
-			buildName := fmt.Sprintf("%s.%s", src.Type, src.Name)
+			pcb := &packer.CoreBuild{
+				BuildName: build.Name,
+				Type:      src.Ref().String(),
+			}
 
+			// Apply the -only and -except command-line options to exclude matching builds.
+			buildName := pcb.Name()
 			// -only
 			if len(opts.Only) > 0 {
 				onlyGlobs, diags := convertFilterOption(opts.Only, "only")
@@ -383,14 +387,11 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				continue
 			}
 
-			pcb := &packer.CoreBuild{
-				BuildName:      build.Name,
-				Type:           src.Ref().String(),
-				Builder:        builder,
-				Provisioners:   provisioners,
-				PostProcessors: pps,
-				Prepared:       true,
-			}
+			pcb.Builder = builder
+			pcb.Provisioners = provisioners
+			pcb.PostProcessors = pps
+			pcb.Prepared = true
+
 			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
 			// we did all the prep here.
 			_, err := pcb.Prepare()
