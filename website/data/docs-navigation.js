@@ -11,12 +11,12 @@ export default [
     content: [
       {
         category: 'blocks',
-        content: [ 
+        content: [
           {
             category: 'build',
-            content: [ 'source', 'provisioner', 'post-processor' ],
+            content: ['source', 'provisioner', 'post-processor'],
           },
-          'locals', 'source', 'variable' ],
+          'locals', 'source', 'variable'],
       },
       {
         category: 'functions',
@@ -141,6 +141,7 @@ export default [
       'variables',
       'locals',
       'syntax',
+      'onlyexcept',
       'expressions',
       'syntax-json',
     ],
