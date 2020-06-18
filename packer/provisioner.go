@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2"
-
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/common"
 )

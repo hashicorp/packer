@@ -198,9 +198,9 @@ func (c *PackerConfig) evaluateLocalVariable(local *Local) hcl.Diagnostics {
 
 // getCoreBuildProvisioners takes a list of provisioner block, starts according
 // provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext) ([]CoreHCL2BuildProvisioner, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	res := []CoreHCL2BuildProvisioner{}
+	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
 		if pb.OnlyExcept.Skip(source.Type + "." + source.Name) {
 			continue
@@ -209,7 +209,7 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 		if moreDiags.HasErrors() {
 			continue
 		}
-		res = append(res, CoreHCL2BuildProvisioner{
+		res = append(res, packer.CoreBuildProvisioner{
 			PType:       pb.PType,
 			PName:       pb.PName,
 			Provisioner: provisioner,
@@ -246,9 +246,9 @@ func (cfg *PackerConfig) getProvisioner(source SourceBlock, pb *ProvisionerBlock
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
 // according provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext) ([]CoreHCL2BuildPostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	res := []CoreHCL2BuildPostProcessor{}
+	res := []packer.CoreBuildPostProcessor{}
 	for _, ppb := range blocks {
 		if ppb.OnlyExcept.Skip(source.Type + "." + source.Name) {
 			continue
@@ -275,7 +275,7 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 		if moreDiags.HasErrors() {
 			continue
 		}
-		res = append(res, CoreHCL2BuildPostProcessor{
+		res = append(res, packer.CoreBuildPostProcessor{
 			PostProcessor: postProcessor,
 			PName:         ppb.PName,
 			PType:         ppb.PType,
@@ -283,6 +283,99 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 	}
 
 	return res, diags
+}
+
+func (cfg *PackerConfig) HCL2ProvisionerPrepare(typeName string, data map[string]interface{}) (packer.Provisioner, hcl.Diagnostics) {
+	// This will interpolate build variables by decoding the provisioner block again
+	var diags hcl.Diagnostics
+	if data == nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary: fmt.Sprintf("failed loading %s", typeName),
+			Detail:  "unable to prepare provisioner with build variables interpolation",
+		})
+		return nil, diags
+	}
+
+	for _, build := range cfg.Builds {
+		for _, from := range build.Sources {
+			src := cfg.Sources[from.Ref()]
+
+			variables := make(Variables)
+			for k, v := range data {
+				if value, ok := v.(string); ok {
+					variables[k] = &Variable{
+						DefaultValue: cty.StringVal(value),
+						Type:         cty.String,
+					}
+				}
+			}
+			variablesVal, _ := variables.Values()
+
+			generatedVariables := map[string]cty.Value{
+				sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
+					"type": cty.StringVal(src.Type),
+					"name": cty.StringVal(src.Name),
+				}),
+				buildAccessor: cty.ObjectVal(variablesVal),
+			}
+
+			for _, pb := range build.ProvisionerBlocks {
+				if pb.PType != typeName {
+					continue
+				}
+				return cfg.getProvisioner(src, pb, cfg.EvalContext(generatedVariables))
+			}
+		}
+	}
+	diags = append(diags, &hcl.Diagnostic{
+		Summary: fmt.Sprintf("failed loading %s", typeName),
+		Detail:  "unable to prepare provisioner with build variables interpolation",
+	})
+	return nil, diags
+}
+
+func (cfg *PackerConfig) HCL2PProcessorsPrepare(builderArtifact packer.Artifact) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+	// This will interpolate build variables by decoding and preparing the post-processor block again
+	var diags hcl.Diagnostics
+	generatedData := make(map[string]interface{})
+	artifactSateData := builderArtifact.State("generated_data")
+	if artifactSateData != nil {
+		for k, v := range artifactSateData.(map[interface{}]interface{}) {
+			generatedData[k.(string)] = v
+		}
+	}
+
+	for _, build := range cfg.Builds {
+		for _, from := range build.Sources {
+			src := cfg.Sources[from.Ref()]
+
+			variables := make(Variables)
+			for k, v := range generatedData {
+				if value, ok := v.(string); ok {
+					variables[k] = &Variable{
+						DefaultValue: cty.StringVal(value),
+						Type:         cty.String,
+					}
+				}
+			}
+			variablesVal, _ := variables.Values()
+
+			generatedVariables := map[string]cty.Value{
+				sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
+					"type": cty.StringVal(src.Type),
+					"name": cty.StringVal(src.Name),
+				}),
+				buildAccessor: cty.ObjectVal(variablesVal),
+			}
+
+			return cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(generatedVariables))
+		}
+	}
+	diags = append(diags, &hcl.Diagnostic{
+		Summary: fmt.Sprintf("failed loading post-provisioner"),
+		Detail:  "unable to prepare provisioner with build variables interpolation",
+	})
+	return nil, diags
 }
 
 // GetBuilds returns a list of packer Build based on the HCL2 parsed build
@@ -380,24 +473,38 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				continue
 			}
 			postProcessors, moreDiags := cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables))
-			pps := [][]CoreHCL2BuildPostProcessor{}
+			pps := [][]packer.CoreBuildPostProcessor{}
 			if len(postProcessors) > 0 {
-				pps = [][]CoreHCL2BuildPostProcessor{postProcessors}
+				pps = [][]packer.CoreBuildPostProcessor{postProcessors}
 			}
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
 
-			pcb := &CoreHCL2Build{
-				BuildName:      build.Name,
-				Type:           src.Ref().String(),
-				Builder:        builder,
-				Provisioners:   provisioners,
-				PostProcessors: pps,
-				cfg:            cfg,
-				prepareCalled:  true,
+			pcb := &packer.CoreBuild{
+				BuildName:                 build.Name,
+				Type:                      src.Ref().String(),
+				Builder:                   builder,
+				Provisioners:              provisioners,
+				PostProcessors:            pps,
+				HCL2ProvisionerPrepare:    cfg.HCL2ProvisionerPrepare,
+				HCL2PostProcessorsPrepare: cfg.HCL2PProcessorsPrepare,
+				Prepared:                  true,
 			}
+			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
+			// we did all the prep here.
+			_, err := pcb.Prepare()
+			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  fmt.Sprintf("Preparing packer core build %s failed", src.Ref().String()),
+					Detail:   err.Error(),
+					Subject:  build.HCL2Ref.DefRange.Ptr(),
+				})
+				continue
+			}
+
 			res = append(res, pcb)
 		}
 	}
@@ -408,7 +515,7 @@ func setBuildVariables(generatedVars map[string]string) Variables {
 	variables := make(Variables)
 	for k := range generatedVars {
 		variables[k] = &Variable{
-			DefaultValue: cty.StringVal("unknown"),
+			DefaultValue: cty.UnknownVal(cty.String),
 			Type:         cty.String,
 		}
 	}

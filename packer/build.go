@@ -6,6 +6,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/helper/common"
 )
 
@@ -100,6 +101,9 @@ type CoreBuild struct {
 
 	// Indicates whether the build is already initialized before calling Prepare(..)
 	Prepared bool
+
+	HCL2ProvisionerPrepare    func(typeName string, data map[string]interface{}) (Provisioner, hcl.Diagnostics)
+	HCL2PostProcessorsPrepare func(builderArtifact Artifact) ([]CoreBuildPostProcessor, hcl.Diagnostics)
 
 	debug         bool
 	force         bool
@@ -263,9 +267,15 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 			hooks[HookProvision] = make([]Hook, 0, 1)
 		}
 
-		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{
+		provisionHook := &ProvisionHook{
 			Provisioners: hookedProvisioners,
-		})
+		}
+
+		if b.HCL2ProvisionerPrepare != nil {
+			provisionHook.HCL2Prepare = b.HCL2ProvisionerPrepare
+		}
+
+		hooks[HookProvision] = append(hooks[HookProvision], provisionHook)
 	}
 
 	if b.CleanupProvisioner.PType != "" {
@@ -304,6 +314,15 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 
 	errors := make([]error, 0)
 	keepOriginalArtifact := len(b.PostProcessors) == 0
+
+	if b.HCL2PostProcessorsPrepare != nil {
+		postProcessors, diags := b.HCL2PostProcessorsPrepare(builderArtifact)
+		if diags.HasErrors() {
+			errors = append(errors, diags)
+		} else {
+			b.PostProcessors = [][]CoreBuildPostProcessor{postProcessors}
+		}
+	}
 
 	// Run the post-processors
 PostProcessorRunSeqLoop:

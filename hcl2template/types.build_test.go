@@ -65,7 +65,7 @@ func TestParse_build(t *testing.T) {
 				Builds:  nil,
 			},
 			true, true,
-			[]packer.Build{&CoreHCL2Build{}},
+			[]packer.Build{&packer.CoreBuild{}},
 			false,
 		},
 		{"untyped post-processor",
@@ -76,7 +76,7 @@ func TestParse_build(t *testing.T) {
 				Builds:  nil,
 			},
 			true, true,
-			[]packer.Build{&CoreHCL2Build{}},
+			[]packer.Build{&packer.CoreBuild{}},
 			false,
 		},
 		{"inexistent post-processor",
@@ -151,11 +151,12 @@ func TestParse_build(t *testing.T) {
 			},
 			false, false,
 			[]packer.Build{
-				&CoreHCL2Build{
+				&packer.CoreBuild{
 					Type:         "virtualbox-iso.ubuntu-1204",
+					Prepared:     true,
 					Builder:      emptyMockBuilder,
-					Provisioners: []CoreHCL2BuildProvisioner{},
-					PostProcessors: [][]CoreHCL2BuildPostProcessor{
+					Provisioners: []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{
 						{
 							{
 								PType: "amazon-import",
@@ -169,11 +170,12 @@ func TestParse_build(t *testing.T) {
 						},
 					},
 				},
-				&CoreHCL2Build{
+				&packer.CoreBuild{
 					Type:         "amazon-ebs.ubuntu-1604",
+					Prepared:     true,
 					Builder:      emptyMockBuilder,
-					Provisioners: []CoreHCL2BuildProvisioner{},
-					PostProcessors: [][]CoreHCL2BuildPostProcessor{
+					Provisioners: []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{
 						{
 							{
 								PType: "manifest",
@@ -217,10 +219,11 @@ func TestParse_build(t *testing.T) {
 			},
 			false, false,
 			[]packer.Build{
-				&CoreHCL2Build{
-					Type:    "virtualbox-iso.ubuntu-1204",
-					Builder: emptyMockBuilder,
-					Provisioners: []CoreHCL2BuildProvisioner{
+				&packer.CoreBuild{
+					Type:     "virtualbox-iso.ubuntu-1204",
+					Prepared: true,
+					Builder:  emptyMockBuilder,
+					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType: "shell",
 							Provisioner: &MockProvisioner{
@@ -231,12 +234,13 @@ func TestParse_build(t *testing.T) {
 							},
 						},
 					},
-					PostProcessors: [][]CoreHCL2BuildPostProcessor{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
-				&CoreHCL2Build{
-					Type:    "amazon-ebs.ubuntu-1604",
-					Builder: emptyMockBuilder,
-					Provisioners: []CoreHCL2BuildProvisioner{
+				&packer.CoreBuild{
+					Type:     "amazon-ebs.ubuntu-1604",
+					Prepared: true,
+					Builder:  emptyMockBuilder,
+					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType: "file",
 							Provisioner: &MockProvisioner{
@@ -247,7 +251,7 @@ func TestParse_build(t *testing.T) {
 							},
 						},
 					},
-					PostProcessors: [][]CoreHCL2BuildPostProcessor{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
 			},
 			false,

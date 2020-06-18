@@ -102,10 +102,11 @@ func TestParser_complete(t *testing.T) {
 			},
 			false, false,
 			[]packer.Build{
-				&CoreHCL2Build{
-					Type:    "virtualbox-iso.ubuntu-1204",
-					Builder: basicMockBuilder,
-					Provisioners: []CoreHCL2BuildProvisioner{
+				&packer.CoreBuild{
+					Type:     "virtualbox-iso.ubuntu-1204",
+					Prepared: true,
+					Builder:  basicMockBuilder,
+					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType:       "shell",
 							PName:       "provisioner that does something",
@@ -113,7 +114,7 @@ func TestParser_complete(t *testing.T) {
 						},
 						{PType: "file", Provisioner: basicMockProvisioner},
 					},
-					PostProcessors: [][]CoreHCL2BuildPostProcessor{
+					PostProcessors: [][]packer.CoreBuildPostProcessor{
 						{
 							{
 								PType:         "amazon-import",
@@ -127,8 +128,9 @@ func TestParser_complete(t *testing.T) {
 						},
 					},
 				},
-				&CoreHCL2Build{
-					Type: "amazon-ebs.ubuntu-1604",
+				&packer.CoreBuild{
+					Type:     "amazon-ebs.ubuntu-1604",
+					Prepared: true,
 					Builder: &MockBuilder{
 						Config: MockConfig{
 							NestedMockConfig: NestedMockConfig{
@@ -139,7 +141,7 @@ func TestParser_complete(t *testing.T) {
 							NestedSlice: []NestedMockConfig{},
 						},
 					},
-					Provisioners: []CoreHCL2BuildProvisioner{
+					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType:       "shell",
 							PName:       "provisioner that does something",
@@ -147,7 +149,7 @@ func TestParser_complete(t *testing.T) {
 						},
 						{PType: "file", Provisioner: basicMockProvisioner},
 					},
-					PostProcessors: [][]CoreHCL2BuildPostProcessor{
+					PostProcessors: [][]packer.CoreBuildPostProcessor{
 						{
 							{
 								PType:         "amazon-import",

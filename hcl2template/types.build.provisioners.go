@@ -155,7 +155,7 @@ func (cfg *PackerConfig) startProvisioner(source SourceBlock, pb *ProvisionerBlo
 	// configs := make([]interface{}, 2)
 	// configs = append(, flatProvisionerCfg)
 	// configs = append(configs, generatedVars)
-	err = provisioner.Prepare(source.builderVariables(), flatProvisionerCfg, nil)
+	err = provisioner.Prepare(source.builderVariables(), flatProvisionerCfg)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
