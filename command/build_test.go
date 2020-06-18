@@ -515,14 +515,19 @@ func TestBuildCommand_HCLOnlyExceptOptions(t *testing.T) {
 			[]string{"chocolate.txt", "vanilla.txt"},
 		},
 		{
-			[]string{"-only=file.chocolate"},
+			[]string{"-only=my_build.file.chocolate"},
 			[]string{"chocolate.txt"},
 			[]string{"vanilla.txt", "cherry.txt"},
 		},
 		{
-			[]string{"-except=file.chocolate"},
+			[]string{"-except=my_build.file.chocolate"},
 			[]string{"vanilla.txt", "cherry.txt"},
 			[]string{"chocolate.txt"},
+		},
+		{
+			[]string{"-only=file.cherry"},
+			[]string{"cherry.txt"},
+			[]string{"vanilla.txt", "chocolate.txt"},
 		},
 	}
 
