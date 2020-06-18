@@ -11,6 +11,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -38,6 +39,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 // Run is where the actual build should take place. It takes a Build and a Ui.
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	artifact := new(FileArtifact)
+
+	// Create all directories leading to target
+	dir := filepath.Dir(b.config.Target)
+	if dir != "." {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return nil, err
+		}
+	}
 
 	if b.config.Source != "" {
 		source, err := os.Open(b.config.Source)
