@@ -93,6 +93,9 @@
 -   `machine_type` (string) - The machine type. Defaults to "n1-standard-1".
     
 -   `metadata` (map[string]string) - Metadata applied to the launched instance.
+    All metadata configuration values are expected to be of type string.
+    Google metadata options that take a value of `TRUE` or `FALSE` should be
+    set as a string (i.e  `"TRUE"` `"FALSE"` or `"true"` `"false"`).
     
 -   `metadata_files` (map[string]string) - Metadata applied to the launched instance. Values are files.
     
