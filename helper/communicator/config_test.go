@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/masterzen/winrm"
 )
@@ -134,6 +135,40 @@ func TestConfig_winrm_use_ntlm(t *testing.T) {
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("WinRMTransportDecorator isn't ClientNTLM.")
+	}
+
+}
+
+func TestSSHConfigFunc(t *testing.T) {
+	state := new(multistep.BasicStateBag)
+
+	// No ciphers set
+	c := &Config{
+		Type: "ssh",
+	}
+
+	f := c.SSHConfigFunc()
+	sshConfig, _ := f(state)
+	if sshConfig.Config.Ciphers != nil {
+		t.Fatalf("Shouldn't set SSHCiphers if communicator config option " +
+			"ssh_ciphers is unset.")
+	}
+
+	// Ciphers are set
+	c = &Config{
+		Type: "ssh",
+		SSH: SSH{
+			SSHCiphers: []string{"partycipher"},
+		},
+	}
+	f = c.SSHConfigFunc()
+	sshConfig, _ = f(state)
+	if sshConfig.Config.Ciphers == nil {
+		t.Fatalf("Shouldn't set SSHCiphers if communicator config option " +
+			"ssh_ciphers is unset.")
+	}
+	if sshConfig.Config.Ciphers[0] != "partycipher" {
+		t.Fatalf("ssh_ciphers should be a direct passthrough.")
 	}
 
 }
