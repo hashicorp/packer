@@ -220,7 +220,7 @@ type Config struct {
 	// If true, use the instance's internal IP instead of its external IP
 	// during building.
 	UseInternalIP bool `mapstructure:"use_internal_ip" required:"false"`
-	// If true, OSLogin will be used to manage SSH access to the compute instance. 
+	// If true, OSLogin will be used to manage SSH access to the compute instance.
 	// Enabling this option will set `enable-oslogin` to `TRUE` in the instance metadata.
 	UseOSLogin bool `mapstructure:"use_os_login" required:"false"`
 	// Can be set instead of account_file. If set, this builder will use
