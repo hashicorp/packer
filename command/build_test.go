@@ -207,6 +207,19 @@ func TestBuild(t *testing.T) {
 				},
 			},
 		},
+
+		// only / except HCL2
+		{
+			name: "hcl - 'except' a build block",
+			args: []string{
+				"-except=my_build.*",
+				testFixture("hcl-only-except"),
+			},
+			fileCheck: fileCheck{
+				expected:    []string{"cherry.txt"},
+				notExpected: []string{"chocolate.txt", "vanilla.txt"},
+			},
+		},
 	}
 
 	for _, tt := range tc {
