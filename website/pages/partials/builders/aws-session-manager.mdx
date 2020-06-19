@@ -2,11 +2,13 @@
 
 Support for the AWS Systems Manager session manager lets users manage EC2 instances without the need to open inbound ports, or maintain bastion hosts. Session manager connectivity relies on the use of the [session manager plugin](#session-manager-plugin) to open a secure tunnel between the local machine and the remote instance. Once the tunnel has been created all SSH communication will be tunneled through SSM to the remote instance.
 
+-> Note: Session manager connectivity is currently only implemented for the SSH communicator, not the WinRM Communicator.
+
 To use the session manager as the connection interface for the SSH communicator you need to add the following configuration options to the Amazon builder options:
 
  * `ssh_interface`: The ssh interface must be set to "session_manager".  When using this option the builder will create an SSM tunnel to the configured `ssh_port` (defaults to 22) on the remote host.
  * `iam_instance_profile`: A valid instance profile granting Systems Manager permissions to manage the remote instance is required in order for the aws ssm-agent to start and stop session connections.
- See below for more details on IAM instance profile for Systems Manager(#iam-instance-profile-for-systems-manager).
+ See below for more details on [IAM instance profile for Systems Manager](#iam-instance-profile-for-systems-manager).
 
 #### Optional
  * `session_manager_port`: A local port on the host machine that should be used as the local end of the session tunnel to the remote host. If not specified Packer will find an available port to use.
