@@ -163,7 +163,7 @@
               "lun": 0,
               "name": "[concat(parameters('dataDiskName'),'-1')]",
               "vhd": {
-                "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),parameters('dataDiskName'), '-1','.vhd')]"
+                "uri": "[concat(parameters('storageAccountBlobEndpoint'), variables('vmStorageAccountContainerName'), '/', parameters('dataDiskName'), '-1','.vhd')]"
               }
             },
             {
@@ -173,7 +173,7 @@
               "lun": 1,
               "name": "[concat(parameters('dataDiskName'),'-2')]",
               "vhd": {
-                "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),parameters('dataDiskName'), '-2','.vhd')]"
+                "uri": "[concat(parameters('storageAccountBlobEndpoint'), variables('vmStorageAccountContainerName'), '/', parameters('dataDiskName'), '-2','.vhd')]"
               }
             }
           ],
