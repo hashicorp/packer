@@ -38,6 +38,18 @@ local.fruit: "banana"
       <no post-processor>
 
 `},
+		{[]string{"inspect", "-var=fruit=peach", filepath.Join(testFixture("hcl"), "vars", "fruit_string.pkr.hcl")}, nil, `Packer Inspect: HCL2 mode
+
+> input-variables:
+
+var.fruit: "peach" [debug: {Type:cty.String,CmdValue:peach,VarfileValue:null,EnvValue:null,DefaultValue:banana}]
+
+> local-variables:
+
+
+> builds:
+
+`},
 	}
 
 	for _, tc := range tc {
