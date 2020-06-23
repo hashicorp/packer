@@ -103,8 +103,12 @@ func (c *AccessConfig) Client() (*UCloudClient, error) {
 
 		// set cloud shell client handler
 		cloudShellCredHandler = func(c *ucloud.Client, req *http.HttpRequest) (*http.HttpRequest, error) {
-			req.SetHeader("Cookie", defaultCsCred.Cookie)
-			req.SetHeader("Csrf-Token", defaultCsCred.CSRFToken)
+			if err := req.SetHeader("Cookie", defaultCsCred.Cookie); err != nil {
+				return nil, err
+			}
+			if err := req.SetHeader("Csrf-Token", defaultCsCred.CSRFToken); err != nil {
+				return nil, err
+			}
 			return req, nil
 		}
 	} else {
@@ -119,11 +123,21 @@ func (c *AccessConfig) Client() (*UCloudClient, error) {
 	c.client.UFileConn = ufile.NewClient(&cfg, &cred)
 
 	if cloudShellCredHandler != nil {
-		c.client.UHostConn.AddHttpRequestHandler(cloudShellCredHandler)
-		c.client.UNetConn.AddHttpRequestHandler(cloudShellCredHandler)
-		c.client.VPCConn.AddHttpRequestHandler(cloudShellCredHandler)
-		c.client.UAccountConn.AddHttpRequestHandler(cloudShellCredHandler)
-		c.client.UFileConn.AddHttpRequestHandler(cloudShellCredHandler)
+		if err := c.client.UHostConn.AddHttpRequestHandler(cloudShellCredHandler); err != nil {
+			return nil, err
+		}
+		if err := c.client.UNetConn.AddHttpRequestHandler(cloudShellCredHandler); err != nil {
+			return nil, err
+		}
+		if err := c.client.VPCConn.AddHttpRequestHandler(cloudShellCredHandler); err != nil {
+			return nil, err
+		}
+		if err := c.client.UAccountConn.AddHttpRequestHandler(cloudShellCredHandler); err != nil {
+			return nil, err
+		}
+		if err := c.client.UFileConn.AddHttpRequestHandler(cloudShellCredHandler); err != nil {
+			return nil, err
+		}
 	}
 
 	return c.client, nil
@@ -242,11 +256,10 @@ func (c *AccessConfig) ValidateZone(region, zone string) error {
 
 func (c *AccessConfig) getSupportedProjectIds() ([]string, error) {
 	client, err := c.Client()
-	conn := client.UAccountConn
 	if err != nil {
 		return nil, err
 	}
-
+	conn := client.UAccountConn
 	req := conn.NewGetProjectListRequest()
 	resp, err := conn.GetProjectList(req)
 	if err != nil {
@@ -265,11 +278,11 @@ func (c *AccessConfig) getSupportedProjectIds() ([]string, error) {
 
 func (c *AccessConfig) getSupportedRegions() ([]string, error) {
 	client, err := c.Client()
-	conn := client.UAccountConn
 	if err != nil {
 		return nil, err
 	}
 
+	conn := client.UAccountConn
 	req := conn.NewGetRegionRequest()
 	resp, err := conn.GetRegion(req)
 	if err != nil {
@@ -288,11 +301,11 @@ func (c *AccessConfig) getSupportedRegions() ([]string, error) {
 
 func (c *AccessConfig) getSupportedZones(region string) ([]string, error) {
 	client, err := c.Client()
-	conn := client.UAccountConn
 	if err != nil {
 		return nil, err
 	}
 
+	conn := client.UAccountConn
 	req := conn.NewGetRegionRequest()
 	resp, err := conn.GetRegion(req)
 	if err != nil {
