@@ -47,34 +47,42 @@ var instanceTypeScaleMap = map[string]int{
 
 var availableHostTypes = []string{"n"}
 
-func parseInstanceTypeByCustomize(splited ...string) (*InstanceType, error) {
-	if len(splited) != 4 {
-		return nil, fmt.Errorf("instance type is invalid, expected like n-customize-1-2")
+func parseInstanceTypeByCustomize(split ...string) (*InstanceType, error) {
+	if len(split) != 4 {
+		return nil, fmt.Errorf("instance type is invalid, expected like n-customized-1-2")
 	}
 
-	hostType := splited[0]
+	hostType := split[0]
 	err := CheckStringIn(hostType, availableHostTypes)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("instance type is invalid, the host type of customized %q can only be %q", "instance_type", "n")
 	}
 
-	hostScaleType := splited[1]
+	hostScaleType := split[1]
 
-	cpu, err := strconv.Atoi(splited[2])
+	cpu, err := strconv.Atoi(split[2])
 	if err != nil {
 		return nil, fmt.Errorf("cpu count is invalid, please use a number")
 	}
 
-	memory, err := strconv.Atoi(splited[3])
+	memory, err := strconv.Atoi(split[3])
 	if err != nil {
 		return nil, fmt.Errorf("memory count is invalid, please use a number")
 	}
 
-	if cpu/memory > 2 || memory/cpu > 12 {
+	if cpu != 1 && (cpu%2) != 0 {
+		return nil, fmt.Errorf("expected the number of cores of cpu must be divisible by 2 without a remainder (except single core), got %d", cpu)
+	}
+
+	if memory != 1 && (memory%2) != 0 {
+		return nil, fmt.Errorf("expected the number of memory must be divisible by 2 without a remainder (except single memory), got %d", memory)
+	}
+
+	if cpu/memory > 2 || memory/cpu > 12 || (cpu/memory == 2 && cpu%memory != 0) || (memory/cpu == 12 && memory%cpu != 0) {
 		return nil, fmt.Errorf("the ratio of cpu to memory should be range of 2:1 ~ 1:12, got %d:%d", cpu, memory)
 	}
 
-	if memory/cpu == 1 || memory/cpu == 2 || memory/cpu == 4 || memory/cpu == 8 {
+	if (memory/cpu == 1 || memory/cpu == 2 || memory/cpu == 4 || memory/cpu == 8) && memory%cpu == 0 {
 		return nil, fmt.Errorf("instance type is invalid, expected %q like %q,"+
 			"the Type can be highcpu, basic, standard, highmem when the ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8", "n-Type-CPU", "n-standard-1")
 	}
@@ -87,14 +95,6 @@ func parseInstanceTypeByCustomize(splited ...string) (*InstanceType, error) {
 		return nil, fmt.Errorf("expected memory to be in the range (1 - 128),got %d", memory)
 	}
 
-	if cpu != 1 && (cpu%2) != 0 {
-		return nil, fmt.Errorf("expected the number of cores of cpu must be divisible by 2 without a remainder (except single core), got %d", cpu)
-	}
-
-	if memory != 1 && (memory%2) != 0 {
-		return nil, fmt.Errorf("expected the number of memory must be divisible by 2 without a remainder (except single memory), got %d", memory)
-	}
-
 	t := &InstanceType{}
 	t.HostType = hostType
 	t.HostScaleType = hostScaleType
@@ -103,7 +103,7 @@ func parseInstanceTypeByCustomize(splited ...string) (*InstanceType, error) {
 	return t, nil
 }
 
-var availableOutstandingCpu = []int{4, 8, 16, 32, 64}
+var availableOutstandingCpu = []int{2, 4, 8, 16, 32, 64, 96}
 
 func parseInstanceTypeByNormal(split ...string) (*InstanceType, error) {
 	if len(split) != 3 {
@@ -111,15 +111,16 @@ func parseInstanceTypeByNormal(split ...string) (*InstanceType, error) {
 	}
 
 	hostType := split[0]
-	err := CheckStringIn(hostType, []string{"n", "o"})
+	err := CheckStringIn(hostType, []string{"n", "o", "c"})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("instance type is invalid, the host type of %q must be one of %#v", "instance_type", []string{"n", "o", "c"})
 	}
 
 	hostScaleType := split[1]
 
 	if scale, ok := instanceTypeScaleMap[hostScaleType]; !ok {
-		return nil, fmt.Errorf("instance type is invalid, expected like n-standard-1")
+		return nil, fmt.Errorf("instance type is invalid, expected like %q,"+
+			"the Type can be highcpu, basic, standard, highmem when the ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8, got %q ", "n-standard-1", hostScaleType)
 	} else {
 		cpu, err := strconv.Atoi(split[2])
 		if err != nil {
@@ -132,7 +133,7 @@ func parseInstanceTypeByNormal(split ...string) (*InstanceType, error) {
 
 		if hostType == "o" {
 			if err := CheckIntIn(cpu, availableOutstandingCpu); err != nil {
-				return nil, fmt.Errorf("expected cpu of outstanding instancetype %q", err)
+				return nil, fmt.Errorf("expected cpu of `O` instance type must be one of %#v, got %q", availableOutstandingCpu, cpu)
 			}
 
 			if hostScaleType == "highmem" && cpu == 64 {
@@ -140,11 +141,11 @@ func parseInstanceTypeByNormal(split ...string) (*InstanceType, error) {
 			}
 		} else {
 			if hostScaleType == "highmem" && cpu > 16 {
-				return nil, fmt.Errorf("expected cpu to be in the range (1 - 16) for normal highmem instance type, got %d", cpu)
+				return nil, fmt.Errorf("expected cpu to be in the range (1 - 16) for `N` and `C` highmem instance type, got %d", cpu)
 			}
 
 			if cpu < 1 || 32 < cpu {
-				return nil, fmt.Errorf("expected cpu to be in the range (1 - 32) for normal instance type, got %d", cpu)
+				return nil, fmt.Errorf("expected cpu to be in the range (1 - 32) for `N` and `C` instance type, got %d", cpu)
 			}
 		}
 

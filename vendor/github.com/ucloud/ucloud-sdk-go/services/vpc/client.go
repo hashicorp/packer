@@ -14,7 +14,7 @@ type VPCClient struct {
 
 // NewClient will return a instance of VPCClient
 func NewClient(config *ucloud.Config, credential *auth.Credential) *VPCClient {
-	meta := ucloud.ClientMeta{Product: "VPC2.0"}
+	meta := ucloud.ClientMeta{Product: "VPC"}
 	client := ucloud.NewClientWithMeta(config, credential, meta)
 	return &VPCClient{
 		client,
