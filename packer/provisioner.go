@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
 	"sync"
 	"time"
 
@@ -42,7 +43,8 @@ type ProvisionHook struct {
 	// be prepared (by calling Prepare) at some earlier stage.
 	Provisioners []*HookedProvisioner
 
-	HCL2Prepare func(typeName string, data map[string]interface{}) (Provisioner, hcl.Diagnostics)
+	ParentBuildType string
+	HCL2Prepare     func(buildType string, data map[string]interface{}) ([]CoreBuildProvisioner, hcl.Diagnostics)
 }
 
 // Provisioners interpolate most of their fields in the prepare stage; this
@@ -113,6 +115,10 @@ func CastDataToMap(data interface{}) map[string]interface{} {
 	return cast
 }
 
+func typeName(i interface{}) string {
+	return reflect.Indirect(reflect.ValueOf(i)).Type().Name()
+}
+
 // Runs the provisioners in order.
 func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Communicator, data interface{}) error {
 	// Shortcut
@@ -126,18 +132,40 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Commun
 				"`communicator` config was set to \"none\". If you have any provisioners\n" +
 				"then a communicator is required. Please fix this to continue.")
 	}
+
+	cast := CastDataToMap(data)
+
+	if h.HCL2Prepare != nil {
+		// For HCL2, decode and prepare Provisioners now to interpolate build variables
+		coreP, diags := h.HCL2Prepare(h.ParentBuildType, cast)
+		if diags.HasErrors() {
+			return diags
+		}
+		for i, p := range coreP {
+			var pConfig interface{}
+			if len(p.config) > 0 {
+				pConfig = p.config[0]
+			}
+
+			if typeName(h.Provisioners[i].Provisioner) == typeName(DebuggedProvisioner{}) {
+				h.Provisioners[i] = &HookedProvisioner{
+					Provisioner: &DebuggedProvisioner{Provisioner: p.Provisioner},
+					Config:      pConfig,
+					TypeName:    p.PType,
+				}
+				continue
+			}
+
+			h.Provisioners[i] = &HookedProvisioner{
+				Provisioner: p.Provisioner,
+				Config:      pConfig,
+				TypeName:    p.PType,
+			}
+		}
+	}
+
 	for _, p := range h.Provisioners {
 		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
-
-		cast := CastDataToMap(data)
-
-		if h.HCL2Prepare != nil {
-			provisioner, diags := h.HCL2Prepare(p.TypeName, cast)
-			if diags.HasErrors() {
-				return diags
-			}
-			p.Provisioner = provisioner
-		}
 
 		err := p.Provisioner.Provision(ctx, ui, comm, cast)
 

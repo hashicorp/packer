@@ -285,20 +285,18 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 	return res, diags
 }
 
-func (cfg *PackerConfig) HCL2ProvisionerPrepare(typeName string, data map[string]interface{}) (packer.Provisioner, hcl.Diagnostics) {
+// HCL2ProvisionerPrepare is used by the ProvisionHook at the runtime in the provision step
+// to interpolate any build variable by decoding and preparing it again.
+func (cfg *PackerConfig) HCL2ProvisionerPrepare(srcType string, data map[string]interface{}) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	// This will interpolate build variables by decoding the provisioner block again
 	var diags hcl.Diagnostics
-	if data == nil {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary: fmt.Sprintf("failed loading %s", typeName),
-			Detail:  "unable to prepare provisioner with build variables interpolation",
-		})
-		return nil, diags
-	}
 
 	for _, build := range cfg.Builds {
 		for _, from := range build.Sources {
 			src := cfg.Sources[from.Ref()]
+			if src.Ref().String() != srcType {
+				continue
+			}
 
 			variables := make(Variables)
 			for k, v := range data {
@@ -319,22 +317,20 @@ func (cfg *PackerConfig) HCL2ProvisionerPrepare(typeName string, data map[string
 				buildAccessor: cty.ObjectVal(variablesVal),
 			}
 
-			for _, pb := range build.ProvisionerBlocks {
-				if pb.PType != typeName {
-					continue
-				}
-				return cfg.getProvisioner(src, pb, cfg.EvalContext(generatedVariables))
-			}
+			return cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(generatedVariables))
 		}
 	}
+
 	diags = append(diags, &hcl.Diagnostic{
-		Summary: fmt.Sprintf("failed loading %s", typeName),
+		Summary: fmt.Sprintf("failed loading provisioners"),
 		Detail:  "unable to prepare provisioner with build variables interpolation",
 	})
 	return nil, diags
 }
 
-func (cfg *PackerConfig) HCL2PProcessorsPrepare(builderArtifact packer.Artifact) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+// HCL2PostProcessorsPrepare is used by the CoreBuild at the runtime, after running the build and before running the post-processors,
+// to interpolate any build variable by decoding and preparing it.
+func (cfg *PackerConfig) HCL2PostProcessorsPrepare(builderArtifact packer.Artifact, srcType string) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	// This will interpolate build variables by decoding and preparing the post-processor block again
 	var diags hcl.Diagnostics
 	generatedData := make(map[string]interface{})
@@ -348,6 +344,9 @@ func (cfg *PackerConfig) HCL2PProcessorsPrepare(builderArtifact packer.Artifact)
 	for _, build := range cfg.Builds {
 		for _, from := range build.Sources {
 			src := cfg.Sources[from.Ref()]
+			if src.Ref().String() != srcType {
+				continue
+			}
 
 			variables := make(Variables)
 			for k, v := range generatedData {
@@ -372,8 +371,8 @@ func (cfg *PackerConfig) HCL2PProcessorsPrepare(builderArtifact packer.Artifact)
 		}
 	}
 	diags = append(diags, &hcl.Diagnostic{
-		Summary: fmt.Sprintf("failed loading post-provisioner"),
-		Detail:  "unable to prepare provisioner with build variables interpolation",
+		Summary: fmt.Sprintf("failed loading post-processors"),
+		Detail:  "unable to prepare post-processors with build variables interpolation",
 	})
 	return nil, diags
 }
@@ -489,7 +488,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				Provisioners:              provisioners,
 				PostProcessors:            pps,
 				HCL2ProvisionerPrepare:    cfg.HCL2ProvisionerPrepare,
-				HCL2PostProcessorsPrepare: cfg.HCL2PProcessorsPrepare,
+				HCL2PostProcessorsPrepare: cfg.HCL2PostProcessorsPrepare,
 				Prepared:                  true,
 			}
 			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
@@ -515,7 +514,7 @@ func setBuildVariables(generatedVars map[string]string) Variables {
 	variables := make(Variables)
 	for k := range generatedVars {
 		variables[k] = &Variable{
-			DefaultValue: cty.UnknownVal(cty.String),
+			DefaultValue: cty.StringVal("unknown"), // TODO @sylviamoss change this to cty.UnknownVal(cty.String)
 			Type:         cty.String,
 		}
 	}
