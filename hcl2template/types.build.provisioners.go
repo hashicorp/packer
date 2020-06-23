@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
 )
 
 // OnlyExcept is a struct that is meant to be embedded that contains the
@@ -166,4 +167,37 @@ func (cfg *PackerConfig) startProvisioner(source SourceBlock, pb *ProvisionerBlo
 		return nil, diags
 	}
 	return provisioner, diags
+}
+
+type provisionerPrepare struct {
+	cfg               *PackerConfig
+	provisionersBlock []*ProvisionerBlock
+	src               SourceRef
+}
+
+// HCL2ProvisionerPrepare is used by the ProvisionHook at the runtime in the provision step
+// to interpolate any build variable by decoding and preparing it again.
+func (pp *provisionerPrepare) HCL2ProvisionerPrepare(data map[string]interface{}) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
+	src := pp.cfg.Sources[pp.src.Ref()]
+
+	variables := make(Variables)
+	for k, v := range data {
+		if value, ok := v.(string); ok {
+			variables[k] = &Variable{
+				DefaultValue: cty.StringVal(value),
+				Type:         cty.String,
+			}
+		}
+	}
+	variablesVal, _ := variables.Values()
+
+	generatedVariables := map[string]cty.Value{
+		sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
+			"type": cty.StringVal(src.Type),
+			"name": cty.StringVal(src.Name),
+		}),
+		buildAccessor: cty.ObjectVal(variablesVal),
+	}
+
+	return pp.cfg.getCoreBuildProvisioners(src, pp.provisionersBlock, pp.cfg.EvalContext(generatedVariables))
 }

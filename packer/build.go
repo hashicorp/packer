@@ -104,8 +104,8 @@ type CoreBuild struct {
 
 	// HCL2ProvisionerPrepare and HCL2PostProcessorsPrepare are used to interpolate any build variable by decoding and preparing
 	// the Provisioners and Post-Processors at runtime for HCL2 templates.
-	HCL2ProvisionerPrepare    func(buildName string, srcType string, data map[string]interface{}) ([]CoreBuildProvisioner, hcl.Diagnostics)
-	HCL2PostProcessorsPrepare func(buildName string, srcType string, builderArtifact Artifact) ([]CoreBuildPostProcessor, hcl.Diagnostics)
+	HCL2ProvisionerPrepare    func(data map[string]interface{}) ([]CoreBuildProvisioner, hcl.Diagnostics)
+	HCL2PostProcessorsPrepare func(builderArtifact Artifact) ([]CoreBuildPostProcessor, hcl.Diagnostics)
 
 	debug         bool
 	force         bool
@@ -269,17 +269,15 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 			hooks[HookProvision] = make([]Hook, 0, 1)
 		}
 
-		provisionHook := &ProvisionHook{
-			Provisioners:    hookedProvisioners,
-			ParentBuildName: b.BuildName,
-			ParentBuildType: b.Type,
-		}
+		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{
+			Provisioners: hookedProvisioners,
+		})
+	}
 
-		if b.HCL2ProvisionerPrepare != nil {
-			provisionHook.HCL2Prepare = b.HCL2ProvisionerPrepare
-		}
-
-		hooks[HookProvision] = append(hooks[HookProvision], provisionHook)
+	if b.HCL2ProvisionerPrepare != nil {
+		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{
+			HCL2Prepare: b.HCL2ProvisionerPrepare,
+		})
 	}
 
 	if b.CleanupProvisioner.PType != "" {
@@ -317,17 +315,18 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 	}
 
 	errors := make([]error, 0)
-	keepOriginalArtifact := len(b.PostProcessors) == 0
 
 	if b.HCL2PostProcessorsPrepare != nil {
 		// For HCL2, decode and prepare Post-Processors to interpolate build variables.
-		postProcessors, diags := b.HCL2PostProcessorsPrepare(b.BuildName, b.Type, builderArtifact)
+		postProcessors, diags := b.HCL2PostProcessorsPrepare(builderArtifact)
 		if diags.HasErrors() {
 			errors = append(errors, diags)
-		} else {
+		} else if len(postProcessors) > 0 {
 			b.PostProcessors = [][]CoreBuildPostProcessor{postProcessors}
 		}
 	}
+
+	keepOriginalArtifact := len(b.PostProcessors) == 0
 
 	// Run the post-processors
 PostProcessorRunSeqLoop:

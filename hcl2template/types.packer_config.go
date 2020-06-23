@@ -40,6 +40,7 @@ type PackerConfig struct {
 
 	except []glob.Glob
 	only   []glob.Glob
+	debug  bool
 }
 
 type ValidationOptions struct {
@@ -228,6 +229,12 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 				Provisioner: provisioner,
 			}
 		}
+		if cfg.debug {
+			provisioner = &packer.DebuggedProvisioner{
+				Provisioner: provisioner,
+			}
+		}
+
 		res = append(res, packer.CoreBuildProvisioner{
 			PType:       pb.PType,
 			PName:       pb.PName,
@@ -278,110 +285,14 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 	return res, diags
 }
 
-// HCL2ProvisionerPrepare is used by the ProvisionHook at the runtime in the provision step
-// to interpolate any build variable by decoding and preparing it again.
-func (cfg *PackerConfig) HCL2ProvisionerPrepare(buildName string, srcType string, data map[string]interface{}) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
-	// This will interpolate build variables by decoding the provisioner block again
-	var diags hcl.Diagnostics
-
-	for _, build := range cfg.Builds {
-		if build.Name != buildName {
-			continue
-		}
-		for _, from := range build.Sources {
-			src := cfg.Sources[from.Ref()]
-			if src.Ref().String() != srcType {
-				continue
-			}
-
-			variables := make(Variables)
-			for k, v := range data {
-				if value, ok := v.(string); ok {
-					variables[k] = &Variable{
-						DefaultValue: cty.StringVal(value),
-						Type:         cty.String,
-					}
-				}
-			}
-			variablesVal, _ := variables.Values()
-
-			generatedVariables := map[string]cty.Value{
-				sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
-					"type": cty.StringVal(src.Type),
-					"name": cty.StringVal(src.Name),
-				}),
-				buildAccessor: cty.ObjectVal(variablesVal),
-			}
-
-			return cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(generatedVariables))
-		}
-	}
-
-	diags = append(diags, &hcl.Diagnostic{
-		Summary: fmt.Sprintf("failed loading provisioners"),
-		Detail:  "unable to prepare provisioner with build variables interpolation",
-	})
-	return nil, diags
-}
-
-// HCL2PostProcessorsPrepare is used by the CoreBuild at the runtime, after running the build and before running the post-processors,
-// to interpolate any build variable by decoding and preparing it.
-func (cfg *PackerConfig) HCL2PostProcessorsPrepare(buildName string, srcType string, builderArtifact packer.Artifact) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
-	// This will interpolate build variables by decoding and preparing the post-processor block again
-	var diags hcl.Diagnostics
-	generatedData := make(map[string]interface{})
-	artifactSateData := builderArtifact.State("generated_data")
-	if artifactSateData != nil {
-		for k, v := range artifactSateData.(map[interface{}]interface{}) {
-			generatedData[k.(string)] = v
-		}
-	}
-
-	for _, build := range cfg.Builds {
-		if build.Name != buildName {
-			continue
-		}
-		for _, from := range build.Sources {
-			src := cfg.Sources[from.Ref()]
-			if src.Ref().String() != srcType {
-				continue
-			}
-
-			variables := make(Variables)
-			for k, v := range generatedData {
-				if value, ok := v.(string); ok {
-					variables[k] = &Variable{
-						DefaultValue: cty.StringVal(value),
-						Type:         cty.String,
-					}
-				}
-			}
-			variablesVal, _ := variables.Values()
-
-			generatedVariables := map[string]cty.Value{
-				sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
-					"type": cty.StringVal(src.Type),
-					"name": cty.StringVal(src.Name),
-				}),
-				buildAccessor: cty.ObjectVal(variablesVal),
-			}
-
-			return cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(generatedVariables))
-		}
-	}
-	diags = append(diags, &hcl.Diagnostic{
-		Summary: fmt.Sprintf("failed loading post-processors"),
-		Detail:  "unable to prepare post-processors with build variables interpolation",
-	})
-	return nil, diags
-}
-
 // GetBuilds returns a list of packer Build based on the HCL2 parsed build
 // blocks. All Builders, Provisioners and Post Processors will be started and
 // configured.
 func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build, hcl.Diagnostics) {
 	res := []packer.Build{}
 	var diags hcl.Diagnostics
+
+	cfg.debug = opts.Debug
 
 	for _, build := range cfg.Builds {
 		for _, from := range build.Sources {
@@ -469,27 +380,29 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				buildAccessor: cty.ObjectVal(buildVariables),
 			}
 
-			provisioners, moreDiags := cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables))
+			_, moreDiags = cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			postProcessors, moreDiags := cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables))
-			pps := [][]packer.CoreBuildPostProcessor{}
-			if len(postProcessors) > 0 {
-				pps = [][]packer.CoreBuildPostProcessor{postProcessors}
-			}
+			_, moreDiags = cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
 
 			pcb.Builder = builder
-			pcb.Provisioners = provisioners
-			pcb.PostProcessors = pps
 			pcb.Prepared = true
-			pcb.HCL2ProvisionerPrepare = cfg.HCL2ProvisionerPrepare
-			pcb.HCL2PostProcessorsPrepare = cfg.HCL2PostProcessorsPrepare
+			pcb.HCL2ProvisionerPrepare = (&provisionerPrepare{
+				cfg:               cfg,
+				provisionersBlock: build.ProvisionerBlocks,
+				src:               from,
+			}).HCL2ProvisionerPrepare
+			pcb.HCL2PostProcessorsPrepare = (&postProcessorsPrepare{
+				cfg:               cfg,
+				provisionersBlock: build.PostProcessors,
+				src:               from,
+			}).HCL2PostProcessorsPrepare
 
 			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
 			// we did all the prep here.

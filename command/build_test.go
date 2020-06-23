@@ -128,25 +128,25 @@ func TestBuild(t *testing.T) {
 			fileCheck: fileCheck{
 				expectedContent: map[string]string{
 					"manifest.json": `{
-  "builds": [
-    {
-      "name": "test",
-      "builder_type": "null",
-      "files": null,
-      "artifact_id": "Null",
-      "packer_run_uuid": "",
-      "custom_data": null
-    },
-    {
-      "name": "potato",
-      "builder_type": "null",
-      "files": null,
-      "artifact_id": "Null",
-      "packer_run_uuid": "",
-      "custom_data": null
-    }
-  ],
-  "last_run_uuid": ""
+ "builds": [
+   {
+     "name": "test",
+     "builder_type": "null",
+     "files": null,
+     "artifact_id": "Null",
+     "packer_run_uuid": "",
+     "custom_data": null
+   },
+   {
+     "name": "potato",
+     "builder_type": "null",
+     "files": null,
+     "artifact_id": "Null",
+     "packer_run_uuid": "",
+     "custom_data": null
+   }
+ ],
+ "last_run_uuid": ""
 }`,
 				},
 			},
@@ -166,17 +166,17 @@ func TestBuild(t *testing.T) {
 				},
 				expectedContent: map[string]string{
 					"manifest.json": `{
-  "builds": [
-    {
-      "name": "test",
-      "builder_type": "null",
-      "files": null,
-      "artifact_id": "Null",
-      "packer_run_uuid": "",
-      "custom_data": null
-    }
-  ],
-  "last_run_uuid": ""
+ "builds": [
+   {
+     "name": "test",
+     "builder_type": "null",
+     "files": null,
+     "artifact_id": "Null",
+     "packer_run_uuid": "",
+     "custom_data": null
+   }
+ ],
+ "last_run_uuid": ""
 }`,
 				},
 			},
@@ -192,17 +192,17 @@ func TestBuild(t *testing.T) {
 			fileCheck: fileCheck{
 				expectedContent: map[string]string{
 					"manifest.json": `{
-  "builds": [
-    {
-      "name": "potato",
-      "builder_type": "null",
-      "files": null,
-      "artifact_id": "Null",
-      "packer_run_uuid": "",
-      "custom_data": null
-    }
-  ],
-  "last_run_uuid": ""
+ "builds": [
+   {
+     "name": "potato",
+     "builder_type": "null",
+     "files": null,
+     "artifact_id": "Null",
+     "packer_run_uuid": "",
+     "custom_data": null
+   }
+ ],
+ "last_run_uuid": ""
 }`,
 				},
 			},
@@ -228,8 +228,8 @@ func TestBuild(t *testing.T) {
 				testFixture("hcl-only-except"),
 			},
 			fileCheck: fileCheck{
-				notExpected: []string{"cherry.txt"},
 				expected:    []string{"chocolate.txt", "vanilla.txt"},
+				notExpected: []string{"cherry.txt"},
 			},
 		},
 	}
@@ -344,61 +344,61 @@ func TestBuildProvisionAndPosProcessWithBuildVariablesSharing(t *testing.T) {
 	tc := []struct {
 		name             string
 		args             []string
-		expectedfiles    []string
+		expectedFiles    []string
 		notExpectedFiles []string
 	}{
 		{
-			"JSON: basic template",
-			[]string{
+			name: "JSON: basic template",
+			args: []string{
 				filepath.Join(testFixture("build-variable-sharing"), "template.json"),
 			},
-			[]string{
+			expectedFiles: []string{
 				"provisioner.Null.txt",
 				"post-processor.Null.txt",
 			},
-			[]string{},
+			notExpectedFiles: []string{},
 		},
 		{
-			"HCL2: basic template",
-			[]string{
+			name: "HCL2: basic template",
+			args: []string{
 				filepath.Join(testFixture("build-variable-sharing"), "basic_template.pkr.hcl"),
 			},
-			[]string{
+			expectedFiles: []string{
 				"provisioner.Null.txt",
 				"post-processor.Null.txt",
 			},
-			[]string{},
+			notExpectedFiles: []string{},
 		},
 		{
-			"HCL2: basic template with build variables within HCL function",
-			[]string{
+			name: "HCL2: basic template with build variables within HCL function",
+			args: []string{
 				filepath.Join(testFixture("build-variable-sharing"), "basic_template_with_hcl_func.pkr.hcl"),
 			},
-			[]string{
+			expectedFiles: []string{
 				"provisioner.Null.txt",
 				"provisioner.NULL.txt",
 				"post-processor.Null.txt",
 				"post-processor.NULL.txt",
 			},
-			[]string{},
+			notExpectedFiles: []string{},
 		},
 		{
-			"HCL2: basic template with named build",
-			[]string{
+			name: "HCL2: basic template with named build",
+			args: []string{
 				filepath.Join(testFixture("build-variable-sharing"), "named_build.pkr.hcl"),
 			},
-			[]string{
+			expectedFiles: []string{
 				"provisioner.Null.txt",
 				"post-processor.Null.txt",
 			},
-			[]string{},
+			notExpectedFiles: []string{},
 		},
 		{
-			"HCL2: multiple build block sharing same sources",
-			[]string{
+			name: "HCL2: multiple build block sharing same sources",
+			args: []string{
 				filepath.Join(testFixture("build-variable-sharing"), "multiple_build_blocks.pkr.hcl"),
 			},
-			[]string{
+			expectedFiles: []string{
 				"vanilla.chocolate.provisioner.Null.txt",
 				"vanilla.chocolate.post-processor.Null.txt",
 				"apple.chocolate.provisioner.Null.txt",
@@ -406,18 +406,18 @@ func TestBuildProvisionAndPosProcessWithBuildVariablesSharing(t *testing.T) {
 				"sugar.banana.provisioner.Null.txt",
 				"sugar.banana.post-processor.Null.txt",
 			},
-			[]string{},
+			notExpectedFiles: []string{},
 		},
 		{
-			"HCL2: multiple sources build with only/except set for provisioner and post-processors",
-			[]string{
+			name: "HCL2: multiple sources build with only/except set for provisioner and post-processors",
+			args: []string{
 				filepath.Join(testFixture("build-variable-sharing"), "multiple_source_build.pkr.hcl"),
 			},
-			[]string{
+			expectedFiles: []string{
 				"all-provisioner.Null.txt",
 				"all-post-processor.Null.txt",
 			},
-			[]string{
+			notExpectedFiles: []string{
 				"chocolate-provisioner.Null.txt",
 				"banana-provisioner.Null.txt",
 				"chocolate-post-processor.Null.txt",
@@ -428,14 +428,14 @@ func TestBuildProvisionAndPosProcessWithBuildVariablesSharing(t *testing.T) {
 
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
-			defer cleanup(tt.expectedfiles...)
+			defer cleanup(tt.expectedFiles...)
 			defer cleanup(tt.notExpectedFiles...)
 
 			if code := c.Run(tt.args); code != 0 {
 				fatalCommand(t, c.Meta)
 			}
 
-			for _, f := range tt.expectedfiles {
+			for _, f := range tt.expectedFiles {
 				if !fileExists(f) {
 					t.Errorf("Expected to find %s", f)
 				}
