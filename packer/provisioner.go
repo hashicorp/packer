@@ -43,8 +43,9 @@ type ProvisionHook struct {
 	// be prepared (by calling Prepare) at some earlier stage.
 	Provisioners []*HookedProvisioner
 
+	ParentBuildName string
 	ParentBuildType string
-	HCL2Prepare     func(buildType string, data map[string]interface{}) ([]CoreBuildProvisioner, hcl.Diagnostics)
+	HCL2Prepare     func(buildName string, buildType string, data map[string]interface{}) ([]CoreBuildProvisioner, hcl.Diagnostics)
 }
 
 // Provisioners interpolate most of their fields in the prepare stage; this
@@ -137,7 +138,7 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Commun
 
 	if h.HCL2Prepare != nil {
 		// For HCL2, decode and prepare Provisioners now to interpolate build variables
-		coreP, diags := h.HCL2Prepare(h.ParentBuildType, cast)
+		coreP, diags := h.HCL2Prepare(h.ParentBuildName, h.ParentBuildType, cast)
 		if diags.HasErrors() {
 			return diags
 		}

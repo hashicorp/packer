@@ -104,8 +104,8 @@ type CoreBuild struct {
 
 	// HCL2ProvisionerPrepare and HCL2PostProcessorsPrepare are used to interpolate any build variable by decoding and preparing
 	// the Provisioners and Post-Processors at runtime for HCL2 templates.
-	HCL2ProvisionerPrepare    func(srcType string, data map[string]interface{}) ([]CoreBuildProvisioner, hcl.Diagnostics)
-	HCL2PostProcessorsPrepare func(builderArtifact Artifact, srcRef string) ([]CoreBuildPostProcessor, hcl.Diagnostics)
+	HCL2ProvisionerPrepare    func(buildName string, srcType string, data map[string]interface{}) ([]CoreBuildProvisioner, hcl.Diagnostics)
+	HCL2PostProcessorsPrepare func(buildName string, srcType string, builderArtifact Artifact) ([]CoreBuildPostProcessor, hcl.Diagnostics)
 
 	debug         bool
 	force         bool
@@ -271,6 +271,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 
 		provisionHook := &ProvisionHook{
 			Provisioners:    hookedProvisioners,
+			ParentBuildName: b.BuildName,
 			ParentBuildType: b.Type,
 		}
 
@@ -320,7 +321,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 
 	if b.HCL2PostProcessorsPrepare != nil {
 		// For HCL2, decode and prepare Post-Processors to interpolate build variables.
-		postProcessors, diags := b.HCL2PostProcessorsPrepare(builderArtifact, b.Type)
+		postProcessors, diags := b.HCL2PostProcessorsPrepare(b.BuildName, b.Type, builderArtifact)
 		if diags.HasErrors() {
 			errors = append(errors, diags)
 		} else {

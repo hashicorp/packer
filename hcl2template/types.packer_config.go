@@ -205,9 +205,28 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 		if pb.OnlyExcept.Skip(source.Type + "." + source.Name) {
 			continue
 		}
-		provisioner, moreDiags := cfg.getProvisioner(source, pb, ectx)
+		provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx)
+		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
+		}
+		// If we're pausing, we wrap the provisioner in a special pauser.
+		if pb.PauseBefore != 0 {
+			provisioner = &packer.PausedProvisioner{
+				PauseBefore: pb.PauseBefore,
+				Provisioner: provisioner,
+			}
+		} else if pb.Timeout != 0 {
+			provisioner = &packer.TimeoutProvisioner{
+				Timeout:     pb.Timeout,
+				Provisioner: provisioner,
+			}
+		}
+		if pb.MaxRetries != 0 {
+			provisioner = &packer.RetriedProvisioner{
+				MaxRetries:  pb.MaxRetries,
+				Provisioner: provisioner,
+			}
 		}
 		res = append(res, packer.CoreBuildProvisioner{
 			PType:       pb.PType,
@@ -216,32 +235,6 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 		})
 	}
 	return res, diags
-}
-
-func (cfg *PackerConfig) getProvisioner(source SourceBlock, pb *ProvisionerBlock, ectx *hcl.EvalContext) (packer.Provisioner, hcl.Diagnostics) {
-	provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx)
-	if moreDiags.HasErrors() {
-		return nil, moreDiags
-	}
-	// If we're pausing, we wrap the provisioner in a special pauser.
-	if pb.PauseBefore != 0 {
-		provisioner = &packer.PausedProvisioner{
-			PauseBefore: pb.PauseBefore,
-			Provisioner: provisioner,
-		}
-	} else if pb.Timeout != 0 {
-		provisioner = &packer.TimeoutProvisioner{
-			Timeout:     pb.Timeout,
-			Provisioner: provisioner,
-		}
-	}
-	if pb.MaxRetries != 0 {
-		provisioner = &packer.RetriedProvisioner{
-			MaxRetries:  pb.MaxRetries,
-			Provisioner: provisioner,
-		}
-	}
-	return provisioner, nil
 }
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
@@ -287,11 +280,14 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 
 // HCL2ProvisionerPrepare is used by the ProvisionHook at the runtime in the provision step
 // to interpolate any build variable by decoding and preparing it again.
-func (cfg *PackerConfig) HCL2ProvisionerPrepare(srcType string, data map[string]interface{}) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
+func (cfg *PackerConfig) HCL2ProvisionerPrepare(buildName string, srcType string, data map[string]interface{}) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	// This will interpolate build variables by decoding the provisioner block again
 	var diags hcl.Diagnostics
 
 	for _, build := range cfg.Builds {
+		if build.Name != buildName {
+			continue
+		}
 		for _, from := range build.Sources {
 			src := cfg.Sources[from.Ref()]
 			if src.Ref().String() != srcType {
@@ -330,7 +326,7 @@ func (cfg *PackerConfig) HCL2ProvisionerPrepare(srcType string, data map[string]
 
 // HCL2PostProcessorsPrepare is used by the CoreBuild at the runtime, after running the build and before running the post-processors,
 // to interpolate any build variable by decoding and preparing it.
-func (cfg *PackerConfig) HCL2PostProcessorsPrepare(builderArtifact packer.Artifact, srcType string) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) HCL2PostProcessorsPrepare(buildName string, srcType string, builderArtifact packer.Artifact) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	// This will interpolate build variables by decoding and preparing the post-processor block again
 	var diags hcl.Diagnostics
 	generatedData := make(map[string]interface{})
@@ -342,6 +338,9 @@ func (cfg *PackerConfig) HCL2PostProcessorsPrepare(builderArtifact packer.Artifa
 	}
 
 	for _, build := range cfg.Builds {
+		if build.Name != buildName {
+			continue
+		}
 		for _, from := range build.Sources {
 			src := cfg.Sources[from.Ref()]
 			if src.Ref().String() != srcType {
@@ -515,7 +514,7 @@ func setBuildVariables(generatedVars map[string]string) Variables {
 	variables := make(Variables)
 	for k := range generatedVars {
 		variables[k] = &Variable{
-			DefaultValue: cty.StringVal("unknown"), // TODO @sylviamoss change this to cty.UnknownVal(cty.String)
+			DefaultValue: cty.StringVal("unknown"),
 			Type:         cty.String,
 		}
 	}

@@ -341,26 +341,112 @@ func TestBuildProvisionAndPosProcessWithBuildVariablesSharing(t *testing.T) {
 	c := &BuildCommand{
 		Meta: testMetaFile(t),
 	}
-
-	args := []string{
-		filepath.Join(testFixture("build-variable-sharing"), "template.json"),
+	tc := []struct {
+		name             string
+		args             []string
+		expectedfiles    []string
+		notExpectedFiles []string
+	}{
+		{
+			"JSON: basic template",
+			[]string{
+				filepath.Join(testFixture("build-variable-sharing"), "template.json"),
+			},
+			[]string{
+				"provisioner.Null.txt",
+				"post-processor.Null.txt",
+			},
+			[]string{},
+		},
+		{
+			"HCL2: basic template",
+			[]string{
+				filepath.Join(testFixture("build-variable-sharing"), "basic_template.pkr.hcl"),
+			},
+			[]string{
+				"provisioner.Null.txt",
+				"post-processor.Null.txt",
+			},
+			[]string{},
+		},
+		{
+			"HCL2: basic template with build variables within HCL function",
+			[]string{
+				filepath.Join(testFixture("build-variable-sharing"), "basic_template_with_hcl_func.pkr.hcl"),
+			},
+			[]string{
+				"provisioner.Null.txt",
+				"provisioner.NULL.txt",
+				"post-processor.Null.txt",
+				"post-processor.NULL.txt",
+			},
+			[]string{},
+		},
+		{
+			"HCL2: basic template with named build",
+			[]string{
+				filepath.Join(testFixture("build-variable-sharing"), "named_build.pkr.hcl"),
+			},
+			[]string{
+				"provisioner.Null.txt",
+				"post-processor.Null.txt",
+			},
+			[]string{},
+		},
+		{
+			"HCL2: multiple build block sharing same sources",
+			[]string{
+				filepath.Join(testFixture("build-variable-sharing"), "multiple_build_blocks.pkr.hcl"),
+			},
+			[]string{
+				"vanilla.chocolate.provisioner.Null.txt",
+				"vanilla.chocolate.post-processor.Null.txt",
+				"apple.chocolate.provisioner.Null.txt",
+				"apple.chocolate.post-processor.Null.txt",
+				"sugar.banana.provisioner.Null.txt",
+				"sugar.banana.post-processor.Null.txt",
+			},
+			[]string{},
+		},
+		{
+			"HCL2: multiple sources build with only/except set for provisioner and post-processors",
+			[]string{
+				filepath.Join(testFixture("build-variable-sharing"), "multiple_source_build.pkr.hcl"),
+			},
+			[]string{
+				"all-provisioner.Null.txt",
+				"all-post-processor.Null.txt",
+			},
+			[]string{
+				"chocolate-provisioner.Null.txt",
+				"banana-provisioner.Null.txt",
+				"chocolate-post-processor.Null.txt",
+				"banana-post-processor.Null.txt",
+			},
+		},
 	}
 
-	files := []string{
-		"provisioner.Null.txt",
-		"post-processor.Null.txt",
-	}
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			defer cleanup(tt.expectedfiles...)
+			defer cleanup(tt.notExpectedFiles...)
 
-	defer cleanup(files...)
+			if code := c.Run(tt.args); code != 0 {
+				fatalCommand(t, c.Meta)
+			}
 
-	if code := c.Run(args); code != 0 {
-		fatalCommand(t, c.Meta)
-	}
+			for _, f := range tt.expectedfiles {
+				if !fileExists(f) {
+					t.Errorf("Expected to find %s", f)
+				}
+			}
 
-	for _, f := range files {
-		if !fileExists(f) {
-			t.Errorf("Expected to find %s", f)
-		}
+			for _, f := range tt.notExpectedFiles {
+				if fileExists(f) {
+					t.Errorf("Not expected to find %s", f)
+				}
+			}
+		})
 	}
 }
 
