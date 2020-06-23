@@ -29,6 +29,10 @@ local.fruit: "banana"
 
   > <unnamed build 0>:
 
+    sources:
+
+      null.builder
+
     provisioners:
 
       shell-local
@@ -38,7 +42,7 @@ local.fruit: "banana"
       <no post-processor>
 
 `},
-		{[]string{"inspect", "-var=fruit=peach", filepath.Join(testFixture("hcl"), "vars", "fruit_string.pkr.hcl")}, nil, `Packer Inspect: HCL2 mode
+		{[]string{"inspect", "-var=fruit=peach", filepath.Join(testFixture("hcl"), "inspect", "fruit_string.pkr.hcl")}, nil, `Packer Inspect: HCL2 mode
 
 > input-variables:
 
@@ -48,6 +52,39 @@ var.fruit: "peach" [debug: {Type:cty.String,CmdValue:peach,VarfileValue:null,Env
 
 
 > builds:
+
+`},
+		{[]string{"inspect", "-var=fruit=peach", filepath.Join(testFixture("hcl"), "inspect")}, nil, `Packer Inspect: HCL2 mode
+
+> input-variables:
+
+var.fruit: "peach" [debug: {Type:cty.String,CmdValue:peach,VarfileValue:null,EnvValue:null,DefaultValue:banana}]
+
+> local-variables:
+
+
+> builds:
+
+  > aws_example_builder:
+
+  > Description: The builder of clouds !!
+
+Use it at will.
+
+
+    sources:
+
+      amazon-ebs.example-1
+
+      amazon-ebs.example-2
+
+    provisioners:
+
+      shell
+
+    post-processors:
+
+      manifest
 
 `},
 	}

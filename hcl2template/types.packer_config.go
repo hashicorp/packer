@@ -469,6 +469,16 @@ func (p *PackerConfig) printBuilds() string {
 			name = fmt.Sprintf("<unnamed build %d>", i)
 		}
 		fmt.Fprintf(out, "\n  > %s:\n", name)
+		if build.Description != "" {
+			fmt.Fprintf(out, "\n  > Description: %s\n", build.Description)
+		}
+		fmt.Fprintf(out, "\n    sources:\n")
+		if len(build.Sources) == 0 {
+			fmt.Fprintf(out, "\n      <no source>\n")
+		}
+		for _, source := range build.Sources {
+			fmt.Fprintf(out, "\n      %s\n", source)
+		}
 		fmt.Fprintf(out, "\n    provisioners:\n\n")
 		if len(build.ProvisionerBlocks) == 0 {
 			fmt.Fprintf(out, "      <no provisioner>\n")
@@ -485,7 +495,7 @@ func (p *PackerConfig) printBuilds() string {
 			fmt.Fprintf(out, "      <no post-processor>\n")
 		}
 		for _, pp := range build.PostProcessors {
-			str := strings.Join([]string{pp.PType, pp.PName}, ".")
+			str := pp.PType
 			if pp.PName != "" {
 				str = strings.Join([]string{pp.PType, pp.PName}, ".")
 			}
