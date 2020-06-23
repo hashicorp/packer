@@ -28,7 +28,7 @@ func TestPostProcessor_Configure(t *testing.T) {
 					ServiceAccountKeyFile: "",
 				},
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "both token and sa key file",

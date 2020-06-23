@@ -12,6 +12,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/any"
+	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -20,6 +21,9 @@ import (
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 	"github.com/yandex-cloud/go-sdk/pkg/sdkerrors"
 )
+
+// dummy import to avoid problems, when client app tries to unmarshall operation with empty response
+var _ = empty.Empty{}
 
 type Client = operation.OperationServiceClient
 type Proto = operation.Operation

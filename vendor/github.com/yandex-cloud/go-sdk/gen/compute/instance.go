@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
+	compute "github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
@@ -20,7 +20,14 @@ type InstanceServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
 
-var _ compute.InstanceServiceClient = &InstanceServiceClient{}
+// AddOneToOneNat implements compute.InstanceServiceClient
+func (c *InstanceServiceClient) AddOneToOneNat(ctx context.Context, in *compute.AddInstanceOneToOneNatRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return compute.NewInstanceServiceClient(conn).AddOneToOneNat(ctx, in, opts...)
+}
 
 // AttachDisk implements compute.InstanceServiceClient
 func (c *InstanceServiceClient) AttachDisk(ctx context.Context, in *compute.AttachInstanceDiskRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
@@ -85,6 +92,69 @@ func (c *InstanceServiceClient) List(ctx context.Context, in *compute.ListInstan
 	return compute.NewInstanceServiceClient(conn).List(ctx, in, opts...)
 }
 
+type InstanceIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *InstanceServiceClient
+	request *compute.ListInstancesRequest
+
+	items []*compute.Instance
+}
+
+func (c *InstanceServiceClient) InstanceIterator(ctx context.Context, folderId string, opts ...grpc.CallOption) *InstanceIterator {
+	return &InstanceIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &compute.ListInstancesRequest{
+			FolderId: folderId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *InstanceIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Instances
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *InstanceIterator) Value() *compute.Instance {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *InstanceIterator) Error() error {
+	return it.err
+}
+
 // ListOperations implements compute.InstanceServiceClient
 func (c *InstanceServiceClient) ListOperations(ctx context.Context, in *compute.ListInstanceOperationsRequest, opts ...grpc.CallOption) (*compute.ListInstanceOperationsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -92,6 +162,78 @@ func (c *InstanceServiceClient) ListOperations(ctx context.Context, in *compute.
 		return nil, err
 	}
 	return compute.NewInstanceServiceClient(conn).ListOperations(ctx, in, opts...)
+}
+
+type InstanceOperationsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *InstanceServiceClient
+	request *compute.ListInstanceOperationsRequest
+
+	items []*operation.Operation
+}
+
+func (c *InstanceServiceClient) InstanceOperationsIterator(ctx context.Context, instanceId string, opts ...grpc.CallOption) *InstanceOperationsIterator {
+	return &InstanceOperationsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &compute.ListInstanceOperationsRequest{
+			InstanceId: instanceId,
+			PageSize:   1000,
+		},
+	}
+}
+
+func (it *InstanceOperationsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListOperations(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Operations
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *InstanceOperationsIterator) Value() *operation.Operation {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *InstanceOperationsIterator) Error() error {
+	return it.err
+}
+
+// RemoveOneToOneNat implements compute.InstanceServiceClient
+func (c *InstanceServiceClient) RemoveOneToOneNat(ctx context.Context, in *compute.RemoveInstanceOneToOneNatRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return compute.NewInstanceServiceClient(conn).RemoveOneToOneNat(ctx, in, opts...)
 }
 
 // Restart implements compute.InstanceServiceClient
@@ -137,4 +279,13 @@ func (c *InstanceServiceClient) UpdateMetadata(ctx context.Context, in *compute.
 		return nil, err
 	}
 	return compute.NewInstanceServiceClient(conn).UpdateMetadata(ctx, in, opts...)
+}
+
+// UpdateNetworkInterface implements compute.InstanceServiceClient
+func (c *InstanceServiceClient) UpdateNetworkInterface(ctx context.Context, in *compute.UpdateInstanceNetworkInterfaceRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return compute.NewInstanceServiceClient(conn).UpdateNetworkInterface(ctx, in, opts...)
 }

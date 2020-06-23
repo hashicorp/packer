@@ -7,9 +7,11 @@ import (
 	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	empty "github.com/golang/protobuf/ptypes/empty"
 	_ "github.com/yandex-cloud/go-genproto/yandex/cloud"
+	_ "github.com/yandex-cloud/go-genproto/yandex/cloud/api"
+	operation "github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
+	field_mask "google.golang.org/genproto/protobuf/field_mask"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -288,6 +290,105 @@ func (m *CreateApiKeyResponse) GetSecret() string {
 	return ""
 }
 
+type UpdateApiKeyRequest struct {
+	// ID of the ApiKey resource to update.
+	// To get the API key ID, use a [ApiKeyService.List] request.
+	ApiKeyId string `protobuf:"bytes,1,opt,name=api_key_id,json=apiKeyId,proto3" json:"api_key_id,omitempty"`
+	// Field mask that specifies which fields of the ApiKey resource are going to be updated.
+	UpdateMask *field_mask.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// Description of the API key.
+	Description          string   `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UpdateApiKeyRequest) Reset()         { *m = UpdateApiKeyRequest{} }
+func (m *UpdateApiKeyRequest) String() string { return proto.CompactTextString(m) }
+func (*UpdateApiKeyRequest) ProtoMessage()    {}
+func (*UpdateApiKeyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7823c2139024242e, []int{5}
+}
+
+func (m *UpdateApiKeyRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateApiKeyRequest.Unmarshal(m, b)
+}
+func (m *UpdateApiKeyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateApiKeyRequest.Marshal(b, m, deterministic)
+}
+func (m *UpdateApiKeyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateApiKeyRequest.Merge(m, src)
+}
+func (m *UpdateApiKeyRequest) XXX_Size() int {
+	return xxx_messageInfo_UpdateApiKeyRequest.Size(m)
+}
+func (m *UpdateApiKeyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateApiKeyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateApiKeyRequest proto.InternalMessageInfo
+
+func (m *UpdateApiKeyRequest) GetApiKeyId() string {
+	if m != nil {
+		return m.ApiKeyId
+	}
+	return ""
+}
+
+func (m *UpdateApiKeyRequest) GetUpdateMask() *field_mask.FieldMask {
+	if m != nil {
+		return m.UpdateMask
+	}
+	return nil
+}
+
+func (m *UpdateApiKeyRequest) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+type UpdateApiKeyMetadata struct {
+	// ID of the ApiKey resource that is being updated.
+	ApiKeyId             string   `protobuf:"bytes,1,opt,name=api_key_id,json=apiKeyId,proto3" json:"api_key_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UpdateApiKeyMetadata) Reset()         { *m = UpdateApiKeyMetadata{} }
+func (m *UpdateApiKeyMetadata) String() string { return proto.CompactTextString(m) }
+func (*UpdateApiKeyMetadata) ProtoMessage()    {}
+func (*UpdateApiKeyMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7823c2139024242e, []int{6}
+}
+
+func (m *UpdateApiKeyMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateApiKeyMetadata.Unmarshal(m, b)
+}
+func (m *UpdateApiKeyMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateApiKeyMetadata.Marshal(b, m, deterministic)
+}
+func (m *UpdateApiKeyMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateApiKeyMetadata.Merge(m, src)
+}
+func (m *UpdateApiKeyMetadata) XXX_Size() int {
+	return xxx_messageInfo_UpdateApiKeyMetadata.Size(m)
+}
+func (m *UpdateApiKeyMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateApiKeyMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateApiKeyMetadata proto.InternalMessageInfo
+
+func (m *UpdateApiKeyMetadata) GetApiKeyId() string {
+	if m != nil {
+		return m.ApiKeyId
+	}
+	return ""
+}
+
 type DeleteApiKeyRequest struct {
 	// ID of the API key to delete.
 	// To get the API key ID, use a [ApiKeyService.List] request.
@@ -301,7 +402,7 @@ func (m *DeleteApiKeyRequest) Reset()         { *m = DeleteApiKeyRequest{} }
 func (m *DeleteApiKeyRequest) String() string { return proto.CompactTextString(m) }
 func (*DeleteApiKeyRequest) ProtoMessage()    {}
 func (*DeleteApiKeyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_7823c2139024242e, []int{5}
+	return fileDescriptor_7823c2139024242e, []int{7}
 }
 
 func (m *DeleteApiKeyRequest) XXX_Unmarshal(b []byte) error {
@@ -329,13 +430,173 @@ func (m *DeleteApiKeyRequest) GetApiKeyId() string {
 	return ""
 }
 
+type DeleteApiKeyMetadata struct {
+	// ID of the API key that is being deleted.
+	ApiKeyId             string   `protobuf:"bytes,1,opt,name=api_key_id,json=apiKeyId,proto3" json:"api_key_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteApiKeyMetadata) Reset()         { *m = DeleteApiKeyMetadata{} }
+func (m *DeleteApiKeyMetadata) String() string { return proto.CompactTextString(m) }
+func (*DeleteApiKeyMetadata) ProtoMessage()    {}
+func (*DeleteApiKeyMetadata) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7823c2139024242e, []int{8}
+}
+
+func (m *DeleteApiKeyMetadata) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteApiKeyMetadata.Unmarshal(m, b)
+}
+func (m *DeleteApiKeyMetadata) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteApiKeyMetadata.Marshal(b, m, deterministic)
+}
+func (m *DeleteApiKeyMetadata) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteApiKeyMetadata.Merge(m, src)
+}
+func (m *DeleteApiKeyMetadata) XXX_Size() int {
+	return xxx_messageInfo_DeleteApiKeyMetadata.Size(m)
+}
+func (m *DeleteApiKeyMetadata) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteApiKeyMetadata.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteApiKeyMetadata proto.InternalMessageInfo
+
+func (m *DeleteApiKeyMetadata) GetApiKeyId() string {
+	if m != nil {
+		return m.ApiKeyId
+	}
+	return ""
+}
+
+type ListApiKeyOperationsRequest struct {
+	// ID of the key to list operations for.
+	ApiKeyId string `protobuf:"bytes,1,opt,name=api_key_id,json=apiKeyId,proto3" json:"api_key_id,omitempty"`
+	// The maximum number of results per page to return. If the number of available
+	// results is larger than [page_size],
+	// the service returns a [ListApiKeyOperationsResponse.next_page_token]
+	// that can be used to get the next page of results in subsequent list requests.
+	// Default value: 100.
+	PageSize int64 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Page token. To get the next page of results, set [page_token] to the
+	// [ListApiKeyOperationsResponse.next_page_token] returned by a previous list request.
+	PageToken            string   `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ListApiKeyOperationsRequest) Reset()         { *m = ListApiKeyOperationsRequest{} }
+func (m *ListApiKeyOperationsRequest) String() string { return proto.CompactTextString(m) }
+func (*ListApiKeyOperationsRequest) ProtoMessage()    {}
+func (*ListApiKeyOperationsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7823c2139024242e, []int{9}
+}
+
+func (m *ListApiKeyOperationsRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListApiKeyOperationsRequest.Unmarshal(m, b)
+}
+func (m *ListApiKeyOperationsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListApiKeyOperationsRequest.Marshal(b, m, deterministic)
+}
+func (m *ListApiKeyOperationsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListApiKeyOperationsRequest.Merge(m, src)
+}
+func (m *ListApiKeyOperationsRequest) XXX_Size() int {
+	return xxx_messageInfo_ListApiKeyOperationsRequest.Size(m)
+}
+func (m *ListApiKeyOperationsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListApiKeyOperationsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListApiKeyOperationsRequest proto.InternalMessageInfo
+
+func (m *ListApiKeyOperationsRequest) GetApiKeyId() string {
+	if m != nil {
+		return m.ApiKeyId
+	}
+	return ""
+}
+
+func (m *ListApiKeyOperationsRequest) GetPageSize() int64 {
+	if m != nil {
+		return m.PageSize
+	}
+	return 0
+}
+
+func (m *ListApiKeyOperationsRequest) GetPageToken() string {
+	if m != nil {
+		return m.PageToken
+	}
+	return ""
+}
+
+type ListApiKeyOperationsResponse struct {
+	// List of operations for the specified API key.
+	Operations []*operation.Operation `protobuf:"bytes,1,rep,name=operations,proto3" json:"operations,omitempty"`
+	// This token allows you to get the next page of results for list requests. If the number of results
+	// is larger than [ListApiKeyOperationsRequest.page_size], use the [next_page_token] as the value
+	// for the [ListApiKeyOperationsRequest.page_token] query parameter in the next list request.
+	// Each subsequent list request will have its own [next_page_token] to continue paging through the results.
+	NextPageToken        string   `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ListApiKeyOperationsResponse) Reset()         { *m = ListApiKeyOperationsResponse{} }
+func (m *ListApiKeyOperationsResponse) String() string { return proto.CompactTextString(m) }
+func (*ListApiKeyOperationsResponse) ProtoMessage()    {}
+func (*ListApiKeyOperationsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7823c2139024242e, []int{10}
+}
+
+func (m *ListApiKeyOperationsResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ListApiKeyOperationsResponse.Unmarshal(m, b)
+}
+func (m *ListApiKeyOperationsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ListApiKeyOperationsResponse.Marshal(b, m, deterministic)
+}
+func (m *ListApiKeyOperationsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ListApiKeyOperationsResponse.Merge(m, src)
+}
+func (m *ListApiKeyOperationsResponse) XXX_Size() int {
+	return xxx_messageInfo_ListApiKeyOperationsResponse.Size(m)
+}
+func (m *ListApiKeyOperationsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ListApiKeyOperationsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ListApiKeyOperationsResponse proto.InternalMessageInfo
+
+func (m *ListApiKeyOperationsResponse) GetOperations() []*operation.Operation {
+	if m != nil {
+		return m.Operations
+	}
+	return nil
+}
+
+func (m *ListApiKeyOperationsResponse) GetNextPageToken() string {
+	if m != nil {
+		return m.NextPageToken
+	}
+	return ""
+}
+
 func init() {
 	proto.RegisterType((*GetApiKeyRequest)(nil), "yandex.cloud.iam.v1.GetApiKeyRequest")
 	proto.RegisterType((*ListApiKeysRequest)(nil), "yandex.cloud.iam.v1.ListApiKeysRequest")
 	proto.RegisterType((*ListApiKeysResponse)(nil), "yandex.cloud.iam.v1.ListApiKeysResponse")
 	proto.RegisterType((*CreateApiKeyRequest)(nil), "yandex.cloud.iam.v1.CreateApiKeyRequest")
 	proto.RegisterType((*CreateApiKeyResponse)(nil), "yandex.cloud.iam.v1.CreateApiKeyResponse")
+	proto.RegisterType((*UpdateApiKeyRequest)(nil), "yandex.cloud.iam.v1.UpdateApiKeyRequest")
+	proto.RegisterType((*UpdateApiKeyMetadata)(nil), "yandex.cloud.iam.v1.UpdateApiKeyMetadata")
 	proto.RegisterType((*DeleteApiKeyRequest)(nil), "yandex.cloud.iam.v1.DeleteApiKeyRequest")
+	proto.RegisterType((*DeleteApiKeyMetadata)(nil), "yandex.cloud.iam.v1.DeleteApiKeyMetadata")
+	proto.RegisterType((*ListApiKeyOperationsRequest)(nil), "yandex.cloud.iam.v1.ListApiKeyOperationsRequest")
+	proto.RegisterType((*ListApiKeyOperationsResponse)(nil), "yandex.cloud.iam.v1.ListApiKeyOperationsResponse")
 }
 
 func init() {
@@ -343,54 +604,69 @@ func init() {
 }
 
 var fileDescriptor_7823c2139024242e = []byte{
-	// 602 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x94, 0xcf, 0x4f, 0x13, 0x41,
-	0x14, 0xc7, 0xb3, 0x14, 0x4b, 0xfb, 0x90, 0x80, 0x53, 0x82, 0xcd, 0x82, 0x06, 0x37, 0x2a, 0x05,
-	0xc3, 0xfe, 0x40, 0xe1, 0x20, 0x60, 0x02, 0x6a, 0x08, 0xd1, 0x83, 0x29, 0x9e, 0xbc, 0x34, 0xc3,
-	0xee, 0xb3, 0x4e, 0x68, 0x77, 0xd6, 0xce, 0x6c, 0x43, 0x31, 0x5e, 0x3c, 0x72, 0xf5, 0x0f, 0xf0,
-	0xcf, 0x81, 0xbb, 0x7f, 0x81, 0x89, 0x07, 0xff, 0x06, 0x4f, 0x66, 0x67, 0xa6, 0x40, 0xeb, 0x0a,
-	0xea, 0x71, 0xf7, 0xbd, 0xf9, 0x7e, 0xdf, 0xe7, 0xbd, 0x99, 0x07, 0x8b, 0x3d, 0x1a, 0x47, 0x78,
-	0xe8, 0x85, 0x2d, 0x9e, 0x46, 0x1e, 0xa3, 0x6d, 0xaf, 0x1b, 0x78, 0x34, 0x61, 0x8d, 0x03, 0xec,
-	0x35, 0x04, 0x76, 0xba, 0x2c, 0x44, 0x37, 0xe9, 0x70, 0xc9, 0x49, 0x45, 0xa7, 0xba, 0x2a, 0xd5,
-	0x65, 0xb4, 0xed, 0x76, 0x03, 0x7b, 0xae, 0xc9, 0x79, 0xb3, 0x85, 0xd9, 0x11, 0x8f, 0xc6, 0x31,
-	0x97, 0x54, 0x32, 0x1e, 0x0b, 0x7d, 0xc4, 0x9e, 0x35, 0x51, 0xf5, 0xb5, 0x9f, 0xbe, 0xf5, 0xb0,
-	0x9d, 0xc8, 0x9e, 0x09, 0xde, 0xb9, 0xc4, 0xda, 0xa4, 0xdc, 0x1a, 0x48, 0xe9, 0xd2, 0x16, 0x8b,
-	0x94, 0xbe, 0x0e, 0x3b, 0x4f, 0x60, 0x6a, 0x07, 0xe5, 0x56, 0xc2, 0x5e, 0x60, 0xaf, 0x8e, 0xef,
-	0x53, 0x14, 0x92, 0x2c, 0x01, 0xf4, 0xcb, 0x67, 0x51, 0xd5, 0x9a, 0xb7, 0x6a, 0xe5, 0xed, 0xeb,
-	0x3f, 0x4e, 0x02, 0xeb, 0xf8, 0x34, 0x18, 0xdd, 0xd8, 0x5c, 0xf5, 0xeb, 0x25, 0xaa, 0x0e, 0xec,
-	0x46, 0xce, 0x17, 0x0b, 0xc8, 0x4b, 0x26, 0x8c, 0x82, 0xe8, 0x4b, 0xac, 0x01, 0x31, 0xe4, 0x0d,
-	0x1a, 0x86, 0x3c, 0x8d, 0xe5, 0xb9, 0x54, 0xe9, 0x4c, 0x66, 0xca, 0xe4, 0x6c, 0xe9, 0x94, 0xdd,
-	0x88, 0x2c, 0x40, 0x39, 0xa1, 0x4d, 0x6c, 0x08, 0x76, 0x84, 0xd5, 0x91, 0x79, 0xab, 0x56, 0xd8,
-	0x86, 0x9f, 0x27, 0x41, 0xd1, 0x5f, 0x0e, 0x7c, 0xdf, 0xaf, 0x97, 0xb2, 0xe0, 0x1e, 0x3b, 0x42,
-	0x52, 0x03, 0x50, 0x89, 0x92, 0x1f, 0x60, 0x5c, 0x2d, 0x28, 0xe1, 0xf2, 0xf1, 0x69, 0x70, 0x6d,
-	0x63, 0x33, 0xf0, 0xfd, 0xba, 0x52, 0x79, 0x9d, 0xc5, 0x9c, 0x14, 0x2a, 0x03, 0x05, 0x8a, 0x84,
-	0xc7, 0x02, 0xc9, 0x1a, 0x94, 0x0c, 0xa4, 0xa8, 0x5a, 0xf3, 0x85, 0xda, 0xf8, 0xca, 0xac, 0x9b,
-	0x33, 0x1d, 0xd7, 0xb4, 0x66, 0x4c, 0x13, 0x0b, 0x72, 0x1f, 0x26, 0x63, 0x3c, 0x94, 0x8d, 0x0b,
-	0xee, 0x59, 0x9d, 0xe5, 0xfa, 0x44, 0xf6, 0xfb, 0xd5, 0x99, 0xed, 0x11, 0x54, 0x9e, 0x76, 0x90,
-	0x4a, 0x1c, 0xec, 0xed, 0xff, 0x36, 0xe6, 0x01, 0x8c, 0x47, 0x28, 0xc2, 0x0e, 0x4b, 0xb2, 0xe1,
-	0x69, 0xcb, 0x3e, 0xf0, 0xca, 0xea, 0x5a, 0xfd, 0x62, 0xd4, 0x89, 0x60, 0x7a, 0xd0, 0xdb, 0x30,
-	0x3f, 0x82, 0x31, 0xc3, 0xac, 0x1c, 0xaf, 0x40, 0x2e, 0x6a, 0x64, 0x32, 0x03, 0x45, 0x81, 0x61,
-	0x07, 0xa5, 0x01, 0x35, 0x5f, 0xce, 0x16, 0x54, 0x9e, 0x61, 0x0b, 0x87, 0x09, 0xff, 0xe1, 0xf6,
-	0xac, 0x7c, 0x2b, 0xc0, 0x84, 0x3e, 0xbd, 0xa7, 0x81, 0x49, 0x07, 0x46, 0xb3, 0x69, 0x91, 0x85,
-	0xdc, 0xca, 0x7e, 0xbf, 0x69, 0x76, 0xed, 0xea, 0x44, 0x4d, 0xef, 0xdc, 0xfc, 0xf4, 0xf5, 0xfb,
-	0xe7, 0x91, 0x1b, 0x64, 0xf2, 0xc2, 0x43, 0x51, 0x23, 0xe5, 0x50, 0xd8, 0x41, 0x49, 0xee, 0xe5,
-	0x2a, 0x0d, 0xbf, 0x0e, 0xfb, 0xb2, 0x9e, 0x39, 0x77, 0x95, 0xc7, 0x6d, 0x32, 0x37, 0xe4, 0xe1,
-	0x7d, 0x38, 0xef, 0xc9, 0x47, 0xd2, 0x83, 0xa2, 0x9e, 0x0f, 0xc9, 0xaf, 0x3e, 0xe7, 0xe2, 0xd8,
-	0x8b, 0x7f, 0x91, 0x69, 0x40, 0x6d, 0x55, 0xc4, 0xb4, 0x33, 0x0c, 0xfa, 0xd8, 0x5a, 0x22, 0x09,
-	0x14, 0xf5, 0xd0, 0xfe, 0x60, 0x9d, 0x33, 0x51, 0x7b, 0xc6, 0xd5, 0x3b, 0xc8, 0xed, 0xef, 0x20,
-	0xf7, 0x79, 0xb6, 0x83, 0xfa, 0xb0, 0x4b, 0x97, 0xc2, 0x6e, 0x6f, 0xbe, 0x59, 0x6f, 0x32, 0xf9,
-	0x2e, 0xdd, 0x77, 0x43, 0xde, 0xf6, 0xb4, 0xe7, 0xb2, 0xde, 0x46, 0x4d, 0xbe, 0xdc, 0xc4, 0x58,
-	0xa9, 0x7a, 0x39, 0x9b, 0x6c, 0x9d, 0xd1, 0xf6, 0x7e, 0x51, 0x85, 0x1f, 0xfe, 0x0a, 0x00, 0x00,
-	0xff, 0xff, 0x77, 0x3b, 0x11, 0x86, 0x66, 0x05, 0x00, 0x00,
+	// 834 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0x4d, 0x6f, 0x1b, 0x45,
+	0x18, 0xd6, 0xd6, 0x65, 0x6b, 0xbf, 0xa6, 0xb4, 0x8c, 0x03, 0xb5, 0xb6, 0x26, 0x72, 0x56, 0xd0,
+	0x38, 0x46, 0xde, 0x0f, 0xd3, 0xe6, 0x40, 0x5a, 0x24, 0x87, 0x8f, 0x2a, 0x82, 0x0a, 0xb4, 0xa5,
+	0x1c, 0xb8, 0x58, 0x13, 0xef, 0xc4, 0x8c, 0x6c, 0xef, 0x2e, 0x9e, 0xb5, 0x15, 0x07, 0x71, 0xe1,
+	0x46, 0xae, 0x5c, 0x91, 0xe0, 0xc4, 0x05, 0x4e, 0xf9, 0x13, 0xc9, 0x39, 0xfc, 0x05, 0x0e, 0x88,
+	0x9f, 0xc0, 0x09, 0xed, 0xcc, 0xd8, 0xde, 0xb5, 0xd7, 0x1f, 0x09, 0xea, 0xcd, 0xeb, 0x79, 0xe6,
+	0x7d, 0x9e, 0xf7, 0xe3, 0x79, 0x35, 0xb0, 0x33, 0xc2, 0x9e, 0x4b, 0x8e, 0xcd, 0x56, 0xd7, 0x1f,
+	0xb8, 0x26, 0xc5, 0x3d, 0x73, 0x68, 0x9b, 0x38, 0xa0, 0xcd, 0x0e, 0x19, 0x35, 0x19, 0xe9, 0x0f,
+	0x69, 0x8b, 0x18, 0x41, 0xdf, 0x0f, 0x7d, 0x54, 0x10, 0x50, 0x83, 0x43, 0x0d, 0x8a, 0x7b, 0xc6,
+	0xd0, 0xd6, 0x4a, 0x6d, 0xdf, 0x6f, 0x77, 0x49, 0x74, 0xc5, 0xc4, 0x9e, 0xe7, 0x87, 0x38, 0xa4,
+	0xbe, 0xc7, 0xc4, 0x15, 0xad, 0x2c, 0x4f, 0xf9, 0xd7, 0xe1, 0xe0, 0xc8, 0x3c, 0xa2, 0xa4, 0xeb,
+	0x36, 0x7b, 0x98, 0x75, 0xc6, 0x88, 0x04, 0x7f, 0x14, 0xc5, 0x0f, 0x48, 0x9f, 0x07, 0x91, 0x88,
+	0xad, 0x25, 0x0a, 0x25, 0xe4, 0x41, 0x02, 0x32, 0x09, 0x30, 0x17, 0xea, 0xad, 0x04, 0x6e, 0x88,
+	0xbb, 0xd4, 0x8d, 0x1d, 0xeb, 0x1f, 0xc0, 0xdd, 0xa7, 0x24, 0x6c, 0x04, 0xf4, 0x53, 0x32, 0x72,
+	0xc8, 0xb7, 0x03, 0xc2, 0x42, 0x54, 0x05, 0x18, 0x57, 0x83, 0xba, 0x45, 0xa5, 0xac, 0x54, 0x72,
+	0xfb, 0xaf, 0xfe, 0x7d, 0x6e, 0x2b, 0xa7, 0x17, 0xf6, 0xcd, 0xc7, 0x4f, 0x1e, 0x59, 0x4e, 0x16,
+	0xf3, 0x0b, 0x07, 0xae, 0xfe, 0x8b, 0x02, 0xe8, 0x33, 0xca, 0x64, 0x04, 0x36, 0x0e, 0xb1, 0x0b,
+	0x48, 0x16, 0xb2, 0x89, 0x5b, 0x2d, 0x7f, 0xe0, 0x85, 0xd3, 0x50, 0xd9, 0x49, 0x98, 0xbb, 0x12,
+	0xd3, 0x10, 0x90, 0x03, 0x17, 0x6d, 0x43, 0x2e, 0xc0, 0x6d, 0xd2, 0x64, 0xf4, 0x84, 0x14, 0x6f,
+	0x94, 0x95, 0x4a, 0x66, 0x1f, 0xfe, 0x3d, 0xb7, 0x55, 0xab, 0x66, 0x5b, 0x96, 0xe5, 0x64, 0xa3,
+	0xc3, 0xe7, 0xf4, 0x84, 0xa0, 0x0a, 0x00, 0x07, 0x86, 0x7e, 0x87, 0x78, 0xc5, 0x0c, 0x0f, 0x9c,
+	0x3b, 0xbd, 0xb0, 0x5f, 0x79, 0xfc, 0xc4, 0xb6, 0x2c, 0x87, 0x47, 0xf9, 0x32, 0x3a, 0xd3, 0x07,
+	0x50, 0x48, 0x08, 0x64, 0x81, 0xef, 0x31, 0x82, 0x76, 0x21, 0x2b, 0x93, 0x64, 0x45, 0xa5, 0x9c,
+	0xa9, 0xe4, 0xeb, 0xf7, 0x8d, 0x94, 0x66, 0x1b, 0xb2, 0x34, 0xb7, 0x44, 0xc6, 0x0c, 0x3d, 0x80,
+	0x3b, 0x1e, 0x39, 0x0e, 0x9b, 0x31, 0xf6, 0x48, 0x67, 0xce, 0xb9, 0x1d, 0xfd, 0xfd, 0xc5, 0x84,
+	0xf6, 0x04, 0x0a, 0x1f, 0xf6, 0x09, 0x0e, 0x49, 0xb2, 0xb6, 0xd7, 0x2d, 0xcc, 0xbb, 0x90, 0x77,
+	0x09, 0x6b, 0xf5, 0x69, 0x10, 0x35, 0x4f, 0x50, 0x8e, 0x13, 0xae, 0x3f, 0xda, 0x75, 0xe2, 0xa7,
+	0xba, 0x0b, 0x1b, 0x49, 0x6e, 0x99, 0xf3, 0x43, 0xb8, 0x25, 0x73, 0xe6, 0x8c, 0x2b, 0x52, 0x56,
+	0x45, 0xca, 0xe8, 0x4d, 0x50, 0x19, 0x69, 0xf5, 0x49, 0x28, 0x13, 0x95, 0x5f, 0xfa, 0xef, 0x0a,
+	0x14, 0x5e, 0x04, 0xee, 0x5c, 0x8a, 0x57, 0x18, 0x1f, 0xb4, 0x07, 0xf9, 0x01, 0x0f, 0xc1, 0xfd,
+	0xc1, 0x09, 0xf2, 0x75, 0xcd, 0x10, 0x16, 0x32, 0xc6, 0x16, 0x32, 0x3e, 0x89, 0x2c, 0xf4, 0x0c,
+	0xb3, 0x8e, 0x03, 0x02, 0x1e, 0xfd, 0x9e, 0xad, 0x49, 0x66, 0x69, 0x4d, 0x1e, 0xc2, 0x46, 0x5c,
+	0xec, 0x33, 0x12, 0x62, 0x17, 0x87, 0x18, 0x95, 0xe6, 0xd5, 0xc6, 0xc6, 0xbb, 0x01, 0x85, 0x8f,
+	0x48, 0x97, 0xfc, 0x8f, 0x14, 0x23, 0xe2, 0x78, 0x88, 0x35, 0x89, 0x7f, 0x56, 0xe0, 0xfe, 0x74,
+	0x6c, 0x3f, 0x1f, 0x9b, 0x9a, 0x5d, 0xa7, 0xc8, 0x2f, 0xc1, 0x54, 0x3f, 0x2a, 0x50, 0x4a, 0x97,
+	0x27, 0x47, 0xad, 0x01, 0x30, 0xd9, 0x44, 0x63, 0x83, 0x6d, 0x25, 0xa7, 0x6d, 0xba, 0xa9, 0x26,
+	0xf7, 0x9d, 0xd8, 0xa5, 0x75, 0x9d, 0x56, 0xff, 0x47, 0x85, 0xdb, 0x42, 0xc7, 0x73, 0xe1, 0x1a,
+	0xd4, 0x87, 0x9b, 0x91, 0x38, 0xb4, 0x9d, 0x3a, 0xde, 0xf3, 0xeb, 0x4a, 0xab, 0xac, 0x06, 0x8a,
+	0xbc, 0xf4, 0x7b, 0x3f, 0xfc, 0xf9, 0xd7, 0x4f, 0x37, 0x5e, 0x47, 0x77, 0x62, 0x5b, 0x99, 0xef,
+	0x05, 0x1f, 0x32, 0x4f, 0x49, 0x88, 0xde, 0x49, 0x8d, 0x34, 0xbb, 0x62, 0xb5, 0x65, 0xc6, 0xd3,
+	0xdf, 0xe6, 0x1c, 0x9b, 0xa8, 0x34, 0xc3, 0x61, 0x7e, 0x37, 0x6d, 0xf9, 0xf7, 0x68, 0x04, 0xaa,
+	0x30, 0x39, 0x4a, 0x57, 0x9f, 0xb2, 0x7d, 0xb4, 0x9d, 0x35, 0x90, 0x32, 0x51, 0x8d, 0x8b, 0xd8,
+	0xd0, 0x67, 0x13, 0x7d, 0x5f, 0xa9, 0xa2, 0x5f, 0x15, 0x50, 0x85, 0x99, 0x16, 0x70, 0xa7, 0xac,
+	0x05, 0x6d, 0x75, 0xf7, 0xf5, 0x83, 0xb3, 0xcb, 0xea, 0xe6, 0x02, 0x9f, 0xaa, 0xe2, 0x9b, 0xab,
+	0xda, 0xaa, 0x2f, 0x2d, 0x4d, 0x24, 0xf1, 0x0f, 0x05, 0x54, 0x61, 0xbb, 0x05, 0x12, 0x53, 0x6c,
+	0xbd, 0x8e, 0xc4, 0x17, 0x67, 0x97, 0xd5, 0xda, 0x02, 0x47, 0xbf, 0x31, 0xbb, 0xb6, 0x3e, 0xee,
+	0x05, 0xa1, 0x50, 0xbc, 0x59, 0x5d, 0xde, 0xcc, 0xdf, 0x14, 0x78, 0x2d, 0x1a, 0xb7, 0xa9, 0x93,
+	0x90, 0xb5, 0x62, 0x26, 0xe7, 0x76, 0x82, 0x66, 0x5f, 0xe1, 0x86, 0xec, 0xb2, 0xc9, 0xd5, 0xed,
+	0xa0, 0xed, 0x65, 0xea, 0xa6, 0x6f, 0x0a, 0xb6, 0xff, 0x15, 0xdc, 0x4b, 0x90, 0xe0, 0x80, 0x4a,
+	0xa2, 0xaf, 0xf7, 0xda, 0x34, 0xfc, 0x66, 0x70, 0x68, 0xb4, 0xfc, 0x9e, 0x29, 0x30, 0x35, 0xf1,
+	0xe8, 0x68, 0xfb, 0xb5, 0x36, 0xf1, 0x78, 0x55, 0xcc, 0x94, 0x87, 0xcd, 0x1e, 0xc5, 0xbd, 0x43,
+	0x95, 0x1f, 0xbf, 0xf7, 0x5f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x30, 0x3c, 0xfe, 0x2d, 0x9c, 0x09,
+	0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // ApiKeyServiceClient is the client API for ApiKeyService service.
 //
@@ -404,15 +680,19 @@ type ApiKeyServiceClient interface {
 	Get(ctx context.Context, in *GetApiKeyRequest, opts ...grpc.CallOption) (*ApiKey, error)
 	// Creates an API key for the specified service account.
 	Create(ctx context.Context, in *CreateApiKeyRequest, opts ...grpc.CallOption) (*CreateApiKeyResponse, error)
+	// Updates the specified API key.
+	Update(ctx context.Context, in *UpdateApiKeyRequest, opts ...grpc.CallOption) (*operation.Operation, error)
 	// Deletes the specified API key.
-	Delete(ctx context.Context, in *DeleteApiKeyRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	Delete(ctx context.Context, in *DeleteApiKeyRequest, opts ...grpc.CallOption) (*operation.Operation, error)
+	// Retrieves the list of operations for the specified API key.
+	ListOperations(ctx context.Context, in *ListApiKeyOperationsRequest, opts ...grpc.CallOption) (*ListApiKeyOperationsResponse, error)
 }
 
 type apiKeyServiceClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewApiKeyServiceClient(cc *grpc.ClientConn) ApiKeyServiceClient {
+func NewApiKeyServiceClient(cc grpc.ClientConnInterface) ApiKeyServiceClient {
 	return &apiKeyServiceClient{cc}
 }
 
@@ -443,9 +723,27 @@ func (c *apiKeyServiceClient) Create(ctx context.Context, in *CreateApiKeyReques
 	return out, nil
 }
 
-func (c *apiKeyServiceClient) Delete(ctx context.Context, in *DeleteApiKeyRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	out := new(empty.Empty)
+func (c *apiKeyServiceClient) Update(ctx context.Context, in *UpdateApiKeyRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	out := new(operation.Operation)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.iam.v1.ApiKeyService/Update", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *apiKeyServiceClient) Delete(ctx context.Context, in *DeleteApiKeyRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	out := new(operation.Operation)
 	err := c.cc.Invoke(ctx, "/yandex.cloud.iam.v1.ApiKeyService/Delete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *apiKeyServiceClient) ListOperations(ctx context.Context, in *ListApiKeyOperationsRequest, opts ...grpc.CallOption) (*ListApiKeyOperationsResponse, error) {
+	out := new(ListApiKeyOperationsResponse)
+	err := c.cc.Invoke(ctx, "/yandex.cloud.iam.v1.ApiKeyService/ListOperations", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -462,8 +760,12 @@ type ApiKeyServiceServer interface {
 	Get(context.Context, *GetApiKeyRequest) (*ApiKey, error)
 	// Creates an API key for the specified service account.
 	Create(context.Context, *CreateApiKeyRequest) (*CreateApiKeyResponse, error)
+	// Updates the specified API key.
+	Update(context.Context, *UpdateApiKeyRequest) (*operation.Operation, error)
 	// Deletes the specified API key.
-	Delete(context.Context, *DeleteApiKeyRequest) (*empty.Empty, error)
+	Delete(context.Context, *DeleteApiKeyRequest) (*operation.Operation, error)
+	// Retrieves the list of operations for the specified API key.
+	ListOperations(context.Context, *ListApiKeyOperationsRequest) (*ListApiKeyOperationsResponse, error)
 }
 
 // UnimplementedApiKeyServiceServer can be embedded to have forward compatible implementations.
@@ -479,8 +781,14 @@ func (*UnimplementedApiKeyServiceServer) Get(ctx context.Context, req *GetApiKey
 func (*UnimplementedApiKeyServiceServer) Create(ctx context.Context, req *CreateApiKeyRequest) (*CreateApiKeyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (*UnimplementedApiKeyServiceServer) Delete(ctx context.Context, req *DeleteApiKeyRequest) (*empty.Empty, error) {
+func (*UnimplementedApiKeyServiceServer) Update(ctx context.Context, req *UpdateApiKeyRequest) (*operation.Operation, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
+}
+func (*UnimplementedApiKeyServiceServer) Delete(ctx context.Context, req *DeleteApiKeyRequest) (*operation.Operation, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (*UnimplementedApiKeyServiceServer) ListOperations(ctx context.Context, req *ListApiKeyOperationsRequest) (*ListApiKeyOperationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOperations not implemented")
 }
 
 func RegisterApiKeyServiceServer(s *grpc.Server, srv ApiKeyServiceServer) {
@@ -541,6 +849,24 @@ func _ApiKeyService_Create_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ApiKeyService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateApiKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiKeyServiceServer).Update(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.iam.v1.ApiKeyService/Update",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiKeyServiceServer).Update(ctx, req.(*UpdateApiKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ApiKeyService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteApiKeyRequest)
 	if err := dec(in); err != nil {
@@ -555,6 +881,24 @@ func _ApiKeyService_Delete_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ApiKeyServiceServer).Delete(ctx, req.(*DeleteApiKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ApiKeyService_ListOperations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListApiKeyOperationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApiKeyServiceServer).ListOperations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/yandex.cloud.iam.v1.ApiKeyService/ListOperations",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApiKeyServiceServer).ListOperations(ctx, req.(*ListApiKeyOperationsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -576,8 +920,16 @@ var _ApiKeyService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _ApiKeyService_Create_Handler,
 		},
 		{
+			MethodName: "Update",
+			Handler:    _ApiKeyService_Update_Handler,
+		},
+		{
 			MethodName: "Delete",
 			Handler:    _ApiKeyService_Delete_Handler,
+		},
+		{
+			MethodName: "ListOperations",
+			Handler:    _ApiKeyService_ListOperations_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

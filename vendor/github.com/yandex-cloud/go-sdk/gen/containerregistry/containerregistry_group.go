@@ -32,3 +32,8 @@ func (c *ContainerRegistry) Repository() *RepositoryServiceClient {
 func (c *ContainerRegistry) Image() *ImageServiceClient {
 	return &ImageServiceClient{getConn: c.getConn}
 }
+
+// LifecyclePolicy gets LifecyclePolicyService client
+func (c *ContainerRegistry) LifecyclePolicy() *LifecyclePolicyServiceClient {
+	return &LifecyclePolicyServiceClient{getConn: c.getConn}
+}

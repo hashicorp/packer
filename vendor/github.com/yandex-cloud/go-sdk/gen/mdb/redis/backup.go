@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/redis/v1"
+	redis "github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/redis/v1"
 )
 
 //revive:disable
@@ -18,8 +18,6 @@ import (
 type BackupServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ redis.BackupServiceClient = &BackupServiceClient{}
 
 // Get implements redis.BackupServiceClient
 func (c *BackupServiceClient) Get(ctx context.Context, in *redis.GetBackupRequest, opts ...grpc.CallOption) (*redis.Backup, error) {
@@ -37,4 +35,67 @@ func (c *BackupServiceClient) List(ctx context.Context, in *redis.ListBackupsReq
 		return nil, err
 	}
 	return redis.NewBackupServiceClient(conn).List(ctx, in, opts...)
+}
+
+type BackupIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *BackupServiceClient
+	request *redis.ListBackupsRequest
+
+	items []*redis.Backup
+}
+
+func (c *BackupServiceClient) BackupIterator(ctx context.Context, folderId string, opts ...grpc.CallOption) *BackupIterator {
+	return &BackupIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &redis.ListBackupsRequest{
+			FolderId: folderId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *BackupIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Backups
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *BackupIterator) Value() *redis.Backup {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *BackupIterator) Error() error {
+	return it.err
 }

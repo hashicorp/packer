@@ -23,12 +23,14 @@ func BackoffExponentialWithJitter(base time.Duration, cap time.Duration) Backoff
 			to = float64(cap)
 		}
 
-		return time.Duration(to * rand.Float64())
+		return time.Duration(to/2 + to/2*rand.Float64())
 	}
 }
 
 func getExponentialTimeout(attempt int, base time.Duration) float64 {
-	mult := math.Pow(2, float64(attempt))
+	// pow 3: 50ms, 150ms, 450ms, 1.35s, 4.05s, 12.15s - Now.
+	// pow 2: 50ms, 100ms, 200ms, 400ms, 800ms, 1.6s - Previous.
+	mult := math.Pow(3, float64(attempt))
 	return float64(base) * mult
 }
 

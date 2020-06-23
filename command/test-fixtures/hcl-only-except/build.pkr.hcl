@@ -14,9 +14,15 @@ source "file" "cherry" {
 }
 
 build {
+  source "file.cherry" {
+
+  }
+}
+
+build {
+  name = "my_build"
   sources = [
     "file.chocolate",
     "file.vanilla",
-    "file.cherry",
   ]
 }

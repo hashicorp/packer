@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/mongodb/v1"
+	mongodb "github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/mongodb/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
@@ -19,8 +19,6 @@ import (
 type ClusterServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ mongodb.ClusterServiceClient = &ClusterServiceClient{}
 
 // AddHosts implements mongodb.ClusterServiceClient
 func (c *ClusterServiceClient) AddHosts(ctx context.Context, in *mongodb.AddClusterHostsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
@@ -121,6 +119,69 @@ func (c *ClusterServiceClient) List(ctx context.Context, in *mongodb.ListCluster
 	return mongodb.NewClusterServiceClient(conn).List(ctx, in, opts...)
 }
 
+type ClusterIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *mongodb.ListClustersRequest
+
+	items []*mongodb.Cluster
+}
+
+func (c *ClusterServiceClient) ClusterIterator(ctx context.Context, folderId string, opts ...grpc.CallOption) *ClusterIterator {
+	return &ClusterIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &mongodb.ListClustersRequest{
+			FolderId: folderId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *ClusterIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Clusters
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterIterator) Value() *mongodb.Cluster {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterIterator) Error() error {
+	return it.err
+}
+
 // ListBackups implements mongodb.ClusterServiceClient
 func (c *ClusterServiceClient) ListBackups(ctx context.Context, in *mongodb.ListClusterBackupsRequest, opts ...grpc.CallOption) (*mongodb.ListClusterBackupsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -128,6 +189,69 @@ func (c *ClusterServiceClient) ListBackups(ctx context.Context, in *mongodb.List
 		return nil, err
 	}
 	return mongodb.NewClusterServiceClient(conn).ListBackups(ctx, in, opts...)
+}
+
+type ClusterBackupsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *mongodb.ListClusterBackupsRequest
+
+	items []*mongodb.Backup
+}
+
+func (c *ClusterServiceClient) ClusterBackupsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterBackupsIterator {
+	return &ClusterBackupsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &mongodb.ListClusterBackupsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterBackupsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListBackups(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Backups
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterBackupsIterator) Value() *mongodb.Backup {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterBackupsIterator) Error() error {
+	return it.err
 }
 
 // ListHosts implements mongodb.ClusterServiceClient
@@ -139,6 +263,69 @@ func (c *ClusterServiceClient) ListHosts(ctx context.Context, in *mongodb.ListCl
 	return mongodb.NewClusterServiceClient(conn).ListHosts(ctx, in, opts...)
 }
 
+type ClusterHostsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *mongodb.ListClusterHostsRequest
+
+	items []*mongodb.Host
+}
+
+func (c *ClusterServiceClient) ClusterHostsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterHostsIterator {
+	return &ClusterHostsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &mongodb.ListClusterHostsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterHostsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListHosts(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Hosts
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterHostsIterator) Value() *mongodb.Host {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterHostsIterator) Error() error {
+	return it.err
+}
+
 // ListLogs implements mongodb.ClusterServiceClient
 func (c *ClusterServiceClient) ListLogs(ctx context.Context, in *mongodb.ListClusterLogsRequest, opts ...grpc.CallOption) (*mongodb.ListClusterLogsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -146,6 +333,69 @@ func (c *ClusterServiceClient) ListLogs(ctx context.Context, in *mongodb.ListClu
 		return nil, err
 	}
 	return mongodb.NewClusterServiceClient(conn).ListLogs(ctx, in, opts...)
+}
+
+type ClusterLogsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *mongodb.ListClusterLogsRequest
+
+	items []*mongodb.LogRecord
+}
+
+func (c *ClusterServiceClient) ClusterLogsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterLogsIterator {
+	return &ClusterLogsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &mongodb.ListClusterLogsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterLogsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListLogs(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Logs
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterLogsIterator) Value() *mongodb.LogRecord {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterLogsIterator) Error() error {
+	return it.err
 }
 
 // ListOperations implements mongodb.ClusterServiceClient
@@ -157,6 +407,69 @@ func (c *ClusterServiceClient) ListOperations(ctx context.Context, in *mongodb.L
 	return mongodb.NewClusterServiceClient(conn).ListOperations(ctx, in, opts...)
 }
 
+type ClusterOperationsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *mongodb.ListClusterOperationsRequest
+
+	items []*operation.Operation
+}
+
+func (c *ClusterServiceClient) ClusterOperationsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterOperationsIterator {
+	return &ClusterOperationsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &mongodb.ListClusterOperationsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterOperationsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListOperations(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Operations
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterOperationsIterator) Value() *operation.Operation {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterOperationsIterator) Error() error {
+	return it.err
+}
+
 // ListShards implements mongodb.ClusterServiceClient
 func (c *ClusterServiceClient) ListShards(ctx context.Context, in *mongodb.ListClusterShardsRequest, opts ...grpc.CallOption) (*mongodb.ListClusterShardsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -166,6 +479,69 @@ func (c *ClusterServiceClient) ListShards(ctx context.Context, in *mongodb.ListC
 	return mongodb.NewClusterServiceClient(conn).ListShards(ctx, in, opts...)
 }
 
+type ClusterShardsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *mongodb.ListClusterShardsRequest
+
+	items []*mongodb.Shard
+}
+
+func (c *ClusterServiceClient) ClusterShardsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterShardsIterator {
+	return &ClusterShardsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &mongodb.ListClusterShardsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterShardsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListShards(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Shards
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterShardsIterator) Value() *mongodb.Shard {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterShardsIterator) Error() error {
+	return it.err
+}
+
 // Move implements mongodb.ClusterServiceClient
 func (c *ClusterServiceClient) Move(ctx context.Context, in *mongodb.MoveClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)
@@ -173,6 +549,24 @@ func (c *ClusterServiceClient) Move(ctx context.Context, in *mongodb.MoveCluster
 		return nil, err
 	}
 	return mongodb.NewClusterServiceClient(conn).Move(ctx, in, opts...)
+}
+
+// ResetupHosts implements mongodb.ClusterServiceClient
+func (c *ClusterServiceClient) ResetupHosts(ctx context.Context, in *mongodb.ResetupHostsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mongodb.NewClusterServiceClient(conn).ResetupHosts(ctx, in, opts...)
+}
+
+// RestartHosts implements mongodb.ClusterServiceClient
+func (c *ClusterServiceClient) RestartHosts(ctx context.Context, in *mongodb.RestartHostsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mongodb.NewClusterServiceClient(conn).RestartHosts(ctx, in, opts...)
 }
 
 // Restore implements mongodb.ClusterServiceClient
@@ -200,6 +594,15 @@ func (c *ClusterServiceClient) Stop(ctx context.Context, in *mongodb.StopCluster
 		return nil, err
 	}
 	return mongodb.NewClusterServiceClient(conn).Stop(ctx, in, opts...)
+}
+
+// StreamLogs implements mongodb.ClusterServiceClient
+func (c *ClusterServiceClient) StreamLogs(ctx context.Context, in *mongodb.StreamClusterLogsRequest, opts ...grpc.CallOption) (mongodb.ClusterService_StreamLogsClient, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mongodb.NewClusterServiceClient(conn).StreamLogs(ctx, in, opts...)
 }
 
 // Update implements mongodb.ClusterServiceClient

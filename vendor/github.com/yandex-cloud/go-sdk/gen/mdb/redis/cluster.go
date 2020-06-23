@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/redis/v1"
+	redis "github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/redis/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
@@ -19,8 +19,6 @@ import (
 type ClusterServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ redis.ClusterServiceClient = &ClusterServiceClient{}
 
 // AddHosts implements redis.ClusterServiceClient
 func (c *ClusterServiceClient) AddHosts(ctx context.Context, in *redis.AddClusterHostsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
@@ -112,6 +110,69 @@ func (c *ClusterServiceClient) List(ctx context.Context, in *redis.ListClustersR
 	return redis.NewClusterServiceClient(conn).List(ctx, in, opts...)
 }
 
+type ClusterIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *redis.ListClustersRequest
+
+	items []*redis.Cluster
+}
+
+func (c *ClusterServiceClient) ClusterIterator(ctx context.Context, folderId string, opts ...grpc.CallOption) *ClusterIterator {
+	return &ClusterIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &redis.ListClustersRequest{
+			FolderId: folderId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *ClusterIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Clusters
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterIterator) Value() *redis.Cluster {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterIterator) Error() error {
+	return it.err
+}
+
 // ListBackups implements redis.ClusterServiceClient
 func (c *ClusterServiceClient) ListBackups(ctx context.Context, in *redis.ListClusterBackupsRequest, opts ...grpc.CallOption) (*redis.ListClusterBackupsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -119,6 +180,69 @@ func (c *ClusterServiceClient) ListBackups(ctx context.Context, in *redis.ListCl
 		return nil, err
 	}
 	return redis.NewClusterServiceClient(conn).ListBackups(ctx, in, opts...)
+}
+
+type ClusterBackupsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *redis.ListClusterBackupsRequest
+
+	items []*redis.Backup
+}
+
+func (c *ClusterServiceClient) ClusterBackupsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterBackupsIterator {
+	return &ClusterBackupsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &redis.ListClusterBackupsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterBackupsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListBackups(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Backups
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterBackupsIterator) Value() *redis.Backup {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterBackupsIterator) Error() error {
+	return it.err
 }
 
 // ListHosts implements redis.ClusterServiceClient
@@ -130,6 +254,69 @@ func (c *ClusterServiceClient) ListHosts(ctx context.Context, in *redis.ListClus
 	return redis.NewClusterServiceClient(conn).ListHosts(ctx, in, opts...)
 }
 
+type ClusterHostsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *redis.ListClusterHostsRequest
+
+	items []*redis.Host
+}
+
+func (c *ClusterServiceClient) ClusterHostsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterHostsIterator {
+	return &ClusterHostsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &redis.ListClusterHostsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterHostsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListHosts(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Hosts
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterHostsIterator) Value() *redis.Host {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterHostsIterator) Error() error {
+	return it.err
+}
+
 // ListLogs implements redis.ClusterServiceClient
 func (c *ClusterServiceClient) ListLogs(ctx context.Context, in *redis.ListClusterLogsRequest, opts ...grpc.CallOption) (*redis.ListClusterLogsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -137,6 +324,69 @@ func (c *ClusterServiceClient) ListLogs(ctx context.Context, in *redis.ListClust
 		return nil, err
 	}
 	return redis.NewClusterServiceClient(conn).ListLogs(ctx, in, opts...)
+}
+
+type ClusterLogsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *redis.ListClusterLogsRequest
+
+	items []*redis.LogRecord
+}
+
+func (c *ClusterServiceClient) ClusterLogsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterLogsIterator {
+	return &ClusterLogsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &redis.ListClusterLogsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterLogsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListLogs(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Logs
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterLogsIterator) Value() *redis.LogRecord {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterLogsIterator) Error() error {
+	return it.err
 }
 
 // ListOperations implements redis.ClusterServiceClient
@@ -148,6 +398,69 @@ func (c *ClusterServiceClient) ListOperations(ctx context.Context, in *redis.Lis
 	return redis.NewClusterServiceClient(conn).ListOperations(ctx, in, opts...)
 }
 
+type ClusterOperationsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *redis.ListClusterOperationsRequest
+
+	items []*operation.Operation
+}
+
+func (c *ClusterServiceClient) ClusterOperationsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterOperationsIterator {
+	return &ClusterOperationsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &redis.ListClusterOperationsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterOperationsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListOperations(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Operations
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterOperationsIterator) Value() *operation.Operation {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterOperationsIterator) Error() error {
+	return it.err
+}
+
 // ListShards implements redis.ClusterServiceClient
 func (c *ClusterServiceClient) ListShards(ctx context.Context, in *redis.ListClusterShardsRequest, opts ...grpc.CallOption) (*redis.ListClusterShardsResponse, error) {
 	conn, err := c.getConn(ctx)
@@ -155,6 +468,69 @@ func (c *ClusterServiceClient) ListShards(ctx context.Context, in *redis.ListClu
 		return nil, err
 	}
 	return redis.NewClusterServiceClient(conn).ListShards(ctx, in, opts...)
+}
+
+type ClusterShardsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *redis.ListClusterShardsRequest
+
+	items []*redis.Shard
+}
+
+func (c *ClusterServiceClient) ClusterShardsIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterShardsIterator {
+	return &ClusterShardsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &redis.ListClusterShardsRequest{
+			ClusterId: clusterId,
+			PageSize:  1000,
+		},
+	}
+}
+
+func (it *ClusterShardsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListShards(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Shards
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ClusterShardsIterator) Value() *redis.Shard {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterShardsIterator) Error() error {
+	return it.err
 }
 
 // Move implements redis.ClusterServiceClient
@@ -209,6 +585,15 @@ func (c *ClusterServiceClient) Stop(ctx context.Context, in *redis.StopClusterRe
 		return nil, err
 	}
 	return redis.NewClusterServiceClient(conn).Stop(ctx, in, opts...)
+}
+
+// StreamLogs implements redis.ClusterServiceClient
+func (c *ClusterServiceClient) StreamLogs(ctx context.Context, in *redis.StreamClusterLogsRequest, opts ...grpc.CallOption) (redis.ClusterService_StreamLogsClient, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return redis.NewClusterServiceClient(conn).StreamLogs(ctx, in, opts...)
 }
 
 // Update implements redis.ClusterServiceClient

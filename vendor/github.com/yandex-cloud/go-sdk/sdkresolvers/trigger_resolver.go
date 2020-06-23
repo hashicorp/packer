@@ -28,7 +28,7 @@ func (r *triggerResolver) Run(ctx context.Context, sdk *ycsdk.SDK, opts ...grpc.
 		return err
 	}
 
-	resp, err := sdk.Triggers().Trigger().List(ctx, &triggers.ListTriggersRequest{
+	resp, err := sdk.Serverless().Triggers().Trigger().List(ctx, &triggers.ListTriggersRequest{
 		FolderId: r.FolderID(),
 		Filter:   CreateResolverFilter("name", r.Name),
 		PageSize: DefaultResolverPageSize,

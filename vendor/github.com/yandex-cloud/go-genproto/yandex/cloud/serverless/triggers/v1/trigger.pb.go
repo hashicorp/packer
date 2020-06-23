@@ -27,17 +27,34 @@ type TriggerType int32
 
 const (
 	TriggerType_TRIGGER_TYPE_UNSPECIFIED TriggerType = 0
-	TriggerType_MESSAGE_QUEUE            TriggerType = 3
+	// The trigger is activated on a timer.
+	TriggerType_TIMER TriggerType = 2
+	// The trigger is activated by messages from a message queue.
+	//
+	// Only Yandex Message Queue is currently supported.
+	TriggerType_MESSAGE_QUEUE TriggerType = 3
+	// The trigger is activated by messages from Yandex IoT Core.
+	TriggerType_IOT_MESSAGE        TriggerType = 4
+	TriggerType_OBJECT_STORAGE     TriggerType = 5
+	TriggerType_CONTAINER_REGISTRY TriggerType = 6
 )
 
 var TriggerType_name = map[int32]string{
 	0: "TRIGGER_TYPE_UNSPECIFIED",
+	2: "TIMER",
 	3: "MESSAGE_QUEUE",
+	4: "IOT_MESSAGE",
+	5: "OBJECT_STORAGE",
+	6: "CONTAINER_REGISTRY",
 }
 
 var TriggerType_value = map[string]int32{
 	"TRIGGER_TYPE_UNSPECIFIED": 0,
+	"TIMER":                    2,
 	"MESSAGE_QUEUE":            3,
+	"IOT_MESSAGE":              4,
+	"OBJECT_STORAGE":           5,
+	"CONTAINER_REGISTRY":       6,
 }
 
 func (x TriggerType) String() string {
@@ -48,24 +65,120 @@ func (TriggerType) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_83d7b339cc811d06, []int{0}
 }
 
+type Trigger_ObjectStorageEventType int32
+
+const (
+	Trigger_OBJECT_STORAGE_EVENT_TYPE_UNSPECIFIED   Trigger_ObjectStorageEventType = 0
+	Trigger_OBJECT_STORAGE_EVENT_TYPE_CREATE_OBJECT Trigger_ObjectStorageEventType = 1
+	Trigger_OBJECT_STORAGE_EVENT_TYPE_UPDATE_OBJECT Trigger_ObjectStorageEventType = 2
+	Trigger_OBJECT_STORAGE_EVENT_TYPE_DELETE_OBJECT Trigger_ObjectStorageEventType = 3
+)
+
+var Trigger_ObjectStorageEventType_name = map[int32]string{
+	0: "OBJECT_STORAGE_EVENT_TYPE_UNSPECIFIED",
+	1: "OBJECT_STORAGE_EVENT_TYPE_CREATE_OBJECT",
+	2: "OBJECT_STORAGE_EVENT_TYPE_UPDATE_OBJECT",
+	3: "OBJECT_STORAGE_EVENT_TYPE_DELETE_OBJECT",
+}
+
+var Trigger_ObjectStorageEventType_value = map[string]int32{
+	"OBJECT_STORAGE_EVENT_TYPE_UNSPECIFIED":   0,
+	"OBJECT_STORAGE_EVENT_TYPE_CREATE_OBJECT": 1,
+	"OBJECT_STORAGE_EVENT_TYPE_UPDATE_OBJECT": 2,
+	"OBJECT_STORAGE_EVENT_TYPE_DELETE_OBJECT": 3,
+}
+
+func (x Trigger_ObjectStorageEventType) String() string {
+	return proto.EnumName(Trigger_ObjectStorageEventType_name, int32(x))
+}
+
+func (Trigger_ObjectStorageEventType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_83d7b339cc811d06, []int{0, 0}
+}
+
+type Trigger_ContainerRegistryEventType int32
+
+const (
+	Trigger_CONTAINER_REGISTRY_EVENT_TYPE_UNSPECIFIED      Trigger_ContainerRegistryEventType = 0
+	Trigger_CONTAINER_REGISTRY_EVENT_TYPE_CREATE_IMAGE     Trigger_ContainerRegistryEventType = 1
+	Trigger_CONTAINER_REGISTRY_EVENT_TYPE_DELETE_IMAGE     Trigger_ContainerRegistryEventType = 2
+	Trigger_CONTAINER_REGISTRY_EVENT_TYPE_CREATE_IMAGE_TAG Trigger_ContainerRegistryEventType = 3
+	Trigger_CONTAINER_REGISTRY_EVENT_TYPE_DELETE_IMAGE_TAG Trigger_ContainerRegistryEventType = 4
+)
+
+var Trigger_ContainerRegistryEventType_name = map[int32]string{
+	0: "CONTAINER_REGISTRY_EVENT_TYPE_UNSPECIFIED",
+	1: "CONTAINER_REGISTRY_EVENT_TYPE_CREATE_IMAGE",
+	2: "CONTAINER_REGISTRY_EVENT_TYPE_DELETE_IMAGE",
+	3: "CONTAINER_REGISTRY_EVENT_TYPE_CREATE_IMAGE_TAG",
+	4: "CONTAINER_REGISTRY_EVENT_TYPE_DELETE_IMAGE_TAG",
+}
+
+var Trigger_ContainerRegistryEventType_value = map[string]int32{
+	"CONTAINER_REGISTRY_EVENT_TYPE_UNSPECIFIED":      0,
+	"CONTAINER_REGISTRY_EVENT_TYPE_CREATE_IMAGE":     1,
+	"CONTAINER_REGISTRY_EVENT_TYPE_DELETE_IMAGE":     2,
+	"CONTAINER_REGISTRY_EVENT_TYPE_CREATE_IMAGE_TAG": 3,
+	"CONTAINER_REGISTRY_EVENT_TYPE_DELETE_IMAGE_TAG": 4,
+}
+
+func (x Trigger_ContainerRegistryEventType) String() string {
+	return proto.EnumName(Trigger_ContainerRegistryEventType_name, int32(x))
+}
+
+func (Trigger_ContainerRegistryEventType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_83d7b339cc811d06, []int{0, 1}
+}
+
+type Trigger_Status int32
+
+const (
+	Trigger_STATUS_UNSPECIFIED Trigger_Status = 0
+	Trigger_ACTIVE             Trigger_Status = 1
+	Trigger_PAUSED             Trigger_Status = 2
+)
+
+var Trigger_Status_name = map[int32]string{
+	0: "STATUS_UNSPECIFIED",
+	1: "ACTIVE",
+	2: "PAUSED",
+}
+
+var Trigger_Status_value = map[string]int32{
+	"STATUS_UNSPECIFIED": 0,
+	"ACTIVE":             1,
+	"PAUSED":             2,
+}
+
+func (x Trigger_Status) String() string {
+	return proto.EnumName(Trigger_Status_name, int32(x))
+}
+
+func (Trigger_Status) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_83d7b339cc811d06, []int{0, 2}
+}
+
+// A trigger to invoke a serverless function. For more information, see [Triggers](/docs/functions/concepts/trigger).
 type Trigger struct {
-	// ID of the trigger.
+	// ID of the trigger. Generated at creation time.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// ID of the folder that the trigger belongs to.
 	FolderId string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
-	// Timestamp when the trigger was created.
+	// Creation timestamp for the trigger.
 	CreatedAt *timestamp.Timestamp `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// Name of the trigger.
 	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	// Description of the trigger.
 	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	// Resource labels as `key:value` pairs.
+	// Trigger labels as `key:value` pairs.
 	Labels map[string]string `protobuf:"bytes,6,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	// Defines trigger rule (is always consistent with type filed)
-	Rule                 *Trigger_Rule `protobuf:"bytes,8,opt,name=rule,proto3" json:"rule,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
-	XXX_unrecognized     []byte        `json:"-"`
-	XXX_sizecache        int32         `json:"-"`
+	// Rule for trigger activation (always consistent with the trigger type).
+	Rule *Trigger_Rule `protobuf:"bytes,8,opt,name=rule,proto3" json:"rule,omitempty"`
+	// Trigger status
+	Status               Trigger_Status `protobuf:"varint,9,opt,name=status,proto3,enum=yandex.cloud.serverless.triggers.v1.Trigger_Status" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
 func (m *Trigger) Reset()         { *m = Trigger{} }
@@ -142,10 +255,21 @@ func (m *Trigger) GetRule() *Trigger_Rule {
 	return nil
 }
 
+func (m *Trigger) GetStatus() Trigger_Status {
+	if m != nil {
+		return m.Status
+	}
+	return Trigger_STATUS_UNSPECIFIED
+}
+
+// Description of a rule for trigger activation.
 type Trigger_Rule struct {
 	// Types that are valid to be assigned to Rule:
+	//	*Trigger_Rule_Timer
 	//	*Trigger_Rule_MessageQueue
 	//	*Trigger_Rule_IotMessage
+	//	*Trigger_Rule_ObjectStorage
+	//	*Trigger_Rule_ContainerRegistry
 	Rule                 isTrigger_Rule_Rule `protobuf_oneof:"rule"`
 	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
 	XXX_unrecognized     []byte              `json:"-"`
@@ -181,6 +305,10 @@ type isTrigger_Rule_Rule interface {
 	isTrigger_Rule_Rule()
 }
 
+type Trigger_Rule_Timer struct {
+	Timer *Trigger_Timer `protobuf:"bytes,2,opt,name=timer,proto3,oneof"`
+}
+
 type Trigger_Rule_MessageQueue struct {
 	MessageQueue *Trigger_MessageQueue `protobuf:"bytes,3,opt,name=message_queue,json=messageQueue,proto3,oneof"`
 }
@@ -189,13 +317,34 @@ type Trigger_Rule_IotMessage struct {
 	IotMessage *Trigger_IoTMessage `protobuf:"bytes,4,opt,name=iot_message,json=iotMessage,proto3,oneof"`
 }
 
+type Trigger_Rule_ObjectStorage struct {
+	ObjectStorage *Trigger_ObjectStorage `protobuf:"bytes,5,opt,name=object_storage,json=objectStorage,proto3,oneof"`
+}
+
+type Trigger_Rule_ContainerRegistry struct {
+	ContainerRegistry *Trigger_ContainerRegistry `protobuf:"bytes,6,opt,name=container_registry,json=containerRegistry,proto3,oneof"`
+}
+
+func (*Trigger_Rule_Timer) isTrigger_Rule_Rule() {}
+
 func (*Trigger_Rule_MessageQueue) isTrigger_Rule_Rule() {}
 
 func (*Trigger_Rule_IotMessage) isTrigger_Rule_Rule() {}
 
+func (*Trigger_Rule_ObjectStorage) isTrigger_Rule_Rule() {}
+
+func (*Trigger_Rule_ContainerRegistry) isTrigger_Rule_Rule() {}
+
 func (m *Trigger_Rule) GetRule() isTrigger_Rule_Rule {
 	if m != nil {
 		return m.Rule
+	}
+	return nil
+}
+
+func (m *Trigger_Rule) GetTimer() *Trigger_Timer {
+	if x, ok := m.GetRule().(*Trigger_Rule_Timer); ok {
+		return x.Timer
 	}
 	return nil
 }
@@ -214,24 +363,135 @@ func (m *Trigger_Rule) GetIotMessage() *Trigger_IoTMessage {
 	return nil
 }
 
+func (m *Trigger_Rule) GetObjectStorage() *Trigger_ObjectStorage {
+	if x, ok := m.GetRule().(*Trigger_Rule_ObjectStorage); ok {
+		return x.ObjectStorage
+	}
+	return nil
+}
+
+func (m *Trigger_Rule) GetContainerRegistry() *Trigger_ContainerRegistry {
+	if x, ok := m.GetRule().(*Trigger_Rule_ContainerRegistry); ok {
+		return x.ContainerRegistry
+	}
+	return nil
+}
+
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*Trigger_Rule) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
+		(*Trigger_Rule_Timer)(nil),
 		(*Trigger_Rule_MessageQueue)(nil),
 		(*Trigger_Rule_IotMessage)(nil),
+		(*Trigger_Rule_ObjectStorage)(nil),
+		(*Trigger_Rule_ContainerRegistry)(nil),
 	}
 }
 
-type Trigger_MessageQueue struct {
-	// ID of the queue.
+// Rule for activating a timed trigger.
+type Trigger_Timer struct {
+	// Description of a schedule as a [cron expression](/docs/functions/concepts/trigger/timer).
+	CronExpression string `protobuf:"bytes,1,opt,name=cron_expression,json=cronExpression,proto3" json:"cron_expression,omitempty"`
+	// Action to be executed when the current time matches the [cron_expression].
 	//
-	// Types that are valid to be assigned to Queue:
-	//	*Trigger_MessageQueue_Arn
-	Queue isTrigger_MessageQueue_Queue `protobuf_oneof:"queue"`
-	// SA which has read access to the queue.
+	// Types that are valid to be assigned to Action:
+	//	*Trigger_Timer_InvokeFunction
+	//	*Trigger_Timer_InvokeFunctionWithRetry
+	Action               isTrigger_Timer_Action `protobuf_oneof:"action"`
+	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
+	XXX_unrecognized     []byte                 `json:"-"`
+	XXX_sizecache        int32                  `json:"-"`
+}
+
+func (m *Trigger_Timer) Reset()         { *m = Trigger_Timer{} }
+func (m *Trigger_Timer) String() string { return proto.CompactTextString(m) }
+func (*Trigger_Timer) ProtoMessage()    {}
+func (*Trigger_Timer) Descriptor() ([]byte, []int) {
+	return fileDescriptor_83d7b339cc811d06, []int{0, 2}
+}
+
+func (m *Trigger_Timer) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Trigger_Timer.Unmarshal(m, b)
+}
+func (m *Trigger_Timer) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Trigger_Timer.Marshal(b, m, deterministic)
+}
+func (m *Trigger_Timer) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Trigger_Timer.Merge(m, src)
+}
+func (m *Trigger_Timer) XXX_Size() int {
+	return xxx_messageInfo_Trigger_Timer.Size(m)
+}
+func (m *Trigger_Timer) XXX_DiscardUnknown() {
+	xxx_messageInfo_Trigger_Timer.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Trigger_Timer proto.InternalMessageInfo
+
+func (m *Trigger_Timer) GetCronExpression() string {
+	if m != nil {
+		return m.CronExpression
+	}
+	return ""
+}
+
+type isTrigger_Timer_Action interface {
+	isTrigger_Timer_Action()
+}
+
+type Trigger_Timer_InvokeFunction struct {
+	InvokeFunction *InvokeFunctionOnce `protobuf:"bytes,101,opt,name=invoke_function,json=invokeFunction,proto3,oneof"`
+}
+
+type Trigger_Timer_InvokeFunctionWithRetry struct {
+	InvokeFunctionWithRetry *InvokeFunctionWithRetry `protobuf:"bytes,103,opt,name=invoke_function_with_retry,json=invokeFunctionWithRetry,proto3,oneof"`
+}
+
+func (*Trigger_Timer_InvokeFunction) isTrigger_Timer_Action() {}
+
+func (*Trigger_Timer_InvokeFunctionWithRetry) isTrigger_Timer_Action() {}
+
+func (m *Trigger_Timer) GetAction() isTrigger_Timer_Action {
+	if m != nil {
+		return m.Action
+	}
+	return nil
+}
+
+func (m *Trigger_Timer) GetInvokeFunction() *InvokeFunctionOnce {
+	if x, ok := m.GetAction().(*Trigger_Timer_InvokeFunction); ok {
+		return x.InvokeFunction
+	}
+	return nil
+}
+
+func (m *Trigger_Timer) GetInvokeFunctionWithRetry() *InvokeFunctionWithRetry {
+	if x, ok := m.GetAction().(*Trigger_Timer_InvokeFunctionWithRetry); ok {
+		return x.InvokeFunctionWithRetry
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*Trigger_Timer) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*Trigger_Timer_InvokeFunction)(nil),
+		(*Trigger_Timer_InvokeFunctionWithRetry)(nil),
+	}
+}
+
+// Rule for activating a message queue trigger.
+type Trigger_MessageQueue struct {
+	// ID of the message queue in Yandex Message Queue.
+	QueueId string `protobuf:"bytes,11,opt,name=queue_id,json=queueId,proto3" json:"queue_id,omitempty"`
+	// ID of the service account which has read access to the message queue.
 	ServiceAccountId string `protobuf:"bytes,3,opt,name=service_account_id,json=serviceAccountId,proto3" json:"service_account_id,omitempty"`
-	// Batch settings for YMQ client.
+	// Batch settings for processing messages in the queue.
 	BatchSettings *BatchSettings `protobuf:"bytes,4,opt,name=batch_settings,json=batchSettings,proto3" json:"batch_settings,omitempty"`
+	// Queue visibility timeout override.
+	VisibilityTimeout *duration.Duration `protobuf:"bytes,5,opt,name=visibility_timeout,json=visibilityTimeout,proto3" json:"visibility_timeout,omitempty"`
+	// Action to be executed when the there's a new message in the queue.
+	//
 	// Types that are valid to be assigned to Action:
 	//	*Trigger_MessageQueue_InvokeFunction
 	Action               isTrigger_MessageQueue_Action `protobuf_oneof:"action"`
@@ -244,7 +504,7 @@ func (m *Trigger_MessageQueue) Reset()         { *m = Trigger_MessageQueue{} }
 func (m *Trigger_MessageQueue) String() string { return proto.CompactTextString(m) }
 func (*Trigger_MessageQueue) ProtoMessage()    {}
 func (*Trigger_MessageQueue) Descriptor() ([]byte, []int) {
-	return fileDescriptor_83d7b339cc811d06, []int{0, 2}
+	return fileDescriptor_83d7b339cc811d06, []int{0, 3}
 }
 
 func (m *Trigger_MessageQueue) XXX_Unmarshal(b []byte) error {
@@ -265,26 +525,9 @@ func (m *Trigger_MessageQueue) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Trigger_MessageQueue proto.InternalMessageInfo
 
-type isTrigger_MessageQueue_Queue interface {
-	isTrigger_MessageQueue_Queue()
-}
-
-type Trigger_MessageQueue_Arn struct {
-	Arn string `protobuf:"bytes,11,opt,name=arn,proto3,oneof"`
-}
-
-func (*Trigger_MessageQueue_Arn) isTrigger_MessageQueue_Queue() {}
-
-func (m *Trigger_MessageQueue) GetQueue() isTrigger_MessageQueue_Queue {
+func (m *Trigger_MessageQueue) GetQueueId() string {
 	if m != nil {
-		return m.Queue
-	}
-	return nil
-}
-
-func (m *Trigger_MessageQueue) GetArn() string {
-	if x, ok := m.GetQueue().(*Trigger_MessageQueue_Arn); ok {
-		return x.Arn
+		return m.QueueId
 	}
 	return ""
 }
@@ -299,6 +542,13 @@ func (m *Trigger_MessageQueue) GetServiceAccountId() string {
 func (m *Trigger_MessageQueue) GetBatchSettings() *BatchSettings {
 	if m != nil {
 		return m.BatchSettings
+	}
+	return nil
+}
+
+func (m *Trigger_MessageQueue) GetVisibilityTimeout() *duration.Duration {
+	if m != nil {
+		return m.VisibilityTimeout
 	}
 	return nil
 }
@@ -330,15 +580,20 @@ func (m *Trigger_MessageQueue) GetInvokeFunction() *InvokeFunctionOnce {
 // XXX_OneofWrappers is for the internal use of the proto package.
 func (*Trigger_MessageQueue) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
-		(*Trigger_MessageQueue_Arn)(nil),
 		(*Trigger_MessageQueue_InvokeFunction)(nil),
 	}
 }
 
+// Rule for activating a Yandex IoT Core trigger.
 type Trigger_IoTMessage struct {
+	// ID of the Yandex IoT Core registry.
 	RegistryId string `protobuf:"bytes,1,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
-	DeviceId   string `protobuf:"bytes,2,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	MqttTopic  string `protobuf:"bytes,3,opt,name=mqtt_topic,json=mqttTopic,proto3" json:"mqtt_topic,omitempty"`
+	// ID of the Yandex IoT Core device in the registry.
+	DeviceId string `protobuf:"bytes,2,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	// MQTT topic whose messages activate the trigger.
+	MqttTopic string `protobuf:"bytes,3,opt,name=mqtt_topic,json=mqttTopic,proto3" json:"mqtt_topic,omitempty"`
+	// Action to be executed when the there's a new message in the MQTT topic.
+	//
 	// Types that are valid to be assigned to Action:
 	//	*Trigger_IoTMessage_InvokeFunction
 	Action               isTrigger_IoTMessage_Action `protobuf_oneof:"action"`
@@ -351,7 +606,7 @@ func (m *Trigger_IoTMessage) Reset()         { *m = Trigger_IoTMessage{} }
 func (m *Trigger_IoTMessage) String() string { return proto.CompactTextString(m) }
 func (*Trigger_IoTMessage) ProtoMessage()    {}
 func (*Trigger_IoTMessage) Descriptor() ([]byte, []int) {
-	return fileDescriptor_83d7b339cc811d06, []int{0, 3}
+	return fileDescriptor_83d7b339cc811d06, []int{0, 4}
 }
 
 func (m *Trigger_IoTMessage) XXX_Unmarshal(b []byte) error {
@@ -424,10 +679,211 @@ func (*Trigger_IoTMessage) XXX_OneofWrappers() []interface{} {
 	}
 }
 
+type Trigger_ObjectStorage struct {
+	// Type (name) of events, at least one value is required.
+	EventType []Trigger_ObjectStorageEventType `protobuf:"varint,3,rep,packed,name=event_type,json=eventType,proto3,enum=yandex.cloud.serverless.triggers.v1.Trigger_ObjectStorageEventType" json:"event_type,omitempty"`
+	BucketId  string                           `protobuf:"bytes,4,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"`
+	// Filter, optional.
+	Prefix string `protobuf:"bytes,6,opt,name=prefix,proto3" json:"prefix,omitempty"`
+	Suffix string `protobuf:"bytes,7,opt,name=suffix,proto3" json:"suffix,omitempty"`
+	// Types that are valid to be assigned to Action:
+	//	*Trigger_ObjectStorage_InvokeFunction
+	Action               isTrigger_ObjectStorage_Action `protobuf_oneof:"action"`
+	XXX_NoUnkeyedLiteral struct{}                       `json:"-"`
+	XXX_unrecognized     []byte                         `json:"-"`
+	XXX_sizecache        int32                          `json:"-"`
+}
+
+func (m *Trigger_ObjectStorage) Reset()         { *m = Trigger_ObjectStorage{} }
+func (m *Trigger_ObjectStorage) String() string { return proto.CompactTextString(m) }
+func (*Trigger_ObjectStorage) ProtoMessage()    {}
+func (*Trigger_ObjectStorage) Descriptor() ([]byte, []int) {
+	return fileDescriptor_83d7b339cc811d06, []int{0, 5}
+}
+
+func (m *Trigger_ObjectStorage) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Trigger_ObjectStorage.Unmarshal(m, b)
+}
+func (m *Trigger_ObjectStorage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Trigger_ObjectStorage.Marshal(b, m, deterministic)
+}
+func (m *Trigger_ObjectStorage) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Trigger_ObjectStorage.Merge(m, src)
+}
+func (m *Trigger_ObjectStorage) XXX_Size() int {
+	return xxx_messageInfo_Trigger_ObjectStorage.Size(m)
+}
+func (m *Trigger_ObjectStorage) XXX_DiscardUnknown() {
+	xxx_messageInfo_Trigger_ObjectStorage.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Trigger_ObjectStorage proto.InternalMessageInfo
+
+func (m *Trigger_ObjectStorage) GetEventType() []Trigger_ObjectStorageEventType {
+	if m != nil {
+		return m.EventType
+	}
+	return nil
+}
+
+func (m *Trigger_ObjectStorage) GetBucketId() string {
+	if m != nil {
+		return m.BucketId
+	}
+	return ""
+}
+
+func (m *Trigger_ObjectStorage) GetPrefix() string {
+	if m != nil {
+		return m.Prefix
+	}
+	return ""
+}
+
+func (m *Trigger_ObjectStorage) GetSuffix() string {
+	if m != nil {
+		return m.Suffix
+	}
+	return ""
+}
+
+type isTrigger_ObjectStorage_Action interface {
+	isTrigger_ObjectStorage_Action()
+}
+
+type Trigger_ObjectStorage_InvokeFunction struct {
+	InvokeFunction *InvokeFunctionWithRetry `protobuf:"bytes,101,opt,name=invoke_function,json=invokeFunction,proto3,oneof"`
+}
+
+func (*Trigger_ObjectStorage_InvokeFunction) isTrigger_ObjectStorage_Action() {}
+
+func (m *Trigger_ObjectStorage) GetAction() isTrigger_ObjectStorage_Action {
+	if m != nil {
+		return m.Action
+	}
+	return nil
+}
+
+func (m *Trigger_ObjectStorage) GetInvokeFunction() *InvokeFunctionWithRetry {
+	if x, ok := m.GetAction().(*Trigger_ObjectStorage_InvokeFunction); ok {
+		return x.InvokeFunction
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*Trigger_ObjectStorage) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*Trigger_ObjectStorage_InvokeFunction)(nil),
+	}
+}
+
+type Trigger_ContainerRegistry struct {
+	// Type (name) of events, at least one value is required.
+	EventType  []Trigger_ContainerRegistryEventType `protobuf:"varint,3,rep,packed,name=event_type,json=eventType,proto3,enum=yandex.cloud.serverless.triggers.v1.Trigger_ContainerRegistryEventType" json:"event_type,omitempty"`
+	RegistryId string                               `protobuf:"bytes,4,opt,name=registry_id,json=registryId,proto3" json:"registry_id,omitempty"`
+	// Filter, optional.
+	ImageName string `protobuf:"bytes,5,opt,name=image_name,json=imageName,proto3" json:"image_name,omitempty"`
+	Tag       string `protobuf:"bytes,6,opt,name=tag,proto3" json:"tag,omitempty"`
+	// Types that are valid to be assigned to Action:
+	//	*Trigger_ContainerRegistry_InvokeFunction
+	Action               isTrigger_ContainerRegistry_Action `protobuf_oneof:"action"`
+	XXX_NoUnkeyedLiteral struct{}                           `json:"-"`
+	XXX_unrecognized     []byte                             `json:"-"`
+	XXX_sizecache        int32                              `json:"-"`
+}
+
+func (m *Trigger_ContainerRegistry) Reset()         { *m = Trigger_ContainerRegistry{} }
+func (m *Trigger_ContainerRegistry) String() string { return proto.CompactTextString(m) }
+func (*Trigger_ContainerRegistry) ProtoMessage()    {}
+func (*Trigger_ContainerRegistry) Descriptor() ([]byte, []int) {
+	return fileDescriptor_83d7b339cc811d06, []int{0, 6}
+}
+
+func (m *Trigger_ContainerRegistry) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Trigger_ContainerRegistry.Unmarshal(m, b)
+}
+func (m *Trigger_ContainerRegistry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Trigger_ContainerRegistry.Marshal(b, m, deterministic)
+}
+func (m *Trigger_ContainerRegistry) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Trigger_ContainerRegistry.Merge(m, src)
+}
+func (m *Trigger_ContainerRegistry) XXX_Size() int {
+	return xxx_messageInfo_Trigger_ContainerRegistry.Size(m)
+}
+func (m *Trigger_ContainerRegistry) XXX_DiscardUnknown() {
+	xxx_messageInfo_Trigger_ContainerRegistry.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Trigger_ContainerRegistry proto.InternalMessageInfo
+
+func (m *Trigger_ContainerRegistry) GetEventType() []Trigger_ContainerRegistryEventType {
+	if m != nil {
+		return m.EventType
+	}
+	return nil
+}
+
+func (m *Trigger_ContainerRegistry) GetRegistryId() string {
+	if m != nil {
+		return m.RegistryId
+	}
+	return ""
+}
+
+func (m *Trigger_ContainerRegistry) GetImageName() string {
+	if m != nil {
+		return m.ImageName
+	}
+	return ""
+}
+
+func (m *Trigger_ContainerRegistry) GetTag() string {
+	if m != nil {
+		return m.Tag
+	}
+	return ""
+}
+
+type isTrigger_ContainerRegistry_Action interface {
+	isTrigger_ContainerRegistry_Action()
+}
+
+type Trigger_ContainerRegistry_InvokeFunction struct {
+	InvokeFunction *InvokeFunctionWithRetry `protobuf:"bytes,101,opt,name=invoke_function,json=invokeFunction,proto3,oneof"`
+}
+
+func (*Trigger_ContainerRegistry_InvokeFunction) isTrigger_ContainerRegistry_Action() {}
+
+func (m *Trigger_ContainerRegistry) GetAction() isTrigger_ContainerRegistry_Action {
+	if m != nil {
+		return m.Action
+	}
+	return nil
+}
+
+func (m *Trigger_ContainerRegistry) GetInvokeFunction() *InvokeFunctionWithRetry {
+	if x, ok := m.GetAction().(*Trigger_ContainerRegistry_InvokeFunction); ok {
+		return x.InvokeFunction
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*Trigger_ContainerRegistry) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*Trigger_ContainerRegistry_InvokeFunction)(nil),
+	}
+}
+
+// A single function invocation.
 type InvokeFunctionOnce struct {
-	FunctionId  string `protobuf:"bytes,1,opt,name=function_id,json=functionId,proto3" json:"function_id,omitempty"`
+	// ID of the function to invoke.
+	FunctionId string `protobuf:"bytes,1,opt,name=function_id,json=functionId,proto3" json:"function_id,omitempty"`
+	// Tag of the function version to execute.
 	FunctionTag string `protobuf:"bytes,2,opt,name=function_tag,json=functionTag,proto3" json:"function_tag,omitempty"`
-	// SA which should be used to call a function, optional.
+	// ID of the service account that should be used to invoke the function.
 	ServiceAccountId     string   `protobuf:"bytes,3,opt,name=service_account_id,json=serviceAccountId,proto3" json:"service_account_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -480,16 +936,21 @@ func (m *InvokeFunctionOnce) GetServiceAccountId() string {
 	return ""
 }
 
+// A function invocation with retries.
 type InvokeFunctionWithRetry struct {
-	FunctionId  string `protobuf:"bytes,1,opt,name=function_id,json=functionId,proto3" json:"function_id,omitempty"`
+	// ID of the function to invoke.
+	FunctionId string `protobuf:"bytes,1,opt,name=function_id,json=functionId,proto3" json:"function_id,omitempty"`
+	// Tag of the function version to execute.
 	FunctionTag string `protobuf:"bytes,2,opt,name=function_tag,json=functionTag,proto3" json:"function_tag,omitempty"`
-	// SA which has call permission on the function, optional.
+	// ID of the service account which has permission to invoke the function.
 	ServiceAccountId string `protobuf:"bytes,3,opt,name=service_account_id,json=serviceAccountId,proto3" json:"service_account_id,omitempty"`
-	// Retry policy, optional (no value means no retry).
-	RetrySettings        *RetrySettings `protobuf:"bytes,4,opt,name=retry_settings,json=retrySettings,proto3" json:"retry_settings,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
-	XXX_unrecognized     []byte         `json:"-"`
-	XXX_sizecache        int32          `json:"-"`
+	// Retry policy. If the field is not specified, or the value is empty, no retries will be attempted.
+	RetrySettings *RetrySettings `protobuf:"bytes,4,opt,name=retry_settings,json=retrySettings,proto3" json:"retry_settings,omitempty"`
+	// DLQ policy (no value means discarding a message)
+	DeadLetterQueue      *PutQueueMessage `protobuf:"bytes,5,opt,name=dead_letter_queue,json=deadLetterQueue,proto3" json:"dead_letter_queue,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
 }
 
 func (m *InvokeFunctionWithRetry) Reset()         { *m = InvokeFunctionWithRetry{} }
@@ -545,10 +1006,69 @@ func (m *InvokeFunctionWithRetry) GetRetrySettings() *RetrySettings {
 	return nil
 }
 
+func (m *InvokeFunctionWithRetry) GetDeadLetterQueue() *PutQueueMessage {
+	if m != nil {
+		return m.DeadLetterQueue
+	}
+	return nil
+}
+
+type PutQueueMessage struct {
+	// ID of the queue.
+	QueueId string `protobuf:"bytes,11,opt,name=queue_id,json=queueId,proto3" json:"queue_id,omitempty"`
+	// SA which has write permission on the queue.
+	ServiceAccountId     string   `protobuf:"bytes,2,opt,name=service_account_id,json=serviceAccountId,proto3" json:"service_account_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *PutQueueMessage) Reset()         { *m = PutQueueMessage{} }
+func (m *PutQueueMessage) String() string { return proto.CompactTextString(m) }
+func (*PutQueueMessage) ProtoMessage()    {}
+func (*PutQueueMessage) Descriptor() ([]byte, []int) {
+	return fileDescriptor_83d7b339cc811d06, []int{3}
+}
+
+func (m *PutQueueMessage) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PutQueueMessage.Unmarshal(m, b)
+}
+func (m *PutQueueMessage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PutQueueMessage.Marshal(b, m, deterministic)
+}
+func (m *PutQueueMessage) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PutQueueMessage.Merge(m, src)
+}
+func (m *PutQueueMessage) XXX_Size() int {
+	return xxx_messageInfo_PutQueueMessage.Size(m)
+}
+func (m *PutQueueMessage) XXX_DiscardUnknown() {
+	xxx_messageInfo_PutQueueMessage.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PutQueueMessage proto.InternalMessageInfo
+
+func (m *PutQueueMessage) GetQueueId() string {
+	if m != nil {
+		return m.QueueId
+	}
+	return ""
+}
+
+func (m *PutQueueMessage) GetServiceAccountId() string {
+	if m != nil {
+		return m.ServiceAccountId
+	}
+	return ""
+}
+
+// Settings for batch processing of messages in a queue.
 type BatchSettings struct {
-	// Maximum batch size: trigger will send a batch if number of events exceeds this value.
+	// Batch size. Trigger will send the batch of messages to the associated function
+	// when the number of messages in the queue reaches this value, or the [cutoff] time has passed.
 	Size int64 `protobuf:"varint,1,opt,name=size,proto3" json:"size,omitempty"`
-	// Maximum batch size: trigger will send a batch if its lifetime exceeds this value.
+	// Maximum wait time. Trigger will send the batch of messages the time since the last batch
+	// exceeds the `cutoff` value, regardless of the amount of messages in the queue.
 	Cutoff               *duration.Duration `protobuf:"bytes,2,opt,name=cutoff,proto3" json:"cutoff,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
 	XXX_unrecognized     []byte             `json:"-"`
@@ -559,7 +1079,7 @@ func (m *BatchSettings) Reset()         { *m = BatchSettings{} }
 func (m *BatchSettings) String() string { return proto.CompactTextString(m) }
 func (*BatchSettings) ProtoMessage()    {}
 func (*BatchSettings) Descriptor() ([]byte, []int) {
-	return fileDescriptor_83d7b339cc811d06, []int{3}
+	return fileDescriptor_83d7b339cc811d06, []int{4}
 }
 
 func (m *BatchSettings) XXX_Unmarshal(b []byte) error {
@@ -594,10 +1114,11 @@ func (m *BatchSettings) GetCutoff() *duration.Duration {
 	return nil
 }
 
+// Settings for retrying to invoke a function.
 type RetrySettings struct {
-	// Maximum number of retries (extra calls) before an action fails.
+	// Maximum number of retries (extra invokes) before the action is considered failed.
 	RetryAttempts int64 `protobuf:"varint,1,opt,name=retry_attempts,json=retryAttempts,proto3" json:"retry_attempts,omitempty"`
-	// Interval between tries.
+	// Time in seconds to wait between individual retries.
 	Interval             *duration.Duration `protobuf:"bytes,2,opt,name=interval,proto3" json:"interval,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
 	XXX_unrecognized     []byte             `json:"-"`
@@ -608,7 +1129,7 @@ func (m *RetrySettings) Reset()         { *m = RetrySettings{} }
 func (m *RetrySettings) String() string { return proto.CompactTextString(m) }
 func (*RetrySettings) ProtoMessage()    {}
 func (*RetrySettings) Descriptor() ([]byte, []int) {
-	return fileDescriptor_83d7b339cc811d06, []int{4}
+	return fileDescriptor_83d7b339cc811d06, []int{5}
 }
 
 func (m *RetrySettings) XXX_Unmarshal(b []byte) error {
@@ -645,13 +1166,20 @@ func (m *RetrySettings) GetInterval() *duration.Duration {
 
 func init() {
 	proto.RegisterEnum("yandex.cloud.serverless.triggers.v1.TriggerType", TriggerType_name, TriggerType_value)
+	proto.RegisterEnum("yandex.cloud.serverless.triggers.v1.Trigger_ObjectStorageEventType", Trigger_ObjectStorageEventType_name, Trigger_ObjectStorageEventType_value)
+	proto.RegisterEnum("yandex.cloud.serverless.triggers.v1.Trigger_ContainerRegistryEventType", Trigger_ContainerRegistryEventType_name, Trigger_ContainerRegistryEventType_value)
+	proto.RegisterEnum("yandex.cloud.serverless.triggers.v1.Trigger_Status", Trigger_Status_name, Trigger_Status_value)
 	proto.RegisterType((*Trigger)(nil), "yandex.cloud.serverless.triggers.v1.Trigger")
 	proto.RegisterMapType((map[string]string)(nil), "yandex.cloud.serverless.triggers.v1.Trigger.LabelsEntry")
 	proto.RegisterType((*Trigger_Rule)(nil), "yandex.cloud.serverless.triggers.v1.Trigger.Rule")
+	proto.RegisterType((*Trigger_Timer)(nil), "yandex.cloud.serverless.triggers.v1.Trigger.Timer")
 	proto.RegisterType((*Trigger_MessageQueue)(nil), "yandex.cloud.serverless.triggers.v1.Trigger.MessageQueue")
 	proto.RegisterType((*Trigger_IoTMessage)(nil), "yandex.cloud.serverless.triggers.v1.Trigger.IoTMessage")
+	proto.RegisterType((*Trigger_ObjectStorage)(nil), "yandex.cloud.serverless.triggers.v1.Trigger.ObjectStorage")
+	proto.RegisterType((*Trigger_ContainerRegistry)(nil), "yandex.cloud.serverless.triggers.v1.Trigger.ContainerRegistry")
 	proto.RegisterType((*InvokeFunctionOnce)(nil), "yandex.cloud.serverless.triggers.v1.InvokeFunctionOnce")
 	proto.RegisterType((*InvokeFunctionWithRetry)(nil), "yandex.cloud.serverless.triggers.v1.InvokeFunctionWithRetry")
+	proto.RegisterType((*PutQueueMessage)(nil), "yandex.cloud.serverless.triggers.v1.PutQueueMessage")
 	proto.RegisterType((*BatchSettings)(nil), "yandex.cloud.serverless.triggers.v1.BatchSettings")
 	proto.RegisterType((*RetrySettings)(nil), "yandex.cloud.serverless.triggers.v1.RetrySettings")
 }
@@ -661,62 +1189,100 @@ func init() {
 }
 
 var fileDescriptor_83d7b339cc811d06 = []byte{
-	// 897 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x56, 0x41, 0x73, 0xdb, 0x44,
-	0x14, 0xb6, 0x6c, 0xc7, 0xb5, 0x9f, 0x6c, 0x13, 0x76, 0x98, 0x41, 0x98, 0x16, 0x82, 0x19, 0x66,
-	0x02, 0x83, 0xe5, 0xc8, 0x4c, 0xa7, 0x4d, 0x5b, 0x98, 0x89, 0xa9, 0x1a, 0x6b, 0xa0, 0x90, 0x6e,
-	0x9c, 0x61, 0xda, 0x8b, 0x58, 0x4b, 0x6b, 0x65, 0xa7, 0xb2, 0xe4, 0xae, 0x56, 0x1e, 0xcc, 0xf0,
-	0x0b, 0x38, 0x73, 0xe2, 0xd7, 0x00, 0x97, 0x70, 0xe6, 0x57, 0xf4, 0x07, 0x70, 0xea, 0x89, 0xd1,
-	0x6a, 0x95, 0xd8, 0x0d, 0x99, 0x49, 0x72, 0xe9, 0x4d, 0xfb, 0xf6, 0x7d, 0xef, 0x7d, 0xdf, 0xb7,
-	0x6f, 0xbd, 0x06, 0x6b, 0x49, 0x22, 0x9f, 0xfe, 0xd4, 0xf7, 0xc2, 0x38, 0xf5, 0xfb, 0x09, 0xe5,
-	0x0b, 0xca, 0x43, 0x9a, 0x24, 0x7d, 0xc1, 0x59, 0x10, 0x50, 0x9e, 0xf4, 0x17, 0x56, 0xf1, 0x6d,
-	0xce, 0x79, 0x2c, 0x62, 0xf4, 0x71, 0x0e, 0x31, 0x25, 0xc4, 0x3c, 0x83, 0x98, 0x05, 0xc4, 0x5c,
-	0x58, 0x9d, 0x0f, 0x82, 0x38, 0x0e, 0x42, 0xda, 0x97, 0x90, 0x49, 0x3a, 0xed, 0xfb, 0x29, 0x27,
-	0x82, 0xc5, 0x51, 0x5e, 0xa4, 0xf3, 0xe1, 0xeb, 0xfb, 0x82, 0xcd, 0x68, 0x22, 0xc8, 0x6c, 0xae,
-	0x12, 0x6e, 0xad, 0x11, 0x5b, 0x90, 0x90, 0xf9, 0x2b, 0xf8, 0xee, 0xef, 0x0d, 0xb8, 0x31, 0xce,
-	0xfb, 0xa1, 0x36, 0x94, 0x99, 0x6f, 0x68, 0x5b, 0xda, 0x76, 0x03, 0x97, 0x99, 0x8f, 0x3e, 0x85,
-	0xc6, 0x34, 0x0e, 0x7d, 0xca, 0x5d, 0xe6, 0x1b, 0xe5, 0x2c, 0x3c, 0x6c, 0xbe, 0x3c, 0xb1, 0xb4,
-	0x5f, 0xff, 0xb6, 0xaa, 0x0f, 0xbe, 0xbc, 0xbd, 0x83, 0xeb, 0xf9, 0xb6, 0xe3, 0xa3, 0x5d, 0x00,
-	0x8f, 0x53, 0x22, 0xa8, 0xef, 0x12, 0x61, 0x54, 0xb6, 0xb4, 0x6d, 0x7d, 0xd0, 0x31, 0x73, 0x6e,
-	0x66, 0xc1, 0xcd, 0x1c, 0x17, 0xdc, 0x70, 0x43, 0x65, 0xef, 0x09, 0x64, 0x40, 0x35, 0x22, 0x33,
-	0x6a, 0x54, 0x65, 0x83, 0x6a, 0xd6, 0x00, 0xcb, 0x08, 0xda, 0x02, 0xdd, 0xa7, 0x89, 0xc7, 0xd9,
-	0x3c, 0x23, 0x6c, 0x6c, 0x48, 0x62, 0xab, 0x21, 0x74, 0x00, 0xb5, 0x90, 0x4c, 0x68, 0x98, 0x18,
-	0xb5, 0xad, 0xca, 0xb6, 0x3e, 0xb8, 0x6b, 0x5e, 0xc2, 0x53, 0x53, 0xe9, 0x35, 0xbf, 0x95, 0x50,
-	0x3b, 0x12, 0x7c, 0x89, 0x55, 0x1d, 0xf4, 0x0d, 0x54, 0x79, 0x1a, 0x52, 0xa3, 0x2e, 0x25, 0x58,
-	0x57, 0xaa, 0x87, 0xd3, 0x90, 0x16, 0x02, 0xb2, 0x22, 0x9d, 0x5d, 0xd0, 0x57, 0x7a, 0xa0, 0x4d,
-	0xa8, 0x3c, 0xa7, 0x4b, 0x65, 0x70, 0xf6, 0x89, 0xde, 0x81, 0x8d, 0x05, 0x09, 0x53, 0x9a, 0xbb,
-	0x8b, 0xf3, 0xc5, 0xbd, 0xf2, 0x5d, 0xad, 0xf3, 0x8f, 0x06, 0xd5, 0xac, 0x1e, 0xfa, 0x11, 0x5a,
-	0x33, 0x9a, 0x24, 0x24, 0xa0, 0xee, 0x8b, 0x94, 0xa6, 0x54, 0x99, 0xbb, 0x7b, 0x25, 0x66, 0x8f,
-	0xf3, 0x0a, 0x4f, 0xb2, 0x02, 0xa3, 0x12, 0x6e, 0xce, 0x56, 0xd6, 0xe8, 0x19, 0xe8, 0x2c, 0x16,
-	0xae, 0x8a, 0xc9, 0x73, 0xd0, 0x07, 0x77, 0xae, 0x54, 0xdf, 0x89, 0xc7, 0xaa, 0xc5, 0xa8, 0x84,
-	0x81, 0xc5, 0x42, 0xad, 0x86, 0xcd, 0xdc, 0x4e, 0x54, 0xfd, 0xe3, 0x4f, 0x4b, 0xeb, 0xfc, 0x55,
-	0x86, 0xe6, 0x2a, 0x15, 0x84, 0xa0, 0x42, 0x78, 0x64, 0xe8, 0x99, 0xfa, 0x51, 0x09, 0x67, 0x0b,
-	0x74, 0x0f, 0x50, 0xd6, 0x8d, 0x79, 0xd4, 0x25, 0x9e, 0x17, 0xa7, 0x91, 0xc8, 0xc6, 0xaf, 0xf2,
-	0x3f, 0xe3, 0xb7, 0xa9, 0xf2, 0xf6, 0xf2, 0x34, 0xc7, 0x47, 0x2e, 0xb4, 0x27, 0x44, 0x78, 0xc7,
-	0x6e, 0x42, 0x85, 0x60, 0x51, 0x90, 0x28, 0x35, 0x83, 0x4b, 0xa9, 0x19, 0x66, 0xd0, 0x43, 0x85,
-	0x54, 0x07, 0xd9, 0x9a, 0xac, 0x06, 0xd1, 0x04, 0xde, 0x62, 0xd1, 0x22, 0x7e, 0x4e, 0xdd, 0x69,
-	0x1a, 0x79, 0x72, 0x2c, 0xe9, 0x15, 0xfc, 0x72, 0x24, 0xf6, 0x91, 0x82, 0x7e, 0x1f, 0x79, 0x74,
-	0xa4, 0xe1, 0x36, 0x5b, 0x8b, 0x0e, 0x5b, 0xb0, 0x21, 0x4f, 0x3a, 0x37, 0x6d, 0xd8, 0x86, 0x1a,
-	0x91, 0x1b, 0xca, 0xc4, 0x97, 0x1a, 0xc0, 0x99, 0xdf, 0xe8, 0x13, 0xd0, 0x39, 0x0d, 0x58, 0x22,
-	0xf8, 0xd2, 0x2d, 0x6e, 0xaf, 0xe2, 0x0e, 0xc5, 0x86, 0xe3, 0xa3, 0xf7, 0xa1, 0xe1, 0x53, 0x69,
-	0x6a, 0x71, 0x97, 0x71, 0x3d, 0x0f, 0x38, 0x3e, 0xba, 0x05, 0x30, 0x7b, 0x21, 0x84, 0x2b, 0xe2,
-	0x39, 0xf3, 0x72, 0xab, 0x71, 0x23, 0x8b, 0x8c, 0xb3, 0x00, 0x0a, 0x2e, 0x12, 0xfd, 0xe0, 0x1a,
-	0xa2, 0x7f, 0x60, 0xe2, 0x18, 0x53, 0xc1, 0x97, 0xa3, 0xd2, 0x39, 0xe5, 0xaf, 0x49, 0xed, 0xfe,
-	0xa6, 0x01, 0x3a, 0x6f, 0x19, 0xea, 0x81, 0x5e, 0x10, 0x39, 0x93, 0xbc, 0x3e, 0x1a, 0x50, 0x24,
-	0x38, 0x3e, 0xfa, 0x08, 0x9a, 0xa7, 0xe9, 0x82, 0x04, 0x4a, 0xfd, 0x69, 0x89, 0x31, 0x09, 0xd0,
-	0xe7, 0x17, 0xcf, 0xdc, 0xf9, 0x29, 0xeb, 0xfe, 0xab, 0xc1, 0xbb, 0x17, 0x88, 0x7a, 0xd3, 0xdc,
-	0xd0, 0x53, 0x68, 0xf3, 0x8c, 0xc8, 0xf5, 0x6e, 0x80, 0xd4, 0x50, 0x0c, 0x3b, 0x6e, 0xf1, 0xd5,
-	0x65, 0x77, 0x0a, 0xad, 0xb5, 0x1b, 0x82, 0x6e, 0x42, 0x35, 0x61, 0x3f, 0x53, 0x29, 0xb2, 0x32,
-	0xac, 0xbf, 0x3a, 0xb1, 0xaa, 0x3b, 0x3d, 0x6b, 0x07, 0xcb, 0x28, 0xba, 0x03, 0x35, 0x2f, 0x15,
-	0xf1, 0x74, 0x2a, 0x45, 0xe9, 0x83, 0xf7, 0xce, 0x3d, 0x07, 0x0f, 0xd5, 0x53, 0xa6, 0xc6, 0x55,
-	0xa5, 0x77, 0x7f, 0x81, 0xd6, 0x1a, 0x0f, 0x64, 0x16, 0x9a, 0x88, 0x10, 0x74, 0x36, 0x17, 0x89,
-	0xea, 0x78, 0xe3, 0xd5, 0x89, 0x55, 0xb1, 0x7a, 0xb7, 0x15, 0xd1, 0x3d, 0xb5, 0x8b, 0xee, 0x43,
-	0x9d, 0x45, 0x82, 0xf2, 0x05, 0x09, 0x2f, 0xdb, 0xfb, 0x14, 0xf0, 0xd9, 0x57, 0xa0, 0xab, 0x5f,
-	0xb5, 0xf1, 0x72, 0x4e, 0xd1, 0x4d, 0x30, 0xc6, 0xd8, 0xd9, 0xdf, 0xb7, 0xb1, 0x3b, 0x7e, 0x7a,
-	0x60, 0xbb, 0x47, 0xdf, 0x1d, 0x1e, 0xd8, 0x5f, 0x3b, 0x8f, 0x1c, 0xfb, 0xe1, 0x66, 0x09, 0xbd,
-	0x0d, 0xad, 0xc7, 0xf6, 0xe1, 0xe1, 0xde, 0xbe, 0xed, 0x3e, 0x39, 0xb2, 0x8f, 0xec, 0xcd, 0xca,
-	0x10, 0x3f, 0x3b, 0x08, 0x98, 0x38, 0x4e, 0x27, 0xa6, 0x17, 0xcf, 0xfa, 0xb9, 0xe9, 0xbd, 0xfc,
-	0xf1, 0x0d, 0xe2, 0x5e, 0x40, 0x23, 0x49, 0xa1, 0x7f, 0x89, 0xbf, 0x0b, 0xf7, 0x8b, 0xef, 0x49,
-	0x4d, 0x62, 0xbe, 0xf8, 0x2f, 0x00, 0x00, 0xff, 0xff, 0x0f, 0xa6, 0x49, 0x32, 0x65, 0x08, 0x00,
-	0x00,
+	// 1520 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x58, 0x4b, 0x73, 0x13, 0xc7,
+	0x16, 0xb6, 0x9e, 0xb6, 0x8e, 0x2c, 0x59, 0xee, 0xba, 0x05, 0x42, 0x17, 0x2e, 0xbe, 0xba, 0x45,
+	0x61, 0xe0, 0x4a, 0xb2, 0xe4, 0xf0, 0x7e, 0x54, 0x49, 0xf6, 0x60, 0x0f, 0xe0, 0x07, 0xad, 0x31,
+	0x29, 0xd8, 0x0c, 0xa3, 0x99, 0x96, 0x3c, 0x20, 0xcd, 0x88, 0x99, 0x1e, 0x05, 0x87, 0xac, 0xb2,
+	0xc8, 0x82, 0x6d, 0x92, 0xff, 0x91, 0x9f, 0x10, 0x56, 0xa6, 0xb2, 0x48, 0x65, 0x95, 0xdf, 0xc0,
+	0x0f, 0xc8, 0x8a, 0x55, 0xaa, 0x1f, 0xb2, 0x25, 0xbf, 0x05, 0x55, 0x61, 0x37, 0x7d, 0xfa, 0x3b,
+	0x5f, 0x9f, 0x3e, 0xe7, 0xf4, 0x39, 0x47, 0x82, 0xf2, 0x96, 0xe1, 0x58, 0xe4, 0x75, 0xc9, 0x6c,
+	0xbb, 0x81, 0x55, 0xf2, 0x89, 0xd7, 0x23, 0x5e, 0x9b, 0xf8, 0x7e, 0x89, 0x7a, 0x76, 0xab, 0x45,
+	0x3c, 0xbf, 0xd4, 0x2b, 0xf7, 0xbf, 0x8b, 0x5d, 0xcf, 0xa5, 0x2e, 0xfa, 0x9f, 0x50, 0x29, 0x72,
+	0x95, 0xe2, 0xae, 0x4a, 0xb1, 0xaf, 0x52, 0xec, 0x95, 0x73, 0xff, 0x69, 0xb9, 0x6e, 0xab, 0x4d,
+	0x4a, 0x5c, 0xa5, 0x11, 0x34, 0x4b, 0x56, 0xe0, 0x19, 0xd4, 0x76, 0x1d, 0x41, 0x92, 0x3b, 0xbf,
+	0x77, 0x9f, 0xda, 0x1d, 0xe2, 0x53, 0xa3, 0xd3, 0x95, 0x80, 0x73, 0x43, 0x86, 0xf5, 0x8c, 0xb6,
+	0x6d, 0x0d, 0xe8, 0xe7, 0xff, 0xc8, 0xc2, 0xb8, 0x26, 0xce, 0x43, 0x69, 0x08, 0xdb, 0x56, 0x36,
+	0x34, 0x13, 0x9a, 0x4d, 0xe0, 0xb0, 0x6d, 0xa1, 0x4b, 0x90, 0x68, 0xba, 0x6d, 0x8b, 0x78, 0xba,
+	0x6d, 0x65, 0xc3, 0x4c, 0x5c, 0x9b, 0xfc, 0xb0, 0x5d, 0x0e, 0xbd, 0x7d, 0x5f, 0x8e, 0xde, 0xb9,
+	0x7b, 0x75, 0x0e, 0x4f, 0x88, 0x6d, 0xd5, 0x42, 0x37, 0x01, 0x4c, 0x8f, 0x18, 0x94, 0x58, 0xba,
+	0x41, 0xb3, 0x91, 0x99, 0xd0, 0x6c, 0xb2, 0x92, 0x2b, 0x0a, 0xdb, 0x8a, 0x7d, 0xdb, 0x8a, 0x5a,
+	0xdf, 0x36, 0x9c, 0x90, 0xe8, 0x2a, 0x45, 0x67, 0x21, 0xea, 0x18, 0x1d, 0x92, 0x8d, 0xf2, 0x03,
+	0x26, 0x18, 0xf9, 0x7c, 0xe1, 0xda, 0x3c, 0xe6, 0x52, 0x74, 0x05, 0x92, 0x16, 0xf1, 0x4d, 0xcf,
+	0xee, 0x32, 0xa3, 0xb3, 0x31, 0x0e, 0x4a, 0xbc, 0x7d, 0x5f, 0x8e, 0xcd, 0x15, 0x2a, 0x57, 0xaf,
+	0xe1, 0xc1, 0x5d, 0xb4, 0x0e, 0xf1, 0xb6, 0xd1, 0x20, 0x6d, 0x3f, 0x1b, 0x9f, 0x89, 0xcc, 0x26,
+	0x2b, 0x37, 0x8a, 0x27, 0x70, 0x71, 0x51, 0x5e, 0xbf, 0xf8, 0x88, 0xab, 0x2a, 0x0e, 0xf5, 0xb6,
+	0xb0, 0xe4, 0x41, 0x0f, 0x21, 0xea, 0x05, 0x6d, 0x92, 0x9d, 0xe0, 0x37, 0x2a, 0x8f, 0xc4, 0x87,
+	0x83, 0x36, 0xa9, 0x45, 0x99, 0xc3, 0x30, 0x27, 0x41, 0x0f, 0x21, 0xee, 0x53, 0x83, 0x06, 0x7e,
+	0x36, 0x31, 0x13, 0x9a, 0x4d, 0x57, 0xe6, 0x47, 0xa2, 0xab, 0x73, 0x55, 0x2c, 0x29, 0x72, 0x37,
+	0x21, 0x39, 0x60, 0x30, 0xca, 0x40, 0xe4, 0x25, 0xd9, 0x92, 0xc1, 0x63, 0x9f, 0xe8, 0x5f, 0x10,
+	0xeb, 0x19, 0xed, 0x80, 0x88, 0xc8, 0x61, 0xb1, 0xb8, 0x15, 0xbe, 0x11, 0xca, 0xfd, 0x15, 0x81,
+	0x28, 0x33, 0x0e, 0x3d, 0x80, 0x18, 0x4b, 0x17, 0x8f, 0x43, 0x92, 0x95, 0xca, 0x48, 0xf6, 0xb0,
+	0x60, 0x7a, 0xcb, 0x63, 0x58, 0x50, 0xa0, 0xe7, 0x90, 0xea, 0x10, 0xdf, 0x37, 0x5a, 0x44, 0x7f,
+	0x15, 0x90, 0x80, 0xc8, 0x24, 0xb8, 0x39, 0x12, 0xe7, 0x8a, 0x60, 0x78, 0xcc, 0x08, 0x96, 0xc7,
+	0xf0, 0x64, 0x67, 0x60, 0x8d, 0x9e, 0x41, 0xd2, 0x76, 0xa9, 0x2e, 0x65, 0x3c, 0x5f, 0x92, 0x95,
+	0xeb, 0x23, 0xf1, 0xab, 0xae, 0x26, 0x8f, 0x58, 0x1e, 0xc3, 0x60, 0xbb, 0x54, 0xae, 0x90, 0x09,
+	0x69, 0xb7, 0xf1, 0x82, 0x98, 0x54, 0xf7, 0xa9, 0xeb, 0x31, 0xfa, 0x18, 0xa7, 0xbf, 0x35, 0x12,
+	0xfd, 0x1a, 0xa7, 0xa8, 0x0b, 0x86, 0xe5, 0x31, 0x9c, 0x72, 0x07, 0x05, 0xc8, 0x05, 0x64, 0xba,
+	0x0e, 0x35, 0x6c, 0x87, 0x78, 0xba, 0x47, 0x5a, 0xb6, 0x4f, 0xbd, 0xad, 0x6c, 0x9c, 0x1f, 0x74,
+	0x6f, 0xa4, 0x83, 0x16, 0xfa, 0x34, 0x58, 0xb2, 0x2c, 0x8f, 0xe1, 0x69, 0x73, 0xaf, 0xb0, 0x36,
+	0x29, 0xb2, 0x17, 0x45, 0x7f, 0x7d, 0x57, 0x0e, 0xe5, 0x7e, 0x09, 0x43, 0x8c, 0x07, 0x0d, 0x5d,
+	0x83, 0x29, 0xd3, 0x73, 0x1d, 0x9d, 0xbc, 0xee, 0x7a, 0xc4, 0xf7, 0xd9, 0xc3, 0xe2, 0x89, 0x53,
+	0x4b, 0xc9, 0xe7, 0x1d, 0xbb, 0x73, 0xb7, 0x3c, 0x37, 0x87, 0xd3, 0x0c, 0xa5, 0xec, 0x80, 0x50,
+	0x03, 0xa6, 0x6c, 0xa7, 0xe7, 0xbe, 0x24, 0x7a, 0x33, 0x70, 0x4c, 0xfe, 0x20, 0xc9, 0x08, 0x51,
+	0x50, 0xb9, 0xee, 0x7d, 0xa9, 0xba, 0xe6, 0x98, 0xcc, 0x47, 0x69, 0x7b, 0x48, 0x8a, 0xde, 0x40,
+	0x6e, 0xcf, 0x19, 0xfa, 0x37, 0x36, 0xdd, 0xd4, 0x3d, 0xc2, 0x9c, 0xd5, 0xe2, 0xc7, 0xdd, 0xf9,
+	0x84, 0xe3, 0xbe, 0xb6, 0xe9, 0x26, 0x26, 0xc2, 0x55, 0xa7, 0xed, 0x83, 0xb7, 0x6a, 0x69, 0x88,
+	0x1b, 0xc2, 0x0c, 0xe1, 0xb2, 0x9f, 0x23, 0x30, 0x39, 0x98, 0x93, 0xe8, 0x3c, 0x4c, 0xf0, 0xec,
+	0x66, 0x15, 0x31, 0xc9, 0x5d, 0x26, 0x1e, 0xf8, 0x38, 0x97, 0xaa, 0x16, 0xba, 0x05, 0x88, 0x99,
+	0x63, 0x9b, 0x44, 0x37, 0x4c, 0xd3, 0x0d, 0x1c, 0xca, 0xa0, 0x91, 0x03, 0x8a, 0x67, 0x46, 0xe2,
+	0xaa, 0x02, 0xa6, 0x5a, 0x48, 0x87, 0x74, 0xc3, 0xa0, 0xe6, 0xa6, 0xee, 0x13, 0x4a, 0x6d, 0xa7,
+	0xe5, 0xcb, 0x1c, 0x3f, 0xd9, 0xbb, 0xac, 0x31, 0xd5, 0xba, 0xd4, 0x94, 0x66, 0xa5, 0x1a, 0x83,
+	0x42, 0x54, 0x07, 0xd4, 0xb3, 0x7d, 0xbb, 0x61, 0xb7, 0x6d, 0xba, 0xa5, 0xb3, 0x77, 0xeb, 0x06,
+	0x54, 0x66, 0xfa, 0x99, 0x7d, 0xd5, 0x7a, 0x51, 0x76, 0x9a, 0x5a, 0xe2, 0xe3, 0x36, 0xcf, 0x88,
+	0xca, 0x26, 0x9e, 0xde, 0xd5, 0xd7, 0x84, 0xfa, 0x3f, 0x91, 0x14, 0xfb, 0xe2, 0xf2, 0x21, 0x04,
+	0xb0, 0xfb, 0x96, 0xd1, 0x05, 0x48, 0xf6, 0x9f, 0x93, 0xde, 0xef, 0x60, 0xd2, 0x03, 0xd0, 0xdf,
+	0x50, 0x2d, 0xf4, 0x6f, 0x48, 0x58, 0x84, 0x87, 0xa6, 0xdf, 0xcf, 0xf0, 0x84, 0x10, 0xa8, 0x16,
+	0x3a, 0x07, 0xd0, 0x79, 0x45, 0xa9, 0x4e, 0xdd, 0xae, 0x6d, 0x8a, 0x80, 0xe1, 0x04, 0x93, 0x68,
+	0x4c, 0x80, 0x5a, 0x87, 0xdd, 0xf2, 0x73, 0x73, 0xf1, 0xb8, 0xab, 0xbe, 0x0b, 0x43, 0x6a, 0xa8,
+	0xae, 0xa0, 0x17, 0x00, 0xa4, 0x47, 0x1c, 0xaa, 0xd3, 0xad, 0x2e, 0x2b, 0xb3, 0x91, 0xd9, 0x74,
+	0x65, 0xe1, 0xd3, 0xeb, 0x94, 0xc2, 0xb8, 0xb4, 0xad, 0x2e, 0xa9, 0xc5, 0xbf, 0x7f, 0x5f, 0x0e,
+	0xdf, 0x9b, 0xc3, 0x09, 0xd2, 0x17, 0x31, 0x97, 0x35, 0x02, 0xf3, 0x25, 0xe1, 0x59, 0x1c, 0x15,
+	0x2e, 0x13, 0x02, 0xd5, 0x42, 0xa7, 0x20, 0xde, 0xf5, 0x48, 0xd3, 0x7e, 0xcd, 0x6b, 0x58, 0x02,
+	0xcb, 0x15, 0x93, 0xfb, 0x41, 0x93, 0xc9, 0xc7, 0x85, 0x5c, 0xac, 0xbe, 0x9c, 0x0f, 0x7f, 0x0f,
+	0xc3, 0xf4, 0xbe, 0x92, 0x89, 0x9c, 0x03, 0xfc, 0xb8, 0xf4, 0x79, 0x65, 0xf8, 0x48, 0x5f, 0x9e,
+	0x1f, 0xce, 0x52, 0xe1, 0xcd, 0xc1, 0xfc, 0x3c, 0x07, 0x60, 0x77, 0x58, 0x03, 0xe5, 0xf3, 0x50,
+	0x4c, 0xa4, 0x20, 0x97, 0xac, 0xb2, 0x51, 0x28, 0x03, 0x11, 0x6a, 0xb4, 0xa4, 0xaf, 0xd9, 0xe7,
+	0x17, 0x73, 0x68, 0xfe, 0xb7, 0x10, 0x9c, 0x3a, 0x38, 0x89, 0xd0, 0x25, 0xb8, 0xb0, 0x56, 0x7b,
+	0xa0, 0x2c, 0x68, 0x7a, 0x5d, 0x5b, 0xc3, 0xd5, 0x25, 0x45, 0x57, 0x9e, 0x28, 0xab, 0x9a, 0xae,
+	0x3d, 0x5d, 0x57, 0xf4, 0x8d, 0xd5, 0xfa, 0xba, 0xb2, 0xa0, 0xde, 0x57, 0x95, 0xc5, 0xcc, 0x18,
+	0xba, 0x02, 0x17, 0x0f, 0x87, 0x2e, 0x60, 0xa5, 0xaa, 0x29, 0xba, 0x00, 0x64, 0x42, 0x47, 0x83,
+	0x37, 0xd6, 0x17, 0x07, 0xc0, 0xe1, 0xa3, 0xc1, 0x8b, 0xca, 0x23, 0x65, 0x17, 0x1c, 0xc9, 0xff,
+	0x18, 0x86, 0xdc, 0xe1, 0x91, 0x44, 0x05, 0xb8, 0xb4, 0xb0, 0xb6, 0xaa, 0x55, 0xd5, 0x55, 0x05,
+	0xeb, 0x58, 0x59, 0x52, 0xeb, 0x1a, 0x7e, 0x7a, 0xf8, 0xa5, 0x8a, 0x70, 0xf9, 0x68, 0xb8, 0xbc,
+	0x98, 0xba, 0x52, 0x5d, 0x52, 0x32, 0xa1, 0xe3, 0xf1, 0xd2, 0x5c, 0x81, 0x0f, 0xa3, 0x0a, 0x14,
+	0x4f, 0xce, 0xaf, 0x6b, 0xd5, 0xa5, 0x4c, 0xe4, 0x78, 0x9d, 0xc1, 0x33, 0xb8, 0x4e, 0x34, 0x7f,
+	0x03, 0xe2, 0x62, 0xe2, 0x44, 0xa7, 0x00, 0xd5, 0xb5, 0xaa, 0xb6, 0x51, 0xdf, 0x73, 0x53, 0x80,
+	0x78, 0x75, 0x41, 0x53, 0x9f, 0xb0, 0x5b, 0x00, 0xc4, 0xd7, 0xab, 0x1b, 0x75, 0x65, 0x31, 0x13,
+	0xce, 0xff, 0x14, 0x02, 0xb4, 0xbf, 0xaa, 0xa3, 0x02, 0x24, 0x77, 0x3a, 0xfa, 0x4e, 0x91, 0x1e,
+	0x6e, 0x89, 0xd0, 0x07, 0xa8, 0x16, 0xfa, 0x2f, 0x4c, 0xee, 0xc0, 0x59, 0xda, 0x8b, 0x7a, 0xbd,
+	0x43, 0xa1, 0x19, 0x2d, 0xf4, 0xff, 0xc3, 0x7b, 0xed, 0xfe, 0xee, 0x9a, 0xff, 0x33, 0x0c, 0xa7,
+	0x0f, 0xc9, 0xf8, 0x2f, 0x6d, 0x1b, 0x7a, 0x0a, 0x69, 0x3e, 0xdf, 0x7c, 0x5a, 0xe7, 0xe7, 0x77,
+	0xe8, 0x37, 0x79, 0x9c, 0xf2, 0x06, 0x97, 0xe8, 0x39, 0x4c, 0x5b, 0xc4, 0xb0, 0xf4, 0x36, 0xa1,
+	0x94, 0x78, 0x72, 0x36, 0x17, 0x2d, 0xff, 0xab, 0x13, 0xb1, 0xaf, 0x07, 0x94, 0xcf, 0x3e, 0xb2,
+	0xd9, 0xe2, 0x29, 0x46, 0xf7, 0x88, 0xb3, 0x71, 0x79, 0x7e, 0x13, 0xa6, 0xf6, 0x60, 0xd0, 0x99,
+	0xbd, 0x63, 0xd2, 0x71, 0x03, 0x52, 0xf8, 0x24, 0x03, 0x52, 0xbe, 0x09, 0xa9, 0xa1, 0x29, 0x87,
+	0xfd, 0x76, 0xf4, 0xed, 0x6f, 0x09, 0x0f, 0x58, 0xa4, 0x36, 0xf1, 0x71, 0xbb, 0x1c, 0x9d, 0x2b,
+	0x94, 0xe7, 0x30, 0x97, 0xa2, 0xeb, 0x10, 0x37, 0x03, 0xea, 0x36, 0x9b, 0xf2, 0xf7, 0xcd, 0x11,
+	0x23, 0x8e, 0x18, 0x16, 0x24, 0x3c, 0xff, 0x1d, 0xa4, 0x86, 0x7c, 0x8a, 0x8a, 0xfd, 0xf8, 0x18,
+	0x94, 0x92, 0x4e, 0x97, 0xfa, 0xf2, 0xc4, 0xf1, 0x8f, 0xdb, 0xe5, 0x48, 0xb9, 0x70, 0x55, 0x3a,
+	0xbd, 0x2a, 0x77, 0xd1, 0x6d, 0x98, 0xb0, 0x1d, 0x4a, 0xbc, 0x9e, 0xd1, 0x3e, 0xe9, 0xd9, 0x3b,
+	0x0a, 0x97, 0x7f, 0x08, 0x41, 0x52, 0x76, 0x18, 0x5e, 0x80, 0xce, 0x42, 0x56, 0xc3, 0xea, 0xd2,
+	0x92, 0x82, 0x0f, 0xaa, 0x37, 0x09, 0x88, 0x69, 0xea, 0x8a, 0x82, 0x33, 0x61, 0x34, 0x0d, 0xa9,
+	0x15, 0xa5, 0x5e, 0x67, 0x6f, 0xf8, 0xf1, 0x86, 0xb2, 0xa1, 0x64, 0x22, 0x68, 0x0a, 0x92, 0xea,
+	0x9a, 0xa6, 0x4b, 0x71, 0x26, 0x8a, 0x10, 0xa4, 0x87, 0x2b, 0x63, 0x26, 0xc6, 0x1e, 0xf8, 0xfe,
+	0xf2, 0x90, 0x89, 0xd7, 0xde, 0xc0, 0xc5, 0xa1, 0x04, 0x31, 0xba, 0xf6, 0x21, 0x49, 0xf2, 0x6c,
+	0xbd, 0x65, 0xd3, 0xcd, 0xa0, 0x51, 0x34, 0xdd, 0x4e, 0x49, 0xe8, 0x14, 0xc4, 0x1f, 0x0e, 0x2d,
+	0xb7, 0xd0, 0x22, 0x0e, 0xbf, 0x74, 0xe9, 0x04, 0x7f, 0x91, 0xdc, 0xee, 0x7f, 0x37, 0xe2, 0x5c,
+	0x67, 0xfe, 0xef, 0x00, 0x00, 0x00, 0xff, 0xff, 0xc1, 0x95, 0x50, 0x97, 0x59, 0x11, 0x00, 0x00,
 }

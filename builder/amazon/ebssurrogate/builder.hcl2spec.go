@@ -113,6 +113,7 @@ type FlatConfig struct {
 	SSHUsername                               *string                                `mapstructure:"ssh_username" cty:"ssh_username" hcl:"ssh_username"`
 	SSHPassword                               *string                                `mapstructure:"ssh_password" cty:"ssh_password" hcl:"ssh_password"`
 	SSHKeyPairName                            *string                                `mapstructure:"ssh_keypair_name" cty:"ssh_keypair_name" hcl:"ssh_keypair_name"`
+	SSHCiphers                                []string                               `mapstructure:"ssh_ciphers" cty:"ssh_ciphers" hcl:"ssh_ciphers"`
 	SSHClearAuthorizedKeys                    *bool                                  `mapstructure:"ssh_clear_authorized_keys" cty:"ssh_clear_authorized_keys" hcl:"ssh_clear_authorized_keys"`
 	SSHPrivateKeyFile                         *string                                `mapstructure:"ssh_private_key_file" cty:"ssh_private_key_file" hcl:"ssh_private_key_file"`
 	SSHPty                                    *bool                                  `mapstructure:"ssh_pty" cty:"ssh_pty" hcl:"ssh_pty"`
@@ -174,7 +175,8 @@ type FlatConfig struct {
 	AMIMappings                               []common.FlatBlockDevice               `mapstructure:"ami_block_device_mappings" required:"false" cty:"ami_block_device_mappings" hcl:"ami_block_device_mappings"`
 	LaunchMappings                            []FlatBlockDevice                      `mapstructure:"launch_block_device_mappings" required:"false" cty:"launch_block_device_mappings" hcl:"launch_block_device_mappings"`
 	RootDevice                                *FlatRootBlockDevice                   `mapstructure:"ami_root_device" required:"true" cty:"ami_root_device" hcl:"ami_root_device"`
-	VolumeRunTags                             common.TagMap                          `mapstructure:"run_volume_tags" cty:"run_volume_tags" hcl:"run_volume_tags"`
+	VolumeRunTags                             map[string]string                      `mapstructure:"run_volume_tags" cty:"run_volume_tags" hcl:"run_volume_tags"`
+	VolumeRunTag                              []hcl2template.FlatNameValue           `mapstructure:"run_volume_tag" required:"false" cty:"run_volume_tag" hcl:"run_volume_tag"`
 	Architecture                              *string                                `mapstructure:"ami_architecture" required:"false" cty:"ami_architecture" hcl:"ami_architecture"`
 }
 
@@ -249,6 +251,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_username":                          &hcldec.AttrSpec{Name: "ssh_username", Type: cty.String, Required: false},
 		"ssh_password":                          &hcldec.AttrSpec{Name: "ssh_password", Type: cty.String, Required: false},
 		"ssh_keypair_name":                      &hcldec.AttrSpec{Name: "ssh_keypair_name", Type: cty.String, Required: false},
+		"ssh_ciphers":                           &hcldec.AttrSpec{Name: "ssh_ciphers", Type: cty.List(cty.String), Required: false},
 		"ssh_clear_authorized_keys":             &hcldec.AttrSpec{Name: "ssh_clear_authorized_keys", Type: cty.Bool, Required: false},
 		"ssh_private_key_file":                  &hcldec.AttrSpec{Name: "ssh_private_key_file", Type: cty.String, Required: false},
 		"ssh_pty":                               &hcldec.AttrSpec{Name: "ssh_pty", Type: cty.Bool, Required: false},
@@ -311,6 +314,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"launch_block_device_mappings":          &hcldec.BlockListSpec{TypeName: "launch_block_device_mappings", Nested: hcldec.ObjectSpec((*FlatBlockDevice)(nil).HCL2Spec())},
 		"ami_root_device":                       &hcldec.BlockSpec{TypeName: "ami_root_device", Nested: hcldec.ObjectSpec((*FlatRootBlockDevice)(nil).HCL2Spec())},
 		"run_volume_tags":                       &hcldec.AttrSpec{Name: "run_volume_tags", Type: cty.Map(cty.String), Required: false},
+		"run_volume_tag":                        &hcldec.BlockListSpec{TypeName: "run_volume_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 		"ami_architecture":                      &hcldec.AttrSpec{Name: "ami_architecture", Type: cty.String, Required: false},
 	}
 	return s

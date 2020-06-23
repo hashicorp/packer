@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -54,7 +55,12 @@ type Config struct {
 	// duplicated in `tags`. This is a [template
 	// engine](/docs/templates/engine), see [Build template
 	// data](#build-template-data) for more information.
-	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
+	VolumeRunTags map[string]string `mapstructure:"run_volume_tags"`
+	// Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular
+	// block containing a `name` and a `value` field. In HCL2 mode the
+	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// will allow you to create those programatically.
+	VolumeRunTag hcl2template.NameValues `mapstructure:"run_volume_tag" required:"false"`
 	// Relevant only to Windows guests: If you set this flag, we'll add clauses
 	// to the launch_block_device_mappings that make sure ephemeral drives
 	// don't show up in the EC2 console. If you launched from the EC2 console,
@@ -103,6 +109,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	// Accumulate any errors
 	var errs *packer.MultiError
 	var warns []string
+
+	errs = packer.MultiErrorAppend(errs, b.config.VolumeRunTag.CopyOn(&b.config.VolumeRunTags)...)
 
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs,

@@ -32,3 +32,8 @@ func (v *VPC) Subnet() *SubnetServiceClient {
 func (v *VPC) RouteTable() *RouteTableServiceClient {
 	return &RouteTableServiceClient{getConn: v.getConn}
 }
+
+// SecurityGroup gets SecurityGroupService client
+func (v *VPC) SecurityGroup() *SecurityGroupServiceClient {
+	return &SecurityGroupServiceClient{getConn: v.getConn}
+}

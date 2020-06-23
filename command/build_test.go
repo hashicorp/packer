@@ -207,6 +207,31 @@ func TestBuild(t *testing.T) {
 				},
 			},
 		},
+
+		// only / except HCL2
+		{
+			name: "hcl - 'except' a build block",
+			args: []string{
+				"-except=my_build.*",
+				testFixture("hcl-only-except"),
+			},
+			fileCheck: fileCheck{
+				expected:    []string{"cherry.txt"},
+				notExpected: []string{"chocolate.txt", "vanilla.txt"},
+			},
+		},
+
+		{
+			name: "hcl - 'only' a build block",
+			args: []string{
+				"-only=my_build.*",
+				testFixture("hcl-only-except"),
+			},
+			fileCheck: fileCheck{
+				notExpected: []string{"cherry.txt"},
+				expected:    []string{"chocolate.txt", "vanilla.txt"},
+			},
+		},
 	}
 
 	for _, tt := range tc {
@@ -490,14 +515,19 @@ func TestBuildCommand_HCLOnlyExceptOptions(t *testing.T) {
 			[]string{"chocolate.txt", "vanilla.txt"},
 		},
 		{
-			[]string{"-only=file.chocolate"},
+			[]string{"-only=my_build.file.chocolate"},
 			[]string{"chocolate.txt"},
 			[]string{"vanilla.txt", "cherry.txt"},
 		},
 		{
-			[]string{"-except=file.chocolate"},
+			[]string{"-except=my_build.file.chocolate"},
 			[]string{"vanilla.txt", "cherry.txt"},
 			[]string{"chocolate.txt"},
+		},
+		{
+			[]string{"-only=file.cherry"},
+			[]string{"cherry.txt"},
+			[]string{"vanilla.txt", "chocolate.txt"},
 		},
 	}
 

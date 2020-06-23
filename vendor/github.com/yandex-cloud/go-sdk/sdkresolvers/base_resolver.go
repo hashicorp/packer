@@ -4,8 +4,10 @@
 package sdkresolvers
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/yandex-cloud/go-sdk/pkg/sdkerrors"
 )
@@ -18,10 +20,11 @@ func CreateResolverFilter(nameField string, value string) string {
 }
 
 type resolveOptions struct {
-	out       *string
-	folderID  string
-	cloudID   string
-	clusterID string
+	out          *string
+	folderID     string
+	cloudID      string
+	clusterID    string
+	federationID string
 }
 
 type ResolveOption func(*resolveOptions)
@@ -50,6 +53,13 @@ func CloudID(cloudID string) ResolveOption {
 func ClusterID(clusterID string) ResolveOption {
 	return func(o *resolveOptions) {
 		o.clusterID = clusterID
+	}
+}
+
+// FederationID specifies federation id for resolvers that need it, e.g. CertificateResolver
+func FederationID(federationID string) ResolveOption {
+	return func(o *resolveOptions) {
+		o.federationID = federationID
 	}
 }
 
@@ -132,6 +142,27 @@ func (r *BaseResolver) ClusterID() string {
 	return r.opts.clusterID
 }
 
+func (r *BaseResolver) FederationID() string {
+	return r.opts.federationID
+}
+
+func (r *BaseResolver) coordinates() string {
+	buf := bytes.Buffer{}
+	if r.FederationID() != "" {
+		buf.WriteString(fmt.Sprintf("in the federation \"%s\" ", r.FederationID()))
+	}
+	if r.ClusterID() != "" {
+		buf.WriteString(fmt.Sprintf("in the cluster \"%s\" ", r.ClusterID()))
+	}
+	if r.CloudID() != "" {
+		buf.WriteString(fmt.Sprintf("in the cloud \"%s\" ", r.CloudID()))
+	}
+	if r.FolderID() != "" {
+		buf.WriteString(fmt.Sprintf("in the folder \"%s\" ", r.FolderID()))
+	}
+	return strings.TrimSpace(buf.String())
+}
+
 func (r *BaseResolver) writeOut() {
 	if r.opts.out != nil {
 		*r.opts.out = r.id
@@ -178,7 +209,7 @@ func errNotFound(caption, name string) error {
 
 func (r *BaseNameResolver) findNameImpl(slice interface{}, err error) error {
 	if err != nil {
-		return sdkerrors.WithMessagef(err, "failed to find %v with name \"%v\"", r.resolvingObjectType, r.Name)
+		return sdkerrors.WithMessagef(err, "failed to find %v with name \"%v\" %v", r.resolvingObjectType, r.Name, r.coordinates())
 	}
 	rv := reflect.ValueOf(slice)
 	var found nameAndID
@@ -186,7 +217,7 @@ func (r *BaseNameResolver) findNameImpl(slice interface{}, err error) error {
 		v := rv.Index(i).Interface().(nameAndID)
 		if v.GetName() == r.Name {
 			if found != nil {
-				return fmt.Errorf("multiple %v items with name \"%v\" found", r.resolvingObjectType, r.Name)
+				return fmt.Errorf("multiple %v items with name \"%v\" found %v", r.resolvingObjectType, r.Name, r.coordinates())
 			}
 			found = v
 		}

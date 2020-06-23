@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/redis/v1"
+	redis "github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/redis/v1"
 )
 
 //revive:disable
@@ -18,8 +18,6 @@ import (
 type ResourcePresetServiceClient struct {
 	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
-
-var _ redis.ResourcePresetServiceClient = &ResourcePresetServiceClient{}
 
 // Get implements redis.ResourcePresetServiceClient
 func (c *ResourcePresetServiceClient) Get(ctx context.Context, in *redis.GetResourcePresetRequest, opts ...grpc.CallOption) (*redis.ResourcePreset, error) {
@@ -37,4 +35,66 @@ func (c *ResourcePresetServiceClient) List(ctx context.Context, in *redis.ListRe
 		return nil, err
 	}
 	return redis.NewResourcePresetServiceClient(conn).List(ctx, in, opts...)
+}
+
+type ResourcePresetIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ResourcePresetServiceClient
+	request *redis.ListResourcePresetsRequest
+
+	items []*redis.ResourcePreset
+}
+
+func (c *ResourcePresetServiceClient) ResourcePresetIterator(ctx context.Context, opts ...grpc.CallOption) *ResourcePresetIterator {
+	return &ResourcePresetIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &redis.ListResourcePresetsRequest{
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *ResourcePresetIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.List(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.ResourcePresets
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *ResourcePresetIterator) Value() *redis.ResourcePreset {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ResourcePresetIterator) Error() error {
+	return it.err
 }

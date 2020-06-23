@@ -18,20 +18,31 @@ based on existing images.
 
 ## Authentication
 
-Yandex.Cloud services authentication requires one of the following security credentials:
+Builder can authenticate with Yandex.Cloud using one of the following methods:
 
 - OAuth token
 - File with Service Account Key
+- Service Account assigned to Compute Instance
 
 ### Authentication Using Token
 
 To authenticate with an OAuth token only `token` config key is needed.
-Or use the `YC_TOKEN` environment variable.
+Or use the `YC_TOKEN` environment variable with proper value. Token you could get [here](https://oauth.yandex.ru/authorize?response_type=token&client_id=1a6990aa636648e9b2ef855fa7bec2fb).
 
 ### Authentication Using Service Account Key File
 
 To authenticate with a service account credential, only `service_account_key_file` is needed.
 Or use the `YC_SERVICE_ACCOUNT_KEY_FILE` environment variable.
+The parameter expects a value  path to the service account file in json format. Check [documentation](https://cloud.yandex.com/docs/cli/operations/authentication/service-account#auth-as-sa)
+about how to create SA and its key.
+
+### Authentication Using a Compute Instance Service Account
+
+Authentication with a Service Account on an instance happens when neither the `token` nor the `service_account_key_file` parameter is set.
+To get more information about this kind of authentication check [documentaion](https://cloud.yandex.com/docs/compute/operations/vm-connect/auth-inside-vm).
+
+-> **NB** Do not forget to assigne proper roles to Service Account, if you use this type of auth.
+
 
 ## Basic Example
 
