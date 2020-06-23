@@ -175,7 +175,8 @@ type FlatConfig struct {
 	AMIMappings                               []common.FlatBlockDevice               `mapstructure:"ami_block_device_mappings" required:"false" cty:"ami_block_device_mappings" hcl:"ami_block_device_mappings"`
 	LaunchMappings                            []FlatBlockDevice                      `mapstructure:"launch_block_device_mappings" required:"false" cty:"launch_block_device_mappings" hcl:"launch_block_device_mappings"`
 	RootDevice                                *FlatRootBlockDevice                   `mapstructure:"ami_root_device" required:"true" cty:"ami_root_device" hcl:"ami_root_device"`
-	VolumeRunTags                             common.TagMap                          `mapstructure:"run_volume_tags" cty:"run_volume_tags" hcl:"run_volume_tags"`
+	VolumeRunTags                             map[string]string                      `mapstructure:"run_volume_tags" cty:"run_volume_tags" hcl:"run_volume_tags"`
+	VolumeRunTag                              []hcl2template.FlatNameValue           `mapstructure:"run_volume_tag" required:"false" cty:"run_volume_tag" hcl:"run_volume_tag"`
 	Architecture                              *string                                `mapstructure:"ami_architecture" required:"false" cty:"ami_architecture" hcl:"ami_architecture"`
 }
 
@@ -313,6 +314,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"launch_block_device_mappings":          &hcldec.BlockListSpec{TypeName: "launch_block_device_mappings", Nested: hcldec.ObjectSpec((*FlatBlockDevice)(nil).HCL2Spec())},
 		"ami_root_device":                       &hcldec.BlockSpec{TypeName: "ami_root_device", Nested: hcldec.ObjectSpec((*FlatRootBlockDevice)(nil).HCL2Spec())},
 		"run_volume_tags":                       &hcldec.AttrSpec{Name: "run_volume_tags", Type: cty.Map(cty.String), Required: false},
+		"run_volume_tag":                        &hcldec.BlockListSpec{TypeName: "run_volume_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
 		"ami_architecture":                      &hcldec.AttrSpec{Name: "ami_architecture", Type: cty.String, Required: false},
 	}
 	return s
