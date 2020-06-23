@@ -439,22 +439,70 @@ func (p *PackerConfig) EvaluateExpression(line string) (out string, exit bool, d
 	case line == "help":
 		return PackerConsoleHelp, false, nil
 	case line == "variables":
-		out := &strings.Builder{}
-		out.WriteString("> input-variables:\n\n")
-		for _, v := range p.InputVariables {
-			val, _ := v.Value()
-			fmt.Fprintf(out, "var.%s: %q [debug: %#v]\n", v.Name, PrintableCtyValue(val), v)
-		}
-		out.WriteString("\n> local-variables:\n\n")
-		for _, v := range p.LocalVariables {
-			val, _ := v.Value()
-			fmt.Fprintf(out, "local.%s: %q\n", v.Name, PrintableCtyValue(val))
-		}
-
-		return out.String(), false, nil
+		return p.printVariables(), false, nil
 	default:
 		return p.handleEval(line)
 	}
+}
+
+func (p *PackerConfig) printVariables() string {
+	out := &strings.Builder{}
+	out.WriteString("> input-variables:\n\n")
+	for _, v := range p.InputVariables {
+		val, _ := v.Value()
+		fmt.Fprintf(out, "var.%s: %q [debug: %#v]\n", v.Name, PrintableCtyValue(val), v)
+	}
+	out.WriteString("\n> local-variables:\n\n")
+	for _, v := range p.LocalVariables {
+		val, _ := v.Value()
+		fmt.Fprintf(out, "local.%s: %q\n", v.Name, PrintableCtyValue(val))
+	}
+	return out.String()
+}
+
+func (p *PackerConfig) printBuilds() string {
+	out := &strings.Builder{}
+	out.WriteString("> builds:\n")
+	for i, build := range p.Builds {
+		name := build.Name
+		if name == "" {
+			name = fmt.Sprintf("<unnamed build %d>", i)
+		}
+		fmt.Fprintf(out, "\n  > %s:\n", name)
+		if build.Description != "" {
+			fmt.Fprintf(out, "\n  > Description: %s\n", build.Description)
+		}
+		fmt.Fprintf(out, "\n    sources:\n")
+		if len(build.Sources) == 0 {
+			fmt.Fprintf(out, "\n      <no source>\n")
+		}
+		for _, source := range build.Sources {
+			fmt.Fprintf(out, "\n      %s\n", source)
+		}
+		fmt.Fprintf(out, "\n    provisioners:\n\n")
+		if len(build.ProvisionerBlocks) == 0 {
+			fmt.Fprintf(out, "      <no provisioner>\n")
+		}
+		for _, prov := range build.ProvisionerBlocks {
+			str := prov.PType
+			if prov.PName != "" {
+				str = strings.Join([]string{prov.PType, prov.PName}, ".")
+			}
+			fmt.Fprintf(out, "      %s\n", str)
+		}
+		fmt.Fprintf(out, "\n    post-processors:\n\n")
+		if len(build.PostProcessors) == 0 {
+			fmt.Fprintf(out, "      <no post-processor>\n")
+		}
+		for _, pp := range build.PostProcessors {
+			str := pp.PType
+			if pp.PName != "" {
+				str = strings.Join([]string{pp.PType, pp.PName}, ".")
+			}
+			fmt.Fprintf(out, "      %s\n", str)
+		}
+	}
+	return out.String()
 }
 
 func (p *PackerConfig) handleEval(line string) (out string, exit bool, diags hcl.Diagnostics) {
@@ -478,4 +526,13 @@ func (p *PackerConfig) handleEval(line string) (out string, exit bool, diags hcl
 func (p *PackerConfig) FixConfig(_ packer.FixConfigOptions) (diags hcl.Diagnostics) {
 	// No Fixers exist for HCL2 configs so there is nothing to do here for now.
 	return
+}
+
+func (p *PackerConfig) InspectConfig(opts packer.InspectConfigOptions) int {
+
+	ui := opts.Ui
+	ui.Say("Packer Inspect: HCL2 mode\n")
+	ui.Say(p.printVariables())
+	ui.Say(p.printBuilds())
+	return 0
 }

@@ -85,6 +85,8 @@ func TestHelperProcess(*testing.T) {
 	switch cmd {
 	case "console":
 		os.Exit((&ConsoleCommand{Meta: commandMeta()}).Run(args))
+	case "inspect":
+		os.Exit((&InspectCommand{Meta: commandMeta()}).Run(args))
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %q\n", cmd)
 		os.Exit(2)

@@ -38,6 +38,10 @@ type BuildBlock struct {
 	// Name is a string representing the named build to show in the logs
 	Name string
 
+	// A description of what this build does, it could be used in a inspect
+	// call for example.
+	Description string
+
 	// Sources is the list of sources that we want to start in this build block.
 	Sources []SourceRef
 
@@ -61,6 +65,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 
 	var b struct {
 		Name        string   `hcl:"name,optional"`
+		Description string   `hcl:"description,optional"`
 		FromSources []string `hcl:"sources,optional"`
 		Config      hcl.Body `hcl:",remain"`
 	}
@@ -70,6 +75,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 	}
 
 	build.Name = b.Name
+	build.Description = b.Description
 
 	for _, buildFrom := range b.FromSources {
 		ref := sourceRefFromString(buildFrom)
