@@ -121,3 +121,12 @@ type ValidateArgs struct {
 	MetaArgs
 	SyntaxOnly bool
 }
+
+func (va *InspectArgs) AddFlagSets(flags *flag.FlagSet) {
+	va.MetaArgs.AddFlagSets(flags)
+}
+
+// InspectArgs represents a parsed cli line for a `packer inspect`
+type InspectArgs struct {
+	MetaArgs
+}

@@ -29,6 +29,7 @@ type Handler interface {
 	Evaluator
 	BuildGetter
 	ConfigFixer
+	ConfigInspector
 }
 
 //go:generate enumer -type FixConfigMode
@@ -51,4 +52,13 @@ type FixConfigOptions struct {
 type ConfigFixer interface {
 	// FixConfig will output the config in a fixed manner.
 	FixConfig(FixConfigOptions) hcl.Diagnostics
+}
+
+type InspectConfigOptions struct {
+	Ui
+}
+
+type ConfigInspector interface {
+	// Inspect will output self inspection for a configuration
+	InspectConfig(InspectConfigOptions) (ret int)
 }

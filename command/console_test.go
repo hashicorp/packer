@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_piping(t *testing.T) {
+func Test_console(t *testing.T) {
 
 	tc := []struct {
 		piped    string
