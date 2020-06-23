@@ -3,8 +3,6 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ucloud/ucloud-sdk-go/private/protocol/http"
-	"github.com/ucloud/ucloud-sdk-go/ucloud/log"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -14,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/hashicorp/packer/version"
 	"github.com/ucloud/ucloud-sdk-go/external"
+	"github.com/ucloud/ucloud-sdk-go/private/protocol/http"
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
 	"github.com/ucloud/ucloud-sdk-go/services/ufile"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
@@ -21,6 +20,7 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/services/vpc"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
+	"github.com/ucloud/ucloud-sdk-go/ucloud/log"
 )
 
 type AccessConfig struct {

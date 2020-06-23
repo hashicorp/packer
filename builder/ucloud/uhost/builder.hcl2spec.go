@@ -17,23 +17,30 @@ type FlatConfig struct {
 	PackerOnError             *string                       `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
 	PackerUserVars            map[string]string             `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars       []string                      `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	PublicKey                 *string                       `mapstructure:"public_key" cty:"public_key" hcl:"public_key"`
-	PrivateKey                *string                       `mapstructure:"private_key" cty:"private_key" hcl:"private_key"`
-	Region                    *string                       `mapstructure:"region" cty:"region" hcl:"region"`
-	ProjectId                 *string                       `mapstructure:"project_id" cty:"project_id" hcl:"project_id"`
-	BaseUrl                   *string                       `mapstructure:"base_url" cty:"base_url" hcl:"base_url"`
-	ImageName                 *string                       `mapstructure:"image_name" cty:"image_name" hcl:"image_name"`
-	ImageDescription          *string                       `mapstructure:"image_description" cty:"image_description" hcl:"image_description"`
-	ImageDestinations         []common.FlatImageDestination `mapstructure:"image_copy_to_mappings" cty:"image_copy_to_mappings" hcl:"image_copy_to_mappings"`
-	WaitImageReadyTimeout     *int                          `mapstructure:"wait_image_ready_timeout" cty:"wait_image_ready_timeout" hcl:"wait_image_ready_timeout"`
-	Zone                      *string                       `mapstructure:"availability_zone" cty:"availability_zone" hcl:"availability_zone"`
-	SourceImageId             *string                       `mapstructure:"source_image_id" cty:"source_image_id" hcl:"source_image_id"`
-	InstanceType              *string                       `mapstructure:"instance_type" cty:"instance_type" hcl:"instance_type"`
-	InstanceName              *string                       `mapstructure:"instance_name" cty:"instance_name" hcl:"instance_name"`
-	BootDiskType              *string                       `mapstructure:"boot_disk_type" cty:"boot_disk_type" hcl:"boot_disk_type"`
-	VPCId                     *string                       `mapstructure:"vpc_id" cty:"vpc_id" hcl:"vpc_id"`
-	SubnetId                  *string                       `mapstructure:"subnet_id" cty:"subnet_id" hcl:"subnet_id"`
-	SecurityGroupId           *string                       `mapstructure:"security_group_id" cty:"security_group_id" hcl:"security_group_id"`
+	PublicKey                 *string                       `mapstructure:"public_key" required:"true" cty:"public_key" hcl:"public_key"`
+	PrivateKey                *string                       `mapstructure:"private_key" required:"true" cty:"private_key" hcl:"private_key"`
+	Region                    *string                       `mapstructure:"region" required:"true" cty:"region" hcl:"region"`
+	ProjectId                 *string                       `mapstructure:"project_id" required:"true" cty:"project_id" hcl:"project_id"`
+	BaseUrl                   *string                       `mapstructure:"base_url" required:"false" cty:"base_url" hcl:"base_url"`
+	Profile                   *string                       `mapstructure:"profile" required:"false" cty:"profile" hcl:"profile"`
+	SharedCredentialsFile     *string                       `mapstructure:"shared_credentials_file" required:"false" cty:"shared_credentials_file" hcl:"shared_credentials_file"`
+	ImageName                 *string                       `mapstructure:"image_name" required:"true" cty:"image_name" hcl:"image_name"`
+	ImageDescription          *string                       `mapstructure:"image_description" required:"false" cty:"image_description" hcl:"image_description"`
+	ImageDestinations         []common.FlatImageDestination `mapstructure:"image_copy_to_mappings" required:"false" cty:"image_copy_to_mappings" hcl:"image_copy_to_mappings"`
+	WaitImageReadyTimeout     *int                          `mapstructure:"wait_image_ready_timeout" required:"false" cty:"wait_image_ready_timeout" hcl:"wait_image_ready_timeout"`
+	Zone                      *string                       `mapstructure:"availability_zone" required:"true" cty:"availability_zone" hcl:"availability_zone"`
+	SourceImageId             *string                       `mapstructure:"source_image_id" required:"true" cty:"source_image_id" hcl:"source_image_id"`
+	InstanceType              *string                       `mapstructure:"instance_type" required:"true" cty:"instance_type" hcl:"instance_type"`
+	InstanceName              *string                       `mapstructure:"instance_name" required:"false" cty:"instance_name" hcl:"instance_name"`
+	BootDiskType              *string                       `mapstructure:"boot_disk_type" required:"false" cty:"boot_disk_type" hcl:"boot_disk_type"`
+	VPCId                     *string                       `mapstructure:"vpc_id" required:"false" cty:"vpc_id" hcl:"vpc_id"`
+	SubnetId                  *string                       `mapstructure:"subnet_id" required:"false" cty:"subnet_id" hcl:"subnet_id"`
+	SecurityGroupId           *string                       `mapstructure:"security_group_id" required:"false" cty:"security_group_id" hcl:"security_group_id"`
+	EipBandwidth              *int                          `mapstructure:"eip_bandwidth" required:"false" cty:"eip_bandwidth" hcl:"eip_bandwidth"`
+	EipChargeMode             *string                       `mapstructure:"eip_charge_mode" required:"false" cty:"eip_charge_mode" hcl:"eip_charge_mode"`
+	UserData                  *string                       `mapstructure:"user_data" required:"false" cty:"user_data" hcl:"user_data"`
+	UserDataFile              *string                       `mapstructure:"user_data_file" required:"false" cty:"user_data_file" hcl:"user_data_file"`
+	MinCpuPlatform            *string                       `mapstructure:"min_cpu_platform" required:"false" cty:"min_cpu_platform" hcl:"min_cpu_platform"`
 	Type                      *string                       `mapstructure:"communicator" cty:"communicator" hcl:"communicator"`
 	PauseBeforeConnect        *string                       `mapstructure:"pause_before_connecting" cty:"pause_before_connecting" hcl:"pause_before_connecting"`
 	SSHHost                   *string                       `mapstructure:"ssh_host" cty:"ssh_host" hcl:"ssh_host"`
@@ -105,6 +112,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
 		"project_id":                   &hcldec.AttrSpec{Name: "project_id", Type: cty.String, Required: false},
 		"base_url":                     &hcldec.AttrSpec{Name: "base_url", Type: cty.String, Required: false},
+		"profile":                      &hcldec.AttrSpec{Name: "profile", Type: cty.String, Required: false},
+		"shared_credentials_file":      &hcldec.AttrSpec{Name: "shared_credentials_file", Type: cty.String, Required: false},
 		"image_name":                   &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"image_description":            &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
 		"image_copy_to_mappings":       &hcldec.BlockListSpec{TypeName: "image_copy_to_mappings", Nested: hcldec.ObjectSpec((*common.FlatImageDestination)(nil).HCL2Spec())},
@@ -117,6 +126,11 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vpc_id":                       &hcldec.AttrSpec{Name: "vpc_id", Type: cty.String, Required: false},
 		"subnet_id":                    &hcldec.AttrSpec{Name: "subnet_id", Type: cty.String, Required: false},
 		"security_group_id":            &hcldec.AttrSpec{Name: "security_group_id", Type: cty.String, Required: false},
+		"eip_bandwidth":                &hcldec.AttrSpec{Name: "eip_bandwidth", Type: cty.Number, Required: false},
+		"eip_charge_mode":              &hcldec.AttrSpec{Name: "eip_charge_mode", Type: cty.String, Required: false},
+		"user_data":                    &hcldec.AttrSpec{Name: "user_data", Type: cty.String, Required: false},
+		"user_data_file":               &hcldec.AttrSpec{Name: "user_data_file", Type: cty.String, Required: false},
+		"min_cpu_platform":             &hcldec.AttrSpec{Name: "min_cpu_platform", Type: cty.String, Required: false},
 		"communicator":                 &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
 		"pause_before_connecting":      &hcldec.AttrSpec{Name: "pause_before_connecting", Type: cty.String, Required: false},
 		"ssh_host":                     &hcldec.AttrSpec{Name: "ssh_host", Type: cty.String, Required: false},
