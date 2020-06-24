@@ -275,7 +275,7 @@ func (s *TemplateBuilder) SetAdditionalDisks(diskSizeGB []int32, dataDiskname st
 			dataDisks[i].ManagedDisk = profile.OsDisk.ManagedDisk
 		} else {
 			dataDisks[i].Vhd = &compute.VirtualHardDisk{
-				URI: to.StringPtr(fmt.Sprintf("[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),parameters('dataDiskName'), '-%d','.vhd')]", i+1)),
+				URI: to.StringPtr(fmt.Sprintf("[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/',parameters('dataDiskName'),'-%d','.vhd')]", i+1)),
 			}
 			dataDisks[i].ManagedDisk = nil
 		}
