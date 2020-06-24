@@ -109,7 +109,7 @@ source "ucloud-uhost" "basic-example" {
 
 build {
   source "sources.ucloud-uhost.basic-example" {
-    image_name =  "packer-test{{timestamp}}"
+    image_name =  "packer-test-${timestamp()}"
   }
 }
 ```
@@ -196,7 +196,7 @@ source "ucloud-uhost" "basic-example" {
 
 build {
   source "sources.ucloud-uhost.basic-example" {
-    image_name =  "packer-test-ubuntu{{timestamp}}"
+    image_name =  "packer-test-ubuntu-${timestamp()}"
   }
   provisioner "shell" {
       execute_command = "echo '${var.password}' | sudo -S '{{.Path}}'"
