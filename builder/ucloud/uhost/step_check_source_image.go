@@ -3,7 +3,6 @@ package uhost
 import (
 	"context"
 	"fmt"
-
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -29,6 +28,14 @@ func (s *stepCheckSourceImageId) Run(ctx context.Context, state multistep.StateB
 
 	if imageSet.OsType == ucloudcommon.OsTypeWindows {
 		return ucloudcommon.Halt(state, err, "The ucloud-uhost builder does not support Windows images yet")
+	}
+
+	_, uOK := state.GetOk("user_data")
+	_, fOK := state.GetOk("user_data_file")
+	if uOK || fOK {
+		if !ucloudcommon.IsStringIn("CloudInit", imageSet.Features) {
+			return ucloudcommon.Halt(state, err, fmt.Sprintf("The image %s must have %q feature when set the %q or %q, got %#v", imageSet.ImageId, "CloudInit", "user_data", "user_data_file", imageSet.Features))
+		}
 	}
 
 	state.Put("source_image", imageSet)

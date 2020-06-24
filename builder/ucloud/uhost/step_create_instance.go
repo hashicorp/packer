@@ -2,7 +2,9 @@ package uhost
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"strings"
 	"time"
@@ -24,6 +26,12 @@ type stepCreateInstance struct {
 	SourceImageId string
 	UsePrivateIp  bool
 
+	EipBandwidth   int
+	EipChargeMode  string
+	UserData       string
+	UserDataFile   string
+	MinCpuPlatform string
+
 	instanceId string
 }
 
@@ -33,14 +41,19 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating Instance...")
-	resp, err := conn.CreateUHostInstance(s.buildCreateInstanceRequest(state))
+	req, err := s.buildCreateInstanceRequest(state)
+	if err != nil {
+		return ucloudcommon.Halt(state, err, "Error on build instance request")
+	}
+
+	resp, err := conn.CreateUHostInstance(req)
 	if err != nil {
 		return ucloudcommon.Halt(state, err, "Error on creating instance")
 	}
 	instanceId := resp.UHostIds[0]
 
 	err = retry.Config{
-		Tries: 20,
+		Tries: 100,
 		ShouldRetry: func(err error) bool {
 			return ucloudcommon.IsExpectedStateError(err)
 		},
@@ -155,7 +168,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		}
 
 		err = retry.Config{
-			Tries: 30,
+			Tries: 100,
 			ShouldRetry: func(err error) bool {
 				return ucloudcommon.IsExpectedStateError(err)
 			},
@@ -192,7 +205,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	}
 
 	err = retry.Config{
-		Tries:       30,
+		Tries:       50,
 		ShouldRetry: func(err error) bool { return !ucloudcommon.IsNotFoundError(err) },
 		RetryDelay:  (&retry.Backoff{InitialBackoff: 2 * time.Second, MaxBackoff: 6 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
@@ -209,7 +222,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	ui.Message(fmt.Sprintf("Deleting instance %q complete", s.instanceId))
 }
 
-func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag) *uhost.CreateUHostInstanceRequest {
+func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag) (*uhost.CreateUHostInstanceRequest, error) {
 	client := state.Get("client").(*ucloudcommon.UCloudClient)
 	conn := client.UHostConn
 	srcImage := state.Get("source_image").(*uhost.UHostImageSet)
@@ -242,12 +255,8 @@ func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag
 	req.ImageId = ucloud.String(s.SourceImageId)
 	req.ChargeType = ucloud.String("Dynamic")
 	req.Password = ucloud.String(password)
-
-	req.MachineType = ucloud.String("N")
-	req.MinimalCpuPlatform = ucloud.String("Intel/Auto")
-	if t.HostType == "o" {
-		req.MachineType = ucloud.String("O")
-	}
+	req.MinimalCpuPlatform = ucloud.String(s.MinCpuPlatform)
+	req.MachineType = ucloud.String(strings.ToUpper(t.HostType))
 
 	if v, ok := state.GetOk("security_group_id"); ok {
 		req.SecurityGroupId = ucloud.String(v.(string))
@@ -261,6 +270,14 @@ func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag
 		req.SubnetId = ucloud.String(v.(string))
 	}
 
+	userData, err := s.getUserData(state)
+	if err != nil {
+		return nil, err
+	}
+	if userData != "" {
+		req.UserData = ucloud.String(userData)
+	}
+
 	bootDisk := uhost.UHostDisk{}
 	bootDisk.IsBoot = ucloud.String("true")
 	bootDisk.Size = ucloud.Int(srcImage.ImageSize)
@@ -268,22 +285,27 @@ func (s *stepCreateInstance) buildCreateInstanceRequest(state multistep.StateBag
 
 	req.Disks = append(req.Disks, bootDisk)
 
+	if v, ok := state.GetOk("user_data"); ok {
+		req.UserData = ucloud.String(base64.StdEncoding.EncodeToString([]byte(v.(string))))
+	}
+
 	if !s.UsePrivateIp {
 		operatorName := ucloud.String("International")
 		if strings.HasPrefix(s.Region, "cn-") {
 			operatorName = ucloud.String("Bgp")
 		}
+
 		networkInterface := uhost.CreateUHostInstanceParamNetworkInterface{
 			EIP: &uhost.CreateUHostInstanceParamNetworkInterfaceEIP{
-				Bandwidth:    ucloud.Int(30),
-				PayMode:      ucloud.String("Traffic"),
+				Bandwidth:    ucloud.Int(s.EipBandwidth),
+				PayMode:      ucloud.String(ucloudcommon.ChargeModeMap.Convert(s.EipChargeMode)),
 				OperatorName: operatorName,
 			},
 		}
 
 		req.NetworkInterface = append(req.NetworkInterface, networkInterface)
 	}
-	return req
+	return req, nil
 }
 
 func (s *stepCreateInstance) randStringFromCharSet(strlen int, charSet string) string {
@@ -293,4 +315,24 @@ func (s *stepCreateInstance) randStringFromCharSet(strlen int, charSet string) s
 		result[i] = charSet[rand.Intn(len(charSet))]
 	}
 	return string(result)
+}
+
+func (s *stepCreateInstance) getUserData(state multistep.StateBag) (string, error) {
+	userData := s.UserData
+
+	if s.UserDataFile != "" {
+		data, err := ioutil.ReadFile(s.UserDataFile)
+		if err != nil {
+			return "", fmt.Errorf("error on reading user_data_file, %s", err)
+		}
+
+		userData = string(data)
+	}
+
+	if userData != "" {
+		userData = base64.StdEncoding.EncodeToString([]byte(userData))
+	}
+
+	return userData, nil
+
 }

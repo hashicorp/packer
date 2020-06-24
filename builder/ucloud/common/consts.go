@@ -28,4 +28,11 @@ var BootDiskTypeMap = NewStringConverter(map[string]string{
 	"cloud_ssd":    "CLOUD_SSD",
 	"local_normal": "LOCAL_NORMAL",
 	"local_ssd":    "LOCAL_SSD",
+	"cloud_rssd":   "CLOUD_RSSD",
+})
+
+var ChargeModeMap = NewStringConverter(map[string]string{
+	"post_accurate_bandwidth": "PostAccurateBandwidth",
+	"traffic":                 "Traffic",
+	"bandwidth":               "Bandwidth",
 })

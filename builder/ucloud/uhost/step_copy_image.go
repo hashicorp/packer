@@ -59,7 +59,7 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 		expectedImages.Set(image)
 		artifactImages.Set(image)
 
-		ui.Message(fmt.Sprintf("Copying image from %s:%s:%s to %s:%s:%s)",
+		ui.Message(fmt.Sprintf("Copying image from %s:%s:%s to %s:%s:%s",
 			s.ProjectId, s.RegionId, srcImageId, v.ProjectId, v.Region, resp.TargetImageId))
 	}
 	ui.Message("Waiting for the copied images to become available...")
@@ -74,12 +74,15 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 		for _, v := range expectedImages.GetAll() {
 			imageSet, err := client.DescribeImageByInfo(v.ProjectId, v.Region, v.ImageId)
 			if err != nil {
-				return fmt.Errorf("reading %s:%s:%s failed, %s", v.ProjectId, v.Region, v.ImageId, err)
+				return fmt.Errorf("reading copied image %s:%s:%s failed, %s", v.ProjectId, v.Region, v.ImageId, err)
 			}
 
 			if imageSet.State == ucloudcommon.ImageStateAvailable {
 				expectedImages.Remove(v.Id())
 				continue
+			}
+			if imageSet.State == ucloudcommon.ImageStateUnavailable {
+				return fmt.Errorf("the copied image %s:%s:%s got %q error", v.ProjectId, v.Region, v.ImageId, ucloudcommon.ImageStateUnavailable)
 			}
 		}
 

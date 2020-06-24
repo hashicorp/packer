@@ -15,6 +15,11 @@ func ToBase64Query(s *string) *string {
 
 // ToQueryMap will convert a request to string map
 func ToQueryMap(req Common) (map[string]string, error) {
+	if r, ok := req.(GenericRequest); ok {
+		v := reflect.ValueOf(r.GetPayload())
+		return encodeMap(&v, "")
+	}
+
 	v := reflect.ValueOf(req)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
@@ -35,7 +40,7 @@ func encodeOne(v *reflect.Value) (string, error) {
 		return strconv.FormatBool(v.Bool()), nil
 	case reflect.String:
 		return v.String(), nil
-	case reflect.Ptr:
+	case reflect.Ptr, reflect.Interface:
 		ptrValue := v.Elem()
 		return encodeOne(&ptrValue)
 	default:
@@ -72,7 +77,7 @@ func encode(v *reflect.Value, prefix string) (map[string]string, error) {
 			f = f.Elem()
 		}
 
-		// check if non-pointer
+		// check if nil-pointer
 		if f.Kind() == reflect.Ptr && f.IsNil() {
 			continue
 		}
@@ -119,6 +124,97 @@ func encode(v *reflect.Value, prefix string) (map[string]string, error) {
 			for k, v := range m {
 				result[k] = v
 			}
+		default:
+			s, err := encodeOne(&f)
+			if err != nil {
+				return result, err
+			}
+
+			// set field value into result
+			if s != "" {
+				result[name] = s
+			}
+		}
+	}
+
+	return result, nil
+}
+
+func encodeMap(rv *reflect.Value, prefix string) (map[string]string, error) {
+	result := make(map[string]string)
+
+	for _, mapKey := range rv.MapKeys() {
+		f := rv.MapIndex(mapKey)
+		for f.Kind() == reflect.Ptr || f.Kind() == reflect.Interface {
+			if f.IsNil() {
+				break
+			}
+			f = f.Elem()
+		}
+
+		// check if nil-pointer
+		if f.Kind() == reflect.Ptr && f.IsNil() {
+			continue
+		}
+
+		name := mapKey.String()
+		if prefix != "" {
+			name = fmt.Sprintf("%s.%s", prefix, name)
+		}
+
+		switch f.Kind() {
+		case reflect.Slice, reflect.Array:
+			for n := 0; n < f.Len(); n++ {
+				item := f.Index(n)
+				for item.Kind() == reflect.Ptr || item.Kind() == reflect.Interface {
+					if f.IsNil() {
+						break
+					}
+					item = item.Elem()
+				}
+
+				if item.Kind() == reflect.Ptr && item.IsNil() {
+					continue
+				}
+
+				keyPrefix := fmt.Sprintf("%s.%v", name, n)
+				switch item.Kind() {
+				case reflect.Map:
+					kv, err := encodeMap(&item, keyPrefix)
+					if err != nil {
+						return result, err
+					}
+
+					for k, v := range kv {
+						if v != "" {
+							result[k] = v
+						}
+					}
+
+				default:
+					s, err := encodeOne(&item)
+					if err != nil {
+						return result, err
+					}
+
+					if s != "" {
+						result[keyPrefix] = s
+					}
+
+				}
+			}
+		case reflect.Map:
+			kv, err := encodeMap(&f, name)
+			if err != nil {
+				return result, err
+			}
+
+			for k, v := range kv {
+				if v != "" {
+					result[k] = v
+				}
+			}
+
 		default:
 			s, err := encodeOne(&f)
 			if err != nil {

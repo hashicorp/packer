@@ -65,7 +65,7 @@ func (c *Client) buildHTTPRequest(req request.Common) (*http.HttpRequest, error)
 	// set timeout with client configuration
 	httpReq.SetTimeout(config.Timeout)
 
-	// keep query stirng is ordered and append credential signiture as the last query param
+	// keep query string is ordered and append credential signature as the last query param
 	httpReq.SetQueryString(credential.BuildCredentialedQuery(query))
 
 	ua := fmt.Sprintf("GO/%s GO-SDK/%s %s", runtime.Version(), version.Version, config.UserAgent)
@@ -78,6 +78,16 @@ func (c *Client) buildHTTPRequest(req request.Common) (*http.HttpRequest, error)
 func (c *Client) unmarshalHTTPResponse(body []byte, resp response.Common) error {
 	if len(body) == 0 {
 		return nil
+	}
+
+	if r, ok := resp.(response.GenericResponse); ok {
+		m := make(map[string]interface{})
+		if err := json.Unmarshal(body, &m); err != nil {
+			return err
+		}
+		if err := r.SetPayload(m); err != nil {
+			return err
+		}
 	}
 
 	return json.Unmarshal(body, &resp)

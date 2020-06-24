@@ -92,7 +92,6 @@ require (
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
 	github.com/kr/fs v0.0.0-20131111012553-2788f0dbd169 // indirect
 	github.com/linode/linodego v0.14.0
-	github.com/masterzen/azure-sdk-for-go v0.0.0-20161014135628-ee4f0065d00c // indirect
 	github.com/masterzen/simplexml v0.0.0-20190410153822-31eea3082786 // indirect
 	github.com/masterzen/winrm v0.0.0-20200615185753-c42b5136ff88
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
@@ -132,7 +131,7 @@ require (
 	github.com/stretchr/testify v1.5.1
 	github.com/temoto/robotstxt v1.1.1 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.155+incompatible
-	github.com/ucloud/ucloud-sdk-go v0.12.0
+	github.com/ucloud/ucloud-sdk-go v0.16.3
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
 	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 	github.com/ulikunitz/xz v0.5.5
