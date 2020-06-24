@@ -28,7 +28,7 @@ type Config struct {
 	RemoveCDRomConfig   `mapstructure:",squash"`
 	FloppyConfig        `mapstructure:",squash"`
 	common.RunConfig    `mapstructure:",squash"`
-	BootConfig          `mapstructure:",squash"`
+	common.BootConfig   `mapstructure:",squash"`
 	common.WaitIpConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 

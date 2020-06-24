@@ -1,6 +1,8 @@
 ## 1.6.1 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/vsphere-clone: Add `boot_command` support to vsphere-clone builder,
+    including support for starting an HTTP server
 * builder/proxmox: Update Proxmox storagePoolTypes [GH-9418]
 * builder/vsphere: Create vm output folders if they don't exist [GH-9402]
 * builder/vsphere: Update vsphere boot_command to bring it in line with other

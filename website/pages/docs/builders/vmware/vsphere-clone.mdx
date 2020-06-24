@@ -28,6 +28,7 @@ There are many configuration options available for this builder. In addition to
 the items listed here, you will want to look at the general configuration
 references for [Hardware](#hardware-configuration),
 [Output](#output-configuration),
+[Boot](#boot-configuration),
 [Run](#run-configuration),
 [Shutdown](#shutdown-configuration),
 [Communicator](#communicator-configuration),
@@ -44,6 +45,25 @@ necessary for this build to succeed and can be found further down the page.
 ### Extra Configuration Parameters
 
 @include 'builder/vsphere/common/ConfigParamsConfig-not-required.mdx'
+
+### Boot configuration
+
+@include 'common/bootcommand/BootConfig.mdx'
+
+#### Optional:
+
+@include 'common/bootcommand/BootConfig-not-required.mdx'
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools#templates).
+
+### Http directory configuration
+
+@include 'common/HTTPConfig.mdx'
+
+#### Optional:
+
+@include 'common/HTTPConfig-not-required.mdx'
 
 ### Connection Configuration
 
