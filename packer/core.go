@@ -341,7 +341,7 @@ func (c *Core) Build(n string) (Build, error) {
 				PType:             rawP.Type,
 				PName:             rawP.Name,
 				config:            rawP.Config,
-				keepInputArtifact: rawP.KeepInputArtifact,
+				KeepInputArtifact: rawP.KeepInputArtifact,
 			})
 		}
 
