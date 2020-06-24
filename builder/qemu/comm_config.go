@@ -46,7 +46,7 @@ func (c *CommConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs 
 		c.HostPortMax = c.SSHHostPortMax
 	}
 
-	if c.Comm.SSHHost == "" {
+	if c.Comm.SSHHost == "" && c.SkipNatMapping {
 		c.Comm.SSHHost = "127.0.0.1"
 	}
 
