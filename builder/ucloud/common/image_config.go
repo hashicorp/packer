@@ -1,4 +1,5 @@
 //go:generate mapstructure-to-hcl2 -type ImageDestination
+//go:generate struct-markdown
 
 package common
 
