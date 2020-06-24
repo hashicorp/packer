@@ -1,3 +1,4 @@
+//go:generate struct-markdown
 package common
 
 import (
