@@ -36,10 +36,11 @@ func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl
 	}
 
 	postProcessor := &PostProcessorBlock{
-		PType:      block.Labels[0],
-		PName:      b.Name,
-		OnlyExcept: OnlyExcept{Only: b.Only, Except: b.Except},
-		HCL2Ref:    newHCL2Ref(block, b.Rest),
+		PType:             block.Labels[0],
+		PName:             b.Name,
+		OnlyExcept:        OnlyExcept{Only: b.Only, Except: b.Except},
+		HCL2Ref:           newHCL2Ref(block, b.Rest),
+		KeepInputArtifact: b.KeepInputArtifact,
 	}
 
 	diags = diags.Extend(postProcessor.OnlyExcept.Validate())

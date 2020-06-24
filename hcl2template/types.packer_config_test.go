@@ -11,6 +11,7 @@ import (
 var (
 	refVBIsoUbuntu1204  = SourceRef{Type: "virtualbox-iso", Name: "ubuntu-1204"}
 	refAWSEBSUbuntu1604 = SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604"}
+	pTrue               = pointerToBool(true)
 )
 
 func TestParser_complete(t *testing.T) {
@@ -90,8 +91,9 @@ func TestParser_complete(t *testing.T) {
 						},
 						PostProcessors: []*PostProcessorBlock{
 							{
-								PType: "amazon-import",
-								PName: "something",
+								PType:             "amazon-import",
+								PName:             "something",
+								KeepInputArtifact: pTrue,
 							},
 							{
 								PType: "amazon-import",
@@ -117,9 +119,10 @@ func TestParser_complete(t *testing.T) {
 					PostProcessors: [][]packer.CoreBuildPostProcessor{
 						{
 							{
-								PType:         "amazon-import",
-								PName:         "something",
-								PostProcessor: basicMockPostProcessor,
+								PType:             "amazon-import",
+								PName:             "something",
+								PostProcessor:     basicMockPostProcessor,
+								KeepInputArtifact: pTrue,
 							},
 							{
 								PType:         "amazon-import",
@@ -152,9 +155,10 @@ func TestParser_complete(t *testing.T) {
 					PostProcessors: [][]packer.CoreBuildPostProcessor{
 						{
 							{
-								PType:         "amazon-import",
-								PName:         "something",
-								PostProcessor: basicMockPostProcessor,
+								PType:             "amazon-import",
+								PName:             "something",
+								PostProcessor:     basicMockPostProcessor,
+								KeepInputArtifact: pTrue,
 							},
 							{
 								PType:         "amazon-import",
@@ -190,4 +194,8 @@ func TestParser_ValidateFilterOption(t *testing.T) {
 			}
 		})
 	}
+}
+
+func pointerToBool(b bool) *bool {
+	return &b
 }
