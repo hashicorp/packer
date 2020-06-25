@@ -21,6 +21,13 @@ type ClientMeta struct {
 	Product string
 }
 
+type ServiceClient interface {
+	AddRequestHandler(h RequestHandler) error
+	AddResponseHandler(h ResponseHandler) error
+	AddHttpRequestHandler(h HttpRequestHandler) error
+	AddHttpResponseHandler(h HttpResponseHandler) error
+}
+
 // Client 客户端
 type Client struct {
 	// configurations

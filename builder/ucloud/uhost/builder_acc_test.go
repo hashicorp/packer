@@ -198,7 +198,7 @@ func testAccPreCheck(t *testing.T) {
 
 func TestUCloudClientBaseUrlConfigurable(t *testing.T) {
 	const url = "baseUrl"
-	access := &ucloudcommon.AccessConfig{BaseUrl: url}
+	access := &ucloudcommon.AccessConfig{BaseUrl: url, PublicKey: "test", PrivateKey: "test"}
 	client, err := access.Client()
 	assert.Nil(t, err)
 	assert.Equal(t, url, client.UAccountConn.Client.GetConfig().BaseUrl, "account conn's base url not configurable")

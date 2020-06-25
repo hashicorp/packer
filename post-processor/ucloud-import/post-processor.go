@@ -1,4 +1,5 @@
 //go:generate mapstructure-to-hcl2 -type Config
+//go:generate struct-markdown
 
 package ucloudimport
 
@@ -43,16 +44,33 @@ type Config struct {
 	common.PackerConfig       `mapstructure:",squash"`
 	ucloudcommon.AccessConfig `mapstructure:",squash"`
 
-	// Variables specific to this post processor
-	UFileBucket           string `mapstructure:"ufile_bucket_name"`
-	UFileKey              string `mapstructure:"ufile_key_name"`
-	SkipClean             bool   `mapstructure:"skip_clean"`
-	ImageName             string `mapstructure:"image_name"`
-	ImageDescription      string `mapstructure:"image_description"`
-	OSType                string `mapstructure:"image_os_type"`
-	OSName                string `mapstructure:"image_os_name"`
-	Format                string `mapstructure:"format"`
-	WaitImageReadyTimeout int    `mapstructure:"wait_image_ready_timeout"`
+	//  The name of the UFile bucket where the RAW, VHD, VMDK, or qcow2 file will be copied to for import.
+	//  This bucket must exist when the post-processor is run.
+	UFileBucket string `mapstructure:"ufile_bucket_name" required:"true"`
+	// The name of the object key in
+	//  `ufile_bucket_name` where the RAW, VHD, VMDK, or qcow2 file will be copied
+	//  to import. This is a [template engine](/docs/templates/engine).
+	//  Therefore, you may use user variables and template functions in this field.
+	UFileKey string `mapstructure:"ufile_key_name" required:"false"`
+	// Whether we should skip removing the RAW, VHD, VMDK, or qcow2 file uploaded to
+	// UFile after the import process has completed. Possible values are: `true` to
+	// leave it in the UFile bucket, `false` to remove it. (Default: `false`).
+	SkipClean bool `mapstructure:"skip_clean" required:"false"`
+	// The name of the user-defined image, which contains 1-63 characters and only
+	// supports Chinese, English, numbers, '-\_,.:[]'.
+	ImageName string `mapstructure:"image_name" required:"true"`
+	// The description of the image.
+	ImageDescription string `mapstructure:"image_description" required:"false"`
+	// Type of the OS. Possible values are: `CentOS`, `Ubuntu`, `Windows`, `RedHat`, `Debian`, `Other`.
+	// You may refer to [ucloud_api_docs](https://docs.ucloud.cn/api/uhost-api/import_custom_image) for detail.
+	OSType string `mapstructure:"image_os_type" required:"true"`
+	// The name of OS. Such as: `CentOS 7.2 64位`, set `Other` When `image_os_type` is `Other`.
+	// You may refer to [ucloud_api_docs](https://docs.ucloud.cn/api/uhost-api/import_custom_image) for detail.
+	OSName string `mapstructure:"image_os_name" required:"true"`
+	// The format of the import image , Possible values are: `raw`, `vhd`, `vmdk`, or `qcow2`.
+	Format string `mapstructure:"format" required:"true"`
+	// Timeout of importing image. The default timeout is 3600 seconds if this option is not set or is set.
+	WaitImageReadyTimeout int `mapstructure:"wait_image_ready_timeout" required:"false"`
 
 	ctx interpolate.Context
 }

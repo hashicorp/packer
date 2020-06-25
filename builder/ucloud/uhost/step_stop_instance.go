@@ -50,7 +50,7 @@ func (s *stepStopInstance) Run(ctx context.Context, state multistep.StateBag) mu
 		}
 
 		err = retry.Config{
-			Tries: 20,
+			Tries: 100,
 			ShouldRetry: func(err error) bool {
 				return ucloudcommon.IsExpectedStateError(err)
 			},

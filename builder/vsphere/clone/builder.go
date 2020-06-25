@@ -30,6 +30,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
+	state.Put("debug", b.config.PackerDebug)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -54,9 +55,24 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	if b.config.Comm.Type != "none" {
 		steps = append(steps,
+			&common.StepHTTPIPDiscover{
+				HTTPIP:  b.config.BootConfig.HTTPIP,
+				Network: b.config.WaitIpConfig.GetIPNet(),
+			},
+			&packerCommon.StepHTTPServer{
+				HTTPDir:     b.config.HTTPDir,
+				HTTPPortMin: b.config.HTTPPortMin,
+				HTTPPortMax: b.config.HTTPPortMax,
+				HTTPAddress: b.config.HTTPAddress,
+			},
 			&common.StepRun{
 				Config:   &b.config.RunConfig,
 				SetOrder: false,
+			},
+			&common.StepBootCommand{
+				Config: &b.config.BootConfig,
+				Ctx:    b.config.ctx,
+				VMName: b.config.VMName,
 			},
 			&common.StepWaitForIp{
 				Config: &b.config.WaitIpConfig,
@@ -93,7 +109,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		})
 	}
 
-	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = packerCommon.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(ctx, state)
 
 	if rawErr, ok := state.GetOk("error"); ok {

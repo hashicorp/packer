@@ -14,7 +14,8 @@ type UFileClient struct {
 
 // NewClient will return a instance of UFileClient
 func NewClient(config *ucloud.Config, credential *auth.Credential) *UFileClient {
-	client := ucloud.NewClient(config, credential)
+	meta := ucloud.ClientMeta{Product: "UFile"}
+	client := ucloud.NewClientWithMeta(config, credential, meta)
 	return &UFileClient{
 		client,
 	}
