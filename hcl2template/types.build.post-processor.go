@@ -99,10 +99,12 @@ func (pp *postProcessorsPrepare) HCL2PostProcessorsPrepare(builderArtifact packe
 	src := pp.cfg.Sources[pp.src.Ref()]
 
 	generatedData := make(map[string]interface{})
-	artifactStateData := builderArtifact.State("generated_data")
-	if artifactStateData != nil {
-		for k, v := range artifactStateData.(map[interface{}]interface{}) {
-			generatedData[k.(string)] = v
+	if builderArtifact != nil {
+		artifactStateData := builderArtifact.State("generated_data")
+		if artifactStateData != nil {
+			for k, v := range artifactStateData.(map[interface{}]interface{}) {
+				generatedData[k.(string)] = v
+			}
 		}
 	}
 

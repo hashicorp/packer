@@ -128,25 +128,25 @@ func TestBuild(t *testing.T) {
 			fileCheck: fileCheck{
 				expectedContent: map[string]string{
 					"manifest.json": `{
- "builds": [
-   {
-     "name": "test",
-     "builder_type": "null",
-     "files": null,
-     "artifact_id": "Null",
-     "packer_run_uuid": "",
-     "custom_data": null
-   },
-   {
-     "name": "potato",
-     "builder_type": "null",
-     "files": null,
-     "artifact_id": "Null",
-     "packer_run_uuid": "",
-     "custom_data": null
-   }
- ],
- "last_run_uuid": ""
+  "builds": [
+    {
+      "name": "test",
+      "builder_type": "null",
+      "files": null,
+      "artifact_id": "Null",
+      "packer_run_uuid": "",
+      "custom_data": null
+    },
+    {
+      "name": "potato",
+      "builder_type": "null",
+      "files": null,
+      "artifact_id": "Null",
+      "packer_run_uuid": "",
+      "custom_data": null
+    }
+  ],
+  "last_run_uuid": ""
 }`,
 				},
 			},
@@ -166,17 +166,17 @@ func TestBuild(t *testing.T) {
 				},
 				expectedContent: map[string]string{
 					"manifest.json": `{
- "builds": [
-   {
-     "name": "test",
-     "builder_type": "null",
-     "files": null,
-     "artifact_id": "Null",
-     "packer_run_uuid": "",
-     "custom_data": null
-   }
- ],
- "last_run_uuid": ""
+  "builds": [
+    {
+      "name": "test",
+      "builder_type": "null",
+      "files": null,
+      "artifact_id": "Null",
+      "packer_run_uuid": "",
+      "custom_data": null
+    }
+  ],
+  "last_run_uuid": ""
 }`,
 				},
 			},
@@ -192,17 +192,17 @@ func TestBuild(t *testing.T) {
 			fileCheck: fileCheck{
 				expectedContent: map[string]string{
 					"manifest.json": `{
- "builds": [
-   {
-     "name": "potato",
-     "builder_type": "null",
-     "files": null,
-     "artifact_id": "Null",
-     "packer_run_uuid": "",
-     "custom_data": null
-   }
- ],
- "last_run_uuid": ""
+  "builds": [
+    {
+      "name": "potato",
+      "builder_type": "null",
+      "files": null,
+      "artifact_id": "Null",
+      "packer_run_uuid": "",
+      "custom_data": null
+    }
+  ],
+  "last_run_uuid": ""
 }`,
 				},
 			},

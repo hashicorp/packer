@@ -121,6 +121,37 @@ func testParse(t *testing.T, tests []parseTest) {
 			if tt.getBuildsWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.getBuilds() unexpected diagnostics. %s", gotDiags)
 			}
+
+			// Validates implementation of HCL2ProvisionerPrepare and HCL2PostProcessorsPrepare
+			for _, build := range gotBuilds {
+				coreBuild, ok := build.(*packer.CoreBuild)
+				if !ok {
+					t.Fatalf("build %s should implement CoreBuild", build.Name())
+				}
+				if coreBuild.HCL2ProvisionerPrepare == nil {
+					t.Fatalf("build %s should have HCL2ProvisionerPrepare implementation", build.Name())
+				}
+				if coreBuild.HCL2PostProcessorsPrepare == nil {
+					t.Fatalf("build %s should have HCL2PostProcessorsPrepare implementation", build.Name())
+				}
+
+				provisioners, diags := coreBuild.HCL2ProvisionerPrepare(nil)
+				if diags.HasErrors() {
+					t.Fatalf("build %s: HCL2ProvisionerPrepare should prepare provisioners", build.Name())
+				}
+				coreBuild.Provisioners = provisioners
+
+				postProcessors, diags := coreBuild.HCL2PostProcessorsPrepare(nil)
+				if diags.HasErrors() {
+					t.Fatalf("build %s: HCL2PostProcessorsPrepare should prepare post-processors", build.Name())
+				}
+				if len(postProcessors) > 0 {
+					coreBuild.PostProcessors = [][]packer.CoreBuildPostProcessor{postProcessors}
+				} else {
+					coreBuild.PostProcessors = [][]packer.CoreBuildPostProcessor{}
+				}
+			}
+
 			if diff := cmp.Diff(tt.getBuildsWantBuilds, gotBuilds,
 				cmpopts.IgnoreUnexported(
 					cty.Value{},
