@@ -1,3 +1,10 @@
+locals {
+  // fileset lists all files in the http directory as a set, we convert that
+  // set to a list of strings and we then take the directory of the first
+  // value. This validates that the http directory exists even before starting
+  // any builder/provisioner.
+  http_directory = dirname(convert(fileset(".", "etc/http/*"), list(string))[0])
+}
 
 source "virtualbox-iso" "base-ubuntu" {
     boot_command = [
@@ -21,13 +28,13 @@ source "virtualbox-iso" "base-ubuntu" {
         " netcfg/get_hostname=vagrant<wait>",
         " grub-installer/bootdev=/dev/vda<wait>",
         " noapic<wait>",
-        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `preseed_path`}}<wait>",
+        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg<wait>",
         " -- <wait>",
         "<enter><wait>"
     ]
     boot_wait = "10s"
     guest_os_type = "Ubuntu_64"
-    http_directory = "etc/"
+    http_directory = local.http_directory
     shutdown_command = "echo 'vagrant' | sudo -S shutdown -P now"
     ssh_password = "vagrant"
     ssh_port = 22
