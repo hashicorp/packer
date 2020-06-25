@@ -1,7 +1,7 @@
 
 build {
   name = "ubuntu"
-  description = <<<EOF
+  description = <<EOF
 This build creates ubuntu images for ubuntu versions :
 * 16.04
 * 18.04 
@@ -19,19 +19,18 @@ EOF
   }
 
   provisioner "shell" {
-    scripts = [
-      "/scripts/update.sh",
-      "/../_common/motd.sh",
-      "/../_common/sshd.sh",
-      "/scripts/networking.sh",
-      "/scripts/sudoers.sh",
-      "/../_common/vagrant.sh",
-      "/scripts/systemd.sh",
-      "/../_common/virtualbox.sh",
-      "/../ubuntu/scripts/vmware.sh",
-      "/../_common/parallels.sh",
-      "/scripts/cleanup.sh",
-      "/../_common/minimize.sh"
-    ]
+    scripts = fileset("etc/", "*.sh")
+
+    //   "../../_common/motd.sh",
+    //   "..//../_common/sshd.sh",
+    //   "/scripts/networking.sh",
+    //   "/scripts/sudoers.sh",
+    //   "..//../_common/vagrant.sh",
+    //   "/scripts/systemd.sh",
+    //   "..//../_common/virtualbox.sh",
+    //   "..//../ubuntu/scripts/vmware.sh",
+    //   "..//../_common/parallels.sh",
+    //   "/scripts/cleanup.sh",
+    //   "..//../_common/minimize.sh"
   }
 }
