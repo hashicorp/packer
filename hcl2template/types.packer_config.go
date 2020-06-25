@@ -271,9 +271,10 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 			continue
 		}
 		res = append(res, packer.CoreBuildPostProcessor{
-			PostProcessor: postProcessor,
-			PName:         ppb.PName,
-			PType:         ppb.PType,
+			PostProcessor:     postProcessor,
+			PName:             ppb.PName,
+			PType:             ppb.PType,
+			KeepInputArtifact: ppb.KeepInputArtifact,
 		})
 	}
 

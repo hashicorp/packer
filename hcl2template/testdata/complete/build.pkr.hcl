@@ -116,7 +116,7 @@ build {
         }
     }
 
-    post-processor "amazon-import" { 
+    post-processor "amazon-import" {
         name     = "something"
         string   = "string"
         int      = 42
@@ -124,6 +124,7 @@ build {
         bool     = true
         trilean  = true
         duration = "10s"
+        keep_input_artifact = true
         map_string_string = {
             a = "b"
             c = "d"
@@ -164,7 +165,7 @@ build {
         }
     }
 
-    post-processor "amazon-import" { 
+    post-processor "amazon-import" {
         string   = "string"
         int      = 42
         int64    = 43

@@ -115,7 +115,7 @@ type CoreBuildPostProcessor struct {
 	PType             string
 	PName             string
 	config            map[string]interface{}
-	keepInputArtifact *bool
+	KeepInputArtifact *bool
 }
 
 // CoreBuildProvisioner keeps track of the provisioner and the configuration of
@@ -341,15 +341,15 @@ PostProcessorRunSeqLoop:
 			// Exception: for postprocessors that will fail/become
 			// useless if keep isn't true, heed forceOverride and keep the
 			// input artifact regardless of user preference.
-			if corePP.keepInputArtifact != nil {
-				if defaultKeep && *corePP.keepInputArtifact == false && forceOverride {
+			if corePP.KeepInputArtifact != nil {
+				if defaultKeep && *corePP.KeepInputArtifact == false && forceOverride {
 					log.Printf("The %s post-processor forces "+
 						"keep_input_artifact=true to preserve integrity of the"+
 						"build chain. User-set keep_input_artifact=false will be"+
 						"ignored.", corePP.PType)
 				} else {
 					// User overrides default.
-					keep = *corePP.keepInputArtifact
+					keep = *corePP.KeepInputArtifact
 				}
 			}
 			if i == 0 {
