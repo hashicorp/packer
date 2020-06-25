@@ -24,8 +24,6 @@ variable "ubuntu_1804_version" {
 locals {
   iso_url_ubuntu_1604      = "${var.ubuntu_mirror}/16.04/ubuntu-${var.ubuntu_1604_version}-${var.ubuntu_variant}.iso"
   iso_checksum_ubuntu_1604 = "${var.ubuntu_mirror}/16.04/SHA256SUMS"
-
-  iso_ubuntu_1604 = "${local.iso_url_ubuntu_1604}?checksum=${local.iso_checksum_ubuntu_1604}"
 }
 
 ////
@@ -35,6 +33,4 @@ locals {
 locals {
   iso_url_ubuntu_1804      = "${var.ubuntu_mirror}/18.04/ubuntu-${var.ubuntu_1804_version}-${var.ubuntu_variant}.iso"
   iso_checksum_ubuntu_1804 = "${var.ubuntu_mirror}/18.04/SHA256SUMS"
-
-  iso_ubuntu_1804 = "${local.iso_url_ubuntu_1804}?checksum=${local.iso_checksum_ubuntu_1804}"
 }

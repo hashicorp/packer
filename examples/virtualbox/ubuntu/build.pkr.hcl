@@ -9,12 +9,14 @@ For the following builers :
 * virtualbox-iso
 EOF
   source "virtualbox-iso.base-ubuntu" {
-    iso_url = local.iso_ubuntu_1604
+    iso_url          = local.iso_ubuntu_1604
+    iso_checksum     = local.iso_checksum_ubuntu_1604
     output_directory = "ubuntu_1604"
   }
 
   source "virtualbox-iso.base-ubuntu" {
-    iso_url = local.iso_ubuntu_1804
+    iso_url          = local.iso_ubuntu_1804
+    iso_checksum     = local.iso_checksum_ubuntu_1804
     output_directory = "ubuntu_1804"
   }
 
