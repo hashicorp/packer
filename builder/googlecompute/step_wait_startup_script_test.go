@@ -17,6 +17,7 @@ func TestStepWaitStartupScript(t *testing.T) {
 	testZone := "test-zone"
 	testInstanceName := "test-instance-name"
 
+	c.StartupScriptFile = "startup.sh"
 	c.Zone = testZone
 	state.Put("instance_name", testInstanceName)
 

@@ -2,7 +2,6 @@ package googlecompute
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -21,6 +20,10 @@ func (s *StepWaitStartupScript) Run(ctx context.Context, state multistep.StateBa
 	ui := state.Get("ui").(packer.Ui)
 	instanceName := state.Get("instance_name").(string)
 
+	if config.Metadata[StartupScriptKey] == "" && config.StartupScriptFile == "" {
+		return multistep.ActionContinue
+	}
+
 	ui.Say("Waiting for any running startup script to finish...")
 
 	// Keep checking the serial port output to see if the startup script is done.
@@ -30,23 +33,20 @@ func (s *StepWaitStartupScript) Run(ctx context.Context, state multistep.StateBa
 		},
 		RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 60 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
-		status, err := driver.GetInstanceMetadata(config.Zone,
-			instanceName, StartupScriptStatusKey)
-
+		status, err := driver.GetInstanceMetadata(config.Zone, instanceName, StartupScriptStatusKey)
 		if err != nil {
 			err := fmt.Errorf("Error getting startup script status: %s", err)
 			return err
 		}
 
 		if status == StartupScriptStatusError {
-			err = errors.New("Startup script error.")
+			err = fmt.Errorf("Startup script error: %s", err)
 			return err
 		}
 
-		done := status == StartupScriptStatusDone
-		if !done {
+		if status != StartupScriptStatusDone {
 			ui.Say("Startup script not finished yet. Waiting...")
-			return errors.New("Startup script not done.")
+			return fmt.Errorf("Startup script not in the done state (status=%s).", status)
 		}
 
 		return nil

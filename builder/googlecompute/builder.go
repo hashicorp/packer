@@ -72,6 +72,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			AccountFile: b.config.AccountFile,
 			ProjectId:   b.config.ProjectId,
 		},
+		new(StepWaitStartupScript),
 		&communicator.StepConnect{
 			Config:      &b.config.Comm,
 			Host:        communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
@@ -82,11 +83,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepCleanupTempKeys{
 			Comm: &b.config.Comm,
 		},
+		new(StepTeardownInstance),
+		new(StepCreateImage),
 	}
-	if _, exists := b.config.Metadata[StartupScriptKey]; exists || b.config.StartupScriptFile != "" {
-		steps = append(steps, new(StepWaitStartupScript))
-	}
-	steps = append(steps, new(StepTeardownInstance), new(StepCreateImage))
 
 	// Run the steps.
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
