@@ -316,6 +316,11 @@ type Config struct {
 	// "BUILDNAME" is the name of the build. Currently, no file extension will be
 	// used unless it is specified in this option.
 	VMName string `mapstructure:"vm_name" required:"false"`
+	// The interface to use for the CDROM device which contains the ISO image.
+	// Allowed values include any of `ide`, `scsi`, `virtio` or
+	// `virtio-scsi`. The Qemu builder uses `virtio` by default.
+	// Some ARM64 images require `virtio-scsi`.
+	CDROMInterface string `mapstructure:"cdrom_interface" required:"false"`
 
 	// TODO(mitchellh): deprecate
 	RunOnce bool `mapstructure:"run_once"`
