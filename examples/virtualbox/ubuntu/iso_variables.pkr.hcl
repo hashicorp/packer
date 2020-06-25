@@ -5,10 +5,6 @@ variable "ubuntu_mirror" {
   default = "http://releases.ubuntu.com/releases"
 }
 
-variable "ubuntu_variant" {
-  default = "server-amd64"
-}
-
 variable "ubuntu_1604_version" {
   default = "16.04.6"
 }
@@ -22,8 +18,8 @@ variable "ubuntu_1804_version" {
 ////
 
 locals {
-  iso_url_ubuntu_1604      = "${var.ubuntu_mirror}/16.04/ubuntu-${var.ubuntu_1604_version}-${var.ubuntu_variant}.iso"
-  iso_checksum_ubuntu_1604 = "${var.ubuntu_mirror}/16.04/SHA256SUMS"
+  iso_url_ubuntu_1604      = "${var.ubuntu_mirror}/16.04/ubuntu-${var.ubuntu_1604_version}-server-amd64.iso"
+  iso_checksum_ubuntu_1604 = "file:${var.ubuntu_mirror}/16.04/SHA256SUMS"
 }
 
 ////
@@ -31,6 +27,6 @@ locals {
 ////
 
 locals {
-  iso_url_ubuntu_1804      = "${var.ubuntu_mirror}/18.04/ubuntu-${var.ubuntu_1804_version}-${var.ubuntu_variant}.iso"
-  iso_checksum_ubuntu_1804 = "${var.ubuntu_mirror}/18.04/SHA256SUMS"
+  iso_url_ubuntu_1804      = "${var.ubuntu_mirror}/18.04/ubuntu-${var.ubuntu_1804_version}-live-server-amd64.iso"
+  iso_checksum_ubuntu_1804 = "file:${var.ubuntu_mirror}/18.04/SHA256SUMS"
 }
