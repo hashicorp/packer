@@ -19,18 +19,8 @@ EOF
   }
 
   provisioner "shell" {
-    scripts = fileset("etc/", "*.sh")
+    scripts = fileset(".", "etc/scripts/*.sh")
 
-    //   "../../_common/motd.sh",
-    //   "..//../_common/sshd.sh",
-    //   "/scripts/networking.sh",
-    //   "/scripts/sudoers.sh",
-    //   "..//../_common/vagrant.sh",
-    //   "/scripts/systemd.sh",
-    //   "..//../_common/virtualbox.sh",
-    //   "..//../ubuntu/scripts/vmware.sh",
-    //   "..//../_common/parallels.sh",
-    //   "/scripts/cleanup.sh",
-    //   "..//../_common/minimize.sh"
+  // /../_common/minimize.sh"
   }
 }
