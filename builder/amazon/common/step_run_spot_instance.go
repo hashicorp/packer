@@ -324,6 +324,9 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		describeOutput, err = ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
 			InstanceIds: []*string{aws.String(instanceId)},
 		})
+		if len(describeOutput.Reservations) > 0 && len(describeOutput.Reservations[0].Instances) > 0 && len(describeOutput.Reservations[0].Instances[0].BlockDeviceMappings) == 0 {
+			return fmt.Errorf("Instance has no block devices")
+		}
 		return err
 	})
 	if err != nil || len(describeOutput.Reservations) == 0 || len(describeOutput.Reservations[0].Instances) == 0 {
