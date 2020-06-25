@@ -414,14 +414,11 @@ func TestBuildProvisionAndPosProcessWithBuildVariablesSharing(t *testing.T) {
 				filepath.Join(testFixture("build-variable-sharing"), "multiple_source_build.pkr.hcl"),
 			},
 			expectedFiles: []string{
-				"all-provisioner.Null.txt",
-				"all-post-processor.Null.txt",
+				"all.Null.txt",
 			},
 			notExpectedFiles: []string{
-				"chocolate-provisioner.Null.txt",
-				"banana-provisioner.Null.txt",
-				"chocolate-post-processor.Null.txt",
-				"banana-post-processor.Null.txt",
+				"chocolate.Null.txt",
+				"banana.Null.txt",
 			},
 		},
 	}
