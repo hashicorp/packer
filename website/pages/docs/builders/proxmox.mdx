@@ -119,7 +119,8 @@ builder.
     {
       "model": "virtio",
       "bridge": "vmbr0",
-      "vlan_tag": "10"
+      "vlan_tag": "10",
+      "firewall": true
     }
   ]
   ```
@@ -137,6 +138,9 @@ builder.
 
   - `vlan_tag` (string) - If the adapter should tag packets. Defaults to
     no tagging.
+
+  - `firewall` (bool) - If the interface should be protected by the firewall.
+    Defaults to `false`.
 
 - `disks` (array of objects) - Disks attached to the virtual machine.
   Example:
