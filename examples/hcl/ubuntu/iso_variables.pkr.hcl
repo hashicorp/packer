@@ -10,6 +10,10 @@ variable "preseed_path" {
   default = "preseed.cfg"
 }
 
+variable "guest_additions_url" {
+  type    = string
+  default = ""
+}
 
 //// ubuntu 16.04
 
