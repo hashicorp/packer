@@ -192,9 +192,22 @@ type Config struct {
 	// A list of project IDs to search for the source image. Packer will search the first
 	// project ID in the list first, and fall back to the next in the list, until it finds the source image.
 	SourceImageProjectId []string `mapstructure:"source_image_project_id" required:"false"`
-	// The path to a startup script to run on the VM from which the image will
-	// be made.
+	// The path to a startup script to run on the launched instance from which the image will
+	// be made. When set, the contents of the startup script file will be added to the instance metadata
+	// under the `"startup_script"` metadata property. See [Providing startup script contents directly](https://cloud.google.com/compute/docs/startupscript#providing_startup_script_contents_directly) for more details.
+	//
+	// When using `startup_script_file` the following rules apply:
+	// - The contents of the script file will overwrite the value of the `"startup_script"` metadata property at runtime.
+	// - The contents of the script file will be wrapped in Packer's startup script wrapper, unless `wrap_startup_script` is disabled. See `wrap_startup_script` for more details.
+	// - Not supported by Windows instances. See [Startup Scripts for Windows](https://cloud.google.com/compute/docs/startupscript#providing_a_startup_script_for_windows_instances) for more details.
 	StartupScriptFile string `mapstructure:"startup_script_file" required:"false"`
+	// For backwards compatibility this option defaults to `"true"` in the future it will default to `"false"`.
+	// If "true", the contents of `startup_script_file` or `"startup_script"` in the instance metadata
+	// is wrapped in a Packer specific script that tracks the execution and completion of the provided
+	// startup script. The wrapper ensures that the builder will not continue until the startup script has been executed.
+	// - The use of the wrapped script file requires that the user or service account
+	// running the build has the compute.instance.Metadata role.
+	WrapStartupScriptFile config.Trilean `mapstructure:"wrap_startup_script" required:"false"`
 	// The Google Compute subnetwork id or URL to use for the launched
 	// instance. Only required if the network has been created with custom
 	// subnetting. Note, the region of the subnetwork must match the region or
@@ -447,6 +460,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		if _, err := os.Stat(c.StartupScriptFile); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("startup_script_file: %v", err))
+		}
+
+		if c.WrapStartupScriptFile == config.TriUnset {
+			c.WrapStartupScriptFile = config.TriTrue
 		}
 	}
 
