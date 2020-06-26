@@ -52,7 +52,6 @@ variable "ubuntu_1804_version" {
   default = "18.04.4"
 }
 
-
 locals {
   iso_url_ubuntu_1804           = "http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/ubuntu-18.04.4-server-amd64.iso"
   iso_checksum_url_ubuntu_1804  = "http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/SHA256SUMS"
