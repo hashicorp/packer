@@ -7,7 +7,6 @@ locals {
 }
 
 source "virtualbox-iso" "base-ubuntu-amd64" {
-    boot_wait               = "10s"
     guest_os_type           = "Ubuntu_64"
     http_directory          = local.http_directory
     shutdown_command        = "echo 'vagrant' | sudo -S shutdown -P now"
