@@ -1,10 +1,4 @@
 
-// {{user `mirror`}}/{{user `mirror_directory`}}/{{user `iso_name`}}
-
-variable "ubuntu_mirror" {
-  default = "http://releases.ubuntu.com/releases"
-}
-
 variable "preseed_path" {
   type    = string
   default = "preseed.cfg"
@@ -22,9 +16,9 @@ variable "ubuntu_1604_version" {
 }
 
 locals {
-  iso_url_ubuntu_1604      = "${var.ubuntu_mirror}/16.04/ubuntu-${var.ubuntu_1604_version}-server-amd64.iso"
-  iso_checksum_ubuntu_1604 = "file:${var.ubuntu_mirror}/16.04/SHA256SUMS"
-  ubuntu_1604_boot_command = [
+  iso_url_ubuntu_1604           = "http://releases.ubuntu.com/releases/16.04/ubuntu-${var.ubuntu_1604_version}-server-amd64.iso"
+  iso_checksum_url_ubuntu_1604  = "http://releases.ubuntu.com/releases/16.04/SHA256SUMS"
+  ubuntu_1604_boot_command      = [
     "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
     "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
     "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
@@ -60,9 +54,9 @@ variable "ubuntu_1804_version" {
 
 
 locals {
-  iso_url_ubuntu_1804      = "${var.ubuntu_mirror}/18.04/ubuntu-${var.ubuntu_1804_version}-live-server-amd64.iso"
-  iso_checksum_ubuntu_1804 = "file:${var.ubuntu_mirror}/18.04/SHA256SUMS"
-  ubuntu_1804_boot_command  = [
+  iso_url_ubuntu_1804           = "http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/ubuntu-18.04.4-server-amd64.iso"
+  iso_checksum_url_ubuntu_1804  = "http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/SHA256SUMS"
+  ubuntu_1804_boot_command      = [
     "<esc><wait>",
     "<esc><wait>",
     "<enter><wait>",
