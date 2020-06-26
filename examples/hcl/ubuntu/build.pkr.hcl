@@ -20,7 +20,7 @@ EOF
     iso_url                 = local.iso_url_ubuntu_1804
     iso_checksum            = local.iso_checksum_ubuntu_1804
     output_directory        = "ubuntu_1804_amd64"
-    boot_command            = local.ubuntu_1804_boot_command    
+    boot_command            = local.ubuntu_1804_boot_command
   }
 
   provisioner "shell" {
