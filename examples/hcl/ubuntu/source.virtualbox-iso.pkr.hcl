@@ -14,7 +14,7 @@ source "virtualbox-iso" "base-ubuntu-amd64" {
     ssh_username            = "vagrant"
     ssh_password            = "vagrant"
     ssh_port                = 22
-    ssh_wait_timeout        = "15min"
+    ssh_wait_timeout        = "15m"
     hard_drive_interface    = "sata"
     virtualbox_version_file = ".vbox_version"
     guest_additions_path    = "VBoxGuestAdditions_{{.Version}}.iso"

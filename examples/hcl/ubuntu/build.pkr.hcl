@@ -28,7 +28,5 @@ EOF
     execute_command   = "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
     expect_disconnect = true
     scripts           = fileset(".", "etc/scripts/*.sh")
-
-  // /../_common/minimize.sh"
   }
 }
