@@ -1,5 +1,5 @@
 //go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type CloneConfig
+//go:generate mapstructure-to-hcl2 -type CloneConfig,vAppConfig
 
 package clone
 
@@ -14,6 +14,11 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
+type vAppConfig struct {
+	// TODO docs @sylviamoss
+	Properties map[string]string `mapstructure:"properties"`
+}
+
 type CloneConfig struct {
 	// Name of source VM. Path is optional.
 	Template string `mapstructure:"template"`
@@ -26,6 +31,9 @@ type CloneConfig struct {
 	Network string `mapstructure:"network"`
 	// VM notes.
 	Notes string `mapstructure:"notes"`
+
+	// TODO docs @sylviamoss
+	VAppConfig vAppConfig `mapstructure:"vapp"`
 }
 
 func (c *CloneConfig) Prepare() []error {
@@ -67,15 +75,16 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 	}
 
 	vm, err := template.Clone(ctx, &driver.CloneConfig{
-		Name:         s.Location.VMName,
-		Folder:       s.Location.Folder,
-		Cluster:      s.Location.Cluster,
-		Host:         s.Location.Host,
-		ResourcePool: s.Location.ResourcePool,
-		Datastore:    s.Location.Datastore,
-		LinkedClone:  s.Config.LinkedClone,
-		Network:      s.Config.Network,
-		Annotation:   s.Config.Notes,
+		Name:           s.Location.VMName,
+		Folder:         s.Location.Folder,
+		Cluster:        s.Location.Cluster,
+		Host:           s.Location.Host,
+		ResourcePool:   s.Location.ResourcePool,
+		Datastore:      s.Location.Datastore,
+		LinkedClone:    s.Config.LinkedClone,
+		Network:        s.Config.Network,
+		Annotation:     s.Config.Notes,
+		VAppProperties: s.Config.VAppConfig.Properties,
 	})
 	if err != nil {
 		state.Put("error", err)

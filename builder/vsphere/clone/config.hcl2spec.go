@@ -31,6 +31,7 @@ type FlatConfig struct {
 	LinkedClone                *bool                    `mapstructure:"linked_clone" cty:"linked_clone" hcl:"linked_clone"`
 	Network                    *string                  `mapstructure:"network" cty:"network" hcl:"network"`
 	Notes                      *string                  `mapstructure:"notes" cty:"notes" hcl:"notes"`
+	VAppConfig                 *FlatvAppConfig          `mapstructure:"vapp" cty:"vapp" hcl:"vapp"`
 	VMName                     *string                  `mapstructure:"vm_name" cty:"vm_name" hcl:"vm_name"`
 	Folder                     *string                  `mapstructure:"folder" cty:"folder" hcl:"folder"`
 	Cluster                    *string                  `mapstructure:"cluster" cty:"cluster" hcl:"cluster"`
@@ -147,6 +148,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"linked_clone":                   &hcldec.AttrSpec{Name: "linked_clone", Type: cty.Bool, Required: false},
 		"network":                        &hcldec.AttrSpec{Name: "network", Type: cty.String, Required: false},
 		"notes":                          &hcldec.AttrSpec{Name: "notes", Type: cty.String, Required: false},
+		"vapp":                           &hcldec.BlockSpec{TypeName: "vapp", Nested: hcldec.ObjectSpec((*FlatvAppConfig)(nil).HCL2Spec())},
 		"vm_name":                        &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
 		"folder":                         &hcldec.AttrSpec{Name: "folder", Type: cty.String, Required: false},
 		"cluster":                        &hcldec.AttrSpec{Name: "cluster", Type: cty.String, Required: false},
