@@ -247,6 +247,7 @@ type FlatnicConfig struct {
 	MACAddress *string `mapstructure:"mac_address" cty:"mac_address" hcl:"mac_address"`
 	Bridge     *string `mapstructure:"bridge" cty:"bridge" hcl:"bridge"`
 	VLANTag    *string `mapstructure:"vlan_tag" cty:"vlan_tag" hcl:"vlan_tag"`
+	Firewall   *bool   `mapstructure:"firewall" cty:"firewall" hcl:"firewall"`
 }
 
 // FlatMapstructure returns a new FlatnicConfig.
@@ -265,6 +266,7 @@ func (*FlatnicConfig) HCL2Spec() map[string]hcldec.Spec {
 		"mac_address": &hcldec.AttrSpec{Name: "mac_address", Type: cty.String, Required: false},
 		"bridge":      &hcldec.AttrSpec{Name: "bridge", Type: cty.String, Required: false},
 		"vlan_tag":    &hcldec.AttrSpec{Name: "vlan_tag", Type: cty.String, Required: false},
+		"firewall":    &hcldec.AttrSpec{Name: "firewall", Type: cty.Bool, Required: false},
 	}
 	return s
 }
