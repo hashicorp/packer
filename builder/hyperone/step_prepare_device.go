@@ -17,6 +17,13 @@ type stepPrepareDevice struct{}
 
 func (s *stepPrepareDevice) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(*Config)
+
+	if config.ChrootDevice != "" {
+		state.Put("device", config.ChrootDevice)
+		return multistep.ActionContinue
+	}
+
 	controllerNumber := state.Get("chroot_controller_number").(string)
 	controllerLocation := state.Get("chroot_controller_location").(int)
 
