@@ -71,7 +71,7 @@ type nicConfig struct {
 	MACAddress string `mapstructure:"mac_address"`
 	Bridge     string `mapstructure:"bridge"`
 	VLANTag    string `mapstructure:"vlan_tag"`
-	Firewall   *bool  `mapstructure:"firewall"`
+	Firewall   bool   `mapstructure:"firewall"`
 }
 type diskConfig struct {
 	Type            string `mapstructure:"type"`
@@ -159,11 +159,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		if c.NICs[idx].Model == "" {
 			log.Printf("NIC %d model not set, using default 'e1000'", idx)
 			c.NICs[idx].Model = "e1000"
-		}
-		if c.NICs[idx].Firewall == nil {
-			log.Printf("NIC %d firewall toggle not set, using default: 0", idx)
-			toggle := false
-			c.NICs[idx].Firewall = &toggle
 		}
 	}
 	for idx := range c.Disks {

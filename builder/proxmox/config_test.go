@@ -117,8 +117,8 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	if b.config.NICs[0].Model != "e1000" {
 		t.Errorf("Expected NIC model to be 'e1000', got %s", b.config.NICs[0].Model)
 	}
-	if *b.config.NICs[0].Firewall != false {
-		t.Errorf("Expected NIC firewall to be false, got %t", *b.config.NICs[0].Firewall)
+	if b.config.NICs[0].Firewall != false {
+		t.Errorf("Expected NIC firewall to be false, got %t", b.config.NICs[0].Firewall)
 	}
 	if b.config.Disks[0].CacheMode != "none" {
 		t.Errorf("Expected disk cache mode to be 'none', got %s", b.config.Disks[0].CacheMode)

@@ -104,7 +104,7 @@ func generateProxmoxNetworkAdapters(nics []nicConfig) proxmox.QemuDevices {
 		setDeviceParamIfDefined(devs[idx], "macaddr", nics[idx].MACAddress)
 		setDeviceParamIfDefined(devs[idx], "bridge", nics[idx].Bridge)
 		setDeviceParamIfDefined(devs[idx], "tag", nics[idx].VLANTag)
-		devs[idx]["firewall"] = *nics[idx].Firewall
+		devs[idx]["firewall"] = nics[idx].Firewall
 	}
 	return devs
 }
