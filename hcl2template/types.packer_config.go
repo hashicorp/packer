@@ -395,14 +395,14 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			pcb.Builder = builder
 			pcb.Prepared = true
 			pcb.HCL2ProvisionerPrepare = (&provisionerPrepare{
-				cfg:               cfg,
-				provisionersBlock: build.ProvisionerBlocks,
-				src:               from,
+				cfg:              cfg,
+				provisionerBlock: build.ProvisionerBlocks,
+				src:              from,
 			}).HCL2ProvisionerPrepare
 			pcb.HCL2PostProcessorsPrepare = (&postProcessorsPrepare{
-				cfg:               cfg,
-				provisionersBlock: build.PostProcessors,
-				src:               from,
+				cfg:                cfg,
+				postProcessorBlock: build.PostProcessors,
+				src:                from,
 			}).HCL2PostProcessorsPrepare
 
 			// Prepare just sets the "prepareCalled" flag on CoreBuild, since

@@ -91,9 +91,9 @@ func (cfg *PackerConfig) startPostProcessor(source SourceBlock, pp *PostProcesso
 }
 
 type postProcessorsPrepare struct {
-	cfg               *PackerConfig
-	provisionersBlock []*PostProcessorBlock
-	src               SourceRef
+	cfg                *PackerConfig
+	postProcessorBlock []*PostProcessorBlock
+	src                SourceRef
 }
 
 // HCL2PostProcessorsPrepare is used by the CoreBuild at the runtime, after running the build and before running the post-processors,
@@ -130,5 +130,5 @@ func (pp *postProcessorsPrepare) HCL2PostProcessorsPrepare(builderArtifact packe
 		buildAccessor: cty.ObjectVal(variablesVal),
 	}
 
-	return pp.cfg.getCoreBuildPostProcessors(src, pp.provisionersBlock, pp.cfg.EvalContext(generatedVariables))
+	return pp.cfg.getCoreBuildPostProcessors(src, pp.postProcessorBlock, pp.cfg.EvalContext(generatedVariables))
 }

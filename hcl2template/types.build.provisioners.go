@@ -170,9 +170,9 @@ func (cfg *PackerConfig) startProvisioner(source SourceBlock, pb *ProvisionerBlo
 }
 
 type provisionerPrepare struct {
-	cfg               *PackerConfig
-	provisionersBlock []*ProvisionerBlock
-	src               SourceRef
+	cfg              *PackerConfig
+	provisionerBlock []*ProvisionerBlock
+	src              SourceRef
 }
 
 // HCL2ProvisionerPrepare is used by the ProvisionHook at the runtime in the provision step
@@ -199,5 +199,5 @@ func (pp *provisionerPrepare) HCL2ProvisionerPrepare(data map[string]interface{}
 		buildAccessor: cty.ObjectVal(variablesVal),
 	}
 
-	return pp.cfg.getCoreBuildProvisioners(src, pp.provisionersBlock, pp.cfg.EvalContext(generatedVariables))
+	return pp.cfg.getCoreBuildProvisioners(src, pp.provisionerBlock, pp.cfg.EvalContext(generatedVariables))
 }
