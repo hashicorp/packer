@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -104,7 +105,7 @@ func generateProxmoxNetworkAdapters(nics []nicConfig) proxmox.QemuDevices {
 		setDeviceParamIfDefined(devs[idx], "macaddr", nics[idx].MACAddress)
 		setDeviceParamIfDefined(devs[idx], "bridge", nics[idx].Bridge)
 		setDeviceParamIfDefined(devs[idx], "tag", nics[idx].VLANTag)
-		devs[idx]["firewall"] = nics[idx].Firewall
+		setDeviceParamIfDefined(devs[idx], "firewall", strconv.FormatBool(nics[idx].Firewall))
 	}
 	return devs
 }
