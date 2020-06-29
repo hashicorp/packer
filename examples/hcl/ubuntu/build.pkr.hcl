@@ -13,7 +13,7 @@ EOF
     name                    = "16.04"
     iso_url                 = local.iso_url_ubuntu_1604
     iso_checksum            = "file:${local.iso_checksum_url_ubuntu_1604}"
-    output_directory        = "ubuntu_1604_amd64"
+    output_directory        = "virtualbox_iso_ubuntu_1604_amd64"
     boot_command            = local.ubuntu_1604_boot_command
     boot_wait               = "10s"
   }
@@ -22,9 +22,17 @@ EOF
     name                    = "18.04"
     iso_url                 = local.iso_url_ubuntu_1804
     iso_checksum            = "file:${local.iso_checksum_url_ubuntu_1804}"
-    output_directory        = "ubuntu_1804_amd64"
+    output_directory        = "virtualbox_iso_ubuntu_1804_amd64"
     boot_command            = local.ubuntu_1804_boot_command
     boot_wait               = "5s"
+  }
+
+  source "source.parallels-iso.base-ubuntu-amd64" {
+    name                    = "18.04"
+    iso_url                 = local.iso_url_ubuntu_1804
+    iso_checksum            = "file:${local.iso_checksum_url_ubuntu_1804}"
+    output_directory        = "parallels_iso_ubuntu_1804_amd64"
+    boot_command            = local.ubuntu_1804_boot_command
   }
 
   provisioner "shell" {

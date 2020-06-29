@@ -9,6 +9,19 @@ variable "guest_additions_url" {
   default = ""
 }
 
+variable "headless" {
+  type    = bool
+  default = false
+}
+
+locals {
+  // fileset lists all files in the http directory as a set, we convert that
+  // set to a list of strings and we then take the directory of the first
+  // value. This validates that the http directory exists even before starting
+  // any builder/provisioner.
+  http_directory = dirname(convert(fileset(".", "etc/http/*"), list(string))[0])
+}
+
 //// ubuntu 16.04
 
 variable "ubuntu_1604_version" {
