@@ -7,10 +7,10 @@ build {
     ]
 
     provisioner "shell" {
-        only = ["source.virtualbox-iso.ubuntu-1204"]
+        only = ["virtualbox-iso.ubuntu-1204"]
     }
     provisioner "file" {
-        except = ["source.virtualbox-iso.ubuntu-1204"]
+        except = ["virtualbox-iso.ubuntu-1204"]
     }
 }
 

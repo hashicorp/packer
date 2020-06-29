@@ -207,11 +207,11 @@ func TestParse_build(t *testing.T) {
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
 								PType:      "shell",
-								OnlyExcept: OnlyExcept{Only: []string{"virtualbox-iso.ubuntu-1204"}, Except: nil},
+								OnlyExcept: OnlyExcept{Only: []string{"virtualbox-iso.ubuntu-1204"}},
 							},
 							{
 								PType:      "file",
-								OnlyExcept: OnlyExcept{Only: nil, Except: []string{"virtualbox-iso.ubuntu-1204"}},
+								OnlyExcept: OnlyExcept{Except: []string{"virtualbox-iso.ubuntu-1204"}},
 							},
 						},
 					},

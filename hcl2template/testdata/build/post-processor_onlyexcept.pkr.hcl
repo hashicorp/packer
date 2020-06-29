@@ -7,10 +7,10 @@ build {
     ]
 
     post-processor "amazon-import" {
-        only = ["source.virtualbox-iso.ubuntu-1204"]
+        only = ["virtualbox-iso.ubuntu-1204"]
     }
     post-processor "manifest" {
-        except = ["source.virtualbox-iso.ubuntu-1204"]
+        except = ["virtualbox-iso.ubuntu-1204"]
     }
 }
 
