@@ -202,7 +202,7 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
-		if pb.OnlyExcept.Skip(source.Type + "." + source.Name) {
+		if pb.OnlyExcept.Skip(source.String()) {
 			continue
 		}
 		provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx, generatedVars)
@@ -245,7 +245,7 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildPostProcessor{}
 	for _, ppb := range blocks {
-		if ppb.OnlyExcept.Skip(source.Type + "." + source.Name) {
+		if ppb.OnlyExcept.Skip(source.String()) {
 			continue
 		}
 
@@ -300,10 +300,11 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				continue
 			}
 			src.addition = from.addition
+			src.LocalName = from.LocalName
 
 			pcb := &packer.CoreBuild{
 				BuildName: build.Name,
-				Type:      src.Ref().String(),
+				Type:      src.String(),
 			}
 
 			// Apply the -only and -except command-line options to exclude matching builds.

@@ -134,7 +134,10 @@ func TestParse_build(t *testing.T) {
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Sources:           []SourceRef{refVBIsoUbuntu1204, refAWSEBSUbuntu1604},
+						Sources: []SourceRef{
+							refVBIsoUbuntu1204,
+							SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604", LocalName: "aws-ubuntu-16.04"},
+						},
 						ProvisionerBlocks: nil,
 						PostProcessors: []*PostProcessorBlock{
 							{
@@ -144,6 +147,14 @@ func TestParse_build(t *testing.T) {
 							{
 								PType:      "manifest",
 								OnlyExcept: OnlyExcept{Only: nil, Except: []string{"virtualbox-iso.ubuntu-1204"}},
+							},
+							{
+								PType:      "amazon-import",
+								OnlyExcept: OnlyExcept{Only: []string{"amazon-ebs.aws-ubuntu-16.04"}, Except: nil},
+							},
+							{
+								PType:      "manifest",
+								OnlyExcept: OnlyExcept{Only: nil, Except: []string{"amazon-ebs.aws-ubuntu-16.04"}},
 							},
 						},
 					},
@@ -167,11 +178,20 @@ func TestParse_build(t *testing.T) {
 									},
 								},
 							},
+							{
+								PType: "manifest",
+								PostProcessor: &MockPostProcessor{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+										NestedSlice:      []NestedMockConfig{},
+									},
+								},
+							},
 						},
 					},
 				},
 				&packer.CoreBuild{
-					Type:         "amazon-ebs.ubuntu-1604",
+					Type:         "amazon-ebs.aws-ubuntu-16.04",
 					Prepared:     true,
 					Builder:      emptyMockBuilder,
 					Provisioners: []packer.CoreBuildProvisioner{},
@@ -179,6 +199,15 @@ func TestParse_build(t *testing.T) {
 						{
 							{
 								PType: "manifest",
+								PostProcessor: &MockPostProcessor{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+										NestedSlice:      []NestedMockConfig{},
+									},
+								},
+							},
+							{
+								PType: "amazon-import",
 								PostProcessor: &MockPostProcessor{
 									Config: MockConfig{
 										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
@@ -203,7 +232,10 @@ func TestParse_build(t *testing.T) {
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Sources: []SourceRef{refVBIsoUbuntu1204, refAWSEBSUbuntu1604},
+						Sources: []SourceRef{
+							refVBIsoUbuntu1204,
+							SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604", LocalName: "aws-ubuntu-16.04"},
+						},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
 								PType:      "shell",
@@ -212,6 +244,14 @@ func TestParse_build(t *testing.T) {
 							{
 								PType:      "file",
 								OnlyExcept: OnlyExcept{Except: []string{"virtualbox-iso.ubuntu-1204"}},
+							},
+							{
+								PType:      "shell",
+								OnlyExcept: OnlyExcept{Only: []string{"amazon-ebs.aws-ubuntu-16.04"}},
+							},
+							{
+								PType:      "file",
+								OnlyExcept: OnlyExcept{Except: []string{"amazon-ebs.aws-ubuntu-16.04"}},
 							},
 						},
 					},
@@ -233,16 +273,34 @@ func TestParse_build(t *testing.T) {
 								},
 							},
 						},
+						{
+							PType: "file",
+							Provisioner: &MockProvisioner{
+								Config: MockConfig{
+									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+									NestedSlice:      []NestedMockConfig{},
+								},
+							},
+						},
 					},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
 				&packer.CoreBuild{
-					Type:     "amazon-ebs.ubuntu-1604",
+					Type:     "amazon-ebs.aws-ubuntu-16.04",
 					Prepared: true,
 					Builder:  emptyMockBuilder,
 					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType: "file",
+							Provisioner: &MockProvisioner{
+								Config: MockConfig{
+									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+									NestedSlice:      []NestedMockConfig{},
+								},
+							},
+						},
+						{
+							PType: "shell",
 							Provisioner: &MockProvisioner{
 								Config: MockConfig{
 									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},

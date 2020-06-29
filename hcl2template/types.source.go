@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -20,15 +21,36 @@ type SourceBlock struct {
 	// addition will be merged into block to allow user to override builder settings
 	// per build.source block.
 	addition hcl.Body
+	// LocalName can be set in a singular source block from a build block, it
+	// allows to give a special name to a build in the logs.
+	LocalName string
+}
+
+func (b *SourceBlock) String() string {
+	if b.LocalName != "" {
+		return fmt.Sprintf("%s.%s", b.Type, b.LocalName)
+	}
+	return fmt.Sprintf("%s.%s", b.Type, b.Name)
 }
 
 // decodeBuildSource reads a used source block from a build:
 //  build {
-//   source "type.example" {}
+//    source "type.example" {
+//      name = "local_name"
+//    }
 //  }
 func (p *Parser) decodeBuildSource(block *hcl.Block) (SourceRef, hcl.Diagnostics) {
 	ref := sourceRefFromString(block.Labels[0])
-	ref.addition = block.Body
+	var b struct {
+		Name string   `hcl:"name,optional"`
+		Rest hcl.Body `hcl:",remain"`
+	}
+	diags := gohcl.DecodeBody(block.Body, nil, &b)
+	if diags.HasErrors() {
+		return ref, diags
+	}
+	ref.addition = b.Rest
+	ref.LocalName = b.Name
 	return ref, nil
 }
 
@@ -115,6 +137,9 @@ type SourceRef struct {
 	// The content of this body will be merged into a new block to allow to
 	// override builder settings per build section.
 	addition hcl.Body
+	// LocalName can be set in a singular source block from a build block, it
+	// allows to give a special name to a build in the logs.
+	LocalName string
 }
 
 // the 'addition' field makes of ref a different entry in the sources map, so
