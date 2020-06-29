@@ -14,6 +14,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/packer/common"
 	confighelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/stretchr/testify/assert"
@@ -473,6 +474,9 @@ func basicGenData(input map[string]interface{}) map[string]interface{} {
 		"SSHPrivateKeyFile": "",
 		"SSHPrivateKey":     "asdf",
 		"User":              "PartyPacker",
+		"PackerHTTPAddr":    common.HttpAddrNotImplemented,
+		"PackerHTTPIP":      common.HttpIPNotImplemented,
+		"PackerHTTPPort":    common.HttpPortNotImplemented,
 	}
 	if input == nil {
 		return gd
@@ -504,7 +508,7 @@ func TestCreateCmdArgs(t *testing.T) {
 			generatedData:   basicGenData(nil),
 			ExtraArguments:  []string{"-e", "hello-world"},
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas"},
-			callArgs:        []string{"", "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
+			callArgs:        []string{common.HttpAddrNotImplemented, "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
 			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas"},
 		},
@@ -514,7 +518,7 @@ func TestCreateCmdArgs(t *testing.T) {
 			UseProxy:        confighelper.TriTrue,
 			generatedData:   basicGenData(nil),
 			ExtraArguments:  []string{"-e", "hello-world"},
-			callArgs:        []string{"", "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
+			callArgs:        []string{common.HttpAddrNotImplemented, "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
 			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{},
 		},
@@ -527,7 +531,7 @@ func TestCreateCmdArgs(t *testing.T) {
 			}),
 			ExtraArguments:  []string{"-e", "hello-world"},
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas"},
-			callArgs:        []string{"", "/var/inventory", "test-playbook.yml", ""},
+			callArgs:        []string{common.HttpAddrNotImplemented, "/var/inventory", "test-playbook.yml", ""},
 			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas"},
 		},
@@ -536,7 +540,9 @@ func TestCreateCmdArgs(t *testing.T) {
 			TestName:        "HTTPAddr should be set. No env vars",
 			PackerBuildName: "packerparty",
 			ExtraArguments:  []string{"-e", "hello-world"},
-			generatedData:   basicGenData(nil),
+			generatedData: basicGenData(map[string]interface{}{
+				"PackerHTTPAddr": "123.45.67.89",
+			}),
 			callArgs:        []string{"123.45.67.89", "/var/inventory", "test-playbook.yml", ""},
 			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{},
@@ -546,8 +552,9 @@ func TestCreateCmdArgs(t *testing.T) {
 			TestName: "Add ansible_password for proxyless winrm connection.",
 			UseProxy: confighelper.TriFalse,
 			generatedData: basicGenData(map[string]interface{}{
-				"ConnType": "winrm",
-				"Password": "ilovebananapancakes",
+				"ConnType":       "winrm",
+				"Password":       "ilovebananapancakes",
+				"PackerHTTPAddr": "123.45.67.89",
 			}),
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas"},
 			callArgs:        []string{"123.45.67.89", "/var/inventory", "test-playbook.yml", ""},
@@ -563,7 +570,7 @@ func TestCreateCmdArgs(t *testing.T) {
 			}),
 			ExtraArguments:  []string{"-e", "hello-world"},
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas"},
-			callArgs:        []string{"", "/var/inventory", "test-playbook.yml", ""},
+			callArgs:        []string{common.HttpAddrNotImplemented, "/var/inventory", "test-playbook.yml", ""},
 			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas"},
 		},
@@ -572,8 +579,9 @@ func TestCreateCmdArgs(t *testing.T) {
 			TestName: "Windows, no proxy, with extra vars.",
 			UseProxy: confighelper.TriFalse,
 			generatedData: basicGenData(map[string]interface{}{
-				"ConnType": "winrm",
-				"Password": "ilovebananapancakes",
+				"ConnType":       "winrm",
+				"Password":       "ilovebananapancakes",
+				"PackerHTTPAddr": "123.45.67.89",
 			}),
 			ExtraArguments:  []string{"-e", "hello-world"},
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas"},
@@ -585,8 +593,9 @@ func TestCreateCmdArgs(t *testing.T) {
 			// SSH, use Password.
 			TestName: "SSH, use ansible_password.",
 			generatedData: basicGenData(map[string]interface{}{
-				"ConnType": "ssh",
-				"Password": "ilovebananapancakes",
+				"ConnType":       "ssh",
+				"Password":       "ilovebananapancakes",
+				"PackerHTTPAddr": "123.45.67.89",
 			}),
 			ExtraArguments:  []string{"-e", "hello-world", "-e", "ansible_password=ilovebananapancakes"},
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas"},
@@ -598,8 +607,9 @@ func TestCreateCmdArgs(t *testing.T) {
 			// SSH, use Password .
 			TestName: "SSH, already in ENV ansible_host_key_checking.",
 			generatedData: basicGenData(map[string]interface{}{
-				"ConnType": "ssh",
-				"Password": "ilovebananapancakes",
+				"ConnType":       "ssh",
+				"Password":       "ilovebananapancakes",
+				"PackerHTTPAddr": "123.45.67.89",
 			}),
 			ExtraArguments:  []string{"-e", "hello-world", "-e", "ansible_password=ilovebananapancakes"},
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas", "ANSIBLE_HOST_KEY_CHECKING=False"},
@@ -613,7 +623,7 @@ func TestCreateCmdArgs(t *testing.T) {
 			UseProxy:        confighelper.TriTrue,
 			generatedData:   basicGenData(nil),
 			ExtraArguments:  []string{"-e", "hello-world"},
-			callArgs:        []string{"", "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
+			callArgs:        []string{common.HttpAddrNotImplemented, "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
 			ExpectedArgs:    []string{"-e", "packer_build_name=packerparty", "-e", "packer_builder_type=fakebuilder", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{},
 		},
@@ -621,7 +631,7 @@ func TestCreateCmdArgs(t *testing.T) {
 			// No builder name. This shouldn't cause an error, it just shouldn't be set. HCL, yo.
 			TestName:        "No builder name. This shouldn't cause an error, it just shouldn't be set. HCL, yo.",
 			generatedData:   basicGenData(nil),
-			callArgs:        []string{"", "/var/inventory", "test-playbook.yml", ""},
+			callArgs:        []string{common.HttpAddrNotImplemented, "/var/inventory", "test-playbook.yml", ""},
 			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{},
 		},
