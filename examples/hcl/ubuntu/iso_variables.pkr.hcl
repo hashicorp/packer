@@ -11,7 +11,7 @@ variable "guest_additions_url" {
 
 variable "headless" {
   type    = bool
-  default = false
+  default = true
 }
 
 locals {
