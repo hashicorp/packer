@@ -15,6 +15,10 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	// The lxd client used to connect to the lxd server.
+	// Either cli (uses the lxc CLI) or api (uses the lxd client library).
+	// Defaults to cli. 
+	LXDClient string `mapstructure:"lxd_client" required:"false"`
 	// The name of the output artifact. Defaults to
 	// name.
 	OutputImage   string `mapstructure:"output_image" required:"false"`
@@ -62,6 +66,13 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		c.ContainerName = fmt.Sprintf("packer-%s", c.PackerBuildName)
 	}
 
+	if c.LXDClient == "" {
+		c.LXDClient = "cli"
+	}
+	if c.LXDClient != "cli" && c.LXDClient != "api" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("`lxd_client` must be either `api` or `cli`"))
+	}
+	
 	if c.OutputImage == "" {
 		c.OutputImage = c.ContainerName
 	}

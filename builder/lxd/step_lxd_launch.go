@@ -11,27 +11,16 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type stepLxdLaunch struct{}
+type stepLxdLaunch struct{
+	client lxdClient
+}
 
 func (s *stepLxdLaunch) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	name := config.ContainerName
-	image := config.Image
-	profile := fmt.Sprintf("--profile=%s", config.Profile)
-
-	launch_args := []string{
-		"launch", "--ephemeral=false", profile, image, name,
-	}
-
-	for k, v := range config.LaunchConfig {
-		launch_args = append(launch_args, "--config", fmt.Sprintf("%s=%s", k, v))
-	}
-
 	ui.Say("Creating container...")
-	_, err := LXDCommand(launch_args...)
-	if err != nil {
+	if err := s.client.LaunchContainer(config.ContainerName, config.Image, config.Profile, config.LaunchConfig); err != nil {
 		err := fmt.Errorf("Error creating container: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -57,12 +46,9 @@ func (s *stepLxdLaunch) Cleanup(state multistep.StateBag) {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	cleanup_args := []string{
-		"delete", "--force", config.ContainerName,
-	}
-
-	ui.Say("Unregistering and deleting deleting container...")
-	if _, err := LXDCommand(cleanup_args...); err != nil {
+	ui.Say("Unregistering and deleting container...")
+	if err := s.client.DeleteContainer(config.ContainerName); err != nil {
 		ui.Error(fmt.Sprintf("Error deleting container: %s", err))
 	}
 }
+

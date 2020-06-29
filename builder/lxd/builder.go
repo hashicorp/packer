@@ -2,8 +2,11 @@ package lxd
 
 import (
 	"context"
+	"os/exec"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder/lxd/api"
+	"github.com/hashicorp/packer/builder/lxd/cli"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -15,6 +18,15 @@ const BuilderId = "lxd"
 
 type wrappedCommandTemplate struct {
 	Command string
+}
+
+type lxdClient interface {
+	DeleteImage(string) error
+	LaunchContainer(string, string, string, map[string]string) error
+	PublishContainer(string, string, map[string]string) (string, error)
+	StopContainer(string) error
+	DeleteContainer(string) error
+	ExecuteContainer(string, string, func(string) (string, error)) (*exec.Cmd, error)
 }
 
 type Builder struct {
@@ -39,10 +51,20 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return interpolate.Render(b.config.CommandWrapper, &b.config.ctx)
 	}
 
+	var client lxdClient
+	var err error
+	client = &cli_client.LXDClient{}
+	if b.config.LXDClient == "api" {
+		client, err = api_client.NewLXDClient("")
+	}
+	if err != nil {
+		return nil, err
+	}
+
 	steps := []multistep.Step{
-		&stepLxdLaunch{},
+		&stepLxdLaunch{client: client},
 		&StepProvision{},
-		&stepPublish{},
+		&stepPublish{client: client},
 	}
 
 	// Setup the state bag
@@ -64,6 +86,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	artifact := &Artifact{
 		id:        state.Get("imageFingerprint").(string),
 		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
+		client:    client,
 	}
 
 	return artifact, nil

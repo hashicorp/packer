@@ -16,10 +16,11 @@ import (
 type Communicator struct {
 	ContainerName string
 	CmdWrapper    CommandWrapper
+	Client        lxdClient
 }
 
 func (c *Communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
-	localCmd, err := c.Execute(cmd.Command)
+	localCmd, err := c.Client.ExecuteContainer(cmd.Command, c.ContainerName, c.CmdWrapper)
 
 	if err != nil {
 		return err
@@ -125,18 +126,4 @@ func (c *Communicator) Download(src string, w io.Writer) error {
 func (c *Communicator) DownloadDir(src string, dst string, exclude []string) error {
 	// TODO This could probably be "lxc exec <container> -- cd <src> && tar -czf - | tar -xzf - -C <dst>"
 	return fmt.Errorf("DownloadDir is not implemented for lxc")
-}
-
-func (c *Communicator) Execute(commandString string) (*exec.Cmd, error) {
-	log.Printf("Executing with lxc exec in container: %s %s", c.ContainerName, commandString)
-	command, err := c.CmdWrapper(
-		fmt.Sprintf("lxc exec %s -- /bin/sh -c \"%s\"", c.ContainerName, commandString))
-	if err != nil {
-		return nil, err
-	}
-
-	localCmd := ShellCommand(command)
-	log.Printf("Executing lxc exec: %s %#v", localCmd.Path, localCmd.Args)
-
-	return localCmd, nil
 }

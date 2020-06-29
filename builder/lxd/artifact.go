@@ -10,6 +10,7 @@ type Artifact struct {
 	// StateData should store data such as GeneratedData
 	// to be shared with post-processors
 	StateData map[string]interface{}
+	client lxdClient
 }
 
 func (*Artifact) BuilderId() string {
@@ -33,6 +34,5 @@ func (a *Artifact) State(name string) interface{} {
 }
 
 func (a *Artifact) Destroy() error {
-	_, err := LXDCommand("image", "delete", a.id)
-	return err
+	return a.client.DeleteImage(a.id)
 }

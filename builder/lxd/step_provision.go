@@ -10,7 +10,9 @@ import (
 )
 
 // StepProvision provisions the container
-type StepProvision struct{}
+type StepProvision struct {
+	client lxdClient
+}
 
 func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	hook := state.Get("hook").(packer.Hook)
@@ -22,6 +24,7 @@ func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multi
 	comm := &Communicator{
 		ContainerName: config.ContainerName,
 		CmdWrapper:    wrappedCommand,
+		Client:        s.client,
 	}
 
 	// Loads hook data from builder's state, if it has been set.
