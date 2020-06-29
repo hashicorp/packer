@@ -55,6 +55,7 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 		Netadp:       []openapi.VmCreateNetadp{netAdapter},
 		UserMetadata: config.UserData,
 		Tag:          config.VmTags,
+		Username:     config.Comm.SSHUsername,
 	}
 
 	vm, _, err := client.VmApi.VmCreate(ctx, options)
