@@ -11,6 +11,9 @@ For the following builers :
 * vmware-iso
 EOF
 
+  // the common fields of the source blocks are defined in the
+  // source.builder-type.pkr.hcl files, here we only set the fields specific to
+  // the different versions of ubuntu.
   source "source.virtualbox-iso.base-ubuntu-amd64" {
     name                    = "16.04"
     iso_url                 = local.iso_url_ubuntu_1604
