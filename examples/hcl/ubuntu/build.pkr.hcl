@@ -7,6 +7,7 @@ This build creates ubuntu images for ubuntu versions :
 * 18.04 
 For the following builers :
 * virtualbox-iso
+* parallels-iso
 EOF
 
   source "source.virtualbox-iso.base-ubuntu-amd64" {
