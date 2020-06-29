@@ -8,6 +8,7 @@ executors:
   golang:
     docker:
       - image: circleci/golang:1.13
+    resource_class: medium+
   darwin:
     macos:
       xcode: "9.0"
