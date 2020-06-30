@@ -71,6 +71,7 @@ type nicConfig struct {
 	MACAddress string `mapstructure:"mac_address"`
 	Bridge     string `mapstructure:"bridge"`
 	VLANTag    string `mapstructure:"vlan_tag"`
+	Firewall   bool   `mapstructure:"firewall"`
 }
 type diskConfig struct {
 	Type            string `mapstructure:"type"`
