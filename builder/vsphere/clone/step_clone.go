@@ -15,7 +15,13 @@ import (
 )
 
 type vAppConfig struct {
-	// TODO docs @sylviamoss
+	// Set values for the available vApp Properties to supply configuration parameters to a virtual machine cloned from
+	// a template that came from an imported OVF or OVA file.
+	//
+	// -> **Note:** The only supported usage path for vApp properties is for existing user-configurable keys.
+	// These generally come from an existing template that was created from an imported OVF or OVA file.
+	// You cannot set values for vApp properties on virtual machines created from scratch,
+	// virtual machines lacking a vApp configuration, or on property keys that do not exist.
 	Properties map[string]string `mapstructure:"properties"`
 }
 
@@ -31,8 +37,9 @@ type CloneConfig struct {
 	Network string `mapstructure:"network"`
 	// VM notes.
 	Notes string `mapstructure:"notes"`
-
-	// TODO docs @sylviamoss
+	// Set the vApp Options to a virtual machine.
+	// See the [vApp Options Configuration](/docs/builders/vmware/vsphere-clone#vapp-options-configuration)
+	// to know the available options and how to use it.
 	VAppConfig vAppConfig `mapstructure:"vapp"`
 }
 
