@@ -9,8 +9,8 @@ source "qemu" "base-ubuntu-amd64" {
     ssh_username     = "vagrant"
     ssh_wait_timeout = "50m"
     disk_size        = 5000
-    disk_interface   = "virtio"
-    memory           = 512 * 3
-    cpus             = 3
+    disk_interface   = "virtio-scsi"
+    memory           = 512 * 4
+    cpus             = 4
     boot_wait        = "5s"
 }
