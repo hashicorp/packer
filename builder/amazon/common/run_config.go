@@ -55,7 +55,7 @@ type VpcFilterOptions struct {
 type Statement struct {
 	Effect   string
 	Action   []string
-	Resource string
+	Resource []string
 }
 
 type PolicyDocument struct {
