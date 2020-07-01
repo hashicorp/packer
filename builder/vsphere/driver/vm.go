@@ -800,18 +800,24 @@ func (vm *VirtualMachine) addDevice(device types.BaseVirtualDevice) error {
 	return err
 }
 
-func (vm *VirtualMachine) AddConfigParams(params map[string]string) error {
+func (vm *VirtualMachine) AddConfigParams(params map[string]string, info *types.ToolsConfigInfo) error {
 	var confSpec types.VirtualMachineConfigSpec
 
-	var ov []types.BaseOptionValue
-	for k, v := range params {
-		o := types.OptionValue{
-			Key:   k,
-			Value: v,
+	if len(params) > 0 {
+		var ov []types.BaseOptionValue
+		for k, v := range params {
+			o := types.OptionValue{
+				Key:   k,
+				Value: v,
+			}
+			ov = append(ov, &o)
 		}
-		ov = append(ov, &o)
+		confSpec.ExtraConfig = ov
 	}
-	confSpec.ExtraConfig = ov
+
+	if info != nil {
+		confSpec.Tools = info
+	}
 
 	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
 	if err != nil {

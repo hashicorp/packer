@@ -7,6 +7,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/vmware/govmomi/vim25/types"
+
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -17,8 +19,7 @@ type ConfigParamsConfig struct {
 	// ConfigSpec: https://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.vm.ConfigSpec.html
 	ConfigParams map[string]string `mapstructure:"configuration_parameters"`
 
-	// Enables time synchronization with the host. If set to true will set `tools.syncTime` to `TRUE`.
-	// Defaults to FALSE.
+	// Enables time synchronization with the host. Defaults to false.
 	ToolsSyncTime bool `mapstructure:"tools_sync_time"`
 
 	// If sets to true, vSphere will automatically check and upgrade VMware Tools upon a system power cycle.
@@ -39,17 +40,22 @@ func (s *StepConfigParams) Run(_ context.Context, state multistep.StateBag) mult
 		configParams = s.Config.ConfigParams
 	}
 
-	if s.Config.ToolsSyncTime {
-		configParams["tools.syncTime"] = "TRUE"
+	var info *types.ToolsConfigInfo
+	if s.Config.ToolsSyncTime || s.Config.ToolsUpgradePolicy {
+		info = &types.ToolsConfigInfo{}
+
+		if s.Config.ToolsSyncTime {
+			info.SyncTimeWithHost = &s.Config.ToolsSyncTime
+		}
+
+		if s.Config.ToolsUpgradePolicy {
+			info.ToolsUpgradePolicy = "UpgradeAtPowerCycle"
+		}
 	}
 
-	if s.Config.ToolsUpgradePolicy {
-		configParams["tools.upgrade.policy"] = "upgradeAtPowerCycle"
-	}
-
-	if len(configParams) > 0 {
+	if len(configParams) > 0 || info != nil {
 		ui.Say("Adding configuration parameters...")
-		if err := vm.AddConfigParams(configParams); err != nil {
+		if err := vm.AddConfigParams(configParams, info); err != nil {
 			state.Put("error", fmt.Errorf("error adding configuration parameters: %v", err))
 			return multistep.ActionHalt
 		}
