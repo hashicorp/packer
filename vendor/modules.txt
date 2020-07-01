@@ -798,6 +798,7 @@ google.golang.org/api/internal
 google.golang.org/api/internal/gensupport
 google.golang.org/api/internal/third_party/uritemplates
 google.golang.org/api/iterator
+google.golang.org/api/oauth2/v2
 google.golang.org/api/option
 google.golang.org/api/option/internaloption
 google.golang.org/api/oslogin/v1
