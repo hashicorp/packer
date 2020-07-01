@@ -181,6 +181,9 @@ builder.
   that will be copied into the chroot environment before provisioning.
   Defaults to `/etc/resolv.conf` so that DNS lookups work.
 
+- `chroot_device` (string) - The path of chroot device. Defaults an attempt is
+  made to identify it based on the attach location. 
+
 - `chroot_disk_size` (float) - The size of the chroot disk in GiB. Defaults
   to `disk_size`.
 

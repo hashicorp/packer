@@ -83,6 +83,7 @@ type FlatConfig struct {
 	PrivateIP                 *string                      `mapstructure:"private_ip" required:"false" cty:"private_ip" hcl:"private_ip"`
 	PublicIP                  *string                      `mapstructure:"public_ip" required:"false" cty:"public_ip" hcl:"public_ip"`
 	PublicNetAdpService       *string                      `mapstructure:"public_netadp_service" required:"false" cty:"public_netadp_service" hcl:"public_netadp_service"`
+	ChrootDevice              *string                      `mapstructure:"chroot_device" cty:"chroot_device" hcl:"chroot_device"`
 	ChrootDisk                *bool                        `mapstructure:"chroot_disk" cty:"chroot_disk" hcl:"chroot_disk"`
 	ChrootDiskSize            *float32                     `mapstructure:"chroot_disk_size" cty:"chroot_disk_size" hcl:"chroot_disk_size"`
 	ChrootDiskType            *string                      `mapstructure:"chroot_disk_type" cty:"chroot_disk_type" hcl:"chroot_disk_type"`
@@ -183,6 +184,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"private_ip":                   &hcldec.AttrSpec{Name: "private_ip", Type: cty.String, Required: false},
 		"public_ip":                    &hcldec.AttrSpec{Name: "public_ip", Type: cty.String, Required: false},
 		"public_netadp_service":        &hcldec.AttrSpec{Name: "public_netadp_service", Type: cty.String, Required: false},
+		"chroot_device":                &hcldec.AttrSpec{Name: "chroot_device", Type: cty.String, Required: false},
 		"chroot_disk":                  &hcldec.AttrSpec{Name: "chroot_disk", Type: cty.Bool, Required: false},
 		"chroot_disk_size":             &hcldec.AttrSpec{Name: "chroot_disk_size", Type: cty.Number, Required: false},
 		"chroot_disk_type":             &hcldec.AttrSpec{Name: "chroot_disk_type", Type: cty.String, Required: false},
