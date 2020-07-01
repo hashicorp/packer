@@ -112,14 +112,14 @@ type FlatConfig struct {
 	SSHPort                                   *int                                   `mapstructure:"ssh_port" cty:"ssh_port" hcl:"ssh_port"`
 	SSHUsername                               *string                                `mapstructure:"ssh_username" cty:"ssh_username" hcl:"ssh_username"`
 	SSHPassword                               *string                                `mapstructure:"ssh_password" cty:"ssh_password" hcl:"ssh_password"`
-	SSHKeyPairName                            *string                                `mapstructure:"ssh_keypair_name" cty:"ssh_keypair_name" hcl:"ssh_keypair_name"`
+	SSHKeyPairName                            *string                                `mapstructure:"ssh_keypair_name" undocumented:"true" cty:"ssh_keypair_name" hcl:"ssh_keypair_name"`
 	SSHCiphers                                []string                               `mapstructure:"ssh_ciphers" cty:"ssh_ciphers" hcl:"ssh_ciphers"`
 	SSHClearAuthorizedKeys                    *bool                                  `mapstructure:"ssh_clear_authorized_keys" cty:"ssh_clear_authorized_keys" hcl:"ssh_clear_authorized_keys"`
 	SSHPrivateKeyFile                         *string                                `mapstructure:"ssh_private_key_file" undocumented:"true" cty:"ssh_private_key_file" hcl:"ssh_private_key_file"`
 	SSHPty                                    *bool                                  `mapstructure:"ssh_pty" cty:"ssh_pty" hcl:"ssh_pty"`
 	SSHTimeout                                *string                                `mapstructure:"ssh_timeout" cty:"ssh_timeout" hcl:"ssh_timeout"`
 	SSHWaitTimeout                            *string                                `mapstructure:"ssh_wait_timeout" undocumented:"true" cty:"ssh_wait_timeout" hcl:"ssh_wait_timeout"`
-	SSHAgentAuth                              *bool                                  `mapstructure:"ssh_agent_auth" cty:"ssh_agent_auth" hcl:"ssh_agent_auth"`
+	SSHAgentAuth                              *bool                                  `mapstructure:"ssh_agent_auth" undocumented:"true" cty:"ssh_agent_auth" hcl:"ssh_agent_auth"`
 	SSHDisableAgentForwarding                 *bool                                  `mapstructure:"ssh_disable_agent_forwarding" cty:"ssh_disable_agent_forwarding" hcl:"ssh_disable_agent_forwarding"`
 	SSHHandshakeAttempts                      *int                                   `mapstructure:"ssh_handshake_attempts" cty:"ssh_handshake_attempts" hcl:"ssh_handshake_attempts"`
 	SSHBastionHost                            *string                                `mapstructure:"ssh_bastion_host" cty:"ssh_bastion_host" hcl:"ssh_bastion_host"`
