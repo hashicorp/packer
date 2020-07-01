@@ -105,7 +105,7 @@ func (c *CreateConfig) Prepare() []error {
 			if storage.DiskSize == 0 {
 				errs = append(errs, fmt.Errorf("storage[%d].'disk_size' is required", i))
 			}
-			if storage.DiskControllerIndex > len(c.DiskControllerType) {
+			if storage.DiskControllerIndex >= len(c.DiskControllerType) {
 				errs = append(errs, fmt.Errorf("storage[%d].'disk_controller_index' references an unknown disk controller", i))
 			}
 		}
