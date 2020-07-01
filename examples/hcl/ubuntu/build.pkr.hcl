@@ -9,6 +9,8 @@ For the following builers :
 * virtualbox-iso
 * parallels-iso
 * vmware-iso
+* qemu
+* vspher-iso
 EOF
 
   // the common fields of the source blocks are defined in the
