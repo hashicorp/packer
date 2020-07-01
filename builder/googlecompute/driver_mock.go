@@ -278,7 +278,11 @@ func (d *DriverMock) CreateOrResetWindowsPassword(instance, zone string, c *Wind
 }
 
 func (d *DriverMock) ImportOSLoginSSHKey(user, key string) (*oslogin.LoginProfile, error) {
-	return nil, nil
+	account := oslogin.PosixAccount{Primary: true, Username: "testing_packer_io"}
+	profile := oslogin.LoginProfile{
+		PosixAccounts: []*oslogin.PosixAccount{&account},
+	}
+	return &profile, nil
 }
 
 func (d *DriverMock) DeleteOSLoginSSHKey(user, fingerprint string) error {

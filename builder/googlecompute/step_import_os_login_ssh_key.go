@@ -13,8 +13,9 @@ import (
 
 // StepCreateSSHKey represents a Packer build step that generates SSH key pairs.
 type StepImportOSLoginSSHKey struct {
-	Debug        bool
-	accountEmail string
+	Debug         bool
+	TokeninfoFunc func(context.Context) (*oauth2.Tokeninfo, error)
+	accountEmail  string
 }
 
 // Run executes the Packer build step that generates SSH key pairs.
@@ -35,6 +36,10 @@ func (s *StepImportOSLoginSSHKey) Run(ctx context.Context, state multistep.State
 		return multistep.ActionContinue
 	}
 
+	if s.TokeninfoFunc == nil {
+		s.TokeninfoFunc = tokeninfo
+	}
+
 	ui.Say("Importing SSH public key for OSLogin...")
 	// Generate SHA256 fingerprint of SSH public key
 	// Put it into state to clean up later
@@ -46,21 +51,14 @@ func (s *StepImportOSLoginSSHKey) Run(ctx context.Context, state multistep.State
 	}
 
 	if s.accountEmail == "" {
-		svc, err := oauth2.NewService(ctx)
-		if err != nil {
-			err := fmt.Errorf("Error initializing oauth service needed for OsLogin: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-
-		info, err := svc.Tokeninfo().Context(ctx).Do()
+		info, err := s.TokeninfoFunc(ctx)
 		if err != nil {
 			err := fmt.Errorf("Error obtaining token information needed for OsLogin: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+
 		s.accountEmail = info.Email
 	}
 
@@ -108,8 +106,8 @@ func (s *StepImportOSLoginSSHKey) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	fingerprint := state.Get("ssh_key_public_sha256").(string)
-	if fingerprint == "" {
+	fingerprint, ok := state.Get("ssh_key_public_sha256").(string)
+	if !ok || fingerprint == "" {
 		return
 	}
 
@@ -121,4 +119,14 @@ func (s *StepImportOSLoginSSHKey) Cleanup(state multistep.StateBag) {
 	}
 
 	ui.Message("SSH public key for OSLogin has been deleted!")
+}
+
+func tokeninfo(ctx context.Context) (*oauth2.Tokeninfo, error) {
+	svc, err := oauth2.NewService(ctx)
+	if err != nil {
+		err := fmt.Errorf("Error initializing oauth service needed for OsLogin: %s", err)
+		return nil, err
+	}
+
+	return svc.Tokeninfo().Context(ctx).Do()
 }
