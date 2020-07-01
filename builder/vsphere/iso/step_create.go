@@ -64,6 +64,8 @@ type DiskConfig struct {
 	DiskThinProvisioned bool `mapstructure:"disk_thin_provisioned"`
 	// Enable VMDK eager scrubbing for VM. Defaults to `false`.
 	DiskEagerlyScrub bool `mapstructure:"disk_eagerly_scrub"`
+	// The assigned disk controller. Defaults to the first one (0)
+	DiskControllerIndex int `mapstructure:"disk_controller_index"`
 }
 
 type CreateConfig struct {
@@ -78,8 +80,8 @@ type CreateConfig struct {
 	GuestOSType string `mapstructure:"guest_os_type"`
 	// Set the Firmware at machine creation. Supported values: `bios`, `efi` or `efi-secure`. Defaults to `bios`.
 	Firmware string `mapstructure:"firmware"`
-	// Set VM disk controller type. Example `pvscsi`.
-	DiskControllerType string `mapstructure:"disk_controller_type"`
+	// Set VM disk controller type. Example `lsilogic`, pvscsi`, or `scsi`. Use a list to define additional controllers. Defaults to `lsilogic`
+	DiskControllerType []string `mapstructure:"disk_controller_type"`
 	// A collection of one or more disks to be provisioned along with the VM.
 	Storage []DiskConfig `mapstructure:"storage"`
 	// Network adapters
@@ -93,10 +95,18 @@ type CreateConfig struct {
 func (c *CreateConfig) Prepare() []error {
 	var errs []error
 
+	// there should be at least one
+	if len(c.DiskControllerType) == 0 {
+		c.DiskControllerType = append(c.DiskControllerType, "")
+	}
+
 	if len(c.Storage) > 0 {
 		for i, storage := range c.Storage {
 			if storage.DiskSize == 0 {
 				errs = append(errs, fmt.Errorf("storage[%d].'disk_size' is required", i))
+			}
+			if storage.DiskControllerIndex > len(c.DiskControllerType) {
+				errs = append(errs, fmt.Errorf("storage[%d].'disk_controller_index' references an unknown disk controller", i))
 			}
 		}
 	}
@@ -149,6 +159,7 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 			DiskSize:            disk.DiskSize,
 			DiskEagerlyScrub:    disk.DiskEagerlyScrub,
 			DiskThinProvisioned: disk.DiskThinProvisioned,
+			ControllerIndex:     disk.DiskControllerIndex,
 		})
 	}
 

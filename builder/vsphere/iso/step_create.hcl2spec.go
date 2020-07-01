@@ -12,7 +12,7 @@ type FlatCreateConfig struct {
 	Version            *uint            `mapstructure:"vm_version" cty:"vm_version" hcl:"vm_version"`
 	GuestOSType        *string          `mapstructure:"guest_os_type" cty:"guest_os_type" hcl:"guest_os_type"`
 	Firmware           *string          `mapstructure:"firmware" cty:"firmware" hcl:"firmware"`
-	DiskControllerType *string          `mapstructure:"disk_controller_type" cty:"disk_controller_type" hcl:"disk_controller_type"`
+	DiskControllerType []string         `mapstructure:"disk_controller_type" cty:"disk_controller_type" hcl:"disk_controller_type"`
 	Storage            []FlatDiskConfig `mapstructure:"storage" cty:"storage" hcl:"storage"`
 	NICs               []FlatNIC        `mapstructure:"network_adapters" cty:"network_adapters" hcl:"network_adapters"`
 	USBController      *bool            `mapstructure:"usb_controller" cty:"usb_controller" hcl:"usb_controller"`
@@ -34,7 +34,7 @@ func (*FlatCreateConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vm_version":           &hcldec.AttrSpec{Name: "vm_version", Type: cty.Number, Required: false},
 		"guest_os_type":        &hcldec.AttrSpec{Name: "guest_os_type", Type: cty.String, Required: false},
 		"firmware":             &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
-		"disk_controller_type": &hcldec.AttrSpec{Name: "disk_controller_type", Type: cty.String, Required: false},
+		"disk_controller_type": &hcldec.AttrSpec{Name: "disk_controller_type", Type: cty.List(cty.String), Required: false},
 		"storage":              &hcldec.BlockListSpec{TypeName: "storage", Nested: hcldec.ObjectSpec((*FlatDiskConfig)(nil).HCL2Spec())},
 		"network_adapters":     &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatNIC)(nil).HCL2Spec())},
 		"usb_controller":       &hcldec.AttrSpec{Name: "usb_controller", Type: cty.Bool, Required: false},
@@ -49,6 +49,7 @@ type FlatDiskConfig struct {
 	DiskSize            *int64 `mapstructure:"disk_size" required:"true" cty:"disk_size" hcl:"disk_size"`
 	DiskThinProvisioned *bool  `mapstructure:"disk_thin_provisioned" cty:"disk_thin_provisioned" hcl:"disk_thin_provisioned"`
 	DiskEagerlyScrub    *bool  `mapstructure:"disk_eagerly_scrub" cty:"disk_eagerly_scrub" hcl:"disk_eagerly_scrub"`
+	DiskControllerIndex *int   `mapstructure:"disk_controller_index" cty:"disk_controller_index" hcl:"disk_controller_index"`
 }
 
 // FlatMapstructure returns a new FlatDiskConfig.
@@ -66,6 +67,7 @@ func (*FlatDiskConfig) HCL2Spec() map[string]hcldec.Spec {
 		"disk_size":             &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
 		"disk_thin_provisioned": &hcldec.AttrSpec{Name: "disk_thin_provisioned", Type: cty.Bool, Required: false},
 		"disk_eagerly_scrub":    &hcldec.AttrSpec{Name: "disk_eagerly_scrub", Type: cty.Bool, Required: false},
+		"disk_controller_index": &hcldec.AttrSpec{Name: "disk_controller_index", Type: cty.Number, Required: false},
 	}
 	return s
 }
