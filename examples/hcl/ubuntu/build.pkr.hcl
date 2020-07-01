@@ -10,7 +10,7 @@ For the following builers :
 * parallels-iso
 * vmware-iso
 * qemu
-* vspher-iso
+* vsphere-iso
 EOF
 
   // the common fields of the source blocks are defined in the
