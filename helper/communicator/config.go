@@ -87,7 +87,7 @@ type SSH struct {
 	// The name of the temporary key pair to generate. By default, Packer
 	// generates a name that looks like `packer_<UUID>`, where &lt;UUID&gt; is
 	// a 36 character unique identifier.
-	SSHTemporaryKeyPairName string `mapstructure:"temporary_key_pair_name"`
+	SSHTemporaryKeyPairName string `mapstructure:"temporary_key_pair_name" undocumented:"true"`
 	// This overrides the value of ciphers supported by default by golang.
 	// The default value is [
 	//   "aes128-gcm@openssh.com",
@@ -110,7 +110,7 @@ type SSH struct {
 	// Path to a PEM encoded private key file to use to authenticate with SSH.
 	// The `~` can be used in path and will be expanded to the home directory
 	// of current user.
-	SSHPrivateKeyFile string `mapstructure:"ssh_private_key_file"`
+	SSHPrivateKeyFile string `mapstructure:"ssh_private_key_file" undocumented:"true"`
 	// If `true`, a PTY will be requested for the SSH connection. This defaults
 	// to `false`.
 	SSHPty bool `mapstructure:"ssh_pty"`
@@ -175,8 +175,8 @@ type SSH struct {
 	SSHLocalTunnels []string `mapstructure:"ssh_local_tunnels"`
 
 	// SSH Internals
-	SSHPublicKey  []byte `mapstructure:"ssh_public_key"`
-	SSHPrivateKey []byte `mapstructure:"ssh_private_key"`
+	SSHPublicKey  []byte `mapstructure:"ssh_public_key" undocumented:"true"`
+	SSHPrivateKey []byte `mapstructure:"ssh_private_key" undocumented:"true"`
 }
 
 type WinRM struct {
