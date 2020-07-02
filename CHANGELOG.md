@@ -3,6 +3,10 @@
 ### IMPROVEMENTS:
 * builder/file: Create parent directories of target file, if they don't exist.
     [GH-9452]
+* builder/hyperone: Add support for custom username in vm creation. [GH-9497]
+* builder/hyperone: Skip chroot device discovery. [GH-9489]
+* builder/proxmox: Enable Proxmox builder to toggle the firewall parameter for
+    network interfaces. [GH-9487]
 * builder/proxmox: Update Proxmox storagePoolTypes [GH-9418]
 * builder/ucloud: New access config options and run config options. [GH-9466]
 * builder/vsphere-clone: Add `boot_command` support to vsphere-clone builder,
@@ -20,11 +24,14 @@
     [GH-9383]
 * communicator/ssh: Allow users to provide a list of ciphers that they want
     Packer to support. [GH-9453]
-* core/hcl2: add possibility to name singular build.source blocks to differentiate
-    their output and to filter on them [GH-9490]
+* core/hcl2: add possibility to name singular build.source blocks to
+    differentiate their output and to filter on them [GH-9490]
 * core/hcl2: Add the "inspect" command for hcl2 configs. [GH-9468]
 * core/hcl2: HCL configs now respect only/except using build names instead of
     types. [GH-9454]
+* core/hcl: Allow use of `keep_input_artifact` in post processors. [GH-9477]
+* core/hcl: Share build info with Provisioner and Post-Processor via HCL2
+    variables [GH-9444]
 * core: Add on-error flag option to run error-cleanup-provisioner [GH-9429]
 * post-processor/yandex-export: Support Authentication by Service Account Key
     file [GH-9379]
@@ -32,6 +39,9 @@
     lines [GH-9438]
 
 ### BUG FIXES:
+* builder/amazon: Change "statement" field in
+    `temporary_iam_instance_profile_policy_document` to be an array of strings,
+    not just a single string. [GH-9509]
 * builder/amazon: HCL2: Add singular run_volume_tag block to ebs & ebssurrogate
     builders. [GH-9457]
 * builder/azure: Fix data disks URI. [GH-9467]
@@ -45,11 +55,14 @@
     [GH-9387]
 * builder/vmware: update vendor library, enabling retries on 502 errors
     [GH-9391]
+* builder/vsphere: Fix vsphere ToolsSyncTime and ToolsUpgradePolicy [GH-9515]
 * communicator/winrm: add the "no_proxy" environment variable option to have
     winrm bypass the proxy set by the http_proxy or https_proxy environment
     vars, when connecting to the remote instance. [GH-9267]
 * core: Do not print download progress bar if a machine-readable UI is chosen.
     [GH-9448]
+* provisioner/ansible: Correct check for whether PackerHttpAddr is implemented
+    or not [GH-9498]
 
 ## 1.6.0 (June 09, 2020)
 
