@@ -7,6 +7,7 @@ import (
 	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -40,7 +41,6 @@ type PackerConfig struct {
 
 	except []glob.Glob
 	only   []glob.Glob
-	debug  bool
 }
 
 type ValidationOptions struct {
@@ -51,7 +51,6 @@ const (
 	inputVariablesAccessor = "var"
 	localsAccessor         = "local"
 	sourcesAccessor        = "source"
-	buildAccessor          = "build"
 )
 
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
@@ -199,18 +198,19 @@ func (c *PackerConfig) evaluateLocalVariable(local *Local) hcl.Diagnostics {
 
 // getCoreBuildProvisioners takes a list of provisioner block, starts according
 // provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
 		if pb.OnlyExcept.Skip(source.String()) {
 			continue
 		}
-		provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx)
+		provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx, generatedVars)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
 		}
+
 		// If we're pausing, we wrap the provisioner in a special pauser.
 		if pb.PauseBefore != 0 {
 			provisioner = &packer.PausedProvisioner{
@@ -229,11 +229,6 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 				Provisioner: provisioner,
 			}
 		}
-		if cfg.debug {
-			provisioner = &packer.DebuggedProvisioner{
-				Provisioner: provisioner,
-			}
-		}
 
 		res = append(res, packer.CoreBuildProvisioner{
 			PType:       pb.PType,
@@ -246,7 +241,7 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
 // according provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext, generatedVars map[string]string) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildPostProcessor{}
 	for _, ppb := range blocks {
@@ -270,7 +265,7 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 			break
 		}
 
-		postProcessor, moreDiags := cfg.startPostProcessor(source, ppb, ectx)
+		postProcessor, moreDiags := cfg.startPostProcessor(source, ppb, ectx, generatedVars)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -292,8 +287,6 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build, hcl.Diagnostics) {
 	res := []packer.Build{}
 	var diags hcl.Diagnostics
-
-	cfg.debug = opts.Debug
 
 	for _, build := range cfg.Builds {
 		for _, from := range build.Sources {
@@ -361,6 +354,13 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				continue
 			}
 
+			variables := map[string]cty.Value{
+				sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
+					"type": cty.StringVal(src.Type),
+					"name": cty.StringVal(src.Name),
+				}),
+			}
+
 			// If the builder has provided a list of to-be-generated variables that
 			// should be made accessible to provisioners, pass that list into
 			// the provisioner prepare() so that the provisioner can appropriately
@@ -369,42 +369,30 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			generatedPlaceholderMap := packer.BasicPlaceholderData()
 			if generatedVars != nil {
 				for _, k := range generatedVars {
-					generatedPlaceholderMap[k] = ""
+					generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
+						common.PlaceholderMsg, k)
 				}
 			}
-			buildVariables, _ := setBuildVariables(generatedPlaceholderMap).Values()
 
-			variables := map[string]cty.Value{
-				sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
-					"type": cty.StringVal(src.Type),
-					"name": cty.StringVal(src.Name),
-				}),
-				buildAccessor: cty.ObjectVal(buildVariables),
-			}
-
-			_, moreDiags = cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables))
+			provisioners, moreDiags := cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables), generatedPlaceholderMap)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			_, moreDiags = cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables))
+			postProcessors, moreDiags := cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables), generatedPlaceholderMap)
+			pps := [][]packer.CoreBuildPostProcessor{}
+			if len(postProcessors) > 0 {
+				pps = [][]packer.CoreBuildPostProcessor{postProcessors}
+			}
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
 
 			pcb.Builder = builder
+			pcb.Provisioners = provisioners
+			pcb.PostProcessors = pps
 			pcb.Prepared = true
-			pcb.HCL2ProvisionerPrepare = (&provisionerPrepare{
-				cfg:              cfg,
-				provisionerBlock: build.ProvisionerBlocks,
-				src:              from,
-			}).HCL2ProvisionerPrepare
-			pcb.HCL2PostProcessorsPrepare = (&postProcessorsPrepare{
-				cfg:                cfg,
-				postProcessorBlock: build.PostProcessors,
-				src:                from,
-			}).HCL2PostProcessorsPrepare
 
 			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
 			// we did all the prep here.
@@ -423,17 +411,6 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 		}
 	}
 	return res, diags
-}
-
-func setBuildVariables(generatedVars map[string]string) Variables {
-	variables := make(Variables)
-	for k := range generatedVars {
-		variables[k] = &Variable{
-			DefaultValue: cty.StringVal("unknown"),
-			Type:         cty.String,
-		}
-	}
-	return variables
 }
 
 var PackerConsoleHelp = strings.TrimSpace(`

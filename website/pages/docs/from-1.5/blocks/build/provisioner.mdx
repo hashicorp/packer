@@ -59,7 +59,7 @@ build {
   ]
   provisioner "shell" {
     # This provisioner only runs for the 'first-example' source.
-    only = ["source.amazon-ebs.first-example"]
+    only = ["source.amazon-ebs.first-example"] 
 
     inline = [
       "echo provisioning all the things",
@@ -160,8 +160,3 @@ For the above provisioner, Packer will cancel the script if it takes more than
 5 minutes.
 
 Timeout has no effect in debug mode.
-
-## Build Contextual Variables
-
-Packer allows to access connection information and basic instance state information from a provisioner. These information are stored in the `build` variable.
-Check out the [Contextual Variables](/docs/from-1.5/contextual-variables) documentation to learn more about and see some examples of how to use them.

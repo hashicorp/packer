@@ -207,49 +207,14 @@ variables are available:
 - `SourceAMIOwnerName` - The source AMI owner alias/name (for example `amazon`).
 - `SourceAMITags` - The source AMI Tags, as a `map[string]string` object.
 
-## Build Shared Information Variables
+## Build function template engine variables
 
-This builder generates data that are shared with provisioner and post-processor via build function of [template engine](/docs/templates/engine) for JSON and [contextual variables](/docs/from-1.5/contextual-variables) for HCL2.
-
-The generated variables available for this builder are:
+For the build function of [template engine](/docs/templates/engine), the following
+variables are available:
 
 - `SourceAMIName` - The source AMI Name (for example
   `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
   build the AMI.
-
-Usage example:
-
-<Tabs>
-<Tab heading="JSON">
-
-```json
-"post-processors": [
-    {
-      "type": "manifest",
-      "output": "manifest.json",
-      "strip_path": true,
-      "custom_data": {
-        "source_ami_name": "{{ build `SourceAMIName` }}"
-      }
-    }
-]
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-post-processor "manifest" {
-    output = "manifest.json"
-    strip_path = true
-    custom_data = {
-        source_ami_name = "${build.SourceAMIName}"
-    }
-}
-```
-
-</Tab>
-</Tabs>
 
 -> **Note:** Packer uses pre-built AMIs as the source for building images.
 These source AMIs may include volumes that are not flagged to be destroyed on

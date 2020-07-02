@@ -42,9 +42,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	generatedData := make(map[string]interface{})
-	artifactStateData := artifact.State("generated_data")
-	if artifactStateData != nil {
-		for k, v := range artifactStateData.(map[interface{}]interface{}) {
+	artifactSateData := artifact.State("generated_data")
+	if artifactSateData != nil {
+		for k, v := range artifactSateData.(map[interface{}]interface{}) {
 			generatedData[k.(string)] = v
 		}
 	}
