@@ -93,6 +93,7 @@ EOF
     environment_vars  = [ "HOME_DIR=/home/vagrant" ]
     execute_command   = "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'"
     expect_disconnect = true
+    // fileset will list files in etc/scripts sorted in an alphanumerical way.
     scripts           = fileset(".", "etc/scripts/*.sh")
   }
 }
