@@ -51,6 +51,7 @@ const (
 	inputVariablesAccessor = "var"
 	localsAccessor         = "local"
 	sourcesAccessor        = "source"
+	buildAccessor          = "build"
 )
 
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
@@ -354,24 +355,25 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				continue
 			}
 
-			variables := map[string]cty.Value{
-				sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
-					"type": cty.StringVal(src.Type),
-					"name": cty.StringVal(src.Name),
-				}),
-			}
-
 			// If the builder has provided a list of to-be-generated variables that
 			// should be made accessible to provisioners, pass that list into
 			// the provisioner prepare() so that the provisioner can appropriately
 			// validate user input against what will become available. Otherwise,
 			// only pass the default variables, using the basic placeholder data.
 			generatedPlaceholderMap := packer.BasicPlaceholderData()
-			if generatedVars != nil {
-				for _, k := range generatedVars {
-					generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
-						common.PlaceholderMsg, k)
-				}
+			unknownBuildValues := map[string]cty.Value{}
+			for _, k := range generatedVars {
+				generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
+					common.PlaceholderMsg, k)
+				unknownBuildValues[k] = cty.StringVal("<unknown_value>")
+			}
+
+			variables := map[string]cty.Value{
+				sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
+					"type": cty.StringVal(src.Type),
+					"name": cty.StringVal(src.Name),
+				}),
+				buildAccessor: cty.ObjectVal(unknownBuildValues),
 			}
 
 			provisioners, moreDiags := cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables), generatedPlaceholderMap)

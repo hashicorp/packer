@@ -11,7 +11,7 @@ build {
 
     provisioner "shell" {
         name     = "provisioner that does something"
-        not_squashed = var.foo
+        not_squashed = "${var.foo} ${lower(build.ID)}"
         string   = "string"
         int      = "${41 + 1}"
         int64    = "${42 + 1}"
