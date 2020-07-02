@@ -111,6 +111,10 @@ type SSH struct {
 	// The `~` can be used in path and will be expanded to the home directory
 	// of current user.
 	SSHPrivateKeyFile string `mapstructure:"ssh_private_key_file" undocumented:"true"`
+	// Path to user certificate used to authenticate with SSH.
+	// The `~` can be used in path and will be expanded to the
+	// home directory of current user.
+	SSHCertificateFile string `mapstructure:"ssh_certificate_file"`
 	// If `true`, a PTY will be requested for the SSH connection. This defaults
 	// to `false`.
 	SSHPty bool `mapstructure:"ssh_pty"`
@@ -148,6 +152,10 @@ type SSH struct {
 	// bastion host. The `~` can be used in path and will be expanded to the
 	// home directory of current user.
 	SSHBastionPrivateKeyFile string `mapstructure:"ssh_bastion_private_key_file"`
+	// Path to user certificate used to authenticate with bastion host.
+	// The `~` can be used in path and will be expanded to the
+	//home directory of current user.
+	SSHBastionCertificateFile string `mapstructure:"ssh_bastion_certificate_file"`
 	// `scp` or `sftp` - How to transfer files, Secure copy (default) or SSH
 	// File Transfer Protocol.
 	SSHFileTransferMethod string `mapstructure:"ssh_file_transfer_method"`
@@ -316,11 +324,29 @@ func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, er
 			privateKeys = append(privateKeys, c.SSHPrivateKey)
 		}
 
+		certPath := ""
+		if c.SSHCertificateFile != "" {
+			var err error
+			certPath, err = packer.ExpandUser(c.SSHCertificateFile)
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		for _, key := range privateKeys {
+
 			signer, err := ssh.ParsePrivateKey(key)
 			if err != nil {
 				return nil, fmt.Errorf("Error on parsing SSH private key: %s", err)
 			}
+
+			if certPath != "" {
+				signer, err = helperssh.ReadCertificate(certPath, signer)
+				if err != nil {
+					return nil, err
+				}
+			}
+
 			sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeys(signer))
 		}
 
@@ -431,6 +457,11 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		if c.SSHBastionPrivateKeyFile == "" && c.SSHPrivateKeyFile != "" {
 			c.SSHBastionPrivateKeyFile = c.SSHPrivateKeyFile
 		}
+
+		if c.SSHBastionCertificateFile == "" && c.SSHCertificateFile != "" {
+			c.SSHBastionCertificateFile = c.SSHCertificateFile
+		}
+
 	}
 
 	if c.SSHProxyHost != "" {
@@ -462,9 +493,23 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		} else if _, err := os.Stat(path); err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
-		} else if _, err := helperssh.FileSigner(path); err != nil {
-			errs = append(errs, fmt.Errorf(
-				"ssh_private_key_file is invalid: %s", err))
+		} else {
+			if c.SSHCertificateFile != "" {
+				certPath, err := packer.ExpandUser(c.SSHCertificateFile)
+				if err != nil {
+					errs = append(errs, fmt.Errorf("invalid identity certificate: #{err}"))
+				}
+
+				if _, err := helperssh.FileSignerWithCert(path, certPath); err != nil {
+					errs = append(errs, fmt.Errorf(
+						"ssh_private_key_file is invalid: %s", err))
+				}
+			} else {
+				if _, err := helperssh.FileSigner(path); err != nil {
+					errs = append(errs, fmt.Errorf(
+						"ssh_private_key_file is invalid: %s", err))
+				}
+			}
 		}
 	}
 
@@ -480,9 +525,22 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 			} else if _, err := os.Stat(path); err != nil {
 				errs = append(errs, fmt.Errorf(
 					"ssh_bastion_private_key_file is invalid: %s", err))
-			} else if _, err := helperssh.FileSigner(path); err != nil {
-				errs = append(errs, fmt.Errorf(
-					"ssh_bastion_private_key_file is invalid: %s", err))
+			} else {
+				if c.SSHBastionCertificateFile != "" {
+					certPath, err := packer.ExpandUser(c.SSHBastionCertificateFile)
+					if err != nil {
+						errs = append(errs, fmt.Errorf("invalid identity certificate: #{err}"))
+					}
+					if _, err := helperssh.FileSignerWithCert(path, certPath); err != nil {
+						errs = append(errs, fmt.Errorf(
+							"ssh_bastion_private_key_file is invalid: %s", err))
+					}
+				} else {
+					if _, err := helperssh.FileSigner(path); err != nil {
+						errs = append(errs, fmt.Errorf(
+							"ssh_bastion_private_key_file is invalid: %s", err))
+					}
+				}
 			}
 		}
 	}
