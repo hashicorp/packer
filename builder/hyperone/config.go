@@ -100,6 +100,7 @@ type Config struct {
 	// Can be useful when using custom api_url. Defaults to public.
 	PublicNetAdpService string `mapstructure:"public_netadp_service" required:"false"`
 
+	ChrootDevice    string     `mapstructure:"chroot_device"`
 	ChrootDisk      bool       `mapstructure:"chroot_disk"`
 	ChrootDiskSize  float32    `mapstructure:"chroot_disk_size"`
 	ChrootDiskType  string     `mapstructure:"chroot_disk_type"`

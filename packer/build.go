@@ -6,6 +6,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/helper/common"
 )
 
@@ -101,6 +102,11 @@ type CoreBuild struct {
 	// Indicates whether the build is already initialized before calling Prepare(..)
 	Prepared bool
 
+	// HCL2ProvisionerPrepare and HCL2PostProcessorsPrepare are used to interpolate any build variable by decoding and preparing
+	// the Provisioners and Post-Processors at runtime for HCL2 templates.
+	HCL2ProvisionerPrepare    func(data map[string]interface{}) ([]CoreBuildProvisioner, hcl.Diagnostics)
+	HCL2PostProcessorsPrepare func(builderArtifact Artifact) ([]CoreBuildPostProcessor, hcl.Diagnostics)
+
 	debug         bool
 	force         bool
 	onError       string
@@ -115,7 +121,7 @@ type CoreBuildPostProcessor struct {
 	PType             string
 	PName             string
 	config            map[string]interface{}
-	keepInputArtifact *bool
+	KeepInputArtifact *bool
 }
 
 // CoreBuildProvisioner keeps track of the provisioner and the configuration of
@@ -268,6 +274,12 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 		})
 	}
 
+	if b.HCL2ProvisionerPrepare != nil {
+		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{
+			HCL2Prepare: b.HCL2ProvisionerPrepare,
+		})
+	}
+
 	if b.CleanupProvisioner.PType != "" {
 		hookedCleanupProvisioner := &HookedProvisioner{
 			b.CleanupProvisioner.Provisioner,
@@ -303,6 +315,17 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 	}
 
 	errors := make([]error, 0)
+
+	if b.HCL2PostProcessorsPrepare != nil {
+		// For HCL2, decode and prepare Post-Processors to interpolate build variables.
+		postProcessors, diags := b.HCL2PostProcessorsPrepare(builderArtifact)
+		if diags.HasErrors() {
+			errors = append(errors, diags)
+		} else if len(postProcessors) > 0 {
+			b.PostProcessors = [][]CoreBuildPostProcessor{postProcessors}
+		}
+	}
+
 	keepOriginalArtifact := len(b.PostProcessors) == 0
 
 	// Run the post-processors
@@ -341,15 +364,15 @@ PostProcessorRunSeqLoop:
 			// Exception: for postprocessors that will fail/become
 			// useless if keep isn't true, heed forceOverride and keep the
 			// input artifact regardless of user preference.
-			if corePP.keepInputArtifact != nil {
-				if defaultKeep && *corePP.keepInputArtifact == false && forceOverride {
+			if corePP.KeepInputArtifact != nil {
+				if defaultKeep && *corePP.KeepInputArtifact == false && forceOverride {
 					log.Printf("The %s post-processor forces "+
 						"keep_input_artifact=true to preserve integrity of the"+
 						"build chain. User-set keep_input_artifact=false will be"+
 						"ignored.", corePP.PType)
 				} else {
 					// User overrides default.
-					keep = *corePP.keepInputArtifact
+					keep = *corePP.KeepInputArtifact
 				}
 			}
 			if i == 0 {

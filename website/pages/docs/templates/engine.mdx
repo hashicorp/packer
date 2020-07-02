@@ -83,6 +83,8 @@ Here is a full list of the available functions for reference.
   - **ConnType**: Type of communicator being used. For example, for SSH communicator this will be "ssh".
 
   - **PackerRunUUID**: Current build's unique id. Can be used to specify build artifacts.
+    An example of that, is when multiple builds runs at the same time producing the same artifact.
+    It's possible to differentiate these artifacts by naming them with the builds' unique ids.
 
   - **PackerHTTPIP**, **PackerHTTPPort**, and **PackerHTTPAddr**: HTTP IP, port, and address of the file server Packer creates to serve items in the "http" dir to the vm. The HTTP address is displayed in the format `IP:PORT`.
 
@@ -98,16 +100,20 @@ Here is a full list of the available functions for reference.
     }
     ```
 
-  For backwards compatability, `WinRMPassword` is also available through this
+  For backwards compatibility, `WinRMPassword` is also available through this
   engine, though it is no different than using the more general `Password`.
 
   This function is only for use within specific options inside of
   _provisioners_ -- these options will be listed as being template engines
-  in the provisioner documentation. This feature does not yet work
-  if the provisioners are being used in conjunction with our chroot builders
-  or with lxc/lxd builders.
+  in the provisioner documentation.
 
-  For builder-specific engine variables, please also refer to the builder docs.
+  For builder-specific builder variables, please also refer to the builder docs:
+
+    - Amazon EC2: [chroot](/docs/builders/amazon/chroot#build-shared-information-variables),
+    [EBS Volume](/docs/builders/amazon/ebsvolume#build-shared-information-variables),
+    [EBS](/docs/builders/amazon/ebs#build-shared-information-variables),
+    [EBS Surrogate](/docs/builders/amazon/ebssurrogate#build-shared-information-variables),
+    [Instance](/docs/builders/amazon/instance#build-shared-information-variables).
 
   This engine is in beta; please report any issues or requests on the Packer
   issue tracker on GitHub.
@@ -273,7 +279,7 @@ Formatting for the function `isotime` uses the magic reference date **Mon Jan 2
 _The values in parentheses are the abbreviated, or 24-hour clock values_
 
 For those unfamiliar with GO date/time formatting, here is a link to the
-documentation: [go date/time formatting](https://programming.guide/go/format-parse-string-time-date-example)
+documentation: [go date/time formatting](https://programming.guide/go/format-parse-string-time-date-example.html)
 
 Note that "-0700" is always formatted into "+0000" because `isotime` is always
 UTC time.

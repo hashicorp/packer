@@ -691,7 +691,7 @@ func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile s
 	args = append(args, "-e", fmt.Sprintf("packer_builder_type=%s", p.config.PackerBuilderType))
 
 	// expose packer_http_addr extra variable
-	if httpAddr != "" {
+	if httpAddr != common.HttpAddrNotImplemented {
 		args = append(args, "-e", fmt.Sprintf("packer_http_addr=%s", httpAddr))
 	}
 

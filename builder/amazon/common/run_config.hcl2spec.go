@@ -91,7 +91,7 @@ func (*FlatSecurityGroupFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 type FlatStatement struct {
 	Effect   *string  `cty:"effect" hcl:"effect"`
 	Action   []string `cty:"action" hcl:"action"`
-	Resource *string  `cty:"resource" hcl:"resource"`
+	Resource []string `cty:"resource" hcl:"resource"`
 }
 
 // FlatMapstructure returns a new FlatStatement.
@@ -108,7 +108,7 @@ func (*FlatStatement) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"effect":   &hcldec.AttrSpec{Name: "effect", Type: cty.String, Required: false},
 		"action":   &hcldec.AttrSpec{Name: "action", Type: cty.List(cty.String), Required: false},
-		"resource": &hcldec.AttrSpec{Name: "resource", Type: cty.String, Required: false},
+		"resource": &hcldec.AttrSpec{Name: "resource", Type: cty.List(cty.String), Required: false},
 	}
 	return s
 }

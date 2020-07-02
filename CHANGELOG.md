@@ -1,25 +1,55 @@
 ## 1.6.1 (Upcoming)
 
 ### IMPROVEMENTS:
-* core: add possibility to name singular build.source blocks to differentiate
-    their output and to filter on them [GH-9490]
+* builder/file: Create parent directories of target file, if they don't exist.
+    [GH-9452]
+* builder/proxmox: Update Proxmox storagePoolTypes [GH-9418]
+* builder/ucloud: New access config options and run config options. [GH-9466]
 * builder/vsphere-clone: Add `boot_command` support to vsphere-clone builder,
     including support for starting an HTTP server
-* builder/proxmox: Update Proxmox storagePoolTypes [GH-9418]
+* builder/vsphere: Add boot_command support to vsphere-clone builder. [GH-9397]
 * builder/vsphere: Create vm output folders if they don't exist [GH-9402]
+* builder/vsphere: Look at all available IPs in the waiting for IP loop.
+    [GH-9450]
 * builder/vsphere: Update vsphere boot_command to bring it in line with other
     builders' boot_command functionality. [GH-9406]
 * builder/vsphere: Use datacenter inventory path for find folder [GH-9390]
+* builder/vsphere: Use value from "ip_wait_address" option to determine the
+    default for the http server IP [GH-9441]
+* builder/yandex: Support authentication by Service Account on instance
+    [GH-9383]
+* communicator/ssh: Allow users to provide a list of ciphers that they want
+    Packer to support. [GH-9453]
+* core/hcl2: add possibility to name singular build.source blocks to differentiate
+    their output and to filter on them [GH-9490]
+* core/hcl2: Add the "inspect" command for hcl2 configs. [GH-9468]
+* core/hcl2: HCL configs now respect only/except using build names instead of
+    types. [GH-9454]
+* core: Add on-error flag option to run error-cleanup-provisioner [GH-9429]
 * post-processor/yandex-export: Support Authentication by Service Account Key
     file [GH-9379]
+* provisioner/ansible: Add template option for templating the inventory file
+    lines [GH-9438]
 
 ### BUG FIXES:
+* builder/amazon: HCL2: Add singular run_volume_tag block to ebs & ebssurrogate
+    builders. [GH-9457]
+* builder/azure: Fix data disks URI. [GH-9467]
 * builder/google: Fix the "secure boot" validation for uefi_compatible images.
     [GH-9371]
+* builder/qemu: Only set up localhost port forwarding if skipnatmapping is
+    false. [GH-9479]
+* builder/virtualbox-vm: Fix regression where builder would fail if the vm had
+    no snapshots. [GH-9435]
 * builder/vmware: Fix a race that occurred when parsing the network config.
     [GH-9387]
 * builder/vmware: update vendor library, enabling retries on 502 errors
     [GH-9391]
+* communicator/winrm: add the "no_proxy" environment variable option to have
+    winrm bypass the proxy set by the http_proxy or https_proxy environment
+    vars, when connecting to the remote instance. [GH-9267]
+* core: Do not print download progress bar if a machine-readable UI is chosen.
+    [GH-9448]
 
 ## 1.6.0 (June 09, 2020)
 
