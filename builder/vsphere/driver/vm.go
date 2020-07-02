@@ -800,7 +800,7 @@ func (vm *VirtualMachine) addDevice(device types.BaseVirtualDevice) error {
 	return err
 }
 
-func (vm *VirtualMachine) AddConfigParams(params map[string]string) error {
+func (vm *VirtualMachine) AddConfigParams(params map[string]string, info *types.ToolsConfigInfo) error {
 	var confSpec types.VirtualMachineConfigSpec
 
 	var ov []types.BaseOptionValue
@@ -813,13 +813,19 @@ func (vm *VirtualMachine) AddConfigParams(params map[string]string) error {
 	}
 	confSpec.ExtraConfig = ov
 
-	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
-	if err != nil {
+	confSpec.Tools = info
+
+	if len(confSpec.ExtraConfig) > 0 || confSpec.Tools != nil {
+		task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
+		if err != nil {
+			return err
+		}
+
+		_, err = task.WaitForResult(vm.driver.ctx, nil)
 		return err
 	}
 
-	_, err = task.WaitForResult(vm.driver.ctx, nil)
-	return err
+	return nil
 }
 
 func (vm *VirtualMachine) Export() (*nfc.Lease, error) {
