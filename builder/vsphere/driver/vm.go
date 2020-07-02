@@ -802,29 +802,29 @@ func (vm *VirtualMachine) addDevice(device types.BaseVirtualDevice) error {
 
 func (vm *VirtualMachine) AddConfigParams(params map[string]string, info *types.ToolsConfigInfo) error {
 	var confSpec types.VirtualMachineConfigSpec
+	var err error
 
-	if len(params) > 0 {
-		var ov []types.BaseOptionValue
-		for k, v := range params {
-			o := types.OptionValue{
-				Key:   k,
-				Value: v,
-			}
-			ov = append(ov, &o)
+	var ov []types.BaseOptionValue
+	for k, v := range params {
+		o := types.OptionValue{
+			Key:   k,
+			Value: v,
 		}
-		confSpec.ExtraConfig = ov
+		ov = append(ov, &o)
+	}
+	confSpec.ExtraConfig = ov
+
+	confSpec.Tools = info
+
+	if len(confSpec.ExtraConfig) > 0 || confSpec.Tools != nil {
+		task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
+		if err != nil {
+			return err
+		}
+
+		_, err = task.WaitForResult(vm.driver.ctx, nil)
 	}
 
-	if info != nil {
-		confSpec.Tools = info
-	}
-
-	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
-	if err != nil {
-		return err
-	}
-
-	_, err = task.WaitForResult(vm.driver.ctx, nil)
 	return err
 }
 
