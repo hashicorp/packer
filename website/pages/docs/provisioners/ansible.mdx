@@ -150,6 +150,11 @@ connection to chroot and running Ansible as root/sudo.
 
 There are two possible methods for using ansible with the WinRM communicator.
 
+Please note that if you're having trouble getting Ansible to connect, you may
+want to take a look at the script that the Ansible project provides to help
+configure remoting for their Ansible:
+https://github.com/ansible/ansible/blob/devel/examples/scripts/ConfigureRemotingForAnsible.ps1
+
 #### Method 1 (recommended)
 
 The recommended way to use the WinRM communicator is to set `"use_proxy": false`
