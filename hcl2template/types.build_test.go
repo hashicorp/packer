@@ -266,19 +266,23 @@ func TestParse_build(t *testing.T) {
 					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType: "shell",
-							Provisioner: &MockProvisioner{
-								Config: MockConfig{
-									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-									NestedSlice:      []NestedMockConfig{},
+							Provisioner: &HCL2Provisioner{
+								Provisioner: &MockProvisioner{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+										NestedSlice:      []NestedMockConfig{},
+									},
 								},
 							},
 						},
 						{
 							PType: "file",
-							Provisioner: &MockProvisioner{
-								Config: MockConfig{
-									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-									NestedSlice:      []NestedMockConfig{},
+							Provisioner: &HCL2Provisioner{
+								Provisioner: &MockProvisioner{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+										NestedSlice:      []NestedMockConfig{},
+									},
 								},
 							},
 						},
@@ -292,19 +296,23 @@ func TestParse_build(t *testing.T) {
 					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType: "file",
-							Provisioner: &MockProvisioner{
-								Config: MockConfig{
-									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-									NestedSlice:      []NestedMockConfig{},
+							Provisioner: &HCL2Provisioner{
+								Provisioner: &MockProvisioner{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+										NestedSlice:      []NestedMockConfig{},
+									},
 								},
 							},
 						},
 						{
 							PType: "shell",
-							Provisioner: &MockProvisioner{
-								Config: MockConfig{
-									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-									NestedSlice:      []NestedMockConfig{},
+							Provisioner: &HCL2Provisioner{
+								Provisioner: &MockProvisioner{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+										NestedSlice:      []NestedMockConfig{},
+									},
 								},
 							},
 						},

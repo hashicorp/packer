@@ -129,6 +129,7 @@ func testParse(t *testing.T, tests []parseTest) {
 					packer.CoreBuildProvisioner{},
 					packer.CoreBuildPostProcessor{},
 					null.Builder{},
+					HCL2Provisioner{},
 				),
 			); diff != "" {
 				t.Fatalf("Parser.getBuilds() wrong packer builds. %s", diff)
@@ -176,7 +177,7 @@ var (
 
 	basicMockProvisioner = &MockProvisioner{
 		Config: MockConfig{
-			NotSquashed:      "value",
+			NotSquashed:      "value <UNKNOWN>",
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{

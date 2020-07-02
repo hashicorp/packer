@@ -110,11 +110,18 @@ func TestParser_complete(t *testing.T) {
 					Builder:  basicMockBuilder,
 					Provisioners: []packer.CoreBuildProvisioner{
 						{
-							PType:       "shell",
-							PName:       "provisioner that does something",
-							Provisioner: basicMockProvisioner,
+							PType: "shell",
+							PName: "provisioner that does something",
+							Provisioner: &HCL2Provisioner{
+								Provisioner: basicMockProvisioner,
+							},
 						},
-						{PType: "file", Provisioner: basicMockProvisioner},
+						{
+							PType: "file",
+							Provisioner: &HCL2Provisioner{
+								Provisioner: basicMockProvisioner,
+							},
+						},
 					},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{
 						{
@@ -146,11 +153,18 @@ func TestParser_complete(t *testing.T) {
 					},
 					Provisioners: []packer.CoreBuildProvisioner{
 						{
-							PType:       "shell",
-							PName:       "provisioner that does something",
-							Provisioner: basicMockProvisioner,
+							PType: "shell",
+							PName: "provisioner that does something",
+							Provisioner: &HCL2Provisioner{
+								Provisioner: basicMockProvisioner,
+							},
 						},
-						{PType: "file", Provisioner: basicMockProvisioner},
+						{
+							PType: "file",
+							Provisioner: &HCL2Provisioner{
+								Provisioner: basicMockProvisioner,
+							},
+						},
 					},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{
 						{
