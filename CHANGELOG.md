@@ -20,6 +20,8 @@
     [GH-9383]
 * communicator/ssh: Allow users to provide a list of ciphers that they want
     Packer to support. [GH-9453]
+* core/hcl2: add possibility to name singular build.source blocks to differentiate
+    their output and to filter on them [GH-9490]
 * core/hcl2: Add the "inspect" command for hcl2 configs. [GH-9468]
 * core/hcl2: HCL configs now respect only/except using build names instead of
     types. [GH-9454]

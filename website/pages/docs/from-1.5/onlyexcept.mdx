@@ -25,16 +25,20 @@ build {
   name = "my_build"
   sources [
     "source.amazon-ebs.first-example",
-    "source.amazon-ebs.second-example",
   ]
+  source "source.amazon-ebs.second-example" {
+    // setting the name field allows to rename the source only for this build
+    // section.
+    name = "second-example-local-name"
+  }
 
   provisioner "shell-local" {
-    only = ["source.amazon-ebs.second-example"]
+    only = ["source.amazon-ebs.first-example"]
     inline = ["echo I will only run for the second example source"]
   }
 
   provisioner "shell-local" {
-    except = ["source.amazon-ebs.second-example"]
+    except = ["source.amazon-ebs.second-example-local-name"]
     inline = ["echo I will never run for the second example source"]
   }
 }
@@ -59,6 +63,9 @@ configuration:
 
 * `packer build -only '*.amazon-ebs.*' dir`: will only run the builds with a
 source of type `amazon-ebs`.
+
+* `packer build -only '*.second-example-local-name' dir`: will only run that
+specifically named build.
 
 -> Note: In the cli `only` and `except` will match agains **build names** (for
   example:`my_build.amazon-ebs.first-example`) but in a provisioner they will

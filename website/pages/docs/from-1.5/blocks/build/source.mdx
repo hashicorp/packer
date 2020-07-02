@@ -22,7 +22,10 @@ source "lxd" "arch" {
 
 build {
   source "lxd.arch" {
-     output_image = "nomad"
+    // setting the name field allows to rename the source only for this build
+    // section.
+    name = "nomad"
+    output_image = "nomad"
   }
 
   provisioner "shell" {
@@ -32,7 +35,8 @@ build {
 
 build {
   source "lxd.arch" {
-     output_image = "consul"
+    name = "consul"
+    output_image = "consul"
   }
 
   provisioner "shell" {
