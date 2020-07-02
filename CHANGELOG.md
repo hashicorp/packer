@@ -1,8 +1,8 @@
 ## 1.6.1 (Upcoming)
 
 ### IMPROVEMENTS:
-* core: add possibility to name singular source block to differentiate their
-    output and to filter on them [GH-9490]
+* core: add possibility to name singular build.source blocks to differentiate
+    their output and to filter on them [GH-9490]
 * builder/vsphere-clone: Add `boot_command` support to vsphere-clone builder,
     including support for starting an HTTP server
 * builder/proxmox: Update Proxmox storagePoolTypes [GH-9418]
