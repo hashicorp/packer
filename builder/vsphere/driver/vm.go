@@ -802,7 +802,6 @@ func (vm *VirtualMachine) addDevice(device types.BaseVirtualDevice) error {
 
 func (vm *VirtualMachine) AddConfigParams(params map[string]string, info *types.ToolsConfigInfo) error {
 	var confSpec types.VirtualMachineConfigSpec
-	var err error
 
 	var ov []types.BaseOptionValue
 	for k, v := range params {
@@ -823,9 +822,10 @@ func (vm *VirtualMachine) AddConfigParams(params map[string]string, info *types.
 		}
 
 		_, err = task.WaitForResult(vm.driver.ctx, nil)
+		return err
 	}
 
-	return err
+	return nil
 }
 
 func (vm *VirtualMachine) Export() (*nfc.Lease, error) {
