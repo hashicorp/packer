@@ -53,7 +53,7 @@ func (s *StepImportOSLoginSSHKey) Run(ctx context.Context, state multistep.State
 	if s.accountEmail == "" {
 		info, err := s.TokeninfoFunc(ctx)
 		if err != nil {
-			err := fmt.Errorf("Error obtaining token information needed for OsLogin: %s", err)
+			err := fmt.Errorf("Error obtaining token information needed for OSLogin: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -124,7 +124,7 @@ func (s *StepImportOSLoginSSHKey) Cleanup(state multistep.StateBag) {
 func tokeninfo(ctx context.Context) (*oauth2.Tokeninfo, error) {
 	svc, err := oauth2.NewService(ctx)
 	if err != nil {
-		err := fmt.Errorf("Error initializing oauth service needed for OsLogin: %s", err)
+		err := fmt.Errorf("Error initializing oauth service needed for OSLogin: %s", err)
 		return nil, err
 	}
 
