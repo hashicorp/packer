@@ -144,13 +144,13 @@ func (cfg *PackerConfig) startProvisioner(source SourceBlock, pb *ProvisionerBlo
 		})
 		return nil, diags
 	}
-	p := &HCL2Provisioner{
+	hclProvisioner := &HCL2Provisioner{
 		Provisioner:      provisioner,
 		provisionerBlock: pb,
 		evalContext:      ectx,
 		builderVariables: source.builderVariables(),
 	}
-	err = p.HCL2Prepare(generatedVars)
+	err = hclProvisioner.HCL2Prepare(generatedVars)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
@@ -160,5 +160,5 @@ func (cfg *PackerConfig) startProvisioner(source SourceBlock, pb *ProvisionerBlo
 		})
 		return nil, diags
 	}
-	return p, diags
+	return hclProvisioner, diags
 }

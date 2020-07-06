@@ -126,14 +126,18 @@ func TestParser_complete(t *testing.T) {
 					PostProcessors: [][]packer.CoreBuildPostProcessor{
 						{
 							{
-								PType:             "amazon-import",
-								PName:             "something",
-								PostProcessor:     basicMockPostProcessor,
+								PType: "amazon-import",
+								PName: "something",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: basicMockPostProcessor,
+								},
 								KeepInputArtifact: pTrue,
 							},
 							{
-								PType:         "amazon-import",
-								PostProcessor: basicMockPostProcessor,
+								PType: "amazon-import",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: basicMockPostProcessor,
+								},
 							},
 						},
 					},
@@ -169,14 +173,18 @@ func TestParser_complete(t *testing.T) {
 					PostProcessors: [][]packer.CoreBuildPostProcessor{
 						{
 							{
-								PType:             "amazon-import",
-								PName:             "something",
-								PostProcessor:     basicMockPostProcessor,
+								PType: "amazon-import",
+								PName: "something",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: basicMockPostProcessor,
+								},
 								KeepInputArtifact: pTrue,
 							},
 							{
-								PType:         "amazon-import",
-								PostProcessor: basicMockPostProcessor,
+								PType: "amazon-import",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: basicMockPostProcessor,
+								},
 							},
 						},
 					},

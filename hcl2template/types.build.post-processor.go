@@ -74,9 +74,13 @@ func (cfg *PackerConfig) startPostProcessor(source SourceBlock, pp *PostProcesso
 		})
 		return nil, diags
 	}
-	flatProvisinerCfg, moreDiags := decodeHCL2Spec(pp.Rest, ectx, postProcessor)
-	diags = append(diags, moreDiags...)
-	err = postProcessor.Configure(source.builderVariables(), flatProvisinerCfg)
+	hclPostProcessor := &HCL2PostProcessor{
+		PostProcessor:      postProcessor,
+		postProcessorBlock: pp,
+		evalContext:        ectx,
+		builderVariables:   source.builderVariables(),
+	}
+	err = hclPostProcessor.HCL2Prepare(generatedVars)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
@@ -86,5 +90,5 @@ func (cfg *PackerConfig) startPostProcessor(source SourceBlock, pp *PostProcesso
 		})
 		return nil, diags
 	}
-	return postProcessor, diags
+	return hclPostProcessor, diags
 }

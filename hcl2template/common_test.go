@@ -130,6 +130,7 @@ func testParse(t *testing.T, tests []parseTest) {
 					packer.CoreBuildPostProcessor{},
 					null.Builder{},
 					HCL2Provisioner{},
+					HCL2PostProcessor{},
 				),
 			); diff != "" {
 				t.Fatalf("Parser.getBuilds() wrong packer builds. %s", diff)
