@@ -199,14 +199,14 @@ func (c *PackerConfig) evaluateLocalVariable(local *Local) hcl.Diagnostics {
 
 // getCoreBuildProvisioners takes a list of provisioner block, starts according
 // provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext, generatedVars map[string]interface{}) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
 		if pb.OnlyExcept.Skip(source.String()) {
 			continue
 		}
-		provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx, generatedVars)
+		provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -242,7 +242,7 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
 // according provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext, generatedVars map[string]interface{}) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildPostProcessor{}
 	for _, ppb := range blocks {
@@ -266,7 +266,7 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 			break
 		}
 
-		postProcessor, moreDiags := cfg.startPostProcessor(source, ppb, ectx, generatedVars)
+		postProcessor, moreDiags := cfg.startPostProcessor(source, ppb, ectx)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -376,12 +376,12 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 				buildAccessor: cty.ObjectVal(unknownBuildValues),
 			}
 
-			provisioners, moreDiags := cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables), nil)
+			provisioners, moreDiags := cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			postProcessors, moreDiags := cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables), nil)
+			postProcessors, moreDiags := cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables))
 			pps := [][]packer.CoreBuildPostProcessor{}
 			if len(postProcessors) > 0 {
 				pps = [][]packer.CoreBuildPostProcessor{postProcessors}
