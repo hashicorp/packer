@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -16,6 +17,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -231,7 +233,14 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		params.LicenseType = &p.config.LicenseType
 	}
 
-	import_start, err := ec2conn.ImportImage(params)
+	var import_start *ec2.ImportImageOutput
+	err = retry.Config{
+		Tries:      11,
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		import_start, err = ec2conn.ImportImage(params)
+		return err
+	})
 
 	if err != nil {
 		return nil, false, false, fmt.Errorf("Failed to start import from s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
