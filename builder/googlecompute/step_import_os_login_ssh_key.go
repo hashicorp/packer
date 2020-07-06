@@ -11,7 +11,7 @@ import (
 	"google.golang.org/api/oauth2/v2"
 )
 
-// StepCreateSSHKey represents a Packer build step that generates SSH key pairs.
+// StepImportOSLoginSSHKey imports a temporary SSH key pair into a GCE login profile.
 type StepImportOSLoginSSHKey struct {
 	Debug         bool
 	TokeninfoFunc func(context.Context) (*oauth2.Tokeninfo, error)
