@@ -51,8 +51,8 @@ type ProvisionHook struct {
 // custom generated data could be passed into provisioners from builders to
 // enable specialized builder-specific (but still validated!!) access to builder
 // data.
-func BasicPlaceholderData() map[string]interface{} {
-	placeholderData := map[string]interface{}{}
+func BasicPlaceholderData() map[string]string {
+	placeholderData := map[string]string{}
 	msg := "Build_%s. " + common.PlaceholderMsg
 	placeholderData["ID"] = fmt.Sprintf(msg, "ID")
 	// The following correspond to communicator-agnostic functions that are
