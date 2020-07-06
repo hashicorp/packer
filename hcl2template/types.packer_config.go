@@ -369,11 +369,8 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			}
 
 			variables := map[string]cty.Value{
-				sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
-					"type": cty.StringVal(src.Type),
-					"name": cty.StringVal(src.Name),
-				}),
-				buildAccessor: cty.ObjectVal(unknownBuildValues),
+				sourcesAccessor: cty.ObjectVal(src.ctyValues()),
+				buildAccessor:   cty.ObjectVal(unknownBuildValues),
 			}
 
 			provisioners, moreDiags := cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables))
