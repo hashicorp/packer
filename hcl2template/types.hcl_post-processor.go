@@ -10,6 +10,10 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
+// HCL2PostProcessor has a reference to the part of the HCL2 body where it is
+// defined, allowing to completely reconfigure the PostProcessor right before
+// calling PostProcess: with contextual variables.
+// This permits using "${build.ID}" values for example.
 type HCL2PostProcessor struct {
 	PostProcessor      packer.PostProcessor
 	postProcessorBlock *PostProcessorBlock
