@@ -69,6 +69,7 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 				"type": cty.UnknownVal(cty.String),
 				"name": cty.UnknownVal(cty.String),
 			}),
+			buildAccessor: cty.UnknownVal(cty.EmptyObject),
 		},
 	}
 	for k, v := range variables {
