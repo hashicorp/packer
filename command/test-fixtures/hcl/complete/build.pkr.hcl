@@ -47,7 +47,7 @@ build {
 
   post-processor "shell-local" {
     name = "cook"
-    inline = [ "echo 'cooking...' >> ${upper(build.ID)}.${source.name}.txt" ]
+    inline = [ "echo cooking... >> ${upper(build.ID)}.${source.name}.txt" ]
     except = ["null.spaghetti_carbonara"]
   }
 
