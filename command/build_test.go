@@ -20,6 +20,17 @@ import (
 	shell_local "github.com/hashicorp/packer/provisioner/shell-local"
 )
 
+var (
+	spaghettiCarbonara = `spaghetti
+carbonara
+`
+	lasagna = `lasagna
+tomato
+mozza
+cooking...
+`
+)
+
 func TestBuild(t *testing.T) {
 	tc := []struct {
 		name         string
@@ -230,6 +241,62 @@ func TestBuild(t *testing.T) {
 			fileCheck: fileCheck{
 				notExpected: []string{"cherry.txt"},
 				expected:    []string{"chocolate.txt", "vanilla.txt"},
+			},
+		},
+
+		// complete
+		{
+			name: "hcl - complete",
+			args: []string{
+				testFixture("hcl", "complete"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"NULL.spaghetti_carbonara.txt": spaghettiCarbonara,
+					"NULL.lasagna.txt":             lasagna,
+				},
+			},
+		},
+
+		{
+			name: "hcl - complete - except carbonara",
+			args: []string{
+				"-except", "recipes.null.spaghetti_carbonara",
+				testFixture("hcl", "complete"),
+			},
+			fileCheck: fileCheck{
+				notExpected: []string{"NULL.spaghetti_carbonara.txt"},
+				expectedContent: map[string]string{
+					"NULL.lasagna.txt": lasagna,
+				},
+			},
+		},
+
+		{
+			name: "hcl - complete - only lasagna",
+			args: []string{
+				"-only", "*lasagna",
+				testFixture("hcl", "complete"),
+			},
+			fileCheck: fileCheck{
+				notExpected: []string{"NULL.spaghetti_carbonara.txt"},
+				expectedContent: map[string]string{
+					"NULL.lasagna.txt": lasagna,
+				},
+			},
+		},
+
+		{
+			name: "hcl - complete - only recipes",
+			args: []string{
+				"-only", "recipes.*",
+				testFixture("hcl", "complete"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"NULL.spaghetti_carbonara.txt": spaghettiCarbonara,
+					"NULL.lasagna.txt":             lasagna,
+				},
 			},
 		},
 	}
