@@ -20,7 +20,7 @@ type Communicator struct {
 }
 
 func (c *Communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
-	localCmd, err := c.Client.ExecuteContainer(cmd.Command, c.ContainerName, c.CmdWrapper)
+	localCmd, err := c.Execute(cmd.Command)
 
 	if err != nil {
 		return err
@@ -126,4 +126,8 @@ func (c *Communicator) Download(src string, w io.Writer) error {
 func (c *Communicator) DownloadDir(src string, dst string, exclude []string) error {
 	// TODO This could probably be "lxc exec <container> -- cd <src> && tar -czf - | tar -xzf - -C <dst>"
 	return fmt.Errorf("DownloadDir is not implemented for lxc")
+}
+
+func (c *Communicator) Execute(commandString string) (*exec.Cmd, error) {
+	return c.Client.ExecuteContainer(c.ContainerName, commandString, c.CmdWrapper)
 }
