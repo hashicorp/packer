@@ -138,6 +138,7 @@ build {
             ["a","b"],
             ["c","d"]
         ]
+        not_squashed = "${var.foo} ${upper(build.ID)}"
 
         nested {
             string   = "string"
@@ -185,6 +186,7 @@ build {
             ["a","b"],
             ["c","d"]
         ]
+        not_squashed = "${var.foo} ${upper(build.ID)}"
 
         nested {
             string   = "string"

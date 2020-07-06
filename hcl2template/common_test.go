@@ -190,6 +190,7 @@ var (
 	}
 	basicMockPostProcessor = &MockPostProcessor{
 		Config: MockConfig{
+			NotSquashed:      "value <UNKNOWN>",
 			NestedMockConfig: basicNestedMockConfig,
 			Nested:           basicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{
