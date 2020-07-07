@@ -83,11 +83,11 @@ type SSH struct {
 	// [`ssh_private_key_file`](#ssh_private_key_file) or
 	// [`ssh_agent_auth`](#ssh_agent_auth) must be specified when
 	// [`ssh_keypair_name`](#ssh_keypair_name) is utilized.
-	SSHKeyPairName string `mapstructure:"ssh_keypair_name"`
+	SSHKeyPairName string `mapstructure:"ssh_keypair_name" undocumented:"true"`
 	// The name of the temporary key pair to generate. By default, Packer
 	// generates a name that looks like `packer_<UUID>`, where &lt;UUID&gt; is
 	// a 36 character unique identifier.
-	SSHTemporaryKeyPairName string `mapstructure:"temporary_key_pair_name"`
+	SSHTemporaryKeyPairName string `mapstructure:"temporary_key_pair_name" undocumented:"true"`
 	// This overrides the value of ciphers supported by default by golang.
 	// The default value is [
 	//   "aes128-gcm@openssh.com",
@@ -110,7 +110,7 @@ type SSH struct {
 	// Path to a PEM encoded private key file to use to authenticate with SSH.
 	// The `~` can be used in path and will be expanded to the home directory
 	// of current user.
-	SSHPrivateKeyFile string `mapstructure:"ssh_private_key_file"`
+	SSHPrivateKeyFile string `mapstructure:"ssh_private_key_file" undocumented:"true"`
 	// If `true`, a PTY will be requested for the SSH connection. This defaults
 	// to `false`.
 	SSHPty bool `mapstructure:"ssh_pty"`
@@ -125,7 +125,7 @@ type SSH struct {
 	// [`ssh_private_key_file`](#ssh_private_key_file) will be ignored. The
 	// environment variable `SSH_AUTH_SOCK` must be set for this option to work
 	// properly.
-	SSHAgentAuth bool `mapstructure:"ssh_agent_auth"`
+	SSHAgentAuth bool `mapstructure:"ssh_agent_auth" undocumented:"true"`
 	// If true, SSH agent forwarding will be disabled. Defaults to `false`.
 	SSHDisableAgentForwarding bool `mapstructure:"ssh_disable_agent_forwarding"`
 	// The number of handshakes to attempt with SSH once it can connect. This
@@ -175,8 +175,8 @@ type SSH struct {
 	SSHLocalTunnels []string `mapstructure:"ssh_local_tunnels"`
 
 	// SSH Internals
-	SSHPublicKey  []byte `mapstructure:"ssh_public_key"`
-	SSHPrivateKey []byte `mapstructure:"ssh_private_key"`
+	SSHPublicKey  []byte `mapstructure:"ssh_public_key" undocumented:"true"`
+	SSHPrivateKey []byte `mapstructure:"ssh_private_key" undocumented:"true"`
 }
 
 type WinRM struct {
