@@ -16,10 +16,10 @@ type TunnelDriverWindows struct {
 	cmd *exec.Cmd
 }
 
-func (t *TunnelDriverWindows) StartTunnel(cancelCtx context.Context, tempScriptFileName string) error {
+func (t *TunnelDriverWindows) StartTunnel(cancelCtx context.Context, tempScriptFileName string, timeout int) error {
 	args := []string{"/C", "call", tempScriptFileName}
 	cmd := exec.CommandContext(cancelCtx, "cmd", args...)
-	err := RunTunnelCommand(cmd)
+	err := RunTunnelCommand(cmd, timeout)
 	if err != nil {
 		return err
 	}

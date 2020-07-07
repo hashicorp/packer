@@ -51,14 +51,17 @@ type IAPConfig struct {
 	// What file extension to use for script that sets up gcloud.
 	// Default: ".sh"
 	IAPExt string `mapstructure:"iap_ext" required:"false"`
+	// How long to wait, in seconds, before assuming a tunnel launch was
+	// successful. Defaults to 30 seconds.
+	IAPTunnelLaunchTimeout int `mapstructure:"iap_tunnel_launch_timeout" required:"false"`
 }
 
 type TunnelDriver interface {
-	StartTunnel(context.Context, string) error
+	StartTunnel(context.Context, string, int) error
 	StopTunnel()
 }
 
-func RunTunnelCommand(cmd *exec.Cmd) error {
+func RunTunnelCommand(cmd *exec.Cmd, timeout int) error {
 	// set stdout and stderr so we can read what's going on.
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -78,7 +81,8 @@ func RunTunnelCommand(cmd *exec.Cmd) error {
 	// afternoon trying to figure out how to get the SDK to actually send
 	// the "Listening on port [n]" line I see when I run it manually, and I
 	// can't justify spending more time than that on aesthetics.
-	for i := 0; i < 30; i++ {
+
+	for i := 0; i < timeout; i++ {
 		time.Sleep(1 * time.Second)
 
 		lineStderr, err := stderr.ReadString('\n')
@@ -307,7 +311,7 @@ func (s *StepStartTunnel) Run(ctx context.Context, state multistep.StateBag) mul
 		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
 		// tunnel launcher/destroyer has to be different on windows vs. unix.
-		err := s.tunnelDriver.StartTunnel(ctx, tempScriptFileName)
+		err := s.tunnelDriver.StartTunnel(ctx, tempScriptFileName, s.IAPConf.IAPTunnelLaunchTimeout)
 		return err
 	})
 	if err != nil {
