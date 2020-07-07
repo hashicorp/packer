@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/common"
 )
@@ -41,8 +40,31 @@ type ProvisionHook struct {
 	// The provisioners to run as part of the hook. These should already
 	// be prepared (by calling Prepare) at some earlier stage.
 	Provisioners []*HookedProvisioner
+}
 
-	HCL2Prepare func(data map[string]interface{}) ([]CoreBuildProvisioner, hcl.Diagnostics)
+// BuilderDataCommonKeys is the list of common keys that all builder will
+// return
+var BuilderDataCommonKeys = []string{
+	"ID",
+	// The following correspond to communicator-agnostic functions that are		}
+	// part of the SSH and WinRM communicator implementations. These functions
+	// are not part of the communicator interface, but are stored on the
+	// Communicator Config and return the appropriate values rather than
+	// depending on the actual communicator config values. E.g "Password"
+	// reprosents either WinRMPassword or SSHPassword, which makes this more
+	// useful if a template contains multiple builds.
+	"Host",
+	"Port",
+	"User",
+	"Password",
+	"ConnType",
+	"PackerRunUUID",
+	"PackerHTTPPort",
+	"PackerHTTPIP",
+	"PackerHTTPAddr",
+	"SSHPublicKey",
+	"SSHPrivateKey",
+	"WinRMPassword",
 }
 
 // Provisioners interpolate most of their fields in the prepare stage; this
@@ -56,26 +78,9 @@ type ProvisionHook struct {
 // data.
 func BasicPlaceholderData() map[string]string {
 	placeholderData := map[string]string{}
-	msg := "Build_%s. " + common.PlaceholderMsg
-	placeholderData["ID"] = fmt.Sprintf(msg, "ID")
-	// The following correspond to communicator-agnostic functions that are
-	// part of the SSH and WinRM communicator implementations. These functions
-	// are not part of the communicator interface, but are stored on the
-	// Communicator Config and return the appropriate values rather than
-	// depending on the actual communicator config values. E.g "Password"
-	// reprosents either WinRMPassword or SSHPassword, which makes this more
-	// useful if a template contains multiple builds.
-	placeholderData["Host"] = fmt.Sprintf(msg, "Host")
-	placeholderData["Port"] = fmt.Sprintf(msg, "Port")
-	placeholderData["User"] = fmt.Sprintf(msg, "User")
-	placeholderData["Password"] = fmt.Sprintf(msg, "Password")
-	placeholderData["ConnType"] = fmt.Sprintf(msg, "Type")
-	placeholderData["PackerRunUUID"] = fmt.Sprintf(msg, "PackerRunUUID")
-	placeholderData["PackerHTTPPort"] = fmt.Sprintf(msg, "PackerHTTPPort")
-	placeholderData["PackerHTTPIP"] = fmt.Sprintf(msg, "PackerHTTPIP")
-	placeholderData["PackerHTTPAddr"] = fmt.Sprintf(msg, "PackerHTTPAddr")
-	placeholderData["SSHPublicKey"] = fmt.Sprintf(msg, "SSHPublicKey")
-	placeholderData["SSHPrivateKey"] = fmt.Sprintf(msg, "SSHPrivateKey")
+	for _, key := range BuilderDataCommonKeys {
+		placeholderData[key] = fmt.Sprintf("Build_%s. "+common.PlaceholderMsg, key)
+	}
 
 	// Backwards-compatability: WinRM Password can get through without forcing
 	// the generated func validation.
@@ -116,7 +121,7 @@ func CastDataToMap(data interface{}) map[string]interface{} {
 // Runs the provisioners in order.
 func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Communicator, data interface{}) error {
 	// Shortcut
-	if len(h.Provisioners) == 0 && h.HCL2Prepare == nil {
+	if len(h.Provisioners) == 0 {
 		return nil
 	}
 
@@ -126,34 +131,10 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Commun
 				"`communicator` config was set to \"none\". If you have any provisioners\n" +
 				"then a communicator is required. Please fix this to continue.")
 	}
-
-	cast := CastDataToMap(data)
-
-	if h.HCL2Prepare != nil {
-		// For HCL2, decode and prepare Provisioners now to interpolate build variables
-		coreP, diags := h.HCL2Prepare(cast)
-		if diags.HasErrors() {
-			return diags
-		}
-		hookedProvisioners := make([]*HookedProvisioner, len(coreP))
-		for i, p := range coreP {
-			var pConfig interface{}
-			if len(p.config) > 0 {
-				pConfig = p.config[0]
-			}
-
-			hookedProvisioners[i] = &HookedProvisioner{
-				Provisioner: p.Provisioner,
-				Config:      pConfig,
-				TypeName:    p.PType,
-			}
-		}
-		h.Provisioners = hookedProvisioners
-	}
-
 	for _, p := range h.Provisioners {
 		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
 
+		cast := CastDataToMap(data)
 		err := p.Provisioner.Provision(ctx, ui, comm, cast)
 
 		ts.End(err)

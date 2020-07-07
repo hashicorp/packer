@@ -171,19 +171,23 @@ func TestParse_build(t *testing.T) {
 						{
 							{
 								PType: "amazon-import",
-								PostProcessor: &MockPostProcessor{
-									Config: MockConfig{
-										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-										NestedSlice:      []NestedMockConfig{},
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: &MockPostProcessor{
+										Config: MockConfig{
+											NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+											NestedSlice:      []NestedMockConfig{},
+										},
 									},
 								},
 							},
 							{
 								PType: "manifest",
-								PostProcessor: &MockPostProcessor{
-									Config: MockConfig{
-										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-										NestedSlice:      []NestedMockConfig{},
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: &MockPostProcessor{
+										Config: MockConfig{
+											NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+											NestedSlice:      []NestedMockConfig{},
+										},
 									},
 								},
 							},
@@ -199,19 +203,23 @@ func TestParse_build(t *testing.T) {
 						{
 							{
 								PType: "manifest",
-								PostProcessor: &MockPostProcessor{
-									Config: MockConfig{
-										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-										NestedSlice:      []NestedMockConfig{},
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: &MockPostProcessor{
+										Config: MockConfig{
+											NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+											NestedSlice:      []NestedMockConfig{},
+										},
 									},
 								},
 							},
 							{
 								PType: "amazon-import",
-								PostProcessor: &MockPostProcessor{
-									Config: MockConfig{
-										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-										NestedSlice:      []NestedMockConfig{},
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: &MockPostProcessor{
+										Config: MockConfig{
+											NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+											NestedSlice:      []NestedMockConfig{},
+										},
 									},
 								},
 							},
@@ -266,19 +274,23 @@ func TestParse_build(t *testing.T) {
 					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType: "shell",
-							Provisioner: &MockProvisioner{
-								Config: MockConfig{
-									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-									NestedSlice:      []NestedMockConfig{},
+							Provisioner: &HCL2Provisioner{
+								Provisioner: &MockProvisioner{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+										NestedSlice:      []NestedMockConfig{},
+									},
 								},
 							},
 						},
 						{
 							PType: "file",
-							Provisioner: &MockProvisioner{
-								Config: MockConfig{
-									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-									NestedSlice:      []NestedMockConfig{},
+							Provisioner: &HCL2Provisioner{
+								Provisioner: &MockProvisioner{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+										NestedSlice:      []NestedMockConfig{},
+									},
 								},
 							},
 						},
@@ -292,19 +304,23 @@ func TestParse_build(t *testing.T) {
 					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType: "file",
-							Provisioner: &MockProvisioner{
-								Config: MockConfig{
-									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-									NestedSlice:      []NestedMockConfig{},
+							Provisioner: &HCL2Provisioner{
+								Provisioner: &MockProvisioner{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+										NestedSlice:      []NestedMockConfig{},
+									},
 								},
 							},
 						},
 						{
 							PType: "shell",
-							Provisioner: &MockProvisioner{
-								Config: MockConfig{
-									NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-									NestedSlice:      []NestedMockConfig{},
+							Provisioner: &HCL2Provisioner{
+								Provisioner: &MockProvisioner{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+										NestedSlice:      []NestedMockConfig{},
+									},
 								},
 							},
 						},

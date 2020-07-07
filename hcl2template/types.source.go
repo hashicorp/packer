@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
 )
 
 // SourceBlock references an HCL 'source' block.
@@ -26,11 +27,23 @@ type SourceBlock struct {
 	LocalName string
 }
 
-func (b *SourceBlock) String() string {
+func (b *SourceBlock) name() string {
 	if b.LocalName != "" {
-		return fmt.Sprintf("%s.%s", b.Type, b.LocalName)
+		return b.LocalName
 	}
-	return fmt.Sprintf("%s.%s", b.Type, b.Name)
+	return b.Name
+}
+
+func (b *SourceBlock) String() string {
+	return fmt.Sprintf("%s.%s", b.Type, b.name())
+}
+
+// EvalContext adds the values of the source to the passed eval context.
+func (b *SourceBlock) ctyValues() map[string]cty.Value {
+	return map[string]cty.Value{
+		"type": cty.StringVal(b.Type),
+		"name": cty.StringVal(b.name()),
+	}
 }
 
 // decodeBuildSource reads a used source block from a build:

@@ -20,6 +20,22 @@ import (
 	shell_local "github.com/hashicorp/packer/provisioner/shell-local"
 )
 
+var (
+	spaghettiCarbonara = `spaghetti
+carbonara
+`
+	lasagna = `lasagna
+tomato
+mozza
+cooking...
+`
+	tiramisu = `whip_york
+mascarpone
+whipped_egg_white
+dress
+`
+)
+
 func TestBuild(t *testing.T) {
 	tc := []struct {
 		name         string
@@ -228,8 +244,72 @@ func TestBuild(t *testing.T) {
 				testFixture("hcl-only-except"),
 			},
 			fileCheck: fileCheck{
-				expected:    []string{"chocolate.txt", "vanilla.txt"},
 				notExpected: []string{"cherry.txt"},
+				expected:    []string{"chocolate.txt", "vanilla.txt"},
+			},
+		},
+
+		// recipes
+		{
+			name: "hcl - recipes",
+			args: []string{
+				testFixture("hcl", "recipes"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"NULL.spaghetti_carbonara.txt": spaghettiCarbonara,
+					"NULL.lasagna.txt":             lasagna,
+					"NULL.tiramisu.txt":            tiramisu,
+				},
+			},
+		},
+
+		{
+			name: "hcl - recipes - except carbonara",
+			args: []string{
+				"-except", "recipes.null.spaghetti_carbonara",
+				testFixture("hcl", "recipes"),
+			},
+			fileCheck: fileCheck{
+				notExpected: []string{"NULL.spaghetti_carbonara.txt"},
+				expectedContent: map[string]string{
+					"NULL.lasagna.txt":  lasagna,
+					"NULL.tiramisu.txt": tiramisu,
+				},
+			},
+		},
+
+		{
+			name: "hcl - recipes - only lasagna",
+			args: []string{
+				"-only", "*lasagna",
+				testFixture("hcl", "recipes"),
+			},
+			fileCheck: fileCheck{
+				notExpected: []string{
+					"NULL.spaghetti_carbonara.txt",
+					"NULL.tiramisu.txt",
+				},
+				expectedContent: map[string]string{
+					"NULL.lasagna.txt": lasagna,
+				},
+			},
+		},
+
+		{
+			name: "hcl - recipes - only recipes",
+			args: []string{
+				"-only", "recipes.*",
+				testFixture("hcl", "recipes"),
+			},
+			fileCheck: fileCheck{
+				notExpected: []string{
+					"NULL.tiramisu.txt",
+				},
+				expectedContent: map[string]string{
+					"NULL.spaghetti_carbonara.txt": spaghettiCarbonara,
+					"NULL.lasagna.txt":             lasagna,
+				},
 			},
 		},
 	}
@@ -341,109 +421,26 @@ func TestBuildProvisionAndPosProcessWithBuildVariablesSharing(t *testing.T) {
 	c := &BuildCommand{
 		Meta: testMetaFile(t),
 	}
-	tc := []struct {
-		name             string
-		args             []string
-		expectedFiles    []string
-		notExpectedFiles []string
-	}{
-		{
-			name: "JSON: basic template",
-			args: []string{
-				filepath.Join(testFixture("build-variable-sharing"), "template.json"),
-			},
-			expectedFiles: []string{
-				"provisioner.Null.txt",
-				"post-processor.Null.txt",
-			},
-			notExpectedFiles: []string{},
-		},
-		{
-			name: "HCL2: basic template",
-			args: []string{
-				filepath.Join(testFixture("build-variable-sharing"), "basic_template.pkr.hcl"),
-			},
-			expectedFiles: []string{
-				"provisioner.Null.txt",
-				"post-processor.Null.txt",
-			},
-			notExpectedFiles: []string{},
-		},
-		{
-			name: "HCL2: basic template with build variables within HCL function",
-			args: []string{
-				filepath.Join(testFixture("build-variable-sharing"), "basic_template_with_hcl_func.pkr.hcl"),
-			},
-			expectedFiles: []string{
-				"provisioner.Null.txt",
-				"provisioner.NULL.txt",
-				"post-processor.Null.txt",
-				"post-processor.NULL.txt",
-			},
-			notExpectedFiles: []string{},
-		},
-		{
-			name: "HCL2: basic template with named build",
-			args: []string{
-				filepath.Join(testFixture("build-variable-sharing"), "named_build.pkr.hcl"),
-			},
-			expectedFiles: []string{
-				"provisioner.Null.txt",
-				"post-processor.Null.txt",
-			},
-			notExpectedFiles: []string{},
-		},
-		{
-			name: "HCL2: multiple build block sharing same sources",
-			args: []string{
-				filepath.Join(testFixture("build-variable-sharing"), "multiple_build_blocks.pkr.hcl"),
-			},
-			expectedFiles: []string{
-				"vanilla.chocolate.provisioner.Null.txt",
-				"vanilla.chocolate.post-processor.Null.txt",
-				"apple.chocolate.provisioner.Null.txt",
-				"apple.chocolate.post-processor.Null.txt",
-				"sugar.banana.provisioner.Null.txt",
-				"sugar.banana.post-processor.Null.txt",
-			},
-			notExpectedFiles: []string{},
-		},
-		{
-			name: "HCL2: multiple sources build with only/except set for provisioner and post-processors",
-			args: []string{
-				filepath.Join(testFixture("build-variable-sharing"), "multiple_source_build.pkr.hcl"),
-			},
-			expectedFiles: []string{
-				"all.Null.txt",
-			},
-			notExpectedFiles: []string{
-				"chocolate.Null.txt",
-				"banana.Null.txt",
-			},
-		},
+
+	args := []string{
+		filepath.Join(testFixture("build-variable-sharing"), "template.json"),
 	}
 
-	for _, tt := range tc {
-		t.Run(tt.name, func(t *testing.T) {
-			defer cleanup(tt.expectedFiles...)
-			defer cleanup(tt.notExpectedFiles...)
+	files := []string{
+		"provisioner.Null.txt",
+		"post-processor.Null.txt",
+	}
 
-			if code := c.Run(tt.args); code != 0 {
-				fatalCommand(t, c.Meta)
-			}
+	defer cleanup(files...)
 
-			for _, f := range tt.expectedFiles {
-				if !fileExists(f) {
-					t.Errorf("Expected to find %s", f)
-				}
-			}
+	if code := c.Run(args); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
 
-			for _, f := range tt.notExpectedFiles {
-				if fileExists(f) {
-					t.Errorf("Not expected to find %s", f)
-				}
-			}
-		})
+	for _, f := range files {
+		if !fileExists(f) {
+			t.Errorf("Expected to find %s", f)
+		}
 	}
 }
 

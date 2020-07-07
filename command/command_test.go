@@ -27,8 +27,10 @@ func outputCommand(t *testing.T, m Meta) (string, string) {
 	return out.String(), err.String()
 }
 
-func testFixture(n string) string {
-	return filepath.Join(fixturesDir, n)
+func testFixture(n ...string) string {
+	paths := []string{fixturesDir}
+	paths = append(paths, n...)
+	return filepath.Join(paths...)
 }
 
 func testMeta(t *testing.T) Meta {

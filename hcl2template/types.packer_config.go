@@ -40,7 +40,6 @@ type PackerConfig struct {
 
 	except []glob.Glob
 	only   []glob.Glob
-	debug  bool
 }
 
 type ValidationOptions struct {
@@ -69,6 +68,7 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 				"type": cty.UnknownVal(cty.String),
 				"name": cty.UnknownVal(cty.String),
 			}),
+			buildAccessor: cty.UnknownVal(cty.EmptyObject),
 		},
 	}
 	for k, v := range variables {
@@ -211,6 +211,7 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 		if moreDiags.HasErrors() {
 			continue
 		}
+
 		// If we're pausing, we wrap the provisioner in a special pauser.
 		if pb.PauseBefore != 0 {
 			provisioner = &packer.PausedProvisioner{
@@ -226,11 +227,6 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 		if pb.MaxRetries != 0 {
 			provisioner = &packer.RetriedProvisioner{
 				MaxRetries:  pb.MaxRetries,
-				Provisioner: provisioner,
-			}
-		}
-		if cfg.debug {
-			provisioner = &packer.DebuggedProvisioner{
 				Provisioner: provisioner,
 			}
 		}
@@ -292,8 +288,6 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks [
 func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build, hcl.Diagnostics) {
 	res := []packer.Build{}
 	var diags hcl.Diagnostics
-
-	cfg.debug = opts.Debug
 
 	for _, build := range cfg.Builds {
 		for _, from := range build.Sources {
@@ -366,45 +360,35 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			// the provisioner prepare() so that the provisioner can appropriately
 			// validate user input against what will become available. Otherwise,
 			// only pass the default variables, using the basic placeholder data.
-			generatedPlaceholderMap := packer.BasicPlaceholderData()
-			if generatedVars != nil {
-				for _, k := range generatedVars {
-					generatedPlaceholderMap[k] = ""
-				}
+			unknownBuildValues := map[string]cty.Value{}
+			for _, k := range append(packer.BuilderDataCommonKeys, generatedVars...) {
+				unknownBuildValues[k] = cty.StringVal("<unknown>")
 			}
-			buildVariables, _ := setBuildVariables(generatedPlaceholderMap).Values()
 
 			variables := map[string]cty.Value{
-				sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
-					"type": cty.StringVal(src.Type),
-					"name": cty.StringVal(src.Name),
-				}),
-				buildAccessor: cty.ObjectVal(buildVariables),
+				sourcesAccessor: cty.ObjectVal(src.ctyValues()),
+				buildAccessor:   cty.ObjectVal(unknownBuildValues),
 			}
 
-			_, moreDiags = cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables))
+			provisioners, moreDiags := cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			_, moreDiags = cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables))
+			postProcessors, moreDiags := cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables))
+			pps := [][]packer.CoreBuildPostProcessor{}
+			if len(postProcessors) > 0 {
+				pps = [][]packer.CoreBuildPostProcessor{postProcessors}
+			} // TODO(azr): remove this
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
 
 			pcb.Builder = builder
+			pcb.Provisioners = provisioners
+			pcb.PostProcessors = pps
 			pcb.Prepared = true
-			pcb.HCL2ProvisionerPrepare = (&provisionerPrepare{
-				cfg:              cfg,
-				provisionerBlock: build.ProvisionerBlocks,
-				src:              from,
-			}).HCL2ProvisionerPrepare
-			pcb.HCL2PostProcessorsPrepare = (&postProcessorsPrepare{
-				cfg:                cfg,
-				postProcessorBlock: build.PostProcessors,
-				src:                from,
-			}).HCL2PostProcessorsPrepare
 
 			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
 			// we did all the prep here.
@@ -423,17 +407,6 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 		}
 	}
 	return res, diags
-}
-
-func setBuildVariables(generatedVars map[string]string) Variables {
-	variables := make(Variables)
-	for k := range generatedVars {
-		variables[k] = &Variable{
-			DefaultValue: cty.StringVal("unknown"),
-			Type:         cty.String,
-		}
-	}
-	return variables
 }
 
 var PackerConsoleHelp = strings.TrimSpace(`
