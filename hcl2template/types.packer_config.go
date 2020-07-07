@@ -7,7 +7,6 @@ import (
 	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
-	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -361,11 +360,8 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			// the provisioner prepare() so that the provisioner can appropriately
 			// validate user input against what will become available. Otherwise,
 			// only pass the default variables, using the basic placeholder data.
-			generatedPlaceholderMap := packer.BasicPlaceholderData()
 			unknownBuildValues := map[string]cty.Value{}
-			for _, k := range generatedVars {
-				generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
-					common.PlaceholderMsg, k)
+			for _, k := range append(packer.BuilderDataCommonKeys, generatedVars...) {
 				unknownBuildValues[k] = cty.StringVal("<unknown>")
 			}
 
