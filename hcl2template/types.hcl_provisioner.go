@@ -36,7 +36,7 @@ func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]interface{}) error {
 			case string:
 				buildValues[k] = cty.StringVal(v)
 			default:
-				return fmt.Errorf("unhandled builvar type: %T", v)
+				return fmt.Errorf("unhandled buildvar type: %T", v)
 			}
 		}
 		ectx.Variables = map[string]cty.Value{
