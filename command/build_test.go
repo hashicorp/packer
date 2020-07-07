@@ -244,11 +244,11 @@ func TestBuild(t *testing.T) {
 			},
 		},
 
-		// complete
+		// recipes
 		{
-			name: "hcl - complete",
+			name: "hcl - recipes",
 			args: []string{
-				testFixture("hcl", "complete"),
+				testFixture("hcl", "recipes"),
 			},
 			fileCheck: fileCheck{
 				expectedContent: map[string]string{
@@ -259,10 +259,10 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
-			name: "hcl - complete - except carbonara",
+			name: "hcl - recipes - except carbonara",
 			args: []string{
 				"-except", "recipes.null.spaghetti_carbonara",
-				testFixture("hcl", "complete"),
+				testFixture("hcl", "recipes"),
 			},
 			fileCheck: fileCheck{
 				notExpected: []string{"NULL.spaghetti_carbonara.txt"},
@@ -273,10 +273,10 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
-			name: "hcl - complete - only lasagna",
+			name: "hcl - recipes - only lasagna",
 			args: []string{
 				"-only", "*lasagna",
-				testFixture("hcl", "complete"),
+				testFixture("hcl", "recipes"),
 			},
 			fileCheck: fileCheck{
 				notExpected: []string{"NULL.spaghetti_carbonara.txt"},
@@ -287,10 +287,10 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
-			name: "hcl - complete - only recipes",
+			name: "hcl - recipes - only recipes",
 			args: []string{
 				"-only", "recipes.*",
-				testFixture("hcl", "complete"),
+				testFixture("hcl", "recipes"),
 			},
 			fileCheck: fileCheck{
 				expectedContent: map[string]string{
