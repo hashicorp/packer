@@ -140,6 +140,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 	)
 
+	if b.config.ContentLibraryDestinationConfig != nil {
+		steps = append(steps, &common.StepImportToContentLibrary{
+			ContentLibConfig: b.config.ContentLibraryDestinationConfig,
+		})
+	}
+
 	if b.config.Export != nil {
 		steps = append(steps, &common.StepExport{
 			Name:      b.config.Export.Name,

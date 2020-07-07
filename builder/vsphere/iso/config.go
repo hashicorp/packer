@@ -43,6 +43,9 @@ type Config struct {
 	// The VM will not be exported if no [Export Configuration](#export-configuration) is specified.
 	Export *common.ExportConfig `mapstructure:"export"`
 
+	// TODO @sylviamoss docs
+	ContentLibraryDestinationConfig *common.ContentLibraryDestinationConfig `mapstructure:"content_library_destination"`
+
 	ctx interpolate.Context
 }
 
@@ -82,6 +85,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare()...)
 	if c.Export != nil {
 		errs = packer.MultiErrorAppend(errs, c.Export.Prepare(&c.ctx, &c.LocationConfig, &c.PackerConfig)...)
+	}
+	if c.ContentLibraryDestinationConfig != nil {
+		errs = packer.MultiErrorAppend(errs, c.ContentLibraryDestinationConfig.Prepare(&c.LocationConfig)...)
 	}
 
 	if len(errs.Errors) > 0 {

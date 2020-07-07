@@ -10,6 +10,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 )
@@ -17,6 +18,7 @@ import (
 type Driver struct {
 	ctx        context.Context
 	client     *govmomi.Client
+	restClient *rest.Client
 	finder     *find.Finder
 	datacenter *object.Datacenter
 }
@@ -29,9 +31,8 @@ type ConnectConfig struct {
 	Datacenter         string
 }
 
-func NewDriver(config *ConnectConfig) (*Driver, error) {
-	ctx := context.TODO()
-
+func NewDriver(ctx context.Context, config *ConnectConfig) (*Driver, error) {
+	// SDK client
 	vcenterUrl, err := url.Parse(fmt.Sprintf("https://%v/sdk", config.VCenterServer))
 	if err != nil {
 		return nil, err
@@ -56,6 +57,13 @@ func NewDriver(config *ConnectConfig) (*Driver, error) {
 		return nil, err
 	}
 
+	// Rest client
+	restClient := rest.NewClient(vimClient)
+	err = restClient.Login(ctx, credentials)
+	if err != nil {
+		return nil, err
+	}
+
 	finder := find.NewFinder(client.Client, false)
 	datacenter, err := finder.DatacenterOrDefault(ctx, config.Datacenter)
 	if err != nil {
@@ -66,6 +74,7 @@ func NewDriver(config *ConnectConfig) (*Driver, error) {
 	d := Driver{
 		ctx:        ctx,
 		client:     client,
+		restClient: restClient,
 		datacenter: datacenter,
 		finder:     finder,
 	}
