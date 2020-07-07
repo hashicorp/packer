@@ -29,6 +29,11 @@ tomato
 mozza
 cooking...
 `
+	tiramisu = `whip_york
+mascarpone
+whipped_egg_white
+dress
+`
 )
 
 func TestBuild(t *testing.T) {
@@ -254,6 +259,7 @@ func TestBuild(t *testing.T) {
 				expectedContent: map[string]string{
 					"NULL.spaghetti_carbonara.txt": spaghettiCarbonara,
 					"NULL.lasagna.txt":             lasagna,
+					"NULL.tiramisu.txt":            tiramisu,
 				},
 			},
 		},
@@ -267,7 +273,8 @@ func TestBuild(t *testing.T) {
 			fileCheck: fileCheck{
 				notExpected: []string{"NULL.spaghetti_carbonara.txt"},
 				expectedContent: map[string]string{
-					"NULL.lasagna.txt": lasagna,
+					"NULL.lasagna.txt":  lasagna,
+					"NULL.tiramisu.txt": tiramisu,
 				},
 			},
 		},
@@ -279,7 +286,10 @@ func TestBuild(t *testing.T) {
 				testFixture("hcl", "recipes"),
 			},
 			fileCheck: fileCheck{
-				notExpected: []string{"NULL.spaghetti_carbonara.txt"},
+				notExpected: []string{
+					"NULL.spaghetti_carbonara.txt",
+					"NULL.tiramisu.txt",
+				},
 				expectedContent: map[string]string{
 					"NULL.lasagna.txt": lasagna,
 				},
@@ -293,6 +303,9 @@ func TestBuild(t *testing.T) {
 				testFixture("hcl", "recipes"),
 			},
 			fileCheck: fileCheck{
+				notExpected: []string{
+					"NULL.tiramisu.txt",
+				},
 				expectedContent: map[string]string{
 					"NULL.spaghetti_carbonara.txt": spaghettiCarbonara,
 					"NULL.lasagna.txt":             lasagna,

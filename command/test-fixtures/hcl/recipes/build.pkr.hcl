@@ -3,6 +3,23 @@ build {
   source "source.null.base" {
     name  = "tiramisu"
   }
+
+  provisioner "shell-local" {
+    name = "whipped_york"
+    inline = [ "echo whip_york > ${upper(build.ID)}.${source.name}.txt" ]
+  }
+  provisioner "shell-local" {
+    name = "mascarpone"
+    inline = [ "echo mascarpone >> ${upper(build.ID)}.${source.name}.txt" ]
+  }
+  post-processor "shell-local" {
+    name = "whipped_egg_white"
+    inline = [ "echo whipped_egg_white >> ${upper(build.ID)}.${source.name}.txt" ]
+  }
+  post-processor "shell-local" {
+    name = "dress_with_coffeed_boudoirs"
+    inline = [ "echo dress >> ${upper(build.ID)}.${source.name}.txt" ]
+  }
 }
 
 build {
