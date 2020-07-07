@@ -46,6 +46,13 @@ type ProvisionHook struct {
 // return
 var BuilderDataCommonKeys = []string{
 	"ID",
+	// The following correspond to communicator-agnostic functions that are		}
+	// part of the SSH and WinRM communicator implementations. These functions
+	// are not part of the communicator interface, but are stored on the
+	// Communicator Config and return the appropriate values rather than
+	// depending on the actual communicator config values. E.g "Password"
+	// reprosents either WinRMPassword or SSHPassword, which makes this more
+	// useful if a template contains multiple builds.
 	"Host",
 	"Port",
 	"User",
