@@ -18,7 +18,7 @@ func TestArtifact_Id(t *testing.T) {
 		FolderId: "test-folder-id",
 	}
 	a := &Artifact{
-		image: i}
+		Image: i}
 	expected := "test-id-value"
 
 	if a.Id() != expected {
@@ -34,7 +34,7 @@ func TestArtifact_String(t *testing.T) {
 		Family:   "test-family",
 	}
 	a := &Artifact{
-		image: i}
+		Image: i}
 	expected := "A disk image was created: test-name (id: test-id-value) with family name test-family"
 
 	if a.String() != expected {

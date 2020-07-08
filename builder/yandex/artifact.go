@@ -9,7 +9,7 @@ import (
 type Artifact struct {
 	config *Config
 	driver Driver
-	image  *compute.Image
+	Image  *compute.Image
 
 	// StateData should store data such as GeneratedData
 	// to be shared with post-processors
@@ -22,7 +22,7 @@ func (*Artifact) BuilderId() string {
 }
 
 func (a *Artifact) Id() string {
-	return a.image.Id
+	return a.Image.Id
 }
 
 func (*Artifact) Files() []string {
@@ -31,7 +31,7 @@ func (*Artifact) Files() []string {
 
 //revive:enable:var-naming
 func (a *Artifact) String() string {
-	return fmt.Sprintf("A disk image was created: %v (id: %v) with family name %v", a.image.Name, a.image.Id, a.image.Family)
+	return fmt.Sprintf("A disk image was created: %v (id: %v) with family name %v", a.Image.Name, a.Image.Id, a.Image.Family)
 }
 
 func (a *Artifact) State(name string) interface{} {
@@ -41,14 +41,14 @@ func (a *Artifact) State(name string) interface{} {
 
 	switch name {
 	case "ImageID":
-		return a.image.Id
+		return a.Image.Id
 	case "FolderID":
-		return a.image.FolderId
+		return a.Image.FolderId
 	}
 	return nil
 
 }
 
 func (a *Artifact) Destroy() error {
-	return a.driver.DeleteImage(a.image.Id)
+	return a.driver.DeleteImage(a.Image.Id)
 }
