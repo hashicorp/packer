@@ -1,5 +1,5 @@
 //go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type CloneConfig
+//go:generate mapstructure-to-hcl2 -type CloneConfig,vAppConfig
 
 package clone
 
@@ -14,6 +14,17 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
+type vAppConfig struct {
+	// Set values for the available vApp Properties to supply configuration parameters to a virtual machine cloned from
+	// a template that came from an imported OVF or OVA file.
+	//
+	// -> **Note:** The only supported usage path for vApp properties is for existing user-configurable keys.
+	// These generally come from an existing template that was created from an imported OVF or OVA file.
+	// You cannot set values for vApp properties on virtual machines created from scratch,
+	// virtual machines lacking a vApp configuration, or on property keys that do not exist.
+	Properties map[string]string `mapstructure:"properties"`
+}
+
 type CloneConfig struct {
 	// Name of source VM. Path is optional.
 	Template string `mapstructure:"template"`
@@ -26,6 +37,10 @@ type CloneConfig struct {
 	Network string `mapstructure:"network"`
 	// VM notes.
 	Notes string `mapstructure:"notes"`
+	// Set the vApp Options to a virtual machine.
+	// See the [vApp Options Configuration](/docs/builders/vmware/vsphere-clone#vapp-options-configuration)
+	// to know the available options and how to use it.
+	VAppConfig vAppConfig `mapstructure:"vapp"`
 }
 
 func (c *CloneConfig) Prepare() []error {
@@ -67,15 +82,16 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 	}
 
 	vm, err := template.Clone(ctx, &driver.CloneConfig{
-		Name:         s.Location.VMName,
-		Folder:       s.Location.Folder,
-		Cluster:      s.Location.Cluster,
-		Host:         s.Location.Host,
-		ResourcePool: s.Location.ResourcePool,
-		Datastore:    s.Location.Datastore,
-		LinkedClone:  s.Config.LinkedClone,
-		Network:      s.Config.Network,
-		Annotation:   s.Config.Notes,
+		Name:           s.Location.VMName,
+		Folder:         s.Location.Folder,
+		Cluster:        s.Location.Cluster,
+		Host:           s.Location.Host,
+		ResourcePool:   s.Location.ResourcePool,
+		Datastore:      s.Location.Datastore,
+		LinkedClone:    s.Config.LinkedClone,
+		Network:        s.Config.Network,
+		Annotation:     s.Config.Notes,
+		VAppProperties: s.Config.VAppConfig.Properties,
 	})
 	if err != nil {
 		state.Put("error", err)

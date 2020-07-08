@@ -15,6 +15,7 @@ import (
 	"time"
 
 	compute "google.golang.org/api/compute/v1"
+	oslogin "google.golang.org/api/oslogin/v1"
 
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/useragent"
@@ -29,9 +30,10 @@ import (
 // driverGCE is a Driver implementation that actually talks to GCE.
 // Create an instance using NewDriverGCE.
 type driverGCE struct {
-	projectId string
-	service   *compute.Service
-	ui        packer.Ui
+	projectId      string
+	service        *compute.Service
+	osLoginService *oslogin.Service
+	ui             packer.Ui
 }
 
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
@@ -127,13 +129,19 @@ func NewDriverGCE(ui packer.Ui, p string, conf *jwt.Config, vaultOauth string) (
 		return nil, err
 	}
 
+	osLoginService, err := oslogin.New(client)
+	if err != nil {
+		return nil, err
+	}
+
 	// Set UserAgent
 	service.UserAgent = useragent.String()
 
 	return &driverGCE{
-		projectId: p,
-		service:   service,
-		ui:        ui,
+		projectId:      p,
+		service:        service,
+		osLoginService: osLoginService,
+		ui:             ui,
 	}, nil
 }
 
@@ -603,6 +611,28 @@ func (d *driverGCE) getPasswordResponses(zone, instance string) ([]windowsPasswo
 	}
 
 	return passwordResponses, nil
+}
+
+func (d *driverGCE) ImportOSLoginSSHKey(user, sshPublicKey string) (*oslogin.LoginProfile, error) {
+	parent := fmt.Sprintf("users/%s", user)
+	resp, err := d.osLoginService.Users.ImportSshPublicKey(parent, &oslogin.SshPublicKey{
+		Key: sshPublicKey,
+	}).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.LoginProfile, nil
+}
+
+func (d *driverGCE) DeleteOSLoginSSHKey(user, fingerprint string) error {
+	name := fmt.Sprintf("users/%s/sshPublicKeys/%s", user, fingerprint)
+	_, err := d.osLoginService.Users.SshPublicKeys.Delete(name).Do()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (d *driverGCE) WaitForInstance(state, zone, name string) <-chan error {

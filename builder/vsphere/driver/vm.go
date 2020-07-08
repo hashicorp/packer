@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"reflect"
 	"strings"
 	"time"
 
@@ -26,15 +27,16 @@ type VirtualMachine struct {
 }
 
 type CloneConfig struct {
-	Name         string
-	Folder       string
-	Cluster      string
-	Host         string
-	ResourcePool string
-	Datastore    string
-	LinkedClone  bool
-	Network      string
-	Annotation   string
+	Name           string
+	Folder         string
+	Cluster        string
+	Host           string
+	ResourcePool   string
+	Datastore      string
+	LinkedClone    bool
+	Network        string
+	Annotation     string
+	VAppProperties map[string]string
 }
 
 type HardwareConfig struct {
@@ -315,6 +317,12 @@ func (vm *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) (*Virt
 		configSpec.DeviceChange = append(configSpec.DeviceChange, config)
 	}
 
+	vAppConfig, err := vm.updateVAppConfig(ctx, config.VAppProperties)
+	if err != nil {
+		return nil, err
+	}
+	configSpec.VAppConfig = vAppConfig
+
 	task, err := vm.vm.Clone(vm.driver.ctx, folder.folder, config.Name, cloneSpec)
 	if err != nil {
 		return nil, err
@@ -337,6 +345,80 @@ func (vm *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) (*Virt
 
 	created := vm.driver.NewVM(&vmRef)
 	return created, nil
+}
+
+func (vm *VirtualMachine) updateVAppConfig(ctx context.Context, newProps map[string]string) (*types.VmConfigSpec, error) {
+	if len(newProps) == 0 {
+		return nil, nil
+	}
+
+	vProps, _ := vm.Properties(ctx)
+	if vProps.Config.VAppConfig == nil {
+		return nil, fmt.Errorf("this VM lacks a vApp configuration and cannot have vApp properties set on it")
+	}
+
+	allProperties := vProps.Config.VAppConfig.GetVmConfigInfo().Property
+
+	var props []types.VAppPropertySpec
+	for _, p := range allProperties {
+		userValue, setByUser := newProps[p.Id]
+		if !setByUser {
+			continue
+		}
+
+		if *p.UserConfigurable == false {
+			return nil, fmt.Errorf("vApp property with userConfigurable=false specified in vapp.properties: %+v", reflect.ValueOf(newProps).MapKeys())
+		}
+
+		prop := types.VAppPropertySpec{
+			ArrayUpdateSpec: types.ArrayUpdateSpec{
+				Operation: types.ArrayUpdateOperationEdit,
+			},
+			Info: &types.VAppPropertyInfo{
+				Key:              p.Key,
+				Id:               p.Id,
+				Value:            userValue,
+				UserConfigurable: p.UserConfigurable,
+			},
+		}
+		props = append(props, prop)
+
+		delete(newProps, p.Id)
+	}
+
+	if len(newProps) > 0 {
+		return nil, fmt.Errorf("unsupported vApp properties in vapp.properties: %+v", reflect.ValueOf(newProps).MapKeys())
+	}
+
+	return &types.VmConfigSpec{
+		Property: props,
+	}, nil
+}
+
+func (vm *VirtualMachine) AddPublicKeys(ctx context.Context, publicKeys string) error {
+	newProps := map[string]string{"public-keys": publicKeys}
+	config, err := vm.updateVAppConfig(ctx, newProps)
+	if err != nil {
+		return fmt.Errorf("not possible to save temporary public key: %s", err.Error())
+	}
+
+	confSpec := types.VirtualMachineConfigSpec{VAppConfig: config}
+	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
+	if err != nil {
+		return err
+	}
+
+	_, err = task.WaitForResult(vm.driver.ctx, nil)
+	return err
+}
+
+func (vm *VirtualMachine) Properties(ctx context.Context) (*mo.VirtualMachine, error) {
+	log.Printf("fetching properties for VM %q", vm.vm.InventoryPath)
+	var props mo.VirtualMachine
+	if err := vm.vm.Properties(ctx, vm.vm.Reference(), nil, &props); err != nil {
+		return nil, err
+	}
+	return &props, nil
 }
 
 func (vm *VirtualMachine) Destroy() error {

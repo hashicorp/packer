@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	compute "google.golang.org/api/compute/v1"
+	oslogin "google.golang.org/api/oslogin/v1"
 )
 
 // DriverMock is a Driver implementation that is a mocked out so that
@@ -274,4 +275,16 @@ func (d *DriverMock) CreateOrResetWindowsPassword(instance, zone string, c *Wind
 	}
 
 	return resultCh, d.CreateOrResetWindowsPasswordErr
+}
+
+func (d *DriverMock) ImportOSLoginSSHKey(user, key string) (*oslogin.LoginProfile, error) {
+	account := oslogin.PosixAccount{Primary: true, Username: "testing_packer_io"}
+	profile := oslogin.LoginProfile{
+		PosixAccounts: []*oslogin.PosixAccount{&account},
+	}
+	return &profile, nil
+}
+
+func (d *DriverMock) DeleteOSLoginSSHKey(user, fingerprint string) error {
+	return nil
 }

@@ -1,3 +1,4 @@
+//go:generate struct-markdown
 package common
 
 import (
@@ -15,7 +16,9 @@ import (
 
 type BootConfig struct {
 	bootcommand.BootConfig `mapstructure:",squash"`
-	HTTPIP                 string `mapstructure:"http_ip"`
+	// The IP address to use for the HTTP server started to serve the `http_directory`.
+	// If unset, Packer will automatically discover and assign an IP.
+	HTTPIP string `mapstructure:"http_ip"`
 }
 
 type bootCommandTemplateData struct {

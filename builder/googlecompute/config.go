@@ -192,9 +192,22 @@ type Config struct {
 	// A list of project IDs to search for the source image. Packer will search the first
 	// project ID in the list first, and fall back to the next in the list, until it finds the source image.
 	SourceImageProjectId []string `mapstructure:"source_image_project_id" required:"false"`
-	// The path to a startup script to run on the VM from which the image will
-	// be made.
+	// The path to a startup script to run on the launched instance from which the image will
+	// be made. When set, the contents of the startup script file will be added to the instance metadata
+	// under the `"startup_script"` metadata property. See [Providing startup script contents directly](https://cloud.google.com/compute/docs/startupscript#providing_startup_script_contents_directly) for more details.
+	//
+	// When using `startup_script_file` the following rules apply:
+	// - The contents of the script file will overwrite the value of the `"startup_script"` metadata property at runtime.
+	// - The contents of the script file will be wrapped in Packer's startup script wrapper, unless `wrap_startup_script` is disabled. See `wrap_startup_script` for more details.
+	// - Not supported by Windows instances. See [Startup Scripts for Windows](https://cloud.google.com/compute/docs/startupscript#providing_a_startup_script_for_windows_instances) for more details.
 	StartupScriptFile string `mapstructure:"startup_script_file" required:"false"`
+	// For backwards compatibility this option defaults to `"true"` in the future it will default to `"false"`.
+	// If "true", the contents of `startup_script_file` or `"startup_script"` in the instance metadata
+	// is wrapped in a Packer specific script that tracks the execution and completion of the provided
+	// startup script. The wrapper ensures that the builder will not continue until the startup script has been executed.
+	// - The use of the wrapped script file requires that the user or service account
+	// running the build has the compute.instance.Metadata role.
+	WrapStartupScriptFile config.Trilean `mapstructure:"wrap_startup_script" required:"false"`
 	// The Google Compute subnetwork id or URL to use for the launched
 	// instance. Only required if the network has been created with custom
 	// subnetting. Note, the region of the subnetwork must match the region or
@@ -207,6 +220,50 @@ type Config struct {
 	// If true, use the instance's internal IP instead of its external IP
 	// during building.
 	UseInternalIP bool `mapstructure:"use_internal_ip" required:"false"`
+	// If true, OSLogin will be used to manage SSH access to the compute instance by
+	// dynamically importing a temporary SSH key to the Google account's login profile,
+	// and setting the `enable-oslogin` to `TRUE` in the instance metadata.
+	// Optionally, `use_os_login` can be used with an existing `ssh_username` and `ssh_private_key_file`
+	// if a SSH key has already been added to the Google account's login profile - See [Adding SSH Keys](https://cloud.google.com/compute/docs/instances/managing-instance-access#add_oslogin_keys).
+	//
+	// SSH keys can be added to an individual user account
+	//
+	//```shell-session
+	// $ gcloud compute os-login ssh-keys add --key-file=/home/user/.ssh/my-key.pub
+	//
+	// $ gcloud compute os-login describe-profile
+	//PosixAccounts:
+	//- accountId: <project-id>
+	//  gid: '34567890754'
+	//  homeDirectory: /home/user_example_com
+	//  ...
+	//  primary: true
+	//  uid: '2504818925'
+	//  username: /home/user_example_com
+	//sshPublicKeys:
+	//  000000000000000000000000000000000000000000000000000000000000000a:
+	//    fingerprint: 000000000000000000000000000000000000000000000000000000000000000a
+	//```
+	//
+	// Or SSH keys can be added to an associated service account
+	//```shell-session
+	// $ gcloud auth activate-service-account --key-file=<path to service account credentials file (e.g account.json)>
+	// $ gcloud compute os-login ssh-keys add --key-file=/home/user/.ssh/my-key.pub
+	//
+	// $ gcloud compute os-login describe-profile
+	//PosixAccounts:
+	//- accountId: <project-id>
+	//  gid: '34567890754'
+	//  homeDirectory: /home/sa_000000000000000000000
+	//  ...
+	//  primary: true
+	//  uid: '2504818925'
+	//  username: sa_000000000000000000000
+	//sshPublicKeys:
+	//  000000000000000000000000000000000000000000000000000000000000000a:
+	//    fingerprint: 000000000000000000000000000000000000000000000000000000000000000a
+	//```
+	UseOSLogin bool `mapstructure:"use_os_login" required:"false"`
 	// Can be set instead of account_file. If set, this builder will use
 	// HashiCorp Vault to generate an Oauth token for authenticating against
 	// Google's cloud. The value should be the path of the token generator
@@ -447,6 +504,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		if _, err := os.Stat(c.StartupScriptFile); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("startup_script_file: %v", err))
+		}
+
+		if c.WrapStartupScriptFile == config.TriUnset {
+			c.WrapStartupScriptFile = config.TriTrue
 		}
 	}
 

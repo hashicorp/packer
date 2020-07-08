@@ -2,6 +2,7 @@ package clone
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/vsphere/common"
@@ -64,6 +65,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				HTTPPortMin: b.config.HTTPPortMin,
 				HTTPPortMax: b.config.HTTPPortMax,
 				HTTPAddress: b.config.HTTPAddress,
+			},
+			&common.StepSshKeyPair{
+				Debug:        b.config.PackerDebug,
+				DebugKeyPath: fmt.Sprintf("%s.pem", b.config.PackerBuildName),
+				Comm:         &b.config.Comm,
 			},
 			&common.StepRun{
 				Config:   &b.config.RunConfig,

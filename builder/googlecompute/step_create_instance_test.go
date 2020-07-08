@@ -3,10 +3,12 @@ package googlecompute
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/stretchr/testify/assert"
 )
@@ -341,4 +343,45 @@ func TestCreateInstanceMetadata_metadataFile(t *testing.T) {
 
 	// ensure the user-data key in metadata is updated with file content
 	assert.Equal(t, metadata["user-data"], content, "user-data field of the instance metadata should have been updated.")
+}
+
+func TestCreateInstanceMetadata_withWrapStartupScript(t *testing.T) {
+	tt := []struct {
+		WrapStartupScript            config.Trilean
+		StartupScriptContents        string
+		WrappedStartupScriptContents string
+		WrappedStartupScriptStatus   string
+	}{
+		{
+			WrapStartupScript:     config.TriUnset,
+			StartupScriptContents: testMetadataFileContent,
+		},
+		{
+			WrapStartupScript:     config.TriFalse,
+			StartupScriptContents: testMetadataFileContent,
+		},
+		{
+			WrapStartupScript:            config.TriTrue,
+			StartupScriptContents:        StartupScriptLinux,
+			WrappedStartupScriptContents: testMetadataFileContent,
+			WrappedStartupScriptStatus:   StartupScriptStatusNotDone,
+		},
+	}
+
+	for _, tc := range tt {
+		tc := tc
+		state := testState(t)
+		image := StubImage("test-image", "test-project", []string{}, 100)
+		c := state.Get("config").(*Config)
+		c.StartupScriptFile = testMetadataFile(t)
+		c.WrapStartupScriptFile = tc.WrapStartupScript
+
+		// create our metadata
+		metadata, err := c.createInstanceMetadata(image, "")
+
+		assert.True(t, err == nil, "Metadata creation should have succeeded.")
+		assert.Equal(t, tc.StartupScriptContents, metadata[StartupScriptKey], fmt.Sprintf("Instance metadata for startup script should be %q.", tc.StartupScriptContents))
+		assert.Equal(t, tc.WrappedStartupScriptContents, metadata[StartupWrappedScriptKey], fmt.Sprintf("Instance metadata for wrapped startup script should be %q.", tc.WrappedStartupScriptContents))
+		assert.Equal(t, tc.WrappedStartupScriptStatus, metadata[StartupScriptStatusKey], fmt.Sprintf("Instance metadata startup script status should be %q.", tc.WrappedStartupScriptStatus))
+	}
 }

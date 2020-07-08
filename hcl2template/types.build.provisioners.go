@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/packer/packer"
-	"github.com/zclconf/go-cty/cty"
 )
 
 // OnlyExcept is a struct that is meant to be embedded that contains the
@@ -145,18 +144,13 @@ func (cfg *PackerConfig) startProvisioner(source SourceBlock, pb *ProvisionerBlo
 		})
 		return nil, diags
 	}
-	flatProvisionerCfg, moreDiags := decodeHCL2Spec(pb.HCL2Ref.Rest, ectx, provisioner)
-	diags = append(diags, moreDiags...)
-	if diags.HasErrors() {
-		return nil, diags
+	hclProvisioner := &HCL2Provisioner{
+		Provisioner:      provisioner,
+		provisionerBlock: pb,
+		evalContext:      ectx,
+		builderVariables: source.builderVariables(),
 	}
-	// manipulate generatedVars from builder to add to the interfaces being
-	// passed to the provisioner Prepare()
-
-	// configs := make([]interface{}, 2)
-	// configs = append(, flatProvisionerCfg)
-	// configs = append(configs, generatedVars)
-	err = provisioner.Prepare(source.builderVariables(), flatProvisionerCfg)
+	err = hclProvisioner.HCL2Prepare(nil)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
@@ -166,38 +160,5 @@ func (cfg *PackerConfig) startProvisioner(source SourceBlock, pb *ProvisionerBlo
 		})
 		return nil, diags
 	}
-	return provisioner, diags
-}
-
-type provisionerPrepare struct {
-	cfg              *PackerConfig
-	provisionerBlock []*ProvisionerBlock
-	src              SourceRef
-}
-
-// HCL2ProvisionerPrepare is used by the ProvisionHook at the runtime in the provision step
-// to interpolate any build variable by decoding and preparing it again.
-func (pp *provisionerPrepare) HCL2ProvisionerPrepare(data map[string]interface{}) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
-	src := pp.cfg.Sources[pp.src.Ref()]
-
-	variables := make(Variables)
-	for k, v := range data {
-		if value, ok := v.(string); ok {
-			variables[k] = &Variable{
-				DefaultValue: cty.StringVal(value),
-				Type:         cty.String,
-			}
-		}
-	}
-	variablesVal, _ := variables.Values()
-
-	generatedVariables := map[string]cty.Value{
-		sourcesAccessor: cty.ObjectVal(map[string]cty.Value{
-			"type": cty.StringVal(src.Type),
-			"name": cty.StringVal(src.Name),
-		}),
-		buildAccessor: cty.ObjectVal(variablesVal),
-	}
-
-	return pp.cfg.getCoreBuildProvisioners(src, pp.provisionerBlock, pp.cfg.EvalContext(generatedVariables))
+	return hclProvisioner, diags
 }

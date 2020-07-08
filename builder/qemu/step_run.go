@@ -191,12 +191,20 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		}
 	}
 
+	if !config.DiskImage {
+		if config.CDROMInterface == "" {
+			defaultArgs["-cdrom"] = isoPath
+		} else if config.CDROMInterface == "virtio-scsi" {
+			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=none,id=cdrom,media=cdrom", isoPath))
+			deviceArgs = append(deviceArgs, "virtio-scsi-device", "scsi-cd,drive=cdrom")
+		} else {
+			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,id=cdrom,media=cdrom", isoPath, config.CDROMInterface))
+		}
+	}
+
 	defaultArgs["-device"] = deviceArgs
 	defaultArgs["-drive"] = driveArgs
 
-	if !config.DiskImage {
-		defaultArgs["-cdrom"] = isoPath
-	}
 	defaultArgs["-boot"] = bootDrive
 	defaultArgs["-m"] = fmt.Sprintf("%dM", config.MemorySize)
 	if config.CpuCount > 1 {

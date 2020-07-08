@@ -41,6 +41,33 @@ necessary for this build to succeed and can be found further down the page.
 
 @include 'builder/vsphere/iso/Config-not-required.mdx'
 
+### Boot Configuration
+
+@include 'common/bootcommand/BootConfig.mdx'
+
+We send each character to the VM with a default delay of 100ms between groups.
+The delay alleviates possible issues with latency and CPU
+contention. If you notice missing keys, you can tune this delay by specifying
+"boot_keygroup_interval" in your Packer template, for example:
+
+```json
+{
+  "builders": [
+    {
+      "type": "vsphere-iso",
+      "boot_keygroup_interval": "500ms"
+      ...
+    }
+  ]
+}
+```
+
+#### Optional:
+
+@include 'common/bootcommand/BootConfig-not-required.mdx'
+
+@include 'builder/vsphere/common/BootConfig-not-required.mdx'
+
 ### Http directory configuration
 
 @include 'common/HTTPConfig.mdx'
@@ -161,31 +188,6 @@ from the datastore. Example:
 #### Optional WinRM fields:
 
 @include 'helper/communicator/WinRM-not-required.mdx'
-
-## Boot Configuration
-
-@include 'common/bootcommand/BootConfig.mdx'
-
-We send each character to the VM with a default delay of 100ms between groups.
-The delay alleviates possible issues with latency and CPU
-contention. If you notice missing keys, you can tune this delay by specifying
-"boot_keygroup_interval" in your Packer template, for example:
-
-```json
-{
-  "builders": [
-    {
-      "type": "vsphere-iso",
-      "boot_keygroup_interval": "500ms"
-      ...
-    }
-  ]
-}
-```
-
-#### Optional:
-
-@include 'common/bootcommand/BootConfig-not-required.mdx'
 
 ## Working with Clusters
 

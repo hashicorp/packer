@@ -22,15 +22,15 @@ type FlatConfig struct {
 	SSHPort                      *int                       `mapstructure:"ssh_port" cty:"ssh_port" hcl:"ssh_port"`
 	SSHUsername                  *string                    `mapstructure:"ssh_username" cty:"ssh_username" hcl:"ssh_username"`
 	SSHPassword                  *string                    `mapstructure:"ssh_password" cty:"ssh_password" hcl:"ssh_password"`
-	SSHKeyPairName               *string                    `mapstructure:"ssh_keypair_name" cty:"ssh_keypair_name" hcl:"ssh_keypair_name"`
-	SSHTemporaryKeyPairName      *string                    `mapstructure:"temporary_key_pair_name" cty:"temporary_key_pair_name" hcl:"temporary_key_pair_name"`
+	SSHKeyPairName               *string                    `mapstructure:"ssh_keypair_name" undocumented:"true" cty:"ssh_keypair_name" hcl:"ssh_keypair_name"`
+	SSHTemporaryKeyPairName      *string                    `mapstructure:"temporary_key_pair_name" undocumented:"true" cty:"temporary_key_pair_name" hcl:"temporary_key_pair_name"`
 	SSHCiphers                   []string                   `mapstructure:"ssh_ciphers" cty:"ssh_ciphers" hcl:"ssh_ciphers"`
 	SSHClearAuthorizedKeys       *bool                      `mapstructure:"ssh_clear_authorized_keys" cty:"ssh_clear_authorized_keys" hcl:"ssh_clear_authorized_keys"`
-	SSHPrivateKeyFile            *string                    `mapstructure:"ssh_private_key_file" cty:"ssh_private_key_file" hcl:"ssh_private_key_file"`
+	SSHPrivateKeyFile            *string                    `mapstructure:"ssh_private_key_file" undocumented:"true" cty:"ssh_private_key_file" hcl:"ssh_private_key_file"`
 	SSHPty                       *bool                      `mapstructure:"ssh_pty" cty:"ssh_pty" hcl:"ssh_pty"`
 	SSHTimeout                   *string                    `mapstructure:"ssh_timeout" cty:"ssh_timeout" hcl:"ssh_timeout"`
 	SSHWaitTimeout               *string                    `mapstructure:"ssh_wait_timeout" undocumented:"true" cty:"ssh_wait_timeout" hcl:"ssh_wait_timeout"`
-	SSHAgentAuth                 *bool                      `mapstructure:"ssh_agent_auth" cty:"ssh_agent_auth" hcl:"ssh_agent_auth"`
+	SSHAgentAuth                 *bool                      `mapstructure:"ssh_agent_auth" undocumented:"true" cty:"ssh_agent_auth" hcl:"ssh_agent_auth"`
 	SSHDisableAgentForwarding    *bool                      `mapstructure:"ssh_disable_agent_forwarding" cty:"ssh_disable_agent_forwarding" hcl:"ssh_disable_agent_forwarding"`
 	SSHHandshakeAttempts         *int                       `mapstructure:"ssh_handshake_attempts" cty:"ssh_handshake_attempts" hcl:"ssh_handshake_attempts"`
 	SSHBastionHost               *string                    `mapstructure:"ssh_bastion_host" cty:"ssh_bastion_host" hcl:"ssh_bastion_host"`
@@ -49,8 +49,8 @@ type FlatConfig struct {
 	SSHReadWriteTimeout          *string                    `mapstructure:"ssh_read_write_timeout" cty:"ssh_read_write_timeout" hcl:"ssh_read_write_timeout"`
 	SSHRemoteTunnels             []string                   `mapstructure:"ssh_remote_tunnels" cty:"ssh_remote_tunnels" hcl:"ssh_remote_tunnels"`
 	SSHLocalTunnels              []string                   `mapstructure:"ssh_local_tunnels" cty:"ssh_local_tunnels" hcl:"ssh_local_tunnels"`
-	SSHPublicKey                 []byte                     `mapstructure:"ssh_public_key" cty:"ssh_public_key" hcl:"ssh_public_key"`
-	SSHPrivateKey                []byte                     `mapstructure:"ssh_private_key" cty:"ssh_private_key" hcl:"ssh_private_key"`
+	SSHPublicKey                 []byte                     `mapstructure:"ssh_public_key" undocumented:"true" cty:"ssh_public_key" hcl:"ssh_public_key"`
+	SSHPrivateKey                []byte                     `mapstructure:"ssh_private_key" undocumented:"true" cty:"ssh_private_key" hcl:"ssh_private_key"`
 	WinRMUser                    *string                    `mapstructure:"winrm_username" cty:"winrm_username" hcl:"winrm_username"`
 	WinRMPassword                *string                    `mapstructure:"winrm_password" cty:"winrm_password" hcl:"winrm_password"`
 	WinRMHost                    *string                    `mapstructure:"winrm_host" cty:"winrm_host" hcl:"winrm_host"`
@@ -102,9 +102,11 @@ type FlatConfig struct {
 	SourceImageFamily            *string                    `mapstructure:"source_image_family" required:"true" cty:"source_image_family" hcl:"source_image_family"`
 	SourceImageProjectId         []string                   `mapstructure:"source_image_project_id" required:"false" cty:"source_image_project_id" hcl:"source_image_project_id"`
 	StartupScriptFile            *string                    `mapstructure:"startup_script_file" required:"false" cty:"startup_script_file" hcl:"startup_script_file"`
+	WrapStartupScriptFile        *bool                      `mapstructure:"wrap_startup_script" required:"false" cty:"wrap_startup_script" hcl:"wrap_startup_script"`
 	Subnetwork                   *string                    `mapstructure:"subnetwork" required:"false" cty:"subnetwork" hcl:"subnetwork"`
 	Tags                         []string                   `mapstructure:"tags" required:"false" cty:"tags" hcl:"tags"`
 	UseInternalIP                *bool                      `mapstructure:"use_internal_ip" required:"false" cty:"use_internal_ip" hcl:"use_internal_ip"`
+	UseOSLogin                   *bool                      `mapstructure:"use_os_login" required:"false" cty:"use_os_login" hcl:"use_os_login"`
 	VaultGCPOauthEngine          *string                    `mapstructure:"vault_gcp_oauth_engine" cty:"vault_gcp_oauth_engine" hcl:"vault_gcp_oauth_engine"`
 	Zone                         *string                    `mapstructure:"zone" required:"true" cty:"zone" hcl:"zone"`
 }
@@ -214,9 +216,11 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"source_image_family":             &hcldec.AttrSpec{Name: "source_image_family", Type: cty.String, Required: false},
 		"source_image_project_id":         &hcldec.AttrSpec{Name: "source_image_project_id", Type: cty.List(cty.String), Required: false},
 		"startup_script_file":             &hcldec.AttrSpec{Name: "startup_script_file", Type: cty.String, Required: false},
+		"wrap_startup_script":             &hcldec.AttrSpec{Name: "wrap_startup_script", Type: cty.Bool, Required: false},
 		"subnetwork":                      &hcldec.AttrSpec{Name: "subnetwork", Type: cty.String, Required: false},
 		"tags":                            &hcldec.AttrSpec{Name: "tags", Type: cty.List(cty.String), Required: false},
 		"use_internal_ip":                 &hcldec.AttrSpec{Name: "use_internal_ip", Type: cty.Bool, Required: false},
+		"use_os_login":                    &hcldec.AttrSpec{Name: "use_os_login", Type: cty.Bool, Required: false},
 		"vault_gcp_oauth_engine":          &hcldec.AttrSpec{Name: "vault_gcp_oauth_engine", Type: cty.String, Required: false},
 		"zone":                            &hcldec.AttrSpec{Name: "zone", Type: cty.String, Required: false},
 	}

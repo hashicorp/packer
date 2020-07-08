@@ -74,7 +74,7 @@ var _ packer.Builder = new(MockBuilder)
 func (b *MockBuilder) ConfigSpec() hcldec.ObjectSpec { return b.Config.FlatMapstructure().HCL2Spec() }
 
 func (b *MockBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
-	return nil, nil, b.Config.Prepare(raws...)
+	return []string{"ID"}, nil, b.Config.Prepare(raws...)
 }
 
 func (b *MockBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
