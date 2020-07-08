@@ -108,7 +108,7 @@ What does **unmaintained** mean?
 1. Issues and pull requests are monitored as a best effort.
 1. No active development will be performed by the Packer team.
 
-If anyone from the community or an interested third party is willing to
-maintain a community supported plugin, they can fork the repository for
-their own uses. If you are interested in maintaining a plugin that has been
-marked as unmaintained, please reach out via [Packer's Issue Tracker](https://github.com/hashicorp/packer/issues/)
+If anyone form them community is interested in maintaining a community
+supported plugin, please feel free to submit contributions via a pull-
+request for review; reviews are generally prioritized over feature work
+when possible. For a list of open plugin issues and pending feature requests see the [Packer Issue Tracker](https://github.com/hashicorp/packer/issues/).
