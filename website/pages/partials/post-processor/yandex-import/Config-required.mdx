@@ -1,0 +1,14 @@
+<!-- Code generated from the comments of the Config struct in post-processor/yandex-import/post-processor.go; DO NOT EDIT MANUALLY -->
+
+-   `folder_id` (string) - The folder ID that will be used to store imported Image.
+    Alternatively you may set value by environment variable YC_FOLDER_ID.
+    
+-   `service_account_id` (string) - Service Account ID with proper permission to use Storage service
+    for operations 'upload' and 'delete' object to `bucket`
+    
+-   `bucket` (string) - The name of the bucket where the qcow2 file will be copied to for import.
+    This bucket must exist when the post-processor is run.
+    
+-   `image_name` (string) - The name of the image, which contains 1-63 characters and only
+    supports lowercase English characters, numbers and hyphen.
+    
