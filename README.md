@@ -95,3 +95,20 @@ See
 [CONTRIBUTING.md](https://github.com/hashicorp/packer/blob/master/.github/CONTRIBUTING.md)
 for best practices and instructions on setting up your development environment
 to work on Packer.
+
+## Unmaintained Plugins
+As contributors' circumstances change, development on a community-maintained
+plugins can slow. When this happens, the Packer team may mark a plugin as
+unmaintained, to clearly signal the plugin's status to users.
+
+What does **unmaintained** mean?
+
+1. The code repository and all commit history will still be available.
+1. Documentation will remain on the Packer website.
+1. Issues and pull requests are monitored as a best effort.
+1. No active development will be performed by the Packer team.
+
+If anyone from the community or an interested third party is willing to
+maintain a community supported plugin, they can fork the repository for
+their own uses. If you are interested in maintaining a plugin that has been
+marked as unmaintained, please reach out via [Packer's Issue Tracker](https://github.com/hashicorp/packer/issues/)
