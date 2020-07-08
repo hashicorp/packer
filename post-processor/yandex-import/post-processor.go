@@ -241,6 +241,10 @@ func uploadToBucket(s3conn *s3.S3, ui packer.Ui, artifact packer.Artifact, bucke
 	req.Config.S3ForcePathStyle = aws.Bool(true)
 
 	urlStr, _, err := req.PresignRequest(15 * time.Minute)
+	if err != nil {
+		ui.Say(fmt.Sprintf("Failed to presign url: %s", err))
+		return "", err
+	}
 
 	return urlStr, nil
 }
