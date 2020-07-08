@@ -580,6 +580,10 @@ github.com/vmware/govmomi/ovf
 github.com/vmware/govmomi/property
 github.com/vmware/govmomi/session
 github.com/vmware/govmomi/task
+github.com/vmware/govmomi/vapi/internal
+github.com/vmware/govmomi/vapi/library
+github.com/vmware/govmomi/vapi/rest
+github.com/vmware/govmomi/vapi/vcenter
 github.com/vmware/govmomi/vim25
 github.com/vmware/govmomi/vim25/debug
 github.com/vmware/govmomi/vim25/methods
