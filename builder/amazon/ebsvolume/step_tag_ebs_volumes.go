@@ -24,6 +24,19 @@ func (s *stepTagEBSVolumes) Run(ctx context.Context, state multistep.StateBag) m
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
 
+	// re-describe instance now that it's been up a while. This is to prevent
+	// accidental nil block device mappings in the instance info.
+	describeOutput, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
+		InstanceIds: []*string{instance.InstanceId},
+	})
+	if err != nil {
+		err := fmt.Errorf("Error retrieving instance info for block tagging %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	instance = describeOutput.Reservations[0].Instances[0]
+
 	volumes := make(EbsVolumes)
 	for _, instanceBlockDevices := range instance.BlockDeviceMappings {
 		for _, configVolumeMapping := range s.VolumeMapping {
