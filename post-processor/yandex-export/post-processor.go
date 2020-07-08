@@ -14,6 +14,7 @@ import (
 	"github.com/yandex-cloud/go-sdk/iamkey"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -225,6 +226,8 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	state.Put("driver", driver)
 	state.Put("sdk", driver.SDK())
 	state.Put("ui", ui)
+	// no used
+	gd := &builder.GeneratedData{State: state}
 
 	// Build the steps.
 	steps := []multistep.Step{
@@ -233,7 +236,8 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			DebugKeyPath: fmt.Sprintf("yc_pp_%s.pem", p.config.PackerBuildName),
 		},
 		&yandex.StepCreateInstance{
-			Debug: p.config.PackerDebug,
+			Debug:         p.config.PackerDebug,
+			GeneratedData: gd,
 		},
 		new(yandex.StepWaitCloudInitScript),
 		new(yandex.StepTeardownInstance),
