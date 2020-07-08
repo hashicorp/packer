@@ -1,5 +1,8 @@
 ## 1.6.1 (Upcoming)
 
+### FEATURES:
+* **New post-processor** Yandex Import [GH-9553]
+
 ### IMPROVEMENTS:
 * builder/file: Create parent directories of target file, if they don't exist.
     [GH-9452]
