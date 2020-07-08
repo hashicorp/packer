@@ -679,36 +679,34 @@ func (vm *VirtualMachine) ImportToContentLibrary(template vcenter.Template) erro
 	}
 	template.Library = l.library.ID
 
-	placement := new(vcenter.Placement)
 	if template.Placement.Cluster != "" {
 		c, err := vm.driver.FindCluster(template.Placement.Cluster)
 		if err != nil {
 			return err
 		}
-		placement.Cluster = c.cluster.Reference().Value
+		template.Placement.Cluster = c.cluster.Reference().Value
 	}
 	if template.Placement.Folder != "" {
 		f, err := vm.driver.FindFolder(template.Placement.Folder)
 		if err != nil {
 			return err
 		}
-		placement.Folder = f.folder.Reference().Value
+		template.Placement.Folder = f.folder.Reference().Value
 	}
 	if template.Placement.Host != "" {
 		h, err := vm.driver.FindHost(template.Placement.Host)
 		if err != nil {
 			return err
 		}
-		placement.Host = h.host.Reference().Value
+		template.Placement.Host = h.host.Reference().Value
 	}
 	if template.Placement.ResourcePool != "" {
 		rp, err := vm.driver.FindResourcePool(template.Placement.Cluster, template.Placement.Host, template.Placement.ResourcePool)
 		if err != nil {
 			return err
 		}
-		placement.ResourcePool = rp.pool.Reference().Value
+		template.Placement.ResourcePool = rp.pool.Reference().Value
 	}
-	template.Placement = placement
 
 	if template.VMHomeStorage != nil {
 		d, err := vm.driver.FindDatastore(template.VMHomeStorage.Datastore, template.Placement.Host)

@@ -32,7 +32,6 @@ type ConnectConfig struct {
 }
 
 func NewDriver(ctx context.Context, config *ConnectConfig) (*Driver, error) {
-	// SDK client
 	vcenterUrl, err := url.Parse(fmt.Sprintf("https://%v/sdk", config.VCenterServer))
 	if err != nil {
 		return nil, err
@@ -57,7 +56,6 @@ func NewDriver(ctx context.Context, config *ConnectConfig) (*Driver, error) {
 		return nil, err
 	}
 
-	// Rest client
 	restClient := rest.NewClient(vimClient)
 	err = restClient.Login(ctx, credentials)
 	if err != nil {

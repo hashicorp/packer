@@ -8,8 +8,8 @@ type Library struct {
 }
 
 func (d *Driver) FindContentLibrary(name string) (*Library, error) {
-	libm := library.NewManager(d.restClient)
-	l, err := libm.GetLibraryByName(d.ctx, name)
+	lm := library.NewManager(d.restClient)
+	l, err := lm.GetLibraryByName(d.ctx, name)
 	if err != nil {
 		return nil, err
 	}
