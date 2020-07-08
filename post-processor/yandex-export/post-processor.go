@@ -27,7 +27,12 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	// Paths to Yandex Object Storage where exported image will be uploaded
+	// List of paths to Yandex Object Storage where exported image will be uploaded.
+	// Please be aware that use of space char inside path not supported.
+	// Example value `[
+	//        "s3://bucket-name/image-blob.qcow2",
+	//      ]`
+	// Also this param support [build](/docs/templates/engine) template function.
 	Paths []string `mapstructure:"paths" required:"true"`
 	// The folder ID that will be used to launch a temporary instance.
 	// Alternatively you may set value by environment variable YC_FOLDER_ID.
