@@ -8,3 +8,7 @@
 -   `export` (\*common.ExportConfig) - Configuration for exporting VM to an ovf file.
     The VM will not be exported if no [Export Configuration](#export-configuration) is specified.
     
+-   `content_library_destination` (\*common.ContentLibraryDestinationConfig) - Configuration for importing the VM template to a Content Library.
+    The VM template will not be imported if no [Content Library Import Configuration](#content-library-import-configuration) is specified.
+    The import doesn't work if [convert_to_template](#convert_to_template) is set to true.
+    

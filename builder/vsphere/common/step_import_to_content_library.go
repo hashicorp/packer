@@ -13,14 +13,37 @@ import (
 	"github.com/vmware/govmomi/vapi/vcenter"
 )
 
+// With this configuration Packer creates a library item in a content library whose content is a virtual machine template created from the just built VM.
+// The virtual machine template is stored in a newly created library item.
 type ContentLibraryDestinationConfig struct {
-	Library      string `mapstructure:"library"`
-	Name         string `mapstructure:"name"`
-	Description  string `mapstructure:"description"`
-	Cluster      string `mapstructure:"cluster"`
-	Folder       string `mapstructure:"folder"`
-	Host         string `mapstructure:"host"`
+	// Name of the library in which the new library item containing the VM template should be created.
+	// The Content Library should be of type Local to allow deploying virtual machines.
+	Library string `mapstructure:"library"`
+	// Name of the library item that will be created. The name of the item should be different from [vm_name](#vm_name).
+	// Defaults to [vm_name](#vm_name) + timestamp.
+	Name string `mapstructure:"name"`
+	// Description of the library item that will be created. Defaults to "Packer imported [vm_name](#vm_name) VM template".
+	Description string `mapstructure:"description"`
+	// Cluster onto which the virtual machine template should be placed.
+	// If cluster and resource_pool are both specified, resource_pool must belong to cluster.
+	// If cluster and host are both specified, host must be a member of cluster.
+	// Defaults to [cluster](#cluster).
+	Cluster string `mapstructure:"cluster"`
+	// Virtual machine folder into which the virtual machine template should be placed.
+	// Defaults to the same folder as the source virtual machine.
+	Folder string `mapstructure:"folder"`
+	// Host onto which the virtual machine template should be placed.
+	// If host and resource_pool are both specified, resource_pool must belong to host.
+	// If host and cluster are both specified, host must be a member of cluster.
+	// Defaults to [host](#host).
+	Host string `mapstructure:"host"`
+	// Resource pool into which the virtual machine template should be placed.
+	// Defaults to [resource_pool](#resource_pool). if [resource_pool](#resource_pool) is also unset,
+	// the system will attempt to choose a suitable resource pool for the virtual machine template.
 	ResourcePool string `mapstructure:"resource_pool"`
+	// The datastore for the virtual machine template's configuration and log files.
+	// Defaults to the storage backing associated with the library specified by library.
+	Datastore string `mapstructure:"datastore"`
 }
 
 func (c *ContentLibraryDestinationConfig) Prepare(lc *LocationConfig) []error {
@@ -45,9 +68,6 @@ func (c *ContentLibraryDestinationConfig) Prepare(lc *LocationConfig) []error {
 	}
 	if c.Cluster == "" {
 		c.Cluster = lc.Cluster
-	}
-	if c.Folder == "" {
-		c.Folder = lc.Folder
 	}
 	if c.Host == "" {
 		c.Host = lc.Host
@@ -84,6 +104,12 @@ func (s *StepImportToContentLibrary) Run(_ context.Context, state multistep.Stat
 			Host:         s.ContentLibConfig.Host,
 			ResourcePool: s.ContentLibConfig.ResourcePool,
 		},
+	}
+
+	if s.ContentLibConfig.Datastore != "" {
+		template.VMHomeStorage = &vcenter.DiskStorage{
+			Datastore: s.ContentLibConfig.Datastore,
+		}
 	}
 
 	ui.Say(fmt.Sprintf("Importing VM template %s to Content Library...", s.ContentLibConfig.Name))

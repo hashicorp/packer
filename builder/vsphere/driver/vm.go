@@ -710,6 +710,14 @@ func (vm *VirtualMachine) ImportToContentLibrary(template vcenter.Template) erro
 	}
 	template.Placement = placement
 
+	if template.VMHomeStorage != nil {
+		d, err := vm.driver.FindDatastore(template.VMHomeStorage.Datastore, template.Placement.Host)
+		if err != nil {
+			return err
+		}
+		template.VMHomeStorage.Datastore = d.ds.Reference().Value
+	}
+
 	vcm := vcenter.NewManager(vm.driver.restClient)
 	_, err = vcm.CreateTemplate(vm.driver.ctx, template)
 	return err
