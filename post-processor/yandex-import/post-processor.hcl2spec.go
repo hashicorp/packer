@@ -23,7 +23,7 @@ type FlatConfig struct {
 	Bucket                *string           `mapstructure:"bucket" required:"true" cty:"bucket" hcl:"bucket"`
 	ObjectName            *string           `mapstructure:"object_name" required:"false" cty:"object_name" hcl:"object_name"`
 	SkipClean             *bool             `mapstructure:"skip_clean" required:"false" cty:"skip_clean" hcl:"skip_clean"`
-	ImageName             *string           `mapstructure:"image_name" required:"true" cty:"image_name" hcl:"image_name"`
+	ImageName             *string           `mapstructure:"image_name" required:"false" cty:"image_name" hcl:"image_name"`
 	ImageDescription      *string           `mapstructure:"image_description" required:"false" cty:"image_description" hcl:"image_description"`
 	ImageFamily           *string           `mapstructure:"image_family" required:"false" cty:"image_family" hcl:"image_family"`
 	ImageLabels           map[string]string `mapstructure:"image_labels" required:"false" cty:"image_labels" hcl:"image_labels"`

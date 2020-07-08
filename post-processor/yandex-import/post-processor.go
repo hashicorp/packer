@@ -59,7 +59,7 @@ type Config struct {
 
 	// The name of the image, which contains 1-63 characters and only
 	// supports lowercase English characters, numbers and hyphen.
-	ImageName string `mapstructure:"image_name" required:"true"`
+	ImageName string `mapstructure:"image_name" required:"false"`
 	// The description of the image.
 	ImageDescription string `mapstructure:"image_description" required:"false"`
 	//  The family name of the imported image.
