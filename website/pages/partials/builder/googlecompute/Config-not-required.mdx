@@ -176,6 +176,50 @@
 -   `use_internal_ip` (bool) - If true, use the instance's internal IP instead of its external IP
     during building.
     
+-   `use_os_login` (bool) - If true, OSLogin will be used to manage SSH access to the compute instance by
+    dynamically importing a temporary SSH key to the Google account's login profile,
+    and setting the `enable-oslogin` to `TRUE` in the instance metadata.
+    Optionally, `use_os_login` can be used with an existing `ssh_username` and `ssh_private_key_file`
+    if a SSH key has already been added to the Google account's login profile - See [Adding SSH Keys](https://cloud.google.com/compute/docs/instances/managing-instance-access#add_oslogin_keys).
+    
+    SSH keys can be added to an individual user account
+    
+    ```shell-session
+    $ gcloud compute os-login ssh-keys add --key-file=/home/user/.ssh/my-key.pub
+    
+    $ gcloud compute os-login describe-profile
+    PosixAccounts:
+    - accountId: <project-id>
+     gid: '34567890754'
+     homeDirectory: /home/user_example_com
+     ...
+     primary: true
+     uid: '2504818925'
+     username: /home/user_example_com
+    sshPublicKeys:
+     000000000000000000000000000000000000000000000000000000000000000a:
+       fingerprint: 000000000000000000000000000000000000000000000000000000000000000a
+    ```
+    
+    Or SSH keys can be added to an associated service account
+    ```shell-session
+    $ gcloud auth activate-service-account --key-file=<path to service account credentials file (e.g account.json)>
+    $ gcloud compute os-login ssh-keys add --key-file=/home/user/.ssh/my-key.pub
+    
+    $ gcloud compute os-login describe-profile
+    PosixAccounts:
+    - accountId: <project-id>
+     gid: '34567890754'
+     homeDirectory: /home/sa_000000000000000000000
+     ...
+     primary: true
+     uid: '2504818925'
+     username: sa_000000000000000000000
+    sshPublicKeys:
+     000000000000000000000000000000000000000000000000000000000000000a:
+       fingerprint: 000000000000000000000000000000000000000000000000000000000000000a
+    ```
+    
 -   `vault_gcp_oauth_engine` (string) - Can be set instead of account_file. If set, this builder will use
     HashiCorp Vault to generate an Oauth token for authenticating against
     Google's cloud. The value should be the path of the token generator

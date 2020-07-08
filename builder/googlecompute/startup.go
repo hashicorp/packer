@@ -7,6 +7,7 @@ import (
 const StartupScriptKey string = "startup-script"
 const StartupScriptStatusKey string = "startup-script-status"
 const StartupWrappedScriptKey string = "packer-wrapped-startup-script"
+const EnableOSLoginKey string = "enable-oslogin"
 
 const StartupScriptStatusDone string = "done"
 const StartupScriptStatusError string = "error"

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	compute "google.golang.org/api/compute/v1"
+	oslogin "google.golang.org/api/oslogin/v1"
 )
 
 // Driver is the interface that has to be implemented to communicate
@@ -62,6 +63,12 @@ type Driver interface {
 
 	// CreateOrResetWindowsPassword creates or resets the password for a user on an Windows instance.
 	CreateOrResetWindowsPassword(zone, name string, config *WindowsPasswordConfig) (<-chan error, error)
+
+	// ImportOSLoginSSHKey imports SSH public key for OSLogin.
+	ImportOSLoginSSHKey(user, sshPublicKey string) (*oslogin.LoginProfile, error)
+
+	// DeleteOSLoginSSHKey deletes the SSH public key for OSLogin with the given key.
+	DeleteOSLoginSSHKey(user, fingerprint string) error
 }
 
 type InstanceConfig struct {
