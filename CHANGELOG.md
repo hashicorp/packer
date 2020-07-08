@@ -271,6 +271,11 @@
 
 ## 1.5.5 (March 25,2020)
 
+### BACKWARDS INCOMPATIBILITIES:
+* core: Interpolation of undefined variables will now error as expected, in
+    previous versions variables were allowed to be set as a command line
+    argument but that was because the validation was being ignored
+
 ### IMPROVEMENTS:
 * builder/azure: Add support for configurable KeyVault SKU [GH-8879]
 * builder/hyperv: Add `first_boot_device` setting to allow the selection of the
@@ -305,8 +310,6 @@
     strings [GH-8829]
 
 ### Bug Fixes:
-* bilder/proxmox: Bump proxmox-api-go to fix upstream bug where users hit open
-    file limit. [GH-8800]
 * builder/azure: Fix `winrm_password` attribution and allow users to set
     `winrm_username` [GH-8928]
 * builder/azure: Fix azure key vault cleanup failure [GH-8905]
@@ -317,6 +320,8 @@
     to fix SSH authentication issue [GH-8942]
 * builder/proxmox: Add new validation to catch that template_name cannot
     contain spaces. [GH-8799]
+* builder/proxmox: Bump proxmox-api-go to fix upstream bug where users hit open
+    file limit. [GH-8800]
 * builder/vagrant: Fix path validation in ssh config step. [GH-8826]
 * builder/virtualbox-vm: Fix crash when VM has no snapshots. [GH-8906]
 * builder/virtualbox: Remove all floppy controllers before adding a new one.
@@ -333,10 +338,12 @@
     provisioners. [GH-8771]
 * core: Fix bug where user var recursion could fail intermittently when used
     with env vars [GH-8875]
+* core: Interpolation of undefined variables will now error as expected
 * plugins: Make plugin discovery stricter with respect to periods so that users
     can disable plugins by renaming the extension [GH-8735]
+* provisioner/salt: Fix `no_exit_on_failure` config to work correctly as
+    expected. [GH-9119]
 * provisioner/shell: "inline" config option is now a template engine. [GH-8883]
-* provisioner/salt: Fix `no_exit_on_failure` config to work correctly as expected. [GH-9119]
 
 ## 1.5.4 (February 14, 2020)
 no-change release to fix code-signing on OSX binaries. Since checksums for these
