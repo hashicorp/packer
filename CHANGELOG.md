@@ -3,14 +3,20 @@
 ### IMPROVEMENTS:
 * builder/file: Create parent directories of target file, if they don't exist.
     [GH-9452]
+* builder/google: Add support for oslogin via the `use_os_login` configuration
+    option [GH-9339]
+* builder/googlecompute: Add `wrap_startup_script` configuration option to
+    allow the disabling of Packer's startup script wrapper [GH-9505]
 * builder/hyperone: Add support for custom username in vm creation. [GH-9497]
 * builder/hyperone: Skip chroot device discovery. [GH-9489]
 * builder/proxmox: Enable Proxmox builder to toggle the firewall parameter for
     network interfaces. [GH-9487]
 * builder/proxmox: Update Proxmox storagePoolTypes [GH-9418]
+* builder/qemu: Add 'cdrom_interface' option to QEMU builder [GH-9483]
 * builder/ucloud: New access config options and run config options. [GH-9466]
 * builder/vsphere-clone: Add `boot_command` support to vsphere-clone builder,
     including support for starting an HTTP server
+* builder/vsphere-clone: Add `vapp` configuration option [GH-9507]
 * builder/vsphere: Add boot_command support to vsphere-clone builder. [GH-9397]
 * builder/vsphere: Create vm output folders if they don't exist [GH-9402]
 * builder/vsphere: Look at all available IPs in the waiting for IP loop.
@@ -31,7 +37,7 @@
     types. [GH-9454]
 * core/hcl: Allow use of `keep_input_artifact` in post processors. [GH-9477]
 * core/hcl: Share build info with Provisioner and Post-Processor via HCL2
-    variables [GH-9444]
+    variables [GH-9444] [GH-9534]
 * core: Add on-error flag option to run error-cleanup-provisioner [GH-9429]
 * post-processor/yandex-export: Support Authentication by Service Account Key
     file [GH-9379]
@@ -55,12 +61,16 @@
     [GH-9387]
 * builder/vmware: update vendor library, enabling retries on 502 errors
     [GH-9391]
+* builder/vsphere-clone: Fix SSH public key injection for cloned templates
+    [GH-9507]
 * builder/vsphere: Fix vsphere ToolsSyncTime and ToolsUpgradePolicy [GH-9515]
 * communicator/winrm: add the "no_proxy" environment variable option to have
     winrm bypass the proxy set by the http_proxy or https_proxy environment
     vars, when connecting to the remote instance. [GH-9267]
 * core: Do not print download progress bar if a machine-readable UI is chosen.
     [GH-9448]
+* post-processor/amazon-import: Add support for retrying RequestLimitExceeded
+    errors when importing an image [GH-9537]
 * provisioner/ansible: Correct check for whether PackerHttpAddr is implemented
     or not [GH-9498]
 
