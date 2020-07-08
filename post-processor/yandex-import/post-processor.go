@@ -31,18 +31,15 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// The folder ID that will be used to store imported Image.
-	// Alternatively you may set value by environment variable YC_FOLDER_ID.
 	FolderID string `mapstructure:"folder_id" required:"true"`
 	// Service Account ID with proper permission to use Storage service
 	// for operations 'upload' and 'delete' object to `bucket`
 	ServiceAccountID string `mapstructure:"service_account_id" required:"true"`
 
-	// OAuth token to use to authenticate to Yandex.Cloud. Alternatively you may set
-	// value by environment variable YC_TOKEN.
+	// OAuth token to use to authenticate to Yandex.Cloud.
 	Token string `mapstructure:"token" required:"false"`
 	// Path to file with Service Account key in json format. This
-	// is an alternative method to authenticate to Yandex.Cloud. Alternatively you may set environment variable
-	// YC_SERVICE_ACCOUNT_KEY_FILE.
+	// is an alternative method to authenticate to Yandex.Cloud.
 	ServiceAccountKeyFile string `mapstructure:"service_account_key_file" required:"false"`
 
 	// The name of the bucket where the qcow2 file will be copied to for import.
