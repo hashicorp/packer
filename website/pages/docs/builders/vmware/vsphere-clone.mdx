@@ -42,6 +42,43 @@ necessary for this build to succeed and can be found further down the page.
 
 @include 'builder/vsphere/clone/CloneConfig-not-required.mdx'
 
+### vApp Options Configuration
+
+@include 'builder/vsphere/clone/vAppConfig-not-required.mdx'
+
+Example of usage:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+ "vapp": {
+     "properties": {
+         "hostname": "{{ user `hostname`}}",
+         "user-data": "{{ env `USERDATA`}}"
+     }
+ }
+```
+
+A `user-data` field requires the content of a yaml file to be encoded with base64. This
+can be done via environment variable:
+`export USERDATA=$(gzip -c9 <userdata.yaml | { base64 -w0 2>/dev/null || base64; })`
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+   vapp {
+     properties = {
+        hostname  = var.hostname
+        user-data = base64encode(var.user_data)
+     }
+   }
+```
+
+</Tab>
+</Tabs>
+
 ### Extra Configuration Parameters
 
 @include 'builder/vsphere/common/ConfigParamsConfig-not-required.mdx'
@@ -97,6 +134,23 @@ necessary for this build to succeed and can be found further down the page.
 #### Optional SSH fields:
 
 @include 'helper/communicator/SSH-not-required.mdx'
+
+@include 'helper/communicator/SSH-Temporary-Key-Pair-not-required.mdx'
+
+@include 'helper/communicator/SSH-Key-Pair-Name-not-required.mdx'
+
+@include 'helper/communicator/SSH-Private-Key-File-not-required.mdx'
+
+@include 'helper/communicator/SSH-Agent-Auth-not-required.mdx'
+
+-> **NOTE:**  Packer uses vApp Options to inject ssh public keys to the Virtual Machine.
+ The [temporary_key_pair_name](/docs/builders/vmware/vsphere-clone#temporary_key_pair_name) will only work
+ if the template being cloned contains the vApp property `public-keys`.
+ If using [ssh_private_key_file](/docs/builders/vmware/vsphere-clone#ssh_private_key_file), provide
+ the public key via [configuration_parameters](/docs/builders/vmware/vsphere-clone#configuration_parameters) or
+ [vApp Options Configuration](/docs/builders/vmware/vsphere-clone#vapp-options-configuration) whenever the `guestinto.userdata`
+ is available. See [VMware Guestinfo datasource](https://github.com/vmware/cloud-init-vmware-guestinfo) for more information
+ about the key.
 
 #### Optional WinRM fields:
 
