@@ -135,6 +135,14 @@ can be done via environment variable:
 
 @include 'helper/communicator/SSH-not-required.mdx'
 
+@include 'helper/communicator/SSH-Temporary-Key-Pair-not-required.mdx'
+
+@include 'helper/communicator/SSH-Key-Pair-Name-not-required.mdx'
+
+@include 'helper/communicator/SSH-Private-Key-File-not-required.mdx'
+
+@include 'helper/communicator/SSH-Agent-Auth-not-required.mdx'
+
 -> **NOTE:**  Packer uses vApp Options to inject ssh public keys to the Virtual Machine.
  The [temporary_key_pair_name](/docs/builders/vmware/vsphere-clone#temporary_key_pair_name) will only work
  if the template being cloned contains the vApp property `public-keys`.
