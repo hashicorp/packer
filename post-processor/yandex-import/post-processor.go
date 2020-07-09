@@ -6,6 +6,7 @@ package yandeximport
 import (
 	"context"
 	"fmt"
+	yandexexport "github.com/hashicorp/packer/post-processor/yandex-export"
 	"os"
 	"strings"
 	"time"
@@ -154,11 +155,11 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	switch artifact.BuilderId() {
-	case compress.BuilderId, artifice.BuilderId, file.BuilderId:
+	case compress.BuilderId, artifice.BuilderId, file.BuilderId, yandexexport.BuilderId:
 		break
 	default:
 		err := fmt.Errorf(
-			"Unknown artifact type: %s\nCan only import from Compress, Artifice and File post-processor artifacts.",
+			"Unknown artifact type: %s\nCan only import from Yandex-Export, Compress, Artifice and File post-processor artifacts.",
 			artifact.BuilderId())
 		return nil, false, false, err
 	}
