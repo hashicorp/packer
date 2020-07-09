@@ -28,6 +28,10 @@
     (unless the user has set the `-debug` flag). Defaults to "false";
     currently only works on guests with `sed` installed.
     
+-   `ssh_certificate_file` (string) - Path to user certificate used to authenticate with SSH.
+    The `~` can be used in path and will be expanded to the
+    home directory of current user.
+    
 -   `ssh_pty` (bool) - If `true`, a PTY will be requested for the SSH connection. This defaults
     to `false`.
     
@@ -55,6 +59,10 @@
     
 -   `ssh_bastion_private_key_file` (string) - Path to a PEM encoded private key file to use to authenticate with the
     bastion host. The `~` can be used in path and will be expanded to the
+    home directory of current user.
+    
+-   `ssh_bastion_certificate_file` (string) - Path to user certificate used to authenticate with bastion host.
+    The `~` can be used in path and will be expanded to the
     home directory of current user.
     
 -   `ssh_file_transfer_method` (string) - `scp` or `sftp` - How to transfer files, Secure copy (default) or SSH
