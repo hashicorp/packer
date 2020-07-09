@@ -66,6 +66,14 @@ EOF
     boot_command            = local.ubuntu_1804_boot_command
   }
 
+  source "source.vmware-iso.esxi-base-ubuntu-amd64" {
+    name                    = "16.04-from-esxi"
+    iso_url                 = local.iso_url_ubuntu_1604
+    iso_checksum            = "file:${local.iso_checksum_url_ubuntu_1604}"
+    output_directory        = "vmware_iso_ubuntu_1604_amd64_from_esxi"
+    boot_command            = local.ubuntu_1604_boot_command
+  }
+
   source "source.qemu.base-ubuntu-amd64" {
     name                    = "16.04"
     iso_url                 = local.iso_url_ubuntu_1604

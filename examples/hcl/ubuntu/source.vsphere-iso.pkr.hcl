@@ -10,16 +10,22 @@
 // export PKR_VAR_vcenter_user=""
 // export PKR_VAR_vm_ip=""
 // export PKR_VAR_gateway_ip=""
+// ...
 
 variable "vcenter_endpoint" { type = string }
 variable "vcenter_user"     { type = string }
 variable "vcenter_password" { type = string }
 variable "esxi_host"        { type = string }
+variable "esxi_password"    { type = string }
+variable "esxi_user"        { type = string }
 variable "datacenter_name"  { type = string }
 variable "vm_ip"            { type = string }
 variable "gateway_ip"       { type = string }
 variable "datastore" {
     default = "datastore1"
+}
+variable "remote_private_key_file_path" {
+    type = string
 }
 
 source "vsphere-iso" "base-ubuntu-amd64" {
