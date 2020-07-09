@@ -8,6 +8,7 @@ const BuilderId = "packer.post-processor.yandex-export"
 
 type Artifact struct {
 	paths []string
+	urls  []string
 }
 
 func (*Artifact) BuilderId() string {
@@ -26,6 +27,11 @@ func (a *Artifact) Files() []string {
 
 func (a *Artifact) String() string {
 	return fmt.Sprintf("Exported artifacts in: %s", a.paths)
+}
+
+func (a *Artifact) Url() string {
+	// print url for first path
+	return a.urls[0]
 }
 
 func (*Artifact) State(name string) interface{} {
