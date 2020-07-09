@@ -100,6 +100,7 @@ eval "$(jq -r '@sh "export YC_SK_ID=\(.access_key.id); export AWS_ACCESS_KEY_ID=
 echo "Check access to storage..."
 if ! aws s3 --endpoint-url=https://storage.yandexcloud.net ls > /dev/null ; then
   echo "Failed to access storage."
+  exit 1
 fi
 
 FAIL=0
@@ -119,6 +120,7 @@ done
 echo "Delete static access key..."
 if ! yc iam access-key delete ${YC_SK_ID} ; then
   echo "Failed to delete static access key."
+  FAIL=1
 fi
 
 echo "Set metadata key to 'cloud-init-status' to 'cloud-init-done' value"
