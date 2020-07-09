@@ -775,6 +775,7 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
     <device0 type="string">Optical</device0>
   </boot>
   <secure_boot_enabled type="bool">False</secure_boot_enabled>
+  <secure_boot_template type="string">MicrosoftWindows</secure_boot_template>
   <notes type="string">$($vm.Notes)</notes>
   <vm-controllers/>
 </configuration>
@@ -795,6 +796,7 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
     if ((Hyper-V\Get-VMFirmware -VM $vm).SecureBoot -eq [Microsoft.HyperV.PowerShell.OnOffState]::On)
     {
 	  $config.configuration.secure_boot_enabled.'#text' = 'True'
+	  $config.configuration.secure_boot_template.'#text' = (Hyper-V\Get-VMFirmware -VM $vm).SecureBootTemplate
 	}
     else
     {
