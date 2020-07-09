@@ -753,11 +753,35 @@ func addNetwork(d *Driver, devices object.VirtualDeviceList, config *CreateConfi
 func findNetwork(network string, host string, d *Driver) (object.NetworkReference, error) {
 	if network != "" {
 		var err error
-		network, err := d.finder.Network(d.ctx, network)
+		networks, err := d.FindNetworks(network)
 		if err != nil {
 			return nil, err
 		}
-		return network, nil
+		if len(networks) == 1 {
+			return networks[0].network, nil
+		}
+
+		// If there are multiple networks then try to match the host
+		if host != "" {
+			h, err := d.FindHost(host)
+			if err != nil {
+				return nil, &MultipleNetworkFoundError{network, fmt.Sprintf("unable to match a network to the host %s: %s", host, err.Error())}
+			}
+			for _, n := range networks {
+				info, err := n.Info("host")
+				if err != nil {
+					continue
+				}
+				for _, host := range info.Host {
+					if h.host.Reference().Value == host.Reference().Value {
+						return n.network, nil
+					}
+				}
+			}
+			return nil, &MultipleNetworkFoundError{network, fmt.Sprintf("unable to match a network to the host %s", host)}
+		}
+
+		return nil, &MultipleNetworkFoundError{network, "please provide a host to match or the network full path"}
 	}
 
 	if host != "" {
