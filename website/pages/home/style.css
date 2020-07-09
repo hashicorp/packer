@@ -23,14 +23,14 @@
           width: 80%;
           margin: 0 10%;
         }
-      }
 
-      & > *:first-child {
+      &:first-child {
         margin-right: 15px;
 
         @media (max-width: 350px) {
           margin-bottom: 15px;
         }
+      }
       }
     }
   }
