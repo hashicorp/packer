@@ -18,6 +18,9 @@ starts from an ISO file and creates new VMs from scratch.
 
 - VMware Player is not required.
 - It uses the official vCenter API, and does not require ESXi host [modification](/docs/builders/vmware-iso#building-on-a-remote-vsphere-hypervisor)
+- This builder is supported for vSphere version 6.5 and greater. Builds on lower
+versions may work, but some configuration options may throw errors because they
+do not exist in the older versions of the vSphere API.
 
 ## Examples
 
