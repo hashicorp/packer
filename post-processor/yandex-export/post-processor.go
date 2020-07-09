@@ -242,7 +242,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		},
 		&yandex.StepCreateInstance{
 			Debug:         p.config.PackerDebug,
-			GeneratedData: gd,
+			GeneratedData: &builder.GeneratedData{State: state},
 		},
 		new(yandex.StepWaitCloudInitScript),
 		new(yandex.StepTeardownInstance),
