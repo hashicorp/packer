@@ -29,10 +29,8 @@ type Config struct {
 
 	// List of paths to Yandex Object Storage where exported image will be uploaded.
 	// Please be aware that use of space char inside path not supported.
-	// Example value `[
-	//        "s3://bucket-name/image-blob.qcow2",
-	//      ]`
 	// Also this param support [build](/docs/templates/engine) template function.
+	// Check available template data for [Yandex](/docs/builders/yandex#build-template-data) builder.
 	Paths []string `mapstructure:"paths" required:"true"`
 	// The folder ID that will be used to launch a temporary instance.
 	// Alternatively you may set value by environment variable YC_FOLDER_ID.
@@ -231,8 +229,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	state.Put("driver", driver)
 	state.Put("sdk", driver.SDK())
 	state.Put("ui", ui)
-	// no used
-	gd := &builder.GeneratedData{State: state}
 
 	// Build the steps.
 	steps := []multistep.Step{
