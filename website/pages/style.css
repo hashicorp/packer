@@ -98,15 +98,15 @@
   padding-top: 96px;
   padding-bottom: 96px;
 
-& > .g-section-header + *,
-& > .g-container > .g-section-header + * {
-  margin-top: 72px;
-}
+  & > .g-section-header + *,
+  & > .g-container > .g-section-header + * {
+    margin-top: 72px;
+  }
 
-& > * + *,
-& > .g-container > * + * {
-  margin-top: 96px;
-}
+  & > * + *,
+  & > .g-container > * + * {
+    margin-top: 96px;
+  }
 }
 
 .g-section-block .button-container {

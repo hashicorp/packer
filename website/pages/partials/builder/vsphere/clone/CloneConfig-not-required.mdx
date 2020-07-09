@@ -1,17 +1,16 @@
 <!-- Code generated from the comments of the CloneConfig struct in builder/vsphere/clone/step_clone.go; DO NOT EDIT MANUALLY -->
 
--   `template` (string) - Name of source VM. Path is optional.
-    
--   `disk_size` (int64) - The size of the disk in MB.
-    
--   `linked_clone` (bool) - Create VM as a linked clone from latest snapshot. Defaults to `false`.
-    
--   `network` (string) - Set the network in which the VM will be connected to. If no network is specified, `host`
-    must be specified to allow Packer to look for the available network.
-    
--   `notes` (string) - VM notes.
-    
--   `vapp` (vAppConfig) - Set the vApp Options to a virtual machine.
-    See the [vApp Options Configuration](/docs/builders/vmware/vsphere-clone#vapp-options-configuration)
-    to know the available options and how to use it.
-    
+- `template` (string) - Name of source VM. Path is optional.
+
+- `disk_size` (int64) - The size of the disk in MB.
+
+- `linked_clone` (bool) - Create VM as a linked clone from latest snapshot. Defaults to `false`.
+
+- `network` (string) - Set the network in which the VM will be connected to. If no network is specified, `host`
+  must be specified to allow Packer to look for the available network.
+
+- `notes` (string) - VM notes.
+
+- `vapp` (vAppConfig) - Set the vApp Options to a virtual machine.
+  See the [vApp Options Configuration](/docs/builders/vmware/vsphere-clone#vapp-options-configuration)
+  to know the available options and how to use it.

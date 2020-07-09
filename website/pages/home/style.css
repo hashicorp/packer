@@ -24,13 +24,13 @@
           margin: 0 10%;
         }
 
-      &:first-child {
-        margin-right: 15px;
+        &:first-child {
+          margin-right: 15px;
 
-        @media (max-width: 350px) {
-          margin-bottom: 15px;
+          @media (max-width: 350px) {
+            margin-bottom: 15px;
+          }
         }
-      }
       }
     }
   }

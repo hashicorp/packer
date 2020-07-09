@@ -182,7 +182,6 @@ executing the shell script.
 With certain provisioners it is sometimes desirable to retry when it fails.
 Specifically, in cases where the provisioner depends on external processes that are not done yet.
 
-
 Every provisioner definition in a Packer template can take a special
 configuration `max_retries` that is the maximum number of times a provisioner will retry on error.
 By default, there `max_retries` is zero and there is no retry on error. An example is shown below:

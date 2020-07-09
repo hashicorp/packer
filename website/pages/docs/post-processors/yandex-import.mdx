@@ -17,14 +17,11 @@ The Yandex.Cloud Compute Image Import post-processor create new Compute Image
 from a qcow2 file. As Compute service support image creation from Storage service object
 just before request to create its upload file into Storage service.
 
-
 Assigned Service Account must have write permissions to the Yandex Object Storage.
 A new temporary static access keys from assigned Service Account used to upload
 file.
 
-
 ## Configuration
-
 
 ### Required:
 
@@ -33,7 +30,6 @@ file.
 ### Optional:
 
 @include 'post-processor/yandex-import/Config-not-required.mdx'
-
 
 ## Basic Example
 

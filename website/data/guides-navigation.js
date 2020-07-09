@@ -8,11 +8,11 @@
 export default [
   {
     category: 'hcl',
-    content: ['from-json-v1', 'variables', 'component-object-spec']
+    content: ['from-json-v1', 'variables', 'component-object-spec'],
   },
   {
     category: 'automatic-operating-system-installs',
-    content: ['autounattend_windows', 'preseed_ubuntu']
+    content: ['autounattend_windows', 'preseed_ubuntu'],
   },
 
   {
@@ -20,8 +20,8 @@ export default [
     content: [
       'isotime-template-function',
       'veewee-to-packer',
-      'use-packer-with-comment'
-    ]
+      'use-packer-with-comment',
+    ],
   },
   {
     category: 'packer-on-cicd',
@@ -30,7 +30,7 @@ export default [
       'build-virtualbox-image',
       'pipelineing-builds',
       'trigger-tfe',
-      'upload-images-to-artifact'
-    ]
-  }
+      'upload-images-to-artifact',
+    ],
+  },
 ]

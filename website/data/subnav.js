@@ -3,21 +3,21 @@ export default [
   {
     text: 'Intro',
     url: '/intro',
-    type: 'inbound'
+    type: 'inbound',
   },
   {
     text: 'Guides',
     url: '/guides',
-    type: 'inbound'
+    type: 'inbound',
   },
   {
     text: 'Docs',
     url: '/docs',
-    type: 'inbound'
+    type: 'inbound',
   },
   {
     text: 'Community',
     url: '/community',
-    type: 'inbound'
-  }
+    type: 'inbound',
+  },
 ]

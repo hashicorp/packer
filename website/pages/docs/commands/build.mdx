@@ -36,12 +36,13 @@ artifacts that are created will be outputted at the end of the build.
 
 - `-on-error=cleanup` (default), `-on-error=abort`, `-on-error=ask`, `-on-error=run-cleanup-provisioner` -
   Selects what to do when the build fails.
+
   - `cleanup` cleans up after the previous steps, deleting temporary files and virtual machines.
   - `abort` exits without any cleanup, which might require the next build to use `-force`.
   - `ask` presents a prompt and waits for you to decide to clean up, abort, or retry
-  the failed step.
+    the failed step.
   - `run-cleanup-provisioner` aborts and exits without any cleanup besides
-  the [error-cleanup-provisioner](/docs/templates/provisioners#on-error-provisioner) if one is defined.
+    the [error-cleanup-provisioner](/docs/templates/provisioners#on-error-provisioner) if one is defined.
 
 - `-only=foo,bar,baz` - Only run the builds with the given comma-separated
   names. Build names by default are their type, unless a specific `name`

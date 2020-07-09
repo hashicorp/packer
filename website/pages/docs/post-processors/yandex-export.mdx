@@ -29,9 +29,7 @@ As such, assigned Service Account must have write permissions to the Yandex Obje
 `paths`. A new temporary static access keys from assigned Service Account used to upload
 image.
 
-
 ## Configuration
-
 
 ### Required:
 
@@ -40,7 +38,6 @@ image.
 ### Optional:
 
 @include 'post-processor/yandex-export/Config-not-required.mdx'
-
 
 ## Basic Example
 
@@ -67,7 +64,7 @@ must have write access to both `s3://packer-export/my-exported-image.qcow2` and
 
       "source_image_family": "ubuntu-1604-lts",
       "ssh_username": "ubuntu",
-      "use_ipv4_nat": true,
+      "use_ipv4_nat": true
     }
   ],
   "post-processors": [
