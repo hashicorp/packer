@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 
@@ -13,9 +14,11 @@ import (
 	ycsdk "github.com/yandex-cloud/go-sdk"
 )
 
-type stepCreateImage struct{}
+type stepCreateImage struct {
+	GeneratedData *builder.GeneratedData
+}
 
-func (stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
@@ -52,7 +55,7 @@ func (stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multis
 
 	image, ok := resp.(*compute.Image)
 	if !ok {
-		return stepHaltWithError(state, errors.New("Response doesn't contain Image"))
+		return stepHaltWithError(state, errors.New("API call response doesn't contain Compute Image"))
 	}
 
 	log.Printf("Image ID: %s", image.Id)
@@ -61,6 +64,14 @@ func (stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multis
 	log.Printf("Image Description: %s", image.Description)
 	log.Printf("Image Storage size: %d", image.StorageSize)
 	state.Put("image", image)
+
+	// provision generated_data from declared in Builder.Prepare func
+	// see doc https://www.packer.io/docs/extending/custom-builders#build-variables for details
+	s.GeneratedData.Put("ImageID", image.Id)
+	s.GeneratedData.Put("ImageName", image.Name)
+	s.GeneratedData.Put("ImageFamily", image.Family)
+	s.GeneratedData.Put("ImageDescription", image.Description)
+	s.GeneratedData.Put("ImageFolderID", image.FolderId)
 
 	return multistep.ActionContinue
 }

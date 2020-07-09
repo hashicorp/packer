@@ -6,6 +6,7 @@ package yandexexport
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/yandex-cloud/go-sdk/iamkey"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -25,7 +27,10 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	// Paths to Yandex Object Storage where exported image will be uploaded
+	// List of paths to Yandex Object Storage where exported image will be uploaded.
+	// Please be aware that use of space char inside path not supported.
+	// Also this param support [build](/docs/templates/engine) template function.
+	// Check available template data for [Yandex](/docs/builders/yandex#build-template-data) builder.
 	Paths []string `mapstructure:"paths" required:"true"`
 	// The folder ID that will be used to launch a temporary instance.
 	// Alternatively you may set value by environment variable YC_FOLDER_ID.
@@ -67,6 +72,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"paths",
+			},
+		},
 	}, raws...)
 	if err != nil {
 		return err
@@ -77,6 +87,14 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if len(p.config.Paths) == 0 {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("paths must be specified"))
+	}
+
+	// Validate templates in 'paths'
+	for _, path := range p.config.Paths {
+		if err = interpolate.Validate(path, &p.config.ctx); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Error parsing one of 'paths' template: %s", err))
+		}
 	}
 
 	// provision config by OS environment variables
@@ -143,14 +161,38 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, err
 	}
 
-	builderID := artifact.State("ImageID").(string)
+	// prepare and render values
+	var generatedData map[interface{}]interface{}
+	stateData := artifact.State("generated_data")
+	if stateData != nil {
+		// Make sure it's not a nil map so we can assign to it later.
+		generatedData = stateData.(map[interface{}]interface{})
+	}
+	// If stateData has a nil map generatedData will be nil
+	// and we need to make sure it's not
+	if generatedData == nil {
+		generatedData = make(map[interface{}]interface{})
+	}
+	p.config.ctx.Data = generatedData
 
-	ui.Say(fmt.Sprintf("Exporting image %v to destination: %v", builderID, p.config.Paths))
+	var err error
+	// Render this key since we didn't in the configure phase
+	for i, path := range p.config.Paths {
+		p.config.Paths[i], err = interpolate.Render(path, &p.config.ctx)
+		if err != nil {
+			return nil, false, false, fmt.Errorf("Error rendering one of 'path' template: %s", err)
+		}
+	}
+
+	log.Printf("Rendered path items: %v", p.config.Paths)
+
+	imageID := artifact.State("ImageID").(string)
+	ui.Say(fmt.Sprintf("Exporting image %v to destination: %v", imageID, p.config.Paths))
 
 	// Set up exporter instance configuration.
 	exporterName := fmt.Sprintf("%s-exporter", artifact.Id())
 	exporterMetadata := map[string]string{
-		"image_id":  builderID,
+		"image_id":  imageID,
 		"name":      exporterName,
 		"paths":     strings.Join(p.config.Paths, " "),
 		"user-data": CloudInitScript,
@@ -195,7 +237,8 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			DebugKeyPath: fmt.Sprintf("yc_pp_%s.pem", p.config.PackerBuildName),
 		},
 		&yandex.StepCreateInstance{
-			Debug: p.config.PackerDebug,
+			Debug:         p.config.PackerDebug,
+			GeneratedData: &builder.GeneratedData{State: state},
 		},
 		new(yandex.StepWaitCloudInitScript),
 		new(yandex.StepTeardownInstance),

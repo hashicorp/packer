@@ -1,6 +1,9 @@
 <!-- Code generated from the comments of the Config struct in post-processor/yandex-export/post-processor.go; DO NOT EDIT MANUALLY -->
 
--   `paths` ([]string) - Paths to Yandex Object Storage where exported image will be uploaded
+-   `paths` ([]string) - List of paths to Yandex Object Storage where exported image will be uploaded.
+    Please be aware that use of space char inside path not supported.
+    Also this param support [build](/docs/templates/engine) template function.
+    Check available template data for [Yandex](/docs/builders/yandex#build-template-data) builder.
     
 -   `folder_id` (string) - The folder ID that will be used to launch a temporary instance.
     Alternatively you may set value by environment variable YC_FOLDER_ID.

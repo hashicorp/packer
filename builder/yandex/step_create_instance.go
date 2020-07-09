@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 
 	"github.com/c2h5oh/datasize"
+	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -21,6 +22,8 @@ const StandardImagesFolderID = "standard-images"
 type StepCreateInstance struct {
 	Debug         bool
 	SerialLogFile string
+
+	GeneratedData *builder.GeneratedData
 }
 
 func createNetwork(ctx context.Context, c *Config, d Driver) (*vpc.Network, error) {
@@ -261,6 +264,14 @@ runcmd:
 		ui.Message(fmt.Sprintf("Instance ID %s started. Current instance status %s", instance.Id, instance.Status))
 		ui.Message(fmt.Sprintf("Disk ID %s. ", instance.BootDisk.DiskId))
 	}
+
+	// provision generated_data from declared in Builder.Prepare func
+	// see doc https://www.packer.io/docs/extending/custom-builders#build-variables for details
+	s.GeneratedData.Put("SourceImageID", sourceImage.ID)
+	s.GeneratedData.Put("SourceImageName", sourceImage.Name)
+	s.GeneratedData.Put("SourceImageDescription", sourceImage.Description)
+	s.GeneratedData.Put("SourceImageFamily", sourceImage.Family)
+	s.GeneratedData.Put("SourceImageFolderID", sourceImage.FolderID)
 
 	return multistep.ActionContinue
 }

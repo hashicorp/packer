@@ -80,7 +80,7 @@ must have write access to both `s3://packer-export/my-exported-image.qcow2` and
 
       "paths": [
         "s3://packer-export-bucket/my-exported-image.qcow2",
-        "s3://packer-export-bucket/image-number-two.qcow2"
+        "s3://packer-export-bucket/template-supported-get-{{build `ImageID` }}-right-here.qcow2"
       ],
       "keep_input_artifact": true
     }
