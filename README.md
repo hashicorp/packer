@@ -97,8 +97,8 @@ for best practices and instructions on setting up your development environment
 to work on Packer.
 
 ## Unmaintained Plugins
-As contributors' circumstances change, development on a community-maintained
-plugins can slow. When this happens, the Packer team may mark a plugin as
+As contributors' circumstances change, development on a community maintained
+plugin can slow. When this happens, the Packer team may mark a plugin as
 unmaintained, to clearly signal the plugin's status to users.
 
 What does **unmaintained** mean?
