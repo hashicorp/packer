@@ -52,7 +52,7 @@ func (c *ContentLibraryDestinationConfig) Prepare(lc *LocationConfig) []error {
 	if c.Library == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("a library name must be provided"))
 	}
-	if c.Name != "" && c.Name == lc.VMName {
+	if c.Name == lc.VMName {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("the content library destination name must be different from the VM name"))
 	}
 
