@@ -53,6 +53,7 @@ type HardwareConfig struct {
 	VideoRAM            int64
 	VGPUProfile         string
 	Firmware            string
+	ForceBIOSSetup      bool
 }
 
 type NIC struct {
@@ -75,8 +76,7 @@ type CreateConfig struct {
 	GuestOS       string // example: otherGuest
 	NICs          []NIC
 	USBController bool
-	Version       uint   // example: 10
-	Firmware      string // efi-secure, efi or bios
+	Version       uint // example: 10
 	Storage       []Disk
 }
 
@@ -138,14 +138,6 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 	}
 	if config.Version != 0 {
 		createSpec.Version = fmt.Sprintf("%s%d", "vmx-", config.Version)
-	}
-	if config.Firmware == "efi-secure" {
-		createSpec.Firmware = "efi"
-		createSpec.BootOptions = &types.VirtualMachineBootOptions{
-			EfiSecureBootEnabled: types.NewBool(true),
-		}
-	} else if config.Firmware != "" {
-		createSpec.Firmware = config.Firmware
 	}
 
 	folder, err := d.FindFolder(config.Folder)
@@ -499,13 +491,18 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 		confSpec.DeviceChange = append(confSpec.DeviceChange, spec)
 	}
 
-	if config.Firmware == "efi-secure" || config.Firmware == "efi" {
-		confSpec.Firmware = "efi"
-		confSpec.BootOptions = &types.VirtualMachineBootOptions{
-			EfiSecureBootEnabled: types.NewBool(config.Firmware == "efi-secure"),
-		}
-	} else if config.Firmware != "" {
-		confSpec.Firmware = config.Firmware
+	efiSecureBootEnabled := false
+	firmware := config.Firmware
+
+	if firmware == "efi-secure" {
+		firmware = "efi"
+		efiSecureBootEnabled = true
+	}
+
+	confSpec.Firmware = firmware
+	confSpec.BootOptions = &types.VirtualMachineBootOptions{
+		EnterBIOSSetup:       types.NewBool(config.ForceBIOSSetup),
+		EfiSecureBootEnabled: types.NewBool(efiSecureBootEnabled),
 	}
 
 	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)

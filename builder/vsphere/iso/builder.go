@@ -60,11 +60,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		)
 	}
 
-	// default Firmware to "" since it is already configured by the CreateConfig.Firmware
-	if b.config.CreateConfig.Firmware != "" {
-		b.config.HardwareConfig.Firmware = ""
-	}
-
 	steps = append(steps,
 		&StepCreateVM{
 			Config:   &b.config.CreateConfig,
