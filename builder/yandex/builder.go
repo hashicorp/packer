@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -31,7 +32,19 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	if errs != nil {
 		return nil, warnings, errs
 	}
-	return nil, warnings, nil
+	generatedData := []string{
+		"ImageID",
+		"ImageName",
+		"ImageFamily",
+		"ImageDescription",
+		"ImageFolderID",
+		"SourceImageID",
+		"SourceImageName",
+		"SourceImageDescription",
+		"SourceImageFamily",
+		"SourceImageFolderID",
+	}
+	return generatedData, warnings, nil
 }
 
 // Run executes a yandex Packer build and returns a packer.Artifact
@@ -51,6 +64,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("sdk", driver.SDK())
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	generatedData := &builder.GeneratedData{State: state}
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -61,6 +75,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepCreateInstance{
 			Debug:         b.config.PackerDebug,
 			SerialLogFile: b.config.SerialLogFile,
+			GeneratedData: generatedData,
 		},
 		&stepInstanceInfo{},
 		&communicator.StepConnect{
@@ -73,7 +88,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Comm: &b.config.Communicator,
 		},
 		&StepTeardownInstance{},
-		&stepCreateImage{},
+		&stepCreateImage{
+			GeneratedData: generatedData,
+		},
 	}
 
 	// Run the steps

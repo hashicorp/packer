@@ -3,7 +3,11 @@
 
 package common
 
-import "fmt"
+import (
+	"fmt"
+	"path"
+	"strings"
+)
 
 type LocationConfig struct {
 	// Name of the new VM to create.
@@ -37,6 +41,10 @@ func (c *LocationConfig) Prepare() []error {
 	if c.Cluster == "" && c.Host == "" {
 		errs = append(errs, fmt.Errorf("'host' or 'cluster' is required"))
 	}
+
+	// clean Folder path and remove leading slash as folders are relative within vsphere
+	c.Folder = path.Clean(c.Folder)
+	c.Folder = strings.TrimLeft(c.Folder, "/")
 
 	return errs
 }

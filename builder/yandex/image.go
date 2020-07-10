@@ -7,6 +7,7 @@ type Image struct {
 	Licenses      []string
 	MinDiskSizeGb int
 	Name          string
+	Description   string
 	Family        string
 	SizeGb        int
 }

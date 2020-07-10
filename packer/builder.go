@@ -30,7 +30,7 @@ type Builder interface {
 	// configuration.
 	//
 	// Prepare should return a list of variables that will be made accessible to
-	// users during the provison methods, a list of warnings along with any
+	// users during the provision methods, a list of warnings along with any
 	// errors that occurred while preparing.
 	Prepare(...interface{}) ([]string, []string, error)
 

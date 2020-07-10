@@ -31,6 +31,21 @@ func (d *Driver) FindNetwork(name string) (*Network, error) {
 	}, nil
 }
 
+func (d *Driver) FindNetworks(name string) ([]*Network, error) {
+	ns, err := d.finder.NetworkList(d.ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	var networks []*Network
+	for _, n := range ns {
+		networks = append(networks, &Network{
+			network: n,
+			driver:  d,
+		})
+	}
+	return networks, nil
+}
+
 func (n *Network) Info(params ...string) (*mo.Network, error) {
 	var p []string
 	if len(params) == 0 {
@@ -50,4 +65,13 @@ func (n *Network) Info(params ...string) (*mo.Network, error) {
 		return nil, err
 	}
 	return &info, nil
+}
+
+type MultipleNetworkFoundError struct {
+	path   string
+	append string
+}
+
+func (e *MultipleNetworkFoundError) Error() string {
+	return fmt.Sprintf("path '%s' resolves to multiple networks. %s", e.path, e.append)
 }
