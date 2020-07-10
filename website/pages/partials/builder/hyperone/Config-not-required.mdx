@@ -50,12 +50,19 @@
   Can be useful when using custom api_url. Defaults to public.
 
 - `chroot_device` (string) - Chroot Device
+
 - `chroot_disk` (bool) - Chroot Disk
+
 - `chroot_disk_size` (float32) - Chroot Disk Size
+
 - `chroot_disk_type` (string) - Chroot Disk Type
+
 - `chroot_mount_path` (string) - Chroot Mount Path
+
 - `chroot_mounts` ([][]string) - Chroot Mounts
+
 - `chroot_copy_files` ([]string) - Chroot Copy Files
+
 - `chroot_command_wrapper` (string) - How to run shell commands. This defaults to `{{.Command}}`. This may be
   useful to set if you want to set environmental variables or perhaps run
   it with sudo or so on. This is a configuration template where the
@@ -63,7 +70,9 @@
   `{{.Command}}`.
 
 - `mount_options` ([]string) - Mount Options
+
 - `mount_partition` (string) - Mount Partition
+
 - `pre_mount_commands` ([]string) - A series of commands to execute after attaching the root volume and
   before mounting the chroot. This is not required unless using
   from_scratch. If so, this should include any partitioning and filesystem

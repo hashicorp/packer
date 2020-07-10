@@ -81,47 +81,47 @@
   if building based on top of a source_ami which is also io1.
 
 - `source_ami_filter` (awscommon.AmiFilterOptions) - Filters used to populate the source_ami field. Example:
-
+  
   ```json
   {
-    "source_ami_filter": {
-      "filters": {
-        "virtualization-type": "hvm",
-        "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
-        "root-device-type": "ebs"
-      },
-      "owners": ["099720109477"],
-      "most_recent": true
-    }
+  	 "source_ami_filter": {
+  	 "filters": {
+  	  "virtualization-type": "hvm",
+  	  "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+  	  "root-device-type": "ebs"
+  	},
+  	"owners": ["099720109477"],
+  	"most_recent": true
+  	 }
   }
   ```
-
+  
   This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
-  This will fail unless _exactly_ one AMI is returned. In the above example,
+  This will fail unless *exactly* one AMI is returned. In the above example,
   `most_recent` will cause this to succeed by selecting the newest image.
-
-  - `filters` (map of strings) - filters used to select a `source_ami`.
-    NOTE: This will fail unless _exactly_ one AMI is returned. Any filter
-    described in the docs for
-    [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
-    is valid.
-
-  - `owners` (array of strings) - Filters the images by their owner. You
-    may specify one or more AWS account IDs, "self" (which will use the
-    account whose credentials you are using to run Packer), or an AWS owner
-    alias: for example, "amazon", "aws-marketplace", or "microsoft". This
-    option is required for security reasons.
-
-  - `most_recent` (boolean) - Selects the newest created image when true.
-    This is most useful for selecting a daily distro build.
-
+  
+  -   `filters` (map of strings) - filters used to select a `source_ami`.
+  	NOTE: This will fail unless *exactly* one AMI is returned. Any filter
+  	described in the docs for
+  	[DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
+  	is valid.
+  
+  -   `owners` (array of strings) - Filters the images by their owner. You
+  	may specify one or more AWS account IDs, "self" (which will use the
+  	account whose credentials you are using to run Packer), or an AWS owner
+  	alias: for example, "amazon", "aws-marketplace", or "microsoft". This
+  	option is required for security reasons.
+  
+  -   `most_recent` (boolean) - Selects the newest created image when true.
+  	This is most useful for selecting a daily distro build.
+  
   You may set this in place of `source_ami` or in conjunction with it. If you
   set this in conjunction with `source_ami`, the `source_ami` will be added
   to the filter. The provided `source_ami` must meet all of the filtering
   criteria provided in `source_ami_filter`; this pins the AMI returned by the
   filter, but will cause Packer to fail if the `source_ami` does not exist.
 
-- `root_volume_tags` (map[string]string) - Key/value pair tags to apply to the volumes that are _launched_. This is
+- `root_volume_tags` (map[string]string) - Key/value pair tags to apply to the volumes that are *launched*. This is
   a [template engine](/docs/templates/engine), see [Build template
   data](#build-template-data) for more information.
 

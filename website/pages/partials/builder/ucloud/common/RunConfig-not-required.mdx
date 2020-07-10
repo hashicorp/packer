@@ -7,7 +7,7 @@
   Possible values are: `cloud_ssd` and `cloud_rssd` for cloud boot disk, `local_normal` and `local_ssd`
   for local boot disk. (Default: `cloud_ssd`). The `cloud_ssd` and `local_ssd` are not fully supported
   by all regions as boot disk type, please proceed to UCloud console for more details.
-
+  
   ~> **Note:** It takes around 10 mins for boot disk initialization when `boot_disk_type` is `local_normal` or `local_ssd`.
 
 - `vpc_id` (string) - The ID of VPC linked to the UHost instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
@@ -39,17 +39,16 @@
 
 - `min_cpu_platform` (string) - Specifies a minimum CPU platform for the the VM instance. (Default: `Intel/Auto`).
   You may refer to [min_cpu_platform](https://docs.ucloud.cn/uhost/introduction/uhost/type_new)
-
-  - The Intel CPU platform:
-    - `Intel/Auto` as the Intel CPU platform version will be selected randomly by system;
-    - `Intel/IvyBridge` as Intel V2, the version of Intel CPU platform selected by system will be `Intel/IvyBridge` and above;
-    - `Intel/Haswell` as Intel V3, the version of Intel CPU platform selected by system will be `Intel/Haswell` and above;
-    - `Intel/Broadwell` as Intel V4, the version of Intel CPU platform selected by system will be `Intel/Broadwell` and above;
-    - `Intel/Skylake` as Intel V5, the version of Intel CPU platform selected by system will be `Intel/Skylake` and above;
-    - `Intel/Cascadelake` as Intel V6, the version of Intel CPU platform selected by system will be `Intel/Cascadelake`;
-  - The AMD CPU platform:
-    - `Amd/Auto` as the Amd CPU platform version will be selected randomly by system;
-    - `Amd/Epyc2` as the version of Amd CPU platform selected by system will be `Amd/Epyc2` and above;
+     - The Intel CPU platform:
+         - `Intel/Auto` as the Intel CPU platform version will be selected randomly by system;
+         - `Intel/IvyBridge` as Intel V2, the version of Intel CPU platform selected by system will be `Intel/IvyBridge` and above;
+         - `Intel/Haswell` as Intel V3,  the version of Intel CPU platform selected by system will be `Intel/Haswell` and above;
+         - `Intel/Broadwell` as Intel V4, the version of Intel CPU platform selected by system will be `Intel/Broadwell` and above;
+         - `Intel/Skylake` as Intel V5, the version of Intel CPU platform selected by system will be `Intel/Skylake` and above;
+         - `Intel/Cascadelake` as Intel V6, the version of Intel CPU platform selected by system will be `Intel/Cascadelake`;
+     - The AMD CPU platform:
+         - `Amd/Auto` as the Amd CPU platform version will be selected randomly by system;
+         - `Amd/Epyc2` as the version of Amd CPU platform selected by system will be `Amd/Epyc2` and above;
 
 - `use_ssh_private_ip` (bool) - If this value is true, packer will connect to the created UHost instance via a private ip
   instead of allocating an EIP (elastic public ip).(Default: `false`).

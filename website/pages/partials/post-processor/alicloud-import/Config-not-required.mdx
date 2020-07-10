@@ -12,18 +12,20 @@
   `false`.
 
 - `tags` (map[string]string) - Tags
+
 - `image_description` (string) - The description of the image, with a length limit of `0` to `256`
   characters. Leaving it blank means null, which is the default value. It
   cannot begin with `http://` or `https://`.
 
 - `image_share_account` ([]string) - Alicloud Image Share Accounts
-- `image_copy_regions` ([]string) - Alicloud Image Destination Regions
-- `image_system_size` (string) - Size of the system disk, in GB, values
-  range:
 
-  - cloud - 5 \~ 2000
-  - cloud_efficiency - 20 \~ 2048
-  - cloud_ssd - 20 \~ 2048
+- `image_copy_regions` ([]string) - Alicloud Image Destination Regions
+
+- `image_system_size` (string) - Size of the system disk, in GB, values
+   range:
+    - cloud - 5 \~ 2000
+    - cloud_efficiency - 20 \~ 2048
+    - cloud_ssd - 20 \~ 2048
 
 - `image_force_delete` (bool) - If this value is true, when the target image name is duplicated with an
   existing image, it will delete the existing image and then create the

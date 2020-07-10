@@ -12,14 +12,15 @@
   this parameter is ignored.
 
 - `image_unshare_account` ([]string) - Alicloud Image UN Share Accounts
+
 - `image_copy_regions` ([]string) - Copy to the destination regionIds.
 
 - `image_copy_names` ([]string) - The name of the destination image, [2, 128] English or Chinese
   characters. It must begin with an uppercase/lowercase letter or a
-  Chinese character, and may contain numbers, \_ or -. It cannot begin with
+  Chinese character, and may contain numbers, _ or -. It cannot begin with
   `http://` or `https://`.
 
-- `image_encrypted` (boolean) - Whether or not to encrypt the target images, including those
+- `image_encrypted` (boolean) - Whether or not to encrypt the target images,            including those
   copied if image_copy_regions is specified. If this option is set to
   true, a temporary image will be created from the provisioned instance in
   the main region and an encrypted copy will be generated in the same
@@ -40,6 +41,7 @@
   command, this option can be omitted and taken as true.
 
 - `image_force_delete_instances` (bool) - Alicloud Image Force Delete Instances
+
 - `image_ignore_data_disks` (bool) - If this value is true, the image created will not include any snapshot
   of data disks. This option would be useful for any circumstance that
   default data disks with instance types are not concerned. The default

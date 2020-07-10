@@ -16,8 +16,8 @@
   from the source instance. See the
   [BlockDevices](#block-devices-configuration) documentation for fields.
 
-- `run_volume_tags` (map[string]string) - Tags to apply to the volumes that are _launched_ to create the AMI.
-  These tags are _not_ applied to the resulting AMI unless they're
+- `run_volume_tags` (map[string]string) - Tags to apply to the volumes that are *launched* to create the AMI.
+  These tags are *not* applied to the resulting AMI unless they're
   duplicated in `tags`. This is a [template
   engine](/docs/templates/engine), see [Build template
   data](#build-template-data) for more information.
@@ -34,5 +34,5 @@
   For more information, see
   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/InstanceStorage.html.
   Because we don't validate the OS type of your guest, it is up to you to
-  make sure you don't set this for \*nix guests; behavior may be
+  make sure you don't set this for *nix guests; behavior may be
   unpredictable.
