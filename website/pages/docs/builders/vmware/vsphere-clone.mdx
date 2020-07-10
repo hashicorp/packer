@@ -171,6 +171,35 @@ can be done via environment variable:
 
 @include 'builder/vsphere/common/OutputConfig-not-required.mdx'
 
+### Content Library Import Configuration
+
+@include 'builder/vsphere/common/ContentLibraryDestinationConfig.mdx'
+
+@include 'builder/vsphere/common/ContentLibraryDestinationConfig-not-required.mdx'
+
+Minimal example of usage:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+	"content_library_destination" : {
+	    "library": "Packer Library Test"
+	}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+	content_library_destination {
+			library = "Packer Library Test"
+	}
+```
+
+</Tab>
+</Tabs>
+
 ## Working with Clusters
 
 #### Standalone Hosts

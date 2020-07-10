@@ -44,8 +44,8 @@ type StepConnect struct {
 	Config *ConnectConfig
 }
 
-func (s *StepConnect) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	d, err := driver.NewDriver(&driver.ConnectConfig{
+func (s *StepConnect) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	d, err := driver.NewDriver(ctx, &driver.ConnectConfig{
 		VCenterServer:      s.Config.VCenterServer,
 		Username:           s.Config.Username,
 		Password:           s.Config.Password,
