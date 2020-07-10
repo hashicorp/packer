@@ -63,7 +63,7 @@ type NIC struct {
 }
 
 type CreateConfig struct {
-	DiskControllerType string // example: "scsi", "pvscsi"
+	DiskControllerType []string // example: "scsi", "pvscsi", "lsilogic"
 
 	Annotation    string
 	Name          string
@@ -84,6 +84,7 @@ type Disk struct {
 	DiskSize            int64
 	DiskEagerlyScrub    bool
 	DiskThinProvisioned bool
+	ControllerIndex     int
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
@@ -741,14 +742,22 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 		return nil, errors.New("no storage devices have been defined")
 	}
 
-	device, err := devices.CreateSCSIController(config.DiskControllerType)
-	if err != nil {
-		return nil, err
+	if len(config.DiskControllerType) == 0 {
+		return nil, errors.New("no controllers have been defined")
 	}
-	devices = append(devices, device)
-	controller, err := devices.FindDiskController(devices.Name(device))
-	if err != nil {
-		return nil, err
+
+	var controllers []types.BaseVirtualController
+	for _, controllerType := range config.DiskControllerType {
+		device, err := devices.CreateSCSIController(controllerType)
+		if err != nil {
+			return nil, err
+		}
+		devices = append(devices, device)
+		controller, err := devices.FindDiskController(devices.Name(device))
+		if err != nil {
+			return nil, err
+		}
+		controllers = append(controllers, controller)
 	}
 
 	for _, dc := range config.Storage {
@@ -764,7 +773,7 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 			CapacityInKB: dc.DiskSize * 1024,
 		}
 
-		devices.AssignController(disk, controller)
+		devices.AssignController(disk, controllers[dc.ControllerIndex])
 		devices = append(devices, disk)
 	}
 
