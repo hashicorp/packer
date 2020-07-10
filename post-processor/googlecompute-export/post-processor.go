@@ -5,11 +5,12 @@ package googlecomputeexport
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder/google/compute"
+	"github.com/hashicorp/packer/builder/google/gcp"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/builder/googlecompute"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -94,7 +95,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	switch artifact.BuilderId() {
-	case googlecompute.BuilderId, artifice.BuilderId:
+	case compute.BuilderId, artifice.BuilderId:
 		break
 	default:
 		err := fmt.Errorf(
@@ -116,14 +117,14 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	// Set up credentials for GCE driver.
 	if builderAccountFile != "" {
-		cfg, err := googlecompute.ProcessAccountFile(builderAccountFile)
+		cfg, err := gcp.ProcessAccountFile(builderAccountFile)
 		if err != nil {
 			return nil, false, false, err
 		}
 		p.config.account = cfg
 	}
 	if p.config.AccountFile != "" {
-		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
+		cfg, err := gcp.ProcessAccountFile(p.config.AccountFile)
 		if err != nil {
 			return nil, false, false, err
 		}
@@ -139,7 +140,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		"startup-script": StartupScript,
 		"zone":           p.config.Zone,
 	}
-	exporterConfig := googlecompute.Config{
+	exporterConfig := compute.Config{
 		DiskName:             exporterName,
 		DiskSizeGb:           p.config.DiskSizeGb,
 		DiskType:             p.config.DiskType,
@@ -163,7 +164,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		exporterConfig.ServiceAccountEmail = p.config.ServiceAccountEmail
 	}
 
-	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId,
+	driver, err := gcp.NewDriverGCE(ui, builderProjectId,
 		p.config.account, p.config.VaultGCPOauthEngine)
 	if err != nil {
 		return nil, false, false, err
@@ -177,15 +178,15 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	// Build the steps.
 	steps := []multistep.Step{
-		&googlecompute.StepCreateSSHKey{
+		&compute.StepCreateSSHKey{
 			Debug:        p.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("gce_%s.pem", p.config.PackerBuildName),
 		},
-		&googlecompute.StepCreateInstance{
+		&compute.StepCreateInstance{
 			Debug: p.config.PackerDebug,
 		},
-		new(googlecompute.StepWaitStartupScript),
-		new(googlecompute.StepTeardownInstance),
+		new(compute.StepWaitStartupScript),
+		new(compute.StepTeardownInstance),
 	}
 
 	// Run the steps.

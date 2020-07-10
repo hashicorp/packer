@@ -5,6 +5,7 @@ package googlecomputeimport
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/builder/google/gcp"
 	"net/http"
 	"os"
 	"strings"
@@ -15,7 +16,6 @@ import (
 	"google.golang.org/api/storage/v1"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/builder/googlecompute"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -79,7 +79,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.AccountFile != "" {
-		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
+		cfg, err := gcp.ProcessAccountFile(p.config.AccountFile)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
@@ -119,7 +119,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 	p.config.ctx.Data = generatedData
 
-	client, err := googlecompute.NewClientGCE(p.config.account, p.config.VaultGCPOauthEngine)
+	client, err := gcp.NewClientGCE(p.config.account, p.config.VaultGCPOauthEngine)
 	if err != nil {
 		return nil, false, false, err
 	}
