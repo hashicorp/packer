@@ -52,6 +52,7 @@ type FlatConfig struct {
 	VGPUProfile                     *string                                     `mapstructure:"vgpu_profile" cty:"vgpu_profile" hcl:"vgpu_profile"`
 	NestedHV                        *bool                                       `mapstructure:"NestedHV" cty:"NestedHV" hcl:"NestedHV"`
 	Firmware                        *string                                     `mapstructure:"firmware" cty:"firmware" hcl:"firmware"`
+	ForceBIOSSetup                  *bool                                       `mapstructure:"force_bios_setup" cty:"force_bios_setup" hcl:"force_bios_setup"`
 	ConfigParams                    map[string]string                           `mapstructure:"configuration_parameters" cty:"configuration_parameters" hcl:"configuration_parameters"`
 	ToolsSyncTime                   *bool                                       `mapstructure:"tools_sync_time" cty:"tools_sync_time" hcl:"tools_sync_time"`
 	ToolsUpgradePolicy              *bool                                       `mapstructure:"tools_upgrade_policy" cty:"tools_upgrade_policy" hcl:"tools_upgrade_policy"`
@@ -170,6 +171,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vgpu_profile":                   &hcldec.AttrSpec{Name: "vgpu_profile", Type: cty.String, Required: false},
 		"NestedHV":                       &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
 		"firmware":                       &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
+		"force_bios_setup":               &hcldec.AttrSpec{Name: "force_bios_setup", Type: cty.Bool, Required: false},
 		"configuration_parameters":       &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
 		"tools_sync_time":                &hcldec.AttrSpec{Name: "tools_sync_time", Type: cty.Bool, Required: false},
 		"tools_upgrade_policy":           &hcldec.AttrSpec{Name: "tools_upgrade_policy", Type: cty.Bool, Required: false},

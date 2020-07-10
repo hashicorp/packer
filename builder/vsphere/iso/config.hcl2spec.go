@@ -28,7 +28,6 @@ type FlatConfig struct {
 	Datacenter                      *string                                     `mapstructure:"datacenter" cty:"datacenter" hcl:"datacenter"`
 	Version                         *uint                                       `mapstructure:"vm_version" cty:"vm_version" hcl:"vm_version"`
 	GuestOSType                     *string                                     `mapstructure:"guest_os_type" cty:"guest_os_type" hcl:"guest_os_type"`
-	Firmware                        *string                                     `mapstructure:"firmware" cty:"firmware" hcl:"firmware"`
 	DiskControllerType              []string                                    `mapstructure:"disk_controller_type" cty:"disk_controller_type" hcl:"disk_controller_type"`
 	Storage                         []FlatDiskConfig                            `mapstructure:"storage" cty:"storage" hcl:"storage"`
 	NICs                            []FlatNIC                                   `mapstructure:"network_adapters" cty:"network_adapters" hcl:"network_adapters"`
@@ -53,6 +52,8 @@ type FlatConfig struct {
 	VideoRAM                        *int64                                      `mapstructure:"video_ram" cty:"video_ram" hcl:"video_ram"`
 	VGPUProfile                     *string                                     `mapstructure:"vgpu_profile" cty:"vgpu_profile" hcl:"vgpu_profile"`
 	NestedHV                        *bool                                       `mapstructure:"NestedHV" cty:"NestedHV" hcl:"NestedHV"`
+	Firmware                        *string                                     `mapstructure:"firmware" cty:"firmware" hcl:"firmware"`
+	ForceBIOSSetup                  *bool                                       `mapstructure:"force_bios_setup" cty:"force_bios_setup" hcl:"force_bios_setup"`
 	ConfigParams                    map[string]string                           `mapstructure:"configuration_parameters" cty:"configuration_parameters" hcl:"configuration_parameters"`
 	ToolsSyncTime                   *bool                                       `mapstructure:"tools_sync_time" cty:"tools_sync_time" hcl:"tools_sync_time"`
 	ToolsUpgradePolicy              *bool                                       `mapstructure:"tools_upgrade_policy" cty:"tools_upgrade_policy" hcl:"tools_upgrade_policy"`
@@ -159,7 +160,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"datacenter":                     &hcldec.AttrSpec{Name: "datacenter", Type: cty.String, Required: false},
 		"vm_version":                     &hcldec.AttrSpec{Name: "vm_version", Type: cty.Number, Required: false},
 		"guest_os_type":                  &hcldec.AttrSpec{Name: "guest_os_type", Type: cty.String, Required: false},
-		"firmware":                       &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
 		"disk_controller_type":           &hcldec.AttrSpec{Name: "disk_controller_type", Type: cty.List(cty.String), Required: false},
 		"storage":                        &hcldec.BlockListSpec{TypeName: "storage", Nested: hcldec.ObjectSpec((*FlatDiskConfig)(nil).HCL2Spec())},
 		"network_adapters":               &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatNIC)(nil).HCL2Spec())},
@@ -184,6 +184,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"video_ram":                      &hcldec.AttrSpec{Name: "video_ram", Type: cty.Number, Required: false},
 		"vgpu_profile":                   &hcldec.AttrSpec{Name: "vgpu_profile", Type: cty.String, Required: false},
 		"NestedHV":                       &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
+		"firmware":                       &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
+		"force_bios_setup":               &hcldec.AttrSpec{Name: "force_bios_setup", Type: cty.Bool, Required: false},
 		"configuration_parameters":       &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
 		"tools_sync_time":                &hcldec.AttrSpec{Name: "tools_sync_time", Type: cty.Bool, Required: false},
 		"tools_upgrade_policy":           &hcldec.AttrSpec{Name: "tools_upgrade_policy", Type: cty.Bool, Required: false},

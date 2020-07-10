@@ -101,8 +101,6 @@ type CreateConfig struct {
 	// here](https://code.vmware.com/apis/358/vsphere/doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html)
 	// for a full list of possible values.
 	GuestOSType string `mapstructure:"guest_os_type"`
-	// Set the Firmware at machine creation. Supported values: `bios`, `efi` or `efi-secure`. Defaults to `bios`.
-	Firmware string `mapstructure:"firmware"`
 	// Set VM disk controller type. Example `lsilogic`, pvscsi`, or `scsi`. Use a list to define additional controllers. Defaults to `lsilogic`
 	DiskControllerType []string `mapstructure:"disk_controller_type"`
 	// A collection of one or more disks to be provisioned along with the VM.
@@ -136,10 +134,6 @@ func (c *CreateConfig) Prepare() []error {
 
 	if c.GuestOSType == "" {
 		c.GuestOSType = "otherGuest"
-	}
-
-	if c.Firmware != "" && c.Firmware != "bios" && c.Firmware != "efi" && c.Firmware != "efi-secure" {
-		errs = append(errs, fmt.Errorf("'firmware' must be 'bios', 'efi' or 'efi-secure'"))
 	}
 
 	return errs
@@ -200,7 +194,6 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 		NICs:               networkCards,
 		USBController:      s.Config.USBController,
 		Version:            s.Config.Version,
-		Firmware:           s.Config.Firmware,
 	})
 	if err != nil {
 		state.Put("error", fmt.Errorf("error creating vm: %v", err))

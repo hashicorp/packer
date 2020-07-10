@@ -39,8 +39,10 @@ type HardwareConfig struct {
 	VGPUProfile string `mapstructure:"vgpu_profile"`
 	// Enable nested hardware virtualization for VM. Defaults to `false`.
 	NestedHV bool `mapstructure:"NestedHV"`
-	// Set the Firmware for virtual machine. Supported values: `bios`, `efi`, `efi-secure` or empty string to keep as in template. Defaults to empty string.
+	// Set the Firmware for virtual machine. Supported values: `bios`, `efi` or `efi-secure`. Defaults to `bios`.
 	Firmware string `mapstructure:"firmware"`
+	// During the boot, force entry into the BIOS setup screen. Defaults to `false`.
+	ForceBIOSSetup bool `mapstructure:"force_bios_setup"`
 }
 
 func (c *HardwareConfig) Prepare() []error {
@@ -82,6 +84,7 @@ func (s *StepConfigureHardware) Run(_ context.Context, state multistep.StateBag)
 			VideoRAM:            s.Config.VideoRAM,
 			VGPUProfile:         s.Config.VGPUProfile,
 			Firmware:            s.Config.Firmware,
+			ForceBIOSSetup:      s.Config.ForceBIOSSetup,
 		})
 		if err != nil {
 			state.Put("error", err)

@@ -22,6 +22,7 @@ type FlatHardwareConfig struct {
 	VGPUProfile         *string `mapstructure:"vgpu_profile" cty:"vgpu_profile" hcl:"vgpu_profile"`
 	NestedHV            *bool   `mapstructure:"NestedHV" cty:"NestedHV" hcl:"NestedHV"`
 	Firmware            *string `mapstructure:"firmware" cty:"firmware" hcl:"firmware"`
+	ForceBIOSSetup      *bool   `mapstructure:"force_bios_setup" cty:"force_bios_setup" hcl:"force_bios_setup"`
 }
 
 // FlatMapstructure returns a new FlatHardwareConfig.
@@ -36,19 +37,20 @@ func (*HardwareConfig) FlatMapstructure() interface{ HCL2Spec() map[string]hclde
 // The decoded values from this spec will then be applied to a FlatHardwareConfig.
 func (*FlatHardwareConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"CPUs":            &hcldec.AttrSpec{Name: "CPUs", Type: cty.Number, Required: false},
-		"cpu_cores":       &hcldec.AttrSpec{Name: "cpu_cores", Type: cty.Number, Required: false},
-		"CPU_reservation": &hcldec.AttrSpec{Name: "CPU_reservation", Type: cty.Number, Required: false},
-		"CPU_limit":       &hcldec.AttrSpec{Name: "CPU_limit", Type: cty.Number, Required: false},
-		"CPU_hot_plug":    &hcldec.AttrSpec{Name: "CPU_hot_plug", Type: cty.Bool, Required: false},
-		"RAM":             &hcldec.AttrSpec{Name: "RAM", Type: cty.Number, Required: false},
-		"RAM_reservation": &hcldec.AttrSpec{Name: "RAM_reservation", Type: cty.Number, Required: false},
-		"RAM_reserve_all": &hcldec.AttrSpec{Name: "RAM_reserve_all", Type: cty.Bool, Required: false},
-		"RAM_hot_plug":    &hcldec.AttrSpec{Name: "RAM_hot_plug", Type: cty.Bool, Required: false},
-		"video_ram":       &hcldec.AttrSpec{Name: "video_ram", Type: cty.Number, Required: false},
-		"vgpu_profile":    &hcldec.AttrSpec{Name: "vgpu_profile", Type: cty.String, Required: false},
-		"NestedHV":        &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
-		"firmware":        &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
+		"CPUs":             &hcldec.AttrSpec{Name: "CPUs", Type: cty.Number, Required: false},
+		"cpu_cores":        &hcldec.AttrSpec{Name: "cpu_cores", Type: cty.Number, Required: false},
+		"CPU_reservation":  &hcldec.AttrSpec{Name: "CPU_reservation", Type: cty.Number, Required: false},
+		"CPU_limit":        &hcldec.AttrSpec{Name: "CPU_limit", Type: cty.Number, Required: false},
+		"CPU_hot_plug":     &hcldec.AttrSpec{Name: "CPU_hot_plug", Type: cty.Bool, Required: false},
+		"RAM":              &hcldec.AttrSpec{Name: "RAM", Type: cty.Number, Required: false},
+		"RAM_reservation":  &hcldec.AttrSpec{Name: "RAM_reservation", Type: cty.Number, Required: false},
+		"RAM_reserve_all":  &hcldec.AttrSpec{Name: "RAM_reserve_all", Type: cty.Bool, Required: false},
+		"RAM_hot_plug":     &hcldec.AttrSpec{Name: "RAM_hot_plug", Type: cty.Bool, Required: false},
+		"video_ram":        &hcldec.AttrSpec{Name: "video_ram", Type: cty.Number, Required: false},
+		"vgpu_profile":     &hcldec.AttrSpec{Name: "vgpu_profile", Type: cty.String, Required: false},
+		"NestedHV":         &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
+		"firmware":         &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
+		"force_bios_setup": &hcldec.AttrSpec{Name: "force_bios_setup", Type: cty.Bool, Required: false},
 	}
 	return s
 }
