@@ -42,6 +42,7 @@ func (s *StepRemoveFloppy) Run(_ context.Context, state multistep.StateBag) mult
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
+		state.Remove("uploaded_floppy_path")
 	}
 
 	return multistep.ActionContinue

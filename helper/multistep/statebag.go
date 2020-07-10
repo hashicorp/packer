@@ -10,6 +10,7 @@ type StateBag interface {
 	Get(string) interface{}
 	GetOk(string) (interface{}, bool)
 	Put(string, interface{})
+	Remove(string)
 }
 
 // BasicStateBag implements StateBag by using a normal map underneath
@@ -44,4 +45,8 @@ func (b *BasicStateBag) Put(k string, v interface{}) {
 
 	// Write the data
 	b.data[k] = v
+}
+
+func (b *BasicStateBag) Remove(k string) {
+	delete(b.data, k)
 }
