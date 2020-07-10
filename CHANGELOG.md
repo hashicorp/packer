@@ -10,6 +10,7 @@
     option [GH-9339]
 * builder/googlecompute: Add `wrap_startup_script` configuration option to
     allow the disabling of Packer's startup script wrapper [GH-9505]
+* builder/hyper-v: Include secure boot template in box.xml [GH-9552]
 * builder/hyperone: Add support for custom username in vm creation. [GH-9497]
 * builder/hyperone: Skip chroot device discovery. [GH-9489]
 * builder/proxmox: Enable Proxmox builder to toggle the firewall parameter for
@@ -20,10 +21,15 @@
 * builder/vsphere-clone: Add `boot_command` support to vsphere-clone builder,
     including support for starting an HTTP server
 * builder/vsphere-clone: Add `vapp` configuration option [GH-9507]
+* builder/vsphere: Add ability to define multiple disk controllers [GH-9519]
 * builder/vsphere: Add boot_command support to vsphere-clone builder. [GH-9397]
+* builder/vsphere: Add content_library_destination to import VM template to a
+    Content Library [GH-9551]
 * builder/vsphere: Create vm output folders if they don't exist [GH-9402]
 * builder/vsphere: Look at all available IPs in the waiting for IP loop.
     [GH-9450]
+* builder/vsphere: Match network to host when multiple networks are found
+    [GH-9556]
 * builder/vsphere: Update vsphere boot_command to bring it in line with other
     builders' boot_command functionality. [GH-9406]
 * builder/vsphere: Use datacenter inventory path for find folder [GH-9390]
@@ -42,6 +48,8 @@
 * core/hcl: Share build info with Provisioner and Post-Processor via HCL2
     variables [GH-9444] [GH-9534]
 * core: Add on-error flag option to run error-cleanup-provisioner [GH-9429]
+* post-processor/yandex-export: Allow users to utilize generated variables in
+    templating. [GH-9555]
 * post-processor/yandex-export: Support Authentication by Service Account Key
     file [GH-9379]
 * provisioner/ansible: Add template option for templating the inventory file
@@ -53,6 +61,7 @@
     not just a single string. [GH-9509]
 * builder/amazon: HCL2: Add singular run_volume_tag block to ebs & ebssurrogate
     builders. [GH-9457]
+* builder/amazon: Retry fetching block device mappings if empty. [GH-9480]
 * builder/azure: Fix data disks URI. [GH-9467]
 * builder/google: Fix the "secure boot" validation for uefi_compatible images.
     [GH-9371]
@@ -66,6 +75,9 @@
     [GH-9391]
 * builder/vsphere-clone: Fix SSH public key injection for cloned templates
     [GH-9507]
+* builder/vsphere: Clean up folder path to remove leading slashes. [GH-9542]
+* builder/vsphere: Deduplicate where Firmware is set in vsphere-iso builder
+    [GH-9557]
 * builder/vsphere: Fix vsphere ToolsSyncTime and ToolsUpgradePolicy [GH-9515]
 * communicator/winrm: add the "no_proxy" environment variable option to have
     winrm bypass the proxy set by the http_proxy or https_proxy environment
@@ -74,6 +86,7 @@
     [GH-9448]
 * post-processor/amazon-import: Add support for retrying RequestLimitExceeded
     errors when importing an image [GH-9537]
+* post-processor/yandex-export: Fix error handling and docs. [GH-9554]
 * provisioner/ansible: Correct check for whether PackerHttpAddr is implemented
     or not [GH-9498]
 
