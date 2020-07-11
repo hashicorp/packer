@@ -25,7 +25,10 @@ func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 	runConfig := ContainerConfig{
 		Image:      config.Image,
 		RunCommand: config.RunCommand,
+		TmpFs:      config.TmpFs,
 		Volumes:    make(map[string]string),
+		CapAdd:     config.CapAdd,
+		CapDrop:    config.CapDrop,
 		Privileged: config.Privileged,
 	}
 

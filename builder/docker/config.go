@@ -43,6 +43,10 @@ type Config struct {
 	// the [artifice
 	// post-processor](/docs/post-processors/artifice).
 	Discard bool `mapstructure:"discard" required:"true"`
+	// An array of additional Linux capabilities to grant to the container.
+	CapAdd []string `mapstructure:"cap_add" required:"false"`
+	// An array of Linux capabilities to drop from the container.
+	CapDrop []string `mapstructure:"cap_drop" required:"false"`
 	// Username (UID) to run remote commands with. You can also set the group
 	// name/ID if you want: (UID or UID:GID). You may need this if you get
 	// permission errors trying to run the shell or other provisioners.
@@ -75,6 +79,8 @@ type Config struct {
 	// docker image embeds a binary intended to be run often, you should
 	// consider changing the default entrypoint to point to it.
 	RunCommand []string `mapstructure:"run_command" required:"false"`
+	// An array of additional tmpfs volumes to mount into this container.
+	TmpFs []string `mapstructure:"tmpfs" required:"false"`
 	// A mapping of additional volumes to mount into this container. The key of
 	// the object is the host path, the value is the container path.
 	Volumes map[string]string `mapstructure:"volumes" required:"false"`

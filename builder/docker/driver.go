@@ -66,7 +66,10 @@ type Driver interface {
 type ContainerConfig struct {
 	Image      string
 	RunCommand []string
+	CapAdd     []string
+	CapDrop    []string
 	Volumes    map[string]string
+	TmpFs      []string
 	Privileged bool
 }
 

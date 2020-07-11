@@ -10,6 +10,10 @@
   for work [file provisioner](/docs/provisioners/file). This defaults
   to c:/packer-files on windows and /packer-files on other systems.
 
+- `cap_add` ([]string) - An array of additional Linux capabilities to grant to the container.
+
+- `cap_drop` ([]string) - An array of Linux capabilities to drop from the container.
+
 - `exec_user` (string) - Username (UID) to run remote commands with. You can also set the group
   name/ID if you want: (UID or UID:GID). You may need this if you get
   permission errors trying to run the shell or other provisioners.
@@ -33,6 +37,8 @@
   or another shell by running docker run -it --rm  -c /bin/bash. If your
   docker image embeds a binary intended to be run often, you should
   consider changing the default entrypoint to point to it.
+
+- `tmpfs` ([]string) - An array of additional tmpfs volumes to mount into this container.
 
 - `volumes` (map[string]string) - A mapping of additional volumes to mount into this container. The key of
   the object is the host path, the value is the container path.
