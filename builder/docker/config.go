@@ -39,6 +39,9 @@ type Config struct {
 	// for work [file provisioner](/docs/provisioners/file). This defaults
 	// to c:/packer-files on windows and /packer-files on other systems.
 	ContainerDir string `mapstructure:"container_dir" required:"false"`
+	// An array of devices which will be accessible in container when it's run
+	// without `--privileged` flag.
+	Device []string `mapstructure:"device" required:"false"`
 	// Throw away the container when the build is complete. This is useful for
 	// the [artifice
 	// post-processor](/docs/post-processors/artifice).

@@ -66,6 +66,7 @@ type FlatConfig struct {
 	Changes                   []string          `mapstructure:"changes" cty:"changes" hcl:"changes"`
 	Commit                    *bool             `mapstructure:"commit" required:"true" cty:"commit" hcl:"commit"`
 	ContainerDir              *string           `mapstructure:"container_dir" required:"false" cty:"container_dir" hcl:"container_dir"`
+	Device                    []string          `mapstructure:"device" required:"false" cty:"device" hcl:"device"`
 	Discard                   *bool             `mapstructure:"discard" required:"true" cty:"discard" hcl:"discard"`
 	CapAdd                    []string          `mapstructure:"cap_add" required:"false" cty:"cap_add" hcl:"cap_add"`
 	CapDrop                   []string          `mapstructure:"cap_drop" required:"false" cty:"cap_drop" hcl:"cap_drop"`
@@ -161,6 +162,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"changes":                      &hcldec.AttrSpec{Name: "changes", Type: cty.List(cty.String), Required: false},
 		"commit":                       &hcldec.AttrSpec{Name: "commit", Type: cty.Bool, Required: false},
 		"container_dir":                &hcldec.AttrSpec{Name: "container_dir", Type: cty.String, Required: false},
+		"device":                       &hcldec.AttrSpec{Name: "device", Type: cty.List(cty.String), Required: false},
 		"discard":                      &hcldec.AttrSpec{Name: "discard", Type: cty.Bool, Required: false},
 		"cap_add":                      &hcldec.AttrSpec{Name: "cap_add", Type: cty.List(cty.String), Required: false},
 		"cap_drop":                     &hcldec.AttrSpec{Name: "cap_drop", Type: cty.List(cty.String), Required: false},

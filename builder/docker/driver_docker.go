@@ -265,6 +265,9 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 
 	// Args that we're going to pass to Docker
 	args := []string{"run"}
+	for _, v := range config.Device {
+		args = append(args, "--device", v)
+	}
 	for _, v := range config.CapAdd {
 		args = append(args, "--cap-add", v)
 	}
