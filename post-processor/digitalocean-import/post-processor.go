@@ -210,7 +210,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 	ui.Message(fmt.Sprintf("Completed upload of %s to spaces://%s/%s", source, p.config.SpaceName, p.config.ObjectName))
 
-	client := godo.NewClient(oauth2.NewClient(oauth2.NoContext, &apiTokenSource{
+	client := godo.NewClient(oauth2.NewClient(context.Background(), &apiTokenSource{
 		AccessToken: p.config.APIToken,
 	}))
 
