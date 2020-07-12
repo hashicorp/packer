@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/ssh/terminal"
 	"io"
 	"log"
 	"net"
 	"os"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -277,12 +278,23 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 				"Error expanding path for SSH bastion private key: %s", err)
 		}
 
-		signer, err := helperssh.FileSigner(path)
-		if err != nil {
-			return nil, err
+		if config.SSHBastionCertificateFile != "" {
+			identityPath, err := packer.ExpandUser(config.SSHBastionCertificateFile)
+			if err != nil {
+				return nil, fmt.Errorf("Error expanding path for SSH bastion identity certificate: %s", err)
+			}
+			signer, err := helperssh.FileSignerWithCert(path, identityPath)
+			if err != nil {
+				return nil, err
+			}
+			auth = append(auth, gossh.PublicKeys(signer))
+		} else {
+			signer, err := helperssh.FileSigner(path)
+			if err != nil {
+				return nil, err
+			}
+			auth = append(auth, gossh.PublicKeys(signer))
 		}
-
-		auth = append(auth, gossh.PublicKeys(signer))
 	}
 
 	if config.SSHBastionAgentAuth {
