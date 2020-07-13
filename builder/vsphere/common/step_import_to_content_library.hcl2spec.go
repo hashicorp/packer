@@ -17,6 +17,7 @@ type FlatContentLibraryDestinationConfig struct {
 	Host         *string `mapstructure:"host" cty:"host" hcl:"host"`
 	ResourcePool *string `mapstructure:"resource_pool" cty:"resource_pool" hcl:"resource_pool"`
 	Datastore    *string `mapstructure:"datastore" cty:"datastore" hcl:"datastore"`
+	Destroy      *bool   `mapstructure:"destroy" cty:"destroy" hcl:"destroy"`
 }
 
 // FlatMapstructure returns a new FlatContentLibraryDestinationConfig.
@@ -39,6 +40,7 @@ func (*FlatContentLibraryDestinationConfig) HCL2Spec() map[string]hcldec.Spec {
 		"host":          &hcldec.AttrSpec{Name: "host", Type: cty.String, Required: false},
 		"resource_pool": &hcldec.AttrSpec{Name: "resource_pool", Type: cty.String, Required: false},
 		"datastore":     &hcldec.AttrSpec{Name: "datastore", Type: cty.String, Required: false},
+		"destroy":       &hcldec.AttrSpec{Name: "destroy", Type: cty.Bool, Required: false},
 	}
 	return s
 }

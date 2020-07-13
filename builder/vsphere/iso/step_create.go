@@ -207,7 +207,8 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 func (s *StepCreateVM) Cleanup(state multistep.StateBag) {
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
-	if !cancelled && !halted {
+	_, destroy := state.GetOk("destroy_vm")
+	if !cancelled && !halted && !destroy {
 		return
 	}
 
