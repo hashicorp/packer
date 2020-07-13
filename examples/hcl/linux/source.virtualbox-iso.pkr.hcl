@@ -12,3 +12,14 @@ source "virtualbox-iso" "base-ubuntu-amd64" {
     guest_additions_path    = "VBoxGuestAdditions_{{.Version}}.iso"
     guest_additions_url     = var.guest_additions_url
 }
+
+source "virtualbox-iso" "base-alpine-amd64" {
+    headless                = var.headless
+    guest_os_type           = "Linux26_64"
+    http_directory          = local.http_directory
+    hard_drive_interface    = "sata"
+    ssh_username            = "root"
+    ssh_password            = var.alpine_password
+    ssh_wait_timeout        = "60m"
+    shutdown_command        = "poweroff"
+}
