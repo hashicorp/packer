@@ -22,4 +22,5 @@ source "virtualbox-iso" "base-alpine-amd64" {
     ssh_password            = var.alpine_password
     ssh_wait_timeout        = "60m"
     shutdown_command        = "poweroff"
+    floppy_files            = local.floppy_files
 }

@@ -17,7 +17,6 @@ EOF
     iso_checksum            = "file:${local.iso_checksum_url_alpine_380}"
     output_directory        = "virtualbox_iso_alpine_380_amd64"
     boot_command            = local.alpine_380_floppy_boot_command
-    floppy_files            = local.floppy_files
     boot_wait               = "10s"
   }
 
