@@ -139,6 +139,30 @@ func TestConfig_winrm_use_ntlm(t *testing.T) {
 
 }
 
+func TestSSHBastion(t *testing.T) {
+	c := &Config{
+		Type: "ssh",
+		SSH: SSH{
+			SSHUsername:        "root",
+			SSHBastionHost:     "mybastionhost.company.com",
+			SSHBastionPassword: "test",
+		},
+	}
+
+	if err := c.Prepare(testContext(t)); len(err) > 0 {
+		t.Fatalf("bad: %#v", err)
+	}
+
+	if c.SSHBastionCertificateFile != "" {
+		t.Fatalf("Identity certificate somehow set")
+	}
+
+	if c.SSHPrivateKeyFile != "" {
+		t.Fatalf("Private key file somehow set")
+	}
+
+}
+
 func TestSSHConfigFunc(t *testing.T) {
 	state := new(multistep.BasicStateBag)
 
@@ -170,7 +194,9 @@ func TestSSHConfigFunc(t *testing.T) {
 	if sshConfig.Config.Ciphers[0] != "partycipher" {
 		t.Fatalf("ssh_ciphers should be a direct passthrough.")
 	}
-
+	if c.SSHCertificateFile != "" {
+		t.Fatalf("Identity certificate somehow set")
+	}
 }
 
 func TestConfig_winrm(t *testing.T) {

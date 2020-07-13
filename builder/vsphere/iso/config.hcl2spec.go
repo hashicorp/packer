@@ -28,8 +28,7 @@ type FlatConfig struct {
 	Datacenter                      *string                                     `mapstructure:"datacenter" cty:"datacenter" hcl:"datacenter"`
 	Version                         *uint                                       `mapstructure:"vm_version" cty:"vm_version" hcl:"vm_version"`
 	GuestOSType                     *string                                     `mapstructure:"guest_os_type" cty:"guest_os_type" hcl:"guest_os_type"`
-	Firmware                        *string                                     `mapstructure:"firmware" cty:"firmware" hcl:"firmware"`
-	DiskControllerType              *string                                     `mapstructure:"disk_controller_type" cty:"disk_controller_type" hcl:"disk_controller_type"`
+	DiskControllerType              []string                                    `mapstructure:"disk_controller_type" cty:"disk_controller_type" hcl:"disk_controller_type"`
 	Storage                         []FlatDiskConfig                            `mapstructure:"storage" cty:"storage" hcl:"storage"`
 	NICs                            []FlatNIC                                   `mapstructure:"network_adapters" cty:"network_adapters" hcl:"network_adapters"`
 	USBController                   *bool                                       `mapstructure:"usb_controller" cty:"usb_controller" hcl:"usb_controller"`
@@ -53,6 +52,8 @@ type FlatConfig struct {
 	VideoRAM                        *int64                                      `mapstructure:"video_ram" cty:"video_ram" hcl:"video_ram"`
 	VGPUProfile                     *string                                     `mapstructure:"vgpu_profile" cty:"vgpu_profile" hcl:"vgpu_profile"`
 	NestedHV                        *bool                                       `mapstructure:"NestedHV" cty:"NestedHV" hcl:"NestedHV"`
+	Firmware                        *string                                     `mapstructure:"firmware" cty:"firmware" hcl:"firmware"`
+	ForceBIOSSetup                  *bool                                       `mapstructure:"force_bios_setup" cty:"force_bios_setup" hcl:"force_bios_setup"`
 	ConfigParams                    map[string]string                           `mapstructure:"configuration_parameters" cty:"configuration_parameters" hcl:"configuration_parameters"`
 	ToolsSyncTime                   *bool                                       `mapstructure:"tools_sync_time" cty:"tools_sync_time" hcl:"tools_sync_time"`
 	ToolsUpgradePolicy              *bool                                       `mapstructure:"tools_upgrade_policy" cty:"tools_upgrade_policy" hcl:"tools_upgrade_policy"`
@@ -87,6 +88,7 @@ type FlatConfig struct {
 	SSHCiphers                      []string                                    `mapstructure:"ssh_ciphers" cty:"ssh_ciphers" hcl:"ssh_ciphers"`
 	SSHClearAuthorizedKeys          *bool                                       `mapstructure:"ssh_clear_authorized_keys" cty:"ssh_clear_authorized_keys" hcl:"ssh_clear_authorized_keys"`
 	SSHPrivateKeyFile               *string                                     `mapstructure:"ssh_private_key_file" undocumented:"true" cty:"ssh_private_key_file" hcl:"ssh_private_key_file"`
+	SSHCertificateFile              *string                                     `mapstructure:"ssh_certificate_file" cty:"ssh_certificate_file" hcl:"ssh_certificate_file"`
 	SSHPty                          *bool                                       `mapstructure:"ssh_pty" cty:"ssh_pty" hcl:"ssh_pty"`
 	SSHTimeout                      *string                                     `mapstructure:"ssh_timeout" cty:"ssh_timeout" hcl:"ssh_timeout"`
 	SSHWaitTimeout                  *string                                     `mapstructure:"ssh_wait_timeout" undocumented:"true" cty:"ssh_wait_timeout" hcl:"ssh_wait_timeout"`
@@ -100,6 +102,7 @@ type FlatConfig struct {
 	SSHBastionPassword              *string                                     `mapstructure:"ssh_bastion_password" cty:"ssh_bastion_password" hcl:"ssh_bastion_password"`
 	SSHBastionInteractive           *bool                                       `mapstructure:"ssh_bastion_interactive" cty:"ssh_bastion_interactive" hcl:"ssh_bastion_interactive"`
 	SSHBastionPrivateKeyFile        *string                                     `mapstructure:"ssh_bastion_private_key_file" cty:"ssh_bastion_private_key_file" hcl:"ssh_bastion_private_key_file"`
+	SSHBastionCertificateFile       *string                                     `mapstructure:"ssh_bastion_certificate_file" cty:"ssh_bastion_certificate_file" hcl:"ssh_bastion_certificate_file"`
 	SSHFileTransferMethod           *string                                     `mapstructure:"ssh_file_transfer_method" cty:"ssh_file_transfer_method" hcl:"ssh_file_transfer_method"`
 	SSHProxyHost                    *string                                     `mapstructure:"ssh_proxy_host" cty:"ssh_proxy_host" hcl:"ssh_proxy_host"`
 	SSHProxyPort                    *int                                        `mapstructure:"ssh_proxy_port" cty:"ssh_proxy_port" hcl:"ssh_proxy_port"`
@@ -159,8 +162,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"datacenter":                     &hcldec.AttrSpec{Name: "datacenter", Type: cty.String, Required: false},
 		"vm_version":                     &hcldec.AttrSpec{Name: "vm_version", Type: cty.Number, Required: false},
 		"guest_os_type":                  &hcldec.AttrSpec{Name: "guest_os_type", Type: cty.String, Required: false},
-		"firmware":                       &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
-		"disk_controller_type":           &hcldec.AttrSpec{Name: "disk_controller_type", Type: cty.String, Required: false},
+		"disk_controller_type":           &hcldec.AttrSpec{Name: "disk_controller_type", Type: cty.List(cty.String), Required: false},
 		"storage":                        &hcldec.BlockListSpec{TypeName: "storage", Nested: hcldec.ObjectSpec((*FlatDiskConfig)(nil).HCL2Spec())},
 		"network_adapters":               &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatNIC)(nil).HCL2Spec())},
 		"usb_controller":                 &hcldec.AttrSpec{Name: "usb_controller", Type: cty.Bool, Required: false},
@@ -184,6 +186,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"video_ram":                      &hcldec.AttrSpec{Name: "video_ram", Type: cty.Number, Required: false},
 		"vgpu_profile":                   &hcldec.AttrSpec{Name: "vgpu_profile", Type: cty.String, Required: false},
 		"NestedHV":                       &hcldec.AttrSpec{Name: "NestedHV", Type: cty.Bool, Required: false},
+		"firmware":                       &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
+		"force_bios_setup":               &hcldec.AttrSpec{Name: "force_bios_setup", Type: cty.Bool, Required: false},
 		"configuration_parameters":       &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
 		"tools_sync_time":                &hcldec.AttrSpec{Name: "tools_sync_time", Type: cty.Bool, Required: false},
 		"tools_upgrade_policy":           &hcldec.AttrSpec{Name: "tools_upgrade_policy", Type: cty.Bool, Required: false},
@@ -218,6 +222,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_ciphers":                    &hcldec.AttrSpec{Name: "ssh_ciphers", Type: cty.List(cty.String), Required: false},
 		"ssh_clear_authorized_keys":      &hcldec.AttrSpec{Name: "ssh_clear_authorized_keys", Type: cty.Bool, Required: false},
 		"ssh_private_key_file":           &hcldec.AttrSpec{Name: "ssh_private_key_file", Type: cty.String, Required: false},
+		"ssh_certificate_file":           &hcldec.AttrSpec{Name: "ssh_certificate_file", Type: cty.String, Required: false},
 		"ssh_pty":                        &hcldec.AttrSpec{Name: "ssh_pty", Type: cty.Bool, Required: false},
 		"ssh_timeout":                    &hcldec.AttrSpec{Name: "ssh_timeout", Type: cty.String, Required: false},
 		"ssh_wait_timeout":               &hcldec.AttrSpec{Name: "ssh_wait_timeout", Type: cty.String, Required: false},
@@ -231,6 +236,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_bastion_password":           &hcldec.AttrSpec{Name: "ssh_bastion_password", Type: cty.String, Required: false},
 		"ssh_bastion_interactive":        &hcldec.AttrSpec{Name: "ssh_bastion_interactive", Type: cty.Bool, Required: false},
 		"ssh_bastion_private_key_file":   &hcldec.AttrSpec{Name: "ssh_bastion_private_key_file", Type: cty.String, Required: false},
+		"ssh_bastion_certificate_file":   &hcldec.AttrSpec{Name: "ssh_bastion_certificate_file", Type: cty.String, Required: false},
 		"ssh_file_transfer_method":       &hcldec.AttrSpec{Name: "ssh_file_transfer_method", Type: cty.String, Required: false},
 		"ssh_proxy_host":                 &hcldec.AttrSpec{Name: "ssh_proxy_host", Type: cty.String, Required: false},
 		"ssh_proxy_port":                 &hcldec.AttrSpec{Name: "ssh_proxy_port", Type: cty.Number, Required: false},

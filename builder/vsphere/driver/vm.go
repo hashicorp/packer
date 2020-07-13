@@ -53,6 +53,7 @@ type HardwareConfig struct {
 	VideoRAM            int64
 	VGPUProfile         string
 	Firmware            string
+	ForceBIOSSetup      bool
 }
 
 type NIC struct {
@@ -63,7 +64,7 @@ type NIC struct {
 }
 
 type CreateConfig struct {
-	DiskControllerType string // example: "scsi", "pvscsi"
+	DiskControllerType []string // example: "scsi", "pvscsi", "lsilogic"
 
 	Annotation    string
 	Name          string
@@ -75,8 +76,7 @@ type CreateConfig struct {
 	GuestOS       string // example: otherGuest
 	NICs          []NIC
 	USBController bool
-	Version       uint   // example: 10
-	Firmware      string // efi-secure, efi or bios
+	Version       uint // example: 10
 	Storage       []Disk
 }
 
@@ -84,6 +84,7 @@ type Disk struct {
 	DiskSize            int64
 	DiskEagerlyScrub    bool
 	DiskThinProvisioned bool
+	ControllerIndex     int
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
@@ -137,14 +138,6 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 	}
 	if config.Version != 0 {
 		createSpec.Version = fmt.Sprintf("%s%d", "vmx-", config.Version)
-	}
-	if config.Firmware == "efi-secure" {
-		createSpec.Firmware = "efi"
-		createSpec.BootOptions = &types.VirtualMachineBootOptions{
-			EfiSecureBootEnabled: types.NewBool(true),
-		}
-	} else if config.Firmware != "" {
-		createSpec.Firmware = config.Firmware
 	}
 
 	folder, err := d.FindFolder(config.Folder)
@@ -498,13 +491,18 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 		confSpec.DeviceChange = append(confSpec.DeviceChange, spec)
 	}
 
-	if config.Firmware == "efi-secure" || config.Firmware == "efi" {
-		confSpec.Firmware = "efi"
-		confSpec.BootOptions = &types.VirtualMachineBootOptions{
-			EfiSecureBootEnabled: types.NewBool(config.Firmware == "efi-secure"),
-		}
-	} else if config.Firmware != "" {
-		confSpec.Firmware = config.Firmware
+	efiSecureBootEnabled := false
+	firmware := config.Firmware
+
+	if firmware == "efi-secure" {
+		firmware = "efi"
+		efiSecureBootEnabled = true
+	}
+
+	confSpec.Firmware = firmware
+	confSpec.BootOptions = &types.VirtualMachineBootOptions{
+		EnterBIOSSetup:       types.NewBool(config.ForceBIOSSetup),
+		EfiSecureBootEnabled: types.NewBool(efiSecureBootEnabled),
 	}
 
 	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
@@ -741,14 +739,22 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 		return nil, errors.New("no storage devices have been defined")
 	}
 
-	device, err := devices.CreateSCSIController(config.DiskControllerType)
-	if err != nil {
-		return nil, err
+	if len(config.DiskControllerType) == 0 {
+		return nil, errors.New("no controllers have been defined")
 	}
-	devices = append(devices, device)
-	controller, err := devices.FindDiskController(devices.Name(device))
-	if err != nil {
-		return nil, err
+
+	var controllers []types.BaseVirtualController
+	for _, controllerType := range config.DiskControllerType {
+		device, err := devices.CreateSCSIController(controllerType)
+		if err != nil {
+			return nil, err
+		}
+		devices = append(devices, device)
+		controller, err := devices.FindDiskController(devices.Name(device))
+		if err != nil {
+			return nil, err
+		}
+		controllers = append(controllers, controller)
 	}
 
 	for _, dc := range config.Storage {
@@ -764,7 +770,7 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 			CapacityInKB: dc.DiskSize * 1024,
 		}
 
-		devices.AssignController(disk, controller)
+		devices.AssignController(disk, controllers[dc.ControllerIndex])
 		devices = append(devices, disk)
 	}
 
