@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
+	flavors_utils "github.com/gophercloud/utils/openstack/compute/v2/flavors"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -37,7 +38,7 @@ func (s *StepLoadFlavor) Run(ctx context.Context, state multistep.StateBag) mult
 		geterr := err
 
 		log.Printf("[INFO] Loading flavor by name: %s", s.Flavor)
-		id, err := flavors.IDFromName(client, s.Flavor)
+		id, err := flavors_utils.IDFromName(client, s.Flavor)
 		if err != nil {
 			log.Printf("[ERROR] Failed to find flavor by name: %s", err)
 			err = fmt.Errorf(

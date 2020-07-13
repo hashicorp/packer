@@ -16,7 +16,7 @@ type CreateOptsBuilder interface {
 // see the Volume object.
 type CreateOpts struct {
 	// The size of the volume, in GB
-	Size int `json:"size" required:"true"`
+	Size int `json:"size,omitempty"`
 	// The availability zone
 	AvailabilityZone string `json:"availability_zone,omitempty"`
 	// ConsistencyGroupID is the ID of a consistency group
@@ -36,6 +36,9 @@ type CreateOpts struct {
 	// The ID of the image from which you want to create the volume.
 	// Required to create a bootable volume.
 	ImageID string `json:"imageRef,omitempty"`
+	// Specifies the backup ID, from which you want to create the volume.
+	// Create a volume from a backup is supported since 3.47 microversion
+	BackupID string `json:"backup_id,omitempty"`
 	// The associated volume type
 	VolumeType string `json:"volume_type,omitempty"`
 	// Multiattach denotes if the volume is multi-attach capable.
@@ -57,9 +60,10 @@ func Create(client *gophercloud.ServiceClient, opts CreateOptsBuilder) (r Create
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Post(createURL(client), b, &r.Body, &gophercloud.RequestOpts{
+	resp, err := client.Post(createURL(client), b, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{202},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
@@ -93,14 +97,16 @@ func Delete(client *gophercloud.ServiceClient, id string, opts DeleteOptsBuilder
 		}
 		url += query
 	}
-	_, r.Err = client.Delete(url, nil)
+	resp, err := client.Delete(url, nil)
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
 // Get retrieves the Volume with the provided ID. To extract the Volume object
 // from the response, call the Extract method on the GetResult.
 func Get(client *gophercloud.ServiceClient, id string) (r GetResult) {
-	_, r.Err = client.Get(getURL(client, id), &r.Body, nil)
+	resp, err := client.Get(getURL(client, id), &r.Body, nil)
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
@@ -194,44 +200,9 @@ func Update(client *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Put(updateURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
+	resp, err := client.Put(updateURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
-}
-
-// IDFromName is a convienience function that returns a server's ID given its name.
-func IDFromName(client *gophercloud.ServiceClient, name string) (string, error) {
-	count := 0
-	id := ""
-
-	listOpts := ListOpts{
-		Name: name,
-	}
-
-	pages, err := List(client, listOpts).AllPages()
-	if err != nil {
-		return "", err
-	}
-
-	all, err := ExtractVolumes(pages)
-	if err != nil {
-		return "", err
-	}
-
-	for _, s := range all {
-		if s.Name == name {
-			count++
-			id = s.ID
-		}
-	}
-
-	switch count {
-	case 0:
-		return "", gophercloud.ErrResourceNotFound{Name: name, ResourceType: "volume"}
-	case 1:
-		return id, nil
-	default:
-		return "", gophercloud.ErrMultipleResourcesFound{Name: name, Count: count, ResourceType: "volume"}
-	}
 }

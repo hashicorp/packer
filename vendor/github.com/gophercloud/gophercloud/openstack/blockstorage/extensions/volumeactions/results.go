@@ -35,6 +35,12 @@ type SetImageMetadataResult struct {
 	gophercloud.ErrResult
 }
 
+// SetBootableResult contains the response body and error from a SetBootable
+// request.
+type SetBootableResult struct {
+	gophercloud.ErrResult
+}
+
 // ReserveResult contains the response body and error from a Reserve request.
 type ReserveResult struct {
 	gophercloud.ErrResult
@@ -156,6 +162,14 @@ type VolumeImage struct {
 
 	// Current status of the volume.
 	Status string `json:"status"`
+
+	// Visibility defines who can see/use the image.
+	// supported since 3.1 microversion
+	Visibility string `json:"visibility"`
+
+	// whether the image is not deletable.
+	// supported since 3.1 microversion
+	Protected bool `json:"protected"`
 
 	// The date when this volume was last updated.
 	UpdatedAt time.Time `json:"-"`

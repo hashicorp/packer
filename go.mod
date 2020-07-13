@@ -53,8 +53,8 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
 	github.com/google/uuid v1.1.1
-	github.com/gophercloud/gophercloud v0.2.0
-	github.com/gophercloud/utils v0.0.0-20190124192022-a5c25e7a53a6
+	github.com/gophercloud/gophercloud v0.12.0
+	github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/gorilla/websocket v0.0.0-20170319172727-a91eba7f9777 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0

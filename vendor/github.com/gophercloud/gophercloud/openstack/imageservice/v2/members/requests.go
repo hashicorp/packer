@@ -25,9 +25,10 @@ import (
 */
 func Create(client *gophercloud.ServiceClient, id string, member string) (r CreateResult) {
 	b := map[string]interface{}{"member": member}
-	_, r.Err = client.Post(createMemberURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
+	resp, err := client.Post(createMemberURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
@@ -40,13 +41,15 @@ func List(client *gophercloud.ServiceClient, id string) pagination.Pager {
 
 // Get image member details.
 func Get(client *gophercloud.ServiceClient, imageID string, memberID string) (r DetailsResult) {
-	_, r.Err = client.Get(getMemberURL(client, imageID, memberID), &r.Body, &gophercloud.RequestOpts{OkCodes: []int{200}})
+	resp, err := client.Get(getMemberURL(client, imageID, memberID), &r.Body, &gophercloud.RequestOpts{OkCodes: []int{200}})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
 // Delete membership for given image. Callee should be image owner.
 func Delete(client *gophercloud.ServiceClient, imageID string, memberID string) (r DeleteResult) {
-	_, r.Err = client.Delete(deleteMemberURL(client, imageID, memberID), &gophercloud.RequestOpts{OkCodes: []int{204}})
+	resp, err := client.Delete(deleteMemberURL(client, imageID, memberID), &gophercloud.RequestOpts{OkCodes: []int{204}})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
@@ -75,7 +78,8 @@ func Update(client *gophercloud.ServiceClient, imageID string, memberID string, 
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Put(updateMemberURL(client, imageID, memberID), b, &r.Body,
+	resp, err := client.Put(updateMemberURL(client, imageID, memberID), b, &r.Body,
 		&gophercloud.RequestOpts{OkCodes: []int{200}})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }

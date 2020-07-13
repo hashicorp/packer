@@ -75,6 +75,10 @@ type BlockDevice struct {
 	// DiskBus is the bus type of the block devices.
 	// Examples of this are ide, usb, virtio, scsi, etc.
 	DiskBus string `json:"disk_bus,omitempty"`
+
+	// VolumeType is the volume type of the block device.
+	// This requires Compute API microversion 2.67 or later.
+	VolumeType string `json:"volume_type,omitempty"`
 }
 
 // CreateOptsExt is a structure that extends the server `CreateOpts` structure
@@ -121,8 +125,9 @@ func Create(client *gophercloud.ServiceClient, opts servers.CreateOptsBuilder) (
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Post(createURL(client), b, &r.Body, &gophercloud.RequestOpts{
+	resp, err := client.Post(createURL(client), b, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200, 202},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }

@@ -14,9 +14,10 @@ func List(client *gophercloud.ServiceClient, serverID string) pagination.Pager {
 
 // Get requests details on a single interface attachment by the server and port IDs.
 func Get(client *gophercloud.ServiceClient, serverID, portID string) (r GetResult) {
-	_, r.Err = client.Get(getInterfaceURL(client, serverID, portID), &r.Body, &gophercloud.RequestOpts{
+	resp, err := client.Get(getInterfaceURL(client, serverID, portID), &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
@@ -58,15 +59,17 @@ func Create(client *gophercloud.ServiceClient, serverID string, opts CreateOptsB
 		r.Err = err
 		return
 	}
-	_, r.Err = client.Post(createInterfaceURL(client, serverID), b, &r.Body, &gophercloud.RequestOpts{
+	resp, err := client.Post(createInterfaceURL(client, serverID), b, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
 
 // Delete makes a request against the nova API to detach a single interface from the server.
 // It needs server and port IDs to make a such request.
 func Delete(client *gophercloud.ServiceClient, serverID, portID string) (r DeleteResult) {
-	_, r.Err = client.Delete(deleteInterfaceURL(client, serverID, portID), nil)
+	resp, err := client.Delete(deleteInterfaceURL(client, serverID, portID), nil)
+	_, r.Header, r.Err = gophercloud.ParseResponse(resp, err)
 	return
 }
