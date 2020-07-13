@@ -21,7 +21,6 @@ EOF
     boot_wait               = "10s"
   }
 
-
   provisioner "shell" {
     inline = ["echo hi"]
   }

@@ -27,7 +27,6 @@ locals {
     "${var.alpine_password}<enter><wait>",
     "mount -t vfat /dev/fd0 /media/floppy<enter><wait>",
     "/media/floppy/alpine-setup.sh<enter>",
-    "reboot<enter>",
   ]
 
 }
