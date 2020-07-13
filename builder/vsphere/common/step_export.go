@@ -194,15 +194,20 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 			i.Path = s.Name + "-" + i.Path
 		}
 
-		ui.Message("Downloading: " + i.File().Path)
-		err = s.Download(ctx, lease, i)
+		file := i.File()
+
+		ui.Message("Downloading: " + file.Path)
+		size, err := s.Download(ctx, lease, i)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 
-		ui.Message("Exporting file: " + i.File().Path)
-		cdp.OvfFiles = append(cdp.OvfFiles, i.File())
+		// Fix file size descriptor
+		file.Size = size
+
+		ui.Message("Exporting file: " + file.Path)
+		cdp.OvfFiles = append(cdp.OvfFiles, file)
 	}
 
 	if err = lease.Complete(ctx); err != nil {
@@ -292,7 +297,7 @@ func (s *StepExport) addHash(p string, h hash.Hash) {
 	_, _ = fmt.Fprintf(&s.mf, "%s(%s)= %x\n", strings.ToUpper(s.Manifest), p, h.Sum(nil))
 }
 
-func (s *StepExport) Download(ctx context.Context, lease *nfc.Lease, item nfc.FileItem) error {
+func (s *StepExport) Download(ctx context.Context, lease *nfc.Lease, item nfc.FileItem) (int64, error) {
 	path := filepath.Join(s.OutputDir, item.Path)
 	opts := soap.Download{}
 
@@ -301,5 +306,14 @@ func (s *StepExport) Download(ctx context.Context, lease *nfc.Lease, item nfc.Fi
 		defer s.addHash(item.Path, h)
 	}
 
-	return lease.DownloadFile(ctx, path, item, opts)
+	err := lease.DownloadFile(ctx, path, item, opts)
+	if err != nil {
+		return 0, err
+	}
+
+	f, err := os.Stat(path)
+	if err != nil {
+		return 0, err
+	}
+	return f.Size(), err
 }
