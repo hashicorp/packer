@@ -16,7 +16,10 @@ export default [
             category: 'build',
             content: ['source', 'provisioner', 'post-processor'],
           },
-          'locals', 'source', 'variable'],
+          'locals',
+          'source',
+          'variable',
+        ],
       },
       {
         category: 'functions',

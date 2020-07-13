@@ -65,7 +65,7 @@ func main() {
 			SourcePath: sourcePath,
 			Name:       typeSpec.Name.Name,
 			Filename:   typeSpec.Name.Name + ".mdx",
-			Header:     typeDecl.Doc.Text(),
+			Header:     strings.TrimSpace(typeDecl.Doc.Text()),
 		}
 		required := Struct{
 			SourcePath: sourcePath,

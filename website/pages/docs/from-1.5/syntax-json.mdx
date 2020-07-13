@@ -289,11 +289,11 @@ that apply to each top-level block type.
 
 All arguments inside `variable` blocks have non-standard mappings to JSON:
 
-* `type`: a string containing a type expression, like `"string"` or `"list(string)"`.
-* `default`: a literal JSON value that can be converted to the given type.
+- `type`: a string containing a type expression, like `"string"` or `"list(string)"`.
+- `default`: a literal JSON value that can be converted to the given type.
   Strings within this value are taken literally and _not_ interpreted as
   string templates.
-* `description`: a literal JSON string, _not_ interpreted as a template.
+- `description`: a literal JSON string, _not_ interpreted as a template.
 
 ```json
 {

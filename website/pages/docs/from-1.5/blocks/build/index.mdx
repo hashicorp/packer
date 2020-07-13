@@ -13,15 +13,14 @@ sidebar_title: <tt>build</tt>
 The `build` block defines what builders are started, how to `provision` them
 and if necessary what to do with their artifacts using `post-process`.
 
-To use builders in a `build` block you can either: 
+To use builders in a `build` block you can either:
 
-* Set the `sources` array of string with references to pre-defined sources.
+- Set the `sources` array of string with references to pre-defined sources.
 
-* Define [build-level `source` blocks](/docs/from-1.5/blocks/build/source) or
-`sources` to use builders. This also allows you to set specific fields.
+- Define [build-level `source` blocks](/docs/from-1.5/blocks/build/source) or
+  `sources` to use builders. This also allows you to set specific fields.
 
 `@include 'from-1.5/builds/example-block.mdx'`
-
 
 Define [top-level `source` blocks](/docs/from-1.5/blocks/source) to configure
 your builders. The list of available builders can be found in the
@@ -90,12 +89,11 @@ Build 'a.null.second-example' finished.
 Here `'a.null.first-example'` was skipped.
 
 -> Note: It is not yet possible to match a named `build` block to do this, but
-this is soon going to be possible. So here "a.*" will match nothing.
-
+this is soon going to be possible. So here "a.\*" will match nothing.
 
 ## Related
 
-* A list of [community
-builders](/community-tools#community-builders) is available.
+- A list of [community
+  builders](/community-tools#community-builders) is available.
 
-* Create your own [custom builder](/docs/extending/custom-builders) !
+- Create your own [custom builder](/docs/extending/custom-builders) !

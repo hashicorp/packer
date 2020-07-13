@@ -1,30 +1,29 @@
 <!-- Code generated from the comments of the ImageConfig struct in builder/ucloud/common/image_config.go; DO NOT EDIT MANUALLY -->
 
--   `image_description` (string) - The description of the image.
-    
--   `image_copy_to_mappings` ([]ImageDestination) - The array of mappings regarding the copied images to the destination regions and projects.
-    
-     - `project_id` (string) - The destination project id, where copying image in.
-    
-     - `region` (string) - The destination region, where copying image in.
-    
-     - `name` (string) - The copied image name. If not defined, builder will use `image_name` as default name.
-    
-     - `description` (string) - The copied image description.
-    
-    ```json
-    {
-      "image_copy_to_mappings": [
-        {
-          "project_id": "{{user `ucloud_project_id`}}",
-          "region": "cn-sh2",
-          "description": "test",
-          "name": "packer-test-basic-sh"
-        }
-      ]
-    }
-    ```
-    
--   `wait_image_ready_timeout` (int) - Timeout of creating image or copying image. The default timeout is 3600 seconds if this option
-    is not set or is set to 0.
-    
+- `image_description` (string) - The description of the image.
+
+- `image_copy_to_mappings` ([]ImageDestination) - The array of mappings regarding the copied images to the destination regions and projects.
+  
+   - `project_id` (string) - The destination project id, where copying image in.
+  
+   - `region` (string) - The destination region, where copying image in.
+  
+   - `name` (string) - The copied image name. If not defined, builder will use `image_name` as default name.
+  
+   - `description` (string) - The copied image description.
+  
+  ```json
+  {
+    "image_copy_to_mappings": [
+      {
+        "project_id": "{{user `ucloud_project_id`}}",
+        "region": "cn-sh2",
+        "description": "test",
+        "name": "packer-test-basic-sh"
+      }
+    ]
+  }
+  ```
+
+- `wait_image_ready_timeout` (int) - Timeout of creating image or copying image. The default timeout is 3600 seconds if this option
+  is not set or is set to 0.

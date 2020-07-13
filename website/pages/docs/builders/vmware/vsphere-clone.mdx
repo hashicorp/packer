@@ -146,14 +146,14 @@ can be done via environment variable:
 
 @include 'helper/communicator/SSH-Agent-Auth-not-required.mdx'
 
--> **NOTE:**  Packer uses vApp Options to inject ssh public keys to the Virtual Machine.
- The [temporary_key_pair_name](/docs/builders/vmware/vsphere-clone#temporary_key_pair_name) will only work
- if the template being cloned contains the vApp property `public-keys`.
- If using [ssh_private_key_file](/docs/builders/vmware/vsphere-clone#ssh_private_key_file), provide
- the public key via [configuration_parameters](/docs/builders/vmware/vsphere-clone#configuration_parameters) or
- [vApp Options Configuration](/docs/builders/vmware/vsphere-clone#vapp-options-configuration) whenever the `guestinto.userdata`
- is available. See [VMware Guestinfo datasource](https://github.com/vmware/cloud-init-vmware-guestinfo) for more information
- about the key.
+-> **NOTE:** Packer uses vApp Options to inject ssh public keys to the Virtual Machine.
+The [temporary_key_pair_name](/docs/builders/vmware/vsphere-clone#temporary_key_pair_name) will only work
+if the template being cloned contains the vApp property `public-keys`.
+If using [ssh_private_key_file](/docs/builders/vmware/vsphere-clone#ssh_private_key_file), provide
+the public key via [configuration_parameters](/docs/builders/vmware/vsphere-clone#configuration_parameters) or
+[vApp Options Configuration](/docs/builders/vmware/vsphere-clone#vapp-options-configuration) whenever the `guestinto.userdata`
+is available. See [VMware Guestinfo datasource](https://github.com/vmware/cloud-init-vmware-guestinfo) for more information
+about the key.
 
 #### Optional WinRM fields:
 

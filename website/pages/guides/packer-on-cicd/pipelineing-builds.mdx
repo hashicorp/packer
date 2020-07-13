@@ -26,12 +26,11 @@ It also makes it so that a failing build takes less time to debug and re-run.
 In this example, we will use the Virtualbox builders, but the concepts from
 this example can be applied to other builders as well.
 
-
 ## Starting from an ISO
 
 Here is an extremely basic virtualbox-iso template:
 
-``` json
+```json
 {
   "builders": [
     {
@@ -102,7 +101,7 @@ That output filename generated in the first stage can be used as the
 [source_path](https://www.packer.io/docs/builders/virtualbox/ovf#source_path)
 for the virtualbox-ovf builder.
 
-``` json
+```json
 {
   "builders": [
     {
@@ -119,9 +118,7 @@ for the virtualbox-ovf builder.
   ],
   "provisioners": [
     {
-      "inline": [
-        "echo secondary provisioning"
-      ],
+      "inline": ["echo secondary provisioning"],
       "type": "shell"
     }
   ]
@@ -140,18 +137,22 @@ the behavior you want. The below example shows a "vagrant" post-processor
 being used with a null builder, and manually sets the artifact from our
 stage-2 ovf build:
 
-``` json
+```json
 {
-  "builders": [{
-    "type": "null",
-    "communicator": "none"
-  }],
+  "builders": [
+    {
+      "type": "null",
+      "communicator": "none"
+    }
+  ],
   "post-processors": [
     [
       {
         "type": "artifice",
-        "files": ["output-virtualbox-ovf/virtualbox-example-ovf.ovf",
-                  "output-virtualbox-ovf/virtualbox-example-ovf-disk001.vmdk"]
+        "files": [
+          "output-virtualbox-ovf/virtualbox-example-ovf.ovf",
+          "output-virtualbox-ovf/virtualbox-example-ovf-disk001.vmdk"
+        ]
       },
       {
         "type": "vagrant",

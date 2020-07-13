@@ -1,55 +1,54 @@
 <!-- Code generated from the comments of the RunConfig struct in builder/ucloud/common/run_config.go; DO NOT EDIT MANUALLY -->
 
--   `instance_name` (string) - The name of instance, which contains 1-63 characters and only support Chinese,
-    English, numbers, '-', '\_', '.'.
-    
--   `boot_disk_type` (string) - The type of boot disk associated to UHost instance.
-    Possible values are: `cloud_ssd` and `cloud_rssd` for cloud boot disk, `local_normal` and `local_ssd`
-    for local boot disk. (Default: `cloud_ssd`). The `cloud_ssd` and `local_ssd` are not fully supported
-    by all regions as boot disk type, please proceed to UCloud console for more details.
-    
-    ~> **Note:** It takes around 10 mins for boot disk initialization when `boot_disk_type` is `local_normal` or `local_ssd`.
-    
--   `vpc_id` (string) - The ID of VPC linked to the UHost instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
-    
--   `subnet_id` (string) - The ID of subnet under the VPC. If `vpc_id` is defined, the `subnet_id` is mandatory required.
-    If `vpc_id` and `subnet_id` are not defined, the instance will use the default subnet in the current region.
-    
--   `security_group_id` (string) - The ID of the fire wall associated to UHost instance. If `security_group_id` is not defined,
-    the instance will use the non-recommended web fire wall, and open port include 22, 3389 by default.
-    It is supported by ICMP fire wall protocols.
-    You may refer to [security group_id](https://docs.ucloud.cn/network/firewall/firewall).
-    
--   `eip_bandwidth` (int) - Maximum bandwidth to the elastic public network, measured in Mbps (Mega bit per second). (Default: `10`).
-    
--   `eip_charge_mode` (string) - Elastic IP charge mode. Possible values are: `traffic` as pay by traffic, `bandwidth` as pay by bandwidth,
-    `post_accurate_bandwidth` as post pay mode. (Default: `traffic`).
-    Note currently default `traffic` eip charge mode not not fully support by all `availability_zone`
-    in the `region`, please proceed to [UCloud console](https://console.ucloud.cn/unet/eip/create) for more details.
-    You may refer to [eip introduction](https://docs.ucloud.cn/unet/eip/introduction).
-    
--   `user_data` (string) - User data to apply when launching the instance.
-    Note that you need to be careful about escaping characters due to the templates
-    being JSON. It is often more convenient to use user_data_file, instead.
-    Packer will not automatically wait for a user script to finish before
-    shutting down the instance this must be handled in a provisioner.
-    You may refer to [user_data_document](https://docs.ucloud.cn/uhost/guide/metadata/userdata)
-    
--   `user_data_file` (string) - Path to a file that will be used for the user data when launching the instance.
-    
--   `min_cpu_platform` (string) - Specifies a minimum CPU platform for the the VM instance. (Default: `Intel/Auto`).
-    You may refer to [min_cpu_platform](https://docs.ucloud.cn/uhost/introduction/uhost/type_new)
-       - The Intel CPU platform:
-           - `Intel/Auto` as the Intel CPU platform version will be selected randomly by system;
-           - `Intel/IvyBridge` as Intel V2, the version of Intel CPU platform selected by system will be `Intel/IvyBridge` and above;
-           - `Intel/Haswell` as Intel V3,  the version of Intel CPU platform selected by system will be `Intel/Haswell` and above;
-           - `Intel/Broadwell` as Intel V4, the version of Intel CPU platform selected by system will be `Intel/Broadwell` and above;
-           - `Intel/Skylake` as Intel V5, the version of Intel CPU platform selected by system will be `Intel/Skylake` and above;
-           - `Intel/Cascadelake` as Intel V6, the version of Intel CPU platform selected by system will be `Intel/Cascadelake`;
-       - The AMD CPU platform:
-           - `Amd/Auto` as the Amd CPU platform version will be selected randomly by system;
-           - `Amd/Epyc2` as the version of Amd CPU platform selected by system will be `Amd/Epyc2` and above;
-    
--   `use_ssh_private_ip` (bool) - If this value is true, packer will connect to the created UHost instance via a private ip
-    instead of allocating an EIP (elastic public ip).(Default: `false`).
-    
+- `instance_name` (string) - The name of instance, which contains 1-63 characters and only support Chinese,
+  English, numbers, '-', '\_', '.'.
+
+- `boot_disk_type` (string) - The type of boot disk associated to UHost instance.
+  Possible values are: `cloud_ssd` and `cloud_rssd` for cloud boot disk, `local_normal` and `local_ssd`
+  for local boot disk. (Default: `cloud_ssd`). The `cloud_ssd` and `local_ssd` are not fully supported
+  by all regions as boot disk type, please proceed to UCloud console for more details.
+  
+  ~> **Note:** It takes around 10 mins for boot disk initialization when `boot_disk_type` is `local_normal` or `local_ssd`.
+
+- `vpc_id` (string) - The ID of VPC linked to the UHost instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
+
+- `subnet_id` (string) - The ID of subnet under the VPC. If `vpc_id` is defined, the `subnet_id` is mandatory required.
+  If `vpc_id` and `subnet_id` are not defined, the instance will use the default subnet in the current region.
+
+- `security_group_id` (string) - The ID of the fire wall associated to UHost instance. If `security_group_id` is not defined,
+  the instance will use the non-recommended web fire wall, and open port include 22, 3389 by default.
+  It is supported by ICMP fire wall protocols.
+  You may refer to [security group_id](https://docs.ucloud.cn/network/firewall/firewall).
+
+- `eip_bandwidth` (int) - Maximum bandwidth to the elastic public network, measured in Mbps (Mega bit per second). (Default: `10`).
+
+- `eip_charge_mode` (string) - Elastic IP charge mode. Possible values are: `traffic` as pay by traffic, `bandwidth` as pay by bandwidth,
+  `post_accurate_bandwidth` as post pay mode. (Default: `traffic`).
+  Note currently default `traffic` eip charge mode not not fully support by all `availability_zone`
+  in the `region`, please proceed to [UCloud console](https://console.ucloud.cn/unet/eip/create) for more details.
+  You may refer to [eip introduction](https://docs.ucloud.cn/unet/eip/introduction).
+
+- `user_data` (string) - User data to apply when launching the instance.
+  Note that you need to be careful about escaping characters due to the templates
+  being JSON. It is often more convenient to use user_data_file, instead.
+  Packer will not automatically wait for a user script to finish before
+  shutting down the instance this must be handled in a provisioner.
+  You may refer to [user_data_document](https://docs.ucloud.cn/uhost/guide/metadata/userdata)
+
+- `user_data_file` (string) - Path to a file that will be used for the user data when launching the instance.
+
+- `min_cpu_platform` (string) - Specifies a minimum CPU platform for the the VM instance. (Default: `Intel/Auto`).
+  You may refer to [min_cpu_platform](https://docs.ucloud.cn/uhost/introduction/uhost/type_new)
+     - The Intel CPU platform:
+         - `Intel/Auto` as the Intel CPU platform version will be selected randomly by system;
+         - `Intel/IvyBridge` as Intel V2, the version of Intel CPU platform selected by system will be `Intel/IvyBridge` and above;
+         - `Intel/Haswell` as Intel V3,  the version of Intel CPU platform selected by system will be `Intel/Haswell` and above;
+         - `Intel/Broadwell` as Intel V4, the version of Intel CPU platform selected by system will be `Intel/Broadwell` and above;
+         - `Intel/Skylake` as Intel V5, the version of Intel CPU platform selected by system will be `Intel/Skylake` and above;
+         - `Intel/Cascadelake` as Intel V6, the version of Intel CPU platform selected by system will be `Intel/Cascadelake`;
+     - The AMD CPU platform:
+         - `Amd/Auto` as the Amd CPU platform version will be selected randomly by system;
+         - `Amd/Epyc2` as the version of Amd CPU platform selected by system will be `Amd/Epyc2` and above;
+
+- `use_ssh_private_ip` (bool) - If this value is true, packer will connect to the created UHost instance via a private ip
+  instead of allocating an EIP (elastic public ip).(Default: `false`).
