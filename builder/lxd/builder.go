@@ -2,7 +2,6 @@ package lxd
 
 import (
 	"context"
-	"os/exec"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/lxd/api"
@@ -26,7 +25,7 @@ type lxdClient interface {
 	PublishContainer(string, string, map[string]string) (string, error)
 	StopContainer(string) error
 	DeleteContainer(string) error
-	ExecuteContainer(string, string, func(string) (string, error)) (*exec.Cmd, error)
+	ExecuteContainer(string, func(string) (string, error), *packer.RemoteCmd) error
 }
 
 type Builder struct {
@@ -63,7 +62,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	steps := []multistep.Step{
 		&stepLxdLaunch{client: client},
-		&StepProvision{},
+		&StepProvision{client: client},
 		&stepPublish{client: client},
 	}
 

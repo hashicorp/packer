@@ -7,6 +7,9 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"syscall"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 // LXDClient connect to the LXD server via the `lxc` command line interface.
@@ -60,18 +63,49 @@ func (s *LXDClient) DeleteContainer(name string) error {
 	return err
 }
 
-func (s *LXDClient) ExecuteContainer(name string, commandString string, wrapper func(string) (string, error)) (*exec.Cmd, error) {
-	log.Printf("Executing with lxc exec in container: %s %s", name, commandString)
+func (s *LXDClient) ExecuteContainer(name string, wrapper func(string) (string, error), cmd *packer.RemoteCmd) error {
+	log.Printf("Executing with lxc exec in container: %s %s", name, cmd.Command)
 	command, err := wrapper(
-		fmt.Sprintf("lxc exec %s -- /bin/sh -c \"%s\"", name, commandString))
+		fmt.Sprintf("lxc exec %s -- /bin/sh -c \"%s\"", name, cmd.Command))
 	if err != nil {
-		return nil, err
+		return  err
 	}
 
 	localCmd := exec.Command("/bin/sh", "-c", command)
 	log.Printf("Executing lxc exec: %s %#v", localCmd.Path, localCmd.Args)
 
-	return localCmd, nil
+	if err != nil {
+		return err
+	}
+
+	localCmd.Stdin = cmd.Stdin
+	localCmd.Stdout = cmd.Stdout
+	localCmd.Stderr = cmd.Stderr
+	if err := localCmd.Start(); err != nil {
+		return  err
+	}	
+
+	go func() {
+		exitStatus := 0
+		if err := localCmd.Wait(); err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				exitStatus = 1
+
+				// There is no process-independent way to get the REAL
+				// exit status so we just try to go deeper.
+				if status, ok := exitErr.Sys().(syscall.WaitStatus); ok {
+					exitStatus = status.ExitStatus()
+				}
+			}
+		}
+
+		log.Printf(
+			"lxc exec execution exited with '%d': '%s'",
+			exitStatus, cmd.Command)
+		cmd.SetExited(exitStatus)
+	}()
+
+	return nil
 }
 
 // Yeah...LXD calls `lxc` because the command line is different between the
@@ -96,4 +130,10 @@ func lxdCommand(args ...string) (string, error) {
 	log.Printf("stderr: %s", stderrString)
 
 	return stdoutString, err
+}
+
+// ShellCommand takes a command string and returns an *exec.Cmd to execute
+// it within the context of a shell (/bin/sh).
+func ShellCommand(command string) *exec.Cmd {
+	return exec.Command("/bin/sh", "-c", command)
 }

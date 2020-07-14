@@ -1,9 +1,14 @@
 package api_client
 
 import (
+	"bytes"
 	"fmt"
-	"os/exec"
+	"io/ioutil"
+	"log"
+	"os"
+	"strings"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/lxc/lxd/client"
 	"github.com/lxc/lxd/shared/api"
 )
@@ -56,6 +61,8 @@ func (s *LXDClient) CreateContainer(name string, image string, profile string) e
 		Source: api.ContainerSource{
 			Type:  "image",
 			Alias: image,
+			Server: "https://cloud-images.ubuntu.com/daily",
+			Protocol: "simplestreams",
 		},
 	}
 	op, err := s.server.CreateContainer(req)
@@ -141,7 +148,35 @@ func (s *LXDClient) DeleteContainer(name string) error {
 	return nil
 }
 
-func (s *LXDClient) ExecuteContainer(name string, commandString string, wrapper func(string) (string, error)) (*exec.Cmd, error) {
-	// TODO
-	return nil, nil
+// ExecuteContainer executes cmd inside the container with name.
+func (s *LXDClient) ExecuteContainer(name string, wrapper func(string) (string, error), cmd *packer.RemoteCmd) error {
+	stdin := ioutil.NopCloser(bytes.NewReader(nil))
+	stdout := os.Stdout
+
+	// Prepare the command
+	req := api.InstanceExecPost{
+		Command:     strings.Split(cmd.Command, " "),
+		WaitForWS:   true,
+		Interactive: false,
+	}
+
+	execArgs := lxd.InstanceExecArgs{
+		Stdin:    stdin,
+		Stdout:   stdout,
+		Stderr:   os.Stderr,
+		DataDone: make(chan bool),
+	}
+	op, err := s.server.ExecInstance(name, req, &execArgs)
+	if err != nil {
+		return err
+	}
+	if err = op.Wait(); err != nil {
+		return err
+	}
+	opAPI := op.Get()
+
+	if int(opAPI.Metadata["return"].(float64)) == 1 {
+		log.Println("some error")
+	}
+	return nil
 }

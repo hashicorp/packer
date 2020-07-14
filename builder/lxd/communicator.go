@@ -6,9 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"syscall"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -20,40 +18,7 @@ type Communicator struct {
 }
 
 func (c *Communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
-	localCmd, err := c.Execute(cmd.Command)
-
-	if err != nil {
-		return err
-	}
-
-	localCmd.Stdin = cmd.Stdin
-	localCmd.Stdout = cmd.Stdout
-	localCmd.Stderr = cmd.Stderr
-	if err := localCmd.Start(); err != nil {
-		return err
-	}
-
-	go func() {
-		exitStatus := 0
-		if err := localCmd.Wait(); err != nil {
-			if exitErr, ok := err.(*exec.ExitError); ok {
-				exitStatus = 1
-
-				// There is no process-independent way to get the REAL
-				// exit status so we just try to go deeper.
-				if status, ok := exitErr.Sys().(syscall.WaitStatus); ok {
-					exitStatus = status.ExitStatus()
-				}
-			}
-		}
-
-		log.Printf(
-			"lxc exec execution exited with '%d': '%s'",
-			exitStatus, cmd.Command)
-		cmd.SetExited(exitStatus)
-	}()
-
-	return nil
+	return c.Client.ExecuteContainer(c.ContainerName, c.CmdWrapper, cmd)
 }
 
 func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
@@ -126,8 +91,4 @@ func (c *Communicator) Download(src string, w io.Writer) error {
 func (c *Communicator) DownloadDir(src string, dst string, exclude []string) error {
 	// TODO This could probably be "lxc exec <container> -- cd <src> && tar -czf - | tar -xzf - -C <dst>"
 	return fmt.Errorf("DownloadDir is not implemented for lxc")
-}
-
-func (c *Communicator) Execute(commandString string) (*exec.Cmd, error) {
-	return c.Client.ExecuteContainer(c.ContainerName, commandString, c.CmdWrapper)
 }
