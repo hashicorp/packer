@@ -44,6 +44,8 @@ type ContentLibraryDestinationConfig struct {
 	// The datastore for the virtual machine template's configuration and log files.
 	// Defaults to the storage backing associated with the library specified by library.
 	Datastore string `mapstructure:"datastore"`
+	// If set to true, the VM will be destroyed after deploying the template to the Content Library. Defaults to `false`.
+	Destroy bool `mapstructure:"destroy"`
 }
 
 func (c *ContentLibraryDestinationConfig) Prepare(lc *LocationConfig) []error {
@@ -118,6 +120,10 @@ func (s *StepImportToContentLibrary) Run(_ context.Context, state multistep.Stat
 		ui.Error(fmt.Sprintf("Failed to import VM template %s: %s", s.ContentLibConfig.Name, err.Error()))
 		state.Put("error", err)
 		return multistep.ActionHalt
+	}
+
+	if s.ContentLibConfig.Destroy {
+		state.Put("destroy_vm", s.ContentLibConfig.Destroy)
 	}
 
 	return multistep.ActionContinue
