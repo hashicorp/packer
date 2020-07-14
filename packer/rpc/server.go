@@ -140,8 +140,7 @@ func (s *Server) Serve() {
 	defer stream.Close()
 
 	h := &codec.MsgpackHandle{
-		RawToString: true,
-		WriteExt:    true,
+		WriteExt: true,
 	}
 	rpcCodec := codec.GoRpc.ServerCodec(stream, h)
 	s.server.ServeCodec(rpcCodec)
