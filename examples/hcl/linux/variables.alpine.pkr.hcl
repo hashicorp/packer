@@ -41,15 +41,16 @@ locals {
     "setup-alpine -f /media/floppy/alpine-vsphere-answers<enter><wait3s>",
     "${var.alpine_password}<enter>",
     "${var.alpine_password}<enter>",
-    "<wait15s>",
+    "<wait6s>",
     "y<enter>",
-    "<wait15s>",
+    "<wait12s>",
     "reboot<enter>",
-    "<wait15s>",
+    "<wait12s>",
     "root<enter>",
     "${var.alpine_password}<enter><wait>",
     "mount -t vfat /dev/fd0 /media/floppy<enter><wait>",
     "/media/floppy/alpine-setup.sh<enter>",
+    "<wait55s>",
   ]
 
 }
