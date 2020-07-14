@@ -146,6 +146,9 @@ func (c *CreateConfig) Prepare() []error {
 			usbCount++
 		case "xhci":
 			xhciCount++
+		// 0 and false for backwards compatibility
+		case "false", "0":
+			continue
 		default:
 			errs = append(errs, fmt.Errorf("usb_controller[%d] references an unknown usb controller", i))
 		}
