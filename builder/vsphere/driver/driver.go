@@ -16,6 +16,7 @@ import (
 )
 
 type Driver struct {
+	// context that controls the authenticated sessions used to run the VM commands
 	ctx        context.Context
 	client     *govmomi.Client
 	restClient *rest.Client
@@ -31,7 +32,9 @@ type ConnectConfig struct {
 	Datacenter         string
 }
 
-func NewDriver(ctx context.Context, config *ConnectConfig) (*Driver, error) {
+func NewDriver(config *ConnectConfig) (*Driver, error) {
+	ctx := context.TODO()
+
 	vcenterUrl, err := url.Parse(fmt.Sprintf("https://%v/sdk", config.VCenterServer))
 	if err != nil {
 		return nil, err

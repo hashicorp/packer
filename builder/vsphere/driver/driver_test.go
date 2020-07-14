@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"context"
 	"fmt"
 	"math/rand"
 	"os"
@@ -22,7 +21,7 @@ func newTestDriver(t *testing.T) *Driver {
 		password = "jetbrains"
 	}
 
-	d, err := NewDriver(context.TODO(), &ConnectConfig{
+	d, err := NewDriver(&ConnectConfig{
 		VCenterServer:      "vcenter.vsphere65.test",
 		Username:           username,
 		Password:           password,
