@@ -25,7 +25,9 @@
 * builder/vsphere: Add boot_command support to vsphere-clone builder. [GH-9397]
 * builder/vsphere: Add content_library_destination to import VM template to a
     Content Library [GH-9551]
+* builder/vsphere: Add force_bios_setup configuration option: [GH-9563]
 * builder/vsphere: Create vm output folders if they don't exist [GH-9402]
+* builder/vsphere: Fix file size descriptor when exporting OFV [GH-9568]
 * builder/vsphere: Look at all available IPs in the waiting for IP loop.
     [GH-9450]
 * builder/vsphere: Match network to host when multiple networks are found
@@ -37,6 +39,7 @@
     default for the http server IP [GH-9441]
 * builder/yandex: Support authentication by Service Account on instance
     [GH-9383]
+* communicator/ssh: Add support for OpenSSH certificate signing [GH-9521]
 * communicator/ssh: Allow users to provide a list of ciphers that they want
     Packer to support. [GH-9453]
 * core/hcl2: add possibility to name singular build.source blocks to
@@ -79,6 +82,8 @@
 * builder/vsphere: Deduplicate where Firmware is set in vsphere-iso builder
     [GH-9557]
 * builder/vsphere: Fix vsphere ToolsSyncTime and ToolsUpgradePolicy [GH-9515]
+* builder/vsphere: vSphere driver context is no longer cancelled when Packer
+    context is cancelled. [GH-9576]
 * communicator/winrm: add the "no_proxy" environment variable option to have
     winrm bypass the proxy set by the http_proxy or https_proxy environment
     vars, when connecting to the remote instance. [GH-9267]
