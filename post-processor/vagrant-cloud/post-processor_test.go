@@ -173,6 +173,7 @@ func TestPostProcessor_Configure_checkAccessTokenIsRequiredByDefault(t *testing.
 	defer server.Close()
 
 	config := testNoAccessTokenProvidedConfig()
+	config["vagrant_cloud_url"] = server.URL
 	if err := p.Configure(config); err == nil {
 		t.Fatalf("Expected access token to be required.")
 	}
