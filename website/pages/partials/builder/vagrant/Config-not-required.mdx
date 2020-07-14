@@ -51,7 +51,8 @@
   `{{ .BoxName }}`, `{{ .SyncedFolder }}`, and `{{.InsertKey}}`, which
   correspond to the Packer options box_name, synced_folder, and insert_key.
 
-- `synced_folder` (string) - Synced Folder
+- `synced_folder` (string) - Path to the folder to be synced to the guest. The path can be absolute
+  or relative to the directory Packer is being run from.
 
 - `skip_add` (bool) - Don't call "vagrant add" to add the box to your local environment; this
   is necessary if you want to launch a box that is already added to your
