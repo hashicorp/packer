@@ -75,7 +75,7 @@ type CreateConfig struct {
 	Datastore     string
 	GuestOS       string // example: otherGuest
 	NICs          []NIC
-	USBController bool
+	USBController []string
 	Version       uint // example: 10
 	Storage       []Disk
 }
@@ -175,11 +175,21 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 		return nil, err
 	}
 
-	if config.USBController {
-		t := true
-		usb := &types.VirtualUSBController{
-			EhciEnabled: &t,
+	t := true
+	for _, usbType := range config.USBController {
+		var usb types.BaseVirtualDevice
+		switch usbType {
+		// handle "true" and "1" for backwards compatibility
+		case "usb", "true", "1":
+			usb = &types.VirtualUSBController{
+				EhciEnabled: &t,
+			}
+		case "xhci":
+			usb = new(types.VirtualUSBXHCIController)
+		default:
+			continue
 		}
+
 		devices = append(devices, usb)
 	}
 
