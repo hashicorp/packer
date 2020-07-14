@@ -14,7 +14,7 @@ type FlatCreateConfig struct {
 	DiskControllerType []string         `mapstructure:"disk_controller_type" cty:"disk_controller_type" hcl:"disk_controller_type"`
 	Storage            []FlatDiskConfig `mapstructure:"storage" cty:"storage" hcl:"storage"`
 	NICs               []FlatNIC        `mapstructure:"network_adapters" cty:"network_adapters" hcl:"network_adapters"`
-	USBController      *bool            `mapstructure:"usb_controller" cty:"usb_controller" hcl:"usb_controller"`
+	USBController      []string         `mapstructure:"usb_controller" cty:"usb_controller" hcl:"usb_controller"`
 	Notes              *string          `mapstructure:"notes" cty:"notes" hcl:"notes"`
 }
 
@@ -35,7 +35,7 @@ func (*FlatCreateConfig) HCL2Spec() map[string]hcldec.Spec {
 		"disk_controller_type": &hcldec.AttrSpec{Name: "disk_controller_type", Type: cty.List(cty.String), Required: false},
 		"storage":              &hcldec.BlockListSpec{TypeName: "storage", Nested: hcldec.ObjectSpec((*FlatDiskConfig)(nil).HCL2Spec())},
 		"network_adapters":     &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatNIC)(nil).HCL2Spec())},
-		"usb_controller":       &hcldec.AttrSpec{Name: "usb_controller", Type: cty.Bool, Required: false},
+		"usb_controller":       &hcldec.AttrSpec{Name: "usb_controller", Type: cty.List(cty.String), Required: false},
 		"notes":                &hcldec.AttrSpec{Name: "notes", Type: cty.String, Required: false},
 	}
 	return s

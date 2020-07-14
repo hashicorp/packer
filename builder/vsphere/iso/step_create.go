@@ -107,8 +107,8 @@ type CreateConfig struct {
 	Storage []DiskConfig `mapstructure:"storage"`
 	// Network adapters
 	NICs []NIC `mapstructure:"network_adapters"`
-	// Create USB controller for virtual machine. Defaults to `false`.
-	USBController bool `mapstructure:"usb_controller"`
+	// Create USB controllers for the virtual machine. "usb" for a usb 2.0 controller. "xhci" for a usb 3.0 controller. There can only be at most one of each.
+	USBController []string `mapstructure:"usb_controller"`
 	// VM notes.
 	Notes string `mapstructure:"notes"`
 }
@@ -134,6 +134,24 @@ func (c *CreateConfig) Prepare() []error {
 
 	if c.GuestOSType == "" {
 		c.GuestOSType = "otherGuest"
+	}
+
+	usbCount := 0
+	xhciCount := 0
+
+	for i, s := range c.USBController {
+		switch s {
+		// 1 and true for backwards compatibility
+		case "usb", "1", "true":
+			usbCount++
+		case "xhci":
+			xhciCount++
+		default:
+			errs = append(errs, fmt.Errorf("usb_controller[%d] references an unknown usb controller", i))
+		}
+	}
+	if usbCount > 1 || xhciCount > 1 {
+		errs = append(errs, fmt.Errorf("there can only be one usb controller and one xhci controller"))
 	}
 
 	return errs
