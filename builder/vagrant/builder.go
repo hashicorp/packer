@@ -242,6 +242,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		}
 	}
 
+	if _, err := os.Stat(b.config.SyncedFolder); err != nil {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("synced_folder \"%s\" does not exist on the Packer host.", b.config.SyncedFolder))
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, warnings, errs
 	}
