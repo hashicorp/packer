@@ -1,7 +1,6 @@
 package testing
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -45,7 +44,7 @@ func TestConn(t *testing.T) *driver.Driver {
 		password = "jetbrains"
 	}
 
-	d, err := driver.NewDriver(context.TODO(), &driver.ConnectConfig{
+	d, err := driver.NewDriver(&driver.ConnectConfig{
 		VCenterServer:      "vcenter.vsphere65.test",
 		Username:           username,
 		Password:           password,
