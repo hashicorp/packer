@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common/random"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -48,7 +51,22 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 		BlockDeviceMappings: config.AMIMappings.BuildEC2BlockDeviceMappings(),
 	}
 
-	createResp, err := ec2conn.CreateImage(createOpts)
+	var createResp *ec2.CreateImageOutput
+	var err error
+
+	err = retry.Config{
+		Tries: 11,
+		ShouldRetry: func(err error) bool {
+			if err, ok := err.(awserr.Error); ok {
+				return err.Code() == "InvalidParameterValue"
+			}
+			return false
+		},
+		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+	}.Run(ctx, func(ctx context.Context) error {
+		createResp, err = ec2conn.CreateImage(createOpts)
+		return err
+	})
 	if err != nil {
 		err := fmt.Errorf("Error creating AMI: %s", err)
 		state.Put("error", err)
