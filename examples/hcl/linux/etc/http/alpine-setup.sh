@@ -13,8 +13,6 @@ poweroff
 EOF
 chmod +x /usr/local/bin/shutdown
 
-ifconfig eth0 up && udhcpc -i eth0
-
 sed -i "/#PermitRootLogin/c\PermitRootLogin yes" /etc/ssh/sshd_config
 sed -i "/#PasswordAuthentication/c\PasswordAuthentication yes" /etc/ssh/sshd_config
 mkdir ~/.ssh

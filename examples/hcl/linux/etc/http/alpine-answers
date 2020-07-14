@@ -9,7 +9,7 @@ iface eth0 inet dhcp
 "
 TIMEZONEOPTS="-z UTC"
 PROXYOPTS="none"
-APKREPOSOPTS="http://mirror.yandex.ru/mirrors/alpine/v3.8/main"
+APKREPOSOPTS="http://mirrors.dotsrc.org/alpine/v3.8/main"
 SSHDOPTS="-c openssh"
 NTPOPTS="-c none"
 DISKOPTS="-m sys /dev/sda"
