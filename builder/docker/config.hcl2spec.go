@@ -66,7 +66,10 @@ type FlatConfig struct {
 	Changes                   []string          `mapstructure:"changes" cty:"changes" hcl:"changes"`
 	Commit                    *bool             `mapstructure:"commit" required:"true" cty:"commit" hcl:"commit"`
 	ContainerDir              *string           `mapstructure:"container_dir" required:"false" cty:"container_dir" hcl:"container_dir"`
+	Device                    []string          `mapstructure:"device" required:"false" cty:"device" hcl:"device"`
 	Discard                   *bool             `mapstructure:"discard" required:"true" cty:"discard" hcl:"discard"`
+	CapAdd                    []string          `mapstructure:"cap_add" required:"false" cty:"cap_add" hcl:"cap_add"`
+	CapDrop                   []string          `mapstructure:"cap_drop" required:"false" cty:"cap_drop" hcl:"cap_drop"`
 	ExecUser                  *string           `mapstructure:"exec_user" required:"false" cty:"exec_user" hcl:"exec_user"`
 	ExportPath                *string           `mapstructure:"export_path" required:"true" cty:"export_path" hcl:"export_path"`
 	Image                     *string           `mapstructure:"image" required:"true" cty:"image" hcl:"image"`
@@ -75,6 +78,7 @@ type FlatConfig struct {
 	Pty                       *bool             `cty:"pty" hcl:"pty"`
 	Pull                      *bool             `mapstructure:"pull" required:"false" cty:"pull" hcl:"pull"`
 	RunCommand                []string          `mapstructure:"run_command" required:"false" cty:"run_command" hcl:"run_command"`
+	TmpFs                     []string          `mapstructure:"tmpfs" required:"false" cty:"tmpfs" hcl:"tmpfs"`
 	Volumes                   map[string]string `mapstructure:"volumes" required:"false" cty:"volumes" hcl:"volumes"`
 	FixUploadOwner            *bool             `mapstructure:"fix_upload_owner" required:"false" cty:"fix_upload_owner" hcl:"fix_upload_owner"`
 	WindowsContainer          *bool             `mapstructure:"windows_container" required:"false" cty:"windows_container" hcl:"windows_container"`
@@ -158,7 +162,10 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"changes":                      &hcldec.AttrSpec{Name: "changes", Type: cty.List(cty.String), Required: false},
 		"commit":                       &hcldec.AttrSpec{Name: "commit", Type: cty.Bool, Required: false},
 		"container_dir":                &hcldec.AttrSpec{Name: "container_dir", Type: cty.String, Required: false},
+		"device":                       &hcldec.AttrSpec{Name: "device", Type: cty.List(cty.String), Required: false},
 		"discard":                      &hcldec.AttrSpec{Name: "discard", Type: cty.Bool, Required: false},
+		"cap_add":                      &hcldec.AttrSpec{Name: "cap_add", Type: cty.List(cty.String), Required: false},
+		"cap_drop":                     &hcldec.AttrSpec{Name: "cap_drop", Type: cty.List(cty.String), Required: false},
 		"exec_user":                    &hcldec.AttrSpec{Name: "exec_user", Type: cty.String, Required: false},
 		"export_path":                  &hcldec.AttrSpec{Name: "export_path", Type: cty.String, Required: false},
 		"image":                        &hcldec.AttrSpec{Name: "image", Type: cty.String, Required: false},
@@ -167,6 +174,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"pty":                          &hcldec.AttrSpec{Name: "pty", Type: cty.Bool, Required: false},
 		"pull":                         &hcldec.AttrSpec{Name: "pull", Type: cty.Bool, Required: false},
 		"run_command":                  &hcldec.AttrSpec{Name: "run_command", Type: cty.List(cty.String), Required: false},
+		"tmpfs":                        &hcldec.AttrSpec{Name: "tmpfs", Type: cty.List(cty.String), Required: false},
 		"volumes":                      &hcldec.AttrSpec{Name: "volumes", Type: cty.Map(cty.String), Required: false},
 		"fix_upload_owner":             &hcldec.AttrSpec{Name: "fix_upload_owner", Type: cty.Bool, Required: false},
 		"windows_container":            &hcldec.AttrSpec{Name: "windows_container", Type: cty.Bool, Required: false},
