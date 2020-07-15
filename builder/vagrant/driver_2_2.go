@@ -151,13 +151,21 @@ func (d *Vagrant_2_2_Driver) SSHConfig(id string) (*VagrantSSHConfig, error) {
 	if id != "" {
 		args = append(args, id)
 	}
-	stdout, _, err := d.vagrantCmd(args...)
 	sshConf := &VagrantSSHConfig{}
 
+	stdout, stderr, err := d.vagrantCmd(args...)
+	if stderr != "" {
+		err := fmt.Errorf("ssh-config command returned error: %s", stderr)
+		return sshConf, err
+	}
 	lines := strings.Split(stdout, "\n")
 	sshConf.Hostname = parseSSHConfig(lines, "HostName ")
 	sshConf.User = parseSSHConfig(lines, "User ")
 	sshConf.Port = parseSSHConfig(lines, "Port ")
+	if sshConf.Port == "" {
+		err := fmt.Errorf("error: SSH Port was not properly retrieved from SSHConfig.")
+		return sshConf, err
+	}
 	sshConf.UserKnownHostsFile = parseSSHConfig(lines, "UserKnownHostsFile ")
 	sshConf.IdentityFile = parseSSHConfig(lines, "IdentityFile ")
 	sshConf.LogLevel = parseSSHConfig(lines, "LogLevel ")

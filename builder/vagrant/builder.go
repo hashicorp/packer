@@ -106,7 +106,8 @@ type Config struct {
 	// `{{ .BoxName }}`, `{{ .SyncedFolder }}`, and `{{.InsertKey}}`, which
 	// correspond to the Packer options box_name, synced_folder, and insert_key.
 	Template string `mapstructure:"template" required:"false"`
-
+	// Path to the folder to be synced to the guest. The path can be absolute
+	// or relative to the directory Packer is being run from.
 	SyncedFolder string `mapstructure:"synced_folder"`
 	// Don't call "vagrant add" to add the box to your local environment; this
 	// is necessary if you want to launch a box that is already added to your
@@ -239,6 +240,18 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		if !matches {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf(`TeardownMethod must be "halt", "suspend", or "destroy"`))
+		}
+	}
+
+	if b.config.SyncedFolder != "" {
+		b.config.SyncedFolder, err = filepath.Abs(b.config.SyncedFolder)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("unable to determine absolute path for synced_folder: %s", b.config.SyncedFolder))
+		}
+		if _, err := os.Stat(b.config.SyncedFolder); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("synced_folder \"%s\" does not exist on the Packer host.", b.config.SyncedFolder))
 		}
 	}
 
