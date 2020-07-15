@@ -27,12 +27,18 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		agent = 0
 	}
 
+	kvm := true
+	if c.DisableKVM {
+		kvm = false
+	}
+
 	isoFile := state.Get("iso_file").(string)
 
 	ui.Say("Creating VM")
 	config := proxmox.ConfigQemu{
 		Name:         c.VMName,
 		Agent:        agent,
+		QemuKVM:      kvm,
 		Boot:         "cdn", // Boot priority, c:CDROM -> d:Disk -> n:Network
 		QemuCpu:      c.CPUType,
 		Description:  "Packer ephemeral build VM",
