@@ -3,6 +3,7 @@ package hcl2template
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
@@ -36,6 +37,8 @@ func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]interface{}) error {
 				buildValues[k] = cty.StringVal(v)
 			case int64:
 				buildValues[k] = cty.NumberIntVal(v)
+			case uint64:
+				buildValues[k] = cty.NumberUIntVal(v)
 			default:
 				return fmt.Errorf("unhandled buildvar type: %T", v)
 			}
