@@ -31,7 +31,7 @@ func DestroyAMIs(imageids []*string, ec2conn *ec2.EC2) error {
 		err = retry.Config{
 			Tries: 11,
 			ShouldRetry: func(err error) bool {
-				return isAWSErr(err, "UnauthorizedOperation", "")
+				return IsAWSErr(err, "UnauthorizedOperation", "")
 			},
 			RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 		}.Run(ctx, func(ctx context.Context) error {
@@ -54,7 +54,7 @@ func DestroyAMIs(imageids []*string, ec2conn *ec2.EC2) error {
 				err = retry.Config{
 					Tries: 11,
 					ShouldRetry: func(err error) bool {
-						return isAWSErr(err, "UnauthorizedOperation", "")
+						return IsAWSErr(err, "UnauthorizedOperation", "")
 					},
 					RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 				}.Run(ctx, func(ctx context.Context) error {
@@ -79,7 +79,7 @@ func DestroyAMIs(imageids []*string, ec2conn *ec2.EC2) error {
 //  * err is of type awserr.Error
 //  * Error.Code() matches code
 //  * Error.Message() contains message
-func isAWSErr(err error, code string, message string) bool {
+func IsAWSErr(err error, code string, message string) bool {
 	if err, ok := err.(awserr.Error); ok {
 		return err.Code() == code && strings.Contains(err.Message(), message)
 	}

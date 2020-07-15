@@ -188,7 +188,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 
 	cp, err := c.session.Config.Credentials.Get()
 
-	if isAWSErr(err, "NoCredentialProviders", "") {
+	if IsAWSErr(err, "NoCredentialProviders", "") {
 		return nil, fmt.Errorf("No valid credential sources found for AWS Builder. " +
 			"Please see https://www.packer.io/docs/builders/amazon#specifying-amazon-credentials " +
 			"for more information on providing credentials for the AWS Builder.")

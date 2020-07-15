@@ -41,7 +41,7 @@ func (s *StepStopEBSBackedInstance) Run(ctx context.Context, state multistep.Sta
 
 		// Work around this by retrying a few times, up to about 5 minutes.
 		err := retry.Config{Tries: 6, ShouldRetry: func(error) bool {
-			if isAWSErr(err, "InvalidInstanceID.NotFound", "") {
+			if IsAWSErr(err, "InvalidInstanceID.NotFound", "") {
 				return true
 			}
 			return false

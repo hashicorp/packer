@@ -91,7 +91,7 @@ func (s *StepCreateTags) Run(ctx context.Context, state multistep.StateBag) mult
 
 		// Retry creating tags for about 2.5 minutes
 		err = retry.Config{Tries: 11, ShouldRetry: func(error) bool {
-			if isAWSErr(err, "InvalidAMIID.NotFound", "") || isAWSErr(err, "InvalidSnapshot.NotFound", "") {
+			if IsAWSErr(err, "InvalidAMIID.NotFound", "") || IsAWSErr(err, "InvalidSnapshot.NotFound", "") {
 				return true
 			}
 			return false

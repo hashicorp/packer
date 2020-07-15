@@ -377,7 +377,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 
 	// Retry creating tags for about 2.5 minutes
 	err = retry.Config{Tries: 11, ShouldRetry: func(error) bool {
-		if isAWSErr(err, "InvalidInstanceID.NotFound", "") {
+		if IsAWSErr(err, "InvalidInstanceID.NotFound", "") {
 			return true
 		}
 		return false

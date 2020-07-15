@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common/random"
@@ -57,8 +56,8 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 	err = retry.Config{
 		Tries: 11,
 		ShouldRetry: func(err error) bool {
-			if err, ok := err.(awserr.Error); ok {
-				return err.Code() == "InvalidParameterValue"
+			if awscommon.IsAWSErr(err, "InvalidParameterValue", "Instance is not in state") {
+				return true
 			}
 			return false
 		},
