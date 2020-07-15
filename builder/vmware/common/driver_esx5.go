@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/csv"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -195,9 +196,16 @@ func (d *ESX5Driver) UploadISO(localPath string, checksum string) (string, error
 		log.Println("Initial checksum matched, no upload needed.")
 		return finalPath, nil
 	}
+	log.Println("Initial checksum did not match, uploading.")
 
 	if err := d.upload(finalPath, localPath); err != nil {
 		return "", err
+	}
+
+	if !d.VerifyChecksum(checksum, finalPath) {
+		e := fmt.Errorf("Checksum did not match after upload.")
+		log.Println(e)
+		return "", e
 	}
 
 	return finalPath, nil
@@ -677,6 +685,7 @@ func (d *ESX5Driver) Download(src, dst string) error {
 	return d.comm.Download(d.datastorePath(src), file)
 }
 
+// VerifyChecksum checks that file on the esxi instance matches hash
 func (d *ESX5Driver) VerifyChecksum(hash string, file string) bool {
 	if hash == "none" {
 		if err := d.sh("stat", strconv.Quote(file)); err != nil {
@@ -685,22 +694,25 @@ func (d *ESX5Driver) VerifyChecksum(hash string, file string) bool {
 		return true
 	}
 
-	req := &getter.Request{
+	// parse user checksum
+	fcksum, err := getter.DefaultClient.GetChecksum(context.TODO(), &getter.Request{
 		Src: file + "?checksum=" + hash,
-		// Here we don't want to set the PWD to avoid causing any security
-		// concerns. In case the checksum is in a file, the caller, ( mainly
-		// ISOConfig.Prepare ) step should have downloaded it and made it a
-		// simple string.
-	}
-	fcksum, err := getter.DefaultClient.GetChecksum(context.TODO(), req)
+	})
 	if err != nil {
-		log.Printf("coulnd't get the checksum: %v", err)
+		log.Printf("coulnd't parse the checksum: %v", err)
 		return false
 	}
-	err = fcksum.Checksum(file)
+
+	checksumEntry := fmt.Sprintf("%s  %s", hex.EncodeToString(fcksum.Value), file)
+	checksumCommand := []string{fmt.Sprintf("%ssum", fcksum.Type), "-c"}
+
+	log.Printf("running: %s | %s", checksumEntry, checksumCommand)
+
+	_, err = d.run(bytes.NewBufferString(checksumEntry), checksumCommand...)
 	if err != nil {
-		log.Printf("%v", err)
+		log.Printf("checksum failed: %s", err)
 	}
+
 	return err == nil
 }
 
