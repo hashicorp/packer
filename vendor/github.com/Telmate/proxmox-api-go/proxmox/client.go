@@ -13,6 +13,7 @@ import (
 	"mime/multipart"
 	"net"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -722,7 +723,28 @@ func (c *Client) DeleteVMDisks(
 }
 
 func (c *Client) Upload(node string, storage string, contentType string, filename string, file io.Reader) error {
-	body, mimetype, err := createUploadBody(contentType, filename, file)
+	var doStreamingIO bool
+	var fileSize int64
+	var contentLength int64
+
+	if f, ok := file.(*os.File); ok {
+		doStreamingIO = true
+		fileInfo, err := f.Stat()
+		if err != nil {
+			return err
+		}
+		fileSize = fileInfo.Size()
+	}
+
+	var body io.Reader
+	var mimetype string
+	var err error
+
+	if doStreamingIO {
+		body, mimetype, contentLength, err = createStreamedUploadBody(contentType, filename, fileSize, file)
+	} else {
+		body, mimetype, err = createUploadBody(contentType, filename, file)
+	}
 	if err != nil {
 		return err
 	}
@@ -734,6 +756,10 @@ func (c *Client) Upload(node string, storage string, contentType string, filenam
 	}
 	req.Header.Add("Content-Type", mimetype)
 	req.Header.Add("Accept", "application/json")
+
+	if doStreamingIO {
+		req.ContentLength = contentLength
+	}
 
 	resp, err := c.session.Do(req)
 	if err != nil {
@@ -778,6 +804,38 @@ func createUploadBody(contentType string, filename string, r io.Reader) (io.Read
 	}
 
 	return &buf, w.FormDataContentType(), nil
+}
+
+// createStreamedUploadBody - Use MultiReader to create the multipart body from the file reader,
+// avoiding allocation of large files in memory before upload (useful e.g. for Windows ISOs).
+func createStreamedUploadBody(contentType string, filename string, fileSize int64, r io.Reader) (io.Reader, string, int64, error) {
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+
+	err := w.WriteField("content", contentType)
+	if err != nil {
+		return nil, "", 0, err
+	}
+
+	_, err = w.CreateFormFile("filename", filename)
+	if err != nil {
+		return nil, "", 0, err
+	}
+
+	headerSize := buf.Len()
+
+	err = w.Close()
+	if err != nil {
+		return nil, "", 0, err
+	}
+
+	mr := io.MultiReader(bytes.NewReader(buf.Bytes()[:headerSize]),
+		r,
+		bytes.NewReader(buf.Bytes()[headerSize:]))
+
+	contentLength := int64(buf.Len()) + fileSize
+
+	return mr, w.FormDataContentType(), contentLength, nil
 }
 
 // getStorageAndVolumeName - Extract disk storage and disk volume, since disk name is saved

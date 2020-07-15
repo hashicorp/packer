@@ -69,7 +69,7 @@ github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server
 github.com/PuerkitoBio/goquery
 # github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
 github.com/StackExchange/wmi
-# github.com/Telmate/proxmox-api-go v0.0.0-20200225212220-a29566462efd
+# github.com/Telmate/proxmox-api-go v0.0.0-20200715182505-ec97c70ba887
 github.com/Telmate/proxmox-api-go/proxmox
 # github.com/agext/levenshtein v1.2.1
 github.com/agext/levenshtein

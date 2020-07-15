@@ -193,6 +193,8 @@ builder.
   then `qemu-guest-agent` must be installed on the guest. When disabled, then
   `ssh_host` should be used. Defaults to `true`.
 
+- `disable_kvm` (boolean) - Disables KVM hardware virtualization. Defaults to `false`.
+
 - `scsi_controller` (string) - The SCSI controller model to emulate. Can be `lsi`,
   `lsi53c810`, `virtio-scsi-pci`, `virtio-scsi-single`, `megasas`, or `pvscsi`.
   Defaults to `lsi`.

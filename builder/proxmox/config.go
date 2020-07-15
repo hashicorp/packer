@@ -53,6 +53,7 @@ type Config struct {
 	Agent          bool         `mapstructure:"qemu_agent"`
 	SCSIController string       `mapstructure:"scsi_controller"`
 	Onboot         bool         `mapstructure:"onboot"`
+	DisableKVM     bool         `mapstructure:"disable_kvm"`
 
 	TemplateName        string `mapstructure:"template_name"`
 	TemplateDescription string `mapstructure:"template_description"`

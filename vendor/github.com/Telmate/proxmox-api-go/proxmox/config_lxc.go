@@ -313,7 +313,9 @@ func (config configLxc) CreateLxc(vmr *VmRef, client *Client) (err error) {
 	// comma separated list of "key=value" pairs
 	featuresParam := QemuDeviceParam{}
 	featuresParam = featuresParam.createDeviceParam(config.Features, nil)
-	paramMap["features"] = strings.Join(featuresParam, ",")
+	if len(featuresParam) > 0 {
+		paramMap["features"] = strings.Join(featuresParam, ",")
+	}
 
 	// build list of mountpoints
 	// this does the same as for the feature list
