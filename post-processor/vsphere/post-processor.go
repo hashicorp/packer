@@ -115,19 +115,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
-	source := ""
-	for _, path := range artifact.Files() {
-		if strings.HasSuffix(path, ".vmx") || strings.HasSuffix(path, ".ovf") || strings.HasSuffix(path, ".ova") {
-			source = path
-			break
-		}
-	}
-
-	if source == "" {
-		return nil, false, false, fmt.Errorf("VMX, OVF or OVA file not found")
-	}
-
+func (p *PostProcessor) generateURI() string {
 	password := escapeWithSpaces(p.config.Password)
 	ovftool_uri := fmt.Sprintf("vi://%s:%s@%s/%s/host/%s",
 		escapeWithSpaces(p.config.Username),
@@ -147,6 +135,23 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			ovftool_uri += "/?dns=" + p.config.ESXiHost
 		}
 	}
+	return ovftool_uri
+}
+
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+	source := ""
+	for _, path := range artifact.Files() {
+		if strings.HasSuffix(path, ".vmx") || strings.HasSuffix(path, ".ovf") || strings.HasSuffix(path, ".ova") {
+			source = path
+			break
+		}
+	}
+
+	if source == "" {
+		return nil, false, false, fmt.Errorf("VMX, OVF or OVA file not found")
+	}
+
+	ovftool_uri := p.generateURI()
 
 	args, err := p.BuildArgs(source, ovftool_uri)
 	if err != nil {
@@ -156,11 +161,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 
 	log.Printf("Starting ovftool with parameters: %s",
-		strings.Replace(
-			strings.Join(args, " "),
-			password,
-			"<password>",
-			-1))
+		p.filterLog(strings.Join(args, " ")))
 
 	var errWriter io.Writer
 	var errOut bytes.Buffer
