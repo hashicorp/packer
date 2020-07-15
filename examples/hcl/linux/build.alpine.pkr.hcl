@@ -29,6 +29,13 @@ EOF
     boot_wait               = "10s"
   }
 
+  source "source.vmware-iso.esxi-base-alpine-amd64" {
+    name                    = "3.12-from-esxi"
+    iso_url                 = local.iso_url_alpine_312
+    iso_checksum            = "file:${local.iso_checksum_url_alpine_312}"
+    boot_command            = local.alpine_312_floppy_boot_command_vsphere
+  }
+
   provisioner "shell" {
     inline = ["echo hi"]
   }
