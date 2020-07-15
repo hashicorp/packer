@@ -78,6 +78,7 @@ type FlatConfig struct {
 	IAPLocalhostPort             *int                       `mapstructure:"iap_localhost_port" cty:"iap_localhost_port" hcl:"iap_localhost_port"`
 	IAPHashBang                  *string                    `mapstructure:"iap_hashbang" required:"false" cty:"iap_hashbang" hcl:"iap_hashbang"`
 	IAPExt                       *string                    `mapstructure:"iap_ext" required:"false" cty:"iap_ext" hcl:"iap_ext"`
+	IAPTunnelLaunchWait          *int                       `mapstructure:"iap_tunnel_launch_wait" required:"false" cty:"iap_tunnel_launch_wait" hcl:"iap_tunnel_launch_wait"`
 	ImageName                    *string                    `mapstructure:"image_name" required:"false" cty:"image_name" hcl:"image_name"`
 	ImageDescription             *string                    `mapstructure:"image_description" required:"false" cty:"image_description" hcl:"image_description"`
 	ImageEncryptionKey           *FlatCustomerEncryptionKey `mapstructure:"image_encryption_key" required:"false" cty:"image_encryption_key" hcl:"image_encryption_key"`
@@ -194,6 +195,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"iap_localhost_port":              &hcldec.AttrSpec{Name: "iap_localhost_port", Type: cty.Number, Required: false},
 		"iap_hashbang":                    &hcldec.AttrSpec{Name: "iap_hashbang", Type: cty.String, Required: false},
 		"iap_ext":                         &hcldec.AttrSpec{Name: "iap_ext", Type: cty.String, Required: false},
+		"iap_tunnel_launch_wait":          &hcldec.AttrSpec{Name: "iap_tunnel_launch_wait", Type: cty.Number, Required: false},
 		"image_name":                      &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"image_description":               &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
 		"image_encryption_key":            &hcldec.BlockSpec{TypeName: "image_encryption_key", Nested: hcldec.ObjectSpec((*FlatCustomerEncryptionKey)(nil).HCL2Spec())},

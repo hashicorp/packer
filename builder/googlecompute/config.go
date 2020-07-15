@@ -425,6 +425,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 			c.IAPConfig.IAPExt = ".cmd"
 		}
 	}
+	if c.IAPConfig.IAPTunnelLaunchWait == 0 {
+		c.IAPConfig.IAPTunnelLaunchWait = 30
+	}
 
 	// Configure IAP: Update SSH config to use localhost proxy instead
 	if c.IAPConfig.IAP {

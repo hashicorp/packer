@@ -12,16 +12,18 @@ import (
 )
 
 type MockTunnelDriver struct {
-	StopTunnelCalled  bool
-	StartTunnelCalled bool
+	StopTunnelCalled   bool
+	StartTunnelCalled  bool
+	StartTunnelTimeout int
 }
 
 func (m *MockTunnelDriver) StopTunnel() {
 	m.StopTunnelCalled = true
 }
 
-func (m *MockTunnelDriver) StartTunnel(context.Context, string) error {
+func (m *MockTunnelDriver) StartTunnel(_ context.Context, _ string, timeout int) error {
 	m.StartTunnelCalled = true
+	m.StartTunnelTimeout = timeout
 	return nil
 }
 
