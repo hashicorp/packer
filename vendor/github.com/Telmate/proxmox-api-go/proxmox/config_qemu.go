@@ -38,6 +38,7 @@ type ConfigQemu struct {
 	QemuVcpus    int         `json:"vcpus"`
 	QemuCpu      string      `json:"cpu"`
 	QemuNuma     bool        `json:"numa"`
+	QemuKVM      bool        `json:"kvm"`
 	Hotplug      string      `json:"hotplug"`
 	QemuIso      string      `json:"iso"`
 	FullClone    *int        `json:"fullclone"`
@@ -94,6 +95,7 @@ func (config ConfigQemu) CreateVm(vmr *VmRef, client *Client) (err error) {
 		"cores":       config.QemuCores,
 		"cpu":         config.QemuCpu,
 		"numa":        config.QemuNuma,
+		"kvm":         config.QemuKVM,
 		"hotplug":     config.Hotplug,
 		"memory":      config.Memory,
 		"boot":        config.Boot,
@@ -107,11 +109,11 @@ func (config ConfigQemu) CreateVm(vmr *VmRef, client *Client) (err error) {
 	if config.Balloon >= 1 {
 		params["balloon"] = config.Balloon
 	}
-	
+
 	if config.QemuVcpus >= 1 {
 		params["vcpus"] = config.QemuVcpus
 	}
-	
+
 	if vmr.pool != "" {
 		params["pool"] = vmr.pool
 	}
@@ -214,6 +216,7 @@ func (config ConfigQemu) UpdateConfig(vmr *VmRef, client *Client) (err error) {
 		"cores":       config.QemuCores,
 		"cpu":         config.QemuCpu,
 		"numa":        config.QemuNuma,
+		"kvm":         config.QemuKVM,
 		"hotplug":     config.Hotplug,
 		"memory":      config.Memory,
 		"boot":        config.Boot,
@@ -231,13 +234,13 @@ func (config ConfigQemu) UpdateConfig(vmr *VmRef, client *Client) (err error) {
 	} else {
 		deleteParams = append(deleteParams, "balloon")
 	}
-	
+
 	if config.QemuVcpus >= 1 {
 		configParams["vcpus"] = config.QemuVcpus
 	} else {
 		deleteParams = append(deleteParams, "vcpus")
 	}
-	
+
 	if config.BootDisk != "" {
 		configParams["bootdisk"] = config.BootDisk
 	}
@@ -307,11 +310,11 @@ func (config ConfigQemu) UpdateConfig(vmr *VmRef, client *Client) (err error) {
 	if config.Ipconfig2 != "" {
 		configParams["ipconfig2"] = config.Ipconfig2
 	}
-	
+
 	if len(deleteParams) > 0 {
 		configParams["delete"] = strings.Join(deleteParams, ", ")
 	}
-	
+
 	_, err = client.SetVmConfig(vmr, configParams)
 	if err != nil {
 		log.Print(err)
@@ -326,7 +329,7 @@ func (config ConfigQemu) UpdateConfig(vmr *VmRef, client *Client) (err error) {
 }
 
 func NewConfigQemuFromJson(io io.Reader) (config *ConfigQemu, err error) {
-	config = &ConfigQemu{QemuVlanTag: -1}
+	config = &ConfigQemu{QemuVlanTag: -1, QemuKVM: true}
 	err = json.NewDecoder(io).Decode(config)
 	if err != nil {
 		log.Fatal(err)
@@ -449,6 +452,10 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 	if _, isSet := vmConfig["bootdisk"]; isSet {
 		bootdisk = vmConfig["bootdisk"].(string)
 	}
+	kvm := true
+	if _, isSet := vmConfig["kvm"]; isSet {
+		kvm = Itob(int(vmConfig["kvm"].(float64)))
+	}
 	scsihw := "lsi"
 	if _, isSet := vmConfig["scsihw"]; isSet {
 		scsihw = vmConfig["scsihw"].(string)
@@ -470,6 +477,7 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 		QemuSockets:  int(sockets),
 		QemuCpu:      cpu,
 		QemuNuma:     numa,
+		QemuKVM:      kvm,
 		Hotplug:      hotplug,
 		QemuVlanTag:  -1,
 		Boot:         boot,
@@ -481,12 +489,12 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 		QemuNetworks: QemuDevices{},
 		QemuSerials:  QemuDevices{},
 	}
-	
+
 	if balloon >= 1 {
-		config.Balloon = int(balloon);
+		config.Balloon = int(balloon)
 	}
 	if vcpus >= 1 {
-		config.QemuVcpus = int(vcpus);
+		config.QemuVcpus = int(vcpus)
 	}
 
 	if vmConfig["ide2"] != nil {
