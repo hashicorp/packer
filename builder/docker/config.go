@@ -46,9 +46,13 @@ type Config struct {
 	// the [artifice
 	// post-processor](/docs/post-processors/artifice).
 	Discard bool `mapstructure:"discard" required:"true"`
-	// An array of additional Linux capabilities to grant to the container.
+	// An array of additional [Linux
+	// capabilities](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)
+	// to grant to the container.
 	CapAdd []string `mapstructure:"cap_add" required:"false"`
-	// An array of Linux capabilities to drop from the container.
+	// An array of [Linux
+	// capabilities](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)
+	// to drop from the container.
 	CapDrop []string `mapstructure:"cap_drop" required:"false"`
 	// Username (UID) to run remote commands with. You can also set the group
 	// name/ID if you want: (UID or UID:GID). You may need this if you get

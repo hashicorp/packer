@@ -13,9 +13,13 @@
 - `device` ([]string) - An array of devices which will be accessible in container when it's run
   without `--privileged` flag.
 
-- `cap_add` ([]string) - An array of additional Linux capabilities to grant to the container.
+- `cap_add` ([]string) - An array of additional [Linux
+  capabilities](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)
+  to grant to the container.
 
-- `cap_drop` ([]string) - An array of Linux capabilities to drop from the container.
+- `cap_drop` ([]string) - An array of [Linux
+  capabilities](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)
+  to drop from the container.
 
 - `exec_user` (string) - Username (UID) to run remote commands with. You can also set the group
   name/ID if you want: (UID or UID:GID). You may need this if you get
