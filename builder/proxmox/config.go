@@ -67,11 +67,12 @@ type Config struct {
 }
 
 type nicConfig struct {
-	Model      string `mapstructure:"model"`
-	MACAddress string `mapstructure:"mac_address"`
-	Bridge     string `mapstructure:"bridge"`
-	VLANTag    string `mapstructure:"vlan_tag"`
-	Firewall   bool   `mapstructure:"firewall"`
+	Model        string `mapstructure:"model"`
+	PacketQueues int    `mapstructure:"packet_queues"`
+	MACAddress   string `mapstructure:"mac_address"`
+	Bridge       string `mapstructure:"bridge"`
+	VLANTag      string `mapstructure:"vlan_tag"`
+	Firewall     bool   `mapstructure:"firewall"`
 }
 type diskConfig struct {
 	Type            string `mapstructure:"type"`
@@ -232,6 +233,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	for idx := range c.NICs {
 		if c.NICs[idx].Bridge == "" {
 			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("network_adapters[%d].bridge must be specified", idx)))
+		}
+		if c.NICs[idx].Model != "virtio" && c.NICs[idx].PacketQueues > 0 {
+			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("network_adapters[%d].packet_queues can only be set for 'virtio' driver", idx)))
 		}
 	}
 	for idx := range c.Disks {

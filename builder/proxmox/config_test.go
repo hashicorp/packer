@@ -8,6 +8,17 @@ import (
 	"github.com/hashicorp/packer/template"
 )
 
+func mandatoryConfig(t *testing.T) map[string]interface{} {
+	return map[string]interface{}{
+		"proxmox_url":  "https://my-proxmox.my-domain:8006/api2/json",
+		"username":     "apiuser@pve",
+		"password":     "supersecret",
+		"iso_file":     "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso",
+		"node":         "my-proxmox",
+		"ssh_username": "root",
+	}
+}
+
 func TestRequiredParameters(t *testing.T) {
 	var c Config
 	_, err := c.Prepare(make(map[string]interface{}))
@@ -164,5 +175,50 @@ func TestAgentSetToFalse(t *testing.T) {
 
 	if b.config.Agent != false {
 		t.Errorf("Expected Agent to be false, got %t", b.config.Agent)
+	}
+}
+
+func TestNetworkAdapterPacketQueueSupport(t *testing.T) {
+	drivertests := []struct {
+		expectedToFail bool
+		model          string
+	}{
+		{expectedToFail: false, model: "virtio"},
+		{expectedToFail: true, model: "e1000"},
+		{expectedToFail: true, model: "e1000-82540em"},
+		{expectedToFail: true, model: "e1000-82544gc"},
+		{expectedToFail: true, model: "e1000-82545em"},
+		{expectedToFail: true, model: "i82551"},
+		{expectedToFail: true, model: "i82557b"},
+		{expectedToFail: true, model: "i82559er"},
+		{expectedToFail: true, model: "ne2k_isa"},
+		{expectedToFail: true, model: "ne2k_pci"},
+		{expectedToFail: true, model: "pcnet"},
+		{expectedToFail: true, model: "rtl8139"},
+		{expectedToFail: true, model: "vmxnet3"},
+	}
+
+	for _, tt := range drivertests {
+		device := make(map[string]interface{})
+		device["bridge"] = "vmbr0"
+		device["model"] = tt.model
+		device["packet_queues"] = 2
+
+		devices := make([]map[string]interface{}, 0)
+		devices = append(devices, device)
+
+		cfg := mandatoryConfig(t)
+		cfg["network_adapters"] = devices
+
+		var c Config
+		_, err := c.Prepare(cfg)
+
+		if tt.expectedToFail == true && err == nil {
+			t.Error("expected config preparation to fail, but no error occured")
+		}
+
+		if tt.expectedToFail == false && err != nil {
+			t.Errorf("expected config preparation to succeed, but %s", err.Error())
+		}
 	}
 }
