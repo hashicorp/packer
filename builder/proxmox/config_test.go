@@ -98,6 +98,7 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	// Agent not set, default is true
 	// SCSI controller not set, using default 'lsi'
 	// Firewall toggle not set, using default: 0
+	// Disable KVM not set, using default: 0
 
 	if b.config.Memory != 512 {
 		t.Errorf("Expected Memory to be 512, got %d", b.config.Memory)
@@ -125,6 +126,9 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	}
 	if b.config.Agent != true {
 		t.Errorf("Expected Agent to be true, got %t", b.config.Agent)
+	}
+	if b.config.DisableKVM != false {
+		t.Errorf("Expected Disable KVM toggle to be false, got %t", b.config.DisableKVM)
 	}
 	if b.config.SCSIController != "lsi" {
 		t.Errorf("Expected SCSI controller to be 'lsi', got %s", b.config.SCSIController)

@@ -96,6 +96,7 @@ type FlatConfig struct {
 	Agent                     *bool             `mapstructure:"qemu_agent" cty:"qemu_agent" hcl:"qemu_agent"`
 	SCSIController            *string           `mapstructure:"scsi_controller" cty:"scsi_controller" hcl:"scsi_controller"`
 	Onboot                    *bool             `mapstructure:"onboot" cty:"onboot" hcl:"onboot"`
+	DisableKVM                *bool             `mapstructure:"disable_kvm" cty:"disable_kvm" hcl:"disable_kvm"`
 	TemplateName              *string           `mapstructure:"template_name" cty:"template_name" hcl:"template_name"`
 	TemplateDescription       *string           `mapstructure:"template_description" cty:"template_description" hcl:"template_description"`
 	UnmountISO                *bool             `mapstructure:"unmount_iso" cty:"unmount_iso" hcl:"unmount_iso"`
@@ -202,6 +203,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"qemu_agent":                   &hcldec.AttrSpec{Name: "qemu_agent", Type: cty.Bool, Required: false},
 		"scsi_controller":              &hcldec.AttrSpec{Name: "scsi_controller", Type: cty.String, Required: false},
 		"onboot":                       &hcldec.AttrSpec{Name: "onboot", Type: cty.Bool, Required: false},
+		"disable_kvm":                  &hcldec.AttrSpec{Name: "disable_kvm", Type: cty.Bool, Required: false},
 		"template_name":                &hcldec.AttrSpec{Name: "template_name", Type: cty.String, Required: false},
 		"template_description":         &hcldec.AttrSpec{Name: "template_description", Type: cty.String, Required: false},
 		"unmount_iso":                  &hcldec.AttrSpec{Name: "unmount_iso", Type: cty.Bool, Required: false},
