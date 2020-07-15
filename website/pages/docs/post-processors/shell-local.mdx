@@ -17,14 +17,51 @@ some task with packer outputs and variables.
 
 ## Basic example
 
-The example below is fully functional.
+The example below is a fully functional self-contained build.
+
+<Tabs>
+<Tab heading="JSON">
 
 ```json
 {
-  "type": "shell-local",
-  "inline": ["echo foo"]
+  "builders": [
+    {
+      "type": "file",
+      "name": "example",
+      "target": "./test_artifact.txt",
+      "content": "example content"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "shell-local",
+      "inline": ["echo foo"]
+    }
+  ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "file" "example" {
+    content = "example content"
+}
+
+build {
+  source "source.file.example" {
+    target = "./test_artifact.txt"
+  }
+
+  post-processor "shell-local" {
+    inline = ["echo foo"]
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Configuration Reference
 
@@ -173,6 +210,10 @@ still in beta. There will be some limitations as a result. For example, it will
 likely not work unless both Packer and the scripts you want to run are both on
 the C drive.
 
+
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "builders": [
@@ -199,6 +240,39 @@ the C drive.
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "null" "example" {
+    communicator = "none"
+}
+
+build {
+    sources = [
+        "source.null.example"
+    ]
+
+    post-processor "shell-local"{
+        type = "shell-local"
+        environment_vars = ["PROVISIONERTEST=ProvisionerTest1"]
+        execute_command = ["bash", "-c", "{{.Vars}} {{.Script}}"]
+        use_linux_pathing = true
+        scripts = ["C:/Users/me/scripts/example_bash.sh"]
+    }
+    post-processor "shell-local"{
+        type = "shell-local"
+        environment_vars = ["PROVISIONERTEST=ProvisionerTest2"]
+        execute_command = ["bash", "-c", "{{.Vars}} {{.Script}}"]
+        use_linux_pathing = true
+        script = "C:/Users/me/scripts/example_bash.sh"
+    }
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Default Environmental Variables
 
