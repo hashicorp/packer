@@ -11,6 +11,8 @@ import (
 
 type BlockDevice struct {
 	awscommon.BlockDevice `mapstructure:",squash"`
+	// Create a Snapshot of this Volume and copy all tags.
+	SnapshotVolume bool `mapstructure:"snapshot_volume" required:"false"`
 	// Key/value pair tags to apply to the volume. These are retained after the builder
 	// completes. This is a [template engine](/docs/templates/legacy_json_templates/engine), see
 	// [Build template data](#build-template-data) for more information.

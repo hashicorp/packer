@@ -318,6 +318,10 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
+		&stepSnapshotEBSVolumes{
+			VolumeMapping: b.config.VolumeMappings,
+			Ctx:           b.config.ctx,
+		},
 	}
 
 	// Run!
