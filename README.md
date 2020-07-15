@@ -2,7 +2,7 @@
 
 [![Build Status][travis-badge]][travis]
 [![Windows Build Status][appveyor-badge]][appveyor]
-[![GoDoc][godoc-badge]][godoc]
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/hashicorp/packer)](https://pkg.go.dev/github.com/hashicorp/packer)
 [![GoReportCard][report-badge]][report]
 [![codecov](https://codecov.io/gh/hashicorp/packer/branch/master/graph/badge.svg)](https://codecov.io/gh/hashicorp/packer)
 
