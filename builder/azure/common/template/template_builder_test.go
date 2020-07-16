@@ -15,7 +15,7 @@ func TestBuildLinux00(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = testSubject.BuildLinux("--test-ssh-authorized-key--")
+	err = testSubject.BuildLinux("--test-ssh-authorized-key--", true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestBuildLinux01(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = testSubject.BuildLinux("--test-ssh-authorized-key--")
+	err = testSubject.BuildLinux("--test-ssh-authorized-key--", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +71,7 @@ func TestBuildLinux02(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	testSubject.BuildLinux("--test-ssh-authorized-key--")
+	testSubject.BuildLinux("--test-ssh-authorized-key--", true)
 	testSubject.SetImageUrl("http://azure/custom.vhd", compute.Linux, compute.CachingTypesReadWrite)
 	testSubject.SetOSDiskSizeGB(100)
 
@@ -189,7 +189,7 @@ func TestSharedImageGallery00(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = testSubject.BuildLinux("--test-ssh-authorized-key--")
+	err = testSubject.BuildLinux("--test-ssh-authorized-key--", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -218,7 +218,7 @@ func TestNetworkSecurityGroup00(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = testSubject.BuildLinux("--test-ssh-authorized-key--")
+	err = testSubject.BuildLinux("--test-ssh-authorized-key--", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -251,7 +251,7 @@ func TestSetIdentity00(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = testSubject.BuildLinux("--test-ssh-authorized-key--"); err != nil {
+	if err = testSubject.BuildLinux("--test-ssh-authorized-key--", true); err != nil {
 		t.Fatal(err)
 	}
 
