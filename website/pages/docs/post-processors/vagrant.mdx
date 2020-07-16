@@ -113,6 +113,67 @@ more details about certain options in following sections.
   creation of the Vagrantfile at some previous point in the build.
   Defaults to `false`.
 
+## Using together with the Artifice post-processor
+
+Sometimes you may want to run several builds in a pipeline rather than running
+this post-processor inside a long-running Packer build. Here is an example of
+how to do this:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [{
+    "type": "null",
+    "communicator": "none"
+  }],
+  "post-processors": [
+    [
+      {
+        "type": "artifice",
+        "files": ["output-virtualbox-iso/vbox-example-disk001.vmdk",
+              "output-virtualbox-iso/vbox-example.ovf"
+          ]
+      },
+      {
+        "type": "vagrant",
+        "keep_input_artifact": true,
+        "provider_override": "virtualbox",
+      }
+    ]
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "null" "example" {
+    communicator = "none"
+}
+
+build {
+  sources = [
+    "source.null.example"
+  ]
+
+  post-processor "artifice" {
+    files = ["output-virtualbox-iso/vbox-example-disk001.vmdk",
+             "output-virtualbox-iso/vbox-example.ovf"]
+  }
+
+  post-processor "vagrant" {
+    keep_input_artifact = true
+    provider_override = "virtualbox"
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
 ## Provider-Specific Overrides
 
 If you have a Packer template with multiple builder types within it, you may
@@ -122,6 +183,9 @@ different from the contents of the Vagrantfile you want for VMware. The
 post-processor lets you do this.
 
 Specify overrides within the `override` configuration by provider name:
+
+<Tabs>
+<Tab heading="JSON">
 
 ```json
 {
@@ -134,6 +198,16 @@ Specify overrides within the `override` configuration by provider name:
   }
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+## This feature is not implemented in HCL.
+```
+
+</Tab>
+</Tabs>
 
 In the example above, the compression level will be set to 1 except for VMware,
 where it will be set to 0.
