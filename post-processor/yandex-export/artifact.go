@@ -15,8 +15,8 @@ func (*Artifact) BuilderId() string {
 	return BuilderId
 }
 
-func (*Artifact) Id() string {
-	return ""
+func (a *Artifact) Id() string {
+	return a.urls[0]
 }
 
 func (a *Artifact) Files() []string {
@@ -27,11 +27,6 @@ func (a *Artifact) Files() []string {
 
 func (a *Artifact) String() string {
 	return fmt.Sprintf("Exported artifacts in: %s", a.paths)
-}
-
-func (a *Artifact) Url() string {
-	// print url for first path
-	return a.urls[0]
 }
 
 func (*Artifact) State(name string) interface{} {
