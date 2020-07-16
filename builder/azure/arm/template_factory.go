@@ -55,7 +55,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 
 	switch config.OSType {
 	case constants.Target_Linux:
-		builder.BuildLinux(config.sshAuthorizedKey)
+		builder.BuildLinux(config.sshAuthorizedKey, config.Comm.SSHPassword == "") // if ssh password is not explicitly specified, disable password auth
 	case constants.Target_Windows:
 		osType = compute.Windows
 		builder.BuildWindows(config.tmpKeyVaultName, config.tmpWinRMCertificateUrl)

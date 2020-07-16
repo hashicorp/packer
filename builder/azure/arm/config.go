@@ -697,10 +697,10 @@ func setUserNamePassword(c *Config) error {
 	}
 	c.UserName = c.Comm.SSHUsername
 
-	if c.Comm.SSHPassword == "" {
-		c.Comm.SSHPassword = c.Password
+	// if user has an explicit wish to use an SSH password, we'll set it
+	if c.Comm.SSHPassword != "" {
+		c.Password = c.Comm.SSHPassword
 	}
-	c.Password = c.Comm.SSHPassword
 
 	if c.Comm.Type == "ssh" {
 		return nil
