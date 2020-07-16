@@ -685,7 +685,7 @@ func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile s
 	if p.config.PackerBuildName != "" {
 		// HCL configs don't currently have the PakcerBuildName. Don't
 		// cause weirdness with a half-set variable
-		args = append(args, "-e", fmt.Sprintf("packer_build_name=%s", p.config.PackerBuildName))
+		args = append(args, "-e", fmt.Sprintf("packer_build_name=%q", p.config.PackerBuildName))
 	}
 
 	args = append(args, "-e", fmt.Sprintf("packer_builder_type=%s", p.config.PackerBuilderType))
