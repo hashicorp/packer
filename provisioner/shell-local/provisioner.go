@@ -9,12 +9,23 @@ import (
 )
 
 type Provisioner struct {
-	config sl.Config
+	config        sl.Config
+	prepareCalled bool
 }
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
+	if p.prepareCalled {
+		err := sl.Decode(&p.config, raws...)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	p.prepareCalled = true
+
 	err := sl.Decode(&p.config, raws...)
 	if err != nil {
 		return err
