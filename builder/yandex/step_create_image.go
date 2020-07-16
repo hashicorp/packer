@@ -34,6 +34,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		Family:      c.ImageFamily,
 		Description: c.ImageDescription,
 		Labels:      c.ImageLabels,
+		MinDiskSize: toBytes(c.ImageMinDiskSize),
 		ProductIds:  c.ImageProductIDs,
 		Source: &compute.CreateImageRequest_DiskId{
 			DiskId: diskID,
