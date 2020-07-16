@@ -146,39 +146,21 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 }
 
 func TestAgentSetToFalse(t *testing.T) {
-	// only the mandatory attributes are specified
-	const config = `{
-		"builders": [
-			{
-				"type": "proxmox",
-				"proxmox_url": "https://my-proxmox.my-domain:8006/api2/json",
-				"username": "apiuser@pve",
-				"password": "supersecret",
-				"iso_file": "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso",
-				"ssh_username": "root",
-				"node": "my-proxmox",
-				"qemu_agent": false
-			}
-		]
-	}`
+	cfg := mandatoryConfig(t)
+	cfg["qemu_agent"] = false
 
-	tpl, err := template.Parse(strings.NewReader(config))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	b := &Builder{}
-	_, warn, err := b.Prepare(tpl.Builders["proxmox"].Config)
+	var c Config
+	warn, err := c.Prepare(cfg)
 	if err != nil {
 		t.Fatal(err, warn)
 	}
 
-	if b.config.Agent != false {
-		t.Errorf("Expected Agent to be false, got %t", b.config.Agent)
+	if c.Agent != false {
+		t.Errorf("Expected Agent to be false, got %t", c.Agent)
 	}
 }
 
-func TestNetworkAdapterPacketQueueSupport(t *testing.T) {
+func TestPacketQueueSupportForNetworkAdapters(t *testing.T) {
 	drivertests := []struct {
 		expectedToFail bool
 		model          string
