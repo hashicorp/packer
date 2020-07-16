@@ -29,7 +29,7 @@ type options struct {
 func (o *options) AddFlagSets(fs *flag.FlagSet) {
 	fs.StringVar(&o.begin, "begin", "#_BEGIN_WRAP_TAG_", "flag to mark beginning of a snippet")
 	fs.StringVar(&o.end, "end", "#_END_WRAP_TAG_", "flag to mark ending of a snippet")
-	fs.StringVar(&o.outputDir, "output_dir", "./docs/", "flag to mark ending of a snippet")
+	fs.StringVar(&o.outputDir, "output_dir", "./docs/", "directory in which the files will be generated, note that the directory layout is kept")
 	fs.StringVar(&o.extension, "extension", ".mdx", "extension for generated files")
 }
 
