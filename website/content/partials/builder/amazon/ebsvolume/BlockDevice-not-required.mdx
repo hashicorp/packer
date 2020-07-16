@@ -1,7 +1,5 @@
 <!-- Code generated from the comments of the BlockDevice struct in builder/amazon/ebsvolume/block_device.go; DO NOT EDIT MANUALLY -->
 
-- `snapshot_volume` (bool) - Create a Snapshot of this Volume and copy all tags.
-
 - `tags` (map[string]string) - Key/value pair tags to apply to the volume. These are retained after the builder
   completes. This is a [template engine](/docs/templates/legacy_json_templates/engine), see
   [Build template data](#build-template-data) for more information.
@@ -10,3 +8,5 @@
   containing a `key` and a `value` field. In HCL2 mode the
   [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
   will allow you to create those programatically.
+
+- `snapshot_volume` (bool) - Create a Snapshot of this Volume.

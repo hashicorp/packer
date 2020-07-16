@@ -11,8 +11,6 @@ import (
 
 type BlockDevice struct {
 	awscommon.BlockDevice `mapstructure:",squash"`
-	// Create a Snapshot of this Volume and copy all tags.
-	SnapshotVolume bool `mapstructure:"snapshot_volume" required:"false"`
 	// Key/value pair tags to apply to the volume. These are retained after the builder
 	// completes. This is a [template engine](/docs/templates/legacy_json_templates/engine), see
 	// [Build template data](#build-template-data) for more information.
@@ -22,6 +20,11 @@ type BlockDevice struct {
 	// [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	Tag config.KeyValues `mapstructure:"tag" required:"false"`
+
+	// Create a Snapshot of this Volume.
+	SnapshotVolume bool `mapstructure:"snapshot_volume" required:"false"`
+	
+	awscommon.SnapshotConfig `mapstructure:",squash"`
 }
 
 type BlockDevices []BlockDevice
@@ -40,6 +43,7 @@ func (bds BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
 	for _, block := range bds {
 
 		errs = append(errs, block.Tag.CopyOn(&block.Tags)...)
+		errs = append(errs, block.SnapshotTag.CopyOn(&block.SnapshotTags)...)
 
 		if err := block.Prepare(ctx); err != nil {
 			errs = append(errs, err)

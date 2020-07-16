@@ -14,31 +14,35 @@ import (
 
 type stepSnapshotEBSVolumes struct {
 	VolumeMapping []BlockDevice
-	Ctx           interpolate.Context
+	//Map of SnapshotID: BlockDevice, Where *BlockDevice is in VolumeMapping
+	SnapshotMap map[string]*BlockDevice
+	Ctx         interpolate.Context
 }
 
 func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
-	snapshotsIds := make([]string, 0)
+	s.SnapshotMap = make(map[string]*BlockDevice)
 
 	for _, instanceBlockDevices := range instance.BlockDeviceMappings {
 		for _, configVolumeMapping := range s.VolumeMapping {
 			//Find the config entry for the instance blockDevice
 			if configVolumeMapping.DeviceName == *instanceBlockDevices.DeviceName {
+				//Skip Volumes that are not set to create snapshot
 				if configVolumeMapping.SnapshotVolume != true {
 					continue
 				}
 
 				ui.Message(fmt.Sprintf("Compiling list of tags to apply to snapshot from Volume %s...", *instanceBlockDevices.DeviceName))
-				tags, err := awscommon.TagMap(configVolumeMapping.Tags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+				tags, err := awscommon.TagMap(configVolumeMapping.SnapshotTags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 				if err != nil {
-					err := fmt.Errorf("Error generating tags for device %s: %s", *instanceBlockDevices.DeviceName, err)
+					err := fmt.Errorf("Error generating tags for snapshot %s: %s", *instanceBlockDevices.DeviceName, err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
 				}
+				tags.Report(ui)
 
 				tagSpec := &ec2.TagSpecification{
 					ResourceType: aws.String("snapshot"),
@@ -46,23 +50,31 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 				}
 
 				input := &ec2.CreateSnapshotInput{
-					VolumeId:          instanceBlockDevices.Ebs.VolumeId,
+					VolumeId:          aws.String(*instanceBlockDevices.Ebs.VolumeId),
 					TagSpecifications: []*ec2.TagSpecification{tagSpec},
 				}
+
+				//Dont try to set an empty tag spec
+				if len(tags) == 0 {
+					input.TagSpecifications = nil
+				}
+
+				ui.Message(fmt.Sprintf("Requesting snapshot of volume: %s...", *instanceBlockDevices.Ebs.VolumeId))
 				snapshot, err := ec2conn.CreateSnapshot(input)
-				if err != nil {
+				if err != nil || snapshot == nil {
 					err := fmt.Errorf("Error generating snapsot for volume %s: %s", *instanceBlockDevices.Ebs.VolumeId, err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
 				}
-				snapshotsIds = append(snapshotsIds, *snapshot.SnapshotId)
+				ui.Message(fmt.Sprintf("Requested Snapshot of Volume %s: %s", *instanceBlockDevices.Ebs.VolumeId, *snapshot.SnapshotId))
+				s.SnapshotMap[*snapshot.SnapshotId] = &configVolumeMapping
 			}
 		}
 	}
 
 	ui.Say("Waiting for Snapshots to become ready...")
-	for _, snapID := range snapshotsIds {
+	for snapID := range s.SnapshotMap {
 		ui.Message(fmt.Sprintf("Waiting for %s to be ready.", snapID))
 		err := awscommon.WaitUntilSnapshotDone(ctx, ec2conn, snapID)
 		if err != nil {
@@ -73,6 +85,62 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 			return multistep.ActionHalt
 		}
 		ui.Message(fmt.Sprintf("Snapshot Ready: %s", snapID))
+	}
+
+	//Attach User and Group permissions to snapshots
+	ui.Say("Setting User/Group Permissions for Snapshots...")
+	for snapID, bd := range s.SnapshotMap {
+		snapshotOptions := make(map[string]*ec2.ModifySnapshotAttributeInput)
+
+		if len(bd.SnapshotGroups) > 0 {
+			groups := make([]*string, len(bd.SnapshotGroups))
+			addsSnapshot := make([]*ec2.CreateVolumePermission, len(bd.SnapshotGroups))
+
+			addSnapshotGroups := &ec2.ModifySnapshotAttributeInput{
+				CreateVolumePermission: &ec2.CreateVolumePermissionModifications{},
+			}
+
+			for i, g := range bd.SnapshotGroups {
+				groups[i] = aws.String(g)
+				addsSnapshot[i] = &ec2.CreateVolumePermission{
+					Group: aws.String(g),
+				}
+			}
+
+			addSnapshotGroups.GroupNames = groups
+			addSnapshotGroups.CreateVolumePermission.Add = addsSnapshot
+			snapshotOptions["groups"] = addSnapshotGroups
+
+		}
+
+		if len(bd.SnapshotUsers) > 0 {
+			users := make([]*string, len(bd.SnapshotUsers))
+			addsSnapshot := make([]*ec2.CreateVolumePermission, len(bd.SnapshotUsers))
+			for i, u := range bd.SnapshotUsers {
+				users[i] = aws.String(u)
+				addsSnapshot[i] = &ec2.CreateVolumePermission{UserId: aws.String(u)}
+			}
+
+			snapshotOptions["users"] = &ec2.ModifySnapshotAttributeInput{
+				UserIds: users,
+				CreateVolumePermission: &ec2.CreateVolumePermissionModifications{
+					Add: addsSnapshot,
+				},
+			}
+		}
+
+		//Todo: Copy to other regions and repeat this block in all regions.
+		for name, input := range snapshotOptions {
+			ui.Message(fmt.Sprintf("Modifying: %s", name))
+			input.SnapshotId = &snapID
+			_, err := ec2conn.ModifySnapshotAttribute(input)
+			if err != nil {
+				err := fmt.Errorf("Error modify snapshot attributes: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
 	}
 
 	return multistep.ActionContinue

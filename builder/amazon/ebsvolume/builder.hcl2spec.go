@@ -23,9 +23,13 @@ type FlatBlockDevice struct {
 	VolumeType          *string               `mapstructure:"volume_type" required:"false" cty:"volume_type" hcl:"volume_type"`
 	VolumeSize          *int64                `mapstructure:"volume_size" required:"false" cty:"volume_size" hcl:"volume_size"`
 	KmsKeyId            *string               `mapstructure:"kms_key_id" required:"false" cty:"kms_key_id" hcl:"kms_key_id"`
-	SnapshotVolume      *bool                 `mapstructure:"snapshot_volume" required:"false" cty:"snapshot_volume" hcl:"snapshot_volume"`
 	Tags                map[string]string     `mapstructure:"tags" required:"false" cty:"tags" hcl:"tags"`
 	Tag                 []config.FlatKeyValue `mapstructure:"tag" required:"false" cty:"tag" hcl:"tag"`
+	SnapshotVolume      *bool                 `mapstructure:"snapshot_volume" required:"false" cty:"snapshot_volume" hcl:"snapshot_volume"`
+	SnapshotTags        map[string]string     `mapstructure:"snapshot_tags" required:"false" cty:"snapshot_tags" hcl:"snapshot_tags"`
+	SnapshotTag         []config.FlatKeyValue `mapstructure:"snapshot_tag" required:"false" cty:"snapshot_tag" hcl:"snapshot_tag"`
+	SnapshotUsers       []string              `mapstructure:"snapshot_users" required:"false" cty:"snapshot_users" hcl:"snapshot_users"`
+	SnapshotGroups      []string              `mapstructure:"snapshot_groups" required:"false" cty:"snapshot_groups" hcl:"snapshot_groups"`
 }
 
 // FlatMapstructure returns a new FlatBlockDevice.
@@ -51,9 +55,13 @@ func (*FlatBlockDevice) HCL2Spec() map[string]hcldec.Spec {
 		"volume_type":           &hcldec.AttrSpec{Name: "volume_type", Type: cty.String, Required: false},
 		"volume_size":           &hcldec.AttrSpec{Name: "volume_size", Type: cty.Number, Required: false},
 		"kms_key_id":            &hcldec.AttrSpec{Name: "kms_key_id", Type: cty.String, Required: false},
-		"snapshot_volume":       &hcldec.AttrSpec{Name: "snapshot_volume", Type: cty.Bool, Required: false},
 		"tags":                  &hcldec.AttrSpec{Name: "tags", Type: cty.Map(cty.String), Required: false},
 		"tag":                   &hcldec.BlockListSpec{TypeName: "tag", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
+		"snapshot_volume":       &hcldec.AttrSpec{Name: "snapshot_volume", Type: cty.Bool, Required: false},
+		"snapshot_tags":         &hcldec.AttrSpec{Name: "snapshot_tags", Type: cty.Map(cty.String), Required: false},
+		"snapshot_tag":          &hcldec.BlockListSpec{TypeName: "snapshot_tag", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
+		"snapshot_users":        &hcldec.AttrSpec{Name: "snapshot_users", Type: cty.List(cty.String), Required: false},
+		"snapshot_groups":       &hcldec.AttrSpec{Name: "snapshot_groups", Type: cty.List(cty.String), Required: false},
 	}
 	return s
 }
