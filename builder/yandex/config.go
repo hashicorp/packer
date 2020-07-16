@@ -64,7 +64,7 @@ type Config struct {
 	ImageLabels map[string]string `mapstructure:"image_labels" required:"false"`
 	// Minimum size of the disk that will be created from built image, specified in gigabytes.
 	// Should be more or equal to `disk_size_gb`.
-	ImageMinDiskSize int `mapstructure:"image_min_disk_size" required:"false"`
+	ImageMinDiskSizeGb int `mapstructure:"image_min_disk_size_gb" required:"false"`
 	// The unique name of the resulting image. Defaults to
 	// `packer-{{timestamp}}`.
 	ImageName string `mapstructure:"image_name" required:"false"`
@@ -167,14 +167,14 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		c.DiskType = "network-hdd"
 	}
 
-	if c.ImageMinDiskSize == 0 {
-		c.ImageMinDiskSize = c.DiskSizeGb
+	if c.ImageMinDiskSizeGb == 0 {
+		c.ImageMinDiskSizeGb = c.DiskSizeGb
 	}
 
-	if c.ImageMinDiskSize <= c.DiskSizeGb {
+	if c.ImageMinDiskSizeGb < c.DiskSizeGb {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("Invalid image_min_disk_size value (%d): Must be equal or greate than disk_size_gb (%d)",
-				c.ImageMinDiskSize, c.DiskSizeGb))
+				c.ImageMinDiskSizeGb, c.DiskSizeGb))
 	}
 
 	if c.ImageDescription == "" {

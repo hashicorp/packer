@@ -175,30 +175,30 @@ func TestConfigImageMinDiskSize(t *testing.T) {
 		{
 			Name: "image_min_disk_size lower than disk_size (default value)",
 			Config: map[string]interface{}{
-				"image_min_disk_size": 2,
+				"image_min_disk_size_gb": 2,
 			},
 			Err: true,
 		},
 		{
 			Name: "image_min_disk_size greater than disk_size (default value)",
 			Config: map[string]interface{}{
-				"image_min_disk_size": 20,
+				"image_min_disk_size_gb": 20,
 			},
 			Err: false,
 		},
 		{
 			Name: "image_min_disk_size lower than disk_size (custom value)",
 			Config: map[string]interface{}{
-				"disk_size_gb":        50,
-				"image_min_disk_size": 20,
+				"disk_size_gb":           50,
+				"image_min_disk_size_gb": 20,
 			},
 			Err: true,
 		},
 		{
 			Name: "image_min_disk_size greate than disk_size (custom value)",
 			Config: map[string]interface{}{
-				"disk_size_gb":        50,
-				"image_min_disk_size": 55,
+				"disk_size_gb":           50,
+				"image_min_disk_size_gb": 55,
 			},
 			Err: false,
 		},

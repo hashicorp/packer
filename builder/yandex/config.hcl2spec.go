@@ -73,7 +73,7 @@ type FlatConfig struct {
 	ImageDescription          *string           `mapstructure:"image_description" required:"false" cty:"image_description" hcl:"image_description"`
 	ImageFamily               *string           `mapstructure:"image_family" required:"false" cty:"image_family" hcl:"image_family"`
 	ImageLabels               map[string]string `mapstructure:"image_labels" required:"false" cty:"image_labels" hcl:"image_labels"`
-	ImageMinDiskSize          *int              `mapstructure:"image_min_disk_size" required:"false" cty:"image_min_disk_size" hcl:"image_min_disk_size"`
+	ImageMinDiskSizeGb        *int              `mapstructure:"image_min_disk_size_gb" required:"false" cty:"image_min_disk_size_gb" hcl:"image_min_disk_size_gb"`
 	ImageName                 *string           `mapstructure:"image_name" required:"false" cty:"image_name" hcl:"image_name"`
 	ImageProductIDs           []string          `mapstructure:"image_product_ids" required:"false" cty:"image_product_ids" hcl:"image_product_ids"`
 	InstanceCores             *int              `mapstructure:"instance_cores" required:"false" cty:"instance_cores" hcl:"instance_cores"`
@@ -176,7 +176,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"image_description":            &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
 		"image_family":                 &hcldec.AttrSpec{Name: "image_family", Type: cty.String, Required: false},
 		"image_labels":                 &hcldec.AttrSpec{Name: "image_labels", Type: cty.Map(cty.String), Required: false},
-		"image_min_disk_size":          &hcldec.AttrSpec{Name: "image_min_disk_size", Type: cty.Number, Required: false},
+		"image_min_disk_size_gb":       &hcldec.AttrSpec{Name: "image_min_disk_size_gb", Type: cty.Number, Required: false},
 		"image_name":                   &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"image_product_ids":            &hcldec.AttrSpec{Name: "image_product_ids", Type: cty.List(cty.String), Required: false},
 		"instance_cores":               &hcldec.AttrSpec{Name: "instance_cores", Type: cty.Number, Required: false},
