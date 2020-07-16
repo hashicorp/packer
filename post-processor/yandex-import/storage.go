@@ -60,7 +60,7 @@ func presignUrl(s3conn *s3.S3, ui packer.Ui, fullUrl string) (string, error) {
 	// Compute service allow only `https://storage.yandexcloud.net/...` URLs for Image create process
 	req.Config.S3ForcePathStyle = aws.Bool(true)
 
-	urlStr, _, err := req.PresignRequest(15 * time.Minute)
+	urlStr, _, err := req.PresignRequest(30 * time.Minute)
 	if err != nil {
 		ui.Say(fmt.Sprintf("Failed to presign url: %s", err))
 		return "", err

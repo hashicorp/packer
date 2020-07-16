@@ -20,7 +20,7 @@ type FlatConfig struct {
 	ServiceAccountID      *string           `mapstructure:"service_account_id" required:"true" cty:"service_account_id" hcl:"service_account_id"`
 	Token                 *string           `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
 	ServiceAccountKeyFile *string           `mapstructure:"service_account_key_file" required:"false" cty:"service_account_key_file" hcl:"service_account_key_file"`
-	Bucket                *string           `mapstructure:"bucket" required:"true" cty:"bucket" hcl:"bucket"`
+	Bucket                *string           `mapstructure:"bucket" required:"false" cty:"bucket" hcl:"bucket"`
 	ObjectName            *string           `mapstructure:"object_name" required:"false" cty:"object_name" hcl:"object_name"`
 	SkipClean             *bool             `mapstructure:"skip_clean" required:"false" cty:"skip_clean" hcl:"skip_clean"`
 	ImageName             *string           `mapstructure:"image_name" required:"false" cty:"image_name" hcl:"image_name"`
