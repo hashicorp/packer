@@ -23,7 +23,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/post-processor/artifice"
 	"github.com/hashicorp/packer/post-processor/compress"
-	"github.com/hashicorp/packer/post-processor/yandex-export"
+	yandexexport "github.com/hashicorp/packer/post-processor/yandex-export"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
