@@ -90,6 +90,30 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	errs := new(packer.MultiError)
 
+	// provision config by OS environment variables
+	if p.config.Token == "" {
+		p.config.Token = os.Getenv("YC_TOKEN")
+	}
+
+	if p.config.ServiceAccountKeyFile == "" {
+		p.config.ServiceAccountKeyFile = os.Getenv("YC_SERVICE_ACCOUNT_KEY_FILE")
+	}
+
+	if p.config.Token != "" {
+		packer.LogSecretFilter.Set(p.config.Token)
+	}
+
+	if p.config.ServiceAccountKeyFile != "" {
+		if _, err := iamkey.ReadFromJSONFile(p.config.ServiceAccountKeyFile); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("fail to read service account key file: %s", err))
+		}
+	}
+
+	if p.config.FolderID == "" {
+		p.config.FolderID = os.Getenv("YC_FOLDER_ID")
+	}
+
 	// Set defaults
 	if p.config.ObjectName == "" {
 		p.config.ObjectName = "packer-import-{{timestamp}}.qcow2"
