@@ -55,7 +55,11 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		break
 	default:
 		err := fmt.Errorf(
-			"Unknown artifact type: %s\nCan only import from Docker builder and Artifice post-processor artifacts.",
+			"Unknown artifact type: %s\nCan only import from Docker builder "+
+				"and Artifice post-processor artifacts. If you are getting this "+
+				"error after having run the docker builder, it may be because you "+
+				"set commit: true in your Docker builder, so the image is "+
+				"already imported. ",
 			artifact.BuilderId())
 		return nil, false, false, err
 	}
