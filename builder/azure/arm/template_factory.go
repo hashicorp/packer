@@ -55,10 +55,16 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 
 	switch config.OSType {
 	case constants.Target_Linux:
-		builder.BuildLinux(config.sshAuthorizedKey, config.Comm.SSHPassword == "") // if ssh password is not explicitly specified, disable password auth
+		err = builder.BuildLinux(config.sshAuthorizedKey, config.Comm.SSHPassword == "") // if ssh password is not explicitly specified, disable password auth
+		if err != nil {
+			return nil, err
+		}
 	case constants.Target_Windows:
 		osType = compute.Windows
-		builder.BuildWindows(config.tmpKeyVaultName, config.tmpWinRMCertificateUrl)
+		err = builder.BuildWindows(config.tmpKeyVaultName, config.tmpWinRMCertificateUrl)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if len(config.UserAssignedManagedIdentities) != 0 {
@@ -68,9 +74,15 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 	}
 
 	if config.ImageUrl != "" {
-		builder.SetImageUrl(config.ImageUrl, osType, config.diskCachingType)
+		err = builder.SetImageUrl(config.ImageUrl, osType, config.diskCachingType)
+		if err != nil {
+			return nil, err
+		}
 	} else if config.CustomManagedImageName != "" {
-		builder.SetManagedDiskUrl(config.customManagedImageID, config.managedImageStorageAccountType, config.diskCachingType)
+		err = builder.SetManagedDiskUrl(config.customManagedImageID, config.managedImageStorageAccountType, config.diskCachingType)
+		if err != nil {
+			return nil, err
+		}
 	} else if config.ManagedImageName != "" && config.ImagePublisher != "" {
 		imageID := fmt.Sprintf("/subscriptions/%s/providers/Microsoft.Compute/locations/%s/publishers/%s/ArtifactTypes/vmimage/offers/%s/skus/%s/versions/%s",
 			config.ClientConfig.SubscriptionID,
@@ -92,38 +104,62 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 				config.SharedGallery.ImageVersion)
 		}
 
-		builder.SetSharedGalleryImage(config.Location, imageID, config.diskCachingType)
+		err = builder.SetSharedGalleryImage(config.Location, imageID, config.diskCachingType)
+		if err != nil {
+			return nil, err
+		}
 	} else {
-		builder.SetMarketPlaceImage(config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion, config.diskCachingType)
+		err = builder.SetMarketPlaceImage(config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion, config.diskCachingType)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if config.OSDiskSizeGB > 0 {
-		builder.SetOSDiskSizeGB(config.OSDiskSizeGB)
+		err = builder.SetOSDiskSizeGB(config.OSDiskSizeGB)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if len(config.AdditionalDiskSize) > 0 {
 		isManaged := config.CustomManagedImageName != "" || (config.ManagedImageName != "" && config.ImagePublisher != "") || config.SharedGallery.Subscription != ""
-		builder.SetAdditionalDisks(config.AdditionalDiskSize, config.tmpDataDiskName, isManaged, config.diskCachingType)
+		err = builder.SetAdditionalDisks(config.AdditionalDiskSize, config.tmpDataDiskName, isManaged, config.diskCachingType)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if config.customData != "" {
-		builder.SetCustomData(config.customData)
+		err = builder.SetCustomData(config.customData)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if config.PlanInfo.PlanName != "" {
-		builder.SetPlanInfo(config.PlanInfo.PlanName, config.PlanInfo.PlanProduct, config.PlanInfo.PlanPublisher, config.PlanInfo.PlanPromotionCode)
+		err = builder.SetPlanInfo(config.PlanInfo.PlanName, config.PlanInfo.PlanProduct, config.PlanInfo.PlanPublisher, config.PlanInfo.PlanPromotionCode)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if config.VirtualNetworkName != "" && DefaultPrivateVirtualNetworkWithPublicIp != config.PrivateVirtualNetworkWithPublicIp {
-		builder.SetPrivateVirtualNetworkWithPublicIp(
+		err = builder.SetPrivateVirtualNetworkWithPublicIp(
 			config.VirtualNetworkResourceGroupName,
 			config.VirtualNetworkName,
 			config.VirtualNetworkSubnetName)
+		if err != nil {
+			return nil, err
+		}
 	} else if config.VirtualNetworkName != "" {
-		builder.SetVirtualNetwork(
+		err = builder.SetVirtualNetwork(
 			config.VirtualNetworkResourceGroupName,
 			config.VirtualNetworkName,
 			config.VirtualNetworkSubnetName)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if config.AllowedInboundIpAddresses != nil && len(config.AllowedInboundIpAddresses) >= 1 && config.Comm.Port() != 0 {
@@ -140,7 +176,11 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		}
 	}
 
-	builder.SetTags(&config.AzureTags)
+	err = builder.SetTags(&config.AzureTags)
+	if err != nil {
+		return nil, err
+	}
+
 	doc, _ := builder.ToJSON()
 	return createDeploymentParameters(*doc, params)
 }
