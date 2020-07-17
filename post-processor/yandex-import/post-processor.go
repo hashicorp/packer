@@ -172,6 +172,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	var url string
+	var fileSource bool
 
 	// Create temporary storage Access Key
 	respWithKey, err := client.SDK().IAM().AWSCompatibility().AccessKey().Create(ctx, &awscompatibility.CreateAccessKeyRequest{
@@ -190,6 +191,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	switch artifact.BuilderId() {
 	case compress.BuilderId, artifice.BuilderId, file.BuilderId:
 		// Artifact as a file, need to be uploaded to storage before create Compute Image
+		fileSource = true
 
 		// As `bucket` option validate input here
 		if p.config.Bucket == "" {
@@ -205,9 +207,13 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		// Artifact already in storage, just get URL
 		url = artifact.Id()
 
+	case BuilderId:
+		// Artifact from prev yandex-import PP, reuse URL
+		url = artifact.Id()
+
 	default:
 		err := fmt.Errorf(
-			"Unknown artifact type: %s\nCan only import from Yandex-Export, Compress, Artifice and File post-processor artifacts.",
+			"Unknown artifact type: %s\nCan only import from Yandex-Export, Yandex-Import, Compress, Artifice and File post-processor artifacts.",
 			artifact.BuilderId())
 		return nil, false, false, err
 	}
@@ -222,7 +228,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, err
 	}
 
-	if !p.config.SkipClean {
+	if fileSource && !p.config.SkipClean {
 		err = deleteFromBucket(storageClient, ui, url)
 		if err != nil {
 			return nil, false, false, err
@@ -237,7 +243,10 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("error delete static access key: %s", err)
 	}
 
-	return ycImage, false, false, nil
+	return &Artifact{
+		imageID:   ycImage.GetId(),
+		sourceURL: url,
+	}, false, false, nil
 }
 
 func uploadToBucket(s3conn *s3.S3, ui packer.Ui, artifact packer.Artifact, bucket string, objectName string) (string, error) {
@@ -285,7 +294,7 @@ func uploadToBucket(s3conn *s3.S3, ui packer.Ui, artifact packer.Artifact, bucke
 	return req.HTTPRequest.URL.String(), nil
 }
 
-func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, folderID string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string) (packer.Artifact, error) {
+func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, folderID string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string) (*compute.Image, error) {
 	op, err := driver.SDK().WrapOperation(driver.SDK().Compute().Image().Create(ctx, &compute.CreateImageRequest{
 		FolderId:    folderID,
 		Name:        imageName,
@@ -328,9 +337,8 @@ func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, fold
 		return nil, fmt.Errorf("error while image get request: %s", err)
 	}
 
-	return &yandex.Artifact{
-		Image: image,
-	}, nil
+	return image, nil
+
 }
 
 func deleteFromBucket(s3conn *s3.S3, ui packer.Ui, url string) error {
