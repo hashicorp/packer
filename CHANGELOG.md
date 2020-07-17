@@ -4,15 +4,22 @@
 * **New post-processor** Yandex Import [GH-9553]
 
 ### IMPROVEMENTS:
+* builder/docker: Add options for --cap-add, --cap-drop, --tmpfs, --device
+    [GH-9565]
 * builder/file: Create parent directories of target file, if they don't exist.
     [GH-9452]
 * builder/google: Add support for oslogin via the `use_os_login` configuration
     option [GH-9339]
 * builder/googlecompute: Add `wrap_startup_script` configuration option to
     allow the disabling of Packer's startup script wrapper [GH-9505]
+* builder/googlecompute: Make IAP tunnel timeout configurable. [GH-9545]
 * builder/hyper-v: Include secure boot template in box.xml [GH-9552]
 * builder/hyperone: Add support for custom username in vm creation. [GH-9497]
 * builder/hyperone: Skip chroot device discovery. [GH-9489]
+* builder/openstack: Bump gophercloud to latest version [GH-9573]
+* builder/proxmox: Add option to disable KVM hardware virtualization in proxmox
+    builder [GH-9587]
+* builder/proxmox: Add support for multiple NIC packet queues [GH-9597]
 * builder/proxmox: Enable Proxmox builder to toggle the firewall parameter for
     network interfaces. [GH-9487]
 * builder/proxmox: Update Proxmox storagePoolTypes [GH-9418]
@@ -26,6 +33,7 @@
 * builder/vsphere: Add content_library_destination to import VM template to a
     Content Library [GH-9551]
 * builder/vsphere: Add force_bios_setup configuration option: [GH-9563]
+* builder/vsphere: Add option to add a xhci/usb3 controller [GH-9574]
 * builder/vsphere: Create vm output folders if they don't exist [GH-9402]
 * builder/vsphere: Fix file size descriptor when exporting OFV [GH-9568]
 * builder/vsphere: Look at all available IPs in the waiting for IP loop.
@@ -51,10 +59,13 @@
 * core/hcl: Share build info with Provisioner and Post-Processor via HCL2
     variables [GH-9444] [GH-9534]
 * core: Add on-error flag option to run error-cleanup-provisioner [GH-9429]
+* hcl2: Handle uint64 buildvars [GH-9585]
 * post-processor/yandex-export: Allow users to utilize generated variables in
     templating. [GH-9555]
 * post-processor/yandex-export: Support Authentication by Service Account Key
     file [GH-9379]
+* post-processor/yandex-import: Support using URL from yandex-export pp
+    [GH-9601]
 * provisioner/ansible: Add template option for templating the inventory file
     lines [GH-9438]
 
@@ -70,6 +81,9 @@
     [GH-9371]
 * builder/qemu: Only set up localhost port forwarding if skipnatmapping is
     false. [GH-9479]
+* builder/vagrant: Improve validation and error handling around synced_folder.
+    Make sure that synced folder can be defined relative to Packer run
+    directory, not the Vagrant output directory. [GH-9577]
 * builder/virtualbox-vm: Fix regression where builder would fail if the vm had
     no snapshots. [GH-9435]
 * builder/vmware: Fix a race that occurred when parsing the network config.
@@ -94,6 +108,12 @@
 * post-processor/yandex-export: Fix error handling and docs. [GH-9554]
 * provisioner/ansible: Correct check for whether PackerHttpAddr is implemented
     or not [GH-9498]
+* provisioner/ansible: Quote extra-var packer_build_name to handle names with
+    spaces [GH-9590]
+
+### BACKWARDS INCOMPATABILITIES:
+* HCL: builder/vsphere: Add option to add a xhci/usb3 controller; changes
+    controller value to an array of strings.  [GH-9574]
 
 ## 1.6.0 (June 09, 2020)
 
