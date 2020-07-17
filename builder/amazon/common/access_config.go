@@ -116,6 +116,9 @@ type AccessConfig struct {
 	//     credential types) and GetFederationToken (for federation\_token
 	//     credential types) for more details.
 	//
+	// <Tabs>
+	// <Tab heading="JSON">
+	//
 	// ```json
 	// {
 	//     "vault_aws_engine": {
@@ -124,7 +127,20 @@ type AccessConfig struct {
 	//         "ttl": "3600s"
 	//     }
 	// }
+	//
+	// </Tab>
+	// <Tab heading="HCL2">
+	//
+	// ```hcl
+	//   vault_aws_engine {
+	//       name = "myrole"
+	//       role_arn = "myarn"
+	//       ttl = "3600s"
+	//   }
 	// ```
+	//
+	// </Tab>
+	// </Tabs>
 	VaultAWSEngine VaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false"`
 
 	getEC2Connection func() ec2iface.EC2API

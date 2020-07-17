@@ -96,12 +96,27 @@ type RunConfig struct {
 	// `true`, will cause a timeout.
 	// Example of a valid shutdown command:
 	//
+	// <Tabs>
+	// <Tab heading="JSON">
+	//
 	// ```json
-	// {
+	// "provisioners: [{
 	//   "type": "windows-shell",
 	//   "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
+	// }]
+	// ```
+	//
+	// </Tab>
+	// <Tab heading="HCL2">
+	//
+	// ```hcl
+	// provisioner "windows-shell"{
+	//   inline = ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
 	// }
 	// ```
+	//
+	// </Tab>
+	// </Tabs>
 	DisableStopInstance bool `mapstructure:"disable_stop_instance" required:"false"`
 	// Mark instance as [EBS
 	// Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
@@ -164,6 +179,9 @@ type RunConfig struct {
 	InstanceType string `mapstructure:"instance_type" required:"true"`
 	// Filters used to populate the `security_group_ids` field. Example:
 	//
+	// <Tabs>
+	// <Tab heading="JSON">
+	//
 	// ```json
 	// {
 	//   "security_group_filter": {
@@ -173,6 +191,20 @@ type RunConfig struct {
 	//   }
 	// }
 	// ```
+	//
+	// </Tab>
+	// <Tab heading="HCL2">
+	//
+	// ```hcl
+	//   security_group_filter {
+	//     filters = {
+	//       "tag:Class": "packer"
+	//     }
+	//   }
+	// ```
+	//
+	// </Tab>
+	// </Tabs>
 	//
 	// This selects the SG's with tag `Class` with the value `packer`.
 	//
@@ -211,19 +243,45 @@ type RunConfig struct {
 	// Filters used to populate the `source_ami`
 	// field. Example:
 	//
-	//   ```json
+	// <Tabs>
+	// <Tab heading="JSON">
+	//
+	// ```json
+	// "builders" [
 	//   {
+	//     "type": "amazon-ebs",
 	//     "source_ami_filter": {
-	//       "filters": {
-	//         "virtualization-type": "hvm",
-	//         "name": "ubuntu/images/\*ubuntu-xenial-16.04-amd64-server-\*",
-	//         "root-device-type": "ebs"
-	//       },
-	//       "owners": ["099720109477"],
-	//       "most_recent": true
+	//        "filters": {
+	//        "virtualization-type": "hvm",
+	//        "name": "ubuntu/images/\*ubuntu-xenial-16.04-amd64-server-\*",
+	//        "root-device-type": "ebs"
+	//        },
+	//        "owners": ["099720109477"],
+	//        "most_recent": true
 	//     }
 	//   }
-	//   ```
+	// ]
+	// ```
+	//
+	// </Tab>
+	// <Tab heading="HCL2">
+	//
+	// ```hcl
+	// source "amazon-ebs" "basic-example" {
+	//   source_ami_filter {
+	//     filters = {
+	//        virtualization-type = "hvm"
+	//        name = "ubuntu/images/\*ubuntu-xenial-16.04-amd64-server-\*"
+	//        root-device-type = "ebs"
+	//     }
+	//     owners = ["099720109477"]
+	//     most_recent = true
+	//   }
+	// }
+	// ```
+	//
+	// </Tab>
+	// </Tabs>
 	//
 	//   This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
 	//   This will fail unless *exactly* one AMI is returned. In the above example,
@@ -293,8 +351,13 @@ type RunConfig struct {
 	// Filters used to populate the `subnet_id` field.
 	// Example:
 	//
-	//   ```json
+	// <Tabs>
+	// <Tab heading="JSON">
+	//
+	// ```json
+	// "builders" [
 	//   {
+	//     "type": "amazon-ebs",
 	//     "subnet_filter": {
 	//       "filters": {
 	//         "tag:Class": "build"
@@ -303,7 +366,26 @@ type RunConfig struct {
 	//       "random": false
 	//     }
 	//   }
-	//   ```
+	// ]
+	// ```
+	//
+	// </Tab>
+	// <Tab heading="HCL2">
+	//
+	// ```hcl
+	// source "amazon-ebs" "basic-example" {
+	//   subnet_filter {
+	//     filters = {
+	//           "tag:Class": "build"
+	//     }
+	//     most_free = true
+	//     random = false
+	//   }
+	// }
+	// ```
+	//
+	// </Tab>
+	// </Tabs>
 	//
 	//   This selects the Subnet with tag `Class` with the value `build`, which has
 	//   the most free IP addresses. NOTE: This will fail unless *exactly* one
@@ -350,10 +432,31 @@ type RunConfig struct {
 	// Filters used to populate the `vpc_id` field.
 	// Example:
 	//
+	// <Tabs>
+	// <Tab heading="JSON">
+	//
 	// ```json
-	// {
-	//   "vpc_filter": {
-	//     "filters": {
+	// "builders" [
+	//   {
+	//     "type": "amazon-ebs",
+	//     "vpc_filter": {
+	//       "filters": {
+	//         "tag:Class": "build",
+	//         "isDefault": "false",
+	//         "cidr": "/24"
+	//       }
+	//     }
+	//   }
+	// ]
+	// ```
+	//
+	// </Tab>
+	// <Tab heading="HCL2">
+	//
+	// ```hcl
+	// source "amazon-ebs" "basic-example" {
+	//   vpc_filter {
+	//     filters = {
 	//       "tag:Class": "build",
 	//       "isDefault": "false",
 	//       "cidr": "/24"
@@ -361,6 +464,9 @@ type RunConfig struct {
 	//   }
 	// }
 	// ```
+	//
+	// </Tab>
+	// </Tabs>
 	//
 	// This selects the VPC with tag `Class` with the value `build`, which is not
 	// the default VPC, and have a IPv4 CIDR block of `/24`. NOTE: This will fail
