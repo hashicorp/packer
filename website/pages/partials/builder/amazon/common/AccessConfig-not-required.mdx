@@ -59,10 +59,10 @@
       the DurationSeconds parameter for AssumeRole (for assumed\_role
       credential types) and GetFederationToken (for federation\_token
       credential types) for more details.
-
+  
   <Tabs>
   <Tab heading="JSON">
-
+  
   ```json
   {
       "vault_aws_engine": {
@@ -71,11 +71,10 @@
           "ttl": "3600s"
       }
   }
-  ```
-
+  
   </Tab>
   <Tab heading="HCL2">
-
+  
   ```hcl
     vault_aws_engine {
         name = "myrole"
@@ -83,6 +82,6 @@
         ttl = "3600s"
     }
   ```
-
+  
   </Tab>
   </Tabs>
