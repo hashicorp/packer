@@ -68,11 +68,12 @@ type Config struct {
 }
 
 type nicConfig struct {
-	Model      string `mapstructure:"model"`
-	MACAddress string `mapstructure:"mac_address"`
-	Bridge     string `mapstructure:"bridge"`
-	VLANTag    string `mapstructure:"vlan_tag"`
-	Firewall   bool   `mapstructure:"firewall"`
+	Model        string `mapstructure:"model"`
+	PacketQueues int    `mapstructure:"packet_queues"`
+	MACAddress   string `mapstructure:"mac_address"`
+	Bridge       string `mapstructure:"bridge"`
+	VLANTag      string `mapstructure:"vlan_tag"`
+	Firewall     bool   `mapstructure:"firewall"`
 }
 type diskConfig struct {
 	Type            string `mapstructure:"type"`
@@ -179,7 +180,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		// (currently zfspool|lvm|rbd|cephfs), the format parameter is mandatory. Make sure this is still up to date
 		// when updating the vendored code!
 		if !contains([]string{"zfspool", "lvm", "rbd", "cephfs"}, c.Disks[idx].StoragePoolType) && c.Disks[idx].DiskFormat == "" {
-			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("disk format must be specified for pool type %q", c.Disks[idx].StoragePoolType)))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("disk format must be specified for pool type %q", c.Disks[idx].StoragePoolType))
 		}
 	}
 	if c.SCSIController == "" {
@@ -222,7 +223,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, errors.New("proxmox_url must be specified"))
 	}
 	if c.proxmoxURL, err = url.Parse(c.ProxmoxURLRaw); err != nil {
-		errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("Could not parse proxmox_url: %s", err)))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Could not parse proxmox_url: %s", err))
 	}
 	if c.Node == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("node must be specified"))
@@ -232,15 +233,18 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 	for idx := range c.NICs {
 		if c.NICs[idx].Bridge == "" {
-			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("network_adapters[%d].bridge must be specified", idx)))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("network_adapters[%d].bridge must be specified", idx))
+		}
+		if c.NICs[idx].Model != "virtio" && c.NICs[idx].PacketQueues > 0 {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("network_adapters[%d].packet_queues can only be set for 'virtio' driver", idx))
 		}
 	}
 	for idx := range c.Disks {
 		if c.Disks[idx].StoragePool == "" {
-			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("disks[%d].storage_pool must be specified", idx)))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("disks[%d].storage_pool must be specified", idx))
 		}
 		if c.Disks[idx].StoragePoolType == "" {
-			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("disks[%d].storage_pool_type must be specified", idx)))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("disks[%d].storage_pool_type must be specified", idx))
 		}
 	}
 

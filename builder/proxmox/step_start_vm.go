@@ -112,6 +112,10 @@ func generateProxmoxNetworkAdapters(nics []nicConfig) proxmox.QemuDevices {
 		setDeviceParamIfDefined(devs[idx], "bridge", nics[idx].Bridge)
 		setDeviceParamIfDefined(devs[idx], "tag", nics[idx].VLANTag)
 		setDeviceParamIfDefined(devs[idx], "firewall", strconv.FormatBool(nics[idx].Firewall))
+
+		if nics[idx].PacketQueues > 0 {
+			devs[idx]["queues"] = nics[idx].PacketQueues
+		}
 	}
 	return devs
 }

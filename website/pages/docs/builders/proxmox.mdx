@@ -141,6 +141,15 @@ builder.
 
   - `firewall` (bool) - If the interface should be protected by the firewall.
     Defaults to `false`.
+  
+  - `packet_queues` (int) - Number of packet queues to be used on the device.
+    Values greater than 1 indicate that the multiqueue feature is activated.
+    For best performance, set this to the number of cores available to the
+    virtual machine. CPU load on the host and guest systems will increase as
+    the traffic increases, so activate this option only when the VM has to
+    handle a great number of incoming connections, such as when the VM is
+    operating as a router, reverse proxy or a busy HTTP server. Requires
+    `virtio` network adapter. Defaults to `0`.
 
 - `disks` (array of objects) - Disks attached to the virtual machine.
   Example:
