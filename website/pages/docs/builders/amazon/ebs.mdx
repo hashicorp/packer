@@ -143,12 +143,22 @@ run:
 <Tab heading="HCL2">
 
 ```hcl
+// To make Packer read these variables from the environment into the var object,
+// set the environment variables to have the same name as the declared
+// variables, with the prefix PKR_VAR_.
+
+// You could also hardcode them into the file, but we recommend against that.
+
+// export PKR_VAR_aws_access_key=$YOURKEY
 variable "aws_access_key" {
   type = string
+  // default = "hardcoded_key"
 }
 
+// export PKR_VAR_aws_secret_key=$YOURSECRETKEY
 variable "aws_secret_key" {
   type = string
+  // default = "hardcoded_secret_key"
 }
 
 source "amazon-ebs" "basic-example" {
@@ -158,21 +168,23 @@ source "amazon-ebs" "basic-example" {
   source_ami =  "ami-fce3c696"
   instance_type =  "t2.micro"
   ssh_username =  "ubuntu"
+  ami_name =  "packer_AWS {{timestamp}}"
 }
 
 build {
-  source "sources.amazon-ebs.basic-example" {
-    ami_name =  "packer_AWS {{timestamp}}"
-  }
+  sources = [
+    "source.amazon-ebs.basic-example"
+  ]
 }
 ```
 
 </Tab>
 </Tabs>
 
--> **Note:** Packer can also read the access key and secret access key from
-environmental variables. See the configuration reference in the section above
-for more information on what environmental variables Packer will look for.
+-> **Note:** Packer can also read the access key and secret access key directly
+from environmental variables instead of being set as user variables. See the
+configuration reference in the section above for more information on what
+environmental variables Packer will look for.
 
 Further information on locating AMI IDs and their relationship to instance
 types and regions can be found in the AWS EC2 Documentation [for
@@ -195,36 +207,90 @@ configuration of `launch_block_device_mappings` will expand the root volume
 `ami_block_device_mappings` AWS will attach additional volumes `/dev/sdb` and
 `/dev/sdc` when we boot a new instance of our AMI.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
-  "type": "amazon-ebs",
-  "access_key": "YOUR KEY HERE",
-  "secret_key": "YOUR SECRET KEY HERE",
-  "region": "us-east-1",
-  "source_ami": "ami-fce3c696",
-  "instance_type": "t2.micro",
-  "ssh_username": "ubuntu",
-  "ami_name": "packer-quick-start {{timestamp}}",
-  "launch_block_device_mappings": [
-    {
-      "device_name": "/dev/sda1",
-      "volume_size": 40,
-      "volume_type": "gp2",
-      "delete_on_termination": true
-    }
-  ],
-  "ami_block_device_mappings": [
-    {
-      "device_name": "/dev/sdb",
-      "virtual_name": "ephemeral0"
-    },
-    {
-      "device_name": "/dev/sdc",
-      "virtual_name": "ephemeral1"
+  "builders": [
+      {
+      "type": "amazon-ebs",
+      "region": "us-east-1",
+      "source_ami": "ami-fce3c696",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "packer-quick-start {{timestamp}}",
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_size": 40,
+          "volume_type": "gp2",
+          "delete_on_termination": true
+        }
+      ],
+      "ami_block_device_mappings": [
+        {
+          "device_name": "/dev/sdb",
+          "virtual_name": "ephemeral0"
+        },
+        {
+          "device_name": "/dev/sdc",
+          "virtual_name": "ephemeral1"
+        }
+      ]
     }
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebs" "basic-example" {
+  region =  "us-east-1"
+  source_ami =  "ami-fce3c696"
+  instance_type =  "t2.micro"
+  ssh_username =  "ubuntu"
+  ami_name =  "packer_AWS_example_{{timestamp}}"
+  launch_block_device_mappings {
+      device_name = "/dev/sda1"
+      volume_size = 40
+      volume_type = "gp2"
+      delete_on_termination = true
+    }
+  // Notice that instead of providing a list of mappings, you are just providing
+  // multiple mappings in a row. This diverges from the JSON template format.
+  ami_block_device_mappings {
+      device_name = "/dev/sdb"
+      virtual_name = "ephemeral0"
+    }
+  ami_block_device_mappings {
+      device_name = "/dev/sdc"
+      virtual_name = "ephemeral1"
+    }
+}
+
+build {
+  sources = [
+    "source.amazon-ebs.basic-example"
+  ]
+}
+```
+
+</Tab>
+</Tabs>
+
+The above build template is functional assuming you have set the environment
+variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
+
+-> **Note:** Packer uses pre-built AMIs as the source for building images.
+These source AMIs may include volumes that are not flagged to be destroyed on
+termination of the instance building the new image. Packer will attempt to
+clean up all residual volumes that are not designated by the user to remain
+after termination. If you need to preserve those source volumes, you can
+overwrite the termination setting by specifying `delete_on_termination=false`
+in the `launch_block_device_mappings` block for the device.
 
 ## Build template data
 
@@ -294,32 +360,57 @@ Here is an example using the optional AMI tags. This will add the tags
 provide your access keys, and may need to change the source AMI ID based on
 what images exist when this template is run:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
-  "type": "amazon-ebs",
-  "access_key": "YOUR KEY HERE",
-  "secret_key": "YOUR SECRET KEY HERE",
-  "region": "us-east-1",
-  "source_ami": "ami-fce3c696",
-  "instance_type": "t2.micro",
-  "ssh_username": "ubuntu",
-  "ami_name": "packer-quick-start {{timestamp}}",
-  "tags": {
-    "OS_Version": "Ubuntu",
-    "Release": "Latest",
-    "Base_AMI_Name": "{{ .SourceAMIName }}",
-    "Extra": "{{ .SourceAMITags.TagName }}"
-  }
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "us-east-1",
+      "source_ami": "ami-fce3c696",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "packer-tag-example {{timestamp}}",
+      "tags": {
+        "OS_Version": "Ubuntu",
+        "Release": "Latest",
+        "Base_AMI_Name": "{{ .SourceAMIName }}",
+        "Extra": "{{ .SourceAMITags.TagName }}"
+      }
+    }
+  ]
 }
 ```
 
--> **Note:** Packer uses pre-built AMIs as the source for building images.
-These source AMIs may include volumes that are not flagged to be destroyed on
-termination of the instance building the new image. Packer will attempt to
-clean up all residual volumes that are not designated by the user to remain
-after termination. If you need to preserve those source volumes, you can
-overwrite the termination setting by specifying `delete_on_termination=false`
-in the `launch_block_device_mappings` block for the device.
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebs" "basic-example" {
+  region =  "us-east-1"
+  source_ami =  "ami-fce3c696"
+  instance_type =  "t2.micro"
+  ssh_username =  "ubuntu"
+  ami_name =  "packer_tag_example {{timestamp}}"
+  tags = {
+      OS_Version = "Ubuntu"
+      Release = "Latest"
+      Base_AMI_Name = "{{ .SourceAMIName }}"
+      Extra = "{{ .SourceAMITags.TagName }}"
+  }
+}
+
+build {
+  sources = [
+    "source.amazon-ebs.basic-example"
+  ]
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Connecting to Windows instances using WinRM
 
@@ -387,6 +478,9 @@ You'll notice that this config does not define a user or password; instead,
 Packer will ask AWS to provide a random password that it generates
 automatically. The following config will work with the above template:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "builders": [
@@ -404,7 +498,7 @@ automatically. The following config will work with the above template:
         "owners": "amazon"
       },
       "ami_name": "default-packer",
-      "user_data_file": "winrm_bootstrap.txt",
+      "user_data_file": "./boot_config/winrm_bootstrap.txt",
       "communicator": "winrm",
       "force_deregister": true,
       "winrm_insecure": true,
@@ -415,10 +509,62 @@ automatically. The following config will work with the above template:
 }
 ```
 
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebs" "winrm-example" {
+  region =  "us-east-1"
+  // This example uses a source_ami_filter rather than a specific AMI.
+  // this allows us to use the same filter regardless of what region we're in,
+  // among other benefits.
+  source_ami_filter {
+    filter {
+      key = "virtualization-type"
+      value = "hvm"
+    }
+    filter {
+      key = "name"
+      value = "*Windows_Server-2012*English-64Bit-Base*"
+    }
+    filter {
+      key = "root-device-type"
+      value = "ebs"
+    }
+    most_recent = true
+    owners = ["amazon"]
+  }
+  instance_type =  "t2.micro"
+  ami_name =  "packer_winrm_example {{timestamp}}"
+  // This user data file sets up winrm and configures it so that the connection
+  // from Packer is allowed. Without this file being set, Packer will not
+  // connect to the instance.
+  user_data_file = "../boot_config/winrm_bootstrap.txt"
+  communicator = "winrm"
+  force_deregister = true
+  winrm_insecure = true
+  winrm_username = "Administrator"
+  winrm_use_ssl = true
+}
+
+build {
+  sources = [
+    "source.amazon-ebs.winrm-example"
+  ]
+}
+```
+
+</Tab>
+</Tabs>
+
+
 ## Windows 2016 Sysprep Commands - For Amazon Windows AMIs Only
 
 For Amazon Windows 2016 AMIs it is necessary to run Sysprep commands which can
 be easily added to the provisioner section.
+
+<Tabs>
+<Tab heading="JSON">
 
 ```json
 {
@@ -429,5 +575,21 @@ be easily added to the provisioner section.
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "powershell" {
+  inline = [
+    "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/InitializeInstance.ps1 -Schedule",
+    "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/SysprepInstance.ps1 -NoShutdown"
+  ]
+}
+```
+
+</Tab>
+</Tabs>
+
 
 @include 'builders/aws-ssh-differentiation-table.mdx'
