@@ -133,11 +133,13 @@ func (p *PostProcessor) generateURI() (*url.URL, error) {
 	u.User = url.UserPassword(p.config.Username, p.config.Password)
 
 	if p.config.ESXiHost != "" {
+		q := u.Query()
 		if ipv4Regex.MatchString(p.config.ESXiHost) {
-			u.RawQuery = "ip=" + url.QueryEscape(p.config.ESXiHost)
+			q.Add("ip", p.config.ESXiHost)
 		} else if hostnameRegex.MatchString(p.config.ESXiHost) {
-			u.RawQuery = "dns=" + url.QueryEscape(p.config.ESXiHost)
+			q.Add("dns", p.config.ESXiHost)
 		}
+		u.RawQuery = q.Encode()
 	}
 	return u, nil
 }
@@ -191,7 +193,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 func filterLog(s string, u *url.URL) string {
 	password, passwordSet := u.User.Password()
-	if passwordSet {
+	if passwordSet && password != "" {
 		return strings.Replace(s, password, "<password>", -1)
 	}
 
