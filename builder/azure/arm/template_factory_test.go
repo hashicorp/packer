@@ -108,7 +108,10 @@ func TestVirtualMachineDeployment03(t *testing.T) {
 	m["image_version"] = "ImageVersion"
 
 	var c Config
-	c.Prepare(m, getPackerConfiguration())
+	_, err := c.Prepare(m, getPackerConfiguration(), getPackerSSHPasswordCommunicatorConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
 	deployment, err := GetVirtualMachineDeployment(&c)
 	if err != nil {
 		t.Fatal(err)
@@ -168,7 +171,7 @@ func TestVirtualMachineDeployment05(t *testing.T) {
 	}
 
 	var c Config
-	_, err := c.Prepare(config, getPackerConfiguration())
+	_, err := c.Prepare(config, getPackerConfiguration(), getPackerSSHPasswordCommunicatorConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -235,7 +238,7 @@ func TestVirtualMachineDeployment07(t *testing.T) {
 	}
 
 	var c Config
-	_, err := c.Prepare(config, getPackerConfiguration())
+	_, err := c.Prepare(config, getPackerConfiguration(), getPackerSSHPasswordCommunicatorConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -312,7 +315,7 @@ func TestVirtualMachineDeployment09(t *testing.T) {
 	}
 
 	var c Config
-	_, err := c.Prepare(config, getPackerConfiguration())
+	_, err := c.Prepare(config, getPackerConfiguration(), getPackerSSHPasswordCommunicatorConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -387,7 +390,7 @@ func TestVirtualMachineDeployment11(t *testing.T) {
 	}
 
 	var c Config
-	_, err := c.Prepare(config, getPackerConfiguration())
+	_, err := c.Prepare(config, getPackerConfiguration(), getPackerSSHPasswordCommunicatorConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}

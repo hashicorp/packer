@@ -43,7 +43,7 @@ func NewTemplateBuilder(template string) (*TemplateBuilder, error) {
 	}, nil
 }
 
-func (s *TemplateBuilder) BuildLinux(sshAuthorizedKey string) error {
+func (s *TemplateBuilder) BuildLinux(sshAuthorizedKey string, disablePasswordAuthentication bool) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
 		return err
@@ -59,6 +59,11 @@ func (s *TemplateBuilder) BuildLinux(sshAuthorizedKey string) error {
 				},
 			},
 		},
+	}
+
+	if disablePasswordAuthentication {
+		profile.LinuxConfiguration.DisablePasswordAuthentication = to.BoolPtr(true)
+		profile.AdminPassword = nil
 	}
 
 	s.osType = compute.Linux

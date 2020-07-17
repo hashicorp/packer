@@ -127,10 +127,10 @@
           ]
         },
         "osProfile": {
-          "adminPassword": "[parameters('adminPassword')]",
           "adminUsername": "[parameters('adminUsername')]",
           "computerName": "[parameters('vmName')]",
           "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
             "ssh": {
               "publicKeys": [
                 {
