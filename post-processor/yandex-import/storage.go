@@ -2,11 +2,15 @@ package yandeximport
 
 import (
 	"fmt"
+	"net/url"
+	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/hashicorp/packer/packer"
 )
 
 const defaultS3Region = "ru-central1"
@@ -39,4 +43,54 @@ func newYCStorageClient(storageEndpoint, accessKey, secretKey string) (*s3.S3, e
 	}
 
 	return s3.New(newSession), nil
+}
+
+// Get path-style S3 URL and return presigned URL
+func presignUrl(s3conn *s3.S3, ui packer.Ui, fullUrl string) (string, error) {
+	bucket, key, err := s3URLToBucketKey(fullUrl)
+	if err != nil {
+		return "", err
+	}
+
+	req, _ := s3conn.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	})
+
+	// Compute service allow only `https://storage.yandexcloud.net/...` URLs for Image create process
+	req.Config.S3ForcePathStyle = aws.Bool(true)
+
+	urlStr, _, err := req.PresignRequest(30 * time.Minute)
+	if err != nil {
+		ui.Say(fmt.Sprintf("Failed to presign url: %s", err))
+		return "", err
+	}
+
+	return urlStr, nil
+}
+
+func s3URLToBucketKey(storageURL string) (bucket string, key string, err error) {
+	u, err := url.Parse(storageURL)
+	if err != nil {
+		return
+	}
+
+	if u.Scheme == "s3" {
+		// s3://bucket/key
+		bucket = u.Host
+		key = strings.TrimLeft(u.Path, "/")
+	} else if u.Scheme == "https" {
+		// https://***.storage.yandexcloud.net/...
+		if u.Host == defaultStorageEndpoint {
+			// No bucket name in the host part
+			path := strings.SplitN(u.Path, "/", 3)
+			bucket = path[1]
+			key = path[2]
+		} else {
+			// Bucket name in host
+			bucket = strings.TrimSuffix(u.Host, "."+defaultStorageEndpoint)
+			key = strings.TrimLeft(u.Path, "/")
+		}
+	}
+	return
 }

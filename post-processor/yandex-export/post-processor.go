@@ -24,6 +24,8 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
+const defaultStorageEndpoint = "storage.yandexcloud.net"
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -31,12 +33,13 @@ type Config struct {
 	// Please be aware that use of space char inside path not supported.
 	// Also this param support [build](/docs/templates/engine) template function.
 	// Check available template data for [Yandex](/docs/builders/yandex#build-template-data) builder.
+	// Paths to Yandex Object Storage where exported image will be uploaded.
 	Paths []string `mapstructure:"paths" required:"true"`
 	// The folder ID that will be used to launch a temporary instance.
 	// Alternatively you may set value by environment variable YC_FOLDER_ID.
 	FolderID string `mapstructure:"folder_id" required:"true"`
 	// Service Account ID with proper permission to modify an instance, create and attach disk and
-	// make upload to specific Yandex Object Storage paths
+	// make upload to specific Yandex Object Storage paths.
 	ServiceAccountID string `mapstructure:"service_account_id" required:"true"`
 	// The size of the disk in GB. This defaults to `100`, which is 100GB.
 	DiskSizeGb int `mapstructure:"disk_size" required:"false"`
@@ -234,7 +237,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	steps := []multistep.Step{
 		&yandex.StepCreateSSHKey{
 			Debug:        p.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("yc_pp_%s.pem", p.config.PackerBuildName),
+			DebugKeyPath: fmt.Sprintf("yc_export_pp_%s.pem", p.config.PackerBuildName),
 		},
 		&yandex.StepCreateInstance{
 			Debug:         p.config.PackerDebug,
@@ -248,7 +251,10 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	p.runner = common.NewRunner(steps, p.config.PackerConfig, ui)
 	p.runner.Run(ctx, state)
 
-	result := &Artifact{paths: p.config.Paths}
+	result := &Artifact{
+		paths: p.config.Paths,
+		urls:  formUrls(p.config.Paths),
+	}
 
 	return result, false, false, nil
 }
@@ -270,4 +276,13 @@ func ycSaneDefaults() yandex.Config {
 		Zone:                "ru-central1-a",
 		StateTimeout:        3 * time.Minute,
 	}
+}
+
+func formUrls(paths []string) []string {
+	result := []string{}
+	for _, path := range paths {
+		url := fmt.Sprintf("https://%s/%s", defaultStorageEndpoint, strings.TrimPrefix(path, "s3://"))
+		result = append(result, url)
+	}
+	return result
 }

@@ -1,14 +1,14 @@
-package yandexexport
+package yandeximport
 
 import (
 	"fmt"
 )
 
-const BuilderId = "packer.post-processor.yandex-export"
+const BuilderId = "packer.post-processor.yandex-import"
 
 type Artifact struct {
-	paths []string
-	urls  []string
+	imageID   string
+	sourceURL string
 }
 
 func (*Artifact) BuilderId() string {
@@ -16,17 +16,15 @@ func (*Artifact) BuilderId() string {
 }
 
 func (a *Artifact) Id() string {
-	return a.urls[0]
+	return a.sourceURL
 }
 
 func (a *Artifact) Files() []string {
-	pathsCopy := make([]string, len(a.paths))
-	copy(pathsCopy, a.paths)
-	return pathsCopy
+	return nil
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("Exported artifacts in: %s", a.paths)
+	return fmt.Sprintf("Create image %v from URL %v", a.imageID, a.sourceURL)
 }
 
 func (*Artifact) State(name string) interface{} {

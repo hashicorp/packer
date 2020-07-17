@@ -8,14 +8,13 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
-
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1/awscompatibility"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1/awscompatibility"
+	"github.com/yandex-cloud/go-sdk/iamkey"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/file"
@@ -24,6 +23,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/post-processor/artifice"
 	"github.com/hashicorp/packer/post-processor/compress"
+	yandexexport "github.com/hashicorp/packer/post-processor/yandex-export"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -42,12 +42,15 @@ type Config struct {
 	// is an alternative method to authenticate to Yandex.Cloud.
 	ServiceAccountKeyFile string `mapstructure:"service_account_key_file" required:"false"`
 
-	// The name of the bucket where the qcow2 file will be copied to for import.
+	// The name of the bucket where the qcow2 file will be uploaded to for import.
 	// This bucket must exist when the post-processor is run.
-	Bucket string `mapstructure:"bucket" required:"true"`
-	// The name of the object key in
-	//  `bucket` where the qcow2 file will be copied to import. This is a [template engine](/docs/templates/engine).
-	//  Therefore, you may use user variables and template functions in this field.
+	//
+	// If import occurred after Yandex-Export post-processor, artifact already
+	// in storage service and first paths (URL) is used to, so no need to set this param.
+	Bucket string `mapstructure:"bucket" required:"false"`
+	// The name of the object key in `bucket` where the qcow2 file will be copied to import.
+	// This is a [template engine](/docs/templates/engine).
+	// Therefore, you may use user variables and template functions in this field.
 	ObjectName string `mapstructure:"object_name" required:"false"`
 	// Whether skip removing the qcow2 file uploaded to Storage
 	// after the import process has completed. Possible values are: `true` to
@@ -59,7 +62,7 @@ type Config struct {
 	ImageName string `mapstructure:"image_name" required:"false"`
 	// The description of the image.
 	ImageDescription string `mapstructure:"image_description" required:"false"`
-	//  The family name of the imported image.
+	// The family name of the imported image.
 	ImageFamily string `mapstructure:"image_family" required:"false"`
 	// Key/value pair labels to apply to the imported image.
 	ImageLabels map[string]string `mapstructure:"image_labels" required:"false"`
@@ -89,6 +92,30 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	errs := new(packer.MultiError)
 
+	// provision config by OS environment variables
+	if p.config.Token == "" {
+		p.config.Token = os.Getenv("YC_TOKEN")
+	}
+
+	if p.config.ServiceAccountKeyFile == "" {
+		p.config.ServiceAccountKeyFile = os.Getenv("YC_SERVICE_ACCOUNT_KEY_FILE")
+	}
+
+	if p.config.Token != "" {
+		packer.LogSecretFilter.Set(p.config.Token)
+	}
+
+	if p.config.ServiceAccountKeyFile != "" {
+		if _, err := iamkey.ReadFromJSONFile(p.config.ServiceAccountKeyFile); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("fail to read service account key file: %s", err))
+		}
+	}
+
+	if p.config.FolderID == "" {
+		p.config.FolderID = os.Getenv("YC_FOLDER_ID")
+	}
+
 	// Set defaults
 	if p.config.ObjectName == "" {
 		p.config.ObjectName = "packer-import-{{timestamp}}.qcow2"
@@ -103,7 +130,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// TODO: make common code to check and prepare Yandex.Cloud auth configuration data
 
 	templates := map[string]*string{
-		"bucket":      &p.config.Bucket,
 		"object_name": &p.config.ObjectName,
 		"folder_id":   &p.config.FolderID,
 	}
@@ -145,47 +171,71 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("error rendering object_name template: %s", err)
 	}
 
+	var url string
+	var fileSource bool
+
+	// Create temporary storage Access Key
 	respWithKey, err := client.SDK().IAM().AWSCompatibility().AccessKey().Create(ctx, &awscompatibility.CreateAccessKeyRequest{
 		ServiceAccountId: p.config.ServiceAccountID,
-		Description:      "this key is for upload image to storage",
+		Description:      "this temporary key is for upload image to storage; created by Packer",
 	})
 	if err != nil {
 		return nil, false, false, err
 	}
 
+	storageClient, err := newYCStorageClient("", respWithKey.GetAccessKey().GetKeyId(), respWithKey.GetSecret())
+	if err != nil {
+		return nil, false, false, fmt.Errorf("error create object storage client: %s", err)
+	}
+
 	switch artifact.BuilderId() {
 	case compress.BuilderId, artifice.BuilderId, file.BuilderId:
-		break
+		// Artifact as a file, need to be uploaded to storage before create Compute Image
+		fileSource = true
+
+		// As `bucket` option validate input here
+		if p.config.Bucket == "" {
+			return nil, false, false, fmt.Errorf("To upload artfact you need to specify `bucket` value")
+		}
+
+		url, err = uploadToBucket(storageClient, ui, artifact, p.config.Bucket, p.config.ObjectName)
+		if err != nil {
+			return nil, false, false, err
+		}
+
+	case yandexexport.BuilderId:
+		// Artifact already in storage, just get URL
+		url = artifact.Id()
+
+	case BuilderId:
+		// Artifact from prev yandex-import PP, reuse URL
+		url = artifact.Id()
+
 	default:
 		err := fmt.Errorf(
-			"Unknown artifact type: %s\nCan only import from Compress, Artifice and File post-processor artifacts.",
+			"Unknown artifact type: %s\nCan only import from Yandex-Export, Yandex-Import, Compress, Artifice and File post-processor artifacts.",
 			artifact.BuilderId())
 		return nil, false, false, err
 	}
 
-	storageClient, err := newYCStorageClient("", respWithKey.GetAccessKey().GetKeyId(), respWithKey.GetSecret())
-	if err != nil {
-		return nil, false, false, fmt.Errorf("error create object_storage client: %s", err)
-	}
-
-	rawImageUrl, err := uploadToBucket(storageClient, ui, artifact, p.config.Bucket, p.config.ObjectName)
+	presignedUrl, err := presignUrl(storageClient, ui, url)
 	if err != nil {
 		return nil, false, false, err
 	}
 
-	ycImageArtifact, err := createYCImage(ctx, client, ui, p.config.FolderID, rawImageUrl, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels)
+	ycImage, err := createYCImage(ctx, client, ui, p.config.FolderID, presignedUrl, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels)
 	if err != nil {
 		return nil, false, false, err
 	}
 
-	if !p.config.SkipClean {
-		err = deleteFromBucket(storageClient, ui, p.config.Bucket, p.config.ObjectName)
+	if fileSource && !p.config.SkipClean {
+		err = deleteFromBucket(storageClient, ui, url)
 		if err != nil {
 			return nil, false, false, err
 		}
 	}
 
-	// cleanup static access keys
+	// Delete temporary storage Access Key
 	_, err = client.SDK().IAM().AWSCompatibility().AccessKey().Delete(ctx, &awscompatibility.DeleteAccessKeyRequest{
 		AccessKeyId: respWithKey.GetAccessKey().GetId(),
 	})
@@ -193,7 +243,10 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("error delete static access key: %s", err)
 	}
 
-	return ycImageArtifact, false, false, nil
+	return &Artifact{
+		imageID:   ycImage.GetId(),
+		sourceURL: url,
+	}, false, false, nil
 }
 
 func uploadToBucket(s3conn *s3.S3, ui packer.Ui, artifact packer.Artifact, bucket string, objectName string) (string, error) {
@@ -238,16 +291,10 @@ func uploadToBucket(s3conn *s3.S3, ui packer.Ui, artifact packer.Artifact, bucke
 	// Compute service allow only `https://storage.yandexcloud.net/...` URLs for Image create process
 	req.Config.S3ForcePathStyle = aws.Bool(true)
 
-	urlStr, _, err := req.PresignRequest(15 * time.Minute)
-	if err != nil {
-		ui.Say(fmt.Sprintf("Failed to presign url: %s", err))
-		return "", err
-	}
-
-	return urlStr, nil
+	return req.HTTPRequest.URL.String(), nil
 }
 
-func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, folderID string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string) (packer.Artifact, error) {
+func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, folderID string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string) (*compute.Image, error) {
 	op, err := driver.SDK().WrapOperation(driver.SDK().Compute().Image().Create(ctx, &compute.CreateImageRequest{
 		FolderId:    folderID,
 		Name:        imageName,
@@ -290,15 +337,19 @@ func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, fold
 		return nil, fmt.Errorf("error while image get request: %s", err)
 	}
 
-	return &yandex.Artifact{
-		Image: image,
-	}, nil
+	return image, nil
+
 }
 
-func deleteFromBucket(s3conn *s3.S3, ui packer.Ui, bucket string, objectName string) error {
+func deleteFromBucket(s3conn *s3.S3, ui packer.Ui, url string) error {
+	bucket, objectName, err := s3URLToBucketKey(url)
+	if err != nil {
+		return err
+	}
+
 	ui.Say(fmt.Sprintf("Deleting import source from Object Storage %s/%s...", bucket, objectName))
 
-	_, err := s3conn.DeleteObject(&s3.DeleteObjectInput{
+	_, err = s3conn.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(objectName),
 	})
