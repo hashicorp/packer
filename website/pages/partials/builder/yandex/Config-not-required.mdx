@@ -22,6 +22,9 @@
 - `image_labels` (map[string]string) - Key/value pair labels to
   apply to the created image.
 
+- `image_min_disk_size_gb` (int) - Minimum size of the disk that will be created from built image, specified in gigabytes.
+  Should be more or equal to `disk_size_gb`.
+
 - `image_name` (string) - The unique name of the resulting image. Defaults to
   `packer-{{timestamp}}`.
 

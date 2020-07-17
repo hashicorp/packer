@@ -166,6 +166,62 @@ func TestConfigPrepareStartupScriptFile(t *testing.T) {
 	}
 }
 
+func TestConfigImageMinDiskSize(t *testing.T) {
+	cases := []struct {
+		Name   string
+		Config map[string]interface{}
+		Err    bool
+	}{
+		{
+			Name: "image_min_disk_size lower than disk_size (default value)",
+			Config: map[string]interface{}{
+				"image_min_disk_size_gb": 2,
+			},
+			Err: true,
+		},
+		{
+			Name: "image_min_disk_size greater than disk_size (default value)",
+			Config: map[string]interface{}{
+				"image_min_disk_size_gb": 20,
+			},
+			Err: false,
+		},
+		{
+			Name: "image_min_disk_size lower than disk_size (custom value)",
+			Config: map[string]interface{}{
+				"disk_size_gb":           50,
+				"image_min_disk_size_gb": 20,
+			},
+			Err: true,
+		},
+		{
+			Name: "image_min_disk_size greate than disk_size (custom value)",
+			Config: map[string]interface{}{
+				"disk_size_gb":           50,
+				"image_min_disk_size_gb": 55,
+			},
+			Err: false,
+		},
+	}
+
+	for _, tc := range cases {
+		raw := testConfig(t)
+
+		for k, v := range tc.Config {
+			raw[k] = v
+		}
+
+		var c Config
+		warns, errs := c.Prepare(raw)
+
+		if tc.Err {
+			testConfigErr(t, warns, errs, tc.Name)
+		} else {
+			testConfigOk(t, warns, errs)
+		}
+	}
+}
+
 func TestConfigDefaults(t *testing.T) {
 	cases := []struct {
 		Read  func(c *Config) interface{}

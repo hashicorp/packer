@@ -47,6 +47,7 @@
     default for the http server IP [GH-9441]
 * builder/yandex: Support authentication by Service Account on instance
     [GH-9383]
+* builder/yandex: Allow set `min_disk_size` for an image.
 * communicator/ssh: Add support for OpenSSH certificate signing [GH-9521]
 * communicator/ssh: Allow users to provide a list of ciphers that they want
     Packer to support. [GH-9453]
