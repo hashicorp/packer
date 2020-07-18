@@ -426,18 +426,28 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 	if c.IAPConfig.IAPTunnelLaunchWait == 0 {
-		c.IAPConfig.IAPTunnelLaunchWait = 30
+		if c.Comm.Type == "winrm" {
+			// when starting up, WinRM can cause the tunnel to take 30 seconds
+			// before timing out
+			c.IAPConfig.IAPTunnelLaunchWait = 40
+		} else {
+			c.IAPConfig.IAPTunnelLaunchWait = 30
+		}
 	}
 
 	// Configure IAP: Update SSH config to use localhost proxy instead
 	if c.IAPConfig.IAP {
-		if c.Comm.Type == "ssh" {
-			c.Comm.SSHHost = "localhost"
-		} else {
-			err := fmt.Errorf("Error: IAP tunnel currently only implemnted for" +
-				" SSH communicator")
+		if !SupportsIAPTunnel(&c.Comm) {
+			err := fmt.Errorf("Error: IAP tunnel is not implemented for %s communicator", c.Comm.Type)
 			errs = packer.MultiErrorAppend(errs, err)
 		}
+		// These configuration values are copied early to the generic host parameter when configuring
+		// StepConnect. As such they must be set now. Ideally we would handle this as part of
+		// ApplyIAPTunnel and set them during StepStartTunnel but that means defering when the
+		// CommHost function reads the value from the configuration, perhaps pass in b.config.Comm
+		// instead of b.config.Comm.Host()?
+		c.Comm.SSHHost = "localhost"
+		c.Comm.WinRMHost = "localhost"
 	}
 
 	// Process required parameters.
@@ -539,5 +549,27 @@ func (k *CustomerEncryptionKey) ComputeType() *compute.CustomerEncryptionKey {
 	return &compute.CustomerEncryptionKey{
 		KmsKeyName: k.KmsKeyName,
 		RawKey:     k.RawKey,
+	}
+}
+
+func SupportsIAPTunnel(c *communicator.Config) bool {
+	switch c.Type {
+	case "ssh", "winrm":
+		return true
+	default:
+		return false
+	}
+}
+
+func ApplyIAPTunnel(c *communicator.Config, port int) error {
+	switch c.Type {
+	case "ssh":
+		c.SSHPort = port
+		return nil
+	case "winrm":
+		c.WinRMPort = port
+		return nil
+	default:
+		return fmt.Errorf("IAP tunnel is not implemented for %s communicator", c.Type)
 	}
 }

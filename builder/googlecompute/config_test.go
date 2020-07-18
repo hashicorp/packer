@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/communicator"
 )
 
 func TestConfigPrepare(t *testing.T) {
@@ -414,9 +416,6 @@ func TestConfigPrepareIAP(t *testing.T) {
 			t.Fatalf("IAP hashbang didn't default correctly to /bin/sh.")
 		}
 	}
-	if c.Comm.SSHHost != "localhost" {
-		t.Fatalf("Didn't correctly override the ssh host.")
-	}
 }
 
 func TestConfigPrepareIAP_failures(t *testing.T) {
@@ -425,7 +424,7 @@ func TestConfigPrepareIAP_failures(t *testing.T) {
 		"source_image":   "foo",
 		"winrm_username": "packer",
 		"zone":           "us-central1-a",
-		"communicator":   "winrm",
+		"communicator":   "none",
 		"iap_hashbang":   "/bin/bash",
 		"iap_ext":        ".ps1",
 		"use_iap":        true,
@@ -434,7 +433,7 @@ func TestConfigPrepareIAP_failures(t *testing.T) {
 	var c Config
 	_, errs := c.Prepare(config)
 	if errs == nil {
-		t.Fatalf("Should have errored because we're using winrm.")
+		t.Fatalf("Should have errored because we're using none.")
 	}
 	if c.IAPHashBang != "/bin/bash" {
 		t.Fatalf("IAP hashbang defaulted even though set.")
@@ -497,6 +496,59 @@ func TestRegion(t *testing.T) {
 	c.Prepare(raw)
 	if c.Region != "us-east1" {
 		t.Fatalf("Region should be 'us-east1' given Zone of 'us-east1-a', but is %s", c.Region)
+	}
+}
+
+func TestApplyIAPTunnel_SSH(t *testing.T) {
+	c := &communicator.Config{
+		Type: "ssh",
+		SSH: communicator.SSH{
+			SSHHost: "example",
+			SSHPort: 1234,
+		},
+	}
+
+	err := ApplyIAPTunnel(c, 8447)
+	if err != nil {
+		t.Fatalf("Shouldn't have errors")
+	}
+	if c.SSHHost != "localhost" {
+		t.Fatalf("Should have set SSHHost")
+	}
+	if c.SSHPort != 8447 {
+		t.Fatalf("Should have set SSHPort")
+	}
+}
+
+func TestApplyIAPTunnel_WinRM(t *testing.T) {
+	c := &communicator.Config{
+		Type: "winrm",
+		WinRM: communicator.WinRM{
+			WinRMHost: "example",
+			WinRMPort: 1234,
+		},
+	}
+
+	err := ApplyIAPTunnel(c, 8447)
+	if err != nil {
+		t.Fatalf("Shouldn't have errors")
+	}
+	if c.WinRMHost != "localhost" {
+		t.Fatalf("Should have set WinRMHost")
+	}
+	if c.WinRMPort != 8447 {
+		t.Fatalf("Should have set WinRMPort")
+	}
+}
+
+func TestApplyIAPTunnel_none(t *testing.T) {
+	c := &communicator.Config{
+		Type: "none",
+	}
+
+	err := ApplyIAPTunnel(c, 8447)
+	if err == nil {
+		t.Fatalf("Should have errors, none is not supported")
 	}
 }
 
