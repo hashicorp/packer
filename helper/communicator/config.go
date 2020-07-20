@@ -43,41 +43,16 @@ type Config struct {
 	Type string `mapstructure:"communicator"`
 
 	// We recommend that you enable SSH or WinRM as the very last step in your
-	// guest's bootstrap script, but sometimes you may have a race condition where
-	// you need Packer to wait before attempting to connect to your guest.
+	// guest's bootstrap script, but sometimes you may have a race condition
+	// where you need Packer to wait before attempting to connect to your
+	// guest.
 	//
 	// If you end up in this situation, you can use the template option
-	// `pause_before_connecting`. By default, there is no pause. For example:
-	//
-	// <Tabs>
-	// <Tab heading="JSON">
-	//
-	// ```json
-	// "builders" [{
-	//   ...
-	//   "communicator": "ssh",
-	//   "ssh_username": "myuser",
-	//   "pause_before_connecting": "10m"
-	// }]
-	// ```
-	//
-	// </Tab>
-	// <Tab heading="HCL2">
-	//
-	// ```hcl
-	// source "amazon-ebs" "example" {
-	//   communicator = "ssh"
-	//   ssh_username = "myuser"
-	//   pause_before_connecting = "10m"
-	// }
-	// ```
-	//
-	// </Tab>
-	// </Tabs>
-	//
-	// In this example, Packer will check whether it can connect, as normal. But once
-	// a connection attempt is successful, it will disconnect and then wait 10 minutes
-	// before connecting to the guest and beginning provisioning.
+	// `pause_before_connecting`. By default, there is no pause. For example if
+	// you set `pause_before_connecting` to `10m` Packer will check whether it
+	// can connect, as normal. But once a connection attempt is successful, it
+	// will disconnect and then wait 10 minutes before connecting to the guest
+	// and beginning provisioning.
 	PauseBeforeConnect time.Duration `mapstructure:"pause_before_connecting"`
 
 	SSH   `mapstructure:",squash"`
