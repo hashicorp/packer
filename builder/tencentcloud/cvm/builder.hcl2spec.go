@@ -31,7 +31,8 @@ type FlatConfig struct {
 	ImageCopyRegions          []string                    `mapstructure:"image_copy_regions" required:"false" cty:"image_copy_regions" hcl:"image_copy_regions"`
 	ImageShareAccounts        []string                    `mapstructure:"image_share_accounts" required:"false" cty:"image_share_accounts" hcl:"image_share_accounts"`
 	AssociatePublicIpAddress  *bool                       `mapstructure:"associate_public_ip_address" required:"false" cty:"associate_public_ip_address" hcl:"associate_public_ip_address"`
-	SourceImageId             *string                     `mapstructure:"source_image_id" required:"true" cty:"source_image_id" hcl:"source_image_id"`
+	SourceImageId             *string                     `mapstructure:"source_image_id" required:"false" cty:"source_image_id" hcl:"source_image_id"`
+	SourceImageName           *string                     `mapstructure:"source_image_name" required:"false" cty:"source_image_name" hcl:"source_image_name"`
 	InstanceType              *string                     `mapstructure:"instance_type" required:"true" cty:"instance_type" hcl:"instance_type"`
 	InstanceName              *string                     `mapstructure:"instance_name" required:"false" cty:"instance_name" hcl:"instance_name"`
 	DiskType                  *string                     `mapstructure:"disk_type" required:"false" cty:"disk_type" hcl:"disk_type"`
@@ -136,6 +137,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"image_share_accounts":         &hcldec.AttrSpec{Name: "image_share_accounts", Type: cty.List(cty.String), Required: false},
 		"associate_public_ip_address":  &hcldec.AttrSpec{Name: "associate_public_ip_address", Type: cty.Bool, Required: false},
 		"source_image_id":              &hcldec.AttrSpec{Name: "source_image_id", Type: cty.String, Required: false},
+		"source_image_name":            &hcldec.AttrSpec{Name: "source_image_name", Type: cty.String, Required: false},
 		"instance_type":                &hcldec.AttrSpec{Name: "instance_type", Type: cty.String, Required: false},
 		"instance_name":                &hcldec.AttrSpec{Name: "instance_name", Type: cty.String, Required: false},
 		"disk_type":                    &hcldec.AttrSpec{Name: "disk_type", Type: cty.String, Required: false},
