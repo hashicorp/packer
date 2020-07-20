@@ -20,6 +20,52 @@ other Docker post-processors such as
 [docker-push](/docs/post-processors/docker-push) to push the image to a
 registry.
 
+## Basic Example
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [{
+    "type": "docker",
+    "image": "ubuntu:18.04",
+    "export_path": "party_parrot.tar"
+  }],
+  "post-processors": [
+    {
+    "type": "docker-import",
+    "repository": "local/ubuntu",
+    "tag": "latest"
+  }
+]
+}
+
+```
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "docker" "example" {
+    image = "ubuntu:18.04"
+    export_path = "party_parrot.tar"
+}
+
+build {
+  sources = [
+    "source.docker.example"
+  ]
+
+  post-processor "docker-import" {
+    repository = "local/ubuntu"
+    tag = "latest"
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
 ## Configuration
 
 The configuration for this post-processor only requires a `repository`, a `tag`
@@ -45,6 +91,9 @@ is optional.
 
 An example is shown below, showing only the post-processor configuration:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "docker-import",
@@ -52,6 +101,19 @@ An example is shown below, showing only the post-processor configuration:
   "tag": "0.7"
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "docker-import" {
+  repository = "hashicorp/packer"
+  tag = "0.7"
+}
+```
+
+</Tab>
+</Tabs>
 
 This example would take the image created by the Docker builder and import it
 into the local Docker process with a name of `hashicorp/packer:0.7`.
@@ -71,6 +133,9 @@ Docker](https://docs.docker.com/engine/reference/commandline/import/).
 Example uses of all of the options, assuming one is building an NGINX image
 from ubuntu as an simple example:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "docker-import",
@@ -89,6 +154,30 @@ from ubuntu as an simple example:
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "docker-import" {
+  repository = "local/centos6"
+  tag = "latest"
+  changes = [
+    "USER www-data",
+    "WORKDIR /var/www",
+    "ENV HOSTNAME www.example.com",
+    "VOLUME /test1 /test2",
+    "EXPOSE 80 443",
+    "LABEL version=1.0",
+    "ONBUILD RUN date",
+    "CMD [\"nginx\", \"-g\", \"daemon off;\"]",
+    "ENTRYPOINT /var/www/start.sh",
+  ]
+}
+```
+
+</Tab>
+</Tabs>
 
 Allowed metadata fields that can be changed are:
 
