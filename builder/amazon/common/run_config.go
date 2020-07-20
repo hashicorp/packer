@@ -223,10 +223,7 @@ type RunConfig struct {
 	// used when from_scratch is set to true.
 	SourceAmi string `mapstructure:"source_ami" required:"true"`
 	// Filters used to populate the `source_ami`
-	// field. Example:
-	//
-	// <Tabs>
-	// <Tab heading="JSON">
+	// field. JSON Example:
 	//
 	// ```json
 	// "builders" [
@@ -244,9 +241,7 @@ type RunConfig struct {
 	//   }
 	// ]
 	// ```
-	//
-	// </Tab>
-	// <Tab heading="HCL2">
+	// HCL2 example:
 	//
 	// ```hcl
 	// source "amazon-ebs" "basic-example" {
@@ -261,9 +256,6 @@ type RunConfig struct {
 	//   }
 	// }
 	// ```
-	//
-	// </Tab>
-	// </Tabs>
 	//
 	//   This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
 	//   This will fail unless *exactly* one AMI is returned. In the above example,
@@ -331,10 +323,7 @@ type RunConfig struct {
 	// will allow you to create those programatically.
 	SpotTag hcl2template.KeyValues `mapstructure:"spot_tag" required:"false"`
 	// Filters used to populate the `subnet_id` field.
-	// Example:
-	//
-	// <Tabs>
-	// <Tab heading="JSON">
+	// JSON Example:
 	//
 	// ```json
 	// "builders" [
@@ -350,9 +339,7 @@ type RunConfig struct {
 	//   }
 	// ]
 	// ```
-	//
-	// </Tab>
-	// <Tab heading="HCL2">
+	// HCL2 example:
 	//
 	// ```hcl
 	// source "amazon-ebs" "basic-example" {
@@ -365,9 +352,6 @@ type RunConfig struct {
 	//   }
 	// }
 	// ```
-	//
-	// </Tab>
-	// </Tabs>
 	//
 	//   This selects the Subnet with tag `Class` with the value `build`, which has
 	//   the most free IP addresses. NOTE: This will fail unless *exactly* one
@@ -412,10 +396,7 @@ type RunConfig struct {
 	// data when launching the instance.
 	UserDataFile string `mapstructure:"user_data_file" required:"false"`
 	// Filters used to populate the `vpc_id` field.
-	// Example:
-	//
-	// <Tabs>
-	// <Tab heading="JSON">
+	// JSON Example:
 	//
 	// ```json
 	// "builders" [
@@ -431,9 +412,7 @@ type RunConfig struct {
 	//   }
 	// ]
 	// ```
-	//
-	// </Tab>
-	// <Tab heading="HCL2">
+	// HCL2 example:
 	//
 	// ```hcl
 	// source "amazon-ebs" "basic-example" {
@@ -446,9 +425,6 @@ type RunConfig struct {
 	//   }
 	// }
 	// ```
-	//
-	// </Tab>
-	// </Tabs>
 	//
 	// This selects the VPC with tag `Class` with the value `build`, which is not
 	// the default VPC, and have a IPv4 CIDR block of `/24`. NOTE: This will fail

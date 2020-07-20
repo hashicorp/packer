@@ -144,10 +144,7 @@
   security_group_id.
 
 - `source_ami_filter` (AmiFilterOptions) - Filters used to populate the `source_ami`
-  field. Example:
-  
-  <Tabs>
-  <Tab heading="JSON">
+  field. JSON Example:
   
   ```json
   "builders" [
@@ -165,9 +162,7 @@
     }
   ]
   ```
-  
-  </Tab>
-  <Tab heading="HCL2">
+  HCL2 example:
   
   ```hcl
   source "amazon-ebs" "basic-example" {
@@ -182,9 +177,6 @@
     }
   }
   ```
-  
-  </Tab>
-  </Tabs>
   
     This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
     This will fail unless *exactly* one AMI is returned. In the above example,
@@ -246,10 +238,7 @@
   will allow you to create those programatically.
 
 - `subnet_filter` (SubnetFilterOptions) - Filters used to populate the `subnet_id` field.
-  Example:
-  
-  <Tabs>
-  <Tab heading="JSON">
+  JSON Example:
   
   ```json
   "builders" [
@@ -265,9 +254,7 @@
     }
   ]
   ```
-  
-  </Tab>
-  <Tab heading="HCL2">
+  HCL2 example:
   
   ```hcl
   source "amazon-ebs" "basic-example" {
@@ -280,9 +267,6 @@
     }
   }
   ```
-  
-  </Tab>
-  </Tabs>
   
     This selects the Subnet with tag `Class` with the value `build`, which has
     the most free IP addresses. NOTE: This will fail unless *exactly* one
@@ -327,10 +311,7 @@
   data when launching the instance.
 
 - `vpc_filter` (VpcFilterOptions) - Filters used to populate the `vpc_id` field.
-  Example:
-  
-  <Tabs>
-  <Tab heading="JSON">
+  JSON Example:
   
   ```json
   "builders" [
@@ -346,9 +327,7 @@
     }
   ]
   ```
-  
-  </Tab>
-  <Tab heading="HCL2">
+  HCL2 example:
   
   ```hcl
   source "amazon-ebs" "basic-example" {
@@ -361,9 +340,6 @@
     }
   }
   ```
-  
-  </Tab>
-  </Tabs>
   
   This selects the VPC with tag `Class` with the value `build`, which is not
   the default VPC, and have a IPv4 CIDR block of `/24`. NOTE: This will fail
