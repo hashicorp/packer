@@ -92,10 +92,7 @@
   shutdown in case Packer exits ungracefully. Possible values are stop and
   terminate. Defaults to stop.
 
-- `security_group_filter` (SecurityGroupFilterOptions) - Filters used to populate the `security_group_ids` field. Example:
-  
-  <Tabs>
-  <Tab heading="JSON">
+- `security_group_filter` (SecurityGroupFilterOptions) - Filters used to populate the `security_group_ids` field. JSON Example:
   
   ```json
   {
@@ -107,8 +104,7 @@
   }
   ```
   
-  </Tab>
-  <Tab heading="HCL2">
+  HCL2 Example:
   
   ```hcl
     security_group_filter {
@@ -117,9 +113,6 @@
       }
     }
   ```
-  
-  </Tab>
-  </Tabs>
   
   This selects the SG's with tag `Class` with the value `packer`.
   

@@ -166,10 +166,7 @@ type RunConfig struct {
 	// The EC2 instance type to use while building the
 	// AMI, such as t2.small.
 	InstanceType string `mapstructure:"instance_type" required:"true"`
-	// Filters used to populate the `security_group_ids` field. Example:
-	//
-	// <Tabs>
-	// <Tab heading="JSON">
+	// Filters used to populate the `security_group_ids` field. JSON Example:
 	//
 	// ```json
 	// {
@@ -181,8 +178,7 @@ type RunConfig struct {
 	// }
 	// ```
 	//
-	// </Tab>
-	// <Tab heading="HCL2">
+	// HCL2 Example:
 	//
 	// ```hcl
 	//   security_group_filter {
@@ -191,9 +187,6 @@ type RunConfig struct {
 	//     }
 	//   }
 	// ```
-	//
-	// </Tab>
-	// </Tabs>
 	//
 	// This selects the SG's with tag `Class` with the value `packer`.
 	//
