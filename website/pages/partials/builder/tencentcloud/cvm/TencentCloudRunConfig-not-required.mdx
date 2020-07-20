@@ -3,6 +3,12 @@
 - `associate_public_ip_address` (bool) - Whether allocate public ip to your cvm.
   Default value is false.
 
+- `source_image_id` (string) - The base image id of Image you want to create
+  your customized image from.
+
+- `source_image_name` (string) - The base image name of Image you want to create your
+  customized image from.Conflict with SourceImageId.
+
 - `instance_name` (string) - Instance name.
 
 - `disk_type` (string) - Root disk type your cvm will be launched by. you could
