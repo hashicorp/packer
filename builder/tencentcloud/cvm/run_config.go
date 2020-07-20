@@ -27,7 +27,10 @@ type TencentCloudRunConfig struct {
 	AssociatePublicIpAddress bool `mapstructure:"associate_public_ip_address" required:"false"`
 	// The base image id of Image you want to create
 	// your customized image from.
-	SourceImageId string `mapstructure:"source_image_id" required:"true"`
+	SourceImageId string `mapstructure:"source_image_id" required:"false"`
+	// The base image name of Image you want to create your
+	// customized image from.Conflict with SourceImageId.
+	SourceImageName string `mapstructure:"source_image_name" required:"false"`
 	// The instance type your cvm will be launched by.
 	// You should reference Instace Type
 	//  for parameter taking.
@@ -108,11 +111,11 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	errs := cf.Comm.Prepare(ctx)
-	if cf.SourceImageId == "" {
-		errs = append(errs, errors.New("source_image_id must be specified"))
+	if cf.SourceImageId == "" && cf.SourceImageName == "" {
+		errs = append(errs, errors.New("source_image_id or source_image_name must be specified"))
 	}
 
-	if !CheckResourceIdFormat("img", cf.SourceImageId) {
+	if cf.SourceImageId != "" && !CheckResourceIdFormat("img", cf.SourceImageId) {
 		errs = append(errs, errors.New("source_image_id wrong format"))
 	}
 
