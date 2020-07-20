@@ -24,7 +24,7 @@ func (s *stepCheckSourceImage) Run(ctx context.Context, state multistep.StateBag
 	Say(state, config.SourceImageId, "Trying to check source image")
 
 	req := cvm.NewDescribeImagesRequest()
-	// req.InstanceType = &config.InstanceType
+	req.InstanceType = &config.InstanceType
 	if config.SourceImageId != "" {
 		req.ImageIds = []*string{&config.SourceImageId}
 	} else {
