@@ -606,6 +606,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			}()
 		}
 	}
+	defer cleanUpAnsibleDir(ctx, ui, p.config.InventoryDirectory, comm)
 
 	if err := p.executeAnsibleFunc(ui, comm, privKeyFile); err != nil {
 		return fmt.Errorf("Error executing Ansible: %s", err)
@@ -803,6 +804,63 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	}
 
 	return nil
+}
+
+const ansibleCleanUpScript = `
+import shutil
+import sys
+from os.path import expanduser
+
+home = expanduser("~")
+
+dir_path = "{}/.ansible".format(home)
+
+try:
+		shutil.rmtree(dir_path)
+		sys.exit(0)
+except OSError as e:
+		print("Error: %s : %s" % (dir_path, e.strerror))
+		sys.exit(1)
+`
+
+func cleanUpAnsibleDir(ctx context.Context, ui packer.Ui, tempDir string, comm packer.Communicator) {
+	file, err := ioutil.TempFile(tempDir, "janitor.*.py")
+	if err != nil {
+		ui.Message(fmt.Sprintf("ansible cleanup: failed to create temporary clean up file: %v", err))
+		return
+	}
+	defer os.Remove(file.Name())
+	_, err = file.WriteString(ansibleCleanUpScript)
+	if err != nil {
+		ui.Message(fmt.Sprintf("ansible cleanup: failed to write to temporary clean up file: %v", err))
+		return
+	}
+	remoteFilePath := fmt.Sprintf("/tmp/%s", file.Name())
+	err = comm.Upload(remoteFilePath, file, nil)
+	if err != nil {
+		ui.Message(fmt.Sprintf("ansible cleanup: failed to upload clean up file: %v", err))
+		return
+	}
+
+	remoteCmd := fmt.Sprintf("python %s", remoteFilePath)
+	var out, outErr bytes.Buffer
+	cmd := &packer.RemoteCmd{
+		Command: remoteCmd,
+		Stdin:   nil,
+		Stdout:  &out,
+		Stderr:  &outErr,
+	}
+
+	if err := comm.Start(ctx, cmd); err != nil {
+		ui.Message(fmt.Sprintf("ansible cleanup: error running command %s: %v", remoteCmd, err))
+		return
+	}
+	cmd.Wait()
+	if cmd.ExitStatus() != 0 {
+		ui.Message("ansible cleanup: error cleaning up the ansible directory")
+		ui.Message(out.String())
+		ui.Message(outErr.String())
+	}
 }
 
 func validateFileConfig(name string, config string, req bool) error {

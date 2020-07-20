@@ -745,3 +745,33 @@ func TestUseProxy(t *testing.T) {
 		os.Remove(p.config.Command)
 	}
 }
+
+func TestCleanUpAnsibleDirSuccess(t *testing.T) {
+	ctx := context.TODO()
+	errorBuffer := &strings.Builder{}
+	ui := &packer.BasicUi{
+		Reader:      new(bytes.Buffer),
+		Writer:      new(bytes.Buffer),
+		ErrorWriter: errorBuffer,
+	}
+	comm := new(packer.MockCommunicator)
+	cleanUpAnsibleDir(ctx, ui, "/tmp/", comm)
+	assert.True(t, comm.StartCalled)
+	assert.True(t, comm.UploadCalled)
+	assert.Equal(t, "", errorBuffer.String())
+}
+
+func TestCleanUpAnsibleDirFailure(t *testing.T) {
+	ctx := context.TODO()
+	stdOutBuffer := &strings.Builder{}
+	ui := &packer.BasicUi{
+		Reader: new(bytes.Buffer),
+		Writer: stdOutBuffer,
+	}
+	comm := new(packer.MockCommunicator)
+	comm.StartExitStatus = -1
+	cleanUpAnsibleDir(ctx, ui, "/tmp/", comm)
+	assert.True(t, comm.StartCalled)
+	assert.True(t, comm.UploadCalled)
+	assert.True(t, strings.Contains(stdOutBuffer.String(), "ansible cleanup: error cleaning up the ansible directory"))
+}
