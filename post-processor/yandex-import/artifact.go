@@ -7,8 +7,8 @@ import (
 const BuilderId = "packer.post-processor.yandex-import"
 
 type Artifact struct {
-	imageID   string
-	sourceURL string
+	imageID     string
+	imageSource string
 }
 
 func (*Artifact) BuilderId() string {
@@ -16,7 +16,7 @@ func (*Artifact) BuilderId() string {
 }
 
 func (a *Artifact) Id() string {
-	return a.sourceURL
+	return a.imageSource
 }
 
 func (a *Artifact) Files() []string {
@@ -24,7 +24,7 @@ func (a *Artifact) Files() []string {
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("Create image %v from URL %v", a.imageID, a.sourceURL)
+	return fmt.Sprintf("Create image %v from source URL/image %v", a.imageID, a.imageSource)
 }
 
 func (*Artifact) State(name string) interface{} {

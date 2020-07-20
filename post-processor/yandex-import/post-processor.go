@@ -6,6 +6,7 @@ package yandeximport
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 
@@ -171,7 +172,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("error rendering object_name template: %s", err)
 	}
 
-	var url string
+	var imageSource string
 	var fileSource bool
 
 	// Create temporary storage Access Key
@@ -198,18 +199,22 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			return nil, false, false, fmt.Errorf("To upload artfact you need to specify `bucket` value")
 		}
 
-		url, err = uploadToBucket(storageClient, ui, artifact, p.config.Bucket, p.config.ObjectName)
+		imageSource, err = uploadToBucket(storageClient, ui, artifact, p.config.Bucket, p.config.ObjectName)
 		if err != nil {
 			return nil, false, false, err
 		}
 
-	case yandexexport.BuilderId:
+	case yandexexport.BuilderId, BuilderId:
 		// Artifact already in storage, just get URL
-		url = artifact.Id()
+		// OR artifact from prev yandex-import PP, reuse URL
+		imageSource, err = presignUrl(storageClient, ui, artifact.Id())
+		if err != nil {
+			return nil, false, false, err
+		}
 
-	case BuilderId:
-		// Artifact from prev yandex-import PP, reuse URL
-		url = artifact.Id()
+	case yandex.BuilderID:
+		// Artifact is plain Yandex Compute Image, just create new one based on provided.
+		imageSource = artifact.Id()
 
 	default:
 		err := fmt.Errorf(
@@ -218,18 +223,13 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, err
 	}
 
-	presignedUrl, err := presignUrl(storageClient, ui, url)
-	if err != nil {
-		return nil, false, false, err
-	}
-
-	ycImage, err := createYCImage(ctx, client, ui, p.config.FolderID, presignedUrl, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels)
+	ycImage, err := createYCImage(ctx, client, ui, p.config.FolderID, imageSource, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels)
 	if err != nil {
 		return nil, false, false, err
 	}
 
 	if fileSource && !p.config.SkipClean {
-		err = deleteFromBucket(storageClient, ui, url)
+		err = deleteFromBucket(storageClient, ui, imageSource)
 		if err != nil {
 			return nil, false, false, err
 		}
@@ -244,8 +244,8 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	return &Artifact{
-		imageID:   ycImage.GetId(),
-		sourceURL: url,
+		imageID:     ycImage.GetId(),
+		imageSource: imageSource,
 	}, false, false, nil
 }
 
@@ -294,21 +294,30 @@ func uploadToBucket(s3conn *s3.S3, ui packer.Ui, artifact packer.Artifact, bucke
 	return req.HTTPRequest.URL.String(), nil
 }
 
-func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, folderID string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string) (*compute.Image, error) {
-	op, err := driver.SDK().WrapOperation(driver.SDK().Compute().Image().Create(ctx, &compute.CreateImageRequest{
+func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, folderID string, imageSource string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string) (*compute.Image, error) {
+	req := &compute.CreateImageRequest{
 		FolderId:    folderID,
 		Name:        imageName,
 		Description: imageDescription,
 		Labels:      imageLabels,
 		Family:      imageFamily,
-		Source:      &compute.CreateImageRequest_Uri{Uri: rawImageURL},
-	}))
+	}
+
+	// switch on imageSource value: cloud image id or storage URL
+	_, err := url.Parse(imageSource)
+	if err == nil {
+		req.Source = &compute.CreateImageRequest_Uri{Uri: imageSource}
+	} else {
+		req.Source = &compute.CreateImageRequest_ImageId{ImageId: imageSource}
+	}
+
+	op, err := driver.SDK().WrapOperation(driver.SDK().Compute().Image().Create(ctx, req))
 	if err != nil {
 		ui.Say("Error creating Yandex Compute Image")
 		return nil, err
 	}
 
-	ui.Say(fmt.Sprintf("Source url for Image creation: %v", rawImageURL))
+	ui.Say(fmt.Sprintf("Source url for Image creation: %v", imageSource))
 
 	ui.Say(fmt.Sprintf("Creating Yandex Compute Image %v within operation %#v", imageName, op.Id()))
 

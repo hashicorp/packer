@@ -67,6 +67,7 @@
     file [GH-9379]
 * post-processor/yandex-import: Support using URL from yandex-export pp
     [GH-9601]
+* post-processor/yandex-import: Support create the new Image based on another one
 * provisioner/ansible: Add template option for templating the inventory file
     lines [GH-9438]
 
