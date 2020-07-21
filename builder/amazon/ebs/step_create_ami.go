@@ -53,8 +53,12 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 	var createResp *ec2.CreateImageOutput
 	var err error
 
+	// Create a timeout for the CreateImage call.
+	timeoutCtx, cancel := context.WithTimeout(ctx, time.Minute*15)
+	defer cancel()
+
 	err = retry.Config{
-		Tries: 11,
+		Tries: 0,
 		ShouldRetry: func(err error) bool {
 			if awscommon.IsAWSErr(err, "InvalidParameterValue", "Instance is not in state") {
 				return true
@@ -62,7 +66,7 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 			return false
 		},
 		RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
-	}.Run(ctx, func(ctx context.Context) error {
+	}.Run(timeoutCtx, func(ctx context.Context) error {
 		createResp, err = ec2conn.CreateImage(createOpts)
 		return err
 	})
