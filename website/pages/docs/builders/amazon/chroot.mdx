@@ -361,8 +361,8 @@ variable "aws_secret_key" {
 
 source "amazon-chroot" "basic-example" {
   access_key = var.aws_access_key
-  secret_key =  var.aws_secret_key
-  region = "us-east-1"
+  secret_key = var.aws_secret_key
+  region     = "us-east-1"
   source_ami_filter {
     filter {
       key = "virtualization-type"
