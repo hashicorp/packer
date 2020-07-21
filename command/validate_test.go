@@ -17,12 +17,11 @@ func TestValidateCommand(t *testing.T) {
 		{path: filepath.Join(testFixture("validate-invalid"), "missing_build_block.pkr.hcl"), exitCode: 1},
 	}
 
-	c := &ValidateCommand{
-		Meta: testMetaFile(t),
-	}
-
 	for _, tc := range tt {
 		t.Run(tc.path, func(t *testing.T) {
+			c := &ValidateCommand{
+				Meta: testMetaFile(t),
+			}
 			tc := tc
 			args := []string{tc.path}
 			if code := c.Run(args); code != tc.exitCode {
@@ -45,13 +44,12 @@ func TestValidateCommand_SyntaxOnly(t *testing.T) {
 		{path: filepath.Join(testFixture("validate-invalid"), "broken.json"), exitCode: 1},
 	}
 
-	c := &ValidateCommand{
-		Meta: testMetaFile(t),
-	}
-	c.CoreConfig.Version = "102.0.0"
-
 	for _, tc := range tt {
 		t.Run(tc.path, func(t *testing.T) {
+			c := &ValidateCommand{
+				Meta: testMetaFile(t),
+			}
+			c.CoreConfig.Version = "102.0.0"
 			tc := tc
 			args := []string{"-syntax-only", tc.path}
 			if code := c.Run(args); code != tc.exitCode {
