@@ -92,7 +92,7 @@ type ComponentFinder struct {
 }
 
 // NewCore creates a new Core.
-func NewCore(c *CoreConfig) (*Core, error) {
+func NewCore(c *CoreConfig) *Core {
 	core := &Core{
 		Template:   c.Template,
 		components: c.Components,
@@ -101,12 +101,15 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		only:       c.Only,
 		except:     c.Except,
 	}
+	return core
+}
 
+func (core *Core) Initialize() error {
 	if err := core.validate(); err != nil {
-		return nil, err
+		return err
 	}
 	if err := core.init(); err != nil {
-		return nil, err
+		return err
 	}
 	for _, secret := range core.secrets {
 		LogSecretFilter.Set(secret)
@@ -115,17 +118,17 @@ func NewCore(c *CoreConfig) (*Core, error) {
 	// Go through and interpolate all the build names. We should be able
 	// to do this at this point with the variables.
 	core.builds = make(map[string]*template.Builder)
-	for _, b := range c.Template.Builders {
+	for _, b := range core.Template.Builders {
 		v, err := interpolate.Render(b.Name, core.Context())
 		if err != nil {
-			return nil, fmt.Errorf(
+			return fmt.Errorf(
 				"Error interpolating builder '%s': %s",
 				b.Name, err)
 		}
 
 		core.builds[v] = b
 	}
-	return core, nil
+	return nil
 }
 
 // BuildNames returns the builds that are available in this configured core.
