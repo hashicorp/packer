@@ -142,7 +142,7 @@ variable "aws_access_key" {
 // export PKR_VAR_aws_secret_key=$YOURSECRETKEY
 variable "aws_secret_key" {
   type = string
-  // default = "hardcoded_secret_key"
+  // default = "hardcoded_secret_key" // Not recommended !
 }
 
 source "amazon-chroot" "basic-example" {
