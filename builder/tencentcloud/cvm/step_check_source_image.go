@@ -32,15 +32,15 @@ func (s *stepCheckSourceImage) Run(ctx context.Context, state multistep.StateBag
 		if err != nil {
 			return Halt(state, fmt.Errorf("regex compilation error"), "Bad input")
 		}
-		private := "PRIVATE_IMAGE"
-		public := "PUBLIC_IMAGE"
-		shared := "SHARED_IMAGE"
-		filterType := "image-type"
-		filter := &cvm.Filter{
-			Name:   &filterType,
-			Values: []*string{&private, &public, &shared},
-		}
-		req.Filters = []*cvm.Filter{filter}
+		// private := "PRIVATE_IMAGE"
+		// public := "PUBLIC_IMAGE"
+		// shared := "SHARED_IMAGE"
+		// filterType := "image-type"
+		// filter := &cvm.Filter{
+		// 	Name:   &filterType,
+		// 	Values: []*string{&private, &public, &shared},
+		// }
+		// req.Filters = []*cvm.Filter{filter}
 	}
 	var resp *cvm.DescribeImagesResponse
 	err = Retry(ctx, func(ctx context.Context) error {
