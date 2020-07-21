@@ -248,27 +248,27 @@ configuration of `launch_block_device_mappings` will expand the root volume
 
 ```hcl
 source "amazon-ebs" "basic-example" {
-  region =  "us-east-1"
-  source_ami =  "ami-fce3c696"
+  region        =  "us-east-1"
+  source_ami    =  "ami-fce3c696"
   instance_type =  "t2.micro"
-  ssh_username =  "ubuntu"
-  ami_name =  "packer_AWS_example_{{timestamp}}"
+  ssh_username  =  "ubuntu"
+  ami_name      =  "packer_AWS_example_{{timestamp}}"
   launch_block_device_mappings {
-      device_name = "/dev/sda1"
-      volume_size = 40
-      volume_type = "gp2"
-      delete_on_termination = true
-    }
+    device_name = "/dev/sda1"
+    volume_size = 40
+    volume_type = "gp2"
+    delete_on_termination = true
+  }
   // Notice that instead of providing a list of mappings, you are just providing
   // multiple mappings in a row. This diverges from the JSON template format.
   ami_block_device_mappings {
-      device_name = "/dev/sdb"
-      virtual_name = "ephemeral0"
-    }
+    device_name  = "/dev/sdb"
+    virtual_name = "ephemeral0"
+  }
   ami_block_device_mappings {
-      device_name = "/dev/sdc"
-      virtual_name = "ephemeral1"
-    }
+    device_name  = "/dev/sdc"
+    virtual_name = "ephemeral1"
+  }
 }
 
 build {
