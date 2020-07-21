@@ -4,6 +4,8 @@
 * **New post-processor** Yandex Import [GH-9553]
 
 ### IMPROVEMENTS:
+* builder/azure: Disable ssh password authentication unless password is
+    explicitly specified. [GH-9603]
 * builder/docker: Add options for --cap-add, --cap-drop, --tmpfs, --device
     [GH-9565]
 * builder/file: Create parent directories of target file, if they don't exist.
@@ -45,9 +47,10 @@
 * builder/vsphere: Use datacenter inventory path for find folder [GH-9390]
 * builder/vsphere: Use value from "ip_wait_address" option to determine the
     default for the http server IP [GH-9441]
+* builder/yandex: Allow set `min_disk_size` for an image.
 * builder/yandex: Support authentication by Service Account on instance
     [GH-9383]
-* builder/yandex: Allow set `min_disk_size` for an image.
+* builder/yandex: yandex: Add new property 'min_disk_size' of built image #9594
 * communicator/ssh: Add support for OpenSSH certificate signing [GH-9521]
 * communicator/ssh: Allow users to provide a list of ciphers that they want
     Packer to support. [GH-9453]
@@ -87,6 +90,7 @@
     directory, not the Vagrant output directory. [GH-9577]
 * builder/virtualbox-vm: Fix regression where builder would fail if the vm had
     no snapshots. [GH-9435]
+* builder/vmware-iso: Try checksum remote file instead of local file. [GH-9584]
 * builder/vmware: Fix a race that occurred when parsing the network config.
     [GH-9387]
 * builder/vmware: update vendor library, enabling retries on 502 errors
