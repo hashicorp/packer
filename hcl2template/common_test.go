@@ -61,6 +61,8 @@ func testParse(t *testing.T, tests []parseTest) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotCfg, gotDiags := tt.parser.Parse(tt.args.filename, tt.args.varFiles, tt.args.vars)
+			moreDiags := gotCfg.Initialize()
+			gotDiags = append(gotDiags, moreDiags...)
 			if tt.parseWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.parse() unexpected %q diagnostics.", gotDiags)
 			}
@@ -78,6 +80,7 @@ func testParse(t *testing.T, tests []parseTest) {
 					PostProcessorBlock{},
 				),
 				cmpopts.IgnoreTypes(HCL2Ref{}),
+				cmpopts.IgnoreTypes([]*LocalBlock{}),
 				cmpopts.IgnoreTypes([]hcl.Range{}),
 				cmpopts.IgnoreTypes(hcl.Range{}),
 				cmpopts.IgnoreInterfaces(struct{ hcl.Expression }{}),

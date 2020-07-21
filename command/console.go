@@ -60,6 +60,12 @@ func (c *ConsoleCommand) RunContext(ctx context.Context, cla *ConsoleArgs) int {
 		return ret
 	}
 
+	diags := packerStarter.Initialize()
+	ret = writeDiags(c.Ui, nil, diags)
+	if ret != 0 {
+		return ret
+	}
+
 	// Determine if stdin is a pipe. If so, we evaluate directly.
 	if c.StdinPiped() {
 		return c.modePiped(packerStarter)

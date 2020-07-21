@@ -15,6 +15,7 @@ func TestValidateCommand(t *testing.T) {
 		{path: filepath.Join(testFixture("validate"), "build_with_vars.pkr.hcl")},
 		{path: filepath.Join(testFixture("validate-invalid"), "bad_provisioner.json"), exitCode: 1},
 		{path: filepath.Join(testFixture("validate-invalid"), "missing_build_block.pkr.hcl"), exitCode: 1},
+		{path: filepath.Join(testFixture("validate"), "null_var.json"), exitCode: 1},
 	}
 
 	for _, tc := range tt {

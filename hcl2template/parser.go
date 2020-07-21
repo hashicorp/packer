@@ -101,11 +101,12 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		builderSchemas:        p.BuilderSchemas,
 		provisionersSchemas:   p.ProvisionersSchemas,
 		postProcessorsSchemas: p.PostProcessorsSchemas,
+		parser:                p,
+		files:                 files,
 	}
 
 	// Decode variable blocks so that they are available later on. Here locals
 	// can use input variables so we decode them firsthand.
-	var locals []*Local
 	{
 		for _, file := range files {
 			diags = append(diags, cfg.decodeInputVariables(file)...)
@@ -114,7 +115,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		for _, file := range files {
 			moreLocals, morediags := cfg.parseLocalVariables(file)
 			diags = append(diags, morediags...)
-			locals = append(locals, moreLocals...)
+			cfg.LocalBlocks = append(cfg.LocalBlocks, moreLocals...)
 		}
 	}
 
@@ -156,19 +157,24 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 
 		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, argVars)...)
 	}
+	return cfg, diags
+}
+
+func (cfg *PackerConfig) Initialize() hcl.Diagnostics {
+	var diags hcl.Diagnostics
 
 	_, moreDiags := cfg.InputVariables.Values()
 	diags = append(diags, moreDiags...)
 	_, moreDiags = cfg.LocalVariables.Values()
 	diags = append(diags, moreDiags...)
-	diags = append(diags, cfg.evaluateLocalVariables(locals)...)
+	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
 
 	// decode the actual content
-	for _, file := range files {
-		diags = append(diags, p.decodeConfig(file, cfg)...)
+	for _, file := range cfg.files {
+		diags = append(diags, cfg.parser.decodeConfig(file, cfg)...)
 	}
 
-	return cfg, diags
+	return diags
 }
 
 // decodeConfig looks in the found blocks for everything that is not a variable
