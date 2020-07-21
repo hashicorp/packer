@@ -19,19 +19,23 @@
   which will stop the instance for you. If this is set to `true`, Packer
   *will not* stop the instance but will assume that you will send the stop
   signal yourself through your final provisioner. You can do this with a
-  [windows-shell
-  provisioner](/docs/provisioners/windows-shell).
-  Note that Packer will still wait for the instance to be stopped, and
-  failing to send the stop signal yourself, when you have set this flag to
-  `true`, will cause a timeout.
-  Example of a valid shutdown command:
+  [windows-shell provisioner](/docs/provisioners/windows-shell). Note that
+  Packer will still wait for the instance to be stopped, and failing to
+  send the stop signal yourself, when you have set this flag to `true`,
+  will cause a timeout.
   
-  ```json
-  {
-    "type": "windows-shell",
-    "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
-  }
+  An example of a valid windows shutdown command in a `windows-shell`
+  provisioner is :
+  ```shell-session
+    ec2config.exe -sysprep
   ```
+  or
+  ```sell-session
+    "%programfiles%\amazon\ec2configservice\"ec2config.exe -sysprep""
+  ```
+  -> Note: The double quotation marks in the command are not required if
+  your CMD shell is already in the
+  `C:\Program Files\Amazon\EC2ConfigService\` directory.
 
 - `ebs_optimized` (bool) - Mark instance as [EBS
   Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
@@ -88,7 +92,7 @@
   shutdown in case Packer exits ungracefully. Possible values are stop and
   terminate. Defaults to stop.
 
-- `security_group_filter` (SecurityGroupFilterOptions) - Filters used to populate the `security_group_ids` field. Example:
+- `security_group_filter` (SecurityGroupFilterOptions) - Filters used to populate the `security_group_ids` field. JSON Example:
   
   ```json
   {
@@ -98,6 +102,16 @@
       }
     }
   }
+  ```
+  
+  HCL2 Example:
+  
+  ```hcl
+    security_group_filter {
+      filters = {
+        "tag:Class": "packer"
+      }
+    }
   ```
   
   This selects the SG's with tag `Class` with the value `packer`.
@@ -130,21 +144,39 @@
   security_group_id.
 
 - `source_ami_filter` (AmiFilterOptions) - Filters used to populate the `source_ami`
-  field. Example:
+  field. JSON Example:
   
-    ```json
+  ```json
+  "builders" [
     {
+      "type": "amazon-ebs",
       "source_ami_filter": {
-        "filters": {
-          "virtualization-type": "hvm",
-          "name": "ubuntu/images/\*ubuntu-xenial-16.04-amd64-server-\*",
-          "root-device-type": "ebs"
-        },
-        "owners": ["099720109477"],
-        "most_recent": true
+         "filters": {
+         "virtualization-type": "hvm",
+         "name": "ubuntu/images/\*ubuntu-xenial-16.04-amd64-server-\*",
+         "root-device-type": "ebs"
+         },
+         "owners": ["099720109477"],
+         "most_recent": true
       }
     }
-    ```
+  ]
+  ```
+  HCL2 example:
+  
+  ```hcl
+  source "amazon-ebs" "basic-example" {
+    source_ami_filter {
+      filters = {
+         virtualization-type = "hvm"
+         name = "ubuntu/images/\*ubuntu-xenial-16.04-amd64-server-\*"
+         root-device-type = "ebs"
+      }
+      owners = ["099720109477"]
+      most_recent = true
+    }
+  }
+  ```
   
     This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
     This will fail unless *exactly* one AMI is returned. In the above example,
@@ -206,10 +238,12 @@
   will allow you to create those programatically.
 
 - `subnet_filter` (SubnetFilterOptions) - Filters used to populate the `subnet_id` field.
-  Example:
+  JSON Example:
   
-    ```json
+  ```json
+  "builders" [
     {
+      "type": "amazon-ebs",
       "subnet_filter": {
         "filters": {
           "tag:Class": "build"
@@ -218,7 +252,21 @@
         "random": false
       }
     }
-    ```
+  ]
+  ```
+  HCL2 example:
+  
+  ```hcl
+  source "amazon-ebs" "basic-example" {
+    subnet_filter {
+      filters = {
+            "tag:Class": "build"
+      }
+      most_free = true
+      random = false
+    }
+  }
+  ```
   
     This selects the Subnet with tag `Class` with the value `build`, which has
     the most free IP addresses. NOTE: This will fail unless *exactly* one
@@ -263,12 +311,28 @@
   data when launching the instance.
 
 - `vpc_filter` (VpcFilterOptions) - Filters used to populate the `vpc_id` field.
-  Example:
+  JSON Example:
   
   ```json
-  {
-    "vpc_filter": {
-      "filters": {
+  "builders" [
+    {
+      "type": "amazon-ebs",
+      "vpc_filter": {
+        "filters": {
+          "tag:Class": "build",
+          "isDefault": "false",
+          "cidr": "/24"
+        }
+      }
+    }
+  ]
+  ```
+  HCL2 example:
+  
+  ```hcl
+  source "amazon-ebs" "basic-example" {
+    vpc_filter {
+      filters = {
         "tag:Class": "build",
         "isDefault": "false",
         "cidr": "/24"

@@ -21,12 +21,26 @@ import (
 // The following mapping will tell Packer to encrypt the root volume of the
 // build instance at launch using a specific non-default kms key:
 //
+// JSON example:
+//
 // ```json
-// [{
-//		"device_name": "/dev/sda1",
-//		"encrypted": true,
-//		"kms_key_id": "1a2b3c4d-5e6f-1a2b-3c4d-5e6f1a2b3c4d"
-// }]
+// ami_block_device_mappings: [
+//   {
+//      "device_name": "/dev/sda1",
+//      "encrypted": true,
+//      "kms_key_id": "1a2b3c4d-5e6f-1a2b-3c4d-5e6f1a2b3c4d"
+//   }
+// ]
+// ```
+//
+// HCL2 example:
+//
+// ```hcl
+// ami_block_device_mappings {
+//     device_name = "/dev/sda1"
+//     encrypted = true
+//     kms_key_id = "1a2b3c4d-5e6f-1a2b-3c4d-5e6f1a2b3c4d"
+// }
 // ```
 //
 // Documentation for Block Devices Mappings can be found here:
