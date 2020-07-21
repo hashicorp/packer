@@ -1,0 +1,1 @@
+echo hello from the ${BUILDER} builder ${USER}

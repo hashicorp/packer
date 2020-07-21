@@ -323,6 +323,38 @@ func TestBuild(t *testing.T) {
 	}
 }
 
+func Test_build_output(t *testing.T) {
+
+	tc := []struct {
+		command  []string
+		env      []string
+		expected string
+	}{
+		{[]string{"build", "--color=false", testFixture("hcl", "reprepare", "shell-local.pkr.hcl")}, nil,
+			`==> null.example: Running local shell script: ./test-fixtures/hcl/reprepare/hello.sh
+    null.example: hello from the NULL builder packeruser
+Build 'null.example' finished.
+
+==> Builds finished. The artifacts of successful builds are:
+--> null.example: Did not export anything. This is the null builder
+`},
+	}
+
+	for _, tc := range tc {
+		t.Run(fmt.Sprintf("packer %s", tc.command), func(t *testing.T) {
+			p := helperCommand(t, tc.command...)
+			p.Env = append(p.Env, tc.env...)
+			bs, err := p.Output()
+			if err != nil {
+				t.Fatalf("%v: %s", err, bs)
+			}
+			if diff := cmp.Diff(tc.expected, string(bs)); diff != "" {
+				t.Fatalf("unexpected output (+expected -actual): %s", diff)
+			}
+		})
+	}
+}
+
 func TestBuildOnlyFileCommaFlags(t *testing.T) {
 	c := &BuildCommand{
 		Meta: testMetaFile(t),
