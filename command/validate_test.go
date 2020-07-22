@@ -3,6 +3,8 @@ package command
 import (
 	"path/filepath"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestValidateCommand(t *testing.T) {
@@ -93,10 +95,15 @@ func TestValidateCommandBadVersion(t *testing.T) {
 	}
 
 	stdout, stderr := outputCommand(t, c.Meta)
-	expected := `Error initializing core: This template requires Packer version 101.0.0 or higher; using 100.0.0
+	expected := `Error: 
+
+This template requires Packer version 101.0.0 or higher; using 100.0.0
+
+
 `
-	if stderr != expected {
-		t.Fatalf("Expected:\n%s\nFound:\n%s\n", expected, stderr)
+
+	if diff := cmp.Diff(expected, stderr); diff != "" {
+		t.Errorf("Unexpected output: %s", diff)
 	}
 	t.Log(stdout)
 }
