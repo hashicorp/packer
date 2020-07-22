@@ -1,8 +1,9 @@
 package yandeximport
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestArtifactState_StateData(t *testing.T) {
