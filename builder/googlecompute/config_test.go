@@ -385,7 +385,7 @@ func TestConfigPrepareStartupScriptFile(t *testing.T) {
 	}
 }
 
-func TestConfigPrepareIAP(t *testing.T) {
+func TestConfigPrepareIAP_SSH(t *testing.T) {
 	config := map[string]interface{}{
 		"project_id":   "project",
 		"source_image": "foo",
@@ -400,22 +400,33 @@ func TestConfigPrepareIAP(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Shouldn't have errors. Err = %s", err)
 	}
-
-	if runtime.GOOS == "windows" {
-		if c.IAPExt != ".cmd" {
-			t.Fatalf("IAP tempfile extension didn't default correctly to .cmd")
-		}
-		if c.IAPHashBang != "" {
-			t.Fatalf("IAP hashbang didn't default correctly to nothing.")
-		}
-	} else {
-		if c.IAPExt != "" {
-			t.Fatalf("IAP tempfile extension should default to empty on unix mahcines")
-		}
-		if c.IAPHashBang != "/bin/sh" {
-			t.Fatalf("IAP hashbang didn't default correctly to /bin/sh.")
-		}
+	if c.Comm.SSHHost != "localhost" {
+		t.Fatalf("Should have set SSHHost")
 	}
+
+	testIAPScript(t, &c)
+}
+
+func TestConfigPrepareIAP_WinRM(t *testing.T) {
+	config := map[string]interface{}{
+		"project_id":     "project",
+		"source_image":   "foo",
+		"winrm_username": "packer",
+		"zone":           "us-central1-a",
+		"communicator":   "winrm",
+		"use_iap":        true,
+	}
+
+	var c Config
+	_, err := c.Prepare(config)
+	if err != nil {
+		t.Fatalf("Shouldn't have errors. Err = %s", err)
+	}
+	if c.Comm.WinRMHost != "localhost" {
+		t.Fatalf("Should have set WinRMHost")
+	}
+
+	testIAPScript(t, &c)
 }
 
 func TestConfigPrepareIAP_failures(t *testing.T) {
@@ -512,9 +523,6 @@ func TestApplyIAPTunnel_SSH(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Shouldn't have errors")
 	}
-	if c.SSHHost != "localhost" {
-		t.Fatalf("Should have set SSHHost")
-	}
 	if c.SSHPort != 8447 {
 		t.Fatalf("Should have set SSHPort")
 	}
@@ -532,9 +540,6 @@ func TestApplyIAPTunnel_WinRM(t *testing.T) {
 	err := ApplyIAPTunnel(c, 8447)
 	if err != nil {
 		t.Fatalf("Shouldn't have errors")
-	}
-	if c.WinRMHost != "localhost" {
-		t.Fatalf("Should have set WinRMHost")
 	}
 	if c.WinRMPort != 8447 {
 		t.Fatalf("Should have set WinRMPort")
@@ -626,6 +631,24 @@ func testAccountFile(t *testing.T) string {
 	}
 
 	return tf.Name()
+}
+
+func testIAPScript(t *testing.T, c *Config) {
+	if runtime.GOOS == "windows" {
+		if c.IAPExt != ".cmd" {
+			t.Fatalf("IAP tempfile extension didn't default correctly to .cmd")
+		}
+		if c.IAPHashBang != "" {
+			t.Fatalf("IAP hashbang didn't default correctly to nothing.")
+		}
+	} else {
+		if c.IAPExt != "" {
+			t.Fatalf("IAP tempfile extension should default to empty on unix mahcines")
+		}
+		if c.IAPHashBang != "/bin/sh" {
+			t.Fatalf("IAP hashbang didn't default correctly to /bin/sh.")
+		}
+	}
 }
 
 const testMetadataFileContent = `testMetadata`
