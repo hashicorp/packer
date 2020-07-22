@@ -46,10 +46,10 @@ func newYCStorageClient(storageEndpoint, accessKey, secretKey string) (*s3.S3, e
 }
 
 // Get path-style S3 URL and return presigned URL
-func presignUrl(s3conn *s3.S3, ui packer.Ui, fullUrl string) (string, error) {
+func presignUrl(s3conn *s3.S3, ui packer.Ui, fullUrl string) (cloudImageSource, error) {
 	bucket, key, err := s3URLToBucketKey(fullUrl)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	req, _ := s3conn.GetObjectRequest(&s3.GetObjectInput{
@@ -63,10 +63,12 @@ func presignUrl(s3conn *s3.S3, ui packer.Ui, fullUrl string) (string, error) {
 	urlStr, _, err := req.PresignRequest(30 * time.Minute)
 	if err != nil {
 		ui.Say(fmt.Sprintf("Failed to presign url: %s", err))
-		return "", err
+		return nil, err
 	}
 
-	return urlStr, nil
+	return &objectSource{
+		urlStr,
+	}, nil
 }
 
 func s3URLToBucketKey(storageURL string) (bucket string, key string, err error) {

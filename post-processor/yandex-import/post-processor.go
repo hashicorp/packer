@@ -7,17 +7,10 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/hashicorp/packer/builder/yandex"
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1/awscompatibility"
-	"github.com/yandex-cloud/go-sdk/iamkey"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/file"
+	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -25,6 +18,8 @@ import (
 	"github.com/hashicorp/packer/post-processor/compress"
 	yandexexport "github.com/hashicorp/packer/post-processor/yandex-export"
 	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1/awscompatibility"
+	"github.com/yandex-cloud/go-sdk/iamkey"
 )
 
 type Config struct {
@@ -149,12 +144,21 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+	var imageSrc cloudImageSource
+	var fileSource bool
+	var err error
+
 	generatedData := artifact.State("generated_data")
 	if generatedData == nil {
 		// Make sure it's not a nil map so we can assign to it later.
 		generatedData = make(map[string]interface{})
 	}
 	p.config.ctx.Data = generatedData
+
+	p.config.ObjectName, err = interpolate.Render(p.config.ObjectName, &p.config.ctx)
+	if err != nil {
+		return nil, false, false, fmt.Errorf("error rendering object_name template: %s", err)
+	}
 
 	cfg := &yandex.Config{
 		Token:                 p.config.Token,
@@ -165,14 +169,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	if err != nil {
 		return nil, false, false, err
 	}
-
-	p.config.ObjectName, err = interpolate.Render(p.config.ObjectName, &p.config.ctx)
-	if err != nil {
-		return nil, false, false, fmt.Errorf("error rendering object_name template: %s", err)
-	}
-
-	var url string
-	var fileSource bool
 
 	// Create temporary storage Access Key
 	respWithKey, err := client.SDK().IAM().AWSCompatibility().AccessKey().Create(ctx, &awscompatibility.CreateAccessKeyRequest{
@@ -198,18 +194,29 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 			return nil, false, false, fmt.Errorf("To upload artfact you need to specify `bucket` value")
 		}
 
-		url, err = uploadToBucket(storageClient, ui, artifact, p.config.Bucket, p.config.ObjectName)
+		imageSrc, err = uploadToBucket(storageClient, ui, artifact, p.config.Bucket, p.config.ObjectName)
 		if err != nil {
 			return nil, false, false, err
 		}
 
 	case yandexexport.BuilderId:
 		// Artifact already in storage, just get URL
-		url = artifact.Id()
+		imageSrc, err = presignUrl(storageClient, ui, artifact.Id())
+		if err != nil {
+			return nil, false, false, err
+		}
 
+	case yandex.BuilderID:
+		// Artifact is plain Yandex Compute Image, just create new one based on provided
+		imageSrc = &imageSource{
+			imageID: artifact.Id(),
+		}
 	case BuilderId:
-		// Artifact from prev yandex-import PP, reuse URL
-		url = artifact.Id()
+		// Artifact from prev yandex-import PP, reuse URL or Cloud Image ID
+		imageSrc, err = chooseSource(artifact)
+		if err != nil {
+			return nil, false, false, err
+		}
 
 	default:
 		err := fmt.Errorf(
@@ -218,18 +225,13 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, err
 	}
 
-	presignedUrl, err := presignUrl(storageClient, ui, url)
-	if err != nil {
-		return nil, false, false, err
-	}
-
-	ycImage, err := createYCImage(ctx, client, ui, p.config.FolderID, presignedUrl, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels)
+	ycImage, err := createYCImage(ctx, client, ui, p.config.FolderID, imageSrc, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels)
 	if err != nil {
 		return nil, false, false, err
 	}
 
 	if fileSource && !p.config.SkipClean {
-		err = deleteFromBucket(storageClient, ui, url)
+		err = deleteFromBucket(storageClient, ui, imageSrc)
 		if err != nil {
 			return nil, false, false, err
 		}
@@ -244,119 +246,29 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	return &Artifact{
-		imageID:   ycImage.GetId(),
-		sourceURL: url,
+		imageID: ycImage.GetId(),
+		StateData: map[string]interface{}{
+			"source_type": imageSrc.GetSourceType(),
+			"source_id":   imageSrc.GetSourceID(),
+		},
 	}, false, false, nil
 }
 
-func uploadToBucket(s3conn *s3.S3, ui packer.Ui, artifact packer.Artifact, bucket string, objectName string) (string, error) {
-	ui.Say("Looking for qcow2 file in list of artifacts...")
-	source := ""
-	for _, path := range artifact.Files() {
-		ui.Say(fmt.Sprintf("Found artifact %v...", path))
-		if strings.HasSuffix(path, ".qcow2") {
-			source = path
-			break
-		}
+func chooseSource(a packer.Artifact) (cloudImageSource, error) {
+	st := a.State("source_type").(string)
+	if st == "" {
+		return nil, fmt.Errorf("could not determine source type of yandex-import artifact: %v", a)
 	}
+	switch st {
+	case sourceType_IMAGE:
+		return &imageSource{
+			imageID: a.State("source_id").(string),
+		}, nil
 
-	if source == "" {
-		return "", fmt.Errorf("no qcow2 file found in list of artifacts")
+	case sourceType_OBJECT:
+		return &objectSource{
+			url: a.State("source_id").(string),
+		}, nil
 	}
-
-	artifactFile, err := os.Open(source)
-	if err != nil {
-		err := fmt.Errorf("error opening %v", source)
-		return "", err
-	}
-
-	ui.Say(fmt.Sprintf("Uploading file %v to bucket %v/%v...", source, bucket, objectName))
-
-	_, err = s3conn.PutObject(&s3.PutObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(objectName),
-		Body:   artifactFile,
-	})
-
-	if err != nil {
-		ui.Say(fmt.Sprintf("Failed to upload: %v", objectName))
-		return "", err
-	}
-
-	req, _ := s3conn.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(objectName),
-	})
-
-	// Compute service allow only `https://storage.yandexcloud.net/...` URLs for Image create process
-	req.Config.S3ForcePathStyle = aws.Bool(true)
-
-	return req.HTTPRequest.URL.String(), nil
-}
-
-func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, folderID string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string) (*compute.Image, error) {
-	op, err := driver.SDK().WrapOperation(driver.SDK().Compute().Image().Create(ctx, &compute.CreateImageRequest{
-		FolderId:    folderID,
-		Name:        imageName,
-		Description: imageDescription,
-		Labels:      imageLabels,
-		Family:      imageFamily,
-		Source:      &compute.CreateImageRequest_Uri{Uri: rawImageURL},
-	}))
-	if err != nil {
-		ui.Say("Error creating Yandex Compute Image")
-		return nil, err
-	}
-
-	ui.Say(fmt.Sprintf("Source url for Image creation: %v", rawImageURL))
-
-	ui.Say(fmt.Sprintf("Creating Yandex Compute Image %v within operation %#v", imageName, op.Id()))
-
-	ui.Say("Waiting for Yandex Compute Image creation operation to complete...")
-	err = op.Wait(ctx)
-
-	// fail if image creation operation has an error
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Yandex Compute Image: %s", err)
-	}
-
-	protoMetadata, err := op.Metadata()
-	if err != nil {
-		return nil, fmt.Errorf("error while get image create operation metadata: %s", err)
-	}
-
-	md, ok := protoMetadata.(*compute.CreateImageMetadata)
-	if !ok {
-		return nil, fmt.Errorf("could not get Image ID from create operation metadata")
-	}
-
-	image, err := driver.SDK().Compute().Image().Get(ctx, &compute.GetImageRequest{
-		ImageId: md.ImageId,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("error while image get request: %s", err)
-	}
-
-	return image, nil
-
-}
-
-func deleteFromBucket(s3conn *s3.S3, ui packer.Ui, url string) error {
-	bucket, objectName, err := s3URLToBucketKey(url)
-	if err != nil {
-		return err
-	}
-
-	ui.Say(fmt.Sprintf("Deleting import source from Object Storage %s/%s...", bucket, objectName))
-
-	_, err = s3conn.DeleteObject(&s3.DeleteObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(objectName),
-	})
-	if err != nil {
-		ui.Say(fmt.Sprintf("Failed to delete: %v/%v", bucket, objectName))
-		return fmt.Errorf("error deleting storage object %q in bucket %q: %s ", objectName, bucket, err)
-	}
-
-	return nil
+	return nil, fmt.Errorf("unknow source type of yandex-import artifact: %s", st)
 }

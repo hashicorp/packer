@@ -7,8 +7,13 @@ import (
 const BuilderId = "packer.post-processor.yandex-import"
 
 type Artifact struct {
-	imageID   string
-	sourceURL string
+	imageID    string
+	sourceType string
+	sourceID   string
+
+	// StateData should store data such as GeneratedData
+	// to be shared with post-processors
+	StateData map[string]interface{}
 }
 
 func (*Artifact) BuilderId() string {
@@ -16,7 +21,7 @@ func (*Artifact) BuilderId() string {
 }
 
 func (a *Artifact) Id() string {
-	return a.sourceURL
+	return a.imageID
 }
 
 func (a *Artifact) Files() []string {
@@ -24,10 +29,14 @@ func (a *Artifact) Files() []string {
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("Create image %v from URL %v", a.imageID, a.sourceURL)
+	return fmt.Sprintf("Create image %v from source type %v with ID/URL %v", a.imageID, a.sourceType, a.sourceID)
 }
 
-func (*Artifact) State(name string) interface{} {
+func (a *Artifact) State(name string) interface{} {
+	if _, ok := a.StateData[name]; ok {
+		return a.StateData[name]
+	}
+
 	return nil
 }
 
