@@ -261,7 +261,6 @@ func (c *HWConfig) ReadSerial() (*SerialUnion, error) {
 	} else {
 		defaultSerialPort = "/dev/ttyS0"
 	}
-
 	input := strings.SplitN(c.Serial, ":", 2)
 	if len(input) < 1 {
 		return nil, fmt.Errorf("Unexpected format for serial port: %s", c.Serial)
@@ -308,10 +307,11 @@ func (c *HWConfig) ReadSerial() (*SerialUnion, error) {
 		}
 
 		res := &SerialConfigFile{Yield: "FALSE"}
-
 		res.Filename = filepath.FromSlash(comp[0])
-
-		res.Yield = map[bool]string{true: strings.ToUpper(comp[1]), false: "FALSE"}[len(comp) > 1]
+		res.Yield = "FALSE"
+		if len(comp) > 1 {
+			res.Yield = strings.ToUpper(comp[1])
+		}
 		if res.Yield != "TRUE" && res.Yield != "FALSE" {
 			return nil, fmt.Errorf("Unexpected format for yield in serial port file: %s -> %s", c.Serial, res.Yield)
 		}
@@ -323,18 +323,16 @@ func (c *HWConfig) ReadSerial() (*SerialUnion, error) {
 		if len(comp) > 2 {
 			return nil, fmt.Errorf("Unexpected format for serial port device: %s", c.Serial)
 		}
-
 		res := new(SerialConfigDevice)
-
-		if len(comp) == 2 {
-			res.Devicename = map[bool]string{true: filepath.FromSlash(comp[0]), false: defaultSerialPort}[len(comp[0]) > 0]
+		// set serial port defaults
+		res.Devicename = defaultSerialPort
+		res.Yield = "FALSE"
+		// Read actual values from component, if set.
+		if len(comp) == 1 {
+			filepath.FromSlash(comp[0])
+		} else if len(comp) == 2 {
+			res.Devicename = filepath.FromSlash(comp[0])
 			res.Yield = strings.ToUpper(comp[1])
-		} else if len(comp) == 1 {
-			res.Devicename = map[bool]string{true: filepath.FromSlash(comp[0]), false: defaultSerialPort}[len(comp[0]) > 0]
-			res.Yield = "FALSE"
-		} else if len(comp) == 0 {
-			res.Devicename = defaultSerialPort
-			res.Yield = "FALSE"
 		}
 
 		if res.Yield != "TRUE" && res.Yield != "FALSE" {
