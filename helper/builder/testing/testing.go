@@ -125,7 +125,7 @@ func Test(t TestT, c TestCase) {
 		},
 		Template: tpl,
 	})
-	err := core.Initialize()
+	err = core.Initialize()
 	if err != nil {
 		t.Fatal(fmt.Sprintf("Failed to init core: %s", err))
 		return

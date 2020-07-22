@@ -155,7 +155,8 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 	}
 
 	// create a core using our template
-	core, err := packer.NewCore(&config)
+	core := packer.NewCore(&config)
+	err = core.Initialize()
 	if err != nil {
 		t.Fatalf("Unable to create core: %s", err)
 	}
