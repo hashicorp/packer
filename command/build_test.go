@@ -7,6 +7,8 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -329,18 +331,24 @@ func Test_build_output(t *testing.T) {
 		command  []string
 		env      []string
 		expected string
+		runtime  string
 	}{
 		{[]string{"build", "--color=false", testFixture("hcl", "reprepare", "shell-local.pkr.hcl")}, nil,
-			`==> null.example: Running local shell script: ./test-fixtures/hcl/reprepare/hello.sh
+			`
     null.example: hello from the NULL builder packeruser
 Build 'null.example' finished.
-
-==> Builds finished. The artifacts of successful builds are:
---> null.example: Did not export anything. This is the null builder
-`},
+`, "posix"},
+		{[]string{"build", "--color=false", testFixture("hcl", "reprepare", "shell-local-windows.pkr.hcl")}, nil,
+			`
+    null.example: hello from the NULL  builder packeruser
+Build 'null.example' finished.
+`, "windows"},
 	}
 
 	for _, tc := range tc {
+		if (runtime.GOOS == "windows") != (tc.runtime == "windows") {
+			continue
+		}
 		t.Run(fmt.Sprintf("packer %s", tc.command), func(t *testing.T) {
 			p := helperCommand(t, tc.command...)
 			p.Env = append(p.Env, tc.env...)
@@ -348,8 +356,8 @@ Build 'null.example' finished.
 			if err != nil {
 				t.Fatalf("%v: %s", err, bs)
 			}
-			if diff := cmp.Diff(tc.expected, string(bs)); diff != "" {
-				t.Fatalf("unexpected output (+expected -actual): %s", diff)
+			if !strings.Contains(string(bs), tc.expected) {
+				t.Fatalf("Should have given output %s.\nReceived: %s", tc.expected, string(bs))
 			}
 		})
 	}
