@@ -50,7 +50,7 @@ func (d *SSMDriver) StartSession(ctx context.Context, input ssm.StartSessionInpu
 
 	var output *ssm.StartSessionOutput
 	err := retry.Config{
-		ShouldRetry: func(err error) bool { return isAWSErr(err, "TargetNotConnected", "") },
+		ShouldRetry: func(err error) bool { return IsAWSErr(err, "TargetNotConnected", "") },
 		RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 60 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) (err error) {
 		output, err = d.SvcClient.StartSessionWithContext(ctx, &input)

@@ -198,7 +198,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	err = retry.Config{
 		Tries: 11,
 		ShouldRetry: func(err error) bool {
-			if isAWSErr(err, "InvalidParameterValue", "iamInstanceProfile") {
+			if IsAWSErr(err, "InvalidParameterValue", "iamInstanceProfile") {
 				return true
 			}
 			return false
@@ -209,7 +209,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		return err
 	})
 
-	if isAWSErr(err, "VPCIdNotSpecified", "No default VPC for this user") && subnetId == "" {
+	if IsAWSErr(err, "VPCIdNotSpecified", "No default VPC for this user") && subnetId == "" {
 		err := fmt.Errorf("Error launching source instance: a valid Subnet Id was not specified")
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -247,7 +247,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 
 	var r *ec2.DescribeInstancesOutput
 	err = retry.Config{Tries: 11, ShouldRetry: func(err error) bool {
-		if isAWSErr(err, "InvalidInstanceID.NotFound", "") {
+		if IsAWSErr(err, "InvalidInstanceID.NotFound", "") {
 			return true
 		}
 		return false
@@ -292,7 +292,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		ec2Tags.Report(ui)
 		// Retry creating tags for about 2.5 minutes
 		err = retry.Config{Tries: 11, ShouldRetry: func(error) bool {
-			if isAWSErr(err, "InvalidInstanceID.NotFound", "") {
+			if IsAWSErr(err, "InvalidInstanceID.NotFound", "") {
 				return true
 			}
 			return false
