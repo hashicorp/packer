@@ -669,7 +669,7 @@ func TestSensitiveVars(t *testing.T) {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
 
-		ccf = NewCore(&CoreConfig{
+		ccf := NewCore(&CoreConfig{
 			Template:  tpl,
 			Variables: tc.Vars,
 			Version:   "1.0.0",
