@@ -163,7 +163,7 @@ func TestSSHBastion(t *testing.T) {
 
 }
 
-func TestSSHConfigFunc(t *testing.T) {
+func TestSSHConfigFunc_ciphers(t *testing.T) {
 	state := new(multistep.BasicStateBag)
 
 	// No ciphers set
@@ -193,6 +193,42 @@ func TestSSHConfigFunc(t *testing.T) {
 	}
 	if sshConfig.Config.Ciphers[0] != "partycipher" {
 		t.Fatalf("ssh_ciphers should be a direct passthrough.")
+	}
+	if c.SSHCertificateFile != "" {
+		t.Fatalf("Identity certificate somehow set")
+	}
+}
+
+func TestSSHConfigFunc_kexAlgos(t *testing.T) {
+	state := new(multistep.BasicStateBag)
+
+	// No ciphers set
+	c := &Config{
+		Type: "ssh",
+	}
+
+	f := c.SSHConfigFunc()
+	sshConfig, _ := f(state)
+	if sshConfig.Config.KeyExchanges != nil {
+		t.Fatalf("Shouldn't set KeyExchanges if communicator config option " +
+			"ssh_key_exchange_algorithms is unset.")
+	}
+
+	// Ciphers are set
+	c = &Config{
+		Type: "ssh",
+		SSH: SSH{
+			SSHKEXAlgos: []string{"partyalgo"},
+		},
+	}
+	f = c.SSHConfigFunc()
+	sshConfig, _ = f(state)
+	if sshConfig.Config.KeyExchanges == nil {
+		t.Fatalf("Should set SSHKEXAlgos if communicator config option " +
+			"ssh_key_exchange_algorithms is set.")
+	}
+	if sshConfig.Config.KeyExchanges[0] != "partyalgo" {
+		t.Fatalf("ssh_key_exchange_algorithms should be a direct passthrough.")
 	}
 	if c.SSHCertificateFile != "" {
 		t.Fatalf("Identity certificate somehow set")
