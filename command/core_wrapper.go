@@ -16,7 +16,8 @@ func (c *CoreWrapper) Initialize() hcl.Diagnostics {
 	if err != nil {
 		return hcl.Diagnostics{
 			&hcl.Diagnostic{
-				Detail: err.Error(),
+				Detail:   err.Error(),
+				Severity: hcl.DiagError,
 			},
 		}
 	}
