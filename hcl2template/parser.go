@@ -70,7 +70,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		hclFiles, jsonFiles, moreDiags := GetHCL2Files(filename, hcl2FileExt, hcl2JsonFileExt)
 		diags = append(diags, moreDiags...)
 		if len(hclFiles)+len(jsonFiles) == 0 {
-			diags = append(moreDiags, &hcl.Diagnostic{
+			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Could not find any config file in " + filename,
 				Detail: "A config file must be suffixed with `.pkr.hcl` or " +
@@ -96,8 +96,17 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	if isDir, err := isDir(basedir); err == nil && !isDir {
 		basedir = filepath.Dir(basedir)
 	}
+	wd, err := os.Getwd()
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Could not find current working directory",
+			Detail:   err.Error(),
+		})
+	}
 	cfg := &PackerConfig{
 		Basedir:               basedir,
+		Cwd:                   wd,
 		builderSchemas:        p.BuilderSchemas,
 		provisionersSchemas:   p.ProvisionersSchemas,
 		postProcessorsSchemas: p.PostProcessorsSchemas,

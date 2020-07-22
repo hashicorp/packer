@@ -77,6 +77,9 @@ func testParse(t *testing.T, tests []parseTest) {
 					ProvisionerBlock{},
 					PostProcessorBlock{},
 				),
+				cmpopts.IgnoreFields(PackerConfig{},
+					"Cwd", // Cwd will change for every computer
+				),
 				cmpopts.IgnoreTypes(HCL2Ref{}),
 				cmpopts.IgnoreTypes([]hcl.Range{}),
 				cmpopts.IgnoreTypes(hcl.Range{}),
