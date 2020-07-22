@@ -7,7 +7,7 @@ build {
 		"source.null.example"
 	]
 	provisioner "shell-local" {
-		script = "./test-fixtures/hcl/reprepare/hello.sh"
+		script = "./${path.root}/hello.sh"
 		environment_vars = ["USER=packeruser", "BUILDER=${upper(build.ID)}"]
 	}
 }
