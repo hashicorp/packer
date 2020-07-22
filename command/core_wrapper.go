@@ -5,6 +5,8 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
+// CoreWrapper wraps a packer.Core in order to have it's Initialize func return
+// a diagnostic.
 type CoreWrapper struct {
 	*packer.Core
 }
