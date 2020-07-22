@@ -1,13 +1,13 @@
 # Packer
 
-[![Build Status][travis-badge]][travis]
+[![Build Status][circleci-badge]][circleci]
 [![Windows Build Status][appveyor-badge]][appveyor]
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/hashicorp/packer)](https://pkg.go.dev/github.com/hashicorp/packer)
 [![GoReportCard][report-badge]][report]
 [![codecov](https://codecov.io/gh/hashicorp/packer/branch/master/graph/badge.svg)](https://codecov.io/gh/hashicorp/packer)
 
-[travis-badge]: https://travis-ci.org/hashicorp/packer.svg?branch=master
-[travis]: https://travis-ci.org/hashicorp/packer
+[circleci-badge]: https://circleci.com/gh/hashicorp/packer.svg?style=svg
+[circleci]: https://app.circleci.com/pipelines/github/hashicorp/packer
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/miavlgnp989e5obc/branch/master?svg=true
 [appveyor]: https://ci.appveyor.com/project/hashicorp/packer
 [godoc-badge]: https://godoc.org/github.com/hashicorp/packer?status.svg
