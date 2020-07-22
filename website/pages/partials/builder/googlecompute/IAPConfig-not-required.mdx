@@ -6,8 +6,6 @@
   - You must have the gcloud sdk installed on the computer running Packer.
   - You must be using a Service Account with a credentials file (using the
   	 account_file option in the Packer template)
-  - This is currently only implemented for the SSH communicator, not the
-    WinRM Communicator.
   - You must add the given service account to project level IAP permissions
     in https://console.cloud.google.com/security/iap. To do so, click
     "project" > "SSH and TCP resoures" > "All Tunnel Resources" >
@@ -24,4 +22,4 @@
   Default: ".sh"
 
 - `iap_tunnel_launch_wait` (int) - How long to wait, in seconds, before assuming a tunnel launch was
-  successful. Defaults to 30 seconds.
+  successful. Defaults to 30 seconds for SSH or 40 seconds for WinRM.
