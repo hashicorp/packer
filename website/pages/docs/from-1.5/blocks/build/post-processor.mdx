@@ -23,13 +23,14 @@ build {
 }
 ```
 
-Post-processors run after the image is built by the builder and provisioned by
-the provisioner(s). Post-processors are optional, and they can be used to
-upload artifacts, re-package, or more. The list of available post-processors
-can be found in the [post-processors](/docs/post-processors) section.
+Post-processors run after each defined build. A post-processor takes the
+`Artifact` from build/provision steps or the `Artifact` from a previous
+`post-processor`. Post-processors are optional, and they can be used to upload
+artifacts, re-package, or more. The list of available post-processors can be
+found in the [post-processors](/docs/post-processors) section.
 
 -> Note: The input 'artifact' received by a post-processor will be automatically
-deleted.
+deleted by default.
 
 # Keep an input artifact
 
@@ -76,3 +77,9 @@ The values within `only` or `except` are _source names_, not builder types.
 
 Packer allows to access connection information and basic instance state information from a post-processor. These information are stored in the `build` variable.
 Check out the [Contextual Variables](/docs/from-1.5/contextual-variables) documentation to learn more about and see some examples of how to use them.
+
+### Related
+
+* The [post-processors block](/docs/from-1.5/blocks/build/post-processor) 
+  allows to define one or more chain of `post-processor` that will take the
+  output from the build and provision steps.
