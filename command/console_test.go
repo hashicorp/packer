@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -12,6 +13,10 @@ import (
 )
 
 func Test_console(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd: %v", err)
+	}
 
 	tc := []struct {
 		piped    string
@@ -25,6 +30,8 @@ func Test_console(t *testing.T) {
 		{"upper(var.fruit)", []string{"console", filepath.Join(testFixture("var-arg"), "fruit_builder.pkr.hcl")}, []string{"PKR_VAR_fruit=potato"}, "POTATO\n"},
 		{"1 + 5", []string{"console", "--config-type=hcl2"}, nil, "6\n"},
 		{"var.images", []string{"console", filepath.Join(testFixture("var-arg"), "map.pkr.hcl")}, nil, "{\n" + `  "key" = "value"` + "\n}\n"},
+		{"path.cwd", []string{"console", filepath.Join(testFixture("var-arg"), "map.pkr.hcl")}, nil, strings.ReplaceAll(cwd, `\`, `/`) + "\n"},
+		{"path.root", []string{"console", filepath.Join(testFixture("var-arg"), "map.pkr.hcl")}, nil, strings.ReplaceAll(testFixture("var-arg"), `\`, `/`) + "\n"},
 	}
 
 	for _, tc := range tc {

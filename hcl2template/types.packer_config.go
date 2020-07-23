@@ -16,6 +16,8 @@ import (
 type PackerConfig struct {
 	// Directory where the config files are defined
 	Basedir string
+	// directory Packer was called from
+	Cwd string
 
 	// Available Source blocks
 	Sources map[SourceRef]SourceBlock
@@ -49,6 +51,7 @@ type ValidationOptions struct {
 const (
 	inputVariablesAccessor = "var"
 	localsAccessor         = "local"
+	pathVariablesAccessor  = "path"
 	sourcesAccessor        = "source"
 	buildAccessor          = "build"
 )
@@ -69,6 +72,10 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 				"name": cty.UnknownVal(cty.String),
 			}),
 			buildAccessor: cty.UnknownVal(cty.EmptyObject),
+			pathVariablesAccessor: cty.ObjectVal(map[string]cty.Value{
+				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
+				"root": cty.StringVal(strings.ReplaceAll(cfg.Basedir, `\`, `/`)),
+			}),
 		},
 	}
 	for k, v := range variables {

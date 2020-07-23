@@ -72,6 +72,18 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 			return err
 		}
 		raws[i] = raw
+		{
+			// reset target to zero.
+			// In HCL2, we need to prepare provisioners/post-processors after a
+			// builder has started in order to have build values correctly
+			// extrapolated. Packer plugins have never been prepared twice in
+			// the past and some of them set fields during their Validation
+			// steps; which end up in an invalid provisioner/post-processor,
+			// like in [GH-9596]. This ensures Packer plugin will be reset
+			// right before we Prepare them.
+			p := reflect.ValueOf(target).Elem()
+			p.Set(reflect.Zero(p.Type()))
+		}
 	}
 	if config == nil {
 		config = &DecodeOpts{Interpolate: true}

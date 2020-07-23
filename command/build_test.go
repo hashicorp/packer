@@ -7,6 +7,8 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -319,6 +321,44 @@ func TestBuild(t *testing.T) {
 			defer tt.cleanup(t)
 			run(t, tt.args, tt.expectedCode)
 			tt.fileCheck.verify(t)
+		})
+	}
+}
+
+func Test_build_output(t *testing.T) {
+
+	tc := []struct {
+		command  []string
+		env      []string
+		expected string
+		runtime  string
+	}{
+		{[]string{"build", "--color=false", testFixture("hcl", "reprepare", "shell-local.pkr.hcl")}, nil,
+			`
+    null.example: hello from the NULL builder packeruser
+Build 'null.example' finished.
+`, "posix"},
+		{[]string{"build", "--color=false", testFixture("hcl", "reprepare", "shell-local-windows.pkr.hcl")}, nil,
+			`
+    null.example: hello from the NULL  builder packeruser
+Build 'null.example' finished.
+`, "windows"},
+	}
+
+	for _, tc := range tc {
+		if (runtime.GOOS == "windows") != (tc.runtime == "windows") {
+			continue
+		}
+		t.Run(fmt.Sprintf("packer %s", tc.command), func(t *testing.T) {
+			p := helperCommand(t, tc.command...)
+			p.Env = append(p.Env, tc.env...)
+			bs, err := p.Output()
+			if err != nil {
+				t.Fatalf("%v: %s", err, bs)
+			}
+			if !strings.Contains(string(bs), tc.expected) {
+				t.Fatalf("Should have given output %s.\nReceived: %s", tc.expected, string(bs))
+			}
 		})
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
@@ -70,7 +71,17 @@ func Run(ctx context.Context, ui packer.Ui, config *Config, generatedData map[st
 	}
 
 	for _, script := range scripts {
-		interpolatedCmds, err := createInterpolatedCommands(config, script, flattenedEnvVars)
+		// use absolute path in case the script is linked with forward slashes
+		// on windows.
+		absScript, err := filepath.Abs(script)
+		if err != nil {
+			return false, fmt.Errorf(
+				"Error executing script: %s\n%v\n",
+				absScript,
+				err,
+			)
+		}
+		interpolatedCmds, err := createInterpolatedCommands(config, absScript, flattenedEnvVars)
 		if err != nil {
 			return false, err
 		}
@@ -91,7 +102,7 @@ func Run(ctx context.Context, ui packer.Ui, config *Config, generatedData map[st
 			return false, fmt.Errorf(
 				"Error executing script: %s\n\n"+
 					"Please see output above for more information.",
-				script)
+				absScript)
 		}
 
 		if err := config.ValidExitCode(cmd.ExitStatus()); err != nil {

@@ -144,6 +144,7 @@ export default [
       'variables',
       'locals',
       'contextual-variables',
+      'path-variables',
       'syntax',
       'onlyexcept',
       'expressions',
