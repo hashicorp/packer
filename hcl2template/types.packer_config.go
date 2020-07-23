@@ -249,41 +249,45 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
 // according provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocks []*PostProcessorBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocksList [][]*PostProcessorBlock, ectx *hcl.EvalContext) ([][]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	res := []packer.CoreBuildPostProcessor{}
-	for _, ppb := range blocks {
-		if ppb.OnlyExcept.Skip(source.String()) {
-			continue
-		}
+	res := [][]packer.CoreBuildPostProcessor{}
+	for _, blocks := range blocksList {
+		pps := []packer.CoreBuildPostProcessor{}
+		for _, ppb := range blocks {
+			if ppb.OnlyExcept.Skip(source.String()) {
+				continue
+			}
 
-		name := ppb.PName
-		if name == "" {
-			name = ppb.PType
-		}
-		// -except
-		exclude := false
-		for _, exceptGlob := range cfg.except {
-			if exceptGlob.Match(name) {
-				exclude = true
+			name := ppb.PName
+			if name == "" {
+				name = ppb.PType
+			}
+			// -except
+			exclude := false
+			for _, exceptGlob := range cfg.except {
+				if exceptGlob.Match(name) {
+					exclude = true
+					break
+				}
+			}
+			if exclude {
 				break
 			}
-		}
-		if exclude {
-			break
-		}
 
-		postProcessor, moreDiags := cfg.startPostProcessor(source, ppb, ectx)
-		diags = append(diags, moreDiags...)
-		if moreDiags.HasErrors() {
-			continue
+			postProcessor, moreDiags := cfg.startPostProcessor(source, ppb, ectx)
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
+			pps = append(pps, packer.CoreBuildPostProcessor{
+				PostProcessor:     postProcessor,
+				PName:             ppb.PName,
+				PType:             ppb.PType,
+				KeepInputArtifact: ppb.KeepInputArtifact,
+			})
 		}
-		res = append(res, packer.CoreBuildPostProcessor{
-			PostProcessor:     postProcessor,
-			PName:             ppb.PName,
-			PType:             ppb.PType,
-			KeepInputArtifact: ppb.KeepInputArtifact,
-		})
+		res = append(res, pps)
 	}
 
 	return res, diags
@@ -382,11 +386,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			if moreDiags.HasErrors() {
 				continue
 			}
-			postProcessors, moreDiags := cfg.getCoreBuildPostProcessors(src, build.PostProcessors, cfg.EvalContext(variables))
-			pps := [][]packer.CoreBuildPostProcessor{}
-			if len(postProcessors) > 0 {
-				pps = [][]packer.CoreBuildPostProcessor{postProcessors}
-			} // TODO(azr): remove this
+			pps, moreDiags := cfg.getCoreBuildPostProcessors(src, build.getPostProcessorBlocks(), cfg.EvalContext(variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue

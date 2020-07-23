@@ -92,3 +92,10 @@ func (cfg *PackerConfig) startPostProcessor(source SourceBlock, pp *PostProcesso
 	}
 	return hclPostProcessor, diags
 }
+
+func (b BuildBlock) getPostProcessorBlocks() [][]*PostProcessorBlock {
+	if len(b.PostProcessors) == 0 && len(b.PostProcessorsLists) == 0 {
+		return nil
+	}
+	return append(b.PostProcessorsLists, b.PostProcessors)
+}

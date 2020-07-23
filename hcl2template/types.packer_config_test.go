@@ -99,6 +99,18 @@ func TestParser_complete(t *testing.T) {
 								PType: "amazon-import",
 							},
 						},
+						PostProcessorsLists: [][]*PostProcessorBlock{
+							{
+								{
+									PType: "amazon-import",
+									PName: "first-nested-post-processor",
+								},
+								{
+									PType: "amazon-import",
+									PName: "second-nested-post-processor",
+								},
+							},
+						},
 					},
 				},
 			},
@@ -124,6 +136,22 @@ func TestParser_complete(t *testing.T) {
 						},
 					},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{
+						{
+							{
+								PType: "amazon-import",
+								PName: "first-nested-post-processor",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: basicMockPostProcessor,
+								},
+							},
+							{
+								PType: "amazon-import",
+								PName: "second-nested-post-processor",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: basicMockPostProcessor,
+								},
+							},
+						},
 						{
 							{
 								PType: "amazon-import",
@@ -171,6 +199,22 @@ func TestParser_complete(t *testing.T) {
 						},
 					},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{
+						{
+							{
+								PType: "amazon-import",
+								PName: "first-nested-post-processor",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: basicMockPostProcessor,
+								},
+							},
+							{
+								PType: "amazon-import",
+								PName: "second-nested-post-processor",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: basicMockPostProcessor,
+								},
+							},
+						},
 						{
 							{
 								PType: "amazon-import",
