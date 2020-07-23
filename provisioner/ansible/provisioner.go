@@ -561,7 +561,8 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			// In this situation, we need to make sure we have the
 			// private key we actually use to access the instance.
 			SSHPrivateKeyFile := generatedData["SSHPrivateKeyFile"].(string)
-			if SSHPrivateKeyFile != "" {
+			SSHAgentAuth := generatedData["SSHAgentAuth"].(bool)
+			if SSHPrivateKeyFile != "" || SSHAgentAuth {
 				privKeyFile = SSHPrivateKeyFile
 			} else {
 				// See if we can get a private key and write that to a tmpfile
@@ -695,7 +696,7 @@ func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile s
 		args = append(args, "-e", fmt.Sprintf("packer_http_addr=%s", httpAddr))
 	}
 
-	if p.generatedData["ConnType"] == "ssh" {
+	if p.generatedData["ConnType"] == "ssh" && len(privKeyFile) > 0 {
 		// Add ssh extra args to set IdentitiesOnly
 		args = append(args, "--ssh-extra-args", "'-o IdentitiesOnly=yes'")
 	}
