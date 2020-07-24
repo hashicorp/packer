@@ -58,7 +58,7 @@ type BuildBlock struct {
 	// will be ran against the sources.
 	ProvisionerBlocks []*ProvisionerBlock
 
-	// ProvisionerBlocks references the top list of HCL post-processors block
+	// PostProcessorBlock references the top list of HCL post-processors block
 	// that will be run against the artifacts from the provisioning steps.
 	PostProcessors []*PostProcessorBlock
 
