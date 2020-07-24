@@ -497,18 +497,18 @@ func (p *PackerConfig) printBuilds() string {
 			}
 			fmt.Fprintf(out, "      %s\n", str)
 		}
-		fmt.Fprintf(out, "\n    post-processors:\n\n")
+		fmt.Fprintf(out, "\n    post-processors:\n")
 		if len(build.PostProcessorsLists) == 0 {
-			fmt.Fprintf(out, "      <no post-processor>\n")
+			fmt.Fprintf(out, "\n      <no post-processor>\n")
 		}
 		for i, ppList := range build.PostProcessorsLists {
-			fmt.Fprintf(out, "\n      %d:\n\n", i)
+			fmt.Fprintf(out, "\n      %d:\n", i)
 			for _, pp := range ppList {
 				str := pp.PType
 				if pp.PName != "" {
 					str = strings.Join([]string{pp.PType, pp.PName}, ".")
 				}
-				fmt.Fprintf(out, "      %s\n", str)
+				fmt.Fprintf(out, "        %s\n", str)
 			}
 		}
 	}

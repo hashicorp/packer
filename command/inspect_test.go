@@ -84,7 +84,15 @@ Use it at will.
 
     post-processors:
 
-      manifest
+      0:
+        manifest
+
+      1:
+        shell-local
+
+      2:
+        manifest
+        shell-local
 
 `},
 	}

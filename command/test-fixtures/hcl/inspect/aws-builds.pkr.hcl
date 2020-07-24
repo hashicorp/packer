@@ -26,4 +26,15 @@ EOF
 
   post-processor "manifest" {
   }
+
+  post-processor "shell-local" {
+  }
+
+  post-processors {
+    post-processor "manifest" {
+    }
+
+    post-processor "shell-local" {
+    }
+  }
 }
