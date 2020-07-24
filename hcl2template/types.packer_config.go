@@ -29,6 +29,8 @@ type PackerConfig struct {
 	InputVariables Variables
 	LocalVariables Variables
 
+	LocalBlocks []*LocalBlock
+
 	ValidationOptions
 
 	// Builds is the list of Build blocks defined in the config files.
@@ -42,6 +44,9 @@ type PackerConfig struct {
 
 	except []glob.Glob
 	only   []glob.Glob
+
+	parser *Parser
+	files  []*hcl.File
 }
 
 type ValidationOptions struct {
@@ -113,12 +118,12 @@ func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 // parseLocalVariables looks in the found blocks for 'locals' blocks. It
 // should be called after parsing input variables so that they can be
 // referenced.
-func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*Local, hcl.Diagnostics) {
+func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*LocalBlock, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	content, moreDiags := f.Body.Content(configSchema)
 	diags = append(diags, moreDiags...)
-	var locals []*Local
+	var locals []*LocalBlock
 
 	for _, block := range content.Blocks {
 		switch block.Type {
@@ -136,7 +141,7 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*Local, hcl.Diagnosti
 					})
 					return nil, diags
 				}
-				locals = append(locals, &Local{
+				locals = append(locals, &LocalBlock{
 					Name: name,
 					Expr: attr.Expr,
 				})
@@ -147,7 +152,7 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*Local, hcl.Diagnosti
 	return locals, diags
 }
 
-func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
+func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	if len(locals) > 0 && c.LocalVariables == nil {
@@ -187,7 +192,7 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*Local) hcl.Diagnostics {
 	return diags
 }
 
-func (c *PackerConfig) evaluateLocalVariable(local *Local) hcl.Diagnostics {
+func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	value, moreDiags := local.Expr.Value(c.EvalContext(nil))

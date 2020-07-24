@@ -109,7 +109,7 @@ func (m *Meta) GetConfig(cla *MetaArgs) (packer.Handler, int) {
 	}
 }
 
-func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (*packer.Core, int) {
+func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (packer.Handler, int) {
 	// Parse the template
 	var tpl *template.Template
 	var err error
@@ -133,11 +133,16 @@ func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (*packer.Core, int) {
 		m.Ui.Error(err.Error())
 		ret = 1
 	}
-	return core, ret
+	return &CoreWrapper{core}, ret
 }
 
 func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int {
 	packerStarter, ret := c.GetConfig(&cla.MetaArgs)
+	if ret != 0 {
+		return ret
+	}
+	diags := packerStarter.Initialize()
+	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
 	}

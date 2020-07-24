@@ -1,0 +1,15 @@
+{
+    "variables": {
+        "null_var": null
+    },
+    "builders": [{
+        "type": "null",
+        "communicator": "none"
+    }],
+    "provisioners": [
+        {
+            "type": "shell-local",
+            "inline": "echo yop"
+        }
+    ]
+}

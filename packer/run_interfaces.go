@@ -26,6 +26,7 @@ type Evaluator interface {
 
 // The packer.Handler handles all Packer things.
 type Handler interface {
+	Initialize() hcl.Diagnostics
 	Evaluator
 	BuildGetter
 	ConfigFixer

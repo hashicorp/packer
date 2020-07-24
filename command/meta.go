@@ -3,7 +3,6 @@ package command
 import (
 	"bufio"
 	"flag"
-	"fmt"
 	"io"
 	"os"
 
@@ -59,12 +58,7 @@ func (m *Meta) Core(tpl *template.Template, cla *MetaArgs) (*packer.Core, error)
 	}
 	config.Variables = cla.Vars
 
-	// Init the core
-	core, err := packer.NewCore(&config)
-	if err != nil {
-		return nil, fmt.Errorf("Error initializing core: %s", err)
-	}
-
+	core := packer.NewCore(&config)
 	return core, nil
 }
 

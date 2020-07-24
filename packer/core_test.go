@@ -37,10 +37,11 @@ func TestCoreBuildNames(t *testing.T) {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
 
-		core, err := NewCore(&CoreConfig{
+		core := NewCore(&CoreConfig{
 			Template:  tpl,
 			Variables: tc.Vars,
 		})
+		err = core.Initialize()
 		if err != nil {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
@@ -487,11 +488,12 @@ func TestCoreValidate(t *testing.T) {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
 
-		_, err = NewCore(&CoreConfig{
+		core := NewCore(&CoreConfig{
 			Template:  tpl,
 			Variables: tc.Vars,
 			Version:   "1.0.0",
 		})
+		err = core.Initialize()
 
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
@@ -535,10 +537,11 @@ func TestCore_InterpolateUserVars(t *testing.T) {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
 
-		ccf, err := NewCore(&CoreConfig{
+		ccf := NewCore(&CoreConfig{
 			Template: tpl,
 			Version:  "1.0.0",
 		})
+		err = ccf.Initialize()
 
 		if (err != nil) != tc.Err {
 			if tc.Err == false {
@@ -606,11 +609,12 @@ func TestCore_InterpolateUserVars_VarFile(t *testing.T) {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
 
-		ccf, err := NewCore(&CoreConfig{
+		ccf := NewCore(&CoreConfig{
 			Template:  tpl,
 			Version:   "1.0.0",
 			Variables: tc.Variables,
 		})
+		err = ccf.Initialize()
 
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
@@ -665,11 +669,12 @@ func TestSensitiveVars(t *testing.T) {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
 
-		_, err = NewCore(&CoreConfig{
+		ccf := NewCore(&CoreConfig{
 			Template:  tpl,
 			Variables: tc.Vars,
 			Version:   "1.0.0",
 		})
+		err = ccf.Initialize()
 
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
@@ -744,7 +749,7 @@ func TestEnvAndFileVars(t *testing.T) {
 		t.Fatalf("err: %s\n\n%s", "complex-recursed-env-user-var-file.json", err)
 	}
 
-	ccf, err := NewCore(&CoreConfig{
+	ccf := NewCore(&CoreConfig{
 		Template: tpl,
 		Version:  "1.0.0",
 		Variables: map[string]string{
@@ -753,6 +758,8 @@ func TestEnvAndFileVars(t *testing.T) {
 			"final_var": "{{user `env_1`}}/{{user `env_2`}}/{{user `env_4`}}{{user `env_3`}}-{{user `var_1`}}/vmware/{{user `var_2`}}.vmx",
 		},
 	})
+	err = ccf.Initialize()
+
 	expected := map[string]string{
 		"var_1":     "partyparrot",
 		"var_2":     "bulbasaur-5/path/to/nowhere-partyparrot",

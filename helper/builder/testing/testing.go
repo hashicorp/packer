@@ -111,7 +111,7 @@ func Test(t TestT, c TestCase) {
 
 	// Build the core
 	log.Printf("[DEBUG] Initializing core...")
-	core, err := packer.NewCore(&packer.CoreConfig{
+	core := packer.NewCore(&packer.CoreConfig{
 		Components: packer.ComponentFinder{
 			BuilderStore: TestBuilderStore{
 				StartFn: func(n string) (packer.Builder, error) {
@@ -125,6 +125,7 @@ func Test(t TestT, c TestCase) {
 		},
 		Template: tpl,
 	})
+	err = core.Initialize()
 	if err != nil {
 		t.Fatal(fmt.Sprintf("Failed to init core: %s", err))
 		return
