@@ -11,34 +11,30 @@ sidebar_title: <tt>post-processors</tt>
 
 `@include 'from-1.5/beta-hcl2-note.mdx'`
 
-The `post-processors` block allows to define multiple lists of
-`post-processor`s, that will run from the artifact of each build.
+The `post-processors` block allows to define lists of `post-processor`s, that
+will run from the artifact of each build.
 
 ```hcl
 # builds.pkr.hcl
 build {
   # ...
   post-processors {
-    post-processor "checksum" {
+    post-processor "shell-local" { # create an artifice.txt file containing "hello"
+      inline = [ "echo hello > artifice.txt" ]
+    }
+    post-processor "artifice" { # tell packer this is now the new artifact
+      files = ["artifice.txt"]
+    }
+    post-processor "checksum" { # checksum artifice.txt
       checksum_types = [ "md5", "sha512" ] # checksum the artifact
       keep_input_artifact = true           # keep the artifact
     }
   }
-  post-processors {
-    post-processor "alicloud-import" { # upload to alicloud
-    }
-  }
-  post-processors {
-    post-processor "amazon-import" { # upload to amazon
-    }
-  }
-  post-processors {
-    post-processor "googlecompute-import" { # upload to googlecompute
-    }
-  }
+  
 }
 ```
 
-Read the documentation for a [post-processor
-block](/docs/from-1.5/blocks/build/post-processor) to learn more about and see
-some examples of how to use a post-processor.
+The [build.`post-processor` block](/docs/from-1.5/blocks/build/post-processor)
+allows to define multiple post-processors that will run from the `Artifact` of
+each build. Read the `post-processor` documentation to know how to use a
+post-processor.
