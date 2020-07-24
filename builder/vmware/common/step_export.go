@@ -38,22 +38,28 @@ func GetOVFTool() string {
 	return ovftool
 }
 
-func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassword bool) []string {
-	password := url.QueryEscape(c.RemotePassword)
-	username := url.QueryEscape(c.RemoteUser)
+func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassword bool) ([]string, error) {
 
-	if hidePassword {
-		password = "****"
+	ovftool_uri := fmt.Sprintf("vi://%s/%s", c.RemoteHost, displayName)
+	u, err := url.Parse(ovftool_uri)
+	if err != nil {
+		return []string{}, err
 	}
+
+	password := c.RemotePassword
+	if hidePassword {
+		password = "<password_redacted>"
+	}
+	u.User = url.UserPassword(c.RemoteUser, password)
+
 	args := []string{
 		"--noSSLVerify=true",
 		"--skipManifestCheck",
 		"-tt=" + s.Format,
-
-		"vi://" + username + ":" + password + "@" + c.RemoteHost + "/" + displayName,
+		u.String(),
 		s.OutputDir,
 	}
-	return append(s.OVFToolOptions, args...)
+	return append(s.OVFToolOptions, args...), nil
 }
 
 func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -91,9 +97,23 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 	if v, ok := state.GetOk("display_name"); ok {
 		displayName = v.(string)
 	}
-	ui.Message(fmt.Sprintf("Executing: %s %s", ovftool, strings.Join(s.generateArgs(c, displayName, true), " ")))
+	ui_args, err := s.generateArgs(c, displayName, true)
+	if err != nil {
+		err := fmt.Errorf("Couldn't generate ovftool uri: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	ui.Message(fmt.Sprintf("Executing: %s %s", ovftool, strings.Join(ui_args, " ")))
 	var out bytes.Buffer
-	cmd := exec.Command(ovftool, s.generateArgs(c, displayName, false)...)
+	args, err := s.generateArgs(c, displayName, false)
+	if err != nil {
+		err := fmt.Errorf("Couldn't generate ovftool uri: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	cmd := exec.Command(ovftool, args...)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
 		err := fmt.Errorf("Error exporting virtual machine: %s\n%s\n", err, out.String())

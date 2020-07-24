@@ -99,10 +99,16 @@ func (c *DriverConfig) Validate(SkipExport bool) error {
 	// now, so that we don't fail for a simple mistake after a long
 	// build
 	ovftool := GetOVFTool()
-	ovfToolArgs := []string{"--noSSLVerify", "--verifyOnly", fmt.Sprintf("vi://%s:%s@%s",
-		url.QueryEscape(c.RemoteUser),
-		url.QueryEscape(c.RemotePassword),
-		c.RemoteHost)}
+
+	// Generate the uri of the host, with embedded credentials
+	ovftool_uri := fmt.Sprintf("vi://%s", c.RemoteHost)
+	u, err := url.Parse(ovftool_uri)
+	if err != nil {
+		return fmt.Errorf("Couldn't generate uri for ovftool: %s", err)
+	}
+	u.User = url.UserPassword(c.RemoteUser, c.RemotePassword)
+
+	ovfToolArgs := []string{"--noSSLVerify", "--verifyOnly", u.String()}
 
 	var out bytes.Buffer
 	cmdCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
