@@ -4,6 +4,8 @@
 * **New post-processor** Yandex Import [GH-9553]
 
 ### IMPROVEMENTS:
+* builder/amazon-ebs: wrap CreateImage call in a retry to account for eventual
+    consistency [GH-9579]
 * builder/azure: Disable ssh password authentication unless password is
     explicitly specified. [GH-9603]
 * builder/docker: Add options for --cap-add, --cap-drop, --tmpfs, --device
@@ -25,6 +27,8 @@
 * builder/proxmox: Enable Proxmox builder to toggle the firewall parameter for
     network interfaces. [GH-9487]
 * builder/proxmox: Update Proxmox storagePoolTypes [GH-9418]
+* builder/tencent: add key `source_image_name` to get source image by name when
+  creating image [GH-9619]
 * builder/qemu: Add 'cdrom_interface' option to QEMU builder [GH-9483]
 * builder/ucloud: New access config options and run config options. [GH-9466]
 * builder/vsphere-clone: Add `boot_command` support to vsphere-clone builder,
@@ -50,7 +54,8 @@
 * builder/yandex: Allow set `min_disk_size` for an image.
 * builder/yandex: Support authentication by Service Account on instance
     [GH-9383]
-* builder/yandex: yandex: Add new property 'min_disk_size' of built image #9594
+* builder/yandex: yandex: Add new property 'min_disk_size' of built image
+    [GH-9594]
 * communicator/ssh: Add support for OpenSSH certificate signing [GH-9521]
 * communicator/ssh: Allow users to provide a list of ciphers that they want
     Packer to support. [GH-9453]
@@ -61,8 +66,12 @@
     types. [GH-9454]
 * core/hcl: Allow use of `keep_input_artifact` in post processors. [GH-9477]
 * core/hcl: Share build info with Provisioner and Post-Processor via HCL2
-    variables [GH-9444] [GH-9534]
+    variables [GH-9444] [GH-9534] [GH-9622]
 * core: Add on-error flag option to run error-cleanup-provisioner [GH-9429]
+* core: communicator/ssh: Add new `ssh_key_exchange_algorithms` option to
+    supply custom key exchange algorithms in SSH client [GH-9634]
+* core: refactor initialization out from Packer core to allow 
+    `validate --syntax-only` to no error when a variable is not set [GH-9627]
 * hcl2: Handle uint64 buildvars [GH-9585]
 * post-processor/yandex-export: Allow users to utilize generated variables in
     templating. [GH-9555]
@@ -70,7 +79,8 @@
     file [GH-9379]
 * post-processor/yandex-import: Support using URL from yandex-export pp
     [GH-9601]
-* post-processor/yandex-import: Support create the new Image based on another one
+* post-processor/yandex-import: Support creating an Image based on another one
+    [GH-9614]
 * provisioner/ansible: Add template option for templating the inventory file
     lines [GH-9438]
 
