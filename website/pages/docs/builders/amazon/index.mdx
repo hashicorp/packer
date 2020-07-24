@@ -221,6 +221,10 @@ If you have the `spot_price` parameter set to `auto`, you must also add:
 
     ec2:DescribeSpotPriceHistory
 
+If you are using the `vpc_filter` option, you must also add:
+
+    ec2:DescribeVpcs
+
 ## Troubleshooting
 
 ### Attaching IAM Policies to Roles
