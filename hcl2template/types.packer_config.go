@@ -287,7 +287,9 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocksLi
 				KeepInputArtifact: ppb.KeepInputArtifact,
 			})
 		}
-		res = append(res, pps)
+		if len(pps) > 0 {
+			res = append(res, pps)
+		}
 	}
 
 	return res, diags
@@ -386,7 +388,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			if moreDiags.HasErrors() {
 				continue
 			}
-			pps, moreDiags := cfg.getCoreBuildPostProcessors(src, build.getPostProcessorBlocks(), cfg.EvalContext(variables))
+			pps, moreDiags := cfg.getCoreBuildPostProcessors(src, build.PostProcessorsLists, cfg.EvalContext(variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -496,15 +498,18 @@ func (p *PackerConfig) printBuilds() string {
 			fmt.Fprintf(out, "      %s\n", str)
 		}
 		fmt.Fprintf(out, "\n    post-processors:\n\n")
-		if len(build.PostProcessors) == 0 {
+		if len(build.PostProcessorsLists) == 0 {
 			fmt.Fprintf(out, "      <no post-processor>\n")
 		}
-		for _, pp := range build.PostProcessors {
-			str := pp.PType
-			if pp.PName != "" {
-				str = strings.Join([]string{pp.PType, pp.PName}, ".")
+		for i, ppList := range build.PostProcessorsLists {
+			fmt.Fprintf(out, "\n      %d:\n\n", i)
+			for _, pp := range ppList {
+				str := pp.PType
+				if pp.PName != "" {
+					str = strings.Join([]string{pp.PType, pp.PName}, ".")
+				}
+				fmt.Fprintf(out, "      %s\n", str)
 			}
-			fmt.Fprintf(out, "      %s\n", str)
 		}
 	}
 	return out.String()

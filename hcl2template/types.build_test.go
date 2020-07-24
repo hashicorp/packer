@@ -34,9 +34,11 @@ func TestParse_build(t *testing.T) {
 								PType: "file",
 							},
 						},
-						PostProcessors: []*PostProcessorBlock{
+						PostProcessorsLists: [][]*PostProcessorBlock{
 							{
-								PType: "amazon-import",
+								{
+									PType: "amazon-import",
+								},
 							},
 						},
 					},
@@ -139,22 +141,30 @@ func TestParse_build(t *testing.T) {
 							SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604", LocalName: "aws-ubuntu-16.04"},
 						},
 						ProvisionerBlocks: nil,
-						PostProcessors: []*PostProcessorBlock{
+						PostProcessorsLists: [][]*PostProcessorBlock{
 							{
-								PType:      "amazon-import",
-								OnlyExcept: OnlyExcept{Only: []string{"virtualbox-iso.ubuntu-1204"}, Except: nil},
+								{
+									PType:      "amazon-import",
+									OnlyExcept: OnlyExcept{Only: []string{"virtualbox-iso.ubuntu-1204"}, Except: nil},
+								},
 							},
 							{
-								PType:      "manifest",
-								OnlyExcept: OnlyExcept{Only: nil, Except: []string{"virtualbox-iso.ubuntu-1204"}},
+								{
+									PType:      "manifest",
+									OnlyExcept: OnlyExcept{Only: nil, Except: []string{"virtualbox-iso.ubuntu-1204"}},
+								},
 							},
 							{
-								PType:      "amazon-import",
-								OnlyExcept: OnlyExcept{Only: []string{"amazon-ebs.aws-ubuntu-16.04"}, Except: nil},
+								{
+									PType:      "amazon-import",
+									OnlyExcept: OnlyExcept{Only: []string{"amazon-ebs.aws-ubuntu-16.04"}, Except: nil},
+								},
 							},
 							{
-								PType:      "manifest",
-								OnlyExcept: OnlyExcept{Only: nil, Except: []string{"amazon-ebs.aws-ubuntu-16.04"}},
+								{
+									PType:      "manifest",
+									OnlyExcept: OnlyExcept{Only: nil, Except: []string{"amazon-ebs.aws-ubuntu-16.04"}},
+								},
 							},
 						},
 					},
@@ -180,6 +190,8 @@ func TestParse_build(t *testing.T) {
 									},
 								},
 							},
+						},
+						{
 							{
 								PType: "manifest",
 								PostProcessor: &HCL2PostProcessor{
@@ -212,6 +224,8 @@ func TestParse_build(t *testing.T) {
 									},
 								},
 							},
+						},
+						{
 							{
 								PType: "amazon-import",
 								PostProcessor: &HCL2PostProcessor{

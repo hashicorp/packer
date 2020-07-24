@@ -58,10 +58,6 @@ type BuildBlock struct {
 	// will be ran against the sources.
 	ProvisionerBlocks []*ProvisionerBlock
 
-	// PostProcessorBlock references the top list of HCL post-processors block
-	// that will be run against the artifacts from the provisioning steps.
-	PostProcessors []*PostProcessorBlock
-
 	// PostProcessorLists references the lists of lists of HCL post-processors
 	// block that will be run against the artifacts from the provisioning
 	// steps.
@@ -139,7 +135,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 			if moreDiags.HasErrors() {
 				continue
 			}
-			build.PostProcessors = append(build.PostProcessors, pp)
+			build.PostProcessorsLists = append(build.PostProcessorsLists, []*PostProcessorBlock{pp})
 		case buildPostProcessorsLabel:
 
 			content, moreDiags := block.Body.Content(postProcessorsSchema)

@@ -89,17 +89,19 @@ func TestParser_complete(t *testing.T) {
 							},
 							{PType: "file"},
 						},
-						PostProcessors: []*PostProcessorBlock{
-							{
-								PType:             "amazon-import",
-								PName:             "something",
-								KeepInputArtifact: pTrue,
-							},
-							{
-								PType: "amazon-import",
-							},
-						},
 						PostProcessorsLists: [][]*PostProcessorBlock{
+							{
+								{
+									PType:             "amazon-import",
+									PName:             "something",
+									KeepInputArtifact: pTrue,
+								},
+							},
+							{
+								{
+									PType: "amazon-import",
+								},
+							},
 							{
 								{
 									PType: "amazon-import",
@@ -149,6 +151,24 @@ func TestParser_complete(t *testing.T) {
 						{
 							{
 								PType: "amazon-import",
+								PName: "something",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: basicMockPostProcessor,
+								},
+								KeepInputArtifact: pTrue,
+							},
+						},
+						{
+							{
+								PType: "amazon-import",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: basicMockPostProcessor,
+								},
+							},
+						},
+						{
+							{
+								PType: "amazon-import",
 								PName: "first-nested-post-processor",
 								PostProcessor: &HCL2PostProcessor{
 									PostProcessor: basicMockPostProcessor,
@@ -173,22 +193,6 @@ func TestParser_complete(t *testing.T) {
 							{
 								PType: "amazon-import",
 								PName: "fourth-nested-post-processor",
-								PostProcessor: &HCL2PostProcessor{
-									PostProcessor: basicMockPostProcessor,
-								},
-							},
-						},
-						{
-							{
-								PType: "amazon-import",
-								PName: "something",
-								PostProcessor: &HCL2PostProcessor{
-									PostProcessor: basicMockPostProcessor,
-								},
-								KeepInputArtifact: pTrue,
-							},
-							{
-								PType: "amazon-import",
 								PostProcessor: &HCL2PostProcessor{
 									PostProcessor: basicMockPostProcessor,
 								},
@@ -228,6 +232,24 @@ func TestParser_complete(t *testing.T) {
 						{
 							{
 								PType: "amazon-import",
+								PName: "something",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: basicMockPostProcessor,
+								},
+								KeepInputArtifact: pTrue,
+							},
+						},
+						{
+							{
+								PType: "amazon-import",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: basicMockPostProcessor,
+								},
+							},
+						},
+						{
+							{
+								PType: "amazon-import",
 								PName: "first-nested-post-processor",
 								PostProcessor: &HCL2PostProcessor{
 									PostProcessor: basicMockPostProcessor,
@@ -252,22 +274,6 @@ func TestParser_complete(t *testing.T) {
 							{
 								PType: "amazon-import",
 								PName: "fourth-nested-post-processor",
-								PostProcessor: &HCL2PostProcessor{
-									PostProcessor: basicMockPostProcessor,
-								},
-							},
-						},
-						{
-							{
-								PType: "amazon-import",
-								PName: "something",
-								PostProcessor: &HCL2PostProcessor{
-									PostProcessor: basicMockPostProcessor,
-								},
-								KeepInputArtifact: pTrue,
-							},
-							{
-								PType: "amazon-import",
 								PostProcessor: &HCL2PostProcessor{
 									PostProcessor: basicMockPostProcessor,
 								},
