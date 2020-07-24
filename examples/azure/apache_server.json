@@ -1,0 +1,55 @@
+{
+
+    "builders": [{
+
+      "type": "azure-arm",
+
+  
+
+      "client_id": "d8j04jc-03dd-466a-9745-1f5bcmj9yn5a30e",
+
+      "client_secret": "405c41b4-ddc5-4cc1-b473-ae458tu7f1",
+
+      "tenant_id": "aeefb57f-cec2-4491-bf00-2555re4d7b",
+
+      "subscription_id": "52646-f20d-4a7a-a75d-5446b2135a6",
+
+  
+
+      "managed_image_resource_group_name": "myResourceGroup",
+
+      "managed_image_name": "satya",
+
+  
+
+      "os_type": "Linux",
+
+      "image_publisher": "Canonical",
+
+      "image_offer": "UbuntuServer",
+
+      "image_sku": "16.04-LTS",
+
+      
+
+      "location": "East US",
+
+      "vm_size": "Standard_B1S"
+
+    }],
+
+    "provisioners":[{
+
+        "type": "shell",
+
+        "inline": [
+
+          "sudo apt-get update",
+
+          "sudo apt-get install apache2 -y"
+
+        ]
+
+      }]
+
+  }
