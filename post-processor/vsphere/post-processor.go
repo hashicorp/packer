@@ -193,11 +193,13 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 func filterLog(s string, u *url.URL) string {
 	password, passwordSet := u.User.Password()
-	if passwordSet && password != "" {
-		return strings.Replace(s, password, "<password>", -1)
+	if !passwordSet || password == "" {
+		return s
 	}
+	encodedUserPassword := strings.Split(u.User.String(), ":")
+	encodedPassword := encodedUserPassword[len(encodedUserPassword)-1]
 
-	return s
+	return strings.Replace(s, encodedPassword, "<password>", -1)
 }
 
 func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) {
