@@ -102,7 +102,7 @@ func TestGenerateURI_PasswordEscapes(t *testing.T) {
 	}
 }
 
-func TestFilterLogs(t *testing.T) {
+func TestGetEncodedPassword(t *testing.T) {
 
 	// Password is encoded, and contains a colon
 	ovftool_uri := fmt.Sprintf("vi://hostname/Datacenter/host/cluster")
@@ -110,21 +110,21 @@ func TestFilterLogs(t *testing.T) {
 	u, _ := url.Parse(ovftool_uri)
 	u.User = url.UserPassword("us:ername", "P@ssW:rd")
 
-	logstring := "vi://us%3Aername:P%40ssW%3Ard@hostname/Datacenter/host/cluster"
-	outstring := filterLog(logstring, u)
-	expected := "vi://us%3Aername:<password>@hostname/Datacenter/host/cluster"
-	if outstring != expected {
-		t.Fatalf("Should have successfully filtered encoded password. Expected: %s; recieved: %s", expected, outstring)
+	encoded, isSet := getEncodedPassword(u)
+	expected := "P%40ssW%3Ard"
+	if !isSet {
+		t.Fatalf("Password is set but test said it is not")
+	}
+	if encoded != expected {
+		t.Fatalf("Should have successfully gotten encoded password. Expected: %s; recieved: %s", expected, encoded)
 	}
 
 	// There is no password
 	u.User = url.UserPassword("us:ername", "")
 
-	logstring = "vi://us%3Aername:@hostname/Datacenter/host/cluster"
-	outstring = filterLog(logstring, u)
-	expected = "vi://us%3Aername:@hostname/Datacenter/host/cluster"
-	if outstring != expected {
-		t.Fatalf("Should have ignored password filtering since it was not set. Expected: %s; recieved: %s", expected, outstring)
+	_, isSet = getEncodedPassword(u)
+	if isSet {
+		t.Fatalf("Should have determined that password was not set")
 	}
 
 }

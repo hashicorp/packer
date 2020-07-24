@@ -48,7 +48,7 @@ func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassw
 
 	password := c.RemotePassword
 	if hidePassword {
-		password = "<password_redacted>"
+		password = "<password>"
 	}
 	u.User = url.UserPassword(c.RemoteUser, password)
 

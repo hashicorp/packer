@@ -6,17 +6,17 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"net/url"
-	"os"
 	"os/exec"
 	"regexp"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
+	shelllocal "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -144,6 +144,17 @@ func (p *PostProcessor) generateURI() (*url.URL, error) {
 	return u, nil
 }
 
+func getEncodedPassword(u *url.URL) (string, bool) {
+	// filter password from all logging
+	password, passwordSet := u.User.Password()
+	if passwordSet && password != "" {
+		encodedUserPassword := strings.Split(u.User.String(), ":")
+		encodedPassword := encodedUserPassword[len(encodedUserPassword)-1]
+		return encodedPassword, true
+	}
+	return password, false
+}
+
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	source := ""
 	for _, path := range artifact.Files() {
@@ -161,6 +172,10 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	if err != nil {
 		return nil, false, false, err
 	}
+	encodedPassword, isSet := getEncodedPassword(ovftool_uri)
+	if isSet {
+		packer.LogSecretFilter.Set(encodedPassword)
+	}
 
 	args, err := p.BuildArgs(source, ovftool_uri.String())
 	if err != nil {
@@ -169,37 +184,58 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 
-	log.Printf("Starting ovftool with parameters: %s",
-		filterLog(strings.Join(args, " "), ovftool_uri))
+	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
 
-	var errWriter io.Writer
-	var errOut bytes.Buffer
-	cmd := exec.Command(ovftool, args...)
-	errWriter = io.MultiWriter(os.Stderr, &errOut)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = errWriter
-
-	if err := cmd.Run(); err != nil {
-		err := fmt.Errorf("Error uploading virtual machine: %s\n%s\n", err, filterLog(errOut.String(), ovftool_uri))
+	ui.Message("Validating Username and Password with dry-run")
+	err = p.ValidateOvfTool(args, ovftool)
+	if err != nil {
 		return nil, false, false, err
 	}
 
-	ui.Message(filterLog(errOut.String(), ovftool_uri))
+	// Validation has passed, so run for real.
+	ui.Message("Calling OVFtool to upload vm")
+	commandAndArgs := []string{ovftool}
+	commandAndArgs = append(commandAndArgs, args...)
+	comm := &shelllocal.Communicator{
+		ExecuteCommand: commandAndArgs,
+	}
+	flattenedCmd := strings.Join(commandAndArgs, " ")
+	cmd := &packer.RemoteCmd{Command: flattenedCmd}
+	log.Printf("[INFO] (vsphere): starting ovftool command: %s", flattenedCmd)
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
+		return nil, false, false, fmt.Errorf(
+			"Error uploading virtual machine: Please see output above for more information.")
+	}
 
 	artifact = NewArtifact(p.config.Datastore, p.config.VMFolder, p.config.VMName, artifact.Files())
 
 	return artifact, false, false, nil
 }
 
-func filterLog(s string, u *url.URL) string {
-	password, passwordSet := u.User.Password()
-	if !passwordSet || password == "" {
-		return s
-	}
-	encodedUserPassword := strings.Split(u.User.String(), ":")
-	encodedPassword := encodedUserPassword[len(encodedUserPassword)-1]
+func (p *PostProcessor) ValidateOvfTool(args []string, ofvtool string) error {
+	args = append([]string{"--verifyOnly"}, args...)
+	var out bytes.Buffer
+	cmdCtx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(cmdCtx, ovftool, args...)
+	cmd.Stdout = &out
 
-	return strings.Replace(s, encodedPassword, "<password>", -1)
+	// Need to manually close stdin or else the ofvtool call will hang
+	// forever in a situation where the user has provided an invalid
+	// password or username
+	stdin, _ := cmd.StdinPipe()
+	defer stdin.Close()
+
+	if err := cmd.Run(); err != nil {
+		outString := out.String()
+		if strings.Contains(outString, "Enter login information for") {
+			err = fmt.Errorf("Error performing OVFtool dry run; the username " +
+				"or password you provided to ovftool is likely invalid.")
+			return err
+		}
+		return nil
+	}
+	return nil
 }
 
 func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) {
