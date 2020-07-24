@@ -62,7 +62,7 @@ type BuildBlock struct {
 	// that will be run against the artifacts from the provisioning steps.
 	PostProcessors []*PostProcessorBlock
 
-	// ProvisionerBlocks references the lists of lists of HCL post-processors
+	// PostProcessorLists references the lists of lists of HCL post-processors
 	// block that will be run against the artifacts from the provisioning
 	// steps.
 	PostProcessorsLists [][]*PostProcessorBlock
