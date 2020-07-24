@@ -52,6 +52,7 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 
 	// If we're only checking syntax, then we're done already
 	if cla.SyntaxOnly {
+		c.Ui.Say("Syntax-only check passed. Everything looks okay.")
 		return 0
 	}
 
