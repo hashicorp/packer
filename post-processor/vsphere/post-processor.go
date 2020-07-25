@@ -115,6 +115,35 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
+func (p *PostProcessor) generateURI() (*url.URL, error) {
+	// use net/url lib to encode and escape url elements
+	ovftool_uri := fmt.Sprintf("vi://%s/%s/host/%s",
+		p.config.Host,
+		p.config.Datacenter,
+		p.config.Cluster)
+
+	if p.config.ResourcePool != "" {
+		ovftool_uri += "/Resources/" + p.config.ResourcePool
+	}
+
+	u, err := url.Parse(ovftool_uri)
+	if err != nil {
+		return nil, fmt.Errorf("Couldn't generate uri for ovftool: %s", err)
+	}
+	u.User = url.UserPassword(p.config.Username, p.config.Password)
+
+	if p.config.ESXiHost != "" {
+		q := u.Query()
+		if ipv4Regex.MatchString(p.config.ESXiHost) {
+			q.Add("ip", p.config.ESXiHost)
+		} else if hostnameRegex.MatchString(p.config.ESXiHost) {
+			q.Add("dns", p.config.ESXiHost)
+		}
+		u.RawQuery = q.Encode()
+	}
+	return u, nil
+}
+
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	source := ""
 	for _, path := range artifact.Files() {
@@ -128,27 +157,12 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("VMX, OVF or OVA file not found")
 	}
 
-	password := escapeWithSpaces(p.config.Password)
-	ovftool_uri := fmt.Sprintf("vi://%s:%s@%s/%s/host/%s",
-		escapeWithSpaces(p.config.Username),
-		password,
-		p.config.Host,
-		p.config.Datacenter,
-		p.config.Cluster)
-
-	if p.config.ResourcePool != "" {
-		ovftool_uri += "/Resources/" + p.config.ResourcePool
+	ovftool_uri, err := p.generateURI()
+	if err != nil {
+		return nil, false, false, err
 	}
 
-	if p.config.ESXiHost != "" {
-		if ipv4Regex.MatchString(p.config.ESXiHost) {
-			ovftool_uri += "/?ip=" + p.config.ESXiHost
-		} else if hostnameRegex.MatchString(p.config.ESXiHost) {
-			ovftool_uri += "/?dns=" + p.config.ESXiHost
-		}
-	}
-
-	args, err := p.BuildArgs(source, ovftool_uri)
+	args, err := p.BuildArgs(source, ovftool_uri.String())
 	if err != nil {
 		ui.Message(fmt.Sprintf("Failed: %s\n", err))
 	}
@@ -156,11 +170,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 
 	log.Printf("Starting ovftool with parameters: %s",
-		strings.Replace(
-			strings.Join(args, " "),
-			password,
-			"<password>",
-			-1))
+		filterLog(strings.Join(args, " "), ovftool_uri))
 
 	var errWriter io.Writer
 	var errOut bytes.Buffer
@@ -170,20 +180,24 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	cmd.Stderr = errWriter
 
 	if err := cmd.Run(); err != nil {
-		err := fmt.Errorf("Error uploading virtual machine: %s\n%s\n", err, p.filterLog(errOut.String()))
+		err := fmt.Errorf("Error uploading virtual machine: %s\n%s\n", err, filterLog(errOut.String(), ovftool_uri))
 		return nil, false, false, err
 	}
 
-	ui.Message(p.filterLog(errOut.String()))
+	ui.Message(filterLog(errOut.String(), ovftool_uri))
 
 	artifact = NewArtifact(p.config.Datastore, p.config.VMFolder, p.config.VMName, artifact.Files())
 
 	return artifact, false, false, nil
 }
 
-func (p *PostProcessor) filterLog(s string) string {
-	password := escapeWithSpaces(p.config.Password)
-	return strings.Replace(s, password, "<password>", -1)
+func filterLog(s string, u *url.URL) string {
+	password, passwordSet := u.User.Password()
+	if passwordSet && password != "" {
+		return strings.Replace(s, password, "<password>", -1)
+	}
+
+	return s
 }
 
 func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) {
@@ -221,11 +235,4 @@ func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) 
 	args = append(args, ovftool_uri)
 
 	return args, nil
-}
-
-// Encode everything except for + signs
-func escapeWithSpaces(stringToEscape string) string {
-	escapedString := url.QueryEscape(stringToEscape)
-	escapedString = strings.Replace(escapedString, "+", `%20`, -1)
-	return escapedString
 }
