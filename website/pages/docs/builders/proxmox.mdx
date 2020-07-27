@@ -141,7 +141,7 @@ builder.
 
   - `firewall` (bool) - If the interface should be protected by the firewall.
     Defaults to `false`.
-  
+
   - `packet_queues` (int) - Number of packet queues to be used on the device.
     Values greater than 1 indicate that the multiqueue feature is activated.
     For best performance, set this to the number of cores available to the
@@ -213,6 +213,27 @@ builder.
 - `cloud_init_storage_pool` - (string) - Name of the Proxmox storage pool
   to store the Cloud-Init CDROM on. If not given, the storage pool of the boot device will be used.
 
+- `additional_iso_files` (array of objects) - Additional ISO filess attached to the virtual machine.
+  Example:
+
+  ```json
+  [
+    {
+      "device": "scsi",
+      "bus_number": "3",
+      "filemane": "local:iso/virtio-win-0.1.185.iso"
+    }
+  ]
+  ```
+  - `device` (string) - Bus type that the ISO will be mountet on. Can be `ide`,
+    `sata` or `scsi`.
+    Defaults to `ide`.
+
+  - `bus_number` (string) - Number of the device. Can be 0 to 3 for `ide`, 0 to 5
+    for `sata` and 0 to 30 for `scsi`.
+    Defaults to 3 sice `ide` bus 2 is generally the boot drive.
+
+  - `filename` (string) - Required. Path to the ISO file that will be mounted, expressed as a Proxmox datastore path.
 ## Example: Fedora with kickstart
 
 Here is a basic example creating a Fedora 29 server image with a Kickstart
