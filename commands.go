@@ -58,5 +58,11 @@ func init() {
 				Meta: *CommandMeta,
 			}, nil
 		},
+
+		"hcl2_upgrade": func() (cli.Command, error) {
+			return &command.HCL2UpgradeCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
 	}
 }

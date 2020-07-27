@@ -130,3 +130,9 @@ func (va *InspectArgs) AddFlagSets(flags *flag.FlagSet) {
 type InspectArgs struct {
 	MetaArgs
 }
+
+// HCL2UpgradeArgs represents a parsed cli line for a `packer build`
+type HCL2UpgradeArgs struct {
+	MetaArgs
+	OutputDir string
+}
