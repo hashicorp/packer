@@ -222,7 +222,10 @@ func (p *PostProcessor) ValidateOvfTool(args []string, ofvtool string) error {
 	// Need to manually close stdin or else the ofvtool call will hang
 	// forever in a situation where the user has provided an invalid
 	// password or username
-	stdin, _ := cmd.StdinPipe()
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		err
+	}
 	defer stdin.Close()
 
 	if err := cmd.Run(); err != nil {
