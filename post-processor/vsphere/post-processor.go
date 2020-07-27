@@ -148,8 +148,7 @@ func getEncodedPassword(u *url.URL) (string, bool) {
 	// filter password from all logging
 	password, passwordSet := u.User.Password()
 	if passwordSet && password != "" {
-		encodedUserPassword := strings.Split(u.User.String(), ":")
-		encodedPassword := encodedUserPassword[len(encodedUserPassword)-1]
+		encodedPassword := strings.Split(u.User.String(), ":")[1]
 		return encodedPassword, true
 	}
 	return password, false
