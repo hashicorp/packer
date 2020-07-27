@@ -224,7 +224,7 @@ func (p *PostProcessor) ValidateOvfTool(args []string, ofvtool string) error {
 	// password or username
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		err
+		return err
 	}
 	defer stdin.Close()
 
