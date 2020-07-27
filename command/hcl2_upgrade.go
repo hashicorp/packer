@@ -6,9 +6,13 @@ import (
 	"os"
 	"sort"
 	"strings"
+	texttemplate "text/template"
 
+	"github.com/hashicorp/hcl/v2/hclwrite"
+	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/hashicorp/packer/template"
 	"github.com/posener/complete"
+	"github.com/zclconf/go-cty/cty"
 )
 
 type HCL2UpgradeCommand struct {
@@ -76,18 +80,26 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		})
 	}
 
-	variablesOutput := &strings.Builder{}
+	variablesContent := hclwrite.NewEmptyFile()
+	variablesBody := variablesContent.Body()
+
 	for _, variable := range variables {
-		fmt.Fprintf(variablesOutput, "\nvariable %q {\n", variable.Key)
+		variableBody := variablesBody.AppendNewBlock("variable", []string{variable.Key}).Body()
+
 		if variable.Default != "" || !variable.Required {
-			fmt.Fprintf(variablesOutput, "  default = %q\n", variable.Default)
+			variableBody.SetAttributeValue("default", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
 		}
 		if isSensitiveVariable(variable.Key, tpl.SensitiveVariables) {
-			fmt.Fprintln(variablesOutput, "  sensitive = true")
+			variableBody.SetAttributeValue("sensitive", cty.BoolVal(true))
 		}
-		fmt.Fprintln(variablesOutput, "}")
+		variablesBody.AppendNewline()
 	}
-	c.Ui.Say(variablesOutput.String())
+
+	c.Ui.Say(magicTemplate(string(variablesContent.Bytes())))
+
+	c.Ui.Say("locals {\n  timestamp = " +
+		`regex_replace(timestamp(), "[- TZ:]", "")` +
+		"\n}\n")
 
 	builders := []*template.Builder{}
 	{
@@ -100,6 +112,9 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		})
 	}
 
+	buildContent := hclwrite.NewEmptyFile()
+	body := buildContent.Body()
+
 	sourcesOutput := &strings.Builder{}
 	for i, builderCfg := range builders {
 		if !c.Meta.CoreConfig.Components.BuilderStore.Has(builderCfg.Type) {
@@ -109,33 +124,97 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		if builderCfg.Name == "" || builderCfg.Name == builderCfg.Type {
 			builderCfg.Name = fmt.Sprintf("%d", i+1)
 		}
+		sourceBody := body.AppendNewBlock("source", []string{builderCfg.Type, builderCfg.Name}).Body()
 
-		fmt.Fprintf(sourcesOutput, "\nsource %q %q {\n", builderCfg.Type, builderCfg.Name)
-		fmt.Fprintln(sourcesOutput, "}")
-
+		printKeyValues(sourceBody, builderCfg.Config)
 	}
-	c.Ui.Say(sourcesOutput.String())
+	c.Ui.Say(magicTemplate(sourcesOutput.String()))
 
-	buildOutput := &strings.Builder{}
-	fmt.Fprintf(buildOutput, "build {\n")
+	body.AppendNewline()
+
+	buildBody := body.AppendNewBlock("build", nil).Body()
+	if tpl.Description != "" {
+		buildBody.SetAttributeValue("description", cty.StringVal(tpl.Description))
+		buildBody.AppendNewline()
+	}
+	sourceNames := []string{}
 	for _, builder := range builders {
-		if tpl.Description != "" {
-			fmt.Fprintf(buildOutput, "\n  description = %q\n", tpl.Description)
-		}
-		fmt.Fprintf(buildOutput, "\n  sources = [")
-		fmt.Fprintf(buildOutput, "\n    \"source.%s.%s\",\n", builder.Type, builder.Name)
-		fmt.Fprintln(buildOutput, "  ]")
+		sourceNames = append(sourceNames, fmt.Sprintf("source.%s.%s", builder.Type, builder.Name))
 	}
+	buildBody.SetAttributeValue("sources", hcl2shim.HCL2ValueFromConfigValue(sourceNames))
 
 	for _, provisioner := range tpl.Provisioners {
-		fmt.Fprintf(buildOutput, "\n  provisioner %q {\n", provisioner.Type)
-
-		fmt.Fprintln(buildOutput, "  }")
+		buildBody.AppendNewline()
+		block := buildBody.AppendNewBlock("provisioner", []string{provisioner.Type})
+		printKeyValues(block.Body(), provisioner.Config)
+	}
+	for _, pps := range tpl.PostProcessors {
+		var body *hclwrite.Body
+		switch len(pps) {
+		case 0:
+			continue
+		case 1:
+			body = buildBody
+		default:
+			body = buildBody.AppendNewBlock("post-processors", nil).Body()
+		}
+		for _, pp := range pps {
+			ppBody := body.AppendNewBlock("post-processor", []string{pp.Type}).Body()
+			printKeyValues(ppBody, pp.Config)
+		}
 	}
 
-	fmt.Fprintf(buildOutput, "}\n")
-	c.Ui.Say(buildOutput.String())
+	c.Ui.Say(magicTemplate(string(buildContent.Bytes())))
 	return 0
+}
+
+func magicTemplate(s string) string {
+	funcMap := texttemplate.FuncMap{
+		"isotime": func(string) string {
+			return "${local.timestamp}"
+		},
+		"timestamp": func() string {
+			return "${local.timestamp}"
+		},
+		"user": func(in string) string {
+			return fmt.Sprintf("${var.%s}", in)
+		},
+	}
+	transparentFuncs := []string{}
+	for i := range transparentFuncs {
+		v := transparentFuncs[i]
+		funcMap[v] = func(in string) string {
+			return fmt.Sprintf("{{ %s `%s` }}", v, in)
+		}
+	}
+
+	tpl := texttemplate.Must(texttemplate.New("generated").Funcs(funcMap).Parse(s))
+	str := &strings.Builder{}
+	v := struct {
+		HTTPIP   string
+		HTTPPort string
+	}{
+		HTTPIP:   "{{ .HTTPIP }}",
+		HTTPPort: "{{ .HTTPPort }}",
+	}
+	if err := tpl.Execute(str, v); err != nil {
+		panic(fmt.Sprintf("%v: %s.", err, str))
+	}
+
+	return str.String()
+}
+
+func printKeyValues(out *hclwrite.Body, kvs map[string]interface{}) {
+	ks := []string{}
+	for k := range kvs {
+		ks = append(ks, k)
+	}
+	sort.Strings(ks)
+
+	for _, k := range ks {
+		value := kvs[k]
+		out.SetAttributeValue(k, hcl2shim.HCL2ValueFromConfigValue(value))
+	}
 }
 
 func isSensitiveVariable(key string, vars []*template.Variable) bool {
