@@ -141,10 +141,10 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 
 		jsonBodyToHCL2Body(sourceBody, builderCfg.Config)
 
-		out.Write(magicTemplate(sourcesContent.Bytes()))
+		_, _ = out.Write(magicTemplate(sourcesContent.Bytes()))
 	}
 
-	out.Write([]byte("\nbuild {\n"))
+	_, _ = out.Write([]byte("\nbuild {\n"))
 
 	buildContent := hclwrite.NewEmptyFile()
 	buildBody := buildContent.Body()
@@ -159,7 +159,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	}
 	buildBody.SetAttributeValue("sources", hcl2shim.HCL2ValueFromConfigValue(sourceNames))
 	buildBody.AppendNewline()
-	buildContent.WriteTo(out)
+	_, _ = buildContent.WriteTo(out)
 
 	for _, provisioner := range tpl.Provisioners {
 		provisionerContent := hclwrite.NewEmptyFile()
@@ -187,12 +187,12 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 			jsonBodyToHCL2Body(ppBody, pp.Config)
 		}
 
-		out.Write(magicTemplate(postProcessorContent.Bytes()))
+		_, _ = out.Write(magicTemplate(postProcessorContent.Bytes()))
 	}
 
-	out.Write([]byte("}\n"))
+	_, _ = out.Write([]byte("}\n"))
 
-	output.Write(hclwrite.Format(out.Bytes()))
+	_, _ = output.Write(hclwrite.Format(out.Bytes()))
 
 	c.Ui.Say(fmt.Sprintf("Successfully created %s ", cla.OutputFile))
 
