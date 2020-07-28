@@ -213,4 +213,208 @@ build {
         nested_slice {
         }
     }
+
+    post-processors {
+
+        post-processor "amazon-import" {
+            name     = "first-nested-post-processor"
+            string   = "string"
+            int      = 42
+            int64    = 43
+            bool     = true
+            trilean  = true
+            duration = "10s"
+            map_string_string = {
+                a = "b"
+                c = "d"
+            }
+            slice_string = [
+                "a",
+                "b",
+                "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
+            ]
+            not_squashed = "${var.foo} ${upper(build.ID)}"
+
+            nested {
+                string   = "string"
+                int      = 42
+                int64    = 43
+                bool     = true
+                trilean  = true
+                duration = "10s"
+                map_string_string = {
+                    a = "b"
+                    c = "d"
+                }
+                slice_string = [
+                    "a",
+                    "b",
+                    "c",
+                ]
+                slice_slice_string = [
+                    ["a","b"],
+                    ["c","d"]
+                ]
+            }
+
+            nested_slice {
+            }
+        }
+
+        post-processor "amazon-import" {
+            name     = "second-nested-post-processor"
+            string   = "string"
+            int      = 42
+            int64    = 43
+            bool     = true
+            trilean  = true
+            duration = "10s"
+            map_string_string = {
+                a = "b"
+                c = "d"
+            }
+            slice_string = [
+                "a",
+                "b",
+                "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
+            ]
+            not_squashed = "${var.foo} ${upper(build.ID)}"
+
+            nested {
+                string   = "string"
+                int      = 42
+                int64    = 43
+                bool     = true
+                trilean  = true
+                duration = "10s"
+                map_string_string = {
+                    a = "b"
+                    c = "d"
+                }
+                slice_string = [
+                    "a",
+                    "b",
+                    "c",
+                ]
+                slice_slice_string = [
+                    ["a","b"],
+                    ["c","d"]
+                ]
+            }
+
+            nested_slice {
+            }
+        }
+
+    }
+
+    post-processors {
+
+        post-processor "amazon-import" {
+            name     = "third-nested-post-processor"
+            string   = "string"
+            int      = 42
+            int64    = 43
+            bool     = true
+            trilean  = true
+            duration = "10s"
+            map_string_string = {
+                a = "b"
+                c = "d"
+            }
+            slice_string = [
+                "a",
+                "b",
+                "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
+            ]
+            not_squashed = "${var.foo} ${upper(build.ID)}"
+
+            nested {
+                string   = "string"
+                int      = 42
+                int64    = 43
+                bool     = true
+                trilean  = true
+                duration = "10s"
+                map_string_string = {
+                    a = "b"
+                    c = "d"
+                }
+                slice_string = [
+                    "a",
+                    "b",
+                    "c",
+                ]
+                slice_slice_string = [
+                    ["a","b"],
+                    ["c","d"]
+                ]
+            }
+
+            nested_slice {
+            }
+        }
+
+        post-processor "amazon-import" {
+            name     = "fourth-nested-post-processor"
+            string   = "string"
+            int      = 42
+            int64    = 43
+            bool     = true
+            trilean  = true
+            duration = "10s"
+            map_string_string = {
+                a = "b"
+                c = "d"
+            }
+            slice_string = [
+                "a",
+                "b",
+                "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
+            ]
+            not_squashed = "${var.foo} ${upper(build.ID)}"
+
+            nested {
+                string   = "string"
+                int      = 42
+                int64    = 43
+                bool     = true
+                trilean  = true
+                duration = "10s"
+                map_string_string = {
+                    a = "b"
+                    c = "d"
+                }
+                slice_string = [
+                    "a",
+                    "b",
+                    "c",
+                ]
+                slice_slice_string = [
+                    ["a","b"],
+                    ["c","d"]
+                ]
+            }
+
+            nested_slice {
+            }
+        }
+
+    }
 }

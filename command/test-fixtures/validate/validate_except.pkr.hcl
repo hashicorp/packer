@@ -12,17 +12,19 @@ build {
     "source.file.vanilla"
   ]
 
-  post-processor "shell-local" {
-    name = "apple"
-    inline = [ "echo apple 'apple'" ]
-  }
+  post-processors {
+    post-processor "shell-local" {
+      name = "apple"
+      inline = [ "echo apple 'apple'" ]
+    }
 
-  post-processor "shell-local" {
-    name = "pear"
-    inline = [ "echo apple 'pear'" ]
-  }
+    post-processor "shell-local" {
+      name = "pear"
+      inline = [ "echo apple 'pear'" ]
+    }
 
-  post-processor "shell-local" {
-    name = "banana"
+    post-processor "shell-local" {
+      name = "banana"
+    }
   }
 }

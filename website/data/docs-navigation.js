@@ -14,7 +14,12 @@ export default [
         content: [
           {
             category: 'build',
-            content: ['source', 'provisioner', 'post-processor'],
+            content: [
+              'source',
+              'provisioner',
+              'post-processor',
+              'post-processors',
+            ],
           },
           'locals',
           'source',

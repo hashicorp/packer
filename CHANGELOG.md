@@ -1,5 +1,13 @@
 ## 1.6.1 (Upcoming)
 
+### BACKWARDS INCOMPATABILITIES:
+
+* only for HCL: added `post-processors` block to run chained post-processors
+    after a build  [GH-9638]. Before this, defining multiple `post-processor`
+    blocks after provisioning steps would run them sequentially, now doing this
+    makes them start from the build artifact. To queue post-processors you now
+    have to define them in a `post-processors` block. [GH-9638]
+
 ### FEATURES:
 * **New post-processor** Yandex Import [GH-9553]
 

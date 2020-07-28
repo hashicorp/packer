@@ -14,6 +14,8 @@ const (
 	buildProvisionerLabel = "provisioner"
 
 	buildPostProcessorLabel = "post-processor"
+
+	buildPostProcessorsLabel = "post-processors"
 )
 
 var buildSchema = &hcl.BodySchema{
@@ -21,6 +23,13 @@ var buildSchema = &hcl.BodySchema{
 		{Type: buildFromLabel, LabelNames: []string{"type"}},
 		{Type: sourceLabel, LabelNames: []string{"reference"}},
 		{Type: buildProvisionerLabel, LabelNames: []string{"type"}},
+		{Type: buildPostProcessorLabel, LabelNames: []string{"type"}},
+		{Type: buildPostProcessorsLabel, LabelNames: []string{}},
+	},
+}
+
+var postProcessorsSchema = &hcl.BodySchema{
+	Blocks: []hcl.BlockHeaderSchema{
 		{Type: buildPostProcessorLabel, LabelNames: []string{"type"}},
 	},
 }
@@ -49,9 +58,10 @@ type BuildBlock struct {
 	// will be ran against the sources.
 	ProvisionerBlocks []*ProvisionerBlock
 
-	// ProvisionerBlocks references a list of HCL post-processors block that
-	// will be ran against the artifacts from the provisioning steps.
-	PostProcessors []*PostProcessorBlock
+	// PostProcessorLists references the lists of lists of HCL post-processors
+	// block that will be run against the artifacts from the provisioning
+	// steps.
+	PostProcessorsLists [][]*PostProcessorBlock
 
 	HCL2Ref HCL2Ref
 }
@@ -125,7 +135,29 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 			if moreDiags.HasErrors() {
 				continue
 			}
-			build.PostProcessors = append(build.PostProcessors, pp)
+			build.PostProcessorsLists = append(build.PostProcessorsLists, []*PostProcessorBlock{pp})
+		case buildPostProcessorsLabel:
+
+			content, moreDiags := block.Body.Content(postProcessorsSchema)
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
+
+			errored := false
+			postProcessors := []*PostProcessorBlock{}
+			for _, block := range content.Blocks {
+				pp, moreDiags := p.decodePostProcessor(block)
+				diags = append(diags, moreDiags...)
+				if moreDiags.HasErrors() {
+					errored = true
+					break
+				}
+				postProcessors = append(postProcessors, pp)
+			}
+			if errored == false {
+				build.PostProcessorsLists = append(build.PostProcessorsLists, postProcessors)
+			}
 		}
 	}
 
