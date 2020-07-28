@@ -20,7 +20,6 @@ import (
 
 type HCL2UpgradeCommand struct {
 	Meta
-	OutputDir string
 }
 
 func (c *HCL2UpgradeCommand) Run(args []string) int {
