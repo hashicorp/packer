@@ -56,7 +56,6 @@ locals {
 
 `hcl2_upgrade` will do its best to transform your go _template calls_ to HCL2,
 here is the list of calls that should get transformed:
-  - ```{{ build `ID` }}``` becomes ```${build.ID}```.
   - ```{{ user `my_var` }}``` becomes ```${var.my_var}```.
   - ```{{ env `my_var` }}``` becomes ```${var.my_var}```. Packer HCL2 supports 
     environment variables through input variables. See
@@ -64,6 +63,7 @@ here is the list of calls that should get transformed:
     for more info.
   - ```{{ timestamp }}``` becomes ```${local.timestamp}```, the local variable
     will be created for all generated files.
+  - ```{{ build `ID` }}``` becomes ```${build.ID}```.
 
 The rest of the calls should remain go template calls for now, this will be
 improved over time.
