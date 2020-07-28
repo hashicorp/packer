@@ -473,6 +473,7 @@ func basicGenData(input map[string]interface{}) map[string]interface{} {
 		"ConnType":          "ssh",
 		"SSHPrivateKeyFile": "",
 		"SSHPrivateKey":     "asdf",
+		"SSHAgentAuth":      false,
 		"User":              "PartyPacker",
 		"PackerHTTPAddr":    common.HttpAddrNotImplemented,
 		"PackerHTTPIP":      common.HttpIPNotImplemented,
@@ -544,7 +545,7 @@ func TestCreateCmdArgs(t *testing.T) {
 				"PackerHTTPAddr": "123.45.67.89",
 			}),
 			callArgs:        []string{"123.45.67.89", "/var/inventory", "test-playbook.yml", ""},
-			ExpectedArgs:    []string{"-e", "packer_build_name=\"packerparty\"", "-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
+			ExpectedArgs:    []string{"-e", "packer_build_name=\"packerparty\"", "-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{},
 		},
 		{
@@ -600,7 +601,7 @@ func TestCreateCmdArgs(t *testing.T) {
 			ExtraArguments:  []string{"-e", "hello-world", "-e", "ansible_password=ilovebananapancakes"},
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas"},
 			callArgs:        []string{"123.45.67.89", "/var/inventory", "test-playbook.yml", ""},
-			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-e", "ansible_password=ilovebananapancakes", "-e", "ansible_host_key_checking=False", "-i", "/var/inventory", "test-playbook.yml"},
+			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "-e", "hello-world", "-e", "ansible_password=ilovebananapancakes", "-e", "ansible_host_key_checking=False", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas"},
 		},
 		{
@@ -614,7 +615,7 @@ func TestCreateCmdArgs(t *testing.T) {
 			ExtraArguments:  []string{"-e", "hello-world", "-e", "ansible_password=ilovebananapancakes"},
 			AnsibleEnvVars:  []string{"ENV_1=pancakes", "ENV_2=bananas", "ANSIBLE_HOST_KEY_CHECKING=False"},
 			callArgs:        []string{"123.45.67.89", "/var/inventory", "test-playbook.yml", ""},
-			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-e", "ansible_password=ilovebananapancakes", "-i", "/var/inventory", "test-playbook.yml"},
+			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "-e", "packer_http_addr=123.45.67.89", "-e", "hello-world", "-e", "ansible_password=ilovebananapancakes", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas", "ANSIBLE_HOST_KEY_CHECKING=False"},
 		},
 		{
@@ -628,11 +629,19 @@ func TestCreateCmdArgs(t *testing.T) {
 			ExpectedEnvVars: []string{},
 		},
 		{
+			TestName:        "Use SSH Agent",
+			UseProxy:        confighelper.TriTrue,
+			generatedData:   basicGenData(nil),
+			callArgs:        []string{common.HttpAddrNotImplemented, "/var/inventory", "test-playbook.yml", ""},
+			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "-i", "/var/inventory", "test-playbook.yml"},
+			ExpectedEnvVars: []string{},
+		},
+		{
 			// No builder name. This shouldn't cause an error, it just shouldn't be set. HCL, yo.
 			TestName:        "No builder name. This shouldn't cause an error, it just shouldn't be set. HCL, yo.",
 			generatedData:   basicGenData(nil),
 			callArgs:        []string{common.HttpAddrNotImplemented, "/var/inventory", "test-playbook.yml", ""},
-			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-i", "/var/inventory", "test-playbook.yml"},
+			ExpectedArgs:    []string{"-e", "packer_builder_type=fakebuilder", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{},
 		},
 	}
