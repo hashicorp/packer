@@ -65,8 +65,7 @@ for example:
   - ```{{ timestamp }}``` becomes ```${local.timestamp}```, the local variable
     will be created for all generated files.
   - ```{{ .HTTPIP }}```, ```{{ .HTTPPort }}```, ```{{ vault_key }}```,
-    ```{{ consul_key }}```, ```{{ aws_secretsmanager }}``` do not change yet
-    and will remain similar.
+    ```{{ consul_key }}```, ```{{ aws_secretsmanager }}``` will remain similar.
 
 -> **Note**: The `hcl2_upgrade` command does its best to transform template
 calls to their JSON counterpart, but it might fail. I that case the
