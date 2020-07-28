@@ -111,9 +111,8 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		out.Write(magicTemplate(variablesContent.Bytes()))
 	}
 
-	fmt.Fprintf(out, "locals {\n  timestamp = "+
-		`regex_replace(timestamp(), "[- TZ:]", "")`+
-		"\n}\n\n")
+	fmt.Fprintln(out, `# "timestamp" template function replacement`)
+	fmt.Fprintln(out, `locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }`)
 
 	builders := []*template.Builder{}
 	{
@@ -130,6 +129,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		sourcesContent := hclwrite.NewEmptyFile()
 		body := sourcesContent.Body()
 
+		body.AppendNewline()
 		if !c.Meta.CoreConfig.Components.BuilderStore.Has(builderCfg.Type) {
 			c.Ui.Error(fmt.Sprintf("unknown builder type: %q\n", builderCfg.Type))
 			return 1
@@ -140,12 +140,11 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		sourceBody := body.AppendNewBlock("source", []string{builderCfg.Type, builderCfg.Name}).Body()
 
 		jsonBodyToHCL2Body(sourceBody, builderCfg.Config)
-		body.AppendNewline()
 
 		out.Write(magicTemplate(sourcesContent.Bytes()))
 	}
 
-	out.Write([]byte("build {\n"))
+	out.Write([]byte("\nbuild {\n"))
 
 	buildContent := hclwrite.NewEmptyFile()
 	buildBody := buildContent.Body()
@@ -159,6 +158,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		sourceNames = append(sourceNames, fmt.Sprintf("source.%s.%s", builder.Type, builder.Name))
 	}
 	buildBody.SetAttributeValue("sources", hcl2shim.HCL2ValueFromConfigValue(sourceNames))
+	buildBody.AppendNewline()
 	buildContent.WriteTo(out)
 
 	for _, provisioner := range tpl.Provisioners {
