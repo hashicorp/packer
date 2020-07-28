@@ -95,7 +95,7 @@ func (s *StepBootCommand) Run(ctx context.Context, state multistep.StateBag) mul
 			Shift:    keyShift,
 		})
 		if err != nil {
-			return fmt.Errorf("error typing a boot command: %v", err)
+			return fmt.Errorf("error typing a boot command (code, down) `%d, %t`: %w", code, down, err)
 		}
 		return nil
 	}
