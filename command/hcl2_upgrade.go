@@ -213,9 +213,6 @@ func magicTemplate(s []byte) []byte {
 		return append([]byte(fmt.Sprintf("#could not parse template for following block: %q\n", err)), s...)
 	}
 	funcMap := texttemplate.FuncMap{
-		"isotime": func(string) string {
-			return "${local.timestamp}"
-		},
 		"timestamp": func() string {
 			return "${local.timestamp}"
 		},
@@ -225,22 +222,9 @@ func magicTemplate(s []byte) []byte {
 		"env": func(in string) string {
 			return fmt.Sprintf("${var.%s}", in)
 		},
-		"vault_key": func(a, b string) string {
-			return fmt.Sprintf("{{ consul_key `%s` `%s` }}", a, b)
-		},
 		"build": func(a string) string {
 			return fmt.Sprintf("${build.%s}", a)
 		},
-	}
-	transparentFuncs := []string{
-		"consul_key",
-		"aws_secretsmanager",
-	}
-	for i := range transparentFuncs {
-		v := transparentFuncs[i]
-		funcMap[v] = func(in string) string {
-			return fmt.Sprintf("{{ %s `%s` }}", v, in)
-		}
 	}
 
 	tpl, err := texttemplate.New("generated").
