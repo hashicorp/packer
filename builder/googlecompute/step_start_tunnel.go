@@ -196,13 +196,11 @@ func (s *StepStartTunnel) createTempGcloudScript(args []string) (string, error) 
 
 	launchTemplate := `
 gcloud auth activate-service-account --key-file='{{.AccountFile}}'
-gcloud config set project {{.ProjectID}}
 {{.Args}}
 `
 	if runtime.GOOS == "windows" {
 		launchTemplate = `
 call gcloud auth activate-service-account --key-file "{{.AccountFile}}"
-call gcloud config set project {{.ProjectID}}
 call {{.Args}}
 `
 	}
@@ -215,7 +213,6 @@ call {{.Args}}
 
 	opts := map[string]string{
 		"AccountFile": s.AccountFile,
-		"ProjectID":   s.ProjectId,
 		"Args":        argString,
 	}
 
@@ -276,7 +273,7 @@ func (s *StepStartTunnel) Run(ctx context.Context, state multistep.StateBag) mul
 	args := []string{"compute", "start-iap-tunnel", instanceName,
 		strconv.Itoa(s.CommConf.Port()),
 		fmt.Sprintf("--local-host-port=localhost:%d", s.IAPConf.IAPLocalhostPort),
-		"--zone", c.Zone,
+		"--zone", c.Zone, "--project", s.ProjectId,
 	}
 
 	// This is the port the IAP tunnel listens on, on localhost.
