@@ -83,6 +83,8 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	}
 	tpl := core.Template
 
+	// Output variables section
+
 	variables := []*template.Variable{}
 	{
 		// sort variables to avoid map's randomness
@@ -114,9 +116,11 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	fmt.Fprintln(out, `# "timestamp" template function replacement`)
 	fmt.Fprintln(out, `locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }`)
 
+	// Output sources section
+
 	builders := []*template.Builder{}
 	{
-		// sort builders to avoid map's randomness
+		// sort builders to avoid map's randomnes
 		for _, builder := range tpl.Builders {
 			builders = append(builders, builder)
 		}
@@ -143,6 +147,8 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 
 		_, _ = out.Write(magicTemplate(sourcesContent.Bytes()))
 	}
+
+	// Output build section
 
 	_, _ = out.Write([]byte("\nbuild {\n"))
 
@@ -199,6 +205,9 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	return 0
 }
 
+// magicTemplate executes parts of blocks as go template files and replaces
+// their result with their hcl2 variant. If something goes wrong the template
+// containing the go template string is returned.
 func magicTemplate(s []byte) []byte {
 	fallbackReturn := func(err error) []byte {
 		return append([]byte(fmt.Sprintf("#could not parse template for following block: %q\n", err)), s...)
