@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/communicator"
 )
 
 func TestConfigPrepare(t *testing.T) {
@@ -383,7 +385,7 @@ func TestConfigPrepareStartupScriptFile(t *testing.T) {
 	}
 }
 
-func TestConfigPrepareIAP(t *testing.T) {
+func TestConfigPrepareIAP_SSH(t *testing.T) {
 	config := map[string]interface{}{
 		"project_id":   "project",
 		"source_image": "foo",
@@ -398,25 +400,33 @@ func TestConfigPrepareIAP(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Shouldn't have errors. Err = %s", err)
 	}
-
-	if runtime.GOOS == "windows" {
-		if c.IAPExt != ".cmd" {
-			t.Fatalf("IAP tempfile extension didn't default correctly to .cmd")
-		}
-		if c.IAPHashBang != "" {
-			t.Fatalf("IAP hashbang didn't default correctly to nothing.")
-		}
-	} else {
-		if c.IAPExt != "" {
-			t.Fatalf("IAP tempfile extension should default to empty on unix mahcines")
-		}
-		if c.IAPHashBang != "/bin/sh" {
-			t.Fatalf("IAP hashbang didn't default correctly to /bin/sh.")
-		}
-	}
 	if c.Comm.SSHHost != "localhost" {
-		t.Fatalf("Didn't correctly override the ssh host.")
+		t.Fatalf("Should have set SSHHost")
 	}
+
+	testIAPScript(t, &c)
+}
+
+func TestConfigPrepareIAP_WinRM(t *testing.T) {
+	config := map[string]interface{}{
+		"project_id":     "project",
+		"source_image":   "foo",
+		"winrm_username": "packer",
+		"zone":           "us-central1-a",
+		"communicator":   "winrm",
+		"use_iap":        true,
+	}
+
+	var c Config
+	_, err := c.Prepare(config)
+	if err != nil {
+		t.Fatalf("Shouldn't have errors. Err = %s", err)
+	}
+	if c.Comm.WinRMHost != "localhost" {
+		t.Fatalf("Should have set WinRMHost")
+	}
+
+	testIAPScript(t, &c)
 }
 
 func TestConfigPrepareIAP_failures(t *testing.T) {
@@ -425,7 +435,7 @@ func TestConfigPrepareIAP_failures(t *testing.T) {
 		"source_image":   "foo",
 		"winrm_username": "packer",
 		"zone":           "us-central1-a",
-		"communicator":   "winrm",
+		"communicator":   "none",
 		"iap_hashbang":   "/bin/bash",
 		"iap_ext":        ".ps1",
 		"use_iap":        true,
@@ -434,7 +444,7 @@ func TestConfigPrepareIAP_failures(t *testing.T) {
 	var c Config
 	_, errs := c.Prepare(config)
 	if errs == nil {
-		t.Fatalf("Should have errored because we're using winrm.")
+		t.Fatalf("Should have errored because we're using none.")
 	}
 	if c.IAPHashBang != "/bin/bash" {
 		t.Fatalf("IAP hashbang defaulted even though set.")
@@ -497,6 +507,53 @@ func TestRegion(t *testing.T) {
 	c.Prepare(raw)
 	if c.Region != "us-east1" {
 		t.Fatalf("Region should be 'us-east1' given Zone of 'us-east1-a', but is %s", c.Region)
+	}
+}
+
+func TestApplyIAPTunnel_SSH(t *testing.T) {
+	c := &communicator.Config{
+		Type: "ssh",
+		SSH: communicator.SSH{
+			SSHHost: "example",
+			SSHPort: 1234,
+		},
+	}
+
+	err := ApplyIAPTunnel(c, 8447)
+	if err != nil {
+		t.Fatalf("Shouldn't have errors")
+	}
+	if c.SSHPort != 8447 {
+		t.Fatalf("Should have set SSHPort")
+	}
+}
+
+func TestApplyIAPTunnel_WinRM(t *testing.T) {
+	c := &communicator.Config{
+		Type: "winrm",
+		WinRM: communicator.WinRM{
+			WinRMHost: "example",
+			WinRMPort: 1234,
+		},
+	}
+
+	err := ApplyIAPTunnel(c, 8447)
+	if err != nil {
+		t.Fatalf("Shouldn't have errors")
+	}
+	if c.WinRMPort != 8447 {
+		t.Fatalf("Should have set WinRMPort")
+	}
+}
+
+func TestApplyIAPTunnel_none(t *testing.T) {
+	c := &communicator.Config{
+		Type: "none",
+	}
+
+	err := ApplyIAPTunnel(c, 8447)
+	if err == nil {
+		t.Fatalf("Should have errors, none is not supported")
 	}
 }
 
@@ -574,6 +631,24 @@ func testAccountFile(t *testing.T) string {
 	}
 
 	return tf.Name()
+}
+
+func testIAPScript(t *testing.T, c *Config) {
+	if runtime.GOOS == "windows" {
+		if c.IAPExt != ".cmd" {
+			t.Fatalf("IAP tempfile extension didn't default correctly to .cmd")
+		}
+		if c.IAPHashBang != "" {
+			t.Fatalf("IAP hashbang didn't default correctly to nothing.")
+		}
+	} else {
+		if c.IAPExt != "" {
+			t.Fatalf("IAP tempfile extension should default to empty on unix mahcines")
+		}
+		if c.IAPHashBang != "/bin/sh" {
+			t.Fatalf("IAP hashbang didn't default correctly to /bin/sh.")
+		}
+	}
 }
 
 const testMetadataFileContent = `testMetadata`

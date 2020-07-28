@@ -34,8 +34,6 @@ type IAPConfig struct {
 	// - You must have the gcloud sdk installed on the computer running Packer.
 	// - You must be using a Service Account with a credentials file (using the
 	//	 account_file option in the Packer template)
-	// - This is currently only implemented for the SSH communicator, not the
-	//   WinRM Communicator.
 	// - You must add the given service account to project level IAP permissions
 	//   in https://console.cloud.google.com/security/iap. To do so, click
 	//   "project" > "SSH and TCP resoures" > "All Tunnel Resources" >
@@ -52,7 +50,7 @@ type IAPConfig struct {
 	// Default: ".sh"
 	IAPExt string `mapstructure:"iap_ext" required:"false"`
 	// How long to wait, in seconds, before assuming a tunnel launch was
-	// successful. Defaults to 30 seconds.
+	// successful. Defaults to 30 seconds for SSH or 40 seconds for WinRM.
 	IAPTunnelLaunchWait int `mapstructure:"iap_tunnel_launch_wait" required:"false"`
 }
 
@@ -283,7 +281,14 @@ func (s *StepStartTunnel) Run(ctx context.Context, state multistep.StateBag) mul
 
 	// This is the port the IAP tunnel listens on, on localhost.
 	// TODO make setting LocalHostPort optional
-	s.CommConf.SSHPort = s.IAPConf.IAPLocalhostPort
+	err = ApplyIAPTunnel(s.CommConf, s.IAPConf.IAPLocalhostPort)
+	if err != nil {
+		// this should not occur as the config should validate that the communicator
+		// supports using an IAP tunnel
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	log.Printf("Creating tunnel launch script with args %#v", args)
 	// Create temp file that contains both gcloud authentication, and gcloud
