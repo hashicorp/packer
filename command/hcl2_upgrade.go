@@ -109,7 +109,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 			variableBody.SetAttributeValue("sensitive", cty.BoolVal(true))
 		}
 		variablesBody.AppendNewline()
-		out.Write(magicTemplate(variablesContent.Bytes()))
+		out.Write(transposeTemplatingCalls(variablesContent.Bytes()))
 	}
 
 	fmt.Fprintln(out, `# "timestamp" template function replacement`)
@@ -144,7 +144,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 
 		jsonBodyToHCL2Body(sourceBody, builderCfg.Config)
 
-		_, _ = out.Write(magicTemplate(sourcesContent.Bytes()))
+		_, _ = out.Write(transposeTemplatingCalls(sourcesContent.Bytes()))
 	}
 
 	// Output build section
@@ -174,7 +174,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		block := body.AppendNewBlock("provisioner", []string{provisioner.Type})
 		jsonBodyToHCL2Body(block.Body(), provisioner.Config)
 
-		out.Write(magicTemplate(provisionerContent.Bytes()))
+		out.Write(transposeTemplatingCalls(provisionerContent.Bytes()))
 	}
 	for _, pps := range tpl.PostProcessors {
 		postProcessorContent := hclwrite.NewEmptyFile()
@@ -192,7 +192,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 			jsonBodyToHCL2Body(ppBody, pp.Config)
 		}
 
-		_, _ = out.Write(magicTemplate(postProcessorContent.Bytes()))
+		_, _ = out.Write(transposeTemplatingCalls(postProcessorContent.Bytes()))
 	}
 
 	_, _ = out.Write([]byte("}\n"))
@@ -204,10 +204,10 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	return 0
 }
 
-// magicTemplate executes parts of blocks as go template files and replaces
+// transposeTemplatingCalls executes parts of blocks as go template files and replaces
 // their result with their hcl2 variant. If something goes wrong the template
 // containing the go template string is returned.
-func magicTemplate(s []byte) []byte {
+func transposeTemplatingCalls(s []byte) []byte {
 	fallbackReturn := func(err error) []byte {
 		return append([]byte(fmt.Sprintf("#could not parse template for following block: %q\n", err)), s...)
 	}
