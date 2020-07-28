@@ -27,6 +27,31 @@ $ packer hcl2_upgrade my-template.json
 Successfully created my-template.json.pkr.hcl
 ```
 
+## User variables using other user variables
+
+Packer JSON recently started allowing using user variables from variables. In
+HCL2, input variables cannot use functions nor other variables and are
+virtually static, local variables must be used instead to craft more dynamic
+variables. For that reason `hcl2_upgrade` cannot decide for you what local
+variables to create and the `hcl2_upgrade` command will simply output all seen
+variables as an input variable, it is now up to you to create a local variable.
+
+Here is an example of a local variable using a string input variables:
+
+```hcl
+variable "foo" {
+  default = "Hello,"
+}
+
+variable "bar" {
+  default = "World!"
+}
+
+locals {
+  baz = "${var.foo} ${var.bar}"
+}
+```
+
 ## Go template functions
 
 `hcl2_upgrade` will do its best to transform your go _template calls_ to HCL2,
