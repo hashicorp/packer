@@ -1,9 +1,12 @@
 package command
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	texttemplate "text/template"
@@ -17,6 +20,7 @@ import (
 
 type HCL2UpgradeCommand struct {
 	Meta
+	OutputDir string
 }
 
 func (c *HCL2UpgradeCommand) Run(args []string) int {
@@ -40,19 +44,29 @@ func (c *HCL2UpgradeCommand) ParseArgs(args []string) (*HCL2UpgradeArgs, int) {
 	}
 
 	args = flags.Args()
-	if len(args) != 2 {
+	if len(args) != 1 {
 		flags.Usage()
 		return &cfg, 1
 	}
 	cfg.Path = args[0]
-	cfg.OutputDir = args[1]
+	if cfg.OutputFile == "" {
+		cfg.OutputFile = cfg.Path + ".pkr.hcl"
+	}
 	return &cfg, 0
 }
 
 func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2UpgradeArgs) int {
 
-	if err := os.MkdirAll(cla.OutputDir, 0); err != nil {
+	var out io.Writer
+	if err := os.MkdirAll(filepath.Dir(cla.OutputFile), 0); err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to create output directory: %v", err))
+		return 1
+	}
+	if f, err := os.Create(cla.OutputFile); err == nil {
+		out = f
+		defer f.Close()
+	} else {
+		c.Ui.Error(fmt.Sprintf("Failed to create output file: %v", err))
 		return 1
 	}
 
@@ -80,10 +94,10 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		})
 	}
 
-	variablesContent := hclwrite.NewEmptyFile()
-	variablesBody := variablesContent.Body()
-
 	for _, variable := range variables {
+		variablesContent := hclwrite.NewEmptyFile()
+		variablesBody := variablesContent.Body()
+
 		variableBody := variablesBody.AppendNewBlock("variable", []string{variable.Key}).Body()
 
 		if variable.Default != "" || !variable.Required {
@@ -93,13 +107,12 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 			variableBody.SetAttributeValue("sensitive", cty.BoolVal(true))
 		}
 		variablesBody.AppendNewline()
+		out.Write(magicTemplate(variablesContent.Bytes()))
 	}
 
-	c.Ui.Say(magicTemplate(string(variablesContent.Bytes())))
-
-	c.Ui.Say("locals {\n  timestamp = " +
-		`regex_replace(timestamp(), "[- TZ:]", "")` +
-		"\n}\n")
+	fmt.Fprintf(out, "locals {\n  timestamp = "+
+		`regex_replace(timestamp(), "[- TZ:]", "")`+
+		"\n}\n\n")
 
 	builders := []*template.Builder{}
 	{
@@ -112,11 +125,10 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		})
 	}
 
-	buildContent := hclwrite.NewEmptyFile()
-	body := buildContent.Body()
-
-	sourcesOutput := &strings.Builder{}
 	for i, builderCfg := range builders {
+		sourcesContent := hclwrite.NewEmptyFile()
+		body := sourcesContent.Body()
+
 		if !c.Meta.CoreConfig.Components.BuilderStore.Has(builderCfg.Type) {
 			c.Ui.Error(fmt.Sprintf("unknown builder type: %q\n", builderCfg.Type))
 			return 1
@@ -126,49 +138,68 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		}
 		sourceBody := body.AppendNewBlock("source", []string{builderCfg.Type, builderCfg.Name}).Body()
 
-		printKeyValues(sourceBody, builderCfg.Config)
+		jsonBodyToHCL2Body(sourceBody, builderCfg.Config)
+		body.AppendNewline()
+
+		out.Write(magicTemplate(sourcesContent.Bytes()))
 	}
-	c.Ui.Say(magicTemplate(sourcesOutput.String()))
 
-	body.AppendNewline()
+	out.Write([]byte("build {\n"))
 
-	buildBody := body.AppendNewBlock("build", nil).Body()
+	buildContent := hclwrite.NewEmptyFile()
+	buildBody := buildContent.Body()
 	if tpl.Description != "" {
 		buildBody.SetAttributeValue("description", cty.StringVal(tpl.Description))
 		buildBody.AppendNewline()
 	}
+
 	sourceNames := []string{}
 	for _, builder := range builders {
 		sourceNames = append(sourceNames, fmt.Sprintf("source.%s.%s", builder.Type, builder.Name))
 	}
 	buildBody.SetAttributeValue("sources", hcl2shim.HCL2ValueFromConfigValue(sourceNames))
+	buildContent.WriteTo(out)
 
 	for _, provisioner := range tpl.Provisioners {
+		provisionerContent := hclwrite.NewEmptyFile()
+		body := provisionerContent.Body()
+
 		buildBody.AppendNewline()
-		block := buildBody.AppendNewBlock("provisioner", []string{provisioner.Type})
-		printKeyValues(block.Body(), provisioner.Config)
+		block := body.AppendNewBlock("provisioner", []string{provisioner.Type})
+		jsonBodyToHCL2Body(block.Body(), provisioner.Config)
+
+		out.Write(magicTemplate(provisionerContent.Bytes()))
 	}
 	for _, pps := range tpl.PostProcessors {
-		var body *hclwrite.Body
+		postProcessorContent := hclwrite.NewEmptyFile()
+		body := postProcessorContent.Body()
+
 		switch len(pps) {
 		case 0:
 			continue
 		case 1:
-			body = buildBody
 		default:
-			body = buildBody.AppendNewBlock("post-processors", nil).Body()
+			body = body.AppendNewBlock("post-processors", nil).Body()
 		}
 		for _, pp := range pps {
 			ppBody := body.AppendNewBlock("post-processor", []string{pp.Type}).Body()
-			printKeyValues(ppBody, pp.Config)
+			jsonBodyToHCL2Body(ppBody, pp.Config)
 		}
+
+		out.Write(magicTemplate(postProcessorContent.Bytes()))
 	}
 
-	c.Ui.Say(magicTemplate(string(buildContent.Bytes())))
+	out.Write([]byte("}\n"))
+
+	c.Ui.Say(fmt.Sprintf("Successfully created %s ", cla.OutputFile))
+
 	return 0
 }
 
-func magicTemplate(s string) string {
+func magicTemplate(s []byte) []byte {
+	fallbackReturn := func(err error) []byte {
+		return append([]byte(fmt.Sprintf("#could not parse template for following block: %q\n", err)), s...)
+	}
 	funcMap := texttemplate.FuncMap{
 		"isotime": func(string) string {
 			return "${local.timestamp}"
@@ -202,13 +233,13 @@ func magicTemplate(s string) string {
 
 	tpl, err := texttemplate.New("generated").
 		Funcs(funcMap).
-		Parse(s)
+		Parse(string(s))
 
 	if err != nil {
-		panic(fmt.Sprintf("%v in generated template:\n%s.", err, s))
+		return fallbackReturn(err)
 	}
 
-	str := &strings.Builder{}
+	str := &bytes.Buffer{}
 	v := struct {
 		HTTPIP   string
 		HTTPPort string
@@ -217,12 +248,13 @@ func magicTemplate(s string) string {
 		HTTPPort: "{{ .HTTPPort }}",
 	}
 	if err := tpl.Execute(str, v); err != nil {
+		return fallbackReturn(err)
 	}
 
-	return str.String()
+	return str.Bytes()
 }
 
-func printKeyValues(out *hclwrite.Body, kvs map[string]interface{}) {
+func jsonBodyToHCL2Body(out *hclwrite.Body, kvs map[string]interface{}) {
 	ks := []string{}
 	for k := range kvs {
 		ks = append(ks, k)
@@ -246,7 +278,7 @@ func isSensitiveVariable(key string, vars []*template.Variable) bool {
 
 func (*HCL2UpgradeCommand) Help() string {
 	helpText := `
-Usage: packer hcl2_upgrade JSON_TEMPLATE OUTPUT_DIR
+Usage: packer hcl2_upgrade -output-file=JSON_TEMPLATE.pkr.hcl JSON_TEMPLATE...
 
   Will transform your JSON template to a HCL2 configuration.
 `
