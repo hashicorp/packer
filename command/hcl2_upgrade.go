@@ -57,13 +57,14 @@ func (c *HCL2UpgradeCommand) ParseArgs(args []string) (*HCL2UpgradeArgs, int) {
 
 func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2UpgradeArgs) int {
 
-	var out io.Writer
+	out := &bytes.Buffer{}
+	var output io.Writer
 	if err := os.MkdirAll(filepath.Dir(cla.OutputFile), 0); err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to create output directory: %v", err))
 		return 1
 	}
 	if f, err := os.Create(cla.OutputFile); err == nil {
-		out = f
+		output = f
 		defer f.Close()
 	} else {
 		c.Ui.Error(fmt.Sprintf("Failed to create output file: %v", err))
@@ -190,6 +191,8 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	}
 
 	out.Write([]byte("}\n"))
+
+	output.Write(hclwrite.Format(out.Bytes()))
 
 	c.Ui.Say(fmt.Sprintf("Successfully created %s ", cla.OutputFile))
 
