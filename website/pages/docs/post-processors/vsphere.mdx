@@ -22,7 +22,9 @@ each category, the available configuration keys are alphabetized.
 
 Required:
 
-- `cluster` (string) - The cluster to upload the VM to.
+- `cluster` (string) - The cluster to upload the VM to. If you do not have a
+  cluster defined, you can instead provide the IP address of the esx host
+  that you want to upload to.
 
 - `datacenter` (string) - The name of the datacenter within vSphere to add
   the VM to.
