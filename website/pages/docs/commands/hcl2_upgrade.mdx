@@ -55,7 +55,7 @@ locals {
 ## Go template functions
 
 `hcl2_upgrade` will do its best to transform your go _template calls_ to HCL2,
-for example:
+here is the list of calls that should get transformed:
   - ```{{ build `ID` }}``` becomes ```${build.ID}```.
   - ```{{ user `my_var` }}``` becomes ```${var.my_var}```.
   - ```{{ env `my_var` }}``` becomes ```${var.my_var}```. Packer HCL2 supports 
@@ -64,8 +64,9 @@ for example:
     for more info.
   - ```{{ timestamp }}``` becomes ```${local.timestamp}```, the local variable
     will be created for all generated files.
-  - ```{{ .HTTPIP }}```, ```{{ .HTTPPort }}```, ```{{ vault_key }}```,
-    ```{{ consul_key }}```, ```{{ aws_secretsmanager }}``` will remain similar.
+
+The rest of the calls should remain go template calls for now, this will be
+improved over time.
 
 -> **Note**: The `hcl2_upgrade` command does its best to transform template
 calls to their JSON counterpart, but it might fail. I that case the
