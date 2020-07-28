@@ -179,8 +179,20 @@ func magicTemplate(s string) string {
 		"user": func(in string) string {
 			return fmt.Sprintf("${var.%s}", in)
 		},
+		"env": func(in string) string {
+			return fmt.Sprintf("${var.%s}", in)
+		},
+		"vault_key": func(a, b string) string {
+			return fmt.Sprintf("{{ consul_key `%s` `%s` }}", a, b)
+		},
+		"build": func(a string) string {
+			return fmt.Sprintf("${build.%s}", a)
+		},
 	}
-	transparentFuncs := []string{}
+	transparentFuncs := []string{
+		"consul_key",
+		"aws_secretsmanager",
+	}
 	for i := range transparentFuncs {
 		v := transparentFuncs[i]
 		funcMap[v] = func(in string) string {
@@ -188,7 +200,14 @@ func magicTemplate(s string) string {
 		}
 	}
 
-	tpl := texttemplate.Must(texttemplate.New("generated").Funcs(funcMap).Parse(s))
+	tpl, err := texttemplate.New("generated").
+		Funcs(funcMap).
+		Parse(s)
+
+	if err != nil {
+		panic(fmt.Sprintf("%v in generated template:\n%s.", err, s))
+	}
+
 	str := &strings.Builder{}
 	v := struct {
 		HTTPIP   string
@@ -198,7 +217,6 @@ func magicTemplate(s string) string {
 		HTTPPort: "{{ .HTTPPort }}",
 	}
 	if err := tpl.Execute(str, v); err != nil {
-		panic(fmt.Sprintf("%v: %s.", err, str))
 	}
 
 	return str.String()
