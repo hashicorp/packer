@@ -132,7 +132,7 @@ type InspectArgs struct {
 }
 
 func (va *HCL2UpgradeArgs) AddFlagSets(flags *flag.FlagSet) {
-	flags.StringVar(&va.OutputFile, "output-file", "", "File where to put the hcl2 generated config. Default to JSON_TEMPLATE.pkr.hcl ")
+	flags.StringVar(&va.OutputFile, "output-file", "", "File where to put the hcl2 generated config. Defaults to JSON_TEMPLATE.pkr.hcl")
 
 	va.MetaArgs.AddFlagSets(flags)
 }

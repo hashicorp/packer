@@ -1,0 +1,30 @@
+---
+description: |
+  The `packer hcl2_upgrade` Packer command is used to transpile a JSON
+  configuration template to it's formatted HCL2 counterpart. The command will
+  return a zero exit status on success, and a non-zero exit status on failure.
+layout: docs
+page_title: packer hcl2_upgrade - Commands
+sidebar_title: <tt>hcl2_upgrade</tt>
+---
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+# `hcl2_upgrade` Command
+
+The `packer hcl2_upgrade` Packer command is used to transpile a JSON
+configuration template to it's formatted HCL2 counterpart. The command will
+return a zero exit status on success, and a non-zero exit status on failure.
+
+Example usage:
+
+```shell-session
+$ packer hcl2_upgrade my-template.json
+
+Successfully created my-template.json.pkr.hcl
+```
+
+## Options
+
+- `-output-file` - File where to put the hcl2 generated config. Defaults to
+  JSON_TEMPLATE.pkr.hcl

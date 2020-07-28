@@ -39,10 +39,10 @@ func (c *HCL2UpgradeCommand) ParseArgs(args []string) (*HCL2UpgradeArgs, int) {
 	var cfg HCL2UpgradeArgs
 	flags := c.Meta.FlagSet("hcl2_upgrade", FlagSetNone)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
+	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
 		return &cfg, 1
 	}
-
 	args = flags.Args()
 	if len(args) != 1 {
 		flags.Usage()
