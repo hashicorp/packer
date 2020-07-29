@@ -37,7 +37,7 @@ type TencentCloudRunConfig struct {
 	InstanceType string `mapstructure:"instance_type" required:"true"`
 	// Instance name.
 	InstanceName string `mapstructure:"instance_name" required:"false"`
-	// Root disk type your cvm will be launched by. you could
+	// Root disk type your cvm will be launched by, default is `CLOUD_PREMIUM`. you could
 	// reference Disk Type
 	// for parameter taking.
 	DiskType string `mapstructure:"disk_type" required:"false"`
@@ -164,7 +164,7 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 	if cf.DiskType != "" && !checkDiskType(cf.DiskType) {
 		errs = append(errs, errors.New(fmt.Sprintf("specified disk_type(%s) is invalid", cf.DiskType)))
 	} else if cf.DiskType == "" {
-		cf.DiskType = "CLOUD_BASIC"
+		cf.DiskType = "CLOUD_PREMIUM"
 	}
 
 	if cf.DiskSize <= 0 {

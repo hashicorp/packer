@@ -524,7 +524,7 @@ github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.5.1
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# github.com/tencentcloud/tencentcloud-sdk-go v3.0.155+incompatible
+# github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors
 github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http

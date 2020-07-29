@@ -594,6 +594,8 @@ github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/tencentcloud/tencentcloud-sdk-go v3.0.155+incompatible h1:M+Q7+SIBnUZbV0ec+HAOtv2M/wmOUsfjEOpQxM3u4xI=
 github.com/tencentcloud/tencentcloud-sdk-go v3.0.155+incompatible/go.mod h1:0PfYow01SHPMhKY31xa+EFz2RStxIqj6JFAJS+IkCi4=
+github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible h1:bs+0lcG4RELNbE8PsBC9oaPP0/qExr0DuEGnZyocm84=
+github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible/go.mod h1:0PfYow01SHPMhKY31xa+EFz2RStxIqj6JFAJS+IkCi4=
 github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926 h1:G3dpKMzFDjgEh2q1Z7zUUtKa8ViPtH+ocF0bE0g00O8=
 github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqriFuLhtthL60Sar/7RFoluCcXsuvEwTV5KM=
 github.com/ucloud/ucloud-sdk-go v0.16.3 h1:DCh4A5vSxFr3EvtvJL+g0Ehy4hSlEkMpQmEvxEQhYdo=
