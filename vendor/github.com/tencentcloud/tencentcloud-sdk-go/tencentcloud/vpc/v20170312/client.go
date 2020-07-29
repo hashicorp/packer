@@ -316,6 +316,31 @@ func (c *Client) AssociateAddress(request *AssociateAddressRequest) (response *A
     return
 }
 
+func NewAssociateDhcpIpWithAddressIpRequest() (request *AssociateDhcpIpWithAddressIpRequest) {
+    request = &AssociateDhcpIpWithAddressIpRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "AssociateDhcpIpWithAddressIp")
+    return
+}
+
+func NewAssociateDhcpIpWithAddressIpResponse() (response *AssociateDhcpIpWithAddressIpResponse) {
+    response = &AssociateDhcpIpWithAddressIpResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（AssociateDhcpIpWithAddressIp）用于DhcpIp绑定弹性公网IP（EIP）。<br />
+func (c *Client) AssociateDhcpIpWithAddressIp(request *AssociateDhcpIpWithAddressIpRequest) (response *AssociateDhcpIpWithAddressIpResponse, err error) {
+    if request == nil {
+        request = NewAssociateDhcpIpWithAddressIpRequest()
+    }
+    response = NewAssociateDhcpIpWithAddressIpResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewAssociateNatGatewayAddressRequest() (request *AssociateNatGatewayAddressRequest) {
     request = &AssociateNatGatewayAddressRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -794,6 +819,31 @@ func (c *Client) CreateDefaultVpc(request *CreateDefaultVpcRequest) (response *C
     return
 }
 
+func NewCreateDhcpIpRequest() (request *CreateDhcpIpRequest) {
+    request = &CreateDhcpIpRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "CreateDhcpIp")
+    return
+}
+
+func NewCreateDhcpIpResponse() (response *CreateDhcpIpResponse) {
+    response = &CreateDhcpIpResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（CreateDhcpIp）用于创建DhcpIp
+func (c *Client) CreateDhcpIp(request *CreateDhcpIpRequest) (response *CreateDhcpIpResponse, err error) {
+    if request == nil {
+        request = NewCreateDhcpIpRequest()
+    }
+    response = NewCreateDhcpIpResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewCreateDirectConnectGatewayRequest() (request *CreateDirectConnectGatewayRequest) {
     request = &CreateDirectConnectGatewayRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -1149,15 +1199,19 @@ func NewCreateSecurityGroupPoliciesResponse() (response *CreateSecurityGroupPoli
 
 // 本接口（CreateSecurityGroupPolicies）用于创建安全组规则（SecurityGroupPolicy）。
 // 
-// * Version安全组规则版本号，用户每次更新安全规则版本会自动加1，防止您更新的路由规则已过期，不填不考虑冲突。
-// * Protocol字段支持输入TCP, UDP, ICMP, ICMPV6, GRE, ALL。
-// * CidrBlock字段允许输入符合cidr格式标准的任意字符串。(展开)在基础网络中，如果CidrBlock包含您的账户内的云服务器之外的设备在腾讯云的内网IP，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。
-// * Ipv6CidrBlock字段允许输入符合IPv6 cidr格式标准的任意字符串。(展开)在基础网络中，如果Ipv6CidrBlock包含您的账户内的云服务器之外的设备在腾讯云的内网IPv6，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。
-// * SecurityGroupId字段允许输入与待修改的安全组位于相同项目中的安全组ID，包括这个安全组ID本身，代表安全组下所有云服务器的内网IP。使用这个字段时，这条规则用来匹配网络报文的过程中会随着被使用的这个ID所关联的云服务器变化而变化，不需要重新修改。
-// * Port字段允许输入一个单独端口号，或者用减号分隔的两个端口号代表端口范围，例如80或8000-8010。只有当Protocol字段是TCP或UDP时，Port字段才被接受，即Protocol字段不是TCP或UDP时，Protocol和Port排他关系，不允许同时输入，否则会接口报错。
-// * Action字段只允许输入ACCEPT或DROP。
-// * CidrBlock, Ipv6CidrBlock, SecurityGroupId, AddressTemplate四者是排他关系，不允许同时输入，Protocol + Port和ServiceTemplate二者是排他关系，不允许同时输入。
-// * 一次请求中只能创建单个方向的规则, 如果需要指定索引（PolicyIndex）参数, 多条规则的索引必须一致。
+// 在 SecurityGroupPolicySet 参数中：
+// <ul>
+// <li>Version 安全组规则版本号，用户每次更新安全规则版本会自动加1，防止您更新的路由规则已过期，不填不考虑冲突。</li>
+// <li>在创建出站和入站规则（Egress 和 Ingress）时：<ul>
+// <li>Protocol 字段支持输入TCP, UDP, ICMP, ICMPV6, GRE, ALL。</li>
+// <li>CidrBlock 字段允许输入符合cidr格式标准的任意字符串。(展开)在基础网络中，如果 CidrBlock 包含您的账户内的云服务器之外的设备在腾讯云的内网 IP，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。</li>
+// <li>Ipv6CidrBlock 字段允许输入符合IPv6 cidr格式标准的任意字符串。(展开)在基础网络中，如果Ipv6CidrBlock 包含您的账户内的云服务器之外的设备在腾讯云的内网 IPv6，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。</li>
+// <li>SecurityGroupId 字段允许输入与待修改的安全组位于相同项目中的安全组 ID，包括这个安全组 ID 本身，代表安全组下所有云服务器的内网 IP。使用这个字段时，这条规则用来匹配网络报文的过程中会随着被使用的这个 ID 所关联的云服务器变化而变化，不需要重新修改。</li>
+// <li>Port 字段允许输入一个单独端口号，或者用减号分隔的两个端口号代表端口范围，例如80或8000-8010。只有当 Protocol 字段是 TCP 或 UDP 时，Port 字段才被接受，即 Protocol 字段不是 TCP 或 UDP 时，Protocol 和 Port 排他关系，不允许同时输入，否则会接口报错。</li>
+// <li>Action 字段只允许输入 ACCEPT 或 DROP。</li>
+// <li>CidrBlock, Ipv6CidrBlock, SecurityGroupId, AddressTemplate 四者是排他关系，不允许同时输入，Protocol + Port 和 ServiceTemplate 二者是排他关系，不允许同时输入。</li>
+// <li>一次请求中只能创建单个方向的规则, 如果需要指定索引（PolicyIndex）参数, 多条规则的索引必须一致。</li>
+// </ul></li></ul>
 func (c *Client) CreateSecurityGroupPolicies(request *CreateSecurityGroupPoliciesRequest) (response *CreateSecurityGroupPoliciesResponse, err error) {
     if request == nil {
         request = NewCreateSecurityGroupPoliciesRequest()
@@ -1543,6 +1597,31 @@ func (c *Client) DeleteCustomerGateway(request *DeleteCustomerGatewayRequest) (r
         request = NewDeleteCustomerGatewayRequest()
     }
     response = NewDeleteCustomerGatewayResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteDhcpIpRequest() (request *DeleteDhcpIpRequest) {
+    request = &DeleteDhcpIpRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DeleteDhcpIp")
+    return
+}
+
+func NewDeleteDhcpIpResponse() (response *DeleteDhcpIpResponse) {
+    response = &DeleteDhcpIpResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DeleteDhcpIp）用于删除DhcpIp
+func (c *Client) DeleteDhcpIp(request *DeleteDhcpIpRequest) (response *DeleteDhcpIpResponse, err error) {
+    if request == nil {
+        request = NewDeleteDhcpIpRequest()
+    }
+    response = NewDeleteDhcpIpResponse()
     err = c.Send(request, response)
     return
 }
@@ -2438,6 +2517,31 @@ func (c *Client) DescribeCustomerGateways(request *DescribeCustomerGatewaysReque
     return
 }
 
+func NewDescribeDhcpIpsRequest() (request *DescribeDhcpIpsRequest) {
+    request = &DescribeDhcpIpsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeDhcpIps")
+    return
+}
+
+func NewDescribeDhcpIpsResponse() (response *DescribeDhcpIpsResponse) {
+    response = &DescribeDhcpIpsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DescribeDhcpIps）用于查询DhcpIp列表
+func (c *Client) DescribeDhcpIps(request *DescribeDhcpIpsRequest) (response *DescribeDhcpIpsResponse, err error) {
+    if request == nil {
+        request = NewDescribeDhcpIpsRequest()
+    }
+    response = NewDescribeDhcpIpsResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewDescribeDirectConnectGatewayCcnRoutesRequest() (request *DescribeDirectConnectGatewayCcnRoutesRequest) {
     request = &DescribeDirectConnectGatewayCcnRoutesRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -3312,7 +3416,7 @@ func NewDescribeVpcResourceDashboardResponse() (response *DescribeVpcResourceDas
     return
 }
 
-// 查看VPC资源
+// 本接口(DescribeVpcResourceDashboard)用于查看VPC资源信息。
 func (c *Client) DescribeVpcResourceDashboard(request *DescribeVpcResourceDashboardRequest) (response *DescribeVpcResourceDashboardResponse, err error) {
     if request == nil {
         request = NewDescribeVpcResourceDashboardRequest()
@@ -3368,6 +3472,31 @@ func (c *Client) DescribeVpnConnections(request *DescribeVpnConnectionsRequest) 
         request = NewDescribeVpnConnectionsRequest()
     }
     response = NewDescribeVpnConnectionsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeVpnGatewayCcnRoutesRequest() (request *DescribeVpnGatewayCcnRoutesRequest) {
+    request = &DescribeVpnGatewayCcnRoutesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DescribeVpnGatewayCcnRoutes")
+    return
+}
+
+func NewDescribeVpnGatewayCcnRoutesResponse() (response *DescribeVpnGatewayCcnRoutesResponse) {
+    response = &DescribeVpnGatewayCcnRoutesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DescribeVpnGatewayCcnRoutes）用于查询VPN网关云联网路由
+func (c *Client) DescribeVpnGatewayCcnRoutes(request *DescribeVpnGatewayCcnRoutesRequest) (response *DescribeVpnGatewayCcnRoutesResponse, err error) {
+    if request == nil {
+        request = NewDescribeVpnGatewayCcnRoutesRequest()
+    }
+    response = NewDescribeVpnGatewayCcnRoutesResponse()
     err = c.Send(request, response)
     return
 }
@@ -3577,6 +3706,31 @@ func (c *Client) DisassociateAddress(request *DisassociateAddressRequest) (respo
     return
 }
 
+func NewDisassociateDhcpIpWithAddressIpRequest() (request *DisassociateDhcpIpWithAddressIpRequest) {
+    request = &DisassociateDhcpIpWithAddressIpRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "DisassociateDhcpIpWithAddressIp")
+    return
+}
+
+func NewDisassociateDhcpIpWithAddressIpResponse() (response *DisassociateDhcpIpWithAddressIpResponse) {
+    response = &DisassociateDhcpIpWithAddressIpResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（DisassociateDhcpIpWithAddressIp）用于将DhcpIp已绑定的弹性公网IP（EIP）解除绑定。<br />
+func (c *Client) DisassociateDhcpIpWithAddressIp(request *DisassociateDhcpIpWithAddressIpRequest) (response *DisassociateDhcpIpWithAddressIpResponse, err error) {
+    if request == nil {
+        request = NewDisassociateDhcpIpWithAddressIpRequest()
+    }
+    response = NewDisassociateDhcpIpWithAddressIpResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewDisassociateNatGatewayAddressRequest() (request *DisassociateNatGatewayAddressRequest) {
     request = &DisassociateNatGatewayAddressRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -3750,6 +3904,31 @@ func (c *Client) EnableRoutes(request *EnableRoutesRequest) (response *EnableRou
         request = NewEnableRoutesRequest()
     }
     response = NewEnableRoutesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewGetCcnRegionBandwidthLimitsRequest() (request *GetCcnRegionBandwidthLimitsRequest) {
+    request = &GetCcnRegionBandwidthLimitsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "GetCcnRegionBandwidthLimits")
+    return
+}
+
+func NewGetCcnRegionBandwidthLimitsResponse() (response *GetCcnRegionBandwidthLimitsResponse) {
+    response = &GetCcnRegionBandwidthLimitsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（GetCcnRegionBandwidthLimits）用于查询云联网相关地域带宽信息，其中预付费模式的云联网仅支持地域间限速，后付费模式的云联网支持地域间限速和地域出口限速。
+func (c *Client) GetCcnRegionBandwidthLimits(request *GetCcnRegionBandwidthLimitsRequest) (response *GetCcnRegionBandwidthLimitsResponse, err error) {
+    if request == nil {
+        request = NewGetCcnRegionBandwidthLimitsRequest()
+    }
+    response = NewGetCcnRegionBandwidthLimitsResponse()
     err = c.Send(request, response)
     return
 }
@@ -3959,6 +4138,33 @@ func (c *Client) ModifyAddressAttribute(request *ModifyAddressAttributeRequest) 
     return
 }
 
+func NewModifyAddressInternetChargeTypeRequest() (request *ModifyAddressInternetChargeTypeRequest) {
+    request = &ModifyAddressInternetChargeTypeRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "ModifyAddressInternetChargeType")
+    return
+}
+
+func NewModifyAddressInternetChargeTypeResponse() (response *ModifyAddressInternetChargeTypeResponse) {
+    response = &ModifyAddressInternetChargeTypeResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 该接口用于调整具有带宽属性弹性公网IP的网络计费模式
+// * 支持BANDWIDTH_PREPAID_BY_MONTH和TRAFFIC_POSTPAID_BY_HOUR两种网络计费模式之间的切换。
+// * 每个弹性公网IP支持调整两次，次数超出则无法调整。
+func (c *Client) ModifyAddressInternetChargeType(request *ModifyAddressInternetChargeTypeRequest) (response *ModifyAddressInternetChargeTypeResponse, err error) {
+    if request == nil {
+        request = NewModifyAddressInternetChargeTypeRequest()
+    }
+    response = NewModifyAddressInternetChargeTypeResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewModifyAddressTemplateAttributeRequest() (request *ModifyAddressTemplateAttributeRequest) {
     request = &ModifyAddressTemplateAttributeRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -4155,6 +4361,31 @@ func (c *Client) ModifyCustomerGatewayAttribute(request *ModifyCustomerGatewayAt
         request = NewModifyCustomerGatewayAttributeRequest()
     }
     response = NewModifyCustomerGatewayAttributeResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyDhcpIpAttributeRequest() (request *ModifyDhcpIpAttributeRequest) {
+    request = &ModifyDhcpIpAttributeRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "ModifyDhcpIpAttribute")
+    return
+}
+
+func NewModifyDhcpIpAttributeResponse() (response *ModifyDhcpIpAttributeResponse) {
+    response = &ModifyDhcpIpAttributeResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（ModifyDhcpIpAttribute）用于修改DhcpIp属性
+func (c *Client) ModifyDhcpIpAttribute(request *ModifyDhcpIpAttributeRequest) (response *ModifyDhcpIpAttributeResponse, err error) {
+    if request == nil {
+        request = NewModifyDhcpIpAttributeRequest()
+    }
+    response = NewModifyDhcpIpAttributeResponse()
     err = c.Send(request, response)
     return
 }
@@ -4474,7 +4705,9 @@ func NewModifyNetworkAclEntriesResponse() (response *ModifyNetworkAclEntriesResp
     return
 }
 
-// 本接口（ModifyNetworkAclEntries）用于修改（包括添加和删除）网络ACL的入站规则和出站规则。
+// 本接口（ModifyNetworkAclEntries）用于修改（包括添加和删除）网络ACL的入站规则和出站规则。在NetworkAclEntrySet参数中：
+// * 若同时传入入站规则和出站规则，则重置原有的入站规则和出站规则，并分别导入传入的规则。
+// * 若仅传入入站规则，则仅重置原有的入站规则，并导入传入的规则，不影响原有的出站规则（若仅传入出站规则，处理方式类似入站方向）。
 func (c *Client) ModifyNetworkAclEntries(request *ModifyNetworkAclEntriesRequest) (response *ModifyNetworkAclEntriesResponse, err error) {
     if request == nil {
         request = NewModifyNetworkAclEntriesRequest()
@@ -4601,15 +4834,20 @@ func NewModifySecurityGroupPoliciesResponse() (response *ModifySecurityGroupPoli
 
 // 本接口（ModifySecurityGroupPolicies）用于重置安全组出站和入站规则（SecurityGroupPolicy）。
 // 
-// * 接口是先删除当前所有的出入站规则，然后再添加 Egress 和 Ingress 规则，不支持自定义索引 PolicyIndex 。
-// * 如果指定 SecurityGroupPolicySet.Version 为0, 表示清空所有规则，并忽略Egress和Ingress。
-// * Protocol字段支持输入TCP, UDP, ICMP, ICMPV6, GRE, ALL。
-// * CidrBlock字段允许输入符合cidr格式标准的任意字符串。(展开)在基础网络中，如果CidrBlock包含您的账户内的云服务器之外的设备在腾讯云的内网IP，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。
-// * Ipv6CidrBlock字段允许输入符合IPv6 cidr格式标准的任意字符串。(展开)在基础网络中，如果Ipv6CidrBlock包含您的账户内的云服务器之外的设备在腾讯云的内网IPv6，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。
-// * SecurityGroupId字段允许输入与待修改的安全组位于相同项目中的安全组ID，包括这个安全组ID本身，代表安全组下所有云服务器的内网IP。使用这个字段时，这条规则用来匹配网络报文的过程中会随着被使用的这个ID所关联的云服务器变化而变化，不需要重新修改。
-// * Port字段允许输入一个单独端口号，或者用减号分隔的两个端口号代表端口范围，例如80或8000-8010。只有当Protocol字段是TCP或UDP时，Port字段才被接受。
-// * Action字段只允许输入ACCEPT或DROP。
-// * CidrBlock, Ipv6CidrBlock, SecurityGroupId, AddressTemplate四者是排他关系，不允许同时输入，Protocol + Port和ServiceTemplate二者是排他关系，不允许同时输入。
+// <ul>
+// <li>接口是先删除当前所有的出入站规则，然后再添加 Egress 和 Ingress 规则，不支持自定义索引 PolicyIndex。</li>
+// <li>在 SecurityGroupPolicySet 参数中：<ul>
+// 	<li> 如果指定 SecurityGroupPolicySet.Version 为0, 表示清空所有规则，并忽略 Egress 和 Ingress。</li>
+// 	<li> 如果指定 SecurityGroupPolicySet.Version 不为0, 在添加出站和入站规则（Egress 和 Ingress）时：<ul>
+// 		<li>Protocol 字段支持输入 TCP, UDP, ICMP, ICMPV6, GRE, ALL。</li>
+// 		<li>CidrBlock 字段允许输入符合 cidr 格式标准的任意字符串。(展开)在基础网络中，如果 CidrBlock 包含您的账户内的云服务器之外的设备在腾讯云的内网 IP，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。</li>
+// 		<li>Ipv6CidrBlock 字段允许输入符合 IPv6 cidr 格式标准的任意字符串。(展开)在基础网络中，如果Ipv6CidrBlock 包含您的账户内的云服务器之外的设备在腾讯云的内网 IPv6，并不代表此规则允许您访问这些设备，租户之间网络隔离规则优先于安全组中的内网规则。</li>
+// 		<li>SecurityGroupId 字段允许输入与待修改的安全组位于相同项目中的安全组 ID，包括这个安全组 ID 本身，代表安全组下所有云服务器的内网 IP。使用这个字段时，这条规则用来匹配网络报文的过程中会随着被使用的这个ID所关联的云服务器变化而变化，不需要重新修改。</li>
+// 		<li>Port 字段允许输入一个单独端口号，或者用减号分隔的两个端口号代表端口范围，例如80或8000-8010。只有当 Protocol 字段是 TCP 或 UDP 时，Port 字段才被接受。</li>
+// 		<li>Action 字段只允许输入 ACCEPT 或 DROP。</li>
+// 		<li>CidrBlock, Ipv6CidrBlock, SecurityGroupId, AddressTemplate 四者是排他关系，不允许同时输入，Protocol + Port 和 ServiceTemplate 二者是排他关系，不允许同时输入。</li>
+// </ul></li></ul></li>
+// </ul>
 func (c *Client) ModifySecurityGroupPolicies(request *ModifySecurityGroupPoliciesRequest) (response *ModifySecurityGroupPoliciesResponse, err error) {
     if request == nil {
         request = NewModifySecurityGroupPoliciesRequest()
@@ -4765,6 +5003,31 @@ func (c *Client) ModifyVpnGatewayAttribute(request *ModifyVpnGatewayAttributeReq
         request = NewModifyVpnGatewayAttributeRequest()
     }
     response = NewModifyVpnGatewayAttributeResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyVpnGatewayCcnRoutesRequest() (request *ModifyVpnGatewayCcnRoutesRequest) {
+    request = &ModifyVpnGatewayCcnRoutesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    request.Init().WithApiInfo("vpc", APIVersion, "ModifyVpnGatewayCcnRoutes")
+    return
+}
+
+func NewModifyVpnGatewayCcnRoutesResponse() (response *ModifyVpnGatewayCcnRoutesResponse) {
+    response = &ModifyVpnGatewayCcnRoutesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    }
+    return
+}
+
+// 本接口（ModifyVpnGatewayCcnRoutes）用于修改VPN网关云联网路由
+func (c *Client) ModifyVpnGatewayCcnRoutes(request *ModifyVpnGatewayCcnRoutesRequest) (response *ModifyVpnGatewayCcnRoutesResponse, err error) {
+    if request == nil {
+        request = NewModifyVpnGatewayCcnRoutesRequest()
+    }
+    response = NewModifyVpnGatewayCcnRoutesResponse()
     err = c.Send(request, response)
     return
 }
@@ -5165,7 +5428,7 @@ func NewSetCcnRegionBandwidthLimitsResponse() (response *SetCcnRegionBandwidthLi
     return
 }
 
-// 本接口（SetCcnRegionBandwidthLimits）用于设置云联网（CCN）各地域出带宽上限，该接口只能设置已关联网络实例包含的地域的出带宽上限
+// 本接口（SetCcnRegionBandwidthLimits）用于设置云联网（CCN）各地域出带宽上限，或者地域间带宽上限。
 func (c *Client) SetCcnRegionBandwidthLimits(request *SetCcnRegionBandwidthLimitsRequest) (response *SetCcnRegionBandwidthLimitsResponse, err error) {
     if request == nil {
         request = NewSetCcnRegionBandwidthLimitsRequest()
