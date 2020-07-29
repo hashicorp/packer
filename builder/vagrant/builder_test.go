@@ -79,6 +79,46 @@ func TestBuilder_Prepare_ValidateSource(t *testing.T) {
 			errExpected: true,
 			reason:      "Inalid argument for teardown method",
 		},
+		{
+			config: map[string]interface{}{
+				"communicator": "ssh",
+				"source_path":  "./my.box",
+			},
+			errExpected: true,
+			reason:      "Should fail because path does not exist",
+		},
+		{
+			config: map[string]interface{}{
+				"communicator": "ssh",
+				"source_path":  "file://my.box",
+			},
+			errExpected: true,
+			reason:      "Should fail because path does not exist",
+		},
+		{
+			config: map[string]interface{}{
+				"communicator": "ssh",
+				"source_path":  "http://my.box",
+			},
+			errExpected: false,
+			reason:      "Should pass because path is not local",
+		},
+		{
+			config: map[string]interface{}{
+				"communicator": "ssh",
+				"source_path":  "https://my.box",
+			},
+			errExpected: false,
+			reason:      "Should pass because path is not local",
+		},
+		{
+			config: map[string]interface{}{
+				"communicator": "ssh",
+				"source_path":  "smb://my.box",
+			},
+			errExpected: false,
+			reason:      "Should pass because path is not local",
+		},
 	}
 
 	for _, tc := range cases {

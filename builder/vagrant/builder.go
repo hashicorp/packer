@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -194,10 +195,19 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		if b.config.GlobalID != "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You may either set global_id or source_path but not both"))
 		}
+		// We're about to open up an actual boxfile. If the file is local to the
+		// filesystem, let's make sure it exists before we get too far into the
+		// build.
 		if strings.HasSuffix(b.config.SourceBox, ".box") {
-			if _, err := os.Stat(b.config.SourceBox); err != nil {
-				errs = packer.MultiErrorAppend(errs,
-					fmt.Errorf("Source box '%s' needs to exist at time of config validation! %v", b.config.SourceBox, err))
+			// If scheme is "file" or empty, then we need to check the
+			// filesystem to make sure the box is present locally.
+			u, err := url.Parse(b.config.SourceBox)
+			if err == nil && (u.Scheme == "" || u.Scheme == "file") {
+				if _, err := os.Stat(b.config.SourceBox); err != nil {
+					errs = packer.MultiErrorAppend(errs,
+						fmt.Errorf("Source box '%s' needs to exist at time of"+
+							" config validation! %v", b.config.SourceBox, err))
+				}
 			}
 		}
 	}
