@@ -54,7 +54,8 @@ func (c *HCL2UpgradeCommand) ParseArgs(args []string) (*HCL2UpgradeArgs, int) {
 	return &cfg, 0
 }
 
-const hcl2UpgradeFileHeader = `# This file was autogenerate by the BETA 'packer hcl2_upgrade' command. We
+const (
+	hcl2UpgradeFileHeader = `# This file was autogenerate by the BETA 'packer hcl2_upgrade' command. We
 # recommend double checking that everything is correct before going forward. We
 # Also recommend treating auto-generated files as disposable. The HCL2 blocks
 # in this file can be moved in other files. For example the variable blocks
@@ -67,6 +68,20 @@ const hcl2UpgradeFileHeader = `# This file was autogenerate by the BETA 'packer 
 # constraints documentation
 # https://www.packer.io/docs/from-1.5/variables#type-constraints for more info.
 `
+
+	sourcesHeader = `
+# source blocks are generated from your builders; a source can be referenced in
+# build blocks. A build block runs provisioner and post-processors onto a
+# source. Read the documentation for source blocks here:
+# https://www.packer.io/docs/from-1.5/blocks/source`
+
+	buildHeader = `
+# a build block invokes sources and runs provisionning steps on them. The
+# documentation for build blocks can be found here:
+# https://www.packer.io/docs/from-1.5/blocks/build
+build {
+`
+)
 
 func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2UpgradeArgs) int {
 
@@ -147,6 +162,8 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		})
 	}
 
+	out.Write([]byte(sourcesHeader))
+
 	for i, builderCfg := range builders {
 		sourcesContent := hclwrite.NewEmptyFile()
 		body := sourcesContent.Body()
@@ -167,8 +184,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	}
 
 	// Output build section
-
-	_, _ = out.Write([]byte("\nbuild {\n"))
+	out.Write([]byte(buildHeader))
 
 	buildContent := hclwrite.NewEmptyFile()
 	buildBody := buildContent.Body()
