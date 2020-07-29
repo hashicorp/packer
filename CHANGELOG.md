@@ -20,11 +20,12 @@
     [GH-9565]
 * builder/file: Create parent directories of target file, if they don't exist.
     [GH-9452]
-* builder/google: Add support for oslogin via the `use_os_login` configuration
-    option [GH-9339]
 * builder/googlecompute: Add `wrap_startup_script` configuration option to
     allow the disabling of Packer's startup script wrapper [GH-9505]
+* builder/googlecompute: Add support for oslogin via the `use_os_login`
+    configuration option [GH-9339]
 * builder/googlecompute: Make IAP tunnel timeout configurable. [GH-9545]
+* builder/googlecompute: Support using WinRM over an IAP tunnel [GH-9610]
 * builder/hyper-v: Include secure boot template in box.xml [GH-9552]
 * builder/hyperone: Add support for custom username in vm creation. [GH-9497]
 * builder/hyperone: Skip chroot device discovery. [GH-9489]
@@ -35,9 +36,10 @@
 * builder/proxmox: Enable Proxmox builder to toggle the firewall parameter for
     network interfaces. [GH-9487]
 * builder/proxmox: Update Proxmox storagePoolTypes [GH-9418]
-* builder/tencent: add key `source_image_name` to get source image by name when
-  creating image [GH-9619]
 * builder/qemu: Add 'cdrom_interface' option to QEMU builder [GH-9483]
+* builder/tencentcloud: Add `source_image_name` to support getting source image
+    by name [GH-9619]
+* builder/tencentcloud: Update cvm root disk type to `CLOUD_PREMIUM` [GH-9663]
 * builder/ucloud: New access config options and run config options. [GH-9466]
 * builder/vsphere-clone: Add `boot_command` support to vsphere-clone builder,
     including support for starting an HTTP server
@@ -78,17 +80,16 @@
 * core: Add on-error flag option to run error-cleanup-provisioner [GH-9429]
 * core: communicator/ssh: Add new `ssh_key_exchange_algorithms` option to
     supply custom key exchange algorithms in SSH client [GH-9634]
-* core: refactor initialization out from Packer core to allow 
-    `validate --syntax-only` to no error when a variable is not set [GH-9627]
+* core: refactor initialization out from Packer core to allow `validate
+    --syntax-only` to no error when a variable is not set [GH-9627]
 * hcl2: Handle uint64 buildvars [GH-9585]
 * post-processor/yandex-export: Allow users to utilize generated variables in
     templating. [GH-9555]
 * post-processor/yandex-export: Support Authentication by Service Account Key
     file [GH-9379]
-* post-processor/yandex-import: Support using URL from yandex-export pp
-    [GH-9601]
 * post-processor/yandex-import: Support creating an Image based on another one
     [GH-9614]
+* post-processor/yandex-import: Support using URL from yandex-export [GH-9601]
 * provisioner/ansible: Add template option for templating the inventory file
     lines [GH-9438]
 
@@ -100,10 +101,15 @@
     builders. [GH-9457]
 * builder/amazon: Retry fetching block device mappings if empty. [GH-9480]
 * builder/azure: Fix data disks URI. [GH-9467]
-* builder/google: Fix the "secure boot" validation for uefi_compatible images.
-    [GH-9371]
+* builder/googlecompute: Fix issue with `use_iap` globally changing a user's
+    gcloud project configuration, by temporarily setting "project" via project
+    flag and not via `gcloud config` [GH-9662]
+* builder/googlecompute: Fix the "secure boot" validation for uefi_compatible
+    images. [GH-9371]
 * builder/qemu: Only set up localhost port forwarding if skipnatmapping is
     false. [GH-9479]
+* builder/vagrant: Fix box file validation for remote box files specified using
+    `source_path` [GH-9660]
 * builder/vagrant: Improve validation and error handling around synced_folder.
     Make sure that synced folder can be defined relative to Packer run
     directory, not the Vagrant output directory. [GH-9577]
@@ -129,7 +135,10 @@
     [GH-9448]
 * post-processor/amazon-import: Add support for retrying RequestLimitExceeded
     errors when importing an image [GH-9537]
+* post-processor/vsphere: Fix password encoding in vsphere post-processor
+    ovftool call [GH-9589]
 * post-processor/yandex-export: Fix error handling and docs. [GH-9554]
+* provisioner/ansible-local: Fix agent auth in SSH communicator  [GH-9639]
 * provisioner/ansible: Correct check for whether PackerHttpAddr is implemented
     or not [GH-9498]
 * provisioner/ansible: Quote extra-var packer_build_name to handle names with
