@@ -27,7 +27,6 @@ func Test_hcl2_upgrade(t *testing.T) {
 			inputPath := filepath.Join(testFixture(tc.folder, "input.json"))
 			outputPath := inputPath + ".pkr.hcl"
 			expectedPath := filepath.Join(testFixture(tc.folder, "expected.pkr.hcl"))
-			defer os.Remove(outputPath)
 			p := helperCommand(t, "hcl2_upgrade", inputPath)
 			bs, err := p.CombinedOutput()
 			if err != nil {
@@ -39,7 +38,7 @@ func Test_hcl2_upgrade(t *testing.T) {
 			if diff := cmp.Diff(expected, actual); diff != "" {
 				t.Fatalf("unexpected output: %s", diff)
 			}
-
+			os.Remove(outputPath)
 		})
 	}
 }
