@@ -49,7 +49,8 @@ func TestStepStartTunnel_CreateTempScript(t *testing.T) {
 	s := getTestStepStartTunnel()
 
 	args := []string{"compute", "start-iap-tunnel", "fakeinstance-12345",
-		"1234", "--local-host-port=localhost:8774", "--zone", "us-central-b"}
+		"1234", "--local-host-port=localhost:8774", "--zone", "us-central-b",
+		"--project", "fake-project-123"}
 
 	scriptPath, err := s.createTempGcloudScript(args)
 	if err != nil {
@@ -65,16 +66,14 @@ func TestStepStartTunnel_CreateTempScript(t *testing.T) {
 	expected := `#!/bin/bash
 
 gcloud auth activate-service-account --key-file='/path/to/account_file.json'
-gcloud config set project fake-project-123
-gcloud compute start-iap-tunnel fakeinstance-12345 1234 --local-host-port=localhost:8774 --zone us-central-b
+gcloud compute start-iap-tunnel fakeinstance-12345 1234 --local-host-port=localhost:8774 --zone us-central-b --project fake-project-123
 `
 	if runtime.GOOS == "windows" {
 		// in real life you'd not be passing a HashBang here, but GIGO.
 		expected = `#!/bin/bash
 
 call gcloud auth activate-service-account --key-file "/path/to/account_file.json"
-call gcloud config set project fake-project-123
-call gcloud compute start-iap-tunnel fakeinstance-12345 1234 --local-host-port=localhost:8774 --zone us-central-b
+call gcloud compute start-iap-tunnel fakeinstance-12345 1234 --local-host-port=localhost:8774 --zone us-central-b --project fake-project-123
 `
 	}
 	if fmt.Sprintf("%s", f) != expected {
