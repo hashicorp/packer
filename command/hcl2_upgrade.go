@@ -225,6 +225,19 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		}
 		for _, pp := range pps {
 			ppBody := body.AppendNewBlock("post-processor", []string{pp.Type}).Body()
+			if pp.KeepInputArtifact != nil {
+				ppBody.SetAttributeValue("keep_input_artifact", cty.BoolVal(*pp.KeepInputArtifact))
+			}
+			cfg := pp.Config
+			if len(pp.Except) > 0 {
+				cfg["except"] = pp.Except
+			}
+			if len(pp.Only) > 0 {
+				cfg["only"] = pp.Only
+			}
+			if len(pp.Name) > 0 {
+				cfg["name"] = pp.Name
+			}
 			jsonBodyToHCL2Body(ppBody, pp.Config)
 		}
 

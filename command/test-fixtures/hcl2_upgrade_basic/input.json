@@ -80,18 +80,25 @@
         ],
         [
             {
-                "files": [
-                  "path/something.ova"
+                "only": [
+                    "builder"
                 ],
+                "files": [
+                    "path/something.ova"
+                ],
+                "keep_input_artifact": true,
                 "type": "artifice"
-             },
-             {
-               "type": "amazon-import",
-               "s3_bucket_name": "hashicorp.adrien",
-               "license_type": "BYOL",
-               "tags": {
-                 "Description": "packer amazon-import {{timestamp}}"
-               }
+            },
+            {
+                "except": [
+                    "other_builder"
+                ],
+                "type": "amazon-import",
+                "s3_bucket_name": "hashicorp.adrien",
+                "license_type": "BYOL",
+                "tags": {
+                    "Description": "packer amazon-import {{timestamp}}"
+                }
             }
         ]
     ]
