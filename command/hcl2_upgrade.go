@@ -208,7 +208,20 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 
 		buildBody.AppendNewline()
 		block := body.AppendNewBlock("provisioner", []string{provisioner.Type})
-		jsonBodyToHCL2Body(block.Body(), provisioner.Config)
+		cfg := provisioner.Config
+		if len(provisioner.Except) > 0 {
+			cfg["except"] = provisioner.Except
+		}
+		if len(provisioner.Only) > 0 {
+			cfg["only"] = provisioner.Only
+		}
+		if provisioner.MaxRetries > 0 {
+			cfg["max_retries"] = provisioner.MaxRetries
+		}
+		if provisioner.Timeout > 0 {
+			cfg["timeout"] = provisioner.Timeout.String()
+		}
+		jsonBodyToHCL2Body(block.Body(), cfg)
 
 		out.Write(transposeTemplatingCalls(provisionerContent.Bytes()))
 	}
@@ -238,7 +251,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 			if len(pp.Name) > 0 {
 				cfg["name"] = pp.Name
 			}
-			jsonBodyToHCL2Body(ppBody, pp.Config)
+			jsonBodyToHCL2Body(ppBody, cfg)
 		}
 
 		_, _ = out.Write(transposeTemplatingCalls(postProcessorContent.Bytes()))
