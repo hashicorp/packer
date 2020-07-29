@@ -248,7 +248,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 			if len(pp.Only) > 0 {
 				cfg["only"] = pp.Only
 			}
-			if len(pp.Name) > 0 {
+			if pp.Name != "" && pp.Name != pp.Type {
 				cfg["name"] = pp.Name
 			}
 			jsonBodyToHCL2Body(ppBody, cfg)

@@ -67,7 +67,6 @@ build {
   post-processor "amazon-import" {
     format         = "vmdk"
     license_type   = "BYOL"
-    name           = "amazon-import"
     region         = "eu-west-3"
     s3_bucket_name = "hashicorp.adrien"
     tags           = { Description = "packer amazon-import ${local.timestamp}" }
@@ -76,13 +75,12 @@ build {
     post-processor "artifice" {
       keep_input_artifact = true
       files               = ["path/something.ova"]
-      name                = "artifice"
+      name                = "very_special_artifice_post-processor"
       only                = ["builder"]
     }
     post-processor "amazon-import" {
       except         = ["other_builder"]
       license_type   = "BYOL"
-      name           = "amazon-import"
       s3_bucket_name = "hashicorp.adrien"
       tags           = { Description = "packer amazon-import ${local.timestamp}" }
     }

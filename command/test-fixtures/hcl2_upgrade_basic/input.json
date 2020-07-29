@@ -89,6 +89,7 @@
                     "path/something.ova"
                 ],
                 "keep_input_artifact": true,
+                "name": "very_special_artifice_post-processor",
                 "type": "artifice"
             },
             {
