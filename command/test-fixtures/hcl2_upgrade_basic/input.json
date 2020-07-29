@@ -1,18 +1,20 @@
 {
     "variables": {
-        "location": "westus",
-        "secret_password": null,
-        "secret_account": "dark_vader"
+        "aws_region": "eu-west-1",
+        "aws_secret_key": null,
+        "aws_access_key": "the_default_key"
     },
     "sensitive-variables": [
-        "secret_password",
-        "secret_account",
+        "aws_secret_key",
+        "aws_access_key",
         "potato"
     ],
     "builders": [
         {
             "type": "amazon-ebs",
-            "region": "eu-west-1",
+            "access_key": "{{ user `aws_access_key` }}",
+            "secret_key": "{{ user `aws_secret_key` }}",
+            "region": "{{ user `aws_region` }}",
             "ami_name": "ubuntu-16.04 test {{timestamp}}",
             "ami_description": "Ubuntu 16.04 LTS - expand root partition",
             "source_ami_filter": {
