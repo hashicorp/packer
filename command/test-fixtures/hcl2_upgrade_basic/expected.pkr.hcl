@@ -3,17 +3,24 @@
 # The HCL2 blocks in this file can be moved in other files. For example the
 # variable blocks could be moved to their own file. Those files need to be
 # suffixed with '.pkr.hcl' to be seen by Packer. 'packer inspect folder/' will
-# describe to you what is in that folder.
+# describe to you what is in that folder. All generated input variables will be
+# of string type as this how Packer JSON views them; you can later on change
+# their type. Read the type constraints page
+# https://www.packer.io/docs/from-1.5/variables#type-constraints for more info.
+
 variable "location" {
+  type    = string
   default = "westus"
 }
 
 variable "secret_account" {
+  type      = string
   default   = "dark_vader"
   sensitive = true
 }
 
 variable "secret_password" {
+  type      = string
   sensitive = true
 }
 
