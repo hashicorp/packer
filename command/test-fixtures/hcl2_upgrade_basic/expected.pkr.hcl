@@ -1,10 +1,11 @@
 # This file was autogenerate by the BETA 'packer hcl2_upgrade' command. We
 # recommend double checking that everything is correct before going forward. We
 # Also recommend treating auto-generated files as disposable. The HCL2 blocks
-# in this file can be moved in other files. For example the variable blocks
-# could be moved to their own file, etc. Those files need to be suffixed with
-# '.pkr.hcl' to be seen by Packer. 'packer inspect folder/' will describe to
-# you what is in that folder.
+# in this file could be moved in other files. For example the variable blocks
+# could be moved to their own 'variables.pkr.hcl' file, etc. Those files need
+# to be suffixed with '.pkr.hcl' to be visible to Packer. To use multiple files
+# at once they also need to be in the same folder and 'packer inspect folder/'
+# will describe to you what is in that folder.
 
 # All generated input variables will be of string type as this how Packer JSON
 # views them; you can later on change their type. Read the variables type
