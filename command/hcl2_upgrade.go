@@ -61,7 +61,7 @@ const hcl2UpgradeFileHeader = `# This file was autogenerate by the BETA 'packer 
 # suffixed with '.pkr.hcl' to be seen by Packer. 'packer inspect folder/' will
 # describe to you what is in that folder. All generated input variables will be
 # of string type as this how Packer JSON views them; you can later on change
-# their type. Read the type constraints page
+# their type. Read the type constraints documentation
 # https://www.packer.io/docs/from-1.5/variables#type-constraints for more info.
 
 `
