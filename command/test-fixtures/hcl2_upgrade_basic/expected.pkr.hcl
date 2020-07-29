@@ -8,7 +8,6 @@ variable "secret_account" {
 }
 
 variable "secret_password" {
-  default   = "42"
   sensitive = true
 }
 

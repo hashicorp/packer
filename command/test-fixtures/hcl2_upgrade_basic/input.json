@@ -1,7 +1,7 @@
 {
     "variables": {
         "location": "westus",
-        "secret_password": "42",
+        "secret_password": null,
         "secret_account": "dark_vader"
     },
     "sensitive-variables": [

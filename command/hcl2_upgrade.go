@@ -77,8 +77,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 
 	core := hdl.(*CoreWrapper).Core
 	if err := core.Initialize(); err != nil {
-		c.Ui.Error(fmt.Sprintf("Initialization error: %v", err))
-		return 1
+		c.Ui.Error(fmt.Sprintf("Initialization error, continuing: %v", err))
 	}
 	tpl := core.Template
 
