@@ -1,0 +1,15 @@
+<!-- Code generated from the comments of the NetworkInterface struct in builder/vsphere/clone/step_customize.go; DO NOT EDIT MANUALLY -->
+
+- `dns_server_list` ([]string) - Network interface-specific DNS server settings for Windows operating systems.
+  Ignored on Linux and possibly other operating systems - for those systems, please see the [global DNS settings](#global-dns-settings) section.
+
+- `dns_domain` (string) - Network interface-specific DNS search domain for Windows operating systems.
+  Ignored on Linux and possibly other operating systems - for those systems, please see the [global DNS settings](#global-dns-settings) section.
+
+- `ipv4_address` (string) - The IPv4 address assigned to this network adapter. If left blank or not included, DHCP is used.
+
+- `ipv4_netmask` (int) - The IPv4 subnet mask, in bits (example: 24 for 255.255.255.0).
+
+- `ipv6_address` (string) - The IPv6 address assigned to this network adapter. If left blank or not included, auto-configuration is used.
+
+- `ipv6_netmask` (int) - The IPv6 subnet mask, in bits (example: 32).

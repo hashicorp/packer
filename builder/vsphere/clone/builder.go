@@ -54,6 +54,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 	)
 
+	if b.config.CustomizeConfig != nil {
+		steps = append(steps, &StepCustomize{
+			Config: b.config.CustomizeConfig,
+		})
+	}
+
 	if b.config.Comm.Type != "none" {
 		steps = append(steps,
 			&common.StepHTTPIPDiscover{
