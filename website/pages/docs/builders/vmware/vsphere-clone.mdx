@@ -137,7 +137,7 @@ The example shown below is a working boot command used to start an Ubuntu
 ```
 
 </Tab>
-<Tab heading="JSON">
+<Tab heading="HCL2">
 
 ```hcl
 boot_command = [
@@ -314,28 +314,70 @@ Minimal example of usage:
 
 Only use the `host` option. Optionally specify a `resource_pool`:
 
-```text
+<Tabs>
+<Tab heading="JSON">
+
+```json
 "host": "esxi-1.vsphere65.test",
 "resource_pool": "pool1",
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+host = "esxi-1.vsphere65.test"
+resource_pool = "pool1"
+```
+
+</Tab>
+</Tabs>
 
 #### Clusters Without DRS
 
 Use the `cluster` and `host`parameters:
 
-```text
+<Tabs>
+<Tab heading="JSON">
+
+```json
 "cluster": "cluster1",
 "host": "esxi-2.vsphere65.test",
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+cluster = "cluster1"
+host = "esxi-2.vsphere65.test"
+```
+
+</Tab>
+</Tabs>
 
 #### Clusters With DRS
 
 Only use the `cluster` option. Optionally specify a `resource_pool`:
 
-```text
+<Tabs>
+<Tab heading="JSON">
+
+```json
 "cluster": "cluster2",
 "resource_pool": "pool1",
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+cluster = "cluster2"
+resource_pool = "pool1"
+```
+
+</Tab>
+</Tabs>
 
 ## Required vSphere Permissions
 
