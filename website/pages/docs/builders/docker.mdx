@@ -58,6 +58,10 @@ source "docker" "example" {
     image = "ubuntu"
     export_path = "image.tar"
 }
+
+build {
+  sources = ["source.docker.example"]
+ }
 ```
 
 </Tab>
