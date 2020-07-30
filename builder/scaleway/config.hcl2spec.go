@@ -74,7 +74,7 @@ type FlatConfig struct {
 	Bootscript                *string           `mapstructure:"bootscript" required:"false" cty:"bootscript" hcl:"bootscript"`
 	BootType                  *string           `mapstructure:"boottype" required:"false" cty:"boottype" hcl:"boottype"`
 	RemoveVolume              *bool             `mapstructure:"remove_volume" cty:"remove_volume" hcl:"remove_volume"`
-	UserAgent                 *string           `cty:"user_agent" hcl:"user_agent"`
+	UserAgent                 *string           `mapstructure:"user_agent" cty:"user_agent" hcl:"user_agent"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
