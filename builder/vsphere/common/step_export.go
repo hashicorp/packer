@@ -27,26 +27,6 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-// You may optionally export an ovf from VSphere to the instance running Packer.
-//
-// Example usage:
-//
-// ```json
-// ...
-//   "vm_name": "example-ubuntu",
-// ...
-//   "export": {
-//     "force": true,
-//     "output_directory": "./output_vsphere"
-//   },
-// ```
-// The above configuration would create the following files:
-//
-// ```text
-// ./output_vsphere/example-ubuntu-disk-0.vmdk
-// ./output_vsphere/example-ubuntu.mf
-// ./output_vsphere/example-ubuntu.ovf
-// ```
 type ExportConfig struct {
 	// name of the ovf. defaults to the name of the VM
 	Name string `mapstructure:"name"`
@@ -63,15 +43,7 @@ type ExportConfig struct {
 	// * uuid - UUID is exported for all virtual machines
 	// * extraconfig - all extra configuration options are exported for a virtual machine
 	// * nodevicesubtypes - resource subtypes for CD/DVD drives, floppy drives, and serial and parallel ports are not exported
-	//
-	// For example, adding the following export config option would output the mac addresses for all Ethernet devices in the ovf file:
-	//
-	// ```json
-	// ...
-	//   "export": {
-	//     "options": ["mac"]
-	//   },
-	// ```
+	// See the [example](#export-options-example)
 	Options []string `mapstructure:"options"`
 }
 

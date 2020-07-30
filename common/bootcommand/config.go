@@ -77,35 +77,6 @@ import (
 //     specified, these will be blank!
 //
 // -   `{{ .Name }}` - The name of the VM.
-//
-// Example boot command. This is actually a working boot command used to start an
-// CentOS 6.4 installer:
-//
-// ```json
-// "boot_command": [
-//     "<tab><wait>",
-//     " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
-//  ]
-// ```
-//
-// The example shown below is a working boot command used to start an Ubuntu
-// 12.04 installer:
-//
-// ```json
-// [
-//   "<esc><esc><enter><wait>",
-//   "/install/vmlinuz noapic ",
-//   "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
-//   "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-//   "hostname={{ .Name }} ",
-//   "fb=false debconf/frontend=noninteractive ",
-//   "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-//   "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-//   "initrd=/install/initrd.gz -- <enter>"
-// ]
-// ```
-// For more examples of various boot commands, see the sample projects from our
-// [community templates page](/community-tools#templates).
 type BootConfig struct {
 	// Time to wait after sending a group of key pressses. The value of this
 	// should be a duration. Examples are `5s` and `1m30s` which will cause
