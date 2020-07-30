@@ -39,6 +39,9 @@ documentation.
 Below is a fully functioning example. It doesn't do anything useful, since no
 provisioners are defined, but it will effectively repackage an image.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "docker",
@@ -47,11 +50,31 @@ provisioners are defined, but it will effectively repackage an image.
 }
 ```
 
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "docker" "example" {
+    image = "ubuntu"
+    export_path = "image.tar"
+}
+
+build {
+  sources = ["source.docker.example"]
+}
+```
+
+</Tab>
+</Tabs>
+
 ## Basic Example: Commit
 
 Below is another example, the same as above but instead of exporting the
 running container, this one commits the container to an image. The image can
 then be more easily tagged, pushed, etc.
+
+<Tabs>
+<Tab heading="JSON">
 
 ```json
 {
@@ -60,6 +83,23 @@ then be more easily tagged, pushed, etc.
   "commit": true
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "docker" "example" {
+    image = "ubuntu"
+    commit = true
+}
+
+build {
+  sources = ["source.docker.example"]
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Basic Example: Changes to Metadata
 
@@ -71,6 +111,9 @@ Docker](https://docs.docker.com/engine/reference/commandline/commit/).
 
 Example uses of all of the options, assuming one is building an NGINX image
 from ubuntu as an simple example:
+
+<Tabs>
+<Tab heading="JSON">
 
 ```json
 {
@@ -90,6 +133,30 @@ from ubuntu as an simple example:
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "docker" "example" {
+    image = "ubuntu"
+    commit = true
+      changes = [
+      "USER www-data",
+      "WORKDIR /var/www",
+      "ENV HOSTNAME www.example.com",
+      "VOLUME /test1 /test2",
+      "EXPOSE 80 443",
+      "LABEL version=1.0",
+      "ONBUILD RUN date",
+      "CMD [\"nginx\", \"-g\", \"daemon off;\"]",
+      "ENTRYPOINT /var/www/start.sh"
+    ]
+}
+```
+
+</Tab>
+</Tabs>
 
 Allowed metadata fields that can be changed are:
 
@@ -164,20 +231,42 @@ created image. This is accomplished using a sequence definition (a collection
 of post-processors that are treated as as single pipeline, see
 [Post-Processors](/docs/templates/post-processors) for more information):
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "post-processors": [
     [
       {
         "type": "docker-import",
-        "repository": "hashicorp/packer",
+        "repository": "myrepo/myimage",
         "tag": "0.7"
       },
-      "docker-push"
+      {
+        "type": "docker-push"
+      }
     ]
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+  post-processors {
+    post-processor "docker-import" {
+        repository =  "myrepo/myimage"
+        tag = "0.7"
+      }
+    post-processor "docker-push" {}
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 In the above example, the result of each builder is passed through the defined
 sequence of post-processors starting first with the `docker-import`
@@ -204,20 +293,42 @@ definition (a collection of post-processors that are treated as as single
 pipeline, see [Post-Processors](/docs/templates/post-processors) for more
 information):
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "post-processors": [
     [
       {
         "type": "docker-tag",
-        "repository": "hashicorp/packer",
+        "repository": "myrepo/myimage",
         "tag": "0.7"
       },
-      "docker-push"
+      {
+        "type": "docker-push"
+      }
     ]
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+  post-processors {
+    post-processor "docker-tag" {
+        repository =  "myrepo/myimage"
+        tag = "0.7"
+      }
+    post-processor "docker-push" {}
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 In the above example, the result of each builder is passed through the defined
 sequence of post-processors starting first with the `docker-tag` post-processor
@@ -230,13 +341,16 @@ Going a step further, if you wanted to tag and push an image to multiple
 container repositories, this could be accomplished by defining two,
 nearly-identical sequence definitions, as demonstrated by the example below:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "post-processors": [
     [
       {
         "type": "docker-tag",
-        "repository": "hashicorp/packer1",
+        "repository": "myrepo/myimage1",
         "tag": "0.7"
       },
       "docker-push"
@@ -244,7 +358,7 @@ nearly-identical sequence definitions, as demonstrated by the example below:
     [
       {
         "type": "docker-tag",
-        "repository": "hashicorp/packer2",
+        "repository": "myrepo/myimage2",
         "tag": "0.7"
       },
       "docker-push"
@@ -252,6 +366,30 @@ nearly-identical sequence definitions, as demonstrated by the example below:
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+  post-processors {
+    post-processor "docker-tag" {
+        repository =  "myrepo/myimage1"
+        tag = "0.7"
+      }
+    post-processor "docker-push" {}
+  }
+  post-processors {
+    post-processor "docker-tag" {
+        repository =  "myrepo/myimage2"
+        tag = "0.7"
+      }
+    post-processor "docker-push" {}
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 <span id="amazon-ec2-container-registry"></span>
 
@@ -268,6 +406,9 @@ containers, so you must either commit or discard them.
 The following is a fully functional template for building a Windows
 container.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "builders": [
@@ -282,11 +423,33 @@ container.
 }
 ```
 
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "docker" "windows" {
+    image = "ubuntu"
+    container_dir = "c:/app"
+    windows_container = true
+    commit = true
+}
+
+build {
+  sources = ["source.docker.example"]
+}
+```
+
+</Tab>
+</Tabs>
+
 ## Amazon EC2 Container Registry
 
 Packer can tag and push images for use in [Amazon EC2 Container
 Registry](https://aws.amazon.com/ecr/). The post processors work as described
 above and example configuration properties are shown below:
+
+<Tabs>
+<Tab heading="JSON">
 
 ```json
 {
@@ -308,6 +471,27 @@ above and example configuration properties are shown below:
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+post-processors {
+  post-processor "docker-tag" {
+      repository = "12345.dkr.ecr.us-east-1.amazonaws.com/packer"
+      tag = "0.7"
+  }
+  post-processor "docker-push" {
+      ecr_login = true
+      aws_access_key = "YOUR KEY HERE"
+      aws_secret_key = "YOUR SECRET KEY HERE"
+      login_server = "https://12345.dkr.ecr.us-east-1.amazonaws.com/"
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 [Learn how to set Amazon AWS
 credentials.](/docs/builders/amazon#specifying-amazon-credentials)
