@@ -48,75 +48,6 @@ necessary for this build to succeed and can be found further down the page.
 
 @include 'common/bootcommand/BootConfig.mdx'
 
-Example boot command. This is actually a working boot command used to start an
-CentOS 6.4 installer:
-
-<Tabs>
-<Tab heading="JSON">
-
-```json
-"boot_command": [
-    "<tab><wait>",
-    " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
-]
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```json
-boot_command = [
-    "<tab><wait>",
-    " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
-]
-```
-
-</Tab>
-</Tabs>
-
-The example shown below is a working boot command used to start an Ubuntu
-12.04 installer:
-
-<Tabs>
-<Tab heading="JSON">
-
-```json
-"boot_command": [
-  "<esc><esc><enter><wait>",
-  "/install/vmlinuz noapic ",
-  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
-  "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-  "hostname={{ .Name }} ",
-  "fb=false debconf/frontend=noninteractive ",
-  "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-  "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-  "initrd=/install/initrd.gz -- <enter>"
-]
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-boot_command = [
-  "<esc><esc><enter><wait>",
-  "/install/vmlinuz noapic ",
-  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
-  "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-  "hostname={{ .Name }} ",
-  "fb=false debconf/frontend=noninteractive ",
-  "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-  "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
-  "initrd=/install/initrd.gz -- <enter>"
-]
-```
-
-</Tab>
-</Tabs>
-
-For more examples of various boot commands, see the sample projects from our
-[community templates page](/community-tools#templates).
-
 We send each character to the VM with a default delay of 100ms between groups.
 The delay alleviates possible issues with latency and CPU
 contention. If you notice missing keys, you can tune this delay by specifying
@@ -195,58 +126,6 @@ source "vsphere-iso" "example" {
 ### ISO Configuration
 
 @include 'common/ISOConfig.mdx'
-
-Examples:
-go-getter can guess the checksum type based on `iso_checksum` len.
-
-<Tabs>
-<Tab heading="JSON">
-
-```json
-  "iso_checksum": "946a6077af6f5f95a51f82fdc44051c7aa19f9cfc5f737954845a6050543d7c2",
-  "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
-```
-
-```json
-  "iso_checksum": "file:ubuntu.org/..../ubuntu-14.04.1-server-amd64.iso.sum",
-  "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
-```
-
-```json
-  "iso_checksum": "file://./shasums.txt",
-  "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
-```
-
-```json
-  "iso_checksum": "file:./shasums.txt",
-  "iso_url": "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-  iso_checksum = "946a6077af6f5f95a51f82fdc44051c7aa19f9cfc5f737954845a6050543d7c2"
-  iso_url = "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
-```
-
-```hcl
-  iso_checksum = "file:ubuntu.org/..../ubuntu-14.04.1-server-amd64.iso.sum"
-  iso_url = "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
-```
-
-```hcl
-  iso_checksum = "file://./shasums.txt"
-  iso_url = "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
-```
-
-```hcl
-  iso_checksum = "file:./shasums.txt"
-  iso_url = "ubuntu.org/.../ubuntu-14.04.1-server-amd64.iso"
-```
-
-</Tab>
-</Tabs>
 
 #### Required:
 
