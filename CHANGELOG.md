@@ -9,6 +9,9 @@
     blocks after provisioning steps would run them sequentially, now doing this
     makes them start from the build artifact. To queue post-processors you now
     have to define them in a `post-processors` block. [GH-9638]
+* post-processor/vSphere: We have fixed a bug in the ovftool URL encoding. This
+    may mean that you have performed an encoding workaround that is no longer
+    necessary. [GH-9589]
 
 
 ### FEATURES:
