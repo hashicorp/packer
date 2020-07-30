@@ -2,7 +2,7 @@
 
 ### BACKWARDS INCOMPATABILITIES:
 
-* only for HCL: added `post-processors` block to run chained post-processors
+* only for HCL: New `post-processors` block to run chained post-processors
     after a build  [GH-9638]. Before this, defining multiple `post-processor`
     blocks after provisioning steps would run them sequentially, now doing this
     makes them start from the build artifact. To queue post-processors you now
@@ -12,9 +12,9 @@
 * **New post-processor** Yandex Import [GH-9553]
 
 ### IMPROVEMENTS:
-* builder/amazon-ebs: wrap CreateImage call in a retry to account for eventual
+* builder/amazon-ebs: Wrap CreateImage call in a retry to account for eventual
     consistency [GH-9579]
-* builder/azure: Disable ssh password authentication unless password is
+* builder/azure: Disable SSH password authentication unless password is
     explicitly specified. [GH-9603]
 * builder/docker: Add options for --cap-add, --cap-drop, --tmpfs, --device
     [GH-9565]
@@ -30,7 +30,7 @@
 * builder/hyperone: Add support for custom username in vm creation. [GH-9497]
 * builder/hyperone: Skip chroot device discovery. [GH-9489]
 * builder/openstack: Bump gophercloud to latest version [GH-9573]
-* builder/proxmox: Add option to disable KVM hardware virtualization in proxmox
+* builder/proxmox: Add option to disable KVM hardware virtualization in Proxmox
     builder [GH-9587]
 * builder/proxmox: Add support for multiple NIC packet queues [GH-9597]
 * builder/proxmox: Enable Proxmox builder to toggle the firewall parameter for
@@ -45,10 +45,10 @@
     including support for starting an HTTP server
 * builder/vsphere-clone: Add `vapp` configuration option [GH-9507]
 * builder/vsphere: Add ability to define multiple disk controllers [GH-9519]
-* builder/vsphere: Add boot_command support to vsphere-clone builder. [GH-9397]
-* builder/vsphere: Add content_library_destination to import VM template to a
+* builder/vsphere: Add `boot_command` support to vsphere-clone builder. [GH-9397]
+* builder/vsphere: Add `content_library_destination` to import VM template to a
     Content Library [GH-9551]
-* builder/vsphere: Add force_bios_setup configuration option: [GH-9563]
+* builder/vsphere: Add `force_bios_setup` configuration option [GH-9563]
 * builder/vsphere: Add option to add a xhci/usb3 controller [GH-9574]
 * builder/vsphere: Create vm output folders if they don't exist [GH-9402]
 * builder/vsphere: Fix file size descriptor when exporting OFV [GH-9568]
@@ -56,7 +56,7 @@
     [GH-9450]
 * builder/vsphere: Match network to host when multiple networks are found
     [GH-9556]
-* builder/vsphere: Update vsphere boot_command to bring it in line with other
+* builder/vsphere: Update vsphere `boot_command` to bring it in line with other
     builders' boot_command functionality. [GH-9406]
 * builder/vsphere: Use datacenter inventory path for find folder [GH-9390]
 * builder/vsphere: Use value from "ip_wait_address" option to determine the
@@ -64,12 +64,12 @@
 * builder/yandex: Allow set `min_disk_size` for an image.
 * builder/yandex: Support authentication by Service Account on instance
     [GH-9383]
-* builder/yandex: yandex: Add new property 'min_disk_size' of built image
+* builder/yandex: yandex: Add new property `min_disk_size` of built image
     [GH-9594]
 * communicator/ssh: Add support for OpenSSH certificate signing [GH-9521]
 * communicator/ssh: Allow users to provide a list of ciphers that they want
     Packer to support. [GH-9453]
-* core/hcl2: add possibility to name singular build.source blocks to
+* core/hcl2: Add possibility to name singular build.source blocks to
     differentiate their output and to filter on them [GH-9490]
 * core/hcl2: Add the "inspect" command for hcl2 configs. [GH-9468]
 * core/hcl2: HCL configs now respect only/except using build names instead of
@@ -94,10 +94,10 @@
     lines [GH-9438]
 
 ### BUG FIXES:
-* builder/amazon: Change "statement" field in
+* builder/amazon: Change "Resource" field in
     `temporary_iam_instance_profile_policy_document` to be an array of strings,
     not just a single string. [GH-9509]
-* builder/amazon: HCL2: Add singular run_volume_tag block to ebs & ebssurrogate
+* builder/amazon: HCL2: Add singular `run_volume_tag` block to ebs & ebssurrogate
     builders. [GH-9457]
 * builder/amazon: Retry fetching block device mappings if empty. [GH-9480]
 * builder/azure: Fix data disks URI. [GH-9467]
@@ -118,7 +118,7 @@
 * builder/vmware-iso: Try checksum remote file instead of local file. [GH-9584]
 * builder/vmware: Fix a race that occurred when parsing the network config.
     [GH-9387]
-* builder/vmware: update vendor library, enabling retries on 502 errors
+* builder/vmware: Update vendor library, enabling retries on 502 errors
     [GH-9391]
 * builder/vsphere-clone: Fix SSH public key injection for cloned templates
     [GH-9507]
@@ -128,7 +128,7 @@
 * builder/vsphere: Fix vsphere ToolsSyncTime and ToolsUpgradePolicy [GH-9515]
 * builder/vsphere: vSphere driver context is no longer cancelled when Packer
     context is cancelled. [GH-9576]
-* communicator/winrm: add the "no_proxy" environment variable option to have
+* communicator/winrm: Add the "no_proxy" environment variable option to have
     winrm bypass the proxy set by the http_proxy or https_proxy environment
     vars, when connecting to the remote instance. [GH-9267]
 * core: Do not print download progress bar if a machine-readable UI is chosen.
