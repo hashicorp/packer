@@ -2,11 +2,14 @@
 
 ### BACKWARDS INCOMPATABILITIES:
 
-* only for HCL: New `post-processors` block to run chained post-processors
-    after a build  [GH-9638]. Before this, defining multiple `post-processor`
+* HCL: builder/vsphere: Add option to add a xhci/usb3 controller; changes
+    controller value to an array of strings.  [GH-9574]
+* HCL: New HCL-only `post-processors` block to run chained post-processors
+    after a build [GH-9638]. Before this, defining multiple `post-processor`
     blocks after provisioning steps would run them sequentially, now doing this
     makes them start from the build artifact. To queue post-processors you now
     have to define them in a `post-processors` block. [GH-9638]
+
 
 ### FEATURES:
 * **New post-processor** Yandex Import [GH-9553]
@@ -143,10 +146,6 @@
     or not [GH-9498]
 * provisioner/ansible: Quote extra-var packer_build_name to handle names with
     spaces [GH-9590]
-
-### BACKWARDS INCOMPATABILITIES:
-* HCL: builder/vsphere: Add option to add a xhci/usb3 controller; changes
-    controller value to an array of strings.  [GH-9574]
 
 ## 1.6.0 (June 09, 2020)
 
