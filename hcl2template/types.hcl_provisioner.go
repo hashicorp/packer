@@ -39,6 +39,8 @@ func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]interface{}) error {
 				buildValues[k] = cty.NumberIntVal(v)
 			case uint64:
 				buildValues[k] = cty.NumberUIntVal(v)
+			case bool:
+				buildValues[k] = cty.BoolVal(v)
 			default:
 				return fmt.Errorf("unhandled buildvar type: %T", v)
 			}
