@@ -13,7 +13,6 @@
     may mean that you have performed an encoding workaround that is no longer
     necessary. [GH-9589]
 
-
 ### FEATURES:
 * **New post-processor** Yandex Import [GH-9553]
 
@@ -141,6 +140,8 @@
     [GH-9448]
 * post-processor/amazon-import: Add support for retrying RequestLimitExceeded
     errors when importing an image [GH-9537]
+* post-processor/docker-import: Fix crash when using docker-import with HCL.
+    [GH-9670]
 * post-processor/vsphere: Fix password encoding in vsphere post-processor
     ovftool call [GH-9589]
 * post-processor/yandex-export: Fix error handling and docs. [GH-9554]
