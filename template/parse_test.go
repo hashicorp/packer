@@ -112,7 +112,7 @@ func TestParse(t *testing.T) {
 				Provisioners: []*Provisioner{
 					{
 						Type:       "something",
-						MaxRetries: 5,
+						MaxRetries: "5",
 					},
 				},
 			},

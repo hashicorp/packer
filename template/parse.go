@@ -59,7 +59,7 @@ func (r *rawTemplate) MarshalJSON() ([]byte, error) {
 
 func (r *rawTemplate) decodeProvisioner(raw interface{}) (Provisioner, error) {
 	var p Provisioner
-	if err := r.decoder(&p, nil).Decode(raw); err != nil {
+	if err := r.weakDecoder(&p, nil).Decode(raw); err != nil {
 		return p, fmt.Errorf("Error decoding provisioner: %s", err)
 
 	}
@@ -277,6 +277,24 @@ func (r *rawTemplate) decoder(
 		DecodeHook: mapstructure.StringToTimeDurationHookFunc(),
 		Metadata:   md,
 		Result:     result,
+	})
+	if err != nil {
+		// This really shouldn't happen since we have firm control over
+		// all the arguments and they're all unit tested. So we use a
+		// panic here to note this would definitely be a bug.
+		panic(err)
+	}
+	return d
+}
+
+func (r *rawTemplate) weakDecoder(
+	result interface{},
+	md *mapstructure.Metadata) *mapstructure.Decoder {
+	d, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		WeaklyTypedInput: true,
+		DecodeHook:       mapstructure.StringToTimeDurationHookFunc(),
+		Metadata:         md,
+		Result:           result,
 	})
 	if err != nil {
 		// This really shouldn't happen since we have firm control over
