@@ -61,7 +61,7 @@ source "docker" "example" {
 
 build {
   sources = ["source.docker.example"]
- }
+}
 ```
 
 </Tab>
@@ -91,6 +91,10 @@ then be more easily tagged, pushed, etc.
 source "docker" "example" {
     image = "ubuntu"
     commit = true
+}
+
+build {
+  sources = ["source.docker.example"]
 }
 ```
 
@@ -428,6 +432,10 @@ source "docker" "windows" {
     container_dir = "c:/app"
     windows_container = true
     commit = true
+}
+
+build {
+  sources = ["source.docker.example"]
 }
 ```
 
