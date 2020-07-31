@@ -67,7 +67,7 @@ type Config struct {
 
 	RemoveVolume bool `mapstructure:"remove_volume"`
 
-	UserAgent string
+	UserAgent string `mapstructure-to-hcl2:",skip"`
 	ctx       interpolate.Context
 }
 
