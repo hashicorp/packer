@@ -799,7 +799,13 @@ func TestCoreBuild_provRetry(t *testing.T) {
 	config := TestCoreConfig(t)
 	testCoreTemplate(t, config, fixtureDir("build-prov-retry.json"))
 	b := TestBuilder(t, config, "test")
-	p := TestProvisioner(t, config, "test")
+	pString := new(MockProvisioner)
+	pInt := new(MockProvisioner)
+	config.Components.ProvisionerStore = MapOfProvisioner{
+		"test-string": func() (Provisioner, error) { return pString, nil },
+		// backwards compatibility
+		"test-integer": func() (Provisioner, error) { return pInt, nil },
+	}
 	core := TestCore(t, config)
 
 	b.ArtifactId = "hello"
@@ -814,7 +820,10 @@ func TestCoreBuild_provRetry(t *testing.T) {
 	}
 
 	ui := testUi()
-	p.ProvFunc = func(ctx context.Context) error {
+	pInt.ProvFunc = func(ctx context.Context) error {
+		return errors.New("failed")
+	}
+	pString.ProvFunc = func(ctx context.Context) error {
 		return errors.New("failed")
 	}
 
@@ -829,7 +838,11 @@ func TestCoreBuild_provRetry(t *testing.T) {
 	if artifact[0].Id() != b.ArtifactId {
 		t.Fatalf("bad: %s", artifact[0].Id())
 	}
-	if !p.ProvRetried {
-		t.Fatal("provisioner should retry")
+	if !pString.ProvRetried {
+		t.Fatal("provisioner should retry for max_retries string value")
+	}
+	// backwards compatibility
+	if !pInt.ProvRetried {
+		t.Fatal("provisioner should retry for max_retries integer value")
 	}
 }
