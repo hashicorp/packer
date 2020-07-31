@@ -145,6 +145,9 @@ the Compress post-processor will not work with this builder.
 
 Sample for `hashicorp/precise64` with virtualbox provider.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "builders": [
@@ -158,6 +161,25 @@ Sample for `hashicorp/precise64` with virtualbox provider.
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "vagrant" "example" {
+  communicator = "ssh"
+  source_path = "hashicorp/precise64"
+  provider = "virtualbox"
+  add_force = true
+}
+
+build {
+  sources = ["source.vagrant.example"]
+}
+```
+
+</Tab>
+</Tabs>
 
 ## A note on SSH connections
 
