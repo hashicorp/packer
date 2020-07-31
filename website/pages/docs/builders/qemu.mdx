@@ -26,14 +26,16 @@ necessary to run the virtual machine on KVM or Xen.
 Here is a basic example. This example is functional so long as you fixup paths
 to files, URLS for ISOs and checksums.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "builders": [
     {
       "type": "qemu",
       "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.9-x86_64-minimal.iso",
-      "iso_checksum": "af4a1640c0c6f348c6c41f1ea9e192a2",
-      "iso_checksum_type": "md5",
+      "iso_checksum": "md5:af4a1640c0c6f348c6c41f1ea9e192a2",
       "output_directory": "output_centos_tdhtest",
       "shutdown_command": "echo 'packer' | sudo -S shutdown -P now",
       "disk_size": "5000M",
@@ -54,6 +56,37 @@ to files, URLS for ISOs and checksums.
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "qemu" "example" {
+  iso_url           = "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.9-x86_64-minimal.iso"
+  iso_checksum      = "md5:af4a1640c0c6f348c6c41f1ea9e192a2"
+  output_directory  = "output_centos_tdhtest"
+  shutdown_command  = "echo 'packer' | sudo -S shutdown -P now"
+  disk_size         = "5000M"
+  format            = "qcow2"
+  accelerator       = "kvm"
+  http_directory    = "path/to/httpdir"
+  ssh_username      = "root"
+  ssh_password      = "s0m3password"
+  ssh_timeout       = "20m"
+  vm_name           = "tdhtest"
+  net_device        = "virtio-net"
+  disk_interface    = "virtio"
+  boot_wait         = "10s"
+  boot_command      = ["<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter><wait>"]
+}
+
+build {
+  sources = ["source.qemu.example"]
+}
+```
+
+</Tab>
+</Tabs>
 
 This is an example only, and will time out waiting for SSH because we have not
 provided a kickstart file. You must add a valid kickstart file to the

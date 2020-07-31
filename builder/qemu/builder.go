@@ -86,17 +86,17 @@ type Config struct {
 	// accelerator you specified. When no accelerator is specified, Packer will try
 	// to use `kvm` if it is available but will default to `tcg` otherwise.
 	//
-	// -&gt; The `hax` accelerator has issues attaching CDROM ISOs. This is an
+	// ~> The `hax` accelerator has issues attaching CDROM ISOs. This is an
 	// upstream issue which can be tracked
 	// [here](https://github.com/intel/haxm/issues/20).
 	//
-	// -&gt; The `hvf` and `whpx` accelerator are new and experimental as of
+	// ~> The `hvf` and `whpx` accelerator are new and experimental as of
 	// [QEMU 2.12.0](https://wiki.qemu.org/ChangeLog/2.12#Host_support).
 	// You may encounter issues unrelated to Packer when using these.  You may need to
 	// add [ "-global", "virtio-pci.disable-modern=on" ] to `qemuargs` depending on the
 	// guest operating system.
 	//
-	// -&gt; For `whpx`, note that [Stefan Weil's QEMU for Windows distribution](https://qemu.weilnetz.de/w64/)
+	// ~> For `whpx`, note that [Stefan Weil's QEMU for Windows distribution](https://qemu.weilnetz.de/w64/)
 	// does not include WHPX support and users may need to compile or source a
 	// build of QEMU for Windows themselves with WHPX support.
 	Accelerator string `mapstructure:"accelerator" required:"false"`
@@ -208,7 +208,7 @@ type Config struct {
 	// as an empty string is ignored. All values after the switch are
 	// concatenated with no separator.
 	//
-	// ~&gt; **Warning:** The qemu command line allows extreme flexibility, so
+	// ~> **Warning:** The qemu command line allows extreme flexibility, so
 	// beware of conflicting arguments causing failures of your run. For
 	// instance, using --no-acpi could break the ability to send power signal
 	// type commands (e.g., shutdown -P now) to the virtual machine, thus
@@ -218,8 +218,8 @@ type Config struct {
 	//
 	// The following shows a sample usage:
 	//
+	// In JSON:
 	// ```json
-	//{
 	//   "qemuargs": [
 	//     [ "-m", "1024M" ],
 	//     [ "--no-acpi", "" ],
@@ -231,7 +231,21 @@ type Config struct {
 	//     ],
 	//     [ "-device", "virtio-net,netdev=mynet0" ]
 	//   ]
-	// }
+	// ```
+	//
+	// In HCL2:
+	// ```hcl
+	//   qemuargs = [
+	//     [ "-m", "1024M" ],
+	//     [ "--no-acpi", "" ],
+	//     [
+	//       "-netdev",
+	//       "user,id=mynet0,",
+	//       "hostfwd=hostip:hostport-guestip:guestport",
+	//       ""
+	//     ],
+	//     [ "-device", "virtio-net,netdev=mynet0" ]
+	//   ]
 	// ```
 	//
 	// would produce the following (not including other defaults supplied by
@@ -243,7 +257,7 @@ type Config struct {
 	// virtio-net,netdev=mynet0"
 	// ```
 	//
-	// ~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/)
+	// ~> **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/)
 	// builds are available though an environmental variable does need to be
 	// set for QEMU for Windows to redirect stdout to the console instead of
 	// stdout.txt.
@@ -258,14 +272,20 @@ type Config struct {
 	// You can also use the `SSHHostPort` template variable to produce a packer
 	// template that can be invoked by `make` in parallel:
 	//
+	// In JSON:
 	// ```json
-	//{
 	//   "qemuargs": [
 	//     [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
 	//     [ "-device", "virtio-net,netdev=forward,id=net0"]
 	//   ]
-	// }
 	// ```
+	//
+	// In HCL2:
+	// ```hcl
+	//   qemuargs = [
+	//     [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
+	//     [ "-device", "virtio-net,netdev=forward,id=net0"]
+	//   ]
 	//
 	// `make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each
 	// of which will bind to their own SSH port as determined by each process.
