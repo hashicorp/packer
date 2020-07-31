@@ -41,6 +41,19 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatal("should not have errors")
+	}
+}
+
 func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	var b Builder
 	config := testConfig()

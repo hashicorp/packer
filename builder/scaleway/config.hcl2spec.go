@@ -74,7 +74,6 @@ type FlatConfig struct {
 	Bootscript                *string           `mapstructure:"bootscript" required:"false" cty:"bootscript" hcl:"bootscript"`
 	BootType                  *string           `mapstructure:"boottype" required:"false" cty:"boottype" hcl:"boottype"`
 	RemoveVolume              *bool             `mapstructure:"remove_volume" cty:"remove_volume" hcl:"remove_volume"`
-	UserAgent                 *string           `mapstructure:"user_agent" cty:"user_agent" hcl:"user_agent"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -154,7 +153,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"bootscript":                   &hcldec.AttrSpec{Name: "bootscript", Type: cty.String, Required: false},
 		"boottype":                     &hcldec.AttrSpec{Name: "boottype", Type: cty.String, Required: false},
 		"remove_volume":                &hcldec.AttrSpec{Name: "remove_volume", Type: cty.Bool, Required: false},
-		"user_agent":                   &hcldec.AttrSpec{Name: "user_agent", Type: cty.String, Required: false},
 	}
 	return s
 }
