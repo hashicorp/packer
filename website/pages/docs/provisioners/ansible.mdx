@@ -290,7 +290,7 @@ source "amazon-ebs" "example" {
         owners = ["amazon"]
     }
     ami_name = "test-ansible-packer"
-    user_data_file = "windows_bootstrap.txt",
+    user_data_file = "windows_bootstrap.txt"
     communicator = "winrm"
     force_deregister = true
     winrm_username = "Administrator"
