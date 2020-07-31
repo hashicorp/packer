@@ -27,15 +27,11 @@ DigitalOcean. Replace the mock `api_token` value with your own.
 
 Example Packer template:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
-  "provisioners": [
-    {
-      "type": "ansible",
-      "playbook_file": "./playbook.yml"
-    }
-  ],
-
   "builders": [
     {
       "type": "digitalocean",
@@ -43,9 +39,38 @@ Example Packer template:
       "image": "ubuntu-14-04-x64",
       "region": "sfo1"
     }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "playbook_file": "./playbook.yml"
+    }
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "digitalocean" "example"{
+  api_token = "6a561151587389c7cf8faa2d83e94150a4202da0e2bad34dd2bf236018ffaeeb"
+  image = "ubuntu-14-04-x64"
+  region = "sfo1"
+}
+
+build {
+    sources = [
+        "source.digitalocean.example",
+    ]
+    provisioner {
+      "playbook_file": "./playbook.yml"
+    }
+}
+```
+
+</Tab>
+</Tabs>
 
 Example playbook:
 
@@ -102,9 +127,22 @@ commonly useful Ansible variables:
 To debug underlying issues with Ansible, add `"-vvvv"` to `"extra_arguments"`
 to enable verbose logging.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
   "extra_arguments": [ "-vvvv" ]
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+  extra_arguments = [ "-vvvv" ]
+```
+
+</Tab>
+</Tabs>
 
 ## Limitations
 
@@ -123,6 +161,9 @@ Redhat / CentOS builds have been known to fail with the following error due to
 Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible
 connection to chroot and running Ansible as root/sudo.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "builders": [
@@ -138,13 +179,40 @@ connection to chroot and running Ansible as root/sudo.
       "type": "ansible",
       "extra_arguments": [
         "--connection=chroot",
-        "--inventory-file=/mnt/packer-amazon-chroot,"
+        "--inventory-file=/mnt/packer-amazon-chroot"
       ],
       "playbook_file": "main.yml"
     }
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-chroot" "example" {
+  mount_path = "/mnt/packer-amazon-chroot"
+    region = "us-east-1"
+    source_ami = "ami-123456"
+}
+
+build {
+  sources = [
+    "source.amazon-chroot.example"
+  ]
+    provisioner "ansible" {
+      extra_arguments = [
+          "--connection=chroot",
+          "--inventory-file=/mnt/packer-amazon-chroot"
+        ]
+    playbook_file = "main.yml"
+    }
+}
+```
+
+</Tab>
+</Tabs>
 
 ### WinRM Communicator
 
@@ -165,6 +233,9 @@ extra_arguments.
 
 Below is a fully functioning Ansible example using WinRM:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "builders": [
@@ -181,7 +252,7 @@ Below is a fully functioning Ansible example using WinRM:
         "most_recent": true,
         "owners": "amazon"
       },
-      "ami_name": "default-packer",
+      "ami_name": "test-ansible-packer",
       "user_data_file": "windows_bootstrap.txt",
       "communicator": "winrm",
       "force_deregister": true,
@@ -202,6 +273,49 @@ Below is a fully functioning Ansible example using WinRM:
 }
 ```
 
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebs" "example" {
+    region = "us-east-1"
+    instance_type = "t2.micro"
+    source_ami_filter {
+        filters =  {
+          "virtualization-type": "hvm",
+          "name": "*Windows_Server-2012*English-64Bit-Base*",
+          "root-device-type": "ebs"
+        }
+        most_recent = true
+        owners = ["amazon"]
+    }
+    ami_name = "test-ansible-packer"
+    user_data_file = "windows_bootstrap.txt",
+    communicator = "winrm"
+    force_deregister = true
+    winrm_username = "Administrator"
+    winrm_insecure = true
+    winrm_use_ssl = true
+}
+
+build {
+    sources = [
+        "source.amazon-ebs.example",
+    ]
+    provisioner "ansible" {
+      playbook_file = "./playbooks/playbook-windows.yml"
+      user = "Administrator"
+      use_proxy = false
+      extra_arguments = [
+        "-e", "ansible_winrm_server_cert_validation=ignore"
+      ]
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
 Note that you do have to set the "Administrator" user, because otherwise Ansible
 will default to using the user that is calling Packer, rather than the user
 configured inside of the Packer communicator. For the contents of
@@ -218,9 +332,21 @@ When running from OSX, you may see an error like:
 If you see this, you may be able to work around the issue by telling Ansible to
 explicitly not use any proxying; you can do this by setting the template option
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 "ansible_env_vars": ["no_proxy=\"*\""],
 ```
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+ansible_env_vars = ["no_proxy=\"*\""]
+```
+
+</Tab>
+</Tabs>
 
 in the above Ansible template.
 
@@ -380,6 +506,9 @@ source /tmp/venv/bin/activate && ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 /tmp/v
 
 The ansible provisioner template remains very simple. For example:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "ansible",
@@ -387,6 +516,18 @@ The ansible provisioner template remains very simple. For example:
   "playbook_file": "./playbook.yml"
 }
 ```
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "ansible" {
+  command = "/Path/To/call_ansible.sh"
+  playbook_file = "./playbook.yml"
+}
+```
+
+</Tab>
+</Tabs>
 
 Note that we're calling ansible-playbook at the end of this command and passing
 all command line arguments through into this call; this is necessary for
@@ -396,7 +537,8 @@ arguments with spaces will not be read properly.
 
 ### Docker
 
-When trying to use Ansible with Docker, you need to tweak a few options.
+When trying to use Ansible with Docker, it should "just work" but if it doesn't
+you may need to tweak a few options.
 
 - Change the ansible_connection from "ssh" to "docker"
 - Set a Docker container name via the --name option.
@@ -405,7 +547,10 @@ On a CI server you probably want to overwrite ansible_host with a random name.
 
 Example Packer template:
 
-```hcl
+<Tabs>
+<Tab heading="JSON">
+
+```json
 {
   "variables": {
     "ansible_host": "default",
@@ -432,6 +577,42 @@ Example Packer template:
   ]
 }
 ```
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+variable "ansible_host" {
+  default = "default"
+}
+
+variable "ansible_connection" {
+  default = "docker"
+}
+
+source "docker" "example" {
+      image = "centos:7"
+      commit = true
+      run_command = [ "-d", "-i", "-t", "--name", var.ansible_host, "{{.Image}}", "/bin/bash" ]
+}
+
+build {
+  sources = [
+    "source.docker.example"
+  ]
+
+  provisioner "ansible" {
+      groups = [ "webserver" ]
+      playbook_file = "./webserver.yml"
+      extra_arguments = [
+          "--extra-vars",
+          "ansible_host=${var.ansible_host} ansible_connection=${var.ansible_connection}"
+      ]
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 Example playbook:
 
