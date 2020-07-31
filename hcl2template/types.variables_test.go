@@ -6,12 +6,12 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/zclconf/go-cty/cty"
-	"github.com/zclconf/go-cty/cty/convert"
-
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/builder/null"
+	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/convert"
 )
 
 func TestParse_variables(t *testing.T) {
@@ -269,6 +269,92 @@ func TestParse_variables(t *testing.T) {
 			},
 			true, false,
 			[]packer.Build{},
+			false,
+		},
+
+		{"provisioner variable decoding",
+			defaultParser,
+			parseTestArgs{"testdata/variables/provisioner_variable_decoding.pkr.hcl", nil, nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "variables"),
+				InputVariables: Variables{
+					"max_retries": &Variable{
+						Name:         "max_retries",
+						DefaultValue: cty.StringVal("1"),
+						Type:         cty.String,
+					},
+					"max_retries_int": &Variable{
+						Name:         "max_retries_int",
+						DefaultValue: cty.NumberIntVal(1),
+						Type:         cty.Number,
+					},
+				},
+				Sources: map[SourceRef]SourceBlock{
+					SourceRef{Type: "null", Name: "null-builder"}: SourceBlock{
+						Name: "null-builder",
+						Type: "null",
+					},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources: []SourceRef{
+							{Type: "null", Name: "null-builder"},
+						},
+						ProvisionerBlocks: []*ProvisionerBlock{
+							{
+								PType:      "shell",
+								MaxRetries: 1,
+							},
+							{
+								PType:      "shell",
+								MaxRetries: 1,
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packer.Build{&packer.CoreBuild{
+				Type:     "null.null-builder",
+				Prepared: true,
+				Builder:  &null.Builder{},
+				Provisioners: []packer.CoreBuildProvisioner{
+					{
+						PType: "shell",
+						Provisioner: &packer.RetriedProvisioner{
+							MaxRetries: 1,
+							Provisioner: &HCL2Provisioner{
+								Provisioner: &MockProvisioner{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{
+											Tags: []MockTag{},
+										},
+										NestedSlice: []NestedMockConfig{},
+									},
+								},
+							},
+						},
+					},
+					{
+						PType: "shell",
+						Provisioner: &packer.RetriedProvisioner{
+							MaxRetries: 1,
+							Provisioner: &HCL2Provisioner{
+								Provisioner: &MockProvisioner{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{
+											Tags: []MockTag{},
+										},
+										NestedSlice: []NestedMockConfig{},
+									},
+								},
+							},
+						},
+					},
+				},
+				PostProcessors: [][]packer.CoreBuildPostProcessor{},
+			},
+			},
 			false,
 		},
 	}
