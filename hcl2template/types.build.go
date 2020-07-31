@@ -70,7 +70,7 @@ type Builds []*BuildBlock
 
 // decodeBuildConfig is called when a 'build' block has been detected. It will
 // load the references to the contents of the build block.
-func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnostics) {
+func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildBlock, hcl.Diagnostics) {
 	build := &BuildBlock{}
 
 	var b struct {
@@ -123,7 +123,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block) (*BuildBlock, hcl.Diagnosti
 			}
 			build.Sources = append(build.Sources, ref)
 		case buildProvisionerLabel:
-			p, moreDiags := p.decodeProvisioner(block)
+			p, moreDiags := p.decodeProvisioner(block, cfg)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue

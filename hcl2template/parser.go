@@ -61,7 +61,6 @@ const (
 // build; sources(builders)/provisioners/posts-processors will not be started
 // and their contents wont be verified; Most syntax errors will cause an error.
 func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]string) (*PackerConfig, hcl.Diagnostics) {
-
 	var files []*hcl.File
 	var diags hcl.Diagnostics
 
@@ -225,7 +224,7 @@ func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 			cfg.Sources[ref] = source
 
 		case buildLabel:
-			build, moreDiags := p.decodeBuildConfig(block)
+			build, moreDiags := p.decodeBuildConfig(block, cfg)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
