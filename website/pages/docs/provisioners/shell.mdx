@@ -24,12 +24,27 @@ Shell](/docs/provisioners/windows-shell) provisioners.
 
 The example below is fully functional.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "shell",
   "inline": ["echo foo"]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "shell" {
+    inline = ["echo foo"]
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Configuration Reference
 
@@ -67,8 +82,9 @@ The example below is fully functional.
   - `EnvVarFile` is the path to the file containing env vars, if
     `use_env_var_file` is true.
 
-- `expect_disconnect` (boolean) - Defaults to `false`. When `true`, allow the server to disconnect from Packer without throwing an error.
-  A disconnect might happen if you restart the ssh server or reboot the host.
+- `expect_disconnect` (boolean) - Defaults to `false`. When `true`, allow the
+  server to disconnect from Packer without throwing an error. A disconnect
+  might happen if you restart the ssh server or reboot the host.
 
 - `inline_shebang` (string) - The
   [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use
@@ -183,6 +199,9 @@ and Packer will start executing the next one before SSH actually quits and the
 machine restarts. For this, put use "pause_before" to make Packer wait before
 executing the next script:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "shell",
@@ -191,6 +210,20 @@ executing the next script:
   "timeout": "10s"
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "shell" {
+  script       = "script.sh"
+  pause_before = "10s"
+  timeout      = "10s"
+}
+```
+
+</Tab>
+</Tabs>
 
 Some OS configurations don't properly kill all network connections on reboot,
 causing the provisioner to hang despite a reboot occurring. In this case, make
@@ -217,6 +250,9 @@ provisioner](/docs/provisioners/file) (more secure) or using `ssh-keyscan`
 to populate the file (less secure). An example of the latter accessing github
 would be:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "shell",
@@ -227,6 +263,22 @@ would be:
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "shell" {
+  inline = [
+    "sudo apt-get install -y git",
+    "ssh-keyscan github.com >> ~/.ssh/known_hosts",
+    "git clone git@github.com:exampleorg/myprivaterepo.git"
+  ]
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Troubleshooting
 
@@ -260,6 +312,9 @@ _My builds don't always work the same_
   can create race conditions. Your first provisioner can tell the machine to
   wait until it completely boots.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "shell",
@@ -267,31 +322,76 @@ _My builds don't always work the same_
 }
 ```
 
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "shell" {
+  inline = ["sleep 10"]
+}
+```
+
+</Tab>
+</Tabs>
+
 ## Quoting Environment Variables
 
 Packer manages quoting for you, so you should't have to worry about it. Below
 is an example of packer template inputs and what you should expect to get out:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
-  "provisioners": [
-    {
-      "type":  "shell",
-      "environment_vars": ["FOO=foo",
-                           "BAR=bar's",
-                           "BAZ=baz=baz",
-                           "QUX==qux",
-                           "FOOBAR=foo bar",
-                           "FOOBARBAZ='foo bar baz'",
-                           "QUX2=\"qux\""],
-      "inline": ["echo \"FOO is $FOO\"",
-                 "echo \"BAR is $BAR\"",
-                 "echo \"BAZ is $BAZ\"",
-                 "echo \"QUX is $QUX\"",
-                 "echo \"FOOBAR is $FOOBAR\"",
-                 "echo \"FOOBARBAZ is $FOOBARBAZ\"",
-                 "echo \"QUX2 is $QUX2\""]
-    }
+"provisioners": [
+  {
+    "type":  "shell",
+    "environment_vars": ["FOO=foo",
+                         "BAR=bar's",
+                         "BAZ=baz=baz",
+                         "QUX==qux",
+                         "FOOBAR=foo bar",
+                         "FOOBARBAZ='foo bar baz'",
+                         "QUX2=\"qux\""],
+    "inline": ["echo \"FOO is $FOO\"",
+               "echo \"BAR is $BAR\"",
+               "echo \"BAZ is $BAZ\"",
+               "echo \"QUX is $QUX\"",
+               "echo \"FOOBAR is $FOOBAR\"",
+               "echo \"FOOBARBAZ is $FOOBARBAZ\"",
+               "echo \"QUX2 is $QUX2\""]
+  }
+]
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "shell" {
+  environment_vars = [
+    "FOO=foo",
+    "BAR=bar's",
+    "BAZ=baz=baz",
+    "QUX==qux",
+    "FOOBAR=foo bar",
+    "FOOBARBAZ='foo bar baz'",
+    "QUX2=\"qux\""
+  ]
+  inline = [
+    "echo \"FOO is $FOO\"",
+    "echo \"BAR is $BAR\"",
+    "echo \"BAZ is $BAZ\"",
+    "echo \"QUX is $QUX\"",
+    "echo \"FOOBAR is $FOOBAR\"",
+    "echo \"FOOBARBAZ is $FOOBARBAZ\"",
+    "echo \"QUX2 is $QUX2\""
+  ]
+}
+```
+
+</Tab>
+</Tabs>
 
 Output:
 
