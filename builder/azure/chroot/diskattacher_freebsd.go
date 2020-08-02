@@ -36,7 +36,7 @@ func (da diskAttacher) WaitForDevice(ctx context.Context, lun int32) (device str
 			if matches := devRegex.FindStringSubmatch(line); matches != nil {
 				// If this function immediately returns, devfs won't have
 				// created the device yet.
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(1000 * time.Millisecond)
 				return fmt.Sprintf("/dev/da%s", matches[1]), nil
 			}
 		}
