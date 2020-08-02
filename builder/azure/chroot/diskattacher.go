@@ -34,53 +34,6 @@ type diskAttacher struct {
 
 var DiskNotFoundError = errors.New("Disk not found")
 
-func (da *diskAttacher) AttachDisk(ctx context.Context, diskID string) (int32, error) {
-	dataDisks, err := da.getDisks(ctx)
-	if err != nil {
-		return -1, err
-	}
-
-	// check to see if disk is already attached, remember lun if found
-	if disk := findDiskInList(dataDisks, diskID); disk != nil {
-		// disk is already attached, just take this lun
-		if disk.Lun == nil {
-			return -1, errors.New("disk is attached, but lun was not set in VM model (possibly an error in the Azure APIs)")
-		}
-		return to.Int32(disk.Lun), nil
-	}
-
-	// disk was not found on VM, go and actually attach it
-
-	var lun int32 = -1
-findFreeLun:
-	for lun = 0; lun < 64; lun++ {
-		for _, v := range dataDisks {
-			if to.Int32(v.Lun) == lun {
-				continue findFreeLun
-			}
-		}
-		// no datadisk is using this lun
-		break
-	}
-
-	// append new data disk to collection
-	dataDisks = append(dataDisks, compute.DataDisk{
-		CreateOption: compute.DiskCreateOptionTypesAttach,
-		ManagedDisk: &compute.ManagedDiskParameters{
-			ID: to.StringPtr(diskID),
-		},
-		Lun: to.Int32Ptr(lun),
-	})
-
-	// prepare resource object for update operation
-	err = da.setDisks(ctx, dataDisks)
-	if err != nil {
-		return -1, err
-	}
-
-	return lun, nil
-}
-
 func (da *diskAttacher) DetachDisk(ctx context.Context, diskID string) error {
 	log.Println("Fetching list of disks currently attached to VM")
 	currentDisks, err := da.getDisks(ctx)
@@ -126,6 +79,53 @@ func (da *diskAttacher) WaitForDetach(ctx context.Context, diskID string) error 
 			return ctx.Err()
 		}
 	}
+}
+
+func (da *diskAttacher) AttachDisk(ctx context.Context, diskID string) (int32, error) {
+	dataDisks, err := da.getDisks(ctx)
+	if err != nil {
+		return -1, err
+	}
+
+	// check to see if disk is already attached, remember lun if found
+	if disk := findDiskInList(dataDisks, diskID); disk != nil {
+		// disk is already attached, just take this lun
+		if disk.Lun == nil {
+			return -1, errors.New("disk is attached, but lun was not set in VM model (possibly an error in the Azure APIs)")
+		}
+		return to.Int32(disk.Lun), nil
+	}
+
+	// disk was not found on VM, go and actually attach it
+
+	var lun int32 = -1
+findFreeLun:
+	for lun = 0; lun < 64; lun++ {
+		for _, v := range dataDisks {
+			if to.Int32(v.Lun) == lun {
+				continue findFreeLun
+			}
+		}
+		// no datadisk is using this lun
+		break
+	}
+
+	// append new data disk to collection
+	dataDisks = append(dataDisks, compute.DataDisk{
+		CreateOption: compute.DiskCreateOptionTypesAttach,
+		ManagedDisk: &compute.ManagedDiskParameters{
+			ID: to.StringPtr(diskID),
+		},
+		Lun: to.Int32Ptr(lun),
+	})
+
+	// prepare resource object for update operation
+	err = da.setDisks(ctx, dataDisks)
+	if err != nil {
+		return -1, err
+	}
+
+	return lun, nil
 }
 
 func (da *diskAttacher) getThisVM(ctx context.Context) (compute.VirtualMachine, error) {
