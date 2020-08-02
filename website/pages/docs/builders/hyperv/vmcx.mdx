@@ -230,8 +230,7 @@ Packer config:
       "boot_wait": "0s",
       "boot_command": ["a<wait>a<wait>a"],
       "iso_url": "http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.16384.WINBLUE_RTM.130821-1623_X64FRE_SERVER_EVAL_EN-US-IRM_SSS_X64FREE_EN-US_DV5.ISO",
-      "iso_checksum_type": "md5",
-      "iso_checksum": "458ff91f8abc21b75cb544744bf92e6a",
+      "iso_checksum": "md5:458ff91f8abc21b75cb544744bf92e6a",
       "communicator": "winrm",
       "winrm_username": "vagrant",
       "winrm_password": "vagrant",
@@ -752,8 +751,7 @@ virtual switch with an `External` connection type.
     "memory": "1024",
     "disk_size": "21440",
     "iso_url": "http://releases.ubuntu.com/16.04/ubuntu-16.04.1-server-amd64.iso",
-    "iso_checksum_type": "sha1",
-    "iso_checksum": "DE5EE8665048F009577763EFBF4A6F0558833E59"
+    "iso_checksum": "sha1:DE5EE8665048F009577763EFBF4A6F0558833E59"
   },
   "builders": [
     {
@@ -762,7 +760,6 @@ virtual switch with an `External` connection type.
       "disk_size": "{{user `disk_size`}}",
       "guest_additions_mode": "disable",
       "iso_url": "{{user `iso_url`}}",
-      "iso_checksum_type": "{{user `iso_checksum_type`}}",
       "iso_checksum": "{{user `iso_checksum`}}",
       "communicator": "ssh",
       "ssh_username": "packer",
