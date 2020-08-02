@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"runtime"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -31,12 +32,22 @@ func (s *StepCopyFiles) Run(ctx context.Context, state multistep.StateBag) multi
 	s.files = make([]string, 0, len(s.Files))
 	if len(s.Files) > 0 {
 		ui.Say("Copying files from host to chroot...")
+		var removeDestinationOption string
+		switch runtime.GOOS {
+		case "freebsd":
+			// The -f option here is closer to GNU --remove-destination than
+			// what POSIX says -f should do.
+			removeDestinationOption = "-f"
+		default:
+			// This is the GNU binutils version.
+			removeDestinationOption = "--remove-destination"
+		}
 		for _, path := range s.Files {
 			ui.Message(path)
 			chrootPath := filepath.Join(mountPath, path)
 			log.Printf("Copying '%s' to '%s'", path, chrootPath)
 
-			cmdText, err := wrappedCommand(fmt.Sprintf("cp --remove-destination %s %s", path, chrootPath))
+			cmdText, err := wrappedCommand(fmt.Sprintf("cp %s %s %s", removeDestinationOption, path, chrootPath))
 			if err != nil {
 				err := fmt.Errorf("Error building copy command: %s", err)
 				state.Put("error", err)
