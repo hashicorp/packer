@@ -11,6 +11,7 @@ cloud.google.com/go/storage
 # github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1
 github.com/1and1/oneandone-cloudserver-sdk-go
 # github.com/Azure/azure-sdk-for-go v40.5.0+incompatible
+github.com/Azure/azure-sdk-for-go/profiles/latest/compute/mgmt/compute
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute
