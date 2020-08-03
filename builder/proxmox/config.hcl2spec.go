@@ -289,6 +289,7 @@ type FlatstorageConfig struct {
 	Device    *string `mapstructure:"device" cty:"device" hcl:"device"`
 	BusNumber *int    `mapstructure:"bus_number" cty:"bus_number" hcl:"bus_number"`
 	Filename  *string `mapstructure:"filename" cty:"filename" hcl:"filename"`
+	Unmount   *bool   `mapstructure:"unmount" cty:"unmount" hcl:"unmount"`
 }
 
 // FlatMapstructure returns a new FlatstorageConfig.
@@ -306,6 +307,7 @@ func (*FlatstorageConfig) HCL2Spec() map[string]hcldec.Spec {
 		"device":     &hcldec.AttrSpec{Name: "device", Type: cty.String, Required: false},
 		"bus_number": &hcldec.AttrSpec{Name: "bus_number", Type: cty.Number, Required: false},
 		"filename":   &hcldec.AttrSpec{Name: "filename", Type: cty.String, Required: false},
+		"unmount":    &hcldec.AttrSpec{Name: "unmount", Type: cty.Bool, Required: false},
 	}
 	return s
 }

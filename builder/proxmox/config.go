@@ -93,6 +93,7 @@ type storageConfig struct {
 	Device    string `mapstructure:"device"`
 	BusNumber int    `mapstructure:"bus_number"`
 	Filename  string `mapstructure:"filename"`
+	Unmount   bool   `mapstructure:"unmount"`
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
@@ -196,7 +197,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 			c.AdditionalISOFiles[idx].Device = "ide"
 		}
 		if !contains([]string{"ide", "sata", "scsi"}, c.AdditionalISOFiles[idx].Device) {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%q is not a valid AdditionalISOFile Device", c.AdditionalISOFiles[idx]))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%q is not a valid AdditionalISOFile Device", c.AdditionalISOFiles[idx].Device))
 		}
 		if c.AdditionalISOFiles[idx].BusNumber == 0 {
 			log.Printf("AdditionalISOFile %d number not set, using default: '3'", idx)

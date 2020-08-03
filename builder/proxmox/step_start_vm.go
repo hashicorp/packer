@@ -103,7 +103,7 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 			return multistep.ActionHalt
 		}
 	}
-	//LOOK HERE, add the error msg to AdditionalISOFiles SetVmConfig same as below
+
 	ui.Say("Starting VM")
 	_, err = client.StartVm(vmRef)
 	if err != nil {

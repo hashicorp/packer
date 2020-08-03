@@ -221,7 +221,8 @@ builder.
     {
       "device": "scsi",
       "bus_number": "3",
-      "filemane": "local:iso/virtio-win-0.1.185.iso"
+      "filemane": "local:iso/virtio-win-0.1.185.iso",
+      "unmount": true
     }
   ]
   ```
@@ -234,6 +235,7 @@ builder.
     Defaults to 3 sice `ide` bus 2 is generally the boot drive.
 
   - `filename` (string) - Required. Path to the ISO file that will be mounted, expressed as a Proxmox datastore path.
+  - `unmount` (bool) - If true, remove the mounted ISO from the template after finishing. Defaults to `false`.
 ## Example: Fedora with kickstart
 
 Here is a basic example creating a Fedora 29 server image with a Kickstart
