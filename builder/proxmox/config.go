@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -90,9 +91,13 @@ type vgaConfig struct {
 	Memory int    `mapstructure:"memory"`
 }
 type storageConfig struct {
-	Device    string `mapstructure:"device"`
-	BusNumber int    `mapstructure:"bus_number"`
-	Filename  string `mapstructure:"filename"`
+	common.ISOConfig `mapstructure:",squash"`
+	DeviceType       string `mapstructure:"device_type"`
+	ISOFile          string `mapstructure:"iso_file"`
+	ISOStoragePool   string `mapstructure:"iso_storage_pool"`
+	Unmount          bool   `mapstructure:"unmount"`
+	shouldUploadISO  bool
+	downloadPathKey  string
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
@@ -191,28 +196,58 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 	for idx := range c.AdditionalISOFiles {
-		if c.AdditionalISOFiles[idx].Device == "" {
-			log.Printf("AdditionalISOFile %d Device not set, using default 'ide'", idx)
-			c.AdditionalISOFiles[idx].Device = "ide"
+		// Check AdditionalISO config
+		// Either a pre-uploaded ISO should be referenced in iso_file, OR a URL
+		// (possibly to a local file) to an ISO file that will be downloaded and
+		// then uploaded to Proxmox.
+		if c.AdditionalISOFiles[idx].ISOFile != "" {
+			c.AdditionalISOFiles[idx].shouldUploadISO = false
+		} else {
+			c.AdditionalISOFiles[idx].downloadPathKey = "downloaded_additional_iso_path_" + strconv.Itoa(idx)
+			isoWarnings, isoErrors := c.AdditionalISOFiles[idx].ISOConfig.Prepare(&c.ctx)
+			errs = packer.MultiErrorAppend(errs, isoErrors...)
+			warnings = append(warnings, isoWarnings...)
+			c.AdditionalISOFiles[idx].shouldUploadISO = true
 		}
-		if !contains([]string{"ide", "sata", "scsi"}, c.AdditionalISOFiles[idx].Device) {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%q is not a valid AdditionalISOFile Device", c.AdditionalISOFiles[idx]))
+		if c.AdditionalISOFiles[idx].DeviceType == "" {
+			log.Printf("AdditionalISOFile %d DeviceType not set, using default 'ide3'", idx)
+			c.AdditionalISOFiles[idx].DeviceType = "ide3"
 		}
-		if c.AdditionalISOFiles[idx].BusNumber == 0 {
-			log.Printf("AdditionalISOFile %d number not set, using default: '3'", idx)
-			c.AdditionalISOFiles[idx].BusNumber = 3
+		if strings.HasPrefix(c.AdditionalISOFiles[idx].DeviceType, "ide") {
+			busnumber, err := strconv.Atoi(c.AdditionalISOFiles[idx].DeviceType[3:])
+			if err != nil {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s is not a valid bus index", c.AdditionalISOFiles[idx].DeviceType[3:]))
+			}
+			if busnumber == 2 {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("IDE bus 2 is used by boot ISO"))
+			}
+			if busnumber > 3 {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("IDE bus index can't be higher than 3"))
+			}
 		}
-		if c.AdditionalISOFiles[idx].Device == "ide" && c.AdditionalISOFiles[idx].BusNumber == 2 {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("IDE bus 2 is used by boot ISO"))
+		if strings.HasPrefix(c.AdditionalISOFiles[idx].DeviceType, "sata") {
+			busnumber, err := strconv.Atoi(c.AdditionalISOFiles[idx].DeviceType[4:])
+			if err != nil {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s is not a valid bus index", c.AdditionalISOFiles[idx].DeviceType[4:]))
+			}
+			if busnumber > 5 {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("SATA bus index can't be higher than 5"))
+			}
 		}
-		if c.AdditionalISOFiles[idx].Device == "ide" && c.AdditionalISOFiles[idx].BusNumber > 3 {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("IDE bus number can't be higher than 3"))
+		if strings.HasPrefix(c.AdditionalISOFiles[idx].DeviceType, "scsi") {
+			busnumber, err := strconv.Atoi(c.AdditionalISOFiles[idx].DeviceType[4:])
+			if err != nil {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s is not a valid bus index", c.AdditionalISOFiles[idx].DeviceType[4:]))
+			}
+			if busnumber > 30 {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("SCSI bus index can't be higher than 30"))
+			}
 		}
-		if c.AdditionalISOFiles[idx].Device == "sata" && c.AdditionalISOFiles[idx].BusNumber > 5 {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("SATA bus number can't be higher than 5"))
+		if (c.AdditionalISOFiles[idx].ISOFile == "" && len(c.AdditionalISOFiles[idx].ISOConfig.ISOUrls) == 0) || (c.AdditionalISOFiles[idx].ISOFile != "" && len(c.AdditionalISOFiles[idx].ISOConfig.ISOUrls) != 0) {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("either iso_file or iso_url, but not both, must be specified for AdditionalISO file %s", c.AdditionalISOFiles[idx].DeviceType))
 		}
-		if c.AdditionalISOFiles[idx].Device == "scsi" && c.AdditionalISOFiles[idx].BusNumber > 30 {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("SCSI bus number can't be higher than 30"))
+		if len(c.ISOConfig.ISOUrls) != 0 && c.ISOStoragePool == "" {
+			errs = packer.MultiErrorAppend(errs, errors.New("when specifying iso_url, iso_storage_pool must also be specified"))
 		}
 	}
 	if c.SCSIController == "" {

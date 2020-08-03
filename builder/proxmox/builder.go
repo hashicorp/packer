@@ -71,8 +71,21 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			ResultKey:   downloadPathKey,
 			TargetPath:  b.config.TargetPath,
 			Url:         b.config.ISOUrls,
-		},
+		}}
+
+	for idx := range b.config.AdditionalISOFiles {
+		steps = append(steps, &common.StepDownload{
+			Checksum:    b.config.AdditionalISOFiles[idx].ISOChecksum,
+			Description: "additional ISO",
+			Extension:   b.config.AdditionalISOFiles[idx].TargetExtension,
+			ResultKey:   b.config.AdditionalISOFiles[idx].downloadPathKey,
+			TargetPath:  b.config.AdditionalISOFiles[idx].downloadPathKey,
+			Url:         b.config.AdditionalISOFiles[idx].ISOUrls,
+		})
+	}
+	steps = append(steps,
 		&stepUploadISO{},
+		&stepUploadAdditionalISOs{},
 		&stepStartVM{},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
@@ -96,7 +109,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&stepConvertToTemplate{},
 		&stepFinalizeTemplateConfig{},
 		&stepSuccess{},
-	}
+	)
+
 	// Run the steps
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)

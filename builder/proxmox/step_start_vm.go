@@ -93,7 +93,7 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 
 	for idx := range c.AdditionalISOFiles {
 		params := map[string]interface{}{
-			c.AdditionalISOFiles[idx].Device + strconv.Itoa(c.AdditionalISOFiles[idx].BusNumber): c.AdditionalISOFiles[idx].Filename + ",media=cdrom",
+			c.AdditionalISOFiles[idx].DeviceType: c.AdditionalISOFiles[idx].ISOFile + ",media=cdrom",
 		}
 		_, err = client.SetVmConfig(vmRef, params)
 		if err != nil {
@@ -103,7 +103,7 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 			return multistep.ActionHalt
 		}
 	}
-	//LOOK HERE, add the error msg to AdditionalISOFiles SetVmConfig same as below
+
 	ui.Say("Starting VM")
 	_, err = client.StartVm(vmRef)
 	if err != nil {
