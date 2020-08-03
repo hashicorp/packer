@@ -193,6 +193,8 @@ type Config struct {
 	// connections where the provisioner has access to a host IP.
 	UseProxy     config.Trilean `mapstructure:"use_proxy"`
 	userWasEmpty bool
+	// Removes the .ansible folder in the user homedir
+	CleanHomedir bool `mapstructure:"clean_homedir"`
 }
 
 type Provisioner struct {
@@ -801,6 +803,18 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	err = cmd.Wait()
 	if err != nil {
 		return fmt.Errorf("Non-zero exit status: %s", err)
+	}
+
+	if p.config.CleanHomedir {
+		ctx := context.TODO()
+		cmd := &packer.RemoteCmd{
+			Command: fmt.Sprintf("rm -rf ~%s/.ansible", p.config.User),
+		}
+		if err := comm.Start(ctx, cmd); err != nil {
+			return fmt.Errorf(
+				"Error removing %s/.ansible: %s", p.config.User, err)
+		}
+		cmd.Wait()
 	}
 
 	return nil
