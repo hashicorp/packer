@@ -45,7 +45,10 @@ type Config struct {
 	//  `ansible-playbook`. If you would like to provide a more complex command,
 	//  for example, something that sets up a virtual environment before calling
 	//  ansible, take a look at the ansible wrapper guide below for inspiration.
-	Command string
+	//  Please note that Packer expects Command to be a path to an executable.
+	//  Arbitrary bash scripting will not work and needs to go inside an
+	//  executable script.
+	Command string `mapstructure:"command"`
 	// Extra arguments to pass to Ansible.
 	// These arguments _will not_ be passed through a shell and arguments should
 	// not be quoted. Usage example:
