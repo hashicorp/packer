@@ -59,12 +59,11 @@ builder.
 - `iso_storage_pool` (string) - Proxmox storage pool onto which to upload
   the ISO file.
 
-- `iso_checksum` (string) - Checksum of the ISO file.
-
-- `iso_checksum_type` (string) - Type of the checksum. Can be md5, sha1,
-  sha256, sha512 or none. Corruption of large files, such as ISOs, can occur
-  during transfer from time to time. As such, setting this to none is not
-  recommended.
+- `iso_checksum` (string) - Checksum of the ISO file. Type of the checksum
+  is infered based on string length, or can be explicitly prefixed with
+  md5:, sha1:, sha256:, sha512: or set to none. Corruption of large files,
+  such as ISOs, can occur during transfer from time to time. As such,
+  setting this to none is not recommended.
 
 ### Optional:
 
