@@ -109,14 +109,14 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 }
 
 func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) error {
+	dst, err := interpolate.Render(p.config.Destination, &p.config.ctx)
+	if err != nil {
+		return fmt.Errorf("Error interpolating destination: %s", err)
+	}
 	for _, src := range p.config.Sources {
 		src, err := interpolate.Render(src, &p.config.ctx)
 		if err != nil {
 			return fmt.Errorf("Error interpolating source: %s", err)
-		}
-		dst, err := interpolate.Render(p.config.Destination, &p.config.ctx)
-		if err != nil {
-			return fmt.Errorf("Error interpolating destination: %s", err)
 		}
 
 		ui.Say(fmt.Sprintf("Downloading %s => %s", src, dst))
@@ -158,15 +158,14 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 }
 
 func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) error {
+	dst, err := interpolate.Render(p.config.Destination, &p.config.ctx)
+	if err != nil {
+		return fmt.Errorf("Error interpolating destination: %s", err)
+	}
 	for _, src := range p.config.Sources {
 		src, err := interpolate.Render(src, &p.config.ctx)
 		if err != nil {
 			return fmt.Errorf("Error interpolating source: %s", err)
-		}
-
-		dst, err := interpolate.Render(p.config.Destination, &p.config.ctx)
-		if err != nil {
-			return fmt.Errorf("Error interpolating destination: %s", err)
 		}
 
 		ui.Say(fmt.Sprintf("Uploading %s => %s", src, dst))
@@ -178,7 +177,7 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 
 		// If we're uploading a directory, short circuit and do that
 		if info.IsDir() {
-			return comm.UploadDir(p.config.Destination, src, nil)
+			return comm.UploadDir(dst, src, nil)
 		}
 
 		// We're uploading a file...
