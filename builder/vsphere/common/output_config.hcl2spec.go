@@ -2,6 +2,8 @@
 package common
 
 import (
+	"os"
+
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -9,7 +11,8 @@ import (
 // FlatOutputConfig is an auto-generated flat version of OutputConfig.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatOutputConfig struct {
-	OutputDir *string `mapstructure:"output_directory" required:"false" cty:"output_directory" hcl:"output_directory"`
+	OutputDir *string      `mapstructure:"output_directory" required:"false" cty:"output_directory" hcl:"output_directory"`
+	DirPerm   *os.FileMode `mapstructure:"directory_permission" required:"false" cty:"directory_permission" hcl:"directory_permission"`
 }
 
 // FlatMapstructure returns a new FlatOutputConfig.
@@ -24,7 +27,8 @@ func (*OutputConfig) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.
 // The decoded values from this spec will then be applied to a FlatOutputConfig.
 func (*FlatOutputConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"output_directory": &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
+		"output_directory":     &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
+		"directory_permission": &hcldec.AttrSpec{Name: "directory_permission", Type: cty.Number, Required: false},
 	}
 	return s
 }

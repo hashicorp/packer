@@ -21,11 +21,21 @@ type OutputConfig struct {
 	// created, must be empty prior to running the builder. By default this is
 	// "output-BUILDNAME" where "BUILDNAME" is the name of the build.
 	OutputDir string `mapstructure:"output_directory" required:"false"`
+	// The permissions to apply to the "output_directory", and to any parent
+	// directories that get created for output_directory.  By default this is
+	// "0750". You should express the permission as quoted string with a
+	// leading zero such as "0755" in JSON file, because JSON does not support
+	// octal value. In Unix-like OS, the actual permission may differ from
+	// this value because of umask.
+	DirPerm os.FileMode `mapstructure:"directory_permission" required:"false"`
 }
 
 func (c *OutputConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig) []error {
 	if c.OutputDir == "" {
 		c.OutputDir = fmt.Sprintf("output-%s", pc.PackerBuildName)
+	}
+	if c.DirPerm == 0 {
+		c.DirPerm = 0750
 	}
 
 	return nil
