@@ -182,41 +182,6 @@ iso_paths = [
 
 @include 'builder/vsphere/iso/NIC.mdx'
 
-Example that creates two network adapters:
-
-<Tabs>
-<Tab heading="JSON">
-
-```json
-  "network_adapters": [
-    {
-      "network": "VM Network",
-      "network_card": "vmxnet3"
-    },
-    {
-      "network": "OtherNetwork",
-      "network_card": "vmxnet3"
-    }
-  ],
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-  network_adapters {
-      network = "VM Network"
-      network_card = "vmxnet3"
-  }
-  network_adapters {
-      network = "OtherNetwork"
-      network_card = "vmxnet3"
-  }
-```
-
-</Tab>
-</Tabs>
-
 @include 'builder/vsphere/iso/NIC-required.mdx'
 
 #### Optional
@@ -227,93 +192,6 @@ Example that creates two network adapters:
 
 @include 'builder/vsphere/iso/DiskConfig.mdx'
 
-Example that will create a 15GB and a 20GB disk on the VM. The second disk will be thin provisioned:
-
-<Tabs>
-<Tab heading="JSON">
-
-```json
-  "storage": [
-    {
-      "disk_size": 15000
-    },
-    {
-      "disk_size": 20000,
-      "disk_thin_provisioned": true
-    }
-  ],
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-  storage {
-      disk_size = 15000
-  }
-
-  storage {
-      disk_size = 20000
-      disk_thin_provisioned = true
-  }
-```
-
-</Tab>
-</Tabs>
-
-Example that creates 2 pvscsi controllers and adds 2 disks to each one:
-
-<Tabs>
-<Tab heading="JSON">
-
-```json
-  "disk_controller_type": ["pvscsi", "pvscsi"],
-  "storage": [
-    {
-      "disk_size": 15000,
-      "disk_controller_index": 0
-    },
-    {
-      "disk_size": 15000,
-      "disk_controller_index": 0
-    },
-    {
-      "disk_size": 15000,
-      "disk_controller_index": 1
-    },
-    {
-      "disk_size": 15000,
-      "disk_controller_index": 1
-    }
-  ],
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-   disk_controller_type = ["pvscsi", "pvscsi"]
-   storage {
-      disk_size = 15000,
-      disk_controller_index = 0
-   }
-   storage {
-      disk_size = 15000
-      disk_controller_index = 0
-   }
-   storage {
-      disk_size = 15000
-      disk_controller_index = 1
-   }
-   storage {
-      disk_size = 15000
-      disk_controller_index = 1
-   }
-```
-
-</Tab>
-</Tabs>
-
 @include 'builder/vsphere/iso/DiskConfig-required.mdx'
 
 #### Optional
@@ -322,77 +200,11 @@ Example that creates 2 pvscsi controllers and adds 2 disks to each one:
 
 ### Export Configuration
 
-You may optionally export an ovf from VSphere to the instance running Packer.
-
-Example usage:
-
-<Tabs>
-<Tab heading="JSON">
-
-```json
-...
-  "vm_name": "example-ubuntu",
-...
-  "export": {
-    "force": true,
-    "output_directory": "./output_vsphere"
-  },
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-  # ...
-  vm_name = "example-ubuntu"
-  # ...
-  export {
-    force = true
-    output_directory = "./output_vsphere"
-  }
-```
-
-</Tab>
-</Tabs>
-
-The above configuration would create the following files:
-
-```text
-./output_vsphere/example-ubuntu-disk-0.vmdk
-./output_vsphere/example-ubuntu.mf
-./output_vsphere/example-ubuntu.ovf
-```
+@include 'builder/vsphere/common/ExportConfig.mdx'
 
 #### Optional:
 
 @include 'builder/vsphere/common/ExportConfig-not-required.mdx'
-
-#### Export Options Example
-
-For example, adding the following export config option would output the mac addresses for all Ethernet devices in the ovf file:
-
-<Tabs>
-<Tab heading="JSON">
-
-```json
-...
-  "export": {
-    "options": ["mac"]
-  },
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-...
-  export {
-    options = ["mac"]
-  }
-```
-
-</Tab>
-</Tabs>
 
 #### Output Configuration:
 

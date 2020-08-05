@@ -1,0 +1,33 @@
+<!-- Code generated from the comments of the ExportConfig struct in builder/vsphere/common/step_export.go; DO NOT EDIT MANUALLY -->
+
+You may optionally export an ovf from VSphere to the instance running Packer.
+
+Example usage:
+
+In JSON:
+```json
+...
+  "vm_name": "example-ubuntu",
+...
+  "export": {
+    "force": true,
+    "output_directory": "./output_vsphere"
+  },
+```
+In HCL2:
+```hcl
+  # ...
+  vm_name = "example-ubuntu"
+  # ...
+  export {
+    force = true
+    output_directory = "./output_vsphere"
+  }
+```
+The above configuration would create the following files:
+
+```text
+./output_vsphere/example-ubuntu-disk-0.vmdk
+./output_vsphere/example-ubuntu.mf
+./output_vsphere/example-ubuntu.ovf
+```

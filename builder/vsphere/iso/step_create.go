@@ -15,6 +15,33 @@ import (
 )
 
 // Defines a Network Adapter
+//
+// Example that creates two network adapters:
+//
+// In JSON:
+// ```json
+//   "network_adapters": [
+//     {
+//       "network": "VM Network",
+//       "network_card": "vmxnet3"
+//     },
+//     {
+//       "network": "OtherNetwork",
+//       "network_card": "vmxnet3"
+//     }
+//   ],
+// ```
+// In HCL2:
+// ```hcl
+//   network_adapters {
+//       network = "VM Network"
+//       network_card = "vmxnet3"
+//   }
+//   network_adapters {
+//       network = "OtherNetwork"
+//       network_card = "vmxnet3"
+//   }
+// ```
 type NIC struct {
 	// Set the network in which the VM will be connected to. If no network is specified, `host`
 	// must be specified to allow Packer to look for the available network.
@@ -28,6 +55,77 @@ type NIC struct {
 }
 
 // Defines the disk storage for a VM.
+//
+// Example that will create a 15GB and a 20GB disk on the VM. The second disk will be thin provisioned:
+//
+// In JSON:
+// ```json
+//   "storage": [
+//     {
+//       "disk_size": 15000
+//     },
+//     {
+//       "disk_size": 20000,
+//       "disk_thin_provisioned": true
+//     }
+//   ],
+// ```
+// In HCL2:
+// ```hcl
+//   storage {
+//       disk_size = 15000
+//   }
+//   storage {
+//       disk_size = 20000
+//       disk_thin_provisioned = true
+//   }
+// ```
+//
+// Example that creates 2 pvscsi controllers and adds 2 disks to each one:
+//
+// In JSON:
+// ```json
+//   "disk_controller_type": ["pvscsi", "pvscsi"],
+//   "storage": [
+//     {
+//       "disk_size": 15000,
+//       "disk_controller_index": 0
+//     },
+//     {
+//       "disk_size": 15000,
+//       "disk_controller_index": 0
+//     },
+//     {
+//       "disk_size": 15000,
+//       "disk_controller_index": 1
+//     },
+//     {
+//       "disk_size": 15000,
+//       "disk_controller_index": 1
+//     }
+//   ],
+// ```
+//
+// In HCL2:
+// ```hcl
+//   disk_controller_type = ["pvscsi", "pvscsi"]
+//   storage {
+//      disk_size = 15000,
+//      disk_controller_index = 0
+//   }
+//   storage {
+//      disk_size = 15000
+//      disk_controller_index = 0
+//   }
+//   storage {
+//      disk_size = 15000
+//      disk_controller_index = 1
+//   }
+//   storage {
+//      disk_size = 15000
+//      disk_controller_index = 1
+//   }
+// ```
 type DiskConfig struct {
 	// The size of the disk in MB.
 	DiskSize int64 `mapstructure:"disk_size" required:"true"`

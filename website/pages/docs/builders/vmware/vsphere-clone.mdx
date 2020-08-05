@@ -161,48 +161,9 @@ about the key.
 
 ### Export Configuration
 
-You may optionally export an ovf from VSphere to the instance running Packer.
+@include 'builder/vsphere/common/ExportConfig.mdx'
 
-Example usage:
-
-<Tabs>
-<Tab heading="JSON">
-
-```json
-...
-  "vm_name": "example-ubuntu",
-...
-  "export": {
-    "force": true,
-    "output_directory": "./output_vsphere"
-  },
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-  # ...
-  vm_name = "example-ubuntu"
-  # ...
-  export {
-    force = true
-    output_directory = "./output_vsphere"
-  }
-```
-
-</Tab>
-</Tabs>
-
-The above configuration would create the following files:
-
-```text
-./output_vsphere/example-ubuntu-disk-0.vmdk
-./output_vsphere/example-ubuntu.mf
-./output_vsphere/example-ubuntu.ovf
-```
-
-### Optional:
+#### Optional:
 
 @include 'builder/vsphere/common/ExportConfig-not-required.mdx'
 
