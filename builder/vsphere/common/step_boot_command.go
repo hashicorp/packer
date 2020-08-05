@@ -83,7 +83,7 @@ func (s *StepBootCommand) Run(ctx context.Context, state multistep.StateBag) mul
 			keyAlt = down
 		case key.CodeLeftControl:
 			keyCtrl = down
-		default:
+		case key.CodeLeftShift:
 			keyShift = down
 		}
 
