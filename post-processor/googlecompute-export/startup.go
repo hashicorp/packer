@@ -1,6 +1,10 @@
 package googlecomputeexport
 
-import 	"github.com/hashicorp/packer/builder/googlecompute"
+import (
+	"fmt"
+
+	"github.com/hashicorp/packer/builder/googlecompute"
+)
 
 var StartupScript string = fmt.Sprintf(`#!/bin/bash
 
@@ -90,4 +94,4 @@ done
 SetMetadata %s %s
 
 Exit ${FAIL}
-`, googlecompute.StartupWrappedScriptKey, googlecompute.StartupScriptStatusKey)
+`, googlecompute.StartupWrappedScriptKey, googlecompute.StartupScriptStatusKey, googlecompute.StartupScriptStatusDone)
