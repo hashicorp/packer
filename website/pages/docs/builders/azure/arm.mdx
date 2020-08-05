@@ -403,6 +403,27 @@ prevent running afoul of Azure decency controls.
 The password alphabet used for random values is
 **0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ**.
 
+### Deprecation Warning
+
+You may see a scary-looking deprecation warning when you run the Azure builder:
+
+```
+==> azure-arm: Warning: You are using Azure Packer Builder to create VHDs which
+is being deprecated, consider using Managed Images. Learn more
+http://aka.ms/packermanagedimage
+```
+
+Don't panic. Your build won't stop working next week.
+
+Long-term, Azure wants everyone to move to using managed images and managed
+disks because they hide the complexity with respect to storage account
+performance. Managed disks can be exported to a VHD. If this is deprecated,
+it will be done in a transparent process by the Microsoft team who help
+maintain Packer.
+
+In the future, Packer may remove VHD support but add a post-processor that can
+automate the export to a storage account.
+
 ### Windows
 
 The Windows implementation is very similar to the Linux build, with the
