@@ -16,7 +16,6 @@ type FlatConfig struct {
 	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	Keep                *bool             `mapstructure:"keep_input_artifact" cty:"keep_input_artifact" hcl:"keep_input_artifact"`
 	ChecksumTypes       []string          `mapstructure:"checksum_types" cty:"checksum_types" hcl:"checksum_types"`
 	OutputPath          *string           `mapstructure:"output" cty:"output" hcl:"output"`
 }
@@ -40,7 +39,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
 		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
-		"keep_input_artifact":        &hcldec.AttrSpec{Name: "keep_input_artifact", Type: cty.Bool, Required: false},
 		"checksum_types":             &hcldec.AttrSpec{Name: "checksum_types", Type: cty.List(cty.String), Required: false},
 		"output":                     &hcldec.AttrSpec{Name: "output", Type: cty.String, Required: false},
 	}
