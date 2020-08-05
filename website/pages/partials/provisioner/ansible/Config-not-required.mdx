@@ -1,5 +1,13 @@
 <!-- Code generated from the comments of the Config struct in provisioner/ansible/provisioner.go; DO NOT EDIT MANUALLY -->
 
+- `command` (string) - The command to invoke ansible. Defaults to
+   `ansible-playbook`. If you would like to provide a more complex command,
+   for example, something that sets up a virtual environment before calling
+   ansible, take a look at the ansible wrapper guide below for inspiration.
+   Please note that Packer expects Command to be a path to an executable.
+   Arbitrary bash scripting will not work and needs to go inside an
+   executable script.
+
 - `extra_arguments` ([]string) - Extra arguments to pass to Ansible.
   These arguments _will not_ be passed through a shell and arguments should
   not be quoted. Usage example:
