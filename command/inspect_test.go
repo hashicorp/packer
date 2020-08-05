@@ -95,6 +95,26 @@ Use it at will.
         shell-local
 
 `},
+		{[]string{"inspect", "-var=fruit=peach", filepath.Join(testFixture("var-arg"), "fruit_builder.json")}, nil, `Packer Inspect: JSON mode
+Required variables:
+
+  fruit
+
+Optional variables and their defaults:
+
+
+Builders:
+
+  null
+
+Provisioners:
+
+  <No provisioners>
+
+Note: If your build names contain user variables or template
+functions such as 'timestamp', these are processed at build time,
+and therefore only show in their raw form here.
+`},
 	}
 
 	for _, tc := range tc {
@@ -107,7 +127,7 @@ Use it at will.
 			}
 			actual := string(bs)
 			if diff := cmp.Diff(tc.expected, actual); diff != "" {
-				t.Fatalf("unexpected ouput %s", diff)
+				t.Fatalf("unexpected output %s", diff)
 			}
 		})
 	}
