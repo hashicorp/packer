@@ -25,7 +25,7 @@ export GOLDFLAGS
 .PHONY: bin checkversion ci ci-lint default install-build-deps install-gen-deps fmt fmt-docs fmt-examples generate install-lint-deps lint \
 	releasebin test testacc testrace
 
-default: install-build-deps install-gen-deps generate testrace dev releasebin package dev fmt fmt-check mode-check fmt-docs fmt-examples
+default: install-build-deps install-gen-deps generate bin
 
 ci: testrace ## Test in continuous integration
 
