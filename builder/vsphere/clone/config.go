@@ -40,6 +40,8 @@ type Config struct {
 	// The VM template will not be imported if no [Content Library Import Configuration](#content-library-import-configuration) is specified.
 	// The import doesn't work if [convert_to_template](#convert_to_template) is set to true.
 	ContentLibraryDestinationConfig *common.ContentLibraryDestinationConfig `mapstructure:"content_library_destination"`
+	// Customize the cloned VM to configure host, network, or licensing settings. See the [customization options](#customization).
+	CustomizeConfig *CustomizeConfig `mapstructure:"customize"`
 
 	ctx interpolate.Context
 }
@@ -74,6 +76,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 	if c.ContentLibraryDestinationConfig != nil {
 		errs = packer.MultiErrorAppend(errs, c.ContentLibraryDestinationConfig.Prepare(&c.LocationConfig)...)
+	}
+	if c.CustomizeConfig != nil {
+		errs = packer.MultiErrorAppend(errs, c.CustomizeConfig.Prepare()...)
 	}
 
 	if len(errs.Errors) > 0 {

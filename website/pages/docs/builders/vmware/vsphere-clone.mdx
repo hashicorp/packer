@@ -86,6 +86,70 @@ can be done via environment variable:
 
 @include 'builder/vsphere/common/ConfigParamsConfig-not-required.mdx'
 
+### Customization
+
+@include '/builder/vsphere/clone/CustomizeConfig.mdx'
+
+@include 'builder/vsphere/clone/CustomizeConfig-not-required.mdx'
+
+#### Network Interface Settings
+
+@include 'builder/vsphere/clone/NetworkInterface-not-required.mdx'
+
+#### Global Routing Settings
+
+@include 'builder/vsphere/clone/GlobalRoutingSettings.mdx'
+
+@include 'builder/vsphere/clone/GlobalRoutingSettings-not-required.mdx'
+
+#### Global DNS Settings
+
+@include 'builder/vsphere/clone/GlobalDnsSettings.mdx'
+
+@include 'builder/vsphere/clone/GlobalDnsSettings-not-required.mdx'
+
+#### Linux Customization Settings
+
+@include 'builder/vsphere/clone/LinuxOptions-not-required.mdx'
+
+#### Customization Example
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+ "customize": {
+          "linux_options": {
+            "host_name": "packer-test",
+            "domain": "test.internal"
+          },
+          "network_interface": {
+            "ipv4_address": "10.0.0.10",
+            "ipv4_netmask": "24"
+          }
+ }
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+   customize {
+         linux_options {
+           host_name = "packer-test"
+           domain = "test.internal"
+         }
+
+         network_interface {
+           ipv4_address = "10.0.0.10"
+           ipv4_netmask = "24"
+         }
+   }
+```
+
+</Tab>
+</Tabs>
+
 ### Boot configuration
 
 @include 'common/bootcommand/BootConfig.mdx'

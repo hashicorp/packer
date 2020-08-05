@@ -524,6 +524,14 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 	return err
 }
 
+func (vm *VirtualMachine) Customize(spec types.CustomizationSpec) error {
+	task, err := vm.vm.Customize(vm.driver.ctx, spec)
+	if err != nil {
+		return err
+	}
+	return task.Wait(vm.driver.ctx)
+}
+
 func (vm *VirtualMachine) ResizeDisk(diskSize int64) error {
 	var confSpec types.VirtualMachineConfigSpec
 

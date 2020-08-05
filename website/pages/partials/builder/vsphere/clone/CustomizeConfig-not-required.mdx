@@ -1,0 +1,9 @@
+<!-- Code generated from the comments of the CustomizeConfig struct in builder/vsphere/clone/step_customize.go; DO NOT EDIT MANUALLY -->
+
+- `linux_options` (\*LinuxOptions) - Settings to Linux guest OS customization. See [Linux customization settings](#linux-customization-settings).
+
+- `windows_sysprep_file` (string) - Supply your own sysprep.xml file to allow full control of the customization process out-of-band of vSphere.
+
+- `network_interface` (NetworkInterfaces) - Configure network interfaces on a per-interface basis that should matched up to the network adapters present in the VM.
+  To use DHCP, declare an empty network_interface for each adapter being configured. This field is required.
+  See [Network interface settings](#network-interface-settings).
