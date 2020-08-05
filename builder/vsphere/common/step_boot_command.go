@@ -76,15 +76,14 @@ func (s *StepBootCommand) Run(ctx context.Context, state multistep.StateBag) mul
 		ui.Say(fmt.Sprintf("HTTP server is working at http://%v:%v/", ip, port))
 	}
 
+	var keyAlt, keyCtrl, keyShift bool
 	sendCodes := func(code key.Code, down bool) error {
-		var keyAlt, keyCtrl, keyShift bool
-
 		switch code {
 		case key.CodeLeftAlt:
 			keyAlt = down
 		case key.CodeLeftControl:
 			keyCtrl = down
-		default:
+		case key.CodeLeftShift:
 			keyShift = down
 		}
 
