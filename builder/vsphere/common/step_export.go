@@ -31,6 +31,7 @@ import (
 //
 // Example usage:
 //
+// In JSON:
 // ```json
 // ...
 //   "vm_name": "example-ubuntu",
@@ -39,6 +40,16 @@ import (
 //     "force": true,
 //     "output_directory": "./output_vsphere"
 //   },
+// ```
+// In HCL2:
+// ```hcl
+//   # ...
+//   vm_name = "example-ubuntu"
+//   # ...
+//   export {
+//     force = true
+//     output_directory = "./output_vsphere"
+//   }
 // ```
 // The above configuration would create the following files:
 //
@@ -66,11 +77,19 @@ type ExportConfig struct {
 	//
 	// For example, adding the following export config option would output the mac addresses for all Ethernet devices in the ovf file:
 	//
+	// In JSON:
 	// ```json
 	// ...
 	//   "export": {
 	//     "options": ["mac"]
 	//   },
+	// ```
+	// In HCL2:
+	// ```hcl
+	// ...
+	//   export {
+	//     options = ["mac"]
+	//   }
 	// ```
 	Options []string `mapstructure:"options"`
 }

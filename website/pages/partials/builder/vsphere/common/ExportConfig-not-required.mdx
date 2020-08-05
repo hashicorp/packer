@@ -16,9 +16,17 @@
   
   For example, adding the following export config option would output the mac addresses for all Ethernet devices in the ovf file:
   
+  In JSON:
   ```json
   ...
     "export": {
       "options": ["mac"]
     },
+  ```
+  In HCL2:
+  ```hcl
+  ...
+    export {
+      options = ["mac"]
+    }
   ```
