@@ -24,7 +24,6 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Keep          bool     `mapstructure:"keep_input_artifact"`
 	ChecksumTypes []string `mapstructure:"checksum_types"`
 	OutputPath    string   `mapstructure:"output"`
 	ctx           interpolate.Context
