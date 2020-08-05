@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	ttmp "text/template"
@@ -191,9 +192,20 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 			Provisioner: provisioner,
 		}
 	}
-	if rawP.MaxRetries != 0 {
+	maxRetries := 0
+	if rawP.MaxRetries != "" {
+		renderedMaxRetries, err := interpolate.Render(rawP.MaxRetries, c.Context())
+		if err != nil {
+			return cbp, fmt.Errorf("failed to interpolate `max_retries`: %s", err.Error())
+		}
+		maxRetries, err = strconv.Atoi(renderedMaxRetries)
+		if err != nil {
+			return cbp, fmt.Errorf("`max_retries` must be a valid integer: %s", err.Error())
+		}
+	}
+	if maxRetries != 0 {
 		provisioner = &RetriedProvisioner{
-			MaxRetries:  rawP.MaxRetries,
+			MaxRetries:  maxRetries,
 			Provisioner: provisioner,
 		}
 	}
