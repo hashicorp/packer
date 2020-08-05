@@ -31,6 +31,8 @@ type HWConfig struct {
 	// machine](https://kb.vmware.com/s/article/1001805) for desktop VMware
 	// clients. For ESXi, refer to the proper ESXi documentation.
 	NetworkAdapterType string `mapstructure:"network_adapter_type" required:"false"`
+	// The custom name of the network. Sets the vmx value "ethernet0.networkName"
+	NetworkName string `mapstructure:"network_name" required:"false"`
 	// Specify whether to enable VMware's virtual soundcard device when
 	// building the VM. Defaults to false.
 	Sound bool `mapstructure:"sound" required:"false"`
