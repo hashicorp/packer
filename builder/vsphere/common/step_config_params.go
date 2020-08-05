@@ -51,12 +51,12 @@ func (s *StepConfigParams) Run(_ context.Context, state multistep.StateBag) mult
 		if s.Config.ToolsUpgradePolicy {
 			info.ToolsUpgradePolicy = "UpgradeAtPowerCycle"
 		}
+	}
 
-		ui.Say("Adding configuration parameters...")
-		if err := vm.AddConfigParams(configParams, info); err != nil {
-			state.Put("error", fmt.Errorf("error adding configuration parameters: %v", err))
-			return multistep.ActionHalt
-		}
+	ui.Say("Adding configuration parameters...")
+	if err := vm.AddConfigParams(configParams, info); err != nil {
+		state.Put("error", fmt.Errorf("error adding configuration parameters: %v", err))
+		return multistep.ActionHalt
 	}
 
 	return multistep.ActionContinue
