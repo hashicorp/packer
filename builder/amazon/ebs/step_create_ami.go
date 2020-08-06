@@ -85,18 +85,24 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 
 	// Wait for the image to become ready
 	ui.Say("Waiting for AMI to become ready...")
-	if err := awscommon.WaitUntilAMIAvailable(ctx, ec2conn, *createResp.ImageId); err != nil {
-		log.Printf("Error waiting for AMI: %s", err)
+
+	if waitErr := awscommon.WaitUntilAMIAvailable(ctx, ec2conn, *createResp.ImageId); waitErr != nil {
+		// waitErr should get bubbled up if the issue is a wait timeout
+		err := fmt.Errorf("Error waiting for AMI: %s", waitErr)
 		imResp, imerr := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})
 		if imerr != nil {
-			log.Printf("Unable to determine reason waiting for AMI failed: %s", err)
-			err = fmt.Errorf("Unknown error waiting for AMI; %s", err)
+			// If there's a failure describing images, bubble that error up too, but don't erase the waitErr.
+			log.Printf("DescribeImages call was unable to determine reason waiting for AMI failed: %s", imerr)
+			err = fmt.Errorf("Unknown error waiting for AMI; %s. DescribeImages returned an error: %s", waitErr, imerr)
 		}
 		if imResp != nil && len(imResp.Images) > 0 {
+			// Finally, if there's a stateReason, store that with the wait err
 			image := imResp.Images[0]
 			if image != nil {
 				stateReason := image.StateReason
-				err = fmt.Errorf("Error waiting for AMI. Reason: %s", stateReason)
+				if stateReason == nil {
+					err = fmt.Errorf("Error waiting for AMI: %s. DescribeImages returned the state reason: %s", waitErr, stateReason)
+				}
 			}
 		}
 		state.Put("error", err)
