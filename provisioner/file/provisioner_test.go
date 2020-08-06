@@ -149,6 +149,125 @@ func TestProvisionerProvision_SendsFile(t *testing.T) {
 	}
 }
 
+func TestProvisionerProvision_SendsFileMultipleFiles(t *testing.T) {
+	var p Provisioner
+	tf1, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf1.Name())
+
+	if _, err = tf1.Write([]byte("hello")); err != nil {
+		t.Fatalf("error writing tempfile: %s", err)
+	}
+
+	tf2, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf2.Name())
+
+	if _, err = tf2.Write([]byte("hello")); err != nil {
+		t.Fatalf("error writing tempfile: %s", err)
+	}
+
+	config := map[string]interface{}{
+		"sources":      []string{tf1.Name(), tf2.Name()},
+		"destination": "something",
+	}
+
+	if err := p.Prepare(config); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	b := bytes.NewBuffer(nil)
+	ui := &packer.BasicUi{
+		Writer: b,
+	}
+	comm := &packer.MockCommunicator{}
+	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err != nil {
+		t.Fatalf("should successfully provision: %s", err)
+	}
+
+	if !strings.Contains(b.String(), tf1.Name()) {
+		t.Fatalf("should print first source filename")
+	}
+
+	if !strings.Contains(b.String(), tf2.Name()) {
+		t.Fatalf("should print second source filename")
+	}
+}
+
+func TestProvisionerProvision_SendsFileMultipleDirs(t *testing.T) {
+	var p Provisioner
+
+	// Prepare the first directory
+	td1, err := ioutil.TempDir("", "packerdir")
+	if err != nil {
+		t.Fatalf("error temp folder 1: %s", err)
+	}
+	defer os.Remove(td1)
+
+	tf1, err := ioutil.TempFile(td1, "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+
+	if _, err = tf1.Write([]byte("hello")); err != nil {
+		t.Fatalf("error writing tempfile: %s", err)
+	}
+
+	// Prepare the second directory
+	td2, err := ioutil.TempDir("", "packerdir")
+	if err != nil {
+		t.Fatalf("error temp folder 1: %s", err)
+	}
+	defer os.Remove(td2)
+
+	tf2, err := ioutil.TempFile(td2, "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+
+	if _, err = tf2.Write([]byte("hello")); err != nil {
+		t.Fatalf("error writing tempfile: %s", err)
+	}
+
+	if _, err = tf1.Write([]byte("hello")); err != nil {
+		t.Fatalf("error writing tempfile: %s", err)
+	}
+
+	// Run Provision
+
+	config := map[string]interface{}{
+		"sources":      []string{td1, td2},
+		"destination": "something",
+	}
+
+	if err := p.Prepare(config); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	b := bytes.NewBuffer(nil)
+	ui := &packer.BasicUi{
+		Writer: b,
+	}
+	comm := &packer.MockCommunicator{}
+	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err != nil {
+		t.Fatalf("should successfully provision: %s", err)
+	}
+
+	if !strings.Contains(b.String(), td1) {
+		t.Fatalf("should print first directory")
+	}
+
+	if !strings.Contains(b.String(), td2) {
+		t.Fatalf("should print second directory")
+	}
+}
+
 func TestProvisionDownloadMkdirAll(t *testing.T) {
 	tests := []struct {
 		path string

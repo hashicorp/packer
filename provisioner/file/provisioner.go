@@ -177,7 +177,11 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 
 		// If we're uploading a directory, short circuit and do that
 		if info.IsDir() {
-			return comm.UploadDir(dst, src, nil)
+			if err = comm.UploadDir(dst, src, nil); err != nil {
+				ui.Error(fmt.Sprintf("Upload failed: %s", err))
+				return err
+			}
+			continue
 		}
 
 		// We're uploading a file...
