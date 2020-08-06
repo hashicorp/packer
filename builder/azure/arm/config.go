@@ -103,7 +103,8 @@ type Config struct {
 	// Authentication via OAUTH
 	ClientConfig client.Config `mapstructure:",squash"`
 
-	// If set with one or more resource ids of user assigned managed identities, they will be configured on the VM.
+	// A list of one or more fully-qualified resource IDs of user assigned
+	// managed identities to be configured on the VM.
 	// See [documentation](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token)
 	// for how to acquire tokens within the VM.
 	// To assign a user assigned managed identity to a VM, the provided account or service principal must have [Managed Identity Operator](https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#managed-identity-operator)
@@ -787,6 +788,10 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		for _, rid := range c.UserAssignedManagedIdentities {
 			r, err := client.ParseResourceID(rid)
 			if err != nil {
+				err := fmt.Errorf("Error parsing resource ID from `user_assigned_managed_identities`; please make sure"+
+					" that this value follows the full resource id format: "+
+					"/subscriptions/<SUBSCRIPTON_ID>/resourcegroups/<RESOURCE_GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<USER_ASSIGNED_IDENTITY_NAME>.\n"+
+					" Original error: %s", err)
 				errs = packer.MultiErrorAppend(errs, err)
 			} else {
 				if !strings.EqualFold(r.Provider, "Microsoft.ManagedIdentity") {
