@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/go-getter"
@@ -156,6 +157,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
+	if p.config.Formulas != nil && len(p.config.Formulas) > 0 {
+
+		validURLs := hasValidFormulaURLs(p.config.Formulas)
+		if !validURLs {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid formula URL. Please verify the git URLs also contain a '//' subdir"))
+		}
+	}
+
 	err = validateDirConfig(p.config.LocalPillarRoots, "local_pillar_roots", false)
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, err)
@@ -254,6 +263,8 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 				if err = client.Get(); err != nil {
 					return fmt.Errorf("Unable to download Salt formula from %s: %s", i, err)
 				}
+			} else {
+				ui.Message(fmt.Sprintf("Found existing formula at: %s", path))
 			}
 		}
 	}
@@ -350,7 +361,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	// Remove the local Salt formulas if present
 	if p.config.Formulas != nil {
 		for _, f := range formulas {
-			if _, err := os.Stat(f); !os.IsNotExist(err) {
+			if _, err := os.Stat(f); !os.IsNotExist(err) && f != p.config.LocalStateTree {
 				ui.Message(fmt.Sprintf("Removing Salt formula: %s", f))
 				os.RemoveAll(f)
 			}
@@ -434,6 +445,18 @@ func validateFileConfig(path string, name string, required bool) error {
 		return fmt.Errorf("%s: path '%s' must point to a file", name, path)
 	}
 	return nil
+}
+
+func hasValidFormulaURLs(s []string) bool {
+	re := regexp.MustCompile(`^(.*).git\/\/[a-zA-Z0-9-_]+$`)
+
+	for _, u := range s {
+		if !re.MatchString(u) {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, src string) error {
