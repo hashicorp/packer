@@ -363,7 +363,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		for _, f := range formulas {
 			if _, err := os.Stat(f); !os.IsNotExist(err) && f != p.config.LocalStateTree {
 				ui.Message(fmt.Sprintf("Removing Salt formula: %s", f))
-				os.RemoveAll(f)
+				defer os.RemoveAll(f)
 			}
 		}
 	}

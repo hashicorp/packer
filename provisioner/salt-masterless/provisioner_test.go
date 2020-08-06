@@ -325,3 +325,33 @@ func TestProvisionerPrepare_GuestOSType(t *testing.T) {
 		t.Fatalf("GuestOSType should be 'windows'")
 	}
 }
+
+func TestProvisionerPrepare_BadFormulaURL(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	config["formulas"] = []string{
+		"git::https://github.com/org/some-formula.git//",
+	}
+
+	err := p.Prepare(config)
+	if err == nil {
+		t.Fatalf("Expected invalid formula URL: %s", err)
+	}
+}
+
+func TestProvisionerPrepare_ValidFormulaURLs(t *testing.T) {
+
+	var p Provisioner
+	config := testConfig()
+
+	config["formulas"] = []string{
+		"git::https://github.com/org/some-formula.git//example",
+		"git@github.com:org/some-formula.git//example",
+	}
+
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("Unexpected error in formula URLs: %s", err)
+	}
+}
