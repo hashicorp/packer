@@ -1,9 +1,7 @@
 ---
 description: >
   The manifest post-processor writes a JSON file with the build artifacts and
-  IDs
-
-  from a packer run.
+  IDs from a packer run.
 layout: docs
 page_title: Manifest - Post-Processors
 sidebar_title: Manifest
@@ -38,17 +36,37 @@ post-processors such as Docker and Artifice.
 
 @include 'post-processor/manifest/Config-not-required.mdx'
 
-- `keep_input_artifact` (boolean) - Unlike most other post-processors, the
-  keep_input_artifact option will have no effect for the manifest
-  post-processor. We will always retain the input artifact for manifest,
-  since deleting the files we just recorded is not a behavior anyone should
-  ever expect. `keep_input_artifact will` therefore always be evaluated as
-  true, regardless of the value you enter into this field.
-
 ### Example Configuration
 
-You can simply add `{"type":"manifest"}` to your post-processor section. Below
-is a more complete example:
+The minimal way to use the manifest post-processor is by just writing its definition, like:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "post-processors": [
+    {
+      "type": "manifest"
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "manifest" {}
+```
+
+</Tab>
+</Tabs>
+
+A more complete example:
+
+<Tabs>
+<Tab heading="JSON">
 
 ```json
 {
@@ -64,6 +82,22 @@ is a more complete example:
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "manifest" {
+    output = "manifest.json"
+    strip_path = true
+    custom_data = {
+      my_custom_data = "example"
+    }
+}
+```
+
+</Tab>
+</Tabs>
 
 An example manifest file looks like:
 
@@ -95,7 +129,10 @@ If the build is run again, the new build artifacts will be added to the
 manifest file rather than replacing it. It is possible to grab specific build
 artifacts from the manifest by using `packer_run_uuid`.
 
-The above manifest was generated with this packer.json:
+The above manifest was generated with the following template:
+
+<Tabs>
+<Tab heading="JSON">
 
 ```json
 {
@@ -105,21 +142,6 @@ The above manifest was generated with this packer.json:
       "image": "ubuntu:latest",
       "export_path": "packer_example",
       "run_command": ["-d", "-i", "-t", "--entrypoint=/bin/bash", "{{.Image}}"]
-    }
-  ],
-  "provisioners": [
-    {
-      "type": "shell",
-      "inline": "mkdir /Setup"
-    },
-    {
-      "type": "file",
-      "source": "../scripts/dummy_bash.sh",
-      "destination": "/Setup"
-    },
-    {
-      "type": "shell",
-      "inline": ["ls -alh /Setup/"]
     }
   ],
   "post-processors": [
@@ -134,6 +156,32 @@ The above manifest was generated with this packer.json:
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "docker" "docker"{
+    image = "ubuntu:latest"
+    export_path = "packer_example"
+    run_command = ["-d", "-i", "-t", "--entrypoint=/bin/bash", "{{.Image}}"]
+}
+
+build {
+    sources = ["docker.docker"]
+
+    post-processor "manifest" {
+        output = "manifest.json"
+        strip_path = true
+        custom_data = {
+          my_custom_data = "example"
+        }
+    }
+}
+```
+
+</Tab>
+</Tabs>
 
 Example usage:
 
