@@ -305,6 +305,13 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 	errors := make([]error, 0)
 	keepOriginalArtifact := len(b.PostProcessors) == 0
 
+	select {
+	case <-ctx.Done():
+		log.Println("Build was cancelled. Skipping post-processors.")
+		return nil, nil
+	default:
+	}
+
 	// Run the post-processors
 PostProcessorRunSeqLoop:
 	for _, ppSeq := range b.PostProcessors {
