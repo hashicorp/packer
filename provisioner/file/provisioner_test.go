@@ -172,7 +172,7 @@ func TestProvisionerProvision_SendsFileMultipleFiles(t *testing.T) {
 	}
 
 	config := map[string]interface{}{
-		"sources":      []string{tf1.Name(), tf2.Name()},
+		"sources":     []string{tf1.Name(), tf2.Name()},
 		"destination": "something",
 	}
 
@@ -241,7 +241,7 @@ func TestProvisionerProvision_SendsFileMultipleDirs(t *testing.T) {
 	// Run Provision
 
 	config := map[string]interface{}{
-		"sources":      []string{td1, td2},
+		"sources":     []string{td1, td2},
 		"destination": "something",
 	}
 
