@@ -50,6 +50,7 @@ type FlatConfig struct {
 	CoreCount                 *int              `mapstructure:"cores" required:"false" cty:"cores" hcl:"cores"`
 	Network                   *string           `mapstructure:"network" required:"false" cty:"network" hcl:"network"`
 	NetworkAdapterType        *string           `mapstructure:"network_adapter_type" required:"false" cty:"network_adapter_type" hcl:"network_adapter_type"`
+	NetworkName               *string           `mapstructure:"network_name" required:"false" cty:"network_name" hcl:"network_name"`
 	Sound                     *bool             `mapstructure:"sound" required:"false" cty:"sound" hcl:"sound"`
 	USB                       *bool             `mapstructure:"usb" required:"false" cty:"usb" hcl:"usb"`
 	Serial                    *string           `mapstructure:"serial" required:"false" cty:"serial" hcl:"serial"`
@@ -187,6 +188,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"cores":                          &hcldec.AttrSpec{Name: "cores", Type: cty.Number, Required: false},
 		"network":                        &hcldec.AttrSpec{Name: "network", Type: cty.String, Required: false},
 		"network_adapter_type":           &hcldec.AttrSpec{Name: "network_adapter_type", Type: cty.String, Required: false},
+		"network_name":                   &hcldec.AttrSpec{Name: "network_name", Type: cty.String, Required: false},
 		"sound":                          &hcldec.AttrSpec{Name: "sound", Type: cty.Bool, Required: false},
 		"usb":                            &hcldec.AttrSpec{Name: "usb", Type: cty.Bool, Required: false},
 		"serial":                         &hcldec.AttrSpec{Name: "serial", Type: cty.String, Required: false},

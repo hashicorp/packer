@@ -38,6 +38,7 @@ type vmxTemplateData struct {
 	Network_Type    string
 	Network_Device  string
 	Network_Adapter string
+	Network_Name    string
 
 	Sound_Present string
 	Usb_Present   string
@@ -252,6 +253,9 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 
 	/// Check the network type that the user specified
 	network := config.HWConfig.Network
+	if config.HWConfig.NetworkName != "" {
+		templateData.Network_Name = config.HWConfig.NetworkName
+	}
 	driver := state.Get("driver").(vmwcommon.Driver).GetVmwareDriver()
 
 	// check to see if the driver implements a network mapper for mapping
@@ -542,6 +546,7 @@ ethernet0.pciSlotNumber = "33"
 ethernet0.present = "TRUE"
 ethernet0.virtualDev = "{{ .Network_Adapter }}"
 ethernet0.wakeOnPcktRcv = "FALSE"
+{{if .Network_Name }}ethernet0.networkName = "{{ .Network_Name }}"{{end}}
 
 // Hard disks
 scsi0.present = "{{ .SCSI_Present }}"
