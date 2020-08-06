@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/go-getter"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -71,6 +72,9 @@ type Config struct {
 
 	// The Guest OS Type (unix or windows)
 	GuestOSType string `mapstructure:"guest_os_type"`
+
+	// An array of private or community git source formulas
+	Formulas []string `mapstructure:"formulas"`
 
 	ctx interpolate.Context
 }
@@ -228,6 +232,31 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	var err error
 	var src, dst string
+	var formulas []string
+
+	if p.config.Formulas != nil && len(p.config.Formulas) > 0 {
+		ui.Say("Downloading Salt formulas...")
+		client := new(getter.Client)
+		for _, i := range p.config.Formulas {
+			client.Src = i
+			// Use //subdirectory name when creating in local_state_tree directory
+			state := strings.Split(i, "//")
+			last := state[len(state)-1]
+			path := filepath.Join(p.config.LocalStateTree, last)
+			formulas = append(formulas, path)
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				ui.Message(fmt.Sprintf("%s => %s", i, path))
+				if err = os.Mkdir(path, 0755); err != nil {
+					return fmt.Errorf("Unable to create Salt state directory: %s", err)
+				}
+				client.Dst = path
+				client.Mode = getter.ClientModeAny
+				if err = client.Get(); err != nil {
+					return fmt.Errorf("Unable to download Salt formula from %s: %s", i, err)
+				}
+			}
+		}
+	}
 
 	ui.Say("Provisioning with Salt...")
 	if !p.config.SkipBootstrap {
@@ -316,6 +345,16 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 
 	if err = p.moveFile(ui, comm, dst, src); err != nil {
 		return fmt.Errorf("Unable to move %s/states to %s: %s", p.config.TempConfigDir, dst, err)
+	}
+
+	// Remove the local Salt formulas if present
+	if p.config.Formulas != nil {
+		for _, f := range formulas {
+			if _, err := os.Stat(f); !os.IsNotExist(err) {
+				ui.Message(fmt.Sprintf("Removing Salt formula: %s", f))
+				os.RemoveAll(f)
+			}
+		}
 	}
 
 	if p.config.LocalPillarRoots != "" {
