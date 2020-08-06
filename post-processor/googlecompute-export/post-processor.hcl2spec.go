@@ -17,7 +17,6 @@ type FlatConfig struct {
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
 	AccountFile         *string           `mapstructure:"account_file" cty:"account_file" hcl:"account_file"`
-	IAP                 *bool             `mapstructure:"iap" cty:"iap" hcl:"iap"`
 	DiskSizeGb          *int64            `mapstructure:"disk_size" cty:"disk_size" hcl:"disk_size"`
 	DiskType            *string           `mapstructure:"disk_type" cty:"disk_type" hcl:"disk_type"`
 	MachineType         *string           `mapstructure:"machine_type" cty:"machine_type" hcl:"machine_type"`
@@ -49,7 +48,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"account_file":               &hcldec.AttrSpec{Name: "account_file", Type: cty.String, Required: false},
-		"iap":                        &hcldec.AttrSpec{Name: "iap", Type: cty.Bool, Required: false},
 		"disk_size":                  &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
 		"disk_type":                  &hcldec.AttrSpec{Name: "disk_type", Type: cty.String, Required: false},
 		"machine_type":               &hcldec.AttrSpec{Name: "machine_type", Type: cty.String, Required: false},

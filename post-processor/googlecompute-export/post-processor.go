@@ -23,7 +23,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	AccountFile string `mapstructure:"account_file"`
-	IAP         bool   `mapstructure:"iap"`
+	IAP         bool   `mapstructure-to-hcl2:",skip"`
 
 	DiskSizeGb          int64    `mapstructure:"disk_size"`
 	DiskType            string   `mapstructure:"disk_type"`
@@ -34,9 +34,8 @@ type Config struct {
 	VaultGCPOauthEngine string   `mapstructure:"vault_gcp_oauth_engine"`
 	Zone                string   `mapstructure:"zone"`
 	ServiceAccountEmail string   `mapstructure:"service_account_email"`
-
-	account *jwt.Config
-	ctx     interpolate.Context
+	account             *jwt.Config
+	ctx                 interpolate.Context
 }
 
 type PostProcessor struct {
