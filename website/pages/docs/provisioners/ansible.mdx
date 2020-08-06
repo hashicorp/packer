@@ -20,6 +20,11 @@ machine being provisioned by Packer.
 will always connect with the user given in the json config for this
 provisioner.
 
+-> **Note:** Options below that use the Packer template engine won't be able to
+accept jinja2 `{{ function }}` macro syntax in a way that can be preserved to
+the Ansible run. If you need to set variables using Ansible macros, you need to
+do so inside your playbooks or inventory files.
+
 ## Basic Example
 
 This is a fully functional template that will provision an image on
