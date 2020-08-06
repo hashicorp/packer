@@ -1,15 +1,36 @@
 package googlecomputeexport
 
-var StartupScript string = `#!/bin/bash
+import (
+	"fmt"
+
+	"github.com/hashicorp/packer/builder/googlecompute"
+)
+
+var StartupScript string = fmt.Sprintf(`#!/bin/bash
 
 GetMetadata () {
   echo "$(curl -f -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/attributes/$1 2> /dev/null)"
 }
+
+ZONE=$(basename $(GetMetadata zone))
+
+SetMetadata () {
+  gcloud compute instances add-metadata ${HOSTNAME} --metadata ${1}=${2} --zone ${ZONE}
+}
+
+STARTUPSCRIPT=$(GetMetadata attributes/%s)
+STARTUPSCRIPTPATH=/packer-wrapped-startup-script
+if [ -f "/var/log/startupscript.log" ]; then
+  STARTUPSCRIPTLOGPATH=/var/log/startupscript.log
+else
+  STARTUPSCRIPTLOGPATH=/var/log/daemon.log
+fi
+STARTUPSCRIPTLOGDEST=$(GetMetadata attributes/startup-script-log-dest)
+
 IMAGENAME=$(GetMetadata image_name)
 NAME=$(GetMetadata name)
 DISKNAME=${NAME}-toexport
 PATHS=($(GetMetadata paths))
-ZONE=$(GetMetadata zone)
 
 Exit () {
   for i in ${PATHS[@]}; do
@@ -70,5 +91,7 @@ for i in ${PATHS[@]:1}; do
   fi
 done
 
+SetMetadata %s %s
+
 Exit ${FAIL}
-`
+`, googlecompute.StartupWrappedScriptKey, googlecompute.StartupScriptStatusKey, googlecompute.StartupScriptStatusDone)
