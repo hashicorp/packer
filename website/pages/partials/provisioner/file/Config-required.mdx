@@ -1,0 +1,18 @@
+<!-- Code generated from the comments of the Config struct in provisioner/file/provisioner.go; DO NOT EDIT MANUALLY -->
+
+- `source` (string) - The path to a local file or directory to upload to the
+  machine. The path can be absolute or relative. If it is relative, it is
+  relative to the working directory when Packer is executed. If this is a
+  directory, the existence of a trailing slash is important. Read below on
+  uploading directories. Mandatory unless `sources` is set.
+
+- `destination` (string) - The path where the file will be uploaded to in the machine. This value
+  must be a writable location and any parent directories
+  must already exist. If the provisioning user (generally not root) cannot
+  write to this directory, you will receive a "Permission Denied" error.
+  If the source is a file, it's a good idea to make the destination a file
+  as well, but if you set your destination as a directory, at least make
+  sure that the destination ends in a trailing slash so that Packer knows
+  to use the source's basename in the final upload path. Failure to do so
+  may cause Packer to fail on file uploads. If the destination file
+  already exists, it will be overwritten.
