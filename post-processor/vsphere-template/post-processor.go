@@ -33,16 +33,16 @@ var builtins = map[string]string{
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	Host                string `mapstructure:"host"`
-	Insecure            bool   `mapstructure:"insecure"`
-	Username            string `mapstructure:"username"`
-	Password            string `mapstructure:"password"`
-	Datacenter          string `mapstructure:"datacenter"`
-	Folder              string `mapstructure:"folder"`
-	SnapshotEnable      bool   `mapstructure:"snapshot_enable"`
-	SnapshotName        string `mapstructure:"snapshot_name"`
-	SnapshotDescription string `mapstructure:"snapshot_description"`
-	ReregisterVM        bool   `mapstructure:"reregister_vm" default:"true"`
+	Host                string         `mapstructure:"host"`
+	Insecure            bool           `mapstructure:"insecure"`
+	Username            string         `mapstructure:"username"`
+	Password            string         `mapstructure:"password"`
+	Datacenter          string         `mapstructure:"datacenter"`
+	Folder              string         `mapstructure:"folder"`
+	SnapshotEnable      bool           `mapstructure:"snapshot_enable"`
+	SnapshotName        string         `mapstructure:"snapshot_name"`
+	SnapshotDescription string         `mapstructure:"snapshot_description"`
+	ReregisterVM        config.Trilean `mapstructure:"reregister_vm"`
 
 	ctx interpolate.Context
 }
