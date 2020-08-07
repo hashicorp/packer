@@ -100,7 +100,7 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 			image := imResp.Images[0]
 			if image != nil {
 				stateReason := image.StateReason
-				if stateReason == nil {
+				if stateReason != nil {
 					err = fmt.Errorf("Error waiting for AMI: %s. DescribeImages returned the state reason: %s", waitErr, stateReason)
 				}
 			}
