@@ -72,7 +72,6 @@ import (
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
 	digitaloceanimportpostprocessor "github.com/hashicorp/packer/post-processor/digitalocean-import"
-	exoscaleimportpostprocessor "github.com/hashicorp/packer/post-processor/exoscale-import"
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-import"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
@@ -190,7 +189,6 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 	"checksum":             new(checksumpostprocessor.PostProcessor),
 	"compress":             new(compresspostprocessor.PostProcessor),
 	"digitalocean-import":  new(digitaloceanimportpostprocessor.PostProcessor),
-	"exoscale-import":      new(exoscaleimportpostprocessor.PostProcessor),
 	"googlecompute-export": new(googlecomputeexportpostprocessor.PostProcessor),
 	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
 	"manifest":             new(manifestpostprocessor.PostProcessor),
