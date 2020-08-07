@@ -472,7 +472,10 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 		return fmt.Errorf("Error uploading %s: %s", src, err)
 	}
 
-	p.moveFile(ui, comm, dst, temp_dst)
+	err = p.moveFile(ui, comm, dst, temp_dst)
+	if err != nil {
+		return fmt.Errorf("Error moving file to destination: %s", err)
+	}
 
 	return nil
 }
