@@ -40,7 +40,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	paths := strings.SplitAfter(absFilePath, "packer"+string(os.PathSeparator))
+	paths := strings.Split(absFilePath, "cmd"+string(os.PathSeparator)+
+		"generate-fixer-deprecations"+string(os.PathSeparator)+"main.go")
 	packerDir := paths[0]
 
 	// Load all deprecated options from all active fixers
