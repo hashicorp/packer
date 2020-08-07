@@ -348,6 +348,7 @@ func TestProvisionerPrepare_ValidFormulaURLs(t *testing.T) {
 	config["formulas"] = []string{
 		"git::https://github.com/org/some-formula.git//example",
 		"git@github.com:org/some-formula.git//example",
+		"git::https://github.com/org/some-formula.git//example?ref=example",
 	}
 
 	err := p.Prepare(config)

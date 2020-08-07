@@ -448,7 +448,7 @@ func validateFileConfig(path string, name string, required bool) error {
 }
 
 func hasValidFormulaURLs(s []string) bool {
-	re := regexp.MustCompile(`^(.*).git\/\/[a-zA-Z0-9-_]+$`)
+	re := regexp.MustCompile(`^(.*).git\/\/[a-zA-Z0-9-_]+(\?.*)?$`)
 
 	for _, u := range s {
 		if !re.MatchString(u) {
