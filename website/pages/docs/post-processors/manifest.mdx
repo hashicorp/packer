@@ -36,6 +36,10 @@ post-processors such as Docker and Artifice.
 
 @include 'post-processor/manifest/Config-not-required.mdx'
 
+~> **Note**: Unlike most other post-processors, the	keep_input_artifact option doesn't apply for the manifest
+post-processor. We will always retain the input artifact for manifest, since deleting the files we just recorded
+is not a behavior anyone should	ever expect.
+
 ### Example Configuration
 
 The minimal way to use the manifest post-processor is by just writing its definition, like:
