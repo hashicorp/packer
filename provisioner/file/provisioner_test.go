@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -265,6 +266,63 @@ func TestProvisionerProvision_SendsFileMultipleDirs(t *testing.T) {
 
 	if !strings.Contains(b.String(), td2) {
 		t.Fatalf("should print second directory")
+	}
+}
+
+func TestProvisionerProvision_SendsFileMultipleFilesToFolder(t *testing.T) {
+	var p Provisioner
+
+	tf1, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf1.Name())
+
+	if _, err = tf1.Write([]byte("hello")); err != nil {
+		t.Fatalf("error writing tempfile: %s", err)
+	}
+
+	tf2, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf2.Name())
+
+	if _, err = tf2.Write([]byte("hello")); err != nil {
+		t.Fatalf("error writing tempfile: %s", err)
+	}
+
+	config := map[string]interface{}{
+		"sources":     []string{tf1.Name(), tf2.Name()},
+		"destination": "something/",
+	}
+
+	if err := p.Prepare(config); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	b := bytes.NewBuffer(nil)
+	ui := &packer.BasicUi{
+		Writer: b,
+	}
+	comm := &packer.MockCommunicator{}
+	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err != nil {
+		t.Fatalf("should successfully provision: %s", err)
+	}
+
+	if !strings.Contains(b.String(), tf1.Name()) {
+		t.Fatalf("should print first source filename")
+	}
+
+	if !strings.Contains(b.String(), tf2.Name()) {
+		t.Fatalf("should print second source filename")
+	}
+
+	dstRegex := regexp.MustCompile("something/\n")
+	allDst := dstRegex.FindAllString(b.String(), -1)
+	if len(allDst) != 2 {
+		t.Fatalf("some destinations are broken; output: \n%s", b.String())
 	}
 }
 

@@ -196,15 +196,16 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 			return err
 		}
 
+		filedst := dst
 		if strings.HasSuffix(dst, "/") {
-			dst = dst + filepath.Base(src)
+			filedst = dst + filepath.Base(src)
 		}
 
 		pf := ui.TrackProgress(filepath.Base(src), 0, info.Size(), f)
 		defer pf.Close()
 
 		// Upload the file
-		if err = comm.Upload(dst, pf, &fi); err != nil {
+		if err = comm.Upload(filedst, pf, &fi); err != nil {
 			if strings.Contains(err.Error(), "Error restoring file") {
 				ui.Error(fmt.Sprintf("Upload failed: %s; this can occur when "+
 					"your file destination is a folder without a trailing "+
