@@ -1,5 +1,38 @@
 ## 1.6.2 (Upcoming)
 
+### IMPROVEMENTS:
+* builder/vmware-esx: Add `network_name` option to vmware so that users can set
+    a network without using vmx data. [GH-9718]
+* builder/vsphere: Add new `directory_permission` config export option.
+    [GH-9704]
+* builder/vsphere: Add step and options to customize cloned VMs. [GH-9665]
+* core: When a build is cancelled, Packer will skip postprocessors gracefully
+    rather than failing them. [GH-9720]
+* post-processor/vsphere: Improve UI to catch bad credentials and print errors.
+    [GH-9649]
+* provisioner/file: Clean up, bugfix, and document previously-hidden `sources`
+    option. [GH-9725] [GH-9735]
+
+### BUG FIXES:
+* build: Fix bug in code generator that caused generation to fail in nested
+    packer/packer dirs [GH-9728]
+* build: Fix Makefile so that default target doesn't crash and creates dev
+    binaries. [GH-9706]
+* builder/amazon-ebssurrogate: Make skip_save_build_region option work in the
+    ebssurrogate builder, not just the ebs builder. [GH-9666]
+* builder/file: Make sure that UploadDir receives the interpolated destination.
+    [GH-9698]
+* builder/googlecompute: Fix bug where startup script hang would cause export
+    to hang. [GH-9708]
+* builder/scaleway: Fix config issue that made scaleway builder fail when used
+    with HCL2 config. [GH-9677]
+* builder/vsphere: Fix `alt`, `ctrl`, and `shift` keypresses in the
+    boot_command. [GH-9702]
+* builder/vsphere: Fix the configuration_parameters option so that it is always
+    applied, not just when the tool sync policy is set. [GH-9713]
+* core: Make `max_retries` provisioner option a string to allow variable
+    interpolation. [GH-9673]
+
 ## 1.6.1 (July 30, 2020)
 
 ### BACKWARDS INCOMPATABILITIES:
