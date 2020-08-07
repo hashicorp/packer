@@ -1,3 +1,4 @@
+//go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type Config
 
 package googlecomputeexport
@@ -22,20 +23,42 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
+	//The JSON file containing your account credentials.
+	//If specified, the account file will take precedence over any `googlecompute` builder authentication method.
 	AccountFile string `mapstructure:"account_file"`
-	IAP         bool   `mapstructure-to-hcl2:",skip"`
+	//The size of the export instances disk.
+	//The disk is unused for the export but a larger size will increase `pd-ssd` read speed.
+	//This defaults to `200`, which is 200GB.
+	DiskSizeGb int64 `mapstructure:"disk_size"`
+	//Type of disk used to back the export instance, like
+	//`pd-ssd` or `pd-standard`. Defaults to `pd-ssd`.
+	DiskType string `mapstructure:"disk_type"`
+	//The export instance machine type. Defaults to `"n1-highcpu-4"`.
+	MachineType string `mapstructure:"machine_type"`
+	//The Google Compute network id or URL to use for the export instance.
+	//Defaults to `"default"`. If the value is not a URL, it
+	//will be interpolated to `projects/((builder_project_id))/global/networks/((network))`.
+	//This value is not required if a `subnet` is specified.
+	Network string `mapstructure:"network"`
+	//A list of GCS paths where the image will be exported.
+	//For example `'gs://mybucket/path/to/file.tar.gz'`
+	Paths []string `mapstructure:"paths" required:"true"`
+	//The Google Compute subnetwork id or URL to use for
+	//the export instance. Only required if the `network` has been created with
+	//custom subnetting. Note, the region of the subnetwork must match the
+	//`zone` in which the VM is launched. If the value is not a URL,
+	//it will be interpolated to
+	//`projects/((builder_project_id))/regions/((region))/subnetworks/((subnetwork))`
+	Subnetwork string `mapstructure:"subnetwork"`
+	//The zone in which to launch the export instance. Defaults
+	//to `googlecompute` builder zone. Example: `"us-central1-a"`
+	Zone                string `mapstructure:"zone"`
+	IAP                 bool   `mapstructure-to-hcl2:",skip"`
+	VaultGCPOauthEngine string `mapstructure:"vault_gcp_oauth_engine"`
+	ServiceAccountEmail string `mapstructure:"service_account_email"`
 
-	DiskSizeGb          int64    `mapstructure:"disk_size"`
-	DiskType            string   `mapstructure:"disk_type"`
-	MachineType         string   `mapstructure:"machine_type"`
-	Network             string   `mapstructure:"network"`
-	Paths               []string `mapstructure:"paths"`
-	Subnetwork          string   `mapstructure:"subnetwork"`
-	VaultGCPOauthEngine string   `mapstructure:"vault_gcp_oauth_engine"`
-	Zone                string   `mapstructure:"zone"`
-	ServiceAccountEmail string   `mapstructure:"service_account_email"`
-	account             *jwt.Config
-	ctx                 interpolate.Context
+	account *jwt.Config
+	ctx     interpolate.Context
 }
 
 type PostProcessor struct {

@@ -21,10 +21,10 @@ type FlatConfig struct {
 	DiskType            *string           `mapstructure:"disk_type" cty:"disk_type" hcl:"disk_type"`
 	MachineType         *string           `mapstructure:"machine_type" cty:"machine_type" hcl:"machine_type"`
 	Network             *string           `mapstructure:"network" cty:"network" hcl:"network"`
-	Paths               []string          `mapstructure:"paths" cty:"paths" hcl:"paths"`
+	Paths               []string          `mapstructure:"paths" required:"true" cty:"paths" hcl:"paths"`
 	Subnetwork          *string           `mapstructure:"subnetwork" cty:"subnetwork" hcl:"subnetwork"`
-	VaultGCPOauthEngine *string           `mapstructure:"vault_gcp_oauth_engine" cty:"vault_gcp_oauth_engine" hcl:"vault_gcp_oauth_engine"`
 	Zone                *string           `mapstructure:"zone" cty:"zone" hcl:"zone"`
+	VaultGCPOauthEngine *string           `mapstructure:"vault_gcp_oauth_engine" cty:"vault_gcp_oauth_engine" hcl:"vault_gcp_oauth_engine"`
 	ServiceAccountEmail *string           `mapstructure:"service_account_email" cty:"service_account_email" hcl:"service_account_email"`
 }
 
@@ -54,8 +54,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"network":                    &hcldec.AttrSpec{Name: "network", Type: cty.String, Required: false},
 		"paths":                      &hcldec.AttrSpec{Name: "paths", Type: cty.List(cty.String), Required: false},
 		"subnetwork":                 &hcldec.AttrSpec{Name: "subnetwork", Type: cty.String, Required: false},
-		"vault_gcp_oauth_engine":     &hcldec.AttrSpec{Name: "vault_gcp_oauth_engine", Type: cty.String, Required: false},
 		"zone":                       &hcldec.AttrSpec{Name: "zone", Type: cty.String, Required: false},
+		"vault_gcp_oauth_engine":     &hcldec.AttrSpec{Name: "vault_gcp_oauth_engine", Type: cty.String, Required: false},
 		"service_account_email":      &hcldec.AttrSpec{Name: "service_account_email", Type: cty.String, Required: false},
 	}
 	return s
