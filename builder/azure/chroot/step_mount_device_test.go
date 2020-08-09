@@ -1,5 +1,3 @@
-//+build linux,freebsd
-
 package chroot
 
 import (
@@ -16,6 +14,12 @@ import (
 )
 
 func TestStepMountDevice_Run(t *testing.T) {
+	switch runtime.GOOS {
+	case "linux", "freebsd":
+		break
+	default:
+		t.Skip("Unsupported operating system")
+	}
 	mountPath, err := ioutil.TempDir("", "stepmountdevicetest")
 	if err != nil {
 		t.Errorf("Unable to create a temporary directory: %q", err)
