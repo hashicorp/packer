@@ -17,8 +17,7 @@
   "provisioners": [
     {
       "inline": [
-        "env ASSUME_ALWAYS_YES=YES pkg bootstrap",
-        "/usr/local/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"
+        "env ASSUME_ALWAYS_YES=YES pkg bootstrap"
       ],
       "inline_shebang": "/bin/sh -x",
       "type": "shell"
