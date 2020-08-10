@@ -278,6 +278,7 @@ export default [
       'vsphere-template',
       'yandex-export',
       'yandex-import',
+      'community-supported',
     ],
   },
   '----------',
