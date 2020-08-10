@@ -16,11 +16,11 @@ type FlatConfig struct {
 	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	Source              *string           `cty:"source" hcl:"source"`
-	Sources             []string          `cty:"sources" hcl:"sources"`
-	Destination         *string           `cty:"destination" hcl:"destination"`
-	Direction           *string           `cty:"direction" hcl:"direction"`
-	Generated           *bool             `cty:"generated" hcl:"generated"`
+	Source              *string           `mapstructure:"source" required:"true" cty:"source" hcl:"source"`
+	Sources             []string          `mapstructure:"sources" required:"false" cty:"sources" hcl:"sources"`
+	Destination         *string           `mapstructure:"destination" required:"true" cty:"destination" hcl:"destination"`
+	Direction           *string           `mapstructure:"direction" required:"false" cty:"direction" hcl:"direction"`
+	Generated           *bool             `mapstructure:"generated" required:"false" cty:"generated" hcl:"generated"`
 }
 
 // FlatMapstructure returns a new FlatConfig.

@@ -1,4 +1,5 @@
 //go:generate mapstructure-to-hcl2 -type Config
+//go:generate struct-markdown
 
 package file
 
@@ -20,19 +21,41 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-
-	// The local path of the file to upload.
-	Source  string
-	Sources []string
-
-	// The remote path where the local file will be uploaded to.
-	Destination string
-
-	// Direction
-	Direction string
-
-	// False if the sources have to exist.
-	Generated bool
+	// The path to a local file or directory to upload to the
+	// machine. The path can be absolute or relative. If it is relative, it is
+	// relative to the working directory when Packer is executed. If this is a
+	// directory, the existence of a trailing slash is important. Read below on
+	// uploading directories. Mandatory unless `sources` is set.
+	Source string `mapstructure:"source" required:"true"`
+	// A list of sources to upload. This can be used in place of the `source`
+	// option if you have several files that you want to upload to the same
+	// place. Note that the destination must be a directory with a trailing
+	// slash, and that all files listed in `sources` will be uploaded to the
+	// same directory with their file names preserved.
+	Sources []string `mapstructure:"sources" required:"false"`
+	// The path where the file will be uploaded to in the machine. This value
+	// must be a writable location and any parent directories
+	// must already exist. If the provisioning user (generally not root) cannot
+	// write to this directory, you will receive a "Permission Denied" error.
+	// If the source is a file, it's a good idea to make the destination a file
+	// as well, but if you set your destination as a directory, at least make
+	// sure that the destination ends in a trailing slash so that Packer knows
+	// to use the source's basename in the final upload path. Failure to do so
+	// may cause Packer to fail on file uploads. If the destination file
+	// already exists, it will be overwritten.
+	Destination string `mapstructure:"destination" required:"true"`
+	// The direction of the file transfer. This defaults to "upload". If it is
+	// set to "download" then the file "source" in the machine will be
+	// downloaded locally to "destination"
+	Direction string `mapstructure:"direction" required:"false"`
+	// For advanced users only. If true, check the file existence only before
+	// uploading, rather than upon pre-build validation. This allows users to
+	// upload files created on-the-fly. This defaults to false. We
+	// don't recommend using this feature, since it can cause Packer to become
+	// dependent on system state. We would prefer you generate your files before
+	// the Packer run, but realize that there are situations where this may be
+	// unavoidable.
+	Generated bool `mapstructure:"generated" required:"false"`
 
 	ctx interpolate.Context
 }

@@ -27,6 +27,9 @@ The file provisioner can upload both single files and complete directories.
 
 ## Basic Example
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "file",
@@ -35,42 +38,32 @@ The file provisioner can upload both single files and complete directories.
 }
 ```
 
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "file"{
+  source = "app.tar.gz"
+  destination = "/tmp/app.tar.gz"
+}
+```
+
+</Tab>
+</Tabs>
+
 ## Configuration Reference
 
 The available configuration options are listed below.
 
-### Required
+## Configuration Reference
 
-- `source` (string) - The path to a local file or directory to upload to the
-  machine. The path can be absolute or relative. If it is relative, it is
-  relative to the working directory when Packer is executed. If this is a
-  directory, the existence of a trailing slash is important. Read below on
-  uploading directories.
+Required Parameters:
 
-- `destination` (string) - The path where the file will be uploaded to in the
-  machine. This value must be a writable location and any parent directories
-  must already exist. If the provisioning user (generally not root) cannot
-  write to this directory, you will receive a "Permission Denied" error.
-  If the source is a file, it's a good idea to make the
-  destination a file as well, but if you set your destination as a directory,
-  at least make sure that the destination ends in a trailing slash so that
-  Packer knows to use the source's basename in the final upload path. Failure
-  to do so may cause Packer to fail on file uploads. If the destination file
-  already exists, it will be overwritten.
+@include 'provisioner/file/Config-required.mdx'
 
-- `direction` (string) - The direction of the file transfer. This defaults to
-  "upload". If it is set to "download" then the file "source" in the machine
-  will be downloaded locally to "destination"
+Optional Parameters:
 
-### Optional
-
-- `generated` (boolean) - For advanced users only. If true, check the file
-  existence only before uploading, rather than upon pre-build validation.
-  This allows to upload files created on-the-fly. This defaults to false. We
-  don't recommend using this feature, since it can cause Packer to become
-  dependent on system state. We would prefer you generate your files before
-  the Packer run, but realize that there are situations where this may be
-  unavoidable.
+@include '/provisioner/file/Config-not-required.mdx'
 
 @include 'provisioners/common-config.mdx'
 
@@ -131,6 +124,9 @@ total 0
 -rw-r--r--  1 mwhooker  staff    0 Jan 27 17:10 files.tar
 ```
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "provisioners": [
@@ -153,6 +149,34 @@ total 0
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+build {
+  sources = [
+    "source.docker.example"
+  ]
+
+  provisioner "shell-local" {
+    command = "tar cf toupload/files.tar files"
+  }
+  provisioner "file" {
+    destination = "/tmp/"
+    source      = "./toupload"
+  }
+  provisioner "shell" {
+    inline = [
+      "cd /tmp && tar xf toupload/files.tar",
+      "rm toupload/files.tar"
+    ]
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Slowness when transferring large files over WinRM.
 
