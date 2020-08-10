@@ -87,11 +87,16 @@ func (s *StepBootCommand) Run(ctx context.Context, state multistep.StateBag) mul
 			keyShift = down
 		}
 
+		shift := down
+		if keyShift {
+			shift = keyShift
+		}
+
 		_, err := vm.TypeOnKeyboard(driver.KeyInput{
 			Scancode: code,
 			Ctrl:     keyCtrl,
 			Alt:      keyAlt,
-			Shift:    keyShift,
+			Shift:    shift,
 		})
 		if err != nil {
 			return fmt.Errorf("error typing a boot command (code, down) `%d, %t`: %w", code, down, err)
