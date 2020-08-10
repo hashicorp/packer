@@ -391,8 +391,11 @@ func checkHyperVGeneration(s string) interface{} {
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	if runtime.GOOS != "linux" {
-		return nil, errors.New("the azure-chroot builder only works on Linux environments")
+	switch runtime.GOOS {
+	case "linux", "freebsd":
+		break
+	default:
+		return nil, errors.New("the azure-chroot builder only works on Linux and FreeBSD environments")
 	}
 
 	err := b.config.ClientConfig.FillParameters()

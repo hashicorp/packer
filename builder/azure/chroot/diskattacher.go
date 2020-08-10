@@ -3,24 +3,18 @@ package chroot
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
-	"os"
-	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
-
-	"github.com/hashicorp/packer/builder/azure/common/client"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
+	"github.com/hashicorp/packer/builder/azure/common/client"
 )
 
 type DiskAttacher interface {
 	AttachDisk(ctx context.Context, disk string) (lun int32, err error)
-	DiskPathForLun(lun int32) string
 	WaitForDevice(ctx context.Context, i int32) (device string, err error)
 	DetachDisk(ctx context.Context, disk string) (err error)
 	WaitForDetach(ctx context.Context, diskID string) error
@@ -38,31 +32,7 @@ type diskAttacher struct {
 	vm *client.ComputeInfo // store info about this VM so that we don't have to ask metadata service on every call
 }
 
-func (diskAttacher) DiskPathForLun(lun int32) string {
-	return fmt.Sprintf("/dev/disk/azure/scsi1/lun%d", lun)
-}
-
-func (da diskAttacher) WaitForDevice(ctx context.Context, lun int32) (device string, err error) {
-	path := da.DiskPathForLun(lun)
-
-	for {
-		link, err := os.Readlink(path)
-		if err == nil {
-			return filepath.Abs("/dev/disk/azure/scsi1/" + link)
-		} else if err != os.ErrNotExist {
-			if pe, ok := err.(*os.PathError); ok && pe.Err != syscall.ENOENT {
-				return "", err
-			}
-		}
-
-		select {
-		case <-time.After(100 * time.Millisecond):
-			// continue
-		case <-ctx.Done():
-			return "", ctx.Err()
-		}
-	}
-}
+var DiskNotFoundError = errors.New("Disk not found")
 
 func (da *diskAttacher) DetachDisk(ctx context.Context, diskID string) error {
 	log.Println("Fetching list of disks currently attached to VM")
@@ -110,8 +80,6 @@ func (da *diskAttacher) WaitForDetach(ctx context.Context, diskID string) error 
 		}
 	}
 }
-
-var DiskNotFoundError = errors.New("Disk not found")
 
 func (da *diskAttacher) AttachDisk(ctx context.Context, diskID string) (int32, error) {
 	dataDisks, err := da.getDisks(ctx)
