@@ -14,7 +14,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/go-getter"
+	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -247,7 +247,9 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		ui.Say("Downloading Salt formulas...")
 		client := new(getter.Client)
 		for _, i := range p.config.Formulas {
-			client.Src = i
+			req := getter.Request{
+				Src: i,
+			}
 			// Use //subdirectory name when creating in local_state_tree directory
 			state := strings.Split(i, "//")
 			last := state[len(state)-1]
@@ -258,9 +260,9 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 				if err = os.Mkdir(path, 0755); err != nil {
 					return fmt.Errorf("Unable to create Salt state directory: %s", err)
 				}
-				client.Dst = path
-				client.Mode = getter.ClientModeAny
-				if err = client.Get(); err != nil {
+				req.Dst = path
+				req.Mode = getter.ModeAny
+				if _, err := client.Get(ctx, &req); err != nil {
 					return fmt.Errorf("Unable to download Salt formula from %s: %s", i, err)
 				}
 			} else {
