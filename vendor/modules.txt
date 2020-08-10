@@ -199,8 +199,6 @@ github.com/dustin/go-humanize
 github.com/dylanmei/iso8601
 # github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
 github.com/dylanmei/winrmtest
-# github.com/exoscale/egoscale v0.18.1
-github.com/exoscale/egoscale
 # github.com/fatih/camelcase v1.0.0
 github.com/fatih/camelcase
 # github.com/fatih/color v1.9.0

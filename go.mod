@@ -35,7 +35,6 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
-	github.com/exoscale/egoscale v0.18.1
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structtag v1.0.0
 	github.com/go-ini/ini v1.25.4
