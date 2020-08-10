@@ -216,10 +216,8 @@ github.com/digitalocean/godo
 github.com/dimchansky/utfbom
 # github.com/dylanmei/iso8601 v0.1.0
 github.com/dylanmei/iso8601
-# github.com/exoscale/egoscale v0.18.1
 ## explicit
-github.com/exoscale/egoscale
-# github.com/fatih/camelcase v1.0.0
+ github.com/fatih/camelcase v1.0.0
 ## explicit
 github.com/fatih/camelcase
 # github.com/fatih/color v1.9.0
