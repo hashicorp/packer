@@ -100,4 +100,9 @@ Optional:
 - `guest_os_type` (string) - The target guest OS type, either "unix" or
   "windows".
 
+- `formulas` (array of strings) - An array of git source formulas to be downloaded to the local
+  state tree prior to moving to the remote state tree. Note: `//directory` must be included in 
+  the URL to download the appropriate formula directory. Example:
+  `git::https://github.com/saltstack-formulas/vault-formula.git//vault?ref=v1.2.3`
+
 @include 'provisioners/common-config.mdx'

@@ -11,8 +11,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
+	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -71,6 +73,9 @@ type Config struct {
 
 	// The Guest OS Type (unix or windows)
 	GuestOSType string `mapstructure:"guest_os_type"`
+
+	// An array of private or community git source formulas
+	Formulas []string `mapstructure:"formulas"`
 
 	ctx interpolate.Context
 }
@@ -152,6 +157,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
+	if p.config.Formulas != nil && len(p.config.Formulas) > 0 {
+
+		validURLs := hasValidFormulaURLs(p.config.Formulas)
+		if !validURLs {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid formula URL. Please verify the git URLs also contain a '//' subdir"))
+		}
+	}
+
 	err = validateDirConfig(p.config.LocalPillarRoots, "local_pillar_roots", false)
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, err)
@@ -228,6 +241,35 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	var err error
 	var src, dst string
+	var formulas []string
+
+	if p.config.Formulas != nil && len(p.config.Formulas) > 0 {
+		ui.Say("Downloading Salt formulas...")
+		client := new(getter.Client)
+		for _, i := range p.config.Formulas {
+			req := getter.Request{
+				Src: i,
+			}
+			// Use //subdirectory name when creating in local_state_tree directory
+			state := strings.Split(i, "//")
+			last := state[len(state)-1]
+			path := filepath.Join(p.config.LocalStateTree, last)
+			formulas = append(formulas, path)
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				ui.Message(fmt.Sprintf("%s => %s", i, path))
+				if err = os.Mkdir(path, 0755); err != nil {
+					return fmt.Errorf("Unable to create Salt state directory: %s", err)
+				}
+				req.Dst = path
+				req.Mode = getter.ModeAny
+				if _, err := client.Get(ctx, &req); err != nil {
+					return fmt.Errorf("Unable to download Salt formula from %s: %s", i, err)
+				}
+			} else {
+				ui.Message(fmt.Sprintf("Found existing formula at: %s", path))
+			}
+		}
+	}
 
 	ui.Say("Provisioning with Salt...")
 	if !p.config.SkipBootstrap {
@@ -318,6 +360,16 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		return fmt.Errorf("Unable to move %s/states to %s: %s", p.config.TempConfigDir, dst, err)
 	}
 
+	// Remove the local Salt formulas if present
+	if p.config.Formulas != nil {
+		for _, f := range formulas {
+			if _, err := os.Stat(f); !os.IsNotExist(err) && f != p.config.LocalStateTree {
+				ui.Message(fmt.Sprintf("Removing Salt formula: %s", f))
+				defer os.RemoveAll(f)
+			}
+		}
+	}
+
 	if p.config.LocalPillarRoots != "" {
 		ui.Message(fmt.Sprintf("Uploading local pillar roots: %s", p.config.LocalPillarRoots))
 		src = p.config.LocalPillarRoots
@@ -397,6 +449,18 @@ func validateFileConfig(path string, name string, required bool) error {
 	return nil
 }
 
+func hasValidFormulaURLs(s []string) bool {
+	re := regexp.MustCompile(`^(.*).git\/\/[a-zA-Z0-9-_]+(\?.*)?$`)
+
+	for _, u := range s {
+		if !re.MatchString(u) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, src string) error {
 	f, err := os.Open(src)
 	if err != nil {
@@ -410,7 +474,10 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 		return fmt.Errorf("Error uploading %s: %s", src, err)
 	}
 
-	p.moveFile(ui, comm, dst, temp_dst)
+	err = p.moveFile(ui, comm, dst, temp_dst)
+	if err != nil {
+		return fmt.Errorf("Error moving file to destination: %s", err)
+	}
 
 	return nil
 }

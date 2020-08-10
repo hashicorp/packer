@@ -32,6 +32,7 @@ type FlatConfig struct {
 	SaltCallArgs        *string           `mapstructure:"salt_call_args" cty:"salt_call_args" hcl:"salt_call_args"`
 	SaltBinDir          *string           `mapstructure:"salt_bin_dir" cty:"salt_bin_dir" hcl:"salt_bin_dir"`
 	GuestOSType         *string           `mapstructure:"guest_os_type" cty:"guest_os_type" hcl:"guest_os_type"`
+	Formulas            []string          `mapstructure:"formulas" cty:"formulas" hcl:"formulas"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -69,6 +70,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"salt_call_args":             &hcldec.AttrSpec{Name: "salt_call_args", Type: cty.String, Required: false},
 		"salt_bin_dir":               &hcldec.AttrSpec{Name: "salt_bin_dir", Type: cty.String, Required: false},
 		"guest_os_type":              &hcldec.AttrSpec{Name: "guest_os_type", Type: cty.String, Required: false},
+		"formulas":                   &hcldec.AttrSpec{Name: "formulas", Type: cty.List(cty.String), Required: false},
 	}
 	return s
 }
