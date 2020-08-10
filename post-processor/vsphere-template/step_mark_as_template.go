@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/post-processor/vsphere"
@@ -18,7 +19,7 @@ import (
 type stepMarkAsTemplate struct {
 	VMName       string
 	RemoteFolder string
-	ReregisterVM bool
+	ReregisterVM config.Trilean
 }
 
 func NewStepMarkAsTemplate(artifact packer.Artifact, p *PostProcessor) *stepMarkAsTemplate {
@@ -52,7 +53,7 @@ func (s *stepMarkAsTemplate) Run(ctx context.Context, state multistep.StateBag) 
 	}
 
 	// Use a simple "MarkAsTemplate" method unless `reregister_vm` is true
-	if !s.ReregisterVM {
+	if s.ReregisterVM.False() {
 		ui.Message("Marking as a template...")
 
 		if err := vm.MarkAsTemplate(context.Background()); err != nil {

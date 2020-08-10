@@ -25,7 +25,7 @@ type FlatConfig struct {
 	SnapshotEnable      *bool             `mapstructure:"snapshot_enable" cty:"snapshot_enable" hcl:"snapshot_enable"`
 	SnapshotName        *string           `mapstructure:"snapshot_name" cty:"snapshot_name" hcl:"snapshot_name"`
 	SnapshotDescription *string           `mapstructure:"snapshot_description" cty:"snapshot_description" hcl:"snapshot_description"`
-	ReregisterVM        *bool             `mapstructure:"reregister_vm" default:"true" cty:"reregister_vm" hcl:"reregister_vm"`
+	ReregisterVM        *bool             `mapstructure:"reregister_vm" cty:"reregister_vm" hcl:"reregister_vm"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
