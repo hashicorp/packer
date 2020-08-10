@@ -3,7 +3,6 @@ package proxmox
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
@@ -17,8 +16,8 @@ import (
 type stepFinalizeTemplateConfig struct{}
 
 type templateFinalizer interface {
-    GetVmConfig(*proxmox.VmRef) (map[string]interface{}, error)
-    SetVmConfig(*proxmox.VmRef, map[string]interface{}) (interface{}, error)
+	GetVmConfig(*proxmox.VmRef) (map[string]interface{}, error)
+	SetVmConfig(*proxmox.VmRef, map[string]interface{}) (interface{}, error)
 }
 
 var _ templateFinalizer = &proxmox.Client{}
