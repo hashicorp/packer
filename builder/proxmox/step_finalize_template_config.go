@@ -3,6 +3,7 @@ package proxmox
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
