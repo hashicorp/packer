@@ -118,3 +118,42 @@ will upload the artifact to a vSphere endpoint. The resulting artifact is then
 passed on to the `vsphere-template` post-processor which handles marking a VM
 as a template. Note that the `vsphere` and `vsphere-template` post-processors
 are paired together in their own JSON array.
+
+## Permissions
+
+The vsphere post processor needs several permissions to be able to mark the
+vm as a template. Rather than giving full administrator access, you can create
+a role to give the post-processor the permissions necessary to run. Here is an
+example role that will work. Please note that this is a user-supplied list so
+there may be a few extraneous permissions that are not strictly required.
+
+For Vsphere 5.5 the role needs the following privileges:
+
+    Datastore.AllocateSpace
+    Host.Config.AdvancedConfig
+    Host.Config.NetService
+    Host.Config.Network
+    Network.Assign
+    System.Anonymous
+    System.Read
+    System.View
+    VApp.Import
+    VirtualMachine.Config.AddNewDisk
+    VirtualMachine.Config.AdvancedConfig
+    VirtualMachine.Inventory.Delete
+
+and either (If reregister_vm is false):
+
+    VirtualMachine.Provisioning.MarkAsTemplate
+
+or (if reregister_vm is true or unset):
+
+    VirtualMachine.Inventory.Register
+    VirtualMachine.Inventory.Unregister
+
+And this role must be authorized on the:
+
+    Cluster of the host
+    The destination folder (not on Datastore, on the Vsphere logical view)
+    The network to be assigned
+    The destination datastore.

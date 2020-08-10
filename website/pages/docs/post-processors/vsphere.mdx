@@ -149,3 +149,33 @@ build {
 
 </Tab>
 </Tabs>
+
+# Permissions
+
+The vsphere post processor uses ovftool and therefore needs the same privileges
+as ovftool. Rather than giving full administrator access, you can create a role
+to give the post-processor the permissions necessary to run. Below is an example
+role. Please note that this is a user-supplied list so there may be a few
+extraneous permissions that are not strictly required.
+
+For Vsphere 5.5 the role needs the following privileges:
+
+    Datastore.AllocateSpace
+    Host.Config.AdvancedConfig
+    Host.Config.NetService
+    Host.Config.Network
+    Network.Assign
+    System.Anonymous
+    System.Read
+    System.View
+    VApp.Import
+    VirtualMachine.Config.AddNewDisk
+    VirtualMachine.Config.AdvancedConfig
+    VirtualMachine.Inventory.Delete
+
+And this role must be authorized on the:
+
+    Cluster of the host
+    The destination folder (not on Datastore, on the Vsphere logical view)
+    The network to be assigned
+    The destination datastore.
