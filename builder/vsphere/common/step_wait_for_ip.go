@@ -140,6 +140,14 @@ loop:
 	if err != nil {
 		return "", err
 	}
+
+	// Check for ctx cancellation to avoid printing any IP logs at the timeout
+	select {
+	case <-ctx.Done():
+		return "", fmt.Errorf("IP wait cancelled")
+	default:
+	}
+
 	if prevIp == "" || prevIp != ip {
 		if prevIp == "" {
 			log.Printf("VM IP aquired: %s", ip)
