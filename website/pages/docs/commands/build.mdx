@@ -35,7 +35,11 @@ artifacts that are created will be outputted at the end of the build.
   repeat a build without having to manually clean these artifacts beforehand.
 
 - `-on-error=cleanup` (default), `-on-error=abort`, `-on-error=ask`, `-on-error=run-cleanup-provisioner` -
-  Selects what to do when the build fails.
+  Selects what to do when the build fails during provisioning. Please note that
+  this only affects the build during the provisioner run, not during the
+  post-processor run, because it is related to whether or not to keep the
+  instance running and related artifacts like generated SSH keys on the system
+  when a provisioner fails.
 
   - `cleanup` cleans up after the previous steps, deleting temporary files and virtual machines.
   - `abort` exits without any cleanup, which might require the next build to use `-force`.
