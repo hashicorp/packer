@@ -111,27 +111,30 @@ func (s *StepCreateResourceGroup) Cleanup(state multistep.StateBag) {
 	if state.Get(constants.ArmIsExistingResourceGroup).(bool) {
 		ui.Say("\nThe resource group was not created by Packer, not deleting ...")
 		return
-	} else {
-		ui.Say("\nCleanup requested, deleting resource group ...")
+	}
 
-		var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
-		ctx := context.TODO()
-		f, err := s.client.GroupsClient.Delete(ctx, resourceGroupName)
-		if err == nil {
-			if state.Get(constants.ArmAsyncResourceGroupDelete).(bool) {
-				s.say(fmt.Sprintf("\n Not waiting for Resource Group delete as requested by user. Resource Group Name is %s", resourceGroupName))
-			} else {
-				err = f.WaitForCompletionRef(ctx, s.client.GroupsClient.Client)
-			}
+	ctx := context.TODO()
+	resourceGroupName := state.Get(constants.ArmResourceGroupName).(string)
+	if exists, err := s.exists(ctx, resourceGroupName); !exists || err != nil {
+		return
+	}
+
+	ui.Say("\nCleanup requested, deleting resource group ...")
+	f, err := s.client.GroupsClient.Delete(ctx, resourceGroupName)
+	if err == nil {
+		if state.Get(constants.ArmAsyncResourceGroupDelete).(bool) {
+			s.say(fmt.Sprintf("\n Not waiting for Resource Group delete as requested by user. Resource Group Name is %s", resourceGroupName))
+		} else {
+			err = f.WaitForCompletionRef(ctx, s.client.GroupsClient.Client)
 		}
-		if err != nil {
-			ui.Error(fmt.Sprintf("Error deleting resource group.  Please delete it manually.\n\n"+
-				"Name: %s\n"+
-				"Error: %s", resourceGroupName, err))
-			return
-		}
-		if !state.Get(constants.ArmAsyncResourceGroupDelete).(bool) {
-			ui.Say("Resource group has been deleted.")
-		}
+	}
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error deleting resource group.  Please delete it manually.\n\n"+
+			"Name: %s\n"+
+			"Error: %s", resourceGroupName, err))
+		return
+	}
+	if !state.Get(constants.ArmAsyncResourceGroupDelete).(bool) {
+		ui.Say("Resource group has been deleted.")
 	}
 }
