@@ -97,10 +97,16 @@ func (s *StepWaitForIp) Run(ctx context.Context, state multistep.StateBag) multi
 	for {
 		select {
 		case <-timeout:
+			cancel()
+			<-waitDone
+			if ip != "" {
+				state.Put("ip", ip)
+				log.Printf("[WARN] API timeout waiting for IP but one IP was found. Using IP: %s", ip)
+				return multistep.ActionContinue
+			}
 			err := fmt.Errorf("Timeout waiting for IP.")
 			state.Put("error", err)
 			ui.Error(err.Error())
-			cancel()
 			return multistep.ActionHalt
 		case <-ctx.Done():
 			cancel()
@@ -144,7 +150,7 @@ loop:
 	// Check for ctx cancellation to avoid printing any IP logs at the timeout
 	select {
 	case <-ctx.Done():
-		return "", fmt.Errorf("IP wait cancelled")
+		return ip, fmt.Errorf("IP wait cancelled.")
 	default:
 	}
 
