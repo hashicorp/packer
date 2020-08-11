@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
@@ -17,6 +18,7 @@ import (
 	"github.com/hashicorp/packer/template"
 	"golang.org/x/sync/semaphore"
 
+	"github.com/hako/durafmt"
 	"github.com/posener/complete"
 )
 
@@ -202,6 +204,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	log.Printf("Force build: %v", cla.Force)
 	log.Printf("On error: %v", cla.OnError)
 
+	// Get the start of the build command
+	buildCommandStart := time.Now()
+
 	// Run all the builds in parallel and wait for them to complete
 	var wg sync.WaitGroup
 	var artifacts = struct {
@@ -235,6 +240,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 		// Run the build in a goroutine
 		go func() {
+			// Get the start of the build
+			buildStart := time.Now()
+
 			defer wg.Done()
 
 			defer limitParallel.Release(1)
@@ -242,13 +250,18 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			log.Printf("Starting build run: %s", name)
 			runArtifacts, err := b.Run(buildCtx, ui)
 
+			// Get the duration of the build and parse it
+			buildEnd := time.Now()
+			buildDuration := buildEnd.Sub(buildStart)
+			fmtBuildDuration := durafmt.Parse(buildDuration).LimitFirstN(2)
+
 			if err != nil {
-				ui.Error(fmt.Sprintf("Build '%s' errored: %s", name, err))
+				ui.Error(fmt.Sprintf("Build '%s' errored after %s: %s", name, fmtBuildDuration, err))
 				errors.Lock()
 				errors.m[name] = err
 				errors.Unlock()
 			} else {
-				ui.Say(fmt.Sprintf("Build '%s' finished.", name))
+				ui.Say(fmt.Sprintf("Build '%s' finished after %s.", name, fmtBuildDuration))
 				if nil != runArtifacts {
 					artifacts.Lock()
 					artifacts.m[name] = runArtifacts
@@ -273,6 +286,12 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	// if it is interrupted.
 	log.Printf("Waiting on builds to complete...")
 	wg.Wait()
+
+	// Get the duration of the buildCommand command and parse it
+	buildCommandEnd := time.Now()
+	buildCommandDuration := buildCommandEnd.Sub(buildCommandStart)
+	fmtBuildCommandDuration := durafmt.Parse(buildCommandDuration).LimitFirstN(2)
+	c.Ui.Say(fmt.Sprintf("\n==> Wait completed after %s", fmtBuildCommandDuration))
 
 	if err := buildCtx.Err(); err != nil {
 		c.Ui.Say("Cleanly cancelled builds after being interrupted.")

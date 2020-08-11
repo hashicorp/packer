@@ -297,6 +297,8 @@ github.com/gophercloud/utils/openstack/compute/v2/flavors
 github.com/gorilla/websocket
 # github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 github.com/grpc-ecosystem/go-grpc-middleware
+# github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
+github.com/hako/durafmt
 # github.com/hashicorp/consul/api v1.4.0
 github.com/hashicorp/consul/api
 # github.com/hashicorp/errwrap v1.0.0
