@@ -12,6 +12,9 @@
     [GH-9649]
 * provisioner/file: Clean up, bugfix, and document previously-hidden `sources`
     option. [GH-9725] [GH-9735]
+* provisioner/salt-masterless: Add option to option to download community
+    SaltStack formulas [GH-9726]
+* builder/azure: Add FreeBSD support to azure/chroot builder. [GH-9697]
 
 ### BUG FIXES:
 * build: Fix bug in code generator that caused generation to fail in nested
@@ -27,11 +30,13 @@
 * builder/scaleway: Fix config issue that made scaleway builder fail when used
     with HCL2 config. [GH-9677]
 * builder/vsphere: Fix `alt`, `ctrl`, and `shift` keypresses in the
-    boot_command. [GH-9702]
+    boot_command. [GH-9702] [GH-9739]
 * builder/vsphere: Fix the configuration_parameters option so that it is always
     applied, not just when the tool sync policy is set. [GH-9713]
 * core: Make `max_retries` provisioner option a string to allow variable
     interpolation. [GH-9673]
+* post-processor/vsphere-template: Fix ReregisterVM to default to true instead
+    of false. [GH-9736]
 
 ## 1.6.1 (July 30, 2020)
 
