@@ -80,25 +80,26 @@ func (s *StepDeleteAdditionalDisk) Run(ctx context.Context, state multistep.Stat
 				s.say("Failed to delete the managed Additional Disk!")
 				return processStepResult(err, s.error, state)
 			}
+			continue
+		}
+
+		u, err := url.Parse(additionaldisk)
+		if err != nil {
+			s.say("Failed to parse the Additional Disk's VHD URI!")
+			return processStepResult(err, s.error, state)
+		}
+
+		xs := strings.Split(u.Path, "/")
+		if len(xs) < 3 {
+			err = errors.New("Failed to parse Additional Disk's VHD URI!")
 		} else {
-			u, err := url.Parse(additionaldisk)
-			if err != nil {
-				s.say("Failed to parse the Additional Disk's VHD URI!")
-				return processStepResult(err, s.error, state)
-			}
+			var storageAccountName = xs[1]
+			var blobName = strings.Join(xs[2:], "/")
 
-			xs := strings.Split(u.Path, "/")
-			if len(xs) < 3 {
-				err = errors.New("Failed to parse Additional Disk's VHD URI!")
-			} else {
-				var storageAccountName = xs[1]
-				var blobName = strings.Join(xs[2:], "/")
-
-				err = s.delete(storageAccountName, blobName)
-			}
-			if err != nil {
-				return processStepResult(err, s.error, state)
-			}
+			err = s.delete(storageAccountName, blobName)
+		}
+		if err != nil {
+			return processStepResult(err, s.error, state)
 		}
 	}
 	return multistep.ActionContinue

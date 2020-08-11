@@ -90,7 +90,12 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 			deploymentOperation := deploymentOperations.Value()
 			// Sometimes an empty operation is added to the list by Azure
 			if deploymentOperation.Properties.TargetResource == nil {
-				deploymentOperations.Next()
+				if err := deploymentOperations.Next(); err != nil {
+					ui.Error(fmt.Sprintf("Error deleting resources.  Please delete them manually.\n\n"+
+						"Name: %s\n"+
+						"Error: %s", resourceGroupName, err))
+					break
+				}
 				continue
 			}
 
@@ -164,20 +169,20 @@ func (s *StepDeployTemplate) deleteTemplate(ctx context.Context, state multistep
 
 func (s *StepDeployTemplate) getImageDetails(ctx context.Context, resourceGroupName string, computeName string) (string, string, error) {
 	//We can't depend on constants.ArmOSDiskVhd being set
-	var imageName string
-	var imageType string
+	var imageName, imageType string
 	vm, err := s.client.VirtualMachinesClient.Get(ctx, resourceGroupName, computeName, "")
 	if err != nil {
 		return imageName, imageType, err
-	} else {
-		if vm.StorageProfile.OsDisk.Vhd != nil {
-			imageType = "image"
-			imageName = *vm.StorageProfile.OsDisk.Vhd.URI
-		} else {
-			imageType = "Microsoft.Compute/disks"
-			imageName = *vm.StorageProfile.OsDisk.ManagedDisk.ID
-		}
 	}
+
+	if vm.StorageProfile.OsDisk.Vhd != nil {
+		imageType = "image"
+		imageName = *vm.StorageProfile.OsDisk.Vhd.URI
+	} else {
+		imageType = "Microsoft.Compute/disks"
+		imageName = *vm.StorageProfile.OsDisk.ManagedDisk.ID
+	}
+
 	return imageType, imageName, nil
 }
 
