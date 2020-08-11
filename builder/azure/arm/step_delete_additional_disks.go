@@ -35,8 +35,12 @@ func NewStepDeleteAdditionalDisks(client *AzureClient, ui packer.Ui) *StepDelete
 
 func (s *StepDeleteAdditionalDisk) deleteBlob(storageContainerName string, blobName string) error {
 	blob := s.client.BlobStorageClient.GetContainerReference(storageContainerName).GetBlobReference(blobName)
-	err := blob.Delete(nil)
+	if _, err := blob.BreakLease(nil); err != nil {
+		s.say(s.client.LastError.Error())
+		return err
+	}
 
+	err := blob.Delete(nil)
 	if err != nil {
 		s.say(s.client.LastError.Error())
 	}
