@@ -86,7 +86,25 @@ func TestBuilderPrepare_ReturnGeneratedData(t *testing.T) {
 	if len(generatedData) == 0 {
 		t.Fatalf("Generated data should not be empty")
 	}
+	if len(generatedData) == 0 {
+		t.Fatalf("Generated data should not be empty")
+	}
 	if generatedData[0] != "SourceAMIName" {
 		t.Fatalf("Generated data should contain SourceAMIName")
+	}
+	if generatedData[1] != "BuildRegion" {
+		t.Fatalf("Generated data should contain BuildRegion")
+	}
+	if generatedData[2] != "SourceAMI" {
+		t.Fatalf("Generated data should contain SourceAMI")
+	}
+	if generatedData[3] != "SourceAMICreationDate" {
+		t.Fatalf("Generated data should contain SourceAMICreationDate")
+	}
+	if generatedData[4] != "SourceAMIOwner" {
+		t.Fatalf("Generated data should contain SourceAMIOwner")
+	}
+	if generatedData[5] != "SourceAMIOwnerName" {
+		t.Fatalf("Generated data should contain SourceAMIOwnerName")
 	}
 }
