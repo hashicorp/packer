@@ -336,13 +336,11 @@ func Test_build_output(t *testing.T) {
 		{[]string{"build", "--color=false", testFixture("hcl", "reprepare", "shell-local.pkr.hcl")}, nil,
 			`
     null.example: hello from the NULL builder packeruser
-Build 'null.example' finished.
-`, "posix"},
+Build 'null.example' finished after`, "posix"},
 		{[]string{"build", "--color=false", testFixture("hcl", "reprepare", "shell-local-windows.pkr.hcl")}, nil,
 			`
     null.example: hello from the NULL  builder packeruser
-Build 'null.example' finished.
-`, "windows"},
+Build 'null.example' finished after`, "windows"},
 	}
 
 	for _, tc := range tc {
@@ -357,7 +355,7 @@ Build 'null.example' finished.
 				t.Fatalf("%v: %s", err, bs)
 			}
 			if !strings.Contains(string(bs), tc.expected) {
-				t.Fatalf("Should have given output %s.\nReceived: %s", tc.expected, string(bs))
+				t.Fatalf("Should contain output %s.\nReceived: %s", tc.expected, string(bs))
 			}
 		})
 	}
