@@ -216,7 +216,7 @@ Lists are defined either explicitly or implicitly
 variable "cidrs" { default = [] }
 
 # explicitly
-variable "cidrs" { type = "list" }
+variable "cidrs" { type = list }
 ```
 
 You can specify lists in a `variables.pkrvars.hcl` file:
@@ -233,7 +233,7 @@ support for the `us-west-2` region as well:
 
 ```hcl
 variable "amis" {
-  type = "map"
+  type = map
   default = {
     "us-east-1" = "ami-b374d5a5"
     "us-west-2" = "ami-4b32be2b"
@@ -278,7 +278,7 @@ variable definitions:
 ```hcl
 variable "region" {}
 variable "amis" {
-  type = "map"
+  type = map
 }
 ```
 
