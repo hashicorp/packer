@@ -40,6 +40,24 @@ func extractBuildInfo(region string, state multistep.StateBag, generatedData *bu
 		SourceAMIOwnerName:    aws.StringValue(sourceAMI.ImageOwnerAlias),
 		SourceAMITags:         sourceAMITags,
 	}
+
+	generatedData.Put("BuildRegion", buildInfoTemplate.BuildRegion)
+	generatedData.Put("SourceAMI", buildInfoTemplate.SourceAMI)
+	generatedData.Put("SourceAMICreationDate", buildInfoTemplate.SourceAMICreationDate)
 	generatedData.Put("SourceAMIName", buildInfoTemplate.SourceAMIName)
+	generatedData.Put("SourceAMIOwner", buildInfoTemplate.SourceAMIOwner)
+	generatedData.Put("SourceAMIOwnerName", buildInfoTemplate.SourceAMIOwnerName)
+
 	return buildInfoTemplate
+}
+
+func GetGeneratedDataList() []string {
+	return []string{
+		"SourceAMIName",
+		"BuildRegion",
+		"SourceAMI",
+		"SourceAMICreationDate",
+		"SourceAMIOwner",
+		"SourceAMIOwnerName",
+	}
 }

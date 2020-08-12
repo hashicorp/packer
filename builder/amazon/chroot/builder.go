@@ -335,7 +335,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
-	generatedData := []string{"SourceAMIName", "Device", "MountPath"}
+	generatedData := awscommon.GetGeneratedDataList()
+	generatedData = append(generatedData, "Device", "MountPath")
+
 	return generatedData, warns, nil
 }
 
@@ -419,6 +421,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&chroot.StepCopyFiles{
 			Files: b.config.CopyFiles,
+		},
+		&awscommon.StepSetGeneratedData{
+			GeneratedData: generatedData,
 		},
 		&chroot.StepChrootProvision{},
 		&chroot.StepEarlyCleanup{},

@@ -163,7 +163,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
 
-	generatedData := []string{"SourceAMIName"}
+	generatedData := awscommon.GetGeneratedDataList()
 	return generatedData, warns, nil
 }
 
@@ -307,6 +307,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				b.config.Comm.Port(),
 			),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
+		},
+		&awscommon.StepSetGeneratedData{
+			GeneratedData: generatedData,
 		},
 		&common.StepProvision{},
 		&common.StepCleanupTempKeys{

@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/hcl2template"
@@ -146,7 +147,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
 
-	generatedData := []string{"SourceAMIName"}
+	generatedData := awscommon.GetGeneratedDataList()
 	return generatedData, warns, nil
 }
 
@@ -166,6 +167,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("iam", iam)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	generatedData := &builder.GeneratedData{State: state}
 
 	var instanceStep multistep.Step
 
@@ -275,6 +277,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				b.config.Comm.Port(),
 			),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
+		},
+		&awscommon.StepSetGeneratedData{
+			GeneratedData: generatedData,
 		},
 		&common.StepProvision{},
 		&common.StepCleanupTempKeys{
