@@ -68,12 +68,16 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("\nThe resource group was not created by Packer, deleting individual resources ...")
 
-	resourceGroupName := state.Get(constants.ArmResourceGroupName).(string)
-	computeName := state.Get(constants.ArmComputeName).(string)
 	deploymentName := s.name
+	resourceGroupName := state.Get(constants.ArmResourceGroupName).(string)
+
+	// Get image disk details before deleting the image; otherwise we won't be able to
+	// delete the disk as the image request will return a 404
+	computeName := state.Get(constants.ArmComputeName).(string)
 	imageType, imageName, err := s.disk(context.TODO(), resourceGroupName, computeName)
-	if err != nil {
-		ui.Error("Could not retrieve OS Image details")
+
+	if err != nil && !strings.Contains(err.Error(), "ResourceNotFound") {
+		ui.Error(fmt.Sprintf("Could not retrieve OS Image details: %s", err))
 	}
 
 	ui.Say(" -> Deployment Resources within: " + deploymentName)
@@ -91,7 +95,7 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 			// Sometimes an empty operation is added to the list by Azure
 			if deploymentOperation.Properties.TargetResource == nil {
 				if err := deploymentOperations.Next(); err != nil {
-					ui.Error(fmt.Sprintf("Error deleting resources.  Please delete them manually.\n\n"+
+					ui.Error(fmt.Sprintf("Error moving to to next deployment operation ...\n\n"+
 						"Name: %s\n"+
 						"Error: %s", resourceGroupName, err))
 					break
@@ -121,8 +125,11 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 			}
 		}
 
-		// The disk is not defined as an operation in the template so has to be
-		// deleted separately
+		// The disk is not defined as an operation in the template so it has to be deleted separately
+		if imageType == "" && imageName == "" {
+			return
+		}
+
 		ui.Say(fmt.Sprintf(" -> %s : '%s'", imageType, imageName))
 		err = s.deleteDisk(context.TODO(), imageType, imageName, resourceGroupName)
 		if err != nil {
@@ -237,6 +244,7 @@ func (s *StepDeployTemplate) deleteImage(ctx context.Context, imageType string, 
 		}
 		return err
 	}
+
 	// VHD image
 	u, err := url.Parse(imageName)
 	if err != nil {
@@ -250,6 +258,12 @@ func (s *StepDeployTemplate) deleteImage(ctx context.Context, imageType string, 
 	var blobName = strings.Join(xs[2:], "/")
 
 	blob := s.client.BlobStorageClient.GetContainerReference(storageAccountName).GetBlobReference(blobName)
+	if _, err := blob.BreakLease(nil); err != nil {
+		s.say(s.client.LastError.Error())
+		return err
+	}
+
 	err = blob.Delete(nil)
+
 	return err
 }
