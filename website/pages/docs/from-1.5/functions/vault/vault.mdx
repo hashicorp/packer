@@ -18,10 +18,12 @@ If you store a value in vault using `vault kv put secret/hello foo=world`, you
 can access it using the following:
 
 ```hcl
-vault("/secret/data/hello" "foo")
+locals {
+    foo = vault("/secret/data/hello" "foo")
+}
 ```
 
-which will assign "my_secret": "world"
+which will assign `local.foo` with the value "world"
 
 An example of using a v1 kv engine:
 
@@ -33,14 +35,19 @@ If you store a value in vault using:
 You can access it using the following:
 
 ```hcl
-vault("secrets/hello", "foo")
+locals {
+    foo = vault("secrets/hello", "foo")
+}
 ```
 
-This example accesses the Vault path `secret/data/foo` and returns the value
-stored at the key `bar`, storing it as "my_secret".
+This example accesses the Vault path `secret/foo` and returns the value
+stored at the key `foo`, storing it as the local variable `local.foo`.
 
 In order for this to work, you must set the environment variables `VAULT_TOKEN`
 and `VAULT_ADDR` to valid values.
+
+-> **NOTE:** HCL functions can be used in local variable definitions or inline 
+with a provisioner/post-processor. They cannot be used in global variable definitions.
 
 The api tool we use allows for more custom configuration of the Vault client via
 environment variables.
