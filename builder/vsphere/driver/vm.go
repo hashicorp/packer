@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"reflect"
 	"strings"
 	"time"
@@ -683,9 +684,43 @@ func (vm *VirtualMachine) ConvertToTemplate() error {
 	return vm.vm.MarkAsTemplate(vm.driver.ctx)
 }
 
-func (vm *VirtualMachine) ImportToContentLibrary(template vcenter.Template) error {
-	template.SourceVM = vm.vm.Reference().Value
+func (vm *VirtualMachine) ImportOvfToContentLibrary(ovf OVF) error {
+	l, err := vm.driver.FindContentLibrary(ovf.Target.LibraryID)
+	if err != nil {
+		return err
+	}
+	if l.library.Type != "LOCAL" {
+		return fmt.Errorf("can not deploy a VM to the content library %s of type %s; the content library must be of type LOCAL", ovf.Target.LibraryID, l.library.Type)
+	}
 
+	item, err := vm.driver.FindContentLibraryItem(l.library.ID, ovf.Spec.Name)
+	if err != nil {
+		return err
+	}
+
+	// Updates existing library item
+	if item != nil {
+		ovf.Target.LibraryItemID = item.ID
+	}
+
+	ovf.Target.LibraryID = l.library.ID
+	ovf.Source.Value = vm.vm.Reference().Value
+	ovf.Source.Type = "VirtualMachine"
+
+	vcm := vcenter.NewManager(vm.driver.restClient)
+	url := vcm.Resource("/com/vmware/vcenter/ovf/library-item")
+	var res CreateResult
+	err = vcm.Do(vm.driver.ctx, url.Request(http.MethodPost, ovf), &res)
+	if err != nil {
+		return err
+	}
+	if res.Succeeded {
+		return nil
+	}
+	return res.Error
+}
+
+func (vm *VirtualMachine) ImportToContentLibrary(template vcenter.Template) error {
 	l, err := vm.driver.FindContentLibrary(template.Library)
 	if err != nil {
 		return err
@@ -693,7 +728,9 @@ func (vm *VirtualMachine) ImportToContentLibrary(template vcenter.Template) erro
 	if l.library.Type != "LOCAL" {
 		return fmt.Errorf("can not deploy a VM to the content library %s of type %s; the content library must be of type LOCAL", template.Library, l.library.Type)
 	}
+
 	template.Library = l.library.ID
+	template.SourceVM = vm.vm.Reference().Value
 
 	if template.Placement.Cluster != "" {
 		c, err := vm.driver.FindCluster(template.Placement.Cluster)

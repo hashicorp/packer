@@ -5,6 +5,8 @@ package common
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -20,7 +22,13 @@ type ContentLibraryDestinationConfig struct {
 	// The Content Library should be of type Local to allow deploying virtual machines.
 	Library string `mapstructure:"library"`
 	// Name of the library item that will be created. The name of the item should be different from [vm_name](#vm_name).
-	// Defaults to [vm_name](#vm_name) + timestamp.
+	// Defaults to [vm_name](#vm_name) + timestamp. If the item already exists, then it will be updated
+	// with the new template if the operation is compatible with the vSphere API version.
+	//
+	// ~> **Note**: Updating an existing library item is an operation added in vSphere API 6.9.1. Lower
+	// versions will fail to update an existing library item, and therefore, a non-existing name
+	// should be given in order to create a new library item.
+	//
 	Name string `mapstructure:"name"`
 	// Description of the library item that will be created. Defaults to "Packer imported [vm_name](#vm_name) VM template".
 	Description string `mapstructure:"description"`
@@ -46,6 +54,8 @@ type ContentLibraryDestinationConfig struct {
 	Datastore string `mapstructure:"datastore"`
 	// If set to true, the VM will be destroyed after deploying the template to the Content Library. Defaults to `false`.
 	Destroy bool `mapstructure:"destroy"`
+	// TODO
+	Ovf bool `mapstructure:"ovf"`
 }
 
 func (c *ContentLibraryDestinationConfig) Prepare(lc *LocationConfig) []error {
@@ -96,30 +106,56 @@ func (s *StepImportToContentLibrary) Run(_ context.Context, state multistep.Stat
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
-	template := vcenter.Template{
-		Name:        s.ContentLibConfig.Name,
-		Description: s.ContentLibConfig.Description,
-		Library:     s.ContentLibConfig.Library,
-		Placement: &vcenter.Placement{
-			Cluster:      s.ContentLibConfig.Cluster,
-			Folder:       s.ContentLibConfig.Folder,
-			Host:         s.ContentLibConfig.Host,
-			ResourcePool: s.ContentLibConfig.ResourcePool,
-		},
-	}
-
-	if s.ContentLibConfig.Datastore != "" {
-		template.VMHomeStorage = &vcenter.DiskStorage{
-			Datastore: s.ContentLibConfig.Datastore,
+	if s.ContentLibConfig.Ovf {
+		ovf := driver.OVF{
+			Spec: driver.CreateSpec{
+				Name: s.ContentLibConfig.Name,
+			},
+			Target: driver.LibraryTarget{
+				LibraryID: s.ContentLibConfig.Library,
+			},
 		}
-	}
 
-	ui.Say(fmt.Sprintf("Importing VM template %s to Content Library...", s.ContentLibConfig.Name))
-	err := vm.ImportToContentLibrary(template)
-	if err != nil {
-		ui.Error(fmt.Sprintf("Failed to import VM template %s: %s", s.ContentLibConfig.Name, err.Error()))
-		state.Put("error", err)
-		return multistep.ActionHalt
+		ui.Say(fmt.Sprintf("Importing VM OVF template %s to Content Library...", s.ContentLibConfig.Name))
+		err := vm.ImportOvfToContentLibrary(ovf)
+		if err != nil {
+			if strings.Contains(err.Error(), http.StatusText(404)) {
+				err = fmt.Errorf("%s. Please, verify if the vSphere API version is compatible with this operation.", err.Error())
+			}
+			ui.Error(fmt.Sprintf("Failed to import VM template %s: %s", s.ContentLibConfig.Name, err.Error()))
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+
+	} else {
+		template := vcenter.Template{
+			Name:        s.ContentLibConfig.Name,
+			Description: s.ContentLibConfig.Description,
+			Library:     s.ContentLibConfig.Library,
+			Placement: &vcenter.Placement{
+				Cluster:      s.ContentLibConfig.Cluster,
+				Folder:       s.ContentLibConfig.Folder,
+				Host:         s.ContentLibConfig.Host,
+				ResourcePool: s.ContentLibConfig.ResourcePool,
+			},
+		}
+
+		if s.ContentLibConfig.Datastore != "" {
+			template.VMHomeStorage = &vcenter.DiskStorage{
+				Datastore: s.ContentLibConfig.Datastore,
+			}
+		}
+
+		ui.Say(fmt.Sprintf("Importing VM template %s to Content Library...", s.ContentLibConfig.Name))
+		err := vm.ImportToContentLibrary(template)
+		if err != nil {
+			if strings.Contains(err.Error(), http.StatusText(404)) {
+				err = fmt.Errorf("%s. Please, verify if the vSphere API version is compatible with this operation.", err.Error())
+			}
+			ui.Error(fmt.Sprintf("Failed to import VM template %s: %s", s.ContentLibConfig.Name, err.Error()))
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
 	}
 
 	if s.ContentLibConfig.Destroy {
