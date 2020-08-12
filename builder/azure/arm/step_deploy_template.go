@@ -258,12 +258,11 @@ func (s *StepDeployTemplate) deleteImage(ctx context.Context, imageType string, 
 	var blobName = strings.Join(xs[2:], "/")
 
 	blob := s.client.BlobStorageClient.GetContainerReference(storageAccountName).GetBlobReference(blobName)
-	if _, err := blob.BreakLease(nil); err != nil {
+	_, err = blob.BreakLease(nil)
+	if err != nil && !strings.Contains(err.Error(), "LeaseNotPresentWithLeaseOperation") {
 		s.say(s.client.LastError.Error())
 		return err
 	}
 
-	err = blob.Delete(nil)
-
-	return err
+	return blob.Delete(nil)
 }
