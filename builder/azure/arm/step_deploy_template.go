@@ -55,7 +55,12 @@ func (s *StepDeployTemplate) Run(ctx context.Context, state multistep.StateBag) 
 }
 
 func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
-	defer s.deleteTemplate(context.Background(), state)
+	defer func() {
+		err := s.deleteTemplate(context.Background(), state)
+		if err != nil {
+			s.say(s.client.LastError.Error())
+		}
+	}()
 
 	//Only clean up if this was an existing resource group and the resource group
 	//is marked as created
@@ -165,10 +170,6 @@ func (s *StepDeployTemplate) deleteTemplate(ctx context.Context, state multistep
 	f, err := s.client.DeploymentsClient.Delete(ctx, resourceGroupName, deploymentName)
 	if err == nil {
 		err = f.WaitForCompletionRef(ctx, s.client.DeploymentsClient.Client)
-	}
-
-	if err != nil {
-		s.say(s.client.LastError.Error())
 	}
 
 	return err
