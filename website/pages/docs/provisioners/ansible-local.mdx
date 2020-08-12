@@ -32,11 +32,75 @@ do this.
 
 The example below is fully functional.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
-  "type": "ansible-local",
-  "playbook_file": "local.yml"
+    "builders": [
+      {
+          "type":        "docker",
+          "image":       "williamyeh/ansible:ubuntu14.04",
+          "export_path": "packer_example",
+          "run_command": [ "-d", "-i", "-t", "--entrypoint=/bin/bash", "{{.Image}}" ]
+      }
+    ],
+    "variables":
+      {
+        "topping": "mushroom"
+      },
+    "provisioners": [
+      {
+        "type":            "ansible-local",
+        "playbook_file":   "./playbook.yml",
+        "extra_arguments": ["--extra-vars", "\"pizza_toppings={{ user `topping`}}\""]
+      }
+    ]
 }
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+variable "topping" {
+  type    = string
+  default = "mushroom"
+}
+
+source "docker" "example" {
+  image       = "williamyeh/ansible:ubuntu14.04"
+  export_path = "packer_example"
+  run_command = ["-d", "-i", "-t", "--entrypoint=/bin/bash", "{{.Image}}"]
+}
+
+build {
+  sources = [
+    "source.docker.example"
+  ]
+
+  provisioner "ansible-local" {
+    playbook_file   = "./playbook.yml"
+    extra_arguments = ["--extra-vars", "\"pizza_toppings=${var.topping}\""]
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+where ./playbook.yml contains
+
+```
+---
+- name: hello world
+  hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - command: echo {{ pizza_toppings }}
+    - debug: msg="{{ pizza_toppings }}"
+
 ```
 
 ## Configuration Reference
