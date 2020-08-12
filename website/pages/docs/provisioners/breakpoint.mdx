@@ -24,12 +24,61 @@ and between every provisioner.
 
 ## Basic Example
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
-  "type": "breakpoint",
-  "note": "foo bar baz"
+  "builders": [
+    {
+      "type": "null",
+      "communicator": "none"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell-local",
+      "inline": "echo hi"
+    },
+    {
+      "type": "breakpoint",
+      "disable": false,
+      "note": "this is a breakpoint"
+    },
+    {
+      "type": "shell-local",
+      "inline": "echo hi 2"
+    }
+  ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "null" "example" {
+  communicator = "none"
+}
+
+build {
+  sources = ["source.null.example"]
+
+  provisioner "shell-local" {
+    inline = ["echo hi"]
+  }
+  provisioner "breakpoint" {
+    disable = false
+    note    = "this is a breakpoint"
+  }
+  provisioner "shell-local" {
+    inline = ["echo hi 2"]
+  }
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Configuration Reference
 
