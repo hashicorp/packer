@@ -103,6 +103,7 @@ type FlatConfig struct {
 	UnmountISO                *bool             `mapstructure:"unmount_iso" cty:"unmount_iso" hcl:"unmount_iso"`
 	CloudInit                 *bool             `mapstructure:"cloud_init" cty:"cloud_init" hcl:"cloud_init"`
 	CloudInitStoragePool      *string           `mapstructure:"cloud_init_storage_pool" cty:"cloud_init_storage_pool" hcl:"cloud_init_storage_pool"`
+	HTTPInterface             *string           `mapstructure:"http_interface" cty:"http_interface" hcl:"http_interface"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -211,6 +212,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"unmount_iso":                  &hcldec.AttrSpec{Name: "unmount_iso", Type: cty.Bool, Required: false},
 		"cloud_init":                   &hcldec.AttrSpec{Name: "cloud_init", Type: cty.Bool, Required: false},
 		"cloud_init_storage_pool":      &hcldec.AttrSpec{Name: "cloud_init_storage_pool", Type: cty.String, Required: false},
+		"http_interface":               &hcldec.AttrSpec{Name: "http_interface", Type: cty.String, Required: false},
 	}
 	return s
 }

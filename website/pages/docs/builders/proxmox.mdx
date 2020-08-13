@@ -141,7 +141,7 @@ builder.
 
   - `firewall` (bool) - If the interface should be protected by the firewall.
     Defaults to `false`.
-  
+
   - `packet_queues` (int) - Number of packet queues to be used on the device.
     Values greater than 1 indicate that the multiqueue feature is activated.
     For best performance, set this to the number of cores available to the
@@ -212,6 +212,9 @@ builder.
 
 - `cloud_init_storage_pool` - (string) - Name of the Proxmox storage pool
   to store the Cloud-Init CDROM on. If not given, the storage pool of the boot device will be used.
+
+- `http_interface` - (string) - Name of the network interface that Packer gets
+  `HTTPIP` from. Defaults to the first non loopback interface.
 
 ## Example: Fedora with kickstart
 

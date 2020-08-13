@@ -64,6 +64,8 @@ type Config struct {
 
 	shouldUploadISO bool
 
+	HTTPInterface string `mapstructure:"http_interface"`
+
 	ctx interpolate.Context
 }
 
