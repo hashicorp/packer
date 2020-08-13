@@ -6,7 +6,9 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
+	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
 )
 
 // OnlyExcept is a struct that is meant to be embedded that contains the
@@ -62,6 +64,7 @@ type ProvisionerBlock struct {
 	PauseBefore time.Duration
 	MaxRetries  int
 	Timeout     time.Duration
+	Override    map[string]interface{}
 	OnlyExcept  OnlyExcept
 	HCL2Ref
 }
@@ -72,13 +75,14 @@ func (p *ProvisionerBlock) String() string {
 
 func (p *Parser) decodeProvisioner(block *hcl.Block, cfg *PackerConfig) (*ProvisionerBlock, hcl.Diagnostics) {
 	var b struct {
-		Name        string   `hcl:"name,optional"`
-		PauseBefore string   `hcl:"pause_before,optional"`
-		MaxRetries  int      `hcl:"max_retries,optional"`
-		Timeout     string   `hcl:"timeout,optional"`
-		Only        []string `hcl:"only,optional"`
-		Except      []string `hcl:"except,optional"`
-		Rest        hcl.Body `hcl:",remain"`
+		Name        string    `hcl:"name,optional"`
+		PauseBefore string    `hcl:"pause_before,optional"`
+		MaxRetries  int       `hcl:"max_retries,optional"`
+		Timeout     string    `hcl:"timeout,optional"`
+		Only        []string  `hcl:"only,optional"`
+		Except      []string  `hcl:"except,optional"`
+		Override    cty.Value `hcl:"override,optional"`
+		Rest        hcl.Body  `hcl:",remain"`
 	}
 	diags := gohcl.DecodeBody(block.Body, cfg.EvalContext(nil), &b)
 	if diags.HasErrors() {
@@ -96,6 +100,18 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, cfg *PackerConfig) (*Provis
 	diags = diags.Extend(provisioner.OnlyExcept.Validate())
 	if diags.HasErrors() {
 		return nil, diags
+	}
+
+	if !b.Override.IsNull() {
+		override := make(map[string]interface{})
+		for buildName, overrides := range b.Override.AsValueMap() {
+			buildOverrides := make(map[string]interface{})
+			for option, value := range overrides.AsValueMap() {
+				buildOverrides[option] = hcl2shim.ConfigValueFromHCL2(value)
+			}
+			override[buildName] = buildOverrides
+		}
+		provisioner.Override = override
 	}
 
 	if b.PauseBefore != "" {
@@ -144,12 +160,20 @@ func (cfg *PackerConfig) startProvisioner(source SourceBlock, pb *ProvisionerBlo
 		})
 		return nil, diags
 	}
+
 	hclProvisioner := &HCL2Provisioner{
 		Provisioner:      provisioner,
 		provisionerBlock: pb,
 		evalContext:      ectx,
 		builderVariables: source.builderVariables(),
 	}
+
+	if pb.Override != nil {
+		if override, ok := pb.Override[source.name()]; ok {
+			hclProvisioner.override = override.(map[string]interface{})
+		}
+	}
+
 	err = hclProvisioner.HCL2Prepare(nil)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{

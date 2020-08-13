@@ -10,16 +10,32 @@ Parameters common to all provisioners:
 - `override` (object) - Override the builder with different settings for a
   specific builder, eg :
 
+  In JSON:
   ```json
   {
     "type": "shell",
     "script": "script.sh",
     "override": {
-      "vmware-iso": {
-        "execute_command": "echo 'password' | sudo -S bash {{.Path}}"
+      "example_one": {
+        "script": "basic_one-script.sh"
       }
     }
   }
+  ```
+
+  In HCL2:
+  ```hcl
+    build {
+        sources = ["docker.example_one", "docker.example_two"]
+        provisioner "shell" {
+            script = "script.sh"
+            override = {
+                example_one = {
+                    script = "basic-one-script.sh"
+                }
+            }
+        }
+    }
   ```
 
 - `timeout` (duration) - If the provisioner takes more than for example
