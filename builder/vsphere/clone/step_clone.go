@@ -32,8 +32,10 @@ type CloneConfig struct {
 	DiskSize int64 `mapstructure:"disk_size"`
 	// Create VM as a linked clone from latest snapshot. Defaults to `false`.
 	LinkedClone bool `mapstructure:"linked_clone"`
-	// Set the network in which the VM will be connected to. If no network is specified, `host`
-	// must be specified to allow Packer to look for the available network.
+	// Set the network in which the VM will be connected to. If no network is
+	// specified, `host` must be specified to allow Packer to look for the
+	// available network. If the network is inside a network folder in vCenter,
+	// you need to provide the full path to the network.
 	Network string `mapstructure:"network"`
 	// VM notes.
 	Notes string `mapstructure:"notes"`
