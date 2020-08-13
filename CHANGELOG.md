@@ -1,11 +1,16 @@
 ## 1.6.2 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/amazon:  Add all of the custom AWS template engines to `build`
+    template function for use by provisioners. [GH-9751]
+* builder/azure: Add FreeBSD support to azure/chroot builder. [GH-9697]
 * builder/vmware-esx: Add `network_name` option to vmware so that users can set
     a network without using vmx data. [GH-9718]
 * builder/vsphere: Add new `directory_permission` config export option.
     [GH-9704]
 * builder/vsphere: Add step and options to customize cloned VMs. [GH-9665]
+* core/hcl: Add vault integration as an HCL2 function function. [GH-9746]
+* core: Ui now pretty prints build durations. [GH-9749]
 * core: When a build is cancelled, Packer will skip postprocessors gracefully
     rather than failing them. [GH-9720]
 * post-processor/vsphere: Improve UI to catch bad credentials and print errors.
@@ -13,8 +18,7 @@
 * provisioner/file: Clean up, bugfix, and document previously-hidden `sources`
     option. [GH-9725] [GH-9735]
 * provisioner/salt-masterless: Add option to option to download community
-    SaltStack formulas [GH-9726]
-* builder/azure: Add FreeBSD support to azure/chroot builder. [GH-9697]
+    SaltStack formulas. [GH-9726]
 
 ### BUG FIXES:
 * build: Fix bug in code generator that caused generation to fail in nested
@@ -31,6 +35,8 @@
     with HCL2 config. [GH-9677]
 * builder/vsphere: Fix `alt`, `ctrl`, and `shift` keypresses in the
     boot_command. [GH-9702] [GH-9739]
+* builder/vsphere: Fix bug where Packer timed out if two interfaces were
+    defined but only one had an available IP. [GH-9748]
 * builder/vsphere: Fix the configuration_parameters option so that it is always
     applied, not just when the tool sync policy is set. [GH-9713]
 * core: Make `max_retries` provisioner option a string to allow variable
