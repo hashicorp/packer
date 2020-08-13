@@ -102,7 +102,8 @@ source "virtualbox-iso" "step_1" {
   vm_name          = "vbox-example"
 }
 build {
-  sources = ["source.virtualbox-iso.step_2"]
+  sources = ["source.virtualbox-iso.step_1"]
+
 
   provisioner "shell" {
     inline = ["echo initial provisioning"]
