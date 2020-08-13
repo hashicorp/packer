@@ -66,6 +66,7 @@ type Config struct {
 	shouldUploadISO bool
 
 	AdditionalISOFiles []storageConfig `mapstructure:"additional_iso_files"`
+	HTTPInterface string `mapstructure:"http_interface"`
 
 	ctx interpolate.Context
 }
