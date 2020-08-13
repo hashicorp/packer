@@ -11,11 +11,11 @@ import (
 	"time"
 
 	consulapi "github.com/hashicorp/consul/api"
+	commontpl "github.com/hashicorp/packer/common/template"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/common"
 	awssmapi "github.com/hashicorp/packer/template/interpolate/aws/secretsmanager"
 	"github.com/hashicorp/packer/version"
-	vaultapi "github.com/hashicorp/vault/api"
 	strftime "github.com/jehiah/go-strftime"
 )
 
@@ -289,40 +289,8 @@ func funcGenVault(ctx *Context) interface{} {
 			// semantic checks should catch this.
 			return "", errors.New("Vault vars are only allowed in the variables section")
 		}
-		if token := os.Getenv("VAULT_TOKEN"); token == "" {
-			return "", errors.New("Must set VAULT_TOKEN env var in order to " +
-				"use vault template function")
-		}
-		// const EnvVaultAddress = "VAULT_ADDR"
-		// const EnvVaultToken = "VAULT_TOKEN"
-		vaultConfig := vaultapi.DefaultConfig()
-		cli, err := vaultapi.NewClient(vaultConfig)
-		if err != nil {
-			return "", fmt.Errorf("Error getting Vault client: %s", err)
-		}
-		secret, err := cli.Logical().Read(path)
-		if err != nil {
-			return "", fmt.Errorf("Error reading vault secret: %s", err)
-		}
-		if secret == nil {
-			return "", errors.New("Vault Secret does not exist at the given path")
-		}
 
-		data, ok := secret.Data["data"]
-		if !ok {
-			// maybe ths is v1, not v2 kv store
-			value, ok := secret.Data[key]
-			if ok {
-				return value.(string), nil
-			}
-
-			// neither v1 nor v2 proudced a valid value
-			return "", fmt.Errorf("Vault data was empty at the "+
-				"given path. Warnings: %s", strings.Join(secret.Warnings, "; "))
-		}
-
-		value := data.(map[string]interface{})[key].(string)
-		return value, nil
+		return commontpl.Vault(path, key)
 	}
 }
 

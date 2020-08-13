@@ -106,6 +106,7 @@ func Functions(basedir string) map[string]function.Function {
 		"uuidv4":          uuid.V4Func,
 		"uuidv5":          uuid.V5Func,
 		"values":          stdlib.ValuesFunc,
+		"vault":           pkrfunction.VaultFunc,
 		"yamldecode":      ctyyaml.YAMLDecodeFunc,
 		"yamlencode":      ctyyaml.YAMLEncodeFunc,
 		"zipmap":          stdlib.ZipmapFunc,
