@@ -1,6 +1,6 @@
 <!-- Code generated from the comments of the BlockDevice struct in builder/amazon/common/block_device.go; DO NOT EDIT MANUALLY -->
 
-These will be attached when booting a new instance from your AMI. Your
+These will be attached when launching your instance. Your
 options here may vary depending on the type of VM you use.
 
 Example use case:
@@ -11,7 +11,7 @@ build instance at launch using a specific non-default kms key:
 JSON example:
 
 ```json
-ami_block_device_mappings: [
+launch_block_device_mappings: [
   {
      "device_name": "/dev/sda1",
      "encrypted": true,
@@ -23,12 +23,15 @@ ami_block_device_mappings: [
 HCL2 example:
 
 ```hcl
-ami_block_device_mappings {
+launch_block_device_mappings {
     device_name = "/dev/sda1"
     encrypted = true
     kms_key_id = "1a2b3c4d-5e6f-1a2b-3c4d-5e6f1a2b3c4d"
 }
 ```
+
+Please note that the kms_key_id option in this example exists for
+launch_block_device_mappings but not ami_block_device_mappings.
 
 Documentation for Block Devices Mappings can be found here:
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html

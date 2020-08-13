@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-// These will be attached when booting a new instance from your AMI. Your
+// These will be attached when launching your instance. Your
 // options here may vary depending on the type of VM you use.
 //
 // Example use case:
@@ -24,7 +24,7 @@ import (
 // JSON example:
 //
 // ```json
-// ami_block_device_mappings: [
+// launch_block_device_mappings: [
 //   {
 //      "device_name": "/dev/sda1",
 //      "encrypted": true,
@@ -36,12 +36,15 @@ import (
 // HCL2 example:
 //
 // ```hcl
-// ami_block_device_mappings {
+// launch_block_device_mappings {
 //     device_name = "/dev/sda1"
 //     encrypted = true
 //     kms_key_id = "1a2b3c4d-5e6f-1a2b-3c4d-5e6f1a2b3c4d"
 // }
 // ```
+//
+// Please note that the kms_key_id option in this example exists for
+// launch_block_device_mappings but not ami_block_device_mappings.
 //
 // Documentation for Block Devices Mappings can be found here:
 // https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html
@@ -80,12 +83,14 @@ type BlockDevice struct {
 	// The size of the volume, in GiB. Required if not specifying a
 	// snapshot_id.
 	VolumeSize int64 `mapstructure:"volume_size" required:"false"`
-	// ID, alias or ARN of the KMS key to use for boot volume encryption. This
-	// only applies to the main region, other regions where the AMI will be
-	// copied will be encrypted by the default EBS KMS key. For valid formats
-	// see KmsKeyId in the [AWS API docs -
+	// ID, alias or ARN of the KMS key to use for boot volume encryption.
+	// This option exists for launch_block_device_mappings but not
+	// ami_block_device_mappings. The kms key id defined here only applies to
+	// the original build region; if the AMI gets copied to other regions, the
+	// volume in those regions will be encrypted by the default EBS KMS key.
+	// For valid formats see KmsKeyId in the [AWS API docs -
 	// CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html)
-	// This field is validated by Packer, when using an alias, you will have to
+	// This field is validated by Packer. When using an alias, you will have to
 	// prefix kms_key_id with alias/.
 	KmsKeyId string `mapstructure:"kms_key_id" required:"false"`
 }

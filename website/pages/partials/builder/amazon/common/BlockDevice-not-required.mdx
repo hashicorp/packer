@@ -33,10 +33,12 @@
 - `volume_size` (int64) - The size of the volume, in GiB. Required if not specifying a
   snapshot_id.
 
-- `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for boot volume encryption. This
-  only applies to the main region, other regions where the AMI will be
-  copied will be encrypted by the default EBS KMS key. For valid formats
-  see KmsKeyId in the [AWS API docs -
+- `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for boot volume encryption.
+  This option exists for launch_block_device_mappings but not
+  ami_block_device_mappings. The kms key id defined here only applies to
+  the original build region; if the AMI gets copied to other regions, the
+  volume in those regions will be encrypted by the default EBS KMS key.
+  For valid formats see KmsKeyId in the [AWS API docs -
   CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html)
-  This field is validated by Packer, when using an alias, you will have to
+  This field is validated by Packer. When using an alias, you will have to
   prefix kms_key_id with alias/.
