@@ -59,17 +59,17 @@ Example Packer template:
 
 ```hcl
 source "digitalocean" "example"{
-  api_token = "6a561151587389c7cf8faa2d83e94150a4202da0e2bad34dd2bf236018ffaeeb"
-  image = "ubuntu-14-04-x64"
-  region = "sfo1"
+    api_token = "6a561151587389c7cf8faa2d83e94150a4202da0e2bad34dd2bf236018ffaeeb"
+    image = "ubuntu-14-04-x64"
+    region = "sfo1"
 }
 
 build {
     sources = [
-        "source.digitalocean.example",
+        "source.digitalocean.example"
     ]
-    provisioner {
-      "playbook_file": "./playbook.yml"
+    provisioner "ansible" {
+      playbook_file = "./playbook.yml"
     }
 }
 ```
@@ -198,21 +198,21 @@ connection to chroot and running Ansible as root/sudo.
 ```hcl
 source "amazon-chroot" "example" {
   mount_path = "/mnt/packer-amazon-chroot"
-    region = "us-east-1"
-    source_ami = "ami-123456"
+  region = "us-east-1"
+  source_ami = "ami-123456"
 }
 
 build {
   sources = [
     "source.amazon-chroot.example"
   ]
-    provisioner "ansible" {
-      extra_arguments = [
-          "--connection=chroot",
-          "--inventory-file=/mnt/packer-amazon-chroot"
-        ]
+  provisioner "ansible" {
+    extra_arguments = [
+        "--connection=chroot",
+        "--inventory-file=/mnt/packer-amazon-chroot"
+      ]
     playbook_file = "main.yml"
-    }
+  }
 }
 ```
 

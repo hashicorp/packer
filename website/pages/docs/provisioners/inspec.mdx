@@ -21,6 +21,9 @@ by Packer.
 This is a fully functional template that will test an image on DigitalOcean.
 Replace the mock `api_token` value with your own.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "provisioners": [
@@ -41,6 +44,29 @@ Replace the mock `api_token` value with your own.
 }
 ```
 
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "digitalocean" "example"{
+    api_token = "<digital ocean api token>"
+    image = "ubuntu-14-04-x64"
+    region = "sfo1"
+}
+
+build {
+    sources = [
+        "source.digitalocean.example"
+    ]
+    provisioner "inspec" {
+        profile = "https://github.com/dev-sec/linux-baseline"
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
 ## Configuration Reference
 
 Required Parameters:
@@ -52,9 +78,22 @@ Optional Parameters:
 - `inspec_env_vars` (array of strings) - Environment variables to set before
   running InSpec. Usage example:
 
+  <Tabs>
+  <Tab heading="JSON">
+
   ```json
     "inspec_env_vars": [ "FOO=bar" ]
   ```
+
+  </Tab>
+  <Tab heading="HCL2">
+
+  ```hcl
+     inspec_env_vars = [ "FOO=bar" ]
+  ```
+
+  </Tab>
+  </Tabs>
 
 - `command` (string) - The command to invoke InSpec. Defaults to `inspec`.
 
@@ -62,9 +101,21 @@ Optional Parameters:
   These arguments _will not_ be passed through a shell and arguments should
   not be quoted. Usage example:
 
+  <Tabs>
+  <Tab heading="JSON">
+
   ```json
     "extra_arguments": [ "--sudo", "--reporter", "json" ]
   ```
+  </Tab>
+  <Tab heading="HCL2">
+
+  ```hcl
+     extra_arguments = [ "--sudo", "--reporter", "json" ]
+  ```
+
+  </Tab>
+  </Tabs>
 
 - `attributes` (array of strings) - Attribute Files used by InSpec which will
   be passed to the `--input-file` argument of the `inspec` command when this
@@ -111,15 +162,31 @@ Optional Parameters:
 Chef InSpec requires accepting the license before starting to use the tool.
 This can be done via `inspec_env_vars` in the template:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
-"provisioners": [
-    {
-      "type": "inspec",
-      "inspec_env_vars": [ "CHEF_LICENSE=accept"],
-      "profile": "https://github.com/dev-sec/linux-baseline"
-    }
-  ],
+  "provisioners": [
+      {
+        "type": "inspec",
+        "inspec_env_vars": [ "CHEF_LICENSE=accept"],
+        "profile": "https://github.com/dev-sec/linux-baseline"
+      }
+  ]
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+ provisioner "inspec" {
+    inspec_env_vars = [ "CHEF_LICENSE=accept"]
+    profile = "https://github.com/dev-sec/linux-baseline"
+ }
+```
+
+</Tab>
+</Tabs>
 
 See their [official docs](https://docs.chef.io/chef_license_accept/) to learn other ways to accept the license.
 
@@ -143,8 +210,19 @@ commonly useful InSpec Attributes:
 To debug underlying issues with InSpec, add `"-l"` to `"extra_arguments"` to
 enable verbose logging.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
-{
   "extra_arguments": ["-l", "debug"]
-}
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+  extra_arguments = ["-l", "debug"]
+```
+
+</Tab>
+</Tabs>
