@@ -43,8 +43,10 @@ import (
 //   }
 // ```
 type NIC struct {
-	// Set the network in which the VM will be connected to. If no network is specified, `host`
-	// must be specified to allow Packer to look for the available network.
+	// Set the network in which the VM will be connected to. If no network is
+	// specified, `host` must be specified to allow Packer to look for the
+	// available network. If the network is inside a network folder in vCenter,
+	// you need to provide the full path to the network.
 	Network string `mapstructure:"network"`
 	// Set VM network card type. Example `vmxnet3`.
 	NetworkCard string `mapstructure:"network_card" required:"true"`
