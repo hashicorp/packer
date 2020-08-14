@@ -33,8 +33,9 @@ type Config struct {
 	AccountFile string `mapstructure:"account_file" required:"true"`
 	//The project ID where the GCS bucket exists and where the GCE image is stored.
 	ProjectId string `mapstructure:"project_id" required:"true"`
-	IAP       bool   `mapstructure-to-hcl:",skip"` //The name of the GCS bucket where the raw disk image will be uploaded.
-	Bucket    string `mapstructure:"bucket" required:"true"`
+	IAP       bool   `mapstructure-to-hcl:",skip"`
+	//The name of the GCS bucket where the raw disk image will be uploaded.
+	Bucket string `mapstructure:"bucket" required:"true"`
 	//The name of the GCS object in `bucket` where
 	//the RAW disk image will be copied for import. This is treated as a
 	//[template engine](/docs/templates/engine). Therefore, you
