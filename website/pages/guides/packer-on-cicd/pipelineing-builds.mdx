@@ -259,8 +259,93 @@ build {
 </Tab>
 </Tabs>
 
-By using the null builder instead of just running an ovf builder, we can spare ourselves all of the time Packer would normally spend launching and destroying VMs.
+By using the null builder instead of just running an ovf builder, we can spare
+ourselves all of the time Packer would normally spend launching and destroying
+VMs.
 
 ## Putting it all together
 
-Packer templates don't come with a custom "glue" to bind them together. We recommend using your CI system or wrapping scripts to connect the templates into a chain.
+Packer templates don't come with a custom "glue" to bind them together. We
+recommend using your CI system or wrapping scripts to connect the templates
+into a chain.
+
+## Chaining together several of the same builders to make "save points"
+
+If you want to use the same builder for several builds in a row, this can feel
+tedious to implement in json. We recommend you try using HCL configs so that
+you can reuse the same source in several builds:
+
+HCL templates work by allowing you to draw sources and variables from multiple
+different files in a single directory, so the following files are assumed to
+exist in their own folder:
+
+sources.pkr.hcl
+```hcl
+// In your sources file, you can create a configuration for a builder that you
+// want to reuse between multiple steps in the build. Just leave the source
+// and destination images out of this source, and set them specifically in each
+// step without having to set all of the other options over and over again.
+
+source "docker" "example" {
+  commit = true
+  // any other configuration you want for your docker containers
+}
+```
+
+build.pkr.hcl
+```hcl
+build {
+  // Make sure to name your builds so that you can selectively run them one at
+  // a time.
+  name = "step1"
+
+  source "source.docker.example" {
+    image = "ubuntu"
+  }
+
+  provisioner "shell" {
+    inline = ["echo example provisioner"]
+  }
+  provisioner "shell" {
+    inline = ["echo another example provisioner"]
+  }
+  provisioner "shell" {
+    inline = ["echo a third example provisioner"]
+  }
+
+  // Make sure that the output from your build can be used in the next build.
+  // In this example, we're tagging the docker image so that the step-2
+  // builder can find it without us having to track it down in a manifest.
+  post-processor "docker-tag" {
+    repository = "ubuntu"
+    tag = ["step-1-output"]
+  }
+}
+
+build {
+    name = "step2"
+
+    source "source.docker.example" {
+      // This is the tagged artifact from the stage 1 build. You can retrieve
+      // this from a manifest file and setting it as a variable on the command
+      // line, or by making sure you define and know the output of the build,
+      // if it's something you can define like an output name or directory.
+      image = "ubuntu:step-1-output"
+      // disable the pull if your image tag only exists locally
+      pull = false
+    }
+
+    provisioner "shell" {
+      inline = ["echo another provision!"]
+    }
+}
+```
+
+pipeline.sh
+```sh
+#!/bin/bash
+packer build -only='step1.docker.example' .
+packer build -only='step2.docker.example' .
+```
+
+To run the pipeline, call pipeline.sh. You can add error checking to this script to abort if there's an issue with a build. You can create as many build steps as you want. Each can either inhabit one file
