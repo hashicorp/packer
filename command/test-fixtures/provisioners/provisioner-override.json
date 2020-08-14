@@ -1,0 +1,25 @@
+{
+  "builders": [
+    {
+      "type": "null",
+      "name": "example1",
+      "communicator": "none"
+    },
+    {
+      "type": "null",
+      "name": "example2",
+      "communicator": "none"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell-local",
+      "inline": ["echo not overridden"],
+      "override": {
+        "example1": {
+          "inline": ["echo yes overridden"]
+        }
+      }
+    }
+  ]
+}

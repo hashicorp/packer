@@ -13,29 +13,53 @@ Parameters common to all provisioners:
   In JSON:
   ```json
   {
-    "type": "shell",
-    "script": "script.sh",
-    "override": {
-      "example_one": {
-        "script": "basic_one-script.sh"
+    "builders": [
+      {
+        "type": "null",
+        "name": "example1",
+        "communicator": "none"
+      },
+      {
+        "type": "null",
+        "name": "example2",
+        "communicator": "none"
       }
-    }
+    ],
+    "provisioners": [
+      {
+        "type": "shell-local",
+        "inline": ["echo not overridden"],
+        "override": {
+          "example1": {
+            "inline": ["echo yes overridden"]
+          }
+        }
+      }
+    ]
   }
   ```
 
   In HCL2:
   ```hcl
-    build {
-        sources = ["docker.example_one", "docker.example_two"]
-        provisioner "shell" {
-            script = "script.sh"
-            override = {
-                example_one = {
-                    script = "basic-one-script.sh"
-                }
-            }
+  source "null" "example1" {
+    communicator = "none"
+  }
+
+  source "null" "example2" {
+    communicator = "none"
+  }
+
+  build {
+    sources = ["source.null.example1", "source.null.example2"]
+    provisioner "shell-local" {
+      inline = ["echo not overridden"]
+      override = {
+        example1 = {
+          inline = ["echo yes overridden"]
         }
+      }
     }
+  }
   ```
 
 - `timeout` (duration) - If the provisioner takes more than for example

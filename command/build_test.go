@@ -328,19 +328,32 @@ func TestBuild(t *testing.T) {
 func Test_build_output(t *testing.T) {
 
 	tc := []struct {
-		command  []string
-		env      []string
-		expected string
-		runtime  string
+		command     []string
+		env         []string
+		expected    []string
+		notExpected []string
+		runtime     string
 	}{
-		{[]string{"build", "--color=false", testFixture("hcl", "reprepare", "shell-local.pkr.hcl")}, nil,
-			`
-    null.example: hello from the NULL builder packeruser
-Build 'null.example' finished after`, "posix"},
-		{[]string{"build", "--color=false", testFixture("hcl", "reprepare", "shell-local-windows.pkr.hcl")}, nil,
-			`
-    null.example: hello from the NULL  builder packeruser
-Build 'null.example' finished after`, "windows"},
+		{[]string{"build", "--color=false", testFixture("hcl", "reprepare", "shell-local.pkr.hcl")},
+			nil,
+			[]string{"null.example: hello from the NULL builder packeruser", "Build 'null.example' finished after"},
+			[]string{},
+			"posix"},
+		{[]string{"build", "--color=false", testFixture("hcl", "reprepare", "shell-local-windows.pkr.hcl")},
+			nil,
+			[]string{"null.example: hello from the NULL  builder packeruser", "Build 'null.example' finished after"},
+			[]string{},
+			"windows"},
+		{[]string{"build", "--color=false", testFixture("hcl", "provisioner-override.pkr.hcl")},
+			nil,
+			[]string{"null.example1: yes overridden", "null.example2: not overridden"},
+			[]string{"null.example2: yes overridden", "null.example1: not overridden"},
+			"posix"},
+		{[]string{"build", "--color=false", testFixture("provisioners", "provisioner-override.json")},
+			nil,
+			[]string{"example1: yes overridden", "example2: not overridden"},
+			[]string{"example2: yes overridden", "example1: not overridden"},
+			"posix"},
 	}
 
 	for _, tc := range tc {
@@ -354,8 +367,15 @@ Build 'null.example' finished after`, "windows"},
 			if err != nil {
 				t.Fatalf("%v: %s", err, bs)
 			}
-			if !strings.Contains(string(bs), tc.expected) {
-				t.Fatalf("Should contain output %s.\nReceived: %s", tc.expected, string(bs))
+			for _, expected := range tc.expected {
+				if !strings.Contains(string(bs), expected) {
+					t.Fatalf("Should contain output %s.\nReceived: %s", tc.expected, string(bs))
+				}
+			}
+			for _, notExpected := range tc.notExpected {
+				if strings.Contains(string(bs), notExpected) {
+					t.Fatalf("Should NOT contain output %s.\nReceived: %s", tc.expected, string(bs))
+				}
 			}
 		})
 	}
