@@ -3,7 +3,6 @@ package hcl2template
 import (
 	"context"
 	"fmt"
-
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
@@ -19,6 +18,7 @@ type HCL2Provisioner struct {
 	provisionerBlock *ProvisionerBlock
 	evalContext      *hcl.EvalContext
 	builderVariables map[string]string
+	override         map[string]interface{}
 }
 
 func (p *HCL2Provisioner) ConfigSpec() hcldec.ObjectSpec {
@@ -55,7 +55,7 @@ func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]interface{}) error {
 	if diags.HasErrors() {
 		return diags
 	}
-	return p.Provisioner.Prepare(p.builderVariables, flatProvisionerCfg)
+	return p.Provisioner.Prepare(p.builderVariables, flatProvisionerCfg, p.override)
 }
 
 func (p *HCL2Provisioner) Prepare(args ...interface{}) error {
