@@ -60,18 +60,32 @@
   Default false.
 
 - `encrypt_boot` (boolean) - Whether or not to encrypt the resulting AMI when
-  copying a provisioned instance to an AMI. By default, Packer will keep the
-  encryption setting to what it was in the source image. Setting false will
-  result in an unencrypted image, and true will result in an encrypted one.
+  copying a provisioned instance to an AMI. By default, Packer will keep
+  the encryption setting to what it was in the source image. Setting false
+  will result in an unencrypted image, and true will result in an encrypted
+  one.
+  
   If you have used the `launch_block_device_mappings` to set an encryption
   key and that key is the same as the one you want the image encrypted with
   at the end, then you don't need to set this field; leaving it empty will
   prevent an unnecessary extra copy step and save you some time.
 
-- `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for boot volume encryption. This
-  only applies to the main `region`, other regions where the AMI will be
-  copied will be encrypted by the default EBS KMS key. For valid formats
-  see *KmsKeyId* in the [AWS API docs -
+- `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for AMI encryption. This
+  only applies to the main `region` -- any regions the AMI gets copied to
+  copied will be encrypted by the default EBS KMS key for that region,
+  unless you set region-specific keys in AMIRegionKMSKeyIDs.
+  
+  Set this value if you select `encrypt_boot`, but don't want to use the
+  region's default KMS key.
+  
+  If you have a custom kms key you'd like to apply to the launch volume,
+  and are only building in one region, it is more efficient to leave this
+  and `encrypt_boot` empty and to instead set the key id in the
+  launch_block_device_mappings (you can find an example below). This saves
+  potentially many minutes at the end of the build by preventing Packer
+  from having to copy and re-encrypt the image at the end of the build.
+  
+  For valid formats see *KmsKeyId* in the [AWS API docs -
   CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
   This field is validated by Packer, when using an alias, you will have to
   prefix `kms_key_id` with `alias/`.
