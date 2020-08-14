@@ -10,7 +10,7 @@ import (
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatHardwareConfig struct {
 	CPUs                *int32  `mapstructure:"CPUs" cty:"CPUs" hcl:"CPUs"`
-	CpuCores            *int32  `mapstructure:"cpu_cores" cty:"cpu_cores" hcl:"cpu_cores"`
+	CPUCoresPerSocket   *int32  `mapstructure:"cpu_cores" cty:"cpu_cores" hcl:"cpu_cores"`
 	CPUReservation      *int64  `mapstructure:"CPU_reservation" cty:"CPU_reservation" hcl:"CPU_reservation"`
 	CPULimit            *int64  `mapstructure:"CPU_limit" cty:"CPU_limit" hcl:"CPU_limit"`
 	CpuHotAddEnabled    *bool   `mapstructure:"CPU_hot_plug" cty:"CPU_hot_plug" hcl:"CPU_hot_plug"`

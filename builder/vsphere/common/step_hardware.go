@@ -15,8 +15,8 @@ import (
 type HardwareConfig struct {
 	// Number of CPU sockets.
 	CPUs int32 `mapstructure:"CPUs"`
-	// Number of CPU cores per socket.
-	CpuCores int32 `mapstructure:"cpu_cores"`
+	// Number of CPU cores per socket. Defaults to value of `CPUs`
+	CPUCoresPerSocket int32 `mapstructure:"cpu_cores"`
 	// Amount of reserved CPU resources in MHz.
 	CPUReservation int64 `mapstructure:"CPU_reservation"`
 	// Upper limit of available CPU resources in MHz.
@@ -48,6 +48,16 @@ type HardwareConfig struct {
 func (c *HardwareConfig) Prepare() []error {
 	var errs []error
 
+	if c.CPUCoresPerSocket != 0 && c.CPUs != 0 {
+		if c.CPUs%c.CPUCoresPerSocket != 0 {
+			errs = append(errs, fmt.Errorf("'CPUs' must be dividable by 'cpu_cores'"))
+		}
+	}
+
+	if c.CPUCoresPerSocket == 0 && c.CPUs != 0 {
+		c.CPUCoresPerSocket = c.CPUs
+	}
+
 	if c.RAMReservation > 0 && c.RAMReserveAll != false {
 		errs = append(errs, fmt.Errorf("'RAM_reservation' and 'RAM_reserve_all' cannot be used together"))
 	}
@@ -72,7 +82,7 @@ func (s *StepConfigureHardware) Run(_ context.Context, state multistep.StateBag)
 
 		err := vm.Configure(&driver.HardwareConfig{
 			CPUs:                s.Config.CPUs,
-			CpuCores:            s.Config.CpuCores,
+			CPUCoresPerSocket:   s.Config.CPUCoresPerSocket,
 			CPUReservation:      s.Config.CPUReservation,
 			CPULimit:            s.Config.CPULimit,
 			RAM:                 s.Config.RAM,

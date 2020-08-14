@@ -41,7 +41,7 @@ type FlatConfig struct {
 	Datastore                       *string                                     `mapstructure:"datastore" cty:"datastore" hcl:"datastore"`
 	SetHostForDatastoreUploads      *bool                                       `mapstructure:"set_host_for_datastore_uploads" cty:"set_host_for_datastore_uploads" hcl:"set_host_for_datastore_uploads"`
 	CPUs                            *int32                                      `mapstructure:"CPUs" cty:"CPUs" hcl:"CPUs"`
-	CpuCores                        *int32                                      `mapstructure:"cpu_cores" cty:"cpu_cores" hcl:"cpu_cores"`
+	CPUCoresPerSocket               *int32                                      `mapstructure:"cpu_cores" cty:"cpu_cores" hcl:"cpu_cores"`
 	CPUReservation                  *int64                                      `mapstructure:"CPU_reservation" cty:"CPU_reservation" hcl:"CPU_reservation"`
 	CPULimit                        *int64                                      `mapstructure:"CPU_limit" cty:"CPU_limit" hcl:"CPU_limit"`
 	CpuHotAddEnabled                *bool                                       `mapstructure:"CPU_hot_plug" cty:"CPU_hot_plug" hcl:"CPU_hot_plug"`
