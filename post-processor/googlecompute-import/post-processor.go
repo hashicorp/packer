@@ -1,3 +1,4 @@
+//go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type Config
 
 package googlecomputeimport
@@ -27,19 +28,38 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	AccountFile string `mapstructure:"account_file"`
-	ProjectId   string `mapstructure:"project_id"`
-	IAP         bool   `mapstructure:"iap"`
-
-	Bucket               string            `mapstructure:"bucket"`
-	GCSObjectName        string            `mapstructure:"gcs_object_name"`
-	ImageDescription     string            `mapstructure:"image_description"`
-	ImageFamily          string            `mapstructure:"image_family"`
-	ImageGuestOsFeatures []string          `mapstructure:"image_guest_os_features"`
-	ImageLabels          map[string]string `mapstructure:"image_labels"`
-	ImageName            string            `mapstructure:"image_name"`
-	SkipClean            bool              `mapstructure:"skip_clean"`
-	VaultGCPOauthEngine  string            `mapstructure:"vault_gcp_oauth_engine"`
+	//The JSON file containing your account credentials.
+	//If specified, the account file will take precedence over any `googlecompute` builder authentication method.
+	AccountFile string `mapstructure:"account_file" required:"true"`
+	//The project ID where the GCS bucket exists and where the GCE image is stored.
+	ProjectId string `mapstructure:"project_id" required:"true"`
+	IAP       bool   `mapstructure-to-hcl:",skip"`
+	//The name of the GCS bucket where the raw disk image will be uploaded.
+	Bucket string `mapstructure:"bucket" required:"true"`
+	//The name of the GCS object in `bucket` where
+	//the RAW disk image will be copied for import. This is treated as a
+	//[template engine](/docs/templates/engine). Therefore, you
+	//may use user variables and template functions in this field. Defaults to
+	//`packer-import-{{timestamp}}.tar.gz`.
+	GCSObjectName string `mapstructure:"gcs_object_name"`
+	//The description of the resulting image.
+	ImageDescription string `mapstructure:"image_description"`
+	//The name of the image family to which the resulting image belongs.
+	ImageFamily string `mapstructure:"image_family"`
+	//A list of features to enable on the guest operating system. Applicable only for bootable images. Valid
+	//values are `MULTI_IP_SUBNET`, `SECURE_BOOT`, `UEFI_COMPATIBLE`,
+	//`VIRTIO_SCSI_MULTIQUEUE` and `WINDOWS` currently.
+	ImageGuestOsFeatures []string `mapstructure:"image_guest_os_features"`
+	//Key/value pair labels to apply to the created image.
+	ImageLabels map[string]string `mapstructure:"image_labels"`
+	//The unique name of the resulting image.
+	ImageName string `mapstructure:"image_name" required:"true"`
+	//Skip removing the TAR file uploaded to the GCS
+	//bucket after the import process has completed. "true" means that we should
+	//leave it in the GCS bucket, "false" means to clean it out. Defaults to
+	//`false`.
+	SkipClean           bool   `mapstructure:"skip_clean"`
+	VaultGCPOauthEngine string `mapstructure:"vault_gcp_oauth_engine"`
 
 	account *jwt.Config
 	ctx     interpolate.Context

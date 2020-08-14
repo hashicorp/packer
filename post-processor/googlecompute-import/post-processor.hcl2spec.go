@@ -16,16 +16,16 @@ type FlatConfig struct {
 	PackerOnError        *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
 	PackerUserVars       map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars  []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	AccountFile          *string           `mapstructure:"account_file" cty:"account_file" hcl:"account_file"`
-	ProjectId            *string           `mapstructure:"project_id" cty:"project_id" hcl:"project_id"`
-	IAP                  *bool             `mapstructure:"iap" cty:"iap" hcl:"iap"`
-	Bucket               *string           `mapstructure:"bucket" cty:"bucket" hcl:"bucket"`
+	AccountFile          *string           `mapstructure:"account_file" required:"true" cty:"account_file" hcl:"account_file"`
+	ProjectId            *string           `mapstructure:"project_id" required:"true" cty:"project_id" hcl:"project_id"`
+	IAP                  *bool             `mapstructure-to-hcl:",skip" cty:"iap" hcl:"iap"`
+	Bucket               *string           `mapstructure:"bucket" required:"true" cty:"bucket" hcl:"bucket"`
 	GCSObjectName        *string           `mapstructure:"gcs_object_name" cty:"gcs_object_name" hcl:"gcs_object_name"`
 	ImageDescription     *string           `mapstructure:"image_description" cty:"image_description" hcl:"image_description"`
 	ImageFamily          *string           `mapstructure:"image_family" cty:"image_family" hcl:"image_family"`
 	ImageGuestOsFeatures []string          `mapstructure:"image_guest_os_features" cty:"image_guest_os_features" hcl:"image_guest_os_features"`
 	ImageLabels          map[string]string `mapstructure:"image_labels" cty:"image_labels" hcl:"image_labels"`
-	ImageName            *string           `mapstructure:"image_name" cty:"image_name" hcl:"image_name"`
+	ImageName            *string           `mapstructure:"image_name" required:"true" cty:"image_name" hcl:"image_name"`
 	SkipClean            *bool             `mapstructure:"skip_clean" cty:"skip_clean" hcl:"skip_clean"`
 	VaultGCPOauthEngine  *string           `mapstructure:"vault_gcp_oauth_engine" cty:"vault_gcp_oauth_engine" hcl:"vault_gcp_oauth_engine"`
 }

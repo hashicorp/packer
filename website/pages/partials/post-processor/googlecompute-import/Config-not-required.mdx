@@ -1,0 +1,24 @@
+<!-- Code generated from the comments of the Config struct in post-processor/googlecompute-import/post-processor.go; DO NOT EDIT MANUALLY -->
+
+- `gcs_object_name` (string) - The name of the GCS object in `bucket` where
+  the RAW disk image will be copied for import. This is treated as a
+  [template engine](/docs/templates/engine). Therefore, you
+  may use user variables and template functions in this field. Defaults to
+  `packer-import-{{timestamp}}.tar.gz`.
+
+- `image_description` (string) - The description of the resulting image.
+
+- `image_family` (string) - The name of the image family to which the resulting image belongs.
+
+- `image_guest_os_features` ([]string) - A list of features to enable on the guest operating system. Applicable only for bootable images. Valid
+  values are `MULTI_IP_SUBNET`, `SECURE_BOOT`, `UEFI_COMPATIBLE`,
+  `VIRTIO_SCSI_MULTIQUEUE` and `WINDOWS` currently.
+
+- `image_labels` (map[string]string) - Key/value pair labels to apply to the created image.
+
+- `skip_clean` (bool) - Skip removing the TAR file uploaded to the GCS
+  bucket after the import process has completed. "true" means that we should
+  leave it in the GCS bucket, "false" means to clean it out. Defaults to
+  `false`.
+
+- `vault_gcp_oauth_engine` (string) - Vault GCP Oauth Engine
