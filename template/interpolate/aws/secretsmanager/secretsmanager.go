@@ -75,8 +75,12 @@ func (c *Client) GetSecret(spec *SecretSpec) (string, error) {
 
 func getSecretValue(s *SecretString, spec *SecretSpec) (string, error) {
 	var secretValue map[string]string
-
 	blob := []byte(s.SecretString)
+
+	//For those plaintext secrets just return the value
+	if json.Valid(blob) != true {
+		return s.SecretString, nil
+	}
 
 	err := json.Unmarshal(blob, &secretValue)
 	if err != nil {
