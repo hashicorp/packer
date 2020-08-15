@@ -818,7 +818,7 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 	if !changed && shouldRetry {
 		return ctx, fmt.Errorf("Failed to interpolate %s: Please make sure that "+
 			"the variable you're referencing has been defined; Packer treats "+
-			"all variables used to interpolate other user varaibles as "+
+			"all variables used to interpolate other user variables as "+
 			"required.", failedInterpolation)
 	}
 
