@@ -13,8 +13,7 @@ set -e
 function validateToolPresence
 {
     local TOOLNAME=$1
-    which ${TOOLNAME} >/dev/null
-    if [ $? -ne 0 ]; then
+    if ! which ${TOOLNAME} >/dev/null; then
         echo "${TOOLNAME} is not on the path. Exiting..."
         exit 1
     fi
