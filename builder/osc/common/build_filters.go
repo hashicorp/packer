@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 func buildNetFilters(input map[string]string) oapi.FiltersNet {
@@ -83,6 +84,38 @@ func buildOMIFilters(input map[string]string) oapi.FiltersImage {
 			filters.RootDeviceTypes = filterValue
 		case "block-device-mapping-volume-type":
 			filters.BlockDeviceMappingVolumeType = filterValue
+		//Some params are missing.
+		default:
+			log.Printf("[WARN] Unknown Filter Name: %s.", name)
+		}
+	}
+	return filters
+}
+
+func buildOSCOMIFilters(input map[string]string) osc.FiltersImage {
+	var filters osc.FiltersImage
+	for k, v := range input {
+		filterValue := []string{v}
+
+		switch name := k; name {
+		case "account-alias":
+			filters.AccountAliases = filterValue
+		case "account-id":
+			filters.AccountIds = filterValue
+		case "architecture":
+			filters.Architectures = filterValue
+		case "image-id":
+			filters.ImageIds = filterValue
+		case "image-name":
+			filters.ImageNames = filterValue
+		// case "image-type":
+		// 	filters.ImageTypes = filterValue
+		case "virtualization-type":
+			filters.VirtualizationTypes = filterValue
+		case "root-device-type":
+			filters.RootDeviceTypes = filterValue
+		// case "block-device-mapping-volume-type":
+		// 	filters.BlockDeviceMappingVolumeType = filterValue
 		//Some params are missing.
 		default:
 			log.Printf("[WARN] Unknown Filter Name: %s.", name)
