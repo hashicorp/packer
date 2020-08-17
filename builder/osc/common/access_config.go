@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // AccessConfig is for common configuration related to Outscale API access
@@ -24,6 +25,7 @@ type AccessConfig struct {
 	SkipMetadataApiCheck  bool   `mapstructure:"skip_metadata_api_check"`
 	Token                 string `mapstructure:"token"`
 	clientConfig          *oapi.Config
+	API                   string `mapstructure:"api"`
 
 	getOAPIConnection func() oapi.OAPIClient
 }
@@ -66,7 +68,44 @@ func (c *AccessConfig) Config() (*oapi.Config, error) {
 	}
 
 	return config, nil
+}
 
+// NewOSCClient retrieves the Outscale OSC-SDK client
+func (c *AccessConfig) NewOSCClient() *osc.APIClient {
+	if c.AccessKey == "" {
+		c.AccessKey = os.Getenv("OUTSCALE_ACCESSKEYID")
+	}
+
+	if c.SecretKey == "" {
+		c.SecretKey = os.Getenv("OUTSCALE_SECRETKEYID")
+	}
+
+	if c.RawRegion == "" {
+		c.RawRegion = os.Getenv("OUTSCALE_REGION")
+	}
+
+	if c.CustomEndpointOAPI == "" {
+		c.CustomEndpointOAPI = os.Getenv("OUTSCALE_OAPI_URL")
+	}
+
+	if c.CustomEndpointOAPI == "" {
+		c.CustomEndpointOAPI = "outscale.com/oapi/latest"
+	}
+
+	skipClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	skipClient.Transport = NewTransport(c.AccessKey, c.SecretKey, c.RawRegion, skipClient.Transport)
+
+	return osc.NewAPIClient(&osc.Configuration{
+		BasePath:      fmt.Sprintf("https://api.%s.%s", c.RawRegion, c.CustomEndpointOAPI),
+		DefaultHeader: make(map[string]string),
+		UserAgent:     "packer-osc",
+		HTTPClient:    skipClient,
+	})
 }
 
 func (c *AccessConfig) NewOAPIConnection() (oapi.OAPIClient, error) {
@@ -100,6 +139,14 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	if (len(c.AccessKey) > 0) != (len(c.SecretKey) > 0) {
 		errs = append(errs,
 			fmt.Errorf("`access_key` and `secret_key` must both be either set or not set."))
+	}
+
+	if c.API != "" {
+		if c.API != "osc" && c.API != "oapi" {
+			c.API = "oapi"
+		}
+	} else {
+		c.API = "oapi"
 	}
 
 	return errs
