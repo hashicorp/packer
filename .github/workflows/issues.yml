@@ -8,6 +8,7 @@ jobs:
     steps:
       - name: Add track-internal
         uses: andymckay/labeler@1.0.2
+        if: github.event.issue.pull_request == null
         with:
           repo-token: ${{ secrets.Github_Token }}
           add-labels: "track-internal"
