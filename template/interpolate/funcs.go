@@ -299,12 +299,12 @@ func funcGenAwsSecrets(ctx *Context) interface{} {
 		if !ctx.EnableEnv {
 			// The error message doesn't have to be that detailed since
 			// semantic checks should catch this.
-			return "", errors.New("AWS Secrets Manager vars are only allowed in the variables section")
+			return "", errors.New("AWS Secrets Manager is only allowed in the variables section")
 		}
 
 		// Check if at least 1 parameter has been used
 		if len(secret) == 0 {
-			return "", errors.New("At least one parameter must be used")
+			return "", errors.New("At least one secret name must be provided")
 		}
 		// client uses AWS SDK CredentialChain method. So,credentials can
 		// be loaded from credential file, environment variables, or IAM
@@ -329,7 +329,7 @@ func funcGenAwsSecrets(ctx *Context) interface{} {
 
 		s, err := client.GetSecret(spec)
 		if err != nil {
-			return "", fmt.Errorf("Error getting secret: %s", err)
+			return "", err
 		}
 		return s, nil
 	}
