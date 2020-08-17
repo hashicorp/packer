@@ -106,6 +106,18 @@ func TestGetSecret(t *testing.T) {
 			mock: secretsmanager.GetSecretValueOutput{},
 			ok:   false,
 		},
+		{
+			description: "input has secret stored as plaintext",
+			arg: &SecretSpec{
+				Name: "test",
+			},
+			mock: secretsmanager.GetSecretValueOutput{
+				Name:         aws.String("test"),
+				SecretString: aws.String("ThisIsThePassword"),
+			},
+			want: "ThisIsThePassword",
+			ok:   true,
+		},
 	}
 
 	for _, test := range testCases {

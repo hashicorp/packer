@@ -191,10 +191,25 @@ and detailed documentation for usage of each of those variables can be found
 ## AWS Secrets Manager Variables
 
 Secrets can be read from [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/)
-and used within your template as user variables. the `aws_secretsmanager` function is
+and used within your template as user variables. The `aws_secretsmanager` function is
 available _only_ within the default value of a user variable, allowing you to default
 a user variable to an AWS Secrets Manager secret.
 
+
+### Plaintext Secrets
+```json
+{
+  "variables": {
+    "password": "{{ aws_secretsmanager `globalpassword` }}"
+  }
+}
+```
+
+In the example above it is assumed that the secret `globalpassword` is not
+    stored as a key pair but as a single non-JSON string value. Which the
+    `aws_secretsmanager` function will return as a raw string.
+
+### Single Key Secrets
 ```json
 {
   "variables": {
@@ -203,8 +218,11 @@ a user variable to an AWS Secrets Manager secret.
 }
 ```
 
-In the example above it is assumed that only one key is stored in `sample/app/password` if there are multiple keys stored in it then you need to indicate the specific key you want to fetch as shown below.
+In the example above it is assumed that only one key is stored in
+    `sample/app/password` if there are multiple keys stored in it then you need
+    to indicate the specific key you want to fetch as shown below.
 
+### Multiple Key Secrets
 ```json
 {
   "variables": {
