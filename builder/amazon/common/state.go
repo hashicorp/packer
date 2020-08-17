@@ -1,3 +1,5 @@
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type AWSPollingConfig
 package common
 
 import (
@@ -38,12 +40,45 @@ type StateChangeConf struct {
 // Following are wrapper functions that use Packer's environment-variables to
 // determine retry logic, then call the AWS SDK's built-in waiters.
 
-func WaitUntilAMIAvailable(ctx aws.Context, conn ec2iface.EC2API, imageId string) error {
+// Polling configuration for the AWS waiter. Configures the waiter for resources creation or actions like attaching
+// volumes or importing image.
+// Usage example:
+//
+// In JSON:
+// ```json
+// "aws_polling" : {
+// 	 "delay_seconds": 30,
+// 	 "max_attempts": 50
+// }
+// ```
+//
+// In HCL2:
+// ```hcl
+// aws_polling {
+//	 delay_seconds = 30
+//	 max_attempts = 50
+// }
+// ```
+//
+type AWSPollingConfig struct {
+	// Specifies the maximum number of attempts the waiter will check for resource state.
+	// This value can also be set via the AWS_MAX_ATTEMPTS.
+	// If both option and environment variable are set, the max_attepmts will be considered over the AWS_MAX_ATTEMPTS.
+	// If none is set, defaults to AWS waiter default which is 40.
+	MaxAttempts int `mapstructure:"max_attempts" required:"false"`
+	// Specifies the delay in seconds between attempts to check the resource state.
+	// This value can also be set via the AWS_POLL_DELAY_SECONDS.
+	// If both option and environment variable are set, the delay_seconds will be considered over the AWS_POLL_DELAY_SECONDS.
+	// If none is set, defaults to AWS waiter default which is 15 seconds.
+	DelaySeconds int `mapstructure:"delay_seconds" required:"false"`
+}
+
+func (w *AWSPollingConfig) WaitUntilAMIAvailable(ctx aws.Context, conn ec2iface.EC2API, imageId string) error {
 	imageInput := ec2.DescribeImagesInput{
 		ImageIds: []*string{&imageId},
 	}
 
-	waitOpts := getWaiterOptions()
+	waitOpts := w.getWaiterOptions()
 	if len(waitOpts) == 0 {
 		// Bump this default to 30 minutes because the aws default
 		// of ten minutes doesn't work for some of our long-running copies.
@@ -66,7 +101,7 @@ func WaitUntilAMIAvailable(ctx aws.Context, conn ec2iface.EC2API, imageId string
 	return err
 }
 
-func WaitUntilInstanceRunning(ctx aws.Context, conn *ec2.EC2, instanceId string) error {
+func (w *AWSPollingConfig) WaitUntilInstanceRunning(ctx aws.Context, conn *ec2.EC2, instanceId string) error {
 
 	instanceInput := ec2.DescribeInstancesInput{
 		InstanceIds: []*string{&instanceId},
@@ -75,12 +110,11 @@ func WaitUntilInstanceRunning(ctx aws.Context, conn *ec2.EC2, instanceId string)
 	err := conn.WaitUntilInstanceRunningWithContext(
 		ctx,
 		&instanceInput,
-		getWaiterOptions()...)
+		w.getWaiterOptions()...)
 	return err
 }
 
-func WaitUntilInstanceTerminated(ctx aws.Context, conn *ec2.EC2, instanceId string) error {
-
+func (w *AWSPollingConfig) WaitUntilInstanceTerminated(ctx aws.Context, conn *ec2.EC2, instanceId string) error {
 	instanceInput := ec2.DescribeInstancesInput{
 		InstanceIds: []*string{&instanceId},
 	}
@@ -88,12 +122,12 @@ func WaitUntilInstanceTerminated(ctx aws.Context, conn *ec2.EC2, instanceId stri
 	err := conn.WaitUntilInstanceTerminatedWithContext(
 		ctx,
 		&instanceInput,
-		getWaiterOptions()...)
+		w.getWaiterOptions()...)
 	return err
 }
 
 // This function works for both requesting and cancelling spot instances.
-func WaitUntilSpotRequestFulfilled(ctx aws.Context, conn *ec2.EC2, spotRequestId string) error {
+func (w *AWSPollingConfig) WaitUntilSpotRequestFulfilled(ctx aws.Context, conn *ec2.EC2, spotRequestId string) error {
 	spotRequestInput := ec2.DescribeSpotInstanceRequestsInput{
 		SpotInstanceRequestIds: []*string{&spotRequestId},
 	}
@@ -101,11 +135,11 @@ func WaitUntilSpotRequestFulfilled(ctx aws.Context, conn *ec2.EC2, spotRequestId
 	err := conn.WaitUntilSpotInstanceRequestFulfilledWithContext(
 		ctx,
 		&spotRequestInput,
-		getWaiterOptions()...)
+		w.getWaiterOptions()...)
 	return err
 }
 
-func WaitUntilVolumeAvailable(ctx aws.Context, conn *ec2.EC2, volumeId string) error {
+func (w *AWSPollingConfig) WaitUntilVolumeAvailable(ctx aws.Context, conn *ec2.EC2, volumeId string) error {
 	volumeInput := ec2.DescribeVolumesInput{
 		VolumeIds: []*string{&volumeId},
 	}
@@ -113,11 +147,11 @@ func WaitUntilVolumeAvailable(ctx aws.Context, conn *ec2.EC2, volumeId string) e
 	err := conn.WaitUntilVolumeAvailableWithContext(
 		ctx,
 		&volumeInput,
-		getWaiterOptions()...)
+		w.getWaiterOptions()...)
 	return err
 }
 
-func WaitUntilSnapshotDone(ctx aws.Context, conn *ec2.EC2, snapshotID string) error {
+func (w *AWSPollingConfig) WaitUntilSnapshotDone(ctx aws.Context, conn *ec2.EC2, snapshotID string) error {
 	snapInput := ec2.DescribeSnapshotsInput{
 		SnapshotIds: []*string{&snapshotID},
 	}
@@ -125,13 +159,13 @@ func WaitUntilSnapshotDone(ctx aws.Context, conn *ec2.EC2, snapshotID string) er
 	err := conn.WaitUntilSnapshotCompletedWithContext(
 		ctx,
 		&snapInput,
-		getWaiterOptions()...)
+		w.getWaiterOptions()...)
 	return err
 }
 
 // Wrappers for our custom AWS waiters
 
-func WaitUntilVolumeAttached(ctx aws.Context, conn *ec2.EC2, volumeId string) error {
+func (w *AWSPollingConfig) WaitUntilVolumeAttached(ctx aws.Context, conn *ec2.EC2, volumeId string) error {
 	volumeInput := ec2.DescribeVolumesInput{
 		VolumeIds: []*string{&volumeId},
 	}
@@ -139,11 +173,11 @@ func WaitUntilVolumeAttached(ctx aws.Context, conn *ec2.EC2, volumeId string) er
 	err := WaitForVolumeToBeAttached(conn,
 		ctx,
 		&volumeInput,
-		getWaiterOptions()...)
+		w.getWaiterOptions()...)
 	return err
 }
 
-func WaitUntilVolumeDetached(ctx aws.Context, conn *ec2.EC2, volumeId string) error {
+func (w *AWSPollingConfig) WaitUntilVolumeDetached(ctx aws.Context, conn *ec2.EC2, volumeId string) error {
 	volumeInput := ec2.DescribeVolumesInput{
 		VolumeIds: []*string{&volumeId},
 	}
@@ -151,11 +185,11 @@ func WaitUntilVolumeDetached(ctx aws.Context, conn *ec2.EC2, volumeId string) er
 	err := WaitForVolumeToBeDetached(conn,
 		ctx,
 		&volumeInput,
-		getWaiterOptions()...)
+		w.getWaiterOptions()...)
 	return err
 }
 
-func WaitUntilImageImported(ctx aws.Context, conn *ec2.EC2, taskID string) error {
+func (w *AWSPollingConfig) WaitUntilImageImported(ctx aws.Context, conn *ec2.EC2, taskID string) error {
 	importInput := ec2.DescribeImportImageTasksInput{
 		ImportTaskIds: []*string{&taskID},
 	}
@@ -163,7 +197,7 @@ func WaitUntilImageImported(ctx aws.Context, conn *ec2.EC2, taskID string) error
 	err := WaitForImageToBeImported(conn,
 		ctx,
 		&importInput,
-		getWaiterOptions()...)
+		w.getWaiterOptions()...)
 	return err
 }
 
@@ -298,8 +332,18 @@ type overridableWaitVars struct {
 	awsTimeoutSeconds   envInfo
 }
 
-func getWaiterOptions() []request.WaiterOption {
+func (w *AWSPollingConfig) getWaiterOptions() []request.WaiterOption {
 	envOverrides := getEnvOverrides()
+
+	if w.MaxAttempts != 0 {
+		envOverrides.awsMaxAttempts.Val = w.MaxAttempts
+		envOverrides.awsMaxAttempts.overridden = true
+	}
+	if w.DelaySeconds != 0 {
+		envOverrides.awsPollDelaySeconds.Val = w.DelaySeconds
+		envOverrides.awsPollDelaySeconds.overridden = true
+	}
+
 	waitOpts := applyEnvOverrides(envOverrides)
 	return waitOpts
 }
@@ -333,33 +377,38 @@ func getEnvOverrides() overridableWaitVars {
 	return envValues
 }
 
-func LogEnvOverrideWarnings() {
-	pollDelay := os.Getenv("AWS_POLL_DELAY_SECONDS")
-	timeoutSeconds := os.Getenv("AWS_TIMEOUT_SECONDS")
-	maxAttempts := os.Getenv("AWS_MAX_ATTEMPTS")
+func (w *AWSPollingConfig) LogEnvOverrideWarnings() {
+	pollDelayEnv := os.Getenv("AWS_POLL_DELAY_SECONDS")
+	timeoutSecondsEnv := os.Getenv("AWS_TIMEOUT_SECONDS")
+	maxAttemptsEnv := os.Getenv("AWS_MAX_ATTEMPTS")
 
-	if maxAttempts != "" && timeoutSeconds != "" {
+	maxAttemptsIsSet := maxAttemptsEnv != "" || w.MaxAttempts != 0
+	timeoutSecondsIsSet := timeoutSecondsEnv != ""
+	pollDelayIsSet := pollDelayEnv != "" || w.DelaySeconds != 0
+
+	if maxAttemptsIsSet && timeoutSecondsIsSet {
 		warning := fmt.Sprintf("[WARNING] (aws): AWS_MAX_ATTEMPTS and " +
 			"AWS_TIMEOUT_SECONDS are both set. Packer will use " +
 			"AWS_MAX_ATTEMPTS and discard AWS_TIMEOUT_SECONDS.")
-		if pollDelay == "" {
+		if !pollDelayIsSet {
 			warning = fmt.Sprintf("%s  Since you have not set the poll delay, "+
 				"Packer will default to a 2-second delay.", warning)
 		}
 		log.Printf(warning)
-	} else if timeoutSeconds != "" {
+	} else if timeoutSecondsIsSet {
 		log.Printf("[WARNING] (aws): env var AWS_TIMEOUT_SECONDS is " +
-			"deprecated in favor of AWS_MAX_ATTEMPTS. If you have not " +
-			"explicitly set AWS_POLL_DELAY_SECONDS, we are defaulting to a " +
-			"poll delay of 2 seconds, regardless of the AWS waiter's default.")
+			"deprecated in favor of AWS_MAX_ATTEMPTS env or aws_polling_max_attempts config option. " +
+			"If you have not explicitly set AWS_POLL_DELAY_SECONDS env or aws_polling_delay_seconds config option, " +
+			"we are defaulting to a poll delay of 2 seconds, regardless of the AWS waiter's default.")
 	}
-	if maxAttempts == "" && timeoutSeconds == "" && pollDelay == "" {
+	if !maxAttemptsIsSet && !timeoutSecondsIsSet && !pollDelayIsSet {
 		log.Printf("[INFO] (aws): No AWS timeout and polling overrides have been set. " +
 			"Packer will default to waiter-specific delays and timeouts. If you would " +
 			"like to customize the length of time between retries and max " +
 			"number of retries you may do so by setting the environment " +
-			"variables AWS_POLL_DELAY_SECONDS and AWS_MAX_ATTEMPTS to your " +
-			"desired values.")
+			"variables AWS_POLL_DELAY_SECONDS and AWS_MAX_ATTEMPTS or the " +
+			"configuration options aws_polling_delay_seconds and aws_polling_max_attempts " +
+			"to your desired values.")
 	}
 }
 

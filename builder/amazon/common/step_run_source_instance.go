@@ -19,6 +19,7 @@ import (
 )
 
 type StepRunSourceInstance struct {
+	PollingConfig                     *AWSPollingConfig
 	AssociatePublicIpAddress          bool
 	LaunchMappings                    EC2BlockDeviceMappingsBuilder
 	Comm                              *communicator.Config
@@ -234,7 +235,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		InstanceIds: []*string{aws.String(instanceId)},
 	}
 
-	if err := WaitUntilInstanceRunning(ctx, ec2conn, instanceId); err != nil {
+	if err := s.PollingConfig.WaitUntilInstanceRunning(ctx, ec2conn, instanceId); err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -364,7 +365,7 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 			return
 		}
 
-		if err := WaitUntilInstanceTerminated(aws.BackgroundContext(), ec2conn, s.instanceId); err != nil {
+		if err := s.PollingConfig.WaitUntilInstanceTerminated(aws.BackgroundContext(), ec2conn, s.instanceId); err != nil {
 			ui.Error(err.Error())
 		}
 	}

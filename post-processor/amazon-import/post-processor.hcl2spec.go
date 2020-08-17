@@ -30,6 +30,7 @@ type FlatConfig struct {
 	SkipMetadataApiCheck  *bool                             `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check" hcl:"skip_metadata_api_check"`
 	Token                 *string                           `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
 	VaultAWSEngine        *common.FlatVaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false" cty:"vault_aws_engine" hcl:"vault_aws_engine"`
+	PollingConfig         *common.FlatAWSPollingConfig      `mapstructure:"aws_polling" required:"false" cty:"aws_polling" hcl:"aws_polling"`
 	S3Bucket              *string                           `mapstructure:"s3_bucket_name" cty:"s3_bucket_name" hcl:"s3_bucket_name"`
 	S3Key                 *string                           `mapstructure:"s3_key_name" cty:"s3_key_name" hcl:"s3_key_name"`
 	S3Encryption          *string                           `mapstructure:"s3_encryption" cty:"s3_encryption" hcl:"s3_encryption"`
@@ -79,6 +80,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"skip_metadata_api_check":       &hcldec.AttrSpec{Name: "skip_metadata_api_check", Type: cty.Bool, Required: false},
 		"token":                         &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"vault_aws_engine":              &hcldec.BlockSpec{TypeName: "vault_aws_engine", Nested: hcldec.ObjectSpec((*common.FlatVaultAWSEngineOptions)(nil).HCL2Spec())},
+		"aws_polling":                   &hcldec.BlockSpec{TypeName: "aws_polling", Nested: hcldec.ObjectSpec((*common.FlatAWSPollingConfig)(nil).HCL2Spec())},
 		"s3_bucket_name":                &hcldec.AttrSpec{Name: "s3_bucket_name", Type: cty.String, Required: false},
 		"s3_key_name":                   &hcldec.AttrSpec{Name: "s3_key_name", Type: cty.String, Required: false},
 		"s3_encryption":                 &hcldec.AttrSpec{Name: "s3_encryption", Type: cty.String, Required: false},

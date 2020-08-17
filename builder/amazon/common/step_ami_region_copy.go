@@ -209,7 +209,7 @@ func (s *StepAMIRegionCopy) amiRegionCopy(ctx context.Context, state multistep.S
 	}
 
 	// Wait for the image to become ready
-	if err := WaitUntilAMIAvailable(ctx, regionconn, *resp.ImageId); err != nil {
+	if err := s.AccessConfig.PollingConfig.WaitUntilAMIAvailable(ctx, regionconn, *resp.ImageId); err != nil {
 		return "", snapshotIds, fmt.Errorf("Error waiting for AMI (%s) in region (%s): %s",
 			*resp.ImageId, target, err)
 	}

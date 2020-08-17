@@ -138,6 +138,9 @@ type AccessConfig struct {
 	//   }
 	// ```
 	VaultAWSEngine VaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false"`
+	// [Polling configuration](#polling-configuration) for the AWS waiter. Configures the waiter that checks
+	// resource state.
+	PollingConfig *AWSPollingConfig `mapstructure:"aws_polling" required:"false"`
 
 	getEC2Connection func() ec2iface.EC2API
 }
@@ -215,7 +218,6 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	if c.DecodeAuthZMessages {
 		DecodeAuthZMessages(c.session)
 	}
-	LogEnvOverrideWarnings()
 
 	return c.session, nil
 }
@@ -295,6 +297,11 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs,
 			fmt.Errorf("`access_key` and `secret_key` must both be either set or not set."))
 	}
+
+	if c.PollingConfig == nil {
+		c.PollingConfig = new(AWSPollingConfig)
+	}
+	c.PollingConfig.LogEnvOverrideWarnings()
 
 	return errs
 }

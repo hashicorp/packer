@@ -31,6 +31,7 @@ type FlatConfig struct {
 	SkipMetadataApiCheck                      *bool                                  `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check" hcl:"skip_metadata_api_check"`
 	Token                                     *string                                `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
 	VaultAWSEngine                            *common.FlatVaultAWSEngineOptions      `mapstructure:"vault_aws_engine" required:"false" cty:"vault_aws_engine" hcl:"vault_aws_engine"`
+	PollingConfig                             *common.FlatAWSPollingConfig           `mapstructure:"aws_polling" required:"false" cty:"aws_polling" hcl:"aws_polling"`
 	AMIName                                   *string                                `mapstructure:"ami_name" required:"true" cty:"ami_name" hcl:"ami_name"`
 	AMIDescription                            *string                                `mapstructure:"ami_description" required:"false" cty:"ami_description" hcl:"ami_description"`
 	AMIVirtType                               *string                                `mapstructure:"ami_virtualization_type" required:"false" cty:"ami_virtualization_type" hcl:"ami_virtualization_type"`
@@ -171,6 +172,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"skip_metadata_api_check":       &hcldec.AttrSpec{Name: "skip_metadata_api_check", Type: cty.Bool, Required: false},
 		"token":                         &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"vault_aws_engine":              &hcldec.BlockSpec{TypeName: "vault_aws_engine", Nested: hcldec.ObjectSpec((*common.FlatVaultAWSEngineOptions)(nil).HCL2Spec())},
+		"aws_polling":                   &hcldec.BlockSpec{TypeName: "aws_polling", Nested: hcldec.ObjectSpec((*common.FlatAWSPollingConfig)(nil).HCL2Spec())},
 		"ami_name":                      &hcldec.AttrSpec{Name: "ami_name", Type: cty.String, Required: false},
 		"ami_description":               &hcldec.AttrSpec{Name: "ami_description", Type: cty.String, Required: false},
 		"ami_virtualization_type":       &hcldec.AttrSpec{Name: "ami_virtualization_type", Type: cty.String, Required: false},

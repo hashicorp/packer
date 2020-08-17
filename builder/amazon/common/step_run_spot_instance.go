@@ -23,6 +23,7 @@ type EC2BlockDeviceMappingsBuilder interface {
 }
 
 type StepRunSpotInstance struct {
+	PollingConfig                     *AWSPollingConfig
 	AssociatePublicIpAddress          bool
 	LaunchMappings                    EC2BlockDeviceMappingsBuilder
 	BlockDurationMinutes              int64
@@ -466,7 +467,7 @@ func (s *StepRunSpotInstance) Cleanup(state multistep.StateBag) {
 			return
 		}
 
-		if err := WaitUntilInstanceTerminated(aws.BackgroundContext(), ec2conn, s.instanceId); err != nil {
+		if err := s.PollingConfig.WaitUntilInstanceTerminated(aws.BackgroundContext(), ec2conn, s.instanceId); err != nil {
 			ui.Error(err.Error())
 		}
 	}

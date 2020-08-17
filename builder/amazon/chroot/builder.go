@@ -398,12 +398,15 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			GeneratedData: generatedData,
 		},
 		&StepCreateVolume{
+			PollingConfig:  b.config.PollingConfig,
 			RootVolumeType: b.config.RootVolumeType,
 			RootVolumeSize: b.config.RootVolumeSize,
 			RootVolumeTags: b.config.RootVolumeTags,
 			Ctx:            b.config.ctx,
 		},
-		&StepAttachVolume{},
+		&StepAttachVolume{
+			PollingConfig: b.config.PollingConfig,
+		},
 		&StepEarlyUnflock{},
 		&chroot.StepPreMountCommands{
 			Commands: b.config.PreMountCommands,
@@ -427,7 +430,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&chroot.StepChrootProvision{},
 		&chroot.StepEarlyCleanup{},
-		&StepSnapshot{},
+		&StepSnapshot{
+			PollingConfig: b.config.PollingConfig,
+		},
 		&awscommon.StepDeregisterAMI{
 			AccessConfig:        &b.config.AccessConfig,
 			ForceDeregister:     b.config.AMIForceDeregister,
@@ -440,6 +445,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 			AMISkipBuildRegion:       b.config.AMISkipBuildRegion,
+			PollingConfig:            b.config.PollingConfig,
 		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
