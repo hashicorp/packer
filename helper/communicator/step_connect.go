@@ -47,7 +47,6 @@ type StepConnect struct {
 
 func (s *StepConnect) pause(pauseLen time.Duration, ctx context.Context) bool {
 	// Use a select to determine if we get cancelled during the wait
-	log.Printf("Pausing before connecting...")
 	select {
 	case <-ctx.Done():
 		return true
@@ -112,9 +111,17 @@ func (s *StepConnect) Run(ctx context.Context, state multistep.StateBag) multist
 	}
 
 	if s.Config.PauseBeforeConnect > 0 {
+		ui.Say(fmt.Sprintf("Pausing %s before connecting...",
+			s.Config.PauseBeforeConnect.String()))
 		cancelled := s.pause(s.Config.PauseBeforeConnect, ctx)
 		if cancelled {
 			return multistep.ActionHalt
+		}
+		// After pause is complete, re-run the connect substep to make sure
+		// you've connected properly
+		action := s.substep.Run(ctx, state)
+		if action == multistep.ActionHalt {
+			return action
 		}
 	}
 
