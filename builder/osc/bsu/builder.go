@@ -99,10 +99,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	oapiconn := oapi.NewClient(clientConfig, skipClient)
 
+	oscConn := b.config.NewOSCClient()
+
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
 	state.Put("oapi", oapiconn)
+	state.Put("osc", oscConn)
 	state.Put("clientConfig", clientConfig)
 	state.Put("hook", hook)
 	state.Put("ui", ui)

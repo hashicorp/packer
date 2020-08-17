@@ -27,6 +27,7 @@ type FlatConfig struct {
 	SkipValidation              *bool                                  `mapstructure:"skip_region_validation" cty:"skip_region_validation" hcl:"skip_region_validation"`
 	SkipMetadataApiCheck        *bool                                  `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check" hcl:"skip_metadata_api_check"`
 	Token                       *string                                `mapstructure:"token" cty:"token" hcl:"token"`
+	API                         *string                                `mapstructure:"api" cty:"api" hcl:"api"`
 	OMIName                     *string                                `mapstructure:"omi_name" cty:"omi_name" hcl:"omi_name"`
 	OMIDescription              *string                                `mapstructure:"omi_description" cty:"omi_description" hcl:"omi_description"`
 	OMIVirtType                 *string                                `mapstructure:"omi_virtualization_type" cty:"omi_virtualization_type" hcl:"omi_virtualization_type"`
@@ -148,6 +149,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"skip_region_validation":               &hcldec.AttrSpec{Name: "skip_region_validation", Type: cty.Bool, Required: false},
 		"skip_metadata_api_check":              &hcldec.AttrSpec{Name: "skip_metadata_api_check", Type: cty.Bool, Required: false},
 		"token":                                &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
+		"api":                                  &hcldec.AttrSpec{Name: "api", Type: cty.String, Required: false},
 		"omi_name":                             &hcldec.AttrSpec{Name: "omi_name", Type: cty.String, Required: false},
 		"omi_description":                      &hcldec.AttrSpec{Name: "omi_description", Type: cty.String, Required: false},
 		"omi_virtualization_type":              &hcldec.AttrSpec{Name: "omi_virtualization_type", Type: cty.String, Required: false},
