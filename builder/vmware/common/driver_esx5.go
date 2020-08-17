@@ -154,7 +154,7 @@ func (d *ESX5Driver) Stop(vmxPathLocal string) error {
 
 func (d *ESX5Driver) Register(vmxPathLocal string) error {
 	vmxPath := filepath.ToSlash(filepath.Join(d.outputDir, filepath.Base(vmxPathLocal)))
-	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
+	if err := d.upload(vmxPath, vmxPathLocal, nil); err != nil {
 		return err
 	}
 	r, err := d.run(nil, "vim-cmd", "solo/registervm", strconv.Quote(vmxPath))
@@ -185,7 +185,7 @@ func (d *ESX5Driver) IsDestroyed() (bool, error) {
 	return true, err
 }
 
-func (d *ESX5Driver) UploadISO(localPath string, checksum string) (string, error) {
+func (d *ESX5Driver) UploadISO(localPath string, checksum string, ui packer.Ui) (string, error) {
 	finalPath := d.CachePath(localPath)
 	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
@@ -198,7 +198,7 @@ func (d *ESX5Driver) UploadISO(localPath string, checksum string) (string, error
 	}
 	log.Println("Initial checksum did not match, uploading.")
 
-	if err := d.upload(finalPath, localPath); err != nil {
+	if err := d.upload(finalPath, localPath, ui); err != nil {
 		return "", err
 	}
 
@@ -667,12 +667,26 @@ func (d *ESX5Driver) mkdir(path string) error {
 	return d.sh("mkdir", "-p", strconv.Quote(path))
 }
 
-func (d *ESX5Driver) upload(dst, src string) error {
+func (d *ESX5Driver) upload(dst, src string, ui packer.Ui) error {
+	// Get size so we can set up progress tracker
+	info, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
 	f, err := os.Open(src)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
+
+	if ui != nil {
+		pf := ui.TrackProgress(filepath.Base(src), 0, info.Size(), f)
+		defer pf.Close()
+
+		return d.comm.Upload(dst, pf, &info)
+	}
+
 	return d.comm.Upload(dst, f, nil)
 }
 
