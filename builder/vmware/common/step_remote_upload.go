@@ -45,7 +45,7 @@ func (s *StepRemoteUpload) Run(ctx context.Context, state multistep.StateBag) mu
 
 	ui.Say(s.Message)
 	log.Printf("Remote uploading: %s", path)
-	newPath, err := remote.UploadISO(path, s.Checksum)
+	newPath, err := remote.UploadISO(path, s.Checksum, ui)
 	if err != nil {
 		err := fmt.Errorf("Error uploading file: %s", err)
 		state.Put("error", err)
