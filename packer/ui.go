@@ -91,6 +91,10 @@ func (u *ColoredUi) Machine(t string, args ...string) {
 	u.Ui.Machine(t, args...)
 }
 
+func (u *ColoredUi) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser {
+	return u.Ui.TrackProgress(u.colorize(src, u.Color, false), currentSize, totalSize, stream)
+}
+
 func (u *ColoredUi) colorize(message string, color UiColor, bold bool) string {
 	if !u.supportsColors() {
 		return message
@@ -172,7 +176,7 @@ func (u *TargetedUI) prefixLines(arrow bool, message string) string {
 }
 
 func (u *TargetedUI) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser {
-	return u.Ui.TrackProgress(src, currentSize, totalSize, stream)
+	return u.Ui.TrackProgress(u.prefixLines(false, src), currentSize, totalSize, stream)
 }
 
 // The BasicUI is a UI that reads and writes from a standard Go reader
