@@ -47,7 +47,8 @@ const testBuilderAccBasic = `
 		"vm_type": "t2.micro",
 		"source_omi": "ami-abe953fa",
 		"ssh_username": "outscale",
-		"omi_name": "packer-test {{timestamp}}"
+		"omi_name": "packer-test {{timestamp}}",
+		"api":"osc"
 	}]
 }
 `
