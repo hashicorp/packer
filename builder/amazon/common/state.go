@@ -63,8 +63,8 @@ type StateChangeConf struct {
 type AWSPollingConfig struct {
 	// Specifies the maximum number of attempts the waiter will check for resource state.
 	// This value can also be set via the AWS_MAX_ATTEMPTS.
-	// If both option and environment variable are set, the max_attepmts will be considered over the AWS_MAX_ATTEMPTS.
-	// If none is set, defaults to AWS waiter default which is 40.
+	// If both option and environment variable are set, the max_attempts will be considered over the AWS_MAX_ATTEMPTS.
+	// If none is set, defaults to AWS waiter default which is 40 max_attempts.
 	MaxAttempts int `mapstructure:"max_attempts" required:"false"`
 	// Specifies the delay in seconds between attempts to check the resource state.
 	// This value can also be set via the AWS_POLL_DELAY_SECONDS.
