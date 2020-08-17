@@ -1,0 +1,11 @@
+<!-- Code generated from the comments of the AWSPollingConfig struct in builder/amazon/common/state.go; DO NOT EDIT MANUALLY -->
+
+- `max_attempts` (int) - Specifies the maximum number of attempts the waiter will check for resource state.
+  This value can also be set via the AWS_MAX_ATTEMPTS.
+  If both option and environment variable are set, the max_attempts will be considered over the AWS_MAX_ATTEMPTS.
+  If none is set, defaults to AWS waiter default which is 40 max_attempts.
+
+- `delay_seconds` (int) - Specifies the delay in seconds between attempts to check the resource state.
+  This value can also be set via the AWS_POLL_DELAY_SECONDS.
+  If both option and environment variable are set, the delay_seconds will be considered over the AWS_POLL_DELAY_SECONDS.
+  If none is set, defaults to AWS waiter default which is 15 seconds.

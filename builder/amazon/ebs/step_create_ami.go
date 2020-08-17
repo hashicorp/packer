@@ -16,6 +16,7 @@ import (
 )
 
 type stepCreateAMI struct {
+	PollingConfig      *awscommon.AWSPollingConfig
 	image              *ec2.Image
 	AMISkipBuildRegion bool
 }
@@ -85,8 +86,7 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 
 	// Wait for the image to become ready
 	ui.Say("Waiting for AMI to become ready...")
-
-	if waitErr := awscommon.WaitUntilAMIAvailable(ctx, ec2conn, *createResp.ImageId); waitErr != nil {
+	if waitErr := s.PollingConfig.WaitUntilAMIAvailable(ctx, ec2conn, *createResp.ImageId); waitErr != nil {
 		// waitErr should get bubbled up if the issue is a wait timeout
 		err := fmt.Errorf("Error waiting for AMI: %s", waitErr)
 		imResp, imerr := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})

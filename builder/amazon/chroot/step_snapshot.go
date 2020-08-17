@@ -16,7 +16,8 @@ import (
 // Produces:
 //   snapshot_id string - ID of the created snapshot
 type StepSnapshot struct {
-	snapshotId string
+	PollingConfig *awscommon.AWSPollingConfig
+	snapshotId    string
 }
 
 func (s *StepSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -43,7 +44,7 @@ func (s *StepSnapshot) Run(ctx context.Context, state multistep.StateBag) multis
 	ui.Message(fmt.Sprintf("Snapshot ID: %s", s.snapshotId))
 
 	// Wait for the snapshot to be ready
-	err = awscommon.WaitUntilSnapshotDone(ctx, ec2conn, s.snapshotId)
+	err = s.PollingConfig.WaitUntilSnapshotDone(ctx, ec2conn, s.snapshotId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for snapshot: %s", err)
 		state.Put("error", err)

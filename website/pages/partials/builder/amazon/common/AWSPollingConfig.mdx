@@ -1,0 +1,21 @@
+<!-- Code generated from the comments of the AWSPollingConfig struct in builder/amazon/common/state.go; DO NOT EDIT MANUALLY -->
+
+Polling configuration for the AWS waiter. Configures the waiter for resources creation or actions like attaching
+volumes or importing image.
+Usage example:
+
+In JSON:
+```json
+"aws_polling" : {
+	 "delay_seconds": 30,
+	 "max_attempts": 50
+}
+```
+
+In HCL2:
+```hcl
+aws_polling {
+	 delay_seconds = 30
+	 max_attempts = 50
+}
+```

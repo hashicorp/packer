@@ -15,6 +15,7 @@ import (
 
 // StepRegisterAMI creates the AMI.
 type StepRegisterAMI struct {
+	PollingConfig            *awscommon.AWSPollingConfig
 	RootVolumeSize           int64
 	EnableAMIENASupport      confighelper.Trilean
 	EnableAMISriovNetSupport bool
@@ -81,7 +82,7 @@ func (s *StepRegisterAMI) Run(ctx context.Context, state multistep.StateBag) mul
 	state.Put("amis", amis)
 
 	ui.Say("Waiting for AMI to become ready...")
-	if err := awscommon.WaitUntilAMIAvailable(ctx, ec2conn, *registerResp.ImageId); err != nil {
+	if err := s.PollingConfig.WaitUntilAMIAvailable(ctx, ec2conn, *registerResp.ImageId); err != nil {
 		err := fmt.Errorf("Error waiting for AMI: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())

@@ -20,6 +20,7 @@ import (
 // Produces:
 //   volume_id string - The ID of the created volume
 type StepCreateVolume struct {
+	PollingConfig  *awscommon.AWSPollingConfig
 	volumeId       string
 	RootVolumeSize int64
 	RootVolumeType string
@@ -110,7 +111,7 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 	log.Printf("Volume ID: %s", s.volumeId)
 
 	// Wait for the volume to become ready
-	err = awscommon.WaitUntilVolumeAvailable(ctx, ec2conn, s.volumeId)
+	err = s.PollingConfig.WaitUntilVolumeAvailable(ctx, ec2conn, s.volumeId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for volume: %s", err)
 		state.Put("error", err)

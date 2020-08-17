@@ -12,6 +12,7 @@ import (
 )
 
 type StepStopEBSBackedInstance struct {
+	PollingConfig       *AWSPollingConfig
 	Skip                bool
 	DisableStopInstance bool
 }
@@ -74,7 +75,7 @@ func (s *StepStopEBSBackedInstance) Run(ctx context.Context, state multistep.Sta
 		&ec2.DescribeInstancesInput{
 			InstanceIds: []*string{instance.InstanceId},
 		},
-		getWaiterOptions()...)
+		s.PollingConfig.getWaiterOptions()...)
 
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance to stop: %s", err)

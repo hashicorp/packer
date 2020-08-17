@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/builder/amazon/common"
 )
 
 const sourceDeviceName = "/dev/xvdf"
@@ -23,6 +24,7 @@ func newStepRegisterAMI(amiDevices, launchDevices []*ec2.BlockDeviceMapping) *St
 		},
 		AMIDevices:    amiDevices,
 		LaunchDevices: launchDevices,
+		PollingConfig: new(common.AWSPollingConfig),
 	}
 }
 

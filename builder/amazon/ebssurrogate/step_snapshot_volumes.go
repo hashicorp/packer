@@ -18,6 +18,7 @@ import (
 // Produces:
 //   snapshot_ids map[string]string - IDs of the created snapshots
 type StepSnapshotVolumes struct {
+	PollingConfig   *awscommon.AWSPollingConfig
 	LaunchDevices   []*ec2.BlockDeviceMapping
 	snapshotIds     map[string]string
 	snapshotMutex   sync.Mutex
@@ -56,7 +57,7 @@ func (s *StepSnapshotVolumes) snapshotVolume(ctx context.Context, deviceName str
 	s.snapshotMutex.Unlock()
 
 	// Wait for snapshot to be created
-	err = awscommon.WaitUntilSnapshotDone(ctx, ec2conn, *createSnapResp.SnapshotId)
+	err = s.PollingConfig.WaitUntilSnapshotDone(ctx, ec2conn, *createSnapResp.SnapshotId)
 	return err
 }
 

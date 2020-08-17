@@ -74,6 +74,7 @@ type FlatConfig struct {
 	SkipMetadataApiCheck                      *bool                                  `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check" hcl:"skip_metadata_api_check"`
 	Token                                     *string                                `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
 	VaultAWSEngine                            *common.FlatVaultAWSEngineOptions      `mapstructure:"vault_aws_engine" required:"false" cty:"vault_aws_engine" hcl:"vault_aws_engine"`
+	PollingConfig                             *common.FlatAWSPollingConfig           `mapstructure:"aws_polling" required:"false" cty:"aws_polling" hcl:"aws_polling"`
 	AssociatePublicIpAddress                  *bool                                  `mapstructure:"associate_public_ip_address" required:"false" cty:"associate_public_ip_address" hcl:"associate_public_ip_address"`
 	AvailabilityZone                          *string                                `mapstructure:"availability_zone" required:"false" cty:"availability_zone" hcl:"availability_zone"`
 	BlockDurationMinutes                      *int64                                 `mapstructure:"block_duration_minutes" required:"false" cty:"block_duration_minutes" hcl:"block_duration_minutes"`
@@ -215,6 +216,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"skip_metadata_api_check":       &hcldec.AttrSpec{Name: "skip_metadata_api_check", Type: cty.Bool, Required: false},
 		"token":                         &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"vault_aws_engine":              &hcldec.BlockSpec{TypeName: "vault_aws_engine", Nested: hcldec.ObjectSpec((*common.FlatVaultAWSEngineOptions)(nil).HCL2Spec())},
+		"aws_polling":                   &hcldec.BlockSpec{TypeName: "aws_polling", Nested: hcldec.ObjectSpec((*common.FlatAWSPollingConfig)(nil).HCL2Spec())},
 		"associate_public_ip_address":   &hcldec.AttrSpec{Name: "associate_public_ip_address", Type: cty.Bool, Required: false},
 		"availability_zone":             &hcldec.AttrSpec{Name: "availability_zone", Type: cty.String, Required: false},
 		"block_duration_minutes":        &hcldec.AttrSpec{Name: "block_duration_minutes", Type: cty.Number, Required: false},

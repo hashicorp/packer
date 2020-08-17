@@ -19,8 +19,9 @@ import (
 //   device string - The location where the volume was attached.
 //   attach_cleanup CleanupFunc
 type StepAttachVolume struct {
-	attached bool
-	volumeId string
+	PollingConfig *awscommon.AWSPollingConfig
+	attached      bool
+	volumeId      string
 }
 
 func (s *StepAttachVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -51,7 +52,7 @@ func (s *StepAttachVolume) Run(ctx context.Context, state multistep.StateBag) mu
 	s.volumeId = volumeId
 
 	// Wait for the volume to become attached
-	err = awscommon.WaitUntilVolumeAttached(ctx, ec2conn, s.volumeId)
+	err = s.PollingConfig.WaitUntilVolumeAttached(ctx, ec2conn, s.volumeId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for volume: %s", err)
 		state.Put("error", err)
@@ -87,7 +88,7 @@ func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 	s.attached = false
 
 	// Wait for the volume to detach
-	err = awscommon.WaitUntilVolumeDetached(aws.BackgroundContext(), ec2conn, s.volumeId)
+	err = s.PollingConfig.WaitUntilVolumeDetached(aws.BackgroundContext(), ec2conn, s.volumeId)
 	if err != nil {
 		return fmt.Errorf("Error waiting for volume: %s", err)
 	}

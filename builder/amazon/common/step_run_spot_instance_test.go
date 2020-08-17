@@ -29,6 +29,7 @@ func tStateSpot() multistep.StateBag {
 
 func getBasicStep() *StepRunSpotInstance {
 	stepRunSpotInstance := StepRunSpotInstance{
+		PollingConfig:            new(AWSPollingConfig),
 		AssociatePublicIpAddress: false,
 		LaunchMappings:           BlockDevices{},
 		BlockDurationMinutes:     0,

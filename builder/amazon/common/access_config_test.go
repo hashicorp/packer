@@ -13,6 +13,7 @@ func testAccessConfig() *AccessConfig {
 		getEC2Connection: func() ec2iface.EC2API {
 			return &mockEC2Client{}
 		},
+		PollingConfig: new(AWSPollingConfig),
 	}
 }
 

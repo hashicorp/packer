@@ -52,6 +52,7 @@ type FlatConfig struct {
 	SkipMetadataApiCheck    *bool                             `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check" hcl:"skip_metadata_api_check"`
 	Token                   *string                           `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
 	VaultAWSEngine          *common.FlatVaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false" cty:"vault_aws_engine" hcl:"vault_aws_engine"`
+	PollingConfig           *common.FlatAWSPollingConfig      `mapstructure:"aws_polling" required:"false" cty:"aws_polling" hcl:"aws_polling"`
 	AMIMappings             []common.FlatBlockDevice          `mapstructure:"ami_block_device_mappings" hcl2-schema-generator:"ami_block_device_mappings,direct" required:"false" cty:"ami_block_device_mappings" hcl:"ami_block_device_mappings"`
 	ChrootMounts            [][]string                        `mapstructure:"chroot_mounts" required:"false" cty:"chroot_mounts" hcl:"chroot_mounts"`
 	CommandWrapper          *string                           `mapstructure:"command_wrapper" required:"false" cty:"command_wrapper" hcl:"command_wrapper"`
@@ -127,6 +128,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"skip_metadata_api_check":       &hcldec.AttrSpec{Name: "skip_metadata_api_check", Type: cty.Bool, Required: false},
 		"token":                         &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"vault_aws_engine":              &hcldec.BlockSpec{TypeName: "vault_aws_engine", Nested: hcldec.ObjectSpec((*common.FlatVaultAWSEngineOptions)(nil).HCL2Spec())},
+		"aws_polling":                   &hcldec.BlockSpec{TypeName: "aws_polling", Nested: hcldec.ObjectSpec((*common.FlatAWSPollingConfig)(nil).HCL2Spec())},
 		"ami_block_device_mappings":     &hcldec.BlockListSpec{TypeName: "ami_block_device_mappings", Nested: hcldec.ObjectSpec((*common.FlatBlockDevice)(nil).HCL2Spec())},
 		"chroot_mounts":                 &hcldec.AttrSpec{Name: "chroot_mounts", Type: cty.List(cty.List(cty.String)), Required: false},
 		"command_wrapper":               &hcldec.AttrSpec{Name: "command_wrapper", Type: cty.String, Required: false},

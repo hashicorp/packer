@@ -119,7 +119,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if len(errs.Errors) > 0 {
 		return errs
 	}
-	awscommon.LogEnvOverrideWarnings()
+	if p.config.PollingConfig == nil {
+		p.config.PollingConfig = new(awscommon.AWSPollingConfig)
+	}
+	p.config.PollingConfig.LogEnvOverrideWarnings()
 
 	packer.LogSecretFilter.Set(p.config.AccessKey, p.config.SecretKey, p.config.Token)
 	log.Println(p.config)
@@ -250,7 +253,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	// Wait for import process to complete, this takes a while
 	ui.Message(fmt.Sprintf("Waiting for task %s to complete (may take a while)", *import_start.ImportTaskId))
-	err = awscommon.WaitUntilImageImported(aws.BackgroundContext(), ec2conn, *import_start.ImportTaskId)
+	err = p.config.PollingConfig.WaitUntilImageImported(aws.BackgroundContext(), ec2conn, *import_start.ImportTaskId)
 	if err != nil {
 
 		// Retrieve the status message
@@ -313,7 +316,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 		ui.Message(fmt.Sprintf("Waiting for AMI rename to complete (may take a while)"))
 
-		if err := awscommon.WaitUntilAMIAvailable(aws.BackgroundContext(), ec2conn, *resp.ImageId); err != nil {
+		if err := p.config.PollingConfig.WaitUntilAMIAvailable(aws.BackgroundContext(), ec2conn, *resp.ImageId); err != nil {
 			return nil, false, false, fmt.Errorf("Error waiting for AMI (%s): %s", *resp.ImageId, err)
 		}
 
