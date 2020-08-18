@@ -10,6 +10,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 
 	retry "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -67,7 +68,7 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 	}
 
 	ui.Say("Launching a source OUTSCALE vm...")
-	image, ok := state.Get("source_image").(oapi.Image)
+	image, ok := state.Get("source_image").(osc.Image)
 	if !ok {
 		state.Put("error", fmt.Errorf("source_image type assertion failed"))
 		return multistep.ActionHalt

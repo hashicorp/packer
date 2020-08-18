@@ -16,6 +16,7 @@ import (
 type StepPreValidate struct {
 	DestOmiName     string
 	ForceDeregister bool
+	API             string
 }
 
 func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -60,7 +61,13 @@ func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-	return multistep.ActionContinue
+	for _, omi := range resp.Images {
+		if omi.ImageName == imageName {
+			images = append(images, omi)
+		}
+	}
+
+	return images, nil
 }
 
 func (s *StepPreValidate) Cleanup(multistep.StateBag) {}
