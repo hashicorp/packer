@@ -157,3 +157,13 @@ And this role must be authorized on the:
     The destination folder (not on Datastore, on the Vsphere logical view)
     The network to be assigned
     The destination datastore.
+
+# Troubleshooting
+
+Some users have reported that vSphere templates created from local VMWare builds
+get their boot order reset to cdrom only instead of the original boot order
+defined by the template. If this issue affects you, the solution is to set
+`"bios.hddOrder": "scsi0:0"` in your builder's vmx_data.
+
+Packer doesn't automatically do this for you because it causes strange upload
+behavior in certain versions of ovftool.
