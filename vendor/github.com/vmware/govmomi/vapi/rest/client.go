@@ -25,6 +25,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/vmware/govmomi/vapi/internal"
@@ -34,7 +35,10 @@ import (
 
 // Client extends soap.Client to support JSON encoding, while inheriting security features, debug tracing and session persistence.
 type Client struct {
+	mu sync.Mutex
+
 	*soap.Client
+	sessionID string
 }
 
 // Session information
@@ -59,7 +63,47 @@ func (m *LocalizableMessage) Error() string {
 func NewClient(c *vim25.Client) *Client {
 	sc := c.Client.NewServiceClient(Path, "")
 
-	return &Client{sc}
+	return &Client{Client: sc}
+}
+
+// SessionID is set by calling Login() or optionally with the given id param
+func (c *Client) SessionID(id ...string) string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if len(id) != 0 {
+		c.sessionID = id[0]
+	}
+	return c.sessionID
+}
+
+type marshaledClient struct {
+	SoapClient *soap.Client
+	SessionID  string
+}
+
+func (c *Client) MarshalJSON() ([]byte, error) {
+	m := marshaledClient{
+		SoapClient: c.Client,
+		SessionID:  c.sessionID,
+	}
+
+	return json.Marshal(m)
+}
+
+func (c *Client) UnmarshalJSON(b []byte) error {
+	var m marshaledClient
+
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	*c = Client{
+		Client:    m.SoapClient,
+		sessionID: m.SessionID,
+	}
+
+	return nil
 }
 
 // Resource helper for the given path.
@@ -96,6 +140,10 @@ func (c *Client) Do(ctx context.Context, req *http.Request, resBody interface{})
 
 	req.Header.Set("Accept", "application/json")
 
+	if id := c.SessionID(); id != "" {
+		req.Header.Set(internal.SessionCookieName, id)
+	}
+
 	if s, ok := ctx.Value(signerContext{}).(Signer); ok {
 		if err := s.SignRequest(req); err != nil {
 			return err
@@ -105,6 +153,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, resBody interface{})
 	return c.Client.Do(ctx, req, func(res *http.Response) error {
 		switch res.StatusCode {
 		case http.StatusOK:
+		case http.StatusNoContent:
 		case http.StatusBadRequest:
 			// TODO: structured error types
 			detail, err := ioutil.ReadAll(res.Body)
@@ -135,9 +184,46 @@ func (c *Client) Do(ctx context.Context, req *http.Request, resBody interface{})
 	})
 }
 
+// authHeaders ensures the given map contains a REST auth header
+func (c *Client) authHeaders(h map[string]string) map[string]string {
+	if _, exists := h[internal.SessionCookieName]; exists {
+		return h
+	}
+	if h == nil {
+		h = make(map[string]string)
+	}
+
+	h[internal.SessionCookieName] = c.SessionID()
+
+	return h
+}
+
+// Download wraps soap.Client.Download, adding the REST authentication header
+func (c *Client) Download(ctx context.Context, u *url.URL, param *soap.Download) (io.ReadCloser, int64, error) {
+	p := *param
+	p.Headers = c.authHeaders(p.Headers)
+	return c.Client.Download(ctx, u, &p)
+}
+
+// DownloadFile wraps soap.Client.DownloadFile, adding the REST authentication header
+func (c *Client) DownloadFile(ctx context.Context, file string, u *url.URL, param *soap.Download) error {
+	p := *param
+	p.Headers = c.authHeaders(p.Headers)
+	return c.Client.DownloadFile(ctx, file, u, &p)
+}
+
+// Upload wraps soap.Client.Upload, adding the REST authentication header
+func (c *Client) Upload(ctx context.Context, f io.Reader, u *url.URL, param *soap.Upload) error {
+	p := *param
+	p.Headers = c.authHeaders(p.Headers)
+	return c.Client.Upload(ctx, f, u, &p)
+}
+
 // Login creates a new session via Basic Authentication with the given url.Userinfo.
 func (c *Client) Login(ctx context.Context, user *url.Userinfo) error {
 	req := c.Resource(internal.SessionPath).Request(http.MethodPost)
+
+	req.Header.Set(internal.UseHeaderAuthn, "true")
 
 	if user != nil {
 		if password, ok := user.Password(); ok {
@@ -145,7 +231,15 @@ func (c *Client) Login(ctx context.Context, user *url.Userinfo) error {
 		}
 	}
 
-	return c.Do(ctx, req, nil)
+	var id string
+	err := c.Do(ctx, req, &id)
+	if err != nil {
+		return err
+	}
+
+	c.SessionID(id)
+
+	return nil
 }
 
 func (c *Client) LoginByToken(ctx context.Context) error {
@@ -173,4 +267,23 @@ func (c *Client) Session(ctx context.Context) (*Session, error) {
 func (c *Client) Logout(ctx context.Context) error {
 	req := c.Resource(internal.SessionPath).Request(http.MethodDelete)
 	return c.Do(ctx, req, nil)
+}
+
+// Valid returns whether or not the client is valid and ready for use.
+// This should be called after unmarshalling the client.
+func (c *Client) Valid() bool {
+	if c == nil {
+		return false
+	}
+
+	if c.Client == nil {
+		return false
+	}
+
+	return true
+}
+
+// Path returns rest.Path (see cache.Client)
+func (c *Client) Path() string {
+	return Path
 }

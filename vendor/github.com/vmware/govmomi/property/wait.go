@@ -29,6 +29,7 @@ type WaitFilter struct {
 	types.CreateFilter
 	Options          *types.WaitOptions
 	PropagateMissing bool
+	Truncated        bool
 }
 
 // Add a new ObjectSpec and PropertySpec to the WaitFilter
@@ -127,6 +128,10 @@ func WaitForUpdates(ctx context.Context, c *Collector, filter *WaitFilter, f fun
 		}
 
 		req.Version = set.Version
+		filter.Truncated = false
+		if set.Truncated != nil {
+			filter.Truncated = *set.Truncated
+		}
 
 		for _, fs := range set.FilterSet {
 			if filter.PropagateMissing {

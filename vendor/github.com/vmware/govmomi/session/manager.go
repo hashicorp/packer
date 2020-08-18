@@ -19,7 +19,6 @@ package session
 import (
 	"context"
 	"io/ioutil"
-	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -124,7 +123,7 @@ func (sm *Manager) LoginExtensionByCertificate(ctx context.Context, key string) 
 		// "Post https://sdkTunnel:8089/sdk: x509: certificate is valid for $vcenter_hostname, not sdkTunnel"
 		// The only easy way around this is to disable verification for the call to LoginExtensionByCertificate().
 		// TODO: find a way to avoid disabling InsecureSkipVerify.
-		c.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify = true
+		c.DefaultTransport().TLSClientConfig.InsecureSkipVerify = true
 	}
 
 	req := types.LoginExtensionByCertificate{

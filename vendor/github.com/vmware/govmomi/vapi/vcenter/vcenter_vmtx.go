@@ -53,12 +53,7 @@ type TemplateInfo struct {
 }
 
 // Placement information used to place the virtual machine template
-type Placement struct {
-	ResourcePool string `json:"resource_pool,omitempty"`
-	Host         string `json:"host,omitempty"`
-	Folder       string `json:"folder,omitempty"`
-	Cluster      string `json:"cluster,omitempty"`
-}
+type Placement = library.Placement
 
 // StoragePolicy for DiskStorage
 type StoragePolicy struct {
@@ -113,7 +108,7 @@ type CheckIn struct {
 	Message string `json:"message"`
 }
 
-// CreateTemplate creates a library item in content library from an existing VM
+// CreateTemplate creates a library VMTX item in content library from an existing VM
 func (c *Manager) CreateTemplate(ctx context.Context, vmtx Template) (string, error) {
 	url := c.Resource(internal.VCenterVMTXLibraryItem)
 	var res string

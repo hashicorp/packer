@@ -60,14 +60,13 @@ type AdditionalParams struct {
 }
 
 const (
-	ClassOvfParams             = "com.vmware.vcenter.ovf.ovf_params"
-	ClassPropertyParams        = "com.vmware.vcenter.ovf.property_params"
-	TypeDeploymentOptionParams = "DeploymentOptionParams"
-	TypeExtraConfigParams      = "ExtraConfigParams"
-	TypeExtraConfigs           = "ExtraConfigs"
-	TypeIPAllocationParams     = "IpAllocationParams"
-	TypePropertyParams         = "PropertyParams"
-	TypeSizeParams             = "SizeParams"
+	ClassDeploymentOptionParams = "com.vmware.vcenter.ovf.deployment_option_params"
+	ClassPropertyParams         = "com.vmware.vcenter.ovf.property_params"
+	TypeDeploymentOptionParams  = "DeploymentOptionParams"
+	TypeExtraConfigParams       = "ExtraConfigParams"
+	TypeIPAllocationParams      = "IpAllocationParams"
+	TypePropertyParams          = "PropertyParams"
+	TypeSizeParams              = "SizeParams"
 )
 
 // DeploymentOption contains the information about a deployment option as defined in the OVF specification
@@ -204,6 +203,33 @@ func (e *DeploymentError) Error() string {
 	return "deploy error: " + msg
 }
 
+// LibraryTarget specifies a Library or Library item
+type LibraryTarget struct {
+	LibraryID     string `json:"library_id,omitempty"`
+	LibraryItemID string `json:"library_item_id,omitempty"`
+}
+
+// CreateSpec info used to create an OVF package from a VM
+type CreateSpec struct {
+	Description string   `json:"description,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	Flags       []string `json:"flags,omitempty"`
+}
+
+// OVF data used by CreateOVF
+type OVF struct {
+	Spec   CreateSpec    `json:"create_spec"`
+	Source ResourceID    `json:"source"`
+	Target LibraryTarget `json:"target"`
+}
+
+// CreateResult used for decoded a CreateOVF response
+type CreateResult struct {
+	Succeeded bool             `json:"succeeded,omitempty"`
+	ID        string           `json:"ovf_library_item_id,omitempty"`
+	Error     *DeploymentError `json:"error,omitempty"`
+}
+
 // Deployment is the results from issuing a library OVF deployment
 type Deployment struct {
 	Succeeded  bool             `json:"succeeded,omitempty"`
@@ -236,6 +262,23 @@ func NewManager(client *rest.Client) *Manager {
 	return &Manager{
 		Client: client,
 	}
+}
+
+// CreateOVF creates a library OVF item in content library from an existing VM
+func (c *Manager) CreateOVF(ctx context.Context, ovf OVF) (string, error) {
+	if ovf.Source.Type == "" {
+		ovf.Source.Type = "VirtualMachine"
+	}
+	url := c.Resource(internal.VCenterOVFLibraryItem)
+	var res CreateResult
+	err := c.Do(ctx, url.Request(http.MethodPost, ovf), &res)
+	if err != nil {
+		return "", err
+	}
+	if res.Succeeded {
+		return res.ID, nil
+	}
+	return "", res.Error
 }
 
 // DeployLibraryItem deploys a library OVF

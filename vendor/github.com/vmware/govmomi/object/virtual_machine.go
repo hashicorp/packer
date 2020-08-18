@@ -855,8 +855,10 @@ func (v VirtualMachine) UUID(ctx context.Context) string {
 	if err != nil {
 		return ""
 	}
-
-	return o.Config.Uuid
+	if o.Config != nil {
+		return o.Config.Uuid
+	}
+	return ""
 }
 
 func (v VirtualMachine) QueryChangedDiskAreas(ctx context.Context, baseSnapshot, curSnapshot *types.ManagedObjectReference, disk *types.VirtualDisk, offset int64) (types.DiskChangeInfo, error) {

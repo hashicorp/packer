@@ -129,7 +129,7 @@ require (
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
 	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 	github.com/ulikunitz/xz v0.5.5
-	github.com/vmware/govmomi v0.22.2
+	github.com/vmware/govmomi v0.23.1
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20200608085315-d6e7ef5ceb97
 	github.com/yandex-cloud/go-sdk v0.0.0-20200610100221-ae86895efb97

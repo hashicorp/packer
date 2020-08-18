@@ -2,7 +2,6 @@ package driver
 
 import (
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/vcenter"
 )
 
 type Library struct {
@@ -34,31 +33,4 @@ func (d *Driver) FindContentLibraryItem(libraryId string, name string) (*library
 		}
 	}
 	return nil, nil
-}
-
-// LibraryTarget specifies a Library or Library item
-type LibraryTarget struct {
-	LibraryID     string `json:"library_id,omitempty"`
-	LibraryItemID string `json:"library_item_id,omitempty"`
-}
-
-// CreateSpec info used to create an OVF package from a VM
-type CreateSpec struct {
-	Description string   `json:"description,omitempty"`
-	Name        string   `json:"name,omitempty"`
-	Flags       []string `json:"flags,omitempty"`
-}
-
-// OVF data used by CreateOVF
-type OVF struct {
-	Spec   CreateSpec         `json:"create_spec"`
-	Source vcenter.ResourceID `json:"source"`
-	Target LibraryTarget      `json:"target"`
-}
-
-// CreateResult used for decoded a CreateOVF response
-type CreateResult struct {
-	Succeeded bool                     `json:"succeeded,omitempty"`
-	ID        string                   `json:"ovf_library_item_id,omitempty"`
-	Error     *vcenter.DeploymentError `json:"error,omitempty"`
 }

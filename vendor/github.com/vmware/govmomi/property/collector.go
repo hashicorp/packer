@@ -143,7 +143,7 @@ func (p *Collector) Retrieve(ctx context.Context, objs []types.ManagedObjectRefe
 			spec := types.PropertySpec{
 				Type: obj.Type,
 			}
-			if ps == nil {
+			if len(ps) == 0 {
 				spec.All = types.NewBool(true)
 			} else {
 				spec.PathSet = ps

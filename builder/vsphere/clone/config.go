@@ -36,8 +36,8 @@ type Config struct {
 	// Configuration for exporting VM to an ovf file.
 	// The VM will not be exported if no [Export Configuration](#export-configuration) is specified.
 	Export *common.ExportConfig `mapstructure:"export"`
-	// Configuration for importing the VM template to a Content Library.
-	// The VM template will not be imported if no [Content Library Import Configuration](#content-library-import-configuration) is specified.
+	// Configuration for importing a VM template or OVF template to a Content Library.
+	// The template will not be imported if no [Content Library Import Configuration](#content-library-import-configuration) is specified.
 	// The import doesn't work if [convert_to_template](#convert_to_template) is set to true.
 	ContentLibraryDestinationConfig *common.ContentLibraryDestinationConfig `mapstructure:"content_library_destination"`
 	// Customize the cloned VM to configure host, network, or licensing settings. See the [customization options](#customization).

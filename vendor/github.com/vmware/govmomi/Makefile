@@ -9,6 +9,7 @@ goimports:
 	@echo checking go imports...
 	@command -v goimports >/dev/null 2>&1 || $(GO) get golang.org/x/tools/cmd/goimports
 	@! goimports -d . 2>&1 | egrep -v '^$$'
+	@! TERM=xterm git grep encoding/xml -- '*.go' ':!vim25/xml/*.go'
 
 govet:
 	@echo checking go vet...
