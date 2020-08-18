@@ -37,6 +37,41 @@ var psEscape = strings.NewReplacer(
 	"'", "`'",
 )
 
+const PowershellWrapperScript string = `
+if (Test-Path variable:global:ProgressPreference) {
+  set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'
+}
+$global:LASTEXITCODE = 0
+$global:lastcmdlet = $null
+trap [Exception] {write-error ($_.Exception.Message);exit 1}
+
+{{if .DebugMode}}
+Set-PsDebug -Trace {{.DebugMode}}
+{{- end}}
+. {{.Vars}}; & '{{.Path}}'; $global:lastcmdlet = $?
+
+$exitstatus = 1
+if ($lastcmdlet) {
+  $exitstatus = 0
+}
+if ( $LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0 ) {
+  $exitstatus = $LASTEXITCODE
+}
+exit $exitstatus
+`
+
+const PowershellWrapperScriptShortVersion string = `
+if (Test-Path variable:global:ProgressPreference) {
+  set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'
+}
+set-variable -name variable:global:ErrorActionPreference -value 'Continue'
+$global:LASTEXITCODE = 0
+{{if .DebugMode}}
+Set-PsDebug -Trace {{.DebugMode}}
+{{- end}}
+. {{.Vars}};try { & '{{.Path}}' } catch { Write-Error $Error[0]; exit 1 }; if ($LASTEXITCODE) { exit $LASTEXITCODE }
+`
+
 type Config struct {
 	shell.Provisioner `mapstructure:",squash"`
 
@@ -77,6 +112,7 @@ type Config struct {
 	ExecutionPolicy ExecutionPolicy `mapstructure:"execution_policy"`
 
 	remoteCleanUpScriptPath string
+	remoteWrapperScriptPath string
 
 	// If set, sets PowerShell's [PSDebug mode](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/set-psdebug?view=powershell-7)
 	//  in order to make script debugging easier. For instance, setting the
@@ -97,20 +133,12 @@ type Provisioner struct {
 }
 
 func (p *Provisioner) defaultExecuteCommand() string {
-	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
-		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
-
-	if p.config.DebugMode != 0 {
-		baseCmd += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
-	}
-
-	baseCmd += `. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
 
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
-		return baseCmd
+		return p.config.remoteWrapperScriptPath
 	}
 
-	return fmt.Sprintf(`powershell -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)
+	return fmt.Sprintf(`powershell -NoLogo -NonInteractive -ExecutionPolicy %s %s`, p.config.ExecutionPolicy, p.config.remoteWrapperScriptPath)
 }
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
@@ -131,6 +159,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	p.config.remoteCleanUpScriptPath = fmt.Sprintf(`c:/Windows/Temp/packer-cleanup-%s.ps1`, uuid.TimeOrderedUUID())
+	p.config.remoteWrapperScriptPath = fmt.Sprintf(`c:/Windows/Temp/packer-wrapper-%s.ps1`, uuid.TimeOrderedUUID())
 
 	if p.config.EnvVarFormat == "" {
 		p.config.EnvVarFormat = `$env:%s="%s"; `
@@ -173,8 +204,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.Vars == nil {
 		p.config.Vars = make([]string, 0)
 	}
-
-	p.config.remoteCleanUpScriptPath = fmt.Sprintf(`c:/Windows/Temp/packer-cleanup-%s.ps1`, uuid.TimeOrderedUUID())
 
 	var errs error
 	if p.config.Script != "" && len(p.config.Scripts) > 0 {
@@ -233,29 +262,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-// Takes the inline scripts, concatenates them into a temporary file and
-// returns a string containing the location of said file.
-func extractScript(p *Provisioner) (string, error) {
-	temp, err := tmp.File("powershell-provisioner")
-	if err != nil {
-		return "", err
-	}
-	defer temp.Close()
-	writer := bufio.NewWriter(temp)
-	for _, command := range p.config.Inline {
-		log.Printf("Found command: %s", command)
-		if _, err := writer.WriteString(command + "\n"); err != nil {
-			return "", fmt.Errorf("Error preparing powershell script: %s", err)
-		}
-	}
-
-	if err := writer.Flush(); err != nil {
-		return "", fmt.Errorf("Error preparing powershell script: %s", err)
-	}
-
-	return temp.Name(), nil
-}
-
 func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say(fmt.Sprintf("Provisioning with Powershell..."))
 	p.communicator = comm
@@ -293,6 +299,10 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			return fmt.Errorf("Error opening powershell script: %s", err)
 		}
 		defer f.Close()
+
+		if err := p.createPowershellWrapperScript(); err != nil {
+			return fmt.Errorf("Error processing command: %s", err)
+		}
 
 		command, err := p.createCommandText()
 		if err != nil {
@@ -362,7 +372,7 @@ func (p *Provisioner) createRemoteCleanUpCommand(remoteFiles []string) (string, 
 	var b strings.Builder
 	// This script should self destruct.
 	remotePath := p.config.remoteCleanUpScriptPath
-	remoteFiles = append(remoteFiles, remotePath)
+	remoteFiles = append(remoteFiles, remotePath, p.config.remoteWrapperScriptPath)
 	for _, filename := range remoteFiles {
 		fmt.Fprintf(&b, "if (Test-Path %[1]s) {Remove-Item %[1]s}\n", filename)
 	}
@@ -378,6 +388,29 @@ func (p *Provisioner) createRemoteCleanUpCommand(remoteFiles []string) (string, 
 
 	p.config.ctx.Data = data
 	return interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+}
+
+// Takes the inline scripts, concatenates them into a temporary file and
+// returns a string containing the location of said file.
+func extractScript(p *Provisioner) (string, error) {
+	temp, err := tmp.File("powershell-provisioner")
+	if err != nil {
+		return "", err
+	}
+	defer temp.Close()
+	writer := bufio.NewWriter(temp)
+	for _, command := range p.config.Inline {
+		log.Printf("Found command: %s", command)
+		if _, err := writer.WriteString(command + "\n"); err != nil {
+			return "", fmt.Errorf("Error preparing powershell script: %s", err)
+		}
+	}
+
+	if err := writer.Flush(); err != nil {
+		return "", fmt.Errorf("Error preparing powershell script: %s", err)
+	}
+
+	return temp.Name(), nil
 }
 
 // Environment variables required within the remote environment are uploaded
@@ -472,8 +505,43 @@ func (p *Provisioner) uploadEnvVars(flattenedEnvVars string) (err error) {
 	return
 }
 
+func (p *Provisioner) createPowershellWrapperScript() error {
+	// Prepare everything needed to enable the required env vars within the
+	// remote environment
+	err := p.prepareEnvVars(false)
+	if err != nil {
+		return err
+	}
+
+	ctxData := p.generatedData
+	ctxData["Path"] = p.config.RemotePath
+	ctxData["Vars"] = p.config.RemoteEnvVarPath
+	ctxData["DebugMode"] = p.config.DebugMode
+	p.config.ctx.Data = ctxData
+
+	data, err := interpolate.Render(PowershellWrapperScript, &p.config.ctx)
+	if err != nil {
+		return fmt.Errorf("Error processing command: %s", err)
+	}
+
+	return p.communicator.Upload(p.config.remoteWrapperScriptPath, strings.NewReader(data), nil)
+}
+
 func (p *Provisioner) createCommandText() (command string, err error) {
-	// Return the interpolated command
+	// Prepare everything needed to enable the required env vars within the
+	// remote environment
+	err = p.prepareEnvVars(false)
+	if err != nil {
+		return "", err
+	}
+
+	ctxData := p.generatedData
+	ctxData["Path"] = p.config.RemotePath
+	ctxData["Vars"] = p.config.RemoteEnvVarPath
+	p.config.ctx.Data = ctxData
+
+	command, err = interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+
 	if p.config.ElevatedUser == "" {
 		return p.createCommandTextNonPrivileged()
 	} else {
