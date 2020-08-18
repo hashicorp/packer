@@ -37,7 +37,7 @@ var psEscape = strings.NewReplacer(
 	"'", "`'",
 )
 
-const PowershellWrapperScript string = `
+const PowershellWrapperScriptLongVersion string = `
 if (Test-Path variable:global:ProgressPreference) {
   set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'
 }
@@ -60,7 +60,7 @@ if ( $LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0 ) {
 exit $exitstatus
 `
 
-const PowershellWrapperScriptShortVersion string = `
+const PowershellWrapperScript string = `
 if (Test-Path variable:global:ProgressPreference) {
   set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'
 }
