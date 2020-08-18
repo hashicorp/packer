@@ -12,8 +12,20 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
+func testLocalOutputDir(t *testing.T) *LocalOutputDir {
+	td, err := ioutil.TempDir("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	os.RemoveAll(td)
+
+	result := new(LocalOutputDir)
+	result.SetOutputDir(td)
+	return result
+}
+
 func testStepShutdownState(t *testing.T) multistep.StateBag {
-	dir := testOutputDir(t)
+	dir := testLocalOutputDir(t)
 	if err := dir.MkdirAll(); err != nil {
 		t.Fatalf("err: %s", err)
 	}

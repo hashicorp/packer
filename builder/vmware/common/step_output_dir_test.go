@@ -9,16 +9,14 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
-func testOutputDir(t *testing.T) *LocalOutputDir {
+func testOutputDir(t *testing.T) string {
 	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	os.RemoveAll(td)
 
-	result := new(LocalOutputDir)
-	result.SetOutputDir(td)
-	return result
+	return td
 }
 
 func TestStepOutputDir_impl(t *testing.T) {
@@ -27,12 +25,20 @@ func TestStepOutputDir_impl(t *testing.T) {
 
 func TestStepOutputDir(t *testing.T) {
 	state := testState(t)
-	step := new(StepOutputDir)
+	driver := new(DriverMock)
+	state.Put("driver", driver)
 
-	dir := testOutputDir(t)
+	td := testOutputDir(t)
+	outconfig := &OutputConfig{
+		OutputDir: td,
+	}
+
+	step := &StepOutputDir{
+		OutputConfig: outconfig,
+		VMName:       "testVM",
+	}
 	// Delete the test output directory when done
-	defer os.RemoveAll(dir.dir)
-	state.Put("dir", dir)
+	defer os.RemoveAll(td)
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
@@ -41,29 +47,37 @@ func TestStepOutputDir(t *testing.T) {
 	if _, ok := state.GetOk("error"); ok {
 		t.Fatal("should NOT have error")
 	}
-	if _, err := os.Stat(dir.dir); err != nil {
+	if _, err := os.Stat(td); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
 	// Test the cleanup
 	step.Cleanup(state)
-	if _, err := os.Stat(dir.dir); err != nil {
+	if _, err := os.Stat(td); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
 func TestStepOutputDir_existsNoForce(t *testing.T) {
 	state := testState(t)
-	step := new(StepOutputDir)
 
-	dir := testOutputDir(t)
-	state.Put("dir", dir)
+	td := testOutputDir(t)
+	outconfig := &OutputConfig{
+		OutputDir: td,
+	}
+
+	step := &StepOutputDir{
+		OutputConfig: outconfig,
+		VMName:       "testVM",
+	}
+	// Delete the test output directory when done
+	defer os.RemoveAll(td)
 
 	// Make sure the dir exists
-	if err := os.MkdirAll(dir.dir, 0755); err != nil {
+	if err := os.MkdirAll(td, 0755); err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	defer os.RemoveAll(dir.dir)
+	defer os.RemoveAll(td)
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
@@ -75,24 +89,33 @@ func TestStepOutputDir_existsNoForce(t *testing.T) {
 
 	// Test the cleanup
 	step.Cleanup(state)
-	if _, err := os.Stat(dir.dir); err != nil {
+	if _, err := os.Stat(td); err != nil {
 		t.Fatal("should not delete dir")
 	}
 }
 
 func TestStepOutputDir_existsForce(t *testing.T) {
 	state := testState(t)
-	step := new(StepOutputDir)
+
+	td := testOutputDir(t)
+	outconfig := &OutputConfig{
+		OutputDir: td,
+	}
+
+	step := &StepOutputDir{
+		OutputConfig: outconfig,
+		VMName:       "testVM",
+	}
 	step.Force = true
 
-	dir := testOutputDir(t)
-	state.Put("dir", dir)
+	// Delete the test output directory when done
+	defer os.RemoveAll(td)
 
 	// Make sure the dir exists
-	if err := os.MkdirAll(dir.dir, 0755); err != nil {
+	if err := os.MkdirAll(td, 0755); err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	defer os.RemoveAll(dir.dir)
+	defer os.RemoveAll(td)
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
@@ -101,17 +124,22 @@ func TestStepOutputDir_existsForce(t *testing.T) {
 	if _, ok := state.GetOk("error"); ok {
 		t.Fatal("should NOT have error")
 	}
-	if _, err := os.Stat(dir.dir); err != nil {
+	if _, err := os.Stat(td); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
 func TestStepOutputDir_cancel(t *testing.T) {
 	state := testState(t)
-	step := new(StepOutputDir)
+	td := testOutputDir(t)
+	outconfig := &OutputConfig{
+		OutputDir: td,
+	}
 
-	dir := testOutputDir(t)
-	state.Put("dir", dir)
+	step := &StepOutputDir{
+		OutputConfig: outconfig,
+		VMName:       "testVM",
+	}
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
@@ -120,24 +148,29 @@ func TestStepOutputDir_cancel(t *testing.T) {
 	if _, ok := state.GetOk("error"); ok {
 		t.Fatal("should NOT have error")
 	}
-	if _, err := os.Stat(dir.dir); err != nil {
+	if _, err := os.Stat(td); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
 	// Test cancel/halt
 	state.Put(multistep.StateCancelled, true)
 	step.Cleanup(state)
-	if _, err := os.Stat(dir.dir); err == nil {
+	if _, err := os.Stat(td); err == nil {
 		t.Fatal("directory should not exist")
 	}
 }
 
 func TestStepOutputDir_halt(t *testing.T) {
 	state := testState(t)
-	step := new(StepOutputDir)
+	td := testOutputDir(t)
+	outconfig := &OutputConfig{
+		OutputDir: td,
+	}
 
-	dir := testOutputDir(t)
-	state.Put("dir", dir)
+	step := &StepOutputDir{
+		OutputConfig: outconfig,
+		VMName:       "testVM",
+	}
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
@@ -146,14 +179,46 @@ func TestStepOutputDir_halt(t *testing.T) {
 	if _, ok := state.GetOk("error"); ok {
 		t.Fatal("should NOT have error")
 	}
-	if _, err := os.Stat(dir.dir); err != nil {
+	if _, err := os.Stat(td); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
 	// Test cancel/halt
 	state.Put(multistep.StateHalted, true)
 	step.Cleanup(state)
-	if _, err := os.Stat(dir.dir); err == nil {
+	if _, err := os.Stat(td); err == nil {
 		t.Fatal("directory should not exist")
+	}
+}
+
+func TestStepOutputDir_Remote(t *testing.T) {
+	// Tests remote driver
+	state := testState(t)
+	driver := new(RemoteDriverMock)
+	state.Put("driver", driver)
+
+	td := testOutputDir(t)
+	outconfig := &OutputConfig{
+		OutputDir:       td,
+		RemoteOutputDir: "remote_path",
+	}
+
+	step := &StepOutputDir{
+		OutputConfig: outconfig,
+		VMName:       "testVM",
+		RemoteType:   "esx5",
+	}
+	// Delete the test output directory when done
+	defer os.RemoveAll(td)
+
+	// Test the run
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
+
+	// We don't pre-create the output path for export but we do set it in state.
+	exportOutputPath := state.Get("export_output_path").(string)
+	if exportOutputPath != td {
+		t.Fatalf("err: should have set export_output_path!")
 	}
 }
