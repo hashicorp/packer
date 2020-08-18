@@ -34,6 +34,32 @@ func buildNetFilters(input map[string]string) oapi.FiltersNet {
 	return filters
 }
 
+func buildOscNetFilters(input map[string]string) osc.FiltersNet {
+	var filters osc.FiltersNet
+	for k, v := range input {
+		filterValue := []string{v}
+		switch name := k; name {
+		case "ip-range":
+			filters.IpRanges = filterValue
+		case "dhcp-options-set-id":
+			filters.DhcpOptionsSetIds = filterValue
+		case "is-default":
+			if isDefault, err := strconv.ParseBool(v); err == nil {
+				filters.IsDefault = isDefault
+			}
+		case "state":
+			filters.States = filterValue
+		case "tag-key":
+			filters.TagKeys = filterValue
+		case "tag-value":
+			filters.TagValues = filterValue
+		default:
+			log.Printf("[Debug] Unknown Filter Name: %s.", name)
+		}
+	}
+	return filters
+}
+
 func buildSubnetFilters(input map[string]string) oapi.FiltersSubnet {
 	var filters oapi.FiltersSubnet
 	for k, v := range input {
@@ -42,6 +68,32 @@ func buildSubnetFilters(input map[string]string) oapi.FiltersSubnet {
 		case "available-ips-counts":
 			if ipCount, err := strconv.Atoi(v); err == nil {
 				filters.AvailableIpsCounts = []int64{int64(ipCount)}
+			}
+		case "ip-ranges":
+			filters.IpRanges = filterValue
+		case "net-ids":
+			filters.NetIds = filterValue
+		case "states":
+			filters.States = filterValue
+		case "subnet-ids":
+			filters.SubnetIds = filterValue
+		case "sub-region-names":
+			filters.SubregionNames = filterValue
+		default:
+			log.Printf("[Debug] Unknown Filter Name: %s.", name)
+		}
+	}
+	return filters
+}
+
+func buildOscSubnetFilters(input map[string]string) osc.FiltersSubnet {
+	var filters osc.FiltersSubnet
+	for k, v := range input {
+		filterValue := []string{v}
+		switch name := k; name {
+		case "available-ips-counts":
+			if ipCount, err := strconv.Atoi(v); err == nil {
+				filters.AvailableIpsCounts = []int32{int32(ipCount)}
 			}
 		case "ip-ranges":
 			filters.IpRanges = filterValue
