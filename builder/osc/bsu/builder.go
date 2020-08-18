@@ -132,7 +132,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&osccommon.StepKeyPair{
 			Debug:        b.config.PackerDebug,
 			Comm:         &b.config.RunConfig.Comm,
-			DebugKeyPath: fmt.Sprintf("oapi_%s", b.config.PackerBuildName),
+			DebugKeyPath: fmt.Sprintf("osc_%s", b.config.PackerBuildName),
 		},
 		&osccommon.StepPublicIp{
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
