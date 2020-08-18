@@ -36,44 +36,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
 
-	// Hold on to your pants. The output configuration is a little complex
-	// because of all the moving parts between local and remote output, and
-	// exports, and legacy behavior.
-	var dir vmwcommon.OutputDir
-	switch d := driver.(type) {
-	case vmwcommon.OutputDir:
-		// Remote type is esx; the driver fulfils the OutputDir interface so
-		// that it can create output files on the remote instance.
-		dir = d
-	default:
-		// Remote type is ""; the driver will be running the build and creating
-		// the output directory locally
-		dir = new(vmwcommon.LocalOutputDir)
-	}
-
-	// If remote type is esx, we need to track both the output dir on the remote
-	// instance and the output dir locally. This is where we track the local
-	// output dir.
-	exportOutputPath := b.config.OutputDir
-
-	if b.config.RemoteType != "" {
-		if b.config.RemoteOutputDir != "" {
-			b.config.OutputDir = b.config.RemoteOutputDir
-		} else {
-			// Default output dir to vm name. On remote esx instance, this will
-			// become something like /vmfs/volumes/mydatastore/vmname/vmname.vmx
-			b.config.OutputDir = b.config.VMName
-		}
-	}
-	// Remember, this one's either the output from a local build, or the remote
-	// output from a remote build. Not the local export path for a remote build.
-	dir.SetOutputDir(b.config.OutputDir)
-
 	// Setup the state bag
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
 	state.Put("debug", b.config.PackerDebug)
-	state.Put("dir", dir)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -95,7 +61,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Url:         b.config.ISOUrls,
 		},
 		&vmwcommon.StepOutputDir{
-			Force: b.config.PackerForce,
+			Force:        b.config.PackerForce,
+			OutputConfig: &b.config.OutputConfig,
+			RemoteType:   b.config.RemoteType,
+			VMName:       b.config.VMName,
 		},
 		&common.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,
@@ -194,7 +163,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SkipExport:     b.config.SkipExport,
 			VMName:         b.config.VMName,
 			OVFToolOptions: b.config.OVFToolOptions,
-			OutputDir:      exportOutputPath,
 		},
 	}
 
@@ -217,6 +185,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Compile the artifact list
+	exportOutputPath := state.Get("export_output_path").(string) // set in StepOutputDir
 	return vmwcommon.NewArtifact(b.config.RemoteType, b.config.Format, exportOutputPath,
 		b.config.VMName, b.config.SkipExport, b.config.KeepRegistered, state)
 }

@@ -16,7 +16,7 @@ import (
 
 // StepCloneVMX takes a VMX file and clones the VM into the output directory.
 type StepCloneVMX struct {
-	OutputDir string
+	OutputDir *string
 	Path      string
 	VMName    string
 	Linked    bool
@@ -33,7 +33,7 @@ func (s *StepCloneVMX) Run(ctx context.Context, state multistep.StateBag) multis
 	ui := state.Get("ui").(packer.Ui)
 
 	// Set the path we want for the new .vmx file and clone
-	vmxPath := filepath.Join(s.OutputDir, s.VMName+".vmx")
+	vmxPath := filepath.Join(*s.OutputDir, s.VMName+".vmx")
 	ui.Say("Cloning source VM...")
 	log.Printf("Cloning from: %s", s.Path)
 	log.Printf("Cloning to: %s", vmxPath)
@@ -96,7 +96,7 @@ func (s *StepCloneVMX) Run(ctx context.Context, state multistep.StateBag) multis
 	var diskFullPaths []string
 	for _, diskFilename := range diskFilenames {
 		log.Printf("Found attached disk with filename: %s", diskFilename)
-		diskFullPaths = append(diskFullPaths, filepath.Join(s.OutputDir, diskFilename))
+		diskFullPaths = append(diskFullPaths, filepath.Join(*s.OutputDir, diskFilename))
 	}
 
 	if len(diskFullPaths) == 0 {

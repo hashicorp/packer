@@ -33,7 +33,11 @@ type RemoteDriverMock struct {
 	RemovedCachePath string
 	CacheRemoved     bool
 
+	ReturnValDirExists bool
+
 	ReloadVMErr error
+
+	outputDir string
 }
 
 func (d *RemoteDriverMock) UploadISO(path string, checksum string, ui packer.Ui) (string, error) {
@@ -80,4 +84,34 @@ func (d *RemoteDriverMock) RemoveCache(localPath string) error {
 
 func (d *RemoteDriverMock) ReloadVM() error {
 	return d.ReloadVMErr
+}
+
+// the following functions satisfy the Outputdir interface
+
+func (d *RemoteDriverMock) DirExists() (bool, error) {
+	return d.ReturnValDirExists, nil
+}
+
+func (d *RemoteDriverMock) ListFiles() ([]string, error) {
+	return []string{}, nil
+}
+
+func (d *RemoteDriverMock) MkdirAll() error {
+	return nil
+}
+
+func (d *RemoteDriverMock) Remove(string) error {
+	return nil
+}
+
+func (d *RemoteDriverMock) RemoveAll() error {
+	return nil
+}
+
+func (d *RemoteDriverMock) SetOutputDir(s string) {
+	d.outputDir = s
+}
+
+func (d *RemoteDriverMock) String() string {
+	return d.outputDir
 }

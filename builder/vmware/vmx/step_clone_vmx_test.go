@@ -62,7 +62,7 @@ func TestStepCloneVMX(t *testing.T) {
 
 	state := testState(t)
 	step := new(StepCloneVMX)
-	step.OutputDir = td
+	step.OutputDir = &td
 	step.Path = sourcePath
 	step.VMName = "foo"
 
