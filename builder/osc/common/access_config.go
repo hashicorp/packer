@@ -25,7 +25,6 @@ type AccessConfig struct {
 	SkipMetadataApiCheck  bool   `mapstructure:"skip_metadata_api_check"`
 	Token                 string `mapstructure:"token"`
 	clientConfig          *oapi.Config
-	API                   string `mapstructure:"api"`
 
 	getOAPIConnection func() oapi.OAPIClient
 }
@@ -139,14 +138,6 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	if (len(c.AccessKey) > 0) != (len(c.SecretKey) > 0) {
 		errs = append(errs,
 			fmt.Errorf("`access_key` and `secret_key` must both be either set or not set."))
-	}
-
-	if c.API != "" {
-		if c.API != "osc" && c.API != "oapi" {
-			c.API = "oapi"
-		}
-	} else {
-		c.API = "oapi"
 	}
 
 	return errs

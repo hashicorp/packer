@@ -114,7 +114,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&osccommon.StepPreValidate{
 			DestOmiName:     b.config.OMIName,
 			ForceDeregister: b.config.OMIForceDeregister,
-			API:             b.config.AccessConfig.API,
 		},
 		&osccommon.StepSourceOMIInfo{
 			SourceOmi:   b.config.SourceOmi,

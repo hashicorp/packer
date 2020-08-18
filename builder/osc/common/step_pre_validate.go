@@ -61,13 +61,7 @@ func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-	for _, omi := range resp.Images {
-		if omi.ImageName == imageName {
-			images = append(images, omi)
-		}
-	}
-
-	return images, nil
+	return multistep.ActionContinue
 }
 
 func (s *StepPreValidate) Cleanup(multistep.StateBag) {}
