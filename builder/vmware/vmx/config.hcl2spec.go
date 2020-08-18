@@ -41,6 +41,7 @@ type FlatConfig struct {
 	RemotePrivateKey          *string           `mapstructure:"remote_private_key_file" required:"false" cty:"remote_private_key_file" hcl:"remote_private_key_file"`
 	SkipValidateCredentials   *bool             `mapstructure:"skip_validate_credentials" required:"false" cty:"skip_validate_credentials" hcl:"skip_validate_credentials"`
 	OutputDir                 *string           `mapstructure:"output_directory" required:"false" cty:"output_directory" hcl:"output_directory"`
+	RemoteOutputDir           *string           `mapstructure:"remote_output_directory" required:"false" cty:"remote_output_directory" hcl:"remote_output_directory"`
 	Headless                  *bool             `mapstructure:"headless" required:"false" cty:"headless" hcl:"headless"`
 	VNCBindAddress            *string           `mapstructure:"vnc_bind_address" required:"false" cty:"vnc_bind_address" hcl:"vnc_bind_address"`
 	VNCPortMin                *int              `mapstructure:"vnc_port_min" required:"false" cty:"vnc_port_min" hcl:"vnc_port_min"`
@@ -156,6 +157,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"remote_private_key_file":        &hcldec.AttrSpec{Name: "remote_private_key_file", Type: cty.String, Required: false},
 		"skip_validate_credentials":      &hcldec.AttrSpec{Name: "skip_validate_credentials", Type: cty.Bool, Required: false},
 		"output_directory":               &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
+		"remote_output_directory":        &hcldec.AttrSpec{Name: "remote_output_directory", Type: cty.String, Required: false},
 		"headless":                       &hcldec.AttrSpec{Name: "headless", Type: cty.Bool, Required: false},
 		"vnc_bind_address":               &hcldec.AttrSpec{Name: "vnc_bind_address", Type: cty.String, Required: false},
 		"vnc_port_min":                   &hcldec.AttrSpec{Name: "vnc_port_min", Type: cty.Number, Required: false},

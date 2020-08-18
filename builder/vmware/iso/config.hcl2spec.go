@@ -56,6 +56,7 @@ type FlatConfig struct {
 	Serial                    *string           `mapstructure:"serial" required:"false" cty:"serial" hcl:"serial"`
 	Parallel                  *string           `mapstructure:"parallel" required:"false" cty:"parallel" hcl:"parallel"`
 	OutputDir                 *string           `mapstructure:"output_directory" required:"false" cty:"output_directory" hcl:"output_directory"`
+	RemoteOutputDir           *string           `mapstructure:"remote_output_directory" required:"false" cty:"remote_output_directory" hcl:"remote_output_directory"`
 	Headless                  *bool             `mapstructure:"headless" required:"false" cty:"headless" hcl:"headless"`
 	VNCBindAddress            *string           `mapstructure:"vnc_bind_address" required:"false" cty:"vnc_bind_address" hcl:"vnc_bind_address"`
 	VNCPortMin                *int              `mapstructure:"vnc_port_min" required:"false" cty:"vnc_port_min" hcl:"vnc_port_min"`
@@ -194,6 +195,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"serial":                         &hcldec.AttrSpec{Name: "serial", Type: cty.String, Required: false},
 		"parallel":                       &hcldec.AttrSpec{Name: "parallel", Type: cty.String, Required: false},
 		"output_directory":               &hcldec.AttrSpec{Name: "output_directory", Type: cty.String, Required: false},
+		"remote_output_directory":        &hcldec.AttrSpec{Name: "remote_output_directory", Type: cty.String, Required: false},
 		"headless":                       &hcldec.AttrSpec{Name: "headless", Type: cty.Bool, Required: false},
 		"vnc_bind_address":               &hcldec.AttrSpec{Name: "vnc_bind_address", Type: cty.String, Required: false},
 		"vnc_port_min":                   &hcldec.AttrSpec{Name: "vnc_port_min", Type: cty.Number, Required: false},

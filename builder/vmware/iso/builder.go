@@ -36,22 +36,37 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
 
-	// Determine the output dir implementation
+	// Hold on to your pants. The output configuration is a little complex
+	// because of all the moving parts between local and remote output, and
+	// exports, and legacy behavior.
 	var dir vmwcommon.OutputDir
 	switch d := driver.(type) {
 	case vmwcommon.OutputDir:
+		// Remote type is esx; the driver fulfils the OutputDir interface so
+		// that it can create output files on the remote instance.
 		dir = d
 	default:
+		// Remote type is ""; the driver will be running the build and creating
+		// the output directory locally
 		dir = new(vmwcommon.LocalOutputDir)
 	}
 
-	// The OutputDir will track remote esxi output; exportOutputPath preserves
-	// the path to the output on the machine running Packer.
+	// If remote type is esx, we need to track both the output dir on the remote
+	// instance and the output dir locally. This is where we track the local
+	// output dir.
 	exportOutputPath := b.config.OutputDir
 
 	if b.config.RemoteType != "" {
-		b.config.OutputDir = b.config.VMName
+		if b.config.RemoteOutputDir != "" {
+			b.config.OutputDir = b.config.RemoteOutputDir
+		} else {
+			// Default output dir to vm name. On remote esx instance, this will
+			// become something like /vmfs/volumes/mydatastore/vmname/vmname.vmx
+			b.config.OutputDir = b.config.VMName
+		}
 	}
+	// Remember, this one's either the output from a local build, or the remote
+	// output from a remote build. Not the local export path for a remote build.
 	dir.SetOutputDir(b.config.OutputDir)
 
 	// Setup the state bag
