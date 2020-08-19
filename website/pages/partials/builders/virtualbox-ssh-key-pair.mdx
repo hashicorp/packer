@@ -16,13 +16,18 @@ be accessed using the template variables.
 For example, the public key can be provided in the boot command as a URL
 encoded string by appending `| urlquery` to the variable:
 
+In JSON:
 ```json
-{
-  "type": "virtualbox-iso",
-  "boot_command": [
-    "<up><wait><tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg PACKER_USER={{ user `username` }} PACKER_AUTHORIZED_KEY={{ .SSHPublicKey | urlquery }}<enter>"
-  ]
-}
+"boot_command": [
+  "<up><wait><tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg PACKER_USER={{ user `username` }} PACKER_AUTHORIZED_KEY={{ .SSHPublicKey | urlquery }}<enter>"
+]
+```
+
+In HCL2:
+```hcl
+boot_command = [
+  "<up><wait><tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg PACKER_USER={{ user `username` }} PACKER_AUTHORIZED_KEY={{ .SSHPublicKey | urlquery }}<enter>"
+]
 ```
 
 A kickstart could then leverage those fields from the kernel command line by

@@ -186,17 +186,33 @@ delay of 100ms between groups. The delay alleviates issues with latency and CPU
 contention. If you notice missing keys, you can tune this delay by specifying
 "boot_keygroup_interval" in your Packer template, for example:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "builders": [
     {
-      "type": "virtualbox",
+      "type": "virtualbox-ovf",
       "boot_keygroup_interval": "500ms"
       ...
     }
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "virtualbox-ovf" "basic-example" {
+  boot_keygroup_interval = "500ms"
+  # ...
+}
+```
+
+</Tab>
+</Tabs>
 
 #### Optional:
 
@@ -221,31 +237,7 @@ directory of the SSH user.
 
 ## VBoxManage Commands
 
-In order to perform extra customization of the virtual machine, a template can
-define extra calls to `VBoxManage` to perform.
-[VBoxManage](https://www.virtualbox.org/manual/ch09.html) is the command-line
-interface to VirtualBox where you can completely control VirtualBox. It can be
-used to do things such as set RAM, CPUs, etc.
+@include 'builder/virtualbox/common/VBoxManageConfig.mdx'
 
-Extra VBoxManage commands are defined in the template in the `vboxmanage`
-section. An example is shown below that sets the memory and number of CPUs
-within the virtual machine:
+@include 'builder/virtualbox/common/VBoxManageConfig-not-required.mdx'
 
-```json
-{
-  "vboxmanage": [
-    ["modifyvm", "{{.Name}}", "--memory", "1024"],
-    ["modifyvm", "{{.Name}}", "--cpus", "2"]
-  ]
-}
-```
-
-The value of `vboxmanage` is an array of commands to execute. These commands are
-executed in the order defined. So in the above example, the memory will be set
-followed by the CPUs.
-
-Each command itself is an array of strings, where each string is an argument to
-`VBoxManage`. Each argument is treated as a [configuration
-template](/docs/templates/engine). The only available
-variable is `Name` which is replaced with the unique name of the VM, which is
-required for many VBoxManage calls.
