@@ -559,7 +559,7 @@ github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
-# github.com/vmware/govmomi v0.22.2
+# github.com/vmware/govmomi v0.23.1
 github.com/vmware/govmomi
 github.com/vmware/govmomi/find
 github.com/vmware/govmomi/list
@@ -568,6 +568,7 @@ github.com/vmware/govmomi/object
 github.com/vmware/govmomi/ovf
 github.com/vmware/govmomi/property
 github.com/vmware/govmomi/session
+github.com/vmware/govmomi/session/keepalive
 github.com/vmware/govmomi/task
 github.com/vmware/govmomi/vapi/internal
 github.com/vmware/govmomi/vapi/library

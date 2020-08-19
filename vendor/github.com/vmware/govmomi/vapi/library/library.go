@@ -46,6 +46,7 @@ type Library struct {
 	Type             string            `json:"type,omitempty"`
 	Version          string            `json:"version,omitempty"`
 	Subscription     *Subscription     `json:"subscription_info,omitempty"`
+	Publication      *Publication      `json:"publish_info,omitempty"`
 }
 
 // Subscription info
@@ -57,6 +58,59 @@ type Subscription struct {
 	SslThumbprint        string `json:"ssl_thumbprint,omitempty"`
 	SubscriptionURL      string `json:"subscription_url,omitempty"`
 	UserName             string `json:"user_name,omitempty"`
+}
+
+// Publication info
+type Publication struct {
+	AuthenticationMethod string `json:"authentication_method"`
+	UserName             string `json:"user_name,omitempty"`
+	Password             string `json:"password,omitempty"`
+	CurrentPassword      string `json:"current_password,omitempty"`
+	PersistJSON          *bool  `json:"persist_json_enabled,omitempty"`
+	Published            *bool  `json:"published,omitempty"`
+	PublishURL           string `json:"publish_url,omitempty"`
+}
+
+// SubscriberSummary as returned by ListSubscribers
+type SubscriberSummary struct {
+	LibraryID              string `json:"subscribed_library"`
+	LibraryName            string `json:"subscribed_library_name"`
+	SubscriptionID         string `json:"subscription"`
+	LibraryVcenterHostname string `json:"subscribed_library_vcenter_hostname,omitempty"`
+}
+
+// Placement information used to place a virtual machine template
+type Placement struct {
+	ResourcePool string `json:"resource_pool,omitempty"`
+	Host         string `json:"host,omitempty"`
+	Folder       string `json:"folder,omitempty"`
+	Cluster      string `json:"cluster,omitempty"`
+	Network      string `json:"network,omitempty"`
+}
+
+// Vcenter contains information about the vCenter Server instance where a subscribed library associated with a subscription exists.
+type Vcenter struct {
+	Hostname   string `json:"hostname"`
+	Port       int    `json:"https_port,omitempty"`
+	ServerGUID string `json:"server_guid"`
+}
+
+// Subscriber contains the detailed info for a library subscriber.
+type Subscriber struct {
+	LibraryID       string     `json:"subscribed_library"`
+	LibraryName     string     `json:"subscribed_library_name"`
+	LibraryLocation string     `json:"subscribed_library_location"`
+	Placement       *Placement `json:"subscribed_library_placement,omitempty"`
+	Vcenter         *Vcenter   `json:"subscribed_library_vcenter,omitempty"`
+}
+
+// SubscriberLibrary is the specification for a subscribed library to be associated with a subscription.
+type SubscriberLibrary struct {
+	Target    string     `json:"target"`
+	LibraryID string     `json:"subscribed_library,omitempty"`
+	Location  string     `json:"location"`
+	Vcenter   *Vcenter   `json:"vcenter,omitempty"`
+	Placement *Placement `json:"placement,omitempty"`
 }
 
 // Patch merges updates from the given src.
@@ -124,7 +178,7 @@ func (c *Manager) CreateLibrary(ctx context.Context, library Library) (string, e
 		if u.Scheme == "https" && sub.SslThumbprint == "" {
 			thumbprint := c.Thumbprint(u.Host)
 			if thumbprint == "" {
-				t := c.Transport.(*http.Transport)
+				t := c.DefaultTransport()
 				if t.TLSClientConfig.InsecureSkipVerify {
 					var info object.HostCertificateInfo
 					_ = info.FromURL(u, t.TLSClientConfig)
@@ -144,6 +198,18 @@ func (c *Manager) SyncLibrary(ctx context.Context, library *Library) error {
 	path := internal.SubscribedLibraryPath
 	url := c.Resource(path).WithID(library.ID).WithAction("sync")
 	return c.Do(ctx, url.Request(http.MethodPost), nil)
+}
+
+// PublishLibrary publishes the library to specified subscriptions.
+// If no subscriptions are specified, then publishes the library to all subscriptions.
+func (c *Manager) PublishLibrary(ctx context.Context, library *Library, subscriptions []string) error {
+	path := internal.LocalLibraryPath
+	var spec internal.SubscriptionDestinationSpec
+	for i := range subscriptions {
+		spec.Subscriptions = append(spec.Subscriptions, internal.SubscriptionDestination{ID: subscriptions[i]})
+	}
+	url := c.Resource(path).WithID(library.ID).WithAction("publish")
+	return c.Do(ctx, url.Request(http.MethodPost, spec), nil)
 }
 
 // DeleteLibrary deletes an existing library.
@@ -203,4 +269,40 @@ func (c *Manager) GetLibraries(ctx context.Context) ([]Library, error) {
 
 	}
 	return libraries, nil
+}
+
+// ListSubscribers lists the subscriptions of the published library.
+func (c *Manager) ListSubscribers(ctx context.Context, library *Library) ([]SubscriberSummary, error) {
+	url := c.Resource(internal.Subscriptions).WithParam("library", library.ID)
+	var res []SubscriberSummary
+	return res, c.Do(ctx, url.Request(http.MethodGet), &res)
+}
+
+// CreateSubscriber creates a subscription of the published library.
+func (c *Manager) CreateSubscriber(ctx context.Context, library *Library, s SubscriberLibrary) (string, error) {
+	var spec struct {
+		Sub struct {
+			SubscriberLibrary SubscriberLibrary `json:"subscribed_library"`
+		} `json:"spec"`
+	}
+	spec.Sub.SubscriberLibrary = s
+	url := c.Resource(internal.Subscriptions).WithID(library.ID)
+	var res string
+	return res, c.Do(ctx, url.Request(http.MethodPost, &spec), &res)
+}
+
+// GetSubscriber returns information about the specified subscriber of the published library.
+func (c *Manager) GetSubscriber(ctx context.Context, library *Library, subscriber string) (*Subscriber, error) {
+	id := internal.SubscriptionDestination{ID: subscriber}
+	url := c.Resource(internal.Subscriptions).WithID(library.ID).WithAction("get")
+	var res Subscriber
+	return &res, c.Do(ctx, url.Request(http.MethodPost, &id), &res)
+}
+
+// DeleteSubscriber deletes the specified subscription of the published library.
+// The subscribed library associated with the subscription will not be deleted.
+func (c *Manager) DeleteSubscriber(ctx context.Context, library *Library, subscriber string) error {
+	id := internal.SubscriptionDestination{ID: subscriber}
+	url := c.Resource(internal.Subscriptions).WithID(library.ID).WithAction("delete")
+	return c.Do(ctx, url.Request(http.MethodPost, &id), nil)
 }

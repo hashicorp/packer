@@ -216,7 +216,7 @@ iso_paths = [
 
 @include 'builder/vsphere/common/ContentLibraryDestinationConfig-not-required.mdx'
 
-Minimal example of usage:
+Minimal example of usage to import a VM template:
 
 <Tabs>
 <Tab heading="JSON">
@@ -233,6 +233,31 @@ Minimal example of usage:
 ```hcl
 	content_library_destination {
 			library = "Packer Library Test"
+	}
+```
+
+</Tab>
+</Tabs>
+
+Minimal example of usage to import a OVF template:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+	"content_library_destination" : {
+	    "library": "Packer Library Test",
+	    "ovf": true
+	}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+	content_library_destination {
+			library = "Packer Library Test"
+			ovf = true
 	}
 ```
 

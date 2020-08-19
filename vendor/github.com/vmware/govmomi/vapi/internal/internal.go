@@ -38,10 +38,12 @@ const (
 	LocalLibraryPath               = "/com/vmware/content/local-library"
 	SubscribedLibraryPath          = "/com/vmware/content/subscribed-library"
 	SubscribedLibraryItem          = "/com/vmware/content/library/subscribed-item"
+	Subscriptions                  = "/com/vmware/content/library/subscriptions"
 	VCenterOVFLibraryItem          = "/com/vmware/vcenter/ovf/library-item"
 	VCenterVMTXLibraryItem         = "/vcenter/vm-template/library-items"
 	VCenterVM                      = "/vcenter/vm"
 	SessionCookieName              = "vmware-api-session-id"
+	UseHeaderAuthn                 = "vmware-use-header-authn"
 )
 
 // AssociatedObject is the same structure as types.ManagedObjectReference,
@@ -68,4 +70,17 @@ func NewAssociation(ref mo.Reference) Association {
 	return Association{
 		ObjectID: &obj,
 	}
+}
+
+type SubscriptionDestination struct {
+	ID string `json:"subscription"`
+}
+
+type SubscriptionDestinationSpec struct {
+	Subscriptions []SubscriptionDestination `json:"subscriptions,omitempty"`
+}
+
+type SubscriptionItemDestinationSpec struct {
+	Force         bool                      `json:"force_sync_content"`
+	Subscriptions []SubscriptionDestination `json:"subscriptions,omitempty"`
 }

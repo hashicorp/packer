@@ -1,5 +1,27 @@
 # changelog
 
+### 0.23.0 (2020-06-11)
+
+* Finder: support DistributedVirtualSwitch traversal
+
+* Update to vSphere 7 APIs
+
+* Avoid possible nil pointer dereference in guest TransferURL
+
+* Refactor govc session persistence into session/cache package
+
+* Add SetTaskState SetTaskDescription UpdateProgress to object package
+
+* Add Content Library subscriptions support
+
+* Add Content Library item copy support
+
+* Sync vim25/xml with golang 1.13 encoding/xml
+
+* vapi: Add cluster modules client and simulator
+
+* Expose soap client default transport
+
 ### 0.22.1 (2020-01-13)
 
 * Fix SAML token auth using Holder-of-Key with delegated Bearer identity against 6.7 U3b+

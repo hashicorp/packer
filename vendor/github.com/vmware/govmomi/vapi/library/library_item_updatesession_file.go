@@ -116,7 +116,7 @@ func (c *Manager) getContentLengthAndFingerprint(
 	}
 	fingerprint := c.Thumbprint(resp.Request.URL.Host)
 	if fingerprint == "" {
-		if c.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify {
+		if c.DefaultTransport().TLSClientConfig.InsecureSkipVerify {
 			fingerprint = soap.ThumbprintSHA1(resp.TLS.PeerCertificates[0])
 		}
 	}
