@@ -105,6 +105,10 @@ builder.
 
 @include 'common/FloppyConfig-not-required.mdx'
 
+### CD configuration reference
+
+@include 'common/CDConfig-not-required.mdx'
+
 ## Communicator configuration reference
 
 ### Optional common fields:
@@ -136,8 +140,8 @@ for the version of Hyper-V that is running.
 
 Floppy drives are no longer supported by generation 2 machines. This requires
 you to take another approach when dealing with preseed or answer files. Two
-possible options are using virtual DVD drives or using Packers built in web
-server.
+possible options are using your own virtual DVD drives, or the cd_files option,
+or using Packer's built in web server.
 
 When dealing with Windows you need to enable UEFI drives for generation 2
 virtual machines.

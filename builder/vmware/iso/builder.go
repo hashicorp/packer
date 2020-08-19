@@ -76,9 +76,19 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
+		&common.StepCreateCD{
+			Files: b.config.CDConfig.CDFiles,
+			Label: b.config.CDConfig.CDLabel,
+		},
 		&vmwcommon.StepRemoteUpload{
 			Key:       "floppy_path",
 			Message:   "Uploading Floppy to remote machine...",
+			DoCleanup: true,
+			Checksum:  "none",
+		},
+		&vmwcommon.StepRemoteUpload{
+			Key:       "cd_path",
+			Message:   "Uploading CD to remote machine...",
 			DoCleanup: true,
 			Checksum:  "none",
 		},

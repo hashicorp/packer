@@ -37,6 +37,7 @@ const (
 
 type CommonConfig struct {
 	common.FloppyConfig `mapstructure:",squash"`
+	common.CDConfig     `mapstructure:",squash"`
 	// The block size of the VHD to be created.
 	// Recommended disk block size for Linux hyper-v guests is 1 MiB. This
 	// defaults to "32" MiB.
@@ -210,8 +211,8 @@ func (c *CommonConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig
 	}
 
 	// Errors
-	floppyerrs := c.FloppyConfig.Prepare(ctx)
-	errs = append(errs, floppyerrs...)
+	errs = append(errs, c.FloppyConfig.Prepare(ctx)...)
+	errs = append(errs, c.CDConfig.Prepare(ctx)...)
 	if c.GuestAdditionsMode == "" {
 		if c.GuestAdditionsPath != "" {
 			c.GuestAdditionsMode = "attach"

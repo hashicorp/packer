@@ -34,6 +34,7 @@ type vmxTemplateData struct {
 	DiskType                   string
 	CDROMType                  string
 	CDROMType_PrimarySecondary string
+	CDROM_PATH                 string
 
 	Network_Type    string
 	Network_Device  string
@@ -112,6 +113,7 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 
 	ictx := config.ctx
 
+	// Mount extra vmdks we created earlier.
 	if len(config.AdditionalDiskSize) > 0 {
 		for i := range config.AdditionalDiskSize {
 			ictx.Data = &additionalDiskTemplateData{
@@ -236,6 +238,15 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
+	}
+
+	// Add our custom CD, if it exists
+	cd_path, ok := state.Get("cd_path").(string)
+	if ok {
+		if cd_path != "" {
+			vmxTemplate += ExtraCDRomTemplate
+			templateData.CDROM_PATH = cd_path
+		}
 	}
 
 	/// Now that we figured out the CDROM device to add, store it
@@ -595,4 +606,10 @@ const DefaultAdditionalDiskTemplate = `
 scsi0:{{ .DiskNumber }}.fileName = "{{ .DiskName}}-{{ .DiskNumber }}.vmdk"
 scsi0:{{ .DiskNumber }}.present = "TRUE"
 scsi0:{{ .DiskNumber }}.redo = ""
+`
+
+const ExtraCDRomTemplate = `
+{{ .CDROMType }}1:{{ .CDROMType_PrimarySecondary }}.present = "TRUE"
+{{ .CDROMType }}1:{{ .CDROMType_PrimarySecondary }}.fileName = "{{ .CDROM_PATH }}"
+{{ .CDROMType }}1:{{ .CDROMType_PrimarySecondary }}.deviceType = "cdrom-image"
 `
