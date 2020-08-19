@@ -42,20 +42,19 @@ if (Test-Path variable:global:ProgressPreference) {
   set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'
 }
 $global:LASTEXITCODE = 0
-$global:lastcmdlet = $null
 trap [Exception] {write-error ($_.Exception.Message);exit 1}
 
 {{if .DebugMode}}
 Set-PsDebug -Trace {{.DebugMode}}
 {{- end}}
-. {{.Vars}}; & '{{.Path}}'; $global:lastcmdlet = $?
+. {{.Vars}}; & '{{.Path}}'
 
 $exitstatus = 1
-if ($lastcmdlet) {
+if ($?) {
   $exitstatus = 0
 }
 if ( $LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0 ) {
-  $exitstatus = $LASTEXITCODE
+  exit $LASTEXITCODE
 }
 exit $exitstatus
 `
@@ -69,7 +68,10 @@ $global:LASTEXITCODE = 0
 {{if .DebugMode}}
 Set-PsDebug -Trace {{.DebugMode}}
 {{- end}}
-. {{.Vars}};try { & '{{.Path}}' } catch { Write-Error $Error[0]; exit 1 }; if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+. {{.Vars}}; try { . '{{.Path}}' } catch { Write-Error $Error[0]; exit 1 }
+
+exit $LASTEXITCODE
 `
 
 type Config struct {
@@ -132,13 +134,12 @@ type Provisioner struct {
 	generatedData map[string]interface{}
 }
 
-func (p *Provisioner) defaultExecuteCommand() string {
-
+func (p *Provisioner) defaultExecuteCommand(scriptPath string) string {
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
 		return p.config.remoteWrapperScriptPath
 	}
 
-	return fmt.Sprintf(`powershell -NoLogo -NonInteractive -ExecutionPolicy %s %s`, p.config.ExecutionPolicy, p.config.remoteWrapperScriptPath)
+	return fmt.Sprintf(`powershell -NonInteractive -NoProfile -ExecutionPolicy %s -File %s`, p.config.ExecutionPolicy, scriptPath)
 }
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
@@ -172,11 +173,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = p.defaultExecuteCommand()
+		p.config.ExecuteCommand = p.defaultExecuteCommand(p.config.remoteWrapperScriptPath)
 	}
 
 	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = p.defaultExecuteCommand()
+		p.config.ElevatedExecuteCommand = p.defaultExecuteCommand(p.config.remoteWrapperScriptPath)
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -381,13 +382,7 @@ func (p *Provisioner) createRemoteCleanUpCommand(remoteFiles []string) (string, 
 		return "", fmt.Errorf("clean up script %q failed to upload: %s", remotePath, err)
 	}
 
-	data := p.generatedData
-	data["Path"] = remotePath
-	data["Vars"] = p.config.RemoteEnvVarPath
-	p.config.ctx.Data = data
-
-	p.config.ctx.Data = data
-	return interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+	return p.defaultExecuteCommand(remotePath), nil
 }
 
 // Takes the inline scripts, concatenates them into a temporary file and
@@ -528,25 +523,11 @@ func (p *Provisioner) createPowershellWrapperScript() error {
 }
 
 func (p *Provisioner) createCommandText() (command string, err error) {
-	// Prepare everything needed to enable the required env vars within the
-	// remote environment
-	err = p.prepareEnvVars(false)
-	if err != nil {
-		return "", err
-	}
-
-	ctxData := p.generatedData
-	ctxData["Path"] = p.config.RemotePath
-	ctxData["Vars"] = p.config.RemoteEnvVarPath
-	p.config.ctx.Data = ctxData
-
-	command, err = interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
-
 	if p.config.ElevatedUser == "" {
 		return p.createCommandTextNonPrivileged()
-	} else {
-		return p.createCommandTextPrivileged()
 	}
+
+	return p.createCommandTextPrivileged()
 }
 
 func (p *Provisioner) createCommandTextNonPrivileged() (command string, err error) {
