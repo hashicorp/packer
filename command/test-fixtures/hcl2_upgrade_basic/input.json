@@ -34,6 +34,12 @@
                     "device_name": "/dev/sda1",
                     "volume_type": "gp2",
                     "volume_size": 48
+                },
+                {
+                    "delete_on_termination": false,
+                    "device_name": "/dev/sda2",
+                    "volume_type": "gp2",
+                    "volume_size": 42
                 }
             ],
             "spot_price": "0.0075",
