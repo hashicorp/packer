@@ -323,8 +323,18 @@ func jsonBodyToHCL2Body(out *hclwrite.Body, kvs map[string]interface{}) {
 
 		switch value := value.(type) {
 		case map[string]interface{}:
-			nestedBlockBody := out.AppendNewBlock(k, nil).Body()
-			jsonBodyToHCL2Body(nestedBlockBody, value)
+			var first interface{}
+			for _, elem := range value {
+				first = elem
+			}
+
+			switch first.(type) {
+			case string, int, float64:
+				out.SetAttributeValue(k, hcl2shim.HCL2ValueFromConfigValue(value))
+			default:
+				nestedBlockBody := out.AppendNewBlock(k, nil).Body()
+				jsonBodyToHCL2Body(nestedBlockBody, value)
+			}
 		case []interface{}:
 			if len(value) == 0 {
 				continue
