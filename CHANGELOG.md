@@ -3,16 +3,28 @@
 ### IMPROVEMENTS:
 * builder/amazon:  Add all of the custom AWS template engines to `build`
     template function for use by provisioners. [GH-9751]
+* builder/amazon: Add aws_polling config option to override env variables.
+    [GH-9777]
 * builder/azure: Add FreeBSD support to azure/chroot builder. [GH-9697]
 * builder/vmware-esx: Add `network_name` option to vmware so that users can set
     a network without using vmx data. [GH-9718]
+* builder/vmware: Add a `remote_output_directory option` so users can tell
+    Packer where on a datastore to create a vm. [GH-9784]
+* builder/vmware: Add progress tracker to vmware-esx5 iso upload. [GH-9779]
 * builder/vsphere: Add new `directory_permission` config export option.
     [GH-9704]
+* builder/vsphere: Add option to import OVF templates to the Content Library
+    [GH-9755]
 * builder/vsphere: Add step and options to customize cloned VMs. [GH-9665]
+* core/hcl: Add provisioner "override" option to HCL2 templates. [GH-9764]
 * core/hcl: Add vault integration as an HCL2 function function. [GH-9746]
+* core: Add colored prefix to progress bar so it's clearer what build each
+    progress bar belongs to. [GH-9780]
 * core: Ui now pretty prints build durations. [GH-9749]
 * core: When a build is cancelled, Packer will skip postprocessors gracefully
     rather than failing them. [GH-9720]
+* integrations/secretsmanager: Add support for plaintext non-key/pair secrets.
+    [GH-9773]
 * post-processor/vsphere: Improve UI to catch bad credentials and print errors.
     [GH-9649]
 * provisioner/file: Clean up, bugfix, and document previously-hidden `sources`
@@ -31,14 +43,20 @@
     [GH-9698]
 * builder/googlecompute: Fix bug where startup script hang would cause export
     to hang. [GH-9708]
+* builder/hyperv: Send boot command in small chunks to make it more stable.
+    [GH-9765]
 * builder/scaleway: Fix config issue that made scaleway builder fail when used
     with HCL2 config. [GH-9677]
+* builder/vmware: Fully destroy vm if it was cancelled or errored. This will
+    make orphaned vms easier to destroy through vCenter. [GH-9782]
 * builder/vsphere: Fix `alt`, `ctrl`, and `shift` keypresses in the
     boot_command. [GH-9702] [GH-9739]
 * builder/vsphere: Fix bug where Packer timed out if two interfaces were
     defined but only one had an available IP. [GH-9748]
 * builder/vsphere: Fix the configuration_parameters option so that it is always
     applied, not just when the tool sync policy is set. [GH-9713]
+* communicator: Fix `pause_before_connect` option to force a reconnect after
+    the pause. [GH-9772]
 * core: Make `max_retries` provisioner option a string to allow variable
     interpolation. [GH-9673]
 * post-processor/vsphere-template: Fix ReregisterVM to default to true instead
