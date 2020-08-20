@@ -5,25 +5,29 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
-// stepCleanupVolumes cleans up any orphaned volumes that were not designated to
+// StepCleanupVolumes cleans up any orphaned volumes that were not designated to
 // remain after termination of the vm. These volumes are typically ones
 // that are marked as "delete on terminate:false" in the source_ami of a build.
 type StepCleanupVolumes struct {
 	BlockDevices BlockDevices
 }
 
+//Run ...
 func (s *StepCleanupVolumes) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// stepCleanupVolumes is for Cleanup only
 	return multistep.ActionContinue
 }
 
+// Cleanup ...
 func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
-	oapiconn := state.Get("oapi").(*oapi.Client)
+	oscconn := state.Get("osc").(*osc.APIClient)
 	vmRaw := state.Get("vm")
 	var vm oapi.Vm
 	if vmRaw != nil {
@@ -50,10 +54,12 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 
 	// Using the volume list from the cached Vm, check with Outscale for up to
 	// date information on them
-	resp, err := oapiconn.POST_ReadVolumes(oapi.ReadVolumesRequest{
-		Filters: oapi.FiltersVolume{
-			VolumeIds: vl,
-		},
+	resp, _, err := oscconn.VolumeApi.ReadVolumes(context.Background(), &osc.ReadVolumesOpts{
+		ReadVolumesRequest: optional.NewInterface(osc.ReadVolumesRequest{
+			Filters: osc.FiltersVolume{
+				VolumeIds: vl,
+			},
+		}),
 	})
 
 	if err != nil {
@@ -63,13 +69,13 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 
 	// If any of the returned volumes are in a "deleting" stage or otherwise not
 	// available, remove them from the list of volumes
-	for _, v := range resp.OK.Volumes {
+	for _, v := range resp.Volumes {
 		if v.State != "" && v.State != "available" {
 			delete(volList, v.VolumeId)
 		}
 	}
 
-	if len(resp.OK.Volumes) == 0 {
+	if len(resp.Volumes) == 0 {
 		ui.Say("No volumes to clean up, skipping")
 		return
 	}
@@ -87,10 +93,11 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	// Destroy remaining volumes
 	for k := range volList {
 		ui.Say(fmt.Sprintf("Destroying volume (%s)...", k))
-		_, err := oapiconn.POST_DeleteVolume(oapi.DeleteVolumeRequest{VolumeId: k})
+		_, _, err := oscconn.VolumeApi.DeleteVolume(context.Background(), &osc.DeleteVolumeOpts{
+			DeleteVolumeRequest: optional.NewInterface(osc.DeleteVolumeRequest{VolumeId: k}),
+		})
 		if err != nil {
 			ui.Say(fmt.Sprintf("Error deleting volume: %s", err))
 		}
-
 	}
 }
