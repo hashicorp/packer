@@ -17,6 +17,7 @@ type ExportConfig struct {
 	// This can be useful for passing product information to include in the
 	// resulting appliance file. Packer JSON configuration file example:
 	//
+	// In JSON:
 	// ```json
 	// {
 	//   "type": "virtualbox-iso",
@@ -29,6 +30,19 @@ type ExportConfig struct {
 	//   ],
 	//   "format": "ova",
 	// }
+	// ```
+	//
+	// In HCL2:
+	// ```hcl
+	//	source "virtualbox-iso" "basic-example" {
+	//		export_opts = [
+	//	          "--manifest",
+	//	          "--vsys", "0",
+	//	          "--description", "{{user `vm_description`}}",
+	//	          "--version", "{{user `vm_version`}}"
+	//	   	]
+	//		format = "ova"
+	//  }
 	// ```
 	//
 	// A VirtualBox [VM

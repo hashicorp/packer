@@ -89,8 +89,16 @@ type Config struct {
 	// pack](https://www.virtualbox.org/wiki/Downloads#VirtualBox6.0.14OracleVMVirtualBoxExtensionPack)
 	// and you will need to enable EFI mode for nvme to work, ex:
 	//
+	// In JSON:
 	// ```json
 	//  "vboxmanage": [
+	//       [ "modifyvm", "{{.Name}}", "--firmware", "EFI" ],
+	//  ]
+	// ```
+	//
+	// In HCL2:
+	// ```hcl
+	//  vboxmanage = [
 	//       [ "modifyvm", "{{.Name}}", "--firmware", "EFI" ],
 	//  ]
 	// ```
