@@ -67,10 +67,10 @@ func NewDriver(config *ConnectConfig) (*Driver, error) {
 	finder.SetDatacenter(datacenter)
 
 	d := Driver{
-		ctx:        ctx,
-		client:     client,
+		ctx:    ctx,
+		client: client,
 		restClient: &RestClient{
-			client: rest.NewClient(vimClient),
+			client:      rest.NewClient(vimClient),
 			credentials: credentials,
 		},
 		datacenter: datacenter,
@@ -84,7 +84,7 @@ func NewDriver(config *ConnectConfig) (*Driver, error) {
 // This will allow users without vCenter to use the other features that doesn't use the rest.Client.
 // To use the client login/logout must be done to create an authenticated session.
 type RestClient struct {
-	client *rest.Client
+	client      *rest.Client
 	credentials *url.Userinfo
 }
 
