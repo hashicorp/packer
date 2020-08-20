@@ -13,7 +13,7 @@ import (
 //used to do things such as set RAM, CPUs, etc.
 type VBoxManageConfig struct {
 	// Custom `VBoxManage` commands to execute in order to further customize
-	// the virtual machine being created. An example is shown below that sets the memory and number of CPUs
+	// the virtual machine being created. The example shown below sets the memory and number of CPUs
 	// within the virtual machine:
 	//
 	// In JSON:
