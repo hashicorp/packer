@@ -10,7 +10,7 @@ type Library struct {
 }
 
 func (d *Driver) FindContentLibrary(name string) (*Library, error) {
-	lm := library.NewManager(d.restClient)
+	lm := library.NewManager(d.restClient.client)
 	l, err := lm.GetLibraryByName(d.ctx, name)
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func (d *Driver) FindContentLibrary(name string) (*Library, error) {
 }
 
 func (d *Driver) FindContentLibraryItem(libraryId string, name string) (*library.Item, error) {
-	lm := library.NewManager(d.restClient)
+	lm := library.NewManager(d.restClient.client)
 	items, err := lm.GetLibraryItems(d.ctx, libraryId)
 	if err != nil {
 		return nil, err

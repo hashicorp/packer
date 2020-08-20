@@ -19,7 +19,7 @@ type Driver struct {
 	// context that controls the authenticated sessions used to run the VM commands
 	ctx        context.Context
 	client     *govmomi.Client
-	restClient *rest.Client
+	restClient *RestClient
 	finder     *find.Finder
 	datacenter *object.Datacenter
 }
@@ -59,12 +59,6 @@ func NewDriver(config *ConnectConfig) (*Driver, error) {
 		return nil, err
 	}
 
-	restClient := rest.NewClient(vimClient)
-	err = restClient.Login(ctx, credentials)
-	if err != nil {
-		return nil, err
-	}
-
 	finder := find.NewFinder(client.Client, false)
 	datacenter, err := finder.DatacenterOrDefault(ctx, config.Datacenter)
 	if err != nil {
@@ -73,11 +67,31 @@ func NewDriver(config *ConnectConfig) (*Driver, error) {
 	finder.SetDatacenter(datacenter)
 
 	d := Driver{
-		ctx:        ctx,
-		client:     client,
-		restClient: restClient,
+		ctx:    ctx,
+		client: client,
+		restClient: &RestClient{
+			client:      rest.NewClient(vimClient),
+			credentials: credentials,
+		},
 		datacenter: datacenter,
 		finder:     finder,
 	}
 	return &d, nil
+}
+
+// The rest.Client requires vCenter.
+// RestClient is to modularize the rest.Client session and use it only when is necessary.
+// This will allow users without vCenter to use the other features that doesn't use the rest.Client.
+// To use the client login/logout must be done to create an authenticated session.
+type RestClient struct {
+	client      *rest.Client
+	credentials *url.Userinfo
+}
+
+func (r *RestClient) Login(ctx context.Context) error {
+	return r.client.Login(ctx, r.credentials)
+}
+
+func (r *RestClient) Logout(ctx context.Context) error {
+	return r.client.Logout(ctx)
 }
