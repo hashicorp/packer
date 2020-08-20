@@ -59,7 +59,7 @@ here is the list of calls that should get transformed:
   - ```{{ user `my_var` }}``` becomes ```${var.my_var}```.
   - ```{{ env `my_var` }}``` becomes ```${var.my_var}```. Packer HCL2 supports 
     environment variables through input variables. See
-    [docs](http://localhost:3000/docs/from-1.5/variables#environment-variables)
+    [docs](http://packer.io/docs/from-1.5/variables#environment-variables)
     for more info.
   - ```{{ timestamp }}``` becomes ```${local.timestamp}```, the local variable
     will be created for all generated files.
