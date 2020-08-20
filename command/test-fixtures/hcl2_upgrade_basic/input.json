@@ -15,7 +15,7 @@
             "access_key": "{{ user `aws_access_key` }}",
             "secret_key": "{{ user `aws_secret_key` }}",
             "region": "{{ user `aws_region` }}",
-            "ami_name": "ubuntu-16.04 test {{timestamp}}",
+            "ami_name": "ubuntu-16.04 test {{ isotime | clean_ami_name }}",
             "ami_description": "Ubuntu 16.04 LTS - expand root partition",
             "source_ami_filter": {
                 "filters": {

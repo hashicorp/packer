@@ -271,10 +271,13 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 // containing the go template string is returned.
 func transposeTemplatingCalls(s []byte) []byte {
 	fallbackReturn := func(err error) []byte {
-		return append([]byte(fmt.Sprintf("#could not parse template for following block: %q\n", err)), s...)
+		return append([]byte(fmt.Sprintf("\n#could not parse template for following block: %q\n", err)), s...)
 	}
 	funcMap := texttemplate.FuncMap{
 		"timestamp": func() string {
+			return "${local.timestamp}"
+		},
+		"isotime": func() string {
 			return "${local.timestamp}"
 		},
 		"user": func(in string) string {
