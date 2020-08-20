@@ -28,7 +28,7 @@ type VBoxManageConfig struct {
 	// ```hcl
 	// vboxmanage = [
 	//    ["modifyvm", "{{.Name}}", "--memory", "1024"],
-	//	  ["modifyvm", "{{.Name}}", "--cpus", "2"]
+	//    ["modifyvm", "{{.Name}}", "--cpus", "2"],
 	// ]
 	// ```
 	//
