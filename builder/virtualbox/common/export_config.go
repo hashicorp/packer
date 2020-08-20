@@ -36,10 +36,10 @@ type ExportConfig struct {
 	// ```hcl
 	//	source "virtualbox-iso" "basic-example" {
 	//		export_opts = [
-	//	      "--manifest",
-	//	      "--vsys", "0",
-	//	      "--description", "{{user `vm_description`}}",
-	//	      "--version", "{{user `vm_version`}}"
+	//	          "--manifest",
+	//	          "--vsys", "0",
+	//	          "--description", "{{user `vm_description`}}",
+	//	          "--version", "{{user `vm_version`}}"
 	//	   	]
 	//		format = "ova"
 	//  }
