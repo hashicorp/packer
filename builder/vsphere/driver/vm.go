@@ -684,6 +684,11 @@ func (vm *VirtualMachine) ConvertToTemplate() error {
 }
 
 func (vm *VirtualMachine) ImportOvfToContentLibrary(ovf vcenter.OVF) error {
+	err := vm.driver.restClient.Login(vm.driver.ctx)
+	if err != nil {
+		return err
+	}
+
 	l, err := vm.driver.FindContentLibrary(ovf.Target.LibraryID)
 	if err != nil {
 		return err
@@ -706,12 +711,21 @@ func (vm *VirtualMachine) ImportOvfToContentLibrary(ovf vcenter.OVF) error {
 	ovf.Source.Value = vm.vm.Reference().Value
 	ovf.Source.Type = "VirtualMachine"
 
-	vcm := vcenter.NewManager(vm.driver.restClient)
+	vcm := vcenter.NewManager(vm.driver.restClient.client)
 	_, err = vcm.CreateOVF(vm.driver.ctx, ovf)
-	return err
+	if err != nil {
+		return err
+	}
+
+	return vm.driver.restClient.Logout(vm.driver.ctx)
 }
 
 func (vm *VirtualMachine) ImportToContentLibrary(template vcenter.Template) error {
+	err := vm.driver.restClient.Login(vm.driver.ctx)
+	if err != nil {
+		return err
+	}
+
 	l, err := vm.driver.FindContentLibrary(template.Library)
 	if err != nil {
 		return err
@@ -761,9 +775,13 @@ func (vm *VirtualMachine) ImportToContentLibrary(template vcenter.Template) erro
 		template.VMHomeStorage.Datastore = d.ds.Reference().Value
 	}
 
-	vcm := vcenter.NewManager(vm.driver.restClient)
+	vcm := vcenter.NewManager(vm.driver.restClient.client)
 	_, err = vcm.CreateTemplate(vm.driver.ctx, template)
-	return err
+	if err != nil {
+		return err
+	}
+
+	return vm.driver.restClient.Logout(vm.driver.ctx)
 }
 
 func (vm *VirtualMachine) GetDir() (string, error) {
