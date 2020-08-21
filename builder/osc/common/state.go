@@ -52,6 +52,12 @@ func waitUntilVmStopped(conn *oapi.Client, vmID string) error {
 	return <-errCh
 }
 
+func waitUntilOscVmStopped(conn *osc.APIClient, vmID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "stopped", waitUntilOscVmStateFunc(conn, vmID))
+	return <-errCh
+}
+
 func WaitUntilSnapshotCompleted(conn *oapi.Client, id string) error {
 	errCh := make(chan error, 1)
 	go waitForState(errCh, "completed", waitUntilSnapshotStateFunc(conn, id))

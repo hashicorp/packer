@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/antihax/optional"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -18,7 +18,7 @@ type StepStopBSUBackedVm struct {
 }
 
 func (s *StepStopBSUBackedVm) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	oapiconn := state.Get("oapi").(*oapi.Client)
+	oscconn := state.Get("osc").(*osc.APIClient)
 	vm := state.Get("vm").(osc.Vm)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -44,8 +44,10 @@ func (s *StepStopBSUBackedVm) Run(ctx context.Context, state multistep.StateBag)
 		err := common.Retry(10, 60, 6, func(i uint) (bool, error) {
 			ui.Message(fmt.Sprintf("Stopping vm, attempt %d", i+1))
 
-			_, err = oapiconn.POST_StopVms(oapi.StopVmsRequest{
-				VmIds: []string{vm.VmId},
+			_, _, err = oscconn.VmApi.StopVms(context.Background(), &osc.StopVmsOpts{
+				StopVmsRequest: optional.NewInterface(osc.StopVmsRequest{
+					VmIds: []string{vm.VmId},
+				}),
 			})
 
 			if err == nil {
@@ -79,7 +81,7 @@ func (s *StepStopBSUBackedVm) Run(ctx context.Context, state multistep.StateBag)
 
 	// Wait for the vm to actually stop
 	ui.Say("Waiting for the vm to stop...")
-	err = waitUntilVmStopped(oapiconn, vm.VmId)
+	err = waitUntilOscVmStopped(oscconn, vm.VmId)
 
 	if err != nil {
 		err := fmt.Errorf("Error waiting for vm to stop: %s", err)
