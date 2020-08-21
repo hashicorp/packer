@@ -8,7 +8,6 @@ import (
 	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -29,9 +28,9 @@ func (s *StepCleanupVolumes) Run(_ context.Context, state multistep.StateBag) mu
 func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	oscconn := state.Get("osc").(*osc.APIClient)
 	vmRaw := state.Get("vm")
-	var vm oapi.Vm
+	var vm osc.Vm
 	if vmRaw != nil {
-		vm = vmRaw.(oapi.Vm)
+		vm = vmRaw.(osc.Vm)
 	}
 	ui := state.Get("ui").(packer.Ui)
 	if vm.VmId == "" {
@@ -46,7 +45,7 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	var vl []string
 	volList := make(map[string]string)
 	for _, bdm := range vm.BlockDeviceMappings {
-		if !reflect.DeepEqual(bdm.Bsu, oapi.BsuCreated{}) {
+		if !reflect.DeepEqual(bdm.Bsu, osc.BsuCreated{}) {
 			vl = append(vl, bdm.Bsu.VolumeId)
 			volList[bdm.Bsu.VolumeId] = bdm.DeviceName
 		}

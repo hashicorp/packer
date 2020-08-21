@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // StepGetPassword reads the password from a Windows server and sets it
@@ -103,7 +104,7 @@ func (s *StepGetPassword) Cleanup(multistep.StateBag) {}
 
 func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-chan struct{}) (string, error) {
 	oapiconn := state.Get("oapi").(*oapi.Client)
-	vm := state.Get("vm").(oapi.Vm)
+	vm := state.Get("vm").(osc.Vm)
 	privateKey := s.Comm.SSHPrivateKey
 
 	for {

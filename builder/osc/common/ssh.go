@@ -35,7 +35,7 @@ func SSHHost(e oapiDescriber, sshInterface string) func(multistep.StateBag) (str
 		// <= with current structure to check result of describing `tries` times
 		for j := 0; j <= tries; j++ {
 			var host string
-			i := state.Get("vm").(oapi.Vm)
+			i := state.Get("vm").(osc.Vm)
 
 			if sshInterface != "" {
 				switch sshInterface {
