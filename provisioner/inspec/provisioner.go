@@ -41,8 +41,8 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	ctx                 interpolate.Context
 
-	// The command to run inspec
-	Command    string `mapstructure-to-hcl2:",skip"`
+	// The command to invoke InSpec. Defaults to `inspec`.
+	Command    string `mapstructure-to-hcl2:"command"`
 	SubCommand string `mapstructure-to-hcl2:",skip"`
 
 	// Extra options to pass to the inspec command
