@@ -19,6 +19,7 @@ type Driver struct {
 	// context that controls the authenticated sessions used to run the VM commands
 	ctx        context.Context
 	client     *govmomi.Client
+	vimClient  *vim25.Client
 	restClient *RestClient
 	finder     *find.Finder
 	datacenter *object.Datacenter
@@ -67,8 +68,9 @@ func NewDriver(config *ConnectConfig) (*Driver, error) {
 	finder.SetDatacenter(datacenter)
 
 	d := Driver{
-		ctx:    ctx,
-		client: client,
+		ctx:       ctx,
+		client:    client,
+		vimClient: vimClient,
 		restClient: &RestClient{
 			client:      rest.NewClient(vimClient),
 			credentials: credentials,

@@ -689,7 +689,7 @@ func (vm *VirtualMachine) ImportOvfToContentLibrary(ovf vcenter.OVF) error {
 		return err
 	}
 
-	l, err := vm.driver.FindContentLibrary(ovf.Target.LibraryID)
+	l, err := vm.driver.FindContentLibraryByName(ovf.Target.LibraryID)
 	if err != nil {
 		return err
 	}
@@ -726,7 +726,7 @@ func (vm *VirtualMachine) ImportToContentLibrary(template vcenter.Template) erro
 		return err
 	}
 
-	l, err := vm.driver.FindContentLibrary(template.Library)
+	l, err := vm.driver.FindContentLibraryByName(template.Library)
 	if err != nil {
 		return err
 	}
@@ -944,7 +944,7 @@ func newVGPUProfile(vGPUProfile string) types.VirtualPCIPassthrough {
 	}
 }
 
-func (vm *VirtualMachine) AddCdrom(controllerType string, isoPath string) error {
+func (vm *VirtualMachine) AddCdrom(controllerType string, datastoreIsoPath string) error {
 	devices, err := vm.vm.Device(vm.driver.ctx)
 	if err != nil {
 		return err
@@ -970,11 +970,23 @@ func (vm *VirtualMachine) AddCdrom(controllerType string, isoPath string) error 
 		return err
 	}
 
-	if isoPath != "" {
-		devices.InsertIso(cdrom, isoPath)
+	if datastoreIsoPath != "" {
+		isoPath := datastoreIsoPath
+		parts := strings.Split(datastoreIsoPath, "]")
+		if len(parts) > 1 {
+			// removes datastore name from path
+			isoPath = parts[1]
+		}
+		libPath := vm.driver.FindContentLibraryFileDatastorePath(isoPath)
+		if libPath != isoPath {
+			// this is a content library path and is updated with the equivalent datastore path
+			datastoreIsoPath = libPath
+		}
+
+		devices.InsertIso(cdrom, datastoreIsoPath)
 	}
 
-	log.Printf("Creating CD-ROM on controller '%v' with iso '%v'", controller, isoPath)
+	log.Printf("Creating CD-ROM on controller '%v' with iso '%v'", controller, datastoreIsoPath)
 	return vm.addDevice(cdrom)
 }
 
