@@ -48,7 +48,8 @@ const testBuilderAccBasic = `
 		"source_omi": "ami-abe953fa",
 		"ssh_username": "outscale",
 		"omi_name": "packer-test {{timestamp}}",
-		"associate_public_ip_address": true
+		"associate_public_ip_address": true,
+		"force_deregister": true
 	}]
 }
 `
