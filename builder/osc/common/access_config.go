@@ -91,6 +91,16 @@ func (c *AccessConfig) NewOSCClient() *osc.APIClient {
 		c.CustomEndpointOAPI = "outscale.com/oapi/latest"
 	}
 
+	return c.NewOSCClientByRegion(c.RawRegion)
+}
+
+// GetRegion retrieves the Outscale OSC-SDK Region set
+func (c *AccessConfig) GetRegion() string {
+	return c.RawRegion
+}
+
+// NewOSCClientByRegion returns the connection depdending of the region given
+func (c *AccessConfig) NewOSCClientByRegion(region string) *osc.APIClient {
 	skipClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -100,7 +110,7 @@ func (c *AccessConfig) NewOSCClient() *osc.APIClient {
 	skipClient.Transport = NewTransport(c.AccessKey, c.SecretKey, c.RawRegion, skipClient.Transport)
 
 	return osc.NewAPIClient(&osc.Configuration{
-		BasePath:      fmt.Sprintf("https://api.%s.%s", c.RawRegion, c.CustomEndpointOAPI),
+		BasePath:      fmt.Sprintf("https://api.%s.%s", region, c.CustomEndpointOAPI),
 		DefaultHeader: make(map[string]string),
 		UserAgent:     "packer-osc",
 		HTTPClient:    skipClient,
