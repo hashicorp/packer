@@ -2,13 +2,14 @@ package common
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
-	"net/http"
+	"log"
+
+	"github.com/antihax/optional"
+	"github.com/outscale/osc-sdk-go/osc"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
 )
 
 type StepDeregisterOMI struct {
@@ -22,80 +23,78 @@ type StepDeregisterOMI struct {
 func (s *StepDeregisterOMI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// Check for force deregister
 	if !s.ForceDeregister {
+		log.Println("ENTRO 0 ")
+
 		return multistep.ActionContinue
 	}
 
 	ui := state.Get("ui").(packer.Ui)
-	oapiconn := state.Get("oapi").(*oapi.Client)
-	// Add the session region to list of regions will will deregister OMIs in
-	regions := append(s.Regions, oapiconn.GetConfig().Region)
 
-	for _, region := range regions {
+	s.Regions = append(s.Regions, s.AccessConfig.GetRegion())
+
+	log.Printf("LOG_ s.Regions: %#+v\n", s.Regions)
+
+	for _, region := range s.Regions {
 		// get new connection for each region in which we need to deregister vms
-		config, err := s.AccessConfig.Config()
-		if err != nil {
-			return multistep.ActionHalt
-		}
+		conn := s.AccessConfig.NewOSCClientByRegion(region)
 
-		newConfig := &oapi.Config{
-			UserAgent: config.UserAgent,
-			SecretKey: config.SecretKey,
-			Service:   config.Service,
-			Region:    region, //New region
-			URL:       config.URL,
-		}
-
-		skipClient := &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-			},
-		}
-
-		regionconn := oapi.NewClient(newConfig, skipClient)
-
-		resp, err := regionconn.POST_ReadImages(oapi.ReadImagesRequest{
-			Filters: oapi.FiltersImage{
-				ImageNames:     []string{s.OMIName},
-				AccountAliases: []string{"self"},
-			},
+		resp, _, err := conn.ImageApi.ReadImages(context.Background(), &osc.ReadImagesOpts{
+			ReadImagesRequest: optional.NewInterface(osc.ReadImagesRequest{
+				Filters: osc.FiltersImage{
+					ImageNames:     []string{s.OMIName},
+					AccountAliases: []string{"self"},
+				},
+			}),
 		})
 
 		if err != nil {
 			err := fmt.Errorf("Error describing OMI: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
+
 			return multistep.ActionHalt
 		}
 
+		log.Printf("LOG_ resp.Images: %#+v\n", resp.Images)
+
 		// Deregister image(s) by name
-		for _, i := range resp.OK.Images {
+		for i := range resp.Images {
 			//We are supposing that DeleteImage does the same action as DeregisterImage
-			_, err := regionconn.POST_DeleteImage(oapi.DeleteImageRequest{
-				ImageId: i.ImageId,
+			_, _, err := conn.ImageApi.DeleteImage(context.Background(), &osc.DeleteImageOpts{
+				DeleteImageRequest: optional.NewInterface(osc.DeleteImageRequest{
+					ImageId: resp.Images[i].ImageId,
+				}),
 			})
 
 			if err != nil {
 				err := fmt.Errorf("Error deregistering existing OMI: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
+
 				return multistep.ActionHalt
 			}
-			ui.Say(fmt.Sprintf("Deregistered OMI %s, id: %s", s.OMIName, i.ImageId))
+
+			ui.Say(fmt.Sprintf("Deregistered OMI %s, id: %s", s.OMIName, resp.Images[i].ImageId))
 
 			// Delete snapshot(s) by image
 			if s.ForceDeleteSnapshot {
-				for _, b := range i.BlockDeviceMappings {
+				for _, b := range resp.Images[i].BlockDeviceMappings {
 					if b.Bsu.SnapshotId != "" {
-						_, err := regionconn.POST_DeleteSnapshot(oapi.DeleteSnapshotRequest{
-							SnapshotId: b.Bsu.SnapshotId,
+
+						_, _, err := conn.SnapshotApi.DeleteSnapshot(context.Background(), &osc.DeleteSnapshotOpts{
+							DeleteSnapshotRequest: optional.NewInterface(osc.DeleteSnapshotRequest{
+								SnapshotId: b.Bsu.SnapshotId,
+							}),
 						})
 
 						if err != nil {
 							err := fmt.Errorf("Error deleting existing snapshot: %s", err)
 							state.Put("error", err)
 							ui.Error(err.Error())
+
 							return multistep.ActionHalt
 						}
+
 						ui.Say(fmt.Sprintf("Deleted snapshot: %s", b.Bsu.SnapshotId))
 					}
 				}
