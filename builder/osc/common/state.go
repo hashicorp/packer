@@ -1,11 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/common"
 	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 type stateRefreshFunc func() (string, error)
@@ -24,15 +27,34 @@ func waitUntilForVmRunning(conn *oapi.Client, vmID string) error {
 	return err
 }
 
+func waitUntilForOscVmRunning(conn *osc.APIClient, vmID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "running", waitUntilOscVmStateFunc(conn, vmID))
+	err := <-errCh
+	return err
+}
+
 func waitUntilVmDeleted(conn *oapi.Client, vmID string) error {
 	errCh := make(chan error, 1)
 	go waitForState(errCh, "terminated", waitUntilVmStateFunc(conn, vmID))
 	return <-errCh
 }
 
+func waitUntilOscVmDeleted(conn *osc.APIClient, vmID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "terminated", waitUntilOscVmStateFunc(conn, vmID))
+	return <-errCh
+}
+
 func waitUntilVmStopped(conn *oapi.Client, vmID string) error {
 	errCh := make(chan error, 1)
 	go waitForState(errCh, "stopped", waitUntilVmStateFunc(conn, vmID))
+	return <-errCh
+}
+
+func waitUntilOscVmStopped(conn *osc.APIClient, vmID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "stopped", waitUntilOscVmStateFunc(conn, vmID))
 	return <-errCh
 }
 
@@ -110,6 +132,36 @@ func waitUntilVmStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
 		}
 
 		return resp.OK.Vms[0].State, nil
+	}
+}
+
+func waitUntilOscVmStateFunc(conn *osc.APIClient, id string) stateRefreshFunc {
+	return func() (string, error) {
+		log.Printf("[Debug] Retrieving state for VM with id %s", id)
+		resp, _, err := conn.VmApi.ReadVms(context.Background(), &osc.ReadVmsOpts{
+			ReadVmsRequest: optional.NewInterface(osc.ReadVmsRequest{
+				Filters: osc.FiltersVm{
+					VmIds: []string{id},
+				},
+			}),
+		})
+
+		log.Printf("[Debug] Read Response %+v", resp)
+
+		if err != nil {
+			return "", err
+		}
+
+		//TODO: check if needed
+		// if resp == nil {
+		// 	return "", fmt.Errorf("Vm with ID %s not Found", id)
+		// }
+
+		if len(resp.Vms) == 0 {
+			return "pending", nil
+		}
+
+		return resp.Vms[0].State, nil
 	}
 }
 

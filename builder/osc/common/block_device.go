@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // BlockDevice
@@ -123,6 +124,52 @@ func buildBlockDevicesVmCreation(b []BlockDevice) []oapi.BlockDeviceMappingVmCre
 	return blockDevices
 }
 
+func buildOscBlockDevicesVmCreation(b []BlockDevice) []osc.BlockDeviceMappingVmCreation {
+	log.Printf("[DEBUG] Launch Block Device %#v", b)
+
+	var blockDevices []osc.BlockDeviceMappingVmCreation
+
+	for _, blockDevice := range b {
+		mapping := osc.BlockDeviceMappingVmCreation{
+			DeviceName: blockDevice.DeviceName,
+		}
+
+		if blockDevice.NoDevice {
+			mapping.NoDevice = ""
+		} else if blockDevice.VirtualName != "" {
+			if strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
+				mapping.VirtualDeviceName = blockDevice.VirtualName
+			}
+		} else {
+			bsu := osc.BsuToCreate{
+				DeleteOnVmDeletion: blockDevice.DeleteOnVmDeletion,
+			}
+
+			if blockDevice.VolumeType != "" {
+				bsu.VolumeType = blockDevice.VolumeType
+			}
+
+			if blockDevice.VolumeSize > 0 {
+				bsu.VolumeSize = int32(blockDevice.VolumeSize)
+			}
+
+			// IOPS is only valid for io1 type
+			if blockDevice.VolumeType == "io1" {
+				bsu.Iops = int32(blockDevice.IOPS)
+			}
+
+			if blockDevice.SnapshotId != "" {
+				bsu.SnapshotId = blockDevice.SnapshotId
+			}
+
+			mapping.Bsu = bsu
+		}
+
+		blockDevices = append(blockDevices, mapping)
+	}
+	return blockDevices
+}
+
 func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 	if b.DeviceName == "" {
 		return fmt.Errorf("The `device_name` must be specified " +
@@ -151,4 +198,8 @@ func (b *OMIBlockDevices) BuildOMIDevices() []oapi.BlockDeviceMappingImage {
 
 func (b *LaunchBlockDevices) BuildLaunchDevices() []oapi.BlockDeviceMappingVmCreation {
 	return buildBlockDevicesVmCreation(b.LaunchMappings)
+}
+
+func (b *LaunchBlockDevices) BuildOSCLaunchDevices() []osc.BlockDeviceMappingVmCreation {
+	return buildOscBlockDevicesVmCreation(b.LaunchMappings)
 }

@@ -164,6 +164,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			UserData:                    b.config.UserData,
 			UserDataFile:                b.config.UserDataFile,
 			VolumeTags:                  b.config.VolumeRunTags,
+			RawRegion:                   b.config.RawRegion,
 		},
 		&osccommon.StepGetPassword{
 			Debug:     b.config.PackerDebug,
@@ -173,8 +174,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
-			Host: osccommon.SSHHost(
-				oapiconn,
+			Host: osccommon.OscSSHHost(
+				oscConn.VmApi,
 				b.config.SSHInterface),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
