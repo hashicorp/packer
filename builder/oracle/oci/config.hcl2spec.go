@@ -79,6 +79,8 @@ type FlatConfig struct {
 	Shape                     *string                           `mapstructure:"shape" cty:"shape" hcl:"shape"`
 	ImageName                 *string                           `mapstructure:"image_name" cty:"image_name" hcl:"image_name"`
 	InstanceName              *string                           `mapstructure:"instance_name" cty:"instance_name" hcl:"instance_name"`
+	InstanceTags              map[string]string                 `mapstructure:"instance_tags" cty:"instance_tags" hcl:"instance_tags"`
+	InstanceDefinedTags       map[string]map[string]interface{} `mapstructure:"instance_defined_tags" cty:"instance_defined_tags" hcl:"instance_defined_tags"`
 	Metadata                  map[string]string                 `mapstructure:"metadata" cty:"metadata" hcl:"metadata"`
 	UserData                  *string                           `mapstructure:"user_data" cty:"user_data" hcl:"user_data"`
 	UserDataFile              *string                           `mapstructure:"user_data_file" cty:"user_data_file" hcl:"user_data_file"`
@@ -169,6 +171,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"shape":                        &hcldec.AttrSpec{Name: "shape", Type: cty.String, Required: false},
 		"image_name":                   &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"instance_name":                &hcldec.AttrSpec{Name: "instance_name", Type: cty.String, Required: false},
+		"instance_tags":                &hcldec.AttrSpec{Name: "instance_tags", Type: cty.Map(cty.String), Required: false},
+		"instance_defined_tags":        &hcldec.AttrSpec{Name: "instance_defined_tags", Type: cty.Map(cty.String), Required: false},
 		"metadata":                     &hcldec.AttrSpec{Name: "metadata", Type: cty.Map(cty.String), Required: false},
 		"user_data":                    &hcldec.AttrSpec{Name: "user_data", Type: cty.String, Required: false},
 		"user_data_file":               &hcldec.AttrSpec{Name: "user_data_file", Type: cty.String, Required: false},
