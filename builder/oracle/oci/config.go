@@ -61,8 +61,8 @@ type Config struct {
 	ImageName   string `mapstructure:"image_name"`
 
 	// Instance
-	InstanceName        string `mapstructure:"instance_name"`
-	InstanceTags        map[string]string `mapstructure:"instance_tags"`
+	InstanceName        string                            `mapstructure:"instance_name"`
+	InstanceTags        map[string]string                 `mapstructure:"instance_tags"`
 	InstanceDefinedTags map[string]map[string]interface{} `mapstructure:"instance_defined_tags"`
 
 	// Metadata optionally contains custom metadata key/value pairs provided in the
