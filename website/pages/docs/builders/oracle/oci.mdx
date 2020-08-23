@@ -134,6 +134,12 @@ builder.
 - `instance_name` (string) - The name to assign to the instance used for the image creation process.
   If not set a name of the form `instanceYYYYMMDDhhmmss` will be used.
 
+- `instance_tags` (map of strings) - Add one or more freeform tags to the instance used for the 
+  image creation process.
+
+- `instance_defined_tags` (map of maps of strings) - Add one or more defined tags for a given namespace
+  to the instance used for the image creation process.
+
 - `use_private_ip` (boolean) - Use private ip addresses to connect to the
   instance via ssh.
 
