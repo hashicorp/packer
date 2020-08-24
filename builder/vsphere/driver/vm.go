@@ -689,7 +689,7 @@ func (vm *VirtualMachine) ImportOvfToContentLibrary(ovf vcenter.OVF) error {
 		return err
 	}
 
-	l, err := vm.driver.FindContentLibrary(ovf.Target.LibraryID)
+	l, err := vm.driver.FindContentLibraryByName(ovf.Target.LibraryID)
 	if err != nil {
 		return err
 	}
@@ -699,10 +699,7 @@ func (vm *VirtualMachine) ImportOvfToContentLibrary(ovf vcenter.OVF) error {
 	}
 
 	item, err := vm.driver.FindContentLibraryItem(l.library.ID, ovf.Spec.Name)
-	if err != nil {
-		return err
-	}
-	if item != nil {
+	if err == nil {
 		// Updates existing library item
 		ovf.Target.LibraryItemID = item.ID
 	}
@@ -726,7 +723,7 @@ func (vm *VirtualMachine) ImportToContentLibrary(template vcenter.Template) erro
 		return err
 	}
 
-	l, err := vm.driver.FindContentLibrary(template.Library)
+	l, err := vm.driver.FindContentLibraryByName(template.Library)
 	if err != nil {
 		return err
 	}
@@ -944,7 +941,7 @@ func newVGPUProfile(vGPUProfile string) types.VirtualPCIPassthrough {
 	}
 }
 
-func (vm *VirtualMachine) AddCdrom(controllerType string, isoPath string) error {
+func (vm *VirtualMachine) AddCdrom(controllerType string, datastoreIsoPath string) error {
 	devices, err := vm.vm.Device(vm.driver.ctx)
 	if err != nil {
 		return err
@@ -970,11 +967,21 @@ func (vm *VirtualMachine) AddCdrom(controllerType string, isoPath string) error 
 		return err
 	}
 
-	if isoPath != "" {
-		devices.InsertIso(cdrom, isoPath)
+	if datastoreIsoPath != "" {
+		ds := &DatastoreIsoPath{path: datastoreIsoPath}
+		if !ds.Validate() {
+			return fmt.Errorf("%s is not a valid iso path", datastoreIsoPath)
+		}
+		if libPath, err := vm.driver.FindContentLibraryFileDatastorePath(ds.GetFilePath()); err == nil {
+			datastoreIsoPath = libPath
+		} else {
+			log.Printf("Using %s as the datastore path", datastoreIsoPath)
+		}
+
+		devices.InsertIso(cdrom, datastoreIsoPath)
 	}
 
-	log.Printf("Creating CD-ROM on controller '%v' with iso '%v'", controller, isoPath)
+	log.Printf("Creating CD-ROM on controller '%v' with iso '%v'", controller, datastoreIsoPath)
 	return vm.addDevice(cdrom)
 }
 
