@@ -16,6 +16,10 @@ target configured to use SSH, runs an SSH server, executes `inspec exec`, and
 marshals InSpec tests through the SSH server to the machine being provisioned
 by Packer.
 
+-> **Note:** Inspec is required to be installed on the host machine and 
+available in it's corresponding path. It is not required to be installed 
+on the provisioned image.
+
 ## Basic Example
 
 This is a fully functional template that will test an image on DigitalOcean.
