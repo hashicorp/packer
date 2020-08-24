@@ -225,7 +225,7 @@ github.com/gobwas/glob/syntax/ast
 github.com/gobwas/glob/syntax/lexer
 github.com/gobwas/glob/util/runes
 github.com/gobwas/glob/util/strings
-# github.com/gofrs/flock v0.7.1 => github.com/azr/flock v0.0.0-20190823144736-958d66434653
+# github.com/gofrs/flock v0.7.3
 github.com/gofrs/flock
 # github.com/gofrs/uuid v3.2.0+incompatible
 github.com/gofrs/uuid
