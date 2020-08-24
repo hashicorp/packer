@@ -1,0 +1,52 @@
+<!-- Code generated from the comments of the Config struct in provisioner/powershell/provisioner.go; DO NOT EDIT MANUALLY -->
+
+- `remote_env_var_path` (string) - The remote path where the file containing the environment variables
+  will be uploaded to. This should be set to a writable file that is in a
+  pre-existing directory.
+
+- `elevated_execute_command` (string) - The command used to execute the elevated script. The '{{ .Path }}'
+  variable should be used to specify where the script goes, {{ .Vars }}
+  can be used to inject the environment_vars into the environment.
+  ```powershell
+  powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
+  ```
+  This is a [template engine](/docs/templates/engine). Therefore, you
+  may use user variables and template functions in this field. In addition,
+  you may use two extra variables:
+  - `Path`: The path to the script to run
+  - `Vars`: The location of a temp file containing the list of
+  `environment_vars`, if configured.
+
+- `skip_clean` (bool) - Whether to clean scripts up after executing the provisioner.
+  Defaults to false. When true any script created by a non-elevated Powershell
+  provisioner will be removed from the remote machine. Elevated scripts,
+  along with the scheduled tasks, will always be removed regardless of the
+  value set for `skip_clean`.
+
+- `start_retry_timeout` (duration string | ex: "1h5m2s") - The amount of time to attempt to _start_
+  the remote process. By default this is "5m" or 5 minutes. This setting
+  exists in order to deal with times when SSH may restart, such as a system
+  reboot. Set this to a higher value if reboots take a longer amount of time.
+
+- `elevated_env_var_format` (string) - This is used in the template generation to format environment variables
+  inside the `ElevatedExecuteCommand` template.
+
+- `elevated_user` (string) - Instructs the communicator to run the remote script as a Windows
+  scheduled task, effectively elevating the remote user by impersonating
+  a logged-in user
+
+- `elevated_password` (string) - Elevated Password
+
+- `execution_policy` (ExecutionPolicy) - To run ps scripts on windows packer defaults this to
+  "bypass" and wraps the command to run. Setting this to "none" will prevent
+  wrapping, allowing to see exit codes on docker for windows. Possible values
+  are "bypass", "allsigned", "default", "remotesigned", "restricted",
+  "undefined", "unrestricted", "none".
+
+- `debug_mode` (int) - If set, sets PowerShell's [PSDebug mode](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/set-psdebug?view=powershell-7)
+   in order to make script debugging easier. For instance, setting the
+     value to 1 results in adding this to the execute command:
+  
+     ``` powershell
+     Set-PSDebug -Trace 1
+     ```

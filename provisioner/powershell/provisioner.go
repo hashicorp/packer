@@ -1,3 +1,4 @@
+//go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type Config
 
 // This package implements a provisioner for Packer that executes powershell
@@ -50,6 +51,15 @@ type Config struct {
 	// The command used to execute the elevated script. The '{{ .Path }}'
 	// variable should be used to specify where the script goes, {{ .Vars }}
 	// can be used to inject the environment_vars into the environment.
+	// ```powershell
+	// powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
+	// ```
+	// This is a [template engine](/docs/templates/engine). Therefore, you
+	// may use user variables and template functions in this field. In addition,
+	// you may use two extra variables:
+	// - `Path`: The path to the script to run
+	// - `Vars`: The location of a temp file containing the list of
+	// `environment_vars`, if configured.
 	ElevatedExecuteCommand string `mapstructure:"elevated_execute_command"`
 
 	// Whether to clean scripts up after executing the provisioner.
@@ -59,9 +69,10 @@ type Config struct {
 	// value set for `skip_clean`.
 	SkipClean bool `mapstructure:"skip_clean"`
 
-	// The timeout for retrying to start the process. Until this timeout is
-	// reached, if the provisioner can't start a process, it retries.  This
-	// can be set high to allow for reboots.
+	// The amount of time to attempt to _start_
+	// the remote process. By default this is "5m" or 5 minutes. This setting
+	// exists in order to deal with times when SSH may restart, such as a system
+	// reboot. Set this to a higher value if reboots take a longer amount of time.
 	StartRetryTimeout time.Duration `mapstructure:"start_retry_timeout"`
 
 	// This is used in the template generation to format environment variables
@@ -74,6 +85,11 @@ type Config struct {
 	ElevatedUser     string `mapstructure:"elevated_user"`
 	ElevatedPassword string `mapstructure:"elevated_password"`
 
+	// To run ps scripts on windows packer defaults this to
+	// "bypass" and wraps the command to run. Setting this to "none" will prevent
+	// wrapping, allowing to see exit codes on docker for windows. Possible values
+	// are "bypass", "allsigned", "default", "remotesigned", "restricted",
+	// "undefined", "unrestricted", "none".
 	ExecutionPolicy ExecutionPolicy `mapstructure:"execution_policy"`
 
 	remoteCleanUpScriptPath string
