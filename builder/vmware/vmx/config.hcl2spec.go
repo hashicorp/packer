@@ -108,6 +108,10 @@ type FlatConfig struct {
 	SkipExport                *bool             `mapstructure:"skip_export" required:"false" cty:"skip_export" hcl:"skip_export"`
 	KeepRegistered            *bool             `mapstructure:"keep_registered" required:"false" cty:"keep_registered" hcl:"keep_registered"`
 	SkipCompaction            *bool             `mapstructure:"skip_compaction" required:"false" cty:"skip_compaction" hcl:"skip_compaction"`
+	AdditionalDiskSize        []uint            `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size" hcl:"disk_additional_size"`
+	DiskAdapterType           *string           `mapstructure:"disk_adapter_type" required:"false" cty:"disk_adapter_type" hcl:"disk_adapter_type"`
+	DiskName                  *string           `mapstructure:"vmdk_name" required:"false" cty:"vmdk_name" hcl:"vmdk_name"`
+	DiskTypeId                *string           `mapstructure:"disk_type_id" required:"false" cty:"disk_type_id" hcl:"disk_type_id"`
 	Linked                    *bool             `mapstructure:"linked" required:"false" cty:"linked" hcl:"linked"`
 	SourcePath                *string           `mapstructure:"source_path" required:"true" cty:"source_path" hcl:"source_path"`
 	VMName                    *string           `mapstructure:"vm_name" required:"false" cty:"vm_name" hcl:"vm_name"`
@@ -224,6 +228,10 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"skip_export":                    &hcldec.AttrSpec{Name: "skip_export", Type: cty.Bool, Required: false},
 		"keep_registered":                &hcldec.AttrSpec{Name: "keep_registered", Type: cty.Bool, Required: false},
 		"skip_compaction":                &hcldec.AttrSpec{Name: "skip_compaction", Type: cty.Bool, Required: false},
+		"disk_additional_size":           &hcldec.AttrSpec{Name: "disk_additional_size", Type: cty.List(cty.Number), Required: false},
+		"disk_adapter_type":              &hcldec.AttrSpec{Name: "disk_adapter_type", Type: cty.String, Required: false},
+		"vmdk_name":                      &hcldec.AttrSpec{Name: "vmdk_name", Type: cty.String, Required: false},
+		"disk_type_id":                   &hcldec.AttrSpec{Name: "disk_type_id", Type: cty.String, Required: false},
 		"linked":                         &hcldec.AttrSpec{Name: "linked", Type: cty.Bool, Required: false},
 		"source_path":                    &hcldec.AttrSpec{Name: "source_path", Type: cty.String, Required: false},
 		"vm_name":                        &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},

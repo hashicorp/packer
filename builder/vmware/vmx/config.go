@@ -30,6 +30,7 @@ type Config struct {
 	vmwcommon.ToolsConfig          `mapstructure:",squash"`
 	vmwcommon.VMXConfig            `mapstructure:",squash"`
 	vmwcommon.ExportConfig         `mapstructure:",squash"`
+	vmwcommon.DiskConfig           `mapstructure:",squash"`
 	// By default Packer creates a 'full' clone of the virtual machine
 	// specified in source_path. The resultant virtual machine is fully
 	// independant from the parent it was cloned from.
@@ -89,6 +90,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.DiskConfig.Prepare(&c.ctx)...)
 
 	if c.RemoteType == "" {
 		if c.SourcePath == "" {
@@ -109,6 +111,15 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		if c.RemoteType != "esx5" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
+		}
+	}
+
+	if c.DiskTypeId == "" {
+		// Default is growable virtual disk split in 2GB files.
+		c.DiskTypeId = "1"
+
+		if c.RemoteType == "esx5" {
+			c.DiskTypeId = "zeroedthick"
 		}
 	}
 
