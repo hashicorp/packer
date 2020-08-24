@@ -3,6 +3,7 @@ package driver
 import (
 	"fmt"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/vmware/govmomi/object"
@@ -60,7 +61,7 @@ func (d *Driver) FindDatastore(name string, host string) (*Datastore, error) {
 	}, nil
 }
 
-func (d *Driver) GetDatastoreName(id string) string {
+func (d *Driver) GetDatastoreName(id string) (string, error) {
 	obj := types.ManagedObjectReference{
 		Type:  "Datastore",
 		Value: id,
@@ -70,9 +71,9 @@ func (d *Driver) GetDatastoreName(id string) string {
 
 	err := pc.RetrieveOne(d.ctx, obj, []string{"name"}, &me)
 	if err != nil {
-		return id
+		return id, err
 	}
-	return me.Name
+	return me.Name, nil
 }
 
 func (ds *Datastore) Info(params ...string) (*mo.Datastore, error) {
@@ -181,4 +182,29 @@ func RemoveDatastorePrefix(path string) string {
 	} else {
 		return path
 	}
+}
+
+type DatastoreIsoPath struct {
+	path string
+}
+
+func (d *DatastoreIsoPath) Validate() bool {
+	// Matches:
+	// [datastore] /dir/subdir/file
+	// [datastore] dir/subdir/file
+	// [] /dir/subdir/file
+	// /dir/subdir/file or dir/subdir/file
+	matched, _ := regexp.MatchString(`^((\[\w*\])?\s*([^\[\]]+))$`, d.path)
+	return matched
+}
+
+func (d *DatastoreIsoPath) GetFilePath() string {
+	filePath := d.path
+	parts := strings.Split(d.path, "]")
+	if len(parts) > 1 {
+		// removes datastore name from path
+		filePath = parts[1]
+		filePath = strings.TrimLeft(filePath, " ")
+	}
+	return filePath
 }

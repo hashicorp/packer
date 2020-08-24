@@ -699,10 +699,7 @@ func (vm *VirtualMachine) ImportOvfToContentLibrary(ovf vcenter.OVF) error {
 	}
 
 	item, err := vm.driver.FindContentLibraryItem(l.library.ID, ovf.Spec.Name)
-	if err != nil {
-		return err
-	}
-	if item != nil {
+	if err == nil {
 		// Updates existing library item
 		ovf.Target.LibraryItemID = item.ID
 	}
@@ -971,16 +968,14 @@ func (vm *VirtualMachine) AddCdrom(controllerType string, datastoreIsoPath strin
 	}
 
 	if datastoreIsoPath != "" {
-		isoPath := datastoreIsoPath
-		parts := strings.Split(datastoreIsoPath, "]")
-		if len(parts) > 1 {
-			// removes datastore name from path
-			isoPath = parts[1]
+		ds := &DatastoreIsoPath{path: datastoreIsoPath}
+		if !ds.Validate() {
+			return fmt.Errorf("%s is not a valid iso path", datastoreIsoPath)
 		}
-		libPath := vm.driver.FindContentLibraryFileDatastorePath(isoPath)
-		if libPath != isoPath {
-			// this is a content library path and is updated with the equivalent datastore path
+		if libPath, err := vm.driver.FindContentLibraryFileDatastorePath(ds.GetFilePath()); err == nil {
 			datastoreIsoPath = libPath
+		} else {
+			log.Printf("Using %s as the datastore path", datastoreIsoPath)
 		}
 
 		devices.InsertIso(cdrom, datastoreIsoPath)
