@@ -18,12 +18,27 @@ The windows-shell Packer provisioner runs commands on a Windows machine using
 
 The example below is fully functional.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "windows-shell",
   "inline": ["dir c:\\"]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "windows-shell" {
+  inline = ["dir c:\\"]
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Configuration Reference
 
