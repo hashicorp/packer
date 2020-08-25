@@ -699,6 +699,10 @@ func (d *ESX5Driver) Download(src, dst string) error {
 	return d.comm.Download(d.datastorePath(src), file)
 }
 
+func (d *ESX5Driver) Export(args []string) error {
+	return d.base.Export(args)
+}
+
 // VerifyChecksum checks that file on the esxi instance matches hash
 func (d *ESX5Driver) VerifyChecksum(hash string, file string) bool {
 	if hash == "none" {

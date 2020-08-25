@@ -176,18 +176,19 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if c.Format != "" {
+	if c.Format == "" {
 		if c.RemoteType != "esx5" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("format is only valid when RemoteType=esx5"))
+			c.Format = "vmx"
+		} else {
+			c.Format = "ovf"
 		}
-	} else {
-		c.Format = "ovf"
 	}
 
-	if !(c.Format == "ova" || c.Format == "ovf" || c.Format == "vmx") {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("format must be one of ova, ovf, or vmx"))
+	if c.RemoteType != "esx5" && c.Format == "vmx" {
+		// if we're building locally and want a vmx, there's nothing to export.
+		// Set skip export flag here to keep the export step from attempting
+		// an unneded export
+		c.SkipExport = true
 	}
 
 	err = c.DriverConfig.Validate(c.SkipExport)

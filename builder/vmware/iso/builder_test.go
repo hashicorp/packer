@@ -127,6 +127,7 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 	var b Builder
 	config := testConfig()
 	config["floppy_files"] = []string{"nonexistent.bat", "nonexistent.ps1"}
+
 	b = Builder{}
 	_, _, errs := b.Prepare(config)
 	if errs == nil {
