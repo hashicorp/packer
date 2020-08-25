@@ -89,6 +89,8 @@ type Config struct {
 	AnsibleEnvVars []string `mapstructure:"ansible_env_vars"`
 	// The playbook to be run by Ansible.
 	PlaybookFile string `mapstructure:"playbook_file" required:"true"`
+	// Specifies --ssh-extra-args on command line defaults to -o IdentitiesOnly=yes
+	AnsibleSSHExtraArgs []string `mapstructure:"ansible_ssh_extra_args"`
 	// The groups into which the Ansible host should
 	//  be placed. When unspecified, the host is not associated with any groups.
 	Groups []string `mapstructure:"groups"`
@@ -701,7 +703,15 @@ func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile s
 
 	if p.generatedData["ConnType"] == "ssh" && len(privKeyFile) > 0 {
 		// Add ssh extra args to set IdentitiesOnly
-		args = append(args, "--ssh-extra-args", "'-o IdentitiesOnly=yes'")
+		if len(p.config.AnsibleSSHExtraArgs) > 0 {
+			var sshExtraArgs string
+			for _, sshExtraArg := range p.config.AnsibleSSHExtraArgs {
+				sshExtraArgs = sshExtraArgs + sshExtraArg
+			}
+			args = append(args, "--ssh-extra-args", fmt.Sprintf("'%s'", sshExtraArgs))
+		} else {
+			args = append(args, "--ssh-extra-args", "'-o IdentitiesOnly=yes'")
+		}
 	}
 
 	args = append(args, p.config.ExtraArguments...)
