@@ -53,14 +53,14 @@ type VpcFilterOptions struct {
 }
 
 type Statement struct {
-	Effect   string
-	Action   []string
-	Resource []string
+	Effect   string   `mapstructure:"Effect" required:"false"`
+	Action   []string `mapstructure:"Action" required:"false"`
+	Resource []string `mapstructure:"Resource" required:"false"`
 }
 
 type PolicyDocument struct {
-	Version   string
-	Statement []Statement
+	Version   string      `mapstructure:"Version" required:"false"`
+	Statement []Statement `mapstructure:"Statement" required:"false"`
 }
 
 type SecurityGroupFilterOptions struct {
