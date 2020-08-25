@@ -303,9 +303,9 @@ Running on Google Cloud section.
     {
       "type": "googlecompute",
       "project_id": "my project",
-      "subnetwork": "default"
+      "subnetwork": "default",
       "source_image_family": "centos-7",
-      "network_project_id": "SHARED_VPC_PROJECT"
+      "network_project_id": "SHARED_VPC_PROJECT",
       "ssh_username": "packer",
       "zone": "us-central1-a",
       "image_licenses": ["projects/vm-options/global/licenses/enable-vmx"]
@@ -318,7 +318,7 @@ Running on Google Cloud section.
 <Tab heading="HCL2">
 
 ```hcl
-source "googlecompute" "basic-example" {
+source "googlecompute" "sharedvpc-example" {
   project_id = "my project"
   source_image_family = "centos-7"
   subnetwork = "default"
@@ -329,7 +329,7 @@ source "googlecompute" "basic-example" {
 }
 
 build {
-  sources = ["sources.googlecompute.basic-example"]
+  sources = ["sources.googlecompute.sharedvpc-example"]
 }
 ```
 
