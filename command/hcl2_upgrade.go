@@ -215,7 +215,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		if len(provisioner.Only) > 0 {
 			cfg["only"] = provisioner.Only
 		}
-		if provisioner.MaxRetries > 0 {
+		if provisioner.MaxRetries != "" {
 			cfg["max_retries"] = provisioner.MaxRetries
 		}
 		if provisioner.Timeout > 0 {

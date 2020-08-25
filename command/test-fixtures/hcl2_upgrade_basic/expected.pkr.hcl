@@ -78,7 +78,7 @@ build {
 
   provisioner "shell" {
     inline      = ["echo ${var.secret_account}", "echo ${build.ID}", "echo ${build.SSHPrivateKey}", "sleep 100000"]
-    max_retries = 5
+    max_retries = "5"
     only        = ["amazon-ebs"]
     timeout     = "5s"
   }
