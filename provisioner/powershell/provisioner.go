@@ -37,28 +37,6 @@ var psEscape = strings.NewReplacer(
 	"'", "`'",
 )
 
-const PowershellWrapperScriptLongVersion string = `
-if (Test-Path variable:global:ProgressPreference) {
-  set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'
-}
-$global:LASTEXITCODE = 0
-trap [Exception] {write-error ($_.Exception.Message);exit 1}
-
-{{if .DebugMode}}
-Set-PsDebug -Trace {{.DebugMode}}
-{{- end}}
-. {{.Vars}}; & '{{.Path}}'
-
-$exitstatus = 1
-if ($?) {
-  $exitstatus = 0
-}
-if ( $LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0 ) {
-  exit $LASTEXITCODE
-}
-exit $exitstatus
-`
-
 const PowershellWrapperScript string = `
 if (Test-Path variable:global:ProgressPreference) {
   set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'
@@ -129,9 +107,10 @@ type Config struct {
 }
 
 type Provisioner struct {
-	config        Config
-	communicator  packer.Communicator
-	generatedData map[string]interface{}
+	config             Config
+	communicator       packer.Communicator
+	generatedData      map[string]interface{}
+	useWrappedCommmand bool
 }
 
 func (p *Provisioner) defaultExecuteCommand(scriptPath string) string {
@@ -144,7 +123,7 @@ func (p *Provisioner) defaultExecuteCommand(scriptPath string) string {
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
-func (p *Provisioner) Prepare(raws ...interface{}) error {
+func (p *Provisioner) Prepare(raws ...interface{}) error { // {{{
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
@@ -170,14 +149,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.ElevatedEnvVarFormat == "" {
 		p.config.ElevatedEnvVarFormat = `$env:%s="%s"; `
-	}
-
-	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = p.defaultExecuteCommand(p.config.remoteWrapperScriptPath)
-	}
-
-	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = p.defaultExecuteCommand(p.config.remoteWrapperScriptPath)
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -261,7 +232,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	return nil
-}
+} // }}}
 
 func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say(fmt.Sprintf("Provisioning with Powershell..."))
@@ -301,11 +272,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		}
 		defer f.Close()
 
-		if err := p.createPowershellWrapperScript(); err != nil {
-			return fmt.Errorf("Error processing command: %s", err)
-		}
-
-		command, err := p.createCommandText()
+		command, err := p.buildInterpolatedCommand()
 		if err != nil {
 			return fmt.Errorf("Error processing command: %s", err)
 		}
@@ -319,8 +286,18 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			if _, err := f.Seek(0, 0); err != nil {
 				return err
 			}
+
 			if err := comm.Upload(p.config.RemotePath, f, &fi); err != nil {
 				return fmt.Errorf("Error uploading script: %s", err)
+			}
+
+			if p.hasCustomCommand() {
+				cmd = &packer.RemoteCmd{Command: command}
+				return cmd.RunWithUi(ctx, comm, ui)
+			}
+
+			if err := p.uploadPowershellWrapperScript(); err != nil {
+				return fmt.Errorf("failed to upload the powershell wrapper command script: %s", err)
 			}
 
 			cmd = &packer.RemoteCmd{Command: command}
@@ -363,9 +340,32 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	return nil
 }
 
+// uploadPowershellWrapperScript will upload a Powershell wrapper for executing p.config.Inline or p.config.Scripts
+func (p *Provisioner) uploadPowershellWrapperScript() error {
+	// Prepare everything needed to enable the required env vars within the
+	// remote environment
+	err := p.prepareEnvVars(false)
+	if err != nil {
+		return err
+	}
+
+	ctxData := p.generatedData
+	ctxData["Path"] = p.config.RemotePath
+	ctxData["Vars"] = p.config.RemoteEnvVarPath
+	ctxData["DebugMode"] = p.config.DebugMode
+	p.config.ctx.Data = ctxData
+
+	data, err := interpolate.Render(PowershellWrapperScript, &p.config.ctx)
+	if err != nil {
+		return fmt.Errorf("Error processing command: %s", err)
+	}
+
+	return p.communicator.Upload(p.config.remoteWrapperScriptPath, strings.NewReader(data), nil)
+}
+
 // createRemoteCleanUpCommand will generated a powershell script that will remove remote files;
 // returning a command that can be executed remotely to do the cleanup.
-func (p *Provisioner) createRemoteCleanUpCommand(remoteFiles []string) (string, error) {
+func (p *Provisioner) createRemoteCleanUpCommand(remoteFiles []string) (string, error) { // {{{
 	if len(remoteFiles) == 0 {
 		return "", fmt.Errorf("no remoteFiles provided for cleanup")
 	}
@@ -383,6 +383,77 @@ func (p *Provisioner) createRemoteCleanUpCommand(remoteFiles []string) (string, 
 	}
 
 	return p.defaultExecuteCommand(remotePath), nil
+} // }}}
+
+// hasCustomCommand returns true if p.config.ExecuteCommand or p.config.ElevatedExecuteCommand has been set.
+func (p *Provisioner) hasCustomCommand() bool {
+	return p.config.ExecuteCommand != "" || p.config.ElevatedExecuteCommand != ""
+}
+
+// buildInterpolatedCommand returns the actual command to be executed at runtime.
+func (p *Provisioner) buildInterpolatedCommand() (string, error) {
+	if p.config.ElevatedUser != "" {
+		return p.elevatedExecuteCommand()
+	}
+
+	return p.executeCommand()
+}
+
+func (p *Provisioner) executeCommand() (string, error) {
+	if p.config.ExecuteCommand == "" {
+		return p.defaultExecuteCommand(p.config.remoteWrapperScriptPath), nil
+	}
+
+	// Prepare everything needed to enable the required env vars within the
+	// remote environment
+	err := p.prepareEnvVars(false)
+	if err != nil {
+		return "", err
+	}
+
+	ctxData := p.generatedData
+	ctxData["Path"] = p.config.RemotePath
+	ctxData["Vars"] = p.config.RemoteEnvVarPath
+	p.config.ctx.Data = ctxData
+
+	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+
+	if err != nil {
+		return "", fmt.Errorf("Error processing command: %s", err)
+	}
+
+	// Return the interpolated command
+	return command, nil
+}
+
+func (p *Provisioner) elevatedExecuteCommand() (command string, err error) {
+
+	if p.config.ElevatedExecuteCommand == "" {
+		return p.defaultExecuteCommand(p.config.remoteWrapperScriptPath), nil
+	}
+
+	// Prepare everything needed to enable the required env vars within the
+	// remote environment
+	err = p.prepareEnvVars(true)
+	if err != nil {
+		return "", err
+	}
+	ctxData := p.generatedData
+	ctxData["Path"] = p.config.RemotePath
+	ctxData["Vars"] = p.config.RemoteEnvVarPath
+	p.config.ctx.Data = ctxData
+
+	command, err = interpolate.Render(p.config.ElevatedExecuteCommand, &p.config.ctx)
+	if err != nil {
+		return "", fmt.Errorf("Error processing command: %s", err)
+	}
+
+	command, err = provisioner.GenerateElevatedRunner(command, p)
+	if err != nil {
+		return "", fmt.Errorf("Error generating elevated runner: %s", err)
+	}
+
+	return command, err
 }
 
 // Takes the inline scripts, concatenates them into a temporary file and
@@ -498,84 +569,6 @@ func (p *Provisioner) uploadEnvVars(flattenedEnvVars string) (err error) {
 		return err
 	})
 	return
-}
-
-func (p *Provisioner) createPowershellWrapperScript() error {
-	// Prepare everything needed to enable the required env vars within the
-	// remote environment
-	err := p.prepareEnvVars(false)
-	if err != nil {
-		return err
-	}
-
-	ctxData := p.generatedData
-	ctxData["Path"] = p.config.RemotePath
-	ctxData["Vars"] = p.config.RemoteEnvVarPath
-	ctxData["DebugMode"] = p.config.DebugMode
-	p.config.ctx.Data = ctxData
-
-	data, err := interpolate.Render(PowershellWrapperScript, &p.config.ctx)
-	if err != nil {
-		return fmt.Errorf("Error processing command: %s", err)
-	}
-
-	return p.communicator.Upload(p.config.remoteWrapperScriptPath, strings.NewReader(data), nil)
-}
-
-func (p *Provisioner) createCommandText() (command string, err error) {
-	if p.config.ElevatedUser == "" {
-		return p.createCommandTextNonPrivileged()
-	}
-
-	return p.createCommandTextPrivileged()
-}
-
-func (p *Provisioner) createCommandTextNonPrivileged() (command string, err error) {
-	// Prepare everything needed to enable the required env vars within the
-	// remote environment
-	err = p.prepareEnvVars(false)
-	if err != nil {
-		return "", err
-	}
-
-	ctxData := p.generatedData
-	ctxData["Path"] = p.config.RemotePath
-	ctxData["Vars"] = p.config.RemoteEnvVarPath
-	p.config.ctx.Data = ctxData
-
-	command, err = interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
-
-	if err != nil {
-		return "", fmt.Errorf("Error processing command: %s", err)
-	}
-
-	// Return the interpolated command
-	return command, nil
-}
-
-func (p *Provisioner) createCommandTextPrivileged() (command string, err error) {
-	// Prepare everything needed to enable the required env vars within the
-	// remote environment
-	err = p.prepareEnvVars(true)
-	if err != nil {
-		return "", err
-	}
-	ctxData := p.generatedData
-	ctxData["Path"] = p.config.RemotePath
-	ctxData["Vars"] = p.config.RemoteEnvVarPath
-	p.config.ctx.Data = ctxData
-
-	command, err = interpolate.Render(p.config.ElevatedExecuteCommand, &p.config.ctx)
-	if err != nil {
-		return "", fmt.Errorf("Error processing command: %s", err)
-	}
-
-	command, err = provisioner.GenerateElevatedRunner(command, p)
-	if err != nil {
-		return "", fmt.Errorf("Error generating elevated runner: %s", err)
-	}
-
-	return command, err
 }
 
 func (p *Provisioner) Communicator() packer.Communicator {

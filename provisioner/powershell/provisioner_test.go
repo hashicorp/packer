@@ -71,6 +71,44 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Error("expected elevated_password to be empty")
 	}
 
+	matched, _ = regexp.MatchString("powershell -NonInteractive -NoProfile -ExecutionPolicy bypass -File c:/Windows/Temp/packer-wrapper-.*.ps1", p.config.ExecuteCommand)
+	if !matched {
+		t.Errorf("expected default execute command, but got : %s", p.config.ExecuteCommand)
+	}
+
+	matched, _ = regexp.MatchString("powershell -NonInteractive -NoProfile -ExecutionPolicy bypass -File c:/Windows/Temp/packer-wrapper-.*.ps1", p.config.ElevatedExecuteCommand)
+	if !matched {
+		t.Errorf("expected default elevated execute command, but got : %s", p.config.ElevatedExecuteCommand)
+	}
+
+	if p.config.ElevatedEnvVarFormat != `$env:%s="%s"; ` {
+		t.Fatalf(`Default command should be powershell '$env:%%s="%%s"; ', but got %s`, p.config.ElevatedEnvVarFormat)
+	}
+}
+
+func TestProvisionerPrepare_CustomExecuteCommands(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+	config["execute_command"] = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
+	config["elevated_execute_command"] = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
+
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	matched, _ := regexp.MatchString("c:/Windows/Temp/script-.*.ps1", p.config.RemotePath)
+	if !matched {
+		t.Errorf("unexpected remote path: %s", p.config.RemotePath)
+	}
+
+	if p.config.ElevatedUser != "" {
+		t.Error("expected elevated_user to be empty")
+	}
+	if p.config.ElevatedPassword != "" {
+		t.Error("expected elevated_password to be empty")
+	}
+
 	if p.config.ExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"` {
 		t.Fatalf(`Default command should be 'powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"', but got '%s'`, p.config.ExecuteCommand)
 	}
