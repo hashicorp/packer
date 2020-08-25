@@ -6,6 +6,7 @@ package iso
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -45,17 +46,20 @@ func (s *StepAddFloppy) Run(_ context.Context, state multistep.StateBag) multist
 
 		ds, err := d.FindDatastore(s.Datastore, s.Host)
 		if err != nil {
+			log.Printf("errored to find datastore: %s", err.Error())
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 		vmDir, err := vm.GetDir()
 		if err != nil {
+			log.Printf("errored to get VM directory: %s", err.Error())
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 
 		uploadPath := fmt.Sprintf("%v/packer-tmp-created-floppy.flp", vmDir)
 		if err := ds.UploadFile(floppyPath.(string), uploadPath, s.Host, s.SetHostForDatastoreUploads); err != nil {
+			log.Printf("errored to upload floppy file: %s", err.Error())
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
