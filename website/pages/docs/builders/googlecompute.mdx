@@ -37,7 +37,8 @@ If you run the `googlecompute` Packer builder locally on your workstation, you w
 need to install the Google Cloud SDK and authenticate using [User Application Default
 Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default).
 You don't need to specify an _account file_ if you are using this method. Your user
-must have atleast `Compute Instance Admin (v1)` & `Service Account User` to use Packer succesfully.
+must have at least `Compute Instance Admin (v1)` & `Service Account User` roles 
+to use Packer succesfully.
 
 
 ### Running on Google Cloud
@@ -130,9 +131,7 @@ location found:
 
 Below is a fully functioning example. It doesn't do anything useful since no
 provisioners or startup-script metadata are defined, but it will effectively
-repackage an existing GCE image. The account_file is obtained in the previous
-section. If it parses as JSON it is assumed to be the file itself, otherwise,
-it is assumed to be the path to the file containing the JSON.
+repackage an existing GCE image.
 
 <Tabs>
 <Tab heading="JSON">
@@ -273,6 +272,57 @@ for details.
 source "googlecompute" "basic-example" {
   project_id = "my project"
   source_image_family = "centos-7"
+  ssh_username = "packer"
+  zone = "us-central1-a"
+  image_licenses = ["projects/vm-options/global/licenses/enable-vmx"]
+}
+
+build {
+  sources = ["sources.googlecompute.basic-example"]
+}
+```
+
+</Tab>
+</Tabs>
+
+### Shared VPC Example
+
+This is an example of using the `network_project_id` configuration option to create
+a GCE instance in a Shared VPC Network. See [Creating a GCE Instance using Shared
+VPC](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#creating_an_instance_in_a_shared_subnet)
+for details. The user/service account running Packer must have `Compute Network User` role on
+the Shared VPC Host Project to create the instance in addition to the other roles mentioned in the
+Running on Google Cloud section.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "project_id": "my project",
+      "subnetwork": "default"
+      "source_image_family": "centos-7",
+      "network_project_id": "SHARED_VPC_PROJECT"
+      "ssh_username": "packer",
+      "zone": "us-central1-a",
+      "image_licenses": ["projects/vm-options/global/licenses/enable-vmx"]
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "googlecompute" "basic-example" {
+  project_id = "my project"
+  source_image_family = "centos-7"
+  subnetwork = "default"
+  network_project_id = "SHARED_VPC_PROJECT"
   ssh_username = "packer"
   zone = "us-central1-a"
   image_licenses = ["projects/vm-options/global/licenses/enable-vmx"]
