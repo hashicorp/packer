@@ -25,64 +25,80 @@ information.
 
 ## Authentication
 
-Authenticating with Google Cloud services requires at most one JSON file,
-called the _account file_. The _account file_ is **not** required if you are
-running the `googlecompute` Packer builder from a GCE instance with a
-properly-configured [Compute Engine Service
+Authenticating with Google Cloud services requires either a User Application Default Credentials
+or a JSON Service Account Key. These are **not** required if you are
+running the `googlecompute` Packer builder on Google Cloud with a
+properly-configured [Google Service
 Account](https://cloud.google.com/compute/docs/authentication).
 
-### Running With a Compute Engine Service Account
+### Running locally on your workstation.
 
-If you run the `googlecompute` Packer builder from a GCE instance, you can
-configure that instance to use a [Compute Engine Service
+If you run the `googlecompute` Packer builder locally on your workstation, you will 
+need to install the Google Cloud SDK and authenticate using [User Application Default
+Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default).
+You don't need to specify an _account file_ if you are using this method. Your user
+must have at least `Compute Instance Admin (v1)` & `Service Account User` roles 
+to use Packer succesfully.
+
+
+### Running on Google Cloud
+
+If you run the `googlecompute` Packer builder on GCE or GKE, you can
+configure that instance or cluster to use a [Google Service
 Account](https://cloud.google.com/compute/docs/authentication). This will allow
 Packer to authenticate to Google Cloud without having to bake in a separate
 credential/authentication file.
 
-To create a GCE instance that uses a service account, provide the required
-scopes when launching the instance.
+It is recommended that you create a custom service account for Packer and assign it
+ `Compute Instance Admin (v1)` & `Service Account User` roles.
 
-For `gcloud`, do this via the `--scopes` parameter:
-
+For `gcloud`, you can run the following commands:
 ```shell-session
+$ gcloud iam service-accounts create packer \
+  --project YOUR_GCP_PROJECT \
+  --description="Packer Service Account" \
+  --display-name="Packer Service Account"
+
+$ gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
+    --member=serviceAccount:packer@YOUR_GCP_PROJECT.iam.gserviceaccount.com \
+    --role=roles/compute.instanceAdmin.v1
+
+$ gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
+    --member=serviceAccount:packer@YOUR_GCP_PROJECT.iam.gserviceaccount.com \
+    --role=roles/iam.serviceAccountUser
+
 $ gcloud compute instances create INSTANCE-NAME \
   --project YOUR_GCP_PROJECT \
-  --image-family ubuntu-1804-lts \
-  --image-project gce-uefi-images \
+  --image-family ubuntu-2004-lts \
+  --image-project ubuntu-os-cloud \
   --network YOUR_GCP_NETWORK \
   --zone YOUR_GCP_ZONE \
-  --scopes "https://www.googleapis.com/auth/compute,https://www.googleapis.com/auth/devstorage.full_control"
+  --service-account=packer@YOUR_GCP_PROJECT.iam.gserviceaccount.com \
+  --scopes="https://www.googleapis.com/auth/cloud-platform"
 ```
-
-For the [Google Developers Console](https://console.developers.google.com):
-
-1.  Choose "Show advanced options"
-2.  Tick "Enable Compute Engine service account"
-3.  Choose "Read Write" for Compute
-4.  Choose "Full" for "Storage"
 
 **The service account will be used automatically by Packer as long as there is
 no _account file_ specified in the Packer configuration file.**
 
-### Running Without a Compute Engine Service Account
+### Running outside of Google Cloud
 
-The [Google Developers Console](https://console.developers.google.com) allows
+The [Google Cloud Console](https://console.cloud.google.com) allows
 you to create and download a credential file that will let you use the
 `googlecompute` Packer builder anywhere. To make the process more
 straightforwarded, it is documented here.
 
-1.  Log into the [Google Developers
-    Console](https://console.developers.google.com) and select a project.
+1.  Log into the [Google Cloud
+    Console](https://console.cloud.google.com/iam-admin/serviceaccounts) and select a project.
 
-2.  Under the "API Manager" section, click "Credentials."
+2.  Click Select a project, choose your project, and click Open.
 
-3.  Click the "Create credentials" button, select "Service account key"
+3.  Click Create Service Account.
 
-4.  Create a new service account that at least has
-    `Compute Engine Instance Admin (v1)` and `Service Account User` roles.
+4.  Enter a service account name (friendly display name), an optional description, select the `Compute Engine Instance Admin (v1)` and `Service Account User` roles, and then click Save.
 
-5.  Choose `JSON` as the Key type and click "Create". A JSON file will be
-    downloaded automatically. This is your _account file_.
+5.  Generate a JSON Key and save it in a secure location.
+
+5.  Set the Environment Variable `GOOGLE_APPLICATION_CREDENTIALS` to point to the path of the service account key.
 
 ### Precedence of Authentication Methods
 
@@ -115,9 +131,7 @@ location found:
 
 Below is a fully functioning example. It doesn't do anything useful since no
 provisioners or startup-script metadata are defined, but it will effectively
-repackage an existing GCE image. The account_file is obtained in the previous
-section. If it parses as JSON it is assumed to be the file itself, otherwise,
-it is assumed to be the path to the file containing the JSON.
+repackage an existing GCE image.
 
 <Tabs>
 <Tab heading="JSON">
@@ -127,9 +141,8 @@ it is assumed to be the path to the file containing the JSON.
   "builders": [
     {
       "type": "googlecompute",
-      "account_file": "account.json",
       "project_id": "my project",
-      "source_image": "debian-7-wheezy-v20150127",
+      "source_image": "debian-9-stretch-v20200805",
       "ssh_username": "packer",
       "zone": "us-central1-a"
     }
@@ -142,9 +155,8 @@ it is assumed to be the path to the file containing the JSON.
 
 ```hcl
 source "googlecompute" "basic-example" {
-  account_file = "account.json"
   project_id = "my project"
-  source_image = "debian-7-wheezy-v20150127"
+  source_image = "debian-9-stretch-v20200805"
   ssh_username = "packer"
   zone = "us-central1-a"
 }
@@ -168,18 +180,20 @@ using the gcloud command.
 Or alternatively by navigating to [https://console.cloud.google.com/networking/firewalls/list](https://console.cloud.google.com/networking/firewalls/list).
 
 Once this is set up, the following is a complete working packer config after
-setting a valid `account_file` and `project_id`:
+setting a valid `project_id`:
+
+<Tabs>
+<Tab heading="JSON">
 
 ```json
 {
   "builders": [
     {
       "type": "googlecompute",
-      "account_file": "account.json",
       "project_id": "my project",
-      "source_image": "windows-server-2016-dc-v20170227",
+      "source_image": "windows-server-2019-dc-v20200813",
       "disk_size": "50",
-      "machine_type": "n1-standard-1",
+      "machine_type": "n1-standard-2",
       "communicator": "winrm",
       "winrm_username": "packer_user",
       "winrm_insecure": true,
@@ -192,6 +206,33 @@ setting a valid `account_file` and `project_id`:
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "googlecompute" "windows-example" {
+  project_id = "MY_PROJECT"
+  source_image = "windows-server-2019-dc-v20200813"
+  zone = "us-central1-a"
+  disk_size = 50,
+  machine_type = "n1-standard-2",
+  communicator ="winrm",
+  winrm_username = "packer_user",
+  winrm_insecure = true,
+  winrm_use_ssl = true,
+  metadata {
+    windows-startup-script-cmd = "winrm quickconfig -quiet & net user /add packer_user & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
+  }
+}
+
+build {
+  sources = ["sources.googlecompute.windows-example"]
+}
+```
+
+</Tab>
+</Tabs>
 
 -> **Warning:** Please note that if you're setting up WinRM for provisioning, you'll probably want to turn it off or restrict its permissions as part of a shutdown script at the end of Packer's provisioning process. For more details on the why/how, check out this useful blog post and the associated code:
 https://cloudywindows.io/post/winrm-for-provisioning-close-the-door-on-the-way-out-eh/
@@ -206,12 +247,14 @@ Virtualization for VM
 Instances](https://cloud.google.com/compute/docs/instances/enable-nested-virtualization-vm-instances)
 for details.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "builders": [
     {
       "type": "googlecompute",
-      "account_file": "account.json",
       "project_id": "my project",
       "source_image_family": "centos-7",
       "ssh_username": "packer",
@@ -221,6 +264,77 @@ for details.
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "googlecompute" "basic-example" {
+  project_id = "my project"
+  source_image_family = "centos-7"
+  ssh_username = "packer"
+  zone = "us-central1-a"
+  image_licenses = ["projects/vm-options/global/licenses/enable-vmx"]
+}
+
+build {
+  sources = ["sources.googlecompute.basic-example"]
+}
+```
+
+</Tab>
+</Tabs>
+
+### Shared VPC Example
+
+This is an example of using the `network_project_id` configuration option to create
+a GCE instance in a Shared VPC Network. See [Creating a GCE Instance using Shared
+VPC](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#creating_an_instance_in_a_shared_subnet)
+for details. The user/service account running Packer must have `Compute Network User` role on
+the Shared VPC Host Project to create the instance in addition to the other roles mentioned in the
+Running on Google Cloud section.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "project_id": "my project",
+      "subnetwork": "default",
+      "source_image_family": "centos-7",
+      "network_project_id": "SHARED_VPC_PROJECT",
+      "ssh_username": "packer",
+      "zone": "us-central1-a",
+      "image_licenses": ["projects/vm-options/global/licenses/enable-vmx"]
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "googlecompute" "sharedvpc-example" {
+  project_id = "my project"
+  source_image_family = "centos-7"
+  subnetwork = "default"
+  network_project_id = "SHARED_VPC_PROJECT"
+  ssh_username = "packer"
+  zone = "us-central1-a"
+  image_licenses = ["projects/vm-options/global/licenses/enable-vmx"]
+}
+
+build {
+  sources = ["sources.googlecompute.sharedvpc-example"]
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Configuration Reference
 
@@ -252,9 +366,9 @@ will vary depending on the duration of the startup script. If
 `startup_script_file` is set, the `startup-script` `metadata` field will be
 overwritten. In other words, `startup_script_file` takes precedence.
 
-The builder does not check for a pass/fail/error signal from the startup
-script, at this time. Until such support is implemented, startup scripts should
-be robust, as an image will still be built even when a startup script fails.
+The builder does check for a pass/fail/error signal from the startup
+script by tracking the `startup-script-status` metadata. Packer will check if this key
+is set to done and if it not set to done before the timeout, Packer will fail the build.
 
 ### Windows
 
@@ -267,8 +381,7 @@ that it finishes before the instance shuts down.
 
 Startup script logs can be copied to a Google Cloud Storage (GCS) location
 specified via the `startup-script-log-dest` instance creation `metadata` field.
-The GCS location must be writeable by the credentials provided in the builder
-config's `account_file`.
+The GCS location must be writeable by the service account of the instance that Packer created.
 
 ## Gotchas
 
