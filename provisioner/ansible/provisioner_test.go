@@ -520,10 +520,10 @@ func TestCreateCmdArgs(t *testing.T) {
 			PackerBuildName:     "packerparty",
 			generatedData:       basicGenData(nil),
 			ExtraArguments:      []string{"-e", "hello-world"},
-			AnsibleSSHExtraArgs: []string{"'-o IdentitiesOnly=no'"},
+			AnsibleSSHExtraArgs: []string{"-o IdentitiesOnly=no"},
 			AnsibleEnvVars:      []string{"ENV_1=pancakes", "ENV_2=bananas"},
 			callArgs:            []string{common.HttpAddrNotImplemented, "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
-			ExpectedArgs:        []string{"-e", "packer_build_name=\"packerparty\"", "-e", "packer_builder_type=fakebuilder", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "--ssh-extra-args", "'-o IdentitiesOnly=no'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
+			ExpectedArgs:        []string{"-e", "packer_build_name=\"packerparty\"", "-e", "packer_builder_type=fakebuilder", "--ssh-extra-args", "'-o IdentitiesOnly=no'", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars:     []string{"ENV_1=pancakes", "ENV_2=bananas"},
 		},
 		{
