@@ -130,3 +130,15 @@ func (va *InspectArgs) AddFlagSets(flags *flag.FlagSet) {
 type InspectArgs struct {
 	MetaArgs
 }
+
+func (va *HCL2UpgradeArgs) AddFlagSets(flags *flag.FlagSet) {
+	flags.StringVar(&va.OutputFile, "output-file", "", "File where to put the hcl2 generated config. Defaults to JSON_TEMPLATE.pkr.hcl")
+
+	va.MetaArgs.AddFlagSets(flags)
+}
+
+// HCL2UpgradeArgs represents a parsed cli line for a `packer build`
+type HCL2UpgradeArgs struct {
+	MetaArgs
+	OutputFile string
+}

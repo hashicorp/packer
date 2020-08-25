@@ -85,3 +85,48 @@ func ConfigValueFromHCL2(v cty.Value) interface{} {
 	// capsule types, and we don't currently have any such types defined.
 	panic(fmt.Errorf("can't convert %#v to config value", v))
 }
+
+// HCL2ValueFromConfigValue is the opposite of ConfigValueFromHCL2: it takes
+// a value as would be returned from the old interpolator and turns it into
+// a cty.Value so it can be used within, for example, an HCL2 EvalContext.
+func HCL2ValueFromConfigValue(v interface{}) cty.Value {
+	if v == nil {
+		return cty.NullVal(cty.DynamicPseudoType)
+	}
+	if v == UnknownVariableValue {
+		return cty.DynamicVal
+	}
+
+	switch tv := v.(type) {
+	case bool:
+		return cty.BoolVal(tv)
+	case string:
+		return cty.StringVal(tv)
+	case int:
+		return cty.NumberIntVal(int64(tv))
+	case float64:
+		return cty.NumberFloatVal(tv)
+	case []interface{}:
+		vals := make([]cty.Value, len(tv))
+		for i, ev := range tv {
+			vals[i] = HCL2ValueFromConfigValue(ev)
+		}
+		return cty.TupleVal(vals)
+	case []string:
+		vals := make([]cty.Value, len(tv))
+		for i, ev := range tv {
+			vals[i] = cty.StringVal(ev)
+		}
+		return cty.ListVal(vals)
+	case map[string]interface{}:
+		vals := map[string]cty.Value{}
+		for k, ev := range tv {
+			vals[k] = HCL2ValueFromConfigValue(ev)
+		}
+		return cty.ObjectVal(vals)
+	default:
+		// HCL/HIL should never generate anything that isn't caught by
+		// the above, so if we get here something has gone very wrong.
+		panic(fmt.Errorf("can't convert %#v to cty.Value", v))
+	}
+}

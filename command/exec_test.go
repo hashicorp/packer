@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/hashicorp/packer/builder/amazon/ebs"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
@@ -89,6 +90,8 @@ func TestHelperProcess(*testing.T) {
 		os.Exit((&InspectCommand{Meta: commandMeta()}).Run(args))
 	case "build":
 		os.Exit((&BuildCommand{Meta: commandMeta()}).Run(args))
+	case "hcl2_upgrade":
+		os.Exit((&HCL2UpgradeCommand{Meta: commandMeta()}).Run(args))
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %q\n", cmd)
 		os.Exit(2)
@@ -115,8 +118,9 @@ func commandMeta() Meta {
 func getBareComponentFinder() packer.ComponentFinder {
 	return packer.ComponentFinder{
 		BuilderStore: packer.MapOfBuilder{
-			"file": func() (packer.Builder, error) { return &file.Builder{}, nil },
-			"null": func() (packer.Builder, error) { return &null.Builder{}, nil },
+			"file":       func() (packer.Builder, error) { return &file.Builder{}, nil },
+			"null":       func() (packer.Builder, error) { return &null.Builder{}, nil },
+			"amazon-ebs": func() (packer.Builder, error) { return &ebs.Builder{}, nil },
 		},
 		ProvisionerStore: packer.MapOfProvisioner{
 			"shell-local": func() (packer.Provisioner, error) { return &shell_local.Provisioner{}, nil },

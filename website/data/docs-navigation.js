@@ -160,7 +160,7 @@ export default [
   'terminology',
   {
     category: 'commands',
-    content: ['build', 'console', 'fix', 'inspect', 'validate'],
+    content: ['build', 'console', 'fix', 'inspect', 'validate', 'hcl2_upgrade'],
   },
   {
     category: 'templates',

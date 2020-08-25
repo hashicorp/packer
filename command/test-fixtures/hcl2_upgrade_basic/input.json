@@ -1,0 +1,126 @@
+{
+    "variables": {
+        "aws_region": null,
+        "aws_secret_key": "",
+        "aws_access_key": ""
+    },
+    "sensitive-variables": [
+        "aws_secret_key",
+        "aws_access_key",
+        "potato"
+    ],
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "region": "{{ user `aws_region` }}",
+            "secret_key": "{{ user `aws_secret_key` }}",
+            "access_key": "{{ user `aws_access_key` }}",
+            "ami_name": "ubuntu-16-04-test-{{ timestamp }}",
+            "ami_description": "Ubuntu 16.04 LTS - expand root partition",
+            "source_ami_filter": {
+                "filters": {
+                    "virtualization-type": "hvm",
+                    "name": "ubuntu/images/*/ubuntu-xenial-16.04-amd64-server-*",
+                    "root-device-type": "ebs"
+                },
+                "owners": [
+                    "099720109477"
+                ],
+                "most_recent": true
+            },
+            "launch_block_device_mappings": [
+                {
+                    "delete_on_termination": true,
+                    "device_name": "/dev/sda1",
+                    "volume_type": "gp2",
+                    "volume_size": 48
+                }
+            ],
+            "spot_price": "0.0075",
+            "spot_instance_types": [
+                "t2.small",
+                "t2.medium",
+                "t2.large"
+            ],
+            "encrypt_boot": true,
+            "ssh_username": "ubuntu",
+            "temporary_iam_instance_profile_policy_document": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "*"
+                        ],
+                        "Resource": ["*"]
+                    }
+                ]
+            },
+            "ssh_interface": "session_manager"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "only": [
+                "amazon-ebs"
+            ],
+            "max_retries": 5,
+            "timeout": "5s",
+            "inline": [
+                "echo {{ user  `secret_account` }}",
+                "echo {{ build `ID` }}",
+                "echo {{ build `SSHPrivateKey` }}",
+                "sleep 100000"
+            ]
+        },
+        {
+            "type": "shell-local",
+            "except": [
+                "amazon-ebs"
+            ],
+            "timeout": "5s",
+            "inline": [
+                "sleep 100000"
+            ]
+        }
+    ],
+    "post-processors": [
+        [
+            {
+                "type": "amazon-import",
+                "region": "eu-west-3",
+                "s3_bucket_name": "hashicorp.adrien",
+                "license_type": "BYOL",
+                "format": "vmdk",
+                "tags": {
+                    "Description": "packer amazon-import {{timestamp}}"
+                }
+            }
+        ],
+        [
+            {
+                "only": [
+                    "amazon-ebs"
+                ],
+                "files": [
+                    "path/something.ova"
+                ],
+                "keep_input_artifact": true,
+                "name": "very_special_artifice_post-processor",
+                "type": "artifice"
+            },
+            {
+                "except": [
+                    "amazon-ebs"
+                ],
+                "type": "amazon-import",
+                "s3_bucket_name": "hashicorp.adrien",
+                "license_type": "BYOL",
+                "tags": {
+                    "Description": "packer amazon-import {{timestamp}}"
+                }
+            }
+        ]
+    ]
+}

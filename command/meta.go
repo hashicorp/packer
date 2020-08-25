@@ -66,7 +66,7 @@ func (m *Meta) Core(tpl *template.Template, cla *MetaArgs) (*packer.Core, error)
 // command implements. The exact behavior of FlagSet can be configured
 // using the flags as the second parameter, for example to disable
 // build settings on the commands that don't handle builds.
-func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
+func (m *Meta) FlagSet(n string, _ FlagSetFlags) *flag.FlagSet {
 	f := flag.NewFlagSet(n, flag.ContinueOnError)
 
 	// Create an io.Writer that writes to our Ui properly for errors.
