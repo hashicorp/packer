@@ -76,15 +76,16 @@ type FlatConfig struct {
 	AvailabilityDomain        *string                           `mapstructure:"availability_domain" cty:"availability_domain" hcl:"availability_domain"`
 	CompartmentID             *string                           `mapstructure:"compartment_ocid" cty:"compartment_ocid" hcl:"compartment_ocid"`
 	BaseImageID               *string                           `mapstructure:"base_image_ocid" cty:"base_image_ocid" hcl:"base_image_ocid"`
-	Shape                     *string                           `mapstructure:"shape" cty:"shape" hcl:"shape"`
 	ImageName                 *string                           `mapstructure:"image_name" cty:"image_name" hcl:"image_name"`
 	InstanceName              *string                           `mapstructure:"instance_name" cty:"instance_name" hcl:"instance_name"`
 	InstanceTags              map[string]string                 `mapstructure:"instance_tags" cty:"instance_tags" hcl:"instance_tags"`
 	InstanceDefinedTags       map[string]map[string]interface{} `mapstructure:"instance_defined_tags" cty:"instance_defined_tags" hcl:"instance_defined_tags"`
+	Shape                     *string                           `mapstructure:"shape" cty:"shape" hcl:"shape"`
 	Metadata                  map[string]string                 `mapstructure:"metadata" cty:"metadata" hcl:"metadata"`
 	UserData                  *string                           `mapstructure:"user_data" cty:"user_data" hcl:"user_data"`
 	UserDataFile              *string                           `mapstructure:"user_data_file" cty:"user_data_file" hcl:"user_data_file"`
 	SubnetID                  *string                           `mapstructure:"subnet_ocid" cty:"subnet_ocid" hcl:"subnet_ocid"`
+	CreateVnicDetails         map[string]interface{}            `mapstructure:"create_vnic_details" cty:"create_vnic_details" hcl:"create_vnic_details"`
 	Tags                      map[string]string                 `mapstructure:"tags" cty:"tags" hcl:"tags"`
 	DefinedTags               map[string]map[string]interface{} `mapstructure:"defined_tags" cty:"defined_tags" hcl:"defined_tags"`
 }
@@ -168,15 +169,16 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"availability_domain":          &hcldec.AttrSpec{Name: "availability_domain", Type: cty.String, Required: false},
 		"compartment_ocid":             &hcldec.AttrSpec{Name: "compartment_ocid", Type: cty.String, Required: false},
 		"base_image_ocid":              &hcldec.AttrSpec{Name: "base_image_ocid", Type: cty.String, Required: false},
-		"shape":                        &hcldec.AttrSpec{Name: "shape", Type: cty.String, Required: false},
 		"image_name":                   &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"instance_name":                &hcldec.AttrSpec{Name: "instance_name", Type: cty.String, Required: false},
 		"instance_tags":                &hcldec.AttrSpec{Name: "instance_tags", Type: cty.Map(cty.String), Required: false},
 		"instance_defined_tags":        &hcldec.AttrSpec{Name: "instance_defined_tags", Type: cty.Map(cty.String), Required: false},
+		"shape":                        &hcldec.AttrSpec{Name: "shape", Type: cty.String, Required: false},
 		"metadata":                     &hcldec.AttrSpec{Name: "metadata", Type: cty.Map(cty.String), Required: false},
 		"user_data":                    &hcldec.AttrSpec{Name: "user_data", Type: cty.String, Required: false},
 		"user_data_file":               &hcldec.AttrSpec{Name: "user_data_file", Type: cty.String, Required: false},
 		"subnet_ocid":                  &hcldec.AttrSpec{Name: "subnet_ocid", Type: cty.String, Required: false},
+		"create_vnic_details":          &hcldec.AttrSpec{Name: "create_vnic_details", Type: cty.Map(cty.String), Required: false},
 		"tags":                         &hcldec.AttrSpec{Name: "tags", Type: cty.Map(cty.String), Required: false},
 		"defined_tags":                 &hcldec.AttrSpec{Name: "defined_tags", Type: cty.Map(cty.String), Required: false},
 	}

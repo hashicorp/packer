@@ -57,13 +57,13 @@ type Config struct {
 
 	// Image
 	BaseImageID string `mapstructure:"base_image_ocid"`
-	Shape       string `mapstructure:"shape"`
 	ImageName   string `mapstructure:"image_name"`
 
 	// Instance
 	InstanceName        string                            `mapstructure:"instance_name"`
 	InstanceTags        map[string]string                 `mapstructure:"instance_tags"`
 	InstanceDefinedTags map[string]map[string]interface{} `mapstructure:"instance_defined_tags"`
+	Shape               string                            `mapstructure:"shape"`
 
 	// Metadata optionally contains custom metadata key/value pairs provided in the
 	// configuration. While this can be used to set metadata["user_data"] the explicit
@@ -77,7 +77,8 @@ type Config struct {
 	UserDataFile string `mapstructure:"user_data_file"`
 
 	// Networking
-	SubnetID string `mapstructure:"subnet_ocid"`
+	SubnetID          string                 `mapstructure:"subnet_ocid"`
+	CreateVnicDetails map[string]interface{} `mapstructure:"create_vnic_details"`
 
 	// Tagging
 	Tags        map[string]string                 `mapstructure:"tags"`
