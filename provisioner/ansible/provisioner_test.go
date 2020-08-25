@@ -490,16 +490,17 @@ func basicGenData(input map[string]interface{}) map[string]interface{} {
 
 func TestCreateCmdArgs(t *testing.T) {
 	type testcase struct {
-		TestName          string
-		PackerBuildName   string
-		PackerBuilderType string
-		UseProxy          confighelper.Trilean
-		generatedData     map[string]interface{}
-		ExtraArguments    []string
-		AnsibleEnvVars    []string
-		callArgs          []string // httpAddr inventory playbook privKeyFile
-		ExpectedArgs      []string
-		ExpectedEnvVars   []string
+		TestName            string
+		PackerBuildName     string
+		PackerBuilderType   string
+		UseProxy            confighelper.Trilean
+		generatedData       map[string]interface{}
+		AnsibleSSHExtraArgs []string
+		ExtraArguments      []string
+		AnsibleEnvVars      []string
+		callArgs            []string // httpAddr inventory playbook privKeyFile
+		ExpectedArgs        []string
+		ExpectedEnvVars     []string
 	}
 	TestCases := []testcase{
 		{
@@ -512,6 +513,18 @@ func TestCreateCmdArgs(t *testing.T) {
 			callArgs:        []string{common.HttpAddrNotImplemented, "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
 			ExpectedArgs:    []string{"-e", "packer_build_name=\"packerparty\"", "-e", "packer_builder_type=fakebuilder", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "--ssh-extra-args", "'-o IdentitiesOnly=yes'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
 			ExpectedEnvVars: []string{"ENV_1=pancakes", "ENV_2=bananas"},
+		},
+		{
+			// SSH with private key and an extra argument.
+			TestName:            "SSH with private key and an extra argument and a ssh extra argument",
+			PackerBuildName:     "packerparty",
+			generatedData:       basicGenData(nil),
+			ExtraArguments:      []string{"-e", "hello-world"},
+			AnsibleSSHExtraArgs: []string{"'-o IdentitiesOnly=no'"},
+			AnsibleEnvVars:      []string{"ENV_1=pancakes", "ENV_2=bananas"},
+			callArgs:            []string{common.HttpAddrNotImplemented, "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
+			ExpectedArgs:        []string{"-e", "packer_build_name=\"packerparty\"", "-e", "packer_builder_type=fakebuilder", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "--ssh-extra-args", "'-o IdentitiesOnly=no'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
+			ExpectedEnvVars:     []string{"ENV_1=pancakes", "ENV_2=bananas"},
 		},
 		{
 			TestName:        "SSH with private key and an extra argument and UseProxy",
@@ -629,6 +642,17 @@ func TestCreateCmdArgs(t *testing.T) {
 			ExpectedEnvVars: []string{},
 		},
 		{
+			TestName:            "Use PrivateKey and SSH Extra Arg",
+			PackerBuildName:     "packerparty",
+			UseProxy:            confighelper.TriTrue,
+			generatedData:       basicGenData(nil),
+			AnsibleSSHExtraArgs: []string{"-o IdentitiesOnly=no"},
+			ExtraArguments:      []string{"-e", "hello-world"},
+			callArgs:            []string{common.HttpAddrNotImplemented, "/var/inventory", "test-playbook.yml", "/path/to/privkey.pem"},
+			ExpectedArgs:        []string{"-e", "packer_build_name=\"packerparty\"", "-e", "packer_builder_type=fakebuilder", "-e", "ansible_ssh_private_key_file=/path/to/privkey.pem", "--ssh-extra-args", "'-o IdentitiesOnly=no'", "-e", "hello-world", "-i", "/var/inventory", "test-playbook.yml"},
+			ExpectedEnvVars:     []string{},
+		},
+		{
 			TestName:        "Use SSH Agent",
 			UseProxy:        confighelper.TriTrue,
 			generatedData:   basicGenData(nil),
@@ -654,6 +678,7 @@ func TestCreateCmdArgs(t *testing.T) {
 		p.config.PackerBuilderType = "fakebuilder"
 		p.config.PackerBuildName = tc.PackerBuildName
 		p.generatedData = tc.generatedData
+		p.config.AnsibleSSHExtraArgs = tc.AnsibleSSHExtraArgs
 		p.config.ExtraArguments = tc.ExtraArguments
 		p.config.AnsibleEnvVars = tc.AnsibleEnvVars
 
