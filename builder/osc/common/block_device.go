@@ -78,6 +78,48 @@ func buildBlockDevicesImage(b []BlockDevice) []oapi.BlockDeviceMappingImage {
 	return blockDevices
 }
 
+func buildOscBlockDevicesImage(b []BlockDevice) []osc.BlockDeviceMappingImage {
+	var blockDevices []osc.BlockDeviceMappingImage
+
+	for _, blockDevice := range b {
+		mapping := osc.BlockDeviceMappingImage{
+			DeviceName: blockDevice.DeviceName,
+		}
+
+		if blockDevice.VirtualName != "" {
+			if strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
+				mapping.VirtualDeviceName = blockDevice.VirtualName
+			}
+		} else {
+			bsu := osc.BsuToCreate{
+				DeleteOnVmDeletion: blockDevice.DeleteOnVmDeletion,
+			}
+
+			if blockDevice.VolumeType != "" {
+				bsu.VolumeType = blockDevice.VolumeType
+			}
+
+			if blockDevice.VolumeSize > 0 {
+				bsu.VolumeSize = int32(blockDevice.VolumeSize)
+			}
+
+			// IOPS is only valid for io1 type
+			if blockDevice.VolumeType == "io1" {
+				bsu.Iops = int32(blockDevice.IOPS)
+			}
+
+			if blockDevice.SnapshotId != "" {
+				bsu.SnapshotId = blockDevice.SnapshotId
+			}
+
+			mapping.Bsu = bsu
+		}
+
+		blockDevices = append(blockDevices, mapping)
+	}
+	return blockDevices
+}
+
 func buildBlockDevicesVmCreation(b []BlockDevice) []oapi.BlockDeviceMappingVmCreation {
 	log.Printf("[DEBUG] Launch Block Device %#v", b)
 
@@ -194,6 +236,10 @@ func (b *BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
 
 func (b *OMIBlockDevices) BuildOMIDevices() []oapi.BlockDeviceMappingImage {
 	return buildBlockDevicesImage(b.OMIMappings)
+}
+
+func (b *OMIBlockDevices) BuildOscOMIDevices() []osc.BlockDeviceMappingImage {
+	return buildOscBlockDevicesImage(b.OMIMappings)
 }
 
 func (b *LaunchBlockDevices) BuildLaunchDevices() []oapi.BlockDeviceMappingVmCreation {

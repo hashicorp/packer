@@ -70,6 +70,12 @@ func WaitUntilImageAvailable(conn *oapi.Client, imageID string) error {
 	return <-errCh
 }
 
+func WaitUntilOscImageAvailable(conn *osc.APIClient, imageID string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "available", waitUntilOscImageStateFunc(conn, imageID))
+	return <-errCh
+}
+
 func WaitUntilVolumeAvailable(conn *oapi.Client, volumeID string) error {
 	errCh := make(chan error, 1)
 	go waitForState(errCh, "available", volumeWaitFunc(conn, volumeID))
@@ -282,6 +288,39 @@ func waitUntilImageStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
 		}
 
 		return resp.OK.Images[0].State, nil
+	}
+}
+
+func waitUntilOscImageStateFunc(conn *osc.APIClient, id string) stateRefreshFunc {
+	return func() (string, error) {
+		log.Printf("[Debug] Check if Image with id %s exists", id)
+		resp, _, err := conn.ImageApi.ReadImages(context.Background(), &osc.ReadImagesOpts{
+			ReadImagesRequest: optional.NewInterface(osc.ReadImagesRequest{
+				Filters: osc.FiltersImage{
+					ImageIds: []string{id},
+				},
+			}),
+		})
+
+		log.Printf("[Debug] Read Response %+v", resp)
+
+		if err != nil {
+			return "", err
+		}
+
+		// if resp.Images[] == "" {
+		// 	return "", fmt.Errorf("Vm with ID %s. Not Found", id)
+		// }
+
+		if len(resp.Images) == 0 {
+			return "pending", nil
+		}
+
+		if resp.Images[0].State == "failed" {
+			return resp.Images[0].State, fmt.Errorf("Image (%s) creation is failed", id)
+		}
+
+		return resp.Images[0].State, nil
 	}
 }
 
