@@ -46,6 +46,8 @@
     "ansible_env_vars": [ "WINRM_PASSWORD={{.WinRMPassword}}" ],
     ```
 
+- `ansible_ssh_extra_args` ([]string) - Specifies --ssh-extra-args on command line defaults to -o IdentitiesOnly=yes
+
 - `groups` ([]string) - The groups into which the Ansible host should
    be placed. When unspecified, the host is not associated with any groups.
 
