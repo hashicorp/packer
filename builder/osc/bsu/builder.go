@@ -106,7 +106,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("config", &b.config)
 	state.Put("oapi", oapiconn)
 	state.Put("osc", oscConn)
-	state.Put("clientConfig", clientConfig)
+	state.Put("accessConfig", &b.config.AccessConfig)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -200,6 +200,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&osccommon.StepUpdateOMIAttributes{
 			AccountIds:         b.config.OMIAccountIDs,
 			SnapshotAccountIds: b.config.SnapshotAccountIDs,
+			RawRegion:          b.config.RawRegion,
 			Ctx:                b.config.ctx,
 		},
 		&osccommon.StepCreateTags{
