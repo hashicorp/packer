@@ -11,7 +11,9 @@ import (
 	"io"
 	"log"
 	"net"
+	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -260,6 +262,68 @@ func (d *ESX5Driver) Verify() error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (d *ESX5Driver) VerifyOvfTool(SkipExport, skipValidateCredentials bool) error {
+	err := d.base.VerifyOvfTool(SkipExport, skipValidateCredentials)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Verifying that ovftool credentials are valid...")
+	// check that password is valid by sending a dummy ovftool command
+	// now, so that we don't fail for a simple mistake after a long
+	// build
+	ovftool := GetOVFTool()
+
+	if skipValidateCredentials {
+		return nil
+	}
+
+	if d.Password == "" {
+		return fmt.Errorf("exporting the vm from esxi with ovftool requires " +
+			"that you set a value for remote_password")
+	}
+
+	// Generate the uri of the host, with embedded credentials
+	ovftool_uri := fmt.Sprintf("vi://%s", d.Host)
+	u, err := url.Parse(ovftool_uri)
+	if err != nil {
+		return fmt.Errorf("Couldn't generate uri for ovftool: %s", err)
+	}
+	u.User = url.UserPassword(d.Username, d.Password)
+
+	ovfToolArgs := []string{"--noSSLVerify", "--verifyOnly", u.String()}
+
+	var out bytes.Buffer
+	cmdCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(cmdCtx, ovftool, ovfToolArgs...)
+	cmd.Stdout = &out
+
+	// Need to manually close stdin or else the ofvtool call will hang
+	// forever in a situation where the user has provided an invalid
+	// password or username
+	stdin, _ := cmd.StdinPipe()
+	defer stdin.Close()
+
+	if err := cmd.Run(); err != nil {
+		outString := out.String()
+		// The command *should* fail with this error, if it
+		// authenticates properly.
+		if !strings.Contains(outString, "Found wrong kind of object") {
+			err := fmt.Errorf("ovftool validation error: %s; %s",
+				err, outString)
+			if strings.Contains(outString,
+				"Enter login information for source") {
+				err = fmt.Errorf("The username or password you " +
+					"provided to ovftool is invalid.")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

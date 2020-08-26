@@ -35,6 +35,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
+	// Before we get deep into the build, make sure ovftool is present and
+	// credentials are valid, if we're going to use ovftool.
+	if err := driver.VerifyOvfTool(b.config.SkipExport, b.config.SkipValidateCredentials); err != nil {
+		return nil, err
+	}
 
 	// Setup the state bag
 	state := new(multistep.BasicStateBag)
