@@ -77,6 +77,9 @@ type Driver interface {
 
 	// Get the host ip address for the vm
 	HostIP(multistep.StateBag) (string, error)
+
+	// Export the vm to ovf or ova format using ovftool
+	Export([]string) error
 }
 
 // NewDriver returns a new driver implementation for this operating
@@ -599,4 +602,29 @@ func (d *VmwareDriver) HostIP(state multistep.StateBag) (string, error) {
 		return address.String(), nil
 	}
 	return "", fmt.Errorf("Unable to find host IP from devices %v, last error: %s", devices, lastError)
+}
+
+func GetOVFTool() string {
+	ovftool := "ovftool"
+	if runtime.GOOS == "windows" {
+		ovftool = "ovftool.exe"
+	}
+
+	if _, err := exec.LookPath(ovftool); err != nil {
+		return ""
+	}
+	return ovftool
+}
+
+func (d *VmwareDriver) Export(args []string) error {
+	ovftool := GetOVFTool()
+	if ovftool == "" {
+		return fmt.Errorf("Error: ovftool not found")
+	}
+	cmd := exec.Command(ovftool, args...)
+	if _, _, err := runAndLog(cmd); err != nil {
+		return err
+	}
+
+	return nil
 }

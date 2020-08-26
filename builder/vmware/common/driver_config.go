@@ -84,13 +84,28 @@ func (c *DriverConfig) Prepare(ctx *interpolate.Context) []error {
 }
 
 func (c *DriverConfig) Validate(SkipExport bool) error {
-	if c.RemoteType == "" || SkipExport == true {
+	if SkipExport {
 		return nil
 	}
-	if c.RemotePassword == "" {
-		return fmt.Errorf("exporting the vm (with ovftool) requires that " +
-			"you set a value for remote_password")
+
+	if c.RemoteType != "" && c.RemotePassword == "" {
+		return fmt.Errorf("exporting the vm from esxi with ovftool requires " +
+			"that you set a value for remote_password")
 	}
+
+	if c.RemoteType == "" {
+		// Validate that tool exists, but no need to validate credentials.
+		ovftool := GetOVFTool()
+		if ovftool != "" {
+			return nil
+		} else {
+			return fmt.Errorf("Couldn't find ovftool in path! Please either " +
+				"set `skip_export = true` and remove the `format` option " +
+				"from your template, or make sure ovftool is installed on " +
+				"your build system. ")
+		}
+	}
+
 	if c.SkipValidateCredentials {
 		return nil
 	}

@@ -1,13 +1,11 @@
 package common
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/url"
 	"os"
-	"os/exec"
-	"runtime"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -15,30 +13,15 @@ import (
 )
 
 // This step exports a VM built on ESXi using ovftool
-//
-// Uses:
-//   display_name string
 type StepExport struct {
 	Format         string
 	SkipExport     bool
 	VMName         string
 	OVFToolOptions []string
-	OutputDir      string
+	OutputDir      *string
 }
 
-func GetOVFTool() string {
-	ovftool := "ovftool"
-	if runtime.GOOS == "windows" {
-		ovftool = "ovftool.exe"
-	}
-
-	if _, err := exec.LookPath(ovftool); err != nil {
-		return ""
-	}
-	return ovftool
-}
-
-func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassword bool) ([]string, error) {
+func (s *StepExport) generateRemoteExportArgs(c *DriverConfig, displayName string, hidePassword bool, exportOutputPath string) ([]string, error) {
 
 	ovftool_uri := fmt.Sprintf("vi://%s/%s", c.RemoteHost, displayName)
 	u, err := url.Parse(ovftool_uri)
@@ -57,7 +40,15 @@ func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassw
 		"--skipManifestCheck",
 		"-tt=" + s.Format,
 		u.String(),
-		s.OutputDir,
+		filepath.Join(exportOutputPath, s.VMName+"."+s.Format),
+	}
+	return append(s.OVFToolOptions, args...), nil
+}
+
+func (s *StepExport) generateLocalExportArgs(exportOutputPath string) ([]string, error) {
+	args := []string{
+		filepath.Join(exportOutputPath, s.VMName+".vmx"),
+		filepath.Join(exportOutputPath, s.VMName+"."+s.Format),
 	}
 	return append(s.OVFToolOptions, args...), nil
 }
@@ -65,6 +56,7 @@ func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassw
 func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("driverConfig").(*DriverConfig)
 	ui := state.Get("ui").(packer.Ui)
+	driver := state.Get("driver").(Driver)
 
 	// Skip export if requested
 	if s.SkipExport {
@@ -72,57 +64,72 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 		return multistep.ActionContinue
 	}
 
-	if c.RemoteType != "esx5" {
-		ui.Say("Skipping export of virtual machine (export is allowed only for ESXi)...")
-		return multistep.ActionContinue
+	// load output path from state. If it doesn't exist, just use the local
+	// outputdir.
+	exportOutputPath, ok := state.Get("export_output_path").(string)
+	if !ok || exportOutputPath == "" {
+		if *s.OutputDir != "" {
+			exportOutputPath = *s.OutputDir
+		} else {
+			exportOutputPath = s.VMName
+		}
 	}
 
-	ovftool := GetOVFTool()
-	if ovftool == "" {
-		err := fmt.Errorf("Error ovftool not found")
-		state.Put("error", err)
+	err := os.MkdirAll(exportOutputPath, 0755)
+	if err != nil {
+		state.Put("error creating export directory", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	// Export the VM
-	if s.OutputDir == "" {
-		s.OutputDir = s.VMName + "." + s.Format
-	}
-
-	os.MkdirAll(s.OutputDir, 0755)
 
 	ui.Say("Exporting virtual machine...")
 	var displayName string
 	if v, ok := state.GetOk("display_name"); ok {
 		displayName = v.(string)
 	}
-	ui_args, err := s.generateArgs(c, displayName, true)
-	if err != nil {
-		err := fmt.Errorf("Couldn't generate ovftool uri: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+
+	var args, ui_args []string
+
+	ovftool := GetOVFTool()
+	if c.RemoteType == "esx5" {
+		// Generate arguments for the ovftool command, but obfuscating the
+		// password that we can log the command to the UI for debugging.
+		ui_args, err := s.generateRemoteExportArgs(c, displayName, true, exportOutputPath)
+		if err != nil {
+			err := fmt.Errorf("Couldn't generate ovftool export args: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		ui.Message(fmt.Sprintf("Executing: %s %s", ovftool,
+			strings.Join(ui_args, " ")))
+		// Re-run the generate command, this time without obfuscating the
+		// password, so we can actually use it.
+		args, err = s.generateRemoteExportArgs(c, displayName, false, exportOutputPath)
+		if err != nil {
+			err := fmt.Errorf("Couldn't generate ovftool export args: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	} else {
+		args, err = s.generateLocalExportArgs(exportOutputPath)
+		ui.Message(fmt.Sprintf("Executing: %s %s", ovftool,
+			strings.Join(ui_args, " ")))
 	}
-	ui.Message(fmt.Sprintf("Executing: %s %s", ovftool, strings.Join(ui_args, " ")))
-	var out bytes.Buffer
-	args, err := s.generateArgs(c, displayName, false)
 	if err != nil {
-		err := fmt.Errorf("Couldn't generate ovftool uri: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-	cmd := exec.Command(ovftool, args...)
-	cmd.Stdout = &out
-	if err := cmd.Run(); err != nil {
-		err := fmt.Errorf("Error exporting virtual machine: %s\n%s\n", err, out.String())
+		err := fmt.Errorf("Couldn't generate ovftool export args: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	ui.Message(out.String())
+	if err := driver.Export(args); err != nil {
+		err := fmt.Errorf("Error performing ovftool export: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	return multistep.ActionContinue
 }

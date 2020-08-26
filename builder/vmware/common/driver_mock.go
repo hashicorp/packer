@@ -27,6 +27,9 @@ type DriverMock struct {
 	CreateDiskTypeId      string
 	CreateDiskErr         error
 
+	ExportCalled bool
+	ExportArgs   []string
+
 	IsRunningCalled bool
 	IsRunningPath   string
 	IsRunningResult bool
@@ -252,6 +255,12 @@ func (d *DriverMock) NetmapConfPath() string {
 func (d *DriverMock) Verify() error {
 	d.VerifyCalled = true
 	return d.VerifyErr
+}
+
+func (d *DriverMock) Export(args []string) error {
+	d.ExportCalled = true
+	d.ExportArgs = args
+	return nil
 }
 
 func (d *DriverMock) GetVmwareDriver() VmwareDriver {

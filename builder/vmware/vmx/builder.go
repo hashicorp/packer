@@ -170,6 +170,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SkipExport:     b.config.SkipExport,
 			VMName:         b.config.VMName,
 			OVFToolOptions: b.config.OVFToolOptions,
+			OutputDir:      &b.config.OutputConfig.OutputDir,
 		},
 	}
 
