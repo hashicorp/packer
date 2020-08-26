@@ -22,12 +22,16 @@ func ConfigDir() (string, error) {
 }
 
 func homeDir() (string, error) {
-	// Prefer $HOME over user.Current due to glibc bug: golang.org/issue/13470
-	if home := os.Getenv("HOME"); home != "" {
+	// Prefer $APPDATA over $HOME in Windows.
+	// This makes it possible to use packer plugins (as installed by Chocolatey)
+	// in cmd/ps and msys2.
+	// See https://github.com/hashicorp/packer/issues/9795
+	if home := os.Getenv("APPDATA"); home != "" {
 		return home, nil
 	}
 
-	if home := os.Getenv("APPDATA"); home != "" {
+	// Prefer $HOME over user.Current due to glibc bug: golang.org/issue/13470
+	if home := os.Getenv("HOME"); home != "" {
 		return home, nil
 	}
 
