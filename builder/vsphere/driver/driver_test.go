@@ -11,7 +11,7 @@ import (
 // Defines whether acceptance tests should be run
 const TestHostName = "esxi-1.vsphere65.test"
 
-func newTestDriver(t *testing.T) *Driver {
+func newTestDriver(t *testing.T) *VCenterDriver {
 	username := os.Getenv("VSPHERE_USERNAME")
 	if username == "" {
 		username = "root"

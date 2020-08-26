@@ -216,7 +216,7 @@ type StepCreateVM struct {
 
 func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*driver.Driver)
+	d := state.Get("driver").(*driver.VCenterDriver)
 	vmPath := path.Join(s.Location.Folder, s.Location.VMName)
 
 	err := d.PreCleanVM(ui, vmPath, s.Force)

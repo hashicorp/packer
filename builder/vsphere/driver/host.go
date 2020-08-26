@@ -7,18 +7,18 @@ import (
 )
 
 type Host struct {
-	driver *Driver
+	driver *VCenterDriver
 	host   *object.HostSystem
 }
 
-func (d *Driver) NewHost(ref *types.ManagedObjectReference) *Host {
+func (d *VCenterDriver) NewHost(ref *types.ManagedObjectReference) *Host {
 	return &Host{
 		host:   object.NewHostSystem(d.client.Client, *ref),
 		driver: d,
 	}
 }
 
-func (d *Driver) FindHost(name string) (*Host, error) {
+func (d *VCenterDriver) FindHost(name string) (*Host, error) {
 	h, err := d.finder.HostSystem(d.ctx, name)
 	if err != nil {
 		return nil, err

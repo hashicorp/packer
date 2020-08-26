@@ -18,7 +18,7 @@ type StepRemoteUpload struct {
 
 func (s *StepRemoteUpload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*driver.Driver)
+	d := state.Get("driver").(driver.Driver)
 
 	if path, ok := state.GetOk("iso_path"); ok {
 		filename := filepath.Base(path.(string))

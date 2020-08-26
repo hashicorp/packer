@@ -38,7 +38,7 @@ type StepAddFloppy struct {
 func (s *StepAddFloppy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
-	d := state.Get("driver").(*driver.Driver)
+	d := state.Get("driver").(*driver.VCenterDriver)
 
 	if floppyPath, ok := state.GetOk("floppy_path"); ok {
 		ui.Say("Uploading created floppy image")
@@ -90,7 +90,7 @@ func (s *StepAddFloppy) Cleanup(state multistep.StateBag) {
 	}
 
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*driver.Driver)
+	d := state.Get("driver").(*driver.VCenterDriver)
 
 	if UploadedFloppyPath, ok := state.GetOk("uploaded_floppy_path"); ok {
 		ui.Say("Deleting Floppy image ...")

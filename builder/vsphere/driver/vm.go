@@ -23,7 +23,7 @@ import (
 
 type VirtualMachine struct {
 	vm     *object.VirtualMachine
-	driver *Driver
+	driver *VCenterDriver
 }
 
 type CloneConfig struct {
@@ -87,14 +87,14 @@ type Disk struct {
 	ControllerIndex     int
 }
 
-func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
+func (d *VCenterDriver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
 	return &VirtualMachine{
 		vm:     object.NewVirtualMachine(d.client.Client, *ref),
 		driver: d,
 	}
 }
 
-func (d *Driver) FindVM(name string) (*VirtualMachine, error) {
+func (d *VCenterDriver) FindVM(name string) (*VirtualMachine, error) {
 	vm, err := d.finder.VirtualMachine(d.ctx, name)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func (d *Driver) FindVM(name string) (*VirtualMachine, error) {
 	}, nil
 }
 
-func (d *Driver) PreCleanVM(ui packer.Ui, vmPath string, force bool) error {
+func (d *VCenterDriver) PreCleanVM(ui packer.Ui, vmPath string, force bool) error {
 	vm, err := d.FindVM(vmPath)
 	if err != nil {
 		if _, ok := err.(*find.NotFoundError); !ok {
@@ -130,7 +130,7 @@ func (d *Driver) PreCleanVM(ui packer.Ui, vmPath string, force bool) error {
 	return nil
 }
 
-func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
+func (d *VCenterDriver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 	createSpec := types.VirtualMachineConfigSpec{
 		Name:       config.Name,
 		Annotation: config.Annotation,
@@ -262,7 +262,7 @@ func (vm *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) (*Virt
 	if err != nil {
 		return nil, err
 	}
-	datastoreRef := datastore.ds.Reference()
+	datastoreRef := datastore.Reference()
 	relocateSpec.Datastore = &datastoreRef
 
 	var cloneSpec types.VirtualMachineCloneSpec
@@ -769,7 +769,7 @@ func (vm *VirtualMachine) ImportToContentLibrary(template vcenter.Template) erro
 		if err != nil {
 			return err
 		}
-		template.VMHomeStorage.Datastore = d.ds.Reference().Value
+		template.VMHomeStorage.Datastore = d.Reference().Value
 	}
 
 	vcm := vcenter.NewManager(vm.driver.restClient.client)
@@ -789,14 +789,14 @@ func (vm *VirtualMachine) GetDir() (string, error) {
 
 	vmxName := fmt.Sprintf("/%s.vmx", vmInfo.Name)
 	for _, file := range vmInfo.LayoutEx.File {
-		if strings.HasSuffix(file.Name, vmxName) {
+		if strings.Contains(file.Name, vmInfo.Name) {
 			return RemoveDatastorePrefix(file.Name[:len(file.Name)-len(vmxName)]), nil
 		}
 	}
 	return "", fmt.Errorf("cannot find '%s'", vmxName)
 }
 
-func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
+func addDisk(_ *VCenterDriver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
 	if len(config.Storage) == 0 {
 		return nil, errors.New("no storage devices have been defined")
 	}
@@ -839,7 +839,7 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 	return devices, nil
 }
 
-func addNetwork(d *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
+func addNetwork(d *VCenterDriver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
 	if len(config.NICs) == 0 {
 		return nil, errors.New("no network adapters have been defined")
 	}
@@ -872,7 +872,7 @@ func addNetwork(d *Driver, devices object.VirtualDeviceList, config *CreateConfi
 	return devices, nil
 }
 
-func findNetwork(network string, host string, d *Driver) (object.NetworkReference, error) {
+func findNetwork(network string, host string, d *VCenterDriver) (object.NetworkReference, error) {
 	if network != "" {
 		var err error
 		networks, err := d.FindNetworks(network)

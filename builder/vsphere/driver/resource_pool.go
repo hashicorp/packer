@@ -10,17 +10,17 @@ import (
 
 type ResourcePool struct {
 	pool   *object.ResourcePool
-	driver *Driver
+	driver *VCenterDriver
 }
 
-func (d *Driver) NewResourcePool(ref *types.ManagedObjectReference) *ResourcePool {
+func (d *VCenterDriver) NewResourcePool(ref *types.ManagedObjectReference) *ResourcePool {
 	return &ResourcePool{
 		pool:   object.NewResourcePool(d.client.Client, *ref),
 		driver: d,
 	}
 }
 
-func (d *Driver) FindResourcePool(cluster string, host string, name string) (*ResourcePool, error) {
+func (d *VCenterDriver) FindResourcePool(cluster string, host string, name string) (*ResourcePool, error) {
 	var res string
 	if cluster != "" {
 		res = cluster
