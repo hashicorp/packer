@@ -83,7 +83,15 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DoCleanup: b.config.DriverConfig.CleanUpRemoteCache,
 			Checksum:  b.config.ISOChecksum,
 		},
-		&stepCreateDisk{},
+		&vmwcommon.StepCreateDisks{
+			OutputDir:          &b.config.OutputDir,
+			CreateMainDisk:     true,
+			DiskName:           b.config.DiskName,
+			MainDiskSize:       b.config.DiskSize,
+			AdditionalDiskSize: b.config.AdditionalDiskSize,
+			DiskAdapterType:    b.config.DiskAdapterType,
+			DiskTypeId:         b.config.DiskTypeId,
+		},
 		&stepCreateVMX{},
 		&vmwcommon.StepConfigureVMX{
 			CustomData:  b.config.VMXData,

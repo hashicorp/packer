@@ -74,6 +74,15 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DoCleanup: true,
 			Checksum:  "none",
 		},
+		&vmwcommon.StepCreateDisks{
+			OutputDir:          &b.config.OutputDir,
+			CreateMainDisk:     false,
+			DiskName:           b.config.DiskName,
+			MainDiskSize:       0,
+			AdditionalDiskSize: b.config.AdditionalDiskSize,
+			DiskAdapterType:    b.config.DiskAdapterType,
+			DiskTypeId:         b.config.DiskTypeId,
+		},
 		&StepCloneVMX{
 			Path:      b.config.SourcePath,
 			OutputDir: &b.config.OutputDir,

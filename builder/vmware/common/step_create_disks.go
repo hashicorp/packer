@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"log"
 	"path/filepath"
 
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -20,11 +19,18 @@ import (
 //
 // Produces:
 //   disk_full_paths ([]string) - The full paths to all created disks
-type stepCreateDisk struct{}
+type StepCreateDisks struct {
+	OutputDir          *string
+	CreateMainDisk     bool
+	DiskName           string
+	MainDiskSize       uint
+	AdditionalDiskSize []uint
+	DiskAdapterType    string
+	DiskTypeId         string
+}
 
-func (stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
-	driver := state.Get("driver").(vmwcommon.Driver)
+func (s *StepCreateDisks) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating required virtual machine disks")
@@ -32,13 +38,15 @@ func (stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) multist
 	// Users can configure disks at several locations in the template so
 	// first collate all the disk requirements
 	var diskFullPaths, diskSizes []string
-	// The 'main' or 'default' disk
-	diskFullPaths = append(diskFullPaths, filepath.Join(config.OutputDir, config.DiskName+".vmdk"))
-	diskSizes = append(diskSizes, fmt.Sprintf("%dM", uint64(config.DiskSize)))
+	// The 'main' or 'default' disk, only used in vmware-iso
+	if s.CreateMainDisk {
+		diskFullPaths = append(diskFullPaths, filepath.Join(*s.OutputDir, s.DiskName+".vmdk"))
+		diskSizes = append(diskSizes, fmt.Sprintf("%dM", uint64(s.MainDiskSize)))
+	}
 	// Additional disks
-	if len(config.AdditionalDiskSize) > 0 {
-		for i, diskSize := range config.AdditionalDiskSize {
-			path := filepath.Join(config.OutputDir, fmt.Sprintf("%s-%d.vmdk", config.DiskName, i+1))
+	if len(s.AdditionalDiskSize) > 0 {
+		for i, diskSize := range s.AdditionalDiskSize {
+			path := filepath.Join(*s.OutputDir, fmt.Sprintf("%s-%d.vmdk", s.DiskName, i+1))
 			diskFullPaths = append(diskFullPaths, path)
 			size := fmt.Sprintf("%dM", uint64(diskSize))
 			diskSizes = append(diskSizes, size)
@@ -50,7 +58,7 @@ func (stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) multist
 		log.Printf("[INFO] Creating disk with Path: %s and Size: %s", diskFullPath, diskSizes[i])
 		// Additional disks currently use the same adapter type and disk
 		// type as specified for the main disk
-		if err := driver.CreateDisk(diskFullPath, diskSizes[i], config.DiskAdapterType, config.DiskTypeId); err != nil {
+		if err := driver.CreateDisk(diskFullPath, diskSizes[i], s.DiskAdapterType, s.DiskTypeId); err != nil {
 			err := fmt.Errorf("Error creating disk: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -63,4 +71,4 @@ func (stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) multist
 	return multistep.ActionContinue
 }
 
-func (stepCreateDisk) Cleanup(multistep.StateBag) {}
+func (s *StepCreateDisks) Cleanup(multistep.StateBag) {}
