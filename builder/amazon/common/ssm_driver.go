@@ -46,7 +46,7 @@ func NewSSMDriver(config SSMDriverConfig) *SSMDriver {
 // not wish to manage the session manually calling StopSession on a instance of this driver will terminate the active session
 // created from calling StartSession.
 func (d *SSMDriver) StartSession(ctx context.Context, input ssm.StartSessionInput) (*ssm.StartSessionOutput, error) {
-	log.Printf("Starting PortForwarding session to instance %q with following params %v", aws.StringValue(input.Target), input.Parameters)
+	log.Printf("Starting PortForwarding session to instance %q", aws.StringValue(input.Target))
 
 	var output *ssm.StartSessionOutput
 	err := retry.Config{
@@ -110,14 +110,29 @@ func (d *SSMDriver) openTunnelForSession(ctx context.Context) error {
 			select {
 			case <-ctx.Done():
 				return
-			case output := <-stderrCh:
+			case output, ok := <-stderrCh:
+				if !ok {
+					stderrCh = nil
+					break
+				}
+
 				if output != "" {
 					log.Printf("[ERROR] %s: %s", prefix, output)
 				}
-			case output := <-stdoutCh:
+			case output, ok := <-stdoutCh:
+				if !ok {
+					stdoutCh = nil
+					break
+				}
+
 				if output != "" {
 					log.Printf("[DEBUG] %s: %s", prefix, output)
 				}
+			}
+
+			if stdoutCh == nil && stderrCh == nil {
+				log.Printf("[DEBUG] %s: %s", prefix, "active session has been terminated; stopping all log polling processes.")
+				return
 			}
 		}
 	}(ctx, sessionManagerPluginName)
