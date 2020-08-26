@@ -8,8 +8,12 @@
 * builder/azure: Add FreeBSD support to azure/chroot builder. [GH-9697]
 * builder/vmware-esx: Add `network_name` option to vmware so that users can set
     a network without using vmx data. [GH-9718]
+* builder/vmware-vmx: Add additional disk configuration option.  Previously
+    only implemented for vmware-iso builder [Gh-9815]
 * builder/vmware: Add a `remote_output_directory option` so users can tell
     Packer where on a datastore to create a vm. [GH-9784]
+* builder/vmware: Add option to export to ovf or ova from a local vmware build
+    [GH-9825]
 * builder/vmware: Add progress tracker to vmware-esx5 iso upload. [GH-9779]
 * builder/vsphere: Add new `directory_permission` config export option.
     [GH-9704]
@@ -27,6 +31,8 @@
     [GH-9773]
 * post-processor/vsphere: Improve UI to catch bad credentials and print errors.
     [GH-9649]
+* provisioner/ansible-remote: Add `ansible_ssh_extra_args` so users can specify
+    extra arguments to pass to ssh [GH-9821]
 * provisioner/file: Clean up, bugfix, and document previously-hidden `sources`
     option. [GH-9725] [GH-9735]
 * provisioner/salt-masterless: Add option to option to download community
@@ -61,6 +67,7 @@
     interpolation. [GH-9673]
 * post-processor/vsphere-template: Fix ReregisterVM to default to true instead
     of false. [GH-9736]
+* post-processor/yandex-export: Fix issue when validating region_name [GH-9814]
 
 ## 1.6.1 (July 30, 2020)
 
