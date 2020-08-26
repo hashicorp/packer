@@ -462,7 +462,7 @@ func (p *PackerConfig) printVariables() string {
 	out.WriteString("> input-variables:\n\n")
 	for _, v := range p.InputVariables {
 		val, _ := v.Value()
-		fmt.Fprintf(out, "var.%s: %q [debug: %#v]\n", v.Name, PrintableCtyValue(val), v)
+		fmt.Fprintf(out, "var.%s: %q\n", v.Name, PrintableCtyValue(val))
 	}
 	out.WriteString("\n> local-variables:\n\n")
 	for _, v := range p.LocalVariables {

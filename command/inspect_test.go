@@ -19,7 +19,7 @@ func Test_commands(t *testing.T) {
 
 > input-variables:
 
-var.fruit: "banana" [debug: {Type:cty.String,CmdValue:banana,VarfileValue:null,EnvValue:null,DefaultValue:null}]
+var.fruit: "banana"
 
 > local-variables:
 
@@ -46,7 +46,7 @@ local.fruit: "banana"
 
 > input-variables:
 
-var.fruit: "peach" [debug: {Type:cty.String,CmdValue:peach,VarfileValue:null,EnvValue:null,DefaultValue:banana}]
+var.fruit: "peach"
 
 > local-variables:
 
@@ -58,7 +58,7 @@ var.fruit: "peach" [debug: {Type:cty.String,CmdValue:peach,VarfileValue:null,Env
 
 > input-variables:
 
-var.fruit: "peach" [debug: {Type:cty.String,CmdValue:peach,VarfileValue:null,EnvValue:null,DefaultValue:banana}]
+var.fruit: "peach"
 
 > local-variables:
 
