@@ -1,22 +1,16 @@
 package iso
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 )
 
 func TestStepRemoteUpload_Run(t *testing.T) {
-	state := new(multistep.BasicStateBag)
-	state.Put("ui", &packer.BasicUi{
-		Reader: new(bytes.Buffer),
-		Writer: new(bytes.Buffer),
-	})
+	state := basicStateBag()
 	driverMock := driver.NewDriverMock()
 	state.Put("driver", driverMock)
 	state.Put("iso_path", "[datastore] iso/path")
@@ -54,11 +48,7 @@ func TestStepRemoteUpload_Run(t *testing.T) {
 }
 
 func TestStepRemoteUpload_SkipRun(t *testing.T) {
-	state := new(multistep.BasicStateBag)
-	state.Put("ui", &packer.BasicUi{
-		Reader: new(bytes.Buffer),
-		Writer: new(bytes.Buffer),
-	})
+	state := basicStateBag()
 	driverMock := driver.NewDriverMock()
 	state.Put("driver", driverMock)
 

@@ -1,7 +1,6 @@
 package iso
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"io/ioutil"
@@ -277,18 +276,20 @@ func TestStepCreateVM_Cleanup(t *testing.T) {
 func basicStepCreateVM() *StepCreateVM {
 	step := &StepCreateVM{
 		Config:   createConfig(),
-		Location: locationConfig(),
+		Location: basicLocationConfig(),
 	}
 	return step
 }
 
-func basicStateBag() *multistep.BasicStateBag {
-	state := new(multistep.BasicStateBag)
-	state.Put("ui", &packer.BasicUi{
-		Reader: new(bytes.Buffer),
-		Writer: new(bytes.Buffer),
-	})
-	return state
+func basicLocationConfig() *common.LocationConfig {
+	return &common.LocationConfig{
+		VMName:       "test-vm",
+		Folder:       "test-folder",
+		Cluster:      "test-cluster",
+		Host:         "test-host",
+		ResourcePool: "test-resource-pool",
+		Datastore:    "test-datastore",
+	}
 }
 
 func createConfig() *CreateConfig {
@@ -308,17 +309,6 @@ func createConfig() *CreateConfig {
 				NetworkCard: "vmxnet3",
 			},
 		},
-	}
-}
-
-func locationConfig() *common.LocationConfig {
-	return &common.LocationConfig{
-		VMName:       "test-vm",
-		Folder:       "test-folder",
-		Cluster:      "test-cluster",
-		Host:         "test-host",
-		ResourcePool: "test-resource-pool",
-		Datastore:    "test-datastore",
 	}
 }
 
