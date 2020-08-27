@@ -72,9 +72,7 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 		}
 	}
 
-	value := cty.NullVal(cty.DynamicPseudoType)
-
-	return value, &hcl.Diagnostic{
+	return cty.UnknownVal(v.Type), &hcl.Diagnostic{
 		Severity: hcl.DiagError,
 		Summary:  fmt.Sprintf("Unset variable %q", v.Name),
 		Detail: "A used variable must be set or have a default value; see " +
@@ -93,7 +91,6 @@ func (variables Variables) Values() (map[string]cty.Value, hcl.Diagnostics) {
 		value, diag := v.Value()
 		if diag != nil {
 			diags = append(diags, diag)
-			continue
 		}
 		res[k] = value
 	}
@@ -208,12 +205,11 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 
 		res.DefaultValue = defaultValue
 
-		// It's possible no type attribute was assigned so lets make
-		// sure we have a valid type otherwise there will be issues parsing the value.
+		// It's possible no type attribute was assigned so lets make sure we
+		// have a valid type otherwise there could be issues parsing the value.
 		if res.Type == cty.NilType {
 			res.Type = res.DefaultValue.Type()
 		}
-
 	}
 	if len(attrs) > 0 {
 		keys := []string{}
