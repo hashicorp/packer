@@ -1,5 +1,12 @@
 ## 1.6.2 (Upcoming)
 
+### FEATURES:
+* **New command** `hcl2_upgrade` is a JSON to HCL2 transpiler that allows users
+    to transform an existing JSON configuration template into its HCL2 template
+    equivalent. Please see [hcl2_upgrade command
+    docs](https://packer.io/docs/commands/hcl2_upgrade) for more details.
+    [GH-9659]
+
 ### IMPROVEMENTS:
 * builder/amazon:  Add all of the custom AWS template engines to `build`
     template function for use by provisioners. [GH-9751]
@@ -9,17 +16,21 @@
 * builder/vmware-esx: Add `network_name` option to vmware so that users can set
     a network without using vmx data. [GH-9718]
 * builder/vmware-vmx: Add additional disk configuration option.  Previously
-    only implemented for vmware-iso builder [Gh-9815]
+    only implemented for vmware-iso builder [GH-9815]
 * builder/vmware: Add a `remote_output_directory option` so users can tell
     Packer where on a datastore to create a vm. [GH-9784]
 * builder/vmware: Add option to export to ovf or ova from a local vmware build
     [GH-9825]
 * builder/vmware: Add progress tracker to vmware-esx5 iso upload. [GH-9779]
+* builder/vsphere-iso:  Add support for building on a single ESXi host
+    [GH-9793]
 * builder/vsphere: Add new `directory_permission` config export option.
     [GH-9704]
 * builder/vsphere: Add option to import OVF templates to the Content Library
     [GH-9755]
 * builder/vsphere: Add step and options to customize cloned VMs. [GH-9665]
+* builder/vsphere: Update `iso_paths` to support reading ISOs from Content
+    Library paths [GH-9801]
 * core/hcl: Add provisioner "override" option to HCL2 templates. [GH-9764]
 * core/hcl: Add vault integration as an HCL2 function function. [GH-9746]
 * core: Add colored prefix to progress bar so it's clearer what build each
@@ -45,6 +56,11 @@
     binaries. [GH-9706]
 * builder/amazon-ebssurrogate: Make skip_save_build_region option work in the
     ebssurrogate builder, not just the ebs builder. [GH-9666]
+* builder/amazon: Add retry logic to the spot instance creation step to handle
+    "Invalid IAM Instance Profile name" errors [GH-9810]
+* builder/amazon: Update the `aws_secretsmanager` function to read from the AWS
+    credentials file for obtaining default region information; fixes the
+    'MissingRegion' error when AWS_REGION is not set [GH-9781]
 * builder/file: Make sure that UploadDir receives the interpolated destination.
     [GH-9698]
 * builder/googlecompute: Fix bug where startup script hang would cause export
@@ -68,6 +84,9 @@
 * post-processor/vsphere-template: Fix ReregisterVM to default to true instead
     of false. [GH-9736]
 * post-processor/yandex-export: Fix issue when validating region_name [GH-9814]
+* provisioner/inspec: Fix the 'Unsupported argument; An argument named
+    "command"' error when using the inspec provisioner in an HCL2 configuration
+    [GH-9800]
 
 ## 1.6.1 (July 30, 2020)
 
