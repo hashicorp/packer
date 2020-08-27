@@ -379,7 +379,7 @@ Usage: packer hcl2_upgrade -output-file=JSON_TEMPLATE.pkr.hcl JSON_TEMPLATE...
 }
 
 func (*HCL2UpgradeCommand) Synopsis() string {
-	return "build image(s) from template"
+	return "transform a JSON template into a HCL2 configuration"
 }
 
 func (*HCL2UpgradeCommand) AutocompleteArgs() complete.Predictor {
