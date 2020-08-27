@@ -15,6 +15,33 @@ func Test_commands(t *testing.T) {
 		env      []string
 		expected string
 	}{
+		{[]string{"inspect", filepath.Join(testFixture("var-arg"), "fruit_builder.pkr.hcl")}, nil, `Packer Inspect: HCL2 mode
+
+> input-variables:
+
+var.fruit: "<unknown>"
+
+> local-variables:
+
+local.fruit: "<unknown>"
+
+> builds:
+
+  > <unnamed build 0>:
+
+    sources:
+
+      null.builder
+
+    provisioners:
+
+      shell-local
+
+    post-processors:
+
+      <no post-processor>
+
+`},
 		{[]string{"inspect", "-var=fruit=banana", filepath.Join(testFixture("var-arg"), "fruit_builder.pkr.hcl")}, nil, `Packer Inspect: HCL2 mode
 
 > input-variables:
