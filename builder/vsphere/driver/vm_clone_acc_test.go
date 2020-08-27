@@ -13,7 +13,7 @@ func TestVMAcc_clone(t *testing.T) {
 	testCases := []struct {
 		name          string
 		config        *CloneConfig
-		checkFunction func(*testing.T, *VirtualMachine, *CloneConfig)
+		checkFunction func(*testing.T, *VirtualMachineDriver, *CloneConfig)
 	}{
 		{"Default", &CloneConfig{}, cloneDefaultCheck},
 		{"LinkedClone", &CloneConfig{LinkedClone: true}, cloneLinkedCloneCheck},
@@ -53,7 +53,7 @@ func TestVMAcc_clone(t *testing.T) {
 	}
 }
 
-func cloneDefaultCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
+func cloneDefaultCheck(t *testing.T, vm *VirtualMachineDriver, config *CloneConfig) {
 	d := vm.driver
 
 	// Check that the clone can be found by its name
@@ -112,7 +112,7 @@ func cloneDefaultCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 	}
 }
 
-func configureCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
+func configureCheck(t *testing.T, vm *VirtualMachineDriver, _ *CloneConfig) {
 	log.Printf("[DEBUG] Configuring the vm")
 	hwConfig := &HardwareConfig{
 		CPUs:                2,
@@ -170,7 +170,7 @@ func configureCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
 	}
 }
 
-func configureRAMReserveAllCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
+func configureRAMReserveAllCheck(t *testing.T, vm *VirtualMachineDriver, _ *CloneConfig) {
 	log.Printf("[DEBUG] Configuring the vm")
 	err := vm.Configure(&HardwareConfig{RAMReserveAll: true})
 	if err != nil {
@@ -188,7 +188,7 @@ func configureRAMReserveAllCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfi
 	}
 }
 
-func cloneLinkedCloneCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
+func cloneLinkedCloneCheck(t *testing.T, vm *VirtualMachineDriver, _ *CloneConfig) {
 	vmInfo, err := vm.Info("layoutEx.disk")
 	if err != nil {
 		t.Fatalf("Cannot read VM properties: %v", err)
@@ -199,7 +199,7 @@ func cloneLinkedCloneCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
 	}
 }
 
-func cloneFolderCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
+func cloneFolderCheck(t *testing.T, vm *VirtualMachineDriver, config *CloneConfig) {
 	vmInfo, err := vm.Info("parent")
 	if err != nil {
 		t.Fatalf("Cannot read VM properties: %v", err)
@@ -215,7 +215,7 @@ func cloneFolderCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 	}
 }
 
-func cloneResourcePoolCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
+func cloneResourcePoolCheck(t *testing.T, vm *VirtualMachineDriver, config *CloneConfig) {
 	vmInfo, err := vm.Info("resourcePool")
 	if err != nil {
 		t.Fatalf("Cannot read VM properties: %v", err)
@@ -231,7 +231,7 @@ func cloneResourcePoolCheck(t *testing.T, vm *VirtualMachine, config *CloneConfi
 	}
 }
 
-func startAndStopCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
+func startAndStopCheck(t *testing.T, vm *VirtualMachineDriver, config *CloneConfig) {
 	stopper := startVM(t, vm, config.Name)
 	defer stopper()
 
@@ -253,7 +253,7 @@ func startAndStopCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 	}
 }
 
-func snapshotCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
+func snapshotCheck(t *testing.T, vm *VirtualMachineDriver, config *CloneConfig) {
 	stopper := startVM(t, vm, config.Name)
 	defer stopper()
 
@@ -273,7 +273,7 @@ func snapshotCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 	}
 }
 
-func templateCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
+func templateCheck(t *testing.T, vm *VirtualMachineDriver, _ *CloneConfig) {
 	err := vm.ConvertToTemplate()
 	if err != nil {
 		t.Fatalf("Failed to convert to template: %v", err)
@@ -286,7 +286,7 @@ func templateCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
 	}
 }
 
-func startVM(t *testing.T, vm *VirtualMachine, vmName string) (stopper func()) {
+func startVM(t *testing.T, vm *VirtualMachineDriver, vmName string) (stopper func()) {
 	log.Printf("[DEBUG] Starting the vm")
 	if err := vm.PowerOn(); err != nil {
 		t.Fatalf("Cannot start vm '%v': %v", vmName, err)
@@ -299,7 +299,7 @@ func startVM(t *testing.T, vm *VirtualMachine, vmName string) (stopper func()) {
 	}
 }
 
-func destroyVM(t *testing.T, vm *VirtualMachine, vmName string) {
+func destroyVM(t *testing.T, vm *VirtualMachineDriver, vmName string) {
 	log.Printf("[DEBUG] Deleting the VM")
 	if err := vm.Destroy(); err != nil {
 		t.Errorf("!!! ERROR DELETING VM '%v': %v!!!", vmName, err)

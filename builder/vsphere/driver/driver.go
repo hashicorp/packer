@@ -19,11 +19,11 @@ import (
 )
 
 type Driver interface {
-	NewVM(ref *types.ManagedObjectReference) *VirtualMachine
-	FindVM(name string) (*VirtualMachine, error)
+	NewVM(ref *types.ManagedObjectReference) VirtualMachine
+	FindVM(name string) (VirtualMachine, error)
 	FindCluster(name string) (*Cluster, error)
 	PreCleanVM(ui packer.Ui, vmPath string, force bool) error
-	CreateVM(config *CreateConfig) (*VirtualMachine, error)
+	CreateVM(config *CreateConfig) (VirtualMachine, error)
 
 	NewDatastore(ref *types.ManagedObjectReference) Datastore
 	FindDatastore(name string, host string) (Datastore, error)

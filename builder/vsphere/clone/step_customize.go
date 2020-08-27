@@ -123,7 +123,7 @@ func (c *CustomizeConfig) Prepare() []error {
 }
 
 func (s *StepCustomize) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 	ui := state.Get("ui").(packer.Ui)
 
 	identity, err := s.identitySettings()

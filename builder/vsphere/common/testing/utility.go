@@ -56,7 +56,7 @@ func TestConn(t *testing.T) driver.Driver {
 	return d
 }
 
-func GetVM(t *testing.T, d driver.Driver, artifacts []packer.Artifact) *driver.VirtualMachine {
+func GetVM(t *testing.T, d driver.Driver, artifacts []packer.Artifact) driver.VirtualMachine {
 	artifactRaw := artifacts[0]
 	artifact, _ := artifactRaw.(*common.Artifact)
 

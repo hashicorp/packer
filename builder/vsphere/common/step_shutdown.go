@@ -48,7 +48,7 @@ type StepShutdown struct {
 func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	comm := state.Get("communicator").(packer.Communicator)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	if off, _ := vm.IsPoweredOff(); off {
 		// Probably power off initiated by last provisioner, though disable_shutdown is not set

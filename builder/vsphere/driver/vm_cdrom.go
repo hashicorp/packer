@@ -10,12 +10,12 @@ var (
 	ErrNoSataController = errors.New("no available SATA controller")
 )
 
-func (vm *VirtualMachine) AddSATAController() error {
+func (vm *VirtualMachineDriver) AddSATAController() error {
 	sata := &types.VirtualAHCIController{}
 	return vm.addDevice(sata)
 }
 
-func (vm *VirtualMachine) FindSATAController() (*types.VirtualAHCIController, error) {
+func (vm *VirtualMachineDriver) FindSATAController() (*types.VirtualAHCIController, error) {
 	l, err := vm.Devices()
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (vm *VirtualMachine) FindSATAController() (*types.VirtualAHCIController, er
 	return c.(*types.VirtualAHCIController), nil
 }
 
-func (vm *VirtualMachine) CreateCdrom(c *types.VirtualController) (*types.VirtualCdrom, error) {
+func (vm *VirtualMachineDriver) CreateCdrom(c *types.VirtualController) (*types.VirtualCdrom, error) {
 	l, err := vm.Devices()
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (vm *VirtualMachine) CreateCdrom(c *types.VirtualController) (*types.Virtua
 	return device, nil
 }
 
-func (vm *VirtualMachine) RemoveCdroms() error {
+func (vm *VirtualMachineDriver) RemoveCdroms() error {
 	devices, err := vm.Devices()
 	if err != nil {
 		return err
@@ -69,7 +69,7 @@ func (vm *VirtualMachine) RemoveCdroms() error {
 	return nil
 }
 
-func (vm *VirtualMachine) EjectCdroms() error {
+func (vm *VirtualMachineDriver) EjectCdroms() error {
 	devices, err := vm.Devices()
 	if err != nil {
 		return err

@@ -1,6 +1,8 @@
 package driver
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vim25/types"
@@ -9,6 +11,16 @@ import (
 type DriverMock struct {
 	FindDatastoreCalled bool
 	DatastoreMock       *DatastoreMock
+
+	PreCleanShouldFail bool
+	PreCleanVMCalled   bool
+	PreCleanForce      bool
+	PreCleanVMPath     string
+
+	CreateVMShouldFail bool
+	CreateVMCalled     bool
+	CreateConfig       *CreateConfig
+	VM                 VirtualMachine
 }
 
 func NewDriverMock() *DriverMock {
@@ -23,11 +35,11 @@ func (d *DriverMock) FindDatastore(name string, host string) (Datastore, error) 
 	return d.DatastoreMock, nil
 }
 
-func (d *DriverMock) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
+func (d *DriverMock) NewVM(ref *types.ManagedObjectReference) VirtualMachine {
 	return nil
 }
 
-func (d *DriverMock) FindVM(name string) (*VirtualMachine, error) {
+func (d *DriverMock) FindVM(name string) (VirtualMachine, error) {
 	return nil, nil
 }
 
@@ -36,10 +48,24 @@ func (d *DriverMock) FindCluster(name string) (*Cluster, error) {
 }
 
 func (d *DriverMock) PreCleanVM(ui packer.Ui, vmPath string, force bool) error {
+	d.PreCleanVMCalled = true
+	if d.PreCleanShouldFail {
+		return fmt.Errorf("pre clean failed")
+	}
+	d.PreCleanForce = true
+	d.PreCleanVMPath = vmPath
 	return nil
 }
 
-func (d *DriverMock) CreateVM(config *CreateConfig) (*VirtualMachine, error) { return nil, nil }
+func (d *DriverMock) CreateVM(config *CreateConfig) (VirtualMachine, error) {
+	d.CreateVMCalled = true
+	if d.CreateVMShouldFail {
+		return nil, fmt.Errorf("create vm failed")
+	}
+	d.CreateConfig = config
+	d.VM = new(VirtualMachineDriver)
+	return d.VM, nil
+}
 
 func (d *DriverMock) NewDatastore(ref *types.ManagedObjectReference) Datastore { return nil }
 

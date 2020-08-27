@@ -14,7 +14,7 @@ type StepConvertToTemplate struct {
 
 func (s *StepConvertToTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	if s.ConvertToTemplate {
 		ui.Say("Convert VM into template...")

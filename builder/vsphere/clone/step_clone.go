@@ -128,7 +128,7 @@ func (s *StepCloneVM) Cleanup(state multistep.StateBag) {
 	if st == nil {
 		return
 	}
-	vm := st.(*driver.VirtualMachine)
+	vm := st.(*driver.VirtualMachineDriver)
 
 	ui.Say("Destroying VM...")
 

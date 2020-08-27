@@ -170,7 +170,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	artifact := &common.Artifact{
 		Name:      b.config.VMName,
-		VM:        state.Get("vm").(*driver.VirtualMachine),
+		VM:        state.Get("vm").(*driver.VirtualMachineDriver),
 		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 

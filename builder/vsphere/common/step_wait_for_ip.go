@@ -75,7 +75,7 @@ func (c *WaitIpConfig) GetIPNet() *net.IPNet {
 
 func (s *StepWaitForIp) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	var ip string
 	var err error
@@ -128,7 +128,7 @@ func (s *StepWaitForIp) Run(ctx context.Context, state multistep.StateBag) multi
 	}
 }
 
-func doGetIp(vm *driver.VirtualMachine, ctx context.Context, c *WaitIpConfig) (string, error) {
+func doGetIp(vm *driver.VirtualMachineDriver, ctx context.Context, c *WaitIpConfig) (string, error) {
 	var prevIp = ""
 	var stopTime time.Time
 	var interval time.Duration

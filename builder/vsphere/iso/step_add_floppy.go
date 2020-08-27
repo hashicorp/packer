@@ -37,7 +37,7 @@ type StepAddFloppy struct {
 
 func (s *StepAddFloppy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 	d := state.Get("driver").(*driver.VCenterDriver)
 
 	if floppyPath, ok := state.GetOk("floppy_path"); ok {
