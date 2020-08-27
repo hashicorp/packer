@@ -93,7 +93,7 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 
 	for idx := range c.AdditionalISOFiles {
 		params := map[string]interface{}{
-			c.AdditionalISOFiles[idx].DeviceType: c.AdditionalISOFiles[idx].ISOFile + ",media=cdrom",
+			c.AdditionalISOFiles[idx].Device: c.AdditionalISOFiles[idx].ISOFile + ",media=cdrom",
 		}
 		_, err = client.SetVmConfig(vmRef, params)
 		if err != nil {

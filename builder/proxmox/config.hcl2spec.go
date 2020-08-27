@@ -291,7 +291,7 @@ type FlatstorageConfig struct {
 	ISOUrls         []string `mapstructure:"iso_urls" cty:"iso_urls" hcl:"iso_urls"`
 	TargetPath      *string  `mapstructure:"iso_target_path" cty:"iso_target_path" hcl:"iso_target_path"`
 	TargetExtension *string  `mapstructure:"iso_target_extension" cty:"iso_target_extension" hcl:"iso_target_extension"`
-	DeviceType      *string  `mapstructure:"device_type" cty:"device_type" hcl:"device_type"`
+	Device          *string  `mapstructure:"device" cty:"device" hcl:"device"`
 	ISOFile         *string  `mapstructure:"iso_file" cty:"iso_file" hcl:"iso_file"`
 	ISOStoragePool  *string  `mapstructure:"iso_storage_pool" cty:"iso_storage_pool" hcl:"iso_storage_pool"`
 	Unmount         *bool    `mapstructure:"unmount" cty:"unmount" hcl:"unmount"`
@@ -314,7 +314,7 @@ func (*FlatstorageConfig) HCL2Spec() map[string]hcldec.Spec {
 		"iso_urls":             &hcldec.AttrSpec{Name: "iso_urls", Type: cty.List(cty.String), Required: false},
 		"iso_target_path":      &hcldec.AttrSpec{Name: "iso_target_path", Type: cty.String, Required: false},
 		"iso_target_extension": &hcldec.AttrSpec{Name: "iso_target_extension", Type: cty.String, Required: false},
-		"device_type":          &hcldec.AttrSpec{Name: "device_type", Type: cty.String, Required: false},
+		"device":               &hcldec.AttrSpec{Name: "device", Type: cty.String, Required: false},
 		"iso_file":             &hcldec.AttrSpec{Name: "iso_file", Type: cty.String, Required: false},
 		"iso_storage_pool":     &hcldec.AttrSpec{Name: "iso_storage_pool", Type: cty.String, Required: false},
 		"unmount":              &hcldec.AttrSpec{Name: "unmount", Type: cty.Bool, Required: false},

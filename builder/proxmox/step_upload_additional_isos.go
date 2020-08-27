@@ -30,7 +30,7 @@ func (s *stepUploadAdditionalISOs) Run(ctx context.Context, state multistep.Stat
 	for idx := range c.AdditionalISOFiles {
 		if !c.AdditionalISOFiles[idx].shouldUploadISO {
 			state.Put("additional_iso_files", c.AdditionalISOFiles)
-			return multistep.ActionContinue
+			continue
 		}
 
 		p := state.Get(c.AdditionalISOFiles[idx].downloadPathKey).(string)

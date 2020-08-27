@@ -102,7 +102,7 @@ func (s *stepFinalizeTemplateConfig) Run(ctx context.Context, state multistep.St
 			return multistep.ActionHalt
 		}
 		for idx := range c.AdditionalISOFiles {
-			cdrom := c.AdditionalISOFiles[idx].DeviceType
+			cdrom := c.AdditionalISOFiles[idx].Device
 			if c.AdditionalISOFiles[idx].Unmount {
 				if vmParams[cdrom] == nil || !strings.Contains(vmParams[cdrom].(string), "media=cdrom") {
 					err := fmt.Errorf("Cannot eject ISO from cdrom drive, %s is not present or not a cdrom media", cdrom)
