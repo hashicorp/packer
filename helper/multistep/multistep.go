@@ -2,7 +2,10 @@
 // discrete steps.
 package multistep
 
-import "context"
+import (
+	"context"
+	"strconv"
+)
 
 // A StepAction determines the next step to take regarding multi-step actions.
 type StepAction uint
@@ -11,6 +14,18 @@ const (
 	ActionContinue StepAction = iota
 	ActionHalt
 )
+
+// Implement the stringer interface; useful for testing.
+func (a StepAction) String() string {
+	switch a {
+	case ActionContinue:
+		return "ActionContinue"
+	case ActionHalt:
+		return "ActionHalt"
+	default:
+		return "Unexpected value: " + strconv.Itoa(int(a))
+	}
+}
 
 // This is the key set in the state bag when using the basic runner to
 // signal that the step sequence was cancelled.
