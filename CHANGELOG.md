@@ -1,4 +1,4 @@
-## 1.6.2 (August 27, 2020)
+## 1.6.2 (Upcoming)
 
 ### FEATURES:
 * **New command** `hcl2_upgrade` is a JSON to HCL2 transpiler that allows users
