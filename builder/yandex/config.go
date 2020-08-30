@@ -72,8 +72,6 @@ type Config struct {
 	Labels map[string]string `mapstructure:"labels" required:"false"`
 	// Identifier of the hardware platform configuration for the instance. This defaults to `standard-v1`.
 	PlatformID string `mapstructure:"platform_id" required:"false"`
-	// The maximum number of times an API request is being executed
-	MaxRetries int `mapstructure:"max_retries"`
 	// Metadata applied to the launched instance.
 	Metadata map[string]string `mapstructure:"metadata" required:"false"`
 	// Metadata applied to the launched instance. Value are file paths.

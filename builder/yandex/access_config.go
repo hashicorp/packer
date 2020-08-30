@@ -25,6 +25,8 @@ type AccessConfig struct {
 	// OAuth token to use to authenticate to Yandex.Cloud. Alternatively you may set
 	// value by environment variable YC_TOKEN.
 	Token string `mapstructure:"token" required:"true"`
+	// The maximum number of times an API request is being executed
+	MaxRetries int `mapstructure:"max_retries"`
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
