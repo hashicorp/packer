@@ -66,6 +66,7 @@ type FlatConfig struct {
 	Endpoint                  *string           `mapstructure:"endpoint" required:"false" cty:"endpoint" hcl:"endpoint"`
 	ServiceAccountKeyFile     *string           `mapstructure:"service_account_key_file" required:"false" cty:"service_account_key_file" hcl:"service_account_key_file"`
 	Token                     *string           `mapstructure:"token" required:"true" cty:"token" hcl:"token"`
+	MaxRetries                *int              `mapstructure:"max_retries" cty:"max_retries" hcl:"max_retries"`
 	FolderID                  *string           `mapstructure:"folder_id" required:"true" cty:"folder_id" hcl:"folder_id"`
 	ServiceAccountID          *string           `mapstructure:"service_account_id" required:"false" cty:"service_account_id" hcl:"service_account_id"`
 	DiskName                  *string           `mapstructure:"disk_name" required:"false" cty:"disk_name" hcl:"disk_name"`
@@ -83,7 +84,6 @@ type FlatConfig struct {
 	InstanceName              *string           `mapstructure:"instance_name" required:"false" cty:"instance_name" hcl:"instance_name"`
 	Labels                    map[string]string `mapstructure:"labels" required:"false" cty:"labels" hcl:"labels"`
 	PlatformID                *string           `mapstructure:"platform_id" required:"false" cty:"platform_id" hcl:"platform_id"`
-	MaxRetries                *int              `mapstructure:"max_retries" cty:"max_retries" hcl:"max_retries"`
 	Metadata                  map[string]string `mapstructure:"metadata" required:"false" cty:"metadata" hcl:"metadata"`
 	MetadataFromFile          map[string]string `mapstructure:"metadata_from_file" cty:"metadata_from_file" hcl:"metadata_from_file"`
 	Preemptible               *bool             `mapstructure:"preemptible" cty:"preemptible" hcl:"preemptible"`
@@ -170,6 +170,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"endpoint":                     &hcldec.AttrSpec{Name: "endpoint", Type: cty.String, Required: false},
 		"service_account_key_file":     &hcldec.AttrSpec{Name: "service_account_key_file", Type: cty.String, Required: false},
 		"token":                        &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
+		"max_retries":                  &hcldec.AttrSpec{Name: "max_retries", Type: cty.Number, Required: false},
 		"folder_id":                    &hcldec.AttrSpec{Name: "folder_id", Type: cty.String, Required: false},
 		"service_account_id":           &hcldec.AttrSpec{Name: "service_account_id", Type: cty.String, Required: false},
 		"disk_name":                    &hcldec.AttrSpec{Name: "disk_name", Type: cty.String, Required: false},
@@ -187,7 +188,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"instance_name":                &hcldec.AttrSpec{Name: "instance_name", Type: cty.String, Required: false},
 		"labels":                       &hcldec.AttrSpec{Name: "labels", Type: cty.Map(cty.String), Required: false},
 		"platform_id":                  &hcldec.AttrSpec{Name: "platform_id", Type: cty.String, Required: false},
-		"max_retries":                  &hcldec.AttrSpec{Name: "max_retries", Type: cty.Number, Required: false},
 		"metadata":                     &hcldec.AttrSpec{Name: "metadata", Type: cty.Map(cty.String), Required: false},
 		"metadata_from_file":           &hcldec.AttrSpec{Name: "metadata_from_file", Type: cty.Map(cty.String), Required: false},
 		"preemptible":                  &hcldec.AttrSpec{Name: "preemptible", Type: cty.Bool, Required: false},
