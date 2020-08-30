@@ -16,11 +16,8 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-
-	"github.com/yandex-cloud/go-sdk/iamkey"
 )
 
-const defaultEndpoint = "api.cloud.yandex.net:443"
 const defaultGpuPlatformID = "gpu-standard-v1"
 const defaultPlatformID = "standard-v1"
 const defaultMaxRetries = 3
@@ -31,23 +28,15 @@ var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Communicator        communicator.Config `mapstructure:",squash"`
+	AccessConfig        `mapstructure:",squash"`
 
-	// Non standard api endpoint URL.
-	Endpoint string `mapstructure:"endpoint" required:"false"`
 	// The folder ID that will be used to launch instances and store images.
 	// Alternatively you may set value by environment variable YC_FOLDER_ID.
 	// To use a different folder for looking up the source image or saving the target image to
 	// check options 'source_image_folder_id' and 'target_image_folder_id'.
 	FolderID string `mapstructure:"folder_id" required:"true"`
-	// Path to file with Service Account key in json format. This
-	// is an alternative method to authenticate to Yandex.Cloud. Alternatively you may set environment variable
-	// YC_SERVICE_ACCOUNT_KEY_FILE.
-	ServiceAccountKeyFile string `mapstructure:"service_account_key_file" required:"false"`
 	// Service account identifier to assign to instance
 	ServiceAccountID string `mapstructure:"service_account_id" required:"false"`
-	// OAuth token to use to authenticate to Yandex.Cloud. Alternatively you may set
-	// value by environment variable YC_TOKEN.
-	Token string `mapstructure:"token" required:"true"`
 	// The name of the disk, if unset the instance name
 	// will be used.
 	DiskName string `mapstructure:"disk_name" required:"false"`
@@ -142,7 +131,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
+	// Accumulate any errors
 	var errs *packer.MultiError
+
+	errs = packer.MultiErrorAppend(errs, c.AccessConfig.Prepare(&c.ctx)...)
 
 	if c.SerialLogFile != "" {
 		if _, err := os.Stat(c.SerialLogFile); os.IsExist(err) {
@@ -236,10 +228,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if c.Endpoint == "" {
-		c.Endpoint = defaultEndpoint
-	}
-
 	if c.Zone == "" {
 		c.Zone = defaultZone
 	}
@@ -248,33 +236,8 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		c.MaxRetries = defaultMaxRetries
 	}
 
-	// provision config by OS environment variables
-	if c.Token == "" {
-		c.Token = os.Getenv("YC_TOKEN")
-	}
-
-	if c.ServiceAccountKeyFile == "" {
-		c.ServiceAccountKeyFile = os.Getenv("YC_SERVICE_ACCOUNT_KEY_FILE")
-	}
-
 	if c.FolderID == "" {
 		c.FolderID = os.Getenv("YC_FOLDER_ID")
-	}
-
-	if c.Token != "" && c.ServiceAccountKeyFile != "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("one of token or service account key file must be specified, not both"))
-	}
-
-	if c.Token != "" {
-		packer.LogSecretFilter.Set(c.Token)
-	}
-
-	if c.ServiceAccountKeyFile != "" {
-		if _, err := iamkey.ReadFromJSONFile(c.ServiceAccountKeyFile); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("fail to read service account key file: %s", err))
-		}
 	}
 
 	if c.FolderID == "" {
