@@ -11,8 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yandex-cloud/go-sdk/iamkey"
-
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/builder/yandex"
@@ -28,6 +26,7 @@ const defaultStorageEndpoint = "storage.yandexcloud.net"
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	yandex.AccessConfig `mapstructure:",squash"`
 
 	// List of paths to Yandex Object Storage where exported image will be uploaded.
 	// Please be aware that use of space char inside path not supported.
@@ -53,13 +52,6 @@ type Config struct {
 	SubnetID string `mapstructure:"subnet_id" required:"false"`
 	// The name of the zone to launch the instance.  This defaults to `ru-central1-a`.
 	Zone string `mapstructure:"zone" required:"false"`
-	// OAuth token to use to authenticate to Yandex.Cloud. Alternatively you may set
-	// value by environment variable YC_TOKEN.
-	Token string `mapstructure:"token" required:"false"`
-	// Path to file with Service Account key in json format. This
-	// is an alternative method to authenticate to Yandex.Cloud. Alternatively you may set environment variable
-	// YC_SERVICE_ACCOUNT_KEY_FILE.
-	ServiceAccountKeyFile string `mapstructure:"service_account_key_file" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -85,7 +77,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	errs := new(packer.MultiError)
+	// Accumulate any errors
+	var errs *packer.MultiError
+
+	errs = packer.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
 
 	if len(p.config.Paths) == 0 {
 		errs = packer.MultiErrorAppend(
@@ -97,31 +92,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		if err = interpolate.Validate(path, &p.config.ctx); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Error parsing one of 'paths' template: %s", err))
-		}
-	}
-
-	// provision config by OS environment variables
-	if p.config.Token == "" {
-		p.config.Token = os.Getenv("YC_TOKEN")
-	}
-
-	if p.config.ServiceAccountKeyFile == "" {
-		p.config.ServiceAccountKeyFile = os.Getenv("YC_SERVICE_ACCOUNT_KEY_FILE")
-	}
-
-	if p.config.Token != "" && p.config.ServiceAccountKeyFile != "" {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("one of token or service account key file must be specified, not both"))
-	}
-
-	if p.config.Token != "" {
-		packer.LogSecretFilter.Set(p.config.Token)
-	}
-
-	if p.config.ServiceAccountKeyFile != "" {
-		if _, err := iamkey.ReadFromJSONFile(p.config.ServiceAccountKeyFile); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("fail to read service account key file: %s", err))
 		}
 	}
 
@@ -203,8 +173,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	yandexConfig := ycSaneDefaults()
-	yandexConfig.Token = p.config.Token
-	yandexConfig.ServiceAccountKeyFile = p.config.ServiceAccountKeyFile
 	yandexConfig.DiskName = exporterName
 	yandexConfig.InstanceName = exporterName
 	yandexConfig.DiskSizeGb = p.config.DiskSizeGb
@@ -221,7 +189,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		yandexConfig.PlatformID = p.config.PlatformID
 	}
 
-	driver, err := yandex.NewDriverYC(ui, &yandexConfig.AccessConfig)
+	driver, err := yandex.NewDriverYC(ui, &p.config.AccessConfig)
 	if err != nil {
 		return nil, false, false, err
 	}
