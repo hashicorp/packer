@@ -3,6 +3,7 @@ package yandexexport
 import (
 	"testing"
 
+	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/stretchr/testify/require"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -26,8 +27,10 @@ func TestPostProcessor_Configure(t *testing.T) {
 			name: "no one creds",
 			fields: fields{
 				config: Config{
-					Token:                 "",
-					ServiceAccountKeyFile: "",
+					AccessConfig: yandex.AccessConfig{
+						Token:                 "",
+						ServiceAccountKeyFile: "",
+					},
 				},
 			},
 			wantErr: false,
@@ -36,8 +39,10 @@ func TestPostProcessor_Configure(t *testing.T) {
 			name: "both token and sa key file",
 			fields: fields{
 				config: Config{
-					Token:                 "some-value",
-					ServiceAccountKeyFile: "path/not-exist.file",
+					AccessConfig: yandex.AccessConfig{
+						Token:                 "some-value",
+						ServiceAccountKeyFile: "path/not-exist.file",
+					},
 				},
 			},
 			wantErr: true,
@@ -46,8 +51,10 @@ func TestPostProcessor_Configure(t *testing.T) {
 			name: "use sa key file",
 			fields: fields{
 				config: Config{
-					Token:                 "",
-					ServiceAccountKeyFile: "testdata/fake-sa-key.json",
+					AccessConfig: yandex.AccessConfig{
+						Token:                 "",
+						ServiceAccountKeyFile: "testdata/fake-sa-key.json",
+					},
 				},
 			},
 			wantErr: false,
