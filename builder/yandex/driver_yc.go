@@ -38,22 +38,22 @@ func NewDriverYC(ui packer.Ui, config *Config) (Driver, error) {
 
 	sdkConfig := ycsdk.Config{}
 
-	if config.Endpoint != "" {
-		sdkConfig.Endpoint = config.Endpoint
+	if config.AccessConfig.Endpoint != "" {
+		sdkConfig.Endpoint = config.AccessConfig.Endpoint
 	}
 
 	switch {
-	case config.Token == "" && config.ServiceAccountKeyFile == "":
+	case config.AccessConfig.Token == "" && config.AccessConfig.ServiceAccountKeyFile == "":
 		log.Printf("[INFO] Use Instance Service Account for authentication")
 		sdkConfig.Credentials = ycsdk.InstanceServiceAccount()
 
-	case config.Token != "":
+	case config.AccessConfig.Token != "":
 		log.Printf("[INFO] Use OAuth token for authentication")
-		sdkConfig.Credentials = ycsdk.OAuthToken(config.Token)
+		sdkConfig.Credentials = ycsdk.OAuthToken(config.AccessConfig.Token)
 
-	case config.ServiceAccountKeyFile != "":
-		log.Printf("[INFO] Use Service Account key file %q for authentication", config.ServiceAccountKeyFile)
-		key, err := iamkey.ReadFromJSONFile(config.ServiceAccountKeyFile)
+	case config.AccessConfig.ServiceAccountKeyFile != "":
+		log.Printf("[INFO] Use Service Account key file %q for authentication", config.AccessConfig.ServiceAccountKeyFile)
+		key, err := iamkey.ReadFromJSONFile(config.AccessConfig.ServiceAccountKeyFile)
 		if err != nil {
 			return nil, err
 		}
