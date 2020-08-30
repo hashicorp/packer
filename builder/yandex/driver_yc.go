@@ -33,27 +33,27 @@ type driverYC struct {
 	ui  packer.Ui
 }
 
-func NewDriverYC(ui packer.Ui, config *Config) (Driver, error) {
+func NewDriverYC(ui packer.Ui, ac *AccessConfig) (Driver, error) {
 	log.Printf("[INFO] Initialize Yandex.Cloud client...")
 
 	sdkConfig := ycsdk.Config{}
 
-	if config.AccessConfig.Endpoint != "" {
-		sdkConfig.Endpoint = config.AccessConfig.Endpoint
+	if ac.Endpoint != "" {
+		sdkConfig.Endpoint = ac.Endpoint
 	}
 
 	switch {
-	case config.AccessConfig.Token == "" && config.AccessConfig.ServiceAccountKeyFile == "":
+	case ac.Token == "" && ac.ServiceAccountKeyFile == "":
 		log.Printf("[INFO] Use Instance Service Account for authentication")
 		sdkConfig.Credentials = ycsdk.InstanceServiceAccount()
 
-	case config.AccessConfig.Token != "":
+	case ac.Token != "":
 		log.Printf("[INFO] Use OAuth token for authentication")
-		sdkConfig.Credentials = ycsdk.OAuthToken(config.AccessConfig.Token)
+		sdkConfig.Credentials = ycsdk.OAuthToken(ac.Token)
 
-	case config.AccessConfig.ServiceAccountKeyFile != "":
-		log.Printf("[INFO] Use Service Account key file %q for authentication", config.AccessConfig.ServiceAccountKeyFile)
-		key, err := iamkey.ReadFromJSONFile(config.AccessConfig.ServiceAccountKeyFile)
+	case ac.ServiceAccountKeyFile != "":
+		log.Printf("[INFO] Use Service Account key file %q for authentication", ac.ServiceAccountKeyFile)
+		key, err := iamkey.ReadFromJSONFile(ac.ServiceAccountKeyFile)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +69,7 @@ func NewDriverYC(ui packer.Ui, config *Config) (Driver, error) {
 	requestIDInterceptor := requestid.Interceptor()
 
 	retryInterceptor := retry.Interceptor(
-		retry.WithMax(config.MaxRetries),
+		retry.WithMax(ac.MaxRetries),
 		retry.WithCodes(codes.Unavailable),
 		retry.WithAttemptHeader(true),
 		retry.WithBackoff(retry.BackoffExponentialWithJitter(defaultExponentialBackoffBase, defaultExponentialBackoffCap)))

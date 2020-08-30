@@ -221,7 +221,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		yandexConfig.PlatformID = p.config.PlatformID
 	}
 
-	driver, err := yandex.NewDriverYC(ui, &yandexConfig)
+	driver, err := yandex.NewDriverYC(ui, &yandexConfig.AccessConfig)
 	if err != nil {
 		return nil, false, false, err
 	}

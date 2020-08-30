@@ -160,10 +160,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("error rendering object_name template: %s", err)
 	}
 
-	cfg := &yandex.Config{
-		Token:                 p.config.Token,
-		ServiceAccountKeyFile: p.config.ServiceAccountKeyFile,
-	}
+	client, err := yandex.NewDriverYC(ui, &p.config.AccessConfig)
 
 	client, err := yandex.NewDriverYC(ui, cfg)
 	if err != nil {
