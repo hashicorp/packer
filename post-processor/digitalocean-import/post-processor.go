@@ -163,27 +163,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 	log.Printf("Rendered space_object_name as %s", p.config.ObjectName)
 
-	source := ""
-	artifacts := artifact.Files()
 	log.Println("Looking for image in artifact")
-	if len(artifacts) > 1 {
-		validSuffix := []string{"raw", "img", "qcow2", "vhdx", "vdi", "vmdk", "tar.bz2", "tar.xz", "tar.gz"}
-		for _, path := range artifact.Files() {
-			for _, suffix := range validSuffix {
-				if strings.HasSuffix(path, suffix) {
-					source = path
-					break
-				}
-			}
-			if source != "" {
-				break
-			}
-		}
-	} else {
-		source = artifact.Files()[0]
-	}
-
-	if source == "" {
+	source, err := extractImageArtifact(artifact.Files())
+	if err != nil {
 		return nil, false, false, fmt.Errorf("Image file not found")
 	}
 
@@ -258,6 +240,37 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	return artifact, false, false, nil
+}
+
+func extractImageArtifact(artifacts []string) (string, error) {
+	var source string
+	artifactCount := len(artifacts)
+
+	if artifactCount == 0 {
+		return "", fmt.Errorf("no artifacts were provided")
+	}
+
+	if artifactCount == 1 {
+		return artifacts[0], nil
+	}
+
+	validSuffix := []string{"raw", "img", "qcow2", "vhdx", "vdi", "vmdk", "tar.bz2", "tar.xz", "tar.gz"}
+
+artifactLoop:
+	for _, path := range artifacts {
+		for _, suffix := range validSuffix {
+			if strings.HasSuffix(path, suffix) {
+				source = path
+				break artifactLoop
+			}
+		}
+	}
+
+	if source == "" {
+		return "", fmt.Errorf("Image file not found")
+	}
+
+	return source, nil
 }
 
 func uploadImageToSpaces(source string, p *PostProcessor, s *session.Session) (err error) {
