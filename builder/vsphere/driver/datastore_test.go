@@ -51,8 +51,18 @@ func TestDatastoreIsoPath(t *testing.T) {
 			valid:    true,
 		},
 		{
+			isoPath:  "[datastore]    /dir/subdir/file",
+			filePath: "/dir/subdir/file",
+			valid:    true,
+		},
+		{
 			isoPath:  "[datastore] /dir/subdir/file     ",
 			filePath: "/dir/subdir/file",
+			valid:    true,
+		},
+		{
+			isoPath:  "[привѣ́тъ] /привѣ́тъ/привѣ́тъ/привѣ́тъ",
+			filePath: "/привѣ́тъ/привѣ́тъ/привѣ́тъ",
 			valid:    true,
 		},
 		// Test case for #9846
