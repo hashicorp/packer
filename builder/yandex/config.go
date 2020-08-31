@@ -31,11 +31,11 @@ type Config struct {
 	AccessConfig        `mapstructure:",squash"`
 
 	// The folder ID that will be used to launch instances and store images.
-	// Alternatively you may set value by environment variable YC_FOLDER_ID.
+	// Alternatively you may set value by environment variable `YC_FOLDER_ID`.
 	// To use a different folder for looking up the source image or saving the target image to
 	// check options 'source_image_folder_id' and 'target_image_folder_id'.
 	FolderID string `mapstructure:"folder_id" required:"true"`
-	// Service account identifier to assign to instance
+	// Service account identifier to assign to instance.
 	ServiceAccountID string `mapstructure:"service_account_id" required:"false"`
 	// The name of the disk, if unset the instance name
 	// will be used.
@@ -48,8 +48,7 @@ type Config struct {
 	ImageDescription string `mapstructure:"image_description" required:"false"`
 	//  The family name of the resulting image.
 	ImageFamily string `mapstructure:"image_family" required:"false"`
-	// Key/value pair labels to
-	// apply to the created image.
+	// Key/value pair labels to apply to the created image.
 	ImageLabels map[string]string `mapstructure:"image_labels" required:"false"`
 	// Minimum size of the disk that will be created from built image, specified in gigabytes.
 	// Should be more or equal to `disk_size_gb`.
@@ -67,14 +66,14 @@ type Config struct {
 	InstanceMemory int `mapstructure:"instance_mem_gb" required:"false"`
 	// The name assigned to the instance.
 	InstanceName string `mapstructure:"instance_name" required:"false"`
-	// Key/value pair labels to apply to
-	// the launched instance.
+	// Key/value pair labels to apply to the launched instance.
 	Labels map[string]string `mapstructure:"labels" required:"false"`
 	// Identifier of the hardware platform configuration for the instance. This defaults to `standard-v1`.
 	PlatformID string `mapstructure:"platform_id" required:"false"`
 	// Metadata applied to the launched instance.
 	Metadata map[string]string `mapstructure:"metadata" required:"false"`
-	// Metadata applied to the launched instance. Value are file paths.
+	// Metadata applied to the launched instance.
+	// The values in this map are the paths to the content files for the corresponding metadata keys.
 	MetadataFromFile map[string]string `mapstructure:"metadata_from_file"`
 	// Launch a preemptible instance. This defaults to `false`.
 	Preemptible bool `mapstructure:"preemptible"`
@@ -82,12 +81,11 @@ type Config struct {
 	SerialLogFile string `mapstructure:"serial_log_file" required:"false"`
 	// The source image family to create the new image
 	// from. You can also specify source_image_id instead. Just one of a source_image_id or
-	// source_image_family must be specified. Example: `ubuntu-1804-lts`
+	// source_image_family must be specified. Example: `ubuntu-1804-lts`.
 	SourceImageFamily string `mapstructure:"source_image_family" required:"true"`
 	// The ID of the folder containing the source image.
 	SourceImageFolderID string `mapstructure:"source_image_folder_id" required:"false"`
-	// The source image ID to use to create the new image
-	// from.
+	// The source image ID to use to create the new image from.
 	SourceImageID string `mapstructure:"source_image_id" required:"false"`
 	// The source image name to use to create the new image
 	// from. Name will be looked up in `source_image_folder_id`.

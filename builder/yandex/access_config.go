@@ -16,16 +16,16 @@ const defaultEndpoint = "api.cloud.yandex.net:443"
 
 // AccessConfig is for common configuration related to Yandex.Cloud API access
 type AccessConfig struct {
-	// Non standard api endpoint URL.
+	// Non standard API endpoint. Default is `api.cloud.yandex.net:443`.
 	Endpoint string `mapstructure:"endpoint" required:"false"`
 	// Path to file with Service Account key in json format. This
 	// is an alternative method to authenticate to Yandex.Cloud. Alternatively you may set environment variable
-	// YC_SERVICE_ACCOUNT_KEY_FILE.
+	// `YC_SERVICE_ACCOUNT_KEY_FILE`.
 	ServiceAccountKeyFile string `mapstructure:"service_account_key_file" required:"false"`
 	// OAuth token to use to authenticate to Yandex.Cloud. Alternatively you may set
-	// value by environment variable YC_TOKEN.
+	// value by environment variable `YC_TOKEN`.
 	Token string `mapstructure:"token" required:"true"`
-	// The maximum number of times an API request is being executed
+	// The maximum number of times an API request is being executed.
 	MaxRetries int `mapstructure:"max_retries"`
 }
 

@@ -28,7 +28,7 @@ type Config struct {
 	// The folder ID that will be used to store imported Image.
 	FolderID string `mapstructure:"folder_id" required:"true"`
 	// Service Account ID with proper permission to use Storage service
-	// for operations 'upload' and 'delete' object to `bucket`
+	// for operations 'upload' and 'delete' object to `bucket`.
 	ServiceAccountID string `mapstructure:"service_account_id" required:"true"`
 
 	// The name of the bucket where the qcow2 file will be uploaded to for import.
@@ -43,7 +43,7 @@ type Config struct {
 	ObjectName string `mapstructure:"object_name" required:"false"`
 	// Whether skip removing the qcow2 file uploaded to Storage
 	// after the import process has completed. Possible values are: `true` to
-	// leave it in the bucket, `false` to remove it. (Default: `false`).
+	// leave it in the bucket, `false` to remove it. Default is `false`.
 	SkipClean bool `mapstructure:"skip_clean" required:"false"`
 
 	// The name of the image, which contains 1-63 characters and only

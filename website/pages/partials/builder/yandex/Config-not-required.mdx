@@ -1,6 +1,6 @@
 <!-- Code generated from the comments of the Config struct in builder/yandex/config.go; DO NOT EDIT MANUALLY -->
 
-- `service_account_id` (string) - Service account identifier to assign to instance
+- `service_account_id` (string) - Service account identifier to assign to instance.
 
 - `disk_name` (string) - The name of the disk, if unset the instance name
   will be used.
@@ -13,8 +13,7 @@
 
 - `image_family` (string) - The family name of the resulting image.
 
-- `image_labels` (map[string]string) - Key/value pair labels to
-  apply to the created image.
+- `image_labels` (map[string]string) - Key/value pair labels to apply to the created image.
 
 - `image_min_disk_size_gb` (int) - Minimum size of the disk that will be created from built image, specified in gigabytes.
   Should be more or equal to `disk_size_gb`.
@@ -32,14 +31,14 @@
 
 - `instance_name` (string) - The name assigned to the instance.
 
-- `labels` (map[string]string) - Key/value pair labels to apply to
-  the launched instance.
+- `labels` (map[string]string) - Key/value pair labels to apply to the launched instance.
 
 - `platform_id` (string) - Identifier of the hardware platform configuration for the instance. This defaults to `standard-v1`.
 
 - `metadata` (map[string]string) - Metadata applied to the launched instance.
 
-- `metadata_from_file` (map[string]string) - Metadata applied to the launched instance. Value are file paths.
+- `metadata_from_file` (map[string]string) - Metadata applied to the launched instance.
+  The values in this map are the paths to the content files for the corresponding metadata keys.
 
 - `preemptible` (bool) - Launch a preemptible instance. This defaults to `false`.
 
@@ -47,8 +46,7 @@
 
 - `source_image_folder_id` (string) - The ID of the folder containing the source image.
 
-- `source_image_id` (string) - The source image ID to use to create the new image
-  from.
+- `source_image_id` (string) - The source image ID to use to create the new image from.
 
 - `source_image_name` (string) - The source image name to use to create the new image
   from. Name will be looked up in `source_image_folder_id`.

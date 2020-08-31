@@ -35,7 +35,7 @@ type Config struct {
 	// Paths to Yandex Object Storage where exported image will be uploaded.
 	Paths []string `mapstructure:"paths" required:"true"`
 	// The folder ID that will be used to launch a temporary instance.
-	// Alternatively you may set value by environment variable YC_FOLDER_ID.
+	// Alternatively you may set value by environment variable `YC_FOLDER_ID`.
 	FolderID string `mapstructure:"folder_id" required:"true"`
 	// Service Account ID with proper permission to modify an instance, create and attach disk and
 	// make upload to specific Yandex Object Storage paths.
