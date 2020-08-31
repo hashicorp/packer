@@ -10,11 +10,11 @@ import (
 )
 
 type Library struct {
-	driver  *Driver
+	driver  *VCenterDriver
 	library *library.Library
 }
 
-func (d *Driver) FindContentLibraryByName(name string) (*Library, error) {
+func (d *VCenterDriver) FindContentLibraryByName(name string) (*Library, error) {
 	lm := library.NewManager(d.restClient.client)
 	l, err := lm.GetLibraryByName(d.ctx, name)
 	if err != nil {
@@ -26,7 +26,7 @@ func (d *Driver) FindContentLibraryByName(name string) (*Library, error) {
 	}, nil
 }
 
-func (d *Driver) FindContentLibraryItem(libraryId string, name string) (*library.Item, error) {
+func (d *VCenterDriver) FindContentLibraryItem(libraryId string, name string) (*library.Item, error) {
 	lm := library.NewManager(d.restClient.client)
 	items, err := lm.GetLibraryItems(d.ctx, libraryId)
 	if err != nil {
@@ -40,7 +40,7 @@ func (d *Driver) FindContentLibraryItem(libraryId string, name string) (*library
 	return nil, fmt.Errorf("Item %s not found", name)
 }
 
-func (d *Driver) FindContentLibraryFileDatastorePath(isoPath string) (string, error) {
+func (d *VCenterDriver) FindContentLibraryFileDatastorePath(isoPath string) (string, error) {
 	log.Printf("Check if ISO path is a Content Library path")
 	err := d.restClient.Login(d.ctx)
 	if err != nil {

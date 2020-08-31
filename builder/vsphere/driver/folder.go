@@ -12,18 +12,18 @@ import (
 )
 
 type Folder struct {
-	driver *Driver
+	driver *VCenterDriver
 	folder *object.Folder
 }
 
-func (d *Driver) NewFolder(ref *types.ManagedObjectReference) *Folder {
+func (d *VCenterDriver) NewFolder(ref *types.ManagedObjectReference) *Folder {
 	return &Folder{
 		folder: object.NewFolder(d.client.Client, *ref),
 		driver: d,
 	}
 }
 
-func (d *Driver) FindFolder(name string) (*Folder, error) {
+func (d *VCenterDriver) FindFolder(name string) (*Folder, error) {
 	if name != "" {
 		// create folders if they don't exist
 		parent := ""

@@ -10,7 +10,7 @@ func TestVMAcc_create(t *testing.T) {
 	testCases := []struct {
 		name          string
 		config        *CreateConfig
-		checkFunction func(*testing.T, *VirtualMachine, *CreateConfig)
+		checkFunction func(*testing.T, VirtualMachine, *CreateConfig)
 	}{
 		{"MinimalConfiguration", &CreateConfig{}, createDefaultCheck},
 	}
@@ -36,8 +36,8 @@ func TestVMAcc_create(t *testing.T) {
 	}
 }
 
-func createDefaultCheck(t *testing.T, vm *VirtualMachine, config *CreateConfig) {
-	d := vm.driver
+func createDefaultCheck(t *testing.T, vm VirtualMachine, config *CreateConfig) {
+	d := vm.(*VirtualMachineDriver).driver
 
 	// Check that the clone can be found by its name
 	if _, err := d.FindVM(config.Name); err != nil {

@@ -81,7 +81,7 @@ func (s *StepSshKeyPair) Run(ctx context.Context, state multistep.StateBag) mult
 	s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine
 	s.Comm.SSHClearAuthorizedKeys = true
 
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 	err = vm.AddPublicKeys(ctx, string(s.Comm.SSHPublicKey))
 	if err != nil {
 		state.Put("error", fmt.Errorf("error saving temporary keypair in the vm: %s", err))

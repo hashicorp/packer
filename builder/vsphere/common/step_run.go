@@ -24,7 +24,7 @@ type StepRun struct {
 
 func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	if s.Config.BootOrder != "" {
 		ui.Say("Set boot order...")
@@ -55,7 +55,7 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 
 func (s *StepRun) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	if s.Config.BootOrder == "" && s.SetOrder {
 		ui.Say("Clear boot order...")

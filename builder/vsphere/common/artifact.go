@@ -11,7 +11,7 @@ const BuilderId = "jetbrains.vsphere"
 type Artifact struct {
 	Outconfig *OutputConfig
 	Name      string
-	VM        *driver.VirtualMachine
+	VM        *driver.VirtualMachineDriver
 
 	// StateData should store data such as GeneratedData
 	// to be shared with post-processors

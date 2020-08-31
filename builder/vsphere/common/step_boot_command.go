@@ -43,7 +43,7 @@ type StepBootCommand struct {
 func (s *StepBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	debug := state.Get("debug").(bool)
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	if s.Config.BootCommand == nil {
 		return multistep.ActionContinue

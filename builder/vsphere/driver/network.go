@@ -9,18 +9,18 @@ import (
 )
 
 type Network struct {
-	driver  *Driver
+	driver  *VCenterDriver
 	network object.NetworkReference
 }
 
-func (d *Driver) NewNetwork(ref *types.ManagedObjectReference) *Network {
+func (d *VCenterDriver) NewNetwork(ref *types.ManagedObjectReference) *Network {
 	return &Network{
 		network: object.NewNetwork(d.client.Client, *ref),
 		driver:  d,
 	}
 }
 
-func (d *Driver) FindNetwork(name string) (*Network, error) {
+func (d *VCenterDriver) FindNetwork(name string) (*Network, error) {
 	n, err := d.finder.Network(d.ctx, name)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func (d *Driver) FindNetwork(name string) (*Network, error) {
 	}, nil
 }
 
-func (d *Driver) FindNetworks(name string) ([]*Network, error) {
+func (d *VCenterDriver) FindNetworks(name string) ([]*Network, error) {
 	ns, err := d.finder.NetworkList(d.ctx, name)
 	if err != nil {
 		return nil, err

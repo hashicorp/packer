@@ -14,7 +14,7 @@ type StepCreateSnapshot struct {
 
 func (s *StepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	if s.CreateSnapshot {
 		ui.Say("Creating snapshot...")

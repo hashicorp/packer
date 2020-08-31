@@ -118,7 +118,7 @@ type StepImportToContentLibrary struct {
 
 func (s *StepImportToContentLibrary) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 	var err error
 
 	if s.ContentLibConfig.Ovf {
@@ -142,7 +142,7 @@ func (s *StepImportToContentLibrary) Run(_ context.Context, state multistep.Stat
 	return multistep.ActionContinue
 }
 
-func (s *StepImportToContentLibrary) importOvfTemplate(vm *driver.VirtualMachine) error {
+func (s *StepImportToContentLibrary) importOvfTemplate(vm *driver.VirtualMachineDriver) error {
 	ovf := vcenter.OVF{
 		Spec: vcenter.CreateSpec{
 			Name: s.ContentLibConfig.Name,
@@ -154,7 +154,7 @@ func (s *StepImportToContentLibrary) importOvfTemplate(vm *driver.VirtualMachine
 	return vm.ImportOvfToContentLibrary(ovf)
 }
 
-func (s *StepImportToContentLibrary) importVmTemplate(vm *driver.VirtualMachine) error {
+func (s *StepImportToContentLibrary) importVmTemplate(vm *driver.VirtualMachineDriver) error {
 	template := vcenter.Template{
 		Name:        s.ContentLibConfig.Name,
 		Description: s.ContentLibConfig.Description,

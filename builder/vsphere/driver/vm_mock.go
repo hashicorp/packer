@@ -1,0 +1,147 @@
+package driver
+
+import (
+	"context"
+	"net"
+	"time"
+
+	"github.com/vmware/govmomi/nfc"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/ovf"
+	"github.com/vmware/govmomi/vapi/vcenter"
+	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
+)
+
+type VirtualMachineMock struct {
+	DestroyError  error
+	DestroyCalled bool
+}
+
+func (vm *VirtualMachineMock) Info(params ...string) (*mo.VirtualMachine, error) {
+	return nil, nil
+}
+
+func (vm *VirtualMachineMock) Devices() (object.VirtualDeviceList, error) {
+	return object.VirtualDeviceList{}, nil
+}
+
+func (vm *VirtualMachineMock) Clone(ctx context.Context, config *CloneConfig) (VirtualMachine, error) {
+	return nil, nil
+}
+
+func (vm *VirtualMachineMock) updateVAppConfig(ctx context.Context, newProps map[string]string) (*types.VmConfigSpec, error) {
+	return nil, nil
+}
+
+func (vm *VirtualMachineMock) AddPublicKeys(ctx context.Context, publicKeys string) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) Properties(ctx context.Context) (*mo.VirtualMachine, error) {
+	return nil, nil
+}
+
+func (vm *VirtualMachineMock) Destroy() error {
+	vm.DestroyCalled = true
+	if vm.DestroyError != nil {
+		return vm.DestroyError
+	}
+	return nil
+}
+
+func (vm *VirtualMachineMock) Configure(config *HardwareConfig) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) Customize(spec types.CustomizationSpec) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) ResizeDisk(diskSize int64) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) PowerOn() error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) WaitForIP(ctx context.Context, ipNet *net.IPNet) (string, error) {
+	return "", nil
+}
+
+func (vm *VirtualMachineMock) PowerOff() error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) IsPoweredOff() (bool, error) {
+	return false, nil
+}
+
+func (vm *VirtualMachineMock) StartShutdown() error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) WaitForShutdown(ctx context.Context, timeout time.Duration) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) CreateSnapshot(name string) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) ConvertToTemplate() error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) ImportOvfToContentLibrary(ovf vcenter.OVF) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) ImportToContentLibrary(template vcenter.Template) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) GetDir() (string, error) {
+	return "", nil
+}
+
+func (vm *VirtualMachineMock) AddCdrom(controllerType string, datastoreIsoPath string) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) AddFloppy(imgPath string) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) SetBootOrder(order []string) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) RemoveDevice(keepFiles bool, device ...types.BaseVirtualDevice) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) addDevice(device types.BaseVirtualDevice) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) AddConfigParams(params map[string]string, info *types.ToolsConfigInfo) error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) Export() (*nfc.Lease, error) {
+	return nil, nil
+}
+
+func (vm *VirtualMachineMock) CreateDescriptor(m *ovf.Manager, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error) {
+	return nil, nil
+}
+
+func (vm *VirtualMachineMock) NewOvfManager() *ovf.Manager {
+	return nil
+}
+
+func (vm *VirtualMachineMock) GetOvfExportOptions(m *ovf.Manager) ([]types.OvfOptionInfo, error) {
+	return nil, nil
+}
