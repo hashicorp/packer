@@ -80,6 +80,9 @@ type Driver interface {
 
 	// Export the vm to ovf or ova format using ovftool
 	Export([]string) error
+
+	// OvfTool
+	VerifyOvfTool(bool, bool) error
 }
 
 // NewDriver returns a new driver implementation for this operating
@@ -627,4 +630,23 @@ func (d *VmwareDriver) Export(args []string) error {
 	}
 
 	return nil
+}
+
+func (d *VmwareDriver) VerifyOvfTool(SkipExport, _ bool) error {
+	if SkipExport {
+		return nil
+	}
+
+	log.Printf("Verifying that ovftool exists...")
+	// Validate that tool exists, but no need to validate credentials.
+	ovftool := GetOVFTool()
+	if ovftool != "" {
+		return nil
+	} else {
+		return fmt.Errorf("Couldn't find ovftool in path! Please either " +
+			"set `skip_export = true` and remove the `format` option " +
+			"from your template, or make sure ovftool is installed on " +
+			"your build system. ")
+	}
+
 }

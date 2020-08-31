@@ -95,6 +95,8 @@ type DriverMock struct {
 
 	VerifyCalled bool
 	VerifyErr    error
+
+	VerifyOvftoolCalled bool
 }
 
 type NetworkMapperMock struct {
@@ -278,4 +280,8 @@ func (d *DriverMock) GetVmwareDriver() VmwareDriver {
 		return NetworkMapperMock{}, nil
 	}
 	return state
+}
+
+func (d *DriverMock) VerifyOvfTool(_ bool, _ bool) error {
+	return nil
 }
