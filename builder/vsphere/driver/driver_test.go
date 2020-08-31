@@ -64,9 +64,8 @@ func NewSimulatorServer(model *simulator.Model) (*simulator.Server, error) {
 
 func NewSimulatorDriver(s *simulator.Server) (Driver, error) {
 	ctx := context.TODO()
-
-	credentials := url.UserPassword("user", "pass")
-	s.URL.User = credentials
+	user := &url.Userinfo{}
+	s.URL.User = user
 
 	soapClient := soap.NewClient(s.URL, true)
 	vimClient, err := vim25.NewClient(ctx, soapClient)
@@ -80,7 +79,7 @@ func NewSimulatorDriver(s *simulator.Server) (Driver, error) {
 		SessionManager: session.NewManager(vimClient),
 	}
 
-	err = client.SessionManager.Login(ctx, credentials)
+	err = client.SessionManager.Login(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +97,7 @@ func NewSimulatorDriver(s *simulator.Server) (Driver, error) {
 		vimClient: vimClient,
 		restClient: &RestClient{
 			client:      rest.NewClient(vimClient),
-			credentials: credentials,
+			credentials: user,
 		},
 		datacenter: datacenter,
 		finder:     finder,
