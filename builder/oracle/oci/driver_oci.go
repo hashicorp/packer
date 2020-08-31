@@ -54,6 +54,8 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 	instanceDetails := core.LaunchInstanceDetails{
 		AvailabilityDomain: &d.cfg.AvailabilityDomain,
 		CompartmentId:      &d.cfg.CompartmentID,
+		DefinedTags:        d.cfg.InstanceDefinedTags,
+		FreeformTags:       d.cfg.InstanceTags,
 		ImageId:            &d.cfg.BaseImageID,
 		Shape:              &d.cfg.Shape,
 		SubnetId:           &d.cfg.SubnetID,
