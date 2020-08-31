@@ -210,7 +210,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 			c.AdditionalISOFiles[idx].shouldUploadISO = true
 		}
 		if c.AdditionalISOFiles[idx].Device == "" {
-			log.Printf("AdditionalISOFile %d Devicenot set, using default 'ide3'", idx)
+			log.Printf("AdditionalISOFile %d Device not set, using default 'ide3'", idx)
 			c.AdditionalISOFiles[idx].Device = "ide3"
 		}
 		if strings.HasPrefix(c.AdditionalISOFiles[idx].Device, "ide") {
