@@ -1,4 +1,4 @@
----
+
 description: |
   The proxmox Packer builder is able to create new images for use with
   Proxmox VE. The builder takes an ISO source, runs any provisioning
@@ -140,7 +140,7 @@ builder.
 
   - `firewall` (bool) - If the interface should be protected by the firewall.
     Defaults to `false`.
-  
+
   - `packet_queues` (int) - Number of packet queues to be used on the device.
     Values greater than 1 indicate that the multiqueue feature is activated.
     For best performance, set this to the number of cores available to the
@@ -211,6 +211,39 @@ builder.
 
 - `cloud_init_storage_pool` - (string) - Name of the Proxmox storage pool
   to store the Cloud-Init CDROM on. If not given, the storage pool of the boot device will be used.
+
+- `additional_iso_files` (array of objects) - Additional ISO files attached to the virtual machine.
+  Example:
+
+  ```json
+  [
+    {
+      "device": "scsi5",
+      "iso_file": "local:iso/virtio-win-0.1.185.iso",
+      "unmount": true,
+      "iso_checksum": "af2b3cc9fa7905dea5e58d31508d75bba717c2b0d5553962658a47aebc9cc386"
+    }
+  ]
+  ```
+  - `device` (string) - Bus type and bus index that the ISO will be mounted on. Can be `ideX`,
+    `sataX` or `scsiX`.
+    For `ide` the bus index ranges from 0 to 3, for `sata` form 0 to 5 and for
+    `scsi` from 0 to 30.
+    Defaults to `ide3` since `ide2` is generelly the  boot drive.
+
+  - `iso_file` (string) - Path to the ISO file to boot from, expressed as a
+      proxmox datastore path, for example
+      `local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso`.
+      Either `iso_file` OR `iso_url` must be specifed.
+
+  - `iso_url` (string) - URL to an ISO file to upload to Proxmox, and then
+      boot from. Either `iso_file` OR `iso_url` must be specifed.
+
+  - `iso_storage_pool` (string) - Proxmox storage pool onto which to upload
+      the ISO file.
+
+  - `iso_checksum` (string) - Checksum of the ISO file.
+  - `unmount` (bool) - If true, remove the mounted ISO from the template after finishing. Defaults to `false`.
 
 ## Example: Fedora with kickstart
 
