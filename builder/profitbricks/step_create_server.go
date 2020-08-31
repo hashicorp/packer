@@ -251,7 +251,7 @@ func (d *stepCreateServer) getImageAlias(imageAlias string, location string, ui 
 			if i != "" {
 				alias = i
 			}
-			if alias != "" && strings.ToLower(alias) == strings.ToLower(imageAlias) {
+			if alias != "" && strings.EqualFold(alias, imageAlias) {
 				return alias
 			}
 		}
