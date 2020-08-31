@@ -58,7 +58,7 @@ func NewSimulatorServer(model *simulator.Model) (*simulator.Server, error) {
 
 	model.Service.RegisterEndpoints = true
 	model.Service.TLS = new(tls.Config)
-	model.Service.ServeMux = http.DefaultServeMux
+	model.Service.ServeMux = http.NewServeMux()
 	return model.Service.NewServer(), nil
 }
 
