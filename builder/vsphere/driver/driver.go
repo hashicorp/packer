@@ -63,34 +63,6 @@ type ConnectConfig struct {
 	Datacenter         string
 }
 
-func NewDriverAccTest(vimClient *vim25.Client, datacenterPath string) (Driver, error) {
-	ctx := context.TODO()
-	vimClient.RoundTripper = session.KeepAlive(vimClient.RoundTripper, 10*time.Minute)
-	client := &govmomi.Client{
-		Client:         vimClient,
-		SessionManager: session.NewManager(vimClient),
-	}
-
-	finder := find.NewFinder(client.Client, false)
-	datacenter, err := finder.DatacenterOrDefault(ctx, datacenterPath)
-	if err != nil {
-		return nil, err
-	}
-	finder.SetDatacenter(datacenter)
-
-	d := &VCenterDriver{
-		ctx:       ctx,
-		client:    client,
-		vimClient: vimClient,
-		restClient: &RestClient{
-			client: rest.NewClient(vimClient),
-		},
-		datacenter: datacenter,
-		finder:     finder,
-	}
-	return d, nil
-}
-
 func NewDriver(config *ConnectConfig) (Driver, error) {
 	ctx := context.TODO()
 
