@@ -97,8 +97,7 @@ func NewDriver(config *ConnectConfig) (Driver, error) {
 	}
 	finder.SetDatacenter(datacenter)
 
-	var d Driver
-	d = &VCenterDriver{
+	d := &VCenterDriver{
 		ctx:       ctx,
 		client:    client,
 		vimClient: vimClient,

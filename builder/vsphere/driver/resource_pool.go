@@ -2,7 +2,9 @@ package driver
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -28,10 +30,24 @@ func (d *VCenterDriver) FindResourcePool(cluster string, host string, name strin
 		res = host
 	}
 
-	p, err := d.finder.ResourcePool(d.ctx, fmt.Sprintf("%v/Resources/%v", res, name))
+	resourcePath := fmt.Sprintf("%v/Resources/%v", res, name)
+	p, err := d.finder.ResourcePool(d.ctx, resourcePath)
 	if err != nil {
-		return nil, err
+		log.Printf("[WARN] %s not found. Looking for default resource pool.", resourcePath)
+		dp, dperr := d.finder.DefaultResourcePool(d.ctx)
+		if _, ok := dperr.(*find.NotFoundError); ok {
+			// VirtualApp extends ResourcePool, so it should support VirtualApp types.
+			vapp, verr := d.finder.VirtualApp(d.ctx, name)
+			if verr != nil {
+				return nil, err
+			}
+			dp = vapp.ResourcePool
+		} else if dperr != nil {
+			return nil, err
+		}
+		p = dp
 	}
+
 	return &ResourcePool{
 		pool:   p,
 		driver: d,
