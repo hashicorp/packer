@@ -94,7 +94,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 				errs, err)
 		}
 		for _, dc := range dcs {
-			if strings.ToLower(dc.CountryCode) == strings.ToLower(c.DataCenterName) {
+			if strings.EqualFold(dc.CountryCode, c.DataCenterName) {
 				c.DataCenterId = dc.Id
 				break
 			}
