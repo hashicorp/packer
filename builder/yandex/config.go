@@ -16,11 +16,8 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-
-	"github.com/yandex-cloud/go-sdk/iamkey"
 )
 
-const defaultEndpoint = "api.cloud.yandex.net:443"
 const defaultGpuPlatformID = "gpu-standard-v1"
 const defaultPlatformID = "standard-v1"
 const defaultMaxRetries = 3
@@ -31,23 +28,15 @@ var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Communicator        communicator.Config `mapstructure:",squash"`
+	AccessConfig        `mapstructure:",squash"`
 
-	// Non standard api endpoint URL.
-	Endpoint string `mapstructure:"endpoint" required:"false"`
 	// The folder ID that will be used to launch instances and store images.
-	// Alternatively you may set value by environment variable YC_FOLDER_ID.
+	// Alternatively you may set value by environment variable `YC_FOLDER_ID`.
 	// To use a different folder for looking up the source image or saving the target image to
 	// check options 'source_image_folder_id' and 'target_image_folder_id'.
 	FolderID string `mapstructure:"folder_id" required:"true"`
-	// Path to file with Service Account key in json format. This
-	// is an alternative method to authenticate to Yandex.Cloud. Alternatively you may set environment variable
-	// YC_SERVICE_ACCOUNT_KEY_FILE.
-	ServiceAccountKeyFile string `mapstructure:"service_account_key_file" required:"false"`
-	// Service account identifier to assign to instance
+	// Service account identifier to assign to instance.
 	ServiceAccountID string `mapstructure:"service_account_id" required:"false"`
-	// OAuth token to use to authenticate to Yandex.Cloud. Alternatively you may set
-	// value by environment variable YC_TOKEN.
-	Token string `mapstructure:"token" required:"true"`
 	// The name of the disk, if unset the instance name
 	// will be used.
 	DiskName string `mapstructure:"disk_name" required:"false"`
@@ -59,8 +48,7 @@ type Config struct {
 	ImageDescription string `mapstructure:"image_description" required:"false"`
 	//  The family name of the resulting image.
 	ImageFamily string `mapstructure:"image_family" required:"false"`
-	// Key/value pair labels to
-	// apply to the created image.
+	// Key/value pair labels to apply to the created image.
 	ImageLabels map[string]string `mapstructure:"image_labels" required:"false"`
 	// Minimum size of the disk that will be created from built image, specified in gigabytes.
 	// Should be more or equal to `disk_size_gb`.
@@ -78,16 +66,14 @@ type Config struct {
 	InstanceMemory int `mapstructure:"instance_mem_gb" required:"false"`
 	// The name assigned to the instance.
 	InstanceName string `mapstructure:"instance_name" required:"false"`
-	// Key/value pair labels to apply to
-	// the launched instance.
+	// Key/value pair labels to apply to the launched instance.
 	Labels map[string]string `mapstructure:"labels" required:"false"`
 	// Identifier of the hardware platform configuration for the instance. This defaults to `standard-v1`.
 	PlatformID string `mapstructure:"platform_id" required:"false"`
-	// The maximum number of times an API request is being executed
-	MaxRetries int `mapstructure:"max_retries"`
 	// Metadata applied to the launched instance.
 	Metadata map[string]string `mapstructure:"metadata" required:"false"`
-	// Metadata applied to the launched instance. Value are file paths.
+	// Metadata applied to the launched instance.
+	// The values in this map are the paths to the content files for the corresponding metadata keys.
 	MetadataFromFile map[string]string `mapstructure:"metadata_from_file"`
 	// Launch a preemptible instance. This defaults to `false`.
 	Preemptible bool `mapstructure:"preemptible"`
@@ -95,12 +81,11 @@ type Config struct {
 	SerialLogFile string `mapstructure:"serial_log_file" required:"false"`
 	// The source image family to create the new image
 	// from. You can also specify source_image_id instead. Just one of a source_image_id or
-	// source_image_family must be specified. Example: `ubuntu-1804-lts`
+	// source_image_family must be specified. Example: `ubuntu-1804-lts`.
 	SourceImageFamily string `mapstructure:"source_image_family" required:"true"`
 	// The ID of the folder containing the source image.
 	SourceImageFolderID string `mapstructure:"source_image_folder_id" required:"false"`
-	// The source image ID to use to create the new image
-	// from.
+	// The source image ID to use to create the new image from.
 	SourceImageID string `mapstructure:"source_image_id" required:"false"`
 	// The source image name to use to create the new image
 	// from. Name will be looked up in `source_image_folder_id`.
@@ -142,7 +127,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
+	// Accumulate any errors
 	var errs *packer.MultiError
+
+	errs = packer.MultiErrorAppend(errs, c.AccessConfig.Prepare(&c.ctx)...)
 
 	if c.SerialLogFile != "" {
 		if _, err := os.Stat(c.SerialLogFile); os.IsExist(err) {
@@ -236,10 +224,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if c.Endpoint == "" {
-		c.Endpoint = defaultEndpoint
-	}
-
 	if c.Zone == "" {
 		c.Zone = defaultZone
 	}
@@ -248,33 +232,8 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		c.MaxRetries = defaultMaxRetries
 	}
 
-	// provision config by OS environment variables
-	if c.Token == "" {
-		c.Token = os.Getenv("YC_TOKEN")
-	}
-
-	if c.ServiceAccountKeyFile == "" {
-		c.ServiceAccountKeyFile = os.Getenv("YC_SERVICE_ACCOUNT_KEY_FILE")
-	}
-
 	if c.FolderID == "" {
 		c.FolderID = os.Getenv("YC_FOLDER_ID")
-	}
-
-	if c.Token != "" && c.ServiceAccountKeyFile != "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("one of token or service account key file must be specified, not both"))
-	}
-
-	if c.Token != "" {
-		packer.LogSecretFilter.Set(c.Token)
-	}
-
-	if c.ServiceAccountKeyFile != "" {
-		if _, err := iamkey.ReadFromJSONFile(c.ServiceAccountKeyFile); err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("fail to read service account key file: %s", err))
-		}
 	}
 
 	if c.FolderID == "" {
