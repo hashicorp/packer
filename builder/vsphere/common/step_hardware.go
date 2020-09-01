@@ -65,7 +65,7 @@ type StepConfigureHardware struct {
 
 func (s *StepConfigureHardware) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachineDriver)
+	vm := state.Get("vm").(driver.VirtualMachine)
 
 	if *s.Config != (HardwareConfig{}) {
 		ui.Say("Customizing hardware...")
