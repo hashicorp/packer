@@ -213,7 +213,10 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"unmount_iso":                  &hcldec.AttrSpec{Name: "unmount_iso", Type: cty.Bool, Required: false},
 		"cloud_init":                   &hcldec.AttrSpec{Name: "cloud_init", Type: cty.Bool, Required: false},
 		"cloud_init_storage_pool":      &hcldec.AttrSpec{Name: "cloud_init_storage_pool", Type: cty.String, Required: false},
+<<<<<<< HEAD
 		"additional_iso_files":         &hcldec.BlockListSpec{TypeName: "additional_iso_files", Nested: hcldec.ObjectSpec((*FlatstorageConfig)(nil).HCL2Spec())},
+=======
+>>>>>>> 1648a00f68b96b9ad2fe2ae5eed42c2f85c74ea3
 		"http_interface":               &hcldec.AttrSpec{Name: "http_interface", Type: cty.String, Required: false},
 	}
 	return s
