@@ -36,19 +36,54 @@ func TestDatastoreIsoPath(t *testing.T) {
 			isoPath: "[datastore][] /dir/subdir/file",
 			valid:   false,
 		},
+		{
+			isoPath: "[data/store] /dir/subdir/file",
+			valid:   false,
+		},
+		{
+			isoPath:  "[data store] /dir/sub dir/file",
+			filePath: "/dir/sub dir/file",
+			valid:    true,
+		},
+		{
+			isoPath:  "   [datastore] /dir/subdir/file",
+			filePath: "/dir/subdir/file",
+			valid:    true,
+		},
+		{
+			isoPath:  "[datastore]    /dir/subdir/file",
+			filePath: "/dir/subdir/file",
+			valid:    true,
+		},
+		{
+			isoPath:  "[datastore] /dir/subdir/file     ",
+			filePath: "/dir/subdir/file",
+			valid:    true,
+		},
+		{
+			isoPath:  "[привѣ́тъ] /привѣ́тъ/привѣ́тъ/привѣ́тъ",
+			filePath: "/привѣ́тъ/привѣ́тъ/привѣ́тъ",
+			valid:    true,
+		},
+		// Test case for #9846
+		{
+			isoPath:  "[ISO-StorageLun9] Linux/rhel-8.0-x86_64-dvd.iso",
+			filePath: "Linux/rhel-8.0-x86_64-dvd.iso",
+			valid:    true,
+		},
 	}
 
-	for _, c := range tc {
+	for i, c := range tc {
 		dsIsoPath := &DatastoreIsoPath{path: c.isoPath}
 		if dsIsoPath.Validate() != c.valid {
-			t.Fatalf("Expecting %s to be %t but was %t", c.isoPath, c.valid, !c.valid)
+			t.Fatalf("%d Expecting %s to be %t but was %t", i, c.isoPath, c.valid, !c.valid)
 		}
 		if !c.valid {
 			continue
 		}
 		filePath := dsIsoPath.GetFilePath()
 		if filePath != c.filePath {
-			t.Fatalf("Expecting %s but got %s", c.filePath, filePath)
+			t.Fatalf("%d Expecting %s but got %s", i, c.filePath, filePath)
 		}
 	}
 }

@@ -208,8 +208,9 @@ func (d *DatastoreIsoPath) Validate() bool {
 	// [datastore] /dir/subdir/file
 	// [datastore] dir/subdir/file
 	// [] /dir/subdir/file
-	// /dir/subdir/file or dir/subdir/file
-	matched, _ := regexp.MatchString(`^((\[\w*\])?\s*([^\[\]]+))$`, d.path)
+	// [data-store] /dir/subdir/file
+	// dir/subdir/file or dir/subdir/file
+	matched, _ := regexp.MatchString(`^\s*(\[[^\[\]\/]*\])?\s*[^\[\]]+\s*$`, d.path)
 	return matched
 }
 
@@ -219,7 +220,7 @@ func (d *DatastoreIsoPath) GetFilePath() string {
 	if len(parts) > 1 {
 		// removes datastore name from path
 		filePath = parts[1]
-		filePath = strings.TrimLeft(filePath, " ")
+		filePath = strings.TrimSpace(filePath)
 	}
 	return filePath
 }
