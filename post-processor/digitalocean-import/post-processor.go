@@ -243,7 +243,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 }
 
 func extractImageArtifact(artifacts []string) (string, error) {
-	var source string
 	artifactCount := len(artifacts)
 
 	if artifactCount == 0 {
@@ -255,22 +254,15 @@ func extractImageArtifact(artifacts []string) (string, error) {
 	}
 
 	validSuffix := []string{"raw", "img", "qcow2", "vhdx", "vdi", "vmdk", "tar.bz2", "tar.xz", "tar.gz"}
-
-artifactLoop:
 	for _, path := range artifacts {
 		for _, suffix := range validSuffix {
 			if strings.HasSuffix(path, suffix) {
-				source = path
-				break artifactLoop
+				return path, nil
 			}
 		}
 	}
 
-	if source == "" {
-		return "", fmt.Errorf("Image file not found")
-	}
-
-	return source, nil
+	return "", fmt.Errorf("no valid image file found")
 }
 
 func uploadImageToSpaces(source string, p *PostProcessor, s *session.Session) (err error) {
