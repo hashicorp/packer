@@ -220,8 +220,7 @@ func (d *DatastoreIsoPath) GetFilePath() string {
 	if len(parts) > 1 {
 		// removes datastore name from path
 		filePath = parts[1]
-		filePath = strings.TrimLeft(filePath, " ")
-		filePath = strings.TrimRight(filePath, " ")
+		filePath = strings.TrimSpace(filePath)
 	}
 	return filePath
 }
