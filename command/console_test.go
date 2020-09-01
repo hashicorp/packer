@@ -35,6 +35,7 @@ func Test_console(t *testing.T) {
 		{"var.list_of_string[0]", []string{"console", `-var=list_of_string=["first"]`, filepath.Join(testFixture("hcl", "variables", "list_of_string"))}, nil, "first\n"},
 		{"var.untyped[2]", []string{"console", filepath.Join(testFixture("hcl", "variables", "untyped_var"))}, nil, "strings\n"},
 		{"var.untyped", []string{"console", `-var=untyped=just_a_string`, filepath.Join(testFixture("hcl", "variables", "untyped_var"))}, nil, "just_a_string\n"},
+		{"var.untyped", []string{"console", filepath.Join(testFixture("hcl", "variables", "untyped_var", "var.pkr.hcl"))}, nil, "<unknown>\n"},
 		{"var.untyped", []string{"console", filepath.Join(testFixture("hcl", "variables", "untyped_var", "var.pkr.hcl"))}, []string{"PKR_VAR_untyped=just_a_string"}, "just_a_string\n"},
 	}
 
