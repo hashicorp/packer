@@ -84,6 +84,14 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 
 type Variables map[string]*Variable
 
+func (variables Variables) Keys() []string {
+	keys := make([]string, 0, len(variables))
+	for key := range variables {
+		keys = append(keys, key)
+	}
+	return keys
+}
+
 func (variables Variables) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	res := map[string]cty.Value{}
 	var diags hcl.Diagnostics
