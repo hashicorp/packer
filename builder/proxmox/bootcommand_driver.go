@@ -20,13 +20,21 @@ type proxmoxDriver struct {
 func NewProxmoxDriver(c commandTyper, vmRef *proxmox.VmRef, interval time.Duration) *proxmoxDriver {
 	// Mappings for packer shorthand to qemu qkeycodes
 	sMap := map[string]string{
-		"spacebar": "spc",
-		"bs":       "backspace",
-		"del":      "delete",
-		"return":   "ret",
-		"enter":    "ret",
-		"pageUp":   "pgup",
-		"pageDown": "pgdn",
+		"spacebar":   "shift-f10",
+		"bs":         "backspace",
+		"del":        "delete",
+		"return":     "ret",
+		"enter":      "ret",
+		"pageUp":     "pgup",
+		"pageDown":   "pgdn",
+		"leftshift":  "shift",
+		"rightshift": "shift",
+		"leftalt":    "alt",
+		"rightalt":   "alt_r",
+		"leftctrl":   "ctrl",
+		"rightctrl":  "ctrl_r",
+		"leftsuper":  "meta_l",
+		"rightsuper": "meta_r",
 	}
 	// Mappings for runes that need to be translated to special qkeycodes
 	// Taken from https://github.com/qemu/qemu/blob/master/pc-bios/keymaps/en-us
@@ -88,7 +96,6 @@ func (p *proxmoxDriver) SendKey(key rune, action bootcommand.KeyAction) error {
 	} else {
 		keys = fmt.Sprintf("%c", key)
 	}
-
 	return p.send(keys)
 }
 
@@ -97,7 +104,6 @@ func (p *proxmoxDriver) SendSpecial(special string, action bootcommand.KeyAction
 	if replacement, ok := p.specialMap[special]; ok {
 		keys = replacement
 	}
-
 	return p.send(keys)
 }
 
