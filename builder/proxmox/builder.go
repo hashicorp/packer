@@ -153,7 +153,7 @@ func commHost(host string) func(state multistep.StateBag) (string, error) {
 // qemu-guest-agent package must be installed on the VM
 func getVMIP(state multistep.StateBag) (string, error) {
 	client := state.Get("proxmoxClient").(*proxmox.Client)
-    config := state.Get("Config").(*Config)
+	config := state.Get("Config").(*Config)
 	vmRef := state.Get("vmRef").(*proxmox.VmRef)
 
 	ifs, err := client.GetVmAgentNetworkInterfaces(vmRef)
@@ -161,22 +161,22 @@ func getVMIP(state multistep.StateBag) (string, error) {
 		return "", err
 	}
 
-    if client.VMInterface != "" {
-        for _, iface := range ifs {
-            if config.Name != iface.Name{
-                continue
-            }
+	if config.VMInterface != "" {
+		for _, iface := range ifs {
+			if config.VMInterface != iface.Name {
+				continue
+			}
 
-            for _, addr := range iface.IPAddresses {
-                if addr.IsLoopback() {
-                    continue
-                }
-                return addr.String(), nil
-            }
-            return "", fmt.Errorf("Interface %s only has loopback addresses", client.Name)
-        }
-        return "", fmt.Errorf("Interface %s not found in VM", client.Name)
-    }
+			for _, addr := range iface.IPAddresses {
+				if addr.IsLoopback() {
+					continue
+				}
+				return addr.String(), nil
+			}
+			return "", fmt.Errorf("Interface %s only has loopback addresses", config.VMInterface)
+		}
+		return "", fmt.Errorf("Interface %s not found in VM", config.VMInterface)
+	}
 
 	for _, iface := range ifs {
 		for _, addr := range iface.IPAddresses {
