@@ -6,6 +6,7 @@ package ebs
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -104,10 +105,10 @@ func checkSnapshotsDeleted(snapshotIds []*string) builderT.TestCheckFunc {
 
 func TestBuilderAcc_amiSharing(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
+		PreCheck: func() { testAccSharingPreCheck(t) },
 		Builder:  &Builder{},
-		Template: testBuilderAccSharing,
-		Check:    checkAMISharing(2, "932021504756", "all"),
+		Template: buildSharingConfig(os.Getenv("TESTACC_AWS_ACCOUNT_ID")),
+		Check:    checkAMISharing(2, os.Getenv("TESTACC_AWS_ACCOUNT_ID"), "all"),
 	})
 }
 
@@ -248,6 +249,12 @@ func checkBootEncrypted() builderT.TestCheckFunc {
 func testAccPreCheck(t *testing.T) {
 }
 
+func testAccSharingPreCheck(t *testing.T) {
+	if v := os.Getenv("TESTACC_AWS_ACCOUNT_ID"); v == "" {
+		t.Fatal(fmt.Sprintf("TESTACC_AWS_ACCOUNT_ID must be set for acceptance tests"))
+	}
+}
+
 func testEC2Conn() (*ec2.EC2, error) {
 	access := &common.AccessConfig{RawRegion: "us-east-1"}
 	session, err := access.Session()
@@ -324,7 +331,7 @@ const testBuilderAccSharing = `
 		"source_ami": "ami-76b2a71e",
 		"ssh_username": "ubuntu",
 		"ami_name": "packer-test {{timestamp}}",
-		"ami_users":["932021504756"],
+		"ami_users":["%s"],
 		"ami_groups":["all"]
 	}]
 }
@@ -350,4 +357,8 @@ func buildForceDeregisterConfig(val, name string) string {
 
 func buildForceDeleteSnapshotConfig(val, name string) string {
 	return fmt.Sprintf(testBuilderAccForceDeleteSnapshot, val, val, name)
+}
+
+func buildSharingConfig(val string) string {
+	return fmt.Sprintf(testBuilderAccSharing, val)
 }
