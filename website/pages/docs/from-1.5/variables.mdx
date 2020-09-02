@@ -132,6 +132,13 @@ Constraints](https://www.terraform.io/docs/configuration/types.html).
 If both the `type` and `default` arguments are specified, the given default
 value must be convertible to the specified type.
 
+If only `default` is specified, the type of the default value will be used.
+
+When the `type` and `default` are both *not* specified and you try to set a
+variable [from env vars](#environment-variables) or [from the command
+line](#variables-on-the-command-line), the variable will always be interpreted
+as a string.
+
 ## Input Variable Documentation
 
 Because the input variables of a build are part of its user interface, you can

@@ -69,13 +69,19 @@ local.fruit: "banana"
       <no post-processor>
 
 `},
-		{[]string{"inspect", "-var=fruit=peach", "-var=unknown_string=also_peach", `-var=unknown_unknown="peach_too"`, filepath.Join(testFixture("hcl"), "inspect", "fruit_string.pkr.hcl")}, nil, `Packer Inspect: HCL2 mode
+		{[]string{"inspect", "-var=fruit=peach",
+			"-var=unknown_string=also_peach",
+			`-var=unknown_unknown=["peach_too"]`,
+			`-var=unknown_list_of_string=["first_peach", "second_peach"]`,
+			filepath.Join(testFixture("hcl"), "inspect", "fruit_string.pkr.hcl")}, nil,
+			`Packer Inspect: HCL2 mode
 
 > input-variables:
 
 var.fruit: "peach"
+var.unknown_list_of_string: "[\n  \"first_peach\",\n  \"second_peach\",\n]"
 var.unknown_string: "also_peach"
-var.unknown_unknown: "peach_too"
+var.unknown_unknown: "[\"peach_too\"]"
 
 > local-variables:
 
@@ -88,6 +94,7 @@ var.unknown_unknown: "peach_too"
 > input-variables:
 
 var.fruit: "peach"
+var.unknown_list_of_string: "<unknown>"
 var.unknown_string: "<unknown>"
 var.unknown_unknown: "<unknown>"
 
