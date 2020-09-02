@@ -62,7 +62,7 @@ func NewSimulatorServer(model *simulator.Model) (*simulator.Server, error) {
 	return model.Service.NewServer(), nil
 }
 
-func NewSimulatorDriver(s *simulator.Server) (Driver, error) {
+func NewSimulatorDriver(s *simulator.Server) (*VCenterDriver, error) {
 	ctx := context.TODO()
 	user := &url.Userinfo{}
 	s.URL.User = user
