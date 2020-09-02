@@ -152,16 +152,32 @@ func commHost(host string) func(state multistep.StateBag) (string, error) {
 // Reads the first non-loopback interface's IP address from the VM.
 // qemu-guest-agent package must be installed on the VM
 func getVMIP(state multistep.StateBag) (string, error) {
-	c := state.Get("proxmoxClient").(*proxmox.Client)
+	client := state.Get("proxmoxClient").(*proxmox.Client)
+    config := state.Get("Config").(*Config)
 	vmRef := state.Get("vmRef").(*proxmox.VmRef)
 
-	ifs, err := c.GetVmAgentNetworkInterfaces(vmRef)
+	ifs, err := client.GetVmAgentNetworkInterfaces(vmRef)
 	if err != nil {
 		return "", err
 	}
 
-	// TODO: Do something smarter here? Allow specifying interface? Or address family?
-	// For now, just go for first non-loopback
+    if client.VMInterface != "" {
+        for _, iface := range ifs {
+            if config.Name != iface.Name{
+                continue
+            }
+
+            for _, addr := range iface.IPAddresses {
+                if addr.IsLoopback() {
+                    continue
+                }
+                return addr.String(), nil
+            }
+            return "", fmt.Errorf("Interface %s only has loopback addresses", client.Name)
+        }
+        return "", fmt.Errorf("Interface %s not found in VM", client.Name)
+    }
+
 	for _, iface := range ifs {
 		for _, addr := range iface.IPAddresses {
 			if addr.IsLoopback() {
