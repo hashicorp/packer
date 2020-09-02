@@ -127,7 +127,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.BootType == "" {
-		c.BootType = "bootscript"
+		c.BootType = "local"
 	}
 
 	var errs *packer.MultiError
