@@ -131,7 +131,7 @@ func (cfg *PackerConfig) startBuilder(source SourceBlock, ectx *hcl.EvalContext,
 // These variables will populate the PackerConfig inside of the builders.
 func (source *SourceBlock) builderVariables() map[string]string {
 	return map[string]string{
-		"packer_build_name":   source.Name,
+		"packer_build_name":   source.name(),
 		"packer_builder_type": source.Type,
 	}
 }
