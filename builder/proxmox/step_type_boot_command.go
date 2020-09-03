@@ -53,14 +53,20 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 			return multistep.ActionHalt
 		}
 	}
-
-	httpIP, err := hostIP()
-	if err != nil {
-		err := fmt.Errorf("Failed to determine host IP: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	var httpIP string
+	var err error
+	if c.HTTPAddress != "0.0.0.0" {
+		httpIP = c.HTTPAddress
+	} else {
+		httpIP, err = hostIP(c.HTTPInterface)
+		if err != nil {
+			err := fmt.Errorf("Failed to determine host IP: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
+
 	state.Put("http_ip", httpIP)
 	s.Ctx.Data = &bootCommandTemplateData{
 		HTTPIP:   httpIP,
@@ -97,14 +103,9 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
-func hostIP(c *HTTPConfig) (string, error) {
-	if c.HTTPAddress != "0.0.0.0" {
-		return c.HTTPAddress, nil
-	}
-
+func hostIP(ifname string) (string, error) {
 	var addrs []net.Addr
 	var err error
-	ifname := c.HTTPInterface
 
 	if ifname != "" {
 		iface, err := net.InterfaceByName(ifname)
