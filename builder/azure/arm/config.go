@@ -90,6 +90,7 @@ type SharedImageGallery struct {
 }
 
 type SharedImageGalleryDestination struct {
+	SigDestinationSubscription       string   `mapstructure:"subscription"`
 	SigDestinationResourceGroup      string   `mapstructure:"resource_group"`
 	SigDestinationGalleryName        string   `mapstructure:"gallery_name"`
 	SigDestinationImageName          string   `mapstructure:"image_name"`
@@ -118,31 +119,64 @@ type Config struct {
 	// Use a [Shared Gallery
 	// image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
 	// as the source for this build. *VHD targets are incompatible with this
-	// build type* - the target must be a *Managed Image*.
+	// build type* - the target must be a *Managed Image*. When using shared_image_gallery as a source, image_publisher,
+	// image_offer, image_sku, image_version, and custom_managed_image_name should not be set.
 	//
-	//     "shared_image_gallery": {
-	//         "subscription": "00000000-0000-0000-0000-00000000000",
-	//         "resource_group": "ResourceGroup",
-	//         "gallery_name": "GalleryName",
-	//         "image_name": "ImageName",
-	//         "image_version": "1.0.0"
-	//     }
-	//     "managed_image_name": "TargetImageName",
-	//     "managed_image_resource_group_name": "TargetResourceGroup"
+	// In JSON
+	// ```json
+	// "shared_image_gallery": {
+	//     "subscription": "00000000-0000-0000-0000-00000000000",
+	//     "resource_group": "ResourceGroup",
+	//     "gallery_name": "GalleryName",
+	//     "image_name": "ImageName",
+	//     "image_version": "1.0.0"
+	// }
+	// "managed_image_name": "TargetImageName",
+	// "managed_image_resource_group_name": "TargetResourceGroup"
+	// ```
+	// In HCL2
+	// ```hcl
+	// shared_image_gallery {
+	//     subscription = "00000000-0000-0000-0000-00000000000"
+	//     resource_group = "ResourceGroup"
+	//     gallery_name = "GalleryName"
+	//     image_name = "ImageName"
+	//     image_version = "1.0.0"
+	// }
+	// managed_image_name = "TargetImageName"
+	// managed_image_resource_group_name = "TargetResourceGroup"
+	// ```
 	SharedGallery SharedImageGallery `mapstructure:"shared_image_gallery" required:"false"`
 	// The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
 	//
 	// Following is an example.
 	//
-	//     "shared_image_gallery_destination": {
-	//         "resource_group": "ResourceGroup",
-	//         "gallery_name": "GalleryName",
-	//         "image_name": "ImageName",
-	//         "image_version": "1.0.0",
-	//         "replication_regions": ["regionA", "regionB", "regionC"]
-	//     }
-	//     "managed_image_name": "TargetImageName",
-	//     "managed_image_resource_group_name": "TargetResourceGroup"
+	// In JSON
+	// ```json
+	// "shared_image_gallery_destination": {
+	//     "subscription": "00000000-0000-0000-0000-00000000000",
+	//     "resource_group": "ResourceGroup",
+	//     "gallery_name": "GalleryName",
+	//     "image_name": "ImageName",
+	//     "image_version": "1.0.0",
+	//     "replication_regions": ["regionA", "regionB", "regionC"]
+	// }
+	// "managed_image_name": "TargetImageName",
+	// "managed_image_resource_group_name": "TargetResourceGroup"
+	// ```
+	// In HCL2
+	// ```hcl
+	// shared_image_gallery_destination {
+	//     subscription = "00000000-0000-0000-0000-00000000000"
+	//     resource_group = "ResourceGroup"
+	//     gallery_name = "GalleryName"
+	//     image_name = "ImageName"
+	//     image_version = "1.0.0"
+	//     replication_regions = ["regionA", "regionB", "regionC"]
+	// }
+	// managed_image_name = "TargetImageName"
+	// managed_image_resource_group_name = "TargetResourceGroup"
+	// ```
 	SharedGalleryDestination SharedImageGalleryDestination `mapstructure:"shared_image_gallery_destination"`
 	// How long to wait for an image to be published to the shared image
 	// gallery before timing out. If your Packer build is failing on the
@@ -977,6 +1011,9 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		}
 		if len(c.SharedGalleryDestination.SigDestinationReplicationRegions) == 0 {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A list of replication_regions must be specified for shared_image_gallery_destination"))
+		}
+		if c.SharedGalleryDestination.SigDestinationSubscription == "" {
+			c.SharedGalleryDestination.SigDestinationSubscription = c.ClientConfig.SubscriptionID
 		}
 	}
 	if c.SharedGalleryTimeout == 0 {

@@ -14,31 +14,64 @@
 - `shared_image_gallery` (SharedImageGallery) - Use a [Shared Gallery
   image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
   as the source for this build. *VHD targets are incompatible with this
-  build type* - the target must be a *Managed Image*.
+  build type* - the target must be a *Managed Image*. When using shared_image_gallery as a source, image_publisher,
+  image_offer, image_sku, image_version, and custom_managed_image_name should not be set.
   
-      "shared_image_gallery": {
-          "subscription": "00000000-0000-0000-0000-00000000000",
-          "resource_group": "ResourceGroup",
-          "gallery_name": "GalleryName",
-          "image_name": "ImageName",
-          "image_version": "1.0.0"
-      }
-      "managed_image_name": "TargetImageName",
-      "managed_image_resource_group_name": "TargetResourceGroup"
+  In JSON
+  ```json
+  "shared_image_gallery": {
+      "subscription": "00000000-0000-0000-0000-00000000000",
+      "resource_group": "ResourceGroup",
+      "gallery_name": "GalleryName",
+      "image_name": "ImageName",
+      "image_version": "1.0.0"
+  }
+  "managed_image_name": "TargetImageName",
+  "managed_image_resource_group_name": "TargetResourceGroup"
+  ```
+  In HCL2
+  ```hcl
+  shared_image_gallery {
+      subscription = "00000000-0000-0000-0000-00000000000"
+      resource_group = "ResourceGroup"
+      gallery_name = "GalleryName"
+      image_name = "ImageName"
+      image_version = "1.0.0"
+  }
+  managed_image_name = "TargetImageName"
+  managed_image_resource_group_name = "TargetResourceGroup"
+  ```
 
 - `shared_image_gallery_destination` (SharedImageGalleryDestination) - The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
   
   Following is an example.
   
-      "shared_image_gallery_destination": {
-          "resource_group": "ResourceGroup",
-          "gallery_name": "GalleryName",
-          "image_name": "ImageName",
-          "image_version": "1.0.0",
-          "replication_regions": ["regionA", "regionB", "regionC"]
-      }
-      "managed_image_name": "TargetImageName",
-      "managed_image_resource_group_name": "TargetResourceGroup"
+  In JSON
+  ```json
+  "shared_image_gallery_destination": {
+      "subscription": "00000000-0000-0000-0000-00000000000",
+      "resource_group": "ResourceGroup",
+      "gallery_name": "GalleryName",
+      "image_name": "ImageName",
+      "image_version": "1.0.0",
+      "replication_regions": ["regionA", "regionB", "regionC"]
+  }
+  "managed_image_name": "TargetImageName",
+  "managed_image_resource_group_name": "TargetResourceGroup"
+  ```
+  In HCL2
+  ```hcl
+  shared_image_gallery_destination {
+      subscription = "00000000-0000-0000-0000-00000000000"
+      resource_group = "ResourceGroup"
+      gallery_name = "GalleryName"
+      image_name = "ImageName"
+      image_version = "1.0.0"
+      replication_regions = ["regionA", "regionB", "regionC"]
+  }
+  managed_image_name = "TargetImageName"
+  managed_image_resource_group_name = "TargetResourceGroup"
+  ```
 
 - `shared_image_gallery_timeout` (duration string | ex: "1h5m2s") - How long to wait for an image to be published to the shared image
   gallery before timing out. If your Packer build is failing on the

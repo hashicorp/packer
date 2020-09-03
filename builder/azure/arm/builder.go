@@ -84,6 +84,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	ui.Message("Creating Azure Resource Manager (ARM) client ...")
 	azureClient, err := NewAzureClient(
 		b.config.ClientConfig.SubscriptionID,
+		b.config.SharedGalleryDestination.SigDestinationSubscription,
 		b.config.ResourceGroupName,
 		b.config.StorageAccount,
 		b.config.ClientConfig.CloudEnvironment(),

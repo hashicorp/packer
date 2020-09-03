@@ -108,21 +108,7 @@ When creating a managed image the following additional options are required:
   [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
   to learn more about managed images.
 
-Creating a managed image using a [Shared Gallery image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/) as the source can be achieved by specifying the `shared_image_gallery` configuration option.
-When using shared_image_gallery as a source, image_publisher, image_offer, image_sku, image_version, and
-custom_managed_image_name should not be set.
-
-The following is an example.
-
-      "shared_image_gallery": {
-          "subscription": "00000000-0000-0000-0000-00000000000",
-          "resource_group": "ResourceGroup",
-          "gallery_name": "GalleryName",
-          "image_name": "ImageName",
-          "image_version": "1.0.0"
-      }
-      "managed_image_name": "TargetImageName",
-      "managed_image_resource_group_name": "TargetResourceGroup"
+Creating a managed image using a [Shared Gallery image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/) as the source can be achieved by specifying the [shared_image_gallery](#shared_image_gallery) configuration option.
 
 #### Resource Group Usage
 
@@ -251,6 +237,9 @@ after that. The possible states, in case you want to wait for another state,
 [are documented
 here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "provisioners": [
@@ -270,6 +259,26 @@ here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
 }
 ```
 
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "powershell" {
+   inline = [
+        " # NOTE: the following *3* lines are only needed if the you have installed the Guest Agent.",
+        "  while ((Get-Service RdAgent).Status -ne 'Running') { Start-Sleep -s 5 }",
+        "  while ((Get-Service WindowsAzureTelemetryService).Status -ne 'Running') { Start-Sleep -s 5 }",
+        "  while ((Get-Service WindowsAzureGuestAgent).Status -ne 'Running') { Start-Sleep -s 5 }",
+
+        "& $env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /quiet /quit /mode:vm",
+        "while($true) { $imageState = Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\State | Select ImageState; if($imageState.ImageState -ne 'IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE') { Write-Output $imageState.ImageState; Start-Sleep -s 10  } else { break } }"
+   ]
+}
+```
+
+</Tab>
+</Tabs>
+
 The Windows Guest Agent participates in the Sysprep process. The agent must be
 fully installed before the VM can be sysprep'ed. To ensure this is true all
 agent services must be running before executing sysprep.exe. The above JSON
@@ -287,6 +296,9 @@ correctly -- for example, if it is waiting for a reboot that you never perform.
 The following provisioner snippet shows how to deprovision a Linux VM.
 Deprovision should be the last operation executed by a build.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "provisioners": [
@@ -301,6 +313,22 @@ Deprovision should be the last operation executed by a build.
   ]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "shell" {
+   execute_command = "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'"
+   inline = [
+        "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"
+   ]
+   inline_shebang = "/bin/sh -x"
+}
+```
+
+</Tab>
+</Tabs>
 
 To learn more about the Linux deprovision process please see WALinuxAgent's
 [README](https://github.com/Azure/WALinuxAgent/blob/master/README.md).
