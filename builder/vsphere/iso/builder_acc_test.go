@@ -42,8 +42,10 @@ func defaultConfig() map[string]interface{} {
 		"ssh_username": "root",
 		"ssh_password": "jetbrains",
 
-		"vm_name":   commonT.NewVMName(),
-		"disk_size": 2048,
+		"vm_name": commonT.NewVMName(),
+		"storage": map[string]interface{}{
+			"disk_size": 2048,
+		},
 
 		"communicator": "none", // do not start the VM without any bootable devices
 	}
@@ -338,7 +340,9 @@ func TestISOBuilderAcc_networkCard(t *testing.T) {
 
 func networkCardConfig() string {
 	config := defaultConfig()
-	config["network_card"] = "vmxnet3"
+	config["network_adapters"] = map[string]interface{}{
+		"network_card": "vmxnet3",
+	}
 	return commonT.RenderConfig(config)
 }
 
@@ -421,12 +425,18 @@ func fullConfig() map[string]interface{} {
 		"vm_name": commonT.NewVMName(),
 		"host":    "esxi-1.vsphere65.test",
 
-		"RAM":                   512,
-		"disk_controller_type":  "pvscsi",
-		"disk_size":             1024,
-		"disk_thin_provisioned": true,
-		"network_card":          "vmxnet3",
-		"guest_os_type":         "other3xLinux64Guest",
+		"RAM": 512,
+		"disk_controller_type": []string{
+			"pvscsi",
+		},
+		"storage": map[string]interface{}{
+			"disk_size":             1024,
+			"disk_thin_provisioned": true,
+		},
+		"network_adapters": map[string]interface{}{
+			"network_card": "vmxnet3",
+		},
+		"guest_os_type": "other3xLinux64Guest",
 
 		"iso_paths": []string{
 			"[datastore1] ISO/alpine-standard-3.8.2-x86_64.iso",
@@ -550,7 +560,9 @@ func clusterDRSConfig() string {
 	config["cluster"] = "cluster2"
 	config["host"] = ""
 	config["datastore"] = "datastore3" // bug #183
-	config["network"] = "VM Network"   // bug #183
+	config["network_adapters"] = map[string]interface{}{
+		"network": "VM Network",
+	}
 
 	return commonT.RenderConfig(config)
 }
