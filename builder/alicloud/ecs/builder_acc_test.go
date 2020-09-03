@@ -422,7 +422,6 @@ func TestBuilderAcc_ECSImageSharing(t *testing.T) {
 	})
 }
 
-// share with catsby
 const testBuilderAccSharing = `
 {
 	"builders": [{
