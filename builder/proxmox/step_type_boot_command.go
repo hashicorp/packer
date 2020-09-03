@@ -54,7 +54,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		}
 	}
 
-	httpIP, err := hostIP(c.HTTPInterface)
+	httpIP, err := hostIP()
 	if err != nil {
 		err := fmt.Errorf("Failed to determine host IP: %s", err)
 		state.Put("error", err)
@@ -97,9 +97,15 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
-func hostIP(ifname string) (string, error) {
+func hostIP(c *HTTPConfig) (string, error) {
+	if c.HTTPAddress != "0.0.0.0" {
+		return c.HTTPAddress, nil
+	}
+
 	var addrs []net.Addr
 	var err error
+	ifname := c.HTTPInterface
+
 	if ifname != "" {
 		iface, err := net.InterfaceByName(ifname)
 		if err != nil {

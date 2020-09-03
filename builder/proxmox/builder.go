@@ -153,7 +153,7 @@ func commHost(host string) func(state multistep.StateBag) (string, error) {
 // qemu-guest-agent package must be installed on the VM
 func getVMIP(state multistep.StateBag) (string, error) {
 	client := state.Get("proxmoxClient").(*proxmox.Client)
-	config := state.Get("Config").(*Config)
+	config := state.Get("config").(*Config)
 	vmRef := state.Get("vmRef").(*proxmox.VmRef)
 
 	ifs, err := client.GetVmAgentNetworkInterfaces(vmRef)
