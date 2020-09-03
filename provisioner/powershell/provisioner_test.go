@@ -71,12 +71,12 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Error("expected elevated_password to be empty")
 	}
 
-	matched, _ = regexp.MatchString("powershell -NonInteractive -NoProfile -ExecutionPolicy bypass -File c:/Windows/Temp/packer-wrapper-.*.ps1", p.config.ExecuteCommand)
+	matched, _ = regexp.MatchString("powershell -noninteractive -noprofile -executionpolicy bypass -file {{.Path}}", p.config.ExecuteCommand)
 	if !matched {
 		t.Errorf("expected default execute command, but got : %s", p.config.ExecuteCommand)
 	}
 
-	matched, _ = regexp.MatchString("powershell -NonInteractive -NoProfile -ExecutionPolicy bypass -File c:/Windows/Temp/packer-wrapper-.*.ps1", p.config.ElevatedExecuteCommand)
+	matched, _ = regexp.MatchString("powershell -noninteractive -noprofile -executionpolicy bypass -file {{.Path}}", p.config.ElevatedExecuteCommand)
 	if !matched {
 		t.Errorf("expected default elevated execute command, but got : %s", p.config.ElevatedExecuteCommand)
 	}
@@ -514,7 +514,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	}
 
 	cmd := comm.StartCmd.Command
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1'; exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -noninteractive -noprofile -executionpolicy bypass -file c:/Windows/Temp/script.ps1'`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -824,7 +824,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 	}
 }
 
-func TestProvision_createCommandText(t *testing.T) {
+func TestProvision_buildInterpolatedCommand(t *testing.T) {
 	config := testConfig()
 	config["remote_path"] = "c:/Windows/Temp/script.ps1"
 	p := new(Provisioner)
@@ -838,9 +838,9 @@ func TestProvision_createCommandText(t *testing.T) {
 
 	// Non-elevated
 	p.generatedData = make(map[string]interface{})
-	cmd, _ := p.createCommandText()
+	cmd, _ := p.buildInterpolatedCommand()
 
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1'; exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -noninteractive -noprofile -executionpolicy bypass -file c:/Windows/Temp/script.ps1`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -849,7 +849,7 @@ func TestProvision_createCommandText(t *testing.T) {
 	// Elevated
 	p.config.ElevatedUser = "vagrant"
 	p.config.ElevatedPassword = "vagrant"
-	cmd, _ = p.createCommandText()
+	cmd, _ = p.buildInterpolatedCommand()
 	re = regexp.MustCompile(`powershell -executionpolicy bypass -file "C:/Windows/Temp/packer-elevated-shell-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1"`)
 	matched = re.MatchString(cmd)
 	if !matched {

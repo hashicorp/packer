@@ -34,6 +34,7 @@ type FlatConfig struct {
 	ElevatedPassword       *string           `mapstructure:"elevated_password" cty:"elevated_password" hcl:"elevated_password"`
 	ExecutionPolicy        *string           `mapstructure:"execution_policy" cty:"execution_policy" hcl:"execution_policy"`
 	DebugMode              *int              `mapstructure:"debug_mode" cty:"debug_mode" hcl:"debug_mode"`
+	UseErrorWrapperScript  *bool             `mapstructure:"use_error_wrapper" cty:"use_error_wrapper" hcl:"use_error_wrapper"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -73,6 +74,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"elevated_password":          &hcldec.AttrSpec{Name: "elevated_password", Type: cty.String, Required: false},
 		"execution_policy":           &hcldec.AttrSpec{Name: "execution_policy", Type: cty.String, Required: false},
 		"debug_mode":                 &hcldec.AttrSpec{Name: "debug_mode", Type: cty.Number, Required: false},
+		"use_error_wrapper":          &hcldec.AttrSpec{Name: "use_error_wrapper", Type: cty.Bool, Required: false},
 	}
 	return s
 }
