@@ -149,7 +149,10 @@ type CreateConfig struct {
 	// here](https://code.vmware.com/apis/358/vsphere/doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html)
 	// for a full list of possible values.
 	GuestOSType string `mapstructure:"guest_os_type"`
-	// Set VM disk controller type. Example `lsilogic`, pvscsi`, or `scsi`. Use a list to define additional controllers. Defaults to `lsilogic`
+	// Set VM disk controller type. Example `lsilogic`, `pvscsi`, `nvme`, or `scsi`. Use a list to define additional controllers.
+	// Defaults to `lsilogic`. See
+	// [SCSI, SATA, and NVMe Storage Controller Conditions, Limitations, and Compatibility](https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vm_admin.doc/GUID-5872D173-A076-42FE-8D0B-9DB0EB0E7362.html#GUID-5872D173-A076-42FE-8D0B-9DB0EB0E7362)
+	// for additional details.
 	DiskControllerType []string `mapstructure:"disk_controller_type"`
 	// A collection of one or more disks to be provisioned along with the VM.
 	Storage []DiskConfig `mapstructure:"storage"`
