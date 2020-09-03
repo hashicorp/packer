@@ -9,18 +9,19 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
-	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
-	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
-	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
-	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
-	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
-	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	OutputPath          *string           `mapstructure:"output" cty:"output" hcl:"output"`
-	Format              *string           `mapstructure:"format" cty:"format" hcl:"format"`
-	CompressionLevel    *int              `mapstructure:"compression_level" cty:"compression_level" hcl:"compression_level"`
-	Archive             *string           `cty:"archive" hcl:"archive"`
-	Algorithm           *string           `cty:"algorithm" hcl:"algorithm"`
+	PackerBuildGroupName *string           `mapstructure:"packer_build_group_name" cty:"packer_build_group_name" hcl:"packer_build_group_name"`
+	PackerBuildName      *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType    *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug          *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce          *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError        *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars       map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars  []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	OutputPath           *string           `mapstructure:"output" cty:"output" hcl:"output"`
+	Format               *string           `mapstructure:"format" cty:"format" hcl:"format"`
+	CompressionLevel     *int              `mapstructure:"compression_level" cty:"compression_level" hcl:"compression_level"`
+	Archive              *string           `cty:"archive" hcl:"archive"`
+	Algorithm            *string           `cty:"algorithm" hcl:"algorithm"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -35,6 +36,7 @@ func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec }
 // The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
+		"packer_build_group_name":    &hcldec.AttrSpec{Name: "packer_build_group_name", Type: cty.String, Required: false},
 		"packer_build_name":          &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
 		"packer_builder_type":        &hcldec.AttrSpec{Name: "packer_builder_type", Type: cty.String, Required: false},
 		"packer_debug":               &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},

@@ -9,22 +9,23 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
-	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
-	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
-	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
-	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
-	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
-	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	Login               *bool             `cty:"login" hcl:"login"`
-	LoginUsername       *string           `mapstructure:"login_username" cty:"login_username" hcl:"login_username"`
-	LoginPassword       *string           `mapstructure:"login_password" cty:"login_password" hcl:"login_password"`
-	LoginServer         *string           `mapstructure:"login_server" cty:"login_server" hcl:"login_server"`
-	EcrLogin            *bool             `mapstructure:"ecr_login" cty:"ecr_login" hcl:"ecr_login"`
-	AccessKey           *string           `mapstructure:"aws_access_key" required:"false" cty:"aws_access_key" hcl:"aws_access_key"`
-	SecretKey           *string           `mapstructure:"aws_secret_key" required:"false" cty:"aws_secret_key" hcl:"aws_secret_key"`
-	Token               *string           `mapstructure:"aws_token" required:"false" cty:"aws_token" hcl:"aws_token"`
-	Profile             *string           `mapstructure:"aws_profile" required:"false" cty:"aws_profile" hcl:"aws_profile"`
+	PackerBuildGroupName *string           `mapstructure:"packer_build_group_name" cty:"packer_build_group_name" hcl:"packer_build_group_name"`
+	PackerBuildName      *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType    *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug          *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce          *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError        *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars       map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars  []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	Login                *bool             `cty:"login" hcl:"login"`
+	LoginUsername        *string           `mapstructure:"login_username" cty:"login_username" hcl:"login_username"`
+	LoginPassword        *string           `mapstructure:"login_password" cty:"login_password" hcl:"login_password"`
+	LoginServer          *string           `mapstructure:"login_server" cty:"login_server" hcl:"login_server"`
+	EcrLogin             *bool             `mapstructure:"ecr_login" cty:"ecr_login" hcl:"ecr_login"`
+	AccessKey            *string           `mapstructure:"aws_access_key" required:"false" cty:"aws_access_key" hcl:"aws_access_key"`
+	SecretKey            *string           `mapstructure:"aws_secret_key" required:"false" cty:"aws_secret_key" hcl:"aws_secret_key"`
+	Token                *string           `mapstructure:"aws_token" required:"false" cty:"aws_token" hcl:"aws_token"`
+	Profile              *string           `mapstructure:"aws_profile" required:"false" cty:"aws_profile" hcl:"aws_profile"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -39,6 +40,7 @@ func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec }
 // The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
+		"packer_build_group_name":    &hcldec.AttrSpec{Name: "packer_build_group_name", Type: cty.String, Required: false},
 		"packer_build_name":          &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
 		"packer_builder_type":        &hcldec.AttrSpec{Name: "packer_builder_type", Type: cty.String, Required: false},
 		"packer_debug":               &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},

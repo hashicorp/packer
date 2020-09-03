@@ -69,6 +69,7 @@ type FlatConfig struct {
 	ArtifactId                *string           `cty:"artifact_id" hcl:"artifact_id"`
 	PublicIpAddress           *string           `cty:"public_ip_address" hcl:"public_ip_address"`
 	PublicIpId                *string           `cty:"public_ip_id" hcl:"public_ip_id"`
+	PackerBuildGroupName      *string           `mapstructure:"packer_build_group_name" cty:"packer_build_group_name" hcl:"packer_build_group_name"`
 	PackerBuildName           *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
 	PackerBuilderType         *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
 	PackerDebug               *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
@@ -150,6 +151,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"artifact_id":                  &hcldec.AttrSpec{Name: "artifact_id", Type: cty.String, Required: false},
 		"public_ip_address":            &hcldec.AttrSpec{Name: "public_ip_address", Type: cty.String, Required: false},
 		"public_ip_id":                 &hcldec.AttrSpec{Name: "public_ip_id", Type: cty.String, Required: false},
+		"packer_build_group_name":      &hcldec.AttrSpec{Name: "packer_build_group_name", Type: cty.String, Required: false},
 		"packer_build_name":            &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
 		"packer_builder_type":          &hcldec.AttrSpec{Name: "packer_builder_type", Type: cty.String, Required: false},
 		"packer_debug":                 &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
