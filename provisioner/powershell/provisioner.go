@@ -44,6 +44,7 @@ if (Test-Path variable:global:ProgressPreference) {
 }
 set-variable -name variable:global:ErrorActionPreference -value 'Continue'
 $global:LASTEXITCODE = 0
+$global:lastcmdlet = $null
 trap [Exception] {write-error ($_.Exception.Message);exit 1}
 
 {{if .DebugMode}}
@@ -52,16 +53,24 @@ Set-PsDebug -Trace {{.DebugMode}}
 
 {{.Vars}}
 
+$results = {
+
 {{.Payload}}
 
+$global:lastcmdlet = $?
+}.invokereturnasis()
+
 $exitstatus = 1
-if ($?) {
+
+if ($lastcmdlet) {
 	$exitstatus = 0
 }
 
 if ( $LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0 ) {
  $exitstatus = $LASTEXITCODE
 }
+
+Write-Host $results
 
 exit $exitstatus
 `
