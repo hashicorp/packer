@@ -60,6 +60,12 @@ The SSH communicator has the following options:
 
 @include "helper/communicator/SSH-not-required.mdx"
 
+~> Note: SSH communicator options: `ssh_keypair_name`, `ssh_agent_auth`,
+    `temporary_key_pair_name` and `ssh_private_key_file` are also supported by
+    the communicator. But they may not be supported for every builder. Please check
+    the builder specific documentation for additional SSH supported options.
+
+
 ### SSH Communicator Details
 
 Packer will only use one authentication method, either `publickey` or if
