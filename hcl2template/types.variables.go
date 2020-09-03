@@ -72,9 +72,7 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 		}
 	}
 
-	value := cty.NullVal(cty.DynamicPseudoType)
-
-	return value, &hcl.Diagnostic{
+	return cty.UnknownVal(v.Type), &hcl.Diagnostic{
 		Severity: hcl.DiagError,
 		Summary:  fmt.Sprintf("Unset variable %q", v.Name),
 		Detail: "A used variable must be set or have a default value; see " +
@@ -86,6 +84,14 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 
 type Variables map[string]*Variable
 
+func (variables Variables) Keys() []string {
+	keys := make([]string, 0, len(variables))
+	for key := range variables {
+		keys = append(keys, key)
+	}
+	return keys
+}
+
 func (variables Variables) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	res := map[string]cty.Value{}
 	var diags hcl.Diagnostics
@@ -93,7 +99,6 @@ func (variables Variables) Values() (map[string]cty.Value, hcl.Diagnostics) {
 		value, diag := v.Value()
 		if diag != nil {
 			diags = append(diags, diag)
-			continue
 		}
 		res[k] = value
 	}
@@ -208,12 +213,11 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 
 		res.DefaultValue = defaultValue
 
-		// It's possible no type attribute was assigned so lets make
-		// sure we have a valid type otherwise there will be issues parsing the value.
+		// It's possible no type attribute was assigned so lets make sure we
+		// have a valid type otherwise there could be issues parsing the value.
 		if res.Type == cty.NilType {
 			res.Type = res.DefaultValue.Type()
 		}
-
 	}
 	if len(attrs) > 0 {
 		keys := []string{}
@@ -422,7 +426,9 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 // The specified filename is to identify the source of where value originated from in the diagnostics report, if there is an error.
 func expressionFromVariableDefinition(filename string, value string, variableType cty.Type) (hclsyntax.Expression, hcl.Diagnostics) {
 	switch variableType {
-	case cty.String, cty.Number:
+	case cty.String, cty.Number, cty.NilType:
+		// when the type is nil (not set in a variable block) we default to
+		// interpreting everything as a string literal.
 		return &hclsyntax.LiteralValueExpr{Val: cty.StringVal(value)}, nil
 	default:
 		return hclsyntax.ParseExpression([]byte(value), filename, hcl.Pos{Line: 1, Column: 1})

@@ -98,7 +98,7 @@ type NIC struct {
 }
 
 type CreateConfig struct {
-	DiskControllerType []string // example: "scsi", "pvscsi", "lsilogic"
+	DiskControllerType []string // example: "scsi", "pvscsi", "nvme", "lsilogic"
 
 	Annotation    string
 	Name          string
@@ -841,7 +841,13 @@ func addDisk(_ *VCenterDriver, devices object.VirtualDeviceList, config *CreateC
 
 	var controllers []types.BaseVirtualController
 	for _, controllerType := range config.DiskControllerType {
-		device, err := devices.CreateSCSIController(controllerType)
+		var device types.BaseVirtualDevice
+		var err error
+		if controllerType == "nvme" {
+			device, err = devices.CreateNVMEController()
+		} else {
+			device, err = devices.CreateSCSIController(controllerType)
+		}
 		if err != nil {
 			return nil, err
 		}

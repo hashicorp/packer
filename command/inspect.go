@@ -44,11 +44,10 @@ func (c *InspectCommand) RunContext(ctx context.Context, cla *InspectArgs) int {
 	if ret != 0 {
 		return ret
 	}
-	diags := packerStarter.Initialize()
-	ret = writeDiags(c.Ui, nil, diags)
-	if ret != 0 {
-		return ret
-	}
+
+	// here we ignore init diags to allow unknown variables to be used
+	_ = packerStarter.Initialize()
+
 	return packerStarter.InspectConfig(packer.InspectConfigOptions{
 		Ui: c.Ui,
 	})

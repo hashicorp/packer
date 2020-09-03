@@ -16,6 +16,10 @@ import (
 type VirtualMachineMock struct {
 	DestroyError  error
 	DestroyCalled bool
+
+	ConfigureError          error
+	ConfigureCalled         bool
+	ConfigureHardwareConfig *HardwareConfig
 }
 
 func (vm *VirtualMachineMock) Info(params ...string) (*mo.VirtualMachine, error) {
@@ -51,6 +55,11 @@ func (vm *VirtualMachineMock) Destroy() error {
 }
 
 func (vm *VirtualMachineMock) Configure(config *HardwareConfig) error {
+	vm.ConfigureCalled = true
+	vm.ConfigureHardwareConfig = config
+	if vm.ConfigureError != nil {
+		return vm.ConfigureError
+	}
 	return nil
 }
 

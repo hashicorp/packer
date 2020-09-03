@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/gobwas/glob"
@@ -460,12 +461,18 @@ func (p *PackerConfig) EvaluateExpression(line string) (out string, exit bool, d
 func (p *PackerConfig) printVariables() string {
 	out := &strings.Builder{}
 	out.WriteString("> input-variables:\n\n")
-	for _, v := range p.InputVariables {
+	keys := p.InputVariables.Keys()
+	sort.Strings(keys)
+	for _, key := range keys {
+		v := p.InputVariables[key]
 		val, _ := v.Value()
-		fmt.Fprintf(out, "var.%s: %q [debug: %#v]\n", v.Name, PrintableCtyValue(val), v)
+		fmt.Fprintf(out, "var.%s: %q\n", v.Name, PrintableCtyValue(val))
 	}
 	out.WriteString("\n> local-variables:\n\n")
-	for _, v := range p.LocalVariables {
+	keys = p.LocalVariables.Keys()
+	sort.Strings(keys)
+	for _, key := range keys {
+		v := p.LocalVariables[key]
 		val, _ := v.Value()
 		fmt.Fprintf(out, "local.%s: %q\n", v.Name, PrintableCtyValue(val))
 	}
