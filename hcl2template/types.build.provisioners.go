@@ -148,7 +148,7 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, cfg *PackerConfig) (*Provis
 	return provisioner, diags
 }
 
-func (cfg *PackerConfig) startProvisioner(source SourceBlock, pb *ProvisionerBlock, ectx *hcl.EvalContext) (packer.Provisioner, hcl.Diagnostics) {
+func (cfg *PackerConfig) startProvisioner(build BuildBlock, source SourceBlock, pb *ProvisionerBlock, ectx *hcl.EvalContext) (packer.Provisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	provisioner, err := cfg.provisionersSchemas.Start(pb.PType)
@@ -165,7 +165,7 @@ func (cfg *PackerConfig) startProvisioner(source SourceBlock, pb *ProvisionerBlo
 		Provisioner:      provisioner,
 		provisionerBlock: pb,
 		evalContext:      ectx,
-		builderVariables: source.builderVariables(),
+		builderVariables: builderVariables(source, build),
 	}
 
 	if pb.Override != nil {

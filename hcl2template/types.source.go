@@ -88,7 +88,7 @@ func (p *Parser) decodeSource(block *hcl.Block) (SourceBlock, hcl.Diagnostics) {
 	return source, diags
 }
 
-func (cfg *PackerConfig) startBuilder(source SourceBlock, ectx *hcl.EvalContext, opts packer.GetBuildsOptions) (packer.Builder, hcl.Diagnostics, []string) {
+func (cfg *PackerConfig) startBuilder(build BuildBlock, source SourceBlock, ectx *hcl.EvalContext, opts packer.GetBuildsOptions) (packer.Builder, hcl.Diagnostics, []string) {
 	var diags hcl.Diagnostics
 
 	builder, err := cfg.builderSchemas.Start(source.Type)
@@ -117,7 +117,7 @@ func (cfg *PackerConfig) startBuilder(source SourceBlock, ectx *hcl.EvalContext,
 	// TODO: either make json prepare when plugins are loaded, or make HCL
 	// prepare at a later step, to make builds from different template types
 	// easier to reason about.
-	builderVars := source.builderVariables()
+	builderVars := builderVariables(source, build)
 	builderVars["packer_debug"] = strconv.FormatBool(opts.Debug)
 	builderVars["packer_force"] = strconv.FormatBool(opts.Force)
 	builderVars["packer_on_error"] = opts.OnError
@@ -129,10 +129,11 @@ func (cfg *PackerConfig) startBuilder(source SourceBlock, ectx *hcl.EvalContext,
 }
 
 // These variables will populate the PackerConfig inside of the builders.
-func (source *SourceBlock) builderVariables() map[string]string {
+func builderVariables(source SourceBlock, build BuildBlock) map[string]string {
 	return map[string]string{
-		"packer_build_name":   source.name(),
-		"packer_builder_type": source.Type,
+		"packer_build_group_name": build.Name,
+		"packer_build_name":       source.name(),
+		"packer_builder_type":     source.Type,
 	}
 }
 

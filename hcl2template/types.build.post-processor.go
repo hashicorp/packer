@@ -61,7 +61,7 @@ func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl
 	return postProcessor, diags
 }
 
-func (cfg *PackerConfig) startPostProcessor(source SourceBlock, pp *PostProcessorBlock, ectx *hcl.EvalContext) (packer.PostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) startPostProcessor(build BuildBlock, source SourceBlock, pp *PostProcessorBlock, ectx *hcl.EvalContext) (packer.PostProcessor, hcl.Diagnostics) {
 	// ProvisionerBlock represents a detected but unparsed provisioner
 	var diags hcl.Diagnostics
 
@@ -78,7 +78,7 @@ func (cfg *PackerConfig) startPostProcessor(source SourceBlock, pp *PostProcesso
 		PostProcessor:      postProcessor,
 		postProcessorBlock: pp,
 		evalContext:        ectx,
-		builderVariables:   source.builderVariables(),
+		builderVariables:   builderVariables(source, build),
 	}
 	err = hclPostProcessor.HCL2Prepare(nil)
 	if err != nil {
