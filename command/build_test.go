@@ -226,6 +226,48 @@ func TestBuild(t *testing.T) {
 			},
 		},
 
+		{
+			name: "hcl2 manifest",
+			args: []string{
+				testFixture("manifest"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"cherry.txt":    "cherry",
+					"chocolate.txt": "chocolate",
+					"my.auto.pkrvars.hcl": `manifest = {
+  a = {
+    file = {
+      the_first_example = {
+        artifact_id = "File"
+        files = [{
+          name = "cherry.txt"
+          size = 6
+        }]
+        packer_run_uuid = ""
+      }
+      the_second_example = {
+        artifact_id = "File"
+        files = [{
+          name = "chocolate.txt"
+          size = 9
+        }]
+        packer_run_uuid = ""
+      }
+    }
+  }
+  null = {
+    second-example = {
+      artifact_id     = "Null"
+      packer_run_uuid = ""
+    }
+  }
+}
+`,
+				},
+			},
+		},
+
 		// only / except HCL2
 		{
 			name: "hcl - 'except' a build block",

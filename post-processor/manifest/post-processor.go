@@ -4,6 +4,7 @@
 package manifest
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -11,10 +12,14 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/packer/common"
+	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -24,7 +29,8 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// The manifest will be written to this file. This defaults to
-	// `packer-manifest.json`.
+	// `packer-manifest.json`. When using a file that ends with ".pkrvars.hcl"
+	// a hclvars version of the manifest will be generated.
 	OutputPath string `mapstructure:"output"`
 	// Write only filename without the path to the manifest file. This defaults
 	// to false.
@@ -92,6 +98,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, source pa
 
 	var err error
 	var fi os.FileInfo
+	var aFiles []ArtifactFile
 
 	// Create the current artifact.
 	for _, name := range source.Files() {
@@ -104,8 +111,25 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, source pa
 		} else {
 			af.Name = name
 		}
-		artifact.ArtifactFiles = append(artifact.ArtifactFiles, af)
+		aFiles = append(aFiles, af)
 	}
+
+	// Create a lock file with exclusive access. If this fails we will retry
+	// after a delay.
+	lockFilename := p.config.OutputPath + ".lock"
+	defer lockFile(lockFilename)()
+
+	// Read the current manifest file from disk
+	var contents []byte
+	if contents, err = ioutil.ReadFile(p.config.OutputPath); err != nil && !os.IsNotExist(err) {
+		return source, true, true, fmt.Errorf("Unable to open %s for reading: %s", p.config.OutputPath, err)
+	}
+
+	if strings.HasSuffix(p.config.OutputPath, ".pkrvars.hcl") {
+		return p.Hcl2Manifest(ctx, ui, contents, source, aFiles)
+	}
+
+	artifact.ArtifactFiles = aFiles
 	artifact.ArtifactId = source.Id()
 	artifact.CustomData = p.config.CustomData
 	artifact.BuilderType = p.config.PackerBuilderType
@@ -122,26 +146,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, source pa
 	// is different we will check the -force flag and decide whether to truncate
 	// the file before we proceed.
 	artifact.PackerRunUUID = os.Getenv("PACKER_RUN_UUID")
-
-	// Create a lock file with exclusive access. If this fails we will retry
-	// after a delay.
-	lockFilename := p.config.OutputPath + ".lock"
-	for i := 0; i < 3; i++ {
-		// The file should not be locked for very long so we'll keep this short.
-		time.Sleep((time.Duration(i) * 200 * time.Millisecond))
-		_, err = os.OpenFile(lockFilename, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0600)
-		if err == nil {
-			break
-		}
-		log.Printf("Error locking manifest file for reading and writing. Will sleep and retry. %s", err)
-	}
-	defer os.Remove(lockFilename)
-
-	// Read the current manifest file from disk
-	contents := []byte{}
-	if contents, err = ioutil.ReadFile(p.config.OutputPath); err != nil && !os.IsNotExist(err) {
-		return source, true, true, fmt.Errorf("Unable to open %s for reading: %s", p.config.OutputPath, err)
-	}
 
 	// Parse the manifest file JSON, if we have one
 	manifestFile := &ManifestFile{}
@@ -173,6 +177,99 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, source pa
 	// The manifest should never delete the artifacts it is set to record, so it
 	// forcibly sets "keep" to true.
 	return source, true, true, nil
+}
+
+// Create a lock file with exclusive access. If this fails we will retry
+// after a delay.
+func lockFile(lockFilename string) (cleanup func()) {
+	for i := 0; i < 3; i++ {
+		// The file should not be locked for very long so we'll keep this short.
+		time.Sleep((time.Duration(i) * 200 * time.Millisecond))
+		_, err := os.OpenFile(lockFilename, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0600)
+		if err == nil {
+			break
+		}
+		log.Printf("Error locking manifest file for reading and writing. Will sleep and retry. %s", err)
+	}
+	return func() { os.Remove(lockFilename) }
+}
+
+func (p *PostProcessor) Hcl2Manifest(ctx context.Context, ui packer.Ui, contents []byte, source packer.Artifact, aFiles []ArtifactFile) (packer.Artifact, bool, bool, error) {
+	buildName := p.config.PackerBuildGroupName
+	sourceName := p.config.PackerBuildName
+	sourceType := p.config.PackerBuilderType
+
+	file, diags := hclparse.NewParser().ParseHCL(contents, p.config.OutputPath)
+	if diags.HasErrors() {
+		err := fmt.Errorf("Failed to parse output file %s: %s", p.config.OutputPath, diags)
+		return source, true, true, err
+	}
+
+	manifest := map[string]interface{}{}
+
+	attrs, _ := file.Body.JustAttributes()
+	buildAttr, found := attrs["manifest"]
+	if found {
+		buildVal, diags := buildAttr.Expr.Value(nil)
+		if !diags.HasErrors() {
+			manifest = hcl2shim.ConfigValueFromHCL2(buildVal).(map[string]interface{})
+		}
+	}
+	entry := map[string]interface{}{
+		"artifact_id":     source.Id(),
+		"packer_run_uuid": os.Getenv("PACKER_RUN_UUID"),
+	}
+	if len(p.config.CustomData) > 0 {
+		ct := map[string]interface{}{}
+		for k, v := range p.config.CustomData {
+			ct[k] = v
+		}
+		entry["custom_data"] = ct
+	}
+	if len(aFiles) > 0 {
+		files := []interface{}{}
+		for _, v := range aFiles {
+			files = append(files, map[string]interface{}{
+				"name": v.Name,
+				"size": v.Size,
+			})
+		}
+		entry["files"] = files
+	}
+
+	setMapVal(manifest, entry, buildName, sourceType, sourceName)
+
+	wFile := hclwrite.NewEmptyFile()
+	wBody := wFile.Body()
+	for key, val := range attrs {
+		v, _ := val.Expr.Value(nil)
+		wBody.SetAttributeValue(key, v)
+	}
+
+	wBody.SetAttributeValue("manifest", hcl2shim.HCL2ValueFromConfigValue(manifest))
+
+	var out bytes.Buffer
+	_, err := wFile.WriteTo(&out)
+	if err != nil {
+		return source, true, true, err
+	}
+
+	return source, true, true, ioutil.WriteFile(p.config.OutputPath, out.Bytes(), 0664)
+}
+
+func setMapVal(target, toSet map[string]interface{}, keys ...string) {
+	for _, key := range keys[:len(keys)-1] {
+		if key == "" {
+			continue
+		}
+		value, found := target[key]
+		if !found {
+			value = map[string]interface{}{}
+			target[key] = value
+		}
+		target = value.(map[string]interface{})
+	}
+	target[keys[len(keys)-1]] = toSet
 }
 
 func createInterpolatedCustomData(config *Config, customData string) (string, error) {

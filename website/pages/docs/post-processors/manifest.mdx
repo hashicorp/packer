@@ -103,13 +103,13 @@ post-processor "manifest" {
 </Tab>
 </Tabs>
 
-An example manifest file looks like:
+An example JSON manifest file looks like:
 
 ```json
 {
   "builds": [
     {
-      "name": "docker",
+      "name": "example",
       "builder_type": "docker",
       "build_time": 1507245986,
       "files": [
@@ -165,14 +165,14 @@ The above manifest was generated with the following template:
 <Tab heading="HCL2">
 
 ```hcl
-source "docker" "docker"{
+source "docker" "example" {
     image = "ubuntu:latest"
     export_path = "packer_example"
     run_command = ["-d", "-i", "-t", "--entrypoint=/bin/bash", "{{.Image}}"]
 }
 
 build {
-    sources = ["docker.docker"]
+    sources = ["source.docker.example"]
 
     post-processor "manifest" {
         output = "manifest.json"
@@ -187,11 +187,36 @@ build {
 </Tab>
 </Tabs>
 
+If `output` was suffixed with `.pkrvar.hcl`, the following manifest would have
+been created :
+
+```hcl
+manifest = {
+  docker = {
+    example = {
+      artifact_id     = "Container"
+      packer_run_uuid = "16c03321-fb77-1fd1-cfc4-c06d0e118802"
+      files           = {
+        name = "packer_example"
+        size = 102219776
+      }
+      custom_data = {
+        my_custom_data = "example"
+      }
+    }
+  }
+}
+```
+
 Example usage:
 
+
+<Tabs>
+<Tab heading="JSON manifest">
+
 The manifest can be very useful for cleaning up old artifacts, or printing
-important values to logs. The following example uses jq, a command-line tool for
-parsing json output, to find and echo the AWS ami-id of an ami created by a
+important values to logs. The following example uses jq, a command-line tool
+for parsing json output, to find and echo the AWS ami-id of an ami created by a
 build.
 
 ```bash
@@ -202,3 +227,36 @@ AMI_ID=$(jq -r '.builds[-1].artifact_id' manifest.json | cut -d ":" -f2)
 echo $AMI_ID
 
 ```
+
+</Tab>
+<Tab heading="HCL manifest">
+
+The new HCL file could be used in Packer or Terraform to set an input value and
+chain builds.
+
+For example, if the manifest generated:
+
+```hcl
+manifest = {
+  amazon-ebs = {
+    old_build = {
+      artifact_id     = "super_ami_id"
+      # ...
+    }
+  }
+}
+```
+
+We could then use the varfile like so:
+
+```hcl
+variable "manifest" {
+}
+
+source "amazon-ebs" "chained" {
+  source_ami = var.manifest.amazon-ebs.old_build.artifact_id
+}
+```
+
+</Tab>
+</Tabs>

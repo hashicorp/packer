@@ -1,7 +1,8 @@
 <!-- Code generated from the comments of the Config struct in post-processor/manifest/post-processor.go; DO NOT EDIT MANUALLY -->
 
 - `output` (string) - The manifest will be written to this file. This defaults to
-  `packer-manifest.json`.
+  `packer-manifest.json`. When using a file that ends with ".pkrvars.hcl"
+  a hclvars version of the manifest will be generated.
 
 - `strip_path` (bool) - Write only filename without the path to the manifest file. This defaults
   to false.

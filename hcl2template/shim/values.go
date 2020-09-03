@@ -104,6 +104,8 @@ func HCL2ValueFromConfigValue(v interface{}) cty.Value {
 		return cty.StringVal(tv)
 	case int:
 		return cty.NumberIntVal(int64(tv))
+	case int64:
+		return cty.NumberIntVal(tv)
 	case float64:
 		return cty.NumberFloatVal(tv)
 	case []interface{}:
@@ -127,6 +129,6 @@ func HCL2ValueFromConfigValue(v interface{}) cty.Value {
 	default:
 		// HCL/HIL should never generate anything that isn't caught by
 		// the above, so if we get here something has gone very wrong.
-		panic(fmt.Errorf("can't convert %#v to cty.Value", v))
+		panic(fmt.Errorf("can't convert %T to cty.Value", v))
 	}
 }
