@@ -321,7 +321,6 @@ const testBuilderAccForceDeleteSnapshot = `
 }
 `
 
-// share with catsby
 const testBuilderAccSharing = `
 {
 	"builders": [{
