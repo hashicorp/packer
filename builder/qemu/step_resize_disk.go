@@ -25,7 +25,8 @@ func (s *stepResizeDisk) Run(ctx context.Context, state multistep.StateBag) mult
 		path,
 		config.DiskSize,
 	}
-	if config.DiskImage == false {
+
+	if config.DiskImage == false || config.SkipResizeDisk == true {
 		return multistep.ActionContinue
 	}
 

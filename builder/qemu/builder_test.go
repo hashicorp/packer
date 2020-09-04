@@ -302,6 +302,24 @@ func TestBuilderPrepare_UseBackingFile(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_SkipResizeDisk(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["skip_resize_disk"] = true
+
+	// Bad: iso_url is not a disk_image
+	config["disk_image"] = false
+	b = Builder{}
+	_, warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
 func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	var b Builder
 	config := testConfig()
