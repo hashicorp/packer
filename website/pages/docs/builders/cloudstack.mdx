@@ -145,14 +145,6 @@ builder.
 - `security_groups` (array of strings) - A list of security group IDs or
   names to associate the instance with.
 
-- `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
-  authenticate connections to the source instance. No temporary keypair will
-  be created, and the values of `ssh_password` and `ssh_private_key_file`
-  will be ignored. To use this option with a key pair already configured in
-  the source image, leave the `keypair` blank. To associate an existing key
-  pair with the source instance, set the `keypair` field to the name of the
-  key pair.
-
 - `ssl_no_verify` (boolean) - Set to `true` to skip SSL verification.
   Defaults to `false`.
 
@@ -204,6 +196,22 @@ The available variables are:
   that is started serving the directory specified by the `http_directory`
   configuration parameter. If `http_directory` isn't specified, these will be
   blank. Example: `{{.HTTPIP}}:{{.HTTPPort}}/path/to/a/file/in/http_directory`
+
+### Communicator Configuration
+
+#### Optional:
+
+@include 'helper/communicator/Config-not-required.mdx'
+
+@include 'helper/communicator/SSH-not-required.mdx'
+
+@include 'helper/communicator/SSH-Temporary-Key-Pair-not-required.mdx'
+
+@include 'helper/communicator/SSH-Key-Pair-Name-not-required.mdx'
+
+@include 'helper/communicator/SSH-Private-Key-File-not-required.mdx'
+
+@include 'helper/communicator/SSH-Agent-Auth-not-required.mdx'
 
 ## Basic Example
 
