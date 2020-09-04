@@ -23,22 +23,20 @@ import (
 //
 // Produces:
 //   <nothing>
-type StepTypeBootCommand struct {
-	BootCommand string
-	VNCEnabled  bool
-	BootWait    time.Duration
-	VMName      string
-	Ctx         interpolate.Context
-	KeyInterval time.Duration
+type StepVNCBootCommand struct {
+	Config bootcommand.VNCConfig
+	VMName string
+	Ctx    interpolate.Context
 }
-type bootCommandTemplateData struct {
+
+type VNCBootCommandTemplateData struct {
 	HTTPIP   string
 	HTTPPort int
 	Name     string
 }
 
-func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	if !s.VNCEnabled {
+func (s *StepVNCBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	if s.Config.DisableVNC {
 		log.Println("Skipping boot command step...")
 		return multistep.ActionContinue
 	}
@@ -51,10 +49,10 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	vncPassword := state.Get("vnc_password")
 
 	// Wait the for the vm to boot.
-	if int64(s.BootWait) > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s for boot...", s.BootWait.String()))
+	if int64(s.Config.BootWait) > 0 {
+		ui.Say(fmt.Sprintf("Waiting %s for boot...", s.Config.BootWait.String()))
 		select {
-		case <-time.After(s.BootWait):
+		case <-time.After(s.Config.BootWait):
 			break
 		case <-ctx.Done():
 			return multistep.ActionHalt
@@ -98,16 +96,17 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	log.Printf("Connected to VNC desktop: %s", c.DesktopName)
 
 	hostIP := state.Get("http_ip").(string)
-	s.Ctx.Data = &bootCommandTemplateData{
-		hostIP,
-		httpPort,
-		s.VMName,
+	s.Ctx.Data = &VNCBootCommandTemplateData{
+		HTTPIP:   hostIP,
+		HTTPPort: httpPort,
+		Name:     s.VMName,
 	}
 
-	d := bootcommand.NewVNCDriver(c, s.KeyInterval)
+	d := bootcommand.NewVNCDriver(c, s.Config.BootKeyInterval)
 
 	ui.Say("Typing the boot command over VNC...")
-	command, err := interpolate.Render(s.BootCommand, &s.Ctx)
+	flatBootCommand := s.Config.FlatBootCommand()
+	command, err := interpolate.Render(flatBootCommand, &s.Ctx)
 	if err != nil {
 		err := fmt.Errorf("Error preparing boot command: %s", err)
 		state.Put("error", err)
@@ -138,4 +137,4 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	return multistep.ActionContinue
 }
 
-func (*StepTypeBootCommand) Cleanup(multistep.StateBag) {}
+func (*StepVNCBootCommand) Cleanup(multistep.StateBag) {}

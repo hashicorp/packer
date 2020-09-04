@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
+// ~> **Note:** From Packer v1.6.3, remote ESXi builds no longer use VNC to send
+// boot_command keystrokes. Any VNC configuration will be ignored.
 type RunConfig struct {
 	// Packer defaults to building VMware virtual machines
 	// by launching a GUI that shows the console of the machine being built. When
@@ -39,25 +41,26 @@ type RunConfig struct {
 	VNCDisablePassword bool `mapstructure:"vnc_disable_password" required:"false"`
 }
 
-func (c *RunConfig) Prepare(ctx *interpolate.Context) (errs []error) {
-	if c.VNCPortMin == 0 {
-		c.VNCPortMin = 5900
-	}
+func (c *RunConfig) Prepare(ctx *interpolate.Context, driverConfig *DriverConfig) (errs []error) {
+	if driverConfig.RemoteType == "" {
+		if c.VNCPortMin == 0 {
+			c.VNCPortMin = 5900
+		}
 
-	if c.VNCPortMax == 0 {
-		c.VNCPortMax = 6000
-	}
+		if c.VNCPortMax == 0 {
+			c.VNCPortMax = 6000
+		}
 
-	if c.VNCBindAddress == "" {
-		c.VNCBindAddress = "127.0.0.1"
-	}
+		if c.VNCBindAddress == "" {
+			c.VNCBindAddress = "127.0.0.1"
+		}
 
-	if c.VNCPortMin > c.VNCPortMax {
-		errs = append(errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
+		if c.VNCPortMin > c.VNCPortMax {
+			errs = append(errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
+		}
+		if c.VNCPortMin < 0 {
+			errs = append(errs, fmt.Errorf("vnc_port_min must be positive"))
+		}
 	}
-	if c.VNCPortMin < 0 {
-		errs = append(errs, fmt.Errorf("vnc_port_min must be positive"))
-	}
-
 	return
 }

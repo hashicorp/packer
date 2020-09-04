@@ -133,6 +133,8 @@ necessary for this build to succeed and can be found further down the page.
 
 ### Run configuration
 
+@include 'builder/vmware/common/RunConfig.mdx'
+
 #### Optional:
 
 @include 'builder/vmware/common/RunConfig-not-required.mdx'
@@ -177,6 +179,8 @@ necessary for this build to succeed and can be found further down the page.
 
 @include 'common/bootcommand/BootConfig.mdx'
 
+@include 'builder/vmware/common/VNCConfigWrapper.mdx'
+
 @include 'common/bootcommand/VNCConfig.mdx'
 
 -> **Note**: for the `HTTPIP` to be resolved correctly, your VM's network
@@ -198,7 +202,7 @@ For more examples of various boot commands, see the sample projects from our
   "builders": [
     {
       "type": "vmware-vmx",
-      "boot_key_interval": "10ms"
+      "boot_key_interval": "10ms",
       ...
     }
   ]

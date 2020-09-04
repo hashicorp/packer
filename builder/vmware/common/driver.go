@@ -91,20 +91,11 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver,
 	drivers := []Driver{}
 
 	if dconfig.RemoteType != "" {
-		drivers = []Driver{
-			&ESX5Driver{
-				Host:           dconfig.RemoteHost,
-				Port:           dconfig.RemotePort,
-				Username:       dconfig.RemoteUser,
-				Password:       dconfig.RemotePassword,
-				PrivateKeyFile: dconfig.RemotePrivateKey,
-				Datastore:      dconfig.RemoteDatastore,
-				CacheDatastore: dconfig.RemoteCacheDatastore,
-				CacheDirectory: dconfig.RemoteCacheDirectory,
-				VMName:         vmName,
-				CommConfig:     config.Comm,
-			},
+		esx5Driver, err := NewESX5Driver(dconfig, config, vmName)
+		if err != nil {
+			return nil, err
 		}
+		drivers = []Driver{esx5Driver}
 
 	} else {
 		switch runtime.GOOS {

@@ -52,6 +52,8 @@ type DriverConfig struct {
 }
 
 func (c *DriverConfig) Prepare(ctx *interpolate.Context) []error {
+	var errs []error
+
 	if c.FusionAppPath == "" {
 		c.FusionAppPath = os.Getenv("FUSION_APP_PATH")
 	}
@@ -74,7 +76,19 @@ func (c *DriverConfig) Prepare(ctx *interpolate.Context) []error {
 		c.RemotePort = 22
 	}
 
-	return nil
+	if c.RemoteType != "" {
+		if c.RemoteHost == "" {
+			errs = append(errs,
+				fmt.Errorf("remote_host must be specified"))
+		}
+
+		if c.RemoteType != "esx5" {
+			errs = append(errs,
+				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
+		}
+	}
+
+	return errs
 }
 
 func (c *DriverConfig) Validate(SkipExport bool) error {
