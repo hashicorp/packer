@@ -1,4 +1,4 @@
-package proxmox
+package proxmoxiso
 
 import (
 	"context"
@@ -106,7 +106,7 @@ func TestUploadISO(t *testing.T) {
 
 			state := new(multistep.BasicStateBag)
 			state.Put("ui", packer.TestUi(t))
-			state.Put("config", c.builderConfig)
+			state.Put("iso-config", c.builderConfig)
 			state.Put(downloadPathKey, c.downloadPath)
 			state.Put("proxmoxClient", m)
 

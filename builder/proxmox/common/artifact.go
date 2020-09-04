@@ -10,6 +10,7 @@ import (
 )
 
 type Artifact struct {
+	builderID     string
 	templateID    int
 	proxmoxClient *proxmox.Client
 
@@ -21,8 +22,8 @@ type Artifact struct {
 // Artifact implements packer.Artifact
 var _ packer.Artifact = &Artifact{}
 
-func (*Artifact) BuilderId() string {
-	return BuilderId
+func (a *Artifact) BuilderId() string {
+	return a.builderID
 }
 
 func (*Artifact) Files() []string {

@@ -7,40 +7,31 @@ import (
 	"fmt"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
-// The unique id for the builder
-const BuilderId = "proxmox.builder"
+func NewSharedBuilder(id string, config Config, preSteps []multistep.Step, postSteps []multistep.Step) *Builder {
+	return &Builder{
+		id:        id,
+		config:    config,
+		preSteps:  preSteps,
+		postSteps: postSteps,
+	}
+}
 
 type Builder struct {
+	id            string
 	config        Config
+	preSteps      []multistep.Step
+	postSteps     []multistep.Step
 	runner        multistep.Runner
 	proxmoxClient *proxmox.Client
 }
 
-// Builder implements packer.Builder
-var _ packer.Builder = &Builder{}
-
-var pluginVersion = "1.0.0"
-
-func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
-
-func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
-	warnings, errs := b.config.Prepare(raws...)
-	if errs != nil {
-		return nil, warnings, errs
-	}
-	return nil, nil, nil
-}
-
-const downloadPathKey = "downloaded_iso_path"
-
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook, state multistep.StateBag) (packer.Artifact, error) {
 	var err error
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: b.config.SkipCertValidation,
@@ -56,36 +47,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Set up the state
-	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
 	state.Put("proxmoxClient", b.proxmoxClient)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
 	// Build the steps
-	steps := []multistep.Step{
-		&common.StepDownload{
-			Checksum:    b.config.ISOChecksum,
-			Description: "ISO",
-			Extension:   b.config.TargetExtension,
-			ResultKey:   downloadPathKey,
-			TargetPath:  b.config.TargetPath,
-			Url:         b.config.ISOUrls,
-		}}
-
-	for idx := range b.config.AdditionalISOFiles {
-		steps = append(steps, &common.StepDownload{
-			Checksum:    b.config.AdditionalISOFiles[idx].ISOChecksum,
-			Description: "additional ISO",
-			Extension:   b.config.AdditionalISOFiles[idx].TargetExtension,
-			ResultKey:   b.config.AdditionalISOFiles[idx].downloadPathKey,
-			TargetPath:  b.config.AdditionalISOFiles[idx].downloadPathKey,
-			Url:         b.config.AdditionalISOFiles[idx].ISOUrls,
-		})
-	}
-	steps = append(steps,
-		&stepUploadISO{},
-		&stepUploadAdditionalISOs{},
+	coreSteps := []multistep.Step{
 		&stepStartVM{},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
@@ -95,7 +63,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&stepTypeBootCommand{
 			BootConfig: b.config.BootConfig,
-			Ctx:        b.config.ctx,
+			Ctx:        b.config.Ctx,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
@@ -109,8 +77,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&stepConvertToTemplate{},
 		&stepFinalizeTemplateConfig{},
 		&stepSuccess{},
-	)
-
+	}
+	steps := append(b.preSteps, coreSteps...)
+	steps = append(steps, b.postSteps...)
 	// Run the steps
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
@@ -130,6 +99,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	artifact := &Artifact{
+		builderID:     b.id,
 		templateID:    tplID,
 		proxmoxClient: b.proxmoxClient,
 		StateData:     map[string]interface{}{"generated_data": state.Get("generated_data")},

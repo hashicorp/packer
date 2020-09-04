@@ -38,24 +38,6 @@ func (s *stepFinalizeTemplateConfig) Run(ctx context.Context, state multistep.St
 	// set, we need to clear it
 	changes["description"] = c.TemplateDescription
 
-	if c.UnmountISO {
-		vmParams, err := client.GetVmConfig(vmRef)
-		if err != nil {
-			err := fmt.Errorf("Error fetching template config: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-
-		if vmParams["ide2"] == nil || !strings.HasSuffix(vmParams["ide2"].(string), "media=cdrom") {
-			err := fmt.Errorf("Cannot eject ISO from cdrom drive, ide2 is not present, or not a cdrom media")
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		changes["ide2"] = "none,media=cdrom"
-	}
-
 	if c.CloudInit {
 		vmParams, err := client.GetVmConfig(vmRef)
 		if err != nil {
@@ -93,29 +75,6 @@ func (s *stepFinalizeTemplateConfig) Run(ctx context.Context, state multistep.St
 		}
 	}
 
-	if len(c.AdditionalISOFiles) > 0 {
-		vmParams, err := client.GetVmConfig(vmRef)
-		if err != nil {
-			err := fmt.Errorf("Error fetching template config: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		for idx := range c.AdditionalISOFiles {
-			cdrom := c.AdditionalISOFiles[idx].Device
-			if c.AdditionalISOFiles[idx].Unmount {
-				if vmParams[cdrom] == nil || !strings.Contains(vmParams[cdrom].(string), "media=cdrom") {
-					err := fmt.Errorf("Cannot eject ISO from cdrom drive, %s is not present or not a cdrom media", cdrom)
-					state.Put("error", err)
-					ui.Error(err.Error())
-					return multistep.ActionHalt
-				}
-				changes[cdrom] = "none,media=cdrom"
-			} else {
-				changes[cdrom] = c.AdditionalISOFiles[idx].ISOFile + ",media=cdrom"
-			}
-		}
-	}
 	if len(changes) > 0 {
 		_, err := client.SetVmConfig(vmRef, changes)
 		if err != nil {

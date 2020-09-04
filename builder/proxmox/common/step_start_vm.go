@@ -17,6 +17,10 @@ import (
 // in API calls.
 type stepStartVM struct{}
 
+type ProxmoxVMCreator interface {
+	Create(*proxmox.VmRef, proxmox.ConfigQemu, multistep.StateBag) error
+}
+
 func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("proxmoxClient").(*proxmox.Client)
@@ -32,7 +36,7 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		kvm = false
 	}
 
-	isoFile := state.Get("iso_file").(string)
+	vmStarter := state.Get("vm-creator").(ProxmoxVMCreator)
 
 	ui.Say("Creating VM")
 	config := proxmox.ConfigQemu{
@@ -47,7 +51,6 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		QemuSockets:  c.Sockets,
 		QemuOs:       c.OS,
 		QemuVga:      generateProxmoxVga(c.VGA),
-		QemuIso:      isoFile,
 		QemuNetworks: generateProxmoxNetworkAdapters(c.NICs),
 		QemuDisks:    generateProxmoxDisks(c.Disks),
 		Scsihw:       c.SCSIController,
@@ -78,8 +81,9 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		vmRef.SetPool(c.Pool)
 	}
 
-	err := config.CreateVm(vmRef, client)
+	err := vmStarter.Create(vmRef, config, state)
 	if err != nil {
+		err := fmt.Errorf("Error creating VM: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -90,19 +94,6 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 	// instance_id is the generic term used so that users can have access to the
 	// instance id inside of the provisioners, used in step_provision.
 	state.Put("instance_id", vmRef)
-
-	for idx := range c.AdditionalISOFiles {
-		params := map[string]interface{}{
-			c.AdditionalISOFiles[idx].Device: c.AdditionalISOFiles[idx].ISOFile + ",media=cdrom",
-		}
-		_, err = client.SetVmConfig(vmRef, params)
-		if err != nil {
-			err := fmt.Errorf("Error configuring VM: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-	}
 
 	ui.Say("Starting VM")
 	_, err = client.StartVm(vmRef)

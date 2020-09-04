@@ -108,7 +108,7 @@ func TestTypeBootCommand(t *testing.T) {
 
 			step := stepTypeBootCommand{
 				c.builderConfig.BootConfig,
-				c.builderConfig.ctx,
+				c.builderConfig.Ctx,
 			}
 			action := step.Run(context.TODO(), state)
 			step.Cleanup(state)

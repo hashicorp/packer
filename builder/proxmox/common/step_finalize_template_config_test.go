@@ -56,18 +56,15 @@ func TestTemplateFinalize(t *testing.T) {
 			builderConfig: &Config{
 				TemplateName:        "my-template",
 				TemplateDescription: "some-description",
-				UnmountISO:          true,
 			},
 			initialVMConfig: map[string]interface{}{
 				"name":        "dummy",
 				"description": "Packer ephemeral build VM",
-				"ide2":        "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso,media=cdrom",
 			},
 			expectCallSetConfig: true,
 			expectedVMConfig: map[string]interface{}{
 				"name":        "my-template",
 				"description": "some-description",
-				"ide2":        "none,media=cdrom",
 			},
 			expectedAction: multistep.ActionContinue,
 		},
@@ -76,13 +73,11 @@ func TestTemplateFinalize(t *testing.T) {
 			builderConfig: &Config{
 				TemplateName:        "my-template",
 				TemplateDescription: "some-description",
-				UnmountISO:          true,
 				CloudInit:           true,
 			},
 			initialVMConfig: map[string]interface{}{
 				"name":        "dummy",
 				"description": "Packer ephemeral build VM",
-				"ide2":        "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso,media=cdrom",
 				"bootdisk":    "virtio0",
 				"virtio0":     "ceph01:base-223-disk-0,cache=unsafe,media=disk,size=32G",
 			},
@@ -90,7 +85,6 @@ func TestTemplateFinalize(t *testing.T) {
 			expectedVMConfig: map[string]interface{}{
 				"name":        "my-template",
 				"description": "some-description",
-				"ide2":        "none,media=cdrom",
 				"ide3":        "ceph01:cloudinit",
 			},
 			expectedAction: multistep.ActionContinue,
@@ -100,7 +94,6 @@ func TestTemplateFinalize(t *testing.T) {
 			builderConfig: &Config{
 				TemplateName:        "my-template",
 				TemplateDescription: "some-description",
-				UnmountISO:          false,
 				CloudInit:           true,
 			},
 			initialVMConfig: map[string]interface{}{
@@ -117,26 +110,11 @@ func TestTemplateFinalize(t *testing.T) {
 			expectedAction:      multistep.ActionHalt,
 		},
 		{
-			name: "no cd-drive with unmount=true should returns halt",
-			builderConfig: &Config{
-				TemplateName:        "my-template",
-				TemplateDescription: "some-description",
-				UnmountISO:          true,
-			},
-			initialVMConfig: map[string]interface{}{
-				"name":        "dummy",
-				"description": "Packer ephemeral build VM",
-				"ide1":        "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso,media=cdrom",
-			},
-			expectCallSetConfig: false,
-			expectedAction:      multistep.ActionHalt,
-		},
-		{
 			name: "GetVmConfig error should return halt",
 			builderConfig: &Config{
 				TemplateName:        "my-template",
 				TemplateDescription: "some-description",
-				UnmountISO:          true,
+				CloudInit:           true,
 			},
 			getConfigErr:        fmt.Errorf("some error"),
 			expectCallSetConfig: false,
@@ -147,12 +125,10 @@ func TestTemplateFinalize(t *testing.T) {
 			builderConfig: &Config{
 				TemplateName:        "my-template",
 				TemplateDescription: "some-description",
-				UnmountISO:          true,
 			},
 			initialVMConfig: map[string]interface{}{
 				"name":        "dummy",
 				"description": "Packer ephemeral build VM",
-				"ide2":        "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso,media=cdrom",
 			},
 			expectCallSetConfig: true,
 			setConfigErr:        fmt.Errorf("some error"),

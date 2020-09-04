@@ -1,9 +1,8 @@
-package proxmox
+package proxmoxiso
 
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 
@@ -16,16 +15,12 @@ import (
 // to the VM
 type stepUploadAdditionalISOs struct{}
 
-type uploader interface {
-	Upload(node string, storage string, contentType string, filename string, file io.Reader) error
-}
-
 var _ uploader = &proxmox.Client{}
 
 func (s *stepUploadAdditionalISOs) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("proxmoxClient").(uploader)
-	c := state.Get("config").(*Config)
+	c := state.Get("iso-config").(*Config)
 
 	for idx := range c.AdditionalISOFiles {
 		if !c.AdditionalISOFiles[idx].shouldUploadISO {
