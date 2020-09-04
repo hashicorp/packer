@@ -426,7 +426,9 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 // The specified filename is to identify the source of where value originated from in the diagnostics report, if there is an error.
 func expressionFromVariableDefinition(filename string, value string, variableType cty.Type) (hclsyntax.Expression, hcl.Diagnostics) {
 	switch variableType {
-	case cty.String, cty.Number:
+	case cty.String, cty.Number, cty.NilType:
+		// when the type is nil (not set in a variable block) we default to
+		// interpreting everything as a string literal.
 		return &hclsyntax.LiteralValueExpr{Val: cty.StringVal(value)}, nil
 	default:
 		return hclsyntax.ParseExpression([]byte(value), filename, hcl.Pos{Line: 1, Column: 1})

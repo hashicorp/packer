@@ -160,7 +160,7 @@ func TestStepCreateVM_Run(t *testing.T) {
 		t.Fatalf("driver.CreateVM should be called.")
 	}
 	if diff := cmp.Diff(driverMock.CreateConfig, driverCreateConfig(step.Config, step.Location)); diff != "" {
-		t.Fatalf("wrog driver.CreateConfig: %s", diff)
+		t.Fatalf("wrong driver.CreateConfig: %s", diff)
 	}
 	vm, ok := state.GetOk("vm")
 	if !ok {
