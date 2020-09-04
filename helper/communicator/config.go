@@ -119,7 +119,8 @@ type SSH struct {
 	// The time to wait for SSH to become available. Packer uses this to
 	// determine when the machine has booted so this is usually quite long.
 	// Example value: `10m`.
-	SSHTimeout     time.Duration `mapstructure:"ssh_timeout"`
+	SSHTimeout time.Duration `mapstructure:"ssh_timeout"`
+	// Deprecated in favor of SSHTimeout
 	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout" undocumented:"true"`
 	// If true, the local SSH agent will be used to authenticate connections to
 	// the source instance. No temporary keypair will be created, and the
