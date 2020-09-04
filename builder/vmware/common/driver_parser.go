@@ -954,20 +954,20 @@ func createDeclaration(node pDeclaration) configDeclaration {
 
 		// update configDeclaration parameters
 		for _, p := range hierarchy[i].parameters {
-			switch p.(type) {
+			switch p := p.(type) {
 			case pParameterOption:
-				result.options[p.(pParameterOption).name] = p.(pParameterOption).value
+				result.options[p.name] = p.value
 			case pParameterGrant:
 				Grant := map[string]grant{"ignore": IGNORE, "allow": ALLOW, "deny": DENY}
-				result.grants[p.(pParameterGrant).attribute] = Grant[p.(pParameterGrant).verb]
+				result.grants[p.attribute] = Grant[p.verb]
 			case pParameterBoolean:
-				result.attributes[p.(pParameterBoolean).parameter] = p.(pParameterBoolean).truancy
+				result.attributes[p.parameter] = p.truancy
 			case pParameterClientMatch:
-				result.hostid = append(result.hostid, p.(pParameterClientMatch))
+				result.hostid = append(result.hostid, p)
 			case pParameterExpression:
-				result.expressions[p.(pParameterExpression).parameter] = p.(pParameterExpression).expression
+				result.expressions[p.parameter] = p.expression
 			case pParameterOther:
-				result.parameters[p.(pParameterOther).parameter] = p.(pParameterOther).value
+				result.parameters[p.parameter] = p.value
 			default:
 				result.address = append(result.address, p)
 			}
