@@ -65,7 +65,7 @@ type FlatConfig struct {
 	WinRMUseNTLM              *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm" hcl:"winrm_use_ntlm"`
 	AccessKey                 *string           `mapstructure:"access_key" required:"true" cty:"access_key" hcl:"access_key"`
 	SecretKey                 *string           `mapstructure:"secret_key" required:"true" cty:"secret_key" hcl:"secret_key"`
-	ProjectID                 *string           `mapstructure:"project_key" required:"true" cty:"project_key" hcl:"project_key"`
+	ProjectID                 *string           `mapstructure:"project_id" required:"true" cty:"project_id" hcl:"project_id"`
 	Zone                      *string           `mapstructure:"zone" required:"true" cty:"zone" hcl:"zone"`
 	APIURL                    *string           `mapstructure:"api_url" cty:"api_url" hcl:"api_url"`
 	Image                     *string           `mapstructure:"image" required:"true" cty:"image" hcl:"image"`
@@ -149,7 +149,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_use_ntlm":               &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
 		"access_key":                   &hcldec.AttrSpec{Name: "access_key", Type: cty.String, Required: false},
 		"secret_key":                   &hcldec.AttrSpec{Name: "secret_key", Type: cty.String, Required: false},
-		"project_key":                  &hcldec.AttrSpec{Name: "project_key", Type: cty.String, Required: false},
+		"project_id":                   &hcldec.AttrSpec{Name: "project_id", Type: cty.String, Required: false},
 		"zone":                         &hcldec.AttrSpec{Name: "zone", Type: cty.String, Required: false},
 		"api_url":                      &hcldec.AttrSpec{Name: "api_url", Type: cty.String, Required: false},
 		"image":                        &hcldec.AttrSpec{Name: "image", Type: cty.String, Required: false},
