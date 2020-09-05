@@ -3,7 +3,7 @@
   "provisioners": [
     {
       "type":  "ansible",
-      "playbook_file": "./playbook.yml",
+      "playbook_file": "./galaxy-playbook.yml",
       "galaxy_file": "./requirements.yml"
     }
   ],
