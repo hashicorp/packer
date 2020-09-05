@@ -645,7 +645,7 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 	}
 	// Add collections_path argument if specified
 	if p.config.CollectionsPath != "" {
-		roleArgs = append(roleArgs, "-p", filepath.ToSlash(p.config.CollectionsPath))
+		collectionArgs = append(roleArgs, "-p", filepath.ToSlash(p.config.CollectionsPath))
 	}
 
 	roleInstallError := p.invokeGalaxyCommand(roleArgs, ui, comm)
@@ -655,7 +655,7 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 	}
 	// If all is well, proceed with collection install
 	// This variable isn't strictly necessary but including for readability to match the role installation
-	collectionInstallError := p.invokeGalaxyCommand(roleArgs, ui, comm)
+	collectionInstallError := p.invokeGalaxyCommand(collectionArgs, ui, comm)
 	return collectionInstallError
 }
 
