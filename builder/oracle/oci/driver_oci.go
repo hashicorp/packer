@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	core "github.com/oracle/oci-go-sdk/core"
@@ -69,13 +68,17 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 	}
 
 	// Pass VNIC details, if specified, to the instance
-	if len(d.cfg.CreateVnicDetails) > 0 {
-		CreateVnicDetails, err := mapToCreateVnicDetails(d.cfg.CreateVnicDetails)
-		if err != nil {
-			return "", err
-		}
-		instanceDetails.CreateVnicDetails = &CreateVnicDetails
+	CreateVnicDetails := core.CreateVnicDetails{
+		AssignPublicIp:      d.cfg.CreateVnicDetails.AssignPublicIp,
+		DisplayName:         d.cfg.CreateVnicDetails.DisplayName,
+		HostnameLabel:       d.cfg.CreateVnicDetails.HostnameLabel,
+		NsgIds:              d.cfg.CreateVnicDetails.NsgIds,
+		PrivateIp:           d.cfg.CreateVnicDetails.PrivateIp,
+		SkipSourceDestCheck: d.cfg.CreateVnicDetails.SkipSourceDestCheck,
+		SubnetId:            d.cfg.CreateVnicDetails.SubnetId,
 	}
+
+	instanceDetails.CreateVnicDetails = &CreateVnicDetails
 
 	instance, err := d.computeClient.LaunchInstance(context.TODO(), core.LaunchInstanceRequest{LaunchInstanceDetails: instanceDetails})
 
@@ -226,70 +229,4 @@ func stringSliceContains(slice []string, value string) bool {
 		}
 	}
 	return false
-}
-
-// interfaceToBool converts a variable of type interface to type bool
-func interfaceToBool(b interface{}) (bool, error) {
-	var boolVal bool
-	var err error
-
-	switch t := b.(type) {
-	case bool:
-		boolVal = t
-	case string:
-		boolVal, err = strconv.ParseBool(t)
-	default:
-		boolVal, err = false, fmt.Errorf("failed to convert %v to boolean type", b)
-	}
-
-	return boolVal, err
-}
-
-// mapToCreateVnicDetails creates variable of type core.CreateVnicDetails from map
-func mapToCreateVnicDetails(m map[string]interface{}) (core.CreateVnicDetails, error) {
-	result := core.CreateVnicDetails{}
-
-	if val, ok := m["assign_public_ip"]; ok {
-		boolVal, err := interfaceToBool(val)
-		if err != nil {
-			return result, fmt.Errorf("assign_public_ip is incorrect type: %v", err)
-		}
-		result.AssignPublicIp = &boolVal
-	}
-	if val, ok := m["display_name"]; ok {
-		tmp := val.(string)
-		result.DisplayName = &tmp
-	}
-	if val, ok := m["hostname_label"]; ok {
-		tmp := val.(string)
-		result.HostnameLabel = &tmp
-	}
-	if val, ok := m["nsg_ids"]; ok {
-		tmp, tmpok := val.([]interface{})
-		if !tmpok {
-			return result, errors.New("nsg_ids not in correct list format")
-		}
-		valStr := make([]string, len(tmp)) //convert []interface{} to []string
-		for i, v := range tmp {
-			valStr[i] = fmt.Sprint(v)
-		}
-		result.NsgIds = valStr
-	}
-	if val, ok := m["private_ip"]; ok {
-		tmp := val.(string)
-		result.PrivateIp = &tmp
-	}
-	if val, ok := m["skip_source_dest_check"]; ok {
-		boolVal, err := interfaceToBool(val)
-		if err != nil {
-			return result, fmt.Errorf("skip_source_dest_check is incorrect type: %v", err)
-		}
-		result.SkipSourceDestCheck = &boolVal
-	}
-	if val, ok := m["subnet_id"]; ok {
-		tmp := val.(string)
-		result.SubnetId = &tmp
-	}
-
-	return result, nil
 }
