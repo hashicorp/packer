@@ -162,8 +162,8 @@ type Config struct {
 	//  test your playbook. this option is not used if you set an `inventory_file`.
 	KeepInventoryFile bool `mapstructure:"keep_inventory_file"`
 	// A requirements file which provides a way to
-	//  install roles with the [ansible-galaxy
-	//  cli](http://docs.ansible.com/ansible/galaxy.html#the-ansible-galaxy-command-line-tool)
+	//  install roles or collections with the [ansible-galaxy
+	//  cli](https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#the-ansible-galaxy-command-line-tool)
 	//  on the local machine before executing `ansible-playbook`. By default, this is empty.
 	GalaxyFile string `mapstructure:"galaxy_file"`
 	// The command to invoke ansible-galaxy. By default, this is
@@ -173,11 +173,16 @@ type Config struct {
 	//  Adds `--force` option to `ansible-galaxy` command. By default, this is
 	//  `false`.
 	GalaxyForceInstall bool `mapstructure:"galaxy_force_install"`
-	// The path to the directory on your local system to
-	//   install the roles in. Adds `--roles-path /path/to/your/roles` to
+	// The path to the directory on your local system in which to
+	//   install the roles. Adds `--roles-path /path/to/your/roles` to
 	//   `ansible-galaxy` command. By default, this is empty, and thus `--roles-path`
 	//   option is not added to the command.
 	RolesPath string `mapstructure:"roles_path"`
+	// The path to the directory on your local system in which to
+	//   install the collections. Adds `--collections-path /path/to/your/collections` to
+	//   `ansible-galaxy` command. By default, this is empty, and thus `--collections-path`
+	//   option is not added to the command.
+	CollectionsPath string `mapstructure:"collections_path"`
 	// When `true`, set up a localhost proxy adapter
 	// so that Ansible has an IP address to connect to, even if your guest does not
 	// have an IP address. For example, the adapter is necessary for Docker builds
@@ -624,16 +629,38 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 	galaxyFile := filepath.ToSlash(p.config.GalaxyFile)
 
 	// ansible-galaxy install -r requirements.yml
-	args := []string{"install", "-r", galaxyFile}
+	roleArgs := []string{"install", "-r", galaxyFile}
+	// Instead of modifying args depending on config values and removing or modifying values from
+	// the slice between role and collection installs, just use 2 slices and simplify everything
+	collectionArgs := []string{"collection", "install", "-r", galaxyFile}
 	// Add force to arguments
 	if p.config.GalaxyForceInstall {
-		args = append(args, "-f")
-	}
-	// Add roles_path argument if specified
-	if p.config.RolesPath != "" {
-		args = append(args, "-p", filepath.ToSlash(p.config.RolesPath))
+		roleArgs = append(roleArgs, "-f")
+		collectionArgs = append(collectionArgs, "-f")
 	}
 
+	// Add roles_path argument if specified
+	if p.config.RolesPath != "" {
+		roleArgs = append(roleArgs, "-p", filepath.ToSlash(p.config.RolesPath))
+	}
+	// Add collections_path argument if specified
+	if p.config.CollectionsPath != "" {
+		roleArgs = append(roleArgs, "-p", filepath.ToSlash(p.config.CollectionsPath))
+	}
+
+	roleInstallError := p.invokeGalaxyCommand(roleArgs, ui, comm)
+	// Return the error if the role installation failed before attempting the collection install
+	if roleInstallError != nil {
+		return roleInstallError
+	}
+	// If all is well, proceed with collections install
+	// This variable isn't strictly necessary but including for readability to match the role installation
+	collectionInstallError := p.invokeGalaxyCommand(roleArgs, ui, comm)
+	return collectionInstallError
+}
+
+// Intended to be invoked from p.executeGalaxy depending on the Ansible Galaxy parameters passed to Packer
+func (p *Provisioner) invokeGalaxyCommand(args []string, ui packer.Ui, comm packer.Communicator) error {
 	ui.Message(fmt.Sprintf("Executing Ansible Galaxy"))
 	cmd := exec.Command(p.config.GalaxyCommand, args...)
 
