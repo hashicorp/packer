@@ -653,7 +653,7 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 	if roleInstallError != nil {
 		return roleInstallError
 	}
-	// If all is well, proceed with collections install
+	// If all is well, proceed with collection install
 	// This variable isn't strictly necessary but including for readability to match the role installation
 	collectionInstallError := p.invokeGalaxyCommand(roleArgs, ui, comm)
 	return collectionInstallError
