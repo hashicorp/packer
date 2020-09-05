@@ -6,20 +6,23 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/scaleway/scaleway-cli/pkg/api"
+	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
+	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
 type stepShutdown struct{}
 
 func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*api.ScalewayAPI)
+	instanceAPI := instance.NewAPI(state.Get("client").(*scw.Client))
 	ui := state.Get("ui").(packer.Ui)
 	serverID := state.Get("server_id").(string)
 
 	ui.Say("Shutting down server...")
 
-	err := client.PostServerAction(serverID, "poweroff")
-
+	_, err := instanceAPI.ServerAction(&instance.ServerActionRequest{
+		Action:   instance.ServerActionPoweroff,
+		ServerID: serverID,
+	})
 	if err != nil {
 		err := fmt.Errorf("Error stopping server: %s", err)
 		state.Put("error", err)
@@ -27,10 +30,18 @@ func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 		return multistep.ActionHalt
 	}
 
-	_, err = api.WaitForServerState(client, serverID, "stopped")
-
+	instanceResp, err := instanceAPI.WaitForServer(&instance.WaitForServerRequest{
+		ServerID: serverID,
+	})
 	if err != nil {
 		err := fmt.Errorf("Error shutting down server: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	if instanceResp.State != instance.ServerStateStopped {
+		err := fmt.Errorf("Server is in state %s instead of stopped", instanceResp.State.String())
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
