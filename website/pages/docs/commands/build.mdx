@@ -48,11 +48,6 @@ artifacts that are created will be outputted at the end of the build.
   - `run-cleanup-provisioner` aborts and exits without any cleanup besides
     the [error-cleanup-provisioner](/docs/templates/provisioners#on-error-provisioner) if one is defined.
 
-- `-only=foo,bar,baz` - Only run the builds with the given comma-separated
-  names. Build names by default are their type, unless a specific `name`
-  attribute is specified within the configuration. `-only` does not apply to
-  post-processors.
-
 `@include 'commands/only.mdx'`
 
 - `-parallel-builds=N` - Limit the number of builds to run in parallel, 0
