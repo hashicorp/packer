@@ -37,7 +37,7 @@ func TestStepResizeDisk_Run(t *testing.T) {
 	}
 }
 
-func TestStepResizeDisk_SKipIso(t *testing.T) {
+func TestStepResizeDisk_SkipIso(t *testing.T) {
 	state := testState(t)
 	driver := state.Get("driver").(*DriverMock)
 	config := &Config{
