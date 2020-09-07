@@ -37,7 +37,7 @@ type HTTPConfig struct {
 	// This is the bind interface for the HTTP server. Defaults to the first
 	// interface with a non-loopback address. Either `http_bind_address` or
 	// `http_interface` can be specified.
-	HTTPInterface string `mapstructure:"http_interface"`
+	HTTPInterface string `mapstructure:"http_interface" undocumented:"true"`
 }
 
 func (c *HTTPConfig) Prepare(ctx *interpolate.Context) []error {

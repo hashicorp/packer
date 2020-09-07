@@ -20,7 +20,7 @@ type FlatConfig struct {
 	HTTPPortMin               *int                `mapstructure:"http_port_min" cty:"http_port_min" hcl:"http_port_min"`
 	HTTPPortMax               *int                `mapstructure:"http_port_max" cty:"http_port_max" hcl:"http_port_max"`
 	HTTPAddress               *string             `mapstructure:"http_bind_address" cty:"http_bind_address" hcl:"http_bind_address"`
-	HTTPInterface             *string             `mapstructure:"http_interface" cty:"http_interface" hcl:"http_interface"`
+	HTTPInterface             *string             `mapstructure:"http_interface" undocumented:"true" cty:"http_interface" hcl:"http_interface"`
 	ISOChecksum               *string             `mapstructure:"iso_checksum" required:"true" cty:"iso_checksum" hcl:"iso_checksum"`
 	RawSingleISOUrl           *string             `mapstructure:"iso_url" required:"true" cty:"iso_url" hcl:"iso_url"`
 	ISOUrls                   []string            `mapstructure:"iso_urls" cty:"iso_urls" hcl:"iso_urls"`
