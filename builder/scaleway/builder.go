@@ -32,7 +32,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		return nil, warnings, errs
 	}
 
-	return nil, nil, nil
+	return nil, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
