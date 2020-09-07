@@ -8,8 +8,7 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-// ~> **Note:** From Packer v1.6.3, remote ESXi builds no longer use VNC to send
-// boot_command keystrokes. Any VNC configuration will be ignored.
+// ~> **Note:** If [usb_scan_codes](#usb_scan_codes) is set to true, any VNC configuration will be ignored.
 type RunConfig struct {
 	// Packer defaults to building VMware virtual machines
 	// by launching a GUI that shows the console of the machine being built. When
@@ -41,8 +40,8 @@ type RunConfig struct {
 	VNCDisablePassword bool `mapstructure:"vnc_disable_password" required:"false"`
 }
 
-func (c *RunConfig) Prepare(ctx *interpolate.Context, driverConfig *DriverConfig) (errs []error) {
-	if driverConfig.RemoteType == "" {
+func (c *RunConfig) Prepare(_ *interpolate.Context, bootConfig *BootConfigWrapper) (errs []error) {
+	if !bootConfig.USBScanCode {
 		if c.VNCPortMin == 0 {
 			c.VNCPortMin = 5900
 		}

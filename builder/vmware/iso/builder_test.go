@@ -143,7 +143,6 @@ func TestBuilderPrepare_RemoteType(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	config["disable_vnc"] = "true"
 	config["format"] = "ovf"
 	config["remote_host"] = "foobar.example.com"
 	config["remote_password"] = "supersecret"
@@ -225,7 +224,6 @@ func TestBuilderPrepare_Export(t *testing.T) {
 				"remote_host":     "fakehost.com",
 				"remote_password": "fakepassword",
 				"remote_username": "fakeuser",
-				"disable_vnc":     "true",
 			},
 			ExpectedSkipExportValue: false,
 			ExpectedFormat:          "ovf",
@@ -236,7 +234,6 @@ func TestBuilderPrepare_Export(t *testing.T) {
 			InputConfigVals: map[string]string{
 				"remote_type": "esx5",
 				"format":      "",
-				"disable_vnc": "true",
 			},
 			ExpectedSkipExportValue: false,
 			ExpectedFormat:          "ovf",
@@ -250,7 +247,6 @@ func TestBuilderPrepare_Export(t *testing.T) {
 				"remote_host":     "fakehost.com",
 				"remote_password": "fakepassword",
 				"remote_username": "fakeuser",
-				"disable_vnc":     "true",
 			},
 			ExpectedSkipExportValue: false,
 			ExpectedFormat:          "ovf",
@@ -284,7 +280,6 @@ func TestBuilderPrepare_Export(t *testing.T) {
 				"remote_host":     "fakehost.com",
 				"remote_password": "fakepassword",
 				"remote_username": "fakeuser",
-				"disable_vnc":     "true",
 			},
 			ExpectedSkipExportValue: false,
 			ExpectedFormat:          "ova",
@@ -324,7 +319,6 @@ func TestBuilderPrepare_RemoteExport(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	config["disable_vnc"] = "true"
 	config["remote_type"] = "esx5"
 	config["remote_host"] = "foobar.example.com"
 	config["skip_validate_credentials"] = true
@@ -353,7 +347,6 @@ func TestBuilderPrepare_RemoteExport(t *testing.T) {
 func TestBuilderPrepare_Format(t *testing.T) {
 	var b Builder
 	config := testConfig()
-	config["disable_vnc"] = "true"
 
 	// Bad
 	config["format"] = "foobar"

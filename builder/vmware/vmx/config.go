@@ -20,7 +20,7 @@ type Config struct {
 	common.PackerConfig            `mapstructure:",squash"`
 	common.HTTPConfig              `mapstructure:",squash"`
 	common.FloppyConfig            `mapstructure:",squash"`
-	vmwcommon.VNCConfigWrapper     `mapstructure:",squash"`
+	vmwcommon.BootConfigWrapper    `mapstructure:",squash"`
 	vmwcommon.DriverConfig         `mapstructure:",squash"`
 	vmwcommon.OutputConfig         `mapstructure:",squash"`
 	vmwcommon.RunConfig            `mapstructure:",squash"`
@@ -80,13 +80,13 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	var warnings []string
 	var errs *packer.MultiError
 
-	vncWarnings, vncErrs := c.VNCConfigWrapper.Prepare(&c.ctx, &c.DriverConfig)
+	vncWarnings, vncErrs := c.BootConfigWrapper.Prepare(&c.ctx, &c.DriverConfig)
 	warnings = append(warnings, vncWarnings...)
 	errs = packer.MultiErrorAppend(errs, vncErrs...)
 	errs = packer.MultiErrorAppend(errs, c.DriverConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
-	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx, &c.DriverConfig)...)
+	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx, &c.BootConfigWrapper)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
