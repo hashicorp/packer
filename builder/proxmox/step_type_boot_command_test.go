@@ -53,6 +53,13 @@ func TestTypeBootCommand(t *testing.T) {
 			expectedAction:    multistep.ActionContinue,
 		},
 		{
+			name:              "holding and releasing keys",
+			builderConfig:     &Config{BootConfig: bootcommand.BootConfig{BootCommand: []string{"<leftShiftOn>hello<rightAltOn>world<leftShiftOff><rightAltOff>"}}},
+			expectCallSendkey: true,
+			expectedKeysSent:  "shift-hshift-eshift-lshift-lshift-oshift-alt_r-wshift-alt_r-oshift-alt_r-rshift-alt_r-lshift-alt_r-d",
+			expectedAction:    multistep.ActionContinue,
+		},
+		{
 			name:              "without boot command sendkey should not be called",
 			builderConfig:     &Config{BootConfig: bootcommand.BootConfig{BootCommand: []string{}}},
 			expectCallSendkey: false,
