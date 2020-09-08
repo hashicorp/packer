@@ -56,9 +56,9 @@ type CDConfig struct {
 	// between providing the directory with or without the glob is whether the
 	// directory itself or its contents will be at the CD root.
 	//
-	// Use of this option assums that you have a command line tool isntalled
+	// Use of this option assumes that you have a command line tool installed
 	// that can handle the iso creation. If you are running Packer from an OSX host,
-	// the required tool is is hdiutil which comes preinstalled.
+	// the required tool is hdiutil which comes preinstalled.
 	// On linux hosts, you need to have mkisofs.
 	// On Windows, you must have oscdimg.exe. oscdimg.exe is part of the
 	// Windows ADK tooks, downloadable from
