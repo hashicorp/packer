@@ -141,9 +141,10 @@ builder.
   to the instance used for the image creation process.
 
 - `create_vnic_details` (map of strings) - Specify details for the virtual network interface card (VNIC)
-  that get attached to the instance. Possible keys (all optional) are: `assign_public_ip` (bool),
+  that is attached to the instance. Possible keys (all optional) are: `assign_public_ip` (bool),
   `display_name` (string), `hostname_lable` (string), `nsg_ids` (list), `private_ip` (string),
-  `skip_source_dest_check` (bool), and `subnet_id` (string). See
+  `skip_source_dest_check` (bool), `subnet_id` (string), `tags` (map of string), and `defined_tags`
+  (map of maps of strings). See
   [the Oracle docs](https://docs.cloud.oracle.com/en-us/iaas/Content/Network/Tasks/managingVNICs.htm)
   for more information about VNICs.
 
@@ -252,7 +253,7 @@ Build 'oracle-oci' finished.
 [opc@packerhost ~]$
 ```
 
-## Auto-assign Tags and Network Security Groups to Instance
+## Assigning Tags and Network Security Groups to the Instance
 Tags are useful for breaking down costs and usage. The keys `instance_tags`
 and `instance_defined_tags` are assigned to the temporary instance,
 whereas `tags` and `defined_tags` are assigned to the resulting image.
@@ -261,19 +262,19 @@ Network Security Groups (NSGs) are used for granting networking permissions
 to the instance. Depending on network (VCN and subnet) setup, this may be
 required for Packer to successfully SSH into the instance. NSGs are a property
 of the virtual network interface card (VNIC) attached to the instance, and
-are listed in `nsg_ids` under `create_vnic_details`. 
+are listed in `nsg_ids` under `create_vnic_details`.
 ```
 {
-  "name":                "base-image-{{isotime \"20000102030405\"}}",
+  "name":                "base-image-{{isotime \"20060102030405\"}}",
   "type":                "oracle-oci",
   "availability_domain": "aaaa:PHX-AD-1",
   "base_image_ocid":     "ocid1.image.oc1.iad.aaa",
   "compartment_ocid":    "ocid1.compartment.oc1..aaa",
-  "image_name":          "my-image-{{isotime \"20000102030405\"}}",
+  "image_name":          "my-image-{{isotime \"20060102030405\"}}",
   "shape":               "VM.Standard.E2.1",
   "subnet_ocid":         "ocid1.subnet.oc1.iad.aaa",
   "use_private_ip":      "true",
-  "instance_name":       "packer-build-{{isotime \"20000102030405\"}}",
+  "instance_name":       "packer-build-{{isotime \"20060102030405\"}}",
   "instance_tags":       { "testing": "yes" },
   "instance_defined_tags": {
     "Operations": {
@@ -287,7 +288,7 @@ are listed in `nsg_ids` under `create_vnic_details`.
     "nsg_ids": ["ocid1.networksecuritygroup.oc1.iad.aaa"]
   },
   "tags": {
-    "CreationDate":  "{{isotime \"20000102 15:04:05 MST\"}}"
+    "CreationDate":  "{{isotime \"20060102 03:04:05 MST\"}}"
   }
 }
 ```

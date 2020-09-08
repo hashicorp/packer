@@ -188,13 +188,15 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 // FlatCreateVnicDetailsRaw is an auto-generated flat version of CreateVnicDetailsRaw.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatCreateVnicDetailsRaw struct {
-	AssignPublicIp      *bool    `mapstructure:"assign_public_ip" required:"false" cty:"assign_public_ip" hcl:"assign_public_ip"`
-	DisplayName         *string  `mapstructure:"display_name" required:"false" cty:"display_name" hcl:"display_name"`
-	HostnameLabel       *string  `mapstructure:"hostname_label" required:"false" cty:"hostname_label" hcl:"hostname_label"`
-	NsgIds              []string `mapstructure:"nsg_ids" required:"false" cty:"nsg_ids" hcl:"nsg_ids"`
-	PrivateIp           *string  `mapstructure:"private_ip" required:"false" cty:"private_ip" hcl:"private_ip"`
-	SkipSourceDestCheck *bool    `mapstructure:"skip_source_dest_check" required:"false" cty:"skip_source_dest_check" hcl:"skip_source_dest_check"`
-	SubnetId            *string  `mapstructure:"subnet_id" required:"false" cty:"subnet_id" hcl:"subnet_id"`
+	AssignPublicIp      *bool                             `mapstructure:"assign_public_ip" required:"false" cty:"assign_public_ip" hcl:"assign_public_ip"`
+	DefinedTags         map[string]map[string]interface{} `mapstructure:"defined_tags" required:"false" cty:"defined_tags" hcl:"defined_tags"`
+	DisplayName         *string                           `mapstructure:"display_name" required:"false" cty:"display_name" hcl:"display_name"`
+	FreeformTags        map[string]string                 `mapstructure:"tags" required:"false" cty:"tags" hcl:"tags"`
+	HostnameLabel       *string                           `mapstructure:"hostname_label" required:"false" cty:"hostname_label" hcl:"hostname_label"`
+	NsgIds              []string                          `mapstructure:"nsg_ids" required:"false" cty:"nsg_ids" hcl:"nsg_ids"`
+	PrivateIp           *string                           `mapstructure:"private_ip" required:"false" cty:"private_ip" hcl:"private_ip"`
+	SkipSourceDestCheck *bool                             `mapstructure:"skip_source_dest_check" required:"false" cty:"skip_source_dest_check" hcl:"skip_source_dest_check"`
+	SubnetId            *string                           `mapstructure:"subnet_id" required:"false" cty:"subnet_id" hcl:"subnet_id"`
 }
 
 // FlatMapstructure returns a new FlatCreateVnicDetailsRaw.
@@ -210,7 +212,9 @@ func (*CreateVnicDetailsRaw) FlatMapstructure() interface{ HCL2Spec() map[string
 func (*FlatCreateVnicDetailsRaw) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"assign_public_ip":       &hcldec.AttrSpec{Name: "assign_public_ip", Type: cty.Bool, Required: false},
+		"defined_tags":           &hcldec.AttrSpec{Name: "defined_tags", Type: cty.Map(cty.String), Required: false},
 		"display_name":           &hcldec.AttrSpec{Name: "display_name", Type: cty.String, Required: false},
+		"tags":                   &hcldec.AttrSpec{Name: "tags", Type: cty.Map(cty.String), Required: false},
 		"hostname_label":         &hcldec.AttrSpec{Name: "hostname_label", Type: cty.String, Required: false},
 		"nsg_ids":                &hcldec.AttrSpec{Name: "nsg_ids", Type: cty.List(cty.String), Required: false},
 		"private_ip":             &hcldec.AttrSpec{Name: "private_ip", Type: cty.String, Required: false},

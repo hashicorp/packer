@@ -76,6 +76,8 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 		PrivateIp:           d.cfg.CreateVnicDetails.PrivateIp,
 		SkipSourceDestCheck: d.cfg.CreateVnicDetails.SkipSourceDestCheck,
 		SubnetId:            d.cfg.CreateVnicDetails.SubnetId,
+		DefinedTags:         d.cfg.CreateVnicDetails.DefinedTags,
+		FreeformTags:        d.cfg.CreateVnicDetails.FreeformTags,
 	}
 
 	instanceDetails.CreateVnicDetails = &CreateVnicDetails

@@ -24,13 +24,15 @@ import (
 
 type CreateVnicDetailsRaw struct {
 	// fields that can be specified under "create_vnic_details"
-	AssignPublicIp      *bool    `mapstructure:"assign_public_ip" required:"false"`
-	DisplayName         *string  `mapstructure:"display_name" required:"false"`
-	HostnameLabel       *string  `mapstructure:"hostname_label" required:"false"`
-	NsgIds              []string `mapstructure:"nsg_ids" required:"false"`
-	PrivateIp           *string  `mapstructure:"private_ip" required:"false"`
-	SkipSourceDestCheck *bool    `mapstructure:"skip_source_dest_check" required:"false"`
-	SubnetId            *string  `mapstructure:"subnet_id" required:"false"`
+	AssignPublicIp      *bool                             `mapstructure:"assign_public_ip" required:"false"`
+	DefinedTags         map[string]map[string]interface{} `mapstructure:"defined_tags" required:"false"`
+	DisplayName         *string                           `mapstructure:"display_name" required:"false"`
+	FreeformTags        map[string]string                 `mapstructure:"tags" required:"false"`
+	HostnameLabel       *string                           `mapstructure:"hostname_label" required:"false"`
+	NsgIds              []string                          `mapstructure:"nsg_ids" required:"false"`
+	PrivateIp           *string                           `mapstructure:"private_ip" required:"false"`
+	SkipSourceDestCheck *bool                             `mapstructure:"skip_source_dest_check" required:"false"`
+	SubnetId            *string                           `mapstructure:"subnet_id" required:"false"`
 }
 
 type Config struct {
