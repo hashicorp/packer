@@ -302,6 +302,21 @@ func TestBuilderPrepare_UseBackingFile(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_SkipResizeDisk(t *testing.T) {
+	config := testConfig()
+	config["skip_resize_disk"] = true
+	config["disk_image"] = false
+
+	b := Builder{}
+	_, warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Errorf("unexpected warns when calling prepare with skip_resize_disk set to true: %#v", warns)
+	}
+	if err == nil {
+		t.Errorf("setting skip_resize_disk to true when disk_image is false should have error")
+	}
+}
+
 func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	var b Builder
 	config := testConfig()

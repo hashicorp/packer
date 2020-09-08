@@ -130,6 +130,10 @@ type Config struct {
 	// for disk_size, Packer uses a default of `40960M` (40 GB). If a disk_size
 	// number is provided with no units, Packer will default to Megabytes.
 	DiskSize string `mapstructure:"disk_size" required:"false"`
+	// Packer resizes the QCOW2 image using
+	// qemu-img resize.  Set this option to true to disable resizing.
+	// Defaults to false.
+	SkipResizeDisk bool `mapstructure:"skip_resize_disk" required:"false"`
 	// The cache mode to use for disk. Allowed values include any of
 	// `writethrough`, `writeback`, `none`, `unsafe` or `directsync`. By
 	// default, this is set to `writeback`.
@@ -507,6 +511,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	if b.config.DiskImage && len(b.config.AdditionalDiskSize) > 0 {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("disk_additional_size can only be used when disk_image is false"))
+	}
+
+	if b.config.SkipResizeDisk && !(b.config.DiskImage) {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("skip_resize_disk can only be used when disk_image is true"))
 	}
 
 	if _, ok := accels[b.config.Accelerator]; !ok {

@@ -93,6 +93,7 @@ type FlatConfig struct {
 	CpuCount                  *int              `mapstructure:"cpus" required:"false" cty:"cpus" hcl:"cpus"`
 	DiskInterface             *string           `mapstructure:"disk_interface" required:"false" cty:"disk_interface" hcl:"disk_interface"`
 	DiskSize                  *string           `mapstructure:"disk_size" required:"false" cty:"disk_size" hcl:"disk_size"`
+	SkipResizeDisk            *bool             `mapstructure:"skip_resize_disk" required:"false" cty:"skip_resize_disk" hcl:"skip_resize_disk"`
 	DiskCache                 *string           `mapstructure:"disk_cache" required:"false" cty:"disk_cache" hcl:"disk_cache"`
 	DiskDiscard               *string           `mapstructure:"disk_discard" required:"false" cty:"disk_discard" hcl:"disk_discard"`
 	DetectZeroes              *string           `mapstructure:"disk_detect_zeroes" required:"false" cty:"disk_detect_zeroes" hcl:"disk_detect_zeroes"`
@@ -218,6 +219,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"cpus":                         &hcldec.AttrSpec{Name: "cpus", Type: cty.Number, Required: false},
 		"disk_interface":               &hcldec.AttrSpec{Name: "disk_interface", Type: cty.String, Required: false},
 		"disk_size":                    &hcldec.AttrSpec{Name: "disk_size", Type: cty.String, Required: false},
+		"skip_resize_disk":             &hcldec.AttrSpec{Name: "skip_resize_disk", Type: cty.Bool, Required: false},
 		"disk_cache":                   &hcldec.AttrSpec{Name: "disk_cache", Type: cty.String, Required: false},
 		"disk_discard":                 &hcldec.AttrSpec{Name: "disk_discard", Type: cty.String, Required: false},
 		"disk_detect_zeroes":           &hcldec.AttrSpec{Name: "disk_detect_zeroes", Type: cty.String, Required: false},
