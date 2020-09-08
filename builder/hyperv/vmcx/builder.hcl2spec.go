@@ -79,6 +79,8 @@ type FlatConfig struct {
 	FloppyFiles                    []string          `mapstructure:"floppy_files" cty:"floppy_files" hcl:"floppy_files"`
 	FloppyDirectories              []string          `mapstructure:"floppy_dirs" cty:"floppy_dirs" hcl:"floppy_dirs"`
 	FloppyLabel                    *string           `mapstructure:"floppy_label" cty:"floppy_label" hcl:"floppy_label"`
+	CDFiles                        []string          `mapstructure:"cd_files" cty:"cd_files" hcl:"cd_files"`
+	CDLabel                        *string           `mapstructure:"cd_label" cty:"cd_label" hcl:"cd_label"`
 	DiskBlockSize                  *uint             `mapstructure:"disk_block_size" required:"false" cty:"disk_block_size" hcl:"disk_block_size"`
 	RamSize                        *uint             `mapstructure:"memory" required:"false" cty:"memory" hcl:"memory"`
 	SecondaryDvdImages             []string          `mapstructure:"secondary_iso_images" required:"false" cty:"secondary_iso_images" hcl:"secondary_iso_images"`
@@ -197,6 +199,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"floppy_files":                     &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
 		"floppy_dirs":                      &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
 		"floppy_label":                     &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},
+		"cd_files":                         &hcldec.AttrSpec{Name: "cd_files", Type: cty.List(cty.String), Required: false},
+		"cd_label":                         &hcldec.AttrSpec{Name: "cd_label", Type: cty.String, Required: false},
 		"disk_block_size":                  &hcldec.AttrSpec{Name: "disk_block_size", Type: cty.Number, Required: false},
 		"memory":                           &hcldec.AttrSpec{Name: "memory", Type: cty.Number, Required: false},
 		"secondary_iso_images":             &hcldec.AttrSpec{Name: "secondary_iso_images", Type: cty.List(cty.String), Required: false},
