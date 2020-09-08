@@ -73,12 +73,11 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	var deviceArgs []string
 	var driveArgs []string
 	var commHostPort int
-	var vnc string
 
-	if !config.VNCUsePassword {
-		vnc = fmt.Sprintf("%s:%d", vncIP, vncPort-config.VNCPortMin)
-	} else {
-		vnc = fmt.Sprintf("%s:%d,password", vncIP, vncPort-config.VNCPortMin)
+	vncPort = vncPort - config.VNCPortMin
+	vnc := fmt.Sprintf("%s:%d", vncIP, vncPort)
+	if config.VNCUsePassword {
+		vnc = fmt.Sprintf("%s:%d,password", vncIP, vncPort)
 	}
 
 	if config.QMPEnable {
