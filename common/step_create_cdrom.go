@@ -8,7 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
+	"strings"
 
 	"github.com/hashicorp/packer/helper/builder/localexec"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -80,7 +80,12 @@ func (s *StepCreateCD) Run(ctx context.Context, state multistep.StateBag) multis
 		}
 	}
 
-	cmd := retrieveCommandForOS(s.Label, rootFolder, CDPath)
+	cmd, err := retrieveCDISOCreationCommand(s.Label, rootFolder, CDPath)
+	if err != nil {
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
 	err = localexec.RunAndStream(cmd, ui, []string{})
 	if err != nil {
 		state.Put("error", err)
@@ -107,25 +112,75 @@ func (s *StepCreateCD) Cleanup(multistep.StateBag) {
 	}
 }
 
-func retrieveCommandForOS(label string, source string, dest string) *exec.Cmd {
-	switch runtime.GOOS {
-	case "windows":
-		cmd := exec.Command("oscdimg")
-		args := []string{"-j1", "-o", "-m", "-l" + label, source, dest}
-		cmd.Args = append(cmd.Args, args...)
-		return cmd
-	case "darwin":
-		cmd := exec.Command("hdiutil")
-		args := []string{"makehybrid", "-o", dest, "-hfs",
-			"-joliet", "-iso", "-default-volume-name", label, source}
-		cmd.Args = append(cmd.Args, args...)
-		return cmd
-	default:
-		cmd := exec.Command("mkisofs")
-		args := []string{"-joliet", "-volid", label, "-o", dest, source}
-		cmd.Args = append(cmd.Args, args...)
-		return cmd
+type cdISOCreationCommand struct {
+	Name    string
+	Command func(path string, label string, source string, dest string) *exec.Cmd
+}
+
+var supportedCDISOCreationCommands []cdISOCreationCommand = []cdISOCreationCommand{
+	{
+		"xorriso", func(path string, label string, source string, dest string) *exec.Cmd {
+			return exec.Command(
+				path,
+				"-as", "genisoimage",
+				"-rock",
+				"-joliet",
+				"-volid", label,
+				"-output", dest,
+				source)
+		},
+	},
+	{
+		"mkisofs", func(path string, label string, source string, dest string) *exec.Cmd {
+			return exec.Command(
+				path,
+				"-joliet",
+				"-volid", label,
+				"-o", dest,
+				source)
+		},
+	},
+	{
+		"hdiutil", func(path string, label string, source string, dest string) *exec.Cmd {
+			return exec.Command(
+				path,
+				"-o", dest,
+				"-hfs",
+				"-joliet",
+				"-iso",
+				"-default-volume-name", label,
+				source)
+		},
+	},
+	{
+		"oscdimg", func(path string, label string, source string, dest string) *exec.Cmd {
+			return exec.Command(
+				path,
+				"-j1",
+				"-o",
+				"-m",
+				"-l"+label,
+				source,
+				dest)
+		},
+	},
+}
+
+func retrieveCDISOCreationCommand(label string, source string, dest string) (*exec.Cmd, error) {
+	for _, c := range supportedCDISOCreationCommands {
+		path, err := exec.LookPath(c.Name)
+		if err != nil {
+			continue
+		}
+		return c.Command(path, label, source, dest), nil
 	}
+	var commands = make([]string, 0, len(supportedCDISOCreationCommands))
+	for _, c := range supportedCDISOCreationCommands {
+		commands = append(commands, c.Name)
+	}
+	return nil, fmt.Errorf(
+		"could not find a supported CD ISO creation command (the supported commands are: %s)",
+		strings.Join(commands, ", "))
 }
 
 func (s *StepCreateCD) AddFile(dst, src string) error {

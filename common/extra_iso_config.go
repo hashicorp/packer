@@ -57,12 +57,13 @@ type CDConfig struct {
 	// directory itself or its contents will be at the CD root.
 	//
 	// Use of this option assumes that you have a command line tool installed
-	// that can handle the iso creation. If you are running Packer from an OSX host,
-	// the required tool is hdiutil which comes preinstalled.
-	// On linux hosts, you need to have mkisofs.
-	// On Windows, you must have oscdimg.exe. oscdimg.exe is part of the
-	// Windows ADK tooks, downloadable from
-	// https://docs.microsoft.com/en-us/windows-hardware/get-started/adk-install#winADK
+	// that can handle the iso creation. Packer will use one of the following
+	// tools:
+	//
+	//   * xorriso
+	//   * mkisofs
+	//   * hdiutil (normally found in macOS)
+	//   * oscdimg (normally found in Windows as part of the Windows ADK)
 	CDFiles []string `mapstructure:"cd_files"`
 	CDLabel string   `mapstructure:"cd_label"`
 }
