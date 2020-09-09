@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/scaleway/scaleway-cli/pkg/api"
+	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
 // The unique id for the builder
@@ -32,12 +32,27 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		return nil, warnings, errs
 	}
 
-	return nil, nil, nil
+	return nil, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	client, err := api.NewScalewayAPI(b.config.Organization, b.config.Token, b.config.UserAgent, b.config.Region)
+	scwZone, err := scw.ParseZone(b.config.Zone)
+	if err != nil {
+		ui.Error(err.Error())
+		return nil, err
+	}
 
+	clientOpts := []scw.ClientOption{
+		scw.WithDefaultProjectID(b.config.ProjectID),
+		scw.WithAuth(b.config.AccessKey, b.config.SecretKey),
+		scw.WithDefaultZone(scwZone),
+	}
+
+	if b.config.APIURL != "" {
+		clientOpts = append(clientOpts, scw.WithAPIURL(b.config.APIURL))
+	}
+
+	client, err := scw.NewClient(clientOpts...)
 	if err != nil {
 		ui.Error(err.Error())
 		return nil, err
@@ -96,7 +111,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		imageID:      state.Get("image_id").(string),
 		snapshotName: state.Get("snapshot_name").(string),
 		snapshotID:   state.Get("snapshot_id").(string),
-		regionName:   state.Get("region").(string),
+		zoneName:     b.config.Zone,
 		client:       client,
 		StateData:    map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}

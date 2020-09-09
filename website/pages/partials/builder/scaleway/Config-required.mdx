@@ -1,20 +1,16 @@
 <!-- Code generated from the comments of the Config struct in builder/scaleway/config.go; DO NOT EDIT MANUALLY -->
 
-- `api_token` (string) - The token to use to authenticate with your account.
-  It can also be specified via environment variable SCALEWAY_API_TOKEN. You
-  can see and generate tokens in the "Credentials"
-  section of the control panel.
+- `access_key` (string) - The AccessKey corresponding to the secret key.
+  It can also be specified via the environment variable SCW_ACCESS_KEY.
 
-- `organization_id` (string) - The organization id to use to identify your
-  organization. It can also be specified via environment variable
-  SCALEWAY_ORGANIZATION. Your organization id is available in the
-  "Account" section of the
-  control panel.
-  Previously named: api_access_key with environment variable: SCALEWAY_API_ACCESS_KEY
+- `secret_key` (string) - The SecretKey to authenticate against the Scaleway API.
+  It can also be specified via the environment variable SCW_SECRET_KEY.
 
-- `region` (string) - The name of the region to launch the server in (par1
-  or ams1). Consequently, this is the region where the snapshot will be
-  available.
+- `project_id` (string) - The Project ID in which the instances, volumes and snapshots will be created.
+  It can also be specified via the environment variable SCW_DEFAULT_PROJECT_ID.
+
+- `zone` (string) - The Zone in which the instances, volumes and snapshots will be created.
+  It can also be specified via the environment variable SCW_DEFAULT_ZONE
 
 - `image` (string) - The UUID of the base image to use. This is the image
   that will be used to launch a new server and provision it. See

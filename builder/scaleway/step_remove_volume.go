@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/scaleway/scaleway-cli/pkg/api"
-
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
+	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
 type stepRemoveVolume struct{}
@@ -24,7 +24,7 @@ func (s *stepRemoveVolume) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*api.ScalewayAPI)
+	instanceAPI := instance.NewAPI(state.Get("client").(*scw.Client))
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 	volumeID := state.Get("root_volume_id").(string)
@@ -35,7 +35,9 @@ func (s *stepRemoveVolume) Cleanup(state multistep.StateBag) {
 
 	ui.Say("Removing Volume ...")
 
-	err := client.DeleteVolume(volumeID)
+	err := instanceAPI.DeleteVolume(&instance.DeleteVolumeRequest{
+		VolumeID: volumeID,
+	})
 	if err != nil {
 		err := fmt.Errorf("Error removing volume: %s", err)
 		state.Put("error", err)

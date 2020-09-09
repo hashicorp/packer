@@ -173,8 +173,6 @@ github.com/c2h5oh/datasize
 github.com/cheggaaa/pb
 # github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 github.com/chzyer/readline
-# github.com/creack/goselect v0.1.0
-github.com/creack/goselect
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -189,10 +187,6 @@ github.com/digitalocean/go-qemu/qmp
 github.com/digitalocean/godo
 # github.com/dimchansky/utfbom v1.1.0
 github.com/dimchansky/utfbom
-# github.com/docker/docker v0.0.0-20180422163414-57142e89befe
-github.com/docker/docker/pkg/namesgenerator
-# github.com/dustin/go-humanize v1.0.0
-github.com/dustin/go-humanize
 # github.com/dylanmei/iso8601 v0.1.0
 github.com/dylanmei/iso8601
 # github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
@@ -291,8 +285,6 @@ github.com/gophercloud/gophercloud/pagination
 github.com/gophercloud/utils/env
 github.com/gophercloud/utils/openstack/clientconfig
 github.com/gophercloud/utils/openstack/compute/v2/flavors
-# github.com/gorilla/websocket v0.0.0-20170319172727-a91eba7f9777
-github.com/gorilla/websocket
 # github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 github.com/grpc-ecosystem/go-grpc-middleware
 # github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
@@ -468,10 +460,6 @@ github.com/mitchellh/reflectwalk
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.1
 github.com/modern-go/reflect2
-# github.com/moul/anonuuid v0.0.0-20160222162117-609b752a95ef
-github.com/moul/anonuuid
-# github.com/moul/gotty-client v0.0.0-20180327180212-b26a57ebc215
-github.com/moul/gotty-client
 # github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 github.com/nu7hatch/gouuid
 # github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
@@ -500,16 +488,22 @@ github.com/posener/complete/cmd
 github.com/posener/complete/cmd/install
 # github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 github.com/profitbricks/profitbricks-sdk-go
-# github.com/renstrom/fuzzysearch v0.0.0-20160331204855-2d205ac6ec17
-github.com/renstrom/fuzzysearch/fuzzy
 # github.com/ryanuber/go-glob v1.0.0
 github.com/ryanuber/go-glob
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
-# github.com/scaleway/scaleway-cli v0.0.0-20180921094345-7b12c9699d70
-github.com/scaleway/scaleway-cli/pkg/api
-github.com/scaleway/scaleway-cli/pkg/sshcommand
-github.com/scaleway/scaleway-cli/pkg/utils
+# github.com/scaleway/scaleway-sdk-go v1.0.0-beta.6.0.20200903143645-c0ce17a0443d
+github.com/scaleway/scaleway-sdk-go/api/instance/v1
+github.com/scaleway/scaleway-sdk-go/api/marketplace/v1
+github.com/scaleway/scaleway-sdk-go/internal/async
+github.com/scaleway/scaleway-sdk-go/internal/auth
+github.com/scaleway/scaleway-sdk-go/internal/errors
+github.com/scaleway/scaleway-sdk-go/internal/marshaler
+github.com/scaleway/scaleway-sdk-go/internal/parameter
+github.com/scaleway/scaleway-sdk-go/logger
+github.com/scaleway/scaleway-sdk-go/namegenerator
+github.com/scaleway/scaleway-sdk-go/scw
+github.com/scaleway/scaleway-sdk-go/validation
 # github.com/shirou/gopsutil v2.18.12+incompatible
 github.com/shirou/gopsutil/cpu
 github.com/shirou/gopsutil/host
