@@ -1,5 +1,37 @@
 ## 1.6.3 (Upcoming)
 
+### IMPROVEMENTS:
+* builder/azure: Support publishing to a Shared Image Gallery with a different
+    subscription id [GH-9875]
+* builder/oracle-oci: Allow freeform and defined tags to be added instance.
+    [GH-9802]
+* builder/proxmox: Allow the mounting of multiple ISOs via the `cd_drive`
+    option. [GH-9653]
+* builder/qemu: New `skip_resize_disk` option. [GH-9896]
+* builder/scaleway: Change default boottype to local. [GH-9853]
+* builder/scaleway: Update scaleway to use non-deprecated sdk. [GH-9902]
+* builder/vsphere-iso: Add NVMe controller support. [GH-9880]
+* builder/vsphere: Look for a default resource pool when root resource pool is
+    not found. [GH-9809]
+* core: New `cd_files` option to mount iso for modern OSes which don't support
+    floppies. [GH-9796]
+* HCL2: When the type of a variable is not known evaluate setting as a literal
+    string instead of a variable name. [GH-9863]
+* post-processor/yandex-import: Allow custom API endpoint. [GH-9850]
+* provisioner/ansible: Add support for Ansible Galaxy Collections. [GH-9903]
+
+### BUG FIXES:
+* builder/qemu: Fix hardcoded lowerbound causing negative ports [GH-9905]
+* builder/vsphere: Fix overly strict iso_path validation regex. [GH-9855]
+* command/console: Prevent failure when there are unknown vars. [GH-9864]
+* command/inspect: Allow unset variables in HCL2 and JSON. [GH-9832]
+* core: use $APPDATA over $HOME on Windows hosts when determining homedir.
+    [GH-9830]
+* post-processor/digitalocean-import: Fix crash caused by empty artifact.Files
+    slice. [GH-9857]
+* post-processor/yandex-export: Set metadata key to expected value on error.
+    [GH-9849]
+
 ## 1.6.2 (August 28, 2020)
 
 ### FEATURES:
