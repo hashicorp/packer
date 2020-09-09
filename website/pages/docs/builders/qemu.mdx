@@ -2,7 +2,7 @@
 modeline: |
   vim: set ft=pandoc:
 description: |
-  The Qemu Packer builder is able to create KVM and Xen virtual machine images.
+  The Qemu Packer builder is able to create KVM virtual machine images.
 layout: docs
 page_title: QEMU - Builders
 sidebar_title: QEMU
@@ -12,14 +12,14 @@ sidebar_title: QEMU
 
 Type: `qemu`
 
-The Qemu Packer builder is able to create [KVM](http://www.linux-kvm.org) and
-[Xen](http://www.xenproject.org) virtual machine images.
+The Qemu Packer builder is able to create [KVM](http://www.linux-kvm.org) virtual 
+machine images.
 
 The builder builds a virtual machine by creating a new virtual machine from
 scratch, booting it, installing an OS, rebooting the machine with the boot media
 as the virtual hard drive, provisioning software within the OS, then shutting it
 down. The result of the Qemu builder is a directory containing the image file
-necessary to run the virtual machine on KVM or Xen.
+necessary to run the virtual machine on KVM.
 
 ## Basic Example
 
