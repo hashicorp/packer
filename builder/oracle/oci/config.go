@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,CreateVnicDetailsRaw
+//go:generate mapstructure-to-hcl2 -type Config,CreateVNICDetails
 
 package oci
 
@@ -22,7 +22,7 @@ import (
 	ociauth "github.com/oracle/oci-go-sdk/common/auth"
 )
 
-type CreateVnicDetailsRaw struct {
+type CreateVNICDetails struct {
 	// fields that can be specified under "create_vnic_details"
 	AssignPublicIp      *bool                             `mapstructure:"assign_public_ip" required:"false"`
 	DefinedTags         map[string]map[string]interface{} `mapstructure:"defined_tags" required:"false"`
@@ -90,8 +90,8 @@ type Config struct {
 	UserDataFile string `mapstructure:"user_data_file"`
 
 	// Networking
-	SubnetID          string               `mapstructure:"subnet_ocid"`
-	CreateVnicDetails CreateVnicDetailsRaw `mapstructure:"create_vnic_details"`
+	SubnetID          string            `mapstructure:"subnet_ocid"`
+	CreateVnicDetails CreateVNICDetails `mapstructure:"create_vnic_details"`
 
 	// Tagging
 	Tags        map[string]string                 `mapstructure:"tags"`

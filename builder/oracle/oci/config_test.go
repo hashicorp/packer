@@ -21,7 +21,6 @@ func testConfig(accessConfFile *os.File) map[string]interface{} {
 
 		// Image
 		"base_image_ocid": "ocd1...",
-		"shape":           "VM.Standard1.1",
 		"image_name":      "HelloWorld",
 
 		// Networking
@@ -36,6 +35,16 @@ func testConfig(accessConfFile *os.File) map[string]interface{} {
 		"defined_tags": map[string]map[string]interface{}{
 			"namespace": {"key": "value"},
 		},
+
+		// Instance Details
+		"instance_name": "hello-world",
+		"instance_tags": map[string]string{
+			"key": "value",
+		},
+		"create_vnic_details": map[string]interface{}{
+			"nsg_ids": []string{"ocd1..."},
+		},
+		"shape": "VM.Standard1.1",
 	}
 }
 
