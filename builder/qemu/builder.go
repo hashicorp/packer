@@ -173,7 +173,9 @@ type Config struct {
 	// and format is qcow2, set this option to true to create a new QCOW2
 	// file that uses the file located at iso_url as a backing file. The new file
 	// will only contain blocks that have changed compared to the backing file, so
-	// enabling this option can significantly reduce disk usage.
+	// enabling this option can significantly reduce disk usage. If true, Packer
+	// will force the `skip_compaction` also to be true as well to skip disk
+	// conversion which would render the backing file feature useless.
 	UseBackingFile bool `mapstructure:"use_backing_file" required:"false"`
 	// The type of machine emulation to use. Run your qemu binary with the
 	// flags `-machine help` to list available types for your system. This
@@ -503,9 +505,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		b.config.DiskCompression = false
 	}
 
-	if b.config.UseBackingFile && !(b.config.DiskImage && b.config.Format == "qcow2") {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("use_backing_file can only be enabled for QCOW2 images and when disk_image is true"))
+	if b.config.UseBackingFile {
+		b.config.SkipCompaction = true
+		if !(b.config.DiskImage && b.config.Format == "qcow2") {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New("use_backing_file can only be enabled for QCOW2 images and when disk_image is true"))
+		}
 	}
 
 	if b.config.DiskImage && len(b.config.AdditionalDiskSize) > 0 {
