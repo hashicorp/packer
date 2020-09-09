@@ -13,7 +13,7 @@ import (
 )
 
 type HardwareConfig struct {
-	// Number of CPU sockets.
+	// Number of CPU cores.
 	CPUs int32 `mapstructure:"CPUs"`
 	// Number of CPU cores per socket.
 	CpuCores int32 `mapstructure:"cpu_cores"`
