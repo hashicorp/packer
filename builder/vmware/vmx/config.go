@@ -21,6 +21,7 @@ type Config struct {
 	common.HTTPConfig              `mapstructure:",squash"`
 	common.FloppyConfig            `mapstructure:",squash"`
 	vmwcommon.BootConfigWrapper    `mapstructure:",squash"`
+	common.CDConfig                `mapstructure:",squash"`
 	vmwcommon.DriverConfig         `mapstructure:",squash"`
 	vmwcommon.OutputConfig         `mapstructure:",squash"`
 	vmwcommon.RunConfig            `mapstructure:",squash"`
@@ -91,6 +92,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.DiskConfig.Prepare(&c.ctx)...)

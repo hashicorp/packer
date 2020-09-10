@@ -87,6 +87,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
+		&common.StepCreateCD{
+			Files: b.config.CDConfig.CDFiles,
+			Label: b.config.CDConfig.CDLabel,
+		},
 		&vmwcommon.StepRemoteUpload{
 			Key:       "floppy_path",
 			Message:   "Uploading Floppy to remote machine...",
@@ -109,9 +113,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Linked:    b.config.Linked,
 		},
 		&vmwcommon.StepConfigureVMX{
-			CustomData:  b.config.VMXData,
-			VMName:      b.config.VMName,
-			DisplayName: b.config.VMXDisplayName,
+			CustomData:       b.config.VMXData,
+			VMName:           b.config.VMName,
+			DisplayName:      b.config.VMXDisplayName,
+			DiskAdapterType:  b.config.DiskAdapterType,
+			CDROMAdapterType: "",
 		},
 		&vmwcommon.StepSuppressMessages{},
 		&vmwcommon.StepHTTPIPDiscover{},
