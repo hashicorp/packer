@@ -136,7 +136,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			HTTPAddress: b.config.HTTPAddress,
 		},
 		&vmwcommon.StepConfigureVNC{
-			Enabled:            !b.config.DisableVNC,
+			Enabled:            !b.config.DisableVNC && !b.config.VNCOverWebsocket,
 			VNCBindAddress:     b.config.VNCBindAddress,
 			VNCPortMin:         b.config.VNCPortMin,
 			VNCPortMax:         b.config.VNCPortMax,
@@ -150,6 +150,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&vmwcommon.StepRun{
 			DurationBeforeStop: 5 * time.Second,
 			Headless:           b.config.Headless,
+		},
+		&vmwcommon.StepVNCConnect{
+			VNCEnabled:       !b.config.DisableVNC,
+			VNCOverWebsocket: b.config.VNCOverWebsocket,
+			DriverConfig:     &b.config.DriverConfig,
 		},
 		stepBootCommand,
 		&communicator.StepConnect{

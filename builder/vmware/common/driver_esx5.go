@@ -985,3 +985,11 @@ func (d *ESX5Driver) TypeOnKeyboard(input KeyInput) (int32, error) {
 	}
 	return resp.Returnval, nil
 }
+
+func (d *ESX5Driver) AcquireVNCOverWebsocketTicket() (*types.VirtualMachineTicket, error) {
+	vm, err := d.finder.VirtualMachine(d.ctx, d.VMName)
+	if err != nil {
+		return nil, err
+	}
+	return vm.AcquireTicket(d.ctx, string(types.VirtualMachineTicketTypeWebmks))
+}

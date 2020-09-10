@@ -28,3 +28,9 @@
   is used to secure the VNC communication with the VM. This must be set to
   true if building on ESXi 6.5 and 6.7 with VNC enabled. Defaults to
   false.
+
+- `vnc_over_websocket` (bool) - When set to true, Packer will connect to the remote VNC server over a websocket connection
+  and any of the others vnc configuration options will be ignored.
+  Remote builds using ESXi 6.7+ allows to connect to the VNC server only over websocket,
+  for these the `vnc_over_websocket` must be set to true.
+  If [usb_keyboard](#usb_keyboard) is also set to true, `usb_keyboard` will be ignored and set to false.

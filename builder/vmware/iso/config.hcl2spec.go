@@ -65,6 +65,7 @@ type FlatConfig struct {
 	VNCPortMin                *int              `mapstructure:"vnc_port_min" required:"false" cty:"vnc_port_min" hcl:"vnc_port_min"`
 	VNCPortMax                *int              `mapstructure:"vnc_port_max" cty:"vnc_port_max" hcl:"vnc_port_max"`
 	VNCDisablePassword        *bool             `mapstructure:"vnc_disable_password" required:"false" cty:"vnc_disable_password" hcl:"vnc_disable_password"`
+	VNCOverWebsocket          *bool             `mapstructure:"vnc_over_websocket" required:"false" cty:"vnc_over_websocket" hcl:"vnc_over_websocket"`
 	ShutdownCommand           *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command" hcl:"shutdown_command"`
 	ShutdownTimeout           *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout" hcl:"shutdown_timeout"`
 	Type                      *string           `mapstructure:"communicator" cty:"communicator" hcl:"communicator"`
@@ -207,6 +208,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vnc_port_min":                   &hcldec.AttrSpec{Name: "vnc_port_min", Type: cty.Number, Required: false},
 		"vnc_port_max":                   &hcldec.AttrSpec{Name: "vnc_port_max", Type: cty.Number, Required: false},
 		"vnc_disable_password":           &hcldec.AttrSpec{Name: "vnc_disable_password", Type: cty.Bool, Required: false},
+		"vnc_over_websocket":             &hcldec.AttrSpec{Name: "vnc_over_websocket", Type: cty.Bool, Required: false},
 		"shutdown_command":               &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
 		"shutdown_timeout":               &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
 		"communicator":                   &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
