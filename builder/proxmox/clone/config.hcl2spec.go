@@ -105,6 +105,7 @@ type FlatConfig struct {
 	BuildType                 *string                  `cty:"build_type" hcl:"build_type"`
 	TemplatePath              *string                  `cty:"template_path" hcl:"template_path"`
 	CloneVM                   *string                  `mapstructure:"clone_vm" cty:"clone_vm" hcl:"clone_vm"`
+	FullClone                 *bool                    `mapstructure:"full_clone" cty:"full_clone" hcl:"full_clone"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -214,6 +215,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"build_type":                   &hcldec.AttrSpec{Name: "build_type", Type: cty.String, Required: false},
 		"template_path":                &hcldec.AttrSpec{Name: "template_path", Type: cty.String, Required: false},
 		"clone_vm":                     &hcldec.AttrSpec{Name: "clone_vm", Type: cty.String, Required: false},
+		"full_clone":                   &hcldec.AttrSpec{Name: "full_clone", Type: cty.Bool, Required: false},
 	}
 	return s
 }

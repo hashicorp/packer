@@ -11,6 +11,7 @@ type Config struct {
 	proxmox.Config `mapstructure:",squash"`
 
 	CloneVM string `mapstructure:"clone_vm"`
+        FullClone bool `mapstructure:"full_clone"`
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, []string, error) {

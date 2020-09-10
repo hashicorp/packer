@@ -52,6 +52,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook, state
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
+        comm := &b.config.Comm
+        if(state.Get("comm") != nil) {
+                comm = state.Get("comm").(*communicator.Config)
+        }
+
 	// Build the steps
 	coreSteps := []multistep.Step{
 		&stepStartVM{},
@@ -66,9 +71,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook, state
 			Ctx:        b.config.Ctx,
 		},
 		&communicator.StepConnect{
-			Config:    &b.config.Comm,
-			Host:      commHost(b.config.Comm.Host()),
-			SSHConfig: b.config.Comm.SSHConfigFunc(),
+			Config:    comm,
+			Host:      commHost((*comm).Host()),
+			SSHConfig: (*comm).SSHConfigFunc(),
 		},
 		&common.StepProvision{},
 		&common.StepCleanupTempKeys{
