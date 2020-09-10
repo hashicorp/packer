@@ -61,7 +61,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		VMName: b.config.VMName,
 		Ctx:    b.config.ctx,
 	}
-	if b.config.USBScanCode {
+	if b.config.USBKeyBoard {
 		stepBootCommand = &vmwcommon.StepUSBBootCommand{
 			Config:      b.config.VNCConfig.BootConfig,
 			KeyInterval: b.config.VNCConfig.BootKeyInterval,

@@ -29,7 +29,7 @@ func TestVNCConfigWrapper_Prepare(t *testing.T) {
 					},
 					DisableVNC: true,
 				},
-				USBScanCode: false,
+				USBKeyBoard: false,
 			},
 			expectedConfig: nil,
 			driver:         new(DriverConfig),
@@ -45,23 +45,23 @@ func TestVNCConfigWrapper_Prepare(t *testing.T) {
 					},
 					DisableVNC: false,
 				},
-				USBScanCode: true,
+				USBKeyBoard: true,
 			},
 			expectedConfig: &BootConfigWrapper{
 				VNCConfig: bootcommand.VNCConfig{
 					DisableVNC: true,
 				},
-				USBScanCode: true,
+				USBKeyBoard: true,
 			},
 			driver: &DriverConfig{
 				RemoteType: "esxi",
 			},
 			errs: nil,
-			warnings: []string{"[WARN] `usb_scan_codes` is set to true then the remote VMWare builds " +
+			warnings: []string{"[WARN] `usb_keyboard` is set to true then the remote VMWare builds " +
 				"will not use VNC to connect to the host. The `disable_vnc` option will be ignored and automatically set to true."},
 		},
 		{
-			name: "Disable USBScanCode warning for local build",
+			name: "Disable USBKeyBoard warning for local build",
 			config: &BootConfigWrapper{
 				VNCConfig: bootcommand.VNCConfig{
 					BootConfig: bootcommand.BootConfig{
@@ -69,18 +69,18 @@ func TestVNCConfigWrapper_Prepare(t *testing.T) {
 					},
 					DisableVNC: false,
 				},
-				USBScanCode: true,
+				USBKeyBoard: true,
 			},
 			expectedConfig: &BootConfigWrapper{
 				VNCConfig: bootcommand.VNCConfig{
 					DisableVNC: false,
 				},
-				USBScanCode: false,
+				USBKeyBoard: false,
 			},
 			driver: &DriverConfig{},
 			errs:   nil,
-			warnings: []string{"[WARN] `usb_scan_codes` can only be used with remote VMWare builds. " +
-				"The `usb_scan_codes` option will be ignored and automatically set to false."},
+			warnings: []string{"[WARN] `usb_keyboard` can only be used with remote VMWare builds. " +
+				"The `usb_keyboard` option will be ignored and automatically set to false."},
 		},
 	}
 

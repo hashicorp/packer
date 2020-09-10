@@ -28,7 +28,7 @@ type FlatConfig struct {
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command" hcl:"boot_command"`
 	DisableVNC                *bool             `mapstructure:"disable_vnc" cty:"disable_vnc" hcl:"disable_vnc"`
 	BootKeyInterval           *string           `mapstructure:"boot_key_interval" cty:"boot_key_interval" hcl:"boot_key_interval"`
-	USBScanCode               *bool             `mapstructure:"usb_scan_codes" cty:"usb_scan_codes" hcl:"usb_scan_codes"`
+	USBKeyBoard               *bool             `mapstructure:"usb_keyboard" cty:"usb_keyboard" hcl:"usb_keyboard"`
 	CleanUpRemoteCache        *bool             `mapstructure:"cleanup_remote_cache" required:"false" cty:"cleanup_remote_cache" hcl:"cleanup_remote_cache"`
 	FusionAppPath             *string           `mapstructure:"fusion_app_path" required:"false" cty:"fusion_app_path" hcl:"fusion_app_path"`
 	RemoteType                *string           `mapstructure:"remote_type" required:"false" cty:"remote_type" hcl:"remote_type"`
@@ -149,7 +149,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"boot_command":                   &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
 		"disable_vnc":                    &hcldec.AttrSpec{Name: "disable_vnc", Type: cty.Bool, Required: false},
 		"boot_key_interval":              &hcldec.AttrSpec{Name: "boot_key_interval", Type: cty.String, Required: false},
-		"usb_scan_codes":                 &hcldec.AttrSpec{Name: "usb_scan_codes", Type: cty.Bool, Required: false},
+		"usb_keyboard":                   &hcldec.AttrSpec{Name: "usb_keyboard", Type: cty.Bool, Required: false},
 		"cleanup_remote_cache":           &hcldec.AttrSpec{Name: "cleanup_remote_cache", Type: cty.Bool, Required: false},
 		"fusion_app_path":                &hcldec.AttrSpec{Name: "fusion_app_path", Type: cty.String, Required: false},
 		"remote_type":                    &hcldec.AttrSpec{Name: "remote_type", Type: cty.String, Required: false},

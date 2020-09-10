@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-// ~> **Note:** If [usb_scan_codes](#usb_scan_codes) is set to true, any VNC configuration will be ignored.
+// ~> **Note:** If [usb_keyboard](#usb_keyboard) is set to true, any VNC configuration will be ignored.
 type RunConfig struct {
 	// Packer defaults to building VMware virtual machines
 	// by launching a GUI that shows the console of the machine being built. When
@@ -41,7 +41,7 @@ type RunConfig struct {
 }
 
 func (c *RunConfig) Prepare(_ *interpolate.Context, bootConfig *BootConfigWrapper) (errs []error) {
-	if !bootConfig.USBScanCode {
+	if !bootConfig.USBKeyBoard {
 		if c.VNCPortMin == 0 {
 			c.VNCPortMin = 5900
 		}

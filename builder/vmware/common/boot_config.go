@@ -14,19 +14,19 @@ type BootConfigWrapper struct {
 	// the [disable_vnc](#disable_vnc) option will be ignored and automatically set to true.
 	// This option is not supported by hosts with free license.
 	//
-	// ~> **Note:** The ESXi 6.5+ removes support to VNC. In this case, the `usb_scan_codes` should be set to true
+	// ~> **Note:** The ESXi 6.5+ removes support to VNC. In this case, the `usb_keyboard` should be set to true
 	// in order to send boot command keystrokes to the VM.
-	USBScanCode bool `mapstructure:"usb_scan_codes"`
+	USBKeyBoard bool `mapstructure:"usb_keyboard"`
 }
 
 func (c *BootConfigWrapper) Prepare(ctx *interpolate.Context, driverConfig *DriverConfig) (warnings []string, errs []error) {
-	if c.USBScanCode {
+	if c.USBKeyBoard {
 		if driverConfig.RemoteType == "" {
-			warnings = append(warnings, "[WARN] `usb_scan_codes` can only be used with remote VMWare builds. "+
-				"The `usb_scan_codes` option will be ignored and automatically set to false.")
-			c.USBScanCode = false
+			warnings = append(warnings, "[WARN] `usb_keyboard` can only be used with remote VMWare builds. "+
+				"The `usb_keyboard` option will be ignored and automatically set to false.")
+			c.USBKeyBoard = false
 		} else if !c.DisableVNC {
-			warnings = append(warnings, "[WARN] `usb_scan_codes` is set to true then the remote VMWare builds "+
+			warnings = append(warnings, "[WARN] `usb_keyboard` is set to true then the remote VMWare builds "+
 				"will not use VNC to connect to the host. The `disable_vnc` option will be ignored and automatically set to true.")
 			c.DisableVNC = true
 			return
