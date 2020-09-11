@@ -64,6 +64,12 @@ func WaitUntilSnapshotCompleted(conn *oapi.Client, id string) error {
 	return <-errCh
 }
 
+func WaitUntilOscSnapshotCompleted(conn *osc.APIClient, id string) error {
+	errCh := make(chan error, 1)
+	go waitForState(errCh, "completed", waitUntilOscSnapshotStateFunc(conn, id))
+	return <-errCh
+}
+
 func WaitUntilImageAvailable(conn *oapi.Client, imageID string) error {
 	errCh := make(chan error, 1)
 	go waitForState(errCh, "available", waitUntilImageStateFunc(conn, imageID))
@@ -260,6 +266,36 @@ func waitUntilSnapshotStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
 	}
 }
 
+func waitUntilOscSnapshotStateFunc(conn *osc.APIClient, id string) stateRefreshFunc {
+	return func() (string, error) {
+		log.Printf("[Debug] Check if Snapshot with id %s exists", id)
+		resp, _, err := conn.SnapshotApi.ReadSnapshots(context.Background(), &osc.ReadSnapshotsOpts{
+			ReadSnapshotsRequest: optional.NewInterface(osc.ReadSnapshotsRequest{
+				Filters: osc.FiltersSnapshot{
+					SnapshotIds: []string{id},
+				},
+			}),
+		})
+
+		log.Printf("[Debug] Read Response %+v", resp)
+
+		if err != nil {
+			return "", err
+		}
+
+		//TODO: check if needed
+		// if resp.OK == nil {
+		// 	return "", fmt.Errorf("Vm with ID %s. Not Found", id)
+		// }
+
+		if len(resp.Snapshots) == 0 {
+			return "pending", nil
+		}
+
+		return resp.Snapshots[0].State, nil
+	}
+}
+
 func waitUntilImageStateFunc(conn *oapi.Client, id string) stateRefreshFunc {
 	return func() (string, error) {
 		log.Printf("[Debug] Check if Image with id %s exists", id)
@@ -308,7 +344,8 @@ func waitUntilOscImageStateFunc(conn *osc.APIClient, id string) stateRefreshFunc
 			return "", err
 		}
 
-		// if resp.Images[] == "" {
+		//TODO: check if needed
+		// if resp.OK == nil {
 		// 	return "", fmt.Errorf("Vm with ID %s. Not Found", id)
 		// }
 
