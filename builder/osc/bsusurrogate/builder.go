@@ -196,8 +196,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
-			Host: osccommon.SSHHost(
-				oapiconn,
+			Host: osccommon.OscSSHHost(
+				oscConn.VmApi,
 				b.config.SSHInterface),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
