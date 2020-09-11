@@ -52,6 +52,20 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("driverConfig", &b.config.DriverConfig)
 	state.Put("temporaryDevices", []string{}) // Devices (in .vmx) created by packer during building
 
+	var stepBootCommand multistep.Step = &vmwcommon.StepVNCBootCommand{
+		Config: b.config.VNCConfig,
+		VMName: b.config.VMName,
+		Ctx:    b.config.ctx,
+	}
+	if b.config.USBKeyBoard {
+		stepBootCommand = &vmwcommon.StepUSBBootCommand{
+			Config:      b.config.VNCConfig.BootConfig,
+			KeyInterval: b.config.VNCConfig.BootKeyInterval,
+			VMName:      b.config.VMName,
+			Ctx:         b.config.ctx,
+		}
+	}
+
 	steps := []multistep.Step{
 		&vmwcommon.StepPrepareTools{
 			RemoteType:        b.config.RemoteType,
@@ -137,14 +151,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DurationBeforeStop: 5 * time.Second,
 			Headless:           b.config.Headless,
 		},
-		&vmwcommon.StepTypeBootCommand{
-			BootWait:    b.config.BootWait,
-			VNCEnabled:  !b.config.DisableVNC,
-			BootCommand: b.config.FlatBootCommand(),
-			VMName:      b.config.VMName,
-			Ctx:         b.config.ctx,
-			KeyInterval: b.config.VNCConfig.BootKeyInterval,
-		},
+		stepBootCommand,
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
 			Host:      driver.CommHost,

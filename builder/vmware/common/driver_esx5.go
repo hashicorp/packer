@@ -26,7 +26,15 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
+	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 	gossh "golang.org/x/crypto/ssh"
+	"golang.org/x/mobile/event/key"
 )
 
 // ESX5 driver talks to an ESXi5 hypervisor remotely over SSH to build
@@ -45,9 +53,64 @@ type ESX5Driver struct {
 	VMName         string
 	CommConfig     communicator.Config
 
+	ctx    context.Context
+	client *govmomi.Client
+	finder *find.Finder
+
 	comm      packer.Communicator
 	outputDir string
 	vmId      string
+}
+
+func NewESX5Driver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver, error) {
+	ctx := context.TODO()
+
+	vsphereUrl, err := url.Parse(fmt.Sprintf("https://%v/sdk", dconfig.RemoteHost))
+	if err != nil {
+		return nil, err
+	}
+	credentials := url.UserPassword(dconfig.RemoteUser, dconfig.RemotePassword)
+	vsphereUrl.User = credentials
+
+	soapClient := soap.NewClient(vsphereUrl, true)
+	vimClient, err := vim25.NewClient(ctx, soapClient)
+	if err != nil {
+		return nil, err
+	}
+
+	vimClient.RoundTripper = session.KeepAlive(vimClient.RoundTripper, 10*time.Minute)
+	client := &govmomi.Client{
+		Client:         vimClient,
+		SessionManager: session.NewManager(vimClient),
+	}
+
+	err = client.SessionManager.Login(ctx, credentials)
+	if err != nil {
+		return nil, err
+	}
+
+	finder := find.NewFinder(client.Client, false)
+	datacenter, err := finder.DefaultDatacenter(ctx)
+	if err != nil {
+		return nil, err
+	}
+	finder.SetDatacenter(datacenter)
+
+	return &ESX5Driver{
+		Host:           dconfig.RemoteHost,
+		Port:           dconfig.RemotePort,
+		Username:       dconfig.RemoteUser,
+		Password:       dconfig.RemotePassword,
+		PrivateKeyFile: dconfig.RemotePrivateKey,
+		Datastore:      dconfig.RemoteDatastore,
+		CacheDatastore: dconfig.RemoteCacheDatastore,
+		CacheDirectory: dconfig.RemoteCacheDirectory,
+		VMName:         vmName,
+		CommConfig:     config.Comm,
+		ctx:            ctx,
+		client:         client,
+		finder:         finder,
+	}, nil
 }
 
 func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
@@ -886,4 +949,39 @@ func (r *esxcliReader) find(key, val string) (map[string]string, error) {
 			return record, nil
 		}
 	}
+}
+
+type KeyInput struct {
+	Scancode key.Code
+	Alt      bool
+	Ctrl     bool
+	Shift    bool
+}
+
+func (d *ESX5Driver) TypeOnKeyboard(input KeyInput) (int32, error) {
+	vm, err := d.finder.VirtualMachine(d.ctx, d.VMName)
+	if err != nil {
+		return 0, err
+	}
+
+	var spec types.UsbScanCodeSpec
+	spec.KeyEvents = append(spec.KeyEvents, types.UsbScanCodeSpecKeyEvent{
+		UsbHidCode: int32(input.Scancode)<<16 | 7,
+		Modifiers: &types.UsbScanCodeSpecModifierType{
+			LeftControl: &input.Ctrl,
+			LeftAlt:     &input.Alt,
+			LeftShift:   &input.Shift,
+		},
+	})
+
+	req := &types.PutUsbScanCodes{
+		This: vm.Reference(),
+		Spec: spec,
+	}
+
+	resp, err := methods.PutUsbScanCodes(d.ctx, d.client.RoundTripper, req)
+	if err != nil {
+		return 0, err
+	}
+	return resp.Returnval, nil
 }
