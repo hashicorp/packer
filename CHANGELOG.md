@@ -14,7 +14,7 @@
 * builder/vsphere: Look for a default resource pool when root resource pool is
     not found. [GH-9809]
 * core: New `cd_files` option to mount iso for modern OSes which don't support
-    floppies. [GH-9796]
+    floppies. [GH-9796] [GH-9919]
 * HCL2: When the type of a variable is not known evaluate setting as a literal
     string instead of a variable name. [GH-9863]
 * post-processor/yandex-import: Allow custom API endpoint. [GH-9850]
