@@ -15,7 +15,9 @@ import (
 //
 // It sets the vmRef state which is used throughout the later steps to reference the VM
 // in API calls.
-type stepStartVM struct{}
+type stepStartVM struct{
+        vmCreator     ProxmoxVMCreator
+}
 
 type ProxmoxVMCreator interface {
 	Create(*proxmox.VmRef, proxmox.ConfigQemu, multistep.StateBag) error
@@ -35,8 +37,6 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 	if c.DisableKVM {
 		kvm = false
 	}
-
-	vmStarter := state.Get("vm-creator").(ProxmoxVMCreator)
 
 	ui.Say("Creating VM")
 	config := proxmox.ConfigQemu{
@@ -81,7 +81,7 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		vmRef.SetPool(c.Pool)
 	}
 
-	err := vmStarter.Create(vmRef, config, state)
+	err := s.vmCreator.Create(vmRef, config, state)
 	if err != nil {
 		err := fmt.Errorf("Error creating VM: %s", err)
 		state.Put("error", err)

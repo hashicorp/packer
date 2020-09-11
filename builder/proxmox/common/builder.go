@@ -13,12 +13,13 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-func NewSharedBuilder(id string, config Config, preSteps []multistep.Step, postSteps []multistep.Step) *Builder {
+func NewSharedBuilder(id string, config Config, preSteps []multistep.Step, postSteps []multistep.Step, vmCreator ProxmoxVMCreator) *Builder {
 	return &Builder{
 		id:        id,
 		config:    config,
 		preSteps:  preSteps,
 		postSteps: postSteps,
+                vmCreator: vmCreator,
 	}
 }
 
@@ -29,6 +30,7 @@ type Builder struct {
 	postSteps     []multistep.Step
 	runner        multistep.Runner
 	proxmoxClient *proxmox.Client
+        vmCreator     ProxmoxVMCreator
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook, state multistep.StateBag) (packer.Artifact, error) {
@@ -59,7 +61,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook, state
 
 	// Build the steps
 	coreSteps := []multistep.Step{
-		&stepStartVM{},
+		&stepStartVM{
+                        vmCreator: b.vmCreator,
+                },
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,

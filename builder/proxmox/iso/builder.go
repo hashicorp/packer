@@ -34,7 +34,6 @@ const downloadPathKey = "downloaded_iso_path"
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
 	state.Put("iso-config", &b.config)
-	state.Put("vm-creator", &isoVMCreator{})
 
 	preSteps := []multistep.Step{
 		&common.StepDownload{
@@ -64,13 +63,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&stepFinalizeISOTemplate{},
 	}
 
-	sb := proxmox.NewSharedBuilder(BuilderID, b.config.Config, preSteps, postSteps)
+	sb := proxmox.NewSharedBuilder(BuilderID, b.config.Config, preSteps, postSteps, &isoVMCreator{})
 	return sb.Run(ctx, ui, hook, state)
 }
 
 type isoVMCreator struct{}
-
-var _ proxmox.ProxmoxVMCreator = &isoVMCreator{}
 
 func (*isoVMCreator) Create(vmRef *proxmoxapi.VmRef, config proxmoxapi.ConfigQemu, state multistep.StateBag) error {
 	isoFile := state.Get("iso_file").(string)

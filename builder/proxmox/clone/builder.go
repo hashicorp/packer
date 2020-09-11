@@ -34,7 +34,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
 	state.Put("clone-config", &b.config)
-	state.Put("vm-creator", &cloneVMCreator{})
         state.Put("comm", &b.config.Comm)
 
 	preSteps := []multistep.Step{
@@ -46,13 +45,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
         }
 	postSteps := []multistep.Step{}
 
-	sb := proxmox.NewSharedBuilder(BuilderID, b.config.Config, preSteps, postSteps)
+	sb := proxmox.NewSharedBuilder(BuilderID, b.config.Config, preSteps, postSteps, &cloneVMCreator{})
 	return sb.Run(ctx, ui, hook, state)
 }
 
 type cloneVMCreator struct{}
-
-var _ proxmox.ProxmoxVMCreator = &cloneVMCreator{}
 
 func (*cloneVMCreator) Create(vmRef *proxmoxapi.VmRef, config proxmoxapi.ConfigQemu, state multistep.StateBag) error {
 	client := state.Get("proxmoxClient").(*proxmoxapi.Client)
