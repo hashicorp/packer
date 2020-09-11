@@ -117,18 +117,21 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	oapiconn := oapi.NewClient(clientConfig, skipClient)
 
+	oscConn := b.config.NewOSCClient()
+
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
 	state.Put("oapi", oapiconn)
-	state.Put("clientConfig", clientConfig)
+	state.Put("osc", oscConn)
+	state.Put("accessConfig", &b.config.AccessConfig)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
 	//VMStep
 
-	omiDevices := b.config.BuildOMIDevices()
-	launchDevices := b.config.BuildLaunchDevices()
+	omiDevices := b.config.BuildOscOMIDevices()
+	launchOSCDevices := b.config.BuildOSCLaunchDevices()
 
 	steps := []multistep.Step{
 		&osccommon.StepPreValidate{
@@ -207,7 +210,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DisableStopVm: b.config.DisableStopVm,
 		},
 		&StepSnapshotVolumes{
-			LaunchDevices: launchDevices,
+			LaunchDevices: launchOSCDevices,
 		},
 		&osccommon.StepDeregisterOMI{
 			AccessConfig:        &b.config.AccessConfig,
@@ -219,7 +222,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepRegisterOMI{
 			RootDevice:    b.config.RootDevice,
 			OMIDevices:    omiDevices,
-			LaunchDevices: launchDevices,
+			LaunchDevices: launchOSCDevices,
+			RawRegion:     b.config.RawRegion,
 		},
 		&osccommon.StepUpdateOMIAttributes{
 			AccountIds:         b.config.OMIAccountIDs,
