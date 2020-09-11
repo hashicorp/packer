@@ -58,6 +58,10 @@ func (c *CloneConfig) Prepare() []error {
 		errs = append(errs, fmt.Errorf("'linked_clone' and 'disk_size' cannot be used together"))
 	}
 
+	if c.MacAddress != "" && c.Network == "" {
+		errs = append(errs, fmt.Errorf("'network' is required when 'mac_address' is specified"))
+	}
+
 	return errs
 }
 
