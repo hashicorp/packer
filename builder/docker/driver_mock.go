@@ -118,6 +118,10 @@ func (d *MockDriver) IPAddress(id string) (string, error) {
 	return d.IPAddressResult, d.IPAddressErr
 }
 
+func (d *MockDriver) SHA256(id string) (string, error) {
+	return "", nil
+}
+
 func (d *MockDriver) Login(r, u, p string) error {
 	d.LoginCalled = true
 	d.LoginRepo = r

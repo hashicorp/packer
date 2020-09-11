@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -29,7 +30,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		return nil, warnings, errs
 	}
 
-	return nil, warnings, nil
+	return []string{
+		"ImageSha256",
+	}, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
@@ -43,6 +46,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, err
 	}
 	log.Printf("[DEBUG] Docker version: %s", version.String())
+
+	// Setup the state bag and initial state for the steps
+	state := new(multistep.BasicStateBag)
+	state.Put("config", &b.config)
+	state.Put("hook", hook)
+	state.Put("ui", ui)
+	generatedData := &builder.GeneratedData{State: state}
+
+	// Setup the driver that will talk to Docker
+	state.Put("driver", driver)
 
 	steps := []multistep.Step{
 		&StepTempDir{},
@@ -75,14 +88,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, errArtifactNotUsed
 	}
 
-	// Setup the state bag and initial state for the steps
-	state := new(multistep.BasicStateBag)
-	state.Put("config", &b.config)
-	state.Put("hook", hook)
-	state.Put("ui", ui)
-
-	// Setup the driver that will talk to Docker
-	state.Put("driver", driver)
+	steps = append(steps, &StepSetGeneratedData{
+		GeneratedData: generatedData,
+	})
 
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
