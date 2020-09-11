@@ -69,6 +69,7 @@ type CloneConfig struct {
 	Datastore      string
 	LinkedClone    bool
 	Network        string
+	MacAddress     string
 	Annotation     string
 	VAppProperties map[string]string
 }
@@ -344,7 +345,9 @@ func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) 
 			return nil, err
 		}
 
-		adapter.GetVirtualEthernetCard().Backing = backing
+		current := adapter.GetVirtualEthernetCard()
+		current.Backing = backing
+		current.MacAddress = config.MacAddress
 
 		config := &types.VirtualDeviceConfigSpec{
 			Device:    adapter.(types.BaseVirtualDevice),
