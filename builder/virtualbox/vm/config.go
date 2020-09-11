@@ -6,7 +6,6 @@ package vm
 import (
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
@@ -19,44 +18,19 @@ import (
 
 // Config is the configuration structure for the builder.
 type Config struct {
-	common.PackerConfig          `mapstructure:",squash"`
-	common.HTTPConfig            `mapstructure:",squash"`
-	common.FloppyConfig          `mapstructure:",squash"`
-	bootcommand.BootConfig       `mapstructure:",squash"`
-	vboxcommon.ExportConfig      `mapstructure:",squash"`
-	vboxcommon.OutputConfig      `mapstructure:",squash"`
-	vboxcommon.RunConfig         `mapstructure:",squash"`
-	vboxcommon.CommConfig        `mapstructure:",squash"`
-	vboxcommon.ShutdownConfig    `mapstructure:",squash"`
-	vboxcommon.VBoxManageConfig  `mapstructure:",squash"`
-	vboxcommon.VBoxVersionConfig `mapstructure:",squash"`
-
-	// The method by which guest additions are
-	// made available to the guest for installation. Valid options are `upload`,
-	// `attach`, or `disable`. If the mode is `attach` the guest additions ISO will
-	// be attached as a CD device to the virtual machine. If the mode is `upload`
-	// the guest additions ISO will be uploaded to the path specified by
-	// `guest_additions_path`. The default value is `upload`. If `disable` is used,
-	// guest additions won't be downloaded, either.
-	GuestAdditionsMode string `mapstructure:"guest_additions_mode"`
-	// The path on the guest virtual machine
-	//  where the VirtualBox guest additions ISO will be uploaded. By default this
-	//  is `VBoxGuestAdditions.iso` which should upload into the login directory of
-	//  the user. This is a [configuration
-	//  template](/docs/templates/engine) where the `Version`
-	//  variable is replaced with the VirtualBox version.
-	GuestAdditionsPath string `mapstructure:"guest_additions_path"`
-	// The SHA256 checksum of the guest
-	//  additions ISO that will be uploaded to the guest VM. By default the
-	//  checksums will be downloaded from the VirtualBox website, so this only needs
-	//  to be set if you want to be explicit about the checksum.
-	GuestAdditionsSHA256 string `mapstructure:"guest_additions_sha256"`
-	// The URL to the guest additions ISO
-	//  to upload. This can also be a file URL if the ISO is at a local path. By
-	//  default, the VirtualBox builder will attempt to find the guest additions ISO
-	//  on the local file system. If it is not available locally, the builder will
-	//  download the proper guest additions ISO from the internet.
-	GuestAdditionsURL string `mapstructure:"guest_additions_url" required:"false"`
+	common.PackerConfig             `mapstructure:",squash"`
+	common.HTTPConfig               `mapstructure:",squash"`
+	common.FloppyConfig             `mapstructure:",squash"`
+	common.CDConfig                 `mapstructure:",squash"`
+	bootcommand.BootConfig          `mapstructure:",squash"`
+	vboxcommon.ExportConfig         `mapstructure:",squash"`
+	vboxcommon.OutputConfig         `mapstructure:",squash"`
+	vboxcommon.RunConfig            `mapstructure:",squash"`
+	vboxcommon.CommConfig           `mapstructure:",squash"`
+	vboxcommon.ShutdownConfig       `mapstructure:",squash"`
+	vboxcommon.VBoxManageConfig     `mapstructure:",squash"`
+	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
+	vboxcommon.GuestAdditionsConfig `mapstructure:",squash"`
 	// This is the name of the virtual machine to which the
 	//  builder shall attach.
 	VMName string `mapstructure:"vm_name" required:"true"`
@@ -109,14 +83,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// Defaults
-	if c.GuestAdditionsMode == "" {
-		c.GuestAdditionsMode = "upload"
-	}
-
-	if c.GuestAdditionsPath == "" {
-		c.GuestAdditionsPath = "VBoxGuestAdditions.iso"
-	}
-
 	if c.PostShutdownDelay == 0 {
 		c.PostShutdownDelay = 2 * time.Second
 	}
@@ -125,6 +91,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
@@ -133,35 +100,17 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.GuestAdditionsConfig.Prepare(&c.ctx)...)
+
+	if c.GuestAdditionsInterface == "" {
+		c.GuestAdditionsInterface = "ide"
+	}
 
 	log.Printf("PostShutdownDelay: %s", c.PostShutdownDelay)
 
 	if c.VMName == "" {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("vm_name is required"))
-	}
-
-	validMode := false
-	validModes := []string{
-		vboxcommon.GuestAdditionsModeDisable,
-		vboxcommon.GuestAdditionsModeAttach,
-		vboxcommon.GuestAdditionsModeUpload,
-	}
-
-	for _, mode := range validModes {
-		if c.GuestAdditionsMode == mode {
-			validMode = true
-			break
-		}
-	}
-
-	if !validMode {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("guest_additions_mode is invalid. Must be one of: %v", validModes))
-	}
-
-	if c.GuestAdditionsSHA256 != "" {
-		c.GuestAdditionsSHA256 = strings.ToLower(c.GuestAdditionsSHA256)
 	}
 
 	// Warnings

@@ -54,6 +54,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Files:       b.config.FloppyConfig.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 		},
+		&common.StepCreateCD{
+			Files: b.config.CDConfig.CDFiles,
+			Label: b.config.CDConfig.CDLabel,
+		},
 		&StepSetSnapshot{
 			Name:           b.config.VMName,
 			AttachSnapshot: b.config.AttachSnapshot,
@@ -75,8 +79,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepImport{
 			Name: b.config.VMName,
 		},
-		&vboxcommon.StepAttachGuestAdditions{
-			GuestAdditionsMode: b.config.GuestAdditionsMode,
+		&vboxcommon.StepAttachISOs{
+			AttachBootIso:           false,
+			ISOInterface:            b.config.GuestAdditionsInterface,
+			GuestAdditionsMode:      b.config.GuestAdditionsMode,
+			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
 		},
 		&vboxcommon.StepConfigureVRDP{
 			VRDPBindAddress: b.config.VRDPBindAddress,
@@ -131,6 +138,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DisableShutdown: b.config.DisableShutdown,
 			ACPIShutdown:    b.config.ACPIShutdown,
 		},
+		&vboxcommon.StepRemoveDevices{},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManagePost,
 			Ctx:      b.config.ctx,

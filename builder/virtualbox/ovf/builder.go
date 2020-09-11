@@ -60,6 +60,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
+		&common.StepCreateCD{
+			Files: b.config.CDConfig.CDFiles,
+			Label: b.config.CDConfig.CDLabel,
+		},
 		new(vboxcommon.StepHTTPIPDiscover),
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
@@ -91,7 +95,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			ImportFlags:    b.config.ImportFlags,
 			KeepRegistered: b.config.KeepRegistered,
 		},
-		&vboxcommon.StepAttachGuestAdditions{
+		&vboxcommon.StepAttachISOs{
+			AttachBootIso:           false,
+			ISOInterface:            b.config.GuestAdditionsInterface,
 			GuestAdditionsMode:      b.config.GuestAdditionsMode,
 			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
 		},
@@ -148,9 +154,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DisableShutdown: b.config.DisableShutdown,
 			ACPIShutdown:    b.config.ACPIShutdown,
 		},
-		&vboxcommon.StepRemoveDevices{
-			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
-		},
+		&vboxcommon.StepRemoveDevices{},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManagePost,
 			Ctx:      b.config.ctx,

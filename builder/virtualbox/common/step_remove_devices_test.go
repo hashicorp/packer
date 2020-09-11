@@ -37,7 +37,17 @@ func TestStepRemoveDevices_attachedIso(t *testing.T) {
 	state := testState(t)
 	step := new(StepRemoveDevices)
 
-	state.Put("attachedIso", true)
+	diskUnmountCommands := map[string][]string{
+		"boot_iso": []string{
+			"storageattach", "myvm",
+			"--storagectl", "IDE Controller",
+			"--port", "0",
+			"--device", "1",
+			"--type", "dvddrive",
+			"--medium", "none",
+		},
+	}
+	state.Put("disk_unmount_commands", diskUnmountCommands)
 	state.Put("vmName", "foo")
 
 	driver := state.Get("driver").(*DriverMock)
@@ -63,8 +73,17 @@ func TestStepRemoveDevices_attachedIsoOnSata(t *testing.T) {
 	state := testState(t)
 	step := new(StepRemoveDevices)
 
-	state.Put("attachedIso", true)
-	state.Put("attachedIsoOnSata", true)
+	diskUnmountCommands := map[string][]string{
+		"boot_iso": []string{
+			"storageattach", "myvm",
+			"--storagectl", "SATA Controller",
+			"--port", "0",
+			"--device", "1",
+			"--type", "dvddrive",
+			"--medium", "none",
+		},
+	}
+	state.Put("disk_unmount_commands", diskUnmountCommands)
 	state.Put("vmName", "foo")
 
 	driver := state.Get("driver").(*DriverMock)

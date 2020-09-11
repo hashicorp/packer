@@ -21,8 +21,7 @@ import (
 //
 // Produces:
 type StepRemoveDevices struct {
-	Bundling                VBoxBundleConfig
-	GuestAdditionsInterface string
+	Bundling VBoxBundleConfig
 }
 
 func (s *StepRemoveDevices) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -73,53 +72,23 @@ func (s *StepRemoveDevices) Run(ctx context.Context, state multistep.StateBag) m
 		}
 	}
 
-	if !s.Bundling.BundleISO {
-		if _, ok := state.GetOk("attachedIso"); ok {
-			controllerName := "IDE Controller"
-			port := "0"
-			device := "1"
-			if _, ok := state.GetOk("attachedIsoOnSata"); ok {
-				controllerName = "SATA Controller"
-				port = "1"
-				device = "0"
-			}
-
-			command := []string{
-				"storageattach", vmName,
-				"--storagectl", controllerName,
-				"--port", port,
-				"--device", device,
-				"--medium", "none",
-			}
-
-			if err := driver.VBoxManage(command...); err != nil {
-				err := fmt.Errorf("Error detaching ISO: %s", err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			}
-		}
+	var isoUnmountCommands map[string][]string
+	isoUnmountCommandsRaw, ok := state.GetOk("disk_unmount_commands")
+	if !ok {
+		// No disks to unmount
+		return multistep.ActionContinue
+	} else {
+		isoUnmountCommands = isoUnmountCommandsRaw.(map[string][]string)
 	}
 
-	if _, ok := state.GetOk("guest_additions_attached"); ok {
-		ui.Message("Removing guest additions drive...")
-		controllerName := "IDE Controller"
-		port := "1"
-		device := "0"
-		if s.GuestAdditionsInterface == "sata" {
-			controllerName = "SATA Controller"
-			port = "2"
-			device = "0"
+	for diskCategory, unmountCommand := range isoUnmountCommands {
+		if diskCategory == "boot_iso" && s.Bundling.BundleISO {
+			// skip the unmount if user wants to bundle the iso
+			continue
 		}
-		command := []string{
-			"storageattach", vmName,
-			"--storagectl", controllerName,
-			"--port", port,
-			"--device", device,
-			"--medium", "none",
-		}
-		if err := driver.VBoxManage(command...); err != nil {
-			err := fmt.Errorf("Error removing guest additions: %s", err)
+
+		if err := driver.VBoxManage(unmountCommand...); err != nil {
+			err := fmt.Errorf("Error detaching ISO: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
