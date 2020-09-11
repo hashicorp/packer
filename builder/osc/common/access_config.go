@@ -103,7 +103,8 @@ func (c *AccessConfig) GetRegion() string {
 func (c *AccessConfig) NewOSCClientByRegion(region string) *osc.APIClient {
 	skipClient := &http.Client{
 		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.InsecureSkipTLSVerify},
+			Proxy:           http.ProxyFromEnvironment,
 		},
 	}
 
