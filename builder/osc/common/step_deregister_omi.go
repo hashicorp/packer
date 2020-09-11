@@ -23,8 +23,6 @@ type StepDeregisterOMI struct {
 func (s *StepDeregisterOMI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// Check for force deregister
 	if !s.ForceDeregister {
-		log.Println("ENTRO 0 ")
-
 		return multistep.ActionContinue
 	}
 
