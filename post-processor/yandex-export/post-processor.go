@@ -218,6 +218,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	// Run the steps.
 	p.runner = common.NewRunner(steps, p.config.PackerConfig, ui)
 	p.runner.Run(ctx, state)
+	if rawErr, ok := state.GetOk("error"); ok {
+		return nil, false, false, rawErr.(error)
+	}
 
 	result := &Artifact{
 		paths: p.config.Paths,
