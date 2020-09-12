@@ -23,7 +23,7 @@ type proxmoxDriver struct {
 func NewProxmoxDriver(c commandTyper, vmRef *proxmox.VmRef, interval time.Duration) *proxmoxDriver {
 	// Mappings for packer shorthand to qemu qkeycodes
 	sMap := map[string]string{
-		"spacebar":   "shift-f10",
+		"spacebar":   "spc",
 		"bs":         "backspace",
 		"del":        "delete",
 		"return":     "ret",
@@ -120,9 +120,9 @@ func (p *proxmoxDriver) SendSpecial(special string, action bootcommand.KeyAction
 	case "Press":
 		return p.send(keys)
 	case "On":
-		p.normalBuffer = addKeyToBuffer(p.normalBuffer, keys)
+		p.specialBuffer = addKeyToBuffer(p.specialBuffer, keys)
 	case "Off":
-		p.normalBuffer = removeKeyFromBuffer(p.normalBuffer, keys)
+		p.specialBuffer = removeKeyFromBuffer(p.specialBuffer, keys)
 	}
 	return nil
 }
@@ -135,6 +135,7 @@ func (p *proxmoxDriver) send(key string) error {
 	if err != nil {
 		return err
 	}
+	time.Sleep(p.interval)
 	return nil
 }
 
