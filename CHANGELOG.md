@@ -31,6 +31,9 @@
     slice. [GH-9857]
 * post-processor/yandex-export: Set metadata key to expected value on error.
     [GH-9849]
+* post-processor/yandex-export: Check for error after runner completes. 
+    [GH-9925]
+* post-processor/yandex-import: Fix S3 URL construct process. [GH-9931]
 
 ## 1.6.2 (August 28, 2020)
 
