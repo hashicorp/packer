@@ -245,6 +245,12 @@ builder.
   - `iso_checksum` (string) - Checksum of the ISO file.
   - `unmount` (bool) - If true, remove the mounted ISO from the template after finishing. Defaults to `false`.
 
+- `http_interface` - (string) - Name of the network interface that Packer gets
+  `HTTPIP` from. Defaults to the first non loopback interface.
+
+- `vm_interface` - (string) - Name of the network interface that Packer gets
+  the VMs IP from. Defaults to the first non loopback interface.
+
 ## Example: Fedora with kickstart
 
 Here is a basic example creating a Fedora 29 server image with a Kickstart

@@ -20,6 +20,7 @@ type FlatConfig struct {
 	HTTPPortMin               *int                `mapstructure:"http_port_min" cty:"http_port_min" hcl:"http_port_min"`
 	HTTPPortMax               *int                `mapstructure:"http_port_max" cty:"http_port_max" hcl:"http_port_max"`
 	HTTPAddress               *string             `mapstructure:"http_bind_address" cty:"http_bind_address" hcl:"http_bind_address"`
+	HTTPInterface             *string             `mapstructure:"http_interface" undocumented:"true" cty:"http_interface" hcl:"http_interface"`
 	ISOChecksum               *string             `mapstructure:"iso_checksum" required:"true" cty:"iso_checksum" hcl:"iso_checksum"`
 	RawSingleISOUrl           *string             `mapstructure:"iso_url" required:"true" cty:"iso_url" hcl:"iso_url"`
 	ISOUrls                   []string            `mapstructure:"iso_urls" cty:"iso_urls" hcl:"iso_urls"`
@@ -104,6 +105,7 @@ type FlatConfig struct {
 	CloudInit                 *bool               `mapstructure:"cloud_init" cty:"cloud_init" hcl:"cloud_init"`
 	CloudInitStoragePool      *string             `mapstructure:"cloud_init_storage_pool" cty:"cloud_init_storage_pool" hcl:"cloud_init_storage_pool"`
 	AdditionalISOFiles        []FlatstorageConfig `mapstructure:"additional_iso_files" cty:"additional_iso_files" hcl:"additional_iso_files"`
+	VMInterface               *string             `mapstructure:"vm_interface" cty:"vm_interface" hcl:"vm_interface"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -129,6 +131,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"http_port_min":                &hcldec.AttrSpec{Name: "http_port_min", Type: cty.Number, Required: false},
 		"http_port_max":                &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
 		"http_bind_address":            &hcldec.AttrSpec{Name: "http_bind_address", Type: cty.String, Required: false},
+		"http_interface":               &hcldec.AttrSpec{Name: "http_interface", Type: cty.String, Required: false},
 		"iso_checksum":                 &hcldec.AttrSpec{Name: "iso_checksum", Type: cty.String, Required: false},
 		"iso_url":                      &hcldec.AttrSpec{Name: "iso_url", Type: cty.String, Required: false},
 		"iso_urls":                     &hcldec.AttrSpec{Name: "iso_urls", Type: cty.List(cty.String), Required: false},
@@ -213,6 +216,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"cloud_init":                   &hcldec.AttrSpec{Name: "cloud_init", Type: cty.Bool, Required: false},
 		"cloud_init_storage_pool":      &hcldec.AttrSpec{Name: "cloud_init_storage_pool", Type: cty.String, Required: false},
 		"additional_iso_files":         &hcldec.BlockListSpec{TypeName: "additional_iso_files", Nested: hcldec.ObjectSpec((*FlatstorageConfig)(nil).HCL2Spec())},
+		"vm_interface":                 &hcldec.AttrSpec{Name: "vm_interface", Type: cty.String, Required: false},
 	}
 	return s
 }

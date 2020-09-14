@@ -53,14 +53,20 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 			return multistep.ActionHalt
 		}
 	}
-
-	httpIP, err := hostIP()
-	if err != nil {
-		err := fmt.Errorf("Failed to determine host IP: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	var httpIP string
+	var err error
+	if c.HTTPAddress != "0.0.0.0" {
+		httpIP = c.HTTPAddress
+	} else {
+		httpIP, err = hostIP(c.HTTPInterface)
+		if err != nil {
+			err := fmt.Errorf("Failed to determine host IP: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
+
 	state.Put("http_ip", httpIP)
 	s.Ctx.Data = &bootCommandTemplateData{
 		HTTPIP:   httpIP,
@@ -97,12 +103,25 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
-func hostIP() (string, error) {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "", err
-	}
+func hostIP(ifname string) (string, error) {
+	var addrs []net.Addr
+	var err error
 
+	if ifname != "" {
+		iface, err := net.InterfaceByName(ifname)
+		if err != nil {
+			return "", err
+		}
+		addrs, err = iface.Addrs()
+		if err != nil {
+			return "", err
+		}
+	} else {
+		addrs, err = net.InterfaceAddrs()
+		if err != nil {
+			return "", err
+		}
+	}
 	for _, addr := range addrs {
 		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			if ipnet.IP.To4() != nil {
@@ -110,6 +129,5 @@ func hostIP() (string, error) {
 			}
 		}
 	}
-
 	return "", errors.New("No host IP found")
 }

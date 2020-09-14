@@ -34,6 +34,10 @@ type HTTPConfig struct {
 	// This is the bind address for the HTTP server. Defaults to 0.0.0.0 so that
 	// it will work with any network interface.
 	HTTPAddress string `mapstructure:"http_bind_address"`
+	// This is the bind interface for the HTTP server. Defaults to the first
+	// interface with a non-loopback address. Either `http_bind_address` or
+	// `http_interface` can be specified.
+	HTTPInterface string `mapstructure:"http_interface" undocumented:"true"`
 }
 
 func (c *HTTPConfig) Prepare(ctx *interpolate.Context) []error {
@@ -55,6 +59,11 @@ func (c *HTTPConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.HTTPPortMin > c.HTTPPortMax {
 		errs = append(errs,
 			errors.New("http_port_min must be less than http_port_max"))
+	}
+
+	if c.HTTPInterface != "" && c.HTTPAddress == "0.0.0.0" {
+		errs = append(errs,
+			errors.New("either http_interface of http_bind_address can be specified"))
 	}
 
 	return errs
