@@ -209,7 +209,7 @@ export default [
       },
       { category: 'parallels', content: ['iso', 'pvm'] },
       'profitbricks',
-      'proxmox',
+      { category: 'proxmox', content: ['iso', 'clone'] },
       'qemu',
       'scaleway',
       'tencentcloud-cvm',
