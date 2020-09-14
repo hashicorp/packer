@@ -12,7 +12,7 @@ type BootConfigWrapper struct {
 	bootcommand.VNCConfig `mapstructure:",squash"`
 	// If set to true, Packer will use USB HID Keyboard scan codes to send the boot command to the VM and
 	// the [disable_vnc](#disable_vnc) option will be ignored and automatically set to true.
-	// This option is not supported by hosts with free license.
+	// This option is not supported by hosts with free license, use [vnc_over_websocket](#vnc_over_websocket) instead.
 	//
 	// ~> **Note:** The ESXi 6.7+ removes support to VNC. In this case, the `usb_keyboard` or [vnc_over_websocket](#vnc_over_websocket)
 	// should be set to true in order to send boot command keystrokes to the VM. If both are set, `usb_keyboard` will be ignored
