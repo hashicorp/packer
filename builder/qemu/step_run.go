@@ -190,14 +190,26 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		}
 	}
 
+	cdPaths := []string{}
+	// Add the installation CD to the run command
 	if !config.DiskImage {
+		cdPaths = append(cdPaths, isoPath)
+	}
+	// Add our custom CD created from cd_files, if it exists
+	cdFilesPath, ok := state.Get("cd_path").(string)
+	if ok {
+		if cdFilesPath != "" {
+			cdPaths = append(cdPaths, cdFilesPath)
+		}
+	}
+	for i, cdPath := range cdPaths {
 		if config.CDROMInterface == "" {
-			defaultArgs["-cdrom"] = isoPath
+			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,index=%d,media=cdrom", cdPath, i))
 		} else if config.CDROMInterface == "virtio-scsi" {
-			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=none,id=cdrom,media=cdrom", isoPath))
-			deviceArgs = append(deviceArgs, "virtio-scsi-device", "scsi-cd,drive=cdrom")
+			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=none,index=%d,id=cdrom%d,media=cdrom", cdPath, i, i))
+			deviceArgs = append(deviceArgs, "virtio-scsi-device", fmt.Sprintf("scsi-cd,drive=cdrom%d", i))
 		} else {
-			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,id=cdrom,media=cdrom", isoPath, config.CDROMInterface))
+			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,index=%d,id=cdrom%d,media=cdrom", cdPath, config.CDROMInterface, i, i))
 		}
 	}
 

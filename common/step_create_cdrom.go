@@ -144,6 +144,7 @@ var supportedCDISOCreationCommands []cdISOCreationCommand = []cdISOCreationComma
 		"hdiutil", func(path string, label string, source string, dest string) *exec.Cmd {
 			return exec.Command(
 				path,
+				"makehybrid",
 				"-o", dest,
 				"-hfs",
 				"-joliet",

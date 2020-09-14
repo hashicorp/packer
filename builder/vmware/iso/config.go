@@ -193,6 +193,15 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
+	if c.CdromAdapterType != "" {
+		c.CdromAdapterType = strings.ToLower(c.CdromAdapterType)
+		if c.CdromAdapterType != "ide" && c.CdromAdapterType != "sata" && c.CdromAdapterType != "scsi" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("cdrom_adapter_type must be one of ide, sata, or scsi"))
+		}
+	}
+
+	// Warnings
 	if c.ShutdownCommand == "" {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+

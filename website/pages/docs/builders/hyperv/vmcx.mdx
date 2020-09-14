@@ -119,6 +119,14 @@ builder.
 
 @include 'helper/communicator/WinRM-not-required.mdx'
 
+### CD configuration
+
+@include 'common/CDConfig.mdx'
+
+#### Optional:
+
+@include 'common/CDConfig-not-required.mdx'
+
 ## Boot Command
 
 The `boot_command` configuration is very important: it specifies the keys to
@@ -164,7 +172,7 @@ for the version of Hyper-V that is running.
 
 Floppy drives are no longer supported by generation 2 machines. This requires
 you to take another approach when dealing with preseed or answer files. Two
-possible options are using virtual DVD drives or using Packers built in web
+possible options are using the `cd_files` option or using Packer's built in web
 server.
 
 When dealing with Windows you need to enable UEFI drives for generation 2
