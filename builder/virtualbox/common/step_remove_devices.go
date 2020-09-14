@@ -95,6 +95,10 @@ func (s *StepRemoveDevices) Run(ctx context.Context, state multistep.StateBag) m
 		}
 	}
 
+	// log that we removed the isos, so we don't waste time trying to do it
+	// in the step_attach_isos cleanup.
+	state.Put("detached_isos", true)
+
 	return multistep.ActionContinue
 }
 

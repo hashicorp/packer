@@ -145,14 +145,14 @@ func (s *StepAttachISOs) Cleanup(state multistep.StateBag) {
 	}
 
 	driver := state.Get("driver").(Driver)
+	_, ok := state.GetOk("detached_isos")
 
-	for _, command := range s.diskUnmountCommands {
-		// Remove the ISO. Note that this will probably fail since
-		// stepRemoveDevices does this as well. No big deal.
-		err := driver.VBoxManage(command...)
-		if err != nil {
-			log.Printf("error detaching iso; probably was already detached " +
-				"in step_remove_devices")
+	if !ok {
+		for _, command := range s.diskUnmountCommands {
+			err := driver.VBoxManage(command...)
+			if err != nil {
+				log.Printf("error detaching iso: %s", err)
+			}
 		}
 	}
 }
