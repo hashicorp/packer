@@ -16,7 +16,7 @@ func (s *StepSetGeneratedData) Run(_ context.Context, state multistep.StateBag) 
 
 	sha256 := "ERR_IMAGE_SHA256_NOT_FOUND"
 	if imageId, ok := state.GetOk("image_id"); ok {
-		s256, err := driver.SHA256(imageId.(string))
+		s256, err := driver.Sha256(imageId.(string))
 		if err == nil {
 			sha256 = s256
 		}

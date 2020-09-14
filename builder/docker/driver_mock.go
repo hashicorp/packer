@@ -28,6 +28,11 @@ type MockDriver struct {
 	IPAddressResult string
 	IPAddressErr    error
 
+	Sha256Called bool
+	Sha256Id     string
+	Sha256Result string
+	Sha256Err    error
+
 	KillCalled bool
 	KillID     string
 	KillError  error
@@ -118,8 +123,10 @@ func (d *MockDriver) IPAddress(id string) (string, error) {
 	return d.IPAddressResult, d.IPAddressErr
 }
 
-func (d *MockDriver) SHA256(id string) (string, error) {
-	return "", nil
+func (d *MockDriver) Sha256(id string) (string, error) {
+	d.Sha256Called = true
+	d.Sha256Id = id
+	return d.Sha256Result, d.Sha256Err
 }
 
 func (d *MockDriver) Login(r, u, p string) error {

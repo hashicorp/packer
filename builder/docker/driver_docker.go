@@ -159,7 +159,7 @@ func (d *DockerDriver) IPAddress(id string) (string, error) {
 	return strings.TrimSpace(stdout.String()), nil
 }
 
-func (d *DockerDriver) SHA256(id string) (string, error) {
+func (d *DockerDriver) Sha256(id string) (string, error) {
 	var stderr, stdout bytes.Buffer
 	cmd := exec.Command(
 		"docker",
