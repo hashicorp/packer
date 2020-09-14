@@ -24,6 +24,8 @@ type FlatConfig struct {
 	FloppyFiles               []string          `mapstructure:"floppy_files" cty:"floppy_files" hcl:"floppy_files"`
 	FloppyDirectories         []string          `mapstructure:"floppy_dirs" cty:"floppy_dirs" hcl:"floppy_dirs"`
 	FloppyLabel               *string           `mapstructure:"floppy_label" cty:"floppy_label" hcl:"floppy_label"`
+	CDFiles                   []string          `mapstructure:"cd_files" cty:"cd_files" hcl:"cd_files"`
+	CDLabel                   *string           `mapstructure:"cd_label" cty:"cd_label" hcl:"cd_label"`
 	BootGroupInterval         *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval" hcl:"boot_keygroup_interval"`
 	BootWait                  *string           `mapstructure:"boot_wait" cty:"boot_wait" hcl:"boot_wait"`
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command" hcl:"boot_command"`
@@ -97,6 +99,7 @@ type FlatConfig struct {
 	VBoxManagePost            [][]string        `mapstructure:"vboxmanage_post" required:"false" cty:"vboxmanage_post" hcl:"vboxmanage_post"`
 	VBoxVersionFile           *string           `mapstructure:"virtualbox_version_file" required:"false" cty:"virtualbox_version_file" hcl:"virtualbox_version_file"`
 	GuestAdditionsMode        *string           `mapstructure:"guest_additions_mode" cty:"guest_additions_mode" hcl:"guest_additions_mode"`
+	GuestAdditionsInterface   *string           `mapstructure:"guest_additions_interface" required:"false" cty:"guest_additions_interface" hcl:"guest_additions_interface"`
 	GuestAdditionsPath        *string           `mapstructure:"guest_additions_path" cty:"guest_additions_path" hcl:"guest_additions_path"`
 	GuestAdditionsSHA256      *string           `mapstructure:"guest_additions_sha256" cty:"guest_additions_sha256" hcl:"guest_additions_sha256"`
 	GuestAdditionsURL         *string           `mapstructure:"guest_additions_url" required:"false" cty:"guest_additions_url" hcl:"guest_additions_url"`
@@ -135,6 +138,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"floppy_files":                 &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
 		"floppy_dirs":                  &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
 		"floppy_label":                 &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},
+		"cd_files":                     &hcldec.AttrSpec{Name: "cd_files", Type: cty.List(cty.String), Required: false},
+		"cd_label":                     &hcldec.AttrSpec{Name: "cd_label", Type: cty.String, Required: false},
 		"boot_keygroup_interval":       &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                    &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
 		"boot_command":                 &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
@@ -208,6 +213,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vboxmanage_post":              &hcldec.AttrSpec{Name: "vboxmanage_post", Type: cty.List(cty.List(cty.String)), Required: false},
 		"virtualbox_version_file":      &hcldec.AttrSpec{Name: "virtualbox_version_file", Type: cty.String, Required: false},
 		"guest_additions_mode":         &hcldec.AttrSpec{Name: "guest_additions_mode", Type: cty.String, Required: false},
+		"guest_additions_interface":    &hcldec.AttrSpec{Name: "guest_additions_interface", Type: cty.String, Required: false},
 		"guest_additions_path":         &hcldec.AttrSpec{Name: "guest_additions_path", Type: cty.String, Required: false},
 		"guest_additions_sha256":       &hcldec.AttrSpec{Name: "guest_additions_sha256", Type: cty.String, Required: false},
 		"guest_additions_url":          &hcldec.AttrSpec{Name: "guest_additions_url", Type: cty.String, Required: false},
