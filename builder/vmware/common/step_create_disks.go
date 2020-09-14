@@ -45,8 +45,13 @@ func (s *StepCreateDisks) Run(ctx context.Context, state multistep.StateBag) mul
 	}
 	// Additional disks
 	if len(s.AdditionalDiskSize) > 0 {
+		incrementer := 1
 		for i, diskSize := range s.AdditionalDiskSize {
-			path := filepath.Join(*s.OutputDir, fmt.Sprintf("%s-%d.vmdk", s.DiskName, i+1))
+			// scsi slot 7 is reserved, so we skip it.
+			if i+incrementer == 7 {
+				incrementer = 2
+			}
+			path := filepath.Join(*s.OutputDir, fmt.Sprintf("%s-%d.vmdk", s.DiskName, i+incrementer))
 			diskFullPaths = append(diskFullPaths, path)
 			size := fmt.Sprintf("%dM", uint64(diskSize))
 			diskSizes = append(diskSizes, size)
