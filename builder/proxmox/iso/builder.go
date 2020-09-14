@@ -12,7 +12,7 @@ import (
 )
 
 // The unique id for the builder
-const BuilderID = "proxmox.clone"
+const BuilderID = "proxmox.iso"
 
 type Builder struct {
 	config Config
