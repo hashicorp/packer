@@ -3,7 +3,7 @@
 package proxmoxclone
 
 import (
-	"github.com/hashicorp/packer/builder/proxmox/common"
+	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
 	"github.com/hashicorp/packer/packer"
 )
 

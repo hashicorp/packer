@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/packer/builder/proxmox/common"
+	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 )

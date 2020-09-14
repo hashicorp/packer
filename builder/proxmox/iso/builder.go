@@ -5,7 +5,7 @@ import (
 
 	proxmoxapi "github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/builder/proxmox/common"
+	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -20,8 +20,6 @@ type Builder struct {
 
 // Builder implements packer.Builder
 var _ packer.Builder = &Builder{}
-
-var pluginVersion = "1.0.0"
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
