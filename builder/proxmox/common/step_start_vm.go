@@ -15,8 +15,8 @@ import (
 //
 // It sets the vmRef state which is used throughout the later steps to reference the VM
 // in API calls.
-type stepStartVM struct{
-        vmCreator     ProxmoxVMCreator
+type stepStartVM struct {
+	vmCreator ProxmoxVMCreator
 }
 
 type ProxmoxVMCreator interface {

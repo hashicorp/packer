@@ -19,7 +19,7 @@ func NewSharedBuilder(id string, config Config, preSteps []multistep.Step, postS
 		config:    config,
 		preSteps:  preSteps,
 		postSteps: postSteps,
-                vmCreator: vmCreator,
+		vmCreator: vmCreator,
 	}
 }
 
@@ -30,7 +30,7 @@ type Builder struct {
 	postSteps     []multistep.Step
 	runner        multistep.Runner
 	proxmoxClient *proxmox.Client
-        vmCreator     ProxmoxVMCreator
+	vmCreator     ProxmoxVMCreator
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook, state multistep.StateBag) (packer.Artifact, error) {
@@ -54,16 +54,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook, state
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
-        comm := &b.config.Comm
-        if(state.Get("comm") != nil) {
-                comm = state.Get("comm").(*communicator.Config)
-        }
+	comm := &b.config.Comm
+	if state.Get("comm") != nil {
+		comm = state.Get("comm").(*communicator.Config)
+	}
 
 	// Build the steps
 	coreSteps := []multistep.Step{
 		&stepStartVM{
-                        vmCreator: b.vmCreator,
-                },
+			vmCreator: b.vmCreator,
+		},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,

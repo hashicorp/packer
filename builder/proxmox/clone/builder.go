@@ -2,14 +2,14 @@ package proxmoxclone
 
 import (
 	"context"
-        "time"
-        "fmt"
+	"fmt"
+	"time"
 
 	proxmoxapi "github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/proxmox/common"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -34,15 +34,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
 	state.Put("clone-config", &b.config)
-        state.Put("comm", &b.config.Comm)
+	state.Put("comm", &b.config.Comm)
 
 	preSteps := []multistep.Step{
-                &StepSshKeyPair{
-                        Debug:        b.config.PackerDebug,
+		&StepSshKeyPair{
+			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("%s.pem", b.config.PackerBuildName),
 			Comm:         &b.config.Comm,
-                },
-        }
+		},
+	}
 	postSteps := []multistep.Step{}
 
 	sb := proxmox.NewSharedBuilder(BuilderID, b.config.Config, preSteps, postSteps, &cloneVMCreator{})
@@ -53,29 +53,29 @@ type cloneVMCreator struct{}
 
 func (*cloneVMCreator) Create(vmRef *proxmoxapi.VmRef, config proxmoxapi.ConfigQemu, state multistep.StateBag) error {
 	client := state.Get("proxmoxClient").(*proxmoxapi.Client)
-        c := state.Get("clone-config").(*Config)
-        comm := state.Get("comm").(*communicator.Config)
+	c := state.Get("clone-config").(*Config)
+	comm := state.Get("comm").(*communicator.Config)
 
-        fullClone := 1
-        if c.FullClone {
-                fullClone = 0
-        }
+	fullClone := 1
+	if c.FullClone {
+		fullClone = 0
+	}
 
-        config.FullClone = &fullClone
-        config.CIuser = comm.SSHUsername
-        config.Sshkeys = string(comm.SSHPublicKey)
-        sourceVmr, err := client.GetVmRefByName(c.CloneVM)
-        if err != nil {
-                return err
-        }
-        err = config.CloneVm(sourceVmr, vmRef, client)
-        if err != nil {
-                return err
-        }
-        err = config.UpdateConfig(vmRef, client)
-        if err != nil {
-                return err
-        }
-        time.Sleep(time.Duration(15) * time.Second)
+	config.FullClone = &fullClone
+	config.CIuser = comm.SSHUsername
+	config.Sshkeys = string(comm.SSHPublicKey)
+	sourceVmr, err := client.GetVmRefByName(c.CloneVM)
+	if err != nil {
+		return err
+	}
+	err = config.CloneVm(sourceVmr, vmRef, client)
+	if err != nil {
+		return err
+	}
+	err = config.UpdateConfig(vmRef, client)
+	if err != nil {
+		return err
+	}
+	time.Sleep(time.Duration(15) * time.Second)
 	return nil
 }
