@@ -22,6 +22,8 @@ type FlatConfig struct {
 	HTTPPortMax                     *int                                        `mapstructure:"http_port_max" cty:"http_port_max" hcl:"http_port_max"`
 	HTTPAddress                     *string                                     `mapstructure:"http_bind_address" cty:"http_bind_address" hcl:"http_bind_address"`
 	HTTPInterface                   *string                                     `mapstructure:"http_interface" undocumented:"true" cty:"http_interface" hcl:"http_interface"`
+	CDFiles                         []string                                    `mapstructure:"cd_files" cty:"cd_files" hcl:"cd_files"`
+	CDLabel                         *string                                     `mapstructure:"cd_label" cty:"cd_label" hcl:"cd_label"`
 	VCenterServer                   *string                                     `mapstructure:"vcenter_server" cty:"vcenter_server" hcl:"vcenter_server"`
 	Username                        *string                                     `mapstructure:"username" cty:"username" hcl:"username"`
 	Password                        *string                                     `mapstructure:"password" cty:"password" hcl:"password"`
@@ -158,6 +160,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"http_port_max":                  &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
 		"http_bind_address":              &hcldec.AttrSpec{Name: "http_bind_address", Type: cty.String, Required: false},
 		"http_interface":                 &hcldec.AttrSpec{Name: "http_interface", Type: cty.String, Required: false},
+		"cd_files":                       &hcldec.AttrSpec{Name: "cd_files", Type: cty.List(cty.String), Required: false},
+		"cd_label":                       &hcldec.AttrSpec{Name: "cd_label", Type: cty.String, Required: false},
 		"vcenter_server":                 &hcldec.AttrSpec{Name: "vcenter_server", Type: cty.String, Required: false},
 		"username":                       &hcldec.AttrSpec{Name: "username", Type: cty.String, Required: false},
 		"password":                       &hcldec.AttrSpec{Name: "password", Type: cty.String, Required: false},
