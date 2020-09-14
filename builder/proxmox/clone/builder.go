@@ -10,7 +10,6 @@ import (
 
 	"context"
 	"fmt"
-	"time"
 )
 
 // The unique id for the builder
@@ -74,6 +73,5 @@ func (*cloneVMCreator) Create(vmRef *proxmoxapi.VmRef, config proxmoxapi.ConfigQ
 	if err != nil {
 		return err
 	}
-	time.Sleep(time.Duration(15) * time.Second)
 	return nil
 }
