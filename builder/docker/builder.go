@@ -80,17 +80,17 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		log.Print("[DEBUG] Container will be discarded")
 	} else if b.config.Commit {
 		log.Print("[DEBUG] Container will be committed")
-		steps = append(steps, new(StepCommit))
+		steps = append(steps,
+			new(StepCommit),
+			&StepSetGeneratedData{ // Adds ImageSha256 variable available after StepCommit
+				GeneratedData: generatedData,
+			})
 	} else if b.config.ExportPath != "" {
 		log.Printf("[DEBUG] Container will be exported to %s", b.config.ExportPath)
 		steps = append(steps, new(StepExport))
 	} else {
 		return nil, errArtifactNotUsed
 	}
-
-	steps = append(steps, &StepSetGeneratedData{
-		GeneratedData: generatedData,
-	})
 
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)

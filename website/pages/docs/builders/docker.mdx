@@ -222,7 +222,8 @@ for JSON and [contextual variables](/docs/from-1.5/contextual-variables) for HCL
 
 The generated variable available for this builder is:
 
-- `ImageSha256` - When committing a container to an image, this will give the image SHA256.
+- `ImageSha256` - When committing a container to an image, this will give the image SHA256. Because the image is not available at the provision step,
+this variable is only available for post-processor.
 
 ## Using the Artifact: Export
 
