@@ -96,7 +96,9 @@
   and format is qcow2, set this option to true to create a new QCOW2
   file that uses the file located at iso_url as a backing file. The new file
   will only contain blocks that have changed compared to the backing file, so
-  enabling this option can significantly reduce disk usage.
+  enabling this option can significantly reduce disk usage. If true, Packer
+  will force the `skip_compaction` also to be true as well to skip disk
+  conversion which would render the backing file feature useless.
 
 - `machine_type` (string) - The type of machine emulation to use. Run your qemu binary with the
   flags `-machine help` to list available types for your system. This
