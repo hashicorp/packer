@@ -64,5 +64,11 @@ func init() {
 				Meta: *CommandMeta,
 			}, nil
 		},
+
+		"init": func() (cli.Command, error) {
+			return &command.InitCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
 	}
 }
