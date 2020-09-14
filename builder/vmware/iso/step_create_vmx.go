@@ -107,9 +107,14 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 
 	// Mount extra vmdks we created earlier.
 	if len(config.AdditionalDiskSize) > 0 {
+		incrementer := 1
 		for i := range config.AdditionalDiskSize {
+			// slot 7 is special and reserved, so we need to skip that index.
+			if i+1 == 7 {
+				incrementer = 2
+			}
 			ictx.Data = &additionalDiskTemplateData{
-				DiskNumber: i + 1,
+				DiskNumber: i + incrementer,
 				DiskName:   config.DiskName,
 			}
 
