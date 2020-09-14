@@ -67,6 +67,20 @@ func TestTypeBootCommand(t *testing.T) {
 			expectedAction:    multistep.ActionContinue,
 		},
 		{
+			name:              "noop keystrokes",
+			builderConfig:     &Config{BootConfig: bootcommand.BootConfig{BootCommand: []string{"<cOn><leftShiftOn><cOff><leftAltOn><leftShiftOff><leftAltOff>"}}},
+			expectCallSendkey: true,
+			expectedKeysSent:  "",
+			expectedAction:    multistep.ActionContinue,
+		},
+		{
+			name:              "noop keystrokes mixed",
+			builderConfig:     &Config{BootConfig: bootcommand.BootConfig{BootCommand: []string{"<cOn><leftShiftOn><cOff>h<leftShiftOff>"}}},
+			expectCallSendkey: true,
+			expectedKeysSent:  "shift-h",
+			expectedAction:    multistep.ActionContinue,
+		},
+		{
 			name:              "without boot command sendkey should not be called",
 			builderConfig:     &Config{BootConfig: bootcommand.BootConfig{BootCommand: []string{}}},
 			expectCallSendkey: false,
