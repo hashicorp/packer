@@ -37,6 +37,8 @@ type CloneConfig struct {
 	// available network. If the network is inside a network folder in vCenter,
 	// you need to provide the full path to the network.
 	Network string `mapstructure:"network"`
+	// Sets a custom Mac Address to the network adapter. If set, the [network](#network) must be also specified.
+	MacAddress string `mapstructure:"mac_address"`
 	// VM notes.
 	Notes string `mapstructure:"notes"`
 	// Set the vApp Options to a virtual machine.
@@ -54,6 +56,10 @@ func (c *CloneConfig) Prepare() []error {
 
 	if c.LinkedClone == true && c.DiskSize != 0 {
 		errs = append(errs, fmt.Errorf("'linked_clone' and 'disk_size' cannot be used together"))
+	}
+
+	if c.MacAddress != "" && c.Network == "" {
+		errs = append(errs, fmt.Errorf("'network' is required when 'mac_address' is specified"))
 	}
 
 	return errs
@@ -92,6 +98,7 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 		Datastore:      s.Location.Datastore,
 		LinkedClone:    s.Config.LinkedClone,
 		Network:        s.Config.Network,
+		MacAddress:     s.Config.MacAddress,
 		Annotation:     s.Config.Notes,
 		VAppProperties: s.Config.VAppConfig.Properties,
 	})
