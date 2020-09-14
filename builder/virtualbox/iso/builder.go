@@ -279,7 +279,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		new(stepCreateVM),
 		new(stepCreateDisk),
 		&vboxcommon.StepAttachISOs{
-			AttachBootIso:           true,
+			AttachBootISO:           true,
 			ISOInterface:            b.config.ISOInterface,
 			GuestAdditionsMode:      b.config.GuestAdditionsMode,
 			GuestAdditionsInterface: b.config.GuestAdditionsInterface,

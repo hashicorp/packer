@@ -13,7 +13,7 @@ import (
 // This step attaches the boot ISO, cd_files iso, and guest additions to the
 // virtual machine, if present.
 type StepAttachISOs struct {
-	AttachBootIso           bool
+	AttachBootISO           bool
 	ISOInterface            string
 	GuestAdditionsMode      string
 	GuestAdditionsInterface string
@@ -28,7 +28,7 @@ func (s *StepAttachISOs) Run(ctx context.Context, state multistep.StateBag) mult
 	diskMountMap := map[string]string{}
 	s.diskUnmountCommands = map[string][]string{}
 	// Track the bootable iso (only used in virtualbox-iso builder. )
-	if s.AttachBootIso {
+	if s.AttachBootISO {
 		isoPath := state.Get("iso_path").(string)
 		diskMountMap["boot_iso"] = isoPath
 	}

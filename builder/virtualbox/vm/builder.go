@@ -80,7 +80,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Name: b.config.VMName,
 		},
 		&vboxcommon.StepAttachISOs{
-			AttachBootIso:           false,
+			AttachBootISO:           false,
 			ISOInterface:            b.config.GuestAdditionsInterface,
 			GuestAdditionsMode:      b.config.GuestAdditionsMode,
 			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
