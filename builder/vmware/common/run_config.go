@@ -9,8 +9,8 @@ import (
 )
 
 // ~> **Note:** If [usb_keyboard](#usb_keyboard) or [vnc_over_websocket](#vnc_over_websocket) is set to true,
-// any VNC other configuration will be ignored. If both are set to true, [usb_keyboard](#usb_keyboard) will be ignores
-// and set to false and Packer will connect to the VM with VNC over websocket.
+// any other VNC configuration will be ignored. If both are set to true, [usb_keyboard](#usb_keyboard) will be ignored
+// and Packer will connect to the VM with VNC over websocket.
 type RunConfig struct {
 	// Packer defaults to building VMware virtual machines
 	// by launching a GUI that shows the console of the machine being built. When
@@ -41,7 +41,7 @@ type RunConfig struct {
 	// false.
 	VNCDisablePassword bool `mapstructure:"vnc_disable_password" required:"false"`
 	// When set to true, Packer will connect to the remote VNC server over a websocket connection
-	// and any of the others vnc configuration options will be ignored.
+	// and any other VNC configuration option will be ignored.
 	// Remote builds using ESXi 6.7+ allows to connect to the VNC server only over websocket,
 	// for these the `vnc_over_websocket` must be set to true.
 	// If [usb_keyboard](#usb_keyboard) is also set to true, `usb_keyboard` will be ignored and set to false.

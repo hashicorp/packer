@@ -1,5 +1,5 @@
 <!-- Code generated from the comments of the RunConfig struct in builder/vmware/common/run_config.go; DO NOT EDIT MANUALLY -->
 
 ~> **Note:** If [usb_keyboard](#usb_keyboard) or [vnc_over_websocket](#vnc_over_websocket) is set to true,
-any VNC other configuration will be ignored. If both are set to true, [usb_keyboard](#usb_keyboard) will be ignores
-and set to false and Packer will connect to the VM with VNC over websocket.
+any other VNC configuration will be ignored. If both are set to true, [usb_keyboard](#usb_keyboard) will be ignored
+and Packer will connect to the VM with VNC over websocket.
