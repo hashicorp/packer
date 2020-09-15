@@ -44,15 +44,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, fmt.Errorf("Failed creating Qemu driver: %s", err)
 	}
 
-	steprun := &stepRun{}
-	if !b.config.DiskImage {
-		steprun.BootDrive = "once=d"
-		steprun.Message = "Starting VM, booting from CD-ROM"
-	} else {
-		steprun.BootDrive = "c"
-		steprun.Message = "Starting VM, booting disk image"
-	}
-
 	steps := []multistep.Step{}
 	if !b.config.ISOSkipCache {
 		steps = append(steps, &common.StepDownload{
@@ -102,7 +93,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	steps = append(steps,
 		new(stepConfigureVNC),
-		steprun,
+		&stepRun{
+			DiskImage: b.config.DiskImage,
+		},
 		&stepConfigureQMP{
 			QMPSocketPath: b.config.QMPSocketPath,
 		},

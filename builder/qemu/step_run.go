@@ -15,8 +15,7 @@ import (
 
 // stepRun runs the virtual machine
 type stepRun struct {
-	BootDrive string
-	Message   string
+	DiskImage bool
 }
 
 type qemuArgsTemplateData struct {
@@ -32,9 +31,17 @@ func (s *stepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say(s.Message)
+	// Run command is different depending whether we're booting from an
+	// installation CD or a pre-baked image
+	bootDrive := "once=d"
+	message := "Starting VM, booting from CD-ROM"
+	if !s.DiskImage {
+		bootDrive = "c"
+		message = "Starting VM, booting disk image"
+	}
+	ui.Say(message)
 
-	command, err := getCommandArgs(s.BootDrive, state)
+	command, err := getCommandArgs(bootDrive, state)
 	if err != nil {
 		err := fmt.Errorf("Error processing QemuArgs: %s", err)
 		ui.Error(err.Error())
