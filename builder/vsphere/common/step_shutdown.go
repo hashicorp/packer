@@ -47,7 +47,6 @@ type StepShutdown struct {
 
 func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	comm := state.Get("communicator").(packer.Communicator)
 	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	if off, _ := vm.IsPoweredOff(); off {
@@ -59,6 +58,9 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 	if s.Config.DisableShutdown {
 		ui.Say("Automatic shutdown disabled. Please shutdown virtual machine.")
 	} else if s.Config.Command != "" {
+		// Communicator is not needed unless shutdown_command is populated
+		comm := state.Get("communicator").(packer.Communicator)
+
 		ui.Say("Executing shutdown command...")
 		log.Printf("Shutdown command: %s", s.Config.Command)
 
