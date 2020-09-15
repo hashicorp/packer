@@ -120,13 +120,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
 			&packerCommon.StepProvision{},
-			&common.StepShutdown{
-				Config: &b.config.ShutdownConfig,
-			},
 		)
 	}
 
 	steps = append(steps,
+		&common.StepShutdown{
+			Config: &b.config.ShutdownConfig,
+		},
 		&StepRemoveFloppy{
 			Datastore: b.config.Datastore,
 			Host:      b.config.Host,
