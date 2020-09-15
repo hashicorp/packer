@@ -19,12 +19,24 @@ import (
 // This step waits for the guest address to become available in the network
 // bridge, then it sets the guestAddress state property.
 type stepWaitGuestAddress struct {
-	timeout time.Duration
+	CommunicatorType string
+	NetBridge        string
+	timeout          time.Duration
 }
 
 func (s *stepWaitGuestAddress) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.CommunicatorType == "none" {
+		ui.Message("Not using a communicator -- skipping StepWaitGuestAddress")
+		return multistep.ActionContinue
+	}
+	if s.NetBridge == "" {
+		ui.Message("Not using a NetBridge -- skipping StepWaitGuestAddress")
+		return multistep.ActionContinue
+	}
+
 	qmpMonitor := state.Get("qmp_monitor").(*qmp.SocketMonitor)
 	ctx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()

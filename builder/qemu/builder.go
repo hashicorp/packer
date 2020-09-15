@@ -53,14 +53,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			ResultKey:   "iso_path",
 			TargetPath:  b.config.TargetPath,
 			Url:         b.config.ISOUrls,
-		},
-		)
+		})
 	} else {
 		steps = append(steps, &stepSetISO{
 			ResultKey: "iso_path",
 			Url:       b.config.ISOUrls,
-		},
-		)
+		})
 	}
 
 	steps = append(steps, new(stepPrepareOutputDir),
@@ -83,15 +81,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			HTTPPortMax: b.config.HTTPPortMax,
 			HTTPAddress: b.config.HTTPAddress,
 		},
-	)
-
-	if b.config.CommConfig.Comm.Type != "none" && b.config.NetBridge == "" {
-		steps = append(steps,
-			new(stepPortForward),
-		)
-	}
-
-	steps = append(steps,
+		&stepPortForward{
+			CommunicatorType: b.config.CommConfig.Comm.Type,
+			NetBridge:        b.config.NetBridge,
+		},
 		new(stepConfigureVNC),
 		&stepRun{
 			DiskImage: b.config.DiskImage,
@@ -100,42 +93,23 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			QMPSocketPath: b.config.QMPSocketPath,
 		},
 		&stepTypeBootCommand{},
-	)
-
-	if b.config.CommConfig.Comm.Type != "none" && b.config.NetBridge != "" {
-		steps = append(steps,
-			&stepWaitGuestAddress{
-				timeout: b.config.CommConfig.Comm.SSHTimeout,
-			},
-		)
-	}
-
-	if b.config.CommConfig.Comm.Type != "none" {
-		steps = append(steps,
-			&communicator.StepConnect{
-				Config:    &b.config.CommConfig.Comm,
-				Host:      commHost(b.config.CommConfig.Comm.Host()),
-				SSHConfig: b.config.CommConfig.Comm.SSHConfigFunc(),
-				SSHPort:   commPort,
-				WinRMPort: commPort,
-			},
-		)
-	}
-
-	steps = append(steps,
+		&stepWaitGuestAddress{
+			CommunicatorType: b.config.CommConfig.Comm.Type,
+			NetBridge:        b.config.NetBridge,
+			timeout:          b.config.CommConfig.Comm.SSHTimeout,
+		},
+		&communicator.StepConnect{
+			Config:    &b.config.CommConfig.Comm,
+			Host:      commHost(b.config.CommConfig.Comm.Host()),
+			SSHConfig: b.config.CommConfig.Comm.SSHConfigFunc(),
+			SSHPort:   commPort,
+			WinRMPort: commPort,
+		},
 		new(common.StepProvision),
-	)
-
-	steps = append(steps,
 		&common.StepCleanupTempKeys{
 			Comm: &b.config.CommConfig.Comm,
 		},
-	)
-	steps = append(steps,
 		new(stepShutdown),
-	)
-
-	steps = append(steps,
 		new(stepConvertDisk),
 	)
 
