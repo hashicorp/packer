@@ -1,20 +1,28 @@
-## 1.6.3 (Upcoming)
+ ## 1.6.3 (Upcoming)
 
 ### IMPROVEMENTS:
 * builder/azure: Support publishing to a Shared Image Gallery with a different
     subscription id [GH-9875]
+* builder/oracle-oci: Add new `create_vnic_details` option for launch details.
+    [GH-9856]
 * builder/oracle-oci: Allow freeform and defined tags to be added instance.
     [GH-9802]
+* builder/proxmox: Add ability to specify interfaces for http_directroy and VM.
+    [GH-9874]
 * builder/proxmox: Allow the mounting of multiple ISOs via the `cd_drive`
     option. [GH-9653]
-* builder/qemu: New `skip_resize_disk` option. [GH-9896]
+* builder/proxmox: Fix boot command special keys. [GH-9885]
+* builder/qemu: New `skip_resize_disk` option. [GH-9896] [GH-9860 ]
 * builder/scaleway: Change default boottype to local. [GH-9853]
 * builder/scaleway: Update scaleway to use non-deprecated sdk. [GH-9902]
+* builder/vmware-esxi: Add usb_keyboard option to use USB scancodes instead of
+    VNC for remote builds. [GH-9895]
+* builder/vsphere-clone: Add ability to set `mac_address` [GH-9930]
 * builder/vsphere-iso: Add NVMe controller support. [GH-9880]
 * builder/vsphere: Look for a default resource pool when root resource pool is
     not found. [GH-9809]
 * core: New `cd_files` option to mount iso for modern OSes which don't support
-    floppies. [GH-9796] [GH-9919]
+    floppies. [GH-9796] [GH-9919] [GH-9928] [GH-9932]
 * HCL2: When the type of a variable is not known evaluate setting as a literal
     string instead of a variable name. [GH-9863]
 * post-processor/yandex-import: Allow custom API endpoint. [GH-9850]
@@ -22,6 +30,7 @@
 
 ### BUG FIXES:
 * builder/qemu: Fix hardcoded lowerbound causing negative ports [GH-9905]
+* builder/qemu: Skip compaction when backing file is used. [GH-9918]
 * builder/vsphere: Fix overly strict iso_path validation regex. [GH-9855]
 * command/console: Prevent failure when there are unknown vars. [GH-9864]
 * command/inspect: Allow unset variables in HCL2 and JSON. [GH-9832]
@@ -29,10 +38,10 @@
     [GH-9830]
 * post-processor/digitalocean-import: Fix crash caused by empty artifact.Files
     slice. [GH-9857]
+* post-processor/yandex-export: Check for error after runner completes.
+    [GH-9925]
 * post-processor/yandex-export: Set metadata key to expected value on error.
     [GH-9849]
-* post-processor/yandex-export: Check for error after runner completes. 
-    [GH-9925]
 * post-processor/yandex-import: Fix S3 URL construct process. [GH-9931]
 
 ## 1.6.2 (August 28, 2020)
