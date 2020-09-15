@@ -35,7 +35,7 @@ func (s *stepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 	// installation CD or a pre-baked image
 	bootDrive := "once=d"
 	message := "Starting VM, booting from CD-ROM"
-	if !s.DiskImage {
+	if s.DiskImage {
 		bootDrive = "c"
 		message = "Starting VM, booting disk image"
 	}
