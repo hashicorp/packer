@@ -26,7 +26,7 @@ func (c *InitCommand) Run(args []string) int {
 
 func (c *InitCommand) ParseArgs(args []string) (*InitArgs, int) {
 	var cfg InitArgs
-	flags := c.Meta.FlagSet("init", FlagSetNone)
+	flags := c.Meta.FlagSet("init", FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
@@ -39,7 +39,7 @@ func (c *InitCommand) ParseArgs(args []string) (*InitArgs, int) {
 func (c *InitCommand) RunContext(ctx context.Context, cla *InitArgs) int {
 	fmt.Printf(`%s
 
-Packer initialized in an empty directory!
+Packer initialized with no template!
 
 The directory has no Packer templates. You may begin working
 with Packer immediately by creating a Packer template.
@@ -58,16 +58,17 @@ Usage: packer init [options]
   This is the first command that should be executed when working with a new
   or existing template. Running this command in an empty directory will
   will perform no operation, and will need to be executed once a template
-  has been added to the directory to initialize the working directory.
+  has been created to initialize the working directory.
 
-  It is safe to run init multiple times within a given directory.
+  It is safe to run init multiple times on a template to update the builders,
+  provisioners, post-processors with changes in the template configuration file.
+
+Options:
+  -get-plugins=false                Skips plugin installation.
+  -plugin-dir=PATH                  Skips plugin installation and loads plugins only from the specified directory.
 `
 	return helpText
 
-}
-
-type InitArgs struct {
-	MetaArgs
 }
 
 func (c *InitCommand) Synopsis() string {
