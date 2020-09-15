@@ -1,4 +1,4 @@
-
+---
 description: |
   The proxmox Packer builder is able to create new images for use with
   Proxmox VE. The builder takes an ISO source, runs any provisioning
@@ -250,6 +250,50 @@ builder.
 
 - `vm_interface` - (string) - Name of the network interface that Packer gets
   the VMs IP from. Defaults to the first non loopback interface.
+
+## Boot Command
+
+The `boot_command` configuration is very important: it specifies the keys to
+type when the virtual machine is first booted in order to start the OS
+installer. This command is typed after `boot_wait`, which gives the virtual
+machine some time to actually load the ISO.
+
+As documented above, the `boot_command` is an array of strings. The strings
+are all typed in sequence. It is an array only to improve readability within
+the template.
+
+The boot command is "typed" character for character over the virtual keyboard
+to the machine, simulating a human actually typing the keyboard.
+
+@include 'builders/boot-command.mdx'
+
+The example shown below is a working boot command used to start an Ubuntu
+12.04 installer:
+
+```json
+[
+  "<esc><esc><enter><wait>",
+  "/install/vmlinuz noapic ",
+  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+  "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+  "hostname={{ .Name }} ",
+  "fb=false debconf/frontend=noninteractive ",
+  "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+  "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+  "initrd=/install/initrd.gz -- <enter>"
+]
+```
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools#templates).
+
+## Http directory configuration
+
+@include 'common/HTTPConfig.mdx'
+
+### Optional:
+
+@include 'common/HTTPConfig-not-required.mdx'
 
 ## Example: Fedora with kickstart
 
