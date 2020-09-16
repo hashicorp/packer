@@ -46,6 +46,8 @@ type RunConfig struct {
 	// for these the `vnc_over_websocket` must be set to true.
 	// If [usb_keyboard](#usb_keyboard) is also set to true, `usb_keyboard` will be ignored and set to false.
 	VNCOverWebsocket bool `mapstructure:"vnc_over_websocket" required:"false"`
+	// Do not validate VNC over websocket server's TLS certificate. Defaults to `false`.
+	InsecureConnection bool `mapstructure:"insecure_connection" required:"false"`
 }
 
 func (c *RunConfig) Prepare(_ *interpolate.Context, bootConfig *BootConfigWrapper, driverConfig *DriverConfig) (warnings []string, errs []error) {
@@ -63,7 +65,7 @@ func (c *RunConfig) Prepare(_ *interpolate.Context, bootConfig *BootConfigWrappe
 	if bootConfig.USBKeyBoard || c.VNCOverWebsocket {
 		if c.VNCPortMin != 0 || c.VNCPortMax != 0 || c.VNCBindAddress != "" || c.VNCDisablePassword {
 			warnings = append(warnings, "[WARN] When one of  'usb_keyboard' and 'vnc_over_websocket' is set "+
-				"any other VNC configuration option is ignored.")
+				"any other VNC configuration will be ignored.")
 		}
 		return
 	}

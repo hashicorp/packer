@@ -114,7 +114,7 @@ func TestRunConfig_Prepare(t *testing.T) {
 			driver: &DriverConfig{RemoteType: "esxi"},
 			errs:   nil,
 			warnings: []string{"[WARN] When one of  'usb_keyboard' and 'vnc_over_websocket' is set " +
-				"any other VNC configuration option is ignored."},
+				"any other VNC configuration will be ignored."},
 		},
 	}
 

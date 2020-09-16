@@ -141,9 +141,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Headless:           b.config.Headless,
 		},
 		&vmwcommon.StepVNCConnect{
-			VNCEnabled:       !b.config.DisableVNC,
-			VNCOverWebsocket: b.config.VNCOverWebsocket,
-			DriverConfig:     &b.config.DriverConfig,
+			VNCEnabled:         !b.config.DisableVNC,
+			VNCOverWebsocket:   b.config.VNCOverWebsocket,
+			InsecureConnection: b.config.InsecureConnection,
+			DriverConfig:       &b.config.DriverConfig,
 		},
 		stepBootCommand,
 		&communicator.StepConnect{

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net"
 	"net/url"
 
@@ -14,9 +15,10 @@ import (
 )
 
 type StepVNCConnect struct {
-	VNCEnabled       bool
-	VNCOverWebsocket bool
-	DriverConfig     *DriverConfig
+	VNCEnabled         bool
+	VNCOverWebsocket   bool
+	InsecureConnection bool
+	DriverConfig       *DriverConfig
 }
 
 func (s *StepVNCConnect) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -65,7 +67,9 @@ func (s *StepVNCConnect) ConnectVNCOverWebsocketClient(state multistep.StateBag)
 		port = 443
 	}
 
-	u, err := url.Parse(fmt.Sprintf("wss://%s:%d/ticket/%s", host, port, ticket.Ticket))
+	websocketUrl := fmt.Sprintf("wss://%s:%d/ticket/%s", host, port, ticket.Ticket)
+	log.Printf("[DEBUG] websocket url: %s", websocketUrl)
+	u, err := url.Parse(websocketUrl)
 	if err != nil {
 		err := fmt.Errorf("Error parsing websocket url: %s\n", err)
 		state.Put("error", err)
@@ -73,7 +77,7 @@ func (s *StepVNCConnect) ConnectVNCOverWebsocketClient(state multistep.StateBag)
 	}
 	origin, err := url.Parse("http://localhost")
 	if err != nil {
-		err := fmt.Errorf("parse websocket origin url: %s\n", err)
+		err := fmt.Errorf("Error parsing websocket origin url: %s\n", err)
 		state.Put("error", err)
 		return nil, err
 	}
@@ -82,13 +86,13 @@ func (s *StepVNCConnect) ConnectVNCOverWebsocketClient(state multistep.StateBag)
 	websocketConfig := &websocket.Config{
 		Location:  u,
 		Origin:    origin,
-		TlsConfig: &tls.Config{InsecureSkipVerify: true},
+		TlsConfig: &tls.Config{InsecureSkipVerify: s.InsecureConnection},
 		Version:   websocket.ProtocolVersionHybi13,
 		Protocol:  []string{"binary"},
 	}
 	nc, err := websocket.DialConfig(websocketConfig)
 	if err != nil {
-		err := fmt.Errorf("Dial(): %s\n", err)
+		err := fmt.Errorf("Error Dialing: %s\n", err)
 		state.Put("error", err)
 		return nil, err
 	}
@@ -101,7 +105,7 @@ func (s *StepVNCConnect) ConnectVNCOverWebsocketClient(state multistep.StateBag)
 	}
 	c, err := vnc.Client(nc, ccconfig)
 	if err != nil {
-		err := fmt.Errorf("Error setting to VNC over websocket client: %s\n", err)
+		err := fmt.Errorf("Error setting the VNC over websocket client: %s\n", err)
 		state.Put("error", err)
 		return nil, err
 	}
