@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/packer/version"
 )
@@ -33,17 +34,35 @@ func (c *InitCommand) ParseArgs(args []string) (*InitArgs, int) {
 		return &cfg, 1
 	}
 
+	args = flags.Args()
+	if len(args) > 0 {
+		cfg.Path = args[0]
+	}
+
+	// Init command should treat an empty invocation as if it was run
+	// against the current working directory.
+	if cfg.Path == "" {
+		cfg.Path, _ = os.Getwd()
+	}
+
 	return &cfg, 0
 }
 
 func (c *InitCommand) RunContext(ctx context.Context, cla *InitArgs) int {
-	fmt.Printf(`%s
+
+	packerStarter, ret := c.GetConfig(&cla.MetaArgs)
+	if ret != 0 {
+		fmt.Printf(`%s
 
 Packer initialized with no template!
 
 The directory has no Packer templates. You may begin working
 with Packer immediately by creating a Packer template.
 `, version.FormattedVersion())
+		return ret
+	}
+
+	_ = packerStarter.Initialize()
 
 	return 0
 }
@@ -64,8 +83,9 @@ Usage: packer init [options]
   provisioners, post-processors with changes in the template configuration file.
 
 Options:
-  -get-plugins=false                Skips plugin installation.
-  -plugin-dir=PATH                  Skips plugin installation and loads plugins only from the specified directory.
+  -get-plugins=false            Skips plugin installation.
+  -plugin-dir=PATH              Skips plugin installation and loads plugins only from the specified directory.
+  -upgrade=true                 Updates installed plugins to the latest available version.
 `
 	return helpText
 

@@ -146,12 +146,14 @@ type HCL2UpgradeArgs struct {
 func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.StringVar(&ia.PluginDir, "plugin-dir", "", "")
 	flags.BoolVar(&ia.GetPlugins, "get-plugins", true, "")
+	flags.BoolVar(&ia.Upgrade, "upgrade", false, "")
 	ia.MetaArgs.AddFlagSets(flags)
 }
 
 //InitArgs respresents a parsed cli line for packer init
 type InitArgs struct {
 	MetaArgs
-	PluginDir  string
 	GetPlugins bool
+	PluginDir  string
+	Upgrade    bool
 }
