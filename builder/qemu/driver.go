@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -22,6 +23,10 @@ type DriverCancelCallback func(state multistep.StateBag) bool
 // A driver is able to talk to qemu-system-x86_64 and perform certain
 // operations with it.
 type Driver interface {
+	// Copy bypasses qemu-img convert and directly copies an image
+	// that doesn't need converting.
+	Copy(string, string) error
+
 	// Stop stops a running machine, forcefully.
 	Stop() error
 
@@ -61,6 +66,33 @@ func (d *QemuDriver) Stop() error {
 			return err
 		}
 	}
+
+	return nil
+}
+
+func (d *QemuDriver) Copy(sourceName, targetName string) error {
+	source, err := os.Open(sourceName)
+	if err != nil {
+		err = fmt.Errorf("Error opening iso for copy: %s", err)
+		return err
+	}
+	defer source.Close()
+
+	// Create will truncate an existing file
+	target, err := os.Create(targetName)
+	if err != nil {
+		err = fmt.Errorf("Error creating hard drive in output dir: %s", err)
+		return err
+	}
+	defer target.Close()
+
+	log.Printf("Copying %s to %s", source.Name(), target.Name())
+	bytes, err := io.Copy(target, source)
+	if err != nil {
+		err = fmt.Errorf("Error copying iso to output dir: %s", err)
+		return err
+	}
+	log.Printf(fmt.Sprintf("Copied %d bytes", bytes))
 
 	return nil
 }

@@ -5,6 +5,9 @@ import "sync"
 type DriverMock struct {
 	sync.Mutex
 
+	CopyCalled bool
+	CopyErr    error
+
 	StopCalled bool
 	StopErr    error
 
@@ -14,8 +17,9 @@ type DriverMock struct {
 	WaitForShutdownCalled bool
 	WaitForShutdownState  bool
 
-	QemuImgCalls [][]string
-	QemuImgErrs  []error
+	QemuImgCalled bool
+	QemuImgCalls  [][]string
+	QemuImgErrs   []error
 
 	VerifyCalled bool
 	VerifyErr    error
@@ -23,6 +27,11 @@ type DriverMock struct {
 	VersionCalled bool
 	VersionResult string
 	VersionErr    error
+}
+
+func (d *DriverMock) Copy(source, dst string) error {
+	d.CopyCalled = true
+	return d.CopyErr
 }
 
 func (d *DriverMock) Stop() error {
@@ -45,6 +54,7 @@ func (d *DriverMock) WaitForShutdown(cancelCh <-chan struct{}) bool {
 }
 
 func (d *DriverMock) QemuImg(args ...string) error {
+	d.QemuImgCalled = true
 	d.QemuImgCalls = append(d.QemuImgCalls, args)
 
 	if len(d.QemuImgErrs) >= len(d.QemuImgCalls) {
