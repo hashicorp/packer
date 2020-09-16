@@ -99,7 +99,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	vncWarnings, vncErrs := c.BootConfigWrapper.Prepare(&c.ctx, &c.DriverConfig)
 	warnings = append(warnings, vncWarnings...)
 	errs = packer.MultiErrorAppend(errs, vncErrs...)
-
+	runConfigWarnings, runConfigErrs := c.RunConfig.Prepare(&c.ctx, &c.BootConfigWrapper, &c.DriverConfig)
+	warnings = append(warnings, runConfigWarnings...)
+	errs = packer.MultiErrorAppend(errs, runConfigErrs...)
 	isoWarnings, isoErrs := c.ISOConfig.Prepare(&c.ctx)
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
@@ -107,7 +109,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.HWConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.DriverConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx, &c.BootConfigWrapper)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)

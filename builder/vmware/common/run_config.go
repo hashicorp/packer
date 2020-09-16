@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-// ~> **Note:** If [usb_keyboard](#usb_keyboard) is set to true, any VNC configuration will be ignored.
+// ~> **Note:** If [usb_keyboard](#usb_keyboard) or [vnc_over_websocket](#vnc_over_websocket) is set to true,
+// any other VNC configuration will be ignored. If both are set to true, [usb_keyboard](#usb_keyboard) will be ignored
+// and Packer will connect to the VM with VNC over websocket.
 type RunConfig struct {
 	// Packer defaults to building VMware virtual machines
 	// by launching a GUI that shows the console of the machine being built. When
@@ -38,28 +40,54 @@ type RunConfig struct {
 	// true if building on ESXi 6.5 and 6.7 with VNC enabled. Defaults to
 	// false.
 	VNCDisablePassword bool `mapstructure:"vnc_disable_password" required:"false"`
+	// When set to true, Packer will connect to the remote VNC server over a websocket connection
+	// and any other VNC configuration option will be ignored.
+	// Remote builds using ESXi 6.7+ allows to connect to the VNC server only over websocket,
+	// for these the `vnc_over_websocket` must be set to true.
+	// If [usb_keyboard](#usb_keyboard) is also set to true, `usb_keyboard` will be ignored and set to false.
+	VNCOverWebsocket bool `mapstructure:"vnc_over_websocket" required:"false"`
+	// Do not validate VNC over websocket server's TLS certificate. Defaults to `false`.
+	InsecureConnection bool `mapstructure:"insecure_connection" required:"false"`
 }
 
-func (c *RunConfig) Prepare(_ *interpolate.Context, bootConfig *BootConfigWrapper) (errs []error) {
-	if !bootConfig.USBKeyBoard {
-		if c.VNCPortMin == 0 {
-			c.VNCPortMin = 5900
+func (c *RunConfig) Prepare(_ *interpolate.Context, bootConfig *BootConfigWrapper, driverConfig *DriverConfig) (warnings []string, errs []error) {
+	if c.VNCOverWebsocket {
+		if driverConfig.RemoteType == "" {
+			errs = append(errs, fmt.Errorf("'vnc_over_websocket' can only be used with remote VMWare builds."))
+			return
 		}
-
-		if c.VNCPortMax == 0 {
-			c.VNCPortMax = 6000
-		}
-
-		if c.VNCBindAddress == "" {
-			c.VNCBindAddress = "127.0.0.1"
-		}
-
-		if c.VNCPortMin > c.VNCPortMax {
-			errs = append(errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
-		}
-		if c.VNCPortMin < 0 {
-			errs = append(errs, fmt.Errorf("vnc_port_min must be positive"))
+		if bootConfig.USBKeyBoard {
+			warnings = append(warnings, "[WARN] Both 'usb_keyboard' and 'vnc_over_websocket' are set. "+
+				"The `usb_keyboard` option will be ignored and automatically set to false.")
+			bootConfig.USBKeyBoard = false
 		}
 	}
+	if bootConfig.USBKeyBoard || c.VNCOverWebsocket {
+		if c.VNCPortMin != 0 || c.VNCPortMax != 0 || c.VNCBindAddress != "" || c.VNCDisablePassword {
+			warnings = append(warnings, "[WARN] When one of  'usb_keyboard' and 'vnc_over_websocket' is set "+
+				"any other VNC configuration will be ignored.")
+		}
+		return
+	}
+
+	if c.VNCPortMin == 0 {
+		c.VNCPortMin = 5900
+	}
+
+	if c.VNCPortMax == 0 {
+		c.VNCPortMax = 6000
+	}
+
+	if c.VNCBindAddress == "" {
+		c.VNCBindAddress = "127.0.0.1"
+	}
+
+	if c.VNCPortMin > c.VNCPortMax {
+		errs = append(errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
+	}
+	if c.VNCPortMin < 0 {
+		errs = append(errs, fmt.Errorf("vnc_port_min must be positive"))
+	}
+
 	return
 }
