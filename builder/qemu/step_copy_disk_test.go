@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/stretchr/testify/assert"
 )
 
 func copyTestState(t *testing.T, d *DriverMock) multistep.StateBag {
@@ -88,4 +89,34 @@ func Test_StepQemuImgCalled(t *testing.T) {
 	if !d.QemuImgCalled {
 		t.Fatalf("Should have called qemu-img since extensions don't match")
 	}
+}
+
+func Test_StepQemuImgCalledWithExtraArgs(t *testing.T) {
+	step := &stepCopyDisk{
+		DiskImage: true,
+		Format:    "raw",
+		VMName:    "output.qcow2",
+		QemuImgArgs: QemuImgArgs{
+			Convert: []string{"-o", "preallocation=full"},
+		},
+	}
+
+	d := new(DriverMock)
+	state := copyTestState(t, d)
+	action := step.Run(context.TODO(), state)
+	if action != multistep.ActionContinue {
+		t.Fatalf("Should have gotten an ActionContinue")
+	}
+	if d.CopyCalled {
+		t.Fatalf("Should not have copied since extensions don't match")
+	}
+	if !d.QemuImgCalled {
+		t.Fatalf("Should have called qemu-img since extensions don't match")
+	}
+	assert.Equal(
+		t,
+		d.QemuImgCalls,
+		[]string{"convert", "-o", "preallocation=full", "-O", "raw",
+			"example_source.qcow2", "output.qcow2"},
+		"should have added user extra args")
 }

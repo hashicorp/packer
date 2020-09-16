@@ -17,6 +17,8 @@ type stepCopyDisk struct {
 	OutputDir      string
 	UseBackingFile bool
 	VMName         string
+
+	QemuImgArgs QemuImgArgs
 }
 
 func (s *stepCopyDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -43,12 +45,7 @@ func (s *stepCopyDisk) Run(ctx context.Context, state multistep.StateBag) multis
 		return multistep.ActionContinue
 	}
 
-	command := []string{
-		"convert",
-		"-O", s.Format,
-		isoPath,
-		path,
-	}
+	command := s.buildConvertCommand(isoPath, path)
 
 	ui.Say("Copying hard drive...")
 	if err := driver.QemuImg(command...); err != nil {
@@ -59,6 +56,18 @@ func (s *stepCopyDisk) Run(ctx context.Context, state multistep.StateBag) multis
 	}
 
 	return multistep.ActionContinue
+}
+
+func (s *stepCopyDisk) buildConvertCommand(sourcePath, targetPath string) []string {
+	command := []string{"convert"}
+
+	// Add user-provided convert args
+	command = append(command, s.QemuImgArgs.Convert...)
+
+	// Add format, and paths.
+	command = append(command, "-O", s.Format, sourcePath, targetPath)
+
+	return command
 }
 
 func (s *stepCopyDisk) Cleanup(state multistep.StateBag) {}

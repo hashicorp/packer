@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/stretchr/testify/assert"
 )
 
 var testPem = `
@@ -667,4 +668,27 @@ func TestCommConfigPrepare_BackwardsCompatibility(t *testing.T) {
 	if c.CommConfig.HostPortMax != hostPortMax {
 		t.Fatalf("HostPortMax should be %d for backwards compatibility, but it was %d", hostPortMax, c.CommConfig.HostPortMax)
 	}
+}
+
+func TestBuilderPrepare_LoadQemuImgArgs(t *testing.T) {
+	var c Config
+	config := testConfig()
+	config["qemu_img_args"] = map[string][]string{
+		"convert": []string{"-o", "preallocation=full"},
+		"resize":  []string{"-foo", "bar"},
+		"create":  []string{"-baz", "bang"},
+	}
+	warns, err := c.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+	assert.Equal(t, []string{"-o", "preallocation=full"},
+		c.QemuImgArgs.Convert, "Convert args not loaded properly")
+	assert.Equal(t, []string{"-foo", "bar"},
+		c.QemuImgArgs.Resize, "Resize args not loaded properly")
+	assert.Equal(t, []string{"-baz", "bang"},
+		c.QemuImgArgs.Create, "Create args not loaded properly")
 }

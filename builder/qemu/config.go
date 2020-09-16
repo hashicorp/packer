@@ -1,5 +1,5 @@
 //go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type Config
+//go:generate mapstructure-to-hcl2 -type Config,QemuImgArgs
 
 package qemu
 
@@ -55,6 +55,12 @@ var diskDZeroes = map[string]bool{
 	"unmap": true,
 	"on":    true,
 	"off":   true,
+}
+
+type QemuImgArgs struct {
+	Convert []string `mapstructure:"convert" required:"false"`
+	Create  []string `mapstructure:"create" required:"false"`
+	Resize  []string `mapstructure:"resize" required:"false"`
 }
 
 type Config struct {
@@ -297,6 +303,36 @@ type Config struct {
 	// `{{ .HTTPIP }}`, `{{ .HTTPPort }}`, `{{ .HTTPDir }}`,
 	// `{{ .OutputDir }}`, `{{ .Name }}`, and `{{ .SSHHostPort }}`
 	QemuArgs [][]string `mapstructure:"qemuargs" required:"false"`
+	// A map of custom arguemnts to pass to qemu-img commands, where the key
+	// is the subcommand, and the values are lists of strings for each flag.
+	// Example:
+	//
+	// In JSON:
+	// ```json
+	// {
+	//  "qemu_img_args": {
+	//    "convert": ["-o", "preallocation=full"],
+	//	  "resize": ["-foo", "bar"]
+	//  }
+	// ```
+	// Please note
+	// that unlike qemuargs, these commands are not split into switch-value
+	// sub-arrays, because the basic elements in qemu-img calls are  unlikely
+	// to need an actual override.
+	// The arguments will be constructed as follows:
+	// - Convert:
+	// 	Default is `qemu-img convert -O $format $sourcepath $targetpath`. Adding
+	// 	arguments ["-foo", "bar"] to qemu_img_args will change this to
+	// 	`qemu-img convert -foo bar -O $format $sourcepath $targetpath`
+	// - Create:
+	// 	Default is `create -f $format $targetpath $size`. Adding arguments
+	// 	["-foo", "bar"] to qemu_img_args will change this to
+	// 	"create -f qcow2 -foo bar target.qcow2 1234M"
+	// - Resize:
+	// 	Default is `qemu-img resize -f $format $sourcepath $size`. Adding
+	// 	arguments ["-foo", "bar"] to qemu_img_args will change this to
+	// 	`qemu-img resize -f $format -foo bar $sourcepath $size`
+	QemuImgArgs QemuImgArgs `mapstructure:"qemu_img_args" required:"false"`
 	// The name of the Qemu binary to look for. This
 	// defaults to qemu-system-x86_64, but may need to be changed for
 	// some platforms. For example qemu-kvm, or qemu-system-i386 may be a

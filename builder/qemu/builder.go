@@ -68,7 +68,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Files: b.config.CDConfig.CDFiles,
 			Label: b.config.CDConfig.CDLabel,
 		},
-		new(stepCreateDisk),
+		&stepCreateDisk{
+			AdditionalDiskSize: b.config.AdditionalDiskSize,
+			DiskImage:          b.config.DiskImage,
+			DiskSize:           b.config.DiskSize,
+			Format:             b.config.Format,
+			OutputDir:          b.config.OutputDir,
+			UseBackingFile:     b.config.UseBackingFile,
+			VMName:             b.config.VMName,
+			QemuImgArgs:        b.config.QemuImgArgs,
+		},
 		&stepCopyDisk{
 			DiskImage:      b.config.DiskImage,
 			Format:         b.config.Format,
@@ -76,7 +85,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			UseBackingFile: b.config.UseBackingFile,
 			VMName:         b.config.VMName,
 		},
-		new(stepResizeDisk),
+		&stepResizeDisk{
+			DiskCompression: b.config.DiskCompression,
+			DiskImage:       b.config.DiskImage,
+			Format:          b.config.Format,
+			OutputDir:       b.config.OutputDir,
+			SkipResizeDisk:  b.config.SkipResizeDisk,
+			VMName:          b.config.VMName,
+			DiskSize:        b.config.DiskSize,
+			QemuImgArgs:     b.config.QemuImgArgs,
+		},
 		new(stepHTTPIPDiscover),
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
@@ -113,7 +131,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Comm: &b.config.CommConfig.Comm,
 		},
 		new(stepShutdown),
-		new(stepConvertDisk),
+		&stepConvertDisk{
+			DiskCompression: b.config.DiskCompression,
+			Format:          b.config.Format,
+			OutputDir:       b.config.OutputDir,
+			SkipCompaction:  b.config.SkipCompaction,
+			VMName:          b.config.VMName,
+		},
 	)
 
 	// Setup the state bag

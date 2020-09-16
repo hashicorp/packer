@@ -231,6 +231,36 @@
   `{{ .HTTPIP }}`, `{{ .HTTPPort }}`, `{{ .HTTPDir }}`,
   `{{ .OutputDir }}`, `{{ .Name }}`, and `{{ .SSHHostPort }}`
 
+- `qemu_img_args` (QemuImgArgs) - A map of custom arguemnts to pass to qemu-img commands, where the key
+  is the subcommand, and the values are lists of strings for each flag.
+  Example:
+  
+  In JSON:
+  ```json
+  {
+   "qemu_img_args": {
+     "convert": ["-o", "preallocation=full"],
+  	  "resize": ["-foo", "bar"]
+   }
+  ```
+  Please note
+  that unlike qemuargs, these commands are not split into switch-value
+  sub-arrays, because the basic elements in qemu-img calls are  unlikely
+  to need an actual override.
+  The arguments will be constructed as follows:
+  - Convert:
+  	Default is `qemu-img convert -O $format $sourcepath $targetpath`. Adding
+  	arguments ["-foo", "bar"] to qemu_img_args will change this to
+  	`qemu-img convert -foo bar -O $format $sourcepath $targetpath`
+  - Create:
+  	Default is `create -f $format $targetpath $size`. Adding arguments
+  	["-foo", "bar"] to qemu_img_args will change this to
+  	"create -f qcow2 -foo bar target.qcow2 1234M"
+  - Resize:
+  	Default is `qemu-img resize -f $format $sourcepath $size`. Adding
+  	arguments ["-foo", "bar"] to qemu_img_args will change this to
+  	`qemu-img resize -f $format -foo bar $sourcepath $size`
+
 - `qemu_binary` (string) - The name of the Qemu binary to look for. This
   defaults to qemu-system-x86_64, but may need to be changed for
   some platforms. For example qemu-kvm, or qemu-system-i386 may be a
