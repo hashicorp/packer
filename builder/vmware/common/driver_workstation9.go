@@ -24,6 +24,12 @@ type Workstation9Driver struct {
 	SSHConfig *SSHConfig
 }
 
+func NewWorkstation9Driver(config *SSHConfig) Driver {
+	return &Workstation9Driver{
+		SSHConfig: config,
+	}
+}
+
 func (d *Workstation9Driver) Clone(dst, src string, linked bool) error {
 	return errors.New("Cloning is not supported with VMware WS version 9. Please use VMware WS version 10, or greater.")
 }

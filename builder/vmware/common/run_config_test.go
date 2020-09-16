@@ -16,7 +16,6 @@ func TestRunConfig_Prepare(t *testing.T) {
 		name           string
 		config         *RunConfig
 		expectedConfig *RunConfig
-		boot           *BootConfigWrapper
 		driver         *DriverConfig
 		errs           []error
 		warnings       []string
@@ -29,7 +28,6 @@ func TestRunConfig_Prepare(t *testing.T) {
 				VNCPortMax:     6000,
 				VNCBindAddress: "127.0.0.1",
 			},
-			boot:     new(BootConfigWrapper),
 			driver:   new(DriverConfig),
 			errs:     nil,
 			warnings: nil,
@@ -45,7 +43,6 @@ func TestRunConfig_Prepare(t *testing.T) {
 				VNCPortMax:     5900,
 				VNCBindAddress: "127.0.0.1",
 			},
-			boot:     new(BootConfigWrapper),
 			driver:   new(DriverConfig),
 			errs:     nil,
 			warnings: nil,
@@ -57,7 +54,6 @@ func TestRunConfig_Prepare(t *testing.T) {
 				VNCPortMax: 5000,
 			},
 			expectedConfig: nil,
-			boot:           new(BootConfigWrapper),
 			driver:         new(DriverConfig),
 			errs:           []error{fmt.Errorf("vnc_port_min must be less than vnc_port_max")},
 			warnings:       nil,
@@ -68,7 +64,6 @@ func TestRunConfig_Prepare(t *testing.T) {
 				VNCPortMin: -1,
 			},
 			expectedConfig: nil,
-			boot:           new(BootConfigWrapper),
 			driver:         new(DriverConfig),
 			errs:           []error{fmt.Errorf("vnc_port_min must be positive")},
 			warnings:       nil,
@@ -79,24 +74,9 @@ func TestRunConfig_Prepare(t *testing.T) {
 				VNCOverWebsocket: true,
 			},
 			expectedConfig: nil,
-			boot:           new(BootConfigWrapper),
 			driver:         new(DriverConfig),
 			errs:           []error{fmt.Errorf("'vnc_over_websocket' can only be used with remote VMWare builds.")},
 			warnings:       nil,
-		},
-		{
-			name: "choose vnc_over_websocket usb_keyboard",
-			config: &RunConfig{
-				VNCOverWebsocket: true,
-			},
-			expectedConfig: &RunConfig{
-				VNCOverWebsocket: true,
-			},
-			boot:   &BootConfigWrapper{USBKeyBoard: true},
-			driver: &DriverConfig{RemoteType: "esxi"},
-			errs:   nil,
-			warnings: []string{"[WARN] Both 'usb_keyboard' and 'vnc_over_websocket' are set. " +
-				"The `usb_keyboard` option will be ignored and automatically set to false."},
 		},
 		{
 			name: "warn about ignored vnc configuration",
@@ -110,17 +90,16 @@ func TestRunConfig_Prepare(t *testing.T) {
 				VNCPortMin:       5000,
 				VNCPortMax:       5900,
 			},
-			boot:   new(BootConfigWrapper),
 			driver: &DriverConfig{RemoteType: "esxi"},
 			errs:   nil,
-			warnings: []string{"[WARN] When one of  'usb_keyboard' and 'vnc_over_websocket' is set " +
+			warnings: []string{"[WARN] When 'vnc_over_websocket' is set " +
 				"any other VNC configuration will be ignored."},
 		},
 	}
 
 	for _, c := range tc {
 		t.Run(c.name, func(t *testing.T) {
-			warnings, errs := c.config.Prepare(interpolate.NewContext(), c.boot, c.driver)
+			warnings, errs := c.config.Prepare(interpolate.NewContext(), c.driver)
 			if !reflect.DeepEqual(errs, c.errs) {
 				t.Fatalf("bad: \n expected '%v' \nactual '%v'", c.errs, errs)
 			}

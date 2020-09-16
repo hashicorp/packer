@@ -101,37 +101,17 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver,
 		switch runtime.GOOS {
 		case "darwin":
 			drivers = []Driver{
-				&Fusion6Driver{
-					Fusion5Driver: Fusion5Driver{
-						AppPath:   dconfig.FusionAppPath,
-						SSHConfig: config,
-					},
-				},
-				&Fusion5Driver{
-					AppPath:   dconfig.FusionAppPath,
-					SSHConfig: config,
-				},
+				NewFusion6Driver(dconfig, config),
+				NewFusion5Driver(dconfig, config),
 			}
 		case "linux":
 			fallthrough
 		case "windows":
 			drivers = []Driver{
-				&Workstation10Driver{
-					Workstation9Driver: Workstation9Driver{
-						SSHConfig: config,
-					},
-				},
-				&Workstation9Driver{
-					SSHConfig: config,
-				},
-				&Player6Driver{
-					Player5Driver: Player5Driver{
-						SSHConfig: config,
-					},
-				},
-				&Player5Driver{
-					SSHConfig: config,
-				},
+				NewWorkstation10Driver(config),
+				NewWorkstation9Driver(config),
+				NewPlayer6Driver(config),
+				NewPlayer5Driver(config),
 			}
 		default:
 			return nil, fmt.Errorf("can't find driver for OS: %s", runtime.GOOS)
