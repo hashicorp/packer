@@ -102,7 +102,8 @@ more details about certain options in following sections.
   `lxc`, `scaleway`, `hyperv`, `parallels`, `aws`, or `google`.
 
 - `vagrantfile_template` (string) - Path to a template to use for the
-  Vagrantfile that is packaged with the box.
+  Vagrantfile that is packaged with the box. This option supports the usage of the [template engine](/docs/templates/engine)
+  for JSON and the [contextual variables](/docs/from-1.5/contextual-variables) for HCL2.
 
 - `vagrantfile_template_generated` (boolean) - By default, Packer will
   exit with an error if the file specified using the
