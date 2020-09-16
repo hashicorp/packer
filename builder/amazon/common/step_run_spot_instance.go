@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/common/random"
 	"github.com/hashicorp/packer/common/retry"
@@ -291,7 +290,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 				// we can wait on those operations, this can be removed.
 				return true
 			}
-			return request.IsErrorRetryable(err)
+			return false
 		},
 		RetryDelay: (&retry.Backoff{InitialBackoff: 500 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
