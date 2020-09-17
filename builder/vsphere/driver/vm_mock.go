@@ -154,3 +154,24 @@ func (vm *VirtualMachineMock) NewOvfManager() *ovf.Manager {
 func (vm *VirtualMachineMock) GetOvfExportOptions(m *ovf.Manager) ([]types.OvfOptionInfo, error) {
 	return nil, nil
 }
+
+
+func (vm *VirtualMachineMock) AddSATAController() error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) FindSATAController() (*types.VirtualAHCIController, error) {
+	return nil, nil
+}
+
+func (vm *VirtualMachineMock) CreateCdrom(c *types.VirtualController) (*types.VirtualCdrom, error) {
+	return nil, nil
+}
+
+func (vm *VirtualMachineMock) RemoveCdroms() error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) EjectCdroms() error {
+	return nil
+}

@@ -32,8 +32,8 @@ type VirtualMachine interface {
 	Configure(config *HardwareConfig) error
 	Customize(spec types.CustomizationSpec) error
 	ResizeDisk(diskSize int64) error
-	PowerOn() error
 	WaitForIP(ctx context.Context, ipNet *net.IPNet) (string, error)
+	PowerOn() error
 	PowerOff() error
 	IsPoweredOff() (bool, error)
 	StartShutdown() error
@@ -43,7 +43,6 @@ type VirtualMachine interface {
 	ImportOvfToContentLibrary(ovf vcenter.OVF) error
 	ImportToContentLibrary(template vcenter.Template) error
 	GetDir() (string, error)
-	AddCdrom(controllerType string, datastoreIsoPath string) error
 	AddFloppy(imgPath string) error
 	SetBootOrder(order []string) error
 	RemoveDevice(keepFiles bool, device ...types.BaseVirtualDevice) error
@@ -53,6 +52,13 @@ type VirtualMachine interface {
 	CreateDescriptor(m *ovf.Manager, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error)
 	NewOvfManager() *ovf.Manager
 	GetOvfExportOptions(m *ovf.Manager) ([]types.OvfOptionInfo, error)
+
+	AddCdrom(controllerType string, datastoreIsoPath string) error
+	CreateCdrom(c *types.VirtualController) (*types.VirtualCdrom, error)
+	RemoveCdroms() error
+	EjectCdroms() error
+	AddSATAController() error
+	FindSATAController() (*types.VirtualAHCIController, error)
 }
 
 type VirtualMachineDriver struct {
