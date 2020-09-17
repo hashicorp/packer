@@ -11,6 +11,7 @@ import (
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -23,7 +24,7 @@ type Config struct {
 	common.ISOConfig               `mapstructure:",squash"`
 	common.FloppyConfig            `mapstructure:",squash"`
 	common.CDConfig                `mapstructure:",squash"`
-	vmwcommon.BootConfigWrapper    `mapstructure:",squash"`
+	bootcommand.VNCConfig          `mapstructure:",squash"`
 	vmwcommon.DriverConfig         `mapstructure:",squash"`
 	vmwcommon.HWConfig             `mapstructure:",squash"`
 	vmwcommon.OutputConfig         `mapstructure:",squash"`
@@ -96,10 +97,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	var warnings []string
 	var errs *packer.MultiError
 
-	vncWarnings, vncErrs := c.BootConfigWrapper.Prepare(&c.ctx, &c.DriverConfig)
-	warnings = append(warnings, vncWarnings...)
-	errs = packer.MultiErrorAppend(errs, vncErrs...)
-	runConfigWarnings, runConfigErrs := c.RunConfig.Prepare(&c.ctx, &c.BootConfigWrapper, &c.DriverConfig)
+	runConfigWarnings, runConfigErrs := c.RunConfig.Prepare(&c.ctx, &c.DriverConfig)
 	warnings = append(warnings, runConfigWarnings...)
 	errs = packer.MultiErrorAppend(errs, runConfigErrs...)
 	isoWarnings, isoErrs := c.ISOConfig.Prepare(&c.ctx)
@@ -113,6 +111,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)

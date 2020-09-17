@@ -20,21 +20,20 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
+
 	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
-	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/find"
-	"github.com/vmware/govmomi/session"
-	"github.com/vmware/govmomi/vim25"
-	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/soap"
-	"github.com/vmware/govmomi/vim25/types"
 	gossh "golang.org/x/crypto/ssh"
-	"golang.org/x/mobile/event/key"
 )
 
 // ESX5 driver talks to an ESXi5 hypervisor remotely over SSH to build
@@ -949,41 +948,6 @@ func (r *esxcliReader) find(key, val string) (map[string]string, error) {
 			return record, nil
 		}
 	}
-}
-
-type KeyInput struct {
-	Scancode key.Code
-	Alt      bool
-	Ctrl     bool
-	Shift    bool
-}
-
-func (d *ESX5Driver) TypeOnKeyboard(input KeyInput) (int32, error) {
-	vm, err := d.finder.VirtualMachine(d.ctx, d.VMName)
-	if err != nil {
-		return 0, err
-	}
-
-	var spec types.UsbScanCodeSpec
-	spec.KeyEvents = append(spec.KeyEvents, types.UsbScanCodeSpecKeyEvent{
-		UsbHidCode: int32(input.Scancode)<<16 | 7,
-		Modifiers: &types.UsbScanCodeSpecModifierType{
-			LeftControl: &input.Ctrl,
-			LeftAlt:     &input.Alt,
-			LeftShift:   &input.Shift,
-		},
-	})
-
-	req := &types.PutUsbScanCodes{
-		This: vm.Reference(),
-		Spec: spec,
-	}
-
-	resp, err := methods.PutUsbScanCodes(d.ctx, d.client.RoundTripper, req)
-	if err != nil {
-		return 0, err
-	}
-	return resp.Returnval, nil
 }
 
 func (d *ESX5Driver) AcquireVNCOverWebsocketTicket() (*types.VirtualMachineTicket, error) {
