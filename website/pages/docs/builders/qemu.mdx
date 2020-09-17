@@ -196,6 +196,8 @@ necessary for this build to succeed and can be found further down the page.
 
 ### Troubleshooting
 
+#### Invalid Keymaps
+
 Some users have experienced errors complaining about invalid keymaps. This
 seems to be related to having a `common` directory or file in the directory
 they've run Packer in, like the packer source directory. This appears to be an
@@ -205,3 +207,14 @@ file/directory or run in another directory.
 Some users have reported issues with incorrect keymaps using qemu version 2.11.
 This is a bug with qemu, and the solution is to upgrade, or downgrade to 2.10.1
 or earlier.
+
+#### Corrupted image after Packer calls qemu-img convert on OSX
+
+Due to an upstream bug with `qemu-img convert` on OSX, sometimes the qemu-img
+convert call will create a corrupted image. If this is an issue for you, make
+sure that the the output format (provided using the option `format`) matches
+the input file's format and file extension, and Packer will
+perform a simple copy operation instead. You will also want to set
+`"skip_compaction": true,` and `"disk_compression": false` to skip a final
+image conversion at the end of the build. See
+https://bugs.launchpad.net/qemu/+bug/1776920 for more details.

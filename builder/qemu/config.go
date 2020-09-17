@@ -143,7 +143,12 @@ type Config struct {
 	// using qemu-img convert. Defaults to false.
 	DiskCompression bool `mapstructure:"disk_compression" required:"false"`
 	// Either `qcow2` or `raw`, this specifies the output format of the virtual
-	// machine image. This defaults to `qcow2`.
+	// machine image. This defaults to `qcow2`. Due to a long-standing bug with
+	// `qemu-img convert` on OSX, sometimes the qemu-img convert call will
+	// create a corrupted image. If this is an issue for you, make sure that the
+	// the output format matches the input file's format, and Packer will
+	// perform a simple copy operation instead. See
+	// https://bugs.launchpad.net/qemu/+bug/1776920 for more details.
 	Format string `mapstructure:"format" required:"false"`
 	// Packer defaults to building QEMU virtual machines by
 	// launching a GUI that shows the console of the machine being built. When this

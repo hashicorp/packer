@@ -69,7 +69,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Label: b.config.CDConfig.CDLabel,
 		},
 		new(stepCreateDisk),
-		new(stepCopyDisk),
+		&stepCopyDisk{
+			DiskImage:      b.config.DiskImage,
+			Format:         b.config.Format,
+			OutputDir:      b.config.OutputDir,
+			UseBackingFile: b.config.UseBackingFile,
+			VMName:         b.config.VMName,
+		},
 		new(stepResizeDisk),
 		new(stepHTTPIPDiscover),
 		&common.StepHTTPServer{
