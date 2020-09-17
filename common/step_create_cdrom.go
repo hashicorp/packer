@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/hashicorp/packer/helper/builder/localexec"
@@ -167,11 +168,33 @@ var supportedCDISOCreationCommands []cdISOCreationCommand = []cdISOCreationComma
 	},
 }
 
+func isCygwinExecutable(path string) bool {
+	return runtime.GOOS == "windows" && strings.Contains(path, "\\usr\\bin\\")
+}
+
+func toCygwinPath(path string) (string, error) {
+	c := exec.Command("cygpath", path)
+	cygwinPath, err := c.Output()
+	return strings.TrimSpace(string(cygwinPath)), err
+}
+
 func retrieveCDISOCreationCommand(label string, source string, dest string) (*exec.Cmd, error) {
 	for _, c := range supportedCDISOCreationCommands {
 		path, err := exec.LookPath(c.Name)
 		if err != nil {
 			continue
+		}
+		// if we are running a cygwin/msys2 executable we must convert the
+		// native win32 path to a cygwin/msys2/unix style path.
+		if isCygwinExecutable(path) {
+			source, err = toCygwinPath(source)
+			if err != nil {
+				return nil, err
+			}
+			dest, err = toCygwinPath(dest)
+			if err != nil {
+				return nil, err
+			}
 		}
 		return c.Command(path, label, source, dest), nil
 	}
