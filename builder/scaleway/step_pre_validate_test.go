@@ -12,14 +12,8 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/scaleway/scaleway-cli/pkg/api"
-)
-
-const (
-	organization = "Beagle Boys"
-	token        = "NumberOne"
-	userAgent    = "UA"
-	region       = "par1"
+	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
+	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
 // 1. Configure a httptest server to return the list of fakeImgNames or fakeSnapNames
@@ -33,39 +27,47 @@ func setup(t *testing.T, fakeImgNames []string, fakeSnapNames []string) (*multis
 		w.Header().Set("Content-Type", "application/json")
 		enc := json.NewEncoder(w)
 		switch r.URL.Path {
-		case "/images":
-			var imgs api.ScalewayImages
+		case "/instance/v1/zones/fr-par-1/images":
+			var imgs instance.ListImagesResponse
 			for _, name := range fakeImgNames {
-				imgs.Images = append(imgs.Images, api.ScalewayImage{
-					Identifier: strconv.Itoa(rand.Int()),
-					Name:       name,
+				imgs.Images = append(imgs.Images, &instance.Image{
+					ID:   strconv.Itoa(rand.Int()),
+					Name: name,
+					Zone: "fr-par-1",
 				})
 			}
-			enc.Encode(imgs)
-		case "/snapshots":
-			var snaps api.ScalewaySnapshots
+			imgs.TotalCount = uint32(len(fakeImgNames))
+			if err := enc.Encode(imgs); err != nil {
+				t.Fatalf("fake server: encoding reply: %s", err)
+			}
+		case "/instance/v1/zones/fr-par-1/snapshots":
+			var snaps instance.ListSnapshotsResponse
 			for _, name := range fakeSnapNames {
-				snaps.Snapshots = append(snaps.Snapshots, api.ScalewaySnapshot{
-					Identifier: strconv.Itoa(rand.Int()),
-					Name:       name,
+				snaps.Snapshots = append(snaps.Snapshots, &instance.Snapshot{
+					ID:   strconv.Itoa(rand.Int()),
+					Name: name,
+					Zone: "fr-par-1",
 				})
 			}
-			enc.Encode(snaps)
+			snaps.TotalCount = uint32(len(fakeSnapNames))
+			if err := enc.Encode(snaps); err != nil {
+				t.Fatalf("fake server: encoding reply: %s", err)
+			}
 		default:
 			t.Fatalf("fake server: unexpected path: %q", r.URL.Path)
 		}
 	}))
 
-	// Ugly but the only way to wire the httptest server to the client...
-	api.ComputeAPIPar1 = ts.URL
-	api.ComputeAPIAms1 = ts.URL
+	clientOpts := []scw.ClientOption{
+		scw.WithDefaultZone(scw.ZoneFrPar1),
+		scw.WithAPIURL(ts.URL),
+	}
 
-	client, err := api.NewScalewayAPI(organization, token, userAgent, region)
+	client, err := scw.NewClient(clientOpts...)
 	if err != nil {
 		ts.Close()
 		t.Fatalf("setup: client: %s", err)
 	}
-	client.Logger = api.NewDisableLogger()
 
 	state := multistep.BasicStateBag{}
 	state.Put("ui", &packer.BasicUi{
@@ -148,19 +150,5 @@ func TestStepPreValidate(t *testing.T) {
 				t.Fatalf("step.Run: want: %v; got: %v", tc.wantAction, action)
 			}
 		})
-	}
-}
-
-func TestGetImages(t *testing.T) {
-	state, teardown := setup(t, []string{"image-old-1", "image-old-2"}, []string{})
-	defer teardown()
-	client := state.Get("client").(*api.ScalewayAPI)
-
-	images, err := getImages(client)
-	if err != nil {
-		t.Fatalf("getImages: %v", err)
-	}
-	if len(images.Images) != 2 {
-		t.Fatalf("getImages: len(images): want: 2; got: %d", len(images.Images))
 	}
 }
