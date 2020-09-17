@@ -63,11 +63,8 @@ func (s *StepAddCDRom) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	// Add our custom CD, if it exists
-	cd_path, ok := state.Get("cd_path").(string)
-	if ok {
-		if cd_path != "" {
-			s.Config.ISOPaths = append(s.Config.ISOPaths, cd_path)
-		}
+	if cd_path, _ := state.Get("cd_path").(string); cd_path != "" {
+		s.Config.ISOPaths = append(s.Config.ISOPaths, cd_path)
 	}
 
 	if len(s.Config.ISOPaths) > 0 {

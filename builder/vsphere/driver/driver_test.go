@@ -104,3 +104,11 @@ func NewSimulatorDriver(s *simulator.Server) (*VCenterDriver, error) {
 	}
 	return d, nil
 }
+
+//Simulator shortcut to choose any pre created VM.
+func ChooseSimulatorPreCreatedVM(driverSim *VCenterDriver) VirtualMachine {
+	machine := simulator.Map.Any("VirtualMachine").(*simulator.VirtualMachine)
+	ref := machine.Reference()
+	vm := driverSim.NewVM(&ref)
+	return vm
+}
