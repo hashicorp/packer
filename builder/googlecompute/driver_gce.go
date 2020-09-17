@@ -15,6 +15,7 @@ import (
 	"time"
 
 	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/option"
 	oslogin "google.golang.org/api/oslogin/v1"
 
 	"github.com/hashicorp/packer/common/retry"
@@ -124,12 +125,12 @@ func NewDriverGCE(ui packer.Ui, p string, conf *jwt.Config, vaultOauth string) (
 	}
 
 	log.Printf("[INFO] Instantiating GCE client...")
-	service, err := compute.New(client)
+	service, err := compute.NewService(context.TODO(), option.WithHTTPClient(client))
 	if err != nil {
 		return nil, err
 	}
 
-	osLoginService, err := oslogin.New(client)
+	osLoginService, err := oslogin.NewService(context.TODO(), option.WithHTTPClient(client))
 	if err != nil {
 		return nil, err
 	}

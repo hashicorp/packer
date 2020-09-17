@@ -13,6 +13,7 @@ import (
 
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/compute/v1"
+	"google.golang.org/api/option"
 	"google.golang.org/api/storage/v1"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -180,7 +181,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 }
 
 func UploadToBucket(client *http.Client, ui packer.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
-	service, err := storage.New(client)
+	service, err := storage.NewService(context.TODO(), option.WithHTTPClient(client))
 	if err != nil {
 		return "", err
 	}
@@ -216,7 +217,7 @@ func UploadToBucket(client *http.Client, ui packer.Ui, artifact packer.Artifact,
 }
 
 func CreateGceImage(client *http.Client, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string) (packer.Artifact, error) {
-	service, err := compute.New(client)
+	service, err := compute.NewService(context.TODO(), option.WithHTTPClient(client))
 	if err != nil {
 		return nil, err
 	}
@@ -270,7 +271,7 @@ func CreateGceImage(client *http.Client, ui packer.Ui, project string, rawImageU
 }
 
 func DeleteFromBucket(client *http.Client, ui packer.Ui, bucket string, gcsObjectName string) error {
-	service, err := storage.New(client)
+	service, err := storage.NewService(context.TODO(), option.WithHTTPClient(client))
 	if err != nil {
 		return err
 	}
