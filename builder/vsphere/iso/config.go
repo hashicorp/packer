@@ -25,13 +25,13 @@ type Config struct {
 
 	packerCommon.ISOConfig `mapstructure:",squash"`
 
-	CDRomConfig         `mapstructure:",squash"`
-	RemoveCDRomConfig   `mapstructure:",squash"`
-	FloppyConfig        `mapstructure:",squash"`
-	common.RunConfig    `mapstructure:",squash"`
-	common.BootConfig   `mapstructure:",squash"`
-	common.WaitIpConfig `mapstructure:",squash"`
-	Comm                communicator.Config `mapstructure:",squash"`
+	CDRomConfig              `mapstructure:",squash"`
+	common.RemoveCDRomConfig `mapstructure:",squash"`
+	common.FloppyConfig      `mapstructure:",squash"`
+	common.RunConfig         `mapstructure:",squash"`
+	common.BootConfig        `mapstructure:",squash"`
+	common.WaitIpConfig      `mapstructure:",squash"`
+	Comm                     communicator.Config `mapstructure:",squash"`
 
 	common.ShutdownConfig `mapstructure:",squash"`
 

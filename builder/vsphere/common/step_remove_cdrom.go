@@ -1,7 +1,7 @@
 //go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type RemoveCDRomConfig
 
-package iso
+package common
 
 import (
 	"context"

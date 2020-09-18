@@ -15,6 +15,7 @@ import (
 type Config struct {
 	packerCommon.PackerConfig `mapstructure:",squash"`
 	packerCommon.HTTPConfig   `mapstructure:",squash"`
+	packerCommon.CDConfig     `mapstructure:",squash"`
 
 	common.ConnectConfig      `mapstructure:",squash"`
 	CloneConfig               `mapstructure:",squash"`
@@ -22,11 +23,14 @@ type Config struct {
 	common.HardwareConfig     `mapstructure:",squash"`
 	common.ConfigParamsConfig `mapstructure:",squash"`
 
-	common.RunConfig      `mapstructure:",squash"`
-	common.BootConfig     `mapstructure:",squash"`
-	common.WaitIpConfig   `mapstructure:",squash"`
-	Comm                  communicator.Config `mapstructure:",squash"`
-	common.ShutdownConfig `mapstructure:",squash"`
+	CDRomConfig              `mapstructure:",squash"`
+	common.RemoveCDRomConfig `mapstructure:",squash"`
+	common.FloppyConfig      `mapstructure:",squash"`
+	common.RunConfig         `mapstructure:",squash"`
+	common.BootConfig        `mapstructure:",squash"`
+	common.WaitIpConfig      `mapstructure:",squash"`
+	Comm                     communicator.Config `mapstructure:",squash"`
+	common.ShutdownConfig    `mapstructure:",squash"`
 
 	// Create a snapshot when set to `true`, so the VM can be used as a base
 	// for linked clones. Defaults to `false`.
@@ -67,6 +71,8 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.HardwareConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 
+	errs = packer.MultiErrorAppend(errs, c.CDRomConfig.Prepare()...)
+	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.WaitIpConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)

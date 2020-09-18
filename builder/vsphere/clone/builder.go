@@ -41,6 +41,15 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepConnect{
 			Config: &b.config.ConnectConfig,
 		},
+		&packerCommon.StepCreateCD{
+			Files: b.config.CDConfig.CDFiles,
+			Label: b.config.CDConfig.CDLabel,
+		},
+		&common.StepRemoteUpload{
+			Datastore:                  b.config.Datastore,
+			Host:                       b.config.Host,
+			SetHostForDatastoreUploads: b.config.SetHostForDatastoreUploads,
+		},
 		&StepCloneVM{
 			Config:   &b.config.CloneConfig,
 			Location: &b.config.LocationConfig,
@@ -48,6 +57,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&common.StepConfigureHardware{
 			Config: &b.config.HardwareConfig,
+		},
+		&StepAddCDRom{
+			Config: &b.config.CDRomConfig,
 		},
 		&common.StepConfigParams{
 			Config: &b.config.ConfigParamsConfig,
@@ -62,6 +74,17 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	if b.config.Comm.Type != "none" {
 		steps = append(steps,
+			&packerCommon.StepCreateFloppy{
+				Files:       b.config.FloppyFiles,
+				Directories: b.config.FloppyDirectories,
+				Label:       b.config.FloppyLabel,
+			},
+			&common.StepAddFloppy{
+				Config:                     &b.config.FloppyConfig,
+				Datastore:                  b.config.Datastore,
+				Host:                       b.config.Host,
+				SetHostForDatastoreUploads: b.config.SetHostForDatastoreUploads,
+			},
 			&common.StepHTTPIPDiscover{
 				HTTPIP:  b.config.BootConfig.HTTPIP,
 				Network: b.config.WaitIpConfig.GetIPNet(),
@@ -98,10 +121,17 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			&common.StepShutdown{
 				Config: &b.config.ShutdownConfig,
 			},
+			&common.StepRemoveFloppy{
+				Datastore: b.config.Datastore,
+				Host:      b.config.Host,
+			},
 		)
 	}
 
 	steps = append(steps,
+		&common.StepRemoveCDRom{
+			Config: &b.config.RemoveCDRomConfig,
+		},
 		&common.StepCreateSnapshot{
 			CreateSnapshot: b.config.CreateSnapshot,
 		},

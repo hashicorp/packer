@@ -97,7 +97,7 @@ source "vsphere-iso" "example" {
 
 ### Floppy configuration
 
-@include 'builder/vsphere/iso/FloppyConfig-not-required.mdx'
+@include 'builder/vsphere/common/FloppyConfig-not-required.mdx'
 
 ### Connection Configuration
 
@@ -173,6 +173,12 @@ iso_paths = [
 </Tabs>
 
 @include 'builder/vsphere/iso/CDRomConfig-not-required.mdx'
+
+@include 'common/CDConfig.mdx'
+
+#### Optional:
+
+@include 'common/CDConfig-not-required.mdx'
 
 ### Create Configuration
 

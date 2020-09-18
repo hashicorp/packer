@@ -22,6 +22,8 @@ type FlatConfig struct {
 	HTTPPortMax                     *int                                        `mapstructure:"http_port_max" cty:"http_port_max" hcl:"http_port_max"`
 	HTTPAddress                     *string                                     `mapstructure:"http_bind_address" cty:"http_bind_address" hcl:"http_bind_address"`
 	HTTPInterface                   *string                                     `mapstructure:"http_interface" undocumented:"true" cty:"http_interface" hcl:"http_interface"`
+	CDFiles                         []string                                    `mapstructure:"cd_files" cty:"cd_files" hcl:"cd_files"`
+	CDLabel                         *string                                     `mapstructure:"cd_label" cty:"cd_label" hcl:"cd_label"`
 	VCenterServer                   *string                                     `mapstructure:"vcenter_server" cty:"vcenter_server" hcl:"vcenter_server"`
 	Username                        *string                                     `mapstructure:"username" cty:"username" hcl:"username"`
 	Password                        *string                                     `mapstructure:"password" cty:"password" hcl:"password"`
@@ -58,6 +60,12 @@ type FlatConfig struct {
 	ConfigParams                    map[string]string                           `mapstructure:"configuration_parameters" cty:"configuration_parameters" hcl:"configuration_parameters"`
 	ToolsSyncTime                   *bool                                       `mapstructure:"tools_sync_time" cty:"tools_sync_time" hcl:"tools_sync_time"`
 	ToolsUpgradePolicy              *bool                                       `mapstructure:"tools_upgrade_policy" cty:"tools_upgrade_policy" hcl:"tools_upgrade_policy"`
+	CdromType                       *string                                     `mapstructure:"cdrom_type" cty:"cdrom_type" hcl:"cdrom_type"`
+	RemoveCdrom                     *bool                                       `mapstructure:"remove_cdrom" cty:"remove_cdrom" hcl:"remove_cdrom"`
+	FloppyIMGPath                   *string                                     `mapstructure:"floppy_img_path" cty:"floppy_img_path" hcl:"floppy_img_path"`
+	FloppyFiles                     []string                                    `mapstructure:"floppy_files" cty:"floppy_files" hcl:"floppy_files"`
+	FloppyDirectories               []string                                    `mapstructure:"floppy_dirs" cty:"floppy_dirs" hcl:"floppy_dirs"`
+	FloppyLabel                     *string                                     `mapstructure:"floppy_label" cty:"floppy_label" hcl:"floppy_label"`
 	BootOrder                       *string                                     `mapstructure:"boot_order" cty:"boot_order" hcl:"boot_order"`
 	BootGroupInterval               *string                                     `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval" hcl:"boot_keygroup_interval"`
 	BootWait                        *string                                     `mapstructure:"boot_wait" cty:"boot_wait" hcl:"boot_wait"`
@@ -147,6 +155,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"http_port_max":                  &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
 		"http_bind_address":              &hcldec.AttrSpec{Name: "http_bind_address", Type: cty.String, Required: false},
 		"http_interface":                 &hcldec.AttrSpec{Name: "http_interface", Type: cty.String, Required: false},
+		"cd_files":                       &hcldec.AttrSpec{Name: "cd_files", Type: cty.List(cty.String), Required: false},
+		"cd_label":                       &hcldec.AttrSpec{Name: "cd_label", Type: cty.String, Required: false},
 		"vcenter_server":                 &hcldec.AttrSpec{Name: "vcenter_server", Type: cty.String, Required: false},
 		"username":                       &hcldec.AttrSpec{Name: "username", Type: cty.String, Required: false},
 		"password":                       &hcldec.AttrSpec{Name: "password", Type: cty.String, Required: false},
@@ -183,6 +193,12 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"configuration_parameters":       &hcldec.AttrSpec{Name: "configuration_parameters", Type: cty.Map(cty.String), Required: false},
 		"tools_sync_time":                &hcldec.AttrSpec{Name: "tools_sync_time", Type: cty.Bool, Required: false},
 		"tools_upgrade_policy":           &hcldec.AttrSpec{Name: "tools_upgrade_policy", Type: cty.Bool, Required: false},
+		"cdrom_type":                     &hcldec.AttrSpec{Name: "cdrom_type", Type: cty.String, Required: false},
+		"remove_cdrom":                   &hcldec.AttrSpec{Name: "remove_cdrom", Type: cty.Bool, Required: false},
+		"floppy_img_path":                &hcldec.AttrSpec{Name: "floppy_img_path", Type: cty.String, Required: false},
+		"floppy_files":                   &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
+		"floppy_dirs":                    &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
+		"floppy_label":                   &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},
 		"boot_order":                     &hcldec.AttrSpec{Name: "boot_order", Type: cty.String, Required: false},
 		"boot_keygroup_interval":         &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                      &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
