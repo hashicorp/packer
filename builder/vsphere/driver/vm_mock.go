@@ -20,6 +20,18 @@ type VirtualMachineMock struct {
 	ConfigureError          error
 	ConfigureCalled         bool
 	ConfigureHardwareConfig *HardwareConfig
+
+	FindSATAControllerCalled bool
+	FindSATAControllerErr    error
+
+	AddSATAControllerCalled bool
+	AddSATAControllerErr    error
+
+	AddCdromCalled      bool
+	AddCdromCalledTimes int
+	AddCdromErr         error
+	AddCdromTypes       []string
+	AddCdromPaths       []string
 }
 
 func (vm *VirtualMachineMock) Info(params ...string) (*mo.VirtualMachine, error) {
@@ -115,8 +127,12 @@ func (vm *VirtualMachineMock) GetDir() (string, error) {
 	return "", nil
 }
 
-func (vm *VirtualMachineMock) AddCdrom(controllerType string, datastoreIsoPath string) error {
-	return nil
+func (vm *VirtualMachineMock) AddCdrom(cdromType string, isoPath string) error {
+	vm.AddCdromCalledTimes++
+	vm.AddCdromCalled = true
+	vm.AddCdromTypes = append(vm.AddCdromTypes, cdromType)
+	vm.AddCdromPaths = append(vm.AddCdromPaths, isoPath)
+	return vm.AddCdromErr
 }
 
 func (vm *VirtualMachineMock) AddFloppy(imgPath string) error {
@@ -153,4 +169,26 @@ func (vm *VirtualMachineMock) NewOvfManager() *ovf.Manager {
 
 func (vm *VirtualMachineMock) GetOvfExportOptions(m *ovf.Manager) ([]types.OvfOptionInfo, error) {
 	return nil, nil
+}
+
+func (vm *VirtualMachineMock) AddSATAController() error {
+	vm.AddSATAControllerCalled = true
+	return vm.AddSATAControllerErr
+}
+
+func (vm *VirtualMachineMock) FindSATAController() (*types.VirtualAHCIController, error) {
+	vm.FindSATAControllerCalled = true
+	return nil, vm.FindSATAControllerErr
+}
+
+func (vm *VirtualMachineMock) CreateCdrom(c *types.VirtualController) (*types.VirtualCdrom, error) {
+	return nil, nil
+}
+
+func (vm *VirtualMachineMock) RemoveCdroms() error {
+	return nil
+}
+
+func (vm *VirtualMachineMock) EjectCdroms() error {
+	return nil
 }

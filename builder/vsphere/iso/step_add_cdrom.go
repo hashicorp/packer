@@ -42,7 +42,7 @@ func (c *CDRomConfig) Prepare() []error {
 
 func (s *StepAddCDRom) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachineDriver)
+	vm := state.Get("vm").(driver.VirtualMachine)
 
 	if s.Config.CdromType == "sata" {
 		if _, err := vm.FindSATAController(); err == driver.ErrNoSataController {
@@ -63,11 +63,8 @@ func (s *StepAddCDRom) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	// Add our custom CD, if it exists
-	cd_path, ok := state.Get("cd_path").(string)
-	if ok {
-		if cd_path != "" {
-			s.Config.ISOPaths = append(s.Config.ISOPaths, cd_path)
-		}
+	if cd_path, _ := state.Get("cd_path").(string); cd_path != "" {
+		s.Config.ISOPaths = append(s.Config.ISOPaths, cd_path)
 	}
 
 	if len(s.Config.ISOPaths) > 0 {
