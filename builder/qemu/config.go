@@ -303,7 +303,7 @@ type Config struct {
 	// `{{ .HTTPIP }}`, `{{ .HTTPPort }}`, `{{ .HTTPDir }}`,
 	// `{{ .OutputDir }}`, `{{ .Name }}`, and `{{ .SSHHostPort }}`
 	QemuArgs [][]string `mapstructure:"qemuargs" required:"false"`
-	// A map of custom arguemnts to pass to qemu-img commands, where the key
+	// A map of custom arguments to pass to qemu-img commands, where the key
 	// is the subcommand, and the values are lists of strings for each flag.
 	// Example:
 	//
@@ -322,15 +322,15 @@ type Config struct {
 	// The arguments will be constructed as follows:
 	// - Convert:
 	// 	Default is `qemu-img convert -O $format $sourcepath $targetpath`. Adding
-	// 	arguments ["-foo", "bar"] to qemu_img_args will change this to
+	// 	arguments ["-foo", "bar"] to qemu_img_args.convert will change this to
 	// 	`qemu-img convert -foo bar -O $format $sourcepath $targetpath`
 	// - Create:
 	// 	Default is `create -f $format $targetpath $size`. Adding arguments
-	// 	["-foo", "bar"] to qemu_img_args will change this to
+	// 	["-foo", "bar"] to qemu_img_args.create will change this to
 	// 	"create -f qcow2 -foo bar target.qcow2 1234M"
 	// - Resize:
 	// 	Default is `qemu-img resize -f $format $sourcepath $size`. Adding
-	// 	arguments ["-foo", "bar"] to qemu_img_args will change this to
+	// 	arguments ["-foo", "bar"] to qemu_img_args.resize will change this to
 	// 	`qemu-img resize -f $format -foo bar $sourcepath $size`
 	QemuImgArgs QemuImgArgs `mapstructure:"qemu_img_args" required:"false"`
 	// The name of the Qemu binary to look for. This
