@@ -65,6 +65,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("ui", ui)
 
 	steps := []multistep.Step{
+		&stepPreValidate{
+			Force:        b.config.PackerForce,
+			ImageName:    b.config.ImageName,
+			SnapshotName: b.config.SnapshotName,
+		},
 		&stepCreateSSHKey{
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("scw_%s.pem", b.config.PackerBuildName),
