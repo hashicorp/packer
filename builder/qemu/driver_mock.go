@@ -18,7 +18,7 @@ type DriverMock struct {
 	WaitForShutdownState  bool
 
 	QemuImgCalled bool
-	QemuImgCalls  [][]string
+	QemuImgCalls  []string
 	QemuImgErrs   []error
 
 	VerifyCalled bool
@@ -55,7 +55,7 @@ func (d *DriverMock) WaitForShutdown(cancelCh <-chan struct{}) bool {
 
 func (d *DriverMock) QemuImg(args ...string) error {
 	d.QemuImgCalled = true
-	d.QemuImgCalls = append(d.QemuImgCalls, args)
+	d.QemuImgCalls = append(d.QemuImgCalls, args...)
 
 	if len(d.QemuImgErrs) >= len(d.QemuImgCalls) {
 		return d.QemuImgErrs[len(d.QemuImgCalls)-1]

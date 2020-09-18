@@ -247,7 +247,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 	inArgs := make(map[string][]string)
 	if len(config.QemuArgs) > 0 {
-		ui.Say("Overriding defaults Qemu arguments with QemuArgs...")
+		ui.Say("Overriding default Qemu arguments with QemuArgs...")
 
 		httpIp := state.Get("http_ip").(string)
 		httpPort := state.Get("http_port").(int)
