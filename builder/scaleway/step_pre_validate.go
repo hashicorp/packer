@@ -30,7 +30,9 @@ func (s *stepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 	ui.Say(fmt.Sprintf("Prevalidating image name: %s", s.ImageName))
 
 	instanceAPI := instance.NewAPI(state.Get("client").(*scw.Client))
-	images, err := instanceAPI.ListImages(&instance.ListImagesRequest{})
+	images, err := instanceAPI.ListImages(
+		&instance.ListImagesRequest{Name: &s.ImageName},
+		scw.WithAllPages())
 	if err != nil {
 		err := fmt.Errorf("Error: getting image list: %s", err)
 		state.Put("error", err)
@@ -50,7 +52,9 @@ func (s *stepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 
 	ui.Say(fmt.Sprintf("Prevalidating snapshot name: %s", s.SnapshotName))
 
-	snapshots, err := instanceAPI.ListSnapshots(&instance.ListSnapshotsRequest{})
+	snapshots, err := instanceAPI.ListSnapshots(
+		&instance.ListSnapshotsRequest{Name: &s.SnapshotName},
+		scw.WithAllPages())
 	if err != nil {
 		err := fmt.Errorf("Error: getting snapshot list: %s", err)
 		state.Put("error", err)
