@@ -560,6 +560,17 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 			buildNotExpectedFiles:    []string{"chocolate.txt", "vanilla.txt", "tomato.txt", "unnamed.txt"},
 			postProcNotExpectedFiles: []string{"pear.txt, banana.txt"},
 		},
+		{
+			name: "HCL2-JSON: except build and post-processor",
+			args: []string{
+				"-parallel-builds=1",
+				"-except=file.chocolate,file.vanilla,tomato",
+				filepath.Join(testFixture("build-only"), "template.pkr.json"),
+			},
+			expectedFiles:            []string{"apple.txt", "cherry.txt", "peach.txt"},
+			buildNotExpectedFiles:    []string{"chocolate.txt", "vanilla.txt", "tomato.txt", "unnamed.txt"},
+			postProcNotExpectedFiles: []string{"pear.txt, banana.txt"},
+		},
 	}
 
 	for _, tt := range tc {
