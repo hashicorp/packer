@@ -55,7 +55,17 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 		return multistep.ActionContinue
 	}
 
-	if s.Config.DisableShutdown {
+	if state.Get("communicator") == nil {
+
+		ui.Say("The `communicator` is 'none', automatic shutdown disabled.")
+		if s.Config.Command != "" {
+			ui.Message("The parameter `shutdown_command` is ignored as it requires a `communicator`.")
+		}
+
+		msg := fmt.Sprintf("Please shutdown virtual machine within %s.", s.Config.Timeout)
+		ui.Message(msg)
+
+	} else if s.Config.DisableShutdown {
 		ui.Say("Automatic shutdown disabled. Please shutdown virtual machine.")
 	} else if s.Config.Command != "" {
 		// Communicator is not needed unless shutdown_command is populated
