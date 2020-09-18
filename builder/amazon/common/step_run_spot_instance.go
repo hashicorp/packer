@@ -301,10 +301,10 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		// zones doesn't have one of the allowed instance types; as long as
 		// an instance is launched, these errors aren't important.
 		if len(createOutput.Instances) > 0 {
-			if err != nil && !strings.Contains(err.Error(), "Invalid IAM Instance Profile name") {
-				log.Printf("create request failed %v", err)
-				return nil
+			if err != nil {
+				log.Printf("create request failed for some instances %v", err.Error())
 			}
+			return nil
 		}
 		if err != nil {
 			log.Printf("create request failed %v", err)
