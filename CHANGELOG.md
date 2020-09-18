@@ -31,6 +31,8 @@
 ### BUG FIXES:
 * builder/qemu: Fix hardcoded lowerbound causing negative ports [GH-9905]
 * builder/qemu: Skip compaction when backing file is used. [GH-9918]
+* builder/scaleway: Add pre validate step to prevent the creation of multiple
+    images with the same name. [GH-9840]
 * builder/vsphere: Fix overly strict iso_path validation regex. [GH-9855]
 * command/console: Prevent failure when there are unknown vars. [GH-9864]
 * command/inspect: Allow unset variables in HCL2 and JSON. [GH-9832]
