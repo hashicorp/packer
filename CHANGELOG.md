@@ -3,7 +3,7 @@
 ### IMPROVEMENTS:
 * builder/azure: Support publishing to a Shared Image Gallery with a different
     subscription id [GH-9875]
-* builder/oracle-oci: Add new `create_vnic_details` option for launch details.
+* builder/oracle-oci: Add `create_vnic_details` option for launch details.
     [GH-9856]
 * builder/oracle-oci: Allow freeform and defined tags to be added instance.
     [GH-9802]
@@ -12,27 +12,41 @@
 * builder/proxmox: Allow the mounting of multiple ISOs via the `cd_drive`
     option. [GH-9653]
 * builder/proxmox: Fix boot command special keys. [GH-9885]
-* builder/qemu: New `skip_resize_disk` option. [GH-9896] [GH-9860 ]
+* builder/qemu: Add `qemu_img_args` option to set special cli flags for calls
+    to qemu-img [GH-9956]
+* builder/qemu: Add `skip_resize_disk` option to skip the resizing of QCOW2
+    images. [GH-9896] [GH-9860]
+* builder/qemu: Skip qemu-img convert on MacOS to prevent the creation
+    of corrupt images [QEMU
+    #1776920](https://bugs.launchpad.net/qemu/+bug/1776920)[GH-9949]
 * builder/scaleway: Change default boottype to local. [GH-9853]
 * builder/scaleway: Update scaleway to use non-deprecated sdk. [GH-9902]
-* builder/vmware-esxi: Add usb_keyboard option to use USB scancodes instead of
-    VNC for remote builds. [GH-9895]
+* builder/vmware: Add `vnc_over_websocket` to allow the sending of a
+    `boot_command` to hosts running ESXi 6.7 and above. [GH-9938]
 * builder/vsphere-clone: Add ability to set `mac_address` [GH-9930]
 * builder/vsphere-iso: Add NVMe controller support. [GH-9880]
 * builder/vsphere: Look for a default resource pool when root resource pool is
     not found. [GH-9809]
 * core: New `cd_files` option to mount iso for modern OSes which don't support
-    floppies. [GH-9796] [GH-9919] [GH-9928] [GH-9932]
+    floppies. [GH-9796] [GH-9919] [GH-9928] [GH-9932] [GH-9941]
 * HCL2: When the type of a variable is not known evaluate setting as a literal
     string instead of a variable name. [GH-9863]
+* post-processor/vagrant: Support the use of template variables within
+    Vagrantfile templates. [GH-9923]
 * post-processor/yandex-import: Allow custom API endpoint. [GH-9850]
 * provisioner/ansible: Add support for Ansible Galaxy Collections. [GH-9903]
 
 ### BUG FIXES:
+* builder/amazon-ebs: Fix issue where retrying on invalid IAM instance profile
+    error was creating multiple spot instances. [GH-9946]
+* builder/amazon-ebssurrogate: Fix issue where builder defaults to AWS managed
+    key even when custom `kms_key_id` is set. [GH-9959]
 * builder/qemu: Fix hardcoded lowerbound causing negative ports [GH-9905]
 * builder/qemu: Skip compaction when backing file is used. [GH-9918]
 * builder/scaleway: Add pre validate step to prevent the creation of multiple
     images with the same name. [GH-9840]
+* builder/vmware-iso: Prevent the use of reserved SCSI ID 0:7 when attaching
+    multiple disks. [GH-9940]
 * builder/vsphere: Fix overly strict iso_path validation regex. [GH-9855]
 * command/console: Prevent failure when there are unknown vars. [GH-9864]
 * command/inspect: Allow unset variables in HCL2 and JSON. [GH-9832]
