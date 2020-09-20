@@ -13,7 +13,7 @@ type KeyInput struct {
 	Shift    bool
 }
 
-func (vm *VirtualMachine) TypeOnKeyboard(input KeyInput) (int32, error) {
+func (vm *VirtualMachineDriver) TypeOnKeyboard(input KeyInput) (int32, error) {
 	var spec types.UsbScanCodeSpec
 
 	spec.KeyEvents = append(spec.KeyEvents, types.UsbScanCodeSpecKeyEvent{

@@ -20,6 +20,7 @@ type FlatConfig struct {
 	ExtraArguments        []string          `mapstructure:"extra_arguments" cty:"extra_arguments" hcl:"extra_arguments"`
 	AnsibleEnvVars        []string          `mapstructure:"ansible_env_vars" cty:"ansible_env_vars" hcl:"ansible_env_vars"`
 	PlaybookFile          *string           `mapstructure:"playbook_file" required:"true" cty:"playbook_file" hcl:"playbook_file"`
+	AnsibleSSHExtraArgs   []string          `mapstructure:"ansible_ssh_extra_args" cty:"ansible_ssh_extra_args" hcl:"ansible_ssh_extra_args"`
 	Groups                []string          `mapstructure:"groups" cty:"groups" hcl:"groups"`
 	EmptyGroups           []string          `mapstructure:"empty_groups" cty:"empty_groups" hcl:"empty_groups"`
 	HostAlias             *string           `mapstructure:"host_alias" cty:"host_alias" hcl:"host_alias"`
@@ -38,6 +39,7 @@ type FlatConfig struct {
 	GalaxyCommand         *string           `mapstructure:"galaxy_command" cty:"galaxy_command" hcl:"galaxy_command"`
 	GalaxyForceInstall    *bool             `mapstructure:"galaxy_force_install" cty:"galaxy_force_install" hcl:"galaxy_force_install"`
 	RolesPath             *string           `mapstructure:"roles_path" cty:"roles_path" hcl:"roles_path"`
+	CollectionsPath       *string           `mapstructure:"collections_path" cty:"collections_path" hcl:"collections_path"`
 	UseProxy              *bool             `mapstructure:"use_proxy" cty:"use_proxy" hcl:"use_proxy"`
 }
 
@@ -64,6 +66,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"extra_arguments":            &hcldec.AttrSpec{Name: "extra_arguments", Type: cty.List(cty.String), Required: false},
 		"ansible_env_vars":           &hcldec.AttrSpec{Name: "ansible_env_vars", Type: cty.List(cty.String), Required: false},
 		"playbook_file":              &hcldec.AttrSpec{Name: "playbook_file", Type: cty.String, Required: false},
+		"ansible_ssh_extra_args":     &hcldec.AttrSpec{Name: "ansible_ssh_extra_args", Type: cty.List(cty.String), Required: false},
 		"groups":                     &hcldec.AttrSpec{Name: "groups", Type: cty.List(cty.String), Required: false},
 		"empty_groups":               &hcldec.AttrSpec{Name: "empty_groups", Type: cty.List(cty.String), Required: false},
 		"host_alias":                 &hcldec.AttrSpec{Name: "host_alias", Type: cty.String, Required: false},
@@ -82,6 +85,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"galaxy_command":             &hcldec.AttrSpec{Name: "galaxy_command", Type: cty.String, Required: false},
 		"galaxy_force_install":       &hcldec.AttrSpec{Name: "galaxy_force_install", Type: cty.Bool, Required: false},
 		"roles_path":                 &hcldec.AttrSpec{Name: "roles_path", Type: cty.String, Required: false},
+		"collections_path":           &hcldec.AttrSpec{Name: "collections_path", Type: cty.String, Required: false},
 		"use_proxy":                  &hcldec.AttrSpec{Name: "use_proxy", Type: cty.Bool, Required: false},
 	}
 	return s

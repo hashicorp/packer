@@ -77,6 +77,12 @@ type Driver interface {
 
 	// Get the host ip address for the vm
 	HostIP(multistep.StateBag) (string, error)
+
+	// Export the vm to ovf or ova format using ovftool
+	Export([]string) error
+
+	// OvfTool
+	VerifyOvfTool(bool, bool) error
 }
 
 // NewDriver returns a new driver implementation for this operating
@@ -85,56 +91,27 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver,
 	drivers := []Driver{}
 
 	if dconfig.RemoteType != "" {
-		drivers = []Driver{
-			&ESX5Driver{
-				Host:           dconfig.RemoteHost,
-				Port:           dconfig.RemotePort,
-				Username:       dconfig.RemoteUser,
-				Password:       dconfig.RemotePassword,
-				PrivateKeyFile: dconfig.RemotePrivateKey,
-				Datastore:      dconfig.RemoteDatastore,
-				CacheDatastore: dconfig.RemoteCacheDatastore,
-				CacheDirectory: dconfig.RemoteCacheDirectory,
-				VMName:         vmName,
-				CommConfig:     config.Comm,
-			},
+		esx5Driver, err := NewESX5Driver(dconfig, config, vmName)
+		if err != nil {
+			return nil, err
 		}
+		drivers = []Driver{esx5Driver}
 
 	} else {
 		switch runtime.GOOS {
 		case "darwin":
 			drivers = []Driver{
-				&Fusion6Driver{
-					Fusion5Driver: Fusion5Driver{
-						AppPath:   dconfig.FusionAppPath,
-						SSHConfig: config,
-					},
-				},
-				&Fusion5Driver{
-					AppPath:   dconfig.FusionAppPath,
-					SSHConfig: config,
-				},
+				NewFusion6Driver(dconfig, config),
+				NewFusion5Driver(dconfig, config),
 			}
 		case "linux":
 			fallthrough
 		case "windows":
 			drivers = []Driver{
-				&Workstation10Driver{
-					Workstation9Driver: Workstation9Driver{
-						SSHConfig: config,
-					},
-				},
-				&Workstation9Driver{
-					SSHConfig: config,
-				},
-				&Player6Driver{
-					Player5Driver: Player5Driver{
-						SSHConfig: config,
-					},
-				},
-				&Player5Driver{
-					SSHConfig: config,
-				},
+				NewWorkstation10Driver(config),
+				NewWorkstation9Driver(config),
+				NewPlayer6Driver(config),
+				NewPlayer5Driver(config),
 			}
 		default:
 			return nil, fmt.Errorf("can't find driver for OS: %s", runtime.GOOS)
@@ -599,4 +576,48 @@ func (d *VmwareDriver) HostIP(state multistep.StateBag) (string, error) {
 		return address.String(), nil
 	}
 	return "", fmt.Errorf("Unable to find host IP from devices %v, last error: %s", devices, lastError)
+}
+
+func GetOVFTool() string {
+	ovftool := "ovftool"
+	if runtime.GOOS == "windows" {
+		ovftool = "ovftool.exe"
+	}
+
+	if _, err := exec.LookPath(ovftool); err != nil {
+		return ""
+	}
+	return ovftool
+}
+
+func (d *VmwareDriver) Export(args []string) error {
+	ovftool := GetOVFTool()
+	if ovftool == "" {
+		return fmt.Errorf("Error: ovftool not found")
+	}
+	cmd := exec.Command(ovftool, args...)
+	if _, _, err := runAndLog(cmd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *VmwareDriver) VerifyOvfTool(SkipExport, _ bool) error {
+	if SkipExport {
+		return nil
+	}
+
+	log.Printf("Verifying that ovftool exists...")
+	// Validate that tool exists, but no need to validate credentials.
+	ovftool := GetOVFTool()
+	if ovftool != "" {
+		return nil
+	} else {
+		return fmt.Errorf("Couldn't find ovftool in path! Please either " +
+			"set `skip_export = true` and remove the `format` option " +
+			"from your template, or make sure ovftool is installed on " +
+			"your build system. ")
+	}
+
 }

@@ -159,6 +159,8 @@ If this is set, a few more options become available.
   }
   ```
 
+  See below for more details on configuring this communicator.   
+
 - `builder_image_list` (string) - This is the image to use for the builder
   instance. This _must_ be a linux image, and Oracle Linux is recommended.
   Default: `/oracle/public/OL_7.2_UEKR4_x86_64`.
@@ -180,6 +182,19 @@ If this is set, a few more options become available.
   this command is a template engine and can make use of the following
   variables: `{{ .Username }}`, `{{ .Password }}`, `{{ .AccountID }}`,
   `{{ .ImageFile }}`, and `{{ .SegmentPath }}`.
+
+
+### Communicator Configuration
+
+The `builder_communicator` has the following options:
+
+#### Optional:
+
+@include 'helper/communicator/Config-not-required.mdx'
+
+@include 'helper/communicator/SSH-not-required.mdx'
+
+@include 'helper/communicator/SSH-Private-Key-File-not-required.mdx'
 
 ## Basic Example
 

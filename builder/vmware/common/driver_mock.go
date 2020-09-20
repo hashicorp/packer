@@ -27,6 +27,9 @@ type DriverMock struct {
 	CreateDiskTypeId      string
 	CreateDiskErr         error
 
+	ExportCalled bool
+	ExportArgs   []string
+
 	IsRunningCalled bool
 	IsRunningPath   string
 	IsRunningResult bool
@@ -92,6 +95,8 @@ type DriverMock struct {
 
 	VerifyCalled bool
 	VerifyErr    error
+
+	VerifyOvftoolCalled bool
 }
 
 type NetworkMapperMock struct {
@@ -254,6 +259,12 @@ func (d *DriverMock) Verify() error {
 	return d.VerifyErr
 }
 
+func (d *DriverMock) Export(args []string) error {
+	d.ExportCalled = true
+	d.ExportArgs = args
+	return nil
+}
+
 func (d *DriverMock) GetVmwareDriver() VmwareDriver {
 	var state VmwareDriver
 	state.DhcpLeasesPath = func(string) string {
@@ -269,4 +280,8 @@ func (d *DriverMock) GetVmwareDriver() VmwareDriver {
 		return NetworkMapperMock{}, nil
 	}
 	return state
+}
+
+func (d *DriverMock) VerifyOvfTool(_ bool, _ bool) error {
+	return nil
 }

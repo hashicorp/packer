@@ -25,15 +25,8 @@ type vmxTemplateData struct {
 	CpuCount   string
 	MemorySize string
 
-	SCSI_Present         string
-	SCSI_diskAdapterType string
-	SATA_Present         string
-	NVME_Present         string
-
-	DiskName                   string
-	DiskType                   string
-	CDROMType                  string
-	CDROMType_PrimarySecondary string
+	DiskName string
+	vmwcommon.DiskAndCDConfigData
 
 	Network_Type    string
 	Network_Device  string
@@ -112,10 +105,16 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 
 	ictx := config.ctx
 
+	// Mount extra vmdks we created earlier.
 	if len(config.AdditionalDiskSize) > 0 {
+		incrementer := 1
 		for i := range config.AdditionalDiskSize {
+			// slot 7 is special and reserved, so we need to skip that index.
+			if i+1 == 7 {
+				incrementer = 2
+			}
 			ictx.Data = &additionalDiskTemplateData{
-				DiskNumber: i + 1,
+				DiskNumber: i + incrementer,
 				DiskName:   config.DiskName,
 			}
 
@@ -160,15 +159,6 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 		Version:  config.Version,
 		ISOPath:  isoPath,
 
-		SCSI_Present:         "FALSE",
-		SCSI_diskAdapterType: "lsilogic",
-		SATA_Present:         "FALSE",
-		NVME_Present:         "FALSE",
-
-		DiskType:                   "scsi",
-		CDROMType:                  "ide",
-		CDROMType_PrimarySecondary: "0",
-
 		Network_Adapter: "e1000",
 
 		Sound_Present: map[bool]string{true: "TRUE", false: "FALSE"}[bool(config.HWConfig.Sound)],
@@ -178,65 +168,7 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 		Parallel_Present: "FALSE",
 	}
 
-	/// Use the disk adapter type that the user specified to tweak the .vmx
-	//  Also sync the cdrom adapter type according to what's common for that disk type.
-	//  XXX: If the cdrom type is modified, make sure to update common/step_clean_vmx.go
-	//       so that it will regex the correct cdrom device for removal.
-	diskAdapterType := strings.ToLower(config.DiskAdapterType)
-	switch diskAdapterType {
-	case "ide":
-		templateData.DiskType = "ide"
-		templateData.CDROMType = "ide"
-		templateData.CDROMType_PrimarySecondary = "1"
-	case "sata":
-		templateData.SATA_Present = "TRUE"
-		templateData.DiskType = "sata"
-		templateData.CDROMType = "sata"
-		templateData.CDROMType_PrimarySecondary = "1"
-	case "nvme":
-		templateData.NVME_Present = "TRUE"
-		templateData.DiskType = "nvme"
-		templateData.SATA_Present = "TRUE"
-		templateData.CDROMType = "sata"
-		templateData.CDROMType_PrimarySecondary = "0"
-	case "scsi":
-		diskAdapterType = "lsilogic"
-		fallthrough
-	default:
-		templateData.SCSI_Present = "TRUE"
-		templateData.SCSI_diskAdapterType = diskAdapterType
-		templateData.DiskType = "scsi"
-		templateData.CDROMType = "ide"
-		templateData.CDROMType_PrimarySecondary = "0"
-	}
-
-	/// Handle the cdrom adapter type. If the disk adapter type and the
-	//  cdrom adapter type are the same, then ensure that the cdrom is the
-	//  secondary device on whatever bus the disk adapter is on.
-	cdromAdapterType := strings.ToLower(config.CdromAdapterType)
-	if cdromAdapterType == "" {
-		cdromAdapterType = templateData.CDROMType
-	} else if cdromAdapterType == diskAdapterType {
-		templateData.CDROMType_PrimarySecondary = "1"
-	} else {
-		templateData.CDROMType_PrimarySecondary = "0"
-	}
-
-	switch cdromAdapterType {
-	case "ide":
-		templateData.CDROMType = "ide"
-	case "sata":
-		templateData.SATA_Present = "TRUE"
-		templateData.CDROMType = "sata"
-	case "scsi":
-		templateData.SCSI_Present = "TRUE"
-		templateData.CDROMType = "scsi"
-	default:
-		err := fmt.Errorf("Error processing VMX template: %s", cdromAdapterType)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
+	templateData.DiskAndCDConfigData = vmwcommon.DefaultDiskAndCDROMTypes(config.DiskAdapterType, config.CdromAdapterType)
 
 	/// Now that we figured out the CDROM device to add, store it
 	/// to the list of temporary build devices in our statebag

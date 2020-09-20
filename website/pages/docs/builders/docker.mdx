@@ -215,6 +215,16 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 
 @include 'builder/docker/Config-not-required.mdx'
 
+## Build Shared Information Variables
+
+This build shares generated data with provisioners and post-processors via [template engines](/docs/templates/engine)
+for JSON and [contextual variables](/docs/from-1.5/contextual-variables) for HCL2.
+
+The generated variable available for this builder is:
+
+- `ImageSha256` - When committing a container to an image, this will give the image SHA256. Because the image is not available at the provision step,
+this variable is only available for post-processors.
+
 ## Using the Artifact: Export
 
 Once the tar artifact has been generated, you will likely want to import, tag,

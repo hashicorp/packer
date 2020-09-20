@@ -1,0 +1,21 @@
+{
+  "variables": {},
+  "provisioners": [
+    {
+      "type":  "ansible",
+      "playbook_file": "./galaxy-playbook.yml",
+      "galaxy_file": "./requirements.yml"
+    }
+  ],
+  "builders": [
+    {
+      "type": "googlecompute",
+      "account_file": "{{user `account_file`}}",
+      "project_id": "{{user `project_id`}}",
+      "image_name": "packerbats-galaxy-{{timestamp}}",
+      "source_image": "debian-8-jessie-v20161027",
+      "zone": "us-central1-a",
+      "ssh_username": "debian"
+    }
+  ]
+}

@@ -326,24 +326,65 @@ func jsonBodyToHCL2Body(out *hclwrite.Body, kvs map[string]interface{}) {
 
 		switch value := value.(type) {
 		case map[string]interface{}:
-			var first interface{}
-			for _, elem := range value {
-				first = elem
+			var mostComplexElem interface{}
+			for _, randomElem := range value {
+				// HACK: we take the most complex element of that map because
+				// in HCL2, map of objects can be bodies, for example:
+				// map containing object: source_ami_filter {} ( body )
+				// simple string/string map: tags = {} ) ( attribute )
+				//
+				// if we could not find an object in this map then it's most
+				// likely a plain map and so we guess it should be and
+				// attribute. Though now if value refers to something that is
+				// an object but only contains a string or a bool; we could
+				// generate a faulty object. For example a (somewhat invalid)
+				// source_ami_filter where only `most_recent` is set.
+				switch randomElem.(type) {
+				case string, int, float64, bool:
+					if mostComplexElem != nil {
+						continue
+					}
+					mostComplexElem = randomElem
+				default:
+					mostComplexElem = randomElem
+				}
 			}
 
-			switch first.(type) {
-			case string, int, float64:
+			switch mostComplexElem.(type) {
+			case string, int, float64, bool:
 				out.SetAttributeValue(k, hcl2shim.HCL2ValueFromConfigValue(value))
 			default:
 				nestedBlockBody := out.AppendNewBlock(k, nil).Body()
 				jsonBodyToHCL2Body(nestedBlockBody, value)
 			}
+		case map[string]string, map[string]int, map[string]float64:
+			out.SetAttributeValue(k, hcl2shim.HCL2ValueFromConfigValue(value))
 		case []interface{}:
 			if len(value) == 0 {
 				continue
 			}
-			switch value[0].(type) {
+
+			var mostComplexElem interface{}
+			for _, randomElem := range value {
+				// HACK: we take the most complex element of that slice because
+				// in hcl2 slices of plain types can be arrays, for example:
+				// simple string type: owners = ["0000000000"]
+				// object: launch_block_device_mappings {}
+				switch randomElem.(type) {
+				case string, int, float64, bool:
+					if mostComplexElem != nil {
+						continue
+					}
+					mostComplexElem = randomElem
+				default:
+					mostComplexElem = randomElem
+				}
+			}
+			switch mostComplexElem.(type) {
 			case map[string]interface{}:
+				// this is an object in a slice; so we unwrap it. We
+				// could try to remove any 's' suffix in the key, but
+				// this might not work everywhere.
 				for i := range value {
 					value := value[i].(map[string]interface{})
 					nestedBlockBody := out.AppendNewBlock(k, nil).Body()
@@ -351,8 +392,8 @@ func jsonBodyToHCL2Body(out *hclwrite.Body, kvs map[string]interface{}) {
 				}
 				continue
 			default:
+				out.SetAttributeValue(k, hcl2shim.HCL2ValueFromConfigValue(value))
 			}
-			out.SetAttributeValue(k, hcl2shim.HCL2ValueFromConfigValue(value))
 		default:
 			out.SetAttributeValue(k, hcl2shim.HCL2ValueFromConfigValue(value))
 		}
@@ -379,7 +420,7 @@ Usage: packer hcl2_upgrade -output-file=JSON_TEMPLATE.pkr.hcl JSON_TEMPLATE...
 }
 
 func (*HCL2UpgradeCommand) Synopsis() string {
-	return "build image(s) from template"
+	return "transform a JSON template into a HCL2 configuration"
 }
 
 func (*HCL2UpgradeCommand) AutocompleteArgs() complete.Predictor {

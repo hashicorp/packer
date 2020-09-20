@@ -125,6 +125,25 @@ a [communicator](/docs/templates/communicator) can be configured for this builde
 - `run_tags` (map of strings) - Tags to apply to the instance that is _launched_ to create the image.
   These tags are _not_ applied to the resulting image.
 
+### Communicator Configuration
+
+In addition to the above options, a communicator can be configured
+for this builder. 
+
+#### Optional:
+
+@include 'helper/communicator/Config-not-required.mdx'
+
+@include 'helper/communicator/SSH-not-required.mdx'
+
+@include 'helper/communicator/SSH-Temporary-Key-Pair-not-required.mdx'
+
+@include 'helper/communicator/SSH-Key-Pair-Name-not-required.mdx'
+
+@include 'helper/communicator/SSH-Private-Key-File-not-required.mdx'
+
+@include 'helper/communicator/SSH-Agent-Auth-not-required.mdx'
+
 ## Basic Example
 
 Here is a basic example for Tencentcloud.

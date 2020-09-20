@@ -49,8 +49,8 @@
 /builder/proxmox/                      @carlpett
 /website/pages/docs/builders/proxmox* @carlpett
 
-/builder/scaleway/                      @sieben @mvaude @jqueuniet @fflorens @brmzkw
-/website/pages/docs/builders/scaleway* @sieben @mvaude @jqueuniet @fflorens @brmzkw
+/builder/scaleway/                      @scaleway/devtools
+/website/pages/docs/builders/scaleway* @scaleway/devtools
 
 /builder/hcloud/                      @LKaemmerling
 /website/pages/docs/builders/hcloud* @LKaemmerling

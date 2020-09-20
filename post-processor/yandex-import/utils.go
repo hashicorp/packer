@@ -55,6 +55,12 @@ func uploadToBucket(s3conn *s3.S3, ui packer.Ui, artifact packer.Artifact, bucke
 	// Compute service allow only `https://storage.yandexcloud.net/...` URLs for Image create process
 	req.Config.S3ForcePathStyle = aws.Bool(true)
 
+	err = req.Build()
+	if err != nil {
+		ui.Say(fmt.Sprintf("Failed to build S3 request: %v", err))
+		return nil, err
+	}
+
 	return &objectSource{
 		url: req.HTTPRequest.URL.String(),
 	}, nil

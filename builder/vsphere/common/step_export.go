@@ -154,7 +154,7 @@ func (s *StepExport) Cleanup(multistep.StateBag) {
 
 func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	ui.Message("Starting export...")
 	lease, err := vm.Export()

@@ -13,20 +13,17 @@
     "@hashicorp/react-head": "1.1.1",
     "@hashicorp/react-mega-nav": "4.0.1-2",
     "@hashicorp/react-product-downloader": "4.0.2",
+    "@hashicorp/react-search": "^2.1.0",
     "@hashicorp/react-section-header": "2.0.0",
     "@hashicorp/react-subnav": "3.2.3",
     "@hashicorp/react-vertical-text-block-list": "2.0.1",
-    "algoliasearch": "4.3.0",
     "babel-plugin-import-glob-array": "0.2.0",
-    "dotenv": "8.2.0",
-    "gray-matter": "4.0.2",
     "next": "9.4.4",
     "react": "16.13.1",
     "react-dom": "16.13.1"
   },
   "devDependencies": {
     "dart-linkcheck": "2.0.15",
-    "glob": "7.1.6",
     "husky": "4.2.5",
     "prettier": "2.0.5"
   },
@@ -37,9 +34,9 @@
   },
   "main": "index.js",
   "scripts": {
-    "build": "node --max-old-space-size=2048 ./node_modules/.bin/next build",
+    "build": "node --max-old-space-size=8192 ./node_modules/.bin/next build",
     "dynamic": "NODE_ENV=production next build && next start",
-    "export": "node --max-old-space-size=2048 ./node_modules/.bin/next export",
+    "export": "node --max-old-space-size=8192 ./node_modules/.bin/next export",
     "format": "next-hashicorp format",
     "generate:component": "next-hashicorp generate component",
     "generate:readme": "next-hashicorp markdown-blocks README.md",

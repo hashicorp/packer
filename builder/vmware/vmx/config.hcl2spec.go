@@ -20,6 +20,7 @@ type FlatConfig struct {
 	HTTPPortMin               *int              `mapstructure:"http_port_min" cty:"http_port_min" hcl:"http_port_min"`
 	HTTPPortMax               *int              `mapstructure:"http_port_max" cty:"http_port_max" hcl:"http_port_max"`
 	HTTPAddress               *string           `mapstructure:"http_bind_address" cty:"http_bind_address" hcl:"http_bind_address"`
+	HTTPInterface             *string           `mapstructure:"http_interface" undocumented:"true" cty:"http_interface" hcl:"http_interface"`
 	FloppyFiles               []string          `mapstructure:"floppy_files" cty:"floppy_files" hcl:"floppy_files"`
 	FloppyDirectories         []string          `mapstructure:"floppy_dirs" cty:"floppy_dirs" hcl:"floppy_dirs"`
 	FloppyLabel               *string           `mapstructure:"floppy_label" cty:"floppy_label" hcl:"floppy_label"`
@@ -28,6 +29,8 @@ type FlatConfig struct {
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command" hcl:"boot_command"`
 	DisableVNC                *bool             `mapstructure:"disable_vnc" cty:"disable_vnc" hcl:"disable_vnc"`
 	BootKeyInterval           *string           `mapstructure:"boot_key_interval" cty:"boot_key_interval" hcl:"boot_key_interval"`
+	CDFiles                   []string          `mapstructure:"cd_files" cty:"cd_files" hcl:"cd_files"`
+	CDLabel                   *string           `mapstructure:"cd_label" cty:"cd_label" hcl:"cd_label"`
 	CleanUpRemoteCache        *bool             `mapstructure:"cleanup_remote_cache" required:"false" cty:"cleanup_remote_cache" hcl:"cleanup_remote_cache"`
 	FusionAppPath             *string           `mapstructure:"fusion_app_path" required:"false" cty:"fusion_app_path" hcl:"fusion_app_path"`
 	RemoteType                *string           `mapstructure:"remote_type" required:"false" cty:"remote_type" hcl:"remote_type"`
@@ -47,6 +50,8 @@ type FlatConfig struct {
 	VNCPortMin                *int              `mapstructure:"vnc_port_min" required:"false" cty:"vnc_port_min" hcl:"vnc_port_min"`
 	VNCPortMax                *int              `mapstructure:"vnc_port_max" cty:"vnc_port_max" hcl:"vnc_port_max"`
 	VNCDisablePassword        *bool             `mapstructure:"vnc_disable_password" required:"false" cty:"vnc_disable_password" hcl:"vnc_disable_password"`
+	VNCOverWebsocket          *bool             `mapstructure:"vnc_over_websocket" required:"false" cty:"vnc_over_websocket" hcl:"vnc_over_websocket"`
+	InsecureConnection        *bool             `mapstructure:"insecure_connection" required:"false" cty:"insecure_connection" hcl:"insecure_connection"`
 	ShutdownCommand           *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command" hcl:"shutdown_command"`
 	ShutdownTimeout           *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout" hcl:"shutdown_timeout"`
 	Type                      *string           `mapstructure:"communicator" cty:"communicator" hcl:"communicator"`
@@ -108,6 +113,10 @@ type FlatConfig struct {
 	SkipExport                *bool             `mapstructure:"skip_export" required:"false" cty:"skip_export" hcl:"skip_export"`
 	KeepRegistered            *bool             `mapstructure:"keep_registered" required:"false" cty:"keep_registered" hcl:"keep_registered"`
 	SkipCompaction            *bool             `mapstructure:"skip_compaction" required:"false" cty:"skip_compaction" hcl:"skip_compaction"`
+	AdditionalDiskSize        []uint            `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size" hcl:"disk_additional_size"`
+	DiskAdapterType           *string           `mapstructure:"disk_adapter_type" required:"false" cty:"disk_adapter_type" hcl:"disk_adapter_type"`
+	DiskName                  *string           `mapstructure:"vmdk_name" required:"false" cty:"vmdk_name" hcl:"vmdk_name"`
+	DiskTypeId                *string           `mapstructure:"disk_type_id" required:"false" cty:"disk_type_id" hcl:"disk_type_id"`
 	Linked                    *bool             `mapstructure:"linked" required:"false" cty:"linked" hcl:"linked"`
 	SourcePath                *string           `mapstructure:"source_path" required:"true" cty:"source_path" hcl:"source_path"`
 	VMName                    *string           `mapstructure:"vm_name" required:"false" cty:"vm_name" hcl:"vm_name"`
@@ -136,6 +145,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"http_port_min":                  &hcldec.AttrSpec{Name: "http_port_min", Type: cty.Number, Required: false},
 		"http_port_max":                  &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
 		"http_bind_address":              &hcldec.AttrSpec{Name: "http_bind_address", Type: cty.String, Required: false},
+		"http_interface":                 &hcldec.AttrSpec{Name: "http_interface", Type: cty.String, Required: false},
 		"floppy_files":                   &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
 		"floppy_dirs":                    &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
 		"floppy_label":                   &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},
@@ -144,6 +154,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"boot_command":                   &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
 		"disable_vnc":                    &hcldec.AttrSpec{Name: "disable_vnc", Type: cty.Bool, Required: false},
 		"boot_key_interval":              &hcldec.AttrSpec{Name: "boot_key_interval", Type: cty.String, Required: false},
+		"cd_files":                       &hcldec.AttrSpec{Name: "cd_files", Type: cty.List(cty.String), Required: false},
+		"cd_label":                       &hcldec.AttrSpec{Name: "cd_label", Type: cty.String, Required: false},
 		"cleanup_remote_cache":           &hcldec.AttrSpec{Name: "cleanup_remote_cache", Type: cty.Bool, Required: false},
 		"fusion_app_path":                &hcldec.AttrSpec{Name: "fusion_app_path", Type: cty.String, Required: false},
 		"remote_type":                    &hcldec.AttrSpec{Name: "remote_type", Type: cty.String, Required: false},
@@ -163,6 +175,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vnc_port_min":                   &hcldec.AttrSpec{Name: "vnc_port_min", Type: cty.Number, Required: false},
 		"vnc_port_max":                   &hcldec.AttrSpec{Name: "vnc_port_max", Type: cty.Number, Required: false},
 		"vnc_disable_password":           &hcldec.AttrSpec{Name: "vnc_disable_password", Type: cty.Bool, Required: false},
+		"vnc_over_websocket":             &hcldec.AttrSpec{Name: "vnc_over_websocket", Type: cty.Bool, Required: false},
+		"insecure_connection":            &hcldec.AttrSpec{Name: "insecure_connection", Type: cty.Bool, Required: false},
 		"shutdown_command":               &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
 		"shutdown_timeout":               &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
 		"communicator":                   &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
@@ -224,6 +238,10 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"skip_export":                    &hcldec.AttrSpec{Name: "skip_export", Type: cty.Bool, Required: false},
 		"keep_registered":                &hcldec.AttrSpec{Name: "keep_registered", Type: cty.Bool, Required: false},
 		"skip_compaction":                &hcldec.AttrSpec{Name: "skip_compaction", Type: cty.Bool, Required: false},
+		"disk_additional_size":           &hcldec.AttrSpec{Name: "disk_additional_size", Type: cty.List(cty.Number), Required: false},
+		"disk_adapter_type":              &hcldec.AttrSpec{Name: "disk_adapter_type", Type: cty.String, Required: false},
+		"vmdk_name":                      &hcldec.AttrSpec{Name: "vmdk_name", Type: cty.String, Required: false},
+		"disk_type_id":                   &hcldec.AttrSpec{Name: "disk_type_id", Type: cty.String, Required: false},
 		"linked":                         &hcldec.AttrSpec{Name: "linked", Type: cty.Bool, Required: false},
 		"source_path":                    &hcldec.AttrSpec{Name: "source_path", Type: cty.String, Required: false},
 		"vm_name":                        &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},

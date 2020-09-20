@@ -1,0 +1,83 @@
+{
+  "source": {
+    "file": {
+      "chocolate": {
+        "content": "chocolate",
+        "target": "chocolate.txt"
+      }
+    },
+    "file": {
+      "vanilla": {
+        "content": "vanilla",
+        "target": "vanilla.txt"
+      }
+    },
+    "file": {
+      "cherry": {
+        "content": "cherry",
+        "target": "cherry.txt"
+      }
+    }
+  },
+  "build": {
+    "sources": [
+      "sources.file.chocolate",
+      "sources.file.vanilla",
+      "sources.file.cherry"
+    ],
+    "provisioner": [
+      {
+        "shell-local": {
+          "name": "apple",
+          "inline": [
+            "echo apple > apple.txt"
+          ]
+        }
+      }
+    ],
+    "post-processor": [
+      {
+        "shell-local": {
+          "name": "peach",
+          "inline": [
+            "echo peach > peach.txt"
+          ]
+        }
+      },
+      {
+        "shell-local": {
+          "name": "pear",
+          "inline": [
+            "echo pear > pear.txt"
+          ]
+        }
+      },
+      {
+        "shell-local": {
+          "name": "banana",
+          "inline": [
+            "echo banana > banana.txt"
+          ]
+        }
+      },
+      {
+        "shell-local": {
+          "name": "tomato",
+          "inline": [
+            "echo tomato > tomato.txt"
+          ]
+        }
+      },
+      {
+        "shell-local": {
+          "only": [
+            "sources.file.chocolate"
+          ],
+          "inline": [
+            "echo unnamed > unnamed.txt"
+          ]
+        }
+      }
+    ]
+  }
+}

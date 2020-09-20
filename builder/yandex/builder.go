@@ -50,7 +50,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 // Run executes a yandex Packer build and returns a packer.Artifact
 // representing a Yandex.Cloud compute image.
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	driver, err := NewDriverYC(ui, &b.config)
+	driver, err := NewDriverYC(ui, &b.config.AccessConfig)
 	ctx = requestid.ContextWithClientTraceID(ctx, uuid.New().String())
 
 	if err != nil {

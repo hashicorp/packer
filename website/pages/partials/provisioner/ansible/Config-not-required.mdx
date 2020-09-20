@@ -46,6 +46,8 @@
     "ansible_env_vars": [ "WINRM_PASSWORD={{.WinRMPassword}}" ],
     ```
 
+- `ansible_ssh_extra_args` ([]string) - Specifies --ssh-extra-args on command line defaults to -o IdentitiesOnly=yes
+
 - `groups` ([]string) - The groups into which the Ansible host should
    be placed. When unspecified, the host is not associated with any groups.
 
@@ -118,8 +120,8 @@
    test your playbook. this option is not used if you set an `inventory_file`.
 
 - `galaxy_file` (string) - A requirements file which provides a way to
-   install roles with the [ansible-galaxy
-   cli](http://docs.ansible.com/ansible/galaxy.html#the-ansible-galaxy-command-line-tool)
+   install roles or collections with the [ansible-galaxy
+   cli](https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#the-ansible-galaxy-command-line-tool)
    on the local machine before executing `ansible-playbook`. By default, this is empty.
 
 - `galaxy_command` (string) - The command to invoke ansible-galaxy. By default, this is
@@ -129,9 +131,14 @@
    Adds `--force` option to `ansible-galaxy` command. By default, this is
    `false`.
 
-- `roles_path` (string) - The path to the directory on your local system to
-    install the roles in. Adds `--roles-path /path/to/your/roles` to
+- `roles_path` (string) - The path to the directory on your local system in which to
+    install the roles. Adds `--roles-path /path/to/your/roles` to
     `ansible-galaxy` command. By default, this is empty, and thus `--roles-path`
+    option is not added to the command.
+
+- `collections_path` (string) - The path to the directory on your local system in which to
+    install the collections. Adds `--collections-path /path/to/your/collections` to
+    `ansible-galaxy` command. By default, this is empty, and thus `--collections-path`
     option is not added to the command.
 
 - `use_proxy` (boolean) - When `true`, set up a localhost proxy adapter

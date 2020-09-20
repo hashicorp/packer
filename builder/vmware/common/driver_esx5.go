@@ -11,12 +11,21 @@ import (
 	"io"
 	"log"
 	"net"
+	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 
 	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/packer/communicator/ssh"
@@ -43,9 +52,64 @@ type ESX5Driver struct {
 	VMName         string
 	CommConfig     communicator.Config
 
+	ctx    context.Context
+	client *govmomi.Client
+	finder *find.Finder
+
 	comm      packer.Communicator
 	outputDir string
 	vmId      string
+}
+
+func NewESX5Driver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver, error) {
+	ctx := context.TODO()
+
+	vsphereUrl, err := url.Parse(fmt.Sprintf("https://%v/sdk", dconfig.RemoteHost))
+	if err != nil {
+		return nil, err
+	}
+	credentials := url.UserPassword(dconfig.RemoteUser, dconfig.RemotePassword)
+	vsphereUrl.User = credentials
+
+	soapClient := soap.NewClient(vsphereUrl, true)
+	vimClient, err := vim25.NewClient(ctx, soapClient)
+	if err != nil {
+		return nil, err
+	}
+
+	vimClient.RoundTripper = session.KeepAlive(vimClient.RoundTripper, 10*time.Minute)
+	client := &govmomi.Client{
+		Client:         vimClient,
+		SessionManager: session.NewManager(vimClient),
+	}
+
+	err = client.SessionManager.Login(ctx, credentials)
+	if err != nil {
+		return nil, err
+	}
+
+	finder := find.NewFinder(client.Client, false)
+	datacenter, err := finder.DefaultDatacenter(ctx)
+	if err != nil {
+		return nil, err
+	}
+	finder.SetDatacenter(datacenter)
+
+	return &ESX5Driver{
+		Host:           dconfig.RemoteHost,
+		Port:           dconfig.RemotePort,
+		Username:       dconfig.RemoteUser,
+		Password:       dconfig.RemotePassword,
+		PrivateKeyFile: dconfig.RemotePrivateKey,
+		Datastore:      dconfig.RemoteDatastore,
+		CacheDatastore: dconfig.RemoteCacheDatastore,
+		CacheDirectory: dconfig.RemoteCacheDirectory,
+		VMName:         vmName,
+		CommConfig:     config.Comm,
+		ctx:            ctx,
+		client:         client,
+		finder:         finder,
+	}, nil
 }
 
 func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
@@ -260,6 +324,68 @@ func (d *ESX5Driver) Verify() error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (d *ESX5Driver) VerifyOvfTool(SkipExport, skipValidateCredentials bool) error {
+	err := d.base.VerifyOvfTool(SkipExport, skipValidateCredentials)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Verifying that ovftool credentials are valid...")
+	// check that password is valid by sending a dummy ovftool command
+	// now, so that we don't fail for a simple mistake after a long
+	// build
+	ovftool := GetOVFTool()
+
+	if skipValidateCredentials {
+		return nil
+	}
+
+	if d.Password == "" {
+		return fmt.Errorf("exporting the vm from esxi with ovftool requires " +
+			"that you set a value for remote_password")
+	}
+
+	// Generate the uri of the host, with embedded credentials
+	ovftool_uri := fmt.Sprintf("vi://%s", d.Host)
+	u, err := url.Parse(ovftool_uri)
+	if err != nil {
+		return fmt.Errorf("Couldn't generate uri for ovftool: %s", err)
+	}
+	u.User = url.UserPassword(d.Username, d.Password)
+
+	ovfToolArgs := []string{"--noSSLVerify", "--verifyOnly", u.String()}
+
+	var out bytes.Buffer
+	cmdCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(cmdCtx, ovftool, ovfToolArgs...)
+	cmd.Stdout = &out
+
+	// Need to manually close stdin or else the ofvtool call will hang
+	// forever in a situation where the user has provided an invalid
+	// password or username
+	stdin, _ := cmd.StdinPipe()
+	defer stdin.Close()
+
+	if err := cmd.Run(); err != nil {
+		outString := out.String()
+		// The command *should* fail with this error, if it
+		// authenticates properly.
+		if !strings.Contains(outString, "Found wrong kind of object") {
+			err := fmt.Errorf("ovftool validation error: %s; %s",
+				err, outString)
+			if strings.Contains(outString,
+				"Enter login information for source") {
+				err = fmt.Errorf("The username or password you " +
+					"provided to ovftool is invalid.")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -699,6 +825,10 @@ func (d *ESX5Driver) Download(src, dst string) error {
 	return d.comm.Download(d.datastorePath(src), file)
 }
 
+func (d *ESX5Driver) Export(args []string) error {
+	return d.base.Export(args)
+}
+
 // VerifyChecksum checks that file on the esxi instance matches hash
 func (d *ESX5Driver) VerifyChecksum(hash string, file string) bool {
 	if hash == "none" {
@@ -818,4 +948,12 @@ func (r *esxcliReader) find(key, val string) (map[string]string, error) {
 			return record, nil
 		}
 	}
+}
+
+func (d *ESX5Driver) AcquireVNCOverWebsocketTicket() (*types.VirtualMachineTicket, error) {
+	vm, err := d.finder.VirtualMachine(d.ctx, d.VMName)
+	if err != nil {
+		return nil, err
+	}
+	return vm.AcquireTicket(d.ctx, string(types.VirtualMachineTicketTypeWebmks))
 }

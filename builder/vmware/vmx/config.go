@@ -22,6 +22,7 @@ type Config struct {
 	common.HTTPConfig              `mapstructure:",squash"`
 	common.FloppyConfig            `mapstructure:",squash"`
 	bootcommand.VNCConfig          `mapstructure:",squash"`
+	common.CDConfig                `mapstructure:",squash"`
 	vmwcommon.DriverConfig         `mapstructure:",squash"`
 	vmwcommon.OutputConfig         `mapstructure:",squash"`
 	vmwcommon.RunConfig            `mapstructure:",squash"`
@@ -30,6 +31,7 @@ type Config struct {
 	vmwcommon.ToolsConfig          `mapstructure:",squash"`
 	vmwcommon.VMXConfig            `mapstructure:",squash"`
 	vmwcommon.ExportConfig         `mapstructure:",squash"`
+	vmwcommon.DiskConfig           `mapstructure:",squash"`
 	// By default Packer creates a 'full' clone of the virtual machine
 	// specified in source_path. The resultant virtual machine is fully
 	// independant from the parent it was cloned from.
@@ -76,19 +78,25 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 			"packer-%s-%d", c.PackerBuildName, interpolate.InitTime.Unix())
 	}
 
-	// Prepare the errors
+	// Accumulate any errors and warnings
+	var warnings []string
 	var errs *packer.MultiError
+
+	runConfigWarnings, runConfigErrs := c.RunConfig.Prepare(&c.ctx, &c.DriverConfig)
+	warnings = append(warnings, runConfigWarnings...)
+	errs = packer.MultiErrorAppend(errs, runConfigErrs...)
 	errs = packer.MultiErrorAppend(errs, c.DriverConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
-	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.DiskConfig.Prepare(&c.ctx)...)
 
 	if c.RemoteType == "" {
 		if c.SourcePath == "" {
@@ -99,17 +107,35 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 					fmt.Errorf("source_path is invalid: %s", err))
 			}
 		}
-	} else {
-		// Remote configuration validation
-		if c.RemoteHost == "" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("remote_host must be specified"))
+		if c.Headless && c.DisableVNC {
+			warnings = append(warnings,
+				"Headless mode uses VNC to retrieve output. Since VNC has been disabled,\n"+
+					"you won't be able to see any output.")
 		}
+	}
 
-		if c.RemoteType != "esx5" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
+	if c.DiskTypeId == "" {
+		// Default is growable virtual disk split in 2GB files.
+		c.DiskTypeId = "1"
+
+		if c.RemoteType == "esx5" {
+			c.DiskTypeId = "zeroedthick"
 		}
+	}
+
+	if c.Format == "" {
+		if c.RemoteType == "" {
+			c.Format = "vmx"
+		} else {
+			c.Format = "ovf"
+		}
+	}
+
+	if c.RemoteType == "" && c.Format == "vmx" {
+		// if we're building locally and want a vmx, there's nothing to export.
+		// Set skip export flag here to keep the export step from attempting
+		// an unneded export
+		c.SkipExport = true
 	}
 
 	err = c.DriverConfig.Validate(c.SkipExport)
@@ -117,32 +143,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
-	if c.Format != "" {
-		if c.RemoteType != "esx5" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("format is only valid when remote_type=esx5"))
-		}
-	} else {
-		c.Format = "ovf"
-	}
-
-	if !(c.Format == "ova" || c.Format == "ovf" || c.Format == "vmx") {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("format must be one of ova, ovf, or vmx"))
-	}
-
-	// Warnings
-	var warnings []string
 	if c.ShutdownCommand == "" {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
 				"will forcibly halt the virtual machine, which may result in data loss.")
-	}
-
-	if c.Headless && c.DisableVNC {
-		warnings = append(warnings,
-			"Headless mode uses VNC to retrieve output. Since VNC has been disabled,\n"+
-				"you won't be able to see any output.")
 	}
 
 	// Check for any errors.

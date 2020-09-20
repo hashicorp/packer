@@ -91,6 +91,19 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 	// instance id inside of the provisioners, used in step_provision.
 	state.Put("instance_id", vmRef)
 
+	for idx := range c.AdditionalISOFiles {
+		params := map[string]interface{}{
+			c.AdditionalISOFiles[idx].Device: c.AdditionalISOFiles[idx].ISOFile + ",media=cdrom",
+		}
+		_, err = client.SetVmConfig(vmRef, params)
+		if err != nil {
+			err := fmt.Errorf("Error configuring VM: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
 	ui.Say("Starting VM")
 	_, err = client.StartVm(vmRef)
 	if err != nil {

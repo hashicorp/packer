@@ -6,19 +6,22 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/scaleway/scaleway-cli/pkg/api"
+	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
+	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
 type stepServerInfo struct{}
 
 func (s *stepServerInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*api.ScalewayAPI)
+	instanceAPI := instance.NewAPI(state.Get("client").(*scw.Client))
 	ui := state.Get("ui").(packer.Ui)
 	serverID := state.Get("server_id").(string)
 
 	ui.Say("Waiting for server to become active...")
 
-	_, err := api.WaitForServerState(client, serverID, "running")
+	instanceResp, err := instanceAPI.WaitForServer(&instance.WaitForServerRequest{
+		ServerID: serverID,
+	})
 	if err != nil {
 		err := fmt.Errorf("Error waiting for server to become booted: %s", err)
 		state.Put("error", err)
@@ -26,16 +29,22 @@ func (s *stepServerInfo) Run(ctx context.Context, state multistep.StateBag) mult
 		return multistep.ActionHalt
 	}
 
-	server, err := client.GetServer(serverID)
-	if err != nil {
-		err := fmt.Errorf("Error retrieving server: %s", err)
+	if instanceResp.State != instance.ServerStateRunning {
+		err := fmt.Errorf("Server is in state %s", instanceResp.State.String())
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	state.Put("server_ip", server.PublicAddress.IP)
-	state.Put("root_volume_id", server.Volumes["0"].Identifier)
+	if instanceResp.PublicIP == nil {
+		err := fmt.Errorf("Server does not have a public IP")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	state.Put("server_ip", instanceResp.PublicIP.Address.String())
+	state.Put("root_volume_id", instanceResp.Volumes["0"].ID)
 
 	return multistep.ActionContinue
 }

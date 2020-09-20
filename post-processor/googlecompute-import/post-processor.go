@@ -215,8 +215,10 @@ func UploadToBucket(opts *option.ClientOption, ui packer.Ui, artifact packer.Art
 	return storageObject.SelfLink, nil
 }
 
+
 func CreateGceImage(opts *option.ClientOption, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string) (packer.Artifact, error) {
 	service, err := compute.NewService(context.TODO(), *opts)
+
 	if err != nil {
 		return nil, err
 	}
@@ -269,8 +271,10 @@ func CreateGceImage(opts *option.ClientOption, ui packer.Ui, project string, raw
 	return &Artifact{paths: []string{op.TargetLink}}, nil
 }
 
+
 func DeleteFromBucket(opts *option.ClientOption, ui packer.Ui, bucket string, gcsObjectName string) error {
 	service, err := storage.NewService(context.TODO(), *opts)
+
 	if err != nil {
 		return err
 	}

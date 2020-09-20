@@ -15,6 +15,7 @@ import (
 type Config struct {
 	packerCommon.PackerConfig `mapstructure:",squash"`
 	packerCommon.HTTPConfig   `mapstructure:",squash"`
+	packerCommon.CDConfig     `mapstructure:",squash"`
 
 	common.ConnectConfig      `mapstructure:",squash"`
 	CreateConfig              `mapstructure:",squash"`
@@ -80,6 +81,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 
 	errs = packer.MultiErrorAppend(errs, c.CDRomConfig.Prepare()...)
+	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.WaitIpConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)

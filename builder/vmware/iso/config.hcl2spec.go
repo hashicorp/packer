@@ -20,6 +20,7 @@ type FlatConfig struct {
 	HTTPPortMin               *int              `mapstructure:"http_port_min" cty:"http_port_min" hcl:"http_port_min"`
 	HTTPPortMax               *int              `mapstructure:"http_port_max" cty:"http_port_max" hcl:"http_port_max"`
 	HTTPAddress               *string           `mapstructure:"http_bind_address" cty:"http_bind_address" hcl:"http_bind_address"`
+	HTTPInterface             *string           `mapstructure:"http_interface" undocumented:"true" cty:"http_interface" hcl:"http_interface"`
 	ISOChecksum               *string           `mapstructure:"iso_checksum" required:"true" cty:"iso_checksum" hcl:"iso_checksum"`
 	RawSingleISOUrl           *string           `mapstructure:"iso_url" required:"true" cty:"iso_url" hcl:"iso_url"`
 	ISOUrls                   []string          `mapstructure:"iso_urls" cty:"iso_urls" hcl:"iso_urls"`
@@ -28,6 +29,8 @@ type FlatConfig struct {
 	FloppyFiles               []string          `mapstructure:"floppy_files" cty:"floppy_files" hcl:"floppy_files"`
 	FloppyDirectories         []string          `mapstructure:"floppy_dirs" cty:"floppy_dirs" hcl:"floppy_dirs"`
 	FloppyLabel               *string           `mapstructure:"floppy_label" cty:"floppy_label" hcl:"floppy_label"`
+	CDFiles                   []string          `mapstructure:"cd_files" cty:"cd_files" hcl:"cd_files"`
+	CDLabel                   *string           `mapstructure:"cd_label" cty:"cd_label" hcl:"cd_label"`
 	BootGroupInterval         *string           `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval" hcl:"boot_keygroup_interval"`
 	BootWait                  *string           `mapstructure:"boot_wait" cty:"boot_wait" hcl:"boot_wait"`
 	BootCommand               []string          `mapstructure:"boot_command" cty:"boot_command" hcl:"boot_command"`
@@ -62,6 +65,8 @@ type FlatConfig struct {
 	VNCPortMin                *int              `mapstructure:"vnc_port_min" required:"false" cty:"vnc_port_min" hcl:"vnc_port_min"`
 	VNCPortMax                *int              `mapstructure:"vnc_port_max" cty:"vnc_port_max" hcl:"vnc_port_max"`
 	VNCDisablePassword        *bool             `mapstructure:"vnc_disable_password" required:"false" cty:"vnc_disable_password" hcl:"vnc_disable_password"`
+	VNCOverWebsocket          *bool             `mapstructure:"vnc_over_websocket" required:"false" cty:"vnc_over_websocket" hcl:"vnc_over_websocket"`
+	InsecureConnection        *bool             `mapstructure:"insecure_connection" required:"false" cty:"insecure_connection" hcl:"insecure_connection"`
 	ShutdownCommand           *string           `mapstructure:"shutdown_command" required:"false" cty:"shutdown_command" hcl:"shutdown_command"`
 	ShutdownTimeout           *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout" hcl:"shutdown_timeout"`
 	Type                      *string           `mapstructure:"communicator" cty:"communicator" hcl:"communicator"`
@@ -126,8 +131,8 @@ type FlatConfig struct {
 	AdditionalDiskSize        []uint            `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size" hcl:"disk_additional_size"`
 	DiskAdapterType           *string           `mapstructure:"disk_adapter_type" required:"false" cty:"disk_adapter_type" hcl:"disk_adapter_type"`
 	DiskName                  *string           `mapstructure:"vmdk_name" required:"false" cty:"vmdk_name" hcl:"vmdk_name"`
-	DiskSize                  *uint             `mapstructure:"disk_size" required:"false" cty:"disk_size" hcl:"disk_size"`
 	DiskTypeId                *string           `mapstructure:"disk_type_id" required:"false" cty:"disk_type_id" hcl:"disk_type_id"`
+	DiskSize                  *uint             `mapstructure:"disk_size" required:"false" cty:"disk_size" hcl:"disk_size"`
 	CdromAdapterType          *string           `mapstructure:"cdrom_adapter_type" required:"false" cty:"cdrom_adapter_type" hcl:"cdrom_adapter_type"`
 	GuestOSType               *string           `mapstructure:"guest_os_type" required:"false" cty:"guest_os_type" hcl:"guest_os_type"`
 	Version                   *string           `mapstructure:"version" required:"false" cty:"version" hcl:"version"`
@@ -159,6 +164,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"http_port_min":                  &hcldec.AttrSpec{Name: "http_port_min", Type: cty.Number, Required: false},
 		"http_port_max":                  &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
 		"http_bind_address":              &hcldec.AttrSpec{Name: "http_bind_address", Type: cty.String, Required: false},
+		"http_interface":                 &hcldec.AttrSpec{Name: "http_interface", Type: cty.String, Required: false},
 		"iso_checksum":                   &hcldec.AttrSpec{Name: "iso_checksum", Type: cty.String, Required: false},
 		"iso_url":                        &hcldec.AttrSpec{Name: "iso_url", Type: cty.String, Required: false},
 		"iso_urls":                       &hcldec.AttrSpec{Name: "iso_urls", Type: cty.List(cty.String), Required: false},
@@ -167,6 +173,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"floppy_files":                   &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
 		"floppy_dirs":                    &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
 		"floppy_label":                   &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},
+		"cd_files":                       &hcldec.AttrSpec{Name: "cd_files", Type: cty.List(cty.String), Required: false},
+		"cd_label":                       &hcldec.AttrSpec{Name: "cd_label", Type: cty.String, Required: false},
 		"boot_keygroup_interval":         &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                      &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
 		"boot_command":                   &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
@@ -201,6 +209,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vnc_port_min":                   &hcldec.AttrSpec{Name: "vnc_port_min", Type: cty.Number, Required: false},
 		"vnc_port_max":                   &hcldec.AttrSpec{Name: "vnc_port_max", Type: cty.Number, Required: false},
 		"vnc_disable_password":           &hcldec.AttrSpec{Name: "vnc_disable_password", Type: cty.Bool, Required: false},
+		"vnc_over_websocket":             &hcldec.AttrSpec{Name: "vnc_over_websocket", Type: cty.Bool, Required: false},
+		"insecure_connection":            &hcldec.AttrSpec{Name: "insecure_connection", Type: cty.Bool, Required: false},
 		"shutdown_command":               &hcldec.AttrSpec{Name: "shutdown_command", Type: cty.String, Required: false},
 		"shutdown_timeout":               &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
 		"communicator":                   &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
@@ -265,8 +275,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"disk_additional_size":           &hcldec.AttrSpec{Name: "disk_additional_size", Type: cty.List(cty.Number), Required: false},
 		"disk_adapter_type":              &hcldec.AttrSpec{Name: "disk_adapter_type", Type: cty.String, Required: false},
 		"vmdk_name":                      &hcldec.AttrSpec{Name: "vmdk_name", Type: cty.String, Required: false},
-		"disk_size":                      &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
 		"disk_type_id":                   &hcldec.AttrSpec{Name: "disk_type_id", Type: cty.String, Required: false},
+		"disk_size":                      &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
 		"cdrom_adapter_type":             &hcldec.AttrSpec{Name: "cdrom_adapter_type", Type: cty.String, Required: false},
 		"guest_os_type":                  &hcldec.AttrSpec{Name: "guest_os_type", Type: cty.String, Required: false},
 		"version":                        &hcldec.AttrSpec{Name: "version", Type: cty.String, Required: false},

@@ -26,11 +26,24 @@ so Windows must be completely booted in order to continue.
 
 The example below is fully functional.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "windows-restart"
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "windows-restart" {}
+```
+
+</Tab>
+</Tabs>
 
 ## Configuration Reference
 
@@ -64,12 +77,27 @@ Optional parameters:
 - `restart_check_command` (string) - A command to execute to check if the
   restart succeeded. This will be done in a loop. Example usage:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "windows-restart",
   "restart_check_command": "powershell -command \"& {Write-Output 'restarted.'}\""
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "windows-restart" {
+  restart_check_command = "powershell -command \"& {Write-Output 'restarted.'}\""
+}
+```
+
+</Tab>
+</Tabs>
 
 - `restart_timeout` (string) - The timeout to wait for the restart. By
   default this is 5 minutes. Example value: `5m`. If you are installing

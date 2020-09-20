@@ -3,7 +3,6 @@ package proxmox
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 
@@ -14,10 +13,6 @@ import (
 
 // stepUploadISO uploads an ISO file to Proxmox so we can boot from it
 type stepUploadISO struct{}
-
-type uploader interface {
-	Upload(node string, storage string, contentType string, filename string, file io.Reader) error
-}
 
 var _ uploader = &proxmox.Client{}
 
@@ -58,7 +53,6 @@ func (s *stepUploadISO) Run(ctx context.Context, state multistep.StateBag) multi
 
 	isoStoragePath := fmt.Sprintf("%s:iso/%s", c.ISOStoragePool, filename)
 	state.Put("iso_file", isoStoragePath)
-
 	return multistep.ActionContinue
 }
 

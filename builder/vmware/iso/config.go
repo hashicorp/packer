@@ -23,6 +23,7 @@ type Config struct {
 	common.HTTPConfig              `mapstructure:",squash"`
 	common.ISOConfig               `mapstructure:",squash"`
 	common.FloppyConfig            `mapstructure:",squash"`
+	common.CDConfig                `mapstructure:",squash"`
 	bootcommand.VNCConfig          `mapstructure:",squash"`
 	vmwcommon.DriverConfig         `mapstructure:",squash"`
 	vmwcommon.HWConfig             `mapstructure:",squash"`
@@ -33,55 +34,12 @@ type Config struct {
 	vmwcommon.ToolsConfig          `mapstructure:",squash"`
 	vmwcommon.VMXConfig            `mapstructure:",squash"`
 	vmwcommon.ExportConfig         `mapstructure:",squash"`
-	// The size(s) of any additional
-	// hard disks for the VM in megabytes. If this is not specified then the VM
-	// will only contain a primary hard disk. The builder uses expandable, not
-	// fixed-size virtual hard disks, so the actual file representing the disk will
-	// not use the full size unless it is full.
-	AdditionalDiskSize []uint `mapstructure:"disk_additional_size" required:"false"`
-	// The adapter type of the VMware virtual disk to create. This option is
-	// for advanced usage, modify only if you know what you're doing. Some of
-	// the options you can specify are `ide`, `sata`, `nvme` or `scsi` (which
-	// uses the "lsilogic" scsi interface by default). If you specify another
-	// option, Packer will assume that you're specifying a `scsi` interface of
-	// that specified type. For more information, please consult [Virtual Disk
-	// Manager User's Guide](http://www.vmware.com/pdf/VirtualDiskManager.pdf)
-	// for desktop VMware clients. For ESXi, refer to the proper ESXi
-	// documentation.
-	DiskAdapterType string `mapstructure:"disk_adapter_type" required:"false"`
-	// The filename of the virtual disk that'll be created,
-	// without the extension. This defaults to packer.
-	DiskName string `mapstructure:"vmdk_name" required:"false"`
+	vmwcommon.DiskConfig           `mapstructure:",squash"`
 	// The size of the hard disk for the VM in megabytes.
 	// The builder uses expandable, not fixed-size virtual hard disks, so the
 	// actual file representing the disk will not use the full size unless it
 	// is full. By default this is set to 40000 (about 40 GB).
 	DiskSize uint `mapstructure:"disk_size" required:"false"`
-	// The type of VMware virtual disk to create. This
-	// option is for advanced usage.
-	//
-	//   For desktop VMware clients:
-	//
-	//   Type ID | Description
-	//   ------- | ---
-	//   `0`     | Growable virtual disk contained in a single file (monolithic sparse).
-	//   `1`     | Growable virtual disk split into 2GB files (split sparse).
-	//   `2`     | Preallocated virtual disk contained in a single file (monolithic flat).
-	//   `3`     | Preallocated virtual disk split into 2GB files (split flat).
-	//   `4`     | Preallocated virtual disk compatible with ESX server (VMFS flat).
-	//   `5`     | Compressed disk optimized for streaming.
-	//
-	//   The default is `1`.
-	//
-	//   For ESXi, this defaults to `zeroedthick`. The available options for ESXi
-	//   are: `zeroedthick`, `eagerzeroedthick`, `thin`. `rdm:dev`, `rdmp:dev`,
-	//   `2gbsparse` are not supported. Due to default disk compaction, when using
-	//   `zeroedthick` or `eagerzeroedthick` set `skip_compaction` to `true`.
-	//
-	//   For more information, please consult the [Virtual Disk Manager User's
-	//   Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
-	//   VMware clients. For ESXi, refer to the proper ESXi documentation.
-	DiskTypeId string `mapstructure:"disk_type_id" required:"false"`
 	// The adapter type (or bus) that will be used
 	// by the cdrom device. This is chosen by default based on the disk adapter
 	// type. VMware tends to lean towards ide for the cdrom device unless
@@ -136,45 +94,31 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// Accumulate any errors and warnings
+	var warnings []string
 	var errs *packer.MultiError
-	warnings := make([]string, 0)
 
+	runConfigWarnings, runConfigErrs := c.RunConfig.Prepare(&c.ctx, &c.DriverConfig)
+	warnings = append(warnings, runConfigWarnings...)
+	errs = packer.MultiErrorAppend(errs, runConfigErrs...)
 	isoWarnings, isoErrs := c.ISOConfig.Prepare(&c.ctx)
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
 	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.HWConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.DriverConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs,
-		c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
-	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
-
-	if c.DiskName == "" {
-		c.DiskName = "disk"
-	}
+	errs = packer.MultiErrorAppend(errs, c.DiskConfig.Prepare(&c.ctx)...)
 
 	if c.DiskSize == 0 {
 		c.DiskSize = 40000
-	}
-
-	if c.DiskAdapterType == "" {
-		// Default is lsilogic
-		c.DiskAdapterType = "lsilogic"
-	}
-
-	if !c.SkipCompaction {
-		if c.RemoteType == "esx5" {
-			if c.DiskTypeId == "" {
-				c.SkipCompaction = true
-			}
-		}
 	}
 
 	if c.DiskTypeId == "" {
@@ -183,6 +127,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 		if c.RemoteType == "esx5" {
 			c.DiskTypeId = "zeroedthick"
+			c.SkipCompaction = true
 		}
 	}
 
@@ -221,31 +166,26 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		c.HWConfig.Network = "nat"
 	}
 
-	// Remote configuration validation
-	if c.RemoteType != "" {
-		if c.RemoteHost == "" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("remote_host must be specified"))
-		}
-
-		if c.RemoteType != "esx5" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
+	if c.Format == "" {
+		if c.RemoteType == "" {
+			c.Format = "vmx"
+		} else {
+			c.Format = "ovf"
 		}
 	}
 
-	if c.Format != "" {
-		if c.RemoteType != "esx5" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("format is only valid when RemoteType=esx5"))
+	if c.RemoteType == "" {
+		if c.Format == "vmx" {
+			// if we're building locally and want a vmx, there's nothing to export.
+			// Set skip export flag here to keep the export step from attempting
+			// an unneded export
+			c.SkipExport = true
 		}
-	} else {
-		c.Format = "ovf"
-	}
-
-	if !(c.Format == "ova" || c.Format == "ovf" || c.Format == "vmx") {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("format must be one of ova, ovf, or vmx"))
+		if c.Headless && c.DisableVNC {
+			warnings = append(warnings,
+				"Headless mode uses VNC to retrieve output. Since VNC has been disabled,\n"+
+					"you won't be able to see any output.")
+		}
 	}
 
 	err = c.DriverConfig.Validate(c.SkipExport)
@@ -253,17 +193,19 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
+	if c.CdromAdapterType != "" {
+		c.CdromAdapterType = strings.ToLower(c.CdromAdapterType)
+		if c.CdromAdapterType != "ide" && c.CdromAdapterType != "sata" && c.CdromAdapterType != "scsi" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("cdrom_adapter_type must be one of ide, sata, or scsi"))
+		}
+	}
+
 	// Warnings
 	if c.ShutdownCommand == "" {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
 				"will forcibly halt the virtual machine, which may result in data loss.")
-	}
-
-	if c.Headless && c.DisableVNC {
-		warnings = append(warnings,
-			"Headless mode uses VNC to retrieve output. Since VNC has been disabled,\n"+
-				"you won't be able to see any output.")
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

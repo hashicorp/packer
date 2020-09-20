@@ -46,7 +46,6 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
-
 	expected := []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	if !reflect.DeepEqual(b.config.FloppyFiles, expected) {
 		t.Fatalf("bad: %#v", b.config.FloppyFiles)

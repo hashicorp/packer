@@ -954,20 +954,20 @@ func createDeclaration(node pDeclaration) configDeclaration {
 
 		// update configDeclaration parameters
 		for _, p := range hierarchy[i].parameters {
-			switch p.(type) {
+			switch p := p.(type) {
 			case pParameterOption:
-				result.options[p.(pParameterOption).name] = p.(pParameterOption).value
+				result.options[p.name] = p.value
 			case pParameterGrant:
 				Grant := map[string]grant{"ignore": IGNORE, "allow": ALLOW, "deny": DENY}
-				result.grants[p.(pParameterGrant).attribute] = Grant[p.(pParameterGrant).verb]
+				result.grants[p.attribute] = Grant[p.verb]
 			case pParameterBoolean:
-				result.attributes[p.(pParameterBoolean).parameter] = p.(pParameterBoolean).truancy
+				result.attributes[p.parameter] = p.truancy
 			case pParameterClientMatch:
-				result.hostid = append(result.hostid, p.(pParameterClientMatch))
+				result.hostid = append(result.hostid, p)
 			case pParameterExpression:
-				result.expressions[p.(pParameterExpression).parameter] = p.(pParameterExpression).expression
+				result.expressions[p.parameter] = p.expression
 			case pParameterOther:
-				result.parameters[p.(pParameterOther).parameter] = p.(pParameterOther).value
+				result.parameters[p.parameter] = p.value
 			default:
 				result.address = append(result.address, p)
 			}
@@ -1196,7 +1196,7 @@ func (e *DhcpConfiguration) HostByName(host string) (configDeclaration, error) {
 		switch entry.id[0].(type) {
 		case pDeclarationHost:
 			id := entry.id[0].(pDeclarationHost)
-			if strings.ToLower(id.name) == strings.ToLower(host) {
+			if strings.EqualFold(id.name, host) {
 				result = append(result, entry)
 			}
 		}
@@ -1237,7 +1237,7 @@ func (e NetworkMap) NameIntoDevices(name string) ([]string, error) {
 	var devices []string
 
 	for _, val := range e {
-		if strings.ToLower(val["name"]) == strings.ToLower(name) {
+		if strings.EqualFold(val["name"], name) {
 			devices = append(devices, val["device"])
 		}
 	}
@@ -1250,7 +1250,7 @@ func (e NetworkMap) NameIntoDevices(name string) ([]string, error) {
 }
 func (e NetworkMap) DeviceIntoName(device string) (string, error) {
 	for _, val := range e {
-		if strings.ToLower(val["device"]) == strings.ToLower(device) {
+		if strings.EqualFold(val["device"], device) {
 			return val["name"], nil
 		}
 	}

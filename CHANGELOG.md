@@ -1,4 +1,73 @@
-## 1.6.2 (Upcoming)
+ ## 1.6.3 (Upcoming)
+
+### IMPROVEMENTS:
+* builder/azure: Support publishing to a Shared Image Gallery with a different
+    subscription id [GH-9875]
+* builder/oracle-oci: Add `create_vnic_details` option for launch details.
+    [GH-9856]
+* builder/oracle-oci: Allow freeform and defined tags to be added instance.
+    [GH-9802]
+* builder/proxmox: Add ability to specify interfaces for http_directroy and VM.
+    [GH-9874]
+* builder/proxmox: Allow the mounting of multiple ISOs via the `cd_drive`
+    option. [GH-9653]
+* builder/proxmox: Fix boot command special keys. [GH-9885]
+* builder/qemu: Add `qemu_img_args` option to set special cli flags for calls
+    to qemu-img [GH-9956]
+* builder/qemu: Add `skip_resize_disk` option to skip the resizing of QCOW2
+    images. [GH-9896] [GH-9860]
+* builder/qemu: Skip qemu-img convert on MacOS to prevent the creation
+    of corrupt images [QEMU
+    #1776920](https://bugs.launchpad.net/qemu/+bug/1776920)[GH-9949]
+* builder/scaleway: Change default boottype to local. [GH-9853]
+* builder/scaleway: Update scaleway to use non-deprecated sdk. [GH-9902]
+* builder/vmware: Add `vnc_over_websocket` to allow the sending of a
+    `boot_command` to hosts running ESXi 6.7 and above. [GH-9938]
+* builder/vsphere-clone: Add ability to set `mac_address` [GH-9930]
+* builder/vsphere-iso: Add NVMe controller support. [GH-9880]
+* builder/vsphere: Look for a default resource pool when root resource pool is
+    not found. [GH-9809]
+* core: New `cd_files` option to mount iso for modern OSes which don't support
+    floppies. [GH-9796] [GH-9919] [GH-9928] [GH-9932] [GH-9941]
+* HCL2: When the type of a variable is not known evaluate setting as a literal
+    string instead of a variable name. [GH-9863]
+* post-processor/vagrant: Support the use of template variables within
+    Vagrantfile templates. [GH-9923]
+* post-processor/yandex-import: Allow custom API endpoint. [GH-9850]
+* provisioner/ansible: Add support for Ansible Galaxy Collections. [GH-9903]
+
+### BUG FIXES:
+* builder/amazon-ebs: Fix issue where retrying on invalid IAM instance profile
+    error was creating multiple spot instances. [GH-9946]
+* builder/amazon-ebssurrogate: Fix issue where builder defaults to AWS managed
+    key even when custom `kms_key_id` is set. [GH-9959]
+* builder/qemu: Fix hardcoded lowerbound causing negative ports [GH-9905]
+* builder/qemu: Skip compaction when backing file is used. [GH-9918]
+* builder/scaleway: Add pre validate step to prevent the creation of multiple
+    images with the same name. [GH-9840]
+* builder/vmware-iso: Prevent the use of reserved SCSI ID 0:7 when attaching
+    multiple disks. [GH-9940]
+* builder/vsphere: Fix overly strict iso_path validation regex. [GH-9855]
+* command/console: Prevent failure when there are unknown vars. [GH-9864]
+* command/inspect: Allow unset variables in HCL2 and JSON. [GH-9832]
+* core: use $APPDATA over $HOME on Windows hosts when determining homedir.
+    [GH-9830]
+* post-processor/digitalocean-import: Fix crash caused by empty artifact.Files
+    slice. [GH-9857]
+* post-processor/yandex-export: Check for error after runner completes.
+    [GH-9925]
+* post-processor/yandex-export: Set metadata key to expected value on error.
+    [GH-9849]
+* post-processor/yandex-import: Fix S3 URL construct process. [GH-9931]
+
+## 1.6.2 (August 28, 2020)
+
+### FEATURES:
+* **New command** `hcl2_upgrade` is a JSON to HCL2 transpiler that allows users
+    to transform an existing JSON configuration template into its HCL2 template
+    equivalent. Please see [hcl2_upgrade command
+    docs](https://packer.io/docs/commands/hcl2_upgrade) for more details.
+    [GH-9659]
 
 ### IMPROVEMENTS:
 * builder/amazon:  Add all of the custom AWS template engines to `build`
@@ -8,14 +77,22 @@
 * builder/azure: Add FreeBSD support to azure/chroot builder. [GH-9697]
 * builder/vmware-esx: Add `network_name` option to vmware so that users can set
     a network without using vmx data. [GH-9718]
+* builder/vmware-vmx: Add additional disk configuration option.  Previously
+    only implemented for vmware-iso builder [GH-9815]
 * builder/vmware: Add a `remote_output_directory option` so users can tell
     Packer where on a datastore to create a vm. [GH-9784]
+* builder/vmware: Add option to export to ovf or ova from a local vmware build
+    [GH-9825]
 * builder/vmware: Add progress tracker to vmware-esx5 iso upload. [GH-9779]
+* builder/vsphere-iso:  Add support for building on a single ESXi host
+    [GH-9793]
 * builder/vsphere: Add new `directory_permission` config export option.
     [GH-9704]
 * builder/vsphere: Add option to import OVF templates to the Content Library
     [GH-9755]
 * builder/vsphere: Add step and options to customize cloned VMs. [GH-9665]
+* builder/vsphere: Update `iso_paths` to support reading ISOs from Content
+    Library paths [GH-9801]
 * core/hcl: Add provisioner "override" option to HCL2 templates. [GH-9764]
 * core/hcl: Add vault integration as an HCL2 function function. [GH-9746]
 * core: Add colored prefix to progress bar so it's clearer what build each
@@ -27,6 +104,8 @@
     [GH-9773]
 * post-processor/vsphere: Improve UI to catch bad credentials and print errors.
     [GH-9649]
+* provisioner/ansible-remote: Add `ansible_ssh_extra_args` so users can specify
+    extra arguments to pass to ssh [GH-9821]
 * provisioner/file: Clean up, bugfix, and document previously-hidden `sources`
     option. [GH-9725] [GH-9735]
 * provisioner/salt-masterless: Add option to option to download community
@@ -39,6 +118,11 @@
     binaries. [GH-9706]
 * builder/amazon-ebssurrogate: Make skip_save_build_region option work in the
     ebssurrogate builder, not just the ebs builder. [GH-9666]
+* builder/amazon: Add retry logic to the spot instance creation step to handle
+    "Invalid IAM Instance Profile name" errors [GH-9810]
+* builder/amazon: Update the `aws_secretsmanager` function to read from the AWS
+    credentials file for obtaining default region information; fixes the
+    'MissingRegion' error when AWS_REGION is not set [GH-9781]
 * builder/file: Make sure that UploadDir receives the interpolated destination.
     [GH-9698]
 * builder/googlecompute: Fix bug where startup script hang would cause export
@@ -61,6 +145,10 @@
     interpolation. [GH-9673]
 * post-processor/vsphere-template: Fix ReregisterVM to default to true instead
     of false. [GH-9736]
+* post-processor/yandex-export: Fix issue when validating region_name [GH-9814]
+* provisioner/inspec: Fix the 'Unsupported argument; An argument named
+    "command"' error when using the inspec provisioner in an HCL2 configuration
+    [GH-9800]
 
 ## 1.6.1 (July 30, 2020)
 

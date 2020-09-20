@@ -43,8 +43,17 @@ Exit () {
   for i in ${PATHS}; do
     LOGDEST="${i}.exporter.log"
     echo "Uploading exporter log to ${LOGDEST}..."
-    aws s3 --endpoint-url=https://storage.yandexcloud.net cp /var/log/syslog ${LOGDEST}
+    aws s3 --region ru-central1 --endpoint-url=https://storage.yandexcloud.net cp /var/log/syslog ${LOGDEST}
   done
+
+  if [ $1 -ne 0 ]; then
+	echo "Set metadata key 'cloud-init-status' to 'cloud-init-error' value"
+    if ! yc compute instance update ${INSTANCE_ID} --metadata cloud-init-status=cloud-init-error ; then
+	  echo "Failed to update metadata key 'cloud-init-status'."
+	  exit 111
+	fi
+  fi
+	
   exit $1
 }
 
@@ -57,6 +66,28 @@ echo "Instance zone - ${ZONE}"
 echo "Disk name - ${DISKNAME}"
 echo "Export paths - ${PATHS}"
 echo "####################################"
+
+echo "Detect Service Account ID..."
+SERVICE_ACCOUNT_ID=$(GetServiceAccountId)
+echo "Use Service Account ID: ${SERVICE_ACCOUNT_ID}"
+
+echo "Create static access key..."
+SEC_json=$(yc iam access-key create --service-account-id ${SERVICE_ACCOUNT_ID} \
+    --description "this key is for export image to storage" --format json)
+
+if [ $? -ne 0 ]; then
+  echo "Failed to create static access key."
+  Exit 1
+fi
+
+echo "Setup env variables to access storage..."
+eval "$(jq -r '@sh "export YC_SK_ID=\(.access_key.id); export AWS_ACCESS_KEY_ID=\(.access_key.key_id); export AWS_SECRET_ACCESS_KEY=\(.secret)"' <<<${SEC_json}  )"
+
+echo "Check access to storage..."
+if ! aws s3 --region ru-central1 --endpoint-url=https://storage.yandexcloud.net ls > /dev/null ; then
+  echo "Failed to access storage."
+  Exit 1
+fi
 
 echo "Creating disk from image to be exported..."
 if ! yc compute disk create --name ${DISKNAME} --source-image-id ${IMAGE_ID} --zone ${ZONE}; then
@@ -81,28 +112,6 @@ if ! yc compute instance detach-disk ${INSTANCE_ID}  --disk-name ${DISKNAME} ; t
   echo "Failed to detach disk."
 fi
 
-echo "Detect Service Account ID..."
-SERVICE_ACCOUNT_ID=$(GetServiceAccountId)
-echo "Use Service Account ID: ${SERVICE_ACCOUNT_ID}"
-
-echo "Create static access key..."
-SEC_json=$(yc iam access-key create --service-account-id ${SERVICE_ACCOUNT_ID} \
-    --description "this key is for export image to storage" --format json)
-
-if [ $? -ne 0 ]; then
-  echo "Failed to create static access key."
-  exit 1
-fi
-
-echo "Setup env variables to access storage..."
-eval "$(jq -r '@sh "export YC_SK_ID=\(.access_key.id); export AWS_ACCESS_KEY_ID=\(.access_key.key_id); export AWS_SECRET_ACCESS_KEY=\(.secret)"' <<<${SEC_json}  )"
-
-echo "Check access to storage..."
-if ! aws s3 --endpoint-url=https://storage.yandexcloud.net ls > /dev/null ; then
-  echo "Failed to access storage."
-  exit 1
-fi
-
 FAIL=0
 echo "Deleting disk..."
 if ! yc compute disk delete --name ${DISKNAME} ; then
@@ -111,7 +120,7 @@ if ! yc compute disk delete --name ${DISKNAME} ; then
 fi
 for i in ${PATHS}; do
   echo "Uploading qcow2 disk image to ${i}..."
-  if ! aws s3 --endpoint-url=https://storage.yandexcloud.net cp disk.qcow2 ${i}; then
+  if ! aws s3 --region ru-central1 --endpoint-url=https://storage.yandexcloud.net cp disk.qcow2 ${i}; then
     echo "Failed to upload image to ${i}."
     FAIL=1
   fi
@@ -123,7 +132,7 @@ if ! yc iam access-key delete ${YC_SK_ID} ; then
   FAIL=1
 fi
 
-echo "Set metadata key to 'cloud-init-status' to 'cloud-init-done' value"
+echo "Set metadata key 'cloud-init-status' to 'cloud-init-done' value"
 if ! yc compute instance update ${INSTANCE_ID} --metadata cloud-init-status=cloud-init-done ; then
   echo "Failed to update metadata key to 'cloud-init-status'."
   Exit 1

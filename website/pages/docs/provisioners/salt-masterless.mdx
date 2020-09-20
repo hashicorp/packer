@@ -21,12 +21,27 @@ master.
 
 The example below is fully functional.
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "salt-masterless",
   "local_state_tree": "/Users/me/salt"
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "salt-masterless" {
+  local_state_tree = "/Users/me/salt"
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Configuration Reference
 
@@ -101,7 +116,7 @@ Optional:
   "windows".
 
 - `formulas` (array of strings) - An array of git source formulas to be downloaded to the local
-  state tree prior to moving to the remote state tree. Note: `//directory` must be included in 
+  state tree prior to moving to the remote state tree. Note: `//directory` must be included in
   the URL to download the appropriate formula directory. Example:
   `git::https://github.com/saltstack-formulas/vault-formula.git//vault?ref=v1.2.3`
 

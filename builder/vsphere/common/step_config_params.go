@@ -33,7 +33,7 @@ type StepConfigParams struct {
 
 func (s *StepConfigParams) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 	configParams := make(map[string]string)
 
 	if s.Config.ConfigParams != nil {

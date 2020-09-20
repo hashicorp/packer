@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/scaleway/scaleway-cli/pkg/api"
+	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
+	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
 type Artifact struct {
@@ -20,11 +21,11 @@ type Artifact struct {
 	// The ID of the snapshot
 	snapshotID string
 
-	// The name of the region
-	regionName string
+	// The name of the zone
+	zoneName string
 
 	// The client for making API calls
-	client *api.ScalewayAPI
+	client *scw.Client
 
 	// StateData should store data such as GeneratedData
 	// to be shared with post-processors
@@ -41,12 +42,12 @@ func (*Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return fmt.Sprintf("%s:%s", a.regionName, a.imageID)
+	return fmt.Sprintf("%s:%s", a.zoneName, a.imageID)
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("An image was created: '%v' (ID: %v) in region '%v' based on snapshot '%v' (ID: %v)",
-		a.imageName, a.imageID, a.regionName, a.snapshotName, a.snapshotID)
+	return fmt.Sprintf("An image was created: '%v' (ID: %v) in zone '%v' based on snapshot '%v' (ID: %v)",
+		a.imageName, a.imageID, a.zoneName, a.snapshotName, a.snapshotID)
 }
 
 func (a *Artifact) State(name string) interface{} {
@@ -55,11 +56,19 @@ func (a *Artifact) State(name string) interface{} {
 
 func (a *Artifact) Destroy() error {
 	log.Printf("Destroying image: %s (%s)", a.imageID, a.imageName)
-	if err := a.client.DeleteImage(a.imageID); err != nil {
+	instanceAPI := instance.NewAPI(a.client)
+
+	err := instanceAPI.DeleteImage(&instance.DeleteImageRequest{
+		ImageID: a.imageID,
+	})
+	if err != nil {
 		return err
 	}
 	log.Printf("Destroying snapshot: %s (%s)", a.snapshotID, a.snapshotName)
-	if err := a.client.DeleteSnapshot(a.snapshotID); err != nil {
+	err = instanceAPI.DeleteSnapshot(&instance.DeleteSnapshotRequest{
+		SnapshotID: a.snapshotID,
+	})
+	if err != nil {
 		return err
 	}
 	return nil

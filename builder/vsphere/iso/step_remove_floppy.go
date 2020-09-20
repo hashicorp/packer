@@ -16,8 +16,8 @@ type StepRemoveFloppy struct {
 
 func (s *StepRemoveFloppy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
-	d := state.Get("driver").(*driver.Driver)
+	vm := state.Get("vm").(*driver.VirtualMachineDriver)
+	d := state.Get("driver").(*driver.VCenterDriver)
 
 	ui.Say("Deleting Floppy drives...")
 	devices, err := vm.Devices()

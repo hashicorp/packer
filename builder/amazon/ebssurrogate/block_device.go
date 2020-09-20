@@ -3,9 +3,6 @@
 package ebssurrogate
 
 import (
-	"strings"
-
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -39,50 +36,6 @@ func (bds BlockDevices) BuildEC2BlockDeviceMappings() []*ec2.BlockDeviceMapping 
 		blockDevices = append(blockDevices, blockDevice.BuildEC2BlockDeviceMapping())
 	}
 	return blockDevices
-}
-
-func (blockDevice BlockDevice) BuildEC2BlockDeviceMapping() *ec2.BlockDeviceMapping {
-
-	mapping := &ec2.BlockDeviceMapping{
-		DeviceName: aws.String(blockDevice.DeviceName),
-	}
-
-	if blockDevice.NoDevice {
-		mapping.NoDevice = aws.String("")
-		return mapping
-	} else if blockDevice.VirtualName != "" {
-		if strings.HasPrefix(blockDevice.VirtualName, "ephemeral") {
-			mapping.VirtualName = aws.String(blockDevice.VirtualName)
-		}
-		return mapping
-	}
-
-	ebsBlockDevice := &ec2.EbsBlockDevice{
-		DeleteOnTermination: aws.Bool(blockDevice.DeleteOnTermination),
-	}
-
-	if blockDevice.VolumeType != "" {
-		ebsBlockDevice.VolumeType = aws.String(blockDevice.VolumeType)
-	}
-
-	if blockDevice.VolumeSize > 0 {
-		ebsBlockDevice.VolumeSize = aws.Int64(blockDevice.VolumeSize)
-	}
-
-	// IOPS is only valid for io1 type
-	if blockDevice.VolumeType == "io1" {
-		ebsBlockDevice.Iops = aws.Int64(blockDevice.IOPS)
-	}
-
-	// You cannot specify Encrypted if you specify a Snapshot ID
-	if blockDevice.SnapshotId != "" {
-		ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
-	}
-	ebsBlockDevice.Encrypted = blockDevice.Encrypted.ToBoolPointer()
-
-	mapping.Ebs = ebsBlockDevice
-
-	return mapping
 }
 
 func (bds BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {

@@ -21,8 +21,8 @@ type LocationConfig struct {
 	// the host is in a folder. For example `folder/host`. See the
 	// `Specifying Clusters and Hosts` section above for more details.
 	Host string `mapstructure:"host"`
-	// VMWare resource pool. Defaults to the root resource pool of the
-	// `host` or `cluster`.
+	// VMWare resource pool. If not set, it will look for the root resource pool of the `host` or `cluster`.
+	// If a root resource is not found, it will then look for a default resource pool.
 	ResourcePool string `mapstructure:"resource_pool"`
 	// VMWare datastore. Required if `host` is a cluster, or if `host` has
 	// multiple datastores.

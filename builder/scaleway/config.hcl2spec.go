@@ -63,9 +63,11 @@ type FlatConfig struct {
 	WinRMUseSSL               *bool             `mapstructure:"winrm_use_ssl" cty:"winrm_use_ssl" hcl:"winrm_use_ssl"`
 	WinRMInsecure             *bool             `mapstructure:"winrm_insecure" cty:"winrm_insecure" hcl:"winrm_insecure"`
 	WinRMUseNTLM              *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm" hcl:"winrm_use_ntlm"`
-	Token                     *string           `mapstructure:"api_token" required:"true" cty:"api_token" hcl:"api_token"`
-	Organization              *string           `mapstructure:"organization_id" required:"true" cty:"organization_id" hcl:"organization_id"`
-	Region                    *string           `mapstructure:"region" required:"true" cty:"region" hcl:"region"`
+	AccessKey                 *string           `mapstructure:"access_key" required:"true" cty:"access_key" hcl:"access_key"`
+	SecretKey                 *string           `mapstructure:"secret_key" required:"true" cty:"secret_key" hcl:"secret_key"`
+	ProjectID                 *string           `mapstructure:"project_id" required:"true" cty:"project_id" hcl:"project_id"`
+	Zone                      *string           `mapstructure:"zone" required:"true" cty:"zone" hcl:"zone"`
+	APIURL                    *string           `mapstructure:"api_url" cty:"api_url" hcl:"api_url"`
 	Image                     *string           `mapstructure:"image" required:"true" cty:"image" hcl:"image"`
 	CommercialType            *string           `mapstructure:"commercial_type" required:"true" cty:"commercial_type" hcl:"commercial_type"`
 	SnapshotName              *string           `mapstructure:"snapshot_name" required:"false" cty:"snapshot_name" hcl:"snapshot_name"`
@@ -74,6 +76,9 @@ type FlatConfig struct {
 	Bootscript                *string           `mapstructure:"bootscript" required:"false" cty:"bootscript" hcl:"bootscript"`
 	BootType                  *string           `mapstructure:"boottype" required:"false" cty:"boottype" hcl:"boottype"`
 	RemoveVolume              *bool             `mapstructure:"remove_volume" cty:"remove_volume" hcl:"remove_volume"`
+	Token                     *string           `mapstructure:"api_token" required:"false" cty:"api_token" hcl:"api_token"`
+	Organization              *string           `mapstructure:"organization_id" required:"false" cty:"organization_id" hcl:"organization_id"`
+	Region                    *string           `mapstructure:"region" required:"false" cty:"region" hcl:"region"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -142,9 +147,11 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_use_ssl":                &hcldec.AttrSpec{Name: "winrm_use_ssl", Type: cty.Bool, Required: false},
 		"winrm_insecure":               &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":               &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
-		"api_token":                    &hcldec.AttrSpec{Name: "api_token", Type: cty.String, Required: false},
-		"organization_id":              &hcldec.AttrSpec{Name: "organization_id", Type: cty.String, Required: false},
-		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
+		"access_key":                   &hcldec.AttrSpec{Name: "access_key", Type: cty.String, Required: false},
+		"secret_key":                   &hcldec.AttrSpec{Name: "secret_key", Type: cty.String, Required: false},
+		"project_id":                   &hcldec.AttrSpec{Name: "project_id", Type: cty.String, Required: false},
+		"zone":                         &hcldec.AttrSpec{Name: "zone", Type: cty.String, Required: false},
+		"api_url":                      &hcldec.AttrSpec{Name: "api_url", Type: cty.String, Required: false},
 		"image":                        &hcldec.AttrSpec{Name: "image", Type: cty.String, Required: false},
 		"commercial_type":              &hcldec.AttrSpec{Name: "commercial_type", Type: cty.String, Required: false},
 		"snapshot_name":                &hcldec.AttrSpec{Name: "snapshot_name", Type: cty.String, Required: false},
@@ -153,6 +160,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"bootscript":                   &hcldec.AttrSpec{Name: "bootscript", Type: cty.String, Required: false},
 		"boottype":                     &hcldec.AttrSpec{Name: "boottype", Type: cty.String, Required: false},
 		"remove_volume":                &hcldec.AttrSpec{Name: "remove_volume", Type: cty.Bool, Required: false},
+		"api_token":                    &hcldec.AttrSpec{Name: "api_token", Type: cty.String, Required: false},
+		"organization_id":              &hcldec.AttrSpec{Name: "organization_id", Type: cty.String, Required: false},
+		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
 	}
 	return s
 }

@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
@@ -32,6 +31,7 @@ type Config struct {
 	common.HTTPConfig               `mapstructure:",squash"`
 	common.ISOConfig                `mapstructure:",squash"`
 	common.FloppyConfig             `mapstructure:",squash"`
+	common.CDConfig                 `mapstructure:",squash"`
 	bootcommand.BootConfig          `mapstructure:",squash"`
 	vboxcommon.ExportConfig         `mapstructure:",squash"`
 	vboxcommon.OutputConfig         `mapstructure:",squash"`
@@ -46,29 +46,6 @@ type Config struct {
 	// The size, in megabytes, of the hard disk to create for the VM. By
 	// default, this is 40000 (about 40 GB).
 	DiskSize uint `mapstructure:"disk_size" required:"false"`
-	// The path on the guest virtual machine where the VirtualBox guest
-	// additions ISO will be uploaded. By default this is
-	// VBoxGuestAdditions.iso which should upload into the login directory of
-	// the user. This is a configuration template where the `{{ .Version }}`
-	// variable is replaced with the VirtualBox version.
-	GuestAdditionsPath string `mapstructure:"guest_additions_path" required:"false"`
-	// The SHA256 checksum of the guest additions ISO that will be uploaded to
-	// the guest VM. By default the checksums will be downloaded from the
-	// VirtualBox website, so this only needs to be set if you want to be
-	// explicit about the checksum.
-	GuestAdditionsSHA256 string `mapstructure:"guest_additions_sha256" required:"false"`
-	// The URL to the guest additions ISO to upload. This can also be a file
-	// URL if the ISO is at a local path. By default, the VirtualBox builder
-	// will attempt to find the guest additions ISO on the local file system.
-	// If it is not available locally, the builder will download the proper
-	// guest additions ISO from the internet. This is a template engine, and you
-	// have access to the variable `{{ .Version }}`.
-	GuestAdditionsURL string `mapstructure:"guest_additions_url" required:"false"`
-	// The interface type to use to mount guest additions when
-	// guest_additions_mode is set to attach. Will default to the value set in
-	// iso_interface, if iso_interface is set. Will default to "ide", if
-	// iso_interface is not set. Options are "ide" and "sata".
-	GuestAdditionsInterface string `mapstructure:"guest_additions_interface" required:"false"`
 	// The guest OS type being installed. By default this is other, but you can
 	// get dramatic performance improvements by setting this to the proper
 	// value. To view all available values for this run VBoxManage list
@@ -167,6 +144,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.CDConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(
 		errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
@@ -182,14 +160,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
-	}
-
-	if b.config.GuestAdditionsMode == "" {
-		b.config.GuestAdditionsMode = "upload"
-	}
-
-	if b.config.GuestAdditionsPath == "" {
-		b.config.GuestAdditionsPath = "VBoxGuestAdditions.iso"
 	}
 
 	if b.config.HardDriveInterface == "" {
@@ -244,29 +214,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			errs, errors.New("iso_interface can only be ide or sata"))
 	}
 
-	validMode := false
-	validModes := []string{
-		vboxcommon.GuestAdditionsModeDisable,
-		vboxcommon.GuestAdditionsModeAttach,
-		vboxcommon.GuestAdditionsModeUpload,
-	}
-
-	for _, mode := range validModes {
-		if b.config.GuestAdditionsMode == mode {
-			validMode = true
-			break
-		}
-	}
-
-	if !validMode {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("guest_additions_mode is invalid. Must be one of: %v", validModes))
-	}
-
-	if b.config.GuestAdditionsSHA256 != "" {
-		b.config.GuestAdditionsSHA256 = strings.ToLower(b.config.GuestAdditionsSHA256)
-	}
-
 	// Warnings
 	if b.config.ShutdownCommand == "" {
 		warnings = append(warnings,
@@ -312,6 +259,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
+		&common.StepCreateCD{
+			Files: b.config.CDConfig.CDFiles,
+			Label: b.config.CDConfig.CDLabel,
+		},
 		new(vboxcommon.StepHTTPIPDiscover),
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
@@ -327,8 +278,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		new(vboxcommon.StepSuppressMessages),
 		new(stepCreateVM),
 		new(stepCreateDisk),
-		new(stepAttachISO),
-		&vboxcommon.StepAttachGuestAdditions{
+		&vboxcommon.StepAttachISOs{
+			AttachBootISO:           true,
+			ISOInterface:            b.config.ISOInterface,
 			GuestAdditionsMode:      b.config.GuestAdditionsMode,
 			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
 		},
@@ -386,8 +338,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			ACPIShutdown:    b.config.ACPIShutdown,
 		},
 		&vboxcommon.StepRemoveDevices{
-			Bundling:                b.config.VBoxBundleConfig,
-			GuestAdditionsInterface: b.config.GuestAdditionsInterface,
+			Bundling: b.config.VBoxBundleConfig,
 		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManagePost,

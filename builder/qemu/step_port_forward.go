@@ -13,12 +13,24 @@ import (
 // This step adds a NAT port forwarding definition so that SSH or WinRM is available
 // on the guest machine.
 type stepPortForward struct {
+	CommunicatorType string
+	NetBridge        string
+
 	l *net.Listener
 }
 
 func (s *stepPortForward) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.CommunicatorType == "none" {
+		ui.Message("No communicator is set; skipping port forwarding setup.")
+		return multistep.ActionContinue
+	}
+	if s.NetBridge != "" {
+		ui.Message("net_bridge is set; skipping port forwarding setup.")
+		return multistep.ActionContinue
+	}
 
 	commHostPort := config.CommConfig.Comm.Port()
 

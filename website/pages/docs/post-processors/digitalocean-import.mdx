@@ -11,8 +11,10 @@ sidebar_title: DigitalOcean Import
 
 Type: `digitalocean-import`
 
-The Packer DigitalOcean Import post-processor takes an image artifact from
-various builders and imports it to DigitalOcean.
+The Packer DigitalOcean Import post-processor is used to import images created by other Packer builders to DigitalOcean.
+
+~> Note: Users looking to create custom images, and reusable snapshots, directly on DigitalOcean can use
+the [DigitalOcean builder](/docs/builders/digitalocean) without this post-processor.
 
 ## How Does it Work?
 
@@ -90,6 +92,9 @@ Optional:
 
 Here is a basic example:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "digitalocean-import",
@@ -104,3 +109,23 @@ Here is a basic example:
   "image_tags": ["custom", "packer"]
 }
 ```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "digitalocean-import" {
+  api_token         = "{{user `token`}}"
+  spaces_key        = "{{user `key`}}"
+  spaces_secret     = "{{user `secret`}}"
+  spaces_region     = "nyc3"
+  space_name        = "import-bucket"
+  image_name        = "ubuntu-18.10-minimal-amd64"
+  image_description = "Packer import {{timestamp}}"
+  image_regions     = ["nyc3", "nyc2"]
+  image_tags        = ["custom", "packer"]
+}
+```
+
+</Tab>
+</Tabs>

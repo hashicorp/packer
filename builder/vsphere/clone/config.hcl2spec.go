@@ -21,6 +21,7 @@ type FlatConfig struct {
 	HTTPPortMin                     *int                                        `mapstructure:"http_port_min" cty:"http_port_min" hcl:"http_port_min"`
 	HTTPPortMax                     *int                                        `mapstructure:"http_port_max" cty:"http_port_max" hcl:"http_port_max"`
 	HTTPAddress                     *string                                     `mapstructure:"http_bind_address" cty:"http_bind_address" hcl:"http_bind_address"`
+	HTTPInterface                   *string                                     `mapstructure:"http_interface" undocumented:"true" cty:"http_interface" hcl:"http_interface"`
 	VCenterServer                   *string                                     `mapstructure:"vcenter_server" cty:"vcenter_server" hcl:"vcenter_server"`
 	Username                        *string                                     `mapstructure:"username" cty:"username" hcl:"username"`
 	Password                        *string                                     `mapstructure:"password" cty:"password" hcl:"password"`
@@ -30,6 +31,7 @@ type FlatConfig struct {
 	DiskSize                        *int64                                      `mapstructure:"disk_size" cty:"disk_size" hcl:"disk_size"`
 	LinkedClone                     *bool                                       `mapstructure:"linked_clone" cty:"linked_clone" hcl:"linked_clone"`
 	Network                         *string                                     `mapstructure:"network" cty:"network" hcl:"network"`
+	MacAddress                      *string                                     `mapstructure:"mac_address" cty:"mac_address" hcl:"mac_address"`
 	Notes                           *string                                     `mapstructure:"notes" cty:"notes" hcl:"notes"`
 	VAppConfig                      *FlatvAppConfig                             `mapstructure:"vapp" cty:"vapp" hcl:"vapp"`
 	VMName                          *string                                     `mapstructure:"vm_name" cty:"vm_name" hcl:"vm_name"`
@@ -144,6 +146,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"http_port_min":                  &hcldec.AttrSpec{Name: "http_port_min", Type: cty.Number, Required: false},
 		"http_port_max":                  &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
 		"http_bind_address":              &hcldec.AttrSpec{Name: "http_bind_address", Type: cty.String, Required: false},
+		"http_interface":                 &hcldec.AttrSpec{Name: "http_interface", Type: cty.String, Required: false},
 		"vcenter_server":                 &hcldec.AttrSpec{Name: "vcenter_server", Type: cty.String, Required: false},
 		"username":                       &hcldec.AttrSpec{Name: "username", Type: cty.String, Required: false},
 		"password":                       &hcldec.AttrSpec{Name: "password", Type: cty.String, Required: false},
@@ -153,6 +156,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"disk_size":                      &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
 		"linked_clone":                   &hcldec.AttrSpec{Name: "linked_clone", Type: cty.Bool, Required: false},
 		"network":                        &hcldec.AttrSpec{Name: "network", Type: cty.String, Required: false},
+		"mac_address":                    &hcldec.AttrSpec{Name: "mac_address", Type: cty.String, Required: false},
 		"notes":                          &hcldec.AttrSpec{Name: "notes", Type: cty.String, Required: false},
 		"vapp":                           &hcldec.BlockSpec{TypeName: "vapp", Nested: hcldec.ObjectSpec((*FlatvAppConfig)(nil).HCL2Spec())},
 		"vm_name":                        &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},

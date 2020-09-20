@@ -13,7 +13,7 @@ import (
 )
 
 type HardwareConfig struct {
-	// Number of CPU sockets.
+	// Number of CPU cores.
 	CPUs int32 `mapstructure:"CPUs"`
 	// Number of CPU cores per socket.
 	CpuCores int32 `mapstructure:"cpu_cores"`
@@ -65,7 +65,7 @@ type StepConfigureHardware struct {
 
 func (s *StepConfigureHardware) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+	vm := state.Get("vm").(driver.VirtualMachine)
 
 	if *s.Config != (HardwareConfig{}) {
 		ui.Say("Customizing hardware...")

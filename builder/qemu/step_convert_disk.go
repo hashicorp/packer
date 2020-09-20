@@ -17,37 +17,32 @@ import (
 
 // This step converts the virtual disk that was used as the
 // hard drive for the virtual machine.
-type stepConvertDisk struct{}
+type stepConvertDisk struct {
+	DiskCompression bool
+	Format          string
+	OutputDir       string
+	SkipCompaction  bool
+	VMName          string
+
+	QemuImgArgs QemuImgArgs
+}
 
 func (s *stepConvertDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	diskName := config.VMName
 	ui := state.Get("ui").(packer.Ui)
 
-	if config.SkipCompaction && !config.DiskCompression {
+	diskName := s.VMName
+
+	if s.SkipCompaction && !s.DiskCompression {
 		return multistep.ActionContinue
 	}
 
 	name := diskName + ".convert"
 
-	sourcePath := filepath.Join(config.OutputDir, diskName)
-	targetPath := filepath.Join(config.OutputDir, name)
+	sourcePath := filepath.Join(s.OutputDir, diskName)
+	targetPath := filepath.Join(s.OutputDir, name)
 
-	command := []string{
-		"convert",
-	}
-
-	if config.DiskCompression {
-		command = append(command, "-c")
-	}
-
-	command = append(command, []string{
-		"-O", config.Format,
-		sourcePath,
-		targetPath,
-	}...,
-	)
+	command := s.buildConvertCommand(sourcePath, targetPath)
 
 	ui.Say("Converting hard drive...")
 	// Retry the conversion a few times in case it takes the qemu process a
@@ -88,6 +83,22 @@ func (s *stepConvertDisk) Run(ctx context.Context, state multistep.StateBag) mul
 	}
 
 	return multistep.ActionContinue
+}
+
+func (s *stepConvertDisk) buildConvertCommand(sourcePath, targetPath string) []string {
+	command := []string{"convert"}
+
+	if s.DiskCompression {
+		command = append(command, "-c")
+	}
+
+	// Add user-provided convert args
+	command = append(command, s.QemuImgArgs.Convert...)
+
+	// Add format, and paths.
+	command = append(command, "-O", s.Format, sourcePath, targetPath)
+
+	return command
 }
 
 func (s *stepConvertDisk) Cleanup(state multistep.StateBag) {}

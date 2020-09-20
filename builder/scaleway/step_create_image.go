@@ -7,13 +7,14 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/scaleway/scaleway-cli/pkg/api"
+	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
+	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
 type stepImage struct{}
 
 func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*api.ScalewayAPI)
+	instanceAPI := instance.NewAPI(state.Get("client").(*scw.Client))
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 	snapshotID := state.Get("snapshot_id").(string)
@@ -21,7 +22,9 @@ func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep
 
 	ui.Say(fmt.Sprintf("Creating image: %v", c.ImageName))
 
-	image, err := client.GetImage(c.Image)
+	imageResp, err := instanceAPI.GetImage(&instance.GetImageRequest{
+		ImageID: c.Image,
+	})
 	if err != nil {
 		err := fmt.Errorf("Error getting initial image info: %s", err)
 		state.Put("error", err)
@@ -29,11 +32,16 @@ func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep
 		return multistep.ActionHalt
 	}
 
-	if image.DefaultBootscript != nil {
-		bootscriptID = image.DefaultBootscript.Identifier
+	if imageResp.Image.DefaultBootscript != nil {
+		bootscriptID = imageResp.Image.DefaultBootscript.ID
 	}
 
-	imageID, err := client.PostImage(snapshotID, c.ImageName, bootscriptID, image.Arch)
+	createImageResp, err := instanceAPI.CreateImage(&instance.CreateImageRequest{
+		Arch:              imageResp.Image.Arch,
+		DefaultBootscript: bootscriptID,
+		Name:              c.ImageName,
+		RootVolume:        snapshotID,
+	})
 	if err != nil {
 		err := fmt.Errorf("Error creating image: %s", err)
 		state.Put("error", err)
@@ -41,10 +49,11 @@ func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep
 		return multistep.ActionHalt
 	}
 
-	log.Printf("Image ID: %s", imageID)
-	state.Put("image_id", imageID)
+	log.Printf("Image ID: %s", createImageResp.Image.ID)
+	state.Put("image_id", createImageResp.Image.ID)
 	state.Put("image_name", c.ImageName)
-	state.Put("region", c.Region)
+	state.Put("region", c.Zone) // Deprecated
+	state.Put("zone", c.Zone)
 
 	return multistep.ActionContinue
 }

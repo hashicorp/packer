@@ -54,6 +54,8 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 	instanceDetails := core.LaunchInstanceDetails{
 		AvailabilityDomain: &d.cfg.AvailabilityDomain,
 		CompartmentId:      &d.cfg.CompartmentID,
+		DefinedTags:        d.cfg.InstanceDefinedTags,
+		FreeformTags:       d.cfg.InstanceTags,
 		ImageId:            &d.cfg.BaseImageID,
 		Shape:              &d.cfg.Shape,
 		SubnetId:           &d.cfg.SubnetID,
@@ -64,6 +66,21 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 	if d.cfg.InstanceName != "" {
 		instanceDetails.DisplayName = &d.cfg.InstanceName
 	}
+
+	// Pass VNIC details, if specified, to the instance
+	CreateVnicDetails := core.CreateVnicDetails{
+		AssignPublicIp:      d.cfg.CreateVnicDetails.AssignPublicIp,
+		DisplayName:         d.cfg.CreateVnicDetails.DisplayName,
+		HostnameLabel:       d.cfg.CreateVnicDetails.HostnameLabel,
+		NsgIds:              d.cfg.CreateVnicDetails.NsgIds,
+		PrivateIp:           d.cfg.CreateVnicDetails.PrivateIp,
+		SkipSourceDestCheck: d.cfg.CreateVnicDetails.SkipSourceDestCheck,
+		SubnetId:            d.cfg.CreateVnicDetails.SubnetId,
+		DefinedTags:         d.cfg.CreateVnicDetails.DefinedTags,
+		FreeformTags:        d.cfg.CreateVnicDetails.FreeformTags,
+	}
+
+	instanceDetails.CreateVnicDetails = &CreateVnicDetails
 
 	instance, err := d.computeClient.LaunchInstance(context.TODO(), core.LaunchInstanceRequest{LaunchInstanceDetails: instanceDetails})
 

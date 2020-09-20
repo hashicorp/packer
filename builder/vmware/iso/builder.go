@@ -35,6 +35,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
+	// Before we get deep into the build, make sure ovftool is present and
+	// credentials are valid, if we're going to use ovftool.
+	if err := driver.VerifyOvfTool(b.config.SkipExport, b.config.SkipValidateCredentials); err != nil {
+		return nil, err
+	}
 
 	// Setup the state bag
 	state := new(multistep.BasicStateBag)
@@ -71,9 +76,19 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
+		&common.StepCreateCD{
+			Files: b.config.CDConfig.CDFiles,
+			Label: b.config.CDConfig.CDLabel,
+		},
 		&vmwcommon.StepRemoteUpload{
 			Key:       "floppy_path",
 			Message:   "Uploading Floppy to remote machine...",
+			DoCleanup: true,
+			Checksum:  "none",
+		},
+		&vmwcommon.StepRemoteUpload{
+			Key:       "cd_path",
+			Message:   "Uploading CD to remote machine...",
 			DoCleanup: true,
 			Checksum:  "none",
 		},
@@ -83,12 +98,22 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DoCleanup: b.config.DriverConfig.CleanUpRemoteCache,
 			Checksum:  b.config.ISOChecksum,
 		},
-		&stepCreateDisk{},
+		&vmwcommon.StepCreateDisks{
+			OutputDir:          &b.config.OutputDir,
+			CreateMainDisk:     true,
+			DiskName:           b.config.DiskName,
+			MainDiskSize:       b.config.DiskSize,
+			AdditionalDiskSize: b.config.AdditionalDiskSize,
+			DiskAdapterType:    b.config.DiskAdapterType,
+			DiskTypeId:         b.config.DiskTypeId,
+		},
 		&stepCreateVMX{},
 		&vmwcommon.StepConfigureVMX{
-			CustomData:  b.config.VMXData,
-			VMName:      b.config.VMName,
-			DisplayName: b.config.VMXDisplayName,
+			CustomData:       b.config.VMXData,
+			VMName:           b.config.VMName,
+			DisplayName:      b.config.VMXDisplayName,
+			DiskAdapterType:  b.config.DiskAdapterType,
+			CDROMAdapterType: b.config.CdromAdapterType,
 		},
 		&vmwcommon.StepSuppressMessages{},
 		&vmwcommon.StepHTTPIPDiscover{},
@@ -99,7 +124,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			HTTPAddress: b.config.HTTPAddress,
 		},
 		&vmwcommon.StepConfigureVNC{
-			Enabled:            !b.config.DisableVNC,
+			Enabled:            !b.config.DisableVNC && !b.config.VNCOverWebsocket,
 			VNCBindAddress:     b.config.VNCBindAddress,
 			VNCPortMin:         b.config.VNCPortMin,
 			VNCPortMax:         b.config.VNCPortMax,
@@ -114,13 +139,16 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DurationBeforeStop: 5 * time.Second,
 			Headless:           b.config.Headless,
 		},
-		&vmwcommon.StepTypeBootCommand{
-			BootWait:    b.config.BootWait,
-			VNCEnabled:  !b.config.DisableVNC,
-			BootCommand: b.config.FlatBootCommand(),
-			VMName:      b.config.VMName,
-			Ctx:         b.config.ctx,
-			KeyInterval: b.config.VNCConfig.BootKeyInterval,
+		&vmwcommon.StepVNCConnect{
+			VNCEnabled:         !b.config.DisableVNC,
+			VNCOverWebsocket:   b.config.VNCOverWebsocket,
+			InsecureConnection: b.config.InsecureConnection,
+			DriverConfig:       &b.config.DriverConfig,
+		},
+		&vmwcommon.StepVNCBootCommand{
+			Config: b.config.VNCConfig,
+			VMName: b.config.VMName,
+			Ctx:    b.config.ctx,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
@@ -163,6 +191,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SkipExport:     b.config.SkipExport,
 			VMName:         b.config.VMName,
 			OVFToolOptions: b.config.OVFToolOptions,
+			OutputDir:      &b.config.OutputConfig.OutputDir,
 		},
 	}
 
