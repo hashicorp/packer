@@ -208,3 +208,52 @@ func TestPacketQueueSupportForNetworkAdapters(t *testing.T) {
 		}
 	}
 }
+
+func TestHardDiskControllerIOThreadSupport(t *testing.T) {
+	drivertests := []struct {
+		expectedToFail bool
+		controller     string
+		disk_type      string
+	}{
+		// io thread is only supported by virtio-scsi-single controller
+		// and only for virtio and scsi disks
+		{expectedToFail: false, controller: "virtio-scsi-single", disk_type: "scsi"},
+		{expectedToFail: false, controller: "virtio-scsi-single", disk_type: "virtio"},
+		{expectedToFail: true, controller: "virtio-scsi-single", disk_type: "sata"},
+		{expectedToFail: true, controller: "lsi", disk_type: "scsi"},
+		{expectedToFail: true, controller: "lsi53c810", disk_type: "virtio"},
+	}
+
+	for _, tt := range drivertests {
+		nic := make(map[string]interface{})
+		nic["bridge"] = "vmbr0"
+
+		nics := make([]map[string]interface{}, 0)
+		nics = append(nics, nic)
+
+		disk := make(map[string]interface{})
+		disk["type"] = tt.disk_type
+		disk["io_thread"] = true
+		disk["storage_pool"] = "local-lvm"
+		disk["storage_pool_type"] = "lvm"
+
+		disks := make([]map[string]interface{}, 0)
+		disks = append(disks, disk)
+
+		cfg := mandatoryConfig(t)
+		cfg["network_adapters"] = nics
+		cfg["disks"] = disks
+		cfg["scsi_controller"] = tt.controller
+
+		var c Config
+		_, err := c.Prepare(cfg)
+
+		if tt.expectedToFail == true && err == nil {
+			t.Error("expected config preparation to fail, but no error occured")
+		}
+
+		if tt.expectedToFail == false && err != nil {
+			t.Errorf("expected config preparation to succeed, but %s", err.Error())
+		}
+	}
+}
