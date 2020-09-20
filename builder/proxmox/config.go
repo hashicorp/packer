@@ -195,7 +195,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 			if c.SCSIController != "virtio-scsi-single" {
 				errs = packer.MultiErrorAppend(errs, fmt.Errorf("io thread option requires virtio-scsi-single controller"))
 			} else {
-				// and only for virtio and scsi disks
+				// ... and only for virtio and scsi disks
 				if !(c.Disks[idx].Type == "scsi" || c.Disks[idx].Type == "virtio") {
 					errs = packer.MultiErrorAppend(errs, fmt.Errorf("io thread option requires scsi or a virtio disk"))
 				}
