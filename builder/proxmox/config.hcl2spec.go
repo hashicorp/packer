@@ -230,6 +230,7 @@ type FlatdiskConfig struct {
 	Size            *string `mapstructure:"disk_size" cty:"disk_size" hcl:"disk_size"`
 	CacheMode       *string `mapstructure:"cache_mode" cty:"cache_mode" hcl:"cache_mode"`
 	DiskFormat      *string `mapstructure:"format" cty:"format" hcl:"format"`
+	IOThread        *bool   `mapstructure:"io_thread" cty:"io_thread" hcl:"io_thread"`
 }
 
 // FlatMapstructure returns a new FlatdiskConfig.
@@ -250,6 +251,7 @@ func (*FlatdiskConfig) HCL2Spec() map[string]hcldec.Spec {
 		"disk_size":         &hcldec.AttrSpec{Name: "disk_size", Type: cty.String, Required: false},
 		"cache_mode":        &hcldec.AttrSpec{Name: "cache_mode", Type: cty.String, Required: false},
 		"format":            &hcldec.AttrSpec{Name: "format", Type: cty.String, Required: false},
+		"io_thread":         &hcldec.AttrSpec{Name: "io_thread", Type: cty.Bool, Required: false},
 	}
 	return s
 }
