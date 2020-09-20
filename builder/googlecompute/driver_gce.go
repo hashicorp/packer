@@ -70,19 +70,19 @@ func (ots OauthTokenSource) Token() (*oauth2.Token, error) {
 
 }
 
-func NewClientGCE(account *ServiceAccount, vaultOauth string, impersonatedsa string) (*option.ClientOption, error) {
+func NewClientGCE(account *ServiceAccount, vaultOauth string, impersonatedsa string) (option.ClientOption, error) {
 	var err error
 
-	var opts *option.ClientOption
+	var opts option.ClientOption
 
 	if vaultOauth != "" {
 		// Auth with Vault Oauth
 		log.Printf("Using Vault to generate Oauth token.")
 		ts := OauthTokenSource{vaultOauth}
-		*opts = option.WithTokenSource(ts)
+		opts = option.WithTokenSource(ts)
 
 	} else if impersonatedsa != "" {
-		*opts = option.ImpersonateCredentials(impersonatedsa)
+		opts = option.ImpersonateCredentials(impersonatedsa)
 	} else if account.jwt != nil && len(account.jwt.PrivateKey) > 0 {
 		// Auth with AccountFile if provided
 		log.Printf("[INFO] Requesting Google token via account_file...")
@@ -90,14 +90,14 @@ func NewClientGCE(account *ServiceAccount, vaultOauth string, impersonatedsa str
 		log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
 		log.Printf("[INFO]   -- Private Key Length: %d", len(account.jwt.PrivateKey))
 
-		*opts = option.WithCredentialsJSON(account.jsonKey)
+		opts = option.WithCredentialsJSON(account.jsonKey)
 	} else {
 		log.Printf("[INFO] Requesting Google token via GCE API Default Client Token Source...")
 		ts, err := google.DefaultTokenSource(context.TODO(), "https://www.googleapis.com/auth/cloud-platform")
 		if err != nil {
 			return nil, err
 		}
-		*opts = option.WithTokenSource(ts)
+		opts = option.WithTokenSource(ts)
 		// The DefaultClient uses the DefaultTokenSource of the google lib.
 		// The DefaultTokenSource uses the "Application Default Credentials"
 		// It looks for credentials in the following places, preferring the first location found:
@@ -126,13 +126,13 @@ func NewDriverGCE(ui packer.Ui, p string, account *ServiceAccount, impersonateds
 	}
 
 	log.Printf("[INFO] Instantiating GCE client...")
-	service, err := compute.NewService(context.TODO(), *opts)
+	service, err := compute.NewService(context.TODO(), opts)
 	if err != nil {
 		return nil, err
 	}
 
 	log.Printf("[INFO] Instantiating OS Login client...")
-	osLoginService, err := oslogin.NewService(context.TODO(), *opts)
+	osLoginService, err := oslogin.NewService(context.TODO(), opts)
 	if err != nil {
 		return nil, err
 	}

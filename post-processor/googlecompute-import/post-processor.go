@@ -138,7 +138,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 	p.config.ctx.Data = generatedData
 	var err error
-	var opts *option.ClientOption
+	var opts option.ClientOption
 	opts, err = googlecompute.NewClientGCE(p.config.account, p.config.VaultGCPOauthEngine, p.config.ImpersonatedServiceAccount)
 	if err != nil {
 		return nil, false, false, err
@@ -179,8 +179,8 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	return gceImageArtifact, false, false, nil
 }
 
-func UploadToBucket(opts *option.ClientOption, ui packer.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
-	service, err := storage.NewService(context.TODO(), *opts)
+func UploadToBucket(opts option.ClientOption, ui packer.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
+	service, err := storage.NewService(context.TODO(), opts)
 	if err != nil {
 		return "", err
 	}
@@ -215,9 +215,8 @@ func UploadToBucket(opts *option.ClientOption, ui packer.Ui, artifact packer.Art
 	return storageObject.SelfLink, nil
 }
 
-
-func CreateGceImage(opts *option.ClientOption, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string) (packer.Artifact, error) {
-	service, err := compute.NewService(context.TODO(), *opts)
+func CreateGceImage(opts option.ClientOption, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string) (packer.Artifact, error) {
+	service, err := compute.NewService(context.TODO(), opts)
 
 	if err != nil {
 		return nil, err
@@ -271,9 +270,8 @@ func CreateGceImage(opts *option.ClientOption, ui packer.Ui, project string, raw
 	return &Artifact{paths: []string{op.TargetLink}}, nil
 }
 
-
-func DeleteFromBucket(opts *option.ClientOption, ui packer.Ui, bucket string, gcsObjectName string) error {
-	service, err := storage.NewService(context.TODO(), *opts)
+func DeleteFromBucket(opts option.ClientOption, ui packer.Ui, bucket string, gcsObjectName string) error {
+	service, err := storage.NewService(context.TODO(), opts)
 
 	if err != nil {
 		return err
