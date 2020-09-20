@@ -3,6 +3,8 @@
 - `account_file` (string) - The JSON file containing your account credentials.
   If specified, the account file will take precedence over any `googlecompute` builder authentication method.
 
+- `impersonated_service_account` (string) - This allows service account impersonation as per the docs.
+
 - `disk_size` (int64) - The size of the export instances disk.
   The disk is unused for the export but a larger size will increase `pd-ssd` read speed.
   This defaults to `200`, which is 200GB.

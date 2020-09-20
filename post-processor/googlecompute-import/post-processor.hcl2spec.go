@@ -9,25 +9,26 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName      *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
-	PackerBuilderType    *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
-	PackerDebug          *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
-	PackerForce          *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
-	PackerOnError        *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
-	PackerUserVars       map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
-	PackerSensitiveVars  []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	AccountFile          *string           `mapstructure:"account_file" required:"true" cty:"account_file" hcl:"account_file"`
-	ProjectId            *string           `mapstructure:"project_id" required:"true" cty:"project_id" hcl:"project_id"`
-	IAP                  *bool             `mapstructure-to-hcl:",skip" cty:"iap" hcl:"iap"`
-	Bucket               *string           `mapstructure:"bucket" required:"true" cty:"bucket" hcl:"bucket"`
-	GCSObjectName        *string           `mapstructure:"gcs_object_name" cty:"gcs_object_name" hcl:"gcs_object_name"`
-	ImageDescription     *string           `mapstructure:"image_description" cty:"image_description" hcl:"image_description"`
-	ImageFamily          *string           `mapstructure:"image_family" cty:"image_family" hcl:"image_family"`
-	ImageGuestOsFeatures []string          `mapstructure:"image_guest_os_features" cty:"image_guest_os_features" hcl:"image_guest_os_features"`
-	ImageLabels          map[string]string `mapstructure:"image_labels" cty:"image_labels" hcl:"image_labels"`
-	ImageName            *string           `mapstructure:"image_name" required:"true" cty:"image_name" hcl:"image_name"`
-	SkipClean            *bool             `mapstructure:"skip_clean" cty:"skip_clean" hcl:"skip_clean"`
-	VaultGCPOauthEngine  *string           `mapstructure:"vault_gcp_oauth_engine" cty:"vault_gcp_oauth_engine" hcl:"vault_gcp_oauth_engine"`
+	PackerBuildName            *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType          *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerDebug                *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce                *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError              *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars             map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars        []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	AccountFile                *string           `mapstructure:"account_file" required:"true" cty:"account_file" hcl:"account_file"`
+	ImpersonatedServiceAccount *string           `mapstructure:"impersonated_service_account" required:"false" cty:"impersonated_service_account" hcl:"impersonated_service_account"`
+	ProjectId                  *string           `mapstructure:"project_id" required:"true" cty:"project_id" hcl:"project_id"`
+	IAP                        *bool             `mapstructure-to-hcl:",skip" cty:"iap" hcl:"iap"`
+	Bucket                     *string           `mapstructure:"bucket" required:"true" cty:"bucket" hcl:"bucket"`
+	GCSObjectName              *string           `mapstructure:"gcs_object_name" cty:"gcs_object_name" hcl:"gcs_object_name"`
+	ImageDescription           *string           `mapstructure:"image_description" cty:"image_description" hcl:"image_description"`
+	ImageFamily                *string           `mapstructure:"image_family" cty:"image_family" hcl:"image_family"`
+	ImageGuestOsFeatures       []string          `mapstructure:"image_guest_os_features" cty:"image_guest_os_features" hcl:"image_guest_os_features"`
+	ImageLabels                map[string]string `mapstructure:"image_labels" cty:"image_labels" hcl:"image_labels"`
+	ImageName                  *string           `mapstructure:"image_name" required:"true" cty:"image_name" hcl:"image_name"`
+	SkipClean                  *bool             `mapstructure:"skip_clean" cty:"skip_clean" hcl:"skip_clean"`
+	VaultGCPOauthEngine        *string           `mapstructure:"vault_gcp_oauth_engine" cty:"vault_gcp_oauth_engine" hcl:"vault_gcp_oauth_engine"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -42,25 +43,26 @@ func (*Config) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec }
 // The decoded values from this spec will then be applied to a FlatConfig.
 func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"packer_build_name":          &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
-		"packer_builder_type":        &hcldec.AttrSpec{Name: "packer_builder_type", Type: cty.String, Required: false},
-		"packer_debug":               &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
-		"packer_force":               &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
-		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
-		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
-		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
-		"account_file":               &hcldec.AttrSpec{Name: "account_file", Type: cty.String, Required: false},
-		"project_id":                 &hcldec.AttrSpec{Name: "project_id", Type: cty.String, Required: false},
-		"iap":                        &hcldec.AttrSpec{Name: "iap", Type: cty.Bool, Required: false},
-		"bucket":                     &hcldec.AttrSpec{Name: "bucket", Type: cty.String, Required: false},
-		"gcs_object_name":            &hcldec.AttrSpec{Name: "gcs_object_name", Type: cty.String, Required: false},
-		"image_description":          &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
-		"image_family":               &hcldec.AttrSpec{Name: "image_family", Type: cty.String, Required: false},
-		"image_guest_os_features":    &hcldec.AttrSpec{Name: "image_guest_os_features", Type: cty.List(cty.String), Required: false},
-		"image_labels":               &hcldec.AttrSpec{Name: "image_labels", Type: cty.Map(cty.String), Required: false},
-		"image_name":                 &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
-		"skip_clean":                 &hcldec.AttrSpec{Name: "skip_clean", Type: cty.Bool, Required: false},
-		"vault_gcp_oauth_engine":     &hcldec.AttrSpec{Name: "vault_gcp_oauth_engine", Type: cty.String, Required: false},
+		"packer_build_name":            &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
+		"packer_builder_type":          &hcldec.AttrSpec{Name: "packer_builder_type", Type: cty.String, Required: false},
+		"packer_debug":                 &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
+		"packer_force":                 &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
+		"packer_on_error":              &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
+		"packer_user_variables":        &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
+		"packer_sensitive_variables":   &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
+		"account_file":                 &hcldec.AttrSpec{Name: "account_file", Type: cty.String, Required: false},
+		"impersonated_service_account": &hcldec.AttrSpec{Name: "impersonated_service_account", Type: cty.String, Required: false},
+		"project_id":                   &hcldec.AttrSpec{Name: "project_id", Type: cty.String, Required: false},
+		"iap":                          &hcldec.AttrSpec{Name: "iap", Type: cty.Bool, Required: false},
+		"bucket":                       &hcldec.AttrSpec{Name: "bucket", Type: cty.String, Required: false},
+		"gcs_object_name":              &hcldec.AttrSpec{Name: "gcs_object_name", Type: cty.String, Required: false},
+		"image_description":            &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
+		"image_family":                 &hcldec.AttrSpec{Name: "image_family", Type: cty.String, Required: false},
+		"image_guest_os_features":      &hcldec.AttrSpec{Name: "image_guest_os_features", Type: cty.List(cty.String), Required: false},
+		"image_labels":                 &hcldec.AttrSpec{Name: "image_labels", Type: cty.Map(cty.String), Required: false},
+		"image_name":                   &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
+		"skip_clean":                   &hcldec.AttrSpec{Name: "skip_clean", Type: cty.Bool, Required: false},
+		"vault_gcp_oauth_engine":       &hcldec.AttrSpec{Name: "vault_gcp_oauth_engine", Type: cty.String, Required: false},
 	}
 	return s
 }

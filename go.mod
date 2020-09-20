@@ -1,6 +1,7 @@
 module github.com/hashicorp/packer
 
 require (
+	cloud.google.com/go v0.66.0 // indirect
 	github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1
 	github.com/Azure/azure-sdk-for-go v40.5.0+incompatible
 	github.com/Azure/go-autorest/autorest v0.10.0
@@ -96,6 +97,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-testing-interface v1.0.3 // indirect
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
+	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0
 	github.com/mitchellh/mapstructure v1.2.3
 	github.com/mitchellh/panicwrap v0.0.0-20170106182340-fce601fe5557
@@ -134,14 +136,15 @@ require (
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/mobile v0.0.0-20191130191448-5c0e7e404af8
-	golang.org/x/net v0.0.0-20200822124328-c89045814202
+	golang.org/x/net v0.0.0-20200904194848-62affa334b73
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
-	golang.org/x/sys v0.0.0-20200905004654-be1d3432aa8f
+	golang.org/x/sys v0.0.0-20200918174421-af09f7315aff
 	golang.org/x/text v0.3.3 // indirect
-	golang.org/x/tools v0.0.0-20200918201133-e94ab7288189
+	golang.org/x/tools v0.0.0-20200918232735-d647fc253266
 	google.golang.org/api v0.32.0
-	google.golang.org/grpc v1.31.1
+	google.golang.org/genproto v0.0.0-20200918140846-d0d605568037 // indirect
+	google.golang.org/grpc v1.32.0
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect

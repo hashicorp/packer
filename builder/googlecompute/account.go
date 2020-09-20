@@ -38,6 +38,7 @@ func ProcessAccountFile(text string) (*ServiceAccount, error) {
 			return nil, fmt.Errorf("Error parsing account_file: %s", err)
 		}
 	}
+	data = []byte(text)
 	return &ServiceAccount{
 		jsonKey: data,
 		jwt:     conf,
