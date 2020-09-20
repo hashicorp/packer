@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"golang.org/x/oauth2/jwt"
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -35,6 +34,8 @@ type Config struct {
 	// run Packer on a GCE instance with a service account. Instructions for
 	// creating the file or using service accounts are above.
 	AccountFile string `mapstructure:"account_file" required:"false"`
+	// This allows service account impersonation as per the docs.
+	ImpersonatedServiceAccount string `mapstructure:"impersonated_service_account" required:"false"`
 	// The project ID that will be used to launch instances and store images.
 	ProjectId string `mapstructure:"project_id" required:"true"`
 	// Full or partial URL of the guest accelerator type. GPU accelerators can
@@ -266,7 +267,7 @@ type Config struct {
 	UseOSLogin bool `mapstructure:"use_os_login" required:"false"`
 	// Can be set instead of account_file. If set, this builder will use
 	// HashiCorp Vault to generate an Oauth token for authenticating against
-	// Google's cloud. The value should be the path of the token generator
+	// Google Cloud. The value should be the path of the token generator
 	// within vault.
 	// For information on how to configure your Vault + GCP engine to produce
 	// Oauth tokens, see https://www.vaultproject.io/docs/auth/gcp
@@ -280,7 +281,7 @@ type Config struct {
 	// Example: "us-central1-a"
 	Zone string `mapstructure:"zone" required:"true"`
 
-	account            *jwt.Config
+	account            *ServiceAccount
 	imageAlreadyExists bool
 	ctx                interpolate.Context
 }
@@ -481,9 +482,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Authenticating via an account file
 	if c.AccountFile != "" {
-		if c.VaultGCPOauthEngine != "" {
+		if c.VaultGCPOauthEngine != "" && c.ImpersonatedServiceAccount != "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You cannot "+
-				"specify both account_file and vault_gcp_oauth_engine."))
+				"specify impersonated_service_account, account_file and vault_gcp_oauth_engine at the same time"))
 		}
 		cfg, err := ProcessAccountFile(c.AccountFile)
 		if err != nil {

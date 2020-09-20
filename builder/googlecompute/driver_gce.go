@@ -10,11 +10,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"strings"
 	"time"
 
 	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/option"
 	oslogin "google.golang.org/api/oslogin/v1"
 
 	"github.com/hashicorp/packer/common/retry"
@@ -24,7 +24,6 @@ import (
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-	"golang.org/x/oauth2/jwt"
 )
 
 // driverGCE is a Driver implementation that actually talks to GCE.
@@ -71,31 +70,34 @@ func (ots OauthTokenSource) Token() (*oauth2.Token, error) {
 
 }
 
-func NewClientGCE(conf *jwt.Config, vaultOauth string) (*http.Client, error) {
+func NewClientGCE(account *ServiceAccount, vaultOauth string, impersonatedsa string) (*option.ClientOption, error) {
 	var err error
 
-	var client *http.Client
+	var opts *option.ClientOption
 
 	if vaultOauth != "" {
 		// Auth with Vault Oauth
 		log.Printf("Using Vault to generate Oauth token.")
 		ts := OauthTokenSource{vaultOauth}
-		return oauth2.NewClient(context.TODO(), ts), nil
+		*opts = option.WithTokenSource(ts)
 
-	} else if conf != nil && len(conf.PrivateKey) > 0 {
+	} else if impersonatedsa != "" {
+		*opts = option.ImpersonateCredentials(impersonatedsa)
+	} else if account.jwt != nil && len(account.jwt.PrivateKey) > 0 {
 		// Auth with AccountFile if provided
 		log.Printf("[INFO] Requesting Google token via account_file...")
-		log.Printf("[INFO]   -- Email: %s", conf.Email)
+		log.Printf("[INFO]   -- Email: %s", account.jwt.Email)
 		log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
-		log.Printf("[INFO]   -- Private Key Length: %d", len(conf.PrivateKey))
+		log.Printf("[INFO]   -- Private Key Length: %d", len(account.jwt.PrivateKey))
 
-		// Initiate an http.Client. The following GET request will be
-		// authorized and authenticated on the behalf of
-		// your service account.
-		client = conf.Client(context.TODO())
+		*opts = option.WithCredentialsJSON(account.jsonKey)
 	} else {
 		log.Printf("[INFO] Requesting Google token via GCE API Default Client Token Source...")
-		client, err = google.DefaultClient(context.TODO(), DriverScopes...)
+		ts, err := google.DefaultTokenSource(context.TODO(), "https://www.googleapis.com/auth/cloud-platform")
+		if err != nil {
+			return nil, err
+		}
+		*opts = option.WithTokenSource(ts)
 		// The DefaultClient uses the DefaultTokenSource of the google lib.
 		// The DefaultTokenSource uses the "Application Default Credentials"
 		// It looks for credentials in the following places, preferring the first location found:
@@ -114,22 +116,23 @@ func NewClientGCE(conf *jwt.Config, vaultOauth string) (*http.Client, error) {
 		return nil, err
 	}
 
-	return client, nil
+	return opts, nil
 }
 
-func NewDriverGCE(ui packer.Ui, p string, conf *jwt.Config, vaultOauth string) (Driver, error) {
-	client, err := NewClientGCE(conf, vaultOauth)
+func NewDriverGCE(ui packer.Ui, p string, account *ServiceAccount, impersonatedsa string, vaultOauth string) (Driver, error) {
+	opts, err := NewClientGCE(account, vaultOauth, impersonatedsa)
 	if err != nil {
 		return nil, err
 	}
 
 	log.Printf("[INFO] Instantiating GCE client...")
-	service, err := compute.New(client)
+	service, err := compute.NewService(context.TODO(), *opts)
 	if err != nil {
 		return nil, err
 	}
 
-	osLoginService, err := oslogin.New(client)
+	log.Printf("[INFO] Instantiating OS Login client...")
+	osLoginService, err := oslogin.NewService(context.TODO(), *opts)
 	if err != nil {
 		return nil, err
 	}

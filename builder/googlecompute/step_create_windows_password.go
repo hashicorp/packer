@@ -56,7 +56,7 @@ func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.Sta
 
 	email := ""
 	if c.account != nil {
-		email = c.account.Email
+		email = c.account.jwt.Email
 	}
 
 	data := WindowsPasswordConfig{

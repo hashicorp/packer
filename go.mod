@@ -45,7 +45,7 @@ require (
 	github.com/gofrs/flock v0.7.3
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/golang/protobuf v1.4.2 // indirect
-	github.com/google/go-cmp v0.4.0
+	github.com/google/go-cmp v0.5.2
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
 	github.com/google/uuid v1.1.1
@@ -135,17 +135,16 @@ require (
 	github.com/yandex-cloud/go-sdk v0.0.0-20200610100221-ae86895efb97
 	github.com/zclconf/go-cty v1.4.0
 	github.com/zclconf/go-cty-yaml v1.0.1
-	golang.org/x/crypto v0.0.0-20200422194213-44a606286825
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/mobile v0.0.0-20191130191448-5c0e7e404af8
-	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
-	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1
+	golang.org/x/net v0.0.0-20200822124328-c89045814202
+	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
+	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
+	golang.org/x/sys v0.0.0-20200905004654-be1d3432aa8f
 	golang.org/x/text v0.3.3 // indirect
-	golang.org/x/tools v0.0.0-20200224181240-023911ca70b2
-	google.golang.org/api v0.21.0
-	google.golang.org/genproto v0.0.0-20200617032506-f1bdc9086088 // indirect
-	google.golang.org/grpc v1.29.1
+	golang.org/x/tools v0.0.0-20200918201133-e94ab7288189
+	google.golang.org/api v0.32.0
+	google.golang.org/grpc v1.31.1
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect

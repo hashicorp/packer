@@ -47,7 +47,7 @@ func (s *StepImportOSLoginSSHKey) Run(ctx context.Context, state multistep.State
 	state.Put("ssh_key_public_sha256", hex.EncodeToString(sha256sum[:]))
 
 	if config.account != nil {
-		s.accountEmail = config.account.Email
+		s.accountEmail = config.account.jwt.Email
 	}
 
 	if s.accountEmail == "" {

@@ -6,13 +6,12 @@ package googlecomputeimport
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 	"time"
 
-	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/compute/v1"
+	"google.golang.org/api/option"
 	"google.golang.org/api/storage/v1"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -31,6 +30,8 @@ type Config struct {
 	//The JSON file containing your account credentials.
 	//If specified, the account file will take precedence over any `googlecompute` builder authentication method.
 	AccountFile string `mapstructure:"account_file" required:"true"`
+	// This allows service account impersonation as per the docs.
+	ImpersonatedServiceAccount string `mapstructure:"impersonated_service_account" required:"false"`
 	//The project ID where the GCS bucket exists and where the GCE image is stored.
 	ProjectId string `mapstructure:"project_id" required:"true"`
 	IAP       bool   `mapstructure-to-hcl:",skip"`
@@ -61,7 +62,7 @@ type Config struct {
 	SkipClean           bool   `mapstructure:"skip_clean"`
 	VaultGCPOauthEngine string `mapstructure:"vault_gcp_oauth_engine"`
 
-	account *jwt.Config
+	account *googlecompute.ServiceAccount
 	ctx     interpolate.Context
 }
 
@@ -99,17 +100,15 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.AccountFile != "" {
+		if p.config.VaultGCPOauthEngine != "" && p.config.ImpersonatedServiceAccount != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You cannot "+
+				"specify impersonated_service_account, account_file and vault_gcp_oauth_engine at the same time"))
+		}
 		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
 		p.config.account = cfg
-	}
-
-	if p.config.AccountFile != "" && p.config.VaultGCPOauthEngine != "" {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("May set either account_file or "+
-				"vault_gcp_oauth_engine, but not both."))
 	}
 
 	templates := map[string]*string{
@@ -138,8 +137,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		generatedData = make(map[string]interface{})
 	}
 	p.config.ctx.Data = generatedData
-
-	client, err := googlecompute.NewClientGCE(p.config.account, p.config.VaultGCPOauthEngine)
+	var err error
+	var opts *option.ClientOption
+	opts, err = googlecompute.NewClientGCE(p.config.account, p.config.VaultGCPOauthEngine, p.config.ImpersonatedServiceAccount)
 	if err != nil {
 		return nil, false, false, err
 	}
@@ -159,18 +159,18 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, fmt.Errorf("Error rendering gcs_object_name template: %s", err)
 	}
 
-	rawImageGcsPath, err := UploadToBucket(client, ui, artifact, p.config.Bucket, p.config.GCSObjectName)
+	rawImageGcsPath, err := UploadToBucket(opts, ui, artifact, p.config.Bucket, p.config.GCSObjectName)
 	if err != nil {
 		return nil, false, false, err
 	}
 
-	gceImageArtifact, err := CreateGceImage(client, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels, p.config.ImageGuestOsFeatures)
+	gceImageArtifact, err := CreateGceImage(opts, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels, p.config.ImageGuestOsFeatures)
 	if err != nil {
 		return nil, false, false, err
 	}
 
 	if !p.config.SkipClean {
-		err = DeleteFromBucket(client, ui, p.config.Bucket, p.config.GCSObjectName)
+		err = DeleteFromBucket(opts, ui, p.config.Bucket, p.config.GCSObjectName)
 		if err != nil {
 			return nil, false, false, err
 		}
@@ -179,8 +179,8 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	return gceImageArtifact, false, false, nil
 }
 
-func UploadToBucket(client *http.Client, ui packer.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
-	service, err := storage.New(client)
+func UploadToBucket(opts *option.ClientOption, ui packer.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
+	service, err := storage.NewService(context.TODO(), *opts)
 	if err != nil {
 		return "", err
 	}
@@ -215,8 +215,8 @@ func UploadToBucket(client *http.Client, ui packer.Ui, artifact packer.Artifact,
 	return storageObject.SelfLink, nil
 }
 
-func CreateGceImage(client *http.Client, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string) (packer.Artifact, error) {
-	service, err := compute.New(client)
+func CreateGceImage(opts *option.ClientOption, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string) (packer.Artifact, error) {
+	service, err := compute.NewService(context.TODO(), *opts)
 	if err != nil {
 		return nil, err
 	}
@@ -269,8 +269,8 @@ func CreateGceImage(client *http.Client, ui packer.Ui, project string, rawImageU
 	return &Artifact{paths: []string{op.TargetLink}}, nil
 }
 
-func DeleteFromBucket(client *http.Client, ui packer.Ui, bucket string, gcsObjectName string) error {
-	service, err := storage.New(client)
+func DeleteFromBucket(opts *option.ClientOption, ui packer.Ui, bucket string, gcsObjectName string) error {
+	service, err := storage.NewService(context.TODO(), *opts)
 	if err != nil {
 		return err
 	}
