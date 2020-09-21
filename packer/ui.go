@@ -40,11 +40,12 @@ type Ui interface {
 	Message(string)
 	Error(string)
 	Machine(string, ...string)
+	// TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) (body io.ReadCloser)
 	getter.ProgressTracker
 }
 
 type NoopUi struct {
-	NoopProgressTracker
+	PB NoopProgressTracker
 }
 
 var _ Ui = new(NoopUi)
@@ -54,13 +55,16 @@ func (*NoopUi) Say(string)                 { return }
 func (*NoopUi) Message(string)             { return }
 func (*NoopUi) Error(string)               { return }
 func (*NoopUi) Machine(string, ...string)  { return }
+func (u *NoopUi) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser {
+	return u.PB.TrackProgress(src, currentSize, totalSize, stream)
+}
 
 // ColoredUi is a UI that is colored using terminal colors.
 type ColoredUi struct {
 	Color      UiColor
 	ErrorColor UiColor
 	Ui         Ui
-	*uiProgressBar
+	PB         getter.ProgressTracker
 }
 
 var _ Ui = new(ColoredUi)
@@ -189,7 +193,7 @@ type BasicUi struct {
 	l           sync.Mutex
 	interrupted bool
 	TTY         TTY
-	*uiProgressBar
+	PB          getter.ProgressTracker
 }
 
 var _ Ui = new(BasicUi)
@@ -304,11 +308,15 @@ func (rw *BasicUi) Machine(t string, args ...string) {
 	log.Printf("machine readable: %s %#v", t, args)
 }
 
+func (rw *BasicUi) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) (body io.ReadCloser) {
+	return rw.PB.TrackProgress(src, currentSize, totalSize, stream)
+}
+
 // MachineReadableUi is a UI that only outputs machine-readable output
 // to the given Writer.
 type MachineReadableUi struct {
 	Writer io.Writer
-	NoopProgressTracker
+	PB     NoopProgressTracker
 }
 
 var _ Ui = new(MachineReadableUi)
@@ -366,11 +374,15 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 	log.Printf("%d,%s,%s,%s\n", now.Unix(), target, category, argsString)
 }
 
+func (u *MachineReadableUi) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) (body io.ReadCloser) {
+	return u.PB.TrackProgress(src, currentSize, totalSize, stream)
+}
+
 // TimestampedUi is a UI that wraps another UI implementation and
 // prefixes each message with an RFC3339 timestamp
 type TimestampedUi struct {
 	Ui Ui
-	*uiProgressBar
+	PB getter.ProgressTracker
 }
 
 var _ Ui = new(TimestampedUi)
@@ -395,6 +407,10 @@ func (u *TimestampedUi) Machine(message string, args ...string) {
 	u.Ui.Machine(message, args...)
 }
 
+func (u *TimestampedUi) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) (body io.ReadCloser) {
+	return u.Ui.TrackProgress(src, currentSize, totalSize, stream)
+}
+
 func (u *TimestampedUi) timestampLine(string string) string {
 	return fmt.Sprintf("%v: %v", time.Now().Format(time.RFC3339), string)
 }
@@ -404,7 +420,7 @@ func (u *TimestampedUi) timestampLine(string string) string {
 type SafeUi struct {
 	Sem chan int
 	Ui  Ui
-	*uiProgressBar
+	PB  getter.ProgressTracker
 }
 
 var _ Ui = new(SafeUi)
@@ -439,4 +455,12 @@ func (u *SafeUi) Machine(t string, args ...string) {
 	u.Sem <- 1
 	u.Ui.Machine(t, args...)
 	<-u.Sem
+}
+
+func (u *SafeUi) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) (body io.ReadCloser) {
+	u.Sem <- 1
+	ret := u.Ui.TrackProgress(src, currentSize, totalSize, stream)
+	<-u.Sem
+
+	return ret
 }

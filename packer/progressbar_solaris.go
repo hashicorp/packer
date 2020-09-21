@@ -1,3 +1,3 @@
 package packer
 
-type uiProgressBar = NoopProgressTracker
+type UiProgressBar = NoopProgressTracker

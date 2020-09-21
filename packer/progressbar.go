@@ -15,25 +15,27 @@ func ProgressBarConfig(bar *pb.ProgressBar, prefix string) {
 	bar.Prefix(prefix)
 }
 
-var defaultUiProgressBar = &uiProgressBar{}
+var defaultUiProgressBar = &UiProgressBar{}
 
-// uiProgressBar is a self managed progress bar singleton.
-// decorate your struct with a *uiProgressBar to
+// UiProgressBar is a self managed progress bar singleton.
+// decorate your struct with a *UiProgressBar to
 // give it TrackProgress capabilities.
-// In TrackProgress if uiProgressBar is nil
+// In TrackProgress if UiProgressBar is nil
 // defaultUiProgressBar will be used as
 // the progress bar.
-type uiProgressBar struct {
+type UiProgressBar struct {
+	Noop bool
 	lock sync.Mutex
-
 	pool *pb.Pool
-
-	pbs int
+	pbs  int
 }
 
-func (p *uiProgressBar) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser {
+func (p *UiProgressBar) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser {
 	if p == nil {
 		return defaultUiProgressBar.TrackProgress(src, currentSize, totalSize, stream)
+	}
+	if p.Noop {
+		return stream
 	}
 	p.lock.Lock()
 	defer p.lock.Unlock()

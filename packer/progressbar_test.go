@@ -11,7 +11,7 @@ import (
 // The following tests rarelly just happen. So we run them 100 times.
 
 func TestProgressTracking_open_close(t *testing.T) {
-	var bar *uiProgressBar
+	var bar *UiProgressBar
 
 	tracker := bar.TrackProgress("1,", 1, 42, ioutil.NopCloser(nil))
 	tracker.Close()
@@ -21,7 +21,7 @@ func TestProgressTracking_open_close(t *testing.T) {
 }
 
 func TestProgressTracking_multi_open_close(t *testing.T) {
-	var bar *uiProgressBar
+	var bar *UiProgressBar
 	g := errgroup.Group{}
 
 	for i := 0; i < 100; i++ {
@@ -36,7 +36,7 @@ func TestProgressTracking_multi_open_close(t *testing.T) {
 }
 
 func TestProgressTracking_races(t *testing.T) {
-	var bar *uiProgressBar
+	var bar *UiProgressBar
 	g := errgroup.Group{}
 
 	for i := 0; i < 100; i++ {
