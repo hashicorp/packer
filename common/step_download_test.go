@@ -245,6 +245,7 @@ func TestStepDownload_download(t *testing.T) {
 	ui := &packer.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
+		PB:     &packer.NoopProgressTracker{},
 	}
 
 	dir := createTempDir(t)

@@ -16,6 +16,7 @@ func testState(t *testing.T) multistep.StateBag {
 	state.Put("ui", &packer.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
+		PB:     &packer.NoopProgressTracker{},
 	})
 	return state
 }
