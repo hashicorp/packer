@@ -23,7 +23,7 @@ type Config struct {
 	common.HardwareConfig     `mapstructure:",squash"`
 	common.ConfigParamsConfig `mapstructure:",squash"`
 
-	CDRomConfig              `mapstructure:",squash"`
+	common.CDRomConfig       `mapstructure:",squash"`
 	common.RemoveCDRomConfig `mapstructure:",squash"`
 	common.FloppyConfig      `mapstructure:",squash"`
 	common.RunConfig         `mapstructure:",squash"`

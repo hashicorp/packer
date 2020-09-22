@@ -61,6 +61,7 @@ type FlatConfig struct {
 	ToolsSyncTime                   *bool                                       `mapstructure:"tools_sync_time" cty:"tools_sync_time" hcl:"tools_sync_time"`
 	ToolsUpgradePolicy              *bool                                       `mapstructure:"tools_upgrade_policy" cty:"tools_upgrade_policy" hcl:"tools_upgrade_policy"`
 	CdromType                       *string                                     `mapstructure:"cdrom_type" cty:"cdrom_type" hcl:"cdrom_type"`
+	ISOPaths                        []string                                    `mapstructure:"iso_paths" cty:"iso_paths" hcl:"iso_paths"`
 	RemoveCdrom                     *bool                                       `mapstructure:"remove_cdrom" cty:"remove_cdrom" hcl:"remove_cdrom"`
 	FloppyIMGPath                   *string                                     `mapstructure:"floppy_img_path" cty:"floppy_img_path" hcl:"floppy_img_path"`
 	FloppyFiles                     []string                                    `mapstructure:"floppy_files" cty:"floppy_files" hcl:"floppy_files"`
@@ -194,6 +195,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"tools_sync_time":                &hcldec.AttrSpec{Name: "tools_sync_time", Type: cty.Bool, Required: false},
 		"tools_upgrade_policy":           &hcldec.AttrSpec{Name: "tools_upgrade_policy", Type: cty.Bool, Required: false},
 		"cdrom_type":                     &hcldec.AttrSpec{Name: "cdrom_type", Type: cty.String, Required: false},
+		"iso_paths":                      &hcldec.AttrSpec{Name: "iso_paths", Type: cty.List(cty.String), Required: false},
 		"remove_cdrom":                   &hcldec.AttrSpec{Name: "remove_cdrom", Type: cty.Bool, Required: false},
 		"floppy_img_path":                &hcldec.AttrSpec{Name: "floppy_img_path", Type: cty.String, Required: false},
 		"floppy_files":                   &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},

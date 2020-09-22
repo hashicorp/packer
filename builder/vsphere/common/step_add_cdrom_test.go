@@ -1,4 +1,4 @@
-package clone
+package common
 
 import (
 	"context"
@@ -74,11 +74,12 @@ func TestStepAddCDRom_Run(t *testing.T) {
 		errMessage     string
 	}{
 		{
-			name:  "CDRom SATA type with all cd paths set",
-			state: cdPathStateBag(),
+			name:  "CDRom SATA type with all iso paths set",
+			state: cdAndIsoRemotePathStateBag(),
 			step: &StepAddCDRom{
 				Config: &CDRomConfig{
 					CdromType: "sata",
+					ISOPaths:  []string{"iso/path"},
 				},
 			},
 			vmMock:         new(driver.VirtualMachineMock),
@@ -86,16 +87,16 @@ func TestStepAddCDRom_Run(t *testing.T) {
 			expectedVmMock: &driver.VirtualMachineMock{
 				FindSATAControllerCalled: true,
 				AddCdromCalled:           true,
-				AddCdromCalledTimes:      1,
-				AddCdromTypes:            []string{"sata"},
-				AddCdromPaths:            []string{"cd/path"},
+				AddCdromCalledTimes:      3,
+				AddCdromTypes:            []string{"sata", "sata", "sata"},
+				AddCdromPaths:            []string{"remote/path", "iso/path", "cd/path"},
 			},
 			fail:       false,
 			errMessage: "",
 		},
 		{
 			name:  "Add SATA Controller",
-			state: basicStateBag(),
+			state: basicStateBag(nil),
 			step: &StepAddCDRom{
 				Config: &CDRomConfig{
 					CdromType: "sata",
@@ -115,7 +116,7 @@ func TestStepAddCDRom_Run(t *testing.T) {
 		},
 		{
 			name:  "Fail to add SATA Controller",
-			state: basicStateBag(),
+			state: basicStateBag(nil),
 			step: &StepAddCDRom{
 				Config: &CDRomConfig{
 					CdromType: "sata",
@@ -135,21 +136,48 @@ func TestStepAddCDRom_Run(t *testing.T) {
 		},
 		{
 			name:  "IDE CDRom Type and Iso Path set",
-			state: basicStateBag(),
+			state: basicStateBag(nil),
 			step: &StepAddCDRom{
 				Config: &CDRomConfig{
 					CdromType: "ide",
+					ISOPaths:  []string{"iso/path"},
 				},
 			},
 			vmMock:         new(driver.VirtualMachineMock),
 			expectedAction: multistep.ActionContinue,
-			expectedVmMock: new(driver.VirtualMachineMock),
-			fail:           false,
-			errMessage:     "",
+			expectedVmMock: &driver.VirtualMachineMock{
+				AddCdromCalled:      true,
+				AddCdromCalledTimes: 1,
+				AddCdromTypes:       []string{"ide"},
+				AddCdromPaths:       []string{"iso/path"},
+			},
+			fail:       false,
+			errMessage: "",
 		},
 		{
-			name:  "Fail to add cdrom from state cd_path",
-			state: cdPathStateBag(),
+			name:  "Fail to add cdrom from ISOPaths",
+			state: basicStateBag(nil),
+			step: &StepAddCDRom{
+				Config: &CDRomConfig{
+					ISOPaths: []string{"iso/path"},
+				},
+			},
+			vmMock: &driver.VirtualMachineMock{
+				AddCdromErr: fmt.Errorf("AddCdrom error"),
+			},
+			expectedAction: multistep.ActionHalt,
+			expectedVmMock: &driver.VirtualMachineMock{
+				AddCdromCalled:      true,
+				AddCdromCalledTimes: 1,
+				AddCdromTypes:       []string{""},
+				AddCdromPaths:       []string{"iso/path"},
+			},
+			fail:       true,
+			errMessage: fmt.Sprintf("error mounting an image 'iso/path': %v", fmt.Errorf("AddCdrom error")),
+		},
+		{
+			name:  "Fail to add cdrom from state iso_remote_path",
+			state: isoRemotePathStateBag(),
 			step: &StepAddCDRom{
 				Config: new(CDRomConfig),
 			},
@@ -161,10 +189,10 @@ func TestStepAddCDRom_Run(t *testing.T) {
 				AddCdromCalled:      true,
 				AddCdromCalledTimes: 1,
 				AddCdromTypes:       []string{""},
-				AddCdromPaths:       []string{"cd/path"},
+				AddCdromPaths:       []string{"remote/path"},
 			},
 			fail:       true,
-			errMessage: fmt.Sprintf("error mounting a CD 'cd/path': %v", fmt.Errorf("AddCdrom error")),
+			errMessage: fmt.Sprintf("error mounting an image 'remote/path': %v", fmt.Errorf("AddCdrom error")),
 		},
 	}
 
@@ -193,8 +221,15 @@ func TestStepAddCDRom_Run(t *testing.T) {
 	}
 }
 
-func cdPathStateBag() *multistep.BasicStateBag {
-	state := basicStateBag()
+func cdAndIsoRemotePathStateBag() *multistep.BasicStateBag {
+	state := basicStateBag(nil)
+	state.Put("iso_remote_path", "remote/path")
 	state.Put("cd_path", "cd/path")
+	return state
+}
+
+func isoRemotePathStateBag() *multistep.BasicStateBag {
+	state := basicStateBag(nil)
+	state.Put("iso_remote_path", "remote/path")
 	return state
 }

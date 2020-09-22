@@ -65,7 +65,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepConfigureHardware{
 			Config: &b.config.HardwareConfig,
 		},
-		&StepAddCDRom{
+		&common.StepAddCDRom{
 			Config: &b.config.CDRomConfig,
 		},
 		&common.StepConfigParams{
