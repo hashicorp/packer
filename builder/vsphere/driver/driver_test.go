@@ -50,24 +50,73 @@ func newVMName() string {
 	return fmt.Sprintf("test-%v", rand.Intn(1000))
 }
 
-func NewSimulatorServer(model *simulator.Model) (*simulator.Server, error) {
-	err := model.Create()
+type VCenterSimulator struct {
+	model  *simulator.Model
+	server *simulator.Server
+	driver *VCenterDriver
+}
+
+func NewCustomVCenterSimulator(model *simulator.Model) (*VCenterSimulator, error) {
+	sim := new(VCenterSimulator)
+	sim.model = model
+
+	server, err := sim.NewSimulatorServer()
+	if err != nil {
+		sim.Close()
+		return nil, err
+	}
+	sim.server = server
+
+	driver, err := sim.NewSimulatorDriver()
+	if err != nil {
+		sim.Close()
+		return nil, err
+	}
+	sim.driver = driver
+	return sim, nil
+}
+
+func NewVCenterSimulator() (*VCenterSimulator, error) {
+	model := simulator.VPX()
+	model.Machine = 1
+	return NewCustomVCenterSimulator(model)
+}
+
+func (s *VCenterSimulator) Close() {
+	if s.model != nil {
+		s.model.Remove()
+	}
+	if s.server != nil {
+		s.server.Close()
+	}
+}
+
+//Simulator shortcut to choose any pre created VM.
+func (s *VCenterSimulator) ChooseSimulatorPreCreatedVM() (VirtualMachine, *simulator.VirtualMachine) {
+	machine := simulator.Map.Any("VirtualMachine").(*simulator.VirtualMachine)
+	ref := machine.Reference()
+	vm := s.driver.NewVM(&ref)
+	return vm, machine
+}
+
+func (s *VCenterSimulator) NewSimulatorServer() (*simulator.Server, error) {
+	err := s.model.Create()
 	if err != nil {
 		return nil, err
 	}
 
-	model.Service.RegisterEndpoints = true
-	model.Service.TLS = new(tls.Config)
-	model.Service.ServeMux = http.NewServeMux()
-	return model.Service.NewServer(), nil
+	s.model.Service.RegisterEndpoints = true
+	s.model.Service.TLS = new(tls.Config)
+	s.model.Service.ServeMux = http.NewServeMux()
+	return s.model.Service.NewServer(), nil
 }
 
-func NewSimulatorDriver(s *simulator.Server) (*VCenterDriver, error) {
+func (s *VCenterSimulator) NewSimulatorDriver() (*VCenterDriver, error) {
 	ctx := context.TODO()
 	user := &url.Userinfo{}
-	s.URL.User = user
+	s.server.URL.User = user
 
-	soapClient := soap.NewClient(s.URL, true)
+	soapClient := soap.NewClient(s.server.URL, true)
 	vimClient, err := vim25.NewClient(ctx, soapClient)
 	if err != nil {
 		return nil, err
@@ -103,12 +152,4 @@ func NewSimulatorDriver(s *simulator.Server) (*VCenterDriver, error) {
 		finder:     finder,
 	}
 	return d, nil
-}
-
-//Simulator shortcut to choose any pre created VM.
-func ChooseSimulatorPreCreatedVM(driverSim *VCenterDriver) VirtualMachine {
-	machine := simulator.Map.Any("VirtualMachine").(*simulator.VirtualMachine)
-	ref := machine.Reference()
-	vm := driverSim.NewVM(&ref)
-	return vm
 }
