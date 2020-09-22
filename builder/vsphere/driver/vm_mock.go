@@ -32,6 +32,14 @@ type VirtualMachineMock struct {
 	AddCdromErr         error
 	AddCdromTypes       []string
 	AddCdromPaths       []string
+
+	GetDirCalled   bool
+	GetDirResponse string
+	GetDirErr      error
+
+	AddFloppyCalled    bool
+	AddFloppyImagePath string
+	AddFloppyErr       error
 }
 
 func (vm *VirtualMachineMock) Info(params ...string) (*mo.VirtualMachine, error) {
@@ -124,7 +132,8 @@ func (vm *VirtualMachineMock) ImportToContentLibrary(template vcenter.Template) 
 }
 
 func (vm *VirtualMachineMock) GetDir() (string, error) {
-	return "", nil
+	vm.GetDirCalled = true
+	return vm.GetDirResponse, vm.GetDirErr
 }
 
 func (vm *VirtualMachineMock) AddCdrom(cdromType string, isoPath string) error {
@@ -136,7 +145,9 @@ func (vm *VirtualMachineMock) AddCdrom(cdromType string, isoPath string) error {
 }
 
 func (vm *VirtualMachineMock) AddFloppy(imgPath string) error {
-	return nil
+	vm.AddFloppyCalled = true
+	vm.AddFloppyImagePath = imgPath
+	return vm.AddFloppyErr
 }
 
 func (vm *VirtualMachineMock) SetBootOrder(order []string) error {
