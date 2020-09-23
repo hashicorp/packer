@@ -196,7 +196,7 @@ func wrappedMain() int {
 			Reader:      os.Stdin,
 			Writer:      os.Stdout,
 			ErrorWriter: os.Stdout,
-			PB:          &packer.UiProgressBar{},
+			PB:          &packer.NoopProgressTracker{},
 		}
 		ui = basicUi
 		if !inPlugin {
@@ -208,12 +208,11 @@ func wrappedMain() int {
 			}
 			if backgrounded {
 				fmt.Fprint(os.Stderr, "Running in background, not using a TTY\n")
-				basicUi.PB = &packer.NoopProgressTracker{}
 			} else if TTY, err := openTTY(); err != nil {
 				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
-				basicUi.PB = &packer.NoopProgressTracker{}
 			} else {
 				basicUi.TTY = TTY
+				basicUi.PB = &packer.UiProgressBar{}
 				defer TTY.Close()
 			}
 		}
