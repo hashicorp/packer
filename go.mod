@@ -21,7 +21,7 @@ require (
 	github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607 // indirect
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
 	github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878 // indirect
-	github.com/aws/aws-sdk-go v1.30.8
+	github.com/aws/aws-sdk-go v1.34.26
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
 	github.com/cheggaaa/pb v1.0.27

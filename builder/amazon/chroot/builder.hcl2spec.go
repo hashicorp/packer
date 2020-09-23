@@ -41,7 +41,9 @@ type FlatConfig struct {
 	SnapshotUsers           []string                          `mapstructure:"snapshot_users" required:"false" cty:"snapshot_users" hcl:"snapshot_users"`
 	SnapshotGroups          []string                          `mapstructure:"snapshot_groups" required:"false" cty:"snapshot_groups" hcl:"snapshot_groups"`
 	AccessKey               *string                           `mapstructure:"access_key" required:"true" cty:"access_key" hcl:"access_key"`
+	AssumeRole              *common.FlatAssumeRoleConfig      `mapstructure:"assume_role" required:"false" cty:"assume_role" hcl:"assume_role"`
 	CustomEndpointEc2       *string                           `mapstructure:"custom_endpoint_ec2" required:"false" cty:"custom_endpoint_ec2" hcl:"custom_endpoint_ec2"`
+	CredsFilename           *string                           `mapstructure:"shared_credentials_file" required:"false" cty:"shared_credentials_file" hcl:"shared_credentials_file"`
 	DecodeAuthZMessages     *bool                             `mapstructure:"decode_authorization_messages" required:"false" cty:"decode_authorization_messages" hcl:"decode_authorization_messages"`
 	InsecureSkipTLSVerify   *bool                             `mapstructure:"insecure_skip_tls_verify" required:"false" cty:"insecure_skip_tls_verify" hcl:"insecure_skip_tls_verify"`
 	MaxRetries              *int                              `mapstructure:"max_retries" required:"false" cty:"max_retries" hcl:"max_retries"`
@@ -117,7 +119,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"snapshot_users":                &hcldec.AttrSpec{Name: "snapshot_users", Type: cty.List(cty.String), Required: false},
 		"snapshot_groups":               &hcldec.AttrSpec{Name: "snapshot_groups", Type: cty.List(cty.String), Required: false},
 		"access_key":                    &hcldec.AttrSpec{Name: "access_key", Type: cty.String, Required: false},
+		"assume_role":                   &hcldec.BlockSpec{TypeName: "assume_role", Nested: hcldec.ObjectSpec((*common.FlatAssumeRoleConfig)(nil).HCL2Spec())},
 		"custom_endpoint_ec2":           &hcldec.AttrSpec{Name: "custom_endpoint_ec2", Type: cty.String, Required: false},
+		"shared_credentials_file":       &hcldec.AttrSpec{Name: "shared_credentials_file", Type: cty.String, Required: false},
 		"decode_authorization_messages": &hcldec.AttrSpec{Name: "decode_authorization_messages", Type: cty.Bool, Required: false},
 		"insecure_skip_tls_verify":      &hcldec.AttrSpec{Name: "insecure_skip_tls_verify", Type: cty.Bool, Required: false},
 		"max_retries":                   &hcldec.AttrSpec{Name: "max_retries", Type: cty.Number, Required: false},
