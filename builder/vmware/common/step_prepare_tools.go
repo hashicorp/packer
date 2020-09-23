@@ -11,6 +11,7 @@ import (
 type StepPrepareTools struct {
 	RemoteType        string
 	ToolsUploadFlavor string
+	ToolsSourcePath   string
 }
 
 func (c *StepPrepareTools) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -20,11 +21,15 @@ func (c *StepPrepareTools) Run(ctx context.Context, state multistep.StateBag) mu
 		return multistep.ActionContinue
 	}
 
-	if c.ToolsUploadFlavor == "" {
+	if c.ToolsUploadFlavor == "" && c.ToolsSourcePath == "" {
 		return multistep.ActionContinue
 	}
 
-	path := driver.ToolsIsoPath(c.ToolsUploadFlavor)
+	path := c.ToolsSourcePath
+	if path == "" {
+		path = driver.ToolsIsoPath(c.ToolsUploadFlavor)
+	}
+
 	if _, err := os.Stat(path); err != nil {
 		state.Put("error", fmt.Errorf(
 			"Couldn't find VMware tools for '%s'! VMware often downloads these\n"+
