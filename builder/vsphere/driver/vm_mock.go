@@ -40,6 +40,15 @@ type VirtualMachineMock struct {
 	AddFloppyCalled    bool
 	AddFloppyImagePath string
 	AddFloppyErr       error
+
+	FloppyDevicesErr    error
+	FloppyDevicesReturn object.VirtualDeviceList
+	FloppyDevicesCalled bool
+
+	RemoveDeviceErr       error
+	RemoveDeviceCalled    bool
+	RemoveDeviceKeepFiles bool
+	RemoveDeviceDevices   []types.BaseVirtualDevice
 }
 
 func (vm *VirtualMachineMock) Info(params ...string) (*mo.VirtualMachine, error) {
@@ -48,6 +57,11 @@ func (vm *VirtualMachineMock) Info(params ...string) (*mo.VirtualMachine, error)
 
 func (vm *VirtualMachineMock) Devices() (object.VirtualDeviceList, error) {
 	return object.VirtualDeviceList{}, nil
+}
+
+func (vm *VirtualMachineMock) FloppyDevices() (object.VirtualDeviceList, error) {
+	vm.FloppyDevicesCalled = true
+	return vm.FloppyDevicesReturn, vm.FloppyDevicesErr
 }
 
 func (vm *VirtualMachineMock) Clone(ctx context.Context, config *CloneConfig) (VirtualMachine, error) {
@@ -155,7 +169,10 @@ func (vm *VirtualMachineMock) SetBootOrder(order []string) error {
 }
 
 func (vm *VirtualMachineMock) RemoveDevice(keepFiles bool, device ...types.BaseVirtualDevice) error {
-	return nil
+	vm.RemoveDeviceCalled = true
+	vm.RemoveDeviceKeepFiles = keepFiles
+	vm.RemoveDeviceDevices = device
+	return vm.RemoveDeviceErr
 }
 
 func (vm *VirtualMachineMock) addDevice(device types.BaseVirtualDevice) error {
