@@ -49,6 +49,12 @@ type VirtualMachineMock struct {
 	RemoveDeviceCalled    bool
 	RemoveDeviceKeepFiles bool
 	RemoveDeviceDevices   []types.BaseVirtualDevice
+
+	EjectCdromsCalled bool
+	EjectCdromsErr    error
+
+	RemoveCdromsCalled bool
+	RemoveCdromsErr    error
 }
 
 func (vm *VirtualMachineMock) Info(params ...string) (*mo.VirtualMachine, error) {
@@ -214,9 +220,11 @@ func (vm *VirtualMachineMock) CreateCdrom(c *types.VirtualController) (*types.Vi
 }
 
 func (vm *VirtualMachineMock) RemoveCdroms() error {
-	return nil
+	vm.RemoveCdromsCalled = true
+	return vm.RemoveCdromsErr
 }
 
 func (vm *VirtualMachineMock) EjectCdroms() error {
-	return nil
+	vm.EjectCdromsCalled = true
+	return vm.EjectCdromsErr
 }
