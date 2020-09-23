@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"context"
@@ -96,7 +96,7 @@ func TestStepAddCDRom_Run(t *testing.T) {
 		},
 		{
 			name:  "Add SATA Controller",
-			state: basicStateBag(),
+			state: basicStateBag(nil),
 			step: &StepAddCDRom{
 				Config: &CDRomConfig{
 					CdromType: "sata",
@@ -116,7 +116,7 @@ func TestStepAddCDRom_Run(t *testing.T) {
 		},
 		{
 			name:  "Fail to add SATA Controller",
-			state: basicStateBag(),
+			state: basicStateBag(nil),
 			step: &StepAddCDRom{
 				Config: &CDRomConfig{
 					CdromType: "sata",
@@ -136,7 +136,7 @@ func TestStepAddCDRom_Run(t *testing.T) {
 		},
 		{
 			name:  "IDE CDRom Type and Iso Path set",
-			state: basicStateBag(),
+			state: basicStateBag(nil),
 			step: &StepAddCDRom{
 				Config: &CDRomConfig{
 					CdromType: "ide",
@@ -156,7 +156,7 @@ func TestStepAddCDRom_Run(t *testing.T) {
 		},
 		{
 			name:  "Fail to add cdrom from ISOPaths",
-			state: basicStateBag(),
+			state: basicStateBag(nil),
 			step: &StepAddCDRom{
 				Config: &CDRomConfig{
 					ISOPaths: []string{"iso/path"},
@@ -222,14 +222,14 @@ func TestStepAddCDRom_Run(t *testing.T) {
 }
 
 func cdAndIsoRemotePathStateBag() *multistep.BasicStateBag {
-	state := basicStateBag()
+	state := basicStateBag(nil)
 	state.Put("iso_remote_path", "remote/path")
 	state.Put("cd_path", "cd/path")
 	return state
 }
 
 func isoRemotePathStateBag() *multistep.BasicStateBag {
-	state := basicStateBag()
+	state := basicStateBag(nil)
 	state.Put("iso_remote_path", "remote/path")
 	return state
 }

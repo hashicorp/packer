@@ -1,7 +1,7 @@
 //go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type RemoveCDRomConfig
 
-package iso
+package common
 
 import (
 	"context"
@@ -22,7 +22,7 @@ type StepRemoveCDRom struct {
 
 func (s *StepRemoveCDRom) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachineDriver)
+	vm := state.Get("vm").(driver.VirtualMachine)
 
 	ui.Say("Eject CD-ROM drives...")
 	err := vm.EjectCdroms()

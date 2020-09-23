@@ -8,7 +8,20 @@ import (
 type DatastoreMock struct {
 	FileExistsCalled    bool
 	MakeDirectoryCalled bool
-	UploadFileCalled    bool
+
+	ResolvePathCalled bool
+	ResolvePathReturn string
+
+	DeleteCalled bool
+	DeletePath   string
+	DeleteErr    error
+
+	UploadFileCalled  bool
+	UploadFileSrc     string
+	UploadFileDst     string
+	UploadFileHost    string
+	UploadFileSetHost bool
+	UploadFileErr     error
 }
 
 func (ds *DatastoreMock) Info(params ...string) (*mo.Datastore, error) {
@@ -29,16 +42,23 @@ func (ds *DatastoreMock) Reference() types.ManagedObjectReference {
 }
 
 func (ds *DatastoreMock) ResolvePath(path string) string {
-	return ""
+	ds.ResolvePathCalled = true
+	return ds.ResolvePathReturn
 }
 
 func (ds *DatastoreMock) UploadFile(src, dst, host string, setHost bool) error {
 	ds.UploadFileCalled = true
-	return nil
+	ds.UploadFileSrc = src
+	ds.UploadFileDst = dst
+	ds.UploadFileHost = host
+	ds.UploadFileSetHost = setHost
+	return ds.UploadFileErr
 }
 
 func (ds *DatastoreMock) Delete(path string) error {
-	return nil
+	ds.DeleteCalled = true
+	ds.DeletePath = path
+	return ds.DeleteErr
 }
 
 func (ds *DatastoreMock) MakeDirectory(path string) error {
