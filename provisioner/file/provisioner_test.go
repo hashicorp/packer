@@ -126,6 +126,7 @@ func TestProvisionerProvision_SendsFile(t *testing.T) {
 	b := bytes.NewBuffer(nil)
 	ui := &packer.BasicUi{
 		Writer: b,
+		PB:     &packer.NoopProgressTracker{},
 	}
 	comm := &packer.MockCommunicator{}
 	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
@@ -184,6 +185,7 @@ func TestProvisionerProvision_SendsFileMultipleFiles(t *testing.T) {
 	b := bytes.NewBuffer(nil)
 	ui := &packer.BasicUi{
 		Writer: b,
+		PB:     &packer.NoopProgressTracker{},
 	}
 	comm := &packer.MockCommunicator{}
 	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
@@ -253,6 +255,7 @@ func TestProvisionerProvision_SendsFileMultipleDirs(t *testing.T) {
 	b := bytes.NewBuffer(nil)
 	ui := &packer.BasicUi{
 		Writer: b,
+		PB:     &packer.NoopProgressTracker{},
 	}
 	comm := &packer.MockCommunicator{}
 	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
@@ -304,6 +307,7 @@ func TestProvisionerProvision_SendsFileMultipleFilesToFolder(t *testing.T) {
 	b := bytes.NewBuffer(nil)
 	ui := &packer.BasicUi{
 		Writer: b,
+		PB:     &packer.NoopProgressTracker{},
 	}
 	comm := &packer.MockCommunicator{}
 	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
@@ -361,6 +365,7 @@ func TestProvisionDownloadMkdirAll(t *testing.T) {
 		b := bytes.NewBuffer(nil)
 		ui := &packer.BasicUi{
 			Writer: b,
+			PB:     &packer.NoopProgressTracker{},
 		}
 		comm := &packer.MockCommunicator{}
 		err = p.ProvisionDownload(ui, comm)
