@@ -1,6 +1,8 @@
  ## 1.6.3 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/amazon: Implement assume_role option that matches Terraform behavior.
+    [GH-9981]
 * builder/azure: Support publishing to a Shared Image Gallery with a different
     subscription id [GH-9875]
 * builder/oracle-oci: Add `create_vnic_details` option for launch details.
@@ -16,17 +18,22 @@
     to qemu-img [GH-9956]
 * builder/qemu: Add `skip_resize_disk` option to skip the resizing of QCOW2
     images. [GH-9896] [GH-9860]
-* builder/qemu: Skip qemu-img convert on MacOS to prevent the creation
-    of corrupt images [QEMU
+* builder/qemu: Skip qemu-img convert on MacOS to prevent the creation of
+    corrupt images [QEMU
     #1776920](https://bugs.launchpad.net/qemu/+bug/1776920)[GH-9949]
 * builder/scaleway: Change default boottype to local. [GH-9853]
 * builder/scaleway: Update scaleway to use non-deprecated sdk. [GH-9902]
 * builder/vmware: Add `vnc_over_websocket` to allow the sending of a
     `boot_command` to hosts running ESXi 6.7 and above. [GH-9938]
+* builder/vmware: Allow user to set vmware tools source path. [GH-9983]
 * builder/vsphere-clone: Add ability to set `mac_address` [GH-9930]
+* builder/vsphere-clone: Add floppy_files, cd_files, and iso_paths options.
+    [GH-9963]
 * builder/vsphere-iso: Add NVMe controller support. [GH-9880]
 * builder/vsphere: Look for a default resource pool when root resource pool is
     not found. [GH-9809]
+* core: Add support for running cygwin/msys2 based cd/iso creation tool
+    [GH-9954]
 * core: New `cd_files` option to mount iso for modern OSes which don't support
     floppies. [GH-9796] [GH-9919] [GH-9928] [GH-9932] [GH-9941]
 * HCL2: When the type of a variable is not known evaluate setting as a literal
@@ -41,6 +48,9 @@
     error was creating multiple spot instances. [GH-9946]
 * builder/amazon-ebssurrogate: Fix issue where builder defaults to AWS managed
     key even when custom `kms_key_id` is set. [GH-9959]
+* builder/amazon: Update ssm_driver log polling logic to prevent infinite loops
+    when SSM driver is shut down outsite Packer. [GH-9991]
+* builder/azure: Fix crash when using HCL2 configs. [GH-9984]
 * builder/qemu: Fix hardcoded lowerbound causing negative ports [GH-9905]
 * builder/qemu: Skip compaction when backing file is used. [GH-9918]
 * builder/scaleway: Add pre validate step to prevent the creation of multiple
