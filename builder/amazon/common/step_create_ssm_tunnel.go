@@ -35,8 +35,8 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	// Wait for the remote port to become available
-	if int64(s.PauseBeforeSSM) > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s for establishing the SSM session...", s.PauseBeforeSSM.String()))
+	if s.PauseBeforeSSM > 0 {
+		ui.Say(fmt.Sprintf("Waiting %s for establishing the SSM session...", s.PauseBeforeSSM))
 		select {
 		case <-time.After(s.PauseBeforeSSM):
 			break
