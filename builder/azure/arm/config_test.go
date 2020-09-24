@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/hcl2template"
 )
 
 // List of configuration parameters that are required by the ARM builder.
@@ -910,32 +912,55 @@ func TestConfigShouldAcceptTags(t *testing.T) {
 		},
 	}
 
-	var c Config
+	c := Config{
+		AzureTag: hcl2template.NameValues{
+			{Name: "tag03", Value: "value03"},
+		},
+	}
 	_, err := c.Prepare(config, getPackerConfiguration())
-
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(c.AzureTags) != 2 {
-		t.Fatalf("expected to find 2 tags, but got %d", len(c.AzureTags))
+	if diff := cmp.Diff(c.AzureTags, map[string]string{
+		"tag01": "value01",
+		"tag02": "value02",
+		"tag03": "value03",
+	}); diff != "" {
+		t.Fatalf("unexpected azure tags: %s", diff)
+	}
+}
+
+func TestConfigShouldAcceptTag(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
 	}
 
-	if _, ok := c.AzureTags["tag01"]; !ok {
-		t.Error("expected to find key=\"tag01\", but did not")
+	c := Config{
+		AzureTag: hcl2template.NameValues{
+			{Name: "tag03", Value: "value03"},
+		},
 	}
-	if _, ok := c.AzureTags["tag02"]; !ok {
-		t.Error("expected to find key=\"tag02\", but did not")
-	}
-
-	value := c.AzureTags["tag01"]
-	if *value != "value01" {
-		t.Errorf("expected AzureTags[\"tag01\"] to have value \"value01\", but got %q", *value)
+	_, err := c.Prepare(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	value = c.AzureTags["tag02"]
-	if *value != "value02" {
-		t.Errorf("expected AzureTags[\"tag02\"] to have value \"value02\", but got %q", *value)
+	if diff := cmp.Diff(c.AzureTags, map[string]string{
+		"tag03": "value03",
+	}); diff != "" {
+		t.Fatalf("unexpected azure tags: %s", diff)
 	}
 }
 
