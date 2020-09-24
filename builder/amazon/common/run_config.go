@@ -473,6 +473,14 @@ type RunConfig struct {
 	//    terminating the tunnel it will automatically terminate itself after 20 minutes of inactivity.
 	SSHInterface string `mapstructure:"ssh_interface"`
 
+	// The time to wait before establishing the Session Manager session.
+	// The value of this should be a duration. Examples are
+	// `5s` and `1m30s` which will cause Packer to wait five seconds and one
+	// minute 30 seconds, respectively.
+	// This option is useful when the remote port takes longer to become available.
+	// If not specified, Packer will not pause.
+	PauseBeforeSSM time.Duration `mapstructure:"pause_before_ssm"`
+
 	// Which port to connect the local end of the session tunnel to. If
 	// left blank, Packer will choose a port for you from available ports.
 	// This option is only used when `ssh_interface` is set `session_manager`.

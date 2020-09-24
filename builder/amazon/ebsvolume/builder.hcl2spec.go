@@ -158,6 +158,7 @@ type FlatConfig struct {
 	WinRMInsecure                             *bool                                  `mapstructure:"winrm_insecure" cty:"winrm_insecure" hcl:"winrm_insecure"`
 	WinRMUseNTLM                              *bool                                  `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm" hcl:"winrm_use_ntlm"`
 	SSHInterface                              *string                                `mapstructure:"ssh_interface" cty:"ssh_interface" hcl:"ssh_interface"`
+	PauseBeforeSSM                            *string                                `mapstructure:"pause_before_ssm" cty:"pause_before_ssm" hcl:"pause_before_ssm"`
 	SessionManagerPort                        *int                                   `mapstructure:"session_manager_port" cty:"session_manager_port" hcl:"session_manager_port"`
 	AMIENASupport                             *bool                                  `mapstructure:"ena_support" required:"false" cty:"ena_support" hcl:"ena_support"`
 	AMISriovNetSupport                        *bool                                  `mapstructure:"sriov_support" required:"false" cty:"sriov_support" hcl:"sriov_support"`
@@ -280,6 +281,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_insecure":                        &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":                        &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
 		"ssh_interface":                         &hcldec.AttrSpec{Name: "ssh_interface", Type: cty.String, Required: false},
+		"pause_before_ssm":                      &hcldec.AttrSpec{Name: "pause_before_ssm", Type: cty.String, Required: false},
 		"session_manager_port":                  &hcldec.AttrSpec{Name: "session_manager_port", Type: cty.Number, Required: false},
 		"ena_support":                           &hcldec.AttrSpec{Name: "ena_support", Type: cty.Bool, Required: false},
 		"sriov_support":                         &hcldec.AttrSpec{Name: "sriov_support", Type: cty.Bool, Required: false},
