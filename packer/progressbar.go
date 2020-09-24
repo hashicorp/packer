@@ -18,16 +18,13 @@ func ProgressBarConfig(bar *pb.ProgressBar, prefix string) {
 // UiProgressBar is a progress bar compatible with go-getter used in our
 // UI structs.
 type UiProgressBar struct {
-	Noop bool
 	lock sync.Mutex
 	pool *pb.Pool
 	pbs  int
 }
 
-var noOpProgressBar *UiProgressBar = nil
-
 func (p *UiProgressBar) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser {
-	if p.Noop {
+	if p == nil {
 		return stream
 	}
 	p.lock.Lock()
