@@ -1,4 +1,4 @@
- ## 1.6.3 (Upcoming)
+ ## 1.6.3 (September 25, 2020)
 
 ### IMPROVEMENTS:
 * builder/amazon: Add `pause_before_ssm` option to pause for some time before
