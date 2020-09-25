@@ -95,6 +95,8 @@ type FlatConfig struct {
 	SSHIPVersion                *string                 `mapstructure:"ssh_ip_version" required:"false" cty:"ssh_ip_version" hcl:"ssh_ip_version"`
 	SourceImage                 *string                 `mapstructure:"source_image" required:"true" cty:"source_image" hcl:"source_image"`
 	SourceImageName             *string                 `mapstructure:"source_image_name" required:"true" cty:"source_image_name" hcl:"source_image_name"`
+	ExternalSourceImageURL      *string                 `mapstructure:"external_source_image_url" required:"true" cty:"external_source_image_url" hcl:"external_source_image_url"`
+	ExternalSourceImageFormat   *string                 `mapstructure:"external_source_image_format" required:"false" cty:"external_source_image_format" hcl:"external_source_image_format"`
 	SourceImageFilters          *FlatImageFilter        `mapstructure:"source_image_filter" required:"true" cty:"source_image_filter" hcl:"source_image_filter"`
 	Flavor                      *string                 `mapstructure:"flavor" required:"true" cty:"flavor" hcl:"flavor"`
 	AvailabilityZone            *string                 `mapstructure:"availability_zone" required:"false" cty:"availability_zone" hcl:"availability_zone"`
@@ -220,6 +222,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_ip_version":                &hcldec.AttrSpec{Name: "ssh_ip_version", Type: cty.String, Required: false},
 		"source_image":                  &hcldec.AttrSpec{Name: "source_image", Type: cty.String, Required: false},
 		"source_image_name":             &hcldec.AttrSpec{Name: "source_image_name", Type: cty.String, Required: false},
+		"external_source_image_url":     &hcldec.AttrSpec{Name: "external_source_image_url", Type: cty.String, Required: false},
+		"external_source_image_format":  &hcldec.AttrSpec{Name: "external_source_image_format", Type: cty.String, Required: false},
 		"source_image_filter":           &hcldec.BlockSpec{TypeName: "source_image_filter", Nested: hcldec.ObjectSpec((*FlatImageFilter)(nil).HCL2Spec())},
 		"flavor":                        &hcldec.AttrSpec{Name: "flavor", Type: cty.String, Required: false},
 		"availability_zone":             &hcldec.AttrSpec{Name: "availability_zone", Type: cty.String, Required: false},

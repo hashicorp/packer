@@ -274,6 +274,7 @@ github.com/gophercloud/gophercloud/openstack/identity/v2/tokens
 github.com/gophercloud/gophercloud/openstack/identity/v3/extensions/ec2tokens
 github.com/gophercloud/gophercloud/openstack/identity/v3/extensions/oauth1
 github.com/gophercloud/gophercloud/openstack/identity/v3/tokens
+github.com/gophercloud/gophercloud/openstack/imageservice/v2/imageimport
 github.com/gophercloud/gophercloud/openstack/imageservice/v2/images
 github.com/gophercloud/gophercloud/openstack/imageservice/v2/members
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external
