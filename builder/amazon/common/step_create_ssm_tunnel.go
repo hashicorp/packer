@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -21,6 +22,7 @@ type StepCreateSSMTunnel struct {
 	RemotePortNumber int
 	SSMAgentEnabled  bool
 	instanceId       string
+	PauseBeforeSSM   time.Duration
 	driver           *SSMDriver
 }
 
@@ -30,6 +32,17 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 
 	if !s.SSMAgentEnabled {
 		return multistep.ActionContinue
+	}
+
+	// Wait for the remote port to become available
+	if s.PauseBeforeSSM > 0 {
+		ui.Say(fmt.Sprintf("Waiting %s for establishing the SSM session...", s.PauseBeforeSSM))
+		select {
+		case <-time.After(s.PauseBeforeSSM):
+			break
+		case <-ctx.Done():
+			return multistep.ActionHalt
+		}
 	}
 
 	// Configure local port number
