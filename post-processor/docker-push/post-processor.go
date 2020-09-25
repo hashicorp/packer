@@ -106,11 +106,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	names := []string{artifact.Id()}
 	tags := artifact.State("docker_tags")
 	if tags != nil {
-		cast := tags.([]interface{})
+		cast := tags.([]string)
 		for _, name := range cast {
-			if n, ok := name.(string); ok {
-				names = append(names, n)
-			}
+			names = append(names, name)
 		}
 	}
 

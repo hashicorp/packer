@@ -54,6 +54,18 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, retErr
 	}
 
+	// Return a "copy" of the artifact to keep the previous artifact data
+	// If we don't this, the data will be lost in packer/rpc/post_processor.go
+	// when a new artifact is created from the client.
+	artifact = &Artifact{
+		builderId: artifact.BuilderId(),
+		stringVal: artifact.String(),
+		destroy:   artifact.Destroy,
+		files:     artifact.Files(),
+		id:        artifact.Id(),
+		state:     artifact.State,
+	}
+
 	// Force shell-local pp to keep the input artifact, because otherwise we'll
 	// lose it instead of being able to pass it through. If you want to delete
 	// the input artifact for a shell local pp, use the artifice pp to create a

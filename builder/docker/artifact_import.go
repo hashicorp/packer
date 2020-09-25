@@ -34,12 +34,10 @@ func (a *ImportArtifact) String() string {
 	if tags == nil {
 		return fmt.Sprintf("Imported Docker image: %s", a.Id())
 	}
-	cast := tags.([]interface{})
+	cast := tags.([]string)
 	names := []string{}
 	for _, name := range cast {
-		if n, ok := name.(string); ok {
-			names = append(names, n)
-		}
+		names = append(names, name)
 	}
 	return fmt.Sprintf("Imported Docker image: %s with tags %s",
 		a.Id(), strings.Join(names, " "))
