@@ -71,9 +71,9 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		if len(hclFiles)+len(jsonFiles) == 0 {
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
-				Summary:  "Could not find any config file in " + filename,
-				Detail: "A config file must be suffixed with `.pkr.hcl` or " +
-					"`.pkr.json`. A folder can be referenced.",
+				Summary:  "No configuration files found in " + filename,
+				Detail: "A valid configuration file must be present. Configuration \n" +
+					"files must be suffixed with `.pkr.hcl` or `.pkr.json`.",
 			})
 		}
 		for _, filename := range hclFiles {

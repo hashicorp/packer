@@ -2,10 +2,7 @@ package command
 
 import (
 	"context"
-	"fmt"
 	"os"
-
-	"github.com/hashicorp/packer/version"
 )
 
 // InitCommand initializes a Packer working directory.
@@ -52,13 +49,6 @@ func (c *InitCommand) RunContext(ctx context.Context, cla *InitArgs) int {
 
 	packerStarter, ret := c.GetConfig(&cla.MetaArgs)
 	if ret != 0 {
-		fmt.Printf(`%s
-
-Packer initialized with no template!
-
-The directory has no Packer templates. You may begin working
-with Packer immediately by creating a Packer template.
-`, version.FormattedVersion())
 		return ret
 	}
 
