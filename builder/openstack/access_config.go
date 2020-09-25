@@ -3,16 +3,20 @@
 package openstack
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/go-cleanhttp"
+	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -236,6 +240,15 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	return nil
 }
 
+func (c *AccessConfig) enableDebug(ui packer.Ui) {
+	c.osClient.HTTPClient = http.Client{
+		Transport: &DebugRoundTripper{
+			ui: ui,
+			rt: c.osClient.HTTPClient.Transport,
+		},
+	}
+}
+
 func (c *AccessConfig) computeV2Client() (*gophercloud.ServiceClient, error) {
 	return openstack.NewComputeV2(c.osClient, gophercloud.EndpointOpts{
 		Region:       c.Region,
@@ -272,4 +285,50 @@ func (c *AccessConfig) getEndpointType() gophercloud.Availability {
 		return gophercloud.AvailabilityAdmin
 	}
 	return gophercloud.AvailabilityPublic
+}
+
+type DebugRoundTripper struct {
+	ui                packer.Ui
+	rt                http.RoundTripper
+	numReauthAttempts int
+}
+
+// RoundTrip performs a round-trip HTTP request and logs relevant information about it.
+func (drt *DebugRoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
+	defer func() {
+		if request.Body != nil {
+			request.Body.Close()
+		}
+	}()
+
+	var response *http.Response
+	var err error
+
+	response, err = drt.rt.RoundTrip(request)
+	if response == nil {
+		return nil, err
+	}
+
+	if response.StatusCode == http.StatusUnauthorized {
+		if drt.numReauthAttempts == 3 {
+			return response, fmt.Errorf("Tried to re-authenticate 3 times with no success.")
+		}
+		drt.numReauthAttempts++
+	}
+
+	drt.DebugMessage(fmt.Sprintf("Request %s %s %d", request.Method, request.URL, response.StatusCode))
+
+	if response.StatusCode >= 400 {
+		buf := bytes.NewBuffer([]byte{})
+		body, _ := ioutil.ReadAll(io.TeeReader(response.Body, buf))
+		drt.DebugMessage(fmt.Sprintf("Response Error: %+v\n", string(body)))
+		bufWithClose := ioutil.NopCloser(buf)
+		response.Body = bufWithClose
+	}
+
+	return response, err
+}
+
+func (drt *DebugRoundTripper) DebugMessage(message string) {
+	drt.ui.Message(fmt.Sprintf("[DEBUG] %s", message))
 }

@@ -71,6 +71,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+	if b.config.PackerDebug {
+		b.config.enableDebug(ui)
+	}
+
 	computeClient, err := b.config.computeV2Client()
 	if err != nil {
 		return nil, fmt.Errorf("Error initializing compute client: %s", err)
