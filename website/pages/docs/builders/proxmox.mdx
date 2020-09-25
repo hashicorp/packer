@@ -185,6 +185,11 @@ builder.
     `raw`, `cow`, `qcow`, `qed`, `qcow2`, `vmdk` or `cloop`. Defaults to
     `raw`.
 
+  - `io_thread` (bool) - Create one I/O thread per storage controller, rather
+    than a single thread for all I/O. This can increase performance when
+    multiple disks are used. Requires `virtio-scsi-single` controller and a
+    `scsi` or `virtio` disk. Defaults to `false`.
+
 - `template_name` (string) - Name of the template. Defaults to the generated
   name used during creation.
 
