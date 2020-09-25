@@ -1,14 +1,24 @@
  ## 1.6.3 (Upcoming)
 
 ### IMPROVEMENTS:
+* builder/amazon: Add `pause_before_ssm` option to pause for some time before
+    establishing a Session Manager session; defaults to 10s. [GH-9988]
 * builder/amazon: Implement assume_role option that matches Terraform behavior.
     [GH-9981]
 * builder/azure: Support publishing to a Shared Image Gallery with a different
     subscription id [GH-9875]
+* builder/openstack: Add `external_source_image_url` and
+    `external_source_image_format` to support building images from external
+    source URLs. [GH-9992]
+* builder/openstack: Include API requests and responses as part of the debug
+    log output. [GH-9972]
 * builder/oracle-oci: Add `create_vnic_details` option for launch details.
     [GH-9856]
-* builder/oracle-oci: Allow freeform and defined tags to be added instance.
+* builder/oracle-oci: Allow freeform and defined tags to be added to an instance.
     [GH-9802]
+* builder/proxmox: Add `io_thread` option for supporting io threads when using
+    a `virtio-scsi-single` controller with a `scsi` or `virtio` disk type.
+    [GH-9969]
 * builder/proxmox: Add ability to specify interfaces for http_directroy and VM.
     [GH-9874]
 * builder/proxmox: Allow the mounting of multiple ISOs via the `cd_drive`
@@ -20,7 +30,7 @@
     images. [GH-9896] [GH-9860]
 * builder/qemu: Skip qemu-img convert on MacOS to prevent the creation of
     corrupt images [QEMU
-    #1776920](https://bugs.launchpad.net/qemu/+bug/1776920)[GH-9949]
+    #1776920](https://bugs.launchpad.net/qemu/+bug/1776920) [GH-9949]
 * builder/scaleway: Change default boottype to local. [GH-9853]
 * builder/scaleway: Update scaleway to use non-deprecated sdk. [GH-9902]
 * builder/vmware: Add `vnc_over_websocket` to allow the sending of a
@@ -49,8 +59,8 @@
 * builder/amazon-ebssurrogate: Fix issue where builder defaults to AWS managed
     key even when custom `kms_key_id` is set. [GH-9959]
 * builder/amazon: Update ssm_driver log polling logic to prevent infinite loops
-    when SSM driver is shut down outsite Packer. [GH-9991]
-* builder/azure: Fix crash when using HCL2 configs. [GH-9984]
+    when SSM driver is terminated outside of Packer. [GH-9991]
+* builder/azure: Fix crash when using HCL2 configs. [GH-9984] [GH-9985]
 * builder/qemu: Fix hardcoded lowerbound causing negative ports [GH-9905]
 * builder/qemu: Skip compaction when backing file is used. [GH-9918]
 * builder/scaleway: Add pre validate step to prevent the creation of multiple
@@ -60,7 +70,9 @@
 * builder/vsphere: Fix overly strict iso_path validation regex. [GH-9855]
 * command/console: Prevent failure when there are unknown vars. [GH-9864]
 * command/inspect: Allow unset variables in HCL2 and JSON. [GH-9832]
-* core: use $APPDATA over $HOME on Windows hosts when determining homedir.
+* core: Prevent the UI progressbar from hanging and crashing when there is no
+    TTY available. [GH-9974]
+* core: Use $APPDATA over $HOME on Windows hosts when determining homedir.
     [GH-9830]
 * post-processor/digitalocean-import: Fix crash caused by empty artifact.Files
     slice. [GH-9857]
