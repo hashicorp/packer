@@ -122,7 +122,7 @@ require (
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible
 	github.com/ucloud/ucloud-sdk-go v0.16.3
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
-	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
+	github.com/ugorji/go/codec v1.1.13
 	github.com/ulikunitz/xz v0.5.5
 	github.com/vmware/govmomi v0.23.1
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0

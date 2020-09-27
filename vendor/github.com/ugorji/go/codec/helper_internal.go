@@ -1,78 +1,14 @@
-// Copyright (c) 2012-2015 Ugorji Nwoke. All rights reserved.
+// Copyright (c) 2012-2020 Ugorji Nwoke. All rights reserved.
 // Use of this source code is governed by a MIT license found in the LICENSE file.
 
 package codec
 
+// maxArrayLen is the size of uint, which determines
+// the maximum length of any array.
+const maxArrayLen = 1<<((32<<(^uint(0)>>63))-1) - 1
+
 // All non-std package dependencies live in this file,
 // so porting to different environment is easy (just update functions).
-
-import (
-	"errors"
-	"fmt"
-	"math"
-	"reflect"
-)
-
-func panicValToErr(panicVal interface{}, err *error) {
-	if panicVal == nil {
-		return
-	}
-	// case nil
-	switch xerr := panicVal.(type) {
-	case error:
-		*err = xerr
-	case string:
-		*err = errors.New(xerr)
-	default:
-		*err = fmt.Errorf("%v", panicVal)
-	}
-	return
-}
-
-func hIsEmptyValue(v reflect.Value, deref, checkStruct bool) bool {
-	switch v.Kind() {
-	case reflect.Invalid:
-		return true
-	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
-		return v.Len() == 0
-	case reflect.Bool:
-		return !v.Bool()
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return v.Int() == 0
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		return v.Uint() == 0
-	case reflect.Float32, reflect.Float64:
-		return v.Float() == 0
-	case reflect.Interface, reflect.Ptr:
-		if deref {
-			if v.IsNil() {
-				return true
-			}
-			return hIsEmptyValue(v.Elem(), deref, checkStruct)
-		} else {
-			return v.IsNil()
-		}
-	case reflect.Struct:
-		if !checkStruct {
-			return false
-		}
-		// return true if all fields are empty. else return false.
-		// we cannot use equality check, because some fields may be maps/slices/etc
-		// and consequently the structs are not comparable.
-		// return v.Interface() == reflect.Zero(v.Type()).Interface()
-		for i, n := 0, v.NumField(); i < n; i++ {
-			if !hIsEmptyValue(v.Field(i), deref, checkStruct) {
-				return false
-			}
-		}
-		return true
-	}
-	return false
-}
-
-func isEmptyValue(v reflect.Value) bool {
-	return hIsEmptyValue(v, derefForIsEmptyValue, checkStructForEmptyValue)
-}
 
 func pruneSignExt(v []byte, pos bool) (n int) {
 	if len(v) < 2 {
@@ -86,157 +22,126 @@ func pruneSignExt(v []byte, pos bool) (n int) {
 	return
 }
 
-func implementsIntf(typ, iTyp reflect.Type) (success bool, indir int8) {
-	if typ == nil {
-		return
-	}
-	rt := typ
-	// The type might be a pointer and we need to keep
-	// dereferencing to the base type until we find an implementation.
-	for {
-		if rt.Implements(iTyp) {
-			return true, indir
-		}
-		if p := rt; p.Kind() == reflect.Ptr {
-			indir++
-			if indir >= math.MaxInt8 { // insane number of indirections
-				return false, 0
-			}
-			rt = p.Elem()
-			continue
-		}
-		break
-	}
-	// No luck yet, but if this is a base type (non-pointer), the pointer might satisfy.
-	if typ.Kind() != reflect.Ptr {
-		// Not a pointer, but does the pointer work?
-		if reflect.PtrTo(typ).Implements(iTyp) {
-			return true, -1
-		}
-	}
-	return false, 0
-}
+func halfFloatToFloatBits(h uint16) (f uint32) {
+	// retrofitted from:
+	// - OGRE (Object-Oriented Graphics Rendering Engine)
+	//   function: halfToFloatI https://www.ogre3d.org/docs/api/1.9/_ogre_bitwise_8h_source.html
 
-// validate that this function is correct ...
-// culled from OGRE (Object-Oriented Graphics Rendering Engine)
-// function: halfToFloatI (http://stderr.org/doc/ogre-doc/api/OgreBitwise_8h-source.html)
-func halfFloatToFloatBits(yy uint16) (d uint32) {
-	y := uint32(yy)
-	s := (y >> 15) & 0x01
-	e := (y >> 10) & 0x1f
-	m := y & 0x03ff
+	s := uint32(h >> 15)
+	m := uint32(h & 0x03ff)
+	e := int32((h >> 10) & 0x1f)
 
 	if e == 0 {
-		if m == 0 { // plu or minus 0
+		if m == 0 { // plus or minus 0
 			return s << 31
-		} else { // Denormalized number -- renormalize it
-			for (m & 0x00000400) == 0 {
-				m <<= 1
-				e -= 1
-			}
-			e += 1
-			const zz uint32 = 0x0400
-			m &= ^zz
 		}
+		// Denormalized number -- renormalize it
+		for (m & 0x0400) == 0 {
+			m <<= 1
+			e -= 1
+		}
+		e += 1
+		m &= ^uint32(0x0400)
 	} else if e == 31 {
 		if m == 0 { // Inf
 			return (s << 31) | 0x7f800000
-		} else { // NaN
-			return (s << 31) | 0x7f800000 | (m << 13)
 		}
+		return (s << 31) | 0x7f800000 | (m << 13) // NaN
 	}
 	e = e + (127 - 15)
 	m = m << 13
-	return (s << 31) | (e << 23) | m
+	return (s << 31) | (uint32(e) << 23) | m
 }
 
-// GrowCap will return a new capacity for a slice, given the following:
+func floatToHalfFloatBits(i uint32) (h uint16) {
+	// retrofitted from:
+	// - OGRE (Object-Oriented Graphics Rendering Engine)
+	//   function: halfToFloatI https://www.ogre3d.org/docs/api/1.9/_ogre_bitwise_8h_source.html
+	// - http://www.java2s.com/example/java-utility-method/float-to/floattohalf-float-f-fae00.html
+	s := (i >> 16) & 0x8000
+	e := int32(((i >> 23) & 0xff) - (127 - 15))
+	m := i & 0x7fffff
+
+	var h32 uint32
+
+	if e <= 0 {
+		if e < -10 { // zero
+			h32 = s // track -0 vs +0
+		} else {
+			m = (m | 0x800000) >> uint32(1-e)
+			h32 = s | (m >> 13)
+		}
+	} else if e == 0xff-(127-15) {
+		if m == 0 { // Inf
+			h32 = s | 0x7c00
+		} else { // NAN
+			m >>= 13
+			var me uint32
+			if m == 0 {
+				me = 1
+			}
+			h32 = s | 0x7c00 | m | me
+		}
+	} else {
+		if e > 30 { // Overflow
+			h32 = s | 0x7c00
+		} else {
+			h32 = s | (uint32(e) << 10) | (m >> 13)
+		}
+	}
+	h = uint16(h32)
+	return
+}
+
+// growCap will return a new capacity for a slice, given the following:
 //   - oldCap: current capacity
 //   - unit: in-memory size of an element
 //   - num: number of elements to add
-func growCap(oldCap, unit, num int) (newCap int) {
+func growCap(oldCap, unit, num uint) (newCap uint) {
 	// appendslice logic (if cap < 1024, *2, else *1.25):
 	//   leads to many copy calls, especially when copying bytes.
 	//   bytes.Buffer model (2*cap + n): much better for bytes.
 	// smarter way is to take the byte-size of the appended element(type) into account
 
-	// maintain 3 thresholds:
+	// maintain 1 thresholds:
 	// t1: if cap <= t1, newcap = 2x
-	// t2: if cap <= t2, newcap = 1.75x
-	// t3: if cap <= t3, newcap = 1.5x
-	//     else          newcap = 1.25x
+	//     else          newcap = 1.5x
 	//
-	// t1, t2, t3 >= 1024 always.
-	// i.e. if unit size >= 16, then always do 2x or 1.25x (ie t1, t2, t3 are all same)
+	// t1 is always >= 1024.
+	// This means that, if unit size >= 16, then always do 2x or 1.5x (ie t1, t2, t3 are all same)
 	//
 	// With this, appending for bytes increase by:
 	//    100% up to 4K
-	//     75% up to 8K
-	//     50% up to 16K
-	//     25% beyond that
+	//     50% beyond that
 
 	// unit can be 0 e.g. for struct{}{}; handle that appropriately
-	var t1, t2, t3 int // thresholds
-	if unit <= 1 {
-		t1, t2, t3 = 4*1024, 8*1024, 16*1024
-	} else if unit < 16 {
-		t3 = 16 / unit * 1024
-		t1 = t3 * 1 / 4
-		t2 = t3 * 2 / 4
-	} else {
-		t1, t2, t3 = 1024, 1024, 1024
+	maxCap := num + (oldCap * 3 / 2)
+	if unit == 0 || maxCap > maxArrayLen || maxCap < oldCap { // handle wraparound, etc
+		return maxArrayLen
 	}
 
-	var x int // temporary variable
-
-	// x is multiplier here: one of 5, 6, 7 or 8; incr of 25%, 50%, 75% or 100% respectively
-	if oldCap <= t1 { // [0,t1]
-		x = 8
-	} else if oldCap > t3 { // (t3,infinity]
-		x = 5
-	} else if oldCap <= t2 { // (t1,t2]
-		x = 7
-	} else { // (t2,t3]
-		x = 6
-	}
-	newCap = x * oldCap / 4
-
-	if num > 0 {
-		newCap += num
+	var t1 uint = 1024 // default thresholds for large values
+	if unit <= 4 {
+		t1 = 8 * 1024
+	} else if unit <= 16 {
+		t1 = 2 * 1024
 	}
 
-	// ensure newCap is a multiple of 64 (if it is > 64) or 16.
-	if newCap > 64 {
-		if x = newCap % 64; x != 0 {
-			x = newCap / 64
-			newCap = 64 * (x + 1)
-		}
-	} else {
-		if x = newCap % 16; x != 0 {
-			x = newCap / 16
-			newCap = 16 * (x + 1)
+	newCap = 2 + num
+	if oldCap > 0 {
+		if oldCap <= t1 { // [0,t1]
+			newCap = num + (oldCap * 2)
+		} else { // (t1,infinity]
+			newCap = maxCap
 		}
 	}
+
+	// ensure newCap takes multiples of a cache line (size is a multiple of 64)
+	t1 = newCap * unit
+	if t2 := t1 % 64; t2 != 0 {
+		t1 += 64 - t2
+		newCap = t1 / unit
+	}
+
 	return
-}
-
-func expandSliceValue(s reflect.Value, num int) reflect.Value {
-	if num <= 0 {
-		return s
-	}
-	l0 := s.Len()
-	l1 := l0 + num // new slice length
-	if l1 < l0 {
-		panic("ExpandSlice: slice overflow")
-	}
-	c0 := s.Cap()
-	if l1 <= c0 {
-		return s.Slice(0, l1)
-	}
-	st := s.Type()
-	c1 := growCap(c0, int(st.Elem().Size()), num)
-	s2 := reflect.MakeSlice(st, l1, c1)
-	// println("expandslicevalue: cap-old: ", c0, ", cap-new: ", c1, ", len-new: ", l1)
-	reflect.Copy(s2, s)
-	return s2
 }
