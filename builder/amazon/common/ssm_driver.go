@@ -7,6 +7,7 @@ import (
 	"log"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -32,10 +33,12 @@ type SSMDriverConfig struct {
 
 type SSMDriver struct {
 	SSMDriverConfig
-	session         *ssm.StartSessionOutput
-	sessionParams   ssm.StartSessionInput
-	pluginCmdFunc   func(context.Context) error
+	session       *ssm.StartSessionOutput
+	sessionParams ssm.StartSessionInput
+	pluginCmdFunc func(context.Context) error
+
 	retryConnection chan bool
+	wg              sync.WaitGroup
 }
 
 func NewSSMDriver(config SSMDriverConfig) *SSMDriver {
@@ -48,6 +51,8 @@ func NewSSMDriver(config SSMDriverConfig) *SSMDriver {
 // not wish to manage the session manually calling StopSession on a instance of this driver will terminate the active session
 // created from calling StartSession.
 func (d *SSMDriver) StartSession(ctx context.Context, input ssm.StartSessionInput) (*ssm.StartSessionOutput, error) {
+	d.wg.Add(1)
+	defer d.wg.Done()
 	log.Printf("Starting PortForwarding session to instance %q", aws.StringValue(input.Target))
 
 	var output *ssm.StartSessionOutput
@@ -76,6 +81,7 @@ func (d *SSMDriver) StartSession(ctx context.Context, input ssm.StartSessionInpu
 			case <-driver.retryConnection:
 				if retryTimes <= 11 {
 					retryTimes++
+					d.wg.Wait()
 					_, err := driver.StartSession(ctx, input)
 					if err != nil {
 						return
@@ -193,6 +199,9 @@ func isRetryableError(output string) bool {
 
 // StopSession terminates an active Session Manager session
 func (d *SSMDriver) StopSession() error {
+	d.wg.Add(1)
+	defer d.wg.Done()
+
 	if d.retryConnection != nil {
 		close(d.retryConnection)
 	}
