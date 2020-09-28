@@ -648,15 +648,20 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 		collectionArgs = append(collectionArgs, "-p", filepath.ToSlash(p.config.CollectionsPath))
 	}
 
-	roleInstallError := p.invokeGalaxyCommand(roleArgs, ui, comm)
-	// Return the error if the role installation failed before attempting the collection install
-	if roleInstallError != nil {
+	// Run normal ansible-galaxy install for roles
+	if roleInstallError := p.invokeGalaxyCommand(roleArgs, ui, comm); roleInstallError != nil {
 		return roleInstallError
 	}
-	// If all is well, proceed with collection install
-	// This variable isn't strictly necessary but including for readability to match the role installation
-	collectionInstallError := p.invokeGalaxyCommand(collectionArgs, ui, comm)
-	return collectionInstallError
+
+	// Search galaxy_file for collections keyword. If present, run collections install
+	if f, err := ioutil.ReadFile(galaxyFile); err == nil {
+		if strings.Contains(string(f), "collections:") {
+			collectionInstallError := p.invokeGalaxyCommand(collectionArgs, ui, comm)
+			return collectionInstallError
+		}
+	}
+
+	return nil
 }
 
 // Intended to be invoked from p.executeGalaxy depending on the Ansible Galaxy parameters passed to Packer
