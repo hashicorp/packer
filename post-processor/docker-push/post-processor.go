@@ -104,9 +104,11 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	names := []string{artifact.Id()}
-	tags, _ := artifact.State("docker_tags").([]string)
-	if len(tags) > 0 {
-		names = append(names, tags...)
+	tags, _ := artifact.State("docker_tags").([]interface{})
+	for _, tag := range tags {
+		if name, ok := tag.(string); ok {
+			names = append(names, name)
+		}
 	}
 
 	// Get the name.
