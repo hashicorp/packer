@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -31,9 +32,10 @@ type SSMDriverConfig struct {
 
 type SSMDriver struct {
 	SSMDriverConfig
-	session       *ssm.StartSessionOutput
-	sessionParams ssm.StartSessionInput
-	pluginCmdFunc func(context.Context) error
+	session         *ssm.StartSessionOutput
+	sessionParams   ssm.StartSessionInput
+	pluginCmdFunc   func(context.Context) error
+	retryConnection chan bool
 }
 
 func NewSSMDriver(config SSMDriverConfig) *SSMDriver {
@@ -59,6 +61,29 @@ func (d *SSMDriver) StartSession(ctx context.Context, input ssm.StartSessionInpu
 	if err != nil {
 		return nil, fmt.Errorf("error encountered in starting session for instance %q: %s", aws.StringValue(input.Target), err)
 	}
+
+	d.retryConnection = make(chan bool, 1)
+	// Starts go routine that will keep listening to a retry channel and retry the session creation when needed.
+	// The log loop will add data to the retry channel whenever a retryable error happens to session.
+	// TODO @sylviamoss add max retry attempts
+	// TODO @sylviamoss zero retry times
+	go func(ctx context.Context, driver *SSMDriver, input ssm.StartSessionInput) {
+		retryTimes := 0
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-driver.retryConnection:
+				if retryTimes <= 11 {
+					retryTimes++
+					_, err := driver.StartSession(ctx, input)
+					if err != nil {
+						return
+					}
+				}
+			}
+		}
+	}(ctx, d, input)
 
 	d.session = output
 	d.sessionParams = input
@@ -118,6 +143,9 @@ func (d *SSMDriver) openTunnelForSession(ctx context.Context) error {
 
 				if output != "" {
 					log.Printf("[ERROR] %s: %s", prefix, output)
+					if isRetryableError(output) {
+						d.retryConnection <- true
+					}
 				}
 			case output, ok := <-stdoutCh:
 				if !ok {
@@ -150,8 +178,24 @@ func (d *SSMDriver) openTunnelForSession(ctx context.Context) error {
 	return nil
 }
 
+func isRetryableError(output string) bool {
+	retryableError := []string{
+		"Unable to connect to specified port",
+	}
+
+	for _, err := range retryableError {
+		if strings.Contains(output, err) {
+			return true
+		}
+	}
+	return false
+}
+
 // StopSession terminates an active Session Manager session
 func (d *SSMDriver) StopSession() error {
+	if d.retryConnection != nil {
+		close(d.retryConnection)
+	}
 
 	if d.session == nil || d.session.SessionId == nil {
 		return fmt.Errorf("Unable to find a valid session to instance %q; skipping the termination step",
