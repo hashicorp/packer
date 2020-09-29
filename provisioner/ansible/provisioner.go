@@ -375,7 +375,7 @@ func (p *Provisioner) setupAdapter(ui packer.Ui, comm packer.Communicator) (stri
 	keyChecker := ssh.CertChecker{
 		UserKeyFallback: func(conn ssh.ConnMetadata, pubKey ssh.PublicKey) (*ssh.Permissions, error) {
 			if user := conn.User(); user != p.config.User {
-				return nil, errors.New(fmt.Sprintf("authentication failed: %s is not a valid user", user))
+				return nil, fmt.Errorf("authentication failed: %s is not a valid user", user)
 			}
 
 			if !bytes.Equal(k.Marshal(), pubKey.Marshal()) {
@@ -648,15 +648,24 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 		collectionArgs = append(collectionArgs, "-p", filepath.ToSlash(p.config.CollectionsPath))
 	}
 
-	// Run normal ansible-galaxy install for roles
-	if roleInstallError := p.invokeGalaxyCommand(roleArgs, ui, comm); roleInstallError != nil {
-		return roleInstallError
+	// Search galaxy_file for roles and collections keywords
+	f, err := ioutil.ReadFile(galaxyFile)
+	if err != nil {
+		return err
+	}
+	hasRoles, _ := regexp.Match(`(?m)^roles:`, f)
+	hasCollections, _ := regexp.Match(`(?m)^collections:`, f)
+
+	// If if roles keyword present (v2 format), or no collections keywork present (v1), install roles
+	if hasRoles || !hasCollections {
+		if roleInstallError := p.invokeGalaxyCommand(roleArgs, ui, comm); roleInstallError != nil {
+			return roleInstallError
+		}
 	}
 
-	// Search galaxy_file for collections keyword. If present, run collections install
-	if f, err := ioutil.ReadFile(galaxyFile); err == nil {
-		if strings.Contains(string(f), "collections:") {
-			collectionInstallError := p.invokeGalaxyCommand(collectionArgs, ui, comm)
+	// If collections keyword present (v2 format), install collections
+	if hasCollections {
+		if collectionInstallError := p.invokeGalaxyCommand(collectionArgs, ui, comm); collectionInstallError != nil {
 			return collectionInstallError
 		}
 	}
