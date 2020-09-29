@@ -9,19 +9,16 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsCredentials "github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/aws/aws-sdk-go/service/sts"
+	awsbase "github.com/hashicorp/aws-sdk-go-base"
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/packer/template/interpolate"
 	vaultapi "github.com/hashicorp/vault/api"
-	homedir "github.com/mitchellh/go-homedir"
 )
 
 // AssumeRoleConfig lets users set configuration options for assuming a special
@@ -148,6 +145,8 @@ type AccessConfig struct {
 	// validation of the ami_regions configuration option. Default false.
 	SkipValidation       bool `mapstructure:"skip_region_validation" required:"false"`
 	SkipMetadataApiCheck bool `mapstructure:"skip_metadata_api_check"`
+	// Set to true if you want to skip validating AWS credentials before runtime.
+	SkipCredsValidation bool `mapstructure:"skip_credential_validation"`
 	// The access token to use. This is different from the
 	// access key and secret key. If you're not sure what this is, then you
 	// probably don't need it. This will also be read from the AWS_SESSION_TOKEN
@@ -309,169 +308,35 @@ func (c *AccessConfig) IsChinaCloud() bool {
 // endpoints. GetCredentials also validates the credentials and the ability to
 // assume a role or will return an error if unsuccessful.
 func (c *AccessConfig) GetCredentials(config *aws.Config) (*awsCredentials.Credentials, error) {
-
-	sharedCredentialsFilename, err := homedir.Expand(c.CredsFilename)
-	if err != nil {
-		return nil, fmt.Errorf("error expanding shared credentials filename: %w", err)
+	// Reload values into the config used by the Packer-Terraform shared SDK
+	awsbaseConfig := &awsbase.Config{
+		AccessKey:                   c.AccessKey,
+		AssumeRoleARN:               c.AssumeRole.AssumeRoleARN,
+		AssumeRoleDurationSeconds:   c.AssumeRole.AssumeRoleDurationSeconds,
+		AssumeRoleExternalID:        c.AssumeRole.AssumeRoleExternalID,
+		AssumeRolePolicy:            c.AssumeRole.AssumeRolePolicy,
+		AssumeRolePolicyARNs:        c.AssumeRole.AssumeRolePolicyARNs,
+		AssumeRoleSessionName:       c.AssumeRole.AssumeRoleSessionName,
+		AssumeRoleTags:              c.AssumeRole.AssumeRoleTags,
+		AssumeRoleTransitiveTagKeys: c.AssumeRole.AssumeRoleTransitiveTagKeys,
+		CredsFilename:               c.CredsFilename,
+		DebugLogging:                false,
+		// TODO: implement for Packer
+		// IamEndpoint:                 c.Endpoints["iam"],
+		Insecure:             c.InsecureSkipTLSVerify,
+		MaxRetries:           c.MaxRetries,
+		Profile:              c.ProfileName,
+		Region:               c.RawRegion,
+		SecretKey:            c.SecretKey,
+		SkipCredsValidation:  c.SkipCredsValidation,
+		SkipMetadataApiCheck: c.SkipMetadataApiCheck,
+		// TODO: implement for Packer
+		// SkipRequestingAccountId:     c.SkipRequestingAccountId,
+		// StsEndpoint:                 c.Endpoints["sts"],
+		Token: c.Token,
 	}
 
-	// Create a credentials chain that tries to load credentials from various
-	// common sources: config vars, then local profiles.
-	// Rather than using the default credentials chain, build a chain provider,
-	// lazy-evaluated by aws-sdk
-	providers := []awsCredentials.Provider{
-		// Tries to set new credentials object using the given
-		// access_key/secret_key/token. If they are not set, this will fail
-		// over to the other credentials providers
-		&awsCredentials.StaticProvider{Value: awsCredentials.Value{
-			AccessKeyID:     c.AccessKey,
-			SecretAccessKey: c.SecretKey,
-			SessionToken:    c.Token,
-		}},
-		// Tries to load credentials from environment.
-		&awsCredentials.EnvProvider{},
-		// Tries to load credentials from local file.
-		// If sharedCredentialsFilename is empty, the AWS sdk will use the
-		// environment var AWS_SHARED_CREDENTIALS_FILE to determine the file
-		// location, and if that's not set, AWS will use the default locations
-		// of:
-		//   - Linux/Unix: $HOME/.aws/credentials
-		//   - Windows: %USERPROFILE%\.aws\credentials
-		&awsCredentials.SharedCredentialsProvider{
-			Filename: sharedCredentialsFilename,
-			Profile:  c.ProfileName,
-		},
-	}
-
-	// Validate the credentials before returning them
-	creds := awsCredentials.NewChainCredentials(providers)
-	cp, err := creds.Get()
-	if err != nil {
-		if IsAWSErr(err, "NoCredentialProviders", "") {
-			creds, err = c.GetCredentialsFromSession()
-			if err != nil {
-				return nil, err
-			}
-		}
-		return nil, fmt.Errorf("Error loading credentials for AWS Provider: %w", err)
-	}
-
-	log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
-
-	// In the "normal" flow (i.e. not assuming a role), we return here.
-	if c.AssumeRole.AssumeRoleARN == "" {
-		return creds, nil
-	}
-
-	// create a config for the assume role session based off the config we
-	// created for our main sessions
-	assumeRoleAWSConfig := config.Copy()
-	assumeRoleAWSConfig.CredentialsChainVerboseErrors = aws.Bool(true)
-
-	assumeRoleSession, err := session.NewSession(assumeRoleAWSConfig)
-
-	if err != nil {
-		return nil, fmt.Errorf("error creating assume role session: %w", err)
-	}
-
-	stsclient := sts.New(assumeRoleSession)
-	assumeRoleProvider := &stscreds.AssumeRoleProvider{
-		Client:  stsclient,
-		RoleARN: c.AssumeRole.AssumeRoleARN,
-	}
-
-	if c.AssumeRole.AssumeRoleDurationSeconds > 0 {
-		assumeRoleProvider.Duration = time.Duration(c.AssumeRole.AssumeRoleDurationSeconds) * time.Second
-	}
-
-	if c.AssumeRole.AssumeRoleExternalID != "" {
-		assumeRoleProvider.ExternalID = aws.String(c.AssumeRole.AssumeRoleExternalID)
-	}
-
-	if c.AssumeRole.AssumeRolePolicy != "" {
-		assumeRoleProvider.Policy = aws.String(c.AssumeRole.AssumeRolePolicy)
-	}
-
-	if len(c.AssumeRole.AssumeRolePolicyARNs) > 0 {
-		var policyDescriptorTypes []*sts.PolicyDescriptorType
-
-		for _, policyARN := range c.AssumeRole.AssumeRolePolicyARNs {
-			policyDescriptorType := &sts.PolicyDescriptorType{
-				Arn: aws.String(policyARN),
-			}
-			policyDescriptorTypes = append(policyDescriptorTypes, policyDescriptorType)
-		}
-
-		assumeRoleProvider.PolicyArns = policyDescriptorTypes
-	}
-
-	if c.AssumeRole.AssumeRoleSessionName != "" {
-		assumeRoleProvider.RoleSessionName = c.AssumeRole.AssumeRoleSessionName
-	}
-
-	if len(c.AssumeRole.AssumeRoleTags) > 0 {
-		var tags []*sts.Tag
-
-		for k, v := range c.AssumeRole.AssumeRoleTags {
-			tag := &sts.Tag{
-				Key:   aws.String(k),
-				Value: aws.String(v),
-			}
-			tags = append(tags, tag)
-		}
-
-		assumeRoleProvider.Tags = tags
-	}
-
-	if len(c.AssumeRole.AssumeRoleTransitiveTagKeys) > 0 {
-		assumeRoleProvider.TransitiveTagKeys = aws.StringSlice(c.AssumeRole.AssumeRoleTransitiveTagKeys)
-	}
-
-	providers = []awsCredentials.Provider{assumeRoleProvider}
-
-	assumeRoleCreds := awsCredentials.NewChainCredentials(providers)
-
-	_, err = assumeRoleCreds.Get()
-	if err != nil {
-		return nil, fmt.Errorf("Unable to assume role: %w", err)
-	}
-
-	return assumeRoleCreds, nil
-}
-
-// GetCredentialsFromSession returns credentials derived from a session. A
-// session uses the AWS SDK Go chain of providers so may use a provider (e.g.,
-// ProcessProvider) that is not part of the Terraform provider chain.
-func (c *AccessConfig) GetCredentialsFromSession() (*awsCredentials.Credentials, error) {
-	log.Printf("[INFO] Attempting to use session-derived credentials")
-	// Avoid setting HTTPClient here as it will prevent the ec2metadata
-	// client from automatically lowering the timeout to 1 second.
-	options := &session.Options{
-		Config: aws.Config{
-			MaxRetries: aws.Int(0),
-			Region:     aws.String(c.RawRegion),
-		},
-		Profile:           c.ProfileName,
-		SharedConfigState: session.SharedConfigEnable,
-	}
-
-	sess, err := session.NewSessionWithOptions(*options)
-	if err != nil {
-		if IsAWSErr(err, "NoCredentialProviders", "") {
-			return nil, c.NewNoValidCredentialSourcesError(err)
-		}
-		return nil, fmt.Errorf("Error creating AWS session: %w", err)
-	}
-
-	creds := sess.Config.Credentials
-	cp, err := sess.Config.Credentials.Get()
-	if err != nil {
-		return nil, c.NewNoValidCredentialSourcesError(err)
-	}
-
-	log.Printf("[INFO] Successfully derived credentials from session")
-	log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
-	return creds, nil
+	return awsbase.GetCredentials(awsbaseConfig)
 }
 
 func (c *AccessConfig) GetCredsFromVault() error {

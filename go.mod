@@ -51,6 +51,7 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
+	github.com/hashicorp/aws-sdk-go-base v0.6.0
 	github.com/hashicorp/consul/api v1.4.0
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de

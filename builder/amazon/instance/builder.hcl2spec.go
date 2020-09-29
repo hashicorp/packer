@@ -31,6 +31,7 @@ type FlatConfig struct {
 	SecretKey                                 *string                                `mapstructure:"secret_key" required:"true" cty:"secret_key" hcl:"secret_key"`
 	SkipValidation                            *bool                                  `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation" hcl:"skip_region_validation"`
 	SkipMetadataApiCheck                      *bool                                  `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check" hcl:"skip_metadata_api_check"`
+	SkipCredsValidation                       *bool                                  `mapstructure:"skip_credential_validation" cty:"skip_credential_validation" hcl:"skip_credential_validation"`
 	Token                                     *string                                `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
 	VaultAWSEngine                            *common.FlatVaultAWSEngineOptions      `mapstructure:"vault_aws_engine" required:"false" cty:"vault_aws_engine" hcl:"vault_aws_engine"`
 	PollingConfig                             *common.FlatAWSPollingConfig           `mapstructure:"aws_polling" required:"false" cty:"aws_polling" hcl:"aws_polling"`
@@ -181,6 +182,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"secret_key":                    &hcldec.AttrSpec{Name: "secret_key", Type: cty.String, Required: false},
 		"skip_region_validation":        &hcldec.AttrSpec{Name: "skip_region_validation", Type: cty.Bool, Required: false},
 		"skip_metadata_api_check":       &hcldec.AttrSpec{Name: "skip_metadata_api_check", Type: cty.Bool, Required: false},
+		"skip_credential_validation":    &hcldec.AttrSpec{Name: "skip_credential_validation", Type: cty.Bool, Required: false},
 		"token":                         &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"vault_aws_engine":              &hcldec.BlockSpec{TypeName: "vault_aws_engine", Nested: hcldec.ObjectSpec((*common.FlatVaultAWSEngineOptions)(nil).HCL2Spec())},
 		"aws_polling":                   &hcldec.BlockSpec{TypeName: "aws_polling", Nested: hcldec.ObjectSpec((*common.FlatAWSPollingConfig)(nil).HCL2Spec())},

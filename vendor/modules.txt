@@ -291,6 +291,9 @@ github.com/gophercloud/utils/openstack/compute/v2/flavors
 github.com/grpc-ecosystem/go-grpc-middleware
 # github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 github.com/hako/durafmt
+# github.com/hashicorp/aws-sdk-go-base v0.6.0
+github.com/hashicorp/aws-sdk-go-base
+github.com/hashicorp/aws-sdk-go-base/tfawserr
 # github.com/hashicorp/consul/api v1.4.0
 github.com/hashicorp/consul/api
 # github.com/hashicorp/errwrap v1.0.0
