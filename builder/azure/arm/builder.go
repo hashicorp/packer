@@ -390,12 +390,7 @@ func (b *Builder) getBlobAccount(ctx context.Context, client *AzureClient, resou
 func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.AuthorizedKey, b.config.sshAuthorizedKey)
 
-	tagsMap := make(map[string]*string)
-	for key, value := range b.config.AzureTags {
-		tagsMap[key] = &value
-	}
-	// Azure SDK expects string pointers for the values
-	stateBag.Put(constants.ArmTags, tagsMap)
+	stateBag.Put(constants.ArmTags, packerAzureCommon.MapToAzureTags(b.config.AzureTags))
 	stateBag.Put(constants.ArmComputeName, b.config.tmpComputeName)
 	stateBag.Put(constants.ArmDeploymentName, b.config.tmpDeploymentName)
 
