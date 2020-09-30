@@ -236,10 +236,24 @@ func (s *StepCreateCD) AddFile(dst, src string) error {
 		return err
 	}
 
+	// file is a directory, so we need to parse the filename into a path to
+	// dicard and a basename
+	discardPath, _ := filepath.Split(src)
+
 	// Add a directory and its subdirectories
 	visit := func(pathname string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
+		}
+
+		// Clean up pathing so that we preserve the base directory provided by
+		// the user but not the local pathing to that directory.
+		allDirs, base := filepath.Split(pathname)
+		intermediaryDirs := strings.Replace(allDirs, discardPath, "", 1)
+
+		dstPath := filepath.Join(dst, base)
+		if intermediaryDirs != "" {
+			dstPath = filepath.Join(dst, intermediaryDirs, base)
 		}
 
 		// add a file
@@ -250,26 +264,26 @@ func (s *StepCreateCD) AddFile(dst, src string) error {
 			}
 			defer inputF.Close()
 
-			fileDst, err := os.Create(filepath.Join(dst, pathname))
+			fileDst, err := os.Create(dstPath)
 			if err != nil {
-				return fmt.Errorf("Error opening file %s on CD", src)
+				return fmt.Errorf("Error opening file %s on CD: %s", dstPath, err)
 			}
 			defer fileDst.Close()
 			nBytes, err := io.Copy(fileDst, inputF)
 			if err != nil {
-				return fmt.Errorf("Error copying %s to CD", src)
+				return fmt.Errorf("Error copying %s to CD: %s", dstPath, err)
 			}
-			s.filesAdded[pathname] = true
-			log.Printf("Wrote %d bytes to %s", nBytes, pathname)
+			s.filesAdded[dstPath] = true
+			log.Printf("Wrote %d bytes to %s", nBytes, dstPath)
 			return err
 		}
 
 		if fi.Mode().IsDir() {
 			// create the directory on the CD, continue walk.
-			err := os.Mkdir(filepath.Join(dst, pathname), fi.Mode())
+			err := os.MkdirAll(dstPath, fi.Mode())
 			if err != nil {
 				err = fmt.Errorf("error creating new directory %s: %s",
-					filepath.Join(dst, pathname), err)
+					dstPath, err)
 			}
 			return err
 		}
