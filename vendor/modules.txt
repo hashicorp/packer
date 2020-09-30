@@ -302,8 +302,9 @@ github.com/hashicorp/errwrap
 github.com/hashicorp/go-checkpoint
 # github.com/hashicorp/go-cleanhttp v0.5.1
 github.com/hashicorp/go-cleanhttp
-# github.com/hashicorp/go-cty-funcs v0.0.0-20200520133146-0d04eb807361
+# github.com/hashicorp/go-cty-funcs v0.0.0-20200930094925-2721b1e36840
 github.com/hashicorp/go-cty-funcs/cidr
+github.com/hashicorp/go-cty-funcs/collection
 github.com/hashicorp/go-cty-funcs/crypto
 github.com/hashicorp/go-cty-funcs/encoding
 github.com/hashicorp/go-cty-funcs/filesystem
