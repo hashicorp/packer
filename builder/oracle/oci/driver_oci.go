@@ -56,7 +56,6 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 		CompartmentId:      &d.cfg.CompartmentID,
 		DefinedTags:        d.cfg.InstanceDefinedTags,
 		FreeformTags:       d.cfg.InstanceTags,
-		ImageId:            &d.cfg.BaseImageID,
 		Shape:              &d.cfg.Shape,
 		SubnetId:           &d.cfg.SubnetID,
 		Metadata:           metadata,
@@ -81,6 +80,12 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 	}
 
 	instanceDetails.CreateVnicDetails = &CreateVnicDetails
+
+	// Create Source details which will be used to Launch Instance
+	instanceDetails.SourceDetails = core.InstanceSourceViaImageDetails{
+		ImageId:             &d.cfg.BaseImageID,
+		BootVolumeSizeInGBs: &d.cfg.BootVolumeSizeInGBs,
+	}
 
 	instance, err := d.computeClient.LaunchInstance(context.TODO(), core.LaunchInstanceRequest{LaunchInstanceDetails: instanceDetails})
 

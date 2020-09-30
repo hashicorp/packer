@@ -81,6 +81,7 @@ type FlatConfig struct {
 	InstanceTags              map[string]string                 `mapstructure:"instance_tags" cty:"instance_tags" hcl:"instance_tags"`
 	InstanceDefinedTags       map[string]map[string]interface{} `mapstructure:"instance_defined_tags" cty:"instance_defined_tags" hcl:"instance_defined_tags"`
 	Shape                     *string                           `mapstructure:"shape" cty:"shape" hcl:"shape"`
+	BootVolumeSizeInGBs       *int64                            `mapstructure:"boot_volume_size_in_gbs" cty:"boot_volume_size_in_gbs" hcl:"boot_volume_size_in_gbs"`
 	Metadata                  map[string]string                 `mapstructure:"metadata" cty:"metadata" hcl:"metadata"`
 	UserData                  *string                           `mapstructure:"user_data" cty:"user_data" hcl:"user_data"`
 	UserDataFile              *string                           `mapstructure:"user_data_file" cty:"user_data_file" hcl:"user_data_file"`
@@ -174,6 +175,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"instance_tags":                &hcldec.AttrSpec{Name: "instance_tags", Type: cty.Map(cty.String), Required: false},
 		"instance_defined_tags":        &hcldec.AttrSpec{Name: "instance_defined_tags", Type: cty.Map(cty.String), Required: false},
 		"shape":                        &hcldec.AttrSpec{Name: "shape", Type: cty.String, Required: false},
+		"boot_volume_size_in_gbs":      &hcldec.AttrSpec{Name: "boot_volume_size_in_gbs", Type: cty.Number, Required: false},
 		"metadata":                     &hcldec.AttrSpec{Name: "metadata", Type: cty.Map(cty.String), Required: false},
 		"user_data":                    &hcldec.AttrSpec{Name: "user_data", Type: cty.String, Required: false},
 		"user_data_file":               &hcldec.AttrSpec{Name: "user_data_file", Type: cty.String, Required: false},
