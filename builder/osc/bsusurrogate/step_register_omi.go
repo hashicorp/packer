@@ -8,7 +8,6 @@ import (
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -23,7 +22,6 @@ type StepRegisterOMI struct {
 
 func (s *StepRegisterOMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	oapiconn := state.Get("oapi").(*oapi.Client)
 	oscconn := state.Get("osc").(*osc.APIClient)
 	snapshotIds := state.Get("snapshot_ids").(map[string]string)
 	ui := state.Get("ui").(packer.Ui)
@@ -51,7 +49,7 @@ func (s *StepRegisterOMI) Run(ctx context.Context, state multistep.StateBag) mul
 	// Set the OMI ID in the state
 	ui.Say(fmt.Sprintf("OMI: %s", registerResp.Image.ImageId))
 	omis := make(map[string]string)
-	omis[oapiconn.GetConfig().Region] = registerResp.Image.ImageId
+	omis[s.RawRegion] = registerResp.Image.ImageId
 	state.Put("omis", omis)
 
 	// Wait for the image to become ready
