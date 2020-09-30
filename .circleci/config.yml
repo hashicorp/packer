@@ -7,11 +7,11 @@ version: 2.1
 executors:
   golang:
     docker:
-      - image: circleci/golang:1.13
+      - image: circleci/golang:1.15
     resource_class: medium+
   darwin:
     macos:
-      xcode: "9.0"
+      xcode: "12.0.0"
 
 commands:
   install-go-run-tests-unix:
@@ -67,7 +67,7 @@ jobs:
     steps:
       - install-go-run-tests-unix:
           GOOS: darwin
-          GOVERSION: "1.13"
+          GOVERSION: "1.15"
       - codecov/upload:
           file: coverage.txt
   test-windows:
@@ -76,7 +76,7 @@ jobs:
       shell: bash.exe
     steps:
       - install-go-run-tests-windows:
-          GOVERSION: "1.13"
+          GOVERSION: "1.15"
       - codecov/upload:
           file: coverage.txt
   check-lint:
