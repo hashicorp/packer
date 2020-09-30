@@ -2072,8 +2072,8 @@ func TestConfig_PrepareProvidedWinRMPassword(t *testing.T) {
 	}
 }
 
-func getArmBuilderConfiguration() map[string]string {
-	m := make(map[string]string)
+func getArmBuilderConfiguration() map[string]interface{} {
+	m := make(map[string]interface{})
 	for _, v := range requiredConfigValues {
 		m[v] = "ignored00"
 	}
