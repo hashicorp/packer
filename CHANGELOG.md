@@ -1,5 +1,13 @@
 ## 1.6.4 (Upcoming)
 
+### BUG FIXES:
+* builder/amazon: Fix authentication issue when using instance profiles or
+    assumed roles for loading session-derived credentials. [GH-10000]
+* builder/azure: Fix crash when using `azure_tag` or `azure_tags` configuration
+    options. [GH-10014]
+* builder/qemu: Ensure `qemu_img_args` are honored during the disk convert
+    step. [GH-10001]
+
  ## 1.6.3 (September 25, 2020)
 
 ### IMPROVEMENTS:
@@ -21,7 +29,7 @@
 * builder/proxmox: Add `io_thread` option for supporting io threads when using
     a `virtio-scsi-single` controller with a `scsi` or `virtio` disk type.
     [GH-9969]
-* builder/proxmox: Add ability to specify interfaces for http_directroy and VM.
+* builder/proxmox: Add ability to specify interfaces for http_directory and VM.
     [GH-9874]
 * builder/proxmox: Allow the mounting of multiple ISOs via the `cd_drive`
     option. [GH-9653]
