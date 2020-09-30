@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/antihax/optional"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // StepCreateVolume creates a new volume from the snapshot of the root
@@ -23,18 +24,19 @@ type StepCreateVolume struct {
 	RootVolumeSize int64
 	RootVolumeType string
 	RootVolumeTags osccommon.TagMap
+	RawRegion      string
 	Ctx            interpolate.Context
 }
 
 func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	oapiconn := state.Get("oapi").(*oapi.Client)
-	vm := state.Get("vm").(oapi.Vm)
+	oscconn := state.Get("osc").(*osc.APIClient)
+	vm := state.Get("vm").(osc.Vm)
 	ui := state.Get("ui").(packer.Ui)
 
 	var err error
 
-	volTags, err := s.RootVolumeTags.OAPITags(s.Ctx, oapiconn.GetConfig().Region, state)
+	volTags, err := s.RootVolumeTags.OSCTags(s.Ctx, s.RawRegion, state)
 
 	if err != nil {
 		state.Put("error", err)
@@ -42,7 +44,7 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 		return multistep.ActionHalt
 	}
 
-	var createVolume *oapi.CreateVolumeRequest
+	var createVolume *osc.CreateVolumeRequest
 	if config.FromScratch {
 		rootVolumeType := osccommon.VolumeTypeGp2
 		if s.RootVolumeType == "io1" {
@@ -53,17 +55,17 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 		} else if s.RootVolumeType != "" {
 			rootVolumeType = s.RootVolumeType
 		}
-		createVolume = &oapi.CreateVolumeRequest{
+		createVolume = &osc.CreateVolumeRequest{
 			SubregionName: vm.Placement.SubregionName,
-			Size:          s.RootVolumeSize,
+			Size:          int32(s.RootVolumeSize),
 			VolumeType:    rootVolumeType,
 		}
 
 	} else {
 		// Determine the root device snapshot
-		image := state.Get("source_image").(oapi.Image)
+		image := state.Get("source_image").(osc.Image)
 		log.Printf("Searching for root device of the image (%s)", image.RootDeviceName)
-		var rootDevice *oapi.BlockDeviceMappingImage
+		var rootDevice *osc.BlockDeviceMappingImage
 		for _, device := range image.BlockDeviceMappings {
 			if device.DeviceName == image.RootDeviceName {
 				rootDevice = &device
@@ -82,7 +84,9 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 
 	log.Printf("Create args: %+v", createVolume)
 
-	createVolumeResp, err := oapiconn.POST_CreateVolume(*createVolume)
+	createVolumeResp, _, err := oscconn.VolumeApi.CreateVolume(context.Background(), &osc.CreateVolumeOpts{
+		CreateVolumeRequest: optional.NewInterface(*createVolume),
+	})
 	if err != nil {
 		err := fmt.Errorf("Error creating root volume: %s", err)
 		state.Put("error", err)
@@ -91,12 +95,12 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	// Set the volume ID so we remember to delete it later
-	s.volumeId = createVolumeResp.OK.Volume.VolumeId
+	s.volumeId = createVolumeResp.Volume.VolumeId
 	log.Printf("Volume ID: %s", s.volumeId)
 
 	//Create tags for volume
 	if len(volTags) > 0 {
-		if err := osccommon.CreateTags(oapiconn, s.volumeId, ui, volTags); err != nil {
+		if err := osccommon.CreateOSCTags(oscconn, s.volumeId, ui, volTags); err != nil {
 			err := fmt.Errorf("Error creating tags for volume: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -105,7 +109,7 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	// Wait for the volume to become ready
-	err = osccommon.WaitUntilVolumeAvailable(oapiconn, s.volumeId)
+	err = osccommon.WaitUntilOscVolumeAvailable(oscconn, s.volumeId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for volume: %s", err)
 		state.Put("error", err)
@@ -122,32 +126,34 @@ func (s *StepCreateVolume) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	oapiconn := state.Get("oapi").(*oapi.Client)
+	oscconn := state.Get("osc").(*osc.APIClient)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting the created BSU volume...")
-	_, err := oapiconn.POST_DeleteVolume(oapi.DeleteVolumeRequest{VolumeId: s.volumeId})
+	_, _, err := oscconn.VolumeApi.DeleteVolume(context.Background(), &osc.DeleteVolumeOpts{
+		DeleteVolumeRequest: optional.NewInterface(osc.DeleteVolumeRequest{VolumeId: s.volumeId}),
+	})
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error deleting BSU volume: %s", err))
 	}
 }
 
-func (s *StepCreateVolume) buildCreateVolumeInput(suregionName string, rootDevice *oapi.BlockDeviceMappingImage) (*oapi.CreateVolumeRequest, error) {
+func (s *StepCreateVolume) buildCreateVolumeInput(suregionName string, rootDevice *osc.BlockDeviceMappingImage) (*osc.CreateVolumeRequest, error) {
 	if rootDevice == nil {
-		return nil, fmt.Errorf("Couldn't find root device!")
+		return nil, fmt.Errorf("Couldn't find root device")
 	}
 
 	//FIX: Temporary fix
 	gibSize := rootDevice.Bsu.VolumeSize / (1024 * 1024 * 1024)
-	createVolumeInput := &oapi.CreateVolumeRequest{
+	createVolumeInput := &osc.CreateVolumeRequest{
 		SubregionName: suregionName,
 		Size:          gibSize,
 		SnapshotId:    rootDevice.Bsu.SnapshotId,
 		VolumeType:    rootDevice.Bsu.VolumeType,
 		Iops:          rootDevice.Bsu.Iops,
 	}
-	if s.RootVolumeSize > rootDevice.Bsu.VolumeSize {
-		createVolumeInput.Size = s.RootVolumeSize
+	if int32(s.RootVolumeSize) > rootDevice.Bsu.VolumeSize {
+		createVolumeInput.Size = int32(s.RootVolumeSize)
 	}
 
 	if s.RootVolumeType == "" || s.RootVolumeType == rootDevice.Bsu.VolumeType {

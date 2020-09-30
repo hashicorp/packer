@@ -4,42 +4,44 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/antihax/optional"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // StepCreateOMI creates the OMI.
 type StepCreateOMI struct {
 	RootVolumeSize int64
+	RawRegion      string
 }
 
 func (s *StepCreateOMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	oapiconn := state.Get("oapi").(*oapi.Client)
+	osconn := state.Get("osc").(*osc.APIClient)
 	snapshotId := state.Get("snapshot_id").(string)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating the OMI...")
 
 	var (
-		registerOpts   oapi.CreateImageRequest
-		mappings       []oapi.BlockDeviceMappingImage
-		image          oapi.Image
+		registerOpts   osc.CreateImageRequest
+		mappings       []osc.BlockDeviceMappingImage
+		image          osc.Image
 		rootDeviceName string
 	)
 
 	if config.FromScratch {
-		mappings = config.OMIBlockDevices.BuildOMIDevices()
+		mappings = config.OMIBlockDevices.BuildOscOMIDevices()
 		rootDeviceName = config.RootDeviceName
 	} else {
-		image = state.Get("source_image").(oapi.Image)
+		image = state.Get("source_image").(osc.Image)
 		mappings = image.BlockDeviceMappings
 		rootDeviceName = image.RootDeviceName
 	}
 
-	newMappings := make([]oapi.BlockDeviceMappingImage, len(mappings))
+	newMappings := make([]osc.BlockDeviceMappingImage, len(mappings))
 	for i, device := range mappings {
 		newDevice := device
 
@@ -48,14 +50,14 @@ func (s *StepCreateOMI) Run(ctx context.Context, state multistep.StateBag) multi
 		newDevice.Bsu.VolumeSize = gibSize
 
 		if newDevice.DeviceName == rootDeviceName {
-			if newDevice.Bsu != (oapi.BsuToCreate{}) {
+			if newDevice.Bsu != (osc.BsuToCreate{}) {
 				newDevice.Bsu.SnapshotId = snapshotId
 			} else {
-				newDevice.Bsu = oapi.BsuToCreate{SnapshotId: snapshotId}
+				newDevice.Bsu = osc.BsuToCreate{SnapshotId: snapshotId}
 			}
 
-			if config.FromScratch || s.RootVolumeSize > newDevice.Bsu.VolumeSize {
-				newDevice.Bsu.VolumeSize = s.RootVolumeSize
+			if config.FromScratch || int32(s.RootVolumeSize) > newDevice.Bsu.VolumeSize {
+				newDevice.Bsu.VolumeSize = int32(s.RootVolumeSize)
 			}
 		}
 
@@ -63,7 +65,7 @@ func (s *StepCreateOMI) Run(ctx context.Context, state multistep.StateBag) multi
 	}
 
 	if config.FromScratch {
-		registerOpts = oapi.CreateImageRequest{
+		registerOpts = osc.CreateImageRequest{
 			ImageName:           config.OMIName,
 			Architecture:        "x86_64",
 			RootDeviceName:      rootDeviceName,
@@ -73,23 +75,25 @@ func (s *StepCreateOMI) Run(ctx context.Context, state multistep.StateBag) multi
 		registerOpts = buildRegisterOpts(config, image, newMappings)
 	}
 
-	registerResp, err := oapiconn.POST_CreateImage(registerOpts)
+	registerResp, _, err := osconn.ImageApi.CreateImage(context.Background(), &osc.CreateImageOpts{
+		CreateImageRequest: optional.NewInterface(registerOpts),
+	})
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error registering OMI: %s", err))
 		ui.Error(state.Get("error").(error).Error())
 		return multistep.ActionHalt
 	}
 
-	imageID := registerResp.OK.Image.ImageId
+	imageID := registerResp.Image.ImageId
 
 	// Set the OMI ID in the state
 	ui.Say(fmt.Sprintf("OMI: %s", imageID))
 	omis := make(map[string]string)
-	omis[oapiconn.GetConfig().Region] = imageID
+	omis[s.RawRegion] = imageID
 	state.Put("omis", omis)
 
 	ui.Say("Waiting for OMI to become ready...")
-	if err := osccommon.WaitUntilImageAvailable(oapiconn, imageID); err != nil {
+	if err := osccommon.WaitUntilOscImageAvailable(osconn, imageID); err != nil {
 		err := fmt.Errorf("Error waiting for OMI: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -101,8 +105,8 @@ func (s *StepCreateOMI) Run(ctx context.Context, state multistep.StateBag) multi
 
 func (s *StepCreateOMI) Cleanup(state multistep.StateBag) {}
 
-func buildRegisterOpts(config *Config, image oapi.Image, mappings []oapi.BlockDeviceMappingImage) oapi.CreateImageRequest {
-	registerOpts := oapi.CreateImageRequest{
+func buildRegisterOpts(config *Config, image osc.Image, mappings []osc.BlockDeviceMappingImage) osc.CreateImageRequest {
+	registerOpts := osc.CreateImageRequest{
 		ImageName:           config.OMIName,
 		Architecture:        image.Architecture,
 		RootDeviceName:      image.RootDeviceName,
