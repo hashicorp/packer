@@ -1,4 +1,4 @@
-## 1.6.4 (Upcoming)
+## 1.6.4 (September 30, 2020)
 
 ### BUG FIXES:
 * builder/amazon: Fix authentication issue when using instance profiles or
