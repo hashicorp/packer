@@ -2,7 +2,7 @@
 
 ### BUG FIXES:
 * builder/amazon: Fix authentication issue when using instance profiles or
-    assumed roles for loading session-derived credentials. [GH-10000]
+    assumed roles for loading session-derived credentials. [GH-10007]
 * builder/azure: Fix crash when using `azure_tag` or `azure_tags` configuration
     options. [GH-10014]
 * builder/qemu: Ensure `qemu_img_args` are honored during the disk convert
