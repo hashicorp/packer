@@ -39,8 +39,8 @@ func (s *StepDeregisterOMI) Run(_ context.Context, state multistep.StateBag) mul
 		resp, _, err := conn.ImageApi.ReadImages(context.Background(), &osc.ReadImagesOpts{
 			ReadImagesRequest: optional.NewInterface(osc.ReadImagesRequest{
 				Filters: osc.FiltersImage{
-					ImageNames:     []string{s.OMIName},
-					AccountAliases: []string{"self"},
+					ImageNames: []string{s.OMIName},
+					//AccountAliases: []string{"self"},
 				},
 			}),
 		})

@@ -10,7 +10,6 @@ import (
 
 	"github.com/antihax/optional"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/outscale/osc-go/oapi"
 	"github.com/outscale/osc-sdk-go/osc"
 
 	retry "github.com/hashicorp/packer/common"
@@ -119,41 +118,7 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 		Placement:           osc.Placement{SubregionName: subregion},
 		BsuOptimized:        s.BsuOptimized,
 		BlockDeviceMappings: s.BlockDevices.BuildOSCLaunchDevices(),
-		//IamVmProfile:        oapi.IamVmProfileSpecification{Name: &s.IamVmProfile},
 	}
-
-	// if s.EnableT2Unlimited {
-	// 	creditOption := "unlimited"
-	// 	runOpts.CreditSpecification = &oapi.CreditSpecificationRequest{CpuCredits: &creditOption}
-	// }
-
-	// Collect tags for tagging on resource creation
-	//	var tagSpecs []oapi.ResourceTag
-
-	// if len(oapiTags) > 0 {
-	// 	runTags := &oapi.ResourceTag{
-	// 		ResourceType: aws.String("vm"),
-	// 		Tags:         oapiTags,
-	// 	}
-
-	// 	tagSpecs = append(tagSpecs, runTags)
-	// }
-
-	// if len(volTags) > 0 {
-	// 	runVolTags := &oapi.TagSpecification{
-	// 		ResourceType: aws.String("volume"),
-	// 		Tags:         volTags,
-	// 	}
-
-	// 	tagSpecs = append(tagSpecs, runVolTags)
-	// }
-
-	// // If our region supports it, set tag specifications
-	// if len(tagSpecs) > 0 && !s.IsRestricted {
-	// 	runOpts.SetTagSpecifications(tagSpecs)
-	// 	oapiTags.Report(ui)
-	// 	volTags.Report(ui)
-	// }
 
 	if s.Comm.SSHKeyPairName != "" {
 		runOpts.KeypairName = s.Comm.SSHKeyPairName
@@ -299,7 +264,7 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 
 		volumeIds := make([]string, 0)
 		for _, v := range vm.BlockDeviceMappings {
-			if bsu := v.Bsu; !reflect.DeepEqual(bsu, oapi.BsuCreated{}) {
+			if bsu := v.Bsu; !reflect.DeepEqual(bsu, osc.BsuCreated{}) {
 				volumeIds = append(volumeIds, bsu.VolumeId)
 			}
 		}

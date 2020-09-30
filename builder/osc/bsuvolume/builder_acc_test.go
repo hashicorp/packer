@@ -2,13 +2,9 @@
 package bsuvolume
 
 import (
-	"crypto/tls"
-	"net/http"
 	"testing"
 
-	"github.com/hashicorp/packer/builder/osc/common"
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
-	"github.com/outscale/osc-go/oapi"
 )
 
 func TestBuilderAcc_basic(t *testing.T) {
@@ -21,22 +17,6 @@ func TestBuilderAcc_basic(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-}
-
-func testOAPIConn() (*oapi.Client, error) {
-	access := &common.AccessConfig{RawRegion: "us-east-1"}
-	clientConfig, err := access.Config()
-	if err != nil {
-		return nil, err
-	}
-
-	skipClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
-
-	return oapi.NewClient(clientConfig, skipClient), nil
 }
 
 const testBuilderAccBasic = `

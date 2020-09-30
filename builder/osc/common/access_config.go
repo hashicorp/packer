@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/outscale/osc-go/oapi"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -24,49 +23,6 @@ type AccessConfig struct {
 	SkipValidation        bool   `mapstructure:"skip_region_validation"`
 	SkipMetadataApiCheck  bool   `mapstructure:"skip_metadata_api_check"`
 	Token                 string `mapstructure:"token"`
-	clientConfig          *oapi.Config
-
-	getOAPIConnection func() oapi.OAPIClient
-}
-
-// Config returns a valid oapi.Config object for access to Outscale services, or
-// an error if the authentication and region couldn't be resolved
-func (c *AccessConfig) Config() (*oapi.Config, error) {
-	if c.clientConfig != nil {
-		return c.clientConfig, nil
-	}
-
-	//Check env variables if access configuration is not set.
-
-	if c.AccessKey == "" {
-		c.AccessKey = os.Getenv("OUTSCALE_ACCESSKEYID")
-	}
-
-	if c.SecretKey == "" {
-		c.SecretKey = os.Getenv("OUTSCALE_SECRETKEYID")
-	}
-
-	if c.RawRegion == "" {
-		c.RawRegion = os.Getenv("OUTSCALE_REGION")
-	}
-
-	if c.CustomEndpointOAPI == "" {
-		c.CustomEndpointOAPI = os.Getenv("OUTSCALE_OAPI_URL")
-	}
-
-	if c.CustomEndpointOAPI == "" {
-		c.CustomEndpointOAPI = "outscale.com/oapi/latest"
-	}
-
-	config := &oapi.Config{
-		AccessKey: c.AccessKey,
-		SecretKey: c.SecretKey,
-		Region:    c.RawRegion,
-		URL:       c.CustomEndpointOAPI,
-		Service:   "api",
-	}
-
-	return config, nil
 }
 
 // NewOSCClient retrieves the Outscale OSC-SDK client
@@ -115,27 +71,8 @@ func (c *AccessConfig) NewOSCClientByRegion(region string) *osc.APIClient {
 		DefaultHeader: make(map[string]string),
 		UserAgent:     "packer-osc",
 		HTTPClient:    skipClient,
+		Debug:         true,
 	})
-}
-
-func (c *AccessConfig) NewOAPIConnection() (oapi.OAPIClient, error) {
-	if c.getOAPIConnection != nil {
-		return c.getOAPIConnection(), nil
-	}
-	oapicfg, err := c.Config()
-	if err != nil {
-		return nil, err
-	}
-
-	skipClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.InsecureSkipTLSVerify},
-		},
-	}
-
-	oapiClient := oapi.NewClient(oapicfg, skipClient)
-
-	return oapiClient, nil
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
