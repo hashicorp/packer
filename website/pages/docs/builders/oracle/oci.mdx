@@ -139,7 +139,7 @@ can also be supplied to override the typical auto-generated key:
 - `instance_name` (string) - The name to assign to the instance used for the image creation process.
   If not set a name of the form `instanceYYYYMMDDhhmmss` will be used.
 
-- `instance_tags` (map of strings) - Add one or more freeform tags to the instance used for the 
+- `instance_tags` (map of strings) - Add one or more freeform tags to the instance used for the
   image creation process.
 
 - `instance_defined_tags` (map of maps of strings) - Add one or more defined tags for a given namespace
@@ -152,6 +152,10 @@ can also be supplied to override the typical auto-generated key:
   (map of maps of strings). See
   [the Oracle docs](https://docs.cloud.oracle.com/en-us/iaas/Content/Network/Tasks/managingVNICs.htm)
   for more information about VNICs.
+
+- `disk_size` (int64) - The size of the boot volume in GBs. Minimum value is 50 and maximum value is 16384 (16TB).
+  Sets the [BootVolumeSizeInGBs](https://godoc.org/github.com/oracle/oci-go-sdk/core#InstanceConfigurationInstanceSourceViaImageDetails)
+  when launching the instance. Defaults to `50`.
 
 - `use_private_ip` (boolean) - Use private ip addresses to connect to the
   instance via ssh.

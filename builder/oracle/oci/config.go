@@ -77,7 +77,7 @@ type Config struct {
 	InstanceTags        map[string]string                 `mapstructure:"instance_tags"`
 	InstanceDefinedTags map[string]map[string]interface{} `mapstructure:"instance_defined_tags"`
 	Shape               string                            `mapstructure:"shape"`
-	BootVolumeSizeInGBs int64                             `mapstructure:"boot_volume_size_in_gbs"`
+	BootVolumeSizeInGBs int64                             `mapstructure:"disk_size"`
 
 	// Metadata optionally contains custom metadata key/value pairs provided in the
 	// configuration. While this can be used to set metadata["user_data"] the explicit
@@ -333,7 +333,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		c.BootVolumeSizeInGBs = 50
 	} else if c.BootVolumeSizeInGBs < 50 || c.BootVolumeSizeInGBs > 16384 {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("'boot_volume_size_in_gbs' must be between 50 and 16384 GBs"))
+			errs, errors.New("'disk_size' must be between 50 and 16384 GBs"))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
