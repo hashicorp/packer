@@ -43,85 +43,87 @@ func realMain() int {
 	wrapConfig.CookieKey = "PACKER_WRAP_COOKIE"
 	wrapConfig.CookieValue = "49C22B1A-3A93-4C98-97FA-E07D18C787B5"
 
-	if !panicwrap.Wrapped(&wrapConfig) {
-		// Generate a UUID for this packer run and pass it to the environment.
-		// GenerateUUID always returns a nil error (based on rand.Read) so we'll
-		// just ignore it.
-		UUID, _ := uuid.GenerateUUID()
-		os.Setenv("PACKER_RUN_UUID", UUID)
-
-		// Determine where logs should go in general (requested by the user)
-		logWriter, err := logOutput()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't setup log output: %s", err)
-			return 1
-		}
-		if logWriter == nil {
-			logWriter = ioutil.Discard
-		}
-
-		packer.LogSecretFilter.SetOutput(logWriter)
-
-		// Disable logging here
-		log.SetOutput(ioutil.Discard)
-
-		// We always send logs to a temporary file that we use in case
-		// there is a panic. Otherwise, we delete it.
-		logTempFile, err := tmp.File("packer-log")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't setup logging tempfile: %s", err)
-			return 1
-		}
-		defer os.Remove(logTempFile.Name())
-		defer logTempFile.Close()
-
-		// Tell the logger to log to this file
-		os.Setenv(EnvLog, "")
-		os.Setenv(EnvLogFile, "")
-
-		// Setup the prefixed readers that send data properly to
-		// stdout/stderr.
-		doneCh := make(chan struct{})
-		outR, outW := io.Pipe()
-		go copyOutput(outR, doneCh)
-
-		// Enable checkpoint for panic reporting
-		if config, _ := loadConfig(); config != nil && !config.DisableCheckpoint {
-			packer.CheckpointReporter = packer.NewCheckpointReporter(
-				config.DisableCheckpointSignature,
-			)
-		}
-
-		// Create the configuration for panicwrap and wrap our executable
-		wrapConfig.Handler = panicHandler(logTempFile)
-		wrapConfig.Writer = io.MultiWriter(logTempFile, &packer.LogSecretFilter)
-		wrapConfig.Stdout = outW
-		wrapConfig.DetectDuration = 500 * time.Millisecond
-		wrapConfig.ForwardSignals = []os.Signal{syscall.SIGTERM}
-		exitStatus, err := panicwrap.Wrap(&wrapConfig)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't start Packer: %s", err)
-			return 1
-		}
-
-		// If >= 0, we're the parent, so just exit
-		if exitStatus >= 0 {
-			// Close the stdout writer so that our copy process can finish
-			outW.Close()
-
-			// Wait for the output copying to finish
-			<-doneCh
-
-			return exitStatus
-		}
-
-		// We're the child, so just close the tempfile we made in order to
-		// save file handles since the tempfile is only used by the parent.
-		logTempFile.Close()
+	if inPlugin() || panicwrap.Wrapped(&wrapConfig) {
+		// Call the real main
+		return wrappedMain()
 	}
 
-	// Call the real main
-	return wrappedMain()
+	// Generate a UUID for this packer run and pass it to the environment.
+	// GenerateUUID always returns a nil error (based on rand.Read) so we'll
+	// just ignore it.
+	UUID, _ := uuid.GenerateUUID()
+	os.Setenv("PACKER_RUN_UUID", UUID)
+
+	// Determine where logs should go in general (requested by the user)
+	logWriter, err := logOutput()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Couldn't setup log output: %s", err)
+		return 1
+	}
+	if logWriter == nil {
+		logWriter = ioutil.Discard
+	}
+
+	packer.LogSecretFilter.SetOutput(logWriter)
+
+	// Disable logging here
+	log.SetOutput(ioutil.Discard)
+
+	// We always send logs to a temporary file that we use in case
+	// there is a panic. Otherwise, we delete it.
+	logTempFile, err := tmp.File("packer-log")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Couldn't setup logging tempfile: %s", err)
+		return 1
+	}
+	defer os.Remove(logTempFile.Name())
+	defer logTempFile.Close()
+
+	// Tell the logger to log to this file
+	os.Setenv(EnvLog, "")
+	os.Setenv(EnvLogFile, "")
+
+	// Setup the prefixed readers that send data properly to
+	// stdout/stderr.
+	doneCh := make(chan struct{})
+	outR, outW := io.Pipe()
+	go copyOutput(outR, doneCh)
+
+	// Enable checkpoint for panic reporting
+	if config, _ := loadConfig(); config != nil && !config.DisableCheckpoint {
+		packer.CheckpointReporter = packer.NewCheckpointReporter(
+			config.DisableCheckpointSignature,
+		)
+	}
+
+	// Create the configuration for panicwrap and wrap our executable
+	wrapConfig.Handler = panicHandler(logTempFile)
+	wrapConfig.Writer = io.MultiWriter(logTempFile, &packer.LogSecretFilter)
+	wrapConfig.Stdout = outW
+	wrapConfig.DetectDuration = 500 * time.Millisecond
+	wrapConfig.ForwardSignals = []os.Signal{syscall.SIGTERM}
+	exitStatus, err := panicwrap.Wrap(&wrapConfig)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Couldn't start Packer: %s", err)
+		return 1
+	}
+
+	// If >= 0, we're the parent, so just exit
+	if exitStatus >= 0 {
+		// Close the stdout writer so that our copy process can finish
+		outW.Close()
+
+		// Wait for the output copying to finish
+		<-doneCh
+
+		return exitStatus
+	}
+
+	// We're the child, so just close the tempfile we made in order to
+	// save file handles since the tempfile is only used by the parent.
+	logTempFile.Close()
+
+	return 0
 }
 
 // wrappedMain is called only when we're wrapped by panicwrap and
@@ -135,7 +137,7 @@ func wrappedMain() int {
 	packer.LogSecretFilter.SetOutput(os.Stderr)
 	log.SetOutput(&packer.LogSecretFilter)
 
-	inPlugin := os.Getenv(plugin.MagicCookieKey) == plugin.MagicCookieValue
+	inPlugin := inPlugin()
 	if inPlugin {
 		// This prevents double-logging timestamps
 		log.SetFlags(0)
@@ -385,6 +387,10 @@ func copyOutput(r io.Reader, doneCh chan<- struct{}) {
 	}()
 
 	wg.Wait()
+}
+
+func inPlugin() bool {
+	return os.Getenv(plugin.MagicCookieKey) == plugin.MagicCookieValue
 }
 
 func init() {
