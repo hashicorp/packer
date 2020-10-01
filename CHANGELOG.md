@@ -65,7 +65,6 @@
 * post-processor/yandex-import: Allow custom API endpoint. [GH-9850]
 * provisioner/ansible: Add support for Ansible Galaxy Collections. [GH-9903]
 
-
 ### BUG FIXES:
 * builder/amazon-ebs: Fix issue where retrying on invalid IAM instance profile
     error was creating multiple spot instances. [GH-9946]
