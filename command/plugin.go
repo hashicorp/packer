@@ -195,6 +195,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
 	"docker-save":          new(dockersavepostprocessor.PostProcessor),
 	"docker-tag":           new(dockertagpostprocessor.PostProcessor),
+	"ebs-snapshot":         new(ebssnapshotpostprocessor.PostProcessor),
 	"exoscale-import":      new(exoscaleimportpostprocessor.PostProcessor),
 	"googlecompute-export": new(googlecomputeexportpostprocessor.PostProcessor),
 	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
@@ -207,7 +208,6 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
 	"yandex-export":        new(yandexexportpostprocessor.PostProcessor),
 	"yandex-import":        new(yandeximportpostprocessor.PostProcessor),
-	"ebs-snapshot":         new(ebssnapshotpostprocessor.PostProcessor),
 }
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")

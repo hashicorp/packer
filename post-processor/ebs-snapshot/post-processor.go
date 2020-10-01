@@ -50,6 +50,13 @@ func (p *PostProcessor) Configure(raw ...interface{}) error {
 	}, raw...)
 }
 
+func cleanUpVolume(ec2_client *ec2.EC2, deleteVolumeInput *ec2.DeleteVolumeInput, ui packer.Ui) {
+	_, err := ec2_client.DeleteVolume(deleteVolumeInput)
+	if err != nil {
+		ui.Message("[Warning] error cleanining up volume : " + err.Error())
+	}
+}
+
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (a packer.Artifact, keep, mustKeep bool, err error) {
 	ui.Message("Executing EBS snapshot post-processer")
 	ui.Message(fmt.Sprintf("Creating EBS snapshot for %s", artifact.Id()))
@@ -66,7 +73,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	ec2_client := ec2.New(sess)
 
 	// clean up the volume
-	defer ec2_client.DeleteVolume(&ec2.DeleteVolumeInput{VolumeId: aws.String(bits[1])})
+	defer cleanUpVolume(ec2_client, &ec2.DeleteVolumeInput{VolumeId: aws.String(bits[1])}, ui)
 
 	description := p.config.Description
 	if description == "" {
