@@ -73,6 +73,7 @@ import (
 	dockerpushpostprocessor "github.com/hashicorp/packer/post-processor/docker-push"
 	dockersavepostprocessor "github.com/hashicorp/packer/post-processor/docker-save"
 	dockertagpostprocessor "github.com/hashicorp/packer/post-processor/docker-tag"
+	ebssnapshotpostprocessor "github.com/hashicorp/packer/post-processor/ebs-snapshot"
 	exoscaleimportpostprocessor "github.com/hashicorp/packer/post-processor/exoscale-import"
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-import"
@@ -206,6 +207,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
 	"yandex-export":        new(yandexexportpostprocessor.PostProcessor),
 	"yandex-import":        new(yandeximportpostprocessor.PostProcessor),
+	"ebs-snapshot":         new(ebssnapshotpostprocessor.PostProcessor),
 }
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")
