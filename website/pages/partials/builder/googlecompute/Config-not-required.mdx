@@ -4,7 +4,7 @@
   run Packer on a GCE instance with a service account. Instructions for
   creating the file or using service accounts are above.
 
-- `impersonated_service_account` (string) - This allows service account impersonation as per the docs.
+- `impersonate_service_account` (string) - This allows service account impersonation as per the [docs](https://cloud.google.com/iam/docs/impersonating-service-accounts).
 
 - `accelerator_type` (string) - Full or partial URL of the guest accelerator type. GPU accelerators can
   only be used with `"on_host_maintenance": "TERMINATE"` option set.

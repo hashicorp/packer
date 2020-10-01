@@ -34,8 +34,8 @@ type Config struct {
 	// run Packer on a GCE instance with a service account. Instructions for
 	// creating the file or using service accounts are above.
 	AccountFile string `mapstructure:"account_file" required:"false"`
-	// This allows service account impersonation as per the docs.
-	ImpersonatedServiceAccount string `mapstructure:"impersonated_service_account" required:"false"`
+	// This allows service account impersonation as per the [docs](https://cloud.google.com/iam/docs/impersonating-service-accounts).
+	ImpersonateServiceAccount string `mapstructure:"impersonate_service_account" required:"false"`
 	// The project ID that will be used to launch instances and store images.
 	ProjectId string `mapstructure:"project_id" required:"true"`
 	// Full or partial URL of the guest accelerator type. GPU accelerators can
@@ -482,9 +482,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Authenticating via an account file
 	if c.AccountFile != "" {
-		if c.VaultGCPOauthEngine != "" && c.ImpersonatedServiceAccount != "" {
+		if c.VaultGCPOauthEngine != "" && c.ImpersonateServiceAccount != "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You cannot "+
-				"specify impersonated_service_account, account_file and vault_gcp_oauth_engine at the same time"))
+				"specify impersonate_service_account, account_file and vault_gcp_oauth_engine at the same time"))
 		}
 		cfg, err := ProcessAccountFile(c.AccountFile)
 		if err != nil {

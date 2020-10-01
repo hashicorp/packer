@@ -30,8 +30,8 @@ type Config struct {
 	//The JSON file containing your account credentials.
 	//If specified, the account file will take precedence over any `googlecompute` builder authentication method.
 	AccountFile string `mapstructure:"account_file" required:"true"`
-	// This allows service account impersonation as per the docs.
-	ImpersonatedServiceAccount string `mapstructure:"impersonated_service_account" required:"false"`
+	// This allows service account impersonation as per the [docs](https://cloud.google.com/iam/docs/impersonating-service-accounts).
+	ImpersonateServiceAccount string `mapstructure:"impersonate_service_account" required:"false"`
 	//The project ID where the GCS bucket exists and where the GCE image is stored.
 	ProjectId string `mapstructure:"project_id" required:"true"`
 	IAP       bool   `mapstructure-to-hcl:",skip"`
@@ -100,9 +100,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.AccountFile != "" {
-		if p.config.VaultGCPOauthEngine != "" && p.config.ImpersonatedServiceAccount != "" {
+		if p.config.VaultGCPOauthEngine != "" && p.config.ImpersonateServiceAccount != "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You cannot "+
-				"specify impersonated_service_account, account_file and vault_gcp_oauth_engine at the same time"))
+				"specify impersonate_service_account, account_file and vault_gcp_oauth_engine at the same time"))
 		}
 		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
 		if err != nil {
@@ -139,7 +139,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	p.config.ctx.Data = generatedData
 	var err error
 	var opts option.ClientOption
-	opts, err = googlecompute.NewClientGCE(p.config.account, p.config.VaultGCPOauthEngine, p.config.ImpersonatedServiceAccount)
+	opts, err = googlecompute.NewClientOptionGoogle(p.config.account, p.config.VaultGCPOauthEngine, p.config.ImpersonateServiceAccount)
 	if err != nil {
 		return nil, false, false, err
 	}

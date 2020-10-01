@@ -35,6 +35,14 @@ type driverGCE struct {
 	ui             packer.Ui
 }
 
+type GCEDriverConfig struct {
+	Ui                            packer.Ui
+	ProjectId                     string
+	Account                       *ServiceAccount
+	ImpersonateServiceAccountName string
+	VaultOauthEngineName          string
+}
+
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
 // Define a TokenSource that gets tokens from Vault
@@ -70,7 +78,7 @@ func (ots OauthTokenSource) Token() (*oauth2.Token, error) {
 
 }
 
-func NewClientGCE(account *ServiceAccount, vaultOauth string, impersonatedsa string) (option.ClientOption, error) {
+func NewClientOptionGoogle(account *ServiceAccount, vaultOauth string, impersonatesa string) (option.ClientOption, error) {
 	var err error
 
 	var opts option.ClientOption
@@ -81,9 +89,9 @@ func NewClientGCE(account *ServiceAccount, vaultOauth string, impersonatedsa str
 		ts := OauthTokenSource{vaultOauth}
 		opts = option.WithTokenSource(ts)
 
-	} else if impersonatedsa != "" {
-		opts = option.ImpersonateCredentials(impersonatedsa)
-	} else if account.jwt != nil && len(account.jwt.PrivateKey) > 0 {
+	} else if impersonatesa != "" {
+		opts = option.ImpersonateCredentials(impersonatesa)
+	} else if account != nil && account.jwt != nil && len(account.jwt.PrivateKey) > 0 {
 		// Auth with AccountFile if provided
 		log.Printf("[INFO] Requesting Google token via account_file...")
 		log.Printf("[INFO]   -- Email: %s", account.jwt.Email)
@@ -119,8 +127,8 @@ func NewClientGCE(account *ServiceAccount, vaultOauth string, impersonatedsa str
 	return opts, nil
 }
 
-func NewDriverGCE(ui packer.Ui, p string, account *ServiceAccount, impersonatedsa string, vaultOauth string) (Driver, error) {
-	opts, err := NewClientGCE(account, vaultOauth, impersonatedsa)
+func NewDriverGCE(config GCEDriverConfig) (Driver, error) {
+	opts, err := NewClientOptionGoogle(config.Account, config.VaultOauthEngineName, config.ImpersonateServiceAccountName)
 	if err != nil {
 		return nil, err
 	}
@@ -141,10 +149,10 @@ func NewDriverGCE(ui packer.Ui, p string, account *ServiceAccount, impersonateds
 	service.UserAgent = useragent.String()
 
 	return &driverGCE{
-		projectId:      p,
+		projectId:      config.ProjectId,
 		service:        service,
 		osLoginService: osLoginService,
-		ui:             ui,
+		ui:             config.Ui,
 	}, nil
 }
 
