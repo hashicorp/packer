@@ -319,6 +319,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
 		&stepSnapshotEBSVolumes{
+			PollingConfig: b.config.PollingConfig,
 			VolumeMapping: b.config.VolumeMappings,
 			Ctx:           b.config.ctx,
 		},

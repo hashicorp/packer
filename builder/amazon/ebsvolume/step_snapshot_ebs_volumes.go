@@ -13,6 +13,7 @@ import (
 )
 
 type stepSnapshotEBSVolumes struct {
+	PollingConfig *awscommon.AWSPollingConfig
 	VolumeMapping []BlockDevice
 	//Map of SnapshotID: BlockDevice, Where *BlockDevice is in VolumeMapping
 	SnapshotMap map[string]*BlockDevice
@@ -76,7 +77,7 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 	ui.Say("Waiting for Snapshots to become ready...")
 	for snapID := range s.SnapshotMap {
 		ui.Message(fmt.Sprintf("Waiting for %s to be ready.", snapID))
-		err := awscommon.WaitUntilSnapshotDone(ctx, ec2conn, snapID)
+		err := s.PollingConfig.WaitUntilSnapshotDone(ctx, ec2conn, snapID)
 		if err != nil {
 			err = fmt.Errorf("Error waiting for snapsot to become ready %s", err)
 			state.Put("error", err)
