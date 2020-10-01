@@ -71,6 +71,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+	if b.config.PackerDebug {
+		b.config.enableDebug(ui)
+	}
+
 	computeClient, err := b.config.computeV2Client()
 	if err != nil {
 		return nil, fmt.Errorf("Error initializing compute client: %s", err)
@@ -98,11 +102,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DebugKeyPath: fmt.Sprintf("os_%s.pem", b.config.PackerBuildName),
 		},
 		&StepSourceImageInfo{
-			SourceImage:      b.config.RunConfig.SourceImage,
-			SourceImageName:  b.config.RunConfig.SourceImageName,
-			SourceImageOpts:  b.config.RunConfig.sourceImageOpts,
-			SourceMostRecent: b.config.SourceImageFilters.MostRecent,
-			SourceProperties: b.config.SourceImageFilters.Filters.Properties,
+			SourceImage:               b.config.RunConfig.SourceImage,
+			SourceImageName:           b.config.RunConfig.SourceImageName,
+			ExternalSourceImageURL:    b.config.RunConfig.ExternalSourceImageURL,
+			ExternalSourceImageFormat: b.config.RunConfig.ExternalSourceImageFormat,
+			SourceImageOpts:           b.config.RunConfig.sourceImageOpts,
+			SourceMostRecent:          b.config.SourceImageFilters.MostRecent,
+			SourceProperties:          b.config.SourceImageFilters.Filters.Properties,
 		},
 		&StepDiscoverNetwork{
 			Networks:              b.config.Networks,

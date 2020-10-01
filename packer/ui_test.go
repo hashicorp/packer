@@ -49,7 +49,7 @@ func (tty *testTTY) ReadString() (string, error) {
 
 func TestColoredUi(t *testing.T) {
 	bufferUi := testUi()
-	ui := &ColoredUi{UiColorYellow, UiColorRed, bufferUi, defaultUiProgressBar}
+	ui := &ColoredUi{UiColorYellow, UiColorRed, bufferUi, &UiProgressBar{}}
 
 	if !ui.supportsColors() {
 		t.Skip("skipping for ui without color support")
@@ -81,7 +81,7 @@ func TestColoredUi(t *testing.T) {
 
 func TestColoredUi_noColorEnv(t *testing.T) {
 	bufferUi := testUi()
-	ui := &ColoredUi{UiColorYellow, UiColorRed, bufferUi, defaultUiProgressBar}
+	ui := &ColoredUi{UiColorYellow, UiColorRed, bufferUi, &UiProgressBar{}}
 
 	// Set the env var to get rid of the color
 	oldenv := os.Getenv("PACKER_NO_COLOR")

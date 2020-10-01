@@ -223,7 +223,11 @@ const testBuilderAccManagedDiskLinux = `
 	  "image_sku": "16.04-LTS",
 
 	  "location": "South Central US",
-	  "vm_size": "Standard_DS2_v2"
+	  "vm_size": "Standard_DS2_v2",
+	  "azure_tags": {
+	    "env": "testing",
+	    "builder": "packer"
+	   }
 	}]
 }
 `

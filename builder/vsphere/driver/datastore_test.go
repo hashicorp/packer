@@ -1,6 +1,10 @@
 package driver
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/vmware/govmomi/simulator"
+)
 
 func TestDatastoreIsoPath(t *testing.T) {
 	tc := []struct {
@@ -85,5 +89,86 @@ func TestDatastoreIsoPath(t *testing.T) {
 		if filePath != c.filePath {
 			t.Fatalf("%d Expecting %s but got %s", i, c.filePath, filePath)
 		}
+	}
+}
+
+func TestVCenterDriver_FindDatastore(t *testing.T) {
+	sim, err := NewVCenterSimulator()
+	if err != nil {
+		t.Fatalf("should not fail: %s", err.Error())
+	}
+	defer sim.Close()
+
+	_, datastore := sim.ChooseSimulatorPreCreatedDatastore()
+	_, host := sim.ChooseSimulatorPreCreatedHost()
+
+	tc := []struct {
+		name       string
+		datastore  string
+		host       string
+		fail       bool
+		errMessage string
+	}{
+		{
+			name:      "should find datastore when name is provided",
+			datastore: datastore.Name,
+			fail:      false,
+		},
+		{
+			name: "should find datastore when only host is provided",
+			host: host.Name,
+			fail: false,
+		},
+		{
+			name:      "should not find invalid datastore",
+			datastore: "invalid",
+			fail:      true,
+		},
+		{
+			name: "should not find invalid host",
+			host: "invalid",
+			fail: true,
+		},
+	}
+
+	for _, c := range tc {
+		t.Run(c.name, func(t *testing.T) {
+			ds, err := sim.driver.FindDatastore(c.datastore, c.host)
+			if c.fail {
+				if err == nil {
+					t.Fatalf("expected to fail")
+				}
+				if c.errMessage != "" && err.Error() != c.errMessage {
+					t.Fatalf("unexpected error message %s", err.Error())
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("should not fail: %s", err.Error())
+				}
+				if ds == nil {
+					t.Fatalf("expected to find datastore")
+				}
+			}
+		})
+	}
+}
+
+func TestVCenterDriver_MultipleDatastoreError(t *testing.T) {
+	model := simulator.ESX()
+	model.Datastore = 2
+	sim, err := NewCustomVCenterSimulator(model)
+	if err != nil {
+		t.Fatalf("should not fail: %s", err.Error())
+	}
+	defer sim.Close()
+
+	_, host := sim.ChooseSimulatorPreCreatedHost()
+
+	_, err = sim.driver.FindDatastore("", host.Name)
+	if err == nil {
+		t.Fatalf("expected to fail")
+	}
+	if err.Error() != "Host has multiple datastores. Specify it explicitly" {
+		t.Fatalf("unexpected error message %s", err.Error())
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-cty-funcs/cidr"
+	"github.com/hashicorp/go-cty-funcs/collection"
 	"github.com/hashicorp/go-cty-funcs/crypto"
 	"github.com/hashicorp/go-cty-funcs/encoding"
 	"github.com/hashicorp/go-cty-funcs/filesystem"
@@ -41,7 +42,7 @@ func Functions(basedir string) map[string]function.Function {
 		"cidrnetmask":     cidr.NetmaskFunc,
 		"cidrsubnet":      cidr.SubnetFunc,
 		"cidrsubnets":     cidr.SubnetsFunc,
-		"coalesce":        stdlib.CoalesceFunc,
+		"coalesce":        collection.CoalesceFunc,
 		"coalescelist":    stdlib.CoalesceListFunc,
 		"compact":         stdlib.CompactFunc,
 		"concat":          stdlib.ConcatFunc,

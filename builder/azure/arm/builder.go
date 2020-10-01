@@ -390,7 +390,7 @@ func (b *Builder) getBlobAccount(ctx context.Context, client *AzureClient, resou
 func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.AuthorizedKey, b.config.sshAuthorizedKey)
 
-	stateBag.Put(constants.ArmTags, b.config.AzureTags)
+	stateBag.Put(constants.ArmTags, packerAzureCommon.MapToAzureTags(b.config.AzureTags))
 	stateBag.Put(constants.ArmComputeName, b.config.tmpComputeName)
 	stateBag.Put(constants.ArmDeploymentName, b.config.tmpDeploymentName)
 

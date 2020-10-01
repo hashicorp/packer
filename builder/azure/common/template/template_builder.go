@@ -374,7 +374,7 @@ func (s *TemplateBuilder) SetNetworkSecurityGroup(ipAddresses []string, port int
 	return nil
 }
 
-func (s *TemplateBuilder) SetTags(tags *map[string]*string) error {
+func (s *TemplateBuilder) SetTags(tags *map[string]string) error {
 	if tags == nil || len(*tags) == 0 {
 		return nil
 	}

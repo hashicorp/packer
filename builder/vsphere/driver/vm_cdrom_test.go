@@ -5,27 +5,17 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 func TestVirtualMachineDriver_FindAndAddSATAController(t *testing.T) {
-	model := simulator.VPX()
-	model.Machine = 1
-	defer model.Remove()
-
-	s, err := NewSimulatorServer(model)
+	sim, err := NewVCenterSimulator()
 	if err != nil {
 		t.Fatalf("should not fail: %s", err.Error())
 	}
-	defer s.Close()
+	defer sim.Close()
 
-	driverSim, err := NewSimulatorDriver(s)
-	if err != nil {
-		t.Fatalf("should not fail: %s", err.Error())
-	}
-
-	vm := ChooseSimulatorPreCreatedVM(driverSim)
+	vm, _ := sim.ChooseSimulatorPreCreatedVM()
 
 	_, err = vm.FindSATAController()
 	if err != nil && !strings.Contains(err.Error(), "no available SATA controller") {
@@ -49,23 +39,13 @@ func TestVirtualMachineDriver_FindAndAddSATAController(t *testing.T) {
 }
 
 func TestVirtualMachineDriver_CreateAndRemoveCdrom(t *testing.T) {
-	model := simulator.VPX()
-	model.Machine = 1
-	defer model.Remove()
-
-	s, err := NewSimulatorServer(model)
+	sim, err := NewVCenterSimulator()
 	if err != nil {
 		t.Fatalf("should not fail: %s", err.Error())
 	}
-	defer s.Close()
+	defer sim.Close()
 
-	driverSim, err := NewSimulatorDriver(s)
-	if err != nil {
-		t.Fatalf("should not fail: %s", err.Error())
-	}
-
-	//Simulator shortcut to choose any pre created VM.
-	vm := ChooseSimulatorPreCreatedVM(driverSim)
+	vm, _ := sim.ChooseSimulatorPreCreatedVM()
 
 	// Add SATA Controller
 	if err := vm.AddSATAController(); err != nil {
@@ -118,23 +98,13 @@ func TestVirtualMachineDriver_CreateAndRemoveCdrom(t *testing.T) {
 }
 
 func TestVirtualMachineDriver_EjectCdrom(t *testing.T) {
-	model := simulator.VPX()
-	model.Machine = 1
-	defer model.Remove()
-
-	s, err := NewSimulatorServer(model)
+	sim, err := NewVCenterSimulator()
 	if err != nil {
 		t.Fatalf("should not fail: %s", err.Error())
 	}
-	defer s.Close()
+	defer sim.Close()
 
-	driverSim, err := NewSimulatorDriver(s)
-	if err != nil {
-		t.Fatalf("should not fail: %s", err.Error())
-	}
-
-	//Simulator shortcut to choose any pre created VM.
-	vm := ChooseSimulatorPreCreatedVM(driverSim)
+	vm, _ := sim.ChooseSimulatorPreCreatedVM()
 
 	// Add SATA Controller
 	if err := vm.AddSATAController(); err != nil {

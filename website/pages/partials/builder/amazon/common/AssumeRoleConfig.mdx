@@ -1,0 +1,31 @@
+<!-- Code generated from the comments of the AssumeRoleConfig struct in builder/amazon/common/access_config.go; DO NOT EDIT MANUALLY -->
+
+AssumeRoleConfig lets users set configuration options for assuming a special
+role when executing Packer.
+
+Usage example:
+
+HCL config example:
+
+```HCL
+source "example" "amazon-ebs"{
+	assume_role {
+		role_arn     = "arn:aws:iam::ACCOUNT_ID:role/ROLE_NAME"
+		session_name = "SESSION_NAME"
+		external_id  = "EXTERNAL_ID"
+	}
+}
+```
+
+JSON config example:
+
+```json
+builder{
+	"type": "amazon-ebs",
+	"assume_role": {
+		"role_arn"    :  "arn:aws:iam::ACCOUNT_ID:role/ROLE_NAME",
+		"session_name":  "SESSION_NAME",
+		"external_id" :  "EXTERNAL_ID"
+	}
+}
+```

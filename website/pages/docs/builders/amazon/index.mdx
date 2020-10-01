@@ -93,6 +93,16 @@ source "amazon-ebs" "basic-example" {
 </Tab>
 </Tabs>
 
+If you would like, you may also assume a role using the assume_role
+configuration option. You must still have one of the valid credential resources
+explained above, and your user must have permission to assume the role in
+question. This is a way of running Packer with a more restrictive set of
+permissions than your user.
+
+@include 'builder/amazon/common/AssumeRoleConfig.mdx'
+
+@include 'builder/amazon/common/AssumeRoleConfig-not-required.mdx'
+
 ### Environment variables
 
 You can provide your credentials via the `AWS_ACCESS_KEY_ID` and

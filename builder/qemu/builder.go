@@ -137,6 +137,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			OutputDir:       b.config.OutputDir,
 			SkipCompaction:  b.config.SkipCompaction,
 			VMName:          b.config.VMName,
+			QemuImgArgs:     b.config.QemuImgArgs,
 		},
 	)
 

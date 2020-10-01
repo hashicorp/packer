@@ -102,7 +102,7 @@ github.com/approvals/go-approval-tests/utils
 github.com/armon/go-metrics
 # github.com/armon/go-radix v1.0.0
 github.com/armon/go-radix
-# github.com/aws/aws-sdk-go v1.30.8
+# github.com/aws/aws-sdk-go v1.34.26
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/arn
 github.com/aws/aws-sdk-go/aws/awserr
@@ -132,6 +132,7 @@ github.com/aws/aws-sdk-go/internal/sdkuri
 github.com/aws/aws-sdk-go/internal/shareddefaults
 github.com/aws/aws-sdk-go/internal/strings
 github.com/aws/aws-sdk-go/internal/sync/singleflight
+github.com/aws/aws-sdk-go/private/checksum
 github.com/aws/aws-sdk-go/private/protocol
 github.com/aws/aws-sdk-go/private/protocol/ec2query
 github.com/aws/aws-sdk-go/private/protocol/eventstream
@@ -271,6 +272,7 @@ github.com/gophercloud/gophercloud/openstack/identity/v2/tokens
 github.com/gophercloud/gophercloud/openstack/identity/v3/extensions/ec2tokens
 github.com/gophercloud/gophercloud/openstack/identity/v3/extensions/oauth1
 github.com/gophercloud/gophercloud/openstack/identity/v3/tokens
+github.com/gophercloud/gophercloud/openstack/imageservice/v2/imageimport
 github.com/gophercloud/gophercloud/openstack/imageservice/v2/images
 github.com/gophercloud/gophercloud/openstack/imageservice/v2/members
 github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external
@@ -287,6 +289,9 @@ github.com/gophercloud/utils/openstack/compute/v2/flavors
 github.com/grpc-ecosystem/go-grpc-middleware
 # github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 github.com/hako/durafmt
+# github.com/hashicorp/aws-sdk-go-base v0.6.0
+github.com/hashicorp/aws-sdk-go-base
+github.com/hashicorp/aws-sdk-go-base/tfawserr
 # github.com/hashicorp/consul/api v1.4.0
 github.com/hashicorp/consul/api
 # github.com/hashicorp/errwrap v1.0.0
@@ -295,8 +300,9 @@ github.com/hashicorp/errwrap
 github.com/hashicorp/go-checkpoint
 # github.com/hashicorp/go-cleanhttp v0.5.1
 github.com/hashicorp/go-cleanhttp
-# github.com/hashicorp/go-cty-funcs v0.0.0-20200520133146-0d04eb807361
+# github.com/hashicorp/go-cty-funcs v0.0.0-20200930094925-2721b1e36840
 github.com/hashicorp/go-cty-funcs/cidr
+github.com/hashicorp/go-cty-funcs/collection
 github.com/hashicorp/go-cty-funcs/crypto
 github.com/hashicorp/go-cty-funcs/encoding
 github.com/hashicorp/go-cty-funcs/filesystem

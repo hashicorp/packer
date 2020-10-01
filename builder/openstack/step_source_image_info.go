@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imageimport"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/gophercloud/gophercloud/pagination"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -12,11 +14,13 @@ import (
 )
 
 type StepSourceImageInfo struct {
-	SourceImage      string
-	SourceImageName  string
-	SourceImageOpts  images.ListOpts
-	SourceMostRecent bool
-	SourceProperties map[string]string
+	SourceImage               string
+	SourceImageName           string
+	ExternalSourceImageURL    string
+	ExternalSourceImageFormat string
+	SourceImageOpts           images.ListOpts
+	SourceMostRecent          bool
+	SourceProperties          map[string]string
 }
 
 func PropertiesSatisfied(image *images.Image, props *map[string]string) bool {
@@ -33,18 +37,76 @@ func (s *StepSourceImageInfo) Run(ctx context.Context, state multistep.StateBag)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	if s.SourceImage != "" {
-		state.Put("source_image", s.SourceImage)
-
-		return multistep.ActionContinue
-	}
-
 	client, err := config.imageV2Client()
 	if err != nil {
 		err := fmt.Errorf("error creating image client: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
+	}
+
+	if s.ExternalSourceImageURL != "" {
+		createOpts := images.CreateOpts{
+			Name:            s.SourceImageName,
+			ContainerFormat: "bare",
+			DiskFormat:      s.ExternalSourceImageFormat,
+			Properties: map[string]string{
+				"packer_external_source_image_url":    s.ExternalSourceImageURL,
+				"packer_external_source_image_format": s.ExternalSourceImageFormat,
+			},
+		}
+
+		ui.Say("Creating image using external source image with name " + s.SourceImageName)
+		ui.Say("Using disk format " + s.ExternalSourceImageFormat)
+		image, err := images.Create(client, createOpts).Extract()
+
+		if err != nil {
+			err := fmt.Errorf("Error creating source image: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		ui.Say("Created image with ID " + image.ID)
+
+		importOpts := imageimport.CreateOpts{
+			Name: imageimport.WebDownloadMethod,
+			URI:  s.ExternalSourceImageURL,
+		}
+
+		ui.Say("Importing External Source Image from URL " + s.ExternalSourceImageURL)
+		err = imageimport.Create(client, image.ID, importOpts).ExtractErr()
+
+		if err != nil {
+			err := fmt.Errorf("Error importing source image: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		for image.Status != images.ImageStatusActive {
+			ui.Message("Image not Active, retrying in 10 seconds")
+			time.Sleep(10 * time.Second)
+
+			img, err := images.Get(client, image.ID).Extract()
+
+			if err != nil {
+				err := fmt.Errorf("Error querying image: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+
+			image = img
+		}
+
+		s.SourceImage = image.ID
+	}
+
+	if s.SourceImage != "" {
+		state.Put("source_image", s.SourceImage)
+
+		return multistep.ActionContinue
 	}
 
 	if s.SourceImageName != "" {
@@ -117,5 +179,25 @@ func (s *StepSourceImageInfo) Run(ctx context.Context, state multistep.StateBag)
 }
 
 func (s *StepSourceImageInfo) Cleanup(state multistep.StateBag) {
-	// No cleanup required for backout
+	if s.ExternalSourceImageURL != "" {
+		config := state.Get("config").(*Config)
+		ui := state.Get("ui").(packer.Ui)
+
+		client, err := config.imageV2Client()
+		if err != nil {
+			err := fmt.Errorf("error creating image client: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return
+		}
+
+		ui.Say(fmt.Sprintf("Deleting temporary external source image: %s ...", s.SourceImageName))
+		err = images.Delete(client, s.SourceImage).ExtractErr()
+		if err != nil {
+			err := fmt.Errorf("error cleaning up external source image: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return
+		}
+	}
 }

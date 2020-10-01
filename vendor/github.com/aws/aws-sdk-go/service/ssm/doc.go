@@ -8,19 +8,20 @@
 // system (OS) patches, automating the creation of Amazon Machine Images (AMIs),
 // and configuring operating systems (OSs) and applications at scale. Systems
 // Manager lets you remotely and securely manage the configuration of your managed
-// instances. A managed instance is any Amazon EC2 instance or on-premises machine
-// in your hybrid environment that has been configured for Systems Manager.
+// instances. A managed instance is any Amazon Elastic Compute Cloud instance
+// (EC2 instance), or any on-premises server or virtual machine (VM) in your
+// hybrid environment that has been configured for Systems Manager.
 //
 // This reference is intended to be used with the AWS Systems Manager User Guide
-// (http://docs.aws.amazon.com/systems-manager/latest/userguide/).
+// (https://docs.aws.amazon.com/systems-manager/latest/userguide/).
 //
 // To get started, verify prerequisites and configure managed instances. For
-// more information, see Setting Up AWS Systems Manager (http://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-setting-up.html)
+// more information, see Setting up AWS Systems Manager (https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-setting-up.html)
 // in the AWS Systems Manager User Guide.
 //
-// For information about other API actions you can perform on Amazon EC2 instances,
-// see the Amazon EC2 API Reference (http://docs.aws.amazon.com/AWSEC2/latest/APIReference/).
-// For information about how to use a Query API, see Making API Requests (http://docs.aws.amazon.com/AWSEC2/latest/APIReference/making-api-requests.html).
+// For information about other API actions you can perform on EC2 instances,
+// see the Amazon EC2 API Reference (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/).
+// For information about how to use a Query API, see Making API requests (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/making-api-requests.html).
 //
 // See https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06 for more information on this service.
 //

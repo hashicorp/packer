@@ -28,25 +28,13 @@ func (vm *ReconfigureFail) ReconfigVMTask(req *types.ReconfigVM_Task) soap.HasFa
 }
 
 func TestVirtualMachineDriver_Configure(t *testing.T) {
-	model := simulator.VPX()
-	model.Machine = 1
-	defer model.Remove()
-
-	s, err := NewSimulatorServer(model)
+	sim, err := NewVCenterSimulator()
 	if err != nil {
 		t.Fatalf("should not fail: %s", err.Error())
 	}
-	defer s.Close()
+	defer sim.Close()
 
-	driverSim, err := NewSimulatorDriver(s)
-	if err != nil {
-		t.Fatalf("should not fail: %s", err.Error())
-	}
-
-	//Simulator shortcut to choose any pre created VM.
-	machine := simulator.Map.Any("VirtualMachine").(*simulator.VirtualMachine)
-	ref := machine.Reference()
-	vm := driverSim.NewVM(&ref)
+	vm, machine := sim.ChooseSimulatorPreCreatedVM()
 
 	// Happy test
 	hardwareConfig := &HardwareConfig{

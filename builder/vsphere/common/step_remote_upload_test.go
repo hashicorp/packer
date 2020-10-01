@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 )
 
 func TestStepRemoteUpload_Run(t *testing.T) {
-	state := basicStateBag()
+	state := basicStateBag(nil)
 	driverMock := driver.NewDriverMock()
 	state.Put("driver", driverMock)
 	state.Put("iso_path", "[datastore] iso/path")
@@ -48,7 +48,7 @@ func TestStepRemoteUpload_Run(t *testing.T) {
 }
 
 func TestStepRemoteUpload_SkipRun(t *testing.T) {
-	state := basicStateBag()
+	state := basicStateBag(nil)
 	driverMock := driver.NewDriverMock()
 	state.Put("driver", driverMock)
 

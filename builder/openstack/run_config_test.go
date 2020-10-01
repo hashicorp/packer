@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
@@ -129,6 +130,49 @@ func TestRunConfigPrepare_FloatingIPPoolCompat(t *testing.T) {
 
 	if c.FloatingIPNetwork != "uuid2" {
 		t.Fatalf("invalid value: %s", c.FloatingIPNetwork)
+	}
+}
+
+func TestRunConfigPrepare_ExternalSourceImageURL(t *testing.T) {
+	c := testRunConfig()
+	// test setting both ExternalSourceImageURL and SourceImage causes an error
+	c.ExternalSourceImageURL = "http://example.com/image.qcow2"
+	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("err: %s", err)
+	}
+
+	// test setting both ExternalSourceImageURL and SourceImageName causes an error
+	c.SourceImage = ""
+	c.SourceImageName = "abcd"
+	c.ExternalSourceImageURL = "http://example.com/image.qcow2"
+	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("err: %s", err)
+	}
+
+	// test neither setting SourceImage, SourceImageName or ExternalSourceImageURL causes an error
+	c.SourceImage = ""
+	c.SourceImageName = ""
+	c.ExternalSourceImageURL = ""
+	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("err: %s", err)
+	}
+
+	// test setting only ExternalSourceImageURL passes
+	c.SourceImage = ""
+	c.SourceImageName = ""
+	c.ExternalSourceImageURL = "http://example.com/image.qcow2"
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+
+	// test default values
+	if c.ExternalSourceImageFormat != "qcow2" {
+		t.Fatalf("ExternalSourceImageFormat should have been set to default: qcow2")
+	}
+
+	p := `packer_[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}`
+	if matches, _ := regexp.MatchString(p, c.SourceImageName); !matches {
+		t.Fatalf("invalid format for SourceImageName: %s", c.SourceImageName)
 	}
 }
 

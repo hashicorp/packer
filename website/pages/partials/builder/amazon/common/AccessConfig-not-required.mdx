@@ -1,8 +1,15 @@
 <!-- Code generated from the comments of the AccessConfig struct in builder/amazon/common/access_config.go; DO NOT EDIT MANUALLY -->
 
+- `assume_role` (AssumeRoleConfig) - If provided with a role ARN, Packer will attempt to assume this role
+  using the supplied credentials. See
+  [AssumeRoleConfig](#assume-role-configuration) below for more
+  details on all of the options available, and for a usage example.
+
 - `custom_endpoint_ec2` (string) - This option is useful if you use a cloud
   provider whose API is compatible with aws EC2. Specify another endpoint
   like this https://ec2.custom.endpoint.com.
+
+- `shared_credentials_file` (string) - Path to a credentials file to load credentials from
 
 - `decode_authorization_messages` (bool) - Enable automatic decoding of any encoded authorization (error) messages
   using the `sts:DecodeAuthorizationMessage` API. Note: requires that the
@@ -30,6 +37,8 @@
   validation of the ami_regions configuration option. Default false.
 
 - `skip_metadata_api_check` (bool) - Skip Metadata Api Check
+
+- `skip_credential_validation` (bool) - Set to true if you want to skip validating AWS credentials before runtime.
 
 - `token` (string) - The access token to use. This is different from the
   access key and secret key. If you're not sure what this is, then you

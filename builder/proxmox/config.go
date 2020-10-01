@@ -86,6 +86,7 @@ type diskConfig struct {
 	Size            string `mapstructure:"disk_size"`
 	CacheMode       string `mapstructure:"cache_mode"`
 	DiskFormat      string `mapstructure:"format"`
+	IOThread        bool   `mapstructure:"io_thread"`
 }
 type vgaConfig struct {
 	Type   string `mapstructure:"type"`
@@ -188,6 +189,17 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		if c.Disks[idx].CacheMode == "" {
 			log.Printf("Disk %d cache mode not set, using default 'none'", idx)
 			c.Disks[idx].CacheMode = "none"
+		}
+		if c.Disks[idx].IOThread {
+			// io thread is only supported by virtio-scsi-single controller
+			if c.SCSIController != "virtio-scsi-single" {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("io thread option requires virtio-scsi-single controller"))
+			} else {
+				// ... and only for virtio and scsi disks
+				if !(c.Disks[idx].Type == "scsi" || c.Disks[idx].Type == "virtio") {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("io thread option requires scsi or a virtio disk"))
+				}
+			}
 		}
 		// For any storage pool types which aren't in rxStorageTypes in proxmox-api/proxmox/config_qemu.go:890
 		// (currently zfspool|lvm|rbd|cephfs), the format parameter is mandatory. Make sure this is still up to date

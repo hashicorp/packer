@@ -220,3 +220,32 @@ func createTestExistingStateBagStepCreateResourceGroup() multistep.StateBag {
 	stateBag.Put(constants.ArmTags, tags)
 	return stateBag
 }
+
+func TestStepCreateResourceGroupShouldFailIfTagsFailCast(t *testing.T) {
+	stateBag := new(multistep.BasicStateBag)
+
+	stateBag.Put(constants.ArmLocation, "Unit Test: Location")
+	stateBag.Put(constants.ArmResourceGroupName, "Unit Test: ResourceGroupName")
+	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
+
+	value := "Unit Test: Tags"
+	tags := map[string]string{
+		"tag01": value,
+	}
+
+	stateBag.Put(constants.ArmTags, tags)
+	var testSubject = &StepCreateResourceGroup{
+		create: func(context.Context, string, string, map[string]*string) error { return nil },
+		say:    func(message string) {},
+		error:  func(e error) {},
+		exists: func(context.Context, string) (bool, error) { return false, nil },
+	}
+	var result = testSubject.Run(context.Background(), stateBag)
+	if result != multistep.ActionHalt {
+		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
+	}
+
+	if _, ok := stateBag.GetOk(constants.Error); ok == false {
+		t.Fatalf("Expected the step to set stateBag['%s'], but it was not.", constants.Error)
+	}
+}

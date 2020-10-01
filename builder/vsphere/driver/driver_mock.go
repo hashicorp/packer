@@ -11,6 +11,9 @@ import (
 type DriverMock struct {
 	FindDatastoreCalled bool
 	DatastoreMock       *DatastoreMock
+	FindDatastoreName   string
+	FindDatastoreHost   string
+	FindDatastoreErr    error
 
 	PreCleanShouldFail bool
 	PreCleanVMCalled   bool
@@ -32,7 +35,9 @@ func (d *DriverMock) FindDatastore(name string, host string) (Datastore, error) 
 	if d.DatastoreMock == nil {
 		d.DatastoreMock = new(DatastoreMock)
 	}
-	return d.DatastoreMock, nil
+	d.FindDatastoreName = name
+	d.FindDatastoreHost = host
+	return d.DatastoreMock, d.FindDatastoreErr
 }
 
 func (d *DriverMock) NewVM(ref *types.ManagedObjectReference) VirtualMachine {
