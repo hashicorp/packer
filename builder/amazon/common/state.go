@@ -154,10 +154,17 @@ func (w *AWSPollingConfig) WaitUntilSnapshotDone(ctx aws.Context, conn *ec2.EC2,
 		SnapshotIds: []*string{&snapshotID},
 	}
 
+	waitOpts := w.getWaiterOptions()
+	if len(waitOpts) == 0 {
+		// Bump this default to 30 minutes.
+		// Large snapshots can take a long time for the copy to s3
+		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(120))
+	}
+
 	err := conn.WaitUntilSnapshotCompletedWithContext(
 		ctx,
 		&snapInput,
-		w.getWaiterOptions()...)
+		waitOpts...)
 	return err
 }
 

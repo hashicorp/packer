@@ -337,6 +337,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	// Build the artifact and return it
 	artifact := &Artifact{
 		Volumes:        state.Get("ebsvolumes").(EbsVolumes),
+		Snapshots:      state.Get("ebssnapshots").(EbsSnapshots),
 		BuilderIdValue: BuilderId,
 		Conn:           ec2conn,
 		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},

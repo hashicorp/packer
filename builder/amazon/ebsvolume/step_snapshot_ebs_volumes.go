@@ -144,6 +144,16 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 		}
 	}
 
+	//Record all snapshots in current Region.
+	snapshots := make(EbsSnapshots)
+	for snapID := range s.SnapshotMap {
+		snapshots[*ec2conn.Config.Region] = append(
+			snapshots[*ec2conn.Config.Region],
+			snapID)
+	}
+	//Records artifacts
+	state.Put("ebssnapshots", snapshots)
+
 	return multistep.ActionContinue
 }
 
