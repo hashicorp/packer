@@ -44,7 +44,8 @@ func testConfig(accessConfFile *os.File) map[string]interface{} {
 		"create_vnic_details": map[string]interface{}{
 			"nsg_ids": []string{"ocd1..."},
 		},
-		"shape": "VM.Standard1.1",
+		"shape":     "VM.Standard1.1",
+		"disk_size": 60,
 	}
 }
 
