@@ -53,9 +53,10 @@ type VpcFilterOptions struct {
 }
 
 type Statement struct {
-	Effect   string   `mapstructure:"Effect" required:"false"`
-	Action   []string `mapstructure:"Action" required:"false"`
-	Resource []string `mapstructure:"Resource" required:"false"`
+	Effect    string                 `mapstructure:"Effect" required:"false"`
+	Principal map[string]interface{} `mapstructure:"Principal" required:"false"`
+	Action    []string               `mapstructure:"Action" required:"false"`
+	Resource  []string               `mapstructure:"Resource" required:"false"`
 }
 
 type PolicyDocument struct {

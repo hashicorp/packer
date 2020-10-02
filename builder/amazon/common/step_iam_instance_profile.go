@@ -53,6 +53,7 @@ func (s *StepIamInstanceProfile) Run(ctx context.Context, state multistep.StateB
 		profileName := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 
 		policy, err := json.Marshal(s.TemporaryIamInstanceProfilePolicyDocument)
+		log.Printf("policy is %s", policy)
 		if err != nil {
 			ui.Error(err.Error())
 			state.Put("error", err)
