@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
 )
 
 const (
@@ -176,6 +177,22 @@ func (cfg *PackerConfig) Initialize() hcl.Diagnostics {
 	_, moreDiags = cfg.LocalVariables.Values()
 	diags = append(diags, moreDiags...)
 	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
+
+	for _, variable := range cfg.InputVariables {
+		if !variable.Sensitive {
+			continue
+		}
+		value, _ := variable.Value()
+		if !value.IsWhollyKnown() && value.IsNull() && !value.Type().Equals(cty.String) {
+			continue
+		}
+		cty.Walk(value, func(_ cty.Path, nested cty.Value) (bool, error) {
+			if nested.IsWhollyKnown() && !nested.IsNull() && nested.Type().Equals(cty.String) {
+				packer.LogSecretFilter.Set(nested.AsString())
+			}
+			return true, nil
+		})
+	}
 
 	// decode the actual content
 	for _, file := range cfg.files {
