@@ -237,7 +237,7 @@ func (s *StepCreateCD) AddFile(dst, src string) error {
 	}
 
 	// file is a directory, so we need to parse the filename into a path to
-	// dicard and a basename
+	// discard and a basename
 	discardPath, _ := filepath.Split(src)
 
 	// Add a directory and its subdirectories
