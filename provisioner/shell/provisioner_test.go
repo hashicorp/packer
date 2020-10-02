@@ -3,6 +3,7 @@ package shell
 import (
 	"io/ioutil"
 	"os"
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
@@ -202,6 +203,83 @@ func TestProvisionerPrepare_Scripts(t *testing.T) {
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestProvisionerPrepare_ScriptsFromGlob(t *testing.T) {
+	config := testConfig()
+	delete(config, "inline")
+
+	config["scripts"] = []string{}
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Bad glob pattern example from https://golang.org/src/path/filepath/match_test.go
+	config["scripts"] = []string{"\\"}
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	inputScripts := []string{}
+	expectedScripts := []string{}
+
+	// Include some direct script references
+	for i := 0; i < 2; i++ {
+		tf, err := ioutil.TempFile("", "packer")
+		if err != nil {
+			t.Fatalf("error tempfile: %s", err)
+		}
+		defer os.Remove(tf.Name())
+
+		inputScripts = append(inputScripts, tf.Name())
+		expectedScripts = append(expectedScripts, tf.Name())
+	}
+
+	// And a folder whose contents we'll glob
+	td, err := ioutil.TempDir("", "packer")
+	if err != nil {
+		t.Fatalf("error tempdir: %s", err)
+	}
+	defer os.Remove(td)
+
+	inputScripts = append(inputScripts, td+"/*")
+
+	for i := 0; i < 2; i++ {
+		tf, err := ioutil.TempFile(td, "packer")
+		if err != nil {
+			t.Fatalf("error tempfile: %s", err)
+		}
+		defer os.Remove(tf.Name())
+
+		expectedScripts = append(expectedScripts, tf.Name())
+	}
+
+	// And some more direct references after the glob to make sure ordering is respected
+	for i := 0; i < 2; i++ {
+		tf, err := ioutil.TempFile("", "packer")
+		if err != nil {
+			t.Fatalf("error tempfile: %s", err)
+		}
+		defer os.Remove(tf.Name())
+
+		inputScripts = append(inputScripts, tf.Name())
+		expectedScripts = append(expectedScripts, tf.Name())
+	}
+
+	config["scripts"] = inputScripts
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if !reflect.DeepEqual(p.config.Scripts, expectedScripts) {
+		t.Fatalf("resolved scripts (%v) do not match expected scripts (%v)", p.config.Scripts, expectedScripts)
 	}
 }
 

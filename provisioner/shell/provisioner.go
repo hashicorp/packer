@@ -13,6 +13,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -152,6 +153,18 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("Only a script file or an inline script can be specified, not both."))
 	}
+
+	// Resolve glob patterns, making sure ordering is respected
+	resolvedScripts := []string{}
+	for _, path := range p.config.Scripts {
+		if matches, err := filepath.Glob(path); err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Bad glob pattern '%s': %s", path, err))
+		} else {
+			resolvedScripts = append(resolvedScripts, matches...)
+		}
+	}
+	p.config.Scripts = resolvedScripts
 
 	for _, path := range p.config.Scripts {
 		if _, err := os.Stat(path); err != nil {
