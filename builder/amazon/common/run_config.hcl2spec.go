@@ -89,9 +89,10 @@ func (*FlatSecurityGroupFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 // FlatStatement is an auto-generated flat version of Statement.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatStatement struct {
-	Effect   *string  `mapstructure:"Effect" required:"false" cty:"Effect" hcl:"Effect"`
-	Action   []string `mapstructure:"Action" required:"false" cty:"Action" hcl:"Action"`
-	Resource []string `mapstructure:"Resource" required:"false" cty:"Resource" hcl:"Resource"`
+	Effect    *string                `mapstructure:"Effect" required:"false" cty:"Effect" hcl:"Effect"`
+	Principal map[string]interface{} `mapstructure:"Principal" required:"false" cty:"Principal" hcl:"Principal"`
+	Action    []string               `mapstructure:"Action" required:"false" cty:"Action" hcl:"Action"`
+	Resource  []string               `mapstructure:"Resource" required:"false" cty:"Resource" hcl:"Resource"`
 }
 
 // FlatMapstructure returns a new FlatStatement.
@@ -106,9 +107,10 @@ func (*Statement) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spe
 // The decoded values from this spec will then be applied to a FlatStatement.
 func (*FlatStatement) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"Effect":   &hcldec.AttrSpec{Name: "Effect", Type: cty.String, Required: false},
-		"Action":   &hcldec.AttrSpec{Name: "Action", Type: cty.List(cty.String), Required: false},
-		"Resource": &hcldec.AttrSpec{Name: "Resource", Type: cty.List(cty.String), Required: false},
+		"Effect":    &hcldec.AttrSpec{Name: "Effect", Type: cty.String, Required: false},
+		"Principal": &hcldec.AttrSpec{Name: "Principal", Type: cty.Map(cty.String), Required: false},
+		"Action":    &hcldec.AttrSpec{Name: "Action", Type: cty.List(cty.String), Required: false},
+		"Resource":  &hcldec.AttrSpec{Name: "Resource", Type: cty.List(cty.String), Required: false},
 	}
 	return s
 }
