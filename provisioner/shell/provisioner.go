@@ -160,6 +160,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if matches, err := filepath.Glob(path); err != nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Bad glob pattern '%s': %s", path, err))
+		} else if len(matches) == 0 {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Found no files for path '%s'", path))
 		} else {
 			resolvedScripts = append(resolvedScripts, matches...)
 		}
