@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -249,8 +250,8 @@ func TestProvisionerPrepare_ScriptsFromGlob(t *testing.T) {
 
 	inputScripts = append(inputScripts, td+"/*")
 
-	for i := 0; i < 2; i++ {
-		tf, err := ioutil.TempFile(td, "packer")
+	for i := 0; i < 10; i++ {
+		tf, err := ioutil.TempFile(td, fmt.Sprintf("%d_packer", i))
 		if err != nil {
 			t.Fatalf("error tempfile: %s", err)
 		}
