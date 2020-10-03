@@ -69,8 +69,9 @@ type Config struct {
 	CompartmentID      string `mapstructure:"compartment_ocid"`
 
 	// Image
-	BaseImageID string `mapstructure:"base_image_ocid"`
-	ImageName   string `mapstructure:"image_name"`
+	BaseImageID        string `mapstructure:"base_image_ocid"`
+	ImageName          string `mapstructure:"image_name"`
+	ImageCompartmentID string `mapstructure:"image_compartment_ocid"`
 
 	// Instance
 	InstanceName        string                            `mapstructure:"instance_name"`
@@ -252,6 +253,10 @@ func (c *Config) Prepare(raws ...interface{}) error {
 
 	if c.CompartmentID == "" && tenancyOCID != "" {
 		c.CompartmentID = tenancyOCID
+	}
+
+	if c.ImageCompartmentID == "" {
+		c.ImageCompartmentID = c.CompartmentID
 	}
 
 	if c.Shape == "" {
