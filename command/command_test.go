@@ -2,6 +2,7 @@ package command
 
 import (
 	"bytes"
+	"io/ioutil"
 	"path/filepath"
 	"testing"
 
@@ -25,6 +26,15 @@ func outputCommand(t *testing.T, m Meta) (string, string) {
 	out := ui.Writer.(*bytes.Buffer)
 	err := ui.ErrorWriter.(*bytes.Buffer)
 	return out.String(), err.String()
+}
+
+func testFixtureContent(n ...string) string {
+	path := filepath.Join(append([]string{fixturesDir}, n...)...)
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
 }
 
 func testFixture(n ...string) string {

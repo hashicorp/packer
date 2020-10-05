@@ -1,0 +1,16 @@
+Packer Inspect: HCL2 mode
+
+> input-variables:
+
+var.not_sensitive: "I am soooo not sensitive"
+var.not_sensitive_unknown: "<unknown>"
+var.sensitive: "<sensitive>"
+var.sensitive_array: "[\n  \"<sensitive>\",\n  \"<sensitive>\",\n]"
+var.sensitive_tags: "{\n  \"first_key\" = \"<sensitive>\"\n  \"second_key\" = \"<sensitive>\"\n}"
+var.sensitive_unknown: "<unknown>"
+
+> local-variables:
+
+
+> builds:
+
