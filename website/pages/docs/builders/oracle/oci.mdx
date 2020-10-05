@@ -71,7 +71,7 @@ can also be supplied to override the typical auto-generated key:
   operation available in the Core Services API.
 
 - `compartment_ocid` (string) - The OCID of the
-  [compartment](https://docs.us-phoenix-1.oraclecloud.com/Content/GSG/Tasks/choosingcompartments.htm)
+  [compartment](https://docs.us-phoenix-1.oraclecloud.com/Content/GSG/Tasks/choosingcompartments.htm) that the instance will run in.
 
 - `shape` (string) - The template that determines the number of CPUs, amount
   of memory, and other resources allocated to a newly created instance.
@@ -135,6 +135,8 @@ can also be supplied to override the typical auto-generated key:
   if present. This cannot be used along with the `use_instance_principals` key.
 
 - `image_name` (string) - The name to assign to the resulting custom image.
+
+- `image_compartment_ocid` (string) - The OCID of the target compartment for the resulting image. Defaults to `compartment_ocid`.
 
 - `instance_name` (string) - The name to assign to the instance used for the image creation process.
   If not set a name of the form `instanceYYYYMMDDhhmmss` will be used.

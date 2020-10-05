@@ -99,7 +99,7 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 // CreateImage creates a new custom image.
 func (d *driverOCI) CreateImage(ctx context.Context, id string) (core.Image, error) {
 	res, err := d.computeClient.CreateImage(ctx, core.CreateImageRequest{CreateImageDetails: core.CreateImageDetails{
-		CompartmentId: &d.cfg.CompartmentID,
+		CompartmentId: &d.cfg.ImageCompartmentID,
 		InstanceId:    &id,
 		DisplayName:   &d.cfg.ImageName,
 		FreeformTags:  d.cfg.Tags,
