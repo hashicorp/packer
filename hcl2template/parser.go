@@ -183,9 +183,6 @@ func (cfg *PackerConfig) Initialize() hcl.Diagnostics {
 			continue
 		}
 		value, _ := variable.Value()
-		if !value.IsWhollyKnown() && value.IsNull() && !value.Type().Equals(cty.String) {
-			continue
-		}
 		_ = cty.Walk(value, func(_ cty.Path, nested cty.Value) (bool, error) {
 			if nested.IsWhollyKnown() && !nested.IsNull() && nested.Type().Equals(cty.String) {
 				packer.LogSecretFilter.Set(nested.AsString())
