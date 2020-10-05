@@ -92,13 +92,14 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 			"Error: %s", computeName, err))
 		return
 	}
-
-	ui.Say(fmt.Sprintf(" Deleting -> %s : '%s'", imageType, imageName))
-	err = s.deleteDisk(context.TODO(), imageType, imageName, resourceGroupName)
-	if err != nil {
-		ui.Error(fmt.Sprintf("Error deleting resource.  Please delete manually.\n\n"+
-			"Name: %s\n"+
-			"Error: %s", imageName, err))
+	if !state.Get(constants.ArmKeepOSDisk).(bool) {
+		ui.Say(fmt.Sprintf(" Deleting -> %s : '%s'", imageType, imageName))
+		err = s.deleteDisk(context.TODO(), imageType, imageName, resourceGroupName)
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error deleting resource.  Please delete manually.\n\n"+
+				"Name: %s\n"+
+				"Error: %s", imageName, err))
+		}
 	}
 }
 

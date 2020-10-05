@@ -46,7 +46,24 @@ func TestArtifactIdVHD(t *testing.T) {
 }
 
 func TestArtifactIDManagedImage(t *testing.T) {
-	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix", generatedData())
+	template := CaptureTemplate{
+		Resources: []CaptureResources{
+			{
+				Properties: CaptureProperties{
+					StorageProfile: CaptureStorageProfile{
+						OSDisk: CaptureDisk{
+							Image: CaptureUri{
+								Uri: "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd",
+							},
+						},
+					},
+				},
+				Location: "southcentralus",
+			},
+		},
+	}
+
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix", generatedData(), false, &template, getFakeSasUrl)
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -69,7 +86,24 @@ ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
 }
 
 func TestArtifactIDManagedImageWithoutOSDiskSnapshotName(t *testing.T) {
-	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "", "fakeDataDiskSnapshotPrefix", generatedData())
+	template := CaptureTemplate{
+		Resources: []CaptureResources{
+			{
+				Properties: CaptureProperties{
+					StorageProfile: CaptureStorageProfile{
+						OSDisk: CaptureDisk{
+							Image: CaptureUri{
+								Uri: "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd",
+							},
+						},
+					},
+				},
+				Location: "southcentralus",
+			},
+		},
+	}
+
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "", "fakeDataDiskSnapshotPrefix", generatedData(), false, &template, getFakeSasUrl)
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -91,7 +125,24 @@ ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
 }
 
 func TestArtifactIDManagedImageWithoutDataDiskSnapshotPrefix(t *testing.T) {
-	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "", generatedData())
+	template := CaptureTemplate{
+		Resources: []CaptureResources{
+			{
+				Properties: CaptureProperties{
+					StorageProfile: CaptureStorageProfile{
+						OSDisk: CaptureDisk{
+							Image: CaptureUri{
+								Uri: "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd",
+							},
+						},
+					},
+				},
+				Location: "southcentralus",
+			},
+		},
+	}
+
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "", generatedData(), false, &template, getFakeSasUrl)
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
@@ -104,6 +155,47 @@ ManagedImageName: fakeName
 ManagedImageId: fakeID
 ManagedImageLocation: fakeLocation
 ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
+`
+
+	result := artifact.String()
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
+func TestArtifactIDManagedImageWithKeepingTheOSDisk(t *testing.T) {
+	template := CaptureTemplate{
+		Resources: []CaptureResources{
+			{
+				Properties: CaptureProperties{
+					StorageProfile: CaptureStorageProfile{
+						OSDisk: CaptureDisk{
+							Image: CaptureUri{
+								Uri: "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd",
+							},
+						},
+					},
+				},
+				Location: "southcentralus",
+			},
+		},
+	}
+
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "", generatedData(), true, &template, getFakeSasUrl)
+	if err != nil {
+		t.Fatalf("err=%s", err)
+	}
+
+	expected := `Azure.ResourceManagement.VMImage:
+
+OSType: Linux
+ManagedImageResourceGroupName: fakeResourceGroup
+ManagedImageName: fakeName
+ManagedImageId: fakeID
+ManagedImageLocation: fakeLocation
+ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
+OSDiskUri: https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd
+OSDiskUriReadOnlySas: SAS-Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd
 `
 
 	result := artifact.String()

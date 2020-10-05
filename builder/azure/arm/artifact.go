@@ -46,8 +46,8 @@ type Artifact struct {
 	StateData map[string]interface{}
 }
 
-func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSnapshotName, dataDiskSnapshotPrefix string, generatedData map[string]interface{}) (*Artifact, error) {
-	return &Artifact{
+func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSnapshotName, dataDiskSnapshotPrefix string, generatedData map[string]interface{}, keepOSDisk bool, template *CaptureTemplate, getSasUrl func(name string) string) (*Artifact, error) {
+	res := Artifact{
 		ManagedImageResourceGroupName:      resourceGroup,
 		ManagedImageName:                   name,
 		ManagedImageLocation:               location,
@@ -56,7 +56,27 @@ func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSn
 		ManagedImageOSDiskSnapshotName:     osDiskSnapshotName,
 		ManagedImageDataDiskSnapshotPrefix: dataDiskSnapshotPrefix,
 		StateData:                          generatedData,
-	}, nil
+	}
+
+	if keepOSDisk {
+		if template == nil {
+			return nil, fmt.Errorf("nil capture template")
+		}
+
+		if len(template.Resources) != 1 {
+			return nil, fmt.Errorf("malformed capture template, expected one resource")
+		}
+
+		vhdUri, err := url.Parse(template.Resources[0].Properties.StorageProfile.OSDisk.Image.Uri)
+		if err != nil {
+			return nil, err
+		}
+
+		res.OSDiskUri = vhdUri.String()
+		res.OSDiskUriReadOnlySas = getSasUrl(getStorageUrlPath(vhdUri))
+	}
+
+	return &res, nil
 }
 
 func NewManagedImageArtifactWithSIGAsDestination(osType, resourceGroup, name, location, id, osDiskSnapshotName, dataDiskSnapshotPrefix, destinationSharedImageGalleryId string, generatedData map[string]interface{}) (*Artifact, error) {
@@ -197,6 +217,12 @@ func (a *Artifact) String() string {
 		}
 		if a.ManagedImageSharedImageGalleryId != "" {
 			buf.WriteString(fmt.Sprintf("ManagedImageSharedImageGalleryId: %s\n", a.ManagedImageSharedImageGalleryId))
+		}
+		if a.OSDiskUri != "" {
+			buf.WriteString(fmt.Sprintf("OSDiskUri: %s\n", a.OSDiskUri))
+		}
+		if a.OSDiskUriReadOnlySas != "" {
+			buf.WriteString(fmt.Sprintf("OSDiskUriReadOnlySas: %s\n", a.OSDiskUriReadOnlySas))
 		}
 	} else {
 		buf.WriteString(fmt.Sprintf("StorageAccountLocation: %s\n", a.StorageAccountLocation))
