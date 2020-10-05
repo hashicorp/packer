@@ -1,5 +1,23 @@
 ## 1.6.5 (Upcoming)
 
+### BUG FIXES:
+
+* core/hcl2: Packer HCL's "Coalesce" function now behaves same way as
+    Terraform's. [GH-10016]
+* core/HCL: Hide sensitive variables from output. [GH-10031]
+* core: Fix artifact handling so that input artifacts are properly preserved in
+    postprocessors that don't modify artifacts. [GH-9996]
+* core: Fix pathing in cd_files to copy proper directory tree when user
+    provided absolute paths. [GH-10022]
+* provisioner/ansible: Ansible galaxy no longer forces use of collections in v1
+    files. [GH-10010]
+
+### IMPROVEMENTS:
+
+* builder/oracle-oci:  New option to specify image compartment separate from
+    build compartment. [GH-10040]
+* builder/oracle-oci: New option to specify boot volume size. [GH-10017]
+
 ## 1.6.4 (September 30, 2020)
 
 ### BUG FIXES:
