@@ -99,28 +99,42 @@ func (p *PostProcessorServer) PostProcess(streamId uint32, reply *PostProcessorP
 	if err != nil {
 		return NewBasicError(err)
 	}
-	defer client.Close()
 
 	if p.context == nil {
 		p.context, p.contextCancel = context.WithCancel(context.Background())
 	}
 
-	streamId = 0
-	artifactResult, keep, forceOverride, err := p.p.PostProcess(p.context, client.Ui(), client.Artifact())
-	if err == nil && artifactResult != nil {
-		streamId = p.mux.NextId()
-		server := newServerWithMux(p.mux, streamId)
-		server.RegisterArtifact(artifactResult)
-		go server.Serve()
-	}
-
+	artifact := client.Artifact()
+	artifactResult, keep, forceOverride, err := p.p.PostProcess(p.context, client.Ui(), artifact)
 	*reply = PostProcessorProcessResponse{
 		Err:           NewBasicError(err),
 		Keep:          keep,
 		ForceOverride: forceOverride,
-		StreamId:      streamId,
+		StreamId:      0,
+	}
+	if err != nil {
+		log.Printf("error: %v", err)
+		client.Close()
+		return nil
 	}
 
+	if artifactResult != artifact {
+		// Sometimes, the artifact returned by PostProcess is the artifact from
+		// client.Artifact() and in that case we don't want to close client;
+		// otherwise the outcome is sort of undetermined. See [GH-9995] for a
+		// good test file.
+		defer client.Close()
+	}
+
+	if artifactResult != nil {
+		streamId = p.mux.NextId()
+		reply.StreamId = streamId
+		server := newServerWithMux(p.mux, streamId)
+		if err := server.RegisterArtifact(artifactResult); err != nil {
+			return err
+		}
+		go server.Serve()
+	}
 	return nil
 }
 
