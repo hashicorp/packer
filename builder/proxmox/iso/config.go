@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,nicConfig,diskConfig,vgaConfig,storageConfig
+//go:generate mapstructure-to-hcl2 -type Config,nicConfig,diskConfig,vgaConfig
 
 package proxmoxiso
 
@@ -17,22 +17,11 @@ import (
 type Config struct {
 	proxmox.Config `mapstructure:",squash"`
 
-	common.ISOConfig   `mapstructure:",squash"`
-	ISOFile            string          `mapstructure:"iso_file"`
-	AdditionalISOFiles []storageConfig `mapstructure:"additional_iso_files"`
-	ISOStoragePool     string          `mapstructure:"iso_storage_pool"`
-	UnmountISO         bool            `mapstructure:"unmount_iso"`
-	shouldUploadISO    bool
-}
-
-type storageConfig struct {
 	common.ISOConfig `mapstructure:",squash"`
-	Device           string `mapstructure:"device"`
 	ISOFile          string `mapstructure:"iso_file"`
 	ISOStoragePool   string `mapstructure:"iso_storage_pool"`
-	Unmount          bool   `mapstructure:"unmount"`
+	UnmountISO       bool   `mapstructure:"unmount_iso"`
 	shouldUploadISO  bool
-	downloadPathKey  string
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, []string, error) {
@@ -68,13 +57,13 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, []string, error) {
 		// (possibly to a local file) to an ISO file that will be downloaded and
 		// then uploaded to Proxmox.
 		if c.AdditionalISOFiles[idx].ISOFile != "" {
-			c.AdditionalISOFiles[idx].shouldUploadISO = false
+			c.AdditionalISOFiles[idx].ShouldUploadISO = false
 		} else {
-			c.AdditionalISOFiles[idx].downloadPathKey = "downloaded_additional_iso_path_" + strconv.Itoa(idx)
+			c.AdditionalISOFiles[idx].DownloadPathKey = "downloaded_additional_iso_path_" + strconv.Itoa(idx)
 			isoWarnings, isoErrors := c.AdditionalISOFiles[idx].ISOConfig.Prepare(&c.Ctx)
 			errs = packer.MultiErrorAppend(errs, isoErrors...)
 			warnings = append(warnings, isoWarnings...)
-			c.AdditionalISOFiles[idx].shouldUploadISO = true
+			c.AdditionalISOFiles[idx].ShouldUploadISO = true
 		}
 		if c.AdditionalISOFiles[idx].Device == "" {
 			log.Printf("AdditionalISOFile %d Device not set, using default 'ide3'", idx)

@@ -48,8 +48,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Checksum:    b.config.AdditionalISOFiles[idx].ISOChecksum,
 			Description: "additional ISO",
 			Extension:   b.config.AdditionalISOFiles[idx].TargetExtension,
-			ResultKey:   b.config.AdditionalISOFiles[idx].downloadPathKey,
-			TargetPath:  b.config.AdditionalISOFiles[idx].downloadPathKey,
+			ResultKey:   b.config.AdditionalISOFiles[idx].DownloadPathKey,
+			TargetPath:  b.config.AdditionalISOFiles[idx].DownloadPathKey,
 			Url:         b.config.AdditionalISOFiles[idx].ISOUrls,
 		})
 	}

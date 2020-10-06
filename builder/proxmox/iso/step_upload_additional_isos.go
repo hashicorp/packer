@@ -23,12 +23,12 @@ func (s *stepUploadAdditionalISOs) Run(ctx context.Context, state multistep.Stat
 	c := state.Get("iso-config").(*Config)
 
 	for idx := range c.AdditionalISOFiles {
-		if !c.AdditionalISOFiles[idx].shouldUploadISO {
+		if !c.AdditionalISOFiles[idx].ShouldUploadISO {
 			state.Put("additional_iso_files", c.AdditionalISOFiles)
 			continue
 		}
 
-		p := state.Get(c.AdditionalISOFiles[idx].downloadPathKey).(string)
+		p := state.Get(c.AdditionalISOFiles[idx].DownloadPathKey).(string)
 		if p == "" {
 			err := fmt.Errorf("Path to downloaded ISO was empty")
 			state.Put("erroe", err)
