@@ -116,7 +116,7 @@ func TestAgentSetToFalse(t *testing.T) {
 	cfg["qemu_agent"] = false
 
 	var c Config
-	warn, err := c.Prepare(cfg)
+	_, warn, err := c.Prepare(cfg)
 	if err != nil {
 		t.Fatal(err, warn)
 	}
@@ -159,7 +159,7 @@ func TestPacketQueueSupportForNetworkAdapters(t *testing.T) {
 		cfg["network_adapters"] = devices
 
 		var c Config
-		_, err := c.Prepare(cfg)
+		_, _, err := c.Prepare(cfg)
 
 		if tt.expectedToFail == true && err == nil {
 			t.Error("expected config preparation to fail, but no error occured")
@@ -208,7 +208,7 @@ func TestHardDiskControllerIOThreadSupport(t *testing.T) {
 		cfg["scsi_controller"] = tt.controller
 
 		var c Config
-		_, err := c.Prepare(cfg)
+		_, _, err := c.Prepare(cfg)
 
 		if tt.expectedToFail == true && err == nil {
 			t.Error("expected config preparation to fail, but no error occured")
@@ -217,5 +217,15 @@ func TestHardDiskControllerIOThreadSupport(t *testing.T) {
 		if tt.expectedToFail == false && err != nil {
 			t.Errorf("expected config preparation to succeed, but %s", err.Error())
 		}
+	}
+}
+
+func mandatoryConfig(t *testing.T) map[string]interface{} {
+	return map[string]interface{}{
+		"proxmox_url":  "https://my-proxmox.my-domain:8006/api2/json",
+		"username":     "apiuser@pve",
+		"password":     "supersecret",
+		"node":         "my-proxmox",
+		"ssh_username": "root",
 	}
 }
