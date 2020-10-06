@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"strings"
 	"time"
 
@@ -25,7 +24,6 @@ import (
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-	"golang.org/x/oauth2/jwt"
 )
 
 // driverGCE is a Driver implementation that actually talks to GCE.
@@ -35,6 +33,14 @@ type driverGCE struct {
 	service        *compute.Service
 	osLoginService *oslogin.Service
 	ui             packer.Ui
+}
+
+type GCEDriverConfig struct {
+	Ui                            packer.Ui
+	ProjectId                     string
+	Account                       *ServiceAccount
+	ImpersonateServiceAccountName string
+	VaultOauthEngineName          string
 }
 
 var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
@@ -72,31 +78,34 @@ func (ots OauthTokenSource) Token() (*oauth2.Token, error) {
 
 }
 
-func NewClientGCE(conf *jwt.Config, vaultOauth string) (*http.Client, error) {
+func NewClientOptionGoogle(account *ServiceAccount, vaultOauth string, impersonatesa string) (option.ClientOption, error) {
 	var err error
 
-	var client *http.Client
+	var opts option.ClientOption
 
 	if vaultOauth != "" {
 		// Auth with Vault Oauth
 		log.Printf("Using Vault to generate Oauth token.")
 		ts := OauthTokenSource{vaultOauth}
-		return oauth2.NewClient(context.TODO(), ts), nil
+		opts = option.WithTokenSource(ts)
 
-	} else if conf != nil && len(conf.PrivateKey) > 0 {
+	} else if impersonatesa != "" {
+		opts = option.ImpersonateCredentials(impersonatesa)
+	} else if account != nil && account.jwt != nil && len(account.jwt.PrivateKey) > 0 {
 		// Auth with AccountFile if provided
 		log.Printf("[INFO] Requesting Google token via account_file...")
-		log.Printf("[INFO]   -- Email: %s", conf.Email)
+		log.Printf("[INFO]   -- Email: %s", account.jwt.Email)
 		log.Printf("[INFO]   -- Scopes: %s", DriverScopes)
-		log.Printf("[INFO]   -- Private Key Length: %d", len(conf.PrivateKey))
+		log.Printf("[INFO]   -- Private Key Length: %d", len(account.jwt.PrivateKey))
 
-		// Initiate an http.Client. The following GET request will be
-		// authorized and authenticated on the behalf of
-		// your service account.
-		client = conf.Client(context.TODO())
+		opts = option.WithCredentialsJSON(account.jsonKey)
 	} else {
 		log.Printf("[INFO] Requesting Google token via GCE API Default Client Token Source...")
-		client, err = google.DefaultClient(context.TODO(), DriverScopes...)
+		ts, err := google.DefaultTokenSource(context.TODO(), "https://www.googleapis.com/auth/cloud-platform")
+		if err != nil {
+			return nil, err
+		}
+		opts = option.WithTokenSource(ts)
 		// The DefaultClient uses the DefaultTokenSource of the google lib.
 		// The DefaultTokenSource uses the "Application Default Credentials"
 		// It looks for credentials in the following places, preferring the first location found:
@@ -115,22 +124,23 @@ func NewClientGCE(conf *jwt.Config, vaultOauth string) (*http.Client, error) {
 		return nil, err
 	}
 
-	return client, nil
+	return opts, nil
 }
 
-func NewDriverGCE(ui packer.Ui, p string, conf *jwt.Config, vaultOauth string) (Driver, error) {
-	client, err := NewClientGCE(conf, vaultOauth)
+func NewDriverGCE(config GCEDriverConfig) (Driver, error) {
+	opts, err := NewClientOptionGoogle(config.Account, config.VaultOauthEngineName, config.ImpersonateServiceAccountName)
 	if err != nil {
 		return nil, err
 	}
 
 	log.Printf("[INFO] Instantiating GCE client...")
-	service, err := compute.NewService(context.TODO(), option.WithHTTPClient(client))
+	service, err := compute.NewService(context.TODO(), opts)
 	if err != nil {
 		return nil, err
 	}
 
-	osLoginService, err := oslogin.NewService(context.TODO(), option.WithHTTPClient(client))
+	log.Printf("[INFO] Instantiating OS Login client...")
+	osLoginService, err := oslogin.NewService(context.TODO(), opts)
 	if err != nil {
 		return nil, err
 	}
@@ -139,10 +149,10 @@ func NewDriverGCE(ui packer.Ui, p string, conf *jwt.Config, vaultOauth string) (
 	service.UserAgent = useragent.String()
 
 	return &driverGCE{
-		projectId:      p,
+		projectId:      config.ProjectId,
 		service:        service,
 		osLoginService: osLoginService,
-		ui:             ui,
+		ui:             config.Ui,
 	}, nil
 }
 

@@ -6,7 +6,7 @@
 
 // Package oauth2 provides access to the Google OAuth2 API.
 //
-// For product documentation, see: https://developers.google.com/accounts/docs/OAuth2
+// For product documentation, see: https://developers.google.com/identity/protocols/oauth2/
 //
 // Creating a client
 //
@@ -25,7 +25,7 @@
 //
 // By default, all available scopes (see "Constants") are used to authenticate. To restrict scopes, use option.WithScopes:
 //
-//   oauth2Service, err := oauth2.NewService(ctx, option.WithScopes(oauth2.UserinfoProfileScope))
+//   oauth2Service, err := oauth2.NewService(ctx, option.WithScopes(oauth2.OpenIDScope))
 //
 // To use an API key for authentication (note: some APIs do not support API keys), use option.WithAPIKey:
 //
@@ -82,23 +82,23 @@ const basePath = "https://www.googleapis.com/"
 
 // OAuth2 scopes used by this API.
 const (
-	// Associate you with your personal info on Google
-	PlusMeScope = "https://www.googleapis.com/auth/plus.me"
-
 	// View your email address
 	UserinfoEmailScope = "https://www.googleapis.com/auth/userinfo.email"
 
 	// See your personal info, including any personal info you've made
 	// publicly available
 	UserinfoProfileScope = "https://www.googleapis.com/auth/userinfo.profile"
+
+	// Associate you with your personal info on Google
+	OpenIDScope = "openid"
 )
 
 // NewService creates a new Service.
 func NewService(ctx context.Context, opts ...option.ClientOption) (*Service, error) {
 	scopesOption := option.WithScopes(
-		"https://www.googleapis.com/auth/plus.me",
 		"https://www.googleapis.com/auth/userinfo.email",
 		"https://www.googleapis.com/auth/userinfo.profile",
+		"openid",
 	)
 	// NOTE: prepend, so we don't override user-specified scopes.
 	opts = append([]option.ClientOption{scopesOption}, opts...)
@@ -180,10 +180,6 @@ type UserinfoV2MeService struct {
 }
 
 type Tokeninfo struct {
-	// AccessType: The access type granted with this token. It can be
-	// offline or online.
-	AccessType string `json:"access_type,omitempty"`
-
 	// Audience: Who is the intended audience for this token. In general the
 	// same as issued_to.
 	Audience string `json:"audience,omitempty"`
@@ -203,9 +199,6 @@ type Tokeninfo struct {
 	// Scope: The space separated list of scopes granted to this token.
 	Scope string `json:"scope,omitempty"`
 
-	// TokenHandle: The token handle associated with this token.
-	TokenHandle string `json:"token_handle,omitempty"`
-
 	// UserId: The obfuscated user id.
 	UserId string `json:"user_id,omitempty"`
 
@@ -217,7 +210,7 @@ type Tokeninfo struct {
 	// server.
 	googleapi.ServerResponse `json:"-"`
 
-	// ForceSendFields is a list of field names (e.g. "AccessType") to
+	// ForceSendFields is a list of field names (e.g. "Audience") to
 	// unconditionally include in API requests. By default, fields with
 	// empty values are omitted from API requests. However, any non-pointer,
 	// non-interface field appearing in ForceSendFields will be sent to the
@@ -225,7 +218,7 @@ type Tokeninfo struct {
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
 
-	// NullFields is a list of field names (e.g. "AccessType") to include in
+	// NullFields is a list of field names (e.g. "Audience") to include in
 	// API requests with the JSON null value. By default, fields with empty
 	// values are omitted from API requests. However, any field with an
 	// empty value appearing in NullFields will be sent to the server as
@@ -240,7 +233,7 @@ func (s *Tokeninfo) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-type Userinfoplus struct {
+type Userinfo struct {
 	// Email: The user's email address.
 	Email string `json:"email,omitempty"`
 
@@ -300,8 +293,8 @@ type Userinfoplus struct {
 	NullFields []string `json:"-"`
 }
 
-func (s *Userinfoplus) MarshalJSON() ([]byte, error) {
-	type NoMethod Userinfoplus
+func (s *Userinfo) MarshalJSON() ([]byte, error) {
+	type NoMethod Userinfo
 	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
@@ -333,12 +326,6 @@ func (c *TokeninfoCall) IdToken(idToken string) *TokeninfoCall {
 	return c
 }
 
-// TokenHandle sets the optional parameter "token_handle":
-func (c *TokeninfoCall) TokenHandle(tokenHandle string) *TokeninfoCall {
-	c.urlParams_.Set("token_handle", tokenHandle)
-	return c
-}
-
 // Fields allows partial responses to be retrieved. See
 // https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
 // for more information.
@@ -366,7 +353,7 @@ func (c *TokeninfoCall) Header() http.Header {
 
 func (c *TokeninfoCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
-	reqHeaders.Set("x-goog-api-client", "gl-go/"+gensupport.GoVersion()+" gdcl/20200317")
+	reqHeaders.Set("x-goog-api-client", "gl-go/"+gensupport.GoVersion()+" gdcl/20200811")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -432,10 +419,6 @@ func (c *TokeninfoCall) Do(opts ...googleapi.CallOption) (*Tokeninfo, error) {
 	//     "id_token": {
 	//       "location": "query",
 	//       "type": "string"
-	//     },
-	//     "token_handle": {
-	//       "location": "query",
-	//       "type": "string"
 	//     }
 	//   },
 	//   "path": "oauth2/v2/tokeninfo",
@@ -499,7 +482,7 @@ func (c *UserinfoGetCall) Header() http.Header {
 
 func (c *UserinfoGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
-	reqHeaders.Set("x-goog-api-client", "gl-go/"+gensupport.GoVersion()+" gdcl/20200317")
+	reqHeaders.Set("x-goog-api-client", "gl-go/"+gensupport.GoVersion()+" gdcl/20200811")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -521,13 +504,13 @@ func (c *UserinfoGetCall) doRequest(alt string) (*http.Response, error) {
 }
 
 // Do executes the "oauth2.userinfo.get" call.
-// Exactly one of *Userinfoplus or error will be non-nil. Any non-2xx
-// status code is an error. Response headers are in either
-// *Userinfoplus.ServerResponse.Header or (if a response was returned at
+// Exactly one of *Userinfo or error will be non-nil. Any non-2xx status
+// code is an error. Response headers are in either
+// *Userinfo.ServerResponse.Header or (if a response was returned at
 // all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
 // to check whether the returned error was because
 // http.StatusNotModified was returned.
-func (c *UserinfoGetCall) Do(opts ...googleapi.CallOption) (*Userinfoplus, error) {
+func (c *UserinfoGetCall) Do(opts ...googleapi.CallOption) (*Userinfo, error) {
 	gensupport.SetOptions(c.urlParams_, opts...)
 	res, err := c.doRequest("json")
 	if res != nil && res.StatusCode == http.StatusNotModified {
@@ -546,7 +529,7 @@ func (c *UserinfoGetCall) Do(opts ...googleapi.CallOption) (*Userinfoplus, error
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
-	ret := &Userinfoplus{
+	ret := &Userinfo{
 		ServerResponse: googleapi.ServerResponse{
 			Header:         res.Header,
 			HTTPStatusCode: res.StatusCode,
@@ -562,10 +545,10 @@ func (c *UserinfoGetCall) Do(opts ...googleapi.CallOption) (*Userinfoplus, error
 	//   "id": "oauth2.userinfo.get",
 	//   "path": "oauth2/v2/userinfo",
 	//   "response": {
-	//     "$ref": "Userinfoplus"
+	//     "$ref": "Userinfo"
 	//   },
 	//   "scopes": [
-	//     "https://www.googleapis.com/auth/plus.me",
+	//     "openid",
 	//     "https://www.googleapis.com/auth/userinfo.email",
 	//     "https://www.googleapis.com/auth/userinfo.profile"
 	//   ]
@@ -626,7 +609,7 @@ func (c *UserinfoV2MeGetCall) Header() http.Header {
 
 func (c *UserinfoV2MeGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
-	reqHeaders.Set("x-goog-api-client", "gl-go/"+gensupport.GoVersion()+" gdcl/20200317")
+	reqHeaders.Set("x-goog-api-client", "gl-go/"+gensupport.GoVersion()+" gdcl/20200811")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -648,13 +631,13 @@ func (c *UserinfoV2MeGetCall) doRequest(alt string) (*http.Response, error) {
 }
 
 // Do executes the "oauth2.userinfo.v2.me.get" call.
-// Exactly one of *Userinfoplus or error will be non-nil. Any non-2xx
-// status code is an error. Response headers are in either
-// *Userinfoplus.ServerResponse.Header or (if a response was returned at
+// Exactly one of *Userinfo or error will be non-nil. Any non-2xx status
+// code is an error. Response headers are in either
+// *Userinfo.ServerResponse.Header or (if a response was returned at
 // all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
 // to check whether the returned error was because
 // http.StatusNotModified was returned.
-func (c *UserinfoV2MeGetCall) Do(opts ...googleapi.CallOption) (*Userinfoplus, error) {
+func (c *UserinfoV2MeGetCall) Do(opts ...googleapi.CallOption) (*Userinfo, error) {
 	gensupport.SetOptions(c.urlParams_, opts...)
 	res, err := c.doRequest("json")
 	if res != nil && res.StatusCode == http.StatusNotModified {
@@ -673,7 +656,7 @@ func (c *UserinfoV2MeGetCall) Do(opts ...googleapi.CallOption) (*Userinfoplus, e
 	if err := googleapi.CheckResponse(res); err != nil {
 		return nil, err
 	}
-	ret := &Userinfoplus{
+	ret := &Userinfo{
 		ServerResponse: googleapi.ServerResponse{
 			Header:         res.Header,
 			HTTPStatusCode: res.StatusCode,
@@ -689,10 +672,10 @@ func (c *UserinfoV2MeGetCall) Do(opts ...googleapi.CallOption) (*Userinfoplus, e
 	//   "id": "oauth2.userinfo.v2.me.get",
 	//   "path": "userinfo/v2/me",
 	//   "response": {
-	//     "$ref": "Userinfoplus"
+	//     "$ref": "Userinfo"
 	//   },
 	//   "scopes": [
-	//     "https://www.googleapis.com/auth/plus.me",
+	//     "openid",
 	//     "https://www.googleapis.com/auth/userinfo.email",
 	//     "https://www.googleapis.com/auth/userinfo.profile"
 	//   ]
