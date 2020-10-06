@@ -63,7 +63,7 @@ type Config struct {
 	AdditionalISOFiles []storageConfig `mapstructure:"additional_iso_files"`
 	VMInterface        string          `mapstructure:"vm_interface"`
 
-	Ctx interpolate.Context `mapstructure:",squash",mapstructure-to-hcl2:"skip"`
+	Ctx interpolate.Context `mapstructure-to-hcl2:"skip"`
 }
 
 type nicConfig struct {
