@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config
+//go:generate mapstructure-to-hcl2 -type Config,CreateVNICDetails
 
 package oci
 
@@ -21,6 +21,19 @@ import (
 	ocicommon "github.com/oracle/oci-go-sdk/common"
 	ociauth "github.com/oracle/oci-go-sdk/common/auth"
 )
+
+type CreateVNICDetails struct {
+	// fields that can be specified under "create_vnic_details"
+	AssignPublicIp      *bool                             `mapstructure:"assign_public_ip" required:"false"`
+	DefinedTags         map[string]map[string]interface{} `mapstructure:"defined_tags" required:"false"`
+	DisplayName         *string                           `mapstructure:"display_name" required:"false"`
+	FreeformTags        map[string]string                 `mapstructure:"tags" required:"false"`
+	HostnameLabel       *string                           `mapstructure:"hostname_label" required:"false"`
+	NsgIds              []string                          `mapstructure:"nsg_ids" required:"false"`
+	PrivateIp           *string                           `mapstructure:"private_ip" required:"false"`
+	SkipSourceDestCheck *bool                             `mapstructure:"skip_source_dest_check" required:"false"`
+	SubnetId            *string                           `mapstructure:"subnet_id" required:"false"`
+}
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -56,14 +69,16 @@ type Config struct {
 	CompartmentID      string `mapstructure:"compartment_ocid"`
 
 	// Image
-	BaseImageID string `mapstructure:"base_image_ocid"`
-	Shape       string `mapstructure:"shape"`
-	ImageName   string `mapstructure:"image_name"`
+	BaseImageID        string `mapstructure:"base_image_ocid"`
+	ImageName          string `mapstructure:"image_name"`
+	ImageCompartmentID string `mapstructure:"image_compartment_ocid"`
 
 	// Instance
 	InstanceName        string                            `mapstructure:"instance_name"`
 	InstanceTags        map[string]string                 `mapstructure:"instance_tags"`
 	InstanceDefinedTags map[string]map[string]interface{} `mapstructure:"instance_defined_tags"`
+	Shape               string                            `mapstructure:"shape"`
+	BootVolumeSizeInGBs int64                             `mapstructure:"disk_size"`
 
 	// Metadata optionally contains custom metadata key/value pairs provided in the
 	// configuration. While this can be used to set metadata["user_data"] the explicit
@@ -77,7 +92,8 @@ type Config struct {
 	UserDataFile string `mapstructure:"user_data_file"`
 
 	// Networking
-	SubnetID string `mapstructure:"subnet_ocid"`
+	SubnetID          string            `mapstructure:"subnet_ocid"`
+	CreateVnicDetails CreateVNICDetails `mapstructure:"create_vnic_details"`
 
 	// Tagging
 	Tags        map[string]string                 `mapstructure:"tags"`
@@ -239,6 +255,10 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		c.CompartmentID = tenancyOCID
 	}
 
+	if c.ImageCompartmentID == "" {
+		c.ImageCompartmentID = c.CompartmentID
+	}
+
 	if c.Shape == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("'shape' must be specified"))
@@ -310,6 +330,15 @@ func (c *Config) Prepare(raws ...interface{}) error {
 			log.Printf("[DEBUG] base64 encoding user data...")
 			c.UserData = base64.StdEncoding.EncodeToString([]byte(c.UserData))
 		}
+	}
+
+	// Set default boot volume size to 50 if not set
+	// Check if size set is allowed by OCI
+	if c.BootVolumeSizeInGBs == 0 {
+		c.BootVolumeSizeInGBs = 50
+	} else if c.BootVolumeSizeInGBs < 50 || c.BootVolumeSizeInGBs > 16384 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("'disk_size' must be between 50 and 16384 GBs"))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

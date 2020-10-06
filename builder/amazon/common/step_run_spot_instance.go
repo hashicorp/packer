@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/common/random"
 	"github.com/hashicorp/packer/common/retry"
@@ -281,7 +280,6 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	var createOutput *ec2.CreateFleetOutput
-
 	err = retry.Config{
 		Tries: 11,
 		ShouldRetry: func(err error) bool {
@@ -291,14 +289,22 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 				// we can wait on those operations, this can be removed.
 				return true
 			}
-			return request.IsErrorRetryable(err)
+			return false
 		},
 		RetryDelay: (&retry.Backoff{InitialBackoff: 500 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) error {
 		createOutput, err = ec2conn.CreateFleet(createFleetInput)
-
 		if err == nil && createOutput.Errors != nil {
 			err = fmt.Errorf("errors: %v", createOutput.Errors)
+		}
+		// We can end up with errors because one of the allowed availability
+		// zones doesn't have one of the allowed instance types; as long as
+		// an instance is launched, these errors aren't important.
+		if len(createOutput.Instances) > 0 {
+			if err != nil {
+				log.Printf("create request failed for some instances %v", err.Error())
+			}
+			return nil
 		}
 		if err != nil {
 			log.Printf("create request failed %v", err)
@@ -306,25 +312,16 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		return err
 	})
 
-	// Create the request for the spot instance.
 	if err != nil {
 		if createOutput.FleetId != nil {
 			err = fmt.Errorf("Error waiting for fleet request (%s): %s", *createOutput.FleetId, err)
-		} else {
-			err = fmt.Errorf("Error waiting for fleet request: %s", err)
 		}
-		// We can end up with errors because one of the allowed availability
-		// zones doesn't have one of the allowed instance types; as long as
-		// an instance is launched, these errors aren't important.
 		if len(createOutput.Errors) > 0 {
 			errString := fmt.Sprintf("Error waiting for fleet request (%s) to become ready:", *createOutput.FleetId)
 			for _, outErr := range createOutput.Errors {
 				errString = errString + aws.StringValue(outErr.ErrorMessage)
 			}
 			err = fmt.Errorf(errString)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
 		}
 		state.Put("error", err)
 		ui.Error(err.Error())

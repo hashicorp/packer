@@ -26,6 +26,9 @@ type Driver interface {
 	// for external access.
 	IPAddress(id string) (string, error)
 
+	// Sha256 returns the sha256 id of the image
+	Sha256(id string) (string, error)
+
 	// Login. This will lock the driver from performing another Login
 	// until Logout is called. Therefore, any users MUST call Logout.
 	Login(repo, username, password string) error

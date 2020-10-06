@@ -1,4 +1,116 @@
-## 1.6.3 (Upcoming)
+## 1.6.5 (Upcoming)
+
+### BUG FIXES:
+
+* core/hcl2: Packer HCL's "Coalesce" function now behaves same way as
+    Terraform's. [GH-10016]
+* core/HCL: Hide sensitive variables from output. [GH-10031]
+* core: Fix artifact handling so that input artifacts are properly preserved in
+    postprocessors that don't modify artifacts. [GH-9996]
+* core: Fix pathing in cd_files to copy proper directory tree when user
+    provided absolute paths. [GH-10022]
+* provisioner/ansible: Ansible galaxy no longer forces use of collections in v1
+    files. [GH-10010]
+
+### IMPROVEMENTS:
+
+* builder/oracle-oci:  New option to specify image compartment separate from
+    build compartment. [GH-10040]
+* builder/oracle-oci: New option to specify boot volume size. [GH-10017]
+
+## 1.6.4 (September 30, 2020)
+
+### BUG FIXES:
+* builder/amazon: Fix authentication issue when using instance profiles or
+    assumed roles for loading session-derived credentials. [GH-10007]
+* builder/azure: Fix crash when using `azure_tag` or `azure_tags` configuration
+    options. [GH-10014]
+* builder/qemu: Ensure `qemu_img_args` are honored during the disk convert
+    step. [GH-10001]
+
+ ## 1.6.3 (September 25, 2020)
+
+### IMPROVEMENTS:
+* builder/amazon: Add `pause_before_ssm` option to pause for some time before
+    establishing a Session Manager session; defaults to 10s. [GH-9988]
+* builder/amazon: Implement assume_role option that matches Terraform behavior.
+    [GH-9981]
+* builder/azure: Support publishing to a Shared Image Gallery with a different
+    subscription id [GH-9875]
+* builder/openstack: Add `external_source_image_url` and
+    `external_source_image_format` to support building images from external
+    source URLs. [GH-9992]
+* builder/openstack: Include API requests and responses as part of the debug
+    log output. [GH-9972]
+* builder/oracle-oci: Add `create_vnic_details` option for launch details.
+    [GH-9856]
+* builder/oracle-oci: Allow freeform and defined tags to be added to an instance.
+    [GH-9802]
+* builder/proxmox: Add `io_thread` option for supporting io threads when using
+    a `virtio-scsi-single` controller with a `scsi` or `virtio` disk type.
+    [GH-9969]
+* builder/proxmox: Add ability to specify interfaces for http_directory and VM.
+    [GH-9874]
+* builder/proxmox: Allow the mounting of multiple ISOs via the `cd_drive`
+    option. [GH-9653]
+* builder/proxmox: Fix boot command special keys. [GH-9885]
+* builder/qemu: Add `qemu_img_args` option to set special cli flags for calls
+    to qemu-img [GH-9956]
+* builder/qemu: Add `skip_resize_disk` option to skip the resizing of QCOW2
+    images. [GH-9896] [GH-9860]
+* builder/qemu: Skip qemu-img convert on MacOS to prevent the creation of
+    corrupt images [QEMU
+    #1776920](https://bugs.launchpad.net/qemu/+bug/1776920) [GH-9949]
+* builder/scaleway: Change default boottype to local. [GH-9853]
+* builder/scaleway: Update scaleway to use non-deprecated sdk. [GH-9902]
+* builder/vmware: Add `vnc_over_websocket` to allow the sending of a
+    `boot_command` to hosts running ESXi 6.7 and above. [GH-9938]
+* builder/vmware: Allow user to set vmware tools source path. [GH-9983]
+* builder/vsphere-clone: Add ability to set `mac_address` [GH-9930]
+* builder/vsphere-clone: Add floppy_files, cd_files, and iso_paths options.
+    [GH-9963]
+* builder/vsphere-iso: Add NVMe controller support. [GH-9880]
+* builder/vsphere: Look for a default resource pool when root resource pool is
+    not found. [GH-9809]
+* core: Add support for running cygwin/msys2 based cd/iso creation tool
+    [GH-9954]
+* core: New `cd_files` option to mount iso for modern OSes which don't support
+    floppies. [GH-9796] [GH-9919] [GH-9928] [GH-9932] [GH-9941]
+* HCL2: When the type of a variable is not known evaluate setting as a literal
+    string instead of a variable name. [GH-9863]
+* post-processor/vagrant: Support the use of template variables within
+    Vagrantfile templates. [GH-9923]
+* post-processor/yandex-import: Allow custom API endpoint. [GH-9850]
+* provisioner/ansible: Add support for Ansible Galaxy Collections. [GH-9903]
+
+### BUG FIXES:
+* builder/amazon-ebs: Fix issue where retrying on invalid IAM instance profile
+    error was creating multiple spot instances. [GH-9946]
+* builder/amazon-ebssurrogate: Fix issue where builder defaults to AWS managed
+    key even when custom `kms_key_id` is set. [GH-9959]
+* builder/amazon: Update ssm_driver log polling logic to prevent infinite loops
+    when SSM driver is terminated outside of Packer. [GH-9991]
+* builder/azure: Fix crash when using HCL2 configs. [GH-9984] [GH-9985]
+* builder/qemu: Fix hardcoded lowerbound causing negative ports [GH-9905]
+* builder/qemu: Skip compaction when backing file is used. [GH-9918]
+* builder/scaleway: Add pre validate step to prevent the creation of multiple
+    images with the same name. [GH-9840]
+* builder/vmware-iso: Prevent the use of reserved SCSI ID 0:7 when attaching
+    multiple disks. [GH-9940]
+* builder/vsphere: Fix overly strict iso_path validation regex. [GH-9855]
+* command/console: Prevent failure when there are unknown vars. [GH-9864]
+* command/inspect: Allow unset variables in HCL2 and JSON. [GH-9832]
+* core: Prevent the UI progressbar from hanging and crashing when there is no
+    TTY available. [GH-9974]
+* core: Use $APPDATA over $HOME on Windows hosts when determining homedir.
+    [GH-9830]
+* post-processor/digitalocean-import: Fix crash caused by empty artifact.Files
+    slice. [GH-9857]
+* post-processor/yandex-export: Check for error after runner completes.
+    [GH-9925]
+* post-processor/yandex-export: Set metadata key to expected value on error.
+    [GH-9849]
+* post-processor/yandex-import: Fix S3 URL construct process. [GH-9931]
 
 ## 1.6.2 (August 28, 2020)
 

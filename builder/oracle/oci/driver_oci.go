@@ -56,7 +56,6 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 		CompartmentId:      &d.cfg.CompartmentID,
 		DefinedTags:        d.cfg.InstanceDefinedTags,
 		FreeformTags:       d.cfg.InstanceTags,
-		ImageId:            &d.cfg.BaseImageID,
 		Shape:              &d.cfg.Shape,
 		SubnetId:           &d.cfg.SubnetID,
 		Metadata:           metadata,
@@ -65,6 +64,27 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 	// When empty, the default display name is used.
 	if d.cfg.InstanceName != "" {
 		instanceDetails.DisplayName = &d.cfg.InstanceName
+	}
+
+	// Pass VNIC details, if specified, to the instance
+	CreateVnicDetails := core.CreateVnicDetails{
+		AssignPublicIp:      d.cfg.CreateVnicDetails.AssignPublicIp,
+		DisplayName:         d.cfg.CreateVnicDetails.DisplayName,
+		HostnameLabel:       d.cfg.CreateVnicDetails.HostnameLabel,
+		NsgIds:              d.cfg.CreateVnicDetails.NsgIds,
+		PrivateIp:           d.cfg.CreateVnicDetails.PrivateIp,
+		SkipSourceDestCheck: d.cfg.CreateVnicDetails.SkipSourceDestCheck,
+		SubnetId:            d.cfg.CreateVnicDetails.SubnetId,
+		DefinedTags:         d.cfg.CreateVnicDetails.DefinedTags,
+		FreeformTags:        d.cfg.CreateVnicDetails.FreeformTags,
+	}
+
+	instanceDetails.CreateVnicDetails = &CreateVnicDetails
+
+	// Create Source details which will be used to Launch Instance
+	instanceDetails.SourceDetails = core.InstanceSourceViaImageDetails{
+		ImageId:             &d.cfg.BaseImageID,
+		BootVolumeSizeInGBs: &d.cfg.BootVolumeSizeInGBs,
 	}
 
 	instance, err := d.computeClient.LaunchInstance(context.TODO(), core.LaunchInstanceRequest{LaunchInstanceDetails: instanceDetails})
@@ -79,7 +99,7 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 // CreateImage creates a new custom image.
 func (d *driverOCI) CreateImage(ctx context.Context, id string) (core.Image, error) {
 	res, err := d.computeClient.CreateImage(ctx, core.CreateImageRequest{CreateImageDetails: core.CreateImageDetails{
-		CompartmentId: &d.cfg.CompartmentID,
+		CompartmentId: &d.cfg.ImageCompartmentID,
 		InstanceId:    &id,
 		DisplayName:   &d.cfg.ImageName,
 		FreeformTags:  d.cfg.Tags,

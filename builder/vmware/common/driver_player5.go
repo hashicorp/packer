@@ -25,6 +25,12 @@ type Player5Driver struct {
 	SSHConfig *SSHConfig
 }
 
+func NewPlayer5Driver(config *SSHConfig) Driver {
+	return &Player5Driver{
+		SSHConfig: config,
+	}
+}
+
 func (d *Player5Driver) Clone(dst, src string, linked bool) error {
 	return errors.New("Cloning is not supported with VMWare Player version 5. Please use VMWare Player version 6, or greater.")
 }

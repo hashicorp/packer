@@ -21,18 +21,15 @@ require (
 	github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607 // indirect
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
 	github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878 // indirect
-	github.com/aws/aws-sdk-go v1.30.8
+	github.com/aws/aws-sdk-go v1.34.26
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
-	github.com/creack/goselect v0.1.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/digitalocean/go-libvirt v0.0.0-20190626172931-4d226dd6c437 // indirect
 	github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
 	github.com/digitalocean/godo v1.11.1
-	github.com/docker/docker v0.0.0-20180422163414-57142e89befe // indirect
-	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
 	github.com/exoscale/egoscale v0.18.1
@@ -52,14 +49,14 @@ require (
 	github.com/gophercloud/gophercloud v0.12.0
 	github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
-	github.com/gorilla/websocket v0.0.0-20170319172727-a91eba7f9777 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
+	github.com/hashicorp/aws-sdk-go-base v0.6.0
 	github.com/hashicorp/consul/api v1.4.0
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cleanhttp v0.5.1
-	github.com/hashicorp/go-cty-funcs v0.0.0-20200520133146-0d04eb807361
+	github.com/hashicorp/go-cty-funcs v0.0.0-20200930094925-2721b1e36840
 	github.com/hashicorp/go-getter/gcs/v2 v2.0.0-20200604122502-a6995fa1edad
 	github.com/hashicorp/go-getter/s3/v2 v2.0.0-20200604122502-a6995fa1edad
 	github.com/hashicorp/go-getter/v2 v2.0.0-20200604122502-a6995fa1edad
@@ -81,7 +78,7 @@ require (
 	github.com/joyent/triton-go v0.0.0-20180628001255-830d2b111e62
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
-	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
+	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1 // indirect
 	github.com/klauspost/compress v0.0.0-20160131094358-f86d2e6d8a77 // indirect
 	github.com/klauspost/cpuid v0.0.0-20160106104451-349c67577817 // indirect
 	github.com/klauspost/crc32 v0.0.0-20160114101742-999f3125931f // indirect
@@ -103,8 +100,6 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.0
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
-	github.com/moul/anonuuid v0.0.0-20160222162117-609b752a95ef // indirect
-	github.com/moul/gotty-client v0.0.0-20180327180212-b26a57ebc215 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
 	github.com/oracle/oci-go-sdk v18.0.0+incompatible
@@ -115,9 +110,8 @@ require (
 	github.com/pkg/sftp v0.0.0-20160118190721-e84cc8c755ca
 	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
-	github.com/renstrom/fuzzysearch v0.0.0-20160331204855-2d205ac6ec17 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
-	github.com/scaleway/scaleway-cli v0.0.0-20180921094345-7b12c9699d70
+	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.6.0.20200903143645-c0ce17a0443d
 	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect

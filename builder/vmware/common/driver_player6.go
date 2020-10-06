@@ -13,6 +13,14 @@ type Player6Driver struct {
 	Player5Driver
 }
 
+func NewPlayer6Driver(config *SSHConfig) Driver {
+	return &Player6Driver{
+		Player5Driver: Player5Driver{
+			SSHConfig: config,
+		},
+	}
+}
+
 func (d *Player6Driver) Clone(dst, src string, linked bool) error {
 	// TODO(rasa) check if running player+, not just player
 

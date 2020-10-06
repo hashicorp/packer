@@ -33,6 +33,11 @@ type RunConfig struct {
 	// The name of the base image to use. This is an alternative way of
 	// providing source_image and only either of them can be specified.
 	SourceImageName string `mapstructure:"source_image_name" required:"true"`
+	// The URL of an external base image to use. This is an alternative way of
+	// providing source_image and only either of them can be specified.
+	ExternalSourceImageURL string `mapstructure:"external_source_image_url" required:"true"`
+	// The format of the external source image to use, e.g. qcow2, raw.
+	ExternalSourceImageFormat string `mapstructure:"external_source_image_format" required:"false"`
 	// Filters used to populate filter options. Example:
 	//
 	// ```json
@@ -247,10 +252,19 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
-	if c.SourceImage == "" && c.SourceImageName == "" && c.SourceImageFilters.Filters.Empty() {
-		errs = append(errs, errors.New("Either a source_image, a source_image_name, or source_image_filter must be specified"))
-	} else if len(c.SourceImage) > 0 && len(c.SourceImageName) > 0 {
-		errs = append(errs, errors.New("Only a source_image or a source_image_name can be specified, not both."))
+	hasOnlySourceImage := len(c.SourceImage) > 0 && len(c.SourceImageName) == 0 && len(c.ExternalSourceImageURL) == 0
+	hasOnlySourceImageName := len(c.SourceImageName) > 0 && len(c.SourceImage) == 0 && len(c.ExternalSourceImageURL) == 0
+	hasOnlyExternalSourceImageURL := len(c.ExternalSourceImageURL) > 0 && len(c.SourceImage) == 0 && len(c.SourceImageName) == 0
+
+	if c.SourceImage == "" && c.SourceImageName == "" && c.ExternalSourceImageURL == "" && c.SourceImageFilters.Filters.Empty() {
+		errs = append(errs, errors.New("Either a source_image, a source_image_name, an external_source_image_url or source_image_filter must be specified"))
+	} else if !(hasOnlySourceImage || hasOnlySourceImageName || hasOnlyExternalSourceImageURL) {
+		errs = append(errs, errors.New("Only a source_image, a source_image_name or an external_source_image_url can be specified, not multiple."))
+	}
+
+	// if external_source_image_format is not set use qcow2 as default
+	if c.ExternalSourceImageFormat == "" {
+		c.ExternalSourceImageFormat = "qcow2"
 	}
 
 	if c.Flavor == "" {
@@ -283,9 +297,9 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
-	// if neither ID or image name is provided outside the filter, build the
-	// filter
-	if len(c.SourceImage) == 0 && len(c.SourceImageName) == 0 {
+	// if neither ID, image name or external image URL is provided outside the filter,
+	// build the filter
+	if len(c.SourceImage) == 0 && len(c.SourceImageName) == 0 && len(c.ExternalSourceImageURL) == 0 {
 
 		listOpts, filterErr := c.SourceImageFilters.Filters.Build()
 
@@ -293,6 +307,11 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 			errs = append(errs, filterErr)
 		}
 		c.sourceImageOpts = *listOpts
+	}
+
+	// if c.ExternalSourceImageURL is set use a generated source image name
+	if c.ExternalSourceImageURL != "" {
+		c.SourceImageName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}
 
 	return errs

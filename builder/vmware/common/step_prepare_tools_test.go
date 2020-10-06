@@ -114,3 +114,65 @@ func TestStepPrepareTools_nonExist(t *testing.T) {
 		t.Fatal("should NOT have tools_upload_source")
 	}
 }
+
+func TestStepPrepareTools_SourcePath(t *testing.T) {
+	state := testState(t)
+	step := &StepPrepareTools{
+		RemoteType:      "",
+		ToolsSourcePath: "/path/to/tool.iso",
+	}
+
+	driver := state.Get("driver").(*DriverMock)
+
+	// Mock results
+	driver.ToolsIsoPathResult = "foo"
+
+	// Test the run
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
+		t.Fatalf("Should have failed when stat failed %#v", action)
+	}
+	if _, ok := state.GetOk("error"); !ok {
+		t.Fatal("should have error")
+	}
+
+	// Test the driver
+	if driver.ToolsIsoPathCalled {
+		t.Fatal("tools iso path should not be called when ToolsSourcePath is set")
+	}
+
+	// Test the resulting state
+	if _, ok := state.GetOk("tools_upload_source"); ok {
+		t.Fatal("should NOT have tools_upload_source")
+	}
+}
+
+func TestStepPrepareTools_SourcePath_exists(t *testing.T) {
+	state := testState(t)
+	step := &StepPrepareTools{
+		RemoteType:      "",
+		ToolsSourcePath: "./step_prepare_tools.go",
+	}
+
+	driver := state.Get("driver").(*DriverMock)
+
+	// Mock results
+	driver.ToolsIsoPathResult = "foo"
+
+	// Test the run
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
+		t.Fatalf("Step should succeed when stat succeeds: %#v", action)
+	}
+	if _, ok := state.GetOk("error"); ok {
+		t.Fatal("should NOT have error")
+	}
+
+	// Test the driver
+	if driver.ToolsIsoPathCalled {
+		t.Fatal("tools iso path should not be called when ToolsSourcePath is set")
+	}
+
+	// Test the resulting state
+	if _, ok := state.GetOk("tools_upload_source"); !ok {
+		t.Fatal("should have tools_upload_source")
+	}
+}

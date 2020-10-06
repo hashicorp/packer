@@ -13,5 +13,6 @@ coverage:
     project: off
     patch: off
 
-ignore:  # ignore hcl2spec generated code for coverage
+ignore:  # ignore hcl2spec generated code for coverage and mocks
   - "**/*.hcl2spec.go"
+  - "**/*_mock.go"

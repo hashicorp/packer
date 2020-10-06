@@ -40,27 +40,23 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepConnect{
 			Config: &b.config.ConnectConfig,
 		},
-	)
-
-	if b.config.ISOUrls != nil {
-		steps = append(steps,
-			&packerCommon.StepDownload{
-				Checksum:    b.config.ISOChecksum,
-				Description: "ISO",
-				Extension:   b.config.TargetExtension,
-				ResultKey:   "iso_path",
-				TargetPath:  b.config.TargetPath,
-				Url:         b.config.ISOUrls,
-			},
-			&StepRemoteUpload{
-				Datastore:                  b.config.Datastore,
-				Host:                       b.config.Host,
-				SetHostForDatastoreUploads: b.config.SetHostForDatastoreUploads,
-			},
-		)
-	}
-
-	steps = append(steps,
+		&packerCommon.StepDownload{
+			Checksum:    b.config.ISOChecksum,
+			Description: "ISO",
+			Extension:   b.config.TargetExtension,
+			ResultKey:   "iso_path",
+			TargetPath:  b.config.TargetPath,
+			Url:         b.config.ISOUrls,
+		},
+		&packerCommon.StepCreateCD{
+			Files: b.config.CDConfig.CDFiles,
+			Label: b.config.CDConfig.CDLabel,
+		},
+		&common.StepRemoteUpload{
+			Datastore:                  b.config.Datastore,
+			Host:                       b.config.Host,
+			SetHostForDatastoreUploads: b.config.SetHostForDatastoreUploads,
+		},
 		&StepCreateVM{
 			Config:   &b.config.CreateConfig,
 			Location: &b.config.LocationConfig,
@@ -69,7 +65,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepConfigureHardware{
 			Config: &b.config.HardwareConfig,
 		},
-		&StepAddCDRom{
+		&common.StepAddCDRom{
 			Config: &b.config.CDRomConfig,
 		},
 		&common.StepConfigParams{
@@ -84,7 +80,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Directories: b.config.FloppyDirectories,
 				Label:       b.config.FloppyLabel,
 			},
-			&StepAddFloppy{
+			&common.StepAddFloppy{
 				Config:                     &b.config.FloppyConfig,
 				Datastore:                  b.config.Datastore,
 				Host:                       b.config.Host,
@@ -121,7 +117,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			&common.StepShutdown{
 				Config: &b.config.ShutdownConfig,
 			},
-			&StepRemoveFloppy{
+			&common.StepRemoveFloppy{
 				Datastore: b.config.Datastore,
 				Host:      b.config.Host,
 			},
@@ -129,7 +125,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	steps = append(steps,
-		&StepRemoveCDRom{
+		&common.StepRemoveCDRom{
 			Config: &b.config.RemoveCDRomConfig,
 		},
 		&common.StepCreateSnapshot{

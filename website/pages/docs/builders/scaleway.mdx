@@ -36,7 +36,10 @@ each category, the available configuration keys are alphabetized.
 
 In addition to the options listed here, a
 [communicator](/docs/templates/communicator) can be configured for this
-builder.
+builder. In addition to the options defined there, a private key file
+can also be supplied to override the typical auto-generated key:
+
+@include 'helper/communicator/SSH-Private-Key-File-not-required.mdx'
 
 ### Required:
 
@@ -105,6 +108,6 @@ access tokens:
 }
 ```
 
-When you do not specified the `ssh_private_key_file`, a temporarily SSH keypair
+When you do not specify the `ssh_private_key_file`, a temporary SSH keypair
 is generated to connect the server. This key will only allow the `root` user to
 connect the server.

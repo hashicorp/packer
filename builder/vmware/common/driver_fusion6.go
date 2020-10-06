@@ -18,6 +18,15 @@ type Fusion6Driver struct {
 	Fusion5Driver
 }
 
+func NewFusion6Driver(dconfig *DriverConfig, config *SSHConfig) Driver {
+	return &Fusion6Driver{
+		Fusion5Driver: Fusion5Driver{
+			AppPath:   dconfig.FusionAppPath,
+			SSHConfig: config,
+		},
+	}
+}
+
 func (d *Fusion6Driver) Clone(dst, src string, linked bool) error {
 
 	var cloneType string

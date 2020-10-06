@@ -25,16 +25,16 @@ type Parameters struct {
 /////////////////////////////////////////////////
 // Template > Resource
 type Resource struct {
-	ApiVersion *string             `json:"apiVersion"`
-	Name       *string             `json:"name"`
-	Type       *string             `json:"type"`
-	Location   *string             `json:"location,omitempty"`
-	DependsOn  *[]string           `json:"dependsOn,omitempty"`
-	Plan       *Plan               `json:"plan,omitempty"`
-	Properties *Properties         `json:"properties,omitempty"`
-	Tags       *map[string]*string `json:"tags,omitempty"`
-	Resources  *[]Resource         `json:"resources,omitempty"`
-	Identity   *Identity           `json:"identity,omitempty"`
+	ApiVersion *string            `json:"apiVersion"`
+	Name       *string            `json:"name"`
+	Type       *string            `json:"type"`
+	Location   *string            `json:"location,omitempty"`
+	DependsOn  *[]string          `json:"dependsOn,omitempty"`
+	Plan       *Plan              `json:"plan,omitempty"`
+	Properties *Properties        `json:"properties,omitempty"`
+	Tags       *map[string]string `json:"tags,omitempty"`
+	Resources  *[]Resource        `json:"resources,omitempty"`
+	Identity   *Identity          `json:"identity,omitempty"`
 }
 
 type Plan struct {

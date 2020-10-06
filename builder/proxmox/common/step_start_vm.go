@@ -133,6 +133,10 @@ func generateProxmoxDisks(disks []diskConfig) proxmox.QemuDevices {
 		setDeviceParamIfDefined(devs[idx], "storage_type", disks[idx].StoragePoolType)
 		setDeviceParamIfDefined(devs[idx], "cache", disks[idx].CacheMode)
 		setDeviceParamIfDefined(devs[idx], "format", disks[idx].DiskFormat)
+
+		if devs[idx]["type"] == "scsi" || devs[idx]["type"] == "virtio" {
+			setDeviceParamIfDefined(devs[idx], "iothread", strconv.FormatBool(disks[idx].IOThread))
+		}
 	}
 	return devs
 }

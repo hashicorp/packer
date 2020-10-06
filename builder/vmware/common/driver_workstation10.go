@@ -13,6 +13,14 @@ type Workstation10Driver struct {
 	Workstation9Driver
 }
 
+func NewWorkstation10Driver(config *SSHConfig) Driver {
+	return &Workstation10Driver{
+		Workstation9Driver: Workstation9Driver{
+			SSHConfig: config,
+		},
+	}
+}
+
 func (d *Workstation10Driver) Clone(dst, src string, linked bool) error {
 
 	var cloneType string

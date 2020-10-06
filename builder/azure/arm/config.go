@@ -288,7 +288,7 @@ type Config struct {
 	// Group, VM, NIC, VNET, Public IP, KeyVault, etc. The user can define up
 	// to 15 tags. Tag names cannot exceed 512 characters, and tag values
 	// cannot exceed 256 characters.
-	AzureTags map[string]*string `mapstructure:"azure_tags" required:"false"`
+	AzureTags map[string]string `mapstructure:"azure_tags" required:"false"`
 	// Same as [`azure_tags`](#azure_tags) but defined as a singular repeatable block
 	// containing a `name` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
@@ -513,7 +513,7 @@ func (c *Config) toImageParameters() *compute.Image {
 			},
 		},
 		Location: to.StringPtr(c.Location),
-		Tags:     c.AzureTags,
+		Tags:     azcommon.MapToAzureTags(c.AzureTags),
 	}
 }
 
@@ -596,10 +596,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// copy singular blocks
-	for _, kv := range c.AzureTag {
-		v := kv.Value
-		c.AzureTags[kv.Name] = &v
-	}
+	c.AzureTag.CopyOn(&c.AzureTags)
 
 	err = c.ClientConfig.SetDefaultValues()
 	if err != nil {
@@ -807,8 +804,8 @@ func assertTagProperties(c *Config, errs *packer.MultiError) {
 		if len(k) > 512 {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 512 character limit", k, len(k)))
 		}
-		if len(*v) > 256 {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 256 character limit", *v, len(*v)))
+		if len(v) > 256 {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 256 character limit", v, len(v)))
 		}
 	}
 }
@@ -1063,13 +1060,13 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("if either plan_name, plan_product, plan_publisher, or plan_promotion_code are defined then plan_name, plan_product, and plan_publisher must be defined"))
 		} else {
 			if c.AzureTags == nil {
-				c.AzureTags = make(map[string]*string)
+				c.AzureTags = make(map[string]string)
 			}
 
-			c.AzureTags["PlanInfo"] = &c.PlanInfo.PlanName
-			c.AzureTags["PlanProduct"] = &c.PlanInfo.PlanProduct
-			c.AzureTags["PlanPublisher"] = &c.PlanInfo.PlanPublisher
-			c.AzureTags["PlanPromotionCode"] = &c.PlanInfo.PlanPromotionCode
+			c.AzureTags["PlanInfo"] = c.PlanInfo.PlanName
+			c.AzureTags["PlanProduct"] = c.PlanInfo.PlanProduct
+			c.AzureTags["PlanPublisher"] = c.PlanInfo.PlanPublisher
+			c.AzureTags["PlanPromotionCode"] = c.PlanInfo.PlanPromotionCode
 		}
 	}
 

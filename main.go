@@ -196,6 +196,7 @@ func wrappedMain() int {
 			Reader:      os.Stdin,
 			Writer:      os.Stdout,
 			ErrorWriter: os.Stdout,
+			PB:          &packer.NoopProgressTracker{},
 		}
 		ui = basicUi
 		if !inPlugin {
@@ -211,6 +212,7 @@ func wrappedMain() int {
 				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
 			} else {
 				basicUi.TTY = TTY
+				basicUi.PB = &packer.UiProgressBar{}
 				defer TTY.Close()
 			}
 		}

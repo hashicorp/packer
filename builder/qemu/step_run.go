@@ -15,8 +15,7 @@ import (
 
 // stepRun runs the virtual machine
 type stepRun struct {
-	BootDrive string
-	Message   string
+	DiskImage bool
 }
 
 type qemuArgsTemplateData struct {
@@ -32,9 +31,17 @@ func (s *stepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say(s.Message)
+	// Run command is different depending whether we're booting from an
+	// installation CD or a pre-baked image
+	bootDrive := "once=d"
+	message := "Starting VM, booting from CD-ROM"
+	if s.DiskImage {
+		bootDrive = "c"
+		message = "Starting VM, booting disk image"
+	}
+	ui.Say(message)
 
-	command, err := getCommandArgs(s.BootDrive, state)
+	command, err := getCommandArgs(bootDrive, state)
 	if err != nil {
 		err := fmt.Errorf("Error processing QemuArgs: %s", err)
 		ui.Error(err.Error())
@@ -73,12 +80,11 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	var deviceArgs []string
 	var driveArgs []string
 	var commHostPort int
-	var vnc string
 
-	if !config.VNCUsePassword {
-		vnc = fmt.Sprintf("%s:%d", vncIP, vncPort-5900)
-	} else {
-		vnc = fmt.Sprintf("%s:%d,password", vncIP, vncPort-5900)
+	vncPort = vncPort - config.VNCPortMin
+	vnc := fmt.Sprintf("%s:%d", vncIP, vncPort)
+	if config.VNCUsePassword {
+		vnc = fmt.Sprintf("%s:%d,password", vncIP, vncPort)
 	}
 
 	if config.QMPEnable {
@@ -191,14 +197,26 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		}
 	}
 
+	cdPaths := []string{}
+	// Add the installation CD to the run command
 	if !config.DiskImage {
+		cdPaths = append(cdPaths, isoPath)
+	}
+	// Add our custom CD created from cd_files, if it exists
+	cdFilesPath, ok := state.Get("cd_path").(string)
+	if ok {
+		if cdFilesPath != "" {
+			cdPaths = append(cdPaths, cdFilesPath)
+		}
+	}
+	for i, cdPath := range cdPaths {
 		if config.CDROMInterface == "" {
-			defaultArgs["-cdrom"] = isoPath
+			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,index=%d,media=cdrom", cdPath, i))
 		} else if config.CDROMInterface == "virtio-scsi" {
-			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=none,id=cdrom,media=cdrom", isoPath))
-			deviceArgs = append(deviceArgs, "virtio-scsi-device", "scsi-cd,drive=cdrom")
+			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=none,index=%d,id=cdrom%d,media=cdrom", cdPath, i, i))
+			deviceArgs = append(deviceArgs, "virtio-scsi-device", fmt.Sprintf("scsi-cd,drive=cdrom%d", i))
 		} else {
-			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,id=cdrom,media=cdrom", isoPath, config.CDROMInterface))
+			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,index=%d,id=cdrom%d,media=cdrom", cdPath, config.CDROMInterface, i, i))
 		}
 	}
 
@@ -229,7 +247,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 	inArgs := make(map[string][]string)
 	if len(config.QemuArgs) > 0 {
-		ui.Say("Overriding defaults Qemu arguments with QemuArgs...")
+		ui.Say("Overriding default Qemu arguments with QemuArgs...")
 
 		httpIp := state.Get("http_ip").(string)
 		httpPort := state.Get("http_port").(int)

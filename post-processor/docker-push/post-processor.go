@@ -5,7 +5,6 @@ package dockerpush
 import (
 	"context"
 	"fmt"
-
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/common"
@@ -103,16 +102,20 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		}()
 	}
 
-	names := []string{artifact.Id()}
-	tags := artifact.State("docker_tags")
-	if tags != nil {
-		cast := tags.([]interface{})
-		for _, name := range cast {
+	var tags []string
+	switch t := artifact.State("docker_tags").(type) {
+	case []string:
+		tags = t
+	case []interface{}:
+		for _, name := range t {
 			if n, ok := name.(string); ok {
-				names = append(names, n)
+				tags = append(tags, n)
 			}
 		}
 	}
+
+	names := []string{artifact.Id()}
+	names = append(names, tags...)
 
 	// Get the name.
 	for _, name := range names {

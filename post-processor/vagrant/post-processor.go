@@ -175,7 +175,10 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 			return nil, false, err
 		}
 
-		customVagrantfile = string(customBytes)
+		customVagrantfile, err = interpolate.Render(string(customBytes), &config.ctx)
+		if err != nil {
+			return nil, false, err
+		}
 	}
 
 	f, err := os.Create(filepath.Join(dir, "Vagrantfile"))

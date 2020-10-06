@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
+// ~> **Note:** If [vnc_over_websocket](#vnc_over_websocket) is set to true, any other VNC configuration will be ignored.
 type RunConfig struct {
 	// Packer defaults to building VMware virtual machines
 	// by launching a GUI that shows the console of the machine being built. When
@@ -37,9 +38,28 @@ type RunConfig struct {
 	// true if building on ESXi 6.5 and 6.7 with VNC enabled. Defaults to
 	// false.
 	VNCDisablePassword bool `mapstructure:"vnc_disable_password" required:"false"`
+	// When set to true, Packer will connect to the remote VNC server over a websocket connection
+	// and any other VNC configuration option will be ignored.
+	// Remote builds using ESXi 6.7+ allows to connect to the VNC server only over websocket,
+	// for these the `vnc_over_websocket` must be set to true.
+	VNCOverWebsocket bool `mapstructure:"vnc_over_websocket" required:"false"`
+	// Do not validate VNC over websocket server's TLS certificate. Defaults to `false`.
+	InsecureConnection bool `mapstructure:"insecure_connection" required:"false"`
 }
 
-func (c *RunConfig) Prepare(ctx *interpolate.Context) (errs []error) {
+func (c *RunConfig) Prepare(_ *interpolate.Context, driverConfig *DriverConfig) (warnings []string, errs []error) {
+	if c.VNCOverWebsocket {
+		if driverConfig.RemoteType == "" {
+			errs = append(errs, fmt.Errorf("'vnc_over_websocket' can only be used with remote VMWare builds."))
+			return
+		}
+		if c.VNCPortMin != 0 || c.VNCPortMax != 0 || c.VNCBindAddress != "" || c.VNCDisablePassword {
+			warnings = append(warnings, "[WARN] When 'vnc_over_websocket' is set "+
+				"any other VNC configuration will be ignored.")
+		}
+		return
+	}
+
 	if c.VNCPortMin == 0 {
 		c.VNCPortMin = 5900
 	}

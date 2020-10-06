@@ -7,7 +7,7 @@ build {
     ]
 
     provisioner "shell" {
-        string   = "string"
+        string   = coalesce(null, "", "string")
         int      = "${41 + 1}"
         int64    = "${42 + 1}"
         bool     = "true"

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/stretchr/testify/assert"
 )
 
 func testVMXFile(t *testing.T) string {
@@ -270,4 +271,109 @@ func TestStepConfigureVMX_vmxPathBad(t *testing.T) {
 		t.Fatal("should store error in state when vmxPath is bad")
 	}
 
+}
+
+func TestStepConfigureVMX_DefaultDiskAndCDROMTypes(t *testing.T) {
+	type testCase struct {
+		inDiskAdapter  string
+		inCDromAdapter string
+		expectedOut    DiskAndCDConfigData
+		reason         string
+	}
+	testcases := []testCase{
+		{
+			inDiskAdapter:  "",
+			inCDromAdapter: "",
+			expectedOut: DiskAndCDConfigData{
+				SCSI_Present:         "TRUE",
+				SCSI_diskAdapterType: "",
+				SATA_Present:         "FALSE",
+				NVME_Present:         "FALSE",
+
+				DiskType:                   "scsi",
+				CDROMType:                  "ide",
+				CDROMType_PrimarySecondary: "0",
+			},
+			reason: "Test that default creases scsi disk with ide cd",
+		},
+		{
+			inDiskAdapter:  "ide",
+			inCDromAdapter: "",
+			expectedOut: DiskAndCDConfigData{
+				SCSI_Present:         "FALSE",
+				SCSI_diskAdapterType: "lsilogic",
+				SATA_Present:         "FALSE",
+				NVME_Present:         "FALSE",
+
+				DiskType:                   "ide",
+				CDROMType:                  "ide",
+				CDROMType_PrimarySecondary: "1",
+			},
+			reason: "ide disk adapter should pass through and not get defaulted to scsi",
+		},
+		{
+			inDiskAdapter:  "sata",
+			inCDromAdapter: "",
+			expectedOut: DiskAndCDConfigData{
+				SCSI_Present:         "FALSE",
+				SCSI_diskAdapterType: "lsilogic",
+				SATA_Present:         "TRUE",
+				NVME_Present:         "FALSE",
+
+				DiskType:                   "sata",
+				CDROMType:                  "sata",
+				CDROMType_PrimarySecondary: "1",
+			},
+			reason: "when disk is set to sata, cdromtype should also default to sata",
+		},
+		{
+			inDiskAdapter:  "nvme",
+			inCDromAdapter: "",
+			expectedOut: DiskAndCDConfigData{
+				SCSI_Present:         "FALSE",
+				SCSI_diskAdapterType: "lsilogic",
+				SATA_Present:         "TRUE",
+				NVME_Present:         "TRUE",
+
+				DiskType:                   "nvme",
+				CDROMType:                  "sata",
+				CDROMType_PrimarySecondary: "0",
+			},
+			reason: "when disk is set to nvme, cdromtype should default to sata",
+		},
+		{
+			inDiskAdapter:  "scsi",
+			inCDromAdapter: "",
+			expectedOut: DiskAndCDConfigData{
+				SCSI_Present:         "TRUE",
+				SCSI_diskAdapterType: "lsilogic",
+				SATA_Present:         "FALSE",
+				NVME_Present:         "FALSE",
+
+				DiskType:                   "scsi",
+				CDROMType:                  "ide",
+				CDROMType_PrimarySecondary: "0",
+			},
+			reason: "when disk is set to scsi, adapter should default back to lsilogic",
+		},
+		{
+			inDiskAdapter:  "scsi",
+			inCDromAdapter: "scsi",
+			expectedOut: DiskAndCDConfigData{
+				SCSI_Present:         "TRUE",
+				SCSI_diskAdapterType: "lsilogic",
+				SATA_Present:         "FALSE",
+				NVME_Present:         "FALSE",
+
+				DiskType:                   "scsi",
+				CDROMType:                  "scsi",
+				CDROMType_PrimarySecondary: "0",
+			},
+			reason: "when cdrom adapter is set, it should override the default",
+		},
+	}
+	for _, tc := range testcases {
+		diskConfigData := DefaultDiskAndCDROMTypes(tc.inDiskAdapter, tc.inCDromAdapter)
+		assert.Equal(t, diskConfigData, tc.expectedOut, tc.reason)
+	}
 }

@@ -119,6 +119,14 @@ necessary for this build to succeed and can be found further down the page.
 
 @include 'common/FloppyConfig-not-required.mdx'
 
+### CD configuration
+
+@include 'common/CDConfig.mdx'
+
+#### Optional:
+
+@include 'common/CDConfig-not-required.mdx'
+
 ### Export configuration
 
 #### Optional:
@@ -132,6 +140,8 @@ necessary for this build to succeed and can be found further down the page.
 @include 'builder/vmware/common/OutputConfig-not-required.mdx'
 
 ### Run configuration
+
+@include 'builder/vmware/common/RunConfig.mdx'
 
 #### Optional:
 
@@ -188,6 +198,7 @@ to modify the network configuration after the VM is done building.
 #### Optional:
 
 @include 'common/bootcommand/VNCConfig-not-required.mdx'
+
 @include 'common/bootcommand/BootConfig-not-required.mdx'
 
 For more examples of various boot commands, see the sample projects from our
@@ -198,7 +209,7 @@ For more examples of various boot commands, see the sample projects from our
   "builders": [
     {
       "type": "vmware-vmx",
-      "boot_key_interval": "10ms"
+      "boot_key_interval": "10ms",
       ...
     }
   ]

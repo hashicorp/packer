@@ -137,6 +137,10 @@ type SecretsManagerAPI interface {
 	UpdateSecretVersionStage(*secretsmanager.UpdateSecretVersionStageInput) (*secretsmanager.UpdateSecretVersionStageOutput, error)
 	UpdateSecretVersionStageWithContext(aws.Context, *secretsmanager.UpdateSecretVersionStageInput, ...request.Option) (*secretsmanager.UpdateSecretVersionStageOutput, error)
 	UpdateSecretVersionStageRequest(*secretsmanager.UpdateSecretVersionStageInput) (*request.Request, *secretsmanager.UpdateSecretVersionStageOutput)
+
+	ValidateResourcePolicy(*secretsmanager.ValidateResourcePolicyInput) (*secretsmanager.ValidateResourcePolicyOutput, error)
+	ValidateResourcePolicyWithContext(aws.Context, *secretsmanager.ValidateResourcePolicyInput, ...request.Option) (*secretsmanager.ValidateResourcePolicyOutput, error)
+	ValidateResourcePolicyRequest(*secretsmanager.ValidateResourcePolicyInput) (*request.Request, *secretsmanager.ValidateResourcePolicyOutput)
 }
 
 var _ SecretsManagerAPI = (*secretsmanager.SecretsManager)(nil)

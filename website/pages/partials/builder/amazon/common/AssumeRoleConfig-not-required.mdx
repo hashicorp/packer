@@ -1,0 +1,20 @@
+<!-- Code generated from the comments of the AssumeRoleConfig struct in builder/amazon/common/access_config.go; DO NOT EDIT MANUALLY -->
+
+- `role_arn` (string) - Amazon Resource Name (ARN) of the IAM Role to assume.
+
+- `duration_seconds` (int) - Number of seconds to restrict the assume role session duration.
+
+- `external_id` (string) - The external ID to use when assuming the role. If omitted, no external
+  ID is passed to the AssumeRole call.
+
+- `policy` (string) - IAM Policy JSON describing further restricting permissions for the IAM
+  Role being assumed.
+
+- `policy_arns` ([]string) - Set of Amazon Resource Names (ARNs) of IAM Policies describing further
+  restricting permissions for the IAM Role being
+
+- `session_name` (string) - Session name to use when assuming the role.
+
+- `tags` (map[string]string) - Map of assume role session tags.
+
+- `transitive_tag_keys` ([]string) - Set of assume role session tag keys to pass to any subsequent sessions.

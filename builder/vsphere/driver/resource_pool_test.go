@@ -7,21 +7,13 @@ import (
 )
 
 func TestVCenterDriver_FindResourcePool(t *testing.T) {
-	model := simulator.VPX()
-	defer model.Remove()
-
-	s, err := NewSimulatorServer(model)
+	sim, err := NewVCenterSimulator()
 	if err != nil {
 		t.Fatalf("should not fail: %s", err.Error())
 	}
-	defer s.Close()
+	defer sim.Close()
 
-	driverSim, err := NewSimulatorDriver(s)
-	if err != nil {
-		t.Fatalf("should not fail: %s", err.Error())
-	}
-
-	res, err := driverSim.FindResourcePool("", "DC0_H0", "")
+	res, err := sim.driver.FindResourcePool("", "DC0_H0", "")
 	if err != nil {
 		t.Fatalf("should not fail: %s", err.Error())
 	}
@@ -47,19 +39,13 @@ func TestVCenterDriver_FindResourcePoolStandaloneESX(t *testing.T) {
 	model.DelayConfig.MethodDelay = opts.DelayConfig.MethodDelay
 	model.DelayConfig.DelayJitter = opts.DelayConfig.DelayJitter
 
-	s, err := NewSimulatorServer(model)
+	sim, err := NewCustomVCenterSimulator(model)
 	if err != nil {
 		t.Fatalf("should not fail: %s", err.Error())
 	}
-	defer s.Close()
+	defer sim.Close()
 
-	driverSim, err := NewSimulatorDriver(s)
-	if err != nil {
-		t.Fatalf("should not fail: %s", err.Error())
-	}
-
-	//
-	res, err := driverSim.FindResourcePool("", "localhost.localdomain", "")
+	res, err := sim.driver.FindResourcePool("", "localhost.localdomain", "")
 	if err != nil {
 		t.Fatalf("should not fail: %s", err.Error())
 	}
@@ -72,7 +58,7 @@ func TestVCenterDriver_FindResourcePoolStandaloneESX(t *testing.T) {
 	}
 
 	// Invalid resource name should look for default resource pool
-	res, err = driverSim.FindResourcePool("", "localhost.localdomain", "invalid")
+	res, err = sim.driver.FindResourcePool("", "localhost.localdomain", "invalid")
 	if err != nil {
 		t.Fatalf("should not fail: %s", err.Error())
 	}

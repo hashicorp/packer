@@ -24,6 +24,7 @@ import (
 type VirtualMachine interface {
 	Info(params ...string) (*mo.VirtualMachine, error)
 	Devices() (object.VirtualDeviceList, error)
+	FloppyDevices() (object.VirtualDeviceList, error)
 	Clone(ctx context.Context, config *CloneConfig) (VirtualMachine, error)
 	updateVAppConfig(ctx context.Context, newProps map[string]string) (*types.VmConfigSpec, error)
 	AddPublicKeys(ctx context.Context, publicKeys string) error
@@ -32,8 +33,8 @@ type VirtualMachine interface {
 	Configure(config *HardwareConfig) error
 	Customize(spec types.CustomizationSpec) error
 	ResizeDisk(diskSize int64) error
-	PowerOn() error
 	WaitForIP(ctx context.Context, ipNet *net.IPNet) (string, error)
+	PowerOn() error
 	PowerOff() error
 	IsPoweredOff() (bool, error)
 	StartShutdown() error
@@ -43,7 +44,6 @@ type VirtualMachine interface {
 	ImportOvfToContentLibrary(ovf vcenter.OVF) error
 	ImportToContentLibrary(template vcenter.Template) error
 	GetDir() (string, error)
-	AddCdrom(controllerType string, datastoreIsoPath string) error
 	AddFloppy(imgPath string) error
 	SetBootOrder(order []string) error
 	RemoveDevice(keepFiles bool, device ...types.BaseVirtualDevice) error
@@ -53,6 +53,13 @@ type VirtualMachine interface {
 	CreateDescriptor(m *ovf.Manager, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error)
 	NewOvfManager() *ovf.Manager
 	GetOvfExportOptions(m *ovf.Manager) ([]types.OvfOptionInfo, error)
+
+	AddCdrom(controllerType string, datastoreIsoPath string) error
+	CreateCdrom(c *types.VirtualController) (*types.VirtualCdrom, error)
+	RemoveCdroms() error
+	EjectCdroms() error
+	AddSATAController() error
+	FindSATAController() (*types.VirtualAHCIController, error)
 }
 
 type VirtualMachineDriver struct {
@@ -69,6 +76,7 @@ type CloneConfig struct {
 	Datastore      string
 	LinkedClone    bool
 	Network        string
+	MacAddress     string
 	Annotation     string
 	VAppProperties map[string]string
 }
@@ -277,6 +285,15 @@ func (vm *VirtualMachineDriver) Devices() (object.VirtualDeviceList, error) {
 	return vmInfo.Config.Hardware.Device, nil
 }
 
+func (vm *VirtualMachineDriver) FloppyDevices() (object.VirtualDeviceList, error) {
+	device, err := vm.Devices()
+	if err != nil {
+		return device, err
+	}
+	floppies := device.SelectByType((*types.VirtualFloppy)(nil))
+	return floppies, nil
+}
+
 func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) (VirtualMachine, error) {
 	folder, err := vm.driver.FindFolder(config.Folder)
 	if err != nil {
@@ -344,7 +361,9 @@ func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) 
 			return nil, err
 		}
 
-		adapter.GetVirtualEthernetCard().Backing = backing
+		current := adapter.GetVirtualEthernetCard()
+		current.Backing = backing
+		current.MacAddress = config.MacAddress
 
 		config := &types.VirtualDeviceConfigSpec{
 			Device:    adapter.(types.BaseVirtualDevice),

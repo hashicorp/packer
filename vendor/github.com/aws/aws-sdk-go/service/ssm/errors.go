@@ -134,7 +134,7 @@ const (
 	// window or Patch baseline, doesn't exist.
 	//
 	// For information about resource quotas in Systems Manager, see Systems Manager
-	// Service Quotas (http://docs.aws.amazon.com/general/latest/gr/ssm.html#limits_ssm)
+	// service quotas (http://docs.aws.amazon.com/general/latest/gr/ssm.html#limits_ssm)
 	// in the AWS General Reference.
 	ErrCodeDoesNotExistException = "DoesNotExistException"
 
@@ -169,7 +169,7 @@ const (
 	// "HierarchyLevelLimitExceededException".
 	//
 	// A hierarchy can have a maximum of 15 levels. For more information, see Requirements
-	// and Constraints for Parameter Names (http://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-parameter-name-constraints.html)
+	// and constraints for parameter names (https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-parameter-name-constraints.html)
 	// in the AWS Systems Manager User Guide.
 	ErrCodeHierarchyLevelLimitExceededException = "HierarchyLevelLimitExceededException"
 
@@ -489,7 +489,7 @@ const (
 	// The role name can't contain invalid characters. Also verify that you specified
 	// an IAM role for notifications that includes the required trust policy. For
 	// information about configuring the IAM role for Run Command notifications,
-	// see Configuring Amazon SNS Notifications for Run Command (http://docs.aws.amazon.com/systems-manager/latest/userguide/rc-sns-notifications.html)
+	// see Configuring Amazon SNS Notifications for Run Command (https://docs.aws.amazon.com/systems-manager/latest/userguide/rc-sns-notifications.html)
 	// in the AWS Systems Manager User Guide.
 	ErrCodeInvalidRole = "InvalidRole"
 
@@ -503,7 +503,7 @@ const (
 	// "InvalidTarget".
 	//
 	// The target is not valid or does not exist. It might not be configured for
-	// EC2 Systems Manager or you might not have permission to perform the operation.
+	// Systems Manager or you might not have permission to perform the operation.
 	ErrCodeInvalidTarget = "InvalidTarget"
 
 	// ErrCodeInvalidTypeNameException for service response error code
@@ -560,7 +560,7 @@ const (
 	// "OpsItemLimitExceededException".
 	//
 	// The request caused OpsItems to exceed one or more quotas. For information
-	// about OpsItem quotas, see What are the resource limits for OpsCenter? (http://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter-learn-more.html#OpsCenter-learn-more-limits).
+	// about OpsItem quotas, see What are the resource limits for OpsCenter? (https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter-learn-more.html#OpsCenter-learn-more-limits).
 	ErrCodeOpsItemLimitExceededException = "OpsItemLimitExceededException"
 
 	// ErrCodeOpsItemNotFoundException for service response error code
@@ -665,7 +665,7 @@ const (
 	// For example, too many maintenance windows or patch baselines have been created.
 	//
 	// For information about resource quotas in Systems Manager, see Systems Manager
-	// Service Quotas (http://docs.aws.amazon.com/general/latest/gr/ssm.html#limits_ssm)
+	// service quotas (http://docs.aws.amazon.com/general/latest/gr/ssm.html#limits_ssm)
 	// in the AWS General Reference.
 	ErrCodeResourceLimitExceededException = "ResourceLimitExceededException"
 
@@ -699,8 +699,8 @@ const (
 	// "TargetNotConnected".
 	//
 	// The specified target instance for the session is not fully configured for
-	// use with Session Manager. For more information, see Getting Started with
-	// Session Manager (http://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-getting-started.html)
+	// use with Session Manager. For more information, see Getting started with
+	// Session Manager (https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-getting-started.html)
 	// in the AWS Systems Manager User Guide.
 	ErrCodeTargetNotConnected = "TargetNotConnected"
 
@@ -734,10 +734,10 @@ const (
 	// ErrCodeUnsupportedFeatureRequiredException for service response error code
 	// "UnsupportedFeatureRequiredException".
 	//
-	// Microsoft application patching is only available on EC2 instances and Advanced
-	// Instances. To patch Microsoft applications on on-premises servers and VMs,
-	// you must enable Advanced Instances. For more information, see Using the Advanced-Instances
-	// Tier (http://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-managedinstances-advanced.html)
+	// Microsoft application patching is only available on EC2 instances and advanced
+	// instances. To patch Microsoft applications on on-premises servers and VMs,
+	// you must enable advanced instances. For more information, see Using the advanced-instances
+	// tier (https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-managedinstances-advanced.html)
 	// in the AWS Systems Manager User Guide.
 	ErrCodeUnsupportedFeatureRequiredException = "UnsupportedFeatureRequiredException"
 
@@ -761,8 +761,7 @@ const (
 	// "UnsupportedOperatingSystem".
 	//
 	// The operating systems you specified is not supported, or the operation is
-	// not supported for the operating system. Valid operating systems include:
-	// Windows, AmazonLinux, RedhatEnterpriseLinux, and Ubuntu.
+	// not supported for the operating system.
 	ErrCodeUnsupportedOperatingSystem = "UnsupportedOperatingSystem"
 
 	// ErrCodeUnsupportedParameterType for service response error code

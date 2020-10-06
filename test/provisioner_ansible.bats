@@ -65,6 +65,14 @@ teardown() {
     diff -r dir fetched-dir/packer-test/tmp/remote-dir > /dev/null
 }
 
+@test "ansible provisioner: build galaxy.json" {
+    cd $FIXTURE_ROOT
+    run packer build ${USER_VARS} $FIXTURE_ROOT/galaxy.json
+    [ "$status" -eq 0 ]
+    [ "$(gc_has_image "packerbats-galaxy")" -eq 1 ]
+    diff -r dir fetched-dir/default/tmp/remote-dir > /dev/null
+}
+
 @test "ansible provisioner: build scp.json" {
     cd $FIXTURE_ROOT
     run packer build ${USER_VARS} $FIXTURE_ROOT/scp.json

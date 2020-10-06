@@ -23,6 +23,7 @@ type Config struct {
 	common.HTTPConfig              `mapstructure:",squash"`
 	common.ISOConfig               `mapstructure:",squash"`
 	common.FloppyConfig            `mapstructure:",squash"`
+	common.CDConfig                `mapstructure:",squash"`
 	bootcommand.VNCConfig          `mapstructure:",squash"`
 	vmwcommon.DriverConfig         `mapstructure:",squash"`
 	vmwcommon.HWConfig             `mapstructure:",squash"`
@@ -93,24 +94,26 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// Accumulate any errors and warnings
+	var warnings []string
 	var errs *packer.MultiError
-	warnings := make([]string, 0)
 
+	runConfigWarnings, runConfigErrs := c.RunConfig.Prepare(&c.ctx, &c.DriverConfig)
+	warnings = append(warnings, runConfigWarnings...)
+	errs = packer.MultiErrorAppend(errs, runConfigErrs...)
 	isoWarnings, isoErrs := c.ISOConfig.Prepare(&c.ctx)
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
 	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.HWConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.DriverConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs,
-		c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
-	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.DiskConfig.Prepare(&c.ctx)...)
 
@@ -163,19 +166,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		c.HWConfig.Network = "nat"
 	}
 
-	// Remote configuration validation
-	if c.RemoteType != "" {
-		if c.RemoteHost == "" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("remote_host must be specified"))
-		}
-
-		if c.RemoteType != "esx5" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
-		}
-	}
-
 	if c.Format == "" {
 		if c.RemoteType == "" {
 			c.Format = "vmx"
@@ -184,11 +174,18 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if c.RemoteType == "" && c.Format == "vmx" {
-		// if we're building locally and want a vmx, there's nothing to export.
-		// Set skip export flag here to keep the export step from attempting
-		// an unneded export
-		c.SkipExport = true
+	if c.RemoteType == "" {
+		if c.Format == "vmx" {
+			// if we're building locally and want a vmx, there's nothing to export.
+			// Set skip export flag here to keep the export step from attempting
+			// an unneded export
+			c.SkipExport = true
+		}
+		if c.Headless && c.DisableVNC {
+			warnings = append(warnings,
+				"Headless mode uses VNC to retrieve output. Since VNC has been disabled,\n"+
+					"you won't be able to see any output.")
+		}
 	}
 
 	err = c.DriverConfig.Validate(c.SkipExport)
@@ -196,17 +193,19 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
+	if c.CdromAdapterType != "" {
+		c.CdromAdapterType = strings.ToLower(c.CdromAdapterType)
+		if c.CdromAdapterType != "ide" && c.CdromAdapterType != "sata" && c.CdromAdapterType != "scsi" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("cdrom_adapter_type must be one of ide, sata, or scsi"))
+		}
+	}
+
 	// Warnings
 	if c.ShutdownCommand == "" {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
 				"will forcibly halt the virtual machine, which may result in data loss.")
-	}
-
-	if c.Headless && c.DisableVNC {
-		warnings = append(warnings,
-			"Headless mode uses VNC to retrieve output. Since VNC has been disabled,\n"+
-				"you won't be able to see any output.")
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

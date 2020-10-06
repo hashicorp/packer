@@ -20,6 +20,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
+
 	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -45,9 +52,64 @@ type ESX5Driver struct {
 	VMName         string
 	CommConfig     communicator.Config
 
+	ctx    context.Context
+	client *govmomi.Client
+	finder *find.Finder
+
 	comm      packer.Communicator
 	outputDir string
 	vmId      string
+}
+
+func NewESX5Driver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver, error) {
+	ctx := context.TODO()
+
+	vsphereUrl, err := url.Parse(fmt.Sprintf("https://%v/sdk", dconfig.RemoteHost))
+	if err != nil {
+		return nil, err
+	}
+	credentials := url.UserPassword(dconfig.RemoteUser, dconfig.RemotePassword)
+	vsphereUrl.User = credentials
+
+	soapClient := soap.NewClient(vsphereUrl, true)
+	vimClient, err := vim25.NewClient(ctx, soapClient)
+	if err != nil {
+		return nil, err
+	}
+
+	vimClient.RoundTripper = session.KeepAlive(vimClient.RoundTripper, 10*time.Minute)
+	client := &govmomi.Client{
+		Client:         vimClient,
+		SessionManager: session.NewManager(vimClient),
+	}
+
+	err = client.SessionManager.Login(ctx, credentials)
+	if err != nil {
+		return nil, err
+	}
+
+	finder := find.NewFinder(client.Client, false)
+	datacenter, err := finder.DefaultDatacenter(ctx)
+	if err != nil {
+		return nil, err
+	}
+	finder.SetDatacenter(datacenter)
+
+	return &ESX5Driver{
+		Host:           dconfig.RemoteHost,
+		Port:           dconfig.RemotePort,
+		Username:       dconfig.RemoteUser,
+		Password:       dconfig.RemotePassword,
+		PrivateKeyFile: dconfig.RemotePrivateKey,
+		Datastore:      dconfig.RemoteDatastore,
+		CacheDatastore: dconfig.RemoteCacheDatastore,
+		CacheDirectory: dconfig.RemoteCacheDirectory,
+		VMName:         vmName,
+		CommConfig:     config.Comm,
+		ctx:            ctx,
+		client:         client,
+		finder:         finder,
+	}, nil
 }
 
 func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
@@ -886,4 +948,12 @@ func (r *esxcliReader) find(key, val string) (map[string]string, error) {
 			return record, nil
 		}
 	}
+}
+
+func (d *ESX5Driver) AcquireVNCOverWebsocketTicket() (*types.VirtualMachineTicket, error) {
+	vm, err := d.finder.VirtualMachine(d.ctx, d.VMName)
+	if err != nil {
+		return nil, err
+	}
+	return vm.AcquireTicket(d.ctx, string(types.VirtualMachineTicketTypeWebmks))
 }

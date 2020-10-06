@@ -49,7 +49,7 @@ type FlatConfig struct {
 	ManagedImageOSDiskSnapshotName             *string                            `mapstructure:"managed_image_os_disk_snapshot_name" required:"false" cty:"managed_image_os_disk_snapshot_name" hcl:"managed_image_os_disk_snapshot_name"`
 	ManagedImageDataDiskSnapshotPrefix         *string                            `mapstructure:"managed_image_data_disk_snapshot_prefix" required:"false" cty:"managed_image_data_disk_snapshot_prefix" hcl:"managed_image_data_disk_snapshot_prefix"`
 	ManagedImageZoneResilient                  *bool                              `mapstructure:"managed_image_zone_resilient" required:"false" cty:"managed_image_zone_resilient" hcl:"managed_image_zone_resilient"`
-	AzureTags                                  map[string]*string                 `mapstructure:"azure_tags" required:"false" cty:"azure_tags" hcl:"azure_tags"`
+	AzureTags                                  map[string]string                  `mapstructure:"azure_tags" required:"false" cty:"azure_tags" hcl:"azure_tags"`
 	AzureTag                                   []hcl2template.FlatNameValue       `mapstructure:"azure_tag" required:"false" cty:"azure_tag" hcl:"azure_tag"`
 	ResourceGroupName                          *string                            `mapstructure:"resource_group_name" cty:"resource_group_name" hcl:"resource_group_name"`
 	StorageAccount                             *string                            `mapstructure:"storage_account" cty:"storage_account" hcl:"storage_account"`

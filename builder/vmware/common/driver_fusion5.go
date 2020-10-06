@@ -24,6 +24,13 @@ type Fusion5Driver struct {
 	SSHConfig *SSHConfig
 }
 
+func NewFusion5Driver(dconfig *DriverConfig, config *SSHConfig) Driver {
+	return &Fusion5Driver{
+		AppPath:   dconfig.FusionAppPath,
+		SSHConfig: config,
+	}
+}
+
 func (d *Fusion5Driver) Clone(dst, src string, linked bool) error {
 	return errors.New("Cloning is not supported with Fusion 5. Please use Fusion 6+.")
 }

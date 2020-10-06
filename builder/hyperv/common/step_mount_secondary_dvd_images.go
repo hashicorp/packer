@@ -34,7 +34,17 @@ func (s *StepMountSecondaryDvdImages) Run(ctx context.Context, state multistep.S
 	// For IDE, there are only 2 controllers (0,1) with 2 locations each (0,1)
 	var dvdProperties []DvdControllerProperties
 
-	for _, isoPath := range s.IsoPaths {
+	isoPaths := s.IsoPaths
+
+	// Add our custom CD, if it exists
+	cd_path, ok := state.Get("cd_path").(string)
+	if ok {
+		if cd_path != "" {
+			isoPaths = append(isoPaths, cd_path)
+		}
+	}
+
+	for _, isoPath := range isoPaths {
 		var properties DvdControllerProperties
 
 		controllerNumber, controllerLocation, err := driver.CreateDvdDrive(vmName, isoPath, s.Generation)

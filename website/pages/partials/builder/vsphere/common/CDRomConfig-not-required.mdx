@@ -1,0 +1,12 @@
+<!-- Code generated from the comments of the CDRomConfig struct in builder/vsphere/common/step_add_cdrom.go; DO NOT EDIT MANUALLY -->
+
+- `cdrom_type` (string) - Which controller to use. Example: `sata`. Defaults to `ide`.
+
+- `iso_paths` ([]string) - List of Datastore or Content Library paths to ISO files that will be mounted to the VM.
+  Here's an HCL2 example:
+  ```hcl
+  iso_paths = [
+    "[datastore1] ISO/ubuntu.iso",
+    "Packer Library Test/ubuntu-16.04.6-server-amd64/ubuntu-16.04.6-server-amd64.iso"
+  ]
+  ```

@@ -110,3 +110,112 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 		t.Errorf("Expected CloudInit to be false, got %t", b.config.CloudInit)
 	}
 }
+
+func TestAgentSetToFalse(t *testing.T) {
+	cfg := mandatoryConfig(t)
+	cfg["qemu_agent"] = false
+
+	var c Config
+	warn, err := c.Prepare(cfg)
+	if err != nil {
+		t.Fatal(err, warn)
+	}
+
+	if c.Agent != false {
+		t.Errorf("Expected Agent to be false, got %t", c.Agent)
+	}
+}
+
+func TestPacketQueueSupportForNetworkAdapters(t *testing.T) {
+	drivertests := []struct {
+		expectedToFail bool
+		model          string
+	}{
+		{expectedToFail: false, model: "virtio"},
+		{expectedToFail: true, model: "e1000"},
+		{expectedToFail: true, model: "e1000-82540em"},
+		{expectedToFail: true, model: "e1000-82544gc"},
+		{expectedToFail: true, model: "e1000-82545em"},
+		{expectedToFail: true, model: "i82551"},
+		{expectedToFail: true, model: "i82557b"},
+		{expectedToFail: true, model: "i82559er"},
+		{expectedToFail: true, model: "ne2k_isa"},
+		{expectedToFail: true, model: "ne2k_pci"},
+		{expectedToFail: true, model: "pcnet"},
+		{expectedToFail: true, model: "rtl8139"},
+		{expectedToFail: true, model: "vmxnet3"},
+	}
+
+	for _, tt := range drivertests {
+		device := make(map[string]interface{})
+		device["bridge"] = "vmbr0"
+		device["model"] = tt.model
+		device["packet_queues"] = 2
+
+		devices := make([]map[string]interface{}, 0)
+		devices = append(devices, device)
+
+		cfg := mandatoryConfig(t)
+		cfg["network_adapters"] = devices
+
+		var c Config
+		_, err := c.Prepare(cfg)
+
+		if tt.expectedToFail == true && err == nil {
+			t.Error("expected config preparation to fail, but no error occured")
+		}
+
+		if tt.expectedToFail == false && err != nil {
+			t.Errorf("expected config preparation to succeed, but %s", err.Error())
+		}
+	}
+}
+
+func TestHardDiskControllerIOThreadSupport(t *testing.T) {
+	drivertests := []struct {
+		expectedToFail bool
+		controller     string
+		disk_type      string
+	}{
+		// io thread is only supported by virtio-scsi-single controller
+		// and only for virtio and scsi disks
+		{expectedToFail: false, controller: "virtio-scsi-single", disk_type: "scsi"},
+		{expectedToFail: false, controller: "virtio-scsi-single", disk_type: "virtio"},
+		{expectedToFail: true, controller: "virtio-scsi-single", disk_type: "sata"},
+		{expectedToFail: true, controller: "lsi", disk_type: "scsi"},
+		{expectedToFail: true, controller: "lsi53c810", disk_type: "virtio"},
+	}
+
+	for _, tt := range drivertests {
+		nic := make(map[string]interface{})
+		nic["bridge"] = "vmbr0"
+
+		nics := make([]map[string]interface{}, 0)
+		nics = append(nics, nic)
+
+		disk := make(map[string]interface{})
+		disk["type"] = tt.disk_type
+		disk["io_thread"] = true
+		disk["storage_pool"] = "local-lvm"
+		disk["storage_pool_type"] = "lvm"
+
+		disks := make([]map[string]interface{}, 0)
+		disks = append(disks, disk)
+
+		cfg := mandatoryConfig(t)
+		cfg["network_adapters"] = nics
+		cfg["disks"] = disks
+		cfg["scsi_controller"] = tt.controller
+
+		var c Config
+		_, err := c.Prepare(cfg)
+
+		if tt.expectedToFail == true && err == nil {
+			t.Error("expected config preparation to fail, but no error occured")
+		}
+
+		if tt.expectedToFail == false && err != nil {
+			t.Errorf("expected config preparation to succeed, but %s", err.Error())
+		}
+	}
+}

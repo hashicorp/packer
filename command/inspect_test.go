@@ -153,6 +153,13 @@ Note: If your build names contain user variables or template
 functions such as 'timestamp', these are processed at build time,
 and therefore only show in their raw form here.
 `},
+		{
+			[]string{
+				"inspect", filepath.Join(testFixture("hcl-inspect-with-sensitive-vars")),
+			},
+			nil,
+			testFixtureContent("hcl-inspect-with-sensitive-vars", "expected-output.txt"),
+		},
 	}
 
 	for _, tc := range tc {

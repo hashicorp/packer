@@ -9,9 +9,10 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"organization_id": "foo",
-		"api_token":       "bar",
-		"region":          "ams1",
+		"project_id":      "00000000-1111-2222-3333-444444444444",
+		"access_key":      "SCWABCXXXXXXXXXXXXXX",
+		"secret_key":      "00000000-1111-2222-3333-444444444444",
+		"zone":            "fr-par-1",
 		"commercial_type": "START1-S",
 		"ssh_username":    "root",
 		"image":           "image-uuid",
@@ -32,10 +33,7 @@ func TestBuilder_Prepare_BadType(t *testing.T) {
 		"api_token": []string{},
 	}
 
-	_, warnings, err := b.Prepare(c)
-	if len(warnings) > 0 {
-		t.Fatalf("bad: %#v", warnings)
-	}
+	_, _, err := b.Prepare(c)
 	if err == nil {
 		t.Fatalf("prepare should fail")
 	}
@@ -68,11 +66,11 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_Region(t *testing.T) {
+func TestBuilderPrepare_Zone(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	delete(config, "region")
+	delete(config, "zone")
 	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
@@ -81,9 +79,9 @@ func TestBuilderPrepare_Region(t *testing.T) {
 		t.Fatalf("should error")
 	}
 
-	expected := "ams1"
+	expected := "fr-par-1"
 
-	config["region"] = expected
+	config["zone"] = expected
 	b = Builder{}
 	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
@@ -93,8 +91,8 @@ func TestBuilderPrepare_Region(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if b.config.Region != expected {
-		t.Errorf("found %s, expected %s", b.config.Region, expected)
+	if b.config.Zone != expected {
+		t.Errorf("found %s, expected %s", b.config.Zone, expected)
 	}
 }
 
