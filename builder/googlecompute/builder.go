@@ -77,10 +77,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Debug: b.config.PackerDebug,
 		},
 		&StepStartTunnel{
-			IAPConf:     &b.config.IAPConfig,
-			CommConf:    &b.config.Comm,
-			AccountFile: b.config.AccountFile,
-			ProjectId:   b.config.ProjectId,
+			IAPConf:            &b.config.IAPConfig,
+			CommConf:           &b.config.Comm,
+			AccountFile:        b.config.AccountFile,
+			ImpersonateAccount: b.config.ImpersonateServiceAccount,
+			ProjectId:          b.config.ProjectId,
 		},
 		&communicator.StepConnect{
 			Config:      &b.config.Comm,

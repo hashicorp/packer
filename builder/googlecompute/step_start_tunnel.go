@@ -131,10 +131,11 @@ func (e RetryableTunnelError) Error() string {
 }
 
 type StepStartTunnel struct {
-	IAPConf     *IAPConfig
-	CommConf    *communicator.Config
-	AccountFile string
-	ProjectId   string
+	IAPConf            *IAPConfig
+	CommConf           *communicator.Config
+	AccountFile        string
+	ImpersonateAccount string
+	ProjectId          string
 
 	tunnelDriver TunnelDriver
 }
@@ -274,6 +275,10 @@ func (s *StepStartTunnel) Run(ctx context.Context, state multistep.StateBag) mul
 		strconv.Itoa(s.CommConf.Port()),
 		fmt.Sprintf("--local-host-port=localhost:%d", s.IAPConf.IAPLocalhostPort),
 		"--zone", c.Zone, "--project", s.ProjectId,
+	}
+
+	if s.ImpersonateAccount != "" {
+		args = append(args, fmt.Sprintf("--impersonate-service-account='%s'", s.ImpersonateAccount))
 	}
 
 	// This is the port the IAP tunnel listens on, on localhost.
