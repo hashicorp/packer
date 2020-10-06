@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/plugin"
-	"github.com/kardianos/osext"
 )
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -131,7 +130,7 @@ func (c *config) Discover() error {
 	}
 
 	// Next, look in the same directory as the executable.
-	exePath, err := osext.Executable()
+	exePath, err := os.Executable()
 	if err != nil {
 		log.Printf("[ERR] Error loading exe directory: %s", err)
 	} else {
@@ -311,7 +310,7 @@ func (c *config) discoverSingle(glob string) (map[string]string, error) {
 
 func (c *config) discoverInternalComponents() error {
 	// Get the packer binary path
-	packerPath, err := osext.Executable()
+	packerPath, err := os.Executable()
 	if err != nil {
 		log.Printf("[ERR] Error loading exe directory: %s", err)
 		return err
@@ -373,7 +372,7 @@ func (c *config) pluginClient(path string) *plugin.Client {
 		// If that doesn't work, look for it in the same directory
 		// as the `packer` executable (us).
 		log.Printf("Plugin could not be found at %s (%v). Checking same directory as executable.", originalPath, err)
-		exePath, err := osext.Executable()
+		exePath, err := os.Executable()
 		if err != nil {
 			log.Printf("Couldn't get current exe path: %s", err)
 		} else {
