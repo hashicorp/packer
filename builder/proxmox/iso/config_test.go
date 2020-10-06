@@ -227,6 +227,6 @@ func mandatoryConfig(t *testing.T) map[string]interface{} {
 		"password":     "supersecret",
 		"node":         "my-proxmox",
 		"ssh_username": "root",
-    "iso_file": "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso",
+		"iso_file":     "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso",
 	}
 }
