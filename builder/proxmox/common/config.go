@@ -58,8 +58,6 @@ type Config struct {
 	CloudInit            bool   `mapstructure:"cloud_init"`
 	CloudInitStoragePool string `mapstructure:"cloud_init_storage_pool"`
 
-	shouldUploadISO bool
-
 	AdditionalISOFiles []storageConfig `mapstructure:"additional_iso_files"`
 	VMInterface        string          `mapstructure:"vm_interface"`
 
