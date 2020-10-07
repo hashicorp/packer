@@ -148,7 +148,6 @@ var Builders = map[string]packer.Builder{
 	"profitbricks":        new(profitbricksbuilder.Builder),
 	"proxmox-clone":       new(proxmoxclonebuilder.Builder),
 	"proxmox-iso":         new(proxmoxisobuilder.Builder),
-	"proxmox":             new(proxmoxisobuilder.Builder),
 	"qemu":                new(qemubuilder.Builder),
 	"scaleway":            new(scalewaybuilder.Builder),
 	"tencentcloud-cvm":    new(tencentcloudcvmbuilder.Builder),

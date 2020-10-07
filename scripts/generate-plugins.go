@@ -136,15 +136,17 @@ func listDirectories(path string) ([]string, error) {
 
 	for _, item := range items {
 		// We only want directories
-		if item.IsDir() {
-			currentDir := filepath.Join(path, item.Name())
-			names = append(names, currentDir)
+		if !item.IsDir() ||
+			item.Name() == "common" {
+			continue
+		}
+		currentDir := filepath.Join(path, item.Name())
+		names = append(names, currentDir)
 
-			// Do some recursion
-			subNames, err := listDirectories(currentDir)
-			if err == nil {
-				names = append(names, subNames...)
-			}
+		// Do some recursion
+		subNames, err := listDirectories(currentDir)
+		if err == nil {
+			names = append(names, subNames...)
 		}
 	}
 
