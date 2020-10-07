@@ -15,7 +15,7 @@ type FlatSharedImageGalleryDestination struct {
 	ImageVersion          *string            `mapstructure:"image_version" required:"true" cty:"image_version" hcl:"image_version"`
 	TargetRegions         []FlatTargetRegion `mapstructure:"target_regions" cty:"target_regions" hcl:"target_regions"`
 	ExcludeFromLatest     *bool              `mapstructure:"exclude_from_latest" cty:"exclude_from_latest" hcl:"exclude_from_latest"`
-	ExcludeFromLatestTypo *bool              `mapstructure:"exlude_from_latest" cty:"exlude_from_latest" hcl:"exlude_from_latest"`
+	ExcludeFromLatestTypo *bool              `mapstructure:"exlude_from_latest" undocumented:"true" cty:"exlude_from_latest" hcl:"exlude_from_latest"`
 }
 
 // FlatMapstructure returns a new FlatSharedImageGalleryDestination.

@@ -18,7 +18,7 @@ type SharedImageGalleryDestination struct {
 
 	TargetRegions         []TargetRegion `mapstructure:"target_regions"`
 	ExcludeFromLatest     bool           `mapstructure:"exclude_from_latest"`
-	ExcludeFromLatestTypo bool           `mapstructure:"exlude_from_latest"`
+	ExcludeFromLatestTypo bool           `mapstructure:"exlude_from_latest" undocumented:"true"`
 }
 
 // TargetRegion describes a region where the shared image should be replicated
