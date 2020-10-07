@@ -42,7 +42,6 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/flock v0.7.3
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
-	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/go-cmp v0.5.2
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
@@ -79,7 +78,6 @@ require (
 	github.com/joyent/triton-go v0.0.0-20180628001255-830d2b111e62
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
-	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1 // indirect
 	github.com/klauspost/compress v0.0.0-20160131094358-f86d2e6d8a77 // indirect
 	github.com/klauspost/cpuid v0.0.0-20160106104451-349c67577817 // indirect
 	github.com/klauspost/crc32 v0.0.0-20160114101742-999f3125931f // indirect
@@ -94,10 +92,9 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-testing-interface v1.0.3 // indirect
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
-	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0
 	github.com/mitchellh/mapstructure v1.2.3
-	github.com/mitchellh/panicwrap v0.0.0-20170106182340-fce601fe5557
+	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/mitchellh/reflectwalk v1.0.0
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -137,7 +134,6 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
 	golang.org/x/sys v0.0.0-20200918174421-af09f7315aff
-	golang.org/x/text v0.3.3 // indirect
 	golang.org/x/tools v0.0.0-20200918232735-d647fc253266
 	google.golang.org/api v0.32.0
 	google.golang.org/genproto v0.0.0-20200918140846-d0d605568037 // indirect
