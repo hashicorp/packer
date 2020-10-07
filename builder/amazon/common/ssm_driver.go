@@ -7,7 +7,6 @@ import (
 	"log"
 	"os/exec"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -39,7 +38,6 @@ type SSMDriver struct {
 
 	retryConnection       chan bool
 	retryAfterTermination chan bool
-	wg                    sync.WaitGroup
 }
 
 func NewSSMDriver(config SSMDriverConfig) *SSMDriver {
@@ -52,8 +50,6 @@ func NewSSMDriver(config SSMDriverConfig) *SSMDriver {
 // not wish to manage the session manually calling StopSession on a instance of this driver will terminate the active session
 // created from calling StartSession.
 func (d *SSMDriver) StartSession(ctx context.Context, input ssm.StartSessionInput) (*ssm.StartSessionOutput, error) {
-	d.wg.Add(1)
-	defer d.wg.Done()
 	log.Printf("Starting PortForwarding session to instance %q", aws.StringValue(input.Target))
 
 	output, err := d.StartSessionWithContext(ctx, input)
@@ -75,7 +71,6 @@ func (d *SSMDriver) StartSession(ctx context.Context, input ssm.StartSessionInpu
 					return
 				}
 				if r {
-					d.wg.Wait()
 					log.Printf("[DEBUG] Restablishing SSM connection")
 					_, _ = driver.StartSession(ctx, input)
 					// End this routine. Another routine will start.
@@ -88,7 +83,6 @@ func (d *SSMDriver) StartSession(ctx context.Context, input ssm.StartSessionInpu
 
 				// Tunnel is still open an we want to try to reconnect
 				if r {
-					d.wg.Wait()
 					log.Printf("[DEBUG] Retrying to establish SSM connection")
 					_, err := driver.StartSessionWithContext(ctx, input)
 					if err != nil {
@@ -114,9 +108,6 @@ func (d *SSMDriver) StartSession(ctx context.Context, input ssm.StartSessionInpu
 }
 
 func (d *SSMDriver) StartSessionWithContext(ctx context.Context, input ssm.StartSessionInput) (*ssm.StartSessionOutput, error) {
-	d.wg.Add(1)
-	defer d.wg.Done()
-
 	var output *ssm.StartSessionOutput
 	err := retry.Config{
 		ShouldRetry: func(err error) bool { return IsAWSErr(err, "TargetNotConnected", "") },
@@ -225,9 +216,6 @@ func isRetryableError(output string) bool {
 
 // StopSession terminates an active Session Manager session
 func (d *SSMDriver) StopSession() error {
-	d.wg.Add(1)
-	defer d.wg.Done()
-
 	if d.session == nil || d.session.SessionId == nil {
 		return fmt.Errorf("Unable to find a valid session to instance %q; skipping the termination step",
 			aws.StringValue(d.sessionParams.Target))
