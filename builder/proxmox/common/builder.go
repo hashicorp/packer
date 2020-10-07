@@ -55,9 +55,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook, state
 	state.Put("ui", ui)
 
 	comm := &b.config.Comm
-	if state.Get("comm") != nil {
-		comm = state.Get("comm").(*communicator.Config)
-	}
 
 	// Build the steps
 	coreSteps := []multistep.Step{

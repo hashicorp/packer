@@ -4,7 +4,6 @@ import (
 	proxmoxapi "github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 
@@ -31,13 +30,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
 	state.Put("clone-config", &b.config)
-	state.Put("comm", &b.config.Comm)
 
 	preSteps := []multistep.Step{
 		&StepSshKeyPair{
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("%s.pem", b.config.PackerBuildName),
-			Comm:         &b.config.Comm,
 		},
 	}
 	postSteps := []multistep.Step{}
@@ -51,7 +48,7 @@ type cloneVMCreator struct{}
 func (*cloneVMCreator) Create(vmRef *proxmoxapi.VmRef, config proxmoxapi.ConfigQemu, state multistep.StateBag) error {
 	client := state.Get("proxmoxClient").(*proxmoxapi.Client)
 	c := state.Get("clone-config").(*Config)
-	comm := state.Get("comm").(*communicator.Config)
+	comm := state.Get("config").(*proxmox.Config).Comm
 
 	fullClone := 1
 	if c.FullClone.False() {

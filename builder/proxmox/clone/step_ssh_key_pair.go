@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	common "github.com/hashicorp/packer/builder/proxmox/common"
 	"github.com/hashicorp/packer/common/uuid"
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
@@ -17,19 +17,19 @@ import (
 type StepSshKeyPair struct {
 	Debug        bool
 	DebugKeyPath string
-	Comm         *communicator.Config
 }
 
 func (s *StepSshKeyPair) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+	c := state.Get("config").(*common.Config)
 
-	if s.Comm.SSHPassword != "" {
+	if c.Comm.SSHPassword != "" {
 		return multistep.ActionContinue
 	}
 
-	if s.Comm.SSHPrivateKeyFile != "" {
+	if c.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key for the communicator...")
-		privateKeyBytes, err := s.Comm.ReadSSHPrivateKeyFile()
+		privateKeyBytes, err := c.Comm.ReadSSHPrivateKeyFile()
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
@@ -44,15 +44,15 @@ func (s *StepSshKeyPair) Run(ctx context.Context, state multistep.StateBag) mult
 			return multistep.ActionHalt
 		}
 
-		s.Comm.SSHPrivateKey = privateKeyBytes
-		s.Comm.SSHKeyPairName = kp.Comment
-		s.Comm.SSHTemporaryKeyPairName = kp.Comment
-		s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine
+		c.Comm.SSHPrivateKey = privateKeyBytes
+		c.Comm.SSHKeyPairName = kp.Comment
+		c.Comm.SSHTemporaryKeyPairName = kp.Comment
+		c.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine
 
 		return multistep.ActionContinue
 	}
 
-	if s.Comm.SSHAgentAuth {
+	if c.Comm.SSHAgentAuth {
 		ui.Say("Using local SSH Agent to authenticate connections for the communicator...")
 		return multistep.ActionContinue
 	}
@@ -67,11 +67,11 @@ func (s *StepSshKeyPair) Run(ctx context.Context, state multistep.StateBag) mult
 		return multistep.ActionHalt
 	}
 
-	s.Comm.SSHKeyPairName = kp.Comment
-	s.Comm.SSHTemporaryKeyPairName = kp.Comment
-	s.Comm.SSHPrivateKey = kp.PrivateKeyPemBlock
-	s.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine
-	s.Comm.SSHClearAuthorizedKeys = true
+	c.Comm.SSHKeyPairName = kp.Comment
+	c.Comm.SSHTemporaryKeyPairName = kp.Comment
+	c.Comm.SSHPrivateKey = kp.PrivateKeyPemBlock
+	c.Comm.SSHPublicKey = kp.PublicKeyAuthorizedKeysLine
+	c.Comm.SSHClearAuthorizedKeys = true
 
 	ui.Say("Created ephemeral SSH key pair for communicator")
 
