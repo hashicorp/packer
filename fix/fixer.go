@@ -58,6 +58,7 @@ func init() {
 		"vsphere-iso-net-disk":       new(FixerVSphereNetworkDisk),
 		"iso-checksum-type-and-url":  new(FixerISOChecksumTypeAndURL),
 		"qemu-host-port":             new(FixerQEMUHostPort),
+		"azure-exclude_from_latest":  new(FixerAzureExcludeFromLatest),
 	}
 
 	FixerOrder = []string{
@@ -93,5 +94,6 @@ func init() {
 		"vsphere-iso-net-disk",
 		"iso-checksum-type-and-url",
 		"qemu-host-port",
+		"azure-exclude_from_latest",
 	}
 }
