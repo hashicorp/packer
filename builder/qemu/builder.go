@@ -193,7 +193,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	artifact.state["generated_data"] = state.Get("generated_data")
 	artifact.state["diskName"] = b.config.VMName
 
-	// placed in state in steap_create_disk.go
+	// placed in state in step_create_disk.go
 	diskpaths, ok := state.Get("qemu_disk_paths").([]string)
 	if ok {
 		artifact.state["diskPaths"] = diskpaths
