@@ -54,7 +54,7 @@ func (*cloneVMCreator) Create(vmRef *proxmoxapi.VmRef, config proxmoxapi.ConfigQ
 	comm := state.Get("comm").(*communicator.Config)
 
 	fullClone := 1
-	if c.FullClone == false {
+	if c.FullClone.False() {
 		fullClone = 0
 	}
 

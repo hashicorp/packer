@@ -4,14 +4,15 @@ package proxmoxclone
 
 import (
 	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 )
 
 type Config struct {
 	proxmox.Config `mapstructure:",squash"`
 
-	CloneVM   string `mapstructure:"clone_vm"`
-	FullClone bool   `mapstructure:"full_clone"`
+	CloneVM   string         `mapstructure:"clone_vm"`
+	FullClone config.Trilean `mapstructure:"full_clone" required:"false"`
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, []string, error) {

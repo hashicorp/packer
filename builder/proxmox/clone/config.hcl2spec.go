@@ -100,7 +100,7 @@ type FlatConfig struct {
 	AdditionalISOFiles        []proxmox.FlatstorageConfig `mapstructure:"additional_iso_files" cty:"additional_iso_files" hcl:"additional_iso_files"`
 	VMInterface               *string                     `mapstructure:"vm_interface" cty:"vm_interface" hcl:"vm_interface"`
 	CloneVM                   *string                     `mapstructure:"clone_vm" cty:"clone_vm" hcl:"clone_vm"`
-	FullClone                 *bool                       `mapstructure:"full_clone" cty:"full_clone" hcl:"full_clone"`
+	FullClone                 *bool                       `mapstructure:"full_clone" required:"false" cty:"full_clone" hcl:"full_clone"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
