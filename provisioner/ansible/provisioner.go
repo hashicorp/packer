@@ -439,7 +439,7 @@ func (p *Provisioner) setupAdapter(ui packer.Ui, comm packer.Communicator) (stri
 	return k.privKeyFile, nil
 }
 
-const DefaultSSHInventoryFilev2 = "{{ .HostAlias }} ansible_host={{ .Host }} ansible_user={{ .User }} ansible_port={{ .Port }}\n"
+const DefaultSSHInventoryFilev2 = "{{ .HostAlias }} ansible_host={{ .Host }} {{if .UseLocalConnection}}ansible_connection=local {{end}}ansible_user={{ .User }} ansible_port={{ .Port }}\n"
 const DefaultSSHInventoryFilev1 = "{{ .HostAlias }} ansible_ssh_host={{ .Host }} ansible_ssh_user={{ .User }} ansible_ssh_port={{ .Port }}\n"
 const DefaultWinRMInventoryFilev2 = "{{ .HostAlias}} ansible_host={{ .Host }} ansible_connection=winrm ansible_winrm_transport=basic ansible_shell_type=powershell ansible_user={{ .User}} ansible_port={{ .Port }}\n"
 
@@ -471,6 +471,15 @@ func (p *Provisioner) createInventoryFile() error {
 		ctxData["Host"] = "127.0.0.1"
 		ctxData["Port"] = p.config.LocalPort
 	}
+
+	// When using localhost as the connecting target, Ansible will generate an implicit
+	// localhost target if one is not defined in inventory. To prevent this Ansible provides a
+	// connection=local flag that prevents Ansible from generating the implicit localhost.
+	// https://docs.ansible.com/ansible/latest/inventory/implicit_localhost.html
+
+	// This change fixes the issue with using the Amazon SSM connection with Ansible.
+	// As referenced in https://github.com/hashicorp/packer/issues/10035#issuecomment-704620461
+	ctxData["UseLocalConnection"] = ctxData["Host"] == "localhost"
 	p.config.ctx.Data = ctxData
 
 	host, err := interpolate.Render(hostTemplate, &p.config.ctx)
