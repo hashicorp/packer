@@ -42,7 +42,6 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/flock v0.7.3
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
-	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/go-cmp v0.5.2
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
@@ -94,7 +93,6 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-testing-interface v1.0.3 // indirect
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
-	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0
 	github.com/mitchellh/mapstructure v1.2.3
 	github.com/mitchellh/panicwrap v0.0.0-20170106182340-fce601fe5557
@@ -113,7 +111,7 @@ require (
 	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 	github.com/satori/go.uuid v1.2.0 // indirect
-	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.6.0.20200903143645-c0ce17a0443d
+	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
 	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
@@ -137,7 +135,6 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
 	golang.org/x/sys v0.0.0-20200918174421-af09f7315aff
-	golang.org/x/text v0.3.3 // indirect
 	golang.org/x/tools v0.0.0-20200918232735-d647fc253266
 	google.golang.org/api v0.32.0
 	google.golang.org/genproto v0.0.0-20200918140846-d0d605568037 // indirect

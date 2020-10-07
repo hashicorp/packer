@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
+	"github.com/scaleway/scaleway-sdk-go/api/marketplace/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
@@ -22,8 +24,27 @@ func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep
 
 	ui.Say(fmt.Sprintf("Creating image: %v", c.ImageName))
 
+	imageID := c.Image
+
+	// if not a UUID, we check the Marketplace API
+	_, err := uuid.ParseUUID(c.Image)
+	if err != nil {
+		apiMarketplace := marketplace.NewAPI(state.Get("client").(*scw.Client))
+		imageID, err = apiMarketplace.GetLocalImageIDByLabel(&marketplace.GetLocalImageIDByLabelRequest{
+			ImageLabel:     c.Image,
+			Zone:           scw.Zone(c.Zone),
+			CommercialType: c.CommercialType,
+		})
+		if err != nil {
+			err := fmt.Errorf("Error getting initial image info from marketplace: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
 	imageResp, err := instanceAPI.GetImage(&instance.GetImageRequest{
-		ImageID: c.Image,
+		ImageID: imageID,
 	})
 	if err != nil {
 		err := fmt.Errorf("Error getting initial image info: %s", err)

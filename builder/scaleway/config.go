@@ -44,6 +44,7 @@ type Config struct {
 	// that will be used to launch a new server and provision it. See
 	// the images list
 	// get the complete list of the accepted image UUID.
+	// The marketplace image label (eg `ubuntu_focal`) also works.
 	Image string `mapstructure:"image" required:"true"`
 	// The name of the server commercial type:
 	// C1, C2L, C2M, C2S, DEV1-S, DEV1-M, DEV1-L, DEV1-XL,

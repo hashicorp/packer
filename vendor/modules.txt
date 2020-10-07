@@ -496,7 +496,7 @@ github.com/profitbricks/profitbricks-sdk-go
 github.com/ryanuber/go-glob
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
-# github.com/scaleway/scaleway-sdk-go v1.0.0-beta.6.0.20200903143645-c0ce17a0443d
+# github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
 github.com/scaleway/scaleway-sdk-go/api/instance/v1
 github.com/scaleway/scaleway-sdk-go/api/marketplace/v1
 github.com/scaleway/scaleway-sdk-go/internal/async
