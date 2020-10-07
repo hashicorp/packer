@@ -258,7 +258,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.SourceImage == "" && c.SourceImageName == "" && c.ExternalSourceImageURL == "" && c.SourceImageFilters.Filters.Empty() {
 		errs = append(errs, errors.New("Either a source_image, a source_image_name, an external_source_image_url or source_image_filter must be specified"))
-	} else if !(hasOnlySourceImage || hasOnlySourceImageName || hasOnlyExternalSourceImageURL) {
+	} else if !(hasOnlySourceImage || hasOnlySourceImageName || hasOnlyExternalSourceImageURL) && c.SourceImageFilters.Filters.Empty() {
 		errs = append(errs, errors.New("Only a source_image, a source_image_name or an external_source_image_url can be specified, not multiple."))
 	}
 
