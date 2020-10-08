@@ -144,7 +144,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DiskImage:     true,
 				DiskInterface: "virtio-scsi",
 
-				OutputDir:    "/path/to/output",
+				OutputDir:    "path_to_output",
 				DiskCache:    "writeback",
 				Format:       "qcow2",
 				DetectZeroes: "off",
@@ -162,7 +162,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				"-boot", "c",
 				"-device", "virtio-scsi-pci,id=scsi0",
 				"-device", "scsi-hd,bus=scsi0.0,drive=drive0",
-				"-drive", "if=none,file=/path/to/output,id=drive0,cache=writeback,discard=,format=qcow2",
+				"-drive", "if=none,file=path_to_output,id=drive0,cache=writeback,discard=,format=qcow2",
 				"-drive", "file=fake_cd_path.iso,index=0,media=cdrom",
 			},
 			"virtio-scsi interface, DiskImage true, extra cdrom, detectZeroes off",
@@ -172,7 +172,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DiskImage:     true,
 				DiskInterface: "virtio-scsi",
 
-				OutputDir:    "/path/to/output",
+				OutputDir:    "path_to_output",
 				DiskCache:    "writeback",
 				Format:       "qcow2",
 				DetectZeroes: "on",
@@ -190,7 +190,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				"-boot", "c",
 				"-device", "virtio-scsi-pci,id=scsi0",
 				"-device", "scsi-hd,bus=scsi0.0,drive=drive0",
-				"-drive", "if=none,file=/path/to/output,id=drive0,cache=writeback,discard=,format=qcow2,detect-zeroes=on",
+				"-drive", "if=none,file=path_to_output,id=drive0,cache=writeback,discard=,format=qcow2,detect-zeroes=on",
 				"-drive", "file=fake_cd_path.iso,index=0,media=cdrom",
 			},
 			"virtio-scsi interface, DiskImage true, extra cdrom, detectZeroes on",
@@ -199,7 +199,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			&Config{
 				DiskInterface: "virtio-scsi",
 
-				OutputDir:    "/path/to/output",
+				OutputDir:    "path_to_output",
 				DiskCache:    "writeback",
 				Format:       "qcow2",
 				DetectZeroes: "off",
@@ -231,7 +231,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			&Config{
 				DiskInterface: "virtio-scsi",
 
-				OutputDir:    "/path/to/output",
+				OutputDir:    "path_to_output",
 				DiskCache:    "writeback",
 				Format:       "qcow2",
 				DetectZeroes: "on",
@@ -263,7 +263,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			&Config{
 				DiskInterface: "virtio-scsi",
 
-				OutputDir: "/path/to/output",
+				OutputDir: "path_to_output",
 				DiskCache: "writeback",
 				Format:    "qcow2",
 			},
@@ -326,7 +326,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 		},
 		{
 			&Config{
-				OutputDir:     "/path/to/output",
+				OutputDir:     "path_to_output",
 				DiskInterface: "virtio",
 				DiskCache:     "writeback",
 				Format:        "qcow2",
@@ -342,14 +342,14 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			},
 			[]string{
 				"-boot", "once=d",
-				"-drive", "file=/path/to/output,if=virtio,cache=writeback,format=qcow2",
+				"-drive", "file=path_to_output,if=virtio,cache=writeback,format=qcow2",
 				"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
 			},
 			"version less than 2",
 		},
 		{
 			&Config{
-				OutputDir:     "/path/to/output",
+				OutputDir:     "path_to_output",
 				DiskInterface: "virtio",
 				DiskCache:     "writeback",
 				Format:        "qcow2",
@@ -375,7 +375,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 		{
 			&Config{
 				DiskImage:     true,
-				OutputDir:     "/path/to/output",
+				OutputDir:     "path_to_output",
 				DiskInterface: "virtio",
 				DiskCache:     "writeback",
 				Format:        "qcow2",
@@ -391,7 +391,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			[]string{
 				"-display", "gtk",
 				"-boot", "c",
-				"-drive", "file=/path/to/output,if=virtio,cache=writeback,discard=,format=qcow2,detect-zeroes=",
+				"-drive", "file=path_to_output,if=virtio,cache=writeback,discard=,format=qcow2,detect-zeroes=",
 				"-drive", "file=fake_cd_path.iso,index=0,media=cdrom",
 			},
 			"virtio interface with disk image",
