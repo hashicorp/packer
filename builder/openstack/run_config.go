@@ -252,14 +252,21 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
-	hasOnlySourceImage := len(c.SourceImage) > 0 && len(c.SourceImageName) == 0 && len(c.ExternalSourceImageURL) == 0
-	hasOnlySourceImageName := len(c.SourceImageName) > 0 && len(c.SourceImage) == 0 && len(c.ExternalSourceImageURL) == 0
-	hasOnlyExternalSourceImageURL := len(c.ExternalSourceImageURL) > 0 && len(c.SourceImage) == 0 && len(c.SourceImageName) == 0
-
 	if c.SourceImage == "" && c.SourceImageName == "" && c.ExternalSourceImageURL == "" && c.SourceImageFilters.Filters.Empty() {
 		errs = append(errs, errors.New("Either a source_image, a source_image_name, an external_source_image_url or source_image_filter must be specified"))
-	} else if !(hasOnlySourceImage || hasOnlySourceImageName || hasOnlyExternalSourceImageURL) && c.SourceImageFilters.Filters.Empty() {
-		errs = append(errs, errors.New("Only a source_image, a source_image_name or an external_source_image_url can be specified, not multiple."))
+	} else {
+		// Make sure we've only set one image source option
+		thereCanBeOnlyOne := []bool{len(c.SourceImageName) > 0, len(c.SourceImage) > 0, len(c.ExternalSourceImageURL) > 0, !c.SourceImageFilters.Filters.Empty()}
+		numSet := 0
+		for _, val := range thereCanBeOnlyOne {
+			if val {
+				numSet += 1
+			}
+		}
+
+		if numSet > 1 {
+			errs = append(errs, errors.New("Only one of the options source_image, source_image_name, external_source_image_url, or source_image_filter can be specified, not multiple."))
+		}
 	}
 
 	// if external_source_image_format is not set use qcow2 as default
