@@ -10,7 +10,6 @@ import (
 	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -18,23 +17,14 @@ import (
 // that is used throughout the OMI creation process.
 //
 // Produces:
-//   source_image *oapi.Image - the source OMI info
+//   source_image *osc.Image - the source OMI info
 type StepSourceOMIInfo struct {
 	SourceOmi   string
 	OMIVirtType string
 	OmiFilters  OmiFilterOptions
 }
 
-type imageSort []oapi.Image
 type imageOscSort []osc.Image
-
-func (a imageSort) Len() int      { return len(a) }
-func (a imageSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a imageSort) Less(i, j int) bool {
-	itime, _ := time.Parse(time.RFC3339, a[i].CreationDate)
-	jtime, _ := time.Parse(time.RFC3339, a[j].CreationDate)
-	return itime.Unix() < jtime.Unix()
-}
 
 func (a imageOscSort) Len() int      { return len(a) }
 func (a imageOscSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
@@ -42,13 +32,6 @@ func (a imageOscSort) Less(i, j int) bool {
 	itime, _ := time.Parse(time.RFC3339, a[i].CreationDate)
 	jtime, _ := time.Parse(time.RFC3339, a[j].CreationDate)
 	return itime.Unix() < jtime.Unix()
-}
-
-// Returns the most recent OMI out of a slice of images.
-func mostRecentOmi(images []oapi.Image) oapi.Image {
-	sortedImages := images
-	sort.Sort(imageSort(sortedImages))
-	return sortedImages[len(sortedImages)-1]
 }
 
 // Returns the most recent OMI out of a slice of images.

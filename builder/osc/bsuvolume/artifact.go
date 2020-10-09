@@ -1,13 +1,15 @@
 package bsuvolume
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sort"
 	"strings"
 
+	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // map of region to list of volume IDs
@@ -22,7 +24,7 @@ type Artifact struct {
 	BuilderIdValue string
 
 	// Client connection for performing API stuff.
-	Conn *oapi.Client
+	Conn *osc.APIClient
 
 	// StateData should store data such as GeneratedData
 	// to be shared with post-processors
@@ -70,10 +72,12 @@ func (a *Artifact) Destroy() error {
 		for _, volumeID := range volumeIDs {
 			log.Printf("Deregistering Volume ID (%s) from region (%s)", volumeID, region)
 
-			input := oapi.DeleteVolumeRequest{
+			input := osc.DeleteVolumeRequest{
 				VolumeId: volumeID,
 			}
-			if _, err := a.Conn.POST_DeleteVolume(input); err != nil {
+			if _, _, err := a.Conn.VolumeApi.DeleteVolume(context.Background(), &osc.DeleteVolumeOpts{
+				DeleteVolumeRequest: optional.NewInterface(optional.NewInterface(input)),
+			}); err != nil {
 				errors = append(errors, err)
 			}
 		}

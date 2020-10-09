@@ -6,10 +6,8 @@ package bsuvolume
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
@@ -19,7 +17,6 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/outscale/osc-go/oapi"
 )
 
 const BuilderId = "oapi.outscale.bsuvolume"
@@ -89,22 +86,22 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	clientConfig, err := b.config.Config()
-	if err != nil {
-		return nil, err
-	}
+	// clientConfig, err := b.config.Config()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	skipClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
+	// skipClient := &http.Client{
+	// 	Transport: &http.Transport{
+	// 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	// 	},
+	// }
 
-	oapiconn := oapi.NewClient(clientConfig, skipClient)
+	oscConn := b.config.NewOSCClient()
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
-	state.Put("oapi", oapiconn)
+	state.Put("osc", oscConn)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -117,7 +114,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		Debug:                       b.config.PackerDebug,
 		BsuOptimized:                b.config.BsuOptimized,
 		EnableT2Unlimited:           b.config.EnableT2Unlimited,
-		ExpectedRootDevice:          "ebs",
+		ExpectedRootDevice:          "bsu",
 		IamVmProfile:                b.config.IamVmProfile,
 		VmInitiatedShutdownBehavior: b.config.VmInitiatedShutdownBehavior,
 		VmType:                      b.config.VmType,
@@ -170,8 +167,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
-			Host: osccommon.SSHHost(
-				oapiconn,
+			Host: osccommon.OscSSHHost(
+				oscConn.VmApi,
 				b.config.SSHInterface),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
@@ -198,7 +195,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	artifact := &Artifact{
 		Volumes:        state.Get("bsuvolumes").(BsuVolumes),
 		BuilderIdValue: BuilderId,
-		Conn:           oapiconn,
+		Conn:           oscConn,
 		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 	ui.Say(fmt.Sprintf("Created Volumes: %s", artifact))

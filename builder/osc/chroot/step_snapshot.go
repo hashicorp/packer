@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/antihax/optional"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // StepSnapshot creates a snapshot of the created volume.
@@ -17,19 +18,22 @@ import (
 //   snapshot_id string - ID of the created snapshot
 type StepSnapshot struct {
 	snapshotId string
+	RawRegion  string
 }
 
 func (s *StepSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	oapiconn := state.Get("oapi").(*oapi.Client)
+	oscconn := state.Get("osc").(*osc.APIClient)
 	ui := state.Get("ui").(packer.Ui)
 	volumeId := state.Get("volume_id").(string)
 
 	ui.Say("Creating snapshot...")
 	description := fmt.Sprintf("Packer: %s", time.Now().String())
 
-	createSnapResp, err := oapiconn.POST_CreateSnapshot(oapi.CreateSnapshotRequest{
-		VolumeId:    volumeId,
-		Description: description,
+	createSnapResp, _, err := oscconn.SnapshotApi.CreateSnapshot(context.Background(), &osc.CreateSnapshotOpts{
+		CreateSnapshotRequest: optional.NewInterface(osc.CreateSnapshotRequest{
+			VolumeId:    volumeId,
+			Description: description,
+		}),
 	})
 	if err != nil {
 		err := fmt.Errorf("Error creating snapshot: %s", err)
@@ -39,11 +43,11 @@ func (s *StepSnapshot) Run(ctx context.Context, state multistep.StateBag) multis
 	}
 
 	// Set the snapshot ID so we can delete it later
-	s.snapshotId = createSnapResp.OK.Snapshot.SnapshotId
+	s.snapshotId = createSnapResp.Snapshot.SnapshotId
 	ui.Message(fmt.Sprintf("Snapshot ID: %s", s.snapshotId))
 
 	// Wait for the snapshot to be ready
-	err = osccommon.WaitUntilSnapshotDone(oapiconn, s.snapshotId)
+	err = osccommon.WaitUntilOscSnapshotDone(oscconn, s.snapshotId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for snapshot: %s", err)
 		state.Put("error", err)
@@ -54,7 +58,7 @@ func (s *StepSnapshot) Run(ctx context.Context, state multistep.StateBag) multis
 	state.Put("snapshot_id", s.snapshotId)
 
 	snapshots := map[string][]string{
-		oapiconn.GetConfig().Region: {s.snapshotId},
+		s.RawRegion: {s.snapshotId},
 	}
 	state.Put("snapshots", snapshots)
 
@@ -70,10 +74,12 @@ func (s *StepSnapshot) Cleanup(state multistep.StateBag) {
 	_, halted := state.GetOk(multistep.StateHalted)
 
 	if cancelled || halted {
-		oapiconn := state.Get("oapi").(*oapi.Client)
+		oscconn := state.Get("osc").(*osc.APIClient)
 		ui := state.Get("ui").(packer.Ui)
 		ui.Say("Removing snapshot since we cancelled or halted...")
-		_, err := oapiconn.POST_DeleteSnapshot(oapi.DeleteSnapshotRequest{SnapshotId: s.snapshotId})
+		_, _, err := oscconn.SnapshotApi.DeleteSnapshot(context.Background(), &osc.DeleteSnapshotOpts{
+			DeleteSnapshotRequest: optional.NewInterface(osc.DeleteSnapshotRequest{SnapshotId: s.snapshotId}),
+		})
 		if err != nil {
 			ui.Error(fmt.Sprintf("Error: %s", err))
 		}

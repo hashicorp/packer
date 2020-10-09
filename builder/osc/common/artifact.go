@@ -1,15 +1,15 @@
 package common
 
 import (
-	"crypto/tls"
+	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"sort"
 	"strings"
 
+	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // Artifact is an artifact implementation that contains built OMIs.
@@ -19,9 +19,6 @@ type Artifact struct {
 
 	// BuilderId is the unique ID for the builder that created this OMI
 	BuilderIdValue string
-
-	// OAPI connection for performing API stuff.
-	Config *oapi.Config
 
 	// StateData should store data such as GeneratedData
 	// to be shared with post-processors
@@ -74,47 +71,36 @@ func (a *Artifact) State(name string) interface{} {
 func (a *Artifact) Destroy() error {
 	errors := make([]error, 0)
 
+	config := a.State("accessConfig").(*AccessConfig)
+
 	for region, imageId := range a.Omis {
 		log.Printf("Deregistering image ID (%s) from region (%s)", imageId, region)
 
-		newConfig := &oapi.Config{
-			UserAgent: a.Config.UserAgent,
-			AccessKey: a.Config.AccessKey,
-			SecretKey: a.Config.SecretKey,
-			Service:   a.Config.Service,
-			Region:    region, //New region
-			URL:       a.Config.URL,
-		}
-
-		log.Printf("[DEBUG] New Client config %+v", newConfig)
-
-		skipClient := &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-			},
-		}
-
-		regionConn := oapi.NewClient(newConfig, skipClient)
+		regionConn := config.NewOSCClientByRegion(region)
 
 		// Get image metadata
-		imageResp, err := regionConn.POST_ReadImages(oapi.ReadImagesRequest{
-			Filters: oapi.FiltersImage{
-				ImageIds: []string{imageId},
-			},
+		imageResp, _, err := regionConn.ImageApi.ReadImages(context.Background(), &osc.ReadImagesOpts{
+			ReadImagesRequest: optional.NewInterface(osc.ReadImagesRequest{
+				Filters: osc.FiltersImage{
+					ImageIds: []string{imageId},
+				},
+			}),
 		})
 		if err != nil {
 			errors = append(errors, err)
 		}
-		if len(imageResp.OK.Images) == 0 {
+		if len(imageResp.Images) == 0 {
 			err := fmt.Errorf("Error retrieving details for OMI (%s), no images found", imageId)
 			errors = append(errors, err)
 		}
 
 		// Deregister ami
-		input := oapi.DeleteImageRequest{
+		input := osc.DeleteImageRequest{
 			ImageId: imageId,
 		}
-		if _, err := regionConn.POST_DeleteImage(input); err != nil {
+		if _, _, err := regionConn.ImageApi.DeleteImage(context.Background(), &osc.DeleteImageOpts{
+			DeleteImageRequest: optional.NewInterface(input),
+		}); err != nil {
 			errors = append(errors, err)
 		}
 

@@ -10,13 +10,8 @@ import (
 
 	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/outscale/osc-go/oapi"
 	"github.com/outscale/osc-sdk-go/osc"
 )
-
-type oapiDescriber interface {
-	POST_ReadVms(oapi.ReadVmsRequest) (*oapi.POST_ReadVmsResponses, error)
-}
 
 type oscDescriber interface {
 	ReadVms(ctx context.Context, localVarOptionals *osc.ReadVmsOpts) (osc.ReadVmsResponse, *http.Response, error)
@@ -29,7 +24,7 @@ var (
 
 // SSHHost returns a function that can be given to the SSH communicator
 // for determining the SSH address based on the vm DNS name.
-func SSHHost(e oapiDescriber, sshInterface string) func(multistep.StateBag) (string, error) {
+func SSHHost(e oscDescriber, sshInterface string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 		const tries = 2
 		// <= with current structure to check result of describing `tries` times
@@ -72,20 +67,22 @@ func SSHHost(e oapiDescriber, sshInterface string) func(multistep.StateBag) (str
 				return host, nil
 			}
 
-			r, err := e.POST_ReadVms(oapi.ReadVmsRequest{
-				Filters: oapi.FiltersVm{
-					VmIds: []string{i.VmId},
-				},
+			r, _, err := e.ReadVms(context.Background(), &osc.ReadVmsOpts{
+				ReadVmsRequest: optional.NewInterface(osc.ReadVmsRequest{
+					Filters: osc.FiltersVm{
+						VmIds: []string{i.VmId},
+					},
+				}),
 			})
 			if err != nil {
 				return "", err
 			}
 
-			if len(r.OK.Vms) == 0 {
+			if len(r.Vms) == 0 {
 				return "", fmt.Errorf("vm not found: %s", i.VmId)
 			}
 
-			state.Put("vm", r.OK.Vms[0])
+			state.Put("vm", r.Vms[0])
 			time.Sleep(sshHostSleepDuration)
 		}
 

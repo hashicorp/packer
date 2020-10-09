@@ -10,7 +10,6 @@ import (
 	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -31,27 +30,12 @@ type StepNetworkInfo struct {
 	SecurityGroupFilter SecurityGroupFilterOptions
 }
 
-type subnetsSort []oapi.Subnet
-
-func (a subnetsSort) Len() int      { return len(a) }
-func (a subnetsSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a subnetsSort) Less(i, j int) bool {
-	return a[i].AvailableIpsCount < a[j].AvailableIpsCount
-}
-
 type subnetsOscSort []osc.Subnet
 
 func (a subnetsOscSort) Len() int      { return len(a) }
 func (a subnetsOscSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a subnetsOscSort) Less(i, j int) bool {
 	return a[i].AvailableIpsCount < a[j].AvailableIpsCount
-}
-
-// Returns the most recent OMI out of a slice of images.
-func mostFreeSubnet(subnets []oapi.Subnet) oapi.Subnet {
-	sortedSubnets := subnets
-	sort.Sort(subnetsSort(sortedSubnets))
-	return sortedSubnets[len(sortedSubnets)-1]
 }
 
 // Returns the most recent OMI out of a slice of images.

@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
-func testImage() oapi.Image {
-	return oapi.Image{
+func testImage() osc.Image {
+	return osc.Image{
 		ImageId:   "ami-abcd1234",
 		ImageName: "ami_test_name",
-		Tags: []oapi.ResourceTag{
+		Tags: []osc.ResourceTag{
 			{
 				Key:   "key-1",
 				Value: "value-1",
