@@ -3,11 +3,13 @@ package common
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/builder"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -153,7 +155,16 @@ func (s *StepModifyAMIAttributes) Run(ctx context.Context, state multistep.State
 		for name, input := range options {
 			ui.Message(fmt.Sprintf("Modifying: %s", name))
 			input.ImageId = &ami
-			_, err := regionConn.ModifyImageAttribute(input)
+			
+			var modify_start *ec2.ModifyImageAttributeOutput
+			err = retry.Config{
+				Tries:      11,
+				RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+			}.Run(ctx, func(ctx context.Context) error {
+				modify_start, err = regionConn.ModifyImageAttribute(input)
+				return err
+			})
+			
 			if err != nil {
 				err := fmt.Errorf("Error modify AMI attributes: %s", err)
 				state.Put("error", err)
