@@ -155,7 +155,7 @@ func (s *StepModifyAMIAttributes) Run(ctx context.Context, state multistep.State
 		for name, input := range options {
 			ui.Message(fmt.Sprintf("Modifying: %s", name))
 			input.ImageId = &ami
-			
+
 			var modify_start *ec2.ModifyImageAttributeOutput
 			err = retry.Config{
 				Tries:      11,
@@ -164,7 +164,7 @@ func (s *StepModifyAMIAttributes) Run(ctx context.Context, state multistep.State
 				modify_start, err = regionConn.ModifyImageAttribute(input)
 				return err
 			})
-			
+
 			if err != nil {
 				err := fmt.Errorf("Error modify AMI attributes: %s", err)
 				state.Put("error", err)
