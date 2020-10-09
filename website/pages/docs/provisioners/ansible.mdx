@@ -25,6 +25,10 @@ accept jinja2 `{{ function }}` macro syntax in a way that can be preserved to
 the Ansible run. If you need to set variables using Ansible macros, you need to
 do so inside your playbooks or inventory files.
 
+
+Please see the [Debugging](#debugging), [Limitations](#limitations), or [Troubleshooting](#troubleshooting) if you are having trouble
+getting started.
+
 ## Basic Example
 
 This is a fully functional template that will provision an image on
@@ -575,8 +579,7 @@ Example Packer template:
       "groups": [ "webserver" ],
       "playbook_file": "./webserver.yml",
       "extra_arguments": [
-        "--extra-vars",
-        "ansible_host={{user `ansible_host`}} ansible_connection={{user `ansible_connection`}}"
+        "--extra-vars", "ansible_host={{user `ansible_host`}} ansible_connection={{user `ansible_connection`}}"
       ]
     }
   ]
@@ -629,6 +632,147 @@ Example playbook:
       yum:
         name: httpd
 ```
+
+### Amazon Session Manager
+
+When trying to use Ansible with Amazon's Session Manager, you may run into an error where Ansible
+is unable to connect to the remote Amazon instance if the local proxy adapter for Ansible [use_proxy](#use_proxy) is false.
+
+The error may look something like the following:
+
+```
+amazon-ebs: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 8362: Connection timed out", "unreachable": true}
+```
+
+The error is caused by a limitation on using Amazon's SSM default Port Forwarding session which only allows for one
+remote connection on the forwarded port. Since Ansible's SSH communication is not using the local proxy adapter
+it will try to make a new SSH connection to the same forwarded localhost port and fail.
+
+In order to workaround this issue Ansible can be configured via a custom inventory file to use the AWS session-manager-plugin
+directly to create a new session, separate from the one created by Packer, at runtime to connect and remotely provision the instance.
+
+-> **Warning:** Please note that the default region configured for the `aws` cli must match the build region where the instance is being
+provisioned otherwise you may run into a TargetNotConnected error. Users can use `AWS_DEFAULT_REGION` to temporarily override
+their configured region.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+  "provisioners": [
+    {
+      "type": "ansible",
+      "use_proxy": false,
+      "ansible_env_vars": ["PACKER_BUILD_NAME={{ build_name }}"],
+      "playbook_file":   "./playbooks/playbook_remote.yml",
+      "inventory_file_template": "{{ .HostAlias }} ansible_host={{ .ID }} ansible_user={{ .User }} ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand=\"sh -c \\\"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p\\\"\"'\n"
+    }
+  ]
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+  provisioner "ansible" {
+      use_proxy               =  false
+      playbook_file           =    "./playbooks/playbook_remote.yml"
+      ansible_env_vars        =  ["PACKER_BUILD_NAME={{ build_name }}"]
+      inventory_file_template =  "{{ .HostAlias }} ansible_host={{ .ID }} ansible_user={{ .User }} ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand=\"sh -c \\\"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p\\\"\"'\n"
+    }
+```
+</Tab>
+</Tabs>
+
+Full Packer template example:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "variables": {
+    "instance_role": "SSMInstanceProfile"
+  },
+
+  "builders": [
+      {
+        "type": "amazon-ebs",
+        "region": "us-east-1",
+        "ami_name": "packer-ami-ansible",
+        "instance_type": "t2.micro",
+        "source_ami_filter": {
+            "filters": {
+                "virtualization-type": "hvm",
+                "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+                "root-device-type": "ebs"
+            },
+            "owners": [
+                "099720109477"
+            ],
+            "most_recent": true
+        },
+        "communicator": "ssh",
+        "ssh_username": "ubuntu",
+        "ssh_interface": "session_manager",
+        "iam_instance_profile":"{{user `instance_role`}}"
+      }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "use_proxy": false,
+      "ansible_env_vars": ["PACKER_BUILD_NAME={{ build_name }}"],
+      "playbook_file":   "./playbooks/playbook_remote.yml",
+      "inventory_file_template": "{{ .HostAlias }} ansible_host={{ .ID }} ansible_user={{ .User }} ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand=\"sh -c \\\"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p\\\"\"'\n"
+    }
+	]
+}
+
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+
+variables {
+  instance_role = "SSMInstanceProfile"
+}
+
+source "amazon-ebs" "ansible-example" {
+  region        = "us-east-1"
+  ami_name      = "packer-ami-ansible"
+  instance_type = "t2.micro"
+  source_ami_filter {
+      filters = {
+          name                = "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*"
+          virtualization-type = "hvm"
+          root-device-type    = "ebs"
+      }
+      owners      = [ "099720109477" ]
+      most_recent =  true
+  }
+  communicator         = "ssh"
+  ssh_username         = "ubuntu"
+  ssh_interface        = "session_manager"
+  iam_instance_profile = var.instance_role
+}
+
+build {
+  sources = ["source.amazon-ebs.ansible-example"]
+
+  provisioner "ansible" {
+      use_proxy               =  false
+      playbook_file           =    "./playbooks/playbook_remote.yml"
+      ansible_env_vars        =  ["PACKER_BUILD_NAME={{ build_name }}"]
+      inventory_file_template =  "{{ .HostAlias }} ansible_host={{ .ID }} ansible_user={{ .User }} ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand=\"sh -c \\\"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p\\\"\"'\n"
+    }
+}
+```
+
+</Tab>
+</Tabs>
 
 ### Troubleshooting
 
