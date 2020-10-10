@@ -8,8 +8,10 @@ import (
 // to "guest_additions_mode".
 type FixerVirtualBoxGAAttach struct{}
 
-func (FixerVirtualBoxGAAttach) DeprecatedOptions() []string {
-	return []string{"guest_additions_attach"}
+func (FixerVirtualBoxGAAttach) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"mitchellh.virtualbox": []string{"guest_additions_attach"},
+	}
 }
 
 func (FixerVirtualBoxGAAttach) Fix(input map[string]interface{}) (map[string]interface{}, error) {

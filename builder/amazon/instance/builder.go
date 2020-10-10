@@ -107,6 +107,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	b.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&b.config, &config.DecodeOpts{
+		PluginType:         BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{

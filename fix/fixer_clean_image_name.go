@@ -11,8 +11,12 @@ import (
 // calls with "clean_resource_name"
 type FixerCleanImageName struct{}
 
-func (FixerCleanImageName) DeprecatedOptions() []string {
-	return []string{"clean_image_name", "clean_ami_name"}
+func (FixerCleanImageName) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"*amazon*":             []string{"clean_ami_name"},
+		"packer.googlecompute": []string{"clean_image_name"},
+		"Azure*":               []string{"clean_image_name"},
+	}
 }
 
 func (FixerCleanImageName) Fix(input map[string]interface{}) (map[string]interface{}, error) {

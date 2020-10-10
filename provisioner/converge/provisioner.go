@@ -63,6 +63,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(
 		&p.config,
 		&config.DecodeOpts{
+			PluginType:         "converge",
 			Interpolate:        true,
 			InterpolateContext: &p.config.ctx,
 			InterpolateFilter: &interpolate.RenderFilter{

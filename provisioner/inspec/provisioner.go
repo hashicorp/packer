@@ -75,6 +75,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.done = make(chan struct{})
 
 	err := config.Decode(&p.config, &config.DecodeOpts{
+		PluginType:         "inspec",
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{

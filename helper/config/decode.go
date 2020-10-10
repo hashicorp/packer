@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
+	"github.com/ryanuber/go-glob"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/gocty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
@@ -30,6 +31,11 @@ type DecodeOpts struct {
 	InterpolateContext *interpolate.Context
 	InterpolateFilter  *interpolate.RenderFilter
 
+	// PluginType is the BuilderID, etc of the plugin -- it is used to
+	// determine whether to tell the user to "fix" their template if an
+	// unknown option is a deprecated one for this plugin type.
+	PluginType string
+
 	DecodeHooks []mapstructure.DecodeHookFunc
 }
 
@@ -43,6 +49,7 @@ var DefaultDecodeHookFuncs = []mapstructure.DecodeHookFunc{
 // Decode decodes the configuration into the target and optionally
 // automatically interpolates all the configuration as it goes.
 func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
+	// loop over raws once to get cty values from hcl, if that's a thing.
 	for i, raw := range raws {
 		// check for cty values and transform them to json then to a
 		// map[string]interface{} so that mapstructure can do its thing.
@@ -85,6 +92,9 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 			p.Set(reflect.Zero(p.Type()))
 		}
 	}
+
+	// Now perform the normal decode.
+
 	if config == nil {
 		config = &DecodeOpts{Interpolate: true}
 	}
@@ -138,30 +148,44 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	// In practice, raws is two interfaces: one containing all the packer config
+	// vars, and one containing the raw json configuration for a single
+	// plugin.
 	for _, raw := range raws {
 		if err := decoder.Decode(raw); err != nil {
 			return err
 		}
-	}
+		// If we have unused keys, it is an error
+		if len(md.Unused) > 0 {
+			var err error
+			sort.Strings(md.Unused)
+			for _, unused := range md.Unused {
+				if unused == "type" || strings.HasPrefix(unused, "packer_") {
+					continue
+				}
 
-	// Set the metadata if it is set
-	if config.Metadata != nil {
-		*config.Metadata = md
-	}
-
-	// If we have unused keys, it is an error
-	if len(md.Unused) > 0 {
-		var err error
-		sort.Strings(md.Unused)
-		for _, unused := range md.Unused {
-			if unused != "type" && !strings.HasPrefix(unused, "packer_") {
 				// Check for whether the key is handled in a packer fix
 				// call.
 				fixable := false
-				for _, deprecatedOption := range DeprecatedOptions {
-					if unused == deprecatedOption {
-						fixable = true
-						break
+
+				// check whether the deprecation option can be fixed using packer fix.
+				if config.PluginType != "" {
+					for k, deprecatedOptions := range DeprecatedOptions {
+						// the deprecated options keys are globbable, for
+						// example "amazon*" for all amazon builders, or * for
+						// all builders
+						if glob.Glob(k, config.PluginType) {
+							for _, deprecatedOption := range deprecatedOptions {
+								if unused == deprecatedOption {
+									fixable = true
+									break
+								}
+							}
+						}
+						if fixable == true {
+							break
+						}
 					}
 				}
 
@@ -179,10 +203,15 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 
 				err = multierror.Append(err, unusedErr)
 			}
+			if err != nil {
+				return err
+			}
 		}
-		if err != nil {
-			return err
-		}
+	}
+
+	// Set the metadata if it is set
+	if config.Metadata != nil {
+		*config.Metadata = md
 	}
 
 	return nil

@@ -10,8 +10,8 @@ import (
 // calls with "{{timestamp}"
 type FixerCreateTime struct{}
 
-func (FixerCreateTime) DeprecatedOptions() []string {
-	return []string{}
+func (FixerCreateTime) DeprecatedOptions() map[string][]string {
+	return map[string][]string{}
 }
 
 func (FixerCreateTime) Fix(input map[string]interface{}) (map[string]interface{}, error) {

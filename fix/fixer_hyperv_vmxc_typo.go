@@ -8,8 +8,10 @@ import (
 // it with "clone_from_vmcx_path" in Hyper-V VMCX builder templates
 type FixerHypervVmxcTypo struct{}
 
-func (FixerHypervVmxcTypo) DeprecatedOptions() []string {
-	return []string{"clone_from_vmxc_path"}
+func (FixerHypervVmxcTypo) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"MSOpenTech.hyperv": []string{"clone_from_vmxc_path"},
+	}
 }
 
 func (FixerHypervVmxcTypo) Fix(input map[string]interface{}) (map[string]interface{}, error) {

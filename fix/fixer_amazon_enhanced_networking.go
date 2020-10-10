@@ -10,8 +10,10 @@ import (
 // with the clearer "ena_support".  This disambiguates ena_support from sriov_support.
 type FixerAmazonEnhancedNetworking struct{}
 
-func (FixerAmazonEnhancedNetworking) DeprecatedOptions() []string {
-	return []string{"enhanced_networking"}
+func (FixerAmazonEnhancedNetworking) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"*amazon*": []string{"enhanced_networking"},
+	}
 }
 
 func (FixerAmazonEnhancedNetworking) Fix(input map[string]interface{}) (map[string]interface{}, error) {

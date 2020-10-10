@@ -93,6 +93,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-testing-interface v1.0.3 // indirect
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
+	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0
 	github.com/mitchellh/mapstructure v1.2.3
 	github.com/mitchellh/panicwrap v1.0.0
@@ -111,6 +112,7 @@ require (
 	github.com/pkg/sftp v0.0.0-20160118190721-e84cc8c755ca
 	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
+	github.com/ryanuber/go-glob v1.0.0
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
 	github.com/shirou/gopsutil v2.18.12+incompatible

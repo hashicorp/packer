@@ -7,8 +7,8 @@ import (
 // FixerVMwareRename changes "vmware" builders to "vmware-iso"
 type FixerVMwareRename struct{}
 
-func (FixerVMwareRename) DeprecatedOptions() []string {
-	return []string{}
+func (FixerVMwareRename) DeprecatedOptions() map[string][]string {
+	return map[string][]string{}
 }
 
 func (FixerVMwareRename) Fix(input map[string]interface{}) (map[string]interface{}, error) {

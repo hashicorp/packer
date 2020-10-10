@@ -9,8 +9,10 @@ import (
 // "guest_os_type", possibly overwriting any existing "guest_os_type"
 type FixerParallelsDeprecations struct{}
 
-func (FixerParallelsDeprecations) DeprecatedOptions() []string {
-	return []string{"parallels_tools_host_path", "guest_os_distribution"}
+func (FixerParallelsDeprecations) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"packer.parallels": []string{"parallels_tools_host_path", "guest_os_distribution"},
+	}
 }
 
 func (FixerParallelsDeprecations) Fix(input map[string]interface{}) (map[string]interface{}, error) {

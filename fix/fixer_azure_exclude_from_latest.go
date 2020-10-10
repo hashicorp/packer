@@ -10,8 +10,10 @@ import (
 // template in an Azure builder
 type FixerAzureExcludeFromLatest struct{}
 
-func (FixerAzureExcludeFromLatest) DeprecatedOptions() []string {
-	return []string{"exlude_from_latest"}
+func (FixerAzureExcludeFromLatest) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"Azure*": []string{"exlude_from_latest"},
+	}
 }
 
 func (FixerAzureExcludeFromLatest) Fix(input map[string]interface{}) (map[string]interface{}, error) {

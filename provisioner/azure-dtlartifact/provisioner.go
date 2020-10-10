@@ -74,6 +74,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// 	WinRMPassword: `{{.WinRMPassword}}`,
 	// }
 	err := config.Decode(&p.config, &config.DecodeOpts{
+		PluginType:         "azure-dtlartifact",
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{

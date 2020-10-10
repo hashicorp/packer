@@ -27,6 +27,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	errs := &multierror.Error{}
 
 	err := config.Decode(&b.config, &config.DecodeOpts{
+		PluginType:         BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
 	}, raws...)

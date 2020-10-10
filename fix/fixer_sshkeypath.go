@@ -8,8 +8,10 @@ import (
 // to "ssh_private_key_file".
 type FixerSSHKeyPath struct{}
 
-func (FixerSSHKeyPath) DeprecatedOptions() []string {
-	return []string{"ssh_key_path"}
+func (FixerSSHKeyPath) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"*": []string{"ssh_key_path"},
+	}
 }
 
 func (FixerSSHKeyPath) Fix(input map[string]interface{}) (map[string]interface{}, error) {
