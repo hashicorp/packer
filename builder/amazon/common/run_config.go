@@ -635,6 +635,12 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
+	if c.Tenancy != "" && c.Tenancy != "default" {
+		if c.SpotPrice != "" {
+			errs = append(errs, fmt.Errorf("Error: Non-default tenancy cannot be used in conjunction with Spot Instances"))
+		}
+	}
+
 	return errs
 }
 
