@@ -33,6 +33,7 @@ type StepRunSourceInstance struct {
 	IsRestricted                      bool
 	SourceAMI                         string
 	Tags                              map[string]string
+	Tenancy                           string
 	UserData                          string
 	UserDataFile                      string
 	VolumeTags                        map[string]string
@@ -193,6 +194,10 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 
 	if s.ExpectedRootDevice == "ebs" {
 		runOpts.InstanceInitiatedShutdownBehavior = &s.InstanceInitiatedShutdownBehavior
+	}
+
+	if s.Tenancy != "" {
+		runOpts.Placement.Tenancy = aws.String(s.Tenancy)
 	}
 
 	var runResp *ec2.Reservation

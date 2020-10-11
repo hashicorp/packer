@@ -81,6 +81,7 @@ type FlatConfig struct {
 	SpotTag                                   []hcl2template.FlatKeyValue            `mapstructure:"spot_tag" required:"false" cty:"spot_tag" hcl:"spot_tag"`
 	SubnetFilter                              *common.FlatSubnetFilterOptions        `mapstructure:"subnet_filter" required:"false" cty:"subnet_filter" hcl:"subnet_filter"`
 	SubnetId                                  *string                                `mapstructure:"subnet_id" required:"false" cty:"subnet_id" hcl:"subnet_id"`
+	Tenancy                                   *string                                `mapstructure:"tenancy" required:"false" cty:"tenancy" hcl:"tenancy"`
 	TemporaryKeyPairName                      *string                                `mapstructure:"temporary_key_pair_name" required:"false" cty:"temporary_key_pair_name" hcl:"temporary_key_pair_name"`
 	TemporarySGSourceCidrs                    []string                               `mapstructure:"temporary_security_group_source_cidrs" required:"false" cty:"temporary_security_group_source_cidrs" hcl:"temporary_security_group_source_cidrs"`
 	UserData                                  *string                                `mapstructure:"user_data" required:"false" cty:"user_data" hcl:"user_data"`
@@ -232,6 +233,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"spot_tag":                              &hcldec.BlockListSpec{TypeName: "spot_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
 		"subnet_filter":                         &hcldec.BlockSpec{TypeName: "subnet_filter", Nested: hcldec.ObjectSpec((*common.FlatSubnetFilterOptions)(nil).HCL2Spec())},
 		"subnet_id":                             &hcldec.AttrSpec{Name: "subnet_id", Type: cty.String, Required: false},
+		"tenancy":                               &hcldec.AttrSpec{Name: "tenancy", Type: cty.String, Required: false},
 		"temporary_key_pair_name":               &hcldec.AttrSpec{Name: "temporary_key_pair_name", Type: cty.String, Required: false},
 		"temporary_security_group_source_cidrs": &hcldec.AttrSpec{Name: "temporary_security_group_source_cidrs", Type: cty.List(cty.String), Required: false},
 		"user_data":                             &hcldec.AttrSpec{Name: "user_data", Type: cty.String, Required: false},

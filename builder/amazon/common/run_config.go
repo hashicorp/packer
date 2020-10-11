@@ -376,6 +376,10 @@ type RunConfig struct {
 	// subnet-12345def, where Packer will launch the EC2 instance. This field is
 	// required if you are using an non-default VPC.
 	SubnetId string `mapstructure:"subnet_id" required:"false"`
+	// [Tenancy](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-instance.html) used
+	// when Packer launches the EC2 instance, allowing it to be launched on dedicated hardware.
+	// If unset, the default shared tenancy will be used.
+	Tenancy string `mapstructure:"tenancy" required:"false"`
 	// The name of the temporary key pair to
 	// generate. By default, Packer generates a name that looks like
 	// `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
