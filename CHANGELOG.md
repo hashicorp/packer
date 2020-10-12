@@ -4,6 +4,8 @@
 
 * builder/azure-chroot: Fix typo in option `exlude_from_latest` to
     `exclude_from_latest`. Old name will still be respected. [GH-10034]
+* builder/openstack: Fix source image validation regression when using filters.
+    [GH-10065]
 * core/hcl2: Packer HCL's "Coalesce" function now behaves same way as
     Terraform's. [GH-10016]
 * core/HCL: Hide sensitive variables from output. [GH-10031]
