@@ -233,22 +233,22 @@ func TestRunConfigPrepare_TemporaryKeyPairName(t *testing.T) {
 	}
 }
 
-func TestRunConfigPrepare_TenancySpot(t *testing.T) {
+func TestRunConfigPrepare_TenancyBad(t *testing.T) {
 	c := testConfig()
-	c.Tenancy = "dedicated"
-	c.SpotPrice = "1"
+	c.Tenancy = "not_real"
 
 	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatal("Should error if non-default tenancy and spot price are both set")
+		t.Fatal("Should error if tenancy is set to an invalid type")
 	}
 }
 
-func TestRunConfigPrepare_TenancySpotDefault(t *testing.T) {
-	c := testConfig()
-	c.Tenancy = "default"
-	c.SpotPrice = "1"
-
-	if err := c.Prepare(nil); len(err) != 0 {
-		t.Fatal("Should not error if tenancy is set to default with spot price")
+func TestRunConfigPrepare_TenancyGood(t *testing.T) {
+	validTenancy := []string{"", "default", "dedicated", "host"}
+	for _, vt := range validTenancy {
+		c := testConfig()
+		c.Tenancy = vt
+		if err := c.Prepare(nil); len(err) != 0 {
+			t.Fatalf("Should not error if tenancy is set to %s", vt)
+		}
 	}
 }

@@ -378,7 +378,9 @@ type RunConfig struct {
 	SubnetId string `mapstructure:"subnet_id" required:"false"`
 	// [Tenancy](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-instance.html) used
 	// when Packer launches the EC2 instance, allowing it to be launched on dedicated hardware.
-	// If unset, the default shared tenancy will be used.
+	//
+	// The default is "default", meaning shared tenancy. Allowed values are "default",
+	// "dedicated" and "host".
 	Tenancy string `mapstructure:"tenancy" required:"false"`
 	// The name of the temporary key pair to
 	// generate. By default, Packer generates a name that looks like
@@ -635,10 +637,11 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
-	if c.Tenancy != "" && c.Tenancy != "default" {
-		if c.SpotPrice != "" {
-			errs = append(errs, fmt.Errorf("Error: Non-default tenancy cannot be used in conjunction with Spot Instances"))
-		}
+	if c.Tenancy != "" &&
+		c.Tenancy != "default" &&
+		c.Tenancy != "dedicated" &&
+		c.Tenancy != "host" {
+		errs = append(errs, fmt.Errorf("Error: Unknown tenancy type %s", c.Tenancy))
 	}
 
 	return errs
