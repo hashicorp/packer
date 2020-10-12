@@ -2,7 +2,7 @@ import './style.css'
 import '@hashicorp/nextjs-scripts/lib/nprogress/style.css'
 
 import ProductSubnav from 'components/subnav'
-import MegaNav from '@hashicorp/react-mega-nav'
+import HashiStackMenu from '@hashicorp/react-hashi-stack-menu'
 import Footer from 'components/footer'
 import Error from './_error'
 import Head from 'next/head'
@@ -44,7 +44,7 @@ export default function App({ Component, pageProps }) {
           { href: '/fonts/dejavu/mono.woff2', as: 'font' },
         ]}
       />
-      <MegaNav product="Packer" />
+      <HashiStackMenu />
       <ProductSubnav />
       <div className="content">
         <Component {...pageProps} />

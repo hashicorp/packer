@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/post-processor/artifice"
 	"github.com/hashicorp/packer/template/interpolate"
-	"golang.org/x/oauth2/jwt"
 )
 
 type Config struct {
@@ -26,6 +25,8 @@ type Config struct {
 	//The JSON file containing your account credentials.
 	//If specified, the account file will take precedence over any `googlecompute` builder authentication method.
 	AccountFile string `mapstructure:"account_file"`
+	// This allows service account impersonation as per the [docs](https://cloud.google.com/iam/docs/impersonating-service-accounts).
+	ImpersonateServiceAccount string `mapstructure:"impersonate_service_account" required:"false"`
 	//The size of the export instances disk.
 	//The disk is unused for the export but a larger size will increase `pd-ssd` read speed.
 	//This defaults to `200`, which is 200GB.
@@ -57,7 +58,7 @@ type Config struct {
 	VaultGCPOauthEngine string `mapstructure:"vault_gcp_oauth_engine"`
 	ServiceAccountEmail string `mapstructure:"service_account_email"`
 
-	account *jwt.Config
+	account *googlecompute.ServiceAccount
 	ctx     interpolate.Context
 }
 
@@ -184,9 +185,15 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	if p.config.ServiceAccountEmail != "" {
 		exporterConfig.ServiceAccountEmail = p.config.ServiceAccountEmail
 	}
+	cfg := googlecompute.GCEDriverConfig{
+		Ui:                            ui,
+		ProjectId:                     builderProjectId,
+		Account:                       p.config.account,
+		ImpersonateServiceAccountName: p.config.ImpersonateServiceAccount,
+		VaultOauthEngineName:          p.config.VaultGCPOauthEngine,
+	}
 
-	driver, err := googlecompute.NewDriverGCE(ui, builderProjectId,
-		p.config.account, p.config.VaultGCPOauthEngine)
+	driver, err := googlecompute.NewDriverGCE(cfg)
 	if err != nil {
 		return nil, false, false, err
 	}

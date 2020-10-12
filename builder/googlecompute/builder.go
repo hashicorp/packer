@@ -36,8 +36,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 // Run executes a googlecompute Packer build and returns a packer.Artifact
 // representing a GCE machine image.
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	driver, err := NewDriverGCE(
-		ui, b.config.ProjectId, b.config.account, b.config.VaultGCPOauthEngine)
+	cfg := GCEDriverConfig{
+		Ui:                            ui,
+		ProjectId:                     b.config.ProjectId,
+		Account:                       b.config.account,
+		ImpersonateServiceAccountName: b.config.ImpersonateServiceAccount,
+		VaultOauthEngineName:          b.config.VaultGCPOauthEngine,
+	}
+
+	driver, err := NewDriverGCE(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -70,10 +77,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Debug: b.config.PackerDebug,
 		},
 		&StepStartTunnel{
-			IAPConf:     &b.config.IAPConfig,
-			CommConf:    &b.config.Comm,
-			AccountFile: b.config.AccountFile,
-			ProjectId:   b.config.ProjectId,
+			IAPConf:            &b.config.IAPConfig,
+			CommConf:           &b.config.Comm,
+			AccountFile:        b.config.AccountFile,
+			ImpersonateAccount: b.config.ImpersonateServiceAccount,
+			ProjectId:          b.config.ProjectId,
 		},
 		&communicator.StepConnect{
 			Config:      &b.config.Comm,

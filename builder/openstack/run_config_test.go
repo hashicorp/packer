@@ -141,6 +141,7 @@ func TestRunConfigPrepare_ExternalSourceImageURL(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
+	c = testRunConfig()
 	// test setting both ExternalSourceImageURL and SourceImageName causes an error
 	c.SourceImage = ""
 	c.SourceImageName = "abcd"
@@ -149,6 +150,7 @@ func TestRunConfigPrepare_ExternalSourceImageURL(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
+	c = testRunConfig()
 	// test neither setting SourceImage, SourceImageName or ExternalSourceImageURL causes an error
 	c.SourceImage = ""
 	c.SourceImageName = ""
@@ -157,6 +159,7 @@ func TestRunConfigPrepare_ExternalSourceImageURL(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
+	c = testRunConfig()
 	// test setting only ExternalSourceImageURL passes
 	c.SourceImage = ""
 	c.SourceImageName = ""
@@ -174,6 +177,27 @@ func TestRunConfigPrepare_ExternalSourceImageURL(t *testing.T) {
 	if matches, _ := regexp.MatchString(p, c.SourceImageName); !matches {
 		t.Fatalf("invalid format for SourceImageName: %s", c.SourceImageName)
 	}
+
+	c = testRunConfig()
+	// test setting a filter passes
+	c.SourceImage = ""
+	c.SourceImageName = ""
+	c.ExternalSourceImageURL = ""
+	c.SourceImageFilters = ImageFilter{
+		Filters: ImageFilterOptions{
+			Name:       "Ubuntu 16.04",
+			Visibility: "public",
+			Owner:      "1234567890",
+			Tags:       []string{"prod", "ready"},
+			Properties: map[string]string{"os_distro": "ubuntu", "os_version": "16.04"},
+		},
+		MostRecent: true,
+	}
+
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("Should not error if everything but filter is empty: %s", err)
+	}
+
 }
 
 // This test case confirms that only allowed fields will be set to values

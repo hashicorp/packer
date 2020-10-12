@@ -2,6 +2,8 @@
 
 ### BUG FIXES:
 
+* builder/azure-chroot: Fix typo in option `exlude_from_latest` to
+    `exclude_from_latest`. Old name will still be respected. [GH-10034]
 * core/hcl2: Packer HCL's "Coalesce" function now behaves same way as
     Terraform's. [GH-10016]
 * core/HCL: Hide sensitive variables from output. [GH-10031]
@@ -14,9 +16,12 @@
 
 ### IMPROVEMENTS:
 
+* builder/google: Add service account impersonation. [GH-9968] [GH-10054]
 * builder/oracle-oci:  New option to specify image compartment separate from
     build compartment. [GH-10040]
 * builder/oracle-oci: New option to specify boot volume size. [GH-10017]
+* builder/scaleway: Allow the user to use an image label (eg ubuntu_focal)
+    instead of a hardcoded UUID on the Scaleway builder. [GH-10061]
 
 ## 1.6.4 (September 30, 2020)
 

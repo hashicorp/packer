@@ -40,4 +40,5 @@ var DeprecatedOptions = []string{
 	"iso_checksum_type",
 	"ssh_host_port_max",
 	"ssh_host_port_min",
+	"exlude_from_latest",
 }

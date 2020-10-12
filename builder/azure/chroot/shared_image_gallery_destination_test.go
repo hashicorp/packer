@@ -21,12 +21,13 @@ func TestSharedImageGalleryDestination_ResourceID(t *testing.T) {
 
 func TestSharedImageGalleryDestination_Validate(t *testing.T) {
 	type fields struct {
-		ResourceGroup     string
-		GalleryName       string
-		ImageName         string
-		ImageVersion      string
-		TargetRegions     []TargetRegion
-		ExcludeFromLatest bool
+		ResourceGroup         string
+		GalleryName           string
+		ImageName             string
+		ImageVersion          string
+		TargetRegions         []TargetRegion
+		ExcludeFromLatest     bool
+		ExcludeFromLatestTypo bool
 	}
 	tests := []struct {
 		name      string
@@ -67,6 +68,29 @@ func TestSharedImageGalleryDestination_Validate(t *testing.T) {
 			wantWarns: []string{"sigdest.target_regions is empty; image will only be available in the region of the gallery"},
 		},
 		{
+			name: "warn if using exlude_from_latest",
+			fields: fields{
+				ResourceGroup: "ResourceGroup",
+				GalleryName:   "GalleryName",
+				ImageName:     "ImageName",
+				ImageVersion:  "0.1.2",
+				TargetRegions: []TargetRegion{
+					TargetRegion{
+						Name:               "region1",
+						ReplicaCount:       5,
+						StorageAccountType: "Standard_ZRS",
+					},
+					TargetRegion{
+						Name:               "region2",
+						ReplicaCount:       3,
+						StorageAccountType: "Standard_LRS",
+					},
+				},
+				ExcludeFromLatestTypo: true,
+			},
+			wantWarns: []string{"sigdest.exlude_from_latest is being deprecated, please use exclude_from_latest"},
+		},
+		{
 			name: "version format",
 			wantErrs: []string{
 				"sigdest.image_version should match '^[0-9]+\\.[0-9]+\\.[0-9]+$'",
@@ -105,12 +129,13 @@ func TestSharedImageGalleryDestination_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sigd := &SharedImageGalleryDestination{
-				ResourceGroup:     tt.fields.ResourceGroup,
-				GalleryName:       tt.fields.GalleryName,
-				ImageName:         tt.fields.ImageName,
-				ImageVersion:      tt.fields.ImageVersion,
-				TargetRegions:     tt.fields.TargetRegions,
-				ExcludeFromLatest: tt.fields.ExcludeFromLatest,
+				ResourceGroup:         tt.fields.ResourceGroup,
+				GalleryName:           tt.fields.GalleryName,
+				ImageName:             tt.fields.ImageName,
+				ImageVersion:          tt.fields.ImageVersion,
+				TargetRegions:         tt.fields.TargetRegions,
+				ExcludeFromLatest:     tt.fields.ExcludeFromLatest,
+				ExcludeFromLatestTypo: tt.fields.ExcludeFromLatestTypo,
 			}
 			gotErrs, gotWarns := sigd.Validate("sigdest")
 

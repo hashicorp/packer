@@ -44,12 +44,11 @@ type Config struct {
 	// that will be used to launch a new server and provision it. See
 	// the images list
 	// get the complete list of the accepted image UUID.
+	// The marketplace image label (eg `ubuntu_focal`) also works.
 	Image string `mapstructure:"image" required:"true"`
 	// The name of the server commercial type:
-	// ARM64-128GB, ARM64-16GB, ARM64-2GB, ARM64-32GB, ARM64-4GB,
-	// ARM64-64GB, ARM64-8GB, C1, C2L, C2M, C2S, START1-L,
-	// START1-M, START1-S, START1-XS, X64-120GB, X64-15GB, X64-30GB,
-	// X64-60GB
+	// C1, C2L, C2M, C2S, DEV1-S, DEV1-M, DEV1-L, DEV1-XL,
+	// GP1-XS, GP1-S, GP1-M, GP1-L, GP1-XL, RENDER-S
 	CommercialType string `mapstructure:"commercial_type" required:"true"`
 	// The name of the resulting snapshot that will
 	// appear in your account. Default packer-TIMESTAMP
