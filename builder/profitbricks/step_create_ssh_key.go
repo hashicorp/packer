@@ -54,6 +54,7 @@ func (s *StepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 		}
 		c.Comm.SSHPrivateKey = pem.EncodeToMemory(&priv_blk)
 		c.Comm.SSHPublicKey = ssh.MarshalAuthorizedKey(pub)
+		state.Put("publicKey", string(c.Comm.SSHPublicKey))
 	}
 	return multistep.ActionContinue
 }
