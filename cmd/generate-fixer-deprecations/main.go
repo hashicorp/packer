@@ -71,6 +71,9 @@ func main() {
 	// execute template into buffer
 	deprecated := &executeOpts{DeprecatedOpts: allDeprecatedOpts}
 	err = deprecatedOptsTemplate.Execute(&buf, deprecated)
+	if err != nil {
+		panic(err)
+	}
 	// we've written unformatted go code to the file. now we have to format it.
 	out, err := format.Source(buf.Bytes())
 	if err != nil {
