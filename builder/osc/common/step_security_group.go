@@ -130,7 +130,7 @@ func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) mul
 
 	ui.Say(fmt.Sprintf("Authorizing access to port %d from %s in the temporary security group...", port, s.TemporarySGSourceCidr))
 
-	conn.SecurityGroupRuleApi.CreateSecurityGroupRule(context.Background(), &osc.CreateSecurityGroupRuleOpts{
+	_, _, err = conn.SecurityGroupRuleApi.CreateSecurityGroupRule(context.Background(), &osc.CreateSecurityGroupRuleOpts{
 		CreateSecurityGroupRuleRequest: optional.NewInterface(createSGRReq),
 	})
 

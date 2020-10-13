@@ -78,7 +78,6 @@ func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) {
 		return false, nil
 	})
 	errCh <- err
-	return
 }
 
 func waitUntilOscVmStateFunc(conn *osc.APIClient, id string) stateRefreshFunc {
