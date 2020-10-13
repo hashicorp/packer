@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -33,14 +34,17 @@ type ShutdownConfig struct {
 	DisableShutdown bool `mapstructure:"disable_shutdown"`
 }
 
-func (c *ShutdownConfig) Prepare() []error {
-	var errs []error
+func (c *ShutdownConfig) Prepare(comm communicator.Config) (warnings []string, errs []error) {
 
 	if c.Timeout == 0 {
 		c.Timeout = 5 * time.Minute
 	}
 
-	return errs
+	if comm.Type == "none" && c.Command != "" {
+		warnings = append(warnings, "The parameter `shutdown_command` is ignored as it requires a `communicator`.")
+	}
+
+	return
 }
 
 type StepShutdown struct {
@@ -58,11 +62,6 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 	}
 
 	if state.Get("communicator") == nil {
-
-		ui.Say("The `communicator` is 'none', automatic shutdown disabled.")
-		if s.Config.Command != "" {
-			ui.Message("The parameter `shutdown_command` is ignored as it requires a `communicator`.")
-		}
 
 		msg := fmt.Sprintf("Please shutdown virtual machine within %s.", s.Config.Timeout)
 		ui.Message(msg)
