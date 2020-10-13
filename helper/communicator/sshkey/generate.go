@@ -47,9 +47,14 @@ func NewPair(public, private interface{}) (*Pair, error) {
 	}
 
 	privBlk := &pem.Block{
-		Type:    "",
+		Type:    "OPENSSH PRIVATE KEY",
 		Headers: nil,
 		Bytes:   kb,
+	}
+
+	switch private.(type) {
+	case *rsa.PrivateKey:
+		privBlk.Type = "RSA PRIVATE KEY"
 	}
 
 	publicKey, err := ssh.NewPublicKey(public)
