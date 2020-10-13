@@ -208,19 +208,27 @@ type Config struct {
 	// the builder. By default this is output-BUILDNAME where "BUILDNAME" is the
 	// name of the build.
 	OutputDir string `mapstructure:"output_directory" required:"false"`
-	// Allows complete control over the qemu command line (though not, at this
-	// time, qemu-img). Each array of strings makes up a command line switch
+	// Allows complete control over the qemu command line (though not qemu-img).
+	// Each array of strings makes up a command line switch
 	// that overrides matching default switch/value pairs. Any value specified
 	// as an empty string is ignored. All values after the switch are
 	// concatenated with no separator.
 	//
 	// ~> **Warning:** The qemu command line allows extreme flexibility, so
-	// beware of conflicting arguments causing failures of your run. For
-	// instance, using --no-acpi could break the ability to send power signal
-	// type commands (e.g., shutdown -P now) to the virtual machine, thus
-	// preventing proper shutdown. To see the defaults, look in the packer.log
-	// file and search for the qemu-system-x86 command. The arguments are all
-	// printed for review.
+	// beware of conflicting arguments causing failures of your run.
+	// For instance adding a "--drive" or "--device" override will mean that
+	// none of the default configuration Packer sets will be used. To see the
+	// defaults that Packer sets, look in your packer.log
+	// file (set PACKER_LOG=1 to get verbose logging) and search for the
+	// qemu-system-x86 command. The arguments are all printed for review, and
+	// you can use those arguments along with the template engines allowed
+	// by qemu-args to set up a working configuration that includes both the
+	// Packer defaults and your extra arguments.
+	//
+	// Another pitfall could be setting arguments like --no-acpi, which could
+	// break the ability to send power signal type commands
+	// (e.g., shutdown -P now) to the virtual machine, thus preventing proper
+	// shutdown.
 	//
 	// The following shows a sample usage:
 	//
