@@ -67,7 +67,7 @@ func WaitUntilOscSnapshotDone(conn *osc.APIClient, snapshotID string) error {
 	return <-errCh
 }
 
-func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) error {
+func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) {
 	err := common.Retry(2, 2, 0, func(_ uint) (bool, error) {
 		state, err := refresh()
 		if err != nil {
@@ -78,7 +78,7 @@ func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) e
 		return false, nil
 	})
 	errCh <- err
-	return err
+	return
 }
 
 func waitUntilOscVmStateFunc(conn *osc.APIClient, id string) stateRefreshFunc {

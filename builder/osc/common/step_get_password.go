@@ -127,7 +127,7 @@ func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-cha
 
 		if resp.AdminPassword != "" {
 			decryptedPassword, err := decryptPasswordDataWithPrivateKey(
-				resp.AdminPassword, []byte(privateKey))
+				resp.AdminPassword, privateKey)
 			if err != nil {
 				err := fmt.Errorf("Error decrypting auto-generated vm password: %s", err)
 				return "", err
