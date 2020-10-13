@@ -46,10 +46,11 @@ func (s *stepDropletInfo) Run(ctx context.Context, state multistep.StateBag) mul
 		return multistep.ActionHalt
 	}
 
-	// Find a public IPv4 network
+	// Find the ip address which will be used by communicator
 	foundNetwork := false
 	for _, network := range droplet.Networks.V4 {
-		if network.Type == "public" {
+		if (c.ConnectWithPrivateIP && network.Type == "private") ||
+			(!(c.ConnectWithPrivateIP) && network.Type == "public") {
 			state.Put("droplet_ip", network.IPAddress)
 			foundNetwork = true
 			break

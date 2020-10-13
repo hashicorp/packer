@@ -43,3 +43,11 @@
   data when launching the Droplet.
 
 - `tags` ([]string) - Tags to apply to the droplet when it is created
+
+- `vpc_uuid` (string) - UUID of the VPC which the droplet will be created in. Before using this,
+  private_networking should be enabled.
+
+- `connect_with_private_ip` (bool) - Wheter the communicators should use private IP or not (public IP in that case).
+  If the droplet is or going to be accessible only from the local network because
+  it is at behind a firewall, then communicators should use the private IP
+  instead of the public IP. Before using this, private_networking should be enabled.
