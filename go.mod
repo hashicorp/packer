@@ -109,7 +109,7 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
 	github.com/oracle/oci-go-sdk v18.0.0+incompatible
-	github.com/outscale/osc-go v0.0.1
+	github.com/outscale/osc-go v0.0.1 // indirect
 	github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699
 	github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
 	github.com/pierrec/lz4 v2.0.5+incompatible
