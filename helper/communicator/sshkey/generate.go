@@ -1,4 +1,4 @@
-package communicator
+package sshkey
 
 import (
 	"crypto/dsa"
@@ -86,7 +86,7 @@ func PairFromDSA(key *dsa.PrivateKey) (*Pair, error) {
 		Headers: nil,
 		Bytes:   kb,
 	}
-	publicKey, err := ssh.NewPublicKey(key.PublicKey)
+	publicKey, err := ssh.NewPublicKey(&key.PublicKey)
 	if err != nil {
 		return nil, err
 	}
@@ -114,6 +114,9 @@ func GeneratePair(t Algorithm, rand io.Reader, bits int) (*Pair, error) {
 	}
 	switch t {
 	case DSA:
+		if bits == 0 {
+			bits = 3072
+		}
 		var sizes dsa.ParameterSizes
 		switch bits {
 		case 1024:
@@ -141,6 +144,9 @@ func GeneratePair(t Algorithm, rand io.Reader, bits int) (*Pair, error) {
 		}
 		return PairFromDSA(dsakey)
 	case ECDSA:
+		if bits == 0 {
+			bits = 521
+		}
 		var ecdsakey *ecdsa.PrivateKey
 		var err error
 		switch bits {
@@ -156,7 +162,7 @@ func GeneratePair(t Algorithm, rand io.Reader, bits int) (*Pair, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewPair(ecdsakey.PublicKey, ecdsakey)
+		return NewPair(&ecdsakey.PublicKey, ecdsakey)
 	case ED25519:
 		publicKey, privateKey, err := ed25519.GenerateKey(rand)
 		if err != nil {
@@ -174,7 +180,7 @@ func GeneratePair(t Algorithm, rand io.Reader, bits int) (*Pair, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewPair(rsakey.PublicKey, rsakey)
+		return NewPair(&rsakey.PublicKey, rsakey)
 	default:
 		return nil, ErrUnknownAlgorithm
 	}
