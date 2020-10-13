@@ -65,7 +65,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
-	warnings := make([]string, 0)
+	// warnings := make([]string, 0)
 	errs := new(packer.MultiError)
 
 	errs = packer.MultiErrorAppend(errs, c.ConnectConfig.Prepare()...)
@@ -80,8 +80,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.WaitIpConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
 
-	shutdownWarnings, shutdownErrs := c.ShutdownConfig.Prepare(c.Comm)
-	warnings = append(warnings, shutdownWarnings...)
+	_, shutdownErrs := c.ShutdownConfig.Prepare(c.Comm)
+	// shutdownWarnings, shutdownErrs := c.ShutdownConfig.Prepare(c.Comm)
+	// warnings = append(warnings, shutdownWarnings...)
 	errs = packer.MultiErrorAppend(errs, shutdownErrs...)
 
 	if c.Export != nil {
