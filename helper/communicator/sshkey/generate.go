@@ -47,17 +47,34 @@ func NewPair(public, private interface{}) (*Pair, error) {
 	}
 
 	privBlk := &pem.Block{
-		Type:    "OPENSSH PRIVATE KEY",
+		Type:    "PRIVATE KEY",
 		Headers: nil,
 		Bytes:   kb,
 	}
 
-	switch private.(type) {
-	case *rsa.PrivateKey:
-		privBlk.Type = "RSA PRIVATE KEY"
+	publicKey, err := ssh.NewPublicKey(public)
+	if err != nil {
+		return nil, err
+	}
+	return &Pair{
+		Private: pem.EncodeToMemory(privBlk),
+		Public:  ssh.MarshalAuthorizedKey(publicKey),
+	}, nil
+}
+
+func PairFromEC(key *ecdsa.PrivateKey) (*Pair, error) {
+	kb, err := x509.MarshalECPrivateKey(key)
+	if err != nil {
+		return nil, err
 	}
 
-	publicKey, err := ssh.NewPublicKey(public)
+	privBlk := &pem.Block{
+		Type:    "EC PRIVATE KEY",
+		Headers: nil,
+		Bytes:   kb,
+	}
+
+	publicKey, err := ssh.NewPublicKey(&key.PublicKey)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +137,7 @@ func GeneratePair(t Algorithm, rand io.Reader, bits int) (*Pair, error) {
 	switch t {
 	case DSA:
 		if bits == 0 {
-			bits = 3072
+			bits = 1024
 		}
 		var sizes dsa.ParameterSizes
 		switch bits {
@@ -167,7 +184,7 @@ func GeneratePair(t Algorithm, rand io.Reader, bits int) (*Pair, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewPair(&ecdsakey.PublicKey, ecdsakey)
+		return PairFromEC(ecdsakey)
 	case ED25519:
 		publicKey, privateKey, err := ed25519.GenerateKey(rand)
 		if err != nil {
