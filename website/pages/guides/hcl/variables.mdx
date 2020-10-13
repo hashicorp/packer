@@ -18,54 +18,124 @@ Local variables can be a compound of input variables and local variables.
 
 ## Defining Variables and locals
 
-Let's create a file `variables.pkr.hcl` with the following contents.
+In the legacy JSON packer templates, any variables we hadn't already defined in
+the "variables" stanza of our json template could simply be passed in via the
+command line or a var-file; if a variable was never defined it would generally
+be interpolated to an empty string.
+
+*In the HCL2 packer templates, we must always pre-define our variables in the
+HCL equivalent of the "variables" stanza.*
+
+Another difference between JSON and HCL packer templates is that in JSON packer
+templates, the "variables" stanza, if used, was always in the same .json file
+as the builds and builders. In HCL, it can exist in its own file if you want it
+to.
+
+To demonstrate, let's create a file `variables.pkr.hcl` with the following
+contents.
 
 -> **Note**: that the file can be named anything, since Packer loads all
 files ending in `.pkr.hcl` in a directory. If you split your configuration
-across multiple files, use `packer build <source directory>` to initiate
-a build.
+across multiple files, use
+`packer build <command line flags> <source directory>` to initiate a build.
 
 ```hcl
-# variables.pkr.hcl
+//  variables.pkr.hcl
 
-variable "access_key" {}
-variable "secret_key" {}
-variable "region" {
-  default = "us-east-1"
+// For those variables that you don't provide a default for, you must
+// set them from the command line, a var-file, or the environment.
+
+variable "weekday" {}
+
+variable "sudo_password" {
+  type =  string
+  default = "mypassword"
+  // Sensitive vars are hidden from output as of Packer v1.6.5
+  sensitive = true
+}
+
+variable "flavor" {
+  type = string
+  default = "strawberry"
+}
+
+variable "exit_codes" {
+  type = list(number)
+  default = [0]
 }
 
 locals {
-  debian_ami_name = "${var.image_id}-debian"
+  ice_cream_flavor = "${var.flavor}-ice-cream"
   foo             = "bar"
 }
 ```
 
-This defines three variables within your Packer configuration. The first
-two have empty blocks `{}`. The third sets a default. If a default value is
-set, the variable is optional. Otherwise, the variable is required.
-This also defines two locals: `debian_ami_name` and `foo`.
+This defines several variables within your Packer configuration, each showing
+off a different way to set them. The first variable, "weekday", is an empty
+block `{}`. This will work under many simple circumstances, and Packer will
+guess what type the variable should be at runtime.
 
--> **Note**: that it is _not_ possible to use variables in a variable definition
-but it _is_ possible to use locals and variables in a local definition.
+However, it's generally best to provide the type in your variable definition,
+as you can see in variable "flavor", which we have given a type of "string",
+and variable "exit_codes", which we have given a type of "list(number)",
+meaning it is a list/array of numbers.
+
+In addition to setting the type, the "flavor" and "exit_codes" variables also
+provide a default. If you set a default value, then you don't need to set the
+variable at run time. Packer will use a provided command-line var,
+var-file, or environment var if it exists, but if not Packer will fall back to
+this default value.
+
+If you do not set a default value, Packer will fail immediately when you try to
+run a build if you have not provided the missing variable via the command-line,
+a var-file, or the environment.
+
+This also defines two locals: `ice_cream_flavor` and `foo`.
+
+-> **Note**: that it is _not_ possible to a variable in the definition of
+another variable. But it _is_ possible to use locals and variables in the
+definition of a local, as shown in the ice_cream_flavor definition.
 
 ## Using Variables and locals in Configuration
 
-Next, you can define a source using the variables :
+For simplicity's sake, we're going to put a null source in the same file as
+we are putting the build configuration. This file demonstrates how to use the
+variables we previously defined.
 
 ```hcl
-# source.pkr.hcl
+// null_example.pkr.hcl
 
-source "amazon-ebs" "debian" {
-  ami_name   = local.debian_ami_name
-  access_key = var.aws_access_key
-  secret_key = "${var.aws_secret_key}"
-  region     = "${var.aws_region}"
+source "null" "example" {
+    communicator = "none"
+}
+
+build {
+  sources = [
+    "source.null.example"
+  ]
+  provisioner "shell-local" {
+    // Note that for options that are documented as template engines,
+    // we still have to use the golang template engine syntax rather than our
+    // specialized HCL2 variable syntax. This example shows a combination of
+    // an HCL2 variable and the golang template engines built into the
+    // execute_command option
+    execute_command = ["/bin/sh", "-c", "echo ${var.sudo_password}| {{.Vars}} {{.Script}}"]
+    environment_vars = ["HELLO_USER=packeruser", "UUID=${build.PackerRunUUID}"]
+    inline = ["echo the Packer run uuid is $UUID"]
+  }
+  provisioner "shell-local" {
+    inline = ["echo var.flavor is: ${var.flavor}",
+              "echo local.ice_cream_flavor is: ${local.ice_cream_flavor}"]
+    valid_exit_codes = var.exit_codes
+  }
 }
 ```
 
-This uses more interpolations, this time prefixed with `var.` and `local.`.
-This tells Packer that you're accessing variables. This configures the builder
-with the given variables.
+As you can see in the example, you can acces your variables directly by
+giving them the `var.` or `local.` prefix. If you want to embed the variables
+in a string, you can do so with the `${}` HCL interpolation syntax. If you are
+using an option that is a template engine, you still need to use the golang
+templating engine syntax `{{ .OPTION }}` for those engines.
 
 ## Assigning Variables
 
@@ -80,14 +150,13 @@ You can set variables directly on the command-line with the
 
 ```shell-session
 $ packer build \
-  -var 'access_key=foo' \
-  -var 'secret_key=bar'
-# ...
+  -var 'weekday=Sunday' \
+  -var 'flavor=chocolate' \
+  -var 'sudo_password=hunter42' .
 ```
 
 Once again, setting variables this way will not save them, and they'll
 have to be input repeatedly as commands are executed.
-
 
 If you plan to assign variables via the command line, we strongly recommend that
 you at least set a default type instead of using empty blocks; this helps the
@@ -168,17 +237,48 @@ this file. Create a file named `variables.pkrvars.hcl` with the following
 contents:
 
 ```hcl
-access_key = "foo"
-secret_key = "bar"
+sudo_password = "partyparrot"
+weekday = "Sunday"
 ```
 
-For all files which match `*.auto.pkrvars.hcl` present in the current
-directory, Packer automatically loads them to populate variables. If the file
-is named something else, you can use the `-var-file` flag directly to specify a
-file. These files are the same syntax as Packer configuration files. And like
-Packer configuration files, these files can also be JSON.
+You tell Packer to use this var file using the `-var-file` command line flag.
 
-We don't recommend saving usernames and password to version control, but you
+```shell-session
+$ packer build -var-file="variables.pkrvars.hcl" .
+```
+
+Packer will automatically load any var file that matches the name
+`*.auto.pkrvars.hcl`, without the need to pass the file via the command line.
+if we rename the above var-file from variables.pkrvars.hcl to
+variables.auto.pkrvars.hcl, then we can run our build simply by calling
+
+```shell-session
+$ packer build .
+```
+
+You may provide as many -var-file flags as you would like:
+
+```shell-session
+$ packer build \
+  -var-file="secret.pkrvars.hcl" \
+  -var-file="production.pkrvars.hcl" .
+```
+
+These files can also be JSON:
+
+variables.json:
+```json
+{
+  "weekday": "sunday",
+  "flavor": "mint"
+}
+```
+
+```shell-session
+$ packer build -var-file=variables.json
+```
+
+We don't recommend saving sensitive information to version control, but you
 can create a local secret variables file and use `-var-file` to load it.
 
 You can use multiple `-var-file` arguments in a single command, with some
@@ -187,7 +287,7 @@ checked in to version control and others not checked in. For example:
 ```shell-session
 $ packer build \
   -var-file="secret.pkrvars.hcl" \
-  -var-file="production.pkrvars.hcl"
+  -var-file="production.pkrvars.hcl" .
 ```
 
 #### From environment variables
@@ -196,18 +296,42 @@ Packer will read environment variables in the form of `PKR_VAR_name` to find
 the value for a variable. For example, the `PKR_VAR_access_key` variable can be
 set to set the `access_key` variable.
 
+```shell-session
+$ export PKR_VAR_weekday=Monday
+$ packer build .
+```
+
 #### Variable Defaults
 
 If no value is assigned to a variable via any of these methods and the
 variable has a `default` key in its declaration, that value will be used
 for the variable.
 
-#### Unspecified values fails
+If all of your variables have defaults, then you can call a packer build using:
 
-If you execute `packer build` with certain variables unspecified and those are
-used somewhere, Packer will error.
+```shell-session
+$ packer build .
+```
 
-## Lists
+You can make this work for yourself using the variable example file above by
+commenting out or removing the "weekday" variable declaration, since it is not
+actually used in the example build.
+
+If your variable definitions are stored in the same file as your source and
+build, you can call the build against that specific file:
+
+```shell-session
+$ packer build self_contained_example.pkr.hcl
+```
+
+#### Unspecified Values Fail
+
+If you call `packer build` with any variables defined but not set, Packer will
+error.
+
+## Variable Type Reference
+
+### Lists
 
 Lists are defined either explicitly or implicitly
 
@@ -225,7 +349,7 @@ You can specify lists in a `variables.pkrvars.hcl` file:
 cidrs = [ "10.0.0.0/16", "10.1.0.0/16" ]
 ```
 
-## Maps
+### Maps
 
 Maps are a way to create variables that are lookup tables. An example
 will show this best. Let's extract our AMIs into a map and add
