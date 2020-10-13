@@ -61,7 +61,8 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 		return multistep.ActionContinue
 	}
 
-	if state.Get("communicator") == nil {
+	comm, _ := state.Get("communicator").(packer.Communicator)
+	if comm == nil {
 
 		msg := fmt.Sprintf("Please shutdown virtual machine within %s.", s.Config.Timeout)
 		ui.Message(msg)
