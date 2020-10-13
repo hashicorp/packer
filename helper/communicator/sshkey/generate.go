@@ -171,7 +171,7 @@ func GeneratePair(t Algorithm, rand io.Reader, bits int) (*Pair, error) {
 		return NewPair(publicKey, privateKey)
 	case RSA:
 		if bits == 0 {
-			bits = 3072
+			bits = 4096
 		}
 		if bits < 1024 {
 			return nil, ErrInvalidRSAKeySize
