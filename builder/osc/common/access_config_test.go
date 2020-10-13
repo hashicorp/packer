@@ -23,12 +23,6 @@ func TestAccessConfigPrepare_Region(t *testing.T) {
 		t.Fatalf("should have region validation err: %s", c.RawRegion)
 	}
 
-	c.RawRegion = "us-west-1"
-	err = c.ValidateOSCRegion(c.RawRegion)
-	if err != nil {
-		t.Fatalf("shouldn't have region validation err: %s", c.RawRegion)
-	}
-
 	c.RawRegion = "custom"
 	err = c.ValidateOSCRegion(c.RawRegion)
 	if err == nil {
