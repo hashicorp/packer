@@ -13,8 +13,22 @@ description: |-
 
 @include 'guides/hcl2-beta-note.mdx'
 
-We will soon provide a programatic way to transpose a v1 buildfile to a v1.5
-HCL file. In the meantime we will show how to manually do it.
+As of v1.6.4, Packer provides a tool to help you convert legacy JSON files to
+HCL2 files. To run it, you can use the `hcl2_upgrade` command.
+
+for example,
+
+```sh
+packer hcl2_upgrade mytemplate.json
+```
+
+will convert your packer template to a new HCL2 file in your current working
+directory named mytemplate.json.pkr.hcl. It is not a perfect converter yet;
+please open an issue if you find a problem with the conversion. Packer will not
+destroy your legacy json template, so this is not a risky command to call.
+
+Following is an explanation of how to manually upgrade a JSON template to an
+HCL2 template.
 
 The following file :
 
@@ -143,6 +157,7 @@ repeatable blocks with the same identifier. For example:
         }
       ],
     }
+]
 ```
 
 Becomes:
@@ -162,19 +177,19 @@ source "amazon-ebs" "example" {
         delete_on_termination = true
         encrypted = true
     }
+}
 ```
 
 There is soon going to be a PR to drop the `s` at the end of these fields.
 
 ### Deprecation
 
-The current layout of buildfiles will be supported until we and the community
-love the new format. Only then the v1 format will be carefully deprecated.
+As we become more confident in the new templates, we may begin to add new
+features that are HCL2-only; one of our major motivations to moving to the new
+template format is that HCL2 provides us with the flexibility to implement some
+features which would be very difficult to add to the legacy JSON templates.
 
--> **Note:** The HCL parsing library can read JSON and if it is your
-configuration format of predilection, you will still be able to do it. You will
-have to tweak a few things in order to use future versions of Packer that have
-deprecated the current format. Sorry about that! Because the HCL reading code
-is generated from the JSON parsing settings; every builder, provisioner and
-post-processor setting should look and work the same. A config file transposer
-is currently in the making.
+However, the Packer team will continue to support the main functionality of the
+current "legacy JSON" packer templates alongside the new HCL2 templates until
+we and the community love the new templates. Only then the v1 format will be
+deprecated. We do not anticipate this happening until late 2021 at the earliest.
