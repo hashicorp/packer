@@ -28,7 +28,7 @@ type ShutdownConfig struct {
 	// Packer normally halts the virtual machine after all provisioners have
 	// run when no `shutdown_command` is defined. If this is set to `true`, Packer
 	// *will not* halt the virtual machine but will assume that you will send the stop
-	// signal yourself through a script or the final provisioner.
+	// signal yourself through a preseed.cfg, a script or the final provisioner.
 	// Packer will wait for a default of five minutes until the virtual machine is shutdown.
 	// The timeout can be changed using `shutdown_timeout` option.
 	DisableShutdown bool `mapstructure:"disable_shutdown"`
