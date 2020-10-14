@@ -167,75 +167,8 @@ have to be input repeatedly as commands are executed.
 
 If you plan to assign variables via the command line, we strongly recommend that
 you at least set a default type instead of using empty blocks; this helps the
-HCL parser understand what is being set.
-
-For example:
-
-```hcl
-variable "pizza" {
-  type = string
-}
-
-source "null" "example" {
-    communicator = "none"
-}
-
-build {
-  sources = [
-    "source.null.example"
-  ]
-  provisioner "shell-local" {
-    inline           = ["echo $PIZZA"]
-    environment_vars = ["PIZZA=${var.pizza}"]
-  }
-}
-```
-
-If you call the above template using the command
-
-```sh
-packer build -var pizza=pineapple shell_local_variables.pkr.hcl
-```
-
-then the Packer build will run successfully. However, if you define the variable
-using an empty block, the parser will not know what type the variable is, and it
-cannot infer the type from the command line, as shown in this example:
-
-```hcl
-variable "pizza" {}
-
-source "null" "example" {
-    communicator = "none"
-}
-
-build {
-  sources = [
-    "source.null.example"
-  ]
-  provisioner "shell-local" {
-    inline           = ["echo $PIZZA"]
-    environment_vars = ["PIZZA=${var.pizza}"]
-  }
-}
-```
-The above template will result in the error:
-
-```
-Error: Variables not allowed
-
-   on <value for var.pizza from arguments> line 1:
-   (source code not available)
-
-Variables may not be used here.
-```
-
-You can work around this either by quoting the variable on the command line, or
-by adding the type to the variable block as shown in the previous example.
-Setting the expected type is the more resilient option.
-
-```sh
-packer build -var 'pizza="pineapple"' shell_local_variables.pkr.hcl
-```
+HCL parser understand what is being set. Otherwise it will interpret all of your
+command line variables as strings.
 
 #### From a file
 
