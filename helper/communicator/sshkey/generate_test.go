@@ -8,9 +8,6 @@ import (
 )
 
 func TestGeneratePair_parseable(t *testing.T) {
-	type args struct {
-		t Algorithm
-	}
 	tests := []struct {
 		t Algorithm
 	}{

@@ -141,6 +141,9 @@ func PairFromDSA(key *dsa.PrivateKey) (*Pair, error) {
 		Priv:    key.X,
 	}
 	kb, err := asn1.Marshal(k)
+	if err != nil {
+		return nil, err
+	}
 	privBlk := &pem.Block{
 		Type:    "DSA PRIVATE KEY",
 		Headers: nil,
