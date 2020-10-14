@@ -92,7 +92,7 @@ Options:
   -except=foo,bar,baz    Validate all builds other than these.
   -only=foo,bar,baz      Validate only these builds.
   -var 'key=value'       Variable for templates, can be used multiple times.
-  -var-file=path         JSON file containing user variables. [ Note that even in HCL mode this expects file to contain JSON, a fix is comming soon ]
+  -var-file=path         JSON or HCL2 file containing user variables. [ Note that even in HCL mode this expects file to contain JSON, a fix is comming soon ]
 `
 
 	return strings.TrimSpace(helpText)

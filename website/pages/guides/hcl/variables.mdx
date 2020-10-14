@@ -72,13 +72,17 @@ locals {
 
 This defines several variables within your Packer configuration, each showing
 off a different way to set them. The first variable, "weekday", is an empty
-block `{}`. This will work under many simple circumstances, and Packer will
-guess what type the variable should be at runtime.
+block `{}`, without a type or a default.
 
 However, it's generally best to provide the type in your variable definition,
 as you can see in variable "flavor", which we have given a type of "string",
 and variable "exit_codes", which we have given a type of "list(number)",
 meaning it is a list/array of numbers.
+
+When a variable is passed from the cli or environment and the variable's type
+is not set, Packer will expect it to be a string. But if it is passed from a
+var-file where Packer can interpret HCL properly it can be a slice or any
+supported type.
 
 In addition to setting the type, the "flavor" and "exit_codes" variables also
 provide a default. If you set a default value, then you don't need to set the
@@ -87,14 +91,17 @@ var-file, or environment var if it exists, but if not Packer will fall back to
 this default value.
 
 If you do not set a default value, Packer will fail immediately when you try to
-run a build if you have not provided the missing variable via the command-line,
-a var-file, or the environment.
+run a `build` if you have not provided the missing variable via the
+command-line, a var-file, or the environment. The `validate`, `inspect` and
+`console` commands will work, but variables with unknown values will be
+`<unknown>`.
 
 This also defines two locals: `ice_cream_flavor` and `foo`.
 
--> **Note**: that it is _not_ possible to a variable in the definition of
-another variable. But it _is_ possible to use locals and variables in the
-definition of a local, as shown in the ice_cream_flavor definition.
+-> **Note**: that it is _not_ possible to reference a variable in the
+definition of another variable. But it _is_ possible to use locals and
+variables in the definition of a local, as shown in the ice_cream_flavor
+definition.
 
 ## Using Variables and locals in Configuration
 
@@ -119,19 +126,19 @@ build {
     // specialized HCL2 variable syntax. This example shows a combination of
     // an HCL2 variable and the golang template engines built into the
     // execute_command option
-    execute_command = ["/bin/sh", "-c", "echo ${var.sudo_password}| {{.Vars}} {{.Script}}"]
+    execute_command  = ["/bin/sh", "-c", "echo ${var.sudo_password}| {{.Vars}} {{.Script}}"]
     environment_vars = ["HELLO_USER=packeruser", "UUID=${build.PackerRunUUID}"]
-    inline = ["echo the Packer run uuid is $UUID"]
+    inline           = ["echo the Packer run uuid is $UUID"]
   }
   provisioner "shell-local" {
-    inline = ["echo var.flavor is: ${var.flavor}",
-              "echo local.ice_cream_flavor is: ${local.ice_cream_flavor}"]
+    inline           = ["echo var.flavor is: ${var.flavor}",
+                        "echo local.ice_cream_flavor is: ${local.ice_cream_flavor}"]
     valid_exit_codes = var.exit_codes
   }
 }
 ```
 
-As you can see in the example, you can acces your variables directly by
+As you can see in the example, you can access your variables directly by
 giving them the `var.` or `local.` prefix. If you want to embed the variables
 in a string, you can do so with the `${}` HCL interpolation syntax. If you are
 using an option that is a template engine, you still need to use the golang
@@ -178,7 +185,7 @@ build {
     "source.null.example"
   ]
   provisioner "shell-local" {
-    inline = ["echo $PIZZA"]
+    inline           = ["echo $PIZZA"]
     environment_vars = ["PIZZA=${var.pizza}"]
   }
 }
@@ -206,7 +213,7 @@ build {
     "source.null.example"
   ]
   provisioner "shell-local" {
-    inline = ["echo $PIZZA"]
+    inline           = ["echo $PIZZA"]
     environment_vars = ["PIZZA=${var.pizza}"]
   }
 }
@@ -238,7 +245,7 @@ contents:
 
 ```hcl
 sudo_password = "partyparrot"
-weekday = "Sunday"
+weekday       = "Sunday"
 ```
 
 You tell Packer to use this var file using the `-var-file` command line flag.

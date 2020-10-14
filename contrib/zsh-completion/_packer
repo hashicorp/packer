@@ -20,7 +20,7 @@ _packer () {
     '-parallel=[(false) Disable parallelization. (Default: false)]'
     '-parallel-builds=[(0) Number of builds to run in parallel. (Defaults to infinite: 0)]'
     '-var[("key=value") Variable for templates, can be used multiple times.]'
-    '-var-file=[(path) JSON file containing user variables.]'
+    '-var-file=[(path) JSON or HCL2 file containing user variables.]'
     '(-)*:files:_files -g "*.json"'
   )
 
@@ -34,7 +34,7 @@ _packer () {
     '-except=[(foo,bar,baz) Validate all builds other than these.]'
     '-only=[(foo,bar,baz) Validate only these builds.]'
     '-var[("key=value") Variable for templates, can be used multiple times.]'
-    '-var-file=[(path) JSON file containing user variables.]'
+    '-var-file=[(path) JSON or HCL2 file containing user variables.]'
     '(-)*:files:_files -g "*.json"'
   )
 
