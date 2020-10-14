@@ -62,6 +62,62 @@ func NewPair(public, private interface{}) (*Pair, error) {
 	}, nil
 }
 
+func PairFromED25519(public ed25519.PublicKey, private ed25519.PrivateKey) (*Pair, error) {
+	// see https://github.com/golang/crypto/blob/7f63de1d35b0f77fa2b9faea3e7deb402a2383c8/ssh/keys.go#L1273-L1443
+	key := struct {
+		Pub     []byte
+		Priv    []byte
+		Comment string
+		Pad     []byte `ssh:"rest"`
+	}{
+		Pub:  public,
+		Priv: private,
+	}
+	keyBytes := ssh.Marshal(key)
+
+	pk1 := struct {
+		Check1  uint32
+		Check2  uint32
+		Keytype string
+		Rest    []byte `ssh:"rest"`
+	}{
+		Keytype: ssh.KeyAlgoED25519,
+		Rest:    keyBytes,
+	}
+	pk1Bytes := ssh.Marshal(pk1)
+
+	k := struct {
+		CipherName   string
+		KdfName      string
+		KdfOpts      string
+		NumKeys      uint32
+		PubKey       []byte
+		PrivKeyBlock []byte
+	}{
+		CipherName:   "none",
+		KdfName:      "none",
+		KdfOpts:      "",
+		NumKeys:      1,
+		PrivKeyBlock: pk1Bytes,
+	}
+
+	const opensshV1Magic = "openssh-key-v1\x00"
+
+	privBlk := &pem.Block{
+		Type:    "OPENSSH PRIVATE KEY",
+		Headers: nil,
+		Bytes:   append([]byte(opensshV1Magic), ssh.Marshal(k)...),
+	}
+	publicKey, err := ssh.NewPublicKey(public)
+	if err != nil {
+		return nil, err
+	}
+	return &Pair{
+		Private: pem.EncodeToMemory(privBlk),
+		Public:  ssh.MarshalAuthorizedKey(publicKey),
+	}, nil
+}
+
 func PairFromDSA(key *dsa.PrivateKey) (*Pair, error) {
 	// see https://github.com/golang/crypto/blob/7f63de1d35b0f77fa2b9faea3e7deb402a2383c8/ssh/keys.go#L1186-L1195
 	// and https://linux.die.net/man/1/dsa
@@ -168,7 +224,7 @@ func GeneratePair(t Algorithm, rand io.Reader, bits int) (*Pair, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewPair(publicKey, privateKey)
+		return PairFromED25519(publicKey, privateKey)
 	case RSA:
 		if bits == 0 {
 			bits = 4096
