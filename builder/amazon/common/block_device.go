@@ -134,8 +134,8 @@ func (blockDevice BlockDevice) BuildEC2BlockDeviceMapping() *ec2.BlockDeviceMapp
 		ebsBlockDevice.VolumeSize = aws.Int64(blockDevice.VolumeSize)
 	}
 
-	// IOPS is only valid for io1 type
-	if blockDevice.VolumeType == "io1" {
+	// IOPS is only valid for io1 and io2 types
+	if blockDevice.VolumeType == "io1" || blockDevice.VolumeType == "io2" {
 		ebsBlockDevice.Iops = aws.Int64(blockDevice.IOPS)
 	}
 
