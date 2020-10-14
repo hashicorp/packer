@@ -27,6 +27,8 @@ type FlatConfig struct {
 	SkipValidation              *bool                                  `mapstructure:"skip_region_validation" cty:"skip_region_validation" hcl:"skip_region_validation"`
 	SkipMetadataApiCheck        *bool                                  `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check" hcl:"skip_metadata_api_check"`
 	Token                       *string                                `mapstructure:"token" cty:"token" hcl:"token"`
+	X509certPath                *string                                `mapstructure:"x509_cert_path" cty:"x509_cert_path" hcl:"x509_cert_path"`
+	X509keyPath                 *string                                `mapstructure:"x509_key_path" cty:"x509_key_path" hcl:"x509_key_path"`
 	AssociatePublicIpAddress    *bool                                  `mapstructure:"associate_public_ip_address" cty:"associate_public_ip_address" hcl:"associate_public_ip_address"`
 	Subregion                   *string                                `mapstructure:"subregion_name" cty:"subregion_name" hcl:"subregion_name"`
 	BlockDurationMinutes        *int64                                 `mapstructure:"block_duration_minutes" cty:"block_duration_minutes" hcl:"block_duration_minutes"`
@@ -151,6 +153,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"skip_region_validation":               &hcldec.AttrSpec{Name: "skip_region_validation", Type: cty.Bool, Required: false},
 		"skip_metadata_api_check":              &hcldec.AttrSpec{Name: "skip_metadata_api_check", Type: cty.Bool, Required: false},
 		"token":                                &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
+		"x509_cert_path":                       &hcldec.AttrSpec{Name: "x509_cert_path", Type: cty.String, Required: false},
+		"x509_key_path":                        &hcldec.AttrSpec{Name: "x509_key_path", Type: cty.String, Required: false},
 		"associate_public_ip_address":          &hcldec.AttrSpec{Name: "associate_public_ip_address", Type: cty.Bool, Required: false},
 		"subregion_name":                       &hcldec.AttrSpec{Name: "subregion_name", Type: cty.String, Required: false},
 		"block_duration_minutes":               &hcldec.AttrSpec{Name: "block_duration_minutes", Type: cty.Number, Required: false},
