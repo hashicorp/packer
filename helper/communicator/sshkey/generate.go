@@ -171,6 +171,9 @@ func GeneratePair(t Algorithm, rand io.Reader, bits int) (*Pair, error) {
 	switch t {
 	case DSA:
 		if bits == 0 {
+			// currently the ssh package can only decode 1024 bits dsa keys, so
+			// that's going be the default for now see
+			// https://github.com/golang/crypto/blob/7f63de1d35b0f77fa2b9faea3e7deb402a2383c8/ssh/keys.go#L411-L420
 			bits = 1024
 		}
 		var sizes dsa.ParameterSizes
