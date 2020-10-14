@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,CreateVNICDetails
+//go:generate mapstructure-to-hcl2 -type Config,CreateVNICDetails,ListImagesRequest
 
 package oci
 
@@ -35,6 +35,15 @@ type CreateVNICDetails struct {
 	SubnetId            *string                           `mapstructure:"subnet_id" required:"false"`
 }
 
+type ListImagesRequest struct {
+	// fields that can be specified under "base_image_filter"
+	CompartmentId          *string `mapstructure:"compartment_id"`
+	DisplayName            *string `mapstructure:"display_name"`
+	OperatingSystem        *string `mapstructure:"operating_system"`
+	OperatingSystemVersion *string `mapstructure:"operating_system_version"`
+	Shape                  *string `mapstructure:"shape"`
+}
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
@@ -69,12 +78,13 @@ type Config struct {
 	CompartmentID      string `mapstructure:"compartment_ocid"`
 
 	// Image
-	BaseImageID        string `mapstructure:"base_image_ocid"`
-	ImageName          string `mapstructure:"image_name"`
-	ImageCompartmentID string `mapstructure:"image_compartment_ocid"`
+	BaseImageID        string            `mapstructure:"base_image_ocid"`
+	BaseImageFilter    ListImagesRequest `mapstructure:"base_image_filter"`
+	ImageName          string            `mapstructure:"image_name"`
+	ImageCompartmentID string            `mapstructure:"image_compartment_ocid"`
 
 	// Instance
-	InstanceName        string                            `mapstructure:"instance_name"`
+	InstanceName        *string                           `mapstructure:"instance_name"`
 	InstanceTags        map[string]string                 `mapstructure:"instance_tags"`
 	InstanceDefinedTags map[string]map[string]interface{} `mapstructure:"instance_defined_tags"`
 	Shape               string                            `mapstructure:"shape"`
@@ -269,9 +279,17 @@ func (c *Config) Prepare(raws ...interface{}) error {
 			errs, errors.New("'subnet_ocid' must be specified"))
 	}
 
-	if c.BaseImageID == "" {
+	if (c.BaseImageID == "") && (c.BaseImageFilter == ListImagesRequest{}) {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("'base_image_ocid' must be specified"))
+			errs, errors.New("'base_image_ocid' or 'base_image_filter' must be specified"))
+	}
+
+	if c.BaseImageFilter.CompartmentId == nil {
+		c.BaseImageFilter.CompartmentId = &c.CompartmentID
+	}
+
+	if c.BaseImageFilter.Shape == nil {
+		c.BaseImageFilter.Shape = &c.Shape
 	}
 
 	// Validate tag lengths. TODO (hlowndes) maximum number of tags allowed.
