@@ -122,6 +122,8 @@ func PairFromED25519(public ed25519.PublicKey, private ed25519.PrivateKey) (*Pai
 	}, nil
 }
 
+// PairFromDSA marshalls a valid pair of openssh pem for dsa keypairs.
+// x509.MarshalPKCS8PrivateKey does not know how to deal with dsa keys.
 func PairFromDSA(key *dsa.PrivateKey) (*Pair, error) {
 	// see https://github.com/golang/crypto/blob/7f63de1d35b0f77fa2b9faea3e7deb402a2383c8/ssh/keys.go#L1186-L1195
 	// and https://linux.die.net/man/1/dsa
