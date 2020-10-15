@@ -138,7 +138,7 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
-			name: "build name: HCL",
+			name: "source name: HCL",
 			args: []string{
 				"-parallel-builds=1", // to ensure order is kept
 				testFixture("build-name-and-type"),
@@ -297,7 +297,6 @@ func TestBuild(t *testing.T) {
 				},
 			},
 		},
-
 		{
 			name: "hcl - recipes - only recipes",
 			args: []string{
@@ -311,6 +310,17 @@ func TestBuild(t *testing.T) {
 				expectedContent: map[string]string{
 					"NULL.spaghetti_carbonara.txt": spaghettiCarbonara,
 					"NULL.lasagna.txt":             lasagna,
+				},
+			},
+		},
+		{
+			name: "hcl - build.name accessible",
+			args: []string{
+				filepath.Join(testFixture("build-name-and-type"), "buildname.pkr.hcl"),
+			},
+			fileCheck: fileCheck{
+				expected: []string{
+					"pineapple.pizza.txt",
 				},
 			},
 		},

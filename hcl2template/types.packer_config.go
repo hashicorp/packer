@@ -383,6 +383,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packer.Build
 			for _, k := range append(packer.BuilderDataCommonKeys, generatedVars...) {
 				unknownBuildValues[k] = cty.StringVal("<unknown>")
 			}
+			unknownBuildValues["name"] = cty.StringVal(build.Name)
 
 			variables := map[string]cty.Value{
 				sourcesAccessor: cty.ObjectVal(src.ctyValues()),

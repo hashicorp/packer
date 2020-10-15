@@ -31,6 +31,9 @@ func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]interface{}) error {
 	if len(buildVars) > 0 {
 		ectx = p.evalContext.NewChild()
 		buildValues := map[string]cty.Value{}
+		if !p.evalContext.Variables[buildAccessor].IsNull() {
+			buildValues = p.evalContext.Variables[buildAccessor].AsValueMap()
+		}
 		for k, v := range buildVars {
 			switch v := v.(type) {
 			case string:
