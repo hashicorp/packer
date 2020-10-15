@@ -19,10 +19,10 @@ block](/docs/from-1.5/blocks/build), for example :
 
 ```hcl
 build {
-  source = [
+  sources = [
     # Here Packer will use a default ami_name when saving the image.
-    "sources.amazon-ebs.example",
-    "sources.amazon-ebs.foo",
+    "source.amazon-ebs.example",
+    "source.amazon-ebs.foo",
   ]
 }
 ```
@@ -32,7 +32,7 @@ set specific source fields.
 
 ```hcl
 build {
-  source "sources.amazon-ebs.example" {
+  source "source.amazon-ebs.example" {
     # Here Packer will use the provided ami_name instead of defaulting it.
     ami_name = "specific"
   }
