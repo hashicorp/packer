@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/version"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -60,6 +61,7 @@ const (
 	pathVariablesAccessor  = "path"
 	sourcesAccessor        = "source"
 	buildAccessor          = "build"
+	packerAccessor         = "packer"
 )
 
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
@@ -78,6 +80,9 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 				"name": cty.UnknownVal(cty.String),
 			}),
 			buildAccessor: cty.UnknownVal(cty.EmptyObject),
+			packerAccessor: cty.ObjectVal(map[string]cty.Value{
+				"version": cty.StringVal(version.FormattedVersion()),
+			}),
 			pathVariablesAccessor: cty.ObjectVal(map[string]cty.Value{
 				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
 				"root": cty.StringVal(strings.ReplaceAll(cfg.Basedir, `\`, `/`)),
