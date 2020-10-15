@@ -59,10 +59,15 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Build the steps.
 	steps := []multistep.Step{
 		new(StepCheckExistingImage),
-		&StepCreateSSHKey{
-			Debug:        b.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
+		&communicator.StepSSHKeyGen{
+			CommConf:            &b.config.Comm,
+			SSHTemporaryKeyPair: b.config.Comm.SSH.SSHTemporaryKeyPair,
 		},
+		multistep.If(b.config.PackerDebug,
+			&communicator.StepDumpSSHKey{
+				Path: fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
+			},
+		),
 		&StepImportOSLoginSSHKey{
 			Debug: b.config.PackerDebug,
 		},

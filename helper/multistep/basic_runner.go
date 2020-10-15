@@ -53,6 +53,9 @@ func (b *BasicRunner) Run(ctx context.Context, state StateBag) {
 	}()
 
 	for _, step := range b.Steps {
+		if step == nil {
+			continue
+		}
 		if err := ctx.Err(); err != nil {
 			state.Put(StateCancelled, true)
 			break
