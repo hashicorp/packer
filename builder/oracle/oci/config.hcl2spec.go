@@ -235,6 +235,7 @@ func (*FlatCreateVNICDetails) HCL2Spec() map[string]hcldec.Spec {
 type FlatListImagesRequest struct {
 	CompartmentId          *string `mapstructure:"compartment_id" cty:"compartment_id" hcl:"compartment_id"`
 	DisplayName            *string `mapstructure:"display_name" cty:"display_name" hcl:"display_name"`
+	DisplayNameSearch      *string `mapstructure:"display_name_search" cty:"display_name_search" hcl:"display_name_search"`
 	OperatingSystem        *string `mapstructure:"operating_system" cty:"operating_system" hcl:"operating_system"`
 	OperatingSystemVersion *string `mapstructure:"operating_system_version" cty:"operating_system_version" hcl:"operating_system_version"`
 	Shape                  *string `mapstructure:"shape" cty:"shape" hcl:"shape"`
@@ -254,6 +255,7 @@ func (*FlatListImagesRequest) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"compartment_id":           &hcldec.AttrSpec{Name: "compartment_id", Type: cty.String, Required: false},
 		"display_name":             &hcldec.AttrSpec{Name: "display_name", Type: cty.String, Required: false},
+		"display_name_search":      &hcldec.AttrSpec{Name: "display_name_search", Type: cty.String, Required: false},
 		"operating_system":         &hcldec.AttrSpec{Name: "operating_system", Type: cty.String, Required: false},
 		"operating_system_version": &hcldec.AttrSpec{Name: "operating_system_version", Type: cty.String, Required: false},
 		"shape":                    &hcldec.AttrSpec{Name: "shape", Type: cty.String, Required: false},

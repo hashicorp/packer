@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"time"
 
 	core "github.com/oracle/oci-go-sdk/core"
@@ -69,6 +70,7 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 	if d.cfg.BaseImageID != "" {
 		imageId = &d.cfg.BaseImageID
 	} else {
+		// Pull images and determine which image ID to use, if BaseImageId not specified
 		response, err := d.computeClient.ListImages(ctx, core.ListImagesRequest{
 			CompartmentId:          d.cfg.BaseImageFilter.CompartmentId,
 			DisplayName:            d.cfg.BaseImageFilter.DisplayName,
@@ -85,7 +87,25 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 		if len(response.Items) == 0 {
 			return "", errors.New("base_image_filter returned no images")
 		}
-		imageId = response.Items[0].Id
+		if d.cfg.BaseImageFilter.DisplayNameSearch != nil {
+			// Return most recent image that matches regex
+			imageNameRegex, err := regexp.Compile(*d.cfg.BaseImageFilter.DisplayNameSearch)
+			if err != nil {
+				return "", err
+			}
+			for _, image := range response.Items {
+				if imageNameRegex.MatchString(*image.DisplayName) {
+					imageId = image.Id
+					break
+				}
+			}
+			if imageId == nil {
+				return "", errors.New("No image matched display_name_search criteria")
+			}
+		} else {
+			// If no regex provided, simply return most recent image pulled
+			imageId = response.Items[0].Id
+		}
 	}
 
 	// Create Source details which will be used to Launch Instance

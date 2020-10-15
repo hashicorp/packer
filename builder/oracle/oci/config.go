@@ -39,6 +39,7 @@ type ListImagesRequest struct {
 	// fields that can be specified under "base_image_filter"
 	CompartmentId          *string `mapstructure:"compartment_id"`
 	DisplayName            *string `mapstructure:"display_name"`
+	DisplayNameSearch      *string `mapstructure:"display_name_search"`
 	OperatingSystem        *string `mapstructure:"operating_system"`
 	OperatingSystemVersion *string `mapstructure:"operating_system_version"`
 	Shape                  *string `mapstructure:"shape"`
