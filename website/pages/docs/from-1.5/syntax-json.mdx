@@ -168,15 +168,15 @@ source "amazon-ebs" "example" {
 When the nested block type requires one or more labels, or when multiple
 blocks of the same type can be given, the mapping gets a little more
 complicated. For example, the `provisioner` nested block type used
-within `source` blocks expects a label giving the provisioner to use,
+within `build` blocks expects a label giving the provisioner to use,
 and the ordering of provisioner blocks is significant to decide the order
 of operations.
 
-The following native syntax example shows a `source` block with a number
+The following native syntax example shows a `build` block with a number
 of provisioners of different types:
 
 ```hcl
-source "amazon-ebs" "example" {
+build {
   # (source configuration omitted for brevity)
 
   provisioner "shell-local" {
@@ -200,29 +200,27 @@ this JSON equivalent of the above:
 
 ```json
 {
-  "source": {
-    "amazon-ebs": {
-      "example": {
-        "provisioner": [
-          {
-            "shell-local": {
-              "inline": ["echo 'Hello World' >example.txt"]
-            }
-          },
-          {
-            "file": {
-              "source": "example.txt",
-              "destination": "/tmp/example.txt"
-            }
-          },
-          {
-            "shell": {
-              "inline": ["sudo install-something -f /tmp/example.txt"]
-            }
-          }
-        ]
+  "build": {
+    "//": "(source configuration omitted for brevity)",
+
+    "provisioner": [
+      {
+        "shell-local": {
+          "inline": ["echo 'Hello World' >example.txt"]
+        }
+      },
+      {
+        "file": {
+          "source": "example.txt",
+          "destination": "/tmp/example.txt"
+        }
+      },
+      {
+        "shell": {
+          "inline": ["sudo install-something -f /tmp/example.txt"]
+        }
       }
-    }
+    ]
   }
 }
 ```
