@@ -20,13 +20,18 @@ syntax is useful when generating portions of a configuration programmatically,
 since existing JSON libraries can be used to prepare the generated
 configuration files.
 
+This syntax is not to be confused with the pre-version-1.5 "legacy" Packer
+templates, which were exclusively JSON and follow a different format.
+
 The JSON syntax is defined in terms of the native syntax. Everything that can
 be expressed in native syntax can also be expressed in JSON syntax, but some
 constructs are more complex to represent in JSON due to limitations of the
 JSON grammar.
 
 Packer expects native syntax for files named with a `.pkr.hcl` suffix, and JSON
-syntax for files named with a `.pkr.json` suffix.
+syntax for files named with a `.pkr.json` suffix. If you leave out the `.pkr`
+portion of suffix, Packer will try to read your json file as a legacy Packer
+template.
 
 The low-level JSON syntax, just as with the native syntax, is defined in terms
 of a specification called _HCL_. It is not necessary to know all of the details
