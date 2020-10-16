@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/mapstructure"
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -77,8 +76,8 @@ type Config struct {
 	EnableIntegrityMonitoring bool `mapstructure:"enable_integrity_monitoring" required:"false"`
 	// Whether to use an IAP proxy.
 	IAPConfig `mapstructure:",squash"`
-	// Create the image. Useful for setting to `false` during a build test stage. Defaults to `true`.
-	CreateImage bool `mapstructure:"create_image" required:"false"`
+	// Skip creating the image. Useful for setting to `true` during a build test stage. Defaults to `false`.
+	SkipCreateImage bool `mapstructure:"skip_create_image" required:"false"`
 	// The unique name of the resulting image. Defaults to
 	// `packer-{{timestamp}}`.
 	ImageName string `mapstructure:"image_name" required:"false"`
@@ -291,9 +290,7 @@ type Config struct {
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	c.ctx.Funcs = TemplateFuncs
-	var md mapstructure.Metadata
 	err := config.Decode(c, &config.DecodeOpts{
-		Metadata:           &md,
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
@@ -332,18 +329,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(errs,
 				errors.New("You cannot enable Integrity Monitoring when vTPM is disabled."))
 		}
-	}
-
-	hasCreateImage := false
-	for _, k := range md.Keys {
-		if k == "create_image" {
-			hasCreateImage = true
-			break
-		}
-	}
-
-	if !hasCreateImage {
-		c.CreateImage = true
 	}
 
 	if c.ImageDescription == "" {

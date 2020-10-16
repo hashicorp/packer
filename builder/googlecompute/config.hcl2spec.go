@@ -81,7 +81,7 @@ type FlatConfig struct {
 	IAPHashBang                  *string                    `mapstructure:"iap_hashbang" required:"false" cty:"iap_hashbang" hcl:"iap_hashbang"`
 	IAPExt                       *string                    `mapstructure:"iap_ext" required:"false" cty:"iap_ext" hcl:"iap_ext"`
 	IAPTunnelLaunchWait          *int                       `mapstructure:"iap_tunnel_launch_wait" required:"false" cty:"iap_tunnel_launch_wait" hcl:"iap_tunnel_launch_wait"`
-	CreateImage                  *bool                      `mapstructure:"create_image" required:"false" cty:"create_image" hcl:"create_image"`
+	SkipCreateImage              *bool                      `mapstructure:"skip_create_image" required:"false" cty:"skip_create_image" hcl:"skip_create_image"`
 	ImageName                    *string                    `mapstructure:"image_name" required:"false" cty:"image_name" hcl:"image_name"`
 	ImageDescription             *string                    `mapstructure:"image_description" required:"false" cty:"image_description" hcl:"image_description"`
 	ImageEncryptionKey           *FlatCustomerEncryptionKey `mapstructure:"image_encryption_key" required:"false" cty:"image_encryption_key" hcl:"image_encryption_key"`
@@ -201,7 +201,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"iap_hashbang":                    &hcldec.AttrSpec{Name: "iap_hashbang", Type: cty.String, Required: false},
 		"iap_ext":                         &hcldec.AttrSpec{Name: "iap_ext", Type: cty.String, Required: false},
 		"iap_tunnel_launch_wait":          &hcldec.AttrSpec{Name: "iap_tunnel_launch_wait", Type: cty.Number, Required: false},
-		"create_image":                    &hcldec.AttrSpec{Name: "create_image", Type: cty.Bool, Required: false},
+		"skip_create_image":               &hcldec.AttrSpec{Name: "skip_create_image", Type: cty.Bool, Required: false},
 		"image_name":                      &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"image_description":               &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
 		"image_encryption_key":            &hcldec.BlockSpec{TypeName: "image_encryption_key", Nested: hcldec.ObjectSpec((*FlatCustomerEncryptionKey)(nil).HCL2Spec())},

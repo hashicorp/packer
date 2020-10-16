@@ -23,7 +23,7 @@ func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	if !config.CreateImage {
+	if config.SkipCreateImage {
 		ui.Say("Skipping image creation...")
 		return multistep.ActionContinue
 	}
