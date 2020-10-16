@@ -293,7 +293,9 @@
 
 - `tenancy` (string) - [Tenancy](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-instance.html) used
   when Packer launches the EC2 instance, allowing it to be launched on dedicated hardware.
-  If unset, the default shared tenancy will be used.
+  
+  The default is "default", meaning shared tenancy. Allowed values are "default",
+  "dedicated" and "host".
 
 - `temporary_key_pair_name` (string) - The name of the temporary key pair to
   generate. By default, Packer generates a name that looks like
