@@ -30,6 +30,12 @@ export default [
         category: 'functions',
         content: [
           {
+            category: 'contextual',
+            content: [
+              'vault',
+            ],
+          },
+          {
             category: 'numeric',
             content: [
               'abs',
