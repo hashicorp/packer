@@ -71,7 +71,6 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 		ui.Say("Automatic shutdown disabled. Please shutdown virtual machine.")
 	} else if s.Config.Command != "" {
 		// Communicator is not needed unless shutdown_command is populated
-		comm := state.Get("communicator").(packer.Communicator)
 
 		ui.Say("Executing shutdown command...")
 		log.Printf("Shutdown command: %s", s.Config.Command)
