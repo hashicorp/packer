@@ -33,6 +33,7 @@ export default [
             category: 'contextual',
             content: [
               'vault',
+              'consul',
             ],
           },
           {
