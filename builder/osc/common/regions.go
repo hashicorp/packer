@@ -1,19 +1,23 @@
 package common
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/outscale/osc-go/oapi"
+	"github.com/antihax/optional"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
-func listOAPIRegions(oapiconn oapi.OAPIClient) ([]string, error) {
+func listOSCRegions(oscconn *osc.RegionApiService) ([]string, error) {
 	var regions []string
-	resp, err := oapiconn.POST_ReadRegions(oapi.ReadRegionsRequest{})
-	if resp.OK == nil || err != nil {
+	resp, _, err := oscconn.ReadRegions(context.Background(), &osc.ReadRegionsOpts{
+		ReadRegionsRequest: optional.NewInterface(osc.ReadRegionsRequest{}),
+	})
+	if err != nil {
 		return []string{}, err
 	}
 
-	resultRegions := resp.OK
+	resultRegions := resp
 
 	for _, region := range resultRegions.Regions {
 		regions = append(regions, region.RegionName)
@@ -24,13 +28,10 @@ func listOAPIRegions(oapiconn oapi.OAPIClient) ([]string, error) {
 
 // ValidateRegion returns true if the supplied region is a valid Outscale
 // region and false if it's not.
-func (c *AccessConfig) ValidateRegion(regions ...string) error {
-	oapiconn, err := c.NewOAPIConnection()
-	if err != nil {
-		return err
-	}
+func (c *AccessConfig) ValidateOSCRegion(regions ...string) error {
+	oscconn := c.NewOSCClient()
 
-	validRegions, err := listOAPIRegions(oapiconn)
+	validRegions, err := listOSCRegions(oscconn.RegionApi)
 	if err != nil {
 		return err
 	}

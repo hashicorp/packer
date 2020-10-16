@@ -6,11 +6,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/antihax/optional"
 	multierror "github.com/hashicorp/go-multierror"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // StepSnapshotVolumes creates snapshots of the created volumes.
@@ -18,14 +19,14 @@ import (
 // Produces:
 //   snapshot_ids map[string]string - IDs of the created snapshots
 type StepSnapshotVolumes struct {
-	LaunchDevices []oapi.BlockDeviceMappingVmCreation
+	LaunchDevices []osc.BlockDeviceMappingVmCreation
 	snapshotIds   map[string]string
 }
 
 func (s *StepSnapshotVolumes) snapshotVolume(ctx context.Context, deviceName string, state multistep.StateBag) error {
-	oapiconn := state.Get("oapi").(*oapi.Client)
+	oscconn := state.Get("osc").(*osc.APIClient)
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(oapi.Vm)
+	vm := state.Get("vm").(osc.Vm)
 
 	var volumeId string
 	for _, volume := range vm.BlockDeviceMappings {
@@ -40,19 +41,21 @@ func (s *StepSnapshotVolumes) snapshotVolume(ctx context.Context, deviceName str
 	ui.Say(fmt.Sprintf("Creating snapshot of EBS Volume %s...", volumeId))
 	description := fmt.Sprintf("Packer: %s", time.Now().String())
 
-	createSnapResp, err := oapiconn.POST_CreateSnapshot(oapi.CreateSnapshotRequest{
-		VolumeId:    volumeId,
-		Description: description,
+	createSnapResp, _, err := oscconn.SnapshotApi.CreateSnapshot(context.Background(), &osc.CreateSnapshotOpts{
+		CreateSnapshotRequest: optional.NewInterface(osc.CreateSnapshotRequest{
+			VolumeId:    volumeId,
+			Description: description,
+		}),
 	})
 	if err != nil {
 		return err
 	}
 
 	// Set the snapshot ID so we can delete it later
-	s.snapshotIds[deviceName] = createSnapResp.OK.Snapshot.SnapshotId
+	s.snapshotIds[deviceName] = createSnapResp.Snapshot.SnapshotId
 
 	// Wait for snapshot to be created
-	err = osccommon.WaitUntilSnapshotCompleted(oapiconn, createSnapResp.OK.Snapshot.SnapshotId)
+	err = osccommon.WaitUntilOscSnapshotCompleted(oscconn, createSnapResp.Snapshot.SnapshotId)
 	return err
 }
 
@@ -65,7 +68,7 @@ func (s *StepSnapshotVolumes) Run(ctx context.Context, state multistep.StateBag)
 	var errs *multierror.Error
 	for _, device := range s.LaunchDevices {
 		wg.Add(1)
-		go func(device oapi.BlockDeviceMappingVmCreation) {
+		go func(device osc.BlockDeviceMappingVmCreation) {
 			defer wg.Done()
 			if err := s.snapshotVolume(ctx, device.DeviceName, state); err != nil {
 				errs = multierror.Append(errs, err)
@@ -94,11 +97,13 @@ func (s *StepSnapshotVolumes) Cleanup(state multistep.StateBag) {
 	_, halted := state.GetOk(multistep.StateHalted)
 
 	if cancelled || halted {
-		oapiconn := state.Get("oapi").(*oapi.Client)
+		oscconn := state.Get("osc").(*osc.APIClient)
 		ui := state.Get("ui").(packer.Ui)
 		ui.Say("Removing snapshots since we cancelled or halted...")
-		for _, snapshotId := range s.snapshotIds {
-			_, err := oapiconn.POST_DeleteSnapshot(oapi.DeleteSnapshotRequest{SnapshotId: snapshotId})
+		for _, snapshotID := range s.snapshotIds {
+			_, _, err := oscconn.SnapshotApi.DeleteSnapshot(context.Background(), &osc.DeleteSnapshotOpts{
+				DeleteSnapshotRequest: optional.NewInterface(osc.DeleteSnapshotRequest{SnapshotId: snapshotID}),
+			})
 			if err != nil {
 				ui.Error(fmt.Sprintf("Error: %s", err))
 			}

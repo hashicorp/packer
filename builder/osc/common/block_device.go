@@ -5,9 +5,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // BlockDevice
@@ -35,11 +34,11 @@ type LaunchBlockDevices struct {
 	LaunchMappings []BlockDevice `mapstructure:"launch_block_device_mappings"`
 }
 
-func buildBlockDevicesImage(b []BlockDevice) []oapi.BlockDeviceMappingImage {
-	var blockDevices []oapi.BlockDeviceMappingImage
+func buildOscBlockDevicesImage(b []BlockDevice) []osc.BlockDeviceMappingImage {
+	var blockDevices []osc.BlockDeviceMappingImage
 
 	for _, blockDevice := range b {
-		mapping := oapi.BlockDeviceMappingImage{
+		mapping := osc.BlockDeviceMappingImage{
 			DeviceName: blockDevice.DeviceName,
 		}
 
@@ -48,8 +47,8 @@ func buildBlockDevicesImage(b []BlockDevice) []oapi.BlockDeviceMappingImage {
 				mapping.VirtualDeviceName = blockDevice.VirtualName
 			}
 		} else {
-			bsu := oapi.BsuToCreate{
-				DeleteOnVmDeletion: aws.Bool(blockDevice.DeleteOnVmDeletion),
+			bsu := osc.BsuToCreate{
+				DeleteOnVmDeletion: blockDevice.DeleteOnVmDeletion,
 			}
 
 			if blockDevice.VolumeType != "" {
@@ -57,12 +56,12 @@ func buildBlockDevicesImage(b []BlockDevice) []oapi.BlockDeviceMappingImage {
 			}
 
 			if blockDevice.VolumeSize > 0 {
-				bsu.VolumeSize = blockDevice.VolumeSize
+				bsu.VolumeSize = int32(blockDevice.VolumeSize)
 			}
 
 			// IOPS is only valid for io1 type
 			if blockDevice.VolumeType == "io1" {
-				bsu.Iops = blockDevice.IOPS
+				bsu.Iops = int32(blockDevice.IOPS)
 			}
 
 			if blockDevice.SnapshotId != "" {
@@ -77,13 +76,13 @@ func buildBlockDevicesImage(b []BlockDevice) []oapi.BlockDeviceMappingImage {
 	return blockDevices
 }
 
-func buildBlockDevicesVmCreation(b []BlockDevice) []oapi.BlockDeviceMappingVmCreation {
+func buildOscBlockDevicesVmCreation(b []BlockDevice) []osc.BlockDeviceMappingVmCreation {
 	log.Printf("[DEBUG] Launch Block Device %#v", b)
 
-	var blockDevices []oapi.BlockDeviceMappingVmCreation
+	var blockDevices []osc.BlockDeviceMappingVmCreation
 
 	for _, blockDevice := range b {
-		mapping := oapi.BlockDeviceMappingVmCreation{
+		mapping := osc.BlockDeviceMappingVmCreation{
 			DeviceName: blockDevice.DeviceName,
 		}
 
@@ -94,8 +93,8 @@ func buildBlockDevicesVmCreation(b []BlockDevice) []oapi.BlockDeviceMappingVmCre
 				mapping.VirtualDeviceName = blockDevice.VirtualName
 			}
 		} else {
-			bsu := oapi.BsuToCreate{
-				DeleteOnVmDeletion: aws.Bool(blockDevice.DeleteOnVmDeletion),
+			bsu := osc.BsuToCreate{
+				DeleteOnVmDeletion: blockDevice.DeleteOnVmDeletion,
 			}
 
 			if blockDevice.VolumeType != "" {
@@ -103,12 +102,12 @@ func buildBlockDevicesVmCreation(b []BlockDevice) []oapi.BlockDeviceMappingVmCre
 			}
 
 			if blockDevice.VolumeSize > 0 {
-				bsu.VolumeSize = blockDevice.VolumeSize
+				bsu.VolumeSize = int32(blockDevice.VolumeSize)
 			}
 
 			// IOPS is only valid for io1 type
 			if blockDevice.VolumeType == "io1" {
-				bsu.Iops = blockDevice.IOPS
+				bsu.Iops = int32(blockDevice.IOPS)
 			}
 
 			if blockDevice.SnapshotId != "" {
@@ -145,10 +144,10 @@ func (b *BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
 	return errs
 }
 
-func (b *OMIBlockDevices) BuildOMIDevices() []oapi.BlockDeviceMappingImage {
-	return buildBlockDevicesImage(b.OMIMappings)
+func (b *OMIBlockDevices) BuildOscOMIDevices() []osc.BlockDeviceMappingImage {
+	return buildOscBlockDevicesImage(b.OMIMappings)
 }
 
-func (b *LaunchBlockDevices) BuildLaunchDevices() []oapi.BlockDeviceMappingVmCreation {
-	return buildBlockDevicesVmCreation(b.LaunchMappings)
+func (b *LaunchBlockDevices) BuildOSCLaunchDevices() []osc.BlockDeviceMappingVmCreation {
+	return buildOscBlockDevicesVmCreation(b.LaunchMappings)
 }

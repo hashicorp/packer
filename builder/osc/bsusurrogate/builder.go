@@ -6,10 +6,8 @@ package bsusurrogate
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
-	"net/http"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
@@ -19,7 +17,6 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/outscale/osc-go/oapi"
 )
 
 const BuilderId = "oapi.outscale.bsusurrogate"
@@ -104,31 +101,20 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	clientConfig, err := b.config.Config()
-	if err != nil {
-		return nil, err
-	}
-
-	skipClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
-
-	oapiconn := oapi.NewClient(clientConfig, skipClient)
+	oscConn := b.config.NewOSCClient()
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
-	state.Put("oapi", oapiconn)
-	state.Put("clientConfig", clientConfig)
+	state.Put("osc", oscConn)
+	state.Put("accessConfig", &b.config.AccessConfig)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
 	//VMStep
 
-	omiDevices := b.config.BuildOMIDevices()
-	launchDevices := b.config.BuildLaunchDevices()
+	omiDevices := b.config.BuildOscOMIDevices()
+	launchOSCDevices := b.config.BuildOSCLaunchDevices()
 
 	steps := []multistep.Step{
 		&osccommon.StepPreValidate{
@@ -193,8 +179,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
-			Host: osccommon.SSHHost(
-				oapiconn,
+			Host: osccommon.OscSSHHost(
+				oscConn.VmApi,
 				b.config.SSHInterface),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
@@ -207,7 +193,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			DisableStopVm: b.config.DisableStopVm,
 		},
 		&StepSnapshotVolumes{
-			LaunchDevices: launchDevices,
+			LaunchDevices: launchOSCDevices,
 		},
 		&osccommon.StepDeregisterOMI{
 			AccessConfig:        &b.config.AccessConfig,
@@ -219,7 +205,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepRegisterOMI{
 			RootDevice:    b.config.RootDevice,
 			OMIDevices:    omiDevices,
-			LaunchDevices: launchDevices,
+			LaunchDevices: launchOSCDevices,
+			RawRegion:     b.config.RawRegion,
 		},
 		&osccommon.StepUpdateOMIAttributes{
 			AccountIds:         b.config.OMIAccountIDs,
@@ -247,7 +234,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		artifact := &osccommon.Artifact{
 			Omis:           omis.(map[string]string),
 			BuilderIdValue: BuilderId,
-			Config:         clientConfig,
 			StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 		}
 

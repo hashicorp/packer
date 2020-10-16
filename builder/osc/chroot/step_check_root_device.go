@@ -6,14 +6,14 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // StepCheckRootDevice makes sure the root device on the OMI is BSU-backed.
 type StepCheckRootDevice struct{}
 
 func (s *StepCheckRootDevice) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	image := state.Get("source_image").(oapi.Image)
+	image := state.Get("source_image").(osc.Image)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Checking the root device on source OMI...")

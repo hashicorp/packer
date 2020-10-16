@@ -4,19 +4,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 func TestBlockDevice_LaunchDevices(t *testing.T) {
-	tr := new(bool)
-	f := new(bool)
-
-	*tr = true
-	*f = false
-
 	cases := []struct {
 		Config *BlockDevice
-		Result oapi.BlockDeviceMappingVmCreation
+		Result osc.BlockDeviceMappingVmCreation
 	}{
 		{
 			Config: &BlockDevice{
@@ -27,13 +21,13 @@ func TestBlockDevice_LaunchDevices(t *testing.T) {
 				DeleteOnVmDeletion: true,
 			},
 
-			Result: oapi.BlockDeviceMappingVmCreation{
+			Result: osc.BlockDeviceMappingVmCreation{
 				DeviceName: "/dev/sdb",
-				Bsu: oapi.BsuToCreate{
+				Bsu: osc.BsuToCreate{
 					SnapshotId:         "snap-1234",
 					VolumeType:         "standard",
 					VolumeSize:         8,
-					DeleteOnVmDeletion: tr,
+					DeleteOnVmDeletion: true,
 				},
 			},
 		},
@@ -43,11 +37,11 @@ func TestBlockDevice_LaunchDevices(t *testing.T) {
 				VolumeSize: 8,
 			},
 
-			Result: oapi.BlockDeviceMappingVmCreation{
+			Result: osc.BlockDeviceMappingVmCreation{
 				DeviceName: "/dev/sdb",
-				Bsu: oapi.BsuToCreate{
+				Bsu: osc.BsuToCreate{
 					VolumeSize:         8,
-					DeleteOnVmDeletion: f,
+					DeleteOnVmDeletion: false,
 				},
 			},
 		},
@@ -60,12 +54,12 @@ func TestBlockDevice_LaunchDevices(t *testing.T) {
 				IOPS:               1000,
 			},
 
-			Result: oapi.BlockDeviceMappingVmCreation{
+			Result: osc.BlockDeviceMappingVmCreation{
 				DeviceName: "/dev/sdb",
-				Bsu: oapi.BsuToCreate{
+				Bsu: osc.BsuToCreate{
 					VolumeType:         "io1",
 					VolumeSize:         8,
-					DeleteOnVmDeletion: tr,
+					DeleteOnVmDeletion: true,
 					Iops:               1000,
 				},
 			},
@@ -78,12 +72,12 @@ func TestBlockDevice_LaunchDevices(t *testing.T) {
 				DeleteOnVmDeletion: true,
 			},
 
-			Result: oapi.BlockDeviceMappingVmCreation{
+			Result: osc.BlockDeviceMappingVmCreation{
 				DeviceName: "/dev/sdb",
-				Bsu: oapi.BsuToCreate{
+				Bsu: osc.BsuToCreate{
 					VolumeType:         "gp2",
 					VolumeSize:         8,
-					DeleteOnVmDeletion: tr,
+					DeleteOnVmDeletion: true,
 				},
 			},
 		},
@@ -95,12 +89,12 @@ func TestBlockDevice_LaunchDevices(t *testing.T) {
 				DeleteOnVmDeletion: true,
 			},
 
-			Result: oapi.BlockDeviceMappingVmCreation{
+			Result: osc.BlockDeviceMappingVmCreation{
 				DeviceName: "/dev/sdb",
-				Bsu: oapi.BsuToCreate{
+				Bsu: osc.BsuToCreate{
 					VolumeType:         "gp2",
 					VolumeSize:         8,
-					DeleteOnVmDeletion: tr,
+					DeleteOnVmDeletion: true,
 				},
 			},
 		},
@@ -111,11 +105,11 @@ func TestBlockDevice_LaunchDevices(t *testing.T) {
 				DeleteOnVmDeletion: true,
 			},
 
-			Result: oapi.BlockDeviceMappingVmCreation{
+			Result: osc.BlockDeviceMappingVmCreation{
 				DeviceName: "/dev/sdb",
-				Bsu: oapi.BsuToCreate{
+				Bsu: osc.BsuToCreate{
 					VolumeType:         "standard",
-					DeleteOnVmDeletion: tr,
+					DeleteOnVmDeletion: true,
 				},
 			},
 		},
@@ -125,7 +119,7 @@ func TestBlockDevice_LaunchDevices(t *testing.T) {
 				VirtualName: "ephemeral0",
 			},
 
-			Result: oapi.BlockDeviceMappingVmCreation{
+			Result: osc.BlockDeviceMappingVmCreation{
 				DeviceName:        "/dev/sdb",
 				VirtualDeviceName: "ephemeral0",
 			},
@@ -136,7 +130,7 @@ func TestBlockDevice_LaunchDevices(t *testing.T) {
 				NoDevice:   true,
 			},
 
-			Result: oapi.BlockDeviceMappingVmCreation{
+			Result: osc.BlockDeviceMappingVmCreation{
 				DeviceName: "/dev/sdb",
 				NoDevice:   "",
 			},
@@ -149,9 +143,9 @@ func TestBlockDevice_LaunchDevices(t *testing.T) {
 			LaunchMappings: []BlockDevice{*tc.Config},
 		}
 
-		expected := []oapi.BlockDeviceMappingVmCreation{tc.Result}
+		expected := []osc.BlockDeviceMappingVmCreation{tc.Result}
 
-		launchResults := launchBlockDevices.BuildLaunchDevices()
+		launchResults := launchBlockDevices.BuildOSCLaunchDevices()
 		if !reflect.DeepEqual(expected, launchResults) {
 			t.Fatalf("Bad block device, \nexpected: %#v\n\ngot: %#v",
 				expected, launchResults)
@@ -160,15 +154,9 @@ func TestBlockDevice_LaunchDevices(t *testing.T) {
 }
 
 func TestBlockDevice_OMI(t *testing.T) {
-	tr := new(bool)
-	f := new(bool)
-
-	*tr = true
-	*f = false
-
 	cases := []struct {
 		Config *BlockDevice
-		Result oapi.BlockDeviceMappingImage
+		Result osc.BlockDeviceMappingImage
 	}{
 		{
 			Config: &BlockDevice{
@@ -179,27 +167,28 @@ func TestBlockDevice_OMI(t *testing.T) {
 				DeleteOnVmDeletion: true,
 			},
 
-			Result: oapi.BlockDeviceMappingImage{
+			Result: osc.BlockDeviceMappingImage{
 				DeviceName: "/dev/sdb",
-				Bsu: oapi.BsuToCreate{
+				Bsu: osc.BsuToCreate{
 					SnapshotId:         "snap-1234",
 					VolumeType:         "standard",
 					VolumeSize:         8,
-					DeleteOnVmDeletion: tr,
+					DeleteOnVmDeletion: true,
 				},
 			},
 		},
 		{
 			Config: &BlockDevice{
-				DeviceName: "/dev/sdb",
-				VolumeSize: 8,
+				DeviceName:         "/dev/sdb",
+				VolumeSize:         8,
+				DeleteOnVmDeletion: true,
 			},
 
-			Result: oapi.BlockDeviceMappingImage{
+			Result: osc.BlockDeviceMappingImage{
 				DeviceName: "/dev/sdb",
-				Bsu: oapi.BsuToCreate{
+				Bsu: osc.BsuToCreate{
 					VolumeSize:         8,
-					DeleteOnVmDeletion: f,
+					DeleteOnVmDeletion: true,
 				},
 			},
 		},
@@ -212,12 +201,12 @@ func TestBlockDevice_OMI(t *testing.T) {
 				IOPS:               1000,
 			},
 
-			Result: oapi.BlockDeviceMappingImage{
+			Result: osc.BlockDeviceMappingImage{
 				DeviceName: "/dev/sdb",
-				Bsu: oapi.BsuToCreate{
+				Bsu: osc.BsuToCreate{
 					VolumeType:         "io1",
 					VolumeSize:         8,
-					DeleteOnVmDeletion: tr,
+					DeleteOnVmDeletion: true,
 					Iops:               1000,
 				},
 			},
@@ -230,12 +219,12 @@ func TestBlockDevice_OMI(t *testing.T) {
 				DeleteOnVmDeletion: true,
 			},
 
-			Result: oapi.BlockDeviceMappingImage{
+			Result: osc.BlockDeviceMappingImage{
 				DeviceName: "/dev/sdb",
-				Bsu: oapi.BsuToCreate{
+				Bsu: osc.BsuToCreate{
 					VolumeType:         "gp2",
 					VolumeSize:         8,
-					DeleteOnVmDeletion: tr,
+					DeleteOnVmDeletion: true,
 				},
 			},
 		},
@@ -247,12 +236,12 @@ func TestBlockDevice_OMI(t *testing.T) {
 				DeleteOnVmDeletion: true,
 			},
 
-			Result: oapi.BlockDeviceMappingImage{
+			Result: osc.BlockDeviceMappingImage{
 				DeviceName: "/dev/sdb",
-				Bsu: oapi.BsuToCreate{
+				Bsu: osc.BsuToCreate{
 					VolumeType:         "gp2",
 					VolumeSize:         8,
-					DeleteOnVmDeletion: tr,
+					DeleteOnVmDeletion: true,
 				},
 			},
 		},
@@ -263,11 +252,11 @@ func TestBlockDevice_OMI(t *testing.T) {
 				DeleteOnVmDeletion: true,
 			},
 
-			Result: oapi.BlockDeviceMappingImage{
+			Result: osc.BlockDeviceMappingImage{
 				DeviceName: "/dev/sdb",
-				Bsu: oapi.BsuToCreate{
+				Bsu: osc.BsuToCreate{
 					VolumeType:         "standard",
-					DeleteOnVmDeletion: tr,
+					DeleteOnVmDeletion: true,
 				},
 			},
 		},
@@ -277,24 +266,24 @@ func TestBlockDevice_OMI(t *testing.T) {
 				VirtualName: "ephemeral0",
 			},
 
-			Result: oapi.BlockDeviceMappingImage{
+			Result: osc.BlockDeviceMappingImage{
 				DeviceName:        "/dev/sdb",
 				VirtualDeviceName: "ephemeral0",
 			},
 		},
 	}
 
-	for _, tc := range cases {
+	for i, tc := range cases {
 		omiBlockDevices := OMIBlockDevices{
 			OMIMappings: []BlockDevice{*tc.Config},
 		}
 
-		expected := []oapi.BlockDeviceMappingImage{tc.Result}
+		expected := []osc.BlockDeviceMappingImage{tc.Result}
 
-		omiResults := omiBlockDevices.BuildOMIDevices()
+		omiResults := omiBlockDevices.BuildOscOMIDevices()
 		if !reflect.DeepEqual(expected, omiResults) {
-			t.Fatalf("Bad block device, \nexpected: %+#v\n\ngot: %+#v",
-				expected, omiResults)
+			t.Fatalf("%d - Bad block device, \nexpected: %+#v\n\ngot: %+#v",
+				i, expected, omiResults)
 		}
 	}
 }

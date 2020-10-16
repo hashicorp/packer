@@ -8,9 +8,7 @@ package chroot
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
-	"net/http"
 	"runtime"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -20,7 +18,6 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/outscale/osc-go/oapi"
 )
 
 // The unique ID for this builder
@@ -193,19 +190,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		return nil, errors.New("The outscale-chroot builder only works on Linux environments.")
 	}
 
-	clientConfig, err := b.config.Config()
-	if err != nil {
-		return nil, err
-	}
-
-	skipClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
-
-	oapiconn := oapi.NewClient(clientConfig, skipClient)
-
+	oscConn := b.config.NewOSCClient()
 	wrappedCommand := func(command string) (string, error) {
 		ctx := b.config.ctx
 		ctx.Data = &wrappedCommandTemplate{Command: command}
@@ -215,8 +200,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
-	state.Put("oapi", oapiconn)
-	state.Put("clientConfig", clientConfig)
+	state.Put("osc", oscConn)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("wrappedCommand", CommandWrapper(wrappedCommand))
@@ -266,7 +250,9 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&StepCopyFiles{},
 		&StepChrootProvision{},
 		&StepEarlyCleanup{},
-		&StepSnapshot{},
+		&StepSnapshot{
+			RawRegion: b.config.RawRegion,
+		},
 		&osccommon.StepDeregisterOMI{
 			AccessConfig:        &b.config.AccessConfig,
 			ForceDeregister:     b.config.OMIForceDeregister,
@@ -276,6 +262,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&StepCreateOMI{
 			RootVolumeSize: b.config.RootVolumeSize,
+			RawRegion:      b.config.RawRegion,
 		},
 		&osccommon.StepUpdateOMIAttributes{
 			AccountIds:         b.config.OMIAccountIDs,
@@ -307,7 +294,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	artifact := &osccommon.Artifact{
 		Omis:           state.Get("omis").(map[string]string),
 		BuilderIdValue: BuilderId,
-		Config:         clientConfig,
 		StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 	}
 

@@ -4,28 +4,30 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 type stepTagBSUVolumes struct {
 	VolumeMapping []BlockDevice
+	RawRegion     string
 	Ctx           interpolate.Context
 }
 
 func (s *stepTagBSUVolumes) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	oapiconn := state.Get("oapi").(*oapi.Client)
-	vm := state.Get("vm").(oapi.Vm)
+	oscconn := state.Get("osc").(*osc.APIClient)
+	vm := state.Get("vm").(osc.Vm)
 	ui := state.Get("ui").(packer.Ui)
 
 	volumes := make(BsuVolumes)
 	for _, instanceBlockDevices := range vm.BlockDeviceMappings {
 		for _, configVolumeMapping := range s.VolumeMapping {
 			if configVolumeMapping.DeviceName == instanceBlockDevices.DeviceName {
-				volumes[oapiconn.GetConfig().Region] = append(
-					volumes[oapiconn.GetConfig().Region],
+				volumes[s.RawRegion] = append(
+					volumes[s.RawRegion],
 					instanceBlockDevices.Bsu.VolumeId)
 			}
 		}
@@ -35,14 +37,14 @@ func (s *stepTagBSUVolumes) Run(_ context.Context, state multistep.StateBag) mul
 	if len(s.VolumeMapping) > 0 {
 		ui.Say("Tagging BSU volumes...")
 
-		toTag := map[string][]oapi.ResourceTag{}
+		toTag := map[string][]osc.ResourceTag{}
 		for _, mapping := range s.VolumeMapping {
 			if len(mapping.Tags) == 0 {
 				ui.Say(fmt.Sprintf("No tags specified for volume on %s...", mapping.DeviceName))
 				continue
 			}
 
-			tags, err := mapping.Tags.OAPITags(s.Ctx, oapiconn.GetConfig().Region, state)
+			tags, err := mapping.Tags.OSCTags(s.Ctx, s.RawRegion, state)
 			if err != nil {
 				err := fmt.Errorf("Error tagging device %s with %s", mapping.DeviceName, err)
 				state.Put("error", err)
@@ -59,9 +61,11 @@ func (s *stepTagBSUVolumes) Run(_ context.Context, state multistep.StateBag) mul
 		}
 
 		for volumeId, tags := range toTag {
-			_, err := oapiconn.POST_CreateTags(oapi.CreateTagsRequest{
-				ResourceIds: []string{volumeId},
-				Tags:        tags,
+			_, _, err := oscconn.TagApi.CreateTags(context.Background(), &osc.CreateTagsOpts{
+				CreateTagsRequest: optional.NewInterface(osc.CreateTagsRequest{
+					ResourceIds: []string{volumeId},
+					Tags:        tags,
+				}),
 			})
 			if err != nil {
 				err := fmt.Errorf("Error tagging BSU Volume %s on %s: %s", volumeId, vm.VmId, err)

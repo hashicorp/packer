@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/antihax/optional"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // StepLinkVolume attaches the previously created volume to an
@@ -22,9 +23,9 @@ type StepLinkVolume struct {
 }
 
 func (s *StepLinkVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	oapiconn := state.Get("oapi").(*oapi.Client)
+	oscconn := state.Get("osc").(*osc.APIClient)
 	device := state.Get("device").(string)
-	vm := state.Get("vm").(oapi.Vm)
+	vm := state.Get("vm").(osc.Vm)
 	ui := state.Get("ui").(packer.Ui)
 	volumeId := state.Get("volume_id").(string)
 
@@ -33,10 +34,12 @@ func (s *StepLinkVolume) Run(ctx context.Context, state multistep.StateBag) mult
 	linkVolume := device
 
 	ui.Say(fmt.Sprintf("Attaching the root volume to %s", linkVolume))
-	_, err := oapiconn.POST_LinkVolume(oapi.LinkVolumeRequest{
-		VmId:       vm.VmId,
-		VolumeId:   volumeId,
-		DeviceName: linkVolume,
+	_, _, err := oscconn.VolumeApi.LinkVolume(context.Background(), &osc.LinkVolumeOpts{
+		LinkVolumeRequest: optional.NewInterface(osc.LinkVolumeRequest{
+			VmId:       vm.VmId,
+			VolumeId:   volumeId,
+			DeviceName: linkVolume,
+		}),
 	})
 
 	if err != nil {
@@ -51,7 +54,7 @@ func (s *StepLinkVolume) Run(ctx context.Context, state multistep.StateBag) mult
 	s.volumeId = volumeId
 
 	// Wait for the volume to become attached
-	err = osccommon.WaitUntilVolumeIsLinked(oapiconn, s.volumeId)
+	err = osccommon.WaitUntilOscVolumeIsLinked(oscconn, s.volumeId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for volume: %s", err)
 		state.Put("error", err)
@@ -75,11 +78,14 @@ func (s *StepLinkVolume) CleanupFunc(state multistep.StateBag) error {
 		return nil
 	}
 
-	oapiconn := state.Get("oapi").(*oapi.Client)
+	oscconn := state.Get("osc").(*osc.APIClient)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Detaching BSU volume...")
-	_, err := oapiconn.POST_UnlinkVolume(oapi.UnlinkVolumeRequest{VolumeId: s.volumeId})
+	_, _, err := oscconn.VolumeApi.UnlinkVolume(context.Background(), &osc.UnlinkVolumeOpts{
+		UnlinkVolumeRequest: optional.NewInterface(osc.UnlinkVolumeRequest{VolumeId: s.volumeId}),
+	})
+
 	if err != nil {
 		return fmt.Errorf("Error detaching BSU volume: %s", err)
 	}
@@ -87,7 +93,7 @@ func (s *StepLinkVolume) CleanupFunc(state multistep.StateBag) error {
 	s.attached = false
 
 	// Wait for the volume to detach
-	err = osccommon.WaitUntilVolumeIsUnlinked(oapiconn, s.volumeId)
+	err = osccommon.WaitUntilOscVolumeIsUnlinked(oscconn, s.volumeId)
 	if err != nil {
 		return fmt.Errorf("Error waiting for volume: %s", err)
 	}

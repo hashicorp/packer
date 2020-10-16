@@ -7,45 +7,46 @@ import (
 	"sort"
 	"time"
 
+	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // StepSourceOMIInfo extracts critical information from the source OMI
 // that is used throughout the OMI creation process.
 //
 // Produces:
-//   source_image *oapi.Image - the source OMI info
+//   source_image *osc.Image - the source OMI info
 type StepSourceOMIInfo struct {
 	SourceOmi   string
 	OMIVirtType string
 	OmiFilters  OmiFilterOptions
 }
 
-type imageSort []oapi.Image
+type imageOscSort []osc.Image
 
-func (a imageSort) Len() int      { return len(a) }
-func (a imageSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a imageSort) Less(i, j int) bool {
+func (a imageOscSort) Len() int      { return len(a) }
+func (a imageOscSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a imageOscSort) Less(i, j int) bool {
 	itime, _ := time.Parse(time.RFC3339, a[i].CreationDate)
 	jtime, _ := time.Parse(time.RFC3339, a[j].CreationDate)
 	return itime.Unix() < jtime.Unix()
 }
 
 // Returns the most recent OMI out of a slice of images.
-func mostRecentOmi(images []oapi.Image) oapi.Image {
+func mostRecentOscOmi(images []osc.Image) osc.Image {
 	sortedImages := images
-	sort.Sort(imageSort(sortedImages))
+	sort.Sort(imageOscSort(sortedImages))
 	return sortedImages[len(sortedImages)-1]
 }
 
 func (s *StepSourceOMIInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	oapiconn := state.Get("oapi").(*oapi.Client)
+	oscconn := state.Get("osc").(*osc.APIClient)
 	ui := state.Get("ui").(packer.Ui)
 
-	params := oapi.ReadImagesRequest{
-		Filters: oapi.FiltersImage{},
+	params := osc.ReadImagesRequest{
+		Filters: osc.FiltersImage{},
 	}
 
 	if s.SourceOmi != "" {
@@ -54,7 +55,7 @@ func (s *StepSourceOMIInfo) Run(_ context.Context, state multistep.StateBag) mul
 
 	// We have filters to apply
 	if len(s.OmiFilters.Filters) > 0 {
-		params.Filters = buildOMIFilters(s.OmiFilters.Filters)
+		params.Filters = buildOSCOMIFilters(s.OmiFilters.Filters)
 	}
 	//TODO:Check if AccountIds correspond to Owners.
 	if len(s.OmiFilters.Owners) > 0 {
@@ -62,7 +63,9 @@ func (s *StepSourceOMIInfo) Run(_ context.Context, state multistep.StateBag) mul
 	}
 
 	log.Printf("Using OMI Filters %#v", params)
-	imageResp, err := oapiconn.POST_ReadImages(params)
+	imageResp, _, err := oscconn.ImageApi.ReadImages(context.Background(), &osc.ReadImagesOpts{
+		ReadImagesRequest: optional.NewInterface(params),
+	})
 	if err != nil {
 		err := fmt.Errorf("Error querying OMI: %s", err)
 		state.Put("error", err)
@@ -70,25 +73,25 @@ func (s *StepSourceOMIInfo) Run(_ context.Context, state multistep.StateBag) mul
 		return multistep.ActionHalt
 	}
 
-	if len(imageResp.OK.Images) == 0 {
+	if len(imageResp.Images) == 0 {
 		err := fmt.Errorf("No OMI was found matching filters: %#v", params)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	if len(imageResp.OK.Images) > 1 && !s.OmiFilters.MostRecent {
-		err := fmt.Errorf("Your query returned more than one result. Please try a more specific search, or set most_recent to true.")
+	if len(imageResp.Images) > 1 && !s.OmiFilters.MostRecent {
+		err := fmt.Errorf("your query returned more than one result. Please try a more specific search, or set most_recent to true")
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	var image oapi.Image
+	var image osc.Image
 	if s.OmiFilters.MostRecent {
-		image = mostRecentOmi(imageResp.OK.Images)
+		image = mostRecentOscOmi(imageResp.Images)
 	} else {
-		image = imageResp.OK.Images[0]
+		image = imageResp.Images[0]
 	}
 
 	ui.Message(fmt.Sprintf("Found Image ID: %s", image.ImageId))

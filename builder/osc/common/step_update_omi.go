@@ -2,25 +2,24 @@ package common
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
-	"net/http"
 
+	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 type StepUpdateOMIAttributes struct {
 	AccountIds         []string
 	SnapshotAccountIds []string
+	RawRegion          string
 	Ctx                interpolate.Context
 }
 
 func (s *StepUpdateOMIAttributes) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	oapiconn := state.Get("oapi").(*oapi.Client)
-	config := state.Get("clientConfig").(*oapi.Config)
+	config := state.Get("accessConfig").(*AccessConfig)
 	ui := state.Get("ui").(packer.Ui)
 	omis := state.Get("omis").(map[string]string)
 	snapshots := state.Get("snapshots").(map[string][]string)
@@ -34,20 +33,20 @@ func (s *StepUpdateOMIAttributes) Run(_ context.Context, state multistep.StateBa
 		return multistep.ActionContinue
 	}
 
-	s.Ctx.Data = extractBuildInfo(oapiconn.GetConfig().Region, state)
+	s.Ctx.Data = extractBuildInfo(s.RawRegion, state)
 
-	updateSnapshoptRequest := oapi.UpdateSnapshotRequest{
-		PermissionsToCreateVolume: oapi.PermissionsOnResourceCreation{
-			Additions: oapi.PermissionsOnResource{
+	updateSnapshoptRequest := osc.UpdateSnapshotRequest{
+		PermissionsToCreateVolume: osc.PermissionsOnResourceCreation{
+			Additions: osc.PermissionsOnResource{
 				AccountIds:       s.AccountIds,
 				GlobalPermission: false,
 			},
 		},
 	}
 
-	updateImageRequest := oapi.UpdateImageRequest{
-		PermissionsToLaunch: oapi.PermissionsOnResourceCreation{
-			Additions: oapi.PermissionsOnResource{
+	updateImageRequest := osc.UpdateImageRequest{
+		PermissionsToLaunch: osc.PermissionsOnResourceCreation{
+			Additions: osc.PermissionsOnResource{
 				AccountIds:       s.AccountIds,
 				GlobalPermission: false,
 			},
@@ -57,26 +56,31 @@ func (s *StepUpdateOMIAttributes) Run(_ context.Context, state multistep.StateBa
 	// Updating image attributes
 	for region, omi := range omis {
 		ui.Say(fmt.Sprintf("Updating attributes on OMI (%s)...", omi))
-		newConfig := &oapi.Config{
-			UserAgent: config.UserAgent,
-			AccessKey: config.AccessKey,
-			SecretKey: config.SecretKey,
-			Service:   config.Service,
-			Region:    region, //New region
-			URL:       config.URL,
-		}
+		regionconn := config.NewOSCClientByRegion(region)
 
-		skipClient := &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-			},
-		}
+		// newConfig := &osc.Configuration{
+		// 	UserAgent: config.UserAgent,
+		// 	AccessKey: config.AccessKey,
+		// 	SecretKey: config.SecretKey,
+		// 	Service:   config.Service,
+		// 	Region:    region, //New region
+		// 	URL:       config.URL,
+		// }
 
-		regionconn := oapi.NewClient(newConfig, skipClient)
+		// skipClient := &http.Client{
+		// 	Transport: &http.Transport{
+		// 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		// 	},
+		// }
+
+		//regionconn := oapi.NewClient(newConfig, skipClient)
 
 		ui.Message(fmt.Sprintf("Updating: %s", omi))
 		updateImageRequest.ImageId = omi
-		_, err := regionconn.POST_UpdateImage(updateImageRequest)
+		_, _, err := regionconn.ImageApi.UpdateImage(context.Background(), &osc.UpdateImageOpts{
+			UpdateImageRequest: optional.NewInterface(updateImageRequest),
+		})
+
 		if err != nil {
 			err := fmt.Errorf("Error updating OMI: %s", err)
 			state.Put("error", err)
@@ -89,26 +93,13 @@ func (s *StepUpdateOMIAttributes) Run(_ context.Context, state multistep.StateBa
 	for region, region_snapshots := range snapshots {
 		for _, snapshot := range region_snapshots {
 			ui.Say(fmt.Sprintf("Updating attributes on snapshot (%s)...", snapshot))
-			newConfig := &oapi.Config{
-				UserAgent: config.UserAgent,
-				AccessKey: config.AccessKey,
-				SecretKey: config.SecretKey,
-				Service:   config.Service,
-				Region:    region, //New region
-				URL:       config.URL,
-			}
-
-			skipClient := &http.Client{
-				Transport: &http.Transport{
-					TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-				},
-			}
-
-			regionconn := oapi.NewClient(newConfig, skipClient)
+			regionconn := config.NewOSCClientByRegion(region)
 
 			ui.Message(fmt.Sprintf("Updating: %s", snapshot))
 			updateSnapshoptRequest.SnapshotId = snapshot
-			_, err := regionconn.POST_UpdateSnapshot(updateSnapshoptRequest)
+			_, _, err := regionconn.SnapshotApi.UpdateSnapshot(context.Background(), &osc.UpdateSnapshotOpts{
+				UpdateSnapshotRequest: optional.NewInterface(updateSnapshoptRequest),
+			})
 			if err != nil {
 				err := fmt.Errorf("Error updating snapshot: %s", err)
 				state.Put("error", err)

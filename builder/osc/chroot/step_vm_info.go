@@ -5,16 +5,17 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // StepVmInfo verifies that this builder is running on an Outscale vm.
 type StepVmInfo struct{}
 
 func (s *StepVmInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	oapiconn := state.Get("oapi").(*oapi.Client)
+	oscconn := state.Get("osc").(*osc.APIClient)
 	//session := state.Get("clientConfig").(*session.Session)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -36,9 +37,11 @@ func (s *StepVmInfo) Run(_ context.Context, state multistep.StateBag) multistep.
 	log.Printf("[Debug] VmID got: %s", string(vmID))
 
 	// Query the entire vm metadata
-	resp, err := oapiconn.POST_ReadVms(oapi.ReadVmsRequest{Filters: oapi.FiltersVm{
-		VmIds: []string{string(vmID)},
-	}})
+	resp, _, err := oscconn.VmApi.ReadVms(context.Background(), &osc.ReadVmsOpts{
+		ReadVmsRequest: optional.NewInterface(osc.ReadVmsRequest{Filters: osc.FiltersVm{
+			VmIds: []string{string(vmID)},
+		}}),
+	})
 	if err != nil {
 		err := fmt.Errorf("Error getting vm data: %s", err)
 		state.Put("error", err)
@@ -46,10 +49,10 @@ func (s *StepVmInfo) Run(_ context.Context, state multistep.StateBag) multistep.
 		return multistep.ActionHalt
 	}
 
-	vmsResp := resp.OK
+	vmsResp := resp
 
 	if len(vmsResp.Vms) == 0 {
-		err := fmt.Errorf("Error getting vm data: no vm found.")
+		err := fmt.Errorf("Error getting vm data: no vm found")
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
