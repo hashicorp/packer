@@ -23,6 +23,11 @@ func (s *StepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
+	if config.SkipCreateImage {
+		ui.Say("Skipping image creation...")
+		return multistep.ActionContinue
+	}
+
 	if config.PackerForce && config.imageAlreadyExists {
 		ui.Say("Deleting previous image...")
 

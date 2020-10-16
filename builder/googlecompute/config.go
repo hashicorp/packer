@@ -76,6 +76,8 @@ type Config struct {
 	EnableIntegrityMonitoring bool `mapstructure:"enable_integrity_monitoring" required:"false"`
 	// Whether to use an IAP proxy.
 	IAPConfig `mapstructure:",squash"`
+	// Skip creating the image. Useful for setting to `true` during a build test stage. Defaults to `false`.
+	SkipCreateImage bool `mapstructure:"skip_create_image" required:"false"`
 	// The unique name of the resulting image. Defaults to
 	// `packer-{{timestamp}}`.
 	ImageName string `mapstructure:"image_name" required:"false"`
