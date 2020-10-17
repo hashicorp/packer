@@ -1,0 +1,133 @@
+<html>
+
+<body>
+
+<center>
+
+<table border=1>
+
+<caption align="top"><font size="+2" color="red">Text 
+
+Formatting Tags</font> </caption>
+
+<tr>
+
+<th>HTML Tag</th>
+
+<th>Output</th>
+
+</tr>
+
+<tr>
+
+<td>normal text</td>
+
+<td>hello world</td>
+
+</tr>
+
+<tr>
+
+<td>Font & its attributes</td>
+
+<td><FONT SIZE="+2" COLOR="#RRGGBB"> hello world 
+
+</FONT></td>
+
+</tr>
+
+<tr>
+
+<td>&lt;B&gt;</td>
+
+<td><B> Bold </B></td>
+
+</tr>
+
+<tr><tr>
+
+<td>&lt;BIG&gt;</td>
+
+<td><BIG> text in a big font </BIG></td>
+
+</tr>
+
+<tr>
+
+<td>&lt;SMALL&gt;</td>
+
+<td><SMALL> text in a small font <SMALL></td>
+
+</tr>
+
+<tr>
+
+<td>&lt;SUB&gt;</td>
+
+<td>a<SUB> b </SUB></td>
+
+</tr>
+
+<tr>
+
+<td>&lt;SUP&gt;</td>
+
+<td>a<SUP> b</SUP></td>
+
+<td>&lt;I&gt;</td>
+
+<td><I> Italic </I></td>
+
+</tr>
+
+<tr>
+
+<td>&lt;U&gt;</td>
+
+<td><U> Underline </U></td>
+
+</tr>
+
+<tr>
+
+<td>&lt;EM&gt;</td>
+
+<td><EM> Emphasis </EM></td>
+
+</tr>
+
+<tr>
+
+<td>&lt;STRONG&gt;</td>
+
+<td><STRONG> STRONG </STRONG></td>
+
+</tr>
+
+<tr>
+
+<td>&lt;TELETYPE&gt;</td>
+
+<td><TT> TELETYPE </TT></td>
+
+</tr>
+
+<tr>
+
+<td>&lt;CITE&gt;</td>
+
+<td><CITE> Citation </CITE></td>
+
+</tr>
+
+<tr>
+
+<td>&lt;STRIKE&gt;</td></tr>
+
+</table>
+
+</body>
+
+</html>
+
+<td><STRIKE> strike-through text </STRIKE></td>
