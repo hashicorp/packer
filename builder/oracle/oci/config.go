@@ -83,6 +83,7 @@ type Config struct {
 	BaseImageFilter    ListImagesRequest `mapstructure:"base_image_filter"`
 	ImageName          string            `mapstructure:"image_name"`
 	ImageCompartmentID string            `mapstructure:"image_compartment_ocid"`
+	LaunchMode         string            `mapstructure:"image_launch_mode"`
 
 	// Instance
 	InstanceName        *string                           `mapstructure:"instance_name"`
