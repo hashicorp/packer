@@ -32,8 +32,9 @@ export default [
           {
             category: 'contextual',
             content: [
-              'vault',
+              'aws_secretsmanager',
               'consul',
+              'vault',
             ],
           },
           {
