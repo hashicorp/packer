@@ -215,7 +215,9 @@ func (s *StepAMIRegionCopy) amiRegionCopy(ctx context.Context, state multistep.S
 	}
 
 	// Getting snapshot IDs out of the copied AMI
-	describeImageResp, err := regionconn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{resp.ImageId}})
+	describeImageReq, describeImageResp := regionconn.DescribeImagesRequest(&ec2.DescribeImagesInput{ImageIds: []*string{resp.ImageId}})
+	describeImageReq.RetryCount = 11
+	err = describeImageReq.Send()
 	if err != nil {
 		return "", snapshotIds, fmt.Errorf("Error describing copied AMI (%s) in region (%s): %s",
 			imageId, target, err)

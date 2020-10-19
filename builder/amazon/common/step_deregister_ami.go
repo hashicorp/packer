@@ -72,10 +72,11 @@ func (s *StepDeregisterAMI) Run(ctx context.Context, state multistep.StateBag) m
 			if s.ForceDeleteSnapshot {
 				for _, b := range i.BlockDeviceMappings {
 					if b.Ebs != nil && aws.StringValue(b.Ebs.SnapshotId) != "" {
-						_, err := regionconn.DeleteSnapshot(&ec2.DeleteSnapshotInput{
+						delReq, _ := regionconn.DeleteSnapshotRequest(&ec2.DeleteSnapshotInput{
 							SnapshotId: b.Ebs.SnapshotId,
 						})
-
+						delReq.RetryCount = 11
+						err = delReq.Send()
 						if err != nil {
 							err := fmt.Errorf("Error deleting existing snapshot: %s", err)
 							state.Put("error", err)

@@ -3,10 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -40,24 +37,11 @@ func (s *StepStopEBSBackedInstance) Run(ctx context.Context, state multistep.Sta
 		// the system, and you will get an error responding that the resource
 		// does not exist.
 
-		// Work around this by retrying a few times, up to about 5 minutes.
-		err := retry.Config{Tries: 6, ShouldRetry: func(error) bool {
-			if IsAWSErr(err, "InvalidInstanceID.NotFound", "") {
-				return true
-			}
-			return false
-		},
-			RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 60 * time.Second, Multiplier: 2}).Linear,
-		}.Run(ctx, func(ctx context.Context) error {
-			ui.Message(fmt.Sprintf("Stopping instance"))
-
-			_, err = ec2conn.StopInstances(&ec2.StopInstancesInput{
+		stopInReq, _ := ec2conn.StopInstancesRequest(&ec2.StopInstancesInput{
 				InstanceIds: []*string{instance.InstanceId},
 			})
-
-			return err
-		})
-
+		stopInReq.RetryCount = 11
+		err = stopInReq.Send()
 		if err != nil {
 			err := fmt.Errorf("Error stopping instance: %s", err)
 			state.Put("error", err)

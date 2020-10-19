@@ -40,10 +40,11 @@ func (s *StepCreateTags) Run(ctx context.Context, state multistep.StateBag) mult
 
 		// Retrieve image list for given AMI
 		resourceIds := []*string{&ami}
-		imageResp, err := regionConn.DescribeImages(&ec2.DescribeImagesInput{
+		imageReq, imageResp := regionConn.DescribeImagesRequest(&ec2.DescribeImagesInput{
 			ImageIds: resourceIds,
 		})
-
+		imageReq.RetryCount = 11
+		err := imageReq.Send()
 		if err != nil {
 			err := fmt.Errorf("Error retrieving details for AMI (%s): %s", ami, err)
 			state.Put("error", err)

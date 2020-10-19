@@ -50,7 +50,7 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 
 	// Using the volume list from the cached Instance, check with AWS for up to
 	// date information on them
-	resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{
+	desVolReq, resp := ec2conn.DescribeVolumesRequest(&ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
 			{
 				Name:   aws.String("volume-id"),
@@ -58,7 +58,8 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 			},
 		},
 	})
-
+	desVolReq.RetryCount = 11
+    err := desVolReq.Send()
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error describing volumes: %s", err))
 		return
@@ -90,7 +91,9 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	// Destroy remaining volumes
 	for k := range volList {
 		ui.Say(fmt.Sprintf("Destroying volume (%s)...", k))
-		_, err := ec2conn.DeleteVolume(&ec2.DeleteVolumeInput{VolumeId: aws.String(k)})
+		delVolReq, _ := ec2conn.DeleteVolumeRequest(&ec2.DeleteVolumeInput{VolumeId: aws.String(k)})
+		delVolReq.RetryCount = 11
+		err = delVolReq.Send()
 		if err != nil {
 			ui.Say(fmt.Sprintf("Error deleting volume: %s", err))
 		}

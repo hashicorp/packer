@@ -55,10 +55,12 @@ func (s *StepModifyEBSBackedInstance) Run(ctx context.Context, state multistep.S
 			prefix = "Dis"
 		}
 		ui.Say(fmt.Sprintf("%sabling Enhanced Networking (ENA)...", prefix))
-		_, err := ec2conn.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
+		ModInAttreq, _ := ec2conn.ModifyInstanceAttributeRequest(&ec2.ModifyInstanceAttributeInput{
 			InstanceId: instance.InstanceId,
 			EnaSupport: &ec2.AttributeBooleanValue{Value: s.EnableAMIENASupport.ToBoolPointer()},
 		})
+        ModInAttreq.RetryCount = 11
+        err := ModInAttreq.Send()
 		if err != nil {
 			err := fmt.Errorf("Error %sabling Enhanced Networking (ENA) on %s: %s", strings.ToLower(prefix), *instance.InstanceId, err)
 			state.Put("error", err)

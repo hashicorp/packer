@@ -153,7 +153,9 @@ func (s *StepModifyAMIAttributes) Run(ctx context.Context, state multistep.State
 		for name, input := range options {
 			ui.Message(fmt.Sprintf("Modifying: %s", name))
 			input.ImageId = &ami
-			_, err := regionConn.ModifyImageAttribute(input)
+			ModImAttreq, _ := regionConn.ModifyImageAttributeRequest(input)
+			ModImAttreq.RetryCount = 11
+			err := ModImAttreq.Send()
 			if err != nil {
 				err := fmt.Errorf("Error modify AMI attributes: %s", err)
 				state.Put("error", err)
@@ -173,7 +175,10 @@ func (s *StepModifyAMIAttributes) Run(ctx context.Context, state multistep.State
 			for name, input := range snapshotOptions {
 				ui.Message(fmt.Sprintf("Modifying: %s", name))
 				input.SnapshotId = &snapshot
-				_, err := regionConn.ModifySnapshotAttribute(input)
+				ModSnapAttreq, _ := regionConn.ModifySnapshotAttributeRequest(input)
+				ModSnapAttreq.RetryCount = 11
+				err = ModSnapAttreq.Send()
+				err = ModSnapAttreq.Send()
 				if err != nil {
 					err := fmt.Errorf("Error modify snapshot attributes: %s", err)
 					state.Put("error", err)
