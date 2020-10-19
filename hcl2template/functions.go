@@ -46,6 +46,7 @@ func Functions(basedir string) map[string]function.Function {
 		"coalescelist":    stdlib.CoalesceListFunc,
 		"compact":         stdlib.CompactFunc,
 		"concat":          stdlib.ConcatFunc,
+		"consul_key":      pkrfunction.ConsulFunc,
 		"contains":        stdlib.ContainsFunc,
 		"convert":         typeexpr.ConvertFunc,
 		"csvdecode":       stdlib.CSVDecodeFunc,

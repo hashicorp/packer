@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	consulapi "github.com/hashicorp/consul/api"
 	vaultapi "github.com/hashicorp/vault/api"
 )
 
@@ -60,4 +61,28 @@ func Vault(path string, key string) (string, error) {
 		return val.(string), nil
 	}
 	return "", errors.New("Vault path does not contain the requested key")
+}
+
+func Consul(k string) (string, error) {
+	consulConfig := consulapi.DefaultConfig()
+	client, err := consulapi.NewClient(consulConfig)
+	if err != nil {
+		return "", fmt.Errorf("error getting consul client: %s", err)
+	}
+
+	q := &consulapi.QueryOptions{}
+	kv, _, err := client.KV().Get(k, q)
+	if err != nil {
+		return "", fmt.Errorf("error reading consul key: %s", err)
+	}
+	if kv == nil {
+		return "", fmt.Errorf("key does not exist at the given path: %s", k)
+	}
+
+	value := string(kv.Value)
+	if value == "" {
+		return "", fmt.Errorf("value is empty at path %s", k)
+	}
+
+	return value, nil
 }
