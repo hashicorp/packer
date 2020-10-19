@@ -13,8 +13,10 @@ import (
 var AWSSecret = function.New(&function.Spec{
 	Params: []function.Parameter{
 		{
-			Name: "name",
-			Type: cty.String,
+			Name:         "name",
+			Type:         cty.String,
+			AllowNull:    false,
+			AllowUnknown: false,
 		},
 		{
 			Name:         "key",
@@ -26,7 +28,10 @@ var AWSSecret = function.New(&function.Spec{
 	Type: function.StaticReturnType(cty.String),
 	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 		name := args[0].AsString()
-		key := args[1].AsString()
+		var key string
+		if !args[1].IsNull() && args[1].IsWhollyKnown() {
+			key = args[1].AsString()
+		}
 		val, err := commontpl.GetAWSSecret(name, key)
 
 		return cty.StringVal(val), err
