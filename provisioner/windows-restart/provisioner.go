@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hako/durafmt"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/retry"
@@ -129,6 +130,8 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 var waitForRestart = func(ctx context.Context, p *Provisioner, comm packer.Communicator) error {
 	ui := p.ui
 	ui.Say("Waiting for machine to restart...")
+	executionStartTime := time.Now()
+
 	waitDone := make(chan bool, 1)
 	timeout := time.After(p.config.RestartTimeout)
 	var err error
@@ -197,8 +200,13 @@ WaitLoop:
 			return fmt.Errorf("Interrupt detected, quitting waiting for machine to restart")
 		}
 	}
-	return nil
 
+	executionEndTime := time.Now()
+	executionDuration := executionEndTime.Sub(executionStartTime)
+	fmtExecutionDuration := durafmt.Parse(executionDuration.Truncate(time.Second)).LimitFirstN(2)
+	ui.Say(fmt.Sprintf("Restarting machine took %s", fmtExecutionDuration))
+
+	return nil
 }
 
 var waitForCommunicator = func(ctx context.Context, p *Provisioner) error {

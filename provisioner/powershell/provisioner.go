@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hako/durafmt"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/retry"
@@ -278,6 +279,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	uploadedScripts := []string{p.config.RemoteEnvVarPath}
 	for _, path := range scripts {
 		ui.Say(fmt.Sprintf("Provisioning with powershell script: %s", path))
+		executionStartTime := time.Now()
 
 		log.Printf("Opening %s for reading", path)
 		fi, err := os.Stat(path)
@@ -329,6 +331,11 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		if err := p.config.ValidExitCode(cmd.ExitStatus()); err != nil {
 			return err
 		}
+
+		executionEndTime := time.Now()
+		executionDuration := executionEndTime.Sub(executionStartTime)
+		fmtExecutionDuration := durafmt.Parse(executionDuration.Truncate(time.Second)).LimitFirstN(2)
+		ui.Say(fmt.Sprintf("Provisioning with powershell script '%s' took %s", path, fmtExecutionDuration))
 	}
 
 	if p.config.SkipClean {
