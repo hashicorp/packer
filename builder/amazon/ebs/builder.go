@@ -206,6 +206,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			IsRestricted:                      b.config.IsChinaCloud() || b.config.IsGovCloud(),
 			SourceAMI:                         b.config.SourceAmi,
 			Tags:                              b.config.RunTags,
+			Tenancy:                           b.config.Tenancy,
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
 			VolumeTags:                        b.config.VolumeRunTags,
