@@ -18,12 +18,21 @@
 
 ### IMPROVEMENTS:
 
+* builder/amazon: Add `io2` as a supported volume type. [GH-10102]
+* builder/amazon: Add support for source instance tenancy [GH-10085]
 * builder/google: Add service account impersonation. [GH-9968] [GH-10054]
+* builder/googlecompute: Add `skip_create_image` option. [GH-10115]
 * builder/oracle-oci:  New option to specify image compartment separate from
     build compartment. [GH-10040]
 * builder/oracle-oci: New option to specify boot volume size. [GH-10017]
+* builder/outscale: Migrate to new Outscale SDK. [GH-10056]
 * builder/scaleway: Allow the user to use an image label (eg ubuntu_focal)
     instead of a hardcoded UUID on the Scaleway builder. [GH-10061]
+* hcl: Add build.name variable so users can access build name in addition to
+    source name. [GH-10114]
+* hcl: Add consul_key function to HCL templates. [GH-10119]
+* hcl: Add packer.version variable to hcl configs so users can access the
+    Packer release version. [GH-10117]
 
 ## 1.6.4 (September 30, 2020)
 
