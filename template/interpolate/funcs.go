@@ -279,8 +279,16 @@ func funcGenAwsSecrets(ctx *Context) interface{} {
 			// semantic checks should catch this.
 			return "", errors.New("AWS Secrets Manager is only allowed in the variables section")
 		}
-
-		return commontpl.AWS(secret...)
+		switch len(secret) {
+		case 0:
+			return "", errors.New("secret name must be provided")
+		case 1:
+			return commontpl.GetAWSSecret(secret[0], "")
+		case 2:
+			return commontpl.GetAWSSecret(secret[0], secret[1])
+		default:
+			return "", errors.New("only secret name and optional secret key can be provided.")
+		}
 	}
 }
 

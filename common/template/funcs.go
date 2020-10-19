@@ -88,9 +88,9 @@ func Consul(k string) (string, error) {
 	return value, nil
 }
 
-func AWS(secret ...string) (string, error) {
+func GetAWSSecret(name, key string) (string, error) {
 	// Check if at least 1 parameter has been used
-	if len(secret) == 0 {
+	if len(name) == 0 {
 		return "", errors.New("At least one secret name must be provided")
 	}
 	// client uses AWS SDK CredentialChain method. So,credentials can
@@ -102,12 +102,7 @@ func AWS(secret ...string) (string, error) {
 
 	spec := &awssmapi.SecretSpec{
 		Name: name,
-	}
-	// key is optional if not used we fetch the first
-	// value stored in given secret. If more than two parameters
-	// are passed we take second param and ignore the others
-	if len(secret) > 1 {
-		spec.Key = secret[1]
+		Key:  key,
 	}
 
 	return client.GetSecret(spec)
