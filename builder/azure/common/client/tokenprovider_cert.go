@@ -126,12 +126,11 @@ func readCert(file string) (cert *x509.Certificate, key interface{}, err error) 
 
 	if key == nil {
 		key, cert, err = pkcs12.Decode(d, "")
-		certs = append(certs, cert)
-
 		if err != nil {
 			return nil, nil, fmt.Errorf(
 				"Did not find private key in file, tried to read as PKCS#12 and failed: %v", err)
 		}
+		certs = append(certs, cert)
 	}
 
 	if key == nil {
