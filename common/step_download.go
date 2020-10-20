@@ -108,10 +108,10 @@ func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multis
 	return multistep.ActionHalt
 }
 
-func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string) (string, error) {
+func (s *StepDownload) UseSourceToFindCacheTarget(source string) (*url.URL, string, error) {
 	u, err := parseSourceURL(source)
 	if err != nil {
-		return "", fmt.Errorf("url parse: %s", err)
+		return nil, "", fmt.Errorf("url parse: %s", err)
 	}
 	if checksum := u.Query().Get("checksum"); checksum != "" {
 		s.Checksum = checksum
@@ -142,7 +142,7 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 		}
 		targetPath, err = packer.CachePath(targetPath)
 		if err != nil {
-			return "", fmt.Errorf("CachePath: %s", err)
+			return nil, "", fmt.Errorf("CachePath: %s", err)
 		}
 	} else if filepath.Ext(targetPath) == "" {
 		// When an absolute path is provided
@@ -157,7 +157,14 @@ func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string
 			targetPath += ".iso"
 		}
 	}
+	return u, targetPath, nil
+}
 
+func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string) (string, error) {
+	u, targetPath, err := s.UseSourceToFindCacheTarget(source)
+	if err != nil {
+		return "", err
+	}
 	lockFile := targetPath + ".lock"
 
 	log.Printf("Acquiring lock for: %s (%s)", u.String(), lockFile)

@@ -42,23 +42,29 @@ func (s *StepRemoteUpload) Run(_ context.Context, state multistep.StateBag) mult
 	return multistep.ActionContinue
 }
 
+func GetRemoteDirectoryAndPath(path string, ds driver.Datastore) (string, string, string, string) {
+	filename := filepath.Base(path)
+	remotePath := fmt.Sprintf("packer_cache/%s", filename)
+	remoteDirectory := fmt.Sprintf("[%s] packer_cache/", ds.Name())
+	fullRemotePath := fmt.Sprintf("%s/%s", remoteDirectory, filename)
+
+	return filename, remotePath, remoteDirectory, fullRemotePath
+
+}
 func (s *StepRemoteUpload) uploadFile(path string, d driver.Driver, ui packer.Ui) (string, error) {
 	ds, err := d.FindDatastore(s.Datastore, s.Host)
 	if err != nil {
 		return "", fmt.Errorf("datastore doesn't exist: %v", err)
 	}
 
-	filename := filepath.Base(path)
-	remotePath := fmt.Sprintf("packer_cache/%s", filename)
-	remoteDirectory := fmt.Sprintf("[%s] packer_cache/", ds.Name())
-	fullRemotePath := fmt.Sprintf("%s/%s", remoteDirectory, filename)
-
-	ui.Say(fmt.Sprintf("Uploading %s to %s", filename, remotePath))
+	filename, remotePath, remoteDirectory, fullRemotePath := GetRemoteDirectoryAndPath(path, ds)
 
 	if exists := ds.FileExists(remotePath); exists == true {
-		ui.Say(fmt.Sprintf("File %s already uploaded; continuing", filename))
+		ui.Say(fmt.Sprintf("File %s already exists; skipping upload.", fullRemotePath))
 		return fullRemotePath, nil
 	}
+
+	ui.Say(fmt.Sprintf("Uploading %s to %s", filename, remotePath))
 
 	if err := ds.MakeDirectory(remoteDirectory); err != nil {
 		return "", err

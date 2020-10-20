@@ -40,13 +40,19 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepConnect{
 			Config: &b.config.ConnectConfig,
 		},
-		&packerCommon.StepDownload{
-			Checksum:    b.config.ISOChecksum,
-			Description: "ISO",
-			Extension:   b.config.TargetExtension,
-			ResultKey:   "iso_path",
-			TargetPath:  b.config.TargetPath,
-			Url:         b.config.ISOUrls,
+		&common.StepDownload{
+			DownloadStep: &packerCommon.StepDownload{
+				Checksum:    b.config.ISOChecksum,
+				Description: "ISO",
+				Extension:   b.config.TargetExtension,
+				ResultKey:   "iso_path",
+				TargetPath:  b.config.TargetPath,
+				Url:         b.config.ISOUrls,
+			},
+			Url:       b.config.ISOUrls,
+			ResultKey: "iso_path",
+			Datastore: b.config.Datastore,
+			Host:      b.config.Host,
 		},
 		&packerCommon.StepCreateCD{
 			Files: b.config.CDConfig.CDFiles,
