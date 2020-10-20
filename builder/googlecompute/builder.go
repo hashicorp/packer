@@ -63,7 +63,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			CommConf:            &b.config.Comm,
 			SSHTemporaryKeyPair: b.config.Comm.SSH.SSHTemporaryKeyPair,
 		},
-		multistep.If(b.config.PackerDebug,
+		multistep.If(b.config.PackerDebug && b.config.Comm.SSHPrivateKeyFile == "",
 			&communicator.StepDumpSSHKey{
 				Path: fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
 			},
