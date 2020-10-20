@@ -30,6 +30,14 @@ export default [
         category: 'functions',
         content: [
           {
+            category: 'contextual',
+            content: [
+              'aws_secretsmanager',
+              'consul',
+              'vault',
+            ],
+          },
+          {
             category: 'numeric',
             content: [
               'abs',

@@ -470,9 +470,8 @@ github.com/olekukonko/tablewriter
 github.com/oracle/oci-go-sdk/common
 github.com/oracle/oci-go-sdk/common/auth
 github.com/oracle/oci-go-sdk/core
-# github.com/outscale/osc-go v0.0.1
-github.com/outscale/osc-go/oapi
-github.com/outscale/osc-go/utils
+# github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699
+github.com/outscale/osc-sdk-go/osc
 # github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
 github.com/packer-community/winrmcp/winrmcp
 # github.com/pierrec/lz4 v2.0.5+incompatible

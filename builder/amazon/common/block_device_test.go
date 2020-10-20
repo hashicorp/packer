@@ -69,6 +69,25 @@ func TestBlockDevice(t *testing.T) {
 		{
 			Config: &BlockDevice{
 				DeviceName:          "/dev/sdb",
+				VolumeType:          "io2",
+				VolumeSize:          8,
+				DeleteOnTermination: true,
+				IOPS:                1000,
+			},
+
+			Result: &ec2.BlockDeviceMapping{
+				DeviceName: aws.String("/dev/sdb"),
+				Ebs: &ec2.EbsBlockDevice{
+					VolumeType:          aws.String("io2"),
+					VolumeSize:          aws.Int64(8),
+					DeleteOnTermination: aws.Bool(true),
+					Iops:                aws.Int64(1000),
+				},
+			},
+		},
+		{
+			Config: &BlockDevice{
+				DeviceName:          "/dev/sdb",
 				VolumeType:          "gp2",
 				VolumeSize:          8,
 				DeleteOnTermination: true,

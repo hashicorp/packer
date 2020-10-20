@@ -20,13 +20,18 @@ syntax is useful when generating portions of a configuration programmatically,
 since existing JSON libraries can be used to prepare the generated
 configuration files.
 
+This syntax is not to be confused with the pre-version-1.5 "legacy" Packer
+templates, which were exclusively JSON and follow a different format.
+
 The JSON syntax is defined in terms of the native syntax. Everything that can
 be expressed in native syntax can also be expressed in JSON syntax, but some
 constructs are more complex to represent in JSON due to limitations of the
 JSON grammar.
 
 Packer expects native syntax for files named with a `.pkr.hcl` suffix, and JSON
-syntax for files named with a `.pkr.json` suffix.
+syntax for files named with a `.pkr.json` suffix. If you leave out the `.pkr`
+portion of suffix, Packer will try to read your json file as a legacy Packer
+template.
 
 The low-level JSON syntax, just as with the native syntax, is defined in terms
 of a specification called _HCL_. It is not necessary to know all of the details
@@ -168,15 +173,15 @@ source "amazon-ebs" "example" {
 When the nested block type requires one or more labels, or when multiple
 blocks of the same type can be given, the mapping gets a little more
 complicated. For example, the `provisioner` nested block type used
-within `source` blocks expects a label giving the provisioner to use,
+within `build` blocks expects a label giving the provisioner to use,
 and the ordering of provisioner blocks is significant to decide the order
 of operations.
 
-The following native syntax example shows a `source` block with a number
+The following native syntax example shows a `build` block with a number
 of provisioners of different types:
 
 ```hcl
-source "amazon-ebs" "example" {
+build {
   # (source configuration omitted for brevity)
 
   provisioner "shell-local" {
@@ -200,29 +205,27 @@ this JSON equivalent of the above:
 
 ```json
 {
-  "source": {
-    "amazon-ebs": {
-      "example": {
-        "provisioner": [
-          {
-            "shell-local": {
-              "inline": ["echo 'Hello World' >example.txt"]
-            }
-          },
-          {
-            "file": {
-              "source": "example.txt",
-              "destination": "/tmp/example.txt"
-            }
-          },
-          {
-            "shell": {
-              "inline": ["sudo install-something -f /tmp/example.txt"]
-            }
-          }
-        ]
+  "build": {
+    "//": "(source configuration omitted for brevity)",
+
+    "provisioner": [
+      {
+        "shell-local": {
+          "inline": ["echo 'Hello World' >example.txt"]
+        }
+      },
+      {
+        "file": {
+          "source": "example.txt",
+          "destination": "/tmp/example.txt"
+        }
+      },
+      {
+        "shell": {
+          "inline": ["sudo install-something -f /tmp/example.txt"]
+        }
       }
-    }
+    ]
   }
 }
 ```

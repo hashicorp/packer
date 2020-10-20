@@ -10,11 +10,9 @@ import (
 	"text/template"
 	"time"
 
-	consulapi "github.com/hashicorp/consul/api"
 	commontpl "github.com/hashicorp/packer/common/template"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/common"
-	awssmapi "github.com/hashicorp/packer/template/interpolate/aws/secretsmanager"
 	"github.com/hashicorp/packer/version"
 	strftime "github.com/jehiah/go-strftime"
 )
@@ -250,34 +248,14 @@ func funcGenPackerVersion(ctx *Context) interface{} {
 }
 
 func funcGenConsul(ctx *Context) interface{} {
-	return func(k string) (string, error) {
+	return func(key string) (string, error) {
 		if !ctx.EnableEnv {
 			// The error message doesn't have to be that detailed since
 			// semantic checks should catch this.
 			return "", errors.New("consul_key is not allowed here")
 		}
 
-		consulConfig := consulapi.DefaultConfig()
-		client, err := consulapi.NewClient(consulConfig)
-		if err != nil {
-			return "", fmt.Errorf("error getting consul client: %s", err)
-		}
-
-		q := &consulapi.QueryOptions{}
-		kv, _, err := client.KV().Get(k, q)
-		if err != nil {
-			return "", fmt.Errorf("error reading consul key: %s", err)
-		}
-		if kv == nil {
-			return "", fmt.Errorf("key does not exist at the given path: %s", k)
-		}
-
-		value := string(kv.Value)
-		if value == "" {
-			return "", fmt.Errorf("value is empty at path %s", k)
-		}
-
-		return value, nil
+		return commontpl.Consul(key)
 	}
 }
 
@@ -301,37 +279,16 @@ func funcGenAwsSecrets(ctx *Context) interface{} {
 			// semantic checks should catch this.
 			return "", errors.New("AWS Secrets Manager is only allowed in the variables section")
 		}
-
-		// Check if at least 1 parameter has been used
-		if len(secret) == 0 {
-			return "", errors.New("At least one secret name must be provided")
+		switch len(secret) {
+		case 0:
+			return "", errors.New("secret name must be provided")
+		case 1:
+			return commontpl.GetAWSSecret(secret[0], "")
+		case 2:
+			return commontpl.GetAWSSecret(secret[0], secret[1])
+		default:
+			return "", errors.New("only secret name and optional secret key can be provided.")
 		}
-		// client uses AWS SDK CredentialChain method. So,credentials can
-		// be loaded from credential file, environment variables, or IAM
-		// roles.
-		client := awssmapi.New(
-			&awssmapi.AWSConfig{},
-		)
-
-		var name, key string
-		name = secret[0]
-		// key is optional if not used we fetch the first
-		// value stored in given secret. If more than two parameters
-		// are passed we take second param and ignore the others
-		if len(secret) > 1 {
-			key = secret[1]
-		}
-
-		spec := &awssmapi.SecretSpec{
-			Name: name,
-			Key:  key,
-		}
-
-		s, err := client.GetSecret(spec)
-		if err != nil {
-			return "", err
-		}
-		return s, nil
 	}
 }
 

@@ -232,3 +232,23 @@ func TestRunConfigPrepare_TemporaryKeyPairName(t *testing.T) {
 		t.Fatal("keypair name does not match")
 	}
 }
+
+func TestRunConfigPrepare_TenancyBad(t *testing.T) {
+	c := testConfig()
+	c.Tenancy = "not_real"
+
+	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatal("Should error if tenancy is set to an invalid type")
+	}
+}
+
+func TestRunConfigPrepare_TenancyGood(t *testing.T) {
+	validTenancy := []string{"", "default", "dedicated", "host"}
+	for _, vt := range validTenancy {
+		c := testConfig()
+		c.Tenancy = vt
+		if err := c.Prepare(nil); len(err) != 0 {
+			t.Fatalf("Should not error if tenancy is set to %s", vt)
+		}
+	}
+}

@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 // StepPreValidate provides an opportunity to pre-validate any configuration for
@@ -15,6 +16,7 @@ import (
 type StepPreValidate struct {
 	DestOmiName     string
 	ForceDeregister bool
+	API             string
 }
 
 func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -24,11 +26,19 @@ func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionContinue
 	}
 
-	oapiconn := state.Get("oapi").(*oapi.Client)
+	var (
+		conn   = state.Get("osc").(*osc.APIClient)
+		images []interface{}
+	)
 
 	ui.Say(fmt.Sprintf("Prevalidating OMI Name: %s", s.DestOmiName))
-	resp, err := oapiconn.POST_ReadImages(oapi.ReadImagesRequest{
-		Filters: oapi.FiltersImage{ImageNames: []string{s.DestOmiName}},
+
+	resp, _, err := conn.ImageApi.ReadImages(context.Background(), &osc.ReadImagesOpts{
+		ReadImagesRequest: optional.NewInterface(osc.ReadImagesRequest{
+			Filters: osc.FiltersImage{
+				ImageNames: []string{s.DestOmiName},
+			},
+		}),
 	})
 
 	if err != nil {
@@ -38,18 +48,14 @@ func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-	//FIXME: Remove when the oAPI filters works
-	images := make([]oapi.Image, 0)
-
-	for _, omi := range resp.OK.Images {
+	for _, omi := range resp.Images {
 		if omi.ImageName == s.DestOmiName {
 			images = append(images, omi)
 		}
 	}
 
-	//if len(resp.OK.Images) > 0 {
 	if len(images) > 0 {
-		err := fmt.Errorf("Error: name conflicts with an existing OMI: %s", resp.OK.Images[0].ImageId)
+		err := fmt.Errorf("Error: name conflicts with an existing OMI: %s", s.DestOmiName)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

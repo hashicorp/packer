@@ -13,18 +13,31 @@ description: |-
 
 # Build Variables
 
-
 Build variables will allow you to access connection information and basic instance state information for a builder.
 All special build variables are stored in the `build` variable:
 
 ```hcl
-  provisioner "shell" {
-      environment_vars = ["TESTVAR=${build.PackerRunUUID}"]
-      inline = ["echo $TESTVAR"]
+source "null" "first-example" {
+  communicator = "none"
+}
+
+build {
+  name = "my-build-name"
+  sources = ["null.first-example"]
+
+  provisioner "shell-local" {
+    environment_vars = ["TESTVAR=${build.PackerRunUUID}"]
+    inline = ["echo source.name is ${source.name}.",
+              "echo build.name is ${build.name}.",
+              "echo build.PackerRunUUID is $TESTVAR"]
   }
+}
 ```
 
 Here is the list of available build variables:
+
+- **name** Represents the name of the build block being run. This is different
+  than the name of the source block being run.
 
 - **ID**: Represents the vm being provisioned. For example, in Amazon it is the instance id; in digitalocean,
   it is the droplet id; in Vmware, it is the vm name.
@@ -72,3 +85,48 @@ For builder-specific builder variables, please also refer to the builder docs:
 
 The HCL2 Special Build Variables is in beta; please report any issues or requests on the Packer
 issue tracker on GitHub.
+
+
+# Packer Version
+
+This variable is set to the Packer version currently running.
+
+```hcl
+source "null" "first-example" {
+  communicator = "none"
+}
+
+build {
+  sources = ["null.first-example"]
+
+  provisioner "shell-local" {
+    inline = ["echo packer_version is '${packer.version}'"]
+  }
+}
+```
+
+If you are running a development version of Packer, the version variable will
+contain the released version number, dev flag, and current commit.
+
+```shell-session
+PACKER_LOG=0 packer build packer_version_demo.pkr.hcl
+null.first-example: output will be in this color.
+
+==> null.first-example: Running local shell script: /var/folders/8t/0yb5q0_x6mb2jldqq_vjn3lr0000gn/T/packer-shell083160352
+    null.first-example: packer_version is 1.6.5-dev (a69392129+CHANGES)
+```
+
+If you are running a released version of Packer, the version variable will
+contain the released version number only:
+
+```shell-session
+PACKER_LOG=0 packer build packer_version_demo.pkr.hcl
+null.first-example: output will be in this color.
+
+==> null.first-example: Running local shell script: /var/folders/8t/0yb5q0_x6mb2jldqq_vjn3lr0000gn/T/packer-shell718995312
+    null.first-example: packer_version is 1.6.5
+```
+
+Make sure to wrap your variable in single quotes in order to escape the
+string that is returned; if you are running a dev version of packer the
+parenthesis may through off your shell escaping otherwise.

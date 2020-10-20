@@ -390,7 +390,7 @@ Options:
   -parallel-builds=1            Number of builds to run in parallel. 1 disables parallelization. 0 means no limit (Default: 0)
   -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.
   -var 'key=value'              Variable for templates, can be used multiple times.
-  -var-file=path                JSON file containing user variables.
+  -var-file=path                JSON or HCL2 file containing user variables.
 `
 
 	return strings.TrimSpace(helpText)

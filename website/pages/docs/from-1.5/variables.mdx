@@ -177,71 +177,10 @@ The `-var` option can be used any number of times in a single command.
 
 If you plan to assign variables via the command line, we strongly recommend that
 you at least set a default type instead of using empty blocks; this helps the
-HCL parser understand what is being set.
+HCL parser understand what is being set. Otherwise, the interpreter will assume
+that any variable set on the command line is a string.
 
-For example:
-
-```hcl
-variable "pizza" {
-  type = string
-}
-source "null" "example" {
-    communicator = "none"
-}
-build {
-  sources = [
-    "source.null.example"
-  ]
-  provisioner "shell-local" {
-    inline = ["echo $PIZZA"]
-    environment_vars = ["PIZZA=${var.pizza}"]
-  }
-}
-```
-
-If you call the above template using the command
-
-```sh
-packer build -var pizza=pineapple shell_local_variables.pkr.hcl
-```
-
-then the Packer build will run successfully. However, if you define the variable
-using an empty block, the parser will not know what type the variable is, and it
-cannot infer the type from the command line, as shown in this example:
-
-```hcl
-variable "pizza" {}
-source "null" "example" {
-    communicator = "none"
-}
-build {
-  sources = [
-    "source.null.example"
-  ]
-  provisioner "shell-local" {
-    inline = ["echo $PIZZA"]
-    environment_vars = ["PIZZA=${var.pizza}"]
-  }
-}
-```
-The above template will result in the error:
-
-```
-Error: Variables not allowed
-   on <value for var.pizza from arguments> line 1:
-   (source code not available)
-Variables may not be used here.
-```
-
-You can work around this either by quoting the variable on the command line, or
-by adding the type to the variable block as shown in the previous example.
-Setting the expected type is the more resilient option.
-
-```sh
-packer build -var 'pizza="pineapple"' shell_local_variables.pkr.hcl
-```
-
-### Variable Definitions (`.pkrvars.hcl`) Files
+### Variable Definitions (`.pkrvars.hcl` and `.auto.pkrvars.hcl`) Files
 
 To set lots of variables, it is more convenient to specify their values in a
 _variable definitions file_ (with a filename ending in either `.pkrvars.hcl` or
@@ -330,18 +269,20 @@ files.
 ### Variable Definition Precedence
 
 The above mechanisms for setting variables can be used together in any
-combination. If the same variable is assigned multiple values, Packer uses the
-_last_ value it finds, overriding any previous values. Note that the same
-variable cannot be assigned multiple values within a single source.
+combination.
 
 Packer loads variables in the following order, with later sources taking
 precedence over earlier ones:
 
-- Environment variables
+- Environment variables (lowest priority)
 - Any `*.auto.pkrvars.hcl` or `*.auto.pkrvars.json` files, processed in lexical
   order of their filenames.
 - Any `-var` and `-var-file` options on the command line, in the order they are
-  provided.
+  provided. (highest priority)
+
+If the same variable is assigned multiple values using different mechanisms,
+Packer uses the _last_ value it finds, overriding any previous values. Note
+that the same variable cannot be assigned multiple values within a single source.
 
 ~> **Important:** Variables with map and object values behave the same way as
 other variables: the last value found overrides the previous values.

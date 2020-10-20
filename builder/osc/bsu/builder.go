@@ -9,9 +9,7 @@ package bsu
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
-	"net/http"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
@@ -21,7 +19,6 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/outscale/osc-go/oapi"
 )
 
 // The unique ID for this builder
@@ -86,24 +83,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
-	clientConfig, err := b.config.Config()
-	if err != nil {
-		return nil, err
-	}
-
-	skipClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
-
-	oapiconn := oapi.NewClient(clientConfig, skipClient)
+	oscConn := b.config.NewOSCClient()
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
-	state.Put("oapi", oapiconn)
-	state.Put("clientConfig", clientConfig)
+	state.Put("osc", oscConn)
+	state.Put("accessConfig", &b.config.AccessConfig)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -129,7 +115,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&osccommon.StepKeyPair{
 			Debug:        b.config.PackerDebug,
 			Comm:         &b.config.RunConfig.Comm,
-			DebugKeyPath: fmt.Sprintf("oapi_%s", b.config.PackerBuildName),
+			DebugKeyPath: fmt.Sprintf("osc_%s", b.config.PackerBuildName),
 		},
 		&osccommon.StepPublicIp{
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
@@ -161,6 +147,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			UserData:                    b.config.UserData,
 			UserDataFile:                b.config.UserDataFile,
 			VolumeTags:                  b.config.VolumeRunTags,
+			RawRegion:                   b.config.RawRegion,
 		},
 		&osccommon.StepGetPassword{
 			Debug:     b.config.PackerDebug,
@@ -170,8 +157,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
-			Host: osccommon.SSHHost(
-				oapiconn,
+			Host: osccommon.OscSSHHost(
+				oscConn.VmApi,
 				b.config.SSHInterface),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
@@ -190,10 +177,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			OMIName:             b.config.OMIName,
 			Regions:             b.config.OMIRegions,
 		},
-		&stepCreateOMI{},
+		&stepCreateOMI{
+			RawRegion: b.config.RawRegion,
+		},
 		&osccommon.StepUpdateOMIAttributes{
 			AccountIds:         b.config.OMIAccountIDs,
 			SnapshotAccountIds: b.config.SnapshotAccountIDs,
+			RawRegion:          b.config.RawRegion,
 			Ctx:                b.config.ctx,
 		},
 		&osccommon.StepCreateTags{
@@ -217,7 +207,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		artifact := &osccommon.Artifact{
 			Omis:           omis.(map[string]string),
 			BuilderIdValue: BuilderId,
-			Config:         clientConfig,
 			StateData:      map[string]interface{}{"generated_data": state.Get("generated_data")},
 		}
 

@@ -6,10 +6,11 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/outscale/osc-go/oapi"
+	"github.com/outscale/osc-sdk-go/osc"
 )
 
 type StepKeyPair struct {
@@ -52,11 +53,16 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 		return multistep.ActionContinue
 	}
 
-	oapiconn := state.Get("oapi").(*oapi.Client)
+	conn := state.Get("osc").(*osc.APIClient)
 
 	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.Comm.SSHTemporaryKeyPairName))
-	keyResp, err := oapiconn.POST_CreateKeypair(oapi.CreateKeypairRequest{
-		KeypairName: s.Comm.SSHTemporaryKeyPairName})
+
+	resp, _, err := conn.KeypairApi.CreateKeypair(context.Background(), &osc.CreateKeypairOpts{
+		CreateKeypairRequest: optional.NewInterface(osc.CreateKeypairRequest{
+			KeypairName: s.Comm.SSHTemporaryKeyPairName,
+		}),
+	})
+
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
 		return multistep.ActionHalt
@@ -66,7 +72,7 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 
 	// Set some data for use in future steps
 	s.Comm.SSHKeyPairName = s.Comm.SSHTemporaryKeyPairName
-	s.Comm.SSHPrivateKey = []byte(keyResp.OK.Keypair.PrivateKey)
+	s.Comm.SSHPrivateKey = []byte(resp.Keypair.PrivateKey)
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
@@ -80,7 +86,7 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 		defer f.Close()
 
 		// Write the key out
-		if _, err := f.Write([]byte(keyResp.OK.Keypair.PrivateKey)); err != nil {
+		if _, err := f.Write([]byte(resp.Keypair.PrivateKey)); err != nil {
 			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
 			return multistep.ActionHalt
 		}
@@ -102,12 +108,19 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	oapiconn := state.Get("oapi").(*oapi.Client)
-	ui := state.Get("ui").(packer.Ui)
+	var (
+		conn = state.Get("osc").(*osc.APIClient)
+		ui   = state.Get("ui").(packer.Ui)
+	)
 
 	// Remove the keypair
 	ui.Say("Deleting temporary keypair...")
-	_, err := oapiconn.POST_DeleteKeypair(oapi.DeleteKeypairRequest{KeypairName: s.Comm.SSHTemporaryKeyPairName})
+	_, _, err := conn.KeypairApi.DeleteKeypair(context.Background(), &osc.DeleteKeypairOpts{
+		DeleteKeypairRequest: optional.NewInterface(osc.DeleteKeypairRequest{
+			KeypairName: s.Comm.SSHTemporaryKeyPairName,
+		}),
+	})
+
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error cleaning up keypair. Please delete the key manually: %s", s.Comm.SSHTemporaryKeyPairName))

@@ -36,17 +36,13 @@ func TestOMIConfigPrepare_regions(t *testing.T) {
 	c.OMIRegions = nil
 
 	var errs []error
-	var err error
 	accessConf := testAccessConfig()
-	mockConn := &mockOAPIClient{}
 	if errs = c.prepareRegions(accessConf); len(errs) > 0 {
 		t.Fatalf("shouldn't have err: %#v", errs)
 	}
 
-	c.OMIRegions, err = listOAPIRegions(mockConn)
-	if err != nil {
-		t.Fatalf("shouldn't have err: %s", err.Error())
-	}
+	c.OMIRegions = []string{"us-east-1", "us-west-1"}
+
 	if errs = c.prepareRegions(accessConf); len(errs) > 0 {
 		t.Fatalf("shouldn't have err: %#v", errs)
 	}
