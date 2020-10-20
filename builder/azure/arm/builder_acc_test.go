@@ -151,7 +151,7 @@ const testBuilderAccManagedDiskWindowsBuildResourceGroup = `
 
 	  "build_resource_group_name" : "packer-acceptance-test",
 	  "managed_image_resource_group_name": "packer-acceptance-test",
-	  "managed_image_name": "testBuilderAccManagedDiskWindows-{{timestamp}}",
+	  "managed_image_name": "testBuilderAccManagedDiskWindowsBuildResourceGroup-{{timestamp}}",
 
 	  "os_type": "Windows",
 	  "image_publisher": "MicrosoftWindowsServer",
