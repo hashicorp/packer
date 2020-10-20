@@ -88,6 +88,36 @@ func TestConfig(t *testing.T) {
 		}
 	})
 
+	t.Run("BaseImageFilterWithoutOCID", func(t *testing.T) {
+		raw := testConfig(cfgFile)
+		raw["base_image_ocid"] = ""
+		raw["base_image_filter"] = map[string]interface{}{
+			"display_name": "hello_world",
+		}
+
+		var c Config
+		errs := c.Prepare(raw)
+
+		if errs != nil {
+			t.Fatalf("Unexpected error in configuration %+v", errs)
+		}
+	})
+
+	t.Run("BaseImageFilterDefault", func(t *testing.T) {
+		raw := testConfig(cfgFile)
+
+		var c Config
+		errs := c.Prepare(raw)
+		if errs != nil {
+			t.Fatalf("Unexpected error in configuration %+v", errs)
+		}
+
+		if *c.BaseImageFilter.Shape != raw["shape"] {
+			t.Fatalf("Default base_image_filter shape %v does not equal config shape %v",
+				*c.BaseImageFilter.Shape, raw["shape"])
+		}
+	})
+
 	t.Run("NoAccessConfig", func(t *testing.T) {
 		raw := testConfig(cfgFile)
 		delete(raw, "access_cfg_file")
