@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	consulapi "github.com/hashicorp/consul/api"
+	awssmapi "github.com/hashicorp/packer/template/interpolate/aws/secretsmanager"
 	vaultapi "github.com/hashicorp/vault/api"
 )
 
@@ -85,4 +86,24 @@ func Consul(k string) (string, error) {
 	}
 
 	return value, nil
+}
+
+func GetAWSSecret(name, key string) (string, error) {
+	// Check if at least 1 parameter has been used
+	if len(name) == 0 {
+		return "", errors.New("At least one secret name must be provided")
+	}
+	// client uses AWS SDK CredentialChain method. So,credentials can
+	// be loaded from credential file, environment variables, or IAM
+	// roles.
+	client := awssmapi.New(
+		&awssmapi.AWSConfig{},
+	)
+
+	spec := &awssmapi.SecretSpec{
+		Name: name,
+		Key:  key,
+	}
+
+	return client.GetSecret(spec)
 }
