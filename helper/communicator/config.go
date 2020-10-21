@@ -195,7 +195,7 @@ type SSHTemporaryKeyPair struct {
 	//
 	// Specifies the type of key to create. The possible values are 'dsa',
 	// 'ecdsa', 'ed25519', or 'rsa'.
-	Type string `mapstructure:"temporary_key_pair_type"`
+	SSHTemporaryKeyPairType string `mapstructure:"temporary_key_pair_type"`
 	// Specifies the number of bits in the key to create. For RSA keys, the
 	// minimum size is 1024 bits and the default is 4096 bits. Generally, 3072
 	// bits is considered sufficient. DSA keys must be exactly 1024 bits as
@@ -204,7 +204,7 @@ type SSHTemporaryKeyPair struct {
 	// bits. Attempting to use bit lengths other than these three values for
 	// ECDSA keys will fail. Ed25519 keys have a fixed length and bits will be
 	// ignored.
-	Bits int `mapstructure:"temporary_key_pair_bits"`
+	SSHTemporaryKeyPairBits int `mapstructure:"temporary_key_pair_bits"`
 }
 
 type WinRM struct {

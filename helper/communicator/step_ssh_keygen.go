@@ -35,7 +35,7 @@ func (s *StepSSHKeyGen) Run(ctx context.Context, state multistep.StateBag) multi
 		return multistep.ActionContinue
 	}
 
-	algorithm := s.SSHTemporaryKeyPair.Type
+	algorithm := s.SSHTemporaryKeyPair.SSHTemporaryKeyPairType
 	if algorithm == "" {
 		algorithm = sshkey.DSA.String()
 	}
@@ -47,7 +47,7 @@ func (s *StepSSHKeyGen) Run(ctx context.Context, state multistep.StateBag) multi
 	}
 
 	ui.Say(fmt.Sprintf("Creating temporary %s SSH key for instance...", a.String()))
-	pair, err := sshkey.GeneratePair(a, nil, s.Bits)
+	pair, err := sshkey.GeneratePair(a, nil, s.SSHTemporaryKeyPairBits)
 	if err != nil {
 		err := fmt.Errorf("Error creating temporary ssh key: %s", err)
 		state.Put("error", err)
