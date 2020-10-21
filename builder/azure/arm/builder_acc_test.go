@@ -6,7 +6,6 @@ package arm
 // * ARM_CLIENT_ID
 // * ARM_CLIENT_SECRET
 // * ARM_SUBSCRIPTION_ID
-// * ARM_OBJECT_ID
 // * ARM_STORAGE_ACCOUNT
 //
 // The subscription in question should have a resource group
@@ -262,7 +261,6 @@ const testBuilderAccBlobWindows = `
 	  "client_id": "{{env ` + "`ARM_CLIENT_ID`" + `}}",
 	  "client_secret": "{{env ` + "`ARM_CLIENT_SECRET`" + `}}",
 	  "subscription_id": "{{env ` + "`ARM_SUBSCRIPTION_ID`" + `}}",
-	  "object_id": "{{env ` + "`ARM_OBJECT_ID`" + `}}",
 	  "storage_account": "{{env ` + "`ARM_STORAGE_ACCOUNT`" + `}}"
 	},
 	"builders": [{
@@ -271,7 +269,6 @@ const testBuilderAccBlobWindows = `
 	  "client_id": "{{user ` + "`client_id`" + `}}",
 	  "client_secret": "{{user ` + "`client_secret`" + `}}",
 	  "subscription_id": "{{user ` + "`subscription_id`" + `}}",
-	  "object_id": "{{user ` + "`object_id`" + `}}",
 
 	  "storage_account": "{{user ` + "`storage_account`" + `}}",
 	  "resource_group_name": "packer-acceptance-test",
