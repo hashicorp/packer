@@ -124,7 +124,6 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 		FreeformTags:       d.cfg.InstanceTags,
 		Shape:              &d.cfg.Shape,
 		SourceDetails:      InstanceSourceDetails,
-		SubnetId:           &d.cfg.SubnetID,
 		Metadata:           metadata,
 	}
 
