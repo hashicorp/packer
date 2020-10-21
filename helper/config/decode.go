@@ -156,56 +156,57 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		if err := decoder.Decode(raw); err != nil {
 			return err
 		}
-		// If we have unused keys, it is an error
-		if len(md.Unused) > 0 {
-			var err error
-			sort.Strings(md.Unused)
-			for _, unused := range md.Unused {
-				if unused == "type" || strings.HasPrefix(unused, "packer_") {
-					continue
-				}
+	}
 
-				// Check for whether the key is handled in a packer fix
-				// call.
-				fixable := false
+	// If we have unused keys, it is an error
+	if len(md.Unused) > 0 {
+		var err error
+		sort.Strings(md.Unused)
+		for _, unused := range md.Unused {
+			if unused == "type" || strings.HasPrefix(unused, "packer_") {
+				continue
+			}
 
-				// check whether the deprecation option can be fixed using packer fix.
-				if config.PluginType != "" {
-					for k, deprecatedOptions := range DeprecatedOptions {
-						// the deprecated options keys are globbable, for
-						// example "amazon*" for all amazon builders, or * for
-						// all builders
-						if glob.Glob(k, config.PluginType) {
-							for _, deprecatedOption := range deprecatedOptions {
-								if unused == deprecatedOption {
-									fixable = true
-									break
-								}
+			// Check for whether the key is handled in a packer fix
+			// call.
+			fixable := false
+
+			// check whether the deprecation option can be fixed using packer fix.
+			if config.PluginType != "" {
+				for k, deprecatedOptions := range DeprecatedOptions {
+					// the deprecated options keys are globbable, for
+					// example "amazon*" for all amazon builders, or * for
+					// all builders
+					if glob.Glob(k, config.PluginType) {
+						for _, deprecatedOption := range deprecatedOptions {
+							if unused == deprecatedOption {
+								fixable = true
+								break
 							}
 						}
-						if fixable == true {
-							break
-						}
+					}
+					if fixable == true {
+						break
 					}
 				}
+			}
 
-				unusedErr := fmt.Errorf("unknown configuration key: '%q'",
+			unusedErr := fmt.Errorf("unknown configuration key: '%q'",
+				unused)
+
+			if fixable {
+				unusedErr = fmt.Errorf("Deprecated configuration key: '%s'."+
+					" Please call `packer fix` against your template to "+
+					"update your template to be compatible with the current "+
+					"version of Packer. Visit "+
+					"https://www.packer.io/docs/commands/fix/ for more detail.",
 					unused)
-
-				if fixable {
-					unusedErr = fmt.Errorf("Deprecated configuration key: '%s'."+
-						" Please call `packer fix` against your template to "+
-						"update your template to be compatible with the current "+
-						"version of Packer. Visit "+
-						"https://www.packer.io/docs/commands/fix/ for more detail.",
-						unused)
-				}
-
-				err = multierror.Append(err, unusedErr)
 			}
-			if err != nil {
-				return err
-			}
+
+			err = multierror.Append(err, unusedErr)
+		}
+		if err != nil {
+			return err
 		}
 	}
 
