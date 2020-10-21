@@ -58,6 +58,11 @@ EOF
     boot_command            = local.ubuntu_1604_boot_command
   }
 
+  source "source.vmware-vmx.base-ubuntu-amd64" {
+    name        = "16.04"
+    source_path = "vmware_iso_ubuntu_1604_amd64/packer-base-ubuntu-amd64.vmx"
+  }
+
   source "source.vmware-iso.base-ubuntu-amd64" {
     name                    = "18.04"
     iso_url                 = local.iso_url_ubuntu_1804
