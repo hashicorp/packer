@@ -25,12 +25,17 @@
 * builder/oracle-oci:  New option to specify image compartment separate from
     build compartment. [GH-10040]
 * builder/oracle-oci: New option to specify boot volume size. [GH-10017]
+* builder/oracle: Add `base_image_filter` option as alternative to
+    `base_image_ocid` [GH-10116]
 * builder/outscale: Migrate to new Outscale SDK. [GH-10056]
 * builder/scaleway: Allow the user to use an image label (eg ubuntu_focal)
     instead of a hardcoded UUID on the Scaleway builder. [GH-10061]
+* core: Let user provide type of generated ssh key instead of always doing ssh-
+    rsa [GH-10101]
 * hcl: Add build.name variable so users can access build name in addition to
     source name. [GH-10114]
 * hcl: Add consul_key function to HCL templates. [GH-10119]
+* hcl: Add HCL2 aws_secretsmanager function [GH-10124]
 * hcl: Add packer.version variable to hcl configs so users can access the
     Packer release version. [GH-10117]
 
