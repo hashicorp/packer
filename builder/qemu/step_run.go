@@ -282,7 +282,10 @@ func (s *stepRun) applyUserOverrides(defaultArgs map[string]interface{}, config 
 	if len(config.QemuArgs) > 0 {
 		s.ui.Say("Overriding default Qemu arguments with qemuargs template option...")
 
-		commHostPort := state.Get("commHostPort").(int)
+		commHostPort := 0
+		if config.CommConfig.Comm.Type != "none" {
+			commHostPort = state.Get("commHostPort").(int)
+		}
 		httpIp := state.Get("http_ip").(string)
 		httpPort := state.Get("http_port").(int)
 
