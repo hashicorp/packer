@@ -3,6 +3,7 @@ package linode
 import (
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -247,4 +248,44 @@ func TestBuilderPrepare_Label(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
+}
+
+func TestBuilderPrepare_StateTimeout(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test default
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.StateTimeout != 5*time.Minute {
+		t.Errorf("invalid: %s", b.config.StateTimeout)
+	}
+
+	// Test set
+	config["state_timeout"] = "5m"
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Test bad
+	config["state_timeout"] = "tubes"
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
 }

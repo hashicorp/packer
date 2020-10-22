@@ -14,6 +14,7 @@ type stepShutdownLinode struct {
 }
 
 func (s *stepShutdownLinode) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	c := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*linodego.Instance)
 
@@ -25,7 +26,7 @@ func (s *stepShutdownLinode) Run(ctx context.Context, state multistep.StateBag) 
 		return multistep.ActionHalt
 	}
 
-	_, err := s.client.WaitForInstanceStatus(ctx, instance.ID, linodego.InstanceOffline, 120)
+	_, err := s.client.WaitForInstanceStatus(ctx, instance.ID, linodego.InstanceOffline, int(c.StateTimeout.Seconds()))
 	if err != nil {
 		err = errors.New("Error shutting down Linode: " + err.Error())
 		state.Put("error", err)
