@@ -24,6 +24,7 @@ export default [
           'locals',
           'source',
           'variable',
+          'packer',
         ],
       },
       {
