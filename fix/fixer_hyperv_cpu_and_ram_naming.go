@@ -4,12 +4,13 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// FizerHypervCPUandRAM fixes the typo in "clone_from_vmxc_path" replacing
-// it with "clone_from_vmcx_path" in Hyper-V VMCX builder templates
+// FizerHypervCPUandRAM changes `cpu` to `cpus` and `ram_size` to `memory`
 type FizerHypervCPUandRAM struct{}
 
-func (FizerHypervCPUandRAM) DeprecatedOptions() []string {
-	return []string{"cpu", "ram_size"}
+func (FizerHypervCPUandRAM) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"MSOpenTech.hyperv": []string{"cpu", "ram_size"},
+	}
 }
 
 func (FizerHypervCPUandRAM) Fix(input map[string]interface{}) (map[string]interface{}, error) {

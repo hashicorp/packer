@@ -21,6 +21,7 @@ type Config struct {
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	err := config.Decode(c, &config.DecodeOpts{
+		PluginType:        BuilderId,
 		Interpolate:       true,
 		InterpolateFilter: &interpolate.RenderFilter{},
 	}, raws...)

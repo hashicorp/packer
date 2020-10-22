@@ -291,6 +291,7 @@ type Config struct {
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	c.ctx.Funcs = TemplateFuncs
 	err := config.Decode(c, &config.DecodeOpts{
+		PluginType:         BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{

@@ -8,8 +8,10 @@ import (
 // from Hyper-V ISO builder templates
 type FixerHypervDeprecations struct{}
 
-func (FixerHypervDeprecations) DeprecatedOptions() []string {
-	return []string{"vhd_temp_path"}
+func (FixerHypervDeprecations) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"MSOpenTech.hyperv": []string{"vhd_temp_path"},
+	}
 }
 
 func (FixerHypervDeprecations) Fix(input map[string]interface{}) (map[string]interface{}, error) {

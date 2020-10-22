@@ -111,6 +111,7 @@ require (
 	github.com/pkg/sftp v0.0.0-20160118190721-e84cc8c755ca
 	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
+	github.com/ryanuber/go-glob v1.0.0
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
 	github.com/shirou/gopsutil v2.18.12+incompatible

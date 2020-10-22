@@ -8,8 +8,10 @@ import (
 // to "organization_id".
 type FixerScalewayAccessKey struct{}
 
-func (FixerScalewayAccessKey) DeprecatedOptions() []string {
-	return []string{"access_key"}
+func (FixerScalewayAccessKey) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"hashicorp.scaleway": []string{"access_key"},
+	}
 }
 
 func (FixerScalewayAccessKey) Fix(input map[string]interface{}) (map[string]interface{}, error) {

@@ -127,6 +127,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	var md mapstructure.Metadata
 	err := config.Decode(c, &config.DecodeOpts{
 		Metadata:           &md,
+		PluginType:         BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{

@@ -100,6 +100,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		SourceAMI:   `{{ .SourceAMI }} `,
 	}
 	err := config.Decode(&b.config, &config.DecodeOpts{
+		PluginType:         BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
 	}, raws...)

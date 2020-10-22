@@ -8,8 +8,10 @@ import (
 // from Amazon builder templates
 type FixerAmazonSpotPriceProductDeprecation struct{}
 
-func (FixerAmazonSpotPriceProductDeprecation) DeprecatedOptions() []string {
-	return []string{"spot_price_auto_product"}
+func (FixerAmazonSpotPriceProductDeprecation) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"*amazon*": []string{"spot_price_auto_product"},
+	}
 }
 
 func (FixerAmazonSpotPriceProductDeprecation) Fix(input map[string]interface{}) (map[string]interface{}, error) {

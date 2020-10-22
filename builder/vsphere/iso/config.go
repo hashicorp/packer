@@ -53,6 +53,7 @@ type Config struct {
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	err := config.Decode(c, &config.DecodeOpts{
+		PluginType:         common.BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{

@@ -9,8 +9,8 @@ import (
 // FixerQEMUDiskSize updates disk_size from a string to int for QEMU builders
 type FixerQEMUDiskSize struct{}
 
-func (FixerQEMUDiskSize) DeprecatedOptions() []string {
-	return []string{}
+func (FixerQEMUDiskSize) DeprecatedOptions() map[string][]string {
+	return map[string][]string{}
 }
 
 func (FixerQEMUDiskSize) Fix(input map[string]interface{}) (map[string]interface{}, error) {

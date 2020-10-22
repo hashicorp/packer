@@ -82,6 +82,7 @@ func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstruct
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
+		PluginType:         hypervcommon.BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{

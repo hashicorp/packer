@@ -7,8 +7,10 @@ import (
 // FixerParallelsHeadless removes "headless" from a template in a Parallels builder
 type FixerParallelsHeadless struct{}
 
-func (FixerParallelsHeadless) DeprecatedOptions() []string {
-	return []string{"headless"}
+func (FixerParallelsHeadless) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"packer.parallels": []string{"headless"},
+	}
 }
 
 func (FixerParallelsHeadless) Fix(input map[string]interface{}) (map[string]interface{}, error) {

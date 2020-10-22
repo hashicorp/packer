@@ -59,6 +59,7 @@ func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMap
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	p.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&p.config, &config.DecodeOpts{
+		PluginType:         BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{

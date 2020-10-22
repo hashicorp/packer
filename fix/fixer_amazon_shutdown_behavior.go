@@ -10,8 +10,10 @@ import (
 // template in a Amazon builder
 type FixerAmazonShutdownBehavior struct{}
 
-func (FixerAmazonShutdownBehavior) DeprecatedOptions() []string {
-	return []string{"shutdown_behaviour"}
+func (FixerAmazonShutdownBehavior) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"*amazon*": []string{"shutdown_behaviour"},
+	}
 }
 
 func (FixerAmazonShutdownBehavior) Fix(input map[string]interface{}) (map[string]interface{}, error) {

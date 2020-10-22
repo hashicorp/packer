@@ -10,9 +10,11 @@ import (
 // for variables host_port_min, host_port_max, skip_nat_mapping
 type FixerCommConfig struct{}
 
-func (FixerCommConfig) DeprecatedOptions() []string {
-	return []string{"ssh_host_port_min", "ssh_host_port_max",
-		"ssh_skip_nat_mapping"}
+func (FixerCommConfig) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"*": []string{"ssh_host_port_min", "ssh_host_port_max",
+			"ssh_skip_nat_mapping"},
+	}
 }
 
 func (FixerCommConfig) Fix(input map[string]interface{}) (map[string]interface{}, error) {

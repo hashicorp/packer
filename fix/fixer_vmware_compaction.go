@@ -7,8 +7,8 @@ import (
 // FixerVMwareCompaction adds "skip_compaction = true" to "vmware-iso" builders with incompatible disk_type_id
 type FixerVMwareCompaction struct{}
 
-func (FixerVMwareCompaction) DeprecatedOptions() []string {
-	return []string{}
+func (FixerVMwareCompaction) DeprecatedOptions() map[string][]string {
+	return map[string][]string{}
 }
 
 func (FixerVMwareCompaction) Fix(input map[string]interface{}) (map[string]interface{}, error) {

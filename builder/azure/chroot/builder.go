@@ -153,6 +153,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	b.config.ctx.Funcs["vm"] = CreateVMMetadataTemplateFunc()
 	md := &mapstructure.Metadata{}
 	err := config.Decode(&b.config, &config.DecodeOpts{
+		PluginType:         BuilderID,
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
