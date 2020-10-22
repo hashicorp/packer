@@ -89,7 +89,7 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 	state.Put("vmRef", vmRef)
 	// instance_id is the generic term used so that users can have access to the
 	// instance id inside of the provisioners, used in step_provision.
-	state.Put("instance_id", vmRef)
+	state.Put("instance_id", vmRef.VmId())
 
 	for idx := range c.AdditionalISOFiles {
 		params := map[string]interface{}{
