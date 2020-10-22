@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	packerLabel       = "packer"
 	sourceLabel       = "source"
 	variablesLabel    = "variables"
 	variableLabel     = "variable"
@@ -23,6 +24,7 @@ const (
 
 var configSchema = &hcl.BodySchema{
 	Blocks: []hcl.BlockHeaderSchema{
+		{Type: packerLabel},
 		{Type: sourceLabel, LabelNames: []string{"type", "name"}},
 		{Type: variablesLabel},
 		{Type: variableLabel, LabelNames: []string{"name"}},
@@ -114,6 +116,21 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		files:                 files,
 	}
 
+	for _, file := range files {
+		coreVersionConstraints, moreDiags := sniffCoreVersionRequirements(file.Body)
+		cfg.Packer.RequiredVersions = append(cfg.Packer.RequiredVersions, coreVersionConstraints...)
+		diags = append(diags, moreDiags...)
+	}
+
+	// Before we go further, we'll check to make sure this version can read
+	// that file, so we can produce a version-related error message rather than
+	// potentially-confusing downstream errors.
+	versionDiags := cfg.CheckCoreVersionRequirements()
+	diags = append(diags, versionDiags...)
+	if versionDiags.HasErrors() {
+		return cfg, diags
+	}
+
 	// Decode variable blocks so that they are available later on. Here locals
 	// can use input variables so we decode them firsthand.
 	{
@@ -167,6 +184,58 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, argVars)...)
 	}
 	return cfg, diags
+}
+
+// sniffCoreVersionRequirements does minimal parsing of the given body for
+// "packer" blocks with "required_version" attributes, returning the
+// requirements found.
+//
+// This is intended to maximize the chance that we'll be able to read the
+// requirements (syntax errors notwithstanding) even if the config file contains
+// constructs that might've been added in future versions
+//
+// This is a "best effort" sort of method which will return constraints it is
+// able to find, but may return no constraints at all if the given body is
+// so invalid that it cannot be decoded at all.
+func sniffCoreVersionRequirements(body hcl.Body) ([]VersionConstraint, hcl.Diagnostics) {
+
+	var sniffRootSchema = &hcl.BodySchema{
+		Blocks: []hcl.BlockHeaderSchema{
+			{
+				Type: packerLabel,
+			},
+		},
+	}
+
+	var sniffBlockSchema = &hcl.BodySchema{
+		Attributes: []hcl.AttributeSchema{
+			{
+				Name: "required_version",
+			},
+		},
+	}
+
+	rootContent, _, diags := body.PartialContent(sniffRootSchema)
+
+	var constraints []VersionConstraint
+
+	for _, block := range rootContent.Blocks {
+		content, _, blockDiags := block.Body.PartialContent(sniffBlockSchema)
+		diags = append(diags, blockDiags...)
+
+		attr, exists := content.Attributes["required_version"]
+		if !exists {
+			continue
+		}
+
+		constraint, constraintDiags := decodeVersionConstraint(attr)
+		diags = append(diags, constraintDiags...)
+		if !constraintDiags.HasErrors() {
+			constraints = append(constraints, constraint)
+		}
+	}
+
+	return constraints, diags
 }
 
 func (cfg *PackerConfig) Initialize() hcl.Diagnostics {

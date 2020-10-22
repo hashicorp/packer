@@ -16,6 +16,9 @@ import (
 // PackerConfig represents a loaded Packer HCL config. It will contain
 // references to all possible blocks of the allowed configuration.
 type PackerConfig struct {
+	Packer struct {
+		RequiredVersions []VersionConstraint
+	}
 	// Directory where the config files are defined
 	Basedir string
 	// directory Packer was called from
