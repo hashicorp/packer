@@ -22,7 +22,9 @@ type AccessConfig struct {
 	// is an alternative method to authenticate to Yandex.Cloud. Alternatively you may set environment variable
 	// `YC_SERVICE_ACCOUNT_KEY_FILE`.
 	ServiceAccountKeyFile string `mapstructure:"service_account_key_file" required:"false"`
-	// OAuth token or IAM token to use to authenticate to Yandex.Cloud. Alternatively you may set
+	// [OAuth token](https://cloud.yandex.com/docs/iam/concepts/authorization/oauth-token)
+	// or [IAM token](https://cloud.yandex.com/docs/iam/concepts/authorization/iam-token)
+	// to use to authenticate to Yandex.Cloud. Alternatively you may set
 	// value by environment variable `YC_TOKEN`.
 	Token string `mapstructure:"token" required:"true"`
 	// The maximum number of times an API request is being executed.
