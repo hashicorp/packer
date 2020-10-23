@@ -7,8 +7,8 @@ import (
 // FixerProxmoxType updates proxmox builder types to proxmox-iso
 type FixerProxmoxType struct{}
 
-func (FixerProxmoxType) DeprecatedOptions() []string {
-	return []string{}
+func (FixerProxmoxType) DeprecatedOptions() map[string][]string {
+	return map[string][]string{}
 }
 
 func (FixerProxmoxType) Fix(input map[string]interface{}) (map[string]interface{}, error) {
