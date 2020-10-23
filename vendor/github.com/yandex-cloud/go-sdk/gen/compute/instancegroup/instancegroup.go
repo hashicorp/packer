@@ -8,6 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/access"
 	instancegroup "github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1/instancegroup"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
@@ -45,6 +46,15 @@ func (c *InstanceGroupServiceClient) Delete(ctx context.Context, in *instancegro
 		return nil, err
 	}
 	return instancegroup.NewInstanceGroupServiceClient(conn).Delete(ctx, in, opts...)
+}
+
+// DeleteInstances implements instancegroup.InstanceGroupServiceClient
+func (c *InstanceGroupServiceClient) DeleteInstances(ctx context.Context, in *instancegroup.DeleteInstancesRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return instancegroup.NewInstanceGroupServiceClient(conn).DeleteInstances(ctx, in, opts...)
 }
 
 // Get implements instancegroup.InstanceGroupServiceClient
@@ -125,6 +135,78 @@ func (it *InstanceGroupIterator) Value() *instancegroup.InstanceGroup {
 }
 
 func (it *InstanceGroupIterator) Error() error {
+	return it.err
+}
+
+// ListAccessBindings implements instancegroup.InstanceGroupServiceClient
+func (c *InstanceGroupServiceClient) ListAccessBindings(ctx context.Context, in *access.ListAccessBindingsRequest, opts ...grpc.CallOption) (*access.ListAccessBindingsResponse, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return instancegroup.NewInstanceGroupServiceClient(conn).ListAccessBindings(ctx, in, opts...)
+}
+
+type InstanceGroupAccessBindingsIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *InstanceGroupServiceClient
+	request *access.ListAccessBindingsRequest
+
+	items []*access.AccessBinding
+}
+
+func (c *InstanceGroupServiceClient) InstanceGroupAccessBindingsIterator(ctx context.Context, resourceId string, opts ...grpc.CallOption) *InstanceGroupAccessBindingsIterator {
+	return &InstanceGroupAccessBindingsIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &access.ListAccessBindingsRequest{
+			ResourceId: resourceId,
+			PageSize:   1000,
+		},
+	}
+}
+
+func (it *InstanceGroupAccessBindingsIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListAccessBindings(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.AccessBindings
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *InstanceGroupAccessBindingsIterator) Value() *access.AccessBinding {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *InstanceGroupAccessBindingsIterator) Error() error {
 	return it.err
 }
 
@@ -344,6 +426,15 @@ func (it *InstanceGroupOperationsIterator) Error() error {
 	return it.err
 }
 
+// SetAccessBindings implements instancegroup.InstanceGroupServiceClient
+func (c *InstanceGroupServiceClient) SetAccessBindings(ctx context.Context, in *access.SetAccessBindingsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return instancegroup.NewInstanceGroupServiceClient(conn).SetAccessBindings(ctx, in, opts...)
+}
+
 // Start implements instancegroup.InstanceGroupServiceClient
 func (c *InstanceGroupServiceClient) Start(ctx context.Context, in *instancegroup.StartInstanceGroupRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)
@@ -362,6 +453,15 @@ func (c *InstanceGroupServiceClient) Stop(ctx context.Context, in *instancegroup
 	return instancegroup.NewInstanceGroupServiceClient(conn).Stop(ctx, in, opts...)
 }
 
+// StopInstances implements instancegroup.InstanceGroupServiceClient
+func (c *InstanceGroupServiceClient) StopInstances(ctx context.Context, in *instancegroup.StopInstancesRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return instancegroup.NewInstanceGroupServiceClient(conn).StopInstances(ctx, in, opts...)
+}
+
 // Update implements instancegroup.InstanceGroupServiceClient
 func (c *InstanceGroupServiceClient) Update(ctx context.Context, in *instancegroup.UpdateInstanceGroupRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)
@@ -369,6 +469,15 @@ func (c *InstanceGroupServiceClient) Update(ctx context.Context, in *instancegro
 		return nil, err
 	}
 	return instancegroup.NewInstanceGroupServiceClient(conn).Update(ctx, in, opts...)
+}
+
+// UpdateAccessBindings implements instancegroup.InstanceGroupServiceClient
+func (c *InstanceGroupServiceClient) UpdateAccessBindings(ctx context.Context, in *access.UpdateAccessBindingsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return instancegroup.NewInstanceGroupServiceClient(conn).UpdateAccessBindings(ctx, in, opts...)
 }
 
 // UpdateFromYaml implements instancegroup.InstanceGroupServiceClient

@@ -175,6 +175,10 @@ func (m *DeleteInstancesMetadata) SetInstanceGroupId(v string) {
 	m.InstanceGroupId = v
 }
 
+func (m *StopInstancesMetadata) SetInstanceGroupId(v string) {
+	m.InstanceGroupId = v
+}
+
 func (m *ListInstanceGroupsRequest) SetFolderId(v string) {
 	m.FolderId = v
 }
@@ -225,6 +229,26 @@ func (m *ListInstanceGroupInstancesResponse) SetInstances(v []*ManagedInstance) 
 
 func (m *ListInstanceGroupInstancesResponse) SetNextPageToken(v string) {
 	m.NextPageToken = v
+}
+
+func (m *DeleteInstancesRequest) SetInstanceGroupId(v string) {
+	m.InstanceGroupId = v
+}
+
+func (m *DeleteInstancesRequest) SetManagedInstanceIds(v []string) {
+	m.ManagedInstanceIds = v
+}
+
+func (m *DeleteInstancesRequest) SetCreateAnother(v bool) {
+	m.CreateAnother = v
+}
+
+func (m *StopInstancesRequest) SetInstanceGroupId(v string) {
+	m.InstanceGroupId = v
+}
+
+func (m *StopInstancesRequest) SetManagedInstanceIds(v []string) {
+	m.ManagedInstanceIds = v
 }
 
 func (m *ListInstanceGroupOperationsRequest) SetInstanceGroupId(v string) {

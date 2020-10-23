@@ -253,6 +253,10 @@ func (m *DeployPolicy) SetStartupDuration(v *duration.Duration) {
 	m.StartupDuration = v
 }
 
+func (m *DeployPolicy) SetStrategy(v DeployPolicy_Strategy) {
+	m.Strategy = v
+}
+
 func (m *AllocationPolicy) SetZones(v []*AllocationPolicy_Zone) {
 	m.Zones = v
 }
@@ -373,6 +377,10 @@ func (m *AttachedDiskSpec_DiskSpec) SetSnapshotId(v string) {
 	m.SourceOneof = &AttachedDiskSpec_DiskSpec_SnapshotId{
 		SnapshotId: v,
 	}
+}
+
+func (m *AttachedDiskSpec_DiskSpec) SetPreserveAfterInstanceDelete(v bool) {
+	m.PreserveAfterInstanceDelete = v
 }
 
 func (m *NetworkInterfaceSpec) SetNetworkId(v string) {

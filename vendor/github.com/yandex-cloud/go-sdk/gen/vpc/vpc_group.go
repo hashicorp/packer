@@ -37,3 +37,8 @@ func (v *VPC) RouteTable() *RouteTableServiceClient {
 func (v *VPC) SecurityGroup() *SecurityGroupServiceClient {
 	return &SecurityGroupServiceClient{getConn: v.getConn}
 }
+
+// Address gets AddressService client
+func (v *VPC) Address() *AddressServiceClient {
+	return &AddressServiceClient{getConn: v.getConn}
+}

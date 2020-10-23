@@ -263,6 +263,76 @@ func (it *ClusterOperationsIterator) Error() error {
 	return it.err
 }
 
+// ListUILinks implements dataproc.ClusterServiceClient
+func (c *ClusterServiceClient) ListUILinks(ctx context.Context, in *dataproc.ListUILinksRequest, opts ...grpc.CallOption) (*dataproc.ListUILinksResponse, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return dataproc.NewClusterServiceClient(conn).ListUILinks(ctx, in, opts...)
+}
+
+type ClusterUILinksIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *ClusterServiceClient
+	request *dataproc.ListUILinksRequest
+
+	items []*dataproc.UILink
+}
+
+func (c *ClusterServiceClient) ClusterUILinksIterator(ctx context.Context, clusterId string, opts ...grpc.CallOption) *ClusterUILinksIterator {
+	return &ClusterUILinksIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &dataproc.ListUILinksRequest{
+			ClusterId: clusterId,
+		},
+	}
+}
+
+func (it *ClusterUILinksIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListUILinks(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Links
+	return len(it.items) > 0
+}
+
+func (it *ClusterUILinksIterator) Value() *dataproc.UILink {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *ClusterUILinksIterator) Error() error {
+	return it.err
+}
+
 // Start implements dataproc.ClusterServiceClient
 func (c *ClusterServiceClient) Start(ctx context.Context, in *dataproc.StartClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)

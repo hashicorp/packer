@@ -104,18 +104,23 @@ func (m *Key) MarshalYAML() (interface{}, error) {
 	return obj, nil
 }
 
+// ReadFromJSONFile reads IAM Key from JSON bytes.
+func ReadFromJSONBytes(keyBytes []byte) (*Key, error) {
+	key := &Key{}
+	err := json.Unmarshal(keyBytes, key)
+	if err != nil {
+		return nil, sdkerrors.WithMessage(err, "key unmarshal fail")
+	}
+	return key, nil
+}
+
 // ReadFromJSONFile reads IAM Key from JSON file.
 func ReadFromJSONFile(path string) (*Key, error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, sdkerrors.WithMessagef(err, "key file '%s' read fail", path)
 	}
-	key := &Key{}
-	err = json.Unmarshal(data, key)
-	if err != nil {
-		return nil, sdkerrors.WithMessage(err, "key unmarshal fail")
-	}
-	return key, nil
+	return ReadFromJSONBytes(data)
 }
 
 // WriteToJSONFile writes key to file in JSON format.

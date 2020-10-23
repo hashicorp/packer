@@ -191,6 +191,78 @@ func (it *SubnetOperationsIterator) Error() error {
 	return it.err
 }
 
+// ListUsedAddresses implements vpc.SubnetServiceClient
+func (c *SubnetServiceClient) ListUsedAddresses(ctx context.Context, in *vpc.ListUsedAddressesRequest, opts ...grpc.CallOption) (*vpc.ListUsedAddressesResponse, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return vpc.NewSubnetServiceClient(conn).ListUsedAddresses(ctx, in, opts...)
+}
+
+type SubnetUsedAddressesIterator struct {
+	ctx  context.Context
+	opts []grpc.CallOption
+
+	err     error
+	started bool
+
+	client  *SubnetServiceClient
+	request *vpc.ListUsedAddressesRequest
+
+	items []*vpc.UsedAddress
+}
+
+func (c *SubnetServiceClient) SubnetUsedAddressesIterator(ctx context.Context, subnetId string, opts ...grpc.CallOption) *SubnetUsedAddressesIterator {
+	return &SubnetUsedAddressesIterator{
+		ctx:    ctx,
+		opts:   opts,
+		client: c,
+		request: &vpc.ListUsedAddressesRequest{
+			SubnetId: subnetId,
+			PageSize: 1000,
+		},
+	}
+}
+
+func (it *SubnetUsedAddressesIterator) Next() bool {
+	if it.err != nil {
+		return false
+	}
+	if len(it.items) > 1 {
+		it.items[0] = nil
+		it.items = it.items[1:]
+		return true
+	}
+	it.items = nil // consume last item, if any
+
+	if it.started && it.request.PageToken == "" {
+		return false
+	}
+	it.started = true
+
+	response, err := it.client.ListUsedAddresses(it.ctx, it.request, it.opts...)
+	it.err = err
+	if err != nil {
+		return false
+	}
+
+	it.items = response.Addresses
+	it.request.PageToken = response.NextPageToken
+	return len(it.items) > 0
+}
+
+func (it *SubnetUsedAddressesIterator) Value() *vpc.UsedAddress {
+	if len(it.items) == 0 {
+		panic("calling Value on empty iterator")
+	}
+	return it.items[0]
+}
+
+func (it *SubnetUsedAddressesIterator) Error() error {
+	return it.err
+}
+
 // Move implements vpc.SubnetServiceClient
 func (c *SubnetServiceClient) Move(ctx context.Context, in *vpc.MoveSubnetRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)

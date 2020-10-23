@@ -75,3 +75,11 @@ func (m *Disk) SetSourceSnapshotId(v string) {
 func (m *Disk) SetInstanceIds(v []string) {
 	m.InstanceIds = v
 }
+
+func (m *Disk) SetDiskPlacementPolicy(v *DiskPlacementPolicy) {
+	m.DiskPlacementPolicy = v
+}
+
+func (m *DiskPlacementPolicy) SetPlacementGroupId(v string) {
+	m.PlacementGroupId = v
+}

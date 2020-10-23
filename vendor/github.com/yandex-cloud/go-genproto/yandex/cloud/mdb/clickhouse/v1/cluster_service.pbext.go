@@ -119,6 +119,10 @@ func (m *UpdateClusterRequest) SetServiceAccountId(v string) {
 	m.ServiceAccountId = v
 }
 
+func (m *UpdateClusterRequest) SetMaintenanceWindow(v *MaintenanceWindow) {
+	m.MaintenanceWindow = v
+}
+
 func (m *UpdateClusterMetadata) SetClusterId(v string) {
 	m.ClusterId = v
 }
@@ -239,6 +243,26 @@ func (m *RestoreClusterMetadata) SetBackupId(v string) {
 	m.BackupId = v
 }
 
+func (m *RescheduleMaintenanceRequest) SetClusterId(v string) {
+	m.ClusterId = v
+}
+
+func (m *RescheduleMaintenanceRequest) SetRescheduleType(v RescheduleMaintenanceRequest_RescheduleType) {
+	m.RescheduleType = v
+}
+
+func (m *RescheduleMaintenanceRequest) SetDelayedUntil(v *timestamp.Timestamp) {
+	m.DelayedUntil = v
+}
+
+func (m *RescheduleMaintenanceMetadata) SetClusterId(v string) {
+	m.ClusterId = v
+}
+
+func (m *RescheduleMaintenanceMetadata) SetDelayedUntil(v *timestamp.Timestamp) {
+	m.DelayedUntil = v
+}
+
 func (m *LogRecord) SetTimestamp(v *timestamp.Timestamp) {
 	m.Timestamp = v
 }
@@ -283,16 +307,12 @@ func (m *ListClusterLogsResponse) SetNextPageToken(v string) {
 	m.NextPageToken = v
 }
 
-func (m *ListClusterOperationsRequest) SetClusterId(v string) {
-	m.ClusterId = v
+func (m *StreamLogRecord) SetRecord(v *LogRecord) {
+	m.Record = v
 }
 
-func (m *ListClusterOperationsRequest) SetPageSize(v int64) {
-	m.PageSize = v
-}
-
-func (m *ListClusterOperationsRequest) SetPageToken(v string) {
-	m.PageToken = v
+func (m *StreamLogRecord) SetNextRecordToken(v string) {
+	m.NextRecordToken = v
 }
 
 func (m *StreamClusterLogsRequest) SetClusterId(v string) {
@@ -313,6 +333,22 @@ func (m *StreamClusterLogsRequest) SetFromTime(v *timestamp.Timestamp) {
 
 func (m *StreamClusterLogsRequest) SetToTime(v *timestamp.Timestamp) {
 	m.ToTime = v
+}
+
+func (m *StreamClusterLogsRequest) SetRecordToken(v string) {
+	m.RecordToken = v
+}
+
+func (m *ListClusterOperationsRequest) SetClusterId(v string) {
+	m.ClusterId = v
+}
+
+func (m *ListClusterOperationsRequest) SetPageSize(v int64) {
+	m.PageSize = v
+}
+
+func (m *ListClusterOperationsRequest) SetPageToken(v string) {
+	m.PageToken = v
 }
 
 func (m *ListClusterOperationsResponse) SetOperations(v []*operation.Operation) {
@@ -645,6 +681,10 @@ func (m *ConfigSpec) SetBackupWindowStart(v *timeofday.TimeOfDay) {
 
 func (m *ConfigSpec) SetAccess(v *Access) {
 	m.Access = v
+}
+
+func (m *ConfigSpec) SetCloudStorage(v *CloudStorage) {
+	m.CloudStorage = v
 }
 
 func (m *ConfigSpec_Clickhouse) SetConfig(v *config.ClickhouseConfig) {

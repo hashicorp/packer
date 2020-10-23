@@ -668,6 +668,15 @@ func (c *ClusterServiceClient) Move(ctx context.Context, in *clickhouse.MoveClus
 	return clickhouse.NewClusterServiceClient(conn).Move(ctx, in, opts...)
 }
 
+// RescheduleMaintenance implements clickhouse.ClusterServiceClient
+func (c *ClusterServiceClient) RescheduleMaintenance(ctx context.Context, in *clickhouse.RescheduleMaintenanceRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return clickhouse.NewClusterServiceClient(conn).RescheduleMaintenance(ctx, in, opts...)
+}
+
 // Restore implements clickhouse.ClusterServiceClient
 func (c *ClusterServiceClient) Restore(ctx context.Context, in *clickhouse.RestoreClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)

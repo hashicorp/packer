@@ -56,6 +56,14 @@ func (m *Cluster) SetStatus(v Cluster_Status) {
 	m.Status = v
 }
 
+func (m *Cluster) SetMaintenanceWindow(v *MaintenanceWindow) {
+	m.MaintenanceWindow = v
+}
+
+func (m *Cluster) SetPlannedOperation(v *MaintenanceOperation) {
+	m.PlannedOperation = v
+}
+
 func (m *Monitoring) SetName(v string) {
 	m.Name = v
 }
