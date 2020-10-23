@@ -334,6 +334,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			PollingConfig:   b.config.PollingConfig,
 			LaunchDevices:   launchDevices,
 			SnapshotOmitMap: b.config.LaunchMappings.GetOmissions(),
+			SnapshotTags:    b.config.SnapshotTags,
+			Ctx:             b.config.ctx,
 		},
 		&awscommon.StepDeregisterAMI{
 			AccessConfig:        &b.config.AccessConfig,
