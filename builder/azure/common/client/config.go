@@ -54,6 +54,9 @@ type Config struct {
 	SubscriptionID string `mapstructure:"subscription_id"`
 
 	authType string
+
+	// Use Azure CLI Auth
+	UseAzureCLIAuth bool `mapstructure:"use_azure_cli_auth" required:"false"`
 }
 
 const (
@@ -62,6 +65,7 @@ const (
 	authTypeClientSecret    = "ClientSecret"
 	authTypeClientCert      = "ClientCertificate"
 	authTypeClientBearerJWT = "ClientBearerJWT"
+	authTypeAzureCLI        = "AzureCLI"
 )
 
 const DefaultCloudEnvironmentName = "Public"
@@ -123,6 +127,10 @@ func (c Config) Validate(errs *packer.MultiError) {
 	// Device login is not enabled for Windows because the WinRM certificate is
 	// readable by the ObjectID of the App.  There may be another way to handle
 	// this case, but I am not currently aware of it - send feedback.
+
+	if c.UseCLI() {
+		return
+	}
 
 	if c.UseMSI() {
 		return
@@ -193,6 +201,10 @@ func (c Config) useDeviceLogin() bool {
 		c.ClientCertPath == ""
 }
 
+func (c Config) UseCLI() bool {
+	return c.UseAzureCLIAuth == true
+}
+
 func (c Config) UseMSI() bool {
 	return c.SubscriptionID == "" &&
 		c.ClientID == "" &&
@@ -230,6 +242,9 @@ func (c Config) GetServicePrincipalToken(
 	case authTypeDeviceLogin:
 		say("Getting tokens using device flow")
 		auth = NewDeviceFlowOAuthTokenProvider(*c.cloudEnvironment, say, c.TenantID)
+	case authTypeAzureCLI:
+		say("Getting tokens using Azure CLI")
+		auth = NewCliOAuthTokenProvider(*c.cloudEnvironment, say, c.TenantID)
 	case authTypeMSI:
 		say("Getting tokens using Managed Identity for Azure")
 		auth = NewMSIOAuthTokenProvider(*c.cloudEnvironment)
@@ -268,6 +283,8 @@ func (c *Config) FillParameters() error {
 	if c.authType == "" {
 		if c.useDeviceLogin() {
 			c.authType = authTypeDeviceLogin
+		} else if c.UseCLI() {
+			c.authType = authTypeAzureCLI
 		} else if c.UseMSI() {
 			c.authType = authTypeMSI
 		} else if c.ClientSecret != "" {
@@ -293,6 +310,16 @@ func (c *Config) FillParameters() error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if c.authType == authTypeAzureCLI && c.TenantID == "" {
+		tenantID, subscriptionID, err := getCliIds()
+		if err != nil {
+			return fmt.Errorf("error fetching tenantID/subscriptionID from Azure CLI: %v", err)
+		}
+
+		c.TenantID = tenantID
+		c.SubscriptionID = subscriptionID
 	}
 
 	if c.TenantID == "" {
