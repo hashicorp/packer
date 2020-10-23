@@ -89,7 +89,6 @@ func NewDriverYC(ui packer.Ui, ac *AccessConfig) (Driver, error) {
 		grpc.WithDefaultCallOptions(grpc.Header(&userAgentMD)),
 		grpc.WithUnaryInterceptor(interceptorChain))
 
-	log.Printf("%v", sdk.IAM())
 	if err != nil {
 		return nil, err
 	}
