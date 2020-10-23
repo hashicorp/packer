@@ -125,7 +125,8 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 func (s *StepCloneVM) Cleanup(state multistep.StateBag) {
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
-	if !cancelled && !halted {
+	_, destroy := state.GetOk("destroy_vm")
+	if !cancelled && !halted && !destroy {
 		return
 	}
 
