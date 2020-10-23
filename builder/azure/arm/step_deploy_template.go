@@ -226,7 +226,7 @@ func (s *StepDeployTemplate) deleteDeploymentResources(ctx context.Context, depl
 		deploymentOperation := deploymentOperations.Value()
 		// Sometimes an empty operation is added to the list by Azure
 		if deploymentOperation.Properties.TargetResource == nil {
-			deploymentOperations.Next()
+			_ = deploymentOperations.Next()
 			continue
 		}
 
@@ -235,7 +235,7 @@ func (s *StepDeployTemplate) deleteDeploymentResources(ctx context.Context, depl
 
 		s.say(fmt.Sprintf(" -> %s : '%s'", resourceType, resourceName))
 
-		retry.Config{
+		err = retry.Config{
 			Tries:      10,
 			RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 600 * time.Second, Multiplier: 2}).Linear,
 		}.Run(ctx, func(ctx context.Context) error {
@@ -248,6 +248,9 @@ func (s *StepDeployTemplate) deleteDeploymentResources(ctx context.Context, depl
 			}
 			return nil
 		})
+		if err != nil {
+			s.reportIfError(err, resourceName)
+		}
 
 		if err = deploymentOperations.Next(); err != nil {
 			return err
