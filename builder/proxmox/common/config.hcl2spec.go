@@ -21,11 +21,6 @@ type FlatConfig struct {
 	HTTPPortMax               *int                `mapstructure:"http_port_max" cty:"http_port_max" hcl:"http_port_max"`
 	HTTPAddress               *string             `mapstructure:"http_bind_address" cty:"http_bind_address" hcl:"http_bind_address"`
 	HTTPInterface             *string             `mapstructure:"http_interface" undocumented:"true" cty:"http_interface" hcl:"http_interface"`
-	ISOChecksum               *string             `mapstructure:"iso_checksum" required:"true" cty:"iso_checksum" hcl:"iso_checksum"`
-	RawSingleISOUrl           *string             `mapstructure:"iso_url" required:"true" cty:"iso_url" hcl:"iso_url"`
-	ISOUrls                   []string            `mapstructure:"iso_urls" cty:"iso_urls" hcl:"iso_urls"`
-	TargetPath                *string             `mapstructure:"iso_target_path" cty:"iso_target_path" hcl:"iso_target_path"`
-	TargetExtension           *string             `mapstructure:"iso_target_extension" cty:"iso_target_extension" hcl:"iso_target_extension"`
 	BootGroupInterval         *string             `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval" hcl:"boot_keygroup_interval"`
 	BootWait                  *string             `mapstructure:"boot_wait" cty:"boot_wait" hcl:"boot_wait"`
 	BootCommand               []string            `mapstructure:"boot_command" cty:"boot_command" hcl:"boot_command"`
@@ -93,15 +88,12 @@ type FlatConfig struct {
 	VGA                       *FlatvgaConfig      `mapstructure:"vga" cty:"vga" hcl:"vga"`
 	NICs                      []FlatnicConfig     `mapstructure:"network_adapters" cty:"network_adapters" hcl:"network_adapters"`
 	Disks                     []FlatdiskConfig    `mapstructure:"disks" cty:"disks" hcl:"disks"`
-	ISOFile                   *string             `mapstructure:"iso_file" cty:"iso_file" hcl:"iso_file"`
-	ISOStoragePool            *string             `mapstructure:"iso_storage_pool" cty:"iso_storage_pool" hcl:"iso_storage_pool"`
 	Agent                     *bool               `mapstructure:"qemu_agent" cty:"qemu_agent" hcl:"qemu_agent"`
 	SCSIController            *string             `mapstructure:"scsi_controller" cty:"scsi_controller" hcl:"scsi_controller"`
 	Onboot                    *bool               `mapstructure:"onboot" cty:"onboot" hcl:"onboot"`
 	DisableKVM                *bool               `mapstructure:"disable_kvm" cty:"disable_kvm" hcl:"disable_kvm"`
 	TemplateName              *string             `mapstructure:"template_name" cty:"template_name" hcl:"template_name"`
 	TemplateDescription       *string             `mapstructure:"template_description" cty:"template_description" hcl:"template_description"`
-	UnmountISO                *bool               `mapstructure:"unmount_iso" cty:"unmount_iso" hcl:"unmount_iso"`
 	CloudInit                 *bool               `mapstructure:"cloud_init" cty:"cloud_init" hcl:"cloud_init"`
 	CloudInitStoragePool      *string             `mapstructure:"cloud_init_storage_pool" cty:"cloud_init_storage_pool" hcl:"cloud_init_storage_pool"`
 	AdditionalISOFiles        []FlatstorageConfig `mapstructure:"additional_iso_files" cty:"additional_iso_files" hcl:"additional_iso_files"`
@@ -132,11 +124,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"http_port_max":                &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
 		"http_bind_address":            &hcldec.AttrSpec{Name: "http_bind_address", Type: cty.String, Required: false},
 		"http_interface":               &hcldec.AttrSpec{Name: "http_interface", Type: cty.String, Required: false},
-		"iso_checksum":                 &hcldec.AttrSpec{Name: "iso_checksum", Type: cty.String, Required: false},
-		"iso_url":                      &hcldec.AttrSpec{Name: "iso_url", Type: cty.String, Required: false},
-		"iso_urls":                     &hcldec.AttrSpec{Name: "iso_urls", Type: cty.List(cty.String), Required: false},
-		"iso_target_path":              &hcldec.AttrSpec{Name: "iso_target_path", Type: cty.String, Required: false},
-		"iso_target_extension":         &hcldec.AttrSpec{Name: "iso_target_extension", Type: cty.String, Required: false},
 		"boot_keygroup_interval":       &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
 		"boot_wait":                    &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
 		"boot_command":                 &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
@@ -204,15 +191,12 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vga":                          &hcldec.BlockSpec{TypeName: "vga", Nested: hcldec.ObjectSpec((*FlatvgaConfig)(nil).HCL2Spec())},
 		"network_adapters":             &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatnicConfig)(nil).HCL2Spec())},
 		"disks":                        &hcldec.BlockListSpec{TypeName: "disks", Nested: hcldec.ObjectSpec((*FlatdiskConfig)(nil).HCL2Spec())},
-		"iso_file":                     &hcldec.AttrSpec{Name: "iso_file", Type: cty.String, Required: false},
-		"iso_storage_pool":             &hcldec.AttrSpec{Name: "iso_storage_pool", Type: cty.String, Required: false},
 		"qemu_agent":                   &hcldec.AttrSpec{Name: "qemu_agent", Type: cty.Bool, Required: false},
 		"scsi_controller":              &hcldec.AttrSpec{Name: "scsi_controller", Type: cty.String, Required: false},
 		"onboot":                       &hcldec.AttrSpec{Name: "onboot", Type: cty.Bool, Required: false},
 		"disable_kvm":                  &hcldec.AttrSpec{Name: "disable_kvm", Type: cty.Bool, Required: false},
 		"template_name":                &hcldec.AttrSpec{Name: "template_name", Type: cty.String, Required: false},
 		"template_description":         &hcldec.AttrSpec{Name: "template_description", Type: cty.String, Required: false},
-		"unmount_iso":                  &hcldec.AttrSpec{Name: "unmount_iso", Type: cty.Bool, Required: false},
 		"cloud_init":                   &hcldec.AttrSpec{Name: "cloud_init", Type: cty.Bool, Required: false},
 		"cloud_init_storage_pool":      &hcldec.AttrSpec{Name: "cloud_init_storage_pool", Type: cty.String, Required: false},
 		"additional_iso_files":         &hcldec.BlockListSpec{TypeName: "additional_iso_files", Nested: hcldec.ObjectSpec((*FlatstorageConfig)(nil).HCL2Spec())},
@@ -301,6 +285,8 @@ type FlatstorageConfig struct {
 	ISOFile         *string  `mapstructure:"iso_file" cty:"iso_file" hcl:"iso_file"`
 	ISOStoragePool  *string  `mapstructure:"iso_storage_pool" cty:"iso_storage_pool" hcl:"iso_storage_pool"`
 	Unmount         *bool    `mapstructure:"unmount" cty:"unmount" hcl:"unmount"`
+	ShouldUploadISO *bool    `cty:"should_upload_iso" hcl:"should_upload_iso"`
+	DownloadPathKey *string  `cty:"download_path_key" hcl:"download_path_key"`
 }
 
 // FlatMapstructure returns a new FlatstorageConfig.
@@ -324,6 +310,8 @@ func (*FlatstorageConfig) HCL2Spec() map[string]hcldec.Spec {
 		"iso_file":             &hcldec.AttrSpec{Name: "iso_file", Type: cty.String, Required: false},
 		"iso_storage_pool":     &hcldec.AttrSpec{Name: "iso_storage_pool", Type: cty.String, Required: false},
 		"unmount":              &hcldec.AttrSpec{Name: "unmount", Type: cty.Bool, Required: false},
+		"should_upload_iso":    &hcldec.AttrSpec{Name: "should_upload_iso", Type: cty.Bool, Required: false},
+		"download_path_key":    &hcldec.AttrSpec{Name: "download_path_key", Type: cty.String, Required: false},
 	}
 	return s
 }

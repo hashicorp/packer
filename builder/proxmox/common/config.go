@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -25,7 +24,6 @@ import (
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	common.HTTPConfig      `mapstructure:",squash"`
-	common.ISOConfig       `mapstructure:",squash"`
 	bootcommand.BootConfig `mapstructure:",squash"`
 	BootKeyInterval        time.Duration       `mapstructure:"boot_key_interval"`
 	Comm                   communicator.Config `mapstructure:",squash"`
@@ -49,8 +47,6 @@ type Config struct {
 	VGA            vgaConfig    `mapstructure:"vga"`
 	NICs           []nicConfig  `mapstructure:"network_adapters"`
 	Disks          []diskConfig `mapstructure:"disks"`
-	ISOFile        string       `mapstructure:"iso_file"`
-	ISOStoragePool string       `mapstructure:"iso_storage_pool"`
 	Agent          bool         `mapstructure:"qemu_agent"`
 	SCSIController string       `mapstructure:"scsi_controller"`
 	Onboot         bool         `mapstructure:"onboot"`
@@ -58,17 +54,24 @@ type Config struct {
 
 	TemplateName        string `mapstructure:"template_name"`
 	TemplateDescription string `mapstructure:"template_description"`
-	UnmountISO          bool   `mapstructure:"unmount_iso"`
 
 	CloudInit            bool   `mapstructure:"cloud_init"`
 	CloudInitStoragePool string `mapstructure:"cloud_init_storage_pool"`
 
-	shouldUploadISO bool
-
 	AdditionalISOFiles []storageConfig `mapstructure:"additional_iso_files"`
 	VMInterface        string          `mapstructure:"vm_interface"`
 
-	ctx interpolate.Context
+	Ctx interpolate.Context `mapstructure-to-hcl2:",skip"`
+}
+
+type storageConfig struct {
+	common.ISOConfig `mapstructure:",squash"`
+	Device           string `mapstructure:"device"`
+	ISOFile          string `mapstructure:"iso_file"`
+	ISOStoragePool   string `mapstructure:"iso_storage_pool"`
+	Unmount          bool   `mapstructure:"unmount"`
+	ShouldUploadISO  bool
+	DownloadPathKey  string
 }
 
 type nicConfig struct {
@@ -92,27 +95,18 @@ type vgaConfig struct {
 	Type   string `mapstructure:"type"`
 	Memory int    `mapstructure:"memory"`
 }
-type storageConfig struct {
-	common.ISOConfig `mapstructure:",squash"`
-	Device           string `mapstructure:"device"`
-	ISOFile          string `mapstructure:"iso_file"`
-	ISOStoragePool   string `mapstructure:"iso_storage_pool"`
-	Unmount          bool   `mapstructure:"unmount"`
-	shouldUploadISO  bool
-	downloadPathKey  string
-}
 
-func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
+func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []string, error) {
 	// Agent defaults to true
 	c.Agent = true
 	// Do not add a cloud-init cdrom by default
 	c.CloudInit = false
 
 	var md mapstructure.Metadata
-	err := config.Decode(c, &config.DecodeOpts{
+	err := config.Decode(upper, &config.DecodeOpts{
 		Metadata:           &md,
 		Interpolate:        true,
-		InterpolateContext: &c.ctx,
+		InterpolateContext: &c.Ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"boot_command",
@@ -120,11 +114,13 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		},
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var errs *packer.MultiError
-	warnings := make([]string, 0)
+	var warnings []string
+
+	packer.LogSecretFilter.Set(c.Password)
 
 	// Defaults
 	if c.ProxmoxURLRaw == "" {
@@ -208,89 +204,14 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("disk format must be specified for pool type %q", c.Disks[idx].StoragePoolType))
 		}
 	}
-	for idx := range c.AdditionalISOFiles {
-		// Check AdditionalISO config
-		// Either a pre-uploaded ISO should be referenced in iso_file, OR a URL
-		// (possibly to a local file) to an ISO file that will be downloaded and
-		// then uploaded to Proxmox.
-		if c.AdditionalISOFiles[idx].ISOFile != "" {
-			c.AdditionalISOFiles[idx].shouldUploadISO = false
-		} else {
-			c.AdditionalISOFiles[idx].downloadPathKey = "downloaded_additional_iso_path_" + strconv.Itoa(idx)
-			isoWarnings, isoErrors := c.AdditionalISOFiles[idx].ISOConfig.Prepare(&c.ctx)
-			errs = packer.MultiErrorAppend(errs, isoErrors...)
-			warnings = append(warnings, isoWarnings...)
-			c.AdditionalISOFiles[idx].shouldUploadISO = true
-		}
-		if c.AdditionalISOFiles[idx].Device == "" {
-			log.Printf("AdditionalISOFile %d Device not set, using default 'ide3'", idx)
-			c.AdditionalISOFiles[idx].Device = "ide3"
-		}
-		if strings.HasPrefix(c.AdditionalISOFiles[idx].Device, "ide") {
-			busnumber, err := strconv.Atoi(c.AdditionalISOFiles[idx].Device[3:])
-			if err != nil {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s is not a valid bus index", c.AdditionalISOFiles[idx].Device[3:]))
-			}
-			if busnumber == 2 {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("IDE bus 2 is used by boot ISO"))
-			}
-			if busnumber > 3 {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("IDE bus index can't be higher than 3"))
-			}
-		}
-		if strings.HasPrefix(c.AdditionalISOFiles[idx].Device, "sata") {
-			busnumber, err := strconv.Atoi(c.AdditionalISOFiles[idx].Device[4:])
-			if err != nil {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s is not a valid bus index", c.AdditionalISOFiles[idx].Device[4:]))
-			}
-			if busnumber > 5 {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("SATA bus index can't be higher than 5"))
-			}
-		}
-		if strings.HasPrefix(c.AdditionalISOFiles[idx].Device, "scsi") {
-			busnumber, err := strconv.Atoi(c.AdditionalISOFiles[idx].Device[4:])
-			if err != nil {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s is not a valid bus index", c.AdditionalISOFiles[idx].Device[4:]))
-			}
-			if busnumber > 30 {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("SCSI bus index can't be higher than 30"))
-			}
-		}
-		if (c.AdditionalISOFiles[idx].ISOFile == "" && len(c.AdditionalISOFiles[idx].ISOConfig.ISOUrls) == 0) || (c.AdditionalISOFiles[idx].ISOFile != "" && len(c.AdditionalISOFiles[idx].ISOConfig.ISOUrls) != 0) {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("either iso_file or iso_url, but not both, must be specified for AdditionalISO file %s", c.AdditionalISOFiles[idx].Device))
-		}
-		if len(c.ISOConfig.ISOUrls) != 0 && c.ISOStoragePool == "" {
-			errs = packer.MultiErrorAppend(errs, errors.New("when specifying iso_url, iso_storage_pool must also be specified"))
-		}
-	}
 	if c.SCSIController == "" {
 		log.Printf("SCSI controller not set, using default 'lsi'")
 		c.SCSIController = "lsi"
 	}
 
-	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
-
-	// Check ISO config
-	// Either a pre-uploaded ISO should be referenced in iso_file, OR a URL
-	// (possibly to a local file) to an ISO file that will be downloaded and
-	// then uploaded to Proxmox.
-	if c.ISOFile != "" {
-		c.shouldUploadISO = false
-	} else {
-		isoWarnings, isoErrors := c.ISOConfig.Prepare(&c.ctx)
-		errs = packer.MultiErrorAppend(errs, isoErrors...)
-		warnings = append(warnings, isoWarnings...)
-		c.shouldUploadISO = true
-	}
-
-	if (c.ISOFile == "" && len(c.ISOConfig.ISOUrls) == 0) || (c.ISOFile != "" && len(c.ISOConfig.ISOUrls) != 0) {
-		errs = packer.MultiErrorAppend(errs, errors.New("either iso_file or iso_url, but not both, must be specified"))
-	}
-	if len(c.ISOConfig.ISOUrls) != 0 && c.ISOStoragePool == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("when specifying iso_url, iso_storage_pool must also be specified"))
-	}
+	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.Ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.Ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.Ctx)...)
 
 	// Required configurations that will display errors if not set
 	if c.Username == "" {
@@ -329,11 +250,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return nil, errs
+		return nil, warnings, errs
 	}
-
-	packer.LogSecretFilter.Set(c.Password)
-	return nil, nil
+	return nil, warnings, nil
 }
 
 func contains(haystack []string, needle string) bool {

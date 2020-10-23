@@ -1,55 +1,17 @@
-package proxmox
+package proxmoxiso
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
 )
-
-func mandatoryConfig(t *testing.T) map[string]interface{} {
-	return map[string]interface{}{
-		"proxmox_url":  "https://my-proxmox.my-domain:8006/api2/json",
-		"username":     "apiuser@pve",
-		"password":     "supersecret",
-		"iso_file":     "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso",
-		"node":         "my-proxmox",
-		"ssh_username": "root",
-	}
-}
-
-func TestRequiredParameters(t *testing.T) {
-	var c Config
-	_, err := c.Prepare(make(map[string]interface{}))
-	if err == nil {
-		t.Fatal("Expected empty configuration to fail")
-	}
-	errs, ok := err.(*packer.MultiError)
-	if !ok {
-		t.Fatal("Expected errors to be packer.MultiError")
-	}
-
-	required := []string{"username", "password", "proxmox_url", "iso_file", "node", "ssh_username"}
-	for _, param := range required {
-		found := false
-		for _, err := range errs.Errors {
-			if strings.Contains(err.Error(), param) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Errorf("Expected error about missing parameter %q", required)
-		}
-	}
-}
 
 func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	const config = `{
   "builders": [
     {
-      "type": "proxmox",
+      "type": "proxmox-iso",
       "proxmox_url": "https://my-proxmox.my-domain:8006/api2/json",
       "insecure_skip_tls_verify": true,
       "username": "apiuser@pve",
@@ -93,9 +55,9 @@ func TestBasicExampleFromDocsIsValid(t *testing.T) {
 	}
 
 	b := &Builder{}
-	_, warn, err := b.Prepare(tpl.Builders["proxmox"].Config)
+	_, _, err = b.Prepare(tpl.Builders["proxmox-iso"].Config)
 	if err != nil {
-		t.Fatal(err, warn)
+		t.Fatal(err)
 	}
 
 	// The example config does not set a number of optional fields. Validate that:
@@ -154,7 +116,7 @@ func TestAgentSetToFalse(t *testing.T) {
 	cfg["qemu_agent"] = false
 
 	var c Config
-	warn, err := c.Prepare(cfg)
+	_, warn, err := c.Prepare(cfg)
 	if err != nil {
 		t.Fatal(err, warn)
 	}
@@ -197,7 +159,7 @@ func TestPacketQueueSupportForNetworkAdapters(t *testing.T) {
 		cfg["network_adapters"] = devices
 
 		var c Config
-		_, err := c.Prepare(cfg)
+		_, _, err := c.Prepare(cfg)
 
 		if tt.expectedToFail == true && err == nil {
 			t.Error("expected config preparation to fail, but no error occured")
@@ -246,7 +208,7 @@ func TestHardDiskControllerIOThreadSupport(t *testing.T) {
 		cfg["scsi_controller"] = tt.controller
 
 		var c Config
-		_, err := c.Prepare(cfg)
+		_, _, err := c.Prepare(cfg)
 
 		if tt.expectedToFail == true && err == nil {
 			t.Error("expected config preparation to fail, but no error occured")
@@ -255,5 +217,16 @@ func TestHardDiskControllerIOThreadSupport(t *testing.T) {
 		if tt.expectedToFail == false && err != nil {
 			t.Errorf("expected config preparation to succeed, but %s", err.Error())
 		}
+	}
+}
+
+func mandatoryConfig(t *testing.T) map[string]interface{} {
+	return map[string]interface{}{
+		"proxmox_url":  "https://my-proxmox.my-domain:8006/api2/json",
+		"username":     "apiuser@pve",
+		"password":     "supersecret",
+		"node":         "my-proxmox",
+		"ssh_username": "root",
+		"iso_file":     "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso",
 	}
 }
