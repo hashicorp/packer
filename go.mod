@@ -93,6 +93,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-testing-interface v1.0.3 // indirect
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
+	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0
 	github.com/mitchellh/mapstructure v1.2.3
 	github.com/mitchellh/panicwrap v1.0.0
@@ -126,8 +127,8 @@ require (
 	github.com/ulikunitz/xz v0.5.5
 	github.com/vmware/govmomi v0.23.1
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
-	github.com/yandex-cloud/go-genproto v0.0.0-20200608085315-d6e7ef5ceb97
-	github.com/yandex-cloud/go-sdk v0.0.0-20200610100221-ae86895efb97
+	github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd
+	github.com/yandex-cloud/go-sdk v0.0.0-20200921111412-ef15ded2014c
 	github.com/zclconf/go-cty v1.4.0
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9

@@ -21,13 +21,16 @@ based on existing images.
 Builder can authenticate with Yandex.Cloud using one of the following methods:
 
 - OAuth token
+- IAM credential
 - File with Service Account Key
 - Service Account assigned to Compute Instance
 
 ### Authentication Using Token
 
 To authenticate with an OAuth token only `token` config key is needed.
-Or use the `YC_TOKEN` environment variable with proper value. Token you could get [here](https://oauth.yandex.ru/authorize?response_type=token&client_id=1a6990aa636648e9b2ef855fa7bec2fb).
+Or use the `YC_TOKEN` environment variable with proper value.
+Token you could get [here](https://oauth.yandex.ru/authorize?response_type=token&client_id=1a6990aa636648e9b2ef855fa7bec2fb).
+Check [documentation](https://cloud.yandex.ru/docs/iam/operations/iam-token/create) about how to get IAM credential.
 
 ### Authentication Using Service Account Key File
 
