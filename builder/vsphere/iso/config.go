@@ -86,7 +86,11 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.WaitIpConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare()...)
+
+	shutdownWarnings, shutdownErrs := c.ShutdownConfig.Prepare(c.Comm)
+	warnings = append(warnings, shutdownWarnings...)
+	errs = packer.MultiErrorAppend(errs, shutdownErrs...)
+
 	if c.Export != nil {
 		errs = packer.MultiErrorAppend(errs, c.Export.Prepare(&c.ctx, &c.LocationConfig, &c.PackerConfig)...)
 	}
