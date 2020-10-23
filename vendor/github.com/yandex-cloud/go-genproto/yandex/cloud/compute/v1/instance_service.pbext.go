@@ -421,6 +421,14 @@ func (m *AttachedDiskSpec_DiskSpec) SetSize(v int64) {
 	m.Size = v
 }
 
+func (m *AttachedDiskSpec_DiskSpec) SetBlockSize(v int64) {
+	m.BlockSize = v
+}
+
+func (m *AttachedDiskSpec_DiskSpec) SetDiskPlacementPolicy(v *DiskPlacementPolicy) {
+	m.DiskPlacementPolicy = v
+}
+
 func (m *AttachedDiskSpec_DiskSpec) SetImageId(v string) {
 	m.Source = &AttachedDiskSpec_DiskSpec_ImageId{
 		ImageId: v,

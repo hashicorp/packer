@@ -1,0 +1,35 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.13
+    working_directory: /go/src/github.com/yandex-cloud/go-sdk
+    steps:
+      - checkout
+      - run: go build
+
+  lint:
+    docker:
+      - image: golangci/golangci-lint:v1.24
+    steps:
+      - checkout
+      - run: golangci-lint run -v
+
+  test:
+    docker:
+      - image: golang:1.13
+    working_directory: /go/src/github.com/yandex-cloud/go-sdk
+    steps:
+      - checkout
+      - run: go test -v -race ./...
+
+
+workflows:
+  build_lint_test:
+    jobs:
+      - build
+      - lint
+      - test

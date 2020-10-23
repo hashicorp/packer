@@ -11,6 +11,10 @@ func (m *GetDeviceRequest) SetDeviceId(v string) {
 	m.DeviceId = v
 }
 
+func (m *GetDeviceRequest) SetDeviceView(v DeviceView) {
+	m.DeviceView = v
+}
+
 type ListDevicesRequest_Id = isListDevicesRequest_Id
 
 func (m *ListDevicesRequest) SetId(v ListDevicesRequest_Id) {
@@ -35,6 +39,10 @@ func (m *ListDevicesRequest) SetPageSize(v int64) {
 
 func (m *ListDevicesRequest) SetPageToken(v string) {
 	m.PageToken = v
+}
+
+func (m *ListDevicesRequest) SetDeviceView(v DeviceView) {
+	m.DeviceView = v
 }
 
 func (m *ListDevicesResponse) SetDevices(v []*Device) {

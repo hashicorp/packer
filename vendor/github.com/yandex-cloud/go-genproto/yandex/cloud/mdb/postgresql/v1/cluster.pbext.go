@@ -57,6 +57,14 @@ func (m *Cluster) SetStatus(v Cluster_Status) {
 	m.Status = v
 }
 
+func (m *Cluster) SetMaintenanceWindow(v *MaintenanceWindow) {
+	m.MaintenanceWindow = v
+}
+
+func (m *Cluster) SetPlannedOperation(v *MaintenanceOperation) {
+	m.PlannedOperation = v
+}
+
 func (m *Monitoring) SetName(v string) {
 	m.Name = v
 }
@@ -103,9 +111,21 @@ func (m *ClusterConfig) SetPostgresqlConfig_11(v *config.PostgresqlConfigSet11) 
 	}
 }
 
+func (m *ClusterConfig) SetPostgresqlConfig_11_1C(v *config.PostgresqlConfigSet11_1C) {
+	m.PostgresqlConfig = &ClusterConfig_PostgresqlConfig_11_1C{
+		PostgresqlConfig_11_1C: v,
+	}
+}
+
 func (m *ClusterConfig) SetPostgresqlConfig_12(v *config.PostgresqlConfigSet12) {
 	m.PostgresqlConfig = &ClusterConfig_PostgresqlConfig_12{
 		PostgresqlConfig_12: v,
+	}
+}
+
+func (m *ClusterConfig) SetPostgresqlConfig_12_1C(v *config.PostgresqlConfigSet12_1C) {
+	m.PostgresqlConfig = &ClusterConfig_PostgresqlConfig_12_1C{
+		PostgresqlConfig_12_1C: v,
 	}
 }
 
@@ -127,6 +147,10 @@ func (m *ClusterConfig) SetBackupWindowStart(v *timeofday.TimeOfDay) {
 
 func (m *ClusterConfig) SetAccess(v *Access) {
 	m.Access = v
+}
+
+func (m *ClusterConfig) SetPerformanceDiagnostics(v *PerformanceDiagnostics) {
+	m.PerformanceDiagnostics = v
 }
 
 func (m *ConnectionPoolerConfig) SetPoolingMode(v ConnectionPoolerConfig_PoolingMode) {
@@ -219,9 +243,21 @@ func (m *HostConfig) SetPostgresqlConfig_11(v *config.PostgresqlHostConfig11) {
 	}
 }
 
+func (m *HostConfig) SetPostgresqlConfig_11_1C(v *config.PostgresqlHostConfig11_1C) {
+	m.PostgresqlConfig = &HostConfig_PostgresqlConfig_11_1C{
+		PostgresqlConfig_11_1C: v,
+	}
+}
+
 func (m *HostConfig) SetPostgresqlConfig_12(v *config.PostgresqlHostConfig12) {
 	m.PostgresqlConfig = &HostConfig_PostgresqlConfig_12{
 		PostgresqlConfig_12: v,
+	}
+}
+
+func (m *HostConfig) SetPostgresqlConfig_12_1C(v *config.PostgresqlHostConfig12_1C) {
+	m.PostgresqlConfig = &HostConfig_PostgresqlConfig_12_1C{
+		PostgresqlConfig_12_1C: v,
 	}
 }
 
@@ -247,4 +283,16 @@ func (m *Resources) SetDiskTypeId(v string) {
 
 func (m *Access) SetDataLens(v bool) {
 	m.DataLens = v
+}
+
+func (m *PerformanceDiagnostics) SetEnabled(v bool) {
+	m.Enabled = v
+}
+
+func (m *PerformanceDiagnostics) SetSessionsSamplingInterval(v int64) {
+	m.SessionsSamplingInterval = v
+}
+
+func (m *PerformanceDiagnostics) SetStatementsSamplingInterval(v int64) {
+	m.StatementsSamplingInterval = v
 }

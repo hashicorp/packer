@@ -551,6 +551,15 @@ func (c *ClusterServiceClient) Move(ctx context.Context, in *mongodb.MoveCluster
 	return mongodb.NewClusterServiceClient(conn).Move(ctx, in, opts...)
 }
 
+// RescheduleMaintenance implements mongodb.ClusterServiceClient
+func (c *ClusterServiceClient) RescheduleMaintenance(ctx context.Context, in *mongodb.RescheduleMaintenanceRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mongodb.NewClusterServiceClient(conn).RescheduleMaintenance(ctx, in, opts...)
+}
+
 // ResetupHosts implements mongodb.ClusterServiceClient
 func (c *ClusterServiceClient) ResetupHosts(ctx context.Context, in *mongodb.ResetupHostsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)

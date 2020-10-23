@@ -86,6 +86,122 @@ func (m *MysqlConfig8_0) SetCollationServer(v string) {
 	m.CollationServer = v
 }
 
+func (m *MysqlConfig8_0) SetInnodbAdaptiveHashIndex(v *wrappers.BoolValue) {
+	m.InnodbAdaptiveHashIndex = v
+}
+
+func (m *MysqlConfig8_0) SetInnodbNumaInterleave(v *wrappers.BoolValue) {
+	m.InnodbNumaInterleave = v
+}
+
+func (m *MysqlConfig8_0) SetInnodbLogBufferSize(v *wrappers.Int64Value) {
+	m.InnodbLogBufferSize = v
+}
+
+func (m *MysqlConfig8_0) SetInnodbLogFileSize(v *wrappers.Int64Value) {
+	m.InnodbLogFileSize = v
+}
+
+func (m *MysqlConfig8_0) SetInnodbIoCapacity(v *wrappers.Int64Value) {
+	m.InnodbIoCapacity = v
+}
+
+func (m *MysqlConfig8_0) SetInnodbIoCapacityMax(v *wrappers.Int64Value) {
+	m.InnodbIoCapacityMax = v
+}
+
+func (m *MysqlConfig8_0) SetInnodbReadIoThreads(v *wrappers.Int64Value) {
+	m.InnodbReadIoThreads = v
+}
+
+func (m *MysqlConfig8_0) SetInnodbWriteIoThreads(v *wrappers.Int64Value) {
+	m.InnodbWriteIoThreads = v
+}
+
+func (m *MysqlConfig8_0) SetInnodbPurgeThreads(v *wrappers.Int64Value) {
+	m.InnodbPurgeThreads = v
+}
+
+func (m *MysqlConfig8_0) SetInnodbThreadConcurrency(v *wrappers.Int64Value) {
+	m.InnodbThreadConcurrency = v
+}
+
+func (m *MysqlConfig8_0) SetInnodbTempDataFileMaxSize(v *wrappers.Int64Value) {
+	m.InnodbTempDataFileMaxSize = v
+}
+
+func (m *MysqlConfig8_0) SetThreadCacheSize(v *wrappers.Int64Value) {
+	m.ThreadCacheSize = v
+}
+
+func (m *MysqlConfig8_0) SetThreadStack(v *wrappers.Int64Value) {
+	m.ThreadStack = v
+}
+
+func (m *MysqlConfig8_0) SetJoinBufferSize(v *wrappers.Int64Value) {
+	m.JoinBufferSize = v
+}
+
+func (m *MysqlConfig8_0) SetSortBufferSize(v *wrappers.Int64Value) {
+	m.SortBufferSize = v
+}
+
+func (m *MysqlConfig8_0) SetTableDefinitionCache(v *wrappers.Int64Value) {
+	m.TableDefinitionCache = v
+}
+
+func (m *MysqlConfig8_0) SetTableOpenCache(v *wrappers.Int64Value) {
+	m.TableOpenCache = v
+}
+
+func (m *MysqlConfig8_0) SetTableOpenCacheInstances(v *wrappers.Int64Value) {
+	m.TableOpenCacheInstances = v
+}
+
+func (m *MysqlConfig8_0) SetExplicitDefaultsForTimestamp(v *wrappers.BoolValue) {
+	m.ExplicitDefaultsForTimestamp = v
+}
+
+func (m *MysqlConfig8_0) SetAutoIncrementIncrement(v *wrappers.Int64Value) {
+	m.AutoIncrementIncrement = v
+}
+
+func (m *MysqlConfig8_0) SetAutoIncrementOffset(v *wrappers.Int64Value) {
+	m.AutoIncrementOffset = v
+}
+
+func (m *MysqlConfig8_0) SetSyncBinlog(v *wrappers.Int64Value) {
+	m.SyncBinlog = v
+}
+
+func (m *MysqlConfig8_0) SetBinlogCacheSize(v *wrappers.Int64Value) {
+	m.BinlogCacheSize = v
+}
+
+func (m *MysqlConfig8_0) SetBinlogGroupCommitSyncDelay(v *wrappers.Int64Value) {
+	m.BinlogGroupCommitSyncDelay = v
+}
+
+func (m *MysqlConfig8_0) SetBinlogRowImage(v MysqlConfig8_0_BinlogRowImage) {
+	m.BinlogRowImage = v
+}
+
+func (m *MysqlConfig8_0) SetBinlogRowsQueryLogEvents(v *wrappers.BoolValue) {
+	m.BinlogRowsQueryLogEvents = v
+}
+
+func (m *MysqlConfig8_0) SetRplSemiSyncMasterWaitForSlaveCount(v *wrappers.Int64Value) {
+	m.RplSemiSyncMasterWaitForSlaveCount = v
+}
+
+func (m *MysqlConfig8_0) SetSlaveParallelType(v MysqlConfig8_0_SlaveParallelType) {
+	m.SlaveParallelType = v
+}
+
+func (m *MysqlConfig8_0) SetSlaveParallelWorkers(v *wrappers.Int64Value) {
+	m.SlaveParallelWorkers = v
+}
+
 func (m *MysqlConfigSet8_0) SetEffectiveConfig(v *MysqlConfig8_0) {
 	m.EffectiveConfig = v
 }

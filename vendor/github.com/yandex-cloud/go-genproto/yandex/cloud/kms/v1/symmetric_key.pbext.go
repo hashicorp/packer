@@ -51,6 +51,10 @@ func (m *SymmetricKey) SetRotationPeriod(v *duration.Duration) {
 	m.RotationPeriod = v
 }
 
+func (m *SymmetricKey) SetDeletionProtection(v bool) {
+	m.DeletionProtection = v
+}
+
 func (m *SymmetricKeyVersion) SetId(v string) {
 	m.Id = v
 }

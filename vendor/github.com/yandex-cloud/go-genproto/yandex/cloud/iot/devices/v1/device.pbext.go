@@ -34,6 +34,10 @@ func (m *Device) SetStatus(v Device_Status) {
 	m.Status = v
 }
 
+func (m *Device) SetMonitoringData(v *DeviceMonitoringData) {
+	m.MonitoringData = v
+}
+
 func (m *DeviceCertificate) SetDeviceId(v string) {
 	m.DeviceId = v
 }
@@ -60,4 +64,24 @@ func (m *DevicePassword) SetId(v string) {
 
 func (m *DevicePassword) SetCreatedAt(v *timestamp.Timestamp) {
 	m.CreatedAt = v
+}
+
+func (m *DeviceMonitoringData) SetLastAuthIp(v string) {
+	m.LastAuthIp = v
+}
+
+func (m *DeviceMonitoringData) SetLastAuthTime(v *timestamp.Timestamp) {
+	m.LastAuthTime = v
+}
+
+func (m *DeviceMonitoringData) SetLastPubActivityTime(v *timestamp.Timestamp) {
+	m.LastPubActivityTime = v
+}
+
+func (m *DeviceMonitoringData) SetLastSubActivityTime(v *timestamp.Timestamp) {
+	m.LastSubActivityTime = v
+}
+
+func (m *DeviceMonitoringData) SetLastOnlineTime(v *timestamp.Timestamp) {
+	m.LastOnlineTime = v
 }

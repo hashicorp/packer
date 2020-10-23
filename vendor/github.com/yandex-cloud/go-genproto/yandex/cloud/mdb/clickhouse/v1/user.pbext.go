@@ -290,6 +290,30 @@ func (m *UserSettings) SetTimeoutOverflowMode(v UserSettings_OverflowMode) {
 	m.TimeoutOverflowMode = v
 }
 
+func (m *UserSettings) SetMaxRowsInSet(v *wrappers.Int64Value) {
+	m.MaxRowsInSet = v
+}
+
+func (m *UserSettings) SetMaxBytesInSet(v *wrappers.Int64Value) {
+	m.MaxBytesInSet = v
+}
+
+func (m *UserSettings) SetSetOverflowMode(v UserSettings_OverflowMode) {
+	m.SetOverflowMode = v
+}
+
+func (m *UserSettings) SetMaxRowsInJoin(v *wrappers.Int64Value) {
+	m.MaxRowsInJoin = v
+}
+
+func (m *UserSettings) SetMaxBytesInJoin(v *wrappers.Int64Value) {
+	m.MaxBytesInJoin = v
+}
+
+func (m *UserSettings) SetJoinOverflowMode(v UserSettings_OverflowMode) {
+	m.JoinOverflowMode = v
+}
+
 func (m *UserSettings) SetMaxColumnsToRead(v *wrappers.Int64Value) {
 	m.MaxColumnsToRead = v
 }
@@ -316,6 +340,18 @@ func (m *UserSettings) SetMaxAstElements(v *wrappers.Int64Value) {
 
 func (m *UserSettings) SetMaxExpandedAstElements(v *wrappers.Int64Value) {
 	m.MaxExpandedAstElements = v
+}
+
+func (m *UserSettings) SetMinExecutionSpeed(v *wrappers.Int64Value) {
+	m.MinExecutionSpeed = v
+}
+
+func (m *UserSettings) SetMinExecutionSpeedBytes(v *wrappers.Int64Value) {
+	m.MinExecutionSpeedBytes = v
+}
+
+func (m *UserSettings) SetCountDistinctImplementation(v UserSettings_CountDistinctImplementation) {
+	m.CountDistinctImplementation = v
 }
 
 func (m *UserSettings) SetInputFormatValuesInterpretExpressions(v *wrappers.BoolValue) {
@@ -368,6 +404,10 @@ func (m *UserSettings) SetHttpHeadersProgressInterval(v *wrappers.Int64Value) {
 
 func (m *UserSettings) SetAddHttpCorsHeader(v *wrappers.BoolValue) {
 	m.AddHttpCorsHeader = v
+}
+
+func (m *UserSettings) SetQuotaMode(v UserSettings_QuotaMode) {
+	m.QuotaMode = v
 }
 
 func (m *UserQuota) SetIntervalDuration(v *wrappers.Int64Value) {

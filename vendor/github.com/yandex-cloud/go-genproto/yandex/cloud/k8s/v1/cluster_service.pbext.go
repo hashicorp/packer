@@ -47,10 +47,6 @@ func (m *StopClusterRequest) SetClusterId(v string) {
 	m.ClusterId = v
 }
 
-func (m *StopClusterRequest) SetServiceAccountId(v string) {
-	m.ServiceAccountId = v
-}
-
 func (m *StopClusterMetadata) SetClusterId(v string) {
 	m.ClusterId = v
 }

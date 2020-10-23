@@ -4,6 +4,7 @@ package vpc
 
 import (
 	operation "github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
+	reference "github.com/yandex-cloud/go-genproto/yandex/cloud/reference"
 	field_mask "google.golang.org/genproto/protobuf/field_mask"
 )
 
@@ -145,4 +146,40 @@ func (m *MoveSubnetRequest) SetDestinationFolderId(v string) {
 
 func (m *MoveSubnetMetadata) SetSubnetId(v string) {
 	m.SubnetId = v
+}
+
+func (m *ListUsedAddressesRequest) SetSubnetId(v string) {
+	m.SubnetId = v
+}
+
+func (m *ListUsedAddressesRequest) SetPageSize(v int64) {
+	m.PageSize = v
+}
+
+func (m *ListUsedAddressesRequest) SetPageToken(v string) {
+	m.PageToken = v
+}
+
+func (m *ListUsedAddressesRequest) SetFilter(v string) {
+	m.Filter = v
+}
+
+func (m *ListUsedAddressesResponse) SetAddresses(v []*UsedAddress) {
+	m.Addresses = v
+}
+
+func (m *ListUsedAddressesResponse) SetNextPageToken(v string) {
+	m.NextPageToken = v
+}
+
+func (m *UsedAddress) SetAddress(v string) {
+	m.Address = v
+}
+
+func (m *UsedAddress) SetIpVersion(v IpVersion) {
+	m.IpVersion = v
+}
+
+func (m *UsedAddress) SetReferences(v []*reference.Reference) {
+	m.References = v
 }
