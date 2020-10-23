@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -15,7 +17,7 @@ import (
 type StepDeployTemplate struct {
 	client     *AzureClient
 	deploy     func(ctx context.Context, resourceGroupName string, deploymentName string) error
-	delete     func(ctx context.Context, client *AzureClient, resourceType string, resourceName string, resourceGroupName string) error
+	delete     func(ctx context.Context, deploymentName, resourceGroupName string) error
 	disk       func(ctx context.Context, resourceGroupName string, computeName string) (string, string, error)
 	deleteDisk func(ctx context.Context, imageType string, imageName string, resourceGroupName string) error
 	say        func(message string)
@@ -36,7 +38,7 @@ func NewStepDeployTemplate(client *AzureClient, ui packer.Ui, config *Config, de
 	}
 
 	step.deploy = step.deployTemplate
-	step.delete = deleteResource
+	step.delete = step.deleteDeploymentResources
 	step.disk = step.getImageDetails
 	step.deleteDisk = step.deleteImage
 	return step
@@ -62,8 +64,9 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 		}
 	}()
 
-	//Only clean up if this was an existing resource group and the resource group
-	//is marked as created
+	// Only clean up if this is an existing resource group that has been verified to exist.
+	// ArmIsResourceGroupCreated is set in step_create_resource_group to true, when Packer has verified that the resource group exists.
+	// ArmIsExistingResourceGroup is set to true when build_resource_group is set in the Packer configuration.
 	existingResourceGroup := state.Get(constants.ArmIsExistingResourceGroup).(bool)
 	resourceGroupCreated := state.Get(constants.ArmIsResourceGroupCreated).(bool)
 	if !existingResourceGroup || !resourceGroupCreated {
@@ -75,74 +78,12 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 
 	deploymentName := s.name
 	resourceGroupName := state.Get(constants.ArmResourceGroupName).(string)
-
-	// Get image disk details before deleting the image; otherwise we won't be able to
-	// delete the disk as the image request will return a 404
-	computeName := state.Get(constants.ArmComputeName).(string)
-	imageType, imageName, err := s.disk(context.TODO(), resourceGroupName, computeName)
-
-	if err != nil && !strings.Contains(err.Error(), "ResourceNotFound") {
-		ui.Error(fmt.Sprintf("Could not retrieve OS Image details: %s", err))
+	err := s.deleteDeploymentResources(context.TODO(), deploymentName, resourceGroupName)
+	if err != nil {
+		s.reportIfError(err, resourceGroupName)
 	}
 
-	ui.Say(" -> Deployment Resources within: " + deploymentName)
-	if deploymentName != "" {
-		maxResources := int32(50)
-		deploymentOperations, err := s.client.DeploymentOperationsClient.ListComplete(context.TODO(), resourceGroupName, deploymentName, &maxResources)
-		if err != nil {
-			ui.Error(fmt.Sprintf("Error deleting resources.  Please delete them manually.\n\n"+
-				"Name: %s\n"+
-				"Error: %s", resourceGroupName, err))
-		}
-
-		for deploymentOperations.NotDone() {
-			deploymentOperation := deploymentOperations.Value()
-			// Sometimes an empty operation is added to the list by Azure
-			if deploymentOperation.Properties.TargetResource == nil {
-				if err := deploymentOperations.Next(); err != nil {
-					ui.Error(fmt.Sprintf("Error moving to to next deployment operation ...\n\n"+
-						"Name: %s\n"+
-						"Error: %s", resourceGroupName, err))
-					break
-				}
-				continue
-			}
-
-			ui.Say(fmt.Sprintf(" -> %s : '%s'",
-				*deploymentOperation.Properties.TargetResource.ResourceType,
-				*deploymentOperation.Properties.TargetResource.ResourceName))
-
-			err = s.delete(context.TODO(), s.client,
-				*deploymentOperation.Properties.TargetResource.ResourceType,
-				*deploymentOperation.Properties.TargetResource.ResourceName,
-				resourceGroupName)
-			if err != nil {
-				ui.Error(fmt.Sprintf("Error deleting resource.  Please delete manually.\n\n"+
-					"Name: %s\n"+
-					"Error: %s", *deploymentOperation.Properties.TargetResource.ResourceName, err))
-			}
-
-			if err = deploymentOperations.Next(); err != nil {
-				ui.Error(fmt.Sprintf("Error deleting resources.  Please delete them manually.\n\n"+
-					"Name: %s\n"+
-					"Error: %s", resourceGroupName, err))
-				break
-			}
-		}
-
-		// The disk is not defined as an operation in the template so it has to be deleted separately
-		if imageType == "" && imageName == "" {
-			return
-		}
-
-		ui.Say(fmt.Sprintf(" -> %s : '%s'", imageType, imageName))
-		err = s.deleteDisk(context.TODO(), imageType, imageName, resourceGroupName)
-		if err != nil {
-			ui.Error(fmt.Sprintf("Error deleting resource.  Please delete manually.\n\n"+
-				"Name: %s\n"+
-				"Error: %s", imageName, err))
-		}
-	}
+	NewStepDeleteAdditionalDisks(s.client, ui).Run(context.TODO(), state)
 }
 
 func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupName string, deploymentName string) error {
@@ -152,27 +93,31 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 	}
 
 	f, err := s.client.DeploymentsClient.CreateOrUpdate(ctx, resourceGroupName, deploymentName, *deployment)
-	if err == nil {
-		err = f.WaitForCompletionRef(ctx, s.client.DeploymentsClient.Client)
-	}
 	if err != nil {
 		s.say(s.client.LastError.Error())
+		return err
 	}
+
+	err = f.WaitForCompletionRef(ctx, s.client.DeploymentsClient.Client)
+	if err == nil {
+		s.say(s.client.LastError.Error())
+	}
+
 	return err
 }
 
 func (s *StepDeployTemplate) deleteTemplate(ctx context.Context, state multistep.StateBag) error {
-	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
-	var deploymentName = s.name
+	deploymentName := s.name
+	resourceGroupName := state.Get(constants.ArmResourceGroupName).(string)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say(fmt.Sprintf("Removing the created Deployment object: '%s'", deploymentName))
 	f, err := s.client.DeploymentsClient.Delete(ctx, resourceGroupName, deploymentName)
-	if err == nil {
-		err = f.WaitForCompletionRef(ctx, s.client.DeploymentsClient.Client)
+	if err != nil {
+		return err
 	}
 
-	return err
+	return f.WaitForCompletionRef(ctx, s.client.DeploymentsClient.Client)
 }
 
 func (s *StepDeployTemplate) getImageDetails(ctx context.Context, resourceGroupName string, computeName string) (string, string, error) {
@@ -186,10 +131,11 @@ func (s *StepDeployTemplate) getImageDetails(ctx context.Context, resourceGroupN
 	if vm.StorageProfile.OsDisk.Vhd != nil {
 		imageType = "image"
 		imageName = *vm.StorageProfile.OsDisk.Vhd.URI
-	} else {
-		imageType = "Microsoft.Compute/disks"
-		imageName = *vm.StorageProfile.OsDisk.ManagedDisk.ID
+		return imageType, imageName, nil
 	}
+
+	imageType = "Microsoft.Compute/disks"
+	imageName = *vm.StorageProfile.OsDisk.ManagedDisk.ID
 
 	return imageType, imageName, nil
 }
@@ -266,4 +212,59 @@ func (s *StepDeployTemplate) deleteImage(ctx context.Context, imageType string, 
 	}
 
 	return blob.Delete(nil)
+}
+
+func (s *StepDeployTemplate) deleteDeploymentResources(ctx context.Context, deploymentName, resourceGroupName string) error {
+	var maxResources int32 = 50
+	deploymentOperations, err := s.client.DeploymentOperationsClient.ListComplete(ctx, resourceGroupName, deploymentName, &maxResources)
+	if err != nil {
+		s.reportIfError(err, resourceGroupName)
+		return err
+	}
+
+	for deploymentOperations.NotDone() {
+		deploymentOperation := deploymentOperations.Value()
+		// Sometimes an empty operation is added to the list by Azure
+		if deploymentOperation.Properties.TargetResource == nil {
+			_ = deploymentOperations.Next()
+			continue
+		}
+
+		resourceName := *deploymentOperation.Properties.TargetResource.ResourceName
+		resourceType := *deploymentOperation.Properties.TargetResource.ResourceType
+
+		s.say(fmt.Sprintf(" -> %s : '%s'", resourceType, resourceName))
+
+		err = retry.Config{
+			Tries:      10,
+			RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 600 * time.Second, Multiplier: 2}).Linear,
+		}.Run(ctx, func(ctx context.Context) error {
+			err := deleteResource(ctx, s.client,
+				resourceType,
+				resourceName,
+				resourceGroupName)
+			if err != nil {
+				s.reportIfError(err, resourceName)
+			}
+			return nil
+		})
+		if err != nil {
+			s.reportIfError(err, resourceName)
+		}
+
+		if err = deploymentOperations.Next(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *StepDeployTemplate) reportIfError(err error, resourceName string) {
+	if err != nil {
+		s.say(fmt.Sprintf("Error deleting resource. Please delete manually.\n\n"+
+			"Name: %s\n"+
+			"Error: %s", resourceName, err.Error()))
+		s.error(err)
+	}
 }
