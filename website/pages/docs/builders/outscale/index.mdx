@@ -78,6 +78,33 @@ Usage:
     $ export OUTSCALE_REGION="eu-west-2"
     $ packer build packer.json
 
+### x509 Certificate Authentication
+
+Outscale API now supports x509 Client certificate authentication, in addition of traditional AK/SK HMAC based auth.
+This adds an additional layer of security, especially desirable on SecNumCloud compliant regions (cloudgouv-eu-west-1).
+
+You can set this certificates either by environment variables or by the static credentials inside the packer configuration file.
+
+
+#### Environment variables
+
+```bash
+export OUTSCALE_X509CERT="the/path/to/your/x509cert"
+export OUTSCALE_X509KEY="the/path/to/your/x509key"
+```
+
+#### Static Credentials
+
+```json
+{
+  "x509_cert_path": "the/path/to/your/x509cert",
+  "x509_key_path": "the/path/to/your/x509key",
+  "region": "cloudgouv-eu-west-1",
+  "type": "osc-bsu",
+}
+```
+
+
 ### Checking that system time is current
 
 Outscale uses the current time as part of the [request signing
