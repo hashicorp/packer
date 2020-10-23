@@ -31,9 +31,9 @@ type CertificateType int32
 
 const (
 	CertificateType_CERTIFICATE_TYPE_UNSPECIFIED CertificateType = 0
-	// The certificate is imported by user.
+	// The certificate was imported by user
 	CertificateType_IMPORTED CertificateType = 1
-	// The certificate is created by service.
+	// The certificate was created by service
 	CertificateType_MANAGED CertificateType = 2
 )
 
@@ -134,17 +134,17 @@ type Certificate_Status int32
 
 const (
 	Certificate_STATUS_UNSPECIFIED Certificate_Status = 0
-	// The certificate domains validation are required. Used only for managed certificates.
+	// The certificate domains validation are required. Used only for MANAGED certificates.
 	Certificate_VALIDATING Certificate_Status = 1
-	// The certificate issuance is failed. Used only for managed certificates.
+	// The certificate issuance was failed. Used only for MANAGED certificates.
 	Certificate_INVALID Certificate_Status = 2
-	// The certificate is issued.
+	// The certificate was issued.
 	Certificate_ISSUED Certificate_Status = 3
-	// The certificate is revoked.
+	// The certificate was revoked.
 	Certificate_REVOKED Certificate_Status = 4
-	// The certificate renewal is started. Used only for managed certificates.
+	// The certificate renewal was started. Used only for MANAGED certificates.
 	Certificate_RENEWING Certificate_Status = 5
-	// The certificate renewal is failed. Used only for managed certificates.
+	// The certificate renewal was failed. Used only for MANAGED certificates.
 	Certificate_RENEWAL_FAILED Certificate_Status = 6
 )
 
@@ -201,14 +201,10 @@ type Challenge_Status int32
 
 const (
 	Challenge_STATUS_UNSPECIFIED Challenge_Status = 0
-	// The challenge is waiting to be completed.
-	Challenge_PENDING Challenge_Status = 1
-	// The challenge is awaiting approval from Let's Encrypt.
-	Challenge_PROCESSING Challenge_Status = 2
-	// The challenge is complete.
-	Challenge_VALID Challenge_Status = 3
-	// The rights check for a specific domain failed or the one-week period allocated for the check expired.
-	Challenge_INVALID Challenge_Status = 4
+	Challenge_PENDING            Challenge_Status = 1
+	Challenge_PROCESSING         Challenge_Status = 2
+	Challenge_VALID              Challenge_Status = 3
+	Challenge_INVALID            Challenge_Status = 4
 )
 
 // Enum value maps for Challenge_Status.
@@ -256,24 +252,23 @@ func (Challenge_Status) EnumDescriptor() ([]byte, []int) {
 	return file_yandex_cloud_certificatemanager_v1_certificate_proto_rawDescGZIP(), []int{1, 0}
 }
 
-// A certificate. For details about the concept, see [documentation](docs/certificate-manager/concepts/).
+// A certificate.
 type Certificate struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// ID of the certificate. Generated at creation time.
+	// ID of the certificate.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// ID of the folder that the certificate belongs to.
 	FolderId string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
-	// Creation timestamp.
+	// Time when the certificate was created.
 	CreatedAt *timestamp.Timestamp `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// Name of the certificate.
-	// The name is unique within the folder.
 	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	// Description of the certificate.
 	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	// Certificate labels as `key:value` pairs.
+	// Certificate labels as `key:value` pairs. Maximum 64 per certificate.
 	Labels map[string]string `protobuf:"bytes,6,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Type of the certificate.
 	Type CertificateType `protobuf:"varint,7,opt,name=type,proto3,enum=yandex.cloud.certificatemanager.v1.CertificateType" json:"type,omitempty"`
@@ -281,21 +276,21 @@ type Certificate struct {
 	Domains []string `protobuf:"bytes,8,rep,name=domains,proto3" json:"domains,omitempty"`
 	// Status of the certificate.
 	Status Certificate_Status `protobuf:"varint,9,opt,name=status,proto3,enum=yandex.cloud.certificatemanager.v1.Certificate_Status" json:"status,omitempty"`
-	// [Distinguished Name](https://tools.ietf.org/html/rfc1779) of the certificate authority that issued the certificate.
+	// Name of the certificate authority that issued the certificate.
 	Issuer string `protobuf:"bytes,10,opt,name=issuer,proto3" json:"issuer,omitempty"`
-	// [Distinguished Name](https://tools.ietf.org/html/rfc1779) of the entity that is associated with the public key contained in the certificate.
+	// Name of the entity that is associated with the public key contained in the certificate.
 	Subject string `protobuf:"bytes,11,opt,name=subject,proto3" json:"subject,omitempty"`
-	// Serial number of the certificate.
+	// Serial number of the certificate
 	Serial string `protobuf:"bytes,12,opt,name=serial,proto3" json:"serial,omitempty"`
-	// Time when the certificate is updated.
+	// Time when the certificate was updated
 	UpdatedAt *timestamp.Timestamp `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	// Time when the certificate is issued.
+	// Time when the certificate was issued
 	IssuedAt *timestamp.Timestamp `protobuf:"bytes,14,opt,name=issued_at,json=issuedAt,proto3" json:"issued_at,omitempty"`
 	// Time after which the certificate is not valid.
 	NotAfter *timestamp.Timestamp `protobuf:"bytes,15,opt,name=not_after,json=notAfter,proto3" json:"not_after,omitempty"`
 	// Time before which the certificate is not valid.
 	NotBefore *timestamp.Timestamp `protobuf:"bytes,16,opt,name=not_before,json=notBefore,proto3" json:"not_before,omitempty"`
-	// Domains validation challenges of the certificate. Used only for managed certificates.
+	// Domains validation challenges of the certificate. Used only for MANAGED certificates.
 	Challenges []*Challenge `protobuf:"bytes,17,rep,name=challenges,proto3" json:"challenges,omitempty"`
 }
 
@@ -460,9 +455,9 @@ type Challenge struct {
 	Domain string `protobuf:"bytes,1,opt,name=domain,proto3" json:"domain,omitempty"`
 	// Type of the challenge.
 	Type ChallengeType `protobuf:"varint,2,opt,name=type,proto3,enum=yandex.cloud.certificatemanager.v1.ChallengeType" json:"type,omitempty"`
-	// Time when the challenge is created.
+	// Time when the challenge was created.
 	CreatedAt *timestamp.Timestamp `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	// Time when the challenge is updated.
+	// Time when the challenge was updated.
 	UpdatedAt *timestamp.Timestamp `protobuf:"bytes,4,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	// Status of the challenge.
 	Status Challenge_Status `protobuf:"varint,5,opt,name=status,proto3,enum=yandex.cloud.certificatemanager.v1.Challenge_Status" json:"status,omitempty"`
@@ -585,12 +580,12 @@ type isChallenge_Challenge interface {
 }
 
 type Challenge_DnsChallenge struct {
-	// DNS-record.
+	// DNS record.
 	DnsChallenge *Challenge_DnsRecord `protobuf:"bytes,8,opt,name=dns_challenge,json=dnsChallenge,proto3,oneof"`
 }
 
 type Challenge_HttpChallenge struct {
-	// HTTP-file.
+	// HTTP file.
 	HttpChallenge *Challenge_HttpFile `protobuf:"bytes,9,opt,name=http_challenge,json=httpChallenge,proto3,oneof"`
 }
 
@@ -605,9 +600,9 @@ type Challenge_DnsRecord struct {
 
 	// Name of the DNS record.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// Type of the DNS-record.
+	// Type of the DNS record.
 	Type string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	// Value of the DNS-record.
+	// Value of the DNS record.
 	Value string `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
 }
 

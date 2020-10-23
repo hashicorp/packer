@@ -241,11 +241,11 @@ type CreateHostGroupRequest struct {
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	// Resource labels as `key:value` pairs.
 	Labels map[string]string `protobuf:"bytes,4,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	// Availability zone where all dedicated hosts will be allocated.
+	// Availability zone where all dedicated hosts will be allocated
 	ZoneId string `protobuf:"bytes,5,opt,name=zone_id,json=zoneId,proto3" json:"zone_id,omitempty"`
-	// ID of host type. Resources provided by each host of the group.
+	// ID of host type. Resources provided by each host of the group
 	TypeId string `protobuf:"bytes,6,opt,name=type_id,json=typeId,proto3" json:"type_id,omitempty"`
-	// Behaviour on maintenance events.
+	// Behaviour on maintenance events
 	MaintenancePolicy MaintenancePolicy `protobuf:"varint,7,opt,name=maintenance_policy,json=maintenancePolicy,proto3,enum=yandex.cloud.compute.v1.MaintenancePolicy" json:"maintenance_policy,omitempty"`
 	// Scale policy. Only fixed number of hosts are supported at this moment.
 	ScalePolicy *ScalePolicy `protobuf:"bytes,8,opt,name=scale_policy,json=scalePolicy,proto3" json:"scale_policy,omitempty"`
@@ -1640,9 +1640,9 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type HostGroupServiceClient interface {
-	// Returns the specified host group.
+	// Returns the specified host group
 	Get(ctx context.Context, in *GetHostGroupRequest, opts ...grpc.CallOption) (*HostGroup, error)
-	// Retrieves the list of host groups in the specified folder.
+	// Retrieves the list of host groups in the specified folder
 	List(ctx context.Context, in *ListHostGroupsRequest, opts ...grpc.CallOption) (*ListHostGroupsResponse, error)
 	// Creates a host group in the specified folder.
 	Create(ctx context.Context, in *CreateHostGroupRequest, opts ...grpc.CallOption) (*operation.Operation, error)
@@ -1650,11 +1650,11 @@ type HostGroupServiceClient interface {
 	Update(ctx context.Context, in *UpdateHostGroupRequest, opts ...grpc.CallOption) (*operation.Operation, error)
 	// Deletes the specified host group.
 	Delete(ctx context.Context, in *DeleteHostGroupRequest, opts ...grpc.CallOption) (*operation.Operation, error)
-	// Lists operations for the specified host group.
+	// Lists operations for the specified host group
 	ListOperations(ctx context.Context, in *ListHostGroupOperationsRequest, opts ...grpc.CallOption) (*ListHostGroupOperationsResponse, error)
-	// Lists instances that belongs to the specified host group.
+	// Lists instances that belongs to the specified host group
 	ListInstances(ctx context.Context, in *ListHostGroupInstancesRequest, opts ...grpc.CallOption) (*ListHostGroupInstancesResponse, error)
-	// Lists hosts that belongs to the specified host group.
+	// Lists hosts that belongs to the specified host group
 	ListHosts(ctx context.Context, in *ListHostGroupHostsRequest, opts ...grpc.CallOption) (*ListHostGroupHostsResponse, error)
 }
 
@@ -1740,9 +1740,9 @@ func (c *hostGroupServiceClient) ListHosts(ctx context.Context, in *ListHostGrou
 
 // HostGroupServiceServer is the server API for HostGroupService service.
 type HostGroupServiceServer interface {
-	// Returns the specified host group.
+	// Returns the specified host group
 	Get(context.Context, *GetHostGroupRequest) (*HostGroup, error)
-	// Retrieves the list of host groups in the specified folder.
+	// Retrieves the list of host groups in the specified folder
 	List(context.Context, *ListHostGroupsRequest) (*ListHostGroupsResponse, error)
 	// Creates a host group in the specified folder.
 	Create(context.Context, *CreateHostGroupRequest) (*operation.Operation, error)
@@ -1750,11 +1750,11 @@ type HostGroupServiceServer interface {
 	Update(context.Context, *UpdateHostGroupRequest) (*operation.Operation, error)
 	// Deletes the specified host group.
 	Delete(context.Context, *DeleteHostGroupRequest) (*operation.Operation, error)
-	// Lists operations for the specified host group.
+	// Lists operations for the specified host group
 	ListOperations(context.Context, *ListHostGroupOperationsRequest) (*ListHostGroupOperationsResponse, error)
-	// Lists instances that belongs to the specified host group.
+	// Lists instances that belongs to the specified host group
 	ListInstances(context.Context, *ListHostGroupInstancesRequest) (*ListHostGroupInstancesResponse, error)
-	// Lists hosts that belongs to the specified host group.
+	// Lists hosts that belongs to the specified host group
 	ListHosts(context.Context, *ListHostGroupHostsRequest) (*ListHostGroupHostsResponse, error)
 }
 

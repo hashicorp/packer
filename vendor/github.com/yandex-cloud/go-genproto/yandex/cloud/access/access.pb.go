@@ -90,7 +90,7 @@ type Subject struct {
 	// * `allUsers`: A special system identifier that represents anyone. No authentication is required.
 	//    For example, you don't need to specify the IAM token in an API query.
 	// * `<cloud generated id>`: An identifier that represents a user account.
-	//    It can be used only if the [type] is `userAccount`, `federatedUser` or `serviceAccount`.
+	//    It can be used only if the [type] is `userAccount` or `serviceAccount`.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// Type of the subject.
 	//

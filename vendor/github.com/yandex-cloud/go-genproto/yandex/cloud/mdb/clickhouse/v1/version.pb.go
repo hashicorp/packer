@@ -30,13 +30,13 @@ type Version struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// ID of the version.
+	// Version ID
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// Name of the version.
+	// Version name
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// Whether version is deprecated.
+	// Is version deprecated
 	Deprecated bool `protobuf:"varint,3,opt,name=deprecated,proto3" json:"deprecated,omitempty"`
-	// List of versions that can be updated from current.
+	// List of versions that can be updated from current
 	UpdatableTo []string `protobuf:"bytes,4,rep,name=updatable_to,json=updatableTo,proto3" json:"updatable_to,omitempty"`
 }
 

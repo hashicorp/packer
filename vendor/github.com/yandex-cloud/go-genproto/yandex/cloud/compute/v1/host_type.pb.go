@@ -25,19 +25,19 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-// Represents host resources.
-// Note: Platform can use hosts with different number of memory and cores.
+// Represents host resources
+// Note: Platform can use hosts with different number of memory and cores
 // TODO: Do we need sockets here?
 type HostType struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// Unique type identifier.
+	// Unique type identifier
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// Total number of cores available for instances.
+	// Total number of cores available for instances
 	Cores int64 `protobuf:"varint,2,opt,name=cores,proto3" json:"cores,omitempty"`
-	// Ammount of memory available for instances.
+	// Ammount of memory available for instances
 	Memory int64 `protobuf:"varint,3,opt,name=memory,proto3" json:"memory,omitempty"`
 }
 

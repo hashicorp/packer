@@ -38,10 +38,8 @@ const _ = proto.ProtoPackageIsVersion4
 type CertificateView int32
 
 const (
-	// Output basic information about the certificate.
 	CertificateView_BASIC CertificateView = 0
-	// Output full information about the certificate including domain challenges.
-	CertificateView_FULL CertificateView = 1
+	CertificateView_FULL  CertificateView = 1
 )
 
 // Enum value maps for CertificateView.
@@ -89,10 +87,9 @@ type GetCertificateRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	// ID of the certificate to return.
-	//
 	// To get the ID of a certificate use a [CertificateService.List] request.
 	CertificateId string `protobuf:"bytes,1,opt,name=certificate_id,json=certificateId,proto3" json:"certificate_id,omitempty"`
-	// The output type of the certificate.
+	//
 	View CertificateView `protobuf:"varint,2,opt,name=view,proto3,enum=yandex.cloud.certificatemanager.v1.CertificateView" json:"view,omitempty"`
 }
 
@@ -150,14 +147,14 @@ type ListCertificatesRequest struct {
 	// ID of the folder to list certificate in.
 	FolderId string `protobuf:"bytes,1,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
 	// The maximum number of results per page to return. If the number of available
-	// results is larger than `page_size`, the service returns a [ListCertificatesResponse.next_page_token]
+	// results is larger than [page_size], the service returns a [ListCertificatesResponse.next_page_token]
 	// that can be used to get the next page of results in subsequent list requests.
 	// Default value: 100.
 	PageSize int64 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	// Page token. To get the next page of results, set `page_token` to the
+	// Page token. To get the next page of results, set [page_token] to the
 	// [ListCertificatesResponse.next_page_token] returned by a previous list request.
 	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
-	// The output type of the certificate.
+	//
 	View CertificateView `protobuf:"varint,6,opt,name=view,proto3,enum=yandex.cloud.certificatemanager.v1.CertificateView" json:"view,omitempty"`
 }
 
@@ -230,7 +227,7 @@ type ListCertificatesResponse struct {
 	Certificates []*Certificate `protobuf:"bytes,1,rep,name=certificates,proto3" json:"certificates,omitempty"`
 	// This token allows you to get the next page of results for list requests. If the number
 	// of results is greater than the specified [ListCertificatesRequest.page_size], use
-	// the `next_page_token` as the value for the [ListCertificatesRequest.page_token] query parameter
+	// the [next_page_token] as the value for the [ListCertificatesRequest.page_token] query parameter
 	// in the next list request. Each subsequent list request will have its own
 	// [next_page_token] to continue paging through the results.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
@@ -290,11 +287,10 @@ type CreateCertificateRequest struct {
 	// ID of the folder to create a certificate in.
 	FolderId string `protobuf:"bytes,1,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
 	// Name of the certificate.
-	// The name must be unique within the folder.
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	// Description of the certificate.
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// Labels for the certificate as `key:value` pairs.
+	// Labels for the certificate as `key:value` pairs. Maximum 64 per certificate.
 	Labels map[string]string `protobuf:"bytes,4,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// PEM-encoded certificate content of the certificate.
 	Certificate string `protobuf:"bytes,5,opt,name=certificate,proto3" json:"certificate,omitempty"`
@@ -447,13 +443,13 @@ type UpdateCertificateRequest struct {
 	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	// New description for the certificate.
 	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	// New labels for the certificate as `key:value` pairs.
+	// New labels for the certificate as `key:value` pairs. Maximum 64 per certificate.
 	Labels map[string]string `protobuf:"bytes,5,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	// New PEM-encoded certificate content for the certificate. Used only for imported certificates.
+	// New PEM-encoded certificate content for the certificate. Used only for IMPORTED certificates.
 	Certificate string `protobuf:"bytes,6,opt,name=certificate,proto3" json:"certificate,omitempty"`
-	// New PEM-encoded certificate chain content for the certificate. Used only for imported certificates.
+	// New PEM-encoded certificate chain content for the certificate. Used only for IMPORTED certificates.
 	Chain string `protobuf:"bytes,7,opt,name=chain,proto3" json:"chain,omitempty"`
-	// New PEM-encoded private key content for the certificate. Used only for imported certificates.
+	// New PEM-encoded private key content for the certificate. Used only for IMPORTED certificates.
 	PrivateKey string `protobuf:"bytes,8,opt,name=private_key,json=privateKey,proto3" json:"private_key,omitempty"`
 }
 
@@ -700,7 +696,7 @@ type RequestNewCertificateRequest struct {
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	// Description of the certificate.
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// Labels for the certificate as `key:value` pairs.
+	// Labels for the certificate as `key:value` pairs. Maximum 64 per certificate.
 	Labels map[string]string `protobuf:"bytes,4,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Fully qualified domain names of the certificate.
 	Domains []string `protobuf:"bytes,5,rep,name=domains,proto3" json:"domains,omitempty"`
@@ -787,7 +783,7 @@ type RequestNewCertificateMetadata struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// ID of the certificate that is being requested.
+	// ID of the certificate being requested.
 	CertificateId string `protobuf:"bytes,1,opt,name=certificate_id,json=certificateId,proto3" json:"certificate_id,omitempty"`
 }
 
@@ -835,16 +831,16 @@ type ListCertificateOperationsRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// ID of the certificate to list operations for.
+	// ID of the certificate to get operations for.
 	//
 	// To get the certificate ID, use a [CertificateService.List] request.
 	CertificateId string `protobuf:"bytes,1,opt,name=certificate_id,json=certificateId,proto3" json:"certificate_id,omitempty"`
 	// The maximum number of results per page that should be returned. If the number of available
-	// results is larger than `page_size`, the service returns a [ListCertificateOperationsResponse.next_page_token]
+	// results is larger than [page_size], the service returns a [ListCertificateOperationsResponse.next_page_token]
 	// that can be used to get the next page of results in subsequent list requests.
 	// Default value: 100.
 	PageSize int64 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	// Page token. To get the next page of results, set `page_token` to the
+	// Page token. To get the next page of results, set [page_token] to the
 	// [ListCertificateOperationsResponse.next_page_token] returned by a previous list request.
 	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 }
@@ -910,7 +906,7 @@ type ListCertificateOperationsResponse struct {
 	// List of operations for the specified certificate.
 	Operations []*operation.Operation `protobuf:"bytes,1,rep,name=operations,proto3" json:"operations,omitempty"`
 	// This token allows you to get the next page of results for list requests. If the number of results
-	// is larger than [ListCertificateOperationsRequest.page_size], use the `next_page_token` as the value
+	// is larger than [ListCertificateOperationsRequest.page_size], use the [next_page_token] as the value
 	// for the [ListCertificateOperationsRequest.page_token] query parameter in the next list request.
 	// Each subsequent list request will have its own [next_page_token] to continue paging through the results.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
@@ -1593,7 +1589,7 @@ const _ = grpc.SupportPackageIsVersion6
 type CertificateServiceClient interface {
 	// Returns the specified certificate.
 	//
-	// To get the list of available certificates, make a [List] request.
+	//  To get the list of available certificates, make a [CertificateService.List] request.
 	Get(ctx context.Context, in *GetCertificateRequest, opts ...grpc.CallOption) (*Certificate, error)
 	// Returns the list of certificates in the specified folder.
 	List(ctx context.Context, in *ListCertificatesRequest, opts ...grpc.CallOption) (*ListCertificatesResponse, error)
@@ -1717,7 +1713,7 @@ func (c *certificateServiceClient) UpdateAccessBindings(ctx context.Context, in 
 type CertificateServiceServer interface {
 	// Returns the specified certificate.
 	//
-	// To get the list of available certificates, make a [List] request.
+	//  To get the list of available certificates, make a [CertificateService.List] request.
 	Get(context.Context, *GetCertificateRequest) (*Certificate, error)
 	// Returns the list of certificates in the specified folder.
 	List(context.Context, *ListCertificatesRequest) (*ListCertificatesResponse, error)

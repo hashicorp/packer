@@ -36,7 +36,7 @@ type GetCertificateContentResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// ID of the certificate.
+	// ID of the certificate
 	CertificateId string `protobuf:"bytes,1,opt,name=certificate_id,json=certificateId,proto3" json:"certificate_id,omitempty"`
 	// PEM-encoded certificate chain content of the certificate.
 	CertificateChain []string `protobuf:"bytes,3,rep,name=certificate_chain,json=certificateChain,proto3" json:"certificate_chain,omitempty"`
@@ -289,7 +289,7 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type CertificateContentServiceClient interface {
-	// Returns chain and private key of the specified certificate.
+	// Returns chain and private key of the specified certificate
 	Get(ctx context.Context, in *GetCertificateContentRequest, opts ...grpc.CallOption) (*GetCertificateContentResponse, error)
 }
 
@@ -312,7 +312,7 @@ func (c *certificateContentServiceClient) Get(ctx context.Context, in *GetCertif
 
 // CertificateContentServiceServer is the server API for CertificateContentService service.
 type CertificateContentServiceServer interface {
-	// Returns chain and private key of the specified certificate.
+	// Returns chain and private key of the specified certificate
 	Get(context.Context, *GetCertificateContentRequest) (*GetCertificateContentResponse, error)
 }
 

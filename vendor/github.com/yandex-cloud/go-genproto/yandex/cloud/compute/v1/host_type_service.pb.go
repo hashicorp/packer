@@ -373,9 +373,9 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type HostTypeServiceClient interface {
-	// Returns information about specified host type.
+	// Returns information about specified host type
 	Get(ctx context.Context, in *GetHostTypeRequest, opts ...grpc.CallOption) (*HostType, error)
-	// List avaliable host types.
+	// List avaliable host types
 	List(ctx context.Context, in *ListHostTypesRequest, opts ...grpc.CallOption) (*ListHostTypesResponse, error)
 }
 
@@ -407,9 +407,9 @@ func (c *hostTypeServiceClient) List(ctx context.Context, in *ListHostTypesReque
 
 // HostTypeServiceServer is the server API for HostTypeService service.
 type HostTypeServiceServer interface {
-	// Returns information about specified host type.
+	// Returns information about specified host type
 	Get(context.Context, *GetHostTypeRequest) (*HostType, error)
-	// List avaliable host types.
+	// List avaliable host types
 	List(context.Context, *ListHostTypesRequest) (*ListHostTypesResponse, error)
 }
 

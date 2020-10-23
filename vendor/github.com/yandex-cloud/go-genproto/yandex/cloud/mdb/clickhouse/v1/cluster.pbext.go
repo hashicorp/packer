@@ -105,14 +105,6 @@ func (m *ClusterConfig) SetCloudStorage(v *CloudStorage) {
 	m.CloudStorage = v
 }
 
-func (m *ClusterConfig) SetSqlDatabaseManagement(v *wrappers.BoolValue) {
-	m.SqlDatabaseManagement = v
-}
-
-func (m *ClusterConfig) SetSqlUserManagement(v *wrappers.BoolValue) {
-	m.SqlUserManagement = v
-}
-
 func (m *ClusterConfig_Clickhouse) SetConfig(v *config.ClickhouseConfigSet) {
 	m.Config = v
 }

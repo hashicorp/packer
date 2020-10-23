@@ -37,11 +37,11 @@ type ListVersionsRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	// The maximum number of results per page that should be returned. If the number of available
-	// results is larger than [page_size], the service returns a [ListVersionsResponse.next_page_token] that can be used
+	// results is larger than `page_size`, the service returns a `next_page_token` that can be used
 	// to get the next page of results in subsequent ListVersions requests.
-	// Default value: 100.
+	// Acceptable values are 0 to 1000, inclusive. Default value: 100.
 	PageSize int64 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	// Page token. Set [page_token] to the [ListVersionsResponse.next_page_token] returned by a previous ListVersions
+	// Page token. Set `page_token` to the `next_page_token` returned by a previous ListVersions
 	// request to get the next page of results.
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 }
@@ -100,10 +100,10 @@ type ListVersionsResponse struct {
 	// Requested list of available versions.
 	Version []*Version `protobuf:"bytes,1,rep,name=version,proto3" json:"version,omitempty"`
 	// This token allows you to get the next page of results for ListVersions requests,
-	// if the number of results is larger than [ListVersionsRequest.page_size] specified in the request.
-	// To get the next page, specify the value of [next_page_token] as a value for
-	// the [ListVersionsRequest.page_token] parameter in the next ListVerions request. Subsequent ListVersions
-	// requests will have their own [next_page_token] to continue paging through the results.
+	// if the number of results is larger than `page_size` specified in the request.
+	// To get the next page, specify the value of `next_page_token` as a value for
+	// the `page_token` parameter in the next ListVerions request. Subsequent ListVersions
+	// requests will have their own `next_page_token` to continue paging through the results.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 }
 

@@ -30,9 +30,9 @@ type MaintenancePolicy int32
 
 const (
 	MaintenancePolicy_MAINTENANCE_POLICY_UNSPECIFIED MaintenancePolicy = 0
-	// Restart instances on the same host after maintenance event.
+	// Restart instances on the same host after maintenance event
 	MaintenancePolicy_RESTART MaintenancePolicy = 1
-	// Migrate instances to another host before maintenance event.
+	// Migrate instances to another host before maintenance event
 	MaintenancePolicy_MIGRATE MaintenancePolicy = 2
 )
 
@@ -187,7 +187,7 @@ type HostGroup struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// ID of the group.
+	// ID of the group
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// ID of the folder that the group belongs to.
 	FolderId string `protobuf:"bytes,2,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
@@ -199,13 +199,13 @@ type HostGroup struct {
 	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
 	// Resource labels as `key:value` pairs.
 	Labels map[string]string `protobuf:"bytes,6,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	// Availability zone where all dedicated hosts are allocated.
+	// Availability zone where all dedicated hosts are allocated
 	ZoneId string `protobuf:"bytes,7,opt,name=zone_id,json=zoneId,proto3" json:"zone_id,omitempty"`
-	// Status of the group.
+	// Status of the group
 	Status HostGroup_Status `protobuf:"varint,8,opt,name=status,proto3,enum=yandex.cloud.compute.v1.HostGroup_Status" json:"status,omitempty"`
-	// ID of host type. Resources provided by each host of the group.
+	// ID  of host type. Resources provided by each host of the group
 	TypeId string `protobuf:"bytes,9,opt,name=type_id,json=typeId,proto3" json:"type_id,omitempty"`
-	// Behaviour on maintenance events.
+	// Behaviour on maintenance events
 	MaintenancePolicy MaintenancePolicy `protobuf:"varint,10,opt,name=maintenance_policy,json=maintenancePolicy,proto3,enum=yandex.cloud.compute.v1.MaintenancePolicy" json:"maintenance_policy,omitempty"`
 	// Scale policy. Only fixed number of hosts are supported at this moment.
 	ScalePolicy *ScalePolicy `protobuf:"bytes,11,opt,name=scale_policy,json=scalePolicy,proto3" json:"scale_policy,omitempty"`

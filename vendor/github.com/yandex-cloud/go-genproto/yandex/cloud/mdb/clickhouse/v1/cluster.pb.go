@@ -682,10 +682,6 @@ type ClusterConfig struct {
 	// Access policy for external services.
 	Access       *Access       `protobuf:"bytes,5,opt,name=access,proto3" json:"access,omitempty"`
 	CloudStorage *CloudStorage `protobuf:"bytes,6,opt,name=cloud_storage,json=cloudStorage,proto3" json:"cloud_storage,omitempty"`
-	// Whether database management through SQL commands is enabled.
-	SqlDatabaseManagement *wrappers.BoolValue `protobuf:"bytes,7,opt,name=sql_database_management,json=sqlDatabaseManagement,proto3" json:"sql_database_management,omitempty"`
-	// Whether user management through SQL commands is enabled.
-	SqlUserManagement *wrappers.BoolValue `protobuf:"bytes,8,opt,name=sql_user_management,json=sqlUserManagement,proto3" json:"sql_user_management,omitempty"`
 }
 
 func (x *ClusterConfig) Reset() {
@@ -758,20 +754,6 @@ func (x *ClusterConfig) GetAccess() *Access {
 func (x *ClusterConfig) GetCloudStorage() *CloudStorage {
 	if x != nil {
 		return x.CloudStorage
-	}
-	return nil
-}
-
-func (x *ClusterConfig) GetSqlDatabaseManagement() *wrappers.BoolValue {
-	if x != nil {
-		return x.SqlDatabaseManagement
-	}
-	return nil
-}
-
-func (x *ClusterConfig) GetSqlUserManagement() *wrappers.BoolValue {
-	if x != nil {
-		return x.SqlUserManagement
 	}
 	return nil
 }
@@ -1625,7 +1607,7 @@ var file_yandex_cloud_mdb_clickhouse_v1_cluster_proto_rawDesc = []byte{
 	0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01,
 	0x28, 0x09, 0x52, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12,
 	0x12, 0x0a, 0x04, 0x6c, 0x69, 0x6e, 0x6b, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6c,
-	0x69, 0x6e, 0x6b, 0x22, 0xd7, 0x06, 0x0a, 0x0d, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43,
+	0x69, 0x6e, 0x6b, 0x22, 0xb7, 0x05, 0x0a, 0x0d, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43,
 	0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12,
 	0x58, 0x0a, 0x0a, 0x63, 0x6c, 0x69, 0x63, 0x6b, 0x68, 0x6f, 0x75, 0x73, 0x65, 0x18, 0x02, 0x20,
@@ -1652,17 +1634,7 @@ var file_yandex_cloud_mdb_clickhouse_v1_cluster_proto_rawDesc = []byte{
 	0x2c, 0x2e, 0x79, 0x61, 0x6e, 0x64, 0x65, 0x78, 0x2e, 0x63, 0x6c, 0x6f, 0x75, 0x64, 0x2e, 0x6d,
 	0x64, 0x62, 0x2e, 0x63, 0x6c, 0x69, 0x63, 0x6b, 0x68, 0x6f, 0x75, 0x73, 0x65, 0x2e, 0x76, 0x31,
 	0x2e, 0x43, 0x6c, 0x6f, 0x75, 0x64, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x52, 0x0c, 0x63,
-	0x6c, 0x6f, 0x75, 0x64, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x12, 0x52, 0x0a, 0x17, 0x73,
-	0x71, 0x6c, 0x5f, 0x64, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x5f, 0x6d, 0x61, 0x6e, 0x61,
-	0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67,
-	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x42,
-	0x6f, 0x6f, 0x6c, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52, 0x15, 0x73, 0x71, 0x6c, 0x44, 0x61, 0x74,
-	0x61, 0x62, 0x61, 0x73, 0x65, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x12,
-	0x4a, 0x0a, 0x13, 0x73, 0x71, 0x6c, 0x5f, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61,
-	0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67,
-	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x42,
-	0x6f, 0x6f, 0x6c, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52, 0x11, 0x73, 0x71, 0x6c, 0x55, 0x73, 0x65,
-	0x72, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x1a, 0xa9, 0x01, 0x0a, 0x0a,
+	0x6c, 0x6f, 0x75, 0x64, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x1a, 0xa9, 0x01, 0x0a, 0x0a,
 	0x43, 0x6c, 0x69, 0x63, 0x6b, 0x68, 0x6f, 0x75, 0x73, 0x65, 0x12, 0x52, 0x0a, 0x06, 0x63, 0x6f,
 	0x6e, 0x66, 0x69, 0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x3a, 0x2e, 0x79, 0x61, 0x6e,
 	0x64, 0x65, 0x78, 0x2e, 0x63, 0x6c, 0x6f, 0x75, 0x64, 0x2e, 0x6d, 0x64, 0x62, 0x2e, 0x63, 0x6c,
@@ -1837,9 +1809,8 @@ var file_yandex_cloud_mdb_clickhouse_v1_cluster_proto_goTypes = []interface{}{
 	(*MaintenanceWindow)(nil),          // 23: yandex.cloud.mdb.clickhouse.v1.MaintenanceWindow
 	(*MaintenanceOperation)(nil),       // 24: yandex.cloud.mdb.clickhouse.v1.MaintenanceOperation
 	(*timeofday.TimeOfDay)(nil),        // 25: google.type.TimeOfDay
-	(*wrappers.BoolValue)(nil),         // 26: google.protobuf.BoolValue
-	(*config.ClickhouseConfigSet)(nil), // 27: yandex.cloud.mdb.clickhouse.v1.config.ClickhouseConfigSet
-	(*wrappers.Int64Value)(nil),        // 28: google.protobuf.Int64Value
+	(*config.ClickhouseConfigSet)(nil), // 26: yandex.cloud.mdb.clickhouse.v1.config.ClickhouseConfigSet
+	(*wrappers.Int64Value)(nil),        // 27: google.protobuf.Int64Value
 }
 var file_yandex_cloud_mdb_clickhouse_v1_cluster_proto_depIdxs = []int32{
 	22, // 0: yandex.cloud.mdb.clickhouse.v1.Cluster.created_at:type_name -> google.protobuf.Timestamp
@@ -1856,27 +1827,25 @@ var file_yandex_cloud_mdb_clickhouse_v1_cluster_proto_depIdxs = []int32{
 	25, // 11: yandex.cloud.mdb.clickhouse.v1.ClusterConfig.backup_window_start:type_name -> google.type.TimeOfDay
 	16, // 12: yandex.cloud.mdb.clickhouse.v1.ClusterConfig.access:type_name -> yandex.cloud.mdb.clickhouse.v1.Access
 	17, // 13: yandex.cloud.mdb.clickhouse.v1.ClusterConfig.cloud_storage:type_name -> yandex.cloud.mdb.clickhouse.v1.CloudStorage
-	26, // 14: yandex.cloud.mdb.clickhouse.v1.ClusterConfig.sql_database_management:type_name -> google.protobuf.BoolValue
-	26, // 15: yandex.cloud.mdb.clickhouse.v1.ClusterConfig.sql_user_management:type_name -> google.protobuf.BoolValue
-	12, // 16: yandex.cloud.mdb.clickhouse.v1.Shard.config:type_name -> yandex.cloud.mdb.clickhouse.v1.ShardConfig
-	21, // 17: yandex.cloud.mdb.clickhouse.v1.ShardConfig.clickhouse:type_name -> yandex.cloud.mdb.clickhouse.v1.ShardConfig.Clickhouse
-	3,  // 18: yandex.cloud.mdb.clickhouse.v1.Host.type:type_name -> yandex.cloud.mdb.clickhouse.v1.Host.Type
-	15, // 19: yandex.cloud.mdb.clickhouse.v1.Host.resources:type_name -> yandex.cloud.mdb.clickhouse.v1.Resources
-	4,  // 20: yandex.cloud.mdb.clickhouse.v1.Host.health:type_name -> yandex.cloud.mdb.clickhouse.v1.Host.Health
-	14, // 21: yandex.cloud.mdb.clickhouse.v1.Host.services:type_name -> yandex.cloud.mdb.clickhouse.v1.Service
-	5,  // 22: yandex.cloud.mdb.clickhouse.v1.Service.type:type_name -> yandex.cloud.mdb.clickhouse.v1.Service.Type
-	6,  // 23: yandex.cloud.mdb.clickhouse.v1.Service.health:type_name -> yandex.cloud.mdb.clickhouse.v1.Service.Health
-	27, // 24: yandex.cloud.mdb.clickhouse.v1.ClusterConfig.Clickhouse.config:type_name -> yandex.cloud.mdb.clickhouse.v1.config.ClickhouseConfigSet
-	15, // 25: yandex.cloud.mdb.clickhouse.v1.ClusterConfig.Clickhouse.resources:type_name -> yandex.cloud.mdb.clickhouse.v1.Resources
-	15, // 26: yandex.cloud.mdb.clickhouse.v1.ClusterConfig.Zookeeper.resources:type_name -> yandex.cloud.mdb.clickhouse.v1.Resources
-	27, // 27: yandex.cloud.mdb.clickhouse.v1.ShardConfig.Clickhouse.config:type_name -> yandex.cloud.mdb.clickhouse.v1.config.ClickhouseConfigSet
-	15, // 28: yandex.cloud.mdb.clickhouse.v1.ShardConfig.Clickhouse.resources:type_name -> yandex.cloud.mdb.clickhouse.v1.Resources
-	28, // 29: yandex.cloud.mdb.clickhouse.v1.ShardConfig.Clickhouse.weight:type_name -> google.protobuf.Int64Value
-	30, // [30:30] is the sub-list for method output_type
-	30, // [30:30] is the sub-list for method input_type
-	30, // [30:30] is the sub-list for extension type_name
-	30, // [30:30] is the sub-list for extension extendee
-	0,  // [0:30] is the sub-list for field type_name
+	12, // 14: yandex.cloud.mdb.clickhouse.v1.Shard.config:type_name -> yandex.cloud.mdb.clickhouse.v1.ShardConfig
+	21, // 15: yandex.cloud.mdb.clickhouse.v1.ShardConfig.clickhouse:type_name -> yandex.cloud.mdb.clickhouse.v1.ShardConfig.Clickhouse
+	3,  // 16: yandex.cloud.mdb.clickhouse.v1.Host.type:type_name -> yandex.cloud.mdb.clickhouse.v1.Host.Type
+	15, // 17: yandex.cloud.mdb.clickhouse.v1.Host.resources:type_name -> yandex.cloud.mdb.clickhouse.v1.Resources
+	4,  // 18: yandex.cloud.mdb.clickhouse.v1.Host.health:type_name -> yandex.cloud.mdb.clickhouse.v1.Host.Health
+	14, // 19: yandex.cloud.mdb.clickhouse.v1.Host.services:type_name -> yandex.cloud.mdb.clickhouse.v1.Service
+	5,  // 20: yandex.cloud.mdb.clickhouse.v1.Service.type:type_name -> yandex.cloud.mdb.clickhouse.v1.Service.Type
+	6,  // 21: yandex.cloud.mdb.clickhouse.v1.Service.health:type_name -> yandex.cloud.mdb.clickhouse.v1.Service.Health
+	26, // 22: yandex.cloud.mdb.clickhouse.v1.ClusterConfig.Clickhouse.config:type_name -> yandex.cloud.mdb.clickhouse.v1.config.ClickhouseConfigSet
+	15, // 23: yandex.cloud.mdb.clickhouse.v1.ClusterConfig.Clickhouse.resources:type_name -> yandex.cloud.mdb.clickhouse.v1.Resources
+	15, // 24: yandex.cloud.mdb.clickhouse.v1.ClusterConfig.Zookeeper.resources:type_name -> yandex.cloud.mdb.clickhouse.v1.Resources
+	26, // 25: yandex.cloud.mdb.clickhouse.v1.ShardConfig.Clickhouse.config:type_name -> yandex.cloud.mdb.clickhouse.v1.config.ClickhouseConfigSet
+	15, // 26: yandex.cloud.mdb.clickhouse.v1.ShardConfig.Clickhouse.resources:type_name -> yandex.cloud.mdb.clickhouse.v1.Resources
+	27, // 27: yandex.cloud.mdb.clickhouse.v1.ShardConfig.Clickhouse.weight:type_name -> google.protobuf.Int64Value
+	28, // [28:28] is the sub-list for method output_type
+	28, // [28:28] is the sub-list for method input_type
+	28, // [28:28] is the sub-list for extension type_name
+	28, // [28:28] is the sub-list for extension extendee
+	0,  // [0:28] is the sub-list for field type_name
 }
 
 func init() { file_yandex_cloud_mdb_clickhouse_v1_cluster_proto_init() }

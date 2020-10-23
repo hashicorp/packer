@@ -339,10 +339,6 @@ func (m *StreamClusterLogsRequest) SetRecordToken(v string) {
 	m.RecordToken = v
 }
 
-func (m *StreamClusterLogsRequest) SetFilter(v string) {
-	m.Filter = v
-}
-
 func (m *ListClusterOperationsRequest) SetClusterId(v string) {
 	m.ClusterId = v
 }
@@ -689,18 +685,6 @@ func (m *ConfigSpec) SetAccess(v *Access) {
 
 func (m *ConfigSpec) SetCloudStorage(v *CloudStorage) {
 	m.CloudStorage = v
-}
-
-func (m *ConfigSpec) SetSqlDatabaseManagement(v *wrappers.BoolValue) {
-	m.SqlDatabaseManagement = v
-}
-
-func (m *ConfigSpec) SetSqlUserManagement(v *wrappers.BoolValue) {
-	m.SqlUserManagement = v
-}
-
-func (m *ConfigSpec) SetAdminPassword(v string) {
-	m.AdminPassword = v
 }
 
 func (m *ConfigSpec_Clickhouse) SetConfig(v *config.ClickhouseConfig) {

@@ -33,10 +33,6 @@ func (m *CreateSymmetricKeyRequest) SetRotationPeriod(v *duration.Duration) {
 	m.RotationPeriod = v
 }
 
-func (m *CreateSymmetricKeyRequest) SetDeletionProtection(v bool) {
-	m.DeletionProtection = v
-}
-
 func (m *CreateSymmetricKeyMetadata) SetKeyId(v string) {
 	m.KeyId = v
 }
@@ -119,10 +115,6 @@ func (m *UpdateSymmetricKeyRequest) SetDefaultAlgorithm(v SymmetricAlgorithm) {
 
 func (m *UpdateSymmetricKeyRequest) SetRotationPeriod(v *duration.Duration) {
 	m.RotationPeriod = v
-}
-
-func (m *UpdateSymmetricKeyRequest) SetDeletionProtection(v bool) {
-	m.DeletionProtection = v
 }
 
 func (m *UpdateSymmetricKeyMetadata) SetKeyId(v string) {
