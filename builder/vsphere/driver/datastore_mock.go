@@ -9,6 +9,9 @@ type DatastoreMock struct {
 	FileExistsCalled bool
 	FileExistsReturn bool
 
+	DirExistsCalled bool
+	DirExistsReturn bool
+
 	NameReturn string
 
 	MakeDirectoryCalled bool
@@ -38,7 +41,8 @@ func (ds *DatastoreMock) FileExists(path string) bool {
 }
 
 func (ds *DatastoreMock) DirExists(path string) bool {
-	return true
+	ds.DirExistsCalled = true
+	return ds.DirExistsReturn
 }
 func (ds *DatastoreMock) Name() string {
 	if ds.NameReturn == "" {
