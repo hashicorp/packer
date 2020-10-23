@@ -1,4 +1,5 @@
 TEST?=$(shell go list ./...)
+COUNT?=1
 VET?=$(shell go list ./...)
 ACC_TEST_BUILDERS?=all
 ACC_TEST_PROVISIONERS?=all
@@ -136,7 +137,7 @@ generate-check: generate ## Check go code generation is on par
 	fi
 
 test: mode-check vet ## Run unit tests
-	@go test $(TEST) $(TESTARGS) -timeout=3m
+	@go test -count $(COUNT) $(TEST) $(TESTARGS) -timeout=3m
 
 # acctest runs provisioners acceptance tests
 provisioners-acctest: install-build-deps generate
@@ -145,14 +146,14 @@ provisioners-acctest: install-build-deps generate
 # testacc runs acceptance tests
 testacc: install-build-deps generate ## Run acceptance tests
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
-	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
+	PACKER_ACC=1 go test -count $(COUNT) -v $(TEST) $(TESTARGS) -timeout=120m
 
 testrace: mode-check vet ## Test with race detection enabled
-	@GO111MODULE=off go test -race $(TEST) $(TESTARGS) -timeout=3m -p=8
+	@GO111MODULE=off go test -count $(COUNT) -race $(TEST) $(TESTARGS) -timeout=3m -p=8
 
 # Runs code coverage and open a html page with report
 cover:
-	go test $(TEST) $(TESTARGS) -timeout=3m -coverprofile=coverage.out
+	go test -count $(COUNT) $(TEST) $(TESTARGS) -timeout=3m -coverprofile=coverage.out
 	go tool cover -html=coverage.out
 	rm coverage.out
 
