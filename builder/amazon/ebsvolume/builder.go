@@ -123,16 +123,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	// Accumulate any errors
 	var errs *packersdk.MultiError
 	var warns []string
+
 	errs = packersdk.MultiErrorAppend(errs, b.config.VolumeRunTag.CopyOn(&b.config.VolumeRunTags)...)
 	errs = packersdk.MultiErrorAppend(errs, b.config.AccessConfig.Prepare()...)
 	errs = packersdk.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packersdk.MultiErrorAppend(errs, b.config.launchBlockDevices.Prepare(&b.config.ctx)...)
-
-	for _, d := range b.config.VolumeMappings {
-		if err := d.Prepare(&b.config.ctx); err != nil {
-			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("AMIMapping: %s", err.Error()))
-		}
-	}
+	errs = packersdk.MultiErrorAppend(errs, b.config.VolumeMappings.Prepare(&b.config.ctx)...)
 
 	b.config.launchBlockDevices = b.config.VolumeMappings
 	if err != nil {
@@ -321,6 +317,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		&stepSnapshotEBSVolumes{
 			PollingConfig: b.config.PollingConfig,
 			VolumeMapping: b.config.VolumeMappings,
+			AccessConfig:  b.config.AccessConfig,
 			Ctx:           b.config.ctx,
 		},
 	}

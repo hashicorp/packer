@@ -149,7 +149,7 @@ func (w *AWSPollingConfig) WaitUntilVolumeAvailable(ctx aws.Context, conn *ec2.E
 	return err
 }
 
-func (w *AWSPollingConfig) WaitUntilSnapshotDone(ctx aws.Context, conn *ec2.EC2, snapshotID string) error {
+func (w *AWSPollingConfig) WaitUntilSnapshotDone(ctx aws.Context, conn ec2iface.EC2API, snapshotID string) error {
 	snapInput := ec2.DescribeSnapshotsInput{
 		SnapshotIds: []*string{&snapshotID},
 	}

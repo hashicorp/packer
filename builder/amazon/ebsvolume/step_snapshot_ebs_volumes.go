@@ -6,14 +6,16 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepSnapshotEBSVolumes struct {
 	PollingConfig *awscommon.AWSPollingConfig
+	AccessConfig  awscommon.AccessConfig
 	VolumeMapping []BlockDevice
 	//Map of SnapshotID: BlockDevice, Where *BlockDevice is in VolumeMapping
 	SnapshotMap map[string]*BlockDevice
@@ -21,9 +23,10 @@ type stepSnapshotEBSVolumes struct {
 }
 
 func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ec2conn := state.Get("ec2").(ec2iface.EC2API)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
+
 	s.SnapshotMap = make(map[string]*BlockDevice)
 
 	for _, instanceBlockDevices := range instance.BlockDeviceMappings {
@@ -36,7 +39,7 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 				}
 
 				ui.Message(fmt.Sprintf("Compiling list of tags to apply to snapshot from Volume %s...", *instanceBlockDevices.DeviceName))
-				tags, err := awscommon.TagMap(configVolumeMapping.SnapshotTags).EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+				tags, err := awscommon.TagMap(configVolumeMapping.SnapshotTags).EC2Tags(s.Ctx, s.AccessConfig.SessionRegion(), state)
 				if err != nil {
 					err := fmt.Errorf("Error generating tags for snapshot %s: %s", *instanceBlockDevices.DeviceName, err)
 					state.Put("error", err)
@@ -146,9 +149,11 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 
 	//Record all snapshots in current Region.
 	snapshots := make(EbsSnapshots)
+	currentregion := s.AccessConfig.SessionRegion()
+
 	for snapID := range s.SnapshotMap {
-		snapshots[*ec2conn.Config.Region] = append(
-			snapshots[*ec2conn.Config.Region],
+		snapshots[currentregion] = append(
+			snapshots[currentregion],
 			snapID)
 	}
 	//Records artifacts
