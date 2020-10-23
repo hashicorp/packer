@@ -82,7 +82,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Directories: b.config.FloppyDirectories,
 			Label:       b.config.FloppyLabel,
 		},
-		&StepAddFloppy{
+		&common.StepAddFloppy{
 			Config:                     &b.config.FloppyConfig,
 			Datastore:                  b.config.Datastore,
 			Host:                       b.config.Host,
@@ -127,11 +127,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepShutdown{
 			Config: &b.config.ShutdownConfig,
 		},
-		&StepRemoveFloppy{
+		&common.StepRemoveFloppy{
 			Datastore: b.config.Datastore,
 			Host:      b.config.Host,
 		},
-		&StepRemoveCDRom{
+		&common.StepRemoveCDRom{
 			Config: &b.config.RemoveCDRomConfig,
 		},
 		&common.StepCreateSnapshot{
