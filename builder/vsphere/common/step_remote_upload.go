@@ -69,8 +69,11 @@ func (s *StepRemoteUpload) uploadFile(path string, d driver.Driver, ui packer.Ui
 
 	ui.Say(fmt.Sprintf("Uploading %s to %s", filename, remotePath))
 
-	if err := ds.MakeDirectory(remoteDirectory); err != nil {
-		return "", err
+	if exists := ds.DirExists(remotePath); exists == false {
+		log.Printf("Remote directory doesn't exist; creating...")
+		if err := ds.MakeDirectory(remoteDirectory); err != nil {
+			return "", err
+		}
 	}
 
 	if err := ds.UploadFile(path, remotePath, s.Host, s.SetHostForDatastoreUploads); err != nil {

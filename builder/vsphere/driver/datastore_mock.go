@@ -37,6 +37,9 @@ func (ds *DatastoreMock) FileExists(path string) bool {
 	return ds.FileExistsReturn
 }
 
+func (ds *DatastoreMock) DirExists(path string) bool {
+	return true
+}
 func (ds *DatastoreMock) Name() string {
 	if ds.NameReturn == "" {
 		return "datastore-mock"

@@ -16,6 +16,7 @@ import (
 type Datastore interface {
 	Info(params ...string) (*mo.Datastore, error)
 	FileExists(path string) bool
+	DirExists(path string) bool
 	Name() string
 	ResolvePath(path string) string
 	UploadFile(src, dst, host string, setHost bool) error
@@ -100,6 +101,14 @@ func (ds *DatastoreDriver) Info(params ...string) (*mo.Datastore, error) {
 		return nil, err
 	}
 	return &info, nil
+}
+
+func (ds *DatastoreDriver) DirExists(filepath string) bool {
+	_, err := ds.ds.Stat(ds.driver.ctx, filepath)
+	if _, ok := err.(object.DatastoreNoSuchDirectoryError); ok {
+		return false
+	}
+	return true
 }
 
 func (ds *DatastoreDriver) FileExists(path string) bool {
