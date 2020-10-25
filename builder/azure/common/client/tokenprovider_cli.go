@@ -47,7 +47,8 @@ func (tp *cliOAuthTokenProvider) getServicePrincipalTokenWithResource(resource s
 	clientID := clientIDs[tp.env.Name]
 	spToken, err := adal.NewServicePrincipalTokenFromManualToken(*oAuthConfig, clientID, resource, adalToken)
 	if err != nil {
-		tp.say(fmt.Sprintf("unable to get sp token from adal token: %v", err))
+		tp.say(fmt.Sprintf("unable to get service principal token from adal token: %v", err))
+		return nil, err
 	}
 
 	return spToken, nil
