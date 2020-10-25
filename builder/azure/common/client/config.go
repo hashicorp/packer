@@ -320,7 +320,7 @@ func (c *Config) FillParameters() error {
 	if c.authType == authTypeAzureCLI && c.TenantID == "" {
 		tenantID, subscriptionID, err := getCliIds()
 		if err != nil {
-			return fmt.Errorf("error fetching tenantID/subscriptionID from Azure CLI: %v", err)
+			return fmt.Errorf("error fetching tenantID/subscriptionID from Azure CLI (are you logged on using az cli?): %v", err)
 		}
 
 		c.TenantID = tenantID
