@@ -32,16 +32,19 @@ func (tp *cliOAuthTokenProvider) getServicePrincipalTokenWithResource(resource s
 	token, err := cli.GetTokenFromCLI(resource)
 	if err != nil {
 		tp.say(fmt.Sprintf("unable to get token from azure cli: %v", err))
+		return nil, err
 	}
 
 	oAuthConfig, err := adal.NewOAuthConfig(resource, tp.tenantID)
 	if err != nil {
 		tp.say(fmt.Sprintf("unable to generate OAuth Config: %v", err))
+		return nil, err
 	}
 
 	adalToken, err := token.ToADALToken()
 	if err != nil {
 		tp.say(fmt.Sprintf("unable to get ADAL Token from azure cli token: %v", err))
+		return nil, err
 	}
 
 	clientID := clientIDs[tp.env.Name]
