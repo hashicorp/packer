@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -47,14 +48,33 @@ func (tp *cliOAuthTokenProvider) getServicePrincipalTokenWithResource(resource s
 		return nil, err
 	}
 
-	clientID := clientIDs[tp.env.Name]
-	spToken, err := adal.NewServicePrincipalTokenFromManualToken(*oAuthConfig, clientID, resource, adalToken)
+	spt, err := adal.NewServicePrincipalTokenFromManualToken(*oAuthConfig, clientIDs[tp.env.Name], resource, adalToken)
 	if err != nil {
 		tp.say(fmt.Sprintf("unable to get service principal token from adal token: %v", err))
 		return nil, err
 	}
 
-	return spToken, nil
+	// Custom refresh function to make it possible to use Azure CLI to refresh tokens.
+	// Inspired by HashiCorps go-azure-helpers: https://github.com/hashicorp/go-azure-helpers/blob/373622ce2effb0cf299051ea019cb657f357a4d8/authentication/auth_method_azure_cli_token.go#L96-L109
+	var customRefreshFunc adal.TokenRefresh = func(ctx context.Context, resource string) (*adal.Token, error) {
+		token, err := cli.GetTokenFromCLI(resource)
+		if err != nil {
+			tp.say(fmt.Sprintf("token refresh - unable to get token from azure cli: %v", err))
+			return nil, err
+		}
+
+		adalToken, err := token.ToADALToken()
+		if err != nil {
+			tp.say(fmt.Sprintf("token refresh - unable to get ADAL Token from azure cli token: %v", err))
+			return nil, err
+		}
+
+		return &adalToken, nil
+	}
+
+	spt.SetCustomRefreshFunc(customRefreshFunc)
+
+	return spt, nil
 }
 
 // Get TenantID and SubscriptionID from Azure CLI
