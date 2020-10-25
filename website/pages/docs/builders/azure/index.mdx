@@ -40,6 +40,7 @@ following methods are available and are explained below:
   for the Public and US Gov clouds only.
 - Azure Managed Identity
 - Azure Active Directory Service Principal
+- Azure CLI
 
 -> **Don't know which authentication method to use?** Go with interactive
 login to try out the builders. If you need packer to run automatically,
@@ -103,3 +104,13 @@ way to authenticate the SP to AAD:
 
 To create a service principal, you can follow [the Azure documentation on this
 subject](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli?view=azure-cli-latest).
+
+## Azure CLI
+
+This method will skip all other options provided and only use the credentials that the az cli is authenticated with.
+Works with both normal user (`az login`) as well as service principal (`az login --service-principal --username APP_ID --password PASSWORD --tenant TENANT_ID`).
+
+To enable az cli authentication, use the following:
+- `"use_azure_cli_auth": true`
+
+This mode will use the `tenant_id` and `subscription_id` from the current active az session which can be found by running: `az account show`
