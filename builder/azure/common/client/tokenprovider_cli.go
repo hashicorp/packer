@@ -57,7 +57,8 @@ func (tp *cliOAuthTokenProvider) getServicePrincipalTokenWithResource(resource s
 	return spToken, nil
 }
 
-func getCliIds() (tenantID string, subscriptionID string, err error) {
+// Get TenantID and SubscriptionID from Azure CLI
+func getIDsFromAzureCLI() (tenantID string, subscriptionID string, err error) {
 	profilePath, err := cli.ProfilePath()
 	if err != nil {
 		return "", "", err
