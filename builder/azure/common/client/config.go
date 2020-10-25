@@ -317,7 +317,7 @@ func (c *Config) FillParameters() error {
 		}
 	}
 
-	if c.authType == authTypeAzureCLI && c.TenantID == "" {
+	if c.authType == authTypeAzureCLI {
 		tenantID, subscriptionID, err := getCliIds()
 		if err != nil {
 			return fmt.Errorf("error fetching tenantID/subscriptionID from Azure CLI (are you logged on using az cli?): %v", err)
