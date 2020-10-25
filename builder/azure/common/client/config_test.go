@@ -30,6 +30,13 @@ func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "use_azure_cli_auth will trigger Azure CLI auth",
+			config: Config{
+				UseAzureCLIAuth: true,
+			},
+			wantErr: false,
+		},
+		{
 			name: "subscription_id is set will trigger device flow",
 			config: Config{
 				SubscriptionID: "error",
