@@ -1,14 +1,29 @@
 ## 1.6.5 (Upcoming)
 
+### FEATURES:
+* New Builder(s): Proxmox builder has been split into two new builders
+    `proxmox-iso` and `promox-clone`. See [Proxmox
+    Builder](https://packer.io/docs/builders/proxmox) for more information on
+    the builder. For users of the previous `proxmox` builder please use `packer
+    fix` to migrate your templates to the new `promox-iso` builder. [GH-9262]
+
 ### BUG FIXES:
 
+* builder/azure-arm: Fix build failures due to the deletion of additional
+    managed disks defined in "disk_additional_size". [GH-10163]
 * builder/azure-chroot: Fix typo in option `exlude_from_latest` to
     `exclude_from_latest`. Old name will still be respected. [GH-10034]
 * builder/openstack: Fix source image validation regression when using filters.
     [GH-10065]
-* core/hcl2: Packer HCL's "Coalesce" function now behaves same way as
+* builder/proxmox: Fix unhandled buildvar type for HCL2 enabled build
+    templates. [GH-10154]
+* builder/qemu: Fix crash in step_run of qemu when loading commhostport form
+    the statebag in a situation where the communicator is none. [GH-10145]
+* builder/vsphere: Ensure builds are able to continue when no communicator has
+    been specified `"communicator": "none"`. [GH-9964]
+* core/hcl: Hide sensitive variables from output. [GH-10031]
+* core/hcl: Packer HCL's "Coalesce" function now behaves same way as
     Terraform's. [GH-10016]
-* core/HCL: Hide sensitive variables from output. [GH-10031]
 * core: Fix artifact handling so that input artifacts are properly preserved in
     postprocessors that don't modify artifacts. [GH-9996]
 * core: Fix pathing in cd_files to copy proper directory tree when user
@@ -18,26 +33,35 @@
 
 ### IMPROVEMENTS:
 
+* builder/amazon-ebssurrogate: Apply snapshot tags at snapshot creation time.
+    [GH-10150]
 * builder/amazon: Add `io2` as a supported volume type. [GH-10102]
 * builder/amazon: Add support for source instance tenancy [GH-10085]
 * builder/google: Add service account impersonation. [GH-9968] [GH-10054]
 * builder/googlecompute: Add `skip_create_image` option. [GH-10115]
+* builder/linode: Add `state_timeout` attribute to Linode builder. [GH-10128]
 * builder/oracle-oci:  New option to specify image compartment separate from
     build compartment. [GH-10040]
 * builder/oracle-oci: New option to specify boot volume size. [GH-10017]
 * builder/oracle: Add `base_image_filter` option as alternative to
     `base_image_ocid` [GH-10116]
 * builder/outscale: Migrate to new Outscale SDK. [GH-10056]
+* builder/proxmox: split Proxmox into proxmox-iso and proxmox-clone. [GH-9626]
+    [GH-10166]
 * builder/scaleway: Allow the user to use an image label (eg ubuntu_focal)
     instead of a hardcoded UUID on the Scaleway builder. [GH-10061]
+* builder/vsphere: Skip iso download if hashed file is already present on
+    remote datastore. [GH-10143]
+* builder/yandex: Add support for IAM credentials in the token field and
+    YC_TOKEN environment variable. [GH-10158]
+* core/hcl: Add build.name variable so users can access build name in addition
+    to source name. [GH-10114]
+* core/hcl: Add consul_key function to HCL templates. [GH-10119]
+* core/hcl: Add HCL2 aws_secretsmanager function [GH-10124]
+* core/hcl: Add packer.version variable to hcl configs so users can access the
+    Packer release version. [GH-10117]
 * core: Let user provide type of generated ssh key instead of always doing ssh-
     rsa [GH-10101]
-* hcl: Add build.name variable so users can access build name in addition to
-    source name. [GH-10114]
-* hcl: Add consul_key function to HCL templates. [GH-10119]
-* hcl: Add HCL2 aws_secretsmanager function [GH-10124]
-* hcl: Add packer.version variable to hcl configs so users can access the
-    Packer release version. [GH-10117]
 
 ## 1.6.4 (September 30, 2020)
 
