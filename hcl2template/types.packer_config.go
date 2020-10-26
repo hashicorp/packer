@@ -17,7 +17,7 @@ import (
 // references to all possible blocks of the allowed configuration.
 type PackerConfig struct {
 	Packer struct {
-		RequiredVersions []VersionConstraint
+		VersionConstraints []VersionConstraint
 	}
 	// Directory where the config files are defined
 	Basedir string

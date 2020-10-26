@@ -21,7 +21,7 @@ func (cfg *PackerConfig) CheckCoreVersionRequirements() hcl.Diagnostics {
 
 	var diags hcl.Diagnostics
 
-	for _, constraint := range cfg.Packer.RequiredVersions {
+	for _, constraint := range cfg.Packer.VersionConstraints {
 		if !constraint.Required.Check(pkrversion.SemVer) {
 			diags = diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,

@@ -118,7 +118,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 
 	for _, file := range files {
 		coreVersionConstraints, moreDiags := sniffCoreVersionRequirements(file.Body)
-		cfg.Packer.RequiredVersions = append(cfg.Packer.RequiredVersions, coreVersionConstraints...)
+		cfg.Packer.VersionConstraints = append(cfg.Packer.VersionConstraints, coreVersionConstraints...)
 		diags = append(diags, moreDiags...)
 	}
 
