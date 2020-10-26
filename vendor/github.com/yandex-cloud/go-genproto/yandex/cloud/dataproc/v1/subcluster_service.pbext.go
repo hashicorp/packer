@@ -62,6 +62,10 @@ func (m *CreateSubclusterRequest) SetHostsCount(v int64) {
 	m.HostsCount = v
 }
 
+func (m *CreateSubclusterRequest) SetAutoscalingConfig(v *AutoscalingConfig) {
+	m.AutoscalingConfig = v
+}
+
 func (m *CreateSubclusterMetadata) SetClusterId(v string) {
 	m.ClusterId = v
 }
@@ -96,6 +100,10 @@ func (m *UpdateSubclusterRequest) SetHostsCount(v int64) {
 
 func (m *UpdateSubclusterRequest) SetDecommissionTimeout(v int64) {
 	m.DecommissionTimeout = v
+}
+
+func (m *UpdateSubclusterRequest) SetAutoscalingConfig(v *AutoscalingConfig) {
+	m.AutoscalingConfig = v
 }
 
 func (m *UpdateSubclusterMetadata) SetClusterId(v string) {

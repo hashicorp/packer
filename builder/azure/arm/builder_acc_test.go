@@ -46,6 +46,14 @@ func TestBuilderAcc_ManagedDisk_Windows_Build_Resource_Group(t *testing.T) {
 	})
 }
 
+func TestBuilderAcc_ManagedDisk_Windows_Build_Resource_Group_Additional_Disk(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		Builder:  &Builder{},
+		Template: testBuilderAccManagedDiskWindowsBuildResourceGroupAdditionalDisk,
+	})
+}
+
 func TestBuilderAcc_ManagedDisk_Windows_DeviceLogin(t *testing.T) {
 	if os.Getenv(DeviceLoginAcceptanceTest) == "" {
 		t.Skip(fmt.Sprintf(
@@ -165,6 +173,42 @@ const testBuilderAccManagedDiskWindowsBuildResourceGroup = `
 	  "async_resourcegroup_delete": "true",
 
 	  "vm_size": "Standard_DS2_v2"
+	}]
+}
+`
+
+const testBuilderAccManagedDiskWindowsBuildResourceGroupAdditionalDisk = `
+{
+	"variables": {
+	  "client_id": "{{env ` + "`ARM_CLIENT_ID`" + `}}",
+	  "client_secret": "{{env ` + "`ARM_CLIENT_SECRET`" + `}}",
+	  "subscription_id": "{{env ` + "`ARM_SUBSCRIPTION_ID`" + `}}"
+	},
+	"builders": [{
+	  "type": "test",
+
+	  "client_id": "{{user ` + "`client_id`" + `}}",
+	  "client_secret": "{{user ` + "`client_secret`" + `}}",
+	  "subscription_id": "{{user ` + "`subscription_id`" + `}}",
+
+	  "build_resource_group_name" : "packer-acceptance-test",
+	  "managed_image_resource_group_name": "packer-acceptance-test",
+	  "managed_image_name": "testBuilderAccManagedDiskWindowsBuildResourceGroupAdditionDisk-{{timestamp}}",
+
+	  "os_type": "Windows",
+	  "image_publisher": "MicrosoftWindowsServer",
+	  "image_offer": "WindowsServer",
+	  "image_sku": "2012-R2-Datacenter",
+
+	  "communicator": "winrm",
+	  "winrm_use_ssl": "true",
+	  "winrm_insecure": "true",
+	  "winrm_timeout": "3m",
+	  "winrm_username": "packer",
+	  "async_resourcegroup_delete": "true",
+
+	  "vm_size": "Standard_DS2_v2",
+	  "disk_additional_size": [10,15]
 	}]
 }
 `

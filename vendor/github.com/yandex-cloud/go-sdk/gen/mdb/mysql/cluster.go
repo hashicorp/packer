@@ -443,6 +443,15 @@ func (c *ClusterServiceClient) Move(ctx context.Context, in *mysql.MoveClusterRe
 	return mysql.NewClusterServiceClient(conn).Move(ctx, in, opts...)
 }
 
+// RescheduleMaintenance implements mysql.ClusterServiceClient
+func (c *ClusterServiceClient) RescheduleMaintenance(ctx context.Context, in *mysql.RescheduleMaintenanceRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mysql.NewClusterServiceClient(conn).RescheduleMaintenance(ctx, in, opts...)
+}
+
 // Restore implements mysql.ClusterServiceClient
 func (c *ClusterServiceClient) Restore(ctx context.Context, in *mysql.RestoreClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)

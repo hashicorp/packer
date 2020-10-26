@@ -40,13 +40,19 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepConnect{
 			Config: &b.config.ConnectConfig,
 		},
-		&packerCommon.StepDownload{
-			Checksum:    b.config.ISOChecksum,
-			Description: "ISO",
-			Extension:   b.config.TargetExtension,
-			ResultKey:   "iso_path",
-			TargetPath:  b.config.TargetPath,
-			Url:         b.config.ISOUrls,
+		&common.StepDownload{
+			DownloadStep: &packerCommon.StepDownload{
+				Checksum:    b.config.ISOChecksum,
+				Description: "ISO",
+				Extension:   b.config.TargetExtension,
+				ResultKey:   "iso_path",
+				TargetPath:  b.config.TargetPath,
+				Url:         b.config.ISOUrls,
+			},
+			Url:       b.config.ISOUrls,
+			ResultKey: "iso_path",
+			Datastore: b.config.Datastore,
+			Host:      b.config.Host,
 		},
 		&packerCommon.StepCreateCD{
 			Files: b.config.CDConfig.CDFiles,
@@ -71,40 +77,40 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepConfigParams{
 			Config: &b.config.ConfigParamsConfig,
 		},
+		&packerCommon.StepCreateFloppy{
+			Files:       b.config.FloppyFiles,
+			Directories: b.config.FloppyDirectories,
+			Label:       b.config.FloppyLabel,
+		},
+		&common.StepAddFloppy{
+			Config:                     &b.config.FloppyConfig,
+			Datastore:                  b.config.Datastore,
+			Host:                       b.config.Host,
+			SetHostForDatastoreUploads: b.config.SetHostForDatastoreUploads,
+		},
+		&common.StepHTTPIPDiscover{
+			HTTPIP:  b.config.BootConfig.HTTPIP,
+			Network: b.config.WaitIpConfig.GetIPNet(),
+		},
+		&packerCommon.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+			HTTPAddress: b.config.HTTPAddress,
+		},
+		&common.StepRun{
+			Config:   &b.config.RunConfig,
+			SetOrder: true,
+		},
+		&common.StepBootCommand{
+			Config: &b.config.BootConfig,
+			Ctx:    b.config.ctx,
+			VMName: b.config.VMName,
+		},
 	)
 
 	if b.config.Comm.Type != "none" {
 		steps = append(steps,
-			&packerCommon.StepCreateFloppy{
-				Files:       b.config.FloppyFiles,
-				Directories: b.config.FloppyDirectories,
-				Label:       b.config.FloppyLabel,
-			},
-			&common.StepAddFloppy{
-				Config:                     &b.config.FloppyConfig,
-				Datastore:                  b.config.Datastore,
-				Host:                       b.config.Host,
-				SetHostForDatastoreUploads: b.config.SetHostForDatastoreUploads,
-			},
-			&common.StepHTTPIPDiscover{
-				HTTPIP:  b.config.BootConfig.HTTPIP,
-				Network: b.config.WaitIpConfig.GetIPNet(),
-			},
-			&packerCommon.StepHTTPServer{
-				HTTPDir:     b.config.HTTPDir,
-				HTTPPortMin: b.config.HTTPPortMin,
-				HTTPPortMax: b.config.HTTPPortMax,
-				HTTPAddress: b.config.HTTPAddress,
-			},
-			&common.StepRun{
-				Config:   &b.config.RunConfig,
-				SetOrder: true,
-			},
-			&common.StepBootCommand{
-				Config: &b.config.BootConfig,
-				Ctx:    b.config.ctx,
-				VMName: b.config.VMName,
-			},
 			&common.StepWaitForIp{
 				Config: &b.config.WaitIpConfig,
 			},
@@ -114,17 +120,17 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
 			&packerCommon.StepProvision{},
-			&common.StepShutdown{
-				Config: &b.config.ShutdownConfig,
-			},
-			&common.StepRemoveFloppy{
-				Datastore: b.config.Datastore,
-				Host:      b.config.Host,
-			},
 		)
 	}
 
 	steps = append(steps,
+		&common.StepShutdown{
+			Config: &b.config.ShutdownConfig,
+		},
+		&common.StepRemoveFloppy{
+			Datastore: b.config.Datastore,
+			Host:      b.config.Host,
+		},
 		&common.StepRemoveCDRom{
 			Config: &b.config.RemoveCDRomConfig,
 		},

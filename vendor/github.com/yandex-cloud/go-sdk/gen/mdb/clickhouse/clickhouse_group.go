@@ -52,3 +52,8 @@ func (c *Clickhouse) MlModel() *MlModelServiceClient {
 func (c *Clickhouse) FormatSchema() *FormatSchemaServiceClient {
 	return &FormatSchemaServiceClient{getConn: c.getConn}
 }
+
+// Versions gets VersionsService client
+func (c *Clickhouse) Versions() *VersionsServiceClient {
+	return &VersionsServiceClient{getConn: c.getConn}
+}

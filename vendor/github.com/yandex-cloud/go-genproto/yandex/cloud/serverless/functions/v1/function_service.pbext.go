@@ -213,6 +213,12 @@ func (m *CreateFunctionVersionRequest) SetContent(v []byte) {
 	}
 }
 
+func (m *CreateFunctionVersionRequest) SetVersionId(v string) {
+	m.PackageSource = &CreateFunctionVersionRequest_VersionId{
+		VersionId: v,
+	}
+}
+
 func (m *CreateFunctionVersionRequest) SetEnvironment(v map[string]string) {
 	m.Environment = v
 }

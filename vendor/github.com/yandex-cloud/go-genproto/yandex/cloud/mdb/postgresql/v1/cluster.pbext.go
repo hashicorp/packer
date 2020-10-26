@@ -57,6 +57,14 @@ func (m *Cluster) SetStatus(v Cluster_Status) {
 	m.Status = v
 }
 
+func (m *Cluster) SetMaintenanceWindow(v *MaintenanceWindow) {
+	m.MaintenanceWindow = v
+}
+
+func (m *Cluster) SetPlannedOperation(v *MaintenanceOperation) {
+	m.PlannedOperation = v
+}
+
 func (m *Monitoring) SetName(v string) {
 	m.Name = v
 }
@@ -127,6 +135,10 @@ func (m *ClusterConfig) SetBackupWindowStart(v *timeofday.TimeOfDay) {
 
 func (m *ClusterConfig) SetAccess(v *Access) {
 	m.Access = v
+}
+
+func (m *ClusterConfig) SetPerformanceDiagnostics(v *PerformanceDiagnostics) {
+	m.PerformanceDiagnostics = v
 }
 
 func (m *ConnectionPoolerConfig) SetPoolingMode(v ConnectionPoolerConfig_PoolingMode) {
@@ -247,4 +259,16 @@ func (m *Resources) SetDiskTypeId(v string) {
 
 func (m *Access) SetDataLens(v bool) {
 	m.DataLens = v
+}
+
+func (m *PerformanceDiagnostics) SetEnabled(v bool) {
+	m.Enabled = v
+}
+
+func (m *PerformanceDiagnostics) SetSessionsSamplingInterval(v int64) {
+	m.SessionsSamplingInterval = v
+}
+
+func (m *PerformanceDiagnostics) SetStatementsSamplingInterval(v int64) {
+	m.StatementsSamplingInterval = v
 }

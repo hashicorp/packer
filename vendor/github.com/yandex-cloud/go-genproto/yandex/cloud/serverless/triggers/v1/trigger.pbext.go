@@ -75,6 +75,12 @@ func (m *Trigger_Rule) SetContainerRegistry(v *Trigger_ContainerRegistry) {
 	}
 }
 
+func (m *Trigger_Rule) SetCloudLogs(v *Trigger_CloudLogs) {
+	m.Rule = &Trigger_Rule_CloudLogs{
+		CloudLogs: v,
+	}
+}
+
 type Trigger_Timer_Action = isTrigger_Timer_Action
 
 func (m *Trigger_Timer) SetAction(v Trigger_Timer_Action) {
@@ -205,6 +211,26 @@ func (m *Trigger_ContainerRegistry) SetInvokeFunction(v *InvokeFunctionWithRetry
 	}
 }
 
+type Trigger_CloudLogs_Action = isTrigger_CloudLogs_Action
+
+func (m *Trigger_CloudLogs) SetAction(v Trigger_CloudLogs_Action) {
+	m.Action = v
+}
+
+func (m *Trigger_CloudLogs) SetLogGroupId(v []string) {
+	m.LogGroupId = v
+}
+
+func (m *Trigger_CloudLogs) SetBatchSettings(v *CloudLogsBatchSettings) {
+	m.BatchSettings = v
+}
+
+func (m *Trigger_CloudLogs) SetInvokeFunction(v *InvokeFunctionWithRetry) {
+	m.Action = &Trigger_CloudLogs_InvokeFunction{
+		InvokeFunction: v,
+	}
+}
+
 func (m *InvokeFunctionOnce) SetFunctionId(v string) {
 	m.FunctionId = v
 }
@@ -250,6 +276,14 @@ func (m *BatchSettings) SetSize(v int64) {
 }
 
 func (m *BatchSettings) SetCutoff(v *duration.Duration) {
+	m.Cutoff = v
+}
+
+func (m *CloudLogsBatchSettings) SetSize(v int64) {
+	m.Size = v
+}
+
+func (m *CloudLogsBatchSettings) SetCutoff(v *duration.Duration) {
 	m.Cutoff = v
 }
 
