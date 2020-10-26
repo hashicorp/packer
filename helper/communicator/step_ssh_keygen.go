@@ -37,7 +37,7 @@ func (s *StepSSHKeyGen) Run(ctx context.Context, state multistep.StateBag) multi
 
 	algorithm := s.SSHTemporaryKeyPair.SSHTemporaryKeyPairType
 	if algorithm == "" {
-		algorithm = sshkey.DSA.String()
+		algorithm = sshkey.RSA.String()
 	}
 	a, err := sshkey.AlgorithmString(algorithm)
 	if err != nil {
