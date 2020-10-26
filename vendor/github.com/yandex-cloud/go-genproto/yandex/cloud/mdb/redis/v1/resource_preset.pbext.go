@@ -13,3 +13,7 @@ func (m *ResourcePreset) SetZoneIds(v []string) {
 func (m *ResourcePreset) SetMemory(v int64) {
 	m.Memory = v
 }
+
+func (m *ResourcePreset) SetCores(v int64) {
+	m.Cores = v
+}

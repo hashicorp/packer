@@ -580,6 +580,7 @@ func (c *Config) createCertificate() (string, error) {
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	c.ctx.Funcs = azcommon.TemplateFuncs
 	err := config.Decode(c, &config.DecodeOpts{
+		PluginType:         BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
 	}, raws...)

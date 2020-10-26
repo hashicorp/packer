@@ -55,6 +55,10 @@ func (m *CreateSubclusterConfigSpec) SetHostsCount(v int64) {
 	m.HostsCount = v
 }
 
+func (m *CreateSubclusterConfigSpec) SetAutoscalingConfig(v *AutoscalingConfig) {
+	m.AutoscalingConfig = v
+}
+
 func (m *UpdateSubclusterConfigSpec) SetId(v string) {
 	m.Id = v
 }
@@ -69,6 +73,10 @@ func (m *UpdateSubclusterConfigSpec) SetResources(v *Resources) {
 
 func (m *UpdateSubclusterConfigSpec) SetHostsCount(v int64) {
 	m.HostsCount = v
+}
+
+func (m *UpdateSubclusterConfigSpec) SetAutoscalingConfig(v *AutoscalingConfig) {
+	m.AutoscalingConfig = v
 }
 
 func (m *CreateClusterConfigSpec) SetVersionId(v string) {
@@ -119,6 +127,10 @@ func (m *CreateClusterRequest) SetBucket(v string) {
 	m.Bucket = v
 }
 
+func (m *CreateClusterRequest) SetUiProxy(v bool) {
+	m.UiProxy = v
+}
+
 func (m *CreateClusterMetadata) SetClusterId(v string) {
 	m.ClusterId = v
 }
@@ -157,6 +169,10 @@ func (m *UpdateClusterRequest) SetBucket(v string) {
 
 func (m *UpdateClusterRequest) SetDecommissionTimeout(v int64) {
 	m.DecommissionTimeout = v
+}
+
+func (m *UpdateClusterRequest) SetUiProxy(v bool) {
+	m.UiProxy = v
 }
 
 func (m *UpdateClusterMetadata) SetClusterId(v string) {
@@ -237,4 +253,20 @@ func (m *ListClusterHostsResponse) SetHosts(v []*Host) {
 
 func (m *ListClusterHostsResponse) SetNextPageToken(v string) {
 	m.NextPageToken = v
+}
+
+func (m *ListUILinksRequest) SetClusterId(v string) {
+	m.ClusterId = v
+}
+
+func (m *UILink) SetName(v string) {
+	m.Name = v
+}
+
+func (m *UILink) SetUrl(v string) {
+	m.Url = v
+}
+
+func (m *ListUILinksResponse) SetLinks(v []*UILink) {
+	m.Links = v
 }

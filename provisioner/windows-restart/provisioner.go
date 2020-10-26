@@ -68,6 +68,7 @@ func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapst
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
+		PluginType:         "windows-restart",
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{

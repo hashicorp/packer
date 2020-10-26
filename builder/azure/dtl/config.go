@@ -389,6 +389,7 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 	var c Config
 	c.ctx.Funcs = TemplateFuncs
 	err := config.Decode(&c, &config.DecodeOpts{
+		PluginType:         BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
 	}, raws...)

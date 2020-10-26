@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -24,16 +25,17 @@ type Config struct {
 
 	PersonalAccessToken string `mapstructure:"linode_token"`
 
-	Region       string   `mapstructure:"region"`
-	InstanceType string   `mapstructure:"instance_type"`
-	Label        string   `mapstructure:"instance_label"`
-	Tags         []string `mapstructure:"instance_tags"`
-	Image        string   `mapstructure:"image"`
-	SwapSize     int      `mapstructure:"swap_size"`
-	RootPass     string   `mapstructure:"root_pass"`
-	RootSSHKey   string   `mapstructure:"root_ssh_key"`
-	ImageLabel   string   `mapstructure:"image_label"`
-	Description  string   `mapstructure:"image_description"`
+	Region       string        `mapstructure:"region"`
+	InstanceType string        `mapstructure:"instance_type"`
+	Label        string        `mapstructure:"instance_label"`
+	Tags         []string      `mapstructure:"instance_tags"`
+	Image        string        `mapstructure:"image"`
+	SwapSize     int           `mapstructure:"swap_size"`
+	RootPass     string        `mapstructure:"root_pass"`
+	RootSSHKey   string        `mapstructure:"root_ssh_key"`
+	ImageLabel   string        `mapstructure:"image_label"`
+	Description  string        `mapstructure:"image_description"`
+	StateTimeout time.Duration `mapstructure:"state_timeout" required:"false"`
 }
 
 func createRandomRootPassword() (string, error) {
@@ -92,6 +94,11 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to generate root_pass: %s", err))
 		}
+	}
+
+	if c.StateTimeout == 0 {
+		// Default to 5 minute timeouts waiting for state change
+		c.StateTimeout = 5 * time.Minute
 	}
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {

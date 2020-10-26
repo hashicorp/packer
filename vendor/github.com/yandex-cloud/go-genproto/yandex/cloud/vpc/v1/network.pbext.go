@@ -29,3 +29,7 @@ func (m *Network) SetDescription(v string) {
 func (m *Network) SetLabels(v map[string]string) {
 	m.Labels = v
 }
+
+func (m *Network) SetDefaultSecurityGroupId(v string) {
+	m.DefaultSecurityGroupId = v
+}

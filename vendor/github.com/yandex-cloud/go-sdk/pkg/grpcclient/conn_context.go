@@ -22,7 +22,7 @@ type DialError struct {
 }
 
 func (d *DialError) Error() string {
-	return `error dialing endpoint "` + d.Add + `": ` + d.Err.Error()
+	return "error dialing endpoint '" + d.Add + "': " + d.Err.Error()
 }
 
 //go:generate mockery -name=ConnContext

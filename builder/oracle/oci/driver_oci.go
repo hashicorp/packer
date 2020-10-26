@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"time"
 
 	core "github.com/oracle/oci-go-sdk/core"
@@ -51,22 +52,7 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 		metadata["user_data"] = d.cfg.UserData
 	}
 
-	instanceDetails := core.LaunchInstanceDetails{
-		AvailabilityDomain: &d.cfg.AvailabilityDomain,
-		CompartmentId:      &d.cfg.CompartmentID,
-		DefinedTags:        d.cfg.InstanceDefinedTags,
-		FreeformTags:       d.cfg.InstanceTags,
-		Shape:              &d.cfg.Shape,
-		SubnetId:           &d.cfg.SubnetID,
-		Metadata:           metadata,
-	}
-
-	// When empty, the default display name is used.
-	if d.cfg.InstanceName != "" {
-		instanceDetails.DisplayName = &d.cfg.InstanceName
-	}
-
-	// Pass VNIC details, if specified, to the instance
+	// Create VNIC details for instance
 	CreateVnicDetails := core.CreateVnicDetails{
 		AssignPublicIp:      d.cfg.CreateVnicDetails.AssignPublicIp,
 		DisplayName:         d.cfg.CreateVnicDetails.DisplayName,
@@ -79,12 +65,67 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 		FreeformTags:        d.cfg.CreateVnicDetails.FreeformTags,
 	}
 
-	instanceDetails.CreateVnicDetails = &CreateVnicDetails
+	// Determine base image ID
+	var imageId *string
+	if d.cfg.BaseImageID != "" {
+		imageId = &d.cfg.BaseImageID
+	} else {
+		// Pull images and determine which image ID to use, if BaseImageId not specified
+		response, err := d.computeClient.ListImages(ctx, core.ListImagesRequest{
+			CompartmentId:          d.cfg.BaseImageFilter.CompartmentId,
+			DisplayName:            d.cfg.BaseImageFilter.DisplayName,
+			OperatingSystem:        d.cfg.BaseImageFilter.OperatingSystem,
+			OperatingSystemVersion: d.cfg.BaseImageFilter.OperatingSystemVersion,
+			Shape:                  d.cfg.BaseImageFilter.Shape,
+			LifecycleState:         "AVAILABLE",
+			SortBy:                 "TIMECREATED",
+			SortOrder:              "DESC",
+		})
+		if err != nil {
+			return "", err
+		}
+		if len(response.Items) == 0 {
+			return "", errors.New("base_image_filter returned no images")
+		}
+		if d.cfg.BaseImageFilter.DisplayNameSearch != nil {
+			// Return most recent image that matches regex
+			imageNameRegex, err := regexp.Compile(*d.cfg.BaseImageFilter.DisplayNameSearch)
+			if err != nil {
+				return "", err
+			}
+			for _, image := range response.Items {
+				if imageNameRegex.MatchString(*image.DisplayName) {
+					imageId = image.Id
+					break
+				}
+			}
+			if imageId == nil {
+				return "", errors.New("No image matched display_name_search criteria")
+			}
+		} else {
+			// If no regex provided, simply return most recent image pulled
+			imageId = response.Items[0].Id
+		}
+	}
 
 	// Create Source details which will be used to Launch Instance
-	instanceDetails.SourceDetails = core.InstanceSourceViaImageDetails{
-		ImageId:             &d.cfg.BaseImageID,
+	InstanceSourceDetails := core.InstanceSourceViaImageDetails{
+		ImageId:             imageId,
 		BootVolumeSizeInGBs: &d.cfg.BootVolumeSizeInGBs,
+	}
+
+	// Build instance details
+	instanceDetails := core.LaunchInstanceDetails{
+		AvailabilityDomain: &d.cfg.AvailabilityDomain,
+		CompartmentId:      &d.cfg.CompartmentID,
+		CreateVnicDetails:  &CreateVnicDetails,
+		DefinedTags:        d.cfg.InstanceDefinedTags,
+		DisplayName:        d.cfg.InstanceName,
+		FreeformTags:       d.cfg.InstanceTags,
+		Shape:              &d.cfg.Shape,
+		SourceDetails:      InstanceSourceDetails,
+		SubnetId:           &d.cfg.SubnetID,
+		Metadata:           metadata,
 	}
 
 	instance, err := d.computeClient.LaunchInstance(context.TODO(), core.LaunchInstanceRequest{LaunchInstanceDetails: instanceDetails})

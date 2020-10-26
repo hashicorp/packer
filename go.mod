@@ -93,6 +93,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-testing-interface v1.0.3 // indirect
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
+	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0
 	github.com/mitchellh/mapstructure v1.2.3
 	github.com/mitchellh/panicwrap v1.0.0
@@ -111,6 +112,7 @@ require (
 	github.com/pkg/sftp v0.0.0-20160118190721-e84cc8c755ca
 	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
+	github.com/ryanuber/go-glob v1.0.0
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
 	github.com/shirou/gopsutil v2.18.12+incompatible
@@ -126,8 +128,8 @@ require (
 	github.com/ulikunitz/xz v0.5.5
 	github.com/vmware/govmomi v0.23.1
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
-	github.com/yandex-cloud/go-genproto v0.0.0-20200608085315-d6e7ef5ceb97
-	github.com/yandex-cloud/go-sdk v0.0.0-20200610100221-ae86895efb97
+	github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd
+	github.com/yandex-cloud/go-sdk v0.0.0-20200921111412-ef15ded2014c
 	github.com/zclconf/go-cty v1.4.0
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9

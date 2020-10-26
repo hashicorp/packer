@@ -26,6 +26,10 @@ func (m *ClickhouseConfig) SetGraphiteRollup(v []*ClickhouseConfig_GraphiteRollu
 	m.GraphiteRollup = v
 }
 
+func (m *ClickhouseConfig) SetKafka(v *ClickhouseConfig_Kafka) {
+	m.Kafka = v
+}
+
 func (m *ClickhouseConfig) SetMaxConnections(v *wrappers.Int64Value) {
 	m.MaxConnections = v
 }
@@ -134,6 +138,14 @@ func (m *ClickhouseConfig) SetTextLogLevel(v ClickhouseConfig_LogLevel) {
 	m.TextLogLevel = v
 }
 
+func (m *ClickhouseConfig) SetBackgroundPoolSize(v *wrappers.Int64Value) {
+	m.BackgroundPoolSize = v
+}
+
+func (m *ClickhouseConfig) SetBackgroundSchedulePoolSize(v *wrappers.Int64Value) {
+	m.BackgroundSchedulePoolSize = v
+}
+
 func (m *ClickhouseConfig_MergeTree) SetReplicatedDeduplicationWindow(v *wrappers.Int64Value) {
 	m.ReplicatedDeduplicationWindow = v
 }
@@ -160,6 +172,22 @@ func (m *ClickhouseConfig_MergeTree) SetNumberOfFreeEntriesInPoolToLowerMaxSizeO
 
 func (m *ClickhouseConfig_MergeTree) SetMaxBytesToMergeAtMinSpaceInPool(v *wrappers.Int64Value) {
 	m.MaxBytesToMergeAtMinSpaceInPool = v
+}
+
+func (m *ClickhouseConfig_Kafka) SetSecurityProtocol(v ClickhouseConfig_Kafka_SecurityProtocol) {
+	m.SecurityProtocol = v
+}
+
+func (m *ClickhouseConfig_Kafka) SetSaslMechanism(v ClickhouseConfig_Kafka_SaslMechanism) {
+	m.SaslMechanism = v
+}
+
+func (m *ClickhouseConfig_Kafka) SetSaslUsername(v string) {
+	m.SaslUsername = v
+}
+
+func (m *ClickhouseConfig_Kafka) SetSaslPassword(v string) {
+	m.SaslPassword = v
 }
 
 func (m *ClickhouseConfig_Compression) SetMethod(v ClickhouseConfig_Compression_Method) {

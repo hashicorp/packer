@@ -84,6 +84,7 @@ func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstruct
 func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	b.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&b.config, &config.DecodeOpts{
+		PluginType:         BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
@@ -333,6 +334,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			PollingConfig:   b.config.PollingConfig,
 			LaunchDevices:   launchDevices,
 			SnapshotOmitMap: b.config.LaunchMappings.GetOmissions(),
+			SnapshotTags:    b.config.SnapshotTags,
+			Ctx:             b.config.ctx,
 		},
 		&awscommon.StepDeregisterAMI{
 			AccessConfig:        &b.config.AccessConfig,

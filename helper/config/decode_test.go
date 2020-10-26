@@ -2,6 +2,7 @@ package config
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -130,6 +131,76 @@ func TestDecode(t *testing.T) {
 
 		if !reflect.DeepEqual(&result, tc.Output) {
 			t.Fatalf("bad:\n\n%#v\n\n%#v", &result, tc.Output)
+		}
+	}
+}
+
+func TestDecode_fixerRecommendations(t *testing.T) {
+	type TestConfig struct {
+		Name string
+	}
+
+	cases := []struct {
+		Reason   string
+		Input    []interface{}
+		Opts     *DecodeOpts
+		Expected string
+	}{
+		{
+			Reason: "If no plugin type is provided, don't try to match fixer options",
+			Input: []interface{}{
+				map[string]interface{}{
+					"name":    "bar",
+					"iso_md5": "13123412341234",
+				},
+			},
+			Opts:     &DecodeOpts{},
+			Expected: `unknown configuration key: '"iso_md5"'`,
+		},
+		{
+			Reason: "iso_md5 should always recommend packer fix regardless of plugin type",
+			Input: []interface{}{
+				map[string]interface{}{
+					"name":    "bar",
+					"iso_md5": "13123412341234",
+				},
+			},
+			Opts:     &DecodeOpts{PluginType: "someplugin"},
+			Expected: `Deprecated configuration key: 'iso_md5'`,
+		},
+		{
+			Reason: "filename option should generate a fixer recommendation for the manifest postprocessor",
+			Input: []interface{}{
+				map[string]interface{}{
+					"name":     "bar",
+					"filename": "fakefilename",
+				},
+			},
+			Opts:     &DecodeOpts{PluginType: "packer.post-processor.manifest"},
+			Expected: `Deprecated configuration key: 'filename'`,
+		},
+		{
+			Reason: "filename option should generate an unknown key error for other plugins",
+			Input: []interface{}{
+				map[string]interface{}{
+					"name":     "bar",
+					"filename": "fakefilename",
+				},
+			},
+			Opts:     &DecodeOpts{PluginType: "randomplugin"},
+			Expected: `unknown configuration key: '"filename"'`,
+		},
+	}
+
+	for _, tc := range cases {
+		var result TestConfig
+		err := Decode(&result, tc.Opts, tc.Input...)
+		if err == nil {
+			t.Fatalf("Should have had an error: %s", tc.Reason)
+		}
+
+		if !strings.Contains(err.Error(), tc.Expected) {
+			t.Fatalf("Expected: %s\nActual: %s\n; Reason: %s", tc.Expected, err.Error(), tc.Reason)
 		}
 	}
 }

@@ -8,8 +8,10 @@ import (
 // with the newer "iso_checksum" and "iso_checksum_type" within builders.
 type FixerISOMD5 struct{}
 
-func (FixerISOMD5) DeprecatedOptions() []string {
-	return []string{"iso_md5"}
+func (FixerISOMD5) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"*": []string{"iso_md5"},
+	}
 }
 
 func (FixerISOMD5) Fix(input map[string]interface{}) (map[string]interface{}, error) {

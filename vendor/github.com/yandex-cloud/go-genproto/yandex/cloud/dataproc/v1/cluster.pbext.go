@@ -58,6 +58,10 @@ func (m *Cluster) SetBucket(v string) {
 	m.Bucket = v
 }
 
+func (m *Cluster) SetUiProxy(v bool) {
+	m.UiProxy = v
+}
+
 func (m *Monitoring) SetName(v string) {
 	m.Name = v
 }

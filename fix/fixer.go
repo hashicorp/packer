@@ -6,7 +6,7 @@ type Fixer interface {
 	// this fixer. It is used to generate a list of deprecated options that the
 	// template parser checks against to warn users that they need to call
 	// `packer fix` against their templates after upgrading.
-	DeprecatedOptions() []string
+	DeprecatedOptions() map[string][]string
 
 	// Fix takes a raw map structure input, potentially transforms it
 	// in some way, and returns the new, transformed structure. The
@@ -59,6 +59,7 @@ func init() {
 		"iso-checksum-type-and-url":  new(FixerISOChecksumTypeAndURL),
 		"qemu-host-port":             new(FixerQEMUHostPort),
 		"azure-exclude_from_latest":  new(FixerAzureExcludeFromLatest),
+		"proxmox-type":               new(FixerProxmoxType),
 	}
 
 	FixerOrder = []string{
@@ -95,5 +96,6 @@ func init() {
 		"iso-checksum-type-and-url",
 		"qemu-host-port",
 		"azure-exclude_from_latest",
+		"proxmox-type",
 	}
 }

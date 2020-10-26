@@ -70,6 +70,24 @@ can also be supplied to override the typical auto-generated key:
   [ListImages](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/latest/Image/ListImages)
   operation available in the Core Services API.
 
+- `base_image_filter` (map of strings) - As an alternative to providing `base_image_ocid`,
+  the user can supply search criteria, and Packer will use the the most recent image that meets
+  all search criteria. If no image meets all search criteria, Packer returns an error. The
+  following fields, if specified, must match exactly:
+    - `compartment_id` - The OCID of the compartment to find the image. If not specified, will use `compartment_ocid`
+      used for the instance.
+    - `display_name` - The full name of the image, e.g., `Oracle-Linux-7.8-2020.05.26-0`
+    - `operating_system` - The operating system used on the image, e.g., `Oracle Linux`
+    - `operating_system_version` - The version of the operating system on the image, e.g., `7.8`
+    - `shape` - A shape that the image supports. If not specified, will use `shape` used for the instance
+
+  Additionally, the following field takes a regular expression:
+    - `display_name_search` - a regular expression for the display name, e.g., `^Oracle-Linux`. This
+      is ignored if `display_name` is also specified under `base_image_filter`. If no images match
+      the expression, Packer returns an error. If multiple images match, the most recent is used.
+
+  `base_image_filter` is ignored if `base_image_ocid` is also specified.
+
 - `compartment_ocid` (string) - The OCID of the
   [compartment](https://docs.us-phoenix-1.oraclecloud.com/Content/GSG/Tasks/choosingcompartments.htm) that the instance will run in.
 
@@ -274,7 +292,7 @@ to the instance. Depending on network (VCN and subnet) setup, this may be
 required for Packer to successfully SSH into the instance. NSGs are a property
 of the virtual network interface card (VNIC) attached to the instance, and
 are listed in `nsg_ids` under `create_vnic_details`.
-```
+```json
 {
   "name":                "base-image-{{isotime \"20060102030405\"}}",
   "type":                "oracle-oci",
@@ -303,3 +321,21 @@ are listed in `nsg_ids` under `create_vnic_details`.
   }
 }
 ```
+
+## Base Image Filter Example
+Note that `base_image_filter` gets passed as a string, then interpreted as a
+regular expression. This means that all back-slashes must be doubled, e.g., 
+use `\\w+` to mean `\w+`, and `\\\\` to create the regular expression equivalent
+of `\\` (which will search for a literal back-slash).
+```json
+{
+  "name":                "base-image-{{isotime \"20060102030405\"}}",
+  "type":                "oracle-oci",
+  "availability_domain": "aaaa:PHX-AD-1",
+  "base_image_filter": {
+    "operating_system": "Oracle Linux",
+    "operating_system_version": "7.8",
+    "display_name_search": "^Oracle-Linux-7\\.8-2020\\.\\d+"
+  }
+  ...
+}

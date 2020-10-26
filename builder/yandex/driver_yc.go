@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -48,9 +49,13 @@ func NewDriverYC(ui packer.Ui, ac *AccessConfig) (Driver, error) {
 		sdkConfig.Credentials = ycsdk.InstanceServiceAccount()
 
 	case ac.Token != "":
-		log.Printf("[INFO] Use OAuth token for authentication")
-		sdkConfig.Credentials = ycsdk.OAuthToken(ac.Token)
-
+		if strings.HasPrefix(ac.Token, "t1.") && strings.Count(ac.Token, ".") == 2 {
+			log.Printf("[INFO] Use IAM token for authentication")
+			sdkConfig.Credentials = ycsdk.NewIAMTokenCredentials(ac.Token)
+		} else {
+			log.Printf("[INFO] Use OAuth token for authentication")
+			sdkConfig.Credentials = ycsdk.OAuthToken(ac.Token)
+		}
 	case ac.ServiceAccountKeyFile != "":
 		log.Printf("[INFO] Use Service Account key file %q for authentication", ac.ServiceAccountKeyFile)
 		key, err := iamkey.ReadFromJSONFile(ac.ServiceAccountKeyFile)

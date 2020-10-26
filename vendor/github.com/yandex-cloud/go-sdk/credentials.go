@@ -256,3 +256,22 @@ func (creds NoCredentials) YandexCloudAPICredentials() {}
 func (creds NoCredentials) IAMToken(ctx context.Context) (*iampb.CreateIamTokenResponse, error) {
 	return nil, status.Error(codes.Unauthenticated, "unauthenticated connection")
 }
+
+// IAMTokenCredentials implements Credentials with IAM token as-is
+type IAMTokenCredentials struct {
+	iamToken string
+}
+
+func (creds IAMTokenCredentials) YandexCloudAPICredentials() {}
+
+func (creds IAMTokenCredentials) IAMToken(ctx context.Context) (*iampb.CreateIamTokenResponse, error) {
+	return &iampb.CreateIamTokenResponse{
+		IamToken: creds.iamToken,
+	}, nil
+}
+
+func NewIAMTokenCredentials(iamToken string) NonExchangeableCredentials {
+	return &IAMTokenCredentials{
+		iamToken: iamToken,
+	}
+}

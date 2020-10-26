@@ -1,5 +1,5 @@
 variable "ubuntu_1604_version" {
-  default = "16.04.6"
+  default = "16.04.7"
 }
 
 locals {

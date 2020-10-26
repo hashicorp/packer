@@ -443,6 +443,15 @@ func (c *ClusterServiceClient) Move(ctx context.Context, in *postgresql.MoveClus
 	return postgresql.NewClusterServiceClient(conn).Move(ctx, in, opts...)
 }
 
+// RescheduleMaintenance implements postgresql.ClusterServiceClient
+func (c *ClusterServiceClient) RescheduleMaintenance(ctx context.Context, in *postgresql.RescheduleMaintenanceRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return postgresql.NewClusterServiceClient(conn).RescheduleMaintenance(ctx, in, opts...)
+}
+
 // Restore implements postgresql.ClusterServiceClient
 func (c *ClusterServiceClient) Restore(ctx context.Context, in *postgresql.RestoreClusterRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)

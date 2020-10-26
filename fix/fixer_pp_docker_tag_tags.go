@@ -9,8 +9,10 @@ import (
 // FixerDockerTagtoTags renames tag to tags
 type FixerDockerTagtoTags struct{}
 
-func (FixerDockerTagtoTags) DeprecatedOptions() []string {
-	return []string{"tag"}
+func (FixerDockerTagtoTags) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"packer.post-processor.docker-tag": []string{"tag"},
+	}
 }
 
 func (FixerDockerTagtoTags) Fix(input map[string]interface{}) (map[string]interface{}, error) {

@@ -6,7 +6,11 @@ import (
 )
 
 type DatastoreMock struct {
-	FileExistsCalled    bool
+	FileExistsCalled bool
+	FileExistsReturn bool
+
+	NameReturn string
+
 	MakeDirectoryCalled bool
 
 	ResolvePathCalled bool
@@ -30,11 +34,14 @@ func (ds *DatastoreMock) Info(params ...string) (*mo.Datastore, error) {
 
 func (ds *DatastoreMock) FileExists(path string) bool {
 	ds.FileExistsCalled = true
-	return false
+	return ds.FileExistsReturn
 }
 
 func (ds *DatastoreMock) Name() string {
-	return "datastore-mock"
+	if ds.NameReturn == "" {
+		return "datastore-mock"
+	}
+	return ds.NameReturn
 }
 
 func (ds *DatastoreMock) Reference() types.ManagedObjectReference {

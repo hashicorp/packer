@@ -61,6 +61,14 @@ func (m *Cluster) SetServiceAccountId(v string) {
 	m.ServiceAccountId = v
 }
 
+func (m *Cluster) SetMaintenanceWindow(v *MaintenanceWindow) {
+	m.MaintenanceWindow = v
+}
+
+func (m *Cluster) SetPlannedOperation(v *MaintenanceOperation) {
+	m.PlannedOperation = v
+}
+
 func (m *Monitoring) SetName(v string) {
 	m.Name = v
 }
@@ -91,6 +99,10 @@ func (m *ClusterConfig) SetBackupWindowStart(v *timeofday.TimeOfDay) {
 
 func (m *ClusterConfig) SetAccess(v *Access) {
 	m.Access = v
+}
+
+func (m *ClusterConfig) SetCloudStorage(v *CloudStorage) {
+	m.CloudStorage = v
 }
 
 func (m *ClusterConfig_Clickhouse) SetConfig(v *config.ClickhouseConfigSet) {
@@ -223,4 +235,8 @@ func (m *Access) SetMetrika(v bool) {
 
 func (m *Access) SetServerless(v bool) {
 	m.Serverless = v
+}
+
+func (m *CloudStorage) SetEnabled(v bool) {
+	m.Enabled = v
 }

@@ -85,6 +85,10 @@ func (m *CreateDiskRequest) SetBlockSize(v int64) {
 	m.BlockSize = v
 }
 
+func (m *CreateDiskRequest) SetDiskPlacementPolicy(v *DiskPlacementPolicy) {
+	m.DiskPlacementPolicy = v
+}
+
 func (m *CreateDiskMetadata) SetDiskId(v string) {
 	m.DiskId = v
 }
@@ -111,6 +115,10 @@ func (m *UpdateDiskRequest) SetLabels(v map[string]string) {
 
 func (m *UpdateDiskRequest) SetSize(v int64) {
 	m.Size = v
+}
+
+func (m *UpdateDiskRequest) SetDiskPlacementPolicy(v *DiskPlacementPolicy) {
+	m.DiskPlacementPolicy = v
 }
 
 func (m *UpdateDiskMetadata) SetDiskId(v string) {

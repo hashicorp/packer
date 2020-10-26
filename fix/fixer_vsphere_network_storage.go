@@ -9,9 +9,11 @@ import (
 // disk_eagerly_scrub into a storage adapter
 type FixerVSphereNetworkDisk struct{}
 
-func (FixerVSphereNetworkDisk) DeprecatedOptions() []string {
-	return []string{"network_card", "network", "networkCard", "disk_size",
-		"disk_thin_provisioned", "disk_eagerly_scrub"}
+func (FixerVSphereNetworkDisk) DeprecatedOptions() map[string][]string {
+	return map[string][]string{
+		"jetbrains.vsphere": []string{"network_card", "network", "networkCard", "disk_size",
+			"disk_thin_provisioned", "disk_eagerly_scrub"},
+	}
 }
 
 func (FixerVSphereNetworkDisk) Fix(input map[string]interface{}) (map[string]interface{}, error) {
