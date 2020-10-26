@@ -93,7 +93,9 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 	state.Put("vmRef", vmRef)
 	// instance_id is the generic term used so that users can have access to the
 	// instance id inside of the provisioners, used in step_provision.
-	state.Put("instance_id", vmRef)
+	// Note that this is just the VMID, we do not keep the node, pool and other
+	// info available in the vmref type.
+	state.Put("instance_id", vmRef.VmId())
 
 	ui.Say("Starting VM")
 	_, err = client.StartVm(vmRef)
