@@ -59,7 +59,7 @@ func decodeVersionConstraint(attr *hcl.Attribute) (VersionConstraint, hcl.Diagno
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid version constraint",
-			Detail:   "This string does not use correct version constraint syntax.", // Not very actionable :(
+			Detail:   "This string does not use correct version constraint syntax. Check out the docs: https://packer.io/docs/from-1.5/blocks/packer#version-constraints",
 			Subject:  attr.Expr.Range().Ptr(),
 		})
 		return ret, diags
