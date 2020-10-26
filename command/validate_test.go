@@ -23,6 +23,9 @@ func TestValidateCommand(t *testing.T) {
 		// wrong version fails
 		{path: filepath.Join(testFixture("version_req", "base_failure")), exitCode: 1},
 		{path: filepath.Join(testFixture("version_req", "base_success")), exitCode: 0},
+
+		// wrong version field
+		{path: filepath.Join(testFixture("version_req", "wrong_field_name")), exitCode: 1},
 	}
 
 	for _, tc := range tt {

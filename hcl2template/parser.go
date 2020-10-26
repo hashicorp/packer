@@ -34,6 +34,14 @@ var configSchema = &hcl.BodySchema{
 	},
 }
 
+// packerBlockSchema is the schema for a top-level "packer" block in
+// a configuration file.
+var packerBlockSchema = &hcl.BodySchema{
+	Attributes: []hcl.AttributeSchema{
+		{Name: "required_version"},
+	},
+}
+
 // Parser helps you parse HCL folders. It will parse an hcl file or directory
 // and start builders, provisioners and post-processors to configure them with
 // the parsed HCL and then return a []packer.Build. Packer will use that list
@@ -207,20 +215,12 @@ func sniffCoreVersionRequirements(body hcl.Body) ([]VersionConstraint, hcl.Diagn
 		},
 	}
 
-	var sniffBlockSchema = &hcl.BodySchema{
-		Attributes: []hcl.AttributeSchema{
-			{
-				Name: "required_version",
-			},
-		},
-	}
-
 	rootContent, _, diags := body.PartialContent(sniffRootSchema)
 
 	var constraints []VersionConstraint
 
 	for _, block := range rootContent.Blocks {
-		content, _, blockDiags := block.Body.PartialContent(sniffBlockSchema)
+		content, blockDiags := block.Body.Content(packerBlockSchema)
 		diags = append(diags, blockDiags...)
 
 		attr, exists := content.Attributes["required_version"]
