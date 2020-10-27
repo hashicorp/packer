@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"log"
 	"path/filepath"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
@@ -14,6 +15,7 @@ type StepRemoteUpload struct {
 	Datastore                  string
 	Host                       string
 	SetHostForDatastoreUploads bool
+	UploadedCustomCD           bool
 }
 
 func (s *StepRemoteUpload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -36,6 +38,7 @@ func (s *StepRemoteUpload) Run(_ context.Context, state multistep.StateBag) mult
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
+		s.UploadedCustomCD = true
 		state.Put("cd_path", fullRemotePath)
 	}
 
@@ -66,8 +69,11 @@ func (s *StepRemoteUpload) uploadFile(path string, d driver.Driver, ui packer.Ui
 
 	ui.Say(fmt.Sprintf("Uploading %s to %s", filename, remotePath))
 
-	if err := ds.MakeDirectory(remoteDirectory); err != nil {
-		return "", err
+	if exists := ds.DirExists(remotePath); exists == false {
+		log.Printf("Remote directory doesn't exist; creating...")
+		if err := ds.MakeDirectory(remoteDirectory); err != nil {
+			return "", err
+		}
 	}
 
 	if err := ds.UploadFile(path, remotePath, s.Host, s.SetHostForDatastoreUploads); err != nil {
@@ -83,23 +89,29 @@ func (s *StepRemoteUpload) Cleanup(state multistep.StateBag) {
 		return
 	}
 
+	if !s.UploadedCustomCD {
+		return
+	}
+
+	UploadedCDPath, ok := state.GetOk("cd_path")
+	if !ok {
+		return
+	}
+
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(*driver.VCenterDriver)
+	ui.Say("Deleting cd_files image from remote datastore ...")
 
-	if UploadedCDPath, ok := state.GetOk("cd_path"); ok {
-		ui.Say("Deleting cd_files image from remote datastore ...")
+	ds, err := d.FindDatastore(s.Datastore, s.Host)
+	if err != nil {
+		log.Printf("Error finding datastore to delete custom CD; please delete manually: %s", err)
+		return
+	}
 
-		ds, err := d.FindDatastore(s.Datastore, s.Host)
-		if err != nil {
-			state.Put("error", err)
-			return
-		}
-
-		err = ds.Delete(UploadedCDPath.(string))
-		if err != nil {
-			state.Put("error", err)
-			return
-		}
+	err = ds.Delete(UploadedCDPath.(string))
+	if err != nil {
+		log.Printf("Error deleting custom CD from remote datastore; please delete manually: %s", err)
+		return
 
 	}
 }
