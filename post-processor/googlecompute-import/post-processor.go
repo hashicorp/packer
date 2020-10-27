@@ -5,7 +5,11 @@ package googlecomputeimport
 
 import (
 	"context"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -48,7 +52,7 @@ type Config struct {
 	//The name of the image family to which the resulting image belongs.
 	ImageFamily string `mapstructure:"image_family"`
 	//A list of features to enable on the guest operating system. Applicable only for bootable images. Valid
-	//values are `MULTI_IP_SUBNET`, `SECURE_BOOT`, `UEFI_COMPATIBLE`,
+	//values are `MULTI_IP_SUBNET`, `UEFI_COMPATIBLE`,
 	//`VIRTIO_SCSI_MULTIQUEUE` and `WINDOWS` currently.
 	ImageGuestOsFeatures []string `mapstructure:"image_guest_os_features"`
 	//Key/value pair labels to apply to the created image.
@@ -61,6 +65,14 @@ type Config struct {
 	//`false`.
 	SkipClean           bool   `mapstructure:"skip_clean"`
 	VaultGCPOauthEngine string `mapstructure:"vault_gcp_oauth_engine"`
+	//A key used to establish the trust relationship between the platform owner and the firmware. You may only specify one platform key, and it must be a valid X.509 certificate.
+	ImagePlatformKey string `mapstructure:"image_platform_key"`
+	//A key used to establish a trust relationship between the firmware and the OS. You may specify multiple comma-separated keys for this value.
+	ImageKeyExchangeKey []string `mapstructure:"image_key_exchange_key"`
+	//A database of certificates that have been revoked and will cause the system to stop booting if a boot file is signed with one of them. You may specify single or multiple comma-separated values for this value.
+	ImageSignaturesDB []string `mapstructure:"image_signatures_db"`
+	//A database of certificates that are trusted and can be used to sign boot files. You may specify single or multiple comma-separated values for this value.
+	ImageForbiddenSignaturesDB []string `mapstructure:"image_forbidden_signatures_db"`
 
 	account *googlecompute.ServiceAccount
 	ctx     interpolate.Context
@@ -165,7 +177,12 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, err
 	}
 
-	gceImageArtifact, err := CreateGceImage(opts, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels, p.config.ImageGuestOsFeatures)
+	shieldedVMStateConfig, err := CreateShieldedVMStateConfig(p.config.ImageGuestOsFeatures, p.config.ImagePlatformKey, p.config.ImageKeyExchangeKey, p.config.ImageSignaturesDB, p.config.ImageForbiddenSignaturesDB)
+	if err != nil {
+		return nil, false, false, err
+	}
+
+	gceImageArtifact, err := CreateGceImage(opts, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels, p.config.ImageGuestOsFeatures, shieldedVMStateConfig)
 	if err != nil {
 		return nil, false, false, err
 	}
@@ -178,6 +195,68 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	return gceImageArtifact, false, false, nil
+}
+
+func FillFileContentBuffer(certOrKeyFile string) (*compute.FileContentBuffer, error) {
+	data, err := ioutil.ReadFile(certOrKeyFile)
+	if err != nil {
+		err := fmt.Errorf("Unable to read Certificate or Key file %s", certOrKeyFile)
+		return nil, err
+	}
+	shield := &compute.FileContentBuffer{
+		Content:  base64.StdEncoding.EncodeToString(data),
+		FileType: "X509",
+	}
+	block, _ := pem.Decode(data)
+
+	if block == nil || block.Type != "CERTIFICATE" {
+		_, err = x509.ParseCertificate(data)
+	} else {
+		_, err = x509.ParseCertificate(block.Bytes)
+	}
+	if err != nil {
+		shield.FileType = "BIN"
+	}
+	return shield, nil
+
+}
+
+func CreateShieldedVMStateConfig(imageGuestOsFeatures []string, imagePlatformKey string, imageKeyExchangeKey []string, imageSignaturesDB []string, imageForbiddenSignaturesDB []string) (*compute.InitialStateConfig, error) {
+	shieldedVMStateConfig := &compute.InitialStateConfig{}
+	for _, v := range imageGuestOsFeatures {
+		if v == "UEFI_COMPATIBLE" {
+			if imagePlatformKey != "" {
+				shieldedData, err := FillFileContentBuffer(imagePlatformKey)
+				if err != nil {
+					return nil, err
+				}
+				shieldedVMStateConfig.Pk = shieldedData
+			}
+			for _, v := range imageKeyExchangeKey {
+				shieldedData, err := FillFileContentBuffer(v)
+				if err != nil {
+					return nil, err
+				}
+				shieldedVMStateConfig.Keks = append(shieldedVMStateConfig.Keks, shieldedData)
+			}
+			for _, v := range imageSignaturesDB {
+				shieldedData, err := FillFileContentBuffer(v)
+				if err != nil {
+					return nil, err
+				}
+				shieldedVMStateConfig.Dbs = append(shieldedVMStateConfig.Dbs, shieldedData)
+			}
+			for _, v := range imageForbiddenSignaturesDB {
+				shieldedData, err := FillFileContentBuffer(v)
+				if err != nil {
+					return nil, err
+				}
+				shieldedVMStateConfig.Dbxs = append(shieldedVMStateConfig.Dbxs, shieldedData)
+			}
+
+		}
+	}
+	return shieldedVMStateConfig, nil
 }
 
 func UploadToBucket(opts option.ClientOption, ui packer.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
@@ -216,7 +295,7 @@ func UploadToBucket(opts option.ClientOption, ui packer.Ui, artifact packer.Arti
 	return storageObject.SelfLink, nil
 }
 
-func CreateGceImage(opts option.ClientOption, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string) (packer.Artifact, error) {
+func CreateGceImage(opts option.ClientOption, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string, shieldedVMStateConfig *compute.InitialStateConfig) (packer.Artifact, error) {
 	service, err := compute.NewService(context.TODO(), opts)
 
 	if err != nil {
@@ -232,13 +311,14 @@ func CreateGceImage(opts option.ClientOption, ui packer.Ui, project string, rawI
 	}
 
 	gceImage := &compute.Image{
-		Description:     imageDescription,
-		Family:          imageFamily,
-		GuestOsFeatures: imageFeatures,
-		Labels:          imageLabels,
-		Name:            imageName,
-		RawDisk:         &compute.ImageRawDisk{Source: rawImageURL},
-		SourceType:      "RAW",
+		Description:                  imageDescription,
+		Family:                       imageFamily,
+		GuestOsFeatures:              imageFeatures,
+		Labels:                       imageLabels,
+		Name:                         imageName,
+		RawDisk:                      &compute.ImageRawDisk{Source: rawImageURL},
+		SourceType:                   "RAW",
+		ShieldedInstanceInitialState: shieldedVMStateConfig,
 	}
 
 	ui.Say(fmt.Sprintf("Creating GCE image %v...", imageName))
