@@ -87,12 +87,18 @@ type Config struct {
 	// * kmsKeyName -  The name of the encryption key that is stored in Google Cloud KMS.
 	// * RawKey: - A 256-bit customer-supplied encryption key, encodes in RFC 4648 base64.
 	//
-	// example:
+	// examples:
 	//
 	//  ```json
 	//  {
 	//     "kmsKeyName": "projects/${project}/locations/${region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
 	//  }
+	//  ```
+	//
+	//  ```hcl
+	//   image_encryption_key {
+	//     kmsKeyName = "projects/${var.project}/locations/${var.region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
+	//   }
 	//  ```
 	ImageEncryptionKey *CustomerEncryptionKey `mapstructure:"image_encryption_key" required:"false"`
 	// The name of the image family to which the resulting image belongs. You
@@ -539,11 +545,11 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 type CustomerEncryptionKey struct {
 	// KmsKeyName: The name of the encryption key that is stored in Google
 	// Cloud KMS.
-	KmsKeyName string `json:"kmsKeyName,omitempty"`
+	KmsKeyName string `mapstructure:"kmsKeyName" json:"kmsKeyName,omitempty"`
 
 	// RawKey: Specifies a 256-bit customer-supplied encryption key, encoded
 	// in RFC 4648 base64 to either encrypt or decrypt this resource.
-	RawKey string `json:"rawKey,omitempty"`
+	RawKey string `mapstructure:"rawKey" json:"rawKey,omitempty"`
 }
 
 func (k *CustomerEncryptionKey) ComputeType() *compute.CustomerEncryptionKey {

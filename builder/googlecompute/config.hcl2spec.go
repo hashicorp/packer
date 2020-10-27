@@ -242,8 +242,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 // FlatCustomerEncryptionKey is an auto-generated flat version of CustomerEncryptionKey.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatCustomerEncryptionKey struct {
-	KmsKeyName *string `json:"kmsKeyName,omitempty" cty:"kms_key_name" hcl:"kms_key_name"`
-	RawKey     *string `json:"rawKey,omitempty" cty:"raw_key" hcl:"raw_key"`
+	KmsKeyName *string `mapstructure:"kmsKeyName" json:"kmsKeyName,omitempty" cty:"kmsKeyName" hcl:"kmsKeyName"`
+	RawKey     *string `mapstructure:"rawKey" json:"rawKey,omitempty" cty:"rawKey" hcl:"rawKey"`
 }
 
 // FlatMapstructure returns a new FlatCustomerEncryptionKey.
@@ -258,8 +258,8 @@ func (*CustomerEncryptionKey) FlatMapstructure() interface{ HCL2Spec() map[strin
 // The decoded values from this spec will then be applied to a FlatCustomerEncryptionKey.
 func (*FlatCustomerEncryptionKey) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"kms_key_name": &hcldec.AttrSpec{Name: "kms_key_name", Type: cty.String, Required: false},
-		"raw_key":      &hcldec.AttrSpec{Name: "raw_key", Type: cty.String, Required: false},
+		"kmsKeyName": &hcldec.AttrSpec{Name: "kmsKeyName", Type: cty.String, Required: false},
+		"rawKey":     &hcldec.AttrSpec{Name: "rawKey", Type: cty.String, Required: false},
 	}
 	return s
 }

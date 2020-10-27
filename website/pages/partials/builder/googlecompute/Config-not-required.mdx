@@ -53,12 +53,18 @@
   * kmsKeyName -  The name of the encryption key that is stored in Google Cloud KMS.
   * RawKey: - A 256-bit customer-supplied encryption key, encodes in RFC 4648 base64.
   
-  example:
+  examples:
   
    ```json
    {
       "kmsKeyName": "projects/${project}/locations/${region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
    }
+   ```
+  
+   ```hcl
+    image_encryption_key {
+      kmsKeyName = "projects/${var.project}/locations/${var.region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
+    }
    ```
 
 - `image_family` (string) - The name of the image family to which the resulting image belongs. You
