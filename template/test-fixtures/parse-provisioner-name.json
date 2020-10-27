@@ -1,0 +1,8 @@
+{
+    "provisioners": [
+        {
+            "type": "something",
+            "name": "parse_test"
+        }
+    ]
+}

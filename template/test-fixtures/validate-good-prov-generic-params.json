@@ -1,0 +1,13 @@
+{
+    "builders": [{
+        "type": "foo"
+    }],
+
+    "provisioners": [{
+        "type": "bar",
+        "timeout": "5m",
+        "name": "provision bar",
+        "max_retries": 10,
+        "pause_before": "10s"
+    }]
+}

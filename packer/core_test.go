@@ -3,10 +3,13 @@ package packer
 import (
 	"context"
 	"errors"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
+	"time"
 
 	configHelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template"
@@ -392,6 +395,42 @@ func TestCoreBuild_provOverride(t *testing.T) {
 	if !found {
 		t.Fatal("override not called")
 	}
+}
+
+func TestCoreBuild_provWrappers(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-prov-wrappers.json"))
+	b := TestBuilder(t, config, "test")
+	p := TestProvisioner(t, config, "test")
+	core := TestCore(t, config)
+
+	b.ArtifactId = "hello"
+
+	prov, err := core.generateCoreBuildProvisioner(config.Template.Provisioners[0], "raw")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	expected := CoreBuildProvisioner{
+		PType: "test",
+		PName: "provisioner under test",
+		Provisioner: &RetriedProvisioner{
+			MaxRetries: 3,
+			Provisioner: &PausedProvisioner{
+				PauseBefore: 10 * time.Second,
+				Provisioner: &NamedProvisioner{
+					Name:        "provisioner under test",
+					Provisioner: p,
+				},
+			},
+		},
+	}
+	if diff := cmp.Diff(prov, expected,
+		cmpopts.IgnoreUnexported(
+			CoreBuildProvisioner{},
+		)); diff != "" {
+		t.Fatalf("Parser.getBuilds() wrong packer builds. %s", diff)
+	}
+
 }
 
 func TestCoreBuild_postProcess(t *testing.T) {

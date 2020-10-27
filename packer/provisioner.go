@@ -252,3 +252,21 @@ func (p *DebuggedProvisioner) Provision(ctx context.Context, ui Ui, comm Communi
 
 	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
 }
+
+type NamedProvisioner struct {
+	Provisioner Provisioner
+	Name        string
+}
+
+func (n *NamedProvisioner) ConfigSpec() hcldec.ObjectSpec {
+	return n.Provisioner.ConfigSpec()
+}
+
+func (n *NamedProvisioner) Prepare(raws ...interface{}) error {
+	return n.Provisioner.Prepare(raws...)
+}
+
+func (n *NamedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
+	ui.Say(fmt.Sprintf("Starting provisioner %s", n.Name))
+	return n.Provisioner.Provision(ctx, ui, comm, generatedData)
+}

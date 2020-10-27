@@ -143,6 +143,7 @@ type Provisioner struct {
 	PauseBefore time.Duration          `mapstructure:"pause_before" json:"pause_before,omitempty"`
 	MaxRetries  string                 `mapstructure:"max_retries" json:"max_retries,omitempty"`
 	Timeout     time.Duration          `mapstructure:"timeout" json:"timeout,omitempty"`
+	Name        string                 `mapstructure:"name" json:"name,omitempty"`
 }
 
 // MarshalJSON conducts the necessary flattening of the Provisioner struct

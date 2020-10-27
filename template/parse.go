@@ -79,6 +79,7 @@ func (r *rawTemplate) decodeProvisioner(raw interface{}) (Provisioner, error) {
 	delete(p.Config, "max_retries")
 	delete(p.Config, "type")
 	delete(p.Config, "timeout")
+	delete(p.Config, "name")
 
 	if len(p.Config) == 0 {
 		p.Config = nil

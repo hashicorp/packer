@@ -184,6 +184,19 @@ func TestParse(t *testing.T) {
 		},
 
 		{
+			"parse-provisioner-name.json",
+			&Template{
+				Provisioners: []*Provisioner{
+					{
+						Type: "something",
+						Name: "parse_test",
+					},
+				},
+			},
+			false,
+		},
+
+		{
 			"parse-variable-default.json",
 			&Template{
 				Variables: map[string]*Variable{

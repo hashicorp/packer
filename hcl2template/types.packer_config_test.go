@@ -136,8 +136,11 @@ func TestParser_complete(t *testing.T) {
 						{
 							PType: "shell",
 							PName: "provisioner that does something",
-							Provisioner: &HCL2Provisioner{
-								Provisioner: basicMockProvisioner,
+							Provisioner: &packer.NamedProvisioner{
+								Name: "provisioner that does something",
+								Provisioner: &HCL2Provisioner{
+									Provisioner: basicMockProvisioner,
+								},
 							},
 						},
 						{
@@ -217,8 +220,11 @@ func TestParser_complete(t *testing.T) {
 						{
 							PType: "shell",
 							PName: "provisioner that does something",
-							Provisioner: &HCL2Provisioner{
-								Provisioner: basicMockProvisioner,
+							Provisioner: &packer.NamedProvisioner{
+								Name: "provisioner that does something",
+								Provisioner: &HCL2Provisioner{
+									Provisioner: basicMockProvisioner,
+								},
 							},
 						},
 						{

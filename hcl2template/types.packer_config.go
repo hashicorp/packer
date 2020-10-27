@@ -251,6 +251,12 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 				Provisioner: provisioner,
 			}
 		}
+		if pb.PName != "" {
+			provisioner = &packer.NamedProvisioner{
+				Name:        pb.PName,
+				Provisioner: provisioner,
+			}
+		}
 
 		res = append(res, packer.CoreBuildProvisioner{
 			PType:       pb.PType,

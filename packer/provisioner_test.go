@@ -4,8 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestProvisionHook_Impl(t *testing.T) {
@@ -339,5 +342,55 @@ func TestRetriedProvisionerCancel(t *testing.T) {
 	err := prov.Provision(topCtx, testUi(), new(MockCommunicator), make(map[string]interface{}))
 	if err == nil {
 		t.Fatal("should have err")
+	}
+}
+
+func TestNamedProvisioner_impl(t *testing.T) {
+	var _ Provisioner = new(NamedProvisioner)
+}
+
+func TestNamedProvisionerPrepare(t *testing.T) {
+	mock := new(MockProvisioner)
+	prov := &NamedProvisioner{
+		Provisioner: mock,
+	}
+
+	err := prov.Prepare(1, 2, 3)
+	if err != nil {
+		t.Fatal("should not have errored")
+	}
+	if !mock.PrepCalled {
+		t.Fatal("prepare should be called")
+	}
+	if !cmp.Equal(mock.PrepConfigs, []interface{}{1, 2, 3}) {
+		t.Fatal("should have proper configs")
+	}
+}
+
+func TestNamedProvisionerProvision(t *testing.T) {
+	mock := new(MockProvisioner)
+	prov := &NamedProvisioner{
+		Name:        "testing",
+		Provisioner: mock,
+	}
+
+	ui := testUi()
+	comm := new(MockCommunicator)
+	err := prov.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err != nil {
+		t.Fatal("should not have errored")
+	}
+	if !mock.ProvCalled {
+		t.Fatal("prov should be called")
+	}
+	if mock.ProvUi != ui {
+		t.Fatal("should have proper ui")
+	}
+	if mock.ProvCommunicator != comm {
+		t.Fatal("should have proper comm")
+	}
+	var output = readWriter(ui)
+	if !strings.Contains(output, "Starting provisioner testing") {
+		t.Fatal("should have printed provisioner name")
 	}
 }

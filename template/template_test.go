@@ -59,6 +59,11 @@ func TestTemplateValidate(t *testing.T) {
 		},
 
 		{
+			"validate-good-prov-generic-params.json",
+			false,
+		},
+
+		{
 			"validate-bad-pp-only.json",
 			true,
 		},

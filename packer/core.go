@@ -180,6 +180,13 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 			config = append(config, override)
 		}
 	}
+
+	if rawP.Name != "" {
+		provisioner = &NamedProvisioner{
+			Name:        rawP.Name,
+			Provisioner: provisioner,
+		}
+	}
 	// If we're pausing, we wrap the provisioner in a special pauser.
 	if rawP.PauseBefore != 0 {
 		provisioner = &PausedProvisioner{
@@ -209,8 +216,10 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 			Provisioner: provisioner,
 		}
 	}
+
 	cbp = CoreBuildProvisioner{
 		PType:       rawP.Type,
+		PName:       rawP.Name,
 		Provisioner: provisioner,
 		config:      config,
 	}
@@ -551,7 +560,13 @@ func (c *Core) InspectConfig(opts InspectConfigOptions) int {
 	} else {
 		for _, v := range tpl.Provisioners {
 			ui.Machine("template-provisioner", v.Type)
-			ui.Say(fmt.Sprintf("  %s", v.Type))
+
+			var sb strings.Builder
+			fmt.Fprintf(&sb, "  %s", v.Type)
+			if v.Name != "" {
+				fmt.Fprintf(&sb, ".%s", v.Name)
+			}
+			ui.Say(sb.String())
 		}
 	}
 
