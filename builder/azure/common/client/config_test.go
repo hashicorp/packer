@@ -166,6 +166,9 @@ func Test_ClientConfig_DeviceLogin(t *testing.T) {
 }
 
 func Test_ClientConfig_AzureCli(t *testing.T) {
+	// Azure CLI tests skipped unless env 'AZURE_CLI_AUTH' is set, and an active `az login` session has been established
+	getEnvOrSkip(t, "AZURE_CLI_AUTH")
+
 	cfg := Config{
 		UseAzureCLIAuth:  true,
 		cloudEnvironment: getCloud(),
