@@ -55,10 +55,10 @@ type Config struct {
 
 	authType string
 
-	// cli auth will use the information from an active `az login` session to connect to azure and set the subscription id and tenant id associated to the signed in account.
-	// Flag to use Azure CLI authentication and is by default disabled.
-	// If enabled, it will use the authentication provided by the `az cli`.
-	// Will be using the credential marked as `isDefault` and can be verified using `az account show`.
+	// Flag to use Azure CLI authentication. Defaults to false.
+	// CLI auth will use the information from an active `az login` session to connect to Azure and set the subscription id and tenant id associated to the signed in account.
+	// If enabled, it will use the authentication provided by the `az` CLI.
+	// Azure CLI authentication will use the credential marked as `isDefault` and can be verified using `az account show`.
 	// Works with normal authentication (`az login`) and service principals (`az login --service-principal --username APP_ID --password PASSWORD --tenant TENANT_ID`).
 	// Ignores all other configurations if enabled.
 	UseAzureCLIAuth bool `mapstructure:"use_azure_cli_auth" required:"false"`
