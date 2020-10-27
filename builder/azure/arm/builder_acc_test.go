@@ -6,7 +6,6 @@ package arm
 // * ARM_CLIENT_ID
 // * ARM_CLIENT_SECRET
 // * ARM_SUBSCRIPTION_ID
-// * ARM_TENANT_ID
 // * ARM_STORAGE_ACCOUNT
 //
 // The subscription in question should have a resource group
