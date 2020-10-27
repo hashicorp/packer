@@ -166,26 +166,16 @@ func Test_ClientConfig_DeviceLogin(t *testing.T) {
 }
 
 func Test_ClientConfig_AzureCli(t *testing.T) {
-	getEnvOrSkip(t, "AZURE_CLI_AUTH")
 	cfg := Config{
 		UseAzureCLIAuth:  true,
 		cloudEnvironment: getCloud(),
-		authType:         authTypeAzureCLI,
 	}
 	assertValid(t, cfg)
 
-	spt, sptkv, err := cfg.GetServicePrincipalTokens(
-		func(s string) { fmt.Printf("SAY: %s\n", s) })
-	if err != nil {
-		t.Fatalf("Expected nil err, but got: %v", err)
-	}
-	token := spt.Token()
-	if token.AccessToken == "" {
-		t.Fatal("Expected management token to have non-nil access token")
-	}
-	kvtoken := sptkv.Token()
-	if kvtoken.AccessToken == "" {
-		t.Fatal("Expected keyvault token to have non-nil access token")
+	cfg.FillParameters()
+
+	if cfg.authType != authTypeAzureCLI {
+		t.Fatalf("Expected authType to be %q, but got: %q", authTypeAzureCLI, cfg.authType)
 	}
 }
 
