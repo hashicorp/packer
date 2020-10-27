@@ -17,6 +17,7 @@ type FlatProvisioner struct {
 	PauseBefore *string                `mapstructure:"pause_before" json:"pause_before,omitempty" cty:"pause_before" hcl:"pause_before"`
 	MaxRetries  *string                `mapstructure:"max_retries" json:"max_retries,omitempty" cty:"max_retries" hcl:"max_retries"`
 	Timeout     *string                `mapstructure:"timeout" json:"timeout,omitempty" cty:"timeout" hcl:"timeout"`
+	Name        *string                `mapstructure:"name" json:"name,omitempty" cty:"name" hcl:"name"`
 }
 
 // FlatMapstructure returns a new FlatProvisioner.
@@ -39,6 +40,7 @@ func (*FlatProvisioner) HCL2Spec() map[string]hcldec.Spec {
 		"pause_before": &hcldec.AttrSpec{Name: "pause_before", Type: cty.String, Required: false},
 		"max_retries":  &hcldec.AttrSpec{Name: "max_retries", Type: cty.String, Required: false},
 		"timeout":      &hcldec.AttrSpec{Name: "timeout", Type: cty.String, Required: false},
+		"name":         &hcldec.AttrSpec{Name: "name", Type: cty.String, Required: false},
 	}
 	return s
 }

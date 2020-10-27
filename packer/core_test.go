@@ -3,14 +3,14 @@ package packer
 import (
 	"context"
 	"errors"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	configHelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/template"
 )
