@@ -123,24 +123,5 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 }
 
 func (s *StepCloneVM) Cleanup(state multistep.StateBag) {
-	_, cancelled := state.GetOk(multistep.StateCancelled)
-	_, halted := state.GetOk(multistep.StateHalted)
-	if !cancelled && !halted {
-		return
-	}
-
-	ui := state.Get("ui").(packer.Ui)
-
-	st := state.Get("vm")
-	if st == nil {
-		return
-	}
-	vm := st.(*driver.VirtualMachineDriver)
-
-	ui.Say("Destroying VM...")
-
-	err := vm.Destroy()
-	if err != nil {
-		ui.Error(err.Error())
-	}
+	common.CleanupVM(state)
 }

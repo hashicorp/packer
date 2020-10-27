@@ -277,24 +277,5 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 }
 
 func (s *StepCreateVM) Cleanup(state multistep.StateBag) {
-	_, cancelled := state.GetOk(multistep.StateCancelled)
-	_, halted := state.GetOk(multistep.StateHalted)
-	_, destroy := state.GetOk("destroy_vm")
-	if !cancelled && !halted && !destroy {
-		return
-	}
-
-	ui := state.Get("ui").(packer.Ui)
-
-	st := state.Get("vm")
-	if st == nil {
-		return
-	}
-	vm := st.(driver.VirtualMachine)
-
-	ui.Say("Destroying VM...")
-	err := vm.Destroy()
-	if err != nil {
-		ui.Error(err.Error())
-	}
+	common.CleanupVM(state)
 }
