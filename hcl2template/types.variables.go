@@ -12,7 +12,7 @@ import (
 	"github.com/zclconf/go-cty/cty/convert"
 )
 
-// Local represents a single entry from a "locals" block in a module or file.
+// Local represents a single entry from a "locals" block in a file.
 // The "locals" block itself is not represented, because it serves only to
 // provide context for us to interpret its contents.
 type LocalBlock struct {
