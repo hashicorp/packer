@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -36,7 +35,6 @@ type SSMDriver struct {
 	sessionParams ssm.StartSessionInput
 	pluginCmdFunc func(context.Context) error
 
-	retryConnection       chan bool
 	retryAfterTermination chan bool
 }
 
@@ -57,7 +55,6 @@ func (d *SSMDriver) StartSession(ctx context.Context, input ssm.StartSessionInpu
 		return nil, fmt.Errorf("error encountered in starting session for instance %q: %s", aws.StringValue(input.Target), err)
 	}
 
-	d.retryConnection = make(chan bool, 1)
 	d.retryAfterTermination = make(chan bool, 1)
 	// Starts go routine that will keep listening to channels and retry the session creation/connection when needed.
 	// The log polling process will add data to the channels whenever a retryable error happens to the session or if it's terminated.
@@ -71,23 +68,10 @@ func (d *SSMDriver) StartSession(ctx context.Context, input ssm.StartSessionInpu
 					return
 				}
 				if r {
-					log.Printf("[DEBUG] Restablishing SSM connection")
+					log.Printf("[DEBUG] Attempting to restablishing SSM connection")
 					_, _ = driver.StartSession(ctx, input)
 					// End this routine. Another routine will start.
 					return
-				}
-			case r, ok := <-driver.retryConnection:
-				if !ok {
-					return
-				}
-
-				// Tunnel is still open an we want to try to reconnect
-				if r {
-					log.Printf("[DEBUG] Retrying to establish SSM connection")
-					_, err := driver.StartSessionWithContext(ctx, input)
-					if err != nil {
-						return
-					}
 				}
 			}
 		}
@@ -156,34 +140,40 @@ func (d *SSMDriver) openTunnelForSession(ctx context.Context) error {
 			select {
 			case <-ctx.Done():
 				return
-			case output, ok := <-stderrCh:
+			case errorOut, ok := <-stderrCh:
 				if !ok {
 					stderrCh = nil
 					break
 				}
 
-				if output != "" {
-					if isRetryableError(output) {
-						log.Printf("[ERROR] Retryable error - %s: %s", prefix, output)
-						d.retryConnection <- true
-						continue
-					}
-					log.Printf("[ERROR] %s: %s", prefix, output)
+				if errorOut == "" {
+					continue
 				}
+
+				log.Printf("[ERROR] %s: %s", prefix, errorOut)
 			case output, ok := <-stdoutCh:
 				if !ok {
 					stdoutCh = nil
 					break
 				}
 
-				if output != "" {
-					log.Printf("[DEBUG] %s: %s", prefix, output)
+				if output == "" {
+					continue
 				}
+				log.Printf("[DEBUG] %s: %s", prefix, output)
 			}
 
 			if stdoutCh == nil && stderrCh == nil {
+				// It's possible that a remote SSM session was terminated prematurely due to a system reboot, or a termination
+				// on the AWS console, or that the SSMAgent service was stopped on the instance. This will try to reconnect
+				// until the build eventually fails or hits the ssh_timeout threshold.
 				log.Printf("[DEBUG] %s: %s", prefix, "active session has been terminated; stopping all log polling processes.")
-				d.retryAfterTermination <- true
+
+				// A call to StopSession will nullify any active sessions so only retry if StopSession has not be called,
+				// since StopSession will also close the retryAfterTermination channel
+				if d.session != nil {
+					d.retryAfterTermination <- true
+				}
 				return
 			}
 		}
@@ -202,18 +192,6 @@ func (d *SSMDriver) openTunnelForSession(ctx context.Context) error {
 	return nil
 }
 
-func isRetryableError(output string) bool {
-	retryableError := []string{
-		"connection refused",
-	}
-	for _, err := range retryableError {
-		if strings.Contains(output, err) {
-			return true
-		}
-	}
-	return false
-}
-
 // StopSession terminates an active Session Manager session
 func (d *SSMDriver) StopSession() error {
 	if d.session == nil || d.session.SessionId == nil {
@@ -221,13 +199,16 @@ func (d *SSMDriver) StopSession() error {
 			aws.StringValue(d.sessionParams.Target))
 	}
 
-	_, err := d.SvcClient.TerminateSession(&ssm.TerminateSessionInput{SessionId: d.session.SessionId})
-	if err != nil {
-		err = fmt.Errorf("Error terminating SSM Session %q. Please terminate the session manually: %s", aws.StringValue(d.session.SessionId), err)
-	}
+	// Store session id before we nullify any active sessions
+	sid := aws.StringValue(d.session.SessionId)
+
 	// Stop retry polling process to avoid unwanted retries at this point
+	d.session = nil
 	close(d.retryAfterTermination)
-	close(d.retryConnection)
+	_, err := d.SvcClient.TerminateSession(&ssm.TerminateSessionInput{SessionId: aws.String(sid)})
+	if err != nil {
+		err = fmt.Errorf("Error terminating SSM Session %q. Please terminate the session manually: %s", sid, err)
+	}
 
 	return err
 }
