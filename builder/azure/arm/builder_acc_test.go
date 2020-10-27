@@ -21,10 +21,6 @@ package arm
 //   go test -v -timeout 90m -run TestBuilderAcc_.*
 
 import (
-	"bytes"
-	"encoding/json"
-	"os/exec"
-	"strings"
 	"testing"
 
 	"fmt"
@@ -87,35 +83,12 @@ func TestBuilderAcc_ManagedDisk_Linux_DeviceLogin(t *testing.T) {
 	})
 }
 
-// User object of the json response when doing `az login`
-type azLoginUserStruct struct {
-	Name string `mapstructure:"name"`
-	Type string `mapstructure:"type"`
-}
-
-// The output from doing `az login`
-type azLoginStruct struct {
-	CloudName        string            `mapstructure:"cloudName"`
-	HomeTenantID     string            `mapstructure:"homeTenantId"`
-	SubscriptionID   string            `mapstructure:"id"`
-	IsDefault        bool              `mapstructure:"isDefault"`
-	ManagedByTenants []string          `mapstructure:"managedByTenants"`
-	Name             string            `mapstructure:"name"`
-	State            string            `mapstructure:"state"`
-	TenantID         string            `mapstructure:"tenantId"`
-	User             azLoginUserStruct `mapstructure:"user"`
-}
-
 func TestBuilderAcc_ManagedDisk_Linux_AzureCLI(t *testing.T) {
-	clientId := getEnvOrSkip(t, "ARM_CLIENT_ID")
-	clientSecret := getEnvOrSkip(t, "ARM_CLIENT_SECRET")
-	tenantId := getEnvOrSkip(t, "ARM_TENANT_ID")
-
-	var azLogin []azLoginStruct
-	err := jsonUnmarshalAzCmd(&azLogin, "login", "--service-principal", "--username", clientId, "--password", clientSecret, "--tenant", tenantId, "-o=json")
-	if err != nil {
-		t.Fatalf("Expected nil err, but got: %v", err)
+	if os.Getenv("AZURE_CLI_AUTH") == "" {
+		t.Skip("Azure CLI Acceptance tests skipped unless env 'AZURE_CLI_AUTH' is set, and an active `az login` session has been established")
+		return
 	}
+
 	builderT.Test(t, builderT.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 		Builder:  &Builder{},
@@ -387,44 +360,3 @@ const testBuilderAccManagedDiskLinuxAzureCLI = `
 	}]
 }
 `
-
-// Taken from: https://github.com/hashicorp/go-azure-helpers/blob/373622ce2effb0cf299051ea019cb657f357a4d8/authentication/auth_method_azure_cli_token.go#L202-L232
-func jsonUnmarshalAzCmd(i interface{}, arg ...string) error {
-	var stderr bytes.Buffer
-	var stdout bytes.Buffer
-
-	cmd := exec.Command("az", arg...)
-
-	cmd.Stderr = &stderr
-	cmd.Stdout = &stdout
-
-	if err := cmd.Start(); err != nil {
-		err := fmt.Errorf("Error launching Azure CLI: %+v", err)
-		if stdErrStr := stderr.String(); stdErrStr != "" {
-			err = fmt.Errorf("%s: %s", err, strings.TrimSpace(stdErrStr))
-		}
-		return err
-	}
-
-	if err := cmd.Wait(); err != nil {
-		err := fmt.Errorf("Error waiting for the Azure CLI: %+v", err)
-		if stdErrStr := stderr.String(); stdErrStr != "" {
-			err = fmt.Errorf("%s: %s", err, strings.TrimSpace(stdErrStr))
-		}
-		return err
-	}
-
-	if err := json.Unmarshal(stdout.Bytes(), &i); err != nil {
-		return fmt.Errorf("Error unmarshaling the result of Azure CLI: %v", err)
-	}
-
-	return nil
-}
-
-func getEnvOrSkip(t *testing.T, envVar string) string {
-	v := os.Getenv(envVar)
-	if v == "" {
-		t.Skipf("%s is empty, skipping", envVar)
-	}
-	return v
-}
