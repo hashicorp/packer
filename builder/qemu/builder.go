@@ -130,7 +130,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepCleanupTempKeys{
 			Comm: &b.config.CommConfig.Comm,
 		},
-		new(stepShutdown),
+		&stepShutdown{
+			ShutdownTimeout: b.config.ShutdownTimeout,
+			ShutdownCommand: b.config.ShutdownCommand,
+			Comm:            &b.config.CommConfig.Comm,
+		},
 		&stepConvertDisk{
 			DiskCompression: b.config.DiskCompression,
 			Format:          b.config.Format,
