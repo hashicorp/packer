@@ -89,24 +89,29 @@ func (s *StepRemoteUpload) Cleanup(state multistep.StateBag) {
 		return
 	}
 
+	if !s.UploadedCustomCD {
+		return
+	}
+
+	UploadedCDPath, ok := state.GetOk("cd_path")
+	if !ok {
+		return
+	}
+
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(*driver.VCenterDriver)
+	ui.Say("Deleting cd_files image from remote datastore ...")
 
-	if s.UploadedCustomCD {
-		if UploadedCDPath, ok := state.GetOk("cd_path"); ok {
-			ui.Say("Deleting cd_files image from remote datastore ...")
+	ds, err := d.FindDatastore(s.Datastore, s.Host)
+	if err != nil {
+		log.Printf("Error finding datastore to delete custom CD; please delete manually: %s", err)
+		return
+	}
 
-			ds, err := d.FindDatastore(s.Datastore, s.Host)
-			if err != nil {
-				log.Printf("Error finding datastore to delete custom CD; please delete manually: %s", err)
-				return
-			}
+	err = ds.Delete(UploadedCDPath.(string))
+	if err != nil {
+		log.Printf("Error deleting custom CD from remote datastore; please delete manually: %s", err)
+		return
 
-			err = ds.Delete(UploadedCDPath.(string))
-			if err != nil {
-				log.Printf("Error deleting custom CD from remote datastore; please delete manually: %s", err)
-				return
-			}
-		}
 	}
 }
