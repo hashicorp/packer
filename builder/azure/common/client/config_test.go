@@ -172,7 +172,10 @@ func Test_ClientConfig_AzureCli(t *testing.T) {
 	}
 	assertValid(t, cfg)
 
-	cfg.FillParameters()
+	err := cfg.FillParameters()
+	if err != nil {
+		t.Fatalf("Expected nil err, but got: %v", err)
+	}
 
 	if cfg.authType != authTypeAzureCLI {
 		t.Fatalf("Expected authType to be %q, but got: %q", authTypeAzureCLI, cfg.authType)
