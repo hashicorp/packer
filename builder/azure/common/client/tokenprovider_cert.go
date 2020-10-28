@@ -24,7 +24,7 @@ func NewCertOAuthTokenProvider(env azure.Environment, clientID, clientCertPath, 
 	}
 
 	audience := fmt.Sprintf("%s%s/oauth2/token", env.ActiveDirectoryEndpoint, tenantID)
-	jwt, err := makeJWT(clientID, audience, cert, key, time.Hour, true)
+	jwt, err := makeJWT(clientID, audience, cert, key, 2*time.Hour, true)
 	if err != nil {
 		return nil, fmt.Errorf("Error generating JWT: %v", err)
 	}
