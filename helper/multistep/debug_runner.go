@@ -63,6 +63,9 @@ func (r *DebugRunner) Run(ctx context.Context, state StateBag) {
 	// Rebuild the steps so that we insert the pause step after each
 	steps := make([]Step, len(r.Steps)*2)
 	for i, step := range r.Steps {
+		if step == nil {
+			continue
+		}
 		steps[i*2] = step
 		name := ""
 		if wrapped, ok := step.(StepWrapper); ok {

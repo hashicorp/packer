@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/googlecompute"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -207,10 +208,14 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 
 	// Build the steps.
 	steps := []multistep.Step{
-		&googlecompute.StepCreateSSHKey{
-			Debug:        p.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("gce_%s.pem", p.config.PackerBuildName),
+		&communicator.StepSSHKeyGen{
+			CommConf: &exporterConfig.Comm,
 		},
+		multistep.If(p.config.PackerDebug,
+			&communicator.StepDumpSSHKey{
+				Path: fmt.Sprintf("gce_%s.pem", p.config.PackerBuildName),
+			},
+		),
 		&googlecompute.StepCreateInstance{
 			Debug: p.config.PackerDebug,
 		},

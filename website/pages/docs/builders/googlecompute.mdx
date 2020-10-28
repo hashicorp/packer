@@ -366,7 +366,7 @@ builder.
 
 @include 'builder/googlecompute/IAPConfig-not-required.mdx'
 
-## Startup Scripts
+### Startup Scripts
 
 Startup scripts can be a powerful tool for configuring the instance from which
 the image is made. The builder will wait for a startup script to terminate. A
@@ -393,7 +393,16 @@ Startup script logs can be copied to a Google Cloud Storage (GCS) location
 specified via the `startup-script-log-dest` instance creation `metadata` field.
 The GCS location must be writeable by the service account of the instance that Packer created.
 
-## Gotchas
+### Temporary SSH keypair
+
+@include 'helper/communicator/SSHTemporaryKeyPair.mdx'
+
+#### Optional:
+
+@include 'helper/communicator/SSHTemporaryKeyPair-not-required.mdx'
+
+
+### Gotchas
 
 CentOS and recent Debian images have root ssh access disabled by default. Set
 `ssh_username` to any user, which will be created by packer with sudo access.
