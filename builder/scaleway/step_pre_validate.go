@@ -32,7 +32,7 @@ func (s *stepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 	instanceAPI := instance.NewAPI(state.Get("client").(*scw.Client))
 	images, err := instanceAPI.ListImages(
 		&instance.ListImagesRequest{Name: &s.ImageName},
-		scw.WithAllPages())
+		scw.WithAllPages(), scw.WithContext(ctx))
 	if err != nil {
 		err := fmt.Errorf("Error: getting image list: %s", err)
 		state.Put("error", err)
@@ -54,7 +54,7 @@ func (s *stepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 
 	snapshots, err := instanceAPI.ListSnapshots(
 		&instance.ListSnapshotsRequest{Name: &s.SnapshotName},
-		scw.WithAllPages())
+		scw.WithAllPages(), scw.WithContext(ctx))
 	if err != nil {
 		err := fmt.Errorf("Error: getting snapshot list: %s", err)
 		state.Put("error", err)

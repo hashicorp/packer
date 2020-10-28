@@ -1,15 +1,19 @@
 <!-- Code generated from the comments of the Config struct in builder/scaleway/config.go; DO NOT EDIT MANUALLY -->
 
 - `access_key` (string) - The AccessKey corresponding to the secret key.
+  Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
   It can also be specified via the environment variable SCW_ACCESS_KEY.
 
 - `secret_key` (string) - The SecretKey to authenticate against the Scaleway API.
+  Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
   It can also be specified via the environment variable SCW_SECRET_KEY.
 
 - `project_id` (string) - The Project ID in which the instances, volumes and snapshots will be created.
+  Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
   It can also be specified via the environment variable SCW_DEFAULT_PROJECT_ID.
 
 - `zone` (string) - The Zone in which the instances, volumes and snapshots will be created.
+  Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
   It can also be specified via the environment variable SCW_DEFAULT_ZONE
 
 - `image` (string) - The UUID of the base image to use. This is the image

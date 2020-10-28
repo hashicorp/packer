@@ -41,7 +41,7 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 		Name:           c.ServerName,
 		Image:          c.Image,
 		Tags:           tags,
-	})
+	}, scw.WithContext(ctx))
 	if err != nil {
 		err := fmt.Errorf("Error creating server: %s", err)
 		state.Put("error", err)
@@ -52,7 +52,7 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 	_, err = instanceAPI.ServerAction(&instance.ServerActionRequest{
 		Action:   instance.ServerActionPoweron,
 		ServerID: createServerResp.Server.ID,
-	})
+	}, scw.WithContext(ctx))
 	if err != nil {
 		err := fmt.Errorf("Error starting server: %s", err)
 		state.Put("error", err)
