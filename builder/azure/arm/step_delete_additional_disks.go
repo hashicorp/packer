@@ -61,7 +61,11 @@ func (s *StepDeleteAdditionalDisk) deleteManagedDisk(ctx context.Context, resour
 func (s *StepDeleteAdditionalDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Deleting the temporary Additional disk ...")
 
-	var dataDisks = state.Get(constants.ArmAdditionalDiskVhds).([]string)
+	var dataDisks []string
+
+	if disks := state.Get(constants.ArmAdditionalDiskVhds); disks != nil {
+		dataDisks = disks.([]string)
+	}
 	var isManagedDisk = state.Get(constants.ArmIsManagedImage).(bool)
 	var isExistingResourceGroup = state.Get(constants.ArmIsExistingResourceGroup).(bool)
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
