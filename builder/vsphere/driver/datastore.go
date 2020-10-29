@@ -2,6 +2,7 @@ package driver
 
 import (
 	"fmt"
+	"log"
 	"path"
 	"regexp"
 	"strings"
@@ -39,15 +40,16 @@ func (d *VCenterDriver) NewDatastore(ref *types.ManagedObjectReference) Datastor
 
 // If name is an empty string, then resolve host's one
 func (d *VCenterDriver) FindDatastore(name string, host string) (Datastore, error) {
+	log.Printf("[DEBUG 10069] inside FindDatastore call; name is %s and host is %s", name, host)
 	if name == "" {
 		h, err := d.FindHost(host)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error finding host for to get datastore: %s", err)
 		}
 
 		i, err := h.Info("datastore")
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error getting datastore info from host: %s", err)
 		}
 
 		if len(i.Datastore) > 1 {
@@ -57,14 +59,14 @@ func (d *VCenterDriver) FindDatastore(name string, host string) (Datastore, erro
 		ds := d.NewDatastore(&i.Datastore[0])
 		inf, err := ds.Info("name")
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error getting datastore name: %s", err)
 		}
 		name = inf.Name
 	}
 
 	ds, err := d.finder.Datastore(d.ctx, name)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error finding datastore with name %s: %s", name, err)
 	}
 
 	return &DatastoreDriver{
