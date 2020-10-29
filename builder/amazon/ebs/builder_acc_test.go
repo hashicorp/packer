@@ -246,6 +246,14 @@ func checkBootEncrypted() builderT.TestCheckFunc {
 	}
 }
 
+func TestBuilderAcc_SessionManagerInterface(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		Builder:  &Builder{},
+		Template: testBuilderAccSessionManagerInterface,
+	})
+}
+
 func testAccPreCheck(t *testing.T) {
 }
 
@@ -346,6 +354,31 @@ const testBuilderAccEncrypted = `
 		"ssh_username": "ubuntu",
 		"ami_name": "packer-enc-test {{timestamp}}",
 		"encrypt_boot": true
+	}]
+}
+`
+
+const testBuilderAccSessionManagerInterface = `
+{
+	"builders": [{
+		"type": "test",
+		"region": "us-east-1",
+		"instance_type": "m3.medium",
+		"source_ami_filter": {
+				"filters": {
+						"virtualization-type": "hvm",
+						"name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+						"root-device-type": "ebs"
+				},
+				"owners": [
+						"099720109477"
+				],
+				"most_recent": true
+		},
+		"ssh_username": "ubuntu",
+		"ssh_interface": "session_manager",
+		"iam_instance_profile": "SSMInstanceProfile",
+		"ami_name": "packer-ssm-test-{{timestamp}}"
 	}]
 }
 `
