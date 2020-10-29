@@ -9,6 +9,7 @@
 
 ### BUG FIXES:
 
+* builder/amazon: SSM connection now recovers from reboots. [GH-10003]
 * builder/azure-arm: Fix build failures due to the deletion of additional
     managed disks defined in "disk_additional_size". [GH-10163]
 * builder/azure-chroot: Fix typo in option `exlude_from_latest` to
