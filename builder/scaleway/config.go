@@ -6,6 +6,8 @@ package scaleway
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
@@ -128,6 +130,28 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	envProfile := scw.LoadEnvProfile()
 	profile := scw.MergeProfiles(activeProfile, envProfile)
+
+	// Deprecated variables
+	if c.Organization == "" {
+		if os.Getenv("SCALEWAY_ORGANIZATION") != "" {
+			c.Organization = os.Getenv("SCALEWAY_ORGANIZATION")
+		} else {
+			log.Printf("Deprecation warning: Use SCALEWAY_ORGANIZATION environment variable and organization_id argument instead of api_access_key argument and SCALEWAY_API_ACCESS_KEY environment variable.")
+			c.Organization = os.Getenv("SCALEWAY_API_ACCESS_KEY")
+		}
+	}
+	if c.Organization != "" {
+		warnings = append(warnings, "organization_id is deprecated in favor of project_id")
+		c.ProjectID = c.Organization
+	}
+
+	if c.Token == "" {
+		c.Token = os.Getenv("SCALEWAY_API_TOKEN")
+	}
+	if c.Token != "" {
+		warnings = append(warnings, "token is deprecated in favor of secret_key")
+		c.SecretKey = c.Token
+	}
 
 	if c.AccessKey == "" {
 		if profile.AccessKey != nil {
