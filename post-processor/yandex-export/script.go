@@ -53,7 +53,7 @@ Exit () {
 	  exit 111
 	fi
   fi
-	
+
   exit $1
 }
 
@@ -83,11 +83,14 @@ fi
 echo "Setup env variables to access storage..."
 eval "$(jq -r '@sh "export YC_SK_ID=\(.access_key.id); export AWS_ACCESS_KEY_ID=\(.access_key.key_id); export AWS_SECRET_ACCESS_KEY=\(.secret)"' <<<${SEC_json}  )"
 
-echo "Check access to storage..."
-if ! aws s3 --region ru-central1 --endpoint-url=https://storage.yandexcloud.net ls > /dev/null ; then
-  echo "Failed to access storage."
-  Exit 1
-fi
+for i in ${PATHS}; do
+  bucket=$(echo ${i} | sed 's/\(s3:\/\/[^\/]*\).*/\1/')
+  echo "Check access to storage: '${bucket}'..."
+  if ! aws s3 --region ru-central1 --endpoint-url=https://storage.yandexcloud.net ls ${bucket} > /dev/null ; then
+    echo "Failed to access storage: '${bucket}'."
+    Exit 1
+  fi
+done
 
 echo "Creating disk from image to be exported..."
 if ! yc compute disk create --name ${DISKNAME} --source-image-id ${IMAGE_ID} --zone ${ZONE}; then
