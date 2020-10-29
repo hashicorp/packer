@@ -6,13 +6,12 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/aws/aws-sdk-go/service/ssm/ssmiface"
+	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/builder/localexec"
 	"github.com/hashicorp/packer/packer"
@@ -24,22 +23,11 @@ type Session struct {
 	Input     ssm.StartSessionInput
 }
 
-// Returns true if the error matches all these conditions:
-//  * err is of type awserr.Error
-//  * Error.Code() matches code
-//  * Error.Message() contains message
-func isAWSErr(err error, code string, message string) bool {
-	if err, ok := err.(awserr.Error); ok {
-		return err.Code() == code && strings.Contains(err.Message(), message)
-	}
-	return false
-}
-
 // getCommand return a valid ordered set of arguments to pass to the driver command.
 func (s Session) getCommand(ctx context.Context) ([]string, string, error) {
 	var session *ssm.StartSessionOutput
 	err := retry.Config{
-		ShouldRetry: func(err error) bool { return isAWSErr(err, "TargetNotConnected", "") },
+		ShouldRetry: func(err error) bool { return awserrors.Matches(err, "TargetNotConnected", "") },
 		RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 60 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) (err error) {
 		session, err = s.SvcClient.StartSessionWithContext(ctx, &s.Input)
