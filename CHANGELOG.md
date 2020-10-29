@@ -13,14 +13,23 @@
     managed disks defined in "disk_additional_size". [GH-10163]
 * builder/azure-chroot: Fix typo in option `exlude_from_latest` to
     `exclude_from_latest`. Old name will still be respected. [GH-10034]
+* builder/googlecompute: Fix HCL image_encryption_key fields and use the same
+    casing in JSON and HCL2 [GH-10173]
 * builder/openstack: Fix source image validation regression when using filters.
     [GH-10065]
 * builder/proxmox: Fix unhandled buildvar type for HCL2 enabled build
     templates. [GH-10154]
+* builder/qemu: Fix a regression where Packer would not wait properly in
+    step_shutdown when a null communicator was used. [GH-10178]
 * builder/qemu: Fix crash in step_run of qemu when loading commhostport form
     the statebag in a situation where the communicator is none. [GH-10145]
+* builder/vsphere-clone: Packer was not respecting the "destroy" flag set in
+    the content library config, and always keeping the source vm. This has been
+    fixed. [GH-10165]
 * builder/vsphere: Ensure builds are able to continue when no communicator has
     been specified `"communicator": "none"`. [GH-9964]
+* builder/vsphere: Fix CD uploads so that Packer does not try to delete a CD
+    that was not successfully uploaded. [GH-10155]
 * core/hcl: Hide sensitive variables from output. [GH-10031]
 * core/hcl: Packer HCL's "Coalesce" function now behaves same way as
     Terraform's. [GH-10016]
@@ -39,6 +48,8 @@
 * builder/amazon: Add support for source instance tenancy [GH-10085]
 * builder/google: Add service account impersonation. [GH-9968] [GH-10054]
 * builder/googlecompute: Add `skip_create_image` option. [GH-10115]
+* builder/googlecompute: Allow users to select the algorithm to use when
+    generating temporary SSH keypair [GH-10111]
 * builder/linode: Add `state_timeout` attribute to Linode builder. [GH-10128]
 * builder/oracle-oci:  New option to specify image compartment separate from
     build compartment. [GH-10040]
@@ -54,6 +65,7 @@
     remote datastore. [GH-10143]
 * builder/yandex: Add support for IAM credentials in the token field and
     YC_TOKEN environment variable. [GH-10158]
+* core/hcl: Add ability to set version restrictions [GH-10149]
 * core/hcl: Add build.name variable so users can access build name in addition
     to source name. [GH-10114]
 * core/hcl: Add consul_key function to HCL templates. [GH-10119]
