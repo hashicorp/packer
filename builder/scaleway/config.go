@@ -153,6 +153,11 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		c.SecretKey = c.Token
 	}
 
+	if c.Region != "" {
+		warnings = append(warnings, "region is deprecated in favor of zone")
+		c.Zone = c.Region
+	}
+
 	if c.AccessKey == "" {
 		if profile.AccessKey != nil {
 			c.AccessKey = *profile.AccessKey
