@@ -7,7 +7,7 @@ version: 2.1
 executors:
   golang:
     docker:
-      - image: circleci/golang:1.15
+      - image: docker.mirror.hashicorp.services/circleci/golang:1.15
     resource_class: medium+
   darwin:
     macos:
@@ -153,7 +153,7 @@ jobs:
           destination: /
   build-website-docker-image:
     docker:
-      - image: circleci/buildpack-deps
+      - image: docker.mirror.hashicorp.services/circleci/buildpack-deps
     shell: /usr/bin/env bash -euo pipefail -c
     steps:
       - checkout
@@ -167,14 +167,14 @@ jobs:
                 echo "Dependencies have not changed, not building a new website docker image."
             else
                 cd website/
+                docker login -u $WEBSITE_DOCKER_USER -p $WEBSITE_DOCKER_PASS
                 docker build -t hashicorp/packer-website:$IMAGE_TAG .
                 docker tag hashicorp/packer-website:$IMAGE_TAG hashicorp/packer-website:latest
-                docker login -u $WEBSITE_DOCKER_USER -p $WEBSITE_DOCKER_PASS
                 docker push hashicorp/packer-website
             fi
   algolia-index:
     docker:
-      - image: node:12
+      - image: docker.mirror.hashicorp.services/node:12
     steps:
       - checkout
       - run:

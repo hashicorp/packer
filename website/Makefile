@@ -1,7 +1,7 @@
 # Default: run this if working on the website locally to run in watch mode.
 website:
 	@echo "==> Downloading latest Docker image..."
-	@docker pull hashicorp/packer-website
+	@docker pull docker.mirror.hashicorp.services/hashicorp/packer-website
 	@echo "==> Starting website in Docker..."
 	@docker run \
 		--interactive \
@@ -17,7 +17,7 @@ website:
 # This command will generate a static version of the website to the "out" folder.
 build:
 	@echo "==> Downloading latest Docker image..."
-	@docker pull hashicorp/packer-website
+	@docker pull docker.mirror.hashicorp.services/hashicorp/packer-website
 	@echo "==> Starting build in Docker..."
 	@docker run \
 		--interactive \
@@ -26,7 +26,7 @@ build:
 		--workdir "/website" \
 		--volume "$(shell pwd):/website" \
 		--volume "/website/node_modules" \
-		hashicorp/packer-website \
+		docker.mirror.hashicorp.services/hashicorp/packer-website \
 		npm run static
 
 # If you are changing node dependencies locally, run this to generate a new
