@@ -24,7 +24,6 @@ type StepCreateSSMTunnel struct {
 	SSMAgentEnabled  bool
 	instanceId       string
 	PauseBeforeSSM   time.Duration
-	driver           *SSMDriver
 	stopSSMCommand   func()
 }
 
@@ -65,16 +64,6 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 	}
 	s.instanceId = aws.StringValue(instance.InstanceId)
 
-	if s.driver == nil {
-		ssmconn := ssm.New(s.AWSSession)
-		cfg := SSMDriverConfig{
-			SvcClient:   ssmconn,
-			Region:      s.Region,
-			SvcEndpoint: ssmconn.Endpoint,
-		}
-		driver := SSMDriver{SSMDriverConfig: cfg}
-		s.driver = &driver
-	}
 	state.Put("sessionPort", s.LocalPortNumber)
 
 	input := s.BuildTunnelInputForInstance(s.instanceId)
@@ -83,16 +72,15 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 	s.stopSSMCommand = ssmCancel
 
 	go func() {
+		ssmconn := ssm.New(s.AWSSession)
 		err := pssm.Session{
-			SvcClient: s.driver.SvcClient,
+			SvcClient: ssmconn,
 			Input:     input,
-			Region:    s.driver.Region,
+			Region:    s.Region,
 		}.Start(ssmCtx, ui)
 
 		if err != nil {
-			err = fmt.Errorf("error encountered in establishing a tunnel %s", err)
-			ui.Error(err.Error())
-			state.Put("error", err)
+			ui.Error(fmt.Sprintf("ssm error: %s", err))
 		}
 	}()
 
