@@ -130,23 +130,33 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	profile := scw.MergeProfiles(activeProfile, envProfile)
 
 	if c.AccessKey == "" {
-		c.AccessKey = *profile.AccessKey
+		if profile.AccessKey != nil {
+			c.AccessKey = *profile.AccessKey
+		}
 	}
 
 	if c.SecretKey == "" {
-		c.SecretKey = *profile.SecretKey
+		if profile.SecretKey != nil {
+			c.SecretKey = *profile.SecretKey
+		}
 	}
 
 	if c.ProjectID == "" {
-		c.ProjectID = *profile.DefaultProjectID
+		if profile.DefaultProjectID != nil {
+			c.ProjectID = *profile.DefaultProjectID
+		}
 	}
 
 	if c.Zone == "" {
-		c.Zone = *profile.DefaultZone
+		if profile.DefaultZone != nil {
+			c.Zone = *profile.DefaultZone
+		}
 	}
 
 	if c.APIURL == "" {
-		c.APIURL = *profile.APIURL
+		if profile.APIURL != nil {
+			c.APIURL = *profile.APIURL
+		}
 	}
 
 	if c.SnapshotName == "" {
@@ -182,12 +192,12 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 	if c.ProjectID == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("Scaleway Project ID must be specified"))
+			errs, errors.New("scaleway Project ID must be specified"))
 	}
 
 	if c.SecretKey == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("Scaleway Secret Key must be specified"))
+			errs, errors.New("scaleway Secret Key must be specified"))
 	}
 
 	if c.AccessKey == "" {
@@ -197,7 +207,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	if c.Zone == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("Scaleway Zone is required"))
+			errs, errors.New("scaleway Zone is required"))
 	}
 
 	if c.CommercialType == "" {
@@ -215,5 +225,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	packer.LogSecretFilter.Set(c.Token)
+	packer.LogSecretFilter.Set(c.SecretKey)
 	return warnings, nil
 }
