@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -18,19 +19,36 @@ import (
 )
 
 type Session struct {
-	SvcClient ssmiface.SSMAPI
-	Region    string
-	Input     ssm.StartSessionInput
+	SvcClient             ssmiface.SSMAPI
+	Region                string
+	InstanceID            string
+	LocalPort, RemotePort int
+}
+
+func (s Session) buildTunnelInput() *ssm.StartSessionInput {
+	portNumber, localPortNumber := strconv.Itoa(s.RemotePort), strconv.Itoa(s.LocalPort)
+	params := map[string][]*string{
+		"portNumber":      []*string{aws.String(portNumber)},
+		"localPortNumber": []*string{aws.String(localPortNumber)},
+	}
+
+	return &ssm.StartSessionInput{
+		DocumentName: aws.String("AWS-StartPortForwardingSession"),
+		Parameters:   params,
+		Target:       aws.String(s.InstanceID),
+	}
 }
 
 // getCommand return a valid ordered set of arguments to pass to the driver command.
 func (s Session) getCommand(ctx context.Context) ([]string, string, error) {
+	input := s.buildTunnelInput()
+
 	var session *ssm.StartSessionOutput
 	err := retry.Config{
 		ShouldRetry: func(err error) bool { return awserrors.Matches(err, "TargetNotConnected", "") },
 		RetryDelay:  (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 60 * time.Second, Multiplier: 2}).Linear,
 	}.Run(ctx, func(ctx context.Context) (err error) {
-		session, err = s.SvcClient.StartSessionWithContext(ctx, &s.Input)
+		session, err = s.SvcClient.StartSessionWithContext(ctx, input)
 		return err
 	})
 
@@ -49,7 +67,7 @@ func (s Session) getCommand(ctx context.Context) ([]string, string, error) {
 	}
 
 	// AWS session-manager-plugin requires the parameters used in the session to be passed in JSON as well.
-	sessionParameters, err := json.Marshal(s.Input)
+	sessionParameters, err := json.Marshal(input)
 	if err != nil {
 		return nil, "", fmt.Errorf("error encountered in reading session parameter details %s", err)
 	}
@@ -73,7 +91,7 @@ func (s Session) getCommand(ctx context.Context) ([]string, string, error) {
 // created from calling StartSession.
 func (s Session) Start(ctx context.Context, ui packer.Ui) error {
 	for ctx.Err() == nil {
-		log.Printf("ssm: Starting PortForwarding session to instance %q", *s.Input.Target)
+		log.Printf("ssm: Starting PortForwarding session to instance %s", s.InstanceID)
 		args, sessionID, err := s.getCommand(ctx)
 		if sessionID != "" {
 			defer func() {

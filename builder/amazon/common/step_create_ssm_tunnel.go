@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -22,7 +21,6 @@ type StepCreateSSMTunnel struct {
 	LocalPortNumber  int
 	RemotePortNumber int
 	SSMAgentEnabled  bool
-	instanceId       string
 	PauseBeforeSSM   time.Duration
 	stopSSMCommand   func()
 }
@@ -62,11 +60,8 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
-	s.instanceId = aws.StringValue(instance.InstanceId)
 
 	state.Put("sessionPort", s.LocalPortNumber)
-
-	input := s.BuildTunnelInputForInstance(s.instanceId)
 
 	ssmCtx, ssmCancel := context.WithCancel(ctx)
 	s.stopSSMCommand = ssmCancel
@@ -74,9 +69,11 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 	go func() {
 		ssmconn := ssm.New(s.AWSSession)
 		err := pssm.Session{
-			SvcClient: ssmconn,
-			Input:     input,
-			Region:    s.Region,
+			SvcClient:  ssmconn,
+			InstanceID: aws.StringValue(instance.InstanceId),
+			RemotePort: s.RemotePortNumber,
+			LocalPort:  s.LocalPortNumber,
+			Region:     s.Region,
 		}.Start(ssmCtx, ui)
 
 		if err != nil {
@@ -126,20 +123,4 @@ func (s *StepCreateSSMTunnel) ConfigureLocalHostPort(ctx context.Context) error 
 
 	return nil
 
-}
-
-func (s *StepCreateSSMTunnel) BuildTunnelInputForInstance(instance string) ssm.StartSessionInput {
-	dst, src := strconv.Itoa(s.RemotePortNumber), strconv.Itoa(s.LocalPortNumber)
-	params := map[string][]*string{
-		"portNumber":      []*string{aws.String(dst)},
-		"localPortNumber": []*string{aws.String(src)},
-	}
-
-	input := ssm.StartSessionInput{
-		DocumentName: aws.String("AWS-StartPortForwardingSession"),
-		Parameters:   params,
-		Target:       aws.String(instance),
-	}
-
-	return input
 }
