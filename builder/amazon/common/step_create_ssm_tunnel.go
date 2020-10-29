@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ssm"
+	pssm "github.com/hashicorp/packer/builder/amazon/common/ssm"
 	"github.com/hashicorp/packer/common/net"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -24,6 +25,7 @@ type StepCreateSSMTunnel struct {
 	instanceId       string
 	PauseBeforeSSM   time.Duration
 	driver           *SSMDriver
+	stopSSMCommand   func()
 }
 
 // Run executes the Packer build step that creates a session tunnel.
@@ -73,30 +75,38 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 		driver := SSMDriver{SSMDriverConfig: cfg}
 		s.driver = &driver
 	}
+	state.Put("sessionPort", s.LocalPortNumber)
 
 	input := s.BuildTunnelInputForInstance(s.instanceId)
-	_, err := s.driver.StartSession(ctx, input)
-	if err != nil {
-		err = fmt.Errorf("error encountered in establishing a tunnel %s", err)
-		ui.Error(err.Error())
-		state.Put("error", err)
-		return multistep.ActionHalt
-	}
 
-	ui.Message(fmt.Sprintf("PortForwarding session %q has been started", s.instanceId))
-	state.Put("sessionPort", s.LocalPortNumber)
+	ssmCtx, ssmCancel := context.WithCancel(ctx)
+	s.stopSSMCommand = ssmCancel
+
+	go func() {
+		err := pssm.Session{
+			SvcClient: s.driver.SvcClient,
+			Input:     input,
+			Region:    s.driver.Region,
+		}.Start(ssmCtx, ui)
+
+		if err != nil {
+			err = fmt.Errorf("error encountered in establishing a tunnel %s", err)
+			ui.Error(err.Error())
+			state.Put("error", err)
+		}
+	}()
+
 	return multistep.ActionContinue
 }
 
 // Cleanup terminates an active session on AWS, which in turn terminates the associated tunnel process running on the local machine.
 func (s *StepCreateSSMTunnel) Cleanup(state multistep.StateBag) {
-	ui := state.Get("ui").(packer.Ui)
 	if !s.SSMAgentEnabled {
 		return
 	}
 
-	if err := s.driver.StopSession(); err != nil {
-		ui.Error(err.Error())
+	if s.stopSSMCommand != nil {
+		s.stopSSMCommand()
 	}
 }
 

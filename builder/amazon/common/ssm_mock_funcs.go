@@ -21,6 +21,7 @@ func (svc *MockSSMSvc) StartSessionWithContext(ctx aws.Context, input *ssm.Start
 	svc.StartSessionCalled = true
 	return MockStartSessionOutput(), svc.StartSessionError
 }
+
 func (svc *MockSSMSvc) TerminateSession(input *ssm.TerminateSessionInput) (*ssm.TerminateSessionOutput, error) {
 	svc.TerminateSessionCalled = true
 	return new(ssm.TerminateSessionOutput), svc.TerminateSessionError
