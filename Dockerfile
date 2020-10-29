@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM docker.mirror.hashicorp.services/ubuntu:16.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
