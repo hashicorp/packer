@@ -25,18 +25,23 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 	// The AccessKey corresponding to the secret key.
+	// Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
 	// It can also be specified via the environment variable SCW_ACCESS_KEY.
 	AccessKey string `mapstructure:"access_key" required:"true"`
 	// The SecretKey to authenticate against the Scaleway API.
+	// Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
 	// It can also be specified via the environment variable SCW_SECRET_KEY.
 	SecretKey string `mapstructure:"secret_key" required:"true"`
 	// The Project ID in which the instances, volumes and snapshots will be created.
+	// Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
 	// It can also be specified via the environment variable SCW_DEFAULT_PROJECT_ID.
 	ProjectID string `mapstructure:"project_id" required:"true"`
 	// The Zone in which the instances, volumes and snapshots will be created.
+	// Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
 	// It can also be specified via the environment variable SCW_DEFAULT_ZONE
 	Zone string `mapstructure:"zone" required:"true"`
 	// The Scaleway API URL to use
+	// Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
 	// It can also be specified via the environment variable SCW_API_URL
 	APIURL string `mapstructure:"api_url"`
 
