@@ -3,13 +3,13 @@ package common
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ssm"
+	pssm "github.com/hashicorp/packer/builder/amazon/common/ssm"
 	"github.com/hashicorp/packer/common/net"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -21,9 +21,8 @@ type StepCreateSSMTunnel struct {
 	LocalPortNumber  int
 	RemotePortNumber int
 	SSMAgentEnabled  bool
-	instanceId       string
 	PauseBeforeSSM   time.Duration
-	driver           *SSMDriver
+	stopSSMCommand   func()
 }
 
 // Run executes the Packer build step that creates a session tunnel.
@@ -36,7 +35,7 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 
 	// Wait for the remote port to become available
 	if s.PauseBeforeSSM > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s for establishing the SSM session...", s.PauseBeforeSSM))
+		ui.Say(fmt.Sprintf("Waiting %s before establishing the SSM session...", s.PauseBeforeSSM))
 		select {
 		case <-time.After(s.PauseBeforeSSM):
 			break
@@ -61,42 +60,38 @@ func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag)
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
-	s.instanceId = aws.StringValue(instance.InstanceId)
 
-	if s.driver == nil {
-		ssmconn := ssm.New(s.AWSSession)
-		cfg := SSMDriverConfig{
-			SvcClient:   ssmconn,
-			Region:      s.Region,
-			SvcEndpoint: ssmconn.Endpoint,
-		}
-		driver := SSMDriver{SSMDriverConfig: cfg}
-		s.driver = &driver
-	}
-
-	input := s.BuildTunnelInputForInstance(s.instanceId)
-	_, err := s.driver.StartSession(ctx, input)
-	if err != nil {
-		err = fmt.Errorf("error encountered in establishing a tunnel %s", err)
-		ui.Error(err.Error())
-		state.Put("error", err)
-		return multistep.ActionHalt
-	}
-
-	ui.Message(fmt.Sprintf("PortForwarding session %q has been started", s.instanceId))
 	state.Put("sessionPort", s.LocalPortNumber)
+
+	ssmCtx, ssmCancel := context.WithCancel(ctx)
+	s.stopSSMCommand = ssmCancel
+
+	go func() {
+		ssmconn := ssm.New(s.AWSSession)
+		err := pssm.Session{
+			SvcClient:  ssmconn,
+			InstanceID: aws.StringValue(instance.InstanceId),
+			RemotePort: s.RemotePortNumber,
+			LocalPort:  s.LocalPortNumber,
+			Region:     s.Region,
+		}.Start(ssmCtx, ui)
+
+		if err != nil {
+			ui.Error(fmt.Sprintf("ssm error: %s", err))
+		}
+	}()
+
 	return multistep.ActionContinue
 }
 
 // Cleanup terminates an active session on AWS, which in turn terminates the associated tunnel process running on the local machine.
 func (s *StepCreateSSMTunnel) Cleanup(state multistep.StateBag) {
-	ui := state.Get("ui").(packer.Ui)
 	if !s.SSMAgentEnabled {
 		return
 	}
 
-	if err := s.driver.StopSession(); err != nil {
-		ui.Error(err.Error())
+	if s.stopSSMCommand != nil {
+		s.stopSSMCommand()
 	}
 }
 
@@ -128,20 +123,4 @@ func (s *StepCreateSSMTunnel) ConfigureLocalHostPort(ctx context.Context) error 
 
 	return nil
 
-}
-
-func (s *StepCreateSSMTunnel) BuildTunnelInputForInstance(instance string) ssm.StartSessionInput {
-	dst, src := strconv.Itoa(s.RemotePortNumber), strconv.Itoa(s.LocalPortNumber)
-	params := map[string][]*string{
-		"portNumber":      []*string{aws.String(dst)},
-		"localPortNumber": []*string{aws.String(src)},
-	}
-
-	input := ssm.StartSessionInput{
-		DocumentName: aws.String("AWS-StartPortForwardingSession"),
-		Parameters:   params,
-		Target:       aws.String(instance),
-	}
-
-	return input
 }

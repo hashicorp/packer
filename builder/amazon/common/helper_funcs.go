@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
 	"github.com/hashicorp/packer/common/retry"
 )
 
@@ -31,7 +30,7 @@ func DestroyAMIs(imageids []*string, ec2conn *ec2.EC2) error {
 		err = retry.Config{
 			Tries: 11,
 			ShouldRetry: func(err error) bool {
-				return IsAWSErr(err, "UnauthorizedOperation", "")
+				return awserrors.Matches(err, "UnauthorizedOperation", "")
 			},
 			RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 		}.Run(ctx, func(ctx context.Context) error {
@@ -54,7 +53,7 @@ func DestroyAMIs(imageids []*string, ec2conn *ec2.EC2) error {
 				err = retry.Config{
 					Tries: 11,
 					ShouldRetry: func(err error) bool {
-						return IsAWSErr(err, "UnauthorizedOperation", "")
+						return awserrors.Matches(err, "UnauthorizedOperation", "")
 					},
 					RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
 				}.Run(ctx, func(ctx context.Context) error {
@@ -73,15 +72,4 @@ func DestroyAMIs(imageids []*string, ec2conn *ec2.EC2) error {
 		}
 	}
 	return nil
-}
-
-// Returns true if the error matches all these conditions:
-//  * err is of type awserr.Error
-//  * Error.Code() matches code
-//  * Error.Message() contains message
-func IsAWSErr(err error, code string, message string) bool {
-	if err, ok := err.(awserr.Error); ok {
-		return err.Code() == code && strings.Contains(err.Message(), message)
-	}
-	return false
 }

@@ -11,6 +11,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
 	"github.com/hashicorp/packer/common/random"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -396,7 +397,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 
 	// Retry creating tags for about 2.5 minutes
 	err = retry.Config{Tries: 11, ShouldRetry: func(error) bool {
-		if IsAWSErr(err, "InvalidInstanceID.NotFound", "") {
+		if awserrors.Matches(err, "InvalidInstanceID.NotFound", "") {
 			return true
 		}
 		return false
