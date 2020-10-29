@@ -97,7 +97,7 @@ func (s Session) Start(ctx context.Context, ui packer.Ui) error {
 			defer func() {
 				_, err := s.SvcClient.TerminateSession(&ssm.TerminateSessionInput{SessionId: aws.String(sessionID)})
 				if err != nil {
-					err = fmt.Errorf("Error terminating SSM Session %q. Please terminate the session manually: %s", sessionID, err)
+					ui.Error(fmt.Sprintf("Error terminating SSM Session %q. Please terminate the session manually: %s", sessionID, err))
 				}
 			}()
 		}
