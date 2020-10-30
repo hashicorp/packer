@@ -3,14 +3,19 @@ package hcl2template
 import (
 	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/typeexpr"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/hashicorp/packer/hcl2template/addrs"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/convert"
 )
+
+// A consistent detail message for all "not a valid identifier" diagnostics.
+const badIdentifierDetail = "A name must start with a letter or underscore and may contain only letters, digits, underscores, and dashes."
 
 // Local represents a single entry from a "locals" block in a file.
 // The "locals" block itself is not represented, because it serves only to
@@ -46,6 +51,8 @@ type Variable struct {
 	// When Sensitive is set to true Packer will try it best to hide/obfuscate
 	// the variable from the output stream. By replacing the text.
 	Sensitive bool
+
+	Validations []*VariableValidation
 
 	Range hcl.Range
 }
@@ -139,6 +146,28 @@ func (variables *Variables) decodeVariable(key string, attr *hcl.Attribute, ectx
 	return diags
 }
 
+var variableBlockSchema = &hcl.BodySchema{
+	Attributes: []hcl.AttributeSchema{
+		{
+			Name: "description",
+		},
+		{
+			Name: "default",
+		},
+		{
+			Name: "type",
+		},
+		{
+			Name: "sensitive",
+		},
+	},
+	Blocks: []hcl.BlockHeaderSchema{
+		{
+			Type: "validation",
+		},
+	},
+}
+
 // decodeVariableBlock decodes a "variables" section the way packer 1 used to
 func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.EvalContext) hcl.Diagnostics {
 	if (*variables) == nil {
@@ -155,51 +184,53 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 		}}
 	}
 
-	var b struct {
-		Description string   `hcl:"description,optional"`
-		Sensitive   bool     `hcl:"sensitive,optional"`
-		Rest        hcl.Body `hcl:",remain"`
-	}
-	diags := gohcl.DecodeBody(block.Body, nil, &b)
-
-	if diags.HasErrors() {
-		return diags
-	}
-
 	name := block.Labels[0]
 
-	res := &Variable{
-		Name:        name,
-		Description: b.Description,
-		Sensitive:   b.Sensitive,
-		Range:       block.DefRange,
+	content, diags := block.Body.Content(variableBlockSchema)
+	if !hclsyntax.ValidIdentifier(name) {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Invalid variable name",
+			Detail:   badIdentifierDetail,
+			Subject:  &block.LabelRanges[0],
+		})
 	}
 
-	attrs, moreDiags := b.Rest.JustAttributes()
-	diags = append(diags, moreDiags...)
+	v := &Variable{
+		Name:  name,
+		Range: block.DefRange,
+	}
 
-	if t, ok := attrs["type"]; ok {
-		delete(attrs, "type")
+	if attr, exists := content.Attributes["description"]; exists {
+		valDiags := gohcl.DecodeExpression(attr.Expr, nil, &v.Description)
+		diags = append(diags, valDiags...)
+	}
+
+	if t, ok := content.Attributes["type"]; ok {
 		tp, moreDiags := typeexpr.Type(t.Expr)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			return diags
 		}
 
-		res.Type = tp
+		v.Type = tp
 	}
 
-	if def, ok := attrs["default"]; ok {
-		delete(attrs, "default")
+	if attr, exists := content.Attributes["sensitive"]; exists {
+		valDiags := gohcl.DecodeExpression(attr.Expr, nil, &v.Sensitive)
+		diags = append(diags, valDiags...)
+	}
+
+	if def, ok := content.Attributes["default"]; ok {
 		defaultValue, moreDiags := def.Expr.Value(ectx)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			return diags
 		}
 
-		if res.Type != cty.NilType {
+		if v.Type != cty.NilType {
 			var err error
-			defaultValue, err = convert.Convert(defaultValue, res.Type)
+			defaultValue, err = convert.Convert(defaultValue, v.Type)
 			if err != nil {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
@@ -211,30 +242,175 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 			}
 		}
 
-		res.DefaultValue = defaultValue
+		v.DefaultValue = defaultValue
 
 		// It's possible no type attribute was assigned so lets make sure we
 		// have a valid type otherwise there could be issues parsing the value.
-		if res.Type == cty.NilType {
-			res.Type = res.DefaultValue.Type()
+		if v.Type == cty.NilType {
+			v.Type = v.DefaultValue.Type()
 		}
-	}
-	if len(attrs) > 0 {
-		keys := []string{}
-		for k := range attrs {
-			keys = append(keys, k)
-		}
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagWarning,
-			Summary:  "Unknown keys",
-			Detail:   fmt.Sprintf("unknown variable setting(s): %s", keys),
-			Context:  block.DefRange.Ptr(),
-		})
 	}
 
-	(*variables)[name] = res
+	for _, block := range content.Blocks {
+		switch block.Type {
+		case "validation":
+			vv, moreDiags := decodeVariableValidationBlock(v.Name, block)
+			diags = append(diags, moreDiags...)
+			v.Validations = append(v.Validations, vv)
+		}
+	}
+
+	(*variables)[name] = v
 
 	return diags
+}
+
+var variableValidationBlockSchema = &hcl.BodySchema{
+	Attributes: []hcl.AttributeSchema{
+		{
+			Name:     "condition",
+			Required: true,
+		},
+		{
+			Name:     "error_message",
+			Required: true,
+		},
+	},
+}
+
+// VariableValidation represents a configuration-defined validation rule
+// for a particular input variable, given as a "validation" block inside
+// a "variable" block.
+type VariableValidation struct {
+	// Condition is an expression that refers to the variable being tested and
+	// contains no other references. The expression must return true to
+	// indicate that the value is valid or false to indicate that it is
+	// invalid. If the expression produces an error, that's considered a bug in
+	// the block defining the validation rule, not an error in the caller.
+	Condition hcl.Expression
+
+	// ErrorMessage is one or more full sentences, which would need to be in
+	// English for consistency with the rest of the error message output but
+	// can in practice be in any language as long as it ends with a period.
+	// The message should describe what is required for the condition to return
+	// true in a way that would make sense to a caller of the module.
+	ErrorMessage string
+
+	DeclRange hcl.Range
+}
+
+func decodeVariableValidationBlock(varName string, block *hcl.Block) (*VariableValidation, hcl.Diagnostics) {
+	var diags hcl.Diagnostics
+	vv := &VariableValidation{
+		DeclRange: block.DefRange,
+	}
+
+	content, moreDiags := block.Body.Content(variableValidationBlockSchema)
+	diags = append(diags, moreDiags...)
+
+	if attr, exists := content.Attributes["condition"]; exists {
+		vv.Condition = attr.Expr
+
+		// The validation condition must refer to the variable itself and
+		// nothing else; to ensure that the variable declaration can't create
+		// additional edges in the dependency graph.
+		goodRefs := 0
+		for _, traversal := range vv.Condition.Variables() {
+
+			ref, moreDiags := addrs.ParseRef(traversal)
+			if !moreDiags.HasErrors() {
+				if addr, ok := ref.Subject.(addrs.InputVariable); ok {
+					if addr.Name == varName {
+						goodRefs++
+						continue // Reference is valid
+					}
+				}
+			}
+
+			// If we fall out here then the reference is invalid.
+			diags = diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Invalid reference in variable validation",
+				Detail:   fmt.Sprintf("The condition for variable %q can only refer to the variable itself, using var.%s.", varName, varName),
+				Subject:  traversal.SourceRange().Ptr(),
+			})
+		}
+		if goodRefs < 1 {
+			diags = diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Invalid variable validation condition",
+				Detail:   fmt.Sprintf("The condition for variable %q must refer to var.%s in order to test incoming values.", varName, varName),
+				Subject:  attr.Expr.Range().Ptr(),
+			})
+		}
+	}
+
+	if attr, exists := content.Attributes["error_message"]; exists {
+		moreDiags := gohcl.DecodeExpression(attr.Expr, nil, &vv.ErrorMessage)
+		diags = append(diags, moreDiags...)
+		if !moreDiags.HasErrors() {
+			const errSummary = "Invalid validation error message"
+			switch {
+			case vv.ErrorMessage == "":
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  errSummary,
+					Detail:   "An empty string is not a valid nor useful error message.",
+					Subject:  attr.Expr.Range().Ptr(),
+				})
+			case !looksLikeSentences(vv.ErrorMessage):
+				// Because we're going to include this string verbatim as part
+				// of a bigger error message written in our usual style in
+				// English, we'll require the given error message to conform
+				// to that. We might relax this in future if e.g. we start
+				// presenting these error messages in a different way, or if
+				// Terraform starts supporting producing error messages in
+				// other human languages, etc.
+				// For pragmatism we also allow sentences ending with
+				// exclamation points, but we don't mention it explicitly here
+				// because that's not really consistent with the Terraform UI
+				// writing style.
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  errSummary,
+					Detail:   "Validation error message must be at least one full English sentence starting with an uppercase letter and ending with a period or question mark.",
+					Subject:  attr.Expr.Range().Ptr(),
+				})
+			}
+		}
+	}
+
+	return vv, diags
+}
+
+// looksLikeSentence is a simple heuristic that encourages writing error
+// messages that will be presentable when included as part of a larger error
+// diagnostic whose other text is written in the UI writing style.
+//
+// This is intentionally not a very strong validation since we're assuming that
+// authors want to write good messages and might just need a nudge about
+// Packer's specific style, rather than that they are going to try to work
+// around these rules to write a lower-quality message.
+func looksLikeSentences(s string) bool {
+	if len(s) < 1 {
+		return false
+	}
+	runes := []rune(s) // HCL guarantees that all strings are valid UTF-8
+	first := runes[0]
+	last := runes[len(runes)-1]
+
+	// If the first rune is a letter then it must be an uppercase letter.
+	// (This will only see the first rune in a multi-rune combining sequence,
+	// but the first rune is generally the letter if any are, and if not then
+	// we'll just ignore it because we're primarily expecting English messages
+	// right now anyway, for consistency with all of Terraform's other output.)
+	if unicode.IsLetter(first) && !unicode.IsUpper(first) {
+		return false
+	}
+
+	// The string must be at least one full sentence, which implies having
+	// sentence-ending punctuation.
+	return last == '.' || last == '?' || last == '!'
 }
 
 // Prefix your environment variables with VarEnvPrefix so that Packer can see

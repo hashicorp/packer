@@ -131,7 +131,7 @@ func TestParse_variables(t *testing.T) {
 					},
 				},
 			},
-			true, false,
+			true, true,
 			[]packer.Build{},
 			false,
 		},
