@@ -51,3 +51,9 @@ var LengthFunc = function.New(&function.Spec{
 		}
 	},
 })
+
+// Length returns the number of elements in the given collection or number of
+// Unicode characters in the given string.
+func Length(collection cty.Value) (cty.Value, error) {
+	return LengthFunc.Call([]cty.Value{collection})
+}
