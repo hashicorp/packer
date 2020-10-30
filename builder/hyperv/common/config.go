@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
+	powershell "github.com/hashicorp/packer/builder/hyperv/common/powershell"
+	"github.com/hashicorp/packer/builder/hyperv/common/powershell/hyperv"
 	"github.com/hashicorp/packer/common"
-	powershell "github.com/hashicorp/packer/common/powershell"
-	"github.com/hashicorp/packer/common/powershell/hyperv"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
