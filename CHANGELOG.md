@@ -1,4 +1,4 @@
-## 1.6.5 (Upcoming)
+## 1.6.5 (October 30, 2020)
 
 ### FEATURES:
 * New Builder(s): Proxmox builder has been split into two new builders
