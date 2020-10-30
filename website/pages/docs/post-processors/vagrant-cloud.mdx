@@ -114,6 +114,9 @@ on Vagrant Cloud, as well as authentication and version information.
   - `Provider`: The Vagrant provider the box is for
   - `ArtifactId`: The ID of the input artifact.
 
+- `no_direct_upload` (boolean) - When true, upload the box artifact through
+  Vagrant Cloud instead of directly to the backend storage.
+
 ## Use with the Vagrant Post-Processor
 
 An example configuration is shown below. Note the use of the nested array that

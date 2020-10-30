@@ -9,7 +9,8 @@ import (
 )
 
 type Upload struct {
-	UploadPath string `json:"upload_path"`
+	UploadPath   string `json:"upload_path"`
+	CallbackPath string `json:"callback"`
 }
 
 type stepPrepareUpload struct {
@@ -17,6 +18,7 @@ type stepPrepareUpload struct {
 
 func (s *stepPrepareUpload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	box := state.Get("box").(*Box)
 	version := state.Get("version").(*Version)
@@ -24,6 +26,9 @@ func (s *stepPrepareUpload) Run(ctx context.Context, state multistep.StateBag) m
 	artifactFilePath := state.Get("artifactFilePath").(string)
 
 	path := fmt.Sprintf("box/%s/version/%v/provider/%s/upload", box.Tag, version.Version, provider.Name)
+	if !config.NoDirectUpload {
+		path = path + "/direct"
+	}
 	upload := &Upload{}
 
 	ui.Say(fmt.Sprintf("Preparing upload of box: %s", artifactFilePath))

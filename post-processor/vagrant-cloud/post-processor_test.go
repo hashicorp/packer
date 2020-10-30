@@ -17,6 +17,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type stubResponse struct {
+	Path       string
+	Method     string
+	Response   string
+	StatusCode int
+}
+
 type tarFiles []struct {
 	Name, Body string
 }
@@ -44,6 +51,36 @@ func testNoAccessTokenProvidedConfig() map[string]interface{} {
 		"version_description": "bar",
 		"version":             "0.5",
 	}
+}
+
+func newStackServer(stack []stubResponse) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		if len(stack) < 1 {
+			rw.Header().Add("Error", fmt.Sprintf("Request stack is empty - Method: %s Path: %s", req.Method, req.URL.Path))
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		match := stack[0]
+		stack = stack[1:]
+		if match.Method != "" && req.Method != match.Method {
+			rw.Header().Add("Error", fmt.Sprintf("Request %s != %s", match.Method, req.Method))
+			http.Error(rw, fmt.Sprintf("Request %s != %s", match.Method, req.Method), http.StatusInternalServerError)
+			return
+		}
+		if match.Path != "" && match.Path != req.URL.Path {
+			rw.Header().Add("Error", fmt.Sprintf("Request %s != %s", match.Path, req.URL.Path))
+			http.Error(rw, fmt.Sprintf("Request %s != %s", match.Path, req.URL.Path), http.StatusInternalServerError)
+			return
+		}
+		rw.Header().Add("Complete", fmt.Sprintf("Method: %s Path: %s", match.Method, match.Path))
+		rw.WriteHeader(match.StatusCode)
+		if match.Response != "" {
+			_, err := rw.Write([]byte(match.Response))
+			if err != nil {
+				panic("failed to write response: " + err.Error())
+			}
+		}
+	}))
 }
 
 func newSecureServer(token string, handler http.HandlerFunc) *httptest.Server {
@@ -226,6 +263,156 @@ func TestPostProcessor_PostProcess_checkArtifactFileIsBox(t *testing.T) {
 	if !strings.Contains(err.Error(), "Unknown files in artifact") {
 		t.Fatalf("Should error with message 'Unknown files in artifact...' with artifact file: %s",
 			artifact.FilesValue[0])
+	}
+}
+
+func TestPostProcessor_PostProcess_uploadsAndReleases(t *testing.T) {
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", `{"provider": "virtualbox"}`},
+	}
+	boxfile, err := createBox(files)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	artifact := &packer.MockArtifact{
+		BuilderIdValue: "mitchellh.post-processor.vagrant",
+		FilesValue:     []string{boxfile.Name()},
+	}
+
+	s := newStackServer([]stubResponse{stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-path"}})
+	defer s.Close()
+
+	stack := []stubResponse{
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/authenticate"},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/id/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
+		stubResponse{StatusCode: 200, Method: "PUT", Path: "/box/hashicorp/precise64/version/0.5/release"},
+	}
+
+	server := newStackServer(stack)
+	defer server.Close()
+	config := testGoodConfig()
+	config["vagrant_cloud_url"] = server.URL
+	config["no_direct_upload"] = true
+
+	var p PostProcessor
+
+	err = p.Configure(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	_, _, _, err = p.PostProcess(context.Background(), testUi(), artifact)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestPostProcessor_PostProcess_uploadsAndNoRelease(t *testing.T) {
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", `{"provider": "virtualbox"}`},
+	}
+	boxfile, err := createBox(files)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	artifact := &packer.MockArtifact{
+		BuilderIdValue: "mitchellh.post-processor.vagrant",
+		FilesValue:     []string{boxfile.Name()},
+	}
+
+	s := newStackServer([]stubResponse{stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-path"}})
+	defer s.Close()
+
+	stack := []stubResponse{
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/authenticate"},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/id/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
+	}
+
+	server := newStackServer(stack)
+	defer server.Close()
+	config := testGoodConfig()
+	config["vagrant_cloud_url"] = server.URL
+	config["no_direct_upload"] = true
+	config["no_release"] = true
+
+	var p PostProcessor
+
+	err = p.Configure(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	_, _, _, err = p.PostProcess(context.Background(), testUi(), artifact)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestPostProcessor_PostProcess_uploadsDirectAndReleases(t *testing.T) {
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", `{"provider": "virtualbox"}`},
+	}
+	boxfile, err := createBox(files)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer os.Remove(boxfile.Name())
+
+	artifact := &packer.MockArtifact{
+		BuilderIdValue: "mitchellh.post-processor.vagrant",
+		FilesValue:     []string{boxfile.Name()},
+	}
+
+	s := newStackServer(
+		[]stubResponse{
+			stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-path"},
+		},
+	)
+	defer s.Close()
+
+	stack := []stubResponse{
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/authenticate"},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/id/upload/direct"},
+		stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-complete"},
+		stubResponse{StatusCode: 200, Method: "PUT", Path: "/box/hashicorp/precise64/version/0.5/release"},
+	}
+
+	server := newStackServer(stack)
+	defer server.Close()
+	config := testGoodConfig()
+	config["vagrant_cloud_url"] = server.URL
+
+	// Set response here so we have API server URL available
+	stack[4].Response = `{"upload_path": "` + s.URL + `/box-upload-path", "callback": "` + server.URL + `/box-upload-complete"}`
+
+	var p PostProcessor
+
+	err = p.Configure(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	_, _, _, err = p.PostProcess(context.Background(), testUi(), artifact)
+	if err != nil {
+		t.Fatalf("err: %s", err)
 	}
 }
 

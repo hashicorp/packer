@@ -24,6 +24,7 @@ type FlatConfig struct {
 	VagrantCloudUrl       *string           `mapstructure:"vagrant_cloud_url" cty:"vagrant_cloud_url" hcl:"vagrant_cloud_url"`
 	InsecureSkipTLSVerify *bool             `mapstructure:"insecure_skip_tls_verify" cty:"insecure_skip_tls_verify" hcl:"insecure_skip_tls_verify"`
 	BoxDownloadUrl        *string           `mapstructure:"box_download_url" cty:"box_download_url" hcl:"box_download_url"`
+	NoDirectUpload        *bool             `mapstructure:"no_direct_upload" cty:"no_direct_upload" hcl:"no_direct_upload"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -53,6 +54,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vagrant_cloud_url":          &hcldec.AttrSpec{Name: "vagrant_cloud_url", Type: cty.String, Required: false},
 		"insecure_skip_tls_verify":   &hcldec.AttrSpec{Name: "insecure_skip_tls_verify", Type: cty.Bool, Required: false},
 		"box_download_url":           &hcldec.AttrSpec{Name: "box_download_url", Type: cty.String, Required: false},
+		"no_direct_upload":           &hcldec.AttrSpec{Name: "no_direct_upload", Type: cty.Bool, Required: false},
 	}
 	return s
 }
