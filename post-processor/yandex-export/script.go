@@ -46,6 +46,12 @@ Exit () {
     aws s3 --region ru-central1 --endpoint-url=https://storage.yandexcloud.net cp /var/log/syslog ${LOGDEST}
   done
 
+  echo "Delete static access key..."
+  if ! yc iam access-key delete ${YC_SK_ID} ; then
+    echo "Failed to delete static access key."
+    FAIL=1
+  fi
+
   if [ $1 -ne 0 ]; then
 	echo "Set metadata key 'cloud-init-status' to 'cloud-init-error' value"
     if ! yc compute instance update ${INSTANCE_ID} --metadata cloud-init-status=cloud-init-error ; then
@@ -129,11 +135,6 @@ for i in ${PATHS}; do
   fi
 done
 
-echo "Delete static access key..."
-if ! yc iam access-key delete ${YC_SK_ID} ; then
-  echo "Failed to delete static access key."
-  FAIL=1
-fi
 
 echo "Set metadata key 'cloud-init-status' to 'cloud-init-done' value"
 if ! yc compute instance update ${INSTANCE_ID} --metadata cloud-init-status=cloud-init-done ; then
