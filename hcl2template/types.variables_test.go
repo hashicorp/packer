@@ -357,6 +357,28 @@ func TestParse_variables(t *testing.T) {
 			},
 			false,
 		},
+
+		{"valid validation block",
+			defaultParser,
+			parseTestArgs{"testdata/variables/validation/valid.pkr.hcl", nil, nil},
+			&PackerConfig{
+				Basedir: filepath.Join("testdata", "variables", "validation"),
+				InputVariables: Variables{
+					"image_id": &Variable{
+						DefaultValue: cty.StringVal("ami-something-something"),
+						Name:         "image_id",
+						Validations: []*VariableValidation{
+							&VariableValidation{
+								ErrorMessage: `The image_id value must be a valid AMI id, starting with "ami-".`,
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packer.Build{},
+			false,
+		},
 	}
 	testParse(t, tests)
 }
