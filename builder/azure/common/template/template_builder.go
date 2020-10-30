@@ -554,6 +554,7 @@ const KeyVault = `{
       "properties": {
         "enabledForDeployment": "true",
         "enabledForTemplateDeployment": "true",
+        "enableSoftDelete": "true",
         "tenantId": "[parameters('tenantId')]",
         "accessPolicies": [
           {
