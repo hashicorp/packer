@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"unicode"
 
@@ -67,7 +68,76 @@ func (v *Variable) GoString() string {
 	)
 }
 
-func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
+// validateValue ensures that all of the configured custom validations for a
+// variable value are passing.
+//
+func (v *Variable) validateValue(val cty.Value) (diags hcl.Diagnostics) {
+	if len(v.Validations) == 0 {
+		log.Printf("[TRACE] validateValue: not active for %s, so skipping", v.Name)
+		return nil
+	}
+
+	hclCtx := &hcl.EvalContext{
+		Variables: map[string]cty.Value{
+			"var": cty.ObjectVal(map[string]cty.Value{
+				v.Name: val,
+			}),
+		},
+		Functions: Functions(""),
+	}
+
+	for _, validation := range v.Validations {
+		const errInvalidCondition = "Invalid variable validation result"
+		const errInvalidValue = "Invalid value for variable"
+
+		result, moreDiags := validation.Condition.Value(hclCtx)
+		diags = append(diags, moreDiags...)
+		if moreDiags.HasErrors() {
+			log.Printf("[TRACE] evalVariableValidations: %s rule %s condition expression failed: %s", v.Name, validation.DeclRange, moreDiags.Error())
+		}
+		if !result.IsKnown() {
+			log.Printf("[TRACE] evalVariableValidations: %s rule %s condition value is unknown, so skipping validation for now", v.Name, validation.DeclRange)
+			continue // We'll wait until we've learned more, then.
+		}
+		if result.IsNull() {
+			diags = append(diags, &hcl.Diagnostic{
+				Severity:    hcl.DiagError,
+				Summary:     errInvalidCondition,
+				Detail:      "Validation condition expression must return either true or false, not null.",
+				Subject:     validation.Condition.Range().Ptr(),
+				Expression:  validation.Condition,
+				EvalContext: hclCtx,
+			})
+			continue
+		}
+		var err error
+		result, err = convert.Convert(result, cty.Bool)
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Severity:    hcl.DiagError,
+				Summary:     errInvalidCondition,
+				Detail:      fmt.Sprintf("Invalid validation condition result value: %s.", err),
+				Subject:     validation.Condition.Range().Ptr(),
+				Expression:  validation.Condition,
+				EvalContext: hclCtx,
+			})
+			continue
+		}
+
+		if result.False() {
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  errInvalidValue,
+				Detail:   fmt.Sprintf("%s\n\nThis was checked by the validation rule at %s.", validation.ErrorMessage, validation.DeclRange.String()),
+				Subject:  validation.DeclRange.Ptr(),
+			})
+		}
+	}
+
+	return diags
+}
+
+func (v *Variable) Value() (cty.Value, hcl.Diagnostics) {
 	for _, value := range []cty.Value{
 		v.CmdValue,
 		v.VarfileValue,
@@ -75,18 +145,18 @@ func (v *Variable) Value() (cty.Value, *hcl.Diagnostic) {
 		v.DefaultValue,
 	} {
 		if value != cty.NilVal {
-			return value, nil
+			return value, v.validateValue(value)
 		}
 	}
 
-	return cty.UnknownVal(v.Type), &hcl.Diagnostic{
+	return cty.UnknownVal(v.Type), hcl.Diagnostics{&hcl.Diagnostic{
 		Severity: hcl.DiagError,
 		Summary:  fmt.Sprintf("Unset variable %q", v.Name),
 		Detail: "A used variable must be set or have a default value; see " +
 			"https://packer.io/docs/configuration/from-1.5/syntax for " +
 			"details.",
 		Context: v.Range.Ptr(),
-	}
+	}}
 }
 
 type Variables map[string]*Variable
@@ -103,10 +173,8 @@ func (variables Variables) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	res := map[string]cty.Value{}
 	var diags hcl.Diagnostics
 	for k, v := range variables {
-		value, diag := v.Value()
-		if diag != nil {
-			diags = append(diags, diag)
-		}
+		value, moreDiags := v.Value()
+		diags = append(diags, moreDiags...)
 		res[k] = value
 	}
 	return res, diags
@@ -486,7 +554,7 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 			})
 			for _, block := range content.Blocks {
 				name := block.Labels[0]
-				diags = diags.Append(&hcl.Diagnostic{
+				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Variable declaration in a .pkrvar file",
 					Detail: fmt.Sprintf("A .pkrvar file is used to assign "+
