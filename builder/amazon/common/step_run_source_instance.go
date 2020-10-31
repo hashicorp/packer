@@ -245,6 +245,16 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
+
+		// try to get some context from AWS on why was instance
+		// transitioned to the unexpected state
+		if resp, e := ec2conn.DescribeInstances(describeInstance); e == nil {
+			if len(resp.Reservations) > 0 && len(resp.Reservations[0].Instances) > 0 {
+				instance := resp.Reservations[0].Instances[0]
+				ui.Error(fmt.Sprintf("Instance state change details: %s: %s",
+					*instance.StateTransitionReason, *instance.StateReason.Message))
+			}
+		}
 		return multistep.ActionHalt
 	}
 
