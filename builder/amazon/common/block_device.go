@@ -154,6 +154,11 @@ func (blockDevice BlockDevice) BuildEC2BlockDeviceMapping() *ec2.BlockDeviceMapp
 	return mapping
 }
 
+var iopsRatios = map[string]int64{
+	"io1": 50,
+	"io2": 500,
+}
+
 func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 	if b.DeviceName == "" {
 		return fmt.Errorf("The `device_name` must be specified " +
@@ -164,6 +169,13 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 	if b.KmsKeyId != "" && b.Encrypted.False() {
 		return fmt.Errorf("The device %v, must also have `encrypted: "+
 			"true` when setting a kms_key_id.", b.DeviceName)
+	}
+
+	if ratio, ok := iopsRatios[b.VolumeType]; b.VolumeSize != 0 && ok {
+		if b.IOPS/b.VolumeSize > ratio {
+			return fmt.Errorf("The maximum ratio of provisioned IOPS to requested volume size "+
+				"(in GiB) is %v:1 for %s volumes", ratio, b.VolumeType)
+		}
 	}
 
 	_, err := interpolate.RenderInterface(&b, ctx)

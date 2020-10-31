@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func TestBlockDevice(t *testing.T) {
@@ -179,6 +180,88 @@ func TestBlockDevice(t *testing.T) {
 		launchResults := launchBlockDevices.BuildEC2BlockDeviceMappings()
 		if diff := cmp.Diff(expected, launchResults); diff != "" {
 			t.Fatalf("Bad block device: %s", diff)
+		}
+	}
+}
+
+func TestIOPSValidation(t *testing.T) {
+
+	cases := []struct {
+		device BlockDevice
+		ok     bool
+		msg    string
+	}{
+		// volume size unknown
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "io1",
+				IOPS:       1000,
+			},
+			ok: true,
+		},
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "io2",
+				IOPS:       1000,
+			},
+			ok: true,
+		},
+		// ratio requirement satisfied
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "io1",
+				VolumeSize: 50,
+				IOPS:       1000,
+			},
+			ok: true,
+		},
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "io2",
+				VolumeSize: 100,
+				IOPS:       1000,
+			},
+			ok: true,
+		},
+		// ratio requirement not satisfied
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "io1",
+				VolumeSize: 10,
+				IOPS:       2000,
+			},
+			ok:  false,
+			msg: "The maximum ratio of provisioned IOPS to requested volume size (in GiB) is 50:1 for io1 volumes",
+		},
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "io2",
+				VolumeSize: 50,
+				IOPS:       30000,
+			},
+			ok:  false,
+			msg: "The maximum ratio of provisioned IOPS to requested volume size (in GiB) is 500:1 for io2 volumes",
+		},
+	}
+
+	ctx := interpolate.Context{}
+	for _, testCase := range cases {
+		err := testCase.device.Prepare(&ctx)
+		if testCase.ok && err != nil {
+			t.Fatalf("should not error, but: %v", err)
+		}
+		if !testCase.ok {
+			if err == nil {
+				t.Fatalf("should error")
+			} else if err.Error() != testCase.msg {
+				t.Fatalf("wrong error: expected %s, found: %v", testCase.msg, err)
+			}
 		}
 	}
 }
