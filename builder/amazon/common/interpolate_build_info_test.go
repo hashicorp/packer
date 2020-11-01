@@ -17,6 +17,7 @@ func testImage() *ec2.Image {
 		Name:            aws.String("ami_test_name"),
 		OwnerId:         aws.String("ami_test_owner_id"),
 		ImageOwnerAlias: aws.String("ami_test_owner_alias"),
+		RootDeviceType:  aws.String("ebs"),
 		Tags: []*ec2.Tag{
 			{
 				Key:   aws.String("key-1"),

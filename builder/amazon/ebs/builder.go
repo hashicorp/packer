@@ -164,6 +164,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("region", *ec2conn.Config.Region)
 	generatedData := &builder.GeneratedData{State: state}
 
 	var instanceStep multistep.Step
