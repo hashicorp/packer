@@ -398,6 +398,32 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		}
 	}
 
+	if p.config.GuestOSType == provisioner.WindowsOSType {
+		{
+			ui.Message("Running salt-call --local winrepo.update_git_repos")
+			cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("%s --local winrepo.update_git_repos", filepath.Join(p.config.SaltBinDir, "salt-call")))}
+			if err = cmd.RunWithUi(ctx, comm, ui); (err != nil || cmd.ExitStatus() != 0) && !p.config.NoExitOnFailure {
+				if err == nil {
+					err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus())
+				}
+
+				return fmt.Errorf("Error executing salt-call --local winrepo.update_git_repos: %s", err)
+			}
+		}
+
+		{
+			ui.Message("Running salt-call --local pkg.refresh_db")
+			cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("%s --local pkg.refresh_db", filepath.Join(p.config.SaltBinDir, "salt-call")))}
+			if err = cmd.RunWithUi(ctx, comm, ui); (err != nil || cmd.ExitStatus() != 0) && !p.config.NoExitOnFailure {
+				if err == nil {
+					err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus())
+				}
+
+				return fmt.Errorf("Error executing salt-call --local pkg.refresh_db: %s", err)
+			}
+		}
+	}
+
 	ui.Message(fmt.Sprintf("Running: salt-call --local %s", p.config.CmdArgs))
 	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("%s --local %s", filepath.Join(p.config.SaltBinDir, "salt-call"), p.config.CmdArgs))}
 	if err = cmd.RunWithUi(ctx, comm, ui); (err != nil || cmd.ExitStatus() != 0) && !p.config.NoExitOnFailure {
