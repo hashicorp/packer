@@ -219,11 +219,25 @@ var (
 	}
 )
 
+var ctyValueComparer = cmp.Comparer(func(x, y cty.Value) bool {
+	return x.RawEquals(y)
+})
+
+var ctyTypeComparer = cmp.Comparer(func(x, y cty.Type) bool {
+	if x == cty.NilType && y == cty.NilType {
+		return true
+	}
+	if x == cty.NilType || y == cty.NilType {
+		return false
+	}
+	return x.Equals(y)
+})
+
 var cmpOpts = []cmp.Option{
+	ctyValueComparer,
+	ctyTypeComparer,
 	cmpopts.IgnoreUnexported(
 		PackerConfig{},
-		cty.Value{},
-		cty.Type{},
 		Variable{},
 		SourceBlock{},
 		ProvisionerBlock{},

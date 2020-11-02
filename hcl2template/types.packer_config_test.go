@@ -27,14 +27,17 @@ func TestParser_complete(t *testing.T) {
 					"foo": &Variable{
 						Name:   "foo",
 						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("value")}},
+						Type:   cty.String,
 					},
 					"image_id": &Variable{
 						Name:   "image_id",
 						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("image-id-default")}},
+						Type:   cty.String,
 					},
 					"port": &Variable{
 						Name:   "port",
 						Values: []VariableAssignment{{From: "default", Value: cty.NumberIntVal(42)}},
+						Type:   cty.Number,
 					},
 					"availability_zone_names": &Variable{
 						Name: "availability_zone_names",
@@ -46,12 +49,14 @@ func TestParser_complete(t *testing.T) {
 								cty.StringVal("C"),
 							}),
 						}},
+						Type: cty.List(cty.String),
 					},
 				},
 				LocalVariables: Variables{
 					"feefoo": &Variable{
 						Name:   "feefoo",
 						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("value_image-id-default")}},
+						Type:   cty.String,
 					},
 					"standard_tags": &Variable{
 						Name: "standard_tags",
@@ -61,6 +66,10 @@ func TestParser_complete(t *testing.T) {
 								"Environment": cty.StringVal("production"),
 							}),
 						}},
+						Type: cty.Object(map[string]cty.Type{
+							"Component":   cty.String,
+							"Environment": cty.String,
+						}),
 					},
 					"abc_map": &Variable{
 						Name: "abc_map",
@@ -77,6 +86,17 @@ func TestParser_complete(t *testing.T) {
 								}),
 							}),
 						}},
+						Type: cty.Tuple([]cty.Type{
+							cty.Object(map[string]cty.Type{
+								"id": cty.String,
+							}),
+							cty.Object(map[string]cty.Type{
+								"id": cty.String,
+							}),
+							cty.Object(map[string]cty.Type{
+								"id": cty.String,
+							}),
+						}),
 					},
 				},
 				Sources: map[SourceRef]SourceBlock{
