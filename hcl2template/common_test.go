@@ -74,26 +74,12 @@ func testParse(t *testing.T, tests []parseTest) {
 			}
 
 			if gotCfg != nil && !tt.parseWantDiagHasErrors {
-				gotInputVar := gotCfg.InputVariables
-				for name, value := range tt.parseWantCfg.InputVariables {
-					if variable, ok := gotInputVar[name]; ok {
-						if diff := cmp.Diff(variable, value, cmpOpts...); diff != "" {
-							t.Fatalf("Parser.parse(): unexpected variable values %s: %s", name, diff)
-						}
-					} else {
-						t.Fatalf("Parser.parse() missing input variable. %s", name)
-					}
+				if diff := cmp.Diff(tt.parseWantCfg.InputVariables, gotCfg.InputVariables, cmpOpts...); diff != "" {
+					t.Fatalf("Parser.parse() unexpected input vars. %s", diff)
 				}
 
-				gotLocalVar := gotCfg.LocalVariables
-				for name, value := range tt.parseWantCfg.LocalVariables {
-					if variable, ok := gotLocalVar[name]; ok {
-						if diff := cmp.Diff(variable, value, cmpOpts...); diff != "" {
-							t.Fatalf("Parser.parse(): unexpected variable values %s: %s", name, diff)
-						}
-					} else {
-						t.Fatalf("Parser.parse() missing local variable. %s", name)
-					}
+				if diff := cmp.Diff(tt.parseWantCfg.LocalVariables, gotCfg.LocalVariables, cmpOpts...); diff != "" {
+					t.Fatalf("Parser.parse() unexpected local vars. %s", diff)
 				}
 			}
 
