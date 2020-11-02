@@ -69,25 +69,7 @@ func testParse(t *testing.T, tests []parseTest) {
 			if tt.parseWantDiagHasErrors != gotDiags.HasErrors() {
 				t.Fatalf("Parser.parse() unexpected diagnostics HasErrors. %s", gotDiags)
 			}
-			if diff := cmp.Diff(tt.parseWantCfg, gotCfg,
-				cmpopts.IgnoreUnexported(
-					PackerConfig{},
-					cty.Value{},
-					cty.Type{},
-					Variable{},
-					SourceBlock{},
-					ProvisionerBlock{},
-					PostProcessorBlock{},
-				),
-				cmpopts.IgnoreFields(PackerConfig{},
-					"Cwd", // Cwd will change for every computer
-				),
-				cmpopts.IgnoreTypes(HCL2Ref{}),
-				cmpopts.IgnoreTypes([]*LocalBlock{}),
-				cmpopts.IgnoreTypes([]hcl.Range{}),
-				cmpopts.IgnoreTypes(hcl.Range{}),
-				cmpopts.IgnoreInterfaces(struct{ hcl.Expression }{}),
-				cmpopts.IgnoreInterfaces(struct{ hcl.Body }{}),
+			if diff := cmp.Diff(tt.parseWantCfg, gotCfg, cmpOpts...,
 			); diff != "" {
 				t.Fatalf("Parser.parse() wrong packer config. %s", diff)
 			}
@@ -96,11 +78,8 @@ func testParse(t *testing.T, tests []parseTest) {
 				gotInputVar := gotCfg.InputVariables
 				for name, value := range tt.parseWantCfg.InputVariables {
 					if variable, ok := gotInputVar[name]; ok {
-						if diff := cmp.Diff(variable.DefaultValue.GoString(), value.DefaultValue.GoString()); diff != "" {
-							t.Fatalf("Parser.parse(): unexpected default value for %s: %s", name, diff)
-						}
-						if diff := cmp.Diff(variable.VarfileValue.GoString(), value.VarfileValue.GoString()); diff != "" {
-							t.Fatalf("Parser.parse(): varfile value differs for %s: %s", name, diff)
+						if diff := cmp.Diff(variable, value, cmpOpts...); diff != "" {
+							t.Fatalf("Parser.parse(): unexpected variable values %s: %s", name, diff)
 						}
 					} else {
 						t.Fatalf("Parser.parse() missing input variable. %s", name)
@@ -110,8 +89,8 @@ func testParse(t *testing.T, tests []parseTest) {
 				gotLocalVar := gotCfg.LocalVariables
 				for name, value := range tt.parseWantCfg.LocalVariables {
 					if variable, ok := gotLocalVar[name]; ok {
-						if variable.DefaultValue.GoString() != value.DefaultValue.GoString() {
-							t.Fatalf("Parser.parse() local variable %s expected '%s' but was '%s'", name, value.DefaultValue.GoString(), variable.DefaultValue.GoString())
+						if diff := cmp.Diff(variable, value, cmpOpts...); diff != "" {
+							t.Fatalf("Parser.parse(): unexpected variable values %s: %s", name, diff)
 						}
 					} else {
 						t.Fatalf("Parser.parse() missing local variable. %s", name)
@@ -127,18 +106,7 @@ func testParse(t *testing.T, tests []parseTest) {
 			if tt.getBuildsWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.getBuilds() unexpected diagnostics. %s", gotDiags)
 			}
-			if diff := cmp.Diff(tt.getBuildsWantBuilds, gotBuilds,
-				cmpopts.IgnoreUnexported(
-					cty.Value{},
-					cty.Type{},
-					packer.CoreBuild{},
-					packer.CoreBuildProvisioner{},
-					packer.CoreBuildPostProcessor{},
-					null.Builder{},
-					HCL2Provisioner{},
-					HCL2PostProcessor{},
-				),
-			); diff != "" {
+			if diff := cmp.Diff(tt.getBuildsWantBuilds, gotBuilds, cmpOpts...); diff != "" {
 				t.Fatalf("Parser.getBuilds() wrong packer builds. %s", diff)
 			}
 		})
@@ -250,3 +218,34 @@ var (
 		},
 	}
 )
+
+var cmpOpts = []cmp.Option{
+	cmpopts.IgnoreUnexported(
+		PackerConfig{},
+		cty.Value{},
+		cty.Type{},
+		Variable{},
+		SourceBlock{},
+		ProvisionerBlock{},
+		PostProcessorBlock{},
+		packer.CoreBuild{},
+		HCL2Provisioner{},
+		HCL2PostProcessor{},
+		packer.CoreBuildPostProcessor{},
+		packer.CoreBuildProvisioner{},
+		packer.CoreBuildPostProcessor{},
+		null.Builder{},
+	),
+	cmpopts.IgnoreFields(PackerConfig{},
+		"Cwd", // Cwd will change for every os type
+	),
+	cmpopts.IgnoreFields(VariableAssignment{},
+		"Expr", // its an interface
+	),
+	cmpopts.IgnoreTypes(HCL2Ref{}),
+	cmpopts.IgnoreTypes([]*LocalBlock{}),
+	cmpopts.IgnoreTypes([]hcl.Range{}),
+	cmpopts.IgnoreTypes(hcl.Range{}),
+	cmpopts.IgnoreInterfaces(struct{ hcl.Expression }{}),
+	cmpopts.IgnoreInterfaces(struct{ hcl.Body }{}),
+}
