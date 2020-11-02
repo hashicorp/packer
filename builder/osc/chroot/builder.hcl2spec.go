@@ -41,6 +41,8 @@ type FlatConfig struct {
 	SecretKey               *string                      `mapstructure:"secret_key" cty:"secret_key" hcl:"secret_key"`
 	SkipMetadataApiCheck    *bool                        `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check" hcl:"skip_metadata_api_check"`
 	Token                   *string                      `mapstructure:"token" cty:"token" hcl:"token"`
+	X509certPath            *string                      `mapstructure:"x509_cert_path" cty:"x509_cert_path" hcl:"x509_cert_path"`
+	X509keyPath             *string                      `mapstructure:"x509_key_path" cty:"x509_key_path" hcl:"x509_key_path"`
 	ChrootMounts            [][]string                   `mapstructure:"chroot_mounts" cty:"chroot_mounts" hcl:"chroot_mounts"`
 	CommandWrapper          *string                      `mapstructure:"command_wrapper" cty:"command_wrapper" hcl:"command_wrapper"`
 	CopyFiles               []string                     `mapstructure:"copy_files" cty:"copy_files" hcl:"copy_files"`
@@ -103,6 +105,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"secret_key":                 &hcldec.AttrSpec{Name: "secret_key", Type: cty.String, Required: false},
 		"skip_metadata_api_check":    &hcldec.AttrSpec{Name: "skip_metadata_api_check", Type: cty.Bool, Required: false},
 		"token":                      &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
+		"x509_cert_path":             &hcldec.AttrSpec{Name: "x509_cert_path", Type: cty.String, Required: false},
+		"x509_key_path":              &hcldec.AttrSpec{Name: "x509_key_path", Type: cty.String, Required: false},
 		"chroot_mounts":              &hcldec.AttrSpec{Name: "chroot_mounts", Type: cty.List(cty.List(cty.String)), Required: false},
 		"command_wrapper":            &hcldec.AttrSpec{Name: "command_wrapper", Type: cty.String, Required: false},
 		"copy_files":                 &hcldec.AttrSpec{Name: "copy_files", Type: cty.List(cty.String), Required: false},
