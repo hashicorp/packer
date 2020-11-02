@@ -69,8 +69,7 @@ func testParse(t *testing.T, tests []parseTest) {
 			if tt.parseWantDiagHasErrors != gotDiags.HasErrors() {
 				t.Fatalf("Parser.parse() unexpected diagnostics HasErrors. %s", gotDiags)
 			}
-			if diff := cmp.Diff(tt.parseWantCfg, gotCfg, cmpOpts...,
-			); diff != "" {
+			if diff := cmp.Diff(tt.parseWantCfg, gotCfg, cmpOpts...); diff != "" {
 				t.Fatalf("Parser.parse() wrong packer config. %s", diff)
 			}
 

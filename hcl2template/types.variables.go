@@ -446,11 +446,11 @@ func decodeVariableValidationBlock(varName string, block *hcl.Block) (*VariableV
 				// English, we'll require the given error message to conform
 				// to that. We might relax this in future if e.g. we start
 				// presenting these error messages in a different way, or if
-				// Terraform starts supporting producing error messages in
+				// Packer starts supporting producing error messages in
 				// other human languages, etc.
 				// For pragmatism we also allow sentences ending with
 				// exclamation points, but we don't mention it explicitly here
-				// because that's not really consistent with the Terraform UI
+				// because that's not really consistent with the Packer UI
 				// writing style.
 				diags = diags.Append(&hcl.Diagnostic{
 					Severity: hcl.DiagError,
@@ -485,7 +485,7 @@ func looksLikeSentences(s string) bool {
 	// (This will only see the first rune in a multi-rune combining sequence,
 	// but the first rune is generally the letter if any are, and if not then
 	// we'll just ignore it because we're primarily expecting English messages
-	// right now anyway, for consistency with all of Terraform's other output.)
+	// right now anyway, for consistency with all of Packers's other output.)
 	if unicode.IsLetter(first) && !unicode.IsUpper(first) {
 		return false
 	}
