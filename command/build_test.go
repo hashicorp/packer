@@ -324,6 +324,52 @@ func TestBuild(t *testing.T) {
 				},
 			},
 		},
+
+		{
+			name: "hcl - valid validation rule for default value",
+			args: []string{
+				filepath.Join(testFixture("hcl", "validation", "map")),
+			},
+			expectedCode: 0,
+		},
+
+		{
+			name: "hcl - valid setting from varfile",
+			args: []string{
+				"-var-file", filepath.Join(testFixture("hcl", "validation", "map", "valid_value.pkrvars.hcl")),
+				filepath.Join(testFixture("hcl", "validation", "map")),
+			},
+			expectedCode: 0,
+		},
+
+		{
+			name: "hcl - invalid setting from varfile",
+			args: []string{
+				"-var-file", filepath.Join(testFixture("hcl", "validation", "map", "invalid_value.pkrvars.hcl")),
+				filepath.Join(testFixture("hcl", "validation", "map")),
+			},
+			expectedCode: 1,
+		},
+
+		{
+			name: "hcl - valid cmd ( invalid varfile bypased )",
+			args: []string{
+				"-var-file", filepath.Join(testFixture("hcl", "validation", "map", "invalid_value.pkrvars.hcl")),
+				"-var", `image_metadata={key = "new_value", something = { foo = "bar" }}`,
+				filepath.Join(testFixture("hcl", "validation", "map")),
+			},
+			expectedCode: 0,
+		},
+
+		{
+			name: "hcl - invalid cmd ( valid varfile bypased )",
+			args: []string{
+				"-var-file", filepath.Join(testFixture("hcl", "validation", "map", "valid_value.pkrvars.hcl")),
+				"-var", `image_metadata={key = "?", something = { foo = "wrong" }}`,
+				filepath.Join(testFixture("hcl", "validation", "map")),
+			},
+			expectedCode: 1,
+		},
 	}
 
 	for _, tt := range tc {
