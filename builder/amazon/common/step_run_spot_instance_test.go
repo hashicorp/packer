@@ -45,6 +45,7 @@ func getBasicStep() *StepRunSpotInstance {
 		ExpectedRootDevice:                "ebs",
 		InstanceInitiatedShutdownBehavior: "stop",
 		InstanceType:                      "t2.micro",
+		Region:                            "us-east-1",
 		SourceAMI:                         "",
 		SpotPrice:                         "auto",
 		SpotTags:                          nil,
@@ -189,10 +190,7 @@ func (m *runSpotEC2ConnMock) CreateTags(req *ec2.CreateTagsInput) (*ec2.CreateTa
 	}
 }
 
-func TestRun(t *testing.T) {
-	instanceId := aws.String("test-instance-id")
-	spotRequestId := aws.String("spot-id")
-	volumeId := aws.String("volume-id")
+func defaultEc2Mock(instanceId, spotRequestId, volumeId *string) *runSpotEC2ConnMock {
 	instance := &ec2.Instance{
 		InstanceId:            instanceId,
 		SpotInstanceRequestId: spotRequestId,
@@ -204,7 +202,7 @@ func TestRun(t *testing.T) {
 			},
 		},
 	}
-	ec2Mock := &runSpotEC2ConnMock{
+	return &runSpotEC2ConnMock{
 		CreateLaunchTemplateFn: func(in *ec2.CreateLaunchTemplateInput) (*ec2.CreateLaunchTemplateOutput, error) {
 			return &ec2.CreateLaunchTemplateOutput{
 				LaunchTemplate: nil,
@@ -233,6 +231,13 @@ func TestRun(t *testing.T) {
 			}, nil
 		},
 	}
+}
+
+func TestRun(t *testing.T) {
+	instanceId := aws.String("test-instance-id")
+	spotRequestId := aws.String("spot-id")
+	volumeId := aws.String("volume-id")
+	ec2Mock := defaultEc2Mock(instanceId, spotRequestId, volumeId)
 
 	uiMock := packer.TestUi(t)
 
@@ -240,7 +245,6 @@ func TestRun(t *testing.T) {
 	state.Put("ec2", ec2Mock)
 	state.Put("ui", uiMock)
 	state.Put("source_image", testImage())
-	state.Put("region", "test-region")
 
 	stepRunSpotInstance := getBasicStep()
 	stepRunSpotInstance.Tags["Name"] = "Packer Builder"
@@ -274,17 +278,13 @@ func TestRun(t *testing.T) {
 	if *ec2Mock.CreateLaunchTemplateParams[0].TagSpecifications[0].ResourceType != "launch-template" {
 		t.Fatalf("resource type 'launch-template' expected")
 	}
-	if len(ec2Mock.CreateLaunchTemplateParams[0].TagSpecifications[0].Tags) != 2 {
-		t.Fatalf("2 tags expected")
+	if len(ec2Mock.CreateLaunchTemplateParams[0].TagSpecifications[0].Tags) != 1 {
+		t.Fatalf("1 launch template tag expected")
 	}
 
 	nameTag := ec2Mock.CreateLaunchTemplateParams[0].TagSpecifications[0].Tags[0]
-	if *nameTag.Key != "Name" || *nameTag.Value != "Packer Builder" {
-		t.Fatalf("expected name tag")
-	}
-	testTag := ec2Mock.CreateLaunchTemplateParams[0].TagSpecifications[0].Tags[1]
-	if *testTag.Key != "test-tag" || *testTag.Value != "test-value" {
-		t.Fatalf("expected test tag")
+	if *nameTag.Key != "spot-tag" || *nameTag.Value != "spot-tag-value" {
+		t.Fatalf("expected spot-tag: spot-tag-value")
 	}
 
 	if len(ec2Mock.CreateFleetParams) != 1 {
@@ -322,5 +322,41 @@ func TestRun(t *testing.T) {
 	}
 	if len(ec2Mock.CreateTagsParams[2].Resources) != 1 || ec2Mock.CreateTagsParams[2].Resources[0] != volumeId {
 		t.Fatalf("should create tags for volume")
+	}
+}
+
+func TestRun_NoSpotTags(t *testing.T) {
+	instanceId := aws.String("test-instance-id")
+	spotRequestId := aws.String("spot-id")
+	volumeId := aws.String("volume-id")
+	ec2Mock := defaultEc2Mock(instanceId, spotRequestId, volumeId)
+
+	uiMock := packer.TestUi(t)
+
+	state := tStateSpot()
+	state.Put("ec2", ec2Mock)
+	state.Put("ui", uiMock)
+	state.Put("source_image", testImage())
+
+	stepRunSpotInstance := getBasicStep()
+	stepRunSpotInstance.Tags["Name"] = "Packer Builder"
+	stepRunSpotInstance.Tags["test-tag"] = "test-value"
+	stepRunSpotInstance.VolumeTags = map[string]string{
+		"volume-tag": "volume-tag-value",
+	}
+
+	ctx := context.TODO()
+	action := stepRunSpotInstance.Run(ctx, state)
+
+	if err := state.Get("error"); err != nil {
+		t.Fatalf("should not error, but: %v", err)
+	}
+
+	if action != multistep.ActionContinue {
+		t.Fatalf("shoul continue, but: %v", action)
+	}
+
+	if len(ec2Mock.CreateLaunchTemplateParams[0].TagSpecifications) != 0 {
+		t.Fatalf("0 launch template tags expected")
 	}
 }
