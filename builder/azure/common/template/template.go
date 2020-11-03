@@ -85,6 +85,7 @@ type Properties struct {
 	DNSSettings                  *network.PublicIPAddressDNSSettings `json:"dnsSettings,omitempty"`
 	EnabledForDeployment         *string                             `json:"enabledForDeployment,omitempty"`
 	EnabledForTemplateDeployment *string                             `json:"enabledForTemplateDeployment,omitempty"`
+	EnableSoftDelete             *string                             `json:"enableSoftDelete,omitempty"`
 	HardwareProfile              *compute.HardwareProfile            `json:"hardwareProfile,omitempty"`
 	IPConfigurations             *[]network.IPConfiguration          `json:"ipConfigurations,omitempty"`
 	NetworkProfile               *compute.NetworkProfile             `json:"networkProfile,omitempty"`
