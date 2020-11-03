@@ -399,64 +399,54 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}
 
 	if p.config.GuestOSType == provisioner.WindowsOSType {
-		{
-			ui.Message("Downloading Git for Windows")
-			cmd := &packer.RemoteCmd{Command: fmt.Sprintf("powershell [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri https://github.com/git-for-windows/git/releases/download/v2.28.0.windows.1/Git-2.28.0-64-bit.exe -OutFile $env:TEMP/Git.exe")}
-			if err = cmd.RunWithUi(ctx, comm, ui); (err != nil || cmd.ExitStatus() != 0) && !p.config.NoExitOnFailure {
-				if err == nil {
-					err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus())
-				}
-
-				return fmt.Errorf("Unable to Download Git for Windows: %s", err)
+		ui.Message("Downloading Git for Windows")
+		cmd1 := &packer.RemoteCmd{Command: fmt.Sprintf("powershell [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri https://github.com/git-for-windows/git/releases/download/v2.28.0.windows.1/Git-2.28.0-64-bit.exe -OutFile $env:TEMP/Git.exe")}
+		if err = cmd1.RunWithUi(ctx, comm, ui); (err != nil || cmd1.ExitStatus() != 0) && !p.config.NoExitOnFailure {
+			if err == nil {
+				err = fmt.Errorf("Bad exit status: %d", cmd1.ExitStatus())
 			}
+
+			return fmt.Errorf("Unable to Download Git for Windows: %s", err)
 		}
 
-		{
-			ui.Message("Installing Git for Windows")
-			cmd := &packer.RemoteCmd{Command: fmt.Sprintf("powershell Start-Process -FilePath $env:TEMP/Git.exe /SILENT -Wait")}
-			if err = cmd.RunWithUi(ctx, comm, ui); (err != nil || cmd.ExitStatus() != 0) && !p.config.NoExitOnFailure {
-				if err == nil {
-					err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus())
-				}
-
-				return fmt.Errorf("Unable to Install Git for Windows: %s", err)
+		ui.Message("Installing Git for Windows")
+		cmd2 := &packer.RemoteCmd{Command: fmt.Sprintf("powershell Start-Process -FilePath $env:TEMP/Git.exe /SILENT -Wait")}
+		if err = cmd2.RunWithUi(ctx, comm, ui); (err != nil || cmd2.ExitStatus() != 0) && !p.config.NoExitOnFailure {
+			if err == nil {
+				err = fmt.Errorf("Bad exit status: %d", cmd2.ExitStatus())
 			}
+
+			return fmt.Errorf("Unable to Install Git for Windows: %s", err)
 		}
 
-		{
-			ui.Message("Cleaning Up After Git for Windows")
-			cmd := &packer.RemoteCmd{Command: fmt.Sprintf("powershell Remove-Item $env:TEMP/Git.exe")}
-			if err = cmd.RunWithUi(ctx, comm, ui); (err != nil || cmd.ExitStatus() != 0) && !p.config.NoExitOnFailure {
-				if err == nil {
-					err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus())
-				}
-
-				return fmt.Errorf("Unable to Clean-up After Git for Windows: %s", err)
+		ui.Message("Cleaning Up After Git for Windows")
+		cmd3 := &packer.RemoteCmd{Command: fmt.Sprintf("powershell Remove-Item $env:TEMP/Git.exe")}
+		if err = cmd3.RunWithUi(ctx, comm, ui); (err != nil || cmd3.ExitStatus() != 0) && !p.config.NoExitOnFailure {
+			if err == nil {
+				err = fmt.Errorf("Bad exit status: %d", cmd3.ExitStatus())
 			}
+
+			return fmt.Errorf("Unable to Clean-up After Git for Windows: %s", err)
 		}
 
-		{
-			ui.Message("Running salt-call --local winrepo.update_git_repos")
-			cmd := &packer.RemoteCmd{Command: fmt.Sprintf("%s --local winrepo.update_git_repos", filepath.Join(p.config.SaltBinDir, "salt-call"))}
-			if err = cmd.RunWithUi(ctx, comm, ui); (err != nil || cmd.ExitStatus() != 0) && !p.config.NoExitOnFailure {
-				if err == nil {
-					err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus())
-				}
-
-				return fmt.Errorf("Error executing salt-call --local winrepo.update_git_repos: %s", err)
+		ui.Message("Running salt-call --local winrepo.update_git_repos")
+		cmd4 := &packer.RemoteCmd{Command: fmt.Sprintf("%s --local winrepo.update_git_repos", filepath.Join(p.config.SaltBinDir, "salt-call"))}
+		if err = cmd4.RunWithUi(ctx, comm, ui); (err != nil || cmd4.ExitStatus() != 0) && !p.config.NoExitOnFailure {
+			if err == nil {
+				err = fmt.Errorf("Bad exit status: %d", cmd4.ExitStatus())
 			}
+
+			return fmt.Errorf("Error executing salt-call --local winrepo.update_git_repos: %s", err)
 		}
 
-		{
-			ui.Message("Running salt-call --local pkg.refresh_db")
-			cmd := &packer.RemoteCmd{Command: fmt.Sprintf("%s --local pkg.refresh_db", filepath.Join(p.config.SaltBinDir, "salt-call"))}
-			if err = cmd.RunWithUi(ctx, comm, ui); (err != nil || cmd.ExitStatus() != 0) && !p.config.NoExitOnFailure {
-				if err == nil {
-					err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus())
-				}
-
-				return fmt.Errorf("Error executing salt-call --local pkg.refresh_db: %s", err)
+		ui.Message("Running salt-call --local pkg.refresh_db")
+		cmd5 := &packer.RemoteCmd{Command: fmt.Sprintf("%s --local pkg.refresh_db", filepath.Join(p.config.SaltBinDir, "salt-call"))}
+		if err = cmd5.RunWithUi(ctx, comm, ui); (err != nil || cmd5.ExitStatus() != 0) && !p.config.NoExitOnFailure {
+			if err == nil {
+				err = fmt.Errorf("Bad exit status: %d", cmd5.ExitStatus())
 			}
+
+			return fmt.Errorf("Error executing salt-call --local pkg.refresh_db: %s", err)
 		}
 	}
 
