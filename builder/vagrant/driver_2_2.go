@@ -154,8 +154,10 @@ func (d *Vagrant_2_2_Driver) SSHConfig(id string) (*VagrantSSHConfig, error) {
 	sshConf := &VagrantSSHConfig{}
 
 	stdout, stderr, err := d.vagrantCmd(args...)
-	if stderr != "" {
-		err := fmt.Errorf("ssh-config command returned error: %s", stderr)
+	if err != nil {
+		if stderr != "" {
+			err = fmt.Errorf("ssh-config command returned errors: %s", stderr)
+		}
 		return sshConf, err
 	}
 	lines := strings.Split(stdout, "\n")
