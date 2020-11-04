@@ -13,6 +13,11 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
+const (
+	minIops = 100
+	maxIops = 64000
+)
+
 // These will be attached when launching your instance. Your
 // options here may vary depending on the type of VM you use.
 //
@@ -173,9 +178,14 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 
 	if ratio, ok := iopsRatios[b.VolumeType]; b.VolumeSize != 0 && ok {
 		if b.IOPS/b.VolumeSize > ratio {
-			return fmt.Errorf("The maximum ratio of provisioned IOPS to requested volume size "+
-				"(in GiB) is %v:1 for %s volumes", ratio, b.VolumeType)
+			return fmt.Errorf("%s: the maximum ratio of provisioned IOPS to requested volume size "+
+				"(in GiB) is %v:1 for %s volumes", b.DeviceName, ratio, b.VolumeType)
 		}
+	}
+
+	if b.IOPS < minIops || b.IOPS > maxIops {
+		return fmt.Errorf("IOPS must be between %d and %d for device %s",
+			minIops, maxIops, b.DeviceName)
 	}
 
 	_, err := interpolate.RenderInterface(&b, ctx)

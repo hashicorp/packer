@@ -236,7 +236,7 @@ func TestIOPSValidation(t *testing.T) {
 				IOPS:       2000,
 			},
 			ok:  false,
-			msg: "The maximum ratio of provisioned IOPS to requested volume size (in GiB) is 50:1 for io1 volumes",
+			msg: "/dev/sdb: the maximum ratio of provisioned IOPS to requested volume size (in GiB) is 50:1 for io1 volumes",
 		},
 		{
 			device: BlockDevice{
@@ -246,7 +246,29 @@ func TestIOPSValidation(t *testing.T) {
 				IOPS:       30000,
 			},
 			ok:  false,
-			msg: "The maximum ratio of provisioned IOPS to requested volume size (in GiB) is 500:1 for io2 volumes",
+			msg: "/dev/sdb: the maximum ratio of provisioned IOPS to requested volume size (in GiB) is 500:1 for io2 volumes",
+		},
+		// exceed max iops
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "io2",
+				VolumeSize: 500,
+				IOPS:       99999,
+			},
+			ok:  false,
+			msg: "IOPS must be between 100 and 64000 for device /dev/sdb",
+		},
+		// lower than min iops
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "io2",
+				VolumeSize: 50,
+				IOPS:       10,
+			},
+			ok:  false,
+			msg: "IOPS must be between 100 and 64000 for device /dev/sdb",
 		},
 	}
 
