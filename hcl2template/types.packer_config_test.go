@@ -25,49 +25,76 @@ func TestParser_complete(t *testing.T) {
 				Basedir: "testdata/complete",
 				InputVariables: Variables{
 					"foo": &Variable{
-						Name:         "foo",
-						DefaultValue: cty.StringVal("value"),
+						Name:   "foo",
+						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("value")}},
+						Type:   cty.String,
 					},
 					"image_id": &Variable{
-						Name:         "image_id",
-						DefaultValue: cty.StringVal("image-id-default"),
+						Name:   "image_id",
+						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("image-id-default")}},
+						Type:   cty.String,
 					},
 					"port": &Variable{
-						Name:         "port",
-						DefaultValue: cty.NumberIntVal(42),
+						Name:   "port",
+						Values: []VariableAssignment{{From: "default", Value: cty.NumberIntVal(42)}},
+						Type:   cty.Number,
 					},
 					"availability_zone_names": &Variable{
 						Name: "availability_zone_names",
-						DefaultValue: cty.ListVal([]cty.Value{
-							cty.StringVal("A"),
-							cty.StringVal("B"),
-							cty.StringVal("C"),
-						}),
+						Values: []VariableAssignment{{
+							From: "default",
+							Value: cty.ListVal([]cty.Value{
+								cty.StringVal("A"),
+								cty.StringVal("B"),
+								cty.StringVal("C"),
+							}),
+						}},
+						Type: cty.List(cty.String),
 					},
 				},
 				LocalVariables: Variables{
 					"feefoo": &Variable{
-						Name:         "feefoo",
-						DefaultValue: cty.StringVal("value_image-id-default"),
+						Name:   "feefoo",
+						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("value_image-id-default")}},
+						Type:   cty.String,
 					},
 					"standard_tags": &Variable{
 						Name: "standard_tags",
-						DefaultValue: cty.ObjectVal(map[string]cty.Value{
-							"Component":   cty.StringVal("user-service"),
-							"Environment": cty.StringVal("production"),
+						Values: []VariableAssignment{{From: "default",
+							Value: cty.ObjectVal(map[string]cty.Value{
+								"Component":   cty.StringVal("user-service"),
+								"Environment": cty.StringVal("production"),
+							}),
+						}},
+						Type: cty.Object(map[string]cty.Type{
+							"Component":   cty.String,
+							"Environment": cty.String,
 						}),
 					},
 					"abc_map": &Variable{
 						Name: "abc_map",
-						DefaultValue: cty.TupleVal([]cty.Value{
-							cty.ObjectVal(map[string]cty.Value{
-								"id": cty.StringVal("a"),
+						Values: []VariableAssignment{{From: "default",
+							Value: cty.TupleVal([]cty.Value{
+								cty.ObjectVal(map[string]cty.Value{
+									"id": cty.StringVal("a"),
+								}),
+								cty.ObjectVal(map[string]cty.Value{
+									"id": cty.StringVal("b"),
+								}),
+								cty.ObjectVal(map[string]cty.Value{
+									"id": cty.StringVal("c"),
+								}),
 							}),
-							cty.ObjectVal(map[string]cty.Value{
-								"id": cty.StringVal("b"),
+						}},
+						Type: cty.Tuple([]cty.Type{
+							cty.Object(map[string]cty.Type{
+								"id": cty.String,
 							}),
-							cty.ObjectVal(map[string]cty.Value{
-								"id": cty.StringVal("c"),
+							cty.Object(map[string]cty.Type{
+								"id": cty.String,
+							}),
+							cty.Object(map[string]cty.Type{
+								"id": cty.String,
 							}),
 						}),
 					},
