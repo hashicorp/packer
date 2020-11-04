@@ -12,9 +12,9 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
+	powershell "github.com/hashicorp/packer/builder/hyperv/common/powershell"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
-	powershell "github.com/hashicorp/packer/common/powershell"
 	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
