@@ -14,6 +14,10 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
+// RunAndStream allows you to run a local command and stream output to the UI.
+// This does not require use of a shell-local communicator, so is a nice tool
+// for plugins that need to shell out to a local dependency and provide clear
+// output to users.
 func RunAndStream(cmd *exec.Cmd, ui packer.Ui, sensitive []string) error {
 	stdout_r, stdout_w := io.Pipe()
 	stderr_r, stderr_w := io.Pipe()

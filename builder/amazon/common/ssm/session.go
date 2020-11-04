@@ -14,7 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ssm/ssmiface"
 	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
 	"github.com/hashicorp/packer/common/retry"
-	"github.com/hashicorp/packer/helper/builder/localexec"
+	"github.com/hashicorp/packer/common/shell-local/localexec"
 	"github.com/hashicorp/packer/packer"
 )
 

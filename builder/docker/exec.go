@@ -3,7 +3,7 @@ package docker
 import (
 	"os/exec"
 
-	"github.com/hashicorp/packer/helper/builder/localexec"
+	"github.com/hashicorp/packer/common/shell-local/localexec"
 	"github.com/hashicorp/packer/packer"
 )
 
