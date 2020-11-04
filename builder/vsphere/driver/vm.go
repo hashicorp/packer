@@ -295,10 +295,8 @@ func (vm *VirtualMachineDriver) FloppyDevices() (object.VirtualDeviceList, error
 }
 
 func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) (VirtualMachine, error) {
-	log.Printf("[DEBUG 10069] Inside VirtualMachineDriver.Clone")
 	folder, err := vm.driver.FindFolder(config.Folder)
 	if err != nil {
-		log.Printf("[DEBUG 10069] Error from calling vm.Driver.FindFolder")
 		return nil, fmt.Errorf("Error finding filder: %s", err)
 	}
 
@@ -306,7 +304,6 @@ func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) 
 
 	pool, err := vm.driver.FindResourcePool(config.Cluster, config.Host, config.ResourcePool)
 	if err != nil {
-		log.Printf("[DEBUG 10069] Error from calling FindResourcePool")
 		return nil, fmt.Errorf("Error finding resource pool: %s", err)
 	}
 	poolRef := pool.pool.Reference()

@@ -90,7 +90,6 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 		return multistep.ActionHalt
 	}
 
-	log.Printf("[DEBUG 10069] about to call template.Clone command")
 	vm, err := template.Clone(ctx, &driver.CloneConfig{
 		Name:           s.Location.VMName,
 		Folder:         s.Location.Folder,
@@ -105,25 +104,21 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 		VAppProperties: s.Config.VAppConfig.Properties,
 	})
 	if err != nil {
-		log.Printf("[DEBUG 10069] Error from calling template.Clone command")
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 	if vm == nil {
-		log.Printf("[DEBUG 10069] no VM was returned from template.Clone command")
 		return multistep.ActionHalt
 	}
 	state.Put("vm", vm)
 
 	if s.Config.DiskSize > 0 {
-		log.Printf("[DEBUG 10069] Resizing disk...")
 		err = vm.ResizeDisk(s.Config.DiskSize)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 	}
-	log.Printf("[DEBUG 10069] Finished step_clone run method.")
 
 	return multistep.ActionContinue
 }

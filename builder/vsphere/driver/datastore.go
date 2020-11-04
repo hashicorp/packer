@@ -40,7 +40,6 @@ func (d *VCenterDriver) NewDatastore(ref *types.ManagedObjectReference) Datastor
 
 // If name is an empty string, then resolve host's one
 func (d *VCenterDriver) FindDatastore(name string, host string) (Datastore, error) {
-	log.Printf("[DEBUG 10069] inside FindDatastore call; name is %s and host is %s", name, host)
 	if name == "" {
 		h, err := d.FindHost(host)
 		if err != nil {
