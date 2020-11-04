@@ -22,7 +22,7 @@ The expression can refer only to the variable that the condition applies to,
 and _must not_ produce errors.
 
 If the failure of an expression is the basis of the validation decision, use
-[the `can` function](./functions/can.html) to detect such errors. For example:
+[the `can` function](/docs/from-1.5/functions/conversion/can) to detect such errors. For example:
 
 ```hcl
 variable "image_id" {
@@ -57,6 +57,11 @@ variable "image_metadata" {
   validation {
     condition     = length(var.image_metadata.key) > 4
     error_message = "The image_metadata.key field must be more than 4 runes."
+  }
+
+  validation {
+    condition     = can(var.image_metadata.something.foo)
+    error_message = "The image_metadata.something.foo field must exist."
   }
 
   validation {
