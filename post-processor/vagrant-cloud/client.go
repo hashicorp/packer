@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	commonhelper "github.com/hashicorp/packer/helper/common"
+	"github.com/hashicorp/packer/common/net"
 )
 
 type VagrantCloudClient struct {
@@ -48,7 +48,7 @@ func (v VagrantCloudErrors) FormatErrors() string {
 
 func (v VagrantCloudClient) New(baseUrl string, token string, InsecureSkipTLSVerify bool) (*VagrantCloudClient, error) {
 	c := &VagrantCloudClient{
-		client:      commonhelper.HttpClientWithEnvironmentProxy(),
+		client:      net.HttpClientWithEnvironmentProxy(),
 		BaseURL:     baseUrl,
 		AccessToken: token,
 	}
