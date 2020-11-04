@@ -41,3 +41,28 @@ If `condition` evaluates to `false`,  an error message including the sentences
 given in `error_message` will be produced. The error message string should be
 at least one full sentence explaining the constraint that failed, using a
 sentence structure similar to the above examples.
+
+Validation also works with more complex cases:
+
+```hcl
+variable "image_metadata" {
+
+  default = {
+    key: "value",
+    something: { 
+      foo: "bar",
+    }
+  }
+
+  validation {
+    condition     = length(var.image_metadata.key) > 4
+    error_message = "The image_metadata.key field must be more than 4 runes."
+  }
+
+  validation {
+    condition     = substr(var.image_metadata.something.foo, 0, 3) == "bar"
+    error_message = "The image_metadata.something.foo field must start with \"bar\"."
+  }
+
+}
+```
