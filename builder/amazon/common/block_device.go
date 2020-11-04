@@ -181,11 +181,11 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 			return fmt.Errorf("%s: the maximum ratio of provisioned IOPS to requested volume size "+
 				"(in GiB) is %v:1 for %s volumes", b.DeviceName, ratio, b.VolumeType)
 		}
-	}
 
-	if b.IOPS < minIops || b.IOPS > maxIops {
-		return fmt.Errorf("IOPS must be between %d and %d for device %s",
-			minIops, maxIops, b.DeviceName)
+		if b.IOPS < minIops || b.IOPS > maxIops {
+			return fmt.Errorf("IOPS must be between %d and %d for device %s",
+				minIops, maxIops, b.DeviceName)
+		}
 	}
 
 	_, err := interpolate.RenderInterface(&b, ctx)
