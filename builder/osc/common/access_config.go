@@ -47,6 +47,11 @@ func (c *AccessConfig) NewOSCClient() *osc.APIClient {
 
 	if c.CustomEndpointOAPI == "" {
 		c.CustomEndpointOAPI = "outscale.com/oapi/latest"
+
+		if c.RawRegion == "cn-southeast-1" {
+			c.CustomEndpointOAPI = "outscale.hk/oapi/latest"
+		}
+
 	}
 
 	if c.X509certPath == "" {
