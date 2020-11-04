@@ -7,6 +7,12 @@
 # once they also need to be in the same folder. 'packer inspect folder/'
 # will describe to you what is in that folder.
 
+
+# See https://www.packer.io/docs/from-1.5/blocks/packer for more info
+packer {
+  required_version = ">= 1.6.0"
+}
+
 # All generated input variables will be of 'string' type as this is how Packer JSON
 # views them; you can change their type later on. Read the variables type
 # constraints documentation

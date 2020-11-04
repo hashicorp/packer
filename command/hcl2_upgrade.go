@@ -64,10 +64,16 @@ const (
 # once they also need to be in the same folder. 'packer inspect folder/'
 # will describe to you what is in that folder.
 
+`
+	inputVarHeader = `
 # All generated input variables will be of 'string' type as this is how Packer JSON
 # views them; you can change their type later on. Read the variables type
 # constraints documentation
 # https://www.packer.io/docs/from-1.5/variables#type-constraints for more info.
+`
+
+	packerBlockHeader = `
+# See https://www.packer.io/docs/from-1.5/blocks/packer for more info
 `
 
 	sourcesHeader = `
@@ -112,9 +118,21 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 
 	core := hdl.(*CoreWrapper).Core
 	if err := core.Initialize(); err != nil {
-		c.Ui.Error(fmt.Sprintf("Initialization error, continuing: %v", err))
+		c.Ui.Error(fmt.Sprintf("Ignoring following initialization error: %v", err))
 	}
 	tpl := core.Template
+
+	// Packer section
+	if tpl.MinVersion != "" {
+		out.Write([]byte(packerBlockHeader))
+		fileContent := hclwrite.NewEmptyFile()
+		body := fileContent.Body()
+		packerBody := body.AppendNewBlock("packer", nil).Body()
+		packerBody.SetAttributeValue("required_version", cty.StringVal(fmt.Sprintf(">= %s", tpl.MinVersion)))
+		out.Write(fileContent.Bytes())
+	}
+
+	out.Write([]byte(inputVarHeader))
 
 	// Output variables section
 

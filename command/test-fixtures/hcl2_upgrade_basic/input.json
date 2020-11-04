@@ -1,4 +1,5 @@
 {
+    "min_packer_version": "1.6.0",
     "variables": {
         "aws_region": null,
         "aws_secret_key": "",
