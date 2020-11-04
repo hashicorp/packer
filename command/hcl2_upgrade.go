@@ -289,6 +289,12 @@ func transposeTemplatingCalls(s []byte) []byte {
 		"build": func(a string) string {
 			return fmt.Sprintf("${build.%s}", a)
 		},
+		"template_dir": func() string {
+			return fmt.Sprintf("${path.root}")
+		},
+		"pwd": func() string {
+			return fmt.Sprintf("${path.cwd}")
+		},
 	}
 
 	tpl, err := texttemplate.New("generated").

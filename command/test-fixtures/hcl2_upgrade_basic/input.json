@@ -71,7 +71,8 @@
                 "echo {{ user  `secret_account` }}",
                 "echo {{ build `ID` }}",
                 "echo {{ build `SSHPrivateKey` }}",
-                "sleep 100000"
+                "sleep 100000",
+                "echo {{ template_dir }} is not {{ pwd }}"
             ]
         },
         {
