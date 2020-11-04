@@ -371,10 +371,10 @@ type VariableValidation struct {
 	// the block defining the validation rule, not an error in the caller.
 	Condition hcl.Expression
 
-	// ErrorMessage is one or more full sentences, which would need to be in
-	// English for consistency with the rest of the error message output but
-	// can in practice be in any language as long as it ends with a period.
-	// The message should describe what is required for the condition to return
+	// ErrorMessage is one or more full sentences, which _should_ be in English
+	// for consistency with the rest of the error message output but can in
+	// practice be in any language as long as it ends with a period. The
+	// message should describe what is required for the condition to return
 	// true in a way that would make sense to a caller of the module.
 	ErrorMessage string
 
@@ -442,20 +442,19 @@ func decodeVariableValidationBlock(varName string, block *hcl.Block) (*VariableV
 				})
 			case !looksLikeSentences(vv.ErrorMessage):
 				// Because we're going to include this string verbatim as part
-				// of a bigger error message written in our usual style in
-				// English, we'll require the given error message to conform
-				// to that. We might relax this in future if e.g. we start
-				// presenting these error messages in a different way, or if
-				// Packer starts supporting producing error messages in
-				// other human languages, etc.
-				// For pragmatism we also allow sentences ending with
-				// exclamation points, but we don't mention it explicitly here
-				// because that's not really consistent with the Packer UI
-				// writing style.
+				// of a bigger error message written in our usual style, we'll
+				// require the given error message to conform to that. We might
+				// relax this in future if e.g. we start presenting these error
+				// messages in a different way, or if Packer starts supporting
+				// producing error messages in other human languages, etc. For
+				// pragmatism we also allow sentences ending with exclamation
+				// points, but we don't mention it explicitly here because
+				// that's not really consistent with the Packer UI writing
+				// style.
 				diags = diags.Append(&hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  errSummary,
-					Detail:   "Validation error message must be at least one full English sentence starting with an uppercase letter and ending with a period or question mark.",
+					Detail:   "Validation error message must be at least one full sentence starting with an uppercase letter ( if the alphabet permits it ) and ending with a period or question mark.",
 					Subject:  attr.Expr.Range().Ptr(),
 				})
 			}
@@ -481,11 +480,9 @@ func looksLikeSentences(s string) bool {
 	first := runes[0]
 	last := runes[len(runes)-1]
 
-	// If the first rune is a letter then it must be an uppercase letter.
-	// (This will only see the first rune in a multi-rune combining sequence,
-	// but the first rune is generally the letter if any are, and if not then
-	// we'll just ignore it because we're primarily expecting English messages
-	// right now anyway, for consistency with all of Packers's other output.)
+	// If the first rune is a letter then it must be an uppercase letter. To
+	// sorts of nudge people into writting sentences. For alphabets that don't
+	// have the notion of 'upper', this does nothing.
 	if unicode.IsLetter(first) && !unicode.IsUpper(first) {
 		return false
 	}
