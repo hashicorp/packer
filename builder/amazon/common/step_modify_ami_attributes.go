@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/builder"
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -22,7 +22,7 @@ type StepModifyAMIAttributes struct {
 	Description    string
 	Ctx            interpolate.Context
 
-	GeneratedData *builder.GeneratedData
+	GeneratedData *packerbuilderdata.GeneratedData
 }
 
 func (s *StepModifyAMIAttributes) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {

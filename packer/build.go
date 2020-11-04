@@ -6,7 +6,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/hashicorp/packer/helper/common"
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 )
 
 const (
@@ -182,7 +182,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 	if generatedVars != nil {
 		for _, k := range generatedVars {
 			generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
-				common.PlaceholderMsg, k)
+				packerbuilderdata.PlaceholderMsg, k)
 		}
 	}
 

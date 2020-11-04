@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/builder"
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -23,7 +23,7 @@ func (t EC2Tags) Report(ui packer.Ui) {
 
 func (t TagMap) EC2Tags(ictx interpolate.Context, region string, state multistep.StateBag) (EC2Tags, error) {
 	var ec2Tags []*ec2.Tag
-	generatedData := builder.GeneratedData{State: state}
+	generatedData := packerbuilderdata.GeneratedData{State: state}
 	ictx.Data = extractBuildInfo(region, state, &generatedData)
 
 	for key, value := range t {

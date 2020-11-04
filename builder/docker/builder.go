@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -52,7 +52,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	generatedData := &builder.GeneratedData{State: state}
+	generatedData := &packerbuilderdata.GeneratedData{State: state}
 
 	// Setup the driver that will talk to Docker
 	state.Put("driver", driver)
