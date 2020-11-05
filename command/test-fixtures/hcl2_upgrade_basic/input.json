@@ -73,7 +73,8 @@
                 "echo {{ build `ID` }}",
                 "echo {{ build `SSHPrivateKey` }}",
                 "sleep 100000",
-                "echo {{ template_dir }} is not {{ pwd }}"
+                "echo {{ template_dir }} is not {{ pwd }}",
+                "echo {{ packer_version }}"
             ]
         },
         {

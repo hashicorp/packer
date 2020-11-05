@@ -313,6 +313,9 @@ func transposeTemplatingCalls(s []byte) []byte {
 		"pwd": func() string {
 			return fmt.Sprintf("${path.cwd}")
 		},
+		"packer_version": func() string {
+			return fmt.Sprintf("${packer.version}")
+		},
 	}
 
 	tpl, err := texttemplate.New("generated").
