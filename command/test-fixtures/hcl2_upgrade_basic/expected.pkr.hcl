@@ -35,7 +35,7 @@ variable "aws_secret_key" {
 
 variable "secret_account" {
   type      = string
-  default   = "potato"
+  default   = "🤷"
   sensitive = true
 }
 
