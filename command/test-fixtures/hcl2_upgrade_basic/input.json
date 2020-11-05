@@ -79,6 +79,36 @@
             ]
         },
         {
+            "type": "shell",
+            "inline": [
+                "echo {{ `SOMETHING` | lower }}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo {{ `something` | upper }}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo {{ split `some-string` `-` 0 }}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo {{ replace_all `-` `/` build_name }}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo {{ replace `some-string` `-` `/` 1 }}"
+            ]
+        },
+        {
             "type": "shell-local",
             "only": [
                 "amazon-ebs"

@@ -284,12 +284,29 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	return 0
 }
 
+type UnhandleableArgumentError struct {
+	Call           string
+	Correspondance string
+	Docs           string
+}
+
+func (uc UnhandleableArgumentError) Error() string {
+	return fmt.Sprintf(`unhandled %q call:
+# there is no way to know what what passed to the %[1]q call.
+# Please manually upgrade to the corresponding HCL2 %s call
+# Visit %s for more infos.`, uc.Call, uc.Correspondance, uc.Docs)
+}
+
 // transposeTemplatingCalls executes parts of blocks as go template files and replaces
 // their result with their hcl2 variant. If something goes wrong the template
 // containing the go template string is returned.
 func transposeTemplatingCalls(s []byte) []byte {
 	fallbackReturn := func(err error) []byte {
-		return append([]byte(fmt.Sprintf("\n#could not parse template for following block: %q\n", err)), s...)
+		if strings.Contains(err.Error(), "unhandled") {
+			return append([]byte(fmt.Sprintf("\n# %s\n", err)), s...)
+		}
+
+		return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
 	}
 	funcMap := texttemplate.FuncMap{
 		"timestamp": func() string {
@@ -319,9 +336,50 @@ func transposeTemplatingCalls(s []byte) []byte {
 		"uuid": func() string {
 			return fmt.Sprintf("${uuidv4()}")
 		},
+		"lower": func(_ string) (string, error) {
+			return "", UnhandleableArgumentError{
+				"lower",
+				"lower(var.example)",
+				"https://www.packer.io/docs/from-1.5/functions/string/lower",
+			}
+		},
+		"upper": func(_ string) (string, error) {
+			return "", UnhandleableArgumentError{
+				"upper",
+				"upper(var.example)",
+				"https://www.packer.io/docs/from-1.5/functions/string/upper",
+			}
+		},
+		"split": func(_, _ string, _ int) (string, error) {
+			return "", UnhandleableArgumentError{
+				"split",
+				"split(separator, string)",
+				"https://www.packer.io/docs/from-1.5/functions/string/split",
+			}
+		},
+		"replace": func(_, _, _ string, _ int) (string, error) {
+			return "", UnhandleableArgumentError{
+				"replace",
+				"replace(string, substring, replacement) or regex_replace(string, substring, replacement)",
+				"https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",
+			}
+		},
+		"replace_all": func(_, _, _ string) (string, error) {
+			return "", UnhandleableArgumentError{
+				"replace_all",
+				"replace(string, substring, replacement) or regex_replace(string, substring, replacement)",
+				"https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",
+			}
+		},
+		"build_name": func() string {
+			return fmt.Sprintf("${build.name}")
+		},
+		"build_type": func() string {
+			return fmt.Sprintf("${build.type}")
+		},
 	}
 
-	tpl, err := texttemplate.New("generated").
+	tpl, err := texttemplate.New("hcl2_upgrade").
 		Funcs(funcMap).
 		Parse(string(s))
 
