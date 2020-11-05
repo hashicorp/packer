@@ -85,7 +85,7 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 	ui.Say("Cloning VM...")
 	template, err := d.FindVM(s.Config.Template)
 	if err != nil {
-		state.Put("error", err)
+		state.Put("error", fmt.Errorf("Error finding vm to clone: %s", err))
 		return multistep.ActionHalt
 	}
 
