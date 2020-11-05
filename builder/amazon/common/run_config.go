@@ -77,6 +77,9 @@ type RunConfig struct {
 	// Destination availability zone to launch
 	// instance in. Leave this empty to allow Amazon to auto-assign.
 	AvailabilityZone string `mapstructure:"availability_zone" required:"false"`
+	// The tenancy of the instance (if the instance is running in a VPC). An instance
+	// with a tenancy of dedicated runs on single-tenant hardware.
+	InstanceTenancy string `mapstructure:"instance_tenancy" required:"false"`
 	// Requires spot_price to be set. The
 	// required duration for the Spot Instances (also known as Spot blocks). This
 	// value must be a multiple of 60 (60, 120, 180, 240, 300, or 360). You can't
@@ -574,6 +577,11 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.InstanceType != "" && len(c.SpotInstanceTypes) > 0 {
 		errs = append(errs, fmt.Errorf("either instance_type or "+
 			"spot_instance_types must be specified, not both"))
+	}
+
+	if c.InstanceTenancy != "" && len(c.SpotInstanceTypes) > 0 {
+		errs = append(errs, fmt.Errorf("instance_tenancy cannot "+
+			"be used with spot instances"))
 	}
 
 	if c.BlockDurationMinutes%60 != 0 {

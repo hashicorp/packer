@@ -35,6 +35,7 @@ type StepRunSpotInstance struct {
 	ExpectedRootDevice                string
 	InstanceInitiatedShutdownBehavior string
 	InstanceType                      string
+	InstanceTenancy                   string
 	SourceAMI                         string
 	SpotPrice                         string
 	SpotTags                          map[string]string

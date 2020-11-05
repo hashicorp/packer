@@ -31,6 +31,7 @@ type StepRunSourceInstance struct {
 	ExpectedRootDevice                string
 	InstanceInitiatedShutdownBehavior string
 	InstanceType                      string
+	InstanceTenancy                   string
 	IsRestricted                      bool
 	SourceAMI                         string
 	Tags                              map[string]string
@@ -116,7 +117,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		MinCount:            aws.Int64(1),
 		IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: iamInstanceProfile},
 		BlockDeviceMappings: s.LaunchMappings.BuildEC2BlockDeviceMappings(),
-		Placement:           &ec2.Placement{AvailabilityZone: &az},
+		Placement:           &ec2.Placement{AvailabilityZone: &az, Tenancy: &s.InstanceTenancy},
 		EbsOptimized:        &s.EbsOptimized,
 	}
 
