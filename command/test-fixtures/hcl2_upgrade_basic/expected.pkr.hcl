@@ -94,41 +94,49 @@ build {
     max_retries = "5"
   }
 
+  # template: hcl2_upgrade:2:38: executing "hcl2_upgrade" at <clean_resource_name>: error calling clean_resource_name: unhandled "clean_resource_name" call:
+  # there is no way to automatically upgrade the "clean_resource_name" call.
+  # Please manually upgrade to use custom validation rules, replace(string, substring, replacement) or regex_replace(string, substring, replacement)
+  # Visit https://packer.io/docs/from-1.5/variables#custom-validation-rules , https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace for more infos.
+  provisioner "shell" {
+    inline = ["echo mybuild-{{isotime | clean_resource_name}}"]
+  }
+
   # template: hcl2_upgrade:2:35: executing "hcl2_upgrade" at <lower>: error calling lower: unhandled "lower" call:
-  # there is no way to know what what passed to the "lower" call.
-  # Please manually upgrade to the corresponding HCL2 lower(var.example) call
+  # there is no way to automatically upgrade the "lower" call.
+  # Please manually upgrade to lower(var.example)
   # Visit https://www.packer.io/docs/from-1.5/functions/string/lower for more infos.
   provisioner "shell" {
     inline = ["echo {{ `SOMETHING` | lower }}"]
   }
 
   # template: hcl2_upgrade:2:35: executing "hcl2_upgrade" at <upper>: error calling upper: unhandled "upper" call:
-  # there is no way to know what what passed to the "upper" call.
-  # Please manually upgrade to the corresponding HCL2 upper(var.example) call
+  # there is no way to automatically upgrade the "upper" call.
+  # Please manually upgrade to upper(var.example)
   # Visit https://www.packer.io/docs/from-1.5/functions/string/upper for more infos.
   provisioner "shell" {
     inline = ["echo {{ `something` | upper }}"]
   }
 
   # template: hcl2_upgrade:2:21: executing "hcl2_upgrade" at <split `some-string` `-` 0>: error calling split: unhandled "split" call:
-  # there is no way to know what what passed to the "split" call.
-  # Please manually upgrade to the corresponding HCL2 split(separator, string) call
+  # there is no way to automatically upgrade the "split" call.
+  # Please manually upgrade to split(separator, string)
   # Visit https://www.packer.io/docs/from-1.5/functions/string/split for more infos.
   provisioner "shell" {
     inline = ["echo {{ split `some-string` `-` 0 }}"]
   }
 
   # template: hcl2_upgrade:2:21: executing "hcl2_upgrade" at <replace_all `-` `/` build_name>: error calling replace_all: unhandled "replace_all" call:
-  # there is no way to know what what passed to the "replace_all" call.
-  # Please manually upgrade to the corresponding HCL2 replace(string, substring, replacement) or regex_replace(string, substring, replacement) call
+  # there is no way to automatically upgrade the "replace_all" call.
+  # Please manually upgrade to replace(string, substring, replacement) or regex_replace(string, substring, replacement)
   # Visit https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace for more infos.
   provisioner "shell" {
     inline = ["echo {{ replace_all `-` `/` build_name }}"]
   }
 
   # template: hcl2_upgrade:2:21: executing "hcl2_upgrade" at <replace `some-string` `-` `/` 1>: error calling replace: unhandled "replace" call:
-  # there is no way to know what what passed to the "replace" call.
-  # Please manually upgrade to the corresponding HCL2 replace(string, substring, replacement) or regex_replace(string, substring, replacement) call
+  # there is no way to automatically upgrade the "replace" call.
+  # Please manually upgrade to replace(string, substring, replacement) or regex_replace(string, substring, replacement)
   # Visit https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace for more infos.
   provisioner "shell" {
     inline = ["echo {{ replace `some-string` `-` `/` 1 }}"]

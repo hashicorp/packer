@@ -292,8 +292,8 @@ type UnhandleableArgumentError struct {
 
 func (uc UnhandleableArgumentError) Error() string {
 	return fmt.Sprintf(`unhandled %q call:
-# there is no way to know what what passed to the %[1]q call.
-# Please manually upgrade to the corresponding HCL2 %s call
+# there is no way to automatically upgrade the %[1]q call.
+# Please manually upgrade to %s
 # Visit %s for more infos.`, uc.Call, uc.Correspondance, uc.Docs)
 }
 
