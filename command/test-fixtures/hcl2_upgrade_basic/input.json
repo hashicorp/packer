@@ -81,6 +81,12 @@
         {
             "type": "shell",
             "inline": [
+                "echo mybuild-{{isotime | clean_resource_name}}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
                 "echo {{ `SOMETHING` | lower }}"
             ]
         },

@@ -371,6 +371,15 @@ func transposeTemplatingCalls(s []byte) []byte {
 				"https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",
 			}
 		},
+		"clean_resource_name": func(_ string) (string, error) {
+			return "", UnhandleableArgumentError{
+				"clean_resource_name",
+				"use custom validation rules, replace(string, substring, replacement) or regex_replace(string, substring, replacement)",
+				"https://packer.io/docs/from-1.5/variables#custom-validation-rules" +
+					" , https://www.packer.io/docs/from-1.5/functions/string/replace" +
+					" or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",
+			}
+		},
 		"build_name": func() string {
 			return fmt.Sprintf("${build.name}")
 		},
