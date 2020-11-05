@@ -64,6 +64,9 @@ const (
 # once they also need to be in the same folder. 'packer inspect folder/'
 # will describe to you what is in that folder.
 
+# Avoid mixing go templating calls ( for example '{{ upper("string") }}' ) 
+# and HCL2 calls (for example '${ var.string_value_example }' ), they won't be
+# executed together and the outcome will be unknown.
 `
 	inputVarHeader = `
 # All generated input variables will be of 'string' type as this is how Packer JSON
@@ -339,42 +342,42 @@ func transposeTemplatingCalls(s []byte) []byte {
 		"lower": func(_ string) (string, error) {
 			return "", UnhandleableArgumentError{
 				"lower",
-				"lower(var.example)",
+				"`lower(var.example)`",
 				"https://www.packer.io/docs/from-1.5/functions/string/lower",
 			}
 		},
 		"upper": func(_ string) (string, error) {
 			return "", UnhandleableArgumentError{
 				"upper",
-				"upper(var.example)",
+				"`upper(var.example)`",
 				"https://www.packer.io/docs/from-1.5/functions/string/upper",
 			}
 		},
 		"split": func(_, _ string, _ int) (string, error) {
 			return "", UnhandleableArgumentError{
 				"split",
-				"split(separator, string)",
+				"`split(separator, string)`",
 				"https://www.packer.io/docs/from-1.5/functions/string/split",
 			}
 		},
 		"replace": func(_, _, _ string, _ int) (string, error) {
 			return "", UnhandleableArgumentError{
 				"replace",
-				"replace(string, substring, replacement) or regex_replace(string, substring, replacement)",
+				"`replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
 				"https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",
 			}
 		},
 		"replace_all": func(_, _, _ string) (string, error) {
 			return "", UnhandleableArgumentError{
 				"replace_all",
-				"replace(string, substring, replacement) or regex_replace(string, substring, replacement)",
+				"`replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
 				"https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",
 			}
 		},
 		"clean_resource_name": func(_ string) (string, error) {
 			return "", UnhandleableArgumentError{
 				"clean_resource_name",
-				"use custom validation rules, replace(string, substring, replacement) or regex_replace(string, substring, replacement)",
+				"use custom validation rules, `replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
 				"https://packer.io/docs/from-1.5/variables#custom-validation-rules" +
 					" , https://www.packer.io/docs/from-1.5/functions/string/replace" +
 					" or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",

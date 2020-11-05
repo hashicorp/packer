@@ -7,6 +7,9 @@
 # once they also need to be in the same folder. 'packer inspect folder/'
 # will describe to you what is in that folder.
 
+# Avoid mixing go templating calls ( for example '{{ upper("string") }}' ) 
+# and HCL2 calls (for example '${ var.string_value_example }' ), they won't be
+# executed together and the outcome will be unknown.
 
 # See https://www.packer.io/docs/from-1.5/blocks/packer for more info
 packer {
@@ -96,7 +99,7 @@ build {
 
   # template: hcl2_upgrade:2:38: executing "hcl2_upgrade" at <clean_resource_name>: error calling clean_resource_name: unhandled "clean_resource_name" call:
   # there is no way to automatically upgrade the "clean_resource_name" call.
-  # Please manually upgrade to use custom validation rules, replace(string, substring, replacement) or regex_replace(string, substring, replacement)
+  # Please manually upgrade to use custom validation rules, `replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`
   # Visit https://packer.io/docs/from-1.5/variables#custom-validation-rules , https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace for more infos.
   provisioner "shell" {
     inline = ["echo mybuild-{{isotime | clean_resource_name}}"]
@@ -104,7 +107,7 @@ build {
 
   # template: hcl2_upgrade:2:35: executing "hcl2_upgrade" at <lower>: error calling lower: unhandled "lower" call:
   # there is no way to automatically upgrade the "lower" call.
-  # Please manually upgrade to lower(var.example)
+  # Please manually upgrade to `lower(var.example)`
   # Visit https://www.packer.io/docs/from-1.5/functions/string/lower for more infos.
   provisioner "shell" {
     inline = ["echo {{ `SOMETHING` | lower }}"]
@@ -112,7 +115,7 @@ build {
 
   # template: hcl2_upgrade:2:35: executing "hcl2_upgrade" at <upper>: error calling upper: unhandled "upper" call:
   # there is no way to automatically upgrade the "upper" call.
-  # Please manually upgrade to upper(var.example)
+  # Please manually upgrade to `upper(var.example)`
   # Visit https://www.packer.io/docs/from-1.5/functions/string/upper for more infos.
   provisioner "shell" {
     inline = ["echo {{ `something` | upper }}"]
@@ -120,7 +123,7 @@ build {
 
   # template: hcl2_upgrade:2:21: executing "hcl2_upgrade" at <split `some-string` `-` 0>: error calling split: unhandled "split" call:
   # there is no way to automatically upgrade the "split" call.
-  # Please manually upgrade to split(separator, string)
+  # Please manually upgrade to `split(separator, string)`
   # Visit https://www.packer.io/docs/from-1.5/functions/string/split for more infos.
   provisioner "shell" {
     inline = ["echo {{ split `some-string` `-` 0 }}"]
@@ -128,7 +131,7 @@ build {
 
   # template: hcl2_upgrade:2:21: executing "hcl2_upgrade" at <replace_all `-` `/` build_name>: error calling replace_all: unhandled "replace_all" call:
   # there is no way to automatically upgrade the "replace_all" call.
-  # Please manually upgrade to replace(string, substring, replacement) or regex_replace(string, substring, replacement)
+  # Please manually upgrade to `replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`
   # Visit https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace for more infos.
   provisioner "shell" {
     inline = ["echo {{ replace_all `-` `/` build_name }}"]
@@ -136,7 +139,7 @@ build {
 
   # template: hcl2_upgrade:2:21: executing "hcl2_upgrade" at <replace `some-string` `-` `/` 1>: error calling replace: unhandled "replace" call:
   # there is no way to automatically upgrade the "replace" call.
-  # Please manually upgrade to replace(string, substring, replacement) or regex_replace(string, substring, replacement)
+  # Please manually upgrade to `replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`
   # Visit https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace for more infos.
   provisioner "shell" {
     inline = ["echo {{ replace `some-string` `-` `/` 1 }}"]
