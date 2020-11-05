@@ -2,7 +2,6 @@ package driver
 
 import (
 	"fmt"
-	"log"
 	"path"
 	"regexp"
 	"strings"
