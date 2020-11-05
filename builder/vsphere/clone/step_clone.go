@@ -6,7 +6,6 @@ package clone
 import (
 	"context"
 	"fmt"
-	"log"
 	"path"
 
 	"github.com/hashicorp/packer/builder/vsphere/common"
