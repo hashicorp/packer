@@ -10,8 +10,10 @@ import (
 )
 
 // Client is the client end that communicates with a Packer RPC server.
-// Establishing a connection is up to the user, the Client can just
-// communicate over any ReadWriteCloser.
+// Establishing a connection is up to the user. The Client can communicate over
+// any ReadWriteCloser. In Packer, each "plugin" (builder, provisioner,
+// and post-processor) creates and launches a server. The the packer "core"
+// creates and uses the client.
 type Client struct {
 	mux      *muxBroker
 	client   *rpc.Client
