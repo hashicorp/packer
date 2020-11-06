@@ -29,354 +29,6 @@ import (
 // The package's fully qualified name.
 const fqdn = "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage"
 
-// AccessTier enumerates the values for access tier.
-type AccessTier string
-
-const (
-	// Cool ...
-	Cool AccessTier = "Cool"
-	// Hot ...
-	Hot AccessTier = "Hot"
-)
-
-// PossibleAccessTierValues returns an array of possible values for the AccessTier const type.
-func PossibleAccessTierValues() []AccessTier {
-	return []AccessTier{Cool, Hot}
-}
-
-// AccountStatus enumerates the values for account status.
-type AccountStatus string
-
-const (
-	// Available ...
-	Available AccountStatus = "available"
-	// Unavailable ...
-	Unavailable AccountStatus = "unavailable"
-)
-
-// PossibleAccountStatusValues returns an array of possible values for the AccountStatus const type.
-func PossibleAccountStatusValues() []AccountStatus {
-	return []AccountStatus{Available, Unavailable}
-}
-
-// Action enumerates the values for action.
-type Action string
-
-const (
-	// Allow ...
-	Allow Action = "Allow"
-)
-
-// PossibleActionValues returns an array of possible values for the Action const type.
-func PossibleActionValues() []Action {
-	return []Action{Allow}
-}
-
-// Bypass enumerates the values for bypass.
-type Bypass string
-
-const (
-	// AzureServices ...
-	AzureServices Bypass = "AzureServices"
-	// Logging ...
-	Logging Bypass = "Logging"
-	// Metrics ...
-	Metrics Bypass = "Metrics"
-	// None ...
-	None Bypass = "None"
-)
-
-// PossibleBypassValues returns an array of possible values for the Bypass const type.
-func PossibleBypassValues() []Bypass {
-	return []Bypass{AzureServices, Logging, Metrics, None}
-}
-
-// DefaultAction enumerates the values for default action.
-type DefaultAction string
-
-const (
-	// DefaultActionAllow ...
-	DefaultActionAllow DefaultAction = "Allow"
-	// DefaultActionDeny ...
-	DefaultActionDeny DefaultAction = "Deny"
-)
-
-// PossibleDefaultActionValues returns an array of possible values for the DefaultAction const type.
-func PossibleDefaultActionValues() []DefaultAction {
-	return []DefaultAction{DefaultActionAllow, DefaultActionDeny}
-}
-
-// HTTPProtocol enumerates the values for http protocol.
-type HTTPProtocol string
-
-const (
-	// HTTPS ...
-	HTTPS HTTPProtocol = "https"
-	// Httpshttp ...
-	Httpshttp HTTPProtocol = "https,http"
-)
-
-// PossibleHTTPProtocolValues returns an array of possible values for the HTTPProtocol const type.
-func PossibleHTTPProtocolValues() []HTTPProtocol {
-	return []HTTPProtocol{HTTPS, Httpshttp}
-}
-
-// KeyPermission enumerates the values for key permission.
-type KeyPermission string
-
-const (
-	// Full ...
-	Full KeyPermission = "Full"
-	// Read ...
-	Read KeyPermission = "Read"
-)
-
-// PossibleKeyPermissionValues returns an array of possible values for the KeyPermission const type.
-func PossibleKeyPermissionValues() []KeyPermission {
-	return []KeyPermission{Full, Read}
-}
-
-// KeySource enumerates the values for key source.
-type KeySource string
-
-const (
-	// MicrosoftKeyvault ...
-	MicrosoftKeyvault KeySource = "Microsoft.Keyvault"
-	// MicrosoftStorage ...
-	MicrosoftStorage KeySource = "Microsoft.Storage"
-)
-
-// PossibleKeySourceValues returns an array of possible values for the KeySource const type.
-func PossibleKeySourceValues() []KeySource {
-	return []KeySource{MicrosoftKeyvault, MicrosoftStorage}
-}
-
-// Kind enumerates the values for kind.
-type Kind string
-
-const (
-	// BlobStorage ...
-	BlobStorage Kind = "BlobStorage"
-	// Storage ...
-	Storage Kind = "Storage"
-	// StorageV2 ...
-	StorageV2 Kind = "StorageV2"
-)
-
-// PossibleKindValues returns an array of possible values for the Kind const type.
-func PossibleKindValues() []Kind {
-	return []Kind{BlobStorage, Storage, StorageV2}
-}
-
-// Permissions enumerates the values for permissions.
-type Permissions string
-
-const (
-	// A ...
-	A Permissions = "a"
-	// C ...
-	C Permissions = "c"
-	// D ...
-	D Permissions = "d"
-	// L ...
-	L Permissions = "l"
-	// P ...
-	P Permissions = "p"
-	// R ...
-	R Permissions = "r"
-	// U ...
-	U Permissions = "u"
-	// W ...
-	W Permissions = "w"
-)
-
-// PossiblePermissionsValues returns an array of possible values for the Permissions const type.
-func PossiblePermissionsValues() []Permissions {
-	return []Permissions{A, C, D, L, P, R, U, W}
-}
-
-// ProvisioningState enumerates the values for provisioning state.
-type ProvisioningState string
-
-const (
-	// Creating ...
-	Creating ProvisioningState = "Creating"
-	// ResolvingDNS ...
-	ResolvingDNS ProvisioningState = "ResolvingDNS"
-	// Succeeded ...
-	Succeeded ProvisioningState = "Succeeded"
-)
-
-// PossibleProvisioningStateValues returns an array of possible values for the ProvisioningState const type.
-func PossibleProvisioningStateValues() []ProvisioningState {
-	return []ProvisioningState{Creating, ResolvingDNS, Succeeded}
-}
-
-// Reason enumerates the values for reason.
-type Reason string
-
-const (
-	// AccountNameInvalid ...
-	AccountNameInvalid Reason = "AccountNameInvalid"
-	// AlreadyExists ...
-	AlreadyExists Reason = "AlreadyExists"
-)
-
-// PossibleReasonValues returns an array of possible values for the Reason const type.
-func PossibleReasonValues() []Reason {
-	return []Reason{AccountNameInvalid, AlreadyExists}
-}
-
-// ReasonCode enumerates the values for reason code.
-type ReasonCode string
-
-const (
-	// NotAvailableForSubscription ...
-	NotAvailableForSubscription ReasonCode = "NotAvailableForSubscription"
-	// QuotaID ...
-	QuotaID ReasonCode = "QuotaId"
-)
-
-// PossibleReasonCodeValues returns an array of possible values for the ReasonCode const type.
-func PossibleReasonCodeValues() []ReasonCode {
-	return []ReasonCode{NotAvailableForSubscription, QuotaID}
-}
-
-// Services enumerates the values for services.
-type Services string
-
-const (
-	// B ...
-	B Services = "b"
-	// F ...
-	F Services = "f"
-	// Q ...
-	Q Services = "q"
-	// T ...
-	T Services = "t"
-)
-
-// PossibleServicesValues returns an array of possible values for the Services const type.
-func PossibleServicesValues() []Services {
-	return []Services{B, F, Q, T}
-}
-
-// SignedResource enumerates the values for signed resource.
-type SignedResource string
-
-const (
-	// SignedResourceB ...
-	SignedResourceB SignedResource = "b"
-	// SignedResourceC ...
-	SignedResourceC SignedResource = "c"
-	// SignedResourceF ...
-	SignedResourceF SignedResource = "f"
-	// SignedResourceS ...
-	SignedResourceS SignedResource = "s"
-)
-
-// PossibleSignedResourceValues returns an array of possible values for the SignedResource const type.
-func PossibleSignedResourceValues() []SignedResource {
-	return []SignedResource{SignedResourceB, SignedResourceC, SignedResourceF, SignedResourceS}
-}
-
-// SignedResourceTypes enumerates the values for signed resource types.
-type SignedResourceTypes string
-
-const (
-	// SignedResourceTypesC ...
-	SignedResourceTypesC SignedResourceTypes = "c"
-	// SignedResourceTypesO ...
-	SignedResourceTypesO SignedResourceTypes = "o"
-	// SignedResourceTypesS ...
-	SignedResourceTypesS SignedResourceTypes = "s"
-)
-
-// PossibleSignedResourceTypesValues returns an array of possible values for the SignedResourceTypes const type.
-func PossibleSignedResourceTypesValues() []SignedResourceTypes {
-	return []SignedResourceTypes{SignedResourceTypesC, SignedResourceTypesO, SignedResourceTypesS}
-}
-
-// SkuName enumerates the values for sku name.
-type SkuName string
-
-const (
-	// PremiumLRS ...
-	PremiumLRS SkuName = "Premium_LRS"
-	// StandardGRS ...
-	StandardGRS SkuName = "Standard_GRS"
-	// StandardLRS ...
-	StandardLRS SkuName = "Standard_LRS"
-	// StandardRAGRS ...
-	StandardRAGRS SkuName = "Standard_RAGRS"
-	// StandardZRS ...
-	StandardZRS SkuName = "Standard_ZRS"
-)
-
-// PossibleSkuNameValues returns an array of possible values for the SkuName const type.
-func PossibleSkuNameValues() []SkuName {
-	return []SkuName{PremiumLRS, StandardGRS, StandardLRS, StandardRAGRS, StandardZRS}
-}
-
-// SkuTier enumerates the values for sku tier.
-type SkuTier string
-
-const (
-	// Premium ...
-	Premium SkuTier = "Premium"
-	// Standard ...
-	Standard SkuTier = "Standard"
-)
-
-// PossibleSkuTierValues returns an array of possible values for the SkuTier const type.
-func PossibleSkuTierValues() []SkuTier {
-	return []SkuTier{Premium, Standard}
-}
-
-// State enumerates the values for state.
-type State string
-
-const (
-	// StateDeprovisioning ...
-	StateDeprovisioning State = "deprovisioning"
-	// StateFailed ...
-	StateFailed State = "failed"
-	// StateNetworkSourceDeleted ...
-	StateNetworkSourceDeleted State = "networkSourceDeleted"
-	// StateProvisioning ...
-	StateProvisioning State = "provisioning"
-	// StateSucceeded ...
-	StateSucceeded State = "succeeded"
-)
-
-// PossibleStateValues returns an array of possible values for the State const type.
-func PossibleStateValues() []State {
-	return []State{StateDeprovisioning, StateFailed, StateNetworkSourceDeleted, StateProvisioning, StateSucceeded}
-}
-
-// UsageUnit enumerates the values for usage unit.
-type UsageUnit string
-
-const (
-	// Bytes ...
-	Bytes UsageUnit = "Bytes"
-	// BytesPerSecond ...
-	BytesPerSecond UsageUnit = "BytesPerSecond"
-	// Count ...
-	Count UsageUnit = "Count"
-	// CountsPerSecond ...
-	CountsPerSecond UsageUnit = "CountsPerSecond"
-	// Percent ...
-	Percent UsageUnit = "Percent"
-	// Seconds ...
-	Seconds UsageUnit = "Seconds"
-)
-
-// PossibleUsageUnitValues returns an array of possible values for the UsageUnit const type.
-func PossibleUsageUnitValues() []UsageUnit {
-	return []UsageUnit{Bytes, BytesPerSecond, Count, CountsPerSecond, Percent, Seconds}
-}
-
 // Account the storage account.
 type Account struct {
 	autorest.Response `json:"-"`
@@ -514,8 +166,8 @@ func (a *Account) UnmarshalJSON(body []byte) error {
 	return nil
 }
 
-// AccountCheckNameAvailabilityParameters the parameters used to check the availability of the storage
-// account name.
+// AccountCheckNameAvailabilityParameters the parameters used to check the availability of the storage account
+// name.
 type AccountCheckNameAvailabilityParameters struct {
 	// Name - The storage account name.
 	Name *string `json:"name,omitempty"`
@@ -688,6 +340,15 @@ type AccountProperties struct {
 	NetworkRuleSet *NetworkRuleSet `json:"networkAcls,omitempty"`
 }
 
+// MarshalJSON is the custom marshaler for AccountProperties.
+func (ap AccountProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if ap.EnableHTTPSTrafficOnly != nil {
+		objectMap["supportsHttpsTrafficOnly"] = ap.EnableHTTPSTrafficOnly
+	}
+	return json.Marshal(objectMap)
+}
+
 // AccountPropertiesCreateParameters the parameters used to create the storage account.
 type AccountPropertiesCreateParameters struct {
 	// CustomDomain - User domain assigned to the storage account. Name is the CNAME source. Only one custom domain is supported per storage account at this time. To clear the existing custom domain, use an empty string for the custom domain name property.
@@ -742,8 +403,7 @@ type AccountSasParameters struct {
 	KeyToSign *string `json:"keyToSign,omitempty"`
 }
 
-// AccountsCreateFuture an abstraction for monitoring and retrieving the results of a long-running
-// operation.
+// AccountsCreateFuture an abstraction for monitoring and retrieving the results of a long-running operation.
 type AccountsCreateFuture struct {
 	azure.Future
 }
@@ -771,8 +431,7 @@ func (future *AccountsCreateFuture) Result(client AccountsClient) (a Account, er
 	return
 }
 
-// AccountUpdateParameters the parameters that can be provided when updating the storage account
-// properties.
+// AccountUpdateParameters the parameters that can be provided when updating the storage account properties.
 type AccountUpdateParameters struct {
 	// Sku - Gets or sets the SKU name. Note that the SKU name cannot be updated to Standard_ZRS or Premium_LRS, nor can accounts of those sku names be updated to any other value.
 	Sku *Sku `json:"sku,omitempty"`
@@ -912,6 +571,15 @@ type EncryptionService struct {
 	LastEnabledTime *date.Time `json:"lastEnabledTime,omitempty"`
 }
 
+// MarshalJSON is the custom marshaler for EncryptionService.
+func (es EncryptionService) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if es.Enabled != nil {
+		objectMap["enabled"] = es.Enabled
+	}
+	return json.Marshal(objectMap)
+}
+
 // EncryptionServices a list of services that support encryption.
 type EncryptionServices struct {
 	// Blob - The encryption function of the blob storage service.
@@ -922,6 +590,18 @@ type EncryptionServices struct {
 	Table *EncryptionService `json:"table,omitempty"`
 	// Queue - READ-ONLY; The encryption function of the queue storage service.
 	Queue *EncryptionService `json:"queue,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for EncryptionServices.
+func (es EncryptionServices) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if es.Blob != nil {
+		objectMap["blob"] = es.Blob
+	}
+	if es.File != nil {
+		objectMap["file"] = es.File
+	}
+	return json.Marshal(objectMap)
 }
 
 // Endpoints the URIs that are used to perform a retrieval of a public blob, queue, or table object.
@@ -944,6 +624,15 @@ type Identity struct {
 	TenantID *string `json:"tenantId,omitempty"`
 	// Type - The identity type.
 	Type *string `json:"type,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for Identity.
+func (i Identity) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if i.Type != nil {
+		objectMap["type"] = i.Type
+	}
+	return json.Marshal(objectMap)
 }
 
 // IPRule IP rule with specific IP or IP range in CIDR format.
@@ -1103,8 +792,8 @@ type OperationDisplay struct {
 	Operation *string `json:"operation,omitempty"`
 }
 
-// OperationListResult result of the request to list Storage operations. It contains a list of operations
-// and a URL link to get the next set of results.
+// OperationListResult result of the request to list Storage operations. It contains a list of operations and a
+// URL link to get the next set of results.
 type OperationListResult struct {
 	autorest.Response `json:"-"`
 	// Value - List of Storage operations supported by the Storage resource provider.
@@ -1151,6 +840,15 @@ type Restriction struct {
 	Values *[]string `json:"values,omitempty"`
 	// ReasonCode - The reason for the restriction. As of now this can be "QuotaId" or "NotAvailableForSubscription". Quota Id is set when the SKU has requiredQuotas parameter as the subscription does not belong to that quota. The "NotAvailableForSubscription" is related to capacity at DC. Possible values include: 'QuotaID', 'NotAvailableForSubscription'
 	ReasonCode ReasonCode `json:"reasonCode,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for Restriction.
+func (r Restriction) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if r.ReasonCode != "" {
+		objectMap["reasonCode"] = r.ReasonCode
+	}
+	return json.Marshal(objectMap)
 }
 
 // ServiceSasParameters the parameters to list service SAS credentials of a specific resource.
@@ -1215,6 +913,18 @@ type Sku struct {
 	Capabilities *[]SKUCapability `json:"capabilities,omitempty"`
 	// Restrictions - The restrictions because of which SKU cannot be used. This is empty if there are no restrictions.
 	Restrictions *[]Restriction `json:"restrictions,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for Sku.
+func (s Sku) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if s.Name != "" {
+		objectMap["name"] = s.Name
+	}
+	if s.Restrictions != nil {
+		objectMap["restrictions"] = s.Restrictions
+	}
+	return json.Marshal(objectMap)
 }
 
 // SKUCapability the capability information in the specified sku, including file encryption, network acls,

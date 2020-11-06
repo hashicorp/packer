@@ -81,6 +81,9 @@ func (client UsageClient) List(ctx context.Context, location string) (result Lis
 	if err != nil {
 		err = autorest.NewErrorWithError(err, "compute.UsageClient", "List", resp, "Failure responding to request")
 	}
+	if result.lur.hasNextLink() && result.lur.IsEmpty() {
+		err = result.NextWithContext(ctx)
+	}
 
 	return
 }
@@ -92,7 +95,7 @@ func (client UsageClient) ListPreparer(ctx context.Context, location string) (*h
 		"subscriptionId": autorest.Encode("path", client.SubscriptionID),
 	}
 
-	const APIVersion = "2019-07-01"
+	const APIVersion = "2019-12-01"
 	queryParameters := map[string]interface{}{
 		"api-version": APIVersion,
 	}
@@ -116,7 +119,6 @@ func (client UsageClient) ListSender(req *http.Request) (*http.Response, error) 
 func (client UsageClient) ListResponder(resp *http.Response) (result ListUsagesResult, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())

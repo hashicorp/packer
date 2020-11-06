@@ -85,6 +85,21 @@ type DedicatedHostsClientAPI interface {
 
 var _ DedicatedHostsClientAPI = (*compute.DedicatedHostsClient)(nil)
 
+// SSHPublicKeysClientAPI contains the set of methods on the SSHPublicKeysClient type.
+type SSHPublicKeysClientAPI interface {
+	Create(ctx context.Context, resourceGroupName string, SSHPublicKeyName string, parameters compute.SSHPublicKeyResource) (result compute.SSHPublicKeyResource, err error)
+	Delete(ctx context.Context, resourceGroupName string, SSHPublicKeyName string) (result autorest.Response, err error)
+	GenerateKeyPair(ctx context.Context, resourceGroupName string, SSHPublicKeyName string) (result compute.SSHPublicKeyGenerateKeyPairResult, err error)
+	Get(ctx context.Context, resourceGroupName string, SSHPublicKeyName string) (result compute.SSHPublicKeyResource, err error)
+	ListByResourceGroup(ctx context.Context, resourceGroupName string) (result compute.SSHPublicKeysGroupListResultPage, err error)
+	ListByResourceGroupComplete(ctx context.Context, resourceGroupName string) (result compute.SSHPublicKeysGroupListResultIterator, err error)
+	ListBySubscription(ctx context.Context) (result compute.SSHPublicKeysGroupListResultPage, err error)
+	ListBySubscriptionComplete(ctx context.Context) (result compute.SSHPublicKeysGroupListResultIterator, err error)
+	Update(ctx context.Context, resourceGroupName string, SSHPublicKeyName string, parameters compute.SSHPublicKeyUpdateResource) (result compute.SSHPublicKeyResource, err error)
+}
+
+var _ SSHPublicKeysClientAPI = (*compute.SSHPublicKeysClient)(nil)
+
 // VirtualMachineExtensionImagesClientAPI contains the set of methods on the VirtualMachineExtensionImagesClient type.
 type VirtualMachineExtensionImagesClientAPI interface {
 	Get(ctx context.Context, location string, publisherName string, typeParameter string, version string) (result compute.VirtualMachineExtensionImage, err error)
@@ -108,7 +123,7 @@ var _ VirtualMachineExtensionsClientAPI = (*compute.VirtualMachineExtensionsClie
 // VirtualMachineImagesClientAPI contains the set of methods on the VirtualMachineImagesClient type.
 type VirtualMachineImagesClientAPI interface {
 	Get(ctx context.Context, location string, publisherName string, offer string, skus string, version string) (result compute.VirtualMachineImage, err error)
-	List(ctx context.Context, location string, publisherName string, offer string, skus string, filter string, top *int32, orderby string) (result compute.ListVirtualMachineImageResource, err error)
+	List(ctx context.Context, location string, publisherName string, offer string, skus string, expand string, top *int32, orderby string) (result compute.ListVirtualMachineImageResource, err error)
 	ListOffers(ctx context.Context, location string, publisherName string) (result compute.ListVirtualMachineImageResource, err error)
 	ListPublishers(ctx context.Context, location string) (result compute.ListVirtualMachineImageResource, err error)
 	ListSkus(ctx context.Context, location string, publisherName string, offer string) (result compute.ListVirtualMachineImageResource, err error)
@@ -148,6 +163,7 @@ type VirtualMachinesClientAPI interface {
 	Reimage(ctx context.Context, resourceGroupName string, VMName string, parameters *compute.VirtualMachineReimageParameters) (result compute.VirtualMachinesReimageFuture, err error)
 	Restart(ctx context.Context, resourceGroupName string, VMName string) (result compute.VirtualMachinesRestartFuture, err error)
 	RunCommand(ctx context.Context, resourceGroupName string, VMName string, parameters compute.RunCommandInput) (result compute.VirtualMachinesRunCommandFuture, err error)
+	SimulateEviction(ctx context.Context, resourceGroupName string, VMName string) (result autorest.Response, err error)
 	Start(ctx context.Context, resourceGroupName string, VMName string) (result compute.VirtualMachinesStartFuture, err error)
 	Update(ctx context.Context, resourceGroupName string, VMName string, parameters compute.VirtualMachineUpdate) (result compute.VirtualMachinesUpdateFuture, err error)
 }
@@ -199,6 +215,7 @@ type VirtualMachineScaleSetsClientAPI interface {
 	Reimage(ctx context.Context, resourceGroupName string, VMScaleSetName string, VMScaleSetReimageInput *compute.VirtualMachineScaleSetReimageParameters) (result compute.VirtualMachineScaleSetsReimageFuture, err error)
 	ReimageAll(ctx context.Context, resourceGroupName string, VMScaleSetName string, VMInstanceIDs *compute.VirtualMachineScaleSetVMInstanceIDs) (result compute.VirtualMachineScaleSetsReimageAllFuture, err error)
 	Restart(ctx context.Context, resourceGroupName string, VMScaleSetName string, VMInstanceIDs *compute.VirtualMachineScaleSetVMInstanceIDs) (result compute.VirtualMachineScaleSetsRestartFuture, err error)
+	SetOrchestrationServiceState(ctx context.Context, resourceGroupName string, VMScaleSetName string, parameters compute.OrchestrationServiceStateInput) (result compute.VirtualMachineScaleSetsSetOrchestrationServiceStateFuture, err error)
 	Start(ctx context.Context, resourceGroupName string, VMScaleSetName string, VMInstanceIDs *compute.VirtualMachineScaleSetVMInstanceIDs) (result compute.VirtualMachineScaleSetsStartFuture, err error)
 	Update(ctx context.Context, resourceGroupName string, VMScaleSetName string, parameters compute.VirtualMachineScaleSetUpdate) (result compute.VirtualMachineScaleSetsUpdateFuture, err error)
 	UpdateInstances(ctx context.Context, resourceGroupName string, VMScaleSetName string, VMInstanceIDs compute.VirtualMachineScaleSetVMInstanceRequiredIDs) (result compute.VirtualMachineScaleSetsUpdateInstancesFuture, err error)
@@ -254,6 +271,7 @@ type VirtualMachineScaleSetVMsClientAPI interface {
 	ReimageAll(ctx context.Context, resourceGroupName string, VMScaleSetName string, instanceID string) (result compute.VirtualMachineScaleSetVMsReimageAllFuture, err error)
 	Restart(ctx context.Context, resourceGroupName string, VMScaleSetName string, instanceID string) (result compute.VirtualMachineScaleSetVMsRestartFuture, err error)
 	RunCommand(ctx context.Context, resourceGroupName string, VMScaleSetName string, instanceID string, parameters compute.RunCommandInput) (result compute.VirtualMachineScaleSetVMsRunCommandFuture, err error)
+	SimulateEviction(ctx context.Context, resourceGroupName string, VMScaleSetName string, instanceID string) (result autorest.Response, err error)
 	Start(ctx context.Context, resourceGroupName string, VMScaleSetName string, instanceID string) (result compute.VirtualMachineScaleSetVMsStartFuture, err error)
 	Update(ctx context.Context, resourceGroupName string, VMScaleSetName string, instanceID string, parameters compute.VirtualMachineScaleSetVM) (result compute.VirtualMachineScaleSetVMsUpdateFuture, err error)
 }

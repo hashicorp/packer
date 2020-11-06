@@ -78,6 +78,9 @@ func (client GalleryImagesClient) List(ctx context.Context, resourceGroupName st
 	if err != nil {
 		err = autorest.NewErrorWithError(err, "dtl.GalleryImagesClient", "List", resp, "Failure responding to request")
 	}
+	if result.gil.hasNextLink() && result.gil.IsEmpty() {
+		err = result.NextWithContext(ctx)
+	}
 
 	return
 }
@@ -126,7 +129,6 @@ func (client GalleryImagesClient) ListSender(req *http.Request) (*http.Response,
 func (client GalleryImagesClient) ListResponder(resp *http.Response) (result GalleryImageList, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())

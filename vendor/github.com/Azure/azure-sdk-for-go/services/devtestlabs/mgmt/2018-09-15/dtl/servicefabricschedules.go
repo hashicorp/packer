@@ -126,7 +126,6 @@ func (client ServiceFabricSchedulesClient) CreateOrUpdateSender(req *http.Reques
 func (client ServiceFabricSchedulesClient) CreateOrUpdateResponder(resp *http.Response) (result Schedule, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -208,7 +207,6 @@ func (client ServiceFabricSchedulesClient) DeleteSender(req *http.Request) (*htt
 func (client ServiceFabricSchedulesClient) DeleteResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusNoContent),
 		autorest.ByClosing())
 	result.Response = resp
@@ -289,7 +287,6 @@ func (client ServiceFabricSchedulesClient) ExecuteSender(req *http.Request) (fut
 func (client ServiceFabricSchedulesClient) ExecuteResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByClosing())
 	result.Response = resp
@@ -374,7 +371,6 @@ func (client ServiceFabricSchedulesClient) GetSender(req *http.Request) (*http.R
 func (client ServiceFabricSchedulesClient) GetResponder(resp *http.Response) (result Schedule, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -420,6 +416,9 @@ func (client ServiceFabricSchedulesClient) List(ctx context.Context, resourceGro
 	result.sl, err = client.ListResponder(resp)
 	if err != nil {
 		err = autorest.NewErrorWithError(err, "dtl.ServiceFabricSchedulesClient", "List", resp, "Failure responding to request")
+	}
+	if result.sl.hasNextLink() && result.sl.IsEmpty() {
+		err = result.NextWithContext(ctx)
 	}
 
 	return
@@ -471,7 +470,6 @@ func (client ServiceFabricSchedulesClient) ListSender(req *http.Request) (*http.
 func (client ServiceFabricSchedulesClient) ListResponder(resp *http.Response) (result ScheduleList, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -593,7 +591,6 @@ func (client ServiceFabricSchedulesClient) UpdateSender(req *http.Request) (*htt
 func (client ServiceFabricSchedulesClient) UpdateResponder(resp *http.Response) (result Schedule, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())

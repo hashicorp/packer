@@ -115,7 +115,6 @@ func (client VirtualMachineScaleSetVMsClient) DeallocateSender(req *http.Request
 func (client VirtualMachineScaleSetVMsClient) DeallocateResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByClosing())
 	result.Response = resp
@@ -192,7 +191,6 @@ func (client VirtualMachineScaleSetVMsClient) DeleteSender(req *http.Request) (f
 func (client VirtualMachineScaleSetVMsClient) DeleteResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted, http.StatusNoContent),
 		autorest.ByClosing())
 	result.Response = resp
@@ -273,7 +271,6 @@ func (client VirtualMachineScaleSetVMsClient) GetSender(req *http.Request) (*htt
 func (client VirtualMachineScaleSetVMsClient) GetResponder(resp *http.Response) (result VirtualMachineScaleSetVM, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -351,7 +348,6 @@ func (client VirtualMachineScaleSetVMsClient) GetInstanceViewSender(req *http.Re
 func (client VirtualMachineScaleSetVMsClient) GetInstanceViewResponder(resp *http.Response) (result VirtualMachineScaleSetVMInstanceView, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -363,9 +359,10 @@ func (client VirtualMachineScaleSetVMsClient) GetInstanceViewResponder(resp *htt
 // Parameters:
 // resourceGroupName - the name of the resource group.
 // virtualMachineScaleSetName - the name of the VM scale set.
-// filter - the filter to apply to the operation.
-// selectParameter - the list parameters.
-// expand - the expand expression to apply to the operation.
+// filter - the filter to apply to the operation. Allowed values are 'startswith(instanceView/statuses/code,
+// 'PowerState') eq true', 'properties/latestModelApplied eq true', 'properties/latestModelApplied eq false'.
+// selectParameter - the list parameters. Allowed values are 'instanceView', 'instanceView/statuses'.
+// expand - the expand expression to apply to the operation. Allowed values are 'instanceView'.
 func (client VirtualMachineScaleSetVMsClient) List(ctx context.Context, resourceGroupName string, virtualMachineScaleSetName string, filter string, selectParameter string, expand string) (result VirtualMachineScaleSetVMListResultPage, err error) {
 	if tracing.IsEnabled() {
 		ctx = tracing.StartSpan(ctx, fqdn+"/VirtualMachineScaleSetVMsClient.List")
@@ -394,6 +391,9 @@ func (client VirtualMachineScaleSetVMsClient) List(ctx context.Context, resource
 	result.vmssvlr, err = client.ListResponder(resp)
 	if err != nil {
 		err = autorest.NewErrorWithError(err, "compute.VirtualMachineScaleSetVMsClient", "List", resp, "Failure responding to request")
+	}
+	if result.vmssvlr.hasNextLink() && result.vmssvlr.IsEmpty() {
+		err = result.NextWithContext(ctx)
 	}
 
 	return
@@ -440,7 +440,6 @@ func (client VirtualMachineScaleSetVMsClient) ListSender(req *http.Request) (*ht
 func (client VirtualMachineScaleSetVMsClient) ListResponder(resp *http.Response) (result VirtualMachineScaleSetVMListResult, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -555,7 +554,6 @@ func (client VirtualMachineScaleSetVMsClient) PerformMaintenanceSender(req *http
 func (client VirtualMachineScaleSetVMsClient) PerformMaintenanceResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByClosing())
 	result.Response = resp
@@ -641,7 +639,6 @@ func (client VirtualMachineScaleSetVMsClient) PowerOffSender(req *http.Request) 
 func (client VirtualMachineScaleSetVMsClient) PowerOffResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByClosing())
 	result.Response = resp
@@ -719,7 +716,6 @@ func (client VirtualMachineScaleSetVMsClient) RedeploySender(req *http.Request) 
 func (client VirtualMachineScaleSetVMsClient) RedeployResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByClosing())
 	result.Response = resp
@@ -802,7 +798,6 @@ func (client VirtualMachineScaleSetVMsClient) ReimageSender(req *http.Request) (
 func (client VirtualMachineScaleSetVMsClient) ReimageResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByClosing())
 	result.Response = resp
@@ -880,7 +875,6 @@ func (client VirtualMachineScaleSetVMsClient) ReimageAllSender(req *http.Request
 func (client VirtualMachineScaleSetVMsClient) ReimageAllResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByClosing())
 	result.Response = resp
@@ -957,7 +951,6 @@ func (client VirtualMachineScaleSetVMsClient) RestartSender(req *http.Request) (
 func (client VirtualMachineScaleSetVMsClient) RestartResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByClosing())
 	result.Response = resp
@@ -1043,7 +1036,6 @@ func (client VirtualMachineScaleSetVMsClient) RunCommandSender(req *http.Request
 func (client VirtualMachineScaleSetVMsClient) RunCommandResponder(resp *http.Response) (result RunCommandResult, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -1121,7 +1113,6 @@ func (client VirtualMachineScaleSetVMsClient) StartSender(req *http.Request) (fu
 func (client VirtualMachineScaleSetVMsClient) StartResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByClosing())
 	result.Response = resp
@@ -1226,7 +1217,6 @@ func (client VirtualMachineScaleSetVMsClient) UpdateSender(req *http.Request) (f
 func (client VirtualMachineScaleSetVMsClient) UpdateResponder(resp *http.Response) (result VirtualMachineScaleSetVM, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())

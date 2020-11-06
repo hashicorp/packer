@@ -31,450 +31,8 @@ import (
 // The package's fully qualified name.
 const fqdn = "github.com/Azure/azure-sdk-for-go/services/devtestlabs/mgmt/2018-09-15/dtl"
 
-// CostThresholdStatus enumerates the values for cost threshold status.
-type CostThresholdStatus string
-
-const (
-	// Disabled ...
-	Disabled CostThresholdStatus = "Disabled"
-	// Enabled ...
-	Enabled CostThresholdStatus = "Enabled"
-)
-
-// PossibleCostThresholdStatusValues returns an array of possible values for the CostThresholdStatus const type.
-func PossibleCostThresholdStatusValues() []CostThresholdStatus {
-	return []CostThresholdStatus{Disabled, Enabled}
-}
-
-// CostType enumerates the values for cost type.
-type CostType string
-
-const (
-	// Projected ...
-	Projected CostType = "Projected"
-	// Reported ...
-	Reported CostType = "Reported"
-	// Unavailable ...
-	Unavailable CostType = "Unavailable"
-)
-
-// PossibleCostTypeValues returns an array of possible values for the CostType const type.
-func PossibleCostTypeValues() []CostType {
-	return []CostType{Projected, Reported, Unavailable}
-}
-
-// CustomImageOsType enumerates the values for custom image os type.
-type CustomImageOsType string
-
-const (
-	// Linux ...
-	Linux CustomImageOsType = "Linux"
-	// None ...
-	None CustomImageOsType = "None"
-	// Windows ...
-	Windows CustomImageOsType = "Windows"
-)
-
-// PossibleCustomImageOsTypeValues returns an array of possible values for the CustomImageOsType const type.
-func PossibleCustomImageOsTypeValues() []CustomImageOsType {
-	return []CustomImageOsType{Linux, None, Windows}
-}
-
-// EnableStatus enumerates the values for enable status.
-type EnableStatus string
-
-const (
-	// EnableStatusDisabled ...
-	EnableStatusDisabled EnableStatus = "Disabled"
-	// EnableStatusEnabled ...
-	EnableStatusEnabled EnableStatus = "Enabled"
-)
-
-// PossibleEnableStatusValues returns an array of possible values for the EnableStatus const type.
-func PossibleEnableStatusValues() []EnableStatus {
-	return []EnableStatus{EnableStatusDisabled, EnableStatusEnabled}
-}
-
-// EnvironmentPermission enumerates the values for environment permission.
-type EnvironmentPermission string
-
-const (
-	// Contributor ...
-	Contributor EnvironmentPermission = "Contributor"
-	// Reader ...
-	Reader EnvironmentPermission = "Reader"
-)
-
-// PossibleEnvironmentPermissionValues returns an array of possible values for the EnvironmentPermission const type.
-func PossibleEnvironmentPermissionValues() []EnvironmentPermission {
-	return []EnvironmentPermission{Contributor, Reader}
-}
-
-// FileUploadOptions enumerates the values for file upload options.
-type FileUploadOptions string
-
-const (
-	// FileUploadOptionsNone ...
-	FileUploadOptionsNone FileUploadOptions = "None"
-	// FileUploadOptionsUploadFilesAndGenerateSasTokens ...
-	FileUploadOptionsUploadFilesAndGenerateSasTokens FileUploadOptions = "UploadFilesAndGenerateSasTokens"
-)
-
-// PossibleFileUploadOptionsValues returns an array of possible values for the FileUploadOptions const type.
-func PossibleFileUploadOptionsValues() []FileUploadOptions {
-	return []FileUploadOptions{FileUploadOptionsNone, FileUploadOptionsUploadFilesAndGenerateSasTokens}
-}
-
-// HostCachingOptions enumerates the values for host caching options.
-type HostCachingOptions string
-
-const (
-	// HostCachingOptionsNone ...
-	HostCachingOptionsNone HostCachingOptions = "None"
-	// HostCachingOptionsReadOnly ...
-	HostCachingOptionsReadOnly HostCachingOptions = "ReadOnly"
-	// HostCachingOptionsReadWrite ...
-	HostCachingOptionsReadWrite HostCachingOptions = "ReadWrite"
-)
-
-// PossibleHostCachingOptionsValues returns an array of possible values for the HostCachingOptions const type.
-func PossibleHostCachingOptionsValues() []HostCachingOptions {
-	return []HostCachingOptions{HostCachingOptionsNone, HostCachingOptionsReadOnly, HostCachingOptionsReadWrite}
-}
-
-// HTTPStatusCode enumerates the values for http status code.
-type HTTPStatusCode string
-
-const (
-	// Accepted ...
-	Accepted HTTPStatusCode = "Accepted"
-	// BadGateway ...
-	BadGateway HTTPStatusCode = "BadGateway"
-	// BadRequest ...
-	BadRequest HTTPStatusCode = "BadRequest"
-	// Conflict ...
-	Conflict HTTPStatusCode = "Conflict"
-	// Continue ...
-	Continue HTTPStatusCode = "Continue"
-	// Created ...
-	Created HTTPStatusCode = "Created"
-	// ExpectationFailed ...
-	ExpectationFailed HTTPStatusCode = "ExpectationFailed"
-	// Forbidden ...
-	Forbidden HTTPStatusCode = "Forbidden"
-	// GatewayTimeout ...
-	GatewayTimeout HTTPStatusCode = "GatewayTimeout"
-	// Gone ...
-	Gone HTTPStatusCode = "Gone"
-	// HTTPVersionNotSupported ...
-	HTTPVersionNotSupported HTTPStatusCode = "HttpVersionNotSupported"
-	// InternalServerError ...
-	InternalServerError HTTPStatusCode = "InternalServerError"
-	// LengthRequired ...
-	LengthRequired HTTPStatusCode = "LengthRequired"
-	// MethodNotAllowed ...
-	MethodNotAllowed HTTPStatusCode = "MethodNotAllowed"
-	// MovedPermanently ...
-	MovedPermanently HTTPStatusCode = "MovedPermanently"
-	// MultipleChoices ...
-	MultipleChoices HTTPStatusCode = "MultipleChoices"
-	// NoContent ...
-	NoContent HTTPStatusCode = "NoContent"
-	// NonAuthoritativeInformation ...
-	NonAuthoritativeInformation HTTPStatusCode = "NonAuthoritativeInformation"
-	// NotAcceptable ...
-	NotAcceptable HTTPStatusCode = "NotAcceptable"
-	// NotFound ...
-	NotFound HTTPStatusCode = "NotFound"
-	// NotImplemented ...
-	NotImplemented HTTPStatusCode = "NotImplemented"
-	// NotModified ...
-	NotModified HTTPStatusCode = "NotModified"
-	// OK ...
-	OK HTTPStatusCode = "OK"
-	// PartialContent ...
-	PartialContent HTTPStatusCode = "PartialContent"
-	// PaymentRequired ...
-	PaymentRequired HTTPStatusCode = "PaymentRequired"
-	// PreconditionFailed ...
-	PreconditionFailed HTTPStatusCode = "PreconditionFailed"
-	// ProxyAuthenticationRequired ...
-	ProxyAuthenticationRequired HTTPStatusCode = "ProxyAuthenticationRequired"
-	// Redirect ...
-	Redirect HTTPStatusCode = "Redirect"
-	// RequestedRangeNotSatisfiable ...
-	RequestedRangeNotSatisfiable HTTPStatusCode = "RequestedRangeNotSatisfiable"
-	// RequestEntityTooLarge ...
-	RequestEntityTooLarge HTTPStatusCode = "RequestEntityTooLarge"
-	// RequestTimeout ...
-	RequestTimeout HTTPStatusCode = "RequestTimeout"
-	// RequestURITooLong ...
-	RequestURITooLong HTTPStatusCode = "RequestUriTooLong"
-	// ResetContent ...
-	ResetContent HTTPStatusCode = "ResetContent"
-	// SeeOther ...
-	SeeOther HTTPStatusCode = "SeeOther"
-	// ServiceUnavailable ...
-	ServiceUnavailable HTTPStatusCode = "ServiceUnavailable"
-	// SwitchingProtocols ...
-	SwitchingProtocols HTTPStatusCode = "SwitchingProtocols"
-	// TemporaryRedirect ...
-	TemporaryRedirect HTTPStatusCode = "TemporaryRedirect"
-	// Unauthorized ...
-	Unauthorized HTTPStatusCode = "Unauthorized"
-	// UnsupportedMediaType ...
-	UnsupportedMediaType HTTPStatusCode = "UnsupportedMediaType"
-	// Unused ...
-	Unused HTTPStatusCode = "Unused"
-	// UpgradeRequired ...
-	UpgradeRequired HTTPStatusCode = "UpgradeRequired"
-	// UseProxy ...
-	UseProxy HTTPStatusCode = "UseProxy"
-)
-
-// PossibleHTTPStatusCodeValues returns an array of possible values for the HTTPStatusCode const type.
-func PossibleHTTPStatusCodeValues() []HTTPStatusCode {
-	return []HTTPStatusCode{Accepted, BadGateway, BadRequest, Conflict, Continue, Created, ExpectationFailed, Forbidden, GatewayTimeout, Gone, HTTPVersionNotSupported, InternalServerError, LengthRequired, MethodNotAllowed, MovedPermanently, MultipleChoices, NoContent, NonAuthoritativeInformation, NotAcceptable, NotFound, NotImplemented, NotModified, OK, PartialContent, PaymentRequired, PreconditionFailed, ProxyAuthenticationRequired, Redirect, RequestedRangeNotSatisfiable, RequestEntityTooLarge, RequestTimeout, RequestURITooLong, ResetContent, SeeOther, ServiceUnavailable, SwitchingProtocols, TemporaryRedirect, Unauthorized, UnsupportedMediaType, Unused, UpgradeRequired, UseProxy}
-}
-
-// LinuxOsState enumerates the values for linux os state.
-type LinuxOsState string
-
-const (
-	// DeprovisionApplied ...
-	DeprovisionApplied LinuxOsState = "DeprovisionApplied"
-	// DeprovisionRequested ...
-	DeprovisionRequested LinuxOsState = "DeprovisionRequested"
-	// NonDeprovisioned ...
-	NonDeprovisioned LinuxOsState = "NonDeprovisioned"
-)
-
-// PossibleLinuxOsStateValues returns an array of possible values for the LinuxOsState const type.
-func PossibleLinuxOsStateValues() []LinuxOsState {
-	return []LinuxOsState{DeprovisionApplied, DeprovisionRequested, NonDeprovisioned}
-}
-
-// NotificationChannelEventType enumerates the values for notification channel event type.
-type NotificationChannelEventType string
-
-const (
-	// AutoShutdown ...
-	AutoShutdown NotificationChannelEventType = "AutoShutdown"
-	// Cost ...
-	Cost NotificationChannelEventType = "Cost"
-)
-
-// PossibleNotificationChannelEventTypeValues returns an array of possible values for the NotificationChannelEventType const type.
-func PossibleNotificationChannelEventTypeValues() []NotificationChannelEventType {
-	return []NotificationChannelEventType{AutoShutdown, Cost}
-}
-
-// PolicyEvaluatorType enumerates the values for policy evaluator type.
-type PolicyEvaluatorType string
-
-const (
-	// AllowedValuesPolicy ...
-	AllowedValuesPolicy PolicyEvaluatorType = "AllowedValuesPolicy"
-	// MaxValuePolicy ...
-	MaxValuePolicy PolicyEvaluatorType = "MaxValuePolicy"
-)
-
-// PossiblePolicyEvaluatorTypeValues returns an array of possible values for the PolicyEvaluatorType const type.
-func PossiblePolicyEvaluatorTypeValues() []PolicyEvaluatorType {
-	return []PolicyEvaluatorType{AllowedValuesPolicy, MaxValuePolicy}
-}
-
-// PolicyFactName enumerates the values for policy fact name.
-type PolicyFactName string
-
-const (
-	// PolicyFactNameEnvironmentTemplate ...
-	PolicyFactNameEnvironmentTemplate PolicyFactName = "EnvironmentTemplate"
-	// PolicyFactNameGalleryImage ...
-	PolicyFactNameGalleryImage PolicyFactName = "GalleryImage"
-	// PolicyFactNameLabPremiumVMCount ...
-	PolicyFactNameLabPremiumVMCount PolicyFactName = "LabPremiumVmCount"
-	// PolicyFactNameLabTargetCost ...
-	PolicyFactNameLabTargetCost PolicyFactName = "LabTargetCost"
-	// PolicyFactNameLabVMCount ...
-	PolicyFactNameLabVMCount PolicyFactName = "LabVmCount"
-	// PolicyFactNameLabVMSize ...
-	PolicyFactNameLabVMSize PolicyFactName = "LabVmSize"
-	// PolicyFactNameScheduleEditPermission ...
-	PolicyFactNameScheduleEditPermission PolicyFactName = "ScheduleEditPermission"
-	// PolicyFactNameUserOwnedLabPremiumVMCount ...
-	PolicyFactNameUserOwnedLabPremiumVMCount PolicyFactName = "UserOwnedLabPremiumVmCount"
-	// PolicyFactNameUserOwnedLabVMCount ...
-	PolicyFactNameUserOwnedLabVMCount PolicyFactName = "UserOwnedLabVmCount"
-	// PolicyFactNameUserOwnedLabVMCountInSubnet ...
-	PolicyFactNameUserOwnedLabVMCountInSubnet PolicyFactName = "UserOwnedLabVmCountInSubnet"
-)
-
-// PossiblePolicyFactNameValues returns an array of possible values for the PolicyFactName const type.
-func PossiblePolicyFactNameValues() []PolicyFactName {
-	return []PolicyFactName{PolicyFactNameEnvironmentTemplate, PolicyFactNameGalleryImage, PolicyFactNameLabPremiumVMCount, PolicyFactNameLabTargetCost, PolicyFactNameLabVMCount, PolicyFactNameLabVMSize, PolicyFactNameScheduleEditPermission, PolicyFactNameUserOwnedLabPremiumVMCount, PolicyFactNameUserOwnedLabVMCount, PolicyFactNameUserOwnedLabVMCountInSubnet}
-}
-
-// PolicyStatus enumerates the values for policy status.
-type PolicyStatus string
-
-const (
-	// PolicyStatusDisabled ...
-	PolicyStatusDisabled PolicyStatus = "Disabled"
-	// PolicyStatusEnabled ...
-	PolicyStatusEnabled PolicyStatus = "Enabled"
-)
-
-// PossiblePolicyStatusValues returns an array of possible values for the PolicyStatus const type.
-func PossiblePolicyStatusValues() []PolicyStatus {
-	return []PolicyStatus{PolicyStatusDisabled, PolicyStatusEnabled}
-}
-
-// PremiumDataDisk enumerates the values for premium data disk.
-type PremiumDataDisk string
-
-const (
-	// PremiumDataDiskDisabled ...
-	PremiumDataDiskDisabled PremiumDataDisk = "Disabled"
-	// PremiumDataDiskEnabled ...
-	PremiumDataDiskEnabled PremiumDataDisk = "Enabled"
-)
-
-// PossiblePremiumDataDiskValues returns an array of possible values for the PremiumDataDisk const type.
-func PossiblePremiumDataDiskValues() []PremiumDataDisk {
-	return []PremiumDataDisk{PremiumDataDiskDisabled, PremiumDataDiskEnabled}
-}
-
-// ReportingCycleType enumerates the values for reporting cycle type.
-type ReportingCycleType string
-
-const (
-	// CalendarMonth ...
-	CalendarMonth ReportingCycleType = "CalendarMonth"
-	// Custom ...
-	Custom ReportingCycleType = "Custom"
-)
-
-// PossibleReportingCycleTypeValues returns an array of possible values for the ReportingCycleType const type.
-func PossibleReportingCycleTypeValues() []ReportingCycleType {
-	return []ReportingCycleType{CalendarMonth, Custom}
-}
-
-// SourceControlType enumerates the values for source control type.
-type SourceControlType string
-
-const (
-	// GitHub ...
-	GitHub SourceControlType = "GitHub"
-	// VsoGit ...
-	VsoGit SourceControlType = "VsoGit"
-)
-
-// PossibleSourceControlTypeValues returns an array of possible values for the SourceControlType const type.
-func PossibleSourceControlTypeValues() []SourceControlType {
-	return []SourceControlType{GitHub, VsoGit}
-}
-
-// StorageType enumerates the values for storage type.
-type StorageType string
-
-const (
-	// Premium ...
-	Premium StorageType = "Premium"
-	// Standard ...
-	Standard StorageType = "Standard"
-	// StandardSSD ...
-	StandardSSD StorageType = "StandardSSD"
-)
-
-// PossibleStorageTypeValues returns an array of possible values for the StorageType const type.
-func PossibleStorageTypeValues() []StorageType {
-	return []StorageType{Premium, Standard, StandardSSD}
-}
-
-// TargetCostStatus enumerates the values for target cost status.
-type TargetCostStatus string
-
-const (
-	// TargetCostStatusDisabled ...
-	TargetCostStatusDisabled TargetCostStatus = "Disabled"
-	// TargetCostStatusEnabled ...
-	TargetCostStatusEnabled TargetCostStatus = "Enabled"
-)
-
-// PossibleTargetCostStatusValues returns an array of possible values for the TargetCostStatus const type.
-func PossibleTargetCostStatusValues() []TargetCostStatus {
-	return []TargetCostStatus{TargetCostStatusDisabled, TargetCostStatusEnabled}
-}
-
-// TransportProtocol enumerates the values for transport protocol.
-type TransportProtocol string
-
-const (
-	// TCP ...
-	TCP TransportProtocol = "Tcp"
-	// UDP ...
-	UDP TransportProtocol = "Udp"
-)
-
-// PossibleTransportProtocolValues returns an array of possible values for the TransportProtocol const type.
-func PossibleTransportProtocolValues() []TransportProtocol {
-	return []TransportProtocol{TCP, UDP}
-}
-
-// UsagePermissionType enumerates the values for usage permission type.
-type UsagePermissionType string
-
-const (
-	// Allow ...
-	Allow UsagePermissionType = "Allow"
-	// Default ...
-	Default UsagePermissionType = "Default"
-	// Deny ...
-	Deny UsagePermissionType = "Deny"
-)
-
-// PossibleUsagePermissionTypeValues returns an array of possible values for the UsagePermissionType const type.
-func PossibleUsagePermissionTypeValues() []UsagePermissionType {
-	return []UsagePermissionType{Allow, Default, Deny}
-}
-
-// VirtualMachineCreationSource enumerates the values for virtual machine creation source.
-type VirtualMachineCreationSource string
-
-const (
-	// FromCustomImage ...
-	FromCustomImage VirtualMachineCreationSource = "FromCustomImage"
-	// FromGalleryImage ...
-	FromGalleryImage VirtualMachineCreationSource = "FromGalleryImage"
-	// FromSharedGalleryImage ...
-	FromSharedGalleryImage VirtualMachineCreationSource = "FromSharedGalleryImage"
-)
-
-// PossibleVirtualMachineCreationSourceValues returns an array of possible values for the VirtualMachineCreationSource const type.
-func PossibleVirtualMachineCreationSourceValues() []VirtualMachineCreationSource {
-	return []VirtualMachineCreationSource{FromCustomImage, FromGalleryImage, FromSharedGalleryImage}
-}
-
-// WindowsOsState enumerates the values for windows os state.
-type WindowsOsState string
-
-const (
-	// NonSysprepped ...
-	NonSysprepped WindowsOsState = "NonSysprepped"
-	// SysprepApplied ...
-	SysprepApplied WindowsOsState = "SysprepApplied"
-	// SysprepRequested ...
-	SysprepRequested WindowsOsState = "SysprepRequested"
-)
-
-// PossibleWindowsOsStateValues returns an array of possible values for the WindowsOsState const type.
-func PossibleWindowsOsStateValues() []WindowsOsState {
-	return []WindowsOsState{NonSysprepped, SysprepApplied, SysprepRequested}
-}
-
-// ApplicableSchedule schedules applicable to a virtual machine. The schedules may have been defined on a
-// VM or on lab level.
+// ApplicableSchedule schedules applicable to a virtual machine. The schedules may have been defined on a VM or
+// on lab level.
 type ApplicableSchedule struct {
 	autorest.Response `json:"-"`
 	// ApplicableScheduleProperties - The properties of the resource.
@@ -575,8 +133,8 @@ func (as *ApplicableSchedule) UnmarshalJSON(body []byte) error {
 	return nil
 }
 
-// ApplicableScheduleFragment schedules applicable to a virtual machine. The schedules may have been
-// defined on a VM or on lab level.
+// ApplicableScheduleFragment schedules applicable to a virtual machine. The schedules may have been defined on
+// a VM or on lab level.
 type ApplicableScheduleFragment struct {
 	// ApplicableSchedulePropertiesFragment - The properties of the resource.
 	*ApplicableSchedulePropertiesFragment `json:"properties,omitempty"`
@@ -838,10 +396,15 @@ func (atl ArmTemplateList) IsEmpty() bool {
 	return atl.Value == nil || len(*atl.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (atl ArmTemplateList) hasNextLink() bool {
+	return atl.NextLink != nil && len(*atl.NextLink) != 0
+}
+
 // armTemplateListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (atl ArmTemplateList) armTemplateListPreparer(ctx context.Context) (*http.Request, error) {
-	if atl.NextLink == nil || len(to.String(atl.NextLink)) < 1 {
+	if !atl.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -869,11 +432,16 @@ func (page *ArmTemplateListPage) NextWithContext(ctx context.Context) (err error
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.atl)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.atl)
+		if err != nil {
+			return err
+		}
+		page.atl = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.atl = next
 	return nil
 }
 
@@ -1177,10 +745,15 @@ func (al ArtifactList) IsEmpty() bool {
 	return al.Value == nil || len(*al.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (al ArtifactList) hasNextLink() bool {
+	return al.NextLink != nil && len(*al.NextLink) != 0
+}
+
 // artifactListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (al ArtifactList) artifactListPreparer(ctx context.Context) (*http.Request, error) {
-	if al.NextLink == nil || len(to.String(al.NextLink)) < 1 {
+	if !al.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -1208,11 +781,16 @@ func (page *ArtifactListPage) NextWithContext(ctx context.Context) (err error) {
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.al)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.al)
+		if err != nil {
+			return err
+		}
+		page.al = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.al = next
 	return nil
 }
 
@@ -1513,10 +1091,15 @@ func (asl ArtifactSourceList) IsEmpty() bool {
 	return asl.Value == nil || len(*asl.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (asl ArtifactSourceList) hasNextLink() bool {
+	return asl.NextLink != nil && len(*asl.NextLink) != 0
+}
+
 // artifactSourceListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (asl ArtifactSourceList) artifactSourceListPreparer(ctx context.Context) (*http.Request, error) {
-	if asl.NextLink == nil || len(to.String(asl.NextLink)) < 1 {
+	if !asl.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -1544,11 +1127,16 @@ func (page *ArtifactSourceListPage) NextWithContext(ctx context.Context) (err er
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.asl)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.asl)
+		if err != nil {
+			return err
+		}
+		page.asl = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.asl = next
 	return nil
 }
 
@@ -1606,6 +1194,36 @@ type ArtifactSourceProperties struct {
 	ProvisioningState *string `json:"provisioningState,omitempty"`
 	// UniqueIdentifier - READ-ONLY; The unique immutable identifier of a resource (Guid).
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for ArtifactSourceProperties.
+func (asp ArtifactSourceProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if asp.DisplayName != nil {
+		objectMap["displayName"] = asp.DisplayName
+	}
+	if asp.URI != nil {
+		objectMap["uri"] = asp.URI
+	}
+	if asp.SourceType != "" {
+		objectMap["sourceType"] = asp.SourceType
+	}
+	if asp.FolderPath != nil {
+		objectMap["folderPath"] = asp.FolderPath
+	}
+	if asp.ArmTemplateFolderPath != nil {
+		objectMap["armTemplateFolderPath"] = asp.ArmTemplateFolderPath
+	}
+	if asp.BranchRef != nil {
+		objectMap["branchRef"] = asp.BranchRef
+	}
+	if asp.SecurityToken != nil {
+		objectMap["securityToken"] = asp.SecurityToken
+	}
+	if asp.Status != "" {
+		objectMap["status"] = asp.Status
+	}
+	return json.Marshal(objectMap)
 }
 
 // ArtifactSourcePropertiesFragment properties of an artifact source.
@@ -2009,10 +1627,15 @@ func (cil CustomImageList) IsEmpty() bool {
 	return cil.Value == nil || len(*cil.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (cil CustomImageList) hasNextLink() bool {
+	return cil.NextLink != nil && len(*cil.NextLink) != 0
+}
+
 // customImageListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (cil CustomImageList) customImageListPreparer(ctx context.Context) (*http.Request, error) {
-	if cil.NextLink == nil || len(to.String(cil.NextLink)) < 1 {
+	if !cil.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -2040,11 +1663,16 @@ func (page *CustomImageListPage) NextWithContext(ctx context.Context) (err error
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.cil)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.cil)
+		if err != nil {
+			return err
+		}
+		page.cil = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.cil = next
 	return nil
 }
 
@@ -2104,6 +1732,39 @@ type CustomImageProperties struct {
 	ProvisioningState *string `json:"provisioningState,omitempty"`
 	// UniqueIdentifier - READ-ONLY; The unique immutable identifier of a resource (Guid).
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for CustomImageProperties.
+func (cip CustomImageProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if cip.VM != nil {
+		objectMap["vm"] = cip.VM
+	}
+	if cip.Vhd != nil {
+		objectMap["vhd"] = cip.Vhd
+	}
+	if cip.Description != nil {
+		objectMap["description"] = cip.Description
+	}
+	if cip.Author != nil {
+		objectMap["author"] = cip.Author
+	}
+	if cip.ManagedImageID != nil {
+		objectMap["managedImageId"] = cip.ManagedImageID
+	}
+	if cip.ManagedSnapshotID != nil {
+		objectMap["managedSnapshotId"] = cip.ManagedSnapshotID
+	}
+	if cip.DataDiskStorageInfo != nil {
+		objectMap["dataDiskStorageInfo"] = cip.DataDiskStorageInfo
+	}
+	if cip.CustomImagePlan != nil {
+		objectMap["customImagePlan"] = cip.CustomImagePlan
+	}
+	if cip.IsPlanAuthorized != nil {
+		objectMap["isPlanAuthorized"] = cip.IsPlanAuthorized
+	}
+	return json.Marshal(objectMap)
 }
 
 // CustomImagePropertiesCustom properties for creating a custom image from a VHD.
@@ -2188,8 +1849,8 @@ type CustomImagePropertiesFromVMFragment struct {
 	LinuxOsInfo *LinuxOsInfoFragment `json:"linuxOsInfo,omitempty"`
 }
 
-// CustomImagesCreateOrUpdateFuture an abstraction for monitoring and retrieving the results of a
-// long-running operation.
+// CustomImagesCreateOrUpdateFuture an abstraction for monitoring and retrieving the results of a long-running
+// operation.
 type CustomImagesCreateOrUpdateFuture struct {
 	azure.Future
 }
@@ -2531,10 +2192,15 @@ func (dl DiskList) IsEmpty() bool {
 	return dl.Value == nil || len(*dl.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (dl DiskList) hasNextLink() bool {
+	return dl.NextLink != nil && len(*dl.NextLink) != 0
+}
+
 // diskListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (dl DiskList) diskListPreparer(ctx context.Context) (*http.Request, error) {
-	if dl.NextLink == nil || len(to.String(dl.NextLink)) < 1 {
+	if !dl.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -2562,11 +2228,16 @@ func (page *DiskListPage) NextWithContext(ctx context.Context) (err error) {
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.dl)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.dl)
+		if err != nil {
+			return err
+		}
+		page.dl = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.dl = next
 	return nil
 }
 
@@ -2622,6 +2293,33 @@ type DiskProperties struct {
 	ProvisioningState *string `json:"provisioningState,omitempty"`
 	// UniqueIdentifier - READ-ONLY; The unique immutable identifier of a resource (Guid).
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for DiskProperties.
+func (dp DiskProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if dp.DiskType != "" {
+		objectMap["diskType"] = dp.DiskType
+	}
+	if dp.DiskSizeGiB != nil {
+		objectMap["diskSizeGiB"] = dp.DiskSizeGiB
+	}
+	if dp.LeasedByLabVMID != nil {
+		objectMap["leasedByLabVmId"] = dp.LeasedByLabVMID
+	}
+	if dp.DiskBlobName != nil {
+		objectMap["diskBlobName"] = dp.DiskBlobName
+	}
+	if dp.DiskURI != nil {
+		objectMap["diskUri"] = dp.DiskURI
+	}
+	if dp.HostCaching != nil {
+		objectMap["hostCaching"] = dp.HostCaching
+	}
+	if dp.ManagedDiskID != nil {
+		objectMap["managedDiskId"] = dp.ManagedDiskID
+	}
+	return json.Marshal(objectMap)
 }
 
 // DiskPropertiesFragment properties of a disk.
@@ -2984,10 +2682,15 @@ func (el EnvironmentList) IsEmpty() bool {
 	return el.Value == nil || len(*el.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (el EnvironmentList) hasNextLink() bool {
+	return el.NextLink != nil && len(*el.NextLink) != 0
+}
+
 // environmentListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (el EnvironmentList) environmentListPreparer(ctx context.Context) (*http.Request, error) {
-	if el.NextLink == nil || len(to.String(el.NextLink)) < 1 {
+	if !el.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -3015,11 +2718,16 @@ func (page *EnvironmentListPage) NextWithContext(ctx context.Context) (err error
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.el)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.el)
+		if err != nil {
+			return err
+		}
+		page.el = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.el = next
 	return nil
 }
 
@@ -3069,6 +2777,18 @@ type EnvironmentProperties struct {
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
 }
 
+// MarshalJSON is the custom marshaler for EnvironmentProperties.
+func (ep EnvironmentProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if ep.DeploymentProperties != nil {
+		objectMap["deploymentProperties"] = ep.DeploymentProperties
+	}
+	if ep.ArmTemplateDisplayName != nil {
+		objectMap["armTemplateDisplayName"] = ep.ArmTemplateDisplayName
+	}
+	return json.Marshal(objectMap)
+}
+
 // EnvironmentPropertiesFragment properties of an environment.
 type EnvironmentPropertiesFragment struct {
 	// DeploymentProperties - The deployment properties of the environment.
@@ -3077,8 +2797,8 @@ type EnvironmentPropertiesFragment struct {
 	ArmTemplateDisplayName *string `json:"armTemplateDisplayName,omitempty"`
 }
 
-// EnvironmentsCreateOrUpdateFuture an abstraction for monitoring and retrieving the results of a
-// long-running operation.
+// EnvironmentsCreateOrUpdateFuture an abstraction for monitoring and retrieving the results of a long-running
+// operation.
 type EnvironmentsCreateOrUpdateFuture struct {
 	azure.Future
 }
@@ -3421,10 +3141,15 @@ func (fl FormulaList) IsEmpty() bool {
 	return fl.Value == nil || len(*fl.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (fl FormulaList) hasNextLink() bool {
+	return fl.NextLink != nil && len(*fl.NextLink) != 0
+}
+
 // formulaListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (fl FormulaList) formulaListPreparer(ctx context.Context) (*http.Request, error) {
-	if fl.NextLink == nil || len(to.String(fl.NextLink)) < 1 {
+	if !fl.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -3452,11 +3177,16 @@ func (page *FormulaListPage) NextWithContext(ctx context.Context) (err error) {
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.fl)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.fl)
+		if err != nil {
+			return err
+		}
+		page.fl = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.fl = next
 	return nil
 }
 
@@ -3508,6 +3238,27 @@ type FormulaProperties struct {
 	ProvisioningState *string `json:"provisioningState,omitempty"`
 	// UniqueIdentifier - READ-ONLY; The unique immutable identifier of a resource (Guid).
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for FormulaProperties.
+func (fp FormulaProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if fp.Description != nil {
+		objectMap["description"] = fp.Description
+	}
+	if fp.Author != nil {
+		objectMap["author"] = fp.Author
+	}
+	if fp.OsType != nil {
+		objectMap["osType"] = fp.OsType
+	}
+	if fp.FormulaContent != nil {
+		objectMap["formulaContent"] = fp.FormulaContent
+	}
+	if fp.VM != nil {
+		objectMap["vm"] = fp.VM
+	}
+	return json.Marshal(objectMap)
 }
 
 // FormulaPropertiesFragment properties of a formula.
@@ -3742,10 +3493,15 @@ func (gil GalleryImageList) IsEmpty() bool {
 	return gil.Value == nil || len(*gil.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (gil GalleryImageList) hasNextLink() bool {
+	return gil.NextLink != nil && len(*gil.NextLink) != 0
+}
+
 // galleryImageListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (gil GalleryImageList) galleryImageListPreparer(ctx context.Context) (*http.Request, error) {
-	if gil.NextLink == nil || len(to.String(gil.NextLink)) < 1 {
+	if !gil.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -3773,11 +3529,16 @@ func (page *GalleryImageListPage) NextWithContext(ctx context.Context) (err erro
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.gil)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.gil)
+		if err != nil {
+			return err
+		}
+		page.gil = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.gil = next
 	return nil
 }
 
@@ -3829,6 +3590,33 @@ type GalleryImageProperties struct {
 	PlanID *string `json:"planId,omitempty"`
 	// IsPlanAuthorized - Indicates if the plan has been authorized for programmatic deployment.
 	IsPlanAuthorized *bool `json:"isPlanAuthorized,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for GalleryImageProperties.
+func (gip GalleryImageProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if gip.Author != nil {
+		objectMap["author"] = gip.Author
+	}
+	if gip.Description != nil {
+		objectMap["description"] = gip.Description
+	}
+	if gip.ImageReference != nil {
+		objectMap["imageReference"] = gip.ImageReference
+	}
+	if gip.Icon != nil {
+		objectMap["icon"] = gip.Icon
+	}
+	if gip.Enabled != nil {
+		objectMap["enabled"] = gip.Enabled
+	}
+	if gip.PlanID != nil {
+		objectMap["planId"] = gip.PlanID
+	}
+	if gip.IsPlanAuthorized != nil {
+		objectMap["isPlanAuthorized"] = gip.IsPlanAuthorized
+	}
+	return json.Marshal(objectMap)
 }
 
 // GalleryImageReference the reference information for an Azure Marketplace image.
@@ -3974,8 +3762,8 @@ type InboundNatRule struct {
 	BackendPort *int32 `json:"backendPort,omitempty"`
 }
 
-// InboundNatRuleFragment a rule for NAT - exposing a VM's port (backendPort) on the public IP address
-// using a load balancer.
+// InboundNatRuleFragment a rule for NAT - exposing a VM's port (backendPort) on the public IP address using a
+// load balancer.
 type InboundNatRuleFragment struct {
 	// TransportProtocol - The transport protocol for the endpoint. Possible values include: 'TCP', 'UDP'
 	TransportProtocol TransportProtocol `json:"transportProtocol,omitempty"`
@@ -4102,6 +3890,27 @@ type LabAnnouncementProperties struct {
 	ProvisioningState *string `json:"provisioningState,omitempty"`
 	// UniqueIdentifier - READ-ONLY; The unique immutable identifier of a resource (Guid).
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for LabAnnouncementProperties.
+func (lap LabAnnouncementProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if lap.Title != nil {
+		objectMap["title"] = lap.Title
+	}
+	if lap.Markdown != nil {
+		objectMap["markdown"] = lap.Markdown
+	}
+	if lap.Enabled != "" {
+		objectMap["enabled"] = lap.Enabled
+	}
+	if lap.ExpirationDate != nil {
+		objectMap["expirationDate"] = lap.ExpirationDate
+	}
+	if lap.Expired != nil {
+		objectMap["expired"] = lap.Expired
+	}
+	return json.Marshal(objectMap)
 }
 
 // LabAnnouncementPropertiesFragment properties of a lab's announcement banner
@@ -4253,6 +4062,27 @@ type LabCostProperties struct {
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
 }
 
+// MarshalJSON is the custom marshaler for LabCostProperties.
+func (lcp LabCostProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if lcp.TargetCost != nil {
+		objectMap["targetCost"] = lcp.TargetCost
+	}
+	if lcp.CurrencyCode != nil {
+		objectMap["currencyCode"] = lcp.CurrencyCode
+	}
+	if lcp.StartDateTime != nil {
+		objectMap["startDateTime"] = lcp.StartDateTime
+	}
+	if lcp.EndDateTime != nil {
+		objectMap["endDateTime"] = lcp.EndDateTime
+	}
+	if lcp.CreatedDate != nil {
+		objectMap["createdDate"] = lcp.CreatedDate
+	}
+	return json.Marshal(objectMap)
+}
+
 // LabCostSummaryProperties the properties of the cost summary.
 type LabCostSummaryProperties struct {
 	// EstimatedLabCost - The cost component of the cost item.
@@ -4389,10 +4219,15 @@ func (ll LabList) IsEmpty() bool {
 	return ll.Value == nil || len(*ll.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (ll LabList) hasNextLink() bool {
+	return ll.NextLink != nil && len(*ll.NextLink) != 0
+}
+
 // labListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (ll LabList) labListPreparer(ctx context.Context) (*http.Request, error) {
-	if ll.NextLink == nil || len(to.String(ll.NextLink)) < 1 {
+	if !ll.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -4420,11 +4255,16 @@ func (page *LabListPage) NextWithContext(ctx context.Context) (err error) {
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.ll)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.ll)
+		if err != nil {
+			return err
+		}
+		page.ll = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.ll = next
 	return nil
 }
 
@@ -4608,8 +4448,7 @@ type LabResourceCostProperties struct {
 	ExternalResourceID *string `json:"externalResourceId,omitempty"`
 }
 
-// LabsClaimAnyVMFuture an abstraction for monitoring and retrieving the results of a long-running
-// operation.
+// LabsClaimAnyVMFuture an abstraction for monitoring and retrieving the results of a long-running operation.
 type LabsClaimAnyVMFuture struct {
 	azure.Future
 }
@@ -4728,8 +4567,8 @@ func (future *LabsExportResourceUsageFuture) Result(client LabsClient) (ar autor
 	return
 }
 
-// LabsImportVirtualMachineFuture an abstraction for monitoring and retrieving the results of a
-// long-running operation.
+// LabsImportVirtualMachineFuture an abstraction for monitoring and retrieving the results of a long-running
+// operation.
 type LabsImportVirtualMachineFuture struct {
 	azure.Future
 }
@@ -4850,10 +4689,15 @@ func (lvl LabVhdList) IsEmpty() bool {
 	return lvl.Value == nil || len(*lvl.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (lvl LabVhdList) hasNextLink() bool {
+	return lvl.NextLink != nil && len(*lvl.NextLink) != 0
+}
+
 // labVhdListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (lvl LabVhdList) labVhdListPreparer(ctx context.Context) (*http.Request, error) {
-	if lvl.NextLink == nil || len(to.String(lvl.NextLink)) < 1 {
+	if !lvl.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -4881,11 +4725,16 @@ func (page *LabVhdListPage) NextWithContext(ctx context.Context) (err error) {
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.lvl)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.lvl)
+		if err != nil {
+			return err
+		}
+		page.lvl = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.lvl = next
 	return nil
 }
 
@@ -5448,10 +5297,15 @@ func (lvml LabVirtualMachineList) IsEmpty() bool {
 	return lvml.Value == nil || len(*lvml.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (lvml LabVirtualMachineList) hasNextLink() bool {
+	return lvml.NextLink != nil && len(*lvml.NextLink) != 0
+}
+
 // labVirtualMachineListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (lvml LabVirtualMachineList) labVirtualMachineListPreparer(ctx context.Context) (*http.Request, error) {
-	if lvml.NextLink == nil || len(to.String(lvml.NextLink)) < 1 {
+	if !lvml.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -5479,11 +5333,16 @@ func (page *LabVirtualMachineListPage) NextWithContext(ctx context.Context) (err
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.lvml)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.lvml)
+		if err != nil {
+			return err
+		}
+		page.lvml = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.lvml = next
 	return nil
 }
 
@@ -5589,6 +5448,105 @@ type LabVirtualMachineProperties struct {
 	ProvisioningState *string `json:"provisioningState,omitempty"`
 	// UniqueIdentifier - READ-ONLY; The unique immutable identifier of a resource (Guid).
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for LabVirtualMachineProperties.
+func (lvmp LabVirtualMachineProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if lvmp.Notes != nil {
+		objectMap["notes"] = lvmp.Notes
+	}
+	if lvmp.OwnerObjectID != nil {
+		objectMap["ownerObjectId"] = lvmp.OwnerObjectID
+	}
+	if lvmp.OwnerUserPrincipalName != nil {
+		objectMap["ownerUserPrincipalName"] = lvmp.OwnerUserPrincipalName
+	}
+	if lvmp.CreatedByUserID != nil {
+		objectMap["createdByUserId"] = lvmp.CreatedByUserID
+	}
+	if lvmp.CreatedByUser != nil {
+		objectMap["createdByUser"] = lvmp.CreatedByUser
+	}
+	if lvmp.CreatedDate != nil {
+		objectMap["createdDate"] = lvmp.CreatedDate
+	}
+	if lvmp.ComputeID != nil {
+		objectMap["computeId"] = lvmp.ComputeID
+	}
+	if lvmp.CustomImageID != nil {
+		objectMap["customImageId"] = lvmp.CustomImageID
+	}
+	if lvmp.OsType != nil {
+		objectMap["osType"] = lvmp.OsType
+	}
+	if lvmp.Size != nil {
+		objectMap["size"] = lvmp.Size
+	}
+	if lvmp.UserName != nil {
+		objectMap["userName"] = lvmp.UserName
+	}
+	if lvmp.Password != nil {
+		objectMap["password"] = lvmp.Password
+	}
+	if lvmp.SSHKey != nil {
+		objectMap["sshKey"] = lvmp.SSHKey
+	}
+	if lvmp.IsAuthenticationWithSSHKey != nil {
+		objectMap["isAuthenticationWithSshKey"] = lvmp.IsAuthenticationWithSSHKey
+	}
+	if lvmp.Fqdn != nil {
+		objectMap["fqdn"] = lvmp.Fqdn
+	}
+	if lvmp.LabSubnetName != nil {
+		objectMap["labSubnetName"] = lvmp.LabSubnetName
+	}
+	if lvmp.LabVirtualNetworkID != nil {
+		objectMap["labVirtualNetworkId"] = lvmp.LabVirtualNetworkID
+	}
+	if lvmp.DisallowPublicIPAddress != nil {
+		objectMap["disallowPublicIpAddress"] = lvmp.DisallowPublicIPAddress
+	}
+	if lvmp.Artifacts != nil {
+		objectMap["artifacts"] = lvmp.Artifacts
+	}
+	if lvmp.ArtifactDeploymentStatus != nil {
+		objectMap["artifactDeploymentStatus"] = lvmp.ArtifactDeploymentStatus
+	}
+	if lvmp.GalleryImageReference != nil {
+		objectMap["galleryImageReference"] = lvmp.GalleryImageReference
+	}
+	if lvmp.PlanID != nil {
+		objectMap["planId"] = lvmp.PlanID
+	}
+	if lvmp.NetworkInterface != nil {
+		objectMap["networkInterface"] = lvmp.NetworkInterface
+	}
+	if lvmp.ExpirationDate != nil {
+		objectMap["expirationDate"] = lvmp.ExpirationDate
+	}
+	if lvmp.AllowClaim != nil {
+		objectMap["allowClaim"] = lvmp.AllowClaim
+	}
+	if lvmp.StorageType != nil {
+		objectMap["storageType"] = lvmp.StorageType
+	}
+	if lvmp.VirtualMachineCreationSource != "" {
+		objectMap["virtualMachineCreationSource"] = lvmp.VirtualMachineCreationSource
+	}
+	if lvmp.EnvironmentID != nil {
+		objectMap["environmentId"] = lvmp.EnvironmentID
+	}
+	if lvmp.DataDiskParameters != nil {
+		objectMap["dataDiskParameters"] = lvmp.DataDiskParameters
+	}
+	if lvmp.ScheduleParameters != nil {
+		objectMap["scheduleParameters"] = lvmp.ScheduleParameters
+	}
+	if lvmp.LastKnownPowerState != nil {
+		objectMap["lastKnownPowerState"] = lvmp.LastKnownPowerState
+	}
+	return json.Marshal(objectMap)
 }
 
 // LabVirtualMachinePropertiesFragment properties of a virtual machine.
@@ -5944,10 +5902,15 @@ func (ncl NotificationChannelList) IsEmpty() bool {
 	return ncl.Value == nil || len(*ncl.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (ncl NotificationChannelList) hasNextLink() bool {
+	return ncl.NextLink != nil && len(*ncl.NextLink) != 0
+}
+
 // notificationChannelListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (ncl NotificationChannelList) notificationChannelListPreparer(ctx context.Context) (*http.Request, error) {
-	if ncl.NextLink == nil || len(to.String(ncl.NextLink)) < 1 {
+	if !ncl.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -5975,11 +5938,16 @@ func (page *NotificationChannelListPage) NextWithContext(ctx context.Context) (e
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.ncl)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.ncl)
+		if err != nil {
+			return err
+		}
+		page.ncl = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.ncl = next
 	return nil
 }
 
@@ -6031,6 +5999,27 @@ type NotificationChannelProperties struct {
 	ProvisioningState *string `json:"provisioningState,omitempty"`
 	// UniqueIdentifier - READ-ONLY; The unique immutable identifier of a resource (Guid).
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for NotificationChannelProperties.
+func (ncp NotificationChannelProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if ncp.WebHookURL != nil {
+		objectMap["webHookUrl"] = ncp.WebHookURL
+	}
+	if ncp.EmailRecipient != nil {
+		objectMap["emailRecipient"] = ncp.EmailRecipient
+	}
+	if ncp.NotificationLocale != nil {
+		objectMap["notificationLocale"] = ncp.NotificationLocale
+	}
+	if ncp.Description != nil {
+		objectMap["description"] = ncp.Description
+	}
+	if ncp.Events != nil {
+		objectMap["events"] = ncp.Events
+	}
+	return json.Marshal(objectMap)
 }
 
 // NotificationChannelPropertiesFragment properties of a schedule.
@@ -6375,10 +6364,15 @@ func (pl PolicyList) IsEmpty() bool {
 	return pl.Value == nil || len(*pl.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (pl PolicyList) hasNextLink() bool {
+	return pl.NextLink != nil && len(*pl.NextLink) != 0
+}
+
 // policyListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (pl PolicyList) policyListPreparer(ctx context.Context) (*http.Request, error) {
-	if pl.NextLink == nil || len(to.String(pl.NextLink)) < 1 {
+	if !pl.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -6406,11 +6400,16 @@ func (page *PolicyListPage) NextWithContext(ctx context.Context) (err error) {
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.pl)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.pl)
+		if err != nil {
+			return err
+		}
+		page.pl = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.pl = next
 	return nil
 }
 
@@ -6464,6 +6463,30 @@ type PolicyProperties struct {
 	ProvisioningState *string `json:"provisioningState,omitempty"`
 	// UniqueIdentifier - READ-ONLY; The unique immutable identifier of a resource (Guid).
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for PolicyProperties.
+func (pp PolicyProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if pp.Description != nil {
+		objectMap["description"] = pp.Description
+	}
+	if pp.Status != "" {
+		objectMap["status"] = pp.Status
+	}
+	if pp.FactName != "" {
+		objectMap["factName"] = pp.FactName
+	}
+	if pp.FactData != nil {
+		objectMap["factData"] = pp.FactData
+	}
+	if pp.Threshold != nil {
+		objectMap["threshold"] = pp.Threshold
+	}
+	if pp.EvaluatorType != "" {
+		objectMap["evaluatorType"] = pp.EvaluatorType
+	}
+	return json.Marshal(objectMap)
 }
 
 // PolicyPropertiesFragment properties of a Policy.
@@ -6521,6 +6544,15 @@ type ProviderOperationResult struct {
 	Value *[]OperationMetadata `json:"value,omitempty"`
 	// NextLink - READ-ONLY; URL to get the next set of operation list results if there are any.
 	NextLink *string `json:"nextLink,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for ProviderOperationResult.
+func (por ProviderOperationResult) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if por.Value != nil {
+		objectMap["value"] = por.Value
+	}
+	return json.Marshal(objectMap)
 }
 
 // ProviderOperationResultIterator provides access to a complete listing of OperationMetadata values.
@@ -6591,10 +6623,15 @@ func (por ProviderOperationResult) IsEmpty() bool {
 	return por.Value == nil || len(*por.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (por ProviderOperationResult) hasNextLink() bool {
+	return por.NextLink != nil && len(*por.NextLink) != 0
+}
+
 // providerOperationResultPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (por ProviderOperationResult) providerOperationResultPreparer(ctx context.Context) (*http.Request, error) {
-	if por.NextLink == nil || len(to.String(por.NextLink)) < 1 {
+	if !por.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -6622,11 +6659,16 @@ func (page *ProviderOperationResultPage) NextWithContext(ctx context.Context) (e
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.por)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.por)
+		if err != nil {
+			return err
+		}
+		page.por = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.por = next
 	return nil
 }
 
@@ -7140,10 +7182,15 @@ func (sl ScheduleList) IsEmpty() bool {
 	return sl.Value == nil || len(*sl.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (sl ScheduleList) hasNextLink() bool {
+	return sl.NextLink != nil && len(*sl.NextLink) != 0
+}
+
 // scheduleListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (sl ScheduleList) scheduleListPreparer(ctx context.Context) (*http.Request, error) {
-	if sl.NextLink == nil || len(to.String(sl.NextLink)) < 1 {
+	if !sl.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -7171,11 +7218,16 @@ func (page *ScheduleListPage) NextWithContext(ctx context.Context) (err error) {
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.sl)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.sl)
+		if err != nil {
+			return err
+		}
+		page.sl = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.sl = next
 	return nil
 }
 
@@ -7235,6 +7287,36 @@ type ScheduleProperties struct {
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
 }
 
+// MarshalJSON is the custom marshaler for ScheduleProperties.
+func (sp ScheduleProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if sp.Status != "" {
+		objectMap["status"] = sp.Status
+	}
+	if sp.TaskType != nil {
+		objectMap["taskType"] = sp.TaskType
+	}
+	if sp.WeeklyRecurrence != nil {
+		objectMap["weeklyRecurrence"] = sp.WeeklyRecurrence
+	}
+	if sp.DailyRecurrence != nil {
+		objectMap["dailyRecurrence"] = sp.DailyRecurrence
+	}
+	if sp.HourlyRecurrence != nil {
+		objectMap["hourlyRecurrence"] = sp.HourlyRecurrence
+	}
+	if sp.TimeZoneID != nil {
+		objectMap["timeZoneId"] = sp.TimeZoneID
+	}
+	if sp.NotificationSettings != nil {
+		objectMap["notificationSettings"] = sp.NotificationSettings
+	}
+	if sp.TargetResourceID != nil {
+		objectMap["targetResourceId"] = sp.TargetResourceID
+	}
+	return json.Marshal(objectMap)
+}
+
 // SchedulePropertiesFragment properties of a schedule.
 type SchedulePropertiesFragment struct {
 	// Status - The status of the schedule (i.e. Enabled, Disabled). Possible values include: 'EnableStatusEnabled', 'EnableStatusDisabled'
@@ -7255,8 +7337,7 @@ type SchedulePropertiesFragment struct {
 	TargetResourceID *string `json:"targetResourceId,omitempty"`
 }
 
-// SchedulesExecuteFuture an abstraction for monitoring and retrieving the results of a long-running
-// operation.
+// SchedulesExecuteFuture an abstraction for monitoring and retrieving the results of a long-running operation.
 type SchedulesExecuteFuture struct {
 	azure.Future
 }
@@ -7509,10 +7590,15 @@ func (sl SecretList) IsEmpty() bool {
 	return sl.Value == nil || len(*sl.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (sl SecretList) hasNextLink() bool {
+	return sl.NextLink != nil && len(*sl.NextLink) != 0
+}
+
 // secretListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (sl SecretList) secretListPreparer(ctx context.Context) (*http.Request, error) {
-	if sl.NextLink == nil || len(to.String(sl.NextLink)) < 1 {
+	if !sl.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -7540,11 +7626,16 @@ func (page *SecretListPage) NextWithContext(ctx context.Context) (err error) {
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.sl)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.sl)
+		if err != nil {
+			return err
+		}
+		page.sl = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.sl = next
 	return nil
 }
 
@@ -7586,6 +7677,15 @@ type SecretProperties struct {
 	ProvisioningState *string `json:"provisioningState,omitempty"`
 	// UniqueIdentifier - READ-ONLY; The unique immutable identifier of a resource (Guid).
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for SecretProperties.
+func (sp SecretProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if sp.Value != nil {
+		objectMap["value"] = sp.Value
+	}
+	return json.Marshal(objectMap)
 }
 
 // SecretPropertiesFragment properties of a secret.
@@ -7854,10 +7954,15 @@ func (sfl ServiceFabricList) IsEmpty() bool {
 	return sfl.Value == nil || len(*sfl.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (sfl ServiceFabricList) hasNextLink() bool {
+	return sfl.NextLink != nil && len(*sfl.NextLink) != 0
+}
+
 // serviceFabricListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (sfl ServiceFabricList) serviceFabricListPreparer(ctx context.Context) (*http.Request, error) {
-	if sfl.NextLink == nil || len(to.String(sfl.NextLink)) < 1 {
+	if !sfl.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -7885,11 +7990,16 @@ func (page *ServiceFabricListPage) NextWithContext(ctx context.Context) (err err
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.sfl)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.sfl)
+		if err != nil {
+			return err
+		}
+		page.sfl = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.sfl = next
 	return nil
 }
 
@@ -7935,6 +8045,18 @@ type ServiceFabricProperties struct {
 	ProvisioningState *string `json:"provisioningState,omitempty"`
 	// UniqueIdentifier - READ-ONLY; The unique immutable identifier of a resource (Guid).
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for ServiceFabricProperties.
+func (sfp ServiceFabricProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if sfp.ExternalServiceFabricID != nil {
+		objectMap["externalServiceFabricId"] = sfp.ExternalServiceFabricID
+	}
+	if sfp.EnvironmentID != nil {
+		objectMap["environmentId"] = sfp.EnvironmentID
+	}
+	return json.Marshal(objectMap)
 }
 
 // ServiceFabricPropertiesFragment properties of a service fabric.
@@ -8098,8 +8220,8 @@ func (sr ServiceRunner) MarshalJSON() ([]byte, error) {
 	return json.Marshal(objectMap)
 }
 
-// SharedPublicIPAddressConfiguration properties of a virtual machine that determine how it is connected to
-// a load balancer.
+// SharedPublicIPAddressConfiguration properties of a virtual machine that determine how it is connected to a
+// load balancer.
 type SharedPublicIPAddressConfiguration struct {
 	// InboundNatRules - The incoming NAT rules
 	InboundNatRules *[]InboundNatRule `json:"inboundNatRules,omitempty"`
@@ -8497,10 +8619,15 @@ func (ul UserList) IsEmpty() bool {
 	return ul.Value == nil || len(*ul.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (ul UserList) hasNextLink() bool {
+	return ul.NextLink != nil && len(*ul.NextLink) != 0
+}
+
 // userListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (ul UserList) userListPreparer(ctx context.Context) (*http.Request, error) {
-	if ul.NextLink == nil || len(to.String(ul.NextLink)) < 1 {
+	if !ul.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -8528,11 +8655,16 @@ func (page *UserListPage) NextWithContext(ctx context.Context) (err error) {
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.ul)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.ul)
+		if err != nil {
+			return err
+		}
+		page.ul = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.ul = next
 	return nil
 }
 
@@ -8578,6 +8710,18 @@ type UserProperties struct {
 	ProvisioningState *string `json:"provisioningState,omitempty"`
 	// UniqueIdentifier - READ-ONLY; The unique immutable identifier of a resource (Guid).
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for UserProperties.
+func (up UserProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if up.Identity != nil {
+		objectMap["identity"] = up.Identity
+	}
+	if up.SecretStore != nil {
+		objectMap["secretStore"] = up.SecretStore
+	}
+	return json.Marshal(objectMap)
 }
 
 // UserPropertiesFragment properties of a lab user profile.
@@ -8655,8 +8799,8 @@ type UserSecretStoreFragment struct {
 	KeyVaultID *string `json:"keyVaultId,omitempty"`
 }
 
-// VirtualMachinesAddDataDiskFuture an abstraction for monitoring and retrieving the results of a
-// long-running operation.
+// VirtualMachinesAddDataDiskFuture an abstraction for monitoring and retrieving the results of a long-running
+// operation.
 type VirtualMachinesAddDataDiskFuture struct {
 	azure.Future
 }
@@ -9214,10 +9358,15 @@ func (vnl VirtualNetworkList) IsEmpty() bool {
 	return vnl.Value == nil || len(*vnl.Value) == 0
 }
 
+// hasNextLink returns true if the NextLink is not empty.
+func (vnl VirtualNetworkList) hasNextLink() bool {
+	return vnl.NextLink != nil && len(*vnl.NextLink) != 0
+}
+
 // virtualNetworkListPreparer prepares a request to retrieve the next set of results.
 // It returns nil if no more results exist.
 func (vnl VirtualNetworkList) virtualNetworkListPreparer(ctx context.Context) (*http.Request, error) {
-	if vnl.NextLink == nil || len(to.String(vnl.NextLink)) < 1 {
+	if !vnl.hasNextLink() {
 		return nil, nil
 	}
 	return autorest.Prepare((&http.Request{}).WithContext(ctx),
@@ -9245,11 +9394,16 @@ func (page *VirtualNetworkListPage) NextWithContext(ctx context.Context) (err er
 			tracing.EndSpan(ctx, sc, err)
 		}()
 	}
-	next, err := page.fn(ctx, page.vnl)
-	if err != nil {
-		return err
+	for {
+		next, err := page.fn(ctx, page.vnl)
+		if err != nil {
+			return err
+		}
+		page.vnl = next
+		if !next.hasNextLink() || !next.IsEmpty() {
+			break
+		}
 	}
-	page.vnl = next
 	return nil
 }
 
@@ -9301,6 +9455,24 @@ type VirtualNetworkProperties struct {
 	ProvisioningState *string `json:"provisioningState,omitempty"`
 	// UniqueIdentifier - READ-ONLY; The unique immutable identifier of a resource (Guid).
 	UniqueIdentifier *string `json:"uniqueIdentifier,omitempty"`
+}
+
+// MarshalJSON is the custom marshaler for VirtualNetworkProperties.
+func (vnp VirtualNetworkProperties) MarshalJSON() ([]byte, error) {
+	objectMap := make(map[string]interface{})
+	if vnp.AllowedSubnets != nil {
+		objectMap["allowedSubnets"] = vnp.AllowedSubnets
+	}
+	if vnp.Description != nil {
+		objectMap["description"] = vnp.Description
+	}
+	if vnp.ExternalProviderResourceID != nil {
+		objectMap["externalProviderResourceId"] = vnp.ExternalProviderResourceID
+	}
+	if vnp.SubnetOverrides != nil {
+		objectMap["subnetOverrides"] = vnp.SubnetOverrides
+	}
+	return json.Marshal(objectMap)
 }
 
 // VirtualNetworkPropertiesFragment properties of a virtual network.

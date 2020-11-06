@@ -73,6 +73,9 @@ func (client TenantsClient) List(ctx context.Context) (result TenantListResultPa
 	if err != nil {
 		err = autorest.NewErrorWithError(err, "subscriptions.TenantsClient", "List", resp, "Failure responding to request")
 	}
+	if result.tlr.hasNextLink() && result.tlr.IsEmpty() {
+		err = result.NextWithContext(ctx)
+	}
 
 	return
 }
@@ -103,7 +106,6 @@ func (client TenantsClient) ListSender(req *http.Request) (*http.Response, error
 func (client TenantsClient) ListResponder(resp *http.Response) (result TenantListResult, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())

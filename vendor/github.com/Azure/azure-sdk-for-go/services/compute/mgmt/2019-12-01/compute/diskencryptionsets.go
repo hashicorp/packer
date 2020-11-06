@@ -128,7 +128,6 @@ func (client DiskEncryptionSetsClient) CreateOrUpdateSender(req *http.Request) (
 func (client DiskEncryptionSetsClient) CreateOrUpdateResponder(resp *http.Response) (result DiskEncryptionSet, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -206,7 +205,6 @@ func (client DiskEncryptionSetsClient) DeleteSender(req *http.Request) (future D
 func (client DiskEncryptionSetsClient) DeleteResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted, http.StatusNoContent),
 		autorest.ByClosing())
 	result.Response = resp
@@ -283,7 +281,6 @@ func (client DiskEncryptionSetsClient) GetSender(req *http.Request) (*http.Respo
 func (client DiskEncryptionSetsClient) GetResponder(resp *http.Response) (result DiskEncryptionSet, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -321,6 +318,9 @@ func (client DiskEncryptionSetsClient) List(ctx context.Context) (result DiskEnc
 	if err != nil {
 		err = autorest.NewErrorWithError(err, "compute.DiskEncryptionSetsClient", "List", resp, "Failure responding to request")
 	}
+	if result.desl.hasNextLink() && result.desl.IsEmpty() {
+		err = result.NextWithContext(ctx)
+	}
 
 	return
 }
@@ -355,7 +355,6 @@ func (client DiskEncryptionSetsClient) ListSender(req *http.Request) (*http.Resp
 func (client DiskEncryptionSetsClient) ListResponder(resp *http.Response) (result DiskEncryptionSetList, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -432,6 +431,9 @@ func (client DiskEncryptionSetsClient) ListByResourceGroup(ctx context.Context, 
 	if err != nil {
 		err = autorest.NewErrorWithError(err, "compute.DiskEncryptionSetsClient", "ListByResourceGroup", resp, "Failure responding to request")
 	}
+	if result.desl.hasNextLink() && result.desl.IsEmpty() {
+		err = result.NextWithContext(ctx)
+	}
 
 	return
 }
@@ -467,7 +469,6 @@ func (client DiskEncryptionSetsClient) ListByResourceGroupSender(req *http.Reque
 func (client DiskEncryptionSetsClient) ListByResourceGroupResponder(resp *http.Response) (result DiskEncryptionSetList, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -586,7 +587,6 @@ func (client DiskEncryptionSetsClient) UpdateSender(req *http.Request) (future D
 func (client DiskEncryptionSetsClient) UpdateResponder(resp *http.Response) (result DiskEncryptionSet, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())

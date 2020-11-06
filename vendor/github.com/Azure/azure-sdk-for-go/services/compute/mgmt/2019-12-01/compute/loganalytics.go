@@ -86,7 +86,7 @@ func (client LogAnalyticsClient) ExportRequestRateByIntervalPreparer(ctx context
 		"subscriptionId": autorest.Encode("path", client.SubscriptionID),
 	}
 
-	const APIVersion = "2019-07-01"
+	const APIVersion = "2019-12-01"
 	queryParameters := map[string]interface{}{
 		"api-version": APIVersion,
 	}
@@ -118,7 +118,6 @@ func (client LogAnalyticsClient) ExportRequestRateByIntervalSender(req *http.Req
 func (client LogAnalyticsClient) ExportRequestRateByIntervalResponder(resp *http.Response) (result LogAnalyticsOperationResult, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -170,7 +169,7 @@ func (client LogAnalyticsClient) ExportThrottledRequestsPreparer(ctx context.Con
 		"subscriptionId": autorest.Encode("path", client.SubscriptionID),
 	}
 
-	const APIVersion = "2019-07-01"
+	const APIVersion = "2019-12-01"
 	queryParameters := map[string]interface{}{
 		"api-version": APIVersion,
 	}
@@ -202,7 +201,6 @@ func (client LogAnalyticsClient) ExportThrottledRequestsSender(req *http.Request
 func (client LogAnalyticsClient) ExportThrottledRequestsResponder(resp *http.Response) (result LogAnalyticsOperationResult, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())

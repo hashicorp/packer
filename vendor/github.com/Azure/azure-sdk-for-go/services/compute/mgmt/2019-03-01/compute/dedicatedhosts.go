@@ -127,7 +127,6 @@ func (client DedicatedHostsClient) CreateOrUpdateSender(req *http.Request) (futu
 func (client DedicatedHostsClient) CreateOrUpdateResponder(resp *http.Response) (result DedicatedHost, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -205,7 +204,6 @@ func (client DedicatedHostsClient) DeleteSender(req *http.Request) (future Dedic
 func (client DedicatedHostsClient) DeleteResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted, http.StatusNoContent),
 		autorest.ByClosing())
 	result.Response = resp
@@ -286,7 +284,6 @@ func (client DedicatedHostsClient) GetSender(req *http.Request) (*http.Response,
 func (client DedicatedHostsClient) GetResponder(resp *http.Response) (result DedicatedHost, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -328,6 +325,9 @@ func (client DedicatedHostsClient) ListByHostGroup(ctx context.Context, resource
 	if err != nil {
 		err = autorest.NewErrorWithError(err, "compute.DedicatedHostsClient", "ListByHostGroup", resp, "Failure responding to request")
 	}
+	if result.dhlr.hasNextLink() && result.dhlr.IsEmpty() {
+		err = result.NextWithContext(ctx)
+	}
 
 	return
 }
@@ -364,7 +364,6 @@ func (client DedicatedHostsClient) ListByHostGroupSender(req *http.Request) (*ht
 func (client DedicatedHostsClient) ListByHostGroupResponder(resp *http.Response) (result DedicatedHostListResult, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -482,7 +481,6 @@ func (client DedicatedHostsClient) UpdateSender(req *http.Request) (future Dedic
 func (client DedicatedHostsClient) UpdateResponder(resp *http.Response) (result DedicatedHost, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())

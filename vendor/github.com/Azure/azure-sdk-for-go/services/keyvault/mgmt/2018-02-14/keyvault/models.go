@@ -1584,7 +1584,7 @@ type VaultProperties struct {
 	TenantID *uuid.UUID `json:"tenantId,omitempty"`
 	// Sku - SKU details
 	Sku *Sku `json:"sku,omitempty"`
-	// AccessPolicies - An array of 0 to 16 identities that have access to the key vault. All identities in the array must use the same tenant ID as the key vault's tenant ID. When `createMode` is set to `recover`, access policies are not required. Otherwise, access policies are required.
+	// AccessPolicies - An array of 0 to 1024 identities that have access to the key vault. All identities in the array must use the same tenant ID as the key vault's tenant ID. When `createMode` is set to `recover`, access policies are not required. Otherwise, access policies are required.
 	AccessPolicies *[]AccessPolicyEntry `json:"accessPolicies,omitempty"`
 	// VaultURI - The URI of the vault for performing operations on keys and secrets.
 	VaultURI *string `json:"vaultUri,omitempty"`

@@ -118,7 +118,6 @@ func (client PrivateLinkResourcesClient) ListByVaultSender(req *http.Request) (*
 func (client PrivateLinkResourcesClient) ListByVaultResponder(resp *http.Response) (result PrivateLinkResourceListResult, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())

@@ -119,7 +119,6 @@ func (client GlobalSchedulesClient) CreateOrUpdateSender(req *http.Request) (*ht
 func (client GlobalSchedulesClient) CreateOrUpdateResponder(resp *http.Response) (result Schedule, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -195,7 +194,6 @@ func (client GlobalSchedulesClient) DeleteSender(req *http.Request) (*http.Respo
 func (client GlobalSchedulesClient) DeleteResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusNoContent),
 		autorest.ByClosing())
 	result.Response = resp
@@ -270,7 +268,6 @@ func (client GlobalSchedulesClient) ExecuteSender(req *http.Request) (future Glo
 func (client GlobalSchedulesClient) ExecuteResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByClosing())
 	result.Response = resp
@@ -349,7 +346,6 @@ func (client GlobalSchedulesClient) GetSender(req *http.Request) (*http.Response
 func (client GlobalSchedulesClient) GetResponder(resp *http.Response) (result Schedule, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -392,6 +388,9 @@ func (client GlobalSchedulesClient) ListByResourceGroup(ctx context.Context, res
 	result.sl, err = client.ListByResourceGroupResponder(resp)
 	if err != nil {
 		err = autorest.NewErrorWithError(err, "dtl.GlobalSchedulesClient", "ListByResourceGroup", resp, "Failure responding to request")
+	}
+	if result.sl.hasNextLink() && result.sl.IsEmpty() {
+		err = result.NextWithContext(ctx)
 	}
 
 	return
@@ -440,7 +439,6 @@ func (client GlobalSchedulesClient) ListByResourceGroupSender(req *http.Request)
 func (client GlobalSchedulesClient) ListByResourceGroupResponder(resp *http.Response) (result ScheduleList, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -520,6 +518,9 @@ func (client GlobalSchedulesClient) ListBySubscription(ctx context.Context, expa
 	if err != nil {
 		err = autorest.NewErrorWithError(err, "dtl.GlobalSchedulesClient", "ListBySubscription", resp, "Failure responding to request")
 	}
+	if result.sl.hasNextLink() && result.sl.IsEmpty() {
+		err = result.NextWithContext(ctx)
+	}
 
 	return
 }
@@ -566,7 +567,6 @@ func (client GlobalSchedulesClient) ListBySubscriptionSender(req *http.Request) 
 func (client GlobalSchedulesClient) ListBySubscriptionResponder(resp *http.Response) (result ScheduleList, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -682,7 +682,6 @@ func (client GlobalSchedulesClient) RetargetSender(req *http.Request) (future Gl
 func (client GlobalSchedulesClient) RetargetResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
 		autorest.ByClosing())
 	result.Response = resp
@@ -760,7 +759,6 @@ func (client GlobalSchedulesClient) UpdateSender(req *http.Request) (*http.Respo
 func (client GlobalSchedulesClient) UpdateResponder(resp *http.Response) (result Schedule, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())

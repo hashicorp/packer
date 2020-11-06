@@ -122,7 +122,6 @@ func (client NotificationChannelsClient) CreateOrUpdateSender(req *http.Request)
 func (client NotificationChannelsClient) CreateOrUpdateResponder(resp *http.Response) (result NotificationChannel, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -200,7 +199,6 @@ func (client NotificationChannelsClient) DeleteSender(req *http.Request) (*http.
 func (client NotificationChannelsClient) DeleteResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusNoContent),
 		autorest.ByClosing())
 	result.Response = resp
@@ -281,7 +279,6 @@ func (client NotificationChannelsClient) GetSender(req *http.Request) (*http.Res
 func (client NotificationChannelsClient) GetResponder(resp *http.Response) (result NotificationChannel, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -325,6 +322,9 @@ func (client NotificationChannelsClient) List(ctx context.Context, resourceGroup
 	result.ncl, err = client.ListResponder(resp)
 	if err != nil {
 		err = autorest.NewErrorWithError(err, "dtl.NotificationChannelsClient", "List", resp, "Failure responding to request")
+	}
+	if result.ncl.hasNextLink() && result.ncl.IsEmpty() {
+		err = result.NextWithContext(ctx)
 	}
 
 	return
@@ -374,7 +374,6 @@ func (client NotificationChannelsClient) ListSender(req *http.Request) (*http.Re
 func (client NotificationChannelsClient) ListResponder(resp *http.Response) (result NotificationChannelList, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
@@ -492,7 +491,6 @@ func (client NotificationChannelsClient) NotifySender(req *http.Request) (*http.
 func (client NotificationChannelsClient) NotifyResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByClosing())
 	result.Response = resp
@@ -572,7 +570,6 @@ func (client NotificationChannelsClient) UpdateSender(req *http.Request) (*http.
 func (client NotificationChannelsClient) UpdateResponder(resp *http.Response) (result NotificationChannel, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())

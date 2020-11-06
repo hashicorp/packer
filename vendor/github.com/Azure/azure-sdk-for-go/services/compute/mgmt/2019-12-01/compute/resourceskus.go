@@ -43,7 +43,7 @@ func NewResourceSkusClientWithBaseURI(baseURI string, subscriptionID string) Res
 
 // List gets the list of Microsoft.Compute SKUs available for your Subscription.
 // Parameters:
-// filter - the filter to apply on the operation.
+// filter - the filter to apply on the operation. Only **location** filter is supported currently.
 func (client ResourceSkusClient) List(ctx context.Context, filter string) (result ResourceSkusResultPage, err error) {
 	if tracing.IsEnabled() {
 		ctx = tracing.StartSpan(ctx, fqdn+"/ResourceSkusClient.List")
@@ -72,6 +72,9 @@ func (client ResourceSkusClient) List(ctx context.Context, filter string) (resul
 	result.rsr, err = client.ListResponder(resp)
 	if err != nil {
 		err = autorest.NewErrorWithError(err, "compute.ResourceSkusClient", "List", resp, "Failure responding to request")
+	}
+	if result.rsr.hasNextLink() && result.rsr.IsEmpty() {
+		err = result.NextWithContext(ctx)
 	}
 
 	return
@@ -110,7 +113,6 @@ func (client ResourceSkusClient) ListSender(req *http.Request) (*http.Response, 
 func (client ResourceSkusClient) ListResponder(resp *http.Response) (result ResourceSkusResult, err error) {
 	err = autorest.Respond(
 		resp,
-		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK),
 		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
