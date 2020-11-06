@@ -54,6 +54,14 @@ type Config struct {
 	SubscriptionID string `mapstructure:"subscription_id"`
 
 	authType string
+
+	// Flag to use Azure CLI authentication. Defaults to false.
+	// CLI auth will use the information from an active `az login` session to connect to Azure and set the subscription id and tenant id associated to the signed in account.
+	// If enabled, it will use the authentication provided by the `az` CLI.
+	// Azure CLI authentication will use the credential marked as `isDefault` and can be verified using `az account show`.
+	// Works with normal authentication (`az login`) and service principals (`az login --service-principal --username APP_ID --password PASSWORD --tenant TENANT_ID`).
+	// Ignores all other configurations if enabled.
+	UseAzureCLIAuth bool `mapstructure:"use_azure_cli_auth" required:"false"`
 }
 
 const (
@@ -62,6 +70,7 @@ const (
 	authTypeClientSecret    = "ClientSecret"
 	authTypeClientCert      = "ClientCertificate"
 	authTypeClientBearerJWT = "ClientBearerJWT"
+	authTypeAzureCLI        = "AzureCLI"
 )
 
 const DefaultCloudEnvironmentName = "Public"
@@ -123,6 +132,10 @@ func (c Config) Validate(errs *packer.MultiError) {
 	// Device login is not enabled for Windows because the WinRM certificate is
 	// readable by the ObjectID of the App.  There may be another way to handle
 	// this case, but I am not currently aware of it - send feedback.
+
+	if c.UseCLI() {
+		return
+	}
 
 	if c.UseMSI() {
 		return
@@ -193,6 +206,10 @@ func (c Config) useDeviceLogin() bool {
 		c.ClientCertPath == ""
 }
 
+func (c Config) UseCLI() bool {
+	return c.UseAzureCLIAuth == true
+}
+
 func (c Config) UseMSI() bool {
 	return c.SubscriptionID == "" &&
 		c.ClientID == "" &&
@@ -230,6 +247,9 @@ func (c Config) GetServicePrincipalToken(
 	case authTypeDeviceLogin:
 		say("Getting tokens using device flow")
 		auth = NewDeviceFlowOAuthTokenProvider(*c.cloudEnvironment, say, c.TenantID)
+	case authTypeAzureCLI:
+		say("Getting tokens using Azure CLI")
+		auth = NewCliOAuthTokenProvider(*c.cloudEnvironment, say, c.TenantID)
 	case authTypeMSI:
 		say("Getting tokens using Managed Identity for Azure")
 		auth = NewMSIOAuthTokenProvider(*c.cloudEnvironment)
@@ -268,6 +288,8 @@ func (c *Config) FillParameters() error {
 	if c.authType == "" {
 		if c.useDeviceLogin() {
 			c.authType = authTypeDeviceLogin
+		} else if c.UseCLI() {
+			c.authType = authTypeAzureCLI
 		} else if c.UseMSI() {
 			c.authType = authTypeMSI
 		} else if c.ClientSecret != "" {
@@ -293,6 +315,16 @@ func (c *Config) FillParameters() error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if c.authType == authTypeAzureCLI {
+		tenantID, subscriptionID, err := getIDsFromAzureCLI()
+		if err != nil {
+			return fmt.Errorf("error fetching tenantID and subscriptionID from Azure CLI (are you logged on using `az login`?): %v", err)
+		}
+
+		c.TenantID = tenantID
+		c.SubscriptionID = subscriptionID
 	}
 
 	if c.TenantID == "" {
