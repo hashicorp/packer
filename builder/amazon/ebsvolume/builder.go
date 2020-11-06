@@ -103,6 +103,18 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		PluginType:         BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"run_tags",
+				"run_tag",
+				"run_volume_tags",
+				"run_volume_tag",
+				"spot_tags",
+				"spot_tag",
+				"tags",
+				"tag",
+			},
+		},
 	}, raws...)
 	if err != nil {
 		return nil, nil, err
