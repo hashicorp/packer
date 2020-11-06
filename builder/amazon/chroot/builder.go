@@ -201,8 +201,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			Exclude: []string{
 				"ami_description",
 				"snapshot_tags",
+				"snapshot_tag",
 				"tags",
+				"tag",
 				"root_volume_tags",
+				"root_volume_tag",
 				"command_wrapper",
 				"post_mount_commands",
 				"pre_mount_commands",

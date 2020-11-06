@@ -91,10 +91,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			Exclude: []string{
 				"ami_description",
 				"run_tags",
+				"run_tag",
 				"run_volume_tags",
+				"run_volume_tag",
 				"snapshot_tags",
+				"snapshot_tag",
 				"spot_tags",
+				"spot_tag",
 				"tags",
+				"tag",
 			},
 		},
 	}, raws...)
