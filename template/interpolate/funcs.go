@@ -28,24 +28,25 @@ func init() {
 
 // Funcs are the interpolation funcs that are available within interpolations.
 var FuncGens = map[string]interface{}{
-	"build_name":         funcGenBuildName,
-	"build_type":         funcGenBuildType,
-	"env":                funcGenEnv,
-	"isotime":            funcGenIsotime,
-	"strftime":           funcGenStrftime,
-	"pwd":                funcGenPwd,
-	"split":              funcGenSplitter,
-	"template_dir":       funcGenTemplateDir,
-	"timestamp":          funcGenTimestamp,
-	"uuid":               funcGenUuid,
-	"user":               funcGenUser,
-	"packer_version":     funcGenPackerVersion,
-	"consul_key":         funcGenConsul,
-	"vault":              funcGenVault,
-	"sed":                funcGenSed,
-	"build":              funcGenBuild,
-	"aws_secretsmanager": funcGenAwsSecrets,
-	"azure_keyvault":     funcGenAzureSecrets,
+	"build_name":            funcGenBuildName,
+	"build_type":            funcGenBuildType,
+	"env":                   funcGenEnv,
+	"isotime":               funcGenIsotime,
+	"strftime":              funcGenStrftime,
+	"pwd":                   funcGenPwd,
+	"split":                 funcGenSplitter,
+	"template_dir":          funcGenTemplateDir,
+	"timestamp":             funcGenTimestamp,
+	"uuid":                  funcGenUuid,
+	"user":                  funcGenUser,
+	"packer_version":        funcGenPackerVersion,
+	"consul_key":            funcGenConsul,
+	"vault":                 funcGenVault,
+	"sed":                   funcGenSed,
+	"build":                 funcGenBuild,
+	"aws_secretsmanager":    funcGenAwsSecrets,
+	"az_secret_id_key":      funcGenAzureSecretsFromKvId,
+	"az_secret_rg_name_key": funcGenAzureSecretsFromKvRgAndName,
 
 	"replace":     replace,
 	"replace_all": replace_all,
@@ -293,7 +294,7 @@ func funcGenAwsSecrets(ctx *Context) interface{} {
 	}
 }
 
-func funcGenAzureSecrets(ctx *Context) interface{} {
+func funcGenAzureSecretsFromKvId(ctx *Context) interface{} {
 	return func(secret ...string) (string, error) {
 		if !ctx.EnableEnv {
 			// The error message doesn't have to be that detailed since
@@ -301,14 +302,27 @@ func funcGenAzureSecrets(ctx *Context) interface{} {
 			return "", errors.New("Azure KeyVault secrets are only allowed in the variables section")
 		}
 
-		switch len(secret) {
-		case 2:
-			return commontpl.GetAzureSecret(secret[0], secret[1], "")
-		case 3:
-			return commontpl.GetAzureSecret(secret[0], secret[1], secret[2])
-		default:
-			return "", errors.New("Either 2 or 3 parameters must be used")
+		if len(secret) != 2 {
+			return "", errors.New("You need to supply both the Keyvault Id and a key")
 		}
+
+		return commontpl.GetAzureSecretFromKeyVaultId(secret[0], secret[1])
+	}
+}
+
+func funcGenAzureSecretsFromKvRgAndName(ctx *Context) interface{} {
+	return func(secret ...string) (string, error) {
+		if !ctx.EnableEnv {
+			// The error message doesn't have to be that detailed since
+			// semantic checks should catch this.
+			return "", errors.New("Azure KeyVault secrets are only allowed in the variables section")
+		}
+
+		if len(secret) != 3 {
+			return "", errors.New("You need to supply both the Keyvault Resource Group, the Keyvault name and a key")
+		}
+
+		return commontpl.GetAzureSecretFromResourceGroupAndKeyVaultName(secret[0], secret[1], secret[2])
 	}
 }
 

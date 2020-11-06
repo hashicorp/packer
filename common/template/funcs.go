@@ -109,9 +109,9 @@ func GetAWSSecret(name, key string) (string, error) {
 	return client.GetSecret(spec)
 }
 
-func GetAzureSecret(secret1, secret2, secret3 string) (string, error) {
-	if len(secret1) == 0 || len(secret2) == 0 {
-		return "", errors.New("either KeyVaultId or Resource Group + KeyVault Name must be provided")
+func GetAzureSecretFromKeyVaultId(keyVaultId, key string) (string, error) {
+	if keyVaultId == "" || key == "" {
+		return "", errors.New("keyVaultId or key cannot be empty")
 	}
 
 	client, err := azurekvapi.New()
@@ -119,18 +119,22 @@ func GetAzureSecret(secret1, secret2, secret3 string) (string, error) {
 		return "", err
 	}
 
-	var key, keyVaultId string
-	if len(secret3) != 0 {
-		resourceGroup := secret1
-		keyVaultName := secret2
-		keyVaultId, err = client.GetKeyVaultId(resourceGroup, keyVaultName)
-		if err != nil {
-			return "", err
-		}
-		key = secret3
-	} else {
-		keyVaultId = secret1
-		key = secret2
+	return client.GetSecret(keyVaultId, key)
+}
+
+func GetAzureSecretFromResourceGroupAndKeyVaultName(resourceGroup, keyVaultName, key string) (string, error) {
+	if resourceGroup == "" || keyVaultName == "" || key == "" {
+		return "", errors.New("resourceGroup, keyVaultName or key cannot be empty")
+	}
+
+	client, err := azurekvapi.New()
+	if err != nil {
+		return "", err
+	}
+
+	keyVaultId, err := client.GetKeyVaultId(resourceGroup, keyVaultName)
+	if err != nil {
+		return "", err
 	}
 
 	return client.GetSecret(keyVaultId, key)
