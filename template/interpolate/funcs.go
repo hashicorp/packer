@@ -10,9 +10,9 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 	commontpl "github.com/hashicorp/packer/common/template"
 	"github.com/hashicorp/packer/common/uuid"
-	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/version"
 	strftime "github.com/jehiah/go-strftime"
 )
@@ -170,7 +170,7 @@ func passthroughOrInterpolate(data map[interface{}]interface{}, s string) (strin
 			// If we're in the first interpolation pass, the goal is to
 			// make sure that we pass the value through.
 			// TODO match against an actual string constant
-			if strings.Contains(hp, common.PlaceholderMsg) {
+			if strings.Contains(hp, packerbuilderdata.PlaceholderMsg) {
 				return fmt.Sprintf("{{.%s}}", s), nil
 			} else {
 				return hp, nil

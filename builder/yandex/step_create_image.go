@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/builder"
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 
@@ -15,7 +15,7 @@ import (
 )
 
 type stepCreateImage struct {
-	GeneratedData *builder.GeneratedData
+	GeneratedData *packerbuilderdata.GeneratedData
 }
 
 func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {

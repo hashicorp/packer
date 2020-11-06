@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 
 	"github.com/c2h5oh/datasize"
-	"github.com/hashicorp/packer/builder"
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -23,7 +23,7 @@ type StepCreateInstance struct {
 	Debug         bool
 	SerialLogFile string
 
-	GeneratedData *builder.GeneratedData
+	GeneratedData *packerbuilderdata.GeneratedData
 }
 
 func createNetwork(ctx context.Context, c *Config, d Driver) (*vpc.Network, error) {

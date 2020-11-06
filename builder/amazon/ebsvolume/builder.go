@@ -12,9 +12,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -180,7 +180,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("iam", iam)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	generatedData := &builder.GeneratedData{State: state}
+	generatedData := &packerbuilderdata.GeneratedData{State: state}
 
 	var instanceStep multistep.Step
 
