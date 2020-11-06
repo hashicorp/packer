@@ -1,6 +1,7 @@
 ## 1.6.6 (Upcoming)
 
 ### FEATURES:
+* builder/azure-arm: Create keyvaults with SoftDelete enabled [GH-10210]
 * builder/outscale: Add x509 certificate support [GH-10161]
 * post-processor/yandex-export: Verify the access to a specific bucket [GH-10188]
 
