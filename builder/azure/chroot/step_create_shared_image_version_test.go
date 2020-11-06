@@ -60,14 +60,14 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 				"location": "region2",
 				"properties": {
 					"publishingProfile": {
+						"excludeFromLatest": true,
 						"targetRegions": [
 							{
 								"name": "region1",
 								"regionalReplicaCount": 5,
 								"storageAccountType": "Standard_ZRS"
 							}
-						],
-						"excludeFromLatest": true
+						]
 					},
 					"storageProfile": {
 						"osDiskImage": {
@@ -78,22 +78,22 @@ func TestStepCreateSharedImageVersion_Run(t *testing.T) {
 						},
 						"dataDiskImages": [
 							{
-								"lun": 0,
 								"hostCaching": "None",
+								"lun": 0,
 								"source": {
 									"id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot0"
 								}
 							},
 							{
-								"lun": 1,
 								"hostCaching": "None",
+								"lun": 1,
 								"source": {
 									"id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot1"
 								}
 							},
 							{
-								"lun": 2,
 								"hostCaching": "None",
+								"lun": 2,
 								"source": {
 									"id": "/subscriptions/12345/resourceGroups/group1/providers/Microsoft.Compute/snapshots/datadisksnapshot2"
 								}

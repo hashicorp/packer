@@ -39,13 +39,13 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 				{
 					"location": "westus",
 					"properties": {
-						"osType": "Linux",
-						"hyperVGeneration": "V1",
 						"creationData": {
 							"createOption": "Copy",
 							"sourceResourceId": "SourceDisk"
 						},
-						"diskSizeGB": 42
+						"diskSizeGB": 42,
+						"hyperVGeneration": "V1",
+						"osType": "Linux"
 					},
 					"sku": {
 						"name": "Premium_LRS"
@@ -72,14 +72,14 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 				{
 					"location": "westus",
 					"properties": {
-						"osType": "Linux",
-						"hyperVGeneration": "V1",
 						"creationData": {
 							"createOption":"FromImage",
 							"imageReference": {
 								"id":"/subscriptions/SubscriptionID/providers/Microsoft.Compute/locations/westus/publishers/Microsoft/artifacttypes/vmimage/offers/Windows/skus/2016-DataCenter/versions/2016.1.4"
 							}
-						}
+						},
+						"hyperVGeneration": "V1",
+						"osType": "Linux"
 					},
 					"sku": {
 						"name": "Standard_LRS"
@@ -104,14 +104,14 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 				{
 					"location": "westus",
 					"properties": {
-						"osType": "Linux",
-						"hyperVGeneration": "V1",
 						"creationData": {
 							"createOption":"FromImage",
 							"galleryImageReference": {
 								"id":"/subscriptions/SubscriptionID/resourcegroups/imagegroup/providers/Microsoft.Compute/galleries/MyGallery/images/MyImage/versions/1.2.3"
 							}
-						}
+						},
+						"hyperVGeneration": "V1",
+						"osType": "Linux"
 					},
 					"sku": {
 						"name": "Standard_LRS"
