@@ -156,6 +156,52 @@ func (v *VagrantCloudClient) Upload(path string, url string) (*http.Response, er
 	return resp, err
 }
 
+func (v *VagrantCloudClient) DirectUpload(path string, url string) (*http.Response, error) {
+	file, err := os.Open(path)
+
+	if err != nil {
+		return nil, fmt.Errorf("Error opening file for upload: %s", err)
+	}
+	defer file.Close()
+
+	fi, err := file.Stat()
+
+	if err != nil {
+		return nil, fmt.Errorf("Error stating file for upload: %s", err)
+	}
+
+	request, err := http.NewRequest("PUT", url, file)
+
+	if err != nil {
+		return nil, fmt.Errorf("Error preparing upload request: %s", err)
+	}
+
+	log.Printf("Post-Processor Vagrant Cloud API Direct Upload: %s %s", path, url)
+
+	request.ContentLength = fi.Size()
+	resp, err := v.client.Do(request)
+
+	log.Printf("Post-Processor Vagrant Cloud Direct Upload Response: \n\n%+v", resp)
+
+	return resp, err
+}
+
+func (v *VagrantCloudClient) Callback(url string) (*http.Response, error) {
+	request, err := v.newRequest("PUT", url, nil)
+
+	if err != nil {
+		return nil, fmt.Errorf("Error preparing callback request: %s", err)
+	}
+
+	log.Printf("Post-Processor Vagrant Cloud API Direct Upload Callback: %s", url)
+
+	resp, err := v.client.Do(request)
+
+	log.Printf("Post-Processor Vagrant Cloud Direct Upload Callback Response: \n\n%+v", resp)
+
+	return resp, err
+}
+
 func (v *VagrantCloudClient) Post(path string, body interface{}) (*http.Response, error) {
 	reqUrl := fmt.Sprintf("%s/%s", v.BaseURL, path)
 
