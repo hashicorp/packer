@@ -17,9 +17,9 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/guestexec"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/provisioner"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -30,12 +30,12 @@ type guestOSTypeConfig struct {
 }
 
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
-	provisioner.UnixOSType: {
+	guestexec.UnixOSType: {
 		executeCommand: "{{if .Sudo}}sudo {{end}}chef-solo --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
 		installCommand: "curl -L https://omnitruck.chef.io/install.sh | {{if .Sudo}}sudo {{end}}bash -s --{{if .Version}} -v {{.Version}}{{end}}",
 		stagingDir:     "/tmp/packer-chef-solo",
 	},
-	provisioner.WindowsOSType: {
+	guestexec.WindowsOSType: {
 		executeCommand: "c:/opscode/chef/bin/chef-solo.bat --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
 		installCommand: "powershell.exe -Command \". { iwr -useb https://omnitruck.chef.io/install.ps1 } | iex; Install-Project{{if .Version}} -version {{.Version}}{{end}}\"",
 		stagingDir:     "C:/Windows/Temp/packer-chef-solo",
@@ -70,7 +70,7 @@ type Config struct {
 type Provisioner struct {
 	config            Config
 	guestOSTypeConfig guestOSTypeConfig
-	guestCommands     *provisioner.GuestCommands
+	guestCommands     *guestexec.GuestCommands
 }
 
 type ConfigTemplate struct {
@@ -121,7 +121,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.GuestOSType == "" {
-		p.config.GuestOSType = provisioner.DefaultOSType
+		p.config.GuestOSType = guestexec.DefaultOSType
 	}
 	p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
 
@@ -131,7 +131,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}
 
-	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
+	p.guestCommands, err = guestexec.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
 	if err != nil {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}

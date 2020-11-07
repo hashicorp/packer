@@ -1,4 +1,4 @@
-package provisioner
+package guestexec
 
 import (
 	"testing"

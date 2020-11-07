@@ -17,9 +17,9 @@ import (
 	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/guestexec"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/provisioner"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -83,7 +83,7 @@ type Config struct {
 type Provisioner struct {
 	config            Config
 	guestOSTypeConfig guestOSTypeConfig
-	guestCommands     *provisioner.GuestCommands
+	guestCommands     *guestexec.GuestCommands
 }
 
 type guestOSTypeConfig struct {
@@ -96,7 +96,7 @@ type guestOSTypeConfig struct {
 }
 
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
-	provisioner.UnixOSType: {
+	guestexec.UnixOSType: {
 		configDir:         "/etc/salt",
 		tempDir:           "/tmp/salt",
 		stateRoot:         "/srv/salt",
@@ -104,7 +104,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		bootstrapFetchCmd: "curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh || wget -O /tmp/install_salt.sh https://bootstrap.saltstack.com",
 		bootstrapRunCmd:   "sh /tmp/install_salt.sh",
 	},
-	provisioner.WindowsOSType: {
+	guestexec.WindowsOSType: {
 		configDir:         "C:/salt/conf",
 		tempDir:           "C:/Windows/Temp/salt/",
 		stateRoot:         "C:/salt/state",
@@ -130,7 +130,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.GuestOSType == "" {
-		p.config.GuestOSType = provisioner.DefaultOSType
+		p.config.GuestOSType = guestexec.DefaultOSType
 	} else {
 		p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
 	}
@@ -141,7 +141,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}
 
-	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.DisableSudo)
+	p.guestCommands, err = guestexec.NewGuestCommands(p.config.GuestOSType, !p.config.DisableSudo)
 	if err != nil {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}
@@ -413,7 +413,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 
 // Prepends sudo to supplied command if config says to
 func (p *Provisioner) sudo(cmd string) string {
-	if p.config.DisableSudo || (p.config.GuestOSType == provisioner.WindowsOSType) {
+	if p.config.DisableSudo || (p.config.GuestOSType == guestexec.WindowsOSType) {
 		return cmd
 	}
 
