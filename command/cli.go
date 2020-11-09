@@ -145,7 +145,8 @@ type HCL2UpgradeArgs struct {
 
 func (va *FormatArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&va.Check, "check", false, "check if the input is formatted")
-	flags.BoolVar(&va.Write, "write", false, "overwrite source files instead of writing to stdout")
+	flags.BoolVar(&va.Diff, "diff", false, "display the diff of formatting changes")
+	flags.BoolVar(&va.Write, "write", true, "overwrite source files instead of writing to stdout")
 
 	va.MetaArgs.AddFlagSets(flags)
 }
@@ -153,5 +154,5 @@ func (va *FormatArgs) AddFlagSets(flags *flag.FlagSet) {
 // FormatArgs represents a parsed cli line for `packer fmt`
 type FormatArgs struct {
 	MetaArgs
-	Check, Write bool
+	Check, Diff, Write bool
 }

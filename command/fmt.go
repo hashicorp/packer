@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hclparse"
@@ -71,32 +72,29 @@ func (c *FormatCommand) RunContext(ctx context.Context, cla *FormatArgs) int {
 	allHclFiles := append(hclFiles, hclVarFiles...)
 
 	if len(allHclFiles) == 0 {
-		c.Ui.Say("No HCL files found; please check that all HCL files end with the proper suffix")
+		c.Ui.Say("No HCL files found; please check that all HCL files end with the proper suffix.")
 		return 0
 	}
 
+	if cla.Check {
+		cla.Write = false
+	}
+
+	var bytesChanged int
+	var err error
 	c.parser = hclparse.NewParser()
 	for _, path := range allHclFiles {
-		b, err := c.formatFile(path)
+		bytesChanged, err = c.processFile(path, cla.Write, cla.Diff)
 		if err != nil {
 			c.Ui.Say(err.Error())
 			return 1
 		}
 
-		if b == nil {
-			continue
-		}
+	}
 
-		c.Ui.Say(path)
-		if cla.Check {
-			continue
-		}
-
-		if err := ioutil.WriteFile(path, b, 0644); err != nil {
-			c.Ui.Say(err.Error())
-			return 1
-		}
-
+	if cla.Check && bytesChanged != 0 {
+		// exit code taken from Terraform fmt
+		return 3
 	}
 
 	return 0
@@ -114,8 +112,10 @@ Usage: packer fmt [options] [TEMPLATE]
   be in Packer's HCL2 configuration language; JSON is not supported.
 
 Options:
-  -check=false  Check if the input is formatted. Exit status will be 0 if all
+  -check        Check if the input is formatted. Exit status will be 0 if all
                  input is properly formatted and non-zero otherwise.
+
+  -diff         Display diffs of formatting change
 
   -write=false  Don't write to source files
                 (always disabled if using -check)
@@ -140,32 +140,77 @@ func (*FormatCommand) AutocompleteFlags() complete.Flags {
 	}
 }
 
-// formatFile formats the source context of filename if it is not properly formatted.
-func (c *FormatCommand) formatFile(filename string) ([]byte, error) {
+// processFile formats the source contents of filename if it is not properly formatted
+// overwriting the contents of the original file if overwrite is set. A diff of the changes
+// will be outputted if showDiff is true.
+func (c *FormatCommand) processFile(filename string, overwrite bool, showDiff bool) (int, error) {
 
 	in, err := os.Open(filename)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open %s: %s", filename, err)
+		return 0, fmt.Errorf("failed to open %s: %s", filename, err)
 	}
 
 	inSrc, err := ioutil.ReadAll(in)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read %s: %s", filename, err)
+		return 0, fmt.Errorf("failed to read %s: %s", filename, err)
 	}
 
 	_, diags := c.parser.ParseHCL(inSrc, filename)
 	ret := writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
-		return nil, fmt.Errorf("failed to parse HCL %s", filename)
+		return 0, fmt.Errorf("failed to parse HCL %s", filename)
 	}
 
 	outSrc := hclwrite.Format(inSrc)
 
 	if bytes.Equal(inSrc, outSrc) {
-		return nil, nil
+		return 0, nil
 	}
 
-	//_, err = os.Stdout.Write(outSrc)
-	//
-	return outSrc, nil
+	// Display filename as we have changes
+	c.Ui.Say(filename)
+	if overwrite {
+		if err := ioutil.WriteFile(filename, outSrc, 0644); err != nil {
+			c.Ui.Say(err.Error())
+			return 0, err
+		}
+	}
+
+	if showDiff {
+		diff, err := bytesDiff(inSrc, outSrc, filename)
+		if err != nil {
+			c.Ui.Say(fmt.Sprintf("failed to generate diff for %s: %s", filename, err))
+			return len(outSrc), nil
+		}
+		_, _ = os.Stdout.Write(diff)
+	}
+
+	return len(outSrc), nil
+}
+
+func bytesDiff(b1, b2 []byte, path string) (data []byte, err error) {
+	f1, err := ioutil.TempFile("", "")
+	if err != nil {
+		return
+	}
+	defer os.Remove(f1.Name())
+	defer f1.Close()
+
+	f2, err := ioutil.TempFile("", "")
+	if err != nil {
+		return
+	}
+	defer os.Remove(f2.Name())
+	defer f2.Close()
+
+	_, _ = f1.Write(b1)
+	_, _ = f2.Write(b2)
+
+	data, err = exec.Command("diff", "--label=old/"+path, "--label=new/"+path, "-u", f1.Name(), f2.Name()).CombinedOutput()
+	if len(data) > 0 {
+		// diff exits with a non-zero status when the files don't match.
+		// Ignore that failure as long as we get output.
+		err = nil
+	}
+	return
 }
