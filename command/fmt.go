@@ -77,10 +77,26 @@ func (c *FormatCommand) RunContext(ctx context.Context, cla *FormatArgs) int {
 
 	c.parser = hclparse.NewParser()
 	for _, path := range allHclFiles {
-		if err := c.formatFile(path, cla.Write); err != nil {
+		b, err := c.formatFile(path)
+		if err != nil {
 			c.Ui.Say(err.Error())
 			return 1
 		}
+
+		if b == nil {
+			continue
+		}
+
+		c.Ui.Say(path)
+		if cla.Check {
+			continue
+		}
+
+		if err := ioutil.WriteFile(path, b, 0644); err != nil {
+			c.Ui.Say(err.Error())
+			return 1
+		}
+
 	}
 
 	return 0
@@ -98,8 +114,11 @@ Usage: packer fmt [options] [TEMPLATE]
   be in Packer's HCL2 configuration language; JSON is not supported.
 
 Options:
+  -check=false  Check if the input is formatted. Exit status will be 0 if all
+                 input is properly formatted and non-zero otherwise.
 
-  -write	Write changes to source files instead of writing to stdout.
+  -write=false  Don't write to source files
+                (always disabled if using -check)
 
 `
 
@@ -116,45 +135,37 @@ func (*FormatCommand) AutocompleteArgs() complete.Predictor {
 
 func (*FormatCommand) AutocompleteFlags() complete.Flags {
 	return complete.Flags{
-		"-write":    complete.PredictNothing,
-		"-except":   complete.PredictNothing,
-		"-only":     complete.PredictNothing,
-		"-var":      complete.PredictNothing,
-		"-var-file": complete.PredictNothing,
+		"-check": complete.PredictNothing,
+		"-write": complete.PredictNothing,
 	}
 }
 
 // formatFile formats the source context of filename if it is not properly formatted.
-// The output formatFile is written to the STDOUT unless overwrite is true, which overwrites
-// the file behind filename with its formatted version.
-func (c *FormatCommand) formatFile(filename string, overwrite bool) error {
+func (c *FormatCommand) formatFile(filename string) ([]byte, error) {
 
 	in, err := os.Open(filename)
 	if err != nil {
-		return fmt.Errorf("failed to open %s: %s", filename, err)
+		return nil, fmt.Errorf("failed to open %s: %s", filename, err)
 	}
 
 	inSrc, err := ioutil.ReadAll(in)
 	if err != nil {
-		return fmt.Errorf("failed to read %s: %s", filename, err)
+		return nil, fmt.Errorf("failed to read %s: %s", filename, err)
 	}
 
 	_, diags := c.parser.ParseHCL(inSrc, filename)
 	ret := writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
-		return fmt.Errorf("failed to parse HCL %s", filename)
+		return nil, fmt.Errorf("failed to parse HCL %s", filename)
 	}
 
 	outSrc := hclwrite.Format(inSrc)
 
 	if bytes.Equal(inSrc, outSrc) {
-		return nil
+		return nil, nil
 	}
 
-	if overwrite {
-		return ioutil.WriteFile(filename, outSrc, 0644)
-	}
-	_, err = os.Stdout.Write(outSrc)
-
-	return err
+	//_, err = os.Stdout.Write(outSrc)
+	//
+	return outSrc, nil
 }
