@@ -265,6 +265,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Debug:                    b.config.PackerDebug,
 			EbsOptimized:             b.config.EbsOptimized,
 			InstanceType:             b.config.InstanceType,
+			Region:                   *ec2conn.Config.Region,
 			SourceAMI:                b.config.SourceAmi,
 			SpotPrice:                b.config.SpotPrice,
 			SpotInstanceTypes:        b.config.SpotInstanceTypes,
