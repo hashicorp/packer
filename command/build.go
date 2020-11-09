@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
+	"github.com/hashicorp/packer/version"
 	"golang.org/x/sync/semaphore"
 
 	"github.com/hako/durafmt"
@@ -62,10 +63,12 @@ func (c *BuildCommand) ParseArgs(args []string) (*BuildArgs, int) {
 
 func (m *Meta) GetConfigFromHCL(cla *MetaArgs) (*hcl2template.PackerConfig, int) {
 	parser := &hcl2template.Parser{
-		Parser:                hclparse.NewParser(),
-		BuilderSchemas:        m.CoreConfig.Components.BuilderStore,
-		ProvisionersSchemas:   m.CoreConfig.Components.ProvisionerStore,
-		PostProcessorsSchemas: m.CoreConfig.Components.PostProcessorStore,
+		CorePackerVersion:       version.SemVer,
+		CorePackerVersionString: version.FormattedVersion(),
+		Parser:                  hclparse.NewParser(),
+		BuilderSchemas:          m.CoreConfig.Components.BuilderStore,
+		ProvisionersSchemas:     m.CoreConfig.Components.ProvisionerStore,
+		PostProcessorsSchemas:   m.CoreConfig.Components.PostProcessorStore,
 	}
 	cfg, diags := parser.Parse(cla.Path, cla.VarFiles, cla.Vars)
 	return cfg, writeDiags(m.Ui, parser.Files(), diags)

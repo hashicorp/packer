@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/version"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -21,6 +20,10 @@ type PackerConfig struct {
 	}
 	// Directory where the config files are defined
 	Basedir string
+
+	// Core Packer version, for reference by plugins and template functions.
+	CorePackerVersionString string
+
 	// directory Packer was called from
 	Cwd string
 
@@ -84,7 +87,7 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 			}),
 			buildAccessor: cty.UnknownVal(cty.EmptyObject),
 			packerAccessor: cty.ObjectVal(map[string]cty.Value{
-				"version": cty.StringVal(version.FormattedVersion()),
+				"version": cty.StringVal(cfg.CorePackerVersionString),
 			}),
 			pathVariablesAccessor: cty.ObjectVal(map[string]cty.Value{
 				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
