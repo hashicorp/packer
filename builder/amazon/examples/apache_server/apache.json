@@ -1,7 +1,4 @@
-
-
-
-{   
+{
     "variables":
         {
             "accesskey": "",
@@ -22,13 +19,13 @@
               "OS_Version": "Ubuntu",
               "Release": "Latest"
             }
-        }   
+        }
     ],
    "provisioners":[
        {
        "type": "shell",
        "script": "{{user `shellpath`}}"
-       }  
+       }
     ]
 
 }
