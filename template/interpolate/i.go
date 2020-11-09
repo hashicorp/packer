@@ -35,9 +35,10 @@ type Context struct {
 	//
 	// TemplatePath is the path to the template that this is being
 	// rendered within.
-	BuildName    string
-	BuildType    string
-	TemplatePath string
+	BuildName               string
+	BuildType               string
+	CorePackerVersionString string
+	TemplatePath            string
 }
 
 // NewContext returns an initialized empty context.

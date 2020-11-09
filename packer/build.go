@@ -166,7 +166,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 	packerConfig := map[string]interface{}{
 		BuildNameConfigKey:     b.Type,
 		BuilderTypeConfigKey:   b.BuilderType,
-		CoreVersionConfigKey:   version.Version,
+		CoreVersionConfigKey:   version.FormattedVersion(),
 		DebugConfigKey:         b.debug,
 		ForceConfigKey:         b.force,
 		OnErrorConfigKey:       b.onError,

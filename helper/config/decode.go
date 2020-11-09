@@ -113,6 +113,7 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		} else {
 			config.InterpolateContext.BuildName = ctx.BuildName
 			config.InterpolateContext.BuildType = ctx.BuildType
+			config.InterpolateContext.CorePackerVersionString = ctx.CorePackerVersionString
 			config.InterpolateContext.TemplatePath = ctx.TemplatePath
 			config.InterpolateContext.UserVariables = ctx.UserVariables
 			if config.InterpolateContext.Data == nil {
@@ -259,11 +260,12 @@ func DetectContextData(raws ...interface{}) (map[interface{}]interface{}, []inte
 // detecting things like user variables from the raw configuration params.
 func DetectContext(raws ...interface{}) (*interpolate.Context, error) {
 	var s struct {
-		BuildName     string            `mapstructure:"packer_build_name"`
-		BuildType     string            `mapstructure:"packer_builder_type"`
-		TemplatePath  string            `mapstructure:"packer_template_path"`
-		Vars          map[string]string `mapstructure:"packer_user_variables"`
-		SensitiveVars []string          `mapstructure:"packer_sensitive_variables"`
+		BuildName               string            `mapstructure:"packer_build_name"`
+		BuildType               string            `mapstructure:"packer_builder_type"`
+		CorePackerVersionString string            `mapstructure:"packer_core_version"`
+		TemplatePath            string            `mapstructure:"packer_template_path"`
+		Vars                    map[string]string `mapstructure:"packer_user_variables"`
+		SensitiveVars           []string          `mapstructure:"packer_sensitive_variables"`
 	}
 
 	for _, r := range raws {
@@ -274,11 +276,12 @@ func DetectContext(raws ...interface{}) (*interpolate.Context, error) {
 	}
 
 	return &interpolate.Context{
-		BuildName:          s.BuildName,
-		BuildType:          s.BuildType,
-		TemplatePath:       s.TemplatePath,
-		UserVariables:      s.Vars,
-		SensitiveVariables: s.SensitiveVars,
+		BuildName:               s.BuildName,
+		BuildType:               s.BuildType,
+		CorePackerVersionString: s.CorePackerVersionString,
+		TemplatePath:            s.TemplatePath,
+		UserVariables:           s.Vars,
+		SensitiveVariables:      s.SensitiveVars,
 	}, nil
 }
 
