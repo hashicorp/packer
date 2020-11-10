@@ -15,3 +15,7 @@ variable "unknown_list_of_string" {
 
 variable "unknown_unknown" {
 }
+
+variable "default_from_env" {
+  default = env("DEFAULT_FROM_ENV")
+}
