@@ -5,9 +5,9 @@ import (
 	packerVersion "github.com/hashicorp/packer/version"
 )
 
-var ExoscaleImportPluginVersion *version.PluginVersion
+var DigitalOceanPluginVersion *version.PluginVersion
 
 func init() {
-	ExoscaleImportPluginVersion = version.InitializePluginVersion(
+	DigitalOceanPluginVersion = version.InitializePluginVersion(
 		packerVersion.Version, packerVersion.VersionPrerelease)
 }

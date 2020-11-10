@@ -5,7 +5,9 @@ import (
 	packerVersion "github.com/hashicorp/packer/version"
 )
 
-var GCEPluginVersion = version.PluginVersion{
-	Version:           packerVersion.Version,
-	VersionPrerelease: packerVersion.VersionPrerelease,
+var GCEPluginVersion *version.PluginVersion
+
+func init() {
+	GCEPluginVersion = version.InitializePluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease)
 }

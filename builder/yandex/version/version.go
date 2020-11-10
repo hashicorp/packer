@@ -5,7 +5,9 @@ import (
 	packerVersion "github.com/hashicorp/packer/version"
 )
 
-var YandexPluginVersion = version.PluginVersion{
-	Version:           packerVersion.Version,
-	VersionPrerelease: packerVersion.VersionPrerelease,
+var YandexPluginVersion *version.PluginVersion
+
+func init() {
+	YandexPluginVersion = version.InitializePluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease)
 }

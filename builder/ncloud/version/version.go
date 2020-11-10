@@ -5,9 +5,9 @@ import (
 	packerVersion "github.com/hashicorp/packer/version"
 )
 
-var ExoscaleImportPluginVersion *version.PluginVersion
+var NCloudPluginVersion *version.PluginVersion
 
 func init() {
-	ExoscaleImportPluginVersion = version.InitializePluginVersion(
+	NCloudPluginVersion = version.InitializePluginVersion(
 		packerVersion.Version, packerVersion.VersionPrerelease)
 }

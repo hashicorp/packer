@@ -5,7 +5,9 @@ import (
 	packerVersion "github.com/hashicorp/packer/version"
 )
 
-var AlicloudPluginVersion = version.PluginVersion{
-	Version:           packerVersion.Version,
-	VersionPrerelease: packerVersion.VersionPrerelease,
+var AlicloudPluginVersion *version.PluginVersion
+
+func init() {
+	AlicloudPluginVersion = version.InitializePluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease)
 }

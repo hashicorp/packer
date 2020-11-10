@@ -5,7 +5,9 @@ import (
 	packerVersion "github.com/hashicorp/packer/version"
 )
 
-var ScalewayPluginVersion = version.PluginVersion{
-	Version:           packerVersion.Version,
-	VersionPrerelease: packerVersion.VersionPrerelease,
+var ScalewayPluginVersion *version.PluginVersion
+
+func init() {
+	ScalewayPluginVersion = version.InitializePluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease)
 }

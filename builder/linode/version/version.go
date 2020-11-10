@@ -5,7 +5,9 @@ import (
 	packerVersion "github.com/hashicorp/packer/version"
 )
 
-var LinodePluginVersion = version.PluginVersion{
-	Version:           packerVersion.Version,
-	VersionPrerelease: packerVersion.VersionPrerelease,
+var LinodePluginVersion *version.PluginVersion
+
+func init() {
+	LinodePluginVersion = version.InitializePluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease)
 }

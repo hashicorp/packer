@@ -16,10 +16,7 @@ const Version = "1.6.6"
 // such as "dev" (in development), "beta", "rc1", etc.
 const VersionPrerelease = "dev"
 
-var PackerVersion = pluginVersion.PluginVersion{
-	Version:           Version,
-	VersionPrerelease: VersionPrerelease,
-}
+var PackerVersion *pluginVersion.PluginVersion
 
 func FormattedVersion() string {
 	return PackerVersion.FormattedVersion()
@@ -31,7 +28,8 @@ func FormattedVersion() string {
 var SemVer *version.Version
 
 func init() {
-	SemVer = version.Must(version.NewVersion(Version))
+	PackerVersion = pluginVersion.InitializePluginVersion(Version, VersionPrerelease)
+	SemVer = PackerVersion.SemVer()
 }
 
 // String returns the complete version string, including prerelease
