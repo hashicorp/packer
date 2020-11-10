@@ -474,6 +474,7 @@ func decodeVariableValidationBlock(varName string, block *hcl.Block) (*VariableV
 // Packer's specific style, rather than that they are going to try to work
 // around these rules to write a lower-quality message.
 func looksLikeSentences(s string) bool {
+	s = strings.TrimSpace(s)
 	if len(s) < 1 {
 		return false
 	}
