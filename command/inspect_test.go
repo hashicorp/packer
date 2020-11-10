@@ -78,9 +78,9 @@ local.fruit: "banana"
 
 > input-variables:
 
-var.default_from_env: "<unknown>"
+var.default_from_env: ""
 var.fruit: "peach"
-var.other_default_from_env: "<unknown>"
+var.other_default_from_env: ""
 var.unknown_list_of_string: "[\n  \"first_peach\",\n  \"second_peach\",\n]"
 var.unknown_string: "also_peach"
 var.unknown_unknown: "[\"peach_too\"]"
