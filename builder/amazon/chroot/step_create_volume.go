@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/helper/config"
 )
 
 // StepCreateVolume creates a new volume from the snapshot of the root
@@ -20,12 +21,14 @@ import (
 // Produces:
 //   volume_id string - The ID of the created volume
 type StepCreateVolume struct {
-	PollingConfig  *awscommon.AWSPollingConfig
-	volumeId       string
-	RootVolumeSize int64
-	RootVolumeType string
-	RootVolumeTags map[string]string
-	Ctx            interpolate.Context
+	PollingConfig  		  *awscommon.AWSPollingConfig
+	volumeId       		  string
+	RootVolumeSize 		  int64
+	RootVolumeType 		  string
+	RootVolumeTags 		  map[string]string
+	RootVolumeEncryptBoot config.Trilean
+	RootVolumeKmsKeyId 	  string
+	Ctx            		  interpolate.Context
 }
 
 func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -148,9 +151,19 @@ func (s *StepCreateVolume) buildCreateVolumeInput(az string, rootDevice *ec2.Blo
 		SnapshotId:       rootDevice.Ebs.SnapshotId,
 		VolumeType:       rootDevice.Ebs.VolumeType,
 		Iops:             rootDevice.Ebs.Iops,
+		Encrypted:        rootDevice.Ebs.Encrypted,
+		KmsKeyId:         rootDevice.Ebs.KmsKeyId,
 	}
 	if s.RootVolumeSize > *rootDevice.Ebs.VolumeSize {
 		createVolumeInput.Size = aws.Int64(s.RootVolumeSize)
+	}
+
+	if s.RootVolumeEncryptBoot.True() {
+		createVolumeInput.Encrypted = aws.Bool(true)
+	}
+
+	if s.RootVolumeKmsKeyId != "" {
+		createVolumeInput.KmsKeyId = aws.String(s.RootVolumeKmsKeyId)
 	}
 
 	if s.RootVolumeType == "" || s.RootVolumeType == *rootDevice.Ebs.VolumeType {
