@@ -10,9 +10,9 @@ package chroot
 import (
 	"context"
 	"errors"
-	"runtime"
-	"regexp"
 	"fmt"
+	"regexp"
+	"runtime"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -172,10 +172,10 @@ type Config struct {
 	// will allow you to create those programatically.
 	RootVolumeTag hcl2template.KeyValues `mapstructure:"root_volume_tag" required:"false"`
 	// Whether or not to encrypt the volumes that are *launched*. By default, Packer will keep
-	// the encryption setting to what it was in the source image when set to `false`. Setting true will 
+	// the encryption setting to what it was in the source image when set to `false`. Setting true will
 	// always result in an encrypted one.
 	RootVolumeEncryptBoot config.Trilean `mapstructure:"root_volume_encrypt_boot" required:"false"`
-	// ID, alias or ARN of the KMS key to use for *launched* volumes encryption. 
+	// ID, alias or ARN of the KMS key to use for *launched* volumes encryption.
 	//
 	// Set this value if you select `root_volume_encrypt_boot`, but don't want to use the
 	// region's default KMS key.
@@ -351,10 +351,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 					errs, errors.New("If you have set root_kms_key_id, root_encrypt_boot must also be true."))
 			} else if b.config.RootVolumeEncryptBoot.True() && !validateKmsKey(b.config.RootVolumeKmsKeyId) {
 				errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("%q is not a valid KMS Key Id.",b.config.RootVolumeKmsKeyId))
+					errs, fmt.Errorf("%q is not a valid KMS Key Id.", b.config.RootVolumeKmsKeyId))
 			}
 		}
-		
+
 	}
 	valid := false
 	for _, validArch := range []string{"x86_64", "arm64"} {
@@ -435,13 +435,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			GeneratedData: generatedData,
 		},
 		&StepCreateVolume{
-			PollingConfig:  b.config.PollingConfig,
-			RootVolumeType: b.config.RootVolumeType,
-			RootVolumeSize: b.config.RootVolumeSize,
-			RootVolumeTags: b.config.RootVolumeTags,
+			PollingConfig:         b.config.PollingConfig,
+			RootVolumeType:        b.config.RootVolumeType,
+			RootVolumeSize:        b.config.RootVolumeSize,
+			RootVolumeTags:        b.config.RootVolumeTags,
 			RootVolumeEncryptBoot: b.config.RootVolumeEncryptBoot,
-			RootVolumeKmsKeyId: b.config.RootVolumeKmsKeyId,
-			Ctx:            b.config.ctx,
+			RootVolumeKmsKeyId:    b.config.RootVolumeKmsKeyId,
+			Ctx:                   b.config.ctx,
 		},
 		&StepAttachVolume{
 			PollingConfig: b.config.PollingConfig,
@@ -537,7 +537,6 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	return artifact, nil
 }
 
-
 func validateKmsKey(kmsKey string) (valid bool) {
 	kmsKeyIdPattern := `[a-f0-9-]+$`
 	aliasPattern := `alias/[a-zA-Z0-9:/_-]+$`
@@ -556,4 +555,3 @@ func validateKmsKey(kmsKey string) (valid bool) {
 	}
 	return false
 }
-

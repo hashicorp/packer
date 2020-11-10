@@ -5,8 +5,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/stretchr/testify/assert"
 	confighelper "github.com/hashicorp/packer/helper/config"
+	"github.com/stretchr/testify/assert"
 )
 
 func buildTestRootDevice() *ec2.BlockDeviceMapping {
@@ -15,7 +15,7 @@ func buildTestRootDevice() *ec2.BlockDeviceMapping {
 			VolumeSize: aws.Int64(10),
 			SnapshotId: aws.String("snap-1234"),
 			VolumeType: aws.String("gp2"),
-			Encrypted: aws.Bool(false),
+			Encrypted:  aws.Bool(false),
 		},
 	}
 }
@@ -87,7 +87,7 @@ func TestCreateVolume_Encrypted(t *testing.T) {
 func TestCreateVolume_Custom_KMS_Key_Encrypted(t *testing.T) {
 	stepCreateVolume := StepCreateVolume{
 		RootVolumeEncryptBoot: confighelper.TrileanFromBool(true),
-		RootVolumeKmsKeyId: "alias/1234",
+		RootVolumeKmsKeyId:    "alias/1234",
 	}
 	testRootDevice := buildTestRootDevice()
 	ret, err := stepCreateVolume.buildCreateVolumeInput("test-az", testRootDevice)
