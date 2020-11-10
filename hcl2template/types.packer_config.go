@@ -210,9 +210,13 @@ func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics 
 		return diags
 	}
 	c.LocalVariables[local.Name] = &Variable{
-		Name:         local.Name,
-		DefaultValue: value,
-		Type:         value.Type(),
+		Name: local.Name,
+		Values: []VariableAssignment{{
+			Value: value,
+			Expr:  local.Expr,
+			From:  "default",
+		}},
+		Type: value.Type(),
 	}
 
 	return diags

@@ -53,9 +53,6 @@ func (c *Client) GetSecret(spec *SecretSpec) (string, error) {
 		SecretId:     aws.String(spec.Name),
 		VersionStage: aws.String("AWSCURRENT"),
 	}
-	if spec.Name != "" {
-		params.VersionStage = aws.String(spec.Key)
-	}
 
 	resp, err := c.api.GetSecretValue(params)
 	if err != nil {

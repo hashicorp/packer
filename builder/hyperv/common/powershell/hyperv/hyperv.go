@@ -11,7 +11,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/hashicorp/packer/common/powershell"
+	"github.com/hashicorp/packer/builder/hyperv/common/powershell"
 )
 
 type scriptOptions struct {
@@ -194,7 +194,7 @@ func SetFirstBootDeviceGen1(vmName string, controllerType string) error {
 
 	script := `
 param([string] $vmName, [string] $controllerType)
-	$vmBootOrder = Hyper-V\Get-VMBios -VMName $vmName | Select-Object -ExpandProperty StartupOrder | Where-Object { $_ -ne $controllerType } 
+	$vmBootOrder = Hyper-V\Get-VMBios -VMName $vmName | Select-Object -ExpandProperty StartupOrder | Where-Object { $_ -ne $controllerType }
 	Hyper-V\Set-VMBios -VMName $vmName -StartupOrder (@($controllerType) + $vmBootOrder)
 `
 

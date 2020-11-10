@@ -15,9 +15,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -250,7 +250,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	generatedData := &builder.GeneratedData{State: state}
+	generatedData := &packerbuilderdata.GeneratedData{State: state}
 
 	var instanceStep multistep.Step
 
@@ -265,6 +265,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Debug:                    b.config.PackerDebug,
 			EbsOptimized:             b.config.EbsOptimized,
 			InstanceType:             b.config.InstanceType,
+			Region:                   *ec2conn.Config.Region,
 			SourceAMI:                b.config.SourceAmi,
 			SpotPrice:                b.config.SpotPrice,
 			SpotInstanceTypes:        b.config.SpotInstanceTypes,

@@ -18,13 +18,13 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/guestexec"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/common/shell"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/tmp"
-	"github.com/hashicorp/packer/provisioner"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -522,7 +522,7 @@ func (p *Provisioner) createCommandTextPrivileged() (command string, err error) 
 		return "", fmt.Errorf("Error processing command: %s", err)
 	}
 
-	command, err = provisioner.GenerateElevatedRunner(command, p)
+	command, err = guestexec.GenerateElevatedRunner(command, p)
 	if err != nil {
 		return "", fmt.Errorf("Error generating elevated runner: %s", err)
 	}

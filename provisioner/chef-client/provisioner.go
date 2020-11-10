@@ -17,10 +17,10 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/guestexec"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/provisioner"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -32,13 +32,13 @@ type guestOSTypeConfig struct {
 }
 
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
-	provisioner.UnixOSType: {
+	guestexec.UnixOSType: {
 		executeCommand: "{{if .Sudo}}sudo {{end}}chef-client --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
 		installCommand: "curl -L https://omnitruck.chef.io/install.sh | {{if .Sudo}}sudo {{end}}bash -s --{{if .Version}} -v {{.Version}}{{end}}",
 		knifeCommand:   "{{if .Sudo}}sudo {{end}}knife {{.Args}} {{.Flags}}",
 		stagingDir:     "/tmp/packer-chef-client",
 	},
-	provisioner.WindowsOSType: {
+	guestexec.WindowsOSType: {
 		executeCommand: "c:/opscode/chef/bin/chef-client.bat --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
 		installCommand: "powershell.exe -Command \". { iwr -useb https://omnitruck.chef.io/install.ps1 } | iex; Install-Project{{if .Version}} -version {{.Version}}{{end}}\"",
 		knifeCommand:   "c:/opscode/chef/bin/knife.bat {{.Args}} {{.Flags}}",
@@ -86,7 +86,7 @@ type Provisioner struct {
 	config            Config
 	communicator      packer.Communicator
 	guestOSTypeConfig guestOSTypeConfig
-	guestCommands     *provisioner.GuestCommands
+	guestCommands     *guestexec.GuestCommands
 	generatedData     map[string]interface{}
 }
 
@@ -142,7 +142,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.GuestOSType == "" {
-		p.config.GuestOSType = provisioner.DefaultOSType
+		p.config.GuestOSType = guestexec.DefaultOSType
 	}
 	p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
 
@@ -152,7 +152,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}
 
-	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
+	p.guestCommands, err = guestexec.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
 	if err != nil {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}
@@ -581,7 +581,7 @@ func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config
 	}
 
 	if p.config.ElevatedUser != "" {
-		command, err = provisioner.GenerateElevatedRunner(command, p)
+		command, err = guestexec.GenerateElevatedRunner(command, p)
 		if err != nil {
 			return err
 		}

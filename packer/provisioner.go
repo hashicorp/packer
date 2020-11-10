@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/helper/common"
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 )
 
 // A provisioner is responsible for installing and configuring software
@@ -79,7 +79,7 @@ var BuilderDataCommonKeys = []string{
 func BasicPlaceholderData() map[string]string {
 	placeholderData := map[string]string{}
 	for _, key := range BuilderDataCommonKeys {
-		placeholderData[key] = fmt.Sprintf("Build_%s. "+common.PlaceholderMsg, key)
+		placeholderData[key] = fmt.Sprintf("Build_%s. "+packerbuilderdata.PlaceholderMsg, key)
 	}
 
 	// Backwards-compatability: WinRM Password can get through without forcing

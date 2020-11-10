@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -42,7 +43,7 @@ func (s *StepStopEBSBackedInstance) Run(ctx context.Context, state multistep.Sta
 
 		// Work around this by retrying a few times, up to about 5 minutes.
 		err := retry.Config{Tries: 6, ShouldRetry: func(error) bool {
-			if IsAWSErr(err, "InvalidInstanceID.NotFound", "") {
+			if awserrors.Matches(err, "InvalidInstanceID.NotFound", "") {
 				return true
 			}
 			return false

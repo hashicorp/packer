@@ -24,6 +24,7 @@ type FlatConfig struct {
 	ObjectID                          *string                            `mapstructure:"object_id" cty:"object_id" hcl:"object_id"`
 	TenantID                          *string                            `mapstructure:"tenant_id" required:"false" cty:"tenant_id" hcl:"tenant_id"`
 	SubscriptionID                    *string                            `mapstructure:"subscription_id" cty:"subscription_id" hcl:"subscription_id"`
+	UseAzureCLIAuth                   *bool                              `mapstructure:"use_azure_cli_auth" required:"false" cty:"use_azure_cli_auth" hcl:"use_azure_cli_auth"`
 	FromScratch                       *bool                              `mapstructure:"from_scratch" cty:"from_scratch" hcl:"from_scratch"`
 	Source                            *string                            `mapstructure:"source" required:"true" cty:"source" hcl:"source"`
 	CommandWrapper                    *string                            `mapstructure:"command_wrapper" cty:"command_wrapper" hcl:"command_wrapper"`
@@ -76,6 +77,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"object_id":                       &hcldec.AttrSpec{Name: "object_id", Type: cty.String, Required: false},
 		"tenant_id":                       &hcldec.AttrSpec{Name: "tenant_id", Type: cty.String, Required: false},
 		"subscription_id":                 &hcldec.AttrSpec{Name: "subscription_id", Type: cty.String, Required: false},
+		"use_azure_cli_auth":              &hcldec.AttrSpec{Name: "use_azure_cli_auth", Type: cty.Bool, Required: false},
 		"from_scratch":                    &hcldec.AttrSpec{Name: "from_scratch", Type: cty.Bool, Required: false},
 		"source":                          &hcldec.AttrSpec{Name: "source", Type: cty.String, Required: false},
 		"command_wrapper":                 &hcldec.AttrSpec{Name: "command_wrapper", Type: cty.String, Required: false},

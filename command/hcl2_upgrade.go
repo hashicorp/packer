@@ -64,10 +64,19 @@ const (
 # once they also need to be in the same folder. 'packer inspect folder/'
 # will describe to you what is in that folder.
 
+# Avoid mixing go templating calls ( for example ` + "```{{ upper(`string`) }}```" + ` ) 
+# and HCL2 calls (for example '${ var.string_value_example }' ). They won't be
+# executed together and the outcome will be unknown.
+`
+	inputVarHeader = `
 # All generated input variables will be of 'string' type as this is how Packer JSON
 # views them; you can change their type later on. Read the variables type
 # constraints documentation
 # https://www.packer.io/docs/from-1.5/variables#type-constraints for more info.
+`
+
+	packerBlockHeader = `
+# See https://www.packer.io/docs/from-1.5/blocks/packer for more info
 `
 
 	sourcesHeader = `
@@ -112,9 +121,21 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 
 	core := hdl.(*CoreWrapper).Core
 	if err := core.Initialize(); err != nil {
-		c.Ui.Error(fmt.Sprintf("Initialization error, continuing: %v", err))
+		c.Ui.Error(fmt.Sprintf("Ignoring following initialization error: %v", err))
 	}
 	tpl := core.Template
+
+	// Packer section
+	if tpl.MinVersion != "" {
+		out.Write([]byte(packerBlockHeader))
+		fileContent := hclwrite.NewEmptyFile()
+		body := fileContent.Body()
+		packerBody := body.AppendNewBlock("packer", nil).Body()
+		packerBody.SetAttributeValue("required_version", cty.StringVal(fmt.Sprintf(">= %s", tpl.MinVersion)))
+		out.Write(fileContent.Bytes())
+	}
+
+	out.Write([]byte(inputVarHeader))
 
 	// Output variables section
 
@@ -266,12 +287,29 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	return 0
 }
 
+type UnhandleableArgumentError struct {
+	Call           string
+	Correspondance string
+	Docs           string
+}
+
+func (uc UnhandleableArgumentError) Error() string {
+	return fmt.Sprintf(`unhandled %q call:
+# there is no way to automatically upgrade the %[1]q call.
+# Please manually upgrade to %s
+# Visit %s for more infos.`, uc.Call, uc.Correspondance, uc.Docs)
+}
+
 // transposeTemplatingCalls executes parts of blocks as go template files and replaces
 // their result with their hcl2 variant. If something goes wrong the template
 // containing the go template string is returned.
 func transposeTemplatingCalls(s []byte) []byte {
 	fallbackReturn := func(err error) []byte {
-		return append([]byte(fmt.Sprintf("\n#could not parse template for following block: %q\n", err)), s...)
+		if strings.Contains(err.Error(), "unhandled") {
+			return append([]byte(fmt.Sprintf("\n# %s\n", err)), s...)
+		}
+
+		return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
 	}
 	funcMap := texttemplate.FuncMap{
 		"timestamp": func() string {
@@ -289,9 +327,71 @@ func transposeTemplatingCalls(s []byte) []byte {
 		"build": func(a string) string {
 			return fmt.Sprintf("${build.%s}", a)
 		},
+		"template_dir": func() string {
+			return fmt.Sprintf("${path.root}")
+		},
+		"pwd": func() string {
+			return fmt.Sprintf("${path.cwd}")
+		},
+		"packer_version": func() string {
+			return fmt.Sprintf("${packer.version}")
+		},
+		"uuid": func() string {
+			return fmt.Sprintf("${uuidv4()}")
+		},
+		"lower": func(_ string) (string, error) {
+			return "", UnhandleableArgumentError{
+				"lower",
+				"`lower(var.example)`",
+				"https://www.packer.io/docs/from-1.5/functions/string/lower",
+			}
+		},
+		"upper": func(_ string) (string, error) {
+			return "", UnhandleableArgumentError{
+				"upper",
+				"`upper(var.example)`",
+				"https://www.packer.io/docs/from-1.5/functions/string/upper",
+			}
+		},
+		"split": func(_, _ string, _ int) (string, error) {
+			return "", UnhandleableArgumentError{
+				"split",
+				"`split(separator, string)`",
+				"https://www.packer.io/docs/from-1.5/functions/string/split",
+			}
+		},
+		"replace": func(_, _, _ string, _ int) (string, error) {
+			return "", UnhandleableArgumentError{
+				"replace",
+				"`replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
+				"https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",
+			}
+		},
+		"replace_all": func(_, _, _ string) (string, error) {
+			return "", UnhandleableArgumentError{
+				"replace_all",
+				"`replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
+				"https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",
+			}
+		},
+		"clean_resource_name": func(_ string) (string, error) {
+			return "", UnhandleableArgumentError{
+				"clean_resource_name",
+				"use custom validation rules, `replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
+				"https://packer.io/docs/from-1.5/variables#custom-validation-rules" +
+					" , https://www.packer.io/docs/from-1.5/functions/string/replace" +
+					" or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",
+			}
+		},
+		"build_name": func() string {
+			return fmt.Sprintf("${build.name}")
+		},
+		"build_type": func() string {
+			return fmt.Sprintf("${build.type}")
+		},
 	}
 
-	tpl, err := texttemplate.New("generated").
+	tpl, err := texttemplate.New("hcl2_upgrade").
 		Funcs(funcMap).
 		Parse(string(s))
 

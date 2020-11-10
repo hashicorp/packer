@@ -12,9 +12,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -103,6 +103,18 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		PluginType:         BuilderId,
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"run_tags",
+				"run_tag",
+				"run_volume_tags",
+				"run_volume_tag",
+				"spot_tags",
+				"spot_tag",
+				"tags",
+				"tag",
+			},
+		},
 	}, raws...)
 	if err != nil {
 		return nil, nil, err
@@ -168,7 +180,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("iam", iam)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	generatedData := &builder.GeneratedData{State: state}
+	generatedData := &packerbuilderdata.GeneratedData{State: state}
 
 	var instanceStep multistep.Step
 
@@ -185,6 +197,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			ExpectedRootDevice:                "ebs",
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
+			Region:                            *ec2conn.Config.Region,
 			SourceAMI:                         b.config.SourceAmi,
 			SpotInstanceTypes:                 b.config.SpotInstanceTypes,
 			SpotPrice:                         b.config.SpotPrice,

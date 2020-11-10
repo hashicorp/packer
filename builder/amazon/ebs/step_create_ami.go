@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
 	"github.com/hashicorp/packer/common/random"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -61,7 +62,7 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 	err = retry.Config{
 		Tries: 0,
 		ShouldRetry: func(err error) bool {
-			if awscommon.IsAWSErr(err, "InvalidParameterValue", "Instance is not in state") {
+			if awserrors.Matches(err, "InvalidParameterValue", "Instance is not in state") {
 				return true
 			}
 			return false

@@ -45,8 +45,8 @@ type Config struct {
 	AccessToken           string `mapstructure:"access_token"`
 	VagrantCloudUrl       string `mapstructure:"vagrant_cloud_url"`
 	InsecureSkipTLSVerify bool   `mapstructure:"insecure_skip_tls_verify"`
-
-	BoxDownloadUrl string `mapstructure:"box_download_url"`
+	BoxDownloadUrl        string `mapstructure:"box_download_url"`
+	NoDirectUpload        bool   `mapstructure:"no_direct_upload"`
 
 	ctx interpolate.Context
 }
@@ -181,24 +181,18 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	state.Put("boxDownloadUrl", boxDownloadUrl)
 
 	// Build the steps
-	steps := []multistep.Step{}
+	steps := []multistep.Step{
+		new(stepVerifyBox),
+		new(stepCreateVersion),
+		new(stepCreateProvider),
+	}
 	if p.config.BoxDownloadUrl == "" {
-		steps = []multistep.Step{
-			new(stepVerifyBox),
-			new(stepCreateVersion),
-			new(stepCreateProvider),
-			new(stepPrepareUpload),
-			new(stepUpload),
-			new(stepReleaseVersion),
-		}
-	} else {
-		steps = []multistep.Step{
-			new(stepVerifyBox),
-			new(stepCreateVersion),
-			new(stepCreateProvider),
-			new(stepReleaseVersion),
+		steps = append(steps, new(stepPrepareUpload), new(stepUpload))
+		if !p.config.NoDirectUpload {
+			steps = append(steps, new(stepConfirmUpload))
 		}
 	}
+	steps = append(steps, new(stepReleaseVersion))
 
 	// Run the steps
 	p.runner = common.NewRunner(steps, p.config.PackerConfig, ui)

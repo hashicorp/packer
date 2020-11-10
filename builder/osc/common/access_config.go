@@ -23,6 +23,8 @@ type AccessConfig struct {
 	SkipValidation        bool   `mapstructure:"skip_region_validation"`
 	SkipMetadataApiCheck  bool   `mapstructure:"skip_metadata_api_check"`
 	Token                 string `mapstructure:"token"`
+	X509certPath          string `mapstructure:"x509_cert_path"`
+	X509keyPath           string `mapstructure:"x509_key_path"`
 }
 
 // NewOSCClient retrieves the Outscale OSC-SDK client
@@ -45,6 +47,19 @@ func (c *AccessConfig) NewOSCClient() *osc.APIClient {
 
 	if c.CustomEndpointOAPI == "" {
 		c.CustomEndpointOAPI = "outscale.com/oapi/latest"
+
+		if c.RawRegion == "cn-southeast-1" {
+			c.CustomEndpointOAPI = "outscale.hk/oapi/latest"
+		}
+
+	}
+
+	if c.X509certPath == "" {
+		c.X509certPath = os.Getenv("OUTSCALE_X509CERT")
+	}
+
+	if c.X509keyPath == "" {
+		c.X509keyPath = os.Getenv("OUTSCALE_X509KEY")
 	}
 
 	return c.NewOSCClientByRegion(c.RawRegion)
@@ -57,11 +72,23 @@ func (c *AccessConfig) GetRegion() string {
 
 // NewOSCClientByRegion returns the connection depdending of the region given
 func (c *AccessConfig) NewOSCClientByRegion(region string) *osc.APIClient {
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: c.InsecureSkipTLSVerify},
+		Proxy:           http.ProxyFromEnvironment,
+	}
+
+	if c.X509certPath != "" && c.X509keyPath != "" {
+		cert, err := tls.LoadX509KeyPair(c.X509certPath, c.X509keyPath)
+		if err == nil {
+			transport.TLSClientConfig = &tls.Config{
+				InsecureSkipVerify: c.InsecureSkipTLSVerify,
+				Certificates:       []tls.Certificate{cert},
+			}
+		}
+	}
+
 	skipClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: c.InsecureSkipTLSVerify},
-			Proxy:           http.ProxyFromEnvironment,
-		},
+		Transport: transport,
 	}
 
 	skipClient.Transport = NewTransport(c.AccessKey, c.SecretKey, c.RawRegion, skipClient.Transport)

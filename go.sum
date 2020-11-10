@@ -126,7 +126,6 @@ github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj
 github.com/armon/go-radix v1.0.0 h1:F4z6KzEeeQIMeLFa97iZU6vupzoecKdU5TX24SNppXI=
 github.com/armon/go-radix v1.0.0/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
 github.com/aws/aws-sdk-go v1.15.78/go.mod h1:E3/ieXAlvM0XWO57iftYVDLLvQ824smPP3ATZkfNZeM=
-github.com/aws/aws-sdk-go v1.16.22/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.26.3/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.30.8 h1:4BHbh8K3qKmcnAgToZ2LShldRF9inoqIBccpCLNCy3I=
 github.com/aws/aws-sdk-go v1.30.8/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
@@ -377,7 +376,6 @@ github.com/hashicorp/go-uuid v1.0.1 h1:fv1ep09latC32wFoVwnqcnKJGnMSdBanPczbHAYm1
 github.com/hashicorp/go-uuid v1.0.1/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
 github.com/hashicorp/go-uuid v1.0.2 h1:cfejS+Tpcp13yd5nYHWDI6qVCny6wyX2Mt5SGur2IGE=
 github.com/hashicorp/go-uuid v1.0.2/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
-github.com/hashicorp/go-version v1.0.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hashicorp/go-version v1.1.0 h1:bPIoEKD27tNdebFGGxxYwcL4nepeY4j1QP23PFRGzg0=
 github.com/hashicorp/go-version v1.1.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hashicorp/go-version v1.2.0 h1:3vNe/fWF5CBgRIguda1meWhsZHy3m8gCJ5wx+dIzX/E=
@@ -512,8 +510,6 @@ github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7/go.mod h1:ZX
 github.com/mitchellh/go-wordwrap v1.0.0 h1:6GlHJ/LTGMrIJbwgdqdl2eEH8o+Exx/0m8ir9Gns0u4=
 github.com/mitchellh/go-wordwrap v1.0.0/go.mod h1:ZXFpozHsX6DPmq2I0TCekCxypsnAUbP2oI0UX1GXzOo=
 github.com/mitchellh/gox v0.4.0/go.mod h1:Sd9lOJ0+aimLBi73mGofS1ycjY8lL3uZM3JPS42BGNg=
-github.com/mitchellh/gox v1.0.1 h1:x0jD3dcHk9a9xPSDN6YEL4xL6Qz0dvNYm8yZqui5chI=
-github.com/mitchellh/gox v1.0.1/go.mod h1:ED6BioOGXMswlXa2zxfh/xdd5QhwYliBFn9V18Ap4z4=
 github.com/mitchellh/iochan v1.0.0 h1:C+X3KsSTLFVBr/tK1eYN/vs4rJcvsiLU338UhYPJWeY=
 github.com/mitchellh/iochan v1.0.0/go.mod h1:JwYml1nuB7xOzsp52dPpHFffvOCDupsG0QubkSMEySY=
 github.com/mitchellh/mapstructure v0.0.0-20160808181253-ca63d7c062ee/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
@@ -538,9 +534,6 @@ github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b/go.mod h1:v
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/oracle/oci-go-sdk v18.0.0+incompatible h1:FLV4KixsVfF3rwyVTMI6Ryp/Q+OSb9sR5TawbfjFLN4=
 github.com/oracle/oci-go-sdk v18.0.0+incompatible/go.mod h1:VQb79nF8Z2cwLkLS35ukwStZIg5F66tcBccjip/j888=
-github.com/outscale/osc-go v0.0.1 h1:hvBtORyu7sWSKW1norGlfIP8C7c2aegI2Vkq75SRPCE=
-github.com/outscale/osc-go v0.0.1/go.mod h1:hJLmXzqU/t07qQYh90I0TqZzu9s85Zs6FMrxk3ukiFM=
-github.com/outscale/osc-sdk-go v1.2.0 h1:1HKr6OMLLVW4w6KQuiQwYZjhNaVz9mNzy/W3KW+zgnA=
 github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699 h1:SHe9i7h5cHe+cB77fQ6lsEgIwKg3ckNU90P03CjGMnI=
 github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699/go.mod h1:5AqqNH1X8zCHescKVlpSHRzrat1KCKDXqZoQPe8fY3A=
 github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a h1:A3QMuteviunoaY/8ex+RKFqwhcZJ/Cf3fCW3IwL2wx4=
@@ -636,12 +629,8 @@ github.com/vmware/govmomi v0.23.1/go.mod h1:Y+Wq4lst78L85Ge/F8+ORXIWiKYqaro1vhAu
 github.com/vmware/vmw-guestinfo v0.0.0-20170707015358-25eff159a728/go.mod h1:x9oS4Wk2s2u4tS29nEaDLdzvuHdB19CvSGJjPgkZJNk=
 github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0 h1:NJrcIkdzq0C3I8ypAZwFE9RHtGbfp+mJvqIcoFATZuk=
 github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0/go.mod h1:sBh287mCRwCz6zyXHMmw7sSZGPohVpnx+o+OY4M+i3A=
-github.com/yandex-cloud/go-genproto v0.0.0-20200608085315-d6e7ef5ceb97 h1:DoqSUxQkBLislVgA1qkM0u7g04It4VRMidyLBH/O/as=
-github.com/yandex-cloud/go-genproto v0.0.0-20200608085315-d6e7ef5ceb97/go.mod h1:HEUYX/p8966tMUHHT+TsS0hF/Ca/NYwqprC5WXSDMfE=
 github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd h1:o4pvS7D4OErKOM6y+/q6IfOa65OaentKbEDh1ABirE8=
 github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd/go.mod h1:HEUYX/p8966tMUHHT+TsS0hF/Ca/NYwqprC5WXSDMfE=
-github.com/yandex-cloud/go-sdk v0.0.0-20200610100221-ae86895efb97 h1:8KwSw9xtQBeyeX1EpOlOjRc0JaHlh8B8GglKA6iXt08=
-github.com/yandex-cloud/go-sdk v0.0.0-20200610100221-ae86895efb97/go.mod h1:3p2xVpQrHyPxV4UCKnKozt9n+g1LRENOQ33CH8rqLnY=
 github.com/yandex-cloud/go-sdk v0.0.0-20200921111412-ef15ded2014c h1:LJrgyICodRAgtBvOO2eCbhDDIoaJgeLa1tGQecqW9ac=
 github.com/yandex-cloud/go-sdk v0.0.0-20200921111412-ef15ded2014c/go.mod h1:Zn/U9YKH0w8n83ezLps5eB6Jftc4gSoZWxVR8hgXgoY=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

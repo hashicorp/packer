@@ -6,7 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/builder"
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
@@ -17,6 +17,7 @@ func testImage() *ec2.Image {
 		Name:            aws.String("ami_test_name"),
 		OwnerId:         aws.String("ami_test_owner_id"),
 		ImageOwnerAlias: aws.String("ami_test_owner_alias"),
+		RootDeviceType:  aws.String("ebs"),
 		Tags: []*ec2.Tag{
 			{
 				Key:   aws.String("key-1"),
@@ -35,8 +36,8 @@ func testState() multistep.StateBag {
 	return state
 }
 
-func testGeneratedData(state multistep.StateBag) builder.GeneratedData {
-	generatedData := builder.GeneratedData{State: state}
+func testGeneratedData(state multistep.StateBag) packerbuilderdata.GeneratedData {
+	generatedData := packerbuilderdata.GeneratedData{State: state}
 	return generatedData
 }
 

@@ -548,10 +548,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 			msg := fmt.Errorf(`no iam_instance_profile defined; session_manager connectivity requires a valid instance profile with AmazonSSMManagedInstanceCore permissions. Alternatively a temporary_iam_instance_profile_policy_document can be used.`)
 			errs = append(errs, msg)
 		}
-
-		if c.PauseBeforeSSM == 0 {
-			c.PauseBeforeSSM = 10 * time.Second
-		}
 	}
 
 	if c.Comm.SSHKeyPairName != "" {

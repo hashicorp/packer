@@ -13,9 +13,9 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/guestexec"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/provisioner"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -85,7 +85,7 @@ type guestOSTypeConfig struct {
 
 // FIXME assumes both Packer host and target are same OS
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
-	provisioner.UnixOSType: {
+	guestexec.UnixOSType: {
 		tempDir:    "/tmp",
 		stagingDir: "/tmp/packer-puppet-server",
 		executeCommand: "cd {{.WorkingDir}} && " +
@@ -102,7 +102,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		facterVarsFmt:    "FACTER_%s='%s'",
 		facterVarsJoiner: " ",
 	},
-	provisioner.WindowsOSType: {
+	guestexec.WindowsOSType: {
 		tempDir:    filepath.ToSlash(os.Getenv("TEMP")),
 		stagingDir: filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-server",
 		executeCommand: "cd {{.WorkingDir}} && " +
@@ -124,7 +124,7 @@ type Provisioner struct {
 	config            Config
 	communicator      packer.Communicator
 	guestOSTypeConfig guestOSTypeConfig
-	guestCommands     *provisioner.GuestCommands
+	guestCommands     *guestexec.GuestCommands
 	generatedData     map[string]interface{}
 }
 
@@ -164,7 +164,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.GuestOSType == "" {
-		p.config.GuestOSType = provisioner.DefaultOSType
+		p.config.GuestOSType = guestexec.DefaultOSType
 	}
 	p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
 
@@ -174,7 +174,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}
 
-	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
+	p.guestCommands, err = guestexec.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
 	if err != nil {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}
@@ -291,7 +291,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}
 
 	if p.config.ElevatedUser != "" {
-		command, err = provisioner.GenerateElevatedRunner(command, p)
+		command, err = guestexec.GenerateElevatedRunner(command, p)
 		if err != nil {
 			return err
 		}

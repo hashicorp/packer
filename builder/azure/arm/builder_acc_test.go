@@ -90,6 +90,19 @@ func TestBuilderAcc_ManagedDisk_Linux_DeviceLogin(t *testing.T) {
 	})
 }
 
+func TestBuilderAcc_ManagedDisk_Linux_AzureCLI(t *testing.T) {
+	if os.Getenv("AZURE_CLI_AUTH") == "" {
+		t.Skip("Azure CLI Acceptance tests skipped unless env 'AZURE_CLI_AUTH' is set, and an active `az login` session has been established")
+		return
+	}
+
+	builderT.Test(t, builderT.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		Builder:  &Builder{},
+		Template: testBuilderAccManagedDiskLinuxAzureCLI,
+	})
+}
+
 func TestBuilderAcc_Blob_Windows(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
@@ -363,6 +376,30 @@ const testBuilderAccBlobLinux = `
 
 	  "location": "South Central US",
 	  "vm_size": "Standard_DS2_v2"
+	}]
+}
+`
+const testBuilderAccManagedDiskLinuxAzureCLI = `
+{
+	"builders": [{
+	  "type": "test",
+
+	  "use_azure_cli_auth": true,
+
+	  "managed_image_resource_group_name": "packer-acceptance-test",
+	  "managed_image_name": "testBuilderAccManagedDiskLinuxAzureCLI-{{timestamp}}",
+
+	  "os_type": "Linux",
+	  "image_publisher": "Canonical",
+	  "image_offer": "UbuntuServer",
+	  "image_sku": "16.04-LTS",
+
+	  "location": "South Central US",
+	  "vm_size": "Standard_DS2_v2",
+	  "azure_tags": {
+	    "env": "testing",
+	    "builder": "packer"
+	   }
 	}]
 }
 `

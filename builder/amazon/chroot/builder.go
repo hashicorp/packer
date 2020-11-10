@@ -16,10 +16,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/chroot"
+	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -223,8 +223,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			Exclude: []string{
 				"ami_description",
 				"snapshot_tags",
+				"snapshot_tag",
 				"tags",
+				"tag",
 				"root_volume_tags",
+				"root_volume_tag",
 				"command_wrapper",
 				"post_mount_commands",
 				"pre_mount_commands",
@@ -402,7 +405,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("wrappedCommand", common.CommandWrapper(wrappedCommand))
-	generatedData := &builder.GeneratedData{State: state}
+	generatedData := &packerbuilderdata.GeneratedData{State: state}
 
 	// Build the steps
 	steps := []multistep.Step{

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/hashicorp/packer/common/retry"
@@ -16,6 +17,7 @@ type stepUpload struct {
 
 func (s *stepUpload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	upload := state.Get("upload").(*Upload)
 	artifactFilePath := state.Get("artifactFilePath").(string)
@@ -32,7 +34,14 @@ func (s *stepUpload) Run(ctx context.Context, state multistep.StateBag) multiste
 	}.Run(ctx, func(ctx context.Context) error {
 		ui.Message(fmt.Sprintf("Uploading box"))
 
-		resp, err := client.Upload(artifactFilePath, url)
+		var err error
+		var resp *http.Response
+
+		if config.NoDirectUpload {
+			resp, err = client.Upload(artifactFilePath, url)
+		} else {
+			resp, err = client.DirectUpload(artifactFilePath, url)
+		}
 		if err != nil {
 			ui.Message(fmt.Sprintf(
 				"Error uploading box! Will retry in 10 seconds. Error: %s", err))
