@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	confighelper "github.com/hashicorp/packer/helper/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,6 +15,7 @@ func buildTestRootDevice() *ec2.BlockDeviceMapping {
 			VolumeSize: aws.Int64(10),
 			SnapshotId: aws.String("snap-1234"),
 			VolumeType: aws.String("gp2"),
+			Encrypted:  aws.Bool(false),
 		},
 	}
 }
@@ -71,4 +73,25 @@ func TestCreateVolume_gp2_to_io1(t *testing.T) {
 
 	_, err := stepCreateVolume.buildCreateVolumeInput("test-az", testRootDevice)
 	assert.Error(t, err)
+}
+
+func TestCreateVolume_Encrypted(t *testing.T) {
+	stepCreateVolume := StepCreateVolume{RootVolumeEncryptBoot: confighelper.TrileanFromBool(true)}
+	testRootDevice := buildTestRootDevice()
+	ret, err := stepCreateVolume.buildCreateVolumeInput("test-az", testRootDevice)
+	assert.NoError(t, err)
+	// Ensure that the new value is equal to the the value passed in
+	assert.Equal(t, confighelper.TrileanFromBool(*ret.Encrypted), stepCreateVolume.RootVolumeEncryptBoot)
+}
+
+func TestCreateVolume_Custom_KMS_Key_Encrypted(t *testing.T) {
+	stepCreateVolume := StepCreateVolume{
+		RootVolumeEncryptBoot: confighelper.TrileanFromBool(true),
+		RootVolumeKmsKeyId:    "alias/1234",
+	}
+	testRootDevice := buildTestRootDevice()
+	ret, err := stepCreateVolume.buildCreateVolumeInput("test-az", testRootDevice)
+	assert.NoError(t, err)
+	// Ensure that the new value is equal to the value passed in
+	assert.Equal(t, *ret.KmsKeyId, stepCreateVolume.RootVolumeKmsKeyId)
 }

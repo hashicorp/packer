@@ -76,6 +76,8 @@ type FlatConfig struct {
 	SourceAmiFilter         *common.FlatAmiFilterOptions      `mapstructure:"source_ami_filter" required:"false" cty:"source_ami_filter" hcl:"source_ami_filter"`
 	RootVolumeTags          map[string]string                 `mapstructure:"root_volume_tags" required:"false" cty:"root_volume_tags" hcl:"root_volume_tags"`
 	RootVolumeTag           []config.FlatKeyValue             `mapstructure:"root_volume_tag" required:"false" cty:"root_volume_tag" hcl:"root_volume_tag"`
+	RootVolumeEncryptBoot   *bool                             `mapstructure:"root_volume_encrypt_boot" required:"false" cty:"root_volume_encrypt_boot" hcl:"root_volume_encrypt_boot"`
+	RootVolumeKmsKeyId      *string                           `mapstructure:"root_volume_kms_key_id" required:"false" cty:"root_volume_kms_key_id" hcl:"root_volume_kms_key_id"`
 	Architecture            *string                           `mapstructure:"ami_architecture" required:"false" cty:"ami_architecture" hcl:"ami_architecture"`
 }
 
@@ -155,7 +157,13 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"source_ami":                    &hcldec.AttrSpec{Name: "source_ami", Type: cty.String, Required: false},
 		"source_ami_filter":             &hcldec.BlockSpec{TypeName: "source_ami_filter", Nested: hcldec.ObjectSpec((*common.FlatAmiFilterOptions)(nil).HCL2Spec())},
 		"root_volume_tags":              &hcldec.AttrSpec{Name: "root_volume_tags", Type: cty.Map(cty.String), Required: false},
+<<<<<<< HEAD
 		"root_volume_tag":               &hcldec.BlockListSpec{TypeName: "root_volume_tag", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
+=======
+		"root_volume_tag":               &hcldec.BlockListSpec{TypeName: "root_volume_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"root_volume_encrypt_boot":      &hcldec.AttrSpec{Name: "root_volume_encrypt_boot", Type: cty.Bool, Required: false},
+		"root_volume_kms_key_id":        &hcldec.AttrSpec{Name: "root_volume_kms_key_id", Type: cty.String, Required: false},
+>>>>>>> d2717fdcb (adding support for root volume encryption for amazon-chroot)
 		"ami_architecture":              &hcldec.AttrSpec{Name: "ami_architecture", Type: cty.String, Required: false},
 	}
 	return s
