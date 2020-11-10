@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/hashicorp/packer/builder/ucloud/version"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/hashicorp/packer/version"
 	"github.com/ucloud/ucloud-sdk-go/external"
 	"github.com/ucloud/ucloud-sdk-go/private/protocol/http"
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
@@ -68,7 +68,7 @@ func (c *AccessConfig) Client() (*UCloudClient, error) {
 		cfg.BaseUrl = c.BaseUrl
 	}
 	cfg.LogLevel = log.PanicLevel
-	cfg.UserAgent = fmt.Sprintf("Packer-UCloud/%s", version.FormattedVersion())
+	cfg.UserAgent = fmt.Sprintf("Packer-UCloud/%s", version.UcloudPluginVersion.FormattedVersion())
 	// set default max retry count
 	cfg.MaxRetries = 3
 

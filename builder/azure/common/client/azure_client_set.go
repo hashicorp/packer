@@ -1,6 +1,7 @@
 package client
 
 import (
+	"log"
 	"net/http"
 	"regexp"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute/computeapi"
 	"github.com/Azure/go-autorest/autorest"
+	version "github.com/hashicorp/packer/builder/azure/version"
 )
 
 type AzureClientSet interface {
@@ -64,7 +66,10 @@ func (s azureClientSet) SubscriptionID() string {
 }
 
 func (s azureClientSet) configureAutorestClient(c *autorest.Client) {
-	c.AddToUserAgent(useragent.String())
+	err := c.AddToUserAgent(useragent.String(version.AzurePluginVersion.FormattedVersion()))
+	if err != nil {
+		log.Printf("Error appending Packer plugin version to user agent.")
+	}
 	c.Authorizer = s.authorizer
 	c.Sender = s.sender
 }
@@ -72,7 +77,7 @@ func (s azureClientSet) configureAutorestClient(c *autorest.Client) {
 func (s azureClientSet) MetadataClient() MetadataClientAPI {
 	return metadataClient{
 		s.sender,
-		useragent.String(),
+		useragent.String(version.AzurePluginVersion.FormattedVersion()),
 	}
 }
 

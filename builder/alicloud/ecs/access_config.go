@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/hashicorp/packer/builder/alicloud/version"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/hashicorp/packer/version"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -78,7 +78,7 @@ func (c *AlicloudAccessConfig) Client() (*ClientWrapper, error) {
 		return nil, err
 	}
 
-	client.AppendUserAgent(Packer, version.FormattedVersion())
+	client.AppendUserAgent(Packer, version.AlicloudPluginVersion.FormattedVersion())
 	client.SetReadTimeout(DefaultRequestReadTimeout)
 	c.client = &ClientWrapper{client}
 

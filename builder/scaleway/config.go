@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/hashicorp/packer/builder/scaleway/version"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -114,7 +115,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	var warnings []string
 
-	c.UserAgent = useragent.String()
+	c.UserAgent = useragent.String(version.ScalewayPluginVersion.FormattedVersion())
 
 	// Deprecated variables
 	if c.Organization == "" {

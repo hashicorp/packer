@@ -24,7 +24,7 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/post-processor/artifice"
-	"github.com/hashicorp/packer/version"
+	"github.com/hashicorp/packer/post-processor/exoscale-import/version"
 )
 
 var (
@@ -51,7 +51,7 @@ type Config struct {
 }
 
 func init() {
-	egoscale.UserAgent = "Packer-Exoscale/" + version.FormattedVersion() + " " + egoscale.UserAgent
+	egoscale.UserAgent = "Packer-Exoscale/" + version.ExoscaleImportPluginVersion.FormattedVersion() + " " + egoscale.UserAgent
 }
 
 type PostProcessor struct {

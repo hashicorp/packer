@@ -9,9 +9,8 @@ func TestUserAgent(t *testing.T) {
 	rt = "go5.0"
 	goos = "linux"
 	goarch = "amd64"
-	versionFunc = func() string { return "1.2.3" }
 
-	act := String()
+	act := String("1.2.3")
 
 	exp := "Packer/1.2.3 (+https://packer-test.com; go5.0; linux/amd64)"
 	if exp != act {
