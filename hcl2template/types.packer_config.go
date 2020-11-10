@@ -8,9 +8,11 @@ import (
 	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/version"
 	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/function"
 )
 
 // PackerConfig represents a loaded Packer HCL config. It will contain
@@ -107,16 +109,23 @@ func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 	content, moreDiags := f.Body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 
+	// for input variables we allow to use env in the default value section.
+	ectx := &hcl.EvalContext{
+		Functions: map[string]function.Function{
+			"env": pkrfunction.EnvFunc,
+		},
+	}
+
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case variableLabel:
-			moreDiags := c.InputVariables.decodeVariableBlock(block, nil)
+			moreDiags := c.InputVariables.decodeVariableBlock(block, ectx)
 			diags = append(diags, moreDiags...)
 		case variablesLabel:
 			attrs, moreDiags := block.Body.JustAttributes()
 			diags = append(diags, moreDiags...)
 			for key, attr := range attrs {
-				moreDiags = c.InputVariables.decodeVariable(key, attr, nil)
+				moreDiags = c.InputVariables.decodeVariable(key, attr, ectx)
 				diags = append(diags, moreDiags...)
 			}
 		}
