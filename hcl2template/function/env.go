@@ -21,10 +21,7 @@ var EnvFunc = function.New(&function.Spec{
 	Type: function.StaticReturnType(cty.String),
 	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 		key := args[0].AsString()
-		value, found := os.LookupEnv(key)
-		if !found {
-			return cty.UnknownVal(cty.String), nil
-		}
+		value := os.Getenv(key)
 		return cty.StringVal(value), nil
 	},
 })
