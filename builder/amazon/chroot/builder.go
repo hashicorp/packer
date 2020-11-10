@@ -349,7 +349,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		if b.config.RootVolumeKmsKeyId != "" {
 			if b.config.RootVolumeEncryptBoot.False() {
 				errs = packer.MultiErrorAppend(
-					errs, errors.New("If you have set root_kms_key_id, root_encrypt_boot must also be true."))
+					errs, errors.New("If you have set root_volume_kms_key_id, root_volume_encrypt_boot must also be true."))
 			} else if b.config.RootVolumeEncryptBoot.True() && !validateKmsKey(b.config.RootVolumeKmsKeyId) {
 				errs = packer.MultiErrorAppend(
 					errs, fmt.Errorf("%q is not a valid KMS Key Id.", b.config.RootVolumeKmsKeyId))
