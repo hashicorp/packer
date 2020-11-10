@@ -130,5 +130,25 @@
   [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
   will allow you to create those programatically.
 
+- `root_volume_encrypt_boot` (boolean) - Whether or not to encrypt the volumes that are *launched*. By default, Packer will keep
+  the encryption setting to what it was in the source image when set to `false`. Setting true will
+  always result in an encrypted one.
+
+- `root_volume_kms_key_id` (string) - ID, alias or ARN of the KMS key to use for *launched* volumes encryption.
+  
+  Set this value if you select `root_volume_encrypt_boot`, but don't want to use the
+  region's default KMS key.
+  
+  If you have a custom kms key you'd like to apply to the launch volume,
+  and are only building in one region, it is more efficient to set this
+  and `root_volume_encrypt_boot` to `true` and not use `encrypt_boot` and `kms_key_id`. This saves
+  potentially many minutes at the end of the build by preventing Packer
+  from having to copy and re-encrypt the image at the end of the build.
+  
+  For valid formats see *KmsKeyId* in the [AWS API docs -
+  CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
+  This field is validated by Packer, when using an alias, you will have to
+  prefix `kms_key_id` with `alias/`.
+
 - `ami_architecture` (string) - what architecture to use when registering the final AMI; valid options
   are "x86_64" or "arm64". Defaults to "x86_64".
