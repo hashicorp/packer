@@ -3,6 +3,7 @@
     "variables": {
         "secret_account": "🤷",
         "aws_region": null,
+        "aws_secondary_region": "{{ env `AWS_DEFAULT_REGION` }}",
         "aws_secret_key": "",
         "aws_access_key": ""
     },

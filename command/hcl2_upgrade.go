@@ -322,7 +322,7 @@ func transposeTemplatingCalls(s []byte) []byte {
 			return fmt.Sprintf("${var.%s}", in)
 		},
 		"env": func(in string) string {
-			return fmt.Sprintf("${var.%s}", in)
+			return fmt.Sprintf("${env(%q)}", in)
 		},
 		"build": func(a string) string {
 			return fmt.Sprintf("${build.%s}", a)
