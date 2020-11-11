@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/antihax/optional"
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/builder/osc/common/retry"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -68,7 +68,7 @@ func WaitUntilOscSnapshotDone(conn *osc.APIClient, snapshotID string) error {
 }
 
 func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) {
-	err := common.Retry(2, 2, 0, func(_ uint) (bool, error) {
+	err := retry.Retry(2, 2, 0, func(_ uint) (bool, error) {
 		state, err := refresh()
 		if err != nil {
 			return false, err

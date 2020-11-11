@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -62,12 +61,13 @@ func (s *stepConvertDisk) Run(ctx context.Context, state multistep.StateBag) mul
 	})
 
 	if err != nil {
-		if err == common.RetryExhaustedError {
+		switch err.(type) {
+		case *retry.RetryExhaustedError:
 			err = fmt.Errorf("Exhausted retries for getting file lock: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
-		} else {
+		default:
 			err := fmt.Errorf("Error converting hard drive: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())

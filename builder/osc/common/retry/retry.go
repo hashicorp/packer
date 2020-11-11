@@ -1,4 +1,4 @@
-package common
+package retry
 
 import (
 	"fmt"
