@@ -1,9 +1,30 @@
 ## 1.6.6 (Upcoming)
 
 ### FEATURES:
+* **New command** `fmt` allows users to format existing HCL2 configuration
+    files into a canonical style. Please see [fmt command
+    docs](https://packer.io/docs/commands/fmt) for more details. [GH-10225]
+* **New function** `env`allows users to set the default value of a variable to
+    the value of some environment variable. Please see [env function
+    docs](https://www.packer.io/docs/from-1.5/functions/contextual/env") for
+    more details. [GH-10240]
 * builder/azure-arm: Create keyvaults with SoftDelete enabled [GH-10210]
 * builder/outscale: Add x509 certificate support [GH-10161]
-* post-processor/yandex-export: Verify the access to a specific bucket [GH-10188]
+* post-processor/yandex-export: Verify the access to a specific bucket
+    [GH-10188]
+
+### IMPROVEMENTS
+* builder/amazon-ebs: Add tags to launch template. [GH-10203]
+* builder/azure-arm: Add Azure CLI authentication support to builder.
+    [GH-10157]
+* core/hcl: Update to `hcl2_upgrade` command to support complex variable
+    values, and packer version blocks. [GH-10221]
+* post-processor/vagrant-cloud: Add support for uploading directly to storage
+    on Vagrant Cloud. [GH-10193]
+
+### BUG FIXES
+* builder/amazon: Fix single `tag` interpolation to allow for template engine
+    usage. [GH-10224]
 
 ## 1.6.5 (October 30, 2020)
 
