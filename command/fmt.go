@@ -60,6 +60,7 @@ func (c *FormatCommand) RunContext(ctx context.Context, cla *FormatArgs) int {
 	}
 
 	if cla.Check && bytesModified > 0 {
+		// exit code taken from `terraform fmt` command
 		return 3
 	}
 

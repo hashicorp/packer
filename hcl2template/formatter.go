@@ -19,13 +19,14 @@ type HCL2Formatter struct {
 	parser          *hclparse.Parser
 }
 
+// NewHCL2Formatter creates a new formatter, ready to format configuration files.
 func NewHCL2Formatter() *HCL2Formatter {
-	f := HCL2Formatter{}
-	f.parser = hclparse.NewParser()
-	return &f
+	return &HCL2Formatter{
+		parser: hclparse.NewParser(),
+	}
 }
 
-// Format the all HCL2 files in path and return the total bytes formatted.
+// Format all HCL2 files in path and return the total bytes formatted.
 // If any error is encountered, zero bytes will be returned.
 //
 // Path can be a directory or a file.
@@ -61,7 +62,7 @@ func (f *HCL2Formatter) Format(path string) (int, hcl.Diagnostics) {
 		if err != nil {
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
-				Summary:  fmt.Sprintf("Unable to format %s", fn),
+				Summary:  fmt.Sprintf("encountered an error while formatting %s", fn),
 				Detail:   err.Error(),
 			})
 		}
@@ -112,7 +113,7 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 	if f.ShowDiff {
 		diff, err := bytesDiff(inSrc, outSrc, filename)
 		if err != nil {
-			return outSrc, nil
+			return outSrc, fmt.Errorf("failed to generate diff for %s: %s", filename, err)
 		}
 		_, _ = f.Output.Write(diff)
 	}
