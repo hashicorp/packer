@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FlexibleGpuCatalog Information about the flexible GPU (fGPU) that is available in the public catalog.
 type FlexibleGpuCatalog struct {
 	// The generations of VMs that the fGPU is compatible with.

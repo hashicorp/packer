@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type AccountApiService service
 
 // CheckAuthenticationOpts Optional parameters for the method 'CheckAuthentication'
 type CheckAuthenticationOpts struct {
-    CheckAuthenticationRequest optional.Interface
+	CheckAuthenticationRequest optional.Interface
 }
 
 /*
 CheckAuthentication Method for CheckAuthentication
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CheckAuthenticationOpts - Optional Parameters:
- * @param "CheckAuthenticationRequest" (optional.Interface of CheckAuthenticationRequest) - 
+ * @param "CheckAuthenticationRequest" (optional.Interface of CheckAuthenticationRequest) -
 @return CheckAuthenticationResponse
 */
 func (a *AccountApiService) CheckAuthentication(ctx _context.Context, localVarOptionals *CheckAuthenticationOpts) (CheckAuthenticationResponse, *_nethttp.Response, error) {
@@ -139,14 +139,14 @@ func (a *AccountApiService) CheckAuthentication(ctx _context.Context, localVarOp
 
 // CreateAccountOpts Optional parameters for the method 'CreateAccount'
 type CreateAccountOpts struct {
-    CreateAccountRequest optional.Interface
+	CreateAccountRequest optional.Interface
 }
 
 /*
 CreateAccount Method for CreateAccount
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateAccountOpts - Optional Parameters:
- * @param "CreateAccountRequest" (optional.Interface of CreateAccountRequest) - 
+ * @param "CreateAccountRequest" (optional.Interface of CreateAccountRequest) -
 @return CreateAccountResponse
 */
 func (a *AccountApiService) CreateAccount(ctx _context.Context, localVarOptionals *CreateAccountOpts) (CreateAccountResponse, *_nethttp.Response, error) {
@@ -250,14 +250,14 @@ func (a *AccountApiService) CreateAccount(ctx _context.Context, localVarOptional
 
 // ReadAccountsOpts Optional parameters for the method 'ReadAccounts'
 type ReadAccountsOpts struct {
-    ReadAccountsRequest optional.Interface
+	ReadAccountsRequest optional.Interface
 }
 
 /*
 ReadAccounts Method for ReadAccounts
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadAccountsOpts - Optional Parameters:
- * @param "ReadAccountsRequest" (optional.Interface of ReadAccountsRequest) - 
+ * @param "ReadAccountsRequest" (optional.Interface of ReadAccountsRequest) -
 @return ReadAccountsResponse
 */
 func (a *AccountApiService) ReadAccounts(ctx _context.Context, localVarOptionals *ReadAccountsOpts) (ReadAccountsResponse, *_nethttp.Response, error) {
@@ -361,14 +361,14 @@ func (a *AccountApiService) ReadAccounts(ctx _context.Context, localVarOptionals
 
 // ResetAccountPasswordOpts Optional parameters for the method 'ResetAccountPassword'
 type ResetAccountPasswordOpts struct {
-    ResetAccountPasswordRequest optional.Interface
+	ResetAccountPasswordRequest optional.Interface
 }
 
 /*
 ResetAccountPassword Method for ResetAccountPassword
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ResetAccountPasswordOpts - Optional Parameters:
- * @param "ResetAccountPasswordRequest" (optional.Interface of ResetAccountPasswordRequest) - 
+ * @param "ResetAccountPasswordRequest" (optional.Interface of ResetAccountPasswordRequest) -
 @return ResetAccountPasswordResponse
 */
 func (a *AccountApiService) ResetAccountPassword(ctx _context.Context, localVarOptionals *ResetAccountPasswordOpts) (ResetAccountPasswordResponse, *_nethttp.Response, error) {
@@ -472,14 +472,14 @@ func (a *AccountApiService) ResetAccountPassword(ctx _context.Context, localVarO
 
 // SendResetPasswordEmailOpts Optional parameters for the method 'SendResetPasswordEmail'
 type SendResetPasswordEmailOpts struct {
-    SendResetPasswordEmailRequest optional.Interface
+	SendResetPasswordEmailRequest optional.Interface
 }
 
 /*
 SendResetPasswordEmail Method for SendResetPasswordEmail
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *SendResetPasswordEmailOpts - Optional Parameters:
- * @param "SendResetPasswordEmailRequest" (optional.Interface of SendResetPasswordEmailRequest) - 
+ * @param "SendResetPasswordEmailRequest" (optional.Interface of SendResetPasswordEmailRequest) -
 @return SendResetPasswordEmailResponse
 */
 func (a *AccountApiService) SendResetPasswordEmail(ctx _context.Context, localVarOptionals *SendResetPasswordEmailOpts) (SendResetPasswordEmailResponse, *_nethttp.Response, error) {
@@ -583,14 +583,14 @@ func (a *AccountApiService) SendResetPasswordEmail(ctx _context.Context, localVa
 
 // UpdateAccountOpts Optional parameters for the method 'UpdateAccount'
 type UpdateAccountOpts struct {
-    UpdateAccountRequest optional.Interface
+	UpdateAccountRequest optional.Interface
 }
 
 /*
 UpdateAccount Method for UpdateAccount
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *UpdateAccountOpts - Optional Parameters:
- * @param "UpdateAccountRequest" (optional.Interface of UpdateAccountRequest) - 
+ * @param "UpdateAccountRequest" (optional.Interface of UpdateAccountRequest) -
 @return UpdateAccountResponse
 */
 func (a *AccountApiService) UpdateAccount(ctx _context.Context, localVarOptionals *UpdateAccountOpts) (UpdateAccountResponse, *_nethttp.Response, error) {

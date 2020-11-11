@@ -17,19 +17,18 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
 )
 
 type DescribeImageConstraintsRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
-
-    /* 镜像ID  */
-    ImageId string `json:"imageId"`
+	/* 镜像ID  */
+	ImageId string `json:"imageId"`
 }
 
 /*
@@ -39,19 +38,19 @@ type DescribeImageConstraintsRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeImageConstraintsRequest(
-    regionId string,
-    imageId string,
+	regionId string,
+	imageId string,
 ) *DescribeImageConstraintsRequest {
 
 	return &DescribeImageConstraintsRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/images/{imageId}/constraints",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        ImageId: imageId,
+		RegionId: regionId,
+		ImageId:  imageId,
 	}
 }
 
@@ -60,57 +59,57 @@ func NewDescribeImageConstraintsRequest(
  * param imageId: 镜像ID (Required)
  */
 func NewDescribeImageConstraintsRequestWithAllParams(
-    regionId string,
-    imageId string,
+	regionId string,
+	imageId string,
 ) *DescribeImageConstraintsRequest {
 
-    return &DescribeImageConstraintsRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/images/{imageId}/constraints",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        ImageId: imageId,
-    }
+	return &DescribeImageConstraintsRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/images/{imageId}/constraints",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId: regionId,
+		ImageId:  imageId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeImageConstraintsRequestWithoutParam() *DescribeImageConstraintsRequest {
 
-    return &DescribeImageConstraintsRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/images/{imageId}/constraints",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeImageConstraintsRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/images/{imageId}/constraints",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DescribeImageConstraintsRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param imageId: 镜像ID(Required) */
 func (r *DescribeImageConstraintsRequest) SetImageId(imageId string) {
-    r.ImageId = imageId
+	r.ImageId = imageId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeImageConstraintsRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeImageConstraintsResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeImageConstraintsResult `json:"result"`
+	RequestID string                         `json:"requestId"`
+	Error     core.ErrorResponse             `json:"error"`
+	Result    DescribeImageConstraintsResult `json:"result"`
 }
 
 type DescribeImageConstraintsResult struct {
-    ImageConstraints vm.ImageConstraint `json:"imageConstraints"`
+	ImageConstraints vm.ImageConstraint `json:"imageConstraints"`
 }

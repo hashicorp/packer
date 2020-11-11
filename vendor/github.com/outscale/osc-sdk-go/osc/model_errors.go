@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // Errors Information about the errors.
 type Errors struct {
 	// The code of the error.

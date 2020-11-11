@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateAccountRequest struct for CreateAccountRequest
 type CreateAccountRequest struct {
 	// The city of the account owner.

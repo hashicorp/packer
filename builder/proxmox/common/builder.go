@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -61,7 +61,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook, state
 		&stepStartVM{
 			vmCreator: b.vmCreator,
 		},
-		&common.StepHTTPServer{
+		&commonsteps.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
@@ -76,8 +76,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook, state
 			Host:      commHost((*comm).Host()),
 			SSHConfig: (*comm).SSHConfigFunc(),
 		},
-		&common.StepProvision{},
-		&common.StepCleanupTempKeys{
+		&commonsteps.StepProvision{},
+		&commonsteps.StepCleanupTempKeys{
 			Comm: &b.config.Comm,
 		},
 		&stepConvertToTemplate{},
@@ -87,7 +87,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook, state
 	steps := append(b.preSteps, coreSteps...)
 	steps = append(steps, b.postSteps...)
 	// Run the steps
-	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {

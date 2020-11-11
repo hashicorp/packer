@@ -16,24 +16,23 @@
 
 package models
 
-
 type ModifySecurityGroupRules struct {
 
-    /* 安全组规则的ID。  */
-    RuleId string `json:"ruleId"`
+	/* 安全组规则的ID。  */
+	RuleId string `json:"ruleId"`
 
-    /* 规则限定协议。300:All; 6:TCP; 17:UDP; 1:ICMP (Optional) */
-    Protocol *int `json:"protocol"`
+	/* 规则限定协议。300:All; 6:TCP; 17:UDP; 1:ICMP (Optional) */
+	Protocol *int `json:"protocol"`
 
-    /* 安全组规则的起始端口。取值范围：1-65535 (Optional) */
-    FromPort *int `json:"fromPort"`
+	/* 安全组规则的起始端口。取值范围：1-65535 (Optional) */
+	FromPort *int `json:"fromPort"`
 
-    /* 安全组规则的终端口。取值范围：1-65535 (Optional) */
-    ToPort *int `json:"toPort"`
+	/* 安全组规则的终端口。取值范围：1-65535 (Optional) */
+	ToPort *int `json:"toPort"`
 
-    /* 安全组规则前缀，取值范围：正确的CIDR (Optional) */
-    AddressPrefix *string `json:"addressPrefix"`
+	/* 安全组规则前缀，取值范围：正确的CIDR (Optional) */
+	AddressPrefix *string `json:"addressPrefix"`
 
-    /* 安全组规则的描述，取值范围：0-256个UTF-8编码下的全部字符 (Optional) */
-    Description *string `json:"description"`
+	/* 安全组规则的描述，取值范围：0-256个UTF-8编码下的全部字符 (Optional) */
+	Description *string `json:"description"`
 }

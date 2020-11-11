@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // BsuCreated Information about the created BSU volume.
 type BsuCreated struct {
 	// Set to `true` by default, which means that the volume is deleted when the VM is terminated. If set to `false`, the volume is not deleted when the VM is terminated.

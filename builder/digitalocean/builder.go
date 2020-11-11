@@ -11,7 +11,7 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -91,8 +91,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Host:      communicator.CommHost(b.config.Comm.Host(), "droplet_ip"),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
-		new(common.StepProvision),
-		&common.StepCleanupTempKeys{
+		new(commonsteps.StepProvision),
+		&commonsteps.StepCleanupTempKeys{
 			Comm: &b.config.Comm,
 		},
 		new(stepShutdown),
@@ -103,7 +103,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Run the steps
-	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
 
 	// If there was an error, return that

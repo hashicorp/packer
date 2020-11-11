@@ -9,10 +9,11 @@
  */
 
 package osc
+
 // ReadConsoleOutputResponse struct for ReadConsoleOutputResponse
 type ReadConsoleOutputResponse struct {
 	// The Base64-encoded output of the console. If a command line tool is used, the output is decoded by the tool.
-	ConsoleOutput string `json:"ConsoleOutput,omitempty"`
+	ConsoleOutput   string          `json:"ConsoleOutput,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 	// The ID of the VM.
 	VmId string `json:"VmId,omitempty"`

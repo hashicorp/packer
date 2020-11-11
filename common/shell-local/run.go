@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer/tmp"
@@ -181,15 +181,15 @@ func createFlattenedEnvVars(config *Config) (string, error) {
 
 	// expose ip address variables
 	httpAddr := config.generatedData["PackerHTTPAddr"]
-	if httpAddr != nil && httpAddr != common.HttpAddrNotImplemented {
+	if httpAddr != nil && httpAddr != commonsteps.HttpAddrNotImplemented {
 		envVars["PACKER_HTTP_ADDR"] = httpAddr.(string)
 	}
 	httpIP := config.generatedData["PackerHTTPIP"]
-	if httpIP != nil && httpIP != common.HttpIPNotImplemented {
+	if httpIP != nil && httpIP != commonsteps.HttpIPNotImplemented {
 		envVars["PACKER_HTTP_IP"] = httpIP.(string)
 	}
 	httpPort := config.generatedData["PackerHTTPPort"]
-	if httpPort != nil && httpPort != common.HttpPortNotImplemented {
+	if httpPort != nil && httpPort != commonsteps.HttpPortNotImplemented {
 		envVars["PACKER_HTTP_PORT"] = httpPort.(string)
 	}
 

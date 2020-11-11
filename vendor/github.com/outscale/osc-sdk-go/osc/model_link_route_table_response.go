@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // LinkRouteTableResponse struct for LinkRouteTableResponse
 type LinkRouteTableResponse struct {
 	// The ID of the association between the route table and the Subnet.
-	LinkRouteTableId string `json:"LinkRouteTableId,omitempty"`
-	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
+	LinkRouteTableId string          `json:"LinkRouteTableId,omitempty"`
+	ResponseContext  ResponseContext `json:"ResponseContext,omitempty"`
 }

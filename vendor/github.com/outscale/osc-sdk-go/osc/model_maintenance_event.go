@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // MaintenanceEvent Information about the maintenance event.
 type MaintenanceEvent struct {
 	// The code of the event (`system-reboot` \\| `system-maintenance`).

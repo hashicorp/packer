@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FlexibleGpu Information about the flexible GPU (fGPU).
 type FlexibleGpu struct {
 	// If `true`, the fGPU is deleted when the VM is terminated.

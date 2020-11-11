@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ListenerForCreation Information about the listener to create.
 type ListenerForCreation struct {
 	// The port on which the back-end VM is listening (between `1` and `65535`, both included).

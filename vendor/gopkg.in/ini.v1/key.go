@@ -186,8 +186,8 @@ func (k *Key) Float64() (float64, error) {
 
 // Int returns int type value.
 func (k *Key) Int() (int, error) {
-    v, err := strconv.ParseInt(k.String(), 0, 64)
-    return int(v), err
+	v, err := strconv.ParseInt(k.String(), 0, 64)
+	return int(v), err
 }
 
 // Int64 returns int64 type value.
@@ -669,7 +669,7 @@ func (k *Key) parseInts(strs []string, addInvalid, returnOnInvalid bool) ([]int,
 	vals := make([]int, 0, len(strs))
 	for _, str := range strs {
 		valInt64, err := strconv.ParseInt(str, 0, 64)
-		val := int(valInt64)        
+		val := int(valInt64)
 		if err != nil && returnOnInvalid {
 			return nil, err
 		}

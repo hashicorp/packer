@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadNetAccessPointsResponse struct for ReadNetAccessPointsResponse
 type ReadNetAccessPointsResponse struct {
 	// One or more Net access points.
 	NetAccessPoints []NetAccessPoint `json:"NetAccessPoints,omitempty"`
-	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
+	ResponseContext ResponseContext  `json:"ResponseContext,omitempty"`
 }

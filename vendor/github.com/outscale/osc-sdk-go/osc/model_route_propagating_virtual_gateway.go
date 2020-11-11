@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // RoutePropagatingVirtualGateway Information about the route propagating virtual gateway.
 type RoutePropagatingVirtualGateway struct {
 	// The ID of the virtual gateway.

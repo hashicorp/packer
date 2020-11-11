@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type SecurityGroupRuleApiService service
 
 // CreateSecurityGroupRuleOpts Optional parameters for the method 'CreateSecurityGroupRule'
 type CreateSecurityGroupRuleOpts struct {
-    CreateSecurityGroupRuleRequest optional.Interface
+	CreateSecurityGroupRuleRequest optional.Interface
 }
 
 /*
 CreateSecurityGroupRule Method for CreateSecurityGroupRule
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateSecurityGroupRuleOpts - Optional Parameters:
- * @param "CreateSecurityGroupRuleRequest" (optional.Interface of CreateSecurityGroupRuleRequest) - 
+ * @param "CreateSecurityGroupRuleRequest" (optional.Interface of CreateSecurityGroupRuleRequest) -
 @return CreateSecurityGroupRuleResponse
 */
 func (a *SecurityGroupRuleApiService) CreateSecurityGroupRule(ctx _context.Context, localVarOptionals *CreateSecurityGroupRuleOpts) (CreateSecurityGroupRuleResponse, *_nethttp.Response, error) {
@@ -169,14 +169,14 @@ func (a *SecurityGroupRuleApiService) CreateSecurityGroupRule(ctx _context.Conte
 
 // DeleteSecurityGroupRuleOpts Optional parameters for the method 'DeleteSecurityGroupRule'
 type DeleteSecurityGroupRuleOpts struct {
-    DeleteSecurityGroupRuleRequest optional.Interface
+	DeleteSecurityGroupRuleRequest optional.Interface
 }
 
 /*
 DeleteSecurityGroupRule Method for DeleteSecurityGroupRule
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteSecurityGroupRuleOpts - Optional Parameters:
- * @param "DeleteSecurityGroupRuleRequest" (optional.Interface of DeleteSecurityGroupRuleRequest) - 
+ * @param "DeleteSecurityGroupRuleRequest" (optional.Interface of DeleteSecurityGroupRuleRequest) -
 @return DeleteSecurityGroupRuleResponse
 */
 func (a *SecurityGroupRuleApiService) DeleteSecurityGroupRule(ctx _context.Context, localVarOptionals *DeleteSecurityGroupRuleOpts) (DeleteSecurityGroupRuleResponse, *_nethttp.Response, error) {

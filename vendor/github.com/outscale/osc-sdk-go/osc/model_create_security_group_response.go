@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreateSecurityGroupResponse struct for CreateSecurityGroupResponse
 type CreateSecurityGroupResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
-	SecurityGroup SecurityGroup `json:"SecurityGroup,omitempty"`
+	SecurityGroup   SecurityGroup   `json:"SecurityGroup,omitempty"`
 }

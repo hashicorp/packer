@@ -15,6 +15,7 @@ import (
 	powershell "github.com/hashicorp/packer/builder/hyperv/common/powershell"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -44,8 +45,8 @@ type Builder struct {
 
 type Config struct {
 	common.PackerConfig            `mapstructure:",squash"`
-	common.HTTPConfig              `mapstructure:",squash"`
-	common.ISOConfig               `mapstructure:",squash"`
+	commonsteps.HTTPConfig         `mapstructure:",squash"`
+	commonsteps.ISOConfig          `mapstructure:",squash"`
 	bootcommand.BootConfig         `mapstructure:",squash"`
 	hypervcommon.OutputConfig      `mapstructure:",squash"`
 	hypervcommon.SSHConfig         `mapstructure:",squash"`
@@ -233,11 +234,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&hypervcommon.StepCreateBuildDir{
 			TempPath: b.config.TempPath,
 		},
-		&common.StepOutputDir{
+		&commonsteps.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
 		},
-		&common.StepDownload{
+		&commonsteps.StepDownload{
 			Checksum:    b.config.ISOChecksum,
 			Description: "ISO",
 			ResultKey:   "iso_path",
@@ -245,12 +246,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Extension:   b.config.TargetExtension,
 			TargetPath:  b.config.TargetPath,
 		},
-		&common.StepCreateFloppy{
+		&commonsteps.StepCreateFloppy{
 			Files:       b.config.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
-		&common.StepHTTPServer{
+		&commonsteps.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
@@ -295,7 +296,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			GuestAdditionsPath: b.config.GuestAdditionsPath,
 			Generation:         b.config.Generation,
 		},
-		&common.StepCreateCD{
+		&commonsteps.StepCreateCD{
 			Files: b.config.CDConfig.CDFiles,
 			Label: b.config.CDConfig.CDLabel,
 		},
@@ -338,10 +339,10 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 
 		// provision requires communicator to be setup
-		&common.StepProvision{},
+		&commonsteps.StepProvision{},
 
 		// Remove ephemeral SSH keys, if using
-		&common.StepCleanupTempKeys{
+		&commonsteps.StepCleanupTempKeys{
 			Comm: &b.config.SSHConfig.Comm,
 		},
 
@@ -377,7 +378,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// the clean up actions for each step will be executed reverse order
 
 	// Run the steps.
-	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
 
 	// Report any errors.

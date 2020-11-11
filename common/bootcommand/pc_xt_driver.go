@@ -8,8 +8,6 @@ import (
 	"time"
 	"unicode"
 	"unicode/utf8"
-
-	"github.com/hashicorp/packer/common"
 )
 
 // SendCodeFunc will be called to send codes to the VM
@@ -41,8 +39,8 @@ func (sc *scancode) makeBreak() []string {
 func NewPCXTDriver(send SendCodeFunc, chunkSize int, interval time.Duration) *pcXTDriver {
 	// We delay (default 100ms) between each input event to allow for CPU or
 	// network latency. See PackerKeyEnv for tuning.
-	keyInterval := common.PackerKeyDefault
-	if delay, err := time.ParseDuration(os.Getenv(common.PackerKeyEnv)); err == nil {
+	keyInterval := PackerKeyDefault
+	if delay, err := time.ParseDuration(os.Getenv(PackerKeyEnv)); err == nil {
 		keyInterval = delay
 	}
 	// Override interval based on builder-specific override

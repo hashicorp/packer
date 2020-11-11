@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // Placement Information about the placement of the VM.
 type Placement struct {
 	// The name of the Subregion.

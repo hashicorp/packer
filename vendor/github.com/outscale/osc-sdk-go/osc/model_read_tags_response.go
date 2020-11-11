@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ReadTagsResponse struct for ReadTagsResponse
 type ReadTagsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

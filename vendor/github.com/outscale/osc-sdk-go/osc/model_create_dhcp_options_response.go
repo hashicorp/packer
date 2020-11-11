@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreateDhcpOptionsResponse struct for CreateDhcpOptionsResponse
 type CreateDhcpOptionsResponse struct {
-	DhcpOptionsSet DhcpOptionsSet `json:"DhcpOptionsSet,omitempty"`
+	DhcpOptionsSet  DhcpOptionsSet  `json:"DhcpOptionsSet,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

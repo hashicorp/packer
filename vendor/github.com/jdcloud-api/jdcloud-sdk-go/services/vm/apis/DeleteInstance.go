@@ -17,18 +17,17 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DeleteInstanceRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
-
-    /* 云主机ID  */
-    InstanceId string `json:"instanceId"`
+	/* 云主机ID  */
+	InstanceId string `json:"instanceId"`
 }
 
 /*
@@ -38,19 +37,19 @@ type DeleteInstanceRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDeleteInstanceRequest(
-    regionId string,
-    instanceId string,
+	regionId string,
+	instanceId string,
 ) *DeleteInstanceRequest {
 
 	return &DeleteInstanceRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}",
 			Method:  "DELETE",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        InstanceId: instanceId,
+		RegionId:   regionId,
+		InstanceId: instanceId,
 	}
 }
 
@@ -59,55 +58,55 @@ func NewDeleteInstanceRequest(
  * param instanceId: 云主机ID (Required)
  */
 func NewDeleteInstanceRequestWithAllParams(
-    regionId string,
-    instanceId string,
+	regionId string,
+	instanceId string,
 ) *DeleteInstanceRequest {
 
-    return &DeleteInstanceRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}",
-            Method:  "DELETE",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        InstanceId: instanceId,
-    }
+	return &DeleteInstanceRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}",
+			Method:  "DELETE",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:   regionId,
+		InstanceId: instanceId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDeleteInstanceRequestWithoutParam() *DeleteInstanceRequest {
 
-    return &DeleteInstanceRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}",
-            Method:  "DELETE",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DeleteInstanceRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}",
+			Method:  "DELETE",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DeleteInstanceRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *DeleteInstanceRequest) SetInstanceId(instanceId string) {
-    r.InstanceId = instanceId
+	r.InstanceId = instanceId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DeleteInstanceRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DeleteInstanceResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DeleteInstanceResult `json:"result"`
+	RequestID string               `json:"requestId"`
+	Error     core.ErrorResponse   `json:"error"`
+	Result    DeleteInstanceResult `json:"result"`
 }
 
 type DeleteInstanceResult struct {

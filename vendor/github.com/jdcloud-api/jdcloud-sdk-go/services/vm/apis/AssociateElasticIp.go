@@ -17,21 +17,20 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type AssociateElasticIpRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
+	/* 云主机ID  */
+	InstanceId string `json:"instanceId"`
 
-    /* 云主机ID  */
-    InstanceId string `json:"instanceId"`
-
-    /* 弹性公网IP的ID  */
-    ElasticIpId string `json:"elasticIpId"`
+	/* 弹性公网IP的ID  */
+	ElasticIpId string `json:"elasticIpId"`
 }
 
 /*
@@ -42,21 +41,21 @@ type AssociateElasticIpRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewAssociateElasticIpRequest(
-    regionId string,
-    instanceId string,
-    elasticIpId string,
+	regionId string,
+	instanceId string,
+	elasticIpId string,
 ) *AssociateElasticIpRequest {
 
 	return &AssociateElasticIpRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:associateElasticIp",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        InstanceId: instanceId,
-        ElasticIpId: elasticIpId,
+		RegionId:    regionId,
+		InstanceId:  instanceId,
+		ElasticIpId: elasticIpId,
 	}
 }
 
@@ -66,62 +65,62 @@ func NewAssociateElasticIpRequest(
  * param elasticIpId: 弹性公网IP的ID (Required)
  */
 func NewAssociateElasticIpRequestWithAllParams(
-    regionId string,
-    instanceId string,
-    elasticIpId string,
+	regionId string,
+	instanceId string,
+	elasticIpId string,
 ) *AssociateElasticIpRequest {
 
-    return &AssociateElasticIpRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}:associateElasticIp",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        InstanceId: instanceId,
-        ElasticIpId: elasticIpId,
-    }
+	return &AssociateElasticIpRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}:associateElasticIp",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:    regionId,
+		InstanceId:  instanceId,
+		ElasticIpId: elasticIpId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewAssociateElasticIpRequestWithoutParam() *AssociateElasticIpRequest {
 
-    return &AssociateElasticIpRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}:associateElasticIp",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &AssociateElasticIpRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}:associateElasticIp",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *AssociateElasticIpRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *AssociateElasticIpRequest) SetInstanceId(instanceId string) {
-    r.InstanceId = instanceId
+	r.InstanceId = instanceId
 }
 
 /* param elasticIpId: 弹性公网IP的ID(Required) */
 func (r *AssociateElasticIpRequest) SetElasticIpId(elasticIpId string) {
-    r.ElasticIpId = elasticIpId
+	r.ElasticIpId = elasticIpId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r AssociateElasticIpRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type AssociateElasticIpResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result AssociateElasticIpResult `json:"result"`
+	RequestID string                   `json:"requestId"`
+	Error     core.ErrorResponse       `json:"error"`
+	Result    AssociateElasticIpResult `json:"result"`
 }
 
 type AssociateElasticIpResult struct {

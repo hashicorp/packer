@@ -17,29 +17,28 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
-    common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
+	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type DescribeElasticIpsRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页 (Optional) */
+	PageNumber *int `json:"pageNumber"`
 
-    /* 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页 (Optional) */
-    PageNumber *int `json:"pageNumber"`
+	/* 分页大小，默认为20，取值范围：[10,100] (Optional) */
+	PageSize *int `json:"pageSize"`
 
-    /* 分页大小，默认为20，取值范围：[10,100] (Optional) */
-    PageSize *int `json:"pageSize"`
-
-    /* elasticIpIds - elasticip id数组条件，支持多个
-elasticIpAddress - eip的IP地址，支持单个
-chargeStatus	- eip的费用支付状态,normal(正常状态) or overdue(预付费已到期) or arrear(欠费状态)，支持单个
- (Optional) */
-    Filters []common.Filter `json:"filters"`
+	/* elasticIpIds - elasticip id数组条件，支持多个
+	elasticIpAddress - eip的IP地址，支持单个
+	chargeStatus	- eip的费用支付状态,normal(正常状态) or overdue(预付费已到期) or arrear(欠费状态)，支持单个
+	 (Optional) */
+	Filters []common.Filter `json:"filters"`
 }
 
 /*
@@ -48,17 +47,17 @@ chargeStatus	- eip的费用支付状态,normal(正常状态) or overdue(预付�
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeElasticIpsRequest(
-    regionId string,
+	regionId string,
 ) *DescribeElasticIpsRequest {
 
 	return &DescribeElasticIpsRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/elasticIps/",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
+		RegionId: regionId,
 	}
 }
 
@@ -70,54 +69,54 @@ func NewDescribeElasticIpsRequest(
 elasticIpAddress - eip的IP地址，支持单个
 chargeStatus	- eip的费用支付状态,normal(正常状态) or overdue(预付费已到期) or arrear(欠费状态)，支持单个
  (Optional)
- */
+*/
 func NewDescribeElasticIpsRequestWithAllParams(
-    regionId string,
-    pageNumber *int,
-    pageSize *int,
-    filters []common.Filter,
+	regionId string,
+	pageNumber *int,
+	pageSize *int,
+	filters []common.Filter,
 ) *DescribeElasticIpsRequest {
 
-    return &DescribeElasticIpsRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/elasticIps/",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        PageNumber: pageNumber,
-        PageSize: pageSize,
-        Filters: filters,
-    }
+	return &DescribeElasticIpsRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/elasticIps/",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:   regionId,
+		PageNumber: pageNumber,
+		PageSize:   pageSize,
+		Filters:    filters,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeElasticIpsRequestWithoutParam() *DescribeElasticIpsRequest {
 
-    return &DescribeElasticIpsRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/elasticIps/",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeElasticIpsRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/elasticIps/",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeElasticIpsRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param pageNumber: 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页(Optional) */
 func (r *DescribeElasticIpsRequest) SetPageNumber(pageNumber int) {
-    r.PageNumber = &pageNumber
+	r.PageNumber = &pageNumber
 }
 
 /* param pageSize: 分页大小，默认为20，取值范围：[10,100](Optional) */
 func (r *DescribeElasticIpsRequest) SetPageSize(pageSize int) {
-    r.PageSize = &pageSize
+	r.PageSize = &pageSize
 }
 
 /* param filters: elasticIpIds - elasticip id数组条件，支持多个
@@ -125,22 +124,22 @@ elasticIpAddress - eip的IP地址，支持单个
 chargeStatus	- eip的费用支付状态,normal(正常状态) or overdue(预付费已到期) or arrear(欠费状态)，支持单个
 (Optional) */
 func (r *DescribeElasticIpsRequest) SetFilters(filters []common.Filter) {
-    r.Filters = filters
+	r.Filters = filters
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeElasticIpsRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeElasticIpsResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeElasticIpsResult `json:"result"`
+	RequestID string                   `json:"requestId"`
+	Error     core.ErrorResponse       `json:"error"`
+	Result    DescribeElasticIpsResult `json:"result"`
 }
 
 type DescribeElasticIpsResult struct {
-    ElasticIps []vpc.ElasticIp `json:"elasticIps"`
-    TotalCount int `json:"totalCount"`
+	ElasticIps []vpc.ElasticIp `json:"elasticIps"`
+	TotalCount int             `json:"totalCount"`
 }

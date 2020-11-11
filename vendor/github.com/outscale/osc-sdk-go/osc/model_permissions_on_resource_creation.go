@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // PermissionsOnResourceCreation Information about the permissions for the resource.
 type PermissionsOnResourceCreation struct {
 	Additions PermissionsOnResource `json:"Additions,omitempty"`
-	Removals PermissionsOnResource `json:"Removals,omitempty"`
+	Removals  PermissionsOnResource `json:"Removals,omitempty"`
 }

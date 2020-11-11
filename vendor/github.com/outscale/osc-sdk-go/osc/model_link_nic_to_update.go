@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // LinkNicToUpdate Information about the NIC attachment. If you are modifying the `DeleteOnVmDeletion` attribute, you must specify the ID of the NIC attachment.
 type LinkNicToUpdate struct {
 	// If `true`, the NIC is deleted when the VM is terminated.

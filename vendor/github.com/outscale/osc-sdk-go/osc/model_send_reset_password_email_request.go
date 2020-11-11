@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // SendResetPasswordEmailRequest struct for SendResetPasswordEmailRequest
 type SendResetPasswordEmailRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

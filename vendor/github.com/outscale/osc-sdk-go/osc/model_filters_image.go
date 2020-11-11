@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersImage One or more filters.
 type FiltersImage struct {
 	// The account aliases of the owners of the OMIs.

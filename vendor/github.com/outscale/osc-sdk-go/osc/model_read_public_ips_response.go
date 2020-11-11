@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadPublicIpsResponse struct for ReadPublicIpsResponse
 type ReadPublicIpsResponse struct {
 	// Information about one or more EIPs.
-	PublicIps []PublicIp `json:"PublicIps,omitempty"`
+	PublicIps       []PublicIp      `json:"PublicIps,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

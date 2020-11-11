@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadNetAccessPointServicesRequest struct for ReadNetAccessPointServicesRequest
 type ReadNetAccessPointServicesRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool           `json:"DryRun,omitempty"`
 	Filters FiltersService `json:"Filters,omitempty"`
 }

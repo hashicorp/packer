@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CheckAuthenticationResponse struct for CheckAuthenticationResponse
 type CheckAuthenticationResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

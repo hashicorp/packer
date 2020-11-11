@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteFlexibleGpuRequest struct for DeleteFlexibleGpuRequest
 type DeleteFlexibleGpuRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

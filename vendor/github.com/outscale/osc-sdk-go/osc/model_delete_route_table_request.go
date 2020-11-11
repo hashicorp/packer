@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteRouteTableRequest struct for DeleteRouteTableRequest
 type DeleteRouteTableRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

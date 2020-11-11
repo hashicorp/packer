@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type LoadBalancerPolicyApiService service
 
 // CreateLoadBalancerPolicyOpts Optional parameters for the method 'CreateLoadBalancerPolicy'
 type CreateLoadBalancerPolicyOpts struct {
-    CreateLoadBalancerPolicyRequest optional.Interface
+	CreateLoadBalancerPolicyRequest optional.Interface
 }
 
 /*
 CreateLoadBalancerPolicy Method for CreateLoadBalancerPolicy
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateLoadBalancerPolicyOpts - Optional Parameters:
- * @param "CreateLoadBalancerPolicyRequest" (optional.Interface of CreateLoadBalancerPolicyRequest) - 
+ * @param "CreateLoadBalancerPolicyRequest" (optional.Interface of CreateLoadBalancerPolicyRequest) -
 @return CreateLoadBalancerPolicyResponse
 */
 func (a *LoadBalancerPolicyApiService) CreateLoadBalancerPolicy(ctx _context.Context, localVarOptionals *CreateLoadBalancerPolicyOpts) (CreateLoadBalancerPolicyResponse, *_nethttp.Response, error) {
@@ -139,14 +139,14 @@ func (a *LoadBalancerPolicyApiService) CreateLoadBalancerPolicy(ctx _context.Con
 
 // DeleteLoadBalancerPolicyOpts Optional parameters for the method 'DeleteLoadBalancerPolicy'
 type DeleteLoadBalancerPolicyOpts struct {
-    DeleteLoadBalancerPolicyRequest optional.Interface
+	DeleteLoadBalancerPolicyRequest optional.Interface
 }
 
 /*
 DeleteLoadBalancerPolicy Method for DeleteLoadBalancerPolicy
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteLoadBalancerPolicyOpts - Optional Parameters:
- * @param "DeleteLoadBalancerPolicyRequest" (optional.Interface of DeleteLoadBalancerPolicyRequest) - 
+ * @param "DeleteLoadBalancerPolicyRequest" (optional.Interface of DeleteLoadBalancerPolicyRequest) -
 @return DeleteLoadBalancerPolicyResponse
 */
 func (a *LoadBalancerPolicyApiService) DeleteLoadBalancerPolicy(ctx _context.Context, localVarOptionals *DeleteLoadBalancerPolicyOpts) (DeleteLoadBalancerPolicyResponse, *_nethttp.Response, error) {

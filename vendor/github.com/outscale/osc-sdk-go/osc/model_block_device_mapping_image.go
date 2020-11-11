@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // BlockDeviceMappingImage One or more parameters used to automatically set up volumes when the VM is created.
 type BlockDeviceMappingImage struct {
 	Bsu BsuToCreate `json:"Bsu,omitempty"`

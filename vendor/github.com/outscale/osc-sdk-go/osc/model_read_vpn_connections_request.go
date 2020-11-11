@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadVpnConnectionsRequest struct for ReadVpnConnectionsRequest
 type ReadVpnConnectionsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool                 `json:"DryRun,omitempty"`
 	Filters FiltersVpnConnection `json:"Filters,omitempty"`
 }

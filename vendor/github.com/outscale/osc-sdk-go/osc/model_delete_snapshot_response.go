@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteSnapshotResponse struct for DeleteSnapshotResponse
 type DeleteSnapshotResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

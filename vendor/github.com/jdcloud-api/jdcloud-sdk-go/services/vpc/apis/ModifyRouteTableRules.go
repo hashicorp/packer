@@ -17,22 +17,21 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type ModifyRouteTableRulesRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* RouteTable ID  */
+	RouteTableId string `json:"routeTableId"`
 
-    /* RouteTable ID  */
-    RouteTableId string `json:"routeTableId"`
-
-    /* 路由表规则信息  */
-    ModifyRouteTableRuleSpecs []vpc.ModifyRouteTableRules `json:"modifyRouteTableRuleSpecs"`
+	/* 路由表规则信息  */
+	ModifyRouteTableRuleSpecs []vpc.ModifyRouteTableRules `json:"modifyRouteTableRuleSpecs"`
 }
 
 /*
@@ -43,21 +42,21 @@ type ModifyRouteTableRulesRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewModifyRouteTableRulesRequest(
-    regionId string,
-    routeTableId string,
-    modifyRouteTableRuleSpecs []vpc.ModifyRouteTableRules,
+	regionId string,
+	routeTableId string,
+	modifyRouteTableRuleSpecs []vpc.ModifyRouteTableRules,
 ) *ModifyRouteTableRulesRequest {
 
 	return &ModifyRouteTableRulesRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/routeTables/{routeTableId}:modifyRouteTableRules",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        RouteTableId: routeTableId,
-        ModifyRouteTableRuleSpecs: modifyRouteTableRuleSpecs,
+		RegionId:                  regionId,
+		RouteTableId:              routeTableId,
+		ModifyRouteTableRuleSpecs: modifyRouteTableRuleSpecs,
 	}
 }
 
@@ -67,62 +66,62 @@ func NewModifyRouteTableRulesRequest(
  * param modifyRouteTableRuleSpecs: 路由表规则信息 (Required)
  */
 func NewModifyRouteTableRulesRequestWithAllParams(
-    regionId string,
-    routeTableId string,
-    modifyRouteTableRuleSpecs []vpc.ModifyRouteTableRules,
+	regionId string,
+	routeTableId string,
+	modifyRouteTableRuleSpecs []vpc.ModifyRouteTableRules,
 ) *ModifyRouteTableRulesRequest {
 
-    return &ModifyRouteTableRulesRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/{routeTableId}:modifyRouteTableRules",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        RouteTableId: routeTableId,
-        ModifyRouteTableRuleSpecs: modifyRouteTableRuleSpecs,
-    }
+	return &ModifyRouteTableRulesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/{routeTableId}:modifyRouteTableRules",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:                  regionId,
+		RouteTableId:              routeTableId,
+		ModifyRouteTableRuleSpecs: modifyRouteTableRuleSpecs,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewModifyRouteTableRulesRequestWithoutParam() *ModifyRouteTableRulesRequest {
 
-    return &ModifyRouteTableRulesRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/{routeTableId}:modifyRouteTableRules",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &ModifyRouteTableRulesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/{routeTableId}:modifyRouteTableRules",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *ModifyRouteTableRulesRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param routeTableId: RouteTable ID(Required) */
 func (r *ModifyRouteTableRulesRequest) SetRouteTableId(routeTableId string) {
-    r.RouteTableId = routeTableId
+	r.RouteTableId = routeTableId
 }
 
 /* param modifyRouteTableRuleSpecs: 路由表规则信息(Required) */
 func (r *ModifyRouteTableRulesRequest) SetModifyRouteTableRuleSpecs(modifyRouteTableRuleSpecs []vpc.ModifyRouteTableRules) {
-    r.ModifyRouteTableRuleSpecs = modifyRouteTableRuleSpecs
+	r.ModifyRouteTableRuleSpecs = modifyRouteTableRuleSpecs
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ModifyRouteTableRulesRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type ModifyRouteTableRulesResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result ModifyRouteTableRulesResult `json:"result"`
+	RequestID string                      `json:"requestId"`
+	Error     core.ErrorResponse          `json:"error"`
+	Result    ModifyRouteTableRulesResult `json:"result"`
 }
 
 type ModifyRouteTableRulesResult struct {

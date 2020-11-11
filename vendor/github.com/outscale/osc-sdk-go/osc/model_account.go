@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // Account Information about the account.
 type Account struct {
 	// The ID of the account.

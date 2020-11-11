@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteExportTaskRequest struct for DeleteExportTaskRequest
 type DeleteExportTaskRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

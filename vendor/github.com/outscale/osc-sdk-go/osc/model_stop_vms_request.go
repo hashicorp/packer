@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // StopVmsRequest struct for StopVmsRequest
 type StopVmsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

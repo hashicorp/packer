@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersExportTask One or more filters.
 type FiltersExportTask struct {
 	// The keys of the tags associated with the export tasks.

@@ -17,22 +17,21 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
 )
 
 type CopyImagesRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
+	/* 源镜像ID  */
+	SourceImageIds []string `json:"sourceImageIds"`
 
-    /* 源镜像ID  */
-    SourceImageIds []string `json:"sourceImageIds"`
-
-    /* 目标区域  */
-    DestinationRegion string `json:"destinationRegion"`
+	/* 目标区域  */
+	DestinationRegion string `json:"destinationRegion"`
 }
 
 /*
@@ -43,21 +42,21 @@ type CopyImagesRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewCopyImagesRequest(
-    regionId string,
-    sourceImageIds []string,
-    destinationRegion string,
+	regionId string,
+	sourceImageIds []string,
+	destinationRegion string,
 ) *CopyImagesRequest {
 
 	return &CopyImagesRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/images:copyImages",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        SourceImageIds: sourceImageIds,
-        DestinationRegion: destinationRegion,
+		RegionId:          regionId,
+		SourceImageIds:    sourceImageIds,
+		DestinationRegion: destinationRegion,
 	}
 }
 
@@ -67,64 +66,64 @@ func NewCopyImagesRequest(
  * param destinationRegion: 目标区域 (Required)
  */
 func NewCopyImagesRequestWithAllParams(
-    regionId string,
-    sourceImageIds []string,
-    destinationRegion string,
+	regionId string,
+	sourceImageIds []string,
+	destinationRegion string,
 ) *CopyImagesRequest {
 
-    return &CopyImagesRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/images:copyImages",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        SourceImageIds: sourceImageIds,
-        DestinationRegion: destinationRegion,
-    }
+	return &CopyImagesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/images:copyImages",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:          regionId,
+		SourceImageIds:    sourceImageIds,
+		DestinationRegion: destinationRegion,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewCopyImagesRequestWithoutParam() *CopyImagesRequest {
 
-    return &CopyImagesRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/images:copyImages",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &CopyImagesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/images:copyImages",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *CopyImagesRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param sourceImageIds: 源镜像ID(Required) */
 func (r *CopyImagesRequest) SetSourceImageIds(sourceImageIds []string) {
-    r.SourceImageIds = sourceImageIds
+	r.SourceImageIds = sourceImageIds
 }
 
 /* param destinationRegion: 目标区域(Required) */
 func (r *CopyImagesRequest) SetDestinationRegion(destinationRegion string) {
-    r.DestinationRegion = destinationRegion
+	r.DestinationRegion = destinationRegion
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r CopyImagesRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type CopyImagesResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result CopyImagesResult `json:"result"`
+	RequestID string             `json:"requestId"`
+	Error     core.ErrorResponse `json:"error"`
+	Result    CopyImagesResult   `json:"result"`
 }
 
 type CopyImagesResult struct {
-    CopyImages []vm.CopyImage `json:"copyImages"`
+	CopyImages []vm.CopyImage `json:"copyImages"`
 }

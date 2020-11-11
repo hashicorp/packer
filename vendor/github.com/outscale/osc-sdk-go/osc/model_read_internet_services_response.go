@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadInternetServicesResponse struct for ReadInternetServicesResponse
 type ReadInternetServicesResponse struct {
 	// Information about one or more Internet services.
 	InternetServices []InternetService `json:"InternetServices,omitempty"`
-	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
+	ResponseContext  ResponseContext   `json:"ResponseContext,omitempty"`
 }

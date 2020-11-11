@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteNatServiceRequest struct for DeleteNatServiceRequest
 type DeleteNatServiceRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

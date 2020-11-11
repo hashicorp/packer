@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // AccepterNet Information about the accepter Net.
 type AccepterNet struct {
 	// The account ID of the owner of the accepter Net.

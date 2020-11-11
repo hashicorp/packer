@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteSecurityGroupResponse struct for DeleteSecurityGroupResponse
 type DeleteSecurityGroupResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

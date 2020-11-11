@@ -16,15 +16,14 @@
 
 package models
 
-
 type AssociateElasticIpSpec struct {
 
-    /* 绑定的弹性Ip Id (Optional) */
-    ElasticIpId string `json:"elasticIpId"`
+	/* 绑定的弹性Ip Id (Optional) */
+	ElasticIpId string `json:"elasticIpId"`
 
-    /* 绑定弹性Ip到指定的privateIp (Optional) */
-    PrivateIpAddress string `json:"privateIpAddress"`
+	/* 绑定弹性Ip到指定的privateIp (Optional) */
+	PrivateIpAddress string `json:"privateIpAddress"`
 
-    /* 绑定的弹性Ip地址 (Optional) */
-    ElasticIpAddress string `json:"elasticIpAddress"`
+	/* 绑定的弹性Ip地址 (Optional) */
+	ElasticIpAddress string `json:"elasticIpAddress"`
 }

@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadLoadBalancersResponse struct for ReadLoadBalancersResponse
 type ReadLoadBalancersResponse struct {
 	// Information about one or more load balancers.
-	LoadBalancers []LoadBalancer `json:"LoadBalancers,omitempty"`
+	LoadBalancers   []LoadBalancer  `json:"LoadBalancers,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

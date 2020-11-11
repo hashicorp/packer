@@ -16,12 +16,11 @@
 
 package models
 
-
 type SecurityGroupSimple struct {
 
-    /* 安全组ID (Optional) */
-    GroupId string `json:"groupId"`
+	/* 安全组ID (Optional) */
+	GroupId string `json:"groupId"`
 
-    /* 安全组名称 (Optional) */
-    GroupName string `json:"groupName"`
+	/* 安全组名称 (Optional) */
+	GroupName string `json:"groupName"`
 }

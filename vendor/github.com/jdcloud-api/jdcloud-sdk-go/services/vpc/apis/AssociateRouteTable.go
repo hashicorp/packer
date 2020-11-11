@@ -17,21 +17,20 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type AssociateRouteTableRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* RouteTable ID  */
+	RouteTableId string `json:"routeTableId"`
 
-    /* RouteTable ID  */
-    RouteTableId string `json:"routeTableId"`
-
-    /* 路由表要绑定的子网ID列表, subnet已被其他路由表绑定时，自动解绑。  */
-    SubnetIds []string `json:"subnetIds"`
+	/* 路由表要绑定的子网ID列表, subnet已被其他路由表绑定时，自动解绑。  */
+	SubnetIds []string `json:"subnetIds"`
 }
 
 /*
@@ -42,21 +41,21 @@ type AssociateRouteTableRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewAssociateRouteTableRequest(
-    regionId string,
-    routeTableId string,
-    subnetIds []string,
+	regionId string,
+	routeTableId string,
+	subnetIds []string,
 ) *AssociateRouteTableRequest {
 
 	return &AssociateRouteTableRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/routeTables/{routeTableId}:associateRouteTable",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        RouteTableId: routeTableId,
-        SubnetIds: subnetIds,
+		RegionId:     regionId,
+		RouteTableId: routeTableId,
+		SubnetIds:    subnetIds,
 	}
 }
 
@@ -66,62 +65,62 @@ func NewAssociateRouteTableRequest(
  * param subnetIds: 路由表要绑定的子网ID列表, subnet已被其他路由表绑定时，自动解绑。 (Required)
  */
 func NewAssociateRouteTableRequestWithAllParams(
-    regionId string,
-    routeTableId string,
-    subnetIds []string,
+	regionId string,
+	routeTableId string,
+	subnetIds []string,
 ) *AssociateRouteTableRequest {
 
-    return &AssociateRouteTableRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/{routeTableId}:associateRouteTable",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        RouteTableId: routeTableId,
-        SubnetIds: subnetIds,
-    }
+	return &AssociateRouteTableRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/{routeTableId}:associateRouteTable",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:     regionId,
+		RouteTableId: routeTableId,
+		SubnetIds:    subnetIds,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewAssociateRouteTableRequestWithoutParam() *AssociateRouteTableRequest {
 
-    return &AssociateRouteTableRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/{routeTableId}:associateRouteTable",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &AssociateRouteTableRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/{routeTableId}:associateRouteTable",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *AssociateRouteTableRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param routeTableId: RouteTable ID(Required) */
 func (r *AssociateRouteTableRequest) SetRouteTableId(routeTableId string) {
-    r.RouteTableId = routeTableId
+	r.RouteTableId = routeTableId
 }
 
 /* param subnetIds: 路由表要绑定的子网ID列表, subnet已被其他路由表绑定时，自动解绑。(Required) */
 func (r *AssociateRouteTableRequest) SetSubnetIds(subnetIds []string) {
-    r.SubnetIds = subnetIds
+	r.SubnetIds = subnetIds
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r AssociateRouteTableRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type AssociateRouteTableResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result AssociateRouteTableResult `json:"result"`
+	RequestID string                    `json:"requestId"`
+	Error     core.ErrorResponse        `json:"error"`
+	Result    AssociateRouteTableResult `json:"result"`
 }
 
 type AssociateRouteTableResult struct {

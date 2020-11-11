@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateRouteRequest struct for CreateRouteRequest
 type CreateRouteRequest struct {
 	// The IP range used for the destination match, in CIDR notation (for example, 10.0.0.0/24).

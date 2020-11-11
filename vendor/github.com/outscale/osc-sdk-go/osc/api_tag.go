@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type TagApiService service
 
 // CreateTagsOpts Optional parameters for the method 'CreateTags'
 type CreateTagsOpts struct {
-    CreateTagsRequest optional.Interface
+	CreateTagsRequest optional.Interface
 }
 
 /*
 CreateTags Method for CreateTags
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateTagsOpts - Optional Parameters:
- * @param "CreateTagsRequest" (optional.Interface of CreateTagsRequest) - 
+ * @param "CreateTagsRequest" (optional.Interface of CreateTagsRequest) -
 @return CreateTagsResponse
 */
 func (a *TagApiService) CreateTags(ctx _context.Context, localVarOptionals *CreateTagsOpts) (CreateTagsResponse, *_nethttp.Response, error) {
@@ -169,14 +169,14 @@ func (a *TagApiService) CreateTags(ctx _context.Context, localVarOptionals *Crea
 
 // DeleteTagsOpts Optional parameters for the method 'DeleteTags'
 type DeleteTagsOpts struct {
-    DeleteTagsRequest optional.Interface
+	DeleteTagsRequest optional.Interface
 }
 
 /*
 DeleteTags Method for DeleteTags
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteTagsOpts - Optional Parameters:
- * @param "DeleteTagsRequest" (optional.Interface of DeleteTagsRequest) - 
+ * @param "DeleteTagsRequest" (optional.Interface of DeleteTagsRequest) -
 @return DeleteTagsResponse
 */
 func (a *TagApiService) DeleteTags(ctx _context.Context, localVarOptionals *DeleteTagsOpts) (DeleteTagsResponse, *_nethttp.Response, error) {
@@ -310,14 +310,14 @@ func (a *TagApiService) DeleteTags(ctx _context.Context, localVarOptionals *Dele
 
 // ReadTagsOpts Optional parameters for the method 'ReadTags'
 type ReadTagsOpts struct {
-    ReadTagsRequest optional.Interface
+	ReadTagsRequest optional.Interface
 }
 
 /*
 ReadTags Method for ReadTags
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadTagsOpts - Optional Parameters:
- * @param "ReadTagsRequest" (optional.Interface of ReadTagsRequest) - 
+ * @param "ReadTagsRequest" (optional.Interface of ReadTagsRequest) -
 @return ReadTagsResponse
 */
 func (a *TagApiService) ReadTags(ctx _context.Context, localVarOptionals *ReadTagsOpts) (ReadTagsResponse, *_nethttp.Response, error) {

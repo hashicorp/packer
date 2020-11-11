@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // RebootVmsRequest struct for RebootVmsRequest
 type RebootVmsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

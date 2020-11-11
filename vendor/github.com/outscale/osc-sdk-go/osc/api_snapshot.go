@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type SnapshotApiService service
 
 // CreateSnapshotOpts Optional parameters for the method 'CreateSnapshot'
 type CreateSnapshotOpts struct {
-    CreateSnapshotRequest optional.Interface
+	CreateSnapshotRequest optional.Interface
 }
 
 /*
 CreateSnapshot Method for CreateSnapshot
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateSnapshotOpts - Optional Parameters:
- * @param "CreateSnapshotRequest" (optional.Interface of CreateSnapshotRequest) - 
+ * @param "CreateSnapshotRequest" (optional.Interface of CreateSnapshotRequest) -
 @return CreateSnapshotResponse
 */
 func (a *SnapshotApiService) CreateSnapshot(ctx _context.Context, localVarOptionals *CreateSnapshotOpts) (CreateSnapshotResponse, *_nethttp.Response, error) {
@@ -169,14 +169,14 @@ func (a *SnapshotApiService) CreateSnapshot(ctx _context.Context, localVarOption
 
 // CreateSnapshotExportTaskOpts Optional parameters for the method 'CreateSnapshotExportTask'
 type CreateSnapshotExportTaskOpts struct {
-    CreateSnapshotExportTaskRequest optional.Interface
+	CreateSnapshotExportTaskRequest optional.Interface
 }
 
 /*
 CreateSnapshotExportTask Method for CreateSnapshotExportTask
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateSnapshotExportTaskOpts - Optional Parameters:
- * @param "CreateSnapshotExportTaskRequest" (optional.Interface of CreateSnapshotExportTaskRequest) - 
+ * @param "CreateSnapshotExportTaskRequest" (optional.Interface of CreateSnapshotExportTaskRequest) -
 @return CreateSnapshotExportTaskResponse
 */
 func (a *SnapshotApiService) CreateSnapshotExportTask(ctx _context.Context, localVarOptionals *CreateSnapshotExportTaskOpts) (CreateSnapshotExportTaskResponse, *_nethttp.Response, error) {
@@ -280,14 +280,14 @@ func (a *SnapshotApiService) CreateSnapshotExportTask(ctx _context.Context, loca
 
 // DeleteSnapshotOpts Optional parameters for the method 'DeleteSnapshot'
 type DeleteSnapshotOpts struct {
-    DeleteSnapshotRequest optional.Interface
+	DeleteSnapshotRequest optional.Interface
 }
 
 /*
 DeleteSnapshot Method for DeleteSnapshot
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteSnapshotOpts - Optional Parameters:
- * @param "DeleteSnapshotRequest" (optional.Interface of DeleteSnapshotRequest) - 
+ * @param "DeleteSnapshotRequest" (optional.Interface of DeleteSnapshotRequest) -
 @return DeleteSnapshotResponse
 */
 func (a *SnapshotApiService) DeleteSnapshot(ctx _context.Context, localVarOptionals *DeleteSnapshotOpts) (DeleteSnapshotResponse, *_nethttp.Response, error) {
@@ -421,14 +421,14 @@ func (a *SnapshotApiService) DeleteSnapshot(ctx _context.Context, localVarOption
 
 // ReadSnapshotExportTasksOpts Optional parameters for the method 'ReadSnapshotExportTasks'
 type ReadSnapshotExportTasksOpts struct {
-    ReadSnapshotExportTasksRequest optional.Interface
+	ReadSnapshotExportTasksRequest optional.Interface
 }
 
 /*
 ReadSnapshotExportTasks Method for ReadSnapshotExportTasks
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadSnapshotExportTasksOpts - Optional Parameters:
- * @param "ReadSnapshotExportTasksRequest" (optional.Interface of ReadSnapshotExportTasksRequest) - 
+ * @param "ReadSnapshotExportTasksRequest" (optional.Interface of ReadSnapshotExportTasksRequest) -
 @return ReadSnapshotExportTasksResponse
 */
 func (a *SnapshotApiService) ReadSnapshotExportTasks(ctx _context.Context, localVarOptionals *ReadSnapshotExportTasksOpts) (ReadSnapshotExportTasksResponse, *_nethttp.Response, error) {
@@ -532,14 +532,14 @@ func (a *SnapshotApiService) ReadSnapshotExportTasks(ctx _context.Context, local
 
 // ReadSnapshotsOpts Optional parameters for the method 'ReadSnapshots'
 type ReadSnapshotsOpts struct {
-    ReadSnapshotsRequest optional.Interface
+	ReadSnapshotsRequest optional.Interface
 }
 
 /*
 ReadSnapshots Method for ReadSnapshots
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadSnapshotsOpts - Optional Parameters:
- * @param "ReadSnapshotsRequest" (optional.Interface of ReadSnapshotsRequest) - 
+ * @param "ReadSnapshotsRequest" (optional.Interface of ReadSnapshotsRequest) -
 @return ReadSnapshotsResponse
 */
 func (a *SnapshotApiService) ReadSnapshots(ctx _context.Context, localVarOptionals *ReadSnapshotsOpts) (ReadSnapshotsResponse, *_nethttp.Response, error) {
@@ -673,14 +673,14 @@ func (a *SnapshotApiService) ReadSnapshots(ctx _context.Context, localVarOptiona
 
 // UpdateSnapshotOpts Optional parameters for the method 'UpdateSnapshot'
 type UpdateSnapshotOpts struct {
-    UpdateSnapshotRequest optional.Interface
+	UpdateSnapshotRequest optional.Interface
 }
 
 /*
 UpdateSnapshot Method for UpdateSnapshot
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *UpdateSnapshotOpts - Optional Parameters:
- * @param "UpdateSnapshotRequest" (optional.Interface of UpdateSnapshotRequest) - 
+ * @param "UpdateSnapshotRequest" (optional.Interface of UpdateSnapshotRequest) -
 @return UpdateSnapshotResponse
 */
 func (a *SnapshotApiService) UpdateSnapshot(ctx _context.Context, localVarOptionals *UpdateSnapshotOpts) (UpdateSnapshotResponse, *_nethttp.Response, error) {

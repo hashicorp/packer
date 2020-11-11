@@ -17,30 +17,29 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type CreateSubnetRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* 子网所属vpc的Id  */
+	VpcId string `json:"vpcId"`
 
-    /* 子网所属vpc的Id  */
-    VpcId string `json:"vpcId"`
+	/* 子网名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。  */
+	SubnetName string `json:"subnetName"`
 
-    /* 子网名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。  */
-    SubnetName string `json:"subnetName"`
+	/* 子网网段，vpc内子网网段不能重叠，cidr的取值范围：10.0.0.0/8、172.16.0.0/12和192.168.0.0/16及它们包含的子网，且子网掩码长度为16-28之间，如果vpc含有cidr，则必须为vpc所在cidr的子网  */
+	AddressPrefix string `json:"addressPrefix"`
 
-    /* 子网网段，vpc内子网网段不能重叠，cidr的取值范围：10.0.0.0/8、172.16.0.0/12和192.168.0.0/16及它们包含的子网，且子网掩码长度为16-28之间，如果vpc含有cidr，则必须为vpc所在cidr的子网  */
-    AddressPrefix string `json:"addressPrefix"`
+	/* 子网关联的路由表Id, 默认为vpc的默认路由表 (Optional) */
+	RouteTableId *string `json:"routeTableId"`
 
-    /* 子网关联的路由表Id, 默认为vpc的默认路由表 (Optional) */
-    RouteTableId *string `json:"routeTableId"`
-
-    /* 子网描述信息,允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
-    Description *string `json:"description"`
+	/* 子网描述信息,允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
+	Description *string `json:"description"`
 }
 
 /*
@@ -52,23 +51,23 @@ type CreateSubnetRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewCreateSubnetRequest(
-    regionId string,
-    vpcId string,
-    subnetName string,
-    addressPrefix string,
+	regionId string,
+	vpcId string,
+	subnetName string,
+	addressPrefix string,
 ) *CreateSubnetRequest {
 
 	return &CreateSubnetRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/subnets/",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        VpcId: vpcId,
-        SubnetName: subnetName,
-        AddressPrefix: addressPrefix,
+		RegionId:      regionId,
+		VpcId:         vpcId,
+		SubnetName:    subnetName,
+		AddressPrefix: addressPrefix,
 	}
 }
 
@@ -81,85 +80,85 @@ func NewCreateSubnetRequest(
  * param description: 子网描述信息,允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional)
  */
 func NewCreateSubnetRequestWithAllParams(
-    regionId string,
-    vpcId string,
-    subnetName string,
-    addressPrefix string,
-    routeTableId *string,
-    description *string,
+	regionId string,
+	vpcId string,
+	subnetName string,
+	addressPrefix string,
+	routeTableId *string,
+	description *string,
 ) *CreateSubnetRequest {
 
-    return &CreateSubnetRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/subnets/",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        VpcId: vpcId,
-        SubnetName: subnetName,
-        AddressPrefix: addressPrefix,
-        RouteTableId: routeTableId,
-        Description: description,
-    }
+	return &CreateSubnetRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/subnets/",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:      regionId,
+		VpcId:         vpcId,
+		SubnetName:    subnetName,
+		AddressPrefix: addressPrefix,
+		RouteTableId:  routeTableId,
+		Description:   description,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewCreateSubnetRequestWithoutParam() *CreateSubnetRequest {
 
-    return &CreateSubnetRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/subnets/",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &CreateSubnetRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/subnets/",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *CreateSubnetRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param vpcId: 子网所属vpc的Id(Required) */
 func (r *CreateSubnetRequest) SetVpcId(vpcId string) {
-    r.VpcId = vpcId
+	r.VpcId = vpcId
 }
 
 /* param subnetName: 子网名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。(Required) */
 func (r *CreateSubnetRequest) SetSubnetName(subnetName string) {
-    r.SubnetName = subnetName
+	r.SubnetName = subnetName
 }
 
 /* param addressPrefix: 子网网段，vpc内子网网段不能重叠，cidr的取值范围：10.0.0.0/8、172.16.0.0/12和192.168.0.0/16及它们包含的子网，且子网掩码长度为16-28之间，如果vpc含有cidr，则必须为vpc所在cidr的子网(Required) */
 func (r *CreateSubnetRequest) SetAddressPrefix(addressPrefix string) {
-    r.AddressPrefix = addressPrefix
+	r.AddressPrefix = addressPrefix
 }
 
 /* param routeTableId: 子网关联的路由表Id, 默认为vpc的默认路由表(Optional) */
 func (r *CreateSubnetRequest) SetRouteTableId(routeTableId string) {
-    r.RouteTableId = &routeTableId
+	r.RouteTableId = &routeTableId
 }
 
 /* param description: 子网描述信息,允许输入UTF-8编码下的全部字符，不超过256字符。(Optional) */
 func (r *CreateSubnetRequest) SetDescription(description string) {
-    r.Description = &description
+	r.Description = &description
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r CreateSubnetRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type CreateSubnetResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result CreateSubnetResult `json:"result"`
+	RequestID string             `json:"requestId"`
+	Error     core.ErrorResponse `json:"error"`
+	Result    CreateSubnetResult `json:"result"`
 }
 
 type CreateSubnetResult struct {
-    SubnetId string `json:"subnetId"`
+	SubnetId string `json:"subnetId"`
 }

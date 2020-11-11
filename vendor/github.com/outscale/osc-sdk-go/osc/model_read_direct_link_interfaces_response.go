@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadDirectLinkInterfacesResponse struct for ReadDirectLinkInterfacesResponse
 type ReadDirectLinkInterfacesResponse struct {
 	// Information about one or more DirectLink interfaces.
 	DirectLinkInterfaces []DirectLinkInterfaces `json:"DirectLinkInterfaces,omitempty"`
-	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
+	ResponseContext      ResponseContext        `json:"ResponseContext,omitempty"`
 }

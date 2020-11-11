@@ -16,15 +16,14 @@
 
 package models
 
-
 type CreateElasticIpSpec struct {
 
-    /* 购买弹性ip数量；取值范围：[1,100]  */
-    MaxCount int `json:"maxCount"`
+	/* 购买弹性ip数量；取值范围：[1,100]  */
+	MaxCount int `json:"maxCount"`
 
-    /* 指定弹性ip地址进行创建，当申请创建多个弹性ip时，必须为空 (Optional) */
-    ElasticIpAddress string `json:"elasticIpAddress"`
+	/* 指定弹性ip地址进行创建，当申请创建多个弹性ip时，必须为空 (Optional) */
+	ElasticIpAddress string `json:"elasticIpAddress"`
 
-    /* 弹性ip规格  */
-    ElasticIpSpec ElasticIpSpec `json:"elasticIpSpec"`
+	/* 弹性ip规格  */
+	ElasticIpSpec ElasticIpSpec `json:"elasticIpSpec"`
 }

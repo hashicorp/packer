@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // LinkVolumeResponse struct for LinkVolumeResponse
 type LinkVolumeResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

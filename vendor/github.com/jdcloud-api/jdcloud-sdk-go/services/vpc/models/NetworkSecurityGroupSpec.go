@@ -16,15 +16,14 @@
 
 package models
 
-
 type NetworkSecurityGroupSpec struct {
 
-    /* 私有网络ID  */
-    VpcId string `json:"vpcId"`
+	/* 私有网络ID  */
+	VpcId string `json:"vpcId"`
 
-    /* 安全组名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。  */
-    NetworkSecurityGroupName string `json:"networkSecurityGroupName"`
+	/* 安全组名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。  */
+	NetworkSecurityGroupName string `json:"networkSecurityGroupName"`
 
-    /* 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
-    Description string `json:"description"`
+	/* 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
+	Description string `json:"description"`
 }

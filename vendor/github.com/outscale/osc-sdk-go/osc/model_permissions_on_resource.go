@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // PermissionsOnResource Information about the users who have permissions for the resource.
 type PermissionsOnResource struct {
 	// The account ID of one or more users who have permissions for the resource.

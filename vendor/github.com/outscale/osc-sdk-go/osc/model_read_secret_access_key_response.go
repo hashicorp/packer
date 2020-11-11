@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // ReadSecretAccessKeyResponse struct for ReadSecretAccessKeyResponse
 type ReadSecretAccessKeyResponse struct {
-	AccessKey AccessKeySecretKey `json:"AccessKey,omitempty"`
-	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
+	AccessKey       AccessKeySecretKey `json:"AccessKey,omitempty"`
+	ResponseContext ResponseContext    `json:"ResponseContext,omitempty"`
 }

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteNicRequest struct for DeleteNicRequest
 type DeleteNicRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

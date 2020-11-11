@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreateNetResponse struct for CreateNetResponse
 type CreateNetResponse struct {
-	Net Net `json:"Net,omitempty"`
+	Net             Net             `json:"Net,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

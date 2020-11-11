@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteVmsResponse struct for DeleteVmsResponse
 type DeleteVmsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

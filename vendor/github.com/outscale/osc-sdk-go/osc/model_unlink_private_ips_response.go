@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // UnlinkPrivateIpsResponse struct for UnlinkPrivateIpsResponse
 type UnlinkPrivateIpsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

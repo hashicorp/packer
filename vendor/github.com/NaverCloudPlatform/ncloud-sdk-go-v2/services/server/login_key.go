@@ -12,11 +12,11 @@ package server
 type LoginKey struct {
 
 	// 핑거프린트
-Fingerprint *string `json:"fingerprint,omitempty"`
+	Fingerprint *string `json:"fingerprint,omitempty"`
 
 	// 키명
-KeyName *string `json:"keyName,omitempty"`
+	KeyName *string `json:"keyName,omitempty"`
 
 	// 생성일자
-CreateDate *string `json:"createDate,omitempty"`
+	CreateDate *string `json:"createDate,omitempty"`
 }

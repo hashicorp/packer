@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadInternetServicesRequest struct for ReadInternetServicesRequest
 type ReadInternetServicesRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool                   `json:"DryRun,omitempty"`
 	Filters FiltersInternetService `json:"Filters,omitempty"`
 }

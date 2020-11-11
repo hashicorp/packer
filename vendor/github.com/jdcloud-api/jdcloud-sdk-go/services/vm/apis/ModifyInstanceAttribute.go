@@ -17,24 +17,23 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type ModifyInstanceAttributeRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
+	/* 云主机ID  */
+	InstanceId string `json:"instanceId"`
 
-    /* 云主机ID  */
-    InstanceId string `json:"instanceId"`
+	/* 名称，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Optional) */
+	Name *string `json:"name"`
 
-    /* 名称，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Optional) */
-    Name *string `json:"name"`
-
-    /* 描述，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Optional) */
-    Description *string `json:"description"`
+	/* 描述，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Optional) */
+	Description *string `json:"description"`
 }
 
 /*
@@ -44,19 +43,19 @@ type ModifyInstanceAttributeRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewModifyInstanceAttributeRequest(
-    regionId string,
-    instanceId string,
+	regionId string,
+	instanceId string,
 ) *ModifyInstanceAttributeRequest {
 
 	return &ModifyInstanceAttributeRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceAttribute",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        InstanceId: instanceId,
+		RegionId:   regionId,
+		InstanceId: instanceId,
 	}
 }
 
@@ -67,69 +66,69 @@ func NewModifyInstanceAttributeRequest(
  * param description: 描述，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Optional)
  */
 func NewModifyInstanceAttributeRequestWithAllParams(
-    regionId string,
-    instanceId string,
-    name *string,
-    description *string,
+	regionId string,
+	instanceId string,
+	name *string,
+	description *string,
 ) *ModifyInstanceAttributeRequest {
 
-    return &ModifyInstanceAttributeRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceAttribute",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        InstanceId: instanceId,
-        Name: name,
-        Description: description,
-    }
+	return &ModifyInstanceAttributeRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceAttribute",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:    regionId,
+		InstanceId:  instanceId,
+		Name:        name,
+		Description: description,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewModifyInstanceAttributeRequestWithoutParam() *ModifyInstanceAttributeRequest {
 
-    return &ModifyInstanceAttributeRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceAttribute",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &ModifyInstanceAttributeRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceAttribute",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *ModifyInstanceAttributeRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *ModifyInstanceAttributeRequest) SetInstanceId(instanceId string) {
-    r.InstanceId = instanceId
+	r.InstanceId = instanceId
 }
 
 /* param name: 名称，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。(Optional) */
 func (r *ModifyInstanceAttributeRequest) SetName(name string) {
-    r.Name = &name
+	r.Name = &name
 }
 
 /* param description: 描述，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。(Optional) */
 func (r *ModifyInstanceAttributeRequest) SetDescription(description string) {
-    r.Description = &description
+	r.Description = &description
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ModifyInstanceAttributeRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type ModifyInstanceAttributeResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result ModifyInstanceAttributeResult `json:"result"`
+	RequestID string                        `json:"requestId"`
+	Error     core.ErrorResponse            `json:"error"`
+	Result    ModifyInstanceAttributeResult `json:"result"`
 }
 
 type ModifyInstanceAttributeResult struct {

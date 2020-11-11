@@ -16,12 +16,11 @@
 
 package models
 
-
 type Tag struct {
 
-    /* Tag键 (Optional) */
-    Key string `json:"key"`
+	/* Tag键 (Optional) */
+	Key string `json:"key"`
 
-    /* Tag值 (Optional) */
-    Value string `json:"value"`
+	/* Tag值 (Optional) */
+	Value string `json:"value"`
 }

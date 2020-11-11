@@ -17,19 +17,18 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type DescribeRouteTableRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
-
-    /* RouteTable ID  */
-    RouteTableId string `json:"routeTableId"`
+	/* RouteTable ID  */
+	RouteTableId string `json:"routeTableId"`
 }
 
 /*
@@ -39,19 +38,19 @@ type DescribeRouteTableRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeRouteTableRequest(
-    regionId string,
-    routeTableId string,
+	regionId string,
+	routeTableId string,
 ) *DescribeRouteTableRequest {
 
 	return &DescribeRouteTableRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/routeTables/{routeTableId}",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        RouteTableId: routeTableId,
+		RegionId:     regionId,
+		RouteTableId: routeTableId,
 	}
 }
 
@@ -60,57 +59,57 @@ func NewDescribeRouteTableRequest(
  * param routeTableId: RouteTable ID (Required)
  */
 func NewDescribeRouteTableRequestWithAllParams(
-    regionId string,
-    routeTableId string,
+	regionId string,
+	routeTableId string,
 ) *DescribeRouteTableRequest {
 
-    return &DescribeRouteTableRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/{routeTableId}",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        RouteTableId: routeTableId,
-    }
+	return &DescribeRouteTableRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/{routeTableId}",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:     regionId,
+		RouteTableId: routeTableId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeRouteTableRequestWithoutParam() *DescribeRouteTableRequest {
 
-    return &DescribeRouteTableRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/{routeTableId}",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeRouteTableRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/{routeTableId}",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeRouteTableRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param routeTableId: RouteTable ID(Required) */
 func (r *DescribeRouteTableRequest) SetRouteTableId(routeTableId string) {
-    r.RouteTableId = routeTableId
+	r.RouteTableId = routeTableId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeRouteTableRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeRouteTableResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeRouteTableResult `json:"result"`
+	RequestID string                   `json:"requestId"`
+	Error     core.ErrorResponse       `json:"error"`
+	Result    DescribeRouteTableResult `json:"result"`
 }
 
 type DescribeRouteTableResult struct {
-    RouteTable vpc.RouteTable `json:"routeTable"`
+	RouteTable vpc.RouteTable `json:"routeTable"`
 }

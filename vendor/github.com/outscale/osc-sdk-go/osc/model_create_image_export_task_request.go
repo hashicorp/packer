@@ -9,11 +9,12 @@
  */
 
 package osc
+
 // CreateImageExportTaskRequest struct for CreateImageExportTaskRequest
 type CreateImageExportTaskRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
 	DryRun bool `json:"DryRun,omitempty"`
 	// The ID of the OMI to export.
-	ImageId string `json:"ImageId"`
+	ImageId   string    `json:"ImageId"`
 	OsuExport OsuExport `json:"OsuExport"`
 }

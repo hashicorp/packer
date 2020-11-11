@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // Net Information about the Net.
 type Net struct {
 	// The ID of the DHCP options set (or `default` if you want to associate the default one).

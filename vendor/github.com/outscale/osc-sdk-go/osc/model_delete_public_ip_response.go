@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeletePublicIpResponse struct for DeletePublicIpResponse
 type DeletePublicIpResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

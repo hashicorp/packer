@@ -9,10 +9,11 @@
  */
 
 package osc
+
 // CreateDirectLinkInterfaceRequest struct for CreateDirectLinkInterfaceRequest
 type CreateDirectLinkInterfaceRequest struct {
 	// The ID of the existing DirectLink for which you want to create the DirectLink interface.
-	DirectLinkId string `json:"DirectLinkId"`
+	DirectLinkId        string              `json:"DirectLinkId"`
 	DirectLinkInterface DirectLinkInterface `json:"DirectLinkInterface"`
 	// If `true`, checks whether you have the required permissions to perform the action.
 	DryRun bool `json:"DryRun,omitempty"`

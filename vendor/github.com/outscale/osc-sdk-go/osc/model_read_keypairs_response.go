@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadKeypairsResponse struct for ReadKeypairsResponse
 type ReadKeypairsResponse struct {
 	// Information about one or more keypairs.
-	Keypairs []Keypair `json:"Keypairs,omitempty"`
+	Keypairs        []Keypair       `json:"Keypairs,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

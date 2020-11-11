@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // UnlinkFlexibleGpuResponse struct for UnlinkFlexibleGpuResponse
 type UnlinkFlexibleGpuResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersNetAccessPoint One or more filters.
 type FiltersNetAccessPoint struct {
 	// The IDs of the Net access points.

@@ -16,9 +16,8 @@
 
 package models
 
-
 type ModifySecurityGroupRuleSpec struct {
 
-    /* 安全组规则信息  */
-    ModifySecurityGroupRuleSpecs []ModifySecurityGroupRules `json:"modifySecurityGroupRuleSpecs"`
+	/* 安全组规则信息  */
+	ModifySecurityGroupRuleSpecs []ModifySecurityGroupRules `json:"modifySecurityGroupRuleSpecs"`
 }

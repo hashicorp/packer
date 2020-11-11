@@ -12,5 +12,5 @@ package server
 type NasVolumeInstanceCustomIp struct {
 
 	// 커스텀IP
-CustomIp *string `json:"customIp,omitempty"`
+	CustomIp *string `json:"customIp,omitempty"`
 }

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ReadPublicIpRangesRequest struct for ReadPublicIpRangesRequest
 type ReadPublicIpRangesRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

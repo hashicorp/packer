@@ -17,21 +17,20 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DetachNetworkInterfaceRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
+	/* 云主机ID  */
+	InstanceId string `json:"instanceId"`
 
-    /* 云主机ID  */
-    InstanceId string `json:"instanceId"`
-
-    /* 弹性网卡ID  */
-    NetworkInterfaceId string `json:"networkInterfaceId"`
+	/* 弹性网卡ID  */
+	NetworkInterfaceId string `json:"networkInterfaceId"`
 }
 
 /*
@@ -42,21 +41,21 @@ type DetachNetworkInterfaceRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDetachNetworkInterfaceRequest(
-    regionId string,
-    instanceId string,
-    networkInterfaceId string,
+	regionId string,
+	instanceId string,
+	networkInterfaceId string,
 ) *DetachNetworkInterfaceRequest {
 
 	return &DetachNetworkInterfaceRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:detachNetworkInterface",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        InstanceId: instanceId,
-        NetworkInterfaceId: networkInterfaceId,
+		RegionId:           regionId,
+		InstanceId:         instanceId,
+		NetworkInterfaceId: networkInterfaceId,
 	}
 }
 
@@ -66,62 +65,62 @@ func NewDetachNetworkInterfaceRequest(
  * param networkInterfaceId: 弹性网卡ID (Required)
  */
 func NewDetachNetworkInterfaceRequestWithAllParams(
-    regionId string,
-    instanceId string,
-    networkInterfaceId string,
+	regionId string,
+	instanceId string,
+	networkInterfaceId string,
 ) *DetachNetworkInterfaceRequest {
 
-    return &DetachNetworkInterfaceRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}:detachNetworkInterface",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        InstanceId: instanceId,
-        NetworkInterfaceId: networkInterfaceId,
-    }
+	return &DetachNetworkInterfaceRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}:detachNetworkInterface",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:           regionId,
+		InstanceId:         instanceId,
+		NetworkInterfaceId: networkInterfaceId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDetachNetworkInterfaceRequestWithoutParam() *DetachNetworkInterfaceRequest {
 
-    return &DetachNetworkInterfaceRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}:detachNetworkInterface",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DetachNetworkInterfaceRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}:detachNetworkInterface",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DetachNetworkInterfaceRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *DetachNetworkInterfaceRequest) SetInstanceId(instanceId string) {
-    r.InstanceId = instanceId
+	r.InstanceId = instanceId
 }
 
 /* param networkInterfaceId: 弹性网卡ID(Required) */
 func (r *DetachNetworkInterfaceRequest) SetNetworkInterfaceId(networkInterfaceId string) {
-    r.NetworkInterfaceId = networkInterfaceId
+	r.NetworkInterfaceId = networkInterfaceId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DetachNetworkInterfaceRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DetachNetworkInterfaceResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DetachNetworkInterfaceResult `json:"result"`
+	RequestID string                       `json:"requestId"`
+	Error     core.ErrorResponse           `json:"error"`
+	Result    DetachNetworkInterfaceResult `json:"result"`
 }
 
 type DetachNetworkInterfaceResult struct {

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // BlockDeviceMappingCreated Information about the created block device mapping.
 type BlockDeviceMappingCreated struct {
 	Bsu BsuCreated `json:"Bsu,omitempty"`

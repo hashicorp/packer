@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type RegionApiService service
 
 // ReadRegionsOpts Optional parameters for the method 'ReadRegions'
 type ReadRegionsOpts struct {
-    ReadRegionsRequest optional.Interface
+	ReadRegionsRequest optional.Interface
 }
 
 /*
 ReadRegions Method for ReadRegions
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadRegionsOpts - Optional Parameters:
- * @param "ReadRegionsRequest" (optional.Interface of ReadRegionsRequest) - 
+ * @param "ReadRegionsRequest" (optional.Interface of ReadRegionsRequest) -
 @return ReadRegionsResponse
 */
 func (a *RegionApiService) ReadRegions(ctx _context.Context, localVarOptionals *ReadRegionsOpts) (ReadRegionsResponse, *_nethttp.Response, error) {

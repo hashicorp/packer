@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // UpdateVmRequest struct for UpdateVmRequest
 type UpdateVmRequest struct {
 	// One or more block device mappings of the VM.

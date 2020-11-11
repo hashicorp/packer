@@ -9,14 +9,15 @@
  */
 
 package osc
+
 // ReadApiLogsRequest struct for ReadApiLogsRequest
 type ReadApiLogsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool          `json:"DryRun,omitempty"`
 	Filters FiltersApiLog `json:"Filters,omitempty"`
 	// The token to request the next page of results.
 	NextPageToken string `json:"NextPageToken,omitempty"`
 	// The maximum number of items returned in a single page. By default, 100.
 	ResultsPerPage int32 `json:"ResultsPerPage,omitempty"`
-	With With `json:"With,omitempty"`
+	With           With  `json:"With,omitempty"`
 }

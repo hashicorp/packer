@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ReadVmsStateResponse struct for ReadVmsStateResponse
 type ReadVmsStateResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

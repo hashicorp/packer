@@ -17,21 +17,20 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type UnassignSecondaryIpsRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* networkInterface ID  */
+	NetworkInterfaceId string `json:"networkInterfaceId"`
 
-    /* networkInterface ID  */
-    NetworkInterfaceId string `json:"networkInterfaceId"`
-
-    /* 指定删除的secondaryIp地址 (Optional) */
-    SecondaryIps []string `json:"secondaryIps"`
+	/* 指定删除的secondaryIp地址 (Optional) */
+	SecondaryIps []string `json:"secondaryIps"`
 }
 
 /*
@@ -41,19 +40,19 @@ type UnassignSecondaryIpsRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewUnassignSecondaryIpsRequest(
-    regionId string,
-    networkInterfaceId string,
+	regionId string,
+	networkInterfaceId string,
 ) *UnassignSecondaryIpsRequest {
 
 	return &UnassignSecondaryIpsRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}:unassignSecondaryIps",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        NetworkInterfaceId: networkInterfaceId,
+		RegionId:           regionId,
+		NetworkInterfaceId: networkInterfaceId,
 	}
 }
 
@@ -63,62 +62,62 @@ func NewUnassignSecondaryIpsRequest(
  * param secondaryIps: 指定删除的secondaryIp地址 (Optional)
  */
 func NewUnassignSecondaryIpsRequestWithAllParams(
-    regionId string,
-    networkInterfaceId string,
-    secondaryIps []string,
+	regionId string,
+	networkInterfaceId string,
+	secondaryIps []string,
 ) *UnassignSecondaryIpsRequest {
 
-    return &UnassignSecondaryIpsRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}:unassignSecondaryIps",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        NetworkInterfaceId: networkInterfaceId,
-        SecondaryIps: secondaryIps,
-    }
+	return &UnassignSecondaryIpsRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}:unassignSecondaryIps",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:           regionId,
+		NetworkInterfaceId: networkInterfaceId,
+		SecondaryIps:       secondaryIps,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewUnassignSecondaryIpsRequestWithoutParam() *UnassignSecondaryIpsRequest {
 
-    return &UnassignSecondaryIpsRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}:unassignSecondaryIps",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &UnassignSecondaryIpsRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}:unassignSecondaryIps",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *UnassignSecondaryIpsRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param networkInterfaceId: networkInterface ID(Required) */
 func (r *UnassignSecondaryIpsRequest) SetNetworkInterfaceId(networkInterfaceId string) {
-    r.NetworkInterfaceId = networkInterfaceId
+	r.NetworkInterfaceId = networkInterfaceId
 }
 
 /* param secondaryIps: 指定删除的secondaryIp地址(Optional) */
 func (r *UnassignSecondaryIpsRequest) SetSecondaryIps(secondaryIps []string) {
-    r.SecondaryIps = secondaryIps
+	r.SecondaryIps = secondaryIps
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r UnassignSecondaryIpsRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type UnassignSecondaryIpsResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result UnassignSecondaryIpsResult `json:"result"`
+	RequestID string                     `json:"requestId"`
+	Error     core.ErrorResponse         `json:"error"`
+	Result    UnassignSecondaryIpsResult `json:"result"`
 }
 
 type UnassignSecondaryIpsResult struct {

@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type FlexibleGpuApiService service
 
 // CreateFlexibleGpuOpts Optional parameters for the method 'CreateFlexibleGpu'
 type CreateFlexibleGpuOpts struct {
-    CreateFlexibleGpuRequest optional.Interface
+	CreateFlexibleGpuRequest optional.Interface
 }
 
 /*
 CreateFlexibleGpu Method for CreateFlexibleGpu
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateFlexibleGpuOpts - Optional Parameters:
- * @param "CreateFlexibleGpuRequest" (optional.Interface of CreateFlexibleGpuRequest) - 
+ * @param "CreateFlexibleGpuRequest" (optional.Interface of CreateFlexibleGpuRequest) -
 @return CreateFlexibleGpuResponse
 */
 func (a *FlexibleGpuApiService) CreateFlexibleGpu(ctx _context.Context, localVarOptionals *CreateFlexibleGpuOpts) (CreateFlexibleGpuResponse, *_nethttp.Response, error) {
@@ -139,14 +139,14 @@ func (a *FlexibleGpuApiService) CreateFlexibleGpu(ctx _context.Context, localVar
 
 // DeleteFlexibleGpuOpts Optional parameters for the method 'DeleteFlexibleGpu'
 type DeleteFlexibleGpuOpts struct {
-    DeleteFlexibleGpuRequest optional.Interface
+	DeleteFlexibleGpuRequest optional.Interface
 }
 
 /*
 DeleteFlexibleGpu Method for DeleteFlexibleGpu
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteFlexibleGpuOpts - Optional Parameters:
- * @param "DeleteFlexibleGpuRequest" (optional.Interface of DeleteFlexibleGpuRequest) - 
+ * @param "DeleteFlexibleGpuRequest" (optional.Interface of DeleteFlexibleGpuRequest) -
 @return DeleteFlexibleGpuResponse
 */
 func (a *FlexibleGpuApiService) DeleteFlexibleGpu(ctx _context.Context, localVarOptionals *DeleteFlexibleGpuOpts) (DeleteFlexibleGpuResponse, *_nethttp.Response, error) {
@@ -250,14 +250,14 @@ func (a *FlexibleGpuApiService) DeleteFlexibleGpu(ctx _context.Context, localVar
 
 // LinkFlexibleGpuOpts Optional parameters for the method 'LinkFlexibleGpu'
 type LinkFlexibleGpuOpts struct {
-    LinkFlexibleGpuRequest optional.Interface
+	LinkFlexibleGpuRequest optional.Interface
 }
 
 /*
 LinkFlexibleGpu Method for LinkFlexibleGpu
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *LinkFlexibleGpuOpts - Optional Parameters:
- * @param "LinkFlexibleGpuRequest" (optional.Interface of LinkFlexibleGpuRequest) - 
+ * @param "LinkFlexibleGpuRequest" (optional.Interface of LinkFlexibleGpuRequest) -
 @return LinkFlexibleGpuResponse
 */
 func (a *FlexibleGpuApiService) LinkFlexibleGpu(ctx _context.Context, localVarOptionals *LinkFlexibleGpuOpts) (LinkFlexibleGpuResponse, *_nethttp.Response, error) {
@@ -361,14 +361,14 @@ func (a *FlexibleGpuApiService) LinkFlexibleGpu(ctx _context.Context, localVarOp
 
 // ReadFlexibleGpuCatalogOpts Optional parameters for the method 'ReadFlexibleGpuCatalog'
 type ReadFlexibleGpuCatalogOpts struct {
-    ReadFlexibleGpuCatalogRequest optional.Interface
+	ReadFlexibleGpuCatalogRequest optional.Interface
 }
 
 /*
 ReadFlexibleGpuCatalog Method for ReadFlexibleGpuCatalog
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadFlexibleGpuCatalogOpts - Optional Parameters:
- * @param "ReadFlexibleGpuCatalogRequest" (optional.Interface of ReadFlexibleGpuCatalogRequest) - 
+ * @param "ReadFlexibleGpuCatalogRequest" (optional.Interface of ReadFlexibleGpuCatalogRequest) -
 @return ReadFlexibleGpuCatalogResponse
 */
 func (a *FlexibleGpuApiService) ReadFlexibleGpuCatalog(ctx _context.Context, localVarOptionals *ReadFlexibleGpuCatalogOpts) (ReadFlexibleGpuCatalogResponse, *_nethttp.Response, error) {
@@ -460,14 +460,14 @@ func (a *FlexibleGpuApiService) ReadFlexibleGpuCatalog(ctx _context.Context, loc
 
 // ReadFlexibleGpusOpts Optional parameters for the method 'ReadFlexibleGpus'
 type ReadFlexibleGpusOpts struct {
-    ReadFlexibleGpusRequest optional.Interface
+	ReadFlexibleGpusRequest optional.Interface
 }
 
 /*
 ReadFlexibleGpus Method for ReadFlexibleGpus
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadFlexibleGpusOpts - Optional Parameters:
- * @param "ReadFlexibleGpusRequest" (optional.Interface of ReadFlexibleGpusRequest) - 
+ * @param "ReadFlexibleGpusRequest" (optional.Interface of ReadFlexibleGpusRequest) -
 @return ReadFlexibleGpusResponse
 */
 func (a *FlexibleGpuApiService) ReadFlexibleGpus(ctx _context.Context, localVarOptionals *ReadFlexibleGpusOpts) (ReadFlexibleGpusResponse, *_nethttp.Response, error) {
@@ -571,14 +571,14 @@ func (a *FlexibleGpuApiService) ReadFlexibleGpus(ctx _context.Context, localVarO
 
 // UnlinkFlexibleGpuOpts Optional parameters for the method 'UnlinkFlexibleGpu'
 type UnlinkFlexibleGpuOpts struct {
-    UnlinkFlexibleGpuRequest optional.Interface
+	UnlinkFlexibleGpuRequest optional.Interface
 }
 
 /*
 UnlinkFlexibleGpu Method for UnlinkFlexibleGpu
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *UnlinkFlexibleGpuOpts - Optional Parameters:
- * @param "UnlinkFlexibleGpuRequest" (optional.Interface of UnlinkFlexibleGpuRequest) - 
+ * @param "UnlinkFlexibleGpuRequest" (optional.Interface of UnlinkFlexibleGpuRequest) -
 @return UnlinkFlexibleGpuResponse
 */
 func (a *FlexibleGpuApiService) UnlinkFlexibleGpu(ctx _context.Context, localVarOptionals *UnlinkFlexibleGpuOpts) (UnlinkFlexibleGpuResponse, *_nethttp.Response, error) {
@@ -682,14 +682,14 @@ func (a *FlexibleGpuApiService) UnlinkFlexibleGpu(ctx _context.Context, localVar
 
 // UpdateFlexibleGpuOpts Optional parameters for the method 'UpdateFlexibleGpu'
 type UpdateFlexibleGpuOpts struct {
-    UpdateFlexibleGpuRequest optional.Interface
+	UpdateFlexibleGpuRequest optional.Interface
 }
 
 /*
 UpdateFlexibleGpu Method for UpdateFlexibleGpu
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *UpdateFlexibleGpuOpts - Optional Parameters:
- * @param "UpdateFlexibleGpuRequest" (optional.Interface of UpdateFlexibleGpuRequest) - 
+ * @param "UpdateFlexibleGpuRequest" (optional.Interface of UpdateFlexibleGpuRequest) -
 @return UpdateFlexibleGpuResponse
 */
 func (a *FlexibleGpuApiService) UpdateFlexibleGpu(ctx _context.Context, localVarOptionals *UpdateFlexibleGpuOpts) (UpdateFlexibleGpuResponse, *_nethttp.Response, error) {

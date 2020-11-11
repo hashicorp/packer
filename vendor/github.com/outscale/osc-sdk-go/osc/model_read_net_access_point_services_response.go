@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ReadNetAccessPointServicesResponse struct for ReadNetAccessPointServicesResponse
 type ReadNetAccessPointServicesResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // StopVmsResponse struct for StopVmsResponse
 type StopVmsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

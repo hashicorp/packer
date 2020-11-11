@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadVmsRequest struct for ReadVmsRequest
 type ReadVmsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool      `json:"DryRun,omitempty"`
 	Filters FiltersVm `json:"Filters,omitempty"`
 }

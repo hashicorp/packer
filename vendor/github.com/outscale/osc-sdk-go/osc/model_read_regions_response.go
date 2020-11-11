@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadRegionsResponse struct for ReadRegionsResponse
 type ReadRegionsResponse struct {
 	// Information about one or more Regions.
-	Regions []Region `json:"Regions,omitempty"`
+	Regions         []Region        `json:"Regions,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

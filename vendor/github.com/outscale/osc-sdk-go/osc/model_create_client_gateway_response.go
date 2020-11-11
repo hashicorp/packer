@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreateClientGatewayResponse struct for CreateClientGatewayResponse
 type CreateClientGatewayResponse struct {
-	ClientGateway ClientGateway `json:"ClientGateway,omitempty"`
+	ClientGateway   ClientGateway   `json:"ClientGateway,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

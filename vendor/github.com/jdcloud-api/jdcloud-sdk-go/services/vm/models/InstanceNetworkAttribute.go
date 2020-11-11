@@ -16,12 +16,11 @@
 
 package models
 
-
 type InstanceNetworkAttribute struct {
 
-    /* 弹性网卡ID (Optional) */
-    NetworkInterfaceId *string `json:"networkInterfaceId"`
+	/* 弹性网卡ID (Optional) */
+	NetworkInterfaceId *string `json:"networkInterfaceId"`
 
-    /* 随主机自动删除，默认为False (Optional) */
-    AutoDelete *bool `json:"autoDelete"`
+	/* 随主机自动删除，默认为False (Optional) */
+	AutoDelete *bool `json:"autoDelete"`
 }

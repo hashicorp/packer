@@ -15,7 +15,7 @@ import (
 
 // Getter is a Getter implementation that will download a module from
 // a GCS bucket.
-type Getter struct {}
+type Getter struct{}
 
 func (g *Getter) Mode(ctx context.Context, u *url.URL) (getter.Mode, error) {
 

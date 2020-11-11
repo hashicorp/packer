@@ -17,22 +17,21 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
 )
 
 type ModifyInstanceDiskAttributeRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
+	/* 云主机ID  */
+	InstanceId string `json:"instanceId"`
 
-    /* 云主机ID  */
-    InstanceId string `json:"instanceId"`
-
-    /* 云硬盘列表 (Optional) */
-    DataDisks []vm.InstanceDiskAttribute `json:"dataDisks"`
+	/* 云硬盘列表 (Optional) */
+	DataDisks []vm.InstanceDiskAttribute `json:"dataDisks"`
 }
 
 /*
@@ -42,19 +41,19 @@ type ModifyInstanceDiskAttributeRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewModifyInstanceDiskAttributeRequest(
-    regionId string,
-    instanceId string,
+	regionId string,
+	instanceId string,
 ) *ModifyInstanceDiskAttributeRequest {
 
 	return &ModifyInstanceDiskAttributeRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceDiskAttribute",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        InstanceId: instanceId,
+		RegionId:   regionId,
+		InstanceId: instanceId,
 	}
 }
 
@@ -64,62 +63,62 @@ func NewModifyInstanceDiskAttributeRequest(
  * param dataDisks: 云硬盘列表 (Optional)
  */
 func NewModifyInstanceDiskAttributeRequestWithAllParams(
-    regionId string,
-    instanceId string,
-    dataDisks []vm.InstanceDiskAttribute,
+	regionId string,
+	instanceId string,
+	dataDisks []vm.InstanceDiskAttribute,
 ) *ModifyInstanceDiskAttributeRequest {
 
-    return &ModifyInstanceDiskAttributeRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceDiskAttribute",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        InstanceId: instanceId,
-        DataDisks: dataDisks,
-    }
+	return &ModifyInstanceDiskAttributeRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceDiskAttribute",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:   regionId,
+		InstanceId: instanceId,
+		DataDisks:  dataDisks,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewModifyInstanceDiskAttributeRequestWithoutParam() *ModifyInstanceDiskAttributeRequest {
 
-    return &ModifyInstanceDiskAttributeRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceDiskAttribute",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &ModifyInstanceDiskAttributeRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceDiskAttribute",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *ModifyInstanceDiskAttributeRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *ModifyInstanceDiskAttributeRequest) SetInstanceId(instanceId string) {
-    r.InstanceId = instanceId
+	r.InstanceId = instanceId
 }
 
 /* param dataDisks: 云硬盘列表(Optional) */
 func (r *ModifyInstanceDiskAttributeRequest) SetDataDisks(dataDisks []vm.InstanceDiskAttribute) {
-    r.DataDisks = dataDisks
+	r.DataDisks = dataDisks
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ModifyInstanceDiskAttributeRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type ModifyInstanceDiskAttributeResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result ModifyInstanceDiskAttributeResult `json:"result"`
+	RequestID string                            `json:"requestId"`
+	Error     core.ErrorResponse                `json:"error"`
+	Result    ModifyInstanceDiskAttributeResult `json:"result"`
 }
 
 type ModifyInstanceDiskAttributeResult struct {

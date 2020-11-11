@@ -9,12 +9,13 @@
  */
 
 package osc
+
 // UpdateNicRequest struct for UpdateNicRequest
 type UpdateNicRequest struct {
 	// A new description for the NIC.
 	Description string `json:"Description,omitempty"`
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool            `json:"DryRun,omitempty"`
 	LinkNic LinkNicToUpdate `json:"LinkNic,omitempty"`
 	// The ID of the NIC you want to modify.
 	NicId string `json:"NicId"`

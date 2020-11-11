@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ReadConsumptionAccountRequest struct for ReadConsumptionAccountRequest
 type ReadConsumptionAccountRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

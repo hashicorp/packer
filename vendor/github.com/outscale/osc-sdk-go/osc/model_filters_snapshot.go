@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersSnapshot One or more filters.
 type FiltersSnapshot struct {
 	// The account aliases of the owners of the snapshots.

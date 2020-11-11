@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersPublicIp One or more filters.
 type FiltersPublicIp struct {
 	// The IDs representing the associations of EIPs with VMs or NICs.

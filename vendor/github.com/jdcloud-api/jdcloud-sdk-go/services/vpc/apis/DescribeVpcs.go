@@ -17,28 +17,27 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
-    common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
+	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type DescribeVpcsRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页 (Optional) */
+	PageNumber *int `json:"pageNumber"`
 
-    /* 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页 (Optional) */
-    PageNumber *int `json:"pageNumber"`
+	/* 分页大小，默认为20，取值范围：[10,100] (Optional) */
+	PageSize *int `json:"pageSize"`
 
-    /* 分页大小，默认为20，取值范围：[10,100] (Optional) */
-    PageSize *int `json:"pageSize"`
-
-    /* vpcIds - vpc ID列表，支持多个
-vpcNames - vpc名称列表,支持多个
- (Optional) */
-    Filters []common.Filter `json:"filters"`
+	/* vpcIds - vpc ID列表，支持多个
+	vpcNames - vpc名称列表,支持多个
+	 (Optional) */
+	Filters []common.Filter `json:"filters"`
 }
 
 /*
@@ -47,17 +46,17 @@ vpcNames - vpc名称列表,支持多个
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeVpcsRequest(
-    regionId string,
+	regionId string,
 ) *DescribeVpcsRequest {
 
 	return &DescribeVpcsRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/vpcs/",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
+		RegionId: regionId,
 	}
 }
 
@@ -68,76 +67,76 @@ func NewDescribeVpcsRequest(
  * param filters: vpcIds - vpc ID列表，支持多个
 vpcNames - vpc名称列表,支持多个
  (Optional)
- */
+*/
 func NewDescribeVpcsRequestWithAllParams(
-    regionId string,
-    pageNumber *int,
-    pageSize *int,
-    filters []common.Filter,
+	regionId string,
+	pageNumber *int,
+	pageSize *int,
+	filters []common.Filter,
 ) *DescribeVpcsRequest {
 
-    return &DescribeVpcsRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/vpcs/",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        PageNumber: pageNumber,
-        PageSize: pageSize,
-        Filters: filters,
-    }
+	return &DescribeVpcsRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/vpcs/",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:   regionId,
+		PageNumber: pageNumber,
+		PageSize:   pageSize,
+		Filters:    filters,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeVpcsRequestWithoutParam() *DescribeVpcsRequest {
 
-    return &DescribeVpcsRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/vpcs/",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeVpcsRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/vpcs/",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeVpcsRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param pageNumber: 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页(Optional) */
 func (r *DescribeVpcsRequest) SetPageNumber(pageNumber int) {
-    r.PageNumber = &pageNumber
+	r.PageNumber = &pageNumber
 }
 
 /* param pageSize: 分页大小，默认为20，取值范围：[10,100](Optional) */
 func (r *DescribeVpcsRequest) SetPageSize(pageSize int) {
-    r.PageSize = &pageSize
+	r.PageSize = &pageSize
 }
 
 /* param filters: vpcIds - vpc ID列表，支持多个
 vpcNames - vpc名称列表,支持多个
 (Optional) */
 func (r *DescribeVpcsRequest) SetFilters(filters []common.Filter) {
-    r.Filters = filters
+	r.Filters = filters
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeVpcsRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeVpcsResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeVpcsResult `json:"result"`
+	RequestID string             `json:"requestId"`
+	Error     core.ErrorResponse `json:"error"`
+	Result    DescribeVpcsResult `json:"result"`
 }
 
 type DescribeVpcsResult struct {
-    Vpcs []vpc.Vpc `json:"vpcs"`
-    TotalCount int `json:"totalCount"`
+	Vpcs       []vpc.Vpc `json:"vpcs"`
+	TotalCount int       `json:"totalCount"`
 }

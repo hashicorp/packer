@@ -12,11 +12,11 @@ package server
 type GetPrivateSubnetInstanceListRequest struct {
 
 	// 리전번호
-RegionNo *string `json:"regionNo,omitempty"`
+	RegionNo *string `json:"regionNo,omitempty"`
 
 	// 페이지번호
-PageNo *int32 `json:"pageNo,omitempty"`
+	PageNo *int32 `json:"pageNo,omitempty"`
 
 	// 페이지사이즈
-PageSize *int32 `json:"pageSize,omitempty"`
+	PageSize *int32 `json:"pageSize,omitempty"`
 }

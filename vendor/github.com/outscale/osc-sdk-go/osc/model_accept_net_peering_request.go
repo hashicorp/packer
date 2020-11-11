@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // AcceptNetPeeringRequest struct for AcceptNetPeeringRequest
 type AcceptNetPeeringRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

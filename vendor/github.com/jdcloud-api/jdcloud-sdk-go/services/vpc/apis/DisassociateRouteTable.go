@@ -17,21 +17,20 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DisassociateRouteTableRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* RouteTable ID  */
+	RouteTableId string `json:"routeTableId"`
 
-    /* RouteTable ID  */
-    RouteTableId string `json:"routeTableId"`
-
-    /* 路由表要解绑的子网ID，解绑后子网绑定默认路由表  */
-    SubnetId string `json:"subnetId"`
+	/* 路由表要解绑的子网ID，解绑后子网绑定默认路由表  */
+	SubnetId string `json:"subnetId"`
 }
 
 /*
@@ -42,21 +41,21 @@ type DisassociateRouteTableRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDisassociateRouteTableRequest(
-    regionId string,
-    routeTableId string,
-    subnetId string,
+	regionId string,
+	routeTableId string,
+	subnetId string,
 ) *DisassociateRouteTableRequest {
 
 	return &DisassociateRouteTableRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/routeTables/{routeTableId}:disassociateRouteTable",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        RouteTableId: routeTableId,
-        SubnetId: subnetId,
+		RegionId:     regionId,
+		RouteTableId: routeTableId,
+		SubnetId:     subnetId,
 	}
 }
 
@@ -66,62 +65,62 @@ func NewDisassociateRouteTableRequest(
  * param subnetId: 路由表要解绑的子网ID，解绑后子网绑定默认路由表 (Required)
  */
 func NewDisassociateRouteTableRequestWithAllParams(
-    regionId string,
-    routeTableId string,
-    subnetId string,
+	regionId string,
+	routeTableId string,
+	subnetId string,
 ) *DisassociateRouteTableRequest {
 
-    return &DisassociateRouteTableRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/{routeTableId}:disassociateRouteTable",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        RouteTableId: routeTableId,
-        SubnetId: subnetId,
-    }
+	return &DisassociateRouteTableRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/{routeTableId}:disassociateRouteTable",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:     regionId,
+		RouteTableId: routeTableId,
+		SubnetId:     subnetId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDisassociateRouteTableRequestWithoutParam() *DisassociateRouteTableRequest {
 
-    return &DisassociateRouteTableRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/{routeTableId}:disassociateRouteTable",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DisassociateRouteTableRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/{routeTableId}:disassociateRouteTable",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DisassociateRouteTableRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param routeTableId: RouteTable ID(Required) */
 func (r *DisassociateRouteTableRequest) SetRouteTableId(routeTableId string) {
-    r.RouteTableId = routeTableId
+	r.RouteTableId = routeTableId
 }
 
 /* param subnetId: 路由表要解绑的子网ID，解绑后子网绑定默认路由表(Required) */
 func (r *DisassociateRouteTableRequest) SetSubnetId(subnetId string) {
-    r.SubnetId = subnetId
+	r.SubnetId = subnetId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DisassociateRouteTableRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DisassociateRouteTableResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DisassociateRouteTableResult `json:"result"`
+	RequestID string                       `json:"requestId"`
+	Error     core.ErrorResponse           `json:"error"`
+	Result    DisassociateRouteTableResult `json:"result"`
 }
 
 type DisassociateRouteTableResult struct {

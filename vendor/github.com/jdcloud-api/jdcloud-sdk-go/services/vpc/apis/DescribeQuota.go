@@ -17,21 +17,20 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DescribeQuotaRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* 资源类型，取值范围：vpc、elastic_ip、subnet、security_group、vpcpeering、network_interface（配额只统计辅助网卡）  */
+	Type string `json:"type"`
 
-    /* 资源类型，取值范围：vpc、elastic_ip、subnet、security_group、vpcpeering、network_interface（配额只统计辅助网卡）  */
-    Type string `json:"type"`
-
-    /* type为vpc、elastic_ip、network_interface不设置, type为subnet、security_group、vpcpeering设置为vpcId (Optional) */
-    ParentResourceId *string `json:"parentResourceId"`
+	/* type为vpc、elastic_ip、network_interface不设置, type为subnet、security_group、vpcpeering设置为vpcId (Optional) */
+	ParentResourceId *string `json:"parentResourceId"`
 }
 
 /*
@@ -41,19 +40,19 @@ type DescribeQuotaRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeQuotaRequest(
-    regionId string,
-    type_ string,
+	regionId string,
+	type_ string,
 ) *DescribeQuotaRequest {
 
 	return &DescribeQuotaRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/quotas/",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        Type: type_,
+		RegionId: regionId,
+		Type:     type_,
 	}
 }
 
@@ -63,64 +62,64 @@ func NewDescribeQuotaRequest(
  * param parentResourceId: type为vpc、elastic_ip、network_interface不设置, type为subnet、security_group、vpcpeering设置为vpcId (Optional)
  */
 func NewDescribeQuotaRequestWithAllParams(
-    regionId string,
-    type_ string,
-    parentResourceId *string,
+	regionId string,
+	type_ string,
+	parentResourceId *string,
 ) *DescribeQuotaRequest {
 
-    return &DescribeQuotaRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/quotas/",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        Type: type_,
-        ParentResourceId: parentResourceId,
-    }
+	return &DescribeQuotaRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/quotas/",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:         regionId,
+		Type:             type_,
+		ParentResourceId: parentResourceId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeQuotaRequestWithoutParam() *DescribeQuotaRequest {
 
-    return &DescribeQuotaRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/quotas/",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeQuotaRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/quotas/",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeQuotaRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param type_: 资源类型，取值范围：vpc、elastic_ip、subnet、security_group、vpcpeering、network_interface（配额只统计辅助网卡）(Required) */
 func (r *DescribeQuotaRequest) SetType(type_ string) {
-    r.Type = type_
+	r.Type = type_
 }
 
 /* param parentResourceId: type为vpc、elastic_ip、network_interface不设置, type为subnet、security_group、vpcpeering设置为vpcId(Optional) */
 func (r *DescribeQuotaRequest) SetParentResourceId(parentResourceId string) {
-    r.ParentResourceId = &parentResourceId
+	r.ParentResourceId = &parentResourceId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeQuotaRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeQuotaResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeQuotaResult `json:"result"`
+	RequestID string              `json:"requestId"`
+	Error     core.ErrorResponse  `json:"error"`
+	Result    DescribeQuotaResult `json:"result"`
 }
 
 type DescribeQuotaResult struct {
-    Quota interface{} `json:"quota"`
+	Quota interface{} `json:"quota"`
 }

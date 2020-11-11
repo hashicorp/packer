@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // UpdateNetRequest struct for UpdateNetRequest
 type UpdateNetRequest struct {
 	// The ID of the DHCP options set (or `default` if you want to associate the default one).

@@ -17,21 +17,20 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type ShareImageRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
+	/* 镜像ID  */
+	ImageId string `json:"imageId"`
 
-    /* 镜像ID  */
-    ImageId string `json:"imageId"`
-
-    /* 需要共享的帐户 (Optional) */
-    Pins []string `json:"pins"`
+	/* 需要共享的帐户 (Optional) */
+	Pins []string `json:"pins"`
 }
 
 /*
@@ -41,19 +40,19 @@ type ShareImageRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewShareImageRequest(
-    regionId string,
-    imageId string,
+	regionId string,
+	imageId string,
 ) *ShareImageRequest {
 
 	return &ShareImageRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/images/{imageId}:share",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        ImageId: imageId,
+		RegionId: regionId,
+		ImageId:  imageId,
 	}
 }
 
@@ -63,62 +62,62 @@ func NewShareImageRequest(
  * param pins: 需要共享的帐户 (Optional)
  */
 func NewShareImageRequestWithAllParams(
-    regionId string,
-    imageId string,
-    pins []string,
+	regionId string,
+	imageId string,
+	pins []string,
 ) *ShareImageRequest {
 
-    return &ShareImageRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/images/{imageId}:share",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        ImageId: imageId,
-        Pins: pins,
-    }
+	return &ShareImageRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/images/{imageId}:share",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId: regionId,
+		ImageId:  imageId,
+		Pins:     pins,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewShareImageRequestWithoutParam() *ShareImageRequest {
 
-    return &ShareImageRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/images/{imageId}:share",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &ShareImageRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/images/{imageId}:share",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *ShareImageRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param imageId: 镜像ID(Required) */
 func (r *ShareImageRequest) SetImageId(imageId string) {
-    r.ImageId = imageId
+	r.ImageId = imageId
 }
 
 /* param pins: 需要共享的帐户(Optional) */
 func (r *ShareImageRequest) SetPins(pins []string) {
-    r.Pins = pins
+	r.Pins = pins
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ShareImageRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type ShareImageResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result ShareImageResult `json:"result"`
+	RequestID string             `json:"requestId"`
+	Error     core.ErrorResponse `json:"error"`
+	Result    ShareImageResult   `json:"result"`
 }
 
 type ShareImageResult struct {

@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type VpnConnectionApiService service
 
 // CreateVpnConnectionOpts Optional parameters for the method 'CreateVpnConnection'
 type CreateVpnConnectionOpts struct {
-    CreateVpnConnectionRequest optional.Interface
+	CreateVpnConnectionRequest optional.Interface
 }
 
 /*
 CreateVpnConnection Method for CreateVpnConnection
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateVpnConnectionOpts - Optional Parameters:
- * @param "CreateVpnConnectionRequest" (optional.Interface of CreateVpnConnectionRequest) - 
+ * @param "CreateVpnConnectionRequest" (optional.Interface of CreateVpnConnectionRequest) -
 @return CreateVpnConnectionResponse
 */
 func (a *VpnConnectionApiService) CreateVpnConnection(ctx _context.Context, localVarOptionals *CreateVpnConnectionOpts) (CreateVpnConnectionResponse, *_nethttp.Response, error) {
@@ -139,14 +139,14 @@ func (a *VpnConnectionApiService) CreateVpnConnection(ctx _context.Context, loca
 
 // CreateVpnConnectionRouteOpts Optional parameters for the method 'CreateVpnConnectionRoute'
 type CreateVpnConnectionRouteOpts struct {
-    CreateVpnConnectionRouteRequest optional.Interface
+	CreateVpnConnectionRouteRequest optional.Interface
 }
 
 /*
 CreateVpnConnectionRoute Method for CreateVpnConnectionRoute
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateVpnConnectionRouteOpts - Optional Parameters:
- * @param "CreateVpnConnectionRouteRequest" (optional.Interface of CreateVpnConnectionRouteRequest) - 
+ * @param "CreateVpnConnectionRouteRequest" (optional.Interface of CreateVpnConnectionRouteRequest) -
 @return CreateVpnConnectionRouteResponse
 */
 func (a *VpnConnectionApiService) CreateVpnConnectionRoute(ctx _context.Context, localVarOptionals *CreateVpnConnectionRouteOpts) (CreateVpnConnectionRouteResponse, *_nethttp.Response, error) {
@@ -250,14 +250,14 @@ func (a *VpnConnectionApiService) CreateVpnConnectionRoute(ctx _context.Context,
 
 // DeleteVpnConnectionOpts Optional parameters for the method 'DeleteVpnConnection'
 type DeleteVpnConnectionOpts struct {
-    DeleteVpnConnectionRequest optional.Interface
+	DeleteVpnConnectionRequest optional.Interface
 }
 
 /*
 DeleteVpnConnection Method for DeleteVpnConnection
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteVpnConnectionOpts - Optional Parameters:
- * @param "DeleteVpnConnectionRequest" (optional.Interface of DeleteVpnConnectionRequest) - 
+ * @param "DeleteVpnConnectionRequest" (optional.Interface of DeleteVpnConnectionRequest) -
 @return DeleteVpnConnectionResponse
 */
 func (a *VpnConnectionApiService) DeleteVpnConnection(ctx _context.Context, localVarOptionals *DeleteVpnConnectionOpts) (DeleteVpnConnectionResponse, *_nethttp.Response, error) {
@@ -361,14 +361,14 @@ func (a *VpnConnectionApiService) DeleteVpnConnection(ctx _context.Context, loca
 
 // DeleteVpnConnectionRouteOpts Optional parameters for the method 'DeleteVpnConnectionRoute'
 type DeleteVpnConnectionRouteOpts struct {
-    DeleteVpnConnectionRouteRequest optional.Interface
+	DeleteVpnConnectionRouteRequest optional.Interface
 }
 
 /*
 DeleteVpnConnectionRoute Method for DeleteVpnConnectionRoute
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteVpnConnectionRouteOpts - Optional Parameters:
- * @param "DeleteVpnConnectionRouteRequest" (optional.Interface of DeleteVpnConnectionRouteRequest) - 
+ * @param "DeleteVpnConnectionRouteRequest" (optional.Interface of DeleteVpnConnectionRouteRequest) -
 @return DeleteVpnConnectionRouteResponse
 */
 func (a *VpnConnectionApiService) DeleteVpnConnectionRoute(ctx _context.Context, localVarOptionals *DeleteVpnConnectionRouteOpts) (DeleteVpnConnectionRouteResponse, *_nethttp.Response, error) {
@@ -472,14 +472,14 @@ func (a *VpnConnectionApiService) DeleteVpnConnectionRoute(ctx _context.Context,
 
 // ReadVpnConnectionsOpts Optional parameters for the method 'ReadVpnConnections'
 type ReadVpnConnectionsOpts struct {
-    ReadVpnConnectionsRequest optional.Interface
+	ReadVpnConnectionsRequest optional.Interface
 }
 
 /*
 ReadVpnConnections Method for ReadVpnConnections
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadVpnConnectionsOpts - Optional Parameters:
- * @param "ReadVpnConnectionsRequest" (optional.Interface of ReadVpnConnectionsRequest) - 
+ * @param "ReadVpnConnectionsRequest" (optional.Interface of ReadVpnConnectionsRequest) -
 @return ReadVpnConnectionsResponse
 */
 func (a *VpnConnectionApiService) ReadVpnConnections(ctx _context.Context, localVarOptionals *ReadVpnConnectionsOpts) (ReadVpnConnectionsResponse, *_nethttp.Response, error) {

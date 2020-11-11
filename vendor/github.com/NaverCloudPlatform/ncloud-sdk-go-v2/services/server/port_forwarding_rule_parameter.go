@@ -12,11 +12,11 @@ package server
 type PortForwardingRuleParameter struct {
 
 	// 포트포워딩외부포트
-PortForwardingExternalPort *int32 `json:"portForwardingExternalPort"`
+	PortForwardingExternalPort *int32 `json:"portForwardingExternalPort"`
 
 	// 포트포워딩내부포트
-PortForwardingInternalPort *int32 `json:"portForwardingInternalPort"`
+	PortForwardingInternalPort *int32 `json:"portForwardingInternalPort"`
 
 	// 서버인스턴스번호
-ServerInstanceNo *string `json:"serverInstanceNo"`
+	ServerInstanceNo *string `json:"serverInstanceNo"`
 }

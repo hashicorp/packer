@@ -17,18 +17,17 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DeleteVpcPeeringRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
-
-    /* vpcPeeringId ID  */
-    VpcPeeringId string `json:"vpcPeeringId"`
+	/* vpcPeeringId ID  */
+	VpcPeeringId string `json:"vpcPeeringId"`
 }
 
 /*
@@ -38,19 +37,19 @@ type DeleteVpcPeeringRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDeleteVpcPeeringRequest(
-    regionId string,
-    vpcPeeringId string,
+	regionId string,
+	vpcPeeringId string,
 ) *DeleteVpcPeeringRequest {
 
 	return &DeleteVpcPeeringRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
 			Method:  "DELETE",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        VpcPeeringId: vpcPeeringId,
+		RegionId:     regionId,
+		VpcPeeringId: vpcPeeringId,
 	}
 }
 
@@ -59,55 +58,55 @@ func NewDeleteVpcPeeringRequest(
  * param vpcPeeringId: vpcPeeringId ID (Required)
  */
 func NewDeleteVpcPeeringRequestWithAllParams(
-    regionId string,
-    vpcPeeringId string,
+	regionId string,
+	vpcPeeringId string,
 ) *DeleteVpcPeeringRequest {
 
-    return &DeleteVpcPeeringRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
-            Method:  "DELETE",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        VpcPeeringId: vpcPeeringId,
-    }
+	return &DeleteVpcPeeringRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
+			Method:  "DELETE",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:     regionId,
+		VpcPeeringId: vpcPeeringId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDeleteVpcPeeringRequestWithoutParam() *DeleteVpcPeeringRequest {
 
-    return &DeleteVpcPeeringRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
-            Method:  "DELETE",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DeleteVpcPeeringRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
+			Method:  "DELETE",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DeleteVpcPeeringRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param vpcPeeringId: vpcPeeringId ID(Required) */
 func (r *DeleteVpcPeeringRequest) SetVpcPeeringId(vpcPeeringId string) {
-    r.VpcPeeringId = vpcPeeringId
+	r.VpcPeeringId = vpcPeeringId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DeleteVpcPeeringRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DeleteVpcPeeringResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DeleteVpcPeeringResult `json:"result"`
+	RequestID string                 `json:"requestId"`
+	Error     core.ErrorResponse     `json:"error"`
+	Result    DeleteVpcPeeringResult `json:"result"`
 }
 
 type DeleteVpcPeeringResult struct {

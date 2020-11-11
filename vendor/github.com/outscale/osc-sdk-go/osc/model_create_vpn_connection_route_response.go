@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateVpnConnectionRouteResponse struct for CreateVpnConnectionRouteResponse
 type CreateVpnConnectionRouteResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

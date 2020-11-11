@@ -17,27 +17,26 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type RebuildInstanceRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
+	/* 云主机ID  */
+	InstanceId string `json:"instanceId"`
 
-    /* 云主机ID  */
-    InstanceId string `json:"instanceId"`
+	/* 云主机密码，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。  */
+	Password string `json:"password"`
 
-    /* 云主机密码，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。  */
-    Password string `json:"password"`
+	/* 镜像ID。可查询<a href="http://docs.jdcloud.com/virtual-machines/api/describeimages">DescribeImages</a>接口获得指定地域的镜像信息。 (Optional) */
+	ImageId *string `json:"imageId"`
 
-    /* 镜像ID。可查询<a href="http://docs.jdcloud.com/virtual-machines/api/describeimages">DescribeImages</a>接口获得指定地域的镜像信息。 (Optional) */
-    ImageId *string `json:"imageId"`
-
-    /* 密钥对名称；当前只支持一个。仅Linux系统支持指定。 (Optional) */
-    KeyNames []string `json:"keyNames"`
+	/* 密钥对名称；当前只支持一个。仅Linux系统支持指定。 (Optional) */
+	KeyNames []string `json:"keyNames"`
 }
 
 /*
@@ -48,21 +47,21 @@ type RebuildInstanceRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewRebuildInstanceRequest(
-    regionId string,
-    instanceId string,
-    password string,
+	regionId string,
+	instanceId string,
+	password string,
 ) *RebuildInstanceRequest {
 
 	return &RebuildInstanceRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:rebuildInstance",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        InstanceId: instanceId,
-        Password: password,
+		RegionId:   regionId,
+		InstanceId: instanceId,
+		Password:   password,
 	}
 }
 
@@ -74,76 +73,76 @@ func NewRebuildInstanceRequest(
  * param keyNames: 密钥对名称；当前只支持一个。仅Linux系统支持指定。 (Optional)
  */
 func NewRebuildInstanceRequestWithAllParams(
-    regionId string,
-    instanceId string,
-    password string,
-    imageId *string,
-    keyNames []string,
+	regionId string,
+	instanceId string,
+	password string,
+	imageId *string,
+	keyNames []string,
 ) *RebuildInstanceRequest {
 
-    return &RebuildInstanceRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}:rebuildInstance",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        InstanceId: instanceId,
-        Password: password,
-        ImageId: imageId,
-        KeyNames: keyNames,
-    }
+	return &RebuildInstanceRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}:rebuildInstance",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:   regionId,
+		InstanceId: instanceId,
+		Password:   password,
+		ImageId:    imageId,
+		KeyNames:   keyNames,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewRebuildInstanceRequestWithoutParam() *RebuildInstanceRequest {
 
-    return &RebuildInstanceRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}:rebuildInstance",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &RebuildInstanceRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}:rebuildInstance",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *RebuildInstanceRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *RebuildInstanceRequest) SetInstanceId(instanceId string) {
-    r.InstanceId = instanceId
+	r.InstanceId = instanceId
 }
 
 /* param password: 云主机密码，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。(Required) */
 func (r *RebuildInstanceRequest) SetPassword(password string) {
-    r.Password = password
+	r.Password = password
 }
 
 /* param imageId: 镜像ID。可查询<a href="http://docs.jdcloud.com/virtual-machines/api/describeimages">DescribeImages</a>接口获得指定地域的镜像信息。(Optional) */
 func (r *RebuildInstanceRequest) SetImageId(imageId string) {
-    r.ImageId = &imageId
+	r.ImageId = &imageId
 }
 
 /* param keyNames: 密钥对名称；当前只支持一个。仅Linux系统支持指定。(Optional) */
 func (r *RebuildInstanceRequest) SetKeyNames(keyNames []string) {
-    r.KeyNames = keyNames
+	r.KeyNames = keyNames
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r RebuildInstanceRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type RebuildInstanceResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result RebuildInstanceResult `json:"result"`
+	RequestID string                `json:"requestId"`
+	Error     core.ErrorResponse    `json:"error"`
+	Result    RebuildInstanceResult `json:"result"`
 }
 
 type RebuildInstanceResult struct {

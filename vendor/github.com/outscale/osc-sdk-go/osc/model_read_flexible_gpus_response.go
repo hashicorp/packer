@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadFlexibleGpusResponse struct for ReadFlexibleGpusResponse
 type ReadFlexibleGpusResponse struct {
 	// Information about one or more fGPUs.
-	FlexibleGpus []FlexibleGpu `json:"FlexibleGpus,omitempty"`
+	FlexibleGpus    []FlexibleGpu   `json:"FlexibleGpus,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

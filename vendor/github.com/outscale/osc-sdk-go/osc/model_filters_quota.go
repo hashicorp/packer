@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersQuota One or more filters.
 type FiltersQuota struct {
 	// The group names of the quotas.

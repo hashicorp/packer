@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -217,7 +218,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 
 	// Run the steps.
-	p.runner = common.NewRunner(steps, p.config.PackerConfig, ui)
+	p.runner = commonsteps.NewRunner(steps, p.config.PackerConfig, ui)
 	p.runner.Run(ctx, state)
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, false, false, rawErr.(error)

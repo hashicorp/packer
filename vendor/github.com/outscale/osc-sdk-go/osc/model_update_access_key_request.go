@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // UpdateAccessKeyRequest struct for UpdateAccessKeyRequest
 type UpdateAccessKeyRequest struct {
 	// The ID of the access key.

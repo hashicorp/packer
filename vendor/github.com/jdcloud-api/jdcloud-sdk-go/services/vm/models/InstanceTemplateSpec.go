@@ -16,30 +16,29 @@
 
 package models
 
-
 type InstanceTemplateSpec struct {
 
-    /* 实例规格，可查询<a href="http://docs.jdcloud.com/virtual-machines/api/describeinstancetypes">DescribeInstanceTypes</a>接口获得指定地域或可用区的规格信息。  */
-    InstanceType string `json:"instanceType"`
+	/* 实例规格，可查询<a href="http://docs.jdcloud.com/virtual-machines/api/describeinstancetypes">DescribeInstanceTypes</a>接口获得指定地域或可用区的规格信息。  */
+	InstanceType string `json:"instanceType"`
 
-    /* 镜像ID，可查询<a href="http://docs.jdcloud.com/virtual-machines/api/describeimages">DescribeImages</a>接口获得指定地域的镜像信息。  */
-    ImageId string `json:"imageId"`
+	/* 镜像ID，可查询<a href="http://docs.jdcloud.com/virtual-machines/api/describeimages">DescribeImages</a>接口获得指定地域的镜像信息。  */
+	ImageId string `json:"imageId"`
 
-    /* 密码，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Optional) */
-    Password string `json:"password"`
+	/* 密码，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Optional) */
+	Password string `json:"password"`
 
-    /* 密钥对名称；当前只支持一个 (Optional) */
-    KeyNames []string `json:"keyNames"`
+	/* 密钥对名称；当前只支持一个 (Optional) */
+	KeyNames []string `json:"keyNames"`
 
-    /* 主网卡主IP关联的弹性IP规格 (Optional) */
-    ElasticIp InstanceTemplateElasticIpSpec `json:"elasticIp"`
+	/* 主网卡主IP关联的弹性IP规格 (Optional) */
+	ElasticIp InstanceTemplateElasticIpSpec `json:"elasticIp"`
 
-    /* 主网卡配置信息  */
-    PrimaryNetworkInterface InstanceTemplateNetworkInterfaceAttachmentSpec `json:"primaryNetworkInterface"`
+	/* 主网卡配置信息  */
+	PrimaryNetworkInterface InstanceTemplateNetworkInterfaceAttachmentSpec `json:"primaryNetworkInterface"`
 
-    /* 系统盘配置信息  */
-    SystemDisk InstanceTemplateDiskAttachmentSpec `json:"systemDisk"`
+	/* 系统盘配置信息  */
+	SystemDisk InstanceTemplateDiskAttachmentSpec `json:"systemDisk"`
 
-    /* 数据盘配置信息 (Optional) */
-    DataDisks []InstanceTemplateDiskAttachmentSpec `json:"dataDisks"`
+	/* 数据盘配置信息 (Optional) */
+	DataDisks []InstanceTemplateDiskAttachmentSpec `json:"dataDisks"`
 }

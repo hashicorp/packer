@@ -17,24 +17,23 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type CreateNetworkAclRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* 私有网络id  */
+	VpcId string `json:"vpcId"`
 
-    /* 私有网络id  */
-    VpcId string `json:"vpcId"`
+	/* networkAcl名称  */
+	NetworkAclName string `json:"networkAclName"`
 
-    /* networkAcl名称  */
-    NetworkAclName string `json:"networkAclName"`
-
-    /* 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
-    Description *string `json:"description"`
+	/* 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
+	Description *string `json:"description"`
 }
 
 /*
@@ -45,21 +44,21 @@ type CreateNetworkAclRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewCreateNetworkAclRequest(
-    regionId string,
-    vpcId string,
-    networkAclName string,
+	regionId string,
+	vpcId string,
+	networkAclName string,
 ) *CreateNetworkAclRequest {
 
 	return &CreateNetworkAclRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkAcls/",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        VpcId: vpcId,
-        NetworkAclName: networkAclName,
+		RegionId:       regionId,
+		VpcId:          vpcId,
+		NetworkAclName: networkAclName,
 	}
 }
 
@@ -70,71 +69,71 @@ func NewCreateNetworkAclRequest(
  * param description: 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional)
  */
 func NewCreateNetworkAclRequestWithAllParams(
-    regionId string,
-    vpcId string,
-    networkAclName string,
-    description *string,
+	regionId string,
+	vpcId string,
+	networkAclName string,
+	description *string,
 ) *CreateNetworkAclRequest {
 
-    return &CreateNetworkAclRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkAcls/",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        VpcId: vpcId,
-        NetworkAclName: networkAclName,
-        Description: description,
-    }
+	return &CreateNetworkAclRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkAcls/",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:       regionId,
+		VpcId:          vpcId,
+		NetworkAclName: networkAclName,
+		Description:    description,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewCreateNetworkAclRequestWithoutParam() *CreateNetworkAclRequest {
 
-    return &CreateNetworkAclRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkAcls/",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &CreateNetworkAclRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkAcls/",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *CreateNetworkAclRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param vpcId: 私有网络id(Required) */
 func (r *CreateNetworkAclRequest) SetVpcId(vpcId string) {
-    r.VpcId = vpcId
+	r.VpcId = vpcId
 }
 
 /* param networkAclName: networkAcl名称(Required) */
 func (r *CreateNetworkAclRequest) SetNetworkAclName(networkAclName string) {
-    r.NetworkAclName = networkAclName
+	r.NetworkAclName = networkAclName
 }
 
 /* param description: 描述,允许输入UTF-8编码下的全部字符，不超过256字符(Optional) */
 func (r *CreateNetworkAclRequest) SetDescription(description string) {
-    r.Description = &description
+	r.Description = &description
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r CreateNetworkAclRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type CreateNetworkAclResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result CreateNetworkAclResult `json:"result"`
+	RequestID string                 `json:"requestId"`
+	Error     core.ErrorResponse     `json:"error"`
+	Result    CreateNetworkAclResult `json:"result"`
 }
 
 type CreateNetworkAclResult struct {
-    NetworkAclId string `json:"networkAclId"`
+	NetworkAclId string `json:"networkAclId"`
 }

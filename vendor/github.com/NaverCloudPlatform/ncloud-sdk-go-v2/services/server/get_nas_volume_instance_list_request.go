@@ -12,20 +12,20 @@ package server
 type GetNasVolumeInstanceListRequest struct {
 
 	// 볼륨할당프로토콜유형코드
-VolumeAllotmentProtocolTypeCode *string `json:"volumeAllotmentProtocolTypeCode,omitempty"`
+	VolumeAllotmentProtocolTypeCode *string `json:"volumeAllotmentProtocolTypeCode,omitempty"`
 
 	// 이벤트설정여부
-IsEventConfiguration *bool `json:"isEventConfiguration,omitempty"`
+	IsEventConfiguration *bool `json:"isEventConfiguration,omitempty"`
 
 	// 스냅샷볼륨설정여부
-IsSnapshotConfiguration *bool `json:"isSnapshotConfiguration,omitempty"`
+	IsSnapshotConfiguration *bool `json:"isSnapshotConfiguration,omitempty"`
 
 	// NAS볼륨인스턴스번호리스트
-NasVolumeInstanceNoList []*string `json:"nasVolumeInstanceNoList,omitempty"`
+	NasVolumeInstanceNoList []*string `json:"nasVolumeInstanceNoList,omitempty"`
 
 	// 리전번호
-RegionNo *string `json:"regionNo,omitempty"`
+	RegionNo *string `json:"regionNo,omitempty"`
 
 	// ZONE번호
-ZoneNo *string `json:"zoneNo,omitempty"`
+	ZoneNo *string `json:"zoneNo,omitempty"`
 }

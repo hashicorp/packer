@@ -17,24 +17,23 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type ModifyVpcPeeringRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* vpcPeeringId ID  */
+	VpcPeeringId string `json:"vpcPeeringId"`
 
-    /* vpcPeeringId ID  */
-    VpcPeeringId string `json:"vpcPeeringId"`
+	/* VpcPeering的名字,不为空。名称取值范围：1-32个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
+	VpcPeeringName *string `json:"vpcPeeringName"`
 
-    /* VpcPeering的名字,不为空。名称取值范围：1-32个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
-    VpcPeeringName *string `json:"vpcPeeringName"`
-
-    /* VpcPeering 描述，取值范围：0-256个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
-    Description *string `json:"description"`
+	/* VpcPeering 描述，取值范围：0-256个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
+	Description *string `json:"description"`
 }
 
 /*
@@ -44,19 +43,19 @@ type ModifyVpcPeeringRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewModifyVpcPeeringRequest(
-    regionId string,
-    vpcPeeringId string,
+	regionId string,
+	vpcPeeringId string,
 ) *ModifyVpcPeeringRequest {
 
 	return &ModifyVpcPeeringRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
 			Method:  "PUT",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        VpcPeeringId: vpcPeeringId,
+		RegionId:     regionId,
+		VpcPeeringId: vpcPeeringId,
 	}
 }
 
@@ -67,69 +66,69 @@ func NewModifyVpcPeeringRequest(
  * param description: VpcPeering 描述，取值范围：0-256个中文、英文大小写的字母、数字和下划线分隔符 (Optional)
  */
 func NewModifyVpcPeeringRequestWithAllParams(
-    regionId string,
-    vpcPeeringId string,
-    vpcPeeringName *string,
-    description *string,
+	regionId string,
+	vpcPeeringId string,
+	vpcPeeringName *string,
+	description *string,
 ) *ModifyVpcPeeringRequest {
 
-    return &ModifyVpcPeeringRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
-            Method:  "PUT",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        VpcPeeringId: vpcPeeringId,
-        VpcPeeringName: vpcPeeringName,
-        Description: description,
-    }
+	return &ModifyVpcPeeringRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
+			Method:  "PUT",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:       regionId,
+		VpcPeeringId:   vpcPeeringId,
+		VpcPeeringName: vpcPeeringName,
+		Description:    description,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewModifyVpcPeeringRequestWithoutParam() *ModifyVpcPeeringRequest {
 
-    return &ModifyVpcPeeringRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
-            Method:  "PUT",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &ModifyVpcPeeringRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
+			Method:  "PUT",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *ModifyVpcPeeringRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param vpcPeeringId: vpcPeeringId ID(Required) */
 func (r *ModifyVpcPeeringRequest) SetVpcPeeringId(vpcPeeringId string) {
-    r.VpcPeeringId = vpcPeeringId
+	r.VpcPeeringId = vpcPeeringId
 }
 
 /* param vpcPeeringName: VpcPeering的名字,不为空。名称取值范围：1-32个中文、英文大小写的字母、数字和下划线分隔符(Optional) */
 func (r *ModifyVpcPeeringRequest) SetVpcPeeringName(vpcPeeringName string) {
-    r.VpcPeeringName = &vpcPeeringName
+	r.VpcPeeringName = &vpcPeeringName
 }
 
 /* param description: VpcPeering 描述，取值范围：0-256个中文、英文大小写的字母、数字和下划线分隔符(Optional) */
 func (r *ModifyVpcPeeringRequest) SetDescription(description string) {
-    r.Description = &description
+	r.Description = &description
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ModifyVpcPeeringRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type ModifyVpcPeeringResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result ModifyVpcPeeringResult `json:"result"`
+	RequestID string                 `json:"requestId"`
+	Error     core.ErrorResponse     `json:"error"`
+	Result    ModifyVpcPeeringResult `json:"result"`
 }
 
 type ModifyVpcPeeringResult struct {

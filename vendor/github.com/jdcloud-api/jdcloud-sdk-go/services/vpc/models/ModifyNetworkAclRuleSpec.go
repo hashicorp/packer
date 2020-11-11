@@ -16,30 +16,29 @@
 
 package models
 
-
 type ModifyNetworkAclRuleSpec struct {
 
-    /* networkAcl规则ID  */
-    RuleId string `json:"ruleId"`
+	/* networkAcl规则ID  */
+	RuleId string `json:"ruleId"`
 
-    /* 规则限定协议。取值范围：All,TCP,UDP,ICMP (Optional) */
-    Protocol *string `json:"protocol"`
+	/* 规则限定协议。取值范围：All,TCP,UDP,ICMP (Optional) */
+	Protocol *string `json:"protocol"`
 
-    /* 规则限定起始传输层端口, 取值范围:1-65535, 若protocol为传输层协议，默认值为1，若protocol不是传输层协议，设置无效，恒为0。如果规则只限定一个端口号，fromPort和toPort填写同一个值 (Optional) */
-    FromPort *int `json:"fromPort"`
+	/* 规则限定起始传输层端口, 取值范围:1-65535, 若protocol为传输层协议，默认值为1，若protocol不是传输层协议，设置无效，恒为0。如果规则只限定一个端口号，fromPort和toPort填写同一个值 (Optional) */
+	FromPort *int `json:"fromPort"`
 
-    /* 规则限定终止传输层端口, 取值范围:1-65535, 若protocol为传输层协议，默认值为65535，若protocol不是传输层协议，设置无效，恒为0。如果规则只限定一个端口号，fromPort和toPort填写同一个值 (Optional) */
-    ToPort *int `json:"toPort"`
+	/* 规则限定终止传输层端口, 取值范围:1-65535, 若protocol为传输层协议，默认值为65535，若protocol不是传输层协议，设置无效，恒为0。如果规则只限定一个端口号，fromPort和toPort填写同一个值 (Optional) */
+	ToPort *int `json:"toPort"`
 
-    /* 匹配地址前缀 (Optional) */
-    AddressPrefix *string `json:"addressPrefix"`
+	/* 匹配地址前缀 (Optional) */
+	AddressPrefix *string `json:"addressPrefix"`
 
-    /* 访问控制策略：allow:允许，deny：拒绝 (Optional) */
-    RuleAction *string `json:"ruleAction"`
+	/* 访问控制策略：allow:允许，deny：拒绝 (Optional) */
+	RuleAction *string `json:"ruleAction"`
 
-    /* 规则匹配优先级，取值范围为[1,32768]，优先级数字越小优先级越高 (Optional) */
-    Priority *int `json:"priority"`
+	/* 规则匹配优先级，取值范围为[1,32768]，优先级数字越小优先级越高 (Optional) */
+	Priority *int `json:"priority"`
 
-    /* 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
-    Description *string `json:"description"`
+	/* 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
+	Description *string `json:"description"`
 }

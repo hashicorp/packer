@@ -151,7 +151,6 @@ var SubstrFunc = function.New(&function.Spec{
 			return cty.StringVal(""), nil
 		}
 
-
 		sub := in
 		pos := 0
 		var i int

@@ -17,21 +17,20 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type RemoveRouteTableRulesRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* RouteTable ID  */
+	RouteTableId string `json:"routeTableId"`
 
-    /* RouteTable ID  */
-    RouteTableId string `json:"routeTableId"`
-
-    /* 路由表规则Id列表  */
-    RuleIds []string `json:"ruleIds"`
+	/* 路由表规则Id列表  */
+	RuleIds []string `json:"ruleIds"`
 }
 
 /*
@@ -42,21 +41,21 @@ type RemoveRouteTableRulesRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewRemoveRouteTableRulesRequest(
-    regionId string,
-    routeTableId string,
-    ruleIds []string,
+	regionId string,
+	routeTableId string,
+	ruleIds []string,
 ) *RemoveRouteTableRulesRequest {
 
 	return &RemoveRouteTableRulesRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/routeTables/{routeTableId}:removeRouteTableRules",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        RouteTableId: routeTableId,
-        RuleIds: ruleIds,
+		RegionId:     regionId,
+		RouteTableId: routeTableId,
+		RuleIds:      ruleIds,
 	}
 }
 
@@ -66,62 +65,62 @@ func NewRemoveRouteTableRulesRequest(
  * param ruleIds: 路由表规则Id列表 (Required)
  */
 func NewRemoveRouteTableRulesRequestWithAllParams(
-    regionId string,
-    routeTableId string,
-    ruleIds []string,
+	regionId string,
+	routeTableId string,
+	ruleIds []string,
 ) *RemoveRouteTableRulesRequest {
 
-    return &RemoveRouteTableRulesRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/{routeTableId}:removeRouteTableRules",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        RouteTableId: routeTableId,
-        RuleIds: ruleIds,
-    }
+	return &RemoveRouteTableRulesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/{routeTableId}:removeRouteTableRules",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:     regionId,
+		RouteTableId: routeTableId,
+		RuleIds:      ruleIds,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewRemoveRouteTableRulesRequestWithoutParam() *RemoveRouteTableRulesRequest {
 
-    return &RemoveRouteTableRulesRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/{routeTableId}:removeRouteTableRules",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &RemoveRouteTableRulesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/{routeTableId}:removeRouteTableRules",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *RemoveRouteTableRulesRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param routeTableId: RouteTable ID(Required) */
 func (r *RemoveRouteTableRulesRequest) SetRouteTableId(routeTableId string) {
-    r.RouteTableId = routeTableId
+	r.RouteTableId = routeTableId
 }
 
 /* param ruleIds: 路由表规则Id列表(Required) */
 func (r *RemoveRouteTableRulesRequest) SetRuleIds(ruleIds []string) {
-    r.RuleIds = ruleIds
+	r.RuleIds = ruleIds
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r RemoveRouteTableRulesRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type RemoveRouteTableRulesResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result RemoveRouteTableRulesResult `json:"result"`
+	RequestID string                      `json:"requestId"`
+	Error     core.ErrorResponse          `json:"error"`
+	Result    RemoveRouteTableRulesResult `json:"result"`
 }
 
 type RemoveRouteTableRulesResult struct {

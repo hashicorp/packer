@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ReadAccountsRequest struct for ReadAccountsRequest
 type ReadAccountsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

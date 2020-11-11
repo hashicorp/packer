@@ -69,7 +69,6 @@ type FlatConfig struct {
 	CdromType                       *string                                     `mapstructure:"cdrom_type" cty:"cdrom_type" hcl:"cdrom_type"`
 	ISOPaths                        []string                                    `mapstructure:"iso_paths" cty:"iso_paths" hcl:"iso_paths"`
 	RemoveCdrom                     *bool                                       `mapstructure:"remove_cdrom" cty:"remove_cdrom" hcl:"remove_cdrom"`
-	FloppyIMGPath                   *string                                     `mapstructure:"floppy_img_path" cty:"floppy_img_path" hcl:"floppy_img_path"`
 	FloppyFiles                     []string                                    `mapstructure:"floppy_files" cty:"floppy_files" hcl:"floppy_files"`
 	FloppyDirectories               []string                                    `mapstructure:"floppy_dirs" cty:"floppy_dirs" hcl:"floppy_dirs"`
 	FloppyLabel                     *string                                     `mapstructure:"floppy_label" cty:"floppy_label" hcl:"floppy_label"`
@@ -210,7 +209,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"cdrom_type":                     &hcldec.AttrSpec{Name: "cdrom_type", Type: cty.String, Required: false},
 		"iso_paths":                      &hcldec.AttrSpec{Name: "iso_paths", Type: cty.List(cty.String), Required: false},
 		"remove_cdrom":                   &hcldec.AttrSpec{Name: "remove_cdrom", Type: cty.Bool, Required: false},
-		"floppy_img_path":                &hcldec.AttrSpec{Name: "floppy_img_path", Type: cty.String, Required: false},
 		"floppy_files":                   &hcldec.AttrSpec{Name: "floppy_files", Type: cty.List(cty.String), Required: false},
 		"floppy_dirs":                    &hcldec.AttrSpec{Name: "floppy_dirs", Type: cty.List(cty.String), Required: false},
 		"floppy_label":                   &hcldec.AttrSpec{Name: "floppy_label", Type: cty.String, Required: false},

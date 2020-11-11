@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // UpdateServerCertificateResponse struct for UpdateServerCertificateResponse
 type UpdateServerCertificateResponse struct {
-	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
+	ResponseContext   ResponseContext   `json:"ResponseContext,omitempty"`
 	ServerCertificate ServerCertificate `json:"ServerCertificate,omitempty"`
 }

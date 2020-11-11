@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ApplicationStickyCookiePolicy Information about the stickiness policy.
 type ApplicationStickyCookiePolicy struct {
 	// The name of the application cookie used for stickiness.

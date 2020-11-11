@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type DhcpOptionApiService service
 
 // CreateDhcpOptionsOpts Optional parameters for the method 'CreateDhcpOptions'
 type CreateDhcpOptionsOpts struct {
-    CreateDhcpOptionsRequest optional.Interface
+	CreateDhcpOptionsRequest optional.Interface
 }
 
 /*
 CreateDhcpOptions Method for CreateDhcpOptions
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateDhcpOptionsOpts - Optional Parameters:
- * @param "CreateDhcpOptionsRequest" (optional.Interface of CreateDhcpOptionsRequest) - 
+ * @param "CreateDhcpOptionsRequest" (optional.Interface of CreateDhcpOptionsRequest) -
 @return CreateDhcpOptionsResponse
 */
 func (a *DhcpOptionApiService) CreateDhcpOptions(ctx _context.Context, localVarOptionals *CreateDhcpOptionsOpts) (CreateDhcpOptionsResponse, *_nethttp.Response, error) {
@@ -139,14 +139,14 @@ func (a *DhcpOptionApiService) CreateDhcpOptions(ctx _context.Context, localVarO
 
 // DeleteDhcpOptionsOpts Optional parameters for the method 'DeleteDhcpOptions'
 type DeleteDhcpOptionsOpts struct {
-    DeleteDhcpOptionsRequest optional.Interface
+	DeleteDhcpOptionsRequest optional.Interface
 }
 
 /*
 DeleteDhcpOptions Method for DeleteDhcpOptions
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteDhcpOptionsOpts - Optional Parameters:
- * @param "DeleteDhcpOptionsRequest" (optional.Interface of DeleteDhcpOptionsRequest) - 
+ * @param "DeleteDhcpOptionsRequest" (optional.Interface of DeleteDhcpOptionsRequest) -
 @return DeleteDhcpOptionsResponse
 */
 func (a *DhcpOptionApiService) DeleteDhcpOptions(ctx _context.Context, localVarOptionals *DeleteDhcpOptionsOpts) (DeleteDhcpOptionsResponse, *_nethttp.Response, error) {
@@ -250,14 +250,14 @@ func (a *DhcpOptionApiService) DeleteDhcpOptions(ctx _context.Context, localVarO
 
 // ReadDhcpOptionsOpts Optional parameters for the method 'ReadDhcpOptions'
 type ReadDhcpOptionsOpts struct {
-    ReadDhcpOptionsRequest optional.Interface
+	ReadDhcpOptionsRequest optional.Interface
 }
 
 /*
 ReadDhcpOptions Method for ReadDhcpOptions
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadDhcpOptionsOpts - Optional Parameters:
- * @param "ReadDhcpOptionsRequest" (optional.Interface of ReadDhcpOptionsRequest) - 
+ * @param "ReadDhcpOptionsRequest" (optional.Interface of ReadDhcpOptionsRequest) -
 @return ReadDhcpOptionsResponse
 */
 func (a *DhcpOptionApiService) ReadDhcpOptions(ctx _context.Context, localVarOptionals *ReadDhcpOptionsOpts) (ReadDhcpOptionsResponse, *_nethttp.Response, error) {

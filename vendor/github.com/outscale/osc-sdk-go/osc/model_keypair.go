@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // Keypair Information about the keypair.
 type Keypair struct {
 	// If you create a keypair, the SHA-1 digest of the DER encoded private key.<br /> If you import a keypair, the MD5 public key fingerprint as specified in section 4 of RFC 4716.

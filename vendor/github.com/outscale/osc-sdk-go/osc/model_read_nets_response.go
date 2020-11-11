@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadNetsResponse struct for ReadNetsResponse
 type ReadNetsResponse struct {
 	// Information about the described Nets.
-	Nets []Net `json:"Nets,omitempty"`
+	Nets            []Net           `json:"Nets,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

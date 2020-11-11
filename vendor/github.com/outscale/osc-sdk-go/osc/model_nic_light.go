@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // NicLight Information about the network interface card (NIC).
 type NicLight struct {
 	// The account ID of the owner of the NIC.
@@ -16,9 +17,9 @@ type NicLight struct {
 	// The description of the NIC.
 	Description string `json:"Description,omitempty"`
 	// (Net only) If `true`, the source/destination check is enabled. If `false`, it is disabled. This value must be `false` for a NAT VM to perform network address translation (NAT) in a Net.
-	IsSourceDestChecked bool `json:"IsSourceDestChecked,omitempty"`
-	LinkNic LinkNicLight `json:"LinkNic,omitempty"`
-	LinkPublicIp LinkPublicIpLightForVm `json:"LinkPublicIp,omitempty"`
+	IsSourceDestChecked bool                   `json:"IsSourceDestChecked,omitempty"`
+	LinkNic             LinkNicLight           `json:"LinkNic,omitempty"`
+	LinkPublicIp        LinkPublicIpLightForVm `json:"LinkPublicIp,omitempty"`
 	// The Media Access Control (MAC) address of the NIC.
 	MacAddress string `json:"MacAddress,omitempty"`
 	// The ID of the Net for the NIC.

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersNet One or more filters.
 type FiltersNet struct {
 	// The IDs of the DHCP options sets.

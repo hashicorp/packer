@@ -17,19 +17,18 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type DescribeVpcPeeringRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
-
-    /* vpcPeeringId ID  */
-    VpcPeeringId string `json:"vpcPeeringId"`
+	/* vpcPeeringId ID  */
+	VpcPeeringId string `json:"vpcPeeringId"`
 }
 
 /*
@@ -39,19 +38,19 @@ type DescribeVpcPeeringRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeVpcPeeringRequest(
-    regionId string,
-    vpcPeeringId string,
+	regionId string,
+	vpcPeeringId string,
 ) *DescribeVpcPeeringRequest {
 
 	return &DescribeVpcPeeringRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        VpcPeeringId: vpcPeeringId,
+		RegionId:     regionId,
+		VpcPeeringId: vpcPeeringId,
 	}
 }
 
@@ -60,57 +59,57 @@ func NewDescribeVpcPeeringRequest(
  * param vpcPeeringId: vpcPeeringId ID (Required)
  */
 func NewDescribeVpcPeeringRequestWithAllParams(
-    regionId string,
-    vpcPeeringId string,
+	regionId string,
+	vpcPeeringId string,
 ) *DescribeVpcPeeringRequest {
 
-    return &DescribeVpcPeeringRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        VpcPeeringId: vpcPeeringId,
-    }
+	return &DescribeVpcPeeringRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:     regionId,
+		VpcPeeringId: vpcPeeringId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeVpcPeeringRequestWithoutParam() *DescribeVpcPeeringRequest {
 
-    return &DescribeVpcPeeringRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeVpcPeeringRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/vpcPeerings/{vpcPeeringId}",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeVpcPeeringRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param vpcPeeringId: vpcPeeringId ID(Required) */
 func (r *DescribeVpcPeeringRequest) SetVpcPeeringId(vpcPeeringId string) {
-    r.VpcPeeringId = vpcPeeringId
+	r.VpcPeeringId = vpcPeeringId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeVpcPeeringRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeVpcPeeringResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeVpcPeeringResult `json:"result"`
+	RequestID string                   `json:"requestId"`
+	Error     core.ErrorResponse       `json:"error"`
+	Result    DescribeVpcPeeringResult `json:"result"`
 }
 
 type DescribeVpcPeeringResult struct {
-    VpcPeering vpc.VpcPeering `json:"vpcPeering"`
+	VpcPeering vpc.VpcPeering `json:"vpcPeering"`
 }

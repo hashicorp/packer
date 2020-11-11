@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type SecurityGroupApiService service
 
 // CreateSecurityGroupOpts Optional parameters for the method 'CreateSecurityGroup'
 type CreateSecurityGroupOpts struct {
-    CreateSecurityGroupRequest optional.Interface
+	CreateSecurityGroupRequest optional.Interface
 }
 
 /*
 CreateSecurityGroup Method for CreateSecurityGroup
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateSecurityGroupOpts - Optional Parameters:
- * @param "CreateSecurityGroupRequest" (optional.Interface of CreateSecurityGroupRequest) - 
+ * @param "CreateSecurityGroupRequest" (optional.Interface of CreateSecurityGroupRequest) -
 @return CreateSecurityGroupResponse
 */
 func (a *SecurityGroupApiService) CreateSecurityGroup(ctx _context.Context, localVarOptionals *CreateSecurityGroupOpts) (CreateSecurityGroupResponse, *_nethttp.Response, error) {
@@ -169,14 +169,14 @@ func (a *SecurityGroupApiService) CreateSecurityGroup(ctx _context.Context, loca
 
 // DeleteSecurityGroupOpts Optional parameters for the method 'DeleteSecurityGroup'
 type DeleteSecurityGroupOpts struct {
-    DeleteSecurityGroupRequest optional.Interface
+	DeleteSecurityGroupRequest optional.Interface
 }
 
 /*
 DeleteSecurityGroup Method for DeleteSecurityGroup
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteSecurityGroupOpts - Optional Parameters:
- * @param "DeleteSecurityGroupRequest" (optional.Interface of DeleteSecurityGroupRequest) - 
+ * @param "DeleteSecurityGroupRequest" (optional.Interface of DeleteSecurityGroupRequest) -
 @return DeleteSecurityGroupResponse
 */
 func (a *SecurityGroupApiService) DeleteSecurityGroup(ctx _context.Context, localVarOptionals *DeleteSecurityGroupOpts) (DeleteSecurityGroupResponse, *_nethttp.Response, error) {
@@ -310,14 +310,14 @@ func (a *SecurityGroupApiService) DeleteSecurityGroup(ctx _context.Context, loca
 
 // ReadSecurityGroupsOpts Optional parameters for the method 'ReadSecurityGroups'
 type ReadSecurityGroupsOpts struct {
-    ReadSecurityGroupsRequest optional.Interface
+	ReadSecurityGroupsRequest optional.Interface
 }
 
 /*
 ReadSecurityGroups Method for ReadSecurityGroups
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadSecurityGroupsOpts - Optional Parameters:
- * @param "ReadSecurityGroupsRequest" (optional.Interface of ReadSecurityGroupsRequest) - 
+ * @param "ReadSecurityGroupsRequest" (optional.Interface of ReadSecurityGroupsRequest) -
 @return ReadSecurityGroupsResponse
 */
 func (a *SecurityGroupApiService) ReadSecurityGroups(ctx _context.Context, localVarOptionals *ReadSecurityGroupsOpts) (ReadSecurityGroupsResponse, *_nethttp.Response, error) {

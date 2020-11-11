@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteDhcpOptionsRequest struct for DeleteDhcpOptionsRequest
 type DeleteDhcpOptionsRequest struct {
 	// The ID of the DHCP options set you want to delete.

@@ -17,24 +17,23 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type ModifyNetworkAclRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* networkAclId ID  */
+	NetworkAclId string `json:"networkAclId"`
 
-    /* networkAclId ID  */
-    NetworkAclId string `json:"networkAclId"`
+	/* networkAcl名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符 (Optional) */
+	NetworkAclName *string `json:"networkAclName"`
 
-    /* networkAcl名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符 (Optional) */
-    NetworkAclName *string `json:"networkAclName"`
-
-    /* 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
-    Description *string `json:"description"`
+	/* 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
+	Description *string `json:"description"`
 }
 
 /*
@@ -44,19 +43,19 @@ type ModifyNetworkAclRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewModifyNetworkAclRequest(
-    regionId string,
-    networkAclId string,
+	regionId string,
+	networkAclId string,
 ) *ModifyNetworkAclRequest {
 
 	return &ModifyNetworkAclRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
 			Method:  "PATCH",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        NetworkAclId: networkAclId,
+		RegionId:     regionId,
+		NetworkAclId: networkAclId,
 	}
 }
 
@@ -67,69 +66,69 @@ func NewModifyNetworkAclRequest(
  * param description: 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional)
  */
 func NewModifyNetworkAclRequestWithAllParams(
-    regionId string,
-    networkAclId string,
-    networkAclName *string,
-    description *string,
+	regionId string,
+	networkAclId string,
+	networkAclName *string,
+	description *string,
 ) *ModifyNetworkAclRequest {
 
-    return &ModifyNetworkAclRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
-            Method:  "PATCH",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        NetworkAclId: networkAclId,
-        NetworkAclName: networkAclName,
-        Description: description,
-    }
+	return &ModifyNetworkAclRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
+			Method:  "PATCH",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:       regionId,
+		NetworkAclId:   networkAclId,
+		NetworkAclName: networkAclName,
+		Description:    description,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewModifyNetworkAclRequestWithoutParam() *ModifyNetworkAclRequest {
 
-    return &ModifyNetworkAclRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
-            Method:  "PATCH",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &ModifyNetworkAclRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
+			Method:  "PATCH",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *ModifyNetworkAclRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param networkAclId: networkAclId ID(Required) */
 func (r *ModifyNetworkAclRequest) SetNetworkAclId(networkAclId string) {
-    r.NetworkAclId = networkAclId
+	r.NetworkAclId = networkAclId
 }
 
 /* param networkAclName: networkAcl名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符(Optional) */
 func (r *ModifyNetworkAclRequest) SetNetworkAclName(networkAclName string) {
-    r.NetworkAclName = &networkAclName
+	r.NetworkAclName = &networkAclName
 }
 
 /* param description: 描述,允许输入UTF-8编码下的全部字符，不超过256字符(Optional) */
 func (r *ModifyNetworkAclRequest) SetDescription(description string) {
-    r.Description = &description
+	r.Description = &description
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ModifyNetworkAclRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type ModifyNetworkAclResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result ModifyNetworkAclResult `json:"result"`
+	RequestID string                 `json:"requestId"`
+	Error     core.ErrorResponse     `json:"error"`
+	Result    ModifyNetworkAclResult `json:"result"`
 }
 
 type ModifyNetworkAclResult struct {

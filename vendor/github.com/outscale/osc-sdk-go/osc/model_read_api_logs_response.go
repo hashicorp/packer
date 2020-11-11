@@ -9,11 +9,12 @@
  */
 
 package osc
+
 // ReadApiLogsResponse struct for ReadApiLogsResponse
 type ReadApiLogsResponse struct {
 	// Information displayed in one or more API logs.
 	Logs []Log `json:"Logs,omitempty"`
 	// The token to request the next page of results.
-	NextPageToken string `json:"NextPageToken,omitempty"`
+	NextPageToken   string          `json:"NextPageToken,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

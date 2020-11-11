@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ProductType Information about the product type.
 type ProductType struct {
 	// The description of the product type.

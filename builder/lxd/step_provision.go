@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -25,7 +25,7 @@ func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multi
 	}
 
 	// Loads hook data from builder's state, if it has been set.
-	hookData := common.PopulateProvisionHookData(state)
+	hookData := commonsteps.PopulateProvisionHookData(state)
 
 	// Update state generated_data with complete hookData
 	// to make them accessible by post-processors

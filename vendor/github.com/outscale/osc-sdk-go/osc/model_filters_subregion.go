@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersSubregion One or more filters.
 type FiltersSubregion struct {
 	// The names of the Subregions.

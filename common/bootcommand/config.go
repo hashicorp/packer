@@ -10,6 +10,15 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
+// PackerKeyEnv is used to specify the key interval (delay) between keystrokes
+// sent to the VM, typically in boot commands. This is to prevent host CPU
+// utilization from causing key presses to be skipped or repeated incorrectly.
+const PackerKeyEnv = "PACKER_KEY_INTERVAL"
+
+// PackerKeyDefault 100ms is appropriate for shared build infrastructure while a
+// shorter delay (e.g. 10ms) can be used on a workstation. See PackerKeyEnv.
+const PackerKeyDefault = 100 * time.Millisecond
+
 // The boot configuration is very important: `boot_command` specifies the keys
 // to type when the virtual machine is first booted in order to start the OS
 // installer. This command is typed after boot_wait, which gives the virtual

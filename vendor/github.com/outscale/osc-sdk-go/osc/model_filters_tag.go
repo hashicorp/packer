@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersTag One or more filters.
 type FiltersTag struct {
 	// The keys of the tags that are assigned to the resources. You can use this filter alongside the `Values` filter. In that case, you filter the resources corresponding to each tag, regardless of the other filter.

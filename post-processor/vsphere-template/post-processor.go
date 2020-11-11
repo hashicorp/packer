@@ -10,17 +10,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	vsphere "github.com/hashicorp/packer/builder/vsphere/common"
-	vspherepost "github.com/hashicorp/packer/post-processor/vsphere"
-
-	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/post-processor/artifice"
+	vspherepost "github.com/hashicorp/packer/post-processor/vsphere"
 	"github.com/vmware/govmomi"
 )
 
@@ -144,7 +144,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		NewStepCreateSnapshot(artifact, p),
 		NewStepMarkAsTemplate(artifact, p),
 	}
-	runner := common.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
+	runner := commonsteps.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
 	runner.Run(ctx, state)
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, false, false, rawErr.(error)

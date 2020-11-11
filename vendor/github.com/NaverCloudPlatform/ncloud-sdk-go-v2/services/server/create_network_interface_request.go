@@ -12,23 +12,23 @@ package server
 type CreateNetworkInterfaceRequest struct {
 
 	// Private Subnet인스턴스번호
-PrivateSubnetInstanceNo *string `json:"privateSubnetInstanceNo"`
+	PrivateSubnetInstanceNo *string `json:"privateSubnetInstanceNo"`
 
 	// Network Interface이름
-NetworkInterfaceName *string `json:"networkInterfaceName"`
+	NetworkInterfaceName *string `json:"networkInterfaceName"`
 
 	// Network Interface IP
-NetworkInterfaceIp *string `json:"networkInterfaceIp"`
+	NetworkInterfaceIp *string `json:"networkInterfaceIp"`
 
 	// Network Interface설명
-NetworkInterfaceDescription *string `json:"networkInterfaceDescription,omitempty"`
+	NetworkInterfaceDescription *string `json:"networkInterfaceDescription,omitempty"`
 
 	// 리전번호
-RegionNo *string `json:"regionNo,omitempty"`
+	RegionNo *string `json:"regionNo,omitempty"`
 
 	// ZONE번호
-ZoneNo *string `json:"zoneNo,omitempty"`
+	ZoneNo *string `json:"zoneNo,omitempty"`
 
 	// 서버인스턴스번호
-ServerInstanceNo *string `json:"serverInstanceNo,omitempty"`
+	ServerInstanceNo *string `json:"serverInstanceNo,omitempty"`
 }

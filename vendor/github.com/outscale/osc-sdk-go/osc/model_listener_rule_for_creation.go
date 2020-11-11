@@ -9,11 +9,12 @@
  */
 
 package osc
+
 // ListenerRuleForCreation Information about the listener rule.
 type ListenerRuleForCreation struct {
 	// The type of action for the rule (always `forward`).
 	Action string `json:"Action,omitempty"`
-	// A host-name pattern for the rule, with a maximum length of 128 characters. This host-name pattern supports maximum three wildcards, and must not contain any special characters except [-.?]. 
+	// A host-name pattern for the rule, with a maximum length of 128 characters. This host-name pattern supports maximum three wildcards, and must not contain any special characters except [-.?].
 	HostNamePattern string `json:"HostNamePattern,omitempty"`
 	// The ID of the listener.
 	ListenerRuleId string `json:"ListenerRuleId,omitempty"`

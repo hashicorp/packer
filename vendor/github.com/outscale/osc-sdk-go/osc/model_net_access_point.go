@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // NetAccessPoint Information about the Net access point.
 type NetAccessPoint struct {
 	// The ID of the Net access point.

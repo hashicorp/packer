@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // RegisterVmsInLoadBalancerRequest struct for RegisterVmsInLoadBalancerRequest
 type RegisterVmsInLoadBalancerRequest struct {
 	// One or more IDs of back-end VMs.<br /> Specifying the same ID several times has no effect as each back-end VM has equal weight.

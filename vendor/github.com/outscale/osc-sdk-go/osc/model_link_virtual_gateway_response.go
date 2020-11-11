@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // LinkVirtualGatewayResponse struct for LinkVirtualGatewayResponse
 type LinkVirtualGatewayResponse struct {
 	NetToVirtualGatewayLink NetToVirtualGatewayLink `json:"NetToVirtualGatewayLink,omitempty"`
-	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
+	ResponseContext         ResponseContext         `json:"ResponseContext,omitempty"`
 }

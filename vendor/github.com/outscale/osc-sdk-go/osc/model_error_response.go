@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ErrorResponse struct for ErrorResponse
 type ErrorResponse struct {
 	// One or more errors.
-	Errors []Errors `json:"Errors,omitempty"`
+	Errors          []Errors        `json:"Errors,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

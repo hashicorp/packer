@@ -10,14 +10,13 @@
 package server
 
 type GetRaidListResponse struct {
+	RequestId *string `json:"requestId,omitempty"`
 
-RequestId *string `json:"requestId,omitempty"`
+	ReturnCode *string `json:"returnCode,omitempty"`
 
-ReturnCode *string `json:"returnCode,omitempty"`
+	ReturnMessage *string `json:"returnMessage,omitempty"`
 
-ReturnMessage *string `json:"returnMessage,omitempty"`
+	TotalRows *int32 `json:"totalRows,omitempty"`
 
-TotalRows *int32 `json:"totalRows,omitempty"`
-
-RaidList []*Raid `json:"raidList,omitempty"`
+	RaidList []*Raid `json:"raidList,omitempty"`
 }

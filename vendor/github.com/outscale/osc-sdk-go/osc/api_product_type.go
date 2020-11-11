@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type ProductTypeApiService service
 
 // ReadProductTypesOpts Optional parameters for the method 'ReadProductTypes'
 type ReadProductTypesOpts struct {
-    ReadProductTypesRequest optional.Interface
+	ReadProductTypesRequest optional.Interface
 }
 
 /*
 ReadProductTypes Method for ReadProductTypes
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadProductTypesOpts - Optional Parameters:
- * @param "ReadProductTypesRequest" (optional.Interface of ReadProductTypesRequest) - 
+ * @param "ReadProductTypesRequest" (optional.Interface of ReadProductTypesRequest) -
 @return ReadProductTypesResponse
 */
 func (a *ProductTypeApiService) ReadProductTypes(ctx _context.Context, localVarOptionals *ReadProductTypesOpts) (ReadProductTypesResponse, *_nethttp.Response, error) {

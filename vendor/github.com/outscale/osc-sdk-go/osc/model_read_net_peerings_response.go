@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadNetPeeringsResponse struct for ReadNetPeeringsResponse
 type ReadNetPeeringsResponse struct {
 	// Information about one or more Net peering connections.
-	NetPeerings []NetPeering `json:"NetPeerings,omitempty"`
+	NetPeerings     []NetPeering    `json:"NetPeerings,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

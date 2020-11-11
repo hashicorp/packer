@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type VolumeApiService service
 
 // CreateVolumeOpts Optional parameters for the method 'CreateVolume'
 type CreateVolumeOpts struct {
-    CreateVolumeRequest optional.Interface
+	CreateVolumeRequest optional.Interface
 }
 
 /*
 CreateVolume Method for CreateVolume
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateVolumeOpts - Optional Parameters:
- * @param "CreateVolumeRequest" (optional.Interface of CreateVolumeRequest) - 
+ * @param "CreateVolumeRequest" (optional.Interface of CreateVolumeRequest) -
 @return CreateVolumeResponse
 */
 func (a *VolumeApiService) CreateVolume(ctx _context.Context, localVarOptionals *CreateVolumeOpts) (CreateVolumeResponse, *_nethttp.Response, error) {
@@ -169,14 +169,14 @@ func (a *VolumeApiService) CreateVolume(ctx _context.Context, localVarOptionals 
 
 // DeleteVolumeOpts Optional parameters for the method 'DeleteVolume'
 type DeleteVolumeOpts struct {
-    DeleteVolumeRequest optional.Interface
+	DeleteVolumeRequest optional.Interface
 }
 
 /*
 DeleteVolume Method for DeleteVolume
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteVolumeOpts - Optional Parameters:
- * @param "DeleteVolumeRequest" (optional.Interface of DeleteVolumeRequest) - 
+ * @param "DeleteVolumeRequest" (optional.Interface of DeleteVolumeRequest) -
 @return DeleteVolumeResponse
 */
 func (a *VolumeApiService) DeleteVolume(ctx _context.Context, localVarOptionals *DeleteVolumeOpts) (DeleteVolumeResponse, *_nethttp.Response, error) {
@@ -310,14 +310,14 @@ func (a *VolumeApiService) DeleteVolume(ctx _context.Context, localVarOptionals 
 
 // LinkVolumeOpts Optional parameters for the method 'LinkVolume'
 type LinkVolumeOpts struct {
-    LinkVolumeRequest optional.Interface
+	LinkVolumeRequest optional.Interface
 }
 
 /*
 LinkVolume Method for LinkVolume
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *LinkVolumeOpts - Optional Parameters:
- * @param "LinkVolumeRequest" (optional.Interface of LinkVolumeRequest) - 
+ * @param "LinkVolumeRequest" (optional.Interface of LinkVolumeRequest) -
 @return LinkVolumeResponse
 */
 func (a *VolumeApiService) LinkVolume(ctx _context.Context, localVarOptionals *LinkVolumeOpts) (LinkVolumeResponse, *_nethttp.Response, error) {
@@ -451,14 +451,14 @@ func (a *VolumeApiService) LinkVolume(ctx _context.Context, localVarOptionals *L
 
 // ReadVolumesOpts Optional parameters for the method 'ReadVolumes'
 type ReadVolumesOpts struct {
-    ReadVolumesRequest optional.Interface
+	ReadVolumesRequest optional.Interface
 }
 
 /*
 ReadVolumes Method for ReadVolumes
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadVolumesOpts - Optional Parameters:
- * @param "ReadVolumesRequest" (optional.Interface of ReadVolumesRequest) - 
+ * @param "ReadVolumesRequest" (optional.Interface of ReadVolumesRequest) -
 @return ReadVolumesResponse
 */
 func (a *VolumeApiService) ReadVolumes(ctx _context.Context, localVarOptionals *ReadVolumesOpts) (ReadVolumesResponse, *_nethttp.Response, error) {
@@ -592,14 +592,14 @@ func (a *VolumeApiService) ReadVolumes(ctx _context.Context, localVarOptionals *
 
 // UnlinkVolumeOpts Optional parameters for the method 'UnlinkVolume'
 type UnlinkVolumeOpts struct {
-    UnlinkVolumeRequest optional.Interface
+	UnlinkVolumeRequest optional.Interface
 }
 
 /*
 UnlinkVolume Method for UnlinkVolume
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *UnlinkVolumeOpts - Optional Parameters:
- * @param "UnlinkVolumeRequest" (optional.Interface of UnlinkVolumeRequest) - 
+ * @param "UnlinkVolumeRequest" (optional.Interface of UnlinkVolumeRequest) -
 @return UnlinkVolumeResponse
 */
 func (a *VolumeApiService) UnlinkVolume(ctx _context.Context, localVarOptionals *UnlinkVolumeOpts) (UnlinkVolumeResponse, *_nethttp.Response, error) {

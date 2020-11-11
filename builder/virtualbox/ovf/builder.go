@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -50,22 +50,22 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// Build the steps.
 	steps := []multistep.Step{
-		&common.StepOutputDir{
+		&commonsteps.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
 		},
 		new(vboxcommon.StepSuppressMessages),
-		&common.StepCreateFloppy{
+		&commonsteps.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
-		&common.StepCreateCD{
+		&commonsteps.StepCreateCD{
 			Files: b.config.CDConfig.CDFiles,
 			Label: b.config.CDConfig.CDLabel,
 		},
 		new(vboxcommon.StepHTTPIPDiscover),
-		&common.StepHTTPServer{
+		&commonsteps.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
@@ -82,7 +82,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			GuestAdditionsSHA256: b.config.GuestAdditionsSHA256,
 			Ctx:                  b.config.ctx,
 		},
-		&common.StepDownload{
+		&commonsteps.StepDownload{
 			Checksum:    b.config.Checksum,
 			Description: "OVF/OVA",
 			Extension:   "ova",
@@ -143,8 +143,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			GuestAdditionsPath: b.config.GuestAdditionsPath,
 			Ctx:                b.config.ctx,
 		},
-		new(common.StepProvision),
-		&common.StepCleanupTempKeys{
+		new(commonsteps.StepProvision),
+		&commonsteps.StepCleanupTempKeys{
 			Comm: &b.config.CommConfig.Comm,
 		},
 		&vboxcommon.StepShutdown{
@@ -170,7 +170,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Run the steps.
-	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
+	b.runner = commonsteps.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(ctx, state)
 
 	// Report any errors.

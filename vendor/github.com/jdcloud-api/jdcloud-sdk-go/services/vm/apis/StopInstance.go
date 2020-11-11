@@ -17,18 +17,17 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type StopInstanceRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
-
-    /* 云主机ID  */
-    InstanceId string `json:"instanceId"`
+	/* 云主机ID  */
+	InstanceId string `json:"instanceId"`
 }
 
 /*
@@ -38,19 +37,19 @@ type StopInstanceRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewStopInstanceRequest(
-    regionId string,
-    instanceId string,
+	regionId string,
+	instanceId string,
 ) *StopInstanceRequest {
 
 	return &StopInstanceRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:stopInstance",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        InstanceId: instanceId,
+		RegionId:   regionId,
+		InstanceId: instanceId,
 	}
 }
 
@@ -59,55 +58,55 @@ func NewStopInstanceRequest(
  * param instanceId: 云主机ID (Required)
  */
 func NewStopInstanceRequestWithAllParams(
-    regionId string,
-    instanceId string,
+	regionId string,
+	instanceId string,
 ) *StopInstanceRequest {
 
-    return &StopInstanceRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}:stopInstance",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        InstanceId: instanceId,
-    }
+	return &StopInstanceRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}:stopInstance",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:   regionId,
+		InstanceId: instanceId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewStopInstanceRequestWithoutParam() *StopInstanceRequest {
 
-    return &StopInstanceRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}:stopInstance",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &StopInstanceRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}:stopInstance",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *StopInstanceRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *StopInstanceRequest) SetInstanceId(instanceId string) {
-    r.InstanceId = instanceId
+	r.InstanceId = instanceId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r StopInstanceRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type StopInstanceResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result StopInstanceResult `json:"result"`
+	RequestID string             `json:"requestId"`
+	Error     core.ErrorResponse `json:"error"`
+	Result    StopInstanceResult `json:"result"`
 }
 
 type StopInstanceResult struct {

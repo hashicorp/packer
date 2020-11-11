@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ServerCertificate Information about the server certificate.
 type ServerCertificate struct {
 	// The date at which the server certificate expires.

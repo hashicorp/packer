@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type LoadBalancerApiService service
 
 // CreateLoadBalancerOpts Optional parameters for the method 'CreateLoadBalancer'
 type CreateLoadBalancerOpts struct {
-    CreateLoadBalancerRequest optional.Interface
+	CreateLoadBalancerRequest optional.Interface
 }
 
 /*
 CreateLoadBalancer Method for CreateLoadBalancer
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateLoadBalancerOpts - Optional Parameters:
- * @param "CreateLoadBalancerRequest" (optional.Interface of CreateLoadBalancerRequest) - 
+ * @param "CreateLoadBalancerRequest" (optional.Interface of CreateLoadBalancerRequest) -
 @return CreateLoadBalancerResponse
 */
 func (a *LoadBalancerApiService) CreateLoadBalancer(ctx _context.Context, localVarOptionals *CreateLoadBalancerOpts) (CreateLoadBalancerResponse, *_nethttp.Response, error) {
@@ -139,14 +139,14 @@ func (a *LoadBalancerApiService) CreateLoadBalancer(ctx _context.Context, localV
 
 // CreateLoadBalancerTagsOpts Optional parameters for the method 'CreateLoadBalancerTags'
 type CreateLoadBalancerTagsOpts struct {
-    CreateLoadBalancerTagsRequest optional.Interface
+	CreateLoadBalancerTagsRequest optional.Interface
 }
 
 /*
 CreateLoadBalancerTags Method for CreateLoadBalancerTags
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateLoadBalancerTagsOpts - Optional Parameters:
- * @param "CreateLoadBalancerTagsRequest" (optional.Interface of CreateLoadBalancerTagsRequest) - 
+ * @param "CreateLoadBalancerTagsRequest" (optional.Interface of CreateLoadBalancerTagsRequest) -
 @return CreateLoadBalancerTagsResponse
 */
 func (a *LoadBalancerApiService) CreateLoadBalancerTags(ctx _context.Context, localVarOptionals *CreateLoadBalancerTagsOpts) (CreateLoadBalancerTagsResponse, *_nethttp.Response, error) {
@@ -250,14 +250,14 @@ func (a *LoadBalancerApiService) CreateLoadBalancerTags(ctx _context.Context, lo
 
 // DeleteLoadBalancerOpts Optional parameters for the method 'DeleteLoadBalancer'
 type DeleteLoadBalancerOpts struct {
-    DeleteLoadBalancerRequest optional.Interface
+	DeleteLoadBalancerRequest optional.Interface
 }
 
 /*
 DeleteLoadBalancer Method for DeleteLoadBalancer
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteLoadBalancerOpts - Optional Parameters:
- * @param "DeleteLoadBalancerRequest" (optional.Interface of DeleteLoadBalancerRequest) - 
+ * @param "DeleteLoadBalancerRequest" (optional.Interface of DeleteLoadBalancerRequest) -
 @return DeleteLoadBalancerResponse
 */
 func (a *LoadBalancerApiService) DeleteLoadBalancer(ctx _context.Context, localVarOptionals *DeleteLoadBalancerOpts) (DeleteLoadBalancerResponse, *_nethttp.Response, error) {
@@ -361,14 +361,14 @@ func (a *LoadBalancerApiService) DeleteLoadBalancer(ctx _context.Context, localV
 
 // DeleteLoadBalancerTagsOpts Optional parameters for the method 'DeleteLoadBalancerTags'
 type DeleteLoadBalancerTagsOpts struct {
-    DeleteLoadBalancerTagsRequest optional.Interface
+	DeleteLoadBalancerTagsRequest optional.Interface
 }
 
 /*
 DeleteLoadBalancerTags Method for DeleteLoadBalancerTags
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteLoadBalancerTagsOpts - Optional Parameters:
- * @param "DeleteLoadBalancerTagsRequest" (optional.Interface of DeleteLoadBalancerTagsRequest) - 
+ * @param "DeleteLoadBalancerTagsRequest" (optional.Interface of DeleteLoadBalancerTagsRequest) -
 @return DeleteLoadBalancerTagsResponse
 */
 func (a *LoadBalancerApiService) DeleteLoadBalancerTags(ctx _context.Context, localVarOptionals *DeleteLoadBalancerTagsOpts) (DeleteLoadBalancerTagsResponse, *_nethttp.Response, error) {
@@ -472,14 +472,14 @@ func (a *LoadBalancerApiService) DeleteLoadBalancerTags(ctx _context.Context, lo
 
 // DeregisterVmsInLoadBalancerOpts Optional parameters for the method 'DeregisterVmsInLoadBalancer'
 type DeregisterVmsInLoadBalancerOpts struct {
-    DeregisterVmsInLoadBalancerRequest optional.Interface
+	DeregisterVmsInLoadBalancerRequest optional.Interface
 }
 
 /*
 DeregisterVmsInLoadBalancer Method for DeregisterVmsInLoadBalancer
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeregisterVmsInLoadBalancerOpts - Optional Parameters:
- * @param "DeregisterVmsInLoadBalancerRequest" (optional.Interface of DeregisterVmsInLoadBalancerRequest) - 
+ * @param "DeregisterVmsInLoadBalancerRequest" (optional.Interface of DeregisterVmsInLoadBalancerRequest) -
 @return DeregisterVmsInLoadBalancerResponse
 */
 func (a *LoadBalancerApiService) DeregisterVmsInLoadBalancer(ctx _context.Context, localVarOptionals *DeregisterVmsInLoadBalancerOpts) (DeregisterVmsInLoadBalancerResponse, *_nethttp.Response, error) {
@@ -583,14 +583,14 @@ func (a *LoadBalancerApiService) DeregisterVmsInLoadBalancer(ctx _context.Contex
 
 // ReadLoadBalancerTagsOpts Optional parameters for the method 'ReadLoadBalancerTags'
 type ReadLoadBalancerTagsOpts struct {
-    ReadLoadBalancerTagsRequest optional.Interface
+	ReadLoadBalancerTagsRequest optional.Interface
 }
 
 /*
 ReadLoadBalancerTags Method for ReadLoadBalancerTags
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadLoadBalancerTagsOpts - Optional Parameters:
- * @param "ReadLoadBalancerTagsRequest" (optional.Interface of ReadLoadBalancerTagsRequest) - 
+ * @param "ReadLoadBalancerTagsRequest" (optional.Interface of ReadLoadBalancerTagsRequest) -
 @return ReadLoadBalancerTagsResponse
 */
 func (a *LoadBalancerApiService) ReadLoadBalancerTags(ctx _context.Context, localVarOptionals *ReadLoadBalancerTagsOpts) (ReadLoadBalancerTagsResponse, *_nethttp.Response, error) {
@@ -694,14 +694,14 @@ func (a *LoadBalancerApiService) ReadLoadBalancerTags(ctx _context.Context, loca
 
 // ReadLoadBalancersOpts Optional parameters for the method 'ReadLoadBalancers'
 type ReadLoadBalancersOpts struct {
-    ReadLoadBalancersRequest optional.Interface
+	ReadLoadBalancersRequest optional.Interface
 }
 
 /*
 ReadLoadBalancers Method for ReadLoadBalancers
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadLoadBalancersOpts - Optional Parameters:
- * @param "ReadLoadBalancersRequest" (optional.Interface of ReadLoadBalancersRequest) - 
+ * @param "ReadLoadBalancersRequest" (optional.Interface of ReadLoadBalancersRequest) -
 @return ReadLoadBalancersResponse
 */
 func (a *LoadBalancerApiService) ReadLoadBalancers(ctx _context.Context, localVarOptionals *ReadLoadBalancersOpts) (ReadLoadBalancersResponse, *_nethttp.Response, error) {
@@ -805,14 +805,14 @@ func (a *LoadBalancerApiService) ReadLoadBalancers(ctx _context.Context, localVa
 
 // ReadVmsHealthOpts Optional parameters for the method 'ReadVmsHealth'
 type ReadVmsHealthOpts struct {
-    ReadVmsHealthRequest optional.Interface
+	ReadVmsHealthRequest optional.Interface
 }
 
 /*
 ReadVmsHealth Method for ReadVmsHealth
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadVmsHealthOpts - Optional Parameters:
- * @param "ReadVmsHealthRequest" (optional.Interface of ReadVmsHealthRequest) - 
+ * @param "ReadVmsHealthRequest" (optional.Interface of ReadVmsHealthRequest) -
 @return ReadVmsHealthResponse
 */
 func (a *LoadBalancerApiService) ReadVmsHealth(ctx _context.Context, localVarOptionals *ReadVmsHealthOpts) (ReadVmsHealthResponse, *_nethttp.Response, error) {
@@ -916,14 +916,14 @@ func (a *LoadBalancerApiService) ReadVmsHealth(ctx _context.Context, localVarOpt
 
 // RegisterVmsInLoadBalancerOpts Optional parameters for the method 'RegisterVmsInLoadBalancer'
 type RegisterVmsInLoadBalancerOpts struct {
-    RegisterVmsInLoadBalancerRequest optional.Interface
+	RegisterVmsInLoadBalancerRequest optional.Interface
 }
 
 /*
 RegisterVmsInLoadBalancer Method for RegisterVmsInLoadBalancer
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *RegisterVmsInLoadBalancerOpts - Optional Parameters:
- * @param "RegisterVmsInLoadBalancerRequest" (optional.Interface of RegisterVmsInLoadBalancerRequest) - 
+ * @param "RegisterVmsInLoadBalancerRequest" (optional.Interface of RegisterVmsInLoadBalancerRequest) -
 @return RegisterVmsInLoadBalancerResponse
 */
 func (a *LoadBalancerApiService) RegisterVmsInLoadBalancer(ctx _context.Context, localVarOptionals *RegisterVmsInLoadBalancerOpts) (RegisterVmsInLoadBalancerResponse, *_nethttp.Response, error) {
@@ -1027,14 +1027,14 @@ func (a *LoadBalancerApiService) RegisterVmsInLoadBalancer(ctx _context.Context,
 
 // UpdateLoadBalancerOpts Optional parameters for the method 'UpdateLoadBalancer'
 type UpdateLoadBalancerOpts struct {
-    UpdateLoadBalancerRequest optional.Interface
+	UpdateLoadBalancerRequest optional.Interface
 }
 
 /*
 UpdateLoadBalancer Method for UpdateLoadBalancer
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *UpdateLoadBalancerOpts - Optional Parameters:
- * @param "UpdateLoadBalancerRequest" (optional.Interface of UpdateLoadBalancerRequest) - 
+ * @param "UpdateLoadBalancerRequest" (optional.Interface of UpdateLoadBalancerRequest) -
 @return UpdateLoadBalancerResponse
 */
 func (a *LoadBalancerApiService) UpdateLoadBalancer(ctx _context.Context, localVarOptionals *UpdateLoadBalancerOpts) (UpdateLoadBalancerResponse, *_nethttp.Response, error) {

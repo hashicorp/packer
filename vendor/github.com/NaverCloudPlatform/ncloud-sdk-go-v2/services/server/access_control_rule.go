@@ -12,23 +12,23 @@ package server
 type AccessControlRule struct {
 
 	// 접근제어RULE설정번호
-AccessControlRuleConfigurationNo *string `json:"accessControlRuleConfigurationNo,omitempty"`
+	AccessControlRuleConfigurationNo *string `json:"accessControlRuleConfigurationNo,omitempty"`
 
 	// 프로토콜구분
-ProtocolType *CommonCode `json:"protocolType,omitempty"`
+	ProtocolType *CommonCode `json:"protocolType,omitempty"`
 
 	// 소스IP
-SourceIp *string `json:"sourceIp,omitempty"`
+	SourceIp *string `json:"sourceIp,omitempty"`
 
 	// 소스접근제어그룹번호
-SourceAccessControlRuleConfigurationNo *string `json:"sourceAccessControlRuleConfigurationNo,omitempty"`
+	SourceAccessControlRuleConfigurationNo *string `json:"sourceAccessControlRuleConfigurationNo,omitempty"`
 
 	// 소스접근제어그룹이름
-SourceAccessControlRuleName *string `json:"sourceAccessControlRuleName,omitempty"`
+	SourceAccessControlRuleName *string `json:"sourceAccessControlRuleName,omitempty"`
 
 	// 목적지포트
-DestinationPort *string `json:"destinationPort,omitempty"`
+	DestinationPort *string `json:"destinationPort,omitempty"`
 
 	// 접근제어RULE설명
-AccessControlRuleDescription *string `json:"accessControlRuleDescription,omitempty"`
+	AccessControlRuleDescription *string `json:"accessControlRuleDescription,omitempty"`
 }

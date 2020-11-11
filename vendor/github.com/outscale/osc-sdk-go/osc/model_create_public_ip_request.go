@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreatePublicIpRequest struct for CreatePublicIpRequest
 type CreatePublicIpRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

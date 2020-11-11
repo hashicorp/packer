@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // RejectNetPeeringResponse struct for RejectNetPeeringResponse
 type RejectNetPeeringResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

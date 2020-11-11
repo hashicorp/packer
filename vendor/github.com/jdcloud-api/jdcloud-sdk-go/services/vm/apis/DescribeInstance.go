@@ -17,19 +17,18 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
 )
 
 type DescribeInstanceRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
-
-    /* 云主机ID  */
-    InstanceId string `json:"instanceId"`
+	/* 云主机ID  */
+	InstanceId string `json:"instanceId"`
 }
 
 /*
@@ -39,19 +38,19 @@ type DescribeInstanceRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeInstanceRequest(
-    regionId string,
-    instanceId string,
+	regionId string,
+	instanceId string,
 ) *DescribeInstanceRequest {
 
 	return &DescribeInstanceRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        InstanceId: instanceId,
+		RegionId:   regionId,
+		InstanceId: instanceId,
 	}
 }
 
@@ -60,57 +59,57 @@ func NewDescribeInstanceRequest(
  * param instanceId: 云主机ID (Required)
  */
 func NewDescribeInstanceRequestWithAllParams(
-    regionId string,
-    instanceId string,
+	regionId string,
+	instanceId string,
 ) *DescribeInstanceRequest {
 
-    return &DescribeInstanceRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        InstanceId: instanceId,
-    }
+	return &DescribeInstanceRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:   regionId,
+		InstanceId: instanceId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeInstanceRequestWithoutParam() *DescribeInstanceRequest {
 
-    return &DescribeInstanceRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeInstanceRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DescribeInstanceRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *DescribeInstanceRequest) SetInstanceId(instanceId string) {
-    r.InstanceId = instanceId
+	r.InstanceId = instanceId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeInstanceRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeInstanceResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeInstanceResult `json:"result"`
+	RequestID string                 `json:"requestId"`
+	Error     core.ErrorResponse     `json:"error"`
+	Result    DescribeInstanceResult `json:"result"`
 }
 
 type DescribeInstanceResult struct {
-    Instance vm.Instance `json:"instance"`
+	Instance vm.Instance `json:"instance"`
 }

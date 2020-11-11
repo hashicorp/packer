@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/common/guestexec"
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/common/shell"
@@ -407,15 +407,15 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 
 	// expose ip address variables
 	httpAddr := p.generatedData["PackerHTTPAddr"]
-	if httpAddr != nil && httpAddr != common.HttpAddrNotImplemented {
+	if httpAddr != nil && httpAddr != commonsteps.HttpAddrNotImplemented {
 		envVars["PACKER_HTTP_ADDR"] = httpAddr.(string)
 	}
 	httpIP := p.generatedData["PackerHTTPIP"]
-	if httpIP != nil && httpIP != common.HttpIPNotImplemented {
+	if httpIP != nil && httpIP != commonsteps.HttpIPNotImplemented {
 		envVars["PACKER_HTTP_IP"] = httpIP.(string)
 	}
 	httpPort := p.generatedData["PackerHTTPPort"]
-	if httpPort != nil && httpPort != common.HttpPortNotImplemented {
+	if httpPort != nil && httpPort != commonsteps.HttpPortNotImplemented {
 		envVars["PACKER_HTTP_PORT"] = httpPort.(string)
 	}
 

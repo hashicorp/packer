@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // BackendVmHealth Information about the health of a back-end VM.
 type BackendVmHealth struct {
 	// The description of the state of the back-end VM.

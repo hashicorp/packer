@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateVirtualGatewayRequest struct for CreateVirtualGatewayRequest
 type CreateVirtualGatewayRequest struct {
 	// The type of VPN connection supported by the virtual gateway (only `ipsec.1` is supported).

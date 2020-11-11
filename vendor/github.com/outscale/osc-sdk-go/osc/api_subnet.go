@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type SubnetApiService service
 
 // CreateSubnetOpts Optional parameters for the method 'CreateSubnet'
 type CreateSubnetOpts struct {
-    CreateSubnetRequest optional.Interface
+	CreateSubnetRequest optional.Interface
 }
 
 /*
 CreateSubnet Method for CreateSubnet
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateSubnetOpts - Optional Parameters:
- * @param "CreateSubnetRequest" (optional.Interface of CreateSubnetRequest) - 
+ * @param "CreateSubnetRequest" (optional.Interface of CreateSubnetRequest) -
 @return CreateSubnetResponse
 */
 func (a *SubnetApiService) CreateSubnet(ctx _context.Context, localVarOptionals *CreateSubnetOpts) (CreateSubnetResponse, *_nethttp.Response, error) {
@@ -179,14 +179,14 @@ func (a *SubnetApiService) CreateSubnet(ctx _context.Context, localVarOptionals 
 
 // DeleteSubnetOpts Optional parameters for the method 'DeleteSubnet'
 type DeleteSubnetOpts struct {
-    DeleteSubnetRequest optional.Interface
+	DeleteSubnetRequest optional.Interface
 }
 
 /*
 DeleteSubnet Method for DeleteSubnet
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteSubnetOpts - Optional Parameters:
- * @param "DeleteSubnetRequest" (optional.Interface of DeleteSubnetRequest) - 
+ * @param "DeleteSubnetRequest" (optional.Interface of DeleteSubnetRequest) -
 @return DeleteSubnetResponse
 */
 func (a *SubnetApiService) DeleteSubnet(ctx _context.Context, localVarOptionals *DeleteSubnetOpts) (DeleteSubnetResponse, *_nethttp.Response, error) {
@@ -320,14 +320,14 @@ func (a *SubnetApiService) DeleteSubnet(ctx _context.Context, localVarOptionals 
 
 // ReadSubnetsOpts Optional parameters for the method 'ReadSubnets'
 type ReadSubnetsOpts struct {
-    ReadSubnetsRequest optional.Interface
+	ReadSubnetsRequest optional.Interface
 }
 
 /*
 ReadSubnets Method for ReadSubnets
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadSubnetsOpts - Optional Parameters:
- * @param "ReadSubnetsRequest" (optional.Interface of ReadSubnetsRequest) - 
+ * @param "ReadSubnetsRequest" (optional.Interface of ReadSubnetsRequest) -
 @return ReadSubnetsResponse
 */
 func (a *SubnetApiService) ReadSubnets(ctx _context.Context, localVarOptionals *ReadSubnetsOpts) (ReadSubnetsResponse, *_nethttp.Response, error) {
@@ -461,14 +461,14 @@ func (a *SubnetApiService) ReadSubnets(ctx _context.Context, localVarOptionals *
 
 // UpdateSubnetOpts Optional parameters for the method 'UpdateSubnet'
 type UpdateSubnetOpts struct {
-    UpdateSubnetRequest optional.Interface
+	UpdateSubnetRequest optional.Interface
 }
 
 /*
 UpdateSubnet Method for UpdateSubnet
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *UpdateSubnetOpts - Optional Parameters:
- * @param "UpdateSubnetRequest" (optional.Interface of UpdateSubnetRequest) - 
+ * @param "UpdateSubnetRequest" (optional.Interface of UpdateSubnetRequest) -
 @return UpdateSubnetResponse
 */
 func (a *SubnetApiService) UpdateSubnet(ctx _context.Context, localVarOptionals *UpdateSubnetOpts) (UpdateSubnetResponse, *_nethttp.Response, error) {

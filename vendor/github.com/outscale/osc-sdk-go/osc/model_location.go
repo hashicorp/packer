@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // Location Information about the DirectLink location.
 type Location struct {
 	// The location code, to be set as the `Location` parameter of the *CreateDirectLink* method when creating a DirectLink.

@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadLocationsResponse struct for ReadLocationsResponse
 type ReadLocationsResponse struct {
 	// Information about one or more locations.
-	Locations []Location `json:"Locations,omitempty"`
+	Locations       []Location      `json:"Locations,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

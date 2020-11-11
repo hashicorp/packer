@@ -17,29 +17,28 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
-    common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
+	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type DescribeRouteTablesRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页 (Optional) */
+	PageNumber *int `json:"pageNumber"`
 
-    /* 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页 (Optional) */
-    PageNumber *int `json:"pageNumber"`
+	/* 分页大小，默认为20，取值范围：[10,100] (Optional) */
+	PageSize *int `json:"pageSize"`
 
-    /* 分页大小，默认为20，取值范围：[10,100] (Optional) */
-    PageSize *int `json:"pageSize"`
-
-    /* routeTableIds - 路由表ID列表，支持多个
-routeTableNames - 路由表名称列表，支持多个
-vpcId	- 路由表所属vpc Id，支持单个
- (Optional) */
-    Filters []common.Filter `json:"filters"`
+	/* routeTableIds - 路由表ID列表，支持多个
+	routeTableNames - 路由表名称列表，支持多个
+	vpcId	- 路由表所属vpc Id，支持单个
+	 (Optional) */
+	Filters []common.Filter `json:"filters"`
 }
 
 /*
@@ -48,17 +47,17 @@ vpcId	- 路由表所属vpc Id，支持单个
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeRouteTablesRequest(
-    regionId string,
+	regionId string,
 ) *DescribeRouteTablesRequest {
 
 	return &DescribeRouteTablesRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/routeTables/",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
+		RegionId: regionId,
 	}
 }
 
@@ -70,54 +69,54 @@ func NewDescribeRouteTablesRequest(
 routeTableNames - 路由表名称列表，支持多个
 vpcId	- 路由表所属vpc Id，支持单个
  (Optional)
- */
+*/
 func NewDescribeRouteTablesRequestWithAllParams(
-    regionId string,
-    pageNumber *int,
-    pageSize *int,
-    filters []common.Filter,
+	regionId string,
+	pageNumber *int,
+	pageSize *int,
+	filters []common.Filter,
 ) *DescribeRouteTablesRequest {
 
-    return &DescribeRouteTablesRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        PageNumber: pageNumber,
-        PageSize: pageSize,
-        Filters: filters,
-    }
+	return &DescribeRouteTablesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:   regionId,
+		PageNumber: pageNumber,
+		PageSize:   pageSize,
+		Filters:    filters,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeRouteTablesRequestWithoutParam() *DescribeRouteTablesRequest {
 
-    return &DescribeRouteTablesRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeRouteTablesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeRouteTablesRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param pageNumber: 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页(Optional) */
 func (r *DescribeRouteTablesRequest) SetPageNumber(pageNumber int) {
-    r.PageNumber = &pageNumber
+	r.PageNumber = &pageNumber
 }
 
 /* param pageSize: 分页大小，默认为20，取值范围：[10,100](Optional) */
 func (r *DescribeRouteTablesRequest) SetPageSize(pageSize int) {
-    r.PageSize = &pageSize
+	r.PageSize = &pageSize
 }
 
 /* param filters: routeTableIds - 路由表ID列表，支持多个
@@ -125,22 +124,22 @@ routeTableNames - 路由表名称列表，支持多个
 vpcId	- 路由表所属vpc Id，支持单个
 (Optional) */
 func (r *DescribeRouteTablesRequest) SetFilters(filters []common.Filter) {
-    r.Filters = filters
+	r.Filters = filters
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeRouteTablesRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeRouteTablesResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeRouteTablesResult `json:"result"`
+	RequestID string                    `json:"requestId"`
+	Error     core.ErrorResponse        `json:"error"`
+	Result    DescribeRouteTablesResult `json:"result"`
 }
 
 type DescribeRouteTablesResult struct {
-    RouteTables []vpc.RouteTable `json:"routeTables"`
-    TotalCount int `json:"totalCount"`
+	RouteTables []vpc.RouteTable `json:"routeTables"`
+	TotalCount  int              `json:"totalCount"`
 }

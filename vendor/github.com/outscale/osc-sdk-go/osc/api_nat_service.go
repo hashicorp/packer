@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type NatServiceApiService service
 
 // CreateNatServiceOpts Optional parameters for the method 'CreateNatService'
 type CreateNatServiceOpts struct {
-    CreateNatServiceRequest optional.Interface
+	CreateNatServiceRequest optional.Interface
 }
 
 /*
 CreateNatService Method for CreateNatService
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateNatServiceOpts - Optional Parameters:
- * @param "CreateNatServiceRequest" (optional.Interface of CreateNatServiceRequest) - 
+ * @param "CreateNatServiceRequest" (optional.Interface of CreateNatServiceRequest) -
 @return CreateNatServiceResponse
 */
 func (a *NatServiceApiService) CreateNatService(ctx _context.Context, localVarOptionals *CreateNatServiceOpts) (CreateNatServiceResponse, *_nethttp.Response, error) {
@@ -169,14 +169,14 @@ func (a *NatServiceApiService) CreateNatService(ctx _context.Context, localVarOp
 
 // DeleteNatServiceOpts Optional parameters for the method 'DeleteNatService'
 type DeleteNatServiceOpts struct {
-    DeleteNatServiceRequest optional.Interface
+	DeleteNatServiceRequest optional.Interface
 }
 
 /*
 DeleteNatService Method for DeleteNatService
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteNatServiceOpts - Optional Parameters:
- * @param "DeleteNatServiceRequest" (optional.Interface of DeleteNatServiceRequest) - 
+ * @param "DeleteNatServiceRequest" (optional.Interface of DeleteNatServiceRequest) -
 @return DeleteNatServiceResponse
 */
 func (a *NatServiceApiService) DeleteNatService(ctx _context.Context, localVarOptionals *DeleteNatServiceOpts) (DeleteNatServiceResponse, *_nethttp.Response, error) {
@@ -310,14 +310,14 @@ func (a *NatServiceApiService) DeleteNatService(ctx _context.Context, localVarOp
 
 // ReadNatServicesOpts Optional parameters for the method 'ReadNatServices'
 type ReadNatServicesOpts struct {
-    ReadNatServicesRequest optional.Interface
+	ReadNatServicesRequest optional.Interface
 }
 
 /*
 ReadNatServices Method for ReadNatServices
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadNatServicesOpts - Optional Parameters:
- * @param "ReadNatServicesRequest" (optional.Interface of ReadNatServicesRequest) - 
+ * @param "ReadNatServicesRequest" (optional.Interface of ReadNatServicesRequest) -
 @return ReadNatServicesResponse
 */
 func (a *NatServiceApiService) ReadNatServices(ctx _context.Context, localVarOptionals *ReadNatServicesOpts) (ReadNatServicesResponse, *_nethttp.Response, error) {

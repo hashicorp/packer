@@ -6,6 +6,7 @@ package clone
 import (
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	packerCommon "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -14,8 +15,8 @@ import (
 
 type Config struct {
 	packerCommon.PackerConfig `mapstructure:",squash"`
-	packerCommon.HTTPConfig   `mapstructure:",squash"`
-	packerCommon.CDConfig     `mapstructure:",squash"`
+	commonsteps.HTTPConfig    `mapstructure:",squash"`
+	commonsteps.CDConfig      `mapstructure:",squash"`
 
 	common.ConnectConfig      `mapstructure:",squash"`
 	CloneConfig               `mapstructure:",squash"`

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DhcpOptionsSet Information about the DHCP options set.
 type DhcpOptionsSet struct {
 	// If `true`, the DHCP options set is a default one. If `false`, it is not.

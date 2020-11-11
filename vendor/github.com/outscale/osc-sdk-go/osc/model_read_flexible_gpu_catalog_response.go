@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadFlexibleGpuCatalogResponse struct for ReadFlexibleGpuCatalogResponse
 type ReadFlexibleGpuCatalogResponse struct {
 	// Information about one or more fGPUs available in the public catalog.
 	FlexibleGpuCatalog []FlexibleGpuCatalog `json:"FlexibleGpuCatalog,omitempty"`
-	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
+	ResponseContext    ResponseContext      `json:"ResponseContext,omitempty"`
 }

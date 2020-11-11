@@ -15,12 +15,12 @@
 package core
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
-	"fmt"
-	"encoding/json"
-	"encoding/base64"
 )
 
 // JDCloudClient is the base struct of service clients

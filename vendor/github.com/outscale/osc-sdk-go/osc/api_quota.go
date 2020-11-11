@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type QuotaApiService service
 
 // ReadQuotasOpts Optional parameters for the method 'ReadQuotas'
 type ReadQuotasOpts struct {
-    ReadQuotasRequest optional.Interface
+	ReadQuotasRequest optional.Interface
 }
 
 /*
 ReadQuotas Method for ReadQuotas
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadQuotasOpts - Optional Parameters:
- * @param "ReadQuotasRequest" (optional.Interface of ReadQuotasRequest) - 
+ * @param "ReadQuotasRequest" (optional.Interface of ReadQuotasRequest) -
 @return ReadQuotasResponse
 */
 func (a *QuotaApiService) ReadQuotas(ctx _context.Context, localVarOptionals *ReadQuotasOpts) (ReadQuotasResponse, *_nethttp.Response, error) {

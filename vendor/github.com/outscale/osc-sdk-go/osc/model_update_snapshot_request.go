@@ -9,10 +9,11 @@
  */
 
 package osc
+
 // UpdateSnapshotRequest struct for UpdateSnapshotRequest
 type UpdateSnapshotRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun                    bool                          `json:"DryRun,omitempty"`
 	PermissionsToCreateVolume PermissionsOnResourceCreation `json:"PermissionsToCreateVolume"`
 	// The ID of the snapshot.
 	SnapshotId string `json:"SnapshotId"`

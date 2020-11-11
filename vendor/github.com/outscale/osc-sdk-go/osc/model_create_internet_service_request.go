@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateInternetServiceRequest struct for CreateInternetServiceRequest
 type CreateInternetServiceRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

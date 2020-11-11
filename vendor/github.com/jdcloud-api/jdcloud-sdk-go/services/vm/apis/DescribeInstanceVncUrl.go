@@ -17,18 +17,17 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DescribeInstanceVncUrlRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
-
-    /* 云主机ID  */
-    InstanceId string `json:"instanceId"`
+	/* 云主机ID  */
+	InstanceId string `json:"instanceId"`
 }
 
 /*
@@ -38,19 +37,19 @@ type DescribeInstanceVncUrlRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeInstanceVncUrlRequest(
-    regionId string,
-    instanceId string,
+	regionId string,
+	instanceId string,
 ) *DescribeInstanceVncUrlRequest {
 
 	return &DescribeInstanceVncUrlRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}/vnc",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        InstanceId: instanceId,
+		RegionId:   regionId,
+		InstanceId: instanceId,
 	}
 }
 
@@ -59,57 +58,57 @@ func NewDescribeInstanceVncUrlRequest(
  * param instanceId: 云主机ID (Required)
  */
 func NewDescribeInstanceVncUrlRequestWithAllParams(
-    regionId string,
-    instanceId string,
+	regionId string,
+	instanceId string,
 ) *DescribeInstanceVncUrlRequest {
 
-    return &DescribeInstanceVncUrlRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}/vnc",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        InstanceId: instanceId,
-    }
+	return &DescribeInstanceVncUrlRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}/vnc",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:   regionId,
+		InstanceId: instanceId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeInstanceVncUrlRequestWithoutParam() *DescribeInstanceVncUrlRequest {
 
-    return &DescribeInstanceVncUrlRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instances/{instanceId}/vnc",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeInstanceVncUrlRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instances/{instanceId}/vnc",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DescribeInstanceVncUrlRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *DescribeInstanceVncUrlRequest) SetInstanceId(instanceId string) {
-    r.InstanceId = instanceId
+	r.InstanceId = instanceId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeInstanceVncUrlRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeInstanceVncUrlResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeInstanceVncUrlResult `json:"result"`
+	RequestID string                       `json:"requestId"`
+	Error     core.ErrorResponse           `json:"error"`
+	Result    DescribeInstanceVncUrlResult `json:"result"`
 }
 
 type DescribeInstanceVncUrlResult struct {
-    VncUrl string `json:"vncUrl"`
+	VncUrl string `json:"vncUrl"`
 }

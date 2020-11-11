@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreateVirtualGatewayResponse struct for CreateVirtualGatewayResponse
 type CreateVirtualGatewayResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
-	VirtualGateway VirtualGateway `json:"VirtualGateway,omitempty"`
+	VirtualGateway  VirtualGateway  `json:"VirtualGateway,omitempty"`
 }

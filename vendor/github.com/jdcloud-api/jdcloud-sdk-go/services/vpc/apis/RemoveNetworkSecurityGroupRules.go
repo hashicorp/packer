@@ -17,21 +17,20 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type RemoveNetworkSecurityGroupRulesRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* NetworkSecurityGroup ID  */
+	NetworkSecurityGroupId string `json:"networkSecurityGroupId"`
 
-    /* NetworkSecurityGroup ID  */
-    NetworkSecurityGroupId string `json:"networkSecurityGroupId"`
-
-    /* 安全组规则Id列表  */
-    RuleIds []string `json:"ruleIds"`
+	/* 安全组规则Id列表  */
+	RuleIds []string `json:"ruleIds"`
 }
 
 /*
@@ -42,21 +41,21 @@ type RemoveNetworkSecurityGroupRulesRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewRemoveNetworkSecurityGroupRulesRequest(
-    regionId string,
-    networkSecurityGroupId string,
-    ruleIds []string,
+	regionId string,
+	networkSecurityGroupId string,
+	ruleIds []string,
 ) *RemoveNetworkSecurityGroupRulesRequest {
 
 	return &RemoveNetworkSecurityGroupRulesRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}:removeNetworkSecurityGroupRules",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        NetworkSecurityGroupId: networkSecurityGroupId,
-        RuleIds: ruleIds,
+		RegionId:               regionId,
+		NetworkSecurityGroupId: networkSecurityGroupId,
+		RuleIds:                ruleIds,
 	}
 }
 
@@ -66,62 +65,62 @@ func NewRemoveNetworkSecurityGroupRulesRequest(
  * param ruleIds: 安全组规则Id列表 (Required)
  */
 func NewRemoveNetworkSecurityGroupRulesRequestWithAllParams(
-    regionId string,
-    networkSecurityGroupId string,
-    ruleIds []string,
+	regionId string,
+	networkSecurityGroupId string,
+	ruleIds []string,
 ) *RemoveNetworkSecurityGroupRulesRequest {
 
-    return &RemoveNetworkSecurityGroupRulesRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}:removeNetworkSecurityGroupRules",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        NetworkSecurityGroupId: networkSecurityGroupId,
-        RuleIds: ruleIds,
-    }
+	return &RemoveNetworkSecurityGroupRulesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}:removeNetworkSecurityGroupRules",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:               regionId,
+		NetworkSecurityGroupId: networkSecurityGroupId,
+		RuleIds:                ruleIds,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewRemoveNetworkSecurityGroupRulesRequestWithoutParam() *RemoveNetworkSecurityGroupRulesRequest {
 
-    return &RemoveNetworkSecurityGroupRulesRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}:removeNetworkSecurityGroupRules",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &RemoveNetworkSecurityGroupRulesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}:removeNetworkSecurityGroupRules",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *RemoveNetworkSecurityGroupRulesRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param networkSecurityGroupId: NetworkSecurityGroup ID(Required) */
 func (r *RemoveNetworkSecurityGroupRulesRequest) SetNetworkSecurityGroupId(networkSecurityGroupId string) {
-    r.NetworkSecurityGroupId = networkSecurityGroupId
+	r.NetworkSecurityGroupId = networkSecurityGroupId
 }
 
 /* param ruleIds: 安全组规则Id列表(Required) */
 func (r *RemoveNetworkSecurityGroupRulesRequest) SetRuleIds(ruleIds []string) {
-    r.RuleIds = ruleIds
+	r.RuleIds = ruleIds
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r RemoveNetworkSecurityGroupRulesRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type RemoveNetworkSecurityGroupRulesResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result RemoveNetworkSecurityGroupRulesResult `json:"result"`
+	RequestID string                                `json:"requestId"`
+	Error     core.ErrorResponse                    `json:"error"`
+	Result    RemoveNetworkSecurityGroupRulesResult `json:"result"`
 }
 
 type RemoveNetworkSecurityGroupRulesResult struct {

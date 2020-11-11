@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateFlexibleGpuRequest struct for CreateFlexibleGpuRequest
 type CreateFlexibleGpuRequest struct {
 	// If `true`, the fGPU is deleted when the VM is terminated.

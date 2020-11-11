@@ -16,12 +16,12 @@ package core
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	urllib "net/url"
+	"reflect"
 	"regexp"
 	"strings"
-	"errors"
-	"reflect"
-	urllib "net/url"
 )
 
 var baseRequestFields []string
@@ -72,7 +72,7 @@ func (b WithBodyBuilder) BuildURL(url string, paramJson []byte) (string, error) 
 		return "", err
 	}
 
-	b.Logger.Log(LogInfo, "URL=" + encodedUrl)
+	b.Logger.Log(LogInfo, "URL="+encodedUrl)
 	return encodedUrl, nil
 }
 
@@ -123,7 +123,7 @@ func (b WithoutBodyBuilder) BuildURL(url string, paramJson []byte) (string, erro
 	}
 
 	b.Logger.Log(LogInfo, string(paramJson))
-	b.Logger.Log(LogInfo, "URL=" + encodedUrl)
+	b.Logger.Log(LogInfo, "URL="+encodedUrl)
 	return encodedUrl, nil
 }
 

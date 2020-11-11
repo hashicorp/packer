@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteAccessKeyResponse struct for DeleteAccessKeyResponse
 type DeleteAccessKeyResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

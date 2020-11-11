@@ -1214,14 +1214,13 @@ func parseDefaultIfNameFromIPCmd(routeOut string) (string, error) {
 // Android.
 func parseDefaultIfNameFromIPCmdAndroid(routeOut string) (string, error) {
 	parsedLines := parseIfNameFromIPCmd(routeOut)
-	if (len(parsedLines) > 0) {
+	if len(parsedLines) > 0 {
 		ifName := strings.TrimSpace(parsedLines[0][4])
 		return ifName, nil
 	}
 
 	return "", errors.New("No default interface found")
 }
-
 
 // parseIfNameFromIPCmd parses interfaces from ip(8) for
 // Linux.

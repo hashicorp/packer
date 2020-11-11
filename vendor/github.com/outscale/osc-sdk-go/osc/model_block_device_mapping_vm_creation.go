@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // BlockDeviceMappingVmCreation Information about the block device mapping.
 type BlockDeviceMappingVmCreation struct {
 	Bsu BsuToCreate `json:"Bsu,omitempty"`

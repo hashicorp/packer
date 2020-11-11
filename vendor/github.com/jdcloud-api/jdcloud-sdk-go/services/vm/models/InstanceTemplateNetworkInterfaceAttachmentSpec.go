@@ -16,15 +16,14 @@
 
 package models
 
-
 type InstanceTemplateNetworkInterfaceAttachmentSpec struct {
 
-    /* 设备Index；主网卡的index必须为1；当前仅支持主网卡 (Optional) */
-    DeviceIndex int `json:"deviceIndex"`
+	/* 设备Index；主网卡的index必须为1；当前仅支持主网卡 (Optional) */
+	DeviceIndex int `json:"deviceIndex"`
 
-    /* 指明删除实例时是否删除网卡，默认true；当前只能是true (Optional) */
-    AutoDelete bool `json:"autoDelete"`
+	/* 指明删除实例时是否删除网卡，默认true；当前只能是true (Optional) */
+	AutoDelete bool `json:"autoDelete"`
 
-    /* 网卡接口规范；此字段当前必填  */
-    NetworkInterface InstanceTemplateNetworkInterfaceSpec `json:"networkInterface"`
+	/* 网卡接口规范；此字段当前必填  */
+	NetworkInterface InstanceTemplateNetworkInterfaceSpec `json:"networkInterface"`
 }

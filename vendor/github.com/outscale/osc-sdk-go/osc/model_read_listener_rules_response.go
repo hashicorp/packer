@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadListenerRulesResponse struct for ReadListenerRulesResponse
 type ReadListenerRulesResponse struct {
 	// The list of the rules to describe.
-	ListenerRules []ListenerRule `json:"ListenerRules,omitempty"`
+	ListenerRules   []ListenerRule  `json:"ListenerRules,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

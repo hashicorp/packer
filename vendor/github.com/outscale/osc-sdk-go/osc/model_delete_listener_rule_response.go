@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteListenerRuleResponse struct for DeleteListenerRuleResponse
 type DeleteListenerRuleResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

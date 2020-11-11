@@ -17,18 +17,17 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DeleteImageRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
-
-    /* 镜像ID  */
-    ImageId string `json:"imageId"`
+	/* 镜像ID  */
+	ImageId string `json:"imageId"`
 }
 
 /*
@@ -38,19 +37,19 @@ type DeleteImageRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDeleteImageRequest(
-    regionId string,
-    imageId string,
+	regionId string,
+	imageId string,
 ) *DeleteImageRequest {
 
 	return &DeleteImageRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/images/{imageId}",
 			Method:  "DELETE",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        ImageId: imageId,
+		RegionId: regionId,
+		ImageId:  imageId,
 	}
 }
 
@@ -59,55 +58,55 @@ func NewDeleteImageRequest(
  * param imageId: 镜像ID (Required)
  */
 func NewDeleteImageRequestWithAllParams(
-    regionId string,
-    imageId string,
+	regionId string,
+	imageId string,
 ) *DeleteImageRequest {
 
-    return &DeleteImageRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/images/{imageId}",
-            Method:  "DELETE",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        ImageId: imageId,
-    }
+	return &DeleteImageRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/images/{imageId}",
+			Method:  "DELETE",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId: regionId,
+		ImageId:  imageId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDeleteImageRequestWithoutParam() *DeleteImageRequest {
 
-    return &DeleteImageRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/images/{imageId}",
-            Method:  "DELETE",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DeleteImageRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/images/{imageId}",
+			Method:  "DELETE",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DeleteImageRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param imageId: 镜像ID(Required) */
 func (r *DeleteImageRequest) SetImageId(imageId string) {
-    r.ImageId = imageId
+	r.ImageId = imageId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DeleteImageRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DeleteImageResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DeleteImageResult `json:"result"`
+	RequestID string             `json:"requestId"`
+	Error     core.ErrorResponse `json:"error"`
+	Result    DeleteImageResult  `json:"result"`
 }
 
 type DeleteImageResult struct {

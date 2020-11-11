@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // Tag Information about the tag.
 type Tag struct {
 	// The key of the tag, with a minimum of 1 character.

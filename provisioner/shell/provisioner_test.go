@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -563,8 +562,8 @@ func TestProvisionerRemotePathDefaultsSuccessfully(t *testing.T) {
 
 func generatedData() map[string]interface{} {
 	return map[string]interface{}{
-		"PackerHTTPAddr": common.HttpAddrNotImplemented,
-		"PackerHTTPIP":   common.HttpIPNotImplemented,
-		"PackerHTTPPort": common.HttpPortNotImplemented,
+		"PackerHTTPAddr": commonsteps.HttpAddrNotImplemented,
+		"PackerHTTPIP":   commonsteps.HttpIPNotImplemented,
+		"PackerHTTPPort": commonsteps.HttpPortNotImplemented,
 	}
 }

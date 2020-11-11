@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreateSubnetResponse struct for CreateSubnetResponse
 type CreateSubnetResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
-	Subnet Subnet `json:"Subnet,omitempty"`
+	Subnet          Subnet          `json:"Subnet,omitempty"`
 }

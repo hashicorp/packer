@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // AccessKey Information about the access key.
 type AccessKey struct {
 	// The ID of the access key.

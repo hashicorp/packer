@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // LinkVolumeRequest struct for LinkVolumeRequest
 type LinkVolumeRequest struct {
 	// The name of the device.

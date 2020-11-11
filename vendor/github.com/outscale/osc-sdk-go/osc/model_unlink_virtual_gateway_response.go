@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // UnlinkVirtualGatewayResponse struct for UnlinkVirtualGatewayResponse
 type UnlinkVirtualGatewayResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

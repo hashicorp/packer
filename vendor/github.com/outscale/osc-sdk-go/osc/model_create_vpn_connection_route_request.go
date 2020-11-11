@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateVpnConnectionRouteRequest struct for CreateVpnConnectionRouteRequest
 type CreateVpnConnectionRouteRequest struct {
 	// The network prefix of the route, in CIDR notation (for example, 10.12.0.0/16).

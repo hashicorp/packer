@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // BlockDeviceMappingVmUpdate Information about the block device mapping.
 type BlockDeviceMappingVmUpdate struct {
 	Bsu BsuToUpdateVm `json:"Bsu,omitempty"`

@@ -8,7 +8,6 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/hashicorp/packer/common"
 	"golang.org/x/mobile/event/key"
 )
 
@@ -25,8 +24,8 @@ type usbDriver struct {
 func NewUSBDriver(send SendUsbScanCodes, interval time.Duration) *usbDriver {
 	// We delay (default 100ms) between each key event to allow for CPU or
 	// network latency. See PackerKeyEnv for tuning.
-	keyInterval := common.PackerKeyDefault
-	if delay, err := time.ParseDuration(os.Getenv(common.PackerKeyEnv)); err == nil {
+	keyInterval := PackerKeyDefault
+	if delay, err := time.ParseDuration(os.Getenv(PackerKeyEnv)); err == nil {
 		keyInterval = delay
 	}
 	// override interval based on builder-specific override.

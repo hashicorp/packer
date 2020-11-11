@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type ApiLogApiService service
 
 // ReadApiLogsOpts Optional parameters for the method 'ReadApiLogs'
 type ReadApiLogsOpts struct {
-    ReadApiLogsRequest optional.Interface
+	ReadApiLogsRequest optional.Interface
 }
 
 /*
 ReadApiLogs Method for ReadApiLogs
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadApiLogsOpts - Optional Parameters:
- * @param "ReadApiLogsRequest" (optional.Interface of ReadApiLogsRequest) - 
+ * @param "ReadApiLogsRequest" (optional.Interface of ReadApiLogsRequest) -
 @return ReadApiLogsResponse
 */
 func (a *ApiLogApiService) ReadApiLogs(ctx _context.Context, localVarOptionals *ReadApiLogsOpts) (ReadApiLogsResponse, *_nethttp.Response, error) {

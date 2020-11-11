@@ -16,15 +16,14 @@
 
 package models
 
-
 type InstanceNetworkInterfaceAttachment struct {
 
-    /* 设备Index (Optional) */
-    DeviceIndex int `json:"deviceIndex"`
+	/* 设备Index (Optional) */
+	DeviceIndex int `json:"deviceIndex"`
 
-    /* 指明删除实例时是否删除网卡，默认true；当前只能是true (Optional) */
-    AutoDelete bool `json:"autoDelete"`
+	/* 指明删除实例时是否删除网卡，默认true；当前只能是true (Optional) */
+	AutoDelete bool `json:"autoDelete"`
 
-    /* 网卡接口规范 (Optional) */
-    NetworkInterface InstanceNetworkInterface `json:"networkInterface"`
+	/* 网卡接口规范 (Optional) */
+	NetworkInterface InstanceNetworkInterface `json:"networkInterface"`
 }

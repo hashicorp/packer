@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // LinkPublicIpRequest struct for LinkPublicIpRequest
 type LinkPublicIpRequest struct {
 	// - If `true`, allows the EIP to be associated with the VM or NIC that you specify even if it is already associated with another VM or NIC.<br /> - If `false`, prevents the EIP from being associated with the VM or NIC that you specify if it is already associated with another VM or NIC.<br /><br />  (By default, `true` in the public Cloud, `false` in a Net.)

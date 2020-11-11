@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type ListenerApiService service
 
 // CreateListenerRuleOpts Optional parameters for the method 'CreateListenerRule'
 type CreateListenerRuleOpts struct {
-    CreateListenerRuleRequest optional.Interface
+	CreateListenerRuleRequest optional.Interface
 }
 
 /*
 CreateListenerRule Method for CreateListenerRule
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateListenerRuleOpts - Optional Parameters:
- * @param "CreateListenerRuleRequest" (optional.Interface of CreateListenerRuleRequest) - 
+ * @param "CreateListenerRuleRequest" (optional.Interface of CreateListenerRuleRequest) -
 @return CreateListenerRuleResponse
 */
 func (a *ListenerApiService) CreateListenerRule(ctx _context.Context, localVarOptionals *CreateListenerRuleOpts) (CreateListenerRuleResponse, *_nethttp.Response, error) {
@@ -139,14 +139,14 @@ func (a *ListenerApiService) CreateListenerRule(ctx _context.Context, localVarOp
 
 // CreateLoadBalancerListenersOpts Optional parameters for the method 'CreateLoadBalancerListeners'
 type CreateLoadBalancerListenersOpts struct {
-    CreateLoadBalancerListenersRequest optional.Interface
+	CreateLoadBalancerListenersRequest optional.Interface
 }
 
 /*
 CreateLoadBalancerListeners Method for CreateLoadBalancerListeners
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateLoadBalancerListenersOpts - Optional Parameters:
- * @param "CreateLoadBalancerListenersRequest" (optional.Interface of CreateLoadBalancerListenersRequest) - 
+ * @param "CreateLoadBalancerListenersRequest" (optional.Interface of CreateLoadBalancerListenersRequest) -
 @return CreateLoadBalancerListenersResponse
 */
 func (a *ListenerApiService) CreateLoadBalancerListeners(ctx _context.Context, localVarOptionals *CreateLoadBalancerListenersOpts) (CreateLoadBalancerListenersResponse, *_nethttp.Response, error) {
@@ -250,14 +250,14 @@ func (a *ListenerApiService) CreateLoadBalancerListeners(ctx _context.Context, l
 
 // DeleteListenerRuleOpts Optional parameters for the method 'DeleteListenerRule'
 type DeleteListenerRuleOpts struct {
-    DeleteListenerRuleRequest optional.Interface
+	DeleteListenerRuleRequest optional.Interface
 }
 
 /*
 DeleteListenerRule Method for DeleteListenerRule
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteListenerRuleOpts - Optional Parameters:
- * @param "DeleteListenerRuleRequest" (optional.Interface of DeleteListenerRuleRequest) - 
+ * @param "DeleteListenerRuleRequest" (optional.Interface of DeleteListenerRuleRequest) -
 @return DeleteListenerRuleResponse
 */
 func (a *ListenerApiService) DeleteListenerRule(ctx _context.Context, localVarOptionals *DeleteListenerRuleOpts) (DeleteListenerRuleResponse, *_nethttp.Response, error) {
@@ -361,14 +361,14 @@ func (a *ListenerApiService) DeleteListenerRule(ctx _context.Context, localVarOp
 
 // DeleteLoadBalancerListenersOpts Optional parameters for the method 'DeleteLoadBalancerListeners'
 type DeleteLoadBalancerListenersOpts struct {
-    DeleteLoadBalancerListenersRequest optional.Interface
+	DeleteLoadBalancerListenersRequest optional.Interface
 }
 
 /*
 DeleteLoadBalancerListeners Method for DeleteLoadBalancerListeners
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteLoadBalancerListenersOpts - Optional Parameters:
- * @param "DeleteLoadBalancerListenersRequest" (optional.Interface of DeleteLoadBalancerListenersRequest) - 
+ * @param "DeleteLoadBalancerListenersRequest" (optional.Interface of DeleteLoadBalancerListenersRequest) -
 @return DeleteLoadBalancerListenersResponse
 */
 func (a *ListenerApiService) DeleteLoadBalancerListeners(ctx _context.Context, localVarOptionals *DeleteLoadBalancerListenersOpts) (DeleteLoadBalancerListenersResponse, *_nethttp.Response, error) {
@@ -472,14 +472,14 @@ func (a *ListenerApiService) DeleteLoadBalancerListeners(ctx _context.Context, l
 
 // ReadListenerRulesOpts Optional parameters for the method 'ReadListenerRules'
 type ReadListenerRulesOpts struct {
-    ReadListenerRulesRequest optional.Interface
+	ReadListenerRulesRequest optional.Interface
 }
 
 /*
 ReadListenerRules Method for ReadListenerRules
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadListenerRulesOpts - Optional Parameters:
- * @param "ReadListenerRulesRequest" (optional.Interface of ReadListenerRulesRequest) - 
+ * @param "ReadListenerRulesRequest" (optional.Interface of ReadListenerRulesRequest) -
 @return ReadListenerRulesResponse
 */
 func (a *ListenerApiService) ReadListenerRules(ctx _context.Context, localVarOptionals *ReadListenerRulesOpts) (ReadListenerRulesResponse, *_nethttp.Response, error) {
@@ -583,14 +583,14 @@ func (a *ListenerApiService) ReadListenerRules(ctx _context.Context, localVarOpt
 
 // UpdateListenerRuleOpts Optional parameters for the method 'UpdateListenerRule'
 type UpdateListenerRuleOpts struct {
-    UpdateListenerRuleRequest optional.Interface
+	UpdateListenerRuleRequest optional.Interface
 }
 
 /*
 UpdateListenerRule Method for UpdateListenerRule
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *UpdateListenerRuleOpts - Optional Parameters:
- * @param "UpdateListenerRuleRequest" (optional.Interface of UpdateListenerRuleRequest) - 
+ * @param "UpdateListenerRuleRequest" (optional.Interface of UpdateListenerRuleRequest) -
 @return UpdateListenerRuleResponse
 */
 func (a *ListenerApiService) UpdateListenerRule(ctx _context.Context, localVarOptionals *UpdateListenerRuleOpts) (UpdateListenerRuleResponse, *_nethttp.Response, error) {

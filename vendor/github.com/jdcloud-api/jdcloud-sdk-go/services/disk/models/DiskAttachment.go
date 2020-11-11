@@ -16,24 +16,23 @@
 
 package models
 
-
 type DiskAttachment struct {
 
-    /* 挂载ID (Optional) */
-    AttachmentId string `json:"attachmentId"`
+	/* 挂载ID (Optional) */
+	AttachmentId string `json:"attachmentId"`
 
-    /* 云硬盘ID (Optional) */
-    DiskId string `json:"diskId"`
+	/* 云硬盘ID (Optional) */
+	DiskId string `json:"diskId"`
 
-    /* 挂载实例的类型，取值为 vm、nc (Optional) */
-    InstanceType string `json:"instanceType"`
+	/* 挂载实例的类型，取值为 vm、nc (Optional) */
+	InstanceType string `json:"instanceType"`
 
-    /* 挂载实例的ID (Optional) */
-    InstanceId string `json:"instanceId"`
+	/* 挂载实例的ID (Optional) */
+	InstanceId string `json:"instanceId"`
 
-    /* 挂载状态，取值为 "attaching", "attached", "detaching", "detached" (Optional) */
-    Status string `json:"status"`
+	/* 挂载状态，取值为 "attaching", "attached", "detaching", "detached" (Optional) */
+	Status string `json:"status"`
 
-    /* 挂载时间 (Optional) */
-    AttachTime string `json:"attachTime"`
+	/* 挂载时间 (Optional) */
+	AttachTime string `json:"attachTime"`
 }

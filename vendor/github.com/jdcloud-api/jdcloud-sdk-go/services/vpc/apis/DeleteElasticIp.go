@@ -17,18 +17,17 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DeleteElasticIpRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
-
-    /* ElasticIp ID  */
-    ElasticIpId string `json:"elasticIpId"`
+	/* ElasticIp ID  */
+	ElasticIpId string `json:"elasticIpId"`
 }
 
 /*
@@ -38,19 +37,19 @@ type DeleteElasticIpRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDeleteElasticIpRequest(
-    regionId string,
-    elasticIpId string,
+	regionId string,
+	elasticIpId string,
 ) *DeleteElasticIpRequest {
 
 	return &DeleteElasticIpRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
 			Method:  "DELETE",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        ElasticIpId: elasticIpId,
+		RegionId:    regionId,
+		ElasticIpId: elasticIpId,
 	}
 }
 
@@ -59,55 +58,55 @@ func NewDeleteElasticIpRequest(
  * param elasticIpId: ElasticIp ID (Required)
  */
 func NewDeleteElasticIpRequestWithAllParams(
-    regionId string,
-    elasticIpId string,
+	regionId string,
+	elasticIpId string,
 ) *DeleteElasticIpRequest {
 
-    return &DeleteElasticIpRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
-            Method:  "DELETE",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        ElasticIpId: elasticIpId,
-    }
+	return &DeleteElasticIpRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
+			Method:  "DELETE",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:    regionId,
+		ElasticIpId: elasticIpId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDeleteElasticIpRequestWithoutParam() *DeleteElasticIpRequest {
 
-    return &DeleteElasticIpRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
-            Method:  "DELETE",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DeleteElasticIpRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
+			Method:  "DELETE",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DeleteElasticIpRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param elasticIpId: ElasticIp ID(Required) */
 func (r *DeleteElasticIpRequest) SetElasticIpId(elasticIpId string) {
-    r.ElasticIpId = elasticIpId
+	r.ElasticIpId = elasticIpId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DeleteElasticIpRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DeleteElasticIpResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DeleteElasticIpResult `json:"result"`
+	RequestID string                `json:"requestId"`
+	Error     core.ErrorResponse    `json:"error"`
+	Result    DeleteElasticIpResult `json:"result"`
 }
 
 type DeleteElasticIpResult struct {

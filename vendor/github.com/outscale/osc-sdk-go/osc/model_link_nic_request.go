@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // LinkNicRequest struct for LinkNicRequest
 type LinkNicRequest struct {
 	// The index of the VM device for the NIC attachment (between 1 and 7, both included).

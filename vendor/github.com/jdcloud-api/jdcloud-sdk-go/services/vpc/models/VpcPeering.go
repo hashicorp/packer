@@ -16,27 +16,26 @@
 
 package models
 
-
 type VpcPeering struct {
 
-    /* VpcPeering的Id (Optional) */
-    VpcPeeringId string `json:"vpcPeeringId"`
+	/* VpcPeering的Id (Optional) */
+	VpcPeeringId string `json:"vpcPeeringId"`
 
-    /* VpcPeering名称，同账号下不允许重名，取值范围：1-32个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
-    VpcPeeringName string `json:"vpcPeeringName"`
+	/* VpcPeering名称，同账号下不允许重名，取值范围：1-32个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
+	VpcPeeringName string `json:"vpcPeeringName"`
 
-    /* 状态，取值为Connected，Disconnected，Initiated (Optional) */
-    VpcPeeringState string `json:"vpcPeeringState"`
+	/* 状态，取值为Connected，Disconnected，Initiated (Optional) */
+	VpcPeeringState string `json:"vpcPeeringState"`
 
-    /* VpcPeering 描述，可为空值，取值范围：0-256个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
-    Description string `json:"description"`
+	/* VpcPeering 描述，可为空值，取值范围：0-256个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
+	Description string `json:"description"`
 
-    /* 发起VpcPeering的Vpc信息 (Optional) */
-    VpcInfo VpcPeeringVpcInfo `json:"vpcInfo"`
+	/* 发起VpcPeering的Vpc信息 (Optional) */
+	VpcInfo VpcPeeringVpcInfo `json:"vpcInfo"`
 
-    /* 对端的Vpc信息 (Optional) */
-    RemoteVpcInfo VpcPeeringVpcInfo `json:"remoteVpcInfo"`
+	/* 对端的Vpc信息 (Optional) */
+	RemoteVpcInfo VpcPeeringVpcInfo `json:"remoteVpcInfo"`
 
-    /* VpcPeering创建时间 (Optional) */
-    CreatedTime string `json:"createdTime"`
+	/* VpcPeering创建时间 (Optional) */
+	CreatedTime string `json:"createdTime"`
 }

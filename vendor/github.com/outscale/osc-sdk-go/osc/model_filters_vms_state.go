@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersVmsState One or more filters.
 type FiltersVmsState struct {
 	// The names of the Subregions of the VMs.

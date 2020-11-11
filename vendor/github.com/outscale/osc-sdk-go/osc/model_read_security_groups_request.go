@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadSecurityGroupsRequest struct for ReadSecurityGroupsRequest
 type ReadSecurityGroupsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool                 `json:"DryRun,omitempty"`
 	Filters FiltersSecurityGroup `json:"Filters,omitempty"`
 }

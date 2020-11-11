@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadDirectLinkInterfacesRequest struct for ReadDirectLinkInterfacesRequest
 type ReadDirectLinkInterfacesRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool                       `json:"DryRun,omitempty"`
 	Filters FiltersDirectLinkInterface `json:"Filters,omitempty"`
 }

@@ -15,6 +15,7 @@ import (
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -65,13 +66,13 @@ type QemuImgArgs struct {
 
 type Config struct {
 	common.PackerConfig            `mapstructure:",squash"`
-	common.HTTPConfig              `mapstructure:",squash"`
-	common.ISOConfig               `mapstructure:",squash"`
+	commonsteps.HTTPConfig         `mapstructure:",squash"`
+	commonsteps.ISOConfig          `mapstructure:",squash"`
 	bootcommand.VNCConfig          `mapstructure:",squash"`
 	shutdowncommand.ShutdownConfig `mapstructure:",squash"`
 	CommConfig                     CommConfig `mapstructure:",squash"`
-	common.FloppyConfig            `mapstructure:",squash"`
-	common.CDConfig                `mapstructure:",squash"`
+	commonsteps.FloppyConfig       `mapstructure:",squash"`
+	commonsteps.CDConfig           `mapstructure:",squash"`
 	// Use iso from provided url. Qemu must support
 	// curl block device. This defaults to `false`.
 	ISOSkipCache bool `mapstructure:"iso_skip_cache" required:"false"`

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateServerCertificateRequest struct for CreateServerCertificateRequest
 type CreateServerCertificateRequest struct {
 	// The PEM-encoded X509 certificate.

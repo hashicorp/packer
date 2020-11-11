@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ReadSecretAccessKeyRequest struct for ReadSecretAccessKeyRequest
 type ReadSecretAccessKeyRequest struct {
 	// The ID of the access key.

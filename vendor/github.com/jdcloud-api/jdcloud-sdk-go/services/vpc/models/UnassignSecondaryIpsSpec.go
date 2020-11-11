@@ -16,9 +16,8 @@
 
 package models
 
-
 type UnassignSecondaryIpsSpec struct {
 
-    /* 指定删除的secondaryIp地址 (Optional) */
-    SecondaryIps []string `json:"secondaryIps"`
+	/* 指定删除的secondaryIp地址 (Optional) */
+	SecondaryIps []string `json:"secondaryIps"`
 }

@@ -9,10 +9,11 @@
  */
 
 package osc
+
 // PrivateIp Information about the private IP.
 type PrivateIp struct {
 	// If `true`, the IP address is the primary private IP address of the NIC.
-	IsPrimary bool `json:"IsPrimary,omitempty"`
+	IsPrimary    bool         `json:"IsPrimary,omitempty"`
 	LinkPublicIp LinkPublicIp `json:"LinkPublicIp,omitempty"`
 	// The name of the private DNS.
 	PrivateDnsName string `json:"PrivateDnsName,omitempty"`

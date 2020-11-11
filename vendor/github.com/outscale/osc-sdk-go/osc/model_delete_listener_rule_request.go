@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteListenerRuleRequest struct for DeleteListenerRuleRequest
 type DeleteListenerRuleRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

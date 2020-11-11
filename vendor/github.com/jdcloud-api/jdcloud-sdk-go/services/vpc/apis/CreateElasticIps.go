@@ -17,25 +17,24 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type CreateElasticIpsRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* 购买弹性ip数量；取值范围：[1,100]  */
+	MaxCount int `json:"maxCount"`
 
-    /* 购买弹性ip数量；取值范围：[1,100]  */
-    MaxCount int `json:"maxCount"`
+	/* 指定弹性ip地址进行创建，当申请创建多个弹性ip时，必须为空 (Optional) */
+	ElasticIpAddress *string `json:"elasticIpAddress"`
 
-    /* 指定弹性ip地址进行创建，当申请创建多个弹性ip时，必须为空 (Optional) */
-    ElasticIpAddress *string `json:"elasticIpAddress"`
-
-    /* 弹性ip规格  */
-    ElasticIpSpec *vpc.ElasticIpSpec `json:"elasticIpSpec"`
+	/* 弹性ip规格  */
+	ElasticIpSpec *vpc.ElasticIpSpec `json:"elasticIpSpec"`
 }
 
 /*
@@ -46,21 +45,21 @@ type CreateElasticIpsRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewCreateElasticIpsRequest(
-    regionId string,
-    maxCount int,
-    elasticIpSpec *vpc.ElasticIpSpec,
+	regionId string,
+	maxCount int,
+	elasticIpSpec *vpc.ElasticIpSpec,
 ) *CreateElasticIpsRequest {
 
 	return &CreateElasticIpsRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/elasticIps/",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        MaxCount: maxCount,
-        ElasticIpSpec: elasticIpSpec,
+		RegionId:      regionId,
+		MaxCount:      maxCount,
+		ElasticIpSpec: elasticIpSpec,
 	}
 }
 
@@ -71,72 +70,72 @@ func NewCreateElasticIpsRequest(
  * param elasticIpSpec: 弹性ip规格 (Required)
  */
 func NewCreateElasticIpsRequestWithAllParams(
-    regionId string,
-    maxCount int,
-    elasticIpAddress *string,
-    elasticIpSpec *vpc.ElasticIpSpec,
+	regionId string,
+	maxCount int,
+	elasticIpAddress *string,
+	elasticIpSpec *vpc.ElasticIpSpec,
 ) *CreateElasticIpsRequest {
 
-    return &CreateElasticIpsRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/elasticIps/",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        MaxCount: maxCount,
-        ElasticIpAddress: elasticIpAddress,
-        ElasticIpSpec: elasticIpSpec,
-    }
+	return &CreateElasticIpsRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/elasticIps/",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:         regionId,
+		MaxCount:         maxCount,
+		ElasticIpAddress: elasticIpAddress,
+		ElasticIpSpec:    elasticIpSpec,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewCreateElasticIpsRequestWithoutParam() *CreateElasticIpsRequest {
 
-    return &CreateElasticIpsRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/elasticIps/",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &CreateElasticIpsRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/elasticIps/",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *CreateElasticIpsRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param maxCount: 购买弹性ip数量；取值范围：[1,100](Required) */
 func (r *CreateElasticIpsRequest) SetMaxCount(maxCount int) {
-    r.MaxCount = maxCount
+	r.MaxCount = maxCount
 }
 
 /* param elasticIpAddress: 指定弹性ip地址进行创建，当申请创建多个弹性ip时，必须为空(Optional) */
 func (r *CreateElasticIpsRequest) SetElasticIpAddress(elasticIpAddress string) {
-    r.ElasticIpAddress = &elasticIpAddress
+	r.ElasticIpAddress = &elasticIpAddress
 }
 
 /* param elasticIpSpec: 弹性ip规格(Required) */
 func (r *CreateElasticIpsRequest) SetElasticIpSpec(elasticIpSpec *vpc.ElasticIpSpec) {
-    r.ElasticIpSpec = elasticIpSpec
+	r.ElasticIpSpec = elasticIpSpec
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r CreateElasticIpsRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type CreateElasticIpsResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result CreateElasticIpsResult `json:"result"`
+	RequestID string                 `json:"requestId"`
+	Error     core.ErrorResponse     `json:"error"`
+	Result    CreateElasticIpsResult `json:"result"`
 }
 
 type CreateElasticIpsResult struct {
-    ElasticIpIds []string `json:"elasticIpIds"`
-    RequestId string `json:"requestId"`
+	ElasticIpIds []string `json:"elasticIpIds"`
+	RequestId    string   `json:"requestId"`
 }

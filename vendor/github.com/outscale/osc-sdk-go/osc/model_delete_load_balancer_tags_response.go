@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteLoadBalancerTagsResponse struct for DeleteLoadBalancerTagsResponse
 type DeleteLoadBalancerTagsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

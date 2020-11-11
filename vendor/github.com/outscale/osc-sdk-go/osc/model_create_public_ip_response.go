@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreatePublicIpResponse struct for CreatePublicIpResponse
 type CreatePublicIpResponse struct {
-	PublicIp PublicIp `json:"PublicIp,omitempty"`
+	PublicIp        PublicIp        `json:"PublicIp,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

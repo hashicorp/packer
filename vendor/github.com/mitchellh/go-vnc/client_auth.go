@@ -46,7 +46,7 @@ func (p *PasswordAuth) Handshake(c net.Conn) error {
 
 	crypted, err := p.encrypt(p.Password, randomValue)
 
-	if (err != nil) {
+	if err != nil {
 		return err
 	}
 
@@ -97,7 +97,7 @@ func (p *PasswordAuth) reverseBits(b byte) byte {
 }
 
 func (p *PasswordAuth) encrypt(key string, bytes []byte) ([]byte, error) {
-	keyBytes := []byte{0,0,0,0,0,0,0,0}
+	keyBytes := []byte{0, 0, 0, 0, 0, 0, 0, 0}
 
 	if len(key) > 8 {
 		key = key[:8]

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ReadVirtualGatewaysResponse struct for ReadVirtualGatewaysResponse
 type ReadVirtualGatewaysResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

@@ -9,11 +9,12 @@
  */
 
 package osc
+
 // ReadVmsStateRequest struct for ReadVmsStateRequest
 type ReadVmsStateRequest struct {
 	// If `true`, includes the status of all VMs. By default or if set to `false`, only includes the status of running VMs.
 	AllVms bool `json:"AllVms,omitempty"`
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool            `json:"DryRun,omitempty"`
 	Filters FiltersVmsState `json:"Filters,omitempty"`
 }

@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // LinkPublicIpResponse struct for LinkPublicIpResponse
 type LinkPublicIpResponse struct {
 	// (Net only) The ID representing the association of the EIP with the VM or the NIC.
-	LinkPublicIpId string `json:"LinkPublicIpId,omitempty"`
+	LinkPublicIpId  string          `json:"LinkPublicIpId,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

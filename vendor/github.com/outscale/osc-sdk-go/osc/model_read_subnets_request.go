@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadSubnetsRequest struct for ReadSubnetsRequest
 type ReadSubnetsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool          `json:"DryRun,omitempty"`
 	Filters FiltersSubnet `json:"Filters,omitempty"`
 }

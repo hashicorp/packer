@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // LinkRouteTableRequest struct for LinkRouteTableRequest
 type LinkRouteTableRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

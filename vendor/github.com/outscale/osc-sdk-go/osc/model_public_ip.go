@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // PublicIp Information about the public IP.
 type PublicIp struct {
 	// (Required in a Net) The ID representing the association of the EIP with the VM or the NIC.

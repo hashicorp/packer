@@ -12,8 +12,8 @@ package server
 type DeleteInstanceTagsRequest struct {
 
 	// 인스턴스번호리스트
-InstanceNoList []*string `json:"instanceNoList"`
+	InstanceNoList []*string `json:"instanceNoList"`
 
 	// 인스턴스태그리스트
-InstanceTagList []*InstanceTagParameter `json:"instanceTagList,omitempty"`
+	InstanceTagList []*InstanceTagParameter `json:"instanceTagList,omitempty"`
 }

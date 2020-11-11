@@ -12,8 +12,8 @@ package server
 type DetachNetworkInterfaceRequest struct {
 
 	// Network Interface번호
-NetworkInterfaceNo *string `json:"networkInterfaceNo"`
+	NetworkInterfaceNo *string `json:"networkInterfaceNo"`
 
 	// 서버인스턴스번호
-ServerInstanceNo *string `json:"serverInstanceNo"`
+	ServerInstanceNo *string `json:"serverInstanceNo"`
 }

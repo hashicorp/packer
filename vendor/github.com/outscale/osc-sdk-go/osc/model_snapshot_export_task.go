@@ -9,10 +9,11 @@
  */
 
 package osc
+
 // SnapshotExportTask Information about the snapshot export task.
 type SnapshotExportTask struct {
 	// If the snapshot export task fails, an error message appears.
-	Comment string `json:"Comment,omitempty"`
+	Comment   string    `json:"Comment,omitempty"`
 	OsuExport OsuExport `json:"OsuExport,omitempty"`
 	// The progress of the snapshot export task, as a percentage.
 	Progress int32 `json:"Progress,omitempty"`

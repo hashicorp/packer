@@ -10,6 +10,7 @@ import (
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -19,10 +20,10 @@ import (
 // Config is the configuration structure for the builder.
 type Config struct {
 	common.PackerConfig            `mapstructure:",squash"`
-	common.HTTPConfig              `mapstructure:",squash"`
-	common.FloppyConfig            `mapstructure:",squash"`
+	commonsteps.HTTPConfig         `mapstructure:",squash"`
+	commonsteps.FloppyConfig       `mapstructure:",squash"`
 	bootcommand.VNCConfig          `mapstructure:",squash"`
-	common.CDConfig                `mapstructure:",squash"`
+	commonsteps.CDConfig           `mapstructure:",squash"`
 	vmwcommon.DriverConfig         `mapstructure:",squash"`
 	vmwcommon.OutputConfig         `mapstructure:",squash"`
 	vmwcommon.RunConfig            `mapstructure:",squash"`

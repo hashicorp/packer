@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadPublicIpsRequest struct for ReadPublicIpsRequest
 type ReadPublicIpsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool            `json:"DryRun,omitempty"`
 	Filters FiltersPublicIp `json:"Filters,omitempty"`
 }

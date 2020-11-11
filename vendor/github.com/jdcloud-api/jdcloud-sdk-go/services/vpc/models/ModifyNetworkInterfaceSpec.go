@@ -16,15 +16,14 @@
 
 package models
 
-
 type ModifyNetworkInterfaceSpec struct {
 
-    /* 弹性网卡名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符 (Optional) */
-    NetworkInterfaceName string `json:"networkInterfaceName"`
+	/* 弹性网卡名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符 (Optional) */
+	NetworkInterfaceName string `json:"networkInterfaceName"`
 
-    /* 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
-    Description string `json:"description"`
+	/* 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
+	Description string `json:"description"`
 
-    /* 以覆盖原有安全组的方式更新的安全组。如果更新安全组ID列表，最多5个安全组 (Optional) */
-    SecurityGroups []string `json:"securityGroups"`
+	/* 以覆盖原有安全组的方式更新的安全组。如果更新安全组ID列表，最多5个安全组 (Optional) */
+	SecurityGroups []string `json:"securityGroups"`
 }

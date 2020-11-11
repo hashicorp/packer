@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // UnlinkRouteTableRequest struct for UnlinkRouteTableRequest
 type UnlinkRouteTableRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

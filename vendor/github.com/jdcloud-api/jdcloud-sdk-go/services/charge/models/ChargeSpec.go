@@ -16,15 +16,14 @@
 
 package models
 
-
 type ChargeSpec struct {
 
-    /* 计费模式，取值为：prepaid_by_duration，postpaid_by_usage或postpaid_by_duration，prepaid_by_duration表示预付费，postpaid_by_usage表示按用量后付费，postpaid_by_duration表示按配置后付费，默认为postpaid_by_duration (Optional) */
-    ChargeMode *string `json:"chargeMode"`
+	/* 计费模式，取值为：prepaid_by_duration，postpaid_by_usage或postpaid_by_duration，prepaid_by_duration表示预付费，postpaid_by_usage表示按用量后付费，postpaid_by_duration表示按配置后付费，默认为postpaid_by_duration (Optional) */
+	ChargeMode *string `json:"chargeMode"`
 
-    /* 预付费计费单位，当chargeMode为prepaid_by_duration时有效，取值为：month、year，默认为month (Optional) */
-    ChargeUnit *string `json:"chargeUnit"`
+	/* 预付费计费单位，当chargeMode为prepaid_by_duration时有效，取值为：month、year，默认为month (Optional) */
+	ChargeUnit *string `json:"chargeUnit"`
 
-    /* 预付费计费时长，当chargeMode取值为prepaid_by_duration时有效。当chargeUnit为month时取值为：1~9，当chargeUnit为year时取值为：1、2、3 (Optional) */
-    ChargeDuration *int `json:"chargeDuration"`
+	/* 预付费计费时长，当chargeMode取值为prepaid_by_duration时有效。当chargeUnit为month时取值为：1~9，当chargeUnit为year时取值为：1、2、3 (Optional) */
+	ChargeDuration *int `json:"chargeDuration"`
 }

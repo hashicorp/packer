@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadAccountsResponse struct for ReadAccountsResponse
 type ReadAccountsResponse struct {
 	// The list of the accounts.
-	Accounts []Account `json:"Accounts,omitempty"`
+	Accounts        []Account       `json:"Accounts,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

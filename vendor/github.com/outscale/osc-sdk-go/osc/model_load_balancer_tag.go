@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // LoadBalancerTag Information about the load balancer tag.
 type LoadBalancerTag struct {
 	// The key of the tag.

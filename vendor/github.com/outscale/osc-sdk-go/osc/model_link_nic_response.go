@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // LinkNicResponse struct for LinkNicResponse
 type LinkNicResponse struct {
 	// The ID of the NIC attachment.
-	LinkNicId string `json:"LinkNicId,omitempty"`
+	LinkNicId       string          `json:"LinkNicId,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

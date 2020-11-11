@@ -9,11 +9,12 @@
  */
 
 package osc
+
 // UpdateImageRequest struct for UpdateImageRequest
 type UpdateImageRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
 	DryRun bool `json:"DryRun,omitempty"`
 	// The ID of the OMI you want to modify.
-	ImageId string `json:"ImageId"`
+	ImageId             string                        `json:"ImageId"`
 	PermissionsToLaunch PermissionsOnResourceCreation `json:"PermissionsToLaunch"`
 }

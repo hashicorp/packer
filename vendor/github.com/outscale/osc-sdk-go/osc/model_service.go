@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // Service Information about the service.
 type Service struct {
 	// The list of network prefixes used by the service, in CIDR notation.

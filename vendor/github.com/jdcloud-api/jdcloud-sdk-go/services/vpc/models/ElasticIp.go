@@ -20,36 +20,36 @@ import charge "github.com/jdcloud-api/jdcloud-sdk-go/services/charge/models"
 
 type ElasticIp struct {
 
-    /* 弹性IP的Id (Optional) */
-    ElasticIpId string `json:"elasticIpId"`
+	/* 弹性IP的Id (Optional) */
+	ElasticIpId string `json:"elasticIpId"`
 
-    /* 弹性IP地址 (Optional) */
-    ElasticIpAddress string `json:"elasticIpAddress"`
+	/* 弹性IP地址 (Optional) */
+	ElasticIpAddress string `json:"elasticIpAddress"`
 
-    /* 弹性ip的限速（单位：Mbps) (Optional) */
-    BandwidthMbps int `json:"bandwidthMbps"`
+	/* 弹性ip的限速（单位：Mbps) (Optional) */
+	BandwidthMbps int `json:"bandwidthMbps"`
 
-    /* IP服务商，取值为bgp或no_bgp (Optional) */
-    Provider string `json:"provider"`
+	/* IP服务商，取值为bgp或no_bgp (Optional) */
+	Provider string `json:"provider"`
 
-    /* 私有IP的IPV4地址 (Optional) */
-    PrivateIpAddress string `json:"privateIpAddress"`
+	/* 私有IP的IPV4地址 (Optional) */
+	PrivateIpAddress string `json:"privateIpAddress"`
 
-    /* 配置弹性网卡Id (Optional) */
-    NetworkInterfaceId string `json:"networkInterfaceId"`
+	/* 配置弹性网卡Id (Optional) */
+	NetworkInterfaceId string `json:"networkInterfaceId"`
 
-    /* 实例Id (Optional) */
-    InstanceId string `json:"instanceId"`
+	/* 实例Id (Optional) */
+	InstanceId string `json:"instanceId"`
 
-    /* 实例类型 (Optional) */
-    InstanceType string `json:"instanceType"`
+	/* 实例类型 (Optional) */
+	InstanceType string `json:"instanceType"`
 
-    /* 计费配置 (Optional) */
-    Charge charge.Charge `json:"charge"`
+	/* 计费配置 (Optional) */
+	Charge charge.Charge `json:"charge"`
 
-    /* 弹性ip创建时间 (Optional) */
-    CreatedTime string `json:"createdTime"`
+	/* 弹性ip创建时间 (Optional) */
+	CreatedTime string `json:"createdTime"`
 
-    /* 弹性ip可用区属性，如果为空，表示全可用区 (Optional) */
-    Az string `json:"az"`
+	/* 弹性ip可用区属性，如果为空，表示全可用区 (Optional) */
+	Az string `json:"az"`
 }

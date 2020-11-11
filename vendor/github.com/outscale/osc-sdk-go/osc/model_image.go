@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // Image Information about the OMI.
 type Image struct {
 	// The account alias of the owner of the OMI.
@@ -30,7 +31,7 @@ type Image struct {
 	// The name of the OMI.
 	ImageName string `json:"ImageName,omitempty"`
 	// The type of the OMI.
-	ImageType string `json:"ImageType,omitempty"`
+	ImageType           string                `json:"ImageType,omitempty"`
 	PermissionsToLaunch PermissionsOnResource `json:"PermissionsToLaunch,omitempty"`
 	// The product code associated with the OMI (`0001` Linux/Unix \\| `0002` Windows \\| `0004` Linux/Oracle \\| `0005` Windows 10).
 	ProductCodes []string `json:"ProductCodes,omitempty"`
@@ -39,7 +40,7 @@ type Image struct {
 	// The type of root device used by the OMI (always `bsu`).
 	RootDeviceType string `json:"RootDeviceType,omitempty"`
 	// The state of the OMI (`pending` \\| `available` \\| `failed`).
-	State string `json:"State,omitempty"`
+	State        string       `json:"State,omitempty"`
 	StateComment StateComment `json:"StateComment,omitempty"`
 	// One or more tags associated with the OMI.
 	Tags []ResourceTag `json:"Tags,omitempty"`

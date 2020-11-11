@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // UnlinkNicRequest struct for UnlinkNicRequest
 type UnlinkNicRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

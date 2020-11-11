@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // NetToVirtualGatewayLink Information about the attachment.
 type NetToVirtualGatewayLink struct {
 	// The ID of the Net to which the virtual gateway is attached.

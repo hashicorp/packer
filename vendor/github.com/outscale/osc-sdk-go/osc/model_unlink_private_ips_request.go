@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // UnlinkPrivateIpsRequest struct for UnlinkPrivateIpsRequest
 type UnlinkPrivateIpsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

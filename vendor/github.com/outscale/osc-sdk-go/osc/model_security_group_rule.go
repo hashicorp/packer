@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // SecurityGroupRule Information about the security group rule.
 type SecurityGroupRule struct {
 	// The beginning of the port range for the TCP and UDP protocols, or an ICMP type number.

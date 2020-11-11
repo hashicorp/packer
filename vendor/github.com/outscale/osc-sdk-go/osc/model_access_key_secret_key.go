@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // AccessKeySecretKey Information about the secret access key.
 type AccessKeySecretKey struct {
 	// The ID of the secret access key.

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteLoadBalancerListenersRequest struct for DeleteLoadBalancerListenersRequest
 type DeleteLoadBalancerListenersRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

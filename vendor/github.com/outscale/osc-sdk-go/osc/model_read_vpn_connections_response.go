@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ReadVpnConnectionsResponse struct for ReadVpnConnectionsResponse
 type ReadVpnConnectionsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

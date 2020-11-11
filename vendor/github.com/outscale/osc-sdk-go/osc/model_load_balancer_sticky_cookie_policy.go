@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // LoadBalancerStickyCookiePolicy Information about the stickiness policy.
 type LoadBalancerStickyCookiePolicy struct {
 	// The name of the stickiness policy.

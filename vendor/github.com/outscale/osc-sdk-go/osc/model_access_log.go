@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // AccessLog Information about access logs.
 type AccessLog struct {
 	// If `true`, access logs are enabled for your load balancer. If `false`, they are not. If you set this to `true` in your request, the `OsuBucketName` parameter is required.

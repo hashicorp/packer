@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadNicsResponse struct for ReadNicsResponse
 type ReadNicsResponse struct {
 	// Information about one or more NICs.
-	Nics []Nic `json:"Nics,omitempty"`
+	Nics            []Nic           `json:"Nics,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

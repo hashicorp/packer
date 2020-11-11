@@ -5,6 +5,7 @@ package dockerpush
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/common"

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteAccessKeyRequest struct for DeleteAccessKeyRequest
 type DeleteAccessKeyRequest struct {
 	// The ID of the access key you want to delete.

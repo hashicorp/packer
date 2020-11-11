@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // VmState Information about the state of the VM.
 type VmState struct {
 	// The current state of the VM (`InService` \\| `OutOfService` \\| `Unknown`).

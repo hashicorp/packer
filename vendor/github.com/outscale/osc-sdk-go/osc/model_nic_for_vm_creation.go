@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // NicForVmCreation Information about the network interface card (NIC) when creating a virtual machine (VM).
 type NicForVmCreation struct {
 	// If `true`, the NIC is deleted when the VM is terminated. You can specify `true` only if you create a NIC when creating a VM.

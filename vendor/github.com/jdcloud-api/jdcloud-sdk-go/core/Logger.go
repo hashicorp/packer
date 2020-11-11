@@ -20,11 +20,11 @@ const (
 	LogFatal = iota
 	LogError
 	LogWarn
-	LogInfo  
+	LogInfo
 )
 
 type Logger interface {
-	Log(level int, message... interface{})
+	Log(level int, message ...interface{})
 }
 
 type DefaultLogger struct {
@@ -35,9 +35,8 @@ func NewDefaultLogger(level int) *DefaultLogger {
 	return &DefaultLogger{level}
 }
 
-func (logger DefaultLogger) Log (level int, message... interface{}) {
+func (logger DefaultLogger) Log(level int, message ...interface{}) {
 	if level <= logger.Level {
 		fmt.Println(message...)
 	}
 }
-

@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadQuotasResponse struct for ReadQuotasResponse
 type ReadQuotasResponse struct {
 	// Information about one or more quotas.
-	QuotaTypes []QuotaTypes `json:"QuotaTypes,omitempty"`
+	QuotaTypes      []QuotaTypes    `json:"QuotaTypes,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

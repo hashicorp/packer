@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersRouteTable One or more filters.
 type FiltersRouteTable struct {
 	// The IDs of the route tables involved in the associations.

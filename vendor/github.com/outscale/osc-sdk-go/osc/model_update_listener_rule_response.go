@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // UpdateListenerRuleResponse struct for UpdateListenerRuleResponse
 type UpdateListenerRuleResponse struct {
-	ListenerRule ListenerRule `json:"ListenerRule,omitempty"`
+	ListenerRule    ListenerRule    `json:"ListenerRule,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

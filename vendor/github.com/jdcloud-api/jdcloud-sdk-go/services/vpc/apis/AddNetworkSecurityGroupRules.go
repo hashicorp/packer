@@ -17,22 +17,21 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type AddNetworkSecurityGroupRulesRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* NetworkSecurityGroup ID  */
+	NetworkSecurityGroupId string `json:"networkSecurityGroupId"`
 
-    /* NetworkSecurityGroup ID  */
-    NetworkSecurityGroupId string `json:"networkSecurityGroupId"`
-
-    /* 安全组规则信息  */
-    NetworkSecurityGroupRuleSpecs []vpc.AddSecurityGroupRules `json:"networkSecurityGroupRuleSpecs"`
+	/* 安全组规则信息  */
+	NetworkSecurityGroupRuleSpecs []vpc.AddSecurityGroupRules `json:"networkSecurityGroupRuleSpecs"`
 }
 
 /*
@@ -43,21 +42,21 @@ type AddNetworkSecurityGroupRulesRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewAddNetworkSecurityGroupRulesRequest(
-    regionId string,
-    networkSecurityGroupId string,
-    networkSecurityGroupRuleSpecs []vpc.AddSecurityGroupRules,
+	regionId string,
+	networkSecurityGroupId string,
+	networkSecurityGroupRuleSpecs []vpc.AddSecurityGroupRules,
 ) *AddNetworkSecurityGroupRulesRequest {
 
 	return &AddNetworkSecurityGroupRulesRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}:addNetworkSecurityGroupRules",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        NetworkSecurityGroupId: networkSecurityGroupId,
-        NetworkSecurityGroupRuleSpecs: networkSecurityGroupRuleSpecs,
+		RegionId:                      regionId,
+		NetworkSecurityGroupId:        networkSecurityGroupId,
+		NetworkSecurityGroupRuleSpecs: networkSecurityGroupRuleSpecs,
 	}
 }
 
@@ -67,62 +66,62 @@ func NewAddNetworkSecurityGroupRulesRequest(
  * param networkSecurityGroupRuleSpecs: 安全组规则信息 (Required)
  */
 func NewAddNetworkSecurityGroupRulesRequestWithAllParams(
-    regionId string,
-    networkSecurityGroupId string,
-    networkSecurityGroupRuleSpecs []vpc.AddSecurityGroupRules,
+	regionId string,
+	networkSecurityGroupId string,
+	networkSecurityGroupRuleSpecs []vpc.AddSecurityGroupRules,
 ) *AddNetworkSecurityGroupRulesRequest {
 
-    return &AddNetworkSecurityGroupRulesRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}:addNetworkSecurityGroupRules",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        NetworkSecurityGroupId: networkSecurityGroupId,
-        NetworkSecurityGroupRuleSpecs: networkSecurityGroupRuleSpecs,
-    }
+	return &AddNetworkSecurityGroupRulesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}:addNetworkSecurityGroupRules",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:                      regionId,
+		NetworkSecurityGroupId:        networkSecurityGroupId,
+		NetworkSecurityGroupRuleSpecs: networkSecurityGroupRuleSpecs,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewAddNetworkSecurityGroupRulesRequestWithoutParam() *AddNetworkSecurityGroupRulesRequest {
 
-    return &AddNetworkSecurityGroupRulesRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}:addNetworkSecurityGroupRules",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &AddNetworkSecurityGroupRulesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}:addNetworkSecurityGroupRules",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *AddNetworkSecurityGroupRulesRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param networkSecurityGroupId: NetworkSecurityGroup ID(Required) */
 func (r *AddNetworkSecurityGroupRulesRequest) SetNetworkSecurityGroupId(networkSecurityGroupId string) {
-    r.NetworkSecurityGroupId = networkSecurityGroupId
+	r.NetworkSecurityGroupId = networkSecurityGroupId
 }
 
 /* param networkSecurityGroupRuleSpecs: 安全组规则信息(Required) */
 func (r *AddNetworkSecurityGroupRulesRequest) SetNetworkSecurityGroupRuleSpecs(networkSecurityGroupRuleSpecs []vpc.AddSecurityGroupRules) {
-    r.NetworkSecurityGroupRuleSpecs = networkSecurityGroupRuleSpecs
+	r.NetworkSecurityGroupRuleSpecs = networkSecurityGroupRuleSpecs
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r AddNetworkSecurityGroupRulesRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type AddNetworkSecurityGroupRulesResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result AddNetworkSecurityGroupRulesResult `json:"result"`
+	RequestID string                             `json:"requestId"`
+	Error     core.ErrorResponse                 `json:"error"`
+	Result    AddNetworkSecurityGroupRulesResult `json:"result"`
 }
 
 type AddNetworkSecurityGroupRulesResult struct {

@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type AccessKeyApiService service
 
 // CreateAccessKeyOpts Optional parameters for the method 'CreateAccessKey'
 type CreateAccessKeyOpts struct {
-    CreateAccessKeyRequest optional.Interface
+	CreateAccessKeyRequest optional.Interface
 }
 
 /*
 CreateAccessKey Method for CreateAccessKey
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateAccessKeyOpts - Optional Parameters:
- * @param "CreateAccessKeyRequest" (optional.Interface of CreateAccessKeyRequest) - 
+ * @param "CreateAccessKeyRequest" (optional.Interface of CreateAccessKeyRequest) -
 @return CreateAccessKeyResponse
 */
 func (a *AccessKeyApiService) CreateAccessKey(ctx _context.Context, localVarOptionals *CreateAccessKeyOpts) (CreateAccessKeyResponse, *_nethttp.Response, error) {
@@ -139,14 +139,14 @@ func (a *AccessKeyApiService) CreateAccessKey(ctx _context.Context, localVarOpti
 
 // DeleteAccessKeyOpts Optional parameters for the method 'DeleteAccessKey'
 type DeleteAccessKeyOpts struct {
-    DeleteAccessKeyRequest optional.Interface
+	DeleteAccessKeyRequest optional.Interface
 }
 
 /*
 DeleteAccessKey Method for DeleteAccessKey
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteAccessKeyOpts - Optional Parameters:
- * @param "DeleteAccessKeyRequest" (optional.Interface of DeleteAccessKeyRequest) - 
+ * @param "DeleteAccessKeyRequest" (optional.Interface of DeleteAccessKeyRequest) -
 @return DeleteAccessKeyResponse
 */
 func (a *AccessKeyApiService) DeleteAccessKey(ctx _context.Context, localVarOptionals *DeleteAccessKeyOpts) (DeleteAccessKeyResponse, *_nethttp.Response, error) {
@@ -250,14 +250,14 @@ func (a *AccessKeyApiService) DeleteAccessKey(ctx _context.Context, localVarOpti
 
 // ReadAccessKeysOpts Optional parameters for the method 'ReadAccessKeys'
 type ReadAccessKeysOpts struct {
-    ReadAccessKeysRequest optional.Interface
+	ReadAccessKeysRequest optional.Interface
 }
 
 /*
 ReadAccessKeys Method for ReadAccessKeys
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadAccessKeysOpts - Optional Parameters:
- * @param "ReadAccessKeysRequest" (optional.Interface of ReadAccessKeysRequest) - 
+ * @param "ReadAccessKeysRequest" (optional.Interface of ReadAccessKeysRequest) -
 @return ReadAccessKeysResponse
 */
 func (a *AccessKeyApiService) ReadAccessKeys(ctx _context.Context, localVarOptionals *ReadAccessKeysOpts) (ReadAccessKeysResponse, *_nethttp.Response, error) {
@@ -361,14 +361,14 @@ func (a *AccessKeyApiService) ReadAccessKeys(ctx _context.Context, localVarOptio
 
 // ReadSecretAccessKeyOpts Optional parameters for the method 'ReadSecretAccessKey'
 type ReadSecretAccessKeyOpts struct {
-    ReadSecretAccessKeyRequest optional.Interface
+	ReadSecretAccessKeyRequest optional.Interface
 }
 
 /*
 ReadSecretAccessKey Method for ReadSecretAccessKey
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadSecretAccessKeyOpts - Optional Parameters:
- * @param "ReadSecretAccessKeyRequest" (optional.Interface of ReadSecretAccessKeyRequest) - 
+ * @param "ReadSecretAccessKeyRequest" (optional.Interface of ReadSecretAccessKeyRequest) -
 @return ReadSecretAccessKeyResponse
 */
 func (a *AccessKeyApiService) ReadSecretAccessKey(ctx _context.Context, localVarOptionals *ReadSecretAccessKeyOpts) (ReadSecretAccessKeyResponse, *_nethttp.Response, error) {
@@ -472,14 +472,14 @@ func (a *AccessKeyApiService) ReadSecretAccessKey(ctx _context.Context, localVar
 
 // UpdateAccessKeyOpts Optional parameters for the method 'UpdateAccessKey'
 type UpdateAccessKeyOpts struct {
-    UpdateAccessKeyRequest optional.Interface
+	UpdateAccessKeyRequest optional.Interface
 }
 
 /*
 UpdateAccessKey Method for UpdateAccessKey
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *UpdateAccessKeyOpts - Optional Parameters:
- * @param "UpdateAccessKeyRequest" (optional.Interface of UpdateAccessKeyRequest) - 
+ * @param "UpdateAccessKeyRequest" (optional.Interface of UpdateAccessKeyRequest) -
 @return UpdateAccessKeyResponse
 */
 func (a *AccessKeyApiService) UpdateAccessKey(ctx _context.Context, localVarOptionals *UpdateAccessKeyOpts) (UpdateAccessKeyResponse, *_nethttp.Response, error) {

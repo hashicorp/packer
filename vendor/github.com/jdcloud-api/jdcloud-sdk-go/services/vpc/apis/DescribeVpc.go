@@ -17,19 +17,18 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type DescribeVpcRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
-
-    /* Vpc ID  */
-    VpcId string `json:"vpcId"`
+	/* Vpc ID  */
+	VpcId string `json:"vpcId"`
 }
 
 /*
@@ -39,19 +38,19 @@ type DescribeVpcRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeVpcRequest(
-    regionId string,
-    vpcId string,
+	regionId string,
+	vpcId string,
 ) *DescribeVpcRequest {
 
 	return &DescribeVpcRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/vpcs/{vpcId}",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        VpcId: vpcId,
+		RegionId: regionId,
+		VpcId:    vpcId,
 	}
 }
 
@@ -60,57 +59,57 @@ func NewDescribeVpcRequest(
  * param vpcId: Vpc ID (Required)
  */
 func NewDescribeVpcRequestWithAllParams(
-    regionId string,
-    vpcId string,
+	regionId string,
+	vpcId string,
 ) *DescribeVpcRequest {
 
-    return &DescribeVpcRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/vpcs/{vpcId}",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        VpcId: vpcId,
-    }
+	return &DescribeVpcRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/vpcs/{vpcId}",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId: regionId,
+		VpcId:    vpcId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeVpcRequestWithoutParam() *DescribeVpcRequest {
 
-    return &DescribeVpcRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/vpcs/{vpcId}",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeVpcRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/vpcs/{vpcId}",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeVpcRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param vpcId: Vpc ID(Required) */
 func (r *DescribeVpcRequest) SetVpcId(vpcId string) {
-    r.VpcId = vpcId
+	r.VpcId = vpcId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeVpcRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeVpcResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeVpcResult `json:"result"`
+	RequestID string             `json:"requestId"`
+	Error     core.ErrorResponse `json:"error"`
+	Result    DescribeVpcResult  `json:"result"`
 }
 
 type DescribeVpcResult struct {
-    Vpc vpc.Vpc `json:"vpc"`
+	Vpc vpc.Vpc `json:"vpc"`
 }

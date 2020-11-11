@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreateAccountResponse struct for CreateAccountResponse
 type CreateAccountResponse struct {
-	Account Account `json:"Account,omitempty"`
+	Account         Account         `json:"Account,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

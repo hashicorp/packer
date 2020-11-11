@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteVpnConnectionRouteResponse struct for DeleteVpnConnectionRouteResponse
 type DeleteVpnConnectionRouteResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

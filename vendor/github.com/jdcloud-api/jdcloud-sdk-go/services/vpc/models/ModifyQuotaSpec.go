@@ -16,15 +16,14 @@
 
 package models
 
-
 type ModifyQuotaSpec struct {
 
-    /* 资源类型，取值范围：vpc、elastic_ip、subnet、security_group、vpcpeering、network_interface（配额只统计辅助网卡）  */
-    Type string `json:"type"`
+	/* 资源类型，取值范围：vpc、elastic_ip、subnet、security_group、vpcpeering、network_interface（配额只统计辅助网卡）  */
+	Type string `json:"type"`
 
-    /* type为vpc、elastic_ip、network_interface不设置, type为subnet、security_group、vpcpeering设置为vpcId (Optional) */
-    ParentResourceId string `json:"parentResourceId"`
+	/* type为vpc、elastic_ip、network_interface不设置, type为subnet、security_group、vpcpeering设置为vpcId (Optional) */
+	ParentResourceId string `json:"parentResourceId"`
 
-    /* 配额大小  */
-    MaxLimit int `json:"maxLimit"`
+	/* 配额大小  */
+	MaxLimit int `json:"maxLimit"`
 }

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersVm One or more filters.
 type FiltersVm struct {
 	// The keys of the tags associated with the VMs.

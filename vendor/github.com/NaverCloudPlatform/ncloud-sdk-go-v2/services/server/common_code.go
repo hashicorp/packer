@@ -12,8 +12,8 @@ package server
 type CommonCode struct {
 
 	// 코드
-Code *string `json:"code,omitempty"`
+	Code *string `json:"code,omitempty"`
 
 	// 코드명
-CodeName *string `json:"codeName,omitempty"`
+	CodeName *string `json:"codeName,omitempty"`
 }

@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -43,7 +43,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	steps := []multistep.Step{}
 	if !b.config.ISOSkipCache {
-		steps = append(steps, &common.StepDownload{
+		steps = append(steps, &commonsteps.StepDownload{
 			Checksum:    b.config.ISOChecksum,
 			Description: "ISO",
 			Extension:   b.config.TargetExtension,
@@ -59,12 +59,12 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	steps = append(steps, new(stepPrepareOutputDir),
-		&common.StepCreateFloppy{
+		&commonsteps.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
-		&common.StepCreateCD{
+		&commonsteps.StepCreateCD{
 			Files: b.config.CDConfig.CDFiles,
 			Label: b.config.CDConfig.CDLabel,
 		},
@@ -96,7 +96,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			QemuImgArgs:     b.config.QemuImgArgs,
 		},
 		new(stepHTTPIPDiscover),
-		&common.StepHTTPServer{
+		&commonsteps.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
@@ -126,8 +126,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			SSHPort:   commPort,
 			WinRMPort: commPort,
 		},
-		new(common.StepProvision),
-		&common.StepCleanupTempKeys{
+		new(commonsteps.StepProvision),
+		&commonsteps.StepCleanupTempKeys{
 			Comm: &b.config.CommConfig.Comm,
 		},
 		&stepShutdown{
@@ -154,7 +154,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("ui", ui)
 
 	// Run
-	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
+	b.runner = commonsteps.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(ctx, state)
 
 	// If there was an error, return that

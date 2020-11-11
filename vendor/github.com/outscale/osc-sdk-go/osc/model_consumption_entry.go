@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ConsumptionEntry Information about the resources consumed during the specified time period.
 type ConsumptionEntry struct {
 	// The category of the resource (for example, `network`).

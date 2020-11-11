@@ -16,12 +16,11 @@
 
 package models
 
-
 type ShareInfo struct {
 
-    /* 被共享快照的用户的pin (Optional) */
-    ShareTo string `json:"shareTo"`
+	/* 被共享快照的用户的pin (Optional) */
+	ShareTo string `json:"shareTo"`
 
-    /* 共享时间 (Optional) */
-    ShareTime string `json:"shareTime"`
+	/* 共享时间 (Optional) */
+	ShareTime string `json:"shareTime"`
 }

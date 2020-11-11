@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadFlexibleGpusRequest struct for ReadFlexibleGpusRequest
 type ReadFlexibleGpusRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool               `json:"DryRun,omitempty"`
 	Filters FiltersFlexibleGpu `json:"Filters,omitempty"`
 }

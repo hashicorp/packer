@@ -12,5 +12,5 @@ package server
 type DeleteBlockStorageInstancesRequest struct {
 
 	// 블록스토리지인스턴스번호리스트
-BlockStorageInstanceNoList []*string `json:"blockStorageInstanceNoList"`
+	BlockStorageInstanceNoList []*string `json:"blockStorageInstanceNoList"`
 }

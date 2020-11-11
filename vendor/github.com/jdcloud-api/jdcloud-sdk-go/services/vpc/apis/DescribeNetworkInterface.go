@@ -17,19 +17,18 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type DescribeNetworkInterfaceRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
-
-    /* networkInterface ID  */
-    NetworkInterfaceId string `json:"networkInterfaceId"`
+	/* networkInterface ID  */
+	NetworkInterfaceId string `json:"networkInterfaceId"`
 }
 
 /*
@@ -39,19 +38,19 @@ type DescribeNetworkInterfaceRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeNetworkInterfaceRequest(
-    regionId string,
-    networkInterfaceId string,
+	regionId string,
+	networkInterfaceId string,
 ) *DescribeNetworkInterfaceRequest {
 
 	return &DescribeNetworkInterfaceRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        NetworkInterfaceId: networkInterfaceId,
+		RegionId:           regionId,
+		NetworkInterfaceId: networkInterfaceId,
 	}
 }
 
@@ -60,57 +59,57 @@ func NewDescribeNetworkInterfaceRequest(
  * param networkInterfaceId: networkInterface ID (Required)
  */
 func NewDescribeNetworkInterfaceRequestWithAllParams(
-    regionId string,
-    networkInterfaceId string,
+	regionId string,
+	networkInterfaceId string,
 ) *DescribeNetworkInterfaceRequest {
 
-    return &DescribeNetworkInterfaceRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        NetworkInterfaceId: networkInterfaceId,
-    }
+	return &DescribeNetworkInterfaceRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:           regionId,
+		NetworkInterfaceId: networkInterfaceId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeNetworkInterfaceRequestWithoutParam() *DescribeNetworkInterfaceRequest {
 
-    return &DescribeNetworkInterfaceRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeNetworkInterfaceRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeNetworkInterfaceRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param networkInterfaceId: networkInterface ID(Required) */
 func (r *DescribeNetworkInterfaceRequest) SetNetworkInterfaceId(networkInterfaceId string) {
-    r.NetworkInterfaceId = networkInterfaceId
+	r.NetworkInterfaceId = networkInterfaceId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeNetworkInterfaceRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeNetworkInterfaceResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeNetworkInterfaceResult `json:"result"`
+	RequestID string                         `json:"requestId"`
+	Error     core.ErrorResponse             `json:"error"`
+	Result    DescribeNetworkInterfaceResult `json:"result"`
 }
 
 type DescribeNetworkInterfaceResult struct {
-    NetworkInterface vpc.NetworkInterface `json:"networkInterface"`
+	NetworkInterface vpc.NetworkInterface `json:"networkInterface"`
 }

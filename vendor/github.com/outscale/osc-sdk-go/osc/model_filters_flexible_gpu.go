@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersFlexibleGpu One or more filters.
 type FiltersFlexibleGpu struct {
 	// Indicates whether the fGPU is deleted when terminating the VM.

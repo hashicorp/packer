@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreateServerCertificateResponse struct for CreateServerCertificateResponse
 type CreateServerCertificateResponse struct {
-	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
+	ResponseContext   ResponseContext   `json:"ResponseContext,omitempty"`
 	ServerCertificate ServerCertificate `json:"ServerCertificate,omitempty"`
 }

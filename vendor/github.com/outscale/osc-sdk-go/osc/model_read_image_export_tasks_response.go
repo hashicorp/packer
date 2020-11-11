@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadImageExportTasksResponse struct for ReadImageExportTasksResponse
 type ReadImageExportTasksResponse struct {
 	// Information about one or more image export tasks.
 	ImageExportTasks []ImageExportTask `json:"ImageExportTasks,omitempty"`
-	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
+	ResponseContext  ResponseContext   `json:"ResponseContext,omitempty"`
 }

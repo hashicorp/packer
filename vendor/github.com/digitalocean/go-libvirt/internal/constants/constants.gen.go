@@ -867,7 +867,6 @@ const (
 	// ProcDomainSetIothreadParams is libvirt's REMOTE_PROC_DOMAIN_SET_IOTHREAD_PARAMS
 	ProcDomainSetIothreadParams = 402
 
-
 	// From consts:
 	// StringMax is libvirt's REMOTE_STRING_MAX
 	StringMax = 4194304

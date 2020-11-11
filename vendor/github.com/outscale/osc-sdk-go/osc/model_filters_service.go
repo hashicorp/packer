@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersService One or more filters.
 type FiltersService struct {
 	// The IDs of the services.

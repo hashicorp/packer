@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -50,11 +50,11 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	// Build the steps.
 	steps := []multistep.Step{
 		new(vboxcommon.StepSuppressMessages),
-		&common.StepCreateFloppy{
+		&commonsteps.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 		},
-		&common.StepCreateCD{
+		&commonsteps.StepCreateCD{
 			Files: b.config.CDConfig.CDFiles,
 			Label: b.config.CDConfig.CDLabel,
 		},
@@ -64,7 +64,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			KeepRegistered: b.config.KeepRegistered,
 		},
 		new(vboxcommon.StepHTTPIPDiscover),
-		&common.StepHTTPServer{
+		&commonsteps.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
@@ -127,8 +127,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			GuestAdditionsPath: b.config.GuestAdditionsPath,
 			Ctx:                b.config.ctx,
 		},
-		new(common.StepProvision),
-		&common.StepCleanupTempKeys{
+		new(commonsteps.StepProvision),
+		&commonsteps.StepCleanupTempKeys{
 			Comm: &b.config.CommConfig.Comm,
 		},
 		&vboxcommon.StepShutdown{
@@ -160,13 +160,13 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	if !b.config.SkipExport {
 		steps = append(steps, nil)
 		copy(steps[1:], steps)
-		steps[0] = &common.StepOutputDir{
+		steps[0] = &commonsteps.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
 		}
 	}
 	// Run the steps.
-	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
+	b.runner = commonsteps.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(ctx, state)
 
 	// Report any errors.

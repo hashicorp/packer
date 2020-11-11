@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreateNetPeeringResponse struct for CreateNetPeeringResponse
 type CreateNetPeeringResponse struct {
-	NetPeering NetPeering `json:"NetPeering,omitempty"`
+	NetPeering      NetPeering      `json:"NetPeering,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

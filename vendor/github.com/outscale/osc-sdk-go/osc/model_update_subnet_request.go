@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // UpdateSubnetRequest struct for UpdateSubnetRequest
 type UpdateSubnetRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

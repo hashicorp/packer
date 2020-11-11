@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // ReadVolumesResponse struct for ReadVolumesResponse
 type ReadVolumesResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

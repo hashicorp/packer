@@ -16,15 +16,14 @@
 
 package models
 
-
 type VpcPeeringVpcInfo struct {
 
-    /* 子网所属VPC的Id (Optional) */
-    VpcId string `json:"vpcId"`
+	/* 子网所属VPC的Id (Optional) */
+	VpcId string `json:"vpcId"`
 
-    /* 私有网络名称，取值范围：1-60个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
-    VpcName string `json:"vpcName"`
+	/* 私有网络名称，取值范围：1-60个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
+	VpcName string `json:"vpcName"`
 
-    /* 如果为空，则不限制网段，如果不为空，10.0.0.0/8、172.16.0.0/12和192.168.0.0/16及它们包含的子网，且子网掩码长度为16-28之间 (Optional) */
-    AddressPrefix []string `json:"addressPrefix"`
+	/* 如果为空，则不限制网段，如果不为空，10.0.0.0/8、172.16.0.0/12和192.168.0.0/16及它们包含的子网，且子网掩码长度为16-28之间 (Optional) */
+	AddressPrefix []string `json:"addressPrefix"`
 }

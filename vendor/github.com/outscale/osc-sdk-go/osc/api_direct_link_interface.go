@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type DirectLinkInterfaceApiService service
 
 // CreateDirectLinkInterfaceOpts Optional parameters for the method 'CreateDirectLinkInterface'
 type CreateDirectLinkInterfaceOpts struct {
-    CreateDirectLinkInterfaceRequest optional.Interface
+	CreateDirectLinkInterfaceRequest optional.Interface
 }
 
 /*
 CreateDirectLinkInterface Method for CreateDirectLinkInterface
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *CreateDirectLinkInterfaceOpts - Optional Parameters:
- * @param "CreateDirectLinkInterfaceRequest" (optional.Interface of CreateDirectLinkInterfaceRequest) - 
+ * @param "CreateDirectLinkInterfaceRequest" (optional.Interface of CreateDirectLinkInterfaceRequest) -
 @return CreateDirectLinkInterfaceResponse
 */
 func (a *DirectLinkInterfaceApiService) CreateDirectLinkInterface(ctx _context.Context, localVarOptionals *CreateDirectLinkInterfaceOpts) (CreateDirectLinkInterfaceResponse, *_nethttp.Response, error) {
@@ -139,14 +139,14 @@ func (a *DirectLinkInterfaceApiService) CreateDirectLinkInterface(ctx _context.C
 
 // DeleteDirectLinkInterfaceOpts Optional parameters for the method 'DeleteDirectLinkInterface'
 type DeleteDirectLinkInterfaceOpts struct {
-    DeleteDirectLinkInterfaceRequest optional.Interface
+	DeleteDirectLinkInterfaceRequest optional.Interface
 }
 
 /*
 DeleteDirectLinkInterface Method for DeleteDirectLinkInterface
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteDirectLinkInterfaceOpts - Optional Parameters:
- * @param "DeleteDirectLinkInterfaceRequest" (optional.Interface of DeleteDirectLinkInterfaceRequest) - 
+ * @param "DeleteDirectLinkInterfaceRequest" (optional.Interface of DeleteDirectLinkInterfaceRequest) -
 @return DeleteDirectLinkInterfaceResponse
 */
 func (a *DirectLinkInterfaceApiService) DeleteDirectLinkInterface(ctx _context.Context, localVarOptionals *DeleteDirectLinkInterfaceOpts) (DeleteDirectLinkInterfaceResponse, *_nethttp.Response, error) {
@@ -250,14 +250,14 @@ func (a *DirectLinkInterfaceApiService) DeleteDirectLinkInterface(ctx _context.C
 
 // ReadDirectLinkInterfacesOpts Optional parameters for the method 'ReadDirectLinkInterfaces'
 type ReadDirectLinkInterfacesOpts struct {
-    ReadDirectLinkInterfacesRequest optional.Interface
+	ReadDirectLinkInterfacesRequest optional.Interface
 }
 
 /*
 ReadDirectLinkInterfaces Method for ReadDirectLinkInterfaces
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadDirectLinkInterfacesOpts - Optional Parameters:
- * @param "ReadDirectLinkInterfacesRequest" (optional.Interface of ReadDirectLinkInterfacesRequest) - 
+ * @param "ReadDirectLinkInterfacesRequest" (optional.Interface of ReadDirectLinkInterfacesRequest) -
 @return ReadDirectLinkInterfacesResponse
 */
 func (a *DirectLinkInterfaceApiService) ReadDirectLinkInterfaces(ctx _context.Context, localVarOptionals *ReadDirectLinkInterfacesOpts) (ReadDirectLinkInterfacesResponse, *_nethttp.Response, error) {

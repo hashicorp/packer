@@ -16,18 +16,17 @@
 
 package models
 
-
 type Quota struct {
 
-    /* 资源类型，取值范围：vpc、elastic_ip、subnet、security_group、vpcpeering、network_interface（配额只统计辅助网卡） (Optional) */
-    Type string `json:"type"`
+	/* 资源类型，取值范围：vpc、elastic_ip、subnet、security_group、vpcpeering、network_interface（配额只统计辅助网卡） (Optional) */
+	Type string `json:"type"`
 
-    /* vpc、elastic_ip、network_interface为空, subnet、security_group、vpcpeering为vpcId (Optional) */
-    ParentResourceId string `json:"parentResourceId"`
+	/* vpc、elastic_ip、network_interface为空, subnet、security_group、vpcpeering为vpcId (Optional) */
+	ParentResourceId string `json:"parentResourceId"`
 
-    /* 配额大小 (Optional) */
-    MaxLimit int `json:"maxLimit"`
+	/* 配额大小 (Optional) */
+	MaxLimit int `json:"maxLimit"`
 
-    /* 已存在的资源数量 (Optional) */
-    Count int `json:"count"`
+	/* 已存在的资源数量 (Optional) */
+	Count int `json:"count"`
 }

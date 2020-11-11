@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // NatService Information about the NAT service.
 type NatService struct {
 	// The ID of the NAT service.

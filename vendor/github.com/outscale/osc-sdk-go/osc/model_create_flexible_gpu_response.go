@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreateFlexibleGpuResponse struct for CreateFlexibleGpuResponse
 type CreateFlexibleGpuResponse struct {
-	FlexibleGpu FlexibleGpu `json:"FlexibleGpu,omitempty"`
+	FlexibleGpu     FlexibleGpu     `json:"FlexibleGpu,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

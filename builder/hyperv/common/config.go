@@ -11,6 +11,7 @@ import (
 	powershell "github.com/hashicorp/packer/builder/hyperv/common/powershell"
 	"github.com/hashicorp/packer/builder/hyperv/common/powershell/hyperv"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -36,8 +37,8 @@ const (
 )
 
 type CommonConfig struct {
-	common.FloppyConfig `mapstructure:",squash"`
-	common.CDConfig     `mapstructure:",squash"`
+	commonsteps.FloppyConfig `mapstructure:",squash"`
+	commonsteps.CDConfig     `mapstructure:",squash"`
 	// The block size of the VHD to be created.
 	// Recommended disk block size for Linux hyper-v guests is 1 MiB. This
 	// defaults to "32" MiB.

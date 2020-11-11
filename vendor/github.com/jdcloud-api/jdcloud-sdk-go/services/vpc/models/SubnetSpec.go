@@ -16,21 +16,20 @@
 
 package models
 
-
 type SubnetSpec struct {
 
-    /* 子网所属vpc的Id  */
-    VpcId string `json:"vpcId"`
+	/* 子网所属vpc的Id  */
+	VpcId string `json:"vpcId"`
 
-    /* 子网名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。  */
-    SubnetName string `json:"subnetName"`
+	/* 子网名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。  */
+	SubnetName string `json:"subnetName"`
 
-    /* 子网网段，vpc内子网网段不能重叠，cidr的取值范围：10.0.0.0/8、172.16.0.0/12和192.168.0.0/16及它们包含的子网，且子网掩码长度为16-28之间，如果vpc含有cidr，则必须为vpc所在cidr的子网  */
-    AddressPrefix string `json:"addressPrefix"`
+	/* 子网网段，vpc内子网网段不能重叠，cidr的取值范围：10.0.0.0/8、172.16.0.0/12和192.168.0.0/16及它们包含的子网，且子网掩码长度为16-28之间，如果vpc含有cidr，则必须为vpc所在cidr的子网  */
+	AddressPrefix string `json:"addressPrefix"`
 
-    /* 子网关联的路由表Id, 默认为vpc的默认路由表 (Optional) */
-    RouteTableId string `json:"routeTableId"`
+	/* 子网关联的路由表Id, 默认为vpc的默认路由表 (Optional) */
+	RouteTableId string `json:"routeTableId"`
 
-    /* 子网描述信息,允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
-    Description string `json:"description"`
+	/* 子网描述信息,允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
+	Description string `json:"description"`
 }

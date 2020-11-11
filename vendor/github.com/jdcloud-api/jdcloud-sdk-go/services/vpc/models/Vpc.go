@@ -16,30 +16,29 @@
 
 package models
 
-
 type Vpc struct {
 
-    /* Vpc的Id (Optional) */
-    VpcId string `json:"vpcId"`
+	/* Vpc的Id (Optional) */
+	VpcId string `json:"vpcId"`
 
-    /* 如果为空，则不限制网段，如果不为空，10.0.0.0/8、172.16.0.0/12和192.168.0.0/16及它们包含的子网，且子网掩码长度为16-28之间 (Optional) */
-    AddressPrefix string `json:"addressPrefix"`
+	/* 如果为空，则不限制网段，如果不为空，10.0.0.0/8、172.16.0.0/12和192.168.0.0/16及它们包含的子网，且子网掩码长度为16-28之间 (Optional) */
+	AddressPrefix string `json:"addressPrefix"`
 
-    /* VPC 描述，取值范围：1~120个字符 (Optional) */
-    Description string `json:"description"`
+	/* VPC 描述，取值范围：1~120个字符 (Optional) */
+	Description string `json:"description"`
 
-    /* 私有网络名称，取值范围：1-60个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
-    VpcName string `json:"vpcName"`
+	/* 私有网络名称，取值范围：1-60个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
+	VpcName string `json:"vpcName"`
 
-    /* 同一vpc下的acl id 列表 (Optional) */
-    AclIds []string `json:"aclIds"`
+	/* 同一vpc下的acl id 列表 (Optional) */
+	AclIds []string `json:"aclIds"`
 
-    /*  (Optional) */
-    RouteTableIds []string `json:"routeTableIds"`
+	/*  (Optional) */
+	RouteTableIds []string `json:"routeTableIds"`
 
-    /* 私有网络包含的子网列表 (Optional) */
-    Subnets []Subnet `json:"subnets"`
+	/* 私有网络包含的子网列表 (Optional) */
+	Subnets []Subnet `json:"subnets"`
 
-    /* vpc创建时间 (Optional) */
-    CreatedTime string `json:"createdTime"`
+	/* vpc创建时间 (Optional) */
+	CreatedTime string `json:"createdTime"`
 }

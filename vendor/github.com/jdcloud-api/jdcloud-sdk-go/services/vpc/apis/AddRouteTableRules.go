@@ -17,22 +17,21 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type AddRouteTableRulesRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* RouteTable ID  */
+	RouteTableId string `json:"routeTableId"`
 
-    /* RouteTable ID  */
-    RouteTableId string `json:"routeTableId"`
-
-    /* 安全组规则信息  */
-    RouteTableRuleSpecs []vpc.AddRouteTableRules `json:"routeTableRuleSpecs"`
+	/* 安全组规则信息  */
+	RouteTableRuleSpecs []vpc.AddRouteTableRules `json:"routeTableRuleSpecs"`
 }
 
 /*
@@ -43,21 +42,21 @@ type AddRouteTableRulesRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewAddRouteTableRulesRequest(
-    regionId string,
-    routeTableId string,
-    routeTableRuleSpecs []vpc.AddRouteTableRules,
+	regionId string,
+	routeTableId string,
+	routeTableRuleSpecs []vpc.AddRouteTableRules,
 ) *AddRouteTableRulesRequest {
 
 	return &AddRouteTableRulesRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/routeTables/{routeTableId}:addRouteTableRules",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        RouteTableId: routeTableId,
-        RouteTableRuleSpecs: routeTableRuleSpecs,
+		RegionId:            regionId,
+		RouteTableId:        routeTableId,
+		RouteTableRuleSpecs: routeTableRuleSpecs,
 	}
 }
 
@@ -67,62 +66,62 @@ func NewAddRouteTableRulesRequest(
  * param routeTableRuleSpecs: 安全组规则信息 (Required)
  */
 func NewAddRouteTableRulesRequestWithAllParams(
-    regionId string,
-    routeTableId string,
-    routeTableRuleSpecs []vpc.AddRouteTableRules,
+	regionId string,
+	routeTableId string,
+	routeTableRuleSpecs []vpc.AddRouteTableRules,
 ) *AddRouteTableRulesRequest {
 
-    return &AddRouteTableRulesRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/{routeTableId}:addRouteTableRules",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        RouteTableId: routeTableId,
-        RouteTableRuleSpecs: routeTableRuleSpecs,
-    }
+	return &AddRouteTableRulesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/{routeTableId}:addRouteTableRules",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:            regionId,
+		RouteTableId:        routeTableId,
+		RouteTableRuleSpecs: routeTableRuleSpecs,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewAddRouteTableRulesRequestWithoutParam() *AddRouteTableRulesRequest {
 
-    return &AddRouteTableRulesRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/routeTables/{routeTableId}:addRouteTableRules",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &AddRouteTableRulesRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/routeTables/{routeTableId}:addRouteTableRules",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *AddRouteTableRulesRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param routeTableId: RouteTable ID(Required) */
 func (r *AddRouteTableRulesRequest) SetRouteTableId(routeTableId string) {
-    r.RouteTableId = routeTableId
+	r.RouteTableId = routeTableId
 }
 
 /* param routeTableRuleSpecs: 安全组规则信息(Required) */
 func (r *AddRouteTableRulesRequest) SetRouteTableRuleSpecs(routeTableRuleSpecs []vpc.AddRouteTableRules) {
-    r.RouteTableRuleSpecs = routeTableRuleSpecs
+	r.RouteTableRuleSpecs = routeTableRuleSpecs
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r AddRouteTableRulesRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type AddRouteTableRulesResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result AddRouteTableRulesResult `json:"result"`
+	RequestID string                   `json:"requestId"`
+	Error     core.ErrorResponse       `json:"error"`
+	Result    AddRouteTableRulesResult `json:"result"`
 }
 
 type AddRouteTableRulesResult struct {

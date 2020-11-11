@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // UpdateImageResponse struct for UpdateImageResponse
 type UpdateImageResponse struct {
-	Image Image `json:"Image,omitempty"`
+	Image           Image           `json:"Image,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

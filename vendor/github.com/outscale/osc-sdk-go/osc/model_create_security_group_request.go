@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateSecurityGroupRequest struct for CreateSecurityGroupRequest
 type CreateSecurityGroupRequest struct {
 	// A description for the security group, with a maximum length of 255 [ASCII printable characters](https://en.wikipedia.org/wiki/ASCII#Printable_characters).

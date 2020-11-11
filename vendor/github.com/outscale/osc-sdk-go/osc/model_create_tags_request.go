@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateTagsRequest struct for CreateTagsRequest
 type CreateTagsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

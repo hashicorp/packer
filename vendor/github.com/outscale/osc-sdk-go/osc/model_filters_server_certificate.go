@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersServerCertificate One or more filters.
 type FiltersServerCertificate struct {
 	// The path to the server certificate.

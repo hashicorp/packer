@@ -9,11 +9,12 @@
  */
 
 package osc
+
 // CreateListenerRuleRequest struct for CreateListenerRuleRequest
 type CreateListenerRuleRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
-	Listener LoadBalancerLight `json:"Listener"`
+	DryRun       bool                    `json:"DryRun,omitempty"`
+	Listener     LoadBalancerLight       `json:"Listener"`
 	ListenerRule ListenerRuleForCreation `json:"ListenerRule"`
 	// The IDs of the backend VMs.
 	VmIds []string `json:"VmIds"`

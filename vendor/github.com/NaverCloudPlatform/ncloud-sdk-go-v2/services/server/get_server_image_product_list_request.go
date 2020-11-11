@@ -12,20 +12,20 @@ package server
 type GetServerImageProductListRequest struct {
 
 	// 제외할상품코드
-ExclusionProductCode *string `json:"exclusionProductCode,omitempty"`
+	ExclusionProductCode *string `json:"exclusionProductCode,omitempty"`
 
 	// 조회할상품코드
-ProductCode *string `json:"productCode,omitempty"`
+	ProductCode *string `json:"productCode,omitempty"`
 
 	// 플랫폼유형코드리스트
-PlatformTypeCodeList []*string `json:"platformTypeCodeList,omitempty"`
+	PlatformTypeCodeList []*string `json:"platformTypeCodeList,omitempty"`
 
 	// 블록스토리지사이즈
-BlockStorageSize *int32 `json:"blockStorageSize,omitempty"`
+	BlockStorageSize *int32 `json:"blockStorageSize,omitempty"`
 
 	// 리전번호
-RegionNo *string `json:"regionNo,omitempty"`
+	RegionNo *string `json:"regionNo,omitempty"`
 
 	// 인프라자원상세구분코드
-InfraResourceDetailTypeCode *string `json:"infraResourceDetailTypeCode,omitempty"`
+	InfraResourceDetailTypeCode *string `json:"infraResourceDetailTypeCode,omitempty"`
 }

@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreateRouteTableResponse struct for CreateRouteTableResponse
 type CreateRouteTableResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
-	RouteTable RouteTable `json:"RouteTable,omitempty"`
+	RouteTable      RouteTable      `json:"RouteTable,omitempty"`
 }

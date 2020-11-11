@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersApiLog One or more filters.
 type FiltersApiLog struct {
 	// One or more API keys used for the query.

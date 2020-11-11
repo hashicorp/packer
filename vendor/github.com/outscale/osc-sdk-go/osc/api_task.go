@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
+	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type TaskApiService service
 
 // DeleteExportTaskOpts Optional parameters for the method 'DeleteExportTask'
 type DeleteExportTaskOpts struct {
-    DeleteExportTaskRequest optional.Interface
+	DeleteExportTaskRequest optional.Interface
 }
 
 /*
 DeleteExportTask Method for DeleteExportTask
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *DeleteExportTaskOpts - Optional Parameters:
- * @param "DeleteExportTaskRequest" (optional.Interface of DeleteExportTaskRequest) - 
+ * @param "DeleteExportTaskRequest" (optional.Interface of DeleteExportTaskRequest) -
 @return DeleteExportTaskResponse
 */
 func (a *TaskApiService) DeleteExportTask(ctx _context.Context, localVarOptionals *DeleteExportTaskOpts) (DeleteExportTaskResponse, *_nethttp.Response, error) {

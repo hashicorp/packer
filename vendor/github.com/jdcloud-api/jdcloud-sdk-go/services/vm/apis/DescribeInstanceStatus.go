@@ -17,34 +17,33 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
-    common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
+	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
 )
 
 type DescribeInstanceStatusRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
+	/* 页码；默认为1 (Optional) */
+	PageNumber *int `json:"pageNumber"`
 
-    /* 页码；默认为1 (Optional) */
-    PageNumber *int `json:"pageNumber"`
+	/* 分页大小；默认为20；取值范围[10, 100] (Optional) */
+	PageSize *int `json:"pageSize"`
 
-    /* 分页大小；默认为20；取值范围[10, 100] (Optional) */
-    PageSize *int `json:"pageSize"`
-
-    /* instanceId - 云主机ID，精确匹配，支持多个
-privateIpAddress - 主网卡内网主IP地址，模糊匹配，支持多个
-vpcId - 私有网络ID，精确匹配，支持多个
-status - 云主机状态，精确匹配，支持多个，<a href="http://docs.jdcloud.com/virtual-machines/api/vm_status">参考云主机状态</a>
-name - 云主机名称，模糊匹配，支持单个
-imageId - 镜像ID，精确匹配，支持多个
-networkInterfaceId - 弹性网卡ID，精确匹配，支持多个
-subnetId - 子网ID，精确匹配，支持多个
- (Optional) */
-    Filters []common.Filter `json:"filters"`
+	/* instanceId - 云主机ID，精确匹配，支持多个
+	privateIpAddress - 主网卡内网主IP地址，模糊匹配，支持多个
+	vpcId - 私有网络ID，精确匹配，支持多个
+	status - 云主机状态，精确匹配，支持多个，<a href="http://docs.jdcloud.com/virtual-machines/api/vm_status">参考云主机状态</a>
+	name - 云主机名称，模糊匹配，支持单个
+	imageId - 镜像ID，精确匹配，支持多个
+	networkInterfaceId - 弹性网卡ID，精确匹配，支持多个
+	subnetId - 子网ID，精确匹配，支持多个
+	 (Optional) */
+	Filters []common.Filter `json:"filters"`
 }
 
 /*
@@ -53,17 +52,17 @@ subnetId - 子网ID，精确匹配，支持多个
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeInstanceStatusRequest(
-    regionId string,
+	regionId string,
 ) *DescribeInstanceStatusRequest {
 
 	return &DescribeInstanceStatusRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instanceStatus",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
+		RegionId: regionId,
 	}
 }
 
@@ -80,54 +79,54 @@ imageId - 镜像ID，精确匹配，支持多个
 networkInterfaceId - 弹性网卡ID，精确匹配，支持多个
 subnetId - 子网ID，精确匹配，支持多个
  (Optional)
- */
+*/
 func NewDescribeInstanceStatusRequestWithAllParams(
-    regionId string,
-    pageNumber *int,
-    pageSize *int,
-    filters []common.Filter,
+	regionId string,
+	pageNumber *int,
+	pageSize *int,
+	filters []common.Filter,
 ) *DescribeInstanceStatusRequest {
 
-    return &DescribeInstanceStatusRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instanceStatus",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        PageNumber: pageNumber,
-        PageSize: pageSize,
-        Filters: filters,
-    }
+	return &DescribeInstanceStatusRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instanceStatus",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:   regionId,
+		PageNumber: pageNumber,
+		PageSize:   pageSize,
+		Filters:    filters,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeInstanceStatusRequestWithoutParam() *DescribeInstanceStatusRequest {
 
-    return &DescribeInstanceStatusRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/instanceStatus",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeInstanceStatusRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/instanceStatus",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DescribeInstanceStatusRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param pageNumber: 页码；默认为1(Optional) */
 func (r *DescribeInstanceStatusRequest) SetPageNumber(pageNumber int) {
-    r.PageNumber = &pageNumber
+	r.PageNumber = &pageNumber
 }
 
 /* param pageSize: 分页大小；默认为20；取值范围[10, 100](Optional) */
 func (r *DescribeInstanceStatusRequest) SetPageSize(pageSize int) {
-    r.PageSize = &pageSize
+	r.PageSize = &pageSize
 }
 
 /* param filters: instanceId - 云主机ID，精确匹配，支持多个
@@ -140,22 +139,22 @@ networkInterfaceId - 弹性网卡ID，精确匹配，支持多个
 subnetId - 子网ID，精确匹配，支持多个
 (Optional) */
 func (r *DescribeInstanceStatusRequest) SetFilters(filters []common.Filter) {
-    r.Filters = filters
+	r.Filters = filters
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeInstanceStatusRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeInstanceStatusResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeInstanceStatusResult `json:"result"`
+	RequestID string                       `json:"requestId"`
+	Error     core.ErrorResponse           `json:"error"`
+	Result    DescribeInstanceStatusResult `json:"result"`
 }
 
 type DescribeInstanceStatusResult struct {
-    InstanceStatuses []vm.InstanceStatus `json:"instanceStatuses"`
-    TotalCount int `json:"totalCount"`
+	InstanceStatuses []vm.InstanceStatus `json:"instanceStatuses"`
+	TotalCount       int                 `json:"totalCount"`
 }

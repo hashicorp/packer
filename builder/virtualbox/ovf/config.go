@@ -9,6 +9,7 @@ import (
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -17,9 +18,9 @@ import (
 // Config is the configuration structure for the builder.
 type Config struct {
 	common.PackerConfig             `mapstructure:",squash"`
-	common.HTTPConfig               `mapstructure:",squash"`
-	common.FloppyConfig             `mapstructure:",squash"`
-	common.CDConfig                 `mapstructure:",squash"`
+	commonsteps.HTTPConfig          `mapstructure:",squash"`
+	commonsteps.FloppyConfig        `mapstructure:",squash"`
+	commonsteps.CDConfig            `mapstructure:",squash"`
 	bootcommand.BootConfig          `mapstructure:",squash"`
 	vboxcommon.ExportConfig         `mapstructure:",squash"`
 	vboxcommon.OutputConfig         `mapstructure:",squash"`

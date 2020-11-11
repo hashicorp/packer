@@ -17,19 +17,18 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
 )
 
 type DescribeImageConstraintsBatchRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* 地域ID  */
+	RegionId string `json:"regionId"`
 
-    /* 地域ID  */
-    RegionId string `json:"regionId"`
-
-    /* 镜像ID列表 (Optional) */
-    Ids []string `json:"ids"`
+	/* 镜像ID列表 (Optional) */
+	Ids []string `json:"ids"`
 }
 
 /*
@@ -38,17 +37,17 @@ type DescribeImageConstraintsBatchRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeImageConstraintsBatchRequest(
-    regionId string,
+	regionId string,
 ) *DescribeImageConstraintsBatchRequest {
 
 	return &DescribeImageConstraintsBatchRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/imageConstraints",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
+		RegionId: regionId,
 	}
 }
 
@@ -57,57 +56,57 @@ func NewDescribeImageConstraintsBatchRequest(
  * param ids: 镜像ID列表 (Optional)
  */
 func NewDescribeImageConstraintsBatchRequestWithAllParams(
-    regionId string,
-    ids []string,
+	regionId string,
+	ids []string,
 ) *DescribeImageConstraintsBatchRequest {
 
-    return &DescribeImageConstraintsBatchRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/imageConstraints",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        Ids: ids,
-    }
+	return &DescribeImageConstraintsBatchRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/imageConstraints",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId: regionId,
+		Ids:      ids,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeImageConstraintsBatchRequestWithoutParam() *DescribeImageConstraintsBatchRequest {
 
-    return &DescribeImageConstraintsBatchRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/imageConstraints",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeImageConstraintsBatchRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/imageConstraints",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DescribeImageConstraintsBatchRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param ids: 镜像ID列表(Optional) */
 func (r *DescribeImageConstraintsBatchRequest) SetIds(ids []string) {
-    r.Ids = ids
+	r.Ids = ids
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeImageConstraintsBatchRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeImageConstraintsBatchResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeImageConstraintsBatchResult `json:"result"`
+	RequestID string                              `json:"requestId"`
+	Error     core.ErrorResponse                  `json:"error"`
+	Result    DescribeImageConstraintsBatchResult `json:"result"`
 }
 
 type DescribeImageConstraintsBatchResult struct {
-    ImageConstraints []vm.ImageConstraint `json:"imageConstraints"`
+	ImageConstraints []vm.ImageConstraint `json:"imageConstraints"`
 }

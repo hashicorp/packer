@@ -12,32 +12,32 @@ package server
 type CreateNasVolumeInstanceRequest struct {
 
 	// 볼륨이름
-VolumeName *string `json:"volumeName"`
+	VolumeName *string `json:"volumeName"`
 
 	// NAS볼륨사이즈
-VolumeSize *int32 `json:"volumeSize"`
+	VolumeSize *int32 `json:"volumeSize"`
 
 	// 볼륨할당프로토콜유형코드
-VolumeAllotmentProtocolTypeCode *string `json:"volumeAllotmentProtocolTypeCode"`
+	VolumeAllotmentProtocolTypeCode *string `json:"volumeAllotmentProtocolTypeCode"`
 
 	// 서버인스턴스번호리스트
-ServerInstanceNoList []*string `json:"serverInstanceNoList,omitempty"`
+	ServerInstanceNoList []*string `json:"serverInstanceNoList,omitempty"`
 
 	// 커스텀IP리스트
-CustomIpList []*string `json:"customIpList,omitempty"`
+	CustomIpList []*string `json:"customIpList,omitempty"`
 
 	// CIFS유저이름
-CifsUserName *string `json:"cifsUserName,omitempty"`
+	CifsUserName *string `json:"cifsUserName,omitempty"`
 
 	// CIFS유저비밀번호
-CifsUserPassword *string `json:"cifsUserPassword,omitempty"`
+	CifsUserPassword *string `json:"cifsUserPassword,omitempty"`
 
 	// NAS볼륨설명
-NasVolumeDescription *string `json:"nasVolumeDescription,omitempty"`
+	NasVolumeDescription *string `json:"nasVolumeDescription,omitempty"`
 
 	// 리전번호
-RegionNo *string `json:"regionNo,omitempty"`
+	RegionNo *string `json:"regionNo,omitempty"`
 
 	// ZONE번호
-ZoneNo *string `json:"zoneNo,omitempty"`
+	ZoneNo *string `json:"zoneNo,omitempty"`
 }

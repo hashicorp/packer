@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // VpnConnection Information about a VPN connection.
 type VpnConnection struct {
 	// The configuration to apply to the client gateway to establish the VPN connection, in XML format.

@@ -12,5 +12,5 @@ package server
 type DeleteNasVolumeInstanceRequest struct {
 
 	// NAS볼륨인스턴스번호
-NasVolumeInstanceNo *string `json:"nasVolumeInstanceNo"`
+	NasVolumeInstanceNo *string `json:"nasVolumeInstanceNo"`
 }

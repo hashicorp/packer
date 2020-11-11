@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadConsumptionAccountResponse struct for ReadConsumptionAccountResponse
 type ReadConsumptionAccountResponse struct {
 	// Information about the resources consumed during the specified time period.
 	ConsumptionEntries []ConsumptionEntry `json:"ConsumptionEntries,omitempty"`
-	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
+	ResponseContext    ResponseContext    `json:"ResponseContext,omitempty"`
 }

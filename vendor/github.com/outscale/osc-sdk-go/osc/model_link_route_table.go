@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // LinkRouteTable One or more associations between the route table and the Subnets.
 type LinkRouteTable struct {
 	// The ID of the association between the route table and the Subnet.

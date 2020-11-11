@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 	"unicode"
-
-	"github.com/hashicorp/packer/common"
 )
 
 const KeyLeftShift uint32 = 0xFFE1
@@ -28,8 +26,8 @@ type vncDriver struct {
 func NewVNCDriver(c VNCKeyEvent, interval time.Duration) *vncDriver {
 	// We delay (default 100ms) between each key event to allow for CPU or
 	// network latency. See PackerKeyEnv for tuning.
-	keyInterval := common.PackerKeyDefault
-	if delay, err := time.ParseDuration(os.Getenv(common.PackerKeyEnv)); err == nil {
+	keyInterval := PackerKeyDefault
+	if delay, err := time.ParseDuration(os.Getenv(PackerKeyEnv)); err == nil {
 		keyInterval = delay
 	}
 	// override interval based on builder-specific override.

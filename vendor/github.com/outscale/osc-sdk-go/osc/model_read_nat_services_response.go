@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadNatServicesResponse struct for ReadNatServicesResponse
 type ReadNatServicesResponse struct {
 	// Information about one or more NAT services.
-	NatServices []NatService `json:"NatServices,omitempty"`
+	NatServices     []NatService    `json:"NatServices,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

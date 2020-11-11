@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateNetRequest struct for CreateNetRequest
 type CreateNetRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

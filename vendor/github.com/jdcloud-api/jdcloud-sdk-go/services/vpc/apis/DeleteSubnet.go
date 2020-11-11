@@ -17,18 +17,17 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DeleteSubnetRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
-
-    /* Subnet ID  */
-    SubnetId string `json:"subnetId"`
+	/* Subnet ID  */
+	SubnetId string `json:"subnetId"`
 }
 
 /*
@@ -38,19 +37,19 @@ type DeleteSubnetRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDeleteSubnetRequest(
-    regionId string,
-    subnetId string,
+	regionId string,
+	subnetId string,
 ) *DeleteSubnetRequest {
 
 	return &DeleteSubnetRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/subnets/{subnetId}",
 			Method:  "DELETE",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        SubnetId: subnetId,
+		RegionId: regionId,
+		SubnetId: subnetId,
 	}
 }
 
@@ -59,55 +58,55 @@ func NewDeleteSubnetRequest(
  * param subnetId: Subnet ID (Required)
  */
 func NewDeleteSubnetRequestWithAllParams(
-    regionId string,
-    subnetId string,
+	regionId string,
+	subnetId string,
 ) *DeleteSubnetRequest {
 
-    return &DeleteSubnetRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/subnets/{subnetId}",
-            Method:  "DELETE",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        SubnetId: subnetId,
-    }
+	return &DeleteSubnetRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/subnets/{subnetId}",
+			Method:  "DELETE",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId: regionId,
+		SubnetId: subnetId,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDeleteSubnetRequestWithoutParam() *DeleteSubnetRequest {
 
-    return &DeleteSubnetRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/subnets/{subnetId}",
-            Method:  "DELETE",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DeleteSubnetRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/subnets/{subnetId}",
+			Method:  "DELETE",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DeleteSubnetRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param subnetId: Subnet ID(Required) */
 func (r *DeleteSubnetRequest) SetSubnetId(subnetId string) {
-    r.SubnetId = subnetId
+	r.SubnetId = subnetId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DeleteSubnetRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DeleteSubnetResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DeleteSubnetResult `json:"result"`
+	RequestID string             `json:"requestId"`
+	Error     core.ErrorResponse `json:"error"`
+	Result    DeleteSubnetResult `json:"result"`
 }
 
 type DeleteSubnetResult struct {

@@ -9,10 +9,11 @@
  */
 
 package osc
+
 // CreateSnapshotExportTaskRequest struct for CreateSnapshotExportTaskRequest
 type CreateSnapshotExportTaskRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun    bool      `json:"DryRun,omitempty"`
 	OsuExport OsuExport `json:"OsuExport"`
 	// The ID of the snapshot to export.
 	SnapshotId string `json:"SnapshotId"`

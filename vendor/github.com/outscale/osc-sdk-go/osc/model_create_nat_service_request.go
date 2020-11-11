@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateNatServiceRequest struct for CreateNatServiceRequest
 type CreateNatServiceRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

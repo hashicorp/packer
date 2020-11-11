@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // DeleteServerCertificateRequest struct for DeleteServerCertificateRequest
 type DeleteServerCertificateRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

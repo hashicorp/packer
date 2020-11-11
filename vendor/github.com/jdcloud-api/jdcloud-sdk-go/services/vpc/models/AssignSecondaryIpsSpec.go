@@ -16,15 +16,14 @@
 
 package models
 
-
 type AssignSecondaryIpsSpec struct {
 
-    /* secondary ip被其他接口占用时，是否抢占。false：非抢占重分配，true：抢占重分配，默认抢占重分配。默认值：true (Optional) */
-    Force bool `json:"force"`
+	/* secondary ip被其他接口占用时，是否抢占。false：非抢占重分配，true：抢占重分配，默认抢占重分配。默认值：true (Optional) */
+	Force bool `json:"force"`
 
-    /* 指定分配的secondaryIp地址 (Optional) */
-    SecondaryIps []string `json:"secondaryIps"`
+	/* 指定分配的secondaryIp地址 (Optional) */
+	SecondaryIps []string `json:"secondaryIps"`
 
-    /* 指定自动分配的secondaryIp个数 (Optional) */
-    SecondaryIpCount int `json:"secondaryIpCount"`
+	/* 指定自动分配的secondaryIp个数 (Optional) */
+	SecondaryIpCount int `json:"secondaryIpCount"`
 }

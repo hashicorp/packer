@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -121,7 +121,7 @@ func (s *StepDownloadGuestAdditions) Run(ctx context.Context, state multistep.St
 	log.Printf("Guest additions URL: %s", url)
 
 	// We're good, so let's go ahead and download this thing..
-	downStep := &common.StepDownload{
+	downStep := &commonsteps.StepDownload{
 		Checksum:    checksum,
 		Description: "Guest additions",
 		ResultKey:   "guest_additions_path",
@@ -151,7 +151,7 @@ func (s *StepDownloadGuestAdditions) downloadAdditionsSHA256(ctx context.Context
 	defer os.Remove(checksumsFile.Name())
 	checksumsFile.Close()
 
-	downStep := &common.StepDownload{
+	downStep := &commonsteps.StepDownload{
 		Description: "Guest additions checksums",
 		ResultKey:   "guest_additions_checksums_path",
 		Url:         []string{checksumsUrl},

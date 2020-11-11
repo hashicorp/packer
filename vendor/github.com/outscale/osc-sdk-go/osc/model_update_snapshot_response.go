@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // UpdateSnapshotResponse struct for UpdateSnapshotResponse
 type UpdateSnapshotResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
-	Snapshot Snapshot `json:"Snapshot,omitempty"`
+	Snapshot        Snapshot        `json:"Snapshot,omitempty"`
 }

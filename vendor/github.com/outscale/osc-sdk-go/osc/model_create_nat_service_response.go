@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // CreateNatServiceResponse struct for CreateNatServiceResponse
 type CreateNatServiceResponse struct {
-	NatService NatService `json:"NatService,omitempty"`
+	NatService      NatService      `json:"NatService,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

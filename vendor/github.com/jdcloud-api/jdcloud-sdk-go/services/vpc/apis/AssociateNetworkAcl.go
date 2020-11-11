@@ -17,21 +17,20 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type AssociateNetworkAclRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* networkAclId ID  */
+	NetworkAclId string `json:"networkAclId"`
 
-    /* networkAclId ID  */
-    NetworkAclId string `json:"networkAclId"`
-
-    /* networkAcl要绑定的子网ID列表, subnet已被其他networkAcl绑定时，自动解绑  */
-    SubnetIds []string `json:"subnetIds"`
+	/* networkAcl要绑定的子网ID列表, subnet已被其他networkAcl绑定时，自动解绑  */
+	SubnetIds []string `json:"subnetIds"`
 }
 
 /*
@@ -42,21 +41,21 @@ type AssociateNetworkAclRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewAssociateNetworkAclRequest(
-    regionId string,
-    networkAclId string,
-    subnetIds []string,
+	regionId string,
+	networkAclId string,
+	subnetIds []string,
 ) *AssociateNetworkAclRequest {
 
 	return &AssociateNetworkAclRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkAcls/{networkAclId}:associateNetworkAcl",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
-        NetworkAclId: networkAclId,
-        SubnetIds: subnetIds,
+		RegionId:     regionId,
+		NetworkAclId: networkAclId,
+		SubnetIds:    subnetIds,
 	}
 }
 
@@ -66,62 +65,62 @@ func NewAssociateNetworkAclRequest(
  * param subnetIds: networkAcl要绑定的子网ID列表, subnet已被其他networkAcl绑定时，自动解绑 (Required)
  */
 func NewAssociateNetworkAclRequestWithAllParams(
-    regionId string,
-    networkAclId string,
-    subnetIds []string,
+	regionId string,
+	networkAclId string,
+	subnetIds []string,
 ) *AssociateNetworkAclRequest {
 
-    return &AssociateNetworkAclRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkAcls/{networkAclId}:associateNetworkAcl",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        NetworkAclId: networkAclId,
-        SubnetIds: subnetIds,
-    }
+	return &AssociateNetworkAclRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkAcls/{networkAclId}:associateNetworkAcl",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:     regionId,
+		NetworkAclId: networkAclId,
+		SubnetIds:    subnetIds,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewAssociateNetworkAclRequestWithoutParam() *AssociateNetworkAclRequest {
 
-    return &AssociateNetworkAclRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/networkAcls/{networkAclId}:associateNetworkAcl",
-            Method:  "POST",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &AssociateNetworkAclRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/networkAcls/{networkAclId}:associateNetworkAcl",
+			Method:  "POST",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *AssociateNetworkAclRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param networkAclId: networkAclId ID(Required) */
 func (r *AssociateNetworkAclRequest) SetNetworkAclId(networkAclId string) {
-    r.NetworkAclId = networkAclId
+	r.NetworkAclId = networkAclId
 }
 
 /* param subnetIds: networkAcl要绑定的子网ID列表, subnet已被其他networkAcl绑定时，自动解绑(Required) */
 func (r *AssociateNetworkAclRequest) SetSubnetIds(subnetIds []string) {
-    r.SubnetIds = subnetIds
+	r.SubnetIds = subnetIds
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r AssociateNetworkAclRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type AssociateNetworkAclResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result AssociateNetworkAclResult `json:"result"`
+	RequestID string                    `json:"requestId"`
+	Error     core.ErrorResponse        `json:"error"`
+	Result    AssociateNetworkAclResult `json:"result"`
 }
 
 type AssociateNetworkAclResult struct {

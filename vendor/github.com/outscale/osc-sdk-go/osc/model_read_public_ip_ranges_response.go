@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadPublicIpRangesResponse struct for ReadPublicIpRangesResponse
 type ReadPublicIpRangesResponse struct {
 	// The list of public IPv4 addresses used in the Region, in CIDR notation.
-	PublicIps []string `json:"PublicIps,omitempty"`
+	PublicIps       []string        `json:"PublicIps,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

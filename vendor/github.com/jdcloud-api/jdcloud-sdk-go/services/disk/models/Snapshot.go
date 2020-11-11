@@ -16,39 +16,38 @@
 
 package models
 
-
 type Snapshot struct {
 
-    /* 云硬盘快照ID (Optional) */
-    SnapshotId string `json:"snapshotId"`
+	/* 云硬盘快照ID (Optional) */
+	SnapshotId string `json:"snapshotId"`
 
-    /* 快照来源 可以有self，others两种来源 (Optional) */
-    SnapshotSource string `json:"snapshotSource"`
+	/* 快照来源 可以有self，others两种来源 (Optional) */
+	SnapshotSource string `json:"snapshotSource"`
 
-    /* 创建快照的云硬盘ID(snapshotSource为others时不展示) (Optional) */
-    DiskId string `json:"diskId"`
+	/* 创建快照的云硬盘ID(snapshotSource为others时不展示) (Optional) */
+	DiskId string `json:"diskId"`
 
-    /* 快照大小，单位为GiB (Optional) */
-    SnapshotSizeGB int `json:"snapshotSizeGB"`
+	/* 快照大小，单位为GiB (Optional) */
+	SnapshotSizeGB int `json:"snapshotSizeGB"`
 
-    /* 快照关联的所有镜像ID(snapshotSource为others时不展示) (Optional) */
-    Images []string `json:"images"`
+	/* 快照关联的所有镜像ID(snapshotSource为others时不展示) (Optional) */
+	Images []string `json:"images"`
 
-    /* 快照名称 (Optional) */
-    Name string `json:"name"`
+	/* 快照名称 (Optional) */
+	Name string `json:"name"`
 
-    /* 快照描述 (Optional) */
-    Description string `json:"description"`
+	/* 快照描述 (Optional) */
+	Description string `json:"description"`
 
-    /* 快照状态，取值为 creating、available、in-use、deleting、error_create、error_delete 之一 (Optional) */
-    Status string `json:"status"`
+	/* 快照状态，取值为 creating、available、in-use、deleting、error_create、error_delete 之一 (Optional) */
+	Status string `json:"status"`
 
-    /* 创建时间 (Optional) */
-    CreateTime string `json:"createTime"`
+	/* 创建时间 (Optional) */
+	CreateTime string `json:"createTime"`
 
-    /* 共享信息 (Optional) */
-    SharInfo []ShareInfo `json:"sharInfo"`
+	/* 共享信息 (Optional) */
+	SharInfo []ShareInfo `json:"sharInfo"`
 
-    /* 快照是否为加密盘的快照 (Optional) */
-    Encrypted bool `json:"encrypted"`
+	/* 快照是否为加密盘的快照 (Optional) */
+	Encrypted bool `json:"encrypted"`
 }

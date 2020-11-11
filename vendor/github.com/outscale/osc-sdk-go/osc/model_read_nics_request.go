@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadNicsRequest struct for ReadNicsRequest
 type ReadNicsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun bool `json:"DryRun,omitempty"`
+	DryRun  bool       `json:"DryRun,omitempty"`
 	Filters FiltersNic `json:"Filters,omitempty"`
 }

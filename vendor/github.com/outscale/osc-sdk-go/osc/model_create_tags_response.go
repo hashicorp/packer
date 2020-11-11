@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateTagsResponse struct for CreateTagsResponse
 type CreateTagsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

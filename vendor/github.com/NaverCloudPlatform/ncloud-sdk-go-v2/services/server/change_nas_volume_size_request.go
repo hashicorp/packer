@@ -12,8 +12,8 @@ package server
 type ChangeNasVolumeSizeRequest struct {
 
 	// NAS볼륨인스턴스번호
-NasVolumeInstanceNo *string `json:"nasVolumeInstanceNo"`
+	NasVolumeInstanceNo *string `json:"nasVolumeInstanceNo"`
 
 	// NAS볼륨사이즈
-VolumeSize *int32 `json:"volumeSize"`
+	VolumeSize *int32 `json:"volumeSize"`
 }

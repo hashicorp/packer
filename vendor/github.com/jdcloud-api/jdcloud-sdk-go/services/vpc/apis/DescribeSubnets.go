@@ -17,31 +17,30 @@
 package apis
 
 import (
-    "github.com/jdcloud-api/jdcloud-sdk-go/core"
-    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
-    common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
+	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+	common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
+	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type DescribeSubnetsRequest struct {
+	core.JDCloudRequest
 
-    core.JDCloudRequest
+	/* Region ID  */
+	RegionId string `json:"regionId"`
 
-    /* Region ID  */
-    RegionId string `json:"regionId"`
+	/* 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页 (Optional) */
+	PageNumber *int `json:"pageNumber"`
 
-    /* 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页 (Optional) */
-    PageNumber *int `json:"pageNumber"`
+	/* 分页大小，默认为20，取值范围：[10,100] (Optional) */
+	PageSize *int `json:"pageSize"`
 
-    /* 分页大小，默认为20，取值范围：[10,100] (Optional) */
-    PageSize *int `json:"pageSize"`
-
-    /* subnetIds - subnet ID列表，支持多个
-subnetNames - subnet名称列表，支持多个
-routeTableId	- 子网关联路由表Id，支持单个
-aclId - 子网关联acl Id，支持单个
-vpcId - 子网所属VPC Id，支持单个
- (Optional) */
-    Filters []common.Filter `json:"filters"`
+	/* subnetIds - subnet ID列表，支持多个
+	subnetNames - subnet名称列表，支持多个
+	routeTableId	- 子网关联路由表Id，支持单个
+	aclId - 子网关联acl Id，支持单个
+	vpcId - 子网所属VPC Id，支持单个
+	 (Optional) */
+	Filters []common.Filter `json:"filters"`
 }
 
 /*
@@ -50,17 +49,17 @@ vpcId - 子网所属VPC Id，支持单个
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeSubnetsRequest(
-    regionId string,
+	regionId string,
 ) *DescribeSubnetsRequest {
 
 	return &DescribeSubnetsRequest{
-        JDCloudRequest: core.JDCloudRequest{
+		JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/subnets/",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-        RegionId: regionId,
+		RegionId: regionId,
 	}
 }
 
@@ -74,54 +73,54 @@ routeTableId	- 子网关联路由表Id，支持单个
 aclId - 子网关联acl Id，支持单个
 vpcId - 子网所属VPC Id，支持单个
  (Optional)
- */
+*/
 func NewDescribeSubnetsRequestWithAllParams(
-    regionId string,
-    pageNumber *int,
-    pageSize *int,
-    filters []common.Filter,
+	regionId string,
+	pageNumber *int,
+	pageSize *int,
+	filters []common.Filter,
 ) *DescribeSubnetsRequest {
 
-    return &DescribeSubnetsRequest{
-        JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/subnets/",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-        RegionId: regionId,
-        PageNumber: pageNumber,
-        PageSize: pageSize,
-        Filters: filters,
-    }
+	return &DescribeSubnetsRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/subnets/",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+		RegionId:   regionId,
+		PageNumber: pageNumber,
+		PageSize:   pageSize,
+		Filters:    filters,
+	}
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeSubnetsRequestWithoutParam() *DescribeSubnetsRequest {
 
-    return &DescribeSubnetsRequest{
-            JDCloudRequest: core.JDCloudRequest{
-            URL:     "/regions/{regionId}/subnets/",
-            Method:  "GET",
-            Header:  nil,
-            Version: "v1",
-        },
-    }
+	return &DescribeSubnetsRequest{
+		JDCloudRequest: core.JDCloudRequest{
+			URL:     "/regions/{regionId}/subnets/",
+			Method:  "GET",
+			Header:  nil,
+			Version: "v1",
+		},
+	}
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeSubnetsRequest) SetRegionId(regionId string) {
-    r.RegionId = regionId
+	r.RegionId = regionId
 }
 
 /* param pageNumber: 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页(Optional) */
 func (r *DescribeSubnetsRequest) SetPageNumber(pageNumber int) {
-    r.PageNumber = &pageNumber
+	r.PageNumber = &pageNumber
 }
 
 /* param pageSize: 分页大小，默认为20，取值范围：[10,100](Optional) */
 func (r *DescribeSubnetsRequest) SetPageSize(pageSize int) {
-    r.PageSize = &pageSize
+	r.PageSize = &pageSize
 }
 
 /* param filters: subnetIds - subnet ID列表，支持多个
@@ -131,22 +130,22 @@ aclId - 子网关联acl Id，支持单个
 vpcId - 子网所属VPC Id，支持单个
 (Optional) */
 func (r *DescribeSubnetsRequest) SetFilters(filters []common.Filter) {
-    r.Filters = filters
+	r.Filters = filters
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeSubnetsRequest) GetRegionId() string {
-    return r.RegionId
+	return r.RegionId
 }
 
 type DescribeSubnetsResponse struct {
-    RequestID string `json:"requestId"`
-    Error core.ErrorResponse `json:"error"`
-    Result DescribeSubnetsResult `json:"result"`
+	RequestID string                `json:"requestId"`
+	Error     core.ErrorResponse    `json:"error"`
+	Result    DescribeSubnetsResult `json:"result"`
 }
 
 type DescribeSubnetsResult struct {
-    Subnets []vpc.Subnet `json:"subnets"`
-    TotalCount int `json:"totalCount"`
+	Subnets    []vpc.Subnet `json:"subnets"`
+	TotalCount int          `json:"totalCount"`
 }

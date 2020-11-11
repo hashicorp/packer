@@ -16,9 +16,8 @@
 
 package models
 
-
 type ModifyNetworkAclRulesSpec struct {
 
-    /* networkAcl规则列表  */
-    ModifyNetworkAclRuleSpecs []ModifyNetworkAclRuleSpec `json:"modifyNetworkAclRuleSpecs"`
+	/* networkAcl规则列表  */
+	ModifyNetworkAclRuleSpecs []ModifyNetworkAclRuleSpec `json:"modifyNetworkAclRuleSpecs"`
 }

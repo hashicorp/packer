@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // CreateDirectLinkRequest struct for CreateDirectLinkRequest
 type CreateDirectLinkRequest struct {
 	// The bandwidth of the DirectLink (`1Gbps` \\| `10Gbps`).

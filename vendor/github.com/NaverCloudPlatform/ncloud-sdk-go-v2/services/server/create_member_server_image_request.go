@@ -12,11 +12,11 @@ package server
 type CreateMemberServerImageRequest struct {
 
 	// 회원서버이미지설명
-MemberServerImageDescription *string `json:"memberServerImageDescription,omitempty"`
+	MemberServerImageDescription *string `json:"memberServerImageDescription,omitempty"`
 
 	// 회원서버이미지명
-MemberServerImageName *string `json:"memberServerImageName,omitempty"`
+	MemberServerImageName *string `json:"memberServerImageName,omitempty"`
 
 	// 서버인스턴스번호
-ServerInstanceNo *string `json:"serverInstanceNo"`
+	ServerInstanceNo *string `json:"serverInstanceNo"`
 }

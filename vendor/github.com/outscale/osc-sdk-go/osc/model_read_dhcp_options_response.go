@@ -9,9 +9,10 @@
  */
 
 package osc
+
 // ReadDhcpOptionsResponse struct for ReadDhcpOptionsResponse
 type ReadDhcpOptionsResponse struct {
 	// Information about one or more DHCP options sets.
 	DhcpOptionsSets []DhcpOptionsSet `json:"DhcpOptionsSets,omitempty"`
-	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
+	ResponseContext ResponseContext  `json:"ResponseContext,omitempty"`
 }

@@ -9,6 +9,7 @@
  */
 
 package osc
+
 // FiltersListenerRule One or more filters.
 type FiltersListenerRule struct {
 	// The names of the listener rules.

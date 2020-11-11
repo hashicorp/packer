@@ -9,8 +9,9 @@
  */
 
 package osc
+
 // UpdateNetAccessPointResponse struct for UpdateNetAccessPointResponse
 type UpdateNetAccessPointResponse struct {
-	NetAccessPoint NetAccessPoint `json:"NetAccessPoint,omitempty"`
+	NetAccessPoint  NetAccessPoint  `json:"NetAccessPoint,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }
