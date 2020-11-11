@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/packer/communicator/none"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/sdk-internals/communicator/none"
 	gossh "golang.org/x/crypto/ssh"
 )
 

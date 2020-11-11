@@ -13,10 +13,10 @@ import (
 
 	"golang.org/x/crypto/ssh/terminal"
 
-	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/multistep"
 	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/sdk-internals/communicator/ssh"
 	gossh "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 	"golang.org/x/net/proxy"

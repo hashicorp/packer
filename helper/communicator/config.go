@@ -12,11 +12,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
+	packerssh "github.com/hashicorp/packer/sdk-internals/communicator/ssh"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/masterzen/winrm"
 	"golang.org/x/crypto/ssh"

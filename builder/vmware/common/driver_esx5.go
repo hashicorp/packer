@@ -28,11 +28,11 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 
 	"github.com/hashicorp/go-getter/v2"
-	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/sdk-internals/communicator/ssh"
 	gossh "golang.org/x/crypto/ssh"
 )
 
