@@ -137,8 +137,22 @@ func (va *HCL2UpgradeArgs) AddFlagSets(flags *flag.FlagSet) {
 	va.MetaArgs.AddFlagSets(flags)
 }
 
-// HCL2UpgradeArgs represents a parsed cli line for a `packer build`
+// HCL2UpgradeArgs represents a parsed cli line for a `packer hcl2_upgrade`
 type HCL2UpgradeArgs struct {
 	MetaArgs
 	OutputFile string
+}
+
+func (va *FormatArgs) AddFlagSets(flags *flag.FlagSet) {
+	flags.BoolVar(&va.Check, "check", false, "check if the input is formatted")
+	flags.BoolVar(&va.Diff, "diff", false, "display the diff of formatting changes")
+	flags.BoolVar(&va.Write, "write", true, "overwrite source files instead of writing to stdout")
+
+	va.MetaArgs.AddFlagSets(flags)
+}
+
+// FormatArgs represents a parsed cli line for `packer fmt`
+type FormatArgs struct {
+	MetaArgs
+	Check, Diff, Write bool
 }
