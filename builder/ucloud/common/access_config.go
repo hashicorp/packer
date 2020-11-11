@@ -11,7 +11,7 @@ import (
 	"runtime"
 
 	"github.com/hashicorp/packer/builder/ucloud/version"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/ucloud/ucloud-sdk-go/external"
 	"github.com/ucloud/ucloud-sdk-go/private/protocol/http"
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"

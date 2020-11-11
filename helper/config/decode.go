@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/mitchellh/mapstructure"
 	"github.com/ryanuber/go-glob"
 	"github.com/zclconf/go-cty/cty"

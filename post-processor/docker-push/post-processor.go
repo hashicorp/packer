@@ -10,9 +10,9 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	dockerimport "github.com/hashicorp/packer/post-processor/docker-import"
 	dockertag "github.com/hashicorp/packer/post-processor/docker-tag"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
 const BuilderIdImport = "packer.post-processor.docker-import"

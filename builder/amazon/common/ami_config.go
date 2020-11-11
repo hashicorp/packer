@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // AMIConfig is for common configuration related to creating AMIs.

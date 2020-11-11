@@ -15,7 +15,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/version"
 	"golang.org/x/sync/semaphore"
 

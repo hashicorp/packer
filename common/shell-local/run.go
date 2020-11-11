@@ -13,8 +13,8 @@ import (
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer/tmp"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func Run(ctx context.Context, ui packer.Ui, config *Config, generatedData map[string]interface{}) (bool, error) {

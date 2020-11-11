@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // The "AlicloudDiskDevice" object us used for the `ECSSystemDiskMapping` and

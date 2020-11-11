@@ -16,8 +16,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/provisioner/shell"
-	"github.com/hashicorp/packer/template"
 )
 
 var vmxTestBuilderConfig = map[string]string{

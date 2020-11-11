@@ -17,7 +17,7 @@ import (
 	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // AccessConfig is for common configuration related to openstack access

@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer/tmp"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
 var additionsVersionMap = map[string]string{

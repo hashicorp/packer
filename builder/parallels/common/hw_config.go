@@ -5,7 +5,7 @@ package common
 import (
 	"fmt"
 
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 type HWConfig struct {

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/packer/sdk-internals/communicator/ssh"
+	"github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/ssh"
 )
 
 // ParseTunnelArgument parses an SSH tunneling argument compatible with the openssh client form.

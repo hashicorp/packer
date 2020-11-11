@@ -3,7 +3,7 @@ package ssh
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/sdk-internals/communicator/ssh"
+	"github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/ssh"
 )
 
 const (

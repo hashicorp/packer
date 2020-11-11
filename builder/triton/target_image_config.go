@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/packer/hcl2template"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // TargetImageConfig represents the configuration for the image to be created

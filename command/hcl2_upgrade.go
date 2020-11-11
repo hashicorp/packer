@@ -13,7 +13,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
-	"github.com/hashicorp/packer/template"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	"github.com/posener/complete"
 	"github.com/zclconf/go-cty/cty"
 )
