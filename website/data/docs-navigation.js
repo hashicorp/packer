@@ -35,6 +35,7 @@ export default [
             content: [
               'aws_secretsmanager',
               'consul',
+              'env',
               'vault',
             ],
           },

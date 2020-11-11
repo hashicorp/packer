@@ -246,7 +246,8 @@ var variableBlockSchema = &hcl.BodySchema{
 	},
 }
 
-// decodeVariableBlock decodes a "variables" section the way packer 1 used to
+// decodeVariableBlock decodes a "variable" block
+// ectx is passed only in the evaluation of the default value.
 func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.EvalContext) hcl.Diagnostics {
 	if (*variables) == nil {
 		(*variables) = Variables{}
@@ -473,6 +474,7 @@ func decodeVariableValidationBlock(varName string, block *hcl.Block) (*VariableV
 // Packer's specific style, rather than that they are going to try to work
 // around these rules to write a lower-quality message.
 func looksLikeSentences(s string) bool {
+	s = strings.TrimSpace(s)
 	if len(s) < 1 {
 		return false
 	}
