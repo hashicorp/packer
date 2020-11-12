@@ -1,0 +1,48 @@
+## Specifying Required Plugins
+
+```hcl
+packer {
+  required_builders {
+    mybuilder = {
+      source  = "mycorp/mybuilder"
+      version = "~> 1.0"
+    }
+  }
+
+  required_provisioners {
+    myprovisioner = {
+      source  = "mycorp/myprovisioner"
+      version = "~> 2.0"
+    }
+  }
+
+  required_postprocessors {
+    mypostprocessor = {
+      source  = "mycorp/mypostprocessor"
+      version = "~> 3.0"
+    }
+  }
+}
+
+source "mybuilder" "example" {}
+
+build {
+  sources = ["source.mybuilder.example"]
+
+  provisioner    "myprovisioner"   {}
+  post-processor "mypostprocessor" {}
+}
+```
+
+The `required_*` plugin blocks must be nested inside the top-level `packer`
+block (which can also contain other settings).
+
+Each argument in a required plugin block enables one plugin. The key determines
+the plugin's local name (its unique identifier within the configuration), and
+the value is an object with the following elements:
+
+* source - the global source address for the plugin you intend to use, such as
+`hashicorp/packer-builder-amazon-ebs`.
+
+* version - a [version constraint string](#version-constraints) specifying
+which subset of available plugin versions the module is compatible with.

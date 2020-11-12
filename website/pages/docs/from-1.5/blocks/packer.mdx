@@ -35,6 +35,12 @@ following sections.
 
 ## Specifying a Required Packer Version
 
+```hcl
+packer {
+  required_version = ">= 1.2.0, < 2.0.0"
+}
+```
+
 The `required_version` setting accepts a [version constraint
 string,](#version-constraints) which specifies which versions of Packer
 can be used with your configuration.
@@ -46,6 +52,7 @@ Use Packer version constraints in a collaborative environment to
 ensure that everyone is using a specific Packer version, or using at least
 a minimum Packer version that has behavior expected by the configuration.
 
+`@include 'from-1.5/specifying-required-plugins.mdx'`
 
 ## Version Constraints
 
