@@ -7,9 +7,11 @@ import "github.com/hashicorp/packer/helper/multistep"
 const PlaceholderMsg = "To set this dynamically in the Packer template, " +
 	"you must use the `build` function"
 
-// GeneratedData manages variables exported by a builder after
-// it started. It uses the builder's multistep.StateBag internally, make sure it
-// is not nil before calling any functions.
+// GeneratedData manages variables created and exported by a builder after
+// it starts, so that provisioners and post-processors can have access to
+// build data generated at runtime -- for example, instance ID or instance IP
+// address. Internally, it uses the builder's multistep.StateBag. The user
+// must make sure that the State field is not is not nil before calling Put().
 type GeneratedData struct {
 	// The builder's StateBag
 	State multistep.StateBag

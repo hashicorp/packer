@@ -17,11 +17,11 @@ import (
 
 var _ net.Listener = &Listener{}
 
-// Listener wraps a net.Lister with some magic packer capabilies. For example
-// until you call Listener.Close, any call to ListenRangeConfig.Listen cannot
-// bind to Port. Packer tries tells moving parts which port they can use, but
-// often the port has to be released before a 3rd party is started, like a VNC
-// server.
+// Listener wraps a net.Lister with some Packer-specific capabilies. For
+// example, until you call Listener.Close, any call to ListenRangeConfig.Listen
+// cannot bind to a Port. Packer tries to tell moving parts which port they can
+// use, but often the port has to be released before a 3rd party is started,
+// like a VNC server.
 type Listener struct {
 	// Listener can be closed but Port will be file locked by packer until
 	// Close is called.
