@@ -3,7 +3,7 @@ package chroot
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/common/chroot"
+	"github.com/hashicorp/packer/packer-plugin-sdk/chroot"
 )
 
 func TestMountDeviceCleanupFunc_ImplementsCleanupFunc(t *testing.T) {

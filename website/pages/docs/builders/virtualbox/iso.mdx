@@ -95,39 +95,39 @@ necessary for this build to succeed and can be found further down the page.
 
 ### ISO Configuration
 
-@include 'common/commonsteps/ISOConfig.mdx'
+@include 'packer-plugin-sdk/commonsteps/ISOConfig.mdx'
 
 #### Required:
 
-@include 'common/commonsteps/ISOConfig-required.mdx'
+@include 'packer-plugin-sdk/commonsteps/ISOConfig-required.mdx'
 
 #### Optional:
 
-@include 'common/commonsteps/ISOConfig-not-required.mdx'
+@include 'packer-plugin-sdk/commonsteps/ISOConfig-not-required.mdx'
 
 ### Http directory configuration
 
-@include 'common/commonsteps/HTTPConfig.mdx'
+@include 'packer-plugin-sdk/commonsteps/HTTPConfig.mdx'
 
 #### Optional:
 
-@include 'common/commonsteps/HTTPConfig-not-required.mdx'
+@include 'packer-plugin-sdk/commonsteps/HTTPConfig-not-required.mdx'
 
 ### Floppy configuration
 
-@include 'common/commonsteps/FloppyConfig.mdx'
+@include 'packer-plugin-sdk/commonsteps/FloppyConfig.mdx'
 
 #### Optional:
 
-@include 'common/commonsteps/FloppyConfig-not-required.mdx'
+@include 'packer-plugin-sdk/commonsteps/FloppyConfig-not-required.mdx'
 
 ### CD configuration
 
-@include 'common/commonsteps/CDConfig.mdx'
+@include 'packer-plugin-sdk/commonsteps/CDConfig.mdx'
 
 #### Optional:
 
-@include 'common/commonsteps/CDConfig-not-required.mdx'
+@include 'packer-plugin-sdk/commonsteps/CDConfig-not-required.mdx'
 
 ### Export configuration
 
@@ -189,7 +189,7 @@ necessary for this build to succeed and can be found further down the page.
 
 ### Boot Configuration
 
-@include 'common/bootcommand/BootConfig.mdx'
+@include 'packer-plugin-sdk/bootcommand/BootConfig.mdx'
 
 Please note that for the Virtuabox builder, the IP address of the HTTP server
 Packer launches for you to access files like the preseed file in the example
@@ -233,7 +233,7 @@ source "virtualbox-iso" "basic-example" {
 
 #### Optional:
 
-@include 'common/bootcommand/BootConfig-not-required.mdx'
+@include 'packer-plugin-sdk/bootcommand/BootConfig-not-required.mdx'
 
 @include 'builders/virtualbox-ssh-key-pair.mdx'
 

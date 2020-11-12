@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"strconv"
 
-	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"

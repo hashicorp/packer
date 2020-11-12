@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	sl "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/packer"
+	sl "github.com/hashicorp/packer/packer-plugin-sdk/shell-local"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 

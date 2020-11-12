@@ -5,11 +5,11 @@ package iso
 
 import (
 	"github.com/hashicorp/packer/builder/vsphere/common"
-	packerCommon "github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	packerCommon "github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 

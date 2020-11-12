@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/common/net"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/net"
 )
 
 // This step configures the VM to enable the VRDP server

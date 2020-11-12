@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 	"golang.org/x/crypto/ed25519"
 	gossh "golang.org/x/crypto/ssh"
 )

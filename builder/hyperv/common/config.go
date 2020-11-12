@@ -10,8 +10,8 @@ import (
 
 	powershell "github.com/hashicorp/packer/builder/hyperv/common/powershell"
 	"github.com/hashicorp/packer/builder/hyperv/common/powershell/hyperv"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 

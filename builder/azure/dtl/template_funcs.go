@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"text/template"
 
-	packertpl "github.com/hashicorp/packer/common/template"
+	packertpl "github.com/hashicorp/packer/packer-plugin-sdk/template"
 )
 
 func isValidByteValue(b byte) bool {

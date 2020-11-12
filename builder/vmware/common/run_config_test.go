@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 

@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 )
 
 // This step removes any devices (floppy disks, ISOs, etc.) from the

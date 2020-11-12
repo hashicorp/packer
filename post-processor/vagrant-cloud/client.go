@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hashicorp/packer/common/net"
+	"github.com/hashicorp/packer/packer-plugin-sdk/net"
 )
 
 type VagrantCloudClient struct {

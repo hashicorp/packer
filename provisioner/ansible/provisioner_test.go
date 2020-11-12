@@ -14,9 +14,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/common/commonsteps"
 	confighelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
 	"github.com/stretchr/testify/assert"
 )
 

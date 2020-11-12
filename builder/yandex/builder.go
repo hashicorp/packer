@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common/commonsteps"
-	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 	"github.com/yandex-cloud/go-sdk/pkg/requestid"

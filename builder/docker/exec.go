@@ -3,8 +3,8 @@ package docker
 import (
 	"os/exec"
 
-	"github.com/hashicorp/packer/common/shell-local/localexec"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/shell-local/localexec"
 )
 
 func runAndStream(cmd *exec.Cmd, ui packer.Ui) error {

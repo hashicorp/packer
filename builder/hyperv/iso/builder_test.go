@@ -213,7 +213,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 		t.Fatalf("bad: %#v", b.config.FloppyFiles)
 	}
 
-	floppiesPath := "../../../common/test-fixtures/floppies"
+	floppiesPath := "../../../packer-plugin-sdk/test-fixtures/floppies"
 	config["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppiesPath), fmt.Sprintf("%s/foo.ps1", floppiesPath)}
 	b = Builder{}
 	_, warns, err = b.Prepare(config)
