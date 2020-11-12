@@ -19,11 +19,23 @@ var (
 
 var rnd = rand.New(rand.NewSource(time.Now().UnixNano() + int64(os.Getpid())))
 
-func Numbers(length int) string       { return String(PossibleNumbers, length) }
-func AlphaNum(length int) string      { return String(PossibleAlphaNum, length) }
+// Numbers returns a random numeric string of the given length
+func Numbers(length int) string { return String(PossibleNumbers, length) }
+
+// AlphaNum returns a random alphanumeric string of the given length. The
+// returned string can contain both uppercase and lowercase letters.
+func AlphaNum(length int) string { return String(PossibleAlphaNum, length) }
+
+// AlphaNumLower returns a random alphanumeric string of the given length. The
+// returned string can contain lowercase letters, but not uppercase.
 func AlphaNumLower(length int) string { return String(PossibleAlphaNumLower, length) }
+
+// AlphaNumUpper returns a random alphanumeric string of the given length. The
+// returned string can contain uppercase letters, but not lowercase.
 func AlphaNumUpper(length int) string { return String(PossibleAlphaNumUpper, length) }
 
+// String returns a random string of the given length, using only the component
+// characters provided in the "chooseFrom" string.
 func String(chooseFrom string, length int) (randomString string) {
 	cflen := len(chooseFrom)
 	bytes := make([]byte, length)

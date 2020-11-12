@@ -26,7 +26,8 @@ func DeprecatedTemplateFunc(funcName, useInstead string, deprecated func(string)
 	}
 }
 
-// Vault retrieves a secret from an HC vault KV store
+// Vault retrieves a secret from a HashiCorp Vault KV store.
+// It assumes the necessary environment variables are set.
 func Vault(path string, key string) (string, error) {
 
 	if token := os.Getenv("VAULT_TOKEN"); token == "" {
@@ -64,6 +65,8 @@ func Vault(path string, key string) (string, error) {
 	return "", errors.New("Vault path does not contain the requested key")
 }
 
+// Consul retrieves a value from a HashiCorp Consul KV store.
+// It assumes the necessary environment variables are set.
 func Consul(k string) (string, error) {
 	consulConfig := consulapi.DefaultConfig()
 	client, err := consulapi.NewClient(consulConfig)
@@ -88,6 +91,9 @@ func Consul(k string) (string, error) {
 	return value, nil
 }
 
+// GetAwsSecret retrieves a value from an AWS Secrets Manager.
+// It assumes that credentials are properly set in the AWS SDK's credential
+// chain.
 func GetAWSSecret(name, key string) (string, error) {
 	// Check if at least 1 parameter has been used
 	if len(name) == 0 {

@@ -3,7 +3,17 @@ package shell
 
 import "github.com/hashicorp/packer/common"
 
-// Provisioner contains common fields to all shell provisioners
+// Provisioner contains common fields to all shell provisioners.
+// It is provided as a convenience to encourage plugin developers to
+// consider implementing these options, which we believe are valuable for all
+// shell-type provisioners. It also helps guarantee that option names for
+// similar options are the same across the various shell provisioners.
+// Validation and defaulting are left to the maintainer because appropriate
+// values and defaults will be different depending on which shell is used.
+// To use the Provisioner struct, embed it in your shell provisioner's config
+// using the `mapstructure:",squash"` struct tag. Examples can be found in the
+// HashiCorp-maintained "shell", "shell-local", "windows-shell" and "powershell"
+// provisioners.
 type Provisioner struct {
 	common.PackerConfig `mapstructure:",squash"`
 

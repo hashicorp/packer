@@ -8,6 +8,13 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
+// ShutdownConfig defines implementation details for shutting down a VM once it
+// is done provisioned.
+// It is provided as a convenience to encourage builder developers to
+// consider implementing these options, which we believe are valuable for all
+// builders. It also helps guarantee that option names for similar options
+// are the same across the various builders. Embed it in your builder config
+// using the `mapstructure:",squash"` struct tag.
 type ShutdownConfig struct {
 	// The command to use to gracefully shut down the machine once all
 	// provisioning is complete. By default this is an empty string, which

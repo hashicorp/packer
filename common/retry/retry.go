@@ -36,7 +36,16 @@ func (err *RetryExhaustedError) Error() string {
 	return fmt.Sprintf("retry count exhausted. Last err: %s", err.Err)
 }
 
-// Run fn until context is cancelled up until StartTimeout time has passed.
+// Run will repeatedly retry the proivided fn within the constraints set in the
+// retry Config. It will retry until one of the following conditions is met:
+// - The provided context is cancelled.
+// - The Config.StartTimeout time has passed.
+// - The function returns without an error.
+// - The maximum number of tries, Config.Tries is exceeded.
+// - The function returns with an error that does not satisfy conditions
+//   set in the Config.ShouldRetry function.
+// If the given function (fn) does not return an error, then Run will return
+// nil. Otherwise, Run will return a relevant error.
 func (cfg Config) Run(ctx context.Context, fn func(context.Context) error) error {
 	retryDelay := func() time.Duration { return 2 * time.Second }
 	if cfg.RetryDelay != nil {
