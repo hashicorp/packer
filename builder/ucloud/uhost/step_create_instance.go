@@ -10,9 +10,9 @@ import (
 	"time"
 
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
-	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )

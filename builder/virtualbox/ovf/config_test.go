@@ -32,7 +32,7 @@ func getTempFile(t *testing.T) *os.File {
 
 func TestNewConfig_FloppyFiles(t *testing.T) {
 	cfg := testConfig(t)
-	floppies_path := "../../../common/test-fixtures/floppies"
+	floppies_path := "../../../packer-plugin-sdk/test-fixtures/floppies"
 	cfg["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	var c Config
 	_, err := c.Prepare(cfg)

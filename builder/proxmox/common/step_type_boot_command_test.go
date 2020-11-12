@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 )
 
 type commandTyperMock struct {

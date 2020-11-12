@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common/packerbuilderdata"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 )
 
 // A provisioner is responsible for installing and configuring software

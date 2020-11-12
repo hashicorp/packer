@@ -7,10 +7,10 @@ import (
 	"fmt"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
 )
 
 func NewSharedBuilder(id string, config Config, preSteps []multistep.Step, postSteps []multistep.Step, vmCreator ProxmoxVMCreator) *Builder {

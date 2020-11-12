@@ -7,10 +7,10 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
-	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
 )
 
 // Builder implements packer.Builder and builds the actual Parallels

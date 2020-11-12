@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	approvaltests "github.com/approvals/go-approval-tests"
-	"github.com/hashicorp/packer/common/json"
+	"github.com/hashicorp/packer/packer-plugin-sdk/json"
 )
 
 const AzureErrorSimple = `{"error":{"code":"ResourceNotFound","message":"The Resource 'Microsoft.Compute/images/PackerUbuntuImage' under resource group 'packer-test00' was not found."}}`

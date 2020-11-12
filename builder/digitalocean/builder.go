@@ -11,10 +11,10 @@ import (
 
 	"github.com/digitalocean/godo"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
 	"golang.org/x/oauth2"
 )
 

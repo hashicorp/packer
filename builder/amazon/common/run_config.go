@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
 var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")

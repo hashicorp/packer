@@ -17,14 +17,14 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common/commonsteps"
-	"github.com/hashicorp/packer/common/guestexec"
-	"github.com/hashicorp/packer/common/retry"
-	"github.com/hashicorp/packer/common/shell"
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/guestexec"
+	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
+	"github.com/hashicorp/packer/packer-plugin-sdk/shell"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 	"github.com/hashicorp/packer/packer/tmp"
 )
 

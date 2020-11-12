@@ -17,10 +17,10 @@ import (
 	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
-	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
 )
 
 type Builder struct {

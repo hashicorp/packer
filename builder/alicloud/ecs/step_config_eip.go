@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
-	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"

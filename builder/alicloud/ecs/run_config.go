@@ -8,10 +8,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
 type RunConfig struct {

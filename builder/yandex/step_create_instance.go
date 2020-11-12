@@ -7,10 +7,10 @@ import (
 	"io/ioutil"
 
 	"github.com/c2h5oh/datasize"
-	"github.com/hashicorp/packer/common/packerbuilderdata"
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/vpc/v1"

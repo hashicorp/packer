@@ -8,10 +8,10 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
 )
 
 type Builder struct {

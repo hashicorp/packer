@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
-	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
 )
 
 type Config struct {
