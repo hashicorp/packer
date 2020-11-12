@@ -61,3 +61,11 @@ type Runner interface {
 	// Run runs the steps with the given initial state.
 	Run(context.Context, StateBag)
 }
+
+type nullStep struct{}
+
+func (s nullStep) Run(ctx context.Context, state StateBag) StepAction {
+	return ActionContinue
+}
+
+func (s nullStep) Cleanup(state StateBag) {}
