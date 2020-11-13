@@ -44,6 +44,8 @@ type Config struct {
 	DiskSizeGb int `mapstructure:"disk_size_gb" required:"false"`
 	// Specify disk type for the launched instance. Defaults to `network-hdd`.
 	DiskType string `mapstructure:"disk_type" required:"false"`
+	// Key/value pair labels to apply to the disk.
+	DiskLabels map[string]string `mapstructure:"disk_labels" required:"false"`
 	// The description of the resulting image.
 	ImageDescription string `mapstructure:"image_description" required:"false"`
 	//  The family name of the resulting image.
