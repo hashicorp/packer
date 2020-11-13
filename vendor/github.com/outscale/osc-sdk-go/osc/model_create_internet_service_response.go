@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateInternetServiceResponse struct for CreateInternetServiceResponse
 type CreateInternetServiceResponse struct {
 	InternetService InternetService `json:"InternetService,omitempty"`

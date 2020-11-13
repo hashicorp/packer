@@ -9,9 +9,8 @@
  */
 
 package osc
-
 // UpdateVmResponse struct for UpdateVmResponse
 type UpdateVmResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
-	Vm              Vm              `json:"Vm,omitempty"`
+	Vm Vm `json:"Vm,omitempty"`
 }

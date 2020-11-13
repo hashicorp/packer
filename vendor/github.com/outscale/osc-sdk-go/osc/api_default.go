@@ -12,10 +12,10 @@ package osc
 
 import (
 	_context "context"
-	"github.com/antihax/optional"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
+	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -28,14 +28,14 @@ type DefaultApiService service
 
 // ReadConsumptionAccountOpts Optional parameters for the method 'ReadConsumptionAccount'
 type ReadConsumptionAccountOpts struct {
-	ReadConsumptionAccountRequest optional.Interface
+    ReadConsumptionAccountRequest optional.Interface
 }
 
 /*
 ReadConsumptionAccount Method for ReadConsumptionAccount
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ReadConsumptionAccountOpts - Optional Parameters:
- * @param "ReadConsumptionAccountRequest" (optional.Interface of ReadConsumptionAccountRequest) -
+ * @param "ReadConsumptionAccountRequest" (optional.Interface of ReadConsumptionAccountRequest) - 
 @return ReadConsumptionAccountResponse
 */
 func (a *DefaultApiService) ReadConsumptionAccount(ctx _context.Context, localVarOptionals *ReadConsumptionAccountOpts) (ReadConsumptionAccountResponse, *_nethttp.Response, error) {

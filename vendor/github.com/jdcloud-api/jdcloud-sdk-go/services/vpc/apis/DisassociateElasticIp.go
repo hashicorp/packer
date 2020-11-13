@@ -17,23 +17,24 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DisassociateElasticIpRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* networkInterface ID  */
-	NetworkInterfaceId string `json:"networkInterfaceId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
 
-	/* 指定解绑的弹性Ip Id (Optional) */
-	ElasticIpId *string `json:"elasticIpId"`
+    /* networkInterface ID  */
+    NetworkInterfaceId string `json:"networkInterfaceId"`
 
-	/* 指定解绑的弹性Ip地址 (Optional) */
-	ElasticIpAddress *string `json:"elasticIpAddress"`
+    /* 指定解绑的弹性Ip Id (Optional) */
+    ElasticIpId *string `json:"elasticIpId"`
+
+    /* 指定解绑的弹性Ip地址 (Optional) */
+    ElasticIpAddress *string `json:"elasticIpAddress"`
 }
 
 /*
@@ -43,19 +44,19 @@ type DisassociateElasticIpRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDisassociateElasticIpRequest(
-	regionId string,
-	networkInterfaceId string,
+    regionId string,
+    networkInterfaceId string,
 ) *DisassociateElasticIpRequest {
 
 	return &DisassociateElasticIpRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}:disassociateElasticIp",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:           regionId,
-		NetworkInterfaceId: networkInterfaceId,
+        RegionId: regionId,
+        NetworkInterfaceId: networkInterfaceId,
 	}
 }
 
@@ -66,69 +67,69 @@ func NewDisassociateElasticIpRequest(
  * param elasticIpAddress: 指定解绑的弹性Ip地址 (Optional)
  */
 func NewDisassociateElasticIpRequestWithAllParams(
-	regionId string,
-	networkInterfaceId string,
-	elasticIpId *string,
-	elasticIpAddress *string,
+    regionId string,
+    networkInterfaceId string,
+    elasticIpId *string,
+    elasticIpAddress *string,
 ) *DisassociateElasticIpRequest {
 
-	return &DisassociateElasticIpRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}:disassociateElasticIp",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:           regionId,
-		NetworkInterfaceId: networkInterfaceId,
-		ElasticIpId:        elasticIpId,
-		ElasticIpAddress:   elasticIpAddress,
-	}
+    return &DisassociateElasticIpRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}:disassociateElasticIp",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        NetworkInterfaceId: networkInterfaceId,
+        ElasticIpId: elasticIpId,
+        ElasticIpAddress: elasticIpAddress,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDisassociateElasticIpRequestWithoutParam() *DisassociateElasticIpRequest {
 
-	return &DisassociateElasticIpRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}:disassociateElasticIp",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DisassociateElasticIpRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkInterfaces/{networkInterfaceId}:disassociateElasticIp",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DisassociateElasticIpRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param networkInterfaceId: networkInterface ID(Required) */
 func (r *DisassociateElasticIpRequest) SetNetworkInterfaceId(networkInterfaceId string) {
-	r.NetworkInterfaceId = networkInterfaceId
+    r.NetworkInterfaceId = networkInterfaceId
 }
 
 /* param elasticIpId: 指定解绑的弹性Ip Id(Optional) */
 func (r *DisassociateElasticIpRequest) SetElasticIpId(elasticIpId string) {
-	r.ElasticIpId = &elasticIpId
+    r.ElasticIpId = &elasticIpId
 }
 
 /* param elasticIpAddress: 指定解绑的弹性Ip地址(Optional) */
 func (r *DisassociateElasticIpRequest) SetElasticIpAddress(elasticIpAddress string) {
-	r.ElasticIpAddress = &elasticIpAddress
+    r.ElasticIpAddress = &elasticIpAddress
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DisassociateElasticIpRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DisassociateElasticIpResponse struct {
-	RequestID string                      `json:"requestId"`
-	Error     core.ErrorResponse          `json:"error"`
-	Result    DisassociateElasticIpResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DisassociateElasticIpResult `json:"result"`
 }
 
 type DisassociateElasticIpResult struct {

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // SecurityGroupsMember Information about the member of a security group.
 type SecurityGroupsMember struct {
 	// The account ID of a user.

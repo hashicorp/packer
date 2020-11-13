@@ -17,20 +17,21 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DisassociateElasticIpRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 云主机ID  */
-	InstanceId string `json:"instanceId"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
 
-	/* 弹性公网IP的ID  */
-	ElasticIpId string `json:"elasticIpId"`
+    /* 云主机ID  */
+    InstanceId string `json:"instanceId"`
+
+    /* 弹性公网IP的ID  */
+    ElasticIpId string `json:"elasticIpId"`
 }
 
 /*
@@ -41,21 +42,21 @@ type DisassociateElasticIpRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDisassociateElasticIpRequest(
-	regionId string,
-	instanceId string,
-	elasticIpId string,
+    regionId string,
+    instanceId string,
+    elasticIpId string,
 ) *DisassociateElasticIpRequest {
 
 	return &DisassociateElasticIpRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:disassociateElasticIp",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:    regionId,
-		InstanceId:  instanceId,
-		ElasticIpId: elasticIpId,
+        RegionId: regionId,
+        InstanceId: instanceId,
+        ElasticIpId: elasticIpId,
 	}
 }
 
@@ -65,62 +66,62 @@ func NewDisassociateElasticIpRequest(
  * param elasticIpId: 弹性公网IP的ID (Required)
  */
 func NewDisassociateElasticIpRequestWithAllParams(
-	regionId string,
-	instanceId string,
-	elasticIpId string,
+    regionId string,
+    instanceId string,
+    elasticIpId string,
 ) *DisassociateElasticIpRequest {
 
-	return &DisassociateElasticIpRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:disassociateElasticIp",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:    regionId,
-		InstanceId:  instanceId,
-		ElasticIpId: elasticIpId,
-	}
+    return &DisassociateElasticIpRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:disassociateElasticIp",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        InstanceId: instanceId,
+        ElasticIpId: elasticIpId,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDisassociateElasticIpRequestWithoutParam() *DisassociateElasticIpRequest {
 
-	return &DisassociateElasticIpRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:disassociateElasticIp",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DisassociateElasticIpRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:disassociateElasticIp",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DisassociateElasticIpRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *DisassociateElasticIpRequest) SetInstanceId(instanceId string) {
-	r.InstanceId = instanceId
+    r.InstanceId = instanceId
 }
 
 /* param elasticIpId: 弹性公网IP的ID(Required) */
 func (r *DisassociateElasticIpRequest) SetElasticIpId(elasticIpId string) {
-	r.ElasticIpId = elasticIpId
+    r.ElasticIpId = elasticIpId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DisassociateElasticIpRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DisassociateElasticIpResponse struct {
-	RequestID string                      `json:"requestId"`
-	Error     core.ErrorResponse          `json:"error"`
-	Result    DisassociateElasticIpResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DisassociateElasticIpResult `json:"result"`
 }
 
 type DisassociateElasticIpResult struct {

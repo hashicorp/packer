@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateImageExportTaskResponse struct for CreateImageExportTaskResponse
 type CreateImageExportTaskResponse struct {
 	ImageExportTask ImageExportTask `json:"ImageExportTask,omitempty"`

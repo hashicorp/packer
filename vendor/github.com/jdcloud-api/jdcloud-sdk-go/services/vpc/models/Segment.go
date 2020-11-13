@@ -16,29 +16,30 @@
 
 package models
 
+
 type Segment struct {
 
-	/* 网段的Id (Optional) */
-	SegmentId string `json:"segmentId"`
+    /* 网段的Id (Optional) */
+    SegmentId string `json:"segmentId"`
 
-	/* 网段名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。 (Optional) */
-	SegmentName string `json:"segmentName"`
+    /* 网段名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。 (Optional) */
+    SegmentName string `json:"segmentName"`
 
-	/* 网段描述，允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
-	Description string `json:"description"`
+    /* 网段描述，允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
+    Description string `json:"description"`
 
-	/* 网络地址段 (Optional) */
-	AddressPrefix string `json:"addressPrefix"`
+    /* 网络地址段 (Optional) */
+    AddressPrefix string `json:"addressPrefix"`
 
-	/* 网段可用ip数量 (Optional) */
-	AvailableIpCount int `json:"availableIpCount"`
+    /* 网段可用ip数量 (Optional) */
+    AvailableIpCount int `json:"availableIpCount"`
 
-	/* IP服务商，取值为bgp或no_bgp，cn-north-1：bgp；cn-south-1：[bgp，no_bgp]；cn-east-1：[bgp，no_bgp]；cn-east-2：bgp (Optional) */
-	Provider string `json:"provider"`
+    /* IP服务商，取值为bgp或no_bgp，cn-north-1：bgp；cn-south-1：[bgp，no_bgp]；cn-east-1：[bgp，no_bgp]；cn-east-2：bgp (Optional) */
+    Provider string `json:"provider"`
 
-	/* 网段的起始地址 (Optional) */
-	StartIp string `json:"startIp"`
+    /* 网段的起始地址 (Optional) */
+    StartIp string `json:"startIp"`
 
-	/* 网段的结束地址 (Optional) */
-	EndIp string `json:"endIp"`
+    /* 网段的结束地址 (Optional) */
+    EndIp string `json:"endIp"`
 }

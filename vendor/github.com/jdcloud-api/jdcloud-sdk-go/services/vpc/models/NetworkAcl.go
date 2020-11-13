@@ -16,26 +16,27 @@
 
 package models
 
+
 type NetworkAcl struct {
 
-	/* networkAcl ID (Optional) */
-	NetworkAclId string `json:"networkAclId"`
+    /* networkAcl ID (Optional) */
+    NetworkAclId string `json:"networkAclId"`
 
-	/* networkAcl名称 (Optional) */
-	NetworkAclName string `json:"networkAclName"`
+    /* networkAcl名称 (Optional) */
+    NetworkAclName string `json:"networkAclName"`
 
-	/* 私有网络 ID (Optional) */
-	VpcId string `json:"vpcId"`
+    /* 私有网络 ID (Optional) */
+    VpcId string `json:"vpcId"`
 
-	/* networkAcl规则列表 (Optional) */
-	NetworkAclRules []NetworkAclRule `json:"networkAclRules"`
+    /* networkAcl规则列表 (Optional) */
+    NetworkAclRules []NetworkAclRule `json:"networkAclRules"`
 
-	/* networkAcl绑定的子网列表 (Optional) */
-	SubnetIds []string `json:"subnetIds"`
+    /* networkAcl绑定的子网列表 (Optional) */
+    SubnetIds []string `json:"subnetIds"`
 
-	/* 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
-	Description string `json:"description"`
+    /* 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
+    Description string `json:"description"`
 
-	/* networkAcl创建时间 (Optional) */
-	CreatedTime string `json:"createdTime"`
+    /* networkAcl创建时间 (Optional) */
+    CreatedTime string `json:"createdTime"`
 }

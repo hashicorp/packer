@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // LinkNic Information about the NIC attachment.
 type LinkNic struct {
 	// If `true`, the volume is deleted when the VM is terminated.

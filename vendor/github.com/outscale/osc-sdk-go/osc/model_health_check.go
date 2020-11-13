@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // HealthCheck Information about the health check configuration.
 type HealthCheck struct {
 	// The number of seconds between two pings (between `5` and `600` both included).

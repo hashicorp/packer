@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteTagsRequest struct for DeleteTagsRequest
 type DeleteTagsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

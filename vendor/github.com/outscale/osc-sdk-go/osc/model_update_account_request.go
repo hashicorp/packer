@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // UpdateAccountRequest struct for UpdateAccountRequest
 type UpdateAccountRequest struct {
 	// The new city of the account owner.

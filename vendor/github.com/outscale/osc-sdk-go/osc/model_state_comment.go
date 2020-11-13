@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // StateComment Information about the change of state.
 type StateComment struct {
 	// The code of the change of state.

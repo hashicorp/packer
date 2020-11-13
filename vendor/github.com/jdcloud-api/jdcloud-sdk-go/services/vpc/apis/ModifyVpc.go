@@ -17,23 +17,24 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type ModifyVpcRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* Vpc ID  */
-	VpcId string `json:"vpcId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
 
-	/* 私有网络名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。 (Optional) */
-	VpcName *string `json:"vpcName"`
+    /* Vpc ID  */
+    VpcId string `json:"vpcId"`
 
-	/* vpc描述，允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
-	Description *string `json:"description"`
+    /* 私有网络名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。 (Optional) */
+    VpcName *string `json:"vpcName"`
+
+    /* vpc描述，允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
+    Description *string `json:"description"`
 }
 
 /*
@@ -43,19 +44,19 @@ type ModifyVpcRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewModifyVpcRequest(
-	regionId string,
-	vpcId string,
+    regionId string,
+    vpcId string,
 ) *ModifyVpcRequest {
 
 	return &ModifyVpcRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/vpcs/{vpcId}",
 			Method:  "PATCH",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
-		VpcId:    vpcId,
+        RegionId: regionId,
+        VpcId: vpcId,
 	}
 }
 
@@ -66,69 +67,69 @@ func NewModifyVpcRequest(
  * param description: vpc描述，允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional)
  */
 func NewModifyVpcRequestWithAllParams(
-	regionId string,
-	vpcId string,
-	vpcName *string,
-	description *string,
+    regionId string,
+    vpcId string,
+    vpcName *string,
+    description *string,
 ) *ModifyVpcRequest {
 
-	return &ModifyVpcRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/vpcs/{vpcId}",
-			Method:  "PATCH",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:    regionId,
-		VpcId:       vpcId,
-		VpcName:     vpcName,
-		Description: description,
-	}
+    return &ModifyVpcRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/vpcs/{vpcId}",
+            Method:  "PATCH",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        VpcId: vpcId,
+        VpcName: vpcName,
+        Description: description,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewModifyVpcRequestWithoutParam() *ModifyVpcRequest {
 
-	return &ModifyVpcRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/vpcs/{vpcId}",
-			Method:  "PATCH",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &ModifyVpcRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/vpcs/{vpcId}",
+            Method:  "PATCH",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *ModifyVpcRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param vpcId: Vpc ID(Required) */
 func (r *ModifyVpcRequest) SetVpcId(vpcId string) {
-	r.VpcId = vpcId
+    r.VpcId = vpcId
 }
 
 /* param vpcName: 私有网络名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。(Optional) */
 func (r *ModifyVpcRequest) SetVpcName(vpcName string) {
-	r.VpcName = &vpcName
+    r.VpcName = &vpcName
 }
 
 /* param description: vpc描述，允许输入UTF-8编码下的全部字符，不超过256字符。(Optional) */
 func (r *ModifyVpcRequest) SetDescription(description string) {
-	r.Description = &description
+    r.Description = &description
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ModifyVpcRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type ModifyVpcResponse struct {
-	RequestID string             `json:"requestId"`
-	Error     core.ErrorResponse `json:"error"`
-	Result    ModifyVpcResult    `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result ModifyVpcResult `json:"result"`
 }
 
 type ModifyVpcResult struct {

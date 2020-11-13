@@ -17,17 +17,18 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DeleteRouteTableRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* RouteTable ID  */
-	RouteTableId string `json:"routeTableId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
+
+    /* RouteTable ID  */
+    RouteTableId string `json:"routeTableId"`
 }
 
 /*
@@ -37,19 +38,19 @@ type DeleteRouteTableRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDeleteRouteTableRequest(
-	regionId string,
-	routeTableId string,
+    regionId string,
+    routeTableId string,
 ) *DeleteRouteTableRequest {
 
 	return &DeleteRouteTableRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/routeTables/{routeTableId}",
 			Method:  "DELETE",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:     regionId,
-		RouteTableId: routeTableId,
+        RegionId: regionId,
+        RouteTableId: routeTableId,
 	}
 }
 
@@ -58,55 +59,55 @@ func NewDeleteRouteTableRequest(
  * param routeTableId: RouteTable ID (Required)
  */
 func NewDeleteRouteTableRequestWithAllParams(
-	regionId string,
-	routeTableId string,
+    regionId string,
+    routeTableId string,
 ) *DeleteRouteTableRequest {
 
-	return &DeleteRouteTableRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/routeTables/{routeTableId}",
-			Method:  "DELETE",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:     regionId,
-		RouteTableId: routeTableId,
-	}
+    return &DeleteRouteTableRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/routeTables/{routeTableId}",
+            Method:  "DELETE",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        RouteTableId: routeTableId,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDeleteRouteTableRequestWithoutParam() *DeleteRouteTableRequest {
 
-	return &DeleteRouteTableRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/routeTables/{routeTableId}",
-			Method:  "DELETE",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DeleteRouteTableRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/routeTables/{routeTableId}",
+            Method:  "DELETE",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DeleteRouteTableRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param routeTableId: RouteTable ID(Required) */
 func (r *DeleteRouteTableRequest) SetRouteTableId(routeTableId string) {
-	r.RouteTableId = routeTableId
+    r.RouteTableId = routeTableId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DeleteRouteTableRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DeleteRouteTableResponse struct {
-	RequestID string                 `json:"requestId"`
-	Error     core.ErrorResponse     `json:"error"`
-	Result    DeleteRouteTableResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DeleteRouteTableResult `json:"result"`
 }
 
 type DeleteRouteTableResult struct {

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // QuotaTypes One or more quotas.
 type QuotaTypes struct {
 	// The resource ID if it is a resource-specific quota, `global` if it is not.

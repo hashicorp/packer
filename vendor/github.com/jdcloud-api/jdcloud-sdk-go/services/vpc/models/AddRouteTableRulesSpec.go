@@ -16,8 +16,9 @@
 
 package models
 
+
 type AddRouteTableRulesSpec struct {
 
-	/* 安全组规则信息  */
-	RouteTableRuleSpecs []AddRouteTableRules `json:"routeTableRuleSpecs"`
+    /* 安全组规则信息  */
+    RouteTableRuleSpecs []AddRouteTableRules `json:"routeTableRuleSpecs"`
 }

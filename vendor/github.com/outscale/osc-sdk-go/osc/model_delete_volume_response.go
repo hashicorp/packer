@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteVolumeResponse struct for DeleteVolumeResponse
 type DeleteVolumeResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

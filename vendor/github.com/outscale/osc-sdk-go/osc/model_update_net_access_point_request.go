@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // UpdateNetAccessPointRequest struct for UpdateNetAccessPointRequest
 type UpdateNetAccessPointRequest struct {
 	// One or more IDs of route tables to associate with the specified Net access point.

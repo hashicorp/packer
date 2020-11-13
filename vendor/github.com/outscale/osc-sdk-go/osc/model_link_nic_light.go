@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // LinkNicLight Information about the network interface card (NIC).
 type LinkNicLight struct {
 	// If `true`, the volume is deleted when the VM is terminated.

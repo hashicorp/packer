@@ -17,23 +17,24 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type ModifySubnetRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* Subnet ID  */
-	SubnetId string `json:"subnetId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
 
-	/* 子网名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。 (Optional) */
-	SubnetName *string `json:"subnetName"`
+    /* Subnet ID  */
+    SubnetId string `json:"subnetId"`
 
-	/* 子网描述信息，允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
-	Description *string `json:"description"`
+    /* 子网名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。 (Optional) */
+    SubnetName *string `json:"subnetName"`
+
+    /* 子网描述信息，允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
+    Description *string `json:"description"`
 }
 
 /*
@@ -43,19 +44,19 @@ type ModifySubnetRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewModifySubnetRequest(
-	regionId string,
-	subnetId string,
+    regionId string,
+    subnetId string,
 ) *ModifySubnetRequest {
 
 	return &ModifySubnetRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/subnets/{subnetId}",
 			Method:  "PATCH",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
-		SubnetId: subnetId,
+        RegionId: regionId,
+        SubnetId: subnetId,
 	}
 }
 
@@ -66,69 +67,69 @@ func NewModifySubnetRequest(
  * param description: 子网描述信息，允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional)
  */
 func NewModifySubnetRequestWithAllParams(
-	regionId string,
-	subnetId string,
-	subnetName *string,
-	description *string,
+    regionId string,
+    subnetId string,
+    subnetName *string,
+    description *string,
 ) *ModifySubnetRequest {
 
-	return &ModifySubnetRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/subnets/{subnetId}",
-			Method:  "PATCH",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:    regionId,
-		SubnetId:    subnetId,
-		SubnetName:  subnetName,
-		Description: description,
-	}
+    return &ModifySubnetRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/subnets/{subnetId}",
+            Method:  "PATCH",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        SubnetId: subnetId,
+        SubnetName: subnetName,
+        Description: description,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewModifySubnetRequestWithoutParam() *ModifySubnetRequest {
 
-	return &ModifySubnetRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/subnets/{subnetId}",
-			Method:  "PATCH",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &ModifySubnetRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/subnets/{subnetId}",
+            Method:  "PATCH",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *ModifySubnetRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param subnetId: Subnet ID(Required) */
 func (r *ModifySubnetRequest) SetSubnetId(subnetId string) {
-	r.SubnetId = subnetId
+    r.SubnetId = subnetId
 }
 
 /* param subnetName: 子网名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。(Optional) */
 func (r *ModifySubnetRequest) SetSubnetName(subnetName string) {
-	r.SubnetName = &subnetName
+    r.SubnetName = &subnetName
 }
 
 /* param description: 子网描述信息，允许输入UTF-8编码下的全部字符，不超过256字符。(Optional) */
 func (r *ModifySubnetRequest) SetDescription(description string) {
-	r.Description = &description
+    r.Description = &description
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ModifySubnetRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type ModifySubnetResponse struct {
-	RequestID string             `json:"requestId"`
-	Error     core.ErrorResponse `json:"error"`
-	Result    ModifySubnetResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result ModifySubnetResult `json:"result"`
 }
 
 type ModifySubnetResult struct {

@@ -17,21 +17,22 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
-	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type ModifyNetworkAclRulesRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* networkAclId ID  */
-	NetworkAclId string `json:"networkAclId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
 
-	/* networkAcl规则列表  */
-	ModifyNetworkAclRuleSpecs []vpc.ModifyNetworkAclRuleSpec `json:"modifyNetworkAclRuleSpecs"`
+    /* networkAclId ID  */
+    NetworkAclId string `json:"networkAclId"`
+
+    /* networkAcl规则列表  */
+    ModifyNetworkAclRuleSpecs []vpc.ModifyNetworkAclRuleSpec `json:"modifyNetworkAclRuleSpecs"`
 }
 
 /*
@@ -42,21 +43,21 @@ type ModifyNetworkAclRulesRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewModifyNetworkAclRulesRequest(
-	regionId string,
-	networkAclId string,
-	modifyNetworkAclRuleSpecs []vpc.ModifyNetworkAclRuleSpec,
+    regionId string,
+    networkAclId string,
+    modifyNetworkAclRuleSpecs []vpc.ModifyNetworkAclRuleSpec,
 ) *ModifyNetworkAclRulesRequest {
 
 	return &ModifyNetworkAclRulesRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkAcls/{networkAclId}:modifyNetworkAclRules",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:                  regionId,
-		NetworkAclId:              networkAclId,
-		ModifyNetworkAclRuleSpecs: modifyNetworkAclRuleSpecs,
+        RegionId: regionId,
+        NetworkAclId: networkAclId,
+        ModifyNetworkAclRuleSpecs: modifyNetworkAclRuleSpecs,
 	}
 }
 
@@ -66,62 +67,62 @@ func NewModifyNetworkAclRulesRequest(
  * param modifyNetworkAclRuleSpecs: networkAcl规则列表 (Required)
  */
 func NewModifyNetworkAclRulesRequestWithAllParams(
-	regionId string,
-	networkAclId string,
-	modifyNetworkAclRuleSpecs []vpc.ModifyNetworkAclRuleSpec,
+    regionId string,
+    networkAclId string,
+    modifyNetworkAclRuleSpecs []vpc.ModifyNetworkAclRuleSpec,
 ) *ModifyNetworkAclRulesRequest {
 
-	return &ModifyNetworkAclRulesRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkAcls/{networkAclId}:modifyNetworkAclRules",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:                  regionId,
-		NetworkAclId:              networkAclId,
-		ModifyNetworkAclRuleSpecs: modifyNetworkAclRuleSpecs,
-	}
+    return &ModifyNetworkAclRulesRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkAcls/{networkAclId}:modifyNetworkAclRules",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        NetworkAclId: networkAclId,
+        ModifyNetworkAclRuleSpecs: modifyNetworkAclRuleSpecs,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewModifyNetworkAclRulesRequestWithoutParam() *ModifyNetworkAclRulesRequest {
 
-	return &ModifyNetworkAclRulesRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkAcls/{networkAclId}:modifyNetworkAclRules",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &ModifyNetworkAclRulesRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkAcls/{networkAclId}:modifyNetworkAclRules",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *ModifyNetworkAclRulesRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param networkAclId: networkAclId ID(Required) */
 func (r *ModifyNetworkAclRulesRequest) SetNetworkAclId(networkAclId string) {
-	r.NetworkAclId = networkAclId
+    r.NetworkAclId = networkAclId
 }
 
 /* param modifyNetworkAclRuleSpecs: networkAcl规则列表(Required) */
 func (r *ModifyNetworkAclRulesRequest) SetModifyNetworkAclRuleSpecs(modifyNetworkAclRuleSpecs []vpc.ModifyNetworkAclRuleSpec) {
-	r.ModifyNetworkAclRuleSpecs = modifyNetworkAclRuleSpecs
+    r.ModifyNetworkAclRuleSpecs = modifyNetworkAclRuleSpecs
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ModifyNetworkAclRulesRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type ModifyNetworkAclRulesResponse struct {
-	RequestID string                      `json:"requestId"`
-	Error     core.ErrorResponse          `json:"error"`
-	Result    ModifyNetworkAclRulesResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result ModifyNetworkAclRulesResult `json:"result"`
 }
 
 type ModifyNetworkAclRulesResult struct {

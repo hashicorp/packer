@@ -17,20 +17,21 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type UnShareImageRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 镜像ID  */
-	ImageId string `json:"imageId"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
 
-	/* 需要取消的帐户 (Optional) */
-	Pins []string `json:"pins"`
+    /* 镜像ID  */
+    ImageId string `json:"imageId"`
+
+    /* 需要取消的帐户 (Optional) */
+    Pins []string `json:"pins"`
 }
 
 /*
@@ -40,19 +41,19 @@ type UnShareImageRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewUnShareImageRequest(
-	regionId string,
-	imageId string,
+    regionId string,
+    imageId string,
 ) *UnShareImageRequest {
 
 	return &UnShareImageRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/images/{imageId}:unshare",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
-		ImageId:  imageId,
+        RegionId: regionId,
+        ImageId: imageId,
 	}
 }
 
@@ -62,62 +63,62 @@ func NewUnShareImageRequest(
  * param pins: 需要取消的帐户 (Optional)
  */
 func NewUnShareImageRequestWithAllParams(
-	regionId string,
-	imageId string,
-	pins []string,
+    regionId string,
+    imageId string,
+    pins []string,
 ) *UnShareImageRequest {
 
-	return &UnShareImageRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/images/{imageId}:unshare",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId: regionId,
-		ImageId:  imageId,
-		Pins:     pins,
-	}
+    return &UnShareImageRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/images/{imageId}:unshare",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        ImageId: imageId,
+        Pins: pins,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewUnShareImageRequestWithoutParam() *UnShareImageRequest {
 
-	return &UnShareImageRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/images/{imageId}:unshare",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &UnShareImageRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/images/{imageId}:unshare",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *UnShareImageRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param imageId: 镜像ID(Required) */
 func (r *UnShareImageRequest) SetImageId(imageId string) {
-	r.ImageId = imageId
+    r.ImageId = imageId
 }
 
 /* param pins: 需要取消的帐户(Optional) */
 func (r *UnShareImageRequest) SetPins(pins []string) {
-	r.Pins = pins
+    r.Pins = pins
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r UnShareImageRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type UnShareImageResponse struct {
-	RequestID string             `json:"requestId"`
-	Error     core.ErrorResponse `json:"error"`
-	Result    UnShareImageResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result UnShareImageResult `json:"result"`
 }
 
 type UnShareImageResult struct {

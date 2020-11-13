@@ -12,8 +12,8 @@ package server
 type AttachBlockStorageInstanceRequest struct {
 
 	// 서버인스턴스번호
-	ServerInstanceNo *string `json:"serverInstanceNo"`
+ServerInstanceNo *string `json:"serverInstanceNo"`
 
 	// 블록스토리지인스턴스번호
-	BlockStorageInstanceNo *string `json:"blockStorageInstanceNo"`
+BlockStorageInstanceNo *string `json:"blockStorageInstanceNo"`
 }

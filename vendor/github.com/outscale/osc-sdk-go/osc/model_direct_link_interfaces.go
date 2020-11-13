@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DirectLinkInterfaces Information about the DirectLink interfaces.
 type DirectLinkInterfaces struct {
 	// The account ID of the owner of the DirectLink interface.

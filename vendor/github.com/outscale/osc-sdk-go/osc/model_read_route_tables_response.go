@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ReadRouteTablesResponse struct for ReadRouteTablesResponse
 type ReadRouteTablesResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // PrivateIpLight Information about the private IP.
 type PrivateIpLight struct {
 	// If `true`, the IP address is the primary private IP address of the NIC.

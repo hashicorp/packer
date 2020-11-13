@@ -17,23 +17,24 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type AttachNetworkInterfaceRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 云主机ID  */
-	InstanceId string `json:"instanceId"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
 
-	/* 弹性网卡ID  */
-	NetworkInterfaceId string `json:"networkInterfaceId"`
+    /* 云主机ID  */
+    InstanceId string `json:"instanceId"`
 
-	/* 随主机自动删除，默认为False (Optional) */
-	AutoDelete *bool `json:"autoDelete"`
+    /* 弹性网卡ID  */
+    NetworkInterfaceId string `json:"networkInterfaceId"`
+
+    /* 随主机自动删除，默认为False (Optional) */
+    AutoDelete *bool `json:"autoDelete"`
 }
 
 /*
@@ -44,21 +45,21 @@ type AttachNetworkInterfaceRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewAttachNetworkInterfaceRequest(
-	regionId string,
-	instanceId string,
-	networkInterfaceId string,
+    regionId string,
+    instanceId string,
+    networkInterfaceId string,
 ) *AttachNetworkInterfaceRequest {
 
 	return &AttachNetworkInterfaceRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:attachNetworkInterface",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:           regionId,
-		InstanceId:         instanceId,
-		NetworkInterfaceId: networkInterfaceId,
+        RegionId: regionId,
+        InstanceId: instanceId,
+        NetworkInterfaceId: networkInterfaceId,
 	}
 }
 
@@ -69,69 +70,69 @@ func NewAttachNetworkInterfaceRequest(
  * param autoDelete: 随主机自动删除，默认为False (Optional)
  */
 func NewAttachNetworkInterfaceRequestWithAllParams(
-	regionId string,
-	instanceId string,
-	networkInterfaceId string,
-	autoDelete *bool,
+    regionId string,
+    instanceId string,
+    networkInterfaceId string,
+    autoDelete *bool,
 ) *AttachNetworkInterfaceRequest {
 
-	return &AttachNetworkInterfaceRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:attachNetworkInterface",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:           regionId,
-		InstanceId:         instanceId,
-		NetworkInterfaceId: networkInterfaceId,
-		AutoDelete:         autoDelete,
-	}
+    return &AttachNetworkInterfaceRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:attachNetworkInterface",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        InstanceId: instanceId,
+        NetworkInterfaceId: networkInterfaceId,
+        AutoDelete: autoDelete,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewAttachNetworkInterfaceRequestWithoutParam() *AttachNetworkInterfaceRequest {
 
-	return &AttachNetworkInterfaceRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:attachNetworkInterface",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &AttachNetworkInterfaceRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:attachNetworkInterface",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *AttachNetworkInterfaceRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *AttachNetworkInterfaceRequest) SetInstanceId(instanceId string) {
-	r.InstanceId = instanceId
+    r.InstanceId = instanceId
 }
 
 /* param networkInterfaceId: 弹性网卡ID(Required) */
 func (r *AttachNetworkInterfaceRequest) SetNetworkInterfaceId(networkInterfaceId string) {
-	r.NetworkInterfaceId = networkInterfaceId
+    r.NetworkInterfaceId = networkInterfaceId
 }
 
 /* param autoDelete: 随主机自动删除，默认为False(Optional) */
 func (r *AttachNetworkInterfaceRequest) SetAutoDelete(autoDelete bool) {
-	r.AutoDelete = &autoDelete
+    r.AutoDelete = &autoDelete
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r AttachNetworkInterfaceRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type AttachNetworkInterfaceResponse struct {
-	RequestID string                       `json:"requestId"`
-	Error     core.ErrorResponse           `json:"error"`
-	Result    AttachNetworkInterfaceResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result AttachNetworkInterfaceResult `json:"result"`
 }
 
 type AttachNetworkInterfaceResult struct {

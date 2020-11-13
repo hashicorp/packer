@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // Route Information about the route.
 type Route struct {
 	// The method used to create the route.

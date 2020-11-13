@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteVirtualGatewayResponse struct for DeleteVirtualGatewayResponse
 type DeleteVirtualGatewayResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

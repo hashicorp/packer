@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ReadSubnetsResponse struct for ReadSubnetsResponse
 type ReadSubnetsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

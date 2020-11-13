@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/packer"
 )
 

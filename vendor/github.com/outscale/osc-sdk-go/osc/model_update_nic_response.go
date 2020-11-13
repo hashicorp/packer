@@ -9,9 +9,8 @@
  */
 
 package osc
-
 // UpdateNicResponse struct for UpdateNicResponse
 type UpdateNicResponse struct {
-	Nic             Nic             `json:"Nic,omitempty"`
+	Nic Nic `json:"Nic,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

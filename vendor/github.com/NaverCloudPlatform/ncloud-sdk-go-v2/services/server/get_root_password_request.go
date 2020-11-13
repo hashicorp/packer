@@ -12,8 +12,8 @@ package server
 type GetRootPasswordRequest struct {
 
 	// 개인키
-	PrivateKey *string `json:"privateKey,omitempty"`
+PrivateKey *string `json:"privateKey,omitempty"`
 
 	// 서버인스턴스번호
-	ServerInstanceNo *string `json:"serverInstanceNo"`
+ServerInstanceNo *string `json:"serverInstanceNo"`
 }

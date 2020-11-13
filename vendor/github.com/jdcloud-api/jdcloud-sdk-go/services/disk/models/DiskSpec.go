@@ -20,30 +20,30 @@ import charge "github.com/jdcloud-api/jdcloud-sdk-go/services/charge/models"
 
 type DiskSpec struct {
 
-	/* 云硬盘所属的可用区  */
-	Az string `json:"az"`
+    /* 云硬盘所属的可用区  */
+    Az string `json:"az"`
 
-	/* 云硬盘名称  */
-	Name string `json:"name"`
+    /* 云硬盘名称  */
+    Name string `json:"name"`
 
-	/* 云硬盘描述 (Optional) */
-	Description *string `json:"description"`
+    /* 云硬盘描述 (Optional) */
+    Description *string `json:"description"`
 
-	/* 云硬盘类型，取值为ssd、premium-hdd、ssd.gp1、ssd.io1、hdd.std1之一  */
-	DiskType string `json:"diskType"`
+    /* 云硬盘类型，取值为ssd、premium-hdd、ssd.gp1、ssd.io1、hdd.std1之一  */
+    DiskType string `json:"diskType"`
 
-	/* 云硬盘大小，单位为 GiB，ssd 类型取值范围[20,1000]GB，步长为10G，premium-hdd 类型取值范围[20,3000]GB，步长为10G  */
-	DiskSizeGB int `json:"diskSizeGB"`
+    /* 云硬盘大小，单位为 GiB，ssd 类型取值范围[20,1000]GB，步长为10G，premium-hdd 类型取值范围[20,3000]GB，步长为10G  */
+    DiskSizeGB int `json:"diskSizeGB"`
 
-	/* 用于创建云硬盘的快照ID (Optional) */
-	SnapshotId *string `json:"snapshotId"`
+    /* 用于创建云硬盘的快照ID (Optional) */
+    SnapshotId *string `json:"snapshotId"`
 
-	/* 计费配置；如不指定，默认计费类型是后付费-按使用时常付费 (Optional) */
-	Charge *charge.ChargeSpec `json:"charge"`
+    /* 计费配置；如不指定，默认计费类型是后付费-按使用时常付费 (Optional) */
+    Charge *charge.ChargeSpec `json:"charge"`
 
-	/* 云硬盘是否支持一盘多主机挂载，默认为false（不支持） (Optional) */
-	MultiAttachable *bool `json:"multiAttachable"`
+    /* 云硬盘是否支持一盘多主机挂载，默认为false（不支持） (Optional) */
+    MultiAttachable *bool `json:"multiAttachable"`
 
-	/* 云硬盘是否加密，默认为false（不加密） (Optional) */
-	Encrypt *bool `json:"encrypt"`
+    /* 云硬盘是否加密，默认为false（不加密） (Optional) */
+    Encrypt *bool `json:"encrypt"`
 }

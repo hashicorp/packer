@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ClientGateway Information about the client gateway.
 type ClientGateway struct {
 	// An Autonomous System Number (ASN) used by the Border Gateway Protocol (BGP) to find the path to your client gateway through the Internet.

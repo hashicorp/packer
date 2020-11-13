@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeregisterVmsInLoadBalancerResponse struct for DeregisterVmsInLoadBalancerResponse
 type DeregisterVmsInLoadBalancerResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

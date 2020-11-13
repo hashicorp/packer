@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersProductType One or more filters.
 type FiltersProductType struct {
 	// The IDs of the product types.

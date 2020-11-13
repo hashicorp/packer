@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // VmStates Information about the states of the VMs.
 type VmStates struct {
 	// One or more scheduled events associated with the VM.

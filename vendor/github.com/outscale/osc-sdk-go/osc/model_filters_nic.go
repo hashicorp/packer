@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersNic One or more filters.
 type FiltersNic struct {
 	// The device numbers the NICs are attached to.

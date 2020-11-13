@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // SourceNet Information about the source Net.
 type SourceNet struct {
 	// The account ID of the owner of the source Net.

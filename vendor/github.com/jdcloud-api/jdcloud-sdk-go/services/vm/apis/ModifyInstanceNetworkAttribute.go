@@ -17,21 +17,22 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
-	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+    vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
 )
 
 type ModifyInstanceNetworkAttributeRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 云主机ID  */
-	InstanceId string `json:"instanceId"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
 
-	/* 弹性网卡列表 (Optional) */
-	Networks []vm.InstanceNetworkAttribute `json:"networks"`
+    /* 云主机ID  */
+    InstanceId string `json:"instanceId"`
+
+    /* 弹性网卡列表 (Optional) */
+    Networks []vm.InstanceNetworkAttribute `json:"networks"`
 }
 
 /*
@@ -41,19 +42,19 @@ type ModifyInstanceNetworkAttributeRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewModifyInstanceNetworkAttributeRequest(
-	regionId string,
-	instanceId string,
+    regionId string,
+    instanceId string,
 ) *ModifyInstanceNetworkAttributeRequest {
 
 	return &ModifyInstanceNetworkAttributeRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceNetworkAttribute",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:   regionId,
-		InstanceId: instanceId,
+        RegionId: regionId,
+        InstanceId: instanceId,
 	}
 }
 
@@ -63,62 +64,62 @@ func NewModifyInstanceNetworkAttributeRequest(
  * param networks: 弹性网卡列表 (Optional)
  */
 func NewModifyInstanceNetworkAttributeRequestWithAllParams(
-	regionId string,
-	instanceId string,
-	networks []vm.InstanceNetworkAttribute,
+    regionId string,
+    instanceId string,
+    networks []vm.InstanceNetworkAttribute,
 ) *ModifyInstanceNetworkAttributeRequest {
 
-	return &ModifyInstanceNetworkAttributeRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceNetworkAttribute",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:   regionId,
-		InstanceId: instanceId,
-		Networks:   networks,
-	}
+    return &ModifyInstanceNetworkAttributeRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceNetworkAttribute",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        InstanceId: instanceId,
+        Networks: networks,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewModifyInstanceNetworkAttributeRequestWithoutParam() *ModifyInstanceNetworkAttributeRequest {
 
-	return &ModifyInstanceNetworkAttributeRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceNetworkAttribute",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &ModifyInstanceNetworkAttributeRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstanceNetworkAttribute",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *ModifyInstanceNetworkAttributeRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *ModifyInstanceNetworkAttributeRequest) SetInstanceId(instanceId string) {
-	r.InstanceId = instanceId
+    r.InstanceId = instanceId
 }
 
 /* param networks: 弹性网卡列表(Optional) */
 func (r *ModifyInstanceNetworkAttributeRequest) SetNetworks(networks []vm.InstanceNetworkAttribute) {
-	r.Networks = networks
+    r.Networks = networks
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ModifyInstanceNetworkAttributeRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type ModifyInstanceNetworkAttributeResponse struct {
-	RequestID string                               `json:"requestId"`
-	Error     core.ErrorResponse                   `json:"error"`
-	Result    ModifyInstanceNetworkAttributeResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result ModifyInstanceNetworkAttributeResult `json:"result"`
 }
 
 type ModifyInstanceNetworkAttributeResult struct {

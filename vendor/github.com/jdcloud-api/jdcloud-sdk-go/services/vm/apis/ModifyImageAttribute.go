@@ -17,23 +17,24 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type ModifyImageAttributeRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 镜像ID  */
-	ImageId string `json:"imageId"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
 
-	/* 名称，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Optional) */
-	Name *string `json:"name"`
+    /* 镜像ID  */
+    ImageId string `json:"imageId"`
 
-	/* 描述，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Optional) */
-	Description *string `json:"description"`
+    /* 名称，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Optional) */
+    Name *string `json:"name"`
+
+    /* 描述，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Optional) */
+    Description *string `json:"description"`
 }
 
 /*
@@ -43,19 +44,19 @@ type ModifyImageAttributeRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewModifyImageAttributeRequest(
-	regionId string,
-	imageId string,
+    regionId string,
+    imageId string,
 ) *ModifyImageAttributeRequest {
 
 	return &ModifyImageAttributeRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/images/{imageId}:modifyImageAttribute",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
-		ImageId:  imageId,
+        RegionId: regionId,
+        ImageId: imageId,
 	}
 }
 
@@ -66,69 +67,69 @@ func NewModifyImageAttributeRequest(
  * param description: 描述，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Optional)
  */
 func NewModifyImageAttributeRequestWithAllParams(
-	regionId string,
-	imageId string,
-	name *string,
-	description *string,
+    regionId string,
+    imageId string,
+    name *string,
+    description *string,
 ) *ModifyImageAttributeRequest {
 
-	return &ModifyImageAttributeRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/images/{imageId}:modifyImageAttribute",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:    regionId,
-		ImageId:     imageId,
-		Name:        name,
-		Description: description,
-	}
+    return &ModifyImageAttributeRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/images/{imageId}:modifyImageAttribute",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        ImageId: imageId,
+        Name: name,
+        Description: description,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewModifyImageAttributeRequestWithoutParam() *ModifyImageAttributeRequest {
 
-	return &ModifyImageAttributeRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/images/{imageId}:modifyImageAttribute",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &ModifyImageAttributeRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/images/{imageId}:modifyImageAttribute",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *ModifyImageAttributeRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param imageId: 镜像ID(Required) */
 func (r *ModifyImageAttributeRequest) SetImageId(imageId string) {
-	r.ImageId = imageId
+    r.ImageId = imageId
 }
 
 /* param name: 名称，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。(Optional) */
 func (r *ModifyImageAttributeRequest) SetName(name string) {
-	r.Name = &name
+    r.Name = &name
 }
 
 /* param description: 描述，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。(Optional) */
 func (r *ModifyImageAttributeRequest) SetDescription(description string) {
-	r.Description = &description
+    r.Description = &description
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ModifyImageAttributeRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type ModifyImageAttributeResponse struct {
-	RequestID string                     `json:"requestId"`
-	Error     core.ErrorResponse         `json:"error"`
-	Result    ModifyImageAttributeResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result ModifyImageAttributeResult `json:"result"`
 }
 
 type ModifyImageAttributeResult struct {

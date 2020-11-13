@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // SecurityGroupLight Information about the security group.
 type SecurityGroupLight struct {
 	// The ID of the security group.

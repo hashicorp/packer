@@ -17,20 +17,21 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type ResizeInstanceRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 云主机ID  */
-	InstanceId string `json:"instanceId"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
 
-	/* 实例规格，可查询<a href="http://docs.jdcloud.com/virtual-machines/api/describeinstancetypes">DescribeInstanceTypes</a>接口获得指定地域或可用区的规格信息。  */
-	InstanceType string `json:"instanceType"`
+    /* 云主机ID  */
+    InstanceId string `json:"instanceId"`
+
+    /* 实例规格，可查询<a href="http://docs.jdcloud.com/virtual-machines/api/describeinstancetypes">DescribeInstanceTypes</a>接口获得指定地域或可用区的规格信息。  */
+    InstanceType string `json:"instanceType"`
 }
 
 /*
@@ -41,21 +42,21 @@ type ResizeInstanceRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewResizeInstanceRequest(
-	regionId string,
-	instanceId string,
-	instanceType string,
+    regionId string,
+    instanceId string,
+    instanceType string,
 ) *ResizeInstanceRequest {
 
 	return &ResizeInstanceRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:resizeInstance",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:     regionId,
-		InstanceId:   instanceId,
-		InstanceType: instanceType,
+        RegionId: regionId,
+        InstanceId: instanceId,
+        InstanceType: instanceType,
 	}
 }
 
@@ -65,62 +66,62 @@ func NewResizeInstanceRequest(
  * param instanceType: 实例规格，可查询<a href="http://docs.jdcloud.com/virtual-machines/api/describeinstancetypes">DescribeInstanceTypes</a>接口获得指定地域或可用区的规格信息。 (Required)
  */
 func NewResizeInstanceRequestWithAllParams(
-	regionId string,
-	instanceId string,
-	instanceType string,
+    regionId string,
+    instanceId string,
+    instanceType string,
 ) *ResizeInstanceRequest {
 
-	return &ResizeInstanceRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:resizeInstance",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:     regionId,
-		InstanceId:   instanceId,
-		InstanceType: instanceType,
-	}
+    return &ResizeInstanceRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:resizeInstance",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        InstanceId: instanceId,
+        InstanceType: instanceType,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewResizeInstanceRequestWithoutParam() *ResizeInstanceRequest {
 
-	return &ResizeInstanceRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:resizeInstance",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &ResizeInstanceRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:resizeInstance",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *ResizeInstanceRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *ResizeInstanceRequest) SetInstanceId(instanceId string) {
-	r.InstanceId = instanceId
+    r.InstanceId = instanceId
 }
 
 /* param instanceType: 实例规格，可查询<a href="http://docs.jdcloud.com/virtual-machines/api/describeinstancetypes">DescribeInstanceTypes</a>接口获得指定地域或可用区的规格信息。(Required) */
 func (r *ResizeInstanceRequest) SetInstanceType(instanceType string) {
-	r.InstanceType = instanceType
+    r.InstanceType = instanceType
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ResizeInstanceRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type ResizeInstanceResponse struct {
-	RequestID string               `json:"requestId"`
-	Error     core.ErrorResponse   `json:"error"`
-	Result    ResizeInstanceResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result ResizeInstanceResult `json:"result"`
 }
 
 type ResizeInstanceResult struct {

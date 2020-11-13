@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // LinkInternetServiceResponse struct for LinkInternetServiceResponse
 type LinkInternetServiceResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

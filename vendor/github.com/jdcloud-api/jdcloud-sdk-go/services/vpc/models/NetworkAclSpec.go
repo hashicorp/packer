@@ -16,14 +16,15 @@
 
 package models
 
+
 type NetworkAclSpec struct {
 
-	/* 私有网络id  */
-	VpcId string `json:"vpcId"`
+    /* 私有网络id  */
+    VpcId string `json:"vpcId"`
 
-	/* networkAcl名称  */
-	NetworkAclName string `json:"networkAclName"`
+    /* networkAcl名称  */
+    NetworkAclName string `json:"networkAclName"`
 
-	/* 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
-	Description string `json:"description"`
+    /* 描述,允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
+    Description string `json:"description"`
 }

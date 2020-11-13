@@ -9,9 +9,8 @@
  */
 
 package osc
-
 // DeleteLoadBalancerPolicyResponse struct for DeleteLoadBalancerPolicyResponse
 type DeleteLoadBalancerPolicyResponse struct {
-	LoadBalancer    LoadBalancer    `json:"LoadBalancer,omitempty"`
+	LoadBalancer LoadBalancer `json:"LoadBalancer,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // Subregion Information about the Subregion.
 type Subregion struct {
 	// The name of the Region containing the Subregion.

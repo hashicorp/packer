@@ -16,32 +16,33 @@
 
 package models
 
+
 type InstanceType struct {
 
-	/* 实例规格类型 (Optional) */
-	Family string `json:"family"`
+    /* 实例规格类型 (Optional) */
+    Family string `json:"family"`
 
-	/* 实例规格，比如g.b1.2xlarge (Optional) */
-	InstanceType string `json:"instanceType"`
+    /* 实例规格，比如g.b1.2xlarge (Optional) */
+    InstanceType string `json:"instanceType"`
 
-	/* cpu个数 (Optional) */
-	Cpu int `json:"cpu"`
+    /* cpu个数 (Optional) */
+    Cpu int `json:"cpu"`
 
-	/* 内存大小 (Optional) */
-	MemoryMB int `json:"memoryMB"`
+    /* 内存大小 (Optional) */
+    MemoryMB int `json:"memoryMB"`
 
-	/* 支持弹性网卡的数量 (Optional) */
-	NicLimit int `json:"nicLimit"`
+    /* 支持弹性网卡的数量 (Optional) */
+    NicLimit int `json:"nicLimit"`
 
-	/* 描述 (Optional) */
-	Desc string `json:"desc"`
+    /* 描述 (Optional) */
+    Desc string `json:"desc"`
 
-	/* 规格状态 (Optional) */
-	State []InstanceTypeState `json:"state"`
+    /* 规格状态 (Optional) */
+    State []InstanceTypeState `json:"state"`
 
-	/* Gpu配置 (Optional) */
-	Gpu Gpu `json:"gpu"`
+    /* Gpu配置 (Optional) */
+    Gpu Gpu `json:"gpu"`
 
-	/* 本地缓存盘配置，目前只有Gpu规格上才有 (Optional) */
-	LocalDisks []LocalDisk `json:"localDisks"`
+    /* 本地缓存盘配置，目前只有Gpu规格上才有 (Optional) */
+    LocalDisks []LocalDisk `json:"localDisks"`
 }

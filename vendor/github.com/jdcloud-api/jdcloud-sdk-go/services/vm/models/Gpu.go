@@ -16,11 +16,12 @@
 
 package models
 
+
 type Gpu struct {
 
-	/* GPU型号 (Optional) */
-	Model string `json:"model"`
+    /* GPU型号 (Optional) */
+    Model string `json:"model"`
 
-	/* GPU数量 (Optional) */
-	Number int `json:"number"`
+    /* GPU数量 (Optional) */
+    Number int `json:"number"`
 }

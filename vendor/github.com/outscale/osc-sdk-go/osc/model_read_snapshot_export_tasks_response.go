@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ReadSnapshotExportTasksResponse struct for ReadSnapshotExportTasksResponse
 type ReadSnapshotExportTasksResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

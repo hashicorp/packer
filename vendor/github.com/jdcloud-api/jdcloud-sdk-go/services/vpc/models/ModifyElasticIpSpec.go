@@ -16,8 +16,9 @@
 
 package models
 
+
 type ModifyElasticIpSpec struct {
 
-	/* 弹性公网IP的限速（单位：Mbps），取值范围为[1-200]  */
-	BandwidthMbps int `json:"bandwidthMbps"`
+    /* 弹性公网IP的限速（单位：Mbps），取值范围为[1-200]  */
+    BandwidthMbps int `json:"bandwidthMbps"`
 }

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // Vm Information about the VM.
 type Vm struct {
 	// The architecture of the VM (`i386` \\| `x86_64`).
@@ -39,8 +38,8 @@ type Vm struct {
 	// Indicates the operating system (OS) of the VM.
 	OsFamily string `json:"OsFamily,omitempty"`
 	// The performance of the VM (`standard` \\| `high` \\|  `highest`).
-	Performance string    `json:"Performance,omitempty"`
-	Placement   Placement `json:"Placement,omitempty"`
+	Performance string `json:"Performance,omitempty"`
+	Placement Placement `json:"Placement,omitempty"`
 	// The name of the private DNS.
 	PrivateDnsName string `json:"PrivateDnsName,omitempty"`
 	// The primary private IP address of the VM.

@@ -16,8 +16,9 @@
 
 package models
 
+
 type DisassociateRouteTableSpec struct {
 
-	/* 路由表要解绑的子网ID，解绑后子网绑定默认路由表  */
-	SubnetId string `json:"subnetId"`
+    /* 路由表要解绑的子网ID，解绑后子网绑定默认路由表  */
+    SubnetId string `json:"subnetId"`
 }

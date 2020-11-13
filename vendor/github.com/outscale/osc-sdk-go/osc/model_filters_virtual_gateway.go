@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersVirtualGateway One or more filters.
 type FiltersVirtualGateway struct {
 	// The types of the virtual gateways (only `ipsec.1` is supported).

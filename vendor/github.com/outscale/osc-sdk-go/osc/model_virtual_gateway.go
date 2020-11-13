@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // VirtualGateway Information about the virtual gateway.
 type VirtualGateway struct {
 	// The type of VPN connection supported by the virtual gateway (only `ipsec.1` is supported).

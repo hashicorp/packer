@@ -17,27 +17,28 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
-	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+    vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
 )
 
 type CreateImageRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 云主机ID  */
-	InstanceId string `json:"instanceId"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
 
-	/* 镜像名称，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。  */
-	Name string `json:"name"`
+    /* 云主机ID  */
+    InstanceId string `json:"instanceId"`
 
-	/* 镜像描述，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。  */
-	Description string `json:"description"`
+    /* 镜像名称，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。  */
+    Name string `json:"name"`
 
-	/* 数据盘列表，可以在实例已挂载数据盘的基础上，额外增加新的快照、空盘、或排除云主机中的数据盘。 (Optional) */
-	DataDisks []vm.InstanceDiskAttachmentSpec `json:"dataDisks"`
+    /* 镜像描述，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。  */
+    Description string `json:"description"`
+
+    /* 数据盘列表，可以在实例已挂载数据盘的基础上，额外增加新的快照、空盘、或排除云主机中的数据盘。 (Optional) */
+    DataDisks []vm.InstanceDiskAttachmentSpec `json:"dataDisks"`
 }
 
 /*
@@ -49,23 +50,23 @@ type CreateImageRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewCreateImageRequest(
-	regionId string,
-	instanceId string,
-	name string,
-	description string,
+    regionId string,
+    instanceId string,
+    name string,
+    description string,
 ) *CreateImageRequest {
 
 	return &CreateImageRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:createImage",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:    regionId,
-		InstanceId:  instanceId,
-		Name:        name,
-		Description: description,
+        RegionId: regionId,
+        InstanceId: instanceId,
+        Name: name,
+        Description: description,
 	}
 }
 
@@ -77,78 +78,78 @@ func NewCreateImageRequest(
  * param dataDisks: 数据盘列表，可以在实例已挂载数据盘的基础上，额外增加新的快照、空盘、或排除云主机中的数据盘。 (Optional)
  */
 func NewCreateImageRequestWithAllParams(
-	regionId string,
-	instanceId string,
-	name string,
-	description string,
-	dataDisks []vm.InstanceDiskAttachmentSpec,
+    regionId string,
+    instanceId string,
+    name string,
+    description string,
+    dataDisks []vm.InstanceDiskAttachmentSpec,
 ) *CreateImageRequest {
 
-	return &CreateImageRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:createImage",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:    regionId,
-		InstanceId:  instanceId,
-		Name:        name,
-		Description: description,
-		DataDisks:   dataDisks,
-	}
+    return &CreateImageRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:createImage",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        InstanceId: instanceId,
+        Name: name,
+        Description: description,
+        DataDisks: dataDisks,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewCreateImageRequestWithoutParam() *CreateImageRequest {
 
-	return &CreateImageRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:createImage",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &CreateImageRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:createImage",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *CreateImageRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *CreateImageRequest) SetInstanceId(instanceId string) {
-	r.InstanceId = instanceId
+    r.InstanceId = instanceId
 }
 
 /* param name: 镜像名称，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。(Required) */
 func (r *CreateImageRequest) SetName(name string) {
-	r.Name = name
+    r.Name = name
 }
 
 /* param description: 镜像描述，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。(Required) */
 func (r *CreateImageRequest) SetDescription(description string) {
-	r.Description = description
+    r.Description = description
 }
 
 /* param dataDisks: 数据盘列表，可以在实例已挂载数据盘的基础上，额外增加新的快照、空盘、或排除云主机中的数据盘。(Optional) */
 func (r *CreateImageRequest) SetDataDisks(dataDisks []vm.InstanceDiskAttachmentSpec) {
-	r.DataDisks = dataDisks
+    r.DataDisks = dataDisks
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r CreateImageRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type CreateImageResponse struct {
-	RequestID string             `json:"requestId"`
-	Error     core.ErrorResponse `json:"error"`
-	Result    CreateImageResult  `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result CreateImageResult `json:"result"`
 }
 
 type CreateImageResult struct {
-	ImageId string `json:"imageId"`
+    ImageId string `json:"imageId"`
 }

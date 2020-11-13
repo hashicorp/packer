@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteLoadBalancerTagsRequest struct for DeleteLoadBalancerTagsRequest
 type DeleteLoadBalancerTagsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

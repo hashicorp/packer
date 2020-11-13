@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteDirectLinkInterfaceResponse struct for DeleteDirectLinkInterfaceResponse
 type DeleteDirectLinkInterfaceResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

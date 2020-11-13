@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateSnapshotRequest struct for CreateSnapshotRequest
 type CreateSnapshotRequest struct {
 	// A description for the snapshot.

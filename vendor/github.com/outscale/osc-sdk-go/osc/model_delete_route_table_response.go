@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteRouteTableResponse struct for DeleteRouteTableResponse
 type DeleteRouteTableResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

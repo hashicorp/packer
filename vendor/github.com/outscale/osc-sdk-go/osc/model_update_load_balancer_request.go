@@ -9,12 +9,11 @@
  */
 
 package osc
-
 // UpdateLoadBalancerRequest struct for UpdateLoadBalancerRequest
 type UpdateLoadBalancerRequest struct {
 	AccessLog AccessLog `json:"AccessLog,omitempty"`
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun      bool        `json:"DryRun,omitempty"`
+	DryRun bool `json:"DryRun,omitempty"`
 	HealthCheck HealthCheck `json:"HealthCheck,omitempty"`
 	// The name of the load balancer.
 	LoadBalancerName string `json:"LoadBalancerName"`

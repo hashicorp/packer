@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // RebootVmsResponse struct for RebootVmsResponse
 type RebootVmsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

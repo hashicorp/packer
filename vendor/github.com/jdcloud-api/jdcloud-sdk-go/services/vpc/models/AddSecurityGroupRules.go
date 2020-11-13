@@ -16,23 +16,24 @@
 
 package models
 
+
 type AddSecurityGroupRules struct {
 
-	/* 规则限定协议。300:All; 6:TCP; 17:UDP; 1:ICMP  */
-	Protocol int `json:"protocol"`
+    /* 规则限定协议。300:All; 6:TCP; 17:UDP; 1:ICMP  */
+    Protocol int `json:"protocol"`
 
-	/* 安全组规则方向。0：入规则; 1：出规则  */
-	Direction int `json:"direction"`
+    /* 安全组规则方向。0：入规则; 1：出规则  */
+    Direction int `json:"direction"`
 
-	/* 匹配地址前缀  */
-	AddressPrefix string `json:"addressPrefix"`
+    /* 匹配地址前缀  */
+    AddressPrefix string `json:"addressPrefix"`
 
-	/* 规则限定起始传输层端口, 取值范围:1-65535, 若protocol为传输层协议，默认值为1，若protocol不是传输层协议，恒为0。如果规则只限定一个端口号，fromPort和toPort填写同一个值 (Optional) */
-	FromPort *int `json:"fromPort"`
+    /* 规则限定起始传输层端口, 取值范围:1-65535, 若protocol为传输层协议，默认值为1，若protocol不是传输层协议，恒为0。如果规则只限定一个端口号，fromPort和toPort填写同一个值 (Optional) */
+    FromPort *int `json:"fromPort"`
 
-	/* 规则限定终止传输层端口, 取值范围:1-65535, 若protocol为传输层协议，默认值为65535，若protocol不是传输层协议，恒为0。如果规则只限定一个端口号，fromPort和toPort填写同一个值 (Optional) */
-	ToPort *int `json:"toPort"`
+    /* 规则限定终止传输层端口, 取值范围:1-65535, 若protocol为传输层协议，默认值为65535，若protocol不是传输层协议，恒为0。如果规则只限定一个端口号，fromPort和toPort填写同一个值 (Optional) */
+    ToPort *int `json:"toPort"`
 
-	/* 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
-	Description *string `json:"description"`
+    /* 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
+    Description *string `json:"description"`
 }

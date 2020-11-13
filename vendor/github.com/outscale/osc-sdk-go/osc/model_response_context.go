@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ResponseContext Information about the context of the response.
 type ResponseContext struct {
 	// The ID of the request.

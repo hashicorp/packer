@@ -1,10 +1,10 @@
 package core
 
 import (
+	"net/http"
+	"io/ioutil"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 )
 
 type ResponseProcessor interface {

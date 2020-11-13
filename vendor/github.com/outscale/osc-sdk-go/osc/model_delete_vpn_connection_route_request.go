@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteVpnConnectionRouteRequest struct for DeleteVpnConnectionRouteRequest
 type DeleteVpnConnectionRouteRequest struct {
 	// The network prefix of the route to delete, in CIDR notation (for example, 10.12.0.0/16).

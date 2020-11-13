@@ -16,29 +16,30 @@
 
 package models
 
+
 type RouteTable struct {
 
-	/* 路由表ID (Optional) */
-	RouteTableId string `json:"routeTableId"`
+    /* 路由表ID (Optional) */
+    RouteTableId string `json:"routeTableId"`
 
-	/* 路由表名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。 (Optional) */
-	RouteTableName string `json:"routeTableName"`
+    /* 路由表名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。 (Optional) */
+    RouteTableName string `json:"routeTableName"`
 
-	/* 路由表类型，default：默认路由表，custom：自定义路由表 (Optional) */
-	RouteTableType string `json:"routeTableType"`
+    /* 路由表类型，default：默认路由表，custom：自定义路由表 (Optional) */
+    RouteTableType string `json:"routeTableType"`
 
-	/* 路由表描述信息，允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
-	Description string `json:"description"`
+    /* 路由表描述信息，允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
+    Description string `json:"description"`
 
-	/* 私有网络ID (Optional) */
-	VpcId string `json:"vpcId"`
+    /* 私有网络ID (Optional) */
+    VpcId string `json:"vpcId"`
 
-	/* 路由表规则信息 (Optional) */
-	RouteTableRules []RouteTableRule `json:"routeTableRules"`
+    /* 路由表规则信息 (Optional) */
+    RouteTableRules []RouteTableRule `json:"routeTableRules"`
 
-	/* 路由表绑定的子网列表 (Optional) */
-	SubnetIds []string `json:"subnetIds"`
+    /* 路由表绑定的子网列表 (Optional) */
+    SubnetIds []string `json:"subnetIds"`
 
-	/* 路由表创建时间 (Optional) */
-	CreatedTime string `json:"createdTime"`
+    /* 路由表创建时间 (Optional) */
+    CreatedTime string `json:"createdTime"`
 }

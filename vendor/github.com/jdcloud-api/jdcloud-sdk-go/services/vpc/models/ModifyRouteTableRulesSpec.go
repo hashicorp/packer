@@ -16,8 +16,9 @@
 
 package models
 
+
 type ModifyRouteTableRulesSpec struct {
 
-	/* 路由表规则信息  */
-	ModifyRouteTableRuleSpecs []ModifyRouteTableRules `json:"modifyRouteTableRuleSpecs"`
+    /* 路由表规则信息  */
+    ModifyRouteTableRuleSpecs []ModifyRouteTableRules `json:"modifyRouteTableRuleSpecs"`
 }

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersLoadBalancer One or more filters.
 type FiltersLoadBalancer struct {
 	// The names of the load balancers.

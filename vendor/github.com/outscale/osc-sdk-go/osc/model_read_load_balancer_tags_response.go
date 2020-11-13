@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ReadLoadBalancerTagsResponse struct for ReadLoadBalancerTagsResponse
 type ReadLoadBalancerTagsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

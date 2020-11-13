@@ -16,17 +16,18 @@
 
 package models
 
+
 type CreateVpcPeeringSpec struct {
 
-	/* VpcPeering的名字,不为空。名称取值范围：1-32个中文、英文大小写的字母、数字和下划线分隔符  */
-	VpcPeeringName string `json:"vpcPeeringName"`
+    /* VpcPeering的名字,不为空。名称取值范围：1-32个中文、英文大小写的字母、数字和下划线分隔符  */
+    VpcPeeringName string `json:"vpcPeeringName"`
 
-	/* VpcPeering本端Vpc的Id  */
-	VpcId string `json:"vpcId"`
+    /* VpcPeering本端Vpc的Id  */
+    VpcId string `json:"vpcId"`
 
-	/* VpcPeering对端Vpc的Id  */
-	RemoteVpcId string `json:"remoteVpcId"`
+    /* VpcPeering对端Vpc的Id  */
+    RemoteVpcId string `json:"remoteVpcId"`
 
-	/* VpcPeering 描述，取值范围：0-256个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
-	Description string `json:"description"`
+    /* VpcPeering 描述，取值范围：0-256个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
+    Description string `json:"description"`
 }

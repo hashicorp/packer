@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // InternetService Information about the Internet service.
 type InternetService struct {
 	// The ID of the Internet service.

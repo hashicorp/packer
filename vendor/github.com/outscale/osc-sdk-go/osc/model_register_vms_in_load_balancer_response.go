@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // RegisterVmsInLoadBalancerResponse struct for RegisterVmsInLoadBalancerResponse
 type RegisterVmsInLoadBalancerResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

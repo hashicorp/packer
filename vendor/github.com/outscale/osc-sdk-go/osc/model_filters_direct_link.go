@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersDirectLink One or more filters.
 type FiltersDirectLink struct {
 	// The IDs of the DirectLinks.

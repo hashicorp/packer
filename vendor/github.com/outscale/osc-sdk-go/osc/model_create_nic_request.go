@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateNicRequest struct for CreateNicRequest
 type CreateNicRequest struct {
 	// A description for the NIC.

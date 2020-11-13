@@ -16,14 +16,15 @@
 
 package models
 
+
 type SnapshotSpec struct {
 
-	/* 快照名称  */
-	Name string `json:"name"`
+    /* 快照名称  */
+    Name string `json:"name"`
 
-	/* 快照描述 (Optional) */
-	Description *string `json:"description"`
+    /* 快照描述 (Optional) */
+    Description *string `json:"description"`
 
-	/* 用于创建快照的云盘ID  */
-	DiskId string `json:"diskId"`
+    /* 用于创建快照的云盘ID  */
+    DiskId string `json:"diskId"`
 }

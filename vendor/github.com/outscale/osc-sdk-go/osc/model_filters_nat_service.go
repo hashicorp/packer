@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersNatService One or more filters.
 type FiltersNatService struct {
 	// The IDs of the NAT services.

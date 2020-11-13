@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // SecurityGroup Information about the security group.
 type SecurityGroup struct {
 	// The account ID of a user that has been granted permission.

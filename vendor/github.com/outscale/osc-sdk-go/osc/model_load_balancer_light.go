@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // LoadBalancerLight Information about the load balancer.
 type LoadBalancerLight struct {
 	// The name of the load balancer to which the listener is attached.

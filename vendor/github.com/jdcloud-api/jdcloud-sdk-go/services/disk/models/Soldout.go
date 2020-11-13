@@ -16,14 +16,15 @@
 
 package models
 
+
 type Soldout struct {
 
-	/* 云硬盘所属的可用区  */
-	AzName string `json:"azName"`
+    /* 云硬盘所属的可用区  */
+    AzName string `json:"azName"`
 
-	/* 云硬盘类型，取值为ssd、premium-hdd、ssd.gp1、ssd.io1、hdd.std1之一  */
-	MediaType string `json:"mediaType"`
+    /* 云硬盘类型，取值为ssd、premium-hdd、ssd.gp1、ssd.io1、hdd.std1之一  */
+    MediaType string `json:"mediaType"`
 
-	/* 是否售罄  */
-	IsSoldOut bool `json:"isSoldOut"`
+    /* 是否售罄  */
+    IsSoldOut bool `json:"isSoldOut"`
 }

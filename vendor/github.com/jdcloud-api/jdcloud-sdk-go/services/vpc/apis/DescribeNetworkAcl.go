@@ -17,18 +17,19 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
-	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type DescribeNetworkAclRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* networkAclId ID  */
-	NetworkAclId string `json:"networkAclId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
+
+    /* networkAclId ID  */
+    NetworkAclId string `json:"networkAclId"`
 }
 
 /*
@@ -38,19 +39,19 @@ type DescribeNetworkAclRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeNetworkAclRequest(
-	regionId string,
-	networkAclId string,
+    regionId string,
+    networkAclId string,
 ) *DescribeNetworkAclRequest {
 
 	return &DescribeNetworkAclRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:     regionId,
-		NetworkAclId: networkAclId,
+        RegionId: regionId,
+        NetworkAclId: networkAclId,
 	}
 }
 
@@ -59,57 +60,57 @@ func NewDescribeNetworkAclRequest(
  * param networkAclId: networkAclId ID (Required)
  */
 func NewDescribeNetworkAclRequestWithAllParams(
-	regionId string,
-	networkAclId string,
+    regionId string,
+    networkAclId string,
 ) *DescribeNetworkAclRequest {
 
-	return &DescribeNetworkAclRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:     regionId,
-		NetworkAclId: networkAclId,
-	}
+    return &DescribeNetworkAclRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        NetworkAclId: networkAclId,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeNetworkAclRequestWithoutParam() *DescribeNetworkAclRequest {
 
-	return &DescribeNetworkAclRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DescribeNetworkAclRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeNetworkAclRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param networkAclId: networkAclId ID(Required) */
 func (r *DescribeNetworkAclRequest) SetNetworkAclId(networkAclId string) {
-	r.NetworkAclId = networkAclId
+    r.NetworkAclId = networkAclId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeNetworkAclRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DescribeNetworkAclResponse struct {
-	RequestID string                   `json:"requestId"`
-	Error     core.ErrorResponse       `json:"error"`
-	Result    DescribeNetworkAclResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DescribeNetworkAclResult `json:"result"`
 }
 
 type DescribeNetworkAclResult struct {
-	NetworkAcl vpc.NetworkAcl `json:"networkAcl"`
+    NetworkAcl vpc.NetworkAcl `json:"networkAcl"`
 }

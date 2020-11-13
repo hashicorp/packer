@@ -12,5 +12,5 @@ package server
 type DeletePublicIpInstancesRequest struct {
 
 	// 공인IP인스턴스번호리스트
-	PublicIpInstanceNoList []*string `json:"publicIpInstanceNoList"`
+PublicIpInstanceNoList []*string `json:"publicIpInstanceNoList"`
 }

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // VmType Information about the VM type.
 type VmType struct {
 	// Indicates whether the VM is optimized for BSU I/O.

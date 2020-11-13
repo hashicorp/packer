@@ -32,9 +32,9 @@ import (
 	"time"
 	"unicode/utf8"
 
-	awscredentials "github.com/aws/aws-sdk-go/aws/credentials"
-	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
 	"golang.org/x/oauth2"
+	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
+	awscredentials "github.com/aws/aws-sdk-go/aws/credentials"
 )
 
 var (
@@ -273,12 +273,13 @@ func parameterToJson(obj interface{}) (string, error) {
 	return string(jsonBuf), err
 }
 
+
 // callAPI do the request.
 func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 	if c.cfg.Debug {
-		dump, err := httputil.DumpRequestOut(request, true)
+	        dump, err := httputil.DumpRequestOut(request, true)
 		if err != nil {
-			return nil, err
+		        return nil, err
 		}
 		log.Printf("\n%s\n", string(dump))
 	}

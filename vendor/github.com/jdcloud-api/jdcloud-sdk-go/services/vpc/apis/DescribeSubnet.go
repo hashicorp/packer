@@ -17,18 +17,19 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
-	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type DescribeSubnetRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* Subnet ID  */
-	SubnetId string `json:"subnetId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
+
+    /* Subnet ID  */
+    SubnetId string `json:"subnetId"`
 }
 
 /*
@@ -38,19 +39,19 @@ type DescribeSubnetRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeSubnetRequest(
-	regionId string,
-	subnetId string,
+    regionId string,
+    subnetId string,
 ) *DescribeSubnetRequest {
 
 	return &DescribeSubnetRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/subnets/{subnetId}",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
-		SubnetId: subnetId,
+        RegionId: regionId,
+        SubnetId: subnetId,
 	}
 }
 
@@ -59,57 +60,57 @@ func NewDescribeSubnetRequest(
  * param subnetId: Subnet ID (Required)
  */
 func NewDescribeSubnetRequestWithAllParams(
-	regionId string,
-	subnetId string,
+    regionId string,
+    subnetId string,
 ) *DescribeSubnetRequest {
 
-	return &DescribeSubnetRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/subnets/{subnetId}",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId: regionId,
-		SubnetId: subnetId,
-	}
+    return &DescribeSubnetRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/subnets/{subnetId}",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        SubnetId: subnetId,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeSubnetRequestWithoutParam() *DescribeSubnetRequest {
 
-	return &DescribeSubnetRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/subnets/{subnetId}",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DescribeSubnetRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/subnets/{subnetId}",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeSubnetRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param subnetId: Subnet ID(Required) */
 func (r *DescribeSubnetRequest) SetSubnetId(subnetId string) {
-	r.SubnetId = subnetId
+    r.SubnetId = subnetId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeSubnetRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DescribeSubnetResponse struct {
-	RequestID string               `json:"requestId"`
-	Error     core.ErrorResponse   `json:"error"`
-	Result    DescribeSubnetResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DescribeSubnetResult `json:"result"`
 }
 
 type DescribeSubnetResult struct {
-	Subnet vpc.Subnet `json:"subnet"`
+    Subnet vpc.Subnet `json:"subnet"`
 }

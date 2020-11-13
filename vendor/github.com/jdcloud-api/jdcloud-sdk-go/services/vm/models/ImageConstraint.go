@@ -16,11 +16,12 @@
 
 package models
 
+
 type ImageConstraint struct {
 
-	/* 镜像ID (Optional) */
-	ImageId string `json:"imageId"`
+    /* 镜像ID (Optional) */
+    ImageId string `json:"imageId"`
 
-	/* 使用镜像创建实例的规格限制 (Optional) */
-	ImageInstanceTypeConstraint ImageInstanceTypeConstraint `json:"imageInstanceTypeConstraint"`
+    /* 使用镜像创建实例的规格限制 (Optional) */
+    ImageInstanceTypeConstraint ImageInstanceTypeConstraint `json:"imageInstanceTypeConstraint"`
 }

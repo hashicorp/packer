@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // Snapshot Information about the snapshot.
 type Snapshot struct {
 	// The account alias of the owner of the snapshot.
@@ -17,7 +16,7 @@ type Snapshot struct {
 	// The account ID of the owner of the snapshot.
 	AccountId string `json:"AccountId,omitempty"`
 	// The description of the snapshot.
-	Description               string                `json:"Description,omitempty"`
+	Description string `json:"Description,omitempty"`
 	PermissionsToCreateVolume PermissionsOnResource `json:"PermissionsToCreateVolume,omitempty"`
 	// The progress of the snapshot, as a percentage.
 	Progress int32 `json:"Progress,omitempty"`

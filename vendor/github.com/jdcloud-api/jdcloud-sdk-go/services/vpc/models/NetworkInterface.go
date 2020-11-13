@@ -16,56 +16,57 @@
 
 package models
 
+
 type NetworkInterface struct {
 
-	/* 弹性网卡名称 (Optional) */
-	NetworkInterfaceName string `json:"networkInterfaceName"`
+    /* 弹性网卡名称 (Optional) */
+    NetworkInterfaceName string `json:"networkInterfaceName"`
 
-	/* 弹性网卡ID (Optional) */
-	NetworkInterfaceId string `json:"networkInterfaceId"`
+    /* 弹性网卡ID (Optional) */
+    NetworkInterfaceId string `json:"networkInterfaceId"`
 
-	/* 可用区名称 (Optional) */
-	Az string `json:"az"`
+    /* 可用区名称 (Optional) */
+    Az string `json:"az"`
 
-	/* 网卡角色，取值范围：Primary（主网卡）、Secondary（辅助网卡） (Optional) */
-	Role string `json:"role"`
+    /* 网卡角色，取值范围：Primary（主网卡）、Secondary（辅助网卡） (Optional) */
+    Role string `json:"role"`
 
-	/* 以太网地址 (Optional) */
-	MacAddress string `json:"macAddress"`
+    /* 以太网地址 (Optional) */
+    MacAddress string `json:"macAddress"`
 
-	/* 虚拟网络ID (Optional) */
-	VpcId string `json:"vpcId"`
+    /* 虚拟网络ID (Optional) */
+    VpcId string `json:"vpcId"`
 
-	/* 子网ID (Optional) */
-	SubnetId string `json:"subnetId"`
+    /* 子网ID (Optional) */
+    SubnetId string `json:"subnetId"`
 
-	/* 安全组ID列表 (Optional) */
-	NetworkSecurityGroupIds []string `json:"networkSecurityGroupIds"`
+    /* 安全组ID列表 (Optional) */
+    NetworkSecurityGroupIds []string `json:"networkSecurityGroupIds"`
 
-	/* 源和目标IP地址校验，取值为0或者1 (Optional) */
-	SanityCheck int `json:"sanityCheck"`
+    /* 源和目标IP地址校验，取值为0或者1 (Optional) */
+    SanityCheck int `json:"sanityCheck"`
 
-	/* 网卡主IP (Optional) */
-	PrimaryIp NetworkInterfacePrivateIp `json:"primaryIp"`
+    /* 网卡主IP (Optional) */
+    PrimaryIp NetworkInterfacePrivateIp `json:"primaryIp"`
 
-	/* 网卡附属IP列表 (Optional) */
-	SecondaryIps []NetworkInterfacePrivateIp `json:"secondaryIps"`
+    /* 网卡附属IP列表 (Optional) */
+    SecondaryIps []NetworkInterfacePrivateIp `json:"secondaryIps"`
 
-	/* 关联实例类型，取值范围：vm (Optional) */
-	InstanceType string `json:"instanceType"`
+    /* 关联实例类型，取值范围：vm (Optional) */
+    InstanceType string `json:"instanceType"`
 
-	/* 关联实例ID (Optional) */
-	InstanceId string `json:"instanceId"`
+    /* 关联实例ID (Optional) */
+    InstanceId string `json:"instanceId"`
 
-	/* 实例所属的账号 (Optional) */
-	InstanceOwnerId string `json:"instanceOwnerId"`
+    /* 实例所属的账号 (Optional) */
+    InstanceOwnerId string `json:"instanceOwnerId"`
 
-	/* 网卡在实例上的设备索引号，取值范围：[0,8]，0：辅助网卡未绑定设备，1：主网卡，2-8：辅助网卡已绑定设备 (Optional) */
-	DeviceIndex int `json:"deviceIndex"`
+    /* 网卡在实例上的设备索引号，取值范围：[0,8]，0：辅助网卡未绑定设备，1：主网卡，2-8：辅助网卡已绑定设备 (Optional) */
+    DeviceIndex int `json:"deviceIndex"`
 
-	/* 网卡描述信息 (Optional) */
-	Description string `json:"description"`
+    /* 网卡描述信息 (Optional) */
+    Description string `json:"description"`
 
-	/* 弹性网卡创建时间 (Optional) */
-	CreatedTime string `json:"createdTime"`
+    /* 弹性网卡创建时间 (Optional) */
+    CreatedTime string `json:"createdTime"`
 }

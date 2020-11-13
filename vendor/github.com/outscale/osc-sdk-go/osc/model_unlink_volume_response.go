@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // UnlinkVolumeResponse struct for UnlinkVolumeResponse
 type UnlinkVolumeResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

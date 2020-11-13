@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersVmType One or more filters.
 type FiltersVmType struct {
 	// Indicates whether the VM is optimized for BSU I/O.

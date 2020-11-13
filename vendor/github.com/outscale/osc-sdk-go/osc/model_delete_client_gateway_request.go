@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteClientGatewayRequest struct for DeleteClientGatewayRequest
 type DeleteClientGatewayRequest struct {
 	// The ID of the client gateway you want to delete.

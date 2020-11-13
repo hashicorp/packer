@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersInternetService One or more filters.
 type FiltersInternetService struct {
 	// The IDs of the Internet services.

@@ -17,17 +17,18 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DeleteVpcRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* Vpc ID  */
-	VpcId string `json:"vpcId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
+
+    /* Vpc ID  */
+    VpcId string `json:"vpcId"`
 }
 
 /*
@@ -37,19 +38,19 @@ type DeleteVpcRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDeleteVpcRequest(
-	regionId string,
-	vpcId string,
+    regionId string,
+    vpcId string,
 ) *DeleteVpcRequest {
 
 	return &DeleteVpcRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/vpcs/{vpcId}",
 			Method:  "DELETE",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
-		VpcId:    vpcId,
+        RegionId: regionId,
+        VpcId: vpcId,
 	}
 }
 
@@ -58,55 +59,55 @@ func NewDeleteVpcRequest(
  * param vpcId: Vpc ID (Required)
  */
 func NewDeleteVpcRequestWithAllParams(
-	regionId string,
-	vpcId string,
+    regionId string,
+    vpcId string,
 ) *DeleteVpcRequest {
 
-	return &DeleteVpcRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/vpcs/{vpcId}",
-			Method:  "DELETE",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId: regionId,
-		VpcId:    vpcId,
-	}
+    return &DeleteVpcRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/vpcs/{vpcId}",
+            Method:  "DELETE",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        VpcId: vpcId,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDeleteVpcRequestWithoutParam() *DeleteVpcRequest {
 
-	return &DeleteVpcRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/vpcs/{vpcId}",
-			Method:  "DELETE",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DeleteVpcRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/vpcs/{vpcId}",
+            Method:  "DELETE",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DeleteVpcRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param vpcId: Vpc ID(Required) */
 func (r *DeleteVpcRequest) SetVpcId(vpcId string) {
-	r.VpcId = vpcId
+    r.VpcId = vpcId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DeleteVpcRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DeleteVpcResponse struct {
-	RequestID string             `json:"requestId"`
-	Error     core.ErrorResponse `json:"error"`
-	Result    DeleteVpcResult    `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DeleteVpcResult `json:"result"`
 }
 
 type DeleteVpcResult struct {

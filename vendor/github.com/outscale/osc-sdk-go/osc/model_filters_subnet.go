@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersSubnet One or more filters.
 type FiltersSubnet struct {
 	// The number of available IPs.

@@ -17,17 +17,18 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DescribeImageMembersRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 镜像ID  */
-	ImageId string `json:"imageId"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
+
+    /* 镜像ID  */
+    ImageId string `json:"imageId"`
 }
 
 /*
@@ -37,19 +38,19 @@ type DescribeImageMembersRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeImageMembersRequest(
-	regionId string,
-	imageId string,
+    regionId string,
+    imageId string,
 ) *DescribeImageMembersRequest {
 
 	return &DescribeImageMembersRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/images/{imageId}/members",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
-		ImageId:  imageId,
+        RegionId: regionId,
+        ImageId: imageId,
 	}
 }
 
@@ -58,57 +59,57 @@ func NewDescribeImageMembersRequest(
  * param imageId: 镜像ID (Required)
  */
 func NewDescribeImageMembersRequestWithAllParams(
-	regionId string,
-	imageId string,
+    regionId string,
+    imageId string,
 ) *DescribeImageMembersRequest {
 
-	return &DescribeImageMembersRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/images/{imageId}/members",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId: regionId,
-		ImageId:  imageId,
-	}
+    return &DescribeImageMembersRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/images/{imageId}/members",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        ImageId: imageId,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeImageMembersRequestWithoutParam() *DescribeImageMembersRequest {
 
-	return &DescribeImageMembersRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/images/{imageId}/members",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DescribeImageMembersRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/images/{imageId}/members",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DescribeImageMembersRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param imageId: 镜像ID(Required) */
 func (r *DescribeImageMembersRequest) SetImageId(imageId string) {
-	r.ImageId = imageId
+    r.ImageId = imageId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeImageMembersRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DescribeImageMembersResponse struct {
-	RequestID string                     `json:"requestId"`
-	Error     core.ErrorResponse         `json:"error"`
-	Result    DescribeImageMembersResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DescribeImageMembersResult `json:"result"`
 }
 
 type DescribeImageMembersResult struct {
-	Pins []string `json:"pins"`
+    Pins []string `json:"pins"`
 }

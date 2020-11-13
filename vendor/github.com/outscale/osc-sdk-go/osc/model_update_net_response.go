@@ -9,9 +9,8 @@
  */
 
 package osc
-
 // UpdateNetResponse struct for UpdateNetResponse
 type UpdateNetResponse struct {
-	Net             Net             `json:"Net,omitempty"`
+	Net Net `json:"Net,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

@@ -17,36 +17,37 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
-	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+    vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
 )
 
 type DescribeImagesRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 镜像来源，如果没有指定ids参数，此参数必传；取值范围：public、shared、thirdparty、private (Optional) */
-	ImageSource *string `json:"imageSource"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
 
-	/* 操作系统平台，取值范围：Windows Server、CentOS、Ubuntu (Optional) */
-	Platform *string `json:"platform"`
+    /* 镜像来源，如果没有指定ids参数，此参数必传；取值范围：public、shared、thirdparty、private (Optional) */
+    ImageSource *string `json:"imageSource"`
 
-	/* 镜像ID列表，如果指定了此参数，其它参数可为空 (Optional) */
-	Ids []string `json:"ids"`
+    /* 操作系统平台，取值范围：Windows Server、CentOS、Ubuntu (Optional) */
+    Platform *string `json:"platform"`
 
-	/* 镜像支持的系统盘类型，[localDisk,cloudDisk] (Optional) */
-	RootDeviceType *string `json:"rootDeviceType"`
+    /* 镜像ID列表，如果指定了此参数，其它参数可为空 (Optional) */
+    Ids []string `json:"ids"`
 
-	/* <a href="http://docs.jdcloud.com/virtual-machines/api/image_status">参考镜像状态</a> (Optional) */
-	Status *string `json:"status"`
+    /* 镜像支持的系统盘类型，[localDisk,cloudDisk] (Optional) */
+    RootDeviceType *string `json:"rootDeviceType"`
 
-	/* 页码；默认为1 (Optional) */
-	PageNumber *int `json:"pageNumber"`
+    /* <a href="http://docs.jdcloud.com/virtual-machines/api/image_status">参考镜像状态</a> (Optional) */
+    Status *string `json:"status"`
 
-	/* 分页大小；默认为20；取值范围[10, 100] (Optional) */
-	PageSize *int `json:"pageSize"`
+    /* 页码；默认为1 (Optional) */
+    PageNumber *int `json:"pageNumber"`
+
+    /* 分页大小；默认为20；取值范围[10, 100] (Optional) */
+    PageSize *int `json:"pageSize"`
 }
 
 /*
@@ -55,17 +56,17 @@ type DescribeImagesRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeImagesRequest(
-	regionId string,
+    regionId string,
 ) *DescribeImagesRequest {
 
 	return &DescribeImagesRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/images",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
+        RegionId: regionId,
 	}
 }
 
@@ -80,100 +81,100 @@ func NewDescribeImagesRequest(
  * param pageSize: 分页大小；默认为20；取值范围[10, 100] (Optional)
  */
 func NewDescribeImagesRequestWithAllParams(
-	regionId string,
-	imageSource *string,
-	platform *string,
-	ids []string,
-	rootDeviceType *string,
-	status *string,
-	pageNumber *int,
-	pageSize *int,
+    regionId string,
+    imageSource *string,
+    platform *string,
+    ids []string,
+    rootDeviceType *string,
+    status *string,
+    pageNumber *int,
+    pageSize *int,
 ) *DescribeImagesRequest {
 
-	return &DescribeImagesRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/images",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:       regionId,
-		ImageSource:    imageSource,
-		Platform:       platform,
-		Ids:            ids,
-		RootDeviceType: rootDeviceType,
-		Status:         status,
-		PageNumber:     pageNumber,
-		PageSize:       pageSize,
-	}
+    return &DescribeImagesRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/images",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        ImageSource: imageSource,
+        Platform: platform,
+        Ids: ids,
+        RootDeviceType: rootDeviceType,
+        Status: status,
+        PageNumber: pageNumber,
+        PageSize: pageSize,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeImagesRequestWithoutParam() *DescribeImagesRequest {
 
-	return &DescribeImagesRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/images",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DescribeImagesRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/images",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DescribeImagesRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param imageSource: 镜像来源，如果没有指定ids参数，此参数必传；取值范围：public、shared、thirdparty、private(Optional) */
 func (r *DescribeImagesRequest) SetImageSource(imageSource string) {
-	r.ImageSource = &imageSource
+    r.ImageSource = &imageSource
 }
 
 /* param platform: 操作系统平台，取值范围：Windows Server、CentOS、Ubuntu(Optional) */
 func (r *DescribeImagesRequest) SetPlatform(platform string) {
-	r.Platform = &platform
+    r.Platform = &platform
 }
 
 /* param ids: 镜像ID列表，如果指定了此参数，其它参数可为空(Optional) */
 func (r *DescribeImagesRequest) SetIds(ids []string) {
-	r.Ids = ids
+    r.Ids = ids
 }
 
 /* param rootDeviceType: 镜像支持的系统盘类型，[localDisk,cloudDisk](Optional) */
 func (r *DescribeImagesRequest) SetRootDeviceType(rootDeviceType string) {
-	r.RootDeviceType = &rootDeviceType
+    r.RootDeviceType = &rootDeviceType
 }
 
 /* param status: <a href="http://docs.jdcloud.com/virtual-machines/api/image_status">参考镜像状态</a>(Optional) */
 func (r *DescribeImagesRequest) SetStatus(status string) {
-	r.Status = &status
+    r.Status = &status
 }
 
 /* param pageNumber: 页码；默认为1(Optional) */
 func (r *DescribeImagesRequest) SetPageNumber(pageNumber int) {
-	r.PageNumber = &pageNumber
+    r.PageNumber = &pageNumber
 }
 
 /* param pageSize: 分页大小；默认为20；取值范围[10, 100](Optional) */
 func (r *DescribeImagesRequest) SetPageSize(pageSize int) {
-	r.PageSize = &pageSize
+    r.PageSize = &pageSize
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeImagesRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DescribeImagesResponse struct {
-	RequestID string               `json:"requestId"`
-	Error     core.ErrorResponse   `json:"error"`
-	Result    DescribeImagesResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DescribeImagesResult `json:"result"`
 }
 
 type DescribeImagesResult struct {
-	Images     []vm.Image `json:"images"`
-	TotalCount int        `json:"totalCount"`
+    Images []vm.Image `json:"images"`
+    TotalCount int `json:"totalCount"`
 }

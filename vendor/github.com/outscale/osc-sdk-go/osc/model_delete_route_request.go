@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteRouteRequest struct for DeleteRouteRequest
 type DeleteRouteRequest struct {
 	// The exact IP range for the route.

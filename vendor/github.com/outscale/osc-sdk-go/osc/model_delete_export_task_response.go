@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteExportTaskResponse struct for DeleteExportTaskResponse
 type DeleteExportTaskResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

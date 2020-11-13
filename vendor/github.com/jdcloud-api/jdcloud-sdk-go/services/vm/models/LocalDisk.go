@@ -16,11 +16,12 @@
 
 package models
 
+
 type LocalDisk struct {
 
-	/* 磁盘类型，取值范围{premium-hdd, ssd} (Optional) */
-	DiskType string `json:"diskType"`
+    /* 磁盘类型，取值范围{premium-hdd, ssd} (Optional) */
+    DiskType string `json:"diskType"`
 
-	/* 磁盘大小 (Optional) */
-	DiskSizeGB int `json:"diskSizeGB"`
+    /* 磁盘大小 (Optional) */
+    DiskSizeGB int `json:"diskSizeGB"`
 }

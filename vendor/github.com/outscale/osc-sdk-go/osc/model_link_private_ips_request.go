@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // LinkPrivateIpsRequest struct for LinkPrivateIpsRequest
 type LinkPrivateIpsRequest struct {
 	// If `true`, allows an IP address that is already assigned to another NIC in the same Subnet to be assigned to the NIC you specified.

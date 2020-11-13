@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // Region Information about the Region.
 type Region struct {
 	// The hostname of the gateway to access the Region.

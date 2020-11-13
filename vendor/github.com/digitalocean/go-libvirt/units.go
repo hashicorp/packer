@@ -18,10 +18,10 @@
 package libvirt
 
 const (
-	// B - byte
-	B = 1
-	// KiB - kibibyte
+    // B - byte
+	B   = 1
+    // KiB - kibibyte
 	KiB = 1024 * B
-	// MiB - mebibyte
+    // MiB - mebibyte
 	MiB = 1024 * KiB
 )

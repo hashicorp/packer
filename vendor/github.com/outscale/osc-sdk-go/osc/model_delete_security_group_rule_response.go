@@ -9,9 +9,8 @@
  */
 
 package osc
-
 // DeleteSecurityGroupRuleResponse struct for DeleteSecurityGroupRuleResponse
 type DeleteSecurityGroupRuleResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
-	SecurityGroup   SecurityGroup   `json:"SecurityGroup,omitempty"`
+	SecurityGroup SecurityGroup `json:"SecurityGroup,omitempty"`
 }

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteVirtualGatewayRequest struct for DeleteVirtualGatewayRequest
 type DeleteVirtualGatewayRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

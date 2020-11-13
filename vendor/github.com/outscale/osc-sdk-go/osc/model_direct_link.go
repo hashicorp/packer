@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DirectLink Information about the DirectLink.
 type DirectLink struct {
 	// The account ID of the owner of the DirectLink.

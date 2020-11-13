@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CheckAuthenticationRequest struct for CheckAuthenticationRequest
 type CheckAuthenticationRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

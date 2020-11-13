@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersVolume One or more filters.
 type FiltersVolume struct {
 	// The dates and times at which the volumes were created.

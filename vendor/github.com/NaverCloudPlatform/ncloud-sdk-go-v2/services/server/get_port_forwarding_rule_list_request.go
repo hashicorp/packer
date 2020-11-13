@@ -12,11 +12,11 @@ package server
 type GetPortForwardingRuleListRequest struct {
 
 	// 인터넷라인구분코드
-	InternetLineTypeCode *string `json:"internetLineTypeCode,omitempty"`
+InternetLineTypeCode *string `json:"internetLineTypeCode,omitempty"`
 
 	// 리전번호
-	RegionNo *string `json:"regionNo,omitempty"`
+RegionNo *string `json:"regionNo,omitempty"`
 
 	// ZONE번호
-	ZoneNo *string `json:"zoneNo,omitempty"`
+ZoneNo *string `json:"zoneNo,omitempty"`
 }

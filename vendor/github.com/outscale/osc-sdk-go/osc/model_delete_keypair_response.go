@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteKeypairResponse struct for DeleteKeypairResponse
 type DeleteKeypairResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

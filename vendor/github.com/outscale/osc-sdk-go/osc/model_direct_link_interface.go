@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DirectLinkInterface Information about the DirectLink interface.
 type DirectLinkInterface struct {
 	// The BGP (Border Gateway Protocol) ASN (Autonomous System Number) on the customer's side of the DirectLink interface.

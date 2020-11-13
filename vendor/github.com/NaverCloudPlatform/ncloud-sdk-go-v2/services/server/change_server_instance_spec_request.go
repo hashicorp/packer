@@ -12,8 +12,8 @@ package server
 type ChangeServerInstanceSpecRequest struct {
 
 	// 서버인스턴스번호
-	ServerInstanceNo *string `json:"serverInstanceNo"`
+ServerInstanceNo *string `json:"serverInstanceNo"`
 
 	// 서버상품코드
-	ServerProductCode *string `json:"serverProductCode"`
+ServerProductCode *string `json:"serverProductCode"`
 }

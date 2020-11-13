@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersClientGateway One or more filters.
 type FiltersClientGateway struct {
 	// The Border Gateway Protocol (BGP) Autonomous System Numbers (ASNs) of the connections.

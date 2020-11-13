@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ResetAccountPasswordResponse struct for ResetAccountPasswordResponse
 type ResetAccountPasswordResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ReadVmsHealthRequest struct for ReadVmsHealthRequest
 type ReadVmsHealthRequest struct {
 	// One or more IDs of back-end VMs.

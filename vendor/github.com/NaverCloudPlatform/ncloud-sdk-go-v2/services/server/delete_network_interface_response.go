@@ -10,9 +10,10 @@
 package server
 
 type DeleteNetworkInterfaceResponse struct {
-	RequestId *string `json:"requestId,omitempty"`
 
-	ReturnCode *string `json:"returnCode,omitempty"`
+RequestId *string `json:"requestId,omitempty"`
 
-	ReturnMessage *string `json:"returnMessage,omitempty"`
+ReturnCode *string `json:"returnCode,omitempty"`
+
+ReturnMessage *string `json:"returnMessage,omitempty"`
 }

@@ -17,18 +17,18 @@
 package core
 
 import (
-	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"io"
 	"net/http"
 	"net/url"
 	"sort"
 	"strings"
 	"time"
+	"bytes"
+	"github.com/gofrs/uuid"
 )
 
 const (
@@ -40,7 +40,7 @@ const (
 	emptyStringSHA256 = `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`
 )
 
-var ignoredHeaders = []string{"Authorization", "User-Agent", "X-Jdcloud-Request-Id"}
+var ignoredHeaders = []string {"Authorization", "User-Agent", "X-Jdcloud-Request-Id"}
 var noEscape [256]bool
 
 func init() {
@@ -56,15 +56,16 @@ func init() {
 	}
 }
 
+
 type Signer struct {
 	Credentials Credential
-	Logger      Logger
+	Logger		Logger
 }
 
 func NewSigner(credsProvider Credential, logger Logger) *Signer {
 	return &Signer{
 		Credentials: credsProvider,
-		Logger:      logger,
+		Logger: logger,
 	}
 }
 
@@ -101,13 +102,13 @@ func (v4 Signer) signWithBody(r *http.Request, body io.ReadSeeker, service, regi
 	signTime time.Time) (http.Header, error) {
 
 	ctx := &signingCtx{
-		Request:     r,
-		Body:        body,
-		Query:       r.URL.Query(),
-		Time:        signTime,
-		ExpireTime:  exp,
-		ServiceName: service,
-		Region:      region,
+		Request:                r,
+		Body:                   body,
+		Query:                  r.URL.Query(),
+		Time:                   signTime,
+		ExpireTime:             exp,
+		ServiceName:            service,
+		Region:                 region,
 	}
 
 	for key := range ctx.Query {
@@ -140,7 +141,7 @@ func (v4 *Signer) logSigningInfo(ctx *signingCtx) {
 
 func (ctx *signingCtx) build() {
 	ctx.buildTime()             // no depends
-	ctx.buildNonce()            // no depends
+	ctx.buildNonce()			// no depends
 	ctx.buildCredentialString() // no depends
 	ctx.buildBodyDigest()
 

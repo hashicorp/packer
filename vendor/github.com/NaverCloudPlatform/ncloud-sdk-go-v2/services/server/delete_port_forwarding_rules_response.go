@@ -12,18 +12,18 @@ package server
 type DeletePortForwardingRulesResponse struct {
 
 	// 포트포워딩설정번호
-	PortForwardingConfigurationNo *string `json:"portForwardingConfigurationNo,omitempty"`
+PortForwardingConfigurationNo *string `json:"portForwardingConfigurationNo,omitempty"`
 
 	// 포트포워딩공인IP
-	PortForwardingPublicIp *string `json:"portForwardingPublicIp,omitempty"`
+PortForwardingPublicIp *string `json:"portForwardingPublicIp,omitempty"`
 
 	// ZONE
-	Zone *Zone `json:"zone,omitempty"`
+Zone *Zone `json:"zone,omitempty"`
 
 	// 인터넷회선구분
-	InternetLineType *CommonCode `json:"internetLineType,omitempty"`
+InternetLineType *CommonCode `json:"internetLineType,omitempty"`
 
-	TotalRows *int32 `json:"totalRows,omitempty"`
+TotalRows *int32 `json:"totalRows,omitempty"`
 
-	PortForwardingRuleList []*PortForwardingRule `json:"portForwardingRuleList,omitempty"`
+PortForwardingRuleList []*PortForwardingRule `json:"portForwardingRuleList,omitempty"`
 }

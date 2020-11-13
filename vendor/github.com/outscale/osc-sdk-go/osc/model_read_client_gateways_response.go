@@ -9,10 +9,9 @@
  */
 
 package osc
-
 // ReadClientGatewaysResponse struct for ReadClientGatewaysResponse
 type ReadClientGatewaysResponse struct {
 	// Information about one or more client gateways.
-	ClientGateways  []ClientGateway `json:"ClientGateways,omitempty"`
+	ClientGateways []ClientGateway `json:"ClientGateways,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

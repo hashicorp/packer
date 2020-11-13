@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteVpnConnectionRequest struct for DeleteVpnConnectionRequest
 type DeleteVpnConnectionRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // UnlinkInternetServiceRequest struct for UnlinkInternetServiceRequest
 type UnlinkInternetServiceRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

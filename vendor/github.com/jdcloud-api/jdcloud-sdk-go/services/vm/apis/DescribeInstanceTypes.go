@@ -17,21 +17,22 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
-	common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
-	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+    vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
+    common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
 )
 
 type DescribeInstanceTypesRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* instanceTypes - 实例规格，精确匹配，支持多个
-	az - 可用区，精确匹配，支持多个
-	 (Optional) */
-	Filters []common.Filter `json:"filters"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
+
+    /* instanceTypes - 实例规格，精确匹配，支持多个
+az - 可用区，精确匹配，支持多个
+ (Optional) */
+    Filters []common.Filter `json:"filters"`
 }
 
 /*
@@ -40,17 +41,17 @@ type DescribeInstanceTypesRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeInstanceTypesRequest(
-	regionId string,
+    regionId string,
 ) *DescribeInstanceTypesRequest {
 
 	return &DescribeInstanceTypesRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instanceTypes",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
+        RegionId: regionId,
 	}
 }
 
@@ -59,63 +60,63 @@ func NewDescribeInstanceTypesRequest(
  * param filters: instanceTypes - 实例规格，精确匹配，支持多个
 az - 可用区，精确匹配，支持多个
  (Optional)
-*/
+ */
 func NewDescribeInstanceTypesRequestWithAllParams(
-	regionId string,
-	filters []common.Filter,
+    regionId string,
+    filters []common.Filter,
 ) *DescribeInstanceTypesRequest {
 
-	return &DescribeInstanceTypesRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instanceTypes",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId: regionId,
-		Filters:  filters,
-	}
+    return &DescribeInstanceTypesRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instanceTypes",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        Filters: filters,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeInstanceTypesRequestWithoutParam() *DescribeInstanceTypesRequest {
 
-	return &DescribeInstanceTypesRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instanceTypes",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DescribeInstanceTypesRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instanceTypes",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DescribeInstanceTypesRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param filters: instanceTypes - 实例规格，精确匹配，支持多个
 az - 可用区，精确匹配，支持多个
 (Optional) */
 func (r *DescribeInstanceTypesRequest) SetFilters(filters []common.Filter) {
-	r.Filters = filters
+    r.Filters = filters
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeInstanceTypesRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DescribeInstanceTypesResponse struct {
-	RequestID string                      `json:"requestId"`
-	Error     core.ErrorResponse          `json:"error"`
-	Result    DescribeInstanceTypesResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DescribeInstanceTypesResult `json:"result"`
 }
 
 type DescribeInstanceTypesResult struct {
-	InstanceTypes         []vm.InstanceType `json:"instanceTypes"`
-	SpecificInstanceTypes []vm.InstanceType `json:"specificInstanceTypes"`
-	TotalCount            int               `json:"totalCount"`
+    InstanceTypes []vm.InstanceType `json:"instanceTypes"`
+    SpecificInstanceTypes []vm.InstanceType `json:"specificInstanceTypes"`
+    TotalCount int `json:"totalCount"`
 }

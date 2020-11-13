@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // With The information to be displayed in the API logs to retrieve.
 type With struct {
 	// If set to `true`, the account ID is displayed in the logs.

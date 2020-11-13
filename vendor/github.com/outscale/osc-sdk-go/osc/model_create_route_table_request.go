@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateRouteTableRequest struct for CreateRouteTableRequest
 type CreateRouteTableRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

@@ -10,13 +10,14 @@
 package server
 
 type GetAccessControlRuleListResponse struct {
-	RequestId *string `json:"requestId,omitempty"`
 
-	ReturnCode *string `json:"returnCode,omitempty"`
+RequestId *string `json:"requestId,omitempty"`
 
-	ReturnMessage *string `json:"returnMessage,omitempty"`
+ReturnCode *string `json:"returnCode,omitempty"`
 
-	TotalRows *int32 `json:"totalRows,omitempty"`
+ReturnMessage *string `json:"returnMessage,omitempty"`
 
-	AccessControlRuleList []*AccessControlRule `json:"accessControlRuleList,omitempty"`
+TotalRows *int32 `json:"totalRows,omitempty"`
+
+AccessControlRuleList []*AccessControlRule `json:"accessControlRuleList,omitempty"`
 }

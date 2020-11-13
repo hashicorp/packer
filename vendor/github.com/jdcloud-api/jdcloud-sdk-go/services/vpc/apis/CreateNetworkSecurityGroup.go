@@ -17,23 +17,24 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type CreateNetworkSecurityGroupRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 私有网络ID  */
-	VpcId string `json:"vpcId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
 
-	/* 安全组名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。  */
-	NetworkSecurityGroupName string `json:"networkSecurityGroupName"`
+    /* 私有网络ID  */
+    VpcId string `json:"vpcId"`
 
-	/* 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
-	Description *string `json:"description"`
+    /* 安全组名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。  */
+    NetworkSecurityGroupName string `json:"networkSecurityGroupName"`
+
+    /* 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
+    Description *string `json:"description"`
 }
 
 /*
@@ -44,21 +45,21 @@ type CreateNetworkSecurityGroupRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewCreateNetworkSecurityGroupRequest(
-	regionId string,
-	vpcId string,
-	networkSecurityGroupName string,
+    regionId string,
+    vpcId string,
+    networkSecurityGroupName string,
 ) *CreateNetworkSecurityGroupRequest {
 
 	return &CreateNetworkSecurityGroupRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkSecurityGroups/",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:                 regionId,
-		VpcId:                    vpcId,
-		NetworkSecurityGroupName: networkSecurityGroupName,
+        RegionId: regionId,
+        VpcId: vpcId,
+        NetworkSecurityGroupName: networkSecurityGroupName,
 	}
 }
 
@@ -69,71 +70,71 @@ func NewCreateNetworkSecurityGroupRequest(
  * param description: 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional)
  */
 func NewCreateNetworkSecurityGroupRequestWithAllParams(
-	regionId string,
-	vpcId string,
-	networkSecurityGroupName string,
-	description *string,
+    regionId string,
+    vpcId string,
+    networkSecurityGroupName string,
+    description *string,
 ) *CreateNetworkSecurityGroupRequest {
 
-	return &CreateNetworkSecurityGroupRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkSecurityGroups/",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:                 regionId,
-		VpcId:                    vpcId,
-		NetworkSecurityGroupName: networkSecurityGroupName,
-		Description:              description,
-	}
+    return &CreateNetworkSecurityGroupRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkSecurityGroups/",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        VpcId: vpcId,
+        NetworkSecurityGroupName: networkSecurityGroupName,
+        Description: description,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewCreateNetworkSecurityGroupRequestWithoutParam() *CreateNetworkSecurityGroupRequest {
 
-	return &CreateNetworkSecurityGroupRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkSecurityGroups/",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &CreateNetworkSecurityGroupRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkSecurityGroups/",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *CreateNetworkSecurityGroupRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param vpcId: 私有网络ID(Required) */
 func (r *CreateNetworkSecurityGroupRequest) SetVpcId(vpcId string) {
-	r.VpcId = vpcId
+    r.VpcId = vpcId
 }
 
 /* param networkSecurityGroupName: 安全组名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。(Required) */
 func (r *CreateNetworkSecurityGroupRequest) SetNetworkSecurityGroupName(networkSecurityGroupName string) {
-	r.NetworkSecurityGroupName = networkSecurityGroupName
+    r.NetworkSecurityGroupName = networkSecurityGroupName
 }
 
 /* param description: 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符(Optional) */
 func (r *CreateNetworkSecurityGroupRequest) SetDescription(description string) {
-	r.Description = &description
+    r.Description = &description
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r CreateNetworkSecurityGroupRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type CreateNetworkSecurityGroupResponse struct {
-	RequestID string                           `json:"requestId"`
-	Error     core.ErrorResponse               `json:"error"`
-	Result    CreateNetworkSecurityGroupResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result CreateNetworkSecurityGroupResult `json:"result"`
 }
 
 type CreateNetworkSecurityGroupResult struct {
-	NetworkSecurityGroupId string `json:"networkSecurityGroupId"`
+    NetworkSecurityGroupId string `json:"networkSecurityGroupId"`
 }

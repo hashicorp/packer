@@ -10,11 +10,12 @@
 package server
 
 type GetZoneListResponse struct {
-	RequestId *string `json:"requestId,omitempty"`
 
-	ReturnCode *string `json:"returnCode,omitempty"`
+RequestId *string `json:"requestId,omitempty"`
 
-	ReturnMessage *string `json:"returnMessage,omitempty"`
+ReturnCode *string `json:"returnCode,omitempty"`
 
-	ZoneList []*Zone `json:"zoneList,omitempty"`
+ReturnMessage *string `json:"returnMessage,omitempty"`
+
+ZoneList []*Zone `json:"zoneList,omitempty"`
 }

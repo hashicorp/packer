@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // PublicIpLight Information about the public IP.
 type PublicIpLight struct {
 	// The External IP address (EIP) associated with the NAT service.

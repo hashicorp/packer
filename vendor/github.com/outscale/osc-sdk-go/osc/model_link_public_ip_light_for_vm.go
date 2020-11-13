@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // LinkPublicIpLightForVm Information about the EIP associated with the NIC.
 type LinkPublicIpLightForVm struct {
 	// The name of the public DNS.

@@ -16,8 +16,9 @@
 
 package models
 
+
 type AddNetworkAclRulesSpec struct {
 
-	/* networkAcl规则列表  */
-	NetworkAclRuleSpecs []AddNetworkAclRuleSpec `json:"networkAclRuleSpecs"`
+    /* networkAcl规则列表  */
+    NetworkAclRuleSpecs []AddNetworkAclRuleSpec `json:"networkAclRuleSpecs"`
 }

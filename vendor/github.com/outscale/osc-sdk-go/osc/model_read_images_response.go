@@ -9,10 +9,9 @@
  */
 
 package osc
-
 // ReadImagesResponse struct for ReadImagesResponse
 type ReadImagesResponse struct {
 	// Information about one or more OMIs.
-	Images          []Image         `json:"Images,omitempty"`
+	Images []Image `json:"Images,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

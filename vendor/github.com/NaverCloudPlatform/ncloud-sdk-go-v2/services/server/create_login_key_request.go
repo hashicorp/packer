@@ -12,5 +12,5 @@ package server
 type CreateLoginKeyRequest struct {
 
 	// 키명
-	KeyName *string `json:"keyName"`
+KeyName *string `json:"keyName"`
 }

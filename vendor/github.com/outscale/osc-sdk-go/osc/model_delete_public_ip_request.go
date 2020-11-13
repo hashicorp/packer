@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeletePublicIpRequest struct for DeletePublicIpRequest
 type DeletePublicIpRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

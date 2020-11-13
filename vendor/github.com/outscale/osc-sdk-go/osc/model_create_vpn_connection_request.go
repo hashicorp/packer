@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateVpnConnectionRequest struct for CreateVpnConnectionRequest
 type CreateVpnConnectionRequest struct {
 	// The ID of the client gateway.

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // LinkPublicIp Information about the EIP association.
 type LinkPublicIp struct {
 	// (Required in a Net) The ID representing the association of the EIP with the VM or the NIC.

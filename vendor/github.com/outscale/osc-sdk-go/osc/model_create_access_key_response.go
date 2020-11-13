@@ -9,9 +9,8 @@
  */
 
 package osc
-
 // CreateAccessKeyResponse struct for CreateAccessKeyResponse
 type CreateAccessKeyResponse struct {
-	AccessKey       AccessKeySecretKey `json:"AccessKey,omitempty"`
-	ResponseContext ResponseContext    `json:"ResponseContext,omitempty"`
+	AccessKey AccessKeySecretKey `json:"AccessKey,omitempty"`
+	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

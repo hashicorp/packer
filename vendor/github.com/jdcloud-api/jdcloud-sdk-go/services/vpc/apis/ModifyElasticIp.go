@@ -17,20 +17,21 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type ModifyElasticIpRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* ElasticIp ID  */
-	ElasticIpId string `json:"elasticIpId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
 
-	/* 弹性公网IP的限速（单位：Mbps），取值范围为[1-200]  */
-	BandwidthMbps int `json:"bandwidthMbps"`
+    /* ElasticIp ID  */
+    ElasticIpId string `json:"elasticIpId"`
+
+    /* 弹性公网IP的限速（单位：Mbps），取值范围为[1-200]  */
+    BandwidthMbps int `json:"bandwidthMbps"`
 }
 
 /*
@@ -41,21 +42,21 @@ type ModifyElasticIpRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewModifyElasticIpRequest(
-	regionId string,
-	elasticIpId string,
-	bandwidthMbps int,
+    regionId string,
+    elasticIpId string,
+    bandwidthMbps int,
 ) *ModifyElasticIpRequest {
 
 	return &ModifyElasticIpRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
 			Method:  "PATCH",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:      regionId,
-		ElasticIpId:   elasticIpId,
-		BandwidthMbps: bandwidthMbps,
+        RegionId: regionId,
+        ElasticIpId: elasticIpId,
+        BandwidthMbps: bandwidthMbps,
 	}
 }
 
@@ -65,62 +66,62 @@ func NewModifyElasticIpRequest(
  * param bandwidthMbps: 弹性公网IP的限速（单位：Mbps），取值范围为[1-200] (Required)
  */
 func NewModifyElasticIpRequestWithAllParams(
-	regionId string,
-	elasticIpId string,
-	bandwidthMbps int,
+    regionId string,
+    elasticIpId string,
+    bandwidthMbps int,
 ) *ModifyElasticIpRequest {
 
-	return &ModifyElasticIpRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
-			Method:  "PATCH",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:      regionId,
-		ElasticIpId:   elasticIpId,
-		BandwidthMbps: bandwidthMbps,
-	}
+    return &ModifyElasticIpRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
+            Method:  "PATCH",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        ElasticIpId: elasticIpId,
+        BandwidthMbps: bandwidthMbps,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewModifyElasticIpRequestWithoutParam() *ModifyElasticIpRequest {
 
-	return &ModifyElasticIpRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
-			Method:  "PATCH",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &ModifyElasticIpRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
+            Method:  "PATCH",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *ModifyElasticIpRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param elasticIpId: ElasticIp ID(Required) */
 func (r *ModifyElasticIpRequest) SetElasticIpId(elasticIpId string) {
-	r.ElasticIpId = elasticIpId
+    r.ElasticIpId = elasticIpId
 }
 
 /* param bandwidthMbps: 弹性公网IP的限速（单位：Mbps），取值范围为[1-200](Required) */
 func (r *ModifyElasticIpRequest) SetBandwidthMbps(bandwidthMbps int) {
-	r.BandwidthMbps = bandwidthMbps
+    r.BandwidthMbps = bandwidthMbps
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ModifyElasticIpRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type ModifyElasticIpResponse struct {
-	RequestID string                `json:"requestId"`
-	Error     core.ErrorResponse    `json:"error"`
-	Result    ModifyElasticIpResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result ModifyElasticIpResult `json:"result"`
 }
 
 type ModifyElasticIpResult struct {

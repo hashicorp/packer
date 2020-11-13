@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateLoadBalancerPolicyRequest struct for CreateLoadBalancerPolicyRequest
 type CreateLoadBalancerPolicyRequest struct {
 	// The name of the application cookie used for stickiness. This parameter is required if you create a stickiness policy based on an application-generated cookie.

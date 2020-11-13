@@ -17,17 +17,18 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DeleteNetworkAclRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* networkAclId ID  */
-	NetworkAclId string `json:"networkAclId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
+
+    /* networkAclId ID  */
+    NetworkAclId string `json:"networkAclId"`
 }
 
 /*
@@ -37,19 +38,19 @@ type DeleteNetworkAclRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDeleteNetworkAclRequest(
-	regionId string,
-	networkAclId string,
+    regionId string,
+    networkAclId string,
 ) *DeleteNetworkAclRequest {
 
 	return &DeleteNetworkAclRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
 			Method:  "DELETE",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:     regionId,
-		NetworkAclId: networkAclId,
+        RegionId: regionId,
+        NetworkAclId: networkAclId,
 	}
 }
 
@@ -58,55 +59,55 @@ func NewDeleteNetworkAclRequest(
  * param networkAclId: networkAclId ID (Required)
  */
 func NewDeleteNetworkAclRequestWithAllParams(
-	regionId string,
-	networkAclId string,
+    regionId string,
+    networkAclId string,
 ) *DeleteNetworkAclRequest {
 
-	return &DeleteNetworkAclRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
-			Method:  "DELETE",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:     regionId,
-		NetworkAclId: networkAclId,
-	}
+    return &DeleteNetworkAclRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
+            Method:  "DELETE",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        NetworkAclId: networkAclId,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDeleteNetworkAclRequestWithoutParam() *DeleteNetworkAclRequest {
 
-	return &DeleteNetworkAclRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
-			Method:  "DELETE",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DeleteNetworkAclRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkAcls/{networkAclId}",
+            Method:  "DELETE",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DeleteNetworkAclRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param networkAclId: networkAclId ID(Required) */
 func (r *DeleteNetworkAclRequest) SetNetworkAclId(networkAclId string) {
-	r.NetworkAclId = networkAclId
+    r.NetworkAclId = networkAclId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DeleteNetworkAclRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DeleteNetworkAclResponse struct {
-	RequestID string                 `json:"requestId"`
-	Error     core.ErrorResponse     `json:"error"`
-	Result    DeleteNetworkAclResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DeleteNetworkAclResult `json:"result"`
 }
 
 type DeleteNetworkAclResult struct {

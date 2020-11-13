@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // LinkedVolume Information about volume attachment.
 type LinkedVolume struct {
 	// If `true`, the volume is deleted when the VM is terminated.

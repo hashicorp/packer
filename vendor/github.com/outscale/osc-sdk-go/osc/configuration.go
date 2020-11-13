@@ -58,8 +58,8 @@ type APIKey struct {
 // AWSv4 provides AWS Signature to a request passed via context using ContextAWSv4
 // https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 type AWSv4 struct {
-	AccessKey string
-	SecretKey string
+		AccessKey string
+		SecretKey string
 }
 
 // ServerVariable stores the information about a server variable
@@ -71,9 +71,9 @@ type ServerVariable struct {
 
 // ServerConfiguration stores the information about a server
 type ServerConfiguration struct {
-	Url         string
+	Url string
 	Description string
-	Variables   map[string]ServerVariable
+	Variables map[string]ServerVariable
 }
 
 // Configuration stores the configuration of the API client
@@ -95,13 +95,13 @@ func NewConfiguration() *Configuration {
 		DefaultHeader: make(map[string]string),
 		UserAgent:     "OpenAPI-Generator/1.0.0/go",
 		Debug:         false,
-		Servers: []ServerConfiguration{
+		Servers:       []ServerConfiguration{
 			{
-				Url:         "https://api.{region}.outscale.com/api/v1",
+				Url: "https://api.{region}.outscale.com/api/v1",
 				Description: "No description provided",
 				Variables: map[string]ServerVariable{
 					"region": ServerVariable{
-						Description:  "No description provided",
+						Description: "No description provided",
 						DefaultValue: "eu-west-2",
 						EnumValues: []string{
 							"eu-west-2",
@@ -112,11 +112,11 @@ func NewConfiguration() *Configuration {
 				},
 			},
 			{
-				Url:         "https://api.{region}.outscale.hk/api/v1",
+				Url: "https://api.{region}.outscale.hk/api/v1",
 				Description: "No description provided",
 				Variables: map[string]ServerVariable{
 					"region": ServerVariable{
-						Description:  "No description provided",
+						Description: "No description provided",
 						DefaultValue: "cn-southeast-1",
 						EnumValues: []string{
 							"cn-southeast-1",
@@ -137,7 +137,7 @@ func (c *Configuration) AddDefaultHeader(key string, value string) {
 // ServerUrl returns URL based on server settings
 func (c *Configuration) ServerUrl(index int, variables map[string]string) (string, error) {
 	if index < 0 || len(c.Servers) <= index {
-		return "", fmt.Errorf("Index %v out of range %v", index, len(c.Servers)-1)
+		return "", fmt.Errorf("Index %v out of range %v", index, len(c.Servers) - 1)
 	}
 	server := c.Servers[index]
 	url := server.Url

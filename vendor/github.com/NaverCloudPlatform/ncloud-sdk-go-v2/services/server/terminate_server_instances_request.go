@@ -12,5 +12,5 @@ package server
 type TerminateServerInstancesRequest struct {
 
 	// 서버인스턴스번호리스트
-	ServerInstanceNoList []*string `json:"serverInstanceNoList"`
+ServerInstanceNoList []*string `json:"serverInstanceNoList"`
 }

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // UnlinkVirtualGatewayRequest struct for UnlinkVirtualGatewayRequest
 type UnlinkVirtualGatewayRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

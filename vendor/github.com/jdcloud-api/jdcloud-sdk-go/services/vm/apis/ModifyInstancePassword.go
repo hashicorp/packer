@@ -17,20 +17,21 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type ModifyInstancePasswordRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 云主机ID  */
-	InstanceId string `json:"instanceId"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
 
-	/* 密码，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。  */
-	Password string `json:"password"`
+    /* 云主机ID  */
+    InstanceId string `json:"instanceId"`
+
+    /* 密码，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。  */
+    Password string `json:"password"`
 }
 
 /*
@@ -41,21 +42,21 @@ type ModifyInstancePasswordRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewModifyInstancePasswordRequest(
-	regionId string,
-	instanceId string,
-	password string,
+    regionId string,
+    instanceId string,
+    password string,
 ) *ModifyInstancePasswordRequest {
 
 	return &ModifyInstancePasswordRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstancePassword",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:   regionId,
-		InstanceId: instanceId,
-		Password:   password,
+        RegionId: regionId,
+        InstanceId: instanceId,
+        Password: password,
 	}
 }
 
@@ -65,62 +66,62 @@ func NewModifyInstancePasswordRequest(
  * param password: 密码，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。 (Required)
  */
 func NewModifyInstancePasswordRequestWithAllParams(
-	regionId string,
-	instanceId string,
-	password string,
+    regionId string,
+    instanceId string,
+    password string,
 ) *ModifyInstancePasswordRequest {
 
-	return &ModifyInstancePasswordRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstancePassword",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:   regionId,
-		InstanceId: instanceId,
-		Password:   password,
-	}
+    return &ModifyInstancePasswordRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstancePassword",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        InstanceId: instanceId,
+        Password: password,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewModifyInstancePasswordRequestWithoutParam() *ModifyInstancePasswordRequest {
 
-	return &ModifyInstancePasswordRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstancePassword",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &ModifyInstancePasswordRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:modifyInstancePassword",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *ModifyInstancePasswordRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *ModifyInstancePasswordRequest) SetInstanceId(instanceId string) {
-	r.InstanceId = instanceId
+    r.InstanceId = instanceId
 }
 
 /* param password: 密码，<a href="http://docs.jdcloud.com/virtual-machines/api/general_parameters">参考公共参数规范</a>。(Required) */
 func (r *ModifyInstancePasswordRequest) SetPassword(password string) {
-	r.Password = password
+    r.Password = password
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ModifyInstancePasswordRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type ModifyInstancePasswordResponse struct {
-	RequestID string                       `json:"requestId"`
-	Error     core.ErrorResponse           `json:"error"`
-	Result    ModifyInstancePasswordResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result ModifyInstancePasswordResult `json:"result"`
 }
 
 type ModifyInstancePasswordResult struct {

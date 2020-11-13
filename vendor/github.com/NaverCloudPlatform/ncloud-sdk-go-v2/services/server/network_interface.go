@@ -12,26 +12,26 @@ package server
 type NetworkInterface struct {
 
 	// Network Interface번호
-	NetworkInterfaceNo *string `json:"networkInterfaceNo,omitempty"`
+NetworkInterfaceNo *string `json:"networkInterfaceNo,omitempty"`
 
 	// Network Interface이름
-	NetworkInterfaceName *string `json:"networkInterfaceName,omitempty"`
+NetworkInterfaceName *string `json:"networkInterfaceName,omitempty"`
 
 	// Network Interface IP
-	NetworkInterfaceIp *string `json:"networkInterfaceIp,omitempty"`
+NetworkInterfaceIp *string `json:"networkInterfaceIp,omitempty"`
 
 	// Network Interface 설명
-	NetworkInterfaceDescription *string `json:"networkInterfaceDescription,omitempty"`
+NetworkInterfaceDescription *string `json:"networkInterfaceDescription,omitempty"`
 
 	// 서버인스턴스번호
-	ServerInstanceNo *string `json:"serverInstanceNo,omitempty"`
+ServerInstanceNo *string `json:"serverInstanceNo,omitempty"`
 
 	// 상태코드
-	StatusCode *string `json:"statusCode,omitempty"`
+StatusCode *string `json:"statusCode,omitempty"`
 
 	// 리전
-	Region *Region `json:"region,omitempty"`
+Region *Region `json:"region,omitempty"`
 
 	// ZONE
-	Zone *Zone `json:"zone,omitempty"`
+Zone *Zone `json:"zone,omitempty"`
 }

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteDirectLinkRequest struct for DeleteDirectLinkRequest
 type DeleteDirectLinkRequest struct {
 	// The ID of the DirectLink you want to delete.

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // Subnet Information about the Subnet.
 type Subnet struct {
 	// The number of available IP addresses in the Subnets.

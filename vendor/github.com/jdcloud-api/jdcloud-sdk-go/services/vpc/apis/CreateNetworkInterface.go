@@ -17,41 +17,42 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type CreateNetworkInterfaceRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 子网ID  */
-	SubnetId string `json:"subnetId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
 
-	/* 可用区，用户的默认可用区 (Optional) */
-	Az *string `json:"az"`
+    /* 子网ID  */
+    SubnetId string `json:"subnetId"`
 
-	/* 网卡名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。 (Optional) */
-	NetworkInterfaceName *string `json:"networkInterfaceName"`
+    /* 可用区，用户的默认可用区 (Optional) */
+    Az *string `json:"az"`
 
-	/* 网卡主IP，如果不指定，会自动从子网中分配 (Optional) */
-	PrimaryIpAddress *string `json:"primaryIpAddress"`
+    /* 网卡名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。 (Optional) */
+    NetworkInterfaceName *string `json:"networkInterfaceName"`
 
-	/* SecondaryIp列表 (Optional) */
-	SecondaryIpAddresses []string `json:"secondaryIpAddresses"`
+    /* 网卡主IP，如果不指定，会自动从子网中分配 (Optional) */
+    PrimaryIpAddress *string `json:"primaryIpAddress"`
 
-	/* 自动分配的SecondaryIp数量 (Optional) */
-	SecondaryIpCount *int `json:"secondaryIpCount"`
+    /* SecondaryIp列表 (Optional) */
+    SecondaryIpAddresses []string `json:"secondaryIpAddresses"`
 
-	/* 要绑定的安全组ID列表，最多指定5个安全组 (Optional) */
-	SecurityGroups []string `json:"securityGroups"`
+    /* 自动分配的SecondaryIp数量 (Optional) */
+    SecondaryIpCount *int `json:"secondaryIpCount"`
 
-	/* 源和目标IP地址校验，取值为0或者1,默认为1 (Optional) */
-	SanityCheck *int `json:"sanityCheck"`
+    /* 要绑定的安全组ID列表，最多指定5个安全组 (Optional) */
+    SecurityGroups []string `json:"securityGroups"`
 
-	/* 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
-	Description *string `json:"description"`
+    /* 源和目标IP地址校验，取值为0或者1,默认为1 (Optional) */
+    SanityCheck *int `json:"sanityCheck"`
+
+    /* 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
+    Description *string `json:"description"`
 }
 
 /*
@@ -61,19 +62,19 @@ type CreateNetworkInterfaceRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewCreateNetworkInterfaceRequest(
-	regionId string,
-	subnetId string,
+    regionId string,
+    subnetId string,
 ) *CreateNetworkInterfaceRequest {
 
 	return &CreateNetworkInterfaceRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkInterfaces/",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
-		SubnetId: subnetId,
+        RegionId: regionId,
+        SubnetId: subnetId,
 	}
 }
 
@@ -90,113 +91,113 @@ func NewCreateNetworkInterfaceRequest(
  * param description: 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional)
  */
 func NewCreateNetworkInterfaceRequestWithAllParams(
-	regionId string,
-	subnetId string,
-	az *string,
-	networkInterfaceName *string,
-	primaryIpAddress *string,
-	secondaryIpAddresses []string,
-	secondaryIpCount *int,
-	securityGroups []string,
-	sanityCheck *int,
-	description *string,
+    regionId string,
+    subnetId string,
+    az *string,
+    networkInterfaceName *string,
+    primaryIpAddress *string,
+    secondaryIpAddresses []string,
+    secondaryIpCount *int,
+    securityGroups []string,
+    sanityCheck *int,
+    description *string,
 ) *CreateNetworkInterfaceRequest {
 
-	return &CreateNetworkInterfaceRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkInterfaces/",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:             regionId,
-		SubnetId:             subnetId,
-		Az:                   az,
-		NetworkInterfaceName: networkInterfaceName,
-		PrimaryIpAddress:     primaryIpAddress,
-		SecondaryIpAddresses: secondaryIpAddresses,
-		SecondaryIpCount:     secondaryIpCount,
-		SecurityGroups:       securityGroups,
-		SanityCheck:          sanityCheck,
-		Description:          description,
-	}
+    return &CreateNetworkInterfaceRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkInterfaces/",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        SubnetId: subnetId,
+        Az: az,
+        NetworkInterfaceName: networkInterfaceName,
+        PrimaryIpAddress: primaryIpAddress,
+        SecondaryIpAddresses: secondaryIpAddresses,
+        SecondaryIpCount: secondaryIpCount,
+        SecurityGroups: securityGroups,
+        SanityCheck: sanityCheck,
+        Description: description,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewCreateNetworkInterfaceRequestWithoutParam() *CreateNetworkInterfaceRequest {
 
-	return &CreateNetworkInterfaceRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkInterfaces/",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &CreateNetworkInterfaceRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkInterfaces/",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *CreateNetworkInterfaceRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param subnetId: 子网ID(Required) */
 func (r *CreateNetworkInterfaceRequest) SetSubnetId(subnetId string) {
-	r.SubnetId = subnetId
+    r.SubnetId = subnetId
 }
 
 /* param az: 可用区，用户的默认可用区(Optional) */
 func (r *CreateNetworkInterfaceRequest) SetAz(az string) {
-	r.Az = &az
+    r.Az = &az
 }
 
 /* param networkInterfaceName: 网卡名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。(Optional) */
 func (r *CreateNetworkInterfaceRequest) SetNetworkInterfaceName(networkInterfaceName string) {
-	r.NetworkInterfaceName = &networkInterfaceName
+    r.NetworkInterfaceName = &networkInterfaceName
 }
 
 /* param primaryIpAddress: 网卡主IP，如果不指定，会自动从子网中分配(Optional) */
 func (r *CreateNetworkInterfaceRequest) SetPrimaryIpAddress(primaryIpAddress string) {
-	r.PrimaryIpAddress = &primaryIpAddress
+    r.PrimaryIpAddress = &primaryIpAddress
 }
 
 /* param secondaryIpAddresses: SecondaryIp列表(Optional) */
 func (r *CreateNetworkInterfaceRequest) SetSecondaryIpAddresses(secondaryIpAddresses []string) {
-	r.SecondaryIpAddresses = secondaryIpAddresses
+    r.SecondaryIpAddresses = secondaryIpAddresses
 }
 
 /* param secondaryIpCount: 自动分配的SecondaryIp数量(Optional) */
 func (r *CreateNetworkInterfaceRequest) SetSecondaryIpCount(secondaryIpCount int) {
-	r.SecondaryIpCount = &secondaryIpCount
+    r.SecondaryIpCount = &secondaryIpCount
 }
 
 /* param securityGroups: 要绑定的安全组ID列表，最多指定5个安全组(Optional) */
 func (r *CreateNetworkInterfaceRequest) SetSecurityGroups(securityGroups []string) {
-	r.SecurityGroups = securityGroups
+    r.SecurityGroups = securityGroups
 }
 
 /* param sanityCheck: 源和目标IP地址校验，取值为0或者1,默认为1(Optional) */
 func (r *CreateNetworkInterfaceRequest) SetSanityCheck(sanityCheck int) {
-	r.SanityCheck = &sanityCheck
+    r.SanityCheck = &sanityCheck
 }
 
 /* param description: 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符(Optional) */
 func (r *CreateNetworkInterfaceRequest) SetDescription(description string) {
-	r.Description = &description
+    r.Description = &description
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r CreateNetworkInterfaceRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type CreateNetworkInterfaceResponse struct {
-	RequestID string                       `json:"requestId"`
-	Error     core.ErrorResponse           `json:"error"`
-	Result    CreateNetworkInterfaceResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result CreateNetworkInterfaceResult `json:"result"`
 }
 
 type CreateNetworkInterfaceResult struct {
-	NetworkInterfaceId string `json:"networkInterfaceId"`
+    NetworkInterfaceId string `json:"networkInterfaceId"`
 }

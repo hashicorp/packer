@@ -17,17 +17,18 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type RebootInstanceRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 云主机ID  */
-	InstanceId string `json:"instanceId"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
+
+    /* 云主机ID  */
+    InstanceId string `json:"instanceId"`
 }
 
 /*
@@ -37,19 +38,19 @@ type RebootInstanceRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewRebootInstanceRequest(
-	regionId string,
-	instanceId string,
+    regionId string,
+    instanceId string,
 ) *RebootInstanceRequest {
 
 	return &RebootInstanceRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:rebootInstance",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:   regionId,
-		InstanceId: instanceId,
+        RegionId: regionId,
+        InstanceId: instanceId,
 	}
 }
 
@@ -58,55 +59,55 @@ func NewRebootInstanceRequest(
  * param instanceId: 云主机ID (Required)
  */
 func NewRebootInstanceRequestWithAllParams(
-	regionId string,
-	instanceId string,
+    regionId string,
+    instanceId string,
 ) *RebootInstanceRequest {
 
-	return &RebootInstanceRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:rebootInstance",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:   regionId,
-		InstanceId: instanceId,
-	}
+    return &RebootInstanceRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:rebootInstance",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        InstanceId: instanceId,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewRebootInstanceRequestWithoutParam() *RebootInstanceRequest {
 
-	return &RebootInstanceRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:rebootInstance",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &RebootInstanceRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:rebootInstance",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *RebootInstanceRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *RebootInstanceRequest) SetInstanceId(instanceId string) {
-	r.InstanceId = instanceId
+    r.InstanceId = instanceId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r RebootInstanceRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type RebootInstanceResponse struct {
-	RequestID string               `json:"requestId"`
-	Error     core.ErrorResponse   `json:"error"`
-	Result    RebootInstanceResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result RebootInstanceResult `json:"result"`
 }
 
 type RebootInstanceResult struct {

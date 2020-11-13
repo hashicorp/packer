@@ -16,14 +16,15 @@
 
 package models
 
+
 type InstanceTemplateDiskSpec struct {
 
-	/* 云硬盘类型，取值为 ssd 或 premium-hdd (Optional) */
-	DiskType string `json:"diskType"`
+    /* 云硬盘类型，取值为 ssd 或 premium-hdd (Optional) */
+    DiskType string `json:"diskType"`
 
-	/* 云硬盘大小，单位为 GiB；ssd 类型取值范围[20,1000]GB，步长为10G，premium-hdd 类型取值范围[20,3000]GB，步长为10G (Optional) */
-	DiskSizeGB int `json:"diskSizeGB"`
+    /* 云硬盘大小，单位为 GiB；ssd 类型取值范围[20,1000]GB，步长为10G，premium-hdd 类型取值范围[20,3000]GB，步长为10G (Optional) */
+    DiskSizeGB int `json:"diskSizeGB"`
 
-	/* 用于创建云硬盘的快照ID (Optional) */
-	SnapshotId string `json:"snapshotId"`
+    /* 用于创建云硬盘的快照ID (Optional) */
+    SnapshotId string `json:"snapshotId"`
 }

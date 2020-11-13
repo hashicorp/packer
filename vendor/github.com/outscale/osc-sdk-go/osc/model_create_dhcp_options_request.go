@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateDhcpOptionsRequest struct for CreateDhcpOptionsRequest
 type CreateDhcpOptionsRequest struct {
 	// Specify a domain name (for example, MyCompany.com). You can specify only one domain name.

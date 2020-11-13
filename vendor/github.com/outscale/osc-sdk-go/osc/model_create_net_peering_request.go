@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateNetPeeringRequest struct for CreateNetPeeringRequest
 type CreateNetPeeringRequest struct {
 	// The ID of the Net you want to connect with.

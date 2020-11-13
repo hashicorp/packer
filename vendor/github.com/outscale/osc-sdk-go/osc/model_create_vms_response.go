@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateVmsResponse struct for CreateVmsResponse
 type CreateVmsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

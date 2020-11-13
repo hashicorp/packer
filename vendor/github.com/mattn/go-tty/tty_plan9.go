@@ -2,9 +2,9 @@ package tty
 
 import (
 	"bufio"
-	"errors"
 	"os"
 	"syscall"
+	"errors"
 )
 
 type TTY struct {

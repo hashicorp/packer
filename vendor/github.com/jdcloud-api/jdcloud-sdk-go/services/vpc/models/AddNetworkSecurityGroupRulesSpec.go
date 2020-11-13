@@ -16,8 +16,9 @@
 
 package models
 
+
 type AddNetworkSecurityGroupRulesSpec struct {
 
-	/* 安全组规则信息  */
-	NetworkSecurityGroupRuleSpecs []AddSecurityGroupRules `json:"networkSecurityGroupRuleSpecs"`
+    /* 安全组规则信息  */
+    NetworkSecurityGroupRuleSpecs []AddSecurityGroupRules `json:"networkSecurityGroupRuleSpecs"`
 }

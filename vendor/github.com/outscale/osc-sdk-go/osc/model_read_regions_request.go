@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ReadRegionsRequest struct for ReadRegionsRequest
 type ReadRegionsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

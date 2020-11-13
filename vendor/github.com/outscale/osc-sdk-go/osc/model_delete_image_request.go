@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteImageRequest struct for DeleteImageRequest
 type DeleteImageRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

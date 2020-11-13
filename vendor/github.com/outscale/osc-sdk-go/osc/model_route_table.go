@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // RouteTable Information about the route table.
 type RouteTable struct {
 	// One or more associations between the route table and Subnets.

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // NetPeeringState Information about the state of the Net peering connection.
 type NetPeeringState struct {
 	// Additional information about the state of the Net peering connection.

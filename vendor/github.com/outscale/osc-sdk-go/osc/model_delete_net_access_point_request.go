@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteNetAccessPointRequest struct for DeleteNetAccessPointRequest
 type DeleteNetAccessPointRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

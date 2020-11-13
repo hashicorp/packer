@@ -16,11 +16,12 @@
 
 package models
 
+
 type ModifyRouteTableSpec struct {
 
-	/* 路由表的名字。名称取值范围：1-32个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
-	RouteTableName string `json:"routeTableName"`
+    /* 路由表的名字。名称取值范围：1-32个中文、英文大小写的字母、数字和下划线分隔符 (Optional) */
+    RouteTableName string `json:"routeTableName"`
 
-	/* 路由表的描述，取值范围：0-256个UTF-8编码下的全部字符 (Optional) */
-	Description string `json:"description"`
+    /* 路由表的描述，取值范围：0-256个UTF-8编码下的全部字符 (Optional) */
+    Description string `json:"description"`
 }

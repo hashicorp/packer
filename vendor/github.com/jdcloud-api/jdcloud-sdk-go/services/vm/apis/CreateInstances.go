@@ -17,27 +17,28 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
-	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+    vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
 )
 
 type CreateInstancesRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 描述云主机配置
-	 */
-	InstanceSpec *vm.InstanceSpec `json:"instanceSpec"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
 
-	/* 购买云主机的数量；取值范围：[1,100]，默认为1。
-	(Optional) */
-	MaxCount *int `json:"maxCount"`
+    /* 描述云主机配置
+  */
+    InstanceSpec *vm.InstanceSpec `json:"instanceSpec"`
 
-	/* 用于保证请求的幂等性。由客户端生成，长度不能超过64个字符。
-	(Optional) */
-	ClientToken *string `json:"clientToken"`
+    /* 购买云主机的数量；取值范围：[1,100]，默认为1。
+ (Optional) */
+    MaxCount *int `json:"maxCount"`
+
+    /* 用于保证请求的幂等性。由客户端生成，长度不能超过64个字符。
+ (Optional) */
+    ClientToken *string `json:"clientToken"`
 }
 
 /*
@@ -46,21 +47,21 @@ type CreateInstancesRequest struct {
  (Required)
  *
  * @Deprecated, not compatible when mandatory parameters changed
-*/
+ */
 func NewCreateInstancesRequest(
-	regionId string,
-	instanceSpec *vm.InstanceSpec,
+    regionId string,
+    instanceSpec *vm.InstanceSpec,
 ) *CreateInstancesRequest {
 
 	return &CreateInstancesRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:     regionId,
-		InstanceSpec: instanceSpec,
+        RegionId: regionId,
+        InstanceSpec: instanceSpec,
 	}
 }
 
@@ -72,76 +73,76 @@ func NewCreateInstancesRequest(
  (Optional)
  * param clientToken: 用于保证请求的幂等性。由客户端生成，长度不能超过64个字符。
  (Optional)
-*/
+ */
 func NewCreateInstancesRequestWithAllParams(
-	regionId string,
-	instanceSpec *vm.InstanceSpec,
-	maxCount *int,
-	clientToken *string,
+    regionId string,
+    instanceSpec *vm.InstanceSpec,
+    maxCount *int,
+    clientToken *string,
 ) *CreateInstancesRequest {
 
-	return &CreateInstancesRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:     regionId,
-		InstanceSpec: instanceSpec,
-		MaxCount:     maxCount,
-		ClientToken:  clientToken,
-	}
+    return &CreateInstancesRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        InstanceSpec: instanceSpec,
+        MaxCount: maxCount,
+        ClientToken: clientToken,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewCreateInstancesRequestWithoutParam() *CreateInstancesRequest {
 
-	return &CreateInstancesRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &CreateInstancesRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *CreateInstancesRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param instanceSpec: 描述云主机配置
 (Required) */
 func (r *CreateInstancesRequest) SetInstanceSpec(instanceSpec *vm.InstanceSpec) {
-	r.InstanceSpec = instanceSpec
+    r.InstanceSpec = instanceSpec
 }
 
 /* param maxCount: 购买云主机的数量；取值范围：[1,100]，默认为1。
 (Optional) */
 func (r *CreateInstancesRequest) SetMaxCount(maxCount int) {
-	r.MaxCount = &maxCount
+    r.MaxCount = &maxCount
 }
 
 /* param clientToken: 用于保证请求的幂等性。由客户端生成，长度不能超过64个字符。
 (Optional) */
 func (r *CreateInstancesRequest) SetClientToken(clientToken string) {
-	r.ClientToken = &clientToken
+    r.ClientToken = &clientToken
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r CreateInstancesRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type CreateInstancesResponse struct {
-	RequestID string                `json:"requestId"`
-	Error     core.ErrorResponse    `json:"error"`
-	Result    CreateInstancesResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result CreateInstancesResult `json:"result"`
 }
 
 type CreateInstancesResult struct {
-	InstanceIds []string `json:"instanceIds"`
+    InstanceIds []string `json:"instanceIds"`
 }

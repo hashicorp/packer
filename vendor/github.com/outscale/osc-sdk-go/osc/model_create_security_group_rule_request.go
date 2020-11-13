@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateSecurityGroupRuleRequest struct for CreateSecurityGroupRuleRequest
 type CreateSecurityGroupRuleRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

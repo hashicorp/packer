@@ -12,11 +12,11 @@ package server
 type CreateBlockStorageSnapshotInstanceRequest struct {
 
 	// 블록스토리지인스턴스번호
-	BlockStorageInstanceNo *string `json:"blockStorageInstanceNo"`
+BlockStorageInstanceNo *string `json:"blockStorageInstanceNo"`
 
 	// 블록스토리지스냅샷이름
-	BlockStorageSnapshotName *string `json:"blockStorageSnapshotName,omitempty"`
+BlockStorageSnapshotName *string `json:"blockStorageSnapshotName,omitempty"`
 
 	// 블록스토리지스냅샷설명
-	BlockStorageSnapshotDescription *string `json:"blockStorageSnapshotDescription,omitempty"`
+BlockStorageSnapshotDescription *string `json:"blockStorageSnapshotDescription,omitempty"`
 }

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteVolumeRequest struct for DeleteVolumeRequest
 type DeleteVolumeRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

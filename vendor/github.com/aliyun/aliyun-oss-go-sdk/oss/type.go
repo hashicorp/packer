@@ -190,8 +190,8 @@ type GetBucketCORSResult CORSXML
 
 // GetBucketInfoResult GetBucketInfo请求返回结果
 type GetBucketInfoResult struct {
-	XMLName    xml.Name   `xml:"BucketInfo"`
-	BucketInfo BucketInfo `xml:"Bucket"`
+	XMLName        xml.Name `xml:"BucketInfo"`
+	BucketInfo     BucketInfo   `xml:"Bucket"`
 }
 
 // BucketInfo Bucket信息
@@ -200,7 +200,7 @@ type BucketInfo struct {
 	Name             string    `xml:"Name"`                    // Bucket名称
 	Location         string    `xml:"Location"`                // Bucket所在的数据中心
 	CreationDate     time.Time `xml:"CreationDate"`            // Bucket创建时间
-	ExtranetEndpoint string    `xml:"ExtranetEndpoint"`        // Bucket访问的外网域名
+	ExtranetEndpoint string    `xml:"ExtranetEndpoint"`        // Bucket访问的外网域名 
 	IntranetEndpoint string    `xml:"IntranetEndpoint"`        // Bucket访问的内网域名
 	ACL              string    `xml:"AccessControlList>Grant"` // Bucket权限
 	Owner            Owner     `xml:"Owner"`                   // Bucket拥有者信息

@@ -9,10 +9,9 @@
  */
 
 package osc
-
 // ReadProductTypesResponse struct for ReadProductTypesResponse
 type ReadProductTypesResponse struct {
 	// Information about one or more product types.
-	ProductTypes    []ProductType   `json:"ProductTypes,omitempty"`
+	ProductTypes []ProductType `json:"ProductTypes,omitempty"`
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

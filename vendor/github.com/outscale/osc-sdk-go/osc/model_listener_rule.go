@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ListenerRule Information about the listener rule.
 type ListenerRule struct {
 	// The type of action for the rule (always `forward`).

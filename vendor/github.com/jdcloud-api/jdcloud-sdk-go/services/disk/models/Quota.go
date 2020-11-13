@@ -16,11 +16,12 @@
 
 package models
 
+
 type Quota struct {
 
-	/* 配额 (Optional) */
-	Limit int `json:"limit"`
+    /* 配额 (Optional) */
+    Limit int `json:"limit"`
 
-	/* 已使用的数目 (Optional) */
-	Used int `json:"used"`
+    /* 已使用的数目 (Optional) */
+    Used int `json:"used"`
 }

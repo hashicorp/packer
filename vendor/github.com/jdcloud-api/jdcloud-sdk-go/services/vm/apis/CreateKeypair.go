@@ -17,18 +17,19 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type CreateKeypairRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 密钥对名称，需要全局唯一。只允许数字、大小写字母、下划线“_”及中划线“-”，不超过32个字符。
-	 */
-	KeyName string `json:"keyName"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
+
+    /* 密钥对名称，需要全局唯一。只允许数字、大小写字母、下划线“_”及中划线“-”，不超过32个字符。
+  */
+    KeyName string `json:"keyName"`
 }
 
 /*
@@ -37,21 +38,21 @@ type CreateKeypairRequest struct {
  (Required)
  *
  * @Deprecated, not compatible when mandatory parameters changed
-*/
+ */
 func NewCreateKeypairRequest(
-	regionId string,
-	keyName string,
+    regionId string,
+    keyName string,
 ) *CreateKeypairRequest {
 
 	return &CreateKeypairRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/keypairs",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
-		KeyName:  keyName,
+        RegionId: regionId,
+        KeyName: keyName,
 	}
 }
 
@@ -59,62 +60,62 @@ func NewCreateKeypairRequest(
  * param regionId: 地域ID (Required)
  * param keyName: 密钥对名称，需要全局唯一。只允许数字、大小写字母、下划线“_”及中划线“-”，不超过32个字符。
  (Required)
-*/
+ */
 func NewCreateKeypairRequestWithAllParams(
-	regionId string,
-	keyName string,
+    regionId string,
+    keyName string,
 ) *CreateKeypairRequest {
 
-	return &CreateKeypairRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/keypairs",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId: regionId,
-		KeyName:  keyName,
-	}
+    return &CreateKeypairRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/keypairs",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        KeyName: keyName,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewCreateKeypairRequestWithoutParam() *CreateKeypairRequest {
 
-	return &CreateKeypairRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/keypairs",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &CreateKeypairRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/keypairs",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *CreateKeypairRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param keyName: 密钥对名称，需要全局唯一。只允许数字、大小写字母、下划线“_”及中划线“-”，不超过32个字符。
 (Required) */
 func (r *CreateKeypairRequest) SetKeyName(keyName string) {
-	r.KeyName = keyName
+    r.KeyName = keyName
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r CreateKeypairRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type CreateKeypairResponse struct {
-	RequestID string              `json:"requestId"`
-	Error     core.ErrorResponse  `json:"error"`
-	Result    CreateKeypairResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result CreateKeypairResult `json:"result"`
 }
 
 type CreateKeypairResult struct {
-	KeyName        string `json:"keyName"`
-	PrivateKey     string `json:"privateKey"`
-	KeyFingerprint string `json:"keyFingerprint"`
+    KeyName string `json:"keyName"`
+    PrivateKey string `json:"privateKey"`
+    KeyFingerprint string `json:"keyFingerprint"`
 }

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // Listener Information about the listener.
 type Listener struct {
 	// The port on which the back-end VM is listening (between `1` and `65535`, both included).

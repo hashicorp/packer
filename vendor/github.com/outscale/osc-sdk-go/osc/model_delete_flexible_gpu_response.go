@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteFlexibleGpuResponse struct for DeleteFlexibleGpuResponse
 type DeleteFlexibleGpuResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

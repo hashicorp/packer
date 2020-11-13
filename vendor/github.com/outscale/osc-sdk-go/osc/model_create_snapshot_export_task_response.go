@@ -9,9 +9,8 @@
  */
 
 package osc
-
 // CreateSnapshotExportTaskResponse struct for CreateSnapshotExportTaskResponse
 type CreateSnapshotExportTaskResponse struct {
-	ResponseContext    ResponseContext    `json:"ResponseContext,omitempty"`
+	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 	SnapshotExportTask SnapshotExportTask `json:"SnapshotExportTask,omitempty"`
 }

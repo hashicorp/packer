@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersKeypair One or more filters.
 type FiltersKeypair struct {
 	// The fingerprints of the keypairs.

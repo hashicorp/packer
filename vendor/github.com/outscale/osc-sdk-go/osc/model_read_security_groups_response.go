@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ReadSecurityGroupsResponse struct for ReadSecurityGroupsResponse
 type ReadSecurityGroupsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

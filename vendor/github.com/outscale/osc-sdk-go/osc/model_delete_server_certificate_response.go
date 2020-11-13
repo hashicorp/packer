@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteServerCertificateResponse struct for DeleteServerCertificateResponse
 type DeleteServerCertificateResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

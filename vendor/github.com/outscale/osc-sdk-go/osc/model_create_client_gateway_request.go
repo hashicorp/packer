@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateClientGatewayRequest struct for CreateClientGatewayRequest
 type CreateClientGatewayRequest struct {
 	// An Autonomous System Number (ASN) used by the Border Gateway Protocol (BGP) to find the path to your client gateway through the Internet.

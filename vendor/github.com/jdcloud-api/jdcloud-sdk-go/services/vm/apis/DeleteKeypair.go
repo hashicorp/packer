@@ -17,17 +17,18 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DeleteKeypairRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 密钥名称  */
-	KeyName string `json:"keyName"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
+
+    /* 密钥名称  */
+    KeyName string `json:"keyName"`
 }
 
 /*
@@ -37,19 +38,19 @@ type DeleteKeypairRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDeleteKeypairRequest(
-	regionId string,
-	keyName string,
+    regionId string,
+    keyName string,
 ) *DeleteKeypairRequest {
 
 	return &DeleteKeypairRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/keypairs/{keyName}",
 			Method:  "DELETE",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
-		KeyName:  keyName,
+        RegionId: regionId,
+        KeyName: keyName,
 	}
 }
 
@@ -58,55 +59,55 @@ func NewDeleteKeypairRequest(
  * param keyName: 密钥名称 (Required)
  */
 func NewDeleteKeypairRequestWithAllParams(
-	regionId string,
-	keyName string,
+    regionId string,
+    keyName string,
 ) *DeleteKeypairRequest {
 
-	return &DeleteKeypairRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/keypairs/{keyName}",
-			Method:  "DELETE",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId: regionId,
-		KeyName:  keyName,
-	}
+    return &DeleteKeypairRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/keypairs/{keyName}",
+            Method:  "DELETE",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        KeyName: keyName,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDeleteKeypairRequestWithoutParam() *DeleteKeypairRequest {
 
-	return &DeleteKeypairRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/keypairs/{keyName}",
-			Method:  "DELETE",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DeleteKeypairRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/keypairs/{keyName}",
+            Method:  "DELETE",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DeleteKeypairRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param keyName: 密钥名称(Required) */
 func (r *DeleteKeypairRequest) SetKeyName(keyName string) {
-	r.KeyName = keyName
+    r.KeyName = keyName
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DeleteKeypairRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DeleteKeypairResponse struct {
-	RequestID string              `json:"requestId"`
-	Error     core.ErrorResponse  `json:"error"`
-	Result    DeleteKeypairResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DeleteKeypairResult `json:"result"`
 }
 
 type DeleteKeypairResult struct {

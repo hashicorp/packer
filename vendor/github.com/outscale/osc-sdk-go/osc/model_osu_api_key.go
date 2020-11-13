@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // OsuApiKey Information about the OSU API key.
 type OsuApiKey struct {
 	// The API key of the OSU account that enables you to access the bucket.

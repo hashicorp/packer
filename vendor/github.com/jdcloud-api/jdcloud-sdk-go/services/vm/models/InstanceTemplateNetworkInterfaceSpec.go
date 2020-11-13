@@ -16,14 +16,15 @@
 
 package models
 
+
 type InstanceTemplateNetworkInterfaceSpec struct {
 
-	/* 子网ID  */
-	SubnetId string `json:"subnetId"`
+    /* 子网ID  */
+    SubnetId string `json:"subnetId"`
 
-	/* 安全组ID列表 (Optional) */
-	SecurityGroups []string `json:"securityGroups"`
+    /* 安全组ID列表 (Optional) */
+    SecurityGroups []string `json:"securityGroups"`
 
-	/* PortSecurity，取值为0或者1，默认为1 (Optional) */
-	SanityCheck int `json:"sanityCheck"`
+    /* PortSecurity，取值为0或者1，默认为1 (Optional) */
+    SanityCheck int `json:"sanityCheck"`
 }

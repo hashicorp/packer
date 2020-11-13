@@ -17,18 +17,19 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
-	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
 )
 
 type DescribeElasticIpRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* ElasticIp ID  */
-	ElasticIpId string `json:"elasticIpId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
+
+    /* ElasticIp ID  */
+    ElasticIpId string `json:"elasticIpId"`
 }
 
 /*
@@ -38,19 +39,19 @@ type DescribeElasticIpRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeElasticIpRequest(
-	regionId string,
-	elasticIpId string,
+    regionId string,
+    elasticIpId string,
 ) *DescribeElasticIpRequest {
 
 	return &DescribeElasticIpRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:    regionId,
-		ElasticIpId: elasticIpId,
+        RegionId: regionId,
+        ElasticIpId: elasticIpId,
 	}
 }
 
@@ -59,57 +60,57 @@ func NewDescribeElasticIpRequest(
  * param elasticIpId: ElasticIp ID (Required)
  */
 func NewDescribeElasticIpRequestWithAllParams(
-	regionId string,
-	elasticIpId string,
+    regionId string,
+    elasticIpId string,
 ) *DescribeElasticIpRequest {
 
-	return &DescribeElasticIpRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:    regionId,
-		ElasticIpId: elasticIpId,
-	}
+    return &DescribeElasticIpRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        ElasticIpId: elasticIpId,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeElasticIpRequestWithoutParam() *DescribeElasticIpRequest {
 
-	return &DescribeElasticIpRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DescribeElasticIpRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/elasticIps/{elasticIpId}",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeElasticIpRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param elasticIpId: ElasticIp ID(Required) */
 func (r *DescribeElasticIpRequest) SetElasticIpId(elasticIpId string) {
-	r.ElasticIpId = elasticIpId
+    r.ElasticIpId = elasticIpId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeElasticIpRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DescribeElasticIpResponse struct {
-	RequestID string                  `json:"requestId"`
-	Error     core.ErrorResponse      `json:"error"`
-	Result    DescribeElasticIpResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DescribeElasticIpResult `json:"result"`
 }
 
 type DescribeElasticIpResult struct {
-	ElasticIp vpc.ElasticIp `json:"elasticIp"`
+    ElasticIp vpc.ElasticIp `json:"elasticIp"`
 }

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateVmsRequest struct for CreateVmsRequest
 type CreateVmsRequest struct {
 	// One or more block device mappings.
@@ -35,8 +34,8 @@ type CreateVmsRequest struct {
 	// One or more NICs. If you specify this parameter, you must define one NIC as the primary network interface of the VM with `0` as its device number.
 	Nics []NicForVmCreation `json:"Nics,omitempty"`
 	// The performance of the VM (`standard` \\| `high` \\|  `highest`).
-	Performance string    `json:"Performance,omitempty"`
-	Placement   Placement `json:"Placement,omitempty"`
+	Performance string `json:"Performance,omitempty"`
+	Placement Placement `json:"Placement,omitempty"`
 	// One or more private IP addresses of the VM.
 	PrivateIps []string `json:"PrivateIps,omitempty"`
 	// One or more IDs of security group for the VMs.

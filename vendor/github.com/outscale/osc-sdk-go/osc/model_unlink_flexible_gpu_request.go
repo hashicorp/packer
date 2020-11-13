@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // UnlinkFlexibleGpuRequest struct for UnlinkFlexibleGpuRequest
 type UnlinkFlexibleGpuRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

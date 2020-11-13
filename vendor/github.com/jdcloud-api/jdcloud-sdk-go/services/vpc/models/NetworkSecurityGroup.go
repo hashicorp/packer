@@ -16,23 +16,24 @@
 
 package models
 
+
 type NetworkSecurityGroup struct {
 
-	/* 安全组ID (Optional) */
-	NetworkSecurityGroupId string `json:"networkSecurityGroupId"`
+    /* 安全组ID (Optional) */
+    NetworkSecurityGroupId string `json:"networkSecurityGroupId"`
 
-	/* 安全组名称 (Optional) */
-	NetworkSecurityGroupName string `json:"networkSecurityGroupName"`
+    /* 安全组名称 (Optional) */
+    NetworkSecurityGroupName string `json:"networkSecurityGroupName"`
 
-	/* 安全组描述信息 (Optional) */
-	Description string `json:"description"`
+    /* 安全组描述信息 (Optional) */
+    Description string `json:"description"`
 
-	/* 安全组所在vpc的Id (Optional) */
-	VpcId string `json:"vpcId"`
+    /* 安全组所在vpc的Id (Optional) */
+    VpcId string `json:"vpcId"`
 
-	/* 安全组规则信息 (Optional) */
-	SecurityGroupRules []SecurityGroupRule `json:"securityGroupRules"`
+    /* 安全组规则信息 (Optional) */
+    SecurityGroupRules []SecurityGroupRule `json:"securityGroupRules"`
 
-	/* 安全组创建时间 (Optional) */
-	CreatedTime string `json:"createdTime"`
+    /* 安全组创建时间 (Optional) */
+    CreatedTime string `json:"createdTime"`
 }

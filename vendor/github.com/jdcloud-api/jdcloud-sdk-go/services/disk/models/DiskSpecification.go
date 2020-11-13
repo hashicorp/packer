@@ -16,38 +16,39 @@
 
 package models
 
+
 type DiskSpecification struct {
 
-	/* 云硬盘类型 (Optional) */
-	DiskType string `json:"diskType"`
+    /* 云硬盘类型 (Optional) */
+    DiskType string `json:"diskType"`
 
-	/* 支持的最小尺寸，单位为 GiB (Optional) */
-	MinSizeGB int `json:"minSizeGB"`
+    /* 支持的最小尺寸，单位为 GiB (Optional) */
+    MinSizeGB int `json:"minSizeGB"`
 
-	/* 支持的最大尺寸，单位为 GiB (Optional) */
-	MaxSizeGB int `json:"maxSizeGB"`
+    /* 支持的最大尺寸，单位为 GiB (Optional) */
+    MaxSizeGB int `json:"maxSizeGB"`
 
-	/* 步长尺寸，单位为 GiB (Optional) */
-	StepSizeGB int `json:"stepSizeGB"`
+    /* 步长尺寸，单位为 GiB (Optional) */
+    StepSizeGB int `json:"stepSizeGB"`
 
-	/* 描述信息 (Optional) */
-	Description string `json:"description"`
+    /* 描述信息 (Optional) */
+    Description string `json:"description"`
 
-	/* 默认的iops数量(基础iops数量) (Optional) */
-	DefaultIOPS int `json:"defaultIOPS"`
+    /* 默认的iops数量(基础iops数量) (Optional) */
+    DefaultIOPS int `json:"defaultIOPS"`
 
-	/* iops步长增量 (Optional) */
-	StepIOPS float32 `json:"stepIOPS"`
+    /* iops步长增量 (Optional) */
+    StepIOPS float32 `json:"stepIOPS"`
 
-	/* 最大iops数量 (Optional) */
-	MaxIOPS int `json:"maxIOPS"`
+    /* 最大iops数量 (Optional) */
+    MaxIOPS int `json:"maxIOPS"`
 
-	/* 默认的吞吐量 (Optional) */
-	DefaultThroughput int `json:"defaultThroughput"`
+    /* 默认的吞吐量 (Optional) */
+    DefaultThroughput int `json:"defaultThroughput"`
 
-	/* 吞吐量步长增量 (Optional) */
-	StepThroughput float32 `json:"stepThroughput"`
+    /* 吞吐量步长增量 (Optional) */
+    StepThroughput float32 `json:"stepThroughput"`
 
-	/* 最大吞吐量 (Optional) */
-	MaxThroughput int `json:"maxThroughput"`
+    /* 最大吞吐量 (Optional) */
+    MaxThroughput int `json:"maxThroughput"`
 }

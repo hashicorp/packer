@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // Log Information about the log.
 type Log struct {
 	// The account ID.

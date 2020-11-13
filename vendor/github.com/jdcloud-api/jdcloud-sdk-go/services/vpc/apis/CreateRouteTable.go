@@ -17,23 +17,24 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type CreateRouteTableRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 路由表所属的私有网络ID  */
-	VpcId string `json:"vpcId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
 
-	/* 路由表名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。  */
-	RouteTableName string `json:"routeTableName"`
+    /* 路由表所属的私有网络ID  */
+    VpcId string `json:"vpcId"`
 
-	/* 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
-	Description *string `json:"description"`
+    /* 路由表名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。  */
+    RouteTableName string `json:"routeTableName"`
+
+    /* 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional) */
+    Description *string `json:"description"`
 }
 
 /*
@@ -44,21 +45,21 @@ type CreateRouteTableRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewCreateRouteTableRequest(
-	regionId string,
-	vpcId string,
-	routeTableName string,
+    regionId string,
+    vpcId string,
+    routeTableName string,
 ) *CreateRouteTableRequest {
 
 	return &CreateRouteTableRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/routeTables/",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:       regionId,
-		VpcId:          vpcId,
-		RouteTableName: routeTableName,
+        RegionId: regionId,
+        VpcId: vpcId,
+        RouteTableName: routeTableName,
 	}
 }
 
@@ -69,71 +70,71 @@ func NewCreateRouteTableRequest(
  * param description: 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符 (Optional)
  */
 func NewCreateRouteTableRequestWithAllParams(
-	regionId string,
-	vpcId string,
-	routeTableName string,
-	description *string,
+    regionId string,
+    vpcId string,
+    routeTableName string,
+    description *string,
 ) *CreateRouteTableRequest {
 
-	return &CreateRouteTableRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/routeTables/",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:       regionId,
-		VpcId:          vpcId,
-		RouteTableName: routeTableName,
-		Description:    description,
-	}
+    return &CreateRouteTableRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/routeTables/",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        VpcId: vpcId,
+        RouteTableName: routeTableName,
+        Description: description,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewCreateRouteTableRequestWithoutParam() *CreateRouteTableRequest {
 
-	return &CreateRouteTableRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/routeTables/",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &CreateRouteTableRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/routeTables/",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *CreateRouteTableRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param vpcId: 路由表所属的私有网络ID(Required) */
 func (r *CreateRouteTableRequest) SetVpcId(vpcId string) {
-	r.VpcId = vpcId
+    r.VpcId = vpcId
 }
 
 /* param routeTableName: 路由表名称，只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。(Required) */
 func (r *CreateRouteTableRequest) SetRouteTableName(routeTableName string) {
-	r.RouteTableName = routeTableName
+    r.RouteTableName = routeTableName
 }
 
 /* param description: 描述,​ 允许输入UTF-8编码下的全部字符，不超过256字符(Optional) */
 func (r *CreateRouteTableRequest) SetDescription(description string) {
-	r.Description = &description
+    r.Description = &description
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r CreateRouteTableRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type CreateRouteTableResponse struct {
-	RequestID string                 `json:"requestId"`
-	Error     core.ErrorResponse     `json:"error"`
-	Result    CreateRouteTableResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result CreateRouteTableResult `json:"result"`
 }
 
 type CreateRouteTableResult struct {
-	RouteTableId string `json:"routeTableId"`
+    RouteTableId string `json:"routeTableId"`
 }

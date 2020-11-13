@@ -17,28 +17,29 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
-	common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
-	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+    vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/models"
+    common "github.com/jdcloud-api/jdcloud-sdk-go/services/common/models"
 )
 
 type DescribeNetworkSecurityGroupsRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页 (Optional) */
-	PageNumber *int `json:"pageNumber"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
 
-	/* 分页大小，默认为20，取值范围：[10,100] (Optional) */
-	PageSize *int `json:"pageSize"`
+    /* 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页 (Optional) */
+    PageNumber *int `json:"pageNumber"`
 
-	/* networkSecurityGroupIds - 安全组ID列表，支持多个
-	networkSecurityGroupNames - 安全组名称列表，支持多个
-	vpcId	- 安全组所属vpc Id，支持单个
-	 (Optional) */
-	Filters []common.Filter `json:"filters"`
+    /* 分页大小，默认为20，取值范围：[10,100] (Optional) */
+    PageSize *int `json:"pageSize"`
+
+    /* networkSecurityGroupIds - 安全组ID列表，支持多个
+networkSecurityGroupNames - 安全组名称列表，支持多个
+vpcId	- 安全组所属vpc Id，支持单个
+ (Optional) */
+    Filters []common.Filter `json:"filters"`
 }
 
 /*
@@ -47,17 +48,17 @@ type DescribeNetworkSecurityGroupsRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeNetworkSecurityGroupsRequest(
-	regionId string,
+    regionId string,
 ) *DescribeNetworkSecurityGroupsRequest {
 
 	return &DescribeNetworkSecurityGroupsRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkSecurityGroups/",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
+        RegionId: regionId,
 	}
 }
 
@@ -69,54 +70,54 @@ func NewDescribeNetworkSecurityGroupsRequest(
 networkSecurityGroupNames - 安全组名称列表，支持多个
 vpcId	- 安全组所属vpc Id，支持单个
  (Optional)
-*/
+ */
 func NewDescribeNetworkSecurityGroupsRequestWithAllParams(
-	regionId string,
-	pageNumber *int,
-	pageSize *int,
-	filters []common.Filter,
+    regionId string,
+    pageNumber *int,
+    pageSize *int,
+    filters []common.Filter,
 ) *DescribeNetworkSecurityGroupsRequest {
 
-	return &DescribeNetworkSecurityGroupsRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkSecurityGroups/",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:   regionId,
-		PageNumber: pageNumber,
-		PageSize:   pageSize,
-		Filters:    filters,
-	}
+    return &DescribeNetworkSecurityGroupsRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkSecurityGroups/",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        PageNumber: pageNumber,
+        PageSize: pageSize,
+        Filters: filters,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeNetworkSecurityGroupsRequestWithoutParam() *DescribeNetworkSecurityGroupsRequest {
 
-	return &DescribeNetworkSecurityGroupsRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkSecurityGroups/",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DescribeNetworkSecurityGroupsRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkSecurityGroups/",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DescribeNetworkSecurityGroupsRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param pageNumber: 页码, 默认为1, 取值范围：[1,∞), 页码超过总页数时, 显示最后一页(Optional) */
 func (r *DescribeNetworkSecurityGroupsRequest) SetPageNumber(pageNumber int) {
-	r.PageNumber = &pageNumber
+    r.PageNumber = &pageNumber
 }
 
 /* param pageSize: 分页大小，默认为20，取值范围：[10,100](Optional) */
 func (r *DescribeNetworkSecurityGroupsRequest) SetPageSize(pageSize int) {
-	r.PageSize = &pageSize
+    r.PageSize = &pageSize
 }
 
 /* param filters: networkSecurityGroupIds - 安全组ID列表，支持多个
@@ -124,22 +125,22 @@ networkSecurityGroupNames - 安全组名称列表，支持多个
 vpcId	- 安全组所属vpc Id，支持单个
 (Optional) */
 func (r *DescribeNetworkSecurityGroupsRequest) SetFilters(filters []common.Filter) {
-	r.Filters = filters
+    r.Filters = filters
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeNetworkSecurityGroupsRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DescribeNetworkSecurityGroupsResponse struct {
-	RequestID string                              `json:"requestId"`
-	Error     core.ErrorResponse                  `json:"error"`
-	Result    DescribeNetworkSecurityGroupsResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DescribeNetworkSecurityGroupsResult `json:"result"`
 }
 
 type DescribeNetworkSecurityGroupsResult struct {
-	NetworkSecurityGroups []vpc.NetworkSecurityGroup `json:"networkSecurityGroups"`
-	TotalCount            int                        `json:"totalCount"`
+    NetworkSecurityGroups []vpc.NetworkSecurityGroup `json:"networkSecurityGroups"`
+    TotalCount int `json:"totalCount"`
 }

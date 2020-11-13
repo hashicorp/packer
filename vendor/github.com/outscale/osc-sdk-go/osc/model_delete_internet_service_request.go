@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteInternetServiceRequest struct for DeleteInternetServiceRequest
 type DeleteInternetServiceRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

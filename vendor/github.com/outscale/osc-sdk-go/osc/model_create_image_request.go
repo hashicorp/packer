@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // CreateImageRequest struct for CreateImageRequest
 type CreateImageRequest struct {
 	// The architecture of the OMI (by default, `i386`).

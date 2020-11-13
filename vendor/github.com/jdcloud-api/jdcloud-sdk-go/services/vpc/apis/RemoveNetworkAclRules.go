@@ -17,20 +17,21 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type RemoveNetworkAclRulesRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* networkAclId ID  */
-	NetworkAclId string `json:"networkAclId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
 
-	/* networkAcl规则ID列表  */
-	RuleIds []string `json:"ruleIds"`
+    /* networkAclId ID  */
+    NetworkAclId string `json:"networkAclId"`
+
+    /* networkAcl规则ID列表  */
+    RuleIds []string `json:"ruleIds"`
 }
 
 /*
@@ -41,21 +42,21 @@ type RemoveNetworkAclRulesRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewRemoveNetworkAclRulesRequest(
-	regionId string,
-	networkAclId string,
-	ruleIds []string,
+    regionId string,
+    networkAclId string,
+    ruleIds []string,
 ) *RemoveNetworkAclRulesRequest {
 
 	return &RemoveNetworkAclRulesRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkAcls/{networkAclId}:removeNetworkAclRules",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:     regionId,
-		NetworkAclId: networkAclId,
-		RuleIds:      ruleIds,
+        RegionId: regionId,
+        NetworkAclId: networkAclId,
+        RuleIds: ruleIds,
 	}
 }
 
@@ -65,62 +66,62 @@ func NewRemoveNetworkAclRulesRequest(
  * param ruleIds: networkAcl规则ID列表 (Required)
  */
 func NewRemoveNetworkAclRulesRequestWithAllParams(
-	regionId string,
-	networkAclId string,
-	ruleIds []string,
+    regionId string,
+    networkAclId string,
+    ruleIds []string,
 ) *RemoveNetworkAclRulesRequest {
 
-	return &RemoveNetworkAclRulesRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkAcls/{networkAclId}:removeNetworkAclRules",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:     regionId,
-		NetworkAclId: networkAclId,
-		RuleIds:      ruleIds,
-	}
+    return &RemoveNetworkAclRulesRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkAcls/{networkAclId}:removeNetworkAclRules",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        NetworkAclId: networkAclId,
+        RuleIds: ruleIds,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewRemoveNetworkAclRulesRequestWithoutParam() *RemoveNetworkAclRulesRequest {
 
-	return &RemoveNetworkAclRulesRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkAcls/{networkAclId}:removeNetworkAclRules",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &RemoveNetworkAclRulesRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkAcls/{networkAclId}:removeNetworkAclRules",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *RemoveNetworkAclRulesRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param networkAclId: networkAclId ID(Required) */
 func (r *RemoveNetworkAclRulesRequest) SetNetworkAclId(networkAclId string) {
-	r.NetworkAclId = networkAclId
+    r.NetworkAclId = networkAclId
 }
 
 /* param ruleIds: networkAcl规则ID列表(Required) */
 func (r *RemoveNetworkAclRulesRequest) SetRuleIds(ruleIds []string) {
-	r.RuleIds = ruleIds
+    r.RuleIds = ruleIds
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r RemoveNetworkAclRulesRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type RemoveNetworkAclRulesResponse struct {
-	RequestID string                      `json:"requestId"`
-	Error     core.ErrorResponse          `json:"error"`
-	Result    RemoveNetworkAclRulesResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result RemoveNetworkAclRulesResult `json:"result"`
 }
 
 type RemoveNetworkAclRulesResult struct {

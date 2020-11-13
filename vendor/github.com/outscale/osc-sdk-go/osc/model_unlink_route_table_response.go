@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // UnlinkRouteTableResponse struct for UnlinkRouteTableResponse
 type UnlinkRouteTableResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

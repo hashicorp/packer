@@ -9,10 +9,9 @@
  */
 
 package osc
-
 // ReadVmsHealthResponse struct for ReadVmsHealthResponse
 type ReadVmsHealthResponse struct {
 	// Information about the health of one or more back-end VMs.
 	BackendVmHealth []BackendVmHealth `json:"BackendVmHealth,omitempty"`
-	ResponseContext ResponseContext   `json:"ResponseContext,omitempty"`
+	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

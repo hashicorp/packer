@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteKeypairRequest struct for DeleteKeypairRequest
 type DeleteKeypairRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

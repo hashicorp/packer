@@ -9,9 +9,8 @@
  */
 
 package osc
-
 // CreateDirectLinkInterfaceResponse struct for CreateDirectLinkInterfaceResponse
 type CreateDirectLinkInterfaceResponse struct {
 	DirectLinkInterface DirectLinkInterfaces `json:"DirectLinkInterface,omitempty"`
-	ResponseContext     ResponseContext      `json:"ResponseContext,omitempty"`
+	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
 }

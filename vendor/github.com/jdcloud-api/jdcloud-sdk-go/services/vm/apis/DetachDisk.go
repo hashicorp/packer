@@ -17,23 +17,24 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DetachDiskRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 云主机ID  */
-	InstanceId string `json:"instanceId"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
 
-	/* 云硬盘ID  */
-	DiskId string `json:"diskId"`
+    /* 云主机ID  */
+    InstanceId string `json:"instanceId"`
 
-	/* 强制缷载，默认False。如果此参数传值为True，代表数据盘的IO会被强制断掉。 (Optional) */
-	Force *bool `json:"force"`
+    /* 云硬盘ID  */
+    DiskId string `json:"diskId"`
+
+    /* 强制缷载，默认False。如果此参数传值为True，代表数据盘的IO会被强制断掉。 (Optional) */
+    Force *bool `json:"force"`
 }
 
 /*
@@ -44,21 +45,21 @@ type DetachDiskRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDetachDiskRequest(
-	regionId string,
-	instanceId string,
-	diskId string,
+    regionId string,
+    instanceId string,
+    diskId string,
 ) *DetachDiskRequest {
 
 	return &DetachDiskRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/instances/{instanceId}:detachDisk",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:   regionId,
-		InstanceId: instanceId,
-		DiskId:     diskId,
+        RegionId: regionId,
+        InstanceId: instanceId,
+        DiskId: diskId,
 	}
 }
 
@@ -69,69 +70,69 @@ func NewDetachDiskRequest(
  * param force: 强制缷载，默认False。如果此参数传值为True，代表数据盘的IO会被强制断掉。 (Optional)
  */
 func NewDetachDiskRequestWithAllParams(
-	regionId string,
-	instanceId string,
-	diskId string,
-	force *bool,
+    regionId string,
+    instanceId string,
+    diskId string,
+    force *bool,
 ) *DetachDiskRequest {
 
-	return &DetachDiskRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:detachDisk",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:   regionId,
-		InstanceId: instanceId,
-		DiskId:     diskId,
-		Force:      force,
-	}
+    return &DetachDiskRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:detachDisk",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        InstanceId: instanceId,
+        DiskId: diskId,
+        Force: force,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDetachDiskRequestWithoutParam() *DetachDiskRequest {
 
-	return &DetachDiskRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/instances/{instanceId}:detachDisk",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DetachDiskRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/instances/{instanceId}:detachDisk",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DetachDiskRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param instanceId: 云主机ID(Required) */
 func (r *DetachDiskRequest) SetInstanceId(instanceId string) {
-	r.InstanceId = instanceId
+    r.InstanceId = instanceId
 }
 
 /* param diskId: 云硬盘ID(Required) */
 func (r *DetachDiskRequest) SetDiskId(diskId string) {
-	r.DiskId = diskId
+    r.DiskId = diskId
 }
 
 /* param force: 强制缷载，默认False。如果此参数传值为True，代表数据盘的IO会被强制断掉。(Optional) */
 func (r *DetachDiskRequest) SetForce(force bool) {
-	r.Force = &force
+    r.Force = &force
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DetachDiskRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DetachDiskResponse struct {
-	RequestID string             `json:"requestId"`
-	Error     core.ErrorResponse `json:"error"`
-	Result    DetachDiskResult   `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DetachDiskResult `json:"result"`
 }
 
 type DetachDiskResult struct {

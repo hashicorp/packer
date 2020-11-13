@@ -12,5 +12,5 @@ package server
 type GetAccessControlGroupServerInstanceListRequest struct {
 
 	// 접근제어그룹설정번호
-	AccessControlGroupConfigurationNo *string `json:"accessControlGroupConfigurationNo"`
+AccessControlGroupConfigurationNo *string `json:"accessControlGroupConfigurationNo"`
 }

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // UnlinkNicResponse struct for UnlinkNicResponse
 type UnlinkNicResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

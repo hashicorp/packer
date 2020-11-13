@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersNetPeering One or more filters.
 type FiltersNetPeering struct {
 	// The account IDs of the owners of the peer Nets.

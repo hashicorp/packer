@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // Volume Information about the volume.
 type Volume struct {
 	// The number of I/O operations per second (IOPS):<br /> - For `io1` volumes, the number of provisioned IOPS<br /> - For `gp2` volumes, the baseline performance of the volume

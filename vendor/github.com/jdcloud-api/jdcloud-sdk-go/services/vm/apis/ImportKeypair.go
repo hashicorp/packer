@@ -17,21 +17,22 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type ImportKeypairRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 密钥对名称，需要全局唯一。只允许数字、大小写字母、下划线“_”及中划线“-”，不超过32个字符。
-	 */
-	KeyName string `json:"keyName"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
 
-	/* 密钥对的公钥部分  */
-	PublicKey string `json:"publicKey"`
+    /* 密钥对名称，需要全局唯一。只允许数字、大小写字母、下划线“_”及中划线“-”，不超过32个字符。
+  */
+    KeyName string `json:"keyName"`
+
+    /* 密钥对的公钥部分  */
+    PublicKey string `json:"publicKey"`
 }
 
 /*
@@ -41,23 +42,23 @@ type ImportKeypairRequest struct {
  * param publicKey: 密钥对的公钥部分 (Required)
  *
  * @Deprecated, not compatible when mandatory parameters changed
-*/
+ */
 func NewImportKeypairRequest(
-	regionId string,
-	keyName string,
-	publicKey string,
+    regionId string,
+    keyName string,
+    publicKey string,
 ) *ImportKeypairRequest {
 
 	return &ImportKeypairRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/keypairs:import",
 			Method:  "POST",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:  regionId,
-		KeyName:   keyName,
-		PublicKey: publicKey,
+        RegionId: regionId,
+        KeyName: keyName,
+        PublicKey: publicKey,
 	}
 }
 
@@ -66,68 +67,68 @@ func NewImportKeypairRequest(
  * param keyName: 密钥对名称，需要全局唯一。只允许数字、大小写字母、下划线“_”及中划线“-”，不超过32个字符。
  (Required)
  * param publicKey: 密钥对的公钥部分 (Required)
-*/
+ */
 func NewImportKeypairRequestWithAllParams(
-	regionId string,
-	keyName string,
-	publicKey string,
+    regionId string,
+    keyName string,
+    publicKey string,
 ) *ImportKeypairRequest {
 
-	return &ImportKeypairRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/keypairs:import",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:  regionId,
-		KeyName:   keyName,
-		PublicKey: publicKey,
-	}
+    return &ImportKeypairRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/keypairs:import",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        KeyName: keyName,
+        PublicKey: publicKey,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewImportKeypairRequestWithoutParam() *ImportKeypairRequest {
 
-	return &ImportKeypairRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/keypairs:import",
-			Method:  "POST",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &ImportKeypairRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/keypairs:import",
+            Method:  "POST",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *ImportKeypairRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param keyName: 密钥对名称，需要全局唯一。只允许数字、大小写字母、下划线“_”及中划线“-”，不超过32个字符。
 (Required) */
 func (r *ImportKeypairRequest) SetKeyName(keyName string) {
-	r.KeyName = keyName
+    r.KeyName = keyName
 }
 
 /* param publicKey: 密钥对的公钥部分(Required) */
 func (r *ImportKeypairRequest) SetPublicKey(publicKey string) {
-	r.PublicKey = publicKey
+    r.PublicKey = publicKey
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r ImportKeypairRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type ImportKeypairResponse struct {
-	RequestID string              `json:"requestId"`
-	Error     core.ErrorResponse  `json:"error"`
-	Result    ImportKeypairResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result ImportKeypairResult `json:"result"`
 }
 
 type ImportKeypairResult struct {
-	KeyName        string `json:"keyName"`
-	KeyFingerprint string `json:"keyFingerprint"`
+    KeyName string `json:"keyName"`
+    KeyFingerprint string `json:"keyFingerprint"`
 }

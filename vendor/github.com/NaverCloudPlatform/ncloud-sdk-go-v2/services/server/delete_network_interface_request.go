@@ -12,5 +12,5 @@ package server
 type DeleteNetworkInterfaceRequest struct {
 
 	// Network Interface번호
-	NetworkInterfaceNo *string `json:"networkInterfaceNo"`
+NetworkInterfaceNo *string `json:"networkInterfaceNo"`
 }

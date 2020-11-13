@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ResourceTag Information about the tag.
 type ResourceTag struct {
 	// The key of the tag, with a minimum of 1 character.

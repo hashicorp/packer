@@ -16,14 +16,15 @@
 
 package models
 
+
 type VpcSpec struct {
 
-	/* 私有网络名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。  */
-	VpcName string `json:"vpcName"`
+    /* 私有网络名称,只允许输入中文、数字、大小写字母、英文下划线“_”及中划线“-”，不允许为空且不超过32字符。  */
+    VpcName string `json:"vpcName"`
 
-	/* 如果为空，则不限制网段，如果不为空，10.0.0.0/8、172.16.0.0/12和192.168.0.0/16及它们包含的子网，且子网掩码长度为16-28之间 (Optional) */
-	AddressPrefix string `json:"addressPrefix"`
+    /* 如果为空，则不限制网段，如果不为空，10.0.0.0/8、172.16.0.0/12和192.168.0.0/16及它们包含的子网，且子网掩码长度为16-28之间 (Optional) */
+    AddressPrefix string `json:"addressPrefix"`
 
-	/* vpc描述，允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
-	Description string `json:"description"`
+    /* vpc描述，允许输入UTF-8编码下的全部字符，不超过256字符。 (Optional) */
+    Description string `json:"description"`
 }

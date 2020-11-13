@@ -17,18 +17,19 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
-	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
+    vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
 )
 
 type DescribeImageRequest struct {
-	core.JDCloudRequest
 
-	/* 地域ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* 镜像ID  */
-	ImageId string `json:"imageId"`
+    /* 地域ID  */
+    RegionId string `json:"regionId"`
+
+    /* 镜像ID  */
+    ImageId string `json:"imageId"`
 }
 
 /*
@@ -38,19 +39,19 @@ type DescribeImageRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDescribeImageRequest(
-	regionId string,
-	imageId string,
+    regionId string,
+    imageId string,
 ) *DescribeImageRequest {
 
 	return &DescribeImageRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/images/{imageId}",
 			Method:  "GET",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId: regionId,
-		ImageId:  imageId,
+        RegionId: regionId,
+        ImageId: imageId,
 	}
 }
 
@@ -59,57 +60,57 @@ func NewDescribeImageRequest(
  * param imageId: 镜像ID (Required)
  */
 func NewDescribeImageRequestWithAllParams(
-	regionId string,
-	imageId string,
+    regionId string,
+    imageId string,
 ) *DescribeImageRequest {
 
-	return &DescribeImageRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/images/{imageId}",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId: regionId,
-		ImageId:  imageId,
-	}
+    return &DescribeImageRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/images/{imageId}",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        ImageId: imageId,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDescribeImageRequestWithoutParam() *DescribeImageRequest {
 
-	return &DescribeImageRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/images/{imageId}",
-			Method:  "GET",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DescribeImageRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/images/{imageId}",
+            Method:  "GET",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: 地域ID(Required) */
 func (r *DescribeImageRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param imageId: 镜像ID(Required) */
 func (r *DescribeImageRequest) SetImageId(imageId string) {
-	r.ImageId = imageId
+    r.ImageId = imageId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DescribeImageRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DescribeImageResponse struct {
-	RequestID string              `json:"requestId"`
-	Error     core.ErrorResponse  `json:"error"`
-	Result    DescribeImageResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DescribeImageResult `json:"result"`
 }
 
 type DescribeImageResult struct {
-	Image vm.Image `json:"image"`
+    Image vm.Image `json:"image"`
 }

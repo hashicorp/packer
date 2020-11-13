@@ -4,8 +4,8 @@ package tty
 
 import (
 	"context"
-	"errors"
 	"os"
+	"errors"
 	"syscall"
 	"unsafe"
 

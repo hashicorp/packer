@@ -17,17 +17,18 @@
 package apis
 
 import (
-	"github.com/jdcloud-api/jdcloud-sdk-go/core"
+    "github.com/jdcloud-api/jdcloud-sdk-go/core"
 )
 
 type DeleteNetworkSecurityGroupRequest struct {
-	core.JDCloudRequest
 
-	/* Region ID  */
-	RegionId string `json:"regionId"`
+    core.JDCloudRequest
 
-	/* NetworkSecurityGroup ID  */
-	NetworkSecurityGroupId string `json:"networkSecurityGroupId"`
+    /* Region ID  */
+    RegionId string `json:"regionId"`
+
+    /* NetworkSecurityGroup ID  */
+    NetworkSecurityGroupId string `json:"networkSecurityGroupId"`
 }
 
 /*
@@ -37,19 +38,19 @@ type DeleteNetworkSecurityGroupRequest struct {
  * @Deprecated, not compatible when mandatory parameters changed
  */
 func NewDeleteNetworkSecurityGroupRequest(
-	regionId string,
-	networkSecurityGroupId string,
+    regionId string,
+    networkSecurityGroupId string,
 ) *DeleteNetworkSecurityGroupRequest {
 
 	return &DeleteNetworkSecurityGroupRequest{
-		JDCloudRequest: core.JDCloudRequest{
+        JDCloudRequest: core.JDCloudRequest{
 			URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}",
 			Method:  "DELETE",
 			Header:  nil,
 			Version: "v1",
 		},
-		RegionId:               regionId,
-		NetworkSecurityGroupId: networkSecurityGroupId,
+        RegionId: regionId,
+        NetworkSecurityGroupId: networkSecurityGroupId,
 	}
 }
 
@@ -58,55 +59,55 @@ func NewDeleteNetworkSecurityGroupRequest(
  * param networkSecurityGroupId: NetworkSecurityGroup ID (Required)
  */
 func NewDeleteNetworkSecurityGroupRequestWithAllParams(
-	regionId string,
-	networkSecurityGroupId string,
+    regionId string,
+    networkSecurityGroupId string,
 ) *DeleteNetworkSecurityGroupRequest {
 
-	return &DeleteNetworkSecurityGroupRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}",
-			Method:  "DELETE",
-			Header:  nil,
-			Version: "v1",
-		},
-		RegionId:               regionId,
-		NetworkSecurityGroupId: networkSecurityGroupId,
-	}
+    return &DeleteNetworkSecurityGroupRequest{
+        JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}",
+            Method:  "DELETE",
+            Header:  nil,
+            Version: "v1",
+        },
+        RegionId: regionId,
+        NetworkSecurityGroupId: networkSecurityGroupId,
+    }
 }
 
 /* This constructor has better compatible ability when API parameters changed */
 func NewDeleteNetworkSecurityGroupRequestWithoutParam() *DeleteNetworkSecurityGroupRequest {
 
-	return &DeleteNetworkSecurityGroupRequest{
-		JDCloudRequest: core.JDCloudRequest{
-			URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}",
-			Method:  "DELETE",
-			Header:  nil,
-			Version: "v1",
-		},
-	}
+    return &DeleteNetworkSecurityGroupRequest{
+            JDCloudRequest: core.JDCloudRequest{
+            URL:     "/regions/{regionId}/networkSecurityGroups/{networkSecurityGroupId}",
+            Method:  "DELETE",
+            Header:  nil,
+            Version: "v1",
+        },
+    }
 }
 
 /* param regionId: Region ID(Required) */
 func (r *DeleteNetworkSecurityGroupRequest) SetRegionId(regionId string) {
-	r.RegionId = regionId
+    r.RegionId = regionId
 }
 
 /* param networkSecurityGroupId: NetworkSecurityGroup ID(Required) */
 func (r *DeleteNetworkSecurityGroupRequest) SetNetworkSecurityGroupId(networkSecurityGroupId string) {
-	r.NetworkSecurityGroupId = networkSecurityGroupId
+    r.NetworkSecurityGroupId = networkSecurityGroupId
 }
 
 // GetRegionId returns path parameter 'regionId' if exist,
 // otherwise return empty string
 func (r DeleteNetworkSecurityGroupRequest) GetRegionId() string {
-	return r.RegionId
+    return r.RegionId
 }
 
 type DeleteNetworkSecurityGroupResponse struct {
-	RequestID string                           `json:"requestId"`
-	Error     core.ErrorResponse               `json:"error"`
-	Result    DeleteNetworkSecurityGroupResult `json:"result"`
+    RequestID string `json:"requestId"`
+    Error core.ErrorResponse `json:"error"`
+    Result DeleteNetworkSecurityGroupResult `json:"result"`
 }
 
 type DeleteNetworkSecurityGroupResult struct {

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeregisterVmsInLoadBalancerRequest struct for DeregisterVmsInLoadBalancerRequest
 type DeregisterVmsInLoadBalancerRequest struct {
 	// One or more IDs of back-end VMs.

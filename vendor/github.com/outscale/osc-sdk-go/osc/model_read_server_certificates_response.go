@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ReadServerCertificatesResponse struct for ReadServerCertificatesResponse
 type ReadServerCertificatesResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

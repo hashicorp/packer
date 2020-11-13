@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // BsuToUpdateVm Information about the BSU volume.
 type BsuToUpdateVm struct {
 	// If `true`, the volume is deleted when the VM is terminated.

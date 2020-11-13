@@ -12,5 +12,5 @@ package server
 type GetZoneListRequest struct {
 
 	// 리전번호
-	RegionNo *string `json:"regionNo,omitempty"`
+RegionNo *string `json:"regionNo,omitempty"`
 }

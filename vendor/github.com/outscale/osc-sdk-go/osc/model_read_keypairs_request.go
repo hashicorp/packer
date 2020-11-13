@@ -9,10 +9,9 @@
  */
 
 package osc
-
 // ReadKeypairsRequest struct for ReadKeypairsRequest
 type ReadKeypairsRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.
-	DryRun  bool           `json:"DryRun,omitempty"`
+	DryRun bool `json:"DryRun,omitempty"`
 	Filters FiltersKeypair `json:"Filters,omitempty"`
 }

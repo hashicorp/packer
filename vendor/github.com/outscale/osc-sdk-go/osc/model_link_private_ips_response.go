@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // LinkPrivateIpsResponse struct for LinkPrivateIpsResponse
 type LinkPrivateIpsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

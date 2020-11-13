@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // SendResetPasswordEmailResponse struct for SendResetPasswordEmailResponse
 type SendResetPasswordEmailResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

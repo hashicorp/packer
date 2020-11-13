@@ -16,11 +16,12 @@
 
 package models
 
+
 type DisassociateElasticIpSpec struct {
 
-	/* 指定解绑的弹性Ip Id (Optional) */
-	ElasticIpId string `json:"elasticIpId"`
+    /* 指定解绑的弹性Ip Id (Optional) */
+    ElasticIpId string `json:"elasticIpId"`
 
-	/* 指定解绑的弹性Ip地址 (Optional) */
-	ElasticIpAddress string `json:"elasticIpAddress"`
+    /* 指定解绑的弹性Ip地址 (Optional) */
+    ElasticIpAddress string `json:"elasticIpAddress"`
 }

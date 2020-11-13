@@ -9,9 +9,8 @@
  */
 
 package osc
-
 // UpdateRoutePropagationResponse struct for UpdateRoutePropagationResponse
 type UpdateRoutePropagationResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`
-	RouteTable      RouteTable      `json:"RouteTable,omitempty"`
+	RouteTable RouteTable `json:"RouteTable,omitempty"`
 }

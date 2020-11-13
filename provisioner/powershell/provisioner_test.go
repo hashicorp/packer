@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/packer"
 	"github.com/stretchr/testify/assert"
 )

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteSubnetRequest struct for DeleteSubnetRequest
 type DeleteSubnetRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersVpnConnection One or more filters.
 type FiltersVpnConnection struct {
 	// The Border Gateway Protocol (BGP) Autonomous System Numbers (ASNs) of the connections.

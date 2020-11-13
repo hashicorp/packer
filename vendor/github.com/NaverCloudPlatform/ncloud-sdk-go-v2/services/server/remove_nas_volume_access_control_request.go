@@ -12,11 +12,11 @@ package server
 type RemoveNasVolumeAccessControlRequest struct {
 
 	// NAS볼륨인스턴스번호
-	NasVolumeInstanceNo *string `json:"nasVolumeInstanceNo"`
+NasVolumeInstanceNo *string `json:"nasVolumeInstanceNo"`
 
 	// 서버인스턴스번호리스트
-	ServerInstanceNoList []*string `json:"serverInstanceNoList,omitempty"`
+ServerInstanceNoList []*string `json:"serverInstanceNoList,omitempty"`
 
 	// 커스텀IP리스트
-	CustomIpList []*string `json:"customIpList,omitempty"`
+CustomIpList []*string `json:"customIpList,omitempty"`
 }

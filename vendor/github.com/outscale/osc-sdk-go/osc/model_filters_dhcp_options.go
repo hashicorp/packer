@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // FiltersDhcpOptions One or more filters.
 type FiltersDhcpOptions struct {
 	// If `true`, lists all default DHCP options set. If `false`, lists all non-default DHCP options set.

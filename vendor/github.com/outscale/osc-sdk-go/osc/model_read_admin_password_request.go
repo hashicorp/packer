@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // ReadAdminPasswordRequest struct for ReadAdminPasswordRequest
 type ReadAdminPasswordRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // Quota Information about the quota.
 type Quota struct {
 	// The account ID of the owner of the quotas.

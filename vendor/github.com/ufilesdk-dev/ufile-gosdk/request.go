@@ -22,13 +22,13 @@ import (
 //4.远端请求返回值统一返回一个 error，如果为 nil 表示无错。LastResponseStatus，LastResponseHeader，LastResponseBody 可以查看具体的 HTTP 返回信息（）。如果你想少敲几行代码可以直接调用 DumpResponse(true) 查看详细返回。
 //
 type UFileRequest struct {
-	Auth          Auth
-	BucketName    string
-	Host          string
-	Client        *http.Client
-	Context       context.Context
-	baseURL       *url.URL
-	RequestHeader http.Header
+	Auth               Auth
+	BucketName         string
+	Host               string
+	Client             *http.Client
+	Context            context.Context
+	baseURL            *url.URL
+	RequestHeader      http.Header
 
 	LastResponseStatus int
 	LastResponseHeader http.Header
@@ -65,7 +65,7 @@ func NewFileRequest(config *Config, client *http.Client) (*UFileRequest, error) 
 //client 这里你可以传空，会使用默认的 http.Client。如果你需要设置超时以及一些其他相关的网络配置选项请传入一个自定义的 client。
 func NewFileRequestWithHeader(config *Config, header http.Header, client *http.Client) (*UFileRequest, error) {
 	req, err := NewFileRequest(config, client)
-	if err != nil {
+	if err != nil{
 		return nil, err
 	}
 	req.RequestHeader = header

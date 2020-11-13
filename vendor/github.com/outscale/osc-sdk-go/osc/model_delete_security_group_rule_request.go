@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteSecurityGroupRuleRequest struct for DeleteSecurityGroupRuleRequest
 type DeleteSecurityGroupRuleRequest struct {
 	// If `true`, checks whether you have the required permissions to perform the action.

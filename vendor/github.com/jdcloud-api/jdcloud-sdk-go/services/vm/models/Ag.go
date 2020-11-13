@@ -16,11 +16,12 @@
 
 package models
 
+
 type Ag struct {
 
-	/* 高可用组名称 (Optional) */
-	Name string `json:"name"`
+    /* 高可用组名称 (Optional) */
+    Name string `json:"name"`
 
-	/* 高可用组id (Optional) */
-	Id string `json:"id"`
+    /* 高可用组id (Optional) */
+    Id string `json:"id"`
 }

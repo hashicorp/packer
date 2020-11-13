@@ -9,7 +9,6 @@
  */
 
 package osc
-
 // DeleteDhcpOptionsResponse struct for DeleteDhcpOptionsResponse
 type DeleteDhcpOptionsResponse struct {
 	ResponseContext ResponseContext `json:"ResponseContext,omitempty"`

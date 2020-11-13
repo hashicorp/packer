@@ -16,14 +16,15 @@
 
 package models
 
+
 type Quota struct {
 
-	/* 资源类型[instance，keypair，image，instanceTemplate] (Optional) */
-	ResourceType string `json:"resourceType"`
+    /* 资源类型[instance，keypair，image，instanceTemplate] (Optional) */
+    ResourceType string `json:"resourceType"`
 
-	/* 配额上限 (Optional) */
-	Limit int `json:"limit"`
+    /* 配额上限 (Optional) */
+    Limit int `json:"limit"`
 
-	/* 已用配额 (Optional) */
-	Used int `json:"used"`
+    /* 已用配额 (Optional) */
+    Used int `json:"used"`
 }
