@@ -61,6 +61,7 @@ func createDisk(ctx context.Context, c *Config, d Driver, sourceImage *Image) (*
 		Name:     c.DiskName,
 		FolderId: c.FolderID,
 		TypeId:   c.DiskType,
+		Labels:  c.DiskLabels,
 		ZoneId:   c.Zone,
 		Size:     int64((datasize.ByteSize(c.DiskSizeGb) * datasize.GB).Bytes()),
 		Source: &compute.CreateDiskRequest_ImageId{
