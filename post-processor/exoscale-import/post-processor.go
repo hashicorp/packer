@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/qemu"
+	"github.com/hashicorp/packer/builder/qemu/chroot"
 	"github.com/hashicorp/packer/post-processor/artifice"
 	"github.com/hashicorp/packer/post-processor/exoscale-import/version"
 )
@@ -107,7 +108,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	switch a.BuilderId() {
-	case qemu.BuilderId, file.BuilderId, artifice.BuilderId:
+	case chroot.BuilderId, qemu.BuilderId, file.BuilderId, artifice.BuilderId:
 		break
 
 	default:

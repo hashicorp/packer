@@ -1,0 +1,47 @@
+<!-- Code generated from the comments of the Config struct in builder/qemu/chroot/builder.go; DO NOT EDIT MANUALLY -->
+
+- `source_image` (string) - Packer builds from a qcow2 format image file, this parameter is the path of
+  source image file
+
+- `output_directory` (string) - This is the path to the directory where the resulting qcow2 image be created.
+  This may be relative or absolute.
+  If relative, the path is relative to the working directory when packer
+  is executed. This directory must not exist prior to running the builder.
+  By default this is output-BUILDNAME where "BUILDNAME" is the
+  name of the build.
+
+- `image_name` (string) - The output image file name
+
+- `mount_options` ([]string) - Options to supply the mount command when mounting devices. Each option
+  will be prefixed with -o and supplied to the mount command ran by
+  Packer. Because this command is ran in a shell, user discretion is
+  advised. See this manual page for the mount command for valid file
+  system specific options.
+
+- `mount_partition` (string) - The partition number containing the / partition. By default this is the
+  first partition of the volume, (for example, xvda1) but you can
+  designate the entire block device by setting "mount_partition": "0" in
+  your config, which will mount xvda instead.
+
+- `mount_path` (string) - The path where the volume will be mounted. This is where the chroot
+  environment will be. This defaults to
+  `/mnt/packer-qemu-chroot-volumes/{{.Device}}`. This is a configuration
+  template where the .Device variable is replaced with the name of the
+  device where the volume is attached.
+
+- `chroot_mounts` ([][]string) - This is a list of devices to mount into the chroot environment. This
+  configuration parameter requires some additional documentation which is
+  in the Chroot Mounts section. Please read that section for more
+  information on how to use this.
+
+- `command_wrapper` (string) - How to run shell commands. This defaults to `{{.Command}}`. This may be
+  useful to set if you want to set environmental variables or perhaps run
+  it with sudo or so on. This is a configuration template where the
+  .Command variable is replaced with the command to be run. Defaults to
+  `{{.Command}}`.
+
+- `copy_files` ([]string) - Paths to files on the host that will be copied into the
+  chroot environment prior to provisioning. Defaults to /etc/resolv.conf
+  so that DNS lookups work. Pass an empty list to skip copying
+  /etc/resolv.conf. You may need to do this if you're building an image
+  that uses systemd.
