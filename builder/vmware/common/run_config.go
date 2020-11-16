@@ -5,7 +5,7 @@ package common
 import (
 	"fmt"
 
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // ~> **Note:** If [vnc_over_websocket](#vnc_over_websocket) is set to true, any other VNC configuration will be ignored.

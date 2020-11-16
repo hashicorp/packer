@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"unicode/utf8"
 
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 type TencentCloudImageConfig struct {

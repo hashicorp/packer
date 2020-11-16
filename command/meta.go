@@ -9,7 +9,7 @@ import (
 	kvflag "github.com/hashicorp/packer/helper/flag-kv"
 	"github.com/hashicorp/packer/helper/wrappedstreams"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 )
 
 // FlagSetFlags is an enum to define what flags are present in the

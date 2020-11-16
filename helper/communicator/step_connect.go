@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/sdk-internals/communicator/none"
+	"github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/none"
 	gossh "golang.org/x/crypto/ssh"
 )
 

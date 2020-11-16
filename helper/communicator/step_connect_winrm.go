@@ -15,7 +15,7 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/sdk-internals/communicator/winrm"
+	"github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/winrm"
 	winrmcmd "github.com/masterzen/winrm"
 	"golang.org/x/net/http/httpproxy"
 )

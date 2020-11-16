@@ -32,7 +32,7 @@ import (
 	"github.com/hashicorp/packer/common/adapter"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 var SupportedBackends = map[string]bool{"docker": true, "local": true, "ssh": true, "winrm": true}

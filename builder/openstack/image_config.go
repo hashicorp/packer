@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	imageservice "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // ImageConfig is for common configuration related to creating Images.

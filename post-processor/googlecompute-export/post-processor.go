@@ -16,8 +16,8 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/post-processor/artifice"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type Config struct {

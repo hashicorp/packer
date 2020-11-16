@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 )
 
 // TestEnvVar must be set to a non-empty value for acceptance tests to run.

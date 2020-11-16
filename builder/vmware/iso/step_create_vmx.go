@@ -12,8 +12,8 @@ import (
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer/tmp"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type vmxTemplateData struct {

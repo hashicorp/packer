@@ -19,7 +19,7 @@ import (
 	shelllocal "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 var ovftool string = "ovftool"

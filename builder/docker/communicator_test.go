@@ -10,9 +10,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/provisioner/shell"
-	"github.com/hashicorp/packer/template"
 )
 
 // TestUploadDownload verifies that basic upload / download functionality works

@@ -20,7 +20,7 @@ import (
 	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 const BuilderId = "packer.post-processor.amazon-import"

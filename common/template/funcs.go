@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	consulapi "github.com/hashicorp/consul/api"
-	awssmapi "github.com/hashicorp/packer/template/interpolate/aws/secretsmanager"
+	awssmapi "github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate/aws/secretsmanager"
 	vaultapi "github.com/hashicorp/vault/api"
 )
 
