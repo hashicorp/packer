@@ -46,7 +46,7 @@ necessary for this build to succeed and can be found further down the page.
 
 ### Boot Configuration
 
-@include 'common/bootcommand/BootConfig.mdx'
+@include 'packer-plugin-sdk/bootcommand/BootConfig.mdx'
 
 We send each character to the VM with a default delay of 100ms between groups.
 The delay alleviates possible issues with latency and CPU
@@ -83,7 +83,7 @@ source "vsphere-iso" "example" {
 
 #### Optional:
 
-@include 'common/bootcommand/BootConfig-not-required.mdx'
+@include 'packer-plugin-sdk/bootcommand/BootConfig-not-required.mdx'
 
 @include 'builder/vsphere/common/BootConfig-not-required.mdx'
 
