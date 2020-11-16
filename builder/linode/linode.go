@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hashicorp/packer/version"
+	"github.com/hashicorp/packer/builder/linode/version"
 	"github.com/linode/linodego"
 	"golang.org/x/oauth2"
 )
@@ -23,7 +23,7 @@ func newLinodeClient(pat string) linodego.Client {
 
 	projectURL := "https://www.packer.io"
 	userAgent := fmt.Sprintf("Packer/%s (+%s) linodego/%s",
-		version.FormattedVersion(), projectURL, linodego.Version)
+		version.LinodePluginVersion.FormattedVersion(), projectURL, linodego.Version)
 
 	client.SetUserAgent(userAgent)
 	return client

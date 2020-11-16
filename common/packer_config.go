@@ -6,6 +6,7 @@ package common
 type PackerConfig struct {
 	PackerBuildName     string            `mapstructure:"packer_build_name"`
 	PackerBuilderType   string            `mapstructure:"packer_builder_type"`
+	PackerCoreVersion   string            `mapstructure:"packer_core_version"`
 	PackerDebug         bool              `mapstructure:"packer_debug"`
 	PackerForce         bool              `mapstructure:"packer_force"`
 	PackerOnError       string            `mapstructure:"packer_on_error"`

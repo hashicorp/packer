@@ -20,6 +20,7 @@ import (
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/hashicorp/packer/builder/azure/common"
+	"github.com/hashicorp/packer/builder/azure/version"
 	"github.com/hashicorp/packer/helper/useragent"
 )
 
@@ -142,28 +143,28 @@ func NewAzureClient(subscriptionID, resourceGroupName string,
 	azureClient.DtlVirtualMachineClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.DtlVirtualMachineClient.RequestInspector = withInspection(maxlen)
 	azureClient.DtlVirtualMachineClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient), errorCapture(azureClient))
-	azureClient.DtlVirtualMachineClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.DtlVirtualMachineClient.UserAgent)
+	azureClient.DtlVirtualMachineClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(version.AzurePluginVersion.FormattedVersion()), azureClient.DtlVirtualMachineClient.UserAgent)
 	azureClient.DtlVirtualMachineClient.Client.PollingDuration = PollingDuration
 
 	azureClient.DtlEnvironmentsClient = dtl.NewEnvironmentsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.DtlEnvironmentsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.DtlEnvironmentsClient.RequestInspector = withInspection(maxlen)
 	azureClient.DtlEnvironmentsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient), errorCapture(azureClient))
-	azureClient.DtlEnvironmentsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.DtlEnvironmentsClient.UserAgent)
+	azureClient.DtlEnvironmentsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(version.AzurePluginVersion.FormattedVersion()), azureClient.DtlEnvironmentsClient.UserAgent)
 	azureClient.DtlEnvironmentsClient.Client.PollingDuration = PollingDuration
 
 	azureClient.DtlLabsClient = dtl.NewLabsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.DtlLabsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.DtlLabsClient.RequestInspector = withInspection(maxlen)
 	azureClient.DtlLabsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient), errorCapture(azureClient))
-	azureClient.DtlLabsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.DtlLabsClient.UserAgent)
+	azureClient.DtlLabsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(version.AzurePluginVersion.FormattedVersion()), azureClient.DtlLabsClient.UserAgent)
 	azureClient.DtlLabsClient.Client.PollingDuration = PollingDuration
 
 	azureClient.DtlCustomImageClient = dtl.NewCustomImagesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.DtlCustomImageClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.DtlCustomImageClient.RequestInspector = withInspection(maxlen)
 	azureClient.DtlCustomImageClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient), errorCapture(azureClient))
-	azureClient.DtlCustomImageClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.DtlCustomImageClient.UserAgent)
+	azureClient.DtlCustomImageClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(version.AzurePluginVersion.FormattedVersion()), azureClient.DtlCustomImageClient.UserAgent)
 	azureClient.DtlCustomImageClient.PollingDuration = autorest.DefaultPollingDuration
 	azureClient.DtlCustomImageClient.Client.PollingDuration = PollingDuration
 
@@ -171,14 +172,14 @@ func NewAzureClient(subscriptionID, resourceGroupName string,
 	azureClient.DtlVirtualNetworksClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.DtlVirtualNetworksClient.RequestInspector = withInspection(maxlen)
 	azureClient.DtlVirtualNetworksClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient), errorCapture(azureClient))
-	azureClient.DtlVirtualNetworksClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.DtlVirtualNetworksClient.UserAgent)
+	azureClient.DtlVirtualNetworksClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(version.AzurePluginVersion.FormattedVersion()), azureClient.DtlVirtualNetworksClient.UserAgent)
 	azureClient.DtlVirtualNetworksClient.Client.PollingDuration = PollingDuration
 
 	azureClient.GalleryImageVersionsClient = newCompute.NewGalleryImageVersionsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.GalleryImageVersionsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.GalleryImageVersionsClient.RequestInspector = withInspection(maxlen)
 	azureClient.GalleryImageVersionsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
-	azureClient.GalleryImageVersionsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.GalleryImageVersionsClient.UserAgent)
+	azureClient.GalleryImageVersionsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(version.AzurePluginVersion.FormattedVersion()), azureClient.GalleryImageVersionsClient.UserAgent)
 	azureClient.GalleryImageVersionsClient.Client.PollingDuration = SharedGalleryTimeout
 	azureClient.GalleryImageVersionsClient.Client.PollingDuration = PollingDuration
 
@@ -186,7 +187,7 @@ func NewAzureClient(subscriptionID, resourceGroupName string,
 	azureClient.GalleryImagesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.GalleryImagesClient.RequestInspector = withInspection(maxlen)
 	azureClient.GalleryImagesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
-	azureClient.GalleryImagesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.GalleryImagesClient.UserAgent)
+	azureClient.GalleryImagesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(version.AzurePluginVersion.FormattedVersion()), azureClient.GalleryImagesClient.UserAgent)
 	azureClient.GalleryImagesClient.Client.PollingDuration = PollingDuration
 
 	return azureClient, nil

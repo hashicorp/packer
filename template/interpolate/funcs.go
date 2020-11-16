@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/packer/common/packerbuilderdata"
 	commontpl "github.com/hashicorp/packer/common/template"
 	"github.com/hashicorp/packer/common/uuid"
-	"github.com/hashicorp/packer/version"
 	strftime "github.com/jehiah/go-strftime"
 )
 
@@ -242,8 +241,12 @@ func funcGenUuid(ctx *Context) interface{} {
 }
 
 func funcGenPackerVersion(ctx *Context) interface{} {
-	return func() string {
-		return version.FormattedVersion()
+	return func() (string, error) {
+		if ctx == nil || ctx.CorePackerVersionString == "" {
+			return "", errors.New("packer_version not available")
+		}
+
+		return ctx.CorePackerVersionString, nil
 	}
 }
 

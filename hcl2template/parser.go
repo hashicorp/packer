@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
@@ -47,6 +48,10 @@ var packerBlockSchema = &hcl.BodySchema{
 // the parsed HCL and then return a []packer.Build. Packer will use that list
 // of Builds to run everything in order.
 type Parser struct {
+	CorePackerVersion *version.Version
+
+	CorePackerVersionString string
+
 	*hclparse.Parser
 
 	BuilderSchemas packer.BuilderStore
@@ -115,13 +120,14 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		})
 	}
 	cfg := &PackerConfig{
-		Basedir:               basedir,
-		Cwd:                   wd,
-		builderSchemas:        p.BuilderSchemas,
-		provisionersSchemas:   p.ProvisionersSchemas,
-		postProcessorsSchemas: p.PostProcessorsSchemas,
-		parser:                p,
-		files:                 files,
+		Basedir:                 basedir,
+		Cwd:                     wd,
+		CorePackerVersionString: p.CorePackerVersionString,
+		builderSchemas:          p.BuilderSchemas,
+		provisionersSchemas:     p.ProvisionersSchemas,
+		postProcessorsSchemas:   p.PostProcessorsSchemas,
+		parser:                  p,
+		files:                   files,
 	}
 
 	for _, file := range files {
@@ -133,7 +139,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	// Before we go further, we'll check to make sure this version can read
 	// that file, so we can produce a version-related error message rather than
 	// potentially-confusing downstream errors.
-	versionDiags := cfg.CheckCoreVersionRequirements()
+	versionDiags := cfg.CheckCoreVersionRequirements(p.CorePackerVersion)
 	diags = append(diags, versionDiags...)
 	if versionDiags.HasErrors() {
 		return cfg, diags

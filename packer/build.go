@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/hashicorp/packer/common/packerbuilderdata"
+	"github.com/hashicorp/packer/version"
 )
 
 const (
@@ -18,6 +19,11 @@ const (
 	// of the builder that is run. This is useful for provisioners and
 	// such who want to make use of this.
 	BuilderTypeConfigKey = "packer_builder_type"
+
+	// this is the key in the configuration that is set to the version of the
+	// Packer Core. This can be used by plugins to set user agents, etc, without
+	// having to import the Core to find out the Packer version.
+	CoreVersionConfigKey = "packer_core_version"
 
 	// This is the key in configurations that is set to "true" when Packer
 	// debugging is enabled.
@@ -160,6 +166,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 	packerConfig := map[string]interface{}{
 		BuildNameConfigKey:     b.Type,
 		BuilderTypeConfigKey:   b.BuilderType,
+		CoreVersionConfigKey:   version.FormattedVersion(),
 		DebugConfigKey:         b.debug,
 		ForceConfigKey:         b.force,
 		OnErrorConfigKey:       b.onError,

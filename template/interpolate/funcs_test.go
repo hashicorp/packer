@@ -10,7 +10,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer/common/packerbuilderdata"
-	"github.com/hashicorp/packer/version"
 )
 
 func TestFuncBuildName(t *testing.T) {
@@ -413,7 +412,9 @@ func TestFuncPackerBuild(t *testing.T) {
 func TestFuncPackerVersion(t *testing.T) {
 	template := `{{packer_version}}`
 
-	ctx := &Context{}
+	ctx := &Context{
+		CorePackerVersionString: "1.4.3-dev [DEADC0DE]",
+	}
 	i := &I{Value: template}
 
 	result, err := i.Render(ctx)
@@ -422,9 +423,9 @@ func TestFuncPackerVersion(t *testing.T) {
 	}
 
 	// Only match the X.Y.Z portion of the whole version string.
-	if !strings.HasPrefix(result, version.Version) {
+	if !strings.HasPrefix(result, "1.4.3-dev [DEADC0DE]") {
 		t.Fatalf("Expected input to include: %s\n\nGot: %s",
-			version.Version, result)
+			"1.4.3-dev [DEADC0DE]", result)
 	}
 }
 

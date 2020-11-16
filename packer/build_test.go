@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/common/packerbuilderdata"
+	"github.com/hashicorp/packer/version"
 )
 
 func boolPointer(tf bool) *bool {
@@ -41,6 +42,7 @@ func testDefaultPackerConfig() map[string]interface{} {
 	return map[string]interface{}{
 		BuildNameConfigKey:     "test",
 		BuilderTypeConfigKey:   "foo",
+		CoreVersionConfigKey:   version.FormattedVersion(),
 		DebugConfigKey:         false,
 		ForceConfigKey:         false,
 		OnErrorConfigKey:       "cleanup",
