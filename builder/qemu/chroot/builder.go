@@ -37,9 +37,9 @@ type Config struct {
 	// is executed. This directory must not exist prior to running the builder.
 	// By default this is output-BUILDNAME where "BUILDNAME" is the
 	// name of the build.
-	OutputDir   string `mapstructure:"output_directory"`
+	OutputDir string `mapstructure:"output_directory"`
 	// The output image file name
-	ImageName   string `mapstructure:"image_name"`
+	ImageName string `mapstructure:"image_name"`
 	// Options to supply the mount command when mounting devices. Each option
 	// will be prefixed with -o and supplied to the mount command ran by
 	// Packer. Because this command is ran in a shell, user discretion is
@@ -134,7 +134,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	if b.config.ImageName == "" {
-		b.config.ImageName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
+		b.config.ImageName = fmt.Sprintf("packer-%s.qcow2", b.config.PackerBuildName)
 	}
 
 	if b.config.CommandWrapper == "" {
@@ -169,7 +169,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		return nil, warns, errs
 	}
 
-	return nil, warns, nil
+	return []string{"Device", "MountPath"}, warns, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
