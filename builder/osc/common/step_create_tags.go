@@ -90,7 +90,7 @@ func (s *StepCreateTags) Run(_ context.Context, state multistep.StateBag) multis
 		snapshotTags.Report(ui)
 
 		// Retry creating tags for about 2.5 minutes
-		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
+		err = retry.Run(0.2, 30, 11, func(_ uint) (bool, error) {
 			// Tag images and snapshots
 			_, _, err := regionconn.TagApi.CreateTags(context.Background(), &osc.CreateTagsOpts{
 				CreateTagsRequest: optional.NewInterface(osc.CreateTagsRequest{

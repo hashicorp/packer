@@ -234,7 +234,7 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 	if s.IsRestricted {
 		oscTags.Report(ui)
 		// Retry creating tags for about 2.5 minutes
-		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
+		err = retry.Run(0.2, 30, 11, func(_ uint) (bool, error) {
 			_, _, err := oscconn.TagApi.CreateTags(context.Background(), &osc.CreateTagsOpts{
 				CreateTagsRequest: optional.NewInterface(osc.CreateTagsRequest{
 					Tags:        oscTags,

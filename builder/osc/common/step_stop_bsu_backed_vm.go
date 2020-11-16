@@ -41,7 +41,7 @@ func (s *StepStopBSUBackedVm) Run(ctx context.Context, state multistep.StateBag)
 		// does not exist.
 
 		// Work around this by retrying a few times, up to about 5 minutes.
-		err := retry.Retry(10, 60, 6, func(i uint) (bool, error) {
+		err := retry.Run(10, 60, 6, func(i uint) (bool, error) {
 			ui.Message(fmt.Sprintf("Stopping vm, attempt %d", i+1))
 
 			_, _, err = oscconn.VmApi.StopVms(context.Background(), &osc.StopVmsOpts{
