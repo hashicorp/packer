@@ -10,6 +10,7 @@ import (
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/common/shutdowncommand"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -19,7 +20,7 @@ import (
 // Config is the configuration structure for the builder.
 type Config struct {
 	common.PackerConfig                 `mapstructure:",squash"`
-	common.FloppyConfig                 `mapstructure:",squash"`
+	commonsteps.FloppyConfig            `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`

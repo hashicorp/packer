@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -125,7 +126,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				b.config.UseSSHPrivateIp),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
-		&common.StepProvision{},
+		&commonsteps.StepProvision{},
 		&stepStopInstance{},
 		&stepCreateImage{},
 		&stepCopyUCloudImage{
@@ -137,7 +138,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Run!
-	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
 
 	// If there was an error, return that

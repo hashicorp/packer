@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	packerCommon "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -41,7 +41,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Config: &b.config.ConnectConfig,
 		},
 		&common.StepDownload{
-			DownloadStep: &packerCommon.StepDownload{
+			DownloadStep: &commonsteps.StepDownload{
 				Checksum:    b.config.ISOChecksum,
 				Description: "ISO",
 				Extension:   b.config.TargetExtension,
@@ -54,7 +54,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Datastore: b.config.Datastore,
 			Host:      b.config.Host,
 		},
-		&packerCommon.StepCreateCD{
+		&commonsteps.StepCreateCD{
 			Files: b.config.CDConfig.CDFiles,
 			Label: b.config.CDConfig.CDLabel,
 		},
@@ -77,7 +77,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&common.StepConfigParams{
 			Config: &b.config.ConfigParamsConfig,
 		},
-		&packerCommon.StepCreateFloppy{
+		&commonsteps.StepCreateFloppy{
 			Files:       b.config.FloppyFiles,
 			Directories: b.config.FloppyDirectories,
 			Label:       b.config.FloppyLabel,
@@ -92,7 +92,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			HTTPIP:  b.config.BootConfig.HTTPIP,
 			Network: b.config.WaitIpConfig.GetIPNet(),
 		},
-		&packerCommon.StepHTTPServer{
+		&commonsteps.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
@@ -119,7 +119,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Host:      common.CommHost(b.config.Comm.Host()),
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
-			&packerCommon.StepProvision{},
+			&commonsteps.StepProvision{},
 		)
 	}
 
@@ -159,7 +159,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		})
 	}
 
-	b.runner = packerCommon.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
+	b.runner = commonsteps.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(ctx, state)
 
 	if rawErr, ok := state.GetOk("error"); ok {

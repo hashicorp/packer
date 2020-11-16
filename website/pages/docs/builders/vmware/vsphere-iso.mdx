@@ -89,11 +89,11 @@ source "vsphere-iso" "example" {
 
 ### Http directory configuration
 
-@include 'common/HTTPConfig.mdx'
+@include 'common/commonsteps/HTTPConfig.mdx'
 
 #### Optional:
 
-@include 'common/HTTPConfig-not-required.mdx'
+@include 'common/commonsteps/HTTPConfig-not-required.mdx'
 
 ### Floppy configuration
 
@@ -125,15 +125,15 @@ source "vsphere-iso" "example" {
 
 ### ISO Configuration
 
-@include 'common/ISOConfig.mdx'
+@include 'common/commonsteps/ISOConfig.mdx'
 
 #### Required:
 
-@include 'common/ISOConfig-required.mdx'
+@include 'common/commonsteps/ISOConfig-required.mdx'
 
 #### Optional:
 
-@include 'common/ISOConfig-not-required.mdx'
+@include 'common/commonsteps/ISOConfig-not-required.mdx'
 
 ### CDRom Configuration
 
@@ -176,11 +176,11 @@ iso_paths = [
 
 @include 'builder/vsphere/common/RemoveCDRomConfig-not-required.mdx'
 
-@include 'common/CDConfig.mdx'
+@include 'common/commonsteps/CDConfig.mdx'
 
 #### Optional:
 
-@include 'common/CDConfig-not-required.mdx'
+@include 'common/commonsteps/CDConfig-not-required.mdx'
 
 ### Create Configuration
 

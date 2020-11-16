@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/go-oracle-terraform/opc"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	ocommon "github.com/hashicorp/packer/builder/oracle/common"
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -106,7 +106,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Host:      communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
-			&common.StepProvision{},
+			&commonsteps.StepProvision{},
 			&stepTerminatePVMaster{},
 			&stepSecurity{
 				SecurityListKey: "security_list_builder",
@@ -142,7 +142,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			},
 			&stepCreateImage{},
 			&stepListImages{},
-			&common.StepCleanupTempKeys{
+			&commonsteps.StepCleanupTempKeys{
 				Comm: &b.config.Comm,
 			},
 		}
@@ -169,8 +169,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Host:      communicator.CommHost(b.config.Comm.Host(), "instance_ip"),
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
-			&common.StepProvision{},
-			&common.StepCleanupTempKeys{
+			&commonsteps.StepProvision{},
+			&commonsteps.StepCleanupTempKeys{
 				Comm: &b.config.Comm,
 			},
 			&stepSnapshot{},
@@ -179,7 +179,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Run the steps
-	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
 
 	// If there was an error, return that

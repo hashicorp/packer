@@ -10,18 +10,18 @@ import (
 	"strings"
 
 	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/packer"
 )
 
 type Config struct {
 	proxmox.Config `mapstructure:",squash"`
 
-	common.ISOConfig `mapstructure:",squash"`
-	ISOFile          string `mapstructure:"iso_file"`
-	ISOStoragePool   string `mapstructure:"iso_storage_pool"`
-	UnmountISO       bool   `mapstructure:"unmount_iso"`
-	shouldUploadISO  bool
+	commonsteps.ISOConfig `mapstructure:",squash"`
+	ISOFile               string `mapstructure:"iso_file"`
+	ISOStoragePool        string `mapstructure:"iso_storage_pool"`
+	UnmountISO            bool   `mapstructure:"unmount_iso"`
+	shouldUploadISO       bool
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, []string, error) {

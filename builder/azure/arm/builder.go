@@ -18,7 +18,7 @@ import (
 	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
-	packerCommon "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -211,8 +211,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				Host:      lin.SSHHost,
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
-			&packerCommon.StepProvision{},
-			&packerCommon.StepCleanupTempKeys{
+			&commonsteps.StepProvision{},
+			&commonsteps.StepCleanupTempKeys{
 				Comm: &b.config.Comm,
 			},
 			NewStepGetOSDisk(azureClient, ui),
@@ -254,7 +254,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 					}, nil
 				},
 			},
-			&packerCommon.StepProvision{},
+			&commonsteps.StepProvision{},
 			NewStepGetOSDisk(azureClient, ui),
 			NewStepGetAdditionalDisks(azureClient, ui),
 			NewStepPowerOffCompute(azureClient, ui),
@@ -279,7 +279,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		}
 	}
 
-	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, b.stateBag)
 
 	// Report any errors.

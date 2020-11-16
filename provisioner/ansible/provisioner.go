@@ -32,6 +32,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/adapter"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -739,7 +740,7 @@ func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile s
 	args = append(args, "-e", fmt.Sprintf("packer_builder_type=%s", p.config.PackerBuilderType))
 
 	// expose packer_http_addr extra variable
-	if httpAddr != common.HttpAddrNotImplemented {
+	if httpAddr != commonsteps.HttpAddrNotImplemented {
 		args = append(args, "-e", fmt.Sprintf("packer_http_addr=%s", httpAddr))
 	}
 

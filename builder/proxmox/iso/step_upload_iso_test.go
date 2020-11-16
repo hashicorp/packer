@@ -6,7 +6,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/commonsteps"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -51,7 +51,7 @@ func TestUploadISO(t *testing.T) {
 			builderConfig: &Config{
 				shouldUploadISO: true,
 				ISOStoragePool:  "local",
-				ISOConfig:       common.ISOConfig{ISOUrls: []string{"http://server.example/some-file.iso"}},
+				ISOConfig:       commonsteps.ISOConfig{ISOUrls: []string{"http://server.example/some-file.iso"}},
 			},
 			downloadPath: "testdata/test.iso",
 
@@ -64,7 +64,7 @@ func TestUploadISO(t *testing.T) {
 			builderConfig: &Config{
 				shouldUploadISO: true,
 				ISOStoragePool:  "local",
-				ISOConfig:       common.ISOConfig{ISOUrls: []string{"http://server.example/some-file.iso"}},
+				ISOConfig:       commonsteps.ISOConfig{ISOUrls: []string{"http://server.example/some-file.iso"}},
 			},
 			downloadPath: "testdata/test.iso",
 			failUpload:   true,
@@ -78,7 +78,7 @@ func TestUploadISO(t *testing.T) {
 			builderConfig: &Config{
 				shouldUploadISO: true,
 				ISOStoragePool:  "local",
-				ISOConfig:       common.ISOConfig{ISOUrls: []string{"http://server.example/some-file.iso"}},
+				ISOConfig:       commonsteps.ISOConfig{ISOUrls: []string{"http://server.example/some-file.iso"}},
 			},
 
 			expectError:        true,
@@ -90,7 +90,7 @@ func TestUploadISO(t *testing.T) {
 			builderConfig: &Config{
 				shouldUploadISO: true,
 				ISOStoragePool:  "local",
-				ISOConfig:       common.ISOConfig{ISOUrls: []string{"http://server.example/some-file.iso"}},
+				ISOConfig:       commonsteps.ISOConfig{ISOUrls: []string{"http://server.example/some-file.iso"}},
 			},
 			downloadPath: "testdata/non-existent.iso",
 
