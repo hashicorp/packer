@@ -3,13 +3,13 @@ package chroot
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/packer/common/packerbuilderdata"
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepAttachVolume mapping source image to device

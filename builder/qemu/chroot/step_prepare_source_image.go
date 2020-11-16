@@ -3,12 +3,13 @@ package chroot
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/packer/common/packerbuilderdata"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	"os"
 	"path"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/common/packerbuilderdata"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepPrepareSourceImage process the source image.

@@ -3,10 +3,11 @@ package chroot
 import (
 	"bytes"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"strings"
 )
 
 func Halt(state multistep.StateBag, err error) multistep.StepAction {
