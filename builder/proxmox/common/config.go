@@ -39,6 +39,7 @@ type Config struct {
 	VMName string `mapstructure:"vm_name"`
 	VMID   int    `mapstructure:"vm_id"`
 
+	Boot           string       `mapstructure:"boot"`
 	Memory         int          `mapstructure:"memory"`
 	Cores          int          `mapstructure:"cores"`
 	CPUType        string       `mapstructure:"cpu_type"`

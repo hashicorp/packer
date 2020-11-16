@@ -256,6 +256,9 @@ builder.
 - `vm_interface` - (string) - Name of the network interface that Packer gets
   the VMs IP from. Defaults to the first non loopback interface.
 
+- `boot` - (string) - Override default boot order. Format example `order=virtio0;ide2;net0`.
+ Prior to Proxmox 6.2-15 the format was `cdn` (c:CDROM -> d:Disk -> n:Network)
+
 ## Boot Command
 
 The `boot_command` configuration is very important: it specifies the keys to
