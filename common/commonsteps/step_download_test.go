@@ -19,7 +19,7 @@ import (
 	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/packer/tmp"
+	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 
 var _ multistep.Step = new(StepDownload)

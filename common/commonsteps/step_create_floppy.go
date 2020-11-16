@@ -12,7 +12,7 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/packer/tmp"
+	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 	"github.com/mitchellh/go-fs"
 	"github.com/mitchellh/go-fs/fat"
 )
