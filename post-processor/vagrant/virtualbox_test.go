@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/hashicorp/packer/packer/tmp"
+	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 	"github.com/stretchr/testify/assert"
 )
 

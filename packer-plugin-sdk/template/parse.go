@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	multierror "github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/packer/packer/tmp"
+	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 	"github.com/mitchellh/mapstructure"
 )
 

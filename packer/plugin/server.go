@@ -21,8 +21,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 	packrpc "github.com/hashicorp/packer/packer/rpc"
-	"github.com/hashicorp/packer/packer/tmp"
 )
 
 // This is a count of the number of interrupts the process has received.
