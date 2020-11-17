@@ -18,11 +18,11 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/hashicorp/packer/common/net"
-	"github.com/hashicorp/packer/common/retry"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/net"
+	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 

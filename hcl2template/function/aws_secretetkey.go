@@ -4,7 +4,7 @@ import (
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/function"
 
-	commontpl "github.com/hashicorp/packer/common/template"
+	commontpl "github.com/hashicorp/packer/packer-plugin-sdk/template"
 )
 
 // AWSSecret constructs a function that retrieves secrets from aws secrets

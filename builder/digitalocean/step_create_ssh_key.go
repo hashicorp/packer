@@ -12,9 +12,9 @@ import (
 	"runtime"
 
 	"github.com/digitalocean/godo"
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 	"golang.org/x/crypto/ssh"
 )
 

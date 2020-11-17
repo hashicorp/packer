@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/packer/common/iochan"
+	"github.com/hashicorp/packer/packer-plugin-sdk/iochan"
 	"golang.org/x/sync/errgroup"
 )
 

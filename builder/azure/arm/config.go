@@ -18,7 +18,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/common/random"
+	"github.com/hashicorp/packer/packer-plugin-sdk/random"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
@@ -28,11 +28,11 @@ import (
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/pkcs12"
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 
 	"golang.org/x/crypto/ssh"
