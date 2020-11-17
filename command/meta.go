@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	kvflag "github.com/hashicorp/packer/helper/flag-kv"
+	kvflag "github.com/hashicorp/packer/command/flag-kv"
 	"github.com/hashicorp/packer/helper/wrappedstreams"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
