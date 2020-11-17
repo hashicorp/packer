@@ -99,13 +99,16 @@ func (i *Instance) start(kind, name string) error {
 
 	switch kind {
 	case "builder":
-		server.RegisterBuilder(i.Builders[name])
+		err = server.RegisterBuilder(i.Builders[name])
 	case "post-processor":
-		server.RegisterPostProcessor(i.PostProcessors[name])
+		err = server.RegisterPostProcessor(i.PostProcessors[name])
 	case "provisioners":
-		server.RegisterProvisioner(i.Provisioners[name])
+		err = server.RegisterProvisioner(i.Provisioners[name])
 	default:
-		return fmt.Errorf("Unknown pluging type: %s", kind)
+		err = fmt.Errorf("Unknown pluging type: %s", kind)
+	}
+	if err != nil {
+		return err
 	}
 	server.Serve()
 	return nil
