@@ -45,21 +45,21 @@ func New() *Instance {
 
 func (i *Instance) RegisterBuilder(name string, builder packer.Builder) {
 	if _, found := i.Builders[name]; found {
-		panic(fmt.Errorf("registering duplicate %s builder"))
+		panic(fmt.Errorf("registering duplicate %s builder", name))
 	}
 	i.Builders[name] = builder
 }
 
 func (i *Instance) RegisterPostProcessor(name string, postProcessor packer.PostProcessor) {
 	if _, found := i.PostProcessors[name]; found {
-		panic(fmt.Errorf("registering duplicate %s post-processor"))
+		panic(fmt.Errorf("registering duplicate %s post-processor", name))
 	}
 	i.PostProcessors[name] = postProcessor
 }
 
 func (i *Instance) RegisterProvisioner(name string, provisioner packer.Provisioner) {
 	if _, found := i.Provisioners[name]; found {
-		panic(fmt.Errorf("registering duplicate %s provisioner"))
+		panic(fmt.Errorf("registering duplicate %s provisioner", name))
 	}
 	i.Provisioners[name] = provisioner
 }
