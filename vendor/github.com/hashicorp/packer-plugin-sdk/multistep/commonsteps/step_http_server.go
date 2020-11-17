@@ -54,14 +54,21 @@ func (s *StepHTTPServer) Run(ctx context.Context, state multistep.StateBag) mult
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Starting HTTP server on port %d", s.l.Port))
+	httpAddr, present = state.GetOK("http_ip")
+	if present {
+		if httpAddr.(string) == "" {
+			httpAddr = s.HTTPAddress
+		}
+        }
+	ui.Say(fmt.Sprintf("Starting HTTP server on address %s and port %d", httpAddr, s.l.Port))
 
 	// Start the HTTP server and run it in the background
 	fileServer := http.FileServer(http.Dir(s.HTTPDir))
 	server := &http.Server{Addr: httpAddr, Handler: fileServer}
 	go server.Serve(s.l)
 
-	// Save the address into the state so it can be accessed in the future
+	// Save the address and the port into the state so they can be accessed in the future
+	state.Put("http_ip", httpAddr)
 	state.Put("http_port", s.l.Port)
 
 	return multistep.ActionContinue
