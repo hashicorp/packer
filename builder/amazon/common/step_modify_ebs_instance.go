@@ -7,9 +7,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	confighelper "github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	confighelper "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
 type StepModifyEBSBackedInstance struct {

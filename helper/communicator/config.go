@@ -13,10 +13,10 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	helperssh "github.com/hashicorp/packer/helper/communicator/ssh"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packerssh "github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/ssh"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/masterzen/winrm"
 	"golang.org/x/crypto/ssh"

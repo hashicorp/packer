@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/stretchr/testify/assert"
 )
 

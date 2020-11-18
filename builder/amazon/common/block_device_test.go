@@ -6,7 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
 func TestBlockDevice(t *testing.T) {

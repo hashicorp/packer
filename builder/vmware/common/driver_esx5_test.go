@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
 func TestESX5Driver_implDriver(t *testing.T) {
