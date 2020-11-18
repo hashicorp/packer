@@ -3,7 +3,7 @@ package arm
 
 import (
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/hcl2template"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -52,7 +52,7 @@ type FlatConfig struct {
 	ManagedImageDataDiskSnapshotPrefix         *string                            `mapstructure:"managed_image_data_disk_snapshot_prefix" required:"false" cty:"managed_image_data_disk_snapshot_prefix" hcl:"managed_image_data_disk_snapshot_prefix"`
 	ManagedImageZoneResilient                  *bool                              `mapstructure:"managed_image_zone_resilient" required:"false" cty:"managed_image_zone_resilient" hcl:"managed_image_zone_resilient"`
 	AzureTags                                  map[string]string                  `mapstructure:"azure_tags" required:"false" cty:"azure_tags" hcl:"azure_tags"`
-	AzureTag                                   []hcl2template.FlatNameValue       `mapstructure:"azure_tag" required:"false" cty:"azure_tag" hcl:"azure_tag"`
+	AzureTag                                   []config.FlatNameValue             `mapstructure:"azure_tag" required:"false" cty:"azure_tag" hcl:"azure_tag"`
 	ResourceGroupName                          *string                            `mapstructure:"resource_group_name" cty:"resource_group_name" hcl:"resource_group_name"`
 	StorageAccount                             *string                            `mapstructure:"storage_account" cty:"storage_account" hcl:"storage_account"`
 	TempComputeName                            *string                            `mapstructure:"temp_compute_name" required:"false" cty:"temp_compute_name" hcl:"temp_compute_name"`
@@ -180,7 +180,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"managed_image_data_disk_snapshot_prefix":          &hcldec.AttrSpec{Name: "managed_image_data_disk_snapshot_prefix", Type: cty.String, Required: false},
 		"managed_image_zone_resilient":                     &hcldec.AttrSpec{Name: "managed_image_zone_resilient", Type: cty.Bool, Required: false},
 		"azure_tags":                                       &hcldec.AttrSpec{Name: "azure_tags", Type: cty.Map(cty.String), Required: false},
-		"azure_tag":                                        &hcldec.BlockListSpec{TypeName: "azure_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
+		"azure_tag":                                        &hcldec.BlockListSpec{TypeName: "azure_tag", Nested: hcldec.ObjectSpec((*config.FlatNameValue)(nil).HCL2Spec())},
 		"resource_group_name":                              &hcldec.AttrSpec{Name: "resource_group_name", Type: cty.String, Required: false},
 		"storage_account":                                  &hcldec.AttrSpec{Name: "storage_account", Type: cty.String, Required: false},
 		"temp_compute_name":                                &hcldec.AttrSpec{Name: "temp_compute_name", Type: cty.String, Required: false},

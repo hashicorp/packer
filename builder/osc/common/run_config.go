@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
@@ -21,9 +21,9 @@ var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
 // docs at
 // https://wiki.outscale.net/display/EN/Getting+Information+About+Your+OMIs
 type OmiFilterOptions struct {
-	hcl2template.NameValueFilter `mapstructure:",squash"`
-	Owners                       []string
-	MostRecent                   bool `mapstructure:"most_recent"`
+	config.NameValueFilter `mapstructure:",squash"`
+	Owners                 []string
+	MostRecent             bool `mapstructure:"most_recent"`
 }
 
 func (d *OmiFilterOptions) Empty() bool {
@@ -37,20 +37,20 @@ func (d *OmiFilterOptions) NoOwner() bool {
 // docs at
 // https://wiki.outscale.net/display/EN/Getting+Information+About+Your+Subnets
 type SubnetFilterOptions struct {
-	hcl2template.NameValueFilter `mapstructure:",squash"`
-	MostFree                     bool `mapstructure:"most_free"`
-	Random                       bool `mapstructure:"random"`
+	config.NameValueFilter `mapstructure:",squash"`
+	MostFree               bool `mapstructure:"most_free"`
+	Random                 bool `mapstructure:"random"`
 }
 
 // docs at https://docs.outscale.com/api#tocsfiltersnet
 type NetFilterOptions struct {
-	hcl2template.NameValueFilter `mapstructure:",squash"`
+	config.NameValueFilter `mapstructure:",squash"`
 }
 
 // docs at
 // https://wiki.outscale.net/display/EN/Getting+Information+About+Your+Security+Groups
 type SecurityGroupFilterOptions struct {
-	hcl2template.NameValueFilter `mapstructure:",squash"`
+	config.NameValueFilter `mapstructure:",squash"`
 }
 
 // RunConfig contains configuration for running an vm from a source

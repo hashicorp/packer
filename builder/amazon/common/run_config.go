@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
@@ -20,9 +20,9 @@ import (
 var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
 
 type AmiFilterOptions struct {
-	hcl2template.KeyValueFilter `mapstructure:",squash"`
-	Owners                      []string
-	MostRecent                  bool `mapstructure:"most_recent"`
+	config.KeyValueFilter `mapstructure:",squash"`
+	Owners                []string
+	MostRecent            bool `mapstructure:"most_recent"`
 }
 
 func (d *AmiFilterOptions) GetOwners() []*string {
@@ -43,13 +43,13 @@ func (d *AmiFilterOptions) NoOwner() bool {
 }
 
 type SubnetFilterOptions struct {
-	hcl2template.NameValueFilter `mapstructure:",squash"`
-	MostFree                     bool `mapstructure:"most_free"`
-	Random                       bool `mapstructure:"random"`
+	config.NameValueFilter `mapstructure:",squash"`
+	MostFree               bool `mapstructure:"most_free"`
+	Random                 bool `mapstructure:"random"`
 }
 
 type VpcFilterOptions struct {
-	hcl2template.NameValueFilter `mapstructure:",squash"`
+	config.NameValueFilter `mapstructure:",squash"`
 }
 
 type Statement struct {
@@ -64,7 +64,7 @@ type PolicyDocument struct {
 }
 
 type SecurityGroupFilterOptions struct {
-	hcl2template.NameValueFilter `mapstructure:",squash"`
+	config.NameValueFilter `mapstructure:",squash"`
 }
 
 // RunConfig contains configuration for running an instance from a source
@@ -206,7 +206,7 @@ type RunConfig struct {
 	// block containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	RunTag hcl2template.KeyValues `mapstructure:"run_tag" required:"false"`
+	RunTag config.KeyValues `mapstructure:"run_tag" required:"false"`
 	// The ID (not the name) of the security
 	// group to assign to the instance. By default this is not set and Packer will
 	// automatically create a new temporary security group to allow SSH access.
@@ -321,7 +321,7 @@ type RunConfig struct {
 	// containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	SpotTag hcl2template.KeyValues `mapstructure:"spot_tag" required:"false"`
+	SpotTag config.KeyValues `mapstructure:"spot_tag" required:"false"`
 	// Filters used to populate the `subnet_id` field.
 	// JSON Example:
 	//

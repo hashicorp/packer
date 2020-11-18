@@ -10,7 +10,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
@@ -67,7 +66,7 @@ type Config struct {
 	// block containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	ImageTag hcl2template.KeyValues `mapstructure:"image_tag" required:"false"`
+	ImageTag config.KeyValues `mapstructure:"image_tag" required:"false"`
 	// The service of the resulting image.
 	ImageService string `mapstructure:"image_service" required:"false"`
 	// ID or name of the type this server should be created with.
@@ -80,7 +79,7 @@ type Config struct {
 	// containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	VmTag hcl2template.NameValues `mapstructure:"vm_tag" required:"false"`
+	VmTag config.NameValues `mapstructure:"vm_tag" required:"false"`
 	// The name of the created disk.
 	DiskName string `mapstructure:"disk_name" required:"false"`
 	// The type of the created disk. Defaults to ssd.
