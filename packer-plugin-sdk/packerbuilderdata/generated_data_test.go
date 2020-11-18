@@ -3,7 +3,7 @@ package packerbuilderdata
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func TestGeneratedData_Put(t *testing.T) {

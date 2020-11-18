@@ -8,8 +8,8 @@ import (
 	"net"
 	"strings"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )

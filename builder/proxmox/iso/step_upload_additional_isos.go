@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // stepUploadAdditionalISOs uploads all additional ISO files that are mountet

@@ -9,8 +9,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	confighelper "github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // StepSourceAMIInfo extracts critical information from the source AMI

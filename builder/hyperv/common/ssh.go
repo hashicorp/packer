@@ -3,7 +3,7 @@ package common
 import (
 	"log"
 
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func CommHost(host string) func(multistep.StateBag) (string, error) {

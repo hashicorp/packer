@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // stepUploadISO uploads an ISO file to Proxmox so we can boot from it

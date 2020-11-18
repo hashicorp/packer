@@ -8,8 +8,8 @@ import (
 	"github.com/antihax/optional"
 	"github.com/outscale/osc-sdk-go/osc"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 type StepDeregisterOMI struct {

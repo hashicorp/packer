@@ -3,7 +3,7 @@ package docker
 import (
 	"context"
 
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 )
 
