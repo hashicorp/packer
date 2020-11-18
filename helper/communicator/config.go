@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	helperssh "github.com/hashicorp/packer/helper/communicator/ssh"
 	"github.com/hashicorp/packer/helper/config"
-	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packerssh "github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/ssh"
