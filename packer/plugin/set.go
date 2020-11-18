@@ -22,8 +22,8 @@ type Set struct {
 	Provisioners   map[string]packer.Provisioner
 }
 
-// description describes a Set.
-type description struct {
+// Description describes a Set.
+type Description struct {
 	Version        string   `json:"version"`
 	SDKVersion     string   `json:"sdk_version"`
 	Builders       []string `json:"builders"`
@@ -120,8 +120,8 @@ func (i *Set) start(kind, name string) error {
 // Describe
 ////
 
-func (i *Set) description() description {
-	return description{
+func (i *Set) description() Description {
+	return Description{
 		Version:        i.version,
 		SDKVersion:     i.sdkVersion,
 		Builders:       i.buildersDescription(),
