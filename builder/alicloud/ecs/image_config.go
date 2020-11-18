@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/hcl2template"
-	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 

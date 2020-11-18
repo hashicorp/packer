@@ -1,7 +1,7 @@
 package version
 
 import (
-	"github.com/hashicorp/packer/helper/version"
+	"github.com/hashicorp/packer/packer-plugin-sdk/version"
 	packerVersion "github.com/hashicorp/packer/version"
 )
 

@@ -19,8 +19,8 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	packerecs "github.com/hashicorp/packer/builder/alicloud/ecs"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
