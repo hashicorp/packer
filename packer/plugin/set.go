@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/packer/version"
 )
 
-// Instance is a plugin instance it
-type Instance struct {
+// Set is a plugin set. It's API is meant to be very close to what is returned
+// by plugin.Server
+// It can describe itself or run a single plugin using the CLI arguments.
+type Set struct {
 	version        string
 	sdkVersion     string
 	Builders       map[string]packer.Builder
@@ -20,7 +22,7 @@ type Instance struct {
 	Provisioners   map[string]packer.Provisioner
 }
 
-// description is a plugin instance's description
+// description describes a Set.
 type description struct {
 	Version        string   `json:"version"`
 	SDKVersion     string   `json:"sdk_version"`
@@ -33,8 +35,8 @@ type description struct {
 // Setup
 ////
 
-func New() *Instance {
-	return &Instance{
+func New() *Set {
+	return &Set{
 		version:        version.String(),
 		sdkVersion:     version.String(), // TODO: Set me after the split
 		Builders:       map[string]packer.Builder{},
@@ -43,37 +45,37 @@ func New() *Instance {
 	}
 }
 
-func (i *Instance) RegisterBuilder(name string, builder packer.Builder) {
+func (i *Set) RegisterBuilder(name string, builder packer.Builder) {
 	if _, found := i.Builders[name]; found {
 		panic(fmt.Errorf("registering duplicate %s builder", name))
 	}
 	i.Builders[name] = builder
 }
 
-func (i *Instance) RegisterPostProcessor(name string, postProcessor packer.PostProcessor) {
+func (i *Set) RegisterPostProcessor(name string, postProcessor packer.PostProcessor) {
 	if _, found := i.PostProcessors[name]; found {
 		panic(fmt.Errorf("registering duplicate %s post-processor", name))
 	}
 	i.PostProcessors[name] = postProcessor
 }
 
-func (i *Instance) RegisterProvisioner(name string, provisioner packer.Provisioner) {
+func (i *Set) RegisterProvisioner(name string, provisioner packer.Provisioner) {
 	if _, found := i.Provisioners[name]; found {
 		panic(fmt.Errorf("registering duplicate %s provisioner", name))
 	}
 	i.Provisioners[name] = provisioner
 }
 
-////
-// Run
-////
-
-func (i *Instance) Run() error {
+// Run takes the os Args and runs a packer plugin command from it.
+//  * "describe" command makes the plugin set describe itself.
+//  * "start builder builder-name" starts the builder "builder-name"
+//  * "start post-processor example" starts the post-processor "example"
+func (i *Set) Run() error {
 	args := os.Args[1:]
 	return i.run(args)
 }
 
-func (i *Instance) run(args []string) error {
+func (i *Set) run(args []string) error {
 	if len(args) < 1 {
 		return fmt.Errorf("needs at least one argument")
 	}
@@ -91,7 +93,7 @@ func (i *Instance) run(args []string) error {
 		return fmt.Errorf("Unknown command: %q", args[0])
 	}
 }
-func (i *Instance) start(kind, name string) error {
+func (i *Set) start(kind, name string) error {
 	server, err := Server()
 	if err != nil {
 		return err
@@ -118,7 +120,7 @@ func (i *Instance) start(kind, name string) error {
 // Describe
 ////
 
-func (i *Instance) description() description {
+func (i *Set) description() description {
 	return description{
 		Version:        i.version,
 		SDKVersion:     i.sdkVersion,
@@ -128,11 +130,11 @@ func (i *Instance) description() description {
 	}
 }
 
-func (i *Instance) jsonDescribe(out io.Writer) error {
+func (i *Set) jsonDescribe(out io.Writer) error {
 	return json.NewEncoder(out).Encode(i.description())
 }
 
-func (i *Instance) buildersDescription() []string {
+func (i *Set) buildersDescription() []string {
 	out := []string{}
 	for key := range i.Builders {
 		out = append(out, key)
@@ -141,7 +143,7 @@ func (i *Instance) buildersDescription() []string {
 	return out
 }
 
-func (i *Instance) postProcessorsDescription() []string {
+func (i *Set) postProcessorsDescription() []string {
 	out := []string{}
 	for key := range i.PostProcessors {
 		out = append(out, key)
@@ -150,7 +152,7 @@ func (i *Instance) postProcessorsDescription() []string {
 	return out
 }
 
-func (i *Instance) provisionersDescription() []string {
+func (i *Set) provisionersDescription() []string {
 	out := []string{}
 	for key := range i.Provisioners {
 		out = append(out, key)
