@@ -7,8 +7,8 @@ import (
 	"github.com/antihax/optional"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/hashicorp/packer/builder/osc/common/retry"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 

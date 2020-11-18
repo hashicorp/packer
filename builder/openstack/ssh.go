@@ -9,7 +9,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // CommHost looks up the host for the communicator.

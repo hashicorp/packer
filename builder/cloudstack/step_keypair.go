@@ -7,8 +7,8 @@ import (
 	"runtime"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 

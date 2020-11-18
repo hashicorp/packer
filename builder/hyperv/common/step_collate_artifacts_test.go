@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func TestStepCollateArtifacts_impl(t *testing.T) {

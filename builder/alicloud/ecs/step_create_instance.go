@@ -13,8 +13,8 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	confighelper "github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 type stepCreateAlicloudInstance struct {

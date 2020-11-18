@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/digitalocean/go-qemu/qmp"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // This step configures the VM to enable the QMP listener.

@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 )
 
 func testConfig() map[string]interface{} {

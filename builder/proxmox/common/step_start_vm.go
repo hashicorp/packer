@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // stepStartVM takes the given configuration and starts a VM on the given Proxmox node.

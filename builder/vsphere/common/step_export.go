@@ -17,9 +17,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/pkg/errors"
 	"github.com/vmware/govmomi/nfc"

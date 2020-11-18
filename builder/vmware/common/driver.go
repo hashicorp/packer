@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // A driver is able to talk to VMware, control virtual machines, etc.

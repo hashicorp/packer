@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func TestStepAdd_Impl(t *testing.T) {

@@ -8,8 +8,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // StepShutdown is a step that shuts down the machine. It first attempts to do

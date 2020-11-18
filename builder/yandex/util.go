@@ -2,8 +2,8 @@ package yandex
 
 import (
 	"github.com/c2h5oh/datasize"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func stepHaltWithError(state multistep.StateBag, err error) multistep.StepAction {

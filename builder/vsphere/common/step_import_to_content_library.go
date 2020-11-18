@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/vmware/govmomi/vapi/vcenter"
 )

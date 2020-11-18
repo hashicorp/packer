@@ -4,10 +4,10 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 )
 
 // StepChrootProvision provisions the instance within a chroot.

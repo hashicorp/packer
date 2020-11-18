@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 )
 
 // Builder implements packer.Builder and builds the actual VirtualBox

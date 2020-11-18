@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/post-processor/vsphere"
 	"github.com/vmware/govmomi"
 )

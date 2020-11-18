@@ -1,7 +1,7 @@
 package yandex
 
 import (
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func commHost(state multistep.StateBag) (string, error) {

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func TestStepDeleteAdditionalDiskShouldFailIfGetFails(t *testing.T) {
