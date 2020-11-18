@@ -382,10 +382,6 @@ type RunConfig struct {
 	// The default is "default", meaning shared tenancy. Allowed values are "default",
 	// "dedicated" and "host".
 	Tenancy string `mapstructure:"tenancy" required:"false"`
-	// The name of the temporary key pair to
-	// generate. By default, Packer generates a name that looks like
-	// `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
-	TemporaryKeyPairName string `mapstructure:"temporary_key_pair_name" required:"false"`
 	// A list of IPv4 CIDR blocks to be authorized access to the instance, when
 	// packer is creating a temporary security group.
 	//

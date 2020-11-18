@@ -134,8 +134,6 @@ type CommonConfig struct {
 	// If "true", Packer will not delete the VM from
 	// The Hyper-V manager.
 	KeepRegistered bool `mapstructure:"keep_registered" required:"false"`
-
-	Communicator string `mapstructure:"communicator"`
 	// If true skip compacting the hard disk for
 	// the virtual machine when exporting. This defaults to false.
 	SkipCompaction bool `mapstructure:"skip_compaction" required:"false"`

@@ -141,11 +141,8 @@ type AccessConfig struct {
 	// The secret key used to communicate with AWS. [Learn how to set
 	// this](/docs/builders/amazon#specifying-amazon-credentials). This is not required
 	// if you are using `use_vault_aws_engine` for authentication instead.
-	SecretKey string `mapstructure:"secret_key" required:"true"`
-	// Set to true if you want to skip
-	// validation of the ami_regions configuration option. Default false.
-	SkipValidation       bool `mapstructure:"skip_region_validation" required:"false"`
-	SkipMetadataApiCheck bool `mapstructure:"skip_metadata_api_check"`
+	SecretKey            string `mapstructure:"secret_key" required:"true"`
+	SkipMetadataApiCheck bool   `mapstructure:"skip_metadata_api_check"`
 	// Set to true if you want to skip validating AWS credentials before runtime.
 	SkipCredsValidation bool `mapstructure:"skip_credential_validation"`
 	// The access token to use. This is different from the

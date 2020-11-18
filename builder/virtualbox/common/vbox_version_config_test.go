@@ -2,8 +2,6 @@ package common
 
 import (
 	"testing"
-
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 func TestVBoxVersionConfigPrepare_BootWait(t *testing.T) {
@@ -12,7 +10,7 @@ func TestVBoxVersionConfigPrepare_BootWait(t *testing.T) {
 
 	// Test empty
 	c = new(VBoxVersionConfig)
-	errs = c.Prepare(interpolate.NewContext())
+	errs = c.Prepare("ssh")
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %s", errs)
 	}
@@ -25,7 +23,7 @@ func TestVBoxVersionConfigPrepare_BootWait(t *testing.T) {
 	c = new(VBoxVersionConfig)
 	filename := "foo"
 	c.VBoxVersionFile = &filename
-	errs = c.Prepare(interpolate.NewContext())
+	errs = c.Prepare("ssh")
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %s", errs)
 	}
@@ -42,7 +40,7 @@ func TestVBoxVersionConfigPrepare_empty(t *testing.T) {
 	// Test with nil value
 	c = new(VBoxVersionConfig)
 	c.VBoxVersionFile = nil
-	errs = c.Prepare(interpolate.NewContext())
+	errs = c.Prepare("ssh")
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %s", errs)
 	}
@@ -55,7 +53,7 @@ func TestVBoxVersionConfigPrepare_empty(t *testing.T) {
 	c = new(VBoxVersionConfig)
 	filename := ""
 	c.VBoxVersionFile = &filename
-	errs = c.Prepare(interpolate.NewContext())
+	errs = c.Prepare("ssh")
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %s", errs)
 	}
@@ -73,8 +71,7 @@ func TestVBoxVersionConfigPrepare_communicator(t *testing.T) {
 	c = new(VBoxVersionConfig)
 	filename := "test"
 	c.VBoxVersionFile = &filename
-	c.Communicator = "none"
-	errs = c.Prepare(interpolate.NewContext())
+	errs = c.Prepare("none")
 	if len(errs) == 0 {
 		t.Fatalf("should have an error")
 	}

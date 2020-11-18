@@ -91,9 +91,6 @@ type Config struct {
 	// This parameter is required when source_path have more than one provider,
 	// or when using vagrant-cloud post-processor. Defaults to unset.
 	Provider string `mapstructure:"provider" required:"false"`
-
-	Communicator string `mapstructure:"communicator"`
-
 	// Options for the "vagrant init" command
 
 	// What vagrantfile to use
