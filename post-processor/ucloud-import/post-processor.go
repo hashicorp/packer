@@ -106,16 +106,16 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.WaitImageReadyTimeout = ucloudcommon.DefaultCreateImageTimeout
 	}
 
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	// Check and render ufile_key_name
 	if err = interpolate.Validate(p.config.UFileKey, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing ufile_key_name template: %s", err))
 	}
 
 	// Check we have ucloud access variables defined somewhere
-	errs = packer.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
 
 	// define all our required parameters
 	templates := map[string]*string{
@@ -128,20 +128,20 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Check out required params are defined
 	for key, ptr := range templates {
 		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
 	}
 
 	imageName := p.config.ImageName
 	if !ucloudcommon.ImageNamePattern.MatchString(imageName) {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("expected %q to be 1-63 characters and only support chinese, english, numbers, '-_,.:[]', got %q", "image_name", imageName))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("expected %q to be 1-63 characters and only support chinese, english, numbers, '-_,.:[]', got %q", "image_name", imageName))
 	}
 
 	switch p.config.Format {
 	case ImageFileFormatVHD, ImageFileFormatRAW, ImageFileFormatVMDK, ImageFileFormatQCOW2:
 	default:
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("expected %q only be one of 'raw', 'vhd', 'vmdk', or 'qcow2', got %q", "format", p.config.Format))
 	}
 

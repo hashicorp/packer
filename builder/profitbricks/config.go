@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/mitchellh/mapstructure"
@@ -51,10 +52,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	if c.Comm.SSHPassword == "" && c.Comm.SSHPrivateKeyFile == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("Either ssh private key path or ssh password must be set."))
 	}
 
@@ -101,21 +102,21 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
-		errs = packer.MultiErrorAppend(errs, es...)
+		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 
 	if c.Image == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("ProfitBricks 'image' is required"))
 	}
 
 	if c.PBUsername == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("ProfitBricks username is required"))
 	}
 
 	if c.PBPassword == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("ProfitBricks password is required"))
 	}
 

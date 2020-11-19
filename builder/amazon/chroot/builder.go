@@ -261,19 +261,19 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	// Accumulate any errors or warnings
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	var warns []string
 
-	errs = packer.MultiErrorAppend(errs, b.config.RootVolumeTag.CopyOn(&b.config.RootVolumeTags)...)
-	errs = packer.MultiErrorAppend(errs, b.config.SourceAmiFilter.Prepare()...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.RootVolumeTag.CopyOn(&b.config.RootVolumeTags)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.SourceAmiFilter.Prepare()...)
 
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs,
+	errs = packersdk.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs,
 		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
 
 	for _, mounts := range b.config.ChrootMounts {
 		if len(mounts) != 3 {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("Each chroot_mounts entry should be three elements."))
 			break
 		}
@@ -284,43 +284,43 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			warns = append(warns, "source_ami and source_ami_filter are unused when from_scratch is true")
 		}
 		if b.config.RootVolumeSize == 0 {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("root_volume_size is required with from_scratch."))
 		}
 		if len(b.config.PreMountCommands) == 0 {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("pre_mount_commands is required with from_scratch."))
 		}
 		if b.config.AMIVirtType == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("ami_virtualization_type is required with from_scratch."))
 		}
 		if b.config.RootDeviceName == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("root_device_name is required with from_scratch."))
 		}
 		if len(b.config.AMIMappings) == 0 {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("ami_block_device_mappings is required with from_scratch."))
 		}
 	} else {
 		if b.config.SourceAmi == "" && b.config.SourceAmiFilter.Empty() {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("source_ami or source_ami_filter is required."))
 		}
 		if len(b.config.AMIMappings) > 0 && b.config.RootDeviceName != "" {
 			if b.config.RootVolumeSize == 0 {
 				// Although, they can specify the device size in the block
 				// device mapping, it's easier to be specific here.
-				errs = packer.MultiErrorAppend(
+				errs = packersdk.MultiErrorAppend(
 					errs, errors.New("root_volume_size is required if ami_block_device_mappings is specified"))
 			}
 			warns = append(warns, "ami_block_device_mappings from source image will be completely overwritten")
 		} else if len(b.config.AMIMappings) > 0 {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("If ami_block_device_mappings is specified, root_device_name must be specified"))
 		} else if b.config.RootDeviceName != "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("If root_device_name is specified, ami_block_device_mappings must be specified"))
 		}
 	}
@@ -332,7 +332,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		}
 	}
 	if !valid {
-		errs = packer.MultiErrorAppend(errs, errors.New(`The only valid ami_architecture values are "x86_64" and "arm64"`))
+		errs = packersdk.MultiErrorAppend(errs, errors.New(`The only valid ami_architecture values are "x86_64" and "arm64"`))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

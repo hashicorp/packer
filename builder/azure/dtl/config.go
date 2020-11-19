@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 
@@ -424,8 +425,8 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	var errs *packer.MultiError
-	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
+	var errs *packersdk.MultiError
+	errs = packersdk.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
 
 	c.ClientConfig.Validate(errs)
 
@@ -542,66 +543,66 @@ func provideDefaultValues(c *Config) {
 	}
 }
 
-func assertTagProperties(c *Config, errs *packer.MultiError) {
+func assertTagProperties(c *Config, errs *packersdk.MultiError) {
 	if len(c.AzureTags) > 15 {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("a max of 15 tags are supported, but %d were provided", len(c.AzureTags)))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("a max of 15 tags are supported, but %d were provided", len(c.AzureTags)))
 	}
 
 	for k, v := range c.AzureTags {
 		if len(k) > 512 {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 512 character limit", k, len(k)))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 512 character limit", k, len(k)))
 		}
 		if len(*v) > 256 {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 256 character limit", *v, len(*v)))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 256 character limit", *v, len(*v)))
 		}
 	}
 }
 
-func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
+func assertRequiredParametersSet(c *Config, errs *packersdk.MultiError) {
 	c.ClientConfig.Validate(errs)
 
 	/////////////////////////////////////////////
 	// Capture
 	if c.CaptureContainerName == "" && c.ManagedImageName == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name or managed_image_name must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name or managed_image_name must be specified"))
 	}
 
 	if c.CaptureNamePrefix == "" && c.ManagedImageResourceGroupName == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix or managed_image_resource_group_name must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix or managed_image_resource_group_name must be specified"))
 	}
 
 	if (c.CaptureNamePrefix != "" || c.CaptureContainerName != "") && (c.ManagedImageResourceGroupName != "" || c.ManagedImageName != "") {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Either a VHD or a managed image can be built, but not both. Please specify either capture_container_name and capture_name_prefix or managed_image_resource_group_name and managed_image_name."))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Either a VHD or a managed image can be built, but not both. Please specify either capture_container_name and capture_name_prefix or managed_image_resource_group_name and managed_image_name."))
 	}
 
 	if c.CaptureContainerName != "" {
 		if !reCaptureContainerName.MatchString(c.CaptureContainerName) {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must satisfy the regular expression %q.", reCaptureContainerName.String()))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must satisfy the regular expression %q.", reCaptureContainerName.String()))
 		}
 
 		if strings.HasSuffix(c.CaptureContainerName, "-") {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must not end with a hyphen, e.g. '-'."))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must not end with a hyphen, e.g. '-'."))
 		}
 
 		if strings.Contains(c.CaptureContainerName, "--") {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must not contain consecutive hyphens, e.g. '--'."))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must not contain consecutive hyphens, e.g. '--'."))
 		}
 
 		if c.CaptureNamePrefix == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must be specified"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must be specified"))
 		}
 
 		if !reCaptureNamePrefix.MatchString(c.CaptureNamePrefix) {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must satisfy the regular expression %q.", reCaptureNamePrefix.String()))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must satisfy the regular expression %q.", reCaptureNamePrefix.String()))
 		}
 
 		if strings.HasSuffix(c.CaptureNamePrefix, "-") || strings.HasSuffix(c.CaptureNamePrefix, ".") {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must not end with a hyphen or period."))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must not end with a hyphen or period."))
 		}
 	}
 
 	if c.LabResourceGroupName == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The settings lab_resource_group_name needs to be defined."))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The settings lab_resource_group_name needs to be defined."))
 	}
 
 	/////////////////////////////////////////////
@@ -622,75 +623,75 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	countSourceInputs := toInt(isImageUrl) + toInt(isCustomManagedImage) + toInt(isPlatformImage) + toInt(isSharedGallery)
 
 	if countSourceInputs > 1 {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (image_url), Image Reference (image_publisher, image_offer, image_sku), a Managed Disk (custom_managed_disk_image_name, custom_managed_disk_resource_group_name), or a Shared Gallery Image (shared_image_gallery)"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (image_url), Image Reference (image_publisher, image_offer, image_sku), a Managed Disk (custom_managed_disk_image_name, custom_managed_disk_resource_group_name), or a Shared Gallery Image (shared_image_gallery)"))
 	}
 
 	if isImageUrl && c.ManagedImageResourceGroupName != "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A managed image must be created from a managed image, it cannot be created from a VHD."))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A managed image must be created from a managed image, it cannot be created from a VHD."))
 	}
 
 	if c.SharedGallery.GalleryName != "" {
 		if c.SharedGallery.Subscription == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A shared_image_gallery.subscription must be specified"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A shared_image_gallery.subscription must be specified"))
 		}
 		if c.SharedGallery.ResourceGroup == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A shared_image_gallery.resource_group must be specified"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A shared_image_gallery.resource_group must be specified"))
 		}
 		if c.SharedGallery.ImageName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A shared_image_gallery.image_name must be specified"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A shared_image_gallery.image_name must be specified"))
 		}
 		if c.CaptureContainerName != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("VHD Target [capture_container_name] is not supported when using Shared Image Gallery as source. Use managed_image_resource_group_name instead."))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("VHD Target [capture_container_name] is not supported when using Shared Image Gallery as source. Use managed_image_resource_group_name instead."))
 		}
 		if c.CaptureNamePrefix != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("VHD Target [capture_name_prefix] is not supported when using Shared Image Gallery as source. Use managed_image_name instead."))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("VHD Target [capture_name_prefix] is not supported when using Shared Image Gallery as source. Use managed_image_name instead."))
 		}
 	} else if c.ImageUrl == "" && c.CustomManagedImageName == "" {
 		if c.ImagePublisher == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_publisher must be specified"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("An image_publisher must be specified"))
 		}
 		if c.ImageOffer == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_offer must be specified"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("An image_offer must be specified"))
 		}
 		if c.ImageSku == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_sku must be specified"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("An image_sku must be specified"))
 		}
 	} else if c.ImageUrl == "" && c.ImagePublisher == "" {
 		if c.CustomManagedImageResourceGroupName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An custom_managed_image_resource_group_name must be specified"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("An custom_managed_image_resource_group_name must be specified"))
 		}
 		if c.CustomManagedImageName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A custom_managed_image_name must be specified"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("A custom_managed_image_name must be specified"))
 		}
 		if c.ManagedImageResourceGroupName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An managed_image_resource_group_name must be specified"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("An managed_image_resource_group_name must be specified"))
 		}
 		if c.ManagedImageName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An managed_image_name must be specified"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("An managed_image_name must be specified"))
 		}
 	} else {
 		if c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != "" || c.ImageVersion != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_url must not be specified if image_publisher, image_offer, image_sku, or image_version is specified"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("An image_url must not be specified if image_publisher, image_offer, image_sku, or image_version is specified"))
 		}
 	}
 
 	if c.ManagedImageResourceGroupName != "" {
 		if ok, err := assertResourceGroupName(c.ManagedImageResourceGroupName, "managed_image_resource_group_name"); !ok {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
 	if c.ManagedImageName != "" {
 		if ok, err := assertManagedImageName(c.ManagedImageName, "managed_image_name"); !ok {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
 	if c.LabVirtualNetworkName == "" && c.LabResourceGroupName != "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If lab_resource_group_name is specified, so must lab_virtual_network_name"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("If lab_resource_group_name is specified, so must lab_virtual_network_name"))
 	}
 	if c.LabVirtualNetworkName == "" && c.LabSubnetName != "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_subnet_name is specified, so must lab_virtual_network_name"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_subnet_name is specified, so must lab_virtual_network_name"))
 	}
 
 	/////////////////////////////////////////////
@@ -707,9 +708,9 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	} else if strings.EqualFold(c.OSType, constants.Target_Windows) {
 		c.OSType = constants.Target_Windows
 	} else if c.OSType == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("An os_type must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("An os_type must be specified"))
 	} else {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The os_type %q is invalid", c.OSType))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The os_type %q is invalid", c.OSType))
 	}
 
 	switch c.ManagedImageStorageAccountType {
@@ -718,7 +719,7 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	case string(compute.StorageAccountTypesPremiumLRS):
 		c.managedImageStorageAccountType = compute.StorageAccountTypesPremiumLRS
 	default:
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
 	}
 	// Errs check to make the linter happy.
 	if errs != nil {

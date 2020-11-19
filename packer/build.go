@@ -412,7 +412,7 @@ PostProcessorRunSeqLoop:
 	}
 
 	if len(errors) > 0 {
-		err = &MultiError{errors}
+		err = &packersdk.MultiError{errors}
 	}
 
 	return artifacts, err

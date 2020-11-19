@@ -177,41 +177,41 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	// Accumulate any errors
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	var warns []string
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AMIMappings.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.LaunchMappings.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs,
+	errs = packersdk.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.AMIMappings.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.LaunchMappings.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs,
 		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.AccountId == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("account_id is required"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("account_id is required"))
 	} else {
 		b.config.AccountId = strings.Replace(b.config.AccountId, "-", "", -1)
 	}
 
 	if b.config.S3Bucket == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("s3_bucket is required"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("s3_bucket is required"))
 	}
 
 	if b.config.X509CertPath == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("x509_cert_path is required"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("x509_cert_path is required"))
 	} else if _, err := os.Stat(b.config.X509CertPath); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("x509_cert_path points to bad file: %s", err))
 	}
 
 	if b.config.X509KeyPath == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("x509_key_path is required"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("x509_key_path is required"))
 	} else if _, err := os.Stat(b.config.X509KeyPath); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("x509_key_path points to bad file: %s", err))
 	}
 
 	if b.config.IsSpotInstance() && ((b.config.AMIENASupport.True()) || b.config.AMISriovNetSupport) {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			fmt.Errorf("Spot instances do not support modification, which is required "+
 				"when either `ena_support` or `sriov_support` are set. Please ensure "+
 				"you use an AMI that already has either SR-IOV or ENA enabled."))

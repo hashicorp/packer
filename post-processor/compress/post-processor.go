@@ -71,7 +71,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	// If there is no explicit number of Go threads to use, then set it
 	if os.Getenv("GOMAXPROCS") == "" {
@@ -93,7 +93,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if err = interpolate.Validate(p.config.OutputPath, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing target template: %s", err))
 	}
 

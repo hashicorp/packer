@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"regexp"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
@@ -22,20 +21,20 @@ func (s *stepPrepareConfig) Run(ctx context.Context, state multistep.StateBag) m
 	ui.Say("Preparing config...")
 
 	var err error
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	// First get the project and zone UUID's so we can use them in other calls when needed.
 	if config.Project != "" && !isUUID(config.Project) {
 		config.Project, _, err = client.Project.GetProjectID(config.Project)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, &retrieveErr{"project", config.Project, err})
+			errs = packersdk.MultiErrorAppend(errs, &retrieveErr{"project", config.Project, err})
 		}
 	}
 
 	if config.UserDataFile != "" {
 		userdata, err := ioutil.ReadFile(config.UserDataFile)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("problem reading user data file: %s", err))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("problem reading user data file: %s", err))
 		}
 		config.UserData = string(userdata)
 	}
@@ -43,7 +42,7 @@ func (s *stepPrepareConfig) Run(ctx context.Context, state multistep.StateBag) m
 	if !isUUID(config.Zone) {
 		config.Zone, _, err = client.Zone.GetZoneID(config.Zone)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, &retrieveErr{"zone", config.Zone, err})
+			errs = packersdk.MultiErrorAppend(errs, &retrieveErr{"zone", config.Zone, err})
 		}
 	}
 
@@ -51,7 +50,7 @@ func (s *stepPrepareConfig) Run(ctx context.Context, state multistep.StateBag) m
 	if config.DiskOffering != "" && !isUUID(config.DiskOffering) {
 		config.DiskOffering, _, err = client.DiskOffering.GetDiskOfferingID(config.DiskOffering)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, &retrieveErr{"disk offering", config.DiskOffering, err})
+			errs = packersdk.MultiErrorAppend(errs, &retrieveErr{"disk offering", config.DiskOffering, err})
 		}
 	}
 
@@ -59,7 +58,7 @@ func (s *stepPrepareConfig) Run(ctx context.Context, state multistep.StateBag) m
 		if isUUID(config.PublicIPAddress) {
 			ip, _, err := client.Address.GetPublicIpAddressByID(config.PublicIPAddress)
 			if err != nil {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed to retrieve IP address: %s", err))
+				errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Failed to retrieve IP address: %s", err))
 			}
 			state.Put("ipaddress", ip.Ipaddress)
 		} else {
@@ -75,10 +74,10 @@ func (s *stepPrepareConfig) Run(ctx context.Context, state multistep.StateBag) m
 
 			ipAddrs, err := client.Address.ListPublicIpAddresses(p)
 			if err != nil {
-				errs = packer.MultiErrorAppend(errs, &retrieveErr{"IP address", config.PublicIPAddress, err})
+				errs = packersdk.MultiErrorAppend(errs, &retrieveErr{"IP address", config.PublicIPAddress, err})
 			}
 			if err == nil && ipAddrs.Count != 1 {
-				errs = packer.MultiErrorAppend(errs, &retrieveErr{"IP address", config.PublicIPAddress, ipAddrs})
+				errs = packersdk.MultiErrorAppend(errs, &retrieveErr{"IP address", config.PublicIPAddress, ipAddrs})
 			}
 			if err == nil && ipAddrs.Count == 1 {
 				config.PublicIPAddress = ipAddrs.PublicIpAddresses[0].Id
@@ -89,7 +88,7 @@ func (s *stepPrepareConfig) Run(ctx context.Context, state multistep.StateBag) m
 	if !isUUID(config.Network) {
 		config.Network, _, err = client.Network.GetNetworkID(config.Network, cloudstack.WithProject(config.Project))
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, &retrieveErr{"network", config.Network, err})
+			errs = packersdk.MultiErrorAppend(errs, &retrieveErr{"network", config.Network, err})
 		}
 	}
 
@@ -99,7 +98,7 @@ func (s *stepPrepareConfig) Run(ctx context.Context, state multistep.StateBag) m
 			if !isUUID(config.SecurityGroups[i]) {
 				config.SecurityGroups[i], _, err = client.SecurityGroup.GetSecurityGroupID(config.SecurityGroups[i], cloudstack.WithProject(config.Project))
 				if err != nil {
-					errs = packer.MultiErrorAppend(errs, &retrieveErr{"network", config.SecurityGroups[i], err})
+					errs = packersdk.MultiErrorAppend(errs, &retrieveErr{"network", config.SecurityGroups[i], err})
 				}
 			}
 		}
@@ -108,7 +107,7 @@ func (s *stepPrepareConfig) Run(ctx context.Context, state multistep.StateBag) m
 	if !isUUID(config.ServiceOffering) {
 		config.ServiceOffering, _, err = client.ServiceOffering.GetServiceOfferingID(config.ServiceOffering)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, &retrieveErr{"service offering", config.ServiceOffering, err})
+			errs = packersdk.MultiErrorAppend(errs, &retrieveErr{"service offering", config.ServiceOffering, err})
 		}
 	}
 
@@ -118,7 +117,7 @@ func (s *stepPrepareConfig) Run(ctx context.Context, state multistep.StateBag) m
 		} else {
 			isoID, _, err := client.ISO.GetIsoID(config.SourceISO, "executable", config.Zone)
 			if err != nil {
-				errs = packer.MultiErrorAppend(errs, &retrieveErr{"ISO", config.SourceISO, err})
+				errs = packersdk.MultiErrorAppend(errs, &retrieveErr{"ISO", config.SourceISO, err})
 			}
 			state.Put("source", isoID)
 		}
@@ -130,7 +129,7 @@ func (s *stepPrepareConfig) Run(ctx context.Context, state multistep.StateBag) m
 		} else {
 			templateID, _, err := client.Template.GetTemplateID(config.SourceTemplate, "executable", config.Zone)
 			if err != nil {
-				errs = packer.MultiErrorAppend(errs, &retrieveErr{"template", config.SourceTemplate, err})
+				errs = packersdk.MultiErrorAppend(errs, &retrieveErr{"template", config.SourceTemplate, err})
 			}
 			state.Put("source", templateID)
 		}
@@ -142,19 +141,19 @@ func (s *stepPrepareConfig) Run(ctx context.Context, state multistep.StateBag) m
 
 		types, err := client.GuestOS.ListOsTypes(p)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, &retrieveErr{"OS type", config.TemplateOS, err})
+			errs = packersdk.MultiErrorAppend(errs, &retrieveErr{"OS type", config.TemplateOS, err})
 		}
 		if err == nil && types.Count != 1 {
-			errs = packer.MultiErrorAppend(errs, &retrieveErr{"OS type", config.TemplateOS, types})
+			errs = packersdk.MultiErrorAppend(errs, &retrieveErr{"OS type", config.TemplateOS, types})
 		}
 		if err == nil && types.Count == 1 {
 			config.TemplateOS = types.OsTypes[0].Id
 		}
 	}
 
-	// This is needed because nil is not always nil. When returning *packer.MultiError(nil)
+	// This is needed because nil is not always nil. When returning *packersdk.MultiError(nil)
 	// as an error interface, that interface will no longer be equal to nil but it will be
-	// an interface with type *packer.MultiError and value nil which is different then a
+	// an interface with type *packersdk.MultiError and value nil which is different then a
 	// nil interface.
 	if errs != nil && len(errs.Errors) > 0 {
 		state.Put("error", errs)

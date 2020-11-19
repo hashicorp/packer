@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -62,7 +63,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	// Defaults
 
@@ -75,7 +76,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		if def, err := interpolate.Render("packer-{{timestamp}}", nil); err == nil {
 			c.ImageLabel = def
 		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to render image name: %s", err))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Unable to render image name: %s", err))
 		}
 	}
 
@@ -84,7 +85,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		if def, err := interpolate.Render("packer-{{timestamp}}", nil); err == nil {
 			c.Label = def
 		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to render Linode label: %s", err))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Unable to render Linode label: %s", err))
 		}
 	}
 
@@ -92,7 +93,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		var err error
 		c.RootPass, err = createRandomRootPassword()
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to generate root_pass: %s", err))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Unable to generate root_pass: %s", err))
 		}
 	}
 
@@ -102,29 +103,29 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
-		errs = packer.MultiErrorAppend(errs, es...)
+		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 
 	c.Comm.SSHPassword = c.RootPass
 
 	if c.PersonalAccessToken == "" {
 		// Required configurations that will display errors if not set
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("linode_token is required"))
 	}
 
 	if c.Region == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("region is required"))
 	}
 
 	if c.InstanceType == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("instance_type is required"))
 	}
 
 	if c.Image == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("image is required"))
 	}
 
@@ -135,7 +136,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	for _, t := range c.Tags {
 		if !tagRe.MatchString(t) {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("invalid tag: %s", t))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("invalid tag: %s", t))
 		}
 	}
 

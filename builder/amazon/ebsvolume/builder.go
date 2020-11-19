@@ -122,26 +122,26 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	// Accumulate any errors
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	var warns []string
-	errs = packer.MultiErrorAppend(errs, b.config.VolumeRunTag.CopyOn(&b.config.VolumeRunTags)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.launchBlockDevices.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.VolumeRunTag.CopyOn(&b.config.VolumeRunTags)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.launchBlockDevices.Prepare(&b.config.ctx)...)
 
 	for _, d := range b.config.VolumeMappings {
 		if err := d.Prepare(&b.config.ctx); err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("AMIMapping: %s", err.Error()))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("AMIMapping: %s", err.Error()))
 		}
 	}
 
 	b.config.launchBlockDevices = b.config.VolumeMappings
 	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
 	if b.config.IsSpotInstance() && ((b.config.AMIENASupport.True()) || b.config.AMISriovNetSupport) {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			fmt.Errorf("Spot instances do not support modification, which is required "+
 				"when either `ena_support` or `sriov_support` are set. Please ensure "+
 				"you use an AMI that already has either SR-IOV or ENA enabled."))

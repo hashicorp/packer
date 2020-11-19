@@ -97,7 +97,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// Accumulate any errors
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	// Required configuration
 	templates := map[string]*string{
@@ -107,19 +107,19 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	for key, ptr := range templates {
 		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
 	}
 
 	if p.config.VagrantCloudUrl == VAGRANT_CLOUD_URL && p.config.AccessToken == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("access_token must be set if vagrant_cloud_url has not been overriden"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("access_token must be set if vagrant_cloud_url has not been overriden"))
 	}
 
 	// Create the HTTP client
 	p.client, err = VagrantCloudClient{}.New(p.config.VagrantCloudUrl, p.config.AccessToken, p.insecureSkipTLSVerify)
 	if err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Failed to verify authentication token: %v", err))
 	}
 

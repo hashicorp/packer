@@ -113,10 +113,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.Timeout = 20 * time.Minute
 	}
 
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	if err = interpolate.Validate(p.config.ObjectName, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing space_object_name template: %s", err))
 	}
 
@@ -130,13 +130,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 	for key, ptr := range requiredArgs {
 		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
 	}
 
 	if len(p.config.ImageRegions) == 0 {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("image_regions must be set"))
 	}
 

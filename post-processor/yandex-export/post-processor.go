@@ -83,19 +83,19 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// Accumulate any errors
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
-	errs = packer.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
 
 	if len(p.config.Paths) == 0 {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("paths must be specified"))
 	}
 
 	// Validate templates in 'paths'
 	for _, path := range p.config.Paths {
 		if err = interpolate.Validate(path, &p.config.ctx); err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Error parsing one of 'paths' template: %s", err))
 		}
 	}

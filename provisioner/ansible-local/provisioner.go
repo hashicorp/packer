@@ -110,29 +110,29 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	// Validation
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	// Check that either playbook_file or playbook_files is specified
 	if len(p.config.PlaybookFiles) != 0 && p.config.PlaybookFile != "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Either playbook_file or playbook_files can be specified, not both"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Either playbook_file or playbook_files can be specified, not both"))
 	}
 	if len(p.config.PlaybookFiles) == 0 && p.config.PlaybookFile == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Either playbook_file or playbook_files must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Either playbook_file or playbook_files must be specified"))
 	}
 	if p.config.PlaybookFile != "" {
 		err = validateFileConfig(p.config.PlaybookFile, "playbook_file", true)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
 	for _, playbookFile := range p.config.PlaybookFiles {
 		if err := validateFileConfig(playbookFile, "playbook_files", true); err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		} else {
 			playbookFile, err := filepath.Abs(playbookFile)
 			if err != nil {
-				errs = packer.MultiErrorAppend(errs, err)
+				errs = packersdk.MultiErrorAppend(errs, err)
 			} else {
 				p.playbookFiles = append(p.playbookFiles, playbookFile)
 			}
@@ -143,7 +143,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if len(p.config.InventoryFile) > 0 {
 		err = validateFileConfig(p.config.InventoryFile, "inventory_file", true)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
@@ -151,40 +151,40 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if len(p.config.GalaxyFile) > 0 {
 		err = validateFileConfig(p.config.GalaxyFile, "galaxy_file", true)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
 	// Check that the playbook_dir directory exists, if configured
 	if len(p.config.PlaybookDir) > 0 {
 		if err := validateDirConfig(p.config.PlaybookDir, "playbook_dir"); err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
 	// Check that the group_vars directory exists, if configured
 	if len(p.config.GroupVars) > 0 {
 		if err := validateDirConfig(p.config.GroupVars, "group_vars"); err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
 	// Check that the host_vars directory exists, if configured
 	if len(p.config.HostVars) > 0 {
 		if err := validateDirConfig(p.config.HostVars, "host_vars"); err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
 	for _, path := range p.config.PlaybookPaths {
 		err := validateDirConfig(path, "playbook_paths")
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 	for _, path := range p.config.RolePaths {
 		if err := validateDirConfig(path, "role_paths"); err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 

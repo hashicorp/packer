@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
@@ -38,13 +37,13 @@ func (s *stepPreValidate) validateRegions(state multistep.StateBag) error {
 
 	ui.Say("Prevalidating source region and copied regions...")
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if err := config.ValidateRegion(config.AlicloudRegion); err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 	for _, region := range config.AlicloudImageDestinationRegions {
 		if err := config.ValidateRegion(region); err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 

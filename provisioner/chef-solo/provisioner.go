@@ -159,14 +159,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if p.config.ConfigTemplate != "" {
 		fi, err := os.Stat(p.config.ConfigTemplate)
 		if err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Bad config template path: %s", err))
 		} else if fi.IsDir() {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Config template path must be a file: %s", err))
 		}
 	}
@@ -175,7 +175,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		pFileInfo, err := os.Stat(path)
 
 		if err != nil || !pFileInfo.IsDir() {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Bad cookbook path '%s': %s", path, err))
 		}
 	}
@@ -184,7 +184,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		pFileInfo, err := os.Stat(p.config.RolesPath)
 
 		if err != nil || !pFileInfo.IsDir() {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Bad roles path '%s': %s", p.config.RolesPath, err))
 		}
 	}
@@ -193,7 +193,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		pFileInfo, err := os.Stat(p.config.DataBagsPath)
 
 		if err != nil || !pFileInfo.IsDir() {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Bad data bags path '%s': %s", p.config.DataBagsPath, err))
 		}
 	}
@@ -202,7 +202,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		pFileInfo, err := os.Stat(p.config.EncryptedDataBagSecretPath)
 
 		if err != nil || pFileInfo.IsDir() {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Bad encrypted data bag secret '%s': %s", p.config.EncryptedDataBagSecretPath, err))
 		}
 	}
@@ -211,7 +211,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		pFileInfo, err := os.Stat(p.config.EnvironmentsPath)
 
 		if err != nil || !pFileInfo.IsDir() {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Bad environments path '%s': %s", p.config.EnvironmentsPath, err))
 		}
 	}
@@ -220,7 +220,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	for k, v := range p.config.Json {
 		p.config.Json[k], err = p.deepJsonFix(k, v)
 		if err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing JSON: %s", err))
 			jsonValid = false
 		}
@@ -231,7 +231,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		// Do this early so that we can validate and show errors.
 		p.config.Json, err = p.processJsonUserVars()
 		if err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing user variables in JSON: %s", err))
 		}
 	}

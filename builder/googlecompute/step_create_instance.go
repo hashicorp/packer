@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
@@ -21,7 +20,7 @@ type StepCreateInstance struct {
 func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string) (map[string]string, error) {
 	instanceMetadata := make(map[string]string)
 	var err error
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	// Copy metadata from config.
 	for k, v := range c.Metadata {
@@ -75,7 +74,7 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		var content []byte
 		content, err = ioutil.ReadFile(value)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 		instanceMetadata[key] = string(content)
 	}

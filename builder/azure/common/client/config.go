@@ -11,7 +11,7 @@ import (
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // Config allows for various ways to authenticate Azure clients.
@@ -120,7 +120,7 @@ func (c *Config) setCloudEnvironment() error {
 	return err
 }
 
-func (c Config) Validate(errs *packer.MultiError) {
+func (c Config) Validate(errs *packersdk.MultiError) {
 	/////////////////////////////////////////////
 	// Authentication via OAUTH
 
@@ -160,7 +160,7 @@ func (c Config) Validate(errs *packer.MultiError) {
 		// Service principal using certificate
 
 		if _, err := os.Stat(c.ClientCertPath); err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("client_cert_path is not an accessible file: %v", err))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("client_cert_path is not an accessible file: %v", err))
 		}
 		return
 	}
@@ -176,20 +176,20 @@ func (c Config) Validate(errs *packer.MultiError) {
 		claims := jwt.StandardClaims{}
 		token, _, err := p.ParseUnverified(c.ClientJWT, &claims)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("client_jwt is not a JWT: %v", err))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("client_jwt is not a JWT: %v", err))
 		} else {
 			if claims.ExpiresAt < time.Now().Add(5*time.Minute).Unix() {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("client_jwt will expire within 5 minutes, please use a JWT that is valid for at least 5 minutes"))
+				errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("client_jwt will expire within 5 minutes, please use a JWT that is valid for at least 5 minutes"))
 			}
 			if t, ok := token.Header["x5t"]; !ok || t == "" {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("client_jwt is missing the x5t header value, which is required for bearer JWT client authentication to Azure"))
+				errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("client_jwt is missing the x5t header value, which is required for bearer JWT client authentication to Azure"))
 			}
 		}
 
 		return
 	}
 
-	errs = packer.MultiErrorAppend(errs, fmt.Errorf("No valid set of authentication values specified:\n"+
+	errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("No valid set of authentication values specified:\n"+
 		"  to use the Managed Identity of the current machine, do not specify any of the fields below\n"+
 		"  to use interactive user authentication, specify only subscription_id\n"+
 		"  to use an Azure Active Directory service principal, specify either:\n"+

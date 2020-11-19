@@ -137,18 +137,18 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	// Accumulate any errors and warnings
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	warnings := make([]string, 0)
 
 	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
 	warnings = append(warnings, isoWarnings...)
-	errs = packer.MultiErrorAppend(errs, isoErrs...)
+	errs = packersdk.MultiErrorAppend(errs, isoErrs...)
 
-	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.CDConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(
+	errs = packersdk.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.CDConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(
 		errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
@@ -190,7 +190,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	case "ide", "sata", "scsi", "pcie":
 		// do nothing
 	default:
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("hard_drive_interface can only be ide, sata, pcie or scsi"))
 	}
 
@@ -199,7 +199,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	if b.config.SATAPortCount > 30 {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("sata_port_count cannot be greater than 30"))
 	}
 
@@ -208,12 +208,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	if b.config.NVMePortCount > 255 {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("nvme_port_count cannot be greater than 255"))
 	}
 
 	if b.config.ISOInterface != "ide" && b.config.ISOInterface != "sata" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("iso_interface can only be ide or sata"))
 	}
 

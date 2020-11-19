@@ -178,20 +178,20 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.KnifeCommand = p.guestOSTypeConfig.knifeCommand
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if p.config.ConfigTemplate != "" {
 		fi, err := os.Stat(p.config.ConfigTemplate)
 		if err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Bad config template path: %s", err))
 		} else if fi.IsDir() {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Config template path must be a file: %s", err))
 		}
 	}
 
 	if p.config.ServerUrl == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("server_url must be set"))
 	}
 
@@ -205,20 +205,20 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		pFileInfo, err := os.Stat(p.config.EncryptedDataBagSecretPath)
 
 		if err != nil || pFileInfo.IsDir() {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Bad encrypted data bag secret '%s': %s", p.config.EncryptedDataBagSecretPath, err))
 		}
 	}
 
 	if (p.config.PolicyName != "") != (p.config.PolicyGroup != "") {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If either policy_name or policy_group are set, they must both be set."))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("If either policy_name or policy_group are set, they must both be set."))
 	}
 
 	jsonValid := true
 	for k, v := range p.config.Json {
 		p.config.Json[k], err = p.deepJsonFix(k, v)
 		if err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing JSON: %s", err))
 			jsonValid = false
 		}
@@ -229,7 +229,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		// Do this early so that we can validate and show errors.
 		p.config.Json, err = p.processJsonUserVars()
 		if err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing user variables in JSON: %s", err))
 		}
 	}

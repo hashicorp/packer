@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
@@ -130,13 +130,13 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// Accumulate any errors
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
-	errs = packer.MultiErrorAppend(errs, c.AccessConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.AccessConfig.Prepare(&c.ctx)...)
 
 	if c.SerialLogFile != "" {
 		if _, err := os.Stat(c.SerialLogFile); os.IsExist(err) {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Serial log file %s already exist", c.SerialLogFile))
 		}
 	}
@@ -162,7 +162,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.ImageMinDiskSizeGb < c.DiskSizeGb {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			fmt.Errorf("Invalid image_min_disk_size value (%d): Must be equal or greate than disk_size_gb (%d)",
 				c.ImageMinDiskSizeGb, c.DiskSizeGb))
 	}
@@ -174,7 +174,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	if c.ImageName == "" {
 		img, err := interpolate.Render("packer-{{timestamp}}", nil)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Unable to render default image name: %s ", err))
 		} else {
 			c.ImageName = img
@@ -182,13 +182,13 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if len(c.ImageFamily) > 63 {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Invalid image family: Must not be longer than 63 characters"))
 	}
 
 	if c.ImageFamily != "" {
 		if !reImageFamily.MatchString(c.ImageFamily) {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				errors.New("Invalid image family: The first character must be a "+
 					"lowercase letter, and all following characters must be a dash, "+
 					"lowercase letter, or digit, except the last character, which cannot be a dash"))
@@ -211,17 +211,17 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if es := c.Communicator.Prepare(&c.ctx); len(es) > 0 {
-		errs = packer.MultiErrorAppend(errs, es...)
+		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 
 	// Process required parameters.
 	if c.SourceImageID == "" {
 		if c.SourceImageFamily == "" && c.SourceImageName == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("a source_image_name or source_image_family must be specified"))
 		}
 		if c.SourceImageFamily != "" && c.SourceImageName != "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("one of source_image_name or source_image_family must be specified, not both"))
 		}
 	}
@@ -239,7 +239,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.FolderID == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("a folder_id must be specified"))
 	}
 
@@ -249,7 +249,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	for key, file := range c.MetadataFromFile {
 		if _, err := os.Stat(file); err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("cannot access file '%s' with content for value of metadata key '%s': %s", file, key, err))
 		}
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -123,7 +124,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.GuestAdditionsConfig.Prepare(c.CommConfig.Comm.Type)...)
 
 	if c.SourcePath == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
 	}
 
 	if c.GuestAdditionsInterface == "" {

@@ -206,14 +206,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.config.Facter["packer_builder_type"] = p.config.PackerBuilderType
 
 	// Validation
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if p.config.HieraConfigPath != "" {
 		info, err := os.Stat(p.config.HieraConfigPath)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("hiera_config_path is invalid: %s", err))
 		} else if info.IsDir() {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("hiera_config_path must point to a file"))
 		}
 	}
@@ -221,21 +221,21 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.ManifestDir != "" {
 		info, err := os.Stat(p.config.ManifestDir)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("manifest_dir is invalid: %s", err))
 		} else if !info.IsDir() {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("manifest_dir must point to a directory"))
 		}
 	}
 
 	if p.config.ManifestFile == "" {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			fmt.Errorf("A manifest_file must be specified."))
 	} else {
 		_, err := os.Stat(p.config.ManifestFile)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("manifest_file is invalid: %s", err))
 		}
 	}
@@ -243,10 +243,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	for i, path := range p.config.ModulePaths {
 		info, err := os.Stat(path)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("module_path[%d] is invalid: %s", i, err))
 		} else if !info.IsDir() {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("module_path[%d] must point to a directory", i))
 		}
 	}

@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -105,7 +104,7 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 
 	var lock sync.Mutex
 	var wg sync.WaitGroup
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 	wg.Add(len(s.Regions))
 	for _, region := range s.Regions {
 		var regKeyID string
@@ -129,7 +128,7 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 			amis[region] = id
 			snapshots[region] = snapshotIds
 			if err != nil {
-				errs = packer.MultiErrorAppend(errs, err)
+				errs = packersdk.MultiErrorAppend(errs, err)
 			}
 		}(region)
 	}

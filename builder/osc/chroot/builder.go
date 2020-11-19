@@ -128,16 +128,16 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	// Accumulate any errors or warnings
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	var warns []string
 
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs,
+	errs = packersdk.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs,
 		b.config.OMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
 
 	for _, mounts := range b.config.ChrootMounts {
 		if len(mounts) != 3 {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("Each chroot_mounts entry should be three elements."))
 			break
 		}
@@ -148,28 +148,28 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			warns = append(warns, "source_omi and source_omi_filter are unused when from_scratch is true")
 		}
 		if b.config.RootVolumeSize == 0 {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("root_volume_size is required with from_scratch."))
 		}
 		if len(b.config.PreMountCommands) == 0 {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("pre_mount_commands is required with from_scratch."))
 		}
 		if b.config.OMIVirtType == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("omi_virtualization_type is required with from_scratch."))
 		}
 		if b.config.RootDeviceName == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("root_device_name is required with from_scratch."))
 		}
 		if len(b.config.OMIMappings) == 0 {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("omi_block_device_mappings is required with from_scratch."))
 		}
 	} else {
 		if b.config.SourceOMI == "" && b.config.SourceOMIFilter.Empty() {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("source_omi or source_omi_filter is required."))
 		}
 		if len(b.config.OMIMappings) != 0 {

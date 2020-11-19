@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
@@ -310,7 +310,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	// Set defaults.
 	if c.Network == "" && c.Subnetwork == "" {
@@ -333,7 +333,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	// monitoring relies on data gathered by Measured Boot.
 	if !c.EnableVtpm {
 		if c.EnableIntegrityMonitoring {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				errors.New("You cannot enable Integrity Monitoring when vTPM is disabled."))
 		}
 	}
@@ -343,7 +343,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.OnHostMaintenance == "MIGRATE" && c.Preemptible {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("on_host_maintenance must be TERMINATE when using preemptible instances."))
 	}
 	// Setting OnHostMaintenance Correct Defaults
@@ -359,14 +359,14 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Make sure user sets a valid value for on_host_maintenance option
 	if !(c.OnHostMaintenance == "MIGRATE" || c.OnHostMaintenance == "TERMINATE") {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("on_host_maintenance must be one of MIGRATE or TERMINATE."))
 	}
 
 	if c.ImageName == "" {
 		img, err := interpolate.Render("packer-{{timestamp}}", nil)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Unable to parse image name: %s ", err))
 		} else {
 			c.ImageName = img
@@ -377,27 +377,27 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	imageErrorText := "Invalid image %s %q: The first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash"
 
 	if len(c.ImageName) > 63 {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Invalid image name: Must not be longer than 63 characters"))
 	}
 
 	if !validImageName.MatchString(c.ImageName) {
-		errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "name", c.ImageName)))
+		errs = packersdk.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "name", c.ImageName)))
 	}
 
 	if len(c.ImageFamily) > 63 {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Invalid image family: Must not be longer than 63 characters"))
 	}
 
 	if c.ImageFamily != "" {
 		if !validImageName.MatchString(c.ImageFamily) {
-			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "family", c.ImageFamily)))
+			errs = packersdk.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "family", c.ImageFamily)))
 		}
 	}
 
 	if len(c.ImageStorageLocations) > 1 {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Invalid image storage locations: Must not have more than 1 region"))
 	}
 
@@ -419,7 +419,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Set up communicator
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
-		errs = packer.MultiErrorAppend(errs, es...)
+		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 
 	// set defaults for IAP
@@ -449,7 +449,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	if c.IAPConfig.IAP {
 		if !SupportsIAPTunnel(&c.Comm) {
 			err := fmt.Errorf("Error: IAP tunnel is not implemented for %s communicator", c.Comm.Type)
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 		// These configuration values are copied early to the generic host parameter when configuring
 		// StepConnect. As such they must be set now. Ideally we would handle this as part of
@@ -462,7 +462,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Process required parameters.
 	if c.ProjectId == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("a project_id must be specified"))
 	}
 
@@ -475,12 +475,12 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.SourceImage == "" && c.SourceImageFamily == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("a source_image or source_image_family must be specified"))
 	}
 
 	if c.Zone == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("a zone must be specified"))
 	}
 	if c.Region == "" && len(c.Zone) > 2 {
@@ -492,40 +492,40 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	// Authenticating via an account file
 	if c.AccountFile != "" {
 		if c.VaultGCPOauthEngine != "" && c.ImpersonateServiceAccount != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You cannot "+
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("You cannot "+
 				"specify impersonate_service_account, account_file and vault_gcp_oauth_engine at the same time"))
 		}
 		cfg, err := ProcessAccountFile(c.AccountFile)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 		c.account = cfg
 	}
 
 	if c.OmitExternalIP && c.Address != "" {
-		errs = packer.MultiErrorAppend(fmt.Errorf("you can not specify an external address when 'omit_external_ip' is true"))
+		errs = packersdk.MultiErrorAppend(fmt.Errorf("you can not specify an external address when 'omit_external_ip' is true"))
 	}
 
 	if c.OmitExternalIP && !c.UseInternalIP {
-		errs = packer.MultiErrorAppend(fmt.Errorf("'use_internal_ip' must be true if 'omit_external_ip' is true"))
+		errs = packersdk.MultiErrorAppend(fmt.Errorf("'use_internal_ip' must be true if 'omit_external_ip' is true"))
 	}
 
 	if c.AcceleratorCount > 0 && len(c.AcceleratorType) == 0 {
-		errs = packer.MultiErrorAppend(fmt.Errorf("'accelerator_type' must be set when 'accelerator_count' is more than 0"))
+		errs = packersdk.MultiErrorAppend(fmt.Errorf("'accelerator_type' must be set when 'accelerator_count' is more than 0"))
 	}
 
 	if c.AcceleratorCount > 0 && c.OnHostMaintenance != "TERMINATE" {
-		errs = packer.MultiErrorAppend(fmt.Errorf("'on_host_maintenance' must be set to 'TERMINATE' when 'accelerator_count' is more than 0"))
+		errs = packersdk.MultiErrorAppend(fmt.Errorf("'on_host_maintenance' must be set to 'TERMINATE' when 'accelerator_count' is more than 0"))
 	}
 
 	// If DisableDefaultServiceAccount is provided, don't allow a value for ServiceAccountEmail
 	if c.DisableDefaultServiceAccount && c.ServiceAccountEmail != "" {
-		errs = packer.MultiErrorAppend(fmt.Errorf("you may not specify a 'service_account_email' when 'disable_default_service_account' is true"))
+		errs = packersdk.MultiErrorAppend(fmt.Errorf("you may not specify a 'service_account_email' when 'disable_default_service_account' is true"))
 	}
 
 	if c.StartupScriptFile != "" {
 		if _, err := os.Stat(c.StartupScriptFile); err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("startup_script_file: %v", err))
 		}
 

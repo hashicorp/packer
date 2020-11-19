@@ -8,10 +8,10 @@ import (
 	"os"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/shutdowncommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -81,30 +81,30 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors and warnings
 	var warnings []string
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	runConfigWarnings, runConfigErrs := c.RunConfig.Prepare(&c.ctx, &c.DriverConfig)
 	warnings = append(warnings, runConfigWarnings...)
-	errs = packer.MultiErrorAppend(errs, runConfigErrs...)
-	errs = packer.MultiErrorAppend(errs, c.DriverConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
-	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.DiskConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, runConfigErrs...)
+	errs = packersdk.MultiErrorAppend(errs, c.DriverConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
+	errs = packersdk.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.DiskConfig.Prepare(&c.ctx)...)
 
 	if c.RemoteType == "" {
 		if c.SourcePath == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
 		} else {
 			if _, err := os.Stat(c.SourcePath); err != nil {
-				errs = packer.MultiErrorAppend(errs,
+				errs = packersdk.MultiErrorAppend(errs,
 					fmt.Errorf("source_path is invalid: %s", err))
 			}
 		}
@@ -141,7 +141,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	err = c.DriverConfig.Validate(c.SkipExport)
 	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
 	if c.ShutdownCommand == "" {

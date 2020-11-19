@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
@@ -148,38 +149,38 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		c.SnapshotTimeout = 60 * time.Minute
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
-		errs = packer.MultiErrorAppend(errs, es...)
+		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 	if c.APIToken == "" {
 		// Required configurations that will display errors if not set
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("api_token for auth must be specified"))
 	}
 
 	if c.Region == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("region is required"))
 	}
 
 	if c.Size == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("size is required"))
 	}
 
 	if c.Image == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("image is required"))
 	}
 
 	if c.UserData != "" && c.UserDataFile != "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("only one of user_data or user_data_file can be specified"))
 	} else if c.UserDataFile != "" {
 		if _, err := os.Stat(c.UserDataFile); err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New(fmt.Sprintf("user_data_file not found: %s", c.UserDataFile)))
 		}
 	}
@@ -191,7 +192,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	for _, t := range c.Tags {
 		if !tagRe.MatchString(t) {
-			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("invalid tag: %s", t)))
+			errs = packersdk.MultiErrorAppend(errs, errors.New(fmt.Sprintf("invalid tag: %s", t)))
 		}
 	}
 

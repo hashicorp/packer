@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	ocicommon "github.com/oracle/oci-go-sdk/common"
@@ -129,9 +130,9 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		return fmt.Errorf("Failed to mapstructure Config: %+v", err)
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
-		errs = packer.MultiErrorAppend(errs, es...)
+		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 
 	var tenancyOCID string
@@ -143,28 +144,28 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		// key involved.
 		var message string = " cannot be present when use_instance_principals is set to true."
 		if c.AccessCfgFile != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("access_cfg_file"+message))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("access_cfg_file"+message))
 		}
 		if c.AccessCfgFileAccount != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("access_cfg_file_account"+message))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("access_cfg_file_account"+message))
 		}
 		if c.UserID != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("user_ocid"+message))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("user_ocid"+message))
 		}
 		if c.TenancyID != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("tenancy_ocid"+message))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("tenancy_ocid"+message))
 		}
 		if c.Region != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("region"+message))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("region"+message))
 		}
 		if c.Fingerprint != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("fingerprint"+message))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("fingerprint"+message))
 		}
 		if c.KeyFile != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("key_file"+message))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("key_file"+message))
 		}
 		if c.PassPhrase != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("pass_phrase"+message))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("pass_phrase"+message))
 		}
 		// This check is used to facilitate testing. During testing a Mock struct
 		// is assigned to c.configProvider otherwise testing fails because Instance
@@ -235,23 +236,23 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		}
 
 		if userOCID, _ := configProvider.UserOCID(); userOCID == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("'user_ocid' must be specified"))
 		}
 
 		tenancyOCID, _ = configProvider.TenancyOCID()
 		if tenancyOCID == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("'tenancy_ocid' must be specified"))
 		}
 
 		if fingerprint, _ := configProvider.KeyFingerprint(); fingerprint == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("'fingerprint' must be specified"))
 		}
 
 		if _, err := configProvider.PrivateRSAKey(); err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("'key_file' must be specified"))
 		}
 
@@ -259,7 +260,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	}
 
 	if c.AvailabilityDomain == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("'availability_domain' must be specified"))
 	}
 
@@ -272,12 +273,12 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	}
 
 	if c.Shape == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("'shape' must be specified"))
 	}
 
 	if (c.SubnetID == "") && (c.CreateVnicDetails.SubnetId == nil) {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("'subnet_ocid' must be specified"))
 	}
 
@@ -289,7 +290,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	}
 
 	if (c.BaseImageID == "") && (c.BaseImageFilter == ListImagesRequest{}) {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("'base_image_ocid' or 'base_image_filter' must be specified"))
 	}
 
@@ -307,19 +308,19 @@ func (c *Config) Prepare(raws ...interface{}) error {
 			k = strings.TrimSpace(k)
 			v = strings.TrimSpace(v)
 			if len(k) > 100 {
-				errs = packer.MultiErrorAppend(
+				errs = packersdk.MultiErrorAppend(
 					errs, fmt.Errorf("Tag key length too long. Maximum 100 but found %d. Key: %s", len(k), k))
 			}
 			if len(k) == 0 {
-				errs = packer.MultiErrorAppend(
+				errs = packersdk.MultiErrorAppend(
 					errs, errors.New("Tag key empty in config"))
 			}
 			if len(v) > 100 {
-				errs = packer.MultiErrorAppend(
+				errs = packersdk.MultiErrorAppend(
 					errs, fmt.Errorf("Tag value length too long. Maximum 100 but found %d. Key: %s", len(v), k))
 			}
 			if len(v) == 0 {
-				errs = packer.MultiErrorAppend(
+				errs = packersdk.MultiErrorAppend(
 					errs, errors.New("Tag value empty in config"))
 			}
 		}
@@ -328,7 +329,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	if c.ImageName == "" {
 		name, err := interpolate.Render("packer-{{timestamp}}", nil)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("unable to parse image name: %s", err))
 		} else {
 			c.ImageName = name
@@ -337,17 +338,17 @@ func (c *Config) Prepare(raws ...interface{}) error {
 
 	// Optional UserData config
 	if c.UserData != "" && c.UserDataFile != "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Only one of user_data or user_data_file can be specified."))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Only one of user_data or user_data_file can be specified."))
 	} else if c.UserDataFile != "" {
 		if _, err := os.Stat(c.UserDataFile); err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("user_data_file not found: %s", c.UserDataFile))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("user_data_file not found: %s", c.UserDataFile))
 		}
 	}
 	// read UserDataFile into string.
 	if c.UserDataFile != "" {
 		fiData, err := ioutil.ReadFile(c.UserDataFile)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Problem reading user_data_file: %s", err))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Problem reading user_data_file: %s", err))
 		}
 		c.UserData = string(fiData)
 	}
@@ -364,7 +365,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	if c.BootVolumeSizeInGBs == 0 {
 		c.BootVolumeSizeInGBs = 50
 	} else if c.BootVolumeSizeInGBs < 50 || c.BootVolumeSizeInGBs > 16384 {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("'disk_size' must be between 50 and 16384 GBs"))
 	}
 

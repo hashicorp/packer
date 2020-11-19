@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -67,10 +66,10 @@ type ContentLibraryDestinationConfig struct {
 }
 
 func (c *ContentLibraryDestinationConfig) Prepare(lc *LocationConfig) []error {
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	if c.Library == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("a library name must be provided"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("a library name must be provided"))
 	}
 
 	if c.Ovf {
@@ -79,7 +78,7 @@ func (c *ContentLibraryDestinationConfig) Prepare(lc *LocationConfig) []error {
 		}
 	} else {
 		if c.Name == lc.VMName {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the content library destination name must be different from the VM name"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("the content library destination name must be different from the VM name"))
 		}
 
 		if c.Name == "" {
@@ -87,7 +86,7 @@ func (c *ContentLibraryDestinationConfig) Prepare(lc *LocationConfig) []error {
 			// otherwise vSphere won't be able to create the template which will be imported
 			name, err := interpolate.Render(lc.VMName+"{{timestamp}}", nil)
 			if err != nil {
-				errs = packer.MultiErrorAppend(errs,
+				errs = packersdk.MultiErrorAppend(errs,
 					fmt.Errorf("unable to parse content library VM template name: %s", err))
 			}
 			c.Name = name

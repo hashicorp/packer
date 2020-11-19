@@ -6,9 +6,9 @@ package clone
 import (
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	packerCommon "github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -67,33 +67,33 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// warnings := make([]string, 0)
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
-	errs = packer.MultiErrorAppend(errs, c.ConnectConfig.Prepare()...)
-	errs = packer.MultiErrorAppend(errs, c.CloneConfig.Prepare()...)
-	errs = packer.MultiErrorAppend(errs, c.LocationConfig.Prepare()...)
-	errs = packer.MultiErrorAppend(errs, c.HardwareConfig.Prepare()...)
-	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.ConnectConfig.Prepare()...)
+	errs = packersdk.MultiErrorAppend(errs, c.CloneConfig.Prepare()...)
+	errs = packersdk.MultiErrorAppend(errs, c.LocationConfig.Prepare()...)
+	errs = packersdk.MultiErrorAppend(errs, c.HardwareConfig.Prepare()...)
+	errs = packersdk.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 
-	errs = packer.MultiErrorAppend(errs, c.CDRomConfig.Prepare()...)
-	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.WaitIpConfig.Prepare()...)
-	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.CDRomConfig.Prepare()...)
+	errs = packersdk.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.WaitIpConfig.Prepare()...)
+	errs = packersdk.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
 
 	_, shutdownErrs := c.ShutdownConfig.Prepare(c.Comm)
 	// shutdownWarnings, shutdownErrs := c.ShutdownConfig.Prepare(c.Comm)
 	// warnings = append(warnings, shutdownWarnings...)
-	errs = packer.MultiErrorAppend(errs, shutdownErrs...)
+	errs = packersdk.MultiErrorAppend(errs, shutdownErrs...)
 
 	if c.Export != nil {
-		errs = packer.MultiErrorAppend(errs, c.Export.Prepare(&c.ctx, &c.LocationConfig, &c.PackerConfig)...)
+		errs = packersdk.MultiErrorAppend(errs, c.Export.Prepare(&c.ctx, &c.LocationConfig, &c.PackerConfig)...)
 	}
 	if c.ContentLibraryDestinationConfig != nil {
-		errs = packer.MultiErrorAppend(errs, c.ContentLibraryDestinationConfig.Prepare(&c.LocationConfig)...)
+		errs = packersdk.MultiErrorAppend(errs, c.ContentLibraryDestinationConfig.Prepare(&c.LocationConfig)...)
 	}
 	if c.CustomizeConfig != nil {
-		errs = packer.MultiErrorAppend(errs, c.CustomizeConfig.Prepare()...)
+		errs = packersdk.MultiErrorAppend(errs, c.CustomizeConfig.Prepare()...)
 	}
 
 	if len(errs.Errors) > 0 {

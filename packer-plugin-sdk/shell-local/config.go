@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/shell"
 	configHelper "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -67,7 +67,7 @@ func Decode(config *Config, raws ...interface{}) error {
 }
 
 func Validate(config *Config) error {
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	if runtime.GOOS == "windows" {
 		if len(config.ExecuteCommand) == 0 {
@@ -112,7 +112,7 @@ func Validate(config *Config) error {
 	// Verify that the user has given us a command to run
 	if config.Command == "" && len(config.Inline) == 0 &&
 		len(config.Scripts) == 0 && config.Script == "" {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Command, Inline, Script and Scripts options cannot all be empty."))
 	}
 
@@ -123,7 +123,7 @@ func Validate(config *Config) error {
 
 	if config.Command != "" {
 		if len(config.Inline) != 0 || len(config.Scripts) != 0 || config.Script != "" {
-			errs = packer.MultiErrorAppend(errs, tooManyOptionsErr)
+			errs = packersdk.MultiErrorAppend(errs, tooManyOptionsErr)
 		} else {
 			config.Inline = []string{config.Command}
 		}
@@ -131,20 +131,20 @@ func Validate(config *Config) error {
 
 	if config.Script != "" {
 		if len(config.Scripts) > 0 || len(config.Inline) > 0 {
-			errs = packer.MultiErrorAppend(errs, tooManyOptionsErr)
+			errs = packersdk.MultiErrorAppend(errs, tooManyOptionsErr)
 		} else {
 			config.Scripts = []string{config.Script}
 		}
 	}
 
 	if len(config.Scripts) > 0 && config.Inline != nil {
-		errs = packer.MultiErrorAppend(errs, tooManyOptionsErr)
+		errs = packersdk.MultiErrorAppend(errs, tooManyOptionsErr)
 	}
 
 	// Check that all scripts we need to run exist locally
 	for _, path := range config.Scripts {
 		if _, err := os.Stat(path); err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Bad script '%s': %s", path, err))
 		}
 	}
@@ -182,7 +182,7 @@ func Validate(config *Config) error {
 		// Interoperability issues with WSL makes creating and running tempfiles
 		// via golang's os package basically impossible.
 		if len(config.Inline) > 0 {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Packer is unable to use the Command and Inline "+
 					"features with the Windows Linux Subsystem. Please use "+
 					"the Script or Scripts options instead"))
@@ -208,7 +208,7 @@ func Validate(config *Config) error {
 	for _, kv := range config.Vars {
 		vs := strings.SplitN(kv, "=", 2)
 		if len(vs) != 2 || vs[0] == "" {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
 		}
 	}

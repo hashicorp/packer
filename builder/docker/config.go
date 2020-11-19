@@ -8,8 +8,8 @@ import (
 	"os"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/mitchellh/mapstructure"
@@ -169,25 +169,25 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
-		errs = packer.MultiErrorAppend(errs, es...)
+		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 	if c.Image == "" {
-		errs = packer.MultiErrorAppend(errs, errImageNotSpecified)
+		errs = packersdk.MultiErrorAppend(errs, errImageNotSpecified)
 	}
 
 	if (c.ExportPath != "" && c.Commit) || (c.ExportPath != "" && c.Discard) || (c.Commit && c.Discard) {
-		errs = packer.MultiErrorAppend(errs, errArtifactUseConflict)
+		errs = packersdk.MultiErrorAppend(errs, errArtifactUseConflict)
 	}
 
 	if c.ExportPath == "" && !c.Commit && !c.Discard {
-		errs = packer.MultiErrorAppend(errs, errArtifactNotUsed)
+		errs = packersdk.MultiErrorAppend(errs, errArtifactNotUsed)
 	}
 
 	if c.ExportPath != "" {
 		if fi, err := os.Stat(c.ExportPath); err == nil && fi.IsDir() {
-			errs = packer.MultiErrorAppend(errs, errExportPathNotFile)
+			errs = packersdk.MultiErrorAppend(errs, errExportPathNotFile)
 		}
 	}
 
@@ -200,7 +200,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.EcrLogin && c.LoginServer == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("ECR login requires login server to be provided."))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("ECR login requires login server to be provided."))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

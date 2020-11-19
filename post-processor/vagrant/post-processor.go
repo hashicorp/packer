@@ -272,11 +272,11 @@ func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {
 		c.CompressionLevel = flate.DefaultCompression
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if c.VagrantfileTemplate != "" && c.VagrantfileTemplateGenerated == false {
 		_, err := os.Stat(c.VagrantfileTemplate)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf(
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf(
 				"vagrantfile_template '%s' does not exist", c.VagrantfileTemplate))
 		}
 	}

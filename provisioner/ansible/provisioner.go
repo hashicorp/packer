@@ -251,17 +251,17 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.HostAlias = "default"
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	err = validateFileConfig(p.config.PlaybookFile, "playbook_file", true)
 	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
 	// Check that the galaxy file exists, if configured
 	if len(p.config.GalaxyFile) > 0 {
 		err = validateFileConfig(p.config.GalaxyFile, "galaxy_file", true)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
@@ -270,14 +270,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		err = validateFileConfig(p.config.SSHAuthorizedKeyFile, "ssh_authorized_key_file", true)
 		if err != nil {
 			log.Println(p.config.SSHAuthorizedKeyFile, "does not exist")
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 	if len(p.config.SSHHostKeyFile) > 0 {
 		err = validateFileConfig(p.config.SSHHostKeyFile, "ssh_host_key_file", true)
 		if err != nil {
 			log.Println(p.config.SSHHostKeyFile, "does not exist")
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	} else {
 		p.config.AnsibleEnvVars = append(p.config.AnsibleEnvVars, "ANSIBLE_HOST_KEY_CHECKING=False")
@@ -288,21 +288,21 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.LocalPort > 65535 {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("local_port: %d must be a valid port", p.config.LocalPort))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("local_port: %d must be a valid port", p.config.LocalPort))
 	}
 
 	if len(p.config.InventoryDirectory) > 0 {
 		err = validateInventoryDirectoryConfig(p.config.InventoryDirectory)
 		if err != nil {
 			log.Println(p.config.InventoryDirectory, "does not exist")
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
 	if !p.config.SkipVersionCheck {
 		err = p.getVersion()
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
@@ -310,13 +310,13 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.userWasEmpty = true
 		usr, err := user.Current()
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		} else {
 			p.config.User = usr.Username
 		}
 	}
 	if p.config.User == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))
 	}
 
 	// These fields exist so that we can replace the functions for testing

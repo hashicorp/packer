@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
@@ -95,46 +96,46 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		c.ServerName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
-		errs = packer.MultiErrorAppend(errs, es...)
+		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 	if c.HCloudToken == "" {
 		// Required configurations that will display errors if not set
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("token for auth must be specified"))
 	}
 
 	if c.Location == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("location is required"))
 	}
 
 	if c.ServerType == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("server type is required"))
 	}
 
 	if c.Image == "" && c.ImageFilter == nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("image or image_filter is required"))
 	}
 	if c.ImageFilter != nil {
 		if len(c.ImageFilter.WithSelector) == 0 {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("image_filter.with_selector is required when specifying filter"))
 		} else if c.Image != "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("only one of image or image_filter can be specified"))
 		}
 	}
 
 	if c.UserData != "" && c.UserDataFile != "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("only one of user_data or user_data_file can be specified"))
 	} else if c.UserDataFile != "" {
 		if _, err := os.Stat(c.UserDataFile); err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New(fmt.Sprintf("user_data_file not found: %s", c.UserDataFile)))
 		}
 	}

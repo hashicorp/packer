@@ -151,40 +151,40 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.TempConfigDir = p.guestOSTypeConfig.tempDir
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	// require a salt state tree
 	err = validateDirConfig(p.config.LocalStateTree, "local_state_tree", true)
 	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
 	if p.config.Formulas != nil && len(p.config.Formulas) > 0 {
 
 		validURLs := hasValidFormulaURLs(p.config.Formulas)
 		if !validURLs {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid formula URL. Please verify the git URLs also contain a '//' subdir"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Invalid formula URL. Please verify the git URLs also contain a '//' subdir"))
 		}
 	}
 
 	err = validateDirConfig(p.config.LocalPillarRoots, "local_pillar_roots", false)
 	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
 	err = validateFileConfig(p.config.MinionConfig, "minion_config", false)
 	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
 	if p.config.MinionConfig != "" && (p.config.RemoteStateTree != "" || p.config.RemotePillarRoots != "") {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("remote_state_tree and remote_pillar_roots only apply when minion_config is not used"))
 	}
 
 	err = validateFileConfig(p.config.GrainsFile, "grains_file", false)
 	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
 	// build the command line args to pass onto salt

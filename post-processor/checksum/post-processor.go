@@ -67,7 +67,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	if p.config.ChecksumTypes == nil {
 		p.config.ChecksumTypes = []string{"md5"}
@@ -75,7 +75,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	for _, k := range p.config.ChecksumTypes {
 		if h := getHash(k); h == nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Unrecognized checksum type: %s", k))
 		}
 	}
@@ -85,7 +85,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if err = interpolate.Validate(p.config.OutputPath, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing target template: %s", err))
 	}
 

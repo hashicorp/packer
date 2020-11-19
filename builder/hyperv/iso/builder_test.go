@@ -12,6 +12,7 @@ import (
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -240,7 +241,7 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 		t.Fatalf("Nonexistent floppies should trigger multierror")
 	}
 
-	if len(errs.(*packer.MultiError).Errors) != 2 {
+	if len(errs.(*packersdk.MultiError).Errors) != 2 {
 		t.Fatalf("Multierror should work and report 2 errors")
 	}
 }

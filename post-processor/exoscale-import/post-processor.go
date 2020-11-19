@@ -89,10 +89,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		"template_description": &p.config.TemplateDescription,
 	}
 
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 	for k, v := range requiredArgs {
 		if *v == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", k))
 		}
 	}

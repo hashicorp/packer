@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -80,7 +80,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	}
 
 	// Validate that all required fields are present
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	required := map[string]string{
 		"username":          c.Username,
 		"password":          c.Password,
@@ -92,7 +92,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	}
 	for k, v := range required {
 		if v == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You must specify a %s.", k))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("You must specify a %s.", k))
 		}
 	}
 
@@ -107,20 +107,20 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	}
 	for _, ov := range objectValidation {
 		if !reValidObject.MatchString(ov.value) {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s can contain only alphanumeric characters, hyphens, underscores, and periods.", ov.name))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("%s can contain only alphanumeric characters, hyphens, underscores, and periods.", ov.name))
 		}
 	}
 
 	if c.Attributes != "" && c.AttributesFile != "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Only one of user_data or user_data_file can be specified."))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Only one of user_data or user_data_file can be specified."))
 	} else if c.AttributesFile != "" {
 		if _, err := os.Stat(c.AttributesFile); err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("attributes_file not found: %s", c.AttributesFile))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("attributes_file not found: %s", c.AttributesFile))
 		}
 	}
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
-		errs = packer.MultiErrorAppend(errs, es...)
+		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -134,20 +134,20 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		err := json.Unmarshal([]byte(c.Attributes), &data)
 		if err != nil {
 			err = fmt.Errorf("Problem parsing json from attributes: %s", err)
-			packer.MultiErrorAppend(errs, err)
+			packersdk.MultiErrorAppend(errs, err)
 		}
 		c.attribs = data
 	} else if c.AttributesFile != "" {
 		fidata, err := ioutil.ReadFile(c.AttributesFile)
 		if err != nil {
 			err = fmt.Errorf("Problem reading attributes_file: %s", err)
-			packer.MultiErrorAppend(errs, err)
+			packersdk.MultiErrorAppend(errs, err)
 		}
 		err = json.Unmarshal(fidata, &data)
 		c.attribs = data
 		if err != nil {
 			err = fmt.Errorf("Problem parsing json from attributes_file: %s", err)
-			packer.MultiErrorAppend(errs, err)
+			packersdk.MultiErrorAppend(errs, err)
 		}
 		c.attribs = data
 	}

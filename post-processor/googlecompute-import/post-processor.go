@@ -100,7 +100,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	// Set defaults
 	if p.config.GCSObjectName == "" {
@@ -109,18 +109,18 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	// Check and render gcs_object_name
 	if err = interpolate.Validate(p.config.GCSObjectName, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing gcs_object_name template: %s", err))
 	}
 
 	if p.config.AccountFile != "" {
 		if p.config.VaultGCPOauthEngine != "" && p.config.ImpersonateServiceAccount != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You cannot "+
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("You cannot "+
 				"specify impersonate_service_account, account_file and vault_gcp_oauth_engine at the same time"))
 		}
 		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 		p.config.account = cfg
 	}
@@ -132,7 +132,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 	for key, ptr := range templates {
 		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
 	}

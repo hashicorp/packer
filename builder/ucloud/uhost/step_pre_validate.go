@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
@@ -38,14 +37,14 @@ func (s *stepPreValidate) validateProjectIds(state multistep.StateBag) error {
 
 	ui.Say("Validating project_id and copied project_ids...")
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if err := config.ValidateProjectId(s.ProjectId); err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
 	for _, imageDestination := range s.ImageDestinations {
 		if err := config.ValidateProjectId(imageDestination.ProjectId); err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
@@ -62,13 +61,13 @@ func (s *stepPreValidate) validateRegions(state multistep.StateBag) error {
 
 	ui.Say("Validating region and copied regions...")
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if err := config.ValidateRegion(s.Region); err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 	for _, imageDestination := range s.ImageDestinations {
 		if err := config.ValidateRegion(imageDestination.Region); err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
@@ -85,9 +84,9 @@ func (s *stepPreValidate) validateZones(state multistep.StateBag) error {
 
 	ui.Say("Validating availability_zone...")
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if err := config.ValidateZone(s.Region, s.Zone); err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

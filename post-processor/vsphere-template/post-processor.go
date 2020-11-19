@@ -69,7 +69,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 	vc := map[string]*string{
 		"host":     &p.config.Host,
 		"username": &p.config.Username,
@@ -78,19 +78,19 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	for key, ptr := range vc {
 		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
 	}
 
 	if p.config.Folder != "" && !strings.HasPrefix(p.config.Folder, "/") {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Folder must be bound to the root"))
 	}
 
 	sdk, err := url.Parse(fmt.Sprintf("https://%v/sdk", p.config.Host))
 	if err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Error invalid vSphere sdk endpoint: %s", err))
 		return errs
 	}

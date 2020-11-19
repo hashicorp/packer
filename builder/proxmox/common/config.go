@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
@@ -119,7 +120,7 @@ func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []st
 		return nil, nil, err
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	var warnings []string
 
 	packer.LogSecretFilter.Set(c.Password)
@@ -138,7 +139,7 @@ func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []st
 		var err error
 		c.BootKeyInterval, err = time.ParseDuration(os.Getenv(bootcommand.PackerKeyEnv))
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 	if c.BootKeyInterval == 0 {
@@ -191,11 +192,11 @@ func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []st
 		if c.Disks[idx].IOThread {
 			// io thread is only supported by virtio-scsi-single controller
 			if c.SCSIController != "virtio-scsi-single" {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("io thread option requires virtio-scsi-single controller"))
+				errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("io thread option requires virtio-scsi-single controller"))
 			} else {
 				// ... and only for virtio and scsi disks
 				if !(c.Disks[idx].Type == "scsi" || c.Disks[idx].Type == "virtio") {
-					errs = packer.MultiErrorAppend(errs, fmt.Errorf("io thread option requires scsi or a virtio disk"))
+					errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("io thread option requires scsi or a virtio disk"))
 				}
 			}
 		}
@@ -203,7 +204,7 @@ func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []st
 		// (currently zfspool|lvm|rbd|cephfs), the format parameter is mandatory. Make sure this is still up to date
 		// when updating the vendored code!
 		if !contains([]string{"zfspool", "lvm", "rbd", "cephfs"}, c.Disks[idx].StoragePoolType) && c.Disks[idx].DiskFormat == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("disk format must be specified for pool type %q", c.Disks[idx].StoragePoolType))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("disk format must be specified for pool type %q", c.Disks[idx].StoragePoolType))
 		}
 	}
 	if c.SCSIController == "" {
@@ -211,43 +212,43 @@ func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []st
 		c.SCSIController = "lsi"
 	}
 
-	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.Ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.Ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.Ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.Comm.Prepare(&c.Ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.Ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.Ctx)...)
 
 	// Required configurations that will display errors if not set
 	if c.Username == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("username must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("username must be specified"))
 	}
 	if c.Password == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("password must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("password must be specified"))
 	}
 	if c.ProxmoxURLRaw == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("proxmox_url must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("proxmox_url must be specified"))
 	}
 	if c.proxmoxURL, err = url.Parse(c.ProxmoxURLRaw); err != nil {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Could not parse proxmox_url: %s", err))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Could not parse proxmox_url: %s", err))
 	}
 	if c.Node == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("node must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("node must be specified"))
 	}
 	if strings.ContainsAny(c.TemplateName, " ") {
-		errs = packer.MultiErrorAppend(errs, errors.New("template_name must not contain spaces"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("template_name must not contain spaces"))
 	}
 	for idx := range c.NICs {
 		if c.NICs[idx].Bridge == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("network_adapters[%d].bridge must be specified", idx))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("network_adapters[%d].bridge must be specified", idx))
 		}
 		if c.NICs[idx].Model != "virtio" && c.NICs[idx].PacketQueues > 0 {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("network_adapters[%d].packet_queues can only be set for 'virtio' driver", idx))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("network_adapters[%d].packet_queues can only be set for 'virtio' driver", idx))
 		}
 	}
 	for idx := range c.Disks {
 		if c.Disks[idx].StoragePool == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("disks[%d].storage_pool must be specified", idx))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("disks[%d].storage_pool must be specified", idx))
 		}
 		if c.Disks[idx].StoragePoolType == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("disks[%d].storage_pool_type must be specified", idx))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("disks[%d].storage_pool_type must be specified", idx))
 		}
 	}
 

@@ -113,20 +113,20 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	// Accumulate any errors
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	var warns []string
-	errs = packer.MultiErrorAppend(errs, b.config.VolumeRunTag.CopyOn(&b.config.VolumeRunTags)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.VolumeRunTag.CopyOn(&b.config.VolumeRunTags)...)
 
-	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs,
+	errs = packersdk.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs,
 		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AMIMappings.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.LaunchMappings.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RootDevice.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.AMIMappings.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.LaunchMappings.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.RootDevice.Prepare(&b.config.ctx)...)
 
 	if b.config.AMIVirtType == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("ami_virtualization_type is required."))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("ami_virtualization_type is required."))
 	}
 
 	foundRootVolume := false
@@ -134,13 +134,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		if launchDevice.DeviceName == b.config.RootDevice.SourceDeviceName {
 			foundRootVolume = true
 			if launchDevice.OmitFromArtifact {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("You cannot set \"omit_from_artifact\": \"true\" for the root volume."))
+				errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("You cannot set \"omit_from_artifact\": \"true\" for the root volume."))
 			}
 		}
 	}
 
 	if !foundRootVolume {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("no volume with name '%s' is found", b.config.RootDevice.SourceDeviceName))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("no volume with name '%s' is found", b.config.RootDevice.SourceDeviceName))
 	}
 
 	if b.config.RunConfig.SpotPriceAutoProduct != "" {
@@ -162,7 +162,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		}
 	}
 	if !valid {
-		errs = packer.MultiErrorAppend(errs, errors.New(`The only valid ami_architecture values are "x86_64" and "arm64"`))
+		errs = packersdk.MultiErrorAppend(errs, errors.New(`The only valid ami_architecture values are "x86_64" and "arm64"`))
 	}
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, warns, errs

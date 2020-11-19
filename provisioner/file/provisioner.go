@@ -84,10 +84,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.Direction = "upload"
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	if p.config.Direction != "download" && p.config.Direction != "upload" {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Direction must be one of: download, upload."))
 	}
 	if p.config.Source != "" {
@@ -97,19 +97,19 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.Direction == "upload" {
 		for _, src := range p.config.Sources {
 			if _, err := os.Stat(src); p.config.Generated == false && err != nil {
-				errs = packer.MultiErrorAppend(errs,
+				errs = packersdk.MultiErrorAppend(errs,
 					fmt.Errorf("Bad source '%s': %s", src, err))
 			}
 		}
 	}
 
 	if len(p.config.Sources) < 1 {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Source must be specified."))
 	}
 
 	if p.config.Destination == "" {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Destination must be specified."))
 	}
 

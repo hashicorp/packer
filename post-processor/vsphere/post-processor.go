@@ -82,14 +82,14 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// Accumulate any errors
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	if runtime.GOOS == "windows" {
 		ovftool = "ovftool.exe"
 	}
 
 	if _, err := exec.LookPath(ovftool); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("ovftool not found: %s", err))
 	}
 
@@ -105,7 +105,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 	for key, ptr := range templates {
 		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
 	}

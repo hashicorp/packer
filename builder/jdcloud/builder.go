@@ -31,9 +31,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		return nil, nil, fmt.Errorf("[ERROR] Failed in decoding JSON->mapstructure")
 	}
 
-	errs := &packer.MultiError{}
-	errs = packer.MultiErrorAppend(errs, b.config.JDCloudCredentialConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.JDCloudInstanceSpecConfig.Prepare(&b.config.ctx)...)
+	errs := &packersdk.MultiError{}
+	errs = packersdk.MultiErrorAppend(errs, b.config.JDCloudCredentialConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.JDCloudInstanceSpecConfig.Prepare(&b.config.ctx)...)
 	if errs != nil && len(errs.Errors) != 0 {
 		return nil, nil, errs
 	}

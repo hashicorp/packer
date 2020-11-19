@@ -198,14 +198,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.config.Facter["packer_build_name"] = p.config.PackerBuildName
 	p.config.Facter["packer_builder_type"] = p.config.PackerBuilderType
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if p.config.ClientCertPath != "" {
 		info, err := os.Stat(p.config.ClientCertPath)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("client_cert_dir is invalid: %s", err))
 		} else if !info.IsDir() {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("client_cert_dir must point to a directory"))
 		}
 	}
@@ -213,10 +213,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.ClientPrivateKeyPath != "" {
 		info, err := os.Stat(p.config.ClientPrivateKeyPath)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("client_private_key_dir is invalid: %s", err))
 		} else if !info.IsDir() {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("client_private_key_dir must point to a directory"))
 		}
 	}

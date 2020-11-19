@@ -82,9 +82,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// Accumulate any errors
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
-	errs = packer.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
 
 	if p.config.FolderID == "" {
 		p.config.FolderID = os.Getenv("YC_FOLDER_ID")
@@ -97,7 +97,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	// Check and render object_name
 	if err = interpolate.Validate(p.config.ObjectName, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("error parsing object_name template: %s", err))
 	}
 
@@ -110,7 +110,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	for key, ptr := range templates {
 		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
 	}

@@ -130,18 +130,18 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	// Check and render oss_key_name
 	if err = interpolate.Validate(p.config.OSSKey, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing oss_key_name template: %s", err))
 	}
 
-	errs = packer.MultiErrorAppend(errs, p.config.AlicloudImageTag.CopyOn(&p.config.AlicloudImageTags)...)
+	errs = packersdk.MultiErrorAppend(errs, p.config.AlicloudImageTag.CopyOn(&p.config.AlicloudImageTags)...)
 
 	// Check we have alicloud access variables defined somewhere
-	errs = packer.MultiErrorAppend(errs, p.config.AlicloudAccessConfig.Prepare(&p.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, p.config.AlicloudAccessConfig.Prepare(&p.config.ctx)...)
 
 	// define all our required parameters
 	templates := map[string]*string{
@@ -150,7 +150,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Check out required params are defined
 	for key, ptr := range templates {
 		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
 	}

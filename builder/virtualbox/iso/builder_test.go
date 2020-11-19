@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -132,7 +133,7 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 		t.Fatalf("Nonexistent floppies should trigger multierror")
 	}
 
-	if len(errs.(*packer.MultiError).Errors) != 2 {
+	if len(errs.(*packersdk.MultiError).Errors) != 2 {
 		t.Fatalf("Multierror should work and report 2 errors")
 	}
 }

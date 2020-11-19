@@ -18,7 +18,6 @@ import (
 	oslogin "google.golang.org/api/oslogin/v1"
 
 	"github.com/hashicorp/packer/builder/googlecompute/version"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 	"github.com/hashicorp/packer/packer-plugin-sdk/useragent"
@@ -263,7 +262,7 @@ func (d *driverGCE) GetImageFromProjects(projects []string, name string, fromFam
 	for _, project := range projects {
 		image, err := d.GetImageFromProject(project, name, fromFamily)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 		if image != nil {
 			return image, nil
@@ -676,7 +675,7 @@ func (d *driverGCE) refreshGlobalOp(op *compute.Operation) stateRefreshFunc {
 		if newOp.Status == "DONE" {
 			if newOp.Error != nil {
 				for _, e := range newOp.Error.Errors {
-					err = packer.MultiErrorAppend(err, fmt.Errorf(e.Message))
+					err = packersdk.MultiErrorAppend(err, fmt.Errorf(e.Message))
 				}
 			}
 		}
@@ -697,7 +696,7 @@ func (d *driverGCE) refreshZoneOp(zone string, op *compute.Operation) stateRefre
 		if newOp.Status == "DONE" {
 			if newOp.Error != nil {
 				for _, e := range newOp.Error.Errors {
-					err = packer.MultiErrorAppend(err, fmt.Errorf(e.Message))
+					err = packersdk.MultiErrorAppend(err, fmt.Errorf(e.Message))
 				}
 			}
 		}

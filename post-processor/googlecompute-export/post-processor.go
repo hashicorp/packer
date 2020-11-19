@@ -82,10 +82,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	if len(p.config.Paths) == 0 {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("paths must be specified"))
 	}
 
@@ -107,7 +107,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.AccountFile != "" && p.config.VaultGCPOauthEngine != "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("May set either account_file or "+
 				"vault_gcp_oauth_engine, but not both."))
 	}
