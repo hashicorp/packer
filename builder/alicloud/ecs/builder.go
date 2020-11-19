@@ -77,7 +77,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		return nil, nil, errs
 	}
 
-	packer.LogSecretFilter.Set(b.config.AlicloudAccessKey, b.config.AlicloudSecretKey)
+	packersdk.LogSecretFilter.Set(b.config.AlicloudAccessKey, b.config.AlicloudSecretKey)
 	return nil, nil, nil
 }
 

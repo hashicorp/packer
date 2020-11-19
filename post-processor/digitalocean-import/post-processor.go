@@ -21,7 +21,6 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/digitalocean"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -144,7 +143,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return errs
 	}
 
-	packer.LogSecretFilter.Set(p.config.SpacesKey, p.config.SpacesSecret, p.config.APIToken)
+	packersdk.LogSecretFilter.Set(p.config.SpacesKey, p.config.SpacesSecret, p.config.APIToken)
 	log.Println(p.config)
 	return nil
 }

@@ -20,7 +20,6 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/qemu"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -101,7 +100,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return errs
 	}
 
-	packer.LogSecretFilter.Set(p.config.APIKey, p.config.APISecret)
+	packersdk.LogSecretFilter.Set(p.config.APIKey, p.config.APISecret)
 
 	return nil
 }

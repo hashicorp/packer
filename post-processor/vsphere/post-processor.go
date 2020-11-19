@@ -175,7 +175,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	}
 	encodedPassword, isSet := getEncodedPassword(ovftool_uri)
 	if isSet {
-		packer.LogSecretFilter.Set(encodedPassword)
+		packersdk.LogSecretFilter.Set(encodedPassword)
 	}
 
 	args, err := p.BuildArgs(source, ovftool_uri.String())

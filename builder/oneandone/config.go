@@ -9,7 +9,6 @@ import (
 
 	"github.com/1and1/oneandone-cloudserver-sdk-go"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -109,6 +108,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
 	}
-	packer.LogSecretFilter.Set(c.Token)
+	packersdk.LogSecretFilter.Set(c.Token)
 	return nil, nil
 }

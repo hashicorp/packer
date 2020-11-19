@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -144,6 +143,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, errs
 	}
 
-	packer.LogSecretFilter.Set(c.PersonalAccessToken)
+	packersdk.LogSecretFilter.Set(c.PersonalAccessToken)
 	return nil, nil
 }

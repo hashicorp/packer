@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
@@ -123,7 +122,7 @@ func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []st
 	var errs *packersdk.MultiError
 	var warnings []string
 
-	packer.LogSecretFilter.Set(c.Password)
+	packersdk.LogSecretFilter.Set(c.Password)
 
 	// Defaults
 	if c.ProxmoxURLRaw == "" {

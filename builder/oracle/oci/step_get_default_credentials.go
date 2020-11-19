@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
@@ -53,7 +52,7 @@ func (s *stepGetDefaultCredentials) Run(ctx context.Context, state multistep.Sta
 
 	// store so that we can access this later during provisioning
 	state.Put("winrm_password", s.Comm.WinRMPassword)
-	packer.LogSecretFilter.Set(s.Comm.WinRMPassword)
+	packersdk.LogSecretFilter.Set(s.Comm.WinRMPassword)
 	return multistep.ActionContinue
 }
 

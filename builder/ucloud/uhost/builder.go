@@ -64,7 +64,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		return nil, nil, errs
 	}
 
-	packer.LogSecretFilter.Set(b.config.PublicKey, b.config.PrivateKey)
+	packersdk.LogSecretFilter.Set(b.config.PublicKey, b.config.PrivateKey)
 	return nil, nil, nil
 }
 

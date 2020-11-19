@@ -13,7 +13,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
@@ -33,7 +32,7 @@ func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.Sta
 
 	if c.Comm.WinRMPassword != "" {
 		state.Put("winrm_password", c.Comm.WinRMPassword)
-		packer.LogSecretFilter.Set(c.Comm.WinRMPassword)
+		packersdk.LogSecretFilter.Set(c.Comm.WinRMPassword)
 		return multistep.ActionContinue
 	}
 
@@ -119,7 +118,7 @@ func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.Sta
 	}
 
 	state.Put("winrm_password", data.password)
-	packer.LogSecretFilter.Set(data.password)
+	packersdk.LogSecretFilter.Set(data.password)
 
 	return multistep.ActionContinue
 }

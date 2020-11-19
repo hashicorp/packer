@@ -10,7 +10,6 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/iochan"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
@@ -26,7 +25,7 @@ func RunAndStream(cmd *exec.Cmd, ui packersdk.Ui, sensitive []string) error {
 	defer stderr_w.Close()
 
 	// Scrub any sensitive values from being printed to Packer ui.
-	packer.LogSecretFilter.Set(sensitive...)
+	packersdk.LogSecretFilter.Set(sensitive...)
 
 	args := make([]string, len(cmd.Args)-1)
 	copy(args, cmd.Args[1:])

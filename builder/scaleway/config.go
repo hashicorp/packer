@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/packer/builder/scaleway/version"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -260,7 +259,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		return warnings, errs
 	}
 
-	packer.LogSecretFilter.Set(c.Token)
-	packer.LogSecretFilter.Set(c.SecretKey)
+	packersdk.LogSecretFilter.Set(c.Token)
+	packersdk.LogSecretFilter.Set(c.SecretKey)
 	return warnings, nil
 }

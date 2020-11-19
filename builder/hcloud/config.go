@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -144,7 +143,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, errs
 	}
 
-	packer.LogSecretFilter.Set(c.HCloudToken)
+	packersdk.LogSecretFilter.Set(c.HCloudToken)
 	return nil, nil
 }
 

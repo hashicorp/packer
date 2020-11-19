@@ -15,6 +15,7 @@ import (
 	multierror "github.com/hashicorp/go-multierror"
 	version "github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -113,7 +114,7 @@ func (core *Core) Initialize() error {
 		return err
 	}
 	for _, secret := range core.secrets {
-		LogSecretFilter.Set(secret)
+		packersdk.LogSecretFilter.Set(secret)
 	}
 
 	// Go through and interpolate all the build names. We should be able

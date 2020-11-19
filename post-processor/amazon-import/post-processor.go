@@ -16,7 +16,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
@@ -126,7 +125,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 	p.config.PollingConfig.LogEnvOverrideWarnings()
 
-	packer.LogSecretFilter.Set(p.config.AccessKey, p.config.SecretKey, p.config.Token)
+	packersdk.LogSecretFilter.Set(p.config.AccessKey, p.config.SecretKey, p.config.Token)
 	log.Println(p.config)
 	return nil
 }

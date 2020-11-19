@@ -237,12 +237,8 @@ func (rw *BasicUi) Say(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
-	// Use LogSecretFilter to scrub out sensitive variables
-	for s := range LogSecretFilter.s {
-		if s != "" {
-			message = strings.Replace(message, s, "<sensitive>", -1)
-		}
-	}
+	// Use packersdk.LogSecretFilter to scrub out sensitive variables
+	message = packersdk.LogSecretFilter.FilterString(message)
 
 	log.Printf("ui: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
@@ -255,12 +251,8 @@ func (rw *BasicUi) Message(message string) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
-	// Use LogSecretFilter to scrub out sensitive variables
-	for s := range LogSecretFilter.s {
-		if s != "" {
-			message = strings.Replace(message, s, "<sensitive>", -1)
-		}
-	}
+	// Use packersdk.LogSecretFilter to scrub out sensitive variables
+	message = packersdk.LogSecretFilter.FilterString(message)
 
 	log.Printf("ui: %s", message)
 	_, err := fmt.Fprint(rw.Writer, message+"\n")
@@ -278,12 +270,8 @@ func (rw *BasicUi) Error(message string) {
 		writer = rw.Writer
 	}
 
-	// Use LogSecretFilter to scrub out sensitive variables
-	for s := range LogSecretFilter.s {
-		if s != "" {
-			message = strings.Replace(message, s, "<sensitive>", -1)
-		}
-	}
+	// Use packersdk.LogSecretFilter to scrub out sensitive variables
+	message = packersdk.LogSecretFilter.FilterString(message)
 
 	log.Printf("ui error: %s", message)
 	_, err := fmt.Fprint(writer, message+"\n")
@@ -338,12 +326,8 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 
 	// Prepare the args
 	for i, v := range args {
-		// Use LogSecretFilter to scrub out sensitive variables
-		for s := range LogSecretFilter.s {
-			if s != "" {
-				args[i] = strings.Replace(args[i], s, "<sensitive>", -1)
-			}
-		}
+		// Use packersdk.LogSecretFilter to scrub out sensitive variables
+		args[i] = packersdk.LogSecretFilter.FilterString(args[i])
 		args[i] = strings.Replace(v, ",", "%!(PACKER_COMMA)", -1)
 		args[i] = strings.Replace(args[i], "\r", "\\r", -1)
 		args[i] = strings.Replace(args[i], "\n", "\\n", -1)

@@ -13,7 +13,6 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
@@ -150,7 +149,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return errs
 	}
 
-	packer.LogSecretFilter.Set(p.config.PublicKey, p.config.PrivateKey)
+	packersdk.LogSecretFilter.Set(p.config.PublicKey, p.config.PrivateKey)
 	log.Println(p.config)
 	return nil
 }

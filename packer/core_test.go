@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"testing"
 
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	configHelper "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
@@ -679,13 +680,13 @@ func TestSensitiveVars(t *testing.T) {
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
-		filtered := LogSecretFilter.get()
+		filtered := packersdk.LogSecretFilter.get()
 		if filtered[0] != tc.Expected && len(filtered) != 1 {
 			t.Fatalf("not filtering sensitive vars; filtered is %#v", filtered)
 		}
 
 		// clear filter so it doesn't break other tests
-		LogSecretFilter.s = make(map[string]struct{})
+		packersdk.LogSecretFilter.s = make(map[string]struct{})
 	}
 }
 
