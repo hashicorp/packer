@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/packer/builder/qemu"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/post-processor/artifice"
 	"github.com/hashicorp/packer/post-processor/exoscale-import/version"
@@ -105,7 +106,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
 	switch a.BuilderId() {
 	case qemu.BuilderId, file.BuilderId, artifice.BuilderId:
 		break
@@ -139,7 +140,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.
 	return &Artifact{id}, false, false, nil
 }
 
-func (p *PostProcessor) uploadImage(ctx context.Context, ui packer.Ui, a packer.Artifact) (string, string, error) {
+func (p *PostProcessor) uploadImage(ctx context.Context, ui packersdk.Ui, a packer.Artifact) (string, string, error) {
 	var (
 		imageFile  = a.Files()[0]
 		bucketFile = filepath.Base(imageFile)
@@ -188,7 +189,7 @@ func (p *PostProcessor) uploadImage(ctx context.Context, ui packer.Ui, a packer.
 	return output.Location, fmt.Sprintf("%x", hash.Sum(nil)), nil
 }
 
-func (p *PostProcessor) deleteImage(ctx context.Context, ui packer.Ui, a packer.Artifact) error {
+func (p *PostProcessor) deleteImage(ctx context.Context, ui packersdk.Ui, a packer.Artifact) error {
 	var (
 		imageFile  = a.Files()[0]
 		bucketFile = filepath.Base(imageFile)
@@ -210,7 +211,7 @@ func (p *PostProcessor) deleteImage(ctx context.Context, ui packer.Ui, a packer.
 	return nil
 }
 
-func (p *PostProcessor) registerTemplate(ctx context.Context, ui packer.Ui, url, md5sum string) (string, error) {
+func (p *PostProcessor) registerTemplate(ctx context.Context, ui packersdk.Ui, url, md5sum string) (string, error) {
 	var (
 		passwordEnabled = !p.config.TemplateDisablePassword
 		sshkeyEnabled   = !p.config.TemplateDisableSSHKey

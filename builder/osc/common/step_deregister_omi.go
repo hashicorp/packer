@@ -8,8 +8,8 @@ import (
 	"github.com/antihax/optional"
 	"github.com/outscale/osc-sdk-go/osc"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepDeregisterOMI struct {
@@ -26,7 +26,7 @@ func (s *StepDeregisterOMI) Run(_ context.Context, state multistep.StateBag) mul
 		return multistep.ActionContinue
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	s.Regions = append(s.Regions, s.AccessConfig.GetRegion())
 

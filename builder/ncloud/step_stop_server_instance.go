@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepStopServerInstance struct {
@@ -18,7 +18,7 @@ type StepStopServerInstance struct {
 	Error              func(e error)
 }
 
-func NewStepStopServerInstance(conn *NcloudAPIClient, ui packer.Ui) *StepStopServerInstance {
+func NewStepStopServerInstance(conn *NcloudAPIClient, ui packersdk.Ui) *StepStopServerInstance {
 	var step = &StepStopServerInstance{
 		Conn:  conn,
 		Say:   func(message string) { ui.Say(message) },

@@ -6,15 +6,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepPrepareOutputDir struct{}
 
 func (stepPrepareOutputDir) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if _, err := os.Stat(config.OutputDir); err == nil && config.PackerForce {
 		ui.Say("Deleting previous output directory...")
@@ -35,7 +35,7 @@ func (stepPrepareOutputDir) Cleanup(state multistep.StateBag) {
 
 	if cancelled || halted {
 		config := state.Get("config").(*Config)
-		ui := state.Get("ui").(packer.Ui)
+		ui := state.Get("ui").(packersdk.Ui)
 
 		ui.Say("Deleting output directory...")
 		for i := 0; i < 5; i++ {

@@ -13,8 +13,8 @@ import (
 
 	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -49,7 +49,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	securityGroupIds := aws.StringSlice(state.Get("securityGroupIds").([]string))
 	iamInstanceProfile := aws.String(state.Get("iamInstanceProfile").(string))
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	userData := s.UserData
 	if s.UserDataFile != "" {
@@ -371,7 +371,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Terminate the source instance if it exists
 	if s.instanceId != "" {

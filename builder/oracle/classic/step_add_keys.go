@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepAddKeysToAPI struct {
@@ -17,7 +17,7 @@ type stepAddKeysToAPI struct {
 
 func (s *stepAddKeysToAPI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.Client)
 
@@ -62,7 +62,7 @@ func (s *stepAddKeysToAPI) Cleanup(state multistep.StateBag) {
 		// No keys were generated; none need to be cleaned up.
 		return
 	}
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Deleting SSH keys...")
 	deleteInput := compute.DeleteSSHKeyInput{Name: config.Comm.SSHKeyPairName}
 	client := state.Get("client").(*compute.Client)

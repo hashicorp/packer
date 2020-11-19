@@ -6,6 +6,7 @@ import (
 	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/ugorji/go/codec"
 )
 
@@ -138,7 +139,7 @@ func (c *Client) Provisioner() packer.Provisioner {
 	}
 }
 
-func (c *Client) Ui() packer.Ui {
+func (c *Client) Ui() packersdk.Ui {
 	return &Ui{
 		commonClient: commonClient{
 			endpoint: DefaultUiEndpoint,

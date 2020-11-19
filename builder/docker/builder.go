@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 )
 
@@ -35,7 +36,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}, warnings, nil
 }
 
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
 	driver := &DockerDriver{Ctx: &b.config.ctx, Ui: ui}
 	if err := driver.Verify(); err != nil {
 		return nil, err

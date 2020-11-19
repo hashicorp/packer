@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type helperPostProcessor byte
@@ -17,7 +18,7 @@ func (helperPostProcessor) Configure(...interface{}) error {
 	return nil
 }
 
-func (helperPostProcessor) PostProcess(context.Context, packer.Ui, packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (helperPostProcessor) PostProcess(context.Context, packersdk.Ui, packer.Artifact) (packer.Artifact, bool, bool, error) {
 	return nil, false, false, nil
 }
 

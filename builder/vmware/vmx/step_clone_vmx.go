@@ -9,8 +9,8 @@ import (
 	"regexp"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 
@@ -30,7 +30,7 @@ func (s *StepCloneVMX) Run(ctx context.Context, state multistep.StateBag) multis
 	}
 
 	driver := state.Get("driver").(vmwcommon.Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Set the path we want for the new .vmx file and clone
 	vmxPath := filepath.Join(*s.OutputDir, s.VMName+".vmx")

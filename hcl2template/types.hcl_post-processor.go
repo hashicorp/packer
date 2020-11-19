@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -62,7 +63,7 @@ func (p *HCL2PostProcessor) Configure(args ...interface{}) error {
 	return p.PostProcessor.Configure(args...)
 }
 
-func (p *HCL2PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *HCL2PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	generatedData := make(map[string]interface{})
 	if artifactStateData, ok := artifact.State("generated_data").(map[interface{}]interface{}); ok {
 		for k, v := range artifactStateData {

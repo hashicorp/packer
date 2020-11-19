@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type cmdHook struct {
@@ -12,7 +13,7 @@ type cmdHook struct {
 	client *Client
 }
 
-func (c *cmdHook) Run(ctx context.Context, name string, ui packer.Ui, comm packer.Communicator, data interface{}) error {
+func (c *cmdHook) Run(ctx context.Context, name string, ui packersdk.Ui, comm packer.Communicator, data interface{}) error {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)

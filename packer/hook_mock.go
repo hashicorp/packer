@@ -2,6 +2,8 @@ package packer
 
 import (
 	"context"
+
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // MockHook is an implementation of Hook that can be used for tests.
@@ -12,10 +14,10 @@ type MockHook struct {
 	RunComm   Communicator
 	RunData   interface{}
 	RunName   string
-	RunUi     Ui
+	RunUi     packersdk.Ui
 }
 
-func (t *MockHook) Run(ctx context.Context, name string, ui Ui, comm Communicator, data interface{}) error {
+func (t *MockHook) Run(ctx context.Context, name string, ui packersdk.Ui, comm Communicator, data interface{}) error {
 
 	t.RunCalled = true
 	t.RunComm = comm

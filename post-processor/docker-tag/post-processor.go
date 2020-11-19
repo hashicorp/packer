@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	dockerimport "github.com/hashicorp/packer/post-processor/docker-import"
@@ -60,7 +61,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	if len(p.config.Tag) > 0 {
 		ui.Say("Deprecation warning: \"tag\" option has been replaced with " +
 			"\"tags\". In future versions of Packer, this configuration may " +

@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/post-processor/vsphere"
 	"github.com/vmware/govmomi"
@@ -40,7 +41,7 @@ func NewStepMarkAsTemplate(artifact packer.Artifact, p *PostProcessor) *stepMark
 }
 
 func (s *stepMarkAsTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	cli := state.Get("client").(*govmomi.Client)
 	folder := state.Get("folder").(*object.Folder)
 	dcPath := state.Get("dcPath").(string)

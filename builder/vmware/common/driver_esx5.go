@@ -32,6 +32,7 @@ import (
 	helperssh "github.com/hashicorp/packer/helper/communicator/ssh"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/ssh"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -249,7 +250,7 @@ func (d *ESX5Driver) IsDestroyed() (bool, error) {
 	return true, err
 }
 
-func (d *ESX5Driver) UploadISO(localPath string, checksum string, ui packer.Ui) (string, error) {
+func (d *ESX5Driver) UploadISO(localPath string, checksum string, ui packersdk.Ui) (string, error) {
 	finalPath := d.CachePath(localPath)
 	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
@@ -793,7 +794,7 @@ func (d *ESX5Driver) mkdir(path string) error {
 	return d.sh("mkdir", "-p", strconv.Quote(path))
 }
 
-func (d *ESX5Driver) upload(dst, src string, ui packer.Ui) error {
+func (d *ESX5Driver) upload(dst, src string, ui packersdk.Ui) error {
 	// Get size so we can set up progress tracker
 	info, err := os.Stat(src)
 	if err != nil {

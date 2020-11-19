@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step copies the virtual disk that will be used as the
@@ -24,7 +24,7 @@ type stepCopyDisk struct {
 func (s *stepCopyDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	isoPath := state.Get("iso_path").(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	path := filepath.Join(s.OutputDir, s.VMName)
 
 	if !s.DiskImage || s.UseBackingFile {

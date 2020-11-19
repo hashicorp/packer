@@ -8,8 +8,8 @@ import (
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepGetDataDisk struct {
@@ -19,7 +19,7 @@ type StepGetDataDisk struct {
 	error  func(e error)
 }
 
-func NewStepGetAdditionalDisks(client *AzureClient, ui packer.Ui) *StepGetDataDisk {
+func NewStepGetAdditionalDisks(client *AzureClient, ui packersdk.Ui) *StepGetDataDisk {
 	var step = &StepGetDataDisk{
 		client: client,
 		say:    func(message string) { ui.Say(message) },

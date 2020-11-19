@@ -7,8 +7,8 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepCopyFiles copies some files from the host into the chroot environment.
@@ -23,7 +23,7 @@ type StepCopyFiles struct {
 func (s *StepCopyFiles) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 	stderr := new(bytes.Buffer)
 
@@ -63,7 +63,7 @@ func (s *StepCopyFiles) Run(ctx context.Context, state multistep.StateBag) multi
 }
 
 func (s *StepCopyFiles) Cleanup(state multistep.StateBag) {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	if err := s.CleanupFunc(state); err != nil {
 		ui.Error(err.Error())
 	}

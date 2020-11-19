@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -119,7 +120,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	if generatedData == nil {
 		generatedData = make(map[string]interface{})
 	}
@@ -132,7 +133,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	}
 }
 
-func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) ProvisionDownload(ui packersdk.Ui, comm packer.Communicator) error {
 	dst, err := interpolate.Render(p.config.Destination, &p.config.ctx)
 	if err != nil {
 		return fmt.Errorf("Error interpolating destination: %s", err)
@@ -181,7 +182,7 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 	return nil
 }
 
-func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) ProvisionUpload(ui packersdk.Ui, comm packer.Communicator) error {
 	dst, err := interpolate.Render(p.config.Destination, &p.config.ctx)
 	if err != nil {
 		return fmt.Errorf("Error interpolating destination: %s", err)

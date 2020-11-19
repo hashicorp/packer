@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/packer/builder/googlecompute"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/post-processor/artifice"
@@ -143,7 +144,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
 	generatedData := artifact.State("generated_data")
 	if generatedData == nil {
 		// Make sure it's not a nil map so we can assign to it later.
@@ -259,7 +260,7 @@ func CreateShieldedVMStateConfig(imageGuestOsFeatures []string, imagePlatformKey
 	return shieldedVMStateConfig, nil
 }
 
-func UploadToBucket(opts option.ClientOption, ui packer.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
+func UploadToBucket(opts option.ClientOption, ui packersdk.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
 	service, err := storage.NewService(context.TODO(), opts)
 	if err != nil {
 		return "", err
@@ -295,7 +296,7 @@ func UploadToBucket(opts option.ClientOption, ui packer.Ui, artifact packer.Arti
 	return storageObject.SelfLink, nil
 }
 
-func CreateGceImage(opts option.ClientOption, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string, shieldedVMStateConfig *compute.InitialStateConfig) (packer.Artifact, error) {
+func CreateGceImage(opts option.ClientOption, ui packersdk.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string, shieldedVMStateConfig *compute.InitialStateConfig) (packer.Artifact, error) {
 	service, err := compute.NewService(context.TODO(), opts)
 
 	if err != nil {
@@ -351,7 +352,7 @@ func CreateGceImage(opts option.ClientOption, ui packer.Ui, project string, rawI
 	return &Artifact{paths: []string{op.TargetLink}}, nil
 }
 
-func DeleteFromBucket(opts option.ClientOption, ui packer.Ui, bucket string, gcsObjectName string) error {
+func DeleteFromBucket(opts option.ClientOption, ui packersdk.Ui, bucket string, gcsObjectName string) error {
 	service, err := storage.NewService(context.TODO(), opts)
 
 	if err != nil {

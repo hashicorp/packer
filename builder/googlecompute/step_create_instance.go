@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepCreateInstance represents a Packer build step that creates GCE instances.
@@ -104,7 +105,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	c := state.Get("config").(*Config)
 	d := state.Get("driver").(Driver)
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	sourceImage, err := getImage(c, d)
 	if err != nil {
@@ -215,7 +216,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Deleting instance...")
 	errCh, err := driver.DeleteInstance(config.Zone, name)

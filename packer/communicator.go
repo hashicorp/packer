@@ -8,6 +8,7 @@ import (
 	"sync"
 	"unicode"
 
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/mitchellh/iochan"
 )
 
@@ -88,7 +89,7 @@ type ConfigurableCommunicator interface {
 // RunWithUi runs the remote command and streams the output to any configured
 // Writers for stdout/stderr, while also writing each line as it comes to a Ui.
 // RunWithUi will not return until the command finishes or is cancelled.
-func (r *RemoteCmd) RunWithUi(ctx context.Context, c Communicator, ui Ui) error {
+func (r *RemoteCmd) RunWithUi(ctx context.Context, c Communicator, ui packersdk.Ui) error {
 	r.initchan()
 
 	stdout_r, stdout_w := io.Pipe()

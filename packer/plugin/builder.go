@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type cmdBuilder struct {
@@ -31,7 +32,7 @@ func (b *cmdBuilder) Prepare(config ...interface{}) ([]string, []string, error) 
 	return b.builder.Prepare(config...)
 }
 
-func (b *cmdBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *cmdBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
 	defer func() {
 		r := recover()
 		b.checkExit(r, nil)

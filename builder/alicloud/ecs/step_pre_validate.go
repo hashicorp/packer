@@ -7,6 +7,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepPreValidate struct {
@@ -27,7 +28,7 @@ func (s *stepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 }
 
 func (s *stepPreValidate) validateRegions(state multistep.StateBag) error {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 
 	if config.AlicloudSkipValidation {
@@ -55,7 +56,7 @@ func (s *stepPreValidate) validateRegions(state multistep.StateBag) error {
 }
 
 func (s *stepPreValidate) validateDestImageName(state multistep.StateBag) error {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("client").(*ClientWrapper)
 	config := state.Get("config").(*Config)
 

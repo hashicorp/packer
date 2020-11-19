@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepPowerOffCompute struct {
@@ -17,7 +17,7 @@ type StepPowerOffCompute struct {
 	error    func(e error)
 }
 
-func NewStepPowerOffCompute(client *AzureClient, ui packer.Ui, config *Config) *StepPowerOffCompute {
+func NewStepPowerOffCompute(client *AzureClient, ui packersdk.Ui, config *Config) *StepPowerOffCompute {
 
 	var step = &StepPowerOffCompute{
 		client: client,

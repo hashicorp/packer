@@ -7,6 +7,7 @@ import (
 	"errors"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // MockBuilder is an implementation of Builder that can be used for tests.
@@ -22,7 +23,7 @@ type MockBuilder struct {
 	PrepareConfig []interface{}
 	RunCalled     bool
 	RunHook       Hook
-	RunUi         Ui
+	RunUi         packersdk.Ui
 	CancelCalled  bool
 	RunFn         func(ctx context.Context)
 
@@ -39,7 +40,7 @@ func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, []string, error
 	return tb.GeneratedVars, tb.PrepareWarnings, nil
 }
 
-func (tb *MockBuilder) Run(ctx context.Context, ui Ui, h Hook) (Artifact, error) {
+func (tb *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, h Hook) (Artifact, error) {
 	tb.RunCalled = true
 	tb.RunHook = h
 	tb.RunUi = ui

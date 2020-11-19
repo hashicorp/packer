@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // TimeoutProvisioner is a Provisioner implementation that can timeout after a
@@ -13,7 +15,7 @@ type TimeoutProvisioner struct {
 	Timeout time.Duration
 }
 
-func (p *TimeoutProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
+func (p *TimeoutProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm Communicator, generatedData map[string]interface{}) error {
 	ctx, cancel := context.WithTimeout(ctx, p.Timeout)
 	defer cancel()
 

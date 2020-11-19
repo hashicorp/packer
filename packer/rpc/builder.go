@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // An implementation of packer.Builder where the builder is actually executed
@@ -51,7 +52,7 @@ func (b *builder) Prepare(config ...interface{}) ([]string, []string, error) {
 	return resp.GeneratedVars, resp.Warnings, err
 }
 
-func (b *builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
 	nextId := b.mux.NextId()
 	server := newServerWithMux(b.mux, nextId)
 	server.RegisterHook(hook)

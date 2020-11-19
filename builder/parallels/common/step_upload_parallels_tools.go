@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -16,7 +17,7 @@ import (
 // Uses:
 //   communicator packer.Communicator
 //   parallels_tools_path string
-//   ui packer.Ui
+//   ui packersdk.Ui
 //
 // Produces:
 type toolsPathTemplate struct {
@@ -29,7 +30,7 @@ type toolsPathTemplate struct {
 // Uses:
 //   communicator packer.Communicator
 //   parallels_tools_path string
-//   ui packer.Ui
+//   ui packersdk.Ui
 type StepUploadParallelsTools struct {
 	ParallelsToolsFlavor    string
 	ParallelsToolsGuestPath string
@@ -40,7 +41,7 @@ type StepUploadParallelsTools struct {
 // Run uploads the Parallels Tools ISO to the VM.
 func (s *StepUploadParallelsTools) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// If we're attaching then don't do this, since we attached.
 	if s.ParallelsToolsMode != ParallelsToolsModeUpload {

@@ -9,8 +9,8 @@ import (
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepDeleteAdditionalDisk struct {
@@ -21,7 +21,7 @@ type StepDeleteAdditionalDisk struct {
 	error         func(e error)
 }
 
-func NewStepDeleteAdditionalDisks(client *AzureClient, ui packer.Ui) *StepDeleteAdditionalDisk {
+func NewStepDeleteAdditionalDisks(client *AzureClient, ui packersdk.Ui) *StepDeleteAdditionalDisk {
 	var step = &StepDeleteAdditionalDisk{
 		client: client,
 		say:    func(message string) { ui.Say(message) },

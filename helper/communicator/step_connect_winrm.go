@@ -15,6 +15,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/winrm"
 	winrmcmd "github.com/masterzen/winrm"
 	"golang.org/x/net/http/httpproxy"
@@ -25,7 +26,7 @@ import (
 // configuration when creating the step.
 //
 // Uses:
-//   ui packer.Ui
+//   ui packersdk.Ui
 //
 // Produces:
 //   communicator packer.Communicator
@@ -38,7 +39,7 @@ type StepConnectWinRM struct {
 }
 
 func (s *StepConnectWinRM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	var comm packer.Communicator
 	var err error
@@ -181,7 +182,7 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, ctx context.Co
 		}
 
 		log.Printf("Checking that WinRM is connected with: '%s'", connectCheckCommand)
-		ui := state.Get("ui").(packer.Ui)
+		ui := state.Get("ui").(packersdk.Ui)
 		err := cmd.RunWithUi(ctx, comm, ui)
 
 		if err != nil {

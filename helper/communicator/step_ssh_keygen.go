@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/packer/helper/communicator/sshkey"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepSSHKeyGen is a Packer build step that generates SSH key pairs.
@@ -18,7 +18,7 @@ type StepSSHKeyGen struct {
 // Run executes the Packer build step that generates SSH key pairs.
 // The key pairs are added to the ssh config
 func (s *StepSSHKeyGen) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	comm := s.CommConf
 
 	if comm.SSHPrivateKeyFile != "" {

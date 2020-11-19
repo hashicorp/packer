@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepFlock provisions the instance within a chroot.
@@ -20,7 +20,7 @@ type StepFlock struct {
 }
 
 func (s *StepFlock) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	lockfile := "/var/lock/packer-chroot/lock"
 	if err := os.MkdirAll(filepath.Dir(lockfile), 0755); err != nil {

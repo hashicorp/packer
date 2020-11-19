@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/version"
 	"golang.org/x/sync/semaphore"
@@ -74,7 +75,7 @@ func (m *Meta) GetConfigFromHCL(cla *MetaArgs) (*hcl2template.PackerConfig, int)
 	return cfg, writeDiags(m.Ui, parser.Files(), diags)
 }
 
-func writeDiags(ui packer.Ui, files map[string]*hcl.File, diags hcl.Diagnostics) int {
+func writeDiags(ui packersdk.Ui, files map[string]*hcl.File, diags hcl.Diagnostics) int {
 	// write HCL errors/diagnostics if any.
 	b := bytes.NewBuffer(nil)
 	err := hcl.NewDiagnosticTextWriter(b, files, 80, false).WriteDiagnostics(diags)
@@ -176,7 +177,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		packer.UiColorYellow,
 		packer.UiColorBlue,
 	}
-	buildUis := make(map[packer.Build]packer.Ui)
+	buildUis := make(map[packer.Build]packersdk.Ui)
 	for i := range builds {
 		ui := c.Ui
 		if cla.Color {

@@ -3,22 +3,22 @@ package rpc
 import (
 	"log"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-// An implementation of packer.Ui where the Ui is actually executed
+// An implementation of packersdk.Ui where the Ui is actually executed
 // over an RPC connection.
 type Ui struct {
 	commonClient
 	endpoint string
 }
 
-var _ packer.Ui = new(Ui)
+var _ packersdk.Ui = new(Ui)
 
-// UiServer wraps a packer.Ui implementation and makes it exportable
+// UiServer wraps a packersdk.Ui implementation and makes it exportable
 // as part of a Golang RPC server.
 type UiServer struct {
-	ui       packer.Ui
+	ui       packersdk.Ui
 	register func(name string, rcvr interface{}) error
 }
 

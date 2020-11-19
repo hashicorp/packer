@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -20,7 +20,7 @@ type stepSetupNetworking struct {
 func (s *stepSetupNetworking) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Setup networking...")
 
@@ -188,7 +188,7 @@ func (s *stepSetupNetworking) Run(ctx context.Context, state multistep.StateBag)
 // Cleanup any resources that may have been created during the Run phase.
 func (s *stepSetupNetworking) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Cleanup networking...")
 

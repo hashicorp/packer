@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	getter "github.com/hashicorp/go-getter/v2"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 var ErrInterrupted = errors.New("interrupted")
@@ -31,24 +32,11 @@ const (
 	UiColorCyan            = 36
 )
 
-// The Ui interface handles all communication for Packer with the outside
-// world. This sort of control allows us to strictly control how output
-// is formatted and various levels of output.
-type Ui interface {
-	Ask(string) (string, error)
-	Say(string)
-	Message(string)
-	Error(string)
-	Machine(string, ...string)
-	// TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) (body io.ReadCloser)
-	getter.ProgressTracker
-}
-
 type NoopUi struct {
 	PB NoopProgressTracker
 }
 
-var _ Ui = new(NoopUi)
+var _ packersdk.Ui = new(NoopUi)
 
 func (*NoopUi) Ask(string) (string, error) { return "", errors.New("this is a noop ui") }
 func (*NoopUi) Say(string)                 { return }
@@ -63,11 +51,11 @@ func (u *NoopUi) TrackProgress(src string, currentSize, totalSize int64, stream 
 type ColoredUi struct {
 	Color      UiColor
 	ErrorColor UiColor
-	Ui         Ui
+	Ui         packersdk.Ui
 	PB         getter.ProgressTracker
 }
 
-var _ Ui = new(ColoredUi)
+var _ packersdk.Ui = new(ColoredUi)
 
 func (u *ColoredUi) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.colorize(query, u.Color, true))
@@ -138,10 +126,10 @@ func (u *ColoredUi) supportsColors() bool {
 // with Say output. Machine-readable output has the proper target set.
 type TargetedUI struct {
 	Target string
-	Ui     Ui
+	Ui     packersdk.Ui
 }
 
-var _ Ui = new(TargetedUI)
+var _ packersdk.Ui = new(TargetedUI)
 
 func (u *TargetedUI) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.prefixLines(true, query))
@@ -196,7 +184,7 @@ type BasicUi struct {
 	PB          getter.ProgressTracker
 }
 
-var _ Ui = new(BasicUi)
+var _ packersdk.Ui = new(BasicUi)
 
 func (rw *BasicUi) Ask(query string) (string, error) {
 	rw.l.Lock()
@@ -319,7 +307,7 @@ type MachineReadableUi struct {
 	PB     NoopProgressTracker
 }
 
-var _ Ui = new(MachineReadableUi)
+var _ packersdk.Ui = new(MachineReadableUi)
 
 func (u *MachineReadableUi) Ask(query string) (string, error) {
 	return "", errors.New("machine-readable UI can't ask")
@@ -381,11 +369,11 @@ func (u *MachineReadableUi) TrackProgress(src string, currentSize, totalSize int
 // TimestampedUi is a UI that wraps another UI implementation and
 // prefixes each message with an RFC3339 timestamp
 type TimestampedUi struct {
-	Ui Ui
+	Ui packersdk.Ui
 	PB getter.ProgressTracker
 }
 
-var _ Ui = new(TimestampedUi)
+var _ packersdk.Ui = new(TimestampedUi)
 
 func (u *TimestampedUi) Ask(query string) (string, error) {
 	return u.Ui.Ask(query)
@@ -419,11 +407,11 @@ func (u *TimestampedUi) timestampLine(string string) string {
 // provides concurrency-safe access
 type SafeUi struct {
 	Sem chan int
-	Ui  Ui
+	Ui  packersdk.Ui
 	PB  getter.ProgressTracker
 }
 
-var _ Ui = new(SafeUi)
+var _ packersdk.Ui = new(SafeUi)
 
 func (u *SafeUi) Ask(s string) (string, error) {
 	u.Sem <- 1

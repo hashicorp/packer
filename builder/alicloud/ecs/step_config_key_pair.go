@@ -8,8 +8,8 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepConfigAlicloudKeyPair struct {
@@ -22,7 +22,7 @@ type stepConfigAlicloudKeyPair struct {
 }
 
 func (s *stepConfigAlicloudKeyPair) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
@@ -108,7 +108,7 @@ func (s *stepConfigAlicloudKeyPair) Cleanup(state multistep.StateBag) {
 	}
 
 	client := state.Get("client").(*ClientWrapper)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Remove the keypair
 	ui.Say("Deleting temporary keypair...")

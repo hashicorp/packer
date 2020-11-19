@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepProvision provisions the instance within a chroot.
@@ -16,7 +17,7 @@ func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multi
 	hook := state.Get("hook").(packer.Hook)
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 
 	// Create our communicator

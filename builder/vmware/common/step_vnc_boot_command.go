@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/mitchellh/go-vnc"
 )
@@ -17,7 +17,7 @@ import (
 //
 // Uses:
 //   http_port int
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //   vnc_port int
 //
 // Produces:
@@ -42,7 +42,7 @@ func (s *StepVNCBootCommand) Run(ctx context.Context, state multistep.StateBag) 
 
 	debug := state.Get("debug").(bool)
 	httpPort := state.Get("http_port").(int)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	conn := state.Get("vnc_conn").(*vnc.ClientConn)
 	defer conn.Close()
 

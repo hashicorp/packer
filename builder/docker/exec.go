@@ -3,11 +3,11 @@ package docker
 import (
 	"os/exec"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/shell-local/localexec"
 )
 
-func runAndStream(cmd *exec.Cmd, ui packer.Ui) error {
+func runAndStream(cmd *exec.Cmd, ui packersdk.Ui) error {
 
 	args := make([]string, len(cmd.Args)-1)
 	copy(args, cmd.Args[1:])

@@ -8,8 +8,8 @@ import (
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
@@ -21,7 +21,7 @@ func (s *stepStopInstance) Run(ctx context.Context, state multistep.StateBag) mu
 	client := state.Get("client").(*ucloudcommon.UCloudClient)
 	conn := client.UHostConn
 	instance := state.Get("instance").(*uhost.UHostInstanceSet)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	instance, err := client.DescribeUHostById(instance.UHostId)
 	if err != nil {

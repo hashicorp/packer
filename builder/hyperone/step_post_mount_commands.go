@@ -3,8 +3,8 @@ package hyperone
 import (
 	"context"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type postMountCommandsData struct {
@@ -16,7 +16,7 @@ type stepPostMountCommands struct{}
 
 func (s *stepPostMountCommands) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	device := state.Get("device").(string)
 
 	ictx := config.ctx

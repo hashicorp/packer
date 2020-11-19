@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 var testBuildArtifact = &packer.MockArtifact{}
@@ -17,7 +18,7 @@ type testBuild struct {
 	prepareWarnings  []string
 	runFn            func(context.Context)
 	runCalled        bool
-	runUi            packer.Ui
+	runUi            packersdk.Ui
 	setDebugCalled   bool
 	setForceCalled   bool
 	setOnErrorCalled bool
@@ -35,7 +36,7 @@ func (b *testBuild) Prepare() ([]string, error) {
 	return b.prepareWarnings, nil
 }
 
-func (b *testBuild) Run(ctx context.Context, ui packer.Ui) ([]packer.Artifact, error) {
+func (b *testBuild) Run(ctx context.Context, ui packersdk.Ui) ([]packer.Artifact, error) {
 	b.runCalled = true
 	b.runUi = ui
 

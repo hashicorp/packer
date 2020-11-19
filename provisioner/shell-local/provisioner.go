@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	sl "github.com/hashicorp/packer/packer-plugin-sdk/shell-local"
 )
 
@@ -28,7 +29,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, _ packer.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, _ packer.Communicator, generatedData map[string]interface{}) error {
 	_, retErr := sl.Run(ctx, ui, &p.config, generatedData)
 
 	return retErr

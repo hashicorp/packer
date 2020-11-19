@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/json"
@@ -77,7 +78,7 @@ func (b *MockBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return []string{"ID"}, nil, b.Config.Prepare(raws...)
 }
 
-func (b *MockBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
 	return nil, nil
 }
 
@@ -99,7 +100,7 @@ func (b *MockProvisioner) Prepare(raws ...interface{}) error {
 	return b.Config.Prepare(raws...)
 }
 
-func (b *MockProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (b *MockProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	return nil
 }
 
@@ -121,7 +122,7 @@ func (b *MockPostProcessor) Configure(raws ...interface{}) error {
 	return b.Config.Prepare(raws...)
 }
 
-func (b *MockPostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (b *MockPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
 	return nil, false, false, nil
 }
 

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepCreateServerImage struct {
@@ -19,7 +19,7 @@ type StepCreateServerImage struct {
 	Config            *Config
 }
 
-func NewStepCreateServerImage(conn *NcloudAPIClient, ui packer.Ui, config *Config) *StepCreateServerImage {
+func NewStepCreateServerImage(conn *NcloudAPIClient, ui packersdk.Ui, config *Config) *StepCreateServerImage {
 	var step = &StepCreateServerImage{
 		Conn:   conn,
 		Say:    func(message string) { ui.Say(message) },

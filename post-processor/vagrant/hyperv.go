@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type HypervProvider struct{}
@@ -15,7 +16,7 @@ func (p *HypervProvider) KeepInputArtifact() bool {
 	return false
 }
 
-func (p *HypervProvider) Process(ui packer.Ui, artifact packer.Artifact, dir string) (vagrantfile string, metadata map[string]interface{}, err error) {
+func (p *HypervProvider) Process(ui packersdk.Ui, artifact packer.Artifact, dir string) (vagrantfile string, metadata map[string]interface{}, err error) {
 	// Create the metadata
 	metadata = map[string]interface{}{"provider": "hyperv"}
 

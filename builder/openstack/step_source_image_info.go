@@ -9,8 +9,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imageimport"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/gophercloud/gophercloud/pagination"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepSourceImageInfo struct {
@@ -35,7 +35,7 @@ func PropertiesSatisfied(image *images.Image, props *map[string]string) bool {
 
 func (s *StepSourceImageInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	client, err := config.imageV2Client()
 	if err != nil {
@@ -181,7 +181,7 @@ func (s *StepSourceImageInfo) Run(ctx context.Context, state multistep.StateBag)
 func (s *StepSourceImageInfo) Cleanup(state multistep.StateBag) {
 	if s.ExternalSourceImageURL != "" {
 		config := state.Get("config").(*Config)
-		ui := state.Get("ui").(packer.Ui)
+		ui := state.Get("ui").(packersdk.Ui)
 
 		client, err := config.imageV2Client()
 		if err != nil {

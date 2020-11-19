@@ -2,8 +2,8 @@ package common
 
 import (
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func CleanupVM(state multistep.StateBag) {
@@ -14,7 +14,7 @@ func CleanupVM(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	st := state.Get("vm")
 	if st == nil {

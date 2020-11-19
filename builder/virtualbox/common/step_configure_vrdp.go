@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/net"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step configures the VM to enable the VRDP server
@@ -15,7 +15,7 @@ import (
 //
 // Uses:
 //   driver Driver
-//   ui packer.Ui
+//   ui packersdk.Ui
 //   vmName string
 //
 // Produces:
@@ -30,7 +30,7 @@ type StepConfigureVRDP struct {
 
 func (s *StepConfigureVRDP) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
 
 	log.Printf("Looking for available port between %d and %d on %s", s.VRDPPortMin, s.VRDPPortMax, s.VRDPBindAddress)

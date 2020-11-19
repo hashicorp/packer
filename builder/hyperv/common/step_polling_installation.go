@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 const port string = "13000"
@@ -19,7 +19,7 @@ type StepPollingInstallation struct {
 }
 
 func (s *StepPollingInstallation) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	errorMsg := "Error polling VM: %s"
 	vmIp := state.Get("ip").(string)

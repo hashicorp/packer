@@ -6,6 +6,7 @@ import (
 	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"context"
 	"fmt"
@@ -27,7 +28,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return b.config.Prepare(raws...)
 }
 
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
 	state.Put("clone-config", &b.config)
 

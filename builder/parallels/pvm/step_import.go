@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step imports an PVM VM into Parallels.
@@ -18,7 +18,7 @@ type StepImport struct {
 
 func (s *StepImport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(parallelscommon.Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 
 	ui.Say(fmt.Sprintf("Importing VM: %s", s.SourcePath))
@@ -41,7 +41,7 @@ func (s *StepImport) Cleanup(state multistep.StateBag) {
 	}
 
 	driver := state.Get("driver").(parallelscommon.Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Unregistering virtual machine...")
 	if err := driver.Prlctl("unregister", s.vmName); err != nil {

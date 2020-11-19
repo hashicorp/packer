@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepValidateTemplate struct {
@@ -18,7 +18,7 @@ type StepValidateTemplate struct {
 	factory  templateFactoryFunc
 }
 
-func NewStepValidateTemplate(client *AzureClient, ui packer.Ui, config *Config, factory templateFactoryFunc) *StepValidateTemplate {
+func NewStepValidateTemplate(client *AzureClient, ui packersdk.Ui, config *Config, factory templateFactoryFunc) *StepValidateTemplate {
 	var step = &StepValidateTemplate{
 		client:  client,
 		say:     func(message string) { ui.Say(message) },

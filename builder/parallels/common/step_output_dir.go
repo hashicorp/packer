@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepOutputDir sets up the output directory by creating it if it does
@@ -23,7 +23,7 @@ type StepOutputDir struct {
 
 // Run sets up the output directory.
 func (s *StepOutputDir) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if _, err := os.Stat(s.Path); err == nil && s.Force {
 		ui.Say("Deleting previous output directory...")
@@ -60,7 +60,7 @@ func (s *StepOutputDir) Cleanup(state multistep.StateBag) {
 	}
 
 	if cancelled || halted {
-		ui := state.Get("ui").(packer.Ui)
+		ui := state.Get("ui").(packersdk.Ui)
 
 		ui.Say("Deleting output directory...")
 		for i := 0; i < 5; i++ {

@@ -9,8 +9,8 @@ import (
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepCreateBlockStorageInstance struct is for making extra block storage
@@ -23,7 +23,7 @@ type StepCreateBlockStorageInstance struct {
 }
 
 // NewStepCreateBlockStorageInstance make StepCreateBlockStorage struct to make extra block storage
-func NewStepCreateBlockStorageInstance(conn *NcloudAPIClient, ui packer.Ui, config *Config) *StepCreateBlockStorageInstance {
+func NewStepCreateBlockStorageInstance(conn *NcloudAPIClient, ui packersdk.Ui, config *Config) *StepCreateBlockStorageInstance {
 	var step = &StepCreateBlockStorageInstance{
 		Conn:   conn,
 		Say:    func(message string) { ui.Say(message) },

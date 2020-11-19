@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step shuts down the machine. It first attempts to do so gracefully,
@@ -21,7 +22,7 @@ import (
 //   communicator packer.Communicator
 //   dir OutputDir
 //   driver Driver
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //   vmx_path string
 //
 // Produces:
@@ -38,7 +39,7 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 	comm := state.Get("communicator").(packer.Communicator)
 	dir := state.Get("dir").(OutputDir)
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
 	if s.Command != "" {

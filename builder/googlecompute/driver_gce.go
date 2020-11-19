@@ -19,6 +19,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/googlecompute/version"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 	"github.com/hashicorp/packer/packer-plugin-sdk/useragent"
 	vaultapi "github.com/hashicorp/vault/api"
@@ -33,11 +34,11 @@ type driverGCE struct {
 	projectId      string
 	service        *compute.Service
 	osLoginService *oslogin.Service
-	ui             packer.Ui
+	ui             packersdk.Ui
 }
 
 type GCEDriverConfig struct {
-	Ui                            packer.Ui
+	Ui                            packersdk.Ui
 	ProjectId                     string
 	Account                       *ServiceAccount
 	ImpersonateServiceAccountName string

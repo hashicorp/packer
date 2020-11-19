@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepCleanupTempKeys struct {
@@ -32,7 +33,7 @@ func (s *StepCleanupTempKeys) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	comm := state.Get("communicator").(packer.Communicator)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	cmd := new(packer.RemoteCmd)
 

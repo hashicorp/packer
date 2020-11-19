@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // stepStartVM takes the given configuration and starts a VM on the given Proxmox node.
@@ -24,7 +24,7 @@ type ProxmoxVMCreator interface {
 }
 
 func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("proxmoxClient").(*proxmox.Client)
 	c := state.Get("config").(*Config)
 
@@ -180,7 +180,7 @@ func (s *stepStartVM) Cleanup(state multistep.StateBag) {
 	}
 
 	client := state.Get("proxmoxClient").(startedVMCleaner)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Destroy the server we just created
 	ui.Say("Stopping VM")

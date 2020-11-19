@@ -6,16 +6,16 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/net"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step configures the VM to enable the VNC server.
 //
 // Uses:
 //   config *config
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //
 // Produces:
 //   vnc_port int - The port that VNC is configured to listen on.
@@ -40,7 +40,7 @@ func VNCPassword() string {
 
 func (s *stepConfigureVNC) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Find an open VNC port. Note that this can still fail later on
 	// because we have to release the port at some point. But this does its

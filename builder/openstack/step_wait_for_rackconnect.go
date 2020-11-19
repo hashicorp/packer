@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepWaitForRackConnect struct {
@@ -21,7 +21,7 @@ func (s *StepWaitForRackConnect) Run(ctx context.Context, state multistep.StateB
 
 	config := state.Get("config").(*Config)
 	server := state.Get("server").(*servers.Server)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()

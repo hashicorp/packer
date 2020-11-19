@@ -59,6 +59,7 @@ require (
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cleanhttp v0.5.1
 	github.com/hashicorp/go-cty-funcs v0.0.0-20200930094925-2721b1e36840
+	github.com/hashicorp/go-getter v1.4.1
 	github.com/hashicorp/go-getter/gcs/v2 v2.0.0-20200604122502-a6995fa1edad
 	github.com/hashicorp/go-getter/s3/v2 v2.0.0-20200604122502-a6995fa1edad
 	github.com/hashicorp/go-getter/v2 v2.0.0-20200604122502-a6995fa1edad

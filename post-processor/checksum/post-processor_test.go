@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 )
 
@@ -44,7 +45,7 @@ func TestChecksumSHA1(t *testing.T) {
 
 // Test Helpers
 
-func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
+func setup(t *testing.T) (packersdk.Ui, packer.Artifact, error) {
 	// Create fake UI and Cache
 	ui := packer.TestUi(t)
 

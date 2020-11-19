@@ -7,8 +7,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	confighelper "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
@@ -21,7 +21,7 @@ type StepModifyEBSBackedInstance struct {
 func (s *StepModifyEBSBackedInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(ec2iface.EC2API)
 	instance := state.Get("instance").(*ec2.Instance)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Skip when it is a spot instance
 	if s.Skip {

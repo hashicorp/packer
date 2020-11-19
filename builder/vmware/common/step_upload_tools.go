@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -37,7 +38,7 @@ func (c *StepUploadTools) Run(ctx context.Context, state multistep.StateBag) mul
 
 	comm := state.Get("communicator").(packer.Communicator)
 	tools_source := state.Get("tools_upload_source").(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say(fmt.Sprintf("Uploading the '%s' VMware Tools", c.ToolsUploadFlavor))
 	f, err := os.Open(tools_source)

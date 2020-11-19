@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepCreatePersistentVolume struct {
@@ -20,7 +20,7 @@ type stepCreatePersistentVolume struct {
 func (s *stepCreatePersistentVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*compute.Client)
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Creating Volume...")
 
 	c := &compute.CreateStorageVolumeInput{
@@ -49,7 +49,7 @@ func (s *stepCreatePersistentVolume) Run(ctx context.Context, state multistep.St
 func (s *stepCreatePersistentVolume) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*compute.Client)
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Cleaning up Volume...")
 
 	c := &compute.DeleteStorageVolumeInput{

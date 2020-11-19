@@ -6,15 +6,15 @@ import (
 	"log"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepCreateImage struct {
 }
 
 func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("client").(*compute.Client)
 	config := state.Get("config").(*Config)
 	imageFile := state.Get("image_file").(string)
@@ -55,7 +55,7 @@ func (s *stepCreateImage) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*compute.Client)
 	config := state.Get("config").(*Config)
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Cleaning up Image...")
 
 	machineImageClient := client.MachineImages()

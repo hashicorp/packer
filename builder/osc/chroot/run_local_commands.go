@@ -5,11 +5,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	sl "github.com/hashicorp/packer/packer-plugin-sdk/shell-local"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
-func RunLocalCommands(commands []string, wrappedCommand CommandWrapper, ictx interpolate.Context, ui packer.Ui) error {
+func RunLocalCommands(commands []string, wrappedCommand CommandWrapper, ictx interpolate.Context, ui packersdk.Ui) error {
 	ctx := context.TODO()
 	for _, rawCmd := range commands {
 		intCmd, err := interpolate.Render(rawCmd, &ictx)

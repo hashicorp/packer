@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // The unique ID for this builder.
@@ -35,7 +36,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 // Run executes a googlecompute Packer build and returns a packer.Artifact
 // representing a GCE machine image.
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
 	cfg := GCEDriverConfig{
 		Ui:                            ui,
 		ProjectId:                     b.config.ProjectId,

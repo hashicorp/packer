@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -28,7 +29,7 @@ func (s *StepBundleVolume) Run(ctx context.Context, state multistep.StateBag) mu
 	comm := state.Get("communicator").(packer.Communicator)
 	config := state.Get("config").(*Config)
 	instance := state.Get("instance").(*ec2.Instance)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	x509RemoteCertPath := state.Get("x509RemoteCertPath").(string)
 	x509RemoteKeyPath := state.Get("x509RemoteKeyPath").(string)
 

@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type ShutdownConfig struct {
@@ -52,7 +53,7 @@ type StepShutdown struct {
 }
 
 func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	if off, _ := vm.IsPoweredOff(); off {

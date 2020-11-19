@@ -10,10 +10,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 )
 
-func uploadToBucket(s3conn *s3.S3, ui packer.Ui, artifact packer.Artifact, bucket string, objectName string) (cloudImageSource, error) {
+func uploadToBucket(s3conn *s3.S3, ui packersdk.Ui, artifact packer.Artifact, bucket string, objectName string) (cloudImageSource, error) {
 	ui.Say("Looking for qcow2 file in list of artifacts...")
 	source := ""
 	for _, path := range artifact.Files() {
@@ -66,7 +67,7 @@ func uploadToBucket(s3conn *s3.S3, ui packer.Ui, artifact packer.Artifact, bucke
 	}, nil
 }
 
-func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, folderID string, imageSrc cloudImageSource, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string) (*compute.Image, error) {
+func createYCImage(ctx context.Context, driver yandex.Driver, ui packersdk.Ui, folderID string, imageSrc cloudImageSource, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string) (*compute.Image, error) {
 	req := &compute.CreateImageRequest{
 		FolderId:    folderID,
 		Name:        imageName,
@@ -122,7 +123,7 @@ func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, fold
 
 }
 
-func deleteFromBucket(s3conn *s3.S3, ui packer.Ui, imageSrc cloudImageSource) error {
+func deleteFromBucket(s3conn *s3.S3, ui packersdk.Ui, imageSrc cloudImageSource) error {
 	var url string
 	// switch on cloudImageSource type: cloud image id or storage URL
 	switch v := imageSrc.(type) {

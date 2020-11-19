@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepCompactDisk struct {
@@ -15,7 +15,7 @@ type StepCompactDisk struct {
 // Run runs a compaction/optimisation process on attached VHD/VHDX disks
 func (s *StepCompactDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.SkipCompaction {
 		ui.Say("Skipping disk compaction...")

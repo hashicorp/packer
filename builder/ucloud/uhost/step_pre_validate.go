@@ -6,6 +6,7 @@ import (
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepPreValidate struct {
@@ -32,7 +33,7 @@ func (s *stepPreValidate) Run(ctx context.Context, state multistep.StateBag) mul
 }
 
 func (s *stepPreValidate) validateProjectIds(state multistep.StateBag) error {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 
 	ui.Say("Validating project_id and copied project_ids...")
@@ -56,7 +57,7 @@ func (s *stepPreValidate) validateProjectIds(state multistep.StateBag) error {
 }
 
 func (s *stepPreValidate) validateRegions(state multistep.StateBag) error {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 
 	ui.Say("Validating region and copied regions...")
@@ -79,7 +80,7 @@ func (s *stepPreValidate) validateRegions(state multistep.StateBag) error {
 }
 
 func (s *stepPreValidate) validateZones(state multistep.StateBag) error {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 
 	ui.Say("Validating availability_zone...")

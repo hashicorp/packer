@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"io/ioutil"
 	"testing"
+
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestCoreConfig(t *testing.T) *CoreConfig {
@@ -29,7 +31,7 @@ func TestCore(t *testing.T, c *CoreConfig) *Core {
 	return core
 }
 
-func TestUi(t *testing.T) Ui {
+func TestUi(t *testing.T) packersdk.Ui {
 	var buf bytes.Buffer
 	return &BasicUi{
 		Reader:      &buf,

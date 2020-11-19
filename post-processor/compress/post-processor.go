@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/klauspost/pgzip"
@@ -107,7 +108,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(
 	ctx context.Context,
-	ui packer.Ui,
+	ui packersdk.Ui,
 	artifact packer.Artifact,
 ) (packer.Artifact, bool, bool, error) {
 	var generatedData map[interface{}]interface{}

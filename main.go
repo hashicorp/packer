@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/hashicorp/packer/version"
@@ -180,7 +181,7 @@ func wrappedMain() int {
 
 	defer plugin.CleanupClients()
 
-	var ui packer.Ui
+	var ui packersdk.Ui
 	if machineReadable {
 		// Setup the UI as we're being machine-readable
 		ui = &packer.MachineReadableUi{

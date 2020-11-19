@@ -3,8 +3,8 @@ package chroot
 import (
 	"context"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type postMountCommandsData struct {
@@ -22,7 +22,7 @@ func (s *StepPostMountCommands) Run(ctx context.Context, state multistep.StateBa
 	config := state.Get("config").(*Config)
 	device := state.Get("device").(string)
 	mountPath := state.Get("mount_path").(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 
 	if len(s.Commands) == 0 {

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 )
 
@@ -25,7 +26,7 @@ type Provisioner interface {
 	// given for cancellation, a UI is given to communicate with the user, and
 	// a communicator is given that is guaranteed to be connected to some
 	// machine so that provisioning can be done.
-	Provision(context.Context, Ui, Communicator, map[string]interface{}) error
+	Provision(context.Context, packersdk.Ui, Communicator, map[string]interface{}) error
 }
 
 // A HookedProvisioner represents a provisioner and information describing it
@@ -119,7 +120,7 @@ func CastDataToMap(data interface{}) map[string]interface{} {
 }
 
 // Runs the provisioners in order.
-func (h *ProvisionHook) Run(ctx context.Context, name string, ui Ui, comm Communicator, data interface{}) error {
+func (h *ProvisionHook) Run(ctx context.Context, name string, ui packersdk.Ui, comm Communicator, data interface{}) error {
 	// Shortcut
 	if len(h.Provisioners) == 0 {
 		return nil
@@ -159,7 +160,7 @@ func (p *PausedProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
-func (p *PausedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
+func (p *PausedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm Communicator, generatedData map[string]interface{}) error {
 
 	// Use a select to determine if we get cancelled during the wait
 	ui.Say(fmt.Sprintf("Pausing %s before the next provisioner...", p.PauseBefore))
@@ -185,7 +186,7 @@ func (r *RetriedProvisioner) Prepare(raws ...interface{}) error {
 	return r.Provisioner.Prepare(raws...)
 }
 
-func (r *RetriedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
+func (r *RetriedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm Communicator, generatedData map[string]interface{}) error {
 	if ctx.Err() != nil { // context was cancelled
 		return ctx.Err()
 	}
@@ -230,7 +231,7 @@ func (p *DebuggedProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
-func (p *DebuggedProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
+func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm Communicator, generatedData map[string]interface{}) error {
 	// Use a select to determine if we get cancelled during the wait
 	message := "Pausing before the next provisioner . Press enter to continue."
 

@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -111,7 +112,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 // Provision node somehow. TODO: actual docs
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	ui.Say("Provisioning with Converge")
 
 	// bootstrapping
@@ -132,7 +133,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	return nil
 }
 
-func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) maybeBootstrap(ui packersdk.Ui, comm packer.Communicator) error {
 	ctx := context.TODO()
 	if !p.config.Bootstrap {
 		return nil
@@ -174,7 +175,7 @@ func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) err
 	return nil
 }
 
-func (p *Provisioner) sendModuleDirectories(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) sendModuleDirectories(ui packersdk.Ui, comm packer.Communicator) error {
 	for _, dir := range p.config.ModuleDirs {
 		if err := comm.UploadDir(dir.Destination, dir.Source, dir.Exclude); err != nil {
 			return fmt.Errorf("Could not upload %q: %s", dir.Source, err)
@@ -185,7 +186,7 @@ func (p *Provisioner) sendModuleDirectories(ui packer.Ui, comm packer.Communicat
 	return nil
 }
 
-func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) applyModules(ui packersdk.Ui, comm packer.Communicator) error {
 	ctx := context.TODO()
 	// create params JSON file
 	params, err := json.Marshal(p.config.Params)

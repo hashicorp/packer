@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step shuts down the machine. It first attempts to do so gracefully,
@@ -19,7 +20,7 @@ import (
 //   communicator packer.Communicator
 //   config *config
 //   driver Driver
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //
 // Produces:
 //   <nothing>
@@ -31,7 +32,7 @@ type stepShutdown struct {
 
 func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.Comm.Type == "none" {
 		cancelCh := make(chan struct{}, 1)

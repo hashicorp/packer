@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -25,7 +26,7 @@ type uploadCmdData struct {
 }
 
 func (s *stepUploadImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	comm := state.Get("communicator").(packer.Communicator)
 	config := state.Get("config").(*Config)
 	runID := state.Get("run_id").(string)

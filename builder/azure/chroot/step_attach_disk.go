@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/builder/azure/common/client"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 var _ multistep.Step = &StepAttachDisk{}
@@ -19,7 +19,7 @@ type StepAttachDisk struct {
 
 func (s *StepAttachDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	diskset := state.Get(stateBagKey_Diskset).(Diskset)
 	diskResourceID := diskset.OS().String()
 
@@ -57,7 +57,7 @@ func (s *StepAttachDisk) Run(ctx context.Context, state multistep.StateBag) mult
 }
 
 func (s *StepAttachDisk) Cleanup(state multistep.StateBag) {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	if err := s.CleanupFunc(state); err != nil {
 		ui.Error(err.Error())
 	}
@@ -67,7 +67,7 @@ func (s *StepAttachDisk) CleanupFunc(state multistep.StateBag) error {
 
 	if s.attached {
 		azcli := state.Get("azureclient").(client.AzureClientSet)
-		ui := state.Get("ui").(packer.Ui)
+		ui := state.Get("ui").(packersdk.Ui)
 		diskset := state.Get(stateBagKey_Diskset).(Diskset)
 		diskResourceID := diskset.OS().String()
 

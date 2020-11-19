@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/aws/aws-sdk-go/service/ssm/ssmiface"
 	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 	"github.com/hashicorp/packer/packer-plugin-sdk/shell-local/localexec"
 )
@@ -89,7 +89,7 @@ func (s Session) getCommand(ctx context.Context) ([]string, string, error) {
 // context. If you do not wish to terminate the session manually: calling
 // StopSession on a instance of this driver will terminate the active session
 // created from calling StartSession.
-func (s Session) Start(ctx context.Context, ui packer.Ui) error {
+func (s Session) Start(ctx context.Context, ui packersdk.Ui) error {
 	for ctx.Err() == nil {
 		log.Printf("ssm: Starting PortForwarding session to instance %s", s.InstanceID)
 		args, sessionID, err := s.getCommand(ctx)

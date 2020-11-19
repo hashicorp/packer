@@ -6,8 +6,8 @@ import (
 
 	"github.com/antihax/optional"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -26,7 +26,7 @@ func (s *StepLinkVolume) Run(ctx context.Context, state multistep.StateBag) mult
 	oscconn := state.Get("osc").(*osc.APIClient)
 	device := state.Get("device").(string)
 	vm := state.Get("vm").(osc.Vm)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	volumeId := state.Get("volume_id").(string)
 
 	// For the API call, it expects "sd" prefixed devices.
@@ -67,7 +67,7 @@ func (s *StepLinkVolume) Run(ctx context.Context, state multistep.StateBag) mult
 }
 
 func (s *StepLinkVolume) Cleanup(state multistep.StateBag) {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	if err := s.CleanupFunc(state); err != nil {
 		ui.Error(err.Error())
 	}
@@ -79,7 +79,7 @@ func (s *StepLinkVolume) CleanupFunc(state multistep.StateBag) error {
 	}
 
 	oscconn := state.Get("osc").(*osc.APIClient)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Detaching BSU volume...")
 	_, _, err := oscconn.VolumeApi.UnlinkVolume(context.Background(), &osc.UnlinkVolumeOpts{

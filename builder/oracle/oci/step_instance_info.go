@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepInstanceInfo struct{}
@@ -13,7 +13,7 @@ type stepInstanceInfo struct{}
 func (s *stepInstanceInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	var (
 		driver = state.Get("driver").(Driver)
-		ui     = state.Get("ui").(packer.Ui)
+		ui     = state.Get("ui").(packersdk.Ui)
 		id     = state.Get("instance_id").(string)
 	)
 

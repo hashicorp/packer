@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type scalewayVagrantfileTemplate struct {
@@ -20,7 +21,7 @@ func (p *ScalewayProvider) KeepInputArtifact() bool {
 	return true
 }
 
-func (p *ScalewayProvider) Process(ui packer.Ui, artifact packer.Artifact, dir string) (vagrantfile string, metadata map[string]interface{}, err error) {
+func (p *ScalewayProvider) Process(ui packersdk.Ui, artifact packer.Artifact, dir string) (vagrantfile string, metadata map[string]interface{}, err error) {
 	// Create the metadata
 	metadata = map[string]interface{}{"provider": "scaleway"}
 

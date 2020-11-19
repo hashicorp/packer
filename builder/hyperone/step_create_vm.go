@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	openapi "github.com/hyperonecom/h1-client-go"
 )
 
@@ -20,7 +20,7 @@ const (
 
 func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*openapi.APIClient)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 	sshKey := state.Get("ssh_public_key").(string)
 
@@ -173,7 +173,7 @@ func (s *stepCreateVM) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say(fmt.Sprintf("Deleting VM %s...", s.vmID))
 	err := deleteVMWithDisks(s.vmID, state)

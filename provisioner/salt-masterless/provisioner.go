@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/guestexec"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -239,7 +240,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 	var err error
 	var src, dst string
 	var formulas []string
@@ -514,7 +515,7 @@ func hasValidFormulaURLs(s []string) bool {
 	return true
 }
 
-func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, src string) error {
+func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packer.Communicator, dst, src string) error {
 	f, err := os.Open(src)
 	if err != nil {
 		return fmt.Errorf("Error opening: %s", err)
@@ -535,7 +536,7 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 	return nil
 }
 
-func (p *Provisioner) moveFile(ui packer.Ui, comm packer.Communicator, dst string, src string) error {
+func (p *Provisioner) moveFile(ui packersdk.Ui, comm packer.Communicator, dst string, src string) error {
 	ctx := context.TODO()
 
 	ui.Message(fmt.Sprintf("Moving %s to %s", src, dst))
@@ -552,7 +553,7 @@ func (p *Provisioner) moveFile(ui packer.Ui, comm packer.Communicator, dst strin
 	return nil
 }
 
-func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) createDir(ui packersdk.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	cmd := &packer.RemoteCmd{
 		Command: p.guestCommands.CreateDir(dir),
@@ -567,7 +568,7 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 	return nil
 }
 
-func (p *Provisioner) statPath(ui packer.Ui, comm packer.Communicator, path string) error {
+func (p *Provisioner) statPath(ui packersdk.Ui, comm packer.Communicator, path string) error {
 	ctx := context.TODO()
 	ui.Message(fmt.Sprintf("Verifying Path: %s", path))
 	cmd := &packer.RemoteCmd{
@@ -582,7 +583,7 @@ func (p *Provisioner) statPath(ui packer.Ui, comm packer.Communicator, path stri
 	return nil
 }
 
-func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) removeDir(ui packersdk.Ui, comm packer.Communicator, dir string) error {
 	ctx := context.TODO()
 	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
 	cmd := &packer.RemoteCmd{
@@ -597,7 +598,7 @@ func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir stri
 	return nil
 }
 
-func (p *Provisioner) uploadDir(ui packer.Ui, comm packer.Communicator, dst, src string, ignore []string) error {
+func (p *Provisioner) uploadDir(ui packersdk.Ui, comm packer.Communicator, dst, src string, ignore []string) error {
 	_, temp_dst := filepath.Split(dst)
 	if err := comm.UploadDir(temp_dst, src, ignore); err != nil {
 		return err

@@ -7,8 +7,8 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	flavors_utils "github.com/gophercloud/utils/openstack/compute/v2/flavors"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepLoadFlavor gets the FlavorRef from a Flavor. It first assumes
@@ -20,7 +20,7 @@ type StepLoadFlavor struct {
 
 func (s *StepLoadFlavor) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// We need the v2 compute client
 	client, err := config.computeV2Client()

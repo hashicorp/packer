@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepGetRootPassword struct {
@@ -17,7 +17,7 @@ type StepGetRootPassword struct {
 	Config          *Config
 }
 
-func NewStepGetRootPassword(conn *NcloudAPIClient, ui packer.Ui, config *Config) *StepGetRootPassword {
+func NewStepGetRootPassword(conn *NcloudAPIClient, ui packersdk.Ui, config *Config) *StepGetRootPassword {
 	var step = &StepGetRootPassword{
 		Conn:   conn,
 		Say:    func(message string) { ui.Say(message) },

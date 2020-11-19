@@ -5,15 +5,15 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepCreateInstance struct{}
 
 func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Creating Instance...")
 
 	config := state.Get("config").(*Config)
@@ -63,7 +63,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	}
 
 	// terminate instance
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("client").(*compute.Client)
 	config := state.Get("config").(*Config)
 

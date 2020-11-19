@@ -2,6 +2,8 @@ package packer
 
 import (
 	"context"
+
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This is the hook that should be fired for provisioners to run.
@@ -22,7 +24,7 @@ const HookCleanupProvision = "packer_cleanup_provision"
 // must be race-free. Cancel should attempt to cancel the hook in the quickest,
 // safest way possible.
 type Hook interface {
-	Run(context.Context, string, Ui, Communicator, interface{}) error
+	Run(context.Context, string, packersdk.Ui, Communicator, interface{}) error
 }
 
 // A Hook implementation that dispatches based on an internal mapping.
@@ -33,7 +35,7 @@ type DispatchHook struct {
 // Runs the hook with the given name by dispatching it to the proper
 // hooks if a mapping exists. If a mapping doesn't exist, then nothing
 // happens.
-func (h *DispatchHook) Run(ctx context.Context, name string, ui Ui, comm Communicator, data interface{}) error {
+func (h *DispatchHook) Run(ctx context.Context, name string, ui packersdk.Ui, comm Communicator, data interface{}) error {
 	hooks, ok := h.Mapping[name]
 	if !ok {
 		// No hooks for that name. No problem.

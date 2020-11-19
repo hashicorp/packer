@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepAttachFloppy is a step that attaches a floppy to the virtual machine.
 //
 // Uses:
 //   driver Driver
-//   ui packer.Ui
+//   ui packersdk.Ui
 //   vmName string
 //
 // Produces:
@@ -34,7 +34,7 @@ func (s *StepAttachFloppy) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
 
 	ui.Say("Deleting any current floppy disk...")

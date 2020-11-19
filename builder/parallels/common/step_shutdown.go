@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepShutdown is a step that shuts down the machine. It first attempts to do
@@ -18,7 +19,7 @@ import (
 // Uses:
 //   communicator packer.Communicator
 //   driver Driver
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //   vmName string
 //
 // Produces:
@@ -32,7 +33,7 @@ type StepShutdown struct {
 func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
 
 	if s.Command != "" {

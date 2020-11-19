@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"github.com/antihax/optional"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -17,7 +17,7 @@ type StepVmInfo struct{}
 func (s *StepVmInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	oscconn := state.Get("osc").(*osc.APIClient)
 	//session := state.Get("clientConfig").(*session.Session)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Get our own vm ID
 	ui.Say("Gathering information about this Outscale vm...")

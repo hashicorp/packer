@@ -7,8 +7,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepSnapshot creates a snapshot of the created volume.
@@ -22,7 +22,7 @@ type StepSnapshot struct {
 
 func (s *StepSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	volumeId := state.Get("volume_id").(string)
 
 	ui.Say("Creating snapshot...")
@@ -72,7 +72,7 @@ func (s *StepSnapshot) Cleanup(state multistep.StateBag) {
 
 	if cancelled || halted {
 		ec2conn := state.Get("ec2").(*ec2.EC2)
-		ui := state.Get("ui").(packer.Ui)
+		ui := state.Get("ui").(packersdk.Ui)
 		ui.Say("Removing snapshot since we cancelled or halted...")
 		_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{SnapshotId: &s.snapshotId})
 		if err != nil {

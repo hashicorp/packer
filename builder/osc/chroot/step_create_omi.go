@@ -6,8 +6,8 @@ import (
 
 	"github.com/antihax/optional"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -21,7 +21,7 @@ func (s *StepCreateOMI) Run(ctx context.Context, state multistep.StateBag) multi
 	config := state.Get("config").(*Config)
 	osconn := state.Get("osc").(*osc.APIClient)
 	snapshotId := state.Get("snapshot_id").(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Creating the OMI...")
 

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
@@ -14,7 +14,7 @@ type stepShutdown struct{}
 
 func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	instanceAPI := instance.NewAPI(state.Get("client").(*scw.Client))
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	serverID := state.Get("server_id").(string)
 
 	ui.Say("Shutting down server...")

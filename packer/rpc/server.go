@@ -6,6 +6,7 @@ import (
 	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/ugorji/go/codec"
 )
 
@@ -122,7 +123,7 @@ func (s *Server) RegisterProvisioner(p packer.Provisioner) error {
 	})
 }
 
-func (s *Server) RegisterUi(ui packer.Ui) error {
+func (s *Server) RegisterUi(ui packersdk.Ui) error {
 	return s.server.RegisterName(DefaultUiEndpoint, &UiServer{
 		ui:       ui,
 		register: s.server.RegisterName,

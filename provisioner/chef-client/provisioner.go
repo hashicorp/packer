@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/guestexec"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
@@ -240,7 +241,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	p.generatedData = generatedData
 	p.communicator = comm
 
@@ -348,7 +349,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	return nil
 }
 
-func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, remotePath string, localPath string) error {
+func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packer.Communicator, remotePath string, localPath string) error {
 	ui.Message(fmt.Sprintf("Uploading %s...", localPath))
 
 	f, err := os.Open(localPath)
@@ -361,7 +362,7 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, remoteP
 }
 
 func (p *Provisioner) createConfig(
-	ui packer.Ui,
+	ui packersdk.Ui,
 	comm packer.Communicator,
 	nodeName string,
 	serverUrl string,
@@ -423,7 +424,7 @@ func (p *Provisioner) createConfig(
 	return remotePath, nil
 }
 
-func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, clientKey string, sslVerifyMode string, trustedCertsDir string) (string, error) {
+func (p *Provisioner) createKnifeConfig(ui packersdk.Ui, comm packer.Communicator, nodeName string, serverUrl string, clientKey string, sslVerifyMode string, trustedCertsDir string) (string, error) {
 	ui.Message("Creating configuration file 'knife.rb'")
 
 	// Read the template
@@ -450,7 +451,7 @@ func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, 
 	return remotePath, nil
 }
 
-func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string, error) {
+func (p *Provisioner) createJson(ui packersdk.Ui, comm packer.Communicator) (string, error) {
 	ui.Message("Creating JSON attribute file")
 
 	jsonData := make(map[string]interface{})
@@ -479,7 +480,7 @@ func (p *Provisioner) createJson(ui packer.Ui, comm packer.Communicator) (string
 	return remotePath, nil
 }
 
-func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) createDir(ui packersdk.Ui, comm packer.Communicator, dir string) error {
 	ctx := context.TODO()
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 
@@ -503,7 +504,7 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 	return nil
 }
 
-func (p *Provisioner) cleanNode(ui packer.Ui, comm packer.Communicator, node string, knifeConfigPath string) error {
+func (p *Provisioner) cleanNode(ui packersdk.Ui, comm packer.Communicator, node string, knifeConfigPath string) error {
 	ui.Say("Cleaning up chef node...")
 	args := []string{"node", "delete", node}
 	if err := p.knifeExec(ui, comm, node, knifeConfigPath, args); err != nil {
@@ -513,7 +514,7 @@ func (p *Provisioner) cleanNode(ui packer.Ui, comm packer.Communicator, node str
 	return nil
 }
 
-func (p *Provisioner) cleanClient(ui packer.Ui, comm packer.Communicator, node string, knifeConfigPath string) error {
+func (p *Provisioner) cleanClient(ui packersdk.Ui, comm packer.Communicator, node string, knifeConfigPath string) error {
 	ui.Say("Cleaning up chef client...")
 	args := []string{"client", "delete", node}
 	if err := p.knifeExec(ui, comm, node, knifeConfigPath, args); err != nil {
@@ -523,7 +524,7 @@ func (p *Provisioner) cleanClient(ui packer.Ui, comm packer.Communicator, node s
 	return nil
 }
 
-func (p *Provisioner) knifeExec(ui packer.Ui, comm packer.Communicator, node string, knifeConfigPath string, args []string) error {
+func (p *Provisioner) knifeExec(ui packersdk.Ui, comm packer.Communicator, node string, knifeConfigPath string, args []string) error {
 	flags := []string{
 		"-y",
 		"-c", knifeConfigPath,
@@ -555,7 +556,7 @@ func (p *Provisioner) knifeExec(ui packer.Ui, comm packer.Communicator, node str
 	return nil
 }
 
-func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) removeDir(ui packersdk.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
 	ctx := context.TODO()
 
@@ -567,7 +568,7 @@ func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir stri
 	return nil
 }
 
-func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config string, json string) error {
+func (p *Provisioner) executeChef(ui packersdk.Ui, comm packer.Communicator, config string, json string) error {
 	p.config.ctx.Data = &ExecuteTemplate{
 		ConfigPath: config,
 		JsonPath:   json,
@@ -604,7 +605,7 @@ func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config
 	return nil
 }
 
-func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator, version string) error {
+func (p *Provisioner) installChef(ui packersdk.Ui, comm packer.Communicator, version string) error {
 	ui.Message("Installing Chef...")
 	ctx := context.TODO()
 

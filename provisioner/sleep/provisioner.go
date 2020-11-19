@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
@@ -25,7 +26,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return config.Decode(&p, &config.DecodeOpts{}, raws...)
 }
 
-func (p *Provisioner) Provision(ctx context.Context, _ packer.Ui, _ packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, _ packersdk.Ui, _ packer.Communicator, _ map[string]interface{}) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()

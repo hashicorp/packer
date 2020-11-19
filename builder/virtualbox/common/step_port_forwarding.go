@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/net"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step adds a NAT port forwarding definition so that SSH or WinRM is available
@@ -17,7 +17,7 @@ import (
 //
 // Uses:
 //   driver Driver
-//   ui packer.Ui
+//   ui packersdk.Ui
 //   vmName string
 //
 // Produces:
@@ -32,7 +32,7 @@ type StepPortForwarding struct {
 
 func (s *StepPortForwarding) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
 
 	if s.CommConfig.Type == "none" {

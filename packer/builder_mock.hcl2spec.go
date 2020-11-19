@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -19,7 +20,7 @@ type FlatMockBuilder struct {
 	PrepareConfig   []interface{} `cty:"prepare_config" hcl:"prepare_config"`
 	RunCalled       *bool         `cty:"run_called" hcl:"run_called"`
 	RunHook         Hook          `cty:"run_hook" hcl:"run_hook"`
-	RunUi           Ui            `cty:"run_ui" hcl:"run_ui"`
+	RunUi           packersdk.Ui  `cty:"run_ui" hcl:"run_ui"`
 	CancelCalled    *bool         `cty:"cancel_called" hcl:"cancel_called"`
 	GeneratedVars   []string      `cty:"generated_vars" hcl:"generated_vars"`
 }
@@ -120,7 +121,7 @@ type FlatMockPostProcessor struct {
 	ConfigureError      error         `cty:"configure_error" hcl:"configure_error"`
 	PostProcessCalled   *bool         `cty:"post_process_called" hcl:"post_process_called"`
 	PostProcessArtifact Artifact      `cty:"post_process_artifact" hcl:"post_process_artifact"`
-	PostProcessUi       Ui            `cty:"post_process_ui" hcl:"post_process_ui"`
+	PostProcessUi       packersdk.Ui  `cty:"post_process_ui" hcl:"post_process_ui"`
 }
 
 // FlatMapstructure returns a new FlatMockPostProcessor.
@@ -157,7 +158,7 @@ type FlatMockProvisioner struct {
 	ProvCalled       *bool         `cty:"prov_called" hcl:"prov_called"`
 	ProvRetried      *bool         `cty:"prov_retried" hcl:"prov_retried"`
 	ProvCommunicator Communicator  `cty:"prov_communicator" hcl:"prov_communicator"`
-	ProvUi           Ui            `cty:"prov_ui" hcl:"prov_ui"`
+	ProvUi           packersdk.Ui  `cty:"prov_ui" hcl:"prov_ui"`
 }
 
 // FlatMapstructure returns a new FlatMockProvisioner.

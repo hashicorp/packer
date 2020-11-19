@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepTeardownInstance represents a Packer build step that tears down GCE
@@ -20,7 +20,7 @@ type StepTeardownInstance struct {
 func (s *StepTeardownInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	name := config.InstanceName
 	if name == "" {
@@ -57,7 +57,7 @@ func (s *StepTeardownInstance) Run(ctx context.Context, state multistep.StateBag
 func (s *StepTeardownInstance) Cleanup(state multistep.StateBag) {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Deleting disk...")
 	errCh, err := driver.DeleteDisk(config.Zone, config.DiskName)

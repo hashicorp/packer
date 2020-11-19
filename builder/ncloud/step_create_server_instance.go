@@ -10,8 +10,8 @@ import (
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepCreateServerInstance struct {
@@ -24,7 +24,7 @@ type StepCreateServerInstance struct {
 	serverInstanceNo                   string
 }
 
-func NewStepCreateServerInstance(conn *NcloudAPIClient, ui packer.Ui, config *Config) *StepCreateServerInstance {
+func NewStepCreateServerInstance(conn *NcloudAPIClient, ui packersdk.Ui, config *Config) *StepCreateServerInstance {
 	var step = &StepCreateServerInstance{
 		Conn:   conn,
 		Say:    func(message string) { ui.Say(message) },

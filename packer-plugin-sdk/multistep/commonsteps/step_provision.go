@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepProvision runs the provisioners.
@@ -18,7 +19,7 @@ import (
 // Uses:
 //   communicator packer.Communicator
 //   hook         packer.Hook
-//   ui           packer.Ui
+//   ui           packersdk.Ui
 //
 // Produces:
 //   <nothing>
@@ -109,7 +110,7 @@ func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBa
 	}
 
 	hook := state.Get("hook").(packer.Hook)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	hookData := PopulateProvisionHookData(state)
 

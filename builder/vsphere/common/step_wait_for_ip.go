@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type WaitIpConfig struct {
@@ -74,7 +74,7 @@ func (c *WaitIpConfig) GetIPNet() *net.IPNet {
 }
 
 func (s *StepWaitForIp) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	var ip string

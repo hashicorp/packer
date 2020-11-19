@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -18,13 +18,13 @@ type stepRun struct {
 	DiskImage bool
 
 	atLeastVersion2 bool
-	ui              packer.Ui
+	ui              packersdk.Ui
 }
 
 func (s *stepRun) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	s.ui = state.Get("ui").(packer.Ui)
+	s.ui = state.Get("ui").(packersdk.Ui)
 
 	// Figure out version of qemu; store on step for later use
 	rawVersion, err := driver.Version()
@@ -63,7 +63,7 @@ func (s *stepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 
 func (s *stepRun) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if err := driver.Stop(); err != nil {
 		ui.Error(fmt.Sprintf("Error shutting down VM: %s", err))

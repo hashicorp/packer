@@ -7,8 +7,8 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepCreateResourceGroup struct {
@@ -19,7 +19,7 @@ type StepCreateResourceGroup struct {
 	exists func(ctx context.Context, resourceGroupName string) (bool, error)
 }
 
-func NewStepCreateResourceGroup(client *AzureClient, ui packer.Ui) *StepCreateResourceGroup {
+func NewStepCreateResourceGroup(client *AzureClient, ui packersdk.Ui) *StepCreateResourceGroup {
 	var step = &StepCreateResourceGroup{
 		client: client,
 		say:    func(message string) { ui.Say(message) },
@@ -113,7 +113,7 @@ func (s *StepCreateResourceGroup) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	if state.Get(constants.ArmIsExistingResourceGroup).(bool) {
 		ui.Say("\nThe resource group was not created by Packer, not deleting ...")
 		return

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/useragent"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -32,10 +32,10 @@ const (
 
 type driverYC struct {
 	sdk *ycsdk.SDK
-	ui  packer.Ui
+	ui  packersdk.Ui
 }
 
-func NewDriverYC(ui packer.Ui, ac *AccessConfig) (Driver, error) {
+func NewDriverYC(ui packersdk.Ui, ac *AccessConfig) (Driver, error) {
 	log.Printf("[INFO] Initialize Yandex.Cloud client...")
 
 	sdkConfig := ycsdk.Config{}

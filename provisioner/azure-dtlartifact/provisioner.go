@@ -13,6 +13,7 @@ import (
 	dtlBuilder "github.com/hashicorp/packer/builder/azure/dtl"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -96,7 +97,7 @@ func (p *Provisioner) Communicator() packer.Communicator {
 	return p.communicator
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, _ map[string]interface{}) error {
 
 	p.communicator = comm
 

@@ -2,6 +2,8 @@ package packer
 
 import (
 	"context"
+
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // Implementers of Builder are responsible for actually building images
@@ -35,5 +37,5 @@ type Builder interface {
 	Prepare(...interface{}) ([]string, []string, error)
 
 	// Run is where the actual build should take place. It takes a Build and a Ui.
-	Run(context.Context, Ui, Hook) (Artifact, error)
+	Run(context.Context, packersdk.Ui, Hook) (Artifact, error)
 }

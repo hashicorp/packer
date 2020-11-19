@@ -7,17 +7,17 @@ import (
 	"sort"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/joyent/triton-go/compute"
 	terrors "github.com/joyent/triton-go/errors"
 )
 
 type driverTriton struct {
 	client *Client
-	ui     packer.Ui
+	ui     packersdk.Ui
 }
 
-func NewDriverTriton(ui packer.Ui, config Config) (Driver, error) {
+func NewDriverTriton(ui packersdk.Ui, config Config) (Driver, error) {
 	client, err := config.AccessConfig.CreateTritonClient()
 	if err != nil {
 		return nil, err

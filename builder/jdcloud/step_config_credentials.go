@@ -5,19 +5,19 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/jdcloud-api/jdcloud-sdk-go/services/vm/apis"
 )
 
 type stepConfigCredentials struct {
 	InstanceSpecConfig *JDCloudInstanceSpecConfig
-	ui                 packer.Ui
+	ui                 packersdk.Ui
 }
 
 func (s *stepConfigCredentials) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 
-	s.ui = state.Get("ui").(packer.Ui)
+	s.ui = state.Get("ui").(packersdk.Ui)
 	password := s.InstanceSpecConfig.Comm.SSHPassword
 	privateKeyPath := s.InstanceSpecConfig.Comm.SSHPrivateKeyFile
 	privateKeyName := s.InstanceSpecConfig.Comm.SSHKeyPairName

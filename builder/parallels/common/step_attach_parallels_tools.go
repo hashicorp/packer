@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepAttachParallelsTools is a step that attaches Parallels Tools ISO image
@@ -15,7 +15,7 @@ import (
 // Uses:
 //   driver Driver
 //   parallels_tools_path string
-//   ui packer.Ui
+//   ui packersdk.Ui
 //   vmName string
 //
 // Produces:
@@ -28,7 +28,7 @@ type StepAttachParallelsTools struct {
 // If ISO image is not specified, then this step will be skipped.
 func (s *StepAttachParallelsTools) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
 
 	// If we're not attaching the guest additions then just return
@@ -65,7 +65,7 @@ func (s *StepAttachParallelsTools) Cleanup(state multistep.StateBag) {
 	}
 
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
 
 	log.Println("Detaching Parallels Tools ISO...")

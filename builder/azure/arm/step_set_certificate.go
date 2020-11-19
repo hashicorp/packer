@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepSetCertificate struct {
@@ -14,7 +14,7 @@ type StepSetCertificate struct {
 	error  func(e error)
 }
 
-func NewStepSetCertificate(config *Config, ui packer.Ui) *StepSetCertificate {
+func NewStepSetCertificate(config *Config, ui packersdk.Ui) *StepSetCertificate {
 	var step = &StepSetCertificate{
 		config: config,
 		say:    func(message string) { ui.Say(message) },

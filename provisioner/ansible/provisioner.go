@@ -34,6 +34,7 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/adapter"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
@@ -214,8 +215,8 @@ type Provisioner struct {
 	ansibleMajVersion uint
 	generatedData     map[string]interface{}
 
-	setupAdapterFunc   func(ui packer.Ui, comm packer.Communicator) (string, error)
-	executeAnsibleFunc func(ui packer.Ui, comm packer.Communicator, privKeyFile string) error
+	setupAdapterFunc   func(ui packersdk.Ui, comm packer.Communicator) (string, error)
+	executeAnsibleFunc func(ui packersdk.Ui, comm packer.Communicator, privKeyFile string) error
 }
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
@@ -361,7 +362,7 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) setupAdapter(ui packer.Ui, comm packer.Communicator) (string, error) {
+func (p *Provisioner) setupAdapter(ui packersdk.Ui, comm packer.Communicator) (string, error) {
 	ui.Message("Setting up proxy adapter for Ansible....")
 
 	k, err := newUserKey(p.config.SSHAuthorizedKeyFile)
@@ -502,7 +503,7 @@ func (p *Provisioner) createInventoryFile() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Ansible...")
 	// Interpolate env vars to check for generated values like password and port
 	p.generatedData = generatedData
@@ -627,7 +628,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	return nil
 }
 
-func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) executeGalaxy(ui packersdk.Ui, comm packer.Communicator) error {
 	galaxyFile := filepath.ToSlash(p.config.GalaxyFile)
 
 	// ansible-galaxy install -r requirements.yml
@@ -676,7 +677,7 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 }
 
 // Intended to be invoked from p.executeGalaxy depending on the Ansible Galaxy parameters passed to Packer
-func (p *Provisioner) invokeGalaxyCommand(args []string, ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) invokeGalaxyCommand(args []string, ui packersdk.Ui, comm packer.Communicator) error {
 	ui.Message(fmt.Sprintf("Executing Ansible Galaxy"))
 	cmd := exec.Command(p.config.GalaxyCommand, args...)
 
@@ -781,7 +782,7 @@ func (p *Provisioner) createCmdArgs(httpAddr, inventory, playbook, privKeyFile s
 	return args, envVars
 }
 
-func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
+func (p *Provisioner) executeAnsible(ui packersdk.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
 	inventory := p.config.InventoryFile
 	httpAddr := p.generatedData["PackerHTTPAddr"].(string)

@@ -14,7 +14,7 @@ type StepUpdateBSUBackedVm struct {
 func (s *StepUpdateBSUBackedVm) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// oapiconn := state.Get("oapi").(*oapi.Client)
 	// vm := state.Get("vm").(*oapi.Vm)
-	// ui := state.Get("ui").(packer.Ui)
+	// ui := state.Get("ui").(packersdk.Ui)
 
 	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
 	// As of February 2017, this applies to C3, C4, D2, I2, R3, and M4 (excluding m4.16xlarge)

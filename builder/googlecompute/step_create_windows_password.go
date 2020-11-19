@@ -15,6 +15,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepCreateWindowsPassword represents a Packer build step that sets the windows password on a Windows GCE instance.
@@ -25,7 +26,7 @@ type StepCreateWindowsPassword struct {
 
 // Run executes the Packer build step that sets the windows password on a Windows GCE instance.
 func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	d := state.Get("driver").(Driver)
 	c := state.Get("config").(*Config)
 	name := state.Get("instance_name").(string)

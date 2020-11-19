@@ -6,8 +6,8 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepAllocateIp struct {
@@ -18,7 +18,7 @@ type StepAllocateIp struct {
 }
 
 func (s *StepAllocateIp) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 	server := state.Get("server").(*servers.Server)
 
@@ -145,7 +145,7 @@ func (s *StepAllocateIp) Run(ctx context.Context, state multistep.StateBag) mult
 
 func (s *StepAllocateIp) Cleanup(state multistep.StateBag) {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	instanceIP := state.Get("access_ip").(*floatingips.FloatingIP)
 
 	// Don't clean up if unless required

@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 	"github.com/klauspost/pgzip"
 )
@@ -72,7 +72,7 @@ func LinkFile(dst, src string) error {
 // DirToBox takes the directory and compresses it into a Vagrant-compatible
 // box. This function does not perform checks to verify that dir is
 // actually a proper box. This is an expected precondition.
-func DirToBox(dst, dir string, ui packer.Ui, level int) error {
+func DirToBox(dst, dir string, ui packersdk.Ui, level int) error {
 	log.Printf("Turning dir into box: %s => %s", dir, dst)
 
 	// Make the containing directory, if it does not already exist
@@ -163,7 +163,7 @@ func DirToBox(dst, dir string, ui packer.Ui, level int) error {
 // This function is mainly used to check cases such as the host system having
 // a GNU tar incompatible uname that will cause the actual Vagrant box creation
 // to fail later
-func CreateDummyBox(ui packer.Ui, level int) error {
+func CreateDummyBox(ui packersdk.Ui, level int) error {
 	ui.Say("Creating a dummy Vagrant box to ensure the host system can create one correctly")
 
 	// Create a temporary dir to create dummy Vagrant box from

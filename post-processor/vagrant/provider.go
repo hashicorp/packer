@@ -2,6 +2,7 @@ package vagrant
 
 import (
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // Provider is the interface that each provider must implement in order
@@ -18,5 +19,5 @@ type Provider interface {
 	// The Provider should return the contents for the Vagrantfile,
 	// any metadata (including the provider type in that), and an error
 	// if any.
-	Process(packer.Ui, packer.Artifact, string) (vagrantfile string, metadata map[string]interface{}, err error)
+	Process(packersdk.Ui, packer.Artifact, string) (vagrantfile string, metadata map[string]interface{}, err error)
 }

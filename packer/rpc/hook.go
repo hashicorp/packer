@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // An implementation of packer.Hook where the hook is actually executed
@@ -31,7 +32,7 @@ type HookRunArgs struct {
 	StreamId uint32
 }
 
-func (h *hook) Run(ctx context.Context, name string, ui packer.Ui, comm packer.Communicator, data interface{}) error {
+func (h *hook) Run(ctx context.Context, name string, ui packersdk.Ui, comm packer.Communicator, data interface{}) error {
 	nextId := h.mux.NextId()
 	server := newServerWithMux(h.mux, nextId)
 	server.RegisterCommunicator(comm)

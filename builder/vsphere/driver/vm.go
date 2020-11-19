@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/nfc"
 	"github.com/vmware/govmomi/object"
@@ -139,7 +139,7 @@ func (d *VCenterDriver) FindVM(name string) (VirtualMachine, error) {
 	}, nil
 }
 
-func (d *VCenterDriver) PreCleanVM(ui packer.Ui, vmPath string, force bool) error {
+func (d *VCenterDriver) PreCleanVM(ui packersdk.Ui, vmPath string, force bool) error {
 	vm, err := d.FindVM(vmPath)
 	if err != nil {
 		if _, ok := err.(*find.NotFoundError); !ok {

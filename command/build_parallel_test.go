@@ -14,6 +14,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/provisioner/sleep"
 )
 
@@ -36,7 +37,7 @@ func (b *ParallelTestBuilder) Prepare(raws ...interface{}) ([]string, []string, 
 	return nil, nil, nil
 }
 
-func (b *ParallelTestBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *ParallelTestBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
 	ui.Say("building")
 	b.wg.Done()
 	return nil, nil
@@ -51,7 +52,7 @@ func (b *LockedBuilder) Prepare(raws ...interface{}) ([]string, []string, error)
 	return nil, nil, nil
 }
 
-func (b *LockedBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *LockedBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
 	ui.Say("locking build")
 	select {
 	case <-b.unlock:

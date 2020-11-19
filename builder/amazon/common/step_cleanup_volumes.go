@@ -6,8 +6,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // stepCleanupVolumes cleans up any orphaned volumes that were not designated to
@@ -29,7 +29,7 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	if instanceRaw != nil {
 		instance = instanceRaw.(*ec2.Instance)
 	}
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	if instance == nil {
 		ui.Say("No volumes to clean up, skipping")
 		return

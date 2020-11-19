@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	openapi "github.com/hyperonecom/h1-client-go"
 )
 
@@ -15,7 +15,7 @@ type stepDetachDisk struct {
 
 func (s *stepDetachDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*openapi.APIClient)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmID := state.Get("vm_id").(string)
 	chrootDiskID := state.Get("chroot_disk_id").(string)
 
