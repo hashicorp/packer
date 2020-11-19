@@ -9,20 +9,20 @@ import (
 	"os"
 	"sync"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-// An implementation of packer.Communicator where the communicator is actually
+// An implementation of packersdk.Communicator where the communicator is actually
 // executed over an RPC connection.
 type communicator struct {
 	commonClient
 }
 
-// CommunicatorServer wraps a packer.Communicator implementation and makes
+// CommunicatorServer wraps a packersdk.Communicator implementation and makes
 // it exportable as part of a Golang RPC server.
 type CommunicatorServer struct {
 	commonServer
-	c packer.Communicator
+	c packersdk.Communicator
 }
 
 type CommandFinished struct {
@@ -69,7 +69,7 @@ func Communicator(client *rpc.Client) *communicator {
 	}
 }
 
-func (c *communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) (err error) {
+func (c *communicator) Start(ctx context.Context, cmd *packersdk.RemoteCmd) (err error) {
 	var args CommunicatorStartArgs
 	args.Command = cmd.Command
 
@@ -210,7 +210,7 @@ func (c *CommunicatorServer) Start(args *CommunicatorStartArgs, reply *interface
 
 	// Build the RemoteCmd on this side so that it all pipes over
 	// to the remote side.
-	var cmd packer.RemoteCmd
+	var cmd packersdk.RemoteCmd
 	cmd.Command = args.Command
 
 	// Create a channel to signal we're done so that we can close

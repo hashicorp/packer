@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
@@ -160,7 +159,7 @@ func extractScript(p *Provisioner) (string, error) {
 	return temp.Name(), nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with windows-shell...")
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
@@ -204,7 +203,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		// the case that the upload succeeded, a restart is initiated,
 		// and then the command is executed but the file doesn't exist
 		// any longer.
-		var cmd *packer.RemoteCmd
+		var cmd *packersdk.RemoteCmd
 		err = retry.Config{StartTimeout: p.config.StartRetryTimeout}.Run(ctx, func(ctx context.Context) error {
 			if _, err := f.Seek(0, 0); err != nil {
 				return err
@@ -214,7 +213,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
 
-			cmd = &packer.RemoteCmd{Command: command}
+			cmd = &packersdk.RemoteCmd{Command: command}
 			return cmd.RunWithUi(ctx, comm, ui)
 		})
 		if err != nil {

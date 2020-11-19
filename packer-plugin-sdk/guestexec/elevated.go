@@ -8,12 +8,12 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
 type ElevatedProvisioner interface {
-	Communicator() packer.Communicator
+	Communicator() packersdk.Communicator
 	ElevatedUser() string
 	ElevatedPassword() string
 }

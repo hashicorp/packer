@@ -191,7 +191,7 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Inspec...")
 	p.config.ctx.Data = generatedData
 
@@ -342,7 +342,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	return nil
 }
 
-func (p *Provisioner) executeInspec(ui packersdk.Ui, comm packer.Communicator, privKeyFile string) error {
+func (p *Provisioner) executeInspec(ui packersdk.Ui, comm packersdk.Communicator, privKeyFile string) error {
 	var envvars []string
 
 	args := []string{p.config.SubCommand, p.config.Profile}

@@ -67,7 +67,7 @@ func (p *HCL2Provisioner) Prepare(args ...interface{}) error {
 	return p.Provisioner.Prepare(args...)
 }
 
-func (p *HCL2Provisioner) Provision(ctx context.Context, ui packersdk.Ui, c packer.Communicator, vars map[string]interface{}) error {
+func (p *HCL2Provisioner) Provision(ctx context.Context, ui packersdk.Ui, c packersdk.Communicator, vars map[string]interface{}) error {
 	err := p.HCL2Prepare(vars)
 	if err != nil {
 		return err

@@ -42,7 +42,7 @@ type ProvisionerProvisionArgs struct {
 	StreamID      uint32
 }
 
-func (p *provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (p *provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 	nextId := p.mux.NextId()
 	server := newServerWithMux(p.mux, nextId)
 	server.RegisterCommunicator(comm)

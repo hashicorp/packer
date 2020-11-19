@@ -8,7 +8,6 @@ import (
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -34,7 +33,7 @@ type Builder struct {
 	vmCreator     ProxmoxVMCreator
 }
 
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook, state multistep.StateBag) (packersdk.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook, state multistep.StateBag) (packersdk.Artifact, error) {
 	var err error
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: b.config.SkipCertValidation,

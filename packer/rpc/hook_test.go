@@ -5,10 +5,11 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestHook_Implements(t *testing.T) {
-	var _ packer.Hook = new(hook)
+	var _ packersdk.Hook = new(hook)
 }
 
 func TestHook_cancelWhileRun(t *testing.T) {

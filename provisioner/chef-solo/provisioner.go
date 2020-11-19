@@ -16,7 +16,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/guestexec"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -243,7 +242,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, _ map[string]interface{}) error {
 	ui.Say("Provisioning with chef-solo")
 
 	if !p.config.SkipInstall {
@@ -315,7 +314,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	return nil
 }
 
-func (p *Provisioner) uploadDirectory(ui packersdk.Ui, comm packer.Communicator, dst string, src string) error {
+func (p *Provisioner) uploadDirectory(ui packersdk.Ui, comm packersdk.Communicator, dst string, src string) error {
 	if err := p.createDir(ui, comm, dst); err != nil {
 		return err
 	}
@@ -329,7 +328,7 @@ func (p *Provisioner) uploadDirectory(ui packersdk.Ui, comm packer.Communicator,
 	return comm.UploadDir(dst, src, nil)
 }
 
-func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packer.Communicator, dst string, src string) error {
+func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packersdk.Communicator, dst string, src string) error {
 	f, err := os.Open(src)
 	if err != nil {
 		return err
@@ -339,7 +338,7 @@ func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packer.Communicator, dst 
 	return comm.Upload(dst, f, nil)
 }
 
-func (p *Provisioner) createConfig(ui packersdk.Ui, comm packer.Communicator, localCookbooks []string, rolesPath string, dataBagsPath string, encryptedDataBagSecretPath string, environmentsPath string, chefEnvironment string, chefLicense string) (string, error) {
+func (p *Provisioner) createConfig(ui packersdk.Ui, comm packersdk.Communicator, localCookbooks []string, rolesPath string, dataBagsPath string, encryptedDataBagSecretPath string, environmentsPath string, chefEnvironment string, chefLicense string) (string, error) {
 	ui.Message("Creating configuration file 'solo.rb'")
 
 	cookbook_paths := make([]string, len(p.config.RemoteCookbookPaths)+len(localCookbooks))
@@ -395,7 +394,7 @@ func (p *Provisioner) createConfig(ui packersdk.Ui, comm packer.Communicator, lo
 	return remotePath, nil
 }
 
-func (p *Provisioner) createJson(ui packersdk.Ui, comm packer.Communicator) (string, error) {
+func (p *Provisioner) createJson(ui packersdk.Ui, comm packersdk.Communicator) (string, error) {
 	ui.Message("Creating JSON attribute file")
 
 	jsonData := make(map[string]interface{})
@@ -424,11 +423,11 @@ func (p *Provisioner) createJson(ui packersdk.Ui, comm packer.Communicator) (str
 	return remotePath, nil
 }
 
-func (p *Provisioner) createDir(ui packersdk.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) createDir(ui packersdk.Ui, comm packersdk.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	ctx := context.TODO()
 
-	cmd := &packer.RemoteCmd{Command: p.guestCommands.CreateDir(dir)}
+	cmd := &packersdk.RemoteCmd{Command: p.guestCommands.CreateDir(dir)}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
@@ -437,7 +436,7 @@ func (p *Provisioner) createDir(ui packersdk.Ui, comm packer.Communicator, dir s
 	}
 
 	// Chmod the directory to 0777 just so that we can access it as our user
-	cmd = &packer.RemoteCmd{Command: p.guestCommands.Chmod(dir, "0777")}
+	cmd = &packersdk.RemoteCmd{Command: p.guestCommands.Chmod(dir, "0777")}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
@@ -448,7 +447,7 @@ func (p *Provisioner) createDir(ui packersdk.Ui, comm packer.Communicator, dir s
 	return nil
 }
 
-func (p *Provisioner) executeChef(ui packersdk.Ui, comm packer.Communicator, config string, json string) error {
+func (p *Provisioner) executeChef(ui packersdk.Ui, comm packersdk.Communicator, config string, json string) error {
 	p.config.ctx.Data = &ExecuteTemplate{
 		ConfigPath: config,
 		JsonPath:   json,
@@ -461,7 +460,7 @@ func (p *Provisioner) executeChef(ui packersdk.Ui, comm packer.Communicator, con
 
 	ui.Message(fmt.Sprintf("Executing Chef: %s", command))
 
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: command,
 	}
 	ctx := context.TODO()
@@ -476,7 +475,7 @@ func (p *Provisioner) executeChef(ui packersdk.Ui, comm packer.Communicator, con
 	return nil
 }
 
-func (p *Provisioner) installChef(ui packersdk.Ui, comm packer.Communicator, version string) error {
+func (p *Provisioner) installChef(ui packersdk.Ui, comm packersdk.Communicator, version string) error {
 	ui.Message("Installing Chef...")
 	ctx := context.TODO()
 
@@ -489,7 +488,7 @@ func (p *Provisioner) installChef(ui packersdk.Ui, comm packer.Communicator, ver
 		return err
 	}
 
-	cmd := &packer.RemoteCmd{Command: command}
+	cmd := &packersdk.RemoteCmd{Command: command}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}

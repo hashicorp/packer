@@ -4,16 +4,15 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type cmdHook struct {
-	hook   packer.Hook
+	hook   packersdk.Hook
 	client *Client
 }
 
-func (c *cmdHook) Run(ctx context.Context, name string, ui packersdk.Ui, comm packer.Communicator, data interface{}) error {
+func (c *cmdHook) Run(ctx context.Context, name string, ui packersdk.Ui, comm packersdk.Communicator, data interface{}) error {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)

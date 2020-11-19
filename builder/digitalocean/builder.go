@@ -12,7 +12,6 @@ import (
 	"github.com/digitalocean/godo"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -38,7 +37,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, nil, nil
 }
 
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	client := godo.NewClient(oauth2.NewClient(context.TODO(), &apiTokenSource{
 		AccessToken: b.config.APIToken,
 	}))

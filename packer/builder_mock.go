@@ -22,7 +22,7 @@ type MockBuilder struct {
 	PrepareCalled bool
 	PrepareConfig []interface{}
 	RunCalled     bool
-	RunHook       Hook
+	RunHook       packersdk.Hook
 	RunUi         packersdk.Ui
 	CancelCalled  bool
 	RunFn         func(ctx context.Context)
@@ -40,7 +40,7 @@ func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, []string, error
 	return tb.GeneratedVars, tb.PrepareWarnings, nil
 }
 
-func (tb *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, h Hook) (packersdk.Artifact, error) {
+func (tb *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, h packersdk.Hook) (packersdk.Artifact, error) {
 	tb.RunCalled = true
 	tb.RunHook = h
 	tb.RunUi = ui
@@ -57,7 +57,7 @@ func (tb *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, h Hook) (packer
 	}
 
 	if h != nil {
-		if err := h.Run(ctx, HookProvision, ui, new(MockCommunicator), nil); err != nil {
+		if err := h.Run(ctx, packersdk.HookProvision, ui, new(packersdk.MockCommunicator), nil); err != nil {
 			return nil, err
 		}
 	}

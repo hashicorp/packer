@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/provisioner/shell"
@@ -60,10 +61,10 @@ func TestUploadDownload(t *testing.T) {
 	defer os.Remove("my-strawberry-cake")
 
 	// Add hooks so the provisioners run during the build
-	hooks := map[string][]packer.Hook{}
-	hooks[packer.HookProvision] = []packer.Hook{
+	hooks := map[string][]packersdk.Hook{}
+	hooks[packersdk.HookProvision] = []packersdk.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []*packer.HookedProvisioner{
+			Provisioners: []*packersdk.HookedProvisioner{
 				{Provisioner: upload, Config: nil, TypeName: ""},
 				{Provisioner: download, Config: nil, TypeName: ""},
 			},
@@ -148,10 +149,10 @@ func TestLargeDownload(t *testing.T) {
 	defer os.Remove("bigcake")
 
 	// Add hooks so the provisioners run during the build
-	hooks := map[string][]packer.Hook{}
-	hooks[packer.HookProvision] = []packer.Hook{
+	hooks := map[string][]packersdk.Hook{}
+	hooks[packersdk.HookProvision] = []packersdk.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []*packer.HookedProvisioner{
+			Provisioners: []*packersdk.HookedProvisioner{
 				{Provisioner: shell, Config: nil, TypeName: ""},
 				{Provisioner: downloadCupcake, Config: nil, TypeName: ""},
 				{Provisioner: downloadBigcake, Config: nil, TypeName: ""},
@@ -256,10 +257,10 @@ func TestFixUploadOwner(t *testing.T) {
 	}
 
 	// Add hooks so the provisioners run during the build
-	hooks := map[string][]packer.Hook{}
-	hooks[packer.HookProvision] = []packer.Hook{
+	hooks := map[string][]packersdk.Hook{}
+	hooks[packersdk.HookProvision] = []packersdk.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []*packer.HookedProvisioner{
+			Provisioners: []*packersdk.HookedProvisioner{
 				{Provisioner: fileProvisioner, Config: nil, TypeName: ""},
 				{Provisioner: dirProvisioner, Config: nil, TypeName: ""},
 				{Provisioner: shellProvisioner, Config: nil, TypeName: ""},

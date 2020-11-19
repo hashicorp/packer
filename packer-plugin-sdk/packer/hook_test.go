@@ -3,8 +3,6 @@ package packer
 import (
 	"context"
 	"testing"
-
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestDispatchHook_Implements(t *testing.T) {
@@ -42,7 +40,7 @@ type CancelHook struct {
 	cancel func()
 }
 
-func (h *CancelHook) Run(ctx context.Context, _ string, _ packersdk.Ui, _ Communicator, _ interface{}) error {
+func (h *CancelHook) Run(ctx context.Context, _ string, _ Ui, _ Communicator, _ interface{}) error {
 	h.cancel()
 	<-ctx.Done()
 	return ctx.Err()

@@ -37,7 +37,7 @@ type StepConnectSSH struct {
 func (s *StepConnectSSH) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packersdk.Ui)
 
-	var comm packer.Communicator
+	var comm packersdk.Communicator
 	var err error
 
 	subCtx, cancel := context.WithCancel(ctx)
@@ -85,7 +85,7 @@ func (s *StepConnectSSH) Run(ctx context.Context, state multistep.StateBag) mult
 func (s *StepConnectSSH) Cleanup(multistep.StateBag) {
 }
 
-func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Context) (packer.Communicator, error) {
+func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Context) (packersdk.Communicator, error) {
 	// Determine if we're using a bastion host, and if so, retrieve
 	// that configuration. This configuration doesn't change so we
 	// do this one before entering the retry loop.
@@ -118,7 +118,7 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, ctx context.Contex
 
 	handshakeAttempts := 0
 
-	var comm packer.Communicator
+	var comm packersdk.Communicator
 	first := true
 	for {
 		// Don't check for cancel or wait on first iteration

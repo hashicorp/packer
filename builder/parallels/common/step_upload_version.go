@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
@@ -15,7 +14,7 @@ import (
 // Parallels Desktop, which can be useful for various provisioning reasons.
 //
 // Uses:
-//   communicator packer.Communicator
+//   communicator packersdk.Communicator
 //   driver Driver
 //   ui packersdk.Ui
 type StepUploadVersion struct {
@@ -24,7 +23,7 @@ type StepUploadVersion struct {
 
 // Run uploads a file containing the version of Parallels Desktop.
 func (s *StepUploadVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	comm := state.Get("communicator").(packer.Communicator)
+	comm := state.Get("communicator").(packersdk.Communicator)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packersdk.Ui)
 

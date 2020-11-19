@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/dylanmei/winrmtest"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 const PAYLOAD = "stuff"
@@ -74,7 +74,7 @@ func TestStart(t *testing.T) {
 		t.Fatalf("error creating communicator: %s", err)
 	}
 
-	var cmd packer.RemoteCmd
+	var cmd packersdk.RemoteCmd
 	stdout := new(bytes.Buffer)
 	cmd.Command = "echo foo"
 	cmd.Stdout = stdout

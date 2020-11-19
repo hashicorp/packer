@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	sl "github.com/hashicorp/packer/packer-plugin-sdk/shell-local"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -27,7 +26,7 @@ func RunLocalCommands(commands []string, wrappedCommand CommandWrapper, ictx int
 		comm := &sl.Communicator{
 			ExecuteCommand: []string{"sh", "-c", command},
 		}
-		cmd := &packer.RemoteCmd{Command: command}
+		cmd := &packersdk.RemoteCmd{Command: command}
 		if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 			return fmt.Errorf("Error executing command: %s", err)
 		}

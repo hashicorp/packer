@@ -30,7 +30,6 @@ import (
 	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/packer/helper/communicator"
 	helperssh "github.com/hashicorp/packer/helper/communicator/ssh"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/ssh"
@@ -57,7 +56,7 @@ type ESX5Driver struct {
 	client *govmomi.Client
 	finder *find.Finder
 
-	comm      packer.Communicator
+	comm      packersdk.Communicator
 	outputDir string
 	vmId      string
 }
@@ -865,7 +864,7 @@ func (d *ESX5Driver) ssh(command string, stdin io.Reader) (*bytes.Buffer, error)
 	ctx := context.TODO()
 	var stdout, stderr bytes.Buffer
 
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: command,
 		Stdout:  &stdout,
 		Stderr:  &stderr,

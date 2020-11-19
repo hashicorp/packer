@@ -15,6 +15,7 @@ import (
 	helperssh "github.com/hashicorp/packer/helper/communicator/ssh"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	packerssh "github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/ssh"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -257,8 +258,8 @@ func (c *WinRM) Configure(raws ...interface{}) ([]string, error) {
 }
 
 var (
-	_ packer.ConfigurableCommunicator = new(SSH)
-	_ packer.ConfigurableCommunicator = new(WinRM)
+	_ packersdk.ConfigurableCommunicator = new(SSH)
+	_ packersdk.ConfigurableCommunicator = new(WinRM)
 )
 
 type SSHInterface struct {

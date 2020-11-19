@@ -98,7 +98,7 @@ type CoreBuild struct {
 	Builder            Builder
 	BuilderConfig      interface{}
 	BuilderType        string
-	hooks              map[string][]Hook
+	hooks              map[string][]packersdk.Hook
 	Provisioners       []CoreBuildProvisioner
 	PostProcessors     [][]CoreBuildPostProcessor
 	CleanupProvisioner CoreBuildProvisioner
@@ -238,9 +238,9 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	}
 
 	// Copy the hooks
-	hooks := make(map[string][]Hook)
+	hooks := make(map[string][]packersdk.Hook)
 	for hookName, hookList := range b.hooks {
-		hooks[hookName] = make([]Hook, len(hookList))
+		hooks[hookName] = make([]packersdk.Hook, len(hookList))
 		copy(hooks[hookName], hookList)
 	}
 
@@ -267,11 +267,11 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 			}
 		}
 
-		if _, ok := hooks[HookProvision]; !ok {
-			hooks[HookProvision] = make([]Hook, 0, 1)
+		if _, ok := hooks[packersdk.HookProvision]; !ok {
+			hooks[packersdk.HookProvision] = make([]packersdk.Hook, 0, 1)
 		}
 
-		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{
+		hooks[packersdk.HookProvision] = append(hooks[packersdk.HookProvision], &ProvisionHook{
 			Provisioners: hookedProvisioners,
 		})
 	}
@@ -282,12 +282,12 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 			b.CleanupProvisioner.config,
 			b.CleanupProvisioner.PType,
 		}
-		hooks[HookCleanupProvision] = []Hook{&ProvisionHook{
+		hooks[packersdk.HookCleanupProvision] = []packersdk.Hook{&ProvisionHook{
 			Provisioners: []*HookedProvisioner{hookedCleanupProvisioner},
 		}}
 	}
 
-	hook := &DispatchHook{Mapping: hooks}
+	hook := &packersdk.DispatchHook{Mapping: hooks}
 	artifacts := make([]packersdk.Artifact, 0, 1)
 
 	// The builder just has a normal Ui, but targeted

@@ -99,7 +99,7 @@ func (c *Client) Builder() packer.Builder {
 	}
 }
 
-func (c *Client) Communicator() packer.Communicator {
+func (c *Client) Communicator() packersdk.Communicator {
 	return &communicator{
 		commonClient: commonClient{
 			endpoint: DefaultCommunicatorEndpoint,
@@ -109,7 +109,7 @@ func (c *Client) Communicator() packer.Communicator {
 	}
 }
 
-func (c *Client) Hook() packer.Hook {
+func (c *Client) Hook() packersdk.Hook {
 	return &hook{
 		commonClient: commonClient{
 			endpoint: DefaultHookEndpoint,

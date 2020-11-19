@@ -16,7 +16,6 @@ import (
 	"encoding/json"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -112,7 +111,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 // Provision node somehow. TODO: actual docs
-func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, _ map[string]interface{}) error {
 	ui.Say("Provisioning with Converge")
 
 	// bootstrapping
@@ -133,7 +132,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	return nil
 }
 
-func (p *Provisioner) maybeBootstrap(ui packersdk.Ui, comm packer.Communicator) error {
+func (p *Provisioner) maybeBootstrap(ui packersdk.Ui, comm packersdk.Communicator) error {
 	ctx := context.TODO()
 	if !p.config.Bootstrap {
 		return nil
@@ -153,7 +152,7 @@ func (p *Provisioner) maybeBootstrap(ui packersdk.Ui, comm packer.Communicator) 
 	}
 
 	var out, outErr bytes.Buffer
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: command,
 		Stdin:   nil,
 		Stdout:  &out,
@@ -175,7 +174,7 @@ func (p *Provisioner) maybeBootstrap(ui packersdk.Ui, comm packer.Communicator) 
 	return nil
 }
 
-func (p *Provisioner) sendModuleDirectories(ui packersdk.Ui, comm packer.Communicator) error {
+func (p *Provisioner) sendModuleDirectories(ui packersdk.Ui, comm packersdk.Communicator) error {
 	for _, dir := range p.config.ModuleDirs {
 		if err := comm.UploadDir(dir.Destination, dir.Source, dir.Exclude); err != nil {
 			return fmt.Errorf("Could not upload %q: %s", dir.Source, err)
@@ -186,7 +185,7 @@ func (p *Provisioner) sendModuleDirectories(ui packersdk.Ui, comm packer.Communi
 	return nil
 }
 
-func (p *Provisioner) applyModules(ui packersdk.Ui, comm packer.Communicator) error {
+func (p *Provisioner) applyModules(ui packersdk.Ui, comm packersdk.Communicator) error {
 	ctx := context.TODO()
 	// create params JSON file
 	params, err := json.Marshal(p.config.Params)
@@ -210,7 +209,7 @@ func (p *Provisioner) applyModules(ui packersdk.Ui, comm packer.Communicator) er
 
 	// run Converge in the specified directory
 	var runOut, runErr bytes.Buffer
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: command,
 		Stdin:   nil,
 		Stdout:  &runOut,

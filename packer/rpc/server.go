@@ -87,7 +87,7 @@ func (s *Server) RegisterBuilder(b packer.Builder) error {
 	})
 }
 
-func (s *Server) RegisterCommunicator(c packer.Communicator) error {
+func (s *Server) RegisterCommunicator(c packersdk.Communicator) error {
 	return s.server.RegisterName(DefaultCommunicatorEndpoint, &CommunicatorServer{
 		c: c,
 		commonServer: commonServer{
@@ -96,7 +96,7 @@ func (s *Server) RegisterCommunicator(c packer.Communicator) error {
 	})
 }
 
-func (s *Server) RegisterHook(h packer.Hook) error {
+func (s *Server) RegisterHook(h packersdk.Hook) error {
 	return s.server.RegisterName(DefaultHookEndpoint, &HookServer{
 		hook: h,
 		mux:  s.mux,

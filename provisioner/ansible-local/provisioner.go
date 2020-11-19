@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -194,7 +193,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Ansible...")
 	p.generatedData = generatedData
 
@@ -318,7 +317,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	return nil
 }
 
-func (p *Provisioner) provisionPlaybookFiles(ui packersdk.Ui, comm packer.Communicator) error {
+func (p *Provisioner) provisionPlaybookFiles(ui packersdk.Ui, comm packersdk.Communicator) error {
 	var playbookDir string
 	if p.config.PlaybookDir != "" {
 		var err error
@@ -339,7 +338,7 @@ func (p *Provisioner) provisionPlaybookFiles(ui packersdk.Ui, comm packer.Commun
 	return nil
 }
 
-func (p *Provisioner) provisionPlaybookFile(ui packersdk.Ui, comm packer.Communicator, playbookFile string) error {
+func (p *Provisioner) provisionPlaybookFile(ui packersdk.Ui, comm packersdk.Communicator, playbookFile string) error {
 	ui.Message(fmt.Sprintf("Uploading playbook file: %s", playbookFile))
 
 	remoteDir := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Dir(playbookFile)))
@@ -356,7 +355,7 @@ func (p *Provisioner) provisionPlaybookFile(ui packersdk.Ui, comm packer.Communi
 	return nil
 }
 
-func (p *Provisioner) executeGalaxy(ui packersdk.Ui, comm packer.Communicator) error {
+func (p *Provisioner) executeGalaxy(ui packersdk.Ui, comm packersdk.Communicator) error {
 	ctx := context.TODO()
 	rolesDir := filepath.ToSlash(filepath.Join(p.config.StagingDir, "roles"))
 	galaxyFile := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.GalaxyFile)))
@@ -365,7 +364,7 @@ func (p *Provisioner) executeGalaxy(ui packersdk.Ui, comm packer.Communicator) e
 	command := fmt.Sprintf("cd %s && %s install -r %s -p %s",
 		p.config.StagingDir, p.config.GalaxyCommand, galaxyFile, rolesDir)
 	ui.Message(fmt.Sprintf("Executing Ansible Galaxy: %s", command))
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: command,
 	}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
@@ -378,7 +377,7 @@ func (p *Provisioner) executeGalaxy(ui packersdk.Ui, comm packer.Communicator) e
 	return nil
 }
 
-func (p *Provisioner) executeAnsible(ui packersdk.Ui, comm packer.Communicator) error {
+func (p *Provisioner) executeAnsible(ui packersdk.Ui, comm packersdk.Communicator) error {
 	inventory := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile)))
 
 	extraArgs := fmt.Sprintf(" --extra-vars \"packer_build_name=%s packer_builder_type=%s packer_http_addr=%s -o IdentitiesOnly=yes\" ",
@@ -411,14 +410,14 @@ func (p *Provisioner) executeAnsible(ui packersdk.Ui, comm packer.Communicator) 
 }
 
 func (p *Provisioner) executeAnsiblePlaybook(
-	ui packersdk.Ui, comm packer.Communicator, playbookFile, extraArgs, inventory string,
+	ui packersdk.Ui, comm packersdk.Communicator, playbookFile, extraArgs, inventory string,
 ) error {
 	ctx := context.TODO()
 	command := fmt.Sprintf("cd %s && %s %s%s -c local -i %s",
 		p.config.StagingDir, p.config.Command, playbookFile, extraArgs, inventory,
 	)
 	ui.Message(fmt.Sprintf("Executing Ansible: %s", command))
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: command,
 	}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
@@ -461,7 +460,7 @@ func validateFileConfig(name string, config string, req bool) error {
 	return nil
 }
 
-func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packer.Communicator, dst, src string) error {
+func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packersdk.Communicator, dst, src string) error {
 	f, err := os.Open(src)
 	if err != nil {
 		return fmt.Errorf("Error opening: %s", err)
@@ -474,9 +473,9 @@ func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packer.Communicator, dst,
 	return nil
 }
 
-func (p *Provisioner) createDir(ui packersdk.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) createDir(ui packersdk.Ui, comm packersdk.Communicator, dir string) error {
 	ctx := context.TODO()
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: fmt.Sprintf("mkdir -p '%s'", dir),
 	}
 
@@ -491,9 +490,9 @@ func (p *Provisioner) createDir(ui packersdk.Ui, comm packer.Communicator, dir s
 	return nil
 }
 
-func (p *Provisioner) removeDir(ui packersdk.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) removeDir(ui packersdk.Ui, comm packersdk.Communicator, dir string) error {
 	ctx := context.TODO()
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: fmt.Sprintf("rm -rf '%s'", dir),
 	}
 
@@ -508,7 +507,7 @@ func (p *Provisioner) removeDir(ui packersdk.Ui, comm packer.Communicator, dir s
 	return nil
 }
 
-func (p *Provisioner) uploadDir(ui packersdk.Ui, comm packer.Communicator, dst, src string) error {
+func (p *Provisioner) uploadDir(ui packersdk.Ui, comm packersdk.Communicator, dst, src string) error {
 	if err := p.createDir(ui, comm, dst); err != nil {
 		return err
 	}

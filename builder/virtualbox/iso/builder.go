@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
@@ -231,7 +230,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, warnings, nil
 }
 
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	// Create the driver that we'll use to communicate with VirtualBox
 	driver, err := vboxcommon.NewDriver()
 	if err != nil {

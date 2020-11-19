@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -25,7 +24,7 @@ type StepUploadBundle struct {
 }
 
 func (s *StepUploadBundle) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	comm := state.Get("communicator").(packer.Communicator)
+	comm := state.Get("communicator").(packersdk.Communicator)
 	config := state.Get("config").(*Config)
 	manifestName := state.Get("manifest_name").(string)
 	manifestPath := state.Get("manifest_path").(string)
@@ -64,7 +63,7 @@ func (s *StepUploadBundle) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	ui.Say("Uploading the bundle...")
-	cmd := &packer.RemoteCmd{Command: config.BundleUploadCommand}
+	cmd := &packersdk.RemoteCmd{Command: config.BundleUploadCommand}
 
 	if s.Debug {
 		ui.Say(fmt.Sprintf("Running: %s", config.BundleUploadCommand))

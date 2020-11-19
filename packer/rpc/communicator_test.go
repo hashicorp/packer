@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestCommunicatorRPC(t *testing.T) {
@@ -26,7 +27,7 @@ func TestCommunicatorRPC(t *testing.T) {
 	stdout_r, stdout_w := io.Pipe()
 	stderr_r, stderr_w := io.Pipe()
 
-	var cmd packer.RemoteCmd
+	var cmd packersdk.RemoteCmd
 	cmd.Command = "foo"
 	cmd.Stdin = stdin_r
 	cmd.Stdout = stdout_w
@@ -163,7 +164,7 @@ func TestCommunicatorRPC(t *testing.T) {
 func TestCommunicator_ImplementsCommunicator(t *testing.T) {
 	var raw interface{}
 	raw = Communicator(nil)
-	if _, ok := raw.(packer.Communicator); !ok {
+	if _, ok := raw.(packersdk.Communicator); !ok {
 		t.Fatal("should be a Communicator")
 	}
 }

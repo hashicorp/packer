@@ -12,7 +12,6 @@ import (
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
@@ -62,7 +61,7 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 		return multistep.ActionContinue
 	}
 
-	comm, _ := state.Get("communicator").(packer.Communicator)
+	comm, _ := state.Get("communicator").(packersdk.Communicator)
 	if comm == nil {
 
 		msg := fmt.Sprintf("Please shutdown virtual machine within %s.", s.Config.Timeout)
@@ -77,7 +76,7 @@ func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 		log.Printf("Shutdown command: %s", s.Config.Command)
 
 		var stdout, stderr bytes.Buffer
-		cmd := &packer.RemoteCmd{
+		cmd := &packersdk.RemoteCmd{
 			Command: s.Config.Command,
 			Stdout:  &stdout,
 			Stderr:  &stderr,

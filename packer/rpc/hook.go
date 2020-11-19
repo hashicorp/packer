@@ -5,23 +5,22 @@ import (
 	"log"
 	"sync"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-// An implementation of packer.Hook where the hook is actually executed
+// An implementation of packersdk.Hook where the hook is actually executed
 // over an RPC connection.
 type hook struct {
 	commonClient
 }
 
-// HookServer wraps a packer.Hook implementation and makes it exportable
+// HookServer wraps a packersdk.Hook implementation and makes it exportable
 // as part of a Golang RPC server.
 type HookServer struct {
 	context       context.Context
 	contextCancel func()
 
-	hook packer.Hook
+	hook packersdk.Hook
 	lock sync.Mutex
 	mux  *muxBroker
 }
@@ -32,7 +31,7 @@ type HookRunArgs struct {
 	StreamId uint32
 }
 
-func (h *hook) Run(ctx context.Context, name string, ui packersdk.Ui, comm packer.Communicator, data interface{}) error {
+func (h *hook) Run(ctx context.Context, name string, ui packersdk.Ui, comm packersdk.Communicator, data interface{}) error {
 	nextId := h.mux.NextId()
 	server := newServerWithMux(h.mux, nextId)
 	server.RegisterCommunicator(comm)

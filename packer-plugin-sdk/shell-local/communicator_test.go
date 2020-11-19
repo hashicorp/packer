@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestCommunicator_impl(t *testing.T) {
-	var _ packer.Communicator = new(Communicator)
+	var _ packersdk.Communicator = new(Communicator)
 }
 
 func TestCommunicator(t *testing.T) {
@@ -25,7 +25,7 @@ func TestCommunicator(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Stdout: &buf,
 	}
 

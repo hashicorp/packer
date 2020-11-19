@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/winrm"
@@ -29,7 +28,7 @@ import (
 //   ui packersdk.Ui
 //
 // Produces:
-//   communicator packer.Communicator
+//   communicator packersdk.Communicator
 type StepConnectWinRM struct {
 	// All the fields below are documented on StepConnect
 	Config      *Config
@@ -41,7 +40,7 @@ type StepConnectWinRM struct {
 func (s *StepConnectWinRM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packersdk.Ui)
 
-	var comm packer.Communicator
+	var comm packersdk.Communicator
 	var err error
 
 	subCtx, cancel := context.WithCancel(ctx)
@@ -88,8 +87,8 @@ func (s *StepConnectWinRM) Run(ctx context.Context, state multistep.StateBag) mu
 func (s *StepConnectWinRM) Cleanup(multistep.StateBag) {
 }
 
-func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, ctx context.Context) (packer.Communicator, error) {
-	var comm packer.Communicator
+func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, ctx context.Context) (packersdk.Communicator, error) {
+	var comm packersdk.Communicator
 	first := true
 	for {
 		// Don't check for cancel or wait on first iteration
@@ -170,7 +169,7 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, ctx context.Co
 	var retryableSleep = 5 * time.Second
 	// run an "echo" command to make sure that the winrm is connected
 	for {
-		cmd := &packer.RemoteCmd{Command: connectCheckCommand}
+		cmd := &packersdk.RemoteCmd{Command: connectCheckCommand}
 		var buf, buf2 bytes.Buffer
 		cmd.Stdout = &buf
 		cmd.Stdout = io.MultiWriter(cmd.Stdout, &buf2)

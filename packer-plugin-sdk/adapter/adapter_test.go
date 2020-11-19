@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -96,7 +97,7 @@ func (a addr) String() string {
 
 type communicator struct{}
 
-func (c communicator) Start(context.Context, *packer.RemoteCmd) error {
+func (c communicator) Start(context.Context, *packersdk.RemoteCmd) error {
 	return errors.New("communicator not supported")
 }
 

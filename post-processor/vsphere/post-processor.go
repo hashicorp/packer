@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	shelllocal "github.com/hashicorp/packer/packer-plugin-sdk/shell-local"
@@ -201,7 +200,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		ExecuteCommand: commandAndArgs,
 	}
 	flattenedCmd := strings.Join(commandAndArgs, " ")
-	cmd := &packer.RemoteCmd{Command: flattenedCmd}
+	cmd := &packersdk.RemoteCmd{Command: flattenedCmd}
 	log.Printf("[INFO] (vsphere): starting ovftool command: %s", flattenedCmd)
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return nil, false, false, fmt.Errorf(

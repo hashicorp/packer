@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/provisioner/file"
 )
@@ -364,10 +365,10 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 	}
 
 	// Add hooks so the provisioners run during the build
-	hooks := map[string][]packer.Hook{}
-	hooks[packer.HookProvision] = []packer.Hook{
+	hooks := map[string][]packersdk.Hook{}
+	hooks[packersdk.HookProvision] = []packersdk.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []*packer.HookedProvisioner{
+			Provisioners: []*packersdk.HookedProvisioner{
 				{Provisioner: ansible, Config: nil, TypeName: ""},
 				{Provisioner: download, Config: nil, TypeName: ""},
 			},

@@ -28,7 +28,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return b.config.Prepare(raws...)
 }
 
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	state := new(multistep.BasicStateBag)
 	state.Put("clone-config", &b.config)
 

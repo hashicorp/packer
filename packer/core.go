@@ -53,7 +53,7 @@ type CoreConfig struct {
 type BuilderFunc func(name string) (Builder, error)
 
 // The function type used to lookup Hook implementations.
-type HookFunc func(name string) (Hook, error)
+type HookFunc func(name string) (packersdk.Hook, error)
 
 // The function type used to lookup PostProcessor implementations.
 type PostProcessorFunc func(name string) (PostProcessor, error)

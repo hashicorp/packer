@@ -6,7 +6,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -27,7 +26,7 @@ type uploadCmdData struct {
 
 func (s *stepUploadImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packersdk.Ui)
-	comm := state.Get("communicator").(packer.Communicator)
+	comm := state.Get("communicator").(packersdk.Communicator)
 	config := state.Get("config").(*Config)
 	runID := state.Get("run_id").(string)
 
@@ -64,7 +63,7 @@ func (s *stepUploadImage) Run(ctx context.Context, state multistep.StateBag) mul
 
 	dest := "/tmp/create-packer-diskimage.sh"
 	comm.Upload(dest, strings.NewReader(command), nil)
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: fmt.Sprintf("sudo /bin/sh %s", dest),
 	}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
@@ -18,7 +17,7 @@ type StepUploadVersion struct {
 }
 
 func (s *StepUploadVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	comm := state.Get("communicator").(packer.Communicator)
+	comm := state.Get("communicator").(packersdk.Communicator)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packersdk.Ui)
 

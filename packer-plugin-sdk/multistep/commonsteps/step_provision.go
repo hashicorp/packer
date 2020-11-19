@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
@@ -17,8 +16,8 @@ import (
 // StepProvision runs the provisioners.
 //
 // Uses:
-//   communicator packer.Communicator
-//   hook         packer.Hook
+//   communicator packersdk.Communicator
+//   hook         packersdk.Hook
 //   ui           packersdk.Ui
 //
 // Produces:
@@ -96,20 +95,20 @@ func PopulateProvisionHookData(state multistep.StateBag) map[string]interface{} 
 }
 
 type StepProvision struct {
-	Comm packer.Communicator
+	Comm packersdk.Communicator
 }
 
 func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBag, hooktype string) multistep.StepAction {
-	// hooktype will be either packer.HookProvision or packer.HookCleanupProvision
+	// hooktype will be either packersdk.HookProvision or packersdk.HookCleanupProvision
 	comm := s.Comm
 	if comm == nil {
-		raw, ok := state.Get("communicator").(packer.Communicator)
+		raw, ok := state.Get("communicator").(packersdk.Communicator)
 		if ok {
-			comm = raw.(packer.Communicator)
+			comm = raw.(packersdk.Communicator)
 		}
 	}
 
-	hook := state.Get("hook").(packer.Hook)
+	hook := state.Get("hook").(packersdk.Hook)
 	ui := state.Get("ui").(packersdk.Ui)
 
 	hookData := PopulateProvisionHookData(state)
@@ -120,9 +119,9 @@ func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBa
 
 	// Run the provisioner in a goroutine so we can continually check
 	// for cancellations...
-	if hooktype == packer.HookProvision {
+	if hooktype == packersdk.HookProvision {
 		log.Println("Running the provision hook")
-	} else if hooktype == packer.HookCleanupProvision {
+	} else if hooktype == packersdk.HookCleanupProvision {
 		ui.Say("Provisioning step had errors: Running the cleanup provisioner, if present...")
 	}
 	errCh := make(chan error, 1)
@@ -134,11 +133,11 @@ func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBa
 		select {
 		case err := <-errCh:
 			if err != nil {
-				if hooktype == packer.HookProvision {
+				if hooktype == packersdk.HookProvision {
 					// We don't overwrite the error if it's a cleanup
 					// provisioner being run.
 					state.Put("error", err)
-				} else if hooktype == packer.HookCleanupProvision {
+				} else if hooktype == packersdk.HookCleanupProvision {
 					origErr := state.Get("error").(error)
 					state.Put("error", fmt.Errorf("Cleanup failed: %s. "+
 						"Original Provisioning error: %s", err, origErr))
@@ -160,7 +159,7 @@ func (s *StepProvision) runWithHook(ctx context.Context, state multistep.StateBa
 }
 
 func (s *StepProvision) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	return s.runWithHook(ctx, state, packer.HookProvision)
+	return s.runWithHook(ctx, state, packersdk.HookProvision)
 }
 
 func (s *StepProvision) Cleanup(state multistep.StateBag) {
@@ -168,6 +167,6 @@ func (s *StepProvision) Cleanup(state multistep.StateBag) {
 	// which we only call if there's an error during the provision run and
 	// the "error-cleanup-provisioner" is defined.
 	if _, ok := state.GetOk("error"); ok {
-		s.runWithHook(context.Background(), state, packer.HookCleanupProvision)
+		s.runWithHook(context.Background(), state, packersdk.HookCleanupProvision)
 	}
 }

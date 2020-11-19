@@ -14,6 +14,7 @@ import (
 
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 )
 
@@ -187,8 +188,8 @@ func (c *config) StartBuilder(name string) (packer.Builder, error) {
 }
 
 // This is a proper implementation of packer.HookFunc that can be used
-// to load packer.Hook implementations from the defined plugins.
-func (c *config) StarHook(name string) (packer.Hook, error) {
+// to load packersdk.Hook implementations from the defined plugins.
+func (c *config) StarHook(name string) (packersdk.Hook, error) {
 	log.Printf("Loading hook: %s\n", name)
 	return c.pluginClient(name).Hook()
 }

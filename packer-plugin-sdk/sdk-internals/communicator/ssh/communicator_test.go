@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -122,7 +122,7 @@ func newMockBrokenServer(t *testing.T) string {
 func TestCommIsCommunicator(t *testing.T) {
 	var raw interface{}
 	raw = &comm{}
-	if _, ok := raw.(packer.Communicator); !ok {
+	if _, ok := raw.(packersdk.Communicator); !ok {
 		t.Fatalf("comm must be a communicator")
 	}
 }
@@ -184,7 +184,7 @@ func TestStart(t *testing.T) {
 		t.Fatalf("error connecting to SSH: %s", err)
 	}
 
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: "echo foo",
 		Stdout:  new(bytes.Buffer),
 	}

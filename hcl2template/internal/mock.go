@@ -78,7 +78,7 @@ func (b *MockBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return []string{"ID"}, nil, b.Config.Prepare(raws...)
 }
 
-func (b *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
+func (b *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	return nil, nil
 }
 
@@ -100,7 +100,7 @@ func (b *MockProvisioner) Prepare(raws ...interface{}) error {
 	return b.Config.Prepare(raws...)
 }
 
-func (b *MockProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (b *MockProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, _ map[string]interface{}) error {
 	return nil
 }
 
@@ -132,10 +132,10 @@ func (b *MockPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a 
 
 type MockCommunicator struct {
 	Config MockConfig
-	packer.Communicator
+	packersdk.Communicator
 }
 
-var _ packer.ConfigurableCommunicator = new(MockCommunicator)
+var _ packersdk.ConfigurableCommunicator = new(MockCommunicator)
 
 func (b *MockCommunicator) ConfigSpec() hcldec.ObjectSpec {
 	return b.Config.FlatMapstructure().HCL2Spec()

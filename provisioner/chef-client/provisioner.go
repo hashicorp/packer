@@ -85,7 +85,7 @@ type Config struct {
 
 type Provisioner struct {
 	config            Config
-	communicator      packer.Communicator
+	communicator      packersdk.Communicator
 	guestOSTypeConfig guestOSTypeConfig
 	guestCommands     *guestexec.GuestCommands
 	generatedData     map[string]interface{}
@@ -241,7 +241,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 	p.generatedData = generatedData
 	p.communicator = comm
 
@@ -349,7 +349,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	return nil
 }
 
-func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packer.Communicator, remotePath string, localPath string) error {
+func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packersdk.Communicator, remotePath string, localPath string) error {
 	ui.Message(fmt.Sprintf("Uploading %s...", localPath))
 
 	f, err := os.Open(localPath)
@@ -363,7 +363,7 @@ func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packer.Communicator, remo
 
 func (p *Provisioner) createConfig(
 	ui packersdk.Ui,
-	comm packer.Communicator,
+	comm packersdk.Communicator,
 	nodeName string,
 	serverUrl string,
 	clientKey string,
@@ -424,7 +424,7 @@ func (p *Provisioner) createConfig(
 	return remotePath, nil
 }
 
-func (p *Provisioner) createKnifeConfig(ui packersdk.Ui, comm packer.Communicator, nodeName string, serverUrl string, clientKey string, sslVerifyMode string, trustedCertsDir string) (string, error) {
+func (p *Provisioner) createKnifeConfig(ui packersdk.Ui, comm packersdk.Communicator, nodeName string, serverUrl string, clientKey string, sslVerifyMode string, trustedCertsDir string) (string, error) {
 	ui.Message("Creating configuration file 'knife.rb'")
 
 	// Read the template
@@ -451,7 +451,7 @@ func (p *Provisioner) createKnifeConfig(ui packersdk.Ui, comm packer.Communicato
 	return remotePath, nil
 }
 
-func (p *Provisioner) createJson(ui packersdk.Ui, comm packer.Communicator) (string, error) {
+func (p *Provisioner) createJson(ui packersdk.Ui, comm packersdk.Communicator) (string, error) {
 	ui.Message("Creating JSON attribute file")
 
 	jsonData := make(map[string]interface{})
@@ -480,11 +480,11 @@ func (p *Provisioner) createJson(ui packersdk.Ui, comm packer.Communicator) (str
 	return remotePath, nil
 }
 
-func (p *Provisioner) createDir(ui packersdk.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) createDir(ui packersdk.Ui, comm packersdk.Communicator, dir string) error {
 	ctx := context.TODO()
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 
-	cmd := &packer.RemoteCmd{Command: p.guestCommands.CreateDir(dir)}
+	cmd := &packersdk.RemoteCmd{Command: p.guestCommands.CreateDir(dir)}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
@@ -493,7 +493,7 @@ func (p *Provisioner) createDir(ui packersdk.Ui, comm packer.Communicator, dir s
 	}
 
 	// Chmod the directory to 0777 just so that we can access it as our user
-	cmd = &packer.RemoteCmd{Command: p.guestCommands.Chmod(dir, "0777")}
+	cmd = &packersdk.RemoteCmd{Command: p.guestCommands.Chmod(dir, "0777")}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
@@ -504,7 +504,7 @@ func (p *Provisioner) createDir(ui packersdk.Ui, comm packer.Communicator, dir s
 	return nil
 }
 
-func (p *Provisioner) cleanNode(ui packersdk.Ui, comm packer.Communicator, node string, knifeConfigPath string) error {
+func (p *Provisioner) cleanNode(ui packersdk.Ui, comm packersdk.Communicator, node string, knifeConfigPath string) error {
 	ui.Say("Cleaning up chef node...")
 	args := []string{"node", "delete", node}
 	if err := p.knifeExec(ui, comm, node, knifeConfigPath, args); err != nil {
@@ -514,7 +514,7 @@ func (p *Provisioner) cleanNode(ui packersdk.Ui, comm packer.Communicator, node 
 	return nil
 }
 
-func (p *Provisioner) cleanClient(ui packersdk.Ui, comm packer.Communicator, node string, knifeConfigPath string) error {
+func (p *Provisioner) cleanClient(ui packersdk.Ui, comm packersdk.Communicator, node string, knifeConfigPath string) error {
 	ui.Say("Cleaning up chef client...")
 	args := []string{"client", "delete", node}
 	if err := p.knifeExec(ui, comm, node, knifeConfigPath, args); err != nil {
@@ -524,7 +524,7 @@ func (p *Provisioner) cleanClient(ui packersdk.Ui, comm packer.Communicator, nod
 	return nil
 }
 
-func (p *Provisioner) knifeExec(ui packersdk.Ui, comm packer.Communicator, node string, knifeConfigPath string, args []string) error {
+func (p *Provisioner) knifeExec(ui packersdk.Ui, comm packersdk.Communicator, node string, knifeConfigPath string, args []string) error {
 	flags := []string{
 		"-y",
 		"-c", knifeConfigPath,
@@ -542,7 +542,7 @@ func (p *Provisioner) knifeExec(ui packersdk.Ui, comm packer.Communicator, node 
 		return err
 	}
 
-	cmd := &packer.RemoteCmd{Command: command}
+	cmd := &packersdk.RemoteCmd{Command: command}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
@@ -556,11 +556,11 @@ func (p *Provisioner) knifeExec(ui packersdk.Ui, comm packer.Communicator, node 
 	return nil
 }
 
-func (p *Provisioner) removeDir(ui packersdk.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) removeDir(ui packersdk.Ui, comm packersdk.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
 	ctx := context.TODO()
 
-	cmd := &packer.RemoteCmd{Command: p.guestCommands.RemoveDir(dir)}
+	cmd := &packersdk.RemoteCmd{Command: p.guestCommands.RemoveDir(dir)}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
@@ -568,7 +568,7 @@ func (p *Provisioner) removeDir(ui packersdk.Ui, comm packer.Communicator, dir s
 	return nil
 }
 
-func (p *Provisioner) executeChef(ui packersdk.Ui, comm packer.Communicator, config string, json string) error {
+func (p *Provisioner) executeChef(ui packersdk.Ui, comm packersdk.Communicator, config string, json string) error {
 	p.config.ctx.Data = &ExecuteTemplate{
 		ConfigPath: config,
 		JsonPath:   json,
@@ -590,7 +590,7 @@ func (p *Provisioner) executeChef(ui packersdk.Ui, comm packer.Communicator, con
 
 	ui.Message(fmt.Sprintf("Executing Chef: %s", command))
 
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: command,
 	}
 
@@ -605,7 +605,7 @@ func (p *Provisioner) executeChef(ui packersdk.Ui, comm packer.Communicator, con
 	return nil
 }
 
-func (p *Provisioner) installChef(ui packersdk.Ui, comm packer.Communicator, version string) error {
+func (p *Provisioner) installChef(ui packersdk.Ui, comm packersdk.Communicator, version string) error {
 	ui.Message("Installing Chef...")
 	ctx := context.TODO()
 
@@ -620,7 +620,7 @@ func (p *Provisioner) installChef(ui packersdk.Ui, comm packer.Communicator, ver
 
 	ui.Message(command)
 
-	cmd := &packer.RemoteCmd{Command: command}
+	cmd := &packersdk.RemoteCmd{Command: command}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
@@ -715,7 +715,7 @@ func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
 	return result, nil
 }
 
-func (p *Provisioner) Communicator() packer.Communicator {
+func (p *Provisioner) Communicator() packersdk.Communicator {
 	return p.communicator
 }
 

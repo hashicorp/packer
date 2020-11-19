@@ -32,7 +32,7 @@ func (c *cmdProvisioner) Prepare(configs ...interface{}) error {
 	return c.p.Prepare(configs...)
 }
 
-func (c *cmdProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (c *cmdProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)

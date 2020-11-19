@@ -7,7 +7,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -27,7 +26,7 @@ func runCommands(commands []string, ictx interpolate.Context, state multistep.St
 	ctx := context.TODO()
 	ui := state.Get("ui").(packersdk.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
-	comm := state.Get("communicator").(packer.Communicator)
+	comm := state.Get("communicator").(packersdk.Communicator)
 
 	for _, rawCmd := range commands {
 		intCmd, err := interpolate.Render(rawCmd, &ictx)
@@ -40,7 +39,7 @@ func runCommands(commands []string, ictx interpolate.Context, state multistep.St
 			return fmt.Errorf("error wrapping command: %s", err)
 		}
 
-		remoteCmd := &packer.RemoteCmd{
+		remoteCmd := &packersdk.RemoteCmd{
 			Command: command,
 		}
 
@@ -63,10 +62,10 @@ func runCommands(commands []string, ictx interpolate.Context, state multistep.St
 
 func captureOutput(command string, state multistep.StateBag) (string, error) {
 	ctx := context.TODO()
-	comm := state.Get("communicator").(packer.Communicator)
+	comm := state.Get("communicator").(packersdk.Communicator)
 
 	var stdout bytes.Buffer
-	remoteCmd := &packer.RemoteCmd{
+	remoteCmd := &packersdk.RemoteCmd{
 		Command: command,
 		Stdout:  &stdout,
 	}

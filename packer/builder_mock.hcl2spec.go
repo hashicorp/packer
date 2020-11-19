@@ -2,10 +2,8 @@
 package packer
 
 import (
-	"io"
-
 	"github.com/hashicorp/hcl/v2/hcldec"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -19,8 +17,8 @@ type FlatMockBuilder struct {
 	PrepareCalled   *bool         `cty:"prepare_called" hcl:"prepare_called"`
 	PrepareConfig   []interface{} `cty:"prepare_config" hcl:"prepare_config"`
 	RunCalled       *bool         `cty:"run_called" hcl:"run_called"`
-	RunHook         Hook          `cty:"run_hook" hcl:"run_hook"`
-	RunUi           packersdk.Ui  `cty:"run_ui" hcl:"run_ui"`
+	RunHook         packer.Hook   `cty:"run_hook" hcl:"run_hook"`
+	RunUi           packer.Ui     `cty:"run_ui" hcl:"run_ui"`
 	CancelCalled    *bool         `cty:"cancel_called" hcl:"cancel_called"`
 	GeneratedVars   []string      `cty:"generated_vars" hcl:"generated_vars"`
 }
@@ -52,76 +50,19 @@ func (*FlatMockBuilder) HCL2Spec() map[string]hcldec.Spec {
 	return s
 }
 
-// FlatMockCommunicator is an auto-generated flat version of MockCommunicator.
-// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
-type FlatMockCommunicator struct {
-	StartCalled        *bool          `cty:"start_called" hcl:"start_called"`
-	StartCmd           *FlatRemoteCmd `cty:"start_cmd" hcl:"start_cmd"`
-	StartStderr        *string        `cty:"start_stderr" hcl:"start_stderr"`
-	StartStdout        *string        `cty:"start_stdout" hcl:"start_stdout"`
-	StartStdin         *string        `cty:"start_stdin" hcl:"start_stdin"`
-	StartExitStatus    *int           `cty:"start_exit_status" hcl:"start_exit_status"`
-	UploadCalled       *bool          `cty:"upload_called" hcl:"upload_called"`
-	UploadPath         *string        `cty:"upload_path" hcl:"upload_path"`
-	UploadData         *string        `cty:"upload_data" hcl:"upload_data"`
-	UploadDirDst       *string        `cty:"upload_dir_dst" hcl:"upload_dir_dst"`
-	UploadDirSrc       *string        `cty:"upload_dir_src" hcl:"upload_dir_src"`
-	UploadDirExclude   []string       `cty:"upload_dir_exclude" hcl:"upload_dir_exclude"`
-	DownloadDirDst     *string        `cty:"download_dir_dst" hcl:"download_dir_dst"`
-	DownloadDirSrc     *string        `cty:"download_dir_src" hcl:"download_dir_src"`
-	DownloadDirExclude []string       `cty:"download_dir_exclude" hcl:"download_dir_exclude"`
-	DownloadCalled     *bool          `cty:"download_called" hcl:"download_called"`
-	DownloadPath       *string        `cty:"download_path" hcl:"download_path"`
-	DownloadData       *string        `cty:"download_data" hcl:"download_data"`
-}
-
-// FlatMapstructure returns a new FlatMockCommunicator.
-// FlatMockCommunicator is an auto-generated flat version of MockCommunicator.
-// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*MockCommunicator) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
-	return new(FlatMockCommunicator)
-}
-
-// HCL2Spec returns the hcl spec of a MockCommunicator.
-// This spec is used by HCL to read the fields of MockCommunicator.
-// The decoded values from this spec will then be applied to a FlatMockCommunicator.
-func (*FlatMockCommunicator) HCL2Spec() map[string]hcldec.Spec {
-	s := map[string]hcldec.Spec{
-		"start_called":         &hcldec.AttrSpec{Name: "start_called", Type: cty.Bool, Required: false},
-		"start_cmd":            &hcldec.BlockSpec{TypeName: "start_cmd", Nested: hcldec.ObjectSpec((*FlatRemoteCmd)(nil).HCL2Spec())},
-		"start_stderr":         &hcldec.AttrSpec{Name: "start_stderr", Type: cty.String, Required: false},
-		"start_stdout":         &hcldec.AttrSpec{Name: "start_stdout", Type: cty.String, Required: false},
-		"start_stdin":          &hcldec.AttrSpec{Name: "start_stdin", Type: cty.String, Required: false},
-		"start_exit_status":    &hcldec.AttrSpec{Name: "start_exit_status", Type: cty.Number, Required: false},
-		"upload_called":        &hcldec.AttrSpec{Name: "upload_called", Type: cty.Bool, Required: false},
-		"upload_path":          &hcldec.AttrSpec{Name: "upload_path", Type: cty.String, Required: false},
-		"upload_data":          &hcldec.AttrSpec{Name: "upload_data", Type: cty.String, Required: false},
-		"upload_dir_dst":       &hcldec.AttrSpec{Name: "upload_dir_dst", Type: cty.String, Required: false},
-		"upload_dir_src":       &hcldec.AttrSpec{Name: "upload_dir_src", Type: cty.String, Required: false},
-		"upload_dir_exclude":   &hcldec.AttrSpec{Name: "upload_dir_exclude", Type: cty.List(cty.String), Required: false},
-		"download_dir_dst":     &hcldec.AttrSpec{Name: "download_dir_dst", Type: cty.String, Required: false},
-		"download_dir_src":     &hcldec.AttrSpec{Name: "download_dir_src", Type: cty.String, Required: false},
-		"download_dir_exclude": &hcldec.AttrSpec{Name: "download_dir_exclude", Type: cty.List(cty.String), Required: false},
-		"download_called":      &hcldec.AttrSpec{Name: "download_called", Type: cty.Bool, Required: false},
-		"download_path":        &hcldec.AttrSpec{Name: "download_path", Type: cty.String, Required: false},
-		"download_data":        &hcldec.AttrSpec{Name: "download_data", Type: cty.String, Required: false},
-	}
-	return s
-}
-
 // FlatMockPostProcessor is an auto-generated flat version of MockPostProcessor.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatMockPostProcessor struct {
-	ArtifactId          *string            `cty:"artifact_id" hcl:"artifact_id"`
-	Keep                *bool              `cty:"keep" hcl:"keep"`
-	ForceOverride       *bool              `cty:"force_override" hcl:"force_override"`
-	Error               error              `cty:"error" hcl:"error"`
-	ConfigureCalled     *bool              `cty:"configure_called" hcl:"configure_called"`
-	ConfigureConfigs    []interface{}      `cty:"configure_configs" hcl:"configure_configs"`
-	ConfigureError      error              `cty:"configure_error" hcl:"configure_error"`
-	PostProcessCalled   *bool              `cty:"post_process_called" hcl:"post_process_called"`
-	PostProcessArtifact packersdk.Artifact `cty:"post_process_artifact" hcl:"post_process_artifact"`
-	PostProcessUi       packersdk.Ui       `cty:"post_process_ui" hcl:"post_process_ui"`
+	ArtifactId          *string         `cty:"artifact_id" hcl:"artifact_id"`
+	Keep                *bool           `cty:"keep" hcl:"keep"`
+	ForceOverride       *bool           `cty:"force_override" hcl:"force_override"`
+	Error               error           `cty:"error" hcl:"error"`
+	ConfigureCalled     *bool           `cty:"configure_called" hcl:"configure_called"`
+	ConfigureConfigs    []interface{}   `cty:"configure_configs" hcl:"configure_configs"`
+	ConfigureError      error           `cty:"configure_error" hcl:"configure_error"`
+	PostProcessCalled   *bool           `cty:"post_process_called" hcl:"post_process_called"`
+	PostProcessArtifact packer.Artifact `cty:"post_process_artifact" hcl:"post_process_artifact"`
+	PostProcessUi       packer.Ui       `cty:"post_process_ui" hcl:"post_process_ui"`
 }
 
 // FlatMapstructure returns a new FlatMockPostProcessor.
@@ -153,12 +94,12 @@ func (*FlatMockPostProcessor) HCL2Spec() map[string]hcldec.Spec {
 // FlatMockProvisioner is an auto-generated flat version of MockProvisioner.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatMockProvisioner struct {
-	PrepCalled       *bool         `cty:"prep_called" hcl:"prep_called"`
-	PrepConfigs      []interface{} `cty:"prep_configs" hcl:"prep_configs"`
-	ProvCalled       *bool         `cty:"prov_called" hcl:"prov_called"`
-	ProvRetried      *bool         `cty:"prov_retried" hcl:"prov_retried"`
-	ProvCommunicator Communicator  `cty:"prov_communicator" hcl:"prov_communicator"`
-	ProvUi           packersdk.Ui  `cty:"prov_ui" hcl:"prov_ui"`
+	PrepCalled       *bool                `cty:"prep_called" hcl:"prep_called"`
+	PrepConfigs      []interface{}        `cty:"prep_configs" hcl:"prep_configs"`
+	ProvCalled       *bool                `cty:"prov_called" hcl:"prov_called"`
+	ProvRetried      *bool                `cty:"prov_retried" hcl:"prov_retried"`
+	ProvCommunicator *packer.Communicator `cty:"prov_communicator" hcl:"prov_communicator"`
+	ProvUi           packer.Ui            `cty:"prov_ui" hcl:"prov_ui"`
 }
 
 // FlatMapstructure returns a new FlatMockProvisioner.
@@ -177,37 +118,8 @@ func (*FlatMockProvisioner) HCL2Spec() map[string]hcldec.Spec {
 		"prep_configs":      &hcldec.AttrSpec{Name: "prep_configs", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
 		"prov_called":       &hcldec.AttrSpec{Name: "prov_called", Type: cty.Bool, Required: false},
 		"prov_retried":      &hcldec.AttrSpec{Name: "prov_retried", Type: cty.Bool, Required: false},
-		"prov_communicator": &hcldec.AttrSpec{Name: "prov_communicator", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
-		"prov_ui":           &hcldec.AttrSpec{Name: "prov_ui", Type: cty.Bool, Required: false},           /* TODO(azr): could not find type */
-	}
-	return s
-}
-
-// FlatRemoteCmd is an auto-generated flat version of RemoteCmd.
-// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
-type FlatRemoteCmd struct {
-	Command *string   `cty:"command" hcl:"command"`
-	Stdin   io.Reader `cty:"stdin" hcl:"stdin"`
-	Stdout  io.Writer `cty:"stdout" hcl:"stdout"`
-	Stderr  io.Writer `cty:"stderr" hcl:"stderr"`
-}
-
-// FlatMapstructure returns a new FlatRemoteCmd.
-// FlatRemoteCmd is an auto-generated flat version of RemoteCmd.
-// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*RemoteCmd) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
-	return new(FlatRemoteCmd)
-}
-
-// HCL2Spec returns the hcl spec of a RemoteCmd.
-// This spec is used by HCL to read the fields of RemoteCmd.
-// The decoded values from this spec will then be applied to a FlatRemoteCmd.
-func (*FlatRemoteCmd) HCL2Spec() map[string]hcldec.Spec {
-	s := map[string]hcldec.Spec{
-		"command": &hcldec.AttrSpec{Name: "command", Type: cty.String, Required: false},
-		"stdin":   &hcldec.AttrSpec{Name: "stdin", Type: cty.Bool, Required: false},  /* TODO(azr): could not find type */
-		"stdout":  &hcldec.AttrSpec{Name: "stdout", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
-		"stderr":  &hcldec.AttrSpec{Name: "stderr", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
+		"prov_communicator": &hcldec.AttrSpec{Name: "prov_communicator", Type: cty.String, Required: false},
+		"prov_ui":           &hcldec.AttrSpec{Name: "prov_ui", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
 	}
 	return s
 }

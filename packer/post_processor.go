@@ -12,7 +12,7 @@ import (
 // the result of a build, compresses it, and returns a new artifact containing
 // a single file of the prior artifact compressed.
 type PostProcessor interface {
-	HCL2Speccer
+	packersdk.HCL2Speccer
 
 	// Configure is responsible for setting up configuration, storing
 	// the state for later, and returning and errors, such as validation

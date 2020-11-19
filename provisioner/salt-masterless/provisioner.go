@@ -16,7 +16,6 @@ import (
 
 	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/guestexec"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -240,7 +239,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, _ map[string]interface{}) error {
 	var err error
 	var src, dst string
 	var formulas []string
@@ -275,7 +274,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 
 	ui.Say("Provisioning with Salt...")
 	if !p.config.SkipBootstrap {
-		cmd := &packer.RemoteCmd{
+		cmd := &packersdk.RemoteCmd{
 			// Fallback on wget if curl failed for any reason (such as not being installed)
 			Command: fmt.Sprintf(p.guestOSTypeConfig.bootstrapFetchCmd),
 		}
@@ -283,7 +282,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		if err = cmd.RunWithUi(ctx, comm, ui); err != nil {
 			return fmt.Errorf("Unable to download Salt: %s", err)
 		}
-		cmd = &packer.RemoteCmd{
+		cmd = &packersdk.RemoteCmd{
 			Command: fmt.Sprintf("%s %s", p.sudo(p.guestOSTypeConfig.bootstrapRunCmd), p.config.BootstrapArgs),
 		}
 		ui.Message(fmt.Sprintf("Installing Salt with command %s", cmd.Command))
@@ -452,7 +451,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	}
 
 	ui.Message(fmt.Sprintf("Running: salt-call --local %s", p.config.CmdArgs))
-	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("%s --local %s", filepath.Join(p.config.SaltBinDir, "salt-call"), p.config.CmdArgs))}
+	cmd := &packersdk.RemoteCmd{Command: p.sudo(fmt.Sprintf("%s --local %s", filepath.Join(p.config.SaltBinDir, "salt-call"), p.config.CmdArgs))}
 	if err = cmd.RunWithUi(ctx, comm, ui); (err != nil || cmd.ExitStatus() != 0) && !p.config.NoExitOnFailure {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus())
@@ -515,7 +514,7 @@ func hasValidFormulaURLs(s []string) bool {
 	return true
 }
 
-func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packer.Communicator, dst, src string) error {
+func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packersdk.Communicator, dst, src string) error {
 	f, err := os.Open(src)
 	if err != nil {
 		return fmt.Errorf("Error opening: %s", err)
@@ -536,11 +535,11 @@ func (p *Provisioner) uploadFile(ui packersdk.Ui, comm packer.Communicator, dst,
 	return nil
 }
 
-func (p *Provisioner) moveFile(ui packersdk.Ui, comm packer.Communicator, dst string, src string) error {
+func (p *Provisioner) moveFile(ui packersdk.Ui, comm packersdk.Communicator, dst string, src string) error {
 	ctx := context.TODO()
 
 	ui.Message(fmt.Sprintf("Moving %s to %s", src, dst))
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: p.sudo(p.guestCommands.MovePath(src, dst)),
 	}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil || cmd.ExitStatus() != 0 {
@@ -553,9 +552,9 @@ func (p *Provisioner) moveFile(ui packersdk.Ui, comm packer.Communicator, dst st
 	return nil
 }
 
-func (p *Provisioner) createDir(ui packersdk.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) createDir(ui packersdk.Ui, comm packersdk.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: p.guestCommands.CreateDir(dir),
 	}
 	ctx := context.TODO()
@@ -568,10 +567,10 @@ func (p *Provisioner) createDir(ui packersdk.Ui, comm packer.Communicator, dir s
 	return nil
 }
 
-func (p *Provisioner) statPath(ui packersdk.Ui, comm packer.Communicator, path string) error {
+func (p *Provisioner) statPath(ui packersdk.Ui, comm packersdk.Communicator, path string) error {
 	ctx := context.TODO()
 	ui.Message(fmt.Sprintf("Verifying Path: %s", path))
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: p.guestCommands.StatPath(path),
 	}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
@@ -583,10 +582,10 @@ func (p *Provisioner) statPath(ui packersdk.Ui, comm packer.Communicator, path s
 	return nil
 }
 
-func (p *Provisioner) removeDir(ui packersdk.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) removeDir(ui packersdk.Ui, comm packersdk.Communicator, dir string) error {
 	ctx := context.TODO()
 	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: p.guestCommands.RemoveDir(dir),
 	}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
@@ -598,7 +597,7 @@ func (p *Provisioner) removeDir(ui packersdk.Ui, comm packer.Communicator, dir s
 	return nil
 }
 
-func (p *Provisioner) uploadDir(ui packersdk.Ui, comm packer.Communicator, dst, src string, ignore []string) error {
+func (p *Provisioner) uploadDir(ui packersdk.Ui, comm packersdk.Communicator, dst, src string, ignore []string) error {
 	_, temp_dst := filepath.Split(dst)
 	if err := comm.UploadDir(temp_dst, src, ignore); err != nil {
 		return err

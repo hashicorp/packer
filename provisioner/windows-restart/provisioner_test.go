@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -101,7 +102,7 @@ func TestProvisionerProvision_Success(t *testing.T) {
 		return nil
 	}
 	waitForRestartOld := waitForRestart
-	waitForRestart = func(context.Context, *Provisioner, packer.Communicator) error {
+	waitForRestart = func(context.Context, *Provisioner, packersdk.Communicator) error {
 		return nil
 	}
 	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
@@ -137,7 +138,7 @@ func TestProvisionerProvision_CustomCommand(t *testing.T) {
 		return nil
 	}
 	waitForRestartOld := waitForRestart
-	waitForRestart = func(context.Context, *Provisioner, packer.Communicator) error {
+	waitForRestart = func(context.Context, *Provisioner, packersdk.Communicator) error {
 		return nil
 	}
 	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
