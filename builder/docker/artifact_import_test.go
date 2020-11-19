@@ -4,11 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestImportArtifact_impl(t *testing.T) {
-	var _ packer.Artifact = new(ImportArtifact)
+	var _ packersdk.Artifact = new(ImportArtifact)
 }
 
 func TestImportArtifactBuilderId(t *testing.T) {

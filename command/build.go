@@ -215,8 +215,8 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	var wg sync.WaitGroup
 	var artifacts = struct {
 		sync.RWMutex
-		m map[string][]packer.Artifact
-	}{m: make(map[string][]packer.Artifact)}
+		m map[string][]packersdk.Artifact
+	}{m: make(map[string][]packersdk.Artifact)}
 	// Get the builds we care about
 	var errors = struct {
 		sync.RWMutex

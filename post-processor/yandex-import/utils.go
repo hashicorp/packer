@@ -9,12 +9,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/packer/builder/yandex"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 )
 
-func uploadToBucket(s3conn *s3.S3, ui packersdk.Ui, artifact packer.Artifact, bucket string, objectName string) (cloudImageSource, error) {
+func uploadToBucket(s3conn *s3.S3, ui packersdk.Ui, artifact packersdk.Artifact, bucket string, objectName string) (cloudImageSource, error) {
 	ui.Say("Looking for qcow2 file in list of artifacts...")
 	source := ""
 	for _, path := range artifact.Files() {

@@ -36,7 +36,7 @@ func (b *testBuild) Prepare() ([]string, error) {
 	return b.prepareWarnings, nil
 }
 
-func (b *testBuild) Run(ctx context.Context, ui packersdk.Ui) ([]packer.Artifact, error) {
+func (b *testBuild) Run(ctx context.Context, ui packersdk.Ui) ([]packersdk.Artifact, error) {
 	b.runCalled = true
 	b.runUi = ui
 
@@ -47,7 +47,7 @@ func (b *testBuild) Run(ctx context.Context, ui packersdk.Ui) ([]packer.Artifact
 	if b.errRunResult {
 		return nil, errors.New("foo")
 	} else {
-		return []packer.Artifact{testBuildArtifact}, nil
+		return []packersdk.Artifact{testBuildArtifact}, nil
 	}
 }
 

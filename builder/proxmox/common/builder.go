@@ -34,7 +34,7 @@ type Builder struct {
 	vmCreator     ProxmoxVMCreator
 }
 
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook, state multistep.StateBag) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook, state multistep.StateBag) (packersdk.Artifact, error) {
 	var err error
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: b.config.SkipCertValidation,

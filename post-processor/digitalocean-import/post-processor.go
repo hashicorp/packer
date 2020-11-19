@@ -149,7 +149,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	var err error
 
 	generatedData := artifact.State("generated_data")

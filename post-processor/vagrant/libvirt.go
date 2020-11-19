@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
@@ -64,7 +63,7 @@ type LibVirtProvider struct{}
 func (p *LibVirtProvider) KeepInputArtifact() bool {
 	return false
 }
-func (p *LibVirtProvider) Process(ui packersdk.Ui, artifact packer.Artifact, dir string) (vagrantfile string, metadata map[string]interface{}, err error) {
+func (p *LibVirtProvider) Process(ui packersdk.Ui, artifact packersdk.Artifact, dir string) (vagrantfile string, metadata map[string]interface{}, err error) {
 	diskName := artifact.State("diskName").(string)
 
 	// Copy the disk image into the temporary directory (as box.img)

@@ -231,7 +231,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, warnings, nil
 }
 
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	// Create the driver that we'll use to communicate with VirtualBox
 	driver, err := vboxcommon.NewDriver()
 	if err != nil {

@@ -188,7 +188,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, warns, nil
 }
 
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	if runtime.GOOS != "linux" {
 		return nil, errors.New("The outscale-chroot builder only works on Linux environments.")
 	}

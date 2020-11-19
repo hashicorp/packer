@@ -16,7 +16,7 @@ type TestPostProcessor struct {
 	configCalled bool
 	configVal    []interface{}
 	ppCalled     bool
-	ppArtifact   packer.Artifact
+	ppArtifact   packersdk.Artifact
 	ppArtifactId string
 	ppUi         packersdk.Ui
 
@@ -31,7 +31,7 @@ func (pp *TestPostProcessor) Configure(v ...interface{}) error {
 	return nil
 }
 
-func (pp *TestPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (pp *TestPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	pp.ppCalled = true
 	pp.ppArtifact = a
 	pp.ppArtifactId = a.Id()

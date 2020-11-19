@@ -38,7 +38,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 }
 
 // Run is where the actual build should take place. It takes a Build and a Ui.
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	artifact := new(FileArtifact)
 
 	// Create all directories leading to target

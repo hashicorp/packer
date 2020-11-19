@@ -32,7 +32,7 @@ func (b *cmdBuilder) Prepare(config ...interface{}) ([]string, []string, error) 
 	return b.builder.Prepare(config...)
 }
 
-func (b *cmdBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *cmdBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	defer func() {
 		r := recover()
 		b.checkExit(r, nil)

@@ -346,7 +346,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return generatedData, warns, nil
 }
 
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	if runtime.GOOS != "linux" {
 		return nil, errors.New("The amazon-chroot builder only works on Linux environments.")
 	}

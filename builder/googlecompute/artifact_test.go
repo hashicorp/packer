@@ -3,11 +3,11 @@ package googlecompute
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestArtifact_impl(t *testing.T) {
-	var _ packer.Artifact = new(Artifact)
+	var _ packersdk.Artifact = new(Artifact)
 }
 
 func TestArtifactState_StateData(t *testing.T) {

@@ -78,7 +78,7 @@ func (b *MockBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return []string{"ID"}, nil, b.Config.Prepare(raws...)
 }
 
-func (b *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	return nil, nil
 }
 
@@ -122,7 +122,7 @@ func (b *MockPostProcessor) Configure(raws ...interface{}) error {
 	return b.Config.Prepare(raws...)
 }
 
-func (b *MockPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (b *MockPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	return nil, false, false, nil
 }
 

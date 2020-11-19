@@ -3,11 +3,11 @@ package hcloud
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestArtifact_Impl(t *testing.T) {
-	var _ packer.Artifact = (*Artifact)(nil)
+	var _ packersdk.Artifact = (*Artifact)(nil)
 }
 
 func TestArtifactId(t *testing.T) {

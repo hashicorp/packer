@@ -112,16 +112,16 @@ func (*FlatMockCommunicator) HCL2Spec() map[string]hcldec.Spec {
 // FlatMockPostProcessor is an auto-generated flat version of MockPostProcessor.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatMockPostProcessor struct {
-	ArtifactId          *string       `cty:"artifact_id" hcl:"artifact_id"`
-	Keep                *bool         `cty:"keep" hcl:"keep"`
-	ForceOverride       *bool         `cty:"force_override" hcl:"force_override"`
-	Error               error         `cty:"error" hcl:"error"`
-	ConfigureCalled     *bool         `cty:"configure_called" hcl:"configure_called"`
-	ConfigureConfigs    []interface{} `cty:"configure_configs" hcl:"configure_configs"`
-	ConfigureError      error         `cty:"configure_error" hcl:"configure_error"`
-	PostProcessCalled   *bool         `cty:"post_process_called" hcl:"post_process_called"`
-	PostProcessArtifact Artifact      `cty:"post_process_artifact" hcl:"post_process_artifact"`
-	PostProcessUi       packersdk.Ui  `cty:"post_process_ui" hcl:"post_process_ui"`
+	ArtifactId          *string            `cty:"artifact_id" hcl:"artifact_id"`
+	Keep                *bool              `cty:"keep" hcl:"keep"`
+	ForceOverride       *bool              `cty:"force_override" hcl:"force_override"`
+	Error               error              `cty:"error" hcl:"error"`
+	ConfigureCalled     *bool              `cty:"configure_called" hcl:"configure_called"`
+	ConfigureConfigs    []interface{}      `cty:"configure_configs" hcl:"configure_configs"`
+	ConfigureError      error              `cty:"configure_error" hcl:"configure_error"`
+	PostProcessCalled   *bool              `cty:"post_process_called" hcl:"post_process_called"`
+	PostProcessArtifact packersdk.Artifact `cty:"post_process_artifact" hcl:"post_process_artifact"`
+	PostProcessUi       packersdk.Ui       `cty:"post_process_ui" hcl:"post_process_ui"`
 }
 
 // FlatMapstructure returns a new FlatMockPostProcessor.

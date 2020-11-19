@@ -19,7 +19,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
@@ -130,7 +129,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
 		return nil, false, false, fmt.Errorf(
 			"Unknown artifact type: this post-processor requires an input artifact from the artifice post-processor, vagrant post-processor, or vagrant builder: %s", artifact.BuilderId())

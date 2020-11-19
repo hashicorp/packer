@@ -7,6 +7,7 @@ import (
 
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestBuilder_implBuilder(t *testing.T) {
@@ -29,7 +30,7 @@ func TestBuilderFileAcc_copy(t *testing.T) {
 	})
 }
 
-func checkContent(artifacts []packer.Artifact) error {
+func checkContent(artifacts []packersdk.Artifact) error {
 	content, err := ioutil.ReadFile("contentTest.txt")
 	if err != nil {
 		return err
@@ -41,7 +42,7 @@ func checkContent(artifacts []packer.Artifact) error {
 	return nil
 }
 
-func checkCopy(artifacts []packer.Artifact) error {
+func checkCopy(artifacts []packersdk.Artifact) error {
 	content, err := ioutil.ReadFile("copyTest.txt")
 	if err != nil {
 		return err

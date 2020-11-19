@@ -393,7 +393,7 @@ func checkHyperVGeneration(s string) interface{} {
 		s, compute.PossibleHyperVGenerationValues())
 }
 
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	switch runtime.GOOS {
 	case "linux", "freebsd":
 		break

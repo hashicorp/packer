@@ -20,7 +20,6 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/googlecompute"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -144,7 +143,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	generatedData := artifact.State("generated_data")
 	if generatedData == nil {
 		// Make sure it's not a nil map so we can assign to it later.
@@ -260,7 +259,7 @@ func CreateShieldedVMStateConfig(imageGuestOsFeatures []string, imagePlatformKey
 	return shieldedVMStateConfig, nil
 }
 
-func UploadToBucket(opts option.ClientOption, ui packersdk.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
+func UploadToBucket(opts option.ClientOption, ui packersdk.Ui, artifact packersdk.Artifact, bucket string, gcsObjectName string) (string, error) {
 	service, err := storage.NewService(context.TODO(), opts)
 	if err != nil {
 		return "", err
@@ -296,7 +295,11 @@ func UploadToBucket(opts option.ClientOption, ui packersdk.Ui, artifact packer.A
 	return storageObject.SelfLink, nil
 }
 
+<<<<<<< HEAD
 func CreateGceImage(opts option.ClientOption, ui packersdk.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string, shieldedVMStateConfig *compute.InitialStateConfig) (packer.Artifact, error) {
+=======
+func CreateGceImage(opts option.ClientOption, ui packersdk.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string) (packersdk.Artifact, error) {
+>>>>>>> move Artifact and artifact mock to the sdk
 	service, err := compute.NewService(context.TODO(), opts)
 
 	if err != nil {

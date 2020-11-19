@@ -64,7 +64,7 @@ type Build interface {
 	// Run runs the actual builder, returning an artifact implementation
 	// of what is built. If anything goes wrong, an error is returned.
 	// Run can be context cancelled.
-	Run(context.Context, packersdk.Ui) ([]Artifact, error)
+	Run(context.Context, packersdk.Ui) ([]packersdk.Artifact, error)
 
 	// SetDebug will enable/disable debug mode. Debug mode is always
 	// enabled by adding the additional key "packer_debug" to boolean
@@ -232,7 +232,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 }
 
 // Runs the actual build. Prepare must be called prior to running this.
-func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]Artifact, error) {
+func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packersdk.Artifact, error) {
 	if !b.prepareCalled {
 		panic("Prepare must be called first")
 	}
@@ -288,7 +288,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]Artifac
 	}
 
 	hook := &DispatchHook{Mapping: hooks}
-	artifacts := make([]Artifact, 0, 1)
+	artifacts := make([]packersdk.Artifact, 0, 1)
 
 	// The builder just has a normal Ui, but targeted
 	builderUi := &TargetedUI{

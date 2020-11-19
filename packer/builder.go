@@ -37,5 +37,5 @@ type Builder interface {
 	Prepare(...interface{}) ([]string, []string, error)
 
 	// Run is where the actual build should take place. It takes a Build and a Ui.
-	Run(context.Context, packersdk.Ui, Hook) (Artifact, error)
+	Run(context.Context, packersdk.Ui, Hook) (packersdk.Artifact, error)
 }

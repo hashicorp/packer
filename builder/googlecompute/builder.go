@@ -34,9 +34,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, warnings, nil
 }
 
-// Run executes a googlecompute Packer build and returns a packer.Artifact
+// Run executes a googlecompute Packer build and returns a packersdk.Artifact
 // representing a GCE machine image.
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	cfg := GCEDriverConfig{
 		Ui:                            ui,
 		ProjectId:                     b.config.ProjectId,

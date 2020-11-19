@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	dockerimport "github.com/hashicorp/packer/post-processor/docker-import"
 )
 
@@ -30,7 +31,7 @@ func TestPostProcessor_PostProcess(t *testing.T) {
 	}
 
 	result, keep, forceOverride, err := p.PostProcess(context.Background(), testUi(), artifact)
-	if _, ok := result.(packer.Artifact); !ok {
+	if _, ok := result.(packersdk.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}
 	if !keep {
@@ -63,7 +64,7 @@ func TestPostProcessor_PostProcess_portInName(t *testing.T) {
 	}
 
 	result, keep, forceOverride, err := p.PostProcess(context.Background(), testUi(), artifact)
-	if _, ok := result.(packer.Artifact); !ok {
+	if _, ok := result.(packersdk.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}
 	if !keep {
@@ -96,7 +97,7 @@ func TestPostProcessor_PostProcess_tags(t *testing.T) {
 	}
 
 	result, keep, forceOverride, err := p.PostProcess(context.Background(), testUi(), artifact)
-	if _, ok := result.(packer.Artifact); !ok {
+	if _, ok := result.(packersdk.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}
 	if !keep {

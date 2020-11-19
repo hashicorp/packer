@@ -64,7 +64,7 @@ func (s *Server) Close() error {
 	return nil
 }
 
-func (s *Server) RegisterArtifact(a packer.Artifact) error {
+func (s *Server) RegisterArtifact(a packersdk.Artifact) error {
 	return s.server.RegisterName(DefaultArtifactEndpoint, &ArtifactServer{
 		artifact: a,
 	})

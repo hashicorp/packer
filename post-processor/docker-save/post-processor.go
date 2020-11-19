@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/docker"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -53,7 +52,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	if artifact.BuilderId() != dockerimport.BuilderId &&
 		artifact.BuilderId() != dockertag.BuilderId {
 		err := fmt.Errorf(

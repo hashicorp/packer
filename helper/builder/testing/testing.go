@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 )
 
@@ -49,7 +50,7 @@ type TestCase struct {
 }
 
 // TestCheckFunc is the callback used for Check in TestStep.
-type TestCheckFunc func([]packer.Artifact) error
+type TestCheckFunc func([]packersdk.Artifact) error
 
 // TestTeardownFunc is the callback used for Teardown in TestCase.
 type TestTeardownFunc func() error

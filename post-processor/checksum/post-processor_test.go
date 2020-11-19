@@ -45,7 +45,7 @@ func TestChecksumSHA1(t *testing.T) {
 
 // Test Helpers
 
-func setup(t *testing.T) (packersdk.Ui, packer.Artifact, error) {
+func setup(t *testing.T) (packersdk.Ui, packersdk.Artifact, error) {
 	// Create fake UI and Cache
 	ui := packer.TestUi(t)
 
@@ -77,7 +77,7 @@ func setup(t *testing.T) (packersdk.Ui, packer.Artifact, error) {
 	return ui, artifact, err
 }
 
-func testChecksum(t *testing.T, config string) packer.Artifact {
+func testChecksum(t *testing.T, config string) packersdk.Artifact {
 	ui, artifact, err := setup(t)
 	if err != nil {
 		t.Fatalf("Error bootstrapping test: %s", err)

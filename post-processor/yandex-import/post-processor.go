@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/yandex"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -122,7 +121,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	var imageSrc cloudImageSource
 	var fileSource bool
 	var err error
@@ -229,7 +228,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	}, false, false, nil
 }
 
-func chooseSource(a packer.Artifact) (cloudImageSource, error) {
+func chooseSource(a packersdk.Artifact) (cloudImageSource, error) {
 	st := a.State("source_type").(string)
 	if st == "" {
 		return nil, fmt.Errorf("could not determine source type of yandex-import artifact: %v", a)

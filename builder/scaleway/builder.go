@@ -36,7 +36,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, warnings, nil
 }
 
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	scwZone, err := scw.ParseZone(b.config.Zone)
 	if err != nil {
 		ui.Error(err.Error())

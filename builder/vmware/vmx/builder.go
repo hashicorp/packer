@@ -34,9 +34,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, warnings, nil
 }
 
-// Run executes a Packer build and returns a packer.Artifact representing
+// Run executes a Packer build and returns a packersdk.Artifact representing
 // a VMware image.
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	driver, err := vmwcommon.NewDriver(&b.config.DriverConfig, &b.config.SSHConfig, b.config.VMName)
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)

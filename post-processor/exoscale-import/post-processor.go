@@ -106,7 +106,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	switch a.BuilderId() {
 	case qemu.BuilderId, file.BuilderId, artifice.BuilderId:
 		break
@@ -140,7 +140,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a pack
 	return &Artifact{id}, false, false, nil
 }
 
-func (p *PostProcessor) uploadImage(ctx context.Context, ui packersdk.Ui, a packer.Artifact) (string, string, error) {
+func (p *PostProcessor) uploadImage(ctx context.Context, ui packersdk.Ui, a packersdk.Artifact) (string, string, error) {
 	var (
 		imageFile  = a.Files()[0]
 		bucketFile = filepath.Base(imageFile)
@@ -189,7 +189,7 @@ func (p *PostProcessor) uploadImage(ctx context.Context, ui packersdk.Ui, a pack
 	return output.Location, fmt.Sprintf("%x", hash.Sum(nil)), nil
 }
 
-func (p *PostProcessor) deleteImage(ctx context.Context, ui packersdk.Ui, a packer.Artifact) error {
+func (p *PostProcessor) deleteImage(ctx context.Context, ui packersdk.Ui, a packersdk.Artifact) error {
 	var (
 		imageFile  = a.Files()[0]
 		bucketFile = filepath.Base(imageFile)

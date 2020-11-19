@@ -1,19 +1,19 @@
 package rpc
 
 import (
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-// An implementation of packer.Artifact where the artifact is actually
+// An implementation of packersdk.Artifact where the artifact is actually
 // available over an RPC connection.
 type artifact struct {
 	commonClient
 }
 
-// ArtifactServer wraps a packer.Artifact implementation and makes it
+// ArtifactServer wraps a packersdk.Artifact implementation and makes it
 // exportable as part of a Golang RPC server.
 type ArtifactServer struct {
-	artifact packer.Artifact
+	artifact packersdk.Artifact
 }
 
 func (a *artifact) BuilderId() (result string) {

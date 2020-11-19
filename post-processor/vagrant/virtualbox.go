@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
@@ -21,7 +20,7 @@ func (p *VBoxProvider) KeepInputArtifact() bool {
 	return false
 }
 
-func (p *VBoxProvider) Process(ui packersdk.Ui, artifact packer.Artifact, dir string) (vagrantfile string, metadata map[string]interface{}, err error) {
+func (p *VBoxProvider) Process(ui packersdk.Ui, artifact packersdk.Artifact, dir string) (vagrantfile string, metadata map[string]interface{}, err error) {
 	// Create the metadata
 	metadata = map[string]interface{}{"provider": "virtualbox"}
 

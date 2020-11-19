@@ -175,9 +175,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, warnings, nil
 }
 
-// Run executes a Packer build and returns a packer.Artifact representing
+// Run executes a Packer build and returns a packersdk.Artifact representing
 // a Hyperv appliance.
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	// Create the driver that we'll use to communicate with Hyperv
 	driver, err := hypervcommon.NewHypervPS4Driver()
 	if err != nil {

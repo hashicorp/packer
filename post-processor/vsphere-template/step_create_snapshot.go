@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/post-processor/vsphere"
@@ -19,7 +18,7 @@ type stepCreateSnapshot struct {
 	SnapshotEnable      bool
 }
 
-func NewStepCreateSnapshot(artifact packer.Artifact, p *PostProcessor) *stepCreateSnapshot {
+func NewStepCreateSnapshot(artifact packersdk.Artifact, p *PostProcessor) *stepCreateSnapshot {
 	remoteFolder := "Discovered virtual machine"
 	vmname := artifact.Id()
 

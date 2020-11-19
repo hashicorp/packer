@@ -52,7 +52,7 @@ type wrappedCommandTemplate struct {
 	Command string
 }
 
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	wrappedCommand := func(command string) (string, error) {
 		ictx := b.config.ctx
 		ictx.Data = &wrappedCommandTemplate{Command: command}

@@ -40,7 +40,7 @@ func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, []string, error
 	return tb.GeneratedVars, tb.PrepareWarnings, nil
 }
 
-func (tb *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, h Hook) (Artifact, error) {
+func (tb *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, h Hook) (packersdk.Artifact, error) {
 	tb.RunCalled = true
 	tb.RunHook = h
 	tb.RunUi = ui
@@ -62,7 +62,7 @@ func (tb *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, h Hook) (Artifa
 		}
 	}
 
-	return &MockArtifact{
+	return &packersdk.MockArtifact{
 		IdValue: tb.ArtifactId,
 	}, nil
 }

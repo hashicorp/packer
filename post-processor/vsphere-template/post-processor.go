@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	vsphere "github.com/hashicorp/packer/builder/vsphere/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
@@ -104,7 +103,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
 		return nil, false, false, fmt.Errorf("The Packer vSphere Template post-processor "+
 			"can only take an artifact from the VMware-iso builder, built on "+

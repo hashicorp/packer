@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 const (
@@ -62,7 +62,7 @@ func (a *artifact) Destroy() error {
 	return nil
 }
 
-func NewArtifact(remoteType string, format string, exportOutputPath string, vmName string, skipExport bool, keepRegistered bool, state multistep.StateBag) (packer.Artifact, error) {
+func NewArtifact(remoteType string, format string, exportOutputPath string, vmName string, skipExport bool, keepRegistered bool, state multistep.StateBag) (packersdk.Artifact, error) {
 	var files []string
 	var dir OutputDir
 	var err error

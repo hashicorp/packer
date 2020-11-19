@@ -26,5 +26,5 @@ type PostProcessor interface {
 	// user input for keep_input_artifact is ignored and the artifact is either
 	// kept or discarded according to the value set in `keep`.
 	// PostProcess is cancellable using context
-	PostProcess(context.Context, packersdk.Ui, Artifact) (a Artifact, keep bool, forceOverride bool, err error)
+	PostProcess(context.Context, packersdk.Ui, packersdk.Artifact) (a packersdk.Artifact, keep bool, forceOverride bool, err error)
 }

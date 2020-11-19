@@ -63,7 +63,7 @@ func (p *HCL2PostProcessor) Configure(args ...interface{}) error {
 	return p.PostProcessor.Configure(args...)
 }
 
-func (p *HCL2PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *HCL2PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	generatedData := make(map[string]interface{})
 	if artifactStateData, ok := artifact.State("generated_data").(map[interface{}]interface{}); ok {
 		for k, v := range artifactStateData {

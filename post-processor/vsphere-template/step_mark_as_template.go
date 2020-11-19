@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -23,7 +22,7 @@ type stepMarkAsTemplate struct {
 	ReregisterVM config.Trilean
 }
 
-func NewStepMarkAsTemplate(artifact packer.Artifact, p *PostProcessor) *stepMarkAsTemplate {
+func NewStepMarkAsTemplate(artifact packersdk.Artifact, p *PostProcessor) *stepMarkAsTemplate {
 	remoteFolder := "Discovered virtual machine"
 	vmname := artifact.Id()
 

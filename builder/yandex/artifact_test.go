@@ -3,13 +3,13 @@ package yandex
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 )
 
 func TestArtifact_impl(t *testing.T) {
-	var _ packer.Artifact = new(Artifact)
+	var _ packersdk.Artifact = new(Artifact)
 }
 
 func TestArtifact_Id(t *testing.T) {

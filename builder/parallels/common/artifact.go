@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // BuilderId is the common builder ID to all of these artifacts.
@@ -29,7 +29,7 @@ type artifact struct {
 
 // NewArtifact returns a Parallels artifact containing the files
 // in the given directory.
-func NewArtifact(dir string, generatedData map[string]interface{}) (packer.Artifact, error) {
+func NewArtifact(dir string, generatedData map[string]interface{}) (packersdk.Artifact, error) {
 	files := make([]string, 0, 5)
 	visit := func(path string, info os.FileInfo, err error) error {
 		if err != nil {

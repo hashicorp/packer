@@ -44,7 +44,7 @@ func (p *postProcessor) Configure(raw ...interface{}) error {
 	return p.client.Call(p.endpoint+".Configure", args, new(interface{}))
 }
 
-func (p *postProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *postProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	nextId := p.mux.NextId()
 	server := newServerWithMux(p.mux, nextId)
 	server.RegisterArtifact(a)

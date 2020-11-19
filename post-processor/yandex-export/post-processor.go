@@ -13,7 +13,6 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/yandex"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
@@ -128,7 +127,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	switch artifact.BuilderId() {
 	case yandex.BuilderID, artifice.BuilderId:
 		break

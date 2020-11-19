@@ -3,9 +3,9 @@ package file
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestNullArtifact(t *testing.T) {
-	var _ packer.Artifact = new(FileArtifact)
+	var _ packersdk.Artifact = new(FileArtifact)
 }

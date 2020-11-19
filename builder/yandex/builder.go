@@ -48,9 +48,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return generatedData, warnings, nil
 }
 
-// Run executes a yandex Packer build and returns a packer.Artifact
+// Run executes a yandex Packer build and returns a packersdk.Artifact
 // representing a Yandex.Cloud compute image.
-func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packer.Hook) (packersdk.Artifact, error) {
 	driver, err := NewDriverYC(ui, &b.config.AccessConfig)
 	ctx = requestid.ContextWithClientTraceID(ctx, uuid.New().String())
 
