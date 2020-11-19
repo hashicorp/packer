@@ -94,12 +94,12 @@ func (*FlatMockPostProcessor) HCL2Spec() map[string]hcldec.Spec {
 // FlatMockProvisioner is an auto-generated flat version of MockProvisioner.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatMockProvisioner struct {
-	PrepCalled       *bool                `cty:"prep_called" hcl:"prep_called"`
-	PrepConfigs      []interface{}        `cty:"prep_configs" hcl:"prep_configs"`
-	ProvCalled       *bool                `cty:"prov_called" hcl:"prov_called"`
-	ProvRetried      *bool                `cty:"prov_retried" hcl:"prov_retried"`
-	ProvCommunicator *packer.Communicator `cty:"prov_communicator" hcl:"prov_communicator"`
-	ProvUi           packer.Ui            `cty:"prov_ui" hcl:"prov_ui"`
+	PrepCalled       *bool               `cty:"prep_called" hcl:"prep_called"`
+	PrepConfigs      []interface{}       `cty:"prep_configs" hcl:"prep_configs"`
+	ProvCalled       *bool               `cty:"prov_called" hcl:"prov_called"`
+	ProvRetried      *bool               `cty:"prov_retried" hcl:"prov_retried"`
+	ProvCommunicator packer.Communicator `cty:"prov_communicator" hcl:"prov_communicator"`
+	ProvUi           packer.Ui           `cty:"prov_ui" hcl:"prov_ui"`
 }
 
 // FlatMapstructure returns a new FlatMockProvisioner.
@@ -118,8 +118,8 @@ func (*FlatMockProvisioner) HCL2Spec() map[string]hcldec.Spec {
 		"prep_configs":      &hcldec.AttrSpec{Name: "prep_configs", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
 		"prov_called":       &hcldec.AttrSpec{Name: "prov_called", Type: cty.Bool, Required: false},
 		"prov_retried":      &hcldec.AttrSpec{Name: "prov_retried", Type: cty.Bool, Required: false},
-		"prov_communicator": &hcldec.AttrSpec{Name: "prov_communicator", Type: cty.String, Required: false},
-		"prov_ui":           &hcldec.AttrSpec{Name: "prov_ui", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
+		"prov_communicator": &hcldec.AttrSpec{Name: "prov_communicator", Type: cty.Bool, Required: false}, /* TODO(azr): could not find type */
+		"prov_ui":           &hcldec.AttrSpec{Name: "prov_ui", Type: cty.Bool, Required: false},           /* TODO(azr): could not find type */
 	}
 	return s
 }
