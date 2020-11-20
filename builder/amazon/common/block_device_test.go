@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
-  	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 func TestBlockDevice(t *testing.T) {
