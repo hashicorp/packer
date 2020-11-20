@@ -38,6 +38,7 @@
             "tenantId": "[parameters('tenantId')]"
           }
         ],
+        "enableSoftDelete": "true",
         "enabledForDeployment": "true",
         "enabledForTemplateDeployment": "true",
         "sku": {

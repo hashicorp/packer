@@ -6,14 +6,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/hashicorp/packer/builder"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 )
 
 // StepPrepareDevice finds an available device and sets it.
 type StepPrepareDevice struct {
-	GeneratedData *builder.GeneratedData
+	GeneratedData *packerbuilderdata.GeneratedData
 }
 
 func (s *StepPrepareDevice) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {

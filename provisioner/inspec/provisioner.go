@@ -28,11 +28,11 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/adapter"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/adapter"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 var SupportedBackends = map[string]bool{"docker": true, "local": true, "ssh": true, "winrm": true}

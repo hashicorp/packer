@@ -38,6 +38,7 @@ func (*FlatArtifactParameter) HCL2Spec() map[string]hcldec.Spec {
 type FlatConfig struct {
 	PackerBuildName        *string                `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
 	PackerBuilderType      *string                `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerCoreVersion      *string                `mapstructure:"packer_core_version" cty:"packer_core_version" hcl:"packer_core_version"`
 	PackerDebug            *bool                  `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
 	PackerForce            *bool                  `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
 	PackerOnError          *string                `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
@@ -51,6 +52,7 @@ type FlatConfig struct {
 	ObjectID               *string                `mapstructure:"object_id" cty:"object_id" hcl:"object_id"`
 	TenantID               *string                `mapstructure:"tenant_id" required:"false" cty:"tenant_id" hcl:"tenant_id"`
 	SubscriptionID         *string                `mapstructure:"subscription_id" cty:"subscription_id" hcl:"subscription_id"`
+	UseAzureCLIAuth        *bool                  `mapstructure:"use_azure_cli_auth" required:"false" cty:"use_azure_cli_auth" hcl:"use_azure_cli_auth"`
 	DtlArtifacts           []FlatDtlArtifact      `mapstructure:"dtl_artifacts" cty:"dtl_artifacts" hcl:"dtl_artifacts"`
 	LabName                *string                `mapstructure:"lab_name" cty:"lab_name" hcl:"lab_name"`
 	ResourceGroupName      *string                `mapstructure:"lab_resource_group_name" cty:"lab_resource_group_name" hcl:"lab_resource_group_name"`
@@ -74,6 +76,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":          &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
 		"packer_builder_type":        &hcldec.AttrSpec{Name: "packer_builder_type", Type: cty.String, Required: false},
+		"packer_core_version":        &hcldec.AttrSpec{Name: "packer_core_version", Type: cty.String, Required: false},
 		"packer_debug":               &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":               &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
@@ -87,6 +90,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"object_id":                  &hcldec.AttrSpec{Name: "object_id", Type: cty.String, Required: false},
 		"tenant_id":                  &hcldec.AttrSpec{Name: "tenant_id", Type: cty.String, Required: false},
 		"subscription_id":            &hcldec.AttrSpec{Name: "subscription_id", Type: cty.String, Required: false},
+		"use_azure_cli_auth":         &hcldec.AttrSpec{Name: "use_azure_cli_auth", Type: cty.Bool, Required: false},
 		"dtl_artifacts":              &hcldec.BlockListSpec{TypeName: "dtl_artifacts", Nested: hcldec.ObjectSpec((*FlatDtlArtifact)(nil).HCL2Spec())},
 		"lab_name":                   &hcldec.AttrSpec{Name: "lab_name", Type: cty.String, Required: false},
 		"lab_resource_group_name":    &hcldec.AttrSpec{Name: "lab_resource_group_name", Type: cty.String, Required: false},

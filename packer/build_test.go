@@ -5,7 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/packer/helper/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
+	"github.com/hashicorp/packer/version"
 )
 
 func boolPointer(tf bool) *bool {
@@ -41,6 +42,7 @@ func testDefaultPackerConfig() map[string]interface{} {
 	return map[string]interface{}{
 		BuildNameConfigKey:     "test",
 		BuilderTypeConfigKey:   "foo",
+		CoreVersionConfigKey:   version.FormattedVersion(),
 		DebugConfigKey:         false,
 		ForceConfigKey:         false,
 		OnErrorConfigKey:       "cleanup",
@@ -214,7 +216,7 @@ func TestBuildPrepare_ProvisionerGetsGeneratedMap(t *testing.T) {
 	}
 
 	generated := BasicPlaceholderData()
-	generated["PartyVar"] = "Build_PartyVar. " + common.PlaceholderMsg
+	generated["PartyVar"] = "Build_PartyVar. " + packerbuilderdata.PlaceholderMsg
 	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig, generated}) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}

@@ -12,14 +12,15 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/builder"
 	"github.com/hashicorp/packer/builder/yandex"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/post-processor/artifice"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
 const defaultStorageEndpoint = "storage.yandexcloud.net"
@@ -210,14 +211,14 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		},
 		&yandex.StepCreateInstance{
 			Debug:         p.config.PackerDebug,
-			GeneratedData: &builder.GeneratedData{State: state},
+			GeneratedData: &packerbuilderdata.GeneratedData{State: state},
 		},
 		new(yandex.StepWaitCloudInitScript),
 		new(yandex.StepTeardownInstance),
 	}
 
 	// Run the steps.
-	p.runner = common.NewRunner(steps, p.config.PackerConfig, ui)
+	p.runner = commonsteps.NewRunner(steps, p.config.PackerConfig, ui)
 	p.runner.Run(ctx, state)
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, false, false, rawErr.(error)

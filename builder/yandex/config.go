@@ -10,12 +10,12 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
 const defaultGpuPlatformID = "gpu-standard-v1"
@@ -44,6 +44,8 @@ type Config struct {
 	DiskSizeGb int `mapstructure:"disk_size_gb" required:"false"`
 	// Specify disk type for the launched instance. Defaults to `network-hdd`.
 	DiskType string `mapstructure:"disk_type" required:"false"`
+	// Key/value pair labels to apply to the disk.
+	DiskLabels map[string]string `mapstructure:"disk_labels" required:"false"`
 	// The description of the resulting image.
 	ImageDescription string `mapstructure:"image_description" required:"false"`
 	//  The family name of the resulting image.

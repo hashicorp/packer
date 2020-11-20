@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func Test_Shutdown_Null_success(t *testing.T) {

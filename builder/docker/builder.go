@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/builder"
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 )
 
 const (
@@ -52,7 +52,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	generatedData := &builder.GeneratedData{State: state}
+	generatedData := &packerbuilderdata.GeneratedData{State: state}
 
 	// Setup the driver that will talk to Docker
 	state.Put("driver", driver)
@@ -70,8 +70,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				"dockerWindowsContainer": &StepConnectDocker{},
 			},
 		},
-		&common.StepProvision{},
-		&common.StepCleanupTempKeys{
+		&commonsteps.StepProvision{},
+		&commonsteps.StepCleanupTempKeys{
 			Comm: &b.config.Comm,
 		},
 	}
@@ -93,7 +93,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Run!
-	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
 
 	// If there was an error, return that

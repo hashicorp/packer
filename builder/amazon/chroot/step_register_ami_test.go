@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	amazon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"

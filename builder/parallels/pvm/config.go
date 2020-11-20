@@ -8,18 +8,19 @@ import (
 	"os"
 
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/bootcommand"
-	"github.com/hashicorp/packer/common/shutdowncommand"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/shutdowncommand"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // Config is the configuration structure for the builder.
 type Config struct {
 	common.PackerConfig                 `mapstructure:",squash"`
-	common.FloppyConfig                 `mapstructure:",squash"`
+	commonsteps.FloppyConfig            `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`

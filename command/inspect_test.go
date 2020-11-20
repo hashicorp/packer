@@ -78,7 +78,9 @@ local.fruit: "banana"
 
 > input-variables:
 
+var.default_from_env: ""
 var.fruit: "peach"
+var.other_default_from_env: ""
 var.unknown_list_of_string: "[\n  \"first_peach\",\n  \"second_peach\",\n]"
 var.unknown_string: "also_peach"
 var.unknown_unknown: "[\"peach_too\"]"
@@ -89,11 +91,13 @@ var.unknown_unknown: "[\"peach_too\"]"
 > builds:
 
 `},
-		{[]string{"inspect", "-var=fruit=peach", filepath.Join(testFixture("hcl"), "inspect")}, nil, `Packer Inspect: HCL2 mode
+		{[]string{"inspect", "-var=fruit=peach", "-var=other_default_from_env=apple", filepath.Join(testFixture("hcl"), "inspect")}, []string{"DEFAULT_FROM_ENV=cherry"}, `Packer Inspect: HCL2 mode
 
 > input-variables:
 
+var.default_from_env: "cherry"
 var.fruit: "peach"
+var.other_default_from_env: "apple"
 var.unknown_list_of_string: "<unknown>"
 var.unknown_string: "<unknown>"
 var.unknown_unknown: "<unknown>"

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 func testSSHConfig() *SSHConfig {

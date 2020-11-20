@@ -4,7 +4,7 @@ package ebs
 import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/hcl2template"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -13,6 +13,7 @@ import (
 type FlatConfig struct {
 	PackerBuildName                           *string                                `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
 	PackerBuilderType                         *string                                `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerCoreVersion                         *string                                `mapstructure:"packer_core_version" cty:"packer_core_version" hcl:"packer_core_version"`
 	PackerDebug                               *bool                                  `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
 	PackerForce                               *bool                                  `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
 	PackerOnError                             *string                                `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
@@ -29,7 +30,6 @@ type FlatConfig struct {
 	ProfileName                               *string                                `mapstructure:"profile" required:"false" cty:"profile" hcl:"profile"`
 	RawRegion                                 *string                                `mapstructure:"region" required:"true" cty:"region" hcl:"region"`
 	SecretKey                                 *string                                `mapstructure:"secret_key" required:"true" cty:"secret_key" hcl:"secret_key"`
-	SkipValidation                            *bool                                  `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation" hcl:"skip_region_validation"`
 	SkipMetadataApiCheck                      *bool                                  `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check" hcl:"skip_metadata_api_check"`
 	SkipCredsValidation                       *bool                                  `mapstructure:"skip_credential_validation" cty:"skip_credential_validation" hcl:"skip_credential_validation"`
 	Token                                     *string                                `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
@@ -42,8 +42,9 @@ type FlatConfig struct {
 	AMIGroups                                 []string                               `mapstructure:"ami_groups" required:"false" cty:"ami_groups" hcl:"ami_groups"`
 	AMIProductCodes                           []string                               `mapstructure:"ami_product_codes" required:"false" cty:"ami_product_codes" hcl:"ami_product_codes"`
 	AMIRegions                                []string                               `mapstructure:"ami_regions" required:"false" cty:"ami_regions" hcl:"ami_regions"`
+	AMISkipRegionValidation                   *bool                                  `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation" hcl:"skip_region_validation"`
 	AMITags                                   map[string]string                      `mapstructure:"tags" required:"false" cty:"tags" hcl:"tags"`
-	AMITag                                    []hcl2template.FlatKeyValue            `mapstructure:"tag" required:"false" cty:"tag" hcl:"tag"`
+	AMITag                                    []config.FlatKeyValue                  `mapstructure:"tag" required:"false" cty:"tag" hcl:"tag"`
 	AMIENASupport                             *bool                                  `mapstructure:"ena_support" required:"false" cty:"ena_support" hcl:"ena_support"`
 	AMISriovNetSupport                        *bool                                  `mapstructure:"sriov_support" required:"false" cty:"sriov_support" hcl:"sriov_support"`
 	AMIForceDeregister                        *bool                                  `mapstructure:"force_deregister" required:"false" cty:"force_deregister" hcl:"force_deregister"`
@@ -53,7 +54,7 @@ type FlatConfig struct {
 	AMIRegionKMSKeyIDs                        map[string]string                      `mapstructure:"region_kms_key_ids" required:"false" cty:"region_kms_key_ids" hcl:"region_kms_key_ids"`
 	AMISkipBuildRegion                        *bool                                  `mapstructure:"skip_save_build_region" cty:"skip_save_build_region" hcl:"skip_save_build_region"`
 	SnapshotTags                              map[string]string                      `mapstructure:"snapshot_tags" required:"false" cty:"snapshot_tags" hcl:"snapshot_tags"`
-	SnapshotTag                               []hcl2template.FlatKeyValue            `mapstructure:"snapshot_tag" required:"false" cty:"snapshot_tag" hcl:"snapshot_tag"`
+	SnapshotTag                               []config.FlatKeyValue                  `mapstructure:"snapshot_tag" required:"false" cty:"snapshot_tag" hcl:"snapshot_tag"`
 	SnapshotUsers                             []string                               `mapstructure:"snapshot_users" required:"false" cty:"snapshot_users" hcl:"snapshot_users"`
 	SnapshotGroups                            []string                               `mapstructure:"snapshot_groups" required:"false" cty:"snapshot_groups" hcl:"snapshot_groups"`
 	AssociatePublicIpAddress                  *bool                                  `mapstructure:"associate_public_ip_address" required:"false" cty:"associate_public_ip_address" hcl:"associate_public_ip_address"`
@@ -69,7 +70,7 @@ type FlatConfig struct {
 	InstanceType                              *string                                `mapstructure:"instance_type" required:"true" cty:"instance_type" hcl:"instance_type"`
 	SecurityGroupFilter                       *common.FlatSecurityGroupFilterOptions `mapstructure:"security_group_filter" required:"false" cty:"security_group_filter" hcl:"security_group_filter"`
 	RunTags                                   map[string]string                      `mapstructure:"run_tags" required:"false" cty:"run_tags" hcl:"run_tags"`
-	RunTag                                    []hcl2template.FlatKeyValue            `mapstructure:"run_tag" required:"false" cty:"run_tag" hcl:"run_tag"`
+	RunTag                                    []config.FlatKeyValue                  `mapstructure:"run_tag" required:"false" cty:"run_tag" hcl:"run_tag"`
 	SecurityGroupId                           *string                                `mapstructure:"security_group_id" required:"false" cty:"security_group_id" hcl:"security_group_id"`
 	SecurityGroupIds                          []string                               `mapstructure:"security_group_ids" required:"false" cty:"security_group_ids" hcl:"security_group_ids"`
 	SourceAmi                                 *string                                `mapstructure:"source_ami" required:"true" cty:"source_ami" hcl:"source_ami"`
@@ -78,11 +79,10 @@ type FlatConfig struct {
 	SpotPrice                                 *string                                `mapstructure:"spot_price" required:"false" cty:"spot_price" hcl:"spot_price"`
 	SpotPriceAutoProduct                      *string                                `mapstructure:"spot_price_auto_product" required:"false" undocumented:"true" cty:"spot_price_auto_product" hcl:"spot_price_auto_product"`
 	SpotTags                                  map[string]string                      `mapstructure:"spot_tags" required:"false" cty:"spot_tags" hcl:"spot_tags"`
-	SpotTag                                   []hcl2template.FlatKeyValue            `mapstructure:"spot_tag" required:"false" cty:"spot_tag" hcl:"spot_tag"`
+	SpotTag                                   []config.FlatKeyValue                  `mapstructure:"spot_tag" required:"false" cty:"spot_tag" hcl:"spot_tag"`
 	SubnetFilter                              *common.FlatSubnetFilterOptions        `mapstructure:"subnet_filter" required:"false" cty:"subnet_filter" hcl:"subnet_filter"`
 	SubnetId                                  *string                                `mapstructure:"subnet_id" required:"false" cty:"subnet_id" hcl:"subnet_id"`
 	Tenancy                                   *string                                `mapstructure:"tenancy" required:"false" cty:"tenancy" hcl:"tenancy"`
-	TemporaryKeyPairName                      *string                                `mapstructure:"temporary_key_pair_name" required:"false" cty:"temporary_key_pair_name" hcl:"temporary_key_pair_name"`
 	TemporarySGSourceCidrs                    []string                               `mapstructure:"temporary_security_group_source_cidrs" required:"false" cty:"temporary_security_group_source_cidrs" hcl:"temporary_security_group_source_cidrs"`
 	UserData                                  *string                                `mapstructure:"user_data" required:"false" cty:"user_data" hcl:"user_data"`
 	UserDataFile                              *string                                `mapstructure:"user_data_file" required:"false" cty:"user_data_file" hcl:"user_data_file"`
@@ -96,6 +96,7 @@ type FlatConfig struct {
 	SSHUsername                               *string                                `mapstructure:"ssh_username" cty:"ssh_username" hcl:"ssh_username"`
 	SSHPassword                               *string                                `mapstructure:"ssh_password" cty:"ssh_password" hcl:"ssh_password"`
 	SSHKeyPairName                            *string                                `mapstructure:"ssh_keypair_name" undocumented:"true" cty:"ssh_keypair_name" hcl:"ssh_keypair_name"`
+	SSHTemporaryKeyPairName                   *string                                `mapstructure:"temporary_key_pair_name" undocumented:"true" cty:"temporary_key_pair_name" hcl:"temporary_key_pair_name"`
 	SSHTemporaryKeyPairType                   *string                                `mapstructure:"temporary_key_pair_type" cty:"temporary_key_pair_type" hcl:"temporary_key_pair_type"`
 	SSHTemporaryKeyPairBits                   *int                                   `mapstructure:"temporary_key_pair_bits" cty:"temporary_key_pair_bits" hcl:"temporary_key_pair_bits"`
 	SSHCiphers                                []string                               `mapstructure:"ssh_ciphers" cty:"ssh_ciphers" hcl:"ssh_ciphers"`
@@ -143,7 +144,7 @@ type FlatConfig struct {
 	AMIMappings                               []common.FlatBlockDevice               `mapstructure:"ami_block_device_mappings" required:"false" cty:"ami_block_device_mappings" hcl:"ami_block_device_mappings"`
 	LaunchMappings                            []common.FlatBlockDevice               `mapstructure:"launch_block_device_mappings" required:"false" cty:"launch_block_device_mappings" hcl:"launch_block_device_mappings"`
 	VolumeRunTags                             map[string]string                      `mapstructure:"run_volume_tags" cty:"run_volume_tags" hcl:"run_volume_tags"`
-	VolumeRunTag                              []hcl2template.FlatNameValue           `mapstructure:"run_volume_tag" required:"false" cty:"run_volume_tag" hcl:"run_volume_tag"`
+	VolumeRunTag                              []config.FlatNameValue                 `mapstructure:"run_volume_tag" required:"false" cty:"run_volume_tag" hcl:"run_volume_tag"`
 	NoEphemeral                               *bool                                  `mapstructure:"no_ephemeral" required:"false" cty:"no_ephemeral" hcl:"no_ephemeral"`
 }
 
@@ -161,6 +162,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":             &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
 		"packer_builder_type":           &hcldec.AttrSpec{Name: "packer_builder_type", Type: cty.String, Required: false},
+		"packer_core_version":           &hcldec.AttrSpec{Name: "packer_core_version", Type: cty.String, Required: false},
 		"packer_debug":                  &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                  &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":               &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
@@ -177,7 +179,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"profile":                       &hcldec.AttrSpec{Name: "profile", Type: cty.String, Required: false},
 		"region":                        &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
 		"secret_key":                    &hcldec.AttrSpec{Name: "secret_key", Type: cty.String, Required: false},
-		"skip_region_validation":        &hcldec.AttrSpec{Name: "skip_region_validation", Type: cty.Bool, Required: false},
 		"skip_metadata_api_check":       &hcldec.AttrSpec{Name: "skip_metadata_api_check", Type: cty.Bool, Required: false},
 		"skip_credential_validation":    &hcldec.AttrSpec{Name: "skip_credential_validation", Type: cty.Bool, Required: false},
 		"token":                         &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
@@ -190,8 +191,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ami_groups":                    &hcldec.AttrSpec{Name: "ami_groups", Type: cty.List(cty.String), Required: false},
 		"ami_product_codes":             &hcldec.AttrSpec{Name: "ami_product_codes", Type: cty.List(cty.String), Required: false},
 		"ami_regions":                   &hcldec.AttrSpec{Name: "ami_regions", Type: cty.List(cty.String), Required: false},
+		"skip_region_validation":        &hcldec.AttrSpec{Name: "skip_region_validation", Type: cty.Bool, Required: false},
 		"tags":                          &hcldec.AttrSpec{Name: "tags", Type: cty.Map(cty.String), Required: false},
-		"tag":                           &hcldec.BlockListSpec{TypeName: "tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"tag":                           &hcldec.BlockListSpec{TypeName: "tag", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
 		"ena_support":                   &hcldec.AttrSpec{Name: "ena_support", Type: cty.Bool, Required: false},
 		"sriov_support":                 &hcldec.AttrSpec{Name: "sriov_support", Type: cty.Bool, Required: false},
 		"force_deregister":              &hcldec.AttrSpec{Name: "force_deregister", Type: cty.Bool, Required: false},
@@ -201,7 +203,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"region_kms_key_ids":            &hcldec.AttrSpec{Name: "region_kms_key_ids", Type: cty.Map(cty.String), Required: false},
 		"skip_save_build_region":        &hcldec.AttrSpec{Name: "skip_save_build_region", Type: cty.Bool, Required: false},
 		"snapshot_tags":                 &hcldec.AttrSpec{Name: "snapshot_tags", Type: cty.Map(cty.String), Required: false},
-		"snapshot_tag":                  &hcldec.BlockListSpec{TypeName: "snapshot_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"snapshot_tag":                  &hcldec.BlockListSpec{TypeName: "snapshot_tag", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
 		"snapshot_users":                &hcldec.AttrSpec{Name: "snapshot_users", Type: cty.List(cty.String), Required: false},
 		"snapshot_groups":               &hcldec.AttrSpec{Name: "snapshot_groups", Type: cty.List(cty.String), Required: false},
 		"associate_public_ip_address":   &hcldec.AttrSpec{Name: "associate_public_ip_address", Type: cty.Bool, Required: false},
@@ -217,7 +219,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"instance_type":                         &hcldec.AttrSpec{Name: "instance_type", Type: cty.String, Required: false},
 		"security_group_filter":                 &hcldec.BlockSpec{TypeName: "security_group_filter", Nested: hcldec.ObjectSpec((*common.FlatSecurityGroupFilterOptions)(nil).HCL2Spec())},
 		"run_tags":                              &hcldec.AttrSpec{Name: "run_tags", Type: cty.Map(cty.String), Required: false},
-		"run_tag":                               &hcldec.BlockListSpec{TypeName: "run_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"run_tag":                               &hcldec.BlockListSpec{TypeName: "run_tag", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
 		"security_group_id":                     &hcldec.AttrSpec{Name: "security_group_id", Type: cty.String, Required: false},
 		"security_group_ids":                    &hcldec.AttrSpec{Name: "security_group_ids", Type: cty.List(cty.String), Required: false},
 		"source_ami":                            &hcldec.AttrSpec{Name: "source_ami", Type: cty.String, Required: false},
@@ -226,11 +228,10 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"spot_price":                            &hcldec.AttrSpec{Name: "spot_price", Type: cty.String, Required: false},
 		"spot_price_auto_product":               &hcldec.AttrSpec{Name: "spot_price_auto_product", Type: cty.String, Required: false},
 		"spot_tags":                             &hcldec.AttrSpec{Name: "spot_tags", Type: cty.Map(cty.String), Required: false},
-		"spot_tag":                              &hcldec.BlockListSpec{TypeName: "spot_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"spot_tag":                              &hcldec.BlockListSpec{TypeName: "spot_tag", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
 		"subnet_filter":                         &hcldec.BlockSpec{TypeName: "subnet_filter", Nested: hcldec.ObjectSpec((*common.FlatSubnetFilterOptions)(nil).HCL2Spec())},
 		"subnet_id":                             &hcldec.AttrSpec{Name: "subnet_id", Type: cty.String, Required: false},
 		"tenancy":                               &hcldec.AttrSpec{Name: "tenancy", Type: cty.String, Required: false},
-		"temporary_key_pair_name":               &hcldec.AttrSpec{Name: "temporary_key_pair_name", Type: cty.String, Required: false},
 		"temporary_security_group_source_cidrs": &hcldec.AttrSpec{Name: "temporary_security_group_source_cidrs", Type: cty.List(cty.String), Required: false},
 		"user_data":                             &hcldec.AttrSpec{Name: "user_data", Type: cty.String, Required: false},
 		"user_data_file":                        &hcldec.AttrSpec{Name: "user_data_file", Type: cty.String, Required: false},
@@ -244,6 +245,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_username":                          &hcldec.AttrSpec{Name: "ssh_username", Type: cty.String, Required: false},
 		"ssh_password":                          &hcldec.AttrSpec{Name: "ssh_password", Type: cty.String, Required: false},
 		"ssh_keypair_name":                      &hcldec.AttrSpec{Name: "ssh_keypair_name", Type: cty.String, Required: false},
+		"temporary_key_pair_name":               &hcldec.AttrSpec{Name: "temporary_key_pair_name", Type: cty.String, Required: false},
 		"temporary_key_pair_type":               &hcldec.AttrSpec{Name: "temporary_key_pair_type", Type: cty.String, Required: false},
 		"temporary_key_pair_bits":               &hcldec.AttrSpec{Name: "temporary_key_pair_bits", Type: cty.Number, Required: false},
 		"ssh_ciphers":                           &hcldec.AttrSpec{Name: "ssh_ciphers", Type: cty.List(cty.String), Required: false},
@@ -291,7 +293,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ami_block_device_mappings":             &hcldec.BlockListSpec{TypeName: "ami_block_device_mappings", Nested: hcldec.ObjectSpec((*common.FlatBlockDevice)(nil).HCL2Spec())},
 		"launch_block_device_mappings":          &hcldec.BlockListSpec{TypeName: "launch_block_device_mappings", Nested: hcldec.ObjectSpec((*common.FlatBlockDevice)(nil).HCL2Spec())},
 		"run_volume_tags":                       &hcldec.AttrSpec{Name: "run_volume_tags", Type: cty.Map(cty.String), Required: false},
-		"run_volume_tag":                        &hcldec.BlockListSpec{TypeName: "run_volume_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
+		"run_volume_tag":                        &hcldec.BlockListSpec{TypeName: "run_volume_tag", Nested: hcldec.ObjectSpec((*config.FlatNameValue)(nil).HCL2Spec())},
 		"no_ephemeral":                          &hcldec.AttrSpec{Name: "no_ephemeral", Type: cty.Bool, Required: false},
 	}
 	return s

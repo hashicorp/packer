@@ -1,12 +1,16 @@
 {
+    "min_packer_version": "1.6.0",
     "variables": {
+        "secret_account": "🤷",
         "aws_region": null,
+        "aws_secondary_region": "{{ env `AWS_DEFAULT_REGION` }}",
         "aws_secret_key": "",
         "aws_access_key": ""
     },
     "sensitive-variables": [
         "aws_secret_key",
         "aws_access_key",
+        "secret_account",
         "potato"
     ],
     "builders": [
@@ -62,21 +66,58 @@
     "provisioners": [
         {
             "type": "shell",
-            "only": [
+            "except": [
                 "amazon-ebs"
             ],
             "max_retries": 5,
-            "timeout": "5s",
             "inline": [
                 "echo {{ user  `secret_account` }}",
                 "echo {{ build `ID` }}",
-                "echo {{ build `SSHPrivateKey` }}",
-                "sleep 100000"
+                "echo {{ build `SSHPublicKey` }} | head -c 14",
+                "echo {{ template_dir }} is not {{ pwd }}",
+                "echo {{ packer_version }}",
+                "echo {{ uuid }}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo mybuild-{{isotime | clean_resource_name}}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo {{ `SOMETHING` | lower }}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo {{ `something` | upper }}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo {{ split `some-string` `-` 0 }}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo {{ replace_all `-` `/` build_name }}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo {{ replace `some-string` `-` `/` 1 }}"
             ]
         },
         {
             "type": "shell-local",
-            "except": [
+            "only": [
                 "amazon-ebs"
             ],
             "timeout": "5s",

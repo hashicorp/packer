@@ -3,9 +3,9 @@ package hyperone
 import (
 	"context"
 
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 )
 
 type stepChrootProvision struct{}
@@ -21,7 +21,7 @@ func (s *stepChrootProvision) Run(ctx context.Context, state multistep.StateBag)
 		Wrapped:    sshCommunicator,
 	}
 
-	stepProvision := common.StepProvision{Comm: comm}
+	stepProvision := commonsteps.StepProvision{Comm: comm}
 	return stepProvision.Run(ctx, state)
 }
 

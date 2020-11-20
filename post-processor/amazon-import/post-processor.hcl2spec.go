@@ -12,6 +12,7 @@ import (
 type FlatConfig struct {
 	PackerBuildName       *string                           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
 	PackerBuilderType     *string                           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerCoreVersion     *string                           `mapstructure:"packer_core_version" cty:"packer_core_version" hcl:"packer_core_version"`
 	PackerDebug           *bool                             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
 	PackerForce           *bool                             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
 	PackerOnError         *string                           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
@@ -28,7 +29,6 @@ type FlatConfig struct {
 	ProfileName           *string                           `mapstructure:"profile" required:"false" cty:"profile" hcl:"profile"`
 	RawRegion             *string                           `mapstructure:"region" required:"true" cty:"region" hcl:"region"`
 	SecretKey             *string                           `mapstructure:"secret_key" required:"true" cty:"secret_key" hcl:"secret_key"`
-	SkipValidation        *bool                             `mapstructure:"skip_region_validation" required:"false" cty:"skip_region_validation" hcl:"skip_region_validation"`
 	SkipMetadataApiCheck  *bool                             `mapstructure:"skip_metadata_api_check" cty:"skip_metadata_api_check" hcl:"skip_metadata_api_check"`
 	SkipCredsValidation   *bool                             `mapstructure:"skip_credential_validation" cty:"skip_credential_validation" hcl:"skip_credential_validation"`
 	Token                 *string                           `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
@@ -65,6 +65,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":             &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
 		"packer_builder_type":           &hcldec.AttrSpec{Name: "packer_builder_type", Type: cty.String, Required: false},
+		"packer_core_version":           &hcldec.AttrSpec{Name: "packer_core_version", Type: cty.String, Required: false},
 		"packer_debug":                  &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                  &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":               &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
@@ -81,7 +82,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"profile":                       &hcldec.AttrSpec{Name: "profile", Type: cty.String, Required: false},
 		"region":                        &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
 		"secret_key":                    &hcldec.AttrSpec{Name: "secret_key", Type: cty.String, Required: false},
-		"skip_region_validation":        &hcldec.AttrSpec{Name: "skip_region_validation", Type: cty.Bool, Required: false},
 		"skip_metadata_api_check":       &hcldec.AttrSpec{Name: "skip_metadata_api_check", Type: cty.Bool, Required: false},
 		"skip_credential_validation":    &hcldec.AttrSpec{Name: "skip_credential_validation", Type: cty.Bool, Required: false},
 		"token":                         &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},

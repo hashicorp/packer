@@ -12,11 +12,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/outscale/osc-sdk-go/osc"
 
-	retry "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/builder/osc/common/retry"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 const (
@@ -234,7 +234,7 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 	if s.IsRestricted {
 		oscTags.Report(ui)
 		// Retry creating tags for about 2.5 minutes
-		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
+		err = retry.Run(0.2, 30, 11, func(_ uint) (bool, error) {
 			_, _, err := oscconn.TagApi.CreateTags(context.Background(), &osc.CreateTagsOpts{
 				CreateTagsRequest: optional.NewInterface(osc.CreateTagsRequest{
 					Tags:        oscTags,

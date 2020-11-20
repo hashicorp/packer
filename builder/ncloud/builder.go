@@ -5,10 +5,10 @@ import (
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 )
 
 // Builder assume this implements packer.Builder
@@ -65,8 +65,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 				},
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
-			&common.StepProvision{},
-			&common.StepCleanupTempKeys{
+			&commonsteps.StepProvision{},
+			&commonsteps.StepCleanupTempKeys{
 				Comm: &b.config.Comm,
 			},
 			NewStepStopServerInstance(conn, ui),
@@ -94,7 +94,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 					}, nil
 				},
 			},
-			&common.StepProvision{},
+			&commonsteps.StepProvision{},
 			NewStepStopServerInstance(conn, ui),
 			NewStepCreateServerImage(conn, ui, &b.config),
 			NewStepDeleteBlockStorageInstance(conn, ui, &b.config),
@@ -103,7 +103,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Run!
-	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, b.stateBag)
+	b.runner = commonsteps.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, b.stateBag)
 	b.runner.Run(ctx, b.stateBag)
 
 	// If there was an error, return that

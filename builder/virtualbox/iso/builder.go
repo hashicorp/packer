@@ -10,13 +10,14 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 const BuilderId = "mitchellh.virtualbox"
@@ -28,10 +29,10 @@ type Builder struct {
 
 type Config struct {
 	common.PackerConfig             `mapstructure:",squash"`
-	common.HTTPConfig               `mapstructure:",squash"`
-	common.ISOConfig                `mapstructure:",squash"`
-	common.FloppyConfig             `mapstructure:",squash"`
-	common.CDConfig                 `mapstructure:",squash"`
+	commonsteps.HTTPConfig          `mapstructure:",squash"`
+	commonsteps.ISOConfig           `mapstructure:",squash"`
+	commonsteps.FloppyConfig        `mapstructure:",squash"`
+	commonsteps.CDConfig            `mapstructure:",squash"`
 	bootcommand.BootConfig          `mapstructure:",squash"`
 	vboxcommon.ExportConfig         `mapstructure:",squash"`
 	vboxcommon.OutputConfig         `mapstructure:",squash"`
@@ -155,9 +156,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.HWConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxBundleConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxManageConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.VBoxVersionConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VBoxVersionConfig.Prepare(b.config.CommConfig.Comm.Type)...)
 	errs = packer.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.GuestAdditionsConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.GuestAdditionsConfig.Prepare(b.config.CommConfig.Comm.Type)...)
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
@@ -243,7 +244,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			GuestAdditionsSHA256: b.config.GuestAdditionsSHA256,
 			Ctx:                  b.config.ctx,
 		},
-		&common.StepDownload{
+		&commonsteps.StepDownload{
 			Checksum:    b.config.ISOChecksum,
 			Description: "ISO",
 			Extension:   b.config.TargetExtension,
@@ -251,21 +252,21 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			TargetPath:  b.config.TargetPath,
 			Url:         b.config.ISOUrls,
 		},
-		&common.StepOutputDir{
+		&commonsteps.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
 		},
-		&common.StepCreateFloppy{
+		&commonsteps.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 			Label:       b.config.FloppyConfig.FloppyLabel,
 		},
-		&common.StepCreateCD{
+		&commonsteps.StepCreateCD{
 			Files: b.config.CDConfig.CDFiles,
 			Label: b.config.CDConfig.CDLabel,
 		},
 		new(vboxcommon.StepHTTPIPDiscover),
-		&common.StepHTTPServer{
+		&commonsteps.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
@@ -327,8 +328,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			GuestAdditionsPath: b.config.GuestAdditionsPath,
 			Ctx:                b.config.ctx,
 		},
-		new(common.StepProvision),
-		&common.StepCleanupTempKeys{
+		new(commonsteps.StepProvision),
+		&commonsteps.StepCleanupTempKeys{
 			Comm: &b.config.CommConfig.Comm,
 		},
 		&vboxcommon.StepShutdown{
@@ -365,7 +366,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("ui", ui)
 
 	// Run
-	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
+	b.runner = commonsteps.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(ctx, state)
 
 	// If there was an error, return that

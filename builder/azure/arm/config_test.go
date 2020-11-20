@@ -8,7 +8,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/hcl2template"
+	sdkconfig "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
 // List of configuration parameters that are required by the ARM builder.
@@ -913,7 +913,7 @@ func TestConfigShouldAcceptTags(t *testing.T) {
 	}
 
 	c := Config{
-		AzureTag: hcl2template.NameValues{
+		AzureTag: sdkconfig.NameValues{
 			{Name: "tag03", Value: "value03"},
 		},
 	}
@@ -948,7 +948,7 @@ func TestConfigShouldAcceptTag(t *testing.T) {
 	}
 
 	c := Config{
-		AzureTag: hcl2template.NameValues{
+		AzureTag: sdkconfig.NameValues{
 			{Name: "tag03", Value: "value03"},
 		},
 	}

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
@@ -22,7 +22,7 @@ func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 	_, err := instanceAPI.ServerAction(&instance.ServerActionRequest{
 		Action:   instance.ServerActionPoweroff,
 		ServerID: serverID,
-	})
+	}, scw.WithContext(ctx))
 	if err != nil {
 		err := fmt.Errorf("Error stopping server: %s", err)
 		state.Put("error", err)

@@ -3,7 +3,7 @@ package cloudstack
 import (
 	"fmt"
 
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func commPort(state multistep.StateBag) (int, error) {

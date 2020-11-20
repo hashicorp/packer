@@ -9,19 +9,20 @@ import (
 	"os"
 	"time"
 
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
 // Config holds all the details needed to configure the builder.
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-	common.HTTPConfig   `mapstructure:",squash"`
-	Comm                communicator.Config `mapstructure:",squash"`
+	common.PackerConfig    `mapstructure:",squash"`
+	commonsteps.HTTPConfig `mapstructure:",squash"`
+	Comm                   communicator.Config `mapstructure:",squash"`
 
 	// The CloudStack API endpoint we will connect to. It can
 	// also be specified via environment variable CLOUDSTACK_API_URL, if set.

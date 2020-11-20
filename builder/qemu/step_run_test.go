@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,7 +40,7 @@ func Test_UserOverrides(t *testing.T) {
 	testcases := []testCase{
 		{
 			&Config{
-				HTTPConfig: common.HTTPConfig{
+				HTTPConfig: commonsteps.HTTPConfig{
 					HTTPDir: "http/directory",
 				},
 				OutputDir: "output/directory",

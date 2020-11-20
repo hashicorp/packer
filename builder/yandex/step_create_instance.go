@@ -7,10 +7,10 @@ import (
 	"io/ioutil"
 
 	"github.com/c2h5oh/datasize"
-	"github.com/hashicorp/packer/builder"
-	"github.com/hashicorp/packer/common/uuid"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/vpc/v1"
@@ -23,7 +23,7 @@ type StepCreateInstance struct {
 	Debug         bool
 	SerialLogFile string
 
-	GeneratedData *builder.GeneratedData
+	GeneratedData *packerbuilderdata.GeneratedData
 }
 
 func createNetwork(ctx context.Context, c *Config, d Driver) (*vpc.Network, error) {
@@ -54,6 +54,41 @@ func createNetwork(ctx context.Context, c *Config, d Driver) (*vpc.Network, erro
 		return nil, errors.New("network create operation response doesn't contain Network")
 	}
 	return network, nil
+}
+
+func createDisk(ctx context.Context, c *Config, d Driver, sourceImage *Image) (*compute.Disk, error) {
+	req := &compute.CreateDiskRequest{
+		Name:     c.DiskName,
+		FolderId: c.FolderID,
+		TypeId:   c.DiskType,
+		Labels:   c.DiskLabels,
+		ZoneId:   c.Zone,
+		Size:     int64((datasize.ByteSize(c.DiskSizeGb) * datasize.GB).Bytes()),
+		Source: &compute.CreateDiskRequest_ImageId{
+			ImageId: sourceImage.ID,
+		},
+	}
+	sdk := d.SDK()
+
+	op, err := sdk.WrapOperation(sdk.Compute().Disk().Create(ctx, req))
+	if err != nil {
+		return nil, err
+	}
+	err = op.Wait(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := op.Response()
+	if err != nil {
+		return nil, err
+	}
+
+	image, ok := resp.(*compute.Disk)
+	if !ok {
+		return nil, errors.New("disk create operation response doesn't contain Disk")
+	}
+	return image, nil
+
 }
 
 func createSubnet(ctx context.Context, c *Config, d Driver, networkID string) (*vpc.Subnet, error) {
@@ -154,6 +189,14 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		instanceSubnetID = config.SubnetID
 	}
 
+	// Create a disk manually to have a delete ID
+	ui.Say("Creating disk...")
+	disk, err := createDisk(ctx, config, driver, sourceImage)
+	if err != nil {
+		return stepHaltWithError(state, fmt.Errorf("Error creating disk: %s", err))
+	}
+	state.Put("disk_id", disk.Id)
+
 	// Create an instance based on the configuration
 	ui.Say("Creating instance...")
 
@@ -189,15 +232,8 @@ runcmd:
 		Metadata: instanceMetadata,
 		BootDiskSpec: &compute.AttachedDiskSpec{
 			AutoDelete: false,
-			Disk: &compute.AttachedDiskSpec_DiskSpec_{
-				DiskSpec: &compute.AttachedDiskSpec_DiskSpec{
-					Name:   config.DiskName,
-					TypeId: config.DiskType,
-					Size:   int64((datasize.ByteSize(config.DiskSizeGb) * datasize.GB).Bytes()),
-					Source: &compute.AttachedDiskSpec_DiskSpec_ImageId{
-						ImageId: sourceImage.ID,
-					},
-				},
+			Disk: &compute.AttachedDiskSpec_DiskId{
+				DiskId: disk.Id,
 			},
 		},
 		NetworkInterfaceSpecs: []*compute.NetworkInterfaceSpec{
@@ -255,14 +291,13 @@ runcmd:
 		return stepHaltWithError(state, fmt.Errorf("response doesn't contain Instance"))
 	}
 
-	state.Put("disk_id", instance.BootDisk.DiskId)
 	// instance_id is the generic term used so that users can have access to the
 	// instance id inside of the provisioners, used in step_provision.
 	state.Put("instance_id", instance.Id)
 
 	if s.Debug {
 		ui.Message(fmt.Sprintf("Instance ID %s started. Current instance status %s", instance.Id, instance.Status))
-		ui.Message(fmt.Sprintf("Disk ID %s. ", instance.BootDisk.DiskId))
+		ui.Message(fmt.Sprintf("Disk ID %s. ", disk.Id))
 	}
 
 	// provision generated_data from declared in Builder.Prepare func

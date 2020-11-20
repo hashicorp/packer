@@ -11,6 +11,7 @@ import (
 type FlatConfig struct {
 	PackerBuildName       *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
 	PackerBuilderType     *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerCoreVersion     *string           `mapstructure:"packer_core_version" cty:"packer_core_version" hcl:"packer_core_version"`
 	PackerDebug           *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
 	PackerForce           *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
 	PackerOnError         *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
@@ -24,6 +25,7 @@ type FlatConfig struct {
 	VagrantCloudUrl       *string           `mapstructure:"vagrant_cloud_url" cty:"vagrant_cloud_url" hcl:"vagrant_cloud_url"`
 	InsecureSkipTLSVerify *bool             `mapstructure:"insecure_skip_tls_verify" cty:"insecure_skip_tls_verify" hcl:"insecure_skip_tls_verify"`
 	BoxDownloadUrl        *string           `mapstructure:"box_download_url" cty:"box_download_url" hcl:"box_download_url"`
+	NoDirectUpload        *bool             `mapstructure:"no_direct_upload" cty:"no_direct_upload" hcl:"no_direct_upload"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -40,6 +42,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":          &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
 		"packer_builder_type":        &hcldec.AttrSpec{Name: "packer_builder_type", Type: cty.String, Required: false},
+		"packer_core_version":        &hcldec.AttrSpec{Name: "packer_core_version", Type: cty.String, Required: false},
 		"packer_debug":               &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":               &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":            &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
@@ -53,6 +56,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vagrant_cloud_url":          &hcldec.AttrSpec{Name: "vagrant_cloud_url", Type: cty.String, Required: false},
 		"insecure_skip_tls_verify":   &hcldec.AttrSpec{Name: "insecure_skip_tls_verify", Type: cty.Bool, Required: false},
 		"box_download_url":           &hcldec.AttrSpec{Name: "box_download_url", Type: cty.String, Required: false},
+		"no_direct_upload":           &hcldec.AttrSpec{Name: "no_direct_upload", Type: cty.Bool, Required: false},
 	}
 	return s
 }

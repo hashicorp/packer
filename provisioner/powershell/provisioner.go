@@ -17,15 +17,15 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/retry"
-	"github.com/hashicorp/packer/common/shell"
-	"github.com/hashicorp/packer/common/uuid"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/packer/tmp"
-	"github.com/hashicorp/packer/provisioner"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/guestexec"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
+	"github.com/hashicorp/packer/packer-plugin-sdk/shell"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
 var retryableSleep = 2 * time.Second
@@ -407,15 +407,15 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 
 	// expose ip address variables
 	httpAddr := p.generatedData["PackerHTTPAddr"]
-	if httpAddr != nil && httpAddr != common.HttpAddrNotImplemented {
+	if httpAddr != nil && httpAddr != commonsteps.HttpAddrNotImplemented {
 		envVars["PACKER_HTTP_ADDR"] = httpAddr.(string)
 	}
 	httpIP := p.generatedData["PackerHTTPIP"]
-	if httpIP != nil && httpIP != common.HttpIPNotImplemented {
+	if httpIP != nil && httpIP != commonsteps.HttpIPNotImplemented {
 		envVars["PACKER_HTTP_IP"] = httpIP.(string)
 	}
 	httpPort := p.generatedData["PackerHTTPPort"]
-	if httpPort != nil && httpPort != common.HttpPortNotImplemented {
+	if httpPort != nil && httpPort != commonsteps.HttpPortNotImplemented {
 		envVars["PACKER_HTTP_PORT"] = httpPort.(string)
 	}
 
@@ -522,7 +522,7 @@ func (p *Provisioner) createCommandTextPrivileged() (command string, err error) 
 		return "", fmt.Errorf("Error processing command: %s", err)
 	}
 
-	command, err = provisioner.GenerateElevatedRunner(command, p)
+	command, err = guestexec.GenerateElevatedRunner(command, p)
 	if err != nil {
 		return "", fmt.Errorf("Error generating elevated runner: %s", err)
 	}

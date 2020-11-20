@@ -23,7 +23,9 @@ const (
 )
 
 // Server represents an RPC server for Packer. This must be paired on
-// the other side with a Client.
+// the other side with a Client. In Packer, each "plugin" (builder, provisioner,
+// and post-processor) creates and launches a server. The client created and
+// used by the packer "core"
 type Server struct {
 	mux      *muxBroker
 	streamId uint32

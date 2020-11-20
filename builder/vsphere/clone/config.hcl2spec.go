@@ -12,6 +12,7 @@ import (
 type FlatConfig struct {
 	PackerBuildName                 *string                                     `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
 	PackerBuilderType               *string                                     `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerCoreVersion               *string                                     `mapstructure:"packer_core_version" cty:"packer_core_version" hcl:"packer_core_version"`
 	PackerDebug                     *bool                                       `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
 	PackerForce                     *bool                                       `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
 	PackerOnError                   *string                                     `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
@@ -36,6 +37,8 @@ type FlatConfig struct {
 	MacAddress                      *string                                     `mapstructure:"mac_address" cty:"mac_address" hcl:"mac_address"`
 	Notes                           *string                                     `mapstructure:"notes" cty:"notes" hcl:"notes"`
 	VAppConfig                      *FlatvAppConfig                             `mapstructure:"vapp" cty:"vapp" hcl:"vapp"`
+	DiskControllerType              []string                                    `mapstructure:"disk_controller_type" cty:"disk_controller_type" hcl:"disk_controller_type"`
+	Storage                         []common.FlatDiskConfig                     `mapstructure:"storage" cty:"storage" hcl:"storage"`
 	VMName                          *string                                     `mapstructure:"vm_name" cty:"vm_name" hcl:"vm_name"`
 	Folder                          *string                                     `mapstructure:"folder" cty:"folder" hcl:"folder"`
 	Cluster                         *string                                     `mapstructure:"cluster" cty:"cluster" hcl:"cluster"`
@@ -148,6 +151,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":              &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
 		"packer_builder_type":            &hcldec.AttrSpec{Name: "packer_builder_type", Type: cty.String, Required: false},
+		"packer_core_version":            &hcldec.AttrSpec{Name: "packer_core_version", Type: cty.String, Required: false},
 		"packer_debug":                   &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                   &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":                &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
@@ -172,6 +176,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"mac_address":                    &hcldec.AttrSpec{Name: "mac_address", Type: cty.String, Required: false},
 		"notes":                          &hcldec.AttrSpec{Name: "notes", Type: cty.String, Required: false},
 		"vapp":                           &hcldec.BlockSpec{TypeName: "vapp", Nested: hcldec.ObjectSpec((*FlatvAppConfig)(nil).HCL2Spec())},
+		"disk_controller_type":           &hcldec.AttrSpec{Name: "disk_controller_type", Type: cty.List(cty.String), Required: false},
+		"storage":                        &hcldec.BlockListSpec{TypeName: "storage", Nested: hcldec.ObjectSpec((*common.FlatDiskConfig)(nil).HCL2Spec())},
 		"vm_name":                        &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
 		"folder":                         &hcldec.AttrSpec{Name: "folder", Type: cty.String, Required: false},
 		"cluster":                        &hcldec.AttrSpec{Name: "cluster", Type: cty.String, Required: false},

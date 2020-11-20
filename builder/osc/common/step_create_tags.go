@@ -6,10 +6,10 @@ import (
 
 	"github.com/antihax/optional"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	retry "github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/builder/osc/common/retry"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -90,7 +90,7 @@ func (s *StepCreateTags) Run(_ context.Context, state multistep.StateBag) multis
 		snapshotTags.Report(ui)
 
 		// Retry creating tags for about 2.5 minutes
-		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
+		err = retry.Run(0.2, 30, 11, func(_ uint) (bool, error) {
 			// Tag images and snapshots
 			_, _, err := regionconn.TagApi.CreateTags(context.Background(), &osc.CreateTagsOpts{
 				CreateTagsRequest: optional.NewInterface(osc.CreateTagsRequest{

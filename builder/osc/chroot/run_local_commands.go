@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	sl "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	sl "github.com/hashicorp/packer/packer-plugin-sdk/shell-local"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 func RunLocalCommands(commands []string, wrappedCommand CommandWrapper, ictx interpolate.Context, ui packer.Ui) error {

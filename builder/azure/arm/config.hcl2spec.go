@@ -3,7 +3,7 @@ package arm
 
 import (
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/hcl2template"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -12,6 +12,7 @@ import (
 type FlatConfig struct {
 	PackerBuildName                            *string                            `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
 	PackerBuilderType                          *string                            `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerCoreVersion                          *string                            `mapstructure:"packer_core_version" cty:"packer_core_version" hcl:"packer_core_version"`
 	PackerDebug                                *bool                              `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
 	PackerForce                                *bool                              `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
 	PackerOnError                              *string                            `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
@@ -25,6 +26,7 @@ type FlatConfig struct {
 	ObjectID                                   *string                            `mapstructure:"object_id" cty:"object_id" hcl:"object_id"`
 	TenantID                                   *string                            `mapstructure:"tenant_id" required:"false" cty:"tenant_id" hcl:"tenant_id"`
 	SubscriptionID                             *string                            `mapstructure:"subscription_id" cty:"subscription_id" hcl:"subscription_id"`
+	UseAzureCLIAuth                            *bool                              `mapstructure:"use_azure_cli_auth" required:"false" cty:"use_azure_cli_auth" hcl:"use_azure_cli_auth"`
 	UserAssignedManagedIdentities              []string                           `mapstructure:"user_assigned_managed_identities" required:"false" cty:"user_assigned_managed_identities" hcl:"user_assigned_managed_identities"`
 	CaptureNamePrefix                          *string                            `mapstructure:"capture_name_prefix" cty:"capture_name_prefix" hcl:"capture_name_prefix"`
 	CaptureContainerName                       *string                            `mapstructure:"capture_container_name" cty:"capture_container_name" hcl:"capture_container_name"`
@@ -50,7 +52,7 @@ type FlatConfig struct {
 	ManagedImageDataDiskSnapshotPrefix         *string                            `mapstructure:"managed_image_data_disk_snapshot_prefix" required:"false" cty:"managed_image_data_disk_snapshot_prefix" hcl:"managed_image_data_disk_snapshot_prefix"`
 	ManagedImageZoneResilient                  *bool                              `mapstructure:"managed_image_zone_resilient" required:"false" cty:"managed_image_zone_resilient" hcl:"managed_image_zone_resilient"`
 	AzureTags                                  map[string]string                  `mapstructure:"azure_tags" required:"false" cty:"azure_tags" hcl:"azure_tags"`
-	AzureTag                                   []hcl2template.FlatNameValue       `mapstructure:"azure_tag" required:"false" cty:"azure_tag" hcl:"azure_tag"`
+	AzureTag                                   []config.FlatNameValue             `mapstructure:"azure_tag" required:"false" cty:"azure_tag" hcl:"azure_tag"`
 	ResourceGroupName                          *string                            `mapstructure:"resource_group_name" cty:"resource_group_name" hcl:"resource_group_name"`
 	StorageAccount                             *string                            `mapstructure:"storage_account" cty:"storage_account" hcl:"storage_account"`
 	TempComputeName                            *string                            `mapstructure:"temp_compute_name" required:"false" cty:"temp_compute_name" hcl:"temp_compute_name"`
@@ -138,6 +140,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":                                &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
 		"packer_builder_type":                              &hcldec.AttrSpec{Name: "packer_builder_type", Type: cty.String, Required: false},
+		"packer_core_version":                              &hcldec.AttrSpec{Name: "packer_core_version", Type: cty.String, Required: false},
 		"packer_debug":                                     &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                                     &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":                                  &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
@@ -151,6 +154,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"object_id":                                        &hcldec.AttrSpec{Name: "object_id", Type: cty.String, Required: false},
 		"tenant_id":                                        &hcldec.AttrSpec{Name: "tenant_id", Type: cty.String, Required: false},
 		"subscription_id":                                  &hcldec.AttrSpec{Name: "subscription_id", Type: cty.String, Required: false},
+		"use_azure_cli_auth":                               &hcldec.AttrSpec{Name: "use_azure_cli_auth", Type: cty.Bool, Required: false},
 		"user_assigned_managed_identities":                 &hcldec.AttrSpec{Name: "user_assigned_managed_identities", Type: cty.List(cty.String), Required: false},
 		"capture_name_prefix":                              &hcldec.AttrSpec{Name: "capture_name_prefix", Type: cty.String, Required: false},
 		"capture_container_name":                           &hcldec.AttrSpec{Name: "capture_container_name", Type: cty.String, Required: false},
@@ -176,7 +180,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"managed_image_data_disk_snapshot_prefix":          &hcldec.AttrSpec{Name: "managed_image_data_disk_snapshot_prefix", Type: cty.String, Required: false},
 		"managed_image_zone_resilient":                     &hcldec.AttrSpec{Name: "managed_image_zone_resilient", Type: cty.Bool, Required: false},
 		"azure_tags":                                       &hcldec.AttrSpec{Name: "azure_tags", Type: cty.Map(cty.String), Required: false},
-		"azure_tag":                                        &hcldec.BlockListSpec{TypeName: "azure_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatNameValue)(nil).HCL2Spec())},
+		"azure_tag":                                        &hcldec.BlockListSpec{TypeName: "azure_tag", Nested: hcldec.ObjectSpec((*config.FlatNameValue)(nil).HCL2Spec())},
 		"resource_group_name":                              &hcldec.AttrSpec{Name: "resource_group_name", Type: cty.String, Required: false},
 		"storage_account":                                  &hcldec.AttrSpec{Name: "storage_account", Type: cty.String, Required: false},
 		"temp_compute_name":                                &hcldec.AttrSpec{Name: "temp_compute_name", Type: cty.String, Required: false},

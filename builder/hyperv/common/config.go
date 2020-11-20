@@ -8,10 +8,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hashicorp/packer/common"
-	powershell "github.com/hashicorp/packer/common/powershell"
-	"github.com/hashicorp/packer/common/powershell/hyperv"
-	"github.com/hashicorp/packer/template/interpolate"
+	powershell "github.com/hashicorp/packer/builder/hyperv/common/powershell"
+	"github.com/hashicorp/packer/builder/hyperv/common/powershell/hyperv"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 const (
@@ -36,8 +37,8 @@ const (
 )
 
 type CommonConfig struct {
-	common.FloppyConfig `mapstructure:",squash"`
-	common.CDConfig     `mapstructure:",squash"`
+	commonsteps.FloppyConfig `mapstructure:",squash"`
+	commonsteps.CDConfig     `mapstructure:",squash"`
 	// The block size of the VHD to be created.
 	// Recommended disk block size for Linux hyper-v guests is 1 MiB. This
 	// defaults to "32" MiB.
@@ -133,8 +134,6 @@ type CommonConfig struct {
 	// If "true", Packer will not delete the VM from
 	// The Hyper-V manager.
 	KeepRegistered bool `mapstructure:"keep_registered" required:"false"`
-
-	Communicator string `mapstructure:"communicator"`
 	// If true skip compacting the hard disk for
 	// the virtual machine when exporting. This defaults to false.
 	SkipCompaction bool `mapstructure:"skip_compaction" required:"false"`

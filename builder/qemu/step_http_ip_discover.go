@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // Step to discover the http ip

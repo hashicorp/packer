@@ -11,19 +11,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/bootcommand"
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 	"github.com/mitchellh/mapstructure"
 )
 
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
-	common.HTTPConfig      `mapstructure:",squash"`
+	commonsteps.HTTPConfig `mapstructure:",squash"`
 	bootcommand.BootConfig `mapstructure:",squash"`
 	BootKeyInterval        time.Duration       `mapstructure:"boot_key_interval"`
 	Comm                   communicator.Config `mapstructure:",squash"`
@@ -39,6 +40,7 @@ type Config struct {
 	VMName string `mapstructure:"vm_name"`
 	VMID   int    `mapstructure:"vm_id"`
 
+	Boot           string       `mapstructure:"boot"`
 	Memory         int          `mapstructure:"memory"`
 	Cores          int          `mapstructure:"cores"`
 	CPUType        string       `mapstructure:"cpu_type"`
@@ -65,13 +67,13 @@ type Config struct {
 }
 
 type storageConfig struct {
-	common.ISOConfig `mapstructure:",squash"`
-	Device           string `mapstructure:"device"`
-	ISOFile          string `mapstructure:"iso_file"`
-	ISOStoragePool   string `mapstructure:"iso_storage_pool"`
-	Unmount          bool   `mapstructure:"unmount"`
-	ShouldUploadISO  bool
-	DownloadPathKey  string
+	commonsteps.ISOConfig `mapstructure:",squash"`
+	Device                string `mapstructure:"device"`
+	ISOFile               string `mapstructure:"iso_file"`
+	ISOStoragePool        string `mapstructure:"iso_storage_pool"`
+	Unmount               bool   `mapstructure:"unmount"`
+	ShouldUploadISO       bool
+	DownloadPathKey       string
 }
 
 type nicConfig struct {
@@ -132,9 +134,9 @@ func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []st
 	if c.Password == "" {
 		c.Password = os.Getenv("PROXMOX_PASSWORD")
 	}
-	if c.BootKeyInterval == 0 && os.Getenv(common.PackerKeyEnv) != "" {
+	if c.BootKeyInterval == 0 && os.Getenv(bootcommand.PackerKeyEnv) != "" {
 		var err error
-		c.BootKeyInterval, err = time.ParseDuration(os.Getenv(common.PackerKeyEnv))
+		c.BootKeyInterval, err = time.ParseDuration(os.Getenv(bootcommand.PackerKeyEnv))
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}

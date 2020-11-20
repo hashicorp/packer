@@ -35,6 +35,7 @@ export default [
             content: [
               'aws_secretsmanager',
               'consul',
+              'env',
               'vault',
             ],
           },
@@ -169,7 +170,7 @@ export default [
   'terminology',
   {
     category: 'commands',
-    content: ['build', 'console', 'fix', 'inspect', 'validate', 'hcl2_upgrade'],
+    content: ['build', 'console', 'fix', 'fmt', 'inspect', 'validate', 'hcl2_upgrade'],
   },
   {
     category: 'templates',

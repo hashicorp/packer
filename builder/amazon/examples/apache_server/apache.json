@@ -1,0 +1,31 @@
+{
+    "variables":
+        {
+            "accesskey": "",
+            "secretkey": "",
+            "shellpath": "packages.sh"
+        },
+    "builders":[
+        {
+            "type": "amazon-ebs",
+            "access_key": "{{user `accesskey`}}",
+            "secret_key": "{{user `secretkey`}}",
+            "region": "ap-south-1",
+            "source_ami": "ami-sa7608343426b",
+            "instance_type": "t2.micro",
+            "ssh_username": "ubuntu",
+            "ami_name": "apache",
+            "tags": {
+              "OS_Version": "Ubuntu",
+              "Release": "Latest"
+            }
+        }
+    ],
+   "provisioners":[
+       {
+       "type": "shell",
+       "script": "{{user `shellpath`}}"
+       }
+    ]
+
+}

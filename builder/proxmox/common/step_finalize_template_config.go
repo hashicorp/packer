@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // stepFinalizeTemplateConfig does any required modifications to the configuration _after_

@@ -12,6 +12,7 @@ import (
 type FlatConfig struct {
 	PackerBuildName                 *string                                     `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
 	PackerBuilderType               *string                                     `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerCoreVersion               *string                                     `mapstructure:"packer_core_version" cty:"packer_core_version" hcl:"packer_core_version"`
 	PackerDebug                     *bool                                       `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
 	PackerForce                     *bool                                       `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
 	PackerOnError                   *string                                     `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
@@ -32,7 +33,7 @@ type FlatConfig struct {
 	Version                         *uint                                       `mapstructure:"vm_version" cty:"vm_version" hcl:"vm_version"`
 	GuestOSType                     *string                                     `mapstructure:"guest_os_type" cty:"guest_os_type" hcl:"guest_os_type"`
 	DiskControllerType              []string                                    `mapstructure:"disk_controller_type" cty:"disk_controller_type" hcl:"disk_controller_type"`
-	Storage                         []FlatDiskConfig                            `mapstructure:"storage" cty:"storage" hcl:"storage"`
+	Storage                         []common.FlatDiskConfig                     `mapstructure:"storage" cty:"storage" hcl:"storage"`
 	NICs                            []FlatNIC                                   `mapstructure:"network_adapters" cty:"network_adapters" hcl:"network_adapters"`
 	USBController                   []string                                    `mapstructure:"usb_controller" cty:"usb_controller" hcl:"usb_controller"`
 	Notes                           *string                                     `mapstructure:"notes" cty:"notes" hcl:"notes"`
@@ -152,6 +153,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"packer_build_name":              &hcldec.AttrSpec{Name: "packer_build_name", Type: cty.String, Required: false},
 		"packer_builder_type":            &hcldec.AttrSpec{Name: "packer_builder_type", Type: cty.String, Required: false},
+		"packer_core_version":            &hcldec.AttrSpec{Name: "packer_core_version", Type: cty.String, Required: false},
 		"packer_debug":                   &hcldec.AttrSpec{Name: "packer_debug", Type: cty.Bool, Required: false},
 		"packer_force":                   &hcldec.AttrSpec{Name: "packer_force", Type: cty.Bool, Required: false},
 		"packer_on_error":                &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
@@ -172,7 +174,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vm_version":                     &hcldec.AttrSpec{Name: "vm_version", Type: cty.Number, Required: false},
 		"guest_os_type":                  &hcldec.AttrSpec{Name: "guest_os_type", Type: cty.String, Required: false},
 		"disk_controller_type":           &hcldec.AttrSpec{Name: "disk_controller_type", Type: cty.List(cty.String), Required: false},
-		"storage":                        &hcldec.BlockListSpec{TypeName: "storage", Nested: hcldec.ObjectSpec((*FlatDiskConfig)(nil).HCL2Spec())},
+		"storage":                        &hcldec.BlockListSpec{TypeName: "storage", Nested: hcldec.ObjectSpec((*common.FlatDiskConfig)(nil).HCL2Spec())},
 		"network_adapters":               &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*FlatNIC)(nil).HCL2Spec())},
 		"usb_controller":                 &hcldec.AttrSpec{Name: "usb_controller", Type: cty.List(cty.String), Required: false},
 		"notes":                          &hcldec.AttrSpec{Name: "notes", Type: cty.String, Required: false},

@@ -14,13 +14,14 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // Builder implements packer.Builder and builds the actual VirtualBox
@@ -31,11 +32,11 @@ type Builder struct {
 }
 
 type Config struct {
-	common.PackerConfig    `mapstructure:",squash"`
-	common.HTTPConfig      `mapstructure:",squash"`
-	common.ISOConfig       `mapstructure:",squash"`
-	common.FloppyConfig    `mapstructure:",squash"`
-	bootcommand.BootConfig `mapstructure:",squash"`
+	common.PackerConfig      `mapstructure:",squash"`
+	commonsteps.HTTPConfig   `mapstructure:",squash"`
+	commonsteps.ISOConfig    `mapstructure:",squash"`
+	commonsteps.FloppyConfig `mapstructure:",squash"`
+	bootcommand.BootConfig   `mapstructure:",squash"`
 
 	Comm communicator.Config `mapstructure:",squash"`
 	// The directory to create that will contain your output box. We always
@@ -90,9 +91,6 @@ type Config struct {
 	// This parameter is required when source_path have more than one provider,
 	// or when using vagrant-cloud post-processor. Defaults to unset.
 	Provider string `mapstructure:"provider" required:"false"`
-
-	Communicator string `mapstructure:"communicator"`
-
 	// Options for the "vagrant init" command
 
 	// What vagrantfile to use
@@ -298,7 +296,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	steps := []multistep.Step{}
 	// Download if source box isn't from vagrant cloud.
 	if strings.HasSuffix(b.config.SourceBox, ".box") {
-		steps = append(steps, &common.StepDownload{
+		steps = append(steps, &commonsteps.StepDownload{
 			Checksum:    b.config.Checksum,
 			Description: "Box",
 			Extension:   "box",
@@ -307,7 +305,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		})
 	}
 	steps = append(steps,
-		&common.StepOutputDir{
+		&commonsteps.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
 		},
@@ -347,7 +345,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			Host:      CommHost(),
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
-		new(common.StepProvision),
+		new(commonsteps.StepProvision),
 		&StepPackage{
 			SkipPackage: b.config.SkipPackage,
 			Include:     b.config.PackageInclude,
@@ -356,7 +354,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		})
 
 	// Run the steps.
-	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
+	b.runner = commonsteps.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(ctx, state)
 
 	// Report any errors.

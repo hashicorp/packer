@@ -10,11 +10,11 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/builder"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 type mountPathData struct {
@@ -31,7 +31,7 @@ type StepMountDevice struct {
 	MountPartition string
 
 	mountPath     string
-	GeneratedData *builder.GeneratedData
+	GeneratedData *packerbuilderdata.GeneratedData
 }
 
 func (s *StepMountDevice) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {

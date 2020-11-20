@@ -9,8 +9,8 @@ import (
 	"io/ioutil"
 
 	"github.com/digitalocean/godo"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 type stepCreateDroplet struct {
@@ -52,6 +52,7 @@ func (s *stepCreateDroplet) Run(ctx context.Context, state multistep.StateBag) m
 		IPv6:              c.IPv6,
 		UserData:          userData,
 		Tags:              c.Tags,
+		VPCUUID:           c.VPCUUID,
 	}
 
 	log.Printf("[DEBUG] Droplet create paramaters: %s", godo.Stringify(dropletCreateReq))

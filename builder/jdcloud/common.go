@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/client"
 	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/client"
 )

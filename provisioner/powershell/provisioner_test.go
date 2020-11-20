@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -856,8 +856,8 @@ func testConfigWithSkipClean() map[string]interface{} {
 
 func generatedData() map[string]interface{} {
 	return map[string]interface{}{
-		"PackerHTTPAddr": common.HttpAddrNotImplemented,
-		"PackerHTTPIP":   common.HttpIPNotImplemented,
-		"PackerHTTPPort": common.HttpPortNotImplemented,
+		"PackerHTTPAddr": commonsteps.HttpAddrNotImplemented,
+		"PackerHTTPIP":   commonsteps.HttpIPNotImplemented,
+		"PackerHTTPPort": commonsteps.HttpPortNotImplemented,
 	}
 }

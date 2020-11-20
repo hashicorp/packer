@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -47,6 +47,11 @@ func (c *AccessConfig) NewOSCClient() *osc.APIClient {
 
 	if c.CustomEndpointOAPI == "" {
 		c.CustomEndpointOAPI = "outscale.com/oapi/latest"
+
+		if c.RawRegion == "cn-southeast-1" {
+			c.CustomEndpointOAPI = "outscale.hk/oapi/latest"
+		}
+
 	}
 
 	if c.X509certPath == "" {

@@ -362,3 +362,55 @@ func TestBuilderPrepare_DropletName(t *testing.T) {
 	}
 
 }
+
+func TestBuilderPrepare_VPCUUID(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test with the case vpc_uuid is defined but private_networking is not enabled
+	config["vpc_uuid"] = "554c41b3-425f-5403-8860-7f24fb108098"
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err == nil {
+		t.Fatalf("should have error: 'private networking should be enabled to use vpc_uuid'")
+	}
+
+	// Test with the case both vpc_uuid and private_networking are defined/enabled
+	config["private_networking"] = true
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatal("should not have error")
+	}
+}
+
+func TestBuilderPrepare_ConnectWithPrivateIP(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test with the case connect_with_private_ip is defined but private_networking is not enabled
+	config["connect_with_private_ip"] = true
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err == nil {
+		t.Fatalf("should have error: 'private networking should be enabled to use connect_with_private_ip'")
+	}
+
+	// Test with the case both connect_with_private_ip and private_networking are enabled
+	config["private_networking"] = true
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatal("should not have error")
+	}
+}

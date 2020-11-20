@@ -11,13 +11,13 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/yandex"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/post-processor/artifice"
 	"github.com/hashicorp/packer/post-processor/compress"
 	yandexexport "github.com/hashicorp/packer/post-processor/yandex-export"
-	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1/awscompatibility"
 )
 

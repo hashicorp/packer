@@ -6,8 +6,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func TestInstanceInfo(t *testing.T) {

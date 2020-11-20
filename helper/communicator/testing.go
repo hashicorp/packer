@@ -3,7 +3,7 @@ package communicator
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer/tmp"
+	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 
 func TestPEM(t *testing.T) string {

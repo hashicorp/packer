@@ -6,9 +6,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // This step uploads the Parallels Tools ISO to the virtual machine.

@@ -8,8 +8,8 @@ import (
 	"reflect"
 	"testing"
 
-	configHelper "github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/template"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template"
+	configHelper "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
 func TestCoreBuildNames(t *testing.T) {

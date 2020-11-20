@@ -1,0 +1,46 @@
+---
+description: |
+  The `packer fmt` Packer command is used to format HCL2
+  configuration files to a canonical format and style.
+layout: docs
+page_title: packer fmt - Commands
+sidebar_title: <tt>fmt</tt>
+---
+
+# `fmt` Command
+
+The `packer fmt` Packer command is used to format HCL2 configuration files to
+a canonical format and style. JSON files (.json) are not modified. This command
+applies a subset of HCL language style conventions, along with other minor
+adjustments for readability.
+
+`packer fmt` will display the name of the configuration file(s) that need formatting,
+and write any formatted changes back to the original configuration file(s).
+
+Example usage:
+
+Check if configuration file(s) need to be formatted, but don't write the changes.
+
+```shell-session
+$ packer fmt -check .
+my-template.json
+
+```
+
+Format a configuration file, writing the changes back to the original file.
+
+```shell-session
+$ packer fmt my-template.json
+my-template.json
+
+```
+
+## Options
+
+- `-check` - Checks if the input is formatted. Exit status will be 0 if all
+input is properly formatted and non-zero otherwise.
+
+- `-diff` - Display diffs of any formatting change
+
+- `-write=false` - Don't write formatting changes to source files
+(always disabled if using -check)

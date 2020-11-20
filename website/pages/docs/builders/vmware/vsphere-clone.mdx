@@ -45,6 +45,21 @@ necessary for this build to succeed and can be found further down the page.
 
 @include 'builder/vsphere/clone/CloneConfig-not-required.mdx'
 
+@include 'builder/vsphere/common/StorageConfig-not-required.mdx'
+
+### Storage Configuration
+
+When cloning a VM, the storage configuration can be used to add additional storage and disk controllers. The resulting VM
+will contain the origin VM storage and disk controller plus the new configured ones.
+
+@include 'builder/vsphere/common/DiskConfig.mdx'
+
+@include 'builder/vsphere/common/DiskConfig-required.mdx'
+
+#### Optional
+
+@include 'builder/vsphere/common/DiskConfig-not-required.mdx'
+
 ### vApp Options Configuration
 
 @include 'builder/vsphere/clone/vAppConfig-not-required.mdx'
@@ -152,21 +167,21 @@ can be done via environment variable:
 
 ### Boot configuration
 
-@include 'common/bootcommand/BootConfig.mdx'
+@include 'packer-plugin-sdk/bootcommand/BootConfig.mdx'
 
 #### Optional:
 
-@include 'common/bootcommand/BootConfig-not-required.mdx'
+@include 'packer-plugin-sdk/bootcommand/BootConfig-not-required.mdx'
 
 @include 'builder/vsphere/common/BootConfig-not-required.mdx'
 
 ### Http directory configuration
 
-@include 'common/HTTPConfig.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig.mdx'
 
 #### Optional:
 
-@include 'common/HTTPConfig-not-required.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig-not-required.mdx'
 
 ### Floppy configuration
 
@@ -198,11 +213,11 @@ can be done via environment variable:
 
 ### CDRom Configuration
 
-@include 'common/CDConfig.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/CDConfig.mdx'
 
 #### Optional:
 
-@include 'common/CDConfig-not-required.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/CDConfig-not-required.mdx'
 
 @include 'builder/vsphere/common/CDRomConfig-not-required.mdx'
 

@@ -10,20 +10,21 @@ import (
 	"strings"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/bootcommand"
-	"github.com/hashicorp/packer/common/shutdowncommand"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/shutdowncommand"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 type Config struct {
 	common.PackerConfig            `mapstructure:",squash"`
-	common.HTTPConfig              `mapstructure:",squash"`
-	common.ISOConfig               `mapstructure:",squash"`
-	common.FloppyConfig            `mapstructure:",squash"`
-	common.CDConfig                `mapstructure:",squash"`
+	commonsteps.HTTPConfig         `mapstructure:",squash"`
+	commonsteps.ISOConfig          `mapstructure:",squash"`
+	commonsteps.FloppyConfig       `mapstructure:",squash"`
+	commonsteps.CDConfig           `mapstructure:",squash"`
 	bootcommand.VNCConfig          `mapstructure:",squash"`
 	vmwcommon.DriverConfig         `mapstructure:",squash"`
 	vmwcommon.HWConfig             `mapstructure:",squash"`

@@ -79,6 +79,7 @@ type CloneConfig struct {
 	MacAddress     string
 	Annotation     string
 	VAppProperties map[string]string
+	StorageConfig  StorageConfig
 }
 
 type HardwareConfig struct {
@@ -106,8 +107,6 @@ type NIC struct {
 }
 
 type CreateConfig struct {
-	DiskControllerType []string // example: "scsi", "pvscsi", "nvme", "lsilogic"
-
 	Annotation    string
 	Name          string
 	Folder        string
@@ -119,14 +118,7 @@ type CreateConfig struct {
 	NICs          []NIC
 	USBController []string
 	Version       uint // example: 10
-	Storage       []Disk
-}
-
-type Disk struct {
-	DiskSize            int64
-	DiskEagerlyScrub    bool
-	DiskThinProvisioned bool
-	ControllerIndex     int
+	StorageConfig StorageConfig
 }
 
 func (d *VCenterDriver) NewVM(ref *types.ManagedObjectReference) VirtualMachine {
@@ -207,11 +199,12 @@ func (d *VCenterDriver) CreateVM(config *CreateConfig) (VirtualMachine, error) {
 	}
 
 	devices := object.VirtualDeviceList{}
-
-	devices, err = addDisk(d, devices, config)
+	storageConfigSpec, err := config.StorageConfig.AddStorageDevices(devices)
 	if err != nil {
 		return nil, err
 	}
+	createSpec.DeviceChange = append(createSpec.DeviceChange, storageConfigSpec...)
+
 	devices, err = addNetwork(d, devices, config)
 	if err != nil {
 		return nil, err
@@ -235,10 +228,11 @@ func (d *VCenterDriver) CreateVM(config *CreateConfig) (VirtualMachine, error) {
 		devices = append(devices, usb)
 	}
 
-	createSpec.DeviceChange, err = devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+	devicesConfigSpec, err := devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
 	if err != nil {
 		return nil, err
 	}
+	createSpec.DeviceChange = append(createSpec.DeviceChange, devicesConfigSpec...)
 
 	createSpec.Files = &types.VirtualMachineFileInfo{
 		VmPathName: fmt.Sprintf("[%s]", datastore.Name()),
@@ -297,21 +291,21 @@ func (vm *VirtualMachineDriver) FloppyDevices() (object.VirtualDeviceList, error
 func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) (VirtualMachine, error) {
 	folder, err := vm.driver.FindFolder(config.Folder)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error finding filder: %s", err)
 	}
 
 	var relocateSpec types.VirtualMachineRelocateSpec
 
 	pool, err := vm.driver.FindResourcePool(config.Cluster, config.Host, config.ResourcePool)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error finding resource pool: %s", err)
 	}
 	poolRef := pool.pool.Reference()
 	relocateSpec.Pool = &poolRef
 
 	datastore, err := vm.driver.FindDatastore(config.Datastore, config.Host)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error finding datastore: %s", err)
 	}
 	datastoreRef := datastore.Reference()
 	relocateSpec.Datastore = &datastoreRef
@@ -325,7 +319,7 @@ func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) 
 
 		tpl, err := vm.Info("snapshot")
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error getting snapshot info for vm: %s", err)
 		}
 		if tpl.Snapshot == nil {
 			err = errors.New("`linked_clone=true`, but template has no snapshots")
@@ -341,24 +335,42 @@ func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) 
 		configSpec.Annotation = config.Annotation
 	}
 
+	devices, err := vm.vm.Device(vm.driver.ctx)
+	if err != nil {
+		return nil, err
+	}
+	virtualDisks := devices.SelectByType((*types.VirtualDisk)(nil))
+	virtualControllers := devices.SelectByType((*types.VirtualController)(nil))
+
+	// Use existing devices to avoid overlapping configuration
+	existingDevices := object.VirtualDeviceList{}
+	existingDevices = append(existingDevices, virtualDisks...)
+	existingDevices = append(existingDevices, virtualControllers...)
+
+	storageConfigSpec, err := config.StorageConfig.AddStorageDevices(existingDevices)
+	if err != nil {
+		return nil, err
+	}
+	configSpec.DeviceChange = append(configSpec.DeviceChange, storageConfigSpec...)
+
 	if config.Network != "" {
 		net, err := vm.driver.FindNetwork(config.Network)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error finding network: %s", err)
 		}
 		backing, err := net.network.EthernetCardBackingInfo(ctx)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error finding ethernet card backing info: %s", err)
 		}
 
 		devices, err := vm.vm.Device(ctx)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error finding vm devices: %s", err)
 		}
 
 		adapter, err := findNetworkAdapter(devices)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Error finding network adapter: %s", err)
 		}
 
 		current := adapter.GetVirtualEthernetCard()
@@ -375,13 +387,13 @@ func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) 
 
 	vAppConfig, err := vm.updateVAppConfig(ctx, config.VAppProperties)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error updating VAppConfig: %s", err)
 	}
 	configSpec.VAppConfig = vAppConfig
 
 	task, err := vm.vm.Clone(vm.driver.ctx, folder.folder, config.Name, cloneSpec)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error calling vm.vm.Clone task: %s", err)
 	}
 
 	info, err := task.WaitForResult(ctx, nil)
@@ -391,7 +403,7 @@ func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) 
 			return nil, err
 		}
 
-		return nil, err
+		return nil, fmt.Errorf("Error waiting for vm Clone to complete: %s", err)
 	}
 
 	vmRef, ok := info.Result.(types.ManagedObjectReference)
@@ -616,24 +628,6 @@ func (vm *VirtualMachineDriver) ResizeDisk(diskSize int64) error {
 	return err
 }
 
-func findDisk(devices object.VirtualDeviceList) (*types.VirtualDisk, error) {
-	var disks []*types.VirtualDisk
-	for _, device := range devices {
-		switch d := device.(type) {
-		case *types.VirtualDisk:
-			disks = append(disks, d)
-		}
-	}
-
-	switch len(disks) {
-	case 0:
-		return nil, errors.New("VM has no disks")
-	case 1:
-		return disks[0], nil
-	}
-	return nil, errors.New("VM has multiple disks")
-}
-
 func (vm *VirtualMachineDriver) PowerOn() error {
 	task, err := vm.vm.PowerOn(vm.driver.ctx)
 	if err != nil {
@@ -847,55 +841,6 @@ func (vm *VirtualMachineDriver) GetDir() (string, error) {
 		}
 	}
 	return "", fmt.Errorf("cannot find '%s'", vmxName)
-}
-
-func addDisk(_ *VCenterDriver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
-	if len(config.Storage) == 0 {
-		return nil, errors.New("no storage devices have been defined")
-	}
-
-	if len(config.DiskControllerType) == 0 {
-		return nil, errors.New("no controllers have been defined")
-	}
-
-	var controllers []types.BaseVirtualController
-	for _, controllerType := range config.DiskControllerType {
-		var device types.BaseVirtualDevice
-		var err error
-		if controllerType == "nvme" {
-			device, err = devices.CreateNVMEController()
-		} else {
-			device, err = devices.CreateSCSIController(controllerType)
-		}
-		if err != nil {
-			return nil, err
-		}
-		devices = append(devices, device)
-		controller, err := devices.FindDiskController(devices.Name(device))
-		if err != nil {
-			return nil, err
-		}
-		controllers = append(controllers, controller)
-	}
-
-	for _, dc := range config.Storage {
-		disk := &types.VirtualDisk{
-			VirtualDevice: types.VirtualDevice{
-				Key: devices.NewKey(),
-				Backing: &types.VirtualDiskFlatVer2BackingInfo{
-					DiskMode:        string(types.VirtualDiskModePersistent),
-					ThinProvisioned: types.NewBool(dc.DiskThinProvisioned),
-					EagerlyScrub:    types.NewBool(dc.DiskEagerlyScrub),
-				},
-			},
-			CapacityInKB: dc.DiskSize * 1024,
-		}
-
-		devices.AssignController(disk, controllers[dc.ControllerIndex])
-		devices = append(devices, disk)
-	}
-
-	return devices, nil
 }
 
 func addNetwork(d *VCenterDriver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {

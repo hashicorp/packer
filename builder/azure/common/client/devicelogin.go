@@ -15,7 +15,8 @@ import (
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/hashicorp/packer/helper/useragent"
+	version "github.com/hashicorp/packer/builder/azure/version"
+	"github.com/hashicorp/packer/packer-plugin-sdk/useragent"
 )
 
 var (
@@ -123,7 +124,7 @@ func tokenFromFile(say func(string), oauthCfg adal.OAuthConfig, tokenPath, clien
 // endpoint is polled until user gives consent, denies or the flow times out.
 // Returned token must be saved.
 func tokenFromDeviceFlow(say func(string), oauthCfg adal.OAuthConfig, clientID, resource string) (*adal.ServicePrincipalToken, error) {
-	cl := autorest.NewClientWithUserAgent(useragent.String())
+	cl := autorest.NewClientWithUserAgent(useragent.String(version.AzurePluginVersion.FormattedVersion()))
 	deviceCode, err := adal.InitiateDeviceAuth(&cl, oauthCfg, clientID, resource)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to start device auth: %v", err)

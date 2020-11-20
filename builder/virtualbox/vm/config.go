@@ -9,19 +9,20 @@ import (
 	"time"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/bootcommand"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // Config is the configuration structure for the builder.
 type Config struct {
 	common.PackerConfig             `mapstructure:",squash"`
-	common.HTTPConfig               `mapstructure:",squash"`
-	common.FloppyConfig             `mapstructure:",squash"`
-	common.CDConfig                 `mapstructure:",squash"`
+	commonsteps.HTTPConfig          `mapstructure:",squash"`
+	commonsteps.FloppyConfig        `mapstructure:",squash"`
+	commonsteps.CDConfig            `mapstructure:",squash"`
 	bootcommand.BootConfig          `mapstructure:",squash"`
 	vboxcommon.ExportConfig         `mapstructure:",squash"`
 	vboxcommon.OutputConfig         `mapstructure:",squash"`
@@ -99,9 +100,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.CommConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(c.CommConfig.Comm.Type)...)
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.GuestAdditionsConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.GuestAdditionsConfig.Prepare(c.CommConfig.Comm.Type)...)
 
 	if c.GuestAdditionsInterface == "" {
 		c.GuestAdditionsInterface = "ide"

@@ -6,9 +6,9 @@ import (
 	proxmoxapi "github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 )
 
 // The unique id for the builder
@@ -34,7 +34,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("iso-config", &b.config)
 
 	preSteps := []multistep.Step{
-		&common.StepDownload{
+		&commonsteps.StepDownload{
 			Checksum:    b.config.ISOChecksum,
 			Description: "ISO",
 			Extension:   b.config.TargetExtension,
@@ -44,7 +44,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		},
 	}
 	for idx := range b.config.AdditionalISOFiles {
-		preSteps = append(preSteps, &common.StepDownload{
+		preSteps = append(preSteps, &commonsteps.StepDownload{
 			Checksum:    b.config.AdditionalISOFiles[idx].ISOChecksum,
 			Description: "additional ISO",
 			Extension:   b.config.AdditionalISOFiles[idx].TargetExtension,

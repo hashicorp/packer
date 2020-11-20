@@ -30,6 +30,13 @@ func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "use_azure_cli_auth will trigger Azure CLI auth",
+			config: Config{
+				UseAzureCLIAuth: true,
+			},
+			wantErr: false,
+		},
+		{
 			name: "subscription_id is set will trigger device flow",
 			config: Config{
 				SubscriptionID: "error",
@@ -155,6 +162,26 @@ func Test_ClientConfig_DeviceLogin(t *testing.T) {
 	}
 	if kvtoken.RefreshToken == "" {
 		t.Fatal("Expected keyvault token to have non-nil refresh token")
+	}
+}
+
+func Test_ClientConfig_AzureCli(t *testing.T) {
+	// Azure CLI tests skipped unless env 'AZURE_CLI_AUTH' is set, and an active `az login` session has been established
+	getEnvOrSkip(t, "AZURE_CLI_AUTH")
+
+	cfg := Config{
+		UseAzureCLIAuth:  true,
+		cloudEnvironment: getCloud(),
+	}
+	assertValid(t, cfg)
+
+	err := cfg.FillParameters()
+	if err != nil {
+		t.Fatalf("Expected nil err, but got: %v", err)
+	}
+
+	if cfg.authType != authTypeAzureCLI {
+		t.Fatalf("Expected authType to be %q, but got: %q", authTypeAzureCLI, cfg.authType)
 	}
 }
 

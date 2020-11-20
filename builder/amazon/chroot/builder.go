@@ -14,15 +14,15 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/chroot"
-	"github.com/hashicorp/packer/hcl2template"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/chroot"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // The unique ID for this builder
@@ -168,7 +168,7 @@ type Config struct {
 	// singular block containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	RootVolumeTag hcl2template.KeyValues `mapstructure:"root_volume_tag" required:"false"`
+	RootVolumeTag config.KeyValues `mapstructure:"root_volume_tag" required:"false"`
 	// what architecture to use when registering the final AMI; valid options
 	// are "x86_64" or "arm64". Defaults to "x86_64".
 	Architecture string `mapstructure:"ami_architecture" required:"false"`
@@ -201,8 +201,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			Exclude: []string{
 				"ami_description",
 				"snapshot_tags",
+				"snapshot_tag",
 				"tags",
+				"tag",
 				"root_volume_tags",
+				"root_volume_tag",
 				"command_wrapper",
 				"post_mount_commands",
 				"pre_mount_commands",
@@ -369,7 +372,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("wrappedCommand", common.CommandWrapper(wrappedCommand))
-	generatedData := &builder.GeneratedData{State: state}
+	generatedData := &packerbuilderdata.GeneratedData{State: state}
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -475,7 +478,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	)
 
 	// Run!
-	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
 
 	// If there was an error, return that

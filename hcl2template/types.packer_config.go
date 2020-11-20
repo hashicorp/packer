@@ -8,9 +8,10 @@ import (
 	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/version"
 	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/function"
 )
 
 // PackerConfig represents a loaded Packer HCL config. It will contain
@@ -21,6 +22,10 @@ type PackerConfig struct {
 	}
 	// Directory where the config files are defined
 	Basedir string
+
+	// Core Packer version, for reference by plugins and template functions.
+	CorePackerVersionString string
+
 	// directory Packer was called from
 	Cwd string
 
@@ -84,7 +89,7 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 			}),
 			buildAccessor: cty.UnknownVal(cty.EmptyObject),
 			packerAccessor: cty.ObjectVal(map[string]cty.Value{
-				"version": cty.StringVal(version.FormattedVersion()),
+				"version": cty.StringVal(cfg.CorePackerVersionString),
 			}),
 			pathVariablesAccessor: cty.ObjectVal(map[string]cty.Value{
 				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
@@ -107,16 +112,23 @@ func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 	content, moreDiags := f.Body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 
+	// for input variables we allow to use env in the default value section.
+	ectx := &hcl.EvalContext{
+		Functions: map[string]function.Function{
+			"env": pkrfunction.EnvFunc,
+		},
+	}
+
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case variableLabel:
-			moreDiags := c.InputVariables.decodeVariableBlock(block, nil)
+			moreDiags := c.InputVariables.decodeVariableBlock(block, ectx)
 			diags = append(diags, moreDiags...)
 		case variablesLabel:
 			attrs, moreDiags := block.Body.JustAttributes()
 			diags = append(diags, moreDiags...)
 			for key, attr := range attrs {
-				moreDiags = c.InputVariables.decodeVariable(key, attr, nil)
+				moreDiags = c.InputVariables.decodeVariable(key, attr, ectx)
 				diags = append(diags, moreDiags...)
 			}
 		}
@@ -210,9 +222,13 @@ func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics 
 		return diags
 	}
 	c.LocalVariables[local.Name] = &Variable{
-		Name:         local.Name,
-		DefaultValue: value,
-		Type:         value.Type(),
+		Name: local.Name,
+		Values: []VariableAssignment{{
+			Value: value,
+			Expr:  local.Expr,
+			From:  "default",
+		}},
+		Type: value.Type(),
 	}
 
 	return diags

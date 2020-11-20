@@ -1,7 +1,7 @@
 // This is the main package for the `packer` application.
 
 //go:generate go run ./scripts/generate-plugins.go
-//go:generate go generate ./common/bootcommand/...
+//go:generate go generate ./packer-plugin-sdk/bootcommand/...
 package main
 
 import (
@@ -19,8 +19,8 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/packer/plugin"
-	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/version"
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/panicwrap"

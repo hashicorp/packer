@@ -13,15 +13,15 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/builder"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 const BuilderId = "mitchellh.amazon.ebssurrogate"
@@ -66,7 +66,7 @@ type Config struct {
 	// block containing a `name` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	VolumeRunTag hcl2template.NameValues `mapstructure:"run_volume_tag" required:"false"`
+	VolumeRunTag config.NameValues `mapstructure:"run_volume_tag" required:"false"`
 	// what architecture to use when registering the
 	// final AMI; valid options are "x86_64" or "arm64". Defaults to "x86_64".
 	Architecture string `mapstructure:"ami_architecture" required:"false"`
@@ -91,10 +91,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			Exclude: []string{
 				"ami_description",
 				"run_tags",
+				"run_tag",
 				"run_volume_tags",
+				"run_volume_tag",
 				"snapshot_tags",
+				"snapshot_tag",
 				"spot_tags",
+				"spot_tag",
 				"tags",
+				"tag",
 			},
 		},
 	}, raws...)
@@ -187,7 +192,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	generatedData := &builder.GeneratedData{State: state}
+	generatedData := &packerbuilderdata.GeneratedData{State: state}
 
 	var instanceStep multistep.Step
 
@@ -204,6 +209,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 			ExpectedRootDevice:                "ebs",
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
+			Region:                            *ec2conn.Config.Region,
 			SourceAMI:                         b.config.SourceAmi,
 			SpotPrice:                         b.config.SpotPrice,
 			SpotInstanceTypes:                 b.config.SpotInstanceTypes,
@@ -316,8 +322,8 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 		&awscommon.StepSetGeneratedData{
 			GeneratedData: generatedData,
 		},
-		&common.StepProvision{},
-		&common.StepCleanupTempKeys{
+		&commonsteps.StepProvision{},
+		&commonsteps.StepCleanupTempKeys{
 			Comm: &b.config.RunConfig.Comm,
 		},
 		&awscommon.StepStopEBSBackedInstance{
@@ -383,7 +389,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Run!
-	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
