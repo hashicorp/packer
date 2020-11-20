@@ -64,13 +64,13 @@ func TestUploadDownload(t *testing.T) {
 	hooks := map[string][]packersdk.Hook{}
 	hooks[packersdk.HookProvision] = []packersdk.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []*packersdk.HookedProvisioner{
+			Provisioners: []*packer.HookedProvisioner{
 				{Provisioner: upload, Config: nil, TypeName: ""},
 				{Provisioner: download, Config: nil, TypeName: ""},
 			},
 		},
 	}
-	hook := &packer.DispatchHook{Mapping: hooks}
+	hook := &packersdk.DispatchHook{Mapping: hooks}
 
 	// Run things
 	artifact, err := builder.Run(context.Background(), ui, hook)
@@ -152,14 +152,14 @@ func TestLargeDownload(t *testing.T) {
 	hooks := map[string][]packersdk.Hook{}
 	hooks[packersdk.HookProvision] = []packersdk.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []*packersdk.HookedProvisioner{
+			Provisioners: []*packer.HookedProvisioner{
 				{Provisioner: shell, Config: nil, TypeName: ""},
 				{Provisioner: downloadCupcake, Config: nil, TypeName: ""},
 				{Provisioner: downloadBigcake, Config: nil, TypeName: ""},
 			},
 		},
 	}
-	hook := &packer.DispatchHook{Mapping: hooks}
+	hook := &packersdk.DispatchHook{Mapping: hooks}
 
 	// Run things
 	artifact, err := builder.Run(context.Background(), ui, hook)
@@ -260,7 +260,7 @@ func TestFixUploadOwner(t *testing.T) {
 	hooks := map[string][]packersdk.Hook{}
 	hooks[packersdk.HookProvision] = []packersdk.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []*packersdk.HookedProvisioner{
+			Provisioners: []*packer.HookedProvisioner{
 				{Provisioner: fileProvisioner, Config: nil, TypeName: ""},
 				{Provisioner: dirProvisioner, Config: nil, TypeName: ""},
 				{Provisioner: shellProvisioner, Config: nil, TypeName: ""},
@@ -268,7 +268,7 @@ func TestFixUploadOwner(t *testing.T) {
 			},
 		},
 	}
-	hook := &packer.DispatchHook{Mapping: hooks}
+	hook := &packersdk.DispatchHook{Mapping: hooks}
 
 	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {

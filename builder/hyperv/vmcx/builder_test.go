@@ -495,7 +495,7 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	}
 
 	ui := packer.TestUi(t)
-	hook := &packer.MockHook{}
+	hook := &packersdk.MockHook{}
 	driver := &hypervcommon.DriverMock{}
 
 	// Set up the state.

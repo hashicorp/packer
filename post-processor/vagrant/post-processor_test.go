@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -25,8 +26,8 @@ func testPP(t *testing.T) *PostProcessor {
 	return &p
 }
 
-func testUi() *packer.BasicUi {
-	return &packer.BasicUi{
+func testUi() *packersdk.BasicUi {
+	return &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}
@@ -183,7 +184,7 @@ func TestPostProcessorPrepare_ProviderOverrideExists(t *testing.T) {
 }
 
 func TestPostProcessorPostProcess_badId(t *testing.T) {
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: "invalid.packer",
 	}
 
@@ -214,7 +215,7 @@ func TestPostProcessorPostProcess_vagrantfileUserVariable(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	a := &packer.MockArtifact{
+	a := &packersdk.MockArtifact{
 		BuilderIdValue: "packer.parallels",
 	}
 	a2, _, _, err := p.PostProcess(context.Background(), testUi(), a)

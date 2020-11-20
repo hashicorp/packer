@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -116,8 +116,8 @@ func TestCreateInstanceMetadata_fromNotExistFile(t *testing.T) {
 func testState(t *testing.T) multistep.StateBag {
 	state := new(multistep.BasicStateBag)
 	state.Put("config", testConfigStruct(t))
-	state.Put("hook", &packer.MockHook{})
-	state.Put("ui", &packer.BasicUi{
+	state.Put("hook", &packersdk.MockHook{})
+	state.Put("ui", &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	})

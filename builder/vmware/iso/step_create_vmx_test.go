@@ -142,7 +142,7 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 			"vmware-iso": func() (packer.Builder, error) { return &Builder{}, nil },
 		},
 		Hook: func(n string) (packersdk.Hook, error) {
-			return &packer.DispatchHook{}, nil
+			return &packersdk.DispatchHook{}, nil
 		},
 		ProvisionerStore: packer.MapOfProvisioner{
 			"shell": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func helperProcess(s ...string) *exec.Cmd {
@@ -68,7 +69,7 @@ func TestHelperProcess(*testing.T) {
 			log.Printf("[ERR] %s", err)
 			os.Exit(1)
 		}
-		server.RegisterHook(new(packer.MockHook))
+		server.RegisterHook(new(packersdk.MockHook))
 		server.Serve()
 	case "invalid-rpc-address":
 		fmt.Println("lolinvalid")

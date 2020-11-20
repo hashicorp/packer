@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	shell_local "github.com/hashicorp/packer/provisioner/shell-local"
 	"github.com/hashicorp/packer/provisioner/sleep"
 )
@@ -33,7 +34,7 @@ func testMetaSleepFile(t *testing.T) Meta {
 	var out, err bytes.Buffer
 	return Meta{
 		CoreConfig: testCoreConfigSleepBuilder(t),
-		Ui: &packer.BasicUi{
+		Ui: &packersdk.BasicUi{
 			Writer:      &out,
 			ErrorWriter: &err,
 		},

@@ -8,6 +8,7 @@ import (
 	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/provisioner/shell"
 )
@@ -43,7 +44,7 @@ func TestMetaFile(t *testing.T) command.Meta {
 	var out, err bytes.Buffer
 	return command.Meta{
 		CoreConfig: testCoreConfigBuilder(t),
-		Ui: &packer.BasicUi{
+		Ui: &packersdk.BasicUi{
 			Writer:      &out,
 			ErrorWriter: &err,
 		},

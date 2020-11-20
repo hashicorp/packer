@@ -6,9 +6,10 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-var testBuilderArtifact = &packer.MockArtifact{}
+var testBuilderArtifact = &packersdk.MockArtifact{}
 
 func TestBuilderPrepare(t *testing.T) {
 	b := new(packer.MockBuilder)
@@ -68,7 +69,7 @@ func TestBuilderRun(t *testing.T) {
 	bClient := client.Builder()
 
 	// Test Run
-	hook := &packer.MockHook{}
+	hook := &packersdk.MockHook{}
 	ui := &testUi{}
 	artifact, err := bClient.Run(context.Background(), ui, hook)
 	if err != nil {
@@ -94,7 +95,7 @@ func TestBuilderRun_nilResult(t *testing.T) {
 	server.RegisterBuilder(b)
 	bClient := client.Builder()
 
-	hook := &packer.MockHook{}
+	hook := &packersdk.MockHook{}
 	ui := &testUi{}
 	artifact, err := bClient.Run(context.Background(), ui, hook)
 	if artifact != nil {
@@ -115,7 +116,7 @@ func TestBuilderRun_ErrResult(t *testing.T) {
 
 	b.RunErrResult = true
 
-	hook := &packer.MockHook{}
+	hook := &packersdk.MockHook{}
 	ui := &testUi{}
 	artifact, err := bClient.Run(context.Background(), ui, hook)
 	if artifact != nil {
@@ -143,7 +144,7 @@ func TestBuilderCancel(t *testing.T) {
 	server.RegisterBuilder(b)
 	bClient := client.Builder()
 
-	bClient.Run(topCtx, new(testUi), new(packer.MockHook))
+	bClient.Run(topCtx, new(testUi), new(packersdk.MockHook))
 
 	if !cancelled {
 		t.Fatal("context should have been cancelled")

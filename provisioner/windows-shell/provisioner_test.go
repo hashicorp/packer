@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -265,8 +266,8 @@ func TestProvisionerQuote_EnvironmentVars(t *testing.T) {
 
 }
 
-func testUi() *packer.BasicUi {
-	return &packer.BasicUi{
+func testUi() *packersdk.BasicUi {
+	return &packersdk.BasicUi{
 		Reader:      new(bytes.Buffer),
 		Writer:      new(bytes.Buffer),
 		ErrorWriter: new(bytes.Buffer),
@@ -286,7 +287,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	// Defaults provided by Packer
 	p.config.PackerBuildName = "vmware"
 	p.config.PackerBuilderType = "iso"
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	p.Prepare(config)
 
 	err := p.Provision(context.Background(), ui, comm, generatedData())
@@ -337,7 +338,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	ui := testUi()
 
 	p := new(Provisioner)
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	p.Prepare(config)
 	err = p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
@@ -376,7 +377,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	config["environment_vars"] = envVars
 
 	p := new(Provisioner)
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	p.Prepare(config)
 	err = p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {

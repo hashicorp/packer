@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 	"github.com/hashicorp/packer/version"
 )
@@ -19,8 +20,8 @@ func testBuild() *CoreBuild {
 		Builder:       &MockBuilder{ArtifactId: "b"},
 		BuilderConfig: 42,
 		BuilderType:   "foo",
-		hooks: map[string][]Hook{
-			"foo": {&MockHook{}},
+		hooks: map[string][]packersdk.Hook{
+			"foo": {&packersdk.MockHook{}},
 		},
 		Provisioners: []CoreBuildProvisioner{
 			{
@@ -246,7 +247,7 @@ func TestBuild_Run(t *testing.T) {
 	dispatchHook := builder.RunHook
 	dispatchHook.Run(ctx, "foo", nil, nil, 42)
 
-	hook := build.hooks["foo"][0].(*MockHook)
+	hook := build.hooks["foo"][0].(*packersdk.MockHook)
 	if !hook.RunCalled {
 		t.Fatal("should be called")
 	}
@@ -255,7 +256,7 @@ func TestBuild_Run(t *testing.T) {
 	}
 
 	// Verify provisioners run
-	dispatchHook.Run(ctx, HookProvision, nil, new(MockCommunicator), 42)
+	dispatchHook.Run(ctx, packersdk.HookProvision, nil, new(packersdk.MockCommunicator), 42)
 	prov := build.Provisioners[0].Provisioner.(*MockProvisioner)
 	if !prov.ProvCalled {
 		t.Fatal("should be called")

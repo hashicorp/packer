@@ -78,7 +78,7 @@ func testMetaParallel(t *testing.T, builder *ParallelTestBuilder, locked *Locked
 				},
 			},
 		},
-		Ui: &packer.BasicUi{
+		Ui: &packersdk.BasicUi{
 			Writer:      &out,
 			ErrorWriter: &err,
 		},

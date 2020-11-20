@@ -10,7 +10,7 @@ import (
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-var testPostProcessorArtifact = new(packer.MockArtifact)
+var testPostProcessorArtifact = new(packersdk.MockArtifact)
 
 type TestPostProcessor struct {
 	configCalled bool
@@ -71,7 +71,7 @@ func TestPostProcessorRPC(t *testing.T) {
 	}
 
 	// Test PostProcess
-	a := &packer.MockArtifact{
+	a := &packersdk.MockArtifact{
 		IdValue: "ppTestId",
 	}
 	ui := new(testUi)
@@ -121,7 +121,7 @@ func TestPostProcessorRPC_cancel(t *testing.T) {
 	}
 
 	// Test PostProcess
-	a := &packer.MockArtifact{
+	a := &packersdk.MockArtifact{
 		IdValue: "ppTestId",
 	}
 	ui := new(testUi)

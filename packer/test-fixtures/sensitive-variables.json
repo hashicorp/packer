@@ -1,6 +1,6 @@
 {
     "variables": {
-        "foo": "bar"
+        "foo": "bar_extra_sensitive_probably_a_password"
     },
     "sensitive-variables": [
     	"foo"

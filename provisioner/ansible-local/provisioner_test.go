@@ -368,13 +368,13 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 	hooks := map[string][]packersdk.Hook{}
 	hooks[packersdk.HookProvision] = []packersdk.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []*packersdk.HookedProvisioner{
+			Provisioners: []*packer.HookedProvisioner{
 				{Provisioner: ansible, Config: nil, TypeName: ""},
 				{Provisioner: download, Config: nil, TypeName: ""},
 			},
 		},
 	}
-	hook := &packer.DispatchHook{Mapping: hooks}
+	hook := &packersdk.DispatchHook{Mapping: hooks}
 
 	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {

@@ -195,7 +195,7 @@ func wrappedMain() int {
 			return 1
 		}
 	} else {
-		basicUi := &packer.BasicUi{
+		basicUi := &packersdk.BasicUi{
 			Reader:      os.Stdin,
 			Writer:      os.Stdout,
 			ErrorWriter: os.Stdout,

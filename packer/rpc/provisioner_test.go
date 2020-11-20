@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestProvisionerRPC(t *testing.T) {
@@ -38,7 +39,7 @@ func TestProvisionerRPC(t *testing.T) {
 
 	// Test Provision
 	ui := &testUi{}
-	comm := &packer.MockCommunicator{}
+	comm := &packersdk.MockCommunicator{}
 	if err := pClient.Provision(topCtx, ui, comm, make(map[string]interface{})); err == nil {
 		t.Fatalf("Provison should have err")
 	}

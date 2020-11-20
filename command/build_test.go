@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/post-processor/manifest"
 	shell_local_pp "github.com/hashicorp/packer/post-processor/shell-local"
 	filep "github.com/hashicorp/packer/provisioner/file"
@@ -859,7 +860,7 @@ func testMetaFile(t *testing.T) Meta {
 	var out, err bytes.Buffer
 	return Meta{
 		CoreConfig: testCoreConfigBuilder(t),
-		Ui: &packer.BasicUi{
+		Ui: &packersdk.BasicUi{
 			Writer:      &out,
 			ErrorWriter: &err,
 		},

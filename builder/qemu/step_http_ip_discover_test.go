@@ -5,13 +5,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestStepHTTPIPDiscover_Run(t *testing.T) {
 	state := new(multistep.BasicStateBag)
-	state.Put("ui", &packer.BasicUi{
+	state.Put("ui", &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	})

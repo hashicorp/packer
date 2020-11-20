@@ -6,15 +6,15 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
 func testState(t *testing.T) multistep.StateBag {
 	state := new(multistep.BasicStateBag)
 	state.Put("driver", new(DriverMock))
-	state.Put("ui", &packer.BasicUi{
+	state.Put("ui", &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	})

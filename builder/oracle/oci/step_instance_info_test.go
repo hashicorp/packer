@@ -6,8 +6,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestInstanceInfo(t *testing.T) {
@@ -37,8 +37,8 @@ func TestInstanceInfoPrivateIP(t *testing.T) {
 	state := new(multistep.BasicStateBag)
 	state.Put("config", baseTestConfig)
 	state.Put("driver", &driverMock{cfg: baseTestConfig})
-	state.Put("hook", &packer.MockHook{})
-	state.Put("ui", &packer.BasicUi{
+	state.Put("hook", &packersdk.MockHook{})
+	state.Put("ui", &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	})

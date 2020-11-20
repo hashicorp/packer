@@ -7,13 +7,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestCommunicatorRPC(t *testing.T) {
 	// Create the interface to test
-	c := new(packer.MockCommunicator)
+	c := new(packersdk.MockCommunicator)
 
 	// Start the server
 	client, server := testClientServer(t)

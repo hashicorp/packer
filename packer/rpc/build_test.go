@@ -10,7 +10,7 @@ import (
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-var testBuildArtifact = &packer.MockArtifact{}
+var testBuildArtifact = &packersdk.MockArtifact{}
 
 type testBuild struct {
 	nameCalled       bool
@@ -86,7 +86,7 @@ func TestBuild(t *testing.T) {
 	}
 
 	// Test Run
-	ui := new(testUi)
+	ui := new(packersdk.MockUi)
 	artifacts, err := bClient.Run(ctx, ui)
 	if !b.runCalled {
 		t.Fatal("run should be called")
@@ -150,7 +150,7 @@ func TestBuild_cancel(t *testing.T) {
 
 	bClient.Prepare()
 
-	ui := new(testUi)
+	ui := new(packersdk.MockUi)
 	bClient.Run(topCtx, ui)
 
 	// if context cancellation is not propagated, this will timeout

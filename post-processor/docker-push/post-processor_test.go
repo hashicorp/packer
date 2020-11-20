@@ -11,8 +11,8 @@ import (
 	dockerimport "github.com/hashicorp/packer/post-processor/docker-import"
 )
 
-func testUi() *packer.BasicUi {
-	return &packer.BasicUi{
+func testUi() *packersdk.BasicUi {
+	return &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}
@@ -25,7 +25,7 @@ func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
 func TestPostProcessor_PostProcess(t *testing.T) {
 	driver := &docker.MockDriver{}
 	p := &PostProcessor{Driver: driver}
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: dockerimport.BuilderId,
 		IdValue:        "foo/bar",
 	}
@@ -58,7 +58,7 @@ func TestPostProcessor_PostProcess(t *testing.T) {
 func TestPostProcessor_PostProcess_portInName(t *testing.T) {
 	driver := &docker.MockDriver{}
 	p := &PostProcessor{Driver: driver}
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: dockerimport.BuilderId,
 		IdValue:        "localhost:5000/foo/bar",
 	}
@@ -91,7 +91,7 @@ func TestPostProcessor_PostProcess_portInName(t *testing.T) {
 func TestPostProcessor_PostProcess_tags(t *testing.T) {
 	driver := &docker.MockDriver{}
 	p := &PostProcessor{Driver: driver}
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: dockerimport.BuilderId,
 		IdValue:        "hashicorp/ubuntu:precise",
 	}

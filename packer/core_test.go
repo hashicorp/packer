@@ -642,18 +642,18 @@ func TestSensitiveVars(t *testing.T) {
 		// hardcoded
 		{
 			"sensitive-variables.json",
-			map[string]string{"foo": "bar"},
+			map[string]string{"foo": "bar_extra_sensitive_probably_a_password"},
 			[]string{"foo"},
-			"bar",
+			"the foo jumped over the <sensitive>",
 			false,
 		},
 		// interpolated
 		{
 			"sensitive-variables.json",
-			map[string]string{"foo": "bar",
+			map[string]string{"foo": "bar_extra_sensitive_probably_a_password",
 				"bang": "{{ user `foo`}}"},
 			[]string{"bang"},
-			"bar",
+			"the foo jumped over the <sensitive>",
 			false,
 		},
 	}
@@ -680,13 +680,11 @@ func TestSensitiveVars(t *testing.T) {
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
-		filtered := packersdk.LogSecretFilter.get()
-		if filtered[0] != tc.Expected && len(filtered) != 1 {
+		// Check that filter correctly manipulates strings:
+		filtered := packersdk.LogSecretFilter.FilterString("the foo jumped over the bar_extra_sensitive_probably_a_password")
+		if filtered != tc.Expected {
 			t.Fatalf("not filtering sensitive vars; filtered is %#v", filtered)
 		}
-
-		// clear filter so it doesn't break other tests
-		packersdk.LogSecretFilter.s = make(map[string]struct{})
 	}
 }
 

@@ -16,6 +16,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	confighelper "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/stretchr/testify/assert"
 )
@@ -346,8 +347,8 @@ func TestAnsibleLongMessages(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	comm := &packer.MockCommunicator{}
-	ui := &packer.BasicUi{
+	comm := &packersdk.MockCommunicator{}
+	ui := &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}
@@ -766,8 +767,8 @@ func TestUseProxy(t *testing.T) {
 		p.setupAdapterFunc = l.setupAdapter
 		p.executeAnsibleFunc = l.executeAnsible
 		ctx := context.TODO()
-		comm := new(packer.MockCommunicator)
-		ui := &packer.BasicUi{
+		comm := new(packersdk.MockCommunicator)
+		ui := &packersdk.BasicUi{
 			Reader: new(bytes.Buffer),
 			Writer: new(bytes.Buffer),
 		}

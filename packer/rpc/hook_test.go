@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
@@ -15,7 +14,7 @@ func TestHook_Implements(t *testing.T) {
 func TestHook_cancelWhileRun(t *testing.T) {
 	topCtx, cancelTopCtx := context.WithCancel(context.Background())
 
-	h := &packer.MockHook{
+	h := &packersdk.MockHook{
 		RunFunc: func(ctx context.Context) error {
 			cancelTopCtx()
 			<-ctx.Done()

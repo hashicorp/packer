@@ -19,6 +19,7 @@ import (
 	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 
@@ -242,7 +243,7 @@ func TestStepDownload_download(t *testing.T) {
 		ResultKey:   "iso_path",
 		Url:         nil,
 	}
-	ui := &packer.BasicUi{
+	ui := &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 		PB:     &packer.NoopProgressTracker{},

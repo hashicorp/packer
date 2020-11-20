@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestAzureProvider_impl(t *testing.T) {
@@ -22,7 +22,7 @@ func TestAzureProvider_KeepInputArtifact(t *testing.T) {
 func TestAzureProvider_ManagedImage(t *testing.T) {
 	p := new(AzureProvider)
 	ui := testUi()
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		StringValue: `Azure.ResourceManagement.VMImage:
 
 OSType: Linux
@@ -58,7 +58,7 @@ ManagedImageLocation: westus`,
 func TestAzureProvider_VHD(t *testing.T) {
 	p := new(AzureProvider)
 	ui := testUi()
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		IdValue: "https://packerbuildswest.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.96ed2120-591d-4900-95b0-ee8e985f2213.vhd",
 		StringValue: `Azure.ResourceManagement.VMImage:
 
