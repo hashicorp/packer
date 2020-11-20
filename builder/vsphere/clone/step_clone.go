@@ -44,11 +44,13 @@ type CloneConfig struct {
 	// Set the vApp Options to a virtual machine.
 	// See the [vApp Options Configuration](/docs/builders/vmware/vsphere-clone#vapp-options-configuration)
 	// to know the available options and how to use it.
-	VAppConfig vAppConfig `mapstructure:"vapp"`
+	VAppConfig    vAppConfig           `mapstructure:"vapp"`
+	StorageConfig common.StorageConfig `mapstructure:",squash"`
 }
 
 func (c *CloneConfig) Prepare() []error {
 	var errs []error
+	errs = append(errs, c.StorageConfig.Prepare()...)
 
 	if c.Template == "" {
 		errs = append(errs, fmt.Errorf("'template' is required"))
@@ -89,6 +91,16 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 		return multistep.ActionHalt
 	}
 
+	var disks []driver.Disk
+	for _, disk := range s.Config.StorageConfig.Storage {
+		disks = append(disks, driver.Disk{
+			DiskSize:            disk.DiskSize,
+			DiskEagerlyScrub:    disk.DiskEagerlyScrub,
+			DiskThinProvisioned: disk.DiskThinProvisioned,
+			ControllerIndex:     disk.DiskControllerIndex,
+		})
+	}
+
 	vm, err := template.Clone(ctx, &driver.CloneConfig{
 		Name:           s.Location.VMName,
 		Folder:         s.Location.Folder,
@@ -101,6 +113,10 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 		MacAddress:     s.Config.MacAddress,
 		Annotation:     s.Config.Notes,
 		VAppProperties: s.Config.VAppConfig.Properties,
+		StorageConfig: driver.StorageConfig{
+			DiskControllerType: s.Config.StorageConfig.DiskControllerType,
+			Storage:            disks,
+		},
 	})
 	if err != nil {
 		state.Put("error", err)
