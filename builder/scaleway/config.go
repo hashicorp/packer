@@ -26,18 +26,23 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 	// The AccessKey corresponding to the secret key.
+	// Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
 	// It can also be specified via the environment variable SCW_ACCESS_KEY.
 	AccessKey string `mapstructure:"access_key" required:"true"`
 	// The SecretKey to authenticate against the Scaleway API.
+	// Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
 	// It can also be specified via the environment variable SCW_SECRET_KEY.
 	SecretKey string `mapstructure:"secret_key" required:"true"`
 	// The Project ID in which the instances, volumes and snapshots will be created.
+	// Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
 	// It can also be specified via the environment variable SCW_DEFAULT_PROJECT_ID.
 	ProjectID string `mapstructure:"project_id" required:"true"`
 	// The Zone in which the instances, volumes and snapshots will be created.
+	// Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
 	// It can also be specified via the environment variable SCW_DEFAULT_ZONE
 	Zone string `mapstructure:"zone" required:"true"`
 	// The Scaleway API URL to use
+	// Will be fetched first from the [scaleway configuration file](https://github.com/scaleway/scaleway-sdk-go/blob/master/scw/README.md).
 	// It can also be specified via the environment variable SCW_API_URL
 	APIURL string `mapstructure:"api_url"`
 
@@ -117,6 +122,21 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	c.UserAgent = useragent.String(version.ScalewayPluginVersion.FormattedVersion())
 
+	configFile, err := scw.LoadConfig()
+	// If the config file do not exist, don't return an error as we may find config in ENV or flags.
+	if _, isNotFoundError := err.(*scw.ConfigFileNotFoundError); isNotFoundError {
+		configFile = &scw.Config{}
+	} else if err != nil {
+		return nil, err
+	}
+	activeProfile, err := configFile.GetActiveProfile()
+	if err != nil {
+		return nil, err
+	}
+
+	envProfile := scw.LoadEnvProfile()
+	profile := scw.MergeProfiles(activeProfile, envProfile)
+
 	// Deprecated variables
 	if c.Organization == "" {
 		if os.Getenv("SCALEWAY_ORGANIZATION") != "" {
@@ -145,23 +165,33 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.AccessKey == "" {
-		c.AccessKey = os.Getenv(scw.ScwAccessKeyEnv)
+		if profile.AccessKey != nil {
+			c.AccessKey = *profile.AccessKey
+		}
 	}
 
 	if c.SecretKey == "" {
-		c.SecretKey = os.Getenv(scw.ScwSecretKeyEnv)
+		if profile.SecretKey != nil {
+			c.SecretKey = *profile.SecretKey
+		}
 	}
 
 	if c.ProjectID == "" {
-		c.ProjectID = os.Getenv(scw.ScwDefaultProjectIDEnv)
+		if profile.DefaultProjectID != nil {
+			c.ProjectID = *profile.DefaultProjectID
+		}
 	}
 
 	if c.Zone == "" {
-		c.Zone = os.Getenv(scw.ScwDefaultZoneEnv)
+		if profile.DefaultZone != nil {
+			c.Zone = *profile.DefaultZone
+		}
 	}
 
 	if c.APIURL == "" {
-		c.APIURL = os.Getenv(scw.ScwAPIURLEnv)
+		if profile.APIURL != nil {
+			c.APIURL = *profile.APIURL
+		}
 	}
 
 	if c.SnapshotName == "" {
@@ -197,12 +227,12 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 	if c.ProjectID == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("Scaleway Project ID must be specified"))
+			errs, errors.New("scaleway Project ID must be specified"))
 	}
 
 	if c.SecretKey == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("Scaleway Secret Key must be specified"))
+			errs, errors.New("scaleway Secret Key must be specified"))
 	}
 
 	if c.AccessKey == "" {
@@ -212,7 +242,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	if c.Zone == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("Scaleway Zone is required"))
+			errs, errors.New("scaleway Zone is required"))
 	}
 
 	if c.CommercialType == "" {
@@ -230,5 +260,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	packer.LogSecretFilter.Set(c.Token)
+	packer.LogSecretFilter.Set(c.SecretKey)
 	return warnings, nil
 }

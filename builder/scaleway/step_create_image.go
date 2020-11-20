@@ -45,7 +45,7 @@ func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep
 
 	imageResp, err := instanceAPI.GetImage(&instance.GetImageRequest{
 		ImageID: imageID,
-	})
+	}, scw.WithContext(ctx))
 	if err != nil {
 		err := fmt.Errorf("Error getting initial image info: %s", err)
 		state.Put("error", err)
@@ -62,7 +62,7 @@ func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep
 		DefaultBootscript: bootscriptID,
 		Name:              c.ImageName,
 		RootVolume:        snapshotID,
-	})
+	}, scw.WithContext(ctx))
 	if err != nil {
 		err := fmt.Errorf("Error creating image: %s", err)
 		state.Put("error", err)
