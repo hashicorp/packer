@@ -97,7 +97,6 @@ type HardwareConfig struct {
 	VGPUProfile         string
 	Firmware            string
 	ForceBIOSSetup      bool
-	StorageConfig       StorageConfig
 }
 
 type NIC struct {
@@ -521,76 +520,6 @@ func (vm *VirtualMachineDriver) Configure(config *HardwareConfig) error {
 
 	confSpec.CpuHotAddEnabled = &config.CpuHotAddEnabled
 	confSpec.MemoryHotAddEnabled = &config.MemoryHotAddEnabled
-	//
-	//if len(config.StorageConfig.Storage) > 0 {
-	//	ds, err := vm.vm.Device(vm.driver.ctx)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	vd := ds.SelectByType((*types.VirtualDisk)(nil))
-	//	vc := ds.SelectByType((*types.VirtualController)(nil))
-	//
-	//	// Use existing devices to avoid wrong configuration
-	//	devices := object.VirtualDeviceList{}
-	//	devices = append(devices, vd...)
-	//	devices = append(devices, vc...)
-	//
-	//	newDevices := object.VirtualDeviceList{}
-	//
-	//	// Adds new controllers
-	//	var controllers []types.BaseVirtualController
-	//	for _, controllerType := range config.StorageConfig.DiskControllerType {
-	//		var device types.BaseVirtualDevice
-	//		var err error
-	//		if controllerType == "nvme" {
-	//			device, err = devices.CreateNVMEController()
-	//		} else {
-	//			device, err = devices.CreateSCSIController(controllerType)
-	//		}
-	//		if err != nil {
-	//			return err
-	//		}
-	//		devices = append(devices, device)
-	//		newDevices = append(newDevices, device)
-	//		name := devices.Name(device)
-	//		log.Printf("MOSS controller name %s", name)
-	//		controller, err := devices.FindDiskController(name)
-	//		if err != nil {
-	//			return err
-	//		}
-	//		controllers = append(controllers, controller)
-	//	}
-	//
-	//	for _, dc := range config.StorageConfig.Storage {
-	//		key := devices.NewKey()
-	//		disk := &types.VirtualDisk{
-	//			VirtualDevice: types.VirtualDevice{
-	//				Key: key,
-	//				Backing: &types.VirtualDiskFlatVer2BackingInfo{
-	//					DiskMode:        string(types.VirtualDiskModePersistent),
-	//					ThinProvisioned: types.NewBool(dc.DiskThinProvisioned),
-	//					EagerlyScrub:    types.NewBool(dc.DiskEagerlyScrub),
-	//				},
-	//			},
-	//			CapacityInKB: dc.DiskSize * 1024,
-	//		}
-	//
-	//		log.Printf("MOSS device key %d", key)
-	//
-	//		devices.AssignController(disk, controllers[dc.ControllerIndex])
-	//		newDevices = append(newDevices, disk)
-	//	}
-	//	//devices, err = config.StorageConfig.AddStorageDevices(devices)
-	//	//if err != nil {
-	//	//	return err
-	//	//}
-	//
-	//	devicesConfigSpec, err := newDevices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	confSpec.DeviceChange = append(confSpec.DeviceChange, devicesConfigSpec...)
-	//}
 
 	if config.VideoRAM != 0 {
 		devices, err := vm.vm.Device(vm.driver.ctx)

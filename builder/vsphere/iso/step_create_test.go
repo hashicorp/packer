@@ -17,9 +17,18 @@ import (
 
 func TestCreateConfig_Prepare(t *testing.T) {
 	// Empty config - check defaults
-	config := &CreateConfig{}
+	config := &CreateConfig{
+		// Storage is required
+		StorageConfig: common.StorageConfig{
+			Storage: []common.DiskConfig{
+				{
+					DiskSize: 32768,
+				},
+			},
+		},
+	}
 	if errs := config.Prepare(); len(errs) != 0 {
-		t.Fatalf("Config preprare should not fail")
+		t.Fatalf("Config preprare should not fail: %s", errs[0])
 	}
 	if config.GuestOSType != "otherGuest" {
 		t.Fatalf("GuestOSType should default to 'otherGuest'")
@@ -69,6 +78,13 @@ func TestCreateConfig_Prepare(t *testing.T) {
 			name: "USBController validate 'usb' and 'xhci' can be set together",
 			config: &CreateConfig{
 				USBController: []string{"usb", "xhci"},
+				StorageConfig: common.StorageConfig{
+					Storage: []common.DiskConfig{
+						{
+							DiskSize: 32768,
+						},
+					},
+				},
 			},
 			fail: false,
 		},
@@ -76,6 +92,13 @@ func TestCreateConfig_Prepare(t *testing.T) {
 			name: "USBController validate '1' and '0' can be set together",
 			config: &CreateConfig{
 				USBController: []string{"1", "0"},
+				StorageConfig: common.StorageConfig{
+					Storage: []common.DiskConfig{
+						{
+							DiskSize: 32768,
+						},
+					},
+				},
 			},
 			fail: false,
 		},
@@ -83,6 +106,13 @@ func TestCreateConfig_Prepare(t *testing.T) {
 			name: "USBController validate 'true' and 'false' can be set together",
 			config: &CreateConfig{
 				USBController: []string{"true", "false"},
+				StorageConfig: common.StorageConfig{
+					Storage: []common.DiskConfig{
+						{
+							DiskSize: 32768,
+						},
+					},
+				},
 			},
 			fail: false,
 		},
@@ -90,6 +120,13 @@ func TestCreateConfig_Prepare(t *testing.T) {
 			name: "USBController validate 'true' and 'usb' cannot be set together",
 			config: &CreateConfig{
 				USBController: []string{"true", "usb"},
+				StorageConfig: common.StorageConfig{
+					Storage: []common.DiskConfig{
+						{
+							DiskSize: 32768,
+						},
+					},
+				},
 			},
 			fail:           true,
 			expectedErrMsg: "there can only be one usb controller and one xhci controller",
@@ -98,6 +135,13 @@ func TestCreateConfig_Prepare(t *testing.T) {
 			name: "USBController validate '1' and 'usb' cannot be set together",
 			config: &CreateConfig{
 				USBController: []string{"1", "usb"},
+				StorageConfig: common.StorageConfig{
+					Storage: []common.DiskConfig{
+						{
+							DiskSize: 32768,
+						},
+					},
+				},
 			},
 			fail:           true,
 			expectedErrMsg: "there can only be one usb controller and one xhci controller",
@@ -106,6 +150,13 @@ func TestCreateConfig_Prepare(t *testing.T) {
 			name: "USBController validate 'xhci' cannot be set more that once",
 			config: &CreateConfig{
 				USBController: []string{"xhci", "xhci"},
+				StorageConfig: common.StorageConfig{
+					Storage: []common.DiskConfig{
+						{
+							DiskSize: 32768,
+						},
+					},
+				},
 			},
 			fail:           true,
 			expectedErrMsg: "there can only be one usb controller and one xhci controller",
@@ -114,6 +165,13 @@ func TestCreateConfig_Prepare(t *testing.T) {
 			name: "USBController validate unknown value cannot be set",
 			config: &CreateConfig{
 				USBController: []string{"unknown"},
+				StorageConfig: common.StorageConfig{
+					Storage: []common.DiskConfig{
+						{
+							DiskSize: 32768,
+						},
+					},
+				},
 			},
 			fail:           true,
 			expectedErrMsg: "usb_controller[0] references an unknown usb controller",
@@ -131,7 +189,7 @@ func TestCreateConfig_Prepare(t *testing.T) {
 			}
 		} else {
 			if len(errs) != 0 {
-				t.Fatalf("Config preprare should not fail")
+				t.Fatalf("Config preprare should not fail: %s", errs[0])
 			}
 		}
 	}
