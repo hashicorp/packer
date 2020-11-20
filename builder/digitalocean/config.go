@@ -85,6 +85,14 @@ type Config struct {
 	UserDataFile string `mapstructure:"user_data_file" required:"false"`
 	// Tags to apply to the droplet when it is created
 	Tags []string `mapstructure:"tags" required:"false"`
+	// UUID of the VPC which the droplet will be created in. Before using this,
+	// private_networking should be enabled.
+	VPCUUID string `mapstructure:"vpc_uuid" required:"false"`
+	// Wheter the communicators should use private IP or not (public IP in that case).
+	// If the droplet is or going to be accessible only from the local network because
+	// it is at behind a firewall, then communicators should use the private IP
+	// instead of the public IP. Before using this, private_networking should be enabled.
+	ConnectWithPrivateIP bool `mapstructure:"connect_with_private_ip" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -184,6 +192,20 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	for _, t := range c.Tags {
 		if !tagRe.MatchString(t) {
 			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("invalid tag: %s", t)))
+		}
+	}
+
+	// Check if the PrivateNetworking is enabled by user before use VPC UUID
+	if c.VPCUUID != "" {
+		if c.PrivateNetworking != true {
+			errs = packer.MultiErrorAppend(errs, errors.New("private networking should be enabled to use vpc_uuid"))
+		}
+	}
+
+	// Check if the PrivateNetworking is enabled by user before use ConnectWithPrivateIP
+	if c.ConnectWithPrivateIP == true {
+		if c.PrivateNetworking != true {
+			errs = packer.MultiErrorAppend(errs, errors.New("private networking should be enabled to use connect_with_private_ip"))
 		}
 	}
 
