@@ -810,6 +810,7 @@ func assertTagProperties(c *Config, errs *packersdk.MultiError) {
 	}
 }
 
+//nolint:ineffassign //this triggers a false positive because errs is passed by reference
 func assertRequiredParametersSet(c *Config, errs *packersdk.MultiError) {
 	c.ClientConfig.Validate(errs)
 

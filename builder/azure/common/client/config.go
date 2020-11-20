@@ -120,6 +120,7 @@ func (c *Config) setCloudEnvironment() error {
 	return err
 }
 
+//nolint:ineffassign //this triggers a false positive because errs is passed by reference
 func (c Config) Validate(errs *packersdk.MultiError) {
 	/////////////////////////////////////////////
 	// Authentication via OAUTH

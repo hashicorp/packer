@@ -123,10 +123,6 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 
-	if errs != nil && len(errs.Errors) > 0 {
-		return errs
-	}
-
 	// unpack attributes from json into config
 	var data map[string]interface{}
 
@@ -134,23 +130,26 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		err := json.Unmarshal([]byte(c.Attributes), &data)
 		if err != nil {
 			err = fmt.Errorf("Problem parsing json from attributes: %s", err)
-			packersdk.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 		c.attribs = data
 	} else if c.AttributesFile != "" {
 		fidata, err := ioutil.ReadFile(c.AttributesFile)
 		if err != nil {
 			err = fmt.Errorf("Problem reading attributes_file: %s", err)
-			packersdk.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 		err = json.Unmarshal(fidata, &data)
 		c.attribs = data
 		if err != nil {
 			err = fmt.Errorf("Problem parsing json from attributes_file: %s", err)
-			packersdk.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 		c.attribs = data
 	}
 
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs
+	}
 	return nil
 }

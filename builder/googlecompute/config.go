@@ -382,7 +382,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if !validImageName.MatchString(c.ImageName) {
-		errs = packersdk.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "name", c.ImageName)))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf(imageErrorText, "name", c.ImageName))
 	}
 
 	if len(c.ImageFamily) > 63 {
@@ -392,7 +392,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	if c.ImageFamily != "" {
 		if !validImageName.MatchString(c.ImageFamily) {
-			errs = packersdk.MultiErrorAppend(errs, errors.New(fmt.Sprintf(imageErrorText, "family", c.ImageFamily)))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf(imageErrorText, "family", c.ImageFamily))
 		}
 	}
 

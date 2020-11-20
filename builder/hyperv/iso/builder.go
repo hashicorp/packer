@@ -118,7 +118,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	errs = packersdk.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 
 	commonErrs, commonWarns := b.config.CommonConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)
-	packersdk.MultiErrorAppend(errs, commonErrs...)
+	errs = packersdk.MultiErrorAppend(errs, commonErrs...)
 	warnings = append(warnings, commonWarns...)
 
 	if len(b.config.ISOConfig.ISOUrls) < 1 ||

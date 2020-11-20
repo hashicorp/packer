@@ -144,7 +144,10 @@ func TestBuilderCancel(t *testing.T) {
 	server.RegisterBuilder(b)
 	bClient := client.Builder()
 
-	bClient.Run(topCtx, new(testUi), new(packersdk.MockHook))
+	_, err := bClient.Run(topCtx, new(testUi), new(packersdk.MockHook))
+	if err != nil {
+		t.Fatalf("mock shouldnt retun run error for cancellation")
+	}
 
 	if !cancelled {
 		t.Fatal("context should have been cancelled")

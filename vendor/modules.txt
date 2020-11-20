@@ -307,6 +307,9 @@ github.com/hashicorp/go-cty-funcs/crypto
 github.com/hashicorp/go-cty-funcs/encoding
 github.com/hashicorp/go-cty-funcs/filesystem
 github.com/hashicorp/go-cty-funcs/uuid
+# github.com/hashicorp/go-getter v1.4.1
+github.com/hashicorp/go-getter
+github.com/hashicorp/go-getter/helper/url
 # github.com/hashicorp/go-getter/gcs/v2 v2.0.0-20200604122502-a6995fa1edad
 github.com/hashicorp/go-getter/gcs/v2
 # github.com/hashicorp/go-getter/s3/v2 v2.0.0-20200604122502-a6995fa1edad

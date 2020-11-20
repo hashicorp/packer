@@ -191,7 +191,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	for _, t := range c.Tags {
 		if !tagRe.MatchString(t) {
-			errs = packersdk.MultiErrorAppend(errs, errors.New(fmt.Sprintf("invalid tag: %s", t)))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("invalid tag: %s", t))
 		}
 	}
 

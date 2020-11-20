@@ -256,7 +256,10 @@ func TestBuild_Run(t *testing.T) {
 	}
 
 	// Verify provisioners run
-	dispatchHook.Run(ctx, packersdk.HookProvision, nil, new(packersdk.MockCommunicator), 42)
+	err = dispatchHook.Run(ctx, packersdk.HookProvision, nil, new(packersdk.MockCommunicator), 42)
+	if err != nil {
+		t.Fatalf("should not have errored")
+	}
 	prov := build.Provisioners[0].Provisioner.(*MockProvisioner)
 	if !prov.ProvCalled {
 		t.Fatal("should be called")

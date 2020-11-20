@@ -69,7 +69,11 @@ func TestHelperProcess(*testing.T) {
 			log.Printf("[ERR] %s", err)
 			os.Exit(1)
 		}
-		server.RegisterHook(new(packersdk.MockHook))
+		err = server.RegisterHook(new(packersdk.MockHook))
+		if err != nil {
+			log.Printf("[ERR] %s", err)
+			os.Exit(1)
+		}
 		server.Serve()
 	case "invalid-rpc-address":
 		fmt.Println("lolinvalid")
