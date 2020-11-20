@@ -5,7 +5,7 @@ package ebsvolume
 import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/hcl2template"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -19,7 +19,7 @@ type BlockDevice struct {
 	// containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	Tag hcl2template.KeyValues `mapstructure:"tag" required:"false"`
+	Tag config.KeyValues `mapstructure:"tag" required:"false"`
 }
 
 type BlockDevices []BlockDevice

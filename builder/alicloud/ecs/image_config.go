@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -156,7 +155,7 @@ type AlicloudImageConfig struct {
 	// containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	AlicloudImageTag    hcl2template.KeyValues `mapstructure:"tag" required:"false"`
+	AlicloudImageTag    config.KeyValues `mapstructure:"tag" required:"false"`
 	AlicloudDiskDevices `mapstructure:",squash"`
 }
 

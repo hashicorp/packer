@@ -4,25 +4,25 @@ package ebsvolume
 import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/hcl2template"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
 )
 
 // FlatBlockDevice is an auto-generated flat version of BlockDevice.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatBlockDevice struct {
-	DeleteOnTermination *bool                       `mapstructure:"delete_on_termination" required:"false" cty:"delete_on_termination" hcl:"delete_on_termination"`
-	DeviceName          *string                     `mapstructure:"device_name" required:"false" cty:"device_name" hcl:"device_name"`
-	Encrypted           *bool                       `mapstructure:"encrypted" required:"false" cty:"encrypted" hcl:"encrypted"`
-	IOPS                *int64                      `mapstructure:"iops" required:"false" cty:"iops" hcl:"iops"`
-	NoDevice            *bool                       `mapstructure:"no_device" required:"false" cty:"no_device" hcl:"no_device"`
-	SnapshotId          *string                     `mapstructure:"snapshot_id" required:"false" cty:"snapshot_id" hcl:"snapshot_id"`
-	VirtualName         *string                     `mapstructure:"virtual_name" required:"false" cty:"virtual_name" hcl:"virtual_name"`
-	VolumeType          *string                     `mapstructure:"volume_type" required:"false" cty:"volume_type" hcl:"volume_type"`
-	VolumeSize          *int64                      `mapstructure:"volume_size" required:"false" cty:"volume_size" hcl:"volume_size"`
-	KmsKeyId            *string                     `mapstructure:"kms_key_id" required:"false" cty:"kms_key_id" hcl:"kms_key_id"`
-	Tags                map[string]string           `mapstructure:"tags" required:"false" cty:"tags" hcl:"tags"`
-	Tag                 []hcl2template.FlatKeyValue `mapstructure:"tag" required:"false" cty:"tag" hcl:"tag"`
+	DeleteOnTermination *bool                 `mapstructure:"delete_on_termination" required:"false" cty:"delete_on_termination" hcl:"delete_on_termination"`
+	DeviceName          *string               `mapstructure:"device_name" required:"false" cty:"device_name" hcl:"device_name"`
+	Encrypted           *bool                 `mapstructure:"encrypted" required:"false" cty:"encrypted" hcl:"encrypted"`
+	IOPS                *int64                `mapstructure:"iops" required:"false" cty:"iops" hcl:"iops"`
+	NoDevice            *bool                 `mapstructure:"no_device" required:"false" cty:"no_device" hcl:"no_device"`
+	SnapshotId          *string               `mapstructure:"snapshot_id" required:"false" cty:"snapshot_id" hcl:"snapshot_id"`
+	VirtualName         *string               `mapstructure:"virtual_name" required:"false" cty:"virtual_name" hcl:"virtual_name"`
+	VolumeType          *string               `mapstructure:"volume_type" required:"false" cty:"volume_type" hcl:"volume_type"`
+	VolumeSize          *int64                `mapstructure:"volume_size" required:"false" cty:"volume_size" hcl:"volume_size"`
+	KmsKeyId            *string               `mapstructure:"kms_key_id" required:"false" cty:"kms_key_id" hcl:"kms_key_id"`
+	Tags                map[string]string     `mapstructure:"tags" required:"false" cty:"tags" hcl:"tags"`
+	Tag                 []config.FlatKeyValue `mapstructure:"tag" required:"false" cty:"tag" hcl:"tag"`
 }
 
 // FlatMapstructure returns a new FlatBlockDevice.
@@ -48,7 +48,7 @@ func (*FlatBlockDevice) HCL2Spec() map[string]hcldec.Spec {
 		"volume_size":           &hcldec.AttrSpec{Name: "volume_size", Type: cty.Number, Required: false},
 		"kms_key_id":            &hcldec.AttrSpec{Name: "kms_key_id", Type: cty.String, Required: false},
 		"tags":                  &hcldec.AttrSpec{Name: "tags", Type: cty.Map(cty.String), Required: false},
-		"tag":                   &hcldec.BlockListSpec{TypeName: "tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"tag":                   &hcldec.BlockListSpec{TypeName: "tag", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
 	}
 	return s
 }
@@ -93,7 +93,7 @@ type FlatConfig struct {
 	InstanceType                              *string                                `mapstructure:"instance_type" required:"true" cty:"instance_type" hcl:"instance_type"`
 	SecurityGroupFilter                       *common.FlatSecurityGroupFilterOptions `mapstructure:"security_group_filter" required:"false" cty:"security_group_filter" hcl:"security_group_filter"`
 	RunTags                                   map[string]string                      `mapstructure:"run_tags" required:"false" cty:"run_tags" hcl:"run_tags"`
-	RunTag                                    []hcl2template.FlatKeyValue            `mapstructure:"run_tag" required:"false" cty:"run_tag" hcl:"run_tag"`
+	RunTag                                    []config.FlatKeyValue                  `mapstructure:"run_tag" required:"false" cty:"run_tag" hcl:"run_tag"`
 	SecurityGroupId                           *string                                `mapstructure:"security_group_id" required:"false" cty:"security_group_id" hcl:"security_group_id"`
 	SecurityGroupIds                          []string                               `mapstructure:"security_group_ids" required:"false" cty:"security_group_ids" hcl:"security_group_ids"`
 	SourceAmi                                 *string                                `mapstructure:"source_ami" required:"true" cty:"source_ami" hcl:"source_ami"`
@@ -102,7 +102,7 @@ type FlatConfig struct {
 	SpotPrice                                 *string                                `mapstructure:"spot_price" required:"false" cty:"spot_price" hcl:"spot_price"`
 	SpotPriceAutoProduct                      *string                                `mapstructure:"spot_price_auto_product" required:"false" undocumented:"true" cty:"spot_price_auto_product" hcl:"spot_price_auto_product"`
 	SpotTags                                  map[string]string                      `mapstructure:"spot_tags" required:"false" cty:"spot_tags" hcl:"spot_tags"`
-	SpotTag                                   []hcl2template.FlatKeyValue            `mapstructure:"spot_tag" required:"false" cty:"spot_tag" hcl:"spot_tag"`
+	SpotTag                                   []config.FlatKeyValue                  `mapstructure:"spot_tag" required:"false" cty:"spot_tag" hcl:"spot_tag"`
 	SubnetFilter                              *common.FlatSubnetFilterOptions        `mapstructure:"subnet_filter" required:"false" cty:"subnet_filter" hcl:"subnet_filter"`
 	SubnetId                                  *string                                `mapstructure:"subnet_id" required:"false" cty:"subnet_id" hcl:"subnet_id"`
 	Tenancy                                   *string                                `mapstructure:"tenancy" required:"false" cty:"tenancy" hcl:"tenancy"`
@@ -168,7 +168,7 @@ type FlatConfig struct {
 	AMISriovNetSupport                        *bool                                  `mapstructure:"sriov_support" required:"false" cty:"sriov_support" hcl:"sriov_support"`
 	VolumeMappings                            []FlatBlockDevice                      `mapstructure:"ebs_volumes" required:"false" cty:"ebs_volumes" hcl:"ebs_volumes"`
 	VolumeRunTags                             map[string]string                      `mapstructure:"run_volume_tags" cty:"run_volume_tags" hcl:"run_volume_tags"`
-	VolumeRunTag                              []hcl2template.FlatKeyValue            `mapstructure:"run_volume_tag" cty:"run_volume_tag" hcl:"run_volume_tag"`
+	VolumeRunTag                              []config.FlatKeyValue                  `mapstructure:"run_volume_tag" cty:"run_volume_tag" hcl:"run_volume_tag"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -220,7 +220,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"instance_type":                         &hcldec.AttrSpec{Name: "instance_type", Type: cty.String, Required: false},
 		"security_group_filter":                 &hcldec.BlockSpec{TypeName: "security_group_filter", Nested: hcldec.ObjectSpec((*common.FlatSecurityGroupFilterOptions)(nil).HCL2Spec())},
 		"run_tags":                              &hcldec.AttrSpec{Name: "run_tags", Type: cty.Map(cty.String), Required: false},
-		"run_tag":                               &hcldec.BlockListSpec{TypeName: "run_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"run_tag":                               &hcldec.BlockListSpec{TypeName: "run_tag", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
 		"security_group_id":                     &hcldec.AttrSpec{Name: "security_group_id", Type: cty.String, Required: false},
 		"security_group_ids":                    &hcldec.AttrSpec{Name: "security_group_ids", Type: cty.List(cty.String), Required: false},
 		"source_ami":                            &hcldec.AttrSpec{Name: "source_ami", Type: cty.String, Required: false},
@@ -229,7 +229,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"spot_price":                            &hcldec.AttrSpec{Name: "spot_price", Type: cty.String, Required: false},
 		"spot_price_auto_product":               &hcldec.AttrSpec{Name: "spot_price_auto_product", Type: cty.String, Required: false},
 		"spot_tags":                             &hcldec.AttrSpec{Name: "spot_tags", Type: cty.Map(cty.String), Required: false},
-		"spot_tag":                              &hcldec.BlockListSpec{TypeName: "spot_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"spot_tag":                              &hcldec.BlockListSpec{TypeName: "spot_tag", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
 		"subnet_filter":                         &hcldec.BlockSpec{TypeName: "subnet_filter", Nested: hcldec.ObjectSpec((*common.FlatSubnetFilterOptions)(nil).HCL2Spec())},
 		"subnet_id":                             &hcldec.AttrSpec{Name: "subnet_id", Type: cty.String, Required: false},
 		"tenancy":                               &hcldec.AttrSpec{Name: "tenancy", Type: cty.String, Required: false},
@@ -295,7 +295,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"sriov_support":                         &hcldec.AttrSpec{Name: "sriov_support", Type: cty.Bool, Required: false},
 		"ebs_volumes":                           &hcldec.BlockListSpec{TypeName: "ebs_volumes", Nested: hcldec.ObjectSpec((*FlatBlockDevice)(nil).HCL2Spec())},
 		"run_volume_tags":                       &hcldec.AttrSpec{Name: "run_volume_tags", Type: cty.Map(cty.String), Required: false},
-		"run_volume_tag":                        &hcldec.BlockListSpec{TypeName: "run_volume_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
+		"run_volume_tag":                        &hcldec.BlockListSpec{TypeName: "run_volume_tag", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
 	}
 	return s
 }

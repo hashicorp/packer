@@ -7,7 +7,6 @@ import (
 	"log"
 	"regexp"
 
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -55,7 +54,7 @@ type AMIConfig struct {
 	// containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	AMITag hcl2template.KeyValues `mapstructure:"tag" required:"false"`
+	AMITag config.KeyValues `mapstructure:"tag" required:"false"`
 	// Enable enhanced networking (ENA but not SriovNetSupport) on
 	// HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your
 	// AWS IAM policy.
@@ -140,7 +139,7 @@ type AMIConfig struct {
 	// repeatable block containing a `key` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	SnapshotTag hcl2template.KeyValues `mapstructure:"snapshot_tag" required:"false"`
+	SnapshotTag config.KeyValues `mapstructure:"snapshot_tag" required:"false"`
 	// A list of account IDs that have
 	// access to create volumes from the snapshot(s). By default no additional
 	// users other than the user creating the AMI has permissions to create

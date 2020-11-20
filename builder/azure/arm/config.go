@@ -28,7 +28,6 @@ import (
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/pkcs12"
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
@@ -293,7 +292,7 @@ type Config struct {
 	// containing a `name` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	AzureTag hcl2template.NameValues `mapstructure:"azure_tag" required:"false"`
+	AzureTag config.NameValues `mapstructure:"azure_tag" required:"false"`
 	// Resource group under which the final artifact will be stored.
 	ResourceGroupName string `mapstructure:"resource_group_name"`
 	// Storage account under which the final artifact will be stored.

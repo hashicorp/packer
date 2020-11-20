@@ -14,7 +14,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
@@ -67,7 +66,7 @@ type Config struct {
 	// block containing a `name` and a `value` field. In HCL2 mode the
 	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
-	VolumeRunTag hcl2template.NameValues `mapstructure:"run_volume_tag" required:"false"`
+	VolumeRunTag config.NameValues `mapstructure:"run_volume_tag" required:"false"`
 	// what architecture to use when registering the
 	// final AMI; valid options are "x86_64" or "arm64". Defaults to "x86_64".
 	Architecture string `mapstructure:"ami_architecture" required:"false"`

@@ -126,9 +126,9 @@ func main() {
 				fieldType = `duration string | ex: "1h5m2s"`
 			case "config.Trilean":
 				fieldType = `boolean`
-			case "hcl2template.NameValues":
+			case "config.NameValues":
 				fieldType = `[]{name string, value string}`
-			case "hcl2template.KeyValues":
+			case "config.KeyValues":
 				fieldType = `[]{key string, value string}`
 			}
 

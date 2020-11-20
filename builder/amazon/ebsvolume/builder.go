@@ -13,7 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
@@ -73,7 +72,7 @@ type Config struct {
 	// the
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
-	VolumeRunTag hcl2template.KeyValues `mapstructure:"run_volume_tag"`
+	VolumeRunTag config.KeyValues `mapstructure:"run_volume_tag"`
 
 	launchBlockDevices BlockDevices
 
