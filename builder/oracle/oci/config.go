@@ -83,6 +83,7 @@ type Config struct {
 	BaseImageFilter    ListImagesRequest `mapstructure:"base_image_filter"`
 	ImageName          string            `mapstructure:"image_name"`
 	ImageCompartmentID string            `mapstructure:"image_compartment_ocid"`
+	LaunchMode         string            `mapstructure:"image_launch_mode"`
 
 	// Instance
 	InstanceName        *string                           `mapstructure:"instance_name"`
@@ -275,9 +276,16 @@ func (c *Config) Prepare(raws ...interface{}) error {
 			errs, errors.New("'shape' must be specified"))
 	}
 
-	if c.SubnetID == "" {
+	if (c.SubnetID == "") && (c.CreateVnicDetails.SubnetId == nil) {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("'subnet_ocid' must be specified"))
+	}
+
+	if c.CreateVnicDetails.SubnetId == nil {
+		c.CreateVnicDetails.SubnetId = &c.SubnetID
+	} else if (*c.CreateVnicDetails.SubnetId != c.SubnetID) && (c.SubnetID != "") {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("'create_vnic_details[subnet]' must match 'subnet_ocid' if both are specified"))
 	}
 
 	if (c.BaseImageID == "") && (c.BaseImageFilter == ListImagesRequest{}) {

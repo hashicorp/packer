@@ -124,7 +124,6 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 		FreeformTags:       d.cfg.InstanceTags,
 		Shape:              &d.cfg.Shape,
 		SourceDetails:      InstanceSourceDetails,
-		SubnetId:           &d.cfg.SubnetID,
 		Metadata:           metadata,
 	}
 
@@ -145,6 +144,7 @@ func (d *driverOCI) CreateImage(ctx context.Context, id string) (core.Image, err
 		DisplayName:   &d.cfg.ImageName,
 		FreeformTags:  d.cfg.Tags,
 		DefinedTags:   d.cfg.DefinedTags,
+		LaunchMode:    core.CreateImageDetailsLaunchModeEnum(d.cfg.LaunchMode),
 	}})
 
 	if err != nil {
