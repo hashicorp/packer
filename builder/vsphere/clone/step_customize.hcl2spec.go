@@ -3,6 +3,7 @@ package clone
 
 import (
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -94,10 +95,10 @@ func (*FlatGlobalRoutingSettings) HCL2Spec() map[string]hcldec.Spec {
 // FlatLinuxOptions is an auto-generated flat version of LinuxOptions.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatLinuxOptions struct {
-	Domain     *string `mapstructure:"domain" cty:"domain" hcl:"domain"`
-	Hostname   *string `mapstructure:"host_name" cty:"host_name" hcl:"host_name"`
-	HWClockUTC *bool   `mapstructure:"hw_clock_utc" cty:"hw_clock_utc" hcl:"hw_clock_utc"`
-	Timezone   *string `mapstructure:"time_zone" cty:"time_zone" hcl:"time_zone"`
+	Domain     *string         `mapstructure:"domain" cty:"domain" hcl:"domain"`
+	Hostname   *string         `mapstructure:"host_name" cty:"host_name" hcl:"host_name"`
+	HWClockUTC *config.Trilean `mapstructure:"hw_clock_utc" cty:"hw_clock_utc" hcl:"hw_clock_utc"`
+	Timezone   *string         `mapstructure:"time_zone" cty:"time_zone" hcl:"time_zone"`
 }
 
 // FlatMapstructure returns a new FlatLinuxOptions.
@@ -114,7 +115,7 @@ func (*FlatLinuxOptions) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"domain":       &hcldec.AttrSpec{Name: "domain", Type: cty.String, Required: false},
 		"host_name":    &hcldec.AttrSpec{Name: "host_name", Type: cty.String, Required: false},
-		"hw_clock_utc": &hcldec.AttrSpec{Name: "hw_clock_utc", Type: cty.Bool, Required: false},
+		"hw_clock_utc": &hcldec.AttrSpec{Name: "hw_clock_utc", Type: cty.Number, Required: false},
 		"time_zone":    &hcldec.AttrSpec{Name: "time_zone", Type: cty.String, Required: false},
 	}
 	return s

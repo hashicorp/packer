@@ -79,6 +79,7 @@ type CloneConfig struct {
 	MacAddress     string
 	Annotation     string
 	VAppProperties map[string]string
+	StorageConfig  StorageConfig
 }
 
 type HardwareConfig struct {
@@ -96,6 +97,7 @@ type HardwareConfig struct {
 	VGPUProfile         string
 	Firmware            string
 	ForceBIOSSetup      bool
+	StorageConfig       StorageConfig
 }
 
 type NIC struct {
@@ -106,8 +108,6 @@ type NIC struct {
 }
 
 type CreateConfig struct {
-	DiskControllerType []string // example: "scsi", "pvscsi", "nvme", "lsilogic"
-
 	Annotation    string
 	Name          string
 	Folder        string
@@ -119,14 +119,7 @@ type CreateConfig struct {
 	NICs          []NIC
 	USBController []string
 	Version       uint // example: 10
-	Storage       []Disk
-}
-
-type Disk struct {
-	DiskSize            int64
-	DiskEagerlyScrub    bool
-	DiskThinProvisioned bool
-	ControllerIndex     int
+	StorageConfig StorageConfig
 }
 
 func (d *VCenterDriver) NewVM(ref *types.ManagedObjectReference) VirtualMachine {
@@ -207,11 +200,12 @@ func (d *VCenterDriver) CreateVM(config *CreateConfig) (VirtualMachine, error) {
 	}
 
 	devices := object.VirtualDeviceList{}
-
-	devices, err = addDisk(d, devices, config)
+	storageConfigSpec, err := config.StorageConfig.AddStorageDevices(devices)
 	if err != nil {
 		return nil, err
 	}
+	createSpec.DeviceChange = append(createSpec.DeviceChange, storageConfigSpec...)
+
 	devices, err = addNetwork(d, devices, config)
 	if err != nil {
 		return nil, err
@@ -235,10 +229,11 @@ func (d *VCenterDriver) CreateVM(config *CreateConfig) (VirtualMachine, error) {
 		devices = append(devices, usb)
 	}
 
-	createSpec.DeviceChange, err = devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+	devicesConfigSpec, err := devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
 	if err != nil {
 		return nil, err
 	}
+	createSpec.DeviceChange = append(createSpec.DeviceChange, devicesConfigSpec...)
 
 	createSpec.Files = &types.VirtualMachineFileInfo{
 		VmPathName: fmt.Sprintf("[%s]", datastore.Name()),
@@ -340,6 +335,24 @@ func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) 
 	if config.Annotation != "" {
 		configSpec.Annotation = config.Annotation
 	}
+
+	devices, err := vm.vm.Device(vm.driver.ctx)
+	if err != nil {
+		return nil, err
+	}
+	virtualDisks := devices.SelectByType((*types.VirtualDisk)(nil))
+	virtualControllers := devices.SelectByType((*types.VirtualController)(nil))
+
+	// Use existing devices to avoid overlapping configuration
+	existingDevices := object.VirtualDeviceList{}
+	existingDevices = append(existingDevices, virtualDisks...)
+	existingDevices = append(existingDevices, virtualControllers...)
+
+	storageConfigSpec, err := config.StorageConfig.AddStorageDevices(existingDevices)
+	if err != nil {
+		return nil, err
+	}
+	configSpec.DeviceChange = append(configSpec.DeviceChange, storageConfigSpec...)
 
 	if config.Network != "" {
 		net, err := vm.driver.FindNetwork(config.Network)
@@ -508,6 +521,76 @@ func (vm *VirtualMachineDriver) Configure(config *HardwareConfig) error {
 
 	confSpec.CpuHotAddEnabled = &config.CpuHotAddEnabled
 	confSpec.MemoryHotAddEnabled = &config.MemoryHotAddEnabled
+	//
+	//if len(config.StorageConfig.Storage) > 0 {
+	//	ds, err := vm.vm.Device(vm.driver.ctx)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	vd := ds.SelectByType((*types.VirtualDisk)(nil))
+	//	vc := ds.SelectByType((*types.VirtualController)(nil))
+	//
+	//	// Use existing devices to avoid wrong configuration
+	//	devices := object.VirtualDeviceList{}
+	//	devices = append(devices, vd...)
+	//	devices = append(devices, vc...)
+	//
+	//	newDevices := object.VirtualDeviceList{}
+	//
+	//	// Adds new controllers
+	//	var controllers []types.BaseVirtualController
+	//	for _, controllerType := range config.StorageConfig.DiskControllerType {
+	//		var device types.BaseVirtualDevice
+	//		var err error
+	//		if controllerType == "nvme" {
+	//			device, err = devices.CreateNVMEController()
+	//		} else {
+	//			device, err = devices.CreateSCSIController(controllerType)
+	//		}
+	//		if err != nil {
+	//			return err
+	//		}
+	//		devices = append(devices, device)
+	//		newDevices = append(newDevices, device)
+	//		name := devices.Name(device)
+	//		log.Printf("MOSS controller name %s", name)
+	//		controller, err := devices.FindDiskController(name)
+	//		if err != nil {
+	//			return err
+	//		}
+	//		controllers = append(controllers, controller)
+	//	}
+	//
+	//	for _, dc := range config.StorageConfig.Storage {
+	//		key := devices.NewKey()
+	//		disk := &types.VirtualDisk{
+	//			VirtualDevice: types.VirtualDevice{
+	//				Key: key,
+	//				Backing: &types.VirtualDiskFlatVer2BackingInfo{
+	//					DiskMode:        string(types.VirtualDiskModePersistent),
+	//					ThinProvisioned: types.NewBool(dc.DiskThinProvisioned),
+	//					EagerlyScrub:    types.NewBool(dc.DiskEagerlyScrub),
+	//				},
+	//			},
+	//			CapacityInKB: dc.DiskSize * 1024,
+	//		}
+	//
+	//		log.Printf("MOSS device key %d", key)
+	//
+	//		devices.AssignController(disk, controllers[dc.ControllerIndex])
+	//		newDevices = append(newDevices, disk)
+	//	}
+	//	//devices, err = config.StorageConfig.AddStorageDevices(devices)
+	//	//if err != nil {
+	//	//	return err
+	//	//}
+	//
+	//	devicesConfigSpec, err := newDevices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	confSpec.DeviceChange = append(confSpec.DeviceChange, devicesConfigSpec...)
+	//}
 
 	if config.VideoRAM != 0 {
 		devices, err := vm.vm.Device(vm.driver.ctx)
@@ -614,24 +697,6 @@ func (vm *VirtualMachineDriver) ResizeDisk(diskSize int64) error {
 
 	_, err = task.WaitForResult(vm.driver.ctx, nil)
 	return err
-}
-
-func findDisk(devices object.VirtualDeviceList) (*types.VirtualDisk, error) {
-	var disks []*types.VirtualDisk
-	for _, device := range devices {
-		switch d := device.(type) {
-		case *types.VirtualDisk:
-			disks = append(disks, d)
-		}
-	}
-
-	switch len(disks) {
-	case 0:
-		return nil, errors.New("VM has no disks")
-	case 1:
-		return disks[0], nil
-	}
-	return nil, errors.New("VM has multiple disks")
 }
 
 func (vm *VirtualMachineDriver) PowerOn() error {
@@ -847,55 +912,6 @@ func (vm *VirtualMachineDriver) GetDir() (string, error) {
 		}
 	}
 	return "", fmt.Errorf("cannot find '%s'", vmxName)
-}
-
-func addDisk(_ *VCenterDriver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
-	if len(config.Storage) == 0 {
-		return nil, errors.New("no storage devices have been defined")
-	}
-
-	if len(config.DiskControllerType) == 0 {
-		return nil, errors.New("no controllers have been defined")
-	}
-
-	var controllers []types.BaseVirtualController
-	for _, controllerType := range config.DiskControllerType {
-		var device types.BaseVirtualDevice
-		var err error
-		if controllerType == "nvme" {
-			device, err = devices.CreateNVMEController()
-		} else {
-			device, err = devices.CreateSCSIController(controllerType)
-		}
-		if err != nil {
-			return nil, err
-		}
-		devices = append(devices, device)
-		controller, err := devices.FindDiskController(devices.Name(device))
-		if err != nil {
-			return nil, err
-		}
-		controllers = append(controllers, controller)
-	}
-
-	for _, dc := range config.Storage {
-		disk := &types.VirtualDisk{
-			VirtualDevice: types.VirtualDevice{
-				Key: devices.NewKey(),
-				Backing: &types.VirtualDiskFlatVer2BackingInfo{
-					DiskMode:        string(types.VirtualDiskModePersistent),
-					ThinProvisioned: types.NewBool(dc.DiskThinProvisioned),
-					EagerlyScrub:    types.NewBool(dc.DiskEagerlyScrub),
-				},
-			},
-			CapacityInKB: dc.DiskSize * 1024,
-		}
-
-		devices.AssignController(disk, controllers[dc.ControllerIndex])
-		devices = append(devices, disk)
-	}
-
-	return devices, nil
 }
 
 func addNetwork(d *VCenterDriver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {

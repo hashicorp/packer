@@ -45,6 +45,21 @@ necessary for this build to succeed and can be found further down the page.
 
 @include 'builder/vsphere/clone/CloneConfig-not-required.mdx'
 
+@include 'builder/vsphere/common/StorageConfig-not-required.mdx'
+
+### Storage Configuration
+
+When cloning a VM, the storage configuration can be used to add additional storage and disk controllers. The resulting VM
+will contain the origin VM storage and disk controller plus the new configured ones.
+
+@include 'builder/vsphere/common/DiskConfig.mdx'
+
+@include 'builder/vsphere/common/DiskConfig-required.mdx'
+
+#### Optional
+
+@include 'builder/vsphere/common/DiskConfig-not-required.mdx'
+
 ### vApp Options Configuration
 
 @include 'builder/vsphere/clone/vAppConfig-not-required.mdx'

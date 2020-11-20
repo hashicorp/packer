@@ -24,7 +24,7 @@ func TestCreateConfig_Prepare(t *testing.T) {
 	if config.GuestOSType != "otherGuest" {
 		t.Fatalf("GuestOSType should default to 'otherGuest'")
 	}
-	if len(config.DiskControllerType) != 1 {
+	if len(config.StorageConfig.DiskControllerType) != 1 {
 		t.Fatalf("DiskControllerType should have at least one element as default")
 	}
 
@@ -38,10 +38,12 @@ func TestCreateConfig_Prepare(t *testing.T) {
 		{
 			name: "Storage validate disk_size",
 			config: &CreateConfig{
-				Storage: []DiskConfig{
-					{
-						DiskSize:            0,
-						DiskThinProvisioned: true,
+				StorageConfig: common.StorageConfig{
+					Storage: []common.DiskConfig{
+						{
+							DiskSize:            0,
+							DiskThinProvisioned: true,
+						},
 					},
 				},
 			},
@@ -51,10 +53,12 @@ func TestCreateConfig_Prepare(t *testing.T) {
 		{
 			name: "Storage validate disk_controller_index",
 			config: &CreateConfig{
-				Storage: []DiskConfig{
-					{
-						DiskSize:            32768,
-						DiskControllerIndex: 3,
+				StorageConfig: common.StorageConfig{
+					Storage: []common.DiskConfig{
+						{
+							DiskSize:            32768,
+							DiskControllerIndex: 3,
+						},
 					},
 				},
 			},
@@ -294,13 +298,15 @@ func basicLocationConfig() *common.LocationConfig {
 
 func createConfig() *CreateConfig {
 	return &CreateConfig{
-		Version:            1,
-		GuestOSType:        "ubuntu64Guest",
-		DiskControllerType: []string{"pvscsi"},
-		Storage: []DiskConfig{
-			{
-				DiskSize:            32768,
-				DiskThinProvisioned: true,
+		Version:     1,
+		GuestOSType: "ubuntu64Guest",
+		StorageConfig: common.StorageConfig{
+			DiskControllerType: []string{"pvscsi"},
+			Storage: []common.DiskConfig{
+				{
+					DiskSize:            32768,
+					DiskThinProvisioned: true,
+				},
 			},
 		},
 		NICs: []NIC{
@@ -324,7 +330,7 @@ func driverCreateConfig(config *CreateConfig, location *common.LocationConfig) *
 	}
 
 	var disks []driver.Disk
-	for _, disk := range config.Storage {
+	for _, disk := range config.StorageConfig.Storage {
 		disks = append(disks, driver.Disk{
 			DiskSize:            disk.DiskSize,
 			DiskEagerlyScrub:    disk.DiskEagerlyScrub,
@@ -334,18 +340,20 @@ func driverCreateConfig(config *CreateConfig, location *common.LocationConfig) *
 	}
 
 	return &driver.CreateConfig{
-		DiskControllerType: config.DiskControllerType,
-		Storage:            disks,
-		Annotation:         config.Notes,
-		Name:               location.VMName,
-		Folder:             location.Folder,
-		Cluster:            location.Cluster,
-		Host:               location.Host,
-		ResourcePool:       location.ResourcePool,
-		Datastore:          location.Datastore,
-		GuestOS:            config.GuestOSType,
-		NICs:               networkCards,
-		USBController:      config.USBController,
-		Version:            config.Version,
+		StorageConfig: driver.StorageConfig{
+			DiskControllerType: config.StorageConfig.DiskControllerType,
+			Storage:            disks,
+		},
+		Annotation:    config.Notes,
+		Name:          location.VMName,
+		Folder:        location.Folder,
+		Cluster:       location.Cluster,
+		Host:          location.Host,
+		ResourcePool:  location.ResourcePool,
+		Datastore:     location.Datastore,
+		GuestOS:       config.GuestOSType,
+		NICs:          networkCards,
+		USBController: config.USBController,
+		Version:       config.Version,
 	}
 }
