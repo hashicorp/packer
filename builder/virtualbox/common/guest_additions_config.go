@@ -5,8 +5,6 @@ package common
 import (
 	"fmt"
 	"strings"
-
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // These are the different valid mode values for "guest_additions_mode" which
@@ -18,7 +16,6 @@ const (
 )
 
 type GuestAdditionsConfig struct {
-	Communicator string `mapstructure:"communicator"`
 	// The method by which guest additions are
 	// made available to the guest for installation. Valid options are `upload`,
 	// `attach`, or `disable`. If the mode is `attach` the guest additions ISO will
@@ -52,13 +49,8 @@ type GuestAdditionsConfig struct {
 	GuestAdditionsURL string `mapstructure:"guest_additions_url" required:"false"`
 }
 
-func (c *GuestAdditionsConfig) Prepare(ctx *interpolate.Context) []error {
+func (c *GuestAdditionsConfig) Prepare(communicatorType string) []error {
 	var errs []error
-
-	if c.Communicator == "none" && c.GuestAdditionsMode != "disable" {
-		errs = append(errs, fmt.Errorf("guest_additions_mode has to be "+
-			"'disable' when communicator = 'none'."))
-	}
 
 	if c.GuestAdditionsMode == "" {
 		c.GuestAdditionsMode = "upload"
@@ -89,6 +81,11 @@ func (c *GuestAdditionsConfig) Prepare(ctx *interpolate.Context) []error {
 	if !validMode {
 		errs = append(errs,
 			fmt.Errorf("guest_additions_mode is invalid. Must be one of: %v", validModes))
+	}
+
+	if communicatorType == "none" && c.GuestAdditionsMode != "disable" {
+		errs = append(errs, fmt.Errorf("guest_additions_mode has to be "+
+			"'disable' when communicator = 'none'."))
 	}
 
 	return errs
