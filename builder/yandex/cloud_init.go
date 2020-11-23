@@ -5,10 +5,15 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/textproto"
+	"strings"
 )
 
 const (
-	defaultContentType  = "text/cloud-config"
+	defaultContentType = "text/cloud-config"
+	shellContentType   = "text/x-shellscript"
+)
+
+const (
 	cloudInitIPv6Config = `#cloud-config
 bootcmd:
 - [ sh, -c, '/usr/bin/env dhclient -6 -D LL -nw -pf /run/dhclient_ipv6.eth0.pid -lf /var/lib/dhcp/dhclient_ipv6.eth0.leases eth0' ]
@@ -30,8 +35,8 @@ func MergeCloudUserMetaData(usersData ...string) (string, error) {
 
 	for i, userData := range usersData {
 		w, err := data.CreatePart(textproto.MIMEHeader{
-			"Content-Disposition": {fmt.Sprintf("attachment; filename=\"user-data-%d.yaml\"", i)},
-			"Content-Type":        {defaultContentType},
+			"Content-Disposition": {fmt.Sprintf("attachment; filename=\"user-data-%d\"", i)},
+			"Content-Type":        {detectContentType(userData)},
 		})
 		if err != nil {
 			return "", err
@@ -42,4 +47,15 @@ func MergeCloudUserMetaData(usersData ...string) (string, error) {
 		}
 	}
 	return buff.String(), nil
+}
+
+func detectContentType(content string) string {
+	switch {
+	case strings.HasPrefix(content, "#!"):
+		return shellContentType
+	case strings.HasPrefix(content, "#cloud-config"):
+		return defaultContentType
+	}
+
+	return defaultContentType
 }

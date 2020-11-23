@@ -19,12 +19,15 @@ runcmd:
   - touch "cmd3"
   - cmd4
 `
+	data3 = `#!/bin/bash
+touch /test`
 )
 
 func TestCloudInitMerge(t *testing.T) {
 	merged, err := MergeCloudUserMetaData(
 		data1,
 		data2,
+		data3,
 	)
 
 	require.NoError(t, err)
@@ -35,4 +38,6 @@ func TestCloudInitMerge(t *testing.T) {
 	require.Contains(t, merged, "\"cmd3\"")
 	require.Contains(t, merged, "cmd4")
 
+	require.Contains(t, merged, "text/cloud-config")
+	require.Contains(t, merged, "text/x-shellscript")
 }
