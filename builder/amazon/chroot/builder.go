@@ -11,7 +11,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"regexp"
 	"runtime"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
