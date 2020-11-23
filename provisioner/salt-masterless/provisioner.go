@@ -398,7 +398,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		}
 	}
 
-	if p.config.GuestOSType == provisioner.WindowsOSType {
+	if p.config.GuestOSType == guestexec.WindowsOSType {
 		ui.Message("Downloading Git for Windows")
 		cmd1 := &packer.RemoteCmd{Command: fmt.Sprintf("powershell [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri https://github.com/git-for-windows/git/releases/download/v2.28.0.windows.1/Git-2.28.0-64-bit.exe -OutFile $env:TEMP/Git.exe")}
 		if err = cmd1.RunWithUi(ctx, comm, ui); (err != nil || cmd1.ExitStatus() != 0) && !p.config.NoExitOnFailure {
