@@ -224,9 +224,19 @@ var ctyTypeComparer = cmp.Comparer(func(x, y cty.Type) bool {
 	return x.Equals(y)
 })
 
+var versionComparer = cmp.Comparer(func(x, y *version.Version) bool {
+	return x.Equal(y)
+})
+
+var versionConstraintComparer = cmp.Comparer(func(x, y *version.Constraint) bool {
+	return x.String() == y.String()
+})
+
 var cmpOpts = []cmp.Option{
 	ctyValueComparer,
 	ctyTypeComparer,
+	versionComparer,
+	versionConstraintComparer,
 	cmpopts.IgnoreUnexported(
 		PackerConfig{},
 		Variable{},
@@ -240,7 +250,6 @@ var cmpOpts = []cmp.Option{
 		packer.CoreBuildProvisioner{},
 		packer.CoreBuildPostProcessor{},
 		null.Builder{},
-		version.Constraint{},
 	),
 	cmpopts.IgnoreFields(PackerConfig{},
 		"Cwd", // Cwd will change for every os type

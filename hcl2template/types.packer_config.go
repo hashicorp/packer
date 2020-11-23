@@ -20,7 +20,9 @@ import (
 type PackerConfig struct {
 	Packer struct {
 		VersionConstraints []VersionConstraint
+		RequiredPlugins    []*RequiredPlugins
 	}
+
 	// Directory where the config files are defined
 	Basedir string
 

@@ -1,6 +1,13 @@
 
 packer {
     required_version = ">= v1"
+
+    required_plugins {
+        amazon = {
+            source  = "amazon"
+            version = ">= v1"
+        }
+    }
 }
 
 // starts resources to provision them.

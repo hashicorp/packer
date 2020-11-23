@@ -42,6 +42,9 @@ var packerBlockSchema = &hcl.BodySchema{
 	Attributes: []hcl.AttributeSchema{
 		{Name: "required_version"},
 	},
+	Blocks: []hcl.BlockHeaderSchema{
+		{Type: "required_plugins"},
+	},
 }
 
 // Parser helps you parse HCL folders. It will parse an hcl file or directory
@@ -144,6 +147,13 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	diags = append(diags, versionDiags...)
 	if versionDiags.HasErrors() {
 		return cfg, diags
+	}
+
+	// Decode required_plugins blocks
+	{
+		for _, file := range files {
+			diags = append(diags, cfg.decodeRequiredPluginsBlock(file)...)
+		}
 	}
 
 	// Decode variable blocks so that they are available later on. Here locals
