@@ -403,6 +403,12 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 	c.PollingConfig.LogEnvOverrideWarnings()
 
+	// Default MaxRetries to 10, to make throttling issues less likely. The
+	// Aws sdk defaults this to 3, which regularly gets tripped by users.
+	if c.MaxRetries == 0 {
+		c.MaxRetries = 10
+	}
+
 	return errs
 }
 
