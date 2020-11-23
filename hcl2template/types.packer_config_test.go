@@ -49,6 +49,18 @@ func TestParser_complete(t *testing.T) {
 										Required: mustVersionConstraints(version.NewConstraint(">= v1")),
 									},
 								},
+								"amazon-v2": &RequiredPlugin{
+									Name:   "amazon-v2",
+									Source: "amazon",
+									Type: &addrs.Plugin{
+										Type:      "amazon",
+										Namespace: "hashicorp",
+										Hostname:  "github.com",
+									},
+									Requirement: VersionConstraint{
+										Required: mustVersionConstraints(version.NewConstraint(">= v2")),
+									},
+								},
 							},
 						},
 					},

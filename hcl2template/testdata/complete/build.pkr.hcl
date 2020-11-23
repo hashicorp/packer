@@ -7,6 +7,11 @@ packer {
             source  = "amazon"
             version = ">= v1"
         }
+
+        amazon-v2 = {
+            source  = "amazon"
+            version = ">= v2"
+        }
     }
 }
 
