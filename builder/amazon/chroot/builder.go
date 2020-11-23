@@ -350,7 +350,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			if b.config.RootVolumeEncryptBoot.False() {
 				errs = packer.MultiErrorAppend(
 					errs, errors.New("If you have set root_volume_kms_key_id, root_volume_encrypt_boot must also be true."))
-			} else if b.config.RootVolumeEncryptBoot.True() && !validateKmsKey(b.config.RootVolumeKmsKeyId) {
+			} else if b.config.RootVolumeEncryptBoot.True() && !awscommon.ValidateKmsKey(b.config.RootVolumeKmsKeyId) {
 				errs = packer.MultiErrorAppend(
 					errs, fmt.Errorf("%q is not a valid KMS Key Id.", b.config.RootVolumeKmsKeyId))
 			}
@@ -536,23 +536,4 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	}
 
 	return artifact, nil
-}
-
-func validateKmsKey(kmsKey string) (valid bool) {
-	kmsKeyIdPattern := `[a-f0-9-]+$`
-	aliasPattern := `alias/[a-zA-Z0-9:/_-]+$`
-	kmsArnStartPattern := `^arn:aws(-us-gov)?:kms:([a-z]{2}-(gov-)?[a-z]+-\d{1})?:(\d{12}):`
-	if regexp.MustCompile(fmt.Sprintf("^%s", kmsKeyIdPattern)).MatchString(kmsKey) {
-		return true
-	}
-	if regexp.MustCompile(fmt.Sprintf("^%s", aliasPattern)).MatchString(kmsKey) {
-		return true
-	}
-	if regexp.MustCompile(fmt.Sprintf("%skey/%s", kmsArnStartPattern, kmsKeyIdPattern)).MatchString(kmsKey) {
-		return true
-	}
-	if regexp.MustCompile(fmt.Sprintf("%s%s", kmsArnStartPattern, aliasPattern)).MatchString(kmsKey) {
-		return true
-	}
-	return false
 }
