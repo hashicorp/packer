@@ -3,6 +3,7 @@ package hcl2template
 import (
 	"testing"
 
+	"github.com/hashicorp/go-version"
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -23,7 +24,16 @@ func TestParser_complete(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/complete", nil, nil},
 			&PackerConfig{
-				Basedir: "testdata/complete",
+				Packer: struct{ VersionConstraints []VersionConstraint }{
+					VersionConstraints: []VersionConstraint{
+						VersionConstraint{
+							Required: mustVersionConstraints(version.NewConstraint(">= v1")),
+						},
+					},
+				},
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 "testdata/complete",
+
 				InputVariables: Variables{
 					"foo": &Variable{
 						Name:   "foo",
@@ -340,4 +350,11 @@ func TestParser_ValidateFilterOption(t *testing.T) {
 
 func pointerToBool(b bool) *bool {
 	return &b
+}
+
+func mustVersionConstraints(vs version.Constraints, err error) version.Constraints {
+	if err != nil {
+		panic(err)
+	}
+	return vs
 }

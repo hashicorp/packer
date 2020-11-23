@@ -1,4 +1,8 @@
 
+packer {
+    required_version = ">= v1"
+}
+
 // starts resources to provision them.
 build {
     sources = [ 

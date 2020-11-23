@@ -15,7 +15,8 @@ func TestParse_source(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/sources/basic.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "sources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]SourceBlock{
 					{
 						Type: "virtualbox-iso",
@@ -34,7 +35,8 @@ func TestParse_source(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/sources/untyped.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "sources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "sources"),
 			},
 			true, true,
 			nil,
@@ -44,7 +46,8 @@ func TestParse_source(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/sources/unnamed.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "sources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "sources"),
 			},
 			true, true,
 			nil,
@@ -54,7 +57,8 @@ func TestParse_source(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/sources/inexistent.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "sources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "sources"),
 			},
 			true, true,
 			nil,
@@ -64,7 +68,8 @@ func TestParse_source(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/sources/duplicate.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "sources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]SourceBlock{
 					{
 						Type: "virtualbox-iso",
