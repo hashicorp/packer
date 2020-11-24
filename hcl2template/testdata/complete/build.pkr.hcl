@@ -12,6 +12,17 @@ packer {
             source  = "amazon"
             version = ">= v2"
         }
+
+
+        amazon-v3 = {
+            source  = "hashicorp/amazon"
+            version = ">= v3"
+        }
+
+        amazon-v4 = {
+            source  = "github.com/hashicorp/amazon"
+            version = ">= v4"
+        }
     }
 }
 
