@@ -80,6 +80,14 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 			vc, reqDiags := decodeVersionConstraint(attr)
 			diags = append(diags, reqDiags...)
 			rp.Requirement = vc
+			rp.Type, err = addrs.ParsePluginSourceString(name)
+			if err != nil {
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid plugin type",
+					Detail:   fmt.Sprintf(`Invalid plugin type %q: %s"`, name, err),
+				})
+			}
 
 		case expr.Type().IsObjectType():
 			if expr.Type().HasAttribute("version") {
@@ -160,10 +168,6 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 				Detail:   "required_plugins entries must be objects.",
 				Subject:  attr.Expr.Range().Ptr(),
 			})
-		}
-
-		if rp.Type == nil {
-			panic("nil plugin ?") // TODO: fix: can this happen ?
 		}
 
 		ret.RequiredPlugins[rp.Name] = rp

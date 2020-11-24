@@ -39,6 +39,18 @@ func TestParser_complete(t *testing.T) {
 							RequiredPlugins: map[string]*RequiredPlugin{
 								"amazon": &RequiredPlugin{
 									Name:   "amazon",
+									Source: "",
+									Type: &addrs.Plugin{
+										Type:      "amazon",
+										Namespace: "hashicorp",
+										Hostname:  "github.com",
+									},
+									Requirement: VersionConstraint{
+										Required: mustVersionConstraints(version.NewConstraint(">= v0")),
+									},
+								},
+								"amazon-v1": &RequiredPlugin{
+									Name:   "amazon-v1",
 									Source: "amazon",
 									Type: &addrs.Plugin{
 										Type:      "amazon",

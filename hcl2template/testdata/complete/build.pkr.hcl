@@ -3,7 +3,9 @@ packer {
     required_version = ">= v1"
 
     required_plugins {
-        amazon = {
+        amazon = ">= v0"
+
+        amazon-v1 = {
             source  = "amazon"
             version = ">= v1"
         }
