@@ -48,14 +48,6 @@ const DefaultPluginNamespace = "hashicorp"
 // of an addrs.Plugin is already a hostname and it's ideal to use exactly
 // the same case folding and normalization rules for all of the parts.
 //
-// In practice a plugin type string conventionally does not contain dashes
-// either. Such names are permitted, but plugins with such type names will be
-// hard to use because their resource type names will not be able to contain
-// the plugin type name and thus each resource will need an explicit plugin
-// address specified. (A real-world example of such a plugin is the
-// "google-beta" variant of the GCP plugin, which has resource types that
-// start with the "google_" prefix instead.)
-//
 // It's valid to pass the result of this function as the argument to a
 // subsequent call, in which case the result will be identical.
 func ParsePluginPart(given string) (string, error) {
