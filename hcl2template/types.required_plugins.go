@@ -163,7 +163,7 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 		}
 
 		if rp.Type == nil {
-			panic("nil plugin ?")
+			panic("nil plugin ?") // TODO: fix: can this happen ?
 		}
 
 		ret.RequiredPlugins[rp.Name] = rp
