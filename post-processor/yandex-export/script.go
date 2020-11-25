@@ -113,6 +113,7 @@ fi
 DISK_LINK="/dev/disk/by-id/virtio-doexport"
 echo "Waiting for disk..."
 for attempt in 1 2 3; do
+  sleep 3
   if [ -L "${DISK_LINK}" ]; then
     break
   fi
@@ -121,7 +122,6 @@ for attempt in 1 2 3; do
     echo "Symlink ${DISK_LINK} not found"
     Exit 1
   fi
-  sleep 3
 done
 
 echo "Dumping disk..."
