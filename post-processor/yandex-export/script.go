@@ -114,6 +114,7 @@ DISK_LINK="/dev/disk/by-id/virtio-doexport"
 echo "Waiting for disk..."
 for attempt in 1 2 3; do
   sleep 3
+  /sbin/udevadm trigger
   if [ -L "${DISK_LINK}" ]; then
     break
   fi
