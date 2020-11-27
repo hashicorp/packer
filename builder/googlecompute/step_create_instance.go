@@ -85,6 +85,43 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 	return instanceMetadata, nil
 }
 
+func (s *StepCreateInstance) addMetadataToInstance(ctx context.Context, errCh chan<- error, name, state multistep.StateBag, metadata map[string]string) {
+
+	c := state.Get("config").(*Config)
+	d := state.Get("driver").(Driver)
+
+	instance, err := d.service.Instances.Get(d.projectId, c.Zone, name).Do()
+	if err != nil {
+		errCh <- err
+		return
+	}
+	instance.Metadata.Items = append(instance.Metadata.Items, &compute.MetadataItems{Key: "windows-keys", Value: &sshPublicKey})
+
+	op, err := d.service.Instances.SetMetadata(d.projectId, zone, name, &compute.Metadata{
+		Fingerprint: instance.Metadata.Fingerprint,
+		Items:       instance.Metadata.Items,
+	}).Do()
+
+	if err != nil {
+		errCh <- err
+		return
+	}
+
+	newErrCh := make(chan error, 1)
+	go waitForState(newErrCh, "DONE", d.refreshZoneOp(zone, op))
+
+	select {
+	case err = <-newErrCh:
+	case <-time.After(time.Second * 30):
+		err = errors.New("time out while waiting for SSH public key to be added to instance")
+	}
+
+	if err != nil {
+		errCh <- err
+		return
+	}
+}
+
 func getImage(c *Config, d Driver) (*Image, error) {
 	name := c.SourceImageFamily
 	fromFamily := true
@@ -137,6 +174,11 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		state.Put("error", errs.Error())
 		ui.Error(errs.Error())
 		return multistep.ActionHalt
+	}
+
+	if c.WaitToAddSSHKeys == 0 {
+		ui.Message("Adding SSH keys during instance creation...")
+		metadata = make(map[string]string)
 	}
 
 	errCh, err = d.RunInstance(&InstanceConfig{
@@ -199,7 +241,34 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	// instance id inside of the provisioners, used in step_provision.
 	state.Put("instance_id", name)
 
+	if c.WaitToAddSSHKeys > 0 {
+		ui.Say(fmt.Sprintf("Waiting %s before adding SSH keys...",
+			c.WaitToAddSSHKeys.String()))
+		cancelled := s.wait(c.WaitToAddSSHKeys, ctx)
+		if cancelled {
+			return multistep.ActionHalt
+		}
+
+		metadata, errs = s.addMetadataToInstance(metadata, d, c)
+		if errs != nil {
+			state.Put("error", errs.Error())
+			ui.Error(errs.Error())
+			return multistep.ActionHalt
+		}
+	}
+	
 	return multistep.ActionContinue
+}
+
+func (s *StepCreateInstance) wait(waitLen time.Duration, ctx context.Context) bool {
+	// Use a select to determine if we get cancelled during the wait
+	select {
+	case <-ctx.Done():
+		return true
+	case <-time.After(waitLen):
+	}
+	ui.Message("Wait over; adding SSH keys to instance...")
+	return false
 }
 
 // Cleanup destroys the GCE instance created during the image creation process.

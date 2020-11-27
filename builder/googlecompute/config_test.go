@@ -85,6 +85,17 @@ func TestConfigPrepare(t *testing.T) {
 		},
 
 		{
+			"wait_to_add_ssh_keys",
+			"SO BAD",
+			true,
+		},
+		{
+			"wait_to_add_ssh_keys",
+			"5s",
+			false,
+		},
+
+		{
 			"state_timeout",
 			"SO BAD",
 			true,

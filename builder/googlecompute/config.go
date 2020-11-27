@@ -287,6 +287,11 @@ type Config struct {
 	VaultGCPOauthEngine string `mapstructure:"vault_gcp_oauth_engine"`
 	// The zone in which to launch the instance used to create the image.
 	// Example: "us-central1-a"
+
+	// The time to wait between instance creation and adding SSH keys.
+	// Example value: `5m`.
+	WaitToAddSSHKeys time.Duration `mapstructure:"wait_to_add_ssh_keys"`
+
 	Zone string `mapstructure:"zone" required:"true"`
 
 	account            *ServiceAccount
