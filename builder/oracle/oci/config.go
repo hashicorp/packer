@@ -285,7 +285,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	if c.CreateVnicDetails.SubnetId == nil {
 		c.CreateVnicDetails.SubnetId = &c.SubnetID
 	} else if (*c.CreateVnicDetails.SubnetId != c.SubnetID) && (c.SubnetID != "") {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("'create_vnic_details[subnet]' must match 'subnet_ocid' if both are specified"))
 	}
 

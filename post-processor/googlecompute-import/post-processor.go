@@ -295,11 +295,7 @@ func UploadToBucket(opts option.ClientOption, ui packersdk.Ui, artifact packersd
 	return storageObject.SelfLink, nil
 }
 
-<<<<<<< HEAD
-func CreateGceImage(opts option.ClientOption, ui packersdk.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string, shieldedVMStateConfig *compute.InitialStateConfig) (packer.Artifact, error) {
-=======
-func CreateGceImage(opts option.ClientOption, ui packersdk.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string) (packersdk.Artifact, error) {
->>>>>>> move Artifact and artifact mock to the sdk
+func CreateGceImage(opts option.ClientOption, ui packersdk.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string, shieldedVMStateConfig *compute.InitialStateConfig) (packersdk.Artifact, error) {
 	service, err := compute.NewService(context.TODO(), opts)
 
 	if err != nil {
