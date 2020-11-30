@@ -21,6 +21,8 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/post-processor/artifice"
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
+	ycsdk "github.com/yandex-cloud/go-sdk"
 )
 
 const defaultStorageEndpoint = "storage.yandexcloud.net"
@@ -196,6 +198,11 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		return nil, false, false, err
 	}
 
+	ui.Say(fmt.Sprintf("Validating service_account_id: '%s'...", yandexConfig.ServiceAccountID))
+	if err := validateServiceAccount(ctx, driver.SDK(), yandexConfig.ServiceAccountID); err != nil {
+		return nil, false, false, err
+	}
+
 	// Set up the state.
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &yandexConfig)
@@ -258,4 +265,11 @@ func formUrls(paths []string) []string {
 		result = append(result, url)
 	}
 	return result
+}
+
+func validateServiceAccount(ctx context.Context, ycsdk *ycsdk.SDK, serviceAccountID string) error {
+	_, err := ycsdk.IAM().ServiceAccount().Get(ctx, &iam.GetServiceAccountRequest{
+		ServiceAccountId: serviceAccountID,
+	})
+	return err
 }
