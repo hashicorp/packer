@@ -25,6 +25,7 @@
 ### BUG FIXES
 * builder/amazon: Fix single `tag` interpolation to allow for templating engine
     usage. [GH-10224]
+* builder/yandex: Fixed using cloud config when using IPv6 [GH-10297]
 * post-processort/yandex-export: added check of service account id
 
 ## 1.6.5 (October 30, 2020)
