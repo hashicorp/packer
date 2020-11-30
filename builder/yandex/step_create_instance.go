@@ -85,9 +85,12 @@ func createDisk(ctx context.Context, c *Config, d Driver, sourceImage *Image) (*
 			if !ok {
 				return nil, err
 			}
-			sdk.Compute().Disk().Delete(ctx, &compute.DeleteDiskRequest{
+			_, err2 = sdk.Compute().Disk().Delete(ctx, &compute.DeleteDiskRequest{
 				DiskId: disk.Id,
 			})
+			if err2 != nil {
+				return nil, fmt.Errorf("%s. Clean: %s", err, err2)
+			}
 
 		}
 		return nil, err

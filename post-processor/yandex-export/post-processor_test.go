@@ -35,7 +35,9 @@ func TestPostProcessor_Configure(t *testing.T) {
 						ServiceAccountID: "some-srv-acc-id",
 					},
 					CommonConfig: yandex.CommonConfig{
-						FolderID: "some-folder-id",
+						CloudConfig: yandex.CloudConfig{
+							FolderID: "some-folder-id",
+						},
 					},
 				},
 			},
@@ -53,7 +55,9 @@ func TestPostProcessor_Configure(t *testing.T) {
 						ServiceAccountID: "some-srv-acc-id",
 					},
 					CommonConfig: yandex.CommonConfig{
-						FolderID: "some-folder-id",
+						CloudConfig: yandex.CloudConfig{
+							FolderID: "some-folder-id",
+						},
 					},
 				},
 			},
@@ -71,7 +75,9 @@ func TestPostProcessor_Configure(t *testing.T) {
 						ServiceAccountID: "some-srv-acc-id",
 					},
 					CommonConfig: yandex.CommonConfig{
-						FolderID: "some-folder-id",
+						CloudConfig: yandex.CloudConfig{
+							FolderID: "some-folder-id",
+						},
 					},
 				},
 			},
@@ -88,7 +94,9 @@ func TestPostProcessor_Configure(t *testing.T) {
 						ServiceAccountID: "",
 					},
 					CommonConfig: yandex.CommonConfig{
-						FolderID: "some-folder-id",
+						CloudConfig: yandex.CloudConfig{
+							FolderID: "some-folder-id",
+						},
 					},
 				},
 			},
@@ -105,7 +113,9 @@ func TestPostProcessor_Configure(t *testing.T) {
 						ServiceAccountID: "some-srv-acc-id",
 					},
 					CommonConfig: yandex.CommonConfig{
-						FolderID: "",
+						CloudConfig: yandex.CloudConfig{
+							FolderID: "",
+						},
 					},
 				},
 			},
