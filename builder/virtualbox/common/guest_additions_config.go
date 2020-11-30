@@ -83,9 +83,9 @@ func (c *GuestAdditionsConfig) Prepare(communicatorType string) []error {
 			fmt.Errorf("guest_additions_mode is invalid. Must be one of: %v", validModes))
 	}
 
-	if communicatorType == "none" && c.GuestAdditionsMode != "disable" {
-		errs = append(errs, fmt.Errorf("guest_additions_mode has to be "+
-			"'disable' when communicator = 'none'."))
+	if communicatorType == "none" && c.GuestAdditionsMode == "upload" {
+		errs = append(errs, fmt.Errorf("communicator must not be 'none' "+
+			"when guest_additions_mode = 'upload'."))
 	}
 
 	return errs
