@@ -23,13 +23,15 @@ type FlatConfig struct {
 	MaxRetries            *int              `mapstructure:"max_retries" cty:"max_retries" hcl:"max_retries"`
 	FolderID              *string           `mapstructure:"folder_id" required:"true" cty:"folder_id" hcl:"folder_id"`
 	ServiceAccountID      *string           `mapstructure:"service_account_id" required:"true" cty:"service_account_id" hcl:"service_account_id"`
-	Bucket                *string           `mapstructure:"bucket" required:"false" cty:"bucket" hcl:"bucket"`
-	ObjectName            *string           `mapstructure:"object_name" required:"false" cty:"object_name" hcl:"object_name"`
-	SkipClean             *bool             `mapstructure:"skip_clean" required:"false" cty:"skip_clean" hcl:"skip_clean"`
 	ImageName             *string           `mapstructure:"image_name" required:"false" cty:"image_name" hcl:"image_name"`
 	ImageDescription      *string           `mapstructure:"image_description" required:"false" cty:"image_description" hcl:"image_description"`
 	ImageFamily           *string           `mapstructure:"image_family" required:"false" cty:"image_family" hcl:"image_family"`
 	ImageLabels           map[string]string `mapstructure:"image_labels" required:"false" cty:"image_labels" hcl:"image_labels"`
+	ImageMinDiskSizeGb    *int              `mapstructure:"image_min_disk_size_gb" required:"false" cty:"image_min_disk_size_gb" hcl:"image_min_disk_size_gb"`
+	ImageProductIDs       []string          `mapstructure:"image_product_ids" required:"false" cty:"image_product_ids" hcl:"image_product_ids"`
+	Bucket                *string           `mapstructure:"bucket" required:"false" cty:"bucket" hcl:"bucket"`
+	ObjectName            *string           `mapstructure:"object_name" required:"false" cty:"object_name" hcl:"object_name"`
+	SkipClean             *bool             `mapstructure:"skip_clean" required:"false" cty:"skip_clean" hcl:"skip_clean"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -58,13 +60,15 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"max_retries":                &hcldec.AttrSpec{Name: "max_retries", Type: cty.Number, Required: false},
 		"folder_id":                  &hcldec.AttrSpec{Name: "folder_id", Type: cty.String, Required: false},
 		"service_account_id":         &hcldec.AttrSpec{Name: "service_account_id", Type: cty.String, Required: false},
-		"bucket":                     &hcldec.AttrSpec{Name: "bucket", Type: cty.String, Required: false},
-		"object_name":                &hcldec.AttrSpec{Name: "object_name", Type: cty.String, Required: false},
-		"skip_clean":                 &hcldec.AttrSpec{Name: "skip_clean", Type: cty.Bool, Required: false},
 		"image_name":                 &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"image_description":          &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
 		"image_family":               &hcldec.AttrSpec{Name: "image_family", Type: cty.String, Required: false},
 		"image_labels":               &hcldec.AttrSpec{Name: "image_labels", Type: cty.Map(cty.String), Required: false},
+		"image_min_disk_size_gb":     &hcldec.AttrSpec{Name: "image_min_disk_size_gb", Type: cty.Number, Required: false},
+		"image_product_ids":          &hcldec.AttrSpec{Name: "image_product_ids", Type: cty.List(cty.String), Required: false},
+		"bucket":                     &hcldec.AttrSpec{Name: "bucket", Type: cty.String, Required: false},
+		"object_name":                &hcldec.AttrSpec{Name: "object_name", Type: cty.String, Required: false},
+		"skip_clean":                 &hcldec.AttrSpec{Name: "skip_clean", Type: cty.Bool, Required: false},
 	}
 	return s
 }

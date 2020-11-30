@@ -12,7 +12,10 @@ import (
 	"github.com/yandex-cloud/go-sdk/iamkey"
 )
 
-const defaultEndpoint = "api.cloud.yandex.net:443"
+const (
+	defaultEndpoint   = "api.cloud.yandex.net:443"
+	defaultMaxRetries = 3
+)
 
 // AccessConfig is for common configuration related to Yandex.Cloud API access
 type AccessConfig struct {
@@ -33,6 +36,10 @@ type AccessConfig struct {
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
+
+	if c.MaxRetries == 0 {
+		c.MaxRetries = defaultMaxRetries
+	}
 
 	if c.Endpoint == "" {
 		c.Endpoint = defaultEndpoint

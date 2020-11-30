@@ -31,6 +31,12 @@ func TestPostProcessor_Configure(t *testing.T) {
 						Token:                 "",
 						ServiceAccountKeyFile: "",
 					},
+					ExchangeConfig: ExchangeConfig{
+						ServiceAccountID: "some-srv-acc-id",
+					},
+					CommonConfig: yandex.CommonConfig{
+						FolderID: "some-folder-id",
+					},
 				},
 			},
 			wantErr: false,
@@ -42,6 +48,12 @@ func TestPostProcessor_Configure(t *testing.T) {
 					AccessConfig: yandex.AccessConfig{
 						Token:                 "some-value",
 						ServiceAccountKeyFile: "path/not-exist.file",
+					},
+					ExchangeConfig: ExchangeConfig{
+						ServiceAccountID: "some-srv-acc-id",
+					},
+					CommonConfig: yandex.CommonConfig{
+						FolderID: "some-folder-id",
 					},
 				},
 			},
@@ -55,9 +67,49 @@ func TestPostProcessor_Configure(t *testing.T) {
 						Token:                 "",
 						ServiceAccountKeyFile: "testdata/fake-sa-key.json",
 					},
+					ExchangeConfig: ExchangeConfig{
+						ServiceAccountID: "some-srv-acc-id",
+					},
+					CommonConfig: yandex.CommonConfig{
+						FolderID: "some-folder-id",
+					},
 				},
 			},
 			wantErr: false,
+		},
+		{
+			name: "service_account_id required",
+			fields: fields{
+				config: Config{
+					AccessConfig: yandex.AccessConfig{
+						Token: "some token",
+					},
+					ExchangeConfig: ExchangeConfig{
+						ServiceAccountID: "",
+					},
+					CommonConfig: yandex.CommonConfig{
+						FolderID: "some-folder-id",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "folderID required",
+			fields: fields{
+				config: Config{
+					AccessConfig: yandex.AccessConfig{
+						Token: "some token",
+					},
+					ExchangeConfig: ExchangeConfig{
+						ServiceAccountID: "some-srv-acc-id",
+					},
+					CommonConfig: yandex.CommonConfig{
+						FolderID: "",
+					},
+				},
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {

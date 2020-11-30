@@ -66,13 +66,15 @@ func uploadToBucket(s3conn *s3.S3, ui packersdk.Ui, artifact packersdk.Artifact,
 	}, nil
 }
 
-func createYCImage(ctx context.Context, driver yandex.Driver, ui packersdk.Ui, folderID string, imageSrc cloudImageSource, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string) (*compute.Image, error) {
+func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, imageSrc cloudImageSource, c *Config) (*compute.Image, error) {
 	req := &compute.CreateImageRequest{
-		FolderId:    folderID,
-		Name:        imageName,
-		Description: imageDescription,
-		Labels:      imageLabels,
-		Family:      imageFamily,
+		FolderId:    c.CloudConfig.FolderID,
+		Name:        c.ImageConfig.ImageName,
+		Description: c.ImageConfig.ImageDescription,
+		Labels:      c.ImageConfig.ImageLabels,
+		Family:      c.ImageConfig.ImageFamily,
+		MinDiskSize: int64(c.ImageMinDiskSizeGb),
+		ProductIds:  c.ImageProductIDs,
 	}
 
 	// switch on cloudImageSource type: cloud image id or storage URL
@@ -91,7 +93,7 @@ func createYCImage(ctx context.Context, driver yandex.Driver, ui packersdk.Ui, f
 
 	ui.Say(fmt.Sprintf("Source of Image creation: %s", imageSrc.Description()))
 
-	ui.Say(fmt.Sprintf("Creating Yandex Compute Image %v within operation %#v", imageName, op.Id()))
+	ui.Say(fmt.Sprintf("Creating Yandex Compute Image %v within operation %#v", c.ImageName, op.Id()))
 
 	ui.Say("Waiting for Yandex Compute Image creation operation to complete...")
 	err = op.Wait(ctx)

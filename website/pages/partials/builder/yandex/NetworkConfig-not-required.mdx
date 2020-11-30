@@ -1,0 +1,18 @@
+<!-- Code generated from the comments of the NetworkConfig struct in builder/yandex/common_config.go; DO NOT EDIT MANUALLY -->
+
+- `subnet_id` (string) - The Yandex VPC subnet id to use for
+  the launched instance. Note, the zone of the subnet must match the
+  zone in which the VM is launched.
+
+- `zone` (string) - The name of the zone to launch the instance.  This defaults to `ru-central1-a`.
+
+- `use_ipv4_nat` (bool) - If set to true, then launched instance will have external internet
+  access.
+
+- `use_ipv6` (bool) - Set to true to enable IPv6 for the instance being
+  created. This defaults to `false`, or not enabled.
+  
+  -> **Note**: Usage of IPv6 will be available in the future.
+
+- `use_internal_ip` (bool) - If true, use the instance's internal IP address
+  instead of its external IP during building.

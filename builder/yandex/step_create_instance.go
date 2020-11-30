@@ -76,6 +76,20 @@ func createDisk(ctx context.Context, c *Config, d Driver, sourceImage *Image) (*
 	}
 	err = op.Wait(ctx)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			resp, err2 := op.Response()
+			if err2 != nil {
+				return nil, err
+			}
+			disk, ok := resp.(*compute.Disk)
+			if !ok {
+				return nil, err
+			}
+			sdk.Compute().Disk().Delete(ctx, &compute.DeleteDiskRequest{
+				DiskId: disk.Id,
+			})
+
+		}
 		return nil, err
 	}
 	resp, err := op.Response()
@@ -270,6 +284,8 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		}
 	}
 
+	ui.Message(fmt.Sprint(req))
+
 	op, err := sdk.WrapOperation(sdk.Compute().Instance().Create(ctx, req))
 	if err != nil {
 		return stepHaltWithError(state, fmt.Errorf("Error create instance: %s", err))
@@ -331,7 +347,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 
 	if s.SerialLogFile != "" {
 		ui.Say("Current state 'cancelled' or 'halted'...")
-		err := s.writeSerialLogFile(ctx, state)
+		err := writeSerialLogFile(ctx, state, s.SerialLogFile)
 		if err != nil {
 			ui.Error(err.Error())
 		}
@@ -393,25 +409,6 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 		}
 		ui.Message("Disk has been deleted!")
 	}
-}
-
-func (s *StepCreateInstance) writeSerialLogFile(ctx context.Context, state multistep.StateBag) error {
-	sdk := state.Get("sdk").(*ycsdk.SDK)
-	ui := state.Get("ui").(packersdk.Ui)
-
-	instanceID := state.Get("instance_id").(string)
-	ui.Say("Try get instance's serial port output and write to file " + s.SerialLogFile)
-	serialOutput, err := sdk.Compute().Instance().GetSerialPortOutput(ctx, &compute.GetInstanceSerialPortOutputRequest{
-		InstanceId: instanceID,
-	})
-	if err != nil {
-		return fmt.Errorf("Failed to get serial port output for instance (id: %s): %s", instanceID, err)
-	}
-	if err := ioutil.WriteFile(s.SerialLogFile, []byte(serialOutput.Contents), 0600); err != nil {
-		return fmt.Errorf("Failed to write serial port output to file: %s", err)
-	}
-	ui.Message("Serial port output has been successfully written")
-	return nil
 }
 
 func (c *Config) createInstanceMetadata(sshPublicKey string) (map[string]string, error) {

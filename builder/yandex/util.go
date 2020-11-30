@@ -1,9 +1,15 @@
 package yandex
 
 import (
+	"context"
+	"fmt"
+	"io/ioutil"
+
 	"github.com/c2h5oh/datasize"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
+	ycsdk "github.com/yandex-cloud/go-sdk"
 )
 
 func stepHaltWithError(state multistep.StateBag, err error) multistep.StepAction {
@@ -19,4 +25,26 @@ func toGigabytes(bytesCount int64) int {
 
 func toBytes(gigabytesCount int) int64 {
 	return int64((datasize.ByteSize(gigabytesCount) * datasize.GB).Bytes())
+}
+
+func writeSerialLogFile(ctx context.Context, state multistep.StateBag, serialLogFile string) error {
+	sdk := state.Get("sdk").(*ycsdk.SDK)
+	ui := state.Get("ui").(packer.Ui)
+
+	instanceID := state.Get("instance_id").(string)
+	if instanceID == "" {
+		return nil
+	}
+	ui.Say("Try get instance's serial port output and write to file " + serialLogFile)
+	serialOutput, err := sdk.Compute().Instance().GetSerialPortOutput(ctx, &compute.GetInstanceSerialPortOutputRequest{
+		InstanceId: instanceID,
+	})
+	if err != nil {
+		return fmt.Errorf("Failed to get serial port output for instance (id: %s): %s", instanceID, err)
+	}
+	if err := ioutil.WriteFile(serialLogFile, []byte(serialOutput.Contents), 0600); err != nil {
+		return fmt.Errorf("Failed to write serial port output to file: %s", err)
+	}
+	ui.Message("Serial port output has been successfully written")
+	return nil
 }
