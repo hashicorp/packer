@@ -167,7 +167,7 @@ var Builders = map[string]packersdk.Builder{
 	"yandex":              new(yandexbuilder.Builder),
 }
 
-var Provisioners = map[string]packer.Provisioner{
+var Provisioners = map[string]packersdk.Provisioner{
 	"ansible":           new(ansibleprovisioner.Provisioner),
 	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
 	"azure-dtlartifact": new(azuredtlartifactprovisioner.Provisioner),

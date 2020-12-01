@@ -113,7 +113,7 @@ func (s *Server) RegisterPostProcessor(p packer.PostProcessor) error {
 	})
 }
 
-func (s *Server) RegisterProvisioner(p packer.Provisioner) error {
+func (s *Server) RegisterProvisioner(p packersdk.Provisioner) error {
 	return s.server.RegisterName(DefaultProvisionerEndpoint, &ProvisionerServer{
 		commonServer: commonServer{
 			selfConfigurable: p,

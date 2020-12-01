@@ -45,8 +45,8 @@ func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
 
 func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
 	return packer.MapOfProvisioner{
-		"shell": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
-		"file":  func() (packer.Provisioner, error) { return &file.Provisioner{}, nil },
+		"shell": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
+		"file":  func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
 	}
 }
 

@@ -50,5 +50,5 @@ func TestProvisionerRPC(t *testing.T) {
 }
 
 func TestProvisioner_Implements(t *testing.T) {
-	var _ packer.Provisioner = new(provisioner)
+	var _ packersdk.Provisioner = new(provisioner)
 }

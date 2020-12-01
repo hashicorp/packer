@@ -129,7 +129,7 @@ func (c *Client) PostProcessor() packer.PostProcessor {
 	}
 }
 
-func (c *Client) Provisioner() packer.Provisioner {
+func (c *Client) Provisioner() packersdk.Provisioner {
 	return &provisioner{
 		commonClient: commonClient{
 			endpoint: DefaultProvisionerEndpoint,

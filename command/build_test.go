@@ -841,9 +841,9 @@ func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 			"null": func() (packersdk.Builder, error) { return &null.Builder{}, nil },
 		},
 		ProvisionerStore: packer.MapOfProvisioner{
-			"shell-local": func() (packer.Provisioner, error) { return &shell_local.Provisioner{}, nil },
-			"shell":       func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
-			"file":        func() (packer.Provisioner, error) { return &filep.Provisioner{}, nil },
+			"shell-local": func() (packersdk.Provisioner, error) { return &shell_local.Provisioner{}, nil },
+			"shell":       func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
+			"file":        func() (packersdk.Provisioner, error) { return &filep.Provisioner{}, nil },
 		},
 		PostProcessorStore: packer.MapOfPostProcessor{
 			"shell-local": func() (packer.PostProcessor, error) { return &shell_local_pp.PostProcessor{}, nil },

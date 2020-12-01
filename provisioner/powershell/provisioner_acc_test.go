@@ -65,8 +65,8 @@ func (s *PowershellProvisionerAccTest) GetConfig() (string, error) {
 
 func (s *PowershellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
 	return packer.MapOfProvisioner{
-		TestProvisionerName: func() (packer.Provisioner, error) { return &powershell.Provisioner{}, nil },
-		"windows-shell":     func() (packer.Provisioner, error) { return &windowsshellprovisioner.Provisioner{}, nil },
+		TestProvisionerName: func() (packersdk.Provisioner, error) { return &powershell.Provisioner{}, nil },
+		"windows-shell":     func() (packersdk.Provisioner, error) { return &windowsshellprovisioner.Provisioner{}, nil },
 	}
 }
 
