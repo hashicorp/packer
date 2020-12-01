@@ -56,7 +56,7 @@ func createNetwork(ctx context.Context, c *Config, d Driver) (*vpc.Network, erro
 	return network, nil
 }
 
-func createDisk(ctx context.Context, c *Config, d Driver, sourceImage *Image) (*compute.Disk, error) {
+func createDisk(ctx context.Context, state multistep.StateBag, c *Config, d Driver, sourceImage *Image) (*compute.Disk, error) {
 	req := &compute.CreateDiskRequest{
 		Name:     c.DiskName,
 		FolderId: c.FolderID,
@@ -74,25 +74,18 @@ func createDisk(ctx context.Context, c *Config, d Driver, sourceImage *Image) (*
 	if err != nil {
 		return nil, err
 	}
+	protoMD, err := op.Metadata()
+	if err != nil {
+		return nil, err
+	}
+	md, ok := protoMD.(*compute.CreateDiskMetadata)
+	if !ok {
+		return nil, fmt.Errorf("could not get Instance ID from create operation metadata")
+	}
+	state.Put("disk_id", md.DiskId)
+
 	err = op.Wait(ctx)
 	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			resp, err2 := op.Response()
-			if err2 != nil {
-				return nil, err
-			}
-			disk, ok := resp.(*compute.Disk)
-			if !ok {
-				return nil, err
-			}
-			_, err2 = sdk.Compute().Disk().Delete(ctx, &compute.DeleteDiskRequest{
-				DiskId: disk.Id,
-			})
-			if err2 != nil {
-				return nil, fmt.Errorf("%s. Clean: %s", err, err2)
-			}
-
-		}
 		return nil, err
 	}
 	resp, err := op.Response()
@@ -100,11 +93,11 @@ func createDisk(ctx context.Context, c *Config, d Driver, sourceImage *Image) (*
 		return nil, err
 	}
 
-	image, ok := resp.(*compute.Disk)
+	disk, ok := resp.(*compute.Disk)
 	if !ok {
 		return nil, errors.New("disk create operation response doesn't contain Disk")
 	}
-	return image, nil
+	return disk, nil
 
 }
 
@@ -208,11 +201,10 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	// Create a disk manually to have a delete ID
 	ui.Say("Creating disk...")
-	disk, err := createDisk(ctx, config, driver, sourceImage)
+	disk, err := createDisk(ctx, state, config, driver, sourceImage)
 	if err != nil {
 		return stepHaltWithError(state, fmt.Errorf("Error creating disk: %s", err))
 	}
-	state.Put("disk_id", disk.Id)
 
 	// Create an instance based on the configuration
 	ui.Say("Creating instance...")
@@ -286,8 +278,6 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 			},
 		}
 	}
-
-	ui.Message(fmt.Sprint(req))
 
 	op, err := sdk.WrapOperation(sdk.Compute().Instance().Create(ctx, req))
 	if err != nil {
