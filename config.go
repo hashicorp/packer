@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -23,16 +22,15 @@ import (
 const PACKERSPACE = "-PACKERSPACE-"
 
 type config struct {
-	DisableCheckpoint          bool `json:"disable_checkpoint"`
-	DisableCheckpointSignature bool `json:"disable_checkpoint_signature"`
-	PluginMinPort              int
-	PluginMaxPort              int
+	DisableCheckpoint          bool                      `json:"disable_checkpoint"`
+	DisableCheckpointSignature bool                      `json:"disable_checkpoint_signature"`
 	RawBuilders                map[string]string         `json:"builders"`
 	RawProvisioners            map[string]string         `json:"provisioners"`
 	RawPostProcessors          map[string]string         `json:"post-processors"`
 	Builders                   packer.MapOfBuilder       `json:"-"`
 	Provisioners               packer.MapOfProvisioner   `json:"-"`
 	PostProcessors             packer.MapOfPostProcessor `json:"-"`
+	Plugins                    plugin.Config
 }
 
 // decodeConfig decodes configuration in JSON format from the given io.Reader into
@@ -99,85 +97,21 @@ func (c *config) loadSingleComponent(path string) (string, error) {
 	case strings.HasPrefix(pluginName, "packer-builder-"):
 		pluginName = pluginName[len("packer-builder-"):]
 		c.Builders[pluginName] = func() (packersdk.Builder, error) {
-			return c.pluginClient(path).Builder()
+			return c.Plugins.Client(path).Builder()
 		}
 	case strings.HasPrefix(pluginName, "packer-post-processor-"):
 		pluginName = pluginName[len("packer-post-processor-"):]
 		c.PostProcessors[pluginName] = func() (packersdk.PostProcessor, error) {
-			return c.pluginClient(path).PostProcessor()
+			return c.Plugins.Client(path).PostProcessor()
 		}
 	case strings.HasPrefix(pluginName, "packer-provisioner-"):
 		pluginName = pluginName[len("packer-provisioner-"):]
 		c.Provisioners[pluginName] = func() (packersdk.Provisioner, error) {
-			return c.pluginClient(path).Provisioner()
+			return c.Plugins.Client(path).Provisioner()
 		}
 	}
 
 	return pluginName, nil
-}
-
-// Discover discovers plugins.
-//
-// Search the directory of the executable, then the plugins directory, and
-// finally the CWD, in that order. Any conflicts will overwrite previously
-// found plugins, in that order.
-// Hence, the priority order is the reverse of the search order - i.e., the
-// CWD has the highest priority.
-func (c *config) Discover() error {
-	// If we are already inside a plugin process we should not need to
-	// discover anything.
-	if os.Getenv(plugin.MagicCookieKey) == plugin.MagicCookieValue {
-		return nil
-	}
-
-	// Next, look in the same directory as the executable.
-	exePath, err := os.Executable()
-	if err != nil {
-		log.Printf("[ERR] Error loading exe directory: %s", err)
-	} else {
-		if err := c.discoverExternalComponents(filepath.Dir(exePath)); err != nil {
-			return err
-		}
-	}
-
-	// Next, look in the default plugins directory inside the configdir/.packer.d/plugins.
-	dir, err := packer.ConfigDir()
-	if err != nil {
-		log.Printf("[ERR] Error loading config directory: %s", err)
-	} else {
-		if err := c.discoverExternalComponents(filepath.Join(dir, "plugins")); err != nil {
-			return err
-		}
-	}
-
-	// Next, look in the CWD.
-	if err := c.discoverExternalComponents("."); err != nil {
-		return err
-	}
-
-	// Check whether there is a custom Plugin directory defined. This gets
-	// absolute preference.
-	if packerPluginPath := os.Getenv("PACKER_PLUGIN_PATH"); packerPluginPath != "" {
-		sep := ":"
-		if runtime.GOOS == "windows" {
-			// on windows, PATH is semicolon-separated
-			sep = ";"
-		}
-		plugPaths := strings.Split(packerPluginPath, sep)
-		for _, plugPath := range plugPaths {
-			if err := c.discoverExternalComponents(plugPath); err != nil {
-				return err
-			}
-		}
-	}
-
-	// Finally, try to use an internal plugin. Note that this will not override
-	// any previously-loaded plugins.
-	if err := c.discoverInternalComponents(); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // This is a proper packer.BuilderFunc that can be used to load packersdk.Builder
@@ -191,7 +125,7 @@ func (c *config) StartBuilder(name string) (packersdk.Builder, error) {
 // to load packersdk.Hook implementations from the defined plugins.
 func (c *config) StarHook(name string) (packersdk.Hook, error) {
 	log.Printf("Loading hook: %s\n", name)
-	return c.pluginClient(name).Hook()
+	return c.Plugins.Client(name).Hook()
 }
 
 // This is a proper packersdk.PostProcessorFunc that can be used to load
@@ -226,7 +160,7 @@ func (c *config) discoverExternalComponents(path string) error {
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
 		c.Builders[pluginName] = func() (packersdk.Builder, error) {
-			return c.pluginClient(newPath).Builder()
+			return c.Plugins.Client(newPath).Builder()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
 	}
@@ -243,7 +177,7 @@ func (c *config) discoverExternalComponents(path string) error {
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
 		c.PostProcessors[pluginName] = func() (packersdk.PostProcessor, error) {
-			return c.pluginClient(newPath).PostProcessor()
+			return c.Plugins.Client(newPath).PostProcessor()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
 	}
@@ -260,7 +194,7 @@ func (c *config) discoverExternalComponents(path string) error {
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
 		c.Provisioners[pluginName] = func() (packersdk.Provisioner, error) {
-			return c.pluginClient(newPath).Provisioner()
+			return c.Plugins.Client(newPath).Provisioner()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
 	}
@@ -324,7 +258,7 @@ func (c *config) discoverInternalComponents() error {
 			c.Builders[builder] = func() (packersdk.Builder, error) {
 				bin := fmt.Sprintf("%s%splugin%spacker-builder-%s",
 					packerPath, PACKERSPACE, PACKERSPACE, builder)
-				return c.pluginClient(bin).Builder()
+				return c.Plugins.Client(bin).Builder()
 			}
 		}
 	}
@@ -336,7 +270,7 @@ func (c *config) discoverInternalComponents() error {
 			c.Provisioners[provisioner] = func() (packersdk.Provisioner, error) {
 				bin := fmt.Sprintf("%s%splugin%spacker-provisioner-%s",
 					packerPath, PACKERSPACE, PACKERSPACE, provisioner)
-				return c.pluginClient(bin).Provisioner()
+				return c.Plugins.Client(bin).Provisioner()
 			}
 		}
 	}
@@ -348,51 +282,10 @@ func (c *config) discoverInternalComponents() error {
 			c.PostProcessors[postProcessor] = func() (packersdk.PostProcessor, error) {
 				bin := fmt.Sprintf("%s%splugin%spacker-post-processor-%s",
 					packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
-				return c.pluginClient(bin).PostProcessor()
+				return c.Plugins.Client(bin).PostProcessor()
 			}
 		}
 	}
 
 	return nil
-}
-
-func (c *config) pluginClient(path string) *plugin.Client {
-	originalPath := path
-
-	// Check for special case using `packer plugin PLUGIN`
-	args := []string{}
-	if strings.Contains(path, PACKERSPACE) {
-		parts := strings.Split(path, PACKERSPACE)
-		path = parts[0]
-		args = parts[1:]
-	}
-
-	// First attempt to find the executable by consulting the PATH.
-	path, err := exec.LookPath(path)
-	if err != nil {
-		// If that doesn't work, look for it in the same directory
-		// as the `packer` executable (us).
-		log.Printf("Plugin could not be found at %s (%v). Checking same directory as executable.", originalPath, err)
-		exePath, err := os.Executable()
-		if err != nil {
-			log.Printf("Couldn't get current exe path: %s", err)
-		} else {
-			log.Printf("Current exe path: %s", exePath)
-			path = filepath.Join(filepath.Dir(exePath), filepath.Base(originalPath))
-		}
-	}
-
-	// If everything failed, just use the original path and let the error
-	// bubble through.
-	if path == "" {
-		path = originalPath
-	}
-
-	log.Printf("Creating plugin client for path: %s", path)
-	var config plugin.ClientConfig
-	config.Cmd = exec.Command(path, args...)
-	config.Managed = true
-	config.MinPort = c.PluginMinPort
-	config.MaxPort = c.PluginMaxPort
-	return plugin.NewClient(&config)
 }
