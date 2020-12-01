@@ -8,25 +8,48 @@
     the value of an environment variable. Please see [env function
     docs](https://www.packer.io/docs/from-1.5/functions/contextual/env") for
     more details. [GH-10240]
-* builder/azure-arm: Create keyvaults with SoftDelete enabled [GH-10210]
-* builder/outscale: Add x509 certificate support [GH-10161]
-* post-processor/yandex-export: Verify the access to a specific bucket
+* builder/azure-arm: Create keyvaults with SoftDelete enabled. [GH-10210]
+* builder/outscale: Add x509 certificate support. [GH-10161]
+* post-processor/yandex-export: Verify the access to a specific bucket.
     [GH-10188]
 
 ### IMPROVEMENTS
 * builder/amazon-ebs: Add tags to launch templates. [GH-10203]
+* builder/amazon: Increase default max_retries to lessen throttling issues.
+    [GH-10290]
+* builder/amazon: Validate IOPS ratio. [GH-10199]
 * builder/azure-arm: Add Azure CLI authentication support to builder.
     [GH-10157]
-* core/hcl: Update to `hcl2_upgrade` command to support complex variable
-    values and packer version blocks. [GH-10221]
+* builder/digitalocean: New option to provision with private ip. [GH-10093]
+* builder/google: Add support for creating shielded VMs. [GH-10172]
+* builder/oracle-oci: Support image launch mode. [GH-10212]
+* builder/outscale: Add outscale.hk endpoint support [GH-10207]
+* builder/proxmox: New config option for boot-order. [GH-10260]
+* builder/scaleway: Use the SDK functions to load profile from file and env.
+    [GH-10181]
+* builder/virtualbox: Allow attaching guest additions with "none" communicator.
+    [GH-10306]
+* builder/vsphere: New option to add additional storage to a cloned vm.
+    [GH-10287]
+* core/hcl: Update to `hcl2_upgrade` command to support complex variable values
+    and packer version blocks. [GH-10221]
+* hcl2upgrade: Update command to fix `env` call upgrade. [GH-10244]
 * post-processor/vagrant-cloud: Add support for uploading directly to storage
     on Vagrant Cloud. [GH-10193]
+* provisioner/salt-masterless: Call winrepo.update_git_repos and
+    pkg.refresh_db. [GH-10201]
+* yandex-export: Add retries and wait after disk attach operation. [GH-10303]
 
 ### BUG FIXES
 * builder/amazon: Fix single `tag` interpolation to allow for templating engine
     usage. [GH-10224]
-* builder/yandex: Fixed using cloud config when using IPv6 [GH-10297]
-* post-processort/yandex-export: added check of service account id
+* builder/google: Fix crash when using the `-on-error` build flag. [GH-10247]
+* builder/qemu: Fix nil pointer dereference when loading values from state.
+    [GH-10249]
+* builder/vagrant: Return error if ssh-config command fails. [GH-10213]
+* builder/yandex: Change disk creation method to manual. [GH-10250]
+* builder/yandex: Fixed using cloud config when using IPv6. [GH-10297]
+* post-processor/yandex-export: Check service account id. [GH-10305]
 
 ## 1.6.5 (October 30, 2020)
 
