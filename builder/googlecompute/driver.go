@@ -69,6 +69,9 @@ type Driver interface {
 
 	// DeleteOSLoginSSHKey deletes the SSH public key for OSLogin with the given key.
 	DeleteOSLoginSSHKey(user, fingerprint string) error
+
+	// Add to the instance metadata for the existing instance
+	AddToInstanceMetadata(zone string, name string, metadata map[string]string) (<-chan error, error)
 }
 
 type InstanceConfig struct {

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"strings"
 	"time"
+	"log"
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
@@ -17,14 +18,23 @@ type StepCreateInstance struct {
 	Debug bool
 }
 
-func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string) (map[string]string, error) {
-	instanceMetadata := make(map[string]string)
+func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string) (map[string]string, map[string]string, error) {
+
+	instanceMetadataNoSSHKeys := make(map[string]string)
+	instanceMetadataSSHKeys := make(map[string]string)
+
+	sshMetaKey := "ssh-keys"
+
 	var err error
 	var errs *packer.MultiError
 
 	// Copy metadata from config.
 	for k, v := range c.Metadata {
-		instanceMetadata[k] = v
+		if k == sshMetaKey {
+			instanceMetadataSSHKeys[k] = v
+		} else {
+			instanceMetadataNoSSHKeys[k] = v
+		}
 	}
 
 	// Merge any existing ssh keys with our public key, unless there is no
@@ -34,40 +44,40 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		sshMetaKey := "ssh-keys"
 		sshPublicKey = strings.TrimSuffix(sshPublicKey, "\n")
 		sshKeys := fmt.Sprintf("%s:%s %s", c.Comm.SSHUsername, sshPublicKey, c.Comm.SSHUsername)
-		if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
-			sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
+		if confSSHKeys, exists := instanceMetadataSSHKeys[sshMetaKey]; exists {
+			sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSSHKeys)
 		}
-		instanceMetadata[sshMetaKey] = sshKeys
+		instanceMetadataSSHKeys[sshMetaKey] = sshKeys
 	}
 
-	startupScript := instanceMetadata[StartupScriptKey]
+	startupScript := instanceMetadataNoSSHKeys[StartupScriptKey]
 	if c.StartupScriptFile != "" {
 		var content []byte
 		content, err = ioutil.ReadFile(c.StartupScriptFile)
 		if err != nil {
-			return nil, err
+			return nil, instanceMetadataNoSSHKeys, err
 		}
 		startupScript = string(content)
 	}
-	instanceMetadata[StartupScriptKey] = startupScript
+	instanceMetadataNoSSHKeys[StartupScriptKey] = startupScript
 
 	// Wrap any found startup script with our own startup script wrapper.
 	if startupScript != "" && c.WrapStartupScriptFile.True() {
-		instanceMetadata[StartupScriptKey] = StartupScriptLinux
-		instanceMetadata[StartupWrappedScriptKey] = startupScript
-		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusNotDone
+		instanceMetadataNoSSHKeys[StartupScriptKey] = StartupScriptLinux
+		instanceMetadataNoSSHKeys[StartupWrappedScriptKey] = startupScript
+		instanceMetadataNoSSHKeys[StartupScriptStatusKey] = StartupScriptStatusNotDone
 	}
 
 	if sourceImage.IsWindows() {
 		// Windows startup script support is not yet implemented so clear any script data and set status to done
-		instanceMetadata[StartupScriptKey] = StartupScriptWindows
-		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusDone
+		instanceMetadataNoSSHKeys[StartupScriptKey] = StartupScriptWindows
+		instanceMetadataNoSSHKeys[StartupScriptStatusKey] = StartupScriptStatusDone
 	}
 
 	// If UseOSLogin is true, force `enable-oslogin` in metadata
 	// In the event that `enable-oslogin` is not enabled at project level
 	if c.UseOSLogin {
-		instanceMetadata[EnableOSLoginKey] = "TRUE"
+		instanceMetadataNoSSHKeys[EnableOSLoginKey] = "TRUE"
 	}
 
 	for key, value := range c.MetadataFiles {
@@ -76,50 +86,13 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
-		instanceMetadata[key] = string(content)
+		instanceMetadataNoSSHKeys[key] = string(content)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
-		return instanceMetadata, errs
+		return instanceMetadataNoSSHKeys, instanceMetadataSSHKeys, errs
 	}
-	return instanceMetadata, nil
-}
-
-func (s *StepCreateInstance) addMetadataToInstance(ctx context.Context, errCh chan<- error, name, state multistep.StateBag, metadata map[string]string) {
-
-	c := state.Get("config").(*Config)
-	d := state.Get("driver").(Driver)
-
-	instance, err := d.service.Instances.Get(d.projectId, c.Zone, name).Do()
-	if err != nil {
-		errCh <- err
-		return
-	}
-	instance.Metadata.Items = append(instance.Metadata.Items, &compute.MetadataItems{Key: "windows-keys", Value: &sshPublicKey})
-
-	op, err := d.service.Instances.SetMetadata(d.projectId, zone, name, &compute.Metadata{
-		Fingerprint: instance.Metadata.Fingerprint,
-		Items:       instance.Metadata.Items,
-	}).Do()
-
-	if err != nil {
-		errCh <- err
-		return
-	}
-
-	newErrCh := make(chan error, 1)
-	go waitForState(newErrCh, "DONE", d.refreshZoneOp(zone, op))
-
-	select {
-	case err = <-newErrCh:
-	case <-time.After(time.Second * 30):
-		err = errors.New("time out while waiting for SSH public key to be added to instance")
-	}
-
-	if err != nil {
-		errCh <- err
-		return
-	}
+	return instanceMetadataNoSSHKeys, instanceMetadataSSHKeys, nil
 }
 
 func getImage(c *Config, d Driver) (*Image, error) {
@@ -168,17 +141,26 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	name := c.InstanceName
 
 	var errCh <-chan error
-	var metadata map[string]string
-	metadata, errs := c.createInstanceMetadata(sourceImage, string(c.Comm.SSHPublicKey))
+	metadataNoSSHKeys := make(map[string]string)
+	metadataSSHKeys := make(map[string]string)	
+	metadataForInstance := make(map[string]string)
+
+	metadataNoSSHKeys, metadataSSHKeys, errs := c.createInstanceMetadata(sourceImage, string(c.Comm.SSHPublicKey))
 	if errs != nil {
 		state.Put("error", errs.Error())
 		ui.Error(errs.Error())
 		return multistep.ActionHalt
 	}
 
-	if c.WaitToAddSSHKeys == 0 {
-		ui.Message("Adding SSH keys during instance creation...")
-		metadata = make(map[string]string)
+	if c.WaitToAddSSHKeys > 0 {
+		log.Printf("[DEBUG] Adding metadata during instance creation, but not SSH keys...")
+		metadataForInstance = metadataNoSSHKeys
+	} else {
+		log.Printf("[DEBUG] Adding metadata during instance creation...")
+
+		// Union of both non-SSH key meta data and SSH key meta data
+		addmap(metadataForInstance, metadataSSHKeys)
+		addmap(metadataForInstance, metadataNoSSHKeys)		
 	}
 
 	errCh, err = d.RunInstance(&InstanceConfig{
@@ -195,7 +177,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		Image:                        sourceImage,
 		Labels:                       c.Labels,
 		MachineType:                  c.MachineType,
-		Metadata:                     metadata,
+		Metadata:                     metadataForInstance,
 		MinCpuPlatform:               c.MinCpuPlatform,
 		Name:                         name,
 		Network:                      c.Network,
@@ -242,15 +224,18 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	state.Put("instance_id", name)
 
 	if c.WaitToAddSSHKeys > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s before adding SSH keys...",
+		ui.Message(fmt.Sprintf("Waiting %s before adding SSH keys...",
 			c.WaitToAddSSHKeys.String()))
-		cancelled := s.wait(c.WaitToAddSSHKeys, ctx)
+		cancelled := s.waitForBoot(ctx, c.WaitToAddSSHKeys)
 		if cancelled {
 			return multistep.ActionHalt
 		}
+		
+		log.Printf("[DEBUG] %s wait is over. Adding SSH keys to existing instance...",
+				c.WaitToAddSSHKeys.String())
+		errCh, err = d.AddToInstanceMetadata(c.Zone, name, metadataSSHKeys)
 
-		metadata, errs = s.addMetadataToInstance(metadata, d, c)
-		if errs != nil {
+		if err != nil {
 			state.Put("error", errs.Error())
 			ui.Error(errs.Error())
 			return multistep.ActionHalt
@@ -260,14 +245,14 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	return multistep.ActionContinue
 }
 
-func (s *StepCreateInstance) wait(waitLen time.Duration, ctx context.Context) bool {
+func (s *StepCreateInstance) waitForBoot(ctx context.Context, waitLen time.Duration) bool {
 	// Use a select to determine if we get cancelled during the wait
 	select {
 	case <-ctx.Done():
 		return true
 	case <-time.After(waitLen):
 	}
-	ui.Message("Wait over; adding SSH keys to instance...")
+	
 	return false
 }
 
@@ -328,4 +313,10 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 	ui.Message("Disk has been deleted!")
 
 	return
+}
+
+func addmap(a map[string]string, b map[string]string) {
+	for k,v := range b {
+		a[k] = v
+	}
 }

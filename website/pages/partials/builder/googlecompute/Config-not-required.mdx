@@ -241,3 +241,12 @@
   instance. For more information, see the Vault docs:
   https://www.vaultproject.io/docs/commands/#environment-variables
   Example:`"vault_gcp_oauth_engine": "gcp/token/my-project-editor",`
+
+- `wait_to_add_ssh_keys` (duration string | ex: "1h5m2s") - The time to wait between the creation of the instance used to create the image,
+  and the addition of SSH configuration, including SSH keys, to that instance.
+  The delay is intended to protect packer from anything in the instance boot
+  sequence that has potential to disrupt the creation of SSH configuration
+  (e.g. SSH user creation, SSH key creation) on the instance.
+  Note: All other instance metadata, including startup scripts, are still added to the instance
+  during it's creation.
+  Example value: `5m`.

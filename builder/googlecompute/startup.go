@@ -1,7 +1,7 @@
 package googlecompute
 
 import (
-	"fmt"
+  "fmt"
 )
 
 const StartupScriptKey string = "startup-script"

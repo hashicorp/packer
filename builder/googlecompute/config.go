@@ -285,13 +285,17 @@ type Config struct {
 	// https://www.vaultproject.io/docs/commands/#environment-variables
 	// Example:`"vault_gcp_oauth_engine": "gcp/token/my-project-editor",`
 	VaultGCPOauthEngine string `mapstructure:"vault_gcp_oauth_engine"`
-	// The zone in which to launch the instance used to create the image.
-	// Example: "us-central1-a"
-
-	// The time to wait between instance creation and adding SSH keys.
+	// The time to wait between the creation of the instance used to create the image,
+	// and the addition of SSH configuration, including SSH keys, to that instance.
+	// The delay is intended to protect packer from anything in the instance boot 
+	// sequence that has potential to disrupt the creation of SSH configuration 
+	// (e.g. SSH user creation, SSH key creation) on the instance.
+	// Note: All other instance metadata, including startup scripts, are still added to the instance
+	// during it's creation.
 	// Example value: `5m`.
 	WaitToAddSSHKeys time.Duration `mapstructure:"wait_to_add_ssh_keys"`
-
+	// The zone in which to launch the instance used to create the image.
+	// Example: "us-central1-a"
 	Zone string `mapstructure:"zone" required:"true"`
 
 	account            *ServiceAccount

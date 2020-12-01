@@ -305,12 +305,12 @@ func TestCreateInstanceMetadata(t *testing.T) {
 	key := "abcdefgh12345678"
 
 	// create our metadata
-	metadata, err := c.createInstanceMetadata(image, key)
+	_, metadataSSHKeys, err := c.createInstanceMetadata(image, key)
 
 	assert.True(t, err == nil, "Metadata creation should have succeeded.")
 
 	// ensure our key is listed
-	assert.True(t, strings.Contains(metadata["ssh-keys"], key), "Instance metadata should contain provided key")
+	assert.True(t, strings.Contains(metadataSSHKeys["ssh-keys"], key), "Instance metadata should contain provided key")
 }
 
 func TestCreateInstanceMetadata_noPublicKey(t *testing.T) {
@@ -320,12 +320,12 @@ func TestCreateInstanceMetadata_noPublicKey(t *testing.T) {
 	sshKeys := c.Metadata["ssh-keys"]
 
 	// create our metadata
-	metadata, err := c.createInstanceMetadata(image, "")
+	_, metadataSSHKeys, err := c.createInstanceMetadata(image, "")
 
 	assert.True(t, err == nil, "Metadata creation should have succeeded.")
 
 	// ensure the ssh metadata hasn't changed
-	assert.Equal(t, metadata["ssh-keys"], sshKeys, "Instance metadata should not have been modified")
+	assert.Equal(t, metadataSSHKeys["ssh-keys"], sshKeys, "Instance metadata should not have been modified")
 }
 
 func TestCreateInstanceMetadata_metadataFile(t *testing.T) {
@@ -337,12 +337,12 @@ func TestCreateInstanceMetadata_metadataFile(t *testing.T) {
 	c.MetadataFiles["user-data"] = fileName
 
 	// create our metadata
-	metadata, err := c.createInstanceMetadata(image, "")
+	metadataNoSSHKeys, _,err := c.createInstanceMetadata(image, "")
 
 	assert.True(t, err == nil, "Metadata creation should have succeeded.")
 
 	// ensure the user-data key in metadata is updated with file content
-	assert.Equal(t, metadata["user-data"], content, "user-data field of the instance metadata should have been updated.")
+	assert.Equal(t, metadataNoSSHKeys["user-data"], content, "user-data field of the instance metadata should have been updated.")
 }
 
 func TestCreateInstanceMetadata_withWrapStartupScript(t *testing.T) {
@@ -377,11 +377,99 @@ func TestCreateInstanceMetadata_withWrapStartupScript(t *testing.T) {
 		c.WrapStartupScriptFile = tc.WrapStartupScript
 
 		// create our metadata
-		metadata, err := c.createInstanceMetadata(image, "")
+		metadataNoSSHKeys, _, err := c.createInstanceMetadata(image, "")
 
 		assert.True(t, err == nil, "Metadata creation should have succeeded.")
-		assert.Equal(t, tc.StartupScriptContents, metadata[StartupScriptKey], fmt.Sprintf("Instance metadata for startup script should be %q.", tc.StartupScriptContents))
-		assert.Equal(t, tc.WrappedStartupScriptContents, metadata[StartupWrappedScriptKey], fmt.Sprintf("Instance metadata for wrapped startup script should be %q.", tc.WrappedStartupScriptContents))
-		assert.Equal(t, tc.WrappedStartupScriptStatus, metadata[StartupScriptStatusKey], fmt.Sprintf("Instance metadata startup script status should be %q.", tc.WrappedStartupScriptStatus))
+		assert.Equal(t, tc.StartupScriptContents, metadataNoSSHKeys[StartupScriptKey], fmt.Sprintf("Instance metadata for startup script should be %q.", tc.StartupScriptContents))
+		assert.Equal(t, tc.WrappedStartupScriptContents, metadataNoSSHKeys[StartupWrappedScriptKey], fmt.Sprintf("Instance metadata for wrapped startup script should be %q.", tc.WrappedStartupScriptContents))
+		assert.Equal(t, tc.WrappedStartupScriptStatus, metadataNoSSHKeys[StartupScriptStatusKey], fmt.Sprintf("Instance metadata startup script status should be %q.", tc.WrappedStartupScriptStatus))
 	}
+}
+
+func TestCreateInstanceMetadataWaitToAddSSHKeys(t *testing.T) {
+	state := testState(t)
+	c := state.Get("config").(*Config)
+	image := StubImage("test-image", "test-project", []string{}, 100)
+	key := "abcdefgh12345678"
+	
+	var waitTime int = 4
+	c.WaitToAddSSHKeys = time.Duration(waitTime) * time.Second
+	c.Metadata = map[string]string{
+		"metadatakey1": "xyz",
+		"metadatakey2": "123",
+	}
+	
+	// create our metadata
+	metadataNoSSHKeys, metadataSSHKeys, err := c.createInstanceMetadata(image, key)
+
+	assert.True(t, err == nil, "Metadata creation should have succeeded.")
+
+	// ensure our metadata is listed
+	assert.True(t, strings.Contains(metadataSSHKeys["ssh-keys"], key), "Instance metadata should contain provided SSH key")
+	assert.True(t, strings.Contains(metadataNoSSHKeys["metadatakey1"], "xyz"), "Instance metadata should contain provided key: metadatakey1")	
+	assert.True(t, strings.Contains(metadataNoSSHKeys["metadatakey2"], "123"), "Instance metadata should contain provided key: metadatakey2")	
+}
+
+func TestStepCreateInstanceWaitToAddSSHKeys(t *testing.T) {
+	state := testState(t)
+	step := new(StepCreateInstance)
+	defer step.Cleanup(state)
+
+	state.Put("ssh_public_key", "key")
+
+	c := state.Get("config").(*Config)
+	d := state.Get("driver").(*DriverMock)
+	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
+
+	key := "abcdefgh12345678"
+	
+	var waitTime int = 5
+	c.WaitToAddSSHKeys = time.Duration(waitTime) * time.Second
+	c.Comm.SSHPublicKey = []byte(key)
+
+	c.Metadata = map[string]string{
+		"metadatakey1": "xyz",
+		"metadatakey2": "123",
+	}
+
+	// run the step
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionContinue, "Step should have passed and continued.")
+
+	// Verify state
+	_, ok := state.GetOk("instance_name")
+	assert.True(t, ok, "State should have an instance name.")
+
+	// cleanup
+	step.Cleanup(state)
+}
+
+func TestStepCreateInstanceNoWaitToAddSSHKeys(t *testing.T) {
+	state := testState(t)
+	step := new(StepCreateInstance)
+	defer step.Cleanup(state)
+
+	state.Put("ssh_public_key", "key")
+
+	c := state.Get("config").(*Config)
+	d := state.Get("driver").(*DriverMock)
+	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
+
+	key := "abcdefgh12345678"
+	
+	c.Comm.SSHPublicKey = []byte(key)
+
+	c.Metadata = map[string]string{
+		"metadatakey1": "xyz",
+		"metadatakey2": "123",
+	}
+	
+	// run the step
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionContinue, "Step should have passed and continued.")
+
+	// Verify state
+	_, ok := state.GetOk("instance_name")
+	assert.True(t, ok, "State should have an instance name.")
+
+	// cleanup
+	step.Cleanup(state)
 }
