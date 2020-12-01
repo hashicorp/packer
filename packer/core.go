@@ -56,10 +56,10 @@ type BuilderFunc func(name string) (packersdk.Builder, error)
 type HookFunc func(name string) (packersdk.Hook, error)
 
 // The function type used to lookup PostProcessor implementations.
-type PostProcessorFunc func(name string) (PostProcessor, error)
+type PostProcessorFunc func(name string) (packersdk.PostProcessor, error)
 
 // The function type used to lookup Provisioner implementations.
-type ProvisionerFunc func(name string) (Provisioner, error)
+type ProvisionerFunc func(name string) (packersdk.Provisioner, error)
 
 type BasicStore interface {
 	Has(name string) bool
@@ -73,12 +73,12 @@ type BuilderStore interface {
 
 type ProvisionerStore interface {
 	BasicStore
-	Start(name string) (Provisioner, error)
+	Start(name string) (packersdk.Provisioner, error)
 }
 
 type PostProcessorStore interface {
 	BasicStore
-	Start(name string) (PostProcessor, error)
+	Start(name string) (packersdk.PostProcessor, error)
 }
 
 // ComponentFinder is a struct that contains the various function

@@ -103,7 +103,7 @@ func (s *Server) RegisterHook(h packersdk.Hook) error {
 	})
 }
 
-func (s *Server) RegisterPostProcessor(p packer.PostProcessor) error {
+func (s *Server) RegisterPostProcessor(p packersdk.PostProcessor) error {
 	return s.server.RegisterName(DefaultPostProcessorEndpoint, &PostProcessorServer{
 		commonServer: commonServer{
 			selfConfigurable: p,

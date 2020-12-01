@@ -148,7 +148,7 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 			"shell": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
 		},
 		PostProcessorStore: packer.MapOfPostProcessor{
-			"something": func() (packer.PostProcessor, error) { return &packer.MockPostProcessor{}, nil },
+			"something": func() (packersdk.PostProcessor, error) { return &packer.MockPostProcessor{}, nil },
 		},
 	}
 	config := packer.CoreConfig{

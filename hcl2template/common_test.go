@@ -30,8 +30,8 @@ func getBasicParser() *Parser {
 			"file":  func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
 		},
 		PostProcessorsSchemas: packer.MapOfPostProcessor{
-			"amazon-import": func() (packer.PostProcessor, error) { return &MockPostProcessor{}, nil },
-			"manifest":      func() (packer.PostProcessor, error) { return &MockPostProcessor{}, nil },
+			"amazon-import": func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
+			"manifest":      func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
 		},
 	}
 }

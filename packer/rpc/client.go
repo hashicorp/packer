@@ -119,7 +119,7 @@ func (c *Client) Hook() packersdk.Hook {
 	}
 }
 
-func (c *Client) PostProcessor() packer.PostProcessor {
+func (c *Client) PostProcessor() packersdk.PostProcessor {
 	return &postProcessor{
 		commonClient: commonClient{
 			endpoint: DefaultPostProcessorEndpoint,

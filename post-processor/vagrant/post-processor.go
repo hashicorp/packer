@@ -1,6 +1,6 @@
 //go:generate mapstructure-to-hcl2 -type Config
 
-// vagrant implements the packer.PostProcessor interface and adds a
+// vagrant implements the packersdk.PostProcessor interface and adds a
 // post-processor that turns artifacts of known builders into Vagrant
 // boxes.
 package vagrant

@@ -10,7 +10,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 
@@ -188,7 +187,7 @@ var Provisioners = map[string]packersdk.Provisioner{
 	"windows-shell":     new(windowsshellprovisioner.Provisioner),
 }
 
-var PostProcessors = map[string]packer.PostProcessor{
+var PostProcessors = map[string]packersdk.PostProcessor{
 	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
 	"amazon-import":        new(amazonimportpostprocessor.PostProcessor),
 	"artifice":             new(artificepostprocessor.PostProcessor),
