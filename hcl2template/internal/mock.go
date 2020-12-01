@@ -90,7 +90,7 @@ type MockProvisioner struct {
 	Config MockConfig
 }
 
-var _ packer.Provisioner = new(MockProvisioner)
+var _ packersdk.Provisioner = new(MockProvisioner)
 
 func (b *MockProvisioner) ConfigSpec() hcldec.ObjectSpec {
 	return b.Config.FlatMapstructure().HCL2Spec()

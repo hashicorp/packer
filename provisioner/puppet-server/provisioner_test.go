@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func testConfig() (config map[string]interface{}, tf *os.File) {
@@ -24,7 +24,7 @@ func testConfig() (config map[string]interface{}, tf *os.File) {
 func TestProvisioner_Impl(t *testing.T) {
 	var raw interface{}
 	raw = &Provisioner{}
-	if _, ok := raw.(packer.Provisioner); !ok {
+	if _, ok := raw.(packersdk.Provisioner); !ok {
 		t.Fatalf("must be a Provisioner")
 	}
 }

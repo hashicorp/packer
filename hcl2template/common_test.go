@@ -26,8 +26,8 @@ func getBasicParser() *Parser {
 			"null":           func() (packersdk.Builder, error) { return &null.Builder{}, nil },
 		},
 		ProvisionersSchemas: packer.MapOfProvisioner{
-			"shell": func() (packer.Provisioner, error) { return &MockProvisioner{}, nil },
-			"file":  func() (packer.Provisioner, error) { return &MockProvisioner{}, nil },
+			"shell": func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
+			"file":  func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
 		},
 		PostProcessorsSchemas: packer.MapOfPostProcessor{
 			"amazon-import": func() (packer.PostProcessor, error) { return &MockPostProcessor{}, nil },

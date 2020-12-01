@@ -29,8 +29,8 @@ func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 			"amazon-ebs": func() (packersdk.Builder, error) { return &amazonebsbuilder.Builder{}, nil },
 		},
 		ProvisionerStore: packer.MapOfProvisioner{
-			"shell": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
-			"file":  func() (packer.Provisioner, error) { return &fileprovisioner.Provisioner{}, nil },
+			"shell": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
+			"file":  func() (packersdk.Provisioner, error) { return &fileprovisioner.Provisioner{}, nil },
 		},
 		PostProcessorStore: packer.MapOfPostProcessor{},
 	}

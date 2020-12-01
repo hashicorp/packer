@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
@@ -16,7 +15,7 @@ type Provisioner struct {
 	Duration time.Duration
 }
 
-var _ packer.Provisioner = new(Provisioner)
+var _ packersdk.Provisioner = new(Provisioner)
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.FlatMapstructure().HCL2Spec() }
 

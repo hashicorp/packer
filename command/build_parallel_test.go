@@ -74,7 +74,7 @@ func testMetaParallel(t *testing.T, builder *ParallelTestBuilder, locked *Locked
 					"lock":          func() (packersdk.Builder, error) { return locked, nil },
 				},
 				ProvisionerStore: packer.MapOfProvisioner{
-					"sleep": func() (packer.Provisioner, error) { return &sleep.Provisioner{}, nil },
+					"sleep": func() (packersdk.Provisioner, error) { return &sleep.Provisioner{}, nil },
 				},
 			},
 		},

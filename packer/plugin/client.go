@@ -164,7 +164,7 @@ func (c *Client) PostProcessor() (packer.PostProcessor, error) {
 
 // Returns a provisioner implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *Client) Provisioner() (packer.Provisioner, error) {
+func (c *Client) Provisioner() (packersdk.Provisioner, error) {
 	client, err := c.packrpcClient()
 	if err != nil {
 		return nil, err

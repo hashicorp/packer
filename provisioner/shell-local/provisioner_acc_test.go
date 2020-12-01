@@ -42,7 +42,7 @@ func (s *ShellLocalProvisionerAccTest) GetConfig() (string, error) {
 
 func (s *ShellLocalProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
 	return packer.MapOfProvisioner{
-		"shell-local": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
+		"shell-local": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
 	}
 }
 
