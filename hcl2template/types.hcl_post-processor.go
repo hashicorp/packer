@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -16,7 +15,7 @@ import (
 // calling PostProcess: with contextual variables.
 // This permits using "${build.ID}" values for example.
 type HCL2PostProcessor struct {
-	PostProcessor      packer.PostProcessor
+	PostProcessor      packersdk.PostProcessor
 	postProcessorBlock *PostProcessorBlock
 	evalContext        *hcl.EvalContext
 	builderVariables   map[string]string

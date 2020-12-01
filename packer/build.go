@@ -118,7 +118,7 @@ type CoreBuild struct {
 // CoreBuildPostProcessor Keeps track of the post-processor and the
 // configuration of the post-processor used within a build.
 type CoreBuildPostProcessor struct {
-	PostProcessor     PostProcessor
+	PostProcessor     packersdk.PostProcessor
 	PType             string
 	PName             string
 	config            map[string]interface{}
@@ -130,7 +130,7 @@ type CoreBuildPostProcessor struct {
 type CoreBuildProvisioner struct {
 	PType       string
 	PName       string
-	Provisioner Provisioner
+	Provisioner packersdk.Provisioner
 	config      []interface{}
 }
 

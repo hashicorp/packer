@@ -6,12 +6,12 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
-	var _ packer.PostProcessor = new(PostProcessor)
+	var _ packersdk.PostProcessor = new(PostProcessor)
 }
 
 func testConfig() map[string]interface{} {
@@ -23,7 +23,7 @@ func testConfig() map[string]interface{} {
 func TestPostProcessor_Impl(t *testing.T) {
 	var raw interface{}
 	raw = &PostProcessor{}
-	if _, ok := raw.(packer.PostProcessor); !ok {
+	if _, ok := raw.(packersdk.PostProcessor); !ok {
 		t.Fatalf("must be a post processor")
 	}
 }

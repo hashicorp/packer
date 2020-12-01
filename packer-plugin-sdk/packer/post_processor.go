@@ -2,8 +2,6 @@ package packer
 
 import (
 	"context"
-
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // A PostProcessor is responsible for taking an artifact of a build
@@ -12,7 +10,7 @@ import (
 // the result of a build, compresses it, and returns a new artifact containing
 // a single file of the prior artifact compressed.
 type PostProcessor interface {
-	packersdk.HCL2Speccer
+	HCL2Speccer
 
 	// Configure is responsible for setting up configuration, storing
 	// the state for later, and returning and errors, such as validation
@@ -26,5 +24,5 @@ type PostProcessor interface {
 	// user input for keep_input_artifact is ignored and the artifact is either
 	// kept or discarded according to the value set in `keep`.
 	// PostProcess is cancellable using context
-	PostProcess(context.Context, packersdk.Ui, packersdk.Artifact) (a packersdk.Artifact, keep bool, forceOverride bool, err error)
+	PostProcess(context.Context, Ui, Artifact) (a Artifact, keep bool, forceOverride bool, err error)
 }

@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/builder/docker"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	dockerimport "github.com/hashicorp/packer/post-processor/docker-import"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +35,7 @@ func testUi() *packersdk.BasicUi {
 }
 
 func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
-	var _ packer.PostProcessor = new(PostProcessor)
+	var _ packersdk.PostProcessor = new(PostProcessor)
 }
 
 func TestPostProcessor_PostProcess(t *testing.T) {

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
@@ -112,7 +111,7 @@ type MockPostProcessor struct {
 	Config MockConfig
 }
 
-var _ packer.PostProcessor = new(MockPostProcessor)
+var _ packersdk.PostProcessor = new(MockPostProcessor)
 
 func (b *MockPostProcessor) ConfigSpec() hcldec.ObjectSpec {
 	return b.Config.FlatMapstructure().HCL2Spec()

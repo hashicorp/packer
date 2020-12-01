@@ -846,8 +846,8 @@ func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 			"file":        func() (packersdk.Provisioner, error) { return &filep.Provisioner{}, nil },
 		},
 		PostProcessorStore: packer.MapOfPostProcessor{
-			"shell-local": func() (packer.PostProcessor, error) { return &shell_local_pp.PostProcessor{}, nil },
-			"manifest":    func() (packer.PostProcessor, error) { return &manifest.PostProcessor{}, nil },
+			"shell-local": func() (packersdk.PostProcessor, error) { return &shell_local_pp.PostProcessor{}, nil },
+			"manifest":    func() (packersdk.PostProcessor, error) { return &manifest.PostProcessor{}, nil },
 		},
 	}
 	return &packer.CoreConfig{

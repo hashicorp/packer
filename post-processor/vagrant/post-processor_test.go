@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
@@ -34,7 +33,7 @@ func testUi() *packersdk.BasicUi {
 }
 
 func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
-	var _ packer.PostProcessor = new(PostProcessor)
+	var _ packersdk.PostProcessor = new(PostProcessor)
 }
 
 func TestPostProcessorPrepare_compressionLevel(t *testing.T) {

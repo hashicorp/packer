@@ -11,7 +11,7 @@ import (
 // TimeoutProvisioner is a Provisioner implementation that can timeout after a
 // duration
 type TimeoutProvisioner struct {
-	Provisioner
+	packersdk.Provisioner
 	Timeout time.Duration
 }
 

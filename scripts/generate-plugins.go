@@ -97,7 +97,7 @@ type plugin struct {
 func makeMap(varName, varType string, items []plugin) string {
 	output := ""
 
-	output += fmt.Sprintf("var %s = map[string]packer.%s{\n", varName, varType)
+	output += fmt.Sprintf("var %s = map[string]packersdk.%s{\n", varName, varType)
 	for _, item := range items {
 		output += fmt.Sprintf("\t\"%s\":   new(%s.%s),\n", item.PluginName, item.ImportName, item.TypeName)
 	}

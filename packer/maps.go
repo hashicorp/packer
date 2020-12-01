@@ -6,14 +6,14 @@ import (
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-type MapOfProvisioner map[string]func() (Provisioner, error)
+type MapOfProvisioner map[string]func() (packersdk.Provisioner, error)
 
 func (mop MapOfProvisioner) Has(provisioner string) bool {
 	_, res := mop[provisioner]
 	return res
 }
 
-func (mop MapOfProvisioner) Start(provisioner string) (Provisioner, error) {
+func (mop MapOfProvisioner) Start(provisioner string) (packersdk.Provisioner, error) {
 	p, found := mop[provisioner]
 	if !found {
 		return nil, fmt.Errorf("Unknown provisioner %s", provisioner)
@@ -29,14 +29,14 @@ func (mop MapOfProvisioner) List() []string {
 	return res
 }
 
-type MapOfPostProcessor map[string]func() (PostProcessor, error)
+type MapOfPostProcessor map[string]func() (packersdk.PostProcessor, error)
 
 func (mopp MapOfPostProcessor) Has(postProcessor string) bool {
 	_, res := mopp[postProcessor]
 	return res
 }
 
-func (mopp MapOfPostProcessor) Start(postProcessor string) (PostProcessor, error) {
+func (mopp MapOfPostProcessor) Start(postProcessor string) (packersdk.PostProcessor, error) {
 	p, found := mopp[postProcessor]
 	if !found {
 		return nil, fmt.Errorf("Unknown post-processor %s", postProcessor)
