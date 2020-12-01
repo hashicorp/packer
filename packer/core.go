@@ -50,7 +50,7 @@ type CoreConfig struct {
 }
 
 // The function type used to lookup Builder implementations.
-type BuilderFunc func(name string) (Builder, error)
+type BuilderFunc func(name string) (packersdk.Builder, error)
 
 // The function type used to lookup Hook implementations.
 type HookFunc func(name string) (packersdk.Hook, error)
@@ -68,7 +68,7 @@ type BasicStore interface {
 
 type BuilderStore interface {
 	BasicStore
-	Start(name string) (Builder, error)
+	Start(name string) (packersdk.Builder, error)
 }
 
 type ProvisionerStore interface {

@@ -12,7 +12,7 @@ func TestCoreConfig(t *testing.T) *CoreConfig {
 	// Create some test components
 	components := ComponentFinder{
 		BuilderStore: MapOfBuilder{
-			"test": func() (Builder, error) { return &MockBuilder{}, nil },
+			"test": func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
 		},
 	}
 
@@ -46,7 +46,7 @@ func TestBuilder(t *testing.T, c *CoreConfig, n string) *MockBuilder {
 	var b MockBuilder
 
 	c.Components.BuilderStore = MapOfBuilder{
-		n: func() (Builder, error) { return &b, nil },
+		n: func() (packersdk.Builder, error) { return &b, nil },
 	}
 
 	return &b

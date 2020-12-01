@@ -89,7 +89,7 @@ func (c *Client) Build() packer.Build {
 	}
 }
 
-func (c *Client) Builder() packer.Builder {
+func (c *Client) Builder() packersdk.Builder {
 	return &builder{
 		commonClient: commonClient{
 			endpoint: DefaultBuilderEndpoint,

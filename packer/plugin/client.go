@@ -131,7 +131,7 @@ func (c *Client) Exited() bool {
 
 // Returns a builder implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *Client) Builder() (packer.Builder, error) {
+func (c *Client) Builder() (packersdk.Builder, error) {
 	client, err := c.packrpcClient()
 	if err != nil {
 		return nil, err

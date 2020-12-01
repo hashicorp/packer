@@ -1,7 +1,7 @@
 //go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type Config,BlockDevice
 
-// The ebsvolume package contains a packer.Builder implementation that builds
+// The ebsvolume package contains a packersdk.Builder implementation that builds
 // EBS volumes for Amazon EC2 using an ephemeral instance,
 package ebsvolume
 

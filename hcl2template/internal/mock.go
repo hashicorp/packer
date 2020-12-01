@@ -70,7 +70,7 @@ type MockBuilder struct {
 	Config MockConfig
 }
 
-var _ packer.Builder = new(MockBuilder)
+var _ packersdk.Builder = new(MockBuilder)
 
 func (b *MockBuilder) ConfigSpec() hcldec.ObjectSpec { return b.Config.FlatMapstructure().HCL2Spec() }
 

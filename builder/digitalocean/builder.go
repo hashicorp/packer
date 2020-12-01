@@ -1,4 +1,4 @@
-// The digitalocean package contains a packer.Builder implementation
+// The digitalocean package contains a packersdk.Builder implementation
 // that builds DigitalOcean images (snapshots).
 
 package digitalocean

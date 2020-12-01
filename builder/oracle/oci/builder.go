@@ -1,4 +1,4 @@
-// Package oci contains a packer.Builder implementation that builds Oracle
+// Package oci contains a packersdk.Builder implementation that builds Oracle
 // Bare Metal Cloud Services (OCI) images.
 package oci
 

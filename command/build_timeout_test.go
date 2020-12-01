@@ -17,7 +17,7 @@ import (
 func testCoreConfigSleepBuilder(t *testing.T) *packer.CoreConfig {
 	components := packer.ComponentFinder{
 		BuilderStore: packer.MapOfBuilder{
-			"file": func() (packer.Builder, error) { return &file.Builder{}, nil },
+			"file": func() (packersdk.Builder, error) { return &file.Builder{}, nil },
 		},
 		ProvisionerStore: packer.MapOfProvisioner{
 			"sleep":       func() (packer.Provisioner, error) { return &sleep.Provisioner{}, nil },

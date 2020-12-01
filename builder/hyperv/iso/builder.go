@@ -45,7 +45,7 @@ const (
 	DefaultPassword = ""
 )
 
-// Builder implements packer.Builder and builds the actual Hyperv
+// Builder implements packersdk.Builder and builds the actual Hyperv
 // images.
 type Builder struct {
 	config Config

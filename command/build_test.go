@@ -837,8 +837,8 @@ func fileExists(filename string) bool {
 func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 	components := packer.ComponentFinder{
 		BuilderStore: packer.MapOfBuilder{
-			"file": func() (packer.Builder, error) { return &file.Builder{}, nil },
-			"null": func() (packer.Builder, error) { return &null.Builder{}, nil },
+			"file": func() (packersdk.Builder, error) { return &file.Builder{}, nil },
+			"null": func() (packersdk.Builder, error) { return &null.Builder{}, nil },
 		},
 		ProvisionerStore: packer.MapOfProvisioner{
 			"shell-local": func() (packer.Provisioner, error) { return &shell_local.Provisioner{}, nil },

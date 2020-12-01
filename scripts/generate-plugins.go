@@ -90,7 +90,7 @@ type plugin struct {
 // makeMap creates a map named Name with type packer.Name that looks something
 // like this:
 //
-// var Builders = map[string]packer.Builder{
+// var Builders = map[string]packersdk.Builder{
 // 	"amazon-chroot":   new(chroot.Builder),
 // 	"amazon-ebs":      new(ebs.Builder),
 // 	"amazon-instance": new(instance.Builder),
@@ -254,6 +254,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
+packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 
 IMPORTS

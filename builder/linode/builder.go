@@ -1,4 +1,4 @@
-// The linode package contains a packer.Builder implementation
+// The linode package contains a packersdk.Builder implementation
 // that builds Linode images.
 package linode
 

@@ -119,9 +119,9 @@ func commandMeta() Meta {
 func getBareComponentFinder() packer.ComponentFinder {
 	return packer.ComponentFinder{
 		BuilderStore: packer.MapOfBuilder{
-			"file":       func() (packer.Builder, error) { return &file.Builder{}, nil },
-			"null":       func() (packer.Builder, error) { return &null.Builder{}, nil },
-			"amazon-ebs": func() (packer.Builder, error) { return &ebs.Builder{}, nil },
+			"file":       func() (packersdk.Builder, error) { return &file.Builder{}, nil },
+			"null":       func() (packersdk.Builder, error) { return &null.Builder{}, nil },
+			"amazon-ebs": func() (packersdk.Builder, error) { return &ebs.Builder{}, nil },
 		},
 		ProvisionerStore: packer.MapOfProvisioner{
 			"shell-local": func() (packer.Provisioner, error) { return &shell_local.Provisioner{}, nil },

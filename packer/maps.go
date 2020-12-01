@@ -2,6 +2,8 @@ package packer
 
 import (
 	"fmt"
+
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type MapOfProvisioner map[string]func() (Provisioner, error)
@@ -50,14 +52,14 @@ func (mopp MapOfPostProcessor) List() []string {
 	return res
 }
 
-type MapOfBuilder map[string]func() (Builder, error)
+type MapOfBuilder map[string]func() (packersdk.Builder, error)
 
 func (mob MapOfBuilder) Has(builder string) bool {
 	_, res := mob[builder]
 	return res
 }
 
-func (mob MapOfBuilder) Start(builder string) (Builder, error) {
+func (mob MapOfBuilder) Start(builder string) (packersdk.Builder, error) {
 	d, found := mob[builder]
 	if !found {
 		return nil, fmt.Errorf("Unknown builder %s", builder)
