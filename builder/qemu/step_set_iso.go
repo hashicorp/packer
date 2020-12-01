@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/net"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step set iso_patch to available url
@@ -17,7 +17,7 @@ type stepSetISO struct {
 }
 
 func (s *stepSetISO) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	iso_path := ""
 

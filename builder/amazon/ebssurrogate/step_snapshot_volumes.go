@@ -10,8 +10,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	multierror "github.com/hashicorp/go-multierror"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -31,7 +31,7 @@ type StepSnapshotVolumes struct {
 
 func (s *StepSnapshotVolumes) snapshotVolume(ctx context.Context, deviceName string, state multistep.StateBag) error {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	instance := state.Get("instance").(*ec2.Instance)
 
 	var volumeId string
@@ -88,7 +88,7 @@ func (s *StepSnapshotVolumes) snapshotVolume(ctx context.Context, deviceName str
 }
 
 func (s *StepSnapshotVolumes) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	s.snapshotIds = map[string]string{}
 
@@ -132,7 +132,7 @@ func (s *StepSnapshotVolumes) Cleanup(state multistep.StateBag) {
 
 	if cancelled || halted {
 		ec2conn := state.Get("ec2").(*ec2.EC2)
-		ui := state.Get("ui").(packer.Ui)
+		ui := state.Get("ui").(packersdk.Ui)
 		ui.Say("Removing snapshots since we cancelled or halted...")
 		s.snapshotMutex.Lock()
 		for _, snapshotId := range s.snapshotIds {

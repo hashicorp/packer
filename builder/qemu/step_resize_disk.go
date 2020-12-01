@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step resizes the virtual disk that will be used as the
@@ -25,7 +25,7 @@ type stepResizeDisk struct {
 
 func (s *stepResizeDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	path := filepath.Join(s.OutputDir, s.VMName)
 
 	command := s.buildResizeCommand(path)

@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -349,8 +350,8 @@ func TestProvisionerQuote_EnvironmentVars(t *testing.T) {
 	}
 }
 
-func testUi() *packer.BasicUi {
-	return &packer.BasicUi{
+func testUi() *packersdk.BasicUi {
+	return &packersdk.BasicUi{
 		Reader:      new(bytes.Buffer),
 		Writer:      new(bytes.Buffer),
 		ErrorWriter: new(bytes.Buffer),
@@ -371,7 +372,7 @@ func TestProvisionerProvision_ValidExitCodes(t *testing.T) {
 	p.config.PackerBuildName = "vmware"
 	p.config.PackerBuilderType = "iso"
 	p.config.ValidExitCodes = []int{0, 200}
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	comm.StartExitStatus = 200
 	p.Prepare(config)
 	err := p.Provision(context.Background(), ui, comm, generatedData())
@@ -394,7 +395,7 @@ func TestProvisionerProvision_InvalidExitCodes(t *testing.T) {
 	p.config.PackerBuildName = "vmware"
 	p.config.PackerBuilderType = "iso"
 	p.config.ValidExitCodes = []int{0, 200}
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	comm.StartExitStatus = 201 // Invalid!
 	p.Prepare(config)
 	err := p.Provision(context.Background(), ui, comm, generatedData())
@@ -417,7 +418,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	// Defaults provided by Packer - env vars should not appear in cmd
 	p.config.PackerBuildName = "vmware"
 	p.config.PackerBuilderType = "iso"
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	_ = p.Prepare(config)
 
 	err := p.Provision(context.Background(), ui, comm, generatedData())
@@ -468,7 +469,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	ui := testUi()
 
 	p := new(Provisioner)
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	p.Prepare(config)
 	err := p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
@@ -505,7 +506,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	config["remote_path"] = "c:/Windows/Temp/script.ps1"
 
 	p := new(Provisioner)
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	p.Prepare(config)
 	err := p.Provision(context.Background(), ui, comm, generatedData())
 	if err != nil {
@@ -550,7 +551,7 @@ func TestProvisionerProvision_SkipClean(t *testing.T) {
 		tc := tc
 		p := new(Provisioner)
 		ui := testUi()
-		comm := new(packer.MockCommunicator)
+		comm := new(packersdk.MockCommunicator)
 
 		config["skip_clean"] = tc.SkipClean
 		if err := p.Prepare(config); err != nil {
@@ -577,14 +578,14 @@ func TestProvisionerProvision_UploadFails(t *testing.T) {
 	ui := testUi()
 
 	p := new(Provisioner)
-	comm := new(packer.ScriptUploadErrorMockCommunicator)
+	comm := new(packersdk.ScriptUploadErrorMockCommunicator)
 	p.Prepare(config)
 	p.config.StartRetryTimeout = 1 * time.Second
 	err := p.Provision(context.Background(), ui, comm, generatedData())
-	if !strings.Contains(err.Error(), packer.ScriptUploadErrorMockCommunicatorError.Error()) {
+	if !strings.Contains(err.Error(), packersdk.ScriptUploadErrorMockCommunicatorError.Error()) {
 		t.Fatalf("expected Provision() error %q to contain %q",
 			err.Error(),
-			packer.ScriptUploadErrorMockCommunicatorError.Error())
+			packersdk.ScriptUploadErrorMockCommunicatorError.Error())
 	}
 }
 
@@ -790,7 +791,7 @@ func TestProvision_createCommandText(t *testing.T) {
 	config := testConfig()
 	config["remote_path"] = "c:/Windows/Temp/script.ps1"
 	p := new(Provisioner)
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	p.communicator = comm
 	_ = p.Prepare(config)
 
@@ -821,7 +822,7 @@ func TestProvision_createCommandText(t *testing.T) {
 
 func TestProvision_uploadEnvVars(t *testing.T) {
 	p := new(Provisioner)
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	p.communicator = comm
 
 	flattenedEnvVars := `$env:PACKER_BUILDER_TYPE="footype"; $env:PACKER_BUILD_NAME="foobuild";`

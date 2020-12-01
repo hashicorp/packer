@@ -3,7 +3,7 @@ package driver
 import (
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -52,7 +52,7 @@ func (d *DriverMock) FindCluster(name string) (*Cluster, error) {
 	return nil, nil
 }
 
-func (d *DriverMock) PreCleanVM(ui packer.Ui, vmPath string, force bool) error {
+func (d *DriverMock) PreCleanVM(ui packersdk.Ui, vmPath string, force bool) error {
 	d.PreCleanVMCalled = true
 	if d.PreCleanShouldFail {
 		return fmt.Errorf("pre clean failed")

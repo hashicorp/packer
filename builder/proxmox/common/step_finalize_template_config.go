@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // stepFinalizeTemplateConfig does any required modifications to the configuration _after_
@@ -23,7 +23,7 @@ type templateFinalizer interface {
 var _ templateFinalizer = &proxmox.Client{}
 
 func (s *stepFinalizeTemplateConfig) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("proxmoxClient").(templateFinalizer)
 	c := state.Get("config").(*Config)
 	vmRef := state.Get("vmRef").(*proxmox.VmRef)

@@ -17,9 +17,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/pkg/errors"
 	"github.com/vmware/govmomi/nfc"
@@ -102,16 +102,16 @@ var sha = map[string]func() hash.Hash{
 }
 
 func (c *ExportConfig) Prepare(ctx *interpolate.Context, lc *LocationConfig, pc *common.PackerConfig) []error {
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
-	errs = packer.MultiErrorAppend(errs, c.OutputDir.Prepare(ctx, pc)...)
+	errs = packersdk.MultiErrorAppend(errs, c.OutputDir.Prepare(ctx, pc)...)
 
 	// manifest should default to sha256
 	if c.Manifest == "" {
 		c.Manifest = "sha256"
 	}
 	if _, ok := sha[c.Manifest]; !ok {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("unknown hash: %s. available options include available options being 'none', 'sha1', 'sha256', 'sha512'", c.Manifest))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("unknown hash: %s. available options include available options being 'none', 'sha1', 'sha256', 'sha512'", c.Manifest))
 	}
 
 	if c.Name == "" {
@@ -120,12 +120,12 @@ func (c *ExportConfig) Prepare(ctx *interpolate.Context, lc *LocationConfig, pc 
 	target := getTarget(c.OutputDir.OutputDir, c.Name)
 	if !c.Force {
 		if _, err := os.Stat(target); err == nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("file already exists: %s", target))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("file already exists: %s", target))
 		}
 	}
 
 	if err := os.MkdirAll(c.OutputDir.OutputDir, c.OutputDir.DirPerm); err != nil {
-		errs = packer.MultiErrorAppend(errs, errors.Wrap(err, "unable to make directory for export"))
+		errs = packersdk.MultiErrorAppend(errs, errors.Wrap(err, "unable to make directory for export"))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -153,7 +153,7 @@ func (s *StepExport) Cleanup(multistep.StateBag) {
 }
 
 func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	ui.Message("Starting export...")

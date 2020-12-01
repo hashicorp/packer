@@ -5,8 +5,8 @@ package file
 import (
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -35,10 +35,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		return warnings, err
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	if c.Target == "" {
-		errs = packer.MultiErrorAppend(errs, ErrTargetRequired)
+		errs = packersdk.MultiErrorAppend(errs, ErrTargetRequired)
 	}
 
 	if c.Content == "" && c.Source == "" {
@@ -46,7 +46,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.Content != "" && c.Source != "" {
-		errs = packer.MultiErrorAppend(errs, ErrContentSourceConflict)
+		errs = packersdk.MultiErrorAppend(errs, ErrContentSourceConflict)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

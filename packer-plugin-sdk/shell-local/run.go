@@ -11,13 +11,13 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 
-func Run(ctx context.Context, ui packer.Ui, config *Config, generatedData map[string]interface{}) (bool, error) {
+func Run(ctx context.Context, ui packersdk.Ui, config *Config, generatedData map[string]interface{}) (bool, error) {
 	if generatedData != nil {
 		config.generatedData = generatedData
 	} else {
@@ -96,7 +96,7 @@ func Run(ctx context.Context, ui packer.Ui, config *Config, generatedData map[st
 		// the other communicators; ultimately, this command is just used for
 		// buffers and for reading the final exit status.
 		flattenedCmd := strings.Join(interpolatedCmds, " ")
-		cmd := &packer.RemoteCmd{Command: flattenedCmd}
+		cmd := &packersdk.RemoteCmd{Command: flattenedCmd}
 		log.Printf("[INFO] (shell-local): starting local command: %s", flattenedCmd)
 		if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 			return false, fmt.Errorf(

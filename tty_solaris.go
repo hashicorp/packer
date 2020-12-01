@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-func openTTY() (packer.TTY, error) {
+func openTTY() (packersdk.TTY, error) {
 	return nil, fmt.Errorf("no TTY available on solaris")
 }

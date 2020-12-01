@@ -10,8 +10,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 )
 
@@ -28,7 +28,7 @@ type StepPreValidate struct {
 }
 
 func (s *StepPreValidate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if accessConfig, ok := state.GetOk("access_config"); ok {
 		accessconf := accessConfig.(*AccessConfig)

@@ -6,15 +6,15 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepMountChroot struct{}
 
 func (s *stepMountChroot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	device := state.Get("device").(string)
 
 	log.Printf("Mount path: %s", config.ChrootMountPath)

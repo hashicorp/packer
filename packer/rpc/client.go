@@ -6,6 +6,7 @@ import (
 	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/ugorji/go/codec"
 )
 
@@ -69,7 +70,7 @@ func (c *Client) Close() error {
 	return nil
 }
 
-func (c *Client) Artifact() packer.Artifact {
+func (c *Client) Artifact() packersdk.Artifact {
 	return &artifact{
 		commonClient: commonClient{
 			endpoint: DefaultArtifactEndpoint,
@@ -98,7 +99,7 @@ func (c *Client) Builder() packer.Builder {
 	}
 }
 
-func (c *Client) Communicator() packer.Communicator {
+func (c *Client) Communicator() packersdk.Communicator {
 	return &communicator{
 		commonClient: commonClient{
 			endpoint: DefaultCommunicatorEndpoint,
@@ -108,7 +109,7 @@ func (c *Client) Communicator() packer.Communicator {
 	}
 }
 
-func (c *Client) Hook() packer.Hook {
+func (c *Client) Hook() packersdk.Hook {
 	return &hook{
 		commonClient: commonClient{
 			endpoint: DefaultHookEndpoint,
@@ -138,7 +139,7 @@ func (c *Client) Provisioner() packer.Provisioner {
 	}
 }
 
-func (c *Client) Ui() packer.Ui {
+func (c *Client) Ui() packersdk.Ui {
 	return &Ui{
 		commonClient: commonClient{
 			endpoint: DefaultUiEndpoint,

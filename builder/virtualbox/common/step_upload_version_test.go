@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestStepUploadVersion_impl(t *testing.T) {
@@ -17,7 +17,7 @@ func TestStepUploadVersion(t *testing.T) {
 	step := new(StepUploadVersion)
 	step.Path = "foopath"
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 
 	driver := state.Get("driver").(*DriverMock)
@@ -45,7 +45,7 @@ func TestStepUploadVersion_noPath(t *testing.T) {
 	step := new(StepUploadVersion)
 	step.Path = ""
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 
 	// Test the run

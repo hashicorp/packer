@@ -6,6 +6,7 @@ import (
 	"log"
 	"sync"
 
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 	"github.com/hashicorp/packer/version"
 )
@@ -63,7 +64,7 @@ type Build interface {
 	// Run runs the actual builder, returning an artifact implementation
 	// of what is built. If anything goes wrong, an error is returned.
 	// Run can be context cancelled.
-	Run(context.Context, Ui) ([]Artifact, error)
+	Run(context.Context, packersdk.Ui) ([]packersdk.Artifact, error)
 
 	// SetDebug will enable/disable debug mode. Debug mode is always
 	// enabled by adding the additional key "packer_debug" to boolean
@@ -97,7 +98,7 @@ type CoreBuild struct {
 	Builder            Builder
 	BuilderConfig      interface{}
 	BuilderType        string
-	hooks              map[string][]Hook
+	hooks              map[string][]packersdk.Hook
 	Provisioners       []CoreBuildProvisioner
 	PostProcessors     [][]CoreBuildPostProcessor
 	CleanupProvisioner CoreBuildProvisioner
@@ -231,15 +232,15 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 }
 
 // Runs the actual build. Prepare must be called prior to running this.
-func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) {
+func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packersdk.Artifact, error) {
 	if !b.prepareCalled {
 		panic("Prepare must be called first")
 	}
 
 	// Copy the hooks
-	hooks := make(map[string][]Hook)
+	hooks := make(map[string][]packersdk.Hook)
 	for hookName, hookList := range b.hooks {
-		hooks[hookName] = make([]Hook, len(hookList))
+		hooks[hookName] = make([]packersdk.Hook, len(hookList))
 		copy(hooks[hookName], hookList)
 	}
 
@@ -266,11 +267,11 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 			}
 		}
 
-		if _, ok := hooks[HookProvision]; !ok {
-			hooks[HookProvision] = make([]Hook, 0, 1)
+		if _, ok := hooks[packersdk.HookProvision]; !ok {
+			hooks[packersdk.HookProvision] = make([]packersdk.Hook, 0, 1)
 		}
 
-		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{
+		hooks[packersdk.HookProvision] = append(hooks[packersdk.HookProvision], &ProvisionHook{
 			Provisioners: hookedProvisioners,
 		})
 	}
@@ -281,13 +282,13 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi Ui) ([]Artifact, error) 
 			b.CleanupProvisioner.config,
 			b.CleanupProvisioner.PType,
 		}
-		hooks[HookCleanupProvision] = []Hook{&ProvisionHook{
+		hooks[packersdk.HookCleanupProvision] = []packersdk.Hook{&ProvisionHook{
 			Provisioners: []*HookedProvisioner{hookedCleanupProvisioner},
 		}}
 	}
 
-	hook := &DispatchHook{Mapping: hooks}
-	artifacts := make([]Artifact, 0, 1)
+	hook := &packersdk.DispatchHook{Mapping: hooks}
+	artifacts := make([]packersdk.Artifact, 0, 1)
 
 	// The builder just has a normal Ui, but targeted
 	builderUi := &TargetedUI{
@@ -411,7 +412,7 @@ PostProcessorRunSeqLoop:
 	}
 
 	if len(errors) > 0 {
-		err = &MultiError{errors}
+		err = &packersdk.MultiError{Errors: errors}
 	}
 
 	return artifacts, err

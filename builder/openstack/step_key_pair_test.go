@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -76,7 +76,7 @@ func TestBerToDer(t *testing.T) {
 	}
 
 	msg := new(bytes.Buffer)
-	ui := &packer.BasicUi{
+	ui := &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: msg,
 	}

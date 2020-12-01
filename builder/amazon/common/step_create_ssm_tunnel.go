@@ -10,9 +10,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	pssm "github.com/hashicorp/packer/builder/amazon/common/ssm"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/net"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepCreateSSMTunnel struct {
@@ -27,7 +27,7 @@ type StepCreateSSMTunnel struct {
 
 // Run executes the Packer build step that creates a session tunnel.
 func (s *StepCreateSSMTunnel) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if !s.SSMAgentEnabled {
 		return multistep.ActionContinue

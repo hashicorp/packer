@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepMountSecondaryDvdImages struct {
@@ -22,7 +22,7 @@ type DvdControllerProperties struct {
 
 func (s *StepMountSecondaryDvdImages) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Mounting secondary DVD images...")
 
 	vmName := state.Get("vmName").(string)
@@ -84,7 +84,7 @@ func (s *StepMountSecondaryDvdImages) Cleanup(state multistep.StateBag) {
 
 	dvdControllers := dvdControllersState.([]DvdControllerProperties)
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
 	errorMsg := "Error unmounting secondary dvd drive: %s"
 

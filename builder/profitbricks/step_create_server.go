@@ -9,15 +9,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/profitbricks/profitbricks-sdk-go"
 )
 
 type stepCreateServer struct{}
 
 func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	c := state.Get("config").(*Config)
 
 	profitbricks.SetAuth(c.PBUsername, c.PBPassword)
@@ -158,7 +158,7 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 
 func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 	c := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Removing Virtual Data Center...")
 
@@ -240,7 +240,7 @@ func (d *stepCreateServer) getImageId(imageName string, c *Config) string {
 	return ""
 }
 
-func (d *stepCreateServer) getImageAlias(imageAlias string, location string, ui packer.Ui) string {
+func (d *stepCreateServer) getImageAlias(imageAlias string, location string, ui packersdk.Ui) string {
 	if imageAlias == "" {
 		return ""
 	}

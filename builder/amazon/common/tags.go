@@ -5,8 +5,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -14,7 +14,7 @@ import (
 type TagMap map[string]string
 type EC2Tags []*ec2.Tag
 
-func (t EC2Tags) Report(ui packer.Ui) {
+func (t EC2Tags) Report(ui packersdk.Ui) {
 	for _, tag := range t {
 		ui.Message(fmt.Sprintf("Adding tag: \"%s\": \"%s\"",
 			aws.StringValue(tag.Key), aws.StringValue(tag.Value)))

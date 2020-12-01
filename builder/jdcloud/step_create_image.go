@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/jdcloud-api/jdcloud-sdk-go/services/vm/apis"
 )
 
@@ -16,7 +16,7 @@ type stepCreateJDCloudImage struct {
 
 func (s *stepCreateJDCloudImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Creating images")
 
 	req := apis.NewCreateImageRequest(Region, s.InstanceSpecConfig.InstanceId, s.InstanceSpecConfig.ImageName, "")

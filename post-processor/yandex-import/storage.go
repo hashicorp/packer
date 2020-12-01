@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 const defaultS3Region = "ru-central1"
@@ -46,7 +46,7 @@ func newYCStorageClient(storageEndpoint, accessKey, secretKey string) (*s3.S3, e
 }
 
 // Get path-style S3 URL and return presigned URL
-func presignUrl(s3conn *s3.S3, ui packer.Ui, fullUrl string) (cloudImageSource, error) {
+func presignUrl(s3conn *s3.S3, ui packersdk.Ui, fullUrl string) (cloudImageSource, error) {
 	bucket, key, err := s3URLToBucketKey(fullUrl)
 	if err != nil {
 		return nil, err

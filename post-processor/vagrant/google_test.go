@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestGoogleProvider_impl(t *testing.T) {
@@ -22,7 +22,7 @@ func TestGoogleProvider_KeepInputArtifact(t *testing.T) {
 func TestGoogleProvider_ArtifactId(t *testing.T) {
 	p := new(GoogleProvider)
 	ui := testUi()
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		IdValue: "packer-1234",
 	}
 

@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/builder/amazon/common"
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestBuilderAcc_basic(t *testing.T) {
@@ -89,7 +89,7 @@ func TestBuilderAcc_forceDeleteSnapshot(t *testing.T) {
 }
 
 func checkSnapshotsDeleted(snapshotIds []*string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		// Verify the snapshots are gone
 		ec2conn, _ := testEC2Conn()
 		snapshotResp, _ := ec2conn.DescribeSnapshots(
@@ -122,7 +122,7 @@ func TestBuilderAcc_encryptedBoot(t *testing.T) {
 }
 
 func checkAMISharing(count int, uid, group string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		if len(artifacts) > 1 {
 			return fmt.Errorf("more than 1 artifact")
 		}
@@ -178,7 +178,7 @@ func checkAMISharing(count int, uid, group string) builderT.TestCheckFunc {
 }
 
 func checkRegionCopy(regions []string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		if len(artifacts) > 1 {
 			return fmt.Errorf("more than 1 artifact")
 		}
@@ -211,7 +211,7 @@ func checkRegionCopy(regions []string) builderT.TestCheckFunc {
 }
 
 func checkBootEncrypted() builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 
 		// Get the actual *Artifact pointer so we can access the AMIs directly
 		artifactRaw := artifacts[0]

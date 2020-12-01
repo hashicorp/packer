@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepSetSnapshot struct {
@@ -18,7 +18,7 @@ type StepSetSnapshot struct {
 
 func (s *StepSetSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vboxcommon.Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	snapshotTree, err := driver.LoadSnapshots(s.Name)
 	if err != nil {
 		err := fmt.Errorf("Error loading snapshots for VM: %s", err)
@@ -64,7 +64,7 @@ func (s *StepSetSnapshot) Run(_ context.Context, state multistep.StateBag) multi
 func (s *StepSetSnapshot) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(vboxcommon.Driver)
 	if s.revertToSnapshot != "" {
-		ui := state.Get("ui").(packer.Ui)
+		ui := state.Get("ui").(packersdk.Ui)
 		if s.KeepRegistered {
 			ui.Say("Keeping virtual machine state (keep_registered = true)")
 			return

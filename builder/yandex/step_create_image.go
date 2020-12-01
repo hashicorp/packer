@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
@@ -20,7 +20,7 @@ type stepCreateImage struct {
 
 func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	c := state.Get("config").(*Config)
 	diskID := state.Get("disk_id").(string)
 

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepShutdown struct{}
@@ -16,7 +16,7 @@ type stepShutdown struct{}
 func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	c := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	dropletId := state.Get("droplet_id").(int)
 
 	// Gracefully power off the droplet. We have to retry this a number

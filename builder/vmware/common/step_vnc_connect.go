@@ -8,8 +8,8 @@ import (
 	"net"
 	"net/url"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/mitchellh/go-vnc"
 	"golang.org/x/net/websocket"
 )
@@ -25,7 +25,7 @@ func (s *StepVNCConnect) Run(ctx context.Context, state multistep.StateBag) mult
 	if !s.VNCOverWebsocket && !s.VNCEnabled {
 		return multistep.ActionContinue
 	}
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	var c *vnc.ClientConn
 	var err error

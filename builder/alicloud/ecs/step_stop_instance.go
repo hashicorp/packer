@@ -8,8 +8,8 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepStopAlicloudInstance struct {
@@ -20,7 +20,7 @@ type stepStopAlicloudInstance struct {
 func (s *stepStopAlicloudInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ClientWrapper)
 	instance := state.Get("instance").(*ecs.Instance)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if !s.DisableStop {
 		ui.Say(fmt.Sprintf("Stopping instance: %s", instance.InstanceId))

@@ -10,10 +10,10 @@ import (
 	"strings"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/shutdowncommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -96,27 +96,27 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	// Accumulate any errors and warnings
 	var warnings []string
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	runConfigWarnings, runConfigErrs := c.RunConfig.Prepare(&c.ctx, &c.DriverConfig)
 	warnings = append(warnings, runConfigWarnings...)
-	errs = packer.MultiErrorAppend(errs, runConfigErrs...)
+	errs = packersdk.MultiErrorAppend(errs, runConfigErrs...)
 	isoWarnings, isoErrs := c.ISOConfig.Prepare(&c.ctx)
 	warnings = append(warnings, isoWarnings...)
-	errs = packer.MultiErrorAppend(errs, isoErrs...)
-	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.HWConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
-	errs = packer.MultiErrorAppend(errs, c.DriverConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.DiskConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, isoErrs...)
+	errs = packersdk.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.HWConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
+	errs = packersdk.MultiErrorAppend(errs, c.DriverConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.VMXConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.DiskConfig.Prepare(&c.ctx)...)
 
 	if c.DiskSize == 0 {
 		c.DiskSize = 40000
@@ -134,7 +134,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	if c.RemoteType == "esx5" {
 		if c.DiskTypeId != "thin" && !c.SkipCompaction {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("skip_compaction must be 'true' for disk_type_id: %s", c.DiskTypeId))
 		}
 	}
@@ -153,7 +153,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	if c.VMXTemplatePath != "" {
 		if err := c.validateVMXTemplatePath(); err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("vmx_template_path is invalid: %s", err))
 		}
 	} else {
@@ -191,13 +191,13 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	err = c.DriverConfig.Validate(c.SkipExport)
 	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
 	if c.CdromAdapterType != "" {
 		c.CdromAdapterType = strings.ToLower(c.CdromAdapterType)
 		if c.CdromAdapterType != "ide" && c.CdromAdapterType != "sata" && c.CdromAdapterType != "scsi" {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("cdrom_adapter_type must be one of ide, sata, or scsi"))
 		}
 	}

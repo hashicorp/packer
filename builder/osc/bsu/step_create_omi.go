@@ -7,8 +7,8 @@ import (
 
 	"github.com/antihax/optional"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -21,7 +21,7 @@ func (s *stepCreateOMI) Run(ctx context.Context, state multistep.StateBag) multi
 	config := state.Get("config").(*Config)
 	oscconn := state.Get("osc").(*osc.APIClient)
 	vm := state.Get("vm").(osc.Vm)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Create the image
 	omiName := config.OMIName
@@ -113,7 +113,7 @@ func (s *stepCreateOMI) Cleanup(state multistep.StateBag) {
 	}
 
 	oscconn := state.Get("osc").(*osc.APIClient)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Deregistering the OMI because cancellation or error...")
 	DeleteOpts := osc.DeleteImageRequest{ImageId: s.image.ImageId}

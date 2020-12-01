@@ -6,8 +6,8 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepAttachKeyPair struct {
@@ -21,7 +21,7 @@ var attachKeyPairNotRetryErrors = []string{
 }
 
 func (s *stepAttachKeyPair) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("client").(*ClientWrapper)
 	config := state.Get("config").(*Config)
 	instance := state.Get("instance").(*ecs.Instance)
@@ -52,7 +52,7 @@ func (s *stepAttachKeyPair) Run(ctx context.Context, state multistep.StateBag) m
 func (s *stepAttachKeyPair) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*ClientWrapper)
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	instance := state.Get("instance").(*ecs.Instance)
 	keyPairName := config.Comm.SSHKeyPairName
 	if keyPairName == "" {

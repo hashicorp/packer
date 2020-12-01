@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step runs the created virtual machine.
 //
 // Uses:
 //   driver Driver
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //   vmx_path string
 //
 // Produces:
@@ -28,7 +28,7 @@ type StepRun struct {
 
 func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
 	// Set the VMX path so that we know we started the machine
@@ -73,7 +73,7 @@ func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 
 func (s *StepRun) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// If we started the machine... stop it.
 	if s.vmxPath != "" {

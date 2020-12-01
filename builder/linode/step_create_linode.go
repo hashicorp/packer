@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/linode/linodego"
 )
 
@@ -16,7 +16,7 @@ type stepCreateLinode struct {
 
 func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Creating Linode...")
 
@@ -89,7 +89,7 @@ func (s *stepCreateLinode) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if err := s.client.DeleteInstance(context.Background(), instance.(*linodego.Instance).ID); err != nil {
 		ui.Error("Error cleaning up Linode: " + err.Error())

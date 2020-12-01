@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFix(t *testing.T) {
 	s := &strings.Builder{}
-	ui := &packer.BasicUi{
+	ui := &packersdk.BasicUi{
 		Writer: s,
 	}
 	c := &FixCommand{

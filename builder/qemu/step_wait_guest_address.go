@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"github.com/digitalocean/go-qemu/qmp"
 )
@@ -26,7 +26,7 @@ type stepWaitGuestAddress struct {
 }
 
 func (s *stepWaitGuestAddress) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.CommunicatorType == "none" {
 		ui.Message("No communicator is configured -- skipping StepWaitGuestAddress")

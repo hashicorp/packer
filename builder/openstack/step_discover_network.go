@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepDiscoverNetwork struct {
@@ -17,7 +17,7 @@ type StepDiscoverNetwork struct {
 
 func (s *StepDiscoverNetwork) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	networkClient, err := config.networkV2Client()
 	if err != nil {

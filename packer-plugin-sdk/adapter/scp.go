@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 
@@ -36,7 +36,7 @@ well.
 	send a 0 byte after file contents.
 */
 
-func scpUploadSession(opts []byte, rest string, in io.Reader, out io.Writer, comm packer.Communicator) error {
+func scpUploadSession(opts []byte, rest string, in io.Reader, out io.Writer, comm packersdk.Communicator) error {
 	rest = strings.TrimSpace(rest)
 	if len(rest) == 0 {
 		fmt.Fprintf(out, scpEmptyError)
@@ -61,7 +61,7 @@ func scpUploadSession(opts []byte, rest string, in io.Reader, out io.Writer, com
 	return state.Protocol(bufio.NewReader(in), out)
 }
 
-func scpDownloadSession(opts []byte, rest string, in io.Reader, out io.Writer, comm packer.Communicator) error {
+func scpDownloadSession(opts []byte, rest string, in io.Reader, out io.Writer, comm packersdk.Communicator) error {
 	rest = strings.TrimSpace(rest)
 	if len(rest) == 0 {
 		fmt.Fprintf(out, scpEmptyError)
@@ -121,7 +121,7 @@ func (state *scpDownloadState) FileProtocol(path string, info os.FileInfo, in *b
 }
 
 type scpUploadState struct {
-	comm        packer.Communicator
+	comm        packersdk.Communicator
 	target      string // target is the directory on the target
 	srcRoot     string // srcRoot is the directory on the host
 	mtime       time.Time

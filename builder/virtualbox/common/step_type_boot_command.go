@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -43,7 +43,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	debug := state.Get("debug").(bool)
 	driver := state.Get("driver").(Driver)
 	httpPort := state.Get("http_port").(int)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
 
 	// Wait the for the vm to boot.

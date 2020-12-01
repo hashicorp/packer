@@ -7,8 +7,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepSnapshotOSDisk struct {
@@ -19,7 +19,7 @@ type StepSnapshotOSDisk struct {
 	enable func() bool
 }
 
-func NewStepSnapshotOSDisk(client *AzureClient, ui packer.Ui, config *Config) *StepSnapshotOSDisk {
+func NewStepSnapshotOSDisk(client *AzureClient, ui packersdk.Ui, config *Config) *StepSnapshotOSDisk {
 	var step = &StepSnapshotOSDisk{
 		client: client,
 		say:    func(message string) { ui.Say(message) },

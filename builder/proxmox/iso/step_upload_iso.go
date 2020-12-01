@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // stepUploadISO uploads an ISO file to Proxmox so we can boot from it
@@ -22,7 +22,7 @@ type uploader interface {
 var _ uploader = &proxmox.Client{}
 
 func (s *stepUploadISO) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("proxmoxClient").(uploader)
 	c := state.Get("iso-config").(*Config)
 

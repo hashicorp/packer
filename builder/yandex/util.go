@@ -2,12 +2,12 @@ package yandex
 
 import (
 	"github.com/c2h5oh/datasize"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func stepHaltWithError(state multistep.StateBag, err error) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	state.Put("error", err)
 	ui.Error(err.Error())
 	return multistep.ActionHalt

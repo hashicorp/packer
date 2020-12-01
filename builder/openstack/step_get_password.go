@@ -9,8 +9,8 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -24,7 +24,7 @@ type StepGetPassword struct {
 
 func (s *StepGetPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Skip if we're not using winrm
 	if s.Comm.Type != "winrm" {
@@ -77,7 +77,7 @@ func (s *StepGetPassword) Run(ctx context.Context, state multistep.StateBag) mul
 			"Password (since debug is enabled) \"%s\"", s.Comm.WinRMPassword))
 	}
 
-	packer.LogSecretFilter.Set(s.Comm.WinRMPassword)
+	packersdk.LogSecretFilter.Set(s.Comm.WinRMPassword)
 
 	return multistep.ActionContinue
 }

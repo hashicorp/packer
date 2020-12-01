@@ -5,13 +5,13 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // MultistepDebugFn will return a proper multistep.DebugPauseFn to
 // use for debugging if you're using multistep in your builder.
-func MultistepDebugFn(ui packer.Ui) multistep.DebugPauseFn {
+func MultistepDebugFn(ui packersdk.Ui) multistep.DebugPauseFn {
 	return func(loc multistep.DebugLocation, name string, state multistep.StateBag) {
 		var locationString string
 		switch loc {

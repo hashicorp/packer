@@ -8,15 +8,15 @@ import (
 	"time"
 
 	"github.com/digitalocean/go-qemu/qmp"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step configures the VM to enable the QMP listener.
 //
 // Uses:
 //   config *config
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //
 // Produces:
 type stepConfigureQMP struct {
@@ -26,7 +26,7 @@ type stepConfigureQMP struct {
 
 func (s *stepConfigureQMP) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if !config.QMPEnable {
 		return multistep.ActionContinue

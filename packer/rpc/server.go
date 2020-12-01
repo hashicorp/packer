@@ -6,6 +6,7 @@ import (
 	"net/rpc"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/ugorji/go/codec"
 )
 
@@ -63,7 +64,7 @@ func (s *Server) Close() error {
 	return nil
 }
 
-func (s *Server) RegisterArtifact(a packer.Artifact) error {
+func (s *Server) RegisterArtifact(a packersdk.Artifact) error {
 	return s.server.RegisterName(DefaultArtifactEndpoint, &ArtifactServer{
 		artifact: a,
 	})
@@ -86,7 +87,7 @@ func (s *Server) RegisterBuilder(b packer.Builder) error {
 	})
 }
 
-func (s *Server) RegisterCommunicator(c packer.Communicator) error {
+func (s *Server) RegisterCommunicator(c packersdk.Communicator) error {
 	return s.server.RegisterName(DefaultCommunicatorEndpoint, &CommunicatorServer{
 		c: c,
 		commonServer: commonServer{
@@ -95,7 +96,7 @@ func (s *Server) RegisterCommunicator(c packer.Communicator) error {
 	})
 }
 
-func (s *Server) RegisterHook(h packer.Hook) error {
+func (s *Server) RegisterHook(h packersdk.Hook) error {
 	return s.server.RegisterName(DefaultHookEndpoint, &HookServer{
 		hook: h,
 		mux:  s.mux,
@@ -122,7 +123,7 @@ func (s *Server) RegisterProvisioner(p packer.Provisioner) error {
 	})
 }
 
-func (s *Server) RegisterUi(ui packer.Ui) error {
+func (s *Server) RegisterUi(ui packersdk.Ui) error {
 	return s.server.RegisterName(DefaultUiEndpoint, &UiServer{
 		ui:       ui,
 		register: s.server.RegisterName,

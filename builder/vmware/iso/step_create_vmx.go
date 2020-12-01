@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
@@ -60,7 +60,7 @@ type additionalDiskTemplateData struct {
 // Uses:
 //   config *config
 //   iso_path string
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //
 // Produces:
 //   vmx_path string - The path to the VMX file.
@@ -72,7 +72,7 @@ type stepCreateVMX struct {
 func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	isoPath := state.Get("iso_path").(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Convert the iso_path into a path relative to the .vmx file if possible
 	if relativeIsoPath, err := filepath.Rel(config.VMXTemplatePath, filepath.FromSlash(isoPath)); err == nil {

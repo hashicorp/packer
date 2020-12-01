@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepCreateSnapshot struct {
@@ -13,7 +13,7 @@ type StepCreateSnapshot struct {
 }
 
 func (s *StepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	if s.CreateSnapshot {

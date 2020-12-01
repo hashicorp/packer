@@ -18,8 +18,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 	"github.com/hashicorp/packer/packer-plugin-sdk/shell"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
@@ -136,9 +136,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.Vars = make([]string, 0)
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if p.config.Script != "" && len(p.config.Scripts) > 0 {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Only one of script or scripts can be specified."))
 	}
 
@@ -147,16 +147,16 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if len(p.config.Scripts) == 0 && p.config.Inline == nil {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Either a script file or inline script must be specified."))
 	} else if len(p.config.Scripts) > 0 && p.config.Inline != nil {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Only a script file or an inline script can be specified, not both."))
 	}
 
 	for _, path := range p.config.Scripts {
 		if _, err := os.Stat(path); err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Bad script '%s': %s", path, err))
 		}
 	}
@@ -165,7 +165,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	for _, kv := range p.config.Vars {
 		vs := strings.SplitN(kv, "=", 2)
 		if len(vs) != 2 || vs[0] == "" {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
 		}
 	}
@@ -177,7 +177,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 	if generatedData == nil {
 		generatedData = make(map[string]interface{})
 	}
@@ -239,7 +239,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		p.config.envVarFile = tf.Name()
 
 		// upload the var file
-		var cmd *packer.RemoteCmd
+		var cmd *packersdk.RemoteCmd
 		err = retry.Config{StartTimeout: p.config.StartRetryTimeout}.Run(ctx, func(ctx context.Context) error {
 			if _, err := tf.Seek(0, 0); err != nil {
 				return err
@@ -256,7 +256,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			}
 			tf.Close()
 
-			cmd = &packer.RemoteCmd{
+			cmd = &packersdk.RemoteCmd{
 				Command: fmt.Sprintf("chmod 0600 %s", remoteVFName),
 			}
 			if err := comm.Start(ctx, cmd); err != nil {
@@ -301,7 +301,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		// the case that the upload succeeded, a restart is initiated,
 		// and then the command is executed but the file doesn't exist
 		// any longer.
-		var cmd *packer.RemoteCmd
+		var cmd *packersdk.RemoteCmd
 		err = retry.Config{StartTimeout: p.config.StartRetryTimeout}.Run(ctx, func(ctx context.Context) error {
 			if _, err := f.Seek(0, 0); err != nil {
 				return err
@@ -316,7 +316,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
 
-			cmd = &packer.RemoteCmd{
+			cmd = &packersdk.RemoteCmd{
 				Command: fmt.Sprintf("chmod 0755 %s", p.config.RemotePath),
 			}
 			if err := comm.Start(ctx, cmd); err != nil {
@@ -326,7 +326,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 			}
 			cmd.Wait()
 
-			cmd = &packer.RemoteCmd{Command: command}
+			cmd = &packersdk.RemoteCmd{Command: command}
 			return cmd.RunWithUi(ctx, comm, ui)
 		})
 
@@ -336,7 +336,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 
 		// If the exit code indicates a remote disconnect, fail unless
 		// we were expecting it.
-		if cmd.ExitStatus() == packer.CmdDisconnect {
+		if cmd.ExitStatus() == packersdk.CmdDisconnect {
 			if !p.config.ExpectDisconnect {
 				return fmt.Errorf("Script disconnected unexpectedly. " +
 					"If you expected your script to disconnect, i.e. from a " +
@@ -378,10 +378,10 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	return nil
 }
 
-func (p *Provisioner) cleanupRemoteFile(path string, comm packer.Communicator) error {
+func (p *Provisioner) cleanupRemoteFile(path string, comm packersdk.Communicator) error {
 	ctx := context.TODO()
 	err := retry.Config{StartTimeout: p.config.StartRetryTimeout}.Run(ctx, func(ctx context.Context) error {
-		cmd := &packer.RemoteCmd{
+		cmd := &packersdk.RemoteCmd{
 			Command: fmt.Sprintf("rm -f %s", path),
 		}
 		if err := comm.Start(ctx, cmd); err != nil {
@@ -391,7 +391,7 @@ func (p *Provisioner) cleanupRemoteFile(path string, comm packer.Communicator) e
 		}
 		cmd.Wait()
 		// treat disconnects as retryable by returning an error
-		if cmd.ExitStatus() == packer.CmdDisconnect {
+		if cmd.ExitStatus() == packersdk.CmdDisconnect {
 			return fmt.Errorf("Disconnect while removing temporary script.")
 		}
 		if cmd.ExitStatus() != 0 {

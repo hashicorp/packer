@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func mandatoryConfig(t *testing.T) map[string]interface{} {
@@ -23,9 +23,9 @@ func TestRequiredParameters(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected empty configuration to fail")
 	}
-	errs, ok := err.(*packer.MultiError)
+	errs, ok := err.(*packersdk.MultiError)
 	if !ok {
-		t.Fatal("Expected errors to be packer.MultiError")
+		t.Fatal("Expected errors to be packersdk.MultiError")
 	}
 
 	required := []string{"username", "password", "proxmox_url", "node", "ssh_username"}

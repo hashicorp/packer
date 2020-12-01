@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -241,8 +242,8 @@ func TestProvisioner_createDir(t *testing.T) {
 		config["prevent_sudo"] = !sudo
 
 		p := &Provisioner{}
-		comm := &packer.MockCommunicator{}
-		ui := &packer.BasicUi{
+		comm := &packersdk.MockCommunicator{}
+		ui := &packersdk.BasicUi{
 			Reader: new(bytes.Buffer),
 			Writer: new(bytes.Buffer),
 		}
@@ -272,8 +273,8 @@ func TestProvisioner_removeDir(t *testing.T) {
 		config["prevent_sudo"] = !sudo
 
 		p := &Provisioner{}
-		comm := &packer.MockCommunicator{}
-		ui := &packer.BasicUi{
+		comm := &packersdk.MockCommunicator{}
+		ui := &packersdk.BasicUi{
 			Reader: new(bytes.Buffer),
 			Writer: new(bytes.Buffer),
 		}

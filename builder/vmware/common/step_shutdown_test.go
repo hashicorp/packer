@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func testLocalOutputDir(t *testing.T) *LocalOutputDir {
@@ -31,7 +31,7 @@ func testStepShutdownState(t *testing.T) multistep.StateBag {
 	}
 
 	state := testState(t)
-	state.Put("communicator", new(packer.MockCommunicator))
+	state.Put("communicator", new(packersdk.MockCommunicator))
 	state.Put("dir", dir)
 	state.Put("vmx_path", "foo")
 	return state
@@ -48,7 +48,7 @@ func TestStepShutdown_command(t *testing.T) {
 	step.Timeout = 10 * time.Second
 	step.Testing = true
 
-	comm := state.Get("communicator").(*packer.MockCommunicator)
+	comm := state.Get("communicator").(*packersdk.MockCommunicator)
 	driver := state.Get("driver").(*DriverMock)
 	driver.IsRunningResult = true
 
@@ -109,7 +109,7 @@ func TestStepShutdown_noCommand(t *testing.T) {
 	state := testStepShutdownState(t)
 	step := new(StepShutdown)
 
-	comm := state.Get("communicator").(*packer.MockCommunicator)
+	comm := state.Get("communicator").(*packersdk.MockCommunicator)
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
@@ -149,7 +149,7 @@ func TestStepShutdown_locks(t *testing.T) {
 	step.Testing = true
 
 	dir := state.Get("dir").(*LocalOutputDir)
-	comm := state.Get("communicator").(*packer.MockCommunicator)
+	comm := state.Get("communicator").(*packersdk.MockCommunicator)
 	driver := state.Get("driver").(*DriverMock)
 
 	// Create some lock files

@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 	"github.com/jdcloud-api/jdcloud-sdk-go/services/vm/apis"
 	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
@@ -19,7 +19,7 @@ import (
 type stepCreateJDCloudInstance struct {
 	InstanceSpecConfig *JDCloudInstanceSpecConfig
 	CredentialConfig   *JDCloudCredentialConfig
-	ui                 packer.Ui
+	ui                 packersdk.Ui
 }
 
 func (s *stepCreateJDCloudInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -27,7 +27,7 @@ func (s *stepCreateJDCloudInstance) Run(_ context.Context, state multistep.State
 	privateKey := s.InstanceSpecConfig.Comm.SSHPrivateKey
 	keyName := s.InstanceSpecConfig.Comm.SSHKeyPairName
 	password := s.InstanceSpecConfig.Comm.SSHPassword
-	s.ui = state.Get("ui").(packer.Ui)
+	s.ui = state.Get("ui").(packersdk.Ui)
 	s.ui.Say("Creating instances")
 
 	instanceSpec := vm.InstanceSpec{

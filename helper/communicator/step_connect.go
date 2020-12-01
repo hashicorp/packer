@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/none"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -57,7 +57,7 @@ func (s *StepConnect) pause(pauseLen time.Duration, ctx context.Context) bool {
 }
 
 func (s *StepConnect) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	typeMap := map[string]multistep.Step{
 		"none": nil,

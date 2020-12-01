@@ -14,8 +14,8 @@ import (
 
 	"github.com/hashicorp/packer/builder/osc/common/retry"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -48,7 +48,7 @@ type StepRunSourceVm struct {
 func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	oscconn := state.Get("osc").(*osc.APIClient)
 	securityGroupIds := state.Get("securityGroupIds").([]string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	userData := s.UserData
 	if s.UserDataFile != "" {
@@ -302,7 +302,7 @@ func (s *StepRunSourceVm) Run(ctx context.Context, state multistep.StateBag) mul
 
 func (s *StepRunSourceVm) Cleanup(state multistep.StateBag) {
 	oscconn := state.Get("osc").(*osc.APIClient)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Terminate the source vm if it exists
 	if s.vmId != "" {

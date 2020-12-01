@@ -17,6 +17,7 @@ import (
 	"unicode"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	packrpc "github.com/hashicorp/packer/packer/rpc"
 )
 
@@ -141,7 +142,7 @@ func (c *Client) Builder() (packer.Builder, error) {
 
 // Returns a hook implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *Client) Hook() (packer.Hook, error) {
+func (c *Client) Hook() (packersdk.Hook, error) {
 	client, err := c.packrpcClient()
 	if err != nil {
 		return nil, err

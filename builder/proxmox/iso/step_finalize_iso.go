@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // stepFinalizeISOTemplate does any ISO-builder specific modifications after
@@ -23,7 +23,7 @@ type templateFinalizer interface {
 var _ templateFinalizer = &proxmox.Client{}
 
 func (s *stepFinalizeISOTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("proxmoxClient").(templateFinalizer)
 	c := state.Get("iso-config").(*Config)
 	vmRef := state.Get("vmRef").(*proxmox.VmRef)

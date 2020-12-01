@@ -11,8 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
@@ -28,7 +28,7 @@ type StepSecurityGroup struct {
 
 func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vpcId := state.Get("vpc_id").(string)
 
 	if len(s.SecurityGroupIds) > 0 {
@@ -165,7 +165,7 @@ func (s *StepSecurityGroup) Cleanup(state multistep.StateBag) {
 	}
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Deleting temporary security group...")
 

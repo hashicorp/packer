@@ -7,17 +7,18 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-var testPostProcessorArtifact = new(packer.MockArtifact)
+var testPostProcessorArtifact = new(packersdk.MockArtifact)
 
 type TestPostProcessor struct {
 	configCalled bool
 	configVal    []interface{}
 	ppCalled     bool
-	ppArtifact   packer.Artifact
+	ppArtifact   packersdk.Artifact
 	ppArtifactId string
-	ppUi         packer.Ui
+	ppUi         packersdk.Ui
 
 	postProcessFn func(context.Context) error
 }
@@ -30,7 +31,7 @@ func (pp *TestPostProcessor) Configure(v ...interface{}) error {
 	return nil
 }
 
-func (pp *TestPostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (pp *TestPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	pp.ppCalled = true
 	pp.ppArtifact = a
 	pp.ppArtifactId = a.Id()
@@ -70,7 +71,7 @@ func TestPostProcessorRPC(t *testing.T) {
 	}
 
 	// Test PostProcess
-	a := &packer.MockArtifact{
+	a := &packersdk.MockArtifact{
 		IdValue: "ppTestId",
 	}
 	ui := new(testUi)
@@ -120,7 +121,7 @@ func TestPostProcessorRPC_cancel(t *testing.T) {
 	}
 
 	// Test PostProcess
-	a := &packer.MockArtifact{
+	a := &packersdk.MockArtifact{
 		IdValue: "ppTestId",
 	}
 	ui := new(testUi)

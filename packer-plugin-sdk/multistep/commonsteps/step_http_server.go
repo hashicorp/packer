@@ -6,9 +6,9 @@ import (
 
 	"net/http"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/net"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step creates and runs the HTTP server that is serving files from the
@@ -16,7 +16,7 @@ import (
 // template.
 //
 // Uses:
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //
 // Produces:
 //   http_port int - The port the HTTP server started on.
@@ -30,7 +30,7 @@ type StepHTTPServer struct {
 }
 
 func (s *StepHTTPServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.HTTPDir == "" {
 		state.Put("http_port", 0)

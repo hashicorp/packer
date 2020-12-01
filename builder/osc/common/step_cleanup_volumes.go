@@ -6,8 +6,8 @@ import (
 	"reflect"
 
 	"github.com/antihax/optional"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -32,7 +32,7 @@ func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	if vmRaw != nil {
 		vm = vmRaw.(osc.Vm)
 	}
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	if vm.VmId == "" {
 		ui.Say("No volumes to clean up, skipping")
 		return

@@ -8,8 +8,8 @@ import (
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
@@ -22,7 +22,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	client := state.Get("client").(*ucloudcommon.UCloudClient)
 	conn := client.UHostConn
 	instance := state.Get("instance").(*uhost.UHostInstanceSet)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 
 	ui.Say(fmt.Sprintf("Creating image %s...", config.ImageName))
@@ -93,7 +93,7 @@ func (s *stepCreateImage) Cleanup(state multistep.StateBag) {
 
 	client := state.Get("client").(*ucloudcommon.UCloudClient)
 	conn := client.UHostConn
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Deleting image because of cancellation or error...")
 	req := conn.NewTerminateCustomImageRequest()

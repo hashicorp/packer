@@ -7,8 +7,8 @@ import (
 	"github.com/antihax/optional"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/hashicorp/packer/builder/osc/common/retry"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -20,7 +20,7 @@ type StepStopBSUBackedVm struct {
 func (s *StepStopBSUBackedVm) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	oscconn := state.Get("osc").(*osc.APIClient)
 	vm := state.Get("vm").(osc.Vm)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Skip when it is a spot vm
 	if s.Skip {

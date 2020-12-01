@@ -6,14 +6,14 @@ import (
 	"io"
 	"os"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type comm struct {
 	config string
 }
 
-// Creates a null packer.Communicator implementation. This takes
+// Creates a null packersdk.Communicator implementation. This takes
 // an already existing configuration.
 func New(config string) (result *comm, err error) {
 	// Establish an initial connection and connect
@@ -24,7 +24,7 @@ func New(config string) (result *comm, err error) {
 	return
 }
 
-func (c *comm) Start(ctx context.Context, cmd *packer.RemoteCmd) (err error) {
+func (c *comm) Start(ctx context.Context, cmd *packersdk.RemoteCmd) (err error) {
 	cmd.SetExited(0)
 	return
 }

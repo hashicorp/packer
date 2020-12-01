@@ -4,21 +4,21 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/apis"
 	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/apis"
 )
 
 type stepValidateParameters struct {
 	InstanceSpecConfig *JDCloudInstanceSpecConfig
-	ui                 packer.Ui
+	ui                 packersdk.Ui
 	state              multistep.StateBag
 }
 
 func (s *stepValidateParameters) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 
-	s.ui = state.Get("ui").(packer.Ui)
+	s.ui = state.Get("ui").(packersdk.Ui)
 	s.state = state
 	s.ui.Say("Validating parameters...")
 

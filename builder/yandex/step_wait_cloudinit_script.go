@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 )
 
@@ -22,7 +22,7 @@ type StepWaitCloudInitScript int
 func (s *StepWaitCloudInitScript) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	_ = state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	instanceID := state.Get("instance_id").(string)
 
 	ui.Say("Waiting for any running cloud-init script to finish...")

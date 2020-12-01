@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepMountGuestAdditions struct {
@@ -16,7 +16,7 @@ type StepMountGuestAdditions struct {
 }
 
 func (s *StepMountGuestAdditions) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.GuestAdditionsMode != "attach" {
 		ui.Say("Skipping mounting Integration Services Setup Disk...")
@@ -74,7 +74,7 @@ func (s *StepMountGuestAdditions) Cleanup(state multistep.StateBag) {
 	}
 
 	dvdController := dvdControllerState.(DvdControllerProperties)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
 	errorMsg := "Error unmounting Integration Services dvd drive: %s"

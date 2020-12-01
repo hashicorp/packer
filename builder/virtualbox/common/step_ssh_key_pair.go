@@ -7,8 +7,8 @@ import (
 
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/communicator/ssh"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
@@ -25,7 +25,7 @@ func (s *StepSshKeyPair) Run(ctx context.Context, state multistep.StateBag) mult
 		return multistep.ActionContinue
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key for the communicator...")
@@ -99,7 +99,7 @@ func (s *StepSshKeyPair) Run(ctx context.Context, state multistep.StateBag) mult
 func (s *StepSshKeyPair) Cleanup(state multistep.StateBag) {
 	if s.Debug {
 		if err := os.Remove(s.DebugKeyPath); err != nil {
-			ui := state.Get("ui").(packer.Ui)
+			ui := state.Get("ui").(packersdk.Ui)
 			ui.Error(fmt.Sprintf(
 				"Error removing debug key '%s': %s", s.DebugKeyPath, err))
 		}

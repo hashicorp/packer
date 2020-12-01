@@ -5,14 +5,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestArtifact_Impl(t *testing.T) {
 	var raw interface{} = &artifact{}
 
-	if _, ok := raw.(packer.Artifact); !ok {
-		t.Fatalf("Artifact does not implement packer.Artifact")
+	if _, ok := raw.(packersdk.Artifact); !ok {
+		t.Fatalf("Artifact does not implement packersdk.Artifact")
 	}
 }
 

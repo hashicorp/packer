@@ -16,7 +16,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/go-cleanhttp"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -240,7 +240,7 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	return nil
 }
 
-func (c *AccessConfig) enableDebug(ui packer.Ui) {
+func (c *AccessConfig) enableDebug(ui packersdk.Ui) {
 	c.osClient.HTTPClient = http.Client{
 		Transport: &DebugRoundTripper{
 			ui: ui,
@@ -288,7 +288,7 @@ func (c *AccessConfig) getEndpointType() gophercloud.Availability {
 }
 
 type DebugRoundTripper struct {
-	ui                packer.Ui
+	ui                packersdk.Ui
 	rt                http.RoundTripper
 	numReauthAttempts int
 }

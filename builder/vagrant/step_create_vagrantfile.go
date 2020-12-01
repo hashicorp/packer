@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepCreateVagrantfile struct {
@@ -87,7 +87,7 @@ func (s *StepCreateVagrantfile) createVagrantfile() (string, error) {
 }
 
 func (s *StepCreateVagrantfile) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Skip the initialize step if we're trying to launch from a global ID.
 	if s.GlobalID != "" {

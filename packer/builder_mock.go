@@ -7,6 +7,7 @@ import (
 	"errors"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // MockBuilder is an implementation of Builder that can be used for tests.
@@ -21,8 +22,8 @@ type MockBuilder struct {
 	PrepareCalled bool
 	PrepareConfig []interface{}
 	RunCalled     bool
-	RunHook       Hook
-	RunUi         Ui
+	RunHook       packersdk.Hook
+	RunUi         packersdk.Ui
 	CancelCalled  bool
 	RunFn         func(ctx context.Context)
 
@@ -39,7 +40,7 @@ func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, []string, error
 	return tb.GeneratedVars, tb.PrepareWarnings, nil
 }
 
-func (tb *MockBuilder) Run(ctx context.Context, ui Ui, h Hook) (Artifact, error) {
+func (tb *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, h packersdk.Hook) (packersdk.Artifact, error) {
 	tb.RunCalled = true
 	tb.RunHook = h
 	tb.RunUi = ui
@@ -56,12 +57,12 @@ func (tb *MockBuilder) Run(ctx context.Context, ui Ui, h Hook) (Artifact, error)
 	}
 
 	if h != nil {
-		if err := h.Run(ctx, HookProvision, ui, new(MockCommunicator), nil); err != nil {
+		if err := h.Run(ctx, packersdk.HookProvision, ui, new(packersdk.MockCommunicator), nil); err != nil {
 			return nil, err
 		}
 	}
 
-	return &MockArtifact{
+	return &packersdk.MockArtifact{
 		IdValue: tb.ArtifactId,
 	}, nil
 }

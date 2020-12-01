@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -124,11 +125,11 @@ func TestProvisionerProvision_SendsFile(t *testing.T) {
 	}
 
 	b := bytes.NewBuffer(nil)
-	ui := &packer.BasicUi{
+	ui := &packersdk.BasicUi{
 		Writer: b,
 		PB:     &packer.NoopProgressTracker{},
 	}
-	comm := &packer.MockCommunicator{}
+	comm := &packersdk.MockCommunicator{}
 	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatalf("should successfully provision: %s", err)
@@ -183,11 +184,11 @@ func TestProvisionerProvision_SendsFileMultipleFiles(t *testing.T) {
 	}
 
 	b := bytes.NewBuffer(nil)
-	ui := &packer.BasicUi{
+	ui := &packersdk.BasicUi{
 		Writer: b,
 		PB:     &packer.NoopProgressTracker{},
 	}
-	comm := &packer.MockCommunicator{}
+	comm := &packersdk.MockCommunicator{}
 	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatalf("should successfully provision: %s", err)
@@ -253,11 +254,11 @@ func TestProvisionerProvision_SendsFileMultipleDirs(t *testing.T) {
 	}
 
 	b := bytes.NewBuffer(nil)
-	ui := &packer.BasicUi{
+	ui := &packersdk.BasicUi{
 		Writer: b,
 		PB:     &packer.NoopProgressTracker{},
 	}
-	comm := &packer.MockCommunicator{}
+	comm := &packersdk.MockCommunicator{}
 	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatalf("should successfully provision: %s", err)
@@ -305,11 +306,11 @@ func TestProvisionerProvision_SendsFileMultipleFilesToFolder(t *testing.T) {
 	}
 
 	b := bytes.NewBuffer(nil)
-	ui := &packer.BasicUi{
+	ui := &packersdk.BasicUi{
 		Writer: b,
 		PB:     &packer.NoopProgressTracker{},
 	}
-	comm := &packer.MockCommunicator{}
+	comm := &packersdk.MockCommunicator{}
 	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
 	if err != nil {
 		t.Fatalf("should successfully provision: %s", err)
@@ -363,11 +364,11 @@ func TestProvisionDownloadMkdirAll(t *testing.T) {
 			t.Fatalf("err: %s", err)
 		}
 		b := bytes.NewBuffer(nil)
-		ui := &packer.BasicUi{
+		ui := &packersdk.BasicUi{
 			Writer: b,
 			PB:     &packer.NoopProgressTracker{},
 		}
-		comm := &packer.MockCommunicator{}
+		comm := &packersdk.MockCommunicator{}
 		err = p.ProvisionDownload(ui, comm)
 		if err != nil {
 			t.Fatalf("should successfully provision: %s", err)

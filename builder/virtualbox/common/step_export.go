@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step cleans up forwarded ports and exports the VM to an OVF.
@@ -36,7 +36,7 @@ func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multiste
 	}
 
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
 	if s.OutputFilename == "" {
 		s.OutputFilename = vmName

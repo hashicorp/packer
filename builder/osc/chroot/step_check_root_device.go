@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -14,7 +14,7 @@ type StepCheckRootDevice struct{}
 
 func (s *StepCheckRootDevice) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	image := state.Get("source_image").(osc.Image)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Checking the root device on source OMI...")
 

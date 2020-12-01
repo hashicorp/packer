@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/post-processor/manifest"
 	shell_local_pp "github.com/hashicorp/packer/post-processor/shell-local"
 	filep "github.com/hashicorp/packer/provisioner/file"
@@ -99,7 +100,7 @@ func TestHelperProcess(*testing.T) {
 }
 
 func commandMeta() Meta {
-	basicUi := &packer.BasicUi{
+	basicUi := &packersdk.BasicUi{
 		Reader:      os.Stdin,
 		Writer:      os.Stdout,
 		ErrorWriter: os.Stdout,

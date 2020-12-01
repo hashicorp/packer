@@ -4,14 +4,14 @@ import (
 	"context"
 
 	"github.com/1and1/oneandone-cloudserver-sdk-go"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepTakeSnapshot struct{}
 
 func (s *stepTakeSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	c := state.Get("config").(*Config)
 
 	ui.Say("Creating Snapshot...")

@@ -6,8 +6,8 @@ import (
 	"log"
 
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step attaches the ISO to the virtual machine.
@@ -15,7 +15,7 @@ import (
 // Uses:
 //   driver Driver
 //   iso_path string
-//   ui packer.Ui
+//   ui packersdk.Ui
 //   vmName string
 //
 // Produces:
@@ -25,7 +25,7 @@ type stepAttachISO struct{}
 func (s *stepAttachISO) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(parallelscommon.Driver)
 	isoPath := state.Get("iso_path").(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
 
 	// Attach the disk to the cdrom0 device. We couldn't use a separated device because it is failed to boot in PD9 [GH-1667]
@@ -55,7 +55,7 @@ func (s *stepAttachISO) Cleanup(state multistep.StateBag) {
 	}
 
 	driver := state.Get("driver").(parallelscommon.Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
 
 	// Detach ISO by setting an empty string image.

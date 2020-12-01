@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepConfigAlicloudPublicIP struct {
@@ -17,7 +17,7 @@ type stepConfigAlicloudPublicIP struct {
 
 func (s *stepConfigAlicloudPublicIP) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ClientWrapper)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	instance := state.Get("instance").(*ecs.Instance)
 
 	if s.SSHPrivateIp {

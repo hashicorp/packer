@@ -30,8 +30,8 @@ import (
 	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/packer/helper/communicator"
 	helperssh "github.com/hashicorp/packer/helper/communicator/ssh"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/ssh"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -56,7 +56,7 @@ type ESX5Driver struct {
 	client *govmomi.Client
 	finder *find.Finder
 
-	comm      packer.Communicator
+	comm      packersdk.Communicator
 	outputDir string
 	vmId      string
 }
@@ -249,7 +249,7 @@ func (d *ESX5Driver) IsDestroyed() (bool, error) {
 	return true, err
 }
 
-func (d *ESX5Driver) UploadISO(localPath string, checksum string, ui packer.Ui) (string, error) {
+func (d *ESX5Driver) UploadISO(localPath string, checksum string, ui packersdk.Ui) (string, error) {
 	finalPath := d.CachePath(localPath)
 	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
@@ -793,7 +793,7 @@ func (d *ESX5Driver) mkdir(path string) error {
 	return d.sh("mkdir", "-p", strconv.Quote(path))
 }
 
-func (d *ESX5Driver) upload(dst, src string, ui packer.Ui) error {
+func (d *ESX5Driver) upload(dst, src string, ui packersdk.Ui) error {
 	// Get size so we can set up progress tracker
 	info, err := os.Stat(src)
 	if err != nil {
@@ -864,7 +864,7 @@ func (d *ESX5Driver) ssh(command string, stdin io.Reader) (*bytes.Buffer, error)
 	ctx := context.TODO()
 	var stdout, stderr bytes.Buffer
 
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: command,
 		Stdout:  &stdout,
 		Stderr:  &stderr,

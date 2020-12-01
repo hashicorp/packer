@@ -12,8 +12,8 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	confighelper "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
@@ -41,7 +41,7 @@ var deleteInstanceRetryErrors = []string{
 
 func (s *stepCreateAlicloudInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ClientWrapper)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Creating instance...")
 	createInstanceRequest, err := s.buildCreateInstanceRequest(state)
@@ -91,7 +91,7 @@ func (s *stepCreateAlicloudInstance) Cleanup(state multistep.StateBag) {
 	cleanUpMessage(state, "instance")
 
 	client := state.Get("client").(*ClientWrapper)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	_, err := client.WaitForExpected(&WaitForExpectArgs{
 		RequestFunc: func() (responses.AcsResponse, error) {

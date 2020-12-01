@@ -12,22 +12,22 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"golang.org/x/crypto/ssh"
 )
 
 // An adapter satisfies SSH requests (from an Ansible client) by delegating SSH
-// exec and subsystem commands to a packer.Communicator.
+// exec and subsystem commands to a packersdk.Communicator.
 type Adapter struct {
 	done    <-chan struct{}
 	l       net.Listener
 	config  *ssh.ServerConfig
 	sftpCmd string
-	ui      packer.Ui
-	comm    packer.Communicator
+	ui      packersdk.Ui
+	comm    packersdk.Communicator
 }
 
-func NewAdapter(done <-chan struct{}, l net.Listener, config *ssh.ServerConfig, sftpCmd string, ui packer.Ui, comm packer.Communicator) *Adapter {
+func NewAdapter(done <-chan struct{}, l net.Listener, config *ssh.ServerConfig, sftpCmd string, ui packersdk.Ui, comm packersdk.Communicator) *Adapter {
 	return &Adapter{
 		done:    done,
 		l:       l,
@@ -63,7 +63,7 @@ func (c *Adapter) Serve() {
 	}
 }
 
-func (c *Adapter) Handle(conn net.Conn, ui packer.Ui) error {
+func (c *Adapter) Handle(conn net.Conn, ui packersdk.Ui) error {
 	log.Print("SSH proxy: accepted connection")
 	_, chans, reqs, err := ssh.NewServerConn(conn, c.config)
 	if err != nil {
@@ -228,7 +228,7 @@ func (c *Adapter) scpExec(args string, in io.Reader, out io.Writer) error {
 }
 
 func (c *Adapter) remoteExec(command string, in io.Reader, out io.Writer, err io.Writer) int {
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Stdin:   in,
 		Stdout:  out,
 		Stderr:  err,

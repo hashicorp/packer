@@ -3,13 +3,13 @@ package oci
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestArtifactImpl(t *testing.T) {
 	var raw interface{}
 	raw = &Artifact{}
-	if _, ok := raw.(packer.Artifact); !ok {
+	if _, ok := raw.(packersdk.Artifact); !ok {
 		t.Fatalf("Artifact should be artifact")
 	}
 }

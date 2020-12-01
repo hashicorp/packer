@@ -9,9 +9,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
@@ -40,7 +40,7 @@ type StepDownloadGuestAdditions struct {
 func (s *StepDownloadGuestAdditions) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	var action multistep.StepAction
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// If we've disabled guest additions, don't download
 	if s.GuestAdditionsMode == GuestAdditionsModeDisable {

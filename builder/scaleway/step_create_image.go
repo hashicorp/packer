@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"github.com/hashicorp/go-uuid"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
 	"github.com/scaleway/scaleway-sdk-go/api/marketplace/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
@@ -17,7 +17,7 @@ type stepImage struct{}
 
 func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	instanceAPI := instance.NewAPI(state.Get("client").(*scw.Client))
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	c := state.Get("config").(*Config)
 	snapshotID := state.Get("snapshot_id").(string)
 	bootscriptID := ""

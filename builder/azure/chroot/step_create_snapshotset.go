@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/builder/azure/common/client"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
@@ -29,7 +29,7 @@ type StepCreateSnapshotset struct {
 
 func (s *StepCreateSnapshotset) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	diskset := state.Get(stateBagKey_Diskset).(Diskset)
 
 	s.snapshots = make(Diskset)
@@ -92,7 +92,7 @@ func (s *StepCreateSnapshotset) Run(ctx context.Context, state multistep.StateBa
 func (s *StepCreateSnapshotset) Cleanup(state multistep.StateBag) {
 	if !s.SkipCleanup {
 		azcli := state.Get("azureclient").(client.AzureClientSet)
-		ui := state.Get("ui").(packer.Ui)
+		ui := state.Get("ui").(packersdk.Ui)
 
 		for _, resource := range s.snapshots {
 

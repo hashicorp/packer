@@ -3,7 +3,7 @@ package cloudstack
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -12,8 +12,8 @@ const templateID = "286dd44a-ec6b-4789-b192-804f08f04b4c"
 func TestArtifact_Impl(t *testing.T) {
 	var raw interface{} = &Artifact{}
 
-	if _, ok := raw.(packer.Artifact); !ok {
-		t.Fatalf("Artifact does not implement packer.Artifact")
+	if _, ok := raw.(packersdk.Artifact); !ok {
+		t.Fatalf("Artifact does not implement packersdk.Artifact")
 	}
 }
 

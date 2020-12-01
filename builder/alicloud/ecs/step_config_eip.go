@@ -9,8 +9,8 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepConfigAlicloudEIP struct {
@@ -28,7 +28,7 @@ var allocateEipAddressRetryErrors = []string{
 
 func (s *stepConfigAlicloudEIP) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ClientWrapper)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	instance := state.Get("instance").(*ecs.Instance)
 
 	if s.SSHPrivateIp {
@@ -96,7 +96,7 @@ func (s *stepConfigAlicloudEIP) Cleanup(state multistep.StateBag) {
 
 	client := state.Get("client").(*ClientWrapper)
 	instance := state.Get("instance").(*ecs.Instance)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	unassociateEipAddressRequest := ecs.CreateUnassociateEipAddressRequest()
 	unassociateEipAddressRequest.AllocationId = s.allocatedId

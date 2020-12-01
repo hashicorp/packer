@@ -12,12 +12,13 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // Create statebag for running test
 func tStateSpot() multistep.StateBag {
 	state := new(multistep.BasicStateBag)
-	state.Put("ui", &packer.BasicUi{
+	state.Put("ui", &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	})

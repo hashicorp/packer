@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepMountDvdDrive struct {
@@ -18,7 +18,7 @@ type StepMountDvdDrive struct {
 
 func (s *StepMountDvdDrive) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	errorMsg := "Error mounting dvd drive: %s"
 	vmName := state.Get("vmName").(string)
@@ -100,7 +100,7 @@ func (s *StepMountDvdDrive) Cleanup(state multistep.StateBag) {
 	dvdController := dvdControllerState.(DvdControllerProperties)
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	errorMsg := "Error unmounting os dvd drive: %s"
 
 	ui.Say("Clean up os dvd drive...")

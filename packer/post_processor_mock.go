@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // MockPostProcessor is an implementation of PostProcessor that can be
@@ -19,8 +20,8 @@ type MockPostProcessor struct {
 	ConfigureError   error
 
 	PostProcessCalled   bool
-	PostProcessArtifact Artifact
-	PostProcessUi       Ui
+	PostProcessArtifact packersdk.Artifact
+	PostProcessUi       packersdk.Ui
 }
 
 func (t *MockPostProcessor) ConfigSpec() hcldec.ObjectSpec { return t.FlatMapstructure().HCL2Spec() }
@@ -31,12 +32,12 @@ func (t *MockPostProcessor) Configure(configs ...interface{}) error {
 	return t.ConfigureError
 }
 
-func (t *MockPostProcessor) PostProcess(ctx context.Context, ui Ui, a Artifact) (Artifact, bool, bool, error) {
+func (t *MockPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	t.PostProcessCalled = true
 	t.PostProcessArtifact = a
 	t.PostProcessUi = ui
 
-	return &MockArtifact{
+	return &packersdk.MockArtifact{
 		IdValue: t.ArtifactId,
 	}, t.Keep, t.ForceOverride, t.Error
 }

@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepUploadX509Cert struct{}
 
 func (s *StepUploadX509Cert) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	comm := state.Get("communicator").(packer.Communicator)
+	comm := state.Get("communicator").(packersdk.Communicator)
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	x509RemoteCertPath := config.X509UploadPath + "/cert.pem"
 	x509RemoteKeyPath := config.X509UploadPath + "/key.pem"
@@ -40,7 +40,7 @@ func (s *StepUploadX509Cert) Run(ctx context.Context, state multistep.StateBag) 
 
 func (s *StepUploadX509Cert) Cleanup(multistep.StateBag) {}
 
-func (s *StepUploadX509Cert) uploadSingle(comm packer.Communicator, dst, src string) error {
+func (s *StepUploadX509Cert) uploadSingle(comm packersdk.Communicator, dst, src string) error {
 	f, err := os.Open(src)
 	if err != nil {
 		return err

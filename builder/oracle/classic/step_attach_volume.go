@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepAttachVolume struct {
@@ -17,7 +17,7 @@ type stepAttachVolume struct {
 
 func (s *stepAttachVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*compute.Client)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	instanceInfo := state.Get(s.InstanceInfoKey).(*compute.InstanceInfo)
 
 	saClient := client.StorageAttachments()
@@ -47,7 +47,7 @@ func (s *stepAttachVolume) Cleanup(state multistep.StateBag) {
 		return
 	}
 	client := state.Get("client").(*compute.Client)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	saClient := client.StorageAttachments()
 	saI := &compute.DeleteStorageAttachmentInput{

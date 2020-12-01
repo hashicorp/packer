@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepPackage struct {
@@ -17,7 +17,7 @@ type StepPackage struct {
 
 func (s *StepPackage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(VagrantDriver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.SkipPackage {
 		ui.Say("skip_package flag set; not going to call Vagrant package on this box.")

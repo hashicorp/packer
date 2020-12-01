@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepRemoteUpload struct {
@@ -19,7 +19,7 @@ type StepRemoteUpload struct {
 }
 
 func (s *StepRemoteUpload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	d := state.Get("driver").(driver.Driver)
 
 	if path, ok := state.GetOk("iso_path"); ok {
@@ -54,7 +54,7 @@ func GetRemoteDirectoryAndPath(path string, ds driver.Datastore) (string, string
 	return filename, remotePath, remoteDirectory, fullRemotePath
 
 }
-func (s *StepRemoteUpload) uploadFile(path string, d driver.Driver, ui packer.Ui) (string, error) {
+func (s *StepRemoteUpload) uploadFile(path string, d driver.Driver, ui packersdk.Ui) (string, error) {
 	ds, err := d.FindDatastore(s.Datastore, s.Host)
 	if err != nil {
 		return "", fmt.Errorf("datastore doesn't exist: %v", err)
@@ -98,7 +98,7 @@ func (s *StepRemoteUpload) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	d := state.Get("driver").(*driver.VCenterDriver)
 	ui.Say("Deleting cd_files image from remote datastore ...")
 

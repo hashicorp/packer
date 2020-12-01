@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/yandex-cloud/go-sdk/iamkey"
 )
@@ -52,7 +52,7 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if c.Token != "" {
-		packer.LogSecretFilter.Set(c.Token)
+		packersdk.LogSecretFilter.Set(c.Token)
 	}
 
 	if c.ServiceAccountKeyFile != "" {

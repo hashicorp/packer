@@ -15,8 +15,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	shelllocal "github.com/hashicorp/packer/packer-plugin-sdk/shell-local"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -81,14 +81,14 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// Accumulate any errors
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	if runtime.GOOS == "windows" {
 		ovftool = "ovftool.exe"
 	}
 
 	if _, err := exec.LookPath(ovftool); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("ovftool not found: %s", err))
 	}
 
@@ -104,7 +104,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 	for key, ptr := range templates {
 		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
 	}
@@ -155,7 +155,7 @@ func getEncodedPassword(u *url.URL) (string, bool) {
 	return password, false
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	source := ""
 	for _, path := range artifact.Files() {
 		if strings.HasSuffix(path, ".vmx") || strings.HasSuffix(path, ".ovf") || strings.HasSuffix(path, ".ova") {
@@ -174,7 +174,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 	}
 	encodedPassword, isSet := getEncodedPassword(ovftool_uri)
 	if isSet {
-		packer.LogSecretFilter.Set(encodedPassword)
+		packersdk.LogSecretFilter.Set(encodedPassword)
 	}
 
 	args, err := p.BuildArgs(source, ovftool_uri.String())
@@ -200,7 +200,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact 
 		ExecuteCommand: commandAndArgs,
 	}
 	flattenedCmd := strings.Join(commandAndArgs, " ")
-	cmd := &packer.RemoteCmd{Command: flattenedCmd}
+	cmd := &packersdk.RemoteCmd{Command: flattenedCmd}
 	log.Printf("[INFO] (vsphere): starting ovftool command: %s", flattenedCmd)
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return nil, false, false, fmt.Errorf(

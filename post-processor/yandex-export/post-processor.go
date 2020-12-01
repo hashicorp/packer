@@ -13,10 +13,10 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/yandex"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -82,19 +82,19 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// Accumulate any errors
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
-	errs = packer.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
 
 	if len(p.config.Paths) == 0 {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("paths must be specified"))
 	}
 
 	// Validate templates in 'paths'
 	for _, path := range p.config.Paths {
 		if err = interpolate.Validate(path, &p.config.ctx); err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Error parsing one of 'paths' template: %s", err))
 		}
 	}
@@ -127,7 +127,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	switch artifact.BuilderId() {
 	case yandex.BuilderID, artifice.BuilderId:
 		break

@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
@@ -182,7 +182,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		return err
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	// Set some defaults.
 	if c.APIURL == "" {
@@ -219,7 +219,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	if c.TemplateName == "" {
 		name, err := interpolate.Render("packer-{{timestamp}}", nil)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Unable to parse template name: %s ", err))
 		}
 
@@ -240,71 +240,71 @@ func (c *Config) Prepare(raws ...interface{}) error {
 
 	// Process required parameters.
 	if c.APIURL == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("a api_url must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("a api_url must be specified"))
 	}
 
 	if c.APIKey == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("a api_key must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("a api_key must be specified"))
 	}
 
 	if c.SecretKey == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("a secret_key must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("a secret_key must be specified"))
 	}
 
 	if c.Network == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("a network must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("a network must be specified"))
 	}
 
 	if c.CreateSecurityGroup && !c.Expunge {
-		errs = packer.MultiErrorAppend(errs, errors.New("auto creating a temporary security group requires expunge"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("auto creating a temporary security group requires expunge"))
 	}
 
 	if c.ServiceOffering == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("a service_offering must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("a service_offering must be specified"))
 	}
 
 	if c.SourceISO == "" && c.SourceTemplate == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("either source_iso or source_template must be specified"))
 	}
 
 	if c.SourceISO != "" && c.SourceTemplate != "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("only one of source_iso or source_template can be specified"))
 	}
 
 	if c.SourceISO != "" && c.DiskOffering == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("a disk_offering must be specified when using source_iso"))
 	}
 
 	if c.SourceISO != "" && c.Hypervisor == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("a hypervisor must be specified when using source_iso"))
 	}
 
 	if c.TemplateOS == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("a template_os must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("a template_os must be specified"))
 	}
 
 	if c.UserData != "" && c.UserDataFile != "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("only one of user_data or user_data_file can be specified"))
 	}
 
 	if c.UserDataFile != "" {
 		if _, err := os.Stat(c.UserDataFile); err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("user_data_file not found: %s", c.UserDataFile))
 		}
 	}
 
 	if c.Zone == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("a zone must be specified"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("a zone must be specified"))
 	}
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
-		errs = packer.MultiErrorAppend(errs, es...)
+		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 
 	// Check for errors and return if we have any.

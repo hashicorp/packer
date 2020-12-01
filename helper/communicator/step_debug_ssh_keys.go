@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepDumpSSHKey is a multistep Step implementation that writes the ssh
@@ -17,7 +17,7 @@ type StepDumpSSHKey struct {
 }
 
 func (s *StepDumpSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.Path))
 

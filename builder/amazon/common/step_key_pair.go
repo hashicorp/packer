@@ -9,8 +9,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 )
 
@@ -23,7 +23,7 @@ type StepKeyPair struct {
 }
 
 func (s *StepKeyPair) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
@@ -114,7 +114,7 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	}
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Remove the keypair
 	ui.Say("Deleting temporary keypair...")

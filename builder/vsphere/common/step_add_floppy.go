@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type FloppyConfig struct {
@@ -36,7 +36,7 @@ type StepAddFloppy struct {
 }
 
 func (s *StepAddFloppy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vm := state.Get("vm").(driver.VirtualMachine)
 	d := state.Get("driver").(driver.Driver)
 
@@ -89,7 +89,7 @@ func (s *StepAddFloppy) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	d := state.Get("driver").(driver.Driver)
 
 	if UploadedFloppyPath, ok := state.GetOk("uploaded_floppy_path"); ok {

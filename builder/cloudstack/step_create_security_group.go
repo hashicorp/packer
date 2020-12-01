@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
@@ -17,7 +17,7 @@ type stepCreateSecurityGroup struct {
 func (s *stepCreateSecurityGroup) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if len(config.SecurityGroups) > 0 {
 		state.Put("security_groups", config.SecurityGroups)
@@ -75,7 +75,7 @@ func (s *stepCreateSecurityGroup) Run(ctx context.Context, state multistep.State
 func (s *stepCreateSecurityGroup) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.tempSG == "" {
 		return

@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type Artifact struct {
@@ -19,8 +19,8 @@ type Artifact struct {
 	StateData map[string]interface{}
 }
 
-// Artifact implements packer.Artifact
-var _ packer.Artifact = &Artifact{}
+// Artifact implements packersdk.Artifact
+var _ packersdk.Artifact = &Artifact{}
 
 func (a *Artifact) BuilderId() string {
 	return a.builderID

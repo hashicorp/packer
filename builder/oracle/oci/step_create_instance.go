@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepCreateInstance struct{}
@@ -13,7 +13,7 @@ type stepCreateInstance struct{}
 func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	var (
 		driver = state.Get("driver").(Driver)
-		ui     = state.Get("ui").(packer.Ui)
+		ui     = state.Get("ui").(packersdk.Ui)
 		config = state.Get("config").(*Config)
 	)
 
@@ -47,7 +47,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	idRaw, ok := state.GetOk("instance_id")
 	if !ok {

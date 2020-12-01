@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/linode/linodego"
 )
 
@@ -15,7 +15,7 @@ type stepCreateImage struct {
 
 func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	disk := state.Get("disk").(*linodego.InstanceDisk)
 	instance := state.Get("instance").(*linodego.Instance)
 

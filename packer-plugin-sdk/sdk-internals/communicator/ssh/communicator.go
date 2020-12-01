@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
@@ -86,7 +86,7 @@ type Config struct {
 	Tunnels []TunnelSpec
 }
 
-// Creates a new packer.Communicator implementation over SSH. This takes
+// Creates a new packersdk.Communicator implementation over SSH. This takes
 // an already existing TCP connection and SSH configuration.
 func New(address string, config *Config) (result *comm, err error) {
 	// Establish an initial connection and connect
@@ -103,7 +103,7 @@ func New(address string, config *Config) (result *comm, err error) {
 	return
 }
 
-func (c *comm) Start(ctx context.Context, cmd *packer.RemoteCmd) (err error) {
+func (c *comm) Start(ctx context.Context, cmd *packersdk.RemoteCmd) (err error) {
 	session, err := c.newSession()
 	if err != nil {
 		return
@@ -161,7 +161,7 @@ func (c *comm) Start(ctx context.Context, cmd *packer.RemoteCmd) (err error) {
 				log.Printf("[ERROR] Remote command exited with '%d': %s", exitStatus, cmd.Command)
 			case *ssh.ExitMissingError:
 				log.Printf("[ERROR] Remote command exited without exit status or exit signal.")
-				exitStatus = packer.CmdDisconnect
+				exitStatus = packersdk.CmdDisconnect
 			default:
 				log.Printf("[ERROR] Error occurred waiting for ssh session: %s", err.Error())
 			}

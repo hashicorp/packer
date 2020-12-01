@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestDigitalOceanProvider_impl(t *testing.T) {
@@ -22,7 +22,7 @@ func TestDigitalOceanProvider_KeepInputArtifact(t *testing.T) {
 func TestDigitalOceanProvider_ArtifactId(t *testing.T) {
 	p := new(DigitalOceanProvider)
 	ui := testUi()
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		IdValue: "San Francisco:42",
 	}
 

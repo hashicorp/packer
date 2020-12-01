@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 )
 
@@ -27,7 +27,7 @@ type StepDeployTemplate struct {
 	name       string
 }
 
-func NewStepDeployTemplate(client *AzureClient, ui packer.Ui, config *Config, deploymentName string, factory templateFactoryFunc) *StepDeployTemplate {
+func NewStepDeployTemplate(client *AzureClient, ui packersdk.Ui, config *Config, deploymentName string, factory templateFactoryFunc) *StepDeployTemplate {
 	var step = &StepDeployTemplate{
 		client:  client,
 		say:     func(message string) { ui.Say(message) },
@@ -73,7 +73,7 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("\nThe resource group was not created by Packer, deleting individual resources ...")
 
 	deploymentName := s.name
@@ -109,7 +109,7 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 func (s *StepDeployTemplate) deleteTemplate(ctx context.Context, state multistep.StateBag) error {
 	deploymentName := s.name
 	resourceGroupName := state.Get(constants.ArmResourceGroupName).(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say(fmt.Sprintf("Removing the created Deployment object: '%s'", deploymentName))
 	f, err := s.client.DeploymentsClient.Delete(ctx, resourceGroupName, deploymentName)

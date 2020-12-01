@@ -8,8 +8,8 @@ import (
 	"os/exec"
 	"syscall"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepMountExtra mounts the attached device.
@@ -23,7 +23,7 @@ type StepMountExtra struct {
 func (s *StepMountExtra) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 
 	s.mounts = make([]string, 0, len(config.ChrootMounts))
@@ -76,7 +76,7 @@ func (s *StepMountExtra) Run(ctx context.Context, state multistep.StateBag) mult
 }
 
 func (s *StepMountExtra) Cleanup(state multistep.StateBag) {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if err := s.CleanupFunc(state); err != nil {
 		ui.Error(err.Error())

@@ -12,10 +12,10 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/googlecompute"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/post-processor/artifice"
@@ -81,10 +81,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	if len(p.config.Paths) == 0 {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("paths must be specified"))
 	}
 
@@ -106,7 +106,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.AccountFile != "" && p.config.VaultGCPOauthEngine != "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("May set either account_file or "+
 				"vault_gcp_oauth_engine, but not both."))
 	}
@@ -118,7 +118,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	switch artifact.BuilderId() {
 	case googlecompute.BuilderId, artifice.BuilderId:
 		break

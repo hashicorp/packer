@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 )
 
@@ -49,7 +50,7 @@ type TestCase struct {
 }
 
 // TestCheckFunc is the callback used for Check in TestStep.
-type TestCheckFunc func([]packer.Artifact) error
+type TestCheckFunc func([]packersdk.Artifact) error
 
 // TestTeardownFunc is the callback used for Teardown in TestCase.
 type TestTeardownFunc func() error
@@ -156,7 +157,7 @@ func Test(t TestT, c TestCase) {
 	// Run it! We use a temporary directory for caching and discard
 	// any UI output. We discard since it shows up in logs anyways.
 	log.Printf("[DEBUG] Running 'test' build")
-	ui := &packer.BasicUi{
+	ui := &packersdk.BasicUi{
 		Reader:      os.Stdin,
 		Writer:      ioutil.Discard,
 		ErrorWriter: ioutil.Discard,

@@ -6,9 +6,9 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 )
 
@@ -35,7 +35,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}, warnings, nil
 }
 
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	driver := &DockerDriver{Ctx: &b.config.ctx, Ui: ui}
 	if err := driver.Verify(); err != nil {
 		return nil, err
@@ -107,7 +107,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// No errors, must've worked
-	var artifact packer.Artifact
+	var artifact packersdk.Artifact
 	if b.config.Commit {
 		artifact = &ImportArtifact{
 			IdValue:        state.Get("image_id").(string),

@@ -6,8 +6,8 @@ import (
 	"encoding/pem"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -17,7 +17,7 @@ type StepCreateSSHKey struct {
 }
 
 func (s *StepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	c := state.Get("config").(*Config)
 
 	if c.Comm.SSHPrivateKeyFile != "" {

@@ -6,8 +6,8 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepRunAlicloudInstance struct {
@@ -15,7 +15,7 @@ type stepRunAlicloudInstance struct {
 
 func (s *stepRunAlicloudInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ClientWrapper)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	instance := state.Get("instance").(*ecs.Instance)
 
 	startInstanceRequest := ecs.CreateStartInstanceRequest()
@@ -42,7 +42,7 @@ func (s *stepRunAlicloudInstance) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("client").(*ClientWrapper)
 	instance := state.Get("instance").(*ecs.Instance)
 

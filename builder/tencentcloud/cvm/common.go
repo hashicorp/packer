@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
@@ -196,7 +196,7 @@ func Say(state multistep.StateBag, message, prefix string) {
 		message += "..."
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say(message)
 }
 
@@ -206,7 +206,7 @@ func Message(state multistep.StateBag, message, prefix string) {
 		message = fmt.Sprintf("%s: %s", prefix, message)
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Message(message)
 }
 
@@ -216,7 +216,7 @@ func Error(state multistep.StateBag, err error, prefix string) {
 		err = fmt.Errorf("%s: %s", prefix, err)
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Error(err.Error())
 }
 

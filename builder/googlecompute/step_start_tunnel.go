@@ -19,9 +19,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/net"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
@@ -257,7 +257,7 @@ func (s *StepStartTunnel) Run(ctx context.Context, state multistep.StateBag) mul
 	}
 
 	// shell out to create the tunnel.
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	instanceName := state.Get("instance_name").(string)
 	c := state.Get("config").(*Config)
 

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	commonT "github.com/hashicorp/packer/builder/vsphere/common/testing"
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -48,7 +48,7 @@ func defaultConfig() map[string]interface{} {
 }
 
 func checkDefault(t *testing.T, name string, host string, datastore string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
@@ -113,7 +113,7 @@ func TestCloneBuilderAcc_artifact(t *testing.T) {
 }
 
 func checkArtifact(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		if len(artifacts) > 1 {
 			t.Fatal("more than 1 artifact")
 		}
@@ -144,7 +144,7 @@ func folderConfig() string {
 }
 
 func checkFolder(t *testing.T, folder string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
@@ -182,7 +182,7 @@ func resourcePoolConfig() string {
 }
 
 func checkResourcePool(t *testing.T, pool string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
@@ -221,7 +221,7 @@ func datastoreConfig() string {
 }
 
 func checkDatastore(t *testing.T, name string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
@@ -280,7 +280,7 @@ func fullCloneConfig() string {
 }
 
 func checkFullClone(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
@@ -313,7 +313,7 @@ func linkedCloneConfig() string {
 }
 
 func checkLinkedClone(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
@@ -349,7 +349,7 @@ func networkConfig() string {
 }
 
 func checkNetwork(t *testing.T, name string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
@@ -401,7 +401,7 @@ func hardwareConfig() string {
 }
 
 func checkHardware(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 
 		vm := commonT.GetVM(t, d, artifacts)
@@ -483,7 +483,7 @@ func RAMReservationConfig() string {
 }
 
 func checkRAMReservation(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 
 		vm := commonT.GetVM(t, d, artifacts)
@@ -518,7 +518,7 @@ func sshPasswordConfig() string {
 }
 
 func checkDefaultBootOrder(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
@@ -569,7 +569,7 @@ func snapshotConfig() string {
 }
 
 func checkSnapshot(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 
 		vm := commonT.GetVM(t, d, artifacts)
@@ -603,7 +603,7 @@ func templateConfig() string {
 }
 
 func checkTemplate(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 
 		vm := commonT.GetVM(t, d, artifacts)
@@ -641,7 +641,7 @@ func bootOrderConfig() string {
 }
 
 func checkBootOrder(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
@@ -676,7 +676,7 @@ func notesConfig() string {
 }
 
 func checkNotes(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 

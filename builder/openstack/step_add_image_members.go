@@ -5,15 +5,15 @@ import (
 	"fmt"
 
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/members"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepAddImageMembers struct{}
 
 func (s *stepAddImageMembers) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	imageId := state.Get("image").(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 
 	if len(config.ImageMembers) == 0 {

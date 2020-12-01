@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type CommandWrapper func(string) (string, error)
@@ -18,10 +18,10 @@ type CommandWrapper func(string) (string, error)
 type ChrootCommunicator struct {
 	Chroot     string
 	CmdWrapper CommandWrapper
-	Wrapped    packer.Communicator
+	Wrapped    packersdk.Communicator
 }
 
-func (c *ChrootCommunicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
+func (c *ChrootCommunicator) Start(ctx context.Context, cmd *packersdk.RemoteCmd) error {
 	command := strconv.Quote(cmd.Command)
 	chrootCommand, err := c.CmdWrapper(
 		fmt.Sprintf("sudo chroot %s /bin/sh -c %s", c.Chroot, command))

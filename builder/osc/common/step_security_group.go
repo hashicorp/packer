@@ -8,8 +8,8 @@ import (
 
 	"github.com/antihax/optional"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 	"github.com/outscale/osc-sdk-go/osc"
 )
@@ -25,7 +25,7 @@ type StepSecurityGroup struct {
 
 func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	var (
-		ui    = state.Get("ui").(packer.Ui)
+		ui    = state.Get("ui").(packersdk.Ui)
 		conn  = state.Get("osc").(*osc.APIClient)
 		netID = state.Get("net_id").(string)
 	)
@@ -153,7 +153,7 @@ func (s *StepSecurityGroup) Cleanup(state multistep.StateBag) {
 	}
 
 	var (
-		ui   = state.Get("ui").(packer.Ui)
+		ui   = state.Get("ui").(packersdk.Ui)
 		conn = state.Get("osc").(*osc.APIClient)
 	)
 

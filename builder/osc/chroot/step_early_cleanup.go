@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepEarlyCleanup performs some of the cleanup steps early in order to
@@ -14,7 +14,7 @@ import (
 type StepEarlyCleanup struct{}
 
 func (s *StepEarlyCleanup) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	cleanupKeys := []string{
 		"copy_files_cleanup",
 		"mount_extra_cleanup",

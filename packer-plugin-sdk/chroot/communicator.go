@@ -13,8 +13,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 
@@ -25,7 +25,7 @@ type Communicator struct {
 	CmdWrapper common.CommandWrapper
 }
 
-func (c *Communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
+func (c *Communicator) Start(ctx context.Context, cmd *packersdk.RemoteCmd) error {
 	// need extra escapes for the command since we're wrapping it in quotes
 	cmd.Command = strconv.Quote(cmd.Command)
 	command, err := c.CmdWrapper(

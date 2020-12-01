@@ -15,7 +15,7 @@ import (
 	"syscall"
 
 	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type Communicator struct {
@@ -29,9 +29,9 @@ type Communicator struct {
 	EntryPoint    []string
 }
 
-var _ packer.Communicator = new(Communicator)
+var _ packersdk.Communicator = new(Communicator)
 
-func (c *Communicator) Start(ctx context.Context, remote *packer.RemoteCmd) error {
+func (c *Communicator) Start(ctx context.Context, remote *packersdk.RemoteCmd) error {
 	dockerArgs := []string{
 		"exec",
 		"-i",
@@ -274,7 +274,7 @@ func (c *Communicator) DownloadDir(src string, dst string, exclude []string) err
 }
 
 // Runs the given command and blocks until completion
-func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin io.WriteCloser, stdout, stderr io.ReadCloser) {
+func (c *Communicator) run(cmd *exec.Cmd, remote *packersdk.RemoteCmd, stdin io.WriteCloser, stdout, stderr io.ReadCloser) {
 	// For Docker, remote communication must be serialized since it
 	// only supports single execution.
 	c.lock.Lock()

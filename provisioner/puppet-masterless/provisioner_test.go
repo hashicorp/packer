@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/stretchr/testify/assert"
 )
@@ -479,7 +480,7 @@ func TestProvisionerProvision_extraArguments(t *testing.T) {
 	ui := &packer.MachineReadableUi{
 		Writer: ioutil.Discard,
 	}
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 
 	extraArguments := []string{
 		"--some-arg=yup",

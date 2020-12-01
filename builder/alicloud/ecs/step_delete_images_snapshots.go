@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepDeleteAlicloudImageSnapshots struct {
@@ -54,7 +54,7 @@ func (s *stepDeleteAlicloudImageSnapshots) Run(ctx context.Context, state multis
 
 func (s *stepDeleteAlicloudImageSnapshots) deleteImageAndSnapshots(state multistep.StateBag, imageName string, region string) error {
 	client := state.Get("client").(*ClientWrapper)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	describeImagesRequest := ecs.CreateDescribeImagesRequest()
 	describeImagesRequest.RegionId = region

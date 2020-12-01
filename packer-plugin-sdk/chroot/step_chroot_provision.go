@@ -4,10 +4,10 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepChrootProvision provisions the instance within a chroot.
@@ -15,9 +15,9 @@ type StepChrootProvision struct {
 }
 
 func (s *StepChrootProvision) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	hook := state.Get("hook").(packer.Hook)
+	hook := state.Get("hook").(packersdk.Hook)
 	mountPath := state.Get("mount_path").(string)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	wrappedCommand := state.Get("wrappedCommand").(common.CommandWrapper)
 
 	// Create our communicator
@@ -35,7 +35,7 @@ func (s *StepChrootProvision) Run(ctx context.Context, state multistep.StateBag)
 
 	// Provision
 	log.Println("Running the provision hook")
-	if err := hook.Run(ctx, packer.HookProvision, ui, comm, hookData); err != nil {
+	if err := hook.Run(ctx, packersdk.HookProvision, ui, comm, hookData); err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}

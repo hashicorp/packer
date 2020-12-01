@@ -16,8 +16,8 @@ import (
 	"text/template"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
@@ -104,7 +104,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, error) {
 	config, err := p.specificConfig(name)
 	if err != nil {
 		return nil, false, err
@@ -204,7 +204,7 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 	return NewArtifact(name, outputPath), provider.KeepInputArtifact(), nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	name := p.config.ProviderOverride
 	if name == "" {
 		n, ok := builtins[artifact.BuilderId()]
@@ -271,11 +271,11 @@ func (p *PostProcessor) configureSingle(c *Config, raws ...interface{}) error {
 		c.CompressionLevel = flate.DefaultCompression
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if c.VagrantfileTemplate != "" && c.VagrantfileTemplateGenerated == false {
 		_, err := os.Stat(c.VagrantfileTemplate)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf(
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf(
 				"vagrantfile_template '%s' does not exist", c.VagrantfileTemplate))
 		}
 	}

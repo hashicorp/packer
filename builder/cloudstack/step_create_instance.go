@@ -8,8 +8,8 @@ import (
 	"net"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
@@ -30,7 +30,7 @@ type stepCreateInstance struct {
 func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Creating instance...")
 
@@ -169,7 +169,7 @@ func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	instanceID, ok := state.Get("instance_id").(string)
 	if !ok || instanceID == "" {

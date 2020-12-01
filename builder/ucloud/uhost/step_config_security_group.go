@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
@@ -17,7 +17,7 @@ type stepConfigSecurityGroup struct {
 func (s *stepConfigSecurityGroup) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ucloudcommon.UCloudClient)
 	conn := client.UNetConn
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if len(s.SecurityGroupId) != 0 {
 		ui.Say(fmt.Sprintf("Trying to use specified security group %q...", s.SecurityGroupId))

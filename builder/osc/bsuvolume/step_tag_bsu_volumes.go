@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/antihax/optional"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/outscale/osc-sdk-go/osc"
 )
@@ -20,7 +20,7 @@ type stepTagBSUVolumes struct {
 func (s *stepTagBSUVolumes) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	oscconn := state.Get("osc").(*osc.APIClient)
 	vm := state.Get("vm").(osc.Vm)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	volumes := make(BsuVolumes)
 	for _, instanceBlockDevices := range vm.BlockDeviceMappings {

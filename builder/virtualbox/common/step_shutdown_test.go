@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestStepShutdown_impl(t *testing.T) {
@@ -19,7 +19,7 @@ func TestStepShutdown_noShutdownCommand(t *testing.T) {
 	step.DisableShutdown = false
 	step.ACPIShutdown = false
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 	state.Put("vmName", "foo")
 
@@ -50,7 +50,7 @@ func TestStepShutdown_shutdownCommand(t *testing.T) {
 	step.DisableShutdown = false
 	step.ACPIShutdown = false
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 	state.Put("vmName", "foo")
 
@@ -89,7 +89,7 @@ func TestStepShutdown_shutdownTimeout(t *testing.T) {
 	step.DisableShutdown = false
 	step.ACPIShutdown = false
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 	state.Put("vmName", "foo")
 
@@ -119,7 +119,7 @@ func TestStepShutdown_DisableShutdown(t *testing.T) {
 	step.ACPIShutdown = false
 	step.Timeout = 2 * time.Second
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 	state.Put("vmName", "foo")
 
@@ -148,7 +148,7 @@ func TestStepShutdown_ACPIShutdown(t *testing.T) {
 	step.ACPIShutdown = true
 	step.Timeout = 2 * time.Second
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 	state.Put("vmName", "foo")
 

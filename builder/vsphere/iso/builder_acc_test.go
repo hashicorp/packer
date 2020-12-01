@@ -8,7 +8,7 @@ import (
 
 	commonT "github.com/hashicorp/packer/builder/vsphere/common/testing"
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -54,7 +54,7 @@ func defaultConfig() map[string]interface{} {
 }
 
 func checkDefault(t *testing.T, name string, host string, datastore string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
@@ -129,7 +129,7 @@ func notesConfig() string {
 }
 
 func checkNotes(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
@@ -171,7 +171,7 @@ func hardwareConfig() string {
 }
 
 func checkHardware(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 
 		vm := commonT.GetVM(t, d, artifacts)
@@ -261,7 +261,7 @@ func limitConfig() string {
 }
 
 func checkLimit(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 
 		vm := commonT.GetVM(t, d, artifacts)
@@ -295,7 +295,7 @@ func sataConfig() string {
 }
 
 func checkSata(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 
 		vm := commonT.GetVM(t, d, artifacts)
@@ -347,7 +347,7 @@ func networkCardConfig() string {
 }
 
 func checkNetworkCard(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 
 		vm := commonT.GetVM(t, d, artifacts)
@@ -473,7 +473,7 @@ func fullConfig() map[string]interface{} {
 }
 
 func checkFull(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
@@ -515,7 +515,7 @@ func TestISOBuilderAcc_bootOrder(t *testing.T) {
 }
 
 func checkBootOrder(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 

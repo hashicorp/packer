@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -19,7 +19,7 @@ type commandTemplate struct {
 //
 // Uses:
 //   driver Driver
-//   ui packer.Ui
+//   ui packersdk.Ui
 //   vmName string
 //
 // Produces:
@@ -31,7 +31,7 @@ type StepPrlctl struct {
 // Run executes `prlctl` commands.
 func (s *StepPrlctl) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
 
 	if len(s.Commands) > 0 {

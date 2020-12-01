@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-func newRunner(steps []multistep.Step, config common.PackerConfig, ui packer.Ui) (multistep.Runner, multistep.DebugPauseFn) {
+func newRunner(steps []multistep.Step, config common.PackerConfig, ui packersdk.Ui) (multistep.Runner, multistep.DebugPauseFn) {
 	switch config.PackerOnError {
 	case "", "cleanup":
 	case "abort":
@@ -48,7 +48,7 @@ func newRunner(steps []multistep.Step, config common.PackerConfig, ui packer.Ui)
 
 // NewRunner returns a multistep.Runner that runs steps augmented with support
 // for -debug and -on-error command line arguments.
-func NewRunner(steps []multistep.Step, config common.PackerConfig, ui packer.Ui) multistep.Runner {
+func NewRunner(steps []multistep.Step, config common.PackerConfig, ui packersdk.Ui) multistep.Runner {
 	runner, _ := newRunner(steps, config, ui)
 	return runner
 }
@@ -57,7 +57,7 @@ func NewRunner(steps []multistep.Step, config common.PackerConfig, ui packer.Ui)
 // with support for -debug and -on-error command line arguments.  With -debug it
 // puts the multistep.DebugPauseFn that will pause execution between steps into
 // the state under the key "pauseFn".
-func NewRunnerWithPauseFn(steps []multistep.Step, config common.PackerConfig, ui packer.Ui, state multistep.StateBag) multistep.Runner {
+func NewRunnerWithPauseFn(steps []multistep.Step, config common.PackerConfig, ui packersdk.Ui, state multistep.StateBag) multistep.Runner {
 	runner, pauseFn := newRunner(steps, config, ui)
 	if pauseFn != nil {
 		state.Put("pauseFn", pauseFn)
@@ -72,7 +72,7 @@ func typeName(i interface{}) string {
 type abortStep struct {
 	step        multistep.Step
 	cleanupProv bool
-	ui          packer.Ui
+	ui          packersdk.Ui
 }
 
 func (s abortStep) InnerStepName() string {
@@ -98,7 +98,7 @@ func (s abortStep) Cleanup(state multistep.StateBag) {
 
 type askStep struct {
 	step multistep.Step
-	ui   packer.Ui
+	ui   packersdk.Ui
 }
 
 func (s askStep) InnerStepName() string {
@@ -148,7 +148,7 @@ const (
 	askRetry
 )
 
-func ask(ui packer.Ui, name string, state multistep.StateBag) askResponse {
+func ask(ui packersdk.Ui, name string, state multistep.StateBag) askResponse {
 	ui.Say(fmt.Sprintf("Step %q failed", name))
 
 	result := make(chan askResponse)
@@ -168,7 +168,7 @@ func ask(ui packer.Ui, name string, state multistep.StateBag) askResponse {
 	}
 }
 
-func askPrompt(ui packer.Ui) askResponse {
+func askPrompt(ui packersdk.Ui) askResponse {
 	for {
 		line, err := ui.Ask("[c] Clean up and exit, [a] abort without cleanup, or [r] retry step (build may fail even if retry succeeds)?")
 		if err != nil {
@@ -188,7 +188,7 @@ func askPrompt(ui packer.Ui) askResponse {
 	}
 }
 
-func handleAbortsAndInterupts(state multistep.StateBag, ui packer.Ui, stepName string) bool {
+func handleAbortsAndInterupts(state multistep.StateBag, ui packersdk.Ui, stepName string) bool {
 	// if returns false, don't run cleanup. If true, do run cleanup.
 	_, alreadyLogged := state.GetOk("abort_step_logged")
 

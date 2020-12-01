@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/antihax/optional"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/outscale/osc-sdk-go/osc"
 )
@@ -20,7 +20,7 @@ type StepUpdateOMIAttributes struct {
 
 func (s *StepUpdateOMIAttributes) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("accessConfig").(*AccessConfig)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	omis := state.Get("omis").(map[string]string)
 	snapshots := state.Get("snapshots").(map[string][]string)
 

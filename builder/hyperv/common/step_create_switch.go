@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 const (
@@ -35,7 +35,7 @@ type StepCreateSwitch struct {
 
 func (s *StepCreateSwitch) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if len(s.SwitchType) == 0 {
 		s.SwitchType = DefaultSwitchType
@@ -70,7 +70,7 @@ func (s *StepCreateSwitch) Cleanup(state multistep.StateBag) {
 	}
 
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Unregistering and deleting switch...")
 
 	err := driver.DeleteVirtualSwitch(s.SwitchName)

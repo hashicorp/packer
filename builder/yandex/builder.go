@@ -7,9 +7,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
@@ -47,9 +47,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return generatedData, warnings, nil
 }
 
-// Run executes a yandex Packer build and returns a packer.Artifact
+// Run executes a yandex Packer build and returns a packersdk.Artifact
 // representing a Yandex.Cloud compute image.
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	driver, err := NewDriverYC(ui, &b.config.AccessConfig)
 	ctx = requestid.ContextWithClientTraceID(ctx, uuid.New().String())
 

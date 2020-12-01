@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // These are the extensions of files that are important for the function
@@ -19,7 +19,7 @@ var KeepFileExtensions = []string{".nvram", ".vmdk", ".vmsd", ".vmx", ".vmxf"}
 //
 // Uses:
 //   dir    OutputDir
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //
 // Produces:
 //   <nothing>
@@ -27,7 +27,7 @@ type StepCleanFiles struct{}
 
 func (StepCleanFiles) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	dir := state.Get("dir").(OutputDir)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Deleting unnecessary VMware files...")
 	files, err := dir.ListFiles()

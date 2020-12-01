@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepCreateSourceMachine creates an machine with the specified attributes
@@ -16,7 +16,7 @@ type StepCreateSourceMachine struct{}
 func (s *StepCreateSourceMachine) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if !config.MachineImageFilters.Empty() {
 		ui.Say("Selecting an image based on search criteria")
@@ -51,7 +51,7 @@ func (s *StepCreateSourceMachine) Run(ctx context.Context, state multistep.State
 
 func (s *StepCreateSourceMachine) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	machineIdRaw, ok := state.GetOk("machine")
 	if ok && machineIdRaw.(string) != "" {

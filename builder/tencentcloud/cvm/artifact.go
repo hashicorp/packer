@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
@@ -133,7 +133,7 @@ func (a *Artifact) Destroy() error {
 	if len(errors) == 1 {
 		return errors[0]
 	} else if len(errors) > 1 {
-		return &packer.MultiError{Errors: errors}
+		return &packersdk.MultiError{Errors: errors}
 	} else {
 		return nil
 	}

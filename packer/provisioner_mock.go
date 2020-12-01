@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // MockProvisioner is an implementation of Provisioner that can be
@@ -15,8 +16,8 @@ type MockProvisioner struct {
 	PrepConfigs      []interface{}
 	ProvCalled       bool
 	ProvRetried      bool
-	ProvCommunicator Communicator
-	ProvUi           Ui
+	ProvCommunicator packersdk.Communicator
+	ProvUi           packersdk.Ui
 }
 
 func (tp *MockProvisioner) ConfigSpec() hcldec.ObjectSpec { return tp.FlatMapstructure().HCL2Spec() }
@@ -29,7 +30,7 @@ func (t *MockProvisioner) Prepare(configs ...interface{}) error {
 	return nil
 }
 
-func (t *MockProvisioner) Provision(ctx context.Context, ui Ui, comm Communicator, generatedData map[string]interface{}) error {
+func (t *MockProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 	if t.ProvCalled {
 		t.ProvRetried = true
 		return nil
@@ -46,7 +47,7 @@ func (t *MockProvisioner) Provision(ctx context.Context, ui Ui, comm Communicato
 	return t.ProvFunc(ctx)
 }
 
-func (t *MockProvisioner) Communicator() Communicator {
+func (t *MockProvisioner) Communicator() packersdk.Communicator {
 	return t.ProvCommunicator
 }
 

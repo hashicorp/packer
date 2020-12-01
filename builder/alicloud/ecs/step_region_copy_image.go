@@ -7,8 +7,8 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	confighelper "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
@@ -31,7 +31,7 @@ func (s *stepRegionCopyAlicloudImage) Run(ctx context.Context, state multistep.S
 	}
 
 	client := state.Get("client").(*ClientWrapper)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	srcImageId := state.Get("alicloudimage").(string)
 	alicloudImages := state.Get("alicloudimages").(map[string]string)
@@ -83,7 +83,7 @@ func (s *stepRegionCopyAlicloudImage) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say(fmt.Sprintf("Stopping copy image because cancellation or error..."))
 
 	client := state.Get("client").(*ClientWrapper)

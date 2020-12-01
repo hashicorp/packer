@@ -6,8 +6,8 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
@@ -33,7 +33,7 @@ var deleteVSwitchRetryErrors = []string{
 
 func (s *stepConfigAlicloudVSwitch) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ClientWrapper)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vpcId := state.Get("vpcid").(string)
 	config := state.Get("config").(*Config)
 
@@ -176,7 +176,7 @@ func (s *stepConfigAlicloudVSwitch) Cleanup(state multistep.StateBag) {
 	cleanUpMessage(state, "vSwitch")
 
 	client := state.Get("client").(*ClientWrapper)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	_, err := client.WaitForExpected(&WaitForExpectArgs{
 		RequestFunc: func() (responses.AcsResponse, error) {

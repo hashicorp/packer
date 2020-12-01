@@ -6,9 +6,9 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -18,7 +18,7 @@ const BuilderId = "packer.cloudstack"
 type Builder struct {
 	config Config
 	runner multistep.Runner
-	ui     packer.Ui
+	ui     packersdk.Ui
 }
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
@@ -33,7 +33,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 }
 
 // Run implements the packer.Builder interface.
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	b.ui = ui
 
 	// Create a CloudStack API client.

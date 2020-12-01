@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type RemoteDriverMock struct {
@@ -40,7 +40,7 @@ type RemoteDriverMock struct {
 	outputDir string
 }
 
-func (d *RemoteDriverMock) UploadISO(path string, checksum string, ui packer.Ui) (string, error) {
+func (d *RemoteDriverMock) UploadISO(path string, checksum string, ui packersdk.Ui) (string, error) {
 	d.UploadISOCalled = true
 	d.UploadISOPath = path
 	return d.UploadISOResult, d.UploadISOErr
@@ -68,7 +68,7 @@ func (d *RemoteDriverMock) IsDestroyed() (bool, error) {
 	return d.IsDestroyedResult, d.IsDestroyedErr
 }
 
-func (d *RemoteDriverMock) upload(dst, src string, ui packer.Ui) error {
+func (d *RemoteDriverMock) upload(dst, src string, ui packersdk.Ui) error {
 	return d.UploadErr
 }
 

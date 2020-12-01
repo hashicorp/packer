@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 
@@ -26,7 +26,7 @@ type StepCreateBuildDir struct {
 // Creates the main directory used to house the VMs files and folders
 // during the build
 func (s *StepCreateBuildDir) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Creating build directory...")
 
@@ -58,7 +58,7 @@ func (s *StepCreateBuildDir) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Deleting build directory...")
 
 	err := os.RemoveAll(s.buildDir)

@@ -8,8 +8,8 @@ import (
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepGetOSDisk struct {
@@ -19,7 +19,7 @@ type StepGetOSDisk struct {
 	error  func(e error)
 }
 
-func NewStepGetOSDisk(client *AzureClient, ui packer.Ui) *StepGetOSDisk {
+func NewStepGetOSDisk(client *AzureClient, ui packersdk.Ui) *StepGetOSDisk {
 	var step = &StepGetOSDisk{
 		client: client,
 		say:    func(message string) { ui.Say(message) },

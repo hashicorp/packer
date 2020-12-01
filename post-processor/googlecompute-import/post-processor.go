@@ -20,8 +20,8 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/googlecompute"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/post-processor/artifice"
@@ -99,7 +99,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	// Set defaults
 	if p.config.GCSObjectName == "" {
@@ -108,18 +108,18 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	// Check and render gcs_object_name
 	if err = interpolate.Validate(p.config.GCSObjectName, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing gcs_object_name template: %s", err))
 	}
 
 	if p.config.AccountFile != "" {
 		if p.config.VaultGCPOauthEngine != "" && p.config.ImpersonateServiceAccount != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You cannot "+
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("You cannot "+
 				"specify impersonate_service_account, account_file and vault_gcp_oauth_engine at the same time"))
 		}
 		cfg, err := googlecompute.ProcessAccountFile(p.config.AccountFile)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 		p.config.account = cfg
 	}
@@ -131,7 +131,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 	for key, ptr := range templates {
 		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
 	}
@@ -143,7 +143,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	generatedData := artifact.State("generated_data")
 	if generatedData == nil {
 		// Make sure it's not a nil map so we can assign to it later.
@@ -259,7 +259,7 @@ func CreateShieldedVMStateConfig(imageGuestOsFeatures []string, imagePlatformKey
 	return shieldedVMStateConfig, nil
 }
 
-func UploadToBucket(opts option.ClientOption, ui packer.Ui, artifact packer.Artifact, bucket string, gcsObjectName string) (string, error) {
+func UploadToBucket(opts option.ClientOption, ui packersdk.Ui, artifact packersdk.Artifact, bucket string, gcsObjectName string) (string, error) {
 	service, err := storage.NewService(context.TODO(), opts)
 	if err != nil {
 		return "", err
@@ -295,7 +295,7 @@ func UploadToBucket(opts option.ClientOption, ui packer.Ui, artifact packer.Arti
 	return storageObject.SelfLink, nil
 }
 
-func CreateGceImage(opts option.ClientOption, ui packer.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string, shieldedVMStateConfig *compute.InitialStateConfig) (packer.Artifact, error) {
+func CreateGceImage(opts option.ClientOption, ui packersdk.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string, shieldedVMStateConfig *compute.InitialStateConfig) (packersdk.Artifact, error) {
 	service, err := compute.NewService(context.TODO(), opts)
 
 	if err != nil {
@@ -351,7 +351,7 @@ func CreateGceImage(opts option.ClientOption, ui packer.Ui, project string, rawI
 	return &Artifact{paths: []string{op.TargetLink}}, nil
 }
 
-func DeleteFromBucket(opts option.ClientOption, ui packer.Ui, bucket string, gcsObjectName string) error {
+func DeleteFromBucket(opts option.ClientOption, ui packersdk.Ui, bucket string, gcsObjectName string) error {
 	service, err := storage.NewService(context.TODO(), opts)
 
 	if err != nil {

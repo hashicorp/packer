@@ -9,8 +9,8 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
@@ -27,7 +27,7 @@ var createImageRetryErrors = []string{
 func (s *stepCreateAlicloudImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*ClientWrapper)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	tempImageName := config.AlicloudImageName
 	if config.ImageEncrypted.True() {
@@ -95,7 +95,7 @@ func (s *stepCreateAlicloudImage) Cleanup(state multistep.StateBag) {
 	}
 
 	client := state.Get("client").(*ClientWrapper)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if !cancelled && !halted && encryptedSet {
 		ui.Say(fmt.Sprintf("Deleting temporary image %s(%s) and related snapshots after finishing encryption...", s.image.ImageId, s.image.ImageName))

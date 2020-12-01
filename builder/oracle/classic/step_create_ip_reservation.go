@@ -5,15 +5,15 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
 
 type stepCreateIPReservation struct{}
 
 func (s *stepCreateIPReservation) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.Client)
@@ -47,7 +47,7 @@ func (s *stepCreateIPReservation) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Cleaning up IP reservations...")
 	client := state.Get("client").(*compute.Client)
 

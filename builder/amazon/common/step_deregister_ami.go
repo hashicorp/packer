@@ -6,8 +6,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepDeregisterAMI struct {
@@ -24,7 +24,7 @@ func (s *StepDeregisterAMI) Run(ctx context.Context, state multistep.StateBag) m
 		return multistep.ActionContinue
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	// Add the session region to list of regions will deregister AMIs in
 	regions := append(s.Regions, *ec2conn.Config.Region)
