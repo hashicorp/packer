@@ -91,7 +91,7 @@ func TestProvisionHook_cancel(t *testing.T) {
 // TODO(mitchellh): Test that they're run in the proper order
 
 func TestPausedProvisioner_impl(t *testing.T) {
-	var _ Provisioner = new(PausedProvisioner)
+	var _ packersdk.Provisioner = new(PausedProvisioner)
 }
 
 func TestPausedProvisionerPrepare(t *testing.T) {
@@ -174,7 +174,7 @@ func TestPausedProvisionerCancel(t *testing.T) {
 }
 
 func TestDebuggedProvisioner_impl(t *testing.T) {
-	var _ Provisioner = new(DebuggedProvisioner)
+	var _ packersdk.Provisioner = new(DebuggedProvisioner)
 }
 
 func TestDebuggedProvisionerPrepare(t *testing.T) {
@@ -234,7 +234,7 @@ func TestDebuggedProvisionerCancel(t *testing.T) {
 }
 
 func TestRetriedProvisioner_impl(t *testing.T) {
-	var _ Provisioner = new(RetriedProvisioner)
+	var _ packersdk.Provisioner = new(RetriedProvisioner)
 }
 
 func TestRetriedProvisionerPrepare(t *testing.T) {
