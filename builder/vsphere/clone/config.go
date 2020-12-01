@@ -5,8 +5,8 @@ package clone
 
 import (
 	"github.com/hashicorp/packer/builder/vsphere/common"
-	"github.com/hashicorp/packer/helper/communicator"
 	packerCommon "github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"

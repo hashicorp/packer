@@ -33,11 +33,11 @@ Account](https://cloud.google.com/compute/docs/authentication).
 
 ### Running locally on your workstation.
 
-If you run the `googlecompute` Packer builder locally on your workstation, you will 
+If you run the `googlecompute` Packer builder locally on your workstation, you will
 need to install the Google Cloud SDK and authenticate using [User Application Default
 Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default).
 You don't need to specify an _account file_ if you are using this method. Your user
-must have at least `Compute Instance Admin (v1)` & `Service Account User` roles 
+must have at least `Compute Instance Admin (v1)` & `Service Account User` roles
 to use Packer succesfully.
 
 
@@ -350,11 +350,11 @@ builder.
 
 #### Optional:
 
-@include 'helper/communicator/Config-not-required.mdx'
+@include 'packer-plugin-sdk/communicator/Config-not-required.mdx'
 
-@include 'helper/communicator/SSH-not-required.mdx'
+@include 'packer-plugin-sdk/communicator/SSH-not-required.mdx'
 
-@include 'helper/communicator/SSH-Private-Key-File-not-required.mdx'
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
 
 ### Required:
 
@@ -395,11 +395,11 @@ The GCS location must be writeable by the service account of the instance that P
 
 ### Temporary SSH keypair
 
-@include 'helper/communicator/SSHTemporaryKeyPair.mdx'
+@include 'packer-plugin-sdk/communicator/SSHTemporaryKeyPair.mdx'
 
 #### Optional:
 
-@include 'helper/communicator/SSHTemporaryKeyPair-not-required.mdx'
+@include 'packer-plugin-sdk/communicator/SSHTemporaryKeyPair-not-required.mdx'
 
 
 ### Gotchas

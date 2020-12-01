@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	tgo "github.com/joyent/triton-go"
 	"github.com/joyent/triton-go/authentication"

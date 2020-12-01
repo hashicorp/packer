@@ -3,7 +3,7 @@ package common
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 )
 
 func testConfig() *RunConfig {

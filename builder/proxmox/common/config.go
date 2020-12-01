@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"

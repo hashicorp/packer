@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/mitchellh/mapstructure"
 )
 
