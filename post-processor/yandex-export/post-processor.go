@@ -101,6 +101,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return errs
 	}
 
+	// Due to the fact that now it's impossible to go to the object storage
+	// through the internal network - we need access
+	// to the global Internet: either through ipv4 or ipv6
+	// TODO: delete this when access appears
 	if p.config.UseIPv4Nat && p.config.UseIPv6 == false {
 		p.config.UseIPv4Nat = true
 	}
@@ -109,8 +113,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if p.config.Labels == nil {
 		p.config.Labels = make(map[string]string)
 	}
-	p.config.Labels["role"] = "exporter"
-	p.config.Labels["target"] = "object-storage"
+	if _, ok := p.config.Labels["role"]; !ok {
+		p.config.Labels["role"] = "exporter"
+	}
+	if _, ok := p.config.Labels["target"]; !ok {
+		p.config.Labels["target"] = "object-storage"
+	}
 
 	return nil
 }

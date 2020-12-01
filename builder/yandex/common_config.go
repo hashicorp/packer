@@ -120,12 +120,6 @@ func (c *NetworkConfig) Prepare(errs *packer.MultiError) *packer.MultiError {
 		c.Zone = defaultZone
 	}
 
-	// if c.UseIPv4Nat && c.UseIPv6 {
-	// 	errs = packer.MultiErrorAppend(
-	// 		errors.New("one of use_ipv4_nat or use_ipv6 key file must be specified, not both"),
-	// 		errs,
-	// 	)
-	// }
 	return errs
 }
 
