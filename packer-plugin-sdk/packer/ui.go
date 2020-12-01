@@ -11,7 +11,7 @@ import (
 	"sync"
 	"syscall"
 
-	getter "github.com/hashicorp/go-getter"
+	getter "github.com/hashicorp/go-getter/v2"
 )
 
 type TTY interface {
