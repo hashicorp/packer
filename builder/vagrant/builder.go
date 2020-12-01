@@ -24,7 +24,7 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
-// Builder implements packer.Builder and builds the actual VirtualBox
+// Builder implements packersdk.Builder and builds the actual VirtualBox
 // images.
 type Builder struct {
 	config Config

@@ -13,7 +13,7 @@ import (
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-// Builder implements packer.Builder and builds the actual Parallels
+// Builder implements packersdk.Builder and builds the actual Parallels
 // images.
 type Builder struct {
 	config Config

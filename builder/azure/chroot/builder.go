@@ -18,7 +18,6 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	azcommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/client"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/chroot"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
@@ -146,7 +145,7 @@ type Builder struct {
 }
 
 // verify interface implementation
-var _ packer.Builder = &Builder{}
+var _ packersdk.Builder = &Builder{}
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 

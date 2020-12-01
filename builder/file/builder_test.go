@@ -6,12 +6,11 @@ import (
 	"testing"
 
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestBuilder_implBuilder(t *testing.T) {
-	var _ packer.Builder = new(Builder)
+	var _ packersdk.Builder = new(Builder)
 }
 
 func TestBuilderFileAcc_content(t *testing.T) {

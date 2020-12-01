@@ -98,7 +98,7 @@ func (c *config) loadSingleComponent(path string) (string, error) {
 	switch {
 	case strings.HasPrefix(pluginName, "packer-builder-"):
 		pluginName = pluginName[len("packer-builder-"):]
-		c.Builders[pluginName] = func() (packer.Builder, error) {
+		c.Builders[pluginName] = func() (packersdk.Builder, error) {
 			return c.pluginClient(path).Builder()
 		}
 	case strings.HasPrefix(pluginName, "packer-post-processor-"):
@@ -180,9 +180,9 @@ func (c *config) Discover() error {
 	return nil
 }
 
-// This is a proper packer.BuilderFunc that can be used to load packer.Builder
+// This is a proper packer.BuilderFunc that can be used to load packersdk.Builder
 // implementations from the defined plugins.
-func (c *config) StartBuilder(name string) (packer.Builder, error) {
+func (c *config) StartBuilder(name string) (packersdk.Builder, error) {
 	log.Printf("Loading builder: %s\n", name)
 	return c.Builders.Start(name)
 }
@@ -225,7 +225,7 @@ func (c *config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.Builders[pluginName] = func() (packer.Builder, error) {
+		c.Builders[pluginName] = func() (packersdk.Builder, error) {
 			return c.pluginClient(newPath).Builder()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
@@ -321,7 +321,7 @@ func (c *config) discoverInternalComponents() error {
 		builder := builder
 		_, found := (c.Builders)[builder]
 		if !found {
-			c.Builders[builder] = func() (packer.Builder, error) {
+			c.Builders[builder] = func() (packersdk.Builder, error) {
 				bin := fmt.Sprintf("%s%splugin%spacker-builder-%s",
 					packerPath, PACKERSPACE, PACKERSPACE, builder)
 				return c.pluginClient(bin).Builder()

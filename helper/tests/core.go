@@ -26,7 +26,7 @@ func FileExists(filename string) bool {
 func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 	components := packer.ComponentFinder{
 		BuilderStore: packer.MapOfBuilder{
-			"amazon-ebs": func() (packer.Builder, error) { return &amazonebsbuilder.Builder{}, nil },
+			"amazon-ebs": func() (packersdk.Builder, error) { return &amazonebsbuilder.Builder{}, nil },
 		},
 		ProvisionerStore: packer.MapOfProvisioner{
 			"shell": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },

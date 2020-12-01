@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 
 	alicloudecsbuilder "github.com/hashicorp/packer/builder/alicloud/ecs"
@@ -111,7 +112,7 @@ type PluginCommand struct {
 	Meta
 }
 
-var Builders = map[string]packer.Builder{
+var Builders = map[string]packersdk.Builder{
 	"alicloud-ecs":        new(alicloudecsbuilder.Builder),
 	"amazon-chroot":       new(amazonchrootbuilder.Builder),
 	"amazon-ebs":          new(amazonebsbuilder.Builder),

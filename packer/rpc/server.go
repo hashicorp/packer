@@ -77,7 +77,7 @@ func (s *Server) RegisterBuild(b packer.Build) error {
 	})
 }
 
-func (s *Server) RegisterBuilder(b packer.Builder) error {
+func (s *Server) RegisterBuilder(b packersdk.Builder) error {
 	return s.server.RegisterName(DefaultBuilderEndpoint, &BuilderServer{
 		commonServer: commonServer{
 			selfConfigurable: b,

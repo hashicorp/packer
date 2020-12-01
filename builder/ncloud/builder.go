@@ -11,7 +11,7 @@ import (
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-// Builder assume this implements packer.Builder
+// Builder assume this implements packersdk.Builder
 type Builder struct {
 	config   Config
 	stateBag multistep.StateBag

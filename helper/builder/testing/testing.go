@@ -28,7 +28,7 @@ type TestCase struct {
 
 	// Builder is the Builder that will be tested. It will be available
 	// as the "test" builder in the template.
-	Builder packer.Builder
+	Builder packersdk.Builder
 
 	// Template is the template contents to use.
 	Template string
@@ -66,10 +66,10 @@ type TestT interface {
 
 type TestBuilderStore struct {
 	packer.BuilderStore
-	StartFn func(name string) (packer.Builder, error)
+	StartFn func(name string) (packersdk.Builder, error)
 }
 
-func (tbs TestBuilderStore) Start(name string) (packer.Builder, error) { return tbs.StartFn(name) }
+func (tbs TestBuilderStore) Start(name string) (packersdk.Builder, error) { return tbs.StartFn(name) }
 
 // Test performs an acceptance test on a backend with the given test case.
 //
@@ -115,7 +115,7 @@ func Test(t TestT, c TestCase) {
 	core := packer.NewCore(&packer.CoreConfig{
 		Components: packer.ComponentFinder{
 			BuilderStore: TestBuilderStore{
-				StartFn: func(n string) (packer.Builder, error) {
+				StartFn: func(n string) (packersdk.Builder, error) {
 					if n == "test" {
 						return c.Builder, nil
 					}

@@ -95,7 +95,7 @@ type Build interface {
 type CoreBuild struct {
 	BuildName          string
 	Type               string
-	Builder            Builder
+	Builder            packersdk.Builder
 	BuilderConfig      interface{}
 	BuilderType        string
 	hooks              map[string][]packersdk.Hook
