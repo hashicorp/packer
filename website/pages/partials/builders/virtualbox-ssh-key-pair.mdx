@@ -1,13 +1,13 @@
 ### SSH key pair automation
 
 The VirtualBox builders can inject the current SSH key pair's public key into
-the template using the `SSHPublicKey` template engine.  This is the SSH public 
+the template using the `SSHPublicKey` template engine.  This is the SSH public
 key as a line in OpenSSH authorized_keys format.
 
 When a private key is provided using `ssh_private_key_file`, the key's
 corresponding public key can be accessed using the above engine.
 
-@include 'helper/communicator/SSH-Private-Key-File-not-required.mdx'
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
 
 If `ssh_password` and `ssh_private_key_file` are not specified, Packer will
 automatically generate en ephemeral key pair. The key pair's public key can

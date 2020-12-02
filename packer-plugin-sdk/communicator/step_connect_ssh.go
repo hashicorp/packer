@@ -13,8 +13,8 @@ import (
 
 	"golang.org/x/crypto/ssh/terminal"
 
-	helperssh "github.com/hashicorp/packer/helper/communicator/ssh"
 	"github.com/hashicorp/packer/packer"
+	helperssh "github.com/hashicorp/packer/packer-plugin-sdk/communicator/ssh"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/ssh"

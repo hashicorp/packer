@@ -1,0 +1,7 @@
+- `ssh_keypair_name` (string) - If specified, this is the key that will be used for SSH with the
+  machine. The key must match a key pair name loaded up into the remote.
+  By default, this is blank, and Packer will generate a temporary keypair
+  unless [`ssh_password`](#ssh_password) is used.
+  [`ssh_private_key_file`](#ssh_private_key_file) or
+  [`ssh_agent_auth`](#ssh_agent_auth) must be specified when
+  [`ssh_keypair_name`](#ssh_keypair_name) is utilized.

@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )

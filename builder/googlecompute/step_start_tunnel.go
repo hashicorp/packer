@@ -18,7 +18,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/net"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"

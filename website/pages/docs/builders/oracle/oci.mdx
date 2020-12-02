@@ -47,7 +47,7 @@ builder.
 In addition to the options defined there, a private key file
 can also be supplied to override the typical auto-generated key:
 
-@include 'helper/communicator/SSH-Private-Key-File-not-required.mdx'
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
 
 ### Required
 
@@ -329,7 +329,7 @@ are listed in `nsg_ids` under `create_vnic_details`.
 
 ## Base Image Filter Example
 Note that `base_image_filter` gets passed as a string, then interpreted as a
-regular expression. This means that all back-slashes must be doubled, e.g., 
+regular expression. This means that all back-slashes must be doubled, e.g.,
 use `\\w+` to mean `\w+`, and `\\\\` to create the regular expression equivalent
 of `\\` (which will search for a literal back-slash).
 ```json

@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/random"

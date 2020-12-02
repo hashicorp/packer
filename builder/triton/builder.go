@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"

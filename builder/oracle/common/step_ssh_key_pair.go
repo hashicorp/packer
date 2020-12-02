@@ -10,7 +10,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"golang.org/x/crypto/ssh"

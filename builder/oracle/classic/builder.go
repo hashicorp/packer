@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/go-oracle-terraform/opc"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	ocommon "github.com/hashicorp/packer/builder/oracle/common"
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"

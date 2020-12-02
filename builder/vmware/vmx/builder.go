@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"

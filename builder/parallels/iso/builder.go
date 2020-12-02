@@ -10,9 +10,9 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"

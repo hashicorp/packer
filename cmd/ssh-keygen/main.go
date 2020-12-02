@@ -8,7 +8,7 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/helper/communicator/sshkey"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator/sshkey"
 )
 
 type options struct {
@@ -22,11 +22,11 @@ func (o *options) AddFlagSets(fs *flag.FlagSet) {
 Specifies the type of key to create. The possible values are 'dsa', 'ecdsa',
 'ed25519', or 'rsa'.
 `)
-	fs.IntVar(&o.Bits, "bits", 0, `Specifies the number of bits in the key to create. By default maximum 
-number will be picked. For RSA keys, the minimum size is 1024 bits and the 
-default is 3072 bits. Generally, 3072 bits is considered sufficient. DSA 
-keys must be exactly 1024 bits as specified by FIPS 186-2. For ECDSA keys, 
-the bits flag determines the key length by selecting from one of three 
+	fs.IntVar(&o.Bits, "bits", 0, `Specifies the number of bits in the key to create. By default maximum
+number will be picked. For RSA keys, the minimum size is 1024 bits and the
+default is 3072 bits. Generally, 3072 bits is considered sufficient. DSA
+keys must be exactly 1024 bits as specified by FIPS 186-2. For ECDSA keys,
+the bits flag determines the key length by selecting from one of three
 elliptic curve sizes: 256, 384 or 521 bits. Attempting to use bit lengths
 other than these three values for ECDSA keys will fail. Ed25519 keys have a
 fixed length and the bits flag will be ignored.
