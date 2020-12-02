@@ -8,9 +8,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/pathing"
 )
 
 // StepTempDir creates a temporary directory that we use in order to
@@ -21,7 +21,7 @@ type StepTempDir struct {
 
 // ConfigTmpDir returns the configuration tmp directory for Docker
 func ConfigTmpDir() (string, error) {
-	configdir, err := packer.ConfigDir()
+	configdir, err := pathing.ConfigDir()
 	if err != nil {
 		return "", err
 	}

@@ -13,10 +13,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/pathing"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	ocicommon "github.com/oracle/oci-go-sdk/common"
@@ -198,7 +198,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 
 		var keyContent []byte
 		if c.KeyFile != "" {
-			path, err := packer.ExpandUser(c.KeyFile)
+			path, err := pathing.ExpandUser(c.KeyFile)
 			if err != nil {
 				return err
 			}
