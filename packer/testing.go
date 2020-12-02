@@ -11,7 +11,7 @@ import (
 func TestCoreConfig(t *testing.T) *CoreConfig {
 	// Create some test components
 	components := ComponentFinder{
-		BuilderStore: MapOfBuilder{
+		BuilderStore: packersdk.MapOfBuilder{
 			"test": func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
 		},
 	}
@@ -45,7 +45,7 @@ func TestUi(t *testing.T) packersdk.Ui {
 func TestBuilder(t *testing.T, c *CoreConfig, n string) *MockBuilder {
 	var b MockBuilder
 
-	c.Components.BuilderStore = MapOfBuilder{
+	c.Components.BuilderStore = packersdk.MapOfBuilder{
 		n: func() (packersdk.Builder, error) { return &b, nil },
 	}
 
@@ -57,7 +57,7 @@ func TestBuilder(t *testing.T, c *CoreConfig, n string) *MockBuilder {
 func TestProvisioner(t *testing.T, c *CoreConfig, n string) *MockProvisioner {
 	var b MockProvisioner
 
-	c.Components.ProvisionerStore = MapOfProvisioner{
+	c.Components.ProvisionerStore = packersdk.MapOfProvisioner{
 		n: func() (packersdk.Provisioner, error) { return &b, nil },
 	}
 
@@ -69,7 +69,7 @@ func TestProvisioner(t *testing.T, c *CoreConfig, n string) *MockProvisioner {
 func TestPostProcessor(t *testing.T, c *CoreConfig, n string) *MockPostProcessor {
 	var b MockPostProcessor
 
-	c.Components.PostProcessorStore = MapOfPostProcessor{
+	c.Components.PostProcessorStore = packersdk.MapOfPostProcessor{
 		n: func() (packersdk.PostProcessor, error) { return &b, nil },
 	}
 

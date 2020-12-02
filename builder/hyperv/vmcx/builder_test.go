@@ -10,7 +10,7 @@ import (
 	"os"
 
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
@@ -25,7 +25,7 @@ func testConfig() map[string]interface{} {
 		"memory":                  64,
 		"guest_additions_mode":    "none",
 		"clone_from_vmcx_path":    "generated",
-		packer.BuildNameConfigKey: "foo",
+		common.BuildNameConfigKey: "foo",
 	}
 }
 
@@ -483,7 +483,7 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	defer os.RemoveAll(td)
 	config["clone_from_vmcx_path"] = td
 
-	config[packer.UserVariablesConfigKey] = map[string]string{"test-variable": "test"}
+	config[common.UserVariablesConfigKey] = map[string]string{"test-variable": "test"}
 	config["boot_command"] = []string{"blah {{user `test-variable`}} blah"}
 
 	_, warns, err := b.Prepare(config)

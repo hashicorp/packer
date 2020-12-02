@@ -800,7 +800,7 @@ func TestCoreBuild_provRetry(t *testing.T) {
 	b := TestBuilder(t, config, "test")
 	pString := new(MockProvisioner)
 	pInt := new(MockProvisioner)
-	config.Components.ProvisionerStore = MapOfProvisioner{
+	config.Components.ProvisionerStore = packersdk.MapOfProvisioner{
 		"test-string": func() (packersdk.Provisioner, error) { return pString, nil },
 		// backwards compatibility
 		"test-integer": func() (packersdk.Provisioner, error) { return pInt, nil },

@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/helper/tests/acc"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/provisioner/powershell"
 	windowsshellprovisioner "github.com/hashicorp/packer/provisioner/windows-shell"
@@ -63,8 +62,8 @@ func (s *PowershellProvisionerAccTest) GetConfig() (string, error) {
 	return string(file), nil
 }
 
-func (s *PowershellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
-	return packer.MapOfProvisioner{
+func (s *PowershellProvisionerAccTest) GetProvisionerStore() packersdk.MapOfProvisioner {
+	return packersdk.MapOfProvisioner{
 		TestProvisionerName: func() (packersdk.Provisioner, error) { return &powershell.Provisioner{}, nil },
 		"windows-shell":     func() (packersdk.Provisioner, error) { return &windowsshellprovisioner.Provisioner{}, nil },
 	}

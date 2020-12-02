@@ -14,7 +14,7 @@ import (
 	amazonEBS "github.com/hashicorp/packer/builder/amazon/ebs/acceptance"
 	virtualboxISO "github.com/hashicorp/packer/builder/virtualbox/iso/acceptance"
 	"github.com/hashicorp/packer/command"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestProvisionersAgainstBuilders(provisionerAcc ProvisionerAcceptance, t *testing.T) {
@@ -133,14 +133,14 @@ func buildCommand(t *testing.T, builder BuilderAcceptance, provisioner Provision
 type ProvisionerAcceptance interface {
 	GetName() string
 	GetConfig() (string, error)
-	GetProvisionerStore() packer.MapOfProvisioner
+	GetProvisionerStore() packersdk.MapOfProvisioner
 	IsCompatible(builder string, vmOS string) bool
 	RunTest(c *command.BuildCommand, args []string) error
 }
 
 type BuilderAcceptance interface {
 	GetConfigs() (map[string]string, error)
-	GetBuilderStore() packer.MapOfBuilder
+	GetBuilderStore() packersdk.MapOfBuilder
 	CleanUp() error
 }
 

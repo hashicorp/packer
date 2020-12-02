@@ -68,12 +68,12 @@ func testMetaParallel(t *testing.T, builder *ParallelTestBuilder, locked *Locked
 	return Meta{
 		CoreConfig: &packer.CoreConfig{
 			Components: packer.ComponentFinder{
-				BuilderStore: packer.MapOfBuilder{
+				BuilderStore: packersdk.MapOfBuilder{
 					"parallel-test": func() (packersdk.Builder, error) { return builder, nil },
 					"file":          func() (packersdk.Builder, error) { return &file.Builder{}, nil },
 					"lock":          func() (packersdk.Builder, error) { return locked, nil },
 				},
-				ProvisionerStore: packer.MapOfProvisioner{
+				ProvisionerStore: packersdk.MapOfProvisioner{
 					"sleep": func() (packersdk.Provisioner, error) { return &sleep.Provisioner{}, nil },
 				},
 			},
