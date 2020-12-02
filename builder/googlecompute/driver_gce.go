@@ -757,13 +757,16 @@ func (d *driverGCE) AddToInstanceMetadata(zone string, name string, metadata map
 	}
 
 	newErrCh := make(chan error, 1)
-	go waitForState(newErrCh, "DONE", d.refreshZoneOp(zone, op))
 
-	select {
-	case err = <-newErrCh:
-	case <-time.After(time.Second * 30):
-		err = errors.New("time out while waiting for instance to create")
-	}
+	go func() {
+		err = waitForState(newErrCh, "DONE", d.refreshZoneOp(zone, op))
+
+		select {
+		case err = <-newErrCh:
+		case <-time.After(time.Second * 30):
+			err = errors.New("time out while waiting for instance to create")
+		}
+	}()
 
 	if err != nil {
 		newErrCh <- err

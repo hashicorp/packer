@@ -304,7 +304,6 @@ func (d *DriverMock) AddToInstanceMetadata(zone string, name string, metadata ma
 	if resultCh == nil {
 		ch := make(chan error)
 		close(ch)
-		resultCh = ch
 	}
 
 	return nil
