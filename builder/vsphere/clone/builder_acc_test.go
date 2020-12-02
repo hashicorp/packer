@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	commonT "github.com/hashicorp/packer/builder/vsphere/common/testing"
-	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	builderT "github.com/hashicorp/packer/packer-plugin-sdk/builder/testing"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/vmware/govmomi/vim25/types"
 )

@@ -28,7 +28,7 @@ package dtl
 import (
 	"testing"
 
-	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	builderT "github.com/hashicorp/packer/packer-plugin-sdk/builder/testing"
 )
 
 const DeviceLoginAcceptanceTest = "DEVICELOGIN_TEST"
@@ -83,7 +83,7 @@ const testBuilderAccManagedDiskWindows = `
 	  "winrm_insecure": "true",
 	  "winrm_timeout": "3m",
 	  "winrm_username": "packer",
-	 
+
 	  "location": "South Central US",
 	  "vm_size": "Standard_DS2_v2"
 	}]
@@ -120,7 +120,7 @@ const testBuilderAccManagedDiskLinux = `
 	  "location": "South Central US",
 	  "vm_size": "Standard_DS2_v2",
 
-	    
+
       "dtl_artifacts": [{
         "artifact_name": "linux-apt-package",
         "parameters" : [{
