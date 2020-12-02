@@ -728,11 +728,11 @@ func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) e
 	return err
 }
 
-func (d *driverGCE) AddToInstanceMetadata(zone string, name string, metadata map[string]string) (<-chan error, error) {
+func (d *driverGCE) AddToInstanceMetadata(zone string, name string, metadata map[string]string) error {
 
 	instance, err := d.service.Instances.Get(d.projectId, zone, name).Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Build up the metadata
@@ -753,7 +753,7 @@ func (d *driverGCE) AddToInstanceMetadata(zone string, name string, metadata map
 	}).Do()
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	newErrCh := make(chan error, 1)
@@ -762,8 +762,13 @@ func (d *driverGCE) AddToInstanceMetadata(zone string, name string, metadata map
 	select {
 	case err = <-newErrCh:
 	case <-time.After(time.Second * 30):
-		err = errors.New("time out while waiting for SSH keys to be added to instance")
+		err = errors.New("time out while waiting for instance to create")
 	}
 
-	return newErrCh, err
+	if err != nil {
+		newErrCh <- err
+		return err
+	}
+
+	return nil
 }

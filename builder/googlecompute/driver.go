@@ -71,7 +71,7 @@ type Driver interface {
 	DeleteOSLoginSSHKey(user, fingerprint string) error
 
 	// Add to the instance metadata for the existing instance
-	AddToInstanceMetadata(zone string, name string, metadata map[string]string) (<-chan error, error)
+	AddToInstanceMetadata(zone string, name string, metadata map[string]string) error
 }
 
 type InstanceConfig struct {

@@ -141,8 +141,8 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	name := c.InstanceName
 
 	var errCh <-chan error
-	metadataNoSSHKeys := make(map[string]string)
-	metadataSSHKeys := make(map[string]string)
+	var metadataNoSSHKeys map[string]string
+	var metadataSSHKeys map[string]string
 	metadataForInstance := make(map[string]string)
 
 	metadataNoSSHKeys, metadataSSHKeys, errs := c.createInstanceMetadata(sourceImage, string(c.Comm.SSHPublicKey))
@@ -233,11 +233,12 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 		log.Printf("[DEBUG] %s wait is over. Adding SSH keys to existing instance...",
 			c.WaitToAddSSHKeys.String())
-		errCh, err = d.AddToInstanceMetadata(c.Zone, name, metadataSSHKeys)
+		err = d.AddToInstanceMetadata(c.Zone, name, metadataSSHKeys)
 
 		if err != nil {
-			state.Put("error", errs.Error())
-			ui.Error(errs.Error())
+			err := fmt.Errorf("Error adding SSH keys to existing instance: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 	}
@@ -316,6 +317,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 }
 
 func addmap(a map[string]string, b map[string]string) {
+
 	for k, v := range b {
 		a[k] = v
 	}

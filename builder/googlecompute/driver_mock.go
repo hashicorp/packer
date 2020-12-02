@@ -295,7 +295,7 @@ func (d *DriverMock) DeleteOSLoginSSHKey(user, fingerprint string) error {
 	return nil
 }
 
-func (d *DriverMock) AddToInstanceMetadata(zone string, name string, metadata map[string]string) (<-chan error, error) {
+func (d *DriverMock) AddToInstanceMetadata(zone string, name string, metadata map[string]string) error {
 	d.AddToInstanceMetadataZone = zone
 	d.AddToInstanceMetadataName = name
 	d.AddToInstanceMetadataKVPairs = metadata
@@ -307,5 +307,5 @@ func (d *DriverMock) AddToInstanceMetadata(zone string, name string, metadata ma
 		resultCh = ch
 	}
 
-	return resultCh, d.AddToInstanceMetadataErr
+	return nil
 }
