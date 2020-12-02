@@ -300,12 +300,23 @@ func extractMachineReadable(args []string) ([]string, bool) {
 
 func loadConfig() (*config, error) {
 	var config config
-	config.PluginMinPort = 10000
-	config.PluginMaxPort = 25000
-	config.Builders = packer.MapOfBuilder{}
-	config.PostProcessors = packer.MapOfPostProcessor{}
-	config.Provisioners = packer.MapOfProvisioner{}
-	if err := config.Discover(); err != nil {
+	config.Plugins = plugin.Config{
+		PluginMinPort: 10000,
+		PluginMaxPort: 25000,
+	}
+	if err := config.Plugins.Discover(); err != nil {
+		return nil, err
+	}
+
+	// Copy plugins to general list
+	builders, provisioners, postProcessors := config.Plugins.GetPlugins()
+	config.Builders = builders
+	config.Provisioners = provisioners
+	config.PostProcessors = postProcessors
+
+	// Finally, try to use an internal plugin. Note that this will not override
+	// any previously-loaded plugins.
+	if err := config.discoverInternalComponents(); err != nil {
 		return nil, err
 	}
 

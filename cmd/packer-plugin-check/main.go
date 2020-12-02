@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/hashicorp/packer/packer/plugin"
 )
 
 const packerPluginCheck = "packer-plugin-check"
@@ -17,7 +19,7 @@ const packerPluginCheck = "packer-plugin-check"
 var (
 	hcl2spec = flag.Bool("hcl2spec", false, "flag to indicate that hcl2spec files should be checked.")
 	website  = flag.Bool("website", false, "flag to indicate that website files should be checked.")
-	binary   = flag.String("binary", "", "the binary name that will be loaded to check compatibility.")
+	load     = flag.Bool("load", false, "flag to check plugin can be loaded by Packer.")
 )
 
 // Usage is a replacement usage function for the flags package.
@@ -34,24 +36,32 @@ func main() {
 	flag.Usage = Usage
 	flag.Parse()
 
-	if *hcl2spec == false && *website == false && len(*binary) == 0 {
+	if *hcl2spec == false && *website == false && *load == false {
 		flag.Usage()
 		os.Exit(2)
 	}
 
 	if *hcl2spec {
-		fmt.Printf("hcl2spec check\n")
-		_ = checkHCL2Specs()
+		fmt.Printf("====== checking hcl2spec ======\n\n")
+		if err := checkHCL2Specs(); err != nil {
+			fmt.Printf(err.Error())
+			os.Exit(2)
+		}
+		fmt.Printf("\nPlugin succesfully passed hcl2spec check.\n")
 	}
 
 	if *website {
-		fmt.Printf("website check\n")
-		_ = checkWebsite()
+		// To be defined after decisions about plugin's documentation
+		//_ = checkWebsite()
 	}
 
-	if len(*binary) != 0 {
-		fmt.Printf("binary %s\n", *binary)
-		_ = loadBinary()
+	if *load {
+		fmt.Printf("\n====== checking if Packer can load plugin ======\n\n")
+		if err := discoverAndLoad(); err != nil {
+			fmt.Printf(err.Error())
+			os.Exit(2)
+		}
+		fmt.Printf("\nPlugin succesfully passed loading check.\n")
 	}
 }
 
@@ -80,7 +90,6 @@ func checkHCL2Specs() error {
 	})
 
 	if hcl2found {
-		fmt.Printf("a hcl2spec file was found \n")
 		return nil
 	}
 	return fmt.Errorf("No hcl2spec.go files found. Please, make sure to generate them before releasing.")
@@ -120,7 +129,22 @@ func checkWebsite() error {
 	return fmt.Errorf("No website files found. Please, make sure to generate them before releasing.")
 }
 
-func loadBinary() error {
-	//TODO
+func discoverAndLoad() error {
+	config := plugin.Config{
+		PluginMinPort: 10000,
+		PluginMaxPort: 25000,
+	}
+	err := config.Discover()
+	if err != nil {
+		return err
+	}
+
+	builders, provisioners, postProcessors := config.GetPlugins()
+	if len(builders) == 0 &&
+		len(provisioners) == 0 &&
+		len(postProcessors) == 0 {
+		return fmt.Errorf("couldn't indentify any Builder/Provisioner/Post-Processor from plugin binary")
+	}
+
 	return nil
 }
