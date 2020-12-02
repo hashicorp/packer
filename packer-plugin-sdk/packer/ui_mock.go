@@ -1,49 +1,8 @@
 package packer
 
 import (
-	"errors"
 	"io"
-	"log"
-	"strings"
 )
-
-// TestUi is a UI that only outputs unformatted output to the given writer.
-type TestUi struct {
-	Writer io.Writer
-}
-
-var _ Ui = new(TestUi)
-
-func (u *TestUi) Ask(query string) (string, error) {
-	return "", errors.New("Test UI can't ask")
-}
-
-func (u *TestUi) Say(message string) {
-	log.Printf(message)
-}
-
-func (u *TestUi) Message(message string) {
-	log.Printf(message)
-}
-
-func (u *TestUi) Error(message string) {
-	log.Printf(message)
-}
-
-func (u *TestUi) Machine(message string, args ...string) {
-	log.Printf("%s, %s", message, strings.Join(args, ", "))
-}
-
-func (u *TestUi) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) (body io.ReadCloser) {
-	return &readCloser{
-		read: func(p []byte) (int, error) {
-			return stream.Read(p)
-		},
-		close: func() error {
-			return stream.Close()
-		},
-	}
-}
 
 type MockUi struct {
 	AskCalled      bool
