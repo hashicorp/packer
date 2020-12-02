@@ -9,8 +9,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/pathing"
 )
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -64,7 +64,7 @@ func (c *Config) Discover() error {
 	}
 
 	// Next, look in the default plugins directory inside the configdir/.packer.d/plugins.
-	dir, err := packer.ConfigDir()
+	dir, err := pathing.ConfigDir()
 	if err != nil {
 		log.Printf("[ERR] Error loading config directory: %s", err)
 	} else {

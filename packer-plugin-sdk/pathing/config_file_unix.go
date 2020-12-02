@@ -1,6 +1,6 @@
 // +build darwin freebsd linux netbsd openbsd solaris
 
-package packer
+package pathing
 
 const (
 	defaultConfigFile = ".packerconfig"

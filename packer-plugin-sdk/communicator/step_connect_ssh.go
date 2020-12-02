@@ -13,10 +13,10 @@ import (
 
 	"golang.org/x/crypto/ssh/terminal"
 
-	"github.com/hashicorp/packer/packer"
 	helperssh "github.com/hashicorp/packer/packer-plugin-sdk/communicator/ssh"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/pathing"
 	"github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/ssh"
 	gossh "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -273,14 +273,14 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 	}
 
 	if config.SSHBastionPrivateKeyFile != "" {
-		path, err := packer.ExpandUser(config.SSHBastionPrivateKeyFile)
+		path, err := pathing.ExpandUser(config.SSHBastionPrivateKeyFile)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Error expanding path for SSH bastion private key: %s", err)
 		}
 
 		if config.SSHBastionCertificateFile != "" {
-			identityPath, err := packer.ExpandUser(config.SSHBastionCertificateFile)
+			identityPath, err := pathing.ExpandUser(config.SSHBastionCertificateFile)
 			if err != nil {
 				return nil, fmt.Errorf("Error expanding path for SSH bastion identity certificate: %s", err)
 			}

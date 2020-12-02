@@ -1,6 +1,6 @@
 // +build windows
 
-package packer
+package pathing
 
 const (
 	defaultConfigFile = "packer.config"
