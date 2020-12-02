@@ -602,7 +602,7 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	ui := packer.TestUi(t)
+	ui := packersdk.TestUi(t)
 	hook := &packersdk.MockHook{}
 	driver := &hypervcommon.DriverMock{}
 

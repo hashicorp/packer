@@ -6,9 +6,9 @@ import (
 	"io"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type uploaderMock struct {
@@ -105,7 +105,7 @@ func TestUploadISO(t *testing.T) {
 			m := &uploaderMock{fail: c.failUpload}
 
 			state := new(multistep.BasicStateBag)
-			state.Put("ui", packer.TestUi(t))
+			state.Put("ui", packersdk.TestUi(t))
 			state.Put("iso-config", c.builderConfig)
 			state.Put(downloadPathKey, c.downloadPath)
 			state.Put("proxmoxClient", m)
