@@ -5,14 +5,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func Test_Shutdown_Null_success(t *testing.T) {
 	state := new(multistep.BasicStateBag)
-	state.Put("ui", packer.TestUi(t))
+	state.Put("ui", packersdk.TestUi(t))
 	driverMock := new(DriverMock)
 	driverMock.WaitForShutdownState = true
 	state.Put("driver", driverMock)
@@ -37,7 +37,7 @@ func Test_Shutdown_Null_success(t *testing.T) {
 
 func Test_Shutdown_Null_failure(t *testing.T) {
 	state := new(multistep.BasicStateBag)
-	state.Put("ui", packer.TestUi(t))
+	state.Put("ui", packersdk.TestUi(t))
 	driverMock := new(DriverMock)
 	driverMock.WaitForShutdownState = false
 	state.Put("driver", driverMock)
@@ -61,7 +61,7 @@ func Test_Shutdown_Null_failure(t *testing.T) {
 
 func Test_Shutdown_NoShutdownCommand(t *testing.T) {
 	state := new(multistep.BasicStateBag)
-	state.Put("ui", packer.TestUi(t))
+	state.Put("ui", packersdk.TestUi(t))
 	driverMock := new(DriverMock)
 	state.Put("driver", driverMock)
 

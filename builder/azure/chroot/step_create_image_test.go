@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/builder/azure/common/client"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest"
@@ -116,7 +116,7 @@ func TestStepCreateImage_Run(t *testing.T) {
 		state.Put("azureclient", &client.AzureClientSetMock{
 			ImagesClientMock: ic,
 		})
-		state.Put("ui", packer.TestUi(t))
+		state.Put("ui", packersdk.TestUi(t))
 		state.Put(stateBagKey_Diskset, tt.diskset)
 
 		t.Run(tt.name, func(t *testing.T) {

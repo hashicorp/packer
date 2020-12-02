@@ -12,8 +12,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/hashicorp/packer/builder/azure/common/client"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestStepVerifySharedImageSource_Run(t *testing.T) {
@@ -163,7 +163,7 @@ func TestStepVerifySharedImageSource_Run(t *testing.T) {
 			GalleryImageVersionsClientMock: giv,
 			GalleryImagesClientMock:        gi,
 		})
-		state.Put("ui", packer.TestUi(t))
+		state.Put("ui", packersdk.TestUi(t))
 
 		t.Run(tt.name, func(t *testing.T) {
 			s := &StepVerifySharedImageSource{

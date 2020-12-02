@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type startedVMCleanerMock struct {
@@ -85,7 +85,7 @@ func TestCleanupStartVM(t *testing.T) {
 			}
 
 			state := new(multistep.BasicStateBag)
-			state.Put("ui", packer.TestUi(t))
+			state.Put("ui", packersdk.TestUi(t))
 			state.Put("proxmoxClient", cleaner)
 			if c.setVmRef {
 				state.Put("vmRef", proxmox.NewVmRef(1))

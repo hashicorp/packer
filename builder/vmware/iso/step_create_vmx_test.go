@@ -96,7 +96,7 @@ func readFloppyOutput(path string) (string, error) {
 }
 
 func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisionerConfig map[string]string) error {
-	ui := packer.TestUi(t)
+	ui := packersdk.TestUi(t)
 
 	// create builder config and update with user-supplied options
 	cfgBuilder := map[string]string{}

@@ -329,7 +329,7 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 		t.Skip("This test is only run with PACKER_ACC=1")
 	}
 
-	ui := packer.TestUi(t)
+	ui := packersdk.TestUi(t)
 
 	tpl, err := template.Parse(strings.NewReader(templateString))
 	if err != nil {
