@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/provisioner/shell"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"github.com/hashicorp/go-uuid"
@@ -43,8 +42,8 @@ func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
 	return string(file), err
 }
 
-func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
-	return packer.MapOfProvisioner{
+func (s *ShellProvisionerAccTest) GetProvisionerStore() packersdk.MapOfProvisioner {
+	return packersdk.MapOfProvisioner{
 		"shell": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
 		"file":  func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
 	}

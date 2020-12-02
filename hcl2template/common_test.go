@@ -20,16 +20,16 @@ import (
 func getBasicParser() *Parser {
 	return &Parser{
 		Parser: hclparse.NewParser(),
-		BuilderSchemas: packer.MapOfBuilder{
+		BuilderSchemas: packersdk.MapOfBuilder{
 			"amazon-ebs":     func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
 			"virtualbox-iso": func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
 			"null":           func() (packersdk.Builder, error) { return &null.Builder{}, nil },
 		},
-		ProvisionersSchemas: packer.MapOfProvisioner{
+		ProvisionersSchemas: packersdk.MapOfProvisioner{
 			"shell": func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
 			"file":  func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
 		},
-		PostProcessorsSchemas: packer.MapOfPostProcessor{
+		PostProcessorsSchemas: packersdk.MapOfPostProcessor{
 			"amazon-import": func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
 			"manifest":      func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
 		},

@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/stretchr/testify/assert"
@@ -89,7 +89,7 @@ func TestProvisionerPrepare_Config(t *testing.T) {
 	config := testConfig()
 	config["elevated_user"] = "{{user `user`}}"
 	config["elevated_password"] = "{{user `password`}}"
-	config[packer.UserVariablesConfigKey] = map[string]string{
+	config[common.UserVariablesConfigKey] = map[string]string{
 		"user":     "myusername",
 		"password": "mypassword",
 	}

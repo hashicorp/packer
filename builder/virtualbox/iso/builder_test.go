@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/builder/virtualbox/common"
-	"github.com/hashicorp/packer/packer"
+	packercommon "github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
@@ -17,7 +17,7 @@ func testConfig() map[string]interface{} {
 		"shutdown_command": "yes",
 		"ssh_username":     "foo",
 
-		packer.BuildNameConfigKey: "foo",
+		packercommon.BuildNameConfigKey: "foo",
 	}
 }
 

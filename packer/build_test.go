@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 	"github.com/hashicorp/packer/version"
@@ -41,14 +42,14 @@ func testBuild() *CoreBuild {
 
 func testDefaultPackerConfig() map[string]interface{} {
 	return map[string]interface{}{
-		BuildNameConfigKey:     "test",
-		BuilderTypeConfigKey:   "foo",
-		CoreVersionConfigKey:   version.FormattedVersion(),
-		DebugConfigKey:         false,
-		ForceConfigKey:         false,
-		OnErrorConfigKey:       "cleanup",
-		TemplatePathKey:        "",
-		UserVariablesConfigKey: make(map[string]string),
+		common.BuildNameConfigKey:     "test",
+		common.BuilderTypeConfigKey:   "foo",
+		common.CoreVersionConfigKey:   version.FormattedVersion(),
+		common.DebugConfigKey:         false,
+		common.ForceConfigKey:         false,
+		common.OnErrorConfigKey:       "cleanup",
+		common.TemplatePathKey:        "",
+		common.UserVariablesConfigKey: make(map[string]string),
 	}
 }
 func TestBuild_Name(t *testing.T) {
@@ -144,7 +145,7 @@ func TestBuildPrepare_BuilderWarnings(t *testing.T) {
 
 func TestBuild_Prepare_Debug(t *testing.T) {
 	packerConfig := testDefaultPackerConfig()
-	packerConfig[DebugConfigKey] = true
+	packerConfig[common.DebugConfigKey] = true
 
 	build := testBuild()
 	builder := build.Builder.(*MockBuilder)
@@ -170,7 +171,7 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 
 func TestBuildPrepare_variables_default(t *testing.T) {
 	packerConfig := testDefaultPackerConfig()
-	packerConfig[UserVariablesConfigKey] = map[string]string{
+	packerConfig[common.UserVariablesConfigKey] = map[string]string{
 		"foo": "bar",
 	}
 

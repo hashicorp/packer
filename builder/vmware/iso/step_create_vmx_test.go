@@ -138,16 +138,16 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 
 	// create our config to test the vmware-iso builder
 	components := packer.ComponentFinder{
-		BuilderStore: packer.MapOfBuilder{
+		BuilderStore: packersdk.MapOfBuilder{
 			"vmware-iso": func() (packersdk.Builder, error) { return &Builder{}, nil },
 		},
 		Hook: func(n string) (packersdk.Hook, error) {
 			return &packersdk.DispatchHook{}, nil
 		},
-		ProvisionerStore: packer.MapOfProvisioner{
+		ProvisionerStore: packersdk.MapOfProvisioner{
 			"shell": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
 		},
-		PostProcessorStore: packer.MapOfPostProcessor{
+		PostProcessorStore: packersdk.MapOfPostProcessor{
 			"something": func() (packersdk.PostProcessor, error) { return &packer.MockPostProcessor{}, nil },
 		},
 	}
