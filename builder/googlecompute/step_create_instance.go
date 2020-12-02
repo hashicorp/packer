@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"strings"
 	"time"
-	"log"
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
@@ -142,7 +142,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	var errCh <-chan error
 	metadataNoSSHKeys := make(map[string]string)
-	metadataSSHKeys := make(map[string]string)	
+	metadataSSHKeys := make(map[string]string)
 	metadataForInstance := make(map[string]string)
 
 	metadataNoSSHKeys, metadataSSHKeys, errs := c.createInstanceMetadata(sourceImage, string(c.Comm.SSHPublicKey))
@@ -160,7 +160,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 		// Union of both non-SSH key meta data and SSH key meta data
 		addmap(metadataForInstance, metadataSSHKeys)
-		addmap(metadataForInstance, metadataNoSSHKeys)		
+		addmap(metadataForInstance, metadataNoSSHKeys)
 	}
 
 	errCh, err = d.RunInstance(&InstanceConfig{
@@ -230,9 +230,9 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		if cancelled {
 			return multistep.ActionHalt
 		}
-		
+
 		log.Printf("[DEBUG] %s wait is over. Adding SSH keys to existing instance...",
-				c.WaitToAddSSHKeys.String())
+			c.WaitToAddSSHKeys.String())
 		errCh, err = d.AddToInstanceMetadata(c.Zone, name, metadataSSHKeys)
 
 		if err != nil {
@@ -241,7 +241,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 			return multistep.ActionHalt
 		}
 	}
-	
+
 	return multistep.ActionContinue
 }
 
@@ -252,7 +252,7 @@ func (s *StepCreateInstance) waitForBoot(ctx context.Context, waitLen time.Durat
 		return true
 	case <-time.After(waitLen):
 	}
-	
+
 	return false
 }
 
@@ -316,7 +316,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 }
 
 func addmap(a map[string]string, b map[string]string) {
-	for k,v := range b {
+	for k, v := range b {
 		a[k] = v
 	}
 }

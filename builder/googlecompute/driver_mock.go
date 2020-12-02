@@ -93,7 +93,7 @@ type DriverMock struct {
 	AddToInstanceMetadataName    string
 	AddToInstanceMetadataKVPairs map[string]string
 	AddToInstanceMetadataErrCh   <-chan error
-	AddToInstanceMetadataErr   error
+	AddToInstanceMetadataErr     error
 }
 
 func (d *DriverMock) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string, image_encryption_key *compute.CustomerEncryptionKey, imageStorageLocations []string) (<-chan *Image, <-chan error) {
@@ -296,8 +296,8 @@ func (d *DriverMock) DeleteOSLoginSSHKey(user, fingerprint string) error {
 }
 
 func (d *DriverMock) AddToInstanceMetadata(zone string, name string, metadata map[string]string) (<-chan error, error) {
-	d.AddToInstanceMetadataZone    = zone
-	d.AddToInstanceMetadataName    = name
+	d.AddToInstanceMetadataZone = zone
+	d.AddToInstanceMetadataName = name
 	d.AddToInstanceMetadataKVPairs = metadata
 
 	resultCh := d.AddToInstanceMetadataErrCh

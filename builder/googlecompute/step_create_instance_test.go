@@ -337,7 +337,7 @@ func TestCreateInstanceMetadata_metadataFile(t *testing.T) {
 	c.MetadataFiles["user-data"] = fileName
 
 	// create our metadata
-	metadataNoSSHKeys, _,err := c.createInstanceMetadata(image, "")
+	metadataNoSSHKeys, _, err := c.createInstanceMetadata(image, "")
 
 	assert.True(t, err == nil, "Metadata creation should have succeeded.")
 
@@ -391,14 +391,14 @@ func TestCreateInstanceMetadataWaitToAddSSHKeys(t *testing.T) {
 	c := state.Get("config").(*Config)
 	image := StubImage("test-image", "test-project", []string{}, 100)
 	key := "abcdefgh12345678"
-	
+
 	var waitTime int = 4
 	c.WaitToAddSSHKeys = time.Duration(waitTime) * time.Second
 	c.Metadata = map[string]string{
 		"metadatakey1": "xyz",
 		"metadatakey2": "123",
 	}
-	
+
 	// create our metadata
 	metadataNoSSHKeys, metadataSSHKeys, err := c.createInstanceMetadata(image, key)
 
@@ -406,8 +406,8 @@ func TestCreateInstanceMetadataWaitToAddSSHKeys(t *testing.T) {
 
 	// ensure our metadata is listed
 	assert.True(t, strings.Contains(metadataSSHKeys["ssh-keys"], key), "Instance metadata should contain provided SSH key")
-	assert.True(t, strings.Contains(metadataNoSSHKeys["metadatakey1"], "xyz"), "Instance metadata should contain provided key: metadatakey1")	
-	assert.True(t, strings.Contains(metadataNoSSHKeys["metadatakey2"], "123"), "Instance metadata should contain provided key: metadatakey2")	
+	assert.True(t, strings.Contains(metadataNoSSHKeys["metadatakey1"], "xyz"), "Instance metadata should contain provided key: metadatakey1")
+	assert.True(t, strings.Contains(metadataNoSSHKeys["metadatakey2"], "123"), "Instance metadata should contain provided key: metadatakey2")
 }
 
 func TestStepCreateInstanceWaitToAddSSHKeys(t *testing.T) {
@@ -422,7 +422,7 @@ func TestStepCreateInstanceWaitToAddSSHKeys(t *testing.T) {
 	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
 	key := "abcdefgh12345678"
-	
+
 	var waitTime int = 5
 	c.WaitToAddSSHKeys = time.Duration(waitTime) * time.Second
 	c.Comm.SSHPublicKey = []byte(key)
@@ -455,14 +455,14 @@ func TestStepCreateInstanceNoWaitToAddSSHKeys(t *testing.T) {
 	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
 	key := "abcdefgh12345678"
-	
+
 	c.Comm.SSHPublicKey = []byte(key)
 
 	c.Metadata = map[string]string{
 		"metadatakey1": "xyz",
 		"metadatakey2": "123",
 	}
-	
+
 	// run the step
 	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionContinue, "Step should have passed and continued.")
 

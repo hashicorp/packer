@@ -287,8 +287,8 @@ type Config struct {
 	VaultGCPOauthEngine string `mapstructure:"vault_gcp_oauth_engine"`
 	// The time to wait between the creation of the instance used to create the image,
 	// and the addition of SSH configuration, including SSH keys, to that instance.
-	// The delay is intended to protect packer from anything in the instance boot 
-	// sequence that has potential to disrupt the creation of SSH configuration 
+	// The delay is intended to protect packer from anything in the instance boot
+	// sequence that has potential to disrupt the creation of SSH configuration
 	// (e.g. SSH user creation, SSH key creation) on the instance.
 	// Note: All other instance metadata, including startup scripts, are still added to the instance
 	// during it's creation.

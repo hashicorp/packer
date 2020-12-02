@@ -764,6 +764,6 @@ func (d *driverGCE) AddToInstanceMetadata(zone string, name string, metadata map
 	case <-time.After(time.Second * 30):
 		err = errors.New("time out while waiting for SSH keys to be added to instance")
 	}
-	
+
 	return newErrCh, err
 }
