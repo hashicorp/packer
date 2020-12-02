@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
@@ -134,7 +133,7 @@ func TestPostProcessorRPC_cancel(t *testing.T) {
 func TestPostProcessor_Implements(t *testing.T) {
 	var raw interface{}
 	raw = new(postProcessor)
-	if _, ok := raw.(packer.PostProcessor); !ok {
+	if _, ok := raw.(packersdk.PostProcessor); !ok {
 		t.Fatal("not a postprocessor")
 	}
 }

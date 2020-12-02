@@ -16,7 +16,6 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	packrpc "github.com/hashicorp/packer/packer/rpc"
 )
@@ -131,7 +130,7 @@ func (c *Client) Exited() bool {
 
 // Returns a builder implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *Client) Builder() (packer.Builder, error) {
+func (c *Client) Builder() (packersdk.Builder, error) {
 	client, err := c.packrpcClient()
 	if err != nil {
 		return nil, err
@@ -153,7 +152,7 @@ func (c *Client) Hook() (packersdk.Hook, error) {
 
 // Returns a post-processor implementation that is communicating over
 // this client. If the client hasn't been started, this will start it.
-func (c *Client) PostProcessor() (packer.PostProcessor, error) {
+func (c *Client) PostProcessor() (packersdk.PostProcessor, error) {
 	client, err := c.packrpcClient()
 	if err != nil {
 		return nil, err
@@ -164,7 +163,7 @@ func (c *Client) PostProcessor() (packer.PostProcessor, error) {
 
 // Returns a provisioner implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *Client) Provisioner() (packer.Provisioner, error) {
+func (c *Client) Provisioner() (packersdk.Provisioner, error) {
 	client, err := c.packrpcClient()
 	if err != nil {
 		return nil, err

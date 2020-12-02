@@ -1,6 +1,6 @@
 //go:generate mapstructure-to-hcl2 -type Config
 
-// Package bsu contains a packer.Builder implementation that
+// Package bsu contains a packersdk.Builder implementation that
 // builds OMIs for Outscale OAPI.
 //
 // In general, there are two types of OMIs that can be created: ebs-backed or

@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/builder/null"
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -20,17 +21,17 @@ func getBasicParser() *Parser {
 	return &Parser{
 		Parser: hclparse.NewParser(),
 		BuilderSchemas: packer.MapOfBuilder{
-			"amazon-ebs":     func() (packer.Builder, error) { return &MockBuilder{}, nil },
-			"virtualbox-iso": func() (packer.Builder, error) { return &MockBuilder{}, nil },
-			"null":           func() (packer.Builder, error) { return &null.Builder{}, nil },
+			"amazon-ebs":     func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
+			"virtualbox-iso": func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
+			"null":           func() (packersdk.Builder, error) { return &null.Builder{}, nil },
 		},
 		ProvisionersSchemas: packer.MapOfProvisioner{
-			"shell": func() (packer.Provisioner, error) { return &MockProvisioner{}, nil },
-			"file":  func() (packer.Provisioner, error) { return &MockProvisioner{}, nil },
+			"shell": func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
+			"file":  func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
 		},
 		PostProcessorsSchemas: packer.MapOfPostProcessor{
-			"amazon-import": func() (packer.PostProcessor, error) { return &MockPostProcessor{}, nil },
-			"manifest":      func() (packer.PostProcessor, error) { return &MockPostProcessor{}, nil },
+			"amazon-import": func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
+			"manifest":      func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
 		},
 	}
 }

@@ -3,14 +3,14 @@ package cloudstack
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestBuilder_Impl(t *testing.T) {
 	var raw interface{} = &Builder{}
 
-	if _, ok := raw.(packer.Builder); !ok {
-		t.Fatalf("Builder does not implement packer.Builder")
+	if _, ok := raw.(packersdk.Builder); !ok {
+		t.Fatalf("Builder does not implement packersdk.Builder")
 	}
 }
 

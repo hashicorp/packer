@@ -77,7 +77,7 @@ func (s *Server) RegisterBuild(b packer.Build) error {
 	})
 }
 
-func (s *Server) RegisterBuilder(b packer.Builder) error {
+func (s *Server) RegisterBuilder(b packersdk.Builder) error {
 	return s.server.RegisterName(DefaultBuilderEndpoint, &BuilderServer{
 		commonServer: commonServer{
 			selfConfigurable: b,
@@ -103,7 +103,7 @@ func (s *Server) RegisterHook(h packersdk.Hook) error {
 	})
 }
 
-func (s *Server) RegisterPostProcessor(p packer.PostProcessor) error {
+func (s *Server) RegisterPostProcessor(p packersdk.PostProcessor) error {
 	return s.server.RegisterName(DefaultPostProcessorEndpoint, &PostProcessorServer{
 		commonServer: commonServer{
 			selfConfigurable: p,
@@ -113,7 +113,7 @@ func (s *Server) RegisterPostProcessor(p packer.PostProcessor) error {
 	})
 }
 
-func (s *Server) RegisterProvisioner(p packer.Provisioner) error {
+func (s *Server) RegisterProvisioner(p packersdk.Provisioner) error {
 	return s.server.RegisterName(DefaultProvisionerEndpoint, &ProvisionerServer{
 		commonServer: commonServer{
 			selfConfigurable: p,

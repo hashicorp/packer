@@ -1,7 +1,7 @@
 //go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type Config
 
-// The amazonebs package contains a packer.Builder implementation that
+// The amazonebs package contains a packersdk.Builder implementation that
 // builds AMIs for Amazon EC2.
 //
 // In general, there are two types of AMIs that can be created: ebs-backed or

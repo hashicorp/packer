@@ -32,7 +32,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, nil, nil
 }
 
-// Run implements the packer.Builder interface.
+// Run implements the packersdk.Builder interface.
 func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	b.ui = ui
 

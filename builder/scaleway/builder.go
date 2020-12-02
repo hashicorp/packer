@@ -1,4 +1,4 @@
-// The scaleway package contains a packer.Builder implementation
+// The scaleway package contains a packersdk.Builder implementation
 // that builds Scaleway images (snapshots).
 
 package scaleway

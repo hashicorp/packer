@@ -15,7 +15,7 @@ import (
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-// Builder implements packer.Builder and builds the actual VMware
+// Builder implements packersdk.Builder and builds the actual VMware
 // images.
 type Builder struct {
 	config Config

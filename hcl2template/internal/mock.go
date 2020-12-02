@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
@@ -70,7 +69,7 @@ type MockBuilder struct {
 	Config MockConfig
 }
 
-var _ packer.Builder = new(MockBuilder)
+var _ packersdk.Builder = new(MockBuilder)
 
 func (b *MockBuilder) ConfigSpec() hcldec.ObjectSpec { return b.Config.FlatMapstructure().HCL2Spec() }
 
@@ -90,7 +89,7 @@ type MockProvisioner struct {
 	Config MockConfig
 }
 
-var _ packer.Provisioner = new(MockProvisioner)
+var _ packersdk.Provisioner = new(MockProvisioner)
 
 func (b *MockProvisioner) ConfigSpec() hcldec.ObjectSpec {
 	return b.Config.FlatMapstructure().HCL2Spec()
@@ -112,7 +111,7 @@ type MockPostProcessor struct {
 	Config MockConfig
 }
 
-var _ packer.PostProcessor = new(MockPostProcessor)
+var _ packersdk.PostProcessor = new(MockPostProcessor)
 
 func (b *MockPostProcessor) ConfigSpec() hcldec.ObjectSpec {
 	return b.Config.FlatMapstructure().HCL2Spec()

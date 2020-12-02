@@ -12,26 +12,9 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 )
 
-// A provisioner is responsible for installing and configuring software
-// on a machine prior to building the actual image.
-type Provisioner interface {
-	packersdk.HCL2Speccer
-
-	// Prepare is called with a set of configurations to setup the
-	// internal state of the provisioner. The multiple configurations
-	// should be merged in some sane way.
-	Prepare(...interface{}) error
-
-	// Provision is called to actually provision the machine. A context is
-	// given for cancellation, a UI is given to communicate with the user, and
-	// a communicator is given that is guaranteed to be connected to some
-	// machine so that provisioning can be done.
-	Provision(context.Context, packersdk.Ui, packersdk.Communicator, map[string]interface{}) error
-}
-
 // A HookedProvisioner represents a provisioner and information describing it
 type HookedProvisioner struct {
-	Provisioner Provisioner
+	Provisioner packersdk.Provisioner
 	Config      interface{}
 	TypeName    string
 }
@@ -151,7 +134,7 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui packersdk.Ui, c
 // the provisioner is actually run.
 type PausedProvisioner struct {
 	PauseBefore time.Duration
-	Provisioner Provisioner
+	Provisioner packersdk.Provisioner
 }
 
 func (p *PausedProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
@@ -177,7 +160,7 @@ func (p *PausedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm
 // the provisioner whenever there's an error.
 type RetriedProvisioner struct {
 	MaxRetries  int
-	Provisioner Provisioner
+	Provisioner packersdk.Provisioner
 }
 
 func (r *RetriedProvisioner) ConfigSpec() hcldec.ObjectSpec { return r.ConfigSpec() }
@@ -218,7 +201,7 @@ func (r *RetriedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, com
 // DebuggedProvisioner is a Provisioner implementation that waits until a key
 // press before the provisioner is actually run.
 type DebuggedProvisioner struct {
-	Provisioner Provisioner
+	Provisioner packersdk.Provisioner
 
 	cancelCh chan struct{}
 	doneCh   chan struct{}

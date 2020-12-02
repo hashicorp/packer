@@ -89,7 +89,7 @@ func (c *Client) Build() packer.Build {
 	}
 }
 
-func (c *Client) Builder() packer.Builder {
+func (c *Client) Builder() packersdk.Builder {
 	return &builder{
 		commonClient: commonClient{
 			endpoint: DefaultBuilderEndpoint,
@@ -119,7 +119,7 @@ func (c *Client) Hook() packersdk.Hook {
 	}
 }
 
-func (c *Client) PostProcessor() packer.PostProcessor {
+func (c *Client) PostProcessor() packersdk.PostProcessor {
 	return &postProcessor{
 		commonClient: commonClient{
 			endpoint: DefaultPostProcessorEndpoint,
@@ -129,7 +129,7 @@ func (c *Client) PostProcessor() packer.PostProcessor {
 	}
 }
 
-func (c *Client) Provisioner() packer.Provisioner {
+func (c *Client) Provisioner() packersdk.Provisioner {
 	return &provisioner{
 		commonClient: commonClient{
 			endpoint: DefaultProvisionerEndpoint,

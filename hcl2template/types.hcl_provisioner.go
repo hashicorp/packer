@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -16,7 +15,7 @@ import (
 // calling Provision: with contextual variables.
 // This permits using "${build.ID}" values for example.
 type HCL2Provisioner struct {
-	Provisioner      packer.Provisioner
+	Provisioner      packersdk.Provisioner
 	provisionerBlock *ProvisionerBlock
 	evalContext      *hcl.EvalContext
 	builderVariables map[string]string

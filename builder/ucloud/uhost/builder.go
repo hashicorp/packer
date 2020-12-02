@@ -1,6 +1,6 @@
 //go:generate mapstructure-to-hcl2 -type Config
 
-// The ucloud-uhost contains a packer.Builder implementation that
+// The ucloud-uhost contains a packersdk.Builder implementation that
 // builds uhost images for UCloud UHost instance.
 package uhost
 

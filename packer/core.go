@@ -50,16 +50,16 @@ type CoreConfig struct {
 }
 
 // The function type used to lookup Builder implementations.
-type BuilderFunc func(name string) (Builder, error)
+type BuilderFunc func(name string) (packersdk.Builder, error)
 
 // The function type used to lookup Hook implementations.
 type HookFunc func(name string) (packersdk.Hook, error)
 
 // The function type used to lookup PostProcessor implementations.
-type PostProcessorFunc func(name string) (PostProcessor, error)
+type PostProcessorFunc func(name string) (packersdk.PostProcessor, error)
 
 // The function type used to lookup Provisioner implementations.
-type ProvisionerFunc func(name string) (Provisioner, error)
+type ProvisionerFunc func(name string) (packersdk.Provisioner, error)
 
 type BasicStore interface {
 	Has(name string) bool
@@ -68,17 +68,17 @@ type BasicStore interface {
 
 type BuilderStore interface {
 	BasicStore
-	Start(name string) (Builder, error)
+	Start(name string) (packersdk.Builder, error)
 }
 
 type ProvisionerStore interface {
 	BasicStore
-	Start(name string) (Provisioner, error)
+	Start(name string) (packersdk.Provisioner, error)
 }
 
 type PostProcessorStore interface {
 	BasicStore
-	Start(name string) (PostProcessor, error)
+	Start(name string) (packersdk.PostProcessor, error)
 }
 
 // ComponentFinder is a struct that contains the various function

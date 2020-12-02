@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -88,7 +89,7 @@ func (p *Parser) decodeSource(block *hcl.Block) (SourceBlock, hcl.Diagnostics) {
 	return source, diags
 }
 
-func (cfg *PackerConfig) startBuilder(source SourceBlock, ectx *hcl.EvalContext, opts packer.GetBuildsOptions) (packer.Builder, hcl.Diagnostics, []string) {
+func (cfg *PackerConfig) startBuilder(source SourceBlock, ectx *hcl.EvalContext, opts packer.GetBuildsOptions) (packersdk.Builder, hcl.Diagnostics, []string) {
 	var diags hcl.Diagnostics
 
 	builder, err := cfg.builderSchemas.Start(source.Type)

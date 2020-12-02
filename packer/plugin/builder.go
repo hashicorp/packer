@@ -5,12 +5,11 @@ import (
 	"log"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type cmdBuilder struct {
-	builder packer.Builder
+	builder packersdk.Builder
 	client  *Client
 }
 

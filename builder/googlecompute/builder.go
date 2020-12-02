@@ -1,4 +1,4 @@
-// The googlecompute package contains a packer.Builder implementation that
+// The googlecompute package contains a packersdk.Builder implementation that
 // builds images for Google Compute Engine.
 package googlecompute
 
