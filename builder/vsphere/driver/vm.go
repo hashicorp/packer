@@ -658,7 +658,8 @@ func (vm *VirtualMachineDriver) WaitForIP(ctx context.Context, ipNet *net.IPNet)
 		}
 	}
 
-	return "", fmt.Errorf("unable to find an IP")
+	// unable to find an IP
+	return "", nil
 }
 
 func (vm *VirtualMachineDriver) PowerOff() error {
