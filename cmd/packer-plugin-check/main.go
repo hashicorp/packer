@@ -12,48 +12,45 @@ import (
 	"strings"
 )
 
-const pluginCheck = "plugin-check"
+const packerPluginCheck = "packer-plugin-check"
 
 var (
 	hcl2spec = flag.Bool("hcl2spec", false, "flag to indicate that hcl2spec files should be checked.")
 	website  = flag.Bool("website", false, "flag to indicate that website files should be checked.")
-	load     = flag.Bool("load", false, "flag to indicate that the binary should be loaded to check compatibility.")
-	binary   = flag.String("binary", "", "the binary name that will be loaded.")
+	binary   = flag.String("binary", "", "the binary name that will be loaded to check compatibility.")
 )
 
 // Usage is a replacement usage function for the flags package.
 func Usage() {
-	fmt.Fprintf(os.Stderr, "Usage of "+pluginCheck+":\n")
-	fmt.Fprintf(os.Stderr, "\t"+pluginCheck+" [flags]\n")
+	fmt.Fprintf(os.Stderr, "Usage of "+packerPluginCheck+":\n")
+	fmt.Fprintf(os.Stderr, "\t"+packerPluginCheck+" [flags]\n")
 	fmt.Fprintf(os.Stderr, "Flags:\n")
 	flag.PrintDefaults()
 }
 
 func main() {
 	log.SetFlags(0)
-	log.SetPrefix(pluginCheck + ": ")
+	log.SetPrefix(packerPluginCheck + ": ")
 	flag.Usage = Usage
 	flag.Parse()
 
-	if *hcl2spec == false && *website == false && *load == false {
+	if *hcl2spec == false && *website == false && len(*binary) == 0 {
 		flag.Usage()
 		os.Exit(2)
 	}
 
 	if *hcl2spec {
+		fmt.Printf("hcl2spec check\n")
 		_ = checkHCL2Specs()
 	}
 
 	if *website {
+		fmt.Printf("website check\n")
 		_ = checkWebsite()
 	}
 
-	if *load {
-		if len(*binary) == 0 {
-			flag.Usage()
-			os.Exit(2)
-		}
-
+	if len(*binary) != 0 {
+		fmt.Printf("binary %s\n", *binary)
 		_ = loadBinary()
 	}
 }
