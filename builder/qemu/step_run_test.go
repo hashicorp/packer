@@ -150,7 +150,8 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DetectZeroes: "off",
 			},
 			map[string]interface{}{
-				"cd_path": "fake_cd_path.iso",
+				"cd_path":         "fake_cd_path.iso",
+				"qemu_disk_paths": []string{"path_to_output"},
 			},
 			&stepRun{
 				DiskImage:       true,
@@ -178,7 +179,8 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DetectZeroes: "on",
 			},
 			map[string]interface{}{
-				"cd_path": "fake_cd_path.iso",
+				"cd_path":         "fake_cd_path.iso",
+				"qemu_disk_paths": []string{"path_to_output"},
 			},
 			&stepRun{
 				DiskImage:       true,
@@ -381,7 +383,8 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				Format:        "qcow2",
 			},
 			map[string]interface{}{
-				"cd_path": "fake_cd_path.iso",
+				"cd_path":         "fake_cd_path.iso",
+				"qemu_disk_paths": []string{"path_to_output"},
 			},
 			&stepRun{
 				DiskImage:       true,

@@ -196,8 +196,8 @@ func TestBuilderPrepare_AdditionalDiskSize(t *testing.T) {
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
-	if err == nil {
-		t.Fatalf("should have error")
+	if err != nil {
+		t.Fatalf("should not have error")
 	}
 
 	delete(config, "disk_image")

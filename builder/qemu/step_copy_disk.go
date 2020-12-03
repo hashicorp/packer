@@ -27,13 +27,18 @@ func (s *stepCopyDisk) Run(ctx context.Context, state multistep.StateBag) multis
 	ui := state.Get("ui").(packersdk.Ui)
 	path := filepath.Join(s.OutputDir, s.VMName)
 
+	// Only make a copy of the ISO as the 'main' or 'default' disk if is a disk
+	// image and not using a backing file. The create disk step (step_create_disk.go)
+	// would already have made the disk otherwise
 	if !s.DiskImage || s.UseBackingFile {
 		return multistep.ActionContinue
 	}
 
-	// isoPath extention is:
+	// In some cases, the file formats provided are equivalent by comparing the
+	// file extensions. Skip the conversion step
+	// This also serves as a workaround for a QEMU bug: https://bugs.launchpad.net/qemu/+bug/1776920
 	ext := filepath.Ext(isoPath)
-	if len(ext) >= 1 && ext[1:] == s.Format {
+	if len(ext) >= 1 && ext[1:] == s.Format && len(s.QemuImgArgs.Convert) == 0 {
 		ui.Message("File extension already matches desired output format. " +
 			"Skipping qemu-img convert step")
 		err := driver.Copy(isoPath, path)

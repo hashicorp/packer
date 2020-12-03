@@ -554,11 +554,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if c.DiskImage && len(c.AdditionalDiskSize) > 0 {
-		errs = packersdk.MultiErrorAppend(
-			errs, errors.New("disk_additional_size can only be used when disk_image is false"))
-	}
-
 	if c.SkipResizeDisk && !(c.DiskImage) {
 		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("skip_resize_disk can only be used when disk_image is true"))
