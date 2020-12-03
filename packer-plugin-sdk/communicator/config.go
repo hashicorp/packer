@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	helperssh "github.com/hashicorp/packer/packer-plugin-sdk/communicator/ssh"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/pathing"
 	packerssh "github.com/hashicorp/packer/packer-plugin-sdk/sdk-internals/communicator/ssh"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -287,7 +287,7 @@ func (c *Config) ReadSSHPrivateKeyFile() ([]byte, error) {
 	var privateKey []byte
 
 	if c.SSHPrivateKeyFile != "" {
-		keyPath, err := packer.ExpandUser(c.SSHPrivateKeyFile)
+		keyPath, err := pathing.ExpandUser(c.SSHPrivateKeyFile)
 		if err != nil {
 			return []byte{}, fmt.Errorf("Error expanding path for SSH private key: %s", err)
 		}
@@ -352,7 +352,7 @@ func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, er
 		certPath := ""
 		if c.SSHCertificateFile != "" {
 			var err error
-			certPath, err = packer.ExpandUser(c.SSHCertificateFile)
+			certPath, err = pathing.ExpandUser(c.SSHCertificateFile)
 			if err != nil {
 				return nil, err
 			}
@@ -511,7 +511,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 	}
 
 	if c.SSHPrivateKeyFile != "" {
-		path, err := packer.ExpandUser(c.SSHPrivateKeyFile)
+		path, err := pathing.ExpandUser(c.SSHPrivateKeyFile)
 		if err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
@@ -520,7 +520,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 				"ssh_private_key_file is invalid: %s", err))
 		} else {
 			if c.SSHCertificateFile != "" {
-				certPath, err := packer.ExpandUser(c.SSHCertificateFile)
+				certPath, err := pathing.ExpandUser(c.SSHCertificateFile)
 				if err != nil {
 					errs = append(errs, fmt.Errorf("invalid identity certificate: #{err}"))
 				}
@@ -543,7 +543,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 			errs = append(errs, errors.New(
 				"ssh_bastion_password or ssh_bastion_private_key_file must be specified"))
 		} else if c.SSHBastionPrivateKeyFile != "" {
-			path, err := packer.ExpandUser(c.SSHBastionPrivateKeyFile)
+			path, err := pathing.ExpandUser(c.SSHBastionPrivateKeyFile)
 			if err != nil {
 				errs = append(errs, fmt.Errorf(
 					"ssh_bastion_private_key_file is invalid: %s", err))
@@ -552,7 +552,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 					"ssh_bastion_private_key_file is invalid: %s", err))
 			} else {
 				if c.SSHBastionCertificateFile != "" {
-					certPath, err := packer.ExpandUser(c.SSHBastionCertificateFile)
+					certPath, err := pathing.ExpandUser(c.SSHBastionCertificateFile)
 					if err != nil {
 						errs = append(errs, fmt.Errorf("invalid identity certificate: #{err}"))
 					}
