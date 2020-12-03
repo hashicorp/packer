@@ -33,7 +33,7 @@ func (s *stepCopyDisk) Run(ctx context.Context, state multistep.StateBag) multis
 
 	// isoPath extention is:
 	ext := filepath.Ext(isoPath)
-	if ext[1:] == s.Format {
+	if len(ext) >= 1 && ext[1:] == s.Format {
 		ui.Message("File extension already matches desired output format. " +
 			"Skipping qemu-img convert step")
 		err := driver.Copy(isoPath, path)
