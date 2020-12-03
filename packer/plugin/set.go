@@ -73,10 +73,10 @@ func (i *Set) RegisterProvisioner(name string, provisioner packersdk.Provisioner
 //  * "start post-processor example" starts the post-processor "example"
 func (i *Set) Run() error {
 	args := os.Args[1:]
-	return i.run(args)
+	return i.run(args...)
 }
 
-func (i *Set) run(args []string) error {
+func (i *Set) run(args ...string) error {
 	if len(args) < 1 {
 		return fmt.Errorf("needs at least one argument")
 	}

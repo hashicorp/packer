@@ -38,12 +38,14 @@ const MagicCookieValue = "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d69
 // know how to speak it.
 const APIVersion = "5"
 
+var ErrManuallyStartedPlugin = errors.New(
+	"Please do not execute plugins directly. Packer will execute these for you.")
+
 // Server waits for a connection to this plugin and returns a Packer
 // RPC server that you can use to register components and serve them.
 func Server() (*packrpc.Server, error) {
 	if os.Getenv(MagicCookieKey) != MagicCookieValue {
-		return nil, errors.New(
-			"Please do not execute plugins directly. Packer will execute these for you.")
+		return nil, ErrManuallyStartedPlugin
 	}
 
 	// If there is no explicit number of Go threads to use, then set it
