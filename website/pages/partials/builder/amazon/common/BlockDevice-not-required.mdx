@@ -23,10 +23,12 @@
 
 - `snapshot_id` (string) - The ID of the snapshot.
 
+- `throughput` (int64) - The throughput for gp3 volumes
+
 - `virtual_name` (string) - The virtual device name. See the documentation on Block Device Mapping
   for more information.
 
-- `volume_type` (string) - The volume type. gp2 for General Purpose (SSD) volumes, io1 for
+- `volume_type` (string) - The volume type. gp2 & gp3 for General Purpose (SSD) volumes, io1 for
   Provisioned IOPS (SSD) volumes, st1 for Throughput Optimized HDD, sc1
   for Cold HDD, and standard for Magnetic volumes.
 

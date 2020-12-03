@@ -14,8 +14,10 @@ import (
 )
 
 const (
-	minIops = 100
-	maxIops = 64000
+	minIops       = 100
+	maxIops       = 64000
+	minThroughput = 125
+	maxThroughput = 1000
 )
 
 // These will be attached when launching your instance. Your
@@ -78,10 +80,12 @@ type BlockDevice struct {
 	NoDevice bool `mapstructure:"no_device" required:"false"`
 	// The ID of the snapshot.
 	SnapshotId string `mapstructure:"snapshot_id" required:"false"`
+	// The throughput for gp3 volumes
+	Throughput int64 `mapstructure:"throughput" required:"false"`
 	// The virtual device name. See the documentation on Block Device Mapping
 	// for more information.
 	VirtualName string `mapstructure:"virtual_name" required:"false"`
-	// The volume type. gp2 for General Purpose (SSD) volumes, io1 for
+	// The volume type. gp2 & gp3 for General Purpose (SSD) volumes, io1 for
 	// Provisioned IOPS (SSD) volumes, st1 for Throughput Optimized HDD, sc1
 	// for Cold HDD, and standard for Magnetic volumes.
 	VolumeType string `mapstructure:"volume_type" required:"false"`
@@ -144,6 +148,11 @@ func (blockDevice BlockDevice) BuildEC2BlockDeviceMapping() *ec2.BlockDeviceMapp
 		ebsBlockDevice.Iops = aws.Int64(blockDevice.IOPS)
 	}
 
+	// Throughput is only valid for gp3 types
+	if blockDevice.VolumeType == "gp3" {
+		ebsBlockDevice.Throughput = aws.Int64(blockDevice.Throughput)
+	}
+
 	// You cannot specify Encrypted if you specify a Snapshot ID
 	if blockDevice.SnapshotId != "" {
 		ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
@@ -185,6 +194,13 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 		if b.IOPS < minIops || b.IOPS > maxIops {
 			return fmt.Errorf("IOPS must be between %d and %d for device %s",
 				minIops, maxIops, b.DeviceName)
+		}
+	}
+
+	if b.VolumeType == "gp3" {
+		if b.Throughput < minThroughput || b.Throughput > maxThroughput {
+			return fmt.Errorf("Throughput must be between %d and %d for device %s",
+				minThroughput, maxThroughput, b.DeviceName)
 		}
 	}
 

@@ -17,6 +17,7 @@ type FlatBlockDevice struct {
 	IOPS                *int64  `mapstructure:"iops" required:"false" cty:"iops" hcl:"iops"`
 	NoDevice            *bool   `mapstructure:"no_device" required:"false" cty:"no_device" hcl:"no_device"`
 	SnapshotId          *string `mapstructure:"snapshot_id" required:"false" cty:"snapshot_id" hcl:"snapshot_id"`
+	Throughput          *int64  `mapstructure:"throughput" required:"false" cty:"throughput" hcl:"throughput"`
 	VirtualName         *string `mapstructure:"virtual_name" required:"false" cty:"virtual_name" hcl:"virtual_name"`
 	VolumeType          *string `mapstructure:"volume_type" required:"false" cty:"volume_type" hcl:"volume_type"`
 	VolumeSize          *int64  `mapstructure:"volume_size" required:"false" cty:"volume_size" hcl:"volume_size"`
@@ -42,6 +43,7 @@ func (*FlatBlockDevice) HCL2Spec() map[string]hcldec.Spec {
 		"iops":                  &hcldec.AttrSpec{Name: "iops", Type: cty.Number, Required: false},
 		"no_device":             &hcldec.AttrSpec{Name: "no_device", Type: cty.Bool, Required: false},
 		"snapshot_id":           &hcldec.AttrSpec{Name: "snapshot_id", Type: cty.String, Required: false},
+		"throughput":            &hcldec.AttrSpec{Name: "throughput", Type: cty.Number, Required: false},
 		"virtual_name":          &hcldec.AttrSpec{Name: "virtual_name", Type: cty.String, Required: false},
 		"volume_type":           &hcldec.AttrSpec{Name: "volume_type", Type: cty.String, Required: false},
 		"volume_size":           &hcldec.AttrSpec{Name: "volume_size", Type: cty.Number, Required: false},
