@@ -8,7 +8,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/version"
 )
 
@@ -18,9 +18,9 @@ import (
 type Set struct {
 	version        string
 	sdkVersion     string
-	Builders       map[string]packer.Builder
-	PostProcessors map[string]packer.PostProcessor
-	Provisioners   map[string]packer.Provisioner
+	Builders       map[string]packersdk.Builder
+	PostProcessors map[string]packersdk.PostProcessor
+	Provisioners   map[string]packersdk.Provisioner
 }
 
 // Description describes a Set.
@@ -40,27 +40,27 @@ func New() *Set {
 	return &Set{
 		version:        version.String(),
 		sdkVersion:     version.String(), // TODO: Set me after the split
-		Builders:       map[string]packer.Builder{},
-		PostProcessors: map[string]packer.PostProcessor{},
-		Provisioners:   map[string]packer.Provisioner{},
+		Builders:       map[string]packersdk.Builder{},
+		PostProcessors: map[string]packersdk.PostProcessor{},
+		Provisioners:   map[string]packersdk.Provisioner{},
 	}
 }
 
-func (i *Set) RegisterBuilder(name string, builder packer.Builder) {
+func (i *Set) RegisterBuilder(name string, builder packersdk.Builder) {
 	if _, found := i.Builders[name]; found {
 		panic(fmt.Errorf("registering duplicate %s builder", name))
 	}
 	i.Builders[name] = builder
 }
 
-func (i *Set) RegisterPostProcessor(name string, postProcessor packer.PostProcessor) {
+func (i *Set) RegisterPostProcessor(name string, postProcessor packersdk.PostProcessor) {
 	if _, found := i.PostProcessors[name]; found {
 		panic(fmt.Errorf("registering duplicate %s post-processor", name))
 	}
 	i.PostProcessors[name] = postProcessor
 }
 
-func (i *Set) RegisterProvisioner(name string, provisioner packer.Provisioner) {
+func (i *Set) RegisterProvisioner(name string, provisioner packersdk.Provisioner) {
 	if _, found := i.Provisioners[name]; found {
 		panic(fmt.Errorf("registering duplicate %s provisioner", name))
 	}
