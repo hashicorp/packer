@@ -12,8 +12,6 @@ import (
 	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
 
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-
-	testshelper "github.com/hashicorp/packer/helper/tests"
 )
 
 type AmazonEBSAccTest struct{}
@@ -47,7 +45,7 @@ func (s *AmazonEBSAccTest) GetConfigs() (map[string]string, error) {
 }
 
 func (s *AmazonEBSAccTest) CleanUp() error {
-	helper := testshelper.AWSHelper{
+	helper := AWSHelper{
 		Region:  "us-east-1",
 		AMIName: "packer-acc-test",
 	}
