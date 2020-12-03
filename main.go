@@ -200,7 +200,7 @@ func wrappedMain() int {
 			Reader:      os.Stdin,
 			Writer:      os.Stdout,
 			ErrorWriter: os.Stdout,
-			PB:          &packer.NoopProgressTracker{},
+			PB:          &packersdk.NoopProgressTracker{},
 		}
 		ui = basicUi
 		if !inPlugin {
