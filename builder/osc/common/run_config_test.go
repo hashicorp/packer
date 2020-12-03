@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
 func init() {
@@ -74,7 +74,7 @@ func TestRunConfigPrepare_SourceOmiFilterOwnersBlank(t *testing.T) {
 	filter_key := "name"
 	filter_value := "foo"
 	c.SourceOmiFilter = OmiFilterOptions{
-		NameValueFilter: hcl2template.NameValueFilter{
+		NameValueFilter: config.NameValueFilter{
 			Filters: map[string]string{filter_key: filter_value},
 		},
 	}
@@ -90,7 +90,7 @@ func TestRunConfigPrepare_SourceOmiFilterGood(t *testing.T) {
 	filter_value := "foo"
 	goodFilter := OmiFilterOptions{
 		Owners: []string{owner},
-		NameValueFilter: hcl2template.NameValueFilter{
+		NameValueFilter: config.NameValueFilter{
 			Filters: map[string]string{filter_key: filter_value},
 		},
 	}

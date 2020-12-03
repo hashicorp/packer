@@ -2,8 +2,6 @@ package common
 
 import (
 	"testing"
-
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 func TestGuestAdditionsConfigPrepare(t *testing.T) {
@@ -11,8 +9,7 @@ func TestGuestAdditionsConfigPrepare(t *testing.T) {
 	var errs []error
 
 	c.GuestAdditionsMode = "disable"
-	c.Communicator = "none"
-	errs = c.Prepare(interpolate.NewContext())
+	errs = c.Prepare("none")
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %s", errs)
 	}

@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"github.com/hashicorp/go-uuid"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
 	"github.com/scaleway/scaleway-sdk-go/api/marketplace/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
@@ -45,7 +45,7 @@ func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep
 
 	imageResp, err := instanceAPI.GetImage(&instance.GetImageRequest{
 		ImageID: imageID,
-	})
+	}, scw.WithContext(ctx))
 	if err != nil {
 		err := fmt.Errorf("Error getting initial image info: %s", err)
 		state.Put("error", err)
@@ -62,7 +62,7 @@ func (s *stepImage) Run(ctx context.Context, state multistep.StateBag) multistep
 		DefaultBootscript: bootscriptID,
 		Name:              c.ImageName,
 		RootVolume:        snapshotID,
-	})
+	}, scw.WithContext(ctx))
 	if err != nil {
 		err := fmt.Errorf("Error creating image: %s", err)
 		state.Put("error", err)

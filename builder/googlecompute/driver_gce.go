@@ -18,9 +18,9 @@ import (
 	oslogin "google.golang.org/api/oslogin/v1"
 
 	"github.com/hashicorp/packer/builder/googlecompute/version"
-	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
+	"github.com/hashicorp/packer/packer-plugin-sdk/useragent"
 	vaultapi "github.com/hashicorp/vault/api"
 
 	"golang.org/x/oauth2"

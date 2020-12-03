@@ -177,6 +177,11 @@ can also be supplied to override the typical auto-generated key:
   Sets the [BootVolumeSizeInGBs](https://godoc.org/github.com/oracle/oci-go-sdk/core#InstanceConfigurationInstanceSourceViaImageDetails)
   when launching the instance. Defaults to `50`.
 
+- `image_launch_mode` (string) - Specifies the configuration mode for launching instances.
+  Valid values are `"NATIVE"`, `"EMULATED"`, `"PARAVIRTUALIZED"`, and `"CUSTOM"`. See the
+  [Oracle CLI docs](https://docs.cloud.oracle.com/en-us/iaas/tools/oci-cli/2.12.5/oci_cli_docs/cmdref/compute/image/create.html#cmdoption-launch-mode)
+  for more information about these modes.
+
 - `use_private_ip` (boolean) - Use private ip addresses to connect to the
   instance via ssh.
 

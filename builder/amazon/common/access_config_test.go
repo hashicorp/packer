@@ -37,20 +37,6 @@ func TestAccessConfigPrepare_Region(t *testing.T) {
 	if err == nil {
 		t.Fatalf("should have region validation err: %s", c.RawRegion)
 	}
-
-	c.RawRegion = "custom"
-	c.SkipValidation = true
-	// testing whole prepare func here; this is checking that validation is
-	// skipped, so we don't need a mock connection
-	if err := c.Prepare(nil); err != nil {
-		t.Fatalf("shouldn't have err: %s", err)
-	}
-
-	c.SkipValidation = false
-	c.RawRegion = ""
-	if err := c.Prepare(nil); err != nil {
-		t.Fatalf("shouldn't have err: %s", err)
-	}
 }
 
 func TestAccessConfigPrepare_RegionRestricted(t *testing.T) {

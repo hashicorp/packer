@@ -13,8 +13,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // StepCreateWindowsPassword represents a Packer build step that sets the windows password on a Windows GCE instance.

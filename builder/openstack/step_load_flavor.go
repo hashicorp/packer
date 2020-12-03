@@ -7,8 +7,8 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	flavors_utils "github.com/gophercloud/utils/openstack/compute/v2/flavors"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // StepLoadFlavor gets the FlavorRef from a Flavor. It first assumes

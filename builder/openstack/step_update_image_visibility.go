@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	imageservice "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 type stepUpdateImageVisibility struct{}

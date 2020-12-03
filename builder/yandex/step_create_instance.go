@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 
 	"github.com/c2h5oh/datasize"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 

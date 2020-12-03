@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
@@ -23,7 +23,7 @@ func (s *stepSnapshot) Run(ctx context.Context, state multistep.StateBag) multis
 	createSnapshotResp, err := instanceAPI.CreateSnapshot(&instance.CreateSnapshotRequest{
 		Name:     c.SnapshotName,
 		VolumeID: volumeID,
-	})
+	}, scw.WithContext(ctx))
 	if err != nil {
 		err := fmt.Errorf("Error creating snapshot: %s", err)
 		state.Put("error", err)

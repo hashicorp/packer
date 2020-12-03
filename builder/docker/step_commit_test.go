@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func testStepCommitState(t *testing.T) multistep.StateBag {

@@ -3,7 +3,7 @@ package common
 import (
 	"log"
 
-	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // CommHost returns the VM's IP address which should be used to access it by SSH.

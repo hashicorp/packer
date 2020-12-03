@@ -2,7 +2,7 @@ package version
 
 import (
 	"github.com/hashicorp/go-version"
-	pluginVersion "github.com/hashicorp/packer/helper/version"
+	pluginVersion "github.com/hashicorp/packer/packer-plugin-sdk/version"
 )
 
 // The git commit that was compiled. This will be filled in by the compiler.

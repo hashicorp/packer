@@ -2,8 +2,9 @@ package common
 
 import (
 	"context"
-	"github.com/hashicorp/packer/helper/multistep"
 	"testing"
+
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func TestStepHTTPIPDiscover_Run(t *testing.T) {

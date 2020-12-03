@@ -118,6 +118,17 @@ func TestConfig(t *testing.T) {
 		}
 	})
 
+	t.Run("LaunchMode", func(t *testing.T) {
+		raw := testConfig(cfgFile)
+		raw["image_launch_mode"] = "NATIVE"
+
+		var c Config
+		errs := c.Prepare(raw)
+		if errs != nil {
+			t.Fatalf("Unexpected error in configuration %+v", errs)
+		}
+	})
+
 	t.Run("NoAccessConfig", func(t *testing.T) {
 		raw := testConfig(cfgFile)
 		delete(raw, "access_cfg_file")

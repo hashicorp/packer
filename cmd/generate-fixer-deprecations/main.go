@@ -63,8 +63,8 @@ func main() {
 		}
 	}
 
-	deprecated_path := filepath.Join(packerDir, "helper", "config",
-		"deprecated_options.go")
+	deprecated_path := filepath.Join(packerDir, "packer-plugin-sdk", "template",
+		"config", "deprecated_options.go")
 
 	buf := bytes.Buffer{}
 

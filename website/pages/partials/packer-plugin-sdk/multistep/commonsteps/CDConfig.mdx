@@ -1,0 +1,11 @@
+<!-- Code generated from the comments of the CDConfig struct in packer-plugin-sdk/multistep/commonsteps/extra_iso_config.go; DO NOT EDIT MANUALLY -->
+
+An iso (CD) containing custom files can be made available for your build.
+
+By default, no extra CD will be attached. All files listed in this setting
+get placed into the root directory of the CD and the CD is attached as the
+second CD device.
+
+This config exists to work around modern operating systems that have no
+way to mount floppy disks, which was our previous go-to for adding files at
+boot time.

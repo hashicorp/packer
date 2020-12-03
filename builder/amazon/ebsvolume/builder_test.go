@@ -61,7 +61,6 @@ func TestBuilderPrepare_InvalidShutdownBehavior(t *testing.T) {
 
 	// Test good
 	config["shutdown_behavior"] = "terminate"
-	config["skip_region_validation"] = true
 	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)

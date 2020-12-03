@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"os"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 // TODO(apryde): It would be good not to have to write a key file to disk to

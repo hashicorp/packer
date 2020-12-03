@@ -89,11 +89,11 @@ source "vsphere-iso" "example" {
 
 ### Http directory configuration
 
-@include 'packer-plugin-sdk/commonsteps/HTTPConfig.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig.mdx'
 
 #### Optional:
 
-@include 'packer-plugin-sdk/commonsteps/HTTPConfig-not-required.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig-not-required.mdx'
 
 ### Floppy configuration
 
@@ -125,15 +125,15 @@ source "vsphere-iso" "example" {
 
 ### ISO Configuration
 
-@include 'packer-plugin-sdk/commonsteps/ISOConfig.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig.mdx'
 
 #### Required:
 
-@include 'packer-plugin-sdk/commonsteps/ISOConfig-required.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-required.mdx'
 
 #### Optional:
 
-@include 'packer-plugin-sdk/commonsteps/ISOConfig-not-required.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-not-required.mdx'
 
 ### CDRom Configuration
 
@@ -176,15 +176,17 @@ iso_paths = [
 
 @include 'builder/vsphere/common/RemoveCDRomConfig-not-required.mdx'
 
-@include 'packer-plugin-sdk/commonsteps/CDConfig.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/CDConfig.mdx'
 
 #### Optional:
 
-@include 'packer-plugin-sdk/commonsteps/CDConfig-not-required.mdx'
+@include 'packer-plugin-sdk/multistep/commonsteps/CDConfig-not-required.mdx'
 
 ### Create Configuration
 
 @include 'builder/vsphere/iso/CreateConfig-not-required.mdx'
+
+@include 'builder/vsphere/common/StorageConfig-not-required.mdx'
 
 ### Network Adapter Configuration
 
@@ -198,13 +200,13 @@ iso_paths = [
 
 ### Storage Configuration
 
-@include 'builder/vsphere/iso/DiskConfig.mdx'
+@include 'builder/vsphere/common/DiskConfig.mdx'
 
-@include 'builder/vsphere/iso/DiskConfig-required.mdx'
+@include 'builder/vsphere/common/DiskConfig-required.mdx'
 
 #### Optional
 
-@include 'builder/vsphere/iso/DiskConfig-not-required.mdx'
+@include 'builder/vsphere/common/DiskConfig-not-required.mdx'
 
 ### Export Configuration
 

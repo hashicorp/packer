@@ -7,8 +7,8 @@ import (
 
 	"github.com/antihax/optional"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 

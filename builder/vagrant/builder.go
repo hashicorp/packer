@@ -15,12 +15,12 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -91,9 +91,6 @@ type Config struct {
 	// This parameter is required when source_path have more than one provider,
 	// or when using vagrant-cloud post-processor. Defaults to unset.
 	Provider string `mapstructure:"provider" required:"false"`
-
-	Communicator string `mapstructure:"communicator"`
-
 	// Options for the "vagrant init" command
 
 	// What vagrantfile to use

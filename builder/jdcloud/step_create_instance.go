@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 	"github.com/jdcloud-api/jdcloud-sdk-go/services/vm/apis"
 	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/models"
