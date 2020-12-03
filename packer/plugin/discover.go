@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -106,7 +107,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.Builders[pluginName] = func() (packer.Builder, error) {
+		c.Builders[pluginName] = func() (packersdk.Builder, error) {
 			return c.Client(newPath).Builder()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
@@ -123,7 +124,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.PostProcessors[pluginName] = func() (packer.PostProcessor, error) {
+		c.PostProcessors[pluginName] = func() (packersdk.PostProcessor, error) {
 			return c.Client(newPath).PostProcessor()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
@@ -140,7 +141,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.Provisioners[pluginName] = func() (packer.Provisioner, error) {
+		c.Provisioners[pluginName] = func() (packersdk.Provisioner, error) {
 			return c.Client(newPath).Provisioner()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
