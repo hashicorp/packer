@@ -1,4 +1,4 @@
-package acc
+package provisioneracc
 
 import (
 	"bytes"
@@ -9,11 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	testshelper "github.com/hashicorp/packer/helper/tests"
-
 	amazonEBS "github.com/hashicorp/packer/builder/amazon/ebs/acceptance"
 	virtualboxISO "github.com/hashicorp/packer/builder/virtualbox/iso/acceptance"
 	"github.com/hashicorp/packer/command"
+	"github.com/hashicorp/packer/packer-plugin-sdk/acctest/testutils"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
@@ -56,7 +55,7 @@ func TestProvisionersAgainstBuilders(provisionerAcc ProvisionerAcceptance, t *te
 
 				err = provisionerAcc.RunTest(c, args)
 				// Cleanup created resources
-				testshelper.CleanupFiles(fileName)
+				testutils.CleanupFiles(fileName)
 				cleanErr := builderAcc.CleanUp()
 				if cleanErr != nil {
 					log.Printf("bad: failed to clean up resources: %s", cleanErr.Error())
@@ -122,7 +121,7 @@ func writeJsonTemplate(out *bytes.Buffer, filePath string, t *testing.T) {
 
 func buildCommand(t *testing.T, builder BuilderAcceptance, provisioner ProvisionerAcceptance) *command.BuildCommand {
 	c := &command.BuildCommand{
-		Meta: testshelper.TestMetaFile(t),
+		Meta: TestMetaFile(t),
 	}
 	c.CoreConfig.Components.BuilderStore = builder.GetBuilderStore()
 	c.CoreConfig.Components.ProvisionerStore = provisioner.GetProvisionerStore()
