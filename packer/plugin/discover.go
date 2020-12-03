@@ -99,7 +99,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 			return err
 		}
 	}
-	externallyUsed := []string{}
+	var externallyUsed []string
 
 	pluginPaths, err := c.discoverSingle(filepath.Join(path, "packer-builder-*"))
 	if err != nil {
