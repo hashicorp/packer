@@ -447,7 +447,7 @@ For the Shell provisioner this is:
       		os.Setenv("PACKER_RUN_UUID", UUID)
       	}
       	file := "provisioner.shell." + UUID + ".txt"
-      	defer testshelper.CleanupFiles(file)
+      	defer testutils.CleanupFiles(file)
 
       	// Run build
     	// All provisioner acc tests should contain this code and validation
@@ -462,7 +462,7 @@ For the Shell provisioner this is:
       	}
 
       	// Any other extra specific validation
-      	if !testshelper.FileExists(file) {
+      	if !testutils.FileExists(file) {
       		return fmt.Errorf("Expected to find %s", file)
       	}
       	return nil

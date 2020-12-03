@@ -8,7 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/hashicorp/packer/helper/tests/acc"
+	"github.com/hashicorp/packer/packer-plugin-sdk/acctest/provisioneracc"
+	"github.com/hashicorp/packer/packer-plugin-sdk/acctest/testutils"
 	"github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/provisioner/shell"
 
@@ -16,12 +17,11 @@ import (
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
-	testshelper "github.com/hashicorp/packer/helper/tests"
 )
 
 func TestShellProvisioner(t *testing.T) {
-	acc.TestProvisionersPreCheck("shell", t)
-	acc.TestProvisionersAgainstBuilders(new(ShellProvisionerAccTest), t)
+	provisioneracc.TestProvisionersPreCheck("shell", t)
+	provisioneracc.TestProvisionersAgainstBuilders(new(ShellProvisionerAccTest), t)
 }
 
 type ShellProvisionerAccTest struct{}
@@ -61,7 +61,7 @@ func (s *ShellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string
 	}
 
 	file := "provisioner.shell." + UUID + ".txt"
-	defer testshelper.CleanupFiles(file)
+	defer testutils.CleanupFiles(file)
 
 	if code := c.Run(args); code != 0 {
 		ui := c.Meta.Ui.(*packersdk.BasicUi)
@@ -73,7 +73,7 @@ func (s *ShellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string
 			err.String())
 	}
 
-	if !testshelper.FileExists(file) {
+	if !testutils.FileExists(file) {
 		return fmt.Errorf("Expected to find %s", file)
 	}
 	return nil

@@ -8,7 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/hashicorp/packer/helper/tests/acc"
+	"github.com/hashicorp/packer/packer-plugin-sdk/acctest/provisioneracc"
+
 	"github.com/hashicorp/packer/provisioner/shell"
 
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -17,8 +18,8 @@ import (
 )
 
 func TestShellLocalProvisionerWithRetryOption(t *testing.T) {
-	acc.TestProvisionersPreCheck("shell-local", t)
-	acc.TestProvisionersAgainstBuilders(new(ShellLocalProvisionerAccTest), t)
+	provisioneracc.TestProvisionersPreCheck("shell-local", t)
+	provisioneracc.TestProvisionersAgainstBuilders(new(ShellLocalProvisionerAccTest), t)
 }
 
 type ShellLocalProvisionerAccTest struct{}
