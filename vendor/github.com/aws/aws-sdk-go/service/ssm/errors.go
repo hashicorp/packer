@@ -585,7 +585,25 @@ const (
 	// ErrCodeParameterMaxVersionLimitExceeded for service response error code
 	// "ParameterMaxVersionLimitExceeded".
 	//
-	// The parameter exceeded the maximum number of allowed versions.
+	// Parameter Store retains the 100 most recently created versions of a parameter.
+	// After this number of versions has been created, Parameter Store deletes the
+	// oldest version when a new one is created. However, if the oldest version
+	// has a label attached to it, Parameter Store will not delete the version and
+	// instead presents this error message:
+	//
+	// An error occurred (ParameterMaxVersionLimitExceeded) when calling the PutParameter
+	// operation: You attempted to create a new version of parameter-name by calling
+	// the PutParameter API with the overwrite flag. Version version-number, the
+	// oldest version, can't be deleted because it has a label associated with it.
+	// Move the label to another version of the parameter, and try again.
+	//
+	// This safeguard is to prevent parameter versions with mission critical labels
+	// assigned to them from being deleted. To continue creating new parameters,
+	// first move the label from the oldest version of the parameter to a newer
+	// one for use in your operations. For information about moving parameter labels,
+	// see Move a parameter label (console) (http://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-labels.html#sysman-paramstore-labels-console-move)
+	// or Move a parameter label (CLI) (http://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-labels.html#sysman-paramstore-labels-cli-move)
+	// in the AWS Systems Manager User Guide.
 	ErrCodeParameterMaxVersionLimitExceeded = "ParameterMaxVersionLimitExceeded"
 
 	// ErrCodeParameterNotFound for service response error code
@@ -701,7 +719,9 @@ const (
 	// The specified target instance for the session is not fully configured for
 	// use with Session Manager. For more information, see Getting started with
 	// Session Manager (https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-getting-started.html)
-	// in the AWS Systems Manager User Guide.
+	// in the AWS Systems Manager User Guide. This error is also returned if you
+	// attempt to start a session on an instance that is located in a different
+	// account or Region
 	ErrCodeTargetNotConnected = "TargetNotConnected"
 
 	// ErrCodeTooManyTagsError for service response error code
