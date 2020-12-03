@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/packer/helper/tests/acc"
 	"github.com/hashicorp/packer/provisioner/shell"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"github.com/hashicorp/packer/command"
@@ -40,8 +39,8 @@ func (s *ShellLocalProvisionerAccTest) GetConfig() (string, error) {
 	return string(file), err
 }
 
-func (s *ShellLocalProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
-	return packer.MapOfProvisioner{
+func (s *ShellLocalProvisionerAccTest) GetProvisionerStore() packersdk.MapOfProvisioner {
+	return packersdk.MapOfProvisioner{
 		"shell-local": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
 	}
 }

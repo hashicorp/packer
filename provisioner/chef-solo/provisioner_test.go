@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
@@ -303,7 +303,7 @@ func TestProvisionerPrepare_json(t *testing.T) {
 		"foo": "{{ user `foo` }}",
 	}
 
-	config[packer.UserVariablesConfigKey] = map[string]string{
+	config[common.UserVariablesConfigKey] = map[string]string{
 		"foo": `"bar\baz"`,
 	}
 

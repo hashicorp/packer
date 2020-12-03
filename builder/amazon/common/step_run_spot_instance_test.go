@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -240,7 +239,7 @@ func TestRun(t *testing.T) {
 	volumeId := aws.String("volume-id")
 	ec2Mock := defaultEc2Mock(instanceId, spotRequestId, volumeId)
 
-	uiMock := packer.TestUi(t)
+	uiMock := packersdk.TestUi(t)
 
 	state := tStateSpot()
 	state.Put("ec2", ec2Mock)
@@ -332,7 +331,7 @@ func TestRun_NoSpotTags(t *testing.T) {
 	volumeId := aws.String("volume-id")
 	ec2Mock := defaultEc2Mock(instanceId, spotRequestId, volumeId)
 
-	uiMock := packer.TestUi(t)
+	uiMock := packersdk.TestUi(t)
 
 	state := tStateSpot()
 	state.Put("ec2", ec2Mock)

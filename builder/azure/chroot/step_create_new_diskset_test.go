@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/builder/azure/common/client"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest"
@@ -224,7 +224,7 @@ func TestStepCreateNewDisk_Run(t *testing.T) {
 				DisksClientMock:                m,
 				GalleryImageVersionsClientMock: giv,
 			})
-			state.Put("ui", packer.TestUi(t))
+			state.Put("ui", packersdk.TestUi(t))
 
 			if got := s.Run(context.TODO(), state); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("StepCreateNewDisk.Run() = %v, want %v", got, tt.want)

@@ -25,14 +25,14 @@ func FileExists(filename string) bool {
 // available. This allows us to test a builder that writes files to disk.
 func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 	components := packer.ComponentFinder{
-		BuilderStore: packer.MapOfBuilder{
+		BuilderStore: packersdk.MapOfBuilder{
 			"amazon-ebs": func() (packersdk.Builder, error) { return &amazonebsbuilder.Builder{}, nil },
 		},
-		ProvisionerStore: packer.MapOfProvisioner{
+		ProvisionerStore: packersdk.MapOfProvisioner{
 			"shell": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
 			"file":  func() (packersdk.Provisioner, error) { return &fileprovisioner.Provisioner{}, nil },
 		},
-		PostProcessorStore: packer.MapOfPostProcessor{},
+		PostProcessorStore: packersdk.MapOfPostProcessor{},
 	}
 	return &packer.CoreConfig{
 		Components: components,

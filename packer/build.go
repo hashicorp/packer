@@ -6,46 +6,10 @@ import (
 	"log"
 	"sync"
 
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 	"github.com/hashicorp/packer/version"
-)
-
-const (
-	// This is the key in configurations that is set to the name of the
-	// build.
-	BuildNameConfigKey = "packer_build_name"
-
-	// This is the key in the configuration that is set to the type
-	// of the builder that is run. This is useful for provisioners and
-	// such who want to make use of this.
-	BuilderTypeConfigKey = "packer_builder_type"
-
-	// this is the key in the configuration that is set to the version of the
-	// Packer Core. This can be used by plugins to set user agents, etc, without
-	// having to import the Core to find out the Packer version.
-	CoreVersionConfigKey = "packer_core_version"
-
-	// This is the key in configurations that is set to "true" when Packer
-	// debugging is enabled.
-	DebugConfigKey = "packer_debug"
-
-	// This is the key in configurations that is set to "true" when Packer
-	// force build is enabled.
-	ForceConfigKey = "packer_force"
-
-	// This key determines what to do when a normal multistep step fails
-	// - "cleanup" - run cleanup steps
-	// - "abort" - exit without cleanup
-	// - "ask" - ask the user
-	OnErrorConfigKey = "packer_on_error"
-
-	// TemplatePathKey is the path to the template that configured this build
-	TemplatePathKey = "packer_template_path"
-
-	// This key contains a map[string]string of the user variables for
-	// template processing.
-	UserVariablesConfigKey = "packer_user_variables"
 )
 
 // A Build represents a single job within Packer that is responsible for
@@ -165,14 +129,14 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 	b.prepareCalled = true
 
 	packerConfig := map[string]interface{}{
-		BuildNameConfigKey:     b.Type,
-		BuilderTypeConfigKey:   b.BuilderType,
-		CoreVersionConfigKey:   version.FormattedVersion(),
-		DebugConfigKey:         b.debug,
-		ForceConfigKey:         b.force,
-		OnErrorConfigKey:       b.onError,
-		TemplatePathKey:        b.TemplatePath,
-		UserVariablesConfigKey: b.Variables,
+		common.BuildNameConfigKey:     b.Type,
+		common.BuilderTypeConfigKey:   b.BuilderType,
+		common.CoreVersionConfigKey:   version.FormattedVersion(),
+		common.DebugConfigKey:         b.debug,
+		common.ForceConfigKey:         b.force,
+		common.OnErrorConfigKey:       b.onError,
+		common.TemplatePathKey:        b.TemplatePath,
+		common.UserVariablesConfigKey: b.Variables,
 	}
 
 	// Prepare the builder

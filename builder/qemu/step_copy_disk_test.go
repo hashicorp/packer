@@ -4,14 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/stretchr/testify/assert"
 )
 
 func copyTestState(t *testing.T, d *DriverMock) multistep.StateBag {
 	state := new(multistep.BasicStateBag)
-	state.Put("ui", packer.TestUi(t))
+	state.Put("ui", packersdk.TestUi(t))
 	state.Put("driver", d)
 	state.Put("iso_path", "example_source.qcow2")
 

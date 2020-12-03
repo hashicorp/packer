@@ -20,12 +20,12 @@ const PACKERSPACE = "-PACKERSPACE-"
 type Config struct {
 	PluginMinPort  int
 	PluginMaxPort  int
-	builders       packer.MapOfBuilder
-	provisioners   packer.MapOfProvisioner
-	postProcessors packer.MapOfPostProcessor
+	builders       packersdk.MapOfBuilder
+	provisioners   packersdk.MapOfProvisioner
+	postProcessors packersdk.MapOfPostProcessor
 }
 
-func (c *Config) GetPlugins() (packer.MapOfBuilder, packer.MapOfProvisioner, packer.MapOfPostProcessor) {
+func (c *Config) GetPlugins() (packersdk.MapOfBuilder, packersdk.MapOfProvisioner, packersdk.MapOfPostProcessor) {
 	return c.builders, c.provisioners, c.postProcessors
 }
 
@@ -38,13 +38,13 @@ func (c *Config) GetPlugins() (packer.MapOfBuilder, packer.MapOfProvisioner, pac
 // CWD has the highest priority.
 func (c *Config) Discover() error {
 	if c.builders == nil {
-		c.builders = packer.MapOfBuilder{}
+		c.builders = packersdk.MapOfBuilder{}
 	}
 	if c.provisioners == nil {
-		c.provisioners = packer.MapOfProvisioner{}
+		c.provisioners = packersdk.MapOfProvisioner{}
 	}
 	if c.postProcessors == nil {
-		c.postProcessors = packer.MapOfPostProcessor{}
+		c.postProcessors = packersdk.MapOfPostProcessor{}
 	}
 
 	// If we are already inside a plugin process we should not need to
