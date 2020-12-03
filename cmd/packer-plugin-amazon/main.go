@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/hashicorp/packer/builder/amazon/ebs"
 	"github.com/hashicorp/packer/builder/amazon/ebssurrogate"
 	"github.com/hashicorp/packer/builder/amazon/ebsvolume"
@@ -10,14 +13,15 @@ import (
 )
 
 func main() {
-	plugin := plugin.New()
-	plugin.RegisterBuilder("ebs", new(ebs.Builder))
-	plugin.RegisterBuilder("chroot", new(chroot.Builder))
-	plugin.RegisterBuilder("ebssurrogate", new(ebssurrogate.Builder))
-	plugin.RegisterBuilder("ebsvolume", new(ebsvolume.Builder))
-	plugin.RegisterPostProcessor("import", new(amazonimport.PostProcessor))
-	err := plugin.Run()
+	pps := plugin.NewSet()
+	pps.RegisterBuilder("ebs", new(ebs.Builder))
+	pps.RegisterBuilder("chroot", new(chroot.Builder))
+	pps.RegisterBuilder("ebssurrogate", new(ebssurrogate.Builder))
+	pps.RegisterBuilder("ebsvolume", new(ebsvolume.Builder))
+	pps.RegisterPostProcessor("import", new(amazonimport.PostProcessor))
+	err := pps.Run()
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
 }

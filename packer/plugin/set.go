@@ -36,7 +36,7 @@ type Description struct {
 // Setup
 ////
 
-func New() *Set {
+func NewSet() *Set {
 	return &Set{
 		version:        version.String(),
 		sdkVersion:     version.String(), // TODO: Set me after the split
