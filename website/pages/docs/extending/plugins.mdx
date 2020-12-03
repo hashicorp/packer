@@ -34,8 +34,8 @@ of Packer starts and communicates with.
 
 These plugin applications aren't meant to be run manually. Instead, Packer core
 executes them as a sub-process, run as a sub-command (`packer plugin`) and
-communicates with them. For example, the VMware builder is actually run as
-`packer plugin packer-builder-vmware`. The next time you run a Packer build,
+communicates with them. For example, the Shell provisioner is actually run as
+`packer plugin packer-provisioner-shell`. The next time you run a Packer build,
 look at your process list and you should see a handful of `packer-` prefixed
 applications running.
 
@@ -43,9 +43,9 @@ applications running.
 
 The easiest way to install a plugin is to name it correctly, then place it in
 the proper directory. To name a plugin correctly, make sure the binary is named
-`packer-TYPE-NAME`. For example, `packer-builder-amazon-ebs` for a "builder"
-type plugin named "amazon-ebs". Valid types for plugins are down this page
-more.
+`packer-TYPE-NAME`. For example, `packer-plugin-amazon` for a "multi-plugin"
+binary named "amazon". This multi-plugin binary will make one or more plugins
+available to use. Valid types for plugins are down this page more.
 
 Once the plugin is named properly, Packer automatically discovers plugins in
 the following directories in the given order. If a conflicting plugin is found
@@ -72,6 +72,9 @@ later, it will take precedence over one found earlier.
 
 The valid types for plugins are:
 
+- `plugin` - A plugin binary that can contain one or more of each Packer plugin
+  type.
+
 - `builder` - Plugins responsible for building images for a specific
   platform.
 
@@ -80,6 +83,11 @@ The valid types for plugins are:
 
 - `provisioner` - A provisioner to install software on images created by a
   builder.
+
+~> **Note**: Only _multi-plugin binaries_ are expected to work with Packer's plugin
+manager. The legacy `builder`, `post-processor` and `provisioner` plugin types
+will keep on being detected but Packer cannot install them automatically.
+
 
 ## Developing Plugins
 
@@ -141,8 +149,53 @@ There are two steps involved in creating a plugin:
 2.  Serve the interface by calling the appropriate plugin serving method in
     your main method.
 
-A basic example is shown below. In this example, assume the `Builder` struct
-implements the `packer.Builder` interface:
+Basic examples are shown below. Note that if you can define a multi-plugin
+binary as it will allow to add more that one plugin per binary.
+
+
+<Tabs>
+<Tab heading="Multi-plugin Binary">
+
+```go
+import (
+  "github.com/hashicorp/packer/packer/plugin"
+)
+
+// Assume this implements packer.Builder
+type ExampleBuilder struct{}
+
+// Assume this implements packer.PostProcessor
+type FooPostProcessor struct{}
+
+// Assume this implements packer.Provisioner
+type BarProvisioner struct{}
+
+func main() {
+	pps := plugin.NewSet()
+	pps.RegisterBuilder("example", new(ExampleBuilder))
+	pps.RegisterPostProcessor("foo", new(FooPostProcessor))
+	pps.RegisterProvisioner("bar", new(BarProvisioner))
+	err := pps.Run()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+}
+```
+
+**That's it!** `plugin.NewSet` handles all the nitty gritty of
+communicating with Packer core and serving your builder over RPC. It can't get
+much easier than that.
+
+Here the name of the plugin will be used to use each plugin, so if your plugin
+is named `my`, this would make the following parts available:
+
+* the `my-example` builder
+* the `my-foo` post-processor
+* the `my-bar` provisioner
+
+</Tab>
+<Tab heading="Single Plugin Binary">
 
 ```go
 import (
@@ -153,18 +206,22 @@ import (
 type Builder struct{}
 
 func main() {
- 	server, err := plugin.Server()
-	if err != nil {
-		panic(err)
-	}
-	server.RegisterBuilder(new(Builder))
-	server.Serve()
+    server, err := plugin.Server()
+    if err != nil {
+        panic(err)
+    }
+    server.RegisterBuilder(new(Builder))
+    server.Serve()
 }
 ```
 
-**That's it!** `plugin.Server` handles all the nitty gritty of
-communicating with Packer core and serving your builder over RPC. It can't get
-much easier than that.
+**That's it!** `plugin.Server` handles all the nitty gritty of communicating with
+Packer core and serving your builder over RPC. It can't get much easier than
+that.
+
+</Tab>
+</Tabs>
+
 
 Next, just build your plugin like a normal Go application, using `go build` or
 however you please. The resulting binary is the plugin that can be installed
@@ -207,10 +264,10 @@ concerns.
 #### Naming Conventions
 
 It is standard practice to name the resulting plugin application in the format
-of `packer-TYPE-NAME`. For example, if you're building a new builder for
+of `packer-plugin-NAME`. For example, if you're building a new builder for
 CustomCloud, it would be standard practice to name the resulting plugin
-`packer-builder-custom-cloud`. This naming convention helps users identify the
-purpose of a plugin.
+`packer-plugin-custom-cloud`. This naming convention helps users identify the
+scope of a plugin.
 
 #### Testing Plugins
 
