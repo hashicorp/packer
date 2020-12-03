@@ -29,7 +29,7 @@ func toBytes(gigabytesCount int) int64 {
 
 func writeSerialLogFile(ctx context.Context, state multistep.StateBag, serialLogFile string) error {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	instanceID := state.Get("instance_id").(string)
 	if instanceID == "" {

@@ -8,7 +8,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 )
@@ -32,11 +32,11 @@ type CommonConfig struct {
 	CloudConfig    `mapstructure:",squash"`
 }
 
-func (c *CommonConfig) Prepare(errs *packer.MultiError) *packer.MultiError {
+func (c *CommonConfig) Prepare(errs *packersdk.MultiError) *packersdk.MultiError {
 
 	if c.SerialLogFile != "" {
 		if _, err := os.Stat(c.SerialLogFile); os.IsExist(err) {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Serial log file %s already exist", c.SerialLogFile))
 		}
 	}
@@ -57,13 +57,13 @@ type CloudConfig struct {
 	FolderID string `mapstructure:"folder_id" required:"true"`
 }
 
-func (c *CloudConfig) Prepare(errs *packer.MultiError) *packer.MultiError {
+func (c *CloudConfig) Prepare(errs *packersdk.MultiError) *packersdk.MultiError {
 	if c.FolderID == "" {
 		c.FolderID = os.Getenv("YC_FOLDER_ID")
 	}
 
 	if c.FolderID == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("a folder_id must be specified"))
 	}
 	return errs
@@ -81,7 +81,7 @@ type DiskConfig struct {
 	DiskLabels map[string]string `mapstructure:"disk_labels" required:"false"`
 }
 
-func (c *DiskConfig) Prepare(errs *packer.MultiError) *packer.MultiError {
+func (c *DiskConfig) Prepare(errs *packersdk.MultiError) *packersdk.MultiError {
 
 	if c.DiskSizeGb == 0 {
 		c.DiskSizeGb = 10
@@ -115,7 +115,7 @@ type NetworkConfig struct {
 	UseInternalIP bool `mapstructure:"use_internal_ip" required:"false"`
 }
 
-func (c *NetworkConfig) Prepare(errs *packer.MultiError) *packer.MultiError {
+func (c *NetworkConfig) Prepare(errs *packersdk.MultiError) *packersdk.MultiError {
 	if c.Zone == "" {
 		c.Zone = defaultZone
 	}
@@ -141,16 +141,16 @@ type ImageConfig struct {
 	ImageProductIDs []string `mapstructure:"image_product_ids" required:"false"`
 }
 
-func (c *ImageConfig) Prepare(errs *packer.MultiError) *packer.MultiError {
+func (c *ImageConfig) Prepare(errs *packersdk.MultiError) *packersdk.MultiError {
 
 	if len(c.ImageFamily) > 63 {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Invalid image family: Must not be longer than 63 characters"))
 	}
 
 	if c.ImageFamily != "" {
 		if !reImageFamily.MatchString(c.ImageFamily) {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				errors.New("Invalid image family: The first character must be a "+
 					"lowercase letter, and all following characters must be a dash, "+
 					"lowercase letter, or digit, except the last character, which cannot be a dash"))
@@ -164,7 +164,7 @@ func (c *ImageConfig) Prepare(errs *packer.MultiError) *packer.MultiError {
 	if c.ImageName == "" {
 		img, err := interpolate.Render("packer-{{timestamp}}", nil)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Unable to render default image name: %s ", err))
 		} else {
 			c.ImageName = img
@@ -196,7 +196,7 @@ type InstanceConfig struct {
 	Preemptible bool `mapstructure:"preemptible"`
 }
 
-func (c *InstanceConfig) Prepare(errs *packer.MultiError) *packer.MultiError {
+func (c *InstanceConfig) Prepare(errs *packersdk.MultiError) *packersdk.MultiError {
 	if c.InstanceCores == 0 {
 		c.InstanceCores = 2
 	}
@@ -211,7 +211,7 @@ func (c *InstanceConfig) Prepare(errs *packer.MultiError) *packer.MultiError {
 
 	for key, file := range c.MetadataFromFile {
 		if _, err := os.Stat(file); err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("cannot access file '%s' with content for value of metadata key '%s': %s", file, key, err))
 		}
 	}

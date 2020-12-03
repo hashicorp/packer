@@ -4,7 +4,7 @@ package yandexexport
 import (
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type ExchangeConfig struct {
@@ -13,9 +13,9 @@ type ExchangeConfig struct {
 	ServiceAccountID string `mapstructure:"service_account_id" required:"true"`
 }
 
-func (c *ExchangeConfig) Prepare(errs *packer.MultiError) *packer.MultiError {
+func (c *ExchangeConfig) Prepare(errs *packersdk.MultiError) *packersdk.MultiError {
 	if c.ServiceAccountID == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("service_account_id must be specified"))
 	}
 

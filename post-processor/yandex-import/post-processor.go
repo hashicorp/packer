@@ -69,7 +69,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Accumulate any errors
 	var errs *packersdk.MultiError
 
-	errs = packer.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
 	errs = p.config.CloudConfig.Prepare(errs)
 	errs = p.config.ImageConfig.Prepare(errs)
 	errs = p.config.ExchangeConfig.Prepare(errs)

@@ -66,7 +66,7 @@ func uploadToBucket(s3conn *s3.S3, ui packersdk.Ui, artifact packersdk.Artifact,
 	}, nil
 }
 
-func createYCImage(ctx context.Context, driver yandex.Driver, ui packer.Ui, imageSrc cloudImageSource, c *Config) (*compute.Image, error) {
+func createYCImage(ctx context.Context, driver yandex.Driver, ui packersdk.Ui, imageSrc cloudImageSource, c *Config) (*compute.Image, error) {
 	req := &compute.CreateImageRequest{
 		FolderId:    c.CloudConfig.FolderID,
 		Name:        c.ImageConfig.ImageName,
