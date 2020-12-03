@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
+	"github.com/hashicorp/packer/provisioner/file"
+	shellprovisioner "github.com/hashicorp/packer/provisioner/shell"
 )
 
 // TestEnvVar must be set to a non-empty value for acceptance tests to run.
@@ -122,6 +124,10 @@ func Test(t TestT, c TestCase) {
 
 					return nil, nil
 				},
+			},
+			ProvisionerStore: packersdk.MapOfProvisioner{
+				"shell": func() (packersdk.Provisioner, error) { return &shellprovisioner.Provisioner{}, nil },
+				"file":  func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
 			},
 		},
 		Template: tpl,

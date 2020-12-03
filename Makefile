@@ -144,7 +144,7 @@ provisioners-acctest: install-build-deps generate
 	ACC_TEST_BUILDERS=$(ACC_TEST_BUILDERS) ACC_TEST_PROVISIONERS=$(ACC_TEST_PROVISIONERS) go test ./provisioner/... -timeout=1h
 
 # testacc runs acceptance tests
-testacc: install-build-deps generate ## Run acceptance tests
+testacc: # install-build-deps generate ## Run acceptance tests
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
 	PACKER_ACC=1 go test -count $(COUNT) -v $(TEST) $(TESTARGS) -timeout=120m
 
