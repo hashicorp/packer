@@ -149,7 +149,6 @@ func (c *Config) discoverExternalComponents(path string) error {
 	if len(externallyUsed) > 0 {
 		sort.Strings(externallyUsed)
 		log.Printf("using external provisioners %v", externallyUsed)
-		externallyUsed = nil
 	}
 
 	return nil
