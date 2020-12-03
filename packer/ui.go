@@ -31,7 +31,7 @@ const (
 )
 
 type NoopUi struct {
-	PB NoopProgressTracker
+	PB packersdk.NoopProgressTracker
 }
 
 var _ packersdk.Ui = new(NoopUi)
@@ -173,7 +173,7 @@ func (u *TargetedUI) TrackProgress(src string, currentSize, totalSize int64, str
 // to the given Writer.
 type MachineReadableUi struct {
 	Writer io.Writer
-	PB     NoopProgressTracker
+	PB     packersdk.NoopProgressTracker
 }
 
 var _ packersdk.Ui = new(MachineReadableUi)
