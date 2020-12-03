@@ -37,9 +37,16 @@ func (c *Config) GetPlugins() (packer.MapOfBuilder, packer.MapOfProvisioner, pac
 // Hence, the priority order is the reverse of the search order - i.e., the
 // CWD has the highest priority.
 func (c *Config) Discover() error {
-	c.builders = packer.MapOfBuilder{}
-	c.postProcessors = packer.MapOfPostProcessor{}
-	c.provisioners = packer.MapOfProvisioner{}
+	if c.builders == nil {
+		c.builders = packer.MapOfBuilder{}
+	}
+	if c.provisioners == nil {
+		c.provisioners = packer.MapOfProvisioner{}
+	}
+	if c.postProcessors == nil {
+		c.postProcessors = packer.MapOfPostProcessor{}
+	}
+
 	// If we are already inside a plugin process we should not need to
 	// discover anything.
 	if os.Getenv(MagicCookieKey) == MagicCookieValue {
