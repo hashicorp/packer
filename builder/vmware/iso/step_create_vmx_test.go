@@ -34,7 +34,6 @@ func createFloppyOutput(prefix string) (string, map[string]string, error) {
 		"floppy0.fileName":       outputFile,
 		"floppy0.startConnected": "TRUE",
 	}
-	// vmxString := fmt.Sprintf("{"+strings.Join(vmxData, ",")+"}", outputFile)
 	return output, vmxData, nil
 }
 
@@ -108,7 +107,6 @@ func TestStepCreateVmx_SerialFile(t *testing.T) {
 	configString := RenderConfig(serialConfig, map[string]string{})
 
 	builderT.Test(t, builderT.TestCase{
-		// PreCheck: func() { testAccPreCheck(t) },
 		Builder:  &Builder{},
 		Template: configString,
 		Check: func(a []packersdk.Artifact) error {
@@ -158,7 +156,6 @@ func TestStepCreateVmx_SerialPort(t *testing.T) {
 	config["vmx_data"] = vmxData
 	configString := RenderConfig(config, provision)
 	builderT.Test(t, builderT.TestCase{
-		// PreCheck: func() { testAccPreCheck(t) },
 		Builder:  &Builder{},
 		Template: configString,
 		Check: func(a []packersdk.Artifact) error {
@@ -214,7 +211,6 @@ func TestStepCreateVmx_ParallelPort(t *testing.T) {
 	config["vmx_data"] = vmxData
 	configString := RenderConfig(config, provision)
 	builderT.Test(t, builderT.TestCase{
-		// PreCheck: func() { testAccPreCheck(t) },
 		Builder:  &Builder{},
 		Template: configString,
 		Check: func(a []packersdk.Artifact) error {
@@ -262,7 +258,6 @@ func TestStepCreateVmx_Usb(t *testing.T) {
 	config["vmx_data"] = vmxData
 	configString := RenderConfig(config, provision)
 	builderT.Test(t, builderT.TestCase{
-		// PreCheck: func() { testAccPreCheck(t) },
 		Builder:  &Builder{},
 		Template: configString,
 		Check: func(a []packersdk.Artifact) error {
@@ -316,7 +311,6 @@ func TestStepCreateVmx_Sound(t *testing.T) {
 	config["vmx_data"] = vmxData
 	configString := RenderConfig(config, provision)
 	builderT.Test(t, builderT.TestCase{
-		// PreCheck: func() { testAccPreCheck(t) },
 		Builder:  &Builder{},
 		Template: configString,
 		Check: func(a []packersdk.Artifact) error {
