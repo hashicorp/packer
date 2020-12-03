@@ -42,12 +42,11 @@ func main() {
 	}
 
 	if *hcl2spec {
-		fmt.Printf("====== checking hcl2spec ======\n\n")
 		if err := checkHCL2Specs(); err != nil {
 			fmt.Printf(err.Error())
 			os.Exit(2)
 		}
-		fmt.Printf("\nPlugin succesfully passed hcl2spec check.\n")
+		fmt.Printf("Plugin succesfully passed hcl2spec check.\n")
 	}
 
 	if *website {
@@ -56,12 +55,11 @@ func main() {
 	}
 
 	if *load {
-		fmt.Printf("\n====== checking if Packer can load plugin ======\n\n")
 		if err := discoverAndLoad(); err != nil {
 			fmt.Printf(err.Error())
 			os.Exit(2)
 		}
-		fmt.Printf("\nPlugin succesfully passed loading check.\n")
+		fmt.Printf("Plugin succesfully passed loading check.\n")
 	}
 }
 
@@ -130,6 +128,9 @@ func checkWebsite() error {
 }
 
 func discoverAndLoad() error {
+	// TODO: add warning for non `packer-plugin-*` plugins.
+	// these will be detected but Packer cannot install them automatically.
+
 	config := plugin.Config{
 		PluginMinPort: 10000,
 		PluginMaxPort: 25000,
