@@ -72,5 +72,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	f.Write(data)
+	_, err = f.Write(data)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
