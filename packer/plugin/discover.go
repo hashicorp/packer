@@ -20,13 +20,13 @@ const PACKERSPACE = "-PACKERSPACE-"
 type Config struct {
 	PluginMinPort  int
 	PluginMaxPort  int
-	Builders       packer.MapOfBuilder       `json:"-"`
-	Provisioners   packer.MapOfProvisioner   `json:"-"`
-	PostProcessors packer.MapOfPostProcessor `json:"-"`
+	builders       packer.MapOfBuilder
+	provisioners   packer.MapOfProvisioner
+	postProcessors packer.MapOfPostProcessor
 }
 
 func (c *Config) GetPlugins() (packer.MapOfBuilder, packer.MapOfProvisioner, packer.MapOfPostProcessor) {
-	return c.Builders, c.Provisioners, c.PostProcessors
+	return c.builders, c.provisioners, c.postProcessors
 }
 
 // Discover discovers plugins.
@@ -37,9 +37,9 @@ func (c *Config) GetPlugins() (packer.MapOfBuilder, packer.MapOfProvisioner, pac
 // Hence, the priority order is the reverse of the search order - i.e., the
 // CWD has the highest priority.
 func (c *Config) Discover() error {
-	c.Builders = packer.MapOfBuilder{}
-	c.PostProcessors = packer.MapOfPostProcessor{}
-	c.Provisioners = packer.MapOfProvisioner{}
+	c.builders = packer.MapOfBuilder{}
+	c.postProcessors = packer.MapOfPostProcessor{}
+	c.provisioners = packer.MapOfProvisioner{}
 	// If we are already inside a plugin process we should not need to
 	// discover anything.
 	if os.Getenv(MagicCookieKey) == MagicCookieValue {
@@ -99,7 +99,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 			return err
 		}
 	}
-	externallyUsed := []string{}
+	var externallyUsed []string
 
 	pluginPaths, err := c.discoverSingle(filepath.Join(path, "packer-builder-*"))
 	if err != nil {
@@ -107,7 +107,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.Builders[pluginName] = func() (packersdk.Builder, error) {
+		c.builders[pluginName] = func() (packersdk.Builder, error) {
 			return c.Client(newPath).Builder()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
@@ -124,7 +124,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.PostProcessors[pluginName] = func() (packersdk.PostProcessor, error) {
+		c.postProcessors[pluginName] = func() (packersdk.PostProcessor, error) {
 			return c.Client(newPath).PostProcessor()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
@@ -141,7 +141,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.Provisioners[pluginName] = func() (packersdk.Provisioner, error) {
+		c.provisioners[pluginName] = func() (packersdk.Provisioner, error) {
 			return c.Client(newPath).Provisioner()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
@@ -149,7 +149,6 @@ func (c *Config) discoverExternalComponents(path string) error {
 	if len(externallyUsed) > 0 {
 		sort.Strings(externallyUsed)
 		log.Printf("using external provisioners %v", externallyUsed)
-		externallyUsed = nil
 	}
 
 	return nil
