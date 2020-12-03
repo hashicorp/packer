@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	builderT "github.com/hashicorp/packer/packer-plugin-sdk/builder/testing"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 

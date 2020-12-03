@@ -9,7 +9,7 @@ import (
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/stretchr/testify/assert"
 
-	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	builderT "github.com/hashicorp/packer/packer-plugin-sdk/builder/testing"
 )
 
 func TestBuilderAcc_validateRegion(t *testing.T) {
