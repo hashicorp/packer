@@ -218,6 +218,12 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		}
 	}
 
+	secDisk, ok := state.GetOk("secondary_disk")
+	if !ok {
+		secDisk = []*compute.AttachedDiskSpec{}
+	}
+	secDiskSpec := secDisk.([]*compute.AttachedDiskSpec)
+
 	req := &compute.CreateInstanceRequest{
 		FolderId:   config.FolderID,
 		Name:       config.InstanceName,
@@ -239,6 +245,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 				DiskId: disk.Id,
 			},
 		},
+		SecondaryDiskSpecs: secDiskSpec,
 		NetworkInterfaceSpecs: []*compute.NetworkInterfaceSpec{
 			{
 				SubnetId:             instanceSubnetID,
