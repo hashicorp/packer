@@ -15,6 +15,7 @@ import (
 	multierror "github.com/hashicorp/go-multierror"
 	version "github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -49,16 +50,16 @@ type CoreConfig struct {
 }
 
 // The function type used to lookup Builder implementations.
-type BuilderFunc func(name string) (Builder, error)
+type BuilderFunc func(name string) (packersdk.Builder, error)
 
 // The function type used to lookup Hook implementations.
-type HookFunc func(name string) (Hook, error)
+type HookFunc func(name string) (packersdk.Hook, error)
 
 // The function type used to lookup PostProcessor implementations.
-type PostProcessorFunc func(name string) (PostProcessor, error)
+type PostProcessorFunc func(name string) (packersdk.PostProcessor, error)
 
 // The function type used to lookup Provisioner implementations.
-type ProvisionerFunc func(name string) (Provisioner, error)
+type ProvisionerFunc func(name string) (packersdk.Provisioner, error)
 
 type BasicStore interface {
 	Has(name string) bool
@@ -67,17 +68,17 @@ type BasicStore interface {
 
 type BuilderStore interface {
 	BasicStore
-	Start(name string) (Builder, error)
+	Start(name string) (packersdk.Builder, error)
 }
 
 type ProvisionerStore interface {
 	BasicStore
-	Start(name string) (Provisioner, error)
+	Start(name string) (packersdk.Provisioner, error)
 }
 
 type PostProcessorStore interface {
 	BasicStore
-	Start(name string) (PostProcessor, error)
+	Start(name string) (packersdk.PostProcessor, error)
 }
 
 // ComponentFinder is a struct that contains the various function
@@ -113,7 +114,7 @@ func (core *Core) Initialize() error {
 		return err
 	}
 	for _, secret := range core.secrets {
-		LogSecretFilter.Set(secret)
+		packersdk.LogSecretFilter.Set(secret)
 	}
 
 	// Go through and interpolate all the build names. We should be able

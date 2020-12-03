@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepTempDir creates a temporary directory that we use in order to
@@ -55,7 +56,7 @@ func ConfigTmpDir() (string, error) {
 }
 
 func (s *StepTempDir) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Creating a temporary directory for sharing data...")
 

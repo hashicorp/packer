@@ -7,15 +7,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepLxdLaunch struct{}
 
 func (s *stepLxdLaunch) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	name := config.ContainerName
 	image := config.Image
@@ -55,7 +55,7 @@ func (s *stepLxdLaunch) Run(ctx context.Context, state multistep.StateBag) multi
 
 func (s *stepLxdLaunch) Cleanup(state multistep.StateBag) {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	cleanup_args := []string{
 		"delete", "--force", config.ContainerName,

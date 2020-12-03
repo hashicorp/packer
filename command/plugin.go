@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 
 	alicloudecsbuilder "github.com/hashicorp/packer/builder/alicloud/ecs"
@@ -111,7 +111,7 @@ type PluginCommand struct {
 	Meta
 }
 
-var Builders = map[string]packer.Builder{
+var Builders = map[string]packersdk.Builder{
 	"alicloud-ecs":        new(alicloudecsbuilder.Builder),
 	"amazon-chroot":       new(amazonchrootbuilder.Builder),
 	"amazon-ebs":          new(amazonebsbuilder.Builder),
@@ -166,7 +166,7 @@ var Builders = map[string]packer.Builder{
 	"yandex":              new(yandexbuilder.Builder),
 }
 
-var Provisioners = map[string]packer.Provisioner{
+var Provisioners = map[string]packersdk.Provisioner{
 	"ansible":           new(ansibleprovisioner.Provisioner),
 	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
 	"azure-dtlartifact": new(azuredtlartifactprovisioner.Provisioner),
@@ -187,7 +187,7 @@ var Provisioners = map[string]packer.Provisioner{
 	"windows-shell":     new(windowsshellprovisioner.Provisioner),
 }
 
-var PostProcessors = map[string]packer.PostProcessor{
+var PostProcessors = map[string]packersdk.PostProcessor{
 	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
 	"amazon-import":        new(amazonimportpostprocessor.PostProcessor),
 	"artifice":             new(artificepostprocessor.PostProcessor),

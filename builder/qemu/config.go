@@ -13,10 +13,10 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/shutdowncommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -410,10 +410,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// Accumulate any errors and warnings
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	warnings := make([]string, 0)
 
-	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
 
 	if c.DiskSize == "" || c.DiskSize == "0" {
 		c.DiskSize = "40960M"
@@ -423,7 +423,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		re := regexp.MustCompile(`^[\d]+(b|k|m|g|t){0,1}$`)
 		matched := re.MatchString(strings.ToLower(c.DiskSize))
 		if !matched {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid disk size."))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Invalid disk size."))
 		} else {
 			// Okay, it's valid -- if it doesn't alreay have a suffix, then
 			// append "M" as the default unit.
@@ -510,9 +510,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		c.Format = "qcow2"
 	}
 
-	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 
 	if c.NetDevice == "" {
 		c.NetDevice = "virtio-net"
@@ -527,17 +527,17 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 	isoWarnings, isoErrs := c.ISOConfig.Prepare(&c.ctx)
 	warnings = append(warnings, isoWarnings...)
-	errs = packer.MultiErrorAppend(errs, isoErrs...)
+	errs = packersdk.MultiErrorAppend(errs, isoErrs...)
 
-	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 	commConfigWarnings, es := c.CommConfig.Prepare(&c.ctx)
 	if len(es) > 0 {
-		errs = packer.MultiErrorAppend(errs, es...)
+		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 	warnings = append(warnings, commConfigWarnings...)
 
 	if !(c.Format == "qcow2" || c.Format == "raw") {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("invalid format, only 'qcow2' or 'raw' are allowed"))
 	}
 
@@ -549,61 +549,61 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	if c.UseBackingFile {
 		c.SkipCompaction = true
 		if !(c.DiskImage && c.Format == "qcow2") {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("use_backing_file can only be enabled for QCOW2 images and when disk_image is true"))
 		}
 	}
 
 	if c.DiskImage && len(c.AdditionalDiskSize) > 0 {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("disk_additional_size can only be used when disk_image is false"))
 	}
 
 	if c.SkipResizeDisk && !(c.DiskImage) {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("skip_resize_disk can only be used when disk_image is true"))
 	}
 
 	if _, ok := accels[c.Accelerator]; !ok {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', 'hax', 'hvf', 'whpx', or 'none' are allowed"))
 	}
 
 	if _, ok := diskInterface[c.DiskInterface]; !ok {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("unrecognized disk interface type"))
 	}
 
 	if _, ok := diskCache[c.DiskCache]; !ok {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("unrecognized disk cache type"))
 	}
 
 	if _, ok := diskDiscard[c.DiskDiscard]; !ok {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("unrecognized disk discard type"))
 	}
 
 	if _, ok := diskDZeroes[c.DetectZeroes]; !ok {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("unrecognized disk detect zeroes setting"))
 	}
 
 	if !c.PackerForce {
 		if _, err := os.Stat(c.OutputDir); err == nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs,
 				fmt.Errorf("Output directory '%s' already exists. It must not exist.", c.OutputDir))
 		}
 	}
 
 	if c.VNCPortMin > c.VNCPortMax {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
 	}
 
 	if c.NetBridge != "" && runtime.GOOS != "linux" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("net_bridge is only supported in Linux based OSes"))
 	}
 

@@ -6,8 +6,8 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepCaptureImage struct {
@@ -20,7 +20,7 @@ type StepCaptureImage struct {
 	error               func(e error)
 }
 
-func NewStepCaptureImage(client *AzureClient, ui packer.Ui) *StepCaptureImage {
+func NewStepCaptureImage(client *AzureClient, ui packersdk.Ui) *StepCaptureImage {
 	var step = &StepCaptureImage{
 		client: client,
 		get: func(client *AzureClient) *CaptureTemplate {

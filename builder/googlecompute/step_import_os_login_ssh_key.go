@@ -6,8 +6,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"google.golang.org/api/oauth2/v2"
 )
 
@@ -23,7 +23,7 @@ type StepImportOSLoginSSHKey struct {
 func (s *StepImportOSLoginSSHKey) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if !config.UseOSLogin {
 		return multistep.ActionContinue
@@ -100,7 +100,7 @@ func (s *StepImportOSLoginSSHKey) Run(ctx context.Context, state multistep.State
 func (s *StepImportOSLoginSSHKey) Cleanup(state multistep.StateBag) {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if !config.UseOSLogin {
 		return

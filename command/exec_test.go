@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/post-processor/manifest"
 	shell_local_pp "github.com/hashicorp/packer/post-processor/shell-local"
 	filep "github.com/hashicorp/packer/provisioner/file"
@@ -99,7 +100,7 @@ func TestHelperProcess(*testing.T) {
 }
 
 func commandMeta() Meta {
-	basicUi := &packer.BasicUi{
+	basicUi := &packersdk.BasicUi{
 		Reader:      os.Stdin,
 		Writer:      os.Stdout,
 		ErrorWriter: os.Stdout,
@@ -118,18 +119,18 @@ func commandMeta() Meta {
 func getBareComponentFinder() packer.ComponentFinder {
 	return packer.ComponentFinder{
 		BuilderStore: packer.MapOfBuilder{
-			"file":       func() (packer.Builder, error) { return &file.Builder{}, nil },
-			"null":       func() (packer.Builder, error) { return &null.Builder{}, nil },
-			"amazon-ebs": func() (packer.Builder, error) { return &ebs.Builder{}, nil },
+			"file":       func() (packersdk.Builder, error) { return &file.Builder{}, nil },
+			"null":       func() (packersdk.Builder, error) { return &null.Builder{}, nil },
+			"amazon-ebs": func() (packersdk.Builder, error) { return &ebs.Builder{}, nil },
 		},
 		ProvisionerStore: packer.MapOfProvisioner{
-			"shell-local": func() (packer.Provisioner, error) { return &shell_local.Provisioner{}, nil },
-			"shell":       func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
-			"file":        func() (packer.Provisioner, error) { return &filep.Provisioner{}, nil },
+			"shell-local": func() (packersdk.Provisioner, error) { return &shell_local.Provisioner{}, nil },
+			"shell":       func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
+			"file":        func() (packersdk.Provisioner, error) { return &filep.Provisioner{}, nil },
 		},
 		PostProcessorStore: packer.MapOfPostProcessor{
-			"shell-local": func() (packer.PostProcessor, error) { return &shell_local_pp.PostProcessor{}, nil },
-			"manifest":    func() (packer.PostProcessor, error) { return &manifest.PostProcessor{}, nil },
+			"shell-local": func() (packersdk.PostProcessor, error) { return &shell_local_pp.PostProcessor{}, nil },
+			"manifest":    func() (packersdk.PostProcessor, error) { return &manifest.PostProcessor{}, nil },
 		},
 	}
 }

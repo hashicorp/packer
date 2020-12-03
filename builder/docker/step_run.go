@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepRun struct {
@@ -13,7 +13,7 @@ type StepRun struct {
 }
 
 func (s *StepRun) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config, ok := state.Get("config").(*Config)
 	if !ok {
 		err := fmt.Errorf("error encountered obtaining docker config")
@@ -66,7 +66,7 @@ func (s *StepRun) Cleanup(state multistep.StateBag) {
 	}
 
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Kill the container. We don't handle errors because errors usually
 	// just mean that the container doesn't exist anymore, which isn't a

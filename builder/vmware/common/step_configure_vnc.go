@@ -6,15 +6,15 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/net"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step configures the VM to enable the VNC server.
 //
 // Uses:
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //   vmx_path string
 //
 // Produces:
@@ -77,7 +77,7 @@ func (s *StepConfigureVNC) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
 	vmxData, err := ReadVMX(vmxPath)

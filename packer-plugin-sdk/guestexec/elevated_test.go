@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -19,7 +20,7 @@ func TestProvisioner_GenerateElevatedRunner(t *testing.T) {
 	config := testConfig()
 	p := new(packer.MockProvisioner)
 	p.Prepare(config)
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	p.ProvCommunicator = comm
 	path, err := GenerateElevatedRunner("whoami", p)
 

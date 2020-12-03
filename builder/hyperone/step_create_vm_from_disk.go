@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	openapi "github.com/hyperonecom/h1-client-go"
 )
 
@@ -15,7 +15,7 @@ type stepCreateVMFromDisk struct {
 
 func (s *stepCreateVMFromDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*openapi.APIClient)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 	sshKey := state.Get("ssh_public_key").(string)
 	chrootDiskID := state.Get("chroot_disk_id").(string)
@@ -53,7 +53,7 @@ func (s *stepCreateVMFromDisk) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say(fmt.Sprintf("Deleting VM %s (from chroot disk)...", s.vmID))
 	err := deleteVMWithDisks(s.vmID, state)

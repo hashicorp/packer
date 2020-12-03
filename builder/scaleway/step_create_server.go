@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
@@ -17,7 +17,7 @@ type stepCreateServer struct {
 
 func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	instanceAPI := instance.NewAPI(state.Get("client").(*scw.Client))
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	c := state.Get("config").(*Config)
 	tags := []string{}
 	var bootscript *string
@@ -76,7 +76,7 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 	}
 
 	instanceAPI := instance.NewAPI(state.Get("client").(*scw.Client))
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Destroying server...")
 

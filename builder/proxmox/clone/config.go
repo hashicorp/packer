@@ -4,7 +4,7 @@ package proxmoxclone
 
 import (
 	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
@@ -16,10 +16,10 @@ type Config struct {
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, []string, error) {
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	_, warnings, merrs := c.Config.Prepare(c, raws...)
 	if merrs != nil {
-		errs = packer.MultiErrorAppend(errs, merrs)
+		errs = packersdk.MultiErrorAppend(errs, merrs)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

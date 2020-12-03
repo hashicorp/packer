@@ -9,10 +9,10 @@ import (
 	"time"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -90,20 +90,19 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// Prepare the errors
-	var errs *packer.MultiError
-	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
-	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.CommConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(c.CommConfig.Comm.Type)...)
-	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.GuestAdditionsConfig.Prepare(c.CommConfig.Comm.Type)...)
-
+	var errs *packersdk.MultiError
+	errs = packersdk.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
+	errs = packersdk.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.CommConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(c.CommConfig.Comm.Type)...)
+	errs = packersdk.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.GuestAdditionsConfig.Prepare(c.CommConfig.Comm.Type)...)
 	if c.GuestAdditionsInterface == "" {
 		c.GuestAdditionsInterface = "ide"
 	}
@@ -111,7 +110,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	log.Printf("PostShutdownDelay: %s", c.PostShutdownDelay)
 
 	if c.VMName == "" {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			fmt.Errorf("vm_name is required"))
 	}
 
@@ -131,15 +130,15 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	driver, err := vboxcommon.NewDriver()
 	if err != nil {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed creating VirtualBox driver: %s", err))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Failed creating VirtualBox driver: %s", err))
 	} else {
 		if c.AttachSnapshot != "" && c.TargetSnapshot != "" && c.AttachSnapshot == c.TargetSnapshot {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Attach snapshot %s and target snapshot %s cannot be the same", c.AttachSnapshot, c.TargetSnapshot))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Attach snapshot %s and target snapshot %s cannot be the same", c.AttachSnapshot, c.TargetSnapshot))
 		}
 		snapshotTree, err := driver.LoadSnapshots(c.VMName)
 		log.Printf("")
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed to load snapshots for VM %s: %s", c.VMName, err))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Failed to load snapshots for VM %s: %s", c.VMName, err))
 		} else {
 			log.Printf("Snapshots loaded from VM %s", c.VMName)
 
@@ -151,13 +150,13 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 			if c.AttachSnapshot != "" {
 				log.Printf("Checking configuration attach_snapshot [%s]", c.AttachSnapshot)
 				if nil == snapshotTree {
-					errs = packer.MultiErrorAppend(errs, fmt.Errorf("No snapshots defined on VM %s. Unable to attach to %s", c.VMName, c.AttachSnapshot))
+					errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("No snapshots defined on VM %s. Unable to attach to %s", c.VMName, c.AttachSnapshot))
 				} else {
 					snapshots := snapshotTree.GetSnapshotsByName(c.AttachSnapshot)
 					if 0 >= len(snapshots) {
-						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Snapshot %s does not exist on VM %s", c.AttachSnapshot, c.VMName))
+						errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Snapshot %s does not exist on VM %s", c.AttachSnapshot, c.VMName))
 					} else if 1 < len(snapshots) {
-						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Multiple Snapshots with name %s exist on VM %s", c.AttachSnapshot, c.VMName))
+						errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Multiple Snapshots with name %s exist on VM %s", c.AttachSnapshot, c.VMName))
 					} else {
 						attachSnapshot = snapshots[0]
 					}
@@ -169,7 +168,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 					log.Printf("Currently no snapshots defined in VM %s", c.VMName)
 				} else {
 					if c.TargetSnapshot == attachSnapshot.Name {
-						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s cannot be the same as the snapshot to which the builder shall attach: %s", c.TargetSnapshot, attachSnapshot.Name))
+						errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s cannot be the same as the snapshot to which the builder shall attach: %s", c.TargetSnapshot, attachSnapshot.Name))
 					} else {
 						snapshots := snapshotTree.GetSnapshotsByName(c.TargetSnapshot)
 						if 0 < len(snapshots) {
@@ -182,9 +181,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 								isChild = nil != snapshot.Parent && snapshot.Parent.UUID == attachSnapshot.UUID
 							}
 							if !isChild {
-								errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s already exists and is not a direct child of %s", c.TargetSnapshot, attachSnapshot.Name))
+								errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s already exists and is not a direct child of %s", c.TargetSnapshot, attachSnapshot.Name))
 							} else if !c.DeleteTargetSnapshot {
-								errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s already exists as direct child of %s for VM %s. Use force_delete_snapshot = true to overwrite snapshot",
+								errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Target snapshot %s already exists as direct child of %s for VM %s. Use force_delete_snapshot = true to overwrite snapshot",
 									c.TargetSnapshot,
 									attachSnapshot.Name,
 									c.VMName))

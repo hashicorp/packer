@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepWaitForStopNotToFail waits for 10 seconds before returning with continue
@@ -14,7 +14,7 @@ import (
 type StepWaitForStopNotToFail struct{}
 
 func (s *StepWaitForStopNotToFail) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Waiting 10 seconds to avoid potential SDC bug...")
 	time.Sleep(10 * time.Second)
 	return multistep.ActionContinue

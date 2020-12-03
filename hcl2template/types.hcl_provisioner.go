@@ -3,9 +3,10 @@ package hcl2template
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -14,7 +15,7 @@ import (
 // calling Provision: with contextual variables.
 // This permits using "${build.ID}" values for example.
 type HCL2Provisioner struct {
-	Provisioner      packer.Provisioner
+	Provisioner      packersdk.Provisioner
 	provisionerBlock *ProvisionerBlock
 	evalContext      *hcl.EvalContext
 	builderVariables map[string]string
@@ -65,7 +66,7 @@ func (p *HCL2Provisioner) Prepare(args ...interface{}) error {
 	return p.Provisioner.Prepare(args...)
 }
 
-func (p *HCL2Provisioner) Provision(ctx context.Context, ui packer.Ui, c packer.Communicator, vars map[string]interface{}) error {
+func (p *HCL2Provisioner) Provision(ctx context.Context, ui packersdk.Ui, c packersdk.Communicator, vars map[string]interface{}) error {
 	err := p.HCL2Prepare(vars)
 	if err != nil {
 		return err

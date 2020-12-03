@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepConfigSubnet struct {
@@ -15,7 +15,7 @@ type stepConfigSubnet struct {
 
 func (s *stepConfigSubnet) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ucloudcommon.UCloudClient)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if len(s.SubnetId) != 0 {
 		ui.Say(fmt.Sprintf("Trying to use specified subnet %q...", s.SubnetId))

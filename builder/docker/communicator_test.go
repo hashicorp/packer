@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/provisioner/shell"
@@ -60,8 +61,8 @@ func TestUploadDownload(t *testing.T) {
 	defer os.Remove("my-strawberry-cake")
 
 	// Add hooks so the provisioners run during the build
-	hooks := map[string][]packer.Hook{}
-	hooks[packer.HookProvision] = []packer.Hook{
+	hooks := map[string][]packersdk.Hook{}
+	hooks[packersdk.HookProvision] = []packersdk.Hook{
 		&packer.ProvisionHook{
 			Provisioners: []*packer.HookedProvisioner{
 				{Provisioner: upload, Config: nil, TypeName: ""},
@@ -69,7 +70,7 @@ func TestUploadDownload(t *testing.T) {
 			},
 		},
 	}
-	hook := &packer.DispatchHook{Mapping: hooks}
+	hook := &packersdk.DispatchHook{Mapping: hooks}
 
 	// Run things
 	artifact, err := builder.Run(context.Background(), ui, hook)
@@ -148,8 +149,8 @@ func TestLargeDownload(t *testing.T) {
 	defer os.Remove("bigcake")
 
 	// Add hooks so the provisioners run during the build
-	hooks := map[string][]packer.Hook{}
-	hooks[packer.HookProvision] = []packer.Hook{
+	hooks := map[string][]packersdk.Hook{}
+	hooks[packersdk.HookProvision] = []packersdk.Hook{
 		&packer.ProvisionHook{
 			Provisioners: []*packer.HookedProvisioner{
 				{Provisioner: shell, Config: nil, TypeName: ""},
@@ -158,7 +159,7 @@ func TestLargeDownload(t *testing.T) {
 			},
 		},
 	}
-	hook := &packer.DispatchHook{Mapping: hooks}
+	hook := &packersdk.DispatchHook{Mapping: hooks}
 
 	// Run things
 	artifact, err := builder.Run(context.Background(), ui, hook)
@@ -256,8 +257,8 @@ func TestFixUploadOwner(t *testing.T) {
 	}
 
 	// Add hooks so the provisioners run during the build
-	hooks := map[string][]packer.Hook{}
-	hooks[packer.HookProvision] = []packer.Hook{
+	hooks := map[string][]packersdk.Hook{}
+	hooks[packersdk.HookProvision] = []packersdk.Hook{
 		&packer.ProvisionHook{
 			Provisioners: []*packer.HookedProvisioner{
 				{Provisioner: fileProvisioner, Config: nil, TypeName: ""},
@@ -267,7 +268,7 @@ func TestFixUploadOwner(t *testing.T) {
 			},
 		},
 	}
-	hook := &packer.DispatchHook{Mapping: hooks}
+	hook := &packersdk.DispatchHook{Mapping: hooks}
 
 	artifact, err := builder.Run(context.Background(), ui, hook)
 	if err != nil {

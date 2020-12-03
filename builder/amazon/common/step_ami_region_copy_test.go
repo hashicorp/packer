@@ -11,8 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
@@ -87,7 +87,7 @@ func getMockConn(config *AccessConfig, target string) (ec2iface.EC2API, error) {
 // Create statebag for running test
 func tState() multistep.StateBag {
 	state := new(multistep.BasicStateBag)
-	state.Put("ui", &packer.BasicUi{
+	state.Put("ui", &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	})

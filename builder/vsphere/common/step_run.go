@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type RunConfig struct {
@@ -23,7 +23,7 @@ type StepRun struct {
 }
 
 func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	if s.Config.BootOrder != "" {
@@ -54,7 +54,7 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 }
 
 func (s *StepRun) Cleanup(state multistep.StateBag) {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 
 	if s.Config.BootOrder == "" && s.SetOrder {

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepCleanupTempKeys struct {
@@ -31,10 +31,10 @@ func (s *StepCleanupTempKeys) Run(ctx context.Context, state multistep.StateBag)
 		return multistep.ActionContinue
 	}
 
-	comm := state.Get("communicator").(packer.Communicator)
-	ui := state.Get("ui").(packer.Ui)
+	comm := state.Get("communicator").(packersdk.Communicator)
+	ui := state.Get("ui").(packersdk.Ui)
 
-	cmd := new(packer.RemoteCmd)
+	cmd := new(packersdk.RemoteCmd)
 
 	ui.Say("Trying to remove ephemeral keys from authorized_keys files")
 
@@ -59,7 +59,7 @@ func (s *StepCleanupTempKeys) Run(ctx context.Context, state multistep.StateBag)
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		log.Printf("Error cleaning up ~/.ssh/authorized_keys; please clean up keys manually: %s", err)
 	}
-	cmd = new(packer.RemoteCmd)
+	cmd = new(packersdk.RemoteCmd)
 	cmd.Command = fmt.Sprintf("sudo sed -i.bak '/ %s$/d' /root/.ssh/authorized_keys; sudo rm /root/.ssh/authorized_keys.bak", s.Comm.SSHTemporaryKeyPairName)
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		log.Printf("Error cleaning up /root/.ssh/authorized_keys; please clean up keys manually: %s", err)

@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // Windows containers are a special beast in Docker; you can't use docker cp
@@ -46,7 +46,7 @@ func (c *WindowsContainerCommunicator) Upload(dst string, src io.Reader, fi *os.
 
 	// Copy the file into place by copying the temporary file we put
 	// into the shared folder into the proper location in the container
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: fmt.Sprintf("Copy-Item -Path %s/%s -Destination %s", c.ContainerDir,
 			filepath.Base(tempfile.Name()), dst),
 	}
@@ -132,7 +132,7 @@ func (c *WindowsContainerCommunicator) UploadDir(dst string, src string, exclude
 	}
 
 	// Make the directory, then copy into it
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: fmt.Sprintf("Copy-Item %s -Destination %s -Recurse",
 			containerSrc, containerDst),
 	}
@@ -156,7 +156,7 @@ func (c *WindowsContainerCommunicator) Download(src string, dst io.Writer) error
 	log.Printf("Downloading file from container: %s:%s", c.ContainerID, src)
 	// Copy file onto temp file on mounted volume inside container
 	var stdout, stderr bytes.Buffer
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: fmt.Sprintf("Copy-Item -Path %s -Destination %s/%s", src, c.ContainerDir,
 			filepath.Base(src)),
 		Stdout: &stdout,

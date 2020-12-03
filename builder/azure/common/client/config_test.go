@@ -14,7 +14,7 @@ import (
 
 	"github.com/Azure/go-autorest/autorest/azure"
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
@@ -126,7 +126,7 @@ func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			errs := &packer.MultiError{}
+			errs := &packersdk.MultiError{}
 			tt.config.Validate(errs)
 			if (len(errs.Errors) != 0) != tt.wantErr {
 				t.Errorf("newConfig() error = %v, wantErr %v", errs, tt.wantErr)
@@ -312,7 +312,7 @@ func Test_ClientConfig_CanUseDeviceCode(t *testing.T) {
 }
 
 func assertValid(t *testing.T, cfg Config) {
-	errs := &packer.MultiError{}
+	errs := &packersdk.MultiError{}
 	cfg.Validate(errs)
 	if len(errs.Errors) != 0 {
 		t.Fatal("Expected errs to be empty: ", errs)
@@ -320,7 +320,7 @@ func assertValid(t *testing.T, cfg Config) {
 }
 
 func assertInvalid(t *testing.T, cfg Config) {
-	errs := &packer.MultiError{}
+	errs := &packersdk.MultiError{}
 	cfg.Validate(errs)
 	if len(errs.Errors) == 0 {
 		t.Fatal("Expected errs to be non-empty")

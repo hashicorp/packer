@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/1and1/oneandone-cloudserver-sdk-go"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/mitchellh/mapstructure"
@@ -48,7 +48,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	if c.SnapshotName == "" {
 		def, err := interpolate.Render("packer-{{timestamp}}", nil)
@@ -61,7 +61,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.Image == "" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("1&1 'image' is required"))
 	}
 
@@ -90,7 +90,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		dcs, err := api.ListDatacenters()
 
 		if err != nil {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, err)
 		}
 		for _, dc := range dcs {
@@ -102,12 +102,12 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
-		errs = packer.MultiErrorAppend(errs, es...)
+		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
 	}
-	packer.LogSecretFilter.Set(c.Token)
+	packersdk.LogSecretFilter.Set(c.Token)
 	return nil, nil
 }

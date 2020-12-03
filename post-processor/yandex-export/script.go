@@ -110,8 +110,23 @@ if ! yc compute instance attach-disk ${INSTANCE_ID} --disk-name ${DISKNAME} --de
   Exit 1
 fi
 
+DISK_LINK="/dev/disk/by-id/virtio-doexport"
+echo "Waiting for disk..."
+for attempt in 1 2 3; do
+  sleep 3
+  /sbin/udevadm trigger
+  if [ -L "${DISK_LINK}" ]; then
+    break
+  fi
+  echo "Attempt ${attempt}"
+  if [ ${attempt} -eq 3 ]; then
+    echo "Symlink ${DISK_LINK} not found"
+    Exit 1
+  fi
+done
+
 echo "Dumping disk..."
-if ! qemu-img convert -O qcow2 -o cluster_size=2M /dev/disk/by-id/virtio-doexport disk.qcow2 ; then
+if ! qemu-img convert -O qcow2 -o cluster_size=2M "${DISK_LINK}" disk.qcow2 ; then
   echo "Failed to dump disk to qcow2 image."
   Exit 1
 fi

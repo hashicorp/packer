@@ -15,8 +15,8 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -66,7 +66,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	if p.config.ChecksumTypes == nil {
 		p.config.ChecksumTypes = []string{"md5"}
@@ -74,7 +74,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	for _, k := range p.config.ChecksumTypes {
 		if h := getHash(k); h == nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Unrecognized checksum type: %s", k))
 		}
 	}
@@ -84,7 +84,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if err = interpolate.Validate(p.config.OutputPath, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing target template: %s", err))
 	}
 
@@ -95,7 +95,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	files := artifact.Files()
 	var h hash.Hash
 

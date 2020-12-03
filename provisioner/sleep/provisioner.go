@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
@@ -15,7 +15,7 @@ type Provisioner struct {
 	Duration time.Duration
 }
 
-var _ packer.Provisioner = new(Provisioner)
+var _ packersdk.Provisioner = new(Provisioner)
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.FlatMapstructure().HCL2Spec() }
 
@@ -25,7 +25,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return config.Decode(&p, &config.DecodeOpts{}, raws...)
 }
 
-func (p *Provisioner) Provision(ctx context.Context, _ packer.Ui, _ packer.Communicator, _ map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, _ packersdk.Ui, _ packersdk.Communicator, _ map[string]interface{}) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()

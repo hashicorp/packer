@@ -14,6 +14,7 @@ import (
 
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 )
 
@@ -97,17 +98,17 @@ func (c *config) loadSingleComponent(path string) (string, error) {
 	switch {
 	case strings.HasPrefix(pluginName, "packer-builder-"):
 		pluginName = pluginName[len("packer-builder-"):]
-		c.Builders[pluginName] = func() (packer.Builder, error) {
+		c.Builders[pluginName] = func() (packersdk.Builder, error) {
 			return c.pluginClient(path).Builder()
 		}
 	case strings.HasPrefix(pluginName, "packer-post-processor-"):
 		pluginName = pluginName[len("packer-post-processor-"):]
-		c.PostProcessors[pluginName] = func() (packer.PostProcessor, error) {
+		c.PostProcessors[pluginName] = func() (packersdk.PostProcessor, error) {
 			return c.pluginClient(path).PostProcessor()
 		}
 	case strings.HasPrefix(pluginName, "packer-provisioner-"):
 		pluginName = pluginName[len("packer-provisioner-"):]
-		c.Provisioners[pluginName] = func() (packer.Provisioner, error) {
+		c.Provisioners[pluginName] = func() (packersdk.Provisioner, error) {
 			return c.pluginClient(path).Provisioner()
 		}
 	}
@@ -179,30 +180,30 @@ func (c *config) Discover() error {
 	return nil
 }
 
-// This is a proper packer.BuilderFunc that can be used to load packer.Builder
+// This is a proper packer.BuilderFunc that can be used to load packersdk.Builder
 // implementations from the defined plugins.
-func (c *config) StartBuilder(name string) (packer.Builder, error) {
+func (c *config) StartBuilder(name string) (packersdk.Builder, error) {
 	log.Printf("Loading builder: %s\n", name)
 	return c.Builders.Start(name)
 }
 
 // This is a proper implementation of packer.HookFunc that can be used
-// to load packer.Hook implementations from the defined plugins.
-func (c *config) StarHook(name string) (packer.Hook, error) {
+// to load packersdk.Hook implementations from the defined plugins.
+func (c *config) StarHook(name string) (packersdk.Hook, error) {
 	log.Printf("Loading hook: %s\n", name)
 	return c.pluginClient(name).Hook()
 }
 
-// This is a proper packer.PostProcessorFunc that can be used to load
-// packer.PostProcessor implementations from defined plugins.
-func (c *config) StartPostProcessor(name string) (packer.PostProcessor, error) {
+// This is a proper packersdk.PostProcessorFunc that can be used to load
+// packersdk.PostProcessor implementations from defined plugins.
+func (c *config) StartPostProcessor(name string) (packersdk.PostProcessor, error) {
 	log.Printf("Loading post-processor: %s", name)
 	return c.PostProcessors.Start(name)
 }
 
 // This is a proper packer.ProvisionerFunc that can be used to load
 // packer.Provisioner implementations from defined plugins.
-func (c *config) StartProvisioner(name string) (packer.Provisioner, error) {
+func (c *config) StartProvisioner(name string) (packersdk.Provisioner, error) {
 	log.Printf("Loading provisioner: %s\n", name)
 	return c.Provisioners.Start(name)
 }
@@ -224,7 +225,7 @@ func (c *config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.Builders[pluginName] = func() (packer.Builder, error) {
+		c.Builders[pluginName] = func() (packersdk.Builder, error) {
 			return c.pluginClient(newPath).Builder()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
@@ -241,7 +242,7 @@ func (c *config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.PostProcessors[pluginName] = func() (packer.PostProcessor, error) {
+		c.PostProcessors[pluginName] = func() (packersdk.PostProcessor, error) {
 			return c.pluginClient(newPath).PostProcessor()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
@@ -258,7 +259,7 @@ func (c *config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.Provisioners[pluginName] = func() (packer.Provisioner, error) {
+		c.Provisioners[pluginName] = func() (packersdk.Provisioner, error) {
 			return c.pluginClient(newPath).Provisioner()
 		}
 		externallyUsed = append(externallyUsed, pluginName)
@@ -320,7 +321,7 @@ func (c *config) discoverInternalComponents() error {
 		builder := builder
 		_, found := (c.Builders)[builder]
 		if !found {
-			c.Builders[builder] = func() (packer.Builder, error) {
+			c.Builders[builder] = func() (packersdk.Builder, error) {
 				bin := fmt.Sprintf("%s%splugin%spacker-builder-%s",
 					packerPath, PACKERSPACE, PACKERSPACE, builder)
 				return c.pluginClient(bin).Builder()
@@ -332,7 +333,7 @@ func (c *config) discoverInternalComponents() error {
 		provisioner := provisioner
 		_, found := (c.Provisioners)[provisioner]
 		if !found {
-			c.Provisioners[provisioner] = func() (packer.Provisioner, error) {
+			c.Provisioners[provisioner] = func() (packersdk.Provisioner, error) {
 				bin := fmt.Sprintf("%s%splugin%spacker-provisioner-%s",
 					packerPath, PACKERSPACE, PACKERSPACE, provisioner)
 				return c.pluginClient(bin).Provisioner()
@@ -344,7 +345,7 @@ func (c *config) discoverInternalComponents() error {
 		postProcessor := postProcessor
 		_, found := (c.PostProcessors)[postProcessor]
 		if !found {
-			c.PostProcessors[postProcessor] = func() (packer.PostProcessor, error) {
+			c.PostProcessors[postProcessor] = func() (packersdk.PostProcessor, error) {
 				bin := fmt.Sprintf("%s%splugin%spacker-post-processor-%s",
 					packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
 				return c.pluginClient(bin).PostProcessor()

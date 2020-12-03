@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepUp struct {
@@ -31,7 +31,7 @@ func (s *StepUp) generateArgs() []string {
 
 func (s *StepUp) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(VagrantDriver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Calling Vagrant Up (this can take some time)...")
 
@@ -51,7 +51,7 @@ func (s *StepUp) Run(ctx context.Context, state multistep.StateBag) multistep.St
 
 func (s *StepUp) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(VagrantDriver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say(fmt.Sprintf("%sing Vagrant box...", s.TeardownMethod))
 

@@ -3,9 +3,9 @@ package dockerimport
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
-	var _ packer.PostProcessor = new(PostProcessor)
+	var _ packersdk.PostProcessor = new(PostProcessor)
 }

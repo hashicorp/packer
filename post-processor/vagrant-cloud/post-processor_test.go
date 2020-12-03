@@ -13,7 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -229,7 +229,7 @@ func TestPostProcessor_Configure_checkAccessTokenIsNotRequiredForOverridenVagran
 }
 
 func TestPostProcessor_PostProcess_checkArtifactType(t *testing.T) {
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: "invalid.builder",
 	}
 
@@ -247,7 +247,7 @@ func TestPostProcessor_PostProcess_checkArtifactType(t *testing.T) {
 }
 
 func TestPostProcessor_PostProcess_checkArtifactFileIsBox(t *testing.T) {
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: "mitchellh.post-processor.vagrant", // good
 		FilesValue:     []string{"invalid.boxfile"},        // should have .box extension
 	}
@@ -278,7 +278,7 @@ func TestPostProcessor_PostProcess_uploadsAndReleases(t *testing.T) {
 	}
 	defer os.Remove(boxfile.Name())
 
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: "mitchellh.post-processor.vagrant",
 		FilesValue:     []string{boxfile.Name()},
 	}
@@ -325,7 +325,7 @@ func TestPostProcessor_PostProcess_uploadsAndNoRelease(t *testing.T) {
 	}
 	defer os.Remove(boxfile.Name())
 
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: "mitchellh.post-processor.vagrant",
 		FilesValue:     []string{boxfile.Name()},
 	}
@@ -373,7 +373,7 @@ func TestPostProcessor_PostProcess_uploadsDirectAndReleases(t *testing.T) {
 	}
 	defer os.Remove(boxfile.Name())
 
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: "mitchellh.post-processor.vagrant",
 		FilesValue:     []string{boxfile.Name()},
 	}
@@ -416,15 +416,15 @@ func TestPostProcessor_PostProcess_uploadsDirectAndReleases(t *testing.T) {
 	}
 }
 
-func testUi() *packer.BasicUi {
-	return &packer.BasicUi{
+func testUi() *packersdk.BasicUi {
+	return &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}
 }
 
 func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
-	var _ packer.PostProcessor = new(PostProcessor)
+	var _ packersdk.PostProcessor = new(PostProcessor)
 }
 
 func TestProviderFromBuilderName(t *testing.T) {

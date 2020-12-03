@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	helperssh "github.com/hashicorp/packer/helper/communicator/ssh"
+	helperssh "github.com/hashicorp/packer/packer-plugin-sdk/communicator/ssh"
 	"golang.org/x/crypto/ssh"
 )
 

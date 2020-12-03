@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/builder/docker"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	dockerimport "github.com/hashicorp/packer/post-processor/docker-import"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,15 +27,15 @@ func testPP(t *testing.T) *PostProcessor {
 	return &p
 }
 
-func testUi() *packer.BasicUi {
-	return &packer.BasicUi{
+func testUi() *packersdk.BasicUi {
+	return &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}
 }
 
 func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
-	var _ packer.PostProcessor = new(PostProcessor)
+	var _ packersdk.PostProcessor = new(PostProcessor)
 }
 
 func TestPostProcessor_PostProcess(t *testing.T) {
@@ -45,13 +45,13 @@ func TestPostProcessor_PostProcess(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: dockerimport.BuilderId,
 		IdValue:        "1234567890abcdef",
 	}
 
 	result, keep, forceOverride, err := p.PostProcess(context.Background(), testUi(), artifact)
-	if _, ok := result.(packer.Artifact); !ok {
+	if _, ok := result.(packersdk.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}
 	if !keep {
@@ -93,13 +93,13 @@ func TestPostProcessor_PostProcess_Force(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		BuilderIdValue: dockerimport.BuilderId,
 		IdValue:        "1234567890abcdef",
 	}
 
 	result, keep, forceOverride, err := p.PostProcess(context.Background(), testUi(), artifact)
-	if _, ok := result.(packer.Artifact); !ok {
+	if _, ok := result.(packersdk.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}
 	if !keep {
@@ -138,10 +138,10 @@ func TestPostProcessor_PostProcess_NoTag(t *testing.T) {
 		t.Fatalf("err %s", err)
 	}
 
-	artifact := &packer.MockArtifact{BuilderIdValue: dockerimport.BuilderId, IdValue: "1234567890abcdef"}
+	artifact := &packersdk.MockArtifact{BuilderIdValue: dockerimport.BuilderId, IdValue: "1234567890abcdef"}
 
 	result, keep, forceOverride, err := p.PostProcess(context.Background(), testUi(), artifact)
-	if _, ok := result.(packer.Artifact); !ok {
+	if _, ok := result.(packersdk.Artifact); !ok {
 		t.Fatal("should be instance of Artifact")
 	}
 	if !keep {

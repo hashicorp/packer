@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepCreatePVBuilder struct {
@@ -18,7 +18,7 @@ type stepCreatePVBuilder struct {
 
 func (s *stepCreatePVBuilder) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Creating builder instance...")
 
 	config := state.Get("config").(*Config)
@@ -73,7 +73,7 @@ func (s *stepCreatePVBuilder) Cleanup(state multistep.StateBag) {
 	}
 
 	// terminate instance
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("client").(*compute.Client)
 
 	ui.Say("Terminating builder instance...")

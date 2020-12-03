@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/antihax/optional"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/outscale/osc-sdk-go/osc"
 )
@@ -14,7 +14,7 @@ import (
 type TagMap map[string]string
 type OSCTags []osc.ResourceTag
 
-func (t OSCTags) Report(ui packer.Ui) {
+func (t OSCTags) Report(ui packersdk.Ui) {
 	for _, tag := range t {
 		ui.Message(fmt.Sprintf("Adding tag: \"%s\": \"%s\"",
 			tag.Key, tag.Value))
@@ -46,7 +46,7 @@ func (t TagMap) OSCTags(ctx interpolate.Context, region string, state multistep.
 	return oscTags, nil
 }
 
-func CreateOSCTags(conn *osc.APIClient, resourceID string, ui packer.Ui, tags OSCTags) error {
+func CreateOSCTags(conn *osc.APIClient, resourceID string, ui packersdk.Ui, tags OSCTags) error {
 	tags.Report(ui)
 
 	_, _, err := conn.TagApi.CreateTags(context.Background(), &osc.CreateTagsOpts{

@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func NewVMName() string {
@@ -56,7 +56,7 @@ func TestConn(t *testing.T) driver.Driver {
 	return d
 }
 
-func GetVM(t *testing.T, d driver.Driver, artifacts []packer.Artifact) driver.VirtualMachine {
+func GetVM(t *testing.T, d driver.Driver, artifacts []packersdk.Artifact) driver.VirtualMachine {
 	artifactRaw := artifacts[0]
 	artifact, _ := artifactRaw.(*common.Artifact)
 

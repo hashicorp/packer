@@ -4,12 +4,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestArtifactRPC(t *testing.T) {
 	// Create the interface to test
-	a := new(packer.MockArtifact)
+	a := new(packersdk.MockArtifact)
 
 	// Start the server
 	client, server := testClientServer(t)
@@ -38,5 +38,5 @@ func TestArtifactRPC(t *testing.T) {
 }
 
 func TestArtifact_Implements(t *testing.T) {
-	var _ packer.Artifact = new(artifact)
+	var _ packersdk.Artifact = new(artifact)
 }

@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step configures a VMX by setting some default settings as well
@@ -32,7 +32,7 @@ func (s *StepConfigureVMX) Run(ctx context.Context, state multistep.StateBag) mu
 	log.Printf("Configuring VMX...\n")
 
 	var err error
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	vmxPath := state.Get("vmx_path").(string)
 	vmxData, err := ReadVMX(vmxPath)

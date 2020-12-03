@@ -7,8 +7,8 @@ import (
 	"github.com/antihax/optional"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/hashicorp/packer/builder/osc/common/retry"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/outscale/osc-sdk-go/osc"
 )
@@ -21,7 +21,7 @@ type StepCreateTags struct {
 
 func (s *StepCreateTags) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("accessConfig").(*AccessConfig)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	omis := state.Get("omis").(map[string]string)
 
 	if !s.Tags.IsSet() && !s.SnapshotTags.IsSet() {

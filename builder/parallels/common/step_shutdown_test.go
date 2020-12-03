@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestStepShutdown_impl(t *testing.T) {
@@ -17,7 +17,7 @@ func TestStepShutdown_noShutdownCommand(t *testing.T) {
 	state := testState(t)
 	step := new(StepShutdown)
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 	state.Put("vmName", "foo")
 
@@ -46,7 +46,7 @@ func TestStepShutdown_shutdownCommand(t *testing.T) {
 	step.Command = "poweroff"
 	step.Timeout = 1 * time.Second
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 	state.Put("vmName", "foo")
 
@@ -83,7 +83,7 @@ func TestStepShutdown_shutdownTimeout(t *testing.T) {
 	step.Command = "poweroff"
 	step.Timeout = 1 * time.Second
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 	state.Put("vmName", "foo")
 

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepGetCertificate struct {
@@ -18,7 +18,7 @@ type StepGetCertificate struct {
 	pause  func()
 }
 
-func NewStepGetCertificate(client *AzureClient, ui packer.Ui) *StepGetCertificate {
+func NewStepGetCertificate(client *AzureClient, ui packersdk.Ui) *StepGetCertificate {
 	var step = &StepGetCertificate{
 		client: client,
 		say:    func(message string) { ui.Say(message) },

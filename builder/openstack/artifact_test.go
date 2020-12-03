@@ -3,11 +3,11 @@ package openstack
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestArtifact_Impl(t *testing.T) {
-	var _ packer.Artifact = new(Artifact)
+	var _ packersdk.Artifact = new(Artifact)
 }
 
 func TestArtifactId(t *testing.T) {

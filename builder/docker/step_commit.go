@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepCommit commits the container to a image.
@@ -14,7 +14,7 @@ type StepCommit struct {
 }
 
 func (s *StepCommit) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config, ok := state.Get("config").(*Config)
 	if !ok {
 		err := fmt.Errorf("error encountered obtaining docker config")

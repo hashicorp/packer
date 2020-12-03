@@ -4,23 +4,23 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-// An implementation of packer.Builder where the builder is actually executed
+// An implementation of packersdk.Builder where the builder is actually executed
 // over an RPC connection.
 type builder struct {
 	commonClient
 }
 
-// BuilderServer wraps a packer.Builder implementation and makes it exportable
+// BuilderServer wraps a packersdk.Builder implementation and makes it exportable
 // as part of a Golang RPC server.
 type BuilderServer struct {
 	context       context.Context
 	contextCancel func()
 
 	commonServer
-	builder packer.Builder
+	builder packersdk.Builder
 }
 
 type BuilderPrepareArgs struct {
@@ -51,7 +51,7 @@ func (b *builder) Prepare(config ...interface{}) ([]string, []string, error) {
 	return resp.GeneratedVars, resp.Warnings, err
 }
 
-func (b *builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	nextId := b.mux.NextId()
 	server := newServerWithMux(b.mux, nextId)
 	server.RegisterHook(hook)

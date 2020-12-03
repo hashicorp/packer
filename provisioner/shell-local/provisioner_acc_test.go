@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/provisioner/shell"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"github.com/hashicorp/packer/command"
 )
@@ -41,7 +42,7 @@ func (s *ShellLocalProvisionerAccTest) GetConfig() (string, error) {
 
 func (s *ShellLocalProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
 	return packer.MapOfProvisioner{
-		"shell-local": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
+		"shell-local": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
 	}
 }
 
@@ -51,7 +52,7 @@ func (s *ShellLocalProvisionerAccTest) IsCompatible(builder string, vmOS string)
 
 func (s *ShellLocalProvisionerAccTest) RunTest(c *command.BuildCommand, args []string) error {
 	if code := c.Run(args); code != 0 {
-		ui := c.Meta.Ui.(*packer.BasicUi)
+		ui := c.Meta.Ui.(*packersdk.BasicUi)
 		out := ui.Writer.(*bytes.Buffer)
 		err := ui.ErrorWriter.(*bytes.Buffer)
 		return fmt.Errorf(

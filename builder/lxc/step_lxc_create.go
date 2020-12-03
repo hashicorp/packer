@@ -7,15 +7,15 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type stepLxcCreate struct{}
 
 func (s *stepLxcCreate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	name := config.ContainerName
 
@@ -65,7 +65,7 @@ func (s *stepLxcCreate) Run(ctx context.Context, state multistep.StateBag) multi
 
 func (s *stepLxcCreate) Cleanup(state multistep.StateBag) {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	command := []string{
 		"lxc-destroy", "-f", "-n", config.ContainerName,

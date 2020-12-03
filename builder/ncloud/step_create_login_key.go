@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type LoginKey struct {
@@ -22,7 +22,7 @@ type StepCreateLoginKey struct {
 	Error          func(e error)
 }
 
-func NewStepCreateLoginKey(conn *NcloudAPIClient, ui packer.Ui) *StepCreateLoginKey {
+func NewStepCreateLoginKey(conn *NcloudAPIClient, ui packersdk.Ui) *StepCreateLoginKey {
 	var step = &StepCreateLoginKey{
 		Conn:  conn,
 		Say:   func(message string) { ui.Say(message) },

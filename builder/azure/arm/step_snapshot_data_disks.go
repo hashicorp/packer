@@ -8,8 +8,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepSnapshotDataDisks struct {
@@ -20,7 +20,7 @@ type StepSnapshotDataDisks struct {
 	enable func() bool
 }
 
-func NewStepSnapshotDataDisks(client *AzureClient, ui packer.Ui, config *Config) *StepSnapshotDataDisks {
+func NewStepSnapshotDataDisks(client *AzureClient, ui packersdk.Ui, config *Config) *StepSnapshotDataDisks {
 	var step = &StepSnapshotDataDisks{
 		client: client,
 		say:    func(message string) { ui.Say(message) },

@@ -9,8 +9,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/hashicorp/packer/builder/azure/common/client"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 var _ multistep.Step = &StepVerifySharedImageSource{}
@@ -26,7 +26,7 @@ type StepVerifySharedImageSource struct {
 // Run retrieves the image metadata from Azure and compares the location to Location. Verifies the OS Type.
 func (s *StepVerifySharedImageSource) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	errorMessage := func(message string, parameters ...interface{}) multistep.StepAction {
 		err := fmt.Errorf(message, parameters...)

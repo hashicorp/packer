@@ -6,8 +6,8 @@ package lxd
 import (
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/mitchellh/mapstructure"
@@ -56,7 +56,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	}
 
 	// Accumulate any errors
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
 	if c.ContainerName == "" {
 		c.ContainerName = fmt.Sprintf("packer-%s", c.PackerBuildName)
@@ -71,7 +71,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	}
 
 	if c.Image == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("`image` is a required parameter for LXD. Please specify an image by alias or fingerprint. e.g. `ubuntu-daily:x`"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("`image` is a required parameter for LXD. Please specify an image by alias or fingerprint. e.g. `ubuntu-daily:x`"))
 	}
 
 	if c.Profile == "" {

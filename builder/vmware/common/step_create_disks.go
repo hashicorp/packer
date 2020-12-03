@@ -6,8 +6,8 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step creates the virtual disks for the VM.
@@ -15,7 +15,7 @@ import (
 // Uses:
 //   config *config
 //   driver Driver
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //
 // Produces:
 //   disk_full_paths ([]string) - The full paths to all created disks
@@ -31,7 +31,7 @@ type StepCreateDisks struct {
 
 func (s *StepCreateDisks) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Creating required virtual machine disks")
 

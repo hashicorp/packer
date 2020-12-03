@@ -197,11 +197,11 @@ builder.
     This will fail unless _exactly_ one OMIS is returned. In the above example,
     `most_recent` will cause this to succeed by selecting the newest image.
 
-@include 'helper/communicator/SSH-Private-Key-File-not-required.mdx'
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
 
-@include 'helper/communicator/SSH-Key-Pair-Name-not-required.mdx'
+@include 'packer-plugin-sdk/communicator/SSH-Key-Pair-Name-not-required.mdx'
 
-@include 'helper/communicator/SSH-Agent-Auth-not-required.mdx'
+@include 'packer-plugin-sdk/communicator/SSH-Agent-Auth-not-required.mdx'
 
 - `ssh_interface` (string) - One of `public_ip`, `private_ip`, `public_dns`, or `private_dns`. If set, either the public IP address, private IP address, public DNS name or private DNS name will used as the host for SSH. The default behaviour if inside a Net is to use the public IP address if available, otherwise the private IP address will be used. If not in a Net the public DNS name will be used. Also works for WinRM.
 

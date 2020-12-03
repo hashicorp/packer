@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 )
 
@@ -27,7 +28,7 @@ type TestCase struct {
 
 	// Builder is the Builder that will be tested. It will be available
 	// as the "test" builder in the template.
-	Builder packer.Builder
+	Builder packersdk.Builder
 
 	// Template is the template contents to use.
 	Template string
@@ -49,7 +50,7 @@ type TestCase struct {
 }
 
 // TestCheckFunc is the callback used for Check in TestStep.
-type TestCheckFunc func([]packer.Artifact) error
+type TestCheckFunc func([]packersdk.Artifact) error
 
 // TestTeardownFunc is the callback used for Teardown in TestCase.
 type TestTeardownFunc func() error
@@ -65,10 +66,10 @@ type TestT interface {
 
 type TestBuilderStore struct {
 	packer.BuilderStore
-	StartFn func(name string) (packer.Builder, error)
+	StartFn func(name string) (packersdk.Builder, error)
 }
 
-func (tbs TestBuilderStore) Start(name string) (packer.Builder, error) { return tbs.StartFn(name) }
+func (tbs TestBuilderStore) Start(name string) (packersdk.Builder, error) { return tbs.StartFn(name) }
 
 // Test performs an acceptance test on a backend with the given test case.
 //
@@ -114,7 +115,7 @@ func Test(t TestT, c TestCase) {
 	core := packer.NewCore(&packer.CoreConfig{
 		Components: packer.ComponentFinder{
 			BuilderStore: TestBuilderStore{
-				StartFn: func(n string) (packer.Builder, error) {
+				StartFn: func(n string) (packersdk.Builder, error) {
 					if n == "test" {
 						return c.Builder, nil
 					}
@@ -156,7 +157,7 @@ func Test(t TestT, c TestCase) {
 	// Run it! We use a temporary directory for caching and discard
 	// any UI output. We discard since it shows up in logs anyways.
 	log.Printf("[DEBUG] Running 'test' build")
-	ui := &packer.BasicUi{
+	ui := &packersdk.BasicUi{
 		Reader:      os.Stdin,
 		Writer:      ioutil.Discard,
 		ErrorWriter: ioutil.Discard,

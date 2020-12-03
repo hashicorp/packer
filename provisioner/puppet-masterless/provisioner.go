@@ -13,9 +13,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/guestexec"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -127,7 +127,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 
 type Provisioner struct {
 	config            Config
-	communicator      packer.Communicator
+	communicator      packersdk.Communicator
 	guestOSTypeConfig guestOSTypeConfig
 	guestCommands     *guestexec.GuestCommands
 	generatedData     map[string]interface{}
@@ -205,14 +205,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.config.Facter["packer_builder_type"] = p.config.PackerBuilderType
 
 	// Validation
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	if p.config.HieraConfigPath != "" {
 		info, err := os.Stat(p.config.HieraConfigPath)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("hiera_config_path is invalid: %s", err))
 		} else if info.IsDir() {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("hiera_config_path must point to a file"))
 		}
 	}
@@ -220,21 +220,21 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.ManifestDir != "" {
 		info, err := os.Stat(p.config.ManifestDir)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("manifest_dir is invalid: %s", err))
 		} else if !info.IsDir() {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("manifest_dir must point to a directory"))
 		}
 	}
 
 	if p.config.ManifestFile == "" {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			fmt.Errorf("A manifest_file must be specified."))
 	} else {
 		_, err := os.Stat(p.config.ManifestFile)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("manifest_file is invalid: %s", err))
 		}
 	}
@@ -242,10 +242,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	for i, path := range p.config.ModulePaths {
 		info, err := os.Stat(path)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("module_path[%d] is invalid: %s", i, err))
 		} else if !info.IsDir() {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("module_path[%d] must point to a directory", i))
 		}
 	}
@@ -257,7 +257,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Puppet...")
 	p.communicator = comm
 	p.generatedData = generatedData
@@ -344,7 +344,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 		}
 	}
 
-	cmd := &packer.RemoteCmd{
+	cmd := &packersdk.RemoteCmd{
 		Command: command,
 	}
 
@@ -366,7 +366,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	return nil
 }
 
-func (p *Provisioner) uploadHieraConfig(ui packer.Ui, comm packer.Communicator) (string, error) {
+func (p *Provisioner) uploadHieraConfig(ui packersdk.Ui, comm packersdk.Communicator) (string, error) {
 	ui.Message("Uploading hiera configuration...")
 	f, err := os.Open(p.config.HieraConfigPath)
 	if err != nil {
@@ -382,7 +382,7 @@ func (p *Provisioner) uploadHieraConfig(ui packer.Ui, comm packer.Communicator) 
 	return path, nil
 }
 
-func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (string, error) {
+func (p *Provisioner) uploadManifests(ui packersdk.Ui, comm packersdk.Communicator) (string, error) {
 	// Create the remote manifests directory...
 	ui.Message("Uploading manifests...")
 	remoteManifestsPath := fmt.Sprintf("%s/manifests", p.config.StagingDir)
@@ -428,10 +428,10 @@ func (p *Provisioner) uploadManifests(ui packer.Ui, comm packer.Communicator) (s
 	return remoteManifestFile, nil
 }
 
-func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) createDir(ui packersdk.Ui, comm packersdk.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 
-	cmd := &packer.RemoteCmd{Command: p.guestCommands.CreateDir(dir)}
+	cmd := &packersdk.RemoteCmd{Command: p.guestCommands.CreateDir(dir)}
 	ctx := context.TODO()
 
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
@@ -443,7 +443,7 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 	}
 
 	// Chmod the directory to 0777 just so that we can access it as our user
-	cmd = &packer.RemoteCmd{Command: p.guestCommands.Chmod(dir, "0777")}
+	cmd = &packersdk.RemoteCmd{Command: p.guestCommands.Chmod(dir, "0777")}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
@@ -454,10 +454,10 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 	return nil
 }
 
-func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+func (p *Provisioner) removeDir(ui packersdk.Ui, comm packersdk.Communicator, dir string) error {
 	ctx := context.TODO()
 
-	cmd := &packer.RemoteCmd{Command: p.guestCommands.RemoveDir(dir)}
+	cmd := &packersdk.RemoteCmd{Command: p.guestCommands.RemoveDir(dir)}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
 	}
@@ -469,7 +469,7 @@ func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir stri
 	return nil
 }
 
-func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, dst string, src string) error {
+func (p *Provisioner) uploadDirectory(ui packersdk.Ui, comm packersdk.Communicator, dst string, src string) error {
 	if err := p.createDir(ui, comm, dst); err != nil {
 		return err
 	}
@@ -483,7 +483,7 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 	return comm.UploadDir(dst, src, nil)
 }
 
-func (p *Provisioner) Communicator() packer.Communicator {
+func (p *Provisioner) Communicator() packersdk.Communicator {
 	return p.communicator
 }
 

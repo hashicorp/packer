@@ -11,8 +11,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestCreateConfig_Prepare(t *testing.T) {
@@ -307,7 +307,7 @@ func TestStepCreateVM_Cleanup(t *testing.T) {
 
 	// Destroy fail
 	errorBuffer := &strings.Builder{}
-	ui := &packer.BasicUi{
+	ui := &packersdk.BasicUi{
 		Reader:      strings.NewReader(""),
 		Writer:      ioutil.Discard,
 		ErrorWriter: errorBuffer,

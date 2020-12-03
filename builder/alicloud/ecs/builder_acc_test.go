@@ -9,7 +9,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 const defaultTestRegion = "cn-beijing"
@@ -104,7 +104,7 @@ const testBuilderAccWithDiskSettings = `
 }`
 
 func checkImageDisksSettings() builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		if len(artifacts) > 1 {
 			return fmt.Errorf("more than 1 artifact")
 		}
@@ -215,7 +215,7 @@ const testBuilderAccIgnoreDataDisks = `
 }`
 
 func checkIgnoreDataDisks() builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		if len(artifacts) > 1 {
 			return fmt.Errorf("more than 1 artifact")
 		}
@@ -308,7 +308,7 @@ const testBuilderAccRegionCopy = `
 `
 
 func checkRegionCopy(regions []string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		if len(artifacts) > 1 {
 			return fmt.Errorf("more than 1 artifact")
 		}
@@ -438,7 +438,7 @@ const testBuilderAccSharing = `
 `
 
 func checkECSImageSharing(uid string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		if len(artifacts) > 1 {
 			return fmt.Errorf("more than 1 artifact")
 		}
@@ -534,7 +534,7 @@ const testBuilderAccForceDeleteSnapshot = `
 `
 
 func checkSnapshotsDeleted(snapshotIds []string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		// Verify the snapshots are gone
 		client, _ := testAliyunClient()
 		data, err := json.Marshal(snapshotIds)
@@ -587,7 +587,7 @@ const testBuilderAccImageTags = `
 }`
 
 func checkImageTags() builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		if len(artifacts) > 1 {
 			return fmt.Errorf("more than 1 artifact")
 		}
@@ -716,7 +716,7 @@ const testBuilderAccDataDiskEncrypted = `
 }`
 
 func checkDataDiskEncrypted() builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		if len(artifacts) > 1 {
 			return fmt.Errorf("more than 1 artifact")
 		}
@@ -815,7 +815,7 @@ const testBuilderAccSystemDiskEncrypted = `
 }`
 
 func checkSystemDiskEncrypted() builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
+	return func(artifacts []packersdk.Artifact) error {
 		if len(artifacts) > 1 {
 			return fmt.Errorf("more than 1 artifact")
 		}

@@ -12,10 +12,10 @@ import (
 	"github.com/hashicorp/go-oracle-terraform/opc"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	ocommon "github.com/hashicorp/packer/builder/oracle/common"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // BuilderId uniquely identifies the builder
@@ -35,9 +35,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		return nil, nil, err
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 
-	errs = packer.MultiErrorAppend(errs, b.config.PVConfig.Prepare(&b.config.ctx))
+	errs = packersdk.MultiErrorAppend(errs, b.config.PVConfig.Prepare(&b.config.ctx))
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs
@@ -45,7 +45,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, nil, nil
 }
 
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	loggingEnabled := os.Getenv("PACKER_OCI_CLASSIC_LOGGING") != ""
 	httpClient := cleanhttp.DefaultClient()
 	config := &opc.Config{

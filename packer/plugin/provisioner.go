@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type cmdProvisioner struct {
-	p      packer.Provisioner
+	p      packersdk.Provisioner
 	client *Client
 }
 
@@ -31,7 +31,7 @@ func (c *cmdProvisioner) Prepare(configs ...interface{}) error {
 	return c.p.Prepare(configs...)
 }
 
-func (c *cmdProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (c *cmdProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)

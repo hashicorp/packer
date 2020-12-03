@@ -9,8 +9,8 @@ import (
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
@@ -28,7 +28,7 @@ func (s *stepCopyUCloudImage) Run(ctx context.Context, state multistep.StateBag)
 
 	client := state.Get("client").(*ucloudcommon.UCloudClient)
 	conn := client.UHostConn
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	srcImageId := state.Get("image_id").(string)
 	artifactImages := state.Get("ucloud_images").(*ucloudcommon.ImageInfoSet)
@@ -123,7 +123,7 @@ func (s *stepCopyUCloudImage) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("client").(*ucloudcommon.UCloudClient)
 	conn := client.UHostConn
 	ui.Say(fmt.Sprintf("Deleting copied image because of cancellation or error..."))

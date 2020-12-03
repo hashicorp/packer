@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -260,7 +261,7 @@ func (cfg *PackerConfig) Initialize() hcl.Diagnostics {
 		value, _ := variable.Value()
 		_ = cty.Walk(value, func(_ cty.Path, nested cty.Value) (bool, error) {
 			if nested.IsWhollyKnown() && !nested.IsNull() && nested.Type().Equals(cty.String) {
-				packer.LogSecretFilter.Set(nested.AsString())
+				packersdk.LogSecretFilter.Set(nested.AsString())
 			}
 			return true, nil
 		})

@@ -13,8 +13,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepCreateWindowsPassword represents a Packer build step that sets the windows password on a Windows GCE instance.
@@ -25,14 +25,14 @@ type StepCreateWindowsPassword struct {
 
 // Run executes the Packer build step that sets the windows password on a Windows GCE instance.
 func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	d := state.Get("driver").(Driver)
 	c := state.Get("config").(*Config)
 	name := state.Get("instance_name").(string)
 
 	if c.Comm.WinRMPassword != "" {
 		state.Put("winrm_password", c.Comm.WinRMPassword)
-		packer.LogSecretFilter.Set(c.Comm.WinRMPassword)
+		packersdk.LogSecretFilter.Set(c.Comm.WinRMPassword)
 		return multistep.ActionContinue
 	}
 
@@ -118,7 +118,7 @@ func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.Sta
 	}
 
 	state.Put("winrm_password", data.password)
-	packer.LogSecretFilter.Set(data.password)
+	packersdk.LogSecretFilter.Set(data.password)
 
 	return multistep.ActionContinue
 }

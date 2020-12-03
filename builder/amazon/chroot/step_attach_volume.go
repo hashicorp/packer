@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepAttachVolume attaches the previously created volume to an
@@ -28,7 +28,7 @@ func (s *StepAttachVolume) Run(ctx context.Context, state multistep.StateBag) mu
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	device := state.Get("device").(string)
 	instance := state.Get("instance").(*ec2.Instance)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	volumeId := state.Get("volume_id").(string)
 
 	// For the API call, it expects "sd" prefixed devices.
@@ -65,7 +65,7 @@ func (s *StepAttachVolume) Run(ctx context.Context, state multistep.StateBag) mu
 }
 
 func (s *StepAttachVolume) Cleanup(state multistep.StateBag) {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	if err := s.CleanupFunc(state); err != nil {
 		ui.Error(err.Error())
 	}
@@ -77,7 +77,7 @@ func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 	}
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Detaching EBS volume...")
 	_, err := ec2conn.DetachVolume(&ec2.DetachVolumeInput{VolumeId: &s.volumeId})

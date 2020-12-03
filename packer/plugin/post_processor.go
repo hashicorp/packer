@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type cmdPostProcessor struct {
-	p      packer.PostProcessor
+	p      packersdk.PostProcessor
 	client *Client
 }
 
@@ -31,7 +31,7 @@ func (c *cmdPostProcessor) Configure(config ...interface{}) error {
 	return c.p.Configure(config...)
 }
 
-func (c *cmdPostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (c *cmdPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)

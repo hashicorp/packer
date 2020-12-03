@@ -9,8 +9,8 @@ import (
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -27,7 +27,7 @@ type StepValidateTemplate struct {
 }
 
 // NewStepValidateTemplate : function for Validation a template
-func NewStepValidateTemplate(conn *NcloudAPIClient, ui packer.Ui, config *Config) *StepValidateTemplate {
+func NewStepValidateTemplate(conn *NcloudAPIClient, ui packersdk.Ui, config *Config) *StepValidateTemplate {
 	var step = &StepValidateTemplate{
 		Conn:   conn,
 		Say:    func(message string) { ui.Say(message) },

@@ -8,8 +8,8 @@ import (
 	"sort"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepNetworkInfo queries AWS for information about
@@ -46,7 +46,7 @@ func mostFreeSubnet(subnets []*ec2.Subnet) *ec2.Subnet {
 
 func (s *StepNetworkInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// VPC
 	if s.VpcId == "" && !s.VpcFilter.Empty() {

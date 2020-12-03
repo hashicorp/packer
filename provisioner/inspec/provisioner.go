@@ -31,6 +31,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/adapter"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
@@ -95,10 +96,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.SubCommand = "exec"
 	}
 
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	err = validateProfileConfig(p.config.Profile)
 	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
 	// Check that the authorized key file exists
@@ -106,14 +107,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		err = validateFileConfig(p.config.SSHAuthorizedKeyFile, "ssh_authorized_key_file", true)
 		if err != nil {
 			log.Println(p.config.SSHAuthorizedKeyFile, "does not exist")
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 	if len(p.config.SSHHostKeyFile) > 0 {
 		err = validateFileConfig(p.config.SSHHostKeyFile, "ssh_host_key_file", true)
 		if err != nil {
 			log.Println(p.config.SSHHostKeyFile, "does not exist")
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
@@ -122,11 +123,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if _, ok := SupportedBackends[p.config.Backend]; !ok {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("backend: %s must be a valid backend", p.config.Backend))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("backend: %s must be a valid backend", p.config.Backend))
 	}
 
 	if p.config.Backend == "docker" && p.config.Host == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("backend: host must be specified for docker backend"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("backend: host must be specified for docker backend"))
 	}
 
 	if p.config.Host == "" {
@@ -134,27 +135,27 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.LocalPort > 65535 {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("local_port: %d must be a valid port", p.config.LocalPort))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("local_port: %d must be a valid port", p.config.LocalPort))
 	}
 
 	if len(p.config.AttributesDirectory) > 0 {
 		err = validateDirectoryConfig(p.config.AttributesDirectory, "attrs")
 		if err != nil {
 			log.Println(p.config.AttributesDirectory, "does not exist")
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		}
 	}
 
 	if p.config.User == "" {
 		usr, err := user.Current()
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
+			errs = packersdk.MultiErrorAppend(errs, err)
 		} else {
 			p.config.User = usr.Username
 		}
 	}
 	if p.config.User == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -190,7 +191,7 @@ func (p *Provisioner) getVersion() error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 	ui.Say("Provisioning with Inspec...")
 	p.config.ctx.Data = generatedData
 
@@ -341,7 +342,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.C
 	return nil
 }
 
-func (p *Provisioner) executeInspec(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
+func (p *Provisioner) executeInspec(ui packersdk.Ui, comm packersdk.Communicator, privKeyFile string) error {
 	var envvars []string
 
 	args := []string{p.config.SubCommand, p.config.Profile}

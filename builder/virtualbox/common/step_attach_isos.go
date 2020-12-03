@@ -6,8 +6,8 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step attaches the boot ISO, cd_files iso, and guest additions to the
@@ -22,7 +22,7 @@ type StepAttachISOs struct {
 
 func (s *StepAttachISOs) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	// Check whether there is anything to attach
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Mounting ISOs...")
 	diskMountMap := map[string]string{}

@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // Artifact is an artifact implementation that contains built AMIs.
@@ -103,7 +103,7 @@ func (a *Artifact) Destroy() error {
 		if len(errors) == 1 {
 			return errors[0]
 		} else {
-			return &packer.MultiError{Errors: errors}
+			return &packersdk.MultiError{Errors: errors}
 		}
 	}
 

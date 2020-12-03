@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 )
 
@@ -63,7 +63,7 @@ func SSHHost(usePrivateIp bool) func(multistep.StateBag) (string, error) {
 }
 
 func Halt(state multistep.StateBag, err error, prefix string) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if prefix != "" {
 		err = fmt.Errorf("%s: %s", prefix, err)

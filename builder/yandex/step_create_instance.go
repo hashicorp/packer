@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 
 	"github.com/c2h5oh/datasize"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
 	"github.com/hashicorp/packer/packer-plugin-sdk/uuid"
 
@@ -146,7 +146,7 @@ func getImage(ctx context.Context, c *Config, d Driver) (*Image, error) {
 
 func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 
@@ -205,14 +205,17 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		return stepHaltWithError(state, fmt.Errorf("Error preparing instance metadata: %s", err))
 	}
 
-	// TODO make part metadata prepare process
 	if config.UseIPv6 {
-		// this ugly hack will replace user provided 'user-data'
-		userData := `#cloud-config
-runcmd:
-- [ sh, -c, '/sbin/dhclient -6 -D LL -nw -pf /run/dhclient_ipv6.eth0.pid -lf /var/lib/dhcp/dhclient_ipv6.eth0.leases eth0' ]
-`
-		instanceMetadata["user-data"] = userData
+		ui.Say("Prepare user-data...")
+
+		oldUserData, ok := instanceMetadata["user-data"]
+		if !ok {
+			oldUserData = ""
+		}
+		instanceMetadata["user-data"], err = MergeCloudUserMetaData(oldUserData, cloudInitIPv6Config)
+		if err != nil {
+			return stepHaltWithError(state, fmt.Errorf("Error merge user data configs: %s", err))
+		}
 	}
 
 	req := &compute.CreateInstanceRequest{
@@ -314,7 +317,7 @@ runcmd:
 func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ctx, cancel := context.WithTimeout(context.Background(), config.StateTimeout)
 	defer cancel()
@@ -387,7 +390,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 
 func (s *StepCreateInstance) writeSerialLogFile(ctx context.Context, state multistep.StateBag) error {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	instanceID := state.Get("instance_id").(string)
 	ui.Say("Try get instance's serial port output and write to file " + s.SerialLogFile)

@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step exports a VM built on ESXi using ovftool
@@ -55,7 +55,7 @@ func (s *StepExport) generateLocalExportArgs(exportOutputPath string) ([]string,
 
 func (s *StepExport) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("driverConfig").(*DriverConfig)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	driver := state.Get("driver").(Driver)
 
 	// Skip export if requested

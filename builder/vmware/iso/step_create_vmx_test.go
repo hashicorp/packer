@@ -16,6 +16,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/provisioner/shell"
 )
@@ -138,16 +139,16 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 	// create our config to test the vmware-iso builder
 	components := packer.ComponentFinder{
 		BuilderStore: packer.MapOfBuilder{
-			"vmware-iso": func() (packer.Builder, error) { return &Builder{}, nil },
+			"vmware-iso": func() (packersdk.Builder, error) { return &Builder{}, nil },
 		},
-		Hook: func(n string) (packer.Hook, error) {
-			return &packer.DispatchHook{}, nil
+		Hook: func(n string) (packersdk.Hook, error) {
+			return &packersdk.DispatchHook{}, nil
 		},
 		ProvisionerStore: packer.MapOfProvisioner{
-			"shell": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
+			"shell": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
 		},
 		PostProcessorStore: packer.MapOfPostProcessor{
-			"something": func() (packer.PostProcessor, error) { return &packer.MockPostProcessor{}, nil },
+			"something": func() (packersdk.PostProcessor, error) { return &packer.MockPostProcessor{}, nil },
 		},
 	}
 	config := packer.CoreConfig{

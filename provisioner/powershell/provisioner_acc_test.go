@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/helper/tests/acc"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/provisioner/powershell"
 	windowsshellprovisioner "github.com/hashicorp/packer/provisioner/windows-shell"
 )
@@ -64,8 +65,8 @@ func (s *PowershellProvisionerAccTest) GetConfig() (string, error) {
 
 func (s *PowershellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
 	return packer.MapOfProvisioner{
-		TestProvisionerName: func() (packer.Provisioner, error) { return &powershell.Provisioner{}, nil },
-		"windows-shell":     func() (packer.Provisioner, error) { return &windowsshellprovisioner.Provisioner{}, nil },
+		TestProvisionerName: func() (packersdk.Provisioner, error) { return &powershell.Provisioner{}, nil },
+		"windows-shell":     func() (packersdk.Provisioner, error) { return &windowsshellprovisioner.Provisioner{}, nil },
 	}
 }
 
@@ -81,7 +82,7 @@ func (s *PowershellProvisionerAccTest) RunTest(c *command.BuildCommand, args []s
 	}
 
 	if code := c.Run(args); code != 0 {
-		ui := c.Meta.Ui.(*packer.BasicUi)
+		ui := c.Meta.Ui.(*packersdk.BasicUi)
 		out := ui.Writer.(*bytes.Buffer)
 		err := ui.ErrorWriter.(*bytes.Buffer)
 		return fmt.Errorf(

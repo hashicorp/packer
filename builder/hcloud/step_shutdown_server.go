@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hetznercloud/hcloud-go/hcloud"
 )
 
@@ -13,7 +13,7 @@ type stepShutdownServer struct{}
 
 func (s *stepShutdownServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("hcloudClient").(*hcloud.Client)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	serverID := state.Get("server_id").(int)
 
 	ui.Say("Shutting down server...")

@@ -1,6 +1,9 @@
 package packer
 
-import "github.com/hashicorp/hcl/v2"
+import (
+	"github.com/hashicorp/hcl/v2"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+)
 
 type GetBuildsOptions struct {
 	// Get builds except the ones that match with except and with only the ones
@@ -56,7 +59,7 @@ type ConfigFixer interface {
 }
 
 type InspectConfigOptions struct {
-	Ui
+	packersdk.Ui
 }
 
 type ConfigInspector interface {

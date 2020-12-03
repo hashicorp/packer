@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type Communicator struct {
@@ -18,7 +18,7 @@ type Communicator struct {
 	CmdWrapper    CommandWrapper
 }
 
-func (c *Communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
+func (c *Communicator) Start(ctx context.Context, cmd *packersdk.RemoteCmd) error {
 	localCmd, err := c.Execute(cmd.Command)
 
 	if err != nil {
@@ -61,7 +61,7 @@ func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 	fileDestination := filepath.Join(c.ContainerName, dst)
 	// find out if the place we are pushing to is a directory
 	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, dst)
-	cmd := &packer.RemoteCmd{Command: testDirectoryCommand}
+	cmd := &packersdk.RemoteCmd{Command: testDirectoryCommand}
 	err := c.Start(ctx, cmd)
 
 	if err != nil {

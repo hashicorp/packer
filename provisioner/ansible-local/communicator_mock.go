@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type communicatorMock struct {
@@ -13,7 +13,7 @@ type communicatorMock struct {
 	uploadDestination []string
 }
 
-func (c *communicatorMock) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
+func (c *communicatorMock) Start(ctx context.Context, cmd *packersdk.RemoteCmd) error {
 	c.startCommand = append(c.startCommand, cmd.Command)
 	cmd.SetExited(0)
 	return nil

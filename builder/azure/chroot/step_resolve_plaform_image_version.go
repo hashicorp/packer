@@ -8,8 +8,8 @@ import (
 
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/hashicorp/packer/builder/azure/common/client"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepResolvePlatformImageVersion resolves the exact PIR version when the version is 'latest'
@@ -20,7 +20,7 @@ type StepResolvePlatformImageVersion struct {
 
 // Run retrieves all available versions of a PIR image and stores the latest in the PlatformImage
 func (pi *StepResolvePlatformImageVersion) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if strings.EqualFold(pi.Version, "latest") {
 		azcli := state.Get("azureclient").(client.AzureClientSet)

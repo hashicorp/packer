@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This is the common builder ID to all of these artifacts.
@@ -23,7 +23,7 @@ type artifact struct {
 }
 
 // NewArtifact returns a vagrant artifact containing the .box file
-func NewArtifact(provider, dir string, generatedData map[string]interface{}) packer.Artifact {
+func NewArtifact(provider, dir string, generatedData map[string]interface{}) packersdk.Artifact {
 	return &artifact{
 		OutputDir: dir,
 		BoxName:   "package.box",

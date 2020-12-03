@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/packer/provisioner/shell"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
@@ -44,8 +45,8 @@ func (s *ShellProvisionerAccTest) GetConfig() (string, error) {
 
 func (s *ShellProvisionerAccTest) GetProvisionerStore() packer.MapOfProvisioner {
 	return packer.MapOfProvisioner{
-		"shell": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
-		"file":  func() (packer.Provisioner, error) { return &file.Provisioner{}, nil },
+		"shell": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
+		"file":  func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
 	}
 }
 
@@ -64,7 +65,7 @@ func (s *ShellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string
 	defer testshelper.CleanupFiles(file)
 
 	if code := c.Run(args); code != 0 {
-		ui := c.Meta.Ui.(*packer.BasicUi)
+		ui := c.Meta.Ui.(*packersdk.BasicUi)
 		out := ui.Writer.(*bytes.Buffer)
 		err := ui.ErrorWriter.(*bytes.Buffer)
 		return fmt.Errorf(

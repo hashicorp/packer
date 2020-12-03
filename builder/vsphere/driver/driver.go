@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
@@ -22,7 +22,7 @@ type Driver interface {
 	NewVM(ref *types.ManagedObjectReference) VirtualMachine
 	FindVM(name string) (VirtualMachine, error)
 	FindCluster(name string) (*Cluster, error)
-	PreCleanVM(ui packer.Ui, vmPath string, force bool) error
+	PreCleanVM(ui packersdk.Ui, vmPath string, force bool) error
 	CreateVM(config *CreateConfig) (VirtualMachine, error)
 
 	NewDatastore(ref *types.ManagedObjectReference) Datastore

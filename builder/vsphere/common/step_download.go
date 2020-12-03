@@ -6,8 +6,8 @@ import (
 	"net/url"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // Defining this interface ensures that we use the common step download, or the
@@ -33,7 +33,7 @@ type StepDownload struct {
 
 func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(driver.Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// Check whether iso is present on remote datastore.
 	ds, err := driver.FindDatastore(s.Datastore, s.Host)

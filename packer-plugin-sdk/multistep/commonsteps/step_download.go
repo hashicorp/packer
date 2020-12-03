@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/filelock"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepDownload downloads a remote file using the download client within
@@ -28,7 +29,7 @@ import (
 //
 // Uses:
 //   cache packer.Cache
-//   ui    packer.Ui
+//   ui    packersdk.Ui
 type StepDownload struct {
 	// The checksum and the type of the checksum for the download
 	Checksum string
@@ -72,7 +73,7 @@ func (s *StepDownload) Run(ctx context.Context, state multistep.StateBag) multis
 
 	defer log.Printf("Leaving retrieve loop for %s", s.Description)
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say(fmt.Sprintf("Retrieving %s", s.Description))
 
 	var errs []error
@@ -160,7 +161,7 @@ func (s *StepDownload) UseSourceToFindCacheTarget(source string) (*url.URL, stri
 	return u, targetPath, nil
 }
 
-func (s *StepDownload) download(ctx context.Context, ui packer.Ui, source string) (string, error) {
+func (s *StepDownload) download(ctx context.Context, ui packersdk.Ui, source string) (string, error) {
 	u, targetPath, err := s.UseSourceToFindCacheTarget(source)
 	if err != nil {
 		return "", err

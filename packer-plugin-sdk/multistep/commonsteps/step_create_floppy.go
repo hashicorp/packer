@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 	"github.com/mitchellh/go-fs"
 	"github.com/mitchellh/go-fs/fat"
@@ -42,7 +42,7 @@ func (s *StepCreateFloppy) Run(ctx context.Context, state multistep.StateBag) mu
 
 	s.FilesAdded = make(map[string]bool)
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Creating floppy disk...")
 
 	// Create a temporary file to be our floppy drive

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/json"
@@ -69,7 +69,7 @@ type MockBuilder struct {
 	Config MockConfig
 }
 
-var _ packer.Builder = new(MockBuilder)
+var _ packersdk.Builder = new(MockBuilder)
 
 func (b *MockBuilder) ConfigSpec() hcldec.ObjectSpec { return b.Config.FlatMapstructure().HCL2Spec() }
 
@@ -77,7 +77,7 @@ func (b *MockBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return []string{"ID"}, nil, b.Config.Prepare(raws...)
 }
 
-func (b *MockBuilder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	return nil, nil
 }
 
@@ -89,7 +89,7 @@ type MockProvisioner struct {
 	Config MockConfig
 }
 
-var _ packer.Provisioner = new(MockProvisioner)
+var _ packersdk.Provisioner = new(MockProvisioner)
 
 func (b *MockProvisioner) ConfigSpec() hcldec.ObjectSpec {
 	return b.Config.FlatMapstructure().HCL2Spec()
@@ -99,7 +99,7 @@ func (b *MockProvisioner) Prepare(raws ...interface{}) error {
 	return b.Config.Prepare(raws...)
 }
 
-func (b *MockProvisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, _ map[string]interface{}) error {
+func (b *MockProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, _ map[string]interface{}) error {
 	return nil
 }
 
@@ -111,7 +111,7 @@ type MockPostProcessor struct {
 	Config MockConfig
 }
 
-var _ packer.PostProcessor = new(MockPostProcessor)
+var _ packersdk.PostProcessor = new(MockPostProcessor)
 
 func (b *MockPostProcessor) ConfigSpec() hcldec.ObjectSpec {
 	return b.Config.FlatMapstructure().HCL2Spec()
@@ -121,7 +121,7 @@ func (b *MockPostProcessor) Configure(raws ...interface{}) error {
 	return b.Config.Prepare(raws...)
 }
 
-func (b *MockPostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (b *MockPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	return nil, false, false, nil
 }
 
@@ -131,10 +131,10 @@ func (b *MockPostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a pac
 
 type MockCommunicator struct {
 	Config MockConfig
-	packer.Communicator
+	packersdk.Communicator
 }
 
-var _ packer.ConfigurableCommunicator = new(MockCommunicator)
+var _ packersdk.ConfigurableCommunicator = new(MockCommunicator)
 
 func (b *MockCommunicator) ConfigSpec() hcldec.ObjectSpec {
 	return b.Config.FlatMapstructure().HCL2Spec()

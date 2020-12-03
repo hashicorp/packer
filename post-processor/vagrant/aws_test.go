@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestAWSProvider_impl(t *testing.T) {
@@ -22,7 +22,7 @@ func TestAWSProvider_KeepInputArtifact(t *testing.T) {
 func TestAWSProvider_ArtifactId(t *testing.T) {
 	p := new(AWSProvider)
 	ui := testUi()
-	artifact := &packer.MockArtifact{
+	artifact := &packersdk.MockArtifact{
 		IdValue: "us-east-1:ami-1234",
 	}
 

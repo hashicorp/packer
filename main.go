@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/hashicorp/packer/version"
@@ -64,7 +65,7 @@ func realMain() int {
 		logWriter = ioutil.Discard
 	}
 
-	packer.LogSecretFilter.SetOutput(logWriter)
+	packersdk.LogSecretFilter.SetOutput(logWriter)
 
 	// Disable logging here
 	log.SetOutput(ioutil.Discard)
@@ -98,7 +99,7 @@ func realMain() int {
 
 	// Create the configuration for panicwrap and wrap our executable
 	wrapConfig.Handler = panicHandler(logTempFile)
-	wrapConfig.Writer = io.MultiWriter(logTempFile, &packer.LogSecretFilter)
+	wrapConfig.Writer = io.MultiWriter(logTempFile, &packersdk.LogSecretFilter)
 	wrapConfig.Stdout = outW
 	wrapConfig.DetectDuration = 500 * time.Millisecond
 	wrapConfig.ForwardSignals = []os.Signal{syscall.SIGTERM}
@@ -134,8 +135,8 @@ func wrappedMain() int {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
-	packer.LogSecretFilter.SetOutput(os.Stderr)
-	log.SetOutput(&packer.LogSecretFilter)
+	packersdk.LogSecretFilter.SetOutput(os.Stderr)
+	log.SetOutput(&packersdk.LogSecretFilter)
 
 	inPlugin := inPlugin()
 	if inPlugin {
@@ -180,7 +181,7 @@ func wrappedMain() int {
 
 	defer plugin.CleanupClients()
 
-	var ui packer.Ui
+	var ui packersdk.Ui
 	if machineReadable {
 		// Setup the UI as we're being machine-readable
 		ui = &packer.MachineReadableUi{
@@ -194,7 +195,7 @@ func wrappedMain() int {
 			return 1
 		}
 	} else {
-		basicUi := &packer.BasicUi{
+		basicUi := &packersdk.BasicUi{
 			Reader:      os.Stdin,
 			Writer:      os.Stdout,
 			ErrorWriter: os.Stdout,

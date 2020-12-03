@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -18,13 +18,13 @@ type stepRun struct {
 	DiskImage bool
 
 	atLeastVersion2 bool
-	ui              packer.Ui
+	ui              packersdk.Ui
 }
 
 func (s *stepRun) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
-	s.ui = state.Get("ui").(packer.Ui)
+	s.ui = state.Get("ui").(packersdk.Ui)
 
 	// Figure out version of qemu; store on step for later use
 	rawVersion, err := driver.Version()
@@ -63,7 +63,7 @@ func (s *stepRun) Run(ctx context.Context, state multistep.StateBag) multistep.S
 
 func (s *stepRun) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if err := driver.Stop(); err != nil {
 		ui.Error(fmt.Sprintf("Error shutting down VM: %s", err))
@@ -216,8 +216,10 @@ func (s *stepRun) getDeviceAndDriveArgs(config *Config, state multistep.StateBag
 			drivesToAttach = append(drivesToAttach, imgPath)
 		}
 
-		diskFullPaths := state.Get("qemu_disk_paths").([]string)
-		drivesToAttach = append(drivesToAttach, diskFullPaths...)
+		if v, ok := state.GetOk("qemu_disk_paths"); ok {
+			diskFullPaths := v.([]string)
+			drivesToAttach = append(drivesToAttach, diskFullPaths...)
+		}
 
 		for i, drivePath := range drivesToAttach {
 			driveArgumentString := fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s,format=%s", drivePath, config.DiskInterface, config.DiskCache, config.DiskDiscard, config.Format)
@@ -284,7 +286,9 @@ func (s *stepRun) applyUserOverrides(defaultArgs map[string]interface{}, config 
 
 		commHostPort := 0
 		if config.CommConfig.Comm.Type != "none" {
-			commHostPort = state.Get("commHostPort").(int)
+			if v, ok := state.GetOk("commHostPort"); ok {
+				commHostPort = v.(int)
+			}
 		}
 		httpIp := state.Get("http_ip").(string)
 		httpPort := state.Get("http_port").(int)

@@ -12,12 +12,12 @@ import (
 	"sync"
 
 	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 type DockerDriver struct {
-	Ui  packer.Ui
+	Ui  packersdk.Ui
 	Ctx *interpolate.Context
 
 	l sync.Mutex

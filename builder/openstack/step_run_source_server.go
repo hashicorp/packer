@@ -9,8 +9,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepRunSourceServer struct {
@@ -31,7 +31,7 @@ func (s *StepRunSourceServer) Run(ctx context.Context, state multistep.StateBag)
 	flavor := state.Get("flavor_id").(string)
 	sourceImage := state.Get("source_image").(string)
 	networks := state.Get("networks").([]servers.Network)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()
@@ -141,7 +141,7 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 	}
 
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()

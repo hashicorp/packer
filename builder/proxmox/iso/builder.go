@@ -6,9 +6,9 @@ import (
 	proxmoxapi "github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // The unique id for the builder
@@ -18,8 +18,8 @@ type Builder struct {
 	config Config
 }
 
-// Builder implements packer.Builder
-var _ packer.Builder = &Builder{}
+// Builder implements packersdk.Builder
+var _ packersdk.Builder = &Builder{}
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
@@ -29,7 +29,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 const downloadPathKey = "downloaded_iso_path"
 
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	state := new(multistep.BasicStateBag)
 	state.Put("iso-config", &b.config)
 

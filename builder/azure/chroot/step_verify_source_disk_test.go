@@ -12,8 +12,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/hashicorp/packer/builder/azure/common/client"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func Test_StepVerifySourceDisk_Run(t *testing.T) {
@@ -152,6 +152,6 @@ func Test_StepVerifySourceDisk_Run(t *testing.T) {
 }
 
 type uiThatRemebersErrors struct {
-	packer.Ui
+	packersdk.Ui
 	LastError string
 }

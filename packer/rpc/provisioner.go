@@ -4,23 +4,23 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-// An implementation of packer.Provisioner where the provisioner is actually
+// An implementation of packersdk.Provisioner where the provisioner is actually
 // executed over an RPC connection.
 type provisioner struct {
 	commonClient
 }
 
-// ProvisionerServer wraps a packer.Provisioner implementation and makes it
+// ProvisionerServer wraps a packersdk.Provisioner implementation and makes it
 // exportable as part of a Golang RPC server.
 type ProvisionerServer struct {
 	context       context.Context
 	contextCancel func()
 
 	commonServer
-	p packer.Provisioner
+	p packersdk.Provisioner
 }
 
 type ProvisionerPrepareArgs struct {
@@ -41,7 +41,7 @@ type ProvisionerProvisionArgs struct {
 	StreamID      uint32
 }
 
-func (p *provisioner) Provision(ctx context.Context, ui packer.Ui, comm packer.Communicator, generatedData map[string]interface{}) error {
+func (p *provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 	nextId := p.mux.NextId()
 	server := newServerWithMux(p.mux, nextId)
 	server.RegisterCommunicator(comm)

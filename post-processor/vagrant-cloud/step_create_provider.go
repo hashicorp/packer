@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type Provider struct {
@@ -21,7 +21,7 @@ type stepCreateProvider struct {
 
 func (s *stepCreateProvider) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	box := state.Get("box").(*Box)
 	version := state.Get("version").(*Version)
 	providerName := state.Get("providerName").(string)
@@ -68,7 +68,7 @@ func (s *stepCreateProvider) Run(ctx context.Context, state multistep.StateBag) 
 
 func (s *stepCreateProvider) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*VagrantCloudClient)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	box := state.Get("box").(*Box)
 	version := state.Get("version").(*Version)
 

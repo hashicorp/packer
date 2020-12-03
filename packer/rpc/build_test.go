@@ -7,9 +7,10 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-var testBuildArtifact = &packer.MockArtifact{}
+var testBuildArtifact = &packersdk.MockArtifact{}
 
 type testBuild struct {
 	nameCalled       bool
@@ -17,7 +18,7 @@ type testBuild struct {
 	prepareWarnings  []string
 	runFn            func(context.Context)
 	runCalled        bool
-	runUi            packer.Ui
+	runUi            packersdk.Ui
 	setDebugCalled   bool
 	setForceCalled   bool
 	setOnErrorCalled bool
@@ -35,7 +36,7 @@ func (b *testBuild) Prepare() ([]string, error) {
 	return b.prepareWarnings, nil
 }
 
-func (b *testBuild) Run(ctx context.Context, ui packer.Ui) ([]packer.Artifact, error) {
+func (b *testBuild) Run(ctx context.Context, ui packersdk.Ui) ([]packersdk.Artifact, error) {
 	b.runCalled = true
 	b.runUi = ui
 
@@ -46,7 +47,7 @@ func (b *testBuild) Run(ctx context.Context, ui packer.Ui) ([]packer.Artifact, e
 	if b.errRunResult {
 		return nil, errors.New("foo")
 	} else {
-		return []packer.Artifact{testBuildArtifact}, nil
+		return []packersdk.Artifact{testBuildArtifact}, nil
 	}
 }
 
@@ -85,7 +86,7 @@ func TestBuild(t *testing.T) {
 	}
 
 	// Test Run
-	ui := new(testUi)
+	ui := new(packersdk.MockUi)
 	artifacts, err := bClient.Run(ctx, ui)
 	if !b.runCalled {
 		t.Fatal("run should be called")
@@ -149,7 +150,7 @@ func TestBuild_cancel(t *testing.T) {
 
 	bClient.Prepare()
 
-	ui := new(testUi)
+	ui := new(packersdk.MockUi)
 	bClient.Run(topCtx, ui)
 
 	// if context cancellation is not propagated, this will timeout

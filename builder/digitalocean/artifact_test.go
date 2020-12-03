@@ -3,7 +3,7 @@ package digitalocean
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func generatedData() map[string]interface{} {
@@ -13,7 +13,7 @@ func generatedData() map[string]interface{} {
 func TestArtifact_Impl(t *testing.T) {
 	var raw interface{}
 	raw = &Artifact{}
-	if _, ok := raw.(packer.Artifact); !ok {
+	if _, ok := raw.(packersdk.Artifact); !ok {
 		t.Fatalf("Artifact should be artifact")
 	}
 }

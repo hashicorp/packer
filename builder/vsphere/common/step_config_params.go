@@ -10,8 +10,8 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type ConfigParamsConfig struct {
@@ -32,7 +32,7 @@ type StepConfigParams struct {
 }
 
 func (s *StepConfigParams) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachineDriver)
 	configParams := make(map[string]string)
 

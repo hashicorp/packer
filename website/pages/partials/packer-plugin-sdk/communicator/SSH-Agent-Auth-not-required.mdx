@@ -1,0 +1,6 @@
+- `ssh_agent_auth` (bool) - If true, the local SSH agent will be used to authenticate connections to
+  the source instance. No temporary keypair will be created, and the
+  values of [`ssh_password`](#ssh_password) and
+  [`ssh_private_key_file`](#ssh_private_key_file) will be ignored. The
+  environment variable `SSH_AUTH_SOCK` must be set for this option to work
+  properly.

@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 )
 
@@ -18,7 +18,7 @@ type stepUpload struct {
 func (s *stepUpload) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	upload := state.Get("upload").(*Upload)
 	artifactFilePath := state.Get("artifactFilePath").(string)
 	url := upload.UploadPath

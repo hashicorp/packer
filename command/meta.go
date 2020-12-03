@@ -9,6 +9,7 @@ import (
 	kvflag "github.com/hashicorp/packer/command/flag-kv"
 	"github.com/hashicorp/packer/helper/wrappedstreams"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 )
 
@@ -26,7 +27,7 @@ const (
 // Packer command inherits.
 type Meta struct {
 	CoreConfig *packer.CoreConfig
-	Ui         packer.Ui
+	Ui         packersdk.Ui
 	Version    string
 }
 

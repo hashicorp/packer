@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,7 +32,7 @@ func testConfig() (config map[string]interface{}, tf *os.File) {
 func TestProvisioner_Impl(t *testing.T) {
 	var raw interface{}
 	raw = &Provisioner{}
-	if _, ok := raw.(packer.Provisioner); !ok {
+	if _, ok := raw.(packersdk.Provisioner); !ok {
 		t.Fatalf("must be a Provisioner")
 	}
 }
@@ -479,7 +480,7 @@ func TestProvisionerProvision_extraArguments(t *testing.T) {
 	ui := &packer.MachineReadableUi{
 		Writer: ioutil.Discard,
 	}
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 
 	extraArguments := []string{
 		"--some-arg=yup",

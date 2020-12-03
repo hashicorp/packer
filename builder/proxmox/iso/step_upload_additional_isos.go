@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // stepUploadAdditionalISOs uploads all additional ISO files that are mountet
@@ -18,7 +18,7 @@ type stepUploadAdditionalISOs struct{}
 var _ uploader = &proxmox.Client{}
 
 func (s *stepUploadAdditionalISOs) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("proxmoxClient").(uploader)
 	c := state.Get("iso-config").(*Config)
 

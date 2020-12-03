@@ -6,8 +6,8 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step creates the virtual disk that will be used as the
@@ -25,19 +25,18 @@ type stepCreateDisk struct {
 
 func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	name := s.VMName
 
 	if s.DiskImage && !s.UseBackingFile {
 		return multistep.ActionContinue
 	}
 
-	var diskFullPaths, diskSizes []string
-
 	ui.Say("Creating required virtual machine disks")
 	// The 'main' or 'default' disk
-	diskFullPaths = append(diskFullPaths, filepath.Join(s.OutputDir, name))
-	diskSizes = append(diskSizes, s.DiskSize)
+	diskFullPaths := []string{filepath.Join(s.OutputDir, name)}
+	diskSizes := []string{s.DiskSize}
+
 	// Additional disks
 	if len(s.AdditionalDiskSize) > 0 {
 		for i, diskSize := range s.AdditionalDiskSize {

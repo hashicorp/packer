@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // StepOutputDir sets up the output directory by creating it if it does
@@ -68,7 +68,7 @@ func (s *StepOutputDir) SetOutputAndExportDirs(state multistep.StateBag) OutputD
 }
 
 func (s *StepOutputDir) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Configuring output and export directories...")
 
 	dir := s.SetOutputAndExportDirs(state)
@@ -108,7 +108,7 @@ func (s *StepOutputDir) Cleanup(state multistep.StateBag) {
 
 	if cancelled || halted {
 		dir := state.Get("dir").(OutputDir)
-		ui := state.Get("ui").(packer.Ui)
+		ui := state.Get("ui").(packersdk.Ui)
 
 		exists, _ := dir.DirExists()
 		if exists {

@@ -16,8 +16,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -81,16 +81,16 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.S3Key = "packer-import-{{timestamp}}." + p.config.Format
 	}
 
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	// Check and render s3_key_name
 	if err = interpolate.Validate(p.config.S3Key, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing s3_key_name template: %s", err))
 	}
 
 	// Check we have AWS access variables defined somewhere
-	errs = packer.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
 
 	// define all our required parameters
 	templates := map[string]*string{
@@ -99,7 +99,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Check out required params are defined
 	for key, ptr := range templates {
 		if *ptr == "" {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
 	}
@@ -107,12 +107,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	switch p.config.Format {
 	case "ova", "raw", "vmdk", "vhd", "vhdx":
 	default:
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("invalid format '%s'. Only 'ova', 'raw', 'vhd', 'vhdx', or 'vmdk' are allowed", p.config.Format))
 	}
 
 	if p.config.S3Encryption != "" && p.config.S3Encryption != "AES256" && p.config.S3Encryption != "aws:kms" {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("invalid s3 encryption format '%s'. Only 'AES256' and 'aws:kms' are allowed", p.config.S3Encryption))
 	}
 
@@ -125,12 +125,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 	p.config.PollingConfig.LogEnvOverrideWarnings()
 
-	packer.LogSecretFilter.Set(p.config.AccessKey, p.config.SecretKey, p.config.Token)
+	packersdk.LogSecretFilter.Set(p.config.AccessKey, p.config.SecretKey, p.config.Token)
 	log.Println(p.config)
 	return nil
 }
 
-func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	var err error
 
 	generatedData := artifact.State("generated_data")

@@ -1,4 +1,4 @@
-// The googlecompute package contains a packer.Builder implementation that
+// The googlecompute package contains a packersdk.Builder implementation that
 // builds images for Google Compute Engine.
 package googlecompute
 
@@ -8,10 +8,10 @@ import (
 	"log"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // The unique ID for this builder.
@@ -33,9 +33,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, warnings, nil
 }
 
-// Run executes a googlecompute Packer build and returns a packer.Artifact
+// Run executes a googlecompute Packer build and returns a packersdk.Artifact
 // representing a GCE machine image.
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	cfg := GCEDriverConfig{
 		Ui:                            ui,
 		ProjectId:                     b.config.ProjectId,

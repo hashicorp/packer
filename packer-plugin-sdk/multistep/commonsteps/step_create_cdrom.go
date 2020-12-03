@@ -11,8 +11,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/shell-local/localexec"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
@@ -36,7 +36,7 @@ func (s *StepCreateCD) Run(ctx context.Context, state multistep.StateBag) multis
 		return multistep.ActionContinue
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say("Creating CD disk...")
 
 	if s.Label == "" {

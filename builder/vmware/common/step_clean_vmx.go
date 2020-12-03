@@ -6,15 +6,15 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step cleans up the VMX by removing or changing this prior to
 // being ready for use.
 //
 // Uses:
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //   vmx_path string
 //
 // Produces:
@@ -25,7 +25,7 @@ type StepCleanVMX struct {
 }
 
 func (s StepCleanVMX) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
 	ui.Say("Cleaning VMX prior to finishing up...")

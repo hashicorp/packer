@@ -1,6 +1,8 @@
 package packer
 
-import "context"
+import (
+	"context"
+)
 
 // A PostProcessor is responsible for taking an artifact of a build
 // and doing some sort of post-processing to turn this into another

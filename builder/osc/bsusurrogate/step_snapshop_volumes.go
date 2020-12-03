@@ -9,8 +9,8 @@ import (
 	"github.com/antihax/optional"
 	multierror "github.com/hashicorp/go-multierror"
 	osccommon "github.com/hashicorp/packer/builder/osc/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 
@@ -25,7 +25,7 @@ type StepSnapshotVolumes struct {
 
 func (s *StepSnapshotVolumes) snapshotVolume(ctx context.Context, deviceName string, state multistep.StateBag) error {
 	oscconn := state.Get("osc").(*osc.APIClient)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vm := state.Get("vm").(osc.Vm)
 
 	var volumeId string
@@ -60,7 +60,7 @@ func (s *StepSnapshotVolumes) snapshotVolume(ctx context.Context, deviceName str
 }
 
 func (s *StepSnapshotVolumes) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	s.snapshotIds = map[string]string{}
 
@@ -98,7 +98,7 @@ func (s *StepSnapshotVolumes) Cleanup(state multistep.StateBag) {
 
 	if cancelled || halted {
 		oscconn := state.Get("osc").(*osc.APIClient)
-		ui := state.Get("ui").(packer.Ui)
+		ui := state.Get("ui").(packersdk.Ui)
 		ui.Say("Removing snapshots since we cancelled or halted...")
 		for _, snapshotID := range s.snapshotIds {
 			_, _, err := oscconn.SnapshotApi.DeleteSnapshot(context.Background(), &osc.DeleteSnapshotOpts{

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step compacts the virtual disk for the VM unless the "skip_compaction"
@@ -15,7 +15,7 @@ import (
 // Uses:
 //   driver Driver
 //   disk_full_paths ([]string) - The full paths to all created disks
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //
 // Produces:
 //   <nothing>
@@ -25,7 +25,7 @@ type StepCompactDisk struct {
 
 func (s StepCompactDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	diskFullPaths := state.Get("disk_full_paths").([]string)
 
 	if s.Skip {

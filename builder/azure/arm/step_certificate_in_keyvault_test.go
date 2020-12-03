@@ -7,13 +7,13 @@ import (
 
 	azcommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestNewStepCertificateInKeyVault(t *testing.T) {
 	cli := azcommon.MockAZVaultClient{}
-	ui := &packer.BasicUi{
+	ui := &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}
@@ -46,7 +46,7 @@ func TestNewStepCertificateInKeyVault_error(t *testing.T) {
 	cli := azcommon.MockAZVaultClient{}
 	cli.IsError = true
 
-	ui := &packer.BasicUi{
+	ui := &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}

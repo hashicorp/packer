@@ -13,12 +13,12 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	powershell "github.com/hashicorp/packer/builder/hyperv/common/powershell"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/shutdowncommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -36,7 +36,7 @@ const (
 	DefaultPassword = ""
 )
 
-// Builder implements packer.Builder and builds the actual Hyperv
+// Builder implements packersdk.Builder and builds the actual Hyperv
 // images.
 type Builder struct {
 	config Config
@@ -97,23 +97,23 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	// Accumulate any errors and warnings
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	warnings := make([]string, 0)
 
 	if b.config.RawSingleISOUrl != "" || len(b.config.ISOUrls) > 0 {
 		isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
 		warnings = append(warnings, isoWarnings...)
-		errs = packer.MultiErrorAppend(errs, isoErrs...)
+		errs = packersdk.MultiErrorAppend(errs, isoErrs...)
 	}
 
-	errs = packer.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
-	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 
 	commonErrs, commonWarns := b.config.CommonConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)
-	packer.MultiErrorAppend(errs, commonErrs...)
+	errs = packersdk.MultiErrorAppend(errs, commonErrs...)
 	warnings = append(warnings, commonWarns...)
 
 	if b.config.Cpu < 1 {
@@ -122,22 +122,22 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	if b.config.CloneFromVMName == "" {
 		if b.config.CloneFromVMCXPath == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vm_name must be specified if "+
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vm_name must be specified if "+
 				"clone_from_vmcx_path is not specified."))
 		}
 	} else {
 		virtualMachineExists, err := powershell.DoesVirtualMachineExist(b.config.CloneFromVMName)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to clone "+
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to clone "+
 				"from exists: %s", err))
 		} else {
 			if !virtualMachineExists {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Virtual machine '%s' to clone from does not "+
+				errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Virtual machine '%s' to clone from does not "+
 					"exist.", b.config.CloneFromVMName))
 			} else {
 				b.config.Generation, err = powershell.GetVirtualMachineGeneration(b.config.CloneFromVMName)
 				if err != nil {
-					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting virtual machine to clone "+
+					errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Failed detecting virtual machine to clone "+
 						"from generation: %s", err))
 				}
 
@@ -145,11 +145,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 					virtualMachineSnapshotExists, err := powershell.DoesVirtualMachineSnapshotExist(
 						b.config.CloneFromVMName, b.config.CloneFromSnapshotName)
 					if err != nil {
-						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine "+
+						errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine "+
 							"snapshot to clone from exists: %s", err))
 					} else {
 						if !virtualMachineSnapshotExists {
-							errs = packer.MultiErrorAppend(errs, fmt.Errorf("Virtual machine snapshot '%s' on "+
+							errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Virtual machine snapshot '%s' on "+
 								"virtual machine '%s' to clone from does not exist.",
 								b.config.CloneFromSnapshotName, b.config.CloneFromVMName))
 						}
@@ -158,7 +158,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 				virtualMachineOn, err := powershell.IsVirtualMachineOn(b.config.CloneFromVMName)
 				if err != nil {
-					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to "+
+					errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to "+
 						"clone is running: %s", err))
 				} else {
 					if virtualMachineOn {
@@ -172,13 +172,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	if b.config.CloneFromVMCXPath == "" {
 		if b.config.CloneFromVMName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vmcx_path be specified if "+
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vmcx_path be specified if "+
 				"clone_from_vm_name must is not specified."))
 		}
 	} else {
 		if _, err := os.Stat(b.config.CloneFromVMCXPath); os.IsNotExist(err) {
 			if err != nil {
-				errs = packer.MultiErrorAppend(
+				errs = packersdk.MultiErrorAppend(
 					errs, fmt.Errorf("CloneFromVMCXPath does not exist: %s", err))
 			}
 		}
@@ -189,7 +189,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 				keep := strings.Split(b.config.CloneFromVMCXPath, "Virtual Machines")
 				b.config.CloneFromVMCXPath = keep[0]
 			} else {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Unable to "+
+				errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Unable to "+
 					"parse the clone_from_vmcx_path to find the vm directory. "+
 					"Please provide the path to the folder containing the "+
 					"vmcx file, not the file itself. Example: instead of "+
@@ -214,9 +214,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, warnings, nil
 }
 
-// Run executes a Packer build and returns a packer.Artifact representing
+// Run executes a Packer build and returns a packersdk.Artifact representing
 // a Hyperv appliance.
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	// Create the driver that we'll use to communicate with Hyperv
 	driver, err := hypervcommon.NewHypervPS4Driver()
 	if err != nil {

@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestStepUploadParallelsTools_impl(t *testing.T) {
@@ -20,7 +20,7 @@ func TestStepUploadParallelsTools(t *testing.T) {
 	step.ParallelsToolsGuestPath = "/tmp/prl-lin.iso"
 	step.ParallelsToolsFlavor = "lin"
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 
 	// Test the run
@@ -45,7 +45,7 @@ func TestStepUploadParallelsTools_interpolate(t *testing.T) {
 	step.ParallelsToolsGuestPath = "/tmp/prl-{{ .Flavor }}.iso"
 	step.ParallelsToolsFlavor = "win"
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 
 	// Test the run
@@ -70,7 +70,7 @@ func TestStepUploadParallelsTools_attach(t *testing.T) {
 	step.ParallelsToolsGuestPath = "/tmp/prl-lin.iso"
 	step.ParallelsToolsFlavor = "lin"
 
-	comm := new(packer.MockCommunicator)
+	comm := new(packersdk.MockCommunicator)
 	state.Put("communicator", comm)
 
 	// Test the run

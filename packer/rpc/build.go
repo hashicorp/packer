@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // An implementation of packer.Build where the build is actually executed
@@ -46,7 +47,7 @@ func (b *build) Prepare() ([]string, error) {
 	return resp.Warnings, err
 }
 
-func (b *build) Run(ctx context.Context, ui packer.Ui) ([]packer.Artifact, error) {
+func (b *build) Run(ctx context.Context, ui packersdk.Ui) ([]packersdk.Artifact, error) {
 	nextId := b.mux.NextId()
 	server := newServerWithMux(b.mux, nextId)
 	server.RegisterUi(ui)
@@ -70,7 +71,7 @@ func (b *build) Run(ctx context.Context, ui packer.Ui) ([]packer.Artifact, error
 		return nil, err
 	}
 
-	artifacts := make([]packer.Artifact, len(result))
+	artifacts := make([]packersdk.Artifact, len(result))
 	for i, streamId := range result {
 		client, err := newClientWithMux(b.mux, streamId)
 		if err != nil {

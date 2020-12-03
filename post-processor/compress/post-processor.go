@@ -15,8 +15,8 @@ import (
 
 	"github.com/biogo/hts/bgzf"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/klauspost/pgzip"
@@ -70,7 +70,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	errs := new(packer.MultiError)
+	errs := new(packersdk.MultiError)
 
 	// If there is no explicit number of Go threads to use, then set it
 	if os.Getenv("GOMAXPROCS") == "" {
@@ -92,7 +92,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if err = interpolate.Validate(p.config.OutputPath, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
+		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("Error parsing target template: %s", err))
 	}
 
@@ -107,9 +107,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(
 	ctx context.Context,
-	ui packer.Ui,
-	artifact packer.Artifact,
-) (packer.Artifact, bool, bool, error) {
+	ui packersdk.Ui,
+	artifact packersdk.Artifact,
+) (packersdk.Artifact, bool, bool, error) {
 	var generatedData map[interface{}]interface{}
 	stateData := artifact.State("generated_data")
 	if stateData != nil {

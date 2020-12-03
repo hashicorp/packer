@@ -7,19 +7,19 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step shuts down the machine. It first attempts to do so gracefully,
 // but ultimately forcefully shuts it down if that fails.
 //
 // Uses:
-//   communicator packer.Communicator
+//   communicator packersdk.Communicator
 //   config *config
 //   driver Driver
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //
 // Produces:
 //   <nothing>
@@ -31,7 +31,7 @@ type stepShutdown struct {
 
 func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.Comm.Type == "none" {
 		cancelCh := make(chan struct{}, 1)
@@ -52,10 +52,10 @@ func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 	}
 
 	if s.ShutdownCommand != "" {
-		comm := state.Get("communicator").(packer.Communicator)
+		comm := state.Get("communicator").(packersdk.Communicator)
 		ui.Say("Gracefully halting virtual machine...")
 		log.Printf("Executing shutdown command: %s", s.ShutdownCommand)
-		cmd := &packer.RemoteCmd{Command: s.ShutdownCommand}
+		cmd := &packersdk.RemoteCmd{Command: s.ShutdownCommand}
 		if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 			err := fmt.Errorf("Failed to send shutdown command: %s", err)
 			state.Put("error", err)

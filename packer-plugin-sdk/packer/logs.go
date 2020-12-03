@@ -3,6 +3,7 @@ package packer
 import (
 	"bytes"
 	"io"
+	"strings"
 	"sync"
 )
 
@@ -33,6 +34,17 @@ func (l *secretFilter) Write(p []byte) (n int, err error) {
 		}
 	}
 	return l.w.Write(p)
+}
+
+// FilterString will overwrite any senstitive variables in a string, returning
+// the filtered string.
+func (l *secretFilter) FilterString(message string) string {
+	for s := range l.s {
+		if s != "" {
+			message = strings.Replace(message, s, "<sensitive>", -1)
+		}
+	}
+	return message
 }
 
 func (l *secretFilter) get() (s []string) {

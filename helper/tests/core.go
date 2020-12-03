@@ -8,6 +8,7 @@ import (
 	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/provisioner/shell"
 )
@@ -25,11 +26,11 @@ func FileExists(filename string) bool {
 func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 	components := packer.ComponentFinder{
 		BuilderStore: packer.MapOfBuilder{
-			"amazon-ebs": func() (packer.Builder, error) { return &amazonebsbuilder.Builder{}, nil },
+			"amazon-ebs": func() (packersdk.Builder, error) { return &amazonebsbuilder.Builder{}, nil },
 		},
 		ProvisionerStore: packer.MapOfProvisioner{
-			"shell": func() (packer.Provisioner, error) { return &shell.Provisioner{}, nil },
-			"file":  func() (packer.Provisioner, error) { return &fileprovisioner.Provisioner{}, nil },
+			"shell": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
+			"file":  func() (packersdk.Provisioner, error) { return &fileprovisioner.Provisioner{}, nil },
 		},
 		PostProcessorStore: packer.MapOfPostProcessor{},
 	}
@@ -43,7 +44,7 @@ func TestMetaFile(t *testing.T) command.Meta {
 	var out, err bytes.Buffer
 	return command.Meta{
 		CoreConfig: testCoreConfigBuilder(t),
-		Ui: &packer.BasicUi{
+		Ui: &packersdk.BasicUi{
 			Writer:      &out,
 			ErrorWriter: &err,
 		},

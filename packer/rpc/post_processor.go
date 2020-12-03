@@ -4,23 +4,23 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-// An implementation of packer.PostProcessor where the PostProcessor is actually
+// An implementation of packersdk.PostProcessor where the PostProcessor is actually
 // executed over an RPC connection.
 type postProcessor struct {
 	commonClient
 }
 
-// PostProcessorServer wraps a packer.PostProcessor implementation and makes it
+// PostProcessorServer wraps a packersdk.PostProcessor implementation and makes it
 // exportable as part of a Golang RPC server.
 type PostProcessorServer struct {
 	context       context.Context
 	contextCancel func()
 
 	commonServer
-	p packer.PostProcessor
+	p packersdk.PostProcessor
 }
 
 type PostProcessorConfigureArgs struct {
@@ -43,7 +43,7 @@ func (p *postProcessor) Configure(raw ...interface{}) error {
 	return p.client.Call(p.endpoint+".Configure", args, new(interface{}))
 }
 
-func (p *postProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.Artifact) (packer.Artifact, bool, bool, error) {
+func (p *postProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	nextId := p.mux.NextId()
 	server := newServerWithMux(p.mux, nextId)
 	server.RegisterArtifact(a)

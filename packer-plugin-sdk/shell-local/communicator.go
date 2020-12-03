@@ -9,14 +9,14 @@ import (
 	"os/exec"
 	"syscall"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type Communicator struct {
 	ExecuteCommand []string
 }
 
-func (c *Communicator) Start(ctx context.Context, cmd *packer.RemoteCmd) error {
+func (c *Communicator) Start(ctx context.Context, cmd *packersdk.RemoteCmd) error {
 	if len(c.ExecuteCommand) == 0 {
 		return fmt.Errorf("Error launching command via shell-local communicator: No ExecuteCommand provided")
 	}

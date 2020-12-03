@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step creates the actual virtual machine.
@@ -22,7 +22,7 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(parallelscommon.Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	name := config.VMName
 
 	commands := make([][]string, 3)
@@ -91,7 +91,7 @@ func (s *stepCreateVM) Cleanup(state multistep.StateBag) {
 	}
 
 	driver := state.Get("driver").(parallelscommon.Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Unregistering virtual machine...")
 	if err := driver.Prlctl("unregister", s.vmName); err != nil {

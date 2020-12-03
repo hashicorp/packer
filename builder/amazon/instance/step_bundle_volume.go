@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
@@ -25,10 +25,10 @@ type StepBundleVolume struct {
 }
 
 func (s *StepBundleVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	comm := state.Get("communicator").(packer.Communicator)
+	comm := state.Get("communicator").(packersdk.Communicator)
 	config := state.Get("config").(*Config)
 	instance := state.Get("instance").(*ec2.Instance)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	x509RemoteCertPath := state.Get("x509RemoteCertPath").(string)
 	x509RemoteKeyPath := state.Get("x509RemoteKeyPath").(string)
 
@@ -52,7 +52,7 @@ func (s *StepBundleVolume) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	ui.Say("Bundling the volume...")
-	cmd := new(packer.RemoteCmd)
+	cmd := new(packersdk.RemoteCmd)
 	cmd.Command = config.BundleVolCommand
 
 	if s.Debug {

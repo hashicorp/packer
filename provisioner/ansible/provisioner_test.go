@@ -14,8 +14,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	confighelper "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/stretchr/testify/assert"
 )
@@ -42,7 +42,7 @@ func testConfig(t *testing.T) map[string]interface{} {
 func TestProvisioner_Impl(t *testing.T) {
 	var raw interface{}
 	raw = &Provisioner{}
-	if _, ok := raw.(packer.Provisioner); !ok {
+	if _, ok := raw.(packersdk.Provisioner); !ok {
 		t.Fatalf("must be a Provisioner")
 	}
 }
@@ -346,8 +346,8 @@ func TestAnsibleLongMessages(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	comm := &packer.MockCommunicator{}
-	ui := &packer.BasicUi{
+	comm := &packersdk.MockCommunicator{}
+	ui := &packersdk.BasicUi{
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	}
@@ -766,8 +766,8 @@ func TestUseProxy(t *testing.T) {
 		p.setupAdapterFunc = l.setupAdapter
 		p.executeAnsibleFunc = l.executeAnsible
 		ctx := context.TODO()
-		comm := new(packer.MockCommunicator)
-		ui := &packer.BasicUi{
+		comm := new(packersdk.MockCommunicator)
+		ui := &packersdk.BasicUi{
 			Reader: new(bytes.Buffer),
 			Writer: new(bytes.Buffer),
 		}

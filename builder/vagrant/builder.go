@@ -14,17 +14,17 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
-// Builder implements packer.Builder and builds the actual VirtualBox
+// Builder implements packersdk.Builder and builds the actual VirtualBox
 // images.
 type Builder struct {
 	config Config
@@ -166,7 +166,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	// Accumulate any errors and warnings
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	warnings := make([]string, 0)
 
 	if b.config.OutputDir == "" {
@@ -178,7 +178,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	if b.config.Comm.Type != "ssh" {
-		errs = packer.MultiErrorAppend(errs,
+		errs = packersdk.MultiErrorAppend(errs,
 			fmt.Errorf(`The Vagrant builder currently only supports the ssh communicator"`))
 	}
 	// The box isn't a namespace like you'd pull from vagrant cloud
@@ -188,11 +188,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	if b.config.SourceBox == "" {
 		if b.config.GlobalID == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required unless you have set global_id"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("source_path is required unless you have set global_id"))
 		}
 	} else {
 		if b.config.GlobalID != "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You may either set global_id or source_path but not both"))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("You may either set global_id or source_path but not both"))
 		}
 		// We're about to open up an actual boxfile. If the file is local to the
 		// filesystem, let's make sure it exists before we get too far into the
@@ -203,7 +203,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			u, err := url.Parse(b.config.SourceBox)
 			if err == nil && (u.Scheme == "" || u.Scheme == "file") {
 				if _, err := os.Stat(b.config.SourceBox); err != nil {
-					errs = packer.MultiErrorAppend(errs,
+					errs = packersdk.MultiErrorAppend(errs,
 						fmt.Errorf("Source box '%s' needs to exist at time of"+
 							" config validation! %v", b.config.SourceBox, err))
 				}
@@ -214,7 +214,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	if b.config.OutputVagrantfile != "" {
 		b.config.OutputVagrantfile, err = filepath.Abs(b.config.OutputVagrantfile)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("unable to determine absolute path for output vagrantfile: %s", err))
 		}
 	}
@@ -223,7 +223,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		for i, rawFile := range b.config.PackageInclude {
 			inclFile, err := filepath.Abs(rawFile)
 			if err != nil {
-				errs = packer.MultiErrorAppend(errs,
+				errs = packersdk.MultiErrorAppend(errs,
 					fmt.Errorf("unable to determine absolute path for file to be included: %s", rawFile))
 			}
 			b.config.PackageInclude[i] = inclFile
@@ -247,7 +247,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			}
 		}
 		if !matches {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf(`TeardownMethod must be "halt", "suspend", or "destroy"`))
 		}
 	}
@@ -255,11 +255,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	if b.config.SyncedFolder != "" {
 		b.config.SyncedFolder, err = filepath.Abs(b.config.SyncedFolder)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("unable to determine absolute path for synced_folder: %s", b.config.SyncedFolder))
 		}
 		if _, err := os.Stat(b.config.SyncedFolder); err != nil {
-			errs = packer.MultiErrorAppend(errs,
+			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("synced_folder \"%s\" does not exist on the Packer host.", b.config.SyncedFolder))
 		}
 	}
@@ -271,9 +271,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, warnings, nil
 }
 
-// Run executes a Packer build and returns a packer.Artifact representing
+// Run executes a Packer build and returns a packersdk.Artifact representing
 // a VirtualBox appliance.
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	// Create the driver that we'll use to communicate with VirtualBox
 	VagrantCWD, err := filepath.Abs(b.config.OutputDir)
 	if err != nil {

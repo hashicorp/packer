@@ -17,10 +17,10 @@ import (
 	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type Builder struct {
@@ -51,7 +51,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return nil, warnings, errs
 }
 
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 
 	ui.Say("Running builder ...")
 
@@ -261,7 +261,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	return &Artifact{}, nil
 }
 
-func (b *Builder) writeSSHPrivateKey(ui packer.Ui, debugKeyPath string) {
+func (b *Builder) writeSSHPrivateKey(ui packersdk.Ui, debugKeyPath string) {
 	f, err := os.Create(debugKeyPath)
 	if err != nil {
 		ui.Say(fmt.Sprintf("Error saving debug key: %s", err))
@@ -323,7 +323,7 @@ func (b *Builder) getServicePrincipalToken(say func(string)) (*adal.ServicePrinc
 	return b.config.ClientConfig.GetServicePrincipalToken(say, b.config.ClientConfig.CloudEnvironment().ResourceManagerEndpoint)
 }
 
-func (b *Builder) getSubnetInformation(ctx context.Context, ui packer.Ui, azClient AzureClient) (*string, *string, error) {
+func (b *Builder) getSubnetInformation(ctx context.Context, ui packersdk.Ui, azClient AzureClient) (*string, *string, error) {
 	num := int32(10)
 	virtualNetworkPage, err := azClient.DtlVirtualNetworksClient.List(ctx, b.config.LabResourceGroupName, b.config.LabName, "", "", &num, "")
 
@@ -346,7 +346,7 @@ func (b *Builder) getSubnetInformation(ctx context.Context, ui packer.Ui, azClie
 	return nil, nil, fmt.Errorf("No available Subnet with available space in resource group %s", b.config.LabResourceGroupName)
 }
 
-func getObjectIdFromToken(ui packer.Ui, token *adal.ServicePrincipalToken) string {
+func getObjectIdFromToken(ui packersdk.Ui, token *adal.ServicePrincipalToken) string {
 	claims := jwt.MapClaims{}
 	var p jwt.Parser
 

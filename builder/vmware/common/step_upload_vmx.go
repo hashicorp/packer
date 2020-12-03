@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // This step upload the VMX to the remote host
 //
 // Uses:
 //   driver Driver
-//   ui     packer.Ui
+//   ui     packersdk.Ui
 //   vmx_path string
 //
 // Produces:
@@ -25,7 +25,7 @@ type StepUploadVMX struct {
 func (c *StepUploadVMX) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
 	if c.RemoteType == "esx5" {

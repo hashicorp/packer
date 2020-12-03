@@ -7,12 +7,13 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 const fixturesDir = "./test-fixtures"
 
 func fatalCommand(t *testing.T, m Meta) {
-	ui := m.Ui.(*packer.BasicUi)
+	ui := m.Ui.(*packersdk.BasicUi)
 	out := ui.Writer.(*bytes.Buffer)
 	err := ui.ErrorWriter.(*bytes.Buffer)
 	t.Fatalf(
@@ -22,7 +23,7 @@ func fatalCommand(t *testing.T, m Meta) {
 }
 
 func outputCommand(t *testing.T, m Meta) (string, string) {
-	ui := m.Ui.(*packer.BasicUi)
+	ui := m.Ui.(*packersdk.BasicUi)
 	out := ui.Writer.(*bytes.Buffer)
 	err := ui.ErrorWriter.(*bytes.Buffer)
 	return out.String(), err.String()
@@ -48,7 +49,7 @@ func testMeta(t *testing.T) Meta {
 
 	return Meta{
 		CoreConfig: packer.TestCoreConfig(t),
-		Ui: &packer.BasicUi{
+		Ui: &packersdk.BasicUi{
 			Writer:      &out,
 			ErrorWriter: &err,
 		},

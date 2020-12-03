@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/amazon/common"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -22,7 +22,7 @@ func testConfig() map[string]interface{} {
 func TestBuilder_ImplementsBuilder(t *testing.T) {
 	var raw interface{}
 	raw = &Builder{}
-	if _, ok := raw.(packer.Builder); !ok {
+	if _, ok := raw.(packersdk.Builder); !ok {
 		t.Fatal("Builder should be a builder")
 	}
 }

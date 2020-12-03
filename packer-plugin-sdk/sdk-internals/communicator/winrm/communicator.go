@@ -12,7 +12,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/masterzen/winrm"
 	"github.com/packer-community/winrmcp/winrmcp"
 )
@@ -75,7 +75,7 @@ func New(config *Config) (*Communicator, error) {
 }
 
 // Start implementation of communicator.Communicator interface
-func (c *Communicator) Start(ctx context.Context, rc *packer.RemoteCmd) error {
+func (c *Communicator) Start(ctx context.Context, rc *packersdk.RemoteCmd) error {
 	shell, err := c.client.CreateShell()
 	if err != nil {
 		return err
@@ -91,7 +91,7 @@ func (c *Communicator) Start(ctx context.Context, rc *packer.RemoteCmd) error {
 	return nil
 }
 
-func runCommand(shell *winrm.Shell, cmd *winrm.Command, rc *packer.RemoteCmd) {
+func runCommand(shell *winrm.Shell, cmd *winrm.Command, rc *packersdk.RemoteCmd) {
 	defer shell.Close()
 	var wg sync.WaitGroup
 

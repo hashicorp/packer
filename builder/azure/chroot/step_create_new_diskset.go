@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/builder/azure/common/client"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
@@ -44,7 +44,7 @@ type StepCreateNewDiskset struct {
 
 func (s *StepCreateNewDiskset) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	azcli := state.Get("azureclient").(client.AzureClientSet)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	s.disks = make(Diskset)
 
@@ -214,7 +214,7 @@ func (s StepCreateNewDiskset) getDatadiskDefinitionFromImage(lun int32) compute.
 func (s *StepCreateNewDiskset) Cleanup(state multistep.StateBag) {
 	if !s.SkipCleanup {
 		azcli := state.Get("azureclient").(client.AzureClientSet)
-		ui := state.Get("ui").(packer.Ui)
+		ui := state.Get("ui").(packersdk.Ui)
 
 		for _, d := range s.disks {
 
