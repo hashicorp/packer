@@ -160,6 +160,7 @@ export default [
       'locals',
       'contextual-variables',
       'path-variables',
+      'plugin-requirements',
       'syntax',
       'onlyexcept',
       'expressions',

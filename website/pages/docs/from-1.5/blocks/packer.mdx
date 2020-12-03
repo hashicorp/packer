@@ -48,6 +48,26 @@ Use Packer version constraints in a collaborative environment to
 ensure that everyone is using a specific Packer version, or using at least
 a minimum Packer version that has behavior expected by the configuration.
 
+## Specifying Plugin Requirements
+
+The `required_plugins` block specifies all of the plugins required by the
+current config, mapping each local provider name to a source address and a
+version constraint.
+
+```hcl
+packer {
+  required_plugins {
+    aws = {
+      version = ">= 2.7.0"
+      source = "hashicorp/aws"
+    }
+  }
+}
+```
+
+For more information, see [Plugin
+Requirements](/docs/from-1.5/plugin-requirements).
+
 
 ## Version Constraints
 
