@@ -33,9 +33,7 @@ func RenderConfig(builderConfig map[string]interface{}, provisionerConfig []map[
 		t["builders"][0][k] = v
 	}
 	// Apply special provisioner overrides
-	for _, v := range provisionerConfig {
-		t["provisioners"] = append(t["provisioners"], v)
-	}
+	t["provisioners"] = append(t["provisioners"], provisionerConfig...)
 
 	j, _ := json.Marshal(t)
 	return string(j)
