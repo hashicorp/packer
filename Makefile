@@ -140,7 +140,7 @@ test: mode-check vet ## Run unit tests
 	@go test -count $(COUNT) $(TEST) $(TESTARGS) -timeout=3m
 
 # acctest runs provisioners acceptance tests
-provisioners-acctest: install-build-deps generate
+provisioners-acctest: #install-build-deps generate
 	ACC_TEST_BUILDERS=$(ACC_TEST_BUILDERS) ACC_TEST_PROVISIONERS=$(ACC_TEST_PROVISIONERS) go test ./provisioner/... -timeout=1h
 
 # testacc runs acceptance tests

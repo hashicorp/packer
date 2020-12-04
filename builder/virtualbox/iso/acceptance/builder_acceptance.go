@@ -27,7 +27,7 @@ func (v *VirtualBoxISOAccTest) GetConfigs() (map[string]string, error) {
 
 	file, err := ioutil.ReadAll(config)
 	if err != nil {
-		return nil, fmt.Errorf("Uneble to read %s", filePath)
+		return nil, fmt.Errorf("Unable to read %s", filePath)
 	}
 	return map[string]string{"linux": string(file)}, nil
 }
