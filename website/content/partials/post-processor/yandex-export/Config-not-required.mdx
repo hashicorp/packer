@@ -1,0 +1,19 @@
+<!-- Code generated from the comments of the Config struct in post-processor/yandex-export/post-processor.go; DO NOT EDIT MANUALLY -->
+
+- `ssh_private_key_file` (string) - Path to a PEM encoded private key file to use to authenticate with SSH.
+  The `~` can be used in path and will be expanded to the home directory
+  of current user. Login for attach: `ubuntu`
+
+<<<<<<< HEAD:website/pages/partials/post-processor/yandex-export/Config-not-required.mdx
+- `tries` (int) - Number of attempts to wait for export (must be greater than 0). Default: 1000
+=======
+- `disk_type` (string) - Specify disk type for the launched instance. Defaults to `network-ssd`.
+
+- `platform_id` (string) - Identifier of the hardware platform configuration for the instance. This defaults to `standard-v2`.
+
+- `subnet_id` (string) - The Yandex VPC subnet id to use for
+  the launched instance. Note, the zone of the subnet must match the
+  zone in which the VM is launched.
+
+- `zone` (string) - The name of the zone to launch the instance. This defaults to `ru-central1-a`.
+>>>>>>> ce92f0ec7 (refactor to mdx remote):website/content/partials/post-processor/yandex-export/Config-not-required.mdx

@@ -1,0 +1,11 @@
+.root {
+  composes: g-grid-container from global;
+  margin-top: 75px;
+  margin-bottom: 75px;
+
+  & article {
+    padding-left: 0;
+    max-width: 875px;
+    margin-left: 0;
+  }
+}
