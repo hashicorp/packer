@@ -135,7 +135,7 @@ func TestProvisionerProvision_PlaybookFiles(t *testing.T) {
 	}
 
 	comm := &communicatorMock{}
-	if err := p.Provision(context.Background(), new(packer.NoopUi), comm, make(map[string]interface{})); err != nil {
+	if err := p.Provision(context.Background(), packersdk.TestUi(t), comm, make(map[string]interface{})); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -169,7 +169,7 @@ func TestProvisionerProvision_PlaybookFilesWithPlaybookDir(t *testing.T) {
 	}
 
 	comm := &communicatorMock{}
-	if err := p.Provision(context.Background(), new(packer.NoopUi), comm, make(map[string]interface{})); err != nil {
+	if err := p.Provision(context.Background(), packersdk.TestUi(t), comm, make(map[string]interface{})); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 

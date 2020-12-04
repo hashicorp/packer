@@ -28,7 +28,6 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/adapter"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -304,7 +303,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		return err
 	}
 
-	ui = &packer.SafeUi{
+	ui = &packersdk.SafeUi{
 		Sem: make(chan int, 1),
 		Ui:  ui,
 	}

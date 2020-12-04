@@ -7,6 +7,8 @@ import (
 	"testing"
 )
 
+// TestUi creates a simple UI for use in testing.
+// It's not meant for "real" use.
 func TestUi(t *testing.T) Ui {
 	var buf bytes.Buffer
 	return &BasicUi{
