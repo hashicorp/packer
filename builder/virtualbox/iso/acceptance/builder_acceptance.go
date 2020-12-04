@@ -11,9 +11,8 @@ import (
 
 	"github.com/hashicorp/packer/builder/virtualbox/iso"
 
+	"github.com/hashicorp/packer/packer-plugin-sdk/acctest/testutils"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-
-	testshelper "github.com/hashicorp/packer/helper/tests"
 )
 
 type VirtualBoxISOAccTest struct{}
@@ -34,8 +33,8 @@ func (v *VirtualBoxISOAccTest) GetConfigs() (map[string]string, error) {
 }
 
 func (v *VirtualBoxISOAccTest) CleanUp() error {
-	testshelper.CleanupFiles("virtualbox-iso-packer-acc-test")
-	testshelper.CleanupFiles("packer_cache")
+	testutils.CleanupFiles("virtualbox-iso-packer-acc-test")
+	testutils.CleanupFiles("packer_cache")
 	return nil
 }
 

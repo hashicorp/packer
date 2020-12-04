@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 
-	builderT "github.com/hashicorp/packer/packer-plugin-sdk/builder/testing"
+	builderT "github.com/hashicorp/packer/packer-plugin-sdk/acctest"
 )
 
 const InstanceMetadataAddr = "169.254.169.254"

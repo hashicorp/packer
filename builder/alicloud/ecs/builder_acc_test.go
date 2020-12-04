@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	builderT "github.com/hashicorp/packer/packer-plugin-sdk/builder/testing"
+	builderT "github.com/hashicorp/packer/packer-plugin-sdk/acctest"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 

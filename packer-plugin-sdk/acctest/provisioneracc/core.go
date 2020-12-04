@@ -1,8 +1,7 @@
-package testshelper
+package provisioneracc
 
 import (
 	"bytes"
-	"os"
 	"testing"
 
 	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
@@ -12,14 +11,6 @@ import (
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/provisioner/shell"
 )
-
-// fileExists returns true if the filename is found
-func FileExists(filename string) bool {
-	if _, err := os.Stat(filename); err == nil {
-		return true
-	}
-	return false
-}
 
 // testCoreConfigBuilder creates a packer CoreConfig that has a file builder
 // available. This allows us to test a builder that writes files to disk.
@@ -48,11 +39,5 @@ func TestMetaFile(t *testing.T) command.Meta {
 			Writer:      &out,
 			ErrorWriter: &err,
 		},
-	}
-}
-
-func CleanupFiles(moreFiles ...string) {
-	for _, file := range moreFiles {
-		os.RemoveAll(file)
 	}
 }

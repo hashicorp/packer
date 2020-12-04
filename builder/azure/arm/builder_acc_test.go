@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"os"
 
-	builderT "github.com/hashicorp/packer/packer-plugin-sdk/builder/testing"
+	builderT "github.com/hashicorp/packer/packer-plugin-sdk/acctest"
 )
 
 const DeviceLoginAcceptanceTest = "DEVICELOGIN_TEST"

@@ -150,3 +150,12 @@ func (rw *BasicUi) Machine(t string, args ...string) {
 func (rw *BasicUi) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) (body io.ReadCloser) {
 	return rw.PB.TrackProgress(src, currentSize, totalSize, stream)
 }
+
+// NoopProgressTracker is a progress tracker
+// that displays nothing.
+type NoopProgressTracker struct{}
+
+// TrackProgress returns stream
+func (*NoopProgressTracker) TrackProgress(_ string, _, _ int64, stream io.ReadCloser) io.ReadCloser {
+	return stream
+}

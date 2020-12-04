@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
-	"github.com/hashicorp/packer/helper/tests/acc"
+	"github.com/hashicorp/packer/packer-plugin-sdk/acctest/provisioneracc"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/provisioner/powershell"
 	windowsshellprovisioner "github.com/hashicorp/packer/provisioner/windows-shell"
@@ -19,24 +19,24 @@ import (
 const TestProvisionerName = "powershell"
 
 func TestAccPowershellProvisioner_basic(t *testing.T) {
-	acc.TestProvisionersPreCheck(TestProvisionerName, t)
+	provisioneracc.TestProvisionersPreCheck(TestProvisionerName, t)
 
 	testProvisioner := PowershellProvisionerAccTest{"powershell-provisioner-cleanup.txt"}
-	acc.TestProvisionersAgainstBuilders(&testProvisioner, t)
+	provisioneracc.TestProvisionersAgainstBuilders(&testProvisioner, t)
 }
 
 func TestAccPowershellProvisioner_Inline(t *testing.T) {
-	acc.TestProvisionersPreCheck(TestProvisionerName, t)
+	provisioneracc.TestProvisionersPreCheck(TestProvisionerName, t)
 
 	testProvisioner := PowershellProvisionerAccTest{"powershell-inline-provisioner.txt"}
-	acc.TestProvisionersAgainstBuilders(&testProvisioner, t)
+	provisioneracc.TestProvisionersAgainstBuilders(&testProvisioner, t)
 }
 
 func TestAccPowershellProvisioner_Script(t *testing.T) {
-	acc.TestProvisionersPreCheck(TestProvisionerName, t)
+	provisioneracc.TestProvisionersPreCheck(TestProvisionerName, t)
 
 	testProvisioner := PowershellProvisionerAccTest{"powershell-script-provisioner.txt"}
-	acc.TestProvisionersAgainstBuilders(&testProvisioner, t)
+	provisioneracc.TestProvisionersAgainstBuilders(&testProvisioner, t)
 }
 
 type PowershellProvisionerAccTest struct {

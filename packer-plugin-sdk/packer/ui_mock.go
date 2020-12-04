@@ -13,6 +13,7 @@ func TestUi(t *testing.T) Ui {
 		Reader:      &buf,
 		Writer:      ioutil.Discard,
 		ErrorWriter: ioutil.Discard,
+		PB:          &NoopProgressTracker{},
 	}
 }
 
