@@ -2,7 +2,6 @@
 description: |
   The inspec Packer provisioner allows inspec profiles to be run to test the
   machine.
-layout: docs
 page_title: InSpec - Provisioners
 sidebar_title: InSpec
 ---
@@ -82,21 +81,21 @@ Optional Parameters:
 - `inspec_env_vars` (array of strings) - Environment variables to set before
   running InSpec. Usage example:
 
-  <Tabs>
+    <Tabs>
 <Tab heading="JSON">
 
   ```json
     "inspec_env_vars": [ "FOO=bar" ]
   ```
 
-  </Tab>
+    </Tab>
 <Tab heading="HCL2">
 
   ```hcl
      inspec_env_vars = [ "FOO=bar" ]
   ```
 
-  </Tab>
+    </Tab>
 </Tabs>
 
 - `command` (string) - The command to invoke InSpec. Defaults to `inspec`.
@@ -105,21 +104,21 @@ Optional Parameters:
   These arguments _will not_ be passed through a shell and arguments should
   not be quoted. Usage example:
 
-  <Tabs>
+    <Tabs>
 <Tab heading="JSON">
 
   ```json
     "extra_arguments": [ "--sudo", "--reporter", "json" ]
   ```
 
-  </Tab>
+    </Tab>
 <Tab heading="HCL2">
 
   ```hcl
      extra_arguments = [ "--sudo", "--reporter", "json" ]
   ```
 
-  </Tab>
+    </Tab>
 </Tabs>
 
 - `attributes` (array of strings) - Attribute Files used by InSpec which will
