@@ -12,9 +12,8 @@ import (
 	"os/exec"
 
 	"github.com/hashicorp/packer/builder/docker"
-	"github.com/hashicorp/packer/packer"
+	builderT "github.com/hashicorp/packer/packer-plugin-sdk/acctest"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/provisioner/file"
 )
 
@@ -329,69 +328,38 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 		t.Skip("This test is only run with PACKER_ACC=1")
 	}
 
-	ui := packersdk.TestUi(t)
-
-	tpl, err := template.Parse(strings.NewReader(templateString))
-	if err != nil {
-		t.Fatalf("Unable to parse config: %s", err)
-	}
-
-	// Check if docker executable can be found.
-	_, err = exec.LookPath("docker")
+	// this should be a precheck
+	cmd := exec.Command("docker", "-v")
+	err := cmd.Run()
 	if err != nil {
 		t.Error("docker command not found; please make sure docker is installed")
 	}
 
-	// Setup the builder
-	builder := &docker.Builder{}
-	_, warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
-	if err != nil {
-		t.Fatalf("Error preparing configuration %s", err)
-	}
-	if len(warnings) > 0 {
-		t.Fatal("Encountered configuration warnings; aborting")
-	}
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &docker.Builder{},
+		Template: templateString,
+		Check: func(a []packersdk.Artifact) error {
 
-	ansible := &Provisioner{}
-	err = ansible.Prepare(tpl.Provisioners[0].Config)
-	if err != nil {
-		t.Fatalf("Error preparing ansible-local provisioner: %s", err)
-	}
+			actualContent, err := ioutil.ReadFile("hello_world")
+			if err != nil {
+				return fmt.Errorf("Expected file not found: %s", err)
+			}
 
-	download := &file.Provisioner{}
-	err = download.Prepare(tpl.Provisioners[1].Config)
-	if err != nil {
-		t.Fatalf("Error preparing download: %s", err)
-	}
-
-	// Add hooks so the provisioners run during the build
-	hooks := map[string][]packersdk.Hook{}
-	hooks[packersdk.HookProvision] = []packersdk.Hook{
-		&packer.ProvisionHook{
-			Provisioners: []*packer.HookedProvisioner{
-				{Provisioner: ansible, Config: nil, TypeName: ""},
-				{Provisioner: download, Config: nil, TypeName: ""},
-			},
+			expectedContent := "Hello world!"
+			if string(actualContent) != expectedContent {
+				return fmt.Errorf(`Unexpected file content: expected="%s", actual="%s"`, expectedContent, actualContent)
+			}
+			return nil
 		},
-	}
-	hook := &packersdk.DispatchHook{Mapping: hooks}
-
-	artifact, err := builder.Run(context.Background(), ui, hook)
-	if err != nil {
-		t.Fatalf("Error running build %s", err)
-	}
-	defer os.Remove("hello_world")
-	defer artifact.Destroy()
-
-	actualContent, err := ioutil.ReadFile("hello_world")
-	if err != nil {
-		t.Fatalf("Expected file not found: %s", err)
-	}
-
-	expectedContent := "Hello world!"
-	if string(actualContent) != expectedContent {
-		t.Fatalf(`Unexpected file content: expected="%s", actual="%s"`, expectedContent, actualContent)
-	}
+		Teardown: func() error {
+			os.Remove("hello_world")
+			return nil
+		},
+		ProvisionerStore: packersdk.MapOfProvisioner{
+			"ansible-local": func() (packersdk.Provisioner, error) { return &Provisioner{}, nil },
+			"file":          func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
+		},
+	})
 }
 
 func assertPlaybooksExecuted(comm *communicatorMock, playbooks []string) {
@@ -477,7 +445,7 @@ const playbookFilesDockerTemplate = `
 {
 	"builders": [
 		{
-			"type": "docker",
+			"type": "test",
 			"image": "williamyeh/ansible:centos7",
 			"discard": true
 		}
@@ -504,7 +472,7 @@ const playbookFilesWithPlaybookDirDockerTemplate = `
 {
 	"builders": [
 		{
-			"type": "docker",
+			"type": "test",
 			"image": "williamyeh/ansible:centos7",
 			"discard": true
 		}

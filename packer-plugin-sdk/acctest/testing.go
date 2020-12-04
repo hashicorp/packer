@@ -49,6 +49,15 @@ type TestCase struct {
 	// If SkipArtifactTeardown is true, we will not attempt to destroy the
 	// artifact created in this test run.
 	SkipArtifactTeardown bool
+	// If set, overrides the default provisioner store with custom provisioners.
+	// This can be useful for running acceptance tests for a particular
+	// provisioner using a specific builder.
+	// Default provisioner store:
+	// ProvisionerStore: packersdk.MapOfProvisioner{
+	// 	"shell": func() (packersdk.Provisioner, error) { return &shellprovisioner.Provisioner{}, nil },
+	// 	"file":  func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
+	// },
+	ProvisionerStore packersdk.MapOfProvisioner
 }
 
 // TestCheckFunc is the callback used for Check in TestStep.
@@ -112,6 +121,12 @@ func Test(t TestT, c TestCase) {
 		return
 	}
 
+	if c.ProvisionerStore == nil {
+		c.ProvisionerStore = packersdk.MapOfProvisioner{
+			"shell": func() (packersdk.Provisioner, error) { return &shellprovisioner.Provisioner{}, nil },
+			"file":  func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
+		}
+	}
 	// Build the core
 	log.Printf("[DEBUG] Initializing core...")
 	core := packer.NewCore(&packer.CoreConfig{
@@ -125,10 +140,7 @@ func Test(t TestT, c TestCase) {
 					return nil, nil
 				},
 			},
-			ProvisionerStore: packersdk.MapOfProvisioner{
-				"shell": func() (packersdk.Provisioner, error) { return &shellprovisioner.Provisioner{}, nil },
-				"file":  func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
-			},
+			ProvisionerStore: c.ProvisionerStore,
 		},
 		Template: tpl,
 	})
