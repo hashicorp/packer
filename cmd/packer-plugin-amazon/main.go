@@ -21,7 +21,7 @@ func main() {
 	pps.RegisterPostProcessor("import", new(amazonimport.PostProcessor))
 	err := pps.Run()
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 }
