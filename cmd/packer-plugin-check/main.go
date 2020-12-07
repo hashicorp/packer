@@ -1,4 +1,4 @@
-// plugin-check is a command used by plugins to validate compatibility and basic configuration
+// packer-plugin-check is a command used by plugins to validate compatibility and basic configuration
 // to work with Packer.
 package main
 
@@ -18,8 +18,8 @@ const packerPluginCheck = "packer-plugin-check"
 
 var (
 	hcl2spec = flag.Bool("hcl2spec", false, "flag to indicate that hcl2spec files should be checked.")
-	website  = flag.Bool("website", false, "flag to indicate that website files should be checked.")
-	load     = flag.Bool("load", false, "flag to check plugin can be loaded by Packer.")
+	docs     = flag.Bool("docs", false, "flag to indicate that documentation files should be checked.")
+	load     = flag.String("load", "", "flag to check if plugin can be loaded by Packer.")
 )
 
 // Usage is a replacement usage function for the flags package.
@@ -36,7 +36,7 @@ func main() {
 	flag.Usage = Usage
 	flag.Parse()
 
-	if *hcl2spec == false && *website == false && *load == false {
+	if *hcl2spec == false && *docs == false && len(*load) == 0 {
 		flag.Usage()
 		os.Exit(2)
 	}
@@ -49,16 +49,24 @@ func main() {
 		fmt.Printf("Plugin succesfully passed hcl2spec check.\n")
 	}
 
-	if *website {
-		_ = checkWebsite()
+	if *docs {
+		if err := checkDocumentation(); err != nil {
+			fmt.Printf(err.Error())
+			os.Exit(2)
+		}
+		fmt.Printf("Plugin succesfully passed docs check.\n")
 	}
 
-	if *load {
+	if len(*load) > 0 {
+		if err := checkPluginName(*load); err != nil {
+			fmt.Printf(err.Error())
+			os.Exit(2)
+		}
 		if err := discoverAndLoad(); err != nil {
 			fmt.Printf(err.Error())
 			os.Exit(2)
 		}
-		fmt.Printf("Plugin succesfully passed loading check.\n")
+		fmt.Printf("Plugin succesfully passed compatibility check.\n")
 	}
 }
 
@@ -89,13 +97,14 @@ func checkHCL2Specs() error {
 	if hcl2found {
 		return nil
 	}
-	return fmt.Errorf("No hcl2spec.go files found. Please, make sure to generate them before releasing.")
+	return fmt.Errorf("no hcl2spec.go files found, make sure to generate them before releasing")
 }
 
-// checkWebsite looks for the presence of a website folder with mdx files inside.
+// checkDocumentation looks for the presence of a website folder with mdx files inside.
 // It is not possible to predict the number of mdx files for a given plugin.
 // Because of that, finding one file inside de folder is enough to validate the knowledge of website generation.
-func checkWebsite() error {
+func checkDocumentation() error {
+	// TODO: this should be updated once we have defined what's going to be for plguin's docs
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -120,16 +129,34 @@ func checkWebsite() error {
 	})
 
 	if mdxFound {
-		fmt.Printf("a mdx file was found inside website folder\n")
+		fmt.Printf("a mdx file was found inside the docs folder\n")
 		return nil
 	}
-	return fmt.Errorf("No website files found. Please, make sure to generate them before releasing.")
+	return fmt.Errorf("no docs files found, make sure to have the docs in place before releasing")
 }
 
-func discoverAndLoad() error {
-	// TODO: add warning for non `packer-plugin-*` plugins.
-	// these will be detected but Packer cannot install them automatically.
+// checkPluginName checks for the possible valid names for a plugin, packer-plugin-* or packer-[builder|provisioner|post-processor]-*.
+// If the name is prefixed with `packer-[builder|provisioner|post-processor]-`, packer won't be able to install it,
+// therefore a WARNING will be shown.
+func checkPluginName(name string) error {
+	if strings.HasPrefix(name, "packer-plugin-") {
+		return nil
+	}
+	if strings.HasPrefix(name, "packer-builder-") ||
+		strings.HasPrefix(name, "packer-provisioner-") ||
+		strings.HasPrefix(name, "packer-post-processor-") {
+		fmt.Printf("[WARNING] Plugin is named with old prefix `packer-[builder|provisioner|post-processor]-{name})`. \n" +
+			"These will be detected but Packer cannot install them automatically. \n" +
+			"Update the name to packer-plugin-{name} and the plugin will become available through `packer init` command.")
+		return nil
+	}
+	return fmt.Errorf("plugin's name is not valid")
+}
 
+// discoverAndLoad will discover the plugin binary from the current directory and load any builder/provisioner/post-processor
+// in the plugin configuration. At least one builder, provisioner, or post-processor should be found to validate the plugin's
+// compatibility with Packer.
+func discoverAndLoad() error {
 	config := plugin.Config{
 		PluginMinPort: 10000,
 		PluginMaxPort: 25000,
@@ -139,11 +166,12 @@ func discoverAndLoad() error {
 		return err
 	}
 
+	// TODO: validate correctness of plugins loaded by checking them against the output of the `describe` command.
 	builders, provisioners, postProcessors := config.GetPlugins()
 	if len(builders) == 0 &&
 		len(provisioners) == 0 &&
 		len(postProcessors) == 0 {
-		return fmt.Errorf("couldn't indentify any Builder/Provisioner/Post-Processor from plugin binary")
+		return fmt.Errorf("couldn't load any Builder/Provisioner/Post-Processor from the plugin binary")
 	}
 
 	return nil
