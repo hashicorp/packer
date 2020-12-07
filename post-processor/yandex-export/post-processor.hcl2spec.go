@@ -22,6 +22,7 @@ type FlatConfig struct {
 	Token                 *string           `mapstructure:"token" required:"true" cty:"token" hcl:"token"`
 	MaxRetries            *int              `mapstructure:"max_retries" cty:"max_retries" hcl:"max_retries"`
 	SerialLogFile         *string           `mapstructure:"serial_log_file" required:"false" cty:"serial_log_file" hcl:"serial_log_file"`
+	StateTimeout          *string           `mapstructure:"state_timeout" required:"false" cty:"state_timeout" hcl:"state_timeout"`
 	InstanceCores         *int              `mapstructure:"instance_cores" required:"false" cty:"instance_cores" hcl:"instance_cores"`
 	InstanceGpus          *int              `mapstructure:"instance_gpus" required:"false" cty:"instance_gpus" hcl:"instance_gpus"`
 	InstanceMemory        *int              `mapstructure:"instance_mem_gb" required:"false" cty:"instance_mem_gb" hcl:"instance_mem_gb"`
@@ -71,6 +72,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"token":                      &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"max_retries":                &hcldec.AttrSpec{Name: "max_retries", Type: cty.Number, Required: false},
 		"serial_log_file":            &hcldec.AttrSpec{Name: "serial_log_file", Type: cty.String, Required: false},
+		"state_timeout":              &hcldec.AttrSpec{Name: "state_timeout", Type: cty.String, Required: false},
 		"instance_cores":             &hcldec.AttrSpec{Name: "instance_cores", Type: cty.Number, Required: false},
 		"instance_gpus":              &hcldec.AttrSpec{Name: "instance_gpus", Type: cty.Number, Required: false},
 		"instance_mem_gb":            &hcldec.AttrSpec{Name: "instance_mem_gb", Type: cty.Number, Required: false},

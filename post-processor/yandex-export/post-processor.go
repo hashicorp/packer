@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -105,7 +105,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// through the internal network - we need access
 	// to the global Internet: either through ipv4 or ipv6
 	// TODO: delete this when access appears
-	if p.config.UseIPv4Nat && p.config.UseIPv6 == false {
+	if p.config.UseIPv4Nat == false && p.config.UseIPv6 == false {
 		p.config.UseIPv4Nat = true
 	}
 	p.config.Preemptible = true //? safety
@@ -198,9 +198,18 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 			"zone":      p.config.Zone,
 		},
 	)
-	yandexConfig.InstanceConfig.InstanceName = exporterName
-	yandexConfig.DiskName = exporterName
+	if yandexConfig.InstanceConfig.InstanceName == "" {
+		yandexConfig.InstanceConfig.InstanceName = exporterName
+	}
+	if yandexConfig.DiskName == "" {
+		yandexConfig.DiskName = exporterName
+	}
 
+	errs := yandexConfig.Communicator.Prepare(interpolate.NewContext())
+	if len(errs) > 0 {
+		err := &packersdk.MultiError{Errors: errs}
+		return nil, false, false, err
+	}
 	ui.Say(fmt.Sprintf("Validating service_account_id: '%s'...", yandexConfig.ServiceAccountID))
 	if err := validateServiceAccount(ctx, driver.SDK(), yandexConfig.ServiceAccountID); err != nil {
 		return nil, false, false, err
@@ -250,10 +259,15 @@ func ycSaneDefaults(c *Config, md map[string]string) yandex.Config {
 	yandexConfig := yandex.Config{
 		CommonConfig: c.CommonConfig,
 		AccessConfig: c.AccessConfig,
+		Communicator: communicator.Config{
+			Type: "ssh",
+			SSH: communicator.SSH{
+				SSHUsername: "ubuntu",
+			},
+		},
 	}
 	if c.SSHPrivateKeyFile != "" {
 		yandexConfig.Communicator.SSH.SSHPrivateKeyFile = c.SSHPrivateKeyFile
-		yandexConfig.Communicator.SSH.SSHUsername = "ubuntu"
 	}
 	if yandexConfig.Metadata == nil {
 		yandexConfig.Metadata = md
@@ -265,7 +279,6 @@ func ycSaneDefaults(c *Config, md map[string]string) yandex.Config {
 
 	yandexConfig.SourceImageFamily = "ubuntu-1604-lts"
 	yandexConfig.SourceImageFolderID = yandex.StandardImagesFolderID
-	yandexConfig.StateTimeout = 3 * time.Minute
 
 	yandexConfig.ServiceAccountID = c.ServiceAccountID
 

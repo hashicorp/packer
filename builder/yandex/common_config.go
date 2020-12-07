@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"time"
 
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
@@ -25,6 +26,9 @@ type CommonConfig struct {
 
 	// File path to save serial port output of the launched instance.
 	SerialLogFile string `mapstructure:"serial_log_file" required:"false"`
+	// The time to wait for instance state changes.
+	// Defaults to `5m`.
+	StateTimeout time.Duration `mapstructure:"state_timeout" required:"false"`
 
 	InstanceConfig `mapstructure:",squash"`
 	DiskConfig     `mapstructure:",squash"`
@@ -39,6 +43,10 @@ func (c *CommonConfig) Prepare(errs *packersdk.MultiError) *packersdk.MultiError
 			errs = packersdk.MultiErrorAppend(errs,
 				fmt.Errorf("Serial log file %s already exist", c.SerialLogFile))
 		}
+	}
+
+	if c.StateTimeout == 0 {
+		c.StateTimeout = 5 * time.Minute
 	}
 
 	errs = c.CloudConfig.Prepare(errs)

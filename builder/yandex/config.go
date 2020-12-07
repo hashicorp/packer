@@ -6,7 +6,6 @@ package yandex
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
@@ -42,9 +41,6 @@ type Config struct {
 	TargetImageFolderID string `mapstructure:"target_image_folder_id" required:"false"`
 
 	ctx interpolate.Context
-	// The time to wait for instance state changes.
-	// Defaults to `5m`.
-	StateTimeout time.Duration `mapstructure:"state_timeout" required:"false"`
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
@@ -97,10 +93,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	if c.TargetImageFolderID == "" {
 		c.TargetImageFolderID = c.FolderID
-	}
-
-	if c.StateTimeout == 0 {
-		c.StateTimeout = 5 * time.Minute
 	}
 
 	// Check for any errors.
