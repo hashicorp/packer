@@ -50,7 +50,7 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return stepHaltWithError(state, fmt.Errorf("Error generating temporary SSH key: %s", err))
+		return StepHaltWithError(state, fmt.Errorf("Error generating temporary SSH key: %s", err))
 	}
 
 	// ASN.1 DER encoded form
@@ -89,7 +89,7 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
 		err := ioutil.WriteFile(s.DebugKeyPath, config.Communicator.SSHPrivateKey, 0600)
 		if err != nil {
-			return stepHaltWithError(state, fmt.Errorf("Error saving debug key: %s", err))
+			return StepHaltWithError(state, fmt.Errorf("Error saving debug key: %s", err))
 		}
 	}
 
