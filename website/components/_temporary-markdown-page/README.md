@@ -19,4 +19,4 @@ export function getStaticProps() {
 }
 ```
 
-If the specified page contains front matter, the `page_title` and `description` keys will be added as the title and description the the `<head>` of the page.
+If the specified page contains front matter, the `page_title` and `description` keys will be added as the title and description to the `<head>` of the page.
