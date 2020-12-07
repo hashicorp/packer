@@ -87,7 +87,9 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		&commonsteps.StepCleanupTempKeys{
 			Comm: &b.config.Communicator,
 		},
-		&StepTeardownInstance{},
+		&StepTeardownInstance{
+			SerialLogFile: b.config.SerialLogFile,
+		},
 		&stepCreateImage{
 			GeneratedData: generatedData,
 		},

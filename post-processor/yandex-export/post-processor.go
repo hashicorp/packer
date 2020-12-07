@@ -8,13 +8,12 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -32,6 +31,8 @@ const defaultStorageEndpoint = "storage.yandexcloud.net"
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	yandex.AccessConfig `mapstructure:",squash"`
+	yandex.CommonConfig `mapstructure:",squash"`
+	ExchangeConfig      `mapstructure:",squash"`
 
 	// List of paths to Yandex Object Storage where exported image will be uploaded.
 	// Please be aware that use of space char inside path not supported.
@@ -39,24 +40,11 @@ type Config struct {
 	// Check available template data for [Yandex](/docs/builders/yandex#build-template-data) builder.
 	// Paths to Yandex Object Storage where exported image will be uploaded.
 	Paths []string `mapstructure:"paths" required:"true"`
-	// The folder ID that will be used to launch a temporary instance.
-	// Alternatively you may set value by environment variable `YC_FOLDER_ID`.
-	FolderID string `mapstructure:"folder_id" required:"true"`
-	// Service Account ID with proper permission to modify an instance, create and attach disk and
-	// make upload to specific Yandex Object Storage paths.
-	ServiceAccountID string `mapstructure:"service_account_id" required:"true"`
-	// The size of the disk in GB. This defaults to `100`, which is 100GB.
-	DiskSizeGb int `mapstructure:"disk_size" required:"false"`
-	// Specify disk type for the launched instance. Defaults to `network-ssd`.
-	DiskType string `mapstructure:"disk_type" required:"false"`
-	// Identifier of the hardware platform configuration for the instance. This defaults to `standard-v2`.
-	PlatformID string `mapstructure:"platform_id" required:"false"`
-	// The Yandex VPC subnet id to use for
-	// the launched instance. Note, the zone of the subnet must match the
-	// zone in which the VM is launched.
-	SubnetID string `mapstructure:"subnet_id" required:"false"`
-	// The name of the zone to launch the instance.  This defaults to `ru-central1-a`.
-	Zone string `mapstructure:"zone" required:"false"`
+
+	// Path to a PEM encoded private key file to use to authenticate with SSH.
+	// The `~` can be used in path and will be expanded to the home directory
+	// of current user. Login for attach: `ubuntu`
+	SSHPrivateKeyFile string `mapstructure:"ssh_private_key_file" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -88,6 +76,14 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	errs = packersdk.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
 
+	// Set defaults.
+	if p.config.DiskSizeGb == 0 {
+		p.config.DiskSizeGb = 100
+	}
+
+	errs = p.config.CommonConfig.Prepare(errs)
+	errs = p.config.ExchangeConfig.Prepare(errs)
+
 	if len(p.config.Paths) == 0 {
 		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("paths must be specified"))
@@ -101,29 +97,27 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
-	if p.config.FolderID == "" {
-		p.config.FolderID = os.Getenv("YC_FOLDER_ID")
-	}
-
-	// Set defaults.
-	if p.config.DiskSizeGb == 0 {
-		p.config.DiskSizeGb = 100
-	}
-
-	if p.config.DiskType == "" {
-		p.config.DiskType = "network-ssd"
-	}
-
-	if p.config.PlatformID == "" {
-		p.config.PlatformID = "standard-v2"
-	}
-
-	if p.config.Zone == "" {
-		p.config.Zone = "ru-central1-a"
-	}
-
 	if len(errs.Errors) > 0 {
 		return errs
+	}
+
+	// Due to the fact that now it's impossible to go to the object storage
+	// through the internal network - we need access
+	// to the global Internet: either through ipv4 or ipv6
+	// TODO: delete this when access appears
+	if p.config.UseIPv4Nat == false && p.config.UseIPv6 == false {
+		p.config.UseIPv4Nat = true
+	}
+	p.config.Preemptible = true //? safety
+
+	if p.config.Labels == nil {
+		p.config.Labels = make(map[string]string)
+	}
+	if _, ok := p.config.Labels["role"]; !ok {
+		p.config.Labels["role"] = "exporter"
+	}
+	if _, ok := p.config.Labels["target"]; !ok {
+		p.config.Labels["target"] = "object-storage"
 	}
 
 	return nil
@@ -168,15 +162,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	imageID := artifact.State("ImageID").(string)
 	ui.Say(fmt.Sprintf("Exporting image %v to destination: %v", imageID, p.config.Paths))
 
-	// Set up exporter instance configuration.
-	exporterName := fmt.Sprintf("%s-exporter", artifact.Id())
-	exporterMetadata := map[string]string{
-		"image_id":  imageID,
-		"name":      exporterName,
-		"paths":     strings.Join(p.config.Paths, " "),
-		"user-data": CloudInitScript,
-		"zone":      p.config.Zone,
-	}
 	driver, err := yandex.NewDriverYC(ui, &p.config.AccessConfig)
 	if err != nil {
 		return nil, false, false, err
@@ -202,23 +187,29 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 			},
 		},
 	}
-	yandexConfig := ycSaneDefaults()
-	yandexConfig.DiskName = exporterName
-	yandexConfig.InstanceName = exporterName
-	yandexConfig.DiskSizeGb = p.config.DiskSizeGb
-	yandexConfig.Metadata = exporterMetadata
-	yandexConfig.SubnetID = p.config.SubnetID
-	yandexConfig.FolderID = p.config.FolderID
-	yandexConfig.Zone = p.config.Zone
-
-	if p.config.ServiceAccountID != "" {
-		yandexConfig.ServiceAccountID = p.config.ServiceAccountID
+	// Set up exporter instance configuration.
+	exporterName := fmt.Sprintf("%s-exporter", artifact.Id())
+	yandexConfig := ycSaneDefaults(&p.config,
+		map[string]string{
+			"image_id":  imageID,
+			"name":      exporterName,
+			"paths":     strings.Join(p.config.Paths, " "),
+			"user-data": CloudInitScript,
+			"zone":      p.config.Zone,
+		},
+	)
+	if yandexConfig.InstanceConfig.InstanceName == "" {
+		yandexConfig.InstanceConfig.InstanceName = exporterName
+	}
+	if yandexConfig.DiskName == "" {
+		yandexConfig.DiskName = exporterName
 	}
 
-	if p.config.PlatformID != "" {
-		yandexConfig.PlatformID = p.config.PlatformID
+	errs := yandexConfig.Communicator.Prepare(interpolate.NewContext())
+	if len(errs) > 0 {
+		err := &packersdk.MultiError{Errors: errs}
+		return nil, false, false, err
 	}
-
 	ui.Say(fmt.Sprintf("Validating service_account_id: '%s'...", yandexConfig.ServiceAccountID))
 	if err := validateServiceAccount(ctx, driver.SDK(), yandexConfig.ServiceAccountID); err != nil {
 		return nil, false, false, err
@@ -240,10 +231,13 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		},
 		&yandex.StepCreateInstance{
 			Debug:         p.config.PackerDebug,
+			SerialLogFile: yandexConfig.SerialLogFile,
 			GeneratedData: &packerbuilderdata.GeneratedData{State: state},
 		},
 		new(yandex.StepWaitCloudInitScript),
-		new(yandex.StepTeardownInstance),
+		&yandex.StepTeardownInstance{
+			SerialLogFile: yandexConfig.SerialLogFile,
+		},
 	}
 
 	// Run the steps.
@@ -261,23 +255,34 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	return result, false, false, nil
 }
 
-func ycSaneDefaults() yandex.Config {
-	return yandex.Config{
-		DiskType:       "network-ssd",
-		InstanceCores:  2,
-		InstanceMemory: 2,
-		Labels: map[string]string{
-			"role":   "exporter",
-			"target": "object-storage",
+func ycSaneDefaults(c *Config, md map[string]string) yandex.Config {
+	yandexConfig := yandex.Config{
+		CommonConfig: c.CommonConfig,
+		AccessConfig: c.AccessConfig,
+		Communicator: communicator.Config{
+			Type: "ssh",
+			SSH: communicator.SSH{
+				SSHUsername: "ubuntu",
+			},
 		},
-		PlatformID:          "standard-v2",
-		Preemptible:         true,
-		SourceImageFamily:   "ubuntu-1604-lts",
-		SourceImageFolderID: yandex.StandardImagesFolderID,
-		UseIPv4Nat:          true,
-		Zone:                "ru-central1-a",
-		StateTimeout:        3 * time.Minute,
 	}
+	if c.SSHPrivateKeyFile != "" {
+		yandexConfig.Communicator.SSH.SSHPrivateKeyFile = c.SSHPrivateKeyFile
+	}
+	if yandexConfig.Metadata == nil {
+		yandexConfig.Metadata = md
+	} else {
+		for k, v := range md {
+			yandexConfig.Metadata[k] = v
+		}
+	}
+
+	yandexConfig.SourceImageFamily = "ubuntu-1604-lts"
+	yandexConfig.SourceImageFolderID = yandex.StandardImagesFolderID
+
+	yandexConfig.ServiceAccountID = c.ServiceAccountID
+
+	return yandexConfig
 }
 
 func formUrls(paths []string) []string {

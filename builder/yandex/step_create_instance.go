@@ -56,7 +56,7 @@ func createNetwork(ctx context.Context, c *Config, d Driver) (*vpc.Network, erro
 	return network, nil
 }
 
-func createDisk(ctx context.Context, c *Config, d Driver, sourceImage *Image) (*compute.Disk, error) {
+func createDisk(ctx context.Context, state multistep.StateBag, c *Config, d Driver, sourceImage *Image) (*compute.Disk, error) {
 	req := &compute.CreateDiskRequest{
 		Name:     c.DiskName,
 		FolderId: c.FolderID,
@@ -74,6 +74,16 @@ func createDisk(ctx context.Context, c *Config, d Driver, sourceImage *Image) (*
 	if err != nil {
 		return nil, err
 	}
+	protoMD, err := op.Metadata()
+	if err != nil {
+		return nil, err
+	}
+	md, ok := protoMD.(*compute.CreateDiskMetadata)
+	if !ok {
+		return nil, fmt.Errorf("could not get Instance ID from create operation metadata")
+	}
+	state.Put("disk_id", md.DiskId)
+
 	err = op.Wait(ctx)
 	if err != nil {
 		return nil, err
@@ -83,11 +93,11 @@ func createDisk(ctx context.Context, c *Config, d Driver, sourceImage *Image) (*
 		return nil, err
 	}
 
-	image, ok := resp.(*compute.Disk)
+	disk, ok := resp.(*compute.Disk)
 	if !ok {
 		return nil, errors.New("disk create operation response doesn't contain Disk")
 	}
-	return image, nil
+	return disk, nil
 
 }
 
@@ -191,11 +201,10 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	// Create a disk manually to have a delete ID
 	ui.Say("Creating disk...")
-	disk, err := createDisk(ctx, config, driver, sourceImage)
+	disk, err := createDisk(ctx, state, config, driver, sourceImage)
 	if err != nil {
 		return stepHaltWithError(state, fmt.Errorf("Error creating disk: %s", err))
 	}
-	state.Put("disk_id", disk.Id)
 
 	// Create an instance based on the configuration
 	ui.Say("Creating instance...")
@@ -331,7 +340,7 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 
 	if s.SerialLogFile != "" {
 		ui.Say("Current state 'cancelled' or 'halted'...")
-		err := s.writeSerialLogFile(ctx, state)
+		err := writeSerialLogFile(ctx, state, s.SerialLogFile)
 		if err != nil {
 			ui.Error(err.Error())
 		}
@@ -393,25 +402,6 @@ func (s *StepCreateInstance) Cleanup(state multistep.StateBag) {
 		}
 		ui.Message("Disk has been deleted!")
 	}
-}
-
-func (s *StepCreateInstance) writeSerialLogFile(ctx context.Context, state multistep.StateBag) error {
-	sdk := state.Get("sdk").(*ycsdk.SDK)
-	ui := state.Get("ui").(packersdk.Ui)
-
-	instanceID := state.Get("instance_id").(string)
-	ui.Say("Try get instance's serial port output and write to file " + s.SerialLogFile)
-	serialOutput, err := sdk.Compute().Instance().GetSerialPortOutput(ctx, &compute.GetInstanceSerialPortOutputRequest{
-		InstanceId: instanceID,
-	})
-	if err != nil {
-		return fmt.Errorf("Failed to get serial port output for instance (id: %s): %s", instanceID, err)
-	}
-	if err := ioutil.WriteFile(s.SerialLogFile, []byte(serialOutput.Contents), 0600); err != nil {
-		return fmt.Errorf("Failed to write serial port output to file: %s", err)
-	}
-	ui.Message("Serial port output has been successfully written")
-	return nil
 }
 
 func (c *Config) createInstanceMetadata(sshPublicKey string) (map[string]string, error) {

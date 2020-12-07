@@ -6,7 +6,6 @@ package yandeximport
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/builder/file"
@@ -22,14 +21,11 @@ import (
 )
 
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-	yandex.AccessConfig `mapstructure:",squash"`
-
-	// The folder ID that will be used to store imported Image.
-	FolderID string `mapstructure:"folder_id" required:"true"`
-	// Service Account ID with proper permission to use Storage service
-	// for operations 'upload' and 'delete' object to `bucket`.
-	ServiceAccountID string `mapstructure:"service_account_id" required:"true"`
+	common.PackerConfig         `mapstructure:",squash"`
+	yandex.AccessConfig         `mapstructure:",squash"`
+	yandex.CloudConfig          `mapstructure:",squash"`
+	yandexexport.ExchangeConfig `mapstructure:",squash"`
+	yandex.ImageConfig          `mapstructure:",squash"`
 
 	// The name of the bucket where the qcow2 file will be uploaded to for import.
 	// This bucket must exist when the post-processor is run.
@@ -45,16 +41,6 @@ type Config struct {
 	// after the import process has completed. Possible values are: `true` to
 	// leave it in the bucket, `false` to remove it. Default is `false`.
 	SkipClean bool `mapstructure:"skip_clean" required:"false"`
-
-	// The name of the image, which contains 1-63 characters and only
-	// supports lowercase English characters, numbers and hyphen.
-	ImageName string `mapstructure:"image_name" required:"false"`
-	// The description of the image.
-	ImageDescription string `mapstructure:"image_description" required:"false"`
-	// The family name of the imported image.
-	ImageFamily string `mapstructure:"image_family" required:"false"`
-	// Key/value pair labels to apply to the imported image.
-	ImageLabels map[string]string `mapstructure:"image_labels" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -84,10 +70,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	var errs *packersdk.MultiError
 
 	errs = packersdk.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
-
-	if p.config.FolderID == "" {
-		p.config.FolderID = os.Getenv("YC_FOLDER_ID")
-	}
+	errs = p.config.CloudConfig.Prepare(errs)
+	errs = p.config.ImageConfig.Prepare(errs)
+	errs = p.config.ExchangeConfig.Prepare(errs)
 
 	// Set defaults
 	if p.config.ObjectName == "" {
@@ -98,20 +83,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if err = interpolate.Validate(p.config.ObjectName, &p.config.ctx); err != nil {
 		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("error parsing object_name template: %s", err))
-	}
-
-	// TODO: make common code to check and prepare Yandex.Cloud auth configuration data
-
-	templates := map[string]*string{
-		"object_name": &p.config.ObjectName,
-		"folder_id":   &p.config.FolderID,
-	}
-
-	for key, ptr := range templates {
-		if *ptr == "" {
-			errs = packersdk.MultiErrorAppend(
-				errs, fmt.Errorf("%s must be set", key))
-		}
 	}
 
 	if len(errs.Errors) > 0 {
@@ -199,7 +170,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		return nil, false, false, err
 	}
 
-	ycImage, err := createYCImage(ctx, client, ui, p.config.FolderID, imageSrc, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels)
+	ycImage, err := createYCImage(ctx, client, ui, imageSrc, &p.config)
 	if err != nil {
 		return nil, false, false, err
 	}
