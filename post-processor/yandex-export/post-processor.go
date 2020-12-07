@@ -1,5 +1,6 @@
 //go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type Config
+//go:generate go run ./scripts/script-to-var.go ./scripts/export.sh CloudInitScript cloud-init-script.go
 
 package yandexexport
 
@@ -21,6 +22,7 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/post-processor/artifice"
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
 	ycsdk "github.com/yandex-cloud/go-sdk"
 )
@@ -175,7 +177,31 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		"user-data": CloudInitScript,
 		"zone":      p.config.Zone,
 	}
+	driver, err := yandex.NewDriverYC(ui, &p.config.AccessConfig)
+	if err != nil {
+		return nil, false, false, err
+	}
 
+	imageDesc, err := driver.SDK().Compute().Image().Get(ctx, &compute.GetImageRequest{
+		ImageId: imageID,
+	})
+	if err != nil {
+		return nil, false, false, err
+	}
+	secDiskSpec := []*compute.AttachedDiskSpec{
+		{
+			AutoDelete: true,
+			DeviceName: "doexport",
+			Disk: &compute.AttachedDiskSpec_DiskSpec_{
+				DiskSpec: &compute.AttachedDiskSpec_DiskSpec{
+					Source: &compute.AttachedDiskSpec_DiskSpec_ImageId{
+						ImageId: imageID,
+					},
+					Size: imageDesc.MinDiskSize,
+				},
+			},
+		},
+	}
 	yandexConfig := ycSaneDefaults()
 	yandexConfig.DiskName = exporterName
 	yandexConfig.InstanceName = exporterName
@@ -193,11 +219,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		yandexConfig.PlatformID = p.config.PlatformID
 	}
 
-	driver, err := yandex.NewDriverYC(ui, &p.config.AccessConfig)
-	if err != nil {
-		return nil, false, false, err
-	}
-
 	ui.Say(fmt.Sprintf("Validating service_account_id: '%s'...", yandexConfig.ServiceAccountID))
 	if err := validateServiceAccount(ctx, driver.SDK(), yandexConfig.ServiceAccountID); err != nil {
 		return nil, false, false, err
@@ -209,6 +230,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	state.Put("driver", driver)
 	state.Put("sdk", driver.SDK())
 	state.Put("ui", ui)
+	state.Put("secondary_disk", secDiskSpec)
 
 	// Build the steps.
 	steps := []multistep.Step{
