@@ -94,6 +94,7 @@ func (i *Set) run(args ...string) error {
 		return fmt.Errorf("Unknown command: %q", args[0])
 	}
 }
+
 func (i *Set) start(kind, name string) error {
 	server, err := Server()
 	if err != nil {
