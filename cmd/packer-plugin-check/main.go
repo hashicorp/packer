@@ -82,7 +82,7 @@ func checkHCL2Specs() error {
 	var hcl2found bool
 	_ = filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
-			if info.Name() == "website" || info.Name() == ".github" {
+			if info.Name() == "docs" || info.Name() == ".github" {
 				return filepath.SkipDir
 			}
 		} else {
@@ -100,9 +100,9 @@ func checkHCL2Specs() error {
 	return fmt.Errorf("no hcl2spec.go files found, make sure to generate them before releasing")
 }
 
-// checkDocumentation looks for the presence of a website folder with mdx files inside.
+// checkDocumentation looks for the presence of a docs folder with mdx files inside.
 // It is not possible to predict the number of mdx files for a given plugin.
-// Because of that, finding one file inside de folder is enough to validate the knowledge of website generation.
+// Because of that, finding one file inside de folder is enough to validate the knowledge of docs generation.
 func checkDocumentation() error {
 	// TODO: this should be updated once we have defined what's going to be for plguin's docs
 	wd, err := os.Getwd()
@@ -110,17 +110,17 @@ func checkDocumentation() error {
 		return err
 	}
 
-	websiteDir := wd + "/website"
-	stat, err := os.Stat(websiteDir)
+	docsDir := wd + "/docs"
+	stat, err := os.Stat(docsDir)
 	if err != nil {
-		return fmt.Errorf("could not find website folter: %s", err.Error())
+		return fmt.Errorf("could not find docs folter: %s", err.Error())
 	}
 	if !stat.IsDir() {
-		return fmt.Errorf("expecting website do be a directory of mdx files")
+		return fmt.Errorf("expecting docs do be a directory of mdx files")
 	}
 
 	var mdxFound bool
-	_ = filepath.Walk(websiteDir, func(path string, info os.FileInfo, err error) error {
+	_ = filepath.Walk(docsDir, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() && filepath.Ext(path) == ".mdx" {
 			mdxFound = true
 			return io.EOF
@@ -145,9 +145,9 @@ func checkPluginName(name string) error {
 	if strings.HasPrefix(name, "packer-builder-") ||
 		strings.HasPrefix(name, "packer-provisioner-") ||
 		strings.HasPrefix(name, "packer-post-processor-") {
-		fmt.Printf("[WARNING] Plugin is named with old prefix `packer-[builder|provisioner|post-processor]-{name})`. \n" +
-			"These will be detected but Packer cannot install them automatically. \n" +
-			"Update the name to packer-plugin-{name} and the plugin will become available through `packer init` command.")
+		fmt.Printf("\n[WARNING] Plugin is named with old prefix `packer-[builder|provisioner|post-processor]-{name})`. " +
+			"These will be detected but Packer cannot install them automatically. " +
+			"Update the name to packer-plugin-{name} and the plugin will become available through `packer init` command.\n")
 		return nil
 	}
 	return fmt.Errorf("plugin's name is not valid")
