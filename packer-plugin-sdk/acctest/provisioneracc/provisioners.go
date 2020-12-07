@@ -163,10 +163,10 @@ func LoadBuilderFragment(templateFragmentPath string) (string, error) {
 }
 
 func RunProvisionerAccTest(testCase *ProvisionerTestCase, t *testing.T) {
-	TestProvisionersPreCheck(testCase.Type, t)
 	TestProvisionersAgainstBuilders(testCase, t)
 }
 
+//nolint:errcheck
 func TestProvisionersAgainstBuilders(testCase *ProvisionerTestCase, t *testing.T) {
 	// retrieve user-desired builders.
 	builderTypes := checkBuilders(t)
@@ -207,7 +207,6 @@ func TestProvisionersAgainstBuilders(testCase *ProvisionerTestCase, t *testing.T
 				logfile := fmt.Sprintf("packer_log_%s_%s.txt", builderType, testCase.Type)
 
 				// Run build
-				// TODO: stream logs _and_ store in a logfile.
 				buildCommand := exec.Command("packer", "build", "--machine-readable", templatePath)
 				buildCommand.Env = append(buildCommand.Env, os.Environ()...)
 				buildCommand.Env = append(buildCommand.Env, "PACKER_LOG=1",
@@ -219,10 +218,6 @@ func TestProvisionersAgainstBuilders(testCase *ProvisionerTestCase, t *testing.T
 				if testCase.Check != nil {
 					checkErr = testCase.Check(buildCommand, logfile)
 				}
-
-				// preemptive cleanup
-				defer os.Remove(templatePath)
-				defer os.Remove(logfile)
 
 				// Cleanup stuff created by builder.
 				cleanErr := buildFixture.Teardown()
@@ -239,31 +234,17 @@ func TestProvisionersAgainstBuilders(testCase *ProvisionerTestCase, t *testing.T
 
 				// Fail test if check failed.
 				if checkErr != nil {
-					t.Fatalf(checkErr.Error())
+					t.Fatalf(fmt.Sprint("Error running provisioner acceptance"+
+						" tests: %s\nLogs can be found at %s and the "+
+						"acceptance test template can be found at %s",
+						checkErr.Error(), logfile, templatePath))
+				} else {
+					os.Remove(templatePath)
+					os.Remove(logfile)
 				}
 			})
 		}
 	}
-}
-
-// TestProvisionersPreCheck checks if the Provisioner with name is set in ACC_TEST_PROVISIONERS environment variable
-func TestProvisionersPreCheck(name string, t *testing.T) {
-	p := os.Getenv("ACC_TEST_PROVISIONERS")
-
-	if p == "all" {
-		return
-	}
-
-	provisioners := strings.Split(p, ",")
-	for _, provisioner := range provisioners {
-		if provisioner == name {
-			return
-		}
-	}
-
-	msg := fmt.Sprintf("Provisioner %q not defined in ACC_TEST_PROVISIONERS", name)
-	t.Skip(msg)
-
 }
 
 // checkBuilders retrieves  all of the builders that the user has requested to

@@ -175,7 +175,6 @@ func Test(t TestT, c TestCase) {
 	// Run it! We use a temporary directory for caching and discard
 	// any UI output. We discard since it shows up in logs anyways.
 	log.Printf("[DEBUG] Running 'test' build")
-	// ui := packersdk.TestUi(t)
 	ui := &packersdk.BasicUi{
 		Reader:      os.Stdin,
 		Writer:      ioutil.Discard,
