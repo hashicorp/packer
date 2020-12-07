@@ -37,7 +37,7 @@ func TestSet(t *testing.T) {
 
 	outputDesc := set.description()
 
-	if diff := cmp.Diff(Description{
+	if diff := cmp.Diff(SetDescription{
 		Version:        version.String(),
 		SDKVersion:     version.String(),
 		Builders:       []string{"example", "example-2"},
