@@ -16,6 +16,8 @@ import (
 const (
 	minIops       = 100
 	maxIops       = 64000
+	minIopsGp3    = 3000
+	maxIopsGp3    = 16000
 	minThroughput = 125
 	maxThroughput = 1000
 )
@@ -143,8 +145,8 @@ func (blockDevice BlockDevice) BuildEC2BlockDeviceMapping() *ec2.BlockDeviceMapp
 		ebsBlockDevice.VolumeSize = aws.Int64(blockDevice.VolumeSize)
 	}
 
-	// IOPS is only valid for io1 and io2 types
-	if blockDevice.VolumeType == "io1" || blockDevice.VolumeType == "io2" {
+	switch blockDevice.VolumeType {
+	case "io1", "io2", "gp3":
 		ebsBlockDevice.Iops = aws.Int64(blockDevice.IOPS)
 	}
 
@@ -201,6 +203,11 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 		if b.Throughput < minThroughput || b.Throughput > maxThroughput {
 			return fmt.Errorf("Throughput must be between %d and %d for device %s",
 				minThroughput, maxThroughput, b.DeviceName)
+		}
+
+		if b.IOPS < minIopsGp3 || b.IOPS > maxIopsGp3 {
+			return fmt.Errorf("IOPS must be between %d and %d for device %s",
+				minIopsGp3, maxIopsGp3, b.DeviceName)
 		}
 	}
 
