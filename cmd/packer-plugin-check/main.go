@@ -50,8 +50,7 @@ func main() {
 	}
 
 	if *website {
-		// To be defined after decisions about plugin's documentation
-		//_ = checkWebsite()
+		_ = checkWebsite()
 	}
 
 	if *load {
