@@ -116,7 +116,7 @@ func checkPluginName(name string) error {
 }
 
 // discoverAndLoad will discover the plugin binary from the current directory and load any builder/provisioner/post-processor
-// in the plugin configuration. At least one builder, provisioner, or post-processor should be found to template the plugin's
+// in the plugin configuration. At least one builder, provisioner, or post-processor should be found to validate the plugin's
 // compatibility with Packer.
 func discoverAndLoad() error {
 	config := plugin.Config{
