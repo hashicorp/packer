@@ -28,11 +28,10 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 	ui := state.Get("ui").(packersdk.Ui)
 	name := s.VMName
 
-	if s.DiskImage && !s.UseBackingFile {
-		return multistep.ActionContinue
+	if len(s.AdditionalDiskSize) > 0 || s.UseBackingFile {
+		ui.Say("Creating required virtual machine disks")
 	}
 
-	ui.Say("Creating required virtual machine disks")
 	// The 'main' or 'default' disk
 	diskFullPaths := []string{filepath.Join(s.OutputDir, name)}
 	diskSizes := []string{s.DiskSize}
@@ -42,13 +41,17 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 		for i, diskSize := range s.AdditionalDiskSize {
 			path := filepath.Join(s.OutputDir, fmt.Sprintf("%s-%d", name, i+1))
 			diskFullPaths = append(diskFullPaths, path)
-			size := diskSize
-			diskSizes = append(diskSizes, size)
+			diskSizes = append(diskSizes, diskSize)
 		}
 	}
 
 	// Create all required disks
 	for i, diskFullPath := range diskFullPaths {
+		if s.DiskImage && !s.UseBackingFile && i == 0 {
+			// Let the copy disk step (step_copy_disk.go) create the 'main' or
+			// 'default' disk.
+			continue
+		}
 		log.Printf("[INFO] Creating disk with Path: %s and Size: %s", diskFullPath, diskSizes[i])
 
 		command := s.buildCreateCommand(diskFullPath, diskSizes[i], i, state)
@@ -70,7 +73,8 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 func (s *stepCreateDisk) buildCreateCommand(path string, size string, i int, state multistep.StateBag) []string {
 	command := []string{"create", "-f", s.Format}
 
-	if s.UseBackingFile && i == 0 {
+	if s.DiskImage && s.UseBackingFile && i == 0 {
+		// Use a backing file for the 'main' or 'default' disk
 		isoPath := state.Get("iso_path").(string)
 		command = append(command, "-b", isoPath)
 	}
