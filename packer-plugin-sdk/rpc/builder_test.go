@@ -5,14 +5,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 var testBuilderArtifact = &packersdk.MockArtifact{}
 
 func TestBuilderPrepare(t *testing.T) {
-	b := new(packer.MockBuilder)
+	b := new(packersdk.MockBuilder)
 	client, server := testClientServer(t)
 	defer client.Close()
 	defer server.Close()
@@ -40,7 +39,7 @@ func TestBuilderPrepare(t *testing.T) {
 }
 
 func TestBuilderPrepare_Warnings(t *testing.T) {
-	b := new(packer.MockBuilder)
+	b := new(packersdk.MockBuilder)
 	client, server := testClientServer(t)
 	defer client.Close()
 	defer server.Close()
@@ -61,7 +60,7 @@ func TestBuilderPrepare_Warnings(t *testing.T) {
 }
 
 func TestBuilderRun(t *testing.T) {
-	b := new(packer.MockBuilder)
+	b := new(packersdk.MockBuilder)
 	client, server := testClientServer(t)
 	defer client.Close()
 	defer server.Close()
@@ -86,7 +85,7 @@ func TestBuilderRun(t *testing.T) {
 }
 
 func TestBuilderRun_nilResult(t *testing.T) {
-	b := new(packer.MockBuilder)
+	b := new(packersdk.MockBuilder)
 	b.RunNilResult = true
 
 	client, server := testClientServer(t)
@@ -107,7 +106,7 @@ func TestBuilderRun_nilResult(t *testing.T) {
 }
 
 func TestBuilderRun_ErrResult(t *testing.T) {
-	b := new(packer.MockBuilder)
+	b := new(packersdk.MockBuilder)
 	client, server := testClientServer(t)
 	defer client.Close()
 	defer server.Close()
@@ -131,7 +130,7 @@ func TestBuilderCancel(t *testing.T) {
 	topCtx, topCtxCancel := context.WithCancel(context.Background())
 	// var runCtx context.Context
 
-	b := new(packer.MockBuilder)
+	b := new(packersdk.MockBuilder)
 	cancelled := false
 	b.RunFn = func(ctx context.Context) {
 		topCtxCancel()

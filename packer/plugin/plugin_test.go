@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	pluginsdk "github.com/hashicorp/packer/packer-plugin-sdk/plugin"
 )
 
 func helperProcess(s ...string) *exec.Cmd {
@@ -53,18 +53,22 @@ func TestHelperProcess(*testing.T) {
 	cmd, _ := args[0], args[1:]
 	switch cmd {
 	case "bad-version":
-		fmt.Printf("%s1|tcp|:1234\n", APIVersion)
+		fmt.Printf("%s1|tcp|:1234\n", pluginsdk.APIVersion)
 		<-make(chan int)
 	case "builder":
-		server, err := Server()
+		server, err := pluginsdk.Server()
 		if err != nil {
 			log.Printf("[ERR] %s", err)
 			os.Exit(1)
 		}
-		server.RegisterBuilder(new(packer.MockBuilder))
+		err = server.RegisterBuilder(new(packersdk.MockBuilder))
+		if err != nil {
+			log.Printf("[ERR] %s", err)
+			os.Exit(1)
+		}
 		server.Serve()
 	case "hook":
-		server, err := Server()
+		server, err := pluginsdk.Server()
 		if err != nil {
 			log.Printf("[ERR] %s", err)
 			os.Exit(1)
@@ -78,33 +82,41 @@ func TestHelperProcess(*testing.T) {
 	case "invalid-rpc-address":
 		fmt.Println("lolinvalid")
 	case "mock":
-		fmt.Printf("%s|tcp|:1234\n", APIVersion)
+		fmt.Printf("%s|tcp|:1234\n", pluginsdk.APIVersion)
 		<-make(chan int)
 	case "post-processor":
-		server, err := Server()
+		server, err := pluginsdk.Server()
 		if err != nil {
 			log.Printf("[ERR] %s", err)
 			os.Exit(1)
 		}
-		server.RegisterPostProcessor(new(helperPostProcessor))
+		err = server.RegisterPostProcessor(new(helperPostProcessor))
+		if err != nil {
+			log.Printf("[ERR] %s", err)
+			os.Exit(1)
+		}
 		server.Serve()
 	case "provisioner":
-		server, err := Server()
+		server, err := pluginsdk.Server()
 		if err != nil {
 			log.Printf("[ERR] %s", err)
 			os.Exit(1)
 		}
-		server.RegisterProvisioner(new(packer.MockProvisioner))
+		err = server.RegisterProvisioner(new(packersdk.MockProvisioner))
+		if err != nil {
+			log.Printf("[ERR] %s", err)
+			os.Exit(1)
+		}
 		server.Serve()
 	case "start-timeout":
 		time.Sleep(1 * time.Minute)
 		os.Exit(1)
 	case "stderr":
-		fmt.Printf("%s|tcp|:1234\n", APIVersion)
+		fmt.Printf("%s|tcp|:1234\n", pluginsdk.APIVersion)
 		log.Println("HELLO")
 		log.Println("WORLD")
 	case "stdin":
-		fmt.Printf("%s|tcp|:1234\n", APIVersion)
+		fmt.Printf("%s|tcp|:1234\n", pluginsdk.APIVersion)
 		data := make([]byte, 5)
 		if _, err := os.Stdin.Read(data); err != nil {
 			log.Printf("stdin read error: %s", err)

@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
@@ -178,5 +177,5 @@ func TestBuildPrepare_Warnings(t *testing.T) {
 }
 
 func TestBuild_ImplementsBuild(t *testing.T) {
-	var _ packer.Build = new(build)
+	var _ packersdk.Build = new(build)
 }

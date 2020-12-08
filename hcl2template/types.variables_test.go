@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/packer/builder/null"
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/convert"
 )
@@ -91,7 +92,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 		{"duplicate variable",
@@ -111,7 +112,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 		{"duplicate variable in variables",
@@ -131,7 +132,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 		{"invalid default type",
@@ -151,7 +152,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 
@@ -169,7 +170,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 
@@ -186,7 +187,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			true,
 		},
 
@@ -216,7 +217,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packer.Build{
+			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:           "null",
 					Builder:        &null.Builder{},
@@ -280,7 +281,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 		{"recursive locals",
@@ -291,7 +292,7 @@ func TestParse_variables(t *testing.T) {
 				LocalVariables: Variables{},
 			},
 			true, true,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 
@@ -312,7 +313,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 
@@ -323,7 +324,7 @@ func TestParse_variables(t *testing.T) {
 				Basedir: filepath.Join("testdata", "variables"),
 			},
 			true, false,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 
@@ -369,7 +370,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packer.Build{&packer.CoreBuild{
+			[]packersdk.Build{&packer.CoreBuild{
 				Type:     "null.null-builder",
 				Prepared: true,
 				Builder:  &null.Builder{},
@@ -434,7 +435,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 

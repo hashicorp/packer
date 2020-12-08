@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/filelock"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 )
 
@@ -80,7 +80,7 @@ func (lc ListenRangeConfig) Listen(ctx context.Context) (*Listener, error) {
 			port += rand.Intn(portRange)
 		}
 
-		lockFilePath, err := packer.CachePath("port", strconv.Itoa(port))
+		lockFilePath, err := packersdk.CachePath("port", strconv.Itoa(port))
 		if err != nil {
 			return err
 		}

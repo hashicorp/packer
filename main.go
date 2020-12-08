@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/pathing"
+	pluginsdk "github.com/hashicorp/packer/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/hashicorp/packer/version"
@@ -169,7 +170,7 @@ func wrappedMain() int {
 		)
 	}
 
-	cacheDir, err := packer.CachePath()
+	cacheDir, err := packersdk.CachePath()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
 		return 1
@@ -403,7 +404,7 @@ func copyOutput(r io.Reader, doneCh chan<- struct{}) {
 }
 
 func inPlugin() bool {
-	return os.Getenv(plugin.MagicCookieKey) == plugin.MagicCookieValue
+	return os.Getenv(pluginsdk.MagicCookieKey) == pluginsdk.MagicCookieValue
 }
 
 func init() {

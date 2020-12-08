@@ -17,7 +17,6 @@ import (
 	getter "github.com/hashicorp/go-getter/v2"
 	urlhelper "github.com/hashicorp/go-getter/v2/helper/url"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/filelock"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -141,7 +140,7 @@ func (s *StepDownload) UseSourceToFindCacheTarget(source string) (*url.URL, stri
 		if s.Extension != "" {
 			targetPath += "." + s.Extension
 		}
-		targetPath, err = packer.CachePath(targetPath)
+		targetPath, err = packersdk.CachePath(targetPath)
 		if err != nil {
 			return nil, "", fmt.Errorf("CachePath: %s", err)
 		}

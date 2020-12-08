@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/yamux"
 )
 
-// muxBroker is responsible for brokering multiplexed connections by unique ID.
+// MuxBroker is responsible for brokering multiplexed connections by unique ID.
 //
 // This allows a plugin to request a channel with a specific ID to connect to
 // or accept a connection from, and the broker handles the details of

@@ -11,6 +11,7 @@ import (
 
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/pathing"
+	pluginsdk "github.com/hashicorp/packer/packer-plugin-sdk/plugin"
 )
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -49,7 +50,7 @@ func (c *Config) Discover() error {
 
 	// If we are already inside a plugin process we should not need to
 	// discover anything.
-	if os.Getenv(MagicCookieKey) == MagicCookieValue {
+	if os.Getenv(pluginsdk.MagicCookieKey) == pluginsdk.MagicCookieValue {
 		return nil
 	}
 

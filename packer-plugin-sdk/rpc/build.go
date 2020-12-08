@@ -4,23 +4,22 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
-// An implementation of packer.Build where the build is actually executed
+// An implementation of packersdk.Build where the build is actually executed
 // over an RPC connection.
 type build struct {
 	commonClient
 }
 
-// BuildServer wraps a packer.Build implementation and makes it exportable
+// BuildServer wraps a packersdk.Build implementation and makes it exportable
 // as part of a Golang RPC server.
 type BuildServer struct {
 	context       context.Context
 	contextCancel func()
 
-	build packer.Build
+	build packersdk.Build
 	mux   *muxBroker
 }
 

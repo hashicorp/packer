@@ -17,7 +17,8 @@ import (
 	"unicode"
 
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	packrpc "github.com/hashicorp/packer/packer/rpc"
+	pluginsdk "github.com/hashicorp/packer/packer-plugin-sdk/plugin"
+	packerrpc "github.com/hashicorp/packer/packer-plugin-sdk/rpc"
 )
 
 // If this is true, then the "unexpected EOF" panic will not be
@@ -131,7 +132,7 @@ func (c *Client) Exited() bool {
 // Returns a builder implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
 func (c *Client) Builder() (packersdk.Builder, error) {
-	client, err := c.packrpcClient()
+	client, err := c.Client()
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +143,7 @@ func (c *Client) Builder() (packersdk.Builder, error) {
 // Returns a hook implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
 func (c *Client) Hook() (packersdk.Hook, error) {
-	client, err := c.packrpcClient()
+	client, err := c.Client()
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +154,7 @@ func (c *Client) Hook() (packersdk.Hook, error) {
 // Returns a post-processor implementation that is communicating over
 // this client. If the client hasn't been started, this will start it.
 func (c *Client) PostProcessor() (packersdk.PostProcessor, error) {
-	client, err := c.packrpcClient()
+	client, err := c.Client()
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +165,7 @@ func (c *Client) PostProcessor() (packersdk.PostProcessor, error) {
 // Returns a provisioner implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
 func (c *Client) Provisioner() (packersdk.Provisioner, error) {
-	client, err := c.packrpcClient()
+	client, err := c.Client()
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +209,7 @@ func (c *Client) Start() (addr net.Addr, err error) {
 	c.doneLogging = make(chan struct{})
 
 	env := []string{
-		fmt.Sprintf("%s=%s", MagicCookieKey, MagicCookieValue),
+		fmt.Sprintf("%s=%s", pluginsdk.MagicCookieKey, pluginsdk.MagicCookieValue),
 		fmt.Sprintf("PACKER_PLUGIN_MIN_PORT=%d", c.config.MinPort),
 		fmt.Sprintf("PACKER_PLUGIN_MAX_PORT=%d", c.config.MaxPort),
 	}
@@ -318,9 +319,9 @@ func (c *Client) Start() (addr net.Addr, err error) {
 		}
 
 		// Test the API version
-		if parts[0] != APIVersion {
+		if parts[0] != pluginsdk.APIVersion {
 			err = fmt.Errorf("Incompatible API version with plugin. "+
-				"Plugin version: %s, Ours: %s", parts[0], APIVersion)
+				"Plugin version: %s, Ours: %s", parts[0], pluginsdk.APIVersion)
 			return
 		}
 
@@ -368,7 +369,7 @@ func (c *Client) logStderr(r io.Reader) {
 	close(c.doneLogging)
 }
 
-func (c *Client) packrpcClient() (*packrpc.Client, error) {
+func (c *Client) Client() (*packerrpc.Client, error) {
 	addr, err := c.Start()
 	if err != nil {
 		return nil, err
@@ -384,7 +385,7 @@ func (c *Client) packrpcClient() (*packrpc.Client, error) {
 		tcpConn.SetKeepAlive(true)
 	}
 
-	client, err := packrpc.NewClient(conn)
+	client, err := packerrpc.NewClient(conn)
 	if err != nil {
 		conn.Close()
 		return nil, err

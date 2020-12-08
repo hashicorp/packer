@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type MockBuilder,MockCommunicator,RemoteCmd,MockProvisioner,MockPostProcessor
+//go:generate mapstructure-to-hcl2 -type MockBuilder
 
 package packer
 
@@ -7,7 +7,6 @@ import (
 	"errors"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // MockBuilder is an implementation of Builder that can be used for tests.
@@ -22,8 +21,8 @@ type MockBuilder struct {
 	PrepareCalled bool
 	PrepareConfig []interface{}
 	RunCalled     bool
-	RunHook       packersdk.Hook
-	RunUi         packersdk.Ui
+	RunHook       Hook
+	RunUi         Ui
 	CancelCalled  bool
 	RunFn         func(ctx context.Context)
 
@@ -40,7 +39,7 @@ func (tb *MockBuilder) Prepare(config ...interface{}) ([]string, []string, error
 	return tb.GeneratedVars, tb.PrepareWarnings, nil
 }
 
-func (tb *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, h packersdk.Hook) (packersdk.Artifact, error) {
+func (tb *MockBuilder) Run(ctx context.Context, ui Ui, h Hook) (Artifact, error) {
 	tb.RunCalled = true
 	tb.RunHook = h
 	tb.RunUi = ui
@@ -57,12 +56,12 @@ func (tb *MockBuilder) Run(ctx context.Context, ui packersdk.Ui, h packersdk.Hoo
 	}
 
 	if h != nil {
-		if err := h.Run(ctx, packersdk.HookProvision, ui, new(packersdk.MockCommunicator), nil); err != nil {
+		if err := h.Run(ctx, HookProvision, ui, new(MockCommunicator), nil); err != nil {
 			return nil, err
 		}
 	}
 
-	return &packersdk.MockArtifact{
+	return &MockArtifact{
 		IdValue: tb.ArtifactId,
 	}, nil
 }
