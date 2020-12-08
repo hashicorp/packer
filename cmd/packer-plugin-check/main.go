@@ -36,7 +36,7 @@ func main() {
 	flag.Usage = Usage
 	flag.Parse()
 
-	if flag. NFlag() == 0 {
+	if flag.NFlag() == 0 {
 		flag.Usage()
 		os.Exit(2)
 	}
@@ -85,11 +85,12 @@ func checkHCL2Specs() error {
 			if info.Name() == "docs" || info.Name() == ".github" {
 				return filepath.SkipDir
 			}
-		} else {
-			if strings.HasSuffix(path, "hcl2spec.go") {
-				hcl2found = true
-				return io.EOF
-			}
+			return nil
+		}
+
+		if strings.HasSuffix(path, "hcl2spec.go") {
+			hcl2found = true
+			return io.EOF
 		}
 		return nil
 	})
