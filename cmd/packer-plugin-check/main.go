@@ -36,7 +36,7 @@ func main() {
 	flag.Usage = Usage
 	flag.Parse()
 
-	if *hcl2spec == false && *docs == false && len(*load) == 0 {
+	if flag. NFlag() == 0 {
 		flag.Usage()
 		os.Exit(2)
 	}
