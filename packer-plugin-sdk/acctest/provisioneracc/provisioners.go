@@ -206,8 +206,13 @@ func TestProvisionersAgainstBuilders(testCase *ProvisionerTestCase, t *testing.T
 				writeJsonTemplate(out, templatePath, t)
 				logfile := fmt.Sprintf("packer_log_%s_%s.txt", builderType, testCase.Type)
 
+				// Make sure packer is installed:
+				packerbin, err := exec.LookPath("packer")
+				if err != nil {
+					t.Fatalf("Couldn't find packer binary installed on system: %s", err.Error())
+				}
 				// Run build
-				buildCommand := exec.Command("packer", "build", "--machine-readable", templatePath)
+				buildCommand := exec.Command(packerbin, "build", "--machine-readable", templatePath)
 				buildCommand.Env = append(buildCommand.Env, os.Environ()...)
 				buildCommand.Env = append(buildCommand.Env, "PACKER_LOG=1",
 					fmt.Sprintf("PACKER_LOG_PATH=%s", logfile))
@@ -234,10 +239,12 @@ func TestProvisionersAgainstBuilders(testCase *ProvisionerTestCase, t *testing.T
 
 				// Fail test if check failed.
 				if checkErr != nil {
-					t.Fatalf(fmt.Sprint("Error running provisioner acceptance"+
-						" tests: %s\nLogs can be found at %s and the "+
+					cwd, _ := os.Getwd()
+					t.Fatalf(fmt.Sprintf("Error running provisioner acceptance"+
+						" tests: %s\nLogs can be found at %s\nand the "+
 						"acceptance test template can be found at %s",
-						checkErr.Error(), logfile, templatePath))
+						checkErr.Error(), filepath.Join(cwd, logfile),
+						filepath.Join(cwd, templatePath)))
 				} else {
 					os.Remove(templatePath)
 					os.Remove(logfile)

@@ -58,7 +58,7 @@ func TestAccShellProvisioner_basic(t *testing.T) {
 		Check: func(buildcommand *exec.Cmd, logfile string) error {
 			if buildcommand.ProcessState != nil {
 				if buildcommand.ProcessState.ExitCode() != 0 {
-					return fmt.Errorf("Bad exit code. Logfile: %s", logfile)
+					return fmt.Errorf("Bad exit code. Logfile: %s\n", logfile)
 				}
 			}
 			filecontents, err := loadFile("file.txt")
