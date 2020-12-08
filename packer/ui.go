@@ -30,21 +30,6 @@ const (
 	UiColorCyan            = 36
 )
 
-type NoopUi struct {
-	PB packersdk.NoopProgressTracker
-}
-
-var _ packersdk.Ui = new(NoopUi)
-
-func (*NoopUi) Ask(string) (string, error) { return "", errors.New("this is a noop ui") }
-func (*NoopUi) Say(string)                 { return }
-func (*NoopUi) Message(string)             { return }
-func (*NoopUi) Error(string)               { return }
-func (*NoopUi) Machine(string, ...string)  { return }
-func (u *NoopUi) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser {
-	return u.PB.TrackProgress(src, currentSize, totalSize, stream)
-}
-
 // ColoredUi is a UI that is colored using terminal colors.
 type ColoredUi struct {
 	Color      UiColor
@@ -266,54 +251,4 @@ func (u *TimestampedUi) TrackProgress(src string, currentSize, totalSize int64, 
 
 func (u *TimestampedUi) timestampLine(string string) string {
 	return fmt.Sprintf("%v: %v", time.Now().Format(time.RFC3339), string)
-}
-
-// Safe is a UI that wraps another UI implementation and
-// provides concurrency-safe access
-type SafeUi struct {
-	Sem chan int
-	Ui  packersdk.Ui
-	PB  getter.ProgressTracker
-}
-
-var _ packersdk.Ui = new(SafeUi)
-
-func (u *SafeUi) Ask(s string) (string, error) {
-	u.Sem <- 1
-	ret, err := u.Ui.Ask(s)
-	<-u.Sem
-
-	return ret, err
-}
-
-func (u *SafeUi) Say(s string) {
-	u.Sem <- 1
-	u.Ui.Say(s)
-	<-u.Sem
-}
-
-func (u *SafeUi) Message(s string) {
-	u.Sem <- 1
-	u.Ui.Message(s)
-	<-u.Sem
-}
-
-func (u *SafeUi) Error(s string) {
-	u.Sem <- 1
-	u.Ui.Error(s)
-	<-u.Sem
-}
-
-func (u *SafeUi) Machine(t string, args ...string) {
-	u.Sem <- 1
-	u.Ui.Machine(t, args...)
-	<-u.Sem
-}
-
-func (u *SafeUi) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) (body io.ReadCloser) {
-	u.Sem <- 1
-	ret := u.Ui.TrackProgress(src, currentSize, totalSize, stream)
-	<-u.Sem
-
-	return ret
 }

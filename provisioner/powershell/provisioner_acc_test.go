@@ -1,94 +1,110 @@
 package powershell_test
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"testing"
 
-	"github.com/hashicorp/go-uuid"
-	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer-plugin-sdk/acctest/provisioneracc"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/provisioner/powershell"
-	windowsshellprovisioner "github.com/hashicorp/packer/provisioner/windows-shell"
 )
 
-const TestProvisionerName = "powershell"
+const TestProvisionerType = "powershell"
 
-func TestAccPowershellProvisioner_basic(t *testing.T) {
-	provisioneracc.TestProvisionersPreCheck(TestProvisionerName, t)
-
-	testProvisioner := PowershellProvisionerAccTest{"powershell-provisioner-cleanup.txt"}
-	provisioneracc.TestProvisionersAgainstBuilders(&testProvisioner, t)
-}
-
-func TestAccPowershellProvisioner_Inline(t *testing.T) {
-	provisioneracc.TestProvisionersPreCheck(TestProvisionerName, t)
-
-	testProvisioner := PowershellProvisionerAccTest{"powershell-inline-provisioner.txt"}
-	provisioneracc.TestProvisionersAgainstBuilders(&testProvisioner, t)
-}
-
-func TestAccPowershellProvisioner_Script(t *testing.T) {
-	provisioneracc.TestProvisionersPreCheck(TestProvisionerName, t)
-
-	testProvisioner := PowershellProvisionerAccTest{"powershell-script-provisioner.txt"}
-	provisioneracc.TestProvisionersAgainstBuilders(&testProvisioner, t)
-}
-
-type PowershellProvisionerAccTest struct {
-	ConfigName string
-}
-
-func (s *PowershellProvisionerAccTest) GetName() string {
-	return TestProvisionerName
-}
-
-func (s *PowershellProvisionerAccTest) GetConfig() (string, error) {
-	filePath := filepath.Join("./test-fixtures", s.ConfigName)
-	config, err := os.Open(filePath)
-	if err != nil {
-		return "", fmt.Errorf("os.Open:%v", err)
-	}
-	defer config.Close()
-
-	file, err := ioutil.ReadAll(config)
-	if err != nil {
-		return "", fmt.Errorf("ioutil.ReadAll:%v", err)
-	}
-	return string(file), nil
-}
-
-func (s *PowershellProvisionerAccTest) GetProvisionerStore() packersdk.MapOfProvisioner {
-	return packersdk.MapOfProvisioner{
-		TestProvisionerName: func() (packersdk.Provisioner, error) { return &powershell.Provisioner{}, nil },
-		"windows-shell":     func() (packersdk.Provisioner, error) { return &windowsshellprovisioner.Provisioner{}, nil },
-	}
-}
-
-func (s *PowershellProvisionerAccTest) IsCompatible(builder string, vmOS string) bool {
+func powershellIsCompatible(builder string, vmOS string) bool {
 	return vmOS == "windows"
 }
 
-func (s *PowershellProvisionerAccTest) RunTest(c *command.BuildCommand, args []string) error {
-	UUID := os.Getenv("PACKER_RUN_UUID")
-	if UUID == "" {
-		UUID, _ = uuid.GenerateUUID()
-		os.Setenv("PACKER_RUN_UUID", UUID)
+func fixtureDir() string {
+	_, file, _, _ := runtime.Caller(0)
+	return filepath.Join(filepath.Dir(file), "test-fixtures")
+}
+
+func LoadProvisionerFragment(templateFragmentPath string) (string, error) {
+	dir := fixtureDir()
+	fragmentAbsPath := filepath.Join(dir, templateFragmentPath)
+	fragmentFile, err := os.Open(fragmentAbsPath)
+	if err != nil {
+		return "", fmt.Errorf("Unable find %s", fragmentAbsPath)
+	}
+	defer fragmentFile.Close()
+
+	fragmentString, err := ioutil.ReadAll(fragmentFile)
+	if err != nil {
+		return "", fmt.Errorf("Unable to read %s", fragmentAbsPath)
 	}
 
-	if code := c.Run(args); code != 0 {
-		ui := c.Meta.Ui.(*packersdk.BasicUi)
-		out := ui.Writer.(*bytes.Buffer)
-		err := ui.ErrorWriter.(*bytes.Buffer)
-		return fmt.Errorf(
-			"Bad exit code.\n\nStdout:\n\n%s\n\nStderr:\n\n%s",
-			out.String(),
-			err.String())
+	return string(fragmentString), nil
+}
+
+func TestAccPowershellProvisioner_basic(t *testing.T) {
+	templateString, err := LoadProvisionerFragment("powershell-provisioner-cleanup.txt")
+	if err != nil {
+		t.Fatalf("Couldn't load test fixture; %s", err.Error())
+	}
+	testCase := &provisioneracc.ProvisionerTestCase{
+		IsCompatible: powershellIsCompatible,
+		Name:         "powershell-provisioner-cleanup",
+		Template:     templateString,
+		Type:         TestProvisionerType,
+		Check: func(buildcommand *exec.Cmd, logfile string) error {
+			if buildcommand.ProcessState != nil {
+				if buildcommand.ProcessState.ExitCode() != 0 {
+					return fmt.Errorf("Bad exit code. Logfile: %s", logfile)
+				}
+			}
+			return nil
+		},
 	}
 
-	return nil
+	provisioneracc.TestProvisionersAgainstBuilders(testCase, t)
+}
+
+func TestAccPowershellProvisioner_Inline(t *testing.T) {
+	templateString, err := LoadProvisionerFragment("powershell-inline-provisioner.txt")
+	if err != nil {
+		t.Fatalf("Couldn't load test fixture; %s", err.Error())
+	}
+	testCase := &provisioneracc.ProvisionerTestCase{
+		IsCompatible: powershellIsCompatible,
+		Name:         "powershell-provisioner-inline",
+		Template:     templateString,
+		Type:         TestProvisionerType,
+		Check: func(buildcommand *exec.Cmd, logfile string) error {
+			if buildcommand.ProcessState != nil {
+				if buildcommand.ProcessState.ExitCode() != 0 {
+					return fmt.Errorf("Bad exit code. Logfile: %s", logfile)
+				}
+			}
+			return nil
+		},
+	}
+
+	provisioneracc.TestProvisionersAgainstBuilders(testCase, t)
+}
+
+func TestAccPowershellProvisioner_Script(t *testing.T) {
+	templateString, err := LoadProvisionerFragment("powershell-script-provisioner.txt")
+	if err != nil {
+		t.Fatalf("Couldn't load test fixture; %s", err.Error())
+	}
+	testCase := &provisioneracc.ProvisionerTestCase{
+		IsCompatible: powershellIsCompatible,
+		Name:         "powershell-provisioner-script",
+		Template:     templateString,
+		Type:         TestProvisionerType,
+		Check: func(buildcommand *exec.Cmd, logfile string) error {
+			if buildcommand.ProcessState != nil {
+				if buildcommand.ProcessState.ExitCode() != 0 {
+					return fmt.Errorf("Bad exit code. Logfile: %s", logfile)
+				}
+			}
+			return nil
+		},
+	}
+
+	provisioneracc.TestProvisionersAgainstBuilders(testCase, t)
 }

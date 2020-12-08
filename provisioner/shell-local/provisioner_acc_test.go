@@ -1,65 +1,76 @@
 package shell_test
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/packer/packer-plugin-sdk/acctest/provisioneracc"
-
-	"github.com/hashicorp/packer/provisioner/shell"
-
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-
-	"github.com/hashicorp/packer/command"
+	"github.com/hashicorp/packer/packer-plugin-sdk/acctest/testutils"
 )
 
-func TestShellLocalProvisionerWithRetryOption(t *testing.T) {
-	provisioneracc.TestProvisionersPreCheck("shell-local", t)
-	provisioneracc.TestProvisionersAgainstBuilders(new(ShellLocalProvisionerAccTest), t)
+func fixtureDir() string {
+	_, file, _, _ := runtime.Caller(0)
+	return filepath.Join(filepath.Dir(file), "test-fixtures")
 }
 
-type ShellLocalProvisionerAccTest struct{}
-
-func (s *ShellLocalProvisionerAccTest) GetName() string {
-	return "file"
-}
-
-func (s *ShellLocalProvisionerAccTest) GetConfig() (string, error) {
-	filePath := filepath.Join("./test-fixtures", "shell-local-provisioner.txt")
-	config, err := os.Open(filePath)
+func loadFile(templateFragmentPath string) (string, error) {
+	dir := fixtureDir()
+	fragmentAbsPath := filepath.Join(dir, templateFragmentPath)
+	fragmentFile, err := os.Open(fragmentAbsPath)
 	if err != nil {
-		return "", fmt.Errorf("Expected to find %s", filePath)
+		return "", fmt.Errorf("Unable find %s", fragmentAbsPath)
 	}
-	defer config.Close()
+	defer fragmentFile.Close()
 
-	file, err := ioutil.ReadAll(config)
-	return string(file), err
+	fragmentString, err := ioutil.ReadAll(fragmentFile)
+	if err != nil {
+		return "", fmt.Errorf("Unable to read %s", fragmentAbsPath)
+	}
+
+	return string(fragmentString), nil
 }
 
-func (s *ShellLocalProvisionerAccTest) GetProvisionerStore() packersdk.MapOfProvisioner {
-	return packersdk.MapOfProvisioner{
-		"shell-local": func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
-	}
-}
-
-func (s *ShellLocalProvisionerAccTest) IsCompatible(builder string, vmOS string) bool {
+func IsCompatible(builder string, vmOS string) bool {
 	return vmOS == "linux"
 }
 
-func (s *ShellLocalProvisionerAccTest) RunTest(c *command.BuildCommand, args []string) error {
-	if code := c.Run(args); code != 0 {
-		ui := c.Meta.Ui.(*packersdk.BasicUi)
-		out := ui.Writer.(*bytes.Buffer)
-		err := ui.ErrorWriter.(*bytes.Buffer)
-		return fmt.Errorf(
-			"Bad exit code.\n\nStdout:\n\n%s\n\nStderr:\n\n%s",
-			out.String(),
-			err.String())
+func TestAccShellProvisioner_basic(t *testing.T) {
+	templateString, err := loadFile("shell-local-provisioner.txt")
+	if err != nil {
+		t.Fatalf("Couldn't load test fixture; %s", err.Error())
 	}
 
-	return nil
+	testCase := &provisioneracc.ProvisionerTestCase{
+		IsCompatible: IsCompatible,
+		Name:         "shell-local-provisioner-basic",
+		Teardown: func() error {
+			testutils.CleanupFiles("test-fixtures/file.txt")
+			return nil
+		},
+		Template: templateString,
+		Type:     "shell-local",
+		Check: func(buildcommand *exec.Cmd, logfile string) error {
+			if buildcommand.ProcessState != nil {
+				if buildcommand.ProcessState.ExitCode() != 0 {
+					return fmt.Errorf("Bad exit code. Logfile: %s\n", logfile)
+				}
+			}
+			filecontents, err := loadFile("file.txt")
+			if err != nil {
+				return err
+			}
+			if !strings.Contains(filecontents, "hello") {
+				return fmt.Errorf("file contents were wrong: %s", filecontents)
+			}
+			return nil
+		},
+	}
+
+	provisioneracc.TestProvisionersAgainstBuilders(testCase, t)
 }

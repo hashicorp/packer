@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 
 	"golang.org/x/crypto/ssh"
@@ -26,7 +25,7 @@ func TestAdapter_Serve(t *testing.T) {
 
 	config := &ssh.ServerConfig{}
 
-	ui := new(packer.NoopUi)
+	ui := packersdk.TestUi(t)
 
 	sut := NewAdapter(done, &l, config, "", ui, communicator{})
 	go func() {
