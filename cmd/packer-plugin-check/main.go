@@ -1,4 +1,4 @@
-// packer-plugin-check is a command used by plugins to validate compatibility and basic configuration
+// packer-plugin-check is a command used by plugins to template compatibility and basic configuration
 // to work with Packer.
 package main
 
@@ -11,15 +11,15 @@ import (
 	"path/filepath"
 	"strings"
 
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 )
 
 const packerPluginCheck = "packer-plugin-check"
 
 var (
-	hcl2spec = flag.Bool("hcl2spec", false, "flag to indicate that hcl2spec files should be checked.")
-	docs     = flag.Bool("docs", false, "flag to indicate that documentation files should be checked.")
-	load     = flag.String("load", "", "flag to check if plugin can be loaded by Packer.")
+	docs = flag.Bool("docs", false, "flag to indicate that documentation files should be checked.")
+	load = flag.String("load", "", "flag to check if plugin can be loaded by Packer and is compatible with HCL2.")
 )
 
 // Usage is a replacement usage function for the flags package.
@@ -39,14 +39,6 @@ func main() {
 	if flag.NFlag() == 0 {
 		flag.Usage()
 		os.Exit(2)
-	}
-
-	if *hcl2spec {
-		if err := checkHCL2Specs(); err != nil {
-			fmt.Printf(err.Error())
-			os.Exit(2)
-		}
-		fmt.Printf("Plugin succesfully passed hcl2spec check.\n")
 	}
 
 	if *docs {
@@ -70,40 +62,9 @@ func main() {
 	}
 }
 
-// checkHCL2Specs looks for the presence of a hcl2spec.go file in the current directory.
-// It is not possible to predict the number of hcl2spec.go files for a given plugin.
-// Because of that, finding one file is enough to validate the knowledge of hcl2spec generation.
-func checkHCL2Specs() error {
-	wd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	var hcl2found bool
-	_ = filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() {
-			if info.Name() == "docs" || info.Name() == ".github" {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-
-		if strings.HasSuffix(path, "hcl2spec.go") {
-			hcl2found = true
-			return io.EOF
-		}
-		return nil
-	})
-
-	if hcl2found {
-		return nil
-	}
-	return fmt.Errorf("no hcl2spec.go files found, make sure to generate them before releasing")
-}
-
 // checkDocumentation looks for the presence of a docs folder with mdx files inside.
 // It is not possible to predict the number of mdx files for a given plugin.
-// Because of that, finding one file inside de folder is enough to validate the knowledge of docs generation.
+// Because of that, finding one file inside de folder is enough to template the knowledge of docs generation.
 func checkDocumentation() error {
 	// TODO: this should be updated once we have defined what's going to be for plguin's docs
 	wd, err := os.Getwd()
@@ -155,7 +116,7 @@ func checkPluginName(name string) error {
 }
 
 // discoverAndLoad will discover the plugin binary from the current directory and load any builder/provisioner/post-processor
-// in the plugin configuration. At least one builder, provisioner, or post-processor should be found to validate the plugin's
+// in the plugin configuration. At least one builder, provisioner, or post-processor should be found to template the plugin's
 // compatibility with Packer.
 func discoverAndLoad() error {
 	config := plugin.Config{
@@ -167,7 +128,7 @@ func discoverAndLoad() error {
 		return err
 	}
 
-	// TODO: validate correctness of plugins loaded by checking them against the output of the `describe` command.
+	// TODO: template correctness of plugins loaded by checking them against the output of the `describe` command.
 	builders, provisioners, postProcessors := config.GetPlugins()
 	if len(builders) == 0 &&
 		len(provisioners) == 0 &&
@@ -175,5 +136,42 @@ func discoverAndLoad() error {
 		return fmt.Errorf("couldn't load any Builder/Provisioner/Post-Processor from the plugin binary")
 	}
 
+	return checkHCL2ConfigSpec(builders, provisioners, postProcessors)
+}
+
+// checkHCL2ConfigSpec checks if the hcl2spec config is present for the given plugins by validating that ConfigSpec() does not
+// return an empty map of specs.
+func checkHCL2ConfigSpec(builders packersdk.MapOfBuilder, provisioners packersdk.MapOfProvisioner, postProcessors packersdk.MapOfPostProcessor) error {
+	var errs *packersdk.MultiError
+	for _, b := range builders.List() {
+		builder, err := builders.Start(b)
+		if err != nil {
+			return packersdk.MultiErrorAppend(err, errs)
+		}
+		if len(builder.ConfigSpec()) == 0 {
+			errs = packersdk.MultiErrorAppend(fmt.Errorf("builder %q does not contain the required hcl2spec configuration", b), errs)
+		}
+	}
+	for _, p := range provisioners.List() {
+		provisioner, err := provisioners.Start(p)
+		if err != nil {
+			return packersdk.MultiErrorAppend(err, errs)
+		}
+		if len(provisioner.ConfigSpec()) == 0 {
+			errs = packersdk.MultiErrorAppend(fmt.Errorf("provisioner %q does not contain the required hcl2spec configuration", p), errs)
+		}
+	}
+	for _, pp := range postProcessors.List() {
+		postProcessor, err := postProcessors.Start(pp)
+		if err != nil {
+			return packersdk.MultiErrorAppend(err, errs)
+		}
+		if len(postProcessor.ConfigSpec()) == 0 {
+			errs = packersdk.MultiErrorAppend(fmt.Errorf("post-processor %q does not contain the required hcl2spec configuration", pp), errs)
+		}
+	}
+	if errs != nil && len(errs.Errors) > 0 {
+		return errs
+	}
 	return nil
 }
