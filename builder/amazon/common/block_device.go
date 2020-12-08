@@ -82,14 +82,17 @@ type BlockDevice struct {
 	NoDevice bool `mapstructure:"no_device" required:"false"`
 	// The ID of the snapshot.
 	SnapshotId string `mapstructure:"snapshot_id" required:"false"`
-	// The throughput for gp3 volumes
+	// The throughput for gp3 volumes, only valid for gp3 types
+	// See the documentation on
+	// [Throughput](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
+	// for more information
 	Throughput int64 `mapstructure:"throughput" required:"false"`
 	// The virtual device name. See the documentation on Block Device Mapping
 	// for more information.
 	VirtualName string `mapstructure:"virtual_name" required:"false"`
-	// The volume type. gp2 & gp3 for General Purpose (SSD) volumes, io1 for
-	// Provisioned IOPS (SSD) volumes, st1 for Throughput Optimized HDD, sc1
-	// for Cold HDD, and standard for Magnetic volumes.
+	// The volume type. gp2 & gp3 for General Purpose (SSD) volumes, io1 & io2
+	// for Provisioned IOPS (SSD) volumes, st1 for Throughput Optimized HDD,
+	// sc1 for Cold HDD, and standard for Magnetic volumes.
 	VolumeType string `mapstructure:"volume_type" required:"false"`
 	// The size of the volume, in GiB. Required if not specifying a
 	// snapshot_id.
@@ -209,6 +212,9 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 			return fmt.Errorf("IOPS must be between %d and %d for device %s",
 				minIopsGp3, maxIopsGp3, b.DeviceName)
 		}
+	} else if b.Throughput > 0 {
+		return fmt.Errorf("Throughput is not available for device %s",
+			b.DeviceName)
 	}
 
 	_, err := interpolate.RenderInterface(&b, ctx)
