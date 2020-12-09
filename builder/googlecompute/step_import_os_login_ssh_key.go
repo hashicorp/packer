@@ -36,7 +36,10 @@ func (s *StepImportOSLoginSSHKey) Run(ctx context.Context, state multistep.State
 		return multistep.ActionContinue
 	}
 
-	if s.TokeninfoFunc == nil {
+	// Are we running packer on a GCE ?
+	s.accountEmail = driver.GetOSLoginUserFromGCE()
+
+	if s.TokeninfoFunc == nil && s.accountEmail == "" {
 		s.TokeninfoFunc = tokeninfo
 	}
 
@@ -46,7 +49,7 @@ func (s *StepImportOSLoginSSHKey) Run(ctx context.Context, state multistep.State
 	sha256sum := sha256.Sum256(config.Comm.SSHPublicKey)
 	state.Put("ssh_key_public_sha256", hex.EncodeToString(sha256sum[:]))
 
-	if config.account != nil {
+	if config.account != nil && s.accountEmail == "" {
 		s.accountEmail = config.account.jwt.Email
 	}
 
@@ -60,6 +63,13 @@ func (s *StepImportOSLoginSSHKey) Run(ctx context.Context, state multistep.State
 		}
 
 		s.accountEmail = info.Email
+	}
+
+	if s.accountEmail == "" {
+		err := fmt.Errorf("All options for deriving the OSLogin user have been exhausted")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	loginProfile, err := driver.ImportOSLoginSSHKey(s.accountEmail, string(config.Comm.SSHPublicKey))

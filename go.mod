@@ -1,7 +1,7 @@
 module github.com/hashicorp/packer
 
 require (
-	cloud.google.com/go v0.66.0 // indirect
+	cloud.google.com/go v0.66.0
 	github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1
 	github.com/Azure/azure-sdk-for-go v40.5.0+incompatible
 	github.com/Azure/go-autorest/autorest v0.10.0

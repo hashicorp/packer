@@ -94,6 +94,8 @@ type DriverMock struct {
 	AddToInstanceMetadataKVPairs map[string]string
 	AddToInstanceMetadataErrCh   <-chan error
 	AddToInstanceMetadataErr     error
+
+	OSLoginUserFromGCE string
 }
 
 func (d *DriverMock) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string, image_encryption_key *compute.CustomerEncryptionKey, imageStorageLocations []string) (<-chan *Image, <-chan error) {
@@ -307,4 +309,8 @@ func (d *DriverMock) AddToInstanceMetadata(zone string, name string, metadata ma
 	}
 
 	return nil
+}
+
+func (d *DriverMock) GetOSLoginUserFromGCE() string {
+	return d.OSLoginUserFromGCE
 }

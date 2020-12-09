@@ -150,3 +150,37 @@ func TestStepImportOSLoginSSHKey_withPrivateSSHKey(t *testing.T) {
 		t.Errorf("expected to not see a public key when using a dedicated private key, but got %q", pubKey)
 	}
 }
+
+func TestStepImportOSLoginSSHKey_onGCE(t *testing.T) {
+
+	state := testState(t)
+	d := state.Get("driver").(*DriverMock)
+	step := new(StepImportOSLoginSSHKey)
+	defer step.Cleanup(state)
+
+	fakeAccountEmail := "testing@packer.io"
+
+	config := state.Get("config").(*Config)
+	config.UseOSLogin = true
+	config.Comm.SSHPublicKey = []byte{'k', 'e', 'y'}
+
+	d.OSLoginUserFromGCE = fakeAccountEmail
+
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
+
+	if step.accountEmail != fakeAccountEmail {
+		t.Fatalf("expected accountEmail to be %q but got %q", fakeAccountEmail, step.accountEmail)
+	}
+
+	pubKey, ok := state.GetOk("ssh_key_public_sha256")
+	if !ok {
+		t.Fatal("expected to see a public key")
+	}
+
+	sha256sum := sha256.Sum256(config.Comm.SSHPublicKey)
+	if pubKey != hex.EncodeToString(sha256sum[:]) {
+		t.Errorf("expected to see a matching public key, but got %q", pubKey)
+	}
+}
