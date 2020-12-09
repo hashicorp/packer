@@ -23,12 +23,17 @@
 
 - `snapshot_id` (string) - The ID of the snapshot.
 
+- `throughput` (int64) - The throughput for gp3 volumes, only valid for gp3 types
+  See the documentation on
+  [Throughput](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
+  for more information
+
 - `virtual_name` (string) - The virtual device name. See the documentation on Block Device Mapping
   for more information.
 
-- `volume_type` (string) - The volume type. gp2 for General Purpose (SSD) volumes, io1 for
-  Provisioned IOPS (SSD) volumes, st1 for Throughput Optimized HDD, sc1
-  for Cold HDD, and standard for Magnetic volumes.
+- `volume_type` (string) - The volume type. gp2 & gp3 for General Purpose (SSD) volumes, io1 & io2
+  for Provisioned IOPS (SSD) volumes, st1 for Throughput Optimized HDD,
+  sc1 for Cold HDD, and standard for Magnetic volumes.
 
 - `volume_size` (int64) - The size of the volume, in GiB. Required if not specifying a
   snapshot_id.

@@ -24,7 +24,7 @@ require (
 	github.com/antihax/optional v1.0.0
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
 	github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878 // indirect
-	github.com/aws/aws-sdk-go v1.34.26
+	github.com/aws/aws-sdk-go v1.36.0
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
 	github.com/cheggaaa/pb v1.0.27
@@ -134,7 +134,7 @@ require (
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/mobile v0.0.0-20191130191448-5c0e7e404af8
-	golang.org/x/net v0.0.0-20201021035429-f5854403a974
+	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
 	golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f

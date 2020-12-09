@@ -163,6 +163,29 @@ func TestBlockDevice(t *testing.T) {
 				NoDevice:   aws.String(""),
 			},
 		},
+		{
+			Config: &BlockDevice{
+				DeviceName:          "/dev/sdb",
+				VolumeType:          "gp3",
+				VolumeSize:          8,
+				Throughput:          125,
+				IOPS:                3000,
+				DeleteOnTermination: true,
+				Encrypted:           config.TriTrue,
+			},
+
+			Result: &ec2.BlockDeviceMapping{
+				DeviceName: aws.String("/dev/sdb"),
+				Ebs: &ec2.EbsBlockDevice{
+					VolumeType:          aws.String("gp3"),
+					VolumeSize:          aws.Int64(8),
+					Throughput:          aws.Int64(125),
+					Iops:                aws.Int64(3000),
+					DeleteOnTermination: aws.Bool(true),
+					Encrypted:           aws.Bool(true),
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {
@@ -269,6 +292,95 @@ func TestIOPSValidation(t *testing.T) {
 			},
 			ok:  false,
 			msg: "IOPS must be between 100 and 64000 for device /dev/sdb",
+		},
+		// exceed max iops
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "gp3",
+				VolumeSize: 50,
+				Throughput: 125,
+				IOPS:       99999,
+			},
+			ok:  false,
+			msg: "IOPS must be between 3000 and 16000 for device /dev/sdb",
+		},
+		// lower than min iops
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "gp3",
+				VolumeSize: 50,
+				Throughput: 125,
+				IOPS:       10,
+			},
+			ok:  false,
+			msg: "IOPS must be between 3000 and 16000 for device /dev/sdb",
+		},
+	}
+
+	ctx := interpolate.Context{}
+	for _, testCase := range cases {
+		err := testCase.device.Prepare(&ctx)
+		if testCase.ok && err != nil {
+			t.Fatalf("should not error, but: %v", err)
+		}
+		if !testCase.ok {
+			if err == nil {
+				t.Fatalf("should error")
+			} else if err.Error() != testCase.msg {
+				t.Fatalf("wrong error: expected %s, found: %v", testCase.msg, err)
+			}
+		}
+	}
+}
+
+func TestThroughputValidation(t *testing.T) {
+
+	cases := []struct {
+		device BlockDevice
+		ok     bool
+		msg    string
+	}{
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "gp3",
+				Throughput: 125,
+				IOPS:       3000,
+			},
+			ok: true,
+		},
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "gp3",
+				Throughput: 1000,
+				IOPS:       3000,
+			},
+			ok: true,
+		},
+		// exceed max Throughput
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "gp3",
+				Throughput: 1001,
+				IOPS:       3000,
+			},
+			ok:  false,
+			msg: "Throughput must be between 125 and 1000 for device /dev/sdb",
+		},
+		// lower than min Throughput
+		{
+			device: BlockDevice{
+				DeviceName: "/dev/sdb",
+				VolumeType: "gp3",
+				Throughput: 124,
+				IOPS:       3000,
+			},
+			ok:  false,
+			msg: "Throughput must be between 125 and 1000 for device /dev/sdb",
 		},
 	}
 
