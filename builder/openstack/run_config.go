@@ -38,6 +38,8 @@ type RunConfig struct {
 	ExternalSourceImageURL string `mapstructure:"external_source_image_url" required:"true"`
 	// The format of the external source image to use, e.g. qcow2, raw.
 	ExternalSourceImageFormat string `mapstructure:"external_source_image_format" required:"false"`
+	// Properties to set for the external source image
+	ExternalSourceImageProperties map[string]string `mapstructure:"external_source_image_properties" required:"false"`
 	// Filters used to populate filter options. Example:
 	//
 	// ```json

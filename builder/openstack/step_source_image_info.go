@@ -14,13 +14,14 @@ import (
 )
 
 type StepSourceImageInfo struct {
-	SourceImage               string
-	SourceImageName           string
-	ExternalSourceImageURL    string
-	ExternalSourceImageFormat string
-	SourceImageOpts           images.ListOpts
-	SourceMostRecent          bool
-	SourceProperties          map[string]string
+	SourceImage                   string
+	SourceImageName               string
+	ExternalSourceImageURL        string
+	ExternalSourceImageFormat     string
+	ExternalSourceImageProperties map[string]string
+	SourceImageOpts               images.ListOpts
+	SourceMostRecent              bool
+	SourceProperties              map[string]string
 }
 
 func PropertiesSatisfied(image *images.Image, props *map[string]string) bool {
@@ -50,10 +51,7 @@ func (s *StepSourceImageInfo) Run(ctx context.Context, state multistep.StateBag)
 			Name:            s.SourceImageName,
 			ContainerFormat: "bare",
 			DiskFormat:      s.ExternalSourceImageFormat,
-			Properties: map[string]string{
-				"packer_external_source_image_url":    s.ExternalSourceImageURL,
-				"packer_external_source_image_format": s.ExternalSourceImageFormat,
-			},
+			Properties:      s.ExternalSourceImageProperties,
 		}
 
 		ui.Say("Creating image using external source image with name " + s.SourceImageName)
