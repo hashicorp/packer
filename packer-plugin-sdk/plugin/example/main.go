@@ -16,13 +16,13 @@ package main
 
 import (
 	"github.com/hashicorp/packer/builder/amazon/chroot"
-	"github.com/hashicorp/packer/packer/plugin"
+	pluginsdk "github.com/hashicorp/packer/packer-plugin-sdk/plugin"
 	dockerpush "github.com/hashicorp/packer/post-processor/docker-push"
 	"github.com/hashicorp/packer/provisioner/powershell"
 )
 
 func main() {
-	server, err := plugin.Server()
+	server, err := pluginsdk.Server()
 	if err != nil {
 		panic(err)
 	}

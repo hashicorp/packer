@@ -7,7 +7,7 @@
 # once they also need to be in the same folder. 'packer inspect folder/'
 # will describe to you what is in that folder.
 
-# Avoid mixing go templating calls ( for example ```{{ upper(`string`) }}``` ) 
+# Avoid mixing go templating calls ( for example ```{{ upper(`string`) }}``` )
 # and HCL2 calls (for example '${ var.string_value_example }' ). They won't be
 # executed together and the outcome will be unknown.
 

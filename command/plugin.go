@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer/plugin"
+	"github.com/hashicorp/packer/packer-plugin-sdk/plugin"
 
 	alicloudecsbuilder "github.com/hashicorp/packer/builder/alicloud/ecs"
 	amazonchrootbuilder "github.com/hashicorp/packer/builder/amazon/chroot"

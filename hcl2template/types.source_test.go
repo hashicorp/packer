@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestParse_source(t *testing.T) {
@@ -27,7 +27,7 @@ func TestParse_source(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 		{"untyped source",

@@ -12,7 +12,7 @@ func TestCoreConfig(t *testing.T) *CoreConfig {
 	// Create some test components
 	components := ComponentFinder{
 		BuilderStore: packersdk.MapOfBuilder{
-			"test": func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
+			"test": func() (packersdk.Builder, error) { return &packersdk.MockBuilder{}, nil },
 		},
 	}
 
@@ -42,8 +42,8 @@ func TestUi(t *testing.T) packersdk.Ui {
 
 // TestBuilder sets the builder with the name n to the component finder
 // and returns the mock.
-func TestBuilder(t *testing.T, c *CoreConfig, n string) *MockBuilder {
-	var b MockBuilder
+func TestBuilder(t *testing.T, c *CoreConfig, n string) *packersdk.MockBuilder {
+	var b packersdk.MockBuilder
 
 	c.Components.BuilderStore = packersdk.MapOfBuilder{
 		n: func() (packersdk.Builder, error) { return &b, nil },
@@ -54,8 +54,8 @@ func TestBuilder(t *testing.T, c *CoreConfig, n string) *MockBuilder {
 
 // TestProvisioner sets the prov. with the name n to the component finder
 // and returns the mock.
-func TestProvisioner(t *testing.T, c *CoreConfig, n string) *MockProvisioner {
-	var b MockProvisioner
+func TestProvisioner(t *testing.T, c *CoreConfig, n string) *packersdk.MockProvisioner {
+	var b packersdk.MockProvisioner
 
 	c.Components.ProvisionerStore = packersdk.MapOfProvisioner{
 		n: func() (packersdk.Provisioner, error) { return &b, nil },
