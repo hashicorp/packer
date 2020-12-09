@@ -122,6 +122,9 @@ func NewClientOptionGoogle(account *ServiceAccount, vaultOauth string, impersona
 		// 4. On Google Compute Engine and Google App Engine Managed VMs, it fetches
 		//    credentials from the metadata server.
 		//    (In this final case any provided scopes are ignored.)
+		//
+		//    Note: (4) is not usable with OSLogin on Google Compute Engine (GCE).
+		//    The GCE service account is derived separately and used instead.
 	}
 
 	if err != nil {
@@ -147,7 +150,7 @@ func NewDriverGCE(config GCEDriverConfig) (Driver, error) {
 	}
 
 	if metadata.OnGCE() {
-		log.Printf("[INFO] Running on a GCE, capturing it's service account...")
+		log.Printf("[INFO] On GCE, capture service account for OSLogin...")
 		thisGCEUser, err = metadata.NewClient(&http.Client{}).Email("")
 
 		if err != nil {
