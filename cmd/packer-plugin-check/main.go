@@ -1,4 +1,4 @@
-// packer-plugin-check is a command used by plugins to template compatibility and basic configuration
+// packer-plugin-check is a command used by plugins to validate compatibility and basic configuration
 // to work with Packer.
 package main
 
@@ -64,7 +64,7 @@ func main() {
 
 // checkDocumentation looks for the presence of a docs folder with mdx files inside.
 // It is not possible to predict the number of mdx files for a given plugin.
-// Because of that, finding one file inside de folder is enough to template the knowledge of docs generation.
+// Because of that, finding one file inside the folder is enough to validate the docs existence.
 func checkDocumentation() error {
 	// TODO: this should be updated once we have defined what's going to be for plguin's docs
 	wd, err := os.Getwd()
@@ -128,7 +128,7 @@ func discoverAndLoad() error {
 		return err
 	}
 
-	// TODO: template correctness of plugins loaded by checking them against the output of the `describe` command.
+	// TODO: validate correctness of plugins loaded by checking them against the output of the `describe` command.
 	builders, provisioners, postProcessors := config.GetPlugins()
 	if len(builders) == 0 &&
 		len(provisioners) == 0 &&
