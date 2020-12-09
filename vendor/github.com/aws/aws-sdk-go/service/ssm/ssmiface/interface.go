@@ -96,6 +96,10 @@ type SSMAPI interface {
 	CreateOpsItemWithContext(aws.Context, *ssm.CreateOpsItemInput, ...request.Option) (*ssm.CreateOpsItemOutput, error)
 	CreateOpsItemRequest(*ssm.CreateOpsItemInput) (*request.Request, *ssm.CreateOpsItemOutput)
 
+	CreateOpsMetadata(*ssm.CreateOpsMetadataInput) (*ssm.CreateOpsMetadataOutput, error)
+	CreateOpsMetadataWithContext(aws.Context, *ssm.CreateOpsMetadataInput, ...request.Option) (*ssm.CreateOpsMetadataOutput, error)
+	CreateOpsMetadataRequest(*ssm.CreateOpsMetadataInput) (*request.Request, *ssm.CreateOpsMetadataOutput)
+
 	CreatePatchBaseline(*ssm.CreatePatchBaselineInput) (*ssm.CreatePatchBaselineOutput, error)
 	CreatePatchBaselineWithContext(aws.Context, *ssm.CreatePatchBaselineInput, ...request.Option) (*ssm.CreatePatchBaselineOutput, error)
 	CreatePatchBaselineRequest(*ssm.CreatePatchBaselineInput) (*request.Request, *ssm.CreatePatchBaselineOutput)
@@ -123,6 +127,10 @@ type SSMAPI interface {
 	DeleteMaintenanceWindow(*ssm.DeleteMaintenanceWindowInput) (*ssm.DeleteMaintenanceWindowOutput, error)
 	DeleteMaintenanceWindowWithContext(aws.Context, *ssm.DeleteMaintenanceWindowInput, ...request.Option) (*ssm.DeleteMaintenanceWindowOutput, error)
 	DeleteMaintenanceWindowRequest(*ssm.DeleteMaintenanceWindowInput) (*request.Request, *ssm.DeleteMaintenanceWindowOutput)
+
+	DeleteOpsMetadata(*ssm.DeleteOpsMetadataInput) (*ssm.DeleteOpsMetadataOutput, error)
+	DeleteOpsMetadataWithContext(aws.Context, *ssm.DeleteOpsMetadataInput, ...request.Option) (*ssm.DeleteOpsMetadataOutput, error)
+	DeleteOpsMetadataRequest(*ssm.DeleteOpsMetadataInput) (*request.Request, *ssm.DeleteOpsMetadataOutput)
 
 	DeleteParameter(*ssm.DeleteParameterInput) (*ssm.DeleteParameterOutput, error)
 	DeleteParameterWithContext(aws.Context, *ssm.DeleteParameterInput, ...request.Option) (*ssm.DeleteParameterOutput, error)
@@ -434,6 +442,10 @@ type SSMAPI interface {
 	GetOpsItemWithContext(aws.Context, *ssm.GetOpsItemInput, ...request.Option) (*ssm.GetOpsItemOutput, error)
 	GetOpsItemRequest(*ssm.GetOpsItemInput) (*request.Request, *ssm.GetOpsItemOutput)
 
+	GetOpsMetadata(*ssm.GetOpsMetadataInput) (*ssm.GetOpsMetadataOutput, error)
+	GetOpsMetadataWithContext(aws.Context, *ssm.GetOpsMetadataInput, ...request.Option) (*ssm.GetOpsMetadataOutput, error)
+	GetOpsMetadataRequest(*ssm.GetOpsMetadataInput) (*request.Request, *ssm.GetOpsMetadataOutput)
+
 	GetOpsSummary(*ssm.GetOpsSummaryInput) (*ssm.GetOpsSummaryOutput, error)
 	GetOpsSummaryWithContext(aws.Context, *ssm.GetOpsSummaryInput, ...request.Option) (*ssm.GetOpsSummaryOutput, error)
 	GetOpsSummaryRequest(*ssm.GetOpsSummaryInput) (*request.Request, *ssm.GetOpsSummaryOutput)
@@ -538,6 +550,10 @@ type SSMAPI interface {
 	ListInventoryEntries(*ssm.ListInventoryEntriesInput) (*ssm.ListInventoryEntriesOutput, error)
 	ListInventoryEntriesWithContext(aws.Context, *ssm.ListInventoryEntriesInput, ...request.Option) (*ssm.ListInventoryEntriesOutput, error)
 	ListInventoryEntriesRequest(*ssm.ListInventoryEntriesInput) (*request.Request, *ssm.ListInventoryEntriesOutput)
+
+	ListOpsMetadata(*ssm.ListOpsMetadataInput) (*ssm.ListOpsMetadataOutput, error)
+	ListOpsMetadataWithContext(aws.Context, *ssm.ListOpsMetadataInput, ...request.Option) (*ssm.ListOpsMetadataOutput, error)
+	ListOpsMetadataRequest(*ssm.ListOpsMetadataInput) (*request.Request, *ssm.ListOpsMetadataOutput)
 
 	ListResourceComplianceSummaries(*ssm.ListResourceComplianceSummariesInput) (*ssm.ListResourceComplianceSummariesOutput, error)
 	ListResourceComplianceSummariesWithContext(aws.Context, *ssm.ListResourceComplianceSummariesInput, ...request.Option) (*ssm.ListResourceComplianceSummariesOutput, error)
@@ -664,6 +680,10 @@ type SSMAPI interface {
 	UpdateOpsItem(*ssm.UpdateOpsItemInput) (*ssm.UpdateOpsItemOutput, error)
 	UpdateOpsItemWithContext(aws.Context, *ssm.UpdateOpsItemInput, ...request.Option) (*ssm.UpdateOpsItemOutput, error)
 	UpdateOpsItemRequest(*ssm.UpdateOpsItemInput) (*request.Request, *ssm.UpdateOpsItemOutput)
+
+	UpdateOpsMetadata(*ssm.UpdateOpsMetadataInput) (*ssm.UpdateOpsMetadataOutput, error)
+	UpdateOpsMetadataWithContext(aws.Context, *ssm.UpdateOpsMetadataInput, ...request.Option) (*ssm.UpdateOpsMetadataOutput, error)
+	UpdateOpsMetadataRequest(*ssm.UpdateOpsMetadataInput) (*request.Request, *ssm.UpdateOpsMetadataOutput)
 
 	UpdatePatchBaseline(*ssm.UpdatePatchBaselineInput) (*ssm.UpdatePatchBaselineOutput, error)
 	UpdatePatchBaselineWithContext(aws.Context, *ssm.UpdatePatchBaselineInput, ...request.Option) (*ssm.UpdatePatchBaselineOutput, error)

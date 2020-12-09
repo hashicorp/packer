@@ -3,6 +3,7 @@ package winrm
 import (
 	"bytes"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"io"
 	"sync"
@@ -175,6 +176,20 @@ func (c *Client) RunWithString(command string, stdin string) (string, string, in
 	cmd.Close()
 
 	return outWriter.String(), errWriter.String(), cmd.ExitCode(), cmd.err
+}
+
+//RunPSWithString will basically wrap your code to execute commands in powershell.exe. Default RunWithString
+// runs commands in cmd.exe
+func (c *Client) RunPSWithString(command string, stdin string) (string, string, int, error) {
+	command = Powershell(command)
+
+	// Let's check if we actually created a command
+	if command == "" {
+		return "", "", 1, errors.New("cannot encode the given command")
+	}
+
+	// Specify powershell.exe to run encoded command
+	return c.RunWithString(command, stdin)
 }
 
 // RunWithInput will run command on the the remote host, writing the process stdout and stderr to
