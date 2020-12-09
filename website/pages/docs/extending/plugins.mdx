@@ -84,9 +84,11 @@ The valid types for plugins are:
 - `provisioner` - A provisioner to install software on images created by a
   builder.
 
-~> **Note**: Only _multi-plugin binaries_ are expected to work with Packer's plugin
-manager. The legacy `builder`, `post-processor` and `provisioner` plugin types
-will keep on being detected but Packer cannot install them automatically.
+~> **Note**: Only _multi-plugin binaries_ -- that is plugins named
+packer-plugin-*, like the `packer-plugin-amazon` described before -- are
+expected to work with Packer's plugin manager. The legacy `builder`,
+`post-processor` and `provisioner` plugin types will keep on being detected but
+Packer cannot install them automatically.
 
 
 ## Developing Plugins
