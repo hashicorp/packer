@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/useragent"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 
 	"github.com/hashicorp/packer/builder/yandex/version"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
@@ -84,11 +83,10 @@ func NewDriverYC(ui packersdk.Ui, ac *AccessConfig) (Driver, error) {
 	// Now we will have new request id for every retry attempt.
 	interceptorChain := grpc_middleware.ChainUnaryClient(retryInterceptor, requestIDInterceptor)
 
-	userAgentMD := metadata.Pairs("user-agent", useragent.String(version.YandexPluginVersion.FormattedVersion()))
-
 	sdk, err := ycsdk.Build(context.Background(), sdkConfig,
-		grpc.WithDefaultCallOptions(grpc.Header(&userAgentMD)),
-		grpc.WithUnaryInterceptor(interceptorChain))
+		grpc.WithUserAgent(useragent.String(version.YandexPluginVersion.FormattedVersion())),
+		grpc.WithUnaryInterceptor(interceptorChain),
+	)
 
 	if err != nil {
 		return nil, err
