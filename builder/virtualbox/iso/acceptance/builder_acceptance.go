@@ -11,10 +11,8 @@ import (
 
 	"github.com/hashicorp/packer/builder/virtualbox/iso"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/acctest/testutils"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-
-	testshelper "github.com/hashicorp/packer/helper/tests"
 )
 
 type VirtualBoxISOAccTest struct{}
@@ -29,19 +27,19 @@ func (v *VirtualBoxISOAccTest) GetConfigs() (map[string]string, error) {
 
 	file, err := ioutil.ReadAll(config)
 	if err != nil {
-		return nil, fmt.Errorf("Uneble to read %s", filePath)
+		return nil, fmt.Errorf("Unable to read %s", filePath)
 	}
 	return map[string]string{"linux": string(file)}, nil
 }
 
 func (v *VirtualBoxISOAccTest) CleanUp() error {
-	testshelper.CleanupFiles("virtualbox-iso-packer-acc-test")
-	testshelper.CleanupFiles("packer_cache")
+	testutils.CleanupFiles("virtualbox-iso-packer-acc-test")
+	testutils.CleanupFiles("packer_cache")
 	return nil
 }
 
-func (v *VirtualBoxISOAccTest) GetBuilderStore() packer.MapOfBuilder {
-	return packer.MapOfBuilder{
+func (v *VirtualBoxISOAccTest) GetBuilderStore() packersdk.MapOfBuilder {
+	return packersdk.MapOfBuilder{
 		"virtualbox-iso": func() (packersdk.Builder, error) { return &iso.Builder{}, nil },
 	}
 }

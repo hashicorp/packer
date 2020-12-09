@@ -1,0 +1,16 @@
+<!-- Code generated from the comments of the ImageConfig struct in builder/yandex/common_config.go; DO NOT EDIT MANUALLY -->
+
+- `image_name` (string) - The name of the resulting image, which contains 1-63 characters and only
+  supports lowercase English characters, numbers and hyphen. Defaults to
+  `packer-{{timestamp}}`.
+
+- `image_description` (string) - The description of the image.
+
+- `image_family` (string) - The family name of the image.
+
+- `image_labels` (map[string]string) - Key/value pair labels to apply to the image.
+
+- `image_min_disk_size_gb` (int) - Minimum size of the disk that will be created from built image, specified in gigabytes.
+  Should be more or equal to `disk_size_gb`.
+
+- `image_product_ids` ([]string) - License IDs that indicate which licenses are attached to resulting image.

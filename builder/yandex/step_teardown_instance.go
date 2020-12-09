@@ -11,7 +11,9 @@ import (
 	ycsdk "github.com/yandex-cloud/go-sdk"
 )
 
-type StepTeardownInstance struct{}
+type StepTeardownInstance struct {
+	SerialLogFile string
+}
 
 func (s *StepTeardownInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
@@ -23,6 +25,14 @@ func (s *StepTeardownInstance) Run(ctx context.Context, state multistep.StateBag
 	ui.Say("Stopping instance...")
 	ctx, cancel := context.WithTimeout(ctx, c.StateTimeout)
 	defer cancel()
+
+	if s.SerialLogFile != "" {
+		err := writeSerialLogFile(ctx, state, s.SerialLogFile)
+		if err != nil {
+			ui.Error(err.Error())
+		}
+	}
+
 	op, err := sdk.WrapOperation(sdk.Compute().Instance().Stop(ctx, &compute.StopInstanceRequest{
 		InstanceId: instanceID,
 	}))

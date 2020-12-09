@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/stretchr/testify/assert"
 )
@@ -49,7 +49,7 @@ func testConfig() map[string]interface{} {
 		"iso_checksum":            "md5:0B0F137F17AC10944716020B018F8126",
 		"iso_url":                 "http://www.google.com/",
 		"ssh_username":            "foo",
-		packer.BuildNameConfigKey: "foo",
+		common.BuildNameConfigKey: "foo",
 	}
 }
 
@@ -196,8 +196,8 @@ func TestBuilderPrepare_AdditionalDiskSize(t *testing.T) {
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
-	if err == nil {
-		t.Fatalf("should have error")
+	if err != nil {
+		t.Fatalf("should not have error")
 	}
 
 	delete(config, "disk_image")

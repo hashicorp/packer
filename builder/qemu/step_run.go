@@ -209,12 +209,7 @@ func (s *stepRun) getDeviceAndDriveArgs(config *Config, state multistep.StateBag
 
 	// Configure virtual hard drives
 	if s.atLeastVersion2 {
-		// We have different things to attach based on whether we are booting
-		// from an iso or a boot image.
 		drivesToAttach := []string{}
-		if config.DiskImage {
-			drivesToAttach = append(drivesToAttach, imgPath)
-		}
 
 		if v, ok := state.GetOk("qemu_disk_paths"); ok {
 			diskFullPaths := v.([]string)

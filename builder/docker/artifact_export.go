@@ -35,5 +35,8 @@ func (a *ExportArtifact) State(name string) interface{} {
 }
 
 func (a *ExportArtifact) Destroy() error {
-	return os.Remove(a.path)
+	if a.path != "" {
+		return os.Remove(a.path)
+	}
+	return nil
 }

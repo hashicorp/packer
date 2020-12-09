@@ -19,7 +19,7 @@ type StepWaitCloudInitScript int
 
 // Run reads the instance metadata and looks for the log entry
 // indicating the cloud-init script finished.
-func (s *StepWaitCloudInitScript) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (*StepWaitCloudInitScript) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	_ = state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packersdk.Ui)

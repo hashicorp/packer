@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/pathing"
 	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/hashicorp/packer/version"
@@ -199,7 +200,7 @@ func wrappedMain() int {
 			Reader:      os.Stdin,
 			Writer:      os.Stdout,
 			ErrorWriter: os.Stdout,
-			PB:          &packer.NoopProgressTracker{},
+			PB:          &packersdk.NoopProgressTracker{},
 		}
 		ui = basicUi
 		if !inPlugin {
@@ -300,12 +301,23 @@ func extractMachineReadable(args []string) ([]string, bool) {
 
 func loadConfig() (*config, error) {
 	var config config
-	config.PluginMinPort = 10000
-	config.PluginMaxPort = 25000
-	config.Builders = packer.MapOfBuilder{}
-	config.PostProcessors = packer.MapOfPostProcessor{}
-	config.Provisioners = packer.MapOfProvisioner{}
-	if err := config.Discover(); err != nil {
+	config.Plugins = plugin.Config{
+		PluginMinPort: 10000,
+		PluginMaxPort: 25000,
+	}
+	if err := config.Plugins.Discover(); err != nil {
+		return nil, err
+	}
+
+	// Copy plugins to general list
+	builders, provisioners, postProcessors := config.Plugins.GetPlugins()
+	config.Builders = builders
+	config.Provisioners = provisioners
+	config.PostProcessors = postProcessors
+
+	// Finally, try to use an internal plugin. Note that this will not override
+	// any previously-loaded plugins.
+	if err := config.discoverInternalComponents(); err != nil {
 		return nil, err
 	}
 
@@ -316,7 +328,7 @@ func loadConfig() (*config, error) {
 	if configFilePath == "" {
 		var err error
 		log.Print("'PACKER_CONFIG' not set; checking the default config file path")
-		configFilePath, err = packer.ConfigFile()
+		configFilePath, err = pathing.ConfigFile()
 		if err != nil {
 			log.Printf("Error detecting default config file path: %s", err)
 		}

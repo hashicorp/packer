@@ -1,0 +1,20 @@
+<!-- Code generated from the comments of the InstanceConfig struct in builder/yandex/common_config.go; DO NOT EDIT MANUALLY -->
+
+- `instance_cores` (int) - The number of cores available to the instance.
+
+- `instance_gpus` (int) - The number of GPU available to the instance.
+
+- `instance_mem_gb` (int) - The amount of memory available to the instance, specified in gigabytes.
+
+- `instance_name` (string) - The name assigned to the instance.
+
+- `platform_id` (string) - Identifier of the hardware platform configuration for the instance. This defaults to `standard-v2`.
+
+- `labels` (map[string]string) - Key/value pair labels to apply to the launched instance.
+
+- `metadata` (map[string]string) - Metadata applied to the launched instance.
+
+- `metadata_from_file` (map[string]string) - Metadata applied to the launched instance.
+  The values in this map are the paths to the content files for the corresponding metadata keys.
+
+- `preemptible` (bool) - Launch a preemptible instance. This defaults to `false`.

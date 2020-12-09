@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -92,7 +92,7 @@ func Test_UserOverrides(t *testing.T) {
 
 		step := &stepRun{
 			atLeastVersion2: true,
-			ui:              packer.TestUi(t),
+			ui:              packersdk.TestUi(t),
 		}
 		args, err := step.getCommandArgs(tc.Config, state)
 		if err != nil {
@@ -130,7 +130,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			map[string]interface{}{},
 			&stepRun{
 				atLeastVersion2: true,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{
 				"-display", "gtk",
@@ -150,12 +150,13 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DetectZeroes: "off",
 			},
 			map[string]interface{}{
-				"cd_path": "fake_cd_path.iso",
+				"cd_path":         "fake_cd_path.iso",
+				"qemu_disk_paths": []string{"path_to_output"},
 			},
 			&stepRun{
 				DiskImage:       true,
 				atLeastVersion2: true,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{
 				"-display", "gtk",
@@ -178,12 +179,13 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				DetectZeroes: "on",
 			},
 			map[string]interface{}{
-				"cd_path": "fake_cd_path.iso",
+				"cd_path":         "fake_cd_path.iso",
+				"qemu_disk_paths": []string{"path_to_output"},
 			},
 			&stepRun{
 				DiskImage:       true,
 				atLeastVersion2: true,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{
 				"-display", "gtk",
@@ -212,7 +214,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			},
 			&stepRun{
 				atLeastVersion2: true,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{
 				"-display", "gtk",
@@ -244,7 +246,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			},
 			&stepRun{
 				atLeastVersion2: true,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{
 				"-display", "gtk",
@@ -274,7 +276,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			},
 			&stepRun{
 				atLeastVersion2: true,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{
 				"-display", "gtk",
@@ -294,7 +296,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			},
 			&stepRun{
 				atLeastVersion2: true,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{
 				"-display", "gtk",
@@ -314,7 +316,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			},
 			&stepRun{
 				atLeastVersion2: true,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{
 				"-display", "gtk",
@@ -338,7 +340,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			},
 			&stepRun{
 				atLeastVersion2: false,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{
 				"-boot", "once=d",
@@ -360,7 +362,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			},
 			&stepRun{
 				atLeastVersion2: true,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{
 				"-display", "gtk",
@@ -381,12 +383,13 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 				Format:        "qcow2",
 			},
 			map[string]interface{}{
-				"cd_path": "fake_cd_path.iso",
+				"cd_path":         "fake_cd_path.iso",
+				"qemu_disk_paths": []string{"path_to_output"},
 			},
 			&stepRun{
 				DiskImage:       true,
 				atLeastVersion2: true,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{
 				"-display", "gtk",
@@ -436,7 +439,7 @@ func Test_OptionalConfigOptionsGetSet(t *testing.T) {
 	state := runTestState(t, c)
 	step := &stepRun{
 		atLeastVersion2: true,
-		ui:              packer.TestUi(t),
+		ui:              packersdk.TestUi(t),
 	}
 	args, err := step.getCommandArgs(c, state)
 	if err != nil {
@@ -475,7 +478,7 @@ func Test_Defaults(t *testing.T) {
 		{
 			&Config{},
 			map[string]interface{}{},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-boot", "once=d"},
 			"Boot value should default to once=d",
 		},
@@ -484,7 +487,7 @@ func Test_Defaults(t *testing.T) {
 			map[string]interface{}{},
 			&stepRun{
 				DiskImage: true,
-				ui:        packer.TestUi(t),
+				ui:        packersdk.TestUi(t),
 			},
 			[]string{"-boot", "c"},
 			"Boot value should be set to c when DiskImage is set on step",
@@ -495,7 +498,7 @@ func Test_Defaults(t *testing.T) {
 				QMPSocketPath: "/path/to/socket",
 			},
 			map[string]interface{}{},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-qmp", "unix:/path/to/socket,server,nowait"},
 			"Args should contain -qmp when qmp_enable is set",
 		},
@@ -504,7 +507,7 @@ func Test_Defaults(t *testing.T) {
 				QMPEnable: true,
 			},
 			map[string]interface{}{},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-qmp", "unix:,server,nowait"},
 			"Args contain -qmp even when socket path isn't set, if qmp enabled",
 		},
@@ -513,14 +516,14 @@ func Test_Defaults(t *testing.T) {
 				VMName: "partyname",
 			},
 			map[string]interface{}{},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-name", "partyname"},
 			"Name is set from config",
 		},
 		{
 			&Config{},
 			map[string]interface{}{},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-name", ""},
 			"Name is set from config, even when name is blank (which won't " +
 				"happen for real thanks to defaulting in build prepare)",
@@ -531,7 +534,7 @@ func Test_Defaults(t *testing.T) {
 				MachineType: "fancymachine",
 			},
 			map[string]interface{}{},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-machine", "type=fancymachine"},
 			"Don't add accelerator tag when no accelerator is set.",
 		},
@@ -541,7 +544,7 @@ func Test_Defaults(t *testing.T) {
 				MachineType: "fancymachine",
 			},
 			map[string]interface{}{},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-machine", "type=fancymachine,accel=kvm"},
 			"Add accelerator tag when accelerator is set.",
 		},
@@ -550,7 +553,7 @@ func Test_Defaults(t *testing.T) {
 				NetBridge: "fakebridge",
 			},
 			map[string]interface{}{},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-netdev", "bridge,id=user.0,br=fakebridge"},
 			"Add netbridge tag when netbridge is set.",
 		},
@@ -563,7 +566,7 @@ func Test_Defaults(t *testing.T) {
 				},
 			},
 			map[string]interface{}{},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-netdev", "user,id=user.0"},
 			"No host forwarding when no net bridge and no communicator",
 		},
@@ -581,7 +584,7 @@ func Test_Defaults(t *testing.T) {
 			map[string]interface{}{
 				"commHostPort": 1111,
 			},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-netdev", "user,id=user.0,hostfwd=tcp::1111-:4567"},
 			"Host forwarding when a communicator is configured",
 		},
@@ -592,7 +595,7 @@ func Test_Defaults(t *testing.T) {
 			map[string]interface{}{
 				"vnc_port": 5959,
 			},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-vnc", "1.1.1.1:5959"},
 			"no VNC password should be set",
 		},
@@ -604,7 +607,7 @@ func Test_Defaults(t *testing.T) {
 			map[string]interface{}{
 				"vnc_port": 5959,
 			},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-vnc", "1.1.1.1:5959,password"},
 			"VNC password should be set",
 		},
@@ -613,7 +616,7 @@ func Test_Defaults(t *testing.T) {
 				MemorySize: 2345,
 			},
 			map[string]interface{}{},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-m", "2345M"},
 			"Memory is set, with unit M",
 		},
@@ -622,7 +625,7 @@ func Test_Defaults(t *testing.T) {
 				CpuCount: 2,
 			},
 			map[string]interface{}{},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-smp", "cpus=2,sockets=2"},
 			"both cpus and sockets are set to config's CpuCount",
 		},
@@ -631,7 +634,7 @@ func Test_Defaults(t *testing.T) {
 				CpuCount: 2,
 			},
 			map[string]interface{}{},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-smp", "cpus=2,sockets=2"},
 			"both cpus and sockets are set to config's CpuCount",
 		},
@@ -642,7 +645,7 @@ func Test_Defaults(t *testing.T) {
 			map[string]interface{}{
 				"floppy_path": "/path/to/floppy",
 			},
-			&stepRun{ui: packer.TestUi(t)},
+			&stepRun{ui: packersdk.TestUi(t)},
 			[]string{"-fda", "/path/to/floppy"},
 			"floppy path should be set under fda flag, when it exists",
 		},
@@ -655,7 +658,7 @@ func Test_Defaults(t *testing.T) {
 			map[string]interface{}{},
 			&stepRun{
 				atLeastVersion2: true,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{"-display", "fakedisplay"},
 			"Display option should value config display",
@@ -667,7 +670,7 @@ func Test_Defaults(t *testing.T) {
 			map[string]interface{}{},
 			&stepRun{
 				atLeastVersion2: true,
-				ui:              packer.TestUi(t),
+				ui:              packersdk.TestUi(t),
 			},
 			[]string{"-display", "gtk"},
 			"Display option should default to gtk",

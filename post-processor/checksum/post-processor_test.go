@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/builder/file"
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 )
@@ -47,7 +46,7 @@ func TestChecksumSHA1(t *testing.T) {
 
 func setup(t *testing.T) (packersdk.Ui, packersdk.Artifact, error) {
 	// Create fake UI and Cache
-	ui := packer.TestUi(t)
+	ui := packersdk.TestUi(t)
 
 	// Create config for file builder
 	const fileConfig = `{"builders":[{"type":"file","target":"package.txt","content":"Hello world!"}]}`

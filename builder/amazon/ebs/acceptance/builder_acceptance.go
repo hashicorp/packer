@@ -11,10 +11,7 @@ import (
 
 	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-
-	testshelper "github.com/hashicorp/packer/helper/tests"
 )
 
 type AmazonEBSAccTest struct{}
@@ -48,15 +45,15 @@ func (s *AmazonEBSAccTest) GetConfigs() (map[string]string, error) {
 }
 
 func (s *AmazonEBSAccTest) CleanUp() error {
-	helper := testshelper.AWSHelper{
+	helper := AWSHelper{
 		Region:  "us-east-1",
 		AMIName: "packer-acc-test",
 	}
 	return helper.CleanUpAmi()
 }
 
-func (s *AmazonEBSAccTest) GetBuilderStore() packer.MapOfBuilder {
-	return packer.MapOfBuilder{
+func (s *AmazonEBSAccTest) GetBuilderStore() packersdk.MapOfBuilder {
+	return packersdk.MapOfBuilder{
 		"amazon-ebs": func() (packersdk.Builder, error) { return &amazonebsbuilder.Builder{}, nil },
 	}
 }

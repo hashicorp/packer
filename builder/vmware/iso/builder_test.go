@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
@@ -18,7 +18,7 @@ func testConfig() map[string]interface{} {
 		"shutdown_command": "foo",
 		"ssh_username":     "foo",
 
-		packer.BuildNameConfigKey: "foo",
+		common.BuildNameConfigKey: "foo",
 	}
 }
 

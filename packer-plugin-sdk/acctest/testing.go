@@ -1,4 +1,4 @@
-package testing
+package acctest
 
 import (
 	"context"
@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template"
+	"github.com/hashicorp/packer/provisioner/file"
+	shellprovisioner "github.com/hashicorp/packer/provisioner/shell"
 )
 
 // TestEnvVar must be set to a non-empty value for acceptance tests to run.
@@ -47,6 +49,15 @@ type TestCase struct {
 	// If SkipArtifactTeardown is true, we will not attempt to destroy the
 	// artifact created in this test run.
 	SkipArtifactTeardown bool
+	// If set, overrides the default provisioner store with custom provisioners.
+	// This can be useful for running acceptance tests for a particular
+	// provisioner using a specific builder.
+	// Default provisioner store:
+	// ProvisionerStore: packersdk.MapOfProvisioner{
+	// 	"shell": func() (packersdk.Provisioner, error) { return &shellprovisioner.Provisioner{}, nil },
+	// 	"file":  func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
+	// },
+	ProvisionerStore packersdk.MapOfProvisioner
 }
 
 // TestCheckFunc is the callback used for Check in TestStep.
@@ -110,6 +121,12 @@ func Test(t TestT, c TestCase) {
 		return
 	}
 
+	if c.ProvisionerStore == nil {
+		c.ProvisionerStore = packersdk.MapOfProvisioner{
+			"shell": func() (packersdk.Provisioner, error) { return &shellprovisioner.Provisioner{}, nil },
+			"file":  func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
+		}
+	}
 	// Build the core
 	log.Printf("[DEBUG] Initializing core...")
 	core := packer.NewCore(&packer.CoreConfig{
@@ -123,6 +140,7 @@ func Test(t TestT, c TestCase) {
 					return nil, nil
 				},
 			},
+			ProvisionerStore: c.ProvisionerStore,
 		},
 		Template: tpl,
 	})
@@ -161,6 +179,7 @@ func Test(t TestT, c TestCase) {
 		Reader:      os.Stdin,
 		Writer:      ioutil.Discard,
 		ErrorWriter: ioutil.Discard,
+		PB:          &packersdk.NoopProgressTracker{},
 	}
 	artifacts, err := build.Run(context.Background(), ui)
 	if err != nil {

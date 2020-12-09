@@ -1,12 +1,12 @@
 {
   "type": "shell",
   "inline": [
-    "echo {{ build `ID`}} > provisioner.{{ build `PackerRunUUID`}}.txt"
+    "echo build ID is {{ build `ID`}} and build UUID is {{ build `PackerRunUUID` }}> provisioner.{{ build `PackerRunUUID`}}.txt"
   ]
 },
 {
     "type": "file",
     "source": "provisioner.{{ build `PackerRunUUID`}}.txt",
-    "destination": "provisioner.shell.{{ build `PackerRunUUID`}}.txt",
+    "destination": "./test-fixtures/provisioner.shell.txt",
     "direction": "download"
 }
