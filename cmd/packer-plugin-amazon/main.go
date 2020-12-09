@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/packer/builder/amazon/ebssurrogate"
 	"github.com/hashicorp/packer/builder/amazon/ebsvolume"
 	"github.com/hashicorp/packer/builder/osc/chroot"
-	"github.com/hashicorp/packer/packer/plugin"
+	"github.com/hashicorp/packer/packer-plugin-sdk/plugin"
 	amazonimport "github.com/hashicorp/packer/post-processor/amazon-import"
 )
 
