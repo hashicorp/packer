@@ -111,7 +111,7 @@ func (i *Set) start(kind, name string) error {
 	case "provisioners":
 		err = server.RegisterProvisioner(i.Provisioners[name])
 	default:
-		err = fmt.Errorf("Unknown pluging type: %s", kind)
+		err = fmt.Errorf("Unknown plugin type: %s", kind)
 	}
 	if err != nil {
 		return err
