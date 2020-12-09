@@ -51,7 +51,7 @@ func (s *StepCreateS3Keys) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	if val, ok := state.GetOk("s3_secret"); ok {
-		ui.Say("S3 secrets has been founded")
+		ui.Say("S3 secrets have been found")
 		s3Secret := val.(*awscompatibility.CreateAccessKeyResponse)
 
 		ui.Message("Cleanup empty objects...")
