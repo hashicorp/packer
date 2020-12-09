@@ -11,8 +11,8 @@ import (
 	"sort"
 	"strings"
 
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/command"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 )
 

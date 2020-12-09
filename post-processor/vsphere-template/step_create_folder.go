@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
 )

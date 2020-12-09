@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
 )
 
 // A HookedProvisioner represents a provisioner and information describing it

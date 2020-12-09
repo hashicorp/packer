@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 const fixturesDir = "./test-fixtures"

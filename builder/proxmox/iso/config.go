@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type Config struct {

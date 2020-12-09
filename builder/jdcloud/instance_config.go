@@ -3,8 +3,8 @@ package jdcloud
 import (
 	"fmt"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/communicator"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 type JDCloudInstanceSpecConfig struct {

@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/acctest/provisioneracc"
-	"github.com/hashicorp/packer/packer-plugin-sdk/acctest/testutils"
+	"github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc"
+	"github.com/hashicorp/packer-plugin-sdk/acctest/testutils"
 )
 
 func fixtureDir() string {

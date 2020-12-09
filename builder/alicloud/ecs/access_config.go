@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/builder/alicloud/version"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/mitchellh/go-homedir"
 )
 

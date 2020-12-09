@@ -6,9 +6,9 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer/packer-plugin-sdk/net"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/net"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // This step configures the VM to enable the VNC server.

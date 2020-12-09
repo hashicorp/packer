@@ -8,11 +8,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	powershell "github.com/hashicorp/packer/builder/hyperv/common/powershell"
 	"github.com/hashicorp/packer/builder/hyperv/common/powershell/hyperv"
-	"github.com/hashicorp/packer/packer-plugin-sdk/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 const (

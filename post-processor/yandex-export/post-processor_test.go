@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
 )
 
 func TestPostProcessor_Configure(t *testing.T) {

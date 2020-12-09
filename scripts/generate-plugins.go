@@ -254,8 +254,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
-packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/plugin"
+packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/plugin"
 
 IMPORTS
 )

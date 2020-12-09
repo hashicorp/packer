@@ -6,10 +6,10 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer/packer-plugin-sdk/net"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/communicator"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/net"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // This step adds a NAT port forwarding definition so that SSH or WinRM is available

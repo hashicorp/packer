@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/Azure/go-autorest/autorest/azure"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/azure/common/client"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // Artifact is an artifact implementation that contains built Managed Images or Disks.

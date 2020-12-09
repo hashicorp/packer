@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"testing"
 
-	pluginsdk "github.com/hashicorp/packer/packer-plugin-sdk/plugin"
+	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 )
 
 func newConfig() Config {

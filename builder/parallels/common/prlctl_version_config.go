@@ -3,7 +3,7 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 // PrlctlVersionConfig contains the configuration for `prlctl` version.

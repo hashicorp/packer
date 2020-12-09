@@ -5,7 +5,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // MockPostProcessor is an implementation of PostProcessor that can be

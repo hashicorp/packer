@@ -3,7 +3,7 @@ package bsusurrogate
 import (
 	"testing"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func TestBuilder_ImplementsBuilder(t *testing.T) {

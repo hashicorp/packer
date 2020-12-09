@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 /// create mock step

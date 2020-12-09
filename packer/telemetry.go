@@ -9,7 +9,7 @@ import (
 	"time"
 
 	checkpoint "github.com/hashicorp/go-checkpoint"
-	"github.com/hashicorp/packer/packer-plugin-sdk/pathing"
+	"github.com/hashicorp/packer-plugin-sdk/pathing"
 	packerVersion "github.com/hashicorp/packer/version"
 )
 

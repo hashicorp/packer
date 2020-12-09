@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/json"
+	"github.com/hashicorp/packer-plugin-sdk/json"
 )
 
 const (
