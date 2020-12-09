@@ -12,9 +12,9 @@ import (
 	ycsdk "github.com/yandex-cloud/go-sdk"
 )
 
-type stepInstanceInfo struct{}
+type StepInstanceInfo struct{}
 
-func (s *stepInstanceInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepInstanceInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	sdk := state.Get("sdk").(*ycsdk.SDK)
 	ui := state.Get("ui").(packersdk.Ui)
 	c := state.Get("config").(*Config)
@@ -30,12 +30,12 @@ func (s *stepInstanceInfo) Run(ctx context.Context, state multistep.StateBag) mu
 		View:       compute.InstanceView_FULL,
 	})
 	if err != nil {
-		return stepHaltWithError(state, fmt.Errorf("Error retrieving instance data: %s", err))
+		return StepHaltWithError(state, fmt.Errorf("Error retrieving instance data: %s", err))
 	}
 
 	instanceIP, err := getInstanceIPAddress(c, instance)
 	if err != nil {
-		return stepHaltWithError(state, fmt.Errorf("Failed to find instance ip address: %s", err))
+		return StepHaltWithError(state, fmt.Errorf("Failed to find instance ip address: %s", err))
 	}
 
 	state.Put("instance_ip", instanceIP)
@@ -106,6 +106,6 @@ func instanceAddresses(instance *compute.Instance) (ipV4Int, ipV4Ext, ipV6 strin
 	return
 }
 
-func (s *stepInstanceInfo) Cleanup(state multistep.StateBag) {
+func (s *StepInstanceInfo) Cleanup(state multistep.StateBag) {
 	// no cleanup
 }

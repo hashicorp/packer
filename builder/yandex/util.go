@@ -12,7 +12,7 @@ import (
 	ycsdk "github.com/yandex-cloud/go-sdk"
 )
 
-func stepHaltWithError(state multistep.StateBag, err error) multistep.StepAction {
+func StepHaltWithError(state multistep.StateBag, err error) multistep.StepAction {
 	ui := state.Get("ui").(packersdk.Ui)
 	state.Put("error", err)
 	ui.Error(err.Error())

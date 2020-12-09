@@ -77,10 +77,10 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			SerialLogFile: b.config.SerialLogFile,
 			GeneratedData: generatedData,
 		},
-		&stepInstanceInfo{},
+		&StepInstanceInfo{},
 		&communicator.StepConnect{
 			Config:    &b.config.Communicator,
-			Host:      commHost,
+			Host:      CommHost,
 			SSHConfig: b.config.Communicator.SSHConfigFunc(),
 		},
 		&commonsteps.StepProvision{},

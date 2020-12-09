@@ -165,11 +165,11 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	sourceImage, err := getImage(ctx, config, driver)
 	if err != nil {
-		return stepHaltWithError(state, fmt.Errorf("Error getting source image for instance creation: %s", err))
+		return StepHaltWithError(state, fmt.Errorf("Error getting source image for instance creation: %s", err))
 	}
 
 	if sourceImage.MinDiskSizeGb > config.DiskSizeGb {
-		return stepHaltWithError(state, fmt.Errorf("Instance DiskSizeGb (%d) should be equal or greater "+
+		return StepHaltWithError(state, fmt.Errorf("Instance DiskSizeGb (%d) should be equal or greater "+
 			"than SourceImage disk requirement (%d)", config.DiskSizeGb, sourceImage.MinDiskSizeGb))
 	}
 
@@ -182,14 +182,14 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		ui.Say("Creating network...")
 		network, err := createNetwork(ctx, config, driver)
 		if err != nil {
-			return stepHaltWithError(state, fmt.Errorf("Error creating network: %s", err))
+			return StepHaltWithError(state, fmt.Errorf("Error creating network: %s", err))
 		}
 		state.Put("network_id", network.Id)
 
 		ui.Say(fmt.Sprintf("Creating subnet in zone %q...", config.Zone))
 		subnet, err := createSubnet(ctx, config, driver, network.Id)
 		if err != nil {
-			return stepHaltWithError(state, fmt.Errorf("Error creating subnet: %s", err))
+			return StepHaltWithError(state, fmt.Errorf("Error creating subnet: %s", err))
 		}
 		instanceSubnetID = subnet.Id
 		// save for cleanup
@@ -203,7 +203,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 	ui.Say("Creating disk...")
 	disk, err := createDisk(ctx, state, config, driver, sourceImage)
 	if err != nil {
-		return stepHaltWithError(state, fmt.Errorf("Error creating disk: %s", err))
+		return StepHaltWithError(state, fmt.Errorf("Error creating disk: %s", err))
 	}
 
 	// Create an instance based on the configuration
@@ -211,7 +211,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	instanceMetadata, err := config.createInstanceMetadata(string(config.Communicator.SSHPublicKey))
 	if err != nil {
-		return stepHaltWithError(state, fmt.Errorf("Error preparing instance metadata: %s", err))
+		return StepHaltWithError(state, fmt.Errorf("Error preparing instance metadata: %s", err))
 	}
 
 	if config.UseIPv6 {
@@ -223,7 +223,7 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 		}
 		instanceMetadata["user-data"], err = MergeCloudUserMetaData(oldUserData, cloudInitIPv6Config)
 		if err != nil {
-			return stepHaltWithError(state, fmt.Errorf("Error merge user data configs: %s", err))
+			return StepHaltWithError(state, fmt.Errorf("Error merge user data configs: %s", err))
 		}
 	}
 
@@ -281,33 +281,33 @@ func (s *StepCreateInstance) Run(ctx context.Context, state multistep.StateBag) 
 
 	op, err := sdk.WrapOperation(sdk.Compute().Instance().Create(ctx, req))
 	if err != nil {
-		return stepHaltWithError(state, fmt.Errorf("Error create instance: %s", err))
+		return StepHaltWithError(state, fmt.Errorf("Error create instance: %s", err))
 	}
 
 	opMetadata, err := op.Metadata()
 	if err != nil {
-		return stepHaltWithError(state, fmt.Errorf("Error get create operation metadata: %s", err))
+		return StepHaltWithError(state, fmt.Errorf("Error get create operation metadata: %s", err))
 	}
 
 	if cimd, ok := opMetadata.(*compute.CreateInstanceMetadata); ok {
 		state.Put("instance_id", cimd.InstanceId)
 	} else {
-		return stepHaltWithError(state, fmt.Errorf("could not get Instance ID from operation metadata"))
+		return StepHaltWithError(state, fmt.Errorf("could not get Instance ID from operation metadata"))
 	}
 
 	err = op.Wait(ctx)
 	if err != nil {
-		return stepHaltWithError(state, fmt.Errorf("Error create instance: %s", err))
+		return StepHaltWithError(state, fmt.Errorf("Error create instance: %s", err))
 	}
 
 	resp, err := op.Response()
 	if err != nil {
-		return stepHaltWithError(state, err)
+		return StepHaltWithError(state, err)
 	}
 
 	instance, ok := resp.(*compute.Instance)
 	if !ok {
-		return stepHaltWithError(state, fmt.Errorf("response doesn't contain Instance"))
+		return StepHaltWithError(state, fmt.Errorf("response doesn't contain Instance"))
 	}
 
 	// instance_id is the generic term used so that users can have access to the

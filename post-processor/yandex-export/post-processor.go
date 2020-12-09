@@ -26,7 +26,10 @@ import (
 	ycsdk "github.com/yandex-cloud/go-sdk"
 )
 
-const defaultStorageEndpoint = "storage.yandexcloud.net"
+const (
+	defaultStorageEndpoint = "storage.yandexcloud.net"
+	defaultStorageRegion   = "ru-central1"
+)
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -106,6 +109,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// to the global Internet: either through ipv4 or ipv6
 	// TODO: delete this when access appears
 	if p.config.UseIPv4Nat == false && p.config.UseIPv6 == false {
+		log.Printf("[DEBUG] Force use IPv4")
 		p.config.UseIPv4Nat = true
 	}
 	p.config.Preemptible = true //? safety
@@ -210,6 +214,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		err := &packersdk.MultiError{Errors: errs}
 		return nil, false, false, err
 	}
+
 	ui.Say(fmt.Sprintf("Validating service_account_id: '%s'...", yandexConfig.ServiceAccountID))
 	if err := validateServiceAccount(ctx, driver.SDK(), yandexConfig.ServiceAccountID); err != nil {
 		return nil, false, false, err
@@ -225,6 +230,10 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 
 	// Build the steps.
 	steps := []multistep.Step{
+		&StepCreateS3Keys{
+			ServiceAccountID: p.config.ServiceAccountID,
+			Paths:            p.config.Paths,
+		},
 		&yandex.StepCreateSSHKey{
 			Debug:        p.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("yc_export_pp_%s.pem", p.config.PackerBuildName),
@@ -234,10 +243,18 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 			SerialLogFile: yandexConfig.SerialLogFile,
 			GeneratedData: &packerbuilderdata.GeneratedData{State: state},
 		},
-		new(yandex.StepWaitCloudInitScript),
+		new(yandex.StepInstanceInfo),
+		&communicator.StepConnect{
+			Config:    &yandexConfig.Communicator,
+			Host:      yandex.CommHost,
+			SSHConfig: yandexConfig.Communicator.SSHConfigFunc(),
+		},
+		new(StepUploadSecrets),
+		new(StepWaitCloudInitScript),
 		&yandex.StepTeardownInstance{
 			SerialLogFile: yandexConfig.SerialLogFile,
 		},
+		&commonsteps.StepCleanupTempKeys{Comm: &yandexConfig.Communicator},
 	}
 
 	// Run the steps.

@@ -41,22 +41,22 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		},
 	}))
 	if err != nil {
-		return stepHaltWithError(state, fmt.Errorf("Error creating image: %s", err))
+		return StepHaltWithError(state, fmt.Errorf("Error creating image: %s", err))
 	}
 
 	ui.Say("Waiting for image to complete...")
 	if err := op.Wait(ctx); err != nil {
-		return stepHaltWithError(state, fmt.Errorf("Error waiting for image: %s", err))
+		return StepHaltWithError(state, fmt.Errorf("Error waiting for image: %s", err))
 	}
 
 	resp, err := op.Response()
 	if err != nil {
-		return stepHaltWithError(state, err)
+		return StepHaltWithError(state, err)
 	}
 
 	image, ok := resp.(*compute.Image)
 	if !ok {
-		return stepHaltWithError(state, errors.New("API call response doesn't contain Compute Image"))
+		return StepHaltWithError(state, errors.New("API call response doesn't contain Compute Image"))
 	}
 
 	log.Printf("Image ID: %s", image.Id)
