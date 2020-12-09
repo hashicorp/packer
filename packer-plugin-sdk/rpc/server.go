@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/rpc"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/ugorji/go/codec"
 )
@@ -70,7 +69,7 @@ func (s *Server) RegisterArtifact(a packersdk.Artifact) error {
 	})
 }
 
-func (s *Server) RegisterBuild(b packer.Build) error {
+func (s *Server) RegisterBuild(b packersdk.Build) error {
 	return s.server.RegisterName(DefaultBuildEndpoint, &BuildServer{
 		build: b,
 		mux:   s.mux,

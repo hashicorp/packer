@@ -5,6 +5,7 @@ import (
 
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -154,7 +155,7 @@ func TestParser_complete(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packer.Build{
+			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:     "virtualbox-iso.ubuntu-1204",
 					Prepared: true,

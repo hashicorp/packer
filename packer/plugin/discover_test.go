@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+
+	pluginsdk "github.com/hashicorp/packer/packer-plugin-sdk/plugin"
 )
 
 func newConfig() Config {
@@ -19,8 +21,8 @@ func newConfig() Config {
 func TestDiscoverReturnsIfMagicCookieSet(t *testing.T) {
 	config := newConfig()
 
-	os.Setenv(MagicCookieKey, MagicCookieValue)
-	defer os.Unsetenv(MagicCookieKey)
+	os.Setenv(pluginsdk.MagicCookieKey, pluginsdk.MagicCookieValue)
+	defer os.Unsetenv(pluginsdk.MagicCookieKey)
 
 	err := config.Discover()
 	if err != nil {

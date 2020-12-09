@@ -4,7 +4,6 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
@@ -18,7 +17,7 @@ func TestProvisioner_GenerateElevatedRunner(t *testing.T) {
 
 	// Non-elevated
 	config := testConfig()
-	p := new(packer.MockProvisioner)
+	p := new(packersdk.MockProvisioner)
 	p.Prepare(config)
 	comm := new(packersdk.MockCommunicator)
 	p.ProvCommunicator = comm

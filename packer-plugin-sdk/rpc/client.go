@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/rpc"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/ugorji/go/codec"
 )
@@ -79,7 +78,7 @@ func (c *Client) Artifact() packersdk.Artifact {
 	}
 }
 
-func (c *Client) Build() packer.Build {
+func (c *Client) Build() packersdk.Build {
 	return &build{
 		commonClient: commonClient{
 			endpoint: DefaultBuildEndpoint,

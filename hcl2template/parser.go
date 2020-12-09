@@ -46,7 +46,7 @@ var packerBlockSchema = &hcl.BodySchema{
 
 // Parser helps you parse HCL folders. It will parse an hcl file or directory
 // and start builders, provisioners and post-processors to configure them with
-// the parsed HCL and then return a []packer.Build. Packer will use that list
+// the parsed HCL and then return a []packersdk.Build. Packer will use that list
 // of Builds to run everything in order.
 type Parser struct {
 	CorePackerVersion *version.Version

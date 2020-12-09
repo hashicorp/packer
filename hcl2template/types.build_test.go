@@ -6,6 +6,7 @@ import (
 
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func TestParse_build(t *testing.T) {
@@ -45,7 +46,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			true,
 		},
 		{"untyped provisioner",
@@ -67,7 +68,7 @@ func TestParse_build(t *testing.T) {
 				Builds:  nil,
 			},
 			true, true,
-			[]packer.Build{&packer.CoreBuild{}},
+			[]packersdk.Build{&packer.CoreBuild{}},
 			false,
 		},
 		{"untyped post-processor",
@@ -78,7 +79,7 @@ func TestParse_build(t *testing.T) {
 				Builds:  nil,
 			},
 			true, true,
-			[]packer.Build{&packer.CoreBuild{}},
+			[]packersdk.Build{&packer.CoreBuild{}},
 			false,
 		},
 		{"inexistent post-processor",
@@ -89,7 +90,7 @@ func TestParse_build(t *testing.T) {
 				Builds:  nil,
 			},
 			true, true,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 		{"invalid source",
@@ -100,7 +101,7 @@ func TestParse_build(t *testing.T) {
 				Builds:  nil,
 			},
 			true, true,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			false,
 		},
 		{"named build",
@@ -122,7 +123,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packer.Build{},
+			[]packersdk.Build{},
 			true,
 		},
 		{"post-processor with only and except",
@@ -171,7 +172,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packer.Build{
+			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:         "virtualbox-iso.ubuntu-1204",
 					Prepared:     true,
@@ -280,7 +281,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packer.Build{
+			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:     "virtualbox-iso.ubuntu-1204",
 					Prepared: true,

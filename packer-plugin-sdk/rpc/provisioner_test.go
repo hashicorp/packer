@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
@@ -13,7 +12,7 @@ func TestProvisionerRPC(t *testing.T) {
 	topCtx, topCtxCancel := context.WithCancel(context.Background())
 
 	// Create the interface to test
-	p := new(packer.MockProvisioner)
+	p := new(packersdk.MockProvisioner)
 	p.ProvFunc = func(ctx context.Context) error {
 		topCtxCancel()
 		<-ctx.Done()

@@ -798,8 +798,8 @@ func TestCoreBuild_provRetry(t *testing.T) {
 	config := TestCoreConfig(t)
 	testCoreTemplate(t, config, fixtureDir("build-prov-retry.json"))
 	b := TestBuilder(t, config, "test")
-	pString := new(MockProvisioner)
-	pInt := new(MockProvisioner)
+	pString := new(packersdk.MockProvisioner)
+	pInt := new(packersdk.MockProvisioner)
 	config.Components.ProvisionerStore = packersdk.MapOfProvisioner{
 		"test-string": func() (packersdk.Provisioner, error) { return pString, nil },
 		// backwards compatibility

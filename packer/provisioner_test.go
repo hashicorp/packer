@@ -19,8 +19,8 @@ func TestProvisionHook_Impl(t *testing.T) {
 }
 
 func TestProvisionHook(t *testing.T) {
-	pA := &MockProvisioner{}
-	pB := &MockProvisioner{}
+	pA := &packersdk.MockProvisioner{}
+	pB := &packersdk.MockProvisioner{}
 
 	ui := testUi()
 	var comm packersdk.Communicator = new(packersdk.MockCommunicator)
@@ -45,8 +45,8 @@ func TestProvisionHook(t *testing.T) {
 }
 
 func TestProvisionHook_nilComm(t *testing.T) {
-	pA := &MockProvisioner{}
-	pB := &MockProvisioner{}
+	pA := &packersdk.MockProvisioner{}
+	pB := &packersdk.MockProvisioner{}
 
 	ui := testUi()
 	var comm packersdk.Communicator = nil
@@ -68,7 +68,7 @@ func TestProvisionHook_nilComm(t *testing.T) {
 func TestProvisionHook_cancel(t *testing.T) {
 	topCtx, topCtxCancel := context.WithCancel(context.Background())
 
-	p := &MockProvisioner{
+	p := &packersdk.MockProvisioner{
 		ProvFunc: func(ctx context.Context) error {
 			topCtxCancel()
 			<-ctx.Done()
@@ -95,7 +95,7 @@ func TestPausedProvisioner_impl(t *testing.T) {
 }
 
 func TestPausedProvisionerPrepare(t *testing.T) {
-	mock := new(MockProvisioner)
+	mock := new(packersdk.MockProvisioner)
 	prov := &PausedProvisioner{
 		Provisioner: mock,
 	}
@@ -110,7 +110,7 @@ func TestPausedProvisionerPrepare(t *testing.T) {
 }
 
 func TestPausedProvisionerProvision(t *testing.T) {
-	mock := new(MockProvisioner)
+	mock := new(packersdk.MockProvisioner)
 	prov := &PausedProvisioner{
 		Provisioner: mock,
 	}
@@ -135,7 +135,7 @@ func TestPausedProvisionerProvision_waits(t *testing.T) {
 
 	prov := &PausedProvisioner{
 		PauseBefore: waitTime,
-		Provisioner: &MockProvisioner{
+		Provisioner: &packersdk.MockProvisioner{
 			ProvFunc: func(context.Context) error {
 				timeSinceStartTime := time.Since(startTime)
 				if timeSinceStartTime < waitTime {
@@ -156,7 +156,7 @@ func TestPausedProvisionerProvision_waits(t *testing.T) {
 func TestPausedProvisionerCancel(t *testing.T) {
 	topCtx, cancelTopCtx := context.WithCancel(context.Background())
 
-	mock := new(MockProvisioner)
+	mock := new(packersdk.MockProvisioner)
 	prov := &PausedProvisioner{
 		Provisioner: mock,
 	}
@@ -178,7 +178,7 @@ func TestDebuggedProvisioner_impl(t *testing.T) {
 }
 
 func TestDebuggedProvisionerPrepare(t *testing.T) {
-	mock := new(MockProvisioner)
+	mock := new(packersdk.MockProvisioner)
 	prov := &DebuggedProvisioner{
 		Provisioner: mock,
 	}
@@ -193,7 +193,7 @@ func TestDebuggedProvisionerPrepare(t *testing.T) {
 }
 
 func TestDebuggedProvisionerProvision(t *testing.T) {
-	mock := new(MockProvisioner)
+	mock := new(packersdk.MockProvisioner)
 	prov := &DebuggedProvisioner{
 		Provisioner: mock,
 	}
@@ -216,7 +216,7 @@ func TestDebuggedProvisionerProvision(t *testing.T) {
 func TestDebuggedProvisionerCancel(t *testing.T) {
 	topCtx, topCtxCancel := context.WithCancel(context.Background())
 
-	mock := new(MockProvisioner)
+	mock := new(packersdk.MockProvisioner)
 	prov := &DebuggedProvisioner{
 		Provisioner: mock,
 	}
@@ -238,7 +238,7 @@ func TestRetriedProvisioner_impl(t *testing.T) {
 }
 
 func TestRetriedProvisionerPrepare(t *testing.T) {
-	mock := new(MockProvisioner)
+	mock := new(packersdk.MockProvisioner)
 	prov := &RetriedProvisioner{
 		Provisioner: mock,
 	}
@@ -256,7 +256,7 @@ func TestRetriedProvisionerPrepare(t *testing.T) {
 }
 
 func TestRetriedProvisionerProvision(t *testing.T) {
-	mock := &MockProvisioner{
+	mock := &packersdk.MockProvisioner{
 		ProvFunc: func(ctx context.Context) error {
 			return errors.New("failed")
 		},
@@ -291,7 +291,7 @@ func TestRetriedProvisionerCancelledProvision(t *testing.T) {
 	// Don't retry if context is cancelled
 	ctx, topCtxCancel := context.WithCancel(context.Background())
 
-	mock := &MockProvisioner{
+	mock := &packersdk.MockProvisioner{
 		ProvFunc: func(ctx context.Context) error {
 			topCtxCancel()
 			<-ctx.Done()
@@ -327,7 +327,7 @@ func TestRetriedProvisionerCancelledProvision(t *testing.T) {
 func TestRetriedProvisionerCancel(t *testing.T) {
 	topCtx, cancelTopCtx := context.WithCancel(context.Background())
 
-	mock := new(MockProvisioner)
+	mock := new(packersdk.MockProvisioner)
 	prov := &RetriedProvisioner{
 		Provisioner: mock,
 	}

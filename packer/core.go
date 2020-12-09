@@ -221,9 +221,9 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 
 // This is used for json templates to launch the build plugins.
 // They will be prepared via b.Prepare() later.
-func (c *Core) GetBuilds(opts GetBuildsOptions) ([]Build, hcl.Diagnostics) {
+func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics) {
 	buildNames := c.BuildNames(opts.Only, opts.Except)
-	builds := []Build{}
+	builds := []packersdk.Build{}
 	diags := hcl.Diagnostics{}
 	for _, n := range buildNames {
 		b, err := c.Build(n)
@@ -269,7 +269,7 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]Build, hcl.Diagnostics) {
 }
 
 // Build returns the Build object for the given name.
-func (c *Core) Build(n string) (Build, error) {
+func (c *Core) Build(n string) (packersdk.Build, error) {
 	// Setup the builder
 	configBuilder, ok := c.builds[n]
 	if !ok {
