@@ -10,9 +10,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
+	metadata "cloud.google.com/go/compute/metadata"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
 	oslogin "google.golang.org/api/oslogin/v1"
@@ -32,6 +34,7 @@ import (
 type driverGCE struct {
 	projectId      string
 	service        *compute.Service
+	thisGCEUser    string
 	osLoginService *oslogin.Service
 	ui             packersdk.Ui
 }
@@ -129,6 +132,9 @@ func NewClientOptionGoogle(account *ServiceAccount, vaultOauth string, impersona
 }
 
 func NewDriverGCE(config GCEDriverConfig) (Driver, error) {
+
+	var thisGCEUser string
+
 	opts, err := NewClientOptionGoogle(config.Account, config.VaultOauthEngineName, config.ImpersonateServiceAccountName)
 	if err != nil {
 		return nil, err
@@ -138,6 +144,15 @@ func NewDriverGCE(config GCEDriverConfig) (Driver, error) {
 	service, err := compute.NewService(context.TODO(), opts)
 	if err != nil {
 		return nil, err
+	}
+
+	if metadata.OnGCE() {
+		log.Printf("[INFO] Running on a GCE, capturing it's service account...")
+		thisGCEUser, err = metadata.NewClient(&http.Client{}).Email("")
+
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	log.Printf("[INFO] Instantiating OS Login client...")
@@ -152,6 +167,7 @@ func NewDriverGCE(config GCEDriverConfig) (Driver, error) {
 	return &driverGCE{
 		projectId:      config.ProjectId,
 		service:        service,
+		thisGCEUser:    thisGCEUser,
 		osLoginService: osLoginService,
 		ui:             config.Ui,
 	}, nil
@@ -625,8 +641,13 @@ func (d *driverGCE) getPasswordResponses(zone, instance string) ([]windowsPasswo
 	return passwordResponses, nil
 }
 
+func (d *driverGCE) GetOSLoginUserFromGCE() string {
+	return d.thisGCEUser
+}
+
 func (d *driverGCE) ImportOSLoginSSHKey(user, sshPublicKey string) (*oslogin.LoginProfile, error) {
 	parent := fmt.Sprintf("users/%s", user)
+
 	resp, err := d.osLoginService.Users.ImportSshPublicKey(parent, &oslogin.SshPublicKey{
 		Key: sshPublicKey,
 	}).Do()
