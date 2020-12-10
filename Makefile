@@ -65,6 +65,16 @@ install-lint-deps: ## Install linter dependencies
 	@echo "==> Updating linter dependencies..."
 	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.23.8
 
+dev: ## Build and install a development build
+	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
+		echo "ERROR: You must add prerelease tags to version/version.go prior to making a dev build."; \
+		exit 1; \
+	fi
+	@mkdir -p pkg/$(GOOS)_$(GOARCH)
+	@mkdir -p bin
+	@go install -ldflags '$(GOLDFLAGS)'
+	@cp $(GOPATH)/bin/packer bin/packer
+	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 lint: install-lint-deps ## Lint Go code
 	@if [ ! -z  $(PKG_NAME) ]; then \
