@@ -49,7 +49,7 @@ func (c *StepAttachDisk) Run(ctx context.Context, state multistep.StateBag) mult
 	}
 	md, ok := protoMD.(*compute.CreateDiskMetadata)
 	if !ok {
-		return yandex.StepHaltWithError(state, fmt.Errorf("could not get Instance ID from create operation metadata"))
+		return yandex.StepHaltWithError(state, fmt.Errorf("could not get Disk ID from create operation metadata"))
 	}
 	state.Put("secondary_disk_id", md.GetDiskId())
 
