@@ -14,7 +14,9 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
 )
 
-type StepWaitCloudInitScript int
+type StepWaitCloudInitScript struct {
+	Tries int
+}
 
 type cloudInitStatus struct {
 	V1 struct {
@@ -64,6 +66,7 @@ func (s *StepWaitCloudInitScript) Run(ctx context.Context, state multistep.State
 			}
 			return true
 		},
+		Tries:      s.Tries,
 		RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 60 * time.Second, Multiplier: 2}).Linear,
 	}
 

@@ -1,0 +1,100 @@
+package yandexexport
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/hashicorp/packer/builder/yandex"
+	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
+)
+
+type StepAttachDisk struct {
+	yandex.CommonConfig
+	ImageID string
+}
+
+func (c *StepAttachDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	driver := state.Get("driver").(yandex.Driver)
+	ui := state.Get("ui").(packer.Ui)
+	instanceID := state.Get("instance_id").(string)
+
+	ui.Say("Create disk from source image...")
+
+	imageDesc, err := driver.SDK().Compute().Image().Get(ctx, &compute.GetImageRequest{
+		ImageId: c.ImageID,
+	})
+	if err != nil {
+		return yandex.StepHaltWithError(state, err)
+	}
+
+	op, err := driver.SDK().WrapOperation(driver.SDK().Compute().Disk().Create(ctx, &compute.CreateDiskRequest{
+		Source: &compute.CreateDiskRequest_ImageId{
+			ImageId: c.ImageID,
+		},
+		Name:        fmt.Sprintf("export-%s-disk", instanceID),
+		Size:        imageDesc.GetMinDiskSize(),
+		ZoneId:      c.Zone,
+		FolderId:    c.FolderID,
+		TypeId:      c.DiskType,
+		Description: "Temporary disk for exporting",
+	}))
+	if op == nil {
+		return yandex.StepHaltWithError(state, err)
+	}
+	protoMD, err := op.Metadata()
+	if err != nil {
+		return yandex.StepHaltWithError(state, err)
+	}
+	md, ok := protoMD.(*compute.CreateDiskMetadata)
+	if !ok {
+		return yandex.StepHaltWithError(state, fmt.Errorf("could not get Instance ID from create operation metadata"))
+	}
+	state.Put("secondary_disk_id", md.GetDiskId())
+
+	if err := op.Wait(ctx); err != nil {
+		return yandex.StepHaltWithError(state, err)
+	}
+
+	ui.Say("Attach disk...")
+
+	op, err = driver.SDK().WrapOperation(driver.SDK().Compute().Instance().AttachDisk(ctx, &compute.AttachInstanceDiskRequest{
+		InstanceId: instanceID,
+		AttachedDiskSpec: &compute.AttachedDiskSpec{
+			AutoDelete: true,
+			DeviceName: "doexport",
+			Disk: &compute.AttachedDiskSpec_DiskId{
+				DiskId: md.GetDiskId(),
+			},
+		},
+	}))
+	if err != nil {
+		return yandex.StepHaltWithError(state, err)
+	}
+	ui.Message("Wait attached disk...")
+	if err := op.Wait(ctx); err != nil {
+		return yandex.StepHaltWithError(state, err)
+	}
+
+	state.Remove("secondary_disk_id")
+	return multistep.ActionContinue
+}
+
+func (s *StepAttachDisk) Cleanup(state multistep.StateBag) {
+	ui := state.Get("ui").(packer.Ui)
+	driver := state.Get("driver").(yandex.Driver)
+	if diskID, ok := state.GetOk("secondary_disk_id"); ok {
+		ui.Say("Remove the secondary disk...")
+		op, err := driver.SDK().WrapOperation(driver.SDK().Compute().Disk().Delete(context.Background(), &compute.DeleteDiskRequest{
+			DiskId: diskID.(string),
+		}))
+		if err != nil {
+			ui.Error(err.Error())
+			return
+		}
+		if err := op.Wait(context.Background()); err != nil {
+			ui.Error(err.Error())
+		}
+	}
+}

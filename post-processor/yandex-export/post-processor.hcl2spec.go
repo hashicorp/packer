@@ -45,6 +45,7 @@ type FlatConfig struct {
 	ServiceAccountID      *string           `mapstructure:"service_account_id" required:"true" cty:"service_account_id" hcl:"service_account_id"`
 	Paths                 []string          `mapstructure:"paths" required:"true" cty:"paths" hcl:"paths"`
 	SSHPrivateKeyFile     *string           `mapstructure:"ssh_private_key_file" required:"false" cty:"ssh_private_key_file" hcl:"ssh_private_key_file"`
+	Tries                 *int              `mapstructure:"tries" required:"false" cty:"tries" hcl:"tries"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -95,6 +96,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"service_account_id":         &hcldec.AttrSpec{Name: "service_account_id", Type: cty.String, Required: false},
 		"paths":                      &hcldec.AttrSpec{Name: "paths", Type: cty.List(cty.String), Required: false},
 		"ssh_private_key_file":       &hcldec.AttrSpec{Name: "ssh_private_key_file", Type: cty.String, Required: false},
+		"tries":                      &hcldec.AttrSpec{Name: "tries", Type: cty.Number, Required: false},
 	}
 	return s
 }
