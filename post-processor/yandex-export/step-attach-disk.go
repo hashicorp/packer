@@ -20,7 +20,7 @@ func (c *StepAttachDisk) Run(ctx context.Context, state multistep.StateBag) mult
 	ui := state.Get("ui").(packer.Ui)
 	instanceID := state.Get("instance_id").(string)
 
-	ui.Say("Create disk from source image...")
+	ui.Say("Create secondary disk from image for export...")
 
 	imageDesc, err := driver.SDK().Compute().Image().Get(ctx, &compute.GetImageRequest{
 		ImageId: c.ImageID,
