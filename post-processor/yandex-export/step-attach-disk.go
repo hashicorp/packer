@@ -57,7 +57,7 @@ func (c *StepAttachDisk) Run(ctx context.Context, state multistep.StateBag) mult
 		return yandex.StepHaltWithError(state, err)
 	}
 
-	ui.Say("Attach disk...")
+	ui.Say("Attach secondary disk to instance...")
 
 	op, err = driver.SDK().WrapOperation(driver.SDK().Compute().Instance().AttachDisk(ctx, &compute.AttachInstanceDiskRequest{
 		InstanceId: instanceID,
