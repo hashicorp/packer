@@ -27,8 +27,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	paths := strings.SplitAfter(absFilePath, "packer"+string(os.PathSeparator))
-	packerDir := paths[0]
+
+	projectRoot := os.Getenv("PROJECT_ROOT")
+	var paths []string
+	if projectRoot == "" {
+		// fall back to the packer root.
+		paths = strings.SplitAfter(absFilePath, "packer"+string(os.PathSeparator))
+		projectRoot = paths[0]
+	} else {
+		paths = strings.SplitAfter(absFilePath, projectRoot+string(os.PathSeparator))
+	}
 	builderName, _ := filepath.Split(paths[1])
 	builderName = strings.Trim(builderName, string(os.PathSeparator))
 
@@ -144,7 +152,7 @@ func main() {
 			}
 		}
 
-		dir := filepath.Join(packerDir, "website", "pages", "partials", builderName)
+		dir := filepath.Join(projectRoot, "website", "pages", "partials", builderName)
 		os.MkdirAll(dir, 0755)
 
 		for _, str := range []Struct{header, required, notRequired} {
