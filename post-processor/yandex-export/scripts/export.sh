@@ -59,7 +59,7 @@ if ! WaitFile "${DISK_EXPORT_PATH}"; then
 fi
 
 echo "Dumping disk..."
-if ! qemu-img convert -p -O qcow2 -o cluster_size=2M "${DISK_EXPORT_PATH}" disk.qcow2; then
+if ! qemu-img convert -O qcow2 -o cluster_size=2M "${DISK_EXPORT_PATH}" disk.qcow2; then
     echo "Failed to dump disk to qcow2 image."
     Exit 1
 fi

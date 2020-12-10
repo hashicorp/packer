@@ -54,7 +54,21 @@ func (s *StepWaitCloudInitScript) Run(ctx context.Context, state multistep.State
 			ui.Error(err.Error())
 			return
 		}
-		ui.Message("Init output closed")
+		ui.Message("Cloud-init output closed")
+	}()
+
+	// periodically show progress by sending SIGUSR1 to `qemu-img` process
+	go func() {
+		cmd := &packersdk.RemoteCmd{
+			Command: "until pid=$(pidof qemu-img) ; do sleep 1 ; done ; " +
+				"while true ; do sudo kill -s SIGUSR1 ${pid}; sleep 10 ; done",
+		}
+
+		err := cmd.RunWithUi(ctxWithCancel, comm, ui)
+		if err != nil && !errors.Is(err, context.Canceled) {
+			ui.Error("qemu-img signal sender error: " + err.Error())
+			return
+		}
 	}()
 
 	// Keep checking the serial port output to see if the cloud-init script is done.
