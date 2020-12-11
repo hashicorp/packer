@@ -260,7 +260,9 @@ func Test_multiplugin_describe(t *testing.T) {
 			fileContent += strings.Join(
 				append([]string{"PKR_WANT_TEST_PLUGINS=1"}, helperCommand(t, name, "$@")...),
 				" ")
-			ioutil.WriteFile(plugin, []byte(fileContent), os.ModePerm)
+			if err := ioutil.WriteFile(plugin, []byte(fileContent), os.ModePerm); err != nil {
+				t.Fatalf("failed to create fake plugin binary: %v", err)
+			}
 		}
 	}
 	os.Setenv("PACKER_PLUGIN_PATH", pluginDir)
