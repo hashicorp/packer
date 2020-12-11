@@ -72,7 +72,7 @@ func (*FormatCommand) Help() string {
 Usage: packer fmt [options] [TEMPLATE]
 
   Rewrites all Packer configuration files to a canonical format. Both
-  configuration files (.pkr.hcl) and variable files (.pkrvars) are updated.
+  configuration files (.pkr.hcl) and variable files (.pkrvars.hcl) are updated.
   JSON files (.json) are not modified.
 
   If TEMPATE is "." the current directory will be used. The given content must
