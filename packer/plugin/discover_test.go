@@ -168,7 +168,11 @@ func TestHelperPlugins(*testing.T) {
 		os.Exit(2)
 	}
 
-	plugin.RunCommand(args...)
+	err := plugin.RunCommand(args...)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
 }
 
 // HasExec reports whether the current system can start new processes
