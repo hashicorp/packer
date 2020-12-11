@@ -333,6 +333,6 @@ type BuilderAcceptance interface {
 
 // Mapping of all builder fixtures defined for a given builder type.
 var BuildersAccTest = map[string][]*BuilderFixture{
-	"virtualbox-iso": []*BuilderFixture{VirtualboxBuilderFixtureWindows},
+	"virtualbox-iso": []*BuilderFixture{VirtualboxBuilderFixtureLinux},
 	"amazon-ebs":     []*BuilderFixture{AmasonEBSBuilderFixtureLinux, AmasonEBSBuilderFixtureWindows},
 }
