@@ -187,6 +187,9 @@ func HasExec() bool {
 		if runtime.GOARCH == "arm64" {
 			return false
 		}
+	case "windows":
+		// TODO(azr): Fix this once versioning is added and we know more
+		return false
 	}
 	return true
 }
@@ -256,11 +259,7 @@ func Test_multiplugin_describe(t *testing.T) {
 		for name := range mockPlugins {
 			plugin := path.Join(pluginDir, "packer-plugin-"+name)
 			fileContent := ""
-			if runtime.GOOS == "windows" {
-				plugin += ".sh"
-			} else {
-				fileContent = fmt.Sprintf("#!%s\n", shPath)
-			}
+			fileContent = fmt.Sprintf("#!%s\n", shPath)
 			fileContent += strings.Join(
 				append([]string{"PKR_WANT_TEST_PLUGINS=1"}, helperCommand(t, name, "$@")...),
 				" ")
