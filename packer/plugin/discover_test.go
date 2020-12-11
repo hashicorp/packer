@@ -252,11 +252,7 @@ func Test_multiplugin_describe(t *testing.T) {
 		t.Logf("putting temporary mock plugins in %s", pluginDir)
 		defer os.RemoveAll(pluginDir)
 
-		shPath := MustHaveCommand(t, "sh")
-		if runtime.GOOS == "windows" {
-			// Hopefully sh is in the path then
-			shPath = "sh"
-		}
+		shPath := MustHaveCommand(t, "bash")
 		for name := range mockPlugins {
 			plugin := path.Join(pluginDir, "packer-plugin-"+name)
 			fileContent := fmt.Sprintf("#!%s\n", shPath)
