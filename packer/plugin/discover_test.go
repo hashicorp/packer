@@ -229,9 +229,15 @@ func Test_multiplugin_describe(t *testing.T) {
 
 	pluginDir, err := tmp.Dir("pkr-multiplugin-test-*")
 	{
-		// create fake plugins that are started through SH
-		// they actually start TestHelperPlugins which in turn allow to call
-		// describe upon plugins
+		// create an exectutable file with a `sh` sheebang
+		// this file will look like:
+		// #!/bin/sh
+		// PKR_WANT_TEST_PLUGINS=1 ...plugin/debug.test -test.run=TestHelperPlugins -- bird $@
+		// 'bird' is the mock plugin we want to start
+		// $@ just passes all passed arguments
+		// This will allow to run the fake plugin from go tests which in turn
+		// will run go tests callback to `TestHelperPlugins`, this one will be
+		// transparently calling our mock multiplugins `mockPlugins`.
 		if err != nil {
 			t.Fatal(err)
 		}
