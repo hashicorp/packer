@@ -21,7 +21,6 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/post-processor/artifice"
-	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
 	ycsdk "github.com/yandex-cloud/go-sdk"
 )
@@ -48,8 +47,9 @@ type Config struct {
 	// The `~` can be used in path and will be expanded to the home directory
 	// of current user. Login for attach: `ubuntu`
 	SSHPrivateKeyFile string `mapstructure:"ssh_private_key_file" required:"false"`
-
-	ctx interpolate.Context
+	// Number of attempts to wait for export (must be greater than 0). Default: 1000
+	Tries int `mapstructure:"tries" required:"false"`
+	ctx   interpolate.Context
 }
 
 type PostProcessor struct {
@@ -82,6 +82,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Set defaults.
 	if p.config.DiskSizeGb == 0 {
 		p.config.DiskSizeGb = 100
+	}
+	if p.config.Tries <= 0 {
+		p.config.Tries = 1000
 	}
 
 	errs = p.config.CommonConfig.Prepare(errs)
@@ -171,26 +174,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		return nil, false, false, err
 	}
 
-	imageDesc, err := driver.SDK().Compute().Image().Get(ctx, &compute.GetImageRequest{
-		ImageId: imageID,
-	})
-	if err != nil {
-		return nil, false, false, err
-	}
-	secDiskSpec := []*compute.AttachedDiskSpec{
-		{
-			AutoDelete: true,
-			DeviceName: "doexport",
-			Disk: &compute.AttachedDiskSpec_DiskSpec_{
-				DiskSpec: &compute.AttachedDiskSpec_DiskSpec{
-					Source: &compute.AttachedDiskSpec_DiskSpec_ImageId{
-						ImageId: imageID,
-					},
-					Size: imageDesc.MinDiskSize,
-				},
-			},
-		},
-	}
 	// Set up exporter instance configuration.
 	exporterName := fmt.Sprintf("%s-exporter", artifact.Id())
 	yandexConfig := ycSaneDefaults(&p.config,
@@ -226,7 +209,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	state.Put("driver", driver)
 	state.Put("sdk", driver.SDK())
 	state.Put("ui", ui)
-	state.Put("secondary_disk", secDiskSpec)
 
 	// Build the steps.
 	steps := []multistep.Step{
@@ -249,8 +231,14 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 			Host:      yandex.CommHost,
 			SSHConfig: yandexConfig.Communicator.SSHConfigFunc(),
 		},
+		&StepAttachDisk{
+			CommonConfig: p.config.CommonConfig,
+			ImageID:      imageID,
+		},
 		new(StepUploadSecrets),
-		new(StepWaitCloudInitScript),
+		&StepWaitCloudInitScript{
+			Tries: p.config.Tries,
+		},
 		&yandex.StepTeardownInstance{
 			SerialLogFile: yandexConfig.SerialLogFile,
 		},
