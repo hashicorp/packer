@@ -1,7 +1,7 @@
-import MarkdownPage from 'components/_temporary-markdown-page'
-import generateStaticProps from 'components/_temporary-markdown-page/server'
+import MarkdownPage from '@hashicorp/react-markdown-page'
+import generateStaticProps from '@hashicorp/react-markdown-page/server'
 
-export default function CommunityToolsPage({ staticProps }) {
+export default function CommunityToolsPage(staticProps) {
   return <MarkdownPage {...staticProps} />
 }
 
