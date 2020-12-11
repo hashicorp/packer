@@ -2,9 +2,7 @@ package plugin
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -265,14 +263,6 @@ func Test_multiplugin_describe(t *testing.T) {
 				" ")
 			if err := ioutil.WriteFile(plugin, []byte(fileContent), os.ModePerm); err != nil {
 				t.Fatalf("failed to create fake plugin binary: %v", err)
-			}
-			{ // cat
-				fh, err := os.Open(plugin)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				_, _ = io.Copy(os.Stdout, fh)
 			}
 		}
 	}
