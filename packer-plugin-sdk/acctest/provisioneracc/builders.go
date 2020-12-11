@@ -1,3 +1,11 @@
+/*
+The provisioneracc package creates a framework for provisioner acceptance
+testing.
+
+Variables stored in this file represent implementations of the BuilderFixture
+struct inside of provisioners.go
+*/
+
 package provisioneracc
 
 import (

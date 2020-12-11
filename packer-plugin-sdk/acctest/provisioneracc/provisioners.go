@@ -287,7 +287,7 @@ func writeJsonTemplate(out *bytes.Buffer, filePath string, t *testing.T) {
 	outputFile.Sync()
 }
 
-// BuilderAcceptance is specialized tooling implemented by individual builders
+// BuilderAcceptance is specialized tooling implemented by individual builders.
 // To add your builder to the provisioner testing framework, create a struct
 // that implements this interface, add it to the BuildersAccTest map below.
 // TODO add this interface to the plugin server so that Packer can request it

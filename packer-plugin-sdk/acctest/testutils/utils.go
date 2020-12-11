@@ -2,7 +2,7 @@ package testutils
 
 import "os"
 
-// CleanupFiles removes all files in the given strings.
+// CleanupFiles removes all the provided filenames.
 func CleanupFiles(moreFiles ...string) {
 	for _, file := range moreFiles {
 		os.RemoveAll(file)
