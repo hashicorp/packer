@@ -253,7 +253,7 @@ func Test_multiplugin_describe(t *testing.T) {
 		shPath := MustHaveCommand(t, "sh")
 		for name := range mockPlugins {
 			plugin := path.Join(pluginDir, "packer-plugin-"+name)
-			fileContent := fmt.Sprintf("#!%s\n", shPath)
+			fileContent := fmt.Sprintf("#!%q\n", shPath)
 			fileContent += strings.Join(
 				append([]string{"PKR_WANT_TEST_PLUGINS=1"}, helperCommand(t, name, "$@")...),
 				" ")
