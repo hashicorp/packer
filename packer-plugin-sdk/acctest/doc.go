@@ -1,6 +1,6 @@
 /*
-The acctest package provides an acceptance testing framework for testing
-builders and provisioners.
+Package acctest provides an acceptance testing framework for testing builders
+and provisioners.
 
 Writing Provisioner Acceptance Tests
 
@@ -240,5 +240,4 @@ Once you finish these steps, you should be ready to run your new provisioner
 acceptance test by setting the name used in the BuildersAccTest map as your
 `ACC_TEST_BUILDERS` environment variable.
 */
-
 package acctest

@@ -1,3 +1,8 @@
+// Package common provides the PackerConfig structure that gets passed to every
+// plugin and contains information populated by the Packer core. This config
+// contains data about command line flags that were used, as well as template
+// information and information about the Packer core's version. It also
+// proivdes string constants to use to access that config.
 package common
 
 import (
