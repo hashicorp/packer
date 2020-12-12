@@ -1,3 +1,5 @@
+// Package iochan is a Go library for treating `io` readers and writers like
+// channels.
 package iochan
 
 import (

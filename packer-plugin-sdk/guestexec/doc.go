@@ -8,5 +8,4 @@ Note that to successfully use this package your provisioner must have knowledge
 of the guest type, which is not information that builders generally collect --
 your provisioner will have to require guest information in its config.
 */
-
 package guestexec
