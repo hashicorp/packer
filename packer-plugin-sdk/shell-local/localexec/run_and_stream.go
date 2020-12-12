@@ -10,8 +10,8 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/iochan"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/mitchellh/iochan"
 )
 
 // RunAndStream allows you to run a local command and stream output to the UI.
@@ -39,8 +39,8 @@ func RunAndStream(cmd *exec.Cmd, ui packersdk.Ui, sensitive []string) error {
 
 	// Create the channels we'll use for data
 	exitCh := make(chan int, 1)
-	stdoutCh := iochan.LineReader(stdout_r)
-	stderrCh := iochan.LineReader(stderr_r)
+	stdoutCh := iochan.DelimReader(stdout_r, '\n')
+	stderrCh := iochan.DelimReader(stderr_r, '\n')
 
 	// Start the goroutine to watch for the exit
 	go func() {

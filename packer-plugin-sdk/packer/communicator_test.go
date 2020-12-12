@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/packer/packer-plugin-sdk/iochan"
+	"github.com/mitchellh/iochan"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -42,8 +42,8 @@ func TestRemoteCmd_StartWithUi(t *testing.T) {
 	testPrintFn := func(in io.Reader, expected []string) error {
 		i := 0
 		got := []string{}
-		for output := range iochan.LineReader(in) {
-			got = append(got, output)
+		for output := range iochan.DelimReader(in, '\n') {
+			got = append(got, strings.TrimSpace(output))
 			i++
 			if i == len(expected) {
 				// here ideally the LineReader chan should be closed, but since
