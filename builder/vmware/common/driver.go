@@ -430,6 +430,56 @@ func (d *VmwareDriver) PotentialGuestIP(state multistep.StateBag) ([]string, err
 		return addrs, nil
 	}
 
+	if runtime.GOOS == "darwin" {
+		// We have match no vmware DHCP lease for this MAC. We'll try to match it in Apple DHCP leases.
+		// As a remember, VMWare is no longer able to rely on its own dhcpd server on MacOS BigSur and is
+		// forced to use Apple DHCPD server instead.
+		// https://communities.vmware.com/t5/VMware-Fusion-Discussions/Big-Sur-hosts-with-Fusion-Is-vmnet-dhcpd-vmnet8-leases-file/m-p/2298927/highlight/true#M140003
+
+		// set the apple dhcp leases path
+		appleDhcpLeasesPath := "/var/db/dhcpd_leases"
+		log.Printf("Trying Apple DHCP leases path: %s", appleDhcpLeasesPath)
+
+		// open up the path to the apple dhcpd leases
+		fh, err := os.Open(appleDhcpLeasesPath)
+		if err != nil {
+			log.Printf("Error while reading apple DHCP lease path file %s: %s", appleDhcpLeasesPath, err.Error())
+		} else {
+			defer fh.Close()
+
+			// and then read its contents
+			leaseEntries, err := ReadAppleDhcpdLeaseEntries(fh)
+			if err != nil {
+				return []string{}, err
+			}
+
+			// Parse our MAC address again. There's no need to check for an
+			// error because we've already parsed this successfully.
+			hwaddr, _ := net.ParseMAC(MACAddress)
+
+			// Go through our available lease entries and see which ones are within
+			// scope, and that match to our hardware address.
+			available_lease_entries := make([]appleDhcpLeaseEntry, 0)
+			for _, entry := range leaseEntries {
+				// Next check for any where the hardware address matches.
+				if bytes.Equal(hwaddr, []byte(entry.hwAddress)) {
+					available_lease_entries = append(available_lease_entries, entry)
+				}
+			}
+
+			// Check if we found any lease entries that correspond to us. If so, then we
+			// need to map() them in order to extract the address field to return to the
+			// caller.
+			if len(available_lease_entries) > 0 {
+				addrs := make([]string, 0)
+				for _, entry := range available_lease_entries {
+					addrs = append(addrs, entry.ipAddress)
+				}
+				return addrs, nil
+			}
+		}
+	}
+
 	return []string{}, fmt.Errorf("None of the found device(s) %v has a DHCP lease for MAC %s", devices, MACAddress)
 }
 

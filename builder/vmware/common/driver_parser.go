@@ -2430,3 +2430,144 @@ func ReadDhcpdLeaseEntries(fd *os.File) ([]dhcpLeaseEntry, error) {
 	}
 	return result, nil
 }
+
+/*** Apple Dhcp Leases */
+
+// Here is what an Apple DHCPD lease entry looks like:
+// {
+// 	ip_address=192.168.111.2
+// 	hw_address=1,0:50:56:20:ac:33
+// 	identifier=1,0:50:56:20:ac:33
+// 	lease=0x5fd72edc
+// 	name=vagrant-2019
+// }
+
+type appleDhcpLeaseEntry struct {
+	ipAddress     string
+	hwAddress, id []byte
+	lease         string
+	name          string
+	extra         map[string]string
+}
+
+func readAppleDhcpdLeaseEntry(in chan byte) (entry *appleDhcpLeaseEntry, err error) {
+	entry = &appleDhcpLeaseEntry{extra: map[string]string{}}
+	validFieldCount := 0
+	// Read up to the lease item and validate that it actually matches
+	_, ch := consumeOpenClosePair('{', '}', in)
+	for insideBraces := true; insideBraces; {
+		item, ok := consumeUntilSentinel('\n', ch)
+		item_s := strings.TrimSpace(string(item))
+
+		if !ok {
+			insideBraces = false
+		}
+		if item_s == "{" || item_s == "}" {
+			continue
+		}
+		splittedLine := strings.Split(item_s, "=")
+		var key, val string
+		switch len(splittedLine) {
+		case 0:
+			// should never happens as Split always returns at least 1 item
+			fallthrough
+		case 1:
+			log.Printf("Error parsing invalid line: `%s`", item_s)
+			continue
+		case 2:
+			key = strings.TrimSpace(splittedLine[0])
+			val = strings.TrimSpace(splittedLine[1])
+		default:
+			// There were more than one '=' on this line, we'll keep the part before the first '=' as the key and
+			// the rest will be the value
+			key = strings.TrimSpace(splittedLine[0])
+			val = strings.TrimSpace(strings.Join(splittedLine[1:], "="))
+		}
+		switch key {
+		case "ip_address":
+			entry.ipAddress = val
+			validFieldCount++
+		case "identifier":
+			fallthrough
+		case "hw_address":
+			if strings.Count(val, ",") != 1 {
+				log.Printf("Error %s `%s` is not properly formatted for entry %s", key, val, entry.name)
+				break
+			}
+			splittedVal := strings.Split(val, ",")
+			mac := splittedVal[1]
+			splittedMac := strings.Split(mac, ":")
+			// Pad the retrieved hw address with '0' when necessary
+			for idx := range splittedMac {
+				if len(splittedMac[idx]) == 1 {
+					splittedMac[idx] = "0" + splittedMac[idx]
+				}
+			}
+			mac = strings.Join(splittedMac, ":")
+			decodedLease, err := decodeDhcpdLeaseBytes(mac)
+			if err != nil {
+				log.Printf("Error trying to parse %s (%v) for entry %s - %v", key, val, entry.name, mac)
+				break
+			}
+			if key == "identifier" {
+				entry.id = decodedLease
+			} else {
+				entry.hwAddress = decodedLease
+			}
+			validFieldCount++
+		case "lease":
+			entry.lease = val
+			validFieldCount++
+		case "name":
+			entry.name = val
+			validFieldCount++
+		default:
+			// Just stash it for now because we have no idea what it is.
+			entry.extra[key] = val
+		}
+	}
+	// we have most likely parsed the whole file
+	if validFieldCount == 0 {
+		return nil, nil
+	}
+	// an entry is composed of 5 mandatory fields, we'll check that they all have been set during the parsing
+	if validFieldCount < 5 {
+		return entry, fmt.Errorf("Error entry `%v` is missing mandatory information", entry)
+	}
+	return entry, nil
+}
+
+func ReadAppleDhcpdLeaseEntries(fd *os.File) ([]appleDhcpLeaseEntry, error) {
+	fch := consumeFile(fd)
+	uncommentedch := uncomment(fch)
+	wch := filterOutCharacters([]byte{'\r', '\v'}, uncommentedch)
+
+	result := make([]appleDhcpLeaseEntry, 0)
+	errors := make([]error, 0)
+
+	// Consume apple dhcpd lease entries from the channel until we just plain run out.
+	for i := 0; ; i++ {
+		if entry, err := readAppleDhcpdLeaseEntry(wch); entry == nil {
+			// If our entry is nil, then we've run out of input and finished
+			// parsing the file to completion.
+			break
+
+		} else if err != nil {
+			// If we received an error, then log it and keep track of it. This
+			// way we can warn the user later which entries we had issues with.
+			log.Printf("Error parsing apple dhcpd lease entry #%d: %s", 1+i, err)
+			errors = append(errors, err)
+
+		} else {
+			// If we've parsed an entry successfully, then aggregate it to
+			// our slice of results.
+			result = append(result, *entry)
+		}
+	}
+
+	// If we received any errors then include alongside our results.
+	if len(errors) > 0 {
+		return result, fmt.Errorf("Errors found while parsing apple dhcpd lease entries: %v", errors)
+	}
+	return result, nil
+}
