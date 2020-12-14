@@ -1,5 +1,6 @@
 //go:generate struct-markdown
 
+//Package shutdowncommand is a helper module for builder plugin configuration.
 package shutdowncommand
 
 import (
@@ -9,7 +10,8 @@ import (
 )
 
 // ShutdownConfig defines implementation details for shutting down a VM once it
-// is done provisioned.
+// is done being provisioned.
+//
 // It is provided as a convenience to encourage builder developers to
 // consider implementing these options, which we believe are valuable for all
 // builders. It also helps guarantee that option names for similar options

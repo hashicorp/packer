@@ -1,5 +1,5 @@
-// Version helps plugin creators set and track the plugin version using the same
-// convenience functions used by the Packer core.
+// Package version helps plugin creators set and track the plugin version using
+// the same convenience functions used by the Packer core.
 package version
 
 import (

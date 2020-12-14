@@ -1,3 +1,5 @@
+// Package useragent creates a user agent for builders to use when calling out
+// to cloud APIs or other addresses.
 package useragent
 
 import (
