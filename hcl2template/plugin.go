@@ -2,7 +2,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"sort"
 
 	"github.com/hashicorp/hcl/v2"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
@@ -41,8 +40,6 @@ func (cfg *PackerConfig) PluginRequirements() (plugingetter.List, hcl.Diagnostic
 		}
 
 	}
-
-	sort.Sort(reqs)
 
 	return reqs, diags
 }
