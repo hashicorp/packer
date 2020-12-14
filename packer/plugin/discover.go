@@ -10,7 +10,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/pathing"
 	pluginsdk "github.com/hashicorp/packer/packer-plugin-sdk/plugin"
@@ -237,7 +236,7 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 
 	for _, builderName := range desc.Builders {
 		builderName := builderName // copy to avoid pointer overwrite issue
-		c.builders[pluginPrefix+builderName] = func() (packer.Builder, error) {
+		c.builders[pluginPrefix+builderName] = func() (packersdk.Builder, error) {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		}
 	}
@@ -247,7 +246,7 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 
 	for _, postProcessorName := range desc.PostProcessors {
 		postProcessorName := postProcessorName // copy to avoid pointer overwrite issue
-		c.postProcessors[pluginPrefix+postProcessorName] = func() (packer.PostProcessor, error) {
+		c.postProcessors[pluginPrefix+postProcessorName] = func() (packersdk.PostProcessor, error) {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
 		}
 	}
@@ -257,7 +256,7 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 
 	for _, provisionerName := range desc.Provisioners {
 		provisionerName := provisionerName // copy to avoid pointer overwrite issue
-		c.provisioners[pluginPrefix+provisionerName] = func() (packer.Provisioner, error) {
+		c.provisioners[pluginPrefix+provisionerName] = func() (packersdk.Provisioner, error) {
 			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
 		}
 	}
