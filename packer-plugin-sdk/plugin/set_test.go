@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	pluginVersion "github.com/hashicorp/packer/packer-plugin-sdk/version"
 	"github.com/hashicorp/packer/version"
 )
 
@@ -34,11 +35,13 @@ func TestSet(t *testing.T) {
 	set.RegisterPostProcessor("example-2", new(MockPostProcessor))
 	set.RegisterProvisioner("example", new(MockProvisioner))
 	set.RegisterProvisioner("example-2", new(MockProvisioner))
+	set.SetVersion(pluginVersion.InitializePluginVersion(
+		"1.1.1", ""))
 
 	outputDesc := set.description()
 
 	if diff := cmp.Diff(SetDescription{
-		Version:        version.String(),
+		Version:        "1.1.1",
 		SDKVersion:     version.String(),
 		Builders:       []string{"example", "example-2"},
 		PostProcessors: []string{"example", "example-2"},

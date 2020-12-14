@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	pluginVersion "github.com/hashicorp/packer/packer-plugin-sdk/version"
 	"github.com/hashicorp/packer/version"
 )
 
@@ -44,6 +45,10 @@ func NewSet() *Set {
 		PostProcessors: map[string]packersdk.PostProcessor{},
 		Provisioners:   map[string]packersdk.Provisioner{},
 	}
+}
+
+func (i *Set) SetVersion(version *pluginVersion.PluginVersion) {
+	i.version = version.String()
 }
 
 func (i *Set) RegisterBuilder(name string, builder packersdk.Builder) {
