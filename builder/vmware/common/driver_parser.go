@@ -2452,7 +2452,7 @@ type appleDhcpLeaseEntry struct {
 
 func readAppleDhcpdLeaseEntry(in chan byte) (entry *appleDhcpLeaseEntry, err error) {
 	entry = &appleDhcpLeaseEntry{extra: map[string]string{}}
-	validFieldCount := 0
+	mandatoryFieldCount := 0
 	// Read up to the lease item and validate that it actually matches
 	_, ch := consumeOpenClosePair('{', '}', in)
 	for insideBraces := true; insideBraces; {
@@ -2486,7 +2486,7 @@ func readAppleDhcpdLeaseEntry(in chan byte) (entry *appleDhcpLeaseEntry, err err
 		switch key {
 		case "ip_address":
 			entry.ipAddress = val
-			validFieldCount++
+			mandatoryFieldCount++
 		case "identifier":
 			fallthrough
 		case "hw_address":
@@ -2514,24 +2514,22 @@ func readAppleDhcpdLeaseEntry(in chan byte) (entry *appleDhcpLeaseEntry, err err
 			} else {
 				entry.hwAddress = decodedLease
 			}
-			validFieldCount++
+			mandatoryFieldCount++
 		case "lease":
 			entry.lease = val
-			validFieldCount++
 		case "name":
 			entry.name = val
-			validFieldCount++
 		default:
 			// Just stash it for now because we have no idea what it is.
 			entry.extra[key] = val
 		}
 	}
 	// we have most likely parsed the whole file
-	if validFieldCount == 0 {
+	if mandatoryFieldCount == 0 {
 		return nil, nil
 	}
-	// an entry is composed of 5 mandatory fields, we'll check that they all have been set during the parsing
-	if validFieldCount < 5 {
+	// an entry is composed of 3 mandatory fields, we'll check that they all have been set during the parsing
+	if mandatoryFieldCount < 3 {
 		return entry, fmt.Errorf("Error entry `%v` is missing mandatory information", entry)
 	}
 	return entry, nil

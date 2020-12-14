@@ -31,3 +31,10 @@
 	lease=0x5fd72edc
 	name=vagrant-2019
 }
+
+# this entry does not have all fields
+{
+	ip_address=127.0.0.20
+	hw_address=1,d:ea:d0:99:aa:bc
+	identifier=1,d:ea:d0:99:aa:bc
+}

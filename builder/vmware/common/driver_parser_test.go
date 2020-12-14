@@ -913,6 +913,31 @@ func TestParserReadAppleDhcpdLeaseEntry(t *testing.T) {
 	if result.extra["fake"] != expected_extra_1["fake"] {
 		t.Errorf("expected extra %v, got %v", expected_extra_1["fake"], result.extra["fake"])
 	}
+
+	test_2 := `{
+		ip_address=192.168.111.4
+		hw_address=1,0:c:56:3c:e7:23
+		identifier=1,0:c:56:3c:e7:23
+	}`
+	expected_2 := map[string]string{
+		"ipAddress": "192.168.111.4",
+		"hwAddress": "000c563ce723",
+		"id":        "000c563ce723",
+	}
+
+	result, err = readAppleDhcpdLeaseEntry(consumeAppleLeaseString(test_2))
+	if err != nil {
+		t.Errorf("error parsing entry: %v", err)
+	}
+	if result.ipAddress != expected_2["ipAddress"] {
+		t.Errorf("expected ipAddress %v, got %v", expected_2["ipAddress"], result.ipAddress)
+	}
+	if hex.EncodeToString(result.hwAddress) != expected_2["hwAddress"] {
+		t.Errorf("expected hwAddress %v, got %v", expected_2["hwAddress"], hex.EncodeToString(result.hwAddress))
+	}
+	if hex.EncodeToString(result.id) != expected_2["id"] {
+		t.Errorf("expected id %v, got %v", expected_2["id"], hex.EncodeToString(result.id))
+	}
 }
 
 func TestParserReadAppleDhcpdLeases(t *testing.T) {
@@ -1021,6 +1046,23 @@ func TestParserReadAppleDhcpdLeases(t *testing.T) {
 			t.Errorf("unable to find item with id %v", test_4["id"])
 		} else if hex.EncodeToString(res.hwAddress) != test_4["hwAddress"] {
 			t.Errorf("expected hardware address %s, got %s", test_4["hwAddress"], hex.EncodeToString(res.hwAddress))
+		}
+	}
+
+	test_5 := map[string]string{
+		"ipAddress": "127.0.0.20",
+		"id":        "0dead099aabc",
+		"hwAddress": "0dead099aabc",
+	}
+	test_5_findings := filter_ipAddr(test_5["ipAddress"], results)
+	if len(test_5_findings) != 1 {
+		t.Errorf("expected %d matching entries, got %d", 1, len(test_5_findings))
+	} else {
+		res := find_id(test_5["id"], test_5_findings)
+		if res == nil {
+			t.Errorf("unable to find item with id %v", test_5["id"])
+		} else if hex.EncodeToString(res.hwAddress) != test_5["hwAddress"] {
+			t.Errorf("expected hardware address %s, got %s", test_5["hwAddress"], hex.EncodeToString(res.hwAddress))
 		}
 	}
 }
