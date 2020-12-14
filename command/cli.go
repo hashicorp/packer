@@ -93,6 +93,15 @@ type BuildArgs struct {
 	OnError                                           string
 }
 
+func (ba *InitArgs) AddFlagSets(flags *flag.FlagSet) {
+	ba.MetaArgs.AddFlagSets(flags)
+}
+
+// InitArgs represents a parsed cli line for a `packer build`
+type InitArgs struct {
+	MetaArgs
+}
+
 // ConsoleArgs represents a parsed cli line for a `packer console`
 type ConsoleArgs struct {
 	MetaArgs

@@ -3,6 +3,7 @@ package packer
 import (
 	"github.com/hashicorp/hcl/v2"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
 type GetBuildsOptions struct {
@@ -30,6 +31,7 @@ type Evaluator interface {
 // The packer.Handler handles all Packer things.
 type Handler interface {
 	Initialize() hcl.Diagnostics
+	PluginRequirements() (plugingetter.List, hcl.Diagnostics)
 	Evaluator
 	BuildGetter
 	ConfigFixer

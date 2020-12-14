@@ -15,6 +15,10 @@ type Plugin struct {
 	Hostname  string
 }
 
+func (p Plugin) String() string {
+	return p.Hostname + "/" + p.Namespace + "/" + p.Type
+}
+
 // ForDisplay returns a user-friendly FQN string, simplified for readability. If
 // the plugin is using the default hostname, the hostname is omitted.
 func (p *Plugin) ForDisplay() string {
