@@ -462,7 +462,7 @@ func (d *VmwareDriver) PotentialGuestIP(state multistep.StateBag) ([]string, err
 			available_lease_entries := make([]appleDhcpLeaseEntry, 0)
 			for _, entry := range leaseEntries {
 				// Next check for any where the hardware address matches.
-				if bytes.Equal(hwaddr, []byte(entry.hwAddress)) {
+				if bytes.Equal(hwaddr, entry.hwAddress) {
 					available_lease_entries = append(available_lease_entries, entry)
 				}
 			}

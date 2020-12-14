@@ -2462,7 +2462,7 @@ func readAppleDhcpdLeaseEntry(in chan byte) (entry *appleDhcpLeaseEntry, err err
 		if !ok {
 			insideBraces = false
 		}
-		if item_s == "{" || item_s == "}" {
+		if strings.Contains(item_s, "{") || strings.Contains(item_s, "}") {
 			continue
 		}
 		splittedLine := strings.Split(item_s, "=")
