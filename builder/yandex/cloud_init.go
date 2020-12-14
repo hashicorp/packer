@@ -9,14 +9,14 @@ import (
 )
 
 const (
-	defaultContentType = "text/cloud-config"
-	shellContentType   = "text/x-shellscript"
+	defaultContentType   = "text/cloud-config"
+	shellContentType     = "text/x-shellscript"
+	multipartContentType = "multipart/mixed"
 )
 
 const (
-	cloudInitIPv6Config = `#cloud-config
-bootcmd:
-- [ sh, -c, '/usr/bin/env dhclient -6 -D LL -nw -pf /run/dhclient_ipv6.eth0.pid -lf /var/lib/dhcp/dhclient_ipv6.eth0.leases eth0' ]
+	cloudInitIPv6Config = `#!/usr/bin/env bash
+dhclient -6 -D LL -nw -pf /run/dhclient_ipv6.eth0.pid -lf /var/lib/dhcp/dhclient_ipv6.eth0.leases eth0
 `
 )
 
@@ -24,7 +24,7 @@ bootcmd:
 func MergeCloudUserMetaData(usersData ...string) (string, error) {
 	buff := new(bytes.Buffer)
 	data := multipart.NewWriter(buff)
-	_, err := buff.WriteString(fmt.Sprintf("Content-Type: multipart/mixed; boundary=\"%s\"\r\n", data.Boundary()))
+	_, err := buff.WriteString(fmt.Sprintf("Content-Type: %s; boundary=\"%s\"\r\n", multipartContentType, data.Boundary()))
 	if err != nil {
 		return "", err
 	}
