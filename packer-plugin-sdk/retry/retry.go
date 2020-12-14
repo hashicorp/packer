@@ -1,3 +1,5 @@
+// Package retry provides tooling to retry API calls which are known to be
+// vulnerable to throttling or flakiness due to eventual consistency.
 package retry
 
 import (

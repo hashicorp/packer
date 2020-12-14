@@ -1,3 +1,4 @@
+// Package random is a helper for generating random alphanumeric strings.
 package random
 
 import (

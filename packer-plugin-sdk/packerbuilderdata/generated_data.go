@@ -1,3 +1,7 @@
+// Package packerbuilderdata provides tooling for setting and getting special
+// builder-generated data that will be passed to the provisioners. This data
+// should be limited to runtime data like instance id, ip address, and other
+// relevant details that provisioning scripts may need access to.
 package packerbuilderdata
 
 import "github.com/hashicorp/packer/packer-plugin-sdk/multistep"
