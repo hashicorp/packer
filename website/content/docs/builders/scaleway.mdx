@@ -1,0 +1,72 @@
+---
+description: >
+  The Scaleway Packer builder is able to create new images for use with Scaleway
+
+  BareMetal and Virtual cloud server. The builder takes a source image, runs any
+
+  provisioning necessary on the image after launching it, then snapshots it into
+
+  a reusable image. This reusable image can then be used as the foundation of
+  new
+
+  servers that are launched within Scaleway.
+page_title: Scaleway - Builders
+sidebar_title: Scaleway
+---
+
+# Scaleway Builder
+
+Type: `scaleway`
+
+The `scaleway` Packer builder is able to create new images for use with
+[Scaleway](https://www.scaleway.com). The builder takes a source image, runs
+any provisioning necessary on the image after launching it, then snapshots it
+into a reusable image. This reusable image can then be used as the foundation
+of new servers that are launched within Scaleway.
+
+The builder does _not_ manage snapshots. Once it creates an image, it is up to
+you to use it or delete it.
+
+## Configuration Reference
+
+There are many configuration options available for the builder. They are
+segmented below into two categories: required and optional parameters. Within
+each category, the available configuration keys are alphabetized.
+
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator) can be configured for this
+builder. In addition to the options defined there, a private key file
+can also be supplied to override the typical auto-generated key:
+
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
+
+### Required:
+
+@include 'builder/scaleway/Config-required.mdx'
+
+### Optional:
+
+@include 'builder/scaleway/Config-not-required.mdx'
+
+## Basic Example
+
+Here is a basic example. It is completely valid as soon as you enter your own
+access tokens:
+
+```json
+{
+  "type": "scaleway",
+  "project_id": "YOUR PROJECT ID",
+  "access_key": "YOUR ACCESS KEY",
+  "secret_key": "YOUR SECRET KEY",
+  "image": "UUID OF THE BASE IMAGE",
+  "zone": "fr-par-1",
+  "commercial_type": "DEV1-S",
+  "ssh_username": "root",
+  "ssh_private_key_file": "~/.ssh/id_rsa"
+}
+```
+
+When you do not specify the `ssh_private_key_file`, a temporary SSH keypair
+is generated to connect the server. This key will only allow the `root` user to
+connect the server.

@@ -1,0 +1,71 @@
+---
+page_title: Only Except - HCL Configuration Language
+sidebar_title: Only Except
+description: >-
+  Only and Except can be used as a command line argument to selectively run
+  builds. Only and Except can also be used in a provisioner to not run it for a
+  source.
+---
+
+# Only and Except
+
+`only` and `except` are keywords used to filter what runs in your Packer build,
+they can be seen as a command line argument:
+
+`@include 'commands/except.mdx'`
+
+`@include 'commands/only.mdx'`
+
+They can also be seen in a template to run or skip provisioners and/or
+post-processors for a specific source:
+
+```hcl
+build {
+  name = "my_build"
+  sources [
+    "source.amazon-ebs.first-example",
+  ]
+  source "source.amazon-ebs.second-example" {
+    // setting the name field allows to rename the source only for this build
+    // section.
+    name = "second-example-local-name"
+  }
+
+  provisioner "shell-local" {
+    only = ["source.amazon-ebs.first-example"]
+    inline = ["echo I will only run for the second example source"]
+  }
+
+  provisioner "shell-local" {
+    except = ["source.amazon-ebs.second-example-local-name"]
+    inline = ["echo I will never run for the second example source"]
+  }
+}
+
+build {
+  sources [
+    "source.amazon-ebs.third-example",
+  ]
+}
+
+# this file will result in Packer creating three builds named:
+#  my_build.amazon-ebs.first-example
+#  my_build.amazon-ebs.second-example
+#  amazon-ebs.third-example
+```
+
+Note that cli arguments can be used with a glob operator, using the previous
+configuration:
+
+- `packer build -only 'my_build.*' dir`: will only run the builds in blocks
+  named `my_build`.
+
+- `packer build -only '*.amazon-ebs.*' dir`: will only run the builds with a
+  source of type `amazon-ebs`.
+
+- `packer build -only '*.second-example-local-name' dir`: will only run that
+  specifically named build.
+
+-> Note: In the cli `only` and `except` will match agains **build names** (for
+example:`my_build.amazon-ebs.first-example`) but in a provisioner they will
+match on the **source type** (for example:`source.amazon-ebs.third-example`).

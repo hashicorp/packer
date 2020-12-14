@@ -1,0 +1,42 @@
+---
+page_title: Generating code for config spec.
+sidebar_title: Making a plugin HCL2 enabled
+description: Learn how to generate the HCL2 configuration of your component easily.
+---
+
+# Auto Generate the HCL2 code of a plugin
+
+From v1.5, Packer can be configured using HCL2. Because Packer has so many
+builders, provisioner & post-processors, we relied on code generation to
+iterate more easily. The good new is that you can benefit from this code
+generator to get the HCL2 spec code of your component simply. It's a Go binary
+package and is located in [`cmd/mapstructure-to-hcl2`](https://github.com/hashicorp/packer/tree/master/cmd/mapstructure-to-hcl2).
+
+Say you want to configure the `Config` struct of a `Builder` in a package
+located in `my/example-plugin/config.go`. Here are some simple steps you can
+follow to make it HCL2 enabled:
+
+- run `go install github.com/hashicorp/packer/cmd/mapstructure-to-hcl2`
+
+- Add `//go:generate mapstructure-to-hcl2 -type Config` at the top of
+  `config.go`
+
+- run `go generate ./my/example-plugin/...`
+
+  This will generate a `my/example-plugin/config.hcl2spec.go` file containing
+  the configuration fields of `Config`.
+
+- Make sure that all the nested structs of `Config` are also auto generated the
+  same way.
+
+- Now we only need to make Builder implement the interface by adding the
+  following snippet:
+
+  ```go
+  func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
+  ```
+
+  From now on every time you add or change a field of Config you will need to
+  run the `go generate` command again.
+
+A good example of this is the [Config struct of the amazon-ebs builder](https://github.com/hashicorp/packer/blob/master/builder/amazon/ebs/builder.go)

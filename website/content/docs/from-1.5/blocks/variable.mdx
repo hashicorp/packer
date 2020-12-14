@@ -1,0 +1,40 @@
+---
+description: >
+  The variable block, also called the input-variable block, defines variables
+  within your Packer configuration.
+page_title: variable - Blocks
+sidebar_title: <tt>variable</tt>
+---
+
+# The `variable` block
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+The `variable` block, also called the `input-variable` block, defines variables
+within your Packer configuration. An input-variable cannot be used in another
+input variable: we recommend using [locals](/docs/from-1.5/blocks/locals) for that instead.
+
+`@include 'from-1.5/variables/foo-block.mdx'`
+
+## Default value
+
+If a default value is set, the variable is optional. Otherwise, the variable
+**must** be set.
+
+`@include 'from-1.5/variables/assignment.mdx'`
+
+`@include 'from-1.5/variables/custom-validation.mdx'`
+
+Example of a variable assignment from a file:
+
+`@include 'from-1.5/variables/foo-pkrvar.mdx'`
+
+`@include 'from-1.5/variables/must-be-set.mdx'`
+
+`@include 'from-1.5/variables/sensitive.mdx'`
+
+# More on variables
+
+- Read the [full variables](/docs/from-1.5/variables) description for a more
+  thorough read.
+- Read the [variables guide](/guides/hcl/variables) for more examples.

@@ -1,0 +1,157 @@
+---
+description: |
+  The `packer console` command allows you to experiment with Packer variable
+  interpolations.
+page_title: packer console - Commands
+sidebar_title: <tt>console</tt>
+---
+
+# `console` Command
+
+The `packer console` command allows you to experiment with Packer variable
+interpolations. You may access variables in the Packer config you called the
+console with, or provide variables when you call console using the -var or
+-var-file command line options.
+
+~> **Note:** `console` is available from version 1.4.2 and above.
+
+~> **Note:** For HCL2 `console` is available from version 1.6.0 and above, use
+`packer console --config-type=hcl2` to try it without a config file. Go
+templating ( or `{{..}}` calls ) will not work in HCL2 mode.
+
+Type in the interpolation to test and hit `<enter>` to see the result.
+
+To exit the console, type "exit" and hit `<enter>`, or use Control-C.
+
+```shell-session
+$ packer console my_template.json
+```
+
+The full list of options that the console command will accept is visible in the
+help output, which can be seen via `packer console -h`.
+
+## Options
+
+- `-var` - Set a variable in your packer template. This option can be used
+  multiple times. This is useful for setting version numbers for your build.
+  example: `-var "myvar=asdf"`
+
+- `-var-file` - Set template variables from a file.
+  example: `-var-file myvars.json`
+
+## REPL commands
+
+- `help` - displays help text for Packer console.
+
+- `exit` - exits the console
+
+- `variables` - prints a list of all variables read into the console from the
+  `-var` option, `-var-files` option, and template.
+
+## Usage Examples - repl session ( JSON )
+
+Let's say you launch a console using a Packer template `example_template.json`:
+
+```shell-session
+$ packer console example_template.json
+```
+
+You'll be dropped into a prompt that allows you to enter template functions and
+see how they're evaluated; for example, if the variable `myvar` is defined in
+your example_template's variable section:
+
+```json
+"variables":{
+	"myvar": "asdfasdf"
+},
+...
+```
+
+and you enter `` {{user `myvar`}} `` in the Packer console, you'll see the value of
+myvar:
+
+```shell-session
+> {{user `myvar`}}
+asdfasdf
+```
+
+From there you can test more complicated interpolations:
+
+```shell-session
+> {{user `myvar`}}-{{timestamp}}
+asdfasdf-1559854396
+```
+
+And when you're done using the console, just type "exit" or CTRL-C
+
+```shell-session
+> exit
+$
+```
+
+If you'd like to provide a variable or variable files, you'd do this:
+
+```shell-session
+$ packer console -var "myvar=fdsafdsa" -var-file myvars.json example_template.json
+```
+
+If you don't have specific variables or var files you want to test, and just
+want to experiment with a particular template engine, you can do so by simply
+calling `packer console` without a template file.
+
+## Usage Examples - piped commands ( JSON )
+
+If you'd like to just see a specific single interpolation without launching
+the REPL, you can do so by echoing and piping the string into the console
+command:
+
+```shell-session
+$ echo {{timestamp}} | packer console
+1559855090
+```
+
+## Usage Examples - repl session ( HCL2 )
+
+~> **Note:** For HCL2 `console` is available from version 1.6.0 and above, use
+`packer console --config-type=hcl2` to try it without a config file. Go
+templating ( or `{{..}}` calls ) will not work in HCL2 mode.
+
+Without a config file, `packer console` can be used to experiment with the
+expression syntax and [built-in functions](/docs/from-1.5/functions).
+
+### Starting
+
+To start a session on a folder containing HCL2 config files, run:
+
+```shell-session
+packer console folder/
+```
+
+Because `folder/` is a folder Packer will start in HCL2 mode, you can also
+directly pass an HCL2 formatted config file:
+
+```shell-session
+packer console file.pkr.hcl
+```
+
+Because the file is suffixed with `.pkr.hcl` Packer will start in HCL2 mode.
+
+When you just want to play arround without a config file you can set the
+`--config-type=hcl2` option and Packer will start in HCL2 mode:
+
+```shell-session
+packer console --config-type=hcl2
+```
+
+### Scripting
+
+The `packer console` command can be used in non-interactive scripts by piping
+newline-separated commands to it. Only the output from the final command is
+printed unless an error occurs earlier.
+
+For example:
+
+```shell-session
+$ echo "1 + 5" | packer console
+6
+```

@@ -1,0 +1,40 @@
+---
+page_title: consul - Functions - Configuration Language
+sidebar_title: consul
+description: The consul function retrieves secrets from HashiCorp consul KV stores.
+---
+
+# `consul_key` Function
+
+[Consul](https://www.consul.io) keys can be used within your template using the
+`consul_key` function.
+
+You can either use this function in a locals block or directly inline where you
+want to use the value.
+
+```hcl
+locals {
+  my_version = "${consul_key("myservice/version")}"
+}
+
+source "null" "first-example" {
+  communicator = "none"
+}
+
+build {
+  name = "my-build-name"
+  sources = ["null.first-example"]
+
+  provisioner "shell-local" {
+    environment_vars = ["TESTVAR=${build.PackerRunUUID}"]
+    inline = ["echo my_version is '${local.my_version}'",
+              "echo version is '${consul_key("myservice/version")}'."]
+  }
+}
+```
+
+This will load the key stored at the path `myservice/version` from consul.
+
+The configuration for consul (address, tokens, ...) must be specified as
+environment variables, as specified in the
+[Documentation](https://www.consul.io/docs/commands#environment-variables).

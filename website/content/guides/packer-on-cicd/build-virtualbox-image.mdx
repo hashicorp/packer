@@ -1,0 +1,148 @@
+---
+page_title: Build a VirtualBox Image with Packer in TeamCity
+sidebar_title: Build a VirtualBox Image with Packer in TeamCity
+---
+
+# Build a VirtualBox Image with Packer in TeamCity
+
+This guide walks through the process of building a VirtualBox image using
+Packer on a new TeamCity Agent. Before getting started you should have access
+to a TeamCity Server.
+
+The Packer VirtualBox builder requires access to VirtualBox. Virtualization is
+not universally supported on cloud instances, so we recommend you run these
+builds on either a bare metal server, or cloud instances which support nested
+virtualization, such as Azure or GCP. This is also true for the
+[VMWare](/docs/builders/vmware) and the [QEMU](/docs/builders/qemu)
+Packer builders.
+
+We will use Chef's [Bento boxes](https://github.com/chef/bento) to provision an
+Ubuntu image on VirtualBox. For this example, we will use the repository
+directly, but you may also fork it for the same results.
+
+## 1. Provision a Bare-metal Machine
+
+For the purposes of this example, we will run on a bare-metal instance from
+[Packet](https://www.packet.net/). If you are a first time user of Packet, the
+Packet team has provided HashiCorp the coupon code `hashi25` which you can use
+for `$25` off to test out this guide and up to 30&#x25; if you decide to
+reserve ongoing servers (email help@packet.net for details). You can use
+a `baremetal_0` server type for testing, but for regular use, the `baremetal_1`
+instance may be a better option.
+
+There is also a [Packet
+Provider](https://www.terraform.io/docs/providers/packet/index.html) in
+Terraform you can use to provision the project and instance.
+
+```hcl
+provider "packet" { }
+
+resource "packet_project" "teamcity_agents" {
+  name = "TeamCity"
+}
+
+resource "packet_device" "agent" {
+  hostname         = "teamcity-agent"
+  plan             = "baremetal_0"
+  facility         = "ams1"
+  operating_system = "ubuntu_16_04"
+  billing_cycle    = "hourly"
+  project_id       = "${packet_project.teamcity_project.id}"
+}
+```
+
+## 2. Install VirtualBox and TeamCity dependencies
+
+VirtualBox must be installed on the new instance, and TeamCity requires the JDK
+prior to installation. This guide uses Ubuntu as the Linux distribution, so you
+may need to adjust these commands for your distribution of choice.
+
+**Install Teamcity Dependencies**
+
+```shell-session
+$ apt-get upgrade
+$ apt-get install -y zip linux-headers-generic linux-headers-4.13.0-16-generic build-essential openjdk-8-jdk
+```
+
+**Install VirtualBox**
+
+```shell-session
+$ curl -OL "https://download.virtualbox.org/virtualbox/5.2.2/virtualbox-5.2_5.2.2-119230~Ubuntu~xenial_amd64.deb"
+$ dpkg -i virtualbox-5.2_5.2.2-119230~Ubuntu~xenial_amd64.deb
+```
+
+You can also use the [`remote-exec`
+provisioner](https://www.terraform.io/docs/provisioners/remote-exec.html) in
+your Terraform configuration to automatically run these commands when
+provisioning the new instance.
+
+## 3. Install Packer
+
+The TeamCity Agent machine will also need Packer Installed. You can find the
+latest download link from the [Packer
+Download](/downloads) page.
+
+```shell-session
+$ curl -OL "https://releases.hashicorp.com/packer/1.1.2/packer_1.1.2_linux_amd64.zip"
+$ unzip ./packer_1.1.2_linux_amd64.zip
+```
+
+Packer is installed at the `/root/packer` path which is used in subsequent
+steps. If it is installed elsewhere, take note of the path.
+
+## 4. Install TeamCity Agent
+
+This guide assume you already have a running instance of TeamCity Server. The
+new TeamCity Agent can be installed by [downloading a zip file and installing
+manually](https://confluence.jetbrains.com/display/TCD10//Setting+up+and+Running+Additional+Build+Agents#SettingupandRunningAdditionalBuildAgents-InstallingAdditionalBuildAgents),
+or using [Agent
+Push](https://confluence.jetbrains.com/display/TCD10//Setting+up+and+Running+Additional+Build+Agents#SettingupandRunningAdditionalBuildAgents-InstallingviaAgentPush).
+Once it is installed it should appear in TeamCity as a new Agent.
+
+Create a new Agent Pool for agents responsible for VirtualBox Packer builds and
+assign the new Agent to it.
+
+## 5. Create a New Build in TeamCity
+
+In TeamCity Server, create a new build. To use the upstream Bento repository,
+we'll choose _From a repository URL_, and enter
+`https://github.com/chef/bento.git` as the **Repository URL**.
+
+![TeamCity screenshot: New Build](/img/guides/teamcity_create_project_from_url-1.png)
+
+Click **Proceed**.
+
+![TeamCity screenshot: New Build](/img/guides/teamcity_create_project_from_url-2.png)
+
+And **Proceed** again.
+
+We won't use the _Auto-detected Build Steps_. Instead, click _configure build
+steps manually_. For the _runner type_, pick **Command Line**, and enter the
+following values. Make sure to click _Show advanced options_, as we need to set
+the working directory.
+
+![TeamCity screenshot: Build Step](/img/guides/teamcity_build_configuration.png)
+
+This will use the `build` command in Packer to build the image defined in
+`ubuntu/ubuntu-16.04-amd64.json`. It assumes that the VCS repository you're
+using is a fork of [Chef/Bento](https://github.com/chef/bento). Packer defaults
+to building VirtualBox machines by launching a GUI that shows the console.
+Since this will run in CI/CD, use the [`headless`
+variable](/docs/builders/virtualbox-iso#headless) to instruct Packer to
+start the machine without the console. Packer can build multiple image types,
+so the [`-only=virtualbox-iso`
+option](/docs/commands/build#only-foo-bar-baz) instructs Packer to only
+build the builds with the name `virtualbox-iso`.
+
+## 6. Run a build in TeamCity
+
+The entire configuration is ready for a new build. Start a new run in TeamCity
+by pressing “Run”.
+
+The new run should be triggered and the virtual box image will be built.
+
+![TeamCity screenshot: Build log](/img/guides/teamcity_build_log.png)
+
+Once complete, the build status should be updated to complete and successful.
+
+![TeamCity screenshot: Build log complete](/img/guides/teamcity_build_log_complete.png)

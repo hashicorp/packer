@@ -1,0 +1,301 @@
+---
+description: >
+  The amazon-ebssurrogate Packer builder is like the chroot builder, but does
+  not
+
+  require running inside an EC2 instance.
+page_title: Amazon EBS Surrogate - Builders
+sidebar_title: EBS Surrogate
+---
+
+# EBS Surrogate Builder
+
+Type: `amazon-ebssurrogate`
+
+The `amazon-ebssurrogate` Packer builder is able to create Amazon AMIs by
+running a source instance with an attached volume, provisioning the attached
+volume in such a way that it can be used as the root volume for the AMI, and
+then snapshotting and creating the AMI from that volume.
+
+This builder can therefore be used to bootstrap scratch-build images - for
+example FreeBSD or Ubuntu using ZFS as the root file system.
+
+This is all done in your own AWS account. This builder will create temporary
+key pairs, security group rules, etc., that provide it temporary access to the
+instance while the image is being created.
+
+## Configuration Reference
+
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [AMI](#ami-configuration),
+[BlockDevices](#block-devices-configuration),
+[Access](#access-configuration),
+[Run](#run-configuration) and
+[Communicator](#communicator-configuration)
+configuration references, which are
+necessary for this build to succeed and can be found further down the page.
+
+### Required:
+
+@include 'builder/amazon/ebssurrogate/Config-required.mdx'
+
+### Optional:
+
+@include 'builder/amazon/ebssurrogate/Config-not-required.mdx'
+
+### AMI Configuration
+
+#### Required:
+
+@include 'builder/amazon/common/AMIConfig-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/AMIConfig-not-required.mdx'
+
+### Access Configuration
+
+#### Required:
+
+@include 'builder/amazon/common/AccessConfig-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/AccessConfig-not-required.mdx'
+
+### Assume Role Configuration
+
+@include 'builder/amazon/common/AssumeRoleConfig.mdx'
+
+@include 'builder/amazon/common/AssumeRoleConfig-not-required.mdx'
+
+### Polling Configuration
+
+@include 'builder/amazon/common/AWSPollingConfig.mdx'
+
+@include 'builder/amazon/common/AWSPollingConfig-not-required.mdx'
+
+### Run Configuration
+
+#### Required:
+
+@include 'builder/amazon/common/RunConfig-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/RunConfig-not-required.mdx'
+
+@include 'builders/aws-session-manager.mdx'
+
+### Block Devices Configuration
+
+Block devices can be nested in the
+[ami_block_device_mappings](#ami_block_device_mappings) array.
+
+@include 'builder/amazon/common/BlockDevice.mdx'
+
+#### Optional only for [launch_block_device_mappings](#launch_block_device_mappings)
+
+@include 'builder/amazon/ebssurrogate/BlockDevice-not-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/BlockDevice-not-required.mdx'
+
+### Communicator Configuration
+
+#### Optional:
+
+@include 'packer-plugin-sdk/communicator/Config-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSHTemporaryKeyPair-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Key-Pair-Name-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Agent-Auth-not-required.mdx'
+
+## Basic Example
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "amazon-ebssurrogate",
+  "secret_key": "YOUR SECRET KEY HERE",
+  "access_key": "YOUR KEY HERE",
+  "region": "us-east-1",
+  "ssh_username": "ubuntu",
+  "instance_type": "t2.medium",
+  "source_ami": "ami-40d28157",
+  "launch_block_device_mappings": [
+    {
+      "volume_type": "gp2",
+      "device_name": "/dev/xvdf",
+      "delete_on_termination": false,
+      "volume_size": 10
+    }
+  ],
+  "ami_root_device": {
+    "source_device_name": "/dev/xvdf",
+    "device_name": "/dev/xvda",
+    "delete_on_termination": true,
+    "volume_size": 16,
+    "volume_type": "gp2"
+  }
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebssurrogate" "basic-example" {
+  region = "us-east-1"
+  ssh_username = "ubuntu"
+  instance_type = "t2.medium"
+  source_ami = "ami-40d28157"
+  ami_name = "packer-test-adrien"
+  ami_virtualization_type = "paravirtual"
+
+  launch_block_device_mappings {
+      volume_type = "gp2"
+      device_name = "/dev/xvdf"
+      delete_on_termination = false
+      volume_size = 10
+  }
+
+  ami_root_device {
+    source_device_name = "/dev/xvdf"
+    device_name = "/dev/xvda"
+    delete_on_termination = true
+    volume_size = 16
+    volume_type = "gp2"
+  }
+}
+
+build {
+  sources = ["sources.amazon-ebssurrogate.basic-example"]
+
+  provisioner "shell" {
+      inline = ["..."]
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+-> **Note:** Packer can also read the access key and secret access key from
+environmental variables. See the configuration reference in the section above
+for more information on what environmental variables Packer will look for.
+
+Further information on locating AMI IDs and their relationship to instance
+types and regions can be found in the AWS EC2 Documentation [for
+Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html)
+or [for
+Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).
+
+## Accessing the Instance to Debug
+
+If you need to access the instance to debug for some reason, run this builder
+with the `-debug` flag. In debug mode, the Amazon builder will save the private
+key in the current directory and will output the DNS or IP information as well.
+You can use this information to access the instance as it is running.
+
+## Build template data
+
+In configuration directives marked as a template engine above, the following
+variables are available:
+
+- `BuildRegion` - The region (for example `eu-central-1`) where Packer is
+  building the AMI.
+- `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build
+  the AMI.
+- `SourceAMICreationDate` - The source AMI creation date (for example `"2020-05-14T19:26:34.000Z"`).
+- `SourceAMIName` - The source AMI Name (for example
+  `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
+  build the AMI.
+- `SourceAMIOwner` - The source AMI owner ID.
+- `SourceAMIOwnerName` - The source AMI owner alias/name (for example `amazon`).
+- `SourceAMITags` - The source AMI Tags, as a `map[string]string` object.
+
+## Build Shared Information Variables
+
+This builder generates data that are shared with provisioner and post-processor via build function of [template engine](/docs/templates/engine) for JSON and [contextual variables](/docs/from-1.5/contextual-variables) for HCL2.
+
+The generated variables available for this builder are:
+
+- `BuildRegion` - The region (for example `eu-central-1`) where Packer is
+  building the AMI.
+- `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build
+  the AMI.
+- `SourceAMICreationDate` - The source AMI creation date (for example `"2020-05-14T19:26:34.000Z"`).
+- `SourceAMIName` - The source AMI Name (for example
+  `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
+  build the AMI.
+- `SourceAMIOwner` - The source AMI owner ID.
+- `SourceAMIOwnerName` - The source AMI owner alias/name (for example `amazon`).
+
+Usage example:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+"post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest.json",
+      "strip_path": true,
+      "custom_data": {
+        "source_ami_name": "{{ build `SourceAMIName` }}"
+      }
+    }
+]
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+// When accessing one of these variables from inside the builder, you need to
+// use the golang templating syntax. This is due to an architectural quirk that
+// won't be easily resolvable until legacy json templates are deprecated:
+
+{
+source "amazon-ebs" "basic-example" {
+  tags = {
+        OS_Version = "Ubuntu"
+        Release = "Latest"
+        Base_AMI_ID = "{{ .SourceAMI }}"
+        Base_AMI_Name = "{{ .SourceAMIName }}"
+    }
+}
+
+// when accessing one of the variables from a provisioner or post-processor, use
+// hcl-syntax
+post-processor "manifest" {
+    output = "manifest.json"
+    strip_path = true
+    custom_data = {
+        source_ami_name = "${build.SourceAMIName}"
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+-> **Note:** Packer uses pre-built AMIs as the source for building images.
+These source AMIs may include volumes that are not flagged to be destroyed on
+termination of the instance building the new image. In addition to those
+volumes created by this builder, any volumes in the source AMI which are not
+marked for deletion on termination will remain in your account.
+
+@include 'builders/aws-ssh-differentiation-table.mdx'

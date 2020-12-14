@@ -1,0 +1,249 @@
+---
+modeline: |
+  vim: set ft=pandoc:
+description: |
+  This VirtualBox Packer builder is able to create VirtualBox virtual machines
+  and export them in the OVF format, starting from an existing OVF/OVA (exported
+  virtual machine image).
+page_title: VirtualBox OVF/OVA - Builders
+sidebar_title: OVF
+---
+
+# VirtualBox Builder (from an OVF/OVA)
+
+Type: `virtualbox-ovf`
+
+This VirtualBox Packer builder is able to create
+[VirtualBox](https://www.virtualbox.org/) virtual machines and export them in
+the OVF format, starting from an existing OVF/OVA (exported virtual machine
+image).
+
+When exporting from VirtualBox make sure to choose OVF Version 2, since Version
+1 is not compatible and will generate errors like this:
+
+```shell-session
+==> virtualbox-ovf: Progress state: VBOX_E_FILE_ERROR
+==> virtualbox-ovf: VBoxManage: error: Appliance read failed
+==> virtualbox-ovf: VBoxManage: error: Error reading "source.ova": element "Section" has no "type" attribute, line 21
+==> virtualbox-ovf: VBoxManage: error: Details: code VBOX_E_FILE_ERROR (0x80bb0004), component Appliance, interface IAppliance
+==> virtualbox-ovf: VBoxManage: error: Context: "int handleImportAppliance(HandlerArg*)" at line 304 of file VBoxManageAppliance.cpp
+```
+
+The builder builds a virtual machine by importing an existing OVF or OVA file.
+It then boots this image, runs provisioners on this new VM, and exports that VM
+to create the image. The imported machine is deleted prior to finishing the
+build.
+
+## Basic Example
+
+Here is a basic example. This example is functional if you have an OVF matching
+the settings here.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "virtualbox-ovf",
+  "source_path": "source.ovf",
+  "ssh_username": "packer",
+  "ssh_password": "packer",
+  "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "virtualbox-ovf" "basic-example" {
+  source_path = "source.ovf"
+  ssh_username = "packer"
+  ssh_password = "packer"
+  shutdown_command = "echo 'packer' | sudo -S shutdown -P now"
+}
+
+build {
+  sources = ["sources.virtualbox-ovf.basic-example"]
+}
+```
+
+</Tab>
+</Tabs>
+
+It is important to add a `shutdown_command`. By default Packer halts the virtual
+machine and the file system may not be sync'd. Thus, changes made in a
+provisioner might not be saved.
+
+## Configuration Reference
+
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [ISO](#iso-configuration),
+[HTTP](#http-directory-configuration),
+[Floppy](#floppy-configuration),
+[Export](#export-configuration),
+[Boot](#boot-configuration),
+[Shutdown](#shutdown-configuration),
+[Run](#run-configuration),
+[Communicator](#communicator-configuration)
+configuration references, which are
+necessary for this build to succeed and can be found further down the page.
+
+### Required:
+
+@include 'builder/virtualbox/ovf/Config-required.mdx'
+
+#### Optional:
+
+@include 'builder/virtualbox/ovf/Config-not-required.mdx'
+
+@include 'builder/virtualbox/common/VBoxVersionConfig-not-required.mdx'
+
+@include 'builder/virtualbox/common/GuestAdditionsConfig-not-required.mdx'
+
+### VBoxManage configuration
+
+@include 'builder/virtualbox/common/VBoxManageConfig-not-required.mdx'
+
+### Http directory configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig.mdx'
+
+#### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig-not-required.mdx'
+
+### Floppy configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/FloppyConfig.mdx'
+
+#### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/FloppyConfig-not-required.mdx'
+
+### CD configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/CDConfig.mdx'
+
+#### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/CDConfig-not-required.mdx'
+
+### Export configuration
+
+#### Optional:
+
+@include 'builder/virtualbox/common/ExportConfig-not-required.mdx'
+
+### Output configuration
+
+#### Optional:
+
+@include 'builder/virtualbox/common/OutputConfig-not-required.mdx'
+
+### Run configuration
+
+#### Optional:
+
+@include 'builder/virtualbox/common/RunConfig-not-required.mdx'
+
+### Shutdown configuration
+
+#### Optional:
+
+@include 'builder/virtualbox/common/ShutdownConfig-not-required.mdx'
+
+### Communicator configuration
+
+#### Optional common fields:
+
+@include 'packer-plugin-sdk/communicator/Config-not-required.mdx'
+
+@include 'builder/virtualbox/common/CommConfig-not-required.mdx'
+
+#### Optional SSH fields:
+
+@include 'packer-plugin-sdk/communicator/SSH-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSHTemporaryKeyPair-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Key-Pair-Name-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Agent-Auth-not-required.mdx'
+
+#### Optional WinRM fields:
+
+@include 'packer-plugin-sdk/communicator/WinRM-not-required.mdx'
+
+### Boot Configuration
+
+@include 'packer-plugin-sdk/bootcommand/BootConfig.mdx'
+
+Please note that for the Virtuabox builder, the IP address of the HTTP server
+Packer launches for you to access files like the preseed file in the example
+above (`{{ .HTTPIP }}`) is hardcoded to 10.0.2.2. If you change the network
+of your VM you must guarantee that you can still access this HTTP server.
+
+The boot command is sent to the VM through the `VBoxManage` utility in as few
+invocations as possible. We send each character in groups of 25, with a default
+delay of 100ms between groups. The delay alleviates issues with latency and CPU
+contention. If you notice missing keys, you can tune this delay by specifying
+"boot_keygroup_interval" in your Packer template, for example:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+    {
+      "type": "virtualbox-ovf",
+      "boot_keygroup_interval": "500ms"
+      ...
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "virtualbox-ovf" "basic-example" {
+  boot_keygroup_interval = "500ms"
+  # ...
+}
+```
+
+</Tab>
+</Tabs>
+
+#### Optional:
+
+@include 'packer-plugin-sdk/bootcommand/BootConfig-not-required.mdx'
+
+@include 'builders/virtualbox-ssh-key-pair.mdx'
+
+## Guest Additions
+
+Packer will automatically download the proper guest additions for the version of
+VirtualBox that is running and upload those guest additions into the virtual
+machine so that provisioners can easily install them.
+
+Packer downloads the guest additions from the official VirtualBox website, and
+verifies the file with the official checksums released by VirtualBox.
+
+After the virtual machine is up and the operating system is installed, Packer
+uploads the guest additions into the virtual machine. The path where they are
+uploaded is controllable by `guest_additions_path`, and defaults to
+"VBoxGuestAdditions.iso". Without an absolute path, it is uploaded to the home
+directory of the SSH user.
+
+## VBoxManage Commands
+
+@include 'builder/virtualbox/common/VBoxManageConfig.mdx'
+
+@include 'builder/virtualbox/common/VBoxManageConfig-not-required.mdx'

@@ -1,0 +1,586 @@
+---
+description: >
+  The amazon-chroot Packer builder is able to create Amazon AMIs backed by an
+  EBS
+
+  volume as the root device. For more information on the difference between
+
+  instance storage and EBS-backed instances, storage for the root device section
+
+  in the EC2 documentation.
+page_title: Amazon chroot - Builders
+sidebar_title: chroot
+---
+
+# AMI Builder (chroot)
+
+Type: `amazon-chroot`
+
+The `amazon-chroot` Packer builder is able to create Amazon AMIs backed by an
+EBS volume as the root device. For more information on the difference between
+instance storage and EBS-backed instances, see the ["storage for the root
+device" section in the EC2
+documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMIs.html#storage-for-the-root-device).
+
+The difference between this builder and the `amazon-ebs` builder is that this
+builder is able to build an EBS-backed AMI without launching a new EC2
+instance. This can dramatically speed up AMI builds for organizations who need
+the extra fast build.
+
+~> **This is an advanced builder** If you're just getting started with
+Packer, we recommend starting with the [amazon-ebs
+builder](/docs/builders/amazon-ebs), which is much easier to use.
+
+The builder does _not_ manage AMIs. Once it creates an AMI and stores it in
+your account, it is up to you to use, delete, etc., the AMI.
+
+### How Does it Work?
+
+This builder works by creating a new EBS volume from an existing source AMI and
+attaching it into an already-running EC2 instance. Once attached, a
+[chroot](https://en.wikipedia.org/wiki/Chroot) is used to provision the system
+within that volume. After provisioning, the volume is detached, snapshotted,
+and an AMI is made.
+
+Using this process, minutes can be shaved off the AMI creation process because
+a new EC2 instance doesn't need to be launched.
+
+There are some restrictions, however. The host EC2 instance where the volume is
+attached to must be a similar system (generally the same OS version, kernel
+versions, etc.) as the AMI being built. Additionally, this process is much more
+expensive because the EC2 instance must be kept running persistently in order
+to build AMIs, whereas the other AMI builders start instances on-demand to
+build AMIs as needed.
+
+## Chroot Specific Configuration Reference
+
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [AMI](#ami-configuration),
+[BlockDevices](#block-devices-configuration) and
+[Access](#access-config-configuration) configuration references, which are
+necessary for this build to succeed and can be found further down the page.
+
+#### Required:
+
+@include 'builder/amazon/chroot/Config-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/chroot/Config-not-required.mdx'
+
+## General Common Configuration Reference
+
+Following will be a set of fields that are also settable for other aws
+builders.
+
+### AMI Configuration
+
+#### Required:
+
+@include 'builder/amazon/common/AMIConfig-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/AMIConfig-not-required.mdx'
+
+### Block Devices Configuration
+
+Block devices can be nested in the
+[ami_block_device_mappings](#ami_block_device_mappings) array.
+
+@include 'builder/amazon/common/BlockDevice.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/BlockDevice-not-required.mdx'
+
+### Access Config Configuration
+
+#### Required:
+
+@include 'builder/amazon/common/AccessConfig-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/AccessConfig-not-required.mdx'
+
+### Assume Role Configuration
+
+@include 'builder/amazon/common/AssumeRoleConfig.mdx'
+
+@include 'builder/amazon/common/AssumeRoleConfig-not-required.mdx'
+
+### Polling Configuration
+
+@include 'builder/amazon/common/AWSPollingConfig.mdx'
+
+@include 'builder/amazon/common/AWSPollingConfig-not-required.mdx'
+
+## Basic Example
+
+Here is a basic example. It is completely valid except for the access keys:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "amazon-chroot",
+  "access_key": "YOUR KEY HERE",
+  "secret_key": "YOUR SECRET KEY HERE",
+  "source_ami": "ami-e81d5881",
+  "ami_name": "packer-amazon-chroot {{timestamp}}"
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+// To make Packer read these variables from the environment into the var object,
+// set the environment variables to have the same name as the declared
+// variables, with the prefix PKR_VAR_.
+
+// There are other ways to [set variables](/docs/from-1.5/variables#assigning-values-to-build-variables), including from a var
+// file or as a command argument.
+
+// export PKR_VAR_aws_access_key=$YOURKEY
+variable "aws_access_key" {
+  type = string
+  // default = "hardcoded_key" // Not recommended !
+}
+
+// export PKR_VAR_aws_secret_key=$YOURSECRETKEY
+variable "aws_secret_key" {
+  type = string
+  // default = "hardcoded_secret_key" // Not recommended !
+}
+
+source "amazon-chroot" "basic-example" {
+  access_key = var.aws_access_key
+  secret_key =  var.aws_secret_key
+  ami_name = "example-chroot"
+  source_ami = "ami-e81d5881"
+}
+
+build {
+  sources = [
+    "source.amazon-chroot.basic-example"
+  ]
+}
+```
+
+</Tab>
+</Tabs>
+
+## Chroot Mounts
+
+The `chroot_mounts` configuration can be used to mount specific devices within
+the chroot. By default, the following additional mounts are added into the
+chroot by Packer:
+
+- `/proc` (proc)
+- `/sys` (sysfs)
+- `/dev` (bind to real `/dev`)
+- `/dev/pts` (devpts)
+- `/proc/sys/fs/binfmt_misc` (binfmt_misc)
+
+These default mounts are usually good enough for anyone and are reasonable
+defaults. However, if you want to change or add the mount points, you may using
+the `chroot_mounts` configuration. Here is an example configuration which only
+mounts `/proc` and `/dev`:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+...
+"builders": [{
+  "type": "amazon-chroot"
+  ...
+  "chroot_mounts": [
+    ["proc", "proc", "/proc"],
+    ["bind", "/dev", "/dev"]
+  ]
+}]
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-chroot" "basic-example" {
+  // ... other builder options
+  chroot_mounts = [
+    ["proc", "proc", "/proc"],
+    ["bind", "/dev", "/dev"]
+  ]
+}
+```
+
+</Tab>
+</Tabs>
+
+`chroot_mounts` is a list of a 3-tuples of strings. The three components of the
+3-tuple, in order, are:
+
+- The filesystem type. If this is "bind", then Packer will properly bind the
+  filesystem to another mount point.
+
+- The source device.
+
+- The mount directory.
+
+## Parallelism
+
+A quick note on parallelism: it is perfectly safe to run multiple _separate_
+Packer processes with the `amazon-chroot` builder on the same EC2 instance. In
+fact, this is recommended as a way to push the most performance out of your AMI
+builds.
+
+Packer properly obtains a process lock for the parallelism-sensitive parts of
+its internals such as finding an available device.
+
+## Gotchas
+
+### Unmounting the Filesystem
+
+One of the difficulties with using the chroot builder is that your provisioning
+scripts must not leave any processes running or packer will be unable to
+unmount the filesystem.
+
+For debian based distributions you can setup a
+[policy-rc.d](http://people.debian.org/~hmh/invokerc.d-policyrc.d-specification.txt)
+file which will prevent packages installed by your provisioners from starting
+services:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+"provisioners": [
+  {
+    "type": "shell",
+    "inline": [
+      "echo '#!/bin/sh' > /usr/sbin/policy-rc.d",
+      "echo 'exit 101' >> /usr/sbin/policy-rc.d",
+      "chmod a+x /usr/sbin/policy-rc.d"
+    ]
+  },
+  {
+    "type": "shell",
+    "inline": ["rm -f /usr/sbin/policy-rc.d"]
+  }
+]
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+// ...
+build {
+  sources = [
+    "source.amazon-chroot.basic-example"
+  ]
+
+  // Set policy
+  provisioner "shell" {
+    inline = [
+        "echo '#!/bin/sh' > /usr/sbin/policy-rc.d",
+        "echo 'exit 101' >> /usr/sbin/policy-rc.d",
+        "chmod a+x /usr/sbin/policy-rc.d"
+    ]
+  }
+
+  // Un-set policy
+  provisioner "shell" {
+    inline = ["rm -f /usr/sbin/policy-rc.d"]
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+### Ansible provisioner
+
+Running ansible against `amazon-chroot` requires changing the Ansible
+connection to chroot and running Ansible as root/sudo.
+
+### Using Instances with NVMe block devices.
+
+In C5, C5d, M5, and i3.metal instances, EBS volumes are exposed as NVMe block
+devices
+[reference](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html).
+In order to correctly mount these devices, you have to do some extra legwork,
+involving the `nvme_device_path` option above. Read that for more information.
+
+A working example for mounting an NVMe device is below:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "variables": {
+    "region": "us-east-2"
+  },
+  "builders": [
+    {
+      "type": "amazon-chroot",
+      "region": "{{user `region`}}",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "amzn-ami-hvm-*",
+          "root-device-type": "ebs"
+        },
+        "owners": ["137112412989"],
+        "most_recent": true
+      },
+      "ena_support": true,
+      "ami_name": "amazon-chroot-test-{{timestamp}}",
+      "nvme_device_path": "/dev/nvme1n1p",
+      "device_path": "/dev/sdf"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["echo Test > /tmp/test.txt"]
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+// export PKR_VAR_aws_access_key=$YOURKEY
+variable "aws_access_key" {
+  type = string
+}
+
+// export PKR_VAR_aws_secret_key=$YOURSECRETKEY
+variable "aws_secret_key" {
+  type = string
+}
+
+source "amazon-chroot" "basic-example" {
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+  region     = "us-east-1"
+  source_ami_filter {
+    filter {
+      key = "virtualization-type"
+      value = "hvm"
+    }
+    filter {
+      key = "name"
+      value = "amzn-ami-hvm-*"
+    }
+    filter {
+      key = "root-device-type"
+      value = "ebs"
+    }
+    owners = ["137112412989"]
+    most_recent = true
+  }
+  ena_support = true
+  ami_name = "amazon-chroot-test-{{timestamp}}"
+  nvme_device_path = "/dev/nvme1n1p"
+  device_path = "/dev/sdf"
+}
+
+build {
+  sources = [
+    "source.amazon-chroot.basic-example"
+  ]
+
+  provisioner "shell" {
+    inline = ["echo Test > /tmp/test.txt"]
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+Note that in the `nvme_device_path` you must end with the `p`; if you try to
+define the partition in this path (e.g. `nvme_device_path`: `/dev/nvme1n1p1`)
+and haven't also set the `"mount_partition": 0`, a `1` will be appended to the
+`nvme_device_path` and Packer will fail.
+
+## Building From Scratch
+
+This example demonstrates the essentials of building an image from scratch. A
+15G gp2 (SSD) device is created (overriding the default of standard/magnetic).
+The device setup commands partition the device with one partition for use as an
+HVM image and format it ext4. This builder block should be followed by
+provisioning commands to install the os and bootloader.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "amazon-chroot",
+  "ami_name": "packer-from-scratch {{timestamp}}",
+  "from_scratch": true,
+  "ami_virtualization_type": "hvm",
+  "pre_mount_commands": [
+    "parted {{.Device}} mklabel msdos mkpart primary 1M 100% set 1 boot on print",
+    "mkfs.ext4 {{.Device}}1"
+  ],
+  "root_volume_size": 15,
+  "root_device_name": "xvda",
+  "ami_block_device_mappings": [
+    {
+      "device_name": "xvda",
+      "delete_on_termination": true,
+      "volume_type": "gp2"
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+// This example assumes that AWS_SECRET_ACCESS_KEY and AWS_ACCESS_KEY_ID are
+// set in your environment, or a ~/.aws/credentials file is configured.
+source "amazon-chroot" "basic-example" {
+  region = "us-east-1"
+  ami_name = "packer-from-scratch {{timestamp}}"
+  from_scratch = true
+  ami_virtualization_type = "hvm"
+  pre_mount_commands = [
+    "parted {{.Device}} mklabel msdos mkpart primary 1M 100% set 1 boot on print",
+    "mkfs.ext4 {{.Device}}1"
+  ]
+  root_volume_size = 15
+  root_device_name = "xvda"
+  ami_block_device_mappings {
+    device_name = "xvda"
+    delete_on_termination = true
+    volume_type = "gp2"
+  }
+
+}
+
+build {
+  sources = [
+    "source.amazon-chroot.basic-example"
+  ]
+
+  provisioner "shell" {
+    inline = [
+        "echo '#!/bin/sh' > /usr/sbin/policy-rc.d",
+        "echo 'exit 101' >> /usr/sbin/policy-rc.d",
+        "chmod a+x /usr/sbin/policy-rc.d"
+    ]
+  }
+
+  provisioner "shell" {
+    inline = ["rm -f /usr/sbin/policy-rc.d"]
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+## Build template data
+
+In configuration directives marked as a template engine above, the following
+variables are available:
+
+- `BuildRegion` - The region (for example `eu-central-1`) where Packer is
+  building the AMI.
+- `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build
+  the AMI.
+- `SourceAMICreationDate` - The source AMI creation date (for example `"2020-05-14T19:26:34.000Z"`).
+- `SourceAMIName` - The source AMI Name (for example
+  `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
+  build the AMI.
+- `SourceAMIOwner` - The source AMI owner ID.
+- `SourceAMIOwnerName` - The source AMI owner alias/name (for example `amazon`).
+- `SourceAMITags` - The source AMI Tags, as a `map[string]string` object.
+
+## Build Shared Information Variables
+
+This builder generates data that are shared with provisioner and post-processor via build function of [template engine](/docs/templates/engine) for JSON and [contextual variables](/docs/from-1.5/contextual-variables) for HCL2.
+
+The generated variables available for this builder are:
+
+- `BuildRegion` - The region (for example `eu-central-1`) where Packer is
+  building the AMI.
+- `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build
+  the AMI.
+- `SourceAMICreationDate` - The source AMI creation date (for example `"2020-05-14T19:26:34.000Z"`).
+- `SourceAMIName` - The source AMI Name (for example
+  `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
+  build the AMI.
+- `SourceAMIOwner` - The source AMI owner ID.
+- `SourceAMIOwnerName` - The source AMI owner alias/name (for example `amazon`).
+- `Device` - Root device path.
+- `MountPath` - Device mounting path.
+
+Usage example:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+"post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest.json",
+      "strip_path": true,
+      "custom_data": {
+        "source_ami_name": "{{ build `SourceAMIName` }}",
+        "device": "{{ build `Device` }}",
+        "mount_path": "{{ build `MountPath` }}"
+      }
+    }
+]
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+// When accessing one of these variables from inside the builder, you need to
+// use the golang templating syntax. This is due to an architectural quirk that
+// won't be easily resolvable until legacy json templates are deprecated:
+
+{
+source "amazon-ebs" "basic-example" {
+  tags = {
+        OS_Version = "Ubuntu"
+        Release = "Latest"
+        Base_AMI_ID = "{{ .SourceAMI }}"
+        Base_AMI_Name = "{{ .SourceAMIName }}"
+    }
+}
+
+// when accessing one of the variables from a provisioner or post-processor, use
+// hcl-syntax
+post-processor "manifest" {
+    output = "manifest.json"
+    strip_path = true
+    custom_data = {
+        source_ami_name = "${build.SourceAMIName}"
+        device = "${build.Device}"
+        mount_path = "${build.MountPath}"
+    }
+}
+```
+
+</Tab>
+</Tabs>

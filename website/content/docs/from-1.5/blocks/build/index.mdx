@@ -1,0 +1,98 @@
+---
+description: |
+  The source block defines what builders are started.
+page_title: build - Blocks
+sidebar_title: <tt>build</tt>
+---
+
+# The `build` block
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+The `build` block defines what builders are started, how to `provision` them
+and if necessary what to do with their artifacts using `post-process`.
+
+To use builders in a `build` block you can either:
+
+- Set the `sources` array of string with references to pre-defined sources.
+
+- Define [build-level `source` blocks](/docs/from-1.5/blocks/build/source).
+  This also allows you to set specific fields.
+
+`@include 'from-1.5/builds/example-block.mdx'`
+
+Define [top-level `source` blocks](/docs/from-1.5/blocks/source) to configure
+your builders. The list of available builders can be found in the
+[builders](/docs/builders) section.
+
+## Naming your builds
+
+The optional `name` field of the `build` block can be used to set the name of a
+build. Named builds will prefix the log lines in a `packer build` with the name
+of the build block. For example:
+
+```hcl
+source "null" "first-example" {
+    communicator = "none"
+}
+
+source "null" "second-example" {
+    communicator = "none"
+}
+
+build {
+    name = "a"
+
+    sources = [
+        "sources.null.first-example",
+        "sources.null.second-example",
+    ]
+}
+
+
+build {
+    sources = ["sources.null.second-example"]
+}
+```
+
+Will output:
+
+```shell-session
+> packer build ./folder
+Build 'a.null.first-example' finished.
+Build 'a.null.second-example' finished.
+Build 'null.second-example' finished.
+
+==> Builds finished. The artifacts of successful builds are:
+--> a.null.first-example: Did not export anything. This is the null builder
+--> a.null.second-example: Did not export anything. This is the null builder
+--> null.second-example: Did not export anything. This is the null builder
+```
+
+### Running only specific builds
+
+The `-only`/`-except` flags will match a source's `type.name` and run 'only'
+matching **builders** (source) or all referenced builders 'except' the matching
+ones, for example with the same config file:
+
+```shell-session
+> packer build -only "*.second" ./folder
+Build 'null.second-example' finished.
+Build 'a.null.second-example' finished.
+
+==> Builds finished. The artifacts of successful builds are:
+--> a.null.second-example: Did not export anything. This is the null builder
+--> null.second-example: Did not export anything. This is the null builder
+```
+
+Here `'a.null.first-example'` was skipped.
+
+-> Note: It is not yet possible to match a named `build` block to do this, but
+this is soon going to be possible. So here "a.\*" will match nothing.
+
+## Related
+
+- A list of [community
+  builders](/community-tools#community-builders) is available.
+
+- Create your own [custom builder](/docs/extending/custom-builders) !

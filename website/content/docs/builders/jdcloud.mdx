@@ -1,0 +1,88 @@
+---
+description: |
+  The `jdcloud` Packer builder helps you to build instance images
+  based on an existing image
+page_title: JDCloud Image Builder
+sidebar_title: JDCloud
+---
+
+# JDCloud Image Builder
+
+Type: `jdcloud`
+
+The `jdcloud` Packer builder helps you to build instance images
+based on an existing image
+
+## Configuration Reference
+
+In order to build a JDCloud instance image, full-fill your configuration file. Necessary attributes
+are given below:
+
+### Required-Parameters:
+
+- `type` (string) - This parameter tells which cloud-service-provider you are using, in our case, use 'jdcloud'
+- `image_id` (string) - New image is generated based on an old one, specify the base-image-id here.
+- `access_key` (string) - Your JD Cloud access key. You may set this as an env-variable:`export JDCLOUD_ACCESS_KEY=xxx`
+- `secret_key` (string) - Your JD Cloud secret key. You may also set this via env-variable:`export JDCLOUD_SECRET_KEY=xxx`
+- `region_id` (string) - Region of your instance, candidates are {"cn-north-1","cn-south-1","cn-east-1","cn-east-2"}
+- `az` (string) - Exact availability zone of instance, 'cn-north-1c' for example
+- `instance_name` (string) - Name your instance
+- `instance_type` (string) - Class of your expected instance
+- `image_name` (string) - Name the image you would like to create
+- `communicator` (string) - Currently only `ssh` is supported. `winrm` will be added if required
+
+### Optional-Parameters
+
+- `subnet_id` (string) - An instance is supposed to exists in an subnet, if not specified , we will create new one for you
+
+In addition to the above configuration options, a communicator can be configured for this builder:
+
+### Communicator Configuration
+
+#### Optional:
+
+@include 'packer-plugin-sdk/communicator/Config-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSHTemporaryKeyPair-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Key-Pair-Name-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
+
+## Examples
+
+Here is a basic example for JDCloud.
+
+```json
+{
+  "builders": [
+    {
+      "type": "jdcloud",
+      "image_id": "img-h8ly274zg9",
+      "access_key": "<your access key>",
+      "secret_key": "<your secret key>",
+      "region_id": "cn-north-1",
+      "az": "cn-north-1c",
+      "instance_name": "created_by_packer",
+      "instance_type": "g.n2.medium",
+      "ssh_password": "/Users/mac/.ssh/id_rsa",
+      "ssh_keypair_name": "created_by_xiaohan",
+      "image_name": "packerImage",
+      "subnet_id": "subnet-jo6e38sdli",
+      "communicator": "ssh",
+      "ssh_username": "root"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["sleep 3", "echo 123", "pwd"]
+    }
+  ]
+}
+```
+
+[Find more examples](https://github.com/hashicorp/packer/tree/master/examples/jdcloud)

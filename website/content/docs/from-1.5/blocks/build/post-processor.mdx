@@ -1,0 +1,94 @@
+---
+description: |
+  The post-processor block defines how a post-processor is configured.
+page_title: post-processor - build - Blocks
+sidebar_title: <tt>post-processor</tt>
+---
+
+# The `post-processor` block
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+The `post-processor` block defines how a post-processor is configured.
+
+```hcl
+# builds.pkr.hcl
+build {
+  # ... build image
+  post-processor "checksum" { # checksum image
+    checksum_types = [ "md5", "sha512" ] # checksum the artifact
+    keep_input_artifact = true           # keep the artifact
+  }
+
+  post-processor "amazon-import" { # upload image to amazon
+  }
+}
+```
+
+Each `post-processor` runs after each defined build. A post-processor takes the
+`Artifact` from a build. Post-processors are optional, and they can be used to
+upload artifacts, re-package, or more. The list of available post-processors
+can be found in the [post-processors](/docs/post-processors) section.
+
+A `post-processor` can also take the `Artifact` from another post-processor
+when it is defined in a [`post-processors`
+block](/docs/from-1.5/blocks/build/post-processor) list, that is a list of
+chained post processors.
+
+-> Note: The input 'artifact' received by a post-processor will be automatically
+deleted by default.
+
+# Keep an input artifact
+
+To prevent an input artifact from being deleted, you can set the
+`keep_input_artifact` field to true to make Packer keep both artifacts. For
+example if we want to checksum an artifact and keep the artifact:
+
+```hcl
+# builds.pkr.hcl
+build {
+  # ...
+  post-processor "checksum" {
+    checksum_types = [ "md5", "sha512" ]
+    keep_input_artifact = true
+  }
+}
+```
+
+# Run on Specific Builds
+
+You can use the `only` or `except` configurations to run a post-processor only
+with specific sources. These two configurations do what you expect: `only` will
+only run the post-processor on the specified sources and `except` will run the
+post-processor on anything other than the specified sources.
+
+An example of `only` being used is shown below, but the usage of `except` is
+effectively the same:
+
+```hcl
+# builds.pkr.hcl
+build {
+  # ...
+  post-processor "checksum" {
+    checksum_types = [ "md5", "sha512" ]
+    keep_input_artifact = true
+    only = ["source.amazon-ebs.example"]
+  }
+}
+```
+
+The values within `only` or `except` are _source names_, not builder types.
+
+## Build Contextual Variables
+
+Packer allows to access connection information and basic instance state
+information from a post-processor. These information are stored in the `build`
+variable. Check out the [Contextual
+Variables](/docs/from-1.5/contextual-variables) documentation to learn more
+about and see some examples of how to use them.
+
+### Related
+
+- The [`post-processors` block](/docs/from-1.5/blocks/build/post-processor)
+  allows to define one or more chain of `post-processor`s that will take the
+  output from the build and provision steps.

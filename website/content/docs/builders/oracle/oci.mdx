@@ -1,0 +1,352 @@
+---
+description: |
+  The oracle-oci builder is able to create new custom images for use with Oracle
+  Cloud Infrastructure (OCI).
+page_title: Oracle OCI - Builders
+sidebar_title: Oracle OCI
+---
+
+# Oracle Cloud Infrastructure (OCI) Builder
+
+Type: `oracle-oci`
+
+The `oracle-oci` Packer builder is able to create new custom images for use
+with [Oracle Cloud Infrastructure](https://cloud.oracle.com) (OCI). The builder
+takes a base image, runs any provisioning necessary on the base image after
+launching it, and finally snapshots it creating a reusable custom image.
+
+It is recommended that you familiarise yourself with the [Key Concepts and
+Terminology](https://docs.us-phoenix-1.oraclecloud.com/Content/GSG/Concepts/concepts.htm)
+prior to using this builder if you have not done so already.
+
+The builder _does not_ manage images. Once it creates an image, it is up to you
+to use it or delete it.
+
+## Authorization
+
+The Oracle OCI API requires that requests be signed with the RSA public key
+associated with your
+[IAM](https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Concepts/overview.htm)
+user account. For a comprehensive example of how to configure the required
+authentication see the documentation on [Required Keys and
+OCIDs](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/apisigningkey.htm)
+([Oracle Cloud
+IDs](https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/identifiers.htm)).
+Alternatively you can use [Instance
+Principals](https://docs.cloud.oracle.com/en-us/iaas/Content/Identity/Tasks/callingservicesfrominstances.htm)
+in which case you don't need the above user authorization.
+
+## Configuration Reference
+
+There are many configuration options available for the `oracle-oci` builder. In
+addition to the options listed here, a
+[communicator](/docs/templates/communicator) can be configured for this
+builder.
+
+In addition to the options defined there, a private key file
+can also be supplied to override the typical auto-generated key:
+
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
+
+### Required
+
+- `availability_domain` (string) - The name of the [Availability
+  Domain](https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/regions.htm)
+  within which a new instance is launched and provisioned. The names of the
+  Availability Domains have a prefix that is specific to your
+  [tenancy](https://docs.us-phoenix-1.oraclecloud.com/Content/GSG/Concepts/concepts.htm#two).
+
+  To get a list of the Availability Domains, use the
+  [ListAvailabilityDomains](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/identity/latest/AvailabilityDomain/ListAvailabilityDomains)
+  operation, which is available in the IAM Service API.
+
+- `base_image_ocid` (string) - The OCID of the [base
+  image](https://docs.us-phoenix-1.oraclecloud.com/Content/Compute/References/images.htm)
+  to use. This is the unique identifier of the image that will be used to
+  launch a new instance and provision it.
+
+  To get a list of the accepted image OCIDs, use the
+  [ListImages](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/latest/Image/ListImages)
+  operation available in the Core Services API.
+
+- `base_image_filter` (map of strings) - As an alternative to providing `base_image_ocid`,
+  the user can supply search criteria, and Packer will use the the most recent image that meets
+  all search criteria. If no image meets all search criteria, Packer returns an error. The
+  following fields, if specified, must match exactly:
+
+  - `compartment_id` - The OCID of the compartment to find the image. If not specified, will use `compartment_ocid`
+    used for the instance.
+  - `display_name` - The full name of the image, e.g., `Oracle-Linux-7.8-2020.05.26-0`
+  - `operating_system` - The operating system used on the image, e.g., `Oracle Linux`
+  - `operating_system_version` - The version of the operating system on the image, e.g., `7.8`
+  - `shape` - A shape that the image supports. If not specified, will use `shape` used for the instance
+
+  Additionally, the following field takes a regular expression:
+
+  - `display_name_search` - a regular expression for the display name, e.g., `^Oracle-Linux`. This
+    is ignored if `display_name` is also specified under `base_image_filter`. If no images match
+    the expression, Packer returns an error. If multiple images match, the most recent is used.
+
+  `base_image_filter` is ignored if `base_image_ocid` is also specified.
+
+- `compartment_ocid` (string) - The OCID of the
+  [compartment](https://docs.us-phoenix-1.oraclecloud.com/Content/GSG/Tasks/choosingcompartments.htm) that the instance will run in.
+
+- `shape` (string) - The template that determines the number of CPUs, amount
+  of memory, and other resources allocated to a newly created instance.
+
+  To get a list of the available shapes, use the
+  [ListShapes](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/Shape/ListShapes)
+  operation available in the Core Services API.
+
+- `subnet_ocid` (string) - The name of the subnet within which a new instance
+  is launched and provisioned.
+
+  To get a list of your subnets, use the
+  [ListSubnets](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/latest/Subnet/ListSubnets)
+  operation available in the Core Services API.
+
+  Note: the subnet must be configured to allow access via your chosen
+  [communicator](/docs/communicators) (communicator defaults to
+  [SSH tcp/22](/docs/communicators/ssh#ssh_port)).
+
+### Optional
+
+- `use_instance_principals` (boolean) - Whether to use [Instance
+  Principals](https://docs.cloud.oracle.com/en-us/iaas/Content/Identity/Tasks/callingservicesfrominstances.htm)
+  instead of User Principals. If this key is set to true, setting any one of the `access_cfg_file`,
+  `access_cfg_file_account`, `region`, `tenancy_ocid`, `user_ocid`, `key_file`, `fingerprint`,
+  `pass_phrase` will result in configuration validation errors.
+  Defaults to `false`.
+
+- `access_cfg_file` (string) - The path to the [OCI config
+  file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm).
+  This cannot be used along with the `use_instance_principals` key.
+  Defaults to `$HOME/.oci/config`.
+
+- `access_cfg_file_account` (string) - The specific account in the [OCI config
+  file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm) to use.
+  This cannot be used along with the `use_instance_principals` key.
+  Defaults to `DEFAULT`.
+
+- `region` (string) - An Oracle Cloud Infrastructure region. Overrides value provided by the
+  [OCI config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
+  if present. This cannot be used along with the `use_instance_principals` key.
+
+- `tenancy_ocid` (string) - The OCID of your tenancy. Overrides value provided by the [OCI config
+  file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm) if present.
+  This cannot be used along with the `use_instance_principals` key.
+
+- `user_ocid` (string) - The OCID of the user calling the OCI API. Overrides value provided by the
+  [OCI config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
+  if present. This cannot be used along with the `use_instance_principals` key.
+
+- `key_file` (string) - Full path and filename of the OCI API signing key. Overrides value provided
+  by the [OCI config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
+  if present. This cannot be used along with the `use_instance_principals` key.
+
+- `fingerprint` (string) - Fingerprint for the OCI API signing key. Overrides value provided by the
+  [OCI config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm) if
+  present. This cannot be used along with the `use_instance_principals` key.
+
+- `pass_phrase` (string) - Pass phrase used to decrypt the OCI API signing key. Overrides value provided
+  by the [OCI config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
+  if present. This cannot be used along with the `use_instance_principals` key.
+
+- `image_name` (string) - The name to assign to the resulting custom image.
+
+- `image_compartment_ocid` (string) - The OCID of the target compartment for the resulting image. Defaults to `compartment_ocid`.
+
+- `instance_name` (string) - The name to assign to the instance used for the image creation process.
+  If not set a name of the form `instanceYYYYMMDDhhmmss` will be used.
+
+- `instance_tags` (map of strings) - Add one or more freeform tags to the instance used for the
+  image creation process.
+
+- `instance_defined_tags` (map of maps of strings) - Add one or more defined tags for a given namespace
+  to the instance used for the image creation process.
+
+- `create_vnic_details` (map of strings) - Specify details for the virtual network interface card (VNIC)
+  that is attached to the instance. Possible keys (all optional) are: `assign_public_ip` (bool),
+  `display_name` (string), `hostname_lable` (string), `nsg_ids` (list), `private_ip` (string),
+  `skip_source_dest_check` (bool), `subnet_id` (string), `tags` (map of string), and `defined_tags`
+  (map of maps of strings). See
+  [the Oracle docs](https://docs.cloud.oracle.com/en-us/iaas/Content/Network/Tasks/managingVNICs.htm)
+  for more information about VNICs.
+
+- `disk_size` (int64) - The size of the boot volume in GBs. Minimum value is 50 and maximum value is 16384 (16TB).
+  Sets the [BootVolumeSizeInGBs](https://godoc.org/github.com/oracle/oci-go-sdk/core#InstanceConfigurationInstanceSourceViaImageDetails)
+  when launching the instance. Defaults to `50`.
+
+- `image_launch_mode` (string) - Specifies the configuration mode for launching instances.
+  Valid values are `"NATIVE"`, `"EMULATED"`, `"PARAVIRTUALIZED"`, and `"CUSTOM"`. See the
+  [Oracle CLI docs](https://docs.cloud.oracle.com/en-us/iaas/tools/oci-cli/2.12.5/oci_cli_docs/cmdref/compute/image/create.html#cmdoption-launch-mode)
+  for more information about these modes.
+
+- `use_private_ip` (boolean) - Use private ip addresses to connect to the
+  instance via ssh.
+
+- `metadata` (map of strings) - Metadata optionally contains custom metadata
+  key/value pairs provided in the configuration. While this can be used to
+  set metadata\["user_data"\] the explicit "user_data" and
+  "user_data_file" values will have precedence. An instance's metadata can
+  be obtained from at [http://169.254.169.254](http://169.254.169.254) on
+  the launched instance.
+
+- `user_data` (string) - User data to be used by cloud-init. See [the Oracle
+  docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails)
+  for more details. Generally speaking, it is easier to use the
+  `user_data_file`, but you can use this option to put either the plaintext
+  data or the base64 encoded data directly into your Packer config. Packer
+  will not automatically wait for a user script to finish before shutting
+  down the instance this must be handled in a provisioner.
+
+- `user_data_file` (string) - Path to a file to be used as user data by
+  cloud-init. See [the Oracle
+  docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails)
+  for more details. Example: `"user_data_file": "./boot_config/myscript.sh"`
+
+- `tags` (map of strings) - Add one or more freeform tags to the resulting
+  custom image. See [the Oracle
+  docs](https://docs.cloud.oracle.com/iaas/Content/Identity/Concepts/taggingoverview.htm)
+  for more details. Example:
+
+```yaml
+'tags':
+  'tag1': 'value1'
+  'tag2': 'value2'
+```
+
+- `defined_tags` (map of map of strings) - Add one or more defined tags for a given namespace to the resulting
+  custom image. See [the Oracle
+  docs](https://docs.cloud.oracle.com/iaas/Content/Identity/Concepts/taggingoverview.htm)
+  for more details. Example:
+
+```yaml
+'tags':
+  'namespace': { 'tag1': 'value1', 'tag2': 'value2' }
+```
+
+## Basic Example
+
+Here is a basic example. Note that account specific configuration has been
+substituted with the letter `a` and OCIDS have been shortened for brevity.
+
+```json
+{
+  "availability_domain": "aaaa:PHX-AD-1",
+  "base_image_ocid": "ocid1.image.oc1.phx.aaaaaaaa5yu6pw3riqtuhxzov7fdngi4tsteganmao54nq3pyxu3hxcuzmoa",
+  "compartment_ocid": "ocid1.compartment.oc1..aaa",
+  "image_name": "ExampleImage",
+  "shape": "VM.Standard1.1",
+  "ssh_username": "opc",
+  "subnet_ocid": "ocid1.subnet.oc1..aaa",
+  "type": "oracle-oci"
+}
+```
+
+## Using Instance Principals
+
+Here is a basic example. Note that account specific configuration has been
+substituted with the letter `a` and OCIDS have been shortened for brevity.
+
+```json
+{
+  "use_instance_principals": "true",
+  "availability_domain": "aaaa:PHX-AD-1",
+  "base_image_ocid": "ocid1.image.oc1.phx.aaaaaaaa5yu6pw3riqtuhxzov7fdngi4tsteganmao54nq3pyxu3hxcuzmoa",
+  "compartment_ocid": "ocid1.compartment.oc1..aaa",
+  "image_name": "ExampleImage",
+  "shape": "VM.Standard2.1",
+  "ssh_username": "opc",
+  "subnet_ocid": "ocid1.subnet.oc1..aaa",
+  "type": "oracle-oci"
+}
+```
+
+```shell-session
+[opc@packerhost ~]$ packer build packer.json
+oracle-oci: output will be in this color.
+
+==> oracle-oci: Creating temporary ssh key for instance...
+==> oracle-oci: Creating instance...
+==> oracle-oci: Created instance (ocid1.instance.oc1.phx.aaa).
+==> oracle-oci: Waiting for instance to enter 'RUNNING' state...
+==> oracle-oci: Instance 'RUNNING'.
+==> oracle-oci: Instance has IP: 10.10.10.10.
+==> oracle-oci: Using ssh communicator to connect: 10.10.10.10
+==> oracle-oci: Waiting for SSH to become available...
+==> oracle-oci: Connected to SSH!
+==> oracle-oci: Creating image from instance...
+==> oracle-oci: Image created.
+==> oracle-oci: Terminating instance (ocid1.instance.oc1.phx.aaa)...
+==> oracle-oci: Terminated instance.
+Build 'oracle-oci' finished.
+
+==> Builds finished. The artifacts of successful builds are:
+--> oracle-oci: An image was created: 'ExampleImage' (OCID: ocid1.image.oc1.phx.aaa) in region 'us-phoenix-1'
+[opc@packerhost ~]$
+```
+
+## Assigning Tags and Network Security Groups to the Instance
+
+Tags are useful for breaking down costs and usage. The keys `instance_tags`
+and `instance_defined_tags` are assigned to the temporary instance,
+whereas `tags` and `defined_tags` are assigned to the resulting image.
+
+Network Security Groups (NSGs) are used for granting networking permissions
+to the instance. Depending on network (VCN and subnet) setup, this may be
+required for Packer to successfully SSH into the instance. NSGs are a property
+of the virtual network interface card (VNIC) attached to the instance, and
+are listed in `nsg_ids` under `create_vnic_details`.
+
+```json
+{
+  "name": "base-image-{{isotime \"20060102030405\"}}",
+  "type": "oracle-oci",
+  "availability_domain": "aaaa:PHX-AD-1",
+  "base_image_ocid": "ocid1.image.oc1.iad.aaa",
+  "compartment_ocid": "ocid1.compartment.oc1..aaa",
+  "image_name": "my-image-{{isotime \"20060102030405\"}}",
+  "shape": "VM.Standard.E2.1",
+  "subnet_ocid": "ocid1.subnet.oc1.iad.aaa",
+  "use_private_ip": "true",
+  "instance_name": "packer-build-{{isotime \"20060102030405\"}}",
+  "instance_tags": { "testing": "yes" },
+  "instance_defined_tags": {
+    "Operations": {
+      "Team": "CostCenter",
+      "Environment": "prod"
+    }
+  },
+  "create_vnic_details": {
+    "assign_public_ip": "false",
+    "display_name": "testing-123",
+    "nsg_ids": ["ocid1.networksecuritygroup.oc1.iad.aaa"]
+  },
+  "tags": {
+    "CreationDate": "{{isotime \"20060102 03:04:05 MST\"}}"
+  }
+}
+```
+
+## Base Image Filter Example
+
+Note that `base_image_filter` gets passed as a string, then interpreted as a
+regular expression. This means that all back-slashes must be doubled, e.g.,
+use `\\w+` to mean `\w+`, and `\\\\` to create the regular expression equivalent
+of `\\` (which will search for a literal back-slash).
+
+```json
+{
+  "name":                "base-image-{{isotime \"20060102030405\"}}",
+  "type":                "oracle-oci",
+  "availability_domain": "aaaa:PHX-AD-1",
+  "base_image_filter": {
+    "operating_system": "Oracle Linux",
+    "operating_system_version": "7.8",
+    "display_name_search": "^Oracle-Linux-7\\.8-2020\\.\\d+"
+  }
+  ...
+}
+```

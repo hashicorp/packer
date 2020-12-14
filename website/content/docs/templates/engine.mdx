@@ -1,0 +1,369 @@
+---
+description: |
+  All strings within templates are processed by a common Packer templating
+  engine, where variables and functions can be used to modify the value of a
+  configuration parameter at runtime.
+page_title: Template Engine - Templates
+sidebar_title: Engine
+---
+
+# Template Engine
+
+All strings within templates are processed by a common Packer templating
+engine, where variables and functions can be used to modify the value of a
+configuration parameter at runtime.
+
+The syntax of templates uses the following conventions:
+
+- Anything template related happens within double-braces: `{{ }}`.
+- Functions are specified directly within the braces, such as
+  `{{timestamp}}`.
+- Template variables are prefixed with a period and capitalized, such as
+  `{{.Variable}}`.
+
+## Functions
+
+Functions perform operations on and within strings, for example the
+`{{timestamp}}` function can be used in any string to generate the current
+timestamp. This is useful for configurations that require unique keys, such as
+AMI names. By setting the AMI name to something like `My Packer AMI {{timestamp}}`, the AMI name will be unique down to the second. If you need
+greater than one second granularity, you should use `{{uuid}}`, for example
+when you have multiple builders in the same template.
+
+Here is a full list of the available functions for reference.
+
+- `build_name` - The name of the build being run.
+- `build_type` - The type of the builder being used currently.
+- `clean_resource_name` - Image names can only contain certain characters and
+  have a maximum length, eg 63 on GCE & 80 on Azure. `clean_resource_name`
+  will convert upper cases to lower cases and replace illegal characters with
+  a "-" character. Example:
+
+  `"mybuild-{{isotime | clean_resource_name}}"` will become `mybuild-2017-10-18t02-06-30z`.
+
+  Note: Valid Azure image names must match the regex
+  `^[^_\\W][\\w-._)]{0,79}$`
+
+  Note: Valid GCE image names must match the regex
+  `(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)`
+
+  This engine does not guarantee that the final image name will match the
+  regex; it will not truncate your name if it exceeds the maximum number of
+  allowed characters, and it will not validate that the beginning and end of
+  the engine's output are valid. For example, `"image_name": {{isotime | clean_resource_name}}"` will cause your build to fail because the image
+  name will start with a number, which is why in the above example we prepend
+  the isotime with "mybuild".
+  Exact behavior of `clean_resource_name` will depend on which builder it is
+  being applied to; refer to build-specific docs below for more detail on how
+  each function will behave.
+
+- `env` - Returns environment variables. See example in [using home
+  variable](/docs/templates/user-variables#using-home-variable)
+- `build` - This engine will allow you to access, from provisioners and post-processors, special variables that
+  provide connection information and basic instance state information.
+  Usage example:
+
+  ```json
+  {
+    "type": "shell-local",
+    "environment_vars": ["TESTVAR={{ build `PackerRunUUID`}}"],
+    "inline": ["echo $TESTVAR"]
+  }
+  ```
+
+  Valid variables to request are:
+
+  - **ID**: Represents the vm being provisioned. For example, in Amazon it is the instance id; in digitalocean,
+    it is the droplet id; in Vmware, it is the vm name.
+
+  - **Host**, **Port**, **User** and **Password**: The host, port, user, and password that Packer uses to access the machine.
+    Useful for using the shell local provisioner to run Ansible or Inspec against the provisioned instance.
+
+  - **ConnType**: Type of communicator being used. For example, for SSH communicator this will be "ssh".
+
+  - **PackerRunUUID**: Current build's unique id. Can be used to specify build artifacts.
+    An example of that, is when multiple builds runs at the same time producing the same artifact.
+    It's possible to differentiate these artifacts by naming them with the builds' unique ids.
+
+  - **PackerHTTPIP**, **PackerHTTPPort**, and **PackerHTTPAddr**: HTTP IP, port, and address of the file server Packer creates to serve items in the "http" dir to the vm. The HTTP address is displayed in the format `IP:PORT`.
+
+  - **SSHPublicKey** and **SSHPrivateKey**: The public and private key that Packer uses to connect to the instance.
+    These are unique to the SSH communicator and are unset when using other communicators.
+    **SSHPublicKey** and **SSHPrivateKey** can have escape sequences and special characters so their output should be single quoted to avoid surprises. For example:
+
+    ```json
+    { ... "provisioners": [{
+      "type": "shell",
+      "inline": [ "echo '{{ build `SSHPrivateKey`}}' > /tmp/packer-session.pem" ]
+      }]
+    }
+    ```
+
+  For backwards compatibility, `WinRMPassword` is also available through this
+  engine, though it is no different than using the more general `Password`.
+
+  This function is only for use within specific options inside of
+  _provisioners_ -- these options will be listed as being template engines
+  in the provisioner documentation.
+
+  For builder-specific builder variables, please also refer to the builder docs:
+
+  - Amazon EC2: [chroot](/docs/builders/amazon/chroot#build-shared-information-variables),
+    [EBS Volume](/docs/builders/amazon/ebsvolume#build-shared-information-variables),
+    [EBS](/docs/builders/amazon/ebs#build-shared-information-variables),
+    [EBS Surrogate](/docs/builders/amazon/ebssurrogate#build-shared-information-variables),
+    [Instance](/docs/builders/amazon/instance#build-shared-information-variables).
+
+  This engine is in beta; please report any issues or requests on the Packer
+  issue tracker on GitHub.
+
+- `isotime [FORMAT]` - UTC time, which can be
+  [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
+  examples below in [the `isotime` format
+  reference](/docs/templates/engine#isotime-function-format-reference).
+  `strftime FORMAT` - UTC time, formated using the ISO C standard format
+  `FORMAT`. See
+  [jehiah/go-strftime](https://github.com/jehiah/go-strftime) for a list
+  of available format specifier.
+
+  Please note that if you are using a large number of builders,
+  provisioners or post-processors, the isotime may be slightly
+  different for each one because it is from when the plugin is
+  launched not the initial Packer process. In order to avoid this and make
+  the timestamp consistent across all plugins, set it as a user variable
+  and then access the user variable within your plugins.
+
+- `lower` - Lowercases the string.
+- `packer_version` - Returns Packer version.
+- `pwd` - The working directory while executing Packer.
+- `replace` - ( old, new string, n int, s ) Replace returns a copy of the
+  string s with the first n non-overlapping instances of old replaced by new.
+- `replace_all` - ( old, new string, s ) ReplaceAll returns a copy of the
+  string s with all non-overlapping instances of old replaced by new.
+- `split` - Split an input string using separator and return the requested
+  substring.
+- `template_dir` - The directory to the template for the build.
+- `timestamp` - The Unix timestamp in UTC when the Packer process was
+  launched. Please note that if you are using a large number of builders,
+  provisioners or post-processors, the timestamp may be slightly
+  different for each one because it is from when the plugin is
+  launched not the initial Packer process. In order to avoid this and make
+  the timestamp consistent across all plugins, set it as a user variable
+  and then access the user variable within your plugins.
+- `uuid` - Returns a random UUID.
+- `upper` - Uppercases the string.
+- `user` - Specifies a user variable.
+
+#### Specific to Amazon builders:
+
+- `clean_resource_name` - AMI names
+  can only contain certain characters. This function will replace illegal
+  characters with a '-" character. Example usage since ":" is not a legal AMI
+  name is: `{{isotime | clean_resource_name}}`.
+
+#### Specific to Google Compute builders:
+
+- `clean_resource_name` - GCE
+  image names can only contain certain characters and the maximum length is
+
+  63. This function will convert upper cases to lower cases and replace
+      illegal characters with a "-" character. Example:
+
+  `"mybuild-{{isotime | clean_resource_name}}"` will become
+  `mybuild-2017-10-18t02-06-30z`.
+
+  Note: Valid GCE image names must match the regex
+  `(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)`
+
+  This engine does not guarantee that the final image name will match the
+  regex; it will not truncate your name if it exceeds 63 characters, and it
+  will not validate that the beginning and end of the engine's output are
+  valid. For example, `"image_name": {{isotime | clean_resource_name}}"` will
+  cause your build to fail because the image name will start with a number,
+  which is why in the above example we prepend the isotime with "mybuild".
+
+#### Specific to Azure builders:
+
+- `clean_resource_name` - Azure
+  managed image names can only contain certain characters and the maximum
+  length is 80. This function will replace illegal characters with a "-"
+  character. Example:
+
+  `"mybuild-{{isotime | clean_resource_name}}"` will become
+  `mybuild-2017-10-18t02-06-30z`.
+
+  Note: Valid Azure image names must match the regex
+  `^[^_\\W][\\w-._)]{0,79}$`
+
+  This engine does not guarantee that the final image name will match the
+  regex; it will not truncate your name if it exceeds 80 characters, and it
+  will not validate that the beginning and end of the engine's output are
+  valid. It will truncate invalid characters from the end of the name when
+  converting illegal characters. For example, `"managed_image_name: "My-Name::"` will be converted to `"managed_image_name: "My-Name"`
+
+## Template variables
+
+Template variables are special variables automatically set by Packer at build
+time. Some builders, provisioners and other components have template variables
+that are available only for that component. Template variables are recognizable
+because they're prefixed by a period, such as `{{ .Name }}`. For example, when
+using the [`shell`](/docs/builders/vmware-iso) builder template variables
+are available to customize the
+[`execute_command`](/docs/provisioners/shell#execute_command) parameter
+used to determine how Packer will run the shell command.
+
+```json
+{
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "{{.Vars}} sudo -E -S bash '{{.Path}}'",
+      "scripts": ["scripts/bootstrap.sh"]
+    }
+  ]
+}
+```
+
+The `{{ .Vars }}` and `{{ .Path }}` template variables will be replaced with
+the list of the environment variables and the path to the script to be executed
+respectively.
+
+-> **Note:** In addition to template variables, you can specify your own
+user variables. See the [user variable](/docs/templates/user-variables)
+documentation for more information on user variables.
+
+# isotime Function Format Reference
+
+Formatting for the function `isotime` uses the magic reference date **Mon Jan 2
+15:04:05 -0700 MST 2006**, which breaks down to the following:
+
+<table class="table table-bordered table-condensed">
+  <thead>
+    <tr>
+      <th></th>
+      <th align="center">Day of Week</th>
+      <th align="center">Month</th>
+      <th align="center">Date</th>
+      <th align="center">Hour</th>
+      <th align="center">Minute</th>
+      <th align="center">Second</th>
+      <th align="center">Year</th>
+      <th align="center">Timezone</th>
+    </tr>
+  </thead>
+  <tr>
+    <th>Numeric</th>
+    <td align="center">-</td>
+    <td align="center">01</td>
+    <td align="center">02</td>
+    <td align="center">03 (15)</td>
+    <td align="center">04</td>
+    <td align="center">05</td>
+    <td align="center">06</td>
+    <td align="center">-0700</td>
+  </tr>
+  <tr>
+    <th>Textual</th>
+    <td align="center">Monday (Mon)</td>
+    <td align="center">January (Jan)</td>
+    <td align="center">-</td>
+    <td align="center">-</td>
+    <td align="center">-</td>
+    <td align="center">-</td>
+    <td align="center">-</td>
+    <td align="center">MST</td>
+  </tr>
+</table>
+
+_The values in parentheses are the abbreviated, or 24-hour clock values_
+
+For those unfamiliar with GO date/time formatting, here is a link to the
+documentation: [go date/time formatting](https://programming.guide/go/format-parse-string-time-date-example.html)
+
+Note that "-0700" is always formatted into "+0000" because `isotime` is always
+UTC time.
+
+Here are some example formatted time, using the above format options:
+
+```liquid
+isotime = June 7, 7:22:43pm 2014
+
+{{isotime "2006-01-02"}} = 2014-06-07
+{{isotime "Mon 1504"}} = Sat 1922
+{{isotime "02-Jan-06 03\_04\_05"}} = 07-Jun-2014 07\_22\_43
+{{isotime "Hour15Year200603"}} = Hour19Year201407
+```
+
+Please note that double quote characters need escaping inside of templates (in
+this case, on the `ami_name` value):
+
+```json
+{
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "...",
+      "secret_key": "...",
+      "region": "us-east-1",
+      "source_ami": "ami-fce3c696",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "packer {{isotime \"2006-01-02\"}}"
+    }
+  ]
+}
+```
+
+-> **Note:** See the [Amazon builder](/docs/builders/amazon)
+documentation for more information on how to correctly configure the Amazon
+builder in this example.
+
+# split Function Format Reference
+
+The function `split` takes an input string, a seperator string, and a numeric
+component value and returns the requested substring.
+
+Please note that you cannot use the `split` function on user variables, because
+we can't nest the functions currently. This function is indended to be used on
+builder variables like build_name. If you need a split user variable, the best
+way to do it is to create a separate variable.
+
+Here are some examples using the above options:
+
+```liquid
+build_name = foo-bar-provider
+
+{{split build_name "-" 0}} = foo
+{{split "fixed-string" "-" 1}} = string
+```
+
+Please note that double quote characters need escaping inside of templates (in
+this case, on the `fixed-string` value):
+
+```json
+{
+  "post-processors": [
+    [
+      {
+        "type": "vagrant",
+        "compression_level": 9,
+        "keep_input_artifact": false,
+        "vagrantfile_template": "tpl/{{split build_name \"-\" 1}}.rb",
+        "output": "output/{{build_name}}.box",
+        "only": ["org-name-provider"]
+      }
+    ]
+  ]
+}
+```
+
+# replace Function Format Reference
+
+Here are some examples using the replace options:
+
+```liquid
+build_name = foo-bar-provider
+
+{{ replace_all "-" "/" build_name }}  = foo/bar/provider
+{{ build_name | replace "-" "/" 1 }} = foo/bar-provider
+```

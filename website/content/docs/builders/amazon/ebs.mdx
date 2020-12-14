@@ -1,0 +1,628 @@
+---
+description: |
+  The amazon-ebs Packer builder is able to create Amazon AMIs backed by EBS
+  volumes for use in EC2. For more information on the difference between
+  EBS-backed instances and instance-store backed instances, see the storage for
+  the root device section in the EC2 documentation.
+page_title: Amazon EBS - Builders
+sidebar_title: EBS
+---
+
+# AMI Builder (EBS backed)
+
+Type: `amazon-ebs`
+
+The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS
+volumes for use in [EC2](https://aws.amazon.com/ec2/). For more information on
+the difference between EBS-backed instances and instance-store backed
+instances, see the ["storage for the root device" section in the EC2
+documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMIs.html#storage-for-the-root-device).
+
+This builder builds an AMI by launching an EC2 instance from a source AMI,
+provisioning that running machine, and then creating an AMI from that machine.
+This is all done in your own AWS account. The builder will create temporary
+keypairs, security group rules, etc. that provide it temporary access to the
+instance while the image is being created. This simplifies configuration quite
+a bit.
+
+The builder does _not_ manage AMIs. Once it creates an AMI and stores it in
+your account, it is up to you to use, delete, etc. the AMI.
+
+-> **Note:** Temporary resources are, by default, all created with the
+prefix `packer`. This can be useful if you want to restrict the security groups
+and key pairs Packer is able to operate on.
+
+## EBS Specific Configuration Reference
+
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [AMI](#ami-configuration),
+[BlockDevices](#block-devices-configuration),
+[Access](#access-configuration),
+[Run](#run-configuration) and
+[Communicator](#communicator-configuration)
+configuration references, which are
+necessary for this build to succeed and can be found further down the page.
+
+#### Optional:
+
+@include 'builder/amazon/ebs/Config-not-required.mdx'
+
+### AMI Configuration
+
+#### Required:
+
+@include 'builder/amazon/common/AMIConfig-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/AMIConfig-not-required.mdx'
+
+### Access Configuration
+
+#### Required:
+
+@include 'builder/amazon/common/AccessConfig-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/AccessConfig-not-required.mdx'
+
+### Assume Role Configuration
+
+@include 'builder/amazon/common/AssumeRoleConfig.mdx'
+
+@include 'builder/amazon/common/AssumeRoleConfig-not-required.mdx'
+
+### Polling Configuration
+
+@include 'builder/amazon/common/AWSPollingConfig.mdx'
+
+@include 'builder/amazon/common/AWSPollingConfig-not-required.mdx'
+
+### Run Configuration
+
+#### Required:
+
+@include 'builder/amazon/common/RunConfig-required.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/RunConfig-not-required.mdx'
+
+@include 'builders/aws-session-manager.mdx'
+
+### Block Devices Configuration
+
+Block devices can be nested in the
+[ami_block_device_mappings](#ami_block_device_mappings) or the
+[launch_block_device_mappings](#launch_block_device_mappings) array.
+
+@include 'builder/amazon/common/BlockDevice.mdx'
+
+#### Optional:
+
+@include 'builder/amazon/common/BlockDevice-not-required.mdx'
+
+### Communicator Configuration
+
+#### Optional:
+
+@include 'packer-plugin-sdk/communicator/Config-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSHTemporaryKeyPair-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Key-Pair-Name-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Agent-Auth-not-required.mdx'
+
+## Basic Example
+
+Here is a basic example. You will need to provide access keys, and may need to
+change the AMI IDs according to what images exist at the time the template is
+run:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "us-east-1",
+      "source_ami": "ami-fce3c696",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "packer_AWS {{timestamp}}"
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+// To make Packer read these variables from the environment into the var object,
+// set the environment variables to have the same name as the declared
+// variables, with the prefix PKR_VAR_.
+
+// There are other ways to [set variables](/docs/from-1.5/variables#assigning-values-to-build-variables)
+// including from a var file or as a command argument.
+
+// export PKR_VAR_aws_access_key=$YOURKEY
+variable "aws_access_key" {
+  type = string
+  // default = "hardcoded_key"
+}
+
+// export PKR_VAR_aws_secret_key=$YOURSECRETKEY
+variable "aws_secret_key" {
+  type = string
+  // default = "hardcoded_secret_key"
+}
+
+source "amazon-ebs" "basic-example" {
+  access_key = var.aws_access_key
+  secret_key =  var.aws_secret_key
+  region =  "us-east-1"
+  source_ami =  "ami-fce3c696"
+  instance_type =  "t2.micro"
+  ssh_username =  "ubuntu"
+  ami_name =  "packer_AWS {{timestamp}}"
+}
+
+build {
+  sources = [
+    "source.amazon-ebs.basic-example"
+  ]
+}
+```
+
+</Tab>
+</Tabs>
+
+-> **Note:** Packer can also read the access key and secret access key directly
+from environmental variables instead of being set as user variables. See the
+configuration reference in the section above for more information on what
+environmental variables Packer will look for.
+
+Further information on locating AMI IDs and their relationship to instance
+types and regions can be found in the AWS EC2 Documentation [for
+Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html)
+or [for
+Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).
+
+## Accessing the Instance to Debug
+
+If you need to access the instance to debug for some reason, run the builder
+with the `-debug` flag. In debug mode, the Amazon builder will save the private
+key in the current directory and will output the DNS or IP information as well.
+You can use this information to access the instance as it is running.
+
+## AMI Block Device Mappings Example
+
+Here is an example using the optional AMI block device mappings. Our
+configuration of `launch_block_device_mappings` will expand the root volume
+(`/dev/sda`) to 40gb during the build (up from the default of 8gb). With
+`ami_block_device_mappings` AWS will attach additional volumes `/dev/sdb` and
+`/dev/sdc` when we boot a new instance of our AMI.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "us-east-1",
+      "source_ami": "ami-fce3c696",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "packer-quick-start {{timestamp}}",
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_size": 40,
+          "volume_type": "gp2",
+          "delete_on_termination": true
+        }
+      ],
+      "ami_block_device_mappings": [
+        {
+          "device_name": "/dev/sdb",
+          "virtual_name": "ephemeral0"
+        },
+        {
+          "device_name": "/dev/sdc",
+          "virtual_name": "ephemeral1"
+        }
+      ]
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebs" "basic-example" {
+  region        =  "us-east-1"
+  source_ami    =  "ami-fce3c696"
+  instance_type =  "t2.micro"
+  ssh_username  =  "ubuntu"
+  ami_name      =  "packer_AWS_example_{{timestamp}}"
+  launch_block_device_mappings {
+    device_name = "/dev/sda1"
+    volume_size = 40
+    volume_type = "gp2"
+    delete_on_termination = true
+  }
+  // Notice that instead of providing a list of mappings, you are just providing
+  // multiple mappings in a row. This diverges from the JSON template format.
+  ami_block_device_mappings {
+    device_name  = "/dev/sdb"
+    virtual_name = "ephemeral0"
+  }
+  ami_block_device_mappings {
+    device_name  = "/dev/sdc"
+    virtual_name = "ephemeral1"
+  }
+}
+
+build {
+  sources = [
+    "source.amazon-ebs.basic-example"
+  ]
+}
+```
+
+</Tab>
+</Tabs>
+
+The above build template is functional assuming you have set the environment
+variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
+
+-> **Note:** Packer uses pre-built AMIs as the source for building images.
+These source AMIs may include volumes that are not flagged to be destroyed on
+termination of the instance building the new image. Packer will attempt to
+clean up all residual volumes that are not designated by the user to remain
+after termination. If you need to preserve those source volumes, you can
+overwrite the termination setting by setting `delete_on_termination` to `false`
+in the `launch_block_device_mappings` block for the device.
+
+## Build template data
+
+In configuration directives marked as a template engine above, the following
+variables are available:
+
+- `BuildRegion` - The region (for example `eu-central-1`) where Packer is
+  building the AMI.
+- `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build
+  the AMI.
+- `SourceAMICreationDate` - The source AMI creation date (for example `"2020-05-14T19:26:34.000Z"`).
+- `SourceAMIName` - The source AMI Name (for example
+  `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
+  build the AMI.
+- `SourceAMIOwner` - The source AMI owner ID.
+- `SourceAMIOwnerName` - The source AMI owner alias/name (for example `amazon`).
+- `SourceAMITags` - The source AMI Tags, as a `map[string]string` object.
+
+## Build Shared Information Variables
+
+This builder generates data that are shared with provisioner and post-processor via build function of [template engine](/docs/templates/engine) for JSON and [contextual variables](/docs/from-1.5/contextual-variables) for HCL2.
+
+The generated variables available for this builder are:
+
+- `BuildRegion` - The region (for example `eu-central-1`) where Packer is
+  building the AMI.
+- `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build
+  the AMI.
+- `SourceAMICreationDate` - The source AMI creation date (for example `"2020-05-14T19:26:34.000Z"`).
+- `SourceAMIName` - The source AMI Name (for example
+  `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to
+  build the AMI.
+- `SourceAMIOwner` - The source AMI owner ID.
+- `SourceAMIOwnerName` - The source AMI owner alias/name (for example `amazon`).
+
+Usage example:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+"post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest.json",
+      "strip_path": true,
+      "custom_data": {
+        "source_ami_name": "{{ build `SourceAMIName` }}"
+      }
+    }
+]
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+// When accessing one of these variables from inside the builder, you need to
+// use the golang templating syntax. This is due to an architectural quirk that
+// won't be easily resolvable until legacy json templates are deprecated:
+
+{
+source "amazon-ebs" "basic-example" {
+  tags = {
+        OS_Version = "Ubuntu"
+        Release = "Latest"
+        Base_AMI_ID = "{{ .SourceAMI }}"
+        Base_AMI_Name = "{{ .SourceAMIName }}"
+    }
+}
+
+// when accessing one of the variables from a provisioner or post-processor, use
+// hcl-syntax
+post-processor "manifest" {
+    output = "manifest.json"
+    strip_path = true
+    custom_data = {
+        source_ami_name = "${build.SourceAMIName}"
+    }
+}
+```
+
+</Tab>
+</Tabs>
+
+## Tag Example
+
+Here is an example using the optional AMI tags. This will add the tags
+`OS_Version` and `Release` to the finished AMI. As before, you will need to
+provide your access keys, and may need to change the source AMI ID based on
+what images exist when this template is run:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "us-east-1",
+      "source_ami": "ami-fce3c696",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "packer-tag-example {{timestamp}}",
+      "tags": {
+        "OS_Version": "Ubuntu",
+        "Release": "Latest",
+        "Base_AMI_Name": "{{ .SourceAMIName }}",
+        "Extra": "{{ .SourceAMITags.TagName }}"
+      }
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebs" "basic-example" {
+  region =  "us-east-1"
+  source_ami =  "ami-fce3c696"
+  instance_type =  "t2.micro"
+  ssh_username =  "ubuntu"
+  ami_name =  "packer_tag_example {{timestamp}}"
+  tags = {
+      OS_Version = "Ubuntu"
+      Release = "Latest"
+      Base_AMI_Name = "{{ .SourceAMIName }}"
+      Extra = "{{ .SourceAMITags.TagName }}"
+  }
+}
+
+build {
+  sources = [
+    "source.amazon-ebs.basic-example"
+  ]
+}
+```
+
+</Tab>
+</Tabs>
+
+## Connecting to Windows instances using WinRM
+
+If you want to launch a Windows instance and connect using WinRM, you will need
+to configure WinRM on that instance. The following is a basic powershell script
+that can be supplied to AWS using the "user_data_file" option. It enables
+WinRM via HTTPS on port 5986, and creates a self-signed certificate to use to
+connect. If you are using a certificate from a CA, rather than creating a
+self-signed certificate, you can omit the "winrm_insecure" option mentioned
+below.
+
+autogenerated_password_https_boostrap.txt
+
+```powershell
+<powershell>
+
+# MAKE SURE IN YOUR PACKER CONFIG TO SET:
+#
+#
+#    "winrm_username": "Administrator",
+#    "winrm_insecure": true,
+#    "winrm_use_ssl": true,
+#
+#
+
+
+write-output "Running User Data Script"
+write-host "(host) Running User Data Script"
+
+Set-ExecutionPolicy Unrestricted -Scope LocalMachine -Force -ErrorAction Ignore
+
+# Don't set this before Set-ExecutionPolicy as it throws an error
+$ErrorActionPreference = "stop"
+
+# Remove HTTP listener
+Remove-Item -Path WSMan:\Localhost\listener\listener* -Recurse
+
+# Create a self-signed certificate to let ssl work
+$Cert = New-SelfSignedCertificate -CertstoreLocation Cert:\LocalMachine\My -DnsName "packer"
+New-Item -Path WSMan:\LocalHost\Listener -Transport HTTPS -Address * -CertificateThumbPrint $Cert.Thumbprint -Force
+
+# WinRM
+write-output "Setting up WinRM"
+write-host "(host) setting up WinRM"
+
+cmd.exe /c winrm quickconfig -q
+cmd.exe /c winrm set "winrm/config" '@{MaxTimeoutms="1800000"}'
+cmd.exe /c winrm set "winrm/config/winrs" '@{MaxMemoryPerShellMB="1024"}'
+cmd.exe /c winrm set "winrm/config/service" '@{AllowUnencrypted="true"}'
+cmd.exe /c winrm set "winrm/config/client" '@{AllowUnencrypted="true"}'
+cmd.exe /c winrm set "winrm/config/service/auth" '@{Basic="true"}'
+cmd.exe /c winrm set "winrm/config/client/auth" '@{Basic="true"}'
+cmd.exe /c winrm set "winrm/config/service/auth" '@{CredSSP="true"}'
+cmd.exe /c winrm set "winrm/config/listener?Address=*+Transport=HTTPS" "@{Port=`"5986`";Hostname=`"packer`";CertificateThumbprint=`"$($Cert.Thumbprint)`"}"
+cmd.exe /c netsh advfirewall firewall set rule group="remote administration" new enable=yes
+cmd.exe /c netsh firewall add portopening TCP 5986 "Port 5986"
+cmd.exe /c net stop winrm
+cmd.exe /c sc config winrm start= auto
+cmd.exe /c net start winrm
+
+</powershell>
+```
+
+You'll notice that this config does not define a user or password; instead,
+Packer will ask AWS to provide a random password that it generates
+automatically. The following config will work with the above template:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "us-east-1",
+      "instance_type": "t2.micro",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "*Windows_Server-2012*English-64Bit-Base*",
+          "root-device-type": "ebs"
+        },
+        "most_recent": true,
+        "owners": "amazon"
+      },
+      "ami_name": "default-packer",
+      "user_data_file": "./boot_config/winrm_bootstrap.txt",
+      "communicator": "winrm",
+      "force_deregister": true,
+      "winrm_insecure": true,
+      "winrm_username": "Administrator",
+      "winrm_use_ssl": true
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebs" "winrm-example" {
+  region =  "us-east-1"
+  // This example uses a source_ami_filter rather than a specific AMI.
+  // this allows us to use the same filter regardless of what region we're in,
+  // among other benefits.
+  source_ami_filter {
+    filter {
+      key = "virtualization-type"
+      value = "hvm"
+    }
+    filter {
+      key = "name"
+      value = "*Windows_Server-2012*English-64Bit-Base*"
+    }
+    filter {
+      key = "root-device-type"
+      value = "ebs"
+    }
+    most_recent = true
+    owners = ["amazon"]
+  }
+  instance_type =  "t2.micro"
+  ami_name =  "packer_winrm_example {{timestamp}}"
+  // This user data file sets up winrm and configures it so that the connection
+  // from Packer is allowed. Without this file being set, Packer will not
+  // connect to the instance.
+  user_data_file = "../boot_config/winrm_bootstrap.txt"
+  communicator = "winrm"
+  force_deregister = true
+  winrm_insecure = true
+  winrm_username = "Administrator"
+  winrm_use_ssl = true
+}
+
+build {
+  sources = [
+    "source.amazon-ebs.winrm-example"
+  ]
+}
+```
+
+</Tab>
+</Tabs>
+
+## Windows 2016 Sysprep Commands - For Amazon Windows AMIs Only
+
+For Amazon Windows 2016 AMIs it is necessary to run Sysprep commands which can
+be easily added to the provisioner section.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "powershell",
+  "inline": [
+    "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/InitializeInstance.ps1 -Schedule",
+    "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/SysprepInstance.ps1 -NoShutdown"
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "powershell" {
+  inline = [
+    "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/InitializeInstance.ps1 -Schedule",
+    "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/SysprepInstance.ps1 -NoShutdown"
+  ]
+}
+```
+
+</Tab>
+</Tabs>
+
+@include 'builders/aws-ssh-differentiation-table.mdx'
