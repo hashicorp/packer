@@ -183,6 +183,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 			"https://www.googleapis.com/auth/compute",
 			"https://www.googleapis.com/auth/devstorage.full_control",
 			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/logging.write",
 		},
 	}
 	if p.config.ServiceAccountEmail != "" {
