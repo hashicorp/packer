@@ -53,7 +53,11 @@ type ListInstallationsOptions struct {
 	OS, ARCH string
 }
 
-// ListInstallations lists installed versions of Plugin p with opts as a filter.
+// ListInstallations lists unique installed versions of Plugin p with opts as a filter.
+//
+// Installations are sorted by version and one binary per version is returned.
+//
+//
 func (r Requirement) ListInstallations(opts ListInstallationsOptions) (InstallList, error) {
 	res := InstallList{}
 	filenamePrefix := "packer-plugin-" + r.Identifier.Type + "_"
@@ -71,7 +75,7 @@ func (r Requirement) ListInstallations(opts ListInstallationsOptions) (InstallLi
 				continue
 			}
 
-			// last part could look like packer-plugin-amazon_v1.2.3_darwin_amd64.0_x4
+			// base name could look like packer-plugin-amazon_v1.2.3_darwin_amd64.0_x4
 			versionStr := strings.TrimPrefix(fname, filenamePrefix)
 			versionStr = strings.TrimSuffix(versionStr, filenameSuffix)
 			pv, err := version.NewVersion(versionStr)
