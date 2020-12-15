@@ -225,7 +225,7 @@ func wrappedMain() int {
 	CommandMeta = &command.Meta{
 		CoreConfig: &packer.CoreConfig{
 			Components: packer.ComponentFinder{
-				KnownPluginFolders: packersdk.PluginFolders(),
+				KnownPluginFolders: packersdk.PluginFolders("."),
 
 				Hook: config.StarHook,
 

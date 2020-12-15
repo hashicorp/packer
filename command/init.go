@@ -80,7 +80,17 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 			return 1
 		}
 
-		log.Printf("for plugin %s found installations %v", pluginRequirement.Identifier.String(), installs)
+		log.Printf("[TRACE] for plugin %s found %d matching installation(s)", pluginRequirement.Identifier.String(), len(installs))
+
+		if len(installs) > 0 && cla.Upgrade == false {
+			continue
+		}
+
+		newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallLatestOptions{})
+		if err != nil {
+			c.Ui.Error(err.Error())
+		}
+		installs = append(installs, newInstall...)
 	}
 	return ret
 }
@@ -94,14 +104,14 @@ Usage: packer init [options] TEMPLATE
 
 Options:
 
-  -TOTO=TODO                    TODO
+  -upgrade=false          Do you want to try upgrading the plugin if it is already present ? (default: false)
 `
 
 	return strings.TrimSpace(helpText)
 }
 
 func (*InitCommand) Synopsis() string {
-	return "install plugins"
+	return "Install missing plugins or upgrade plugins"
 }
 
 func (*InitCommand) AutocompleteArgs() complete.Predictor {
@@ -109,5 +119,7 @@ func (*InitCommand) AutocompleteArgs() complete.Predictor {
 }
 
 func (*InitCommand) AutocompleteFlags() complete.Flags {
-	return complete.Flags{}
+	return complete.Flags{
+		"-upgrade": complete.PredictNothing,
+	}
 }

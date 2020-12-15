@@ -39,24 +39,24 @@ type ListInstallationsOptions struct {
 	Checksummers []Checksummer
 }
 
-// ListInstallations lists unique installed versions of Plugin p with opts as a
-// filter.
+// ListInstallations lists unique installed versions of plugin Requirement pr
+// with opts as a filter.
 //
 // Installations are sorted by version and one binary per version is returned.
 // Last binary detected takes precedence: in the order 'FromFolders' option.
 //
 // You must pass at least one option to Checksumers for a binary to be even
 // consider.
-func (r Requirement) ListInstallations(opts ListInstallationsOptions) (InstallList, error) {
+func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallList, error) {
 	res := InstallList{}
-	filenamePrefix := "packer-plugin-" + r.Identifier.Type + "_"
+	filenamePrefix := "packer-plugin-" + pr.Identifier.Type + "_"
 	filenameSuffix := "_" + opts.OS + "_" + opts.ARCH + opts.Extension
 	for _, knownFolder := range opts.FromFolders {
-		glob := filepath.Join(knownFolder, r.Identifier.Hostname, r.Identifier.Namespace, r.Identifier.Type, filenamePrefix+"*"+filenameSuffix)
+		glob := filepath.Join(knownFolder, pr.Identifier.Hostname, pr.Identifier.Namespace, pr.Identifier.Type, filenamePrefix+"*"+filenameSuffix)
 
 		matches, err := filepath.Glob(glob)
 		if err != nil {
-			return nil, fmt.Errorf("ListInstallations: %q failed to list binaries in folder: %v", r.Identifier.String(), err)
+			return nil, fmt.Errorf("ListInstallations: %q failed to list binaries in folder: %v", pr.Identifier.String(), err)
 		}
 		for _, path := range matches {
 			fname := filepath.Base(path)
@@ -75,8 +75,8 @@ func (r Requirement) ListInstallations(opts ListInstallationsOptions) (InstallLi
 			}
 
 			// no constraint means always pass
-			if !r.VersionConstraints.Check(pv) {
-				log.Printf("[TRACE]: version %q of file %q does not match constraint %q", versionStr, path, r.VersionConstraints.String())
+			if !pr.VersionConstraints.Check(pv) {
+				log.Printf("[TRACE]: version %q of file %q does not match constraint %q", versionStr, path, pr.VersionConstraints.String())
 				continue
 			}
 
@@ -127,7 +127,17 @@ type Install struct {
 	Path string
 
 	// Version of this plugin, if installed and versionned. Ex:
-	//  * v1.2.3 for packer-plugin-amazon_v1.2.3_darwin_amd64
+	//  * v1.2.3 for packer-plugin-amazon_v1.2.3_darwin_.0_x5
 	//  * empty  for packer-plugin-amazon
 	Version string
+}
+
+// InstallLatestOptions describes the possible option for installing the latest
+// possible plugin that fits the plugin Requirement.
+type InstallLatestOptions struct {
+}
+
+func (pr *Requirement) InstallLatest(opts InstallLatestOptions) (InstallList, error) {
+	log.Printf("TODO: this is when we fetch all possible versions, the checksum and then the binary for a the %q plugin.", pr.Identifier.ForDisplay())
+	return nil, fmt.Errorf("not implemented")
 }
