@@ -50,7 +50,7 @@ func TestSet(t *testing.T) {
 		t.Fatalf("Unexpected description: %s", diff)
 	}
 
-	err := set.run("start", "builder", "example")
+	err := set.RunCommand("start", "builder", "example")
 	if diff := cmp.Diff(err.Error(), ErrManuallyStartedPlugin.Error()); diff != "" {
 		t.Fatalf("Unexpected error: %s", diff)
 	}
