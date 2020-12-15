@@ -3,7 +3,6 @@ package plugingetter
 import (
 	"log"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/hashicorp/go-version"
@@ -26,17 +25,23 @@ type Plugin struct {
 }
 
 type ListInstallationsOptions struct {
+	// Put the folders where plugins could be installed in this list. Paths
+	// should be absolute for safety but can also be relative.
 	FromFolders []string
 	// Usually ".x04" for the 4th API version protocol
 	// Should be ".x04.exe" on windows.
 	Extension string
+
+	// OS and ARCH usually should be runtime.GOOS and runtime.ARCH, they allow
+	// to pick the correct binary.
+	OS, ARCH string
 }
 
 // ListInstallations lists installed versions of Plugin p from knownFolders.
 func (p Plugin) ListInstallations(opts ListInstallationsOptions) ([]Install, error) {
 	res := []Install{}
 	filenamePrefix := "packer-plugin-" + p.Identifier.Type + "_"
-	filenameSuffix := "_" + runtime.GOOS + "_" + runtime.GOARCH + opts.Extension
+	filenameSuffix := "_" + opts.OS + "_" + opts.ARCH + opts.Extension
 	for _, knownFolder := range opts.FromFolders {
 		glob := filepath.Join(knownFolder, p.Identifier.Hostname, p.Identifier.Namespace, p.Identifier.Type, filenamePrefix+"*"+filenameSuffix)
 
@@ -50,7 +55,7 @@ func (p Plugin) ListInstallations(opts ListInstallationsOptions) ([]Install, err
 				continue
 			}
 
-			// last part should look like packer-plugin-amazon_v1.2.3_darwin_amd64.0_x4
+			// last part could look like packer-plugin-amazon_v1.2.3_darwin_amd64.0_x4
 			versionStr := strings.TrimPrefix(fname, filenamePrefix)
 			versionStr = strings.TrimSuffix(versionStr, filenameSuffix)
 			pv, err := version.NewVersion(versionStr)

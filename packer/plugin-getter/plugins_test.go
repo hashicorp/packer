@@ -2,14 +2,17 @@ package plugingetter
 
 import (
 	"path/filepath"
-	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 )
 
 func TestPlugin_ListInstallations(t *testing.T) {
+
+	pluginFolderOne := filepath.Join("testdata", "plugins")
+
 	type fields struct {
 		Identifier         string
 		VersionConstraints version.Constraints
@@ -28,14 +31,38 @@ func TestPlugin_ListInstallations(t *testing.T) {
 			},
 			ListInstallationsOptions{
 				FromFolders: []string{
-					filepath.Join("testdata", "plugins"),
+					pluginFolderOne,
 				},
 				Extension: ".0_x4",
+				OS:        "darwin",
+				ARCH:      "amd64",
 			},
 			false,
 			[]Install{
-				Install{
+				{
 					Version: "v1.2.3",
+					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_darwin_amd64.0_x4"),
+				},
+			},
+		},
+		{
+			"basic",
+			fields{
+				Identifier: "amazon",
+			},
+			ListInstallationsOptions{
+				FromFolders: []string{
+					pluginFolderOne,
+				},
+				Extension: ".0_x4.exe",
+				OS:        "windows",
+				ARCH:      "amd64",
+			},
+			false,
+			[]Install{
+				{
+					Version: "v1.2.3",
+					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_windows_amd64.0_x4.exe"),
 				},
 			},
 		},
@@ -55,8 +82,8 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				t.Errorf("Plugin.ListInstallations() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Plugin.ListInstallations() = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Errorf("Plugin.ListInstallations() unexpected output: %s", diff)
 			}
 		})
 	}
