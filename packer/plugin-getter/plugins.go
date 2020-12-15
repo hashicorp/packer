@@ -10,12 +10,12 @@ import (
 )
 
 // List of plugins
-type List []*Plugin
+type List []*Requirement
 
-// Plugin describes a required plugin and how it is installed. Usually a list
+// Requirement describes a required plugin and how it is installed. Usually a list
 // of required plugins is generated from a config file. From it we check what
 // is actually installed and what needs to happen to get in the desired state.
-type Plugin struct {
+type Requirement struct {
 	// Something like github.com/hashicorp/packer-plugin-amazon
 	Identifier *addrs.Plugin
 
@@ -31,19 +31,18 @@ type ListInstallationsOptions struct {
 	// Usually ".x04" for the 4th API version protocol
 	// Should be ".x04.exe" on windows.
 	Extension string
-
 	// OS and ARCH usually should be runtime.GOOS and runtime.ARCH, they allow
 	// to pick the correct binary.
 	OS, ARCH string
 }
 
-// ListInstallations lists installed versions of Plugin p from knownFolders.
-func (p Plugin) ListInstallations(opts ListInstallationsOptions) ([]Install, error) {
+// ListInstallations lists installed versions of Plugin p with opts as a filter.
+func (r Requirement) ListInstallations(opts ListInstallationsOptions) ([]Install, error) {
 	res := []Install{}
-	filenamePrefix := "packer-plugin-" + p.Identifier.Type + "_"
+	filenamePrefix := "packer-plugin-" + r.Identifier.Type + "_"
 	filenameSuffix := "_" + opts.OS + "_" + opts.ARCH + opts.Extension
 	for _, knownFolder := range opts.FromFolders {
-		glob := filepath.Join(knownFolder, p.Identifier.Hostname, p.Identifier.Namespace, p.Identifier.Type, filenamePrefix+"*"+filenameSuffix)
+		glob := filepath.Join(knownFolder, r.Identifier.Hostname, r.Identifier.Namespace, r.Identifier.Type, filenamePrefix+"*"+filenameSuffix)
 
 		matches, err := filepath.Glob(glob)
 		if err != nil {
@@ -66,8 +65,8 @@ func (p Plugin) ListInstallations(opts ListInstallationsOptions) ([]Install, err
 			}
 
 			// no constraint means always pass
-			if !p.VersionConstraints.Check(pv) {
-				log.Printf("[TRACE]: version %q of file %q does not match constraint %q", versionStr, path, p.VersionConstraints.String())
+			if !r.VersionConstraints.Check(pv) {
+				log.Printf("[TRACE]: version %q of file %q does not match constraint %q", versionStr, path, r.VersionConstraints.String())
 				continue
 			}
 

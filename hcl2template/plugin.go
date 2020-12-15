@@ -32,7 +32,7 @@ func (cfg *PackerConfig) PluginRequirements() (plugingetter.List, hcl.Diagnostic
 				continue
 			}
 
-			reqs = append(reqs, &plugingetter.Plugin{
+			reqs = append(reqs, &plugingetter.Requirement{
 				Identifier:         block.Type,
 				VersionConstraints: block.Requirement.Required,
 			})

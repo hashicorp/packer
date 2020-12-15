@@ -25,7 +25,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 		want    []Install
 	}{
 		{
-			"basic",
+			"basic_darwin",
 			fields{
 				Identifier: "amazon",
 			},
@@ -43,10 +43,18 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					Version: "v1.2.3",
 					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_darwin_amd64.0_x4"),
 				},
+				{
+					Version: "v1.2.4",
+					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.4_darwin_amd64.0_x4"),
+				},
+				{
+					Version: "v1.2.5",
+					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_darwin_amd64.0_x4"),
+				},
 			},
 		},
 		{
-			"basic",
+			"basic_windows",
 			fields{
 				Identifier: "amazon",
 			},
@@ -64,6 +72,14 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					Version: "v1.2.3",
 					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_windows_amd64.0_x4.exe"),
 				},
+				{
+					Version: "v1.2.4",
+					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.4_windows_amd64.0_x4.exe"),
+				},
+				{
+					Version: "v1.2.5",
+					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_windows_amd64.0_x4.exe"),
+				},
 			},
 		},
 	}
@@ -73,7 +89,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 			if diags.HasErrors() {
 				t.Fatalf("%v", diags)
 			}
-			p := Plugin{
+			p := Requirement{
 				Identifier:         identifier,
 				VersionConstraints: tt.fields.VersionConstraints,
 			}
