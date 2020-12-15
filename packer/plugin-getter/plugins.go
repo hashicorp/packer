@@ -28,8 +28,8 @@ type ListInstallationsOptions struct {
 	// Put the folders where plugins could be installed in this list. Paths
 	// should be absolute for safety but can also be relative.
 	FromFolders []string
-	// Usually ".x04" for the 4th API version protocol
-	// Should be ".x04.exe" on windows.
+	// Usually ".0_x4" for the 4th API version protocol
+	// Should be ".0_x4.exe" on windows.
 	Extension string
 	// OS and ARCH usually should be runtime.GOOS and runtime.ARCH, they allow
 	// to pick the correct binary.
