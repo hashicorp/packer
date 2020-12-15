@@ -10,6 +10,7 @@ package chroot
 import (
 	"context"
 	"errors"
+	"fmt"
 	"runtime"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -169,6 +170,26 @@ type Config struct {
 	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	RootVolumeTag config.KeyValues `mapstructure:"root_volume_tag" required:"false"`
+	// Whether or not to encrypt the volumes that are *launched*. By default, Packer will keep
+	// the encryption setting to what it was in the source image when set to `false`. Setting true will
+	// always result in an encrypted one.
+	RootVolumeEncryptBoot config.Trilean `mapstructure:"root_volume_encrypt_boot" required:"false"`
+	// ID, alias or ARN of the KMS key to use for *launched* volumes encryption.
+	//
+	// Set this value if you select `root_volume_encrypt_boot`, but don't want to use the
+	// region's default KMS key.
+	//
+	// If you have a custom kms key you'd like to apply to the launch volume,
+	// and are only building in one region, it is more efficient to set this
+	// and `root_volume_encrypt_boot` to `true` and not use `encrypt_boot` and `kms_key_id`. This saves
+	// potentially many minutes at the end of the build by preventing Packer
+	// from having to copy and re-encrypt the image at the end of the build.
+	//
+	// For valid formats see *KmsKeyId* in the [AWS API docs -
+	// CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
+	// This field is validated by Packer, when using an alias, you will have to
+	// prefix `kms_key_id` with `alias/`.
+	RootVolumeKmsKeyId string `mapstructure:"root_volume_kms_key_id" required:"false"`
 	// what architecture to use when registering the final AMI; valid options
 	// are "x86_64" or "arm64". Defaults to "x86_64".
 	Architecture string `mapstructure:"ami_architecture" required:"false"`
@@ -322,6 +343,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("If root_device_name is specified, ami_block_device_mappings must be specified"))
 		}
+
+		if b.config.RootVolumeKmsKeyId != "" {
+			if b.config.RootVolumeEncryptBoot.False() {
+				errs = packersdk.MultiErrorAppend(
+					errs, errors.New("If you have set root_volume_kms_key_id, root_volume_encrypt_boot must also be true."))
+			} else if b.config.RootVolumeEncryptBoot.True() && !awscommon.ValidateKmsKey(b.config.RootVolumeKmsKeyId) {
+				errs = packersdk.MultiErrorAppend(
+					errs, fmt.Errorf("%q is not a valid KMS Key Id.", b.config.RootVolumeKmsKeyId))
+			}
+		}
+
 	}
 	valid := false
 	for _, validArch := range []string{"x86_64", "arm64"} {
@@ -402,11 +434,13 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			GeneratedData: generatedData,
 		},
 		&StepCreateVolume{
-			PollingConfig:  b.config.PollingConfig,
-			RootVolumeType: b.config.RootVolumeType,
-			RootVolumeSize: b.config.RootVolumeSize,
-			RootVolumeTags: b.config.RootVolumeTags,
-			Ctx:            b.config.ctx,
+			PollingConfig:         b.config.PollingConfig,
+			RootVolumeType:        b.config.RootVolumeType,
+			RootVolumeSize:        b.config.RootVolumeSize,
+			RootVolumeTags:        b.config.RootVolumeTags,
+			RootVolumeEncryptBoot: b.config.RootVolumeEncryptBoot,
+			RootVolumeKmsKeyId:    b.config.RootVolumeKmsKeyId,
+			Ctx:                   b.config.ctx,
 		},
 		&StepAttachVolume{
 			PollingConfig: b.config.PollingConfig,

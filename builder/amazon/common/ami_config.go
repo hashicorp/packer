@@ -215,7 +215,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 
 	}
 	for _, kmsKey := range kmsKeys {
-		if !validateKmsKey(kmsKey) {
+		if !ValidateKmsKey(kmsKey) {
 			errs = append(errs, fmt.Errorf("%q is not a valid KMS Key Id.", kmsKey))
 		}
 	}
@@ -289,7 +289,7 @@ func (c *AMIConfig) prepareRegions(accessConfig *AccessConfig) (errs []error) {
 }
 
 // See https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html
-func validateKmsKey(kmsKey string) (valid bool) {
+func ValidateKmsKey(kmsKey string) (valid bool) {
 	kmsKeyIdPattern := `[a-f0-9-]+$`
 	aliasPattern := `alias/[a-zA-Z0-9:/_-]+$`
 	kmsArnStartPattern := `^arn:aws(-us-gov)?:kms:([a-z]{2}-(gov-)?[a-z]+-\d{1})?:(\d{12}):`
