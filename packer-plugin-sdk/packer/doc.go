@@ -11,7 +11,7 @@ absolutely necessary.
 
 Plugins will need to implement either the Builder, Provisioner,
 or Post-Processor interfaces, and will likely create an Artifact. The
-Communicator must be implemented in the Builder and is then passed into the
+Communicator must be implemented in the Builder and then passed into the
 Provisioners so they can use it communicate with the instance without needing
 to know the connection details.
 

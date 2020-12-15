@@ -24,7 +24,7 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 )
 
-// Config is the common a builder uses to define and configure a Packer
+// Config is the common configuration a builder uses to define and configure a Packer
 // communicator. Embed this struct in your builder config to implement
 // communicator support.
 type Config struct {

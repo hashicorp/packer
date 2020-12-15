@@ -5,6 +5,6 @@ Normally, a builder will want to implement StepConnect, which is smart enough
 to then determine which kind of communicator, and therefore which kind of
 substep, it should implement.
 
-Various helper functions are also supplied. CommHost
+Various helper functions are also supplied.
 */
 package communicator
