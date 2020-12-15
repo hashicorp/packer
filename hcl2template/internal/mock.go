@@ -104,6 +104,28 @@ func (b *MockProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm p
 }
 
 //////
+// MockDataSource
+//////
+
+type MockDataSource struct {
+	Config MockConfig
+}
+
+var _ packersdk.DataSource = new(MockDataSource)
+
+func (b *MockDataSource) ConfigSpec() hcldec.ObjectSpec {
+	return b.Config.FlatMapstructure().HCL2Spec()
+}
+
+func (b *MockDataSource) Configure(...interface{}) error {
+	return nil
+}
+
+func (b *MockDataSource) Execute() (cty.Value, error) {
+	return cty.EmptyObjectVal, nil
+}
+
+//////
 // MockPostProcessor
 //////
 

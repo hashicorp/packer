@@ -42,6 +42,8 @@ type PackerConfig struct {
 
 	LocalBlocks []*LocalBlock
 
+	DataSource map[DataSourceRef]DataSource
+
 	ValidationOptions
 
 	// Builds is the list of Build blocks defined in the config files.

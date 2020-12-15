@@ -20,6 +20,7 @@ const (
 	variablesLabel    = "variables"
 	variableLabel     = "variable"
 	localsLabel       = "locals"
+	dataSourceLabel   = "data"
 	buildLabel        = "build"
 	communicatorLabel = "communicator"
 )
@@ -31,6 +32,7 @@ var configSchema = &hcl.BodySchema{
 		{Type: variablesLabel},
 		{Type: variableLabel, LabelNames: []string{"name"}},
 		{Type: localsLabel},
+		{Type: dataSourceLabel, LabelNames: []string{"type", "name"}},
 		{Type: buildLabel},
 		{Type: communicatorLabel, LabelNames: []string{"type", "name"}},
 	},
@@ -60,6 +62,8 @@ type Parser struct {
 	ProvisionersSchemas packer.ProvisionerStore
 
 	PostProcessorsSchemas packer.PostProcessorStore
+
+	DataSourceSchemas packer.DataSourceStore
 }
 
 const (
@@ -153,6 +157,11 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	{
 		for _, file := range files {
 			diags = append(diags, cfg.decodeInputVariables(file)...)
+		}
+
+		for _, file := range files {
+			morediags := p.decodeDataSources(file, cfg)
+			diags = append(diags, morediags...)
 		}
 
 		for _, file := range files {
@@ -326,5 +335,43 @@ func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 		}
 	}
 
+	return diags
+}
+
+func (p *Parser) decodeDataSources(file *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	body := dynblock.Expand(file.Body, cfg.EvalContext(nil))
+	content, moreDiags := body.Content(configSchema)
+	diags = append(diags, moreDiags...)
+
+	for _, block := range content.Blocks {
+		switch block.Type {
+		case dataSourceLabel:
+			datasource, moreDiags := p.decodeDataBlock(block)
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
+			ref := datasource.Ref()
+			if existing, found := cfg.DataSource[ref]; found {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Duplicate " + dataSourceLabel + " block",
+					Detail: fmt.Sprintf("This "+dataSourceLabel+" block has the "+
+						"same data type and name as a previous block declared "+
+						"at %s. Each "+dataSourceLabel+" must have a unique name per builder type.",
+						existing.block.DefRange.Ptr()),
+					Subject: datasource.block.DefRange.Ptr(),
+				})
+				continue
+			}
+
+			if cfg.DataSource == nil {
+				cfg.DataSource = map[DataSourceRef]DataSource{}
+			}
+			cfg.DataSource[ref] = *datasource
+		}
+	}
 	return diags
 }

@@ -70,6 +70,7 @@ func (m *Meta) GetConfigFromHCL(cla *MetaArgs) (*hcl2template.PackerConfig, int)
 		BuilderSchemas:          m.CoreConfig.Components.BuilderStore,
 		ProvisionersSchemas:     m.CoreConfig.Components.ProvisionerStore,
 		PostProcessorsSchemas:   m.CoreConfig.Components.PostProcessorStore,
+		DataSourceSchemas:       m.CoreConfig.Components.DataSourceStore,
 	}
 	cfg, diags := parser.Parse(cla.Path, cla.VarFiles, cla.Vars)
 	return cfg, writeDiags(m.Ui, parser.Files(), diags)
