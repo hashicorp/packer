@@ -12,6 +12,7 @@ import (
 func TestPlugin_ListInstallations(t *testing.T) {
 
 	pluginFolderOne := filepath.Join("testdata", "plugins")
+	pluginFolderTwo := filepath.Join("testdata", "plugins_2")
 
 	type fields struct {
 		Identifier         string
@@ -22,10 +23,10 @@ func TestPlugin_ListInstallations(t *testing.T) {
 		fields  fields
 		opts    ListInstallationsOptions
 		wantErr bool
-		want    []Install
+		want    InstallList
 	}{
 		{
-			"basic_darwin",
+			"darwin_amazon",
 			fields{
 				Identifier: "amazon",
 			},
@@ -38,7 +39,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				ARCH:      "amd64",
 			},
 			false,
-			[]Install{
+			[]*Install{
 				{
 					Version: "v1.2.3",
 					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_darwin_amd64.0_x4"),
@@ -54,7 +55,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 			},
 		},
 		{
-			"basic_windows",
+			"windows_amazon",
 			fields{
 				Identifier: "amazon",
 			},
@@ -67,7 +68,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				ARCH:      "amd64",
 			},
 			false,
-			[]Install{
+			[]*Install{
 				{
 					Version: "v1.2.3",
 					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_windows_amd64.0_x4.exe"),
@@ -79,6 +80,40 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				{
 					Version: "v1.2.5",
 					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_windows_amd64.0_x4.exe"),
+				},
+			},
+		},
+		{
+			"windows_google_multifolder",
+			fields{
+				Identifier: "hashicorp/google",
+			},
+			ListInstallationsOptions{
+				FromFolders: []string{
+					pluginFolderOne,
+					pluginFolderTwo,
+				},
+				Extension: ".0_x4.exe",
+				OS:        "windows",
+				ARCH:      "amd64",
+			},
+			false,
+			[]*Install{
+				{
+					Version: "v4.5.6",
+					Path:    filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.6_windows_amd64.0_x4.exe"),
+				},
+				{
+					Version: "v4.5.7",
+					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.7_windows_amd64.0_x4.exe"),
+				},
+				{
+					Version: "v4.5.8",
+					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.8_windows_amd64.0_x4.exe"),
+				},
+				{
+					Version: "v4.5.9",
+					Path:    filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.9_windows_amd64.0_x4.exe"),
 				},
 			},
 		},
@@ -98,7 +133,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				t.Errorf("Plugin.ListInstallations() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if diff := cmp.Diff(got, tt.want); diff != "" {
+			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Errorf("Plugin.ListInstallations() unexpected output: %s", diff)
 			}
 		})

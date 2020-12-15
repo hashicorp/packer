@@ -31,7 +31,7 @@ type Evaluator interface {
 // The packer.Handler handles all Packer things.
 type Handler interface {
 	Initialize() hcl.Diagnostics
-	PluginRequirements() (plugingetter.List, hcl.Diagnostics)
+	PluginRequirements() (plugingetter.Requirements, hcl.Diagnostics)
 	Evaluator
 	BuildGetter
 	ConfigFixer

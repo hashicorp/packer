@@ -3,14 +3,14 @@ package plugingetter
 import (
 	"log"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 )
 
-// List of plugins
-type List []*Requirement
+type RequirementList []*Requirement
 
 // Requirement describes a required plugin and how it is installed. Usually a list
 // of required plugins is generated from a config file. From it we check what
@@ -22,6 +22,23 @@ type Requirement struct {
 	// VersionConstraints as defined by user. Empty ( to be avoided ) means
 	// highest found version.
 	VersionConstraints version.Constraints
+}
+
+// InstallList is a list of installs
+type InstallList []*Install
+
+// InsertSortedUniq inserts the installation in the right spot in the list by
+// comparing the version lexicographically.
+// A Duplicate version will replace any already present version.
+func (l *InstallList) InsertSortedUniq(install *Install) {
+	pos := sort.Search(len(*l), func(i int) bool { return (*l)[i].Version >= install.Version })
+	if len(*l) > pos && (*l)[pos].Version == install.Version {
+		(*l)[pos] = install
+		return
+	}
+	(*l) = append((*l), nil)
+	copy((*l)[pos+1:], (*l)[pos:])
+	(*l)[pos] = install
 }
 
 type ListInstallationsOptions struct {
@@ -37,8 +54,8 @@ type ListInstallationsOptions struct {
 }
 
 // ListInstallations lists installed versions of Plugin p with opts as a filter.
-func (r Requirement) ListInstallations(opts ListInstallationsOptions) ([]Install, error) {
-	res := []Install{}
+func (r Requirement) ListInstallations(opts ListInstallationsOptions) (InstallList, error) {
+	res := InstallList{}
 	filenamePrefix := "packer-plugin-" + r.Identifier.Type + "_"
 	filenameSuffix := "_" + opts.OS + "_" + opts.ARCH + opts.Extension
 	for _, knownFolder := range opts.FromFolders {
@@ -70,7 +87,7 @@ func (r Requirement) ListInstallations(opts ListInstallationsOptions) ([]Install
 				continue
 			}
 
-			res = append(res, Install{
+			res.InsertSortedUniq(&Install{
 				Path:    path,
 				Version: versionStr,
 			})
