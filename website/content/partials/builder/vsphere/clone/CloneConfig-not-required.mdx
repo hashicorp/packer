@@ -6,12 +6,14 @@
 
 - `linked_clone` (bool) - Create VM as a linked clone from latest snapshot. Defaults to `false`.
 
-- `network` (string) - Set the network in which the VM will be connected to. If no network is
+- `network` (string) - Sets the network in which the VM will be connected to. If no network is
   specified, `host` must be specified to allow Packer to look for the
   available network. If the network is inside a network folder in vCenter,
   you need to provide the full path to the network.
+  A comma separated list sets the network for each  network adapter individually.
 
 - `mac_address` (string) - Sets a custom Mac Address to the network adapter. If set, the [network](#network) must be also specified.
+  A comma separated list sets a custom Mac Address for each network adapter individually.
 
 - `notes` (string) - VM notes.
 

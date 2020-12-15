@@ -44,6 +44,24 @@ necessary for this build to succeed and can be found further down the page.
 
 @include 'builder/vsphere/clone/CloneConfig-not-required.mdx'
 
+Example of usage:
+
+<Tabs>
+<Tab heading="JSON">
+```json
+"network": "new_network_for_network_adapter_0, , new_network_for_network_adapter_2",
+"mac_address": "mac_address_for_network_adapter_0, , mac_address_for_network_adapter_2"
+ }
+```
+</Tab>
+<Tab heading="HCL2">
+```hcl
+network = new_network_for_network_adapter_0, , new_network_for_network_adapter_2'
+mac_address = 'mac_address_for_network_adapter_0, , mac_address_for_network_adapter_2'
+```
+</Tab>
+</Tabs>
+
 @include 'builder/vsphere/common/StorageConfig-not-required.mdx'
 
 ### Storage Configuration
