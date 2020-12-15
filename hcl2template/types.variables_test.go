@@ -810,7 +810,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			var files []*hcl.File
 			parser := getBasicParser()
 			for i, hclContent := range tt.args.hclFiles {
-				file, diags := parser.ParseHCL([]byte(hclContent), fmt.Sprintf("test_file_%d_*"+hcl2VarFileExt, i))
+				file, diags := parser.ParseHCL([]byte(hclContent), fmt.Sprintf("test_file_%d_*"+hcl2AutoVarFileExt, i))
 				if diags != nil {
 					t.Fatalf("ParseHCLFile %d: %v", i, diags)
 				}

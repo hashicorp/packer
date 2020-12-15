@@ -80,7 +80,7 @@ func Functions(basedir string) map[string]function.Function {
 		"pathexpand":         filesystem.PathExpandFunc,
 		"pow":                stdlib.PowFunc,
 		"range":              stdlib.RangeFunc,
-		"reverse":            stdlib.ReverseFunc,
+		"reverse":            stdlib.ReverseListFunc,
 		"replace":            stdlib.ReplaceFunc,
 		"regex_replace":      stdlib.RegexReplaceFunc,
 		"rsadecrypt":         crypto.RsaDecryptFunc,

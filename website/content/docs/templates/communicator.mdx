@@ -1,0 +1,51 @@
+---
+description: |
+  Communicators are the mechanism Packer uses to upload files, execute scripts,
+  etc. with the machine being created.
+page_title: Communicators - Templates
+sidebar_title: Communicators
+---
+
+# Template Communicators
+
+Communicators are the mechanism Packer uses to upload files, execute scripts,
+etc. with the machine being created.
+
+Communicators are configured within the
+[builder](/docs/templates/builders) section.
+
+All communicators have the following options:
+
+@include 'packer-plugin-sdk/communicator/Config-not-required.mdx'
+
+## Getting Ready to Use the Communicator
+
+Depending on your builder, your communicator may not have all it needs in order
+to work "out of the box".
+
+If you are building from a cloud image (for example, building on Amazon), there
+is a good chance that your cloud provider has already preconfigured SSH on the
+image for you, meaning that all you have to do is configure the communicator in
+the Packer template.
+
+However, if you are building from a brand-new and unconfigured operating system
+image, you will almost always have to perform some extra work to configure SSH
+on the guest machine. For most operating system distributions, this work will
+be performed by a [boot_command](/docs/builders/vmware/iso#boot-configuration) that references a file which
+provides answers to the normally-interactive questions you get asked when
+installing an operating system. The name of this file varies by operating
+system; some common examples are the "preseed" file required by Debian, the
+"kickstart" file required by CentOS or the "answer file", also known as the
+Autounattend.xml file, required by Windows. For simplicity's sake, we'll refer
+to this file as the "preseed" file in the rest of the documentation.
+
+If you are unfamiliar with how to use a preseed file for automatic
+bootstrapping of an image, please either take a look at our quick guides to
+image bootstrapping, or research automatic configuration for your specific
+guest operating system. Knowing how to automatically initalize your operating
+system is critical for being able to successfully use Packer.
+
+## Communicator-Specific Options
+
+For more details on how to use each communicator, visit the
+[communicators](/docs/communicators) page.

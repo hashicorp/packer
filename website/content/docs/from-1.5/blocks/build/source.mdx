@@ -1,0 +1,53 @@
+---
+description: >
+  A source block nested in a build block allows you to use an already defined
+  source and to set specific fields.
+page_title: source - build - Blocks
+sidebar_title: <tt>source</tt>
+---
+
+# The `source` block
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+A `source` block nested in a `build` block allows to use an already defined
+source and to set specific fields.
+
+```hcl
+# builds.pkr.hcl
+source "lxd" "arch" {
+  image = "archlinux"
+}
+
+build {
+  source "lxd.arch" {
+    // setting the name field allows to rename the source only for this build
+    // section.
+    name = "nomad"
+    output_image = "nomad"
+  }
+
+  provisioner "shell" {
+    inline = [ "echo installing nomad" ]
+  }
+}
+
+build {
+  source "lxd.arch" {
+    name = "consul"
+    output_image = "consul"
+  }
+
+  provisioner "shell" {
+    inline = [ "echo installing consul" ]
+  }
+}
+```
+
+This allows to have commonly defined source settings with specific parts of it
+defined inside the specific build block.
+
+-> **Note:** It is **not allowed** to set the same field in a top-level source
+block and in a used source block. For example, if in the above example, the
+top-level "amazon-ebs.example" source block also had an `output` field;
+Packer would error.

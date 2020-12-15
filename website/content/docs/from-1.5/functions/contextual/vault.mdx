@@ -1,0 +1,75 @@
+---
+page_title: vault - Functions - Configuration Language
+sidebar_title: vault
+description: The vault function retrieves secrets from HashiCorp Vault KV stores.
+---
+
+# `vault` Function
+
+Secrets can be read from [Vault](https://www.vaultproject.io/) and used within
+your template as user variables. the `vault` function is available _only_
+within the default value of a user variable, allowing you to default a user
+variable to a vault secret.
+
+An example of using a v2 kv engine:
+
+If you store a value in vault using `vault kv put secret/hello foo=world`, you
+can access it using the following:
+
+```hcl
+locals {
+    foo = vault("/secret/data/hello" "foo")
+}
+```
+
+which will assign `local.foo` with the value "world"
+
+An example of using a v1 kv engine:
+
+If you store a value in vault using:
+
+    vault secrets enable -version=1 -path=secrets kv
+    vault kv put secrets/hello foo=world
+
+You can access it using the following:
+
+```hcl
+locals {
+    foo = vault("secrets/hello", "foo")
+}
+```
+
+This example accesses the Vault path `secret/foo` and returns the value
+stored at the key `foo`, storing it as the local variable `local.foo`.
+
+In order for this to work, you must set the environment variables `VAULT_TOKEN`
+and `VAULT_ADDR` to valid values.
+
+-> **NOTE:** HCL functions can be used in local variable definitions or inline
+with a provisioner/post-processor. They cannot be used in global variable definitions.
+
+The api tool we use allows for more custom configuration of the Vault client via
+environment variables.
+
+The full list of available environment variables is:
+
+```text
+"VAULT_ADDR"
+"VAULT_AGENT_ADDR"
+"VAULT_CACERT"
+"VAULT_CAPATH"
+"VAULT_CLIENT_CERT"
+"VAULT_CLIENT_KEY"
+"VAULT_CLIENT_TIMEOUT"
+"VAULT_SKIP_VERIFY"
+"VAULT_NAMESPACE"
+"VAULT_TLS_SERVER_NAME"
+"VAULT_WRAP_TTL"
+"VAULT_MAX_RETRIES"
+"VAULT_TOKEN"
+"VAULT_MFA"
+"VAULT_RATE_LIMIT"
+```
+
+and detailed documentation for usage of each of those variables can be found
+[here](https://www.vaultproject.io/docs/commands/#environment-variables).

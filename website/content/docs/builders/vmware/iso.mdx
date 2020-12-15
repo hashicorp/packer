@@ -1,0 +1,293 @@
+---
+modeline: |
+  vim: set ft=pandoc:
+description: |
+  This VMware Packer builder is able to create VMware virtual machines from an
+  ISO file as a source. It currently supports building virtual machines on hosts
+  running VMware Fusion for OS X, VMware Workstation for Linux and Windows, and
+  VMware Player on Linux. It can also build machines directly on VMware vSphere
+  Hypervisor using SSH as opposed to the vSphere API.
+page_title: VMware ISO - Builders
+sidebar_title: VMWare ISO
+---
+
+# VMware Builder (from ISO)
+
+Type: `vmware-iso`
+
+This VMware Packer builder is able to create VMware virtual machines from an ISO
+file as a source. It currently supports building virtual machines on hosts
+running [VMware Fusion](https://www.vmware.com/products/fusion/overview.html) for
+OS X, [VMware
+Workstation](https://www.vmware.com/products/workstation/overview.html) for Linux
+and Windows, and [VMware Player](https://www.vmware.com/products/player/) on
+Linux. It can also build machines directly on [VMware vSphere
+Hypervisor](https://www.vmware.com/products/vsphere-hypervisor/) using SSH as
+opposed to the vSphere API.
+
+The builder builds a virtual machine by creating a new virtual machine from
+scratch, booting it, installing an OS, provisioning software within the OS, then
+shutting it down. The result of the VMware builder is a directory containing all
+the files necessary to run the virtual machine.
+
+## Basic Example
+
+Here is a basic example. This example is not functional. It will start the OS
+installer but then fail because we don't provide the preseed file for Ubuntu to
+self-install. Still, the example serves to show the basic configuration:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "vmware-iso",
+  "iso_url": "http://old-releases.ubuntu.com/releases/precise/ubuntu-12.04.2-server-amd64.iso",
+  "iso_checksum": "md5:af5f788aee1b32c4b2634734309cc9e9",
+  "ssh_username": "packer",
+  "ssh_password": "packer",
+  "shutdown_command": "shutdown -P now"
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "vmware-iso" "basic-example" {
+  iso_url = "http://old-releases.ubuntu.com/releases/precise/ubuntu-12.04.2-server-amd64.iso"
+  iso_checksum = "md5:af5f788aee1b32c4b2634734309cc9e9"
+  ssh_username = "packer"
+  ssh_password = "packer"
+  shutdown_command = "shutdown -P now"
+}
+
+build {
+  sources = ["sources.vmware-iso.basic-example"]
+}
+```
+
+</Tab>
+</Tabs>
+
+## VMware-ISO Builder Configuration Reference
+
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [ISO](#iso-configuration),
+[HTTP](#http-directory-configuration),
+[Floppy](#floppy-configuration),
+[CD](#cd-configuration),
+[Boot](#boot-configuration),
+[Driver](#driver-configuration),
+[Hardware](#hardware-configuration),
+[Output](#output-configuration),
+[Run](#run-configuration),
+[Shutdown](#shutdown-configuration),
+[Communicator](#communicator-configuration),
+[Tools](#tools-configuration),
+[vmx](#vmx-configuration),
+[Export](#export-configuration),
+configuration references, which are
+necessary for this build to succeed and can be found further down the page.
+
+#### Optional:
+
+@include 'builder/vmware/iso/Config-not-required.mdx'
+
+### Extra Disk Configuration
+
+#### Optional:
+
+@include 'builder/vmware/common/DiskConfig-not-required.mdx'
+
+### ISO Configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig.mdx'
+
+#### Required:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-required.mdx'
+
+#### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-not-required.mdx'
+
+### Http directory configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig.mdx'
+
+#### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig-not-required.mdx'
+
+### Floppy configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/FloppyConfig.mdx'
+
+#### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/FloppyConfig-not-required.mdx'
+
+### CD configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/CDConfig-not-required.mdx'
+
+### Shutdown configuration
+
+#### Optional:
+
+@include 'packer-plugin-sdk/shutdowncommand/ShutdownConfig-not-required.mdx'
+
+### Driver configuration
+
+#### Optional:
+
+@include 'builder/vmware/common/DriverConfig-not-required.mdx'
+
+### Hardware configuration
+
+#### Optional:
+
+@include 'builder/vmware/common/HWConfig-not-required.mdx'
+
+### Output configuration
+
+#### Optional:
+
+@include 'builder/vmware/common/OutputConfig-not-required.mdx'
+
+### Run configuration
+
+@include 'builder/vmware/common/RunConfig.mdx'
+
+#### Optional:
+
+@include 'builder/vmware/common/RunConfig-not-required.mdx'
+
+### Tools configuration
+
+#### Optional:
+
+@include 'builder/vmware/common/ToolsConfig-not-required.mdx'
+
+### VMX configuration
+
+#### Optional:
+
+@include 'builder/vmware/common/VMXConfig-not-required.mdx'
+
+### Export configuration
+
+#### Optional:
+
+@include 'builder/vmware/common/ExportConfig-not-required.mdx'
+
+### Communicator configuration
+
+#### Optional common fields:
+
+@include 'packer-plugin-sdk/communicator/Config-not-required.mdx'
+
+#### Optional SSH fields:
+
+@include 'packer-plugin-sdk/communicator/SSH-not-required.mdx'
+
+#### Optional WinRM fields:
+
+@include 'packer-plugin-sdk/communicator/WinRM-not-required.mdx'
+
+## Boot Configuration
+
+@include 'packer-plugin-sdk/bootcommand/BootConfig.mdx'
+
+@include 'packer-plugin-sdk/bootcommand/VNCConfig.mdx'
+
+-> **Note**: for the `HTTPIP` to be resolved correctly, your VM's network
+configuration has to include a `hostonly` or `nat` type network interface.
+If you are using this feature, it is recommended to leave the default network
+configuration while you are building the VM, and use the `vmx_data_post` hook
+to modify the network configuration after the VM is done building.
+
+#### Optional:
+
+@include 'packer-plugin-sdk/bootcommand/VNCConfig-not-required.mdx'
+
+@include 'packer-plugin-sdk/bootcommand/BootConfig-not-required.mdx'
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools#templates).
+
+## VMX Template
+
+The heart of a VMware machine is the "vmx" file. This contains all the virtual
+hardware metadata necessary for the VM to function. Packer by default uses a
+[safe, flexible VMX
+file](https://github.com/hashicorp/packer/blob/20541a7eda085aa5cf35bfed5069592ca49d106e/builder/vmware/step_create_vmx.go#L84).
+But for advanced users, this template can be customized. This allows Packer to
+build virtual machines of effectively any guest operating system type.
+
+~> **This is an advanced feature.** Modifying the VMX template can easily
+cause your virtual machine to not boot properly. Please only modify the template
+if you know what you're doing.
+
+Within the template, a handful of variables are available so that your template
+can continue working with the rest of the Packer machinery. Using these
+variables isn't required, however.
+
+- `Name` - The name of the virtual machine.
+- `GuestOS` - The VMware-valid guest OS type.
+- `DiskName` - The filename (without the suffix) of the main virtual disk.
+- `ISOPath` - The path to the ISO to use for the OS installation.
+- `Version` - The Hardware version VMWare will execute this vm under. Also
+  known as the `virtualhw.version`.
+
+@include 'builders/building_on_remote_vsphere_hypervisor.mdx'
+
+### VNC port discovery
+
+Packer needs to decide on a port to use for VNC when building remotely. To find
+an open port, we try to connect to ports in the range of `vnc_port_min` to
+`vnc_port_max`. If we notice something is listening on a port in the range, we
+try to connect to the next one, and so on until we find a port that has nothing
+listening on it. If you have many clients building on the ESXi host, there
+might be competition for the VNC ports. You can adjust how long packer waits
+for a connection timeout by setting `PACKER_ESXI_VNC_PROBE_TIMEOUT`. This
+defaults to 15 seconds. Set this shorter if vnc connections are refused, and
+set it longer if Packer can't find an open port. This is intended as an
+advanced configuration option. Please make sure your firewall settings are
+correct before adjusting.
+
+### Using a Floppy for Linux kickstart file or preseed
+
+Depending on your network configuration, it may be difficult to use packer's
+built-in HTTP server with ESXi. Instead, you can provide a kickstart or preseed
+file by attaching a floppy disk. An example below, based on RHEL:
+
+```json
+{
+  "builders": [
+    {
+      "type": "vmware-iso",
+      "floppy_files": ["folder/ks.cfg"],
+      "boot_command": "<tab> text ks=floppy <enter><wait>"
+    }
+  ]
+}
+```
+
+It's also worth noting that `ks=floppy` has been deprecated. Later versions of
+the Anaconda installer (used in RHEL/CentOS 7 and Fedora) may require
+a different syntax to source a kickstart file from a mounted floppy image.
+
+```json
+{
+  "builders": [
+    {
+      "type": "vmware-iso",
+      "floppy_files": ["folder/ks.cfg"],
+      "boot_command": "<tab> inst.text inst.ks=hd:fd0:/ks.cfg <enter><wait>"
+    }
+  ]
+}
+```

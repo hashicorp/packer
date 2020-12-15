@@ -1,0 +1,142 @@
+---
+description: |
+  The `alicloud-ecs` Packer builder plugin provide the capability to build
+  customized images based on an existing base images.
+page_title: Alicloud Image Builder
+sidebar_title: Alicloud ECS
+---
+
+# Alicloud Image Builder
+
+Type: `alicloud-ecs`
+
+The `alicloud-ecs` Packer builder plugin provide the capability to build
+customized images based on an existing base images.
+
+## Configuration Reference
+
+The following configuration options are available for building Alicloud images.
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator) can be configured for this
+builder.
+
+### Required:
+
+@include 'builder/alicloud/ecs/AlicloudAccessConfig-required.mdx'
+
+@include 'builder/alicloud/ecs/RunConfig-required.mdx'
+
+@include 'builder/alicloud/ecs/AlicloudImageConfig-required.mdx'
+
+### Optional:
+
+@include 'builder/alicloud/ecs/AlicloudAccessConfig-not-required.mdx'
+
+@include 'builder/alicloud/ecs/AlicloudDiskDevices-not-required.mdx'
+
+@include 'builder/alicloud/ecs/RunConfig-not-required.mdx'
+
+@include 'builder/alicloud/ecs/AlicloudImageConfig-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSHTemporaryKeyPair-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Key-Pair-Name-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Agent-Auth-not-required.mdx'
+
+# Disk Devices Configuration:
+
+@include 'builder/alicloud/ecs/AlicloudDiskDevice-not-required.mdx'
+
+## Basic Example
+
+Here is a basic example for Alicloud.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "variables": {
+    "access_key": "{{env `ALICLOUD_ACCESS_KEY`}}",
+    "secret_key": "{{env `ALICLOUD_SECRET_KEY`}}"
+  },
+  "builders": [
+    {
+      "type": "alicloud-ecs",
+      "access_key": "{{user `access_key`}}",
+      "secret_key": "{{user `secret_key`}}",
+      "region": "cn-beijing",
+      "image_name": "packer_test2",
+      "source_image": "centos_7_04_64_20G_alibase_201701015.vhd",
+      "ssh_username": "root",
+      "instance_type": "ecs.n1.tiny",
+      "io_optimized": "true",
+      "internet_charge_type": "PayByTraffic",
+      "image_force_delete": "true"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["sleep 30", "yum install redis.x86_64 -y"]
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+variable "access_key" {
+  type = string
+}
+
+variable "secret_key" {
+  type = string
+}
+
+source "alicloud-ecs" "basic-example" {
+      access_key = var.access_key
+      secret_key = var.secret_key
+      region = "cn-beijing"
+      image_name = "packer_test2"
+      source_image = "centos_7_04_64_20G_alibase_201701015.vhd"
+      ssh_username = "root"
+      instance_type = "ecs.n1.tiny"
+      io_optimized = true
+      internet_charge_type = "PayByTraffic"
+      image_force_delete = true
+}
+
+build {
+  sources = ["sources.alicloud-ecs.basic-example"]
+
+  provisioner "shell" {
+    inline = [
+      "sleep 30", "yum install redis.x86_64 -y",
+    ]
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+~> Note: Images can become deprecated after a while; run
+`aliyun ecs DescribeImages` to find one that exists.
+
+~> Note: Since WinRM is closed by default in the system image. If you are
+planning to use Windows as the base image, you need enable it by userdata in
+order to connect to the instance, check
+[alicloud_windows.json](https://github.com/hashicorp/packer/tree/master/examples/alicloud/basic/alicloud_windows.json)
+and
+[winrm_enable_userdata.ps1](https://github.com/hashicorp/packer/tree/master/examples/alicloud/basic/winrm_enable_userdata.ps1)
+for details.
+
+See the
+[examples/alicloud](https://github.com/hashicorp/packer/tree/master/examples/alicloud)
+folder in the packer project for more examples.

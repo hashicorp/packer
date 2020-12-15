@@ -1,0 +1,353 @@
+---
+page_title: Packer Build Pipelines
+sidebar_title: Pipelineing Builds
+description: |-
+  Here we explore how to break your builds into discrete steps so that your
+  builds can be shorter and more reliable.
+---
+
+# Why Create a Template Pipeline?
+
+A common issue users face when beginning to create their Packer templates is
+that while they may need several specialized images, the early provisioning
+steps are all the same. It can feel tedious to copy all of those images' basic
+configuraton into each build template. It can feel even more tedious to wait a
+long time for similar builds to run duplicate steps.
+
+This is one reason why Packer recommends breaking your builds into small,
+discrete steps. Not only does it allow you to create "base" images that you can
+build from to create further customizations, but it also allows you to save
+time in your build process because the "base" images are likely to change less
+than your customizations.
+
+It also makes it so that a failing build takes less time to debug and re-run.
+
+In this example, we will use the Virtualbox builders, but the concepts from
+this example can be applied to other builders as well.
+
+## Starting from an ISO
+
+Here is an extremely basic virtualbox-iso template:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "vm_name": "vbox-example",
+      "boot_command": [
+        "<esc><wait>",
+        "<esc><wait>",
+        "<enter><wait>",
+        "/install/vmlinuz<wait>",
+        " initrd=/install/initrd.gz",
+        " auto-install/enable=true",
+        " debconf/priority=critical",
+        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ubuntu_preseed.cfg<wait>",
+        " -- <wait>",
+        "<enter><wait>"
+      ],
+      "http_directory": "./http",
+
+      "disk_size": "40960",
+      "guest_os_type": "Ubuntu_64",
+      "iso_checksum": "sha256:946a6077af6f5f95a51f82fdc44051c7aa19f9cfc5f737954845a6050543d7c2",
+      "iso_url": "http://old-releases.ubuntu.com/releases/14.04.1/ubuntu-14.04-server-amd64.iso",
+
+      "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+
+      "ssh_port": 22,
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["echo initial provisioning"]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "stage-1-manifest.json"
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "virtualbox-iso" "step_1" {
+  boot_command     = ["<esc><wait>", "<esc><wait>", "<enter><wait>",
+                      "/install/vmlinuz<wait>", " initrd=/install/initrd.gz",
+                      " auto-install/enable=true", " debconf/priority=critical",
+                      " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ubuntu_preseed.cfg<wait>",
+                      " -- <wait>", "<enter><wait>"]
+  disk_size        = "40960"
+  guest_os_type    = "Ubuntu_64"
+  http_directory   = "./http"
+  iso_checksum     = "sha256:946a6077af6f5f95a51f82fdc44051c7aa19f9cfc5f737954845a6050543d7c2"
+  iso_url          = "http://old-releases.ubuntu.com/releases/14.04.1/ubuntu-14.04-server-amd64.iso"
+  shutdown_command = "echo 'vagrant' | sudo -S shutdown -P now"
+  ssh_password     = "vagrant"
+  ssh_port         = 22
+  ssh_username     = "vagrant"
+  vm_name          = "vbox-example"
+}
+build {
+  sources = ["source.virtualbox-iso.step_1"]
+
+
+  provisioner "shell" {
+    inline = ["echo initial provisioning"]
+  }
+  post-processor "manifest" {
+    output = "stage-1-manifest.json"
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+In order to build using this template, create a directory named "http" in your
+current working directory. Copy the minimal example from our
+[preseed guide](https://www.packer.io/guides/automatic-operating-system-installs/preseed_ubuntu#examples)
+into a file in your http directory and name it "ubuntu_preseed.cfg". Copy the
+above json template into your current working directory and save it as
+"example_virtualbox_iso.json"
+
+To run the build, call `packer build example_virtualbox_iso.json`.
+
+This example does not set the output_directory or output_filename, so the file
+will be placed in a default name of "output-virtualbox-iso/vbox-example.ovf" --
+the builder will print this file name to the UI output, but in this example the
+[manifest](https://www.packer.io/docs/post-processors/manifest) post-processor
+to will store build information, including the names of the output files, in a
+json file named "stage-1-manifest.json". From there, you can programmatically
+look up the output file information.
+
+## Customizing the iso using the virtualbox-ovf builder
+
+That output filename generated in the first stage can be used as the
+[source_path](https://www.packer.io/docs/builders/virtualbox/ovf#source_path)
+for the virtualbox-ovf builder.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+    {
+      "type": "virtualbox-ovf",
+      "vm_name": "virtualbox-example-ovf",
+
+      "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+      "source_path": "output-virtualbox-iso/vbox-example.ovf",
+
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_username": "vagrant"
+    }
+  ],
+  "provisioners": [
+    {
+      "inline": ["echo secondary provisioning"],
+      "type": "shell"
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "virtualbox-ovf" "step_2" {
+  shutdown_command = "echo 'vagrant' | sudo -S shutdown -P now"
+  source_path      = "output-virtualbox-iso/vbox-example.ovf"
+  ssh_password     = "vagrant"
+  ssh_port         = 22
+  ssh_username     = "vagrant"
+  vm_name          = "virtualbox-example-ovf"
+}
+
+build {
+  sources = ["source.virtualbox-ovf.step_2"]
+
+  provisioner "shell" {
+    inline = ["echo secondary provisioning"]
+  }
+}
+
+```
+
+</Tab>
+</Tabs>
+
+## More efficiencies
+
+You may find that you want to run time-consuming import post-processors like
+the "amazon-import" post-processor independently of the build that produces
+the artifacts you want to process.
+
+In this case, you can use a null builder
+and manually modify the input to the post-processing chain so that you can get
+the behavior you want. The below example shows a "vagrant" post-processor
+being used with a null builder, and manually sets the artifact from our
+stage-2 ovf build:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+    {
+      "type": "null",
+      "communicator": "none"
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "type": "artifice",
+        "files": [
+          "output-virtualbox-ovf/virtualbox-example-ovf.ovf",
+          "output-virtualbox-ovf/virtualbox-example-ovf-disk001.vmdk"
+        ]
+      },
+      {
+        "type": "vagrant",
+        "provider_override": "virtualbox"
+      }
+    ]
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "null" "step_3" {
+  communicator = "none"
+}
+
+build {
+  sources = ["source.null.step_3"]
+
+  post-processors {
+    post-processor "artifice" {
+      files = ["output-virtualbox-ovf/virtualbox-example-ovf.ovf", "output-virtualbox-ovf/virtualbox-example-ovf-disk001.vmdk"]
+    }
+    post-processor "vagrant" {
+      provider_override = "virtualbox"
+    }
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+By using the null builder instead of just running an ovf builder, we can spare
+ourselves all of the time Packer would normally spend launching and destroying
+VMs.
+
+## Putting it all together
+
+Packer templates don't come with a custom "glue" to bind them together. We
+recommend using your CI system or wrapping scripts to connect the templates
+into a chain.
+
+## Chaining together several of the same builders to make "save points"
+
+If you want to use the same builder for several builds in a row, this can feel
+tedious to implement in json. We recommend you try using HCL configs so that
+you can reuse the same source in several builds:
+
+HCL templates work by allowing you to draw sources and variables from multiple
+different files in a single directory, so the following files are assumed to
+exist in their own folder:
+
+sources.pkr.hcl
+
+```hcl
+// In your sources file, you can create a configuration for a builder that you
+// want to reuse between multiple steps in the build. Just leave the source
+// and destination images out of this source, and set them specifically in each
+// step without having to set all of the other options over and over again.
+
+source "docker" "example" {
+  commit = true
+  // any other configuration you want for your docker containers
+}
+```
+
+build.pkr.hcl
+
+```hcl
+build {
+  // Make sure to name your builds so that you can selectively run them one at
+  // a time.
+  name = "step1"
+
+  source "source.docker.example" {
+    image = "ubuntu"
+  }
+
+  provisioner "shell" {
+    inline = ["echo example provisioner"]
+  }
+  provisioner "shell" {
+    inline = ["echo another example provisioner"]
+  }
+  provisioner "shell" {
+    inline = ["echo a third example provisioner"]
+  }
+
+  // Make sure that the output from your build can be used in the next build.
+  // In this example, we're tagging the docker image so that the step-2
+  // builder can find it without us having to track it down in a manifest.
+  post-processor "docker-tag" {
+    repository = "ubuntu"
+    tag = ["step-1-output"]
+  }
+}
+
+build {
+    name = "step2"
+
+    source "source.docker.example" {
+      // This is the tagged artifact from the stage 1 build. You can retrieve
+      // this from a manifest file and setting it as a variable on the command
+      // line, or by making sure you define and know the output of the build,
+      // if it's something you can define like an output name or directory.
+      image = "ubuntu:step-1-output"
+      // disable the pull if your image tag only exists locally
+      pull = false
+    }
+
+    provisioner "shell" {
+      inline = ["echo another provision!"]
+    }
+}
+```
+
+pipeline.sh
+
+```sh
+#!/bin/bash
+packer build -only='step1.docker.example' .
+packer build -only='step2.docker.example' .
+```
+
+To run the pipeline, call pipeline.sh. You can add error checking to this script to abort if there's an issue with a build. You can create as many build steps as you want. Each can either inhabit one file

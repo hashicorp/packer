@@ -66,10 +66,12 @@ type Parser struct {
 }
 
 const (
-	hcl2FileExt        = ".pkr.hcl"
-	hcl2JsonFileExt    = ".pkr.json"
-	hcl2VarFileExt     = ".auto.pkrvars.hcl"
-	hcl2VarJsonFileExt = ".auto.pkrvars.json"
+	hcl2FileExt            = ".pkr.hcl"
+	hcl2JsonFileExt        = ".pkr.json"
+	hcl2VarFileExt         = ".pkrvars.hcl"
+	hcl2VarJsonFileExt     = ".pkrvars.json"
+	hcl2AutoVarFileExt     = ".auto.pkrvars.hcl"
+	hcl2AutoVarJsonFileExt = ".auto.pkrvars.json"
 )
 
 // Parse will Parse all HCL files in filename. Path can be a folder or a file.
@@ -172,7 +174,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 
 	// parse var files
 	{
-		hclVarFiles, jsonVarFiles, moreDiags := GetHCL2Files(filename, hcl2VarFileExt, hcl2VarJsonFileExt)
+		hclVarFiles, jsonVarFiles, moreDiags := GetHCL2Files(filename, hcl2AutoVarFileExt, hcl2AutoVarJsonFileExt)
 		diags = append(diags, moreDiags...)
 		for _, file := range varFiles {
 			switch filepath.Ext(file) {

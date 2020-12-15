@@ -1,0 +1,358 @@
+---
+description: |
+  The proxmox Packer builder is able to create new images for use with
+  Proxmox VE. The builder takes an ISO source, runs any provisioning
+  necessary on the image after launching it, then creates a virtual machine
+  template.
+page_title: Proxmox ISO - Builders
+sidebar_title: ISO
+---
+
+# Proxmox Builder (from an ISO)
+
+Type: `proxmox-iso`
+
+The `proxmox-iso` Packer builder is able to create new images for use with
+[Proxmox](https://www.proxmox.com/en/proxmox-ve). The builder takes an ISO
+image, runs any provisioning necessary on the image after launching it, then
+creates a virtual machine template. This template can then be used as to
+create new virtual machines within Proxmox.
+
+The builder does _not_ manage templates. Once it creates a template, it is up
+to you to use it or delete it.
+
+## Configuration Reference
+
+There are many configuration options available for the builder. They are
+segmented below into two categories: required and optional parameters. Within
+each category, the available configuration keys are alphabetized.
+
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator) can be configured for this
+builder.
+
+### Required:
+
+- `proxmox_url` (string) - URL to the Proxmox API, including the full path,
+  so `https://<server>:<port>/api2/json` for example.
+  Can also be set via the `PROXMOX_URL` environment variable.
+
+- `username` (string) - Username when authenticating to Proxmox, including
+  the realm. For example `user@pve` to use the local Proxmox realm.
+  Can also be set via the `PROXMOX_USERNAME` environment variable.
+
+- `password` (string) - Password for the user.
+  Can also be set via the `PROXMOX_PASSWORD` environment variable.
+
+- `node` (string) - Which node in the Proxmox cluster to start the virtual
+  machine on during creation.
+
+- `iso_file` (string) - Path to the ISO file to boot from, expressed as a
+  proxmox datastore path, for example
+  `local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso`.
+  Either `iso_file` OR `iso_url` must be specifed.
+
+- `iso_url` (string) - URL to an ISO file to upload to Proxmox, and then
+  boot from. Either `iso_file` OR `iso_url` must be specifed.
+
+- `iso_storage_pool` (string) - Proxmox storage pool onto which to upload
+  the ISO file.
+
+- `iso_checksum` (string) - Checksum of the ISO file. Type of the checksum
+  is infered based on string length, or can be explicitly prefixed with
+  md5:, sha1:, sha256:, sha512: or set to none. Corruption of large files,
+  such as ISOs, can occur during transfer from time to time. As such,
+  setting this to none is not recommended.
+
+### Optional:
+
+- `insecure_skip_tls_verify` (bool) - Skip validating the certificate.
+
+- `pool` (string) - Name of resource pool to create virtual machine in.
+
+- `vm_name` (string) - Name of the virtual machine during creation. If not
+  given, a random uuid will be used.
+
+- `vm_id` (int) - The ID used to reference the virtual machine. This will
+  also be the ID of the final template. If not given, the next free ID on
+  the node will be used.
+
+- `memory` (int) - How much memory, in megabytes, to give the virtual
+  machine. Defaults to `512`.
+
+- `cores` (int) - How many CPU cores to give the virtual machine. Defaults
+  to `1`.
+
+- `sockets` (int) - How many CPU sockets to give the virtual machine.
+  Defaults to `1`
+
+- `cpu_type` (string) - The CPU type to emulate. See the Proxmox API
+  documentation for the complete list of accepted values. For best
+  performance, set this to `host`. Defaults to `kvm64`.
+
+- `os` (string) - The operating system. Can be `wxp`, `w2k`, `w2k3`, `w2k8`,
+  `wvista`, `win7`, `win8`, `win10`, `l24` (Linux 2.4), `l26` (Linux 2.6+),
+  `solaris` or `other`. Defaults to `other`.
+
+- `vga` (object) - The graphics adapter to use. Example:
+
+  ```json
+  {
+    "type": "vmware",
+    "memory": 32
+  }
+  ```
+
+  - `type` (string) - Can be `cirrus`, `none`, `qxl`,`qxl2`, `qxl3`,
+    `qxl4`, `serial0`, `serial1`, `serial2`, `serial3`, `std`, `virtio`, `vmware`.
+    Defaults to `std`.
+
+  - `memory` (int) - How much memory to assign.
+
+- `network_adapters` (array of objects) - Network adapters attached to the
+  virtual machine. Example:
+
+  ```json
+  [
+    {
+      "model": "virtio",
+      "bridge": "vmbr0",
+      "vlan_tag": "10",
+      "firewall": true
+    }
+  ]
+  ```
+
+  - `bridge` (string) - Required. Which Proxmox bridge to attach the
+    adapter to.
+
+  - `model` (string) - Model of the virtual network adapter. Can be
+    `rtl8139`, `ne2k_pci`, `e1000`, `pcnet`, `virtio`, `ne2k_isa`,
+    `i82551`, `i82557b`, `i82559er`, `vmxnet3`, `e1000-82540em`,
+    `e1000-82544gc` or `e1000-82545em`. Defaults to `e1000`.
+
+  - `mac_address` (string) - Give the adapter a specific MAC address. If
+    not set, defaults to a random MAC.
+
+  - `vlan_tag` (string) - If the adapter should tag packets. Defaults to
+    no tagging.
+
+  - `firewall` (bool) - If the interface should be protected by the firewall.
+    Defaults to `false`.
+
+  - `packet_queues` (int) - Number of packet queues to be used on the device.
+    Values greater than 1 indicate that the multiqueue feature is activated.
+    For best performance, set this to the number of cores available to the
+    virtual machine. CPU load on the host and guest systems will increase as
+    the traffic increases, so activate this option only when the VM has to
+    handle a great number of incoming connections, such as when the VM is
+    operating as a router, reverse proxy or a busy HTTP server. Requires
+    `virtio` network adapter. Defaults to `0`.
+
+- `disks` (array of objects) - Disks attached to the virtual machine.
+  Example:
+
+  ```json
+  [
+    {
+      "type": "scsi",
+      "disk_size": "5G",
+      "storage_pool": "local-lvm",
+      "storage_pool_type": "lvm"
+    }
+  ]
+  ```
+
+  - `storage_pool` (string) - Required. Name of the Proxmox storage pool
+    to store the virtual machine disk on. A `local-lvm` pool is allocated
+    by the installer, for example.
+
+  - `storage_pool_type` (string) - Required. The type of the pool, can
+    be `lvm`, `lvm-thin`, `zfspool`, `cephfs`, `rbd` or `directory`.
+
+  - `type` (string) - The type of disk. Can be `scsi`, `sata`, `virtio` or
+    `ide`. Defaults to `scsi`.
+
+  - `disk_size` (string) - The size of the disk, including a unit suffix, such
+    as `10G` to indicate 10 gigabytes.
+
+  - `cache_mode` (string) - How to cache operations to the disk. Can be
+    `none`, `writethrough`, `writeback`, `unsafe` or `directsync`.
+    Defaults to `none`.
+
+  - `format` (string) - The format of the file backing the disk. Can be
+    `raw`, `cow`, `qcow`, `qed`, `qcow2`, `vmdk` or `cloop`. Defaults to
+    `raw`.
+
+  - `io_thread` (bool) - Create one I/O thread per storage controller, rather
+    than a single thread for all I/O. This can increase performance when
+    multiple disks are used. Requires `virtio-scsi-single` controller and a
+    `scsi` or `virtio` disk. Defaults to `false`.
+
+- `template_name` (string) - Name of the template. Defaults to the generated
+  name used during creation.
+
+- `template_description` (string) - Description of the template, visible in
+  the Proxmox interface.
+
+- `unmount_iso` (bool) - If true, remove the mounted ISO from the template
+  after finishing. Defaults to `false`.
+
+- `onboot` (boolean) - Specifies whether a VM will be started during system
+  bootup. Defaults to `false`.
+
+- `qemu_agent` (boolean) - Disables QEMU Agent option for this VM. When enabled,
+  then `qemu-guest-agent` must be installed on the guest. When disabled, then
+  `ssh_host` should be used. Defaults to `true`.
+
+- `disable_kvm` (boolean) - Disables KVM hardware virtualization. Defaults to `false`.
+
+- `scsi_controller` (string) - The SCSI controller model to emulate. Can be `lsi`,
+  `lsi53c810`, `virtio-scsi-pci`, `virtio-scsi-single`, `megasas`, or `pvscsi`.
+  Defaults to `lsi`.
+
+- `cloud_init` (bool) - If true, add a Cloud-Init CDROM drive after the virtual machine has been converted to a template.
+
+- `cloud_init_storage_pool` - (string) - Name of the Proxmox storage pool
+  to store the Cloud-Init CDROM on. If not given, the storage pool of the boot device will be used.
+
+- `additional_iso_files` (array of objects) - Additional ISO files attached to the virtual machine.
+  Example:
+
+  ```json
+  [
+    {
+      "device": "scsi5",
+      "iso_file": "local:iso/virtio-win-0.1.185.iso",
+      "unmount": true,
+      "iso_checksum": "af2b3cc9fa7905dea5e58d31508d75bba717c2b0d5553962658a47aebc9cc386"
+    }
+  ]
+  ```
+
+  - `device` (string) - Bus type and bus index that the ISO will be mounted on. Can be `ideX`,
+    `sataX` or `scsiX`.
+    For `ide` the bus index ranges from 0 to 3, for `sata` form 0 to 5 and for
+    `scsi` from 0 to 30.
+    Defaults to `ide3` since `ide2` is generelly the boot drive.
+
+  - `iso_file` (string) - Path to the ISO file to boot from, expressed as a
+    proxmox datastore path, for example
+    `local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso`.
+    Either `iso_file` OR `iso_url` must be specifed.
+
+  - `iso_url` (string) - URL to an ISO file to upload to Proxmox, and then
+    boot from. Either `iso_file` OR `iso_url` must be specifed.
+
+  - `iso_storage_pool` (string) - Proxmox storage pool onto which to upload
+    the ISO file.
+
+  - `iso_checksum` (string) - Checksum of the ISO file.
+  - `unmount` (bool) - If true, remove the mounted ISO from the template after finishing. Defaults to `false`.
+
+- `http_interface` - (string) - Name of the network interface that Packer gets
+  `HTTPIP` from. Defaults to the first non loopback interface.
+
+- `vm_interface` - (string) - Name of the network interface that Packer gets
+  the VMs IP from. Defaults to the first non loopback interface.
+
+- `boot` - (string) - Override default boot order. Format example `order=virtio0;ide2;net0`.
+  Prior to Proxmox 6.2-15 the format was `cdn` (c:CDROM -> d:Disk -> n:Network)
+
+## Boot Command
+
+The `boot_command` configuration is very important: it specifies the keys to
+type when the virtual machine is first booted in order to start the OS
+installer. This command is typed after `boot_wait`, which gives the virtual
+machine some time to actually load the ISO.
+
+As documented above, the `boot_command` is an array of strings. The strings
+are all typed in sequence. It is an array only to improve readability within
+the template.
+
+The boot command is "typed" character for character over the virtual keyboard
+to the machine, simulating a human actually typing the keyboard.
+
+@include 'builders/boot-command.mdx'
+
+The example shown below is a working boot command used to start an Ubuntu
+12.04 installer:
+
+```json
+[
+  "<esc><esc><enter><wait>",
+  "/install/vmlinuz noapic ",
+  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg ",
+  "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+  "hostname={{ .Name }} ",
+  "fb=false debconf/frontend=noninteractive ",
+  "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+  "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+  "initrd=/install/initrd.gz -- <enter>"
+]
+```
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools#templates).
+
+## Http directory configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig.mdx'
+
+### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig-not-required.mdx'
+
+## Example: Fedora with kickstart
+
+Here is a basic example creating a Fedora 29 server image with a Kickstart
+file served with Packer's HTTP server. Note that the iso file needs to be
+manually downloaded.
+
+```json
+{
+  "variables": {
+    "username": "apiuser@pve",
+    "password": "supersecret"
+  },
+  "builders": [
+    {
+      "type": "proxmox",
+      "proxmox_url": "https://my-proxmox.my-domain:8006/api2/json",
+      "insecure_skip_tls_verify": true,
+      "username": "{{user `username`}}",
+      "password": "{{user `password`}}",
+
+      "node": "my-proxmox",
+      "network_adapters": [
+        {
+          "bridge": "vmbr0"
+        }
+      ],
+      "disks": [
+        {
+          "type": "scsi",
+          "disk_size": "5G",
+          "storage_pool": "local-lvm",
+          "storage_pool_type": "lvm"
+        }
+      ],
+
+      "iso_file": "local:iso/Fedora-Server-dvd-x86_64-29-1.2.iso",
+      "http_directory": "config",
+      "boot_wait": "10s",
+      "boot_command": [
+        "<up><tab> ip=dhcp inst.cmdline inst.ks=http://{{.HTTPIP}}:{{.HTTPPort}}/ks.cfg<enter>"
+      ],
+
+      "ssh_username": "root",
+      "ssh_timeout": "15m",
+      "ssh_password": "packer",
+
+      "unmount_iso": true,
+      "template_name": "fedora-29",
+      "template_description": "Fedora 29-1.2, generated on {{ isotime \"2006-01-02T15:04:05Z\" }}"
+    }
+  ]
+}
+```

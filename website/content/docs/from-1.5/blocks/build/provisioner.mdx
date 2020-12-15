@@ -1,0 +1,164 @@
+---
+description: |
+  The provisioner block defines how a provisioner is configured.
+page_title: provisioner - build - Blocks
+sidebar_title: <tt>provisioner</tt>
+---
+
+# The `provisioner` block
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+The `provisioner` block defines how a provisioner is configured.
+
+```hcl
+# builds.pkr.hcl
+build {
+  # ...
+  provisioner "shell" {
+    inline = [
+      "echo provisioning all the things",
+      "echo the value of 'foo' is '${var.foo}'",
+    ]
+  }
+}
+```
+
+Provisioners use builtin and third-party software to install and configure the
+machine image after booting. Provisioners prepare the system for use.
+
+The list of available provisioners can be found in the
+[provisioners](/docs/provisioners) section.
+
+# Run on Specific Builds
+
+You can use the `only` or `except` configurations to run a provisioner only
+with specific builds. These two configurations do what you expect: `only` will
+only run the provisioner on the specified builds and `except` will run the
+provisioner on anything other than the specified builds.
+
+An example of `only` being used is shown below, but the usage of `except` is
+effectively the same:
+
+```hcl
+# builds.pkr.hcl
+
+source "amazon-ebs" "first-example" {
+  #...
+}
+
+source "amazon-ebs" "second-example" {
+  #...
+}
+
+build {
+  source = [
+    "source.amazon-ebs.first-example",
+    "source.amazon-ebs.second-example",
+  ]
+  provisioner "shell" {
+    # This provisioner only runs for the 'first-example' source.
+    only = ["source.amazon-ebs.first-example"]
+
+    inline = [
+      "echo provisioning all the things",
+      "echo the value of 'foo' is '${var.foo}'",
+    ]
+  }
+  provisioner "shell" {
+    # This runs with all sources.
+    inline = [
+        "echo Hi World!"
+      ]
+  }
+}
+```
+
+The values within `only` or `except` are _build names_, not builder types.
+
+## Pausing Before Running
+
+With certain provisioners it is sometimes desirable to pause for some period of
+time before running it. Specifically, in cases where a provisioner reboots the
+machine, you may want to wait for some period of time before starting the next
+provisioner.
+
+Every provisioner definition in a Packer template can take a special
+configuration `pause_before` that is the amount of time to pause before running
+that provisioner. By default, there is no pause. An example is shown below:
+
+```hcl
+# builds.pkr.hcl
+build {
+  # ...
+  provisioner "shell" {
+      inline = [
+        "echo provisioning all the things",
+        "echo the value of 'foo' is '${var.foo}'",
+      ]
+      pause_before = "10s"
+  }
+}
+```
+
+For the above provisioner, Packer will wait 10 seconds before uploading and
+executing the shell script.
+
+## Retry on error
+
+With certain provisioners it is sometimes desirable to retry when it fails.
+Specifically, in cases where the provisioner depends on external processes that are not done yet.
+
+Every provisioner definition in a Packer template can take a special
+configuration `max_retries` that is the maximum number of times a provisioner will retry on error.
+By default, there `max_retries` is zero and there is no retry on error. An example is shown below:
+
+```hcl
+# builds.pkr.hcl
+build {
+  # ...
+  provisioner "shell" {
+      inline = [
+        "echo provisioning all the things",
+        "echo the value of 'foo' is '${var.foo}'",
+      ]
+      max_retries = 5
+  }
+}
+```
+
+For the above provisioner, Packer will retry maximum five times until stops failing.
+If after five retries the provisioner still fails, then the complete build will fail.
+
+## Timeout
+
+Sometimes a command can take much more time than expected
+
+Every provisioner definition in a Packer template can take a special
+configuration `timeout` that is the amount of time to wait before
+considering that the provisioner failed. By default, there is no timeout. An
+example is shown below:
+
+```hcl
+# builds.pkr.hcl
+build {
+  # ...
+  provisioner "shell" {
+      inline = [
+        "echo provisioning all the things",
+        "echo the value of 'foo' is '${var.foo}'",
+      ]
+      timeout = "5m"
+  }
+}
+```
+
+For the above provisioner, Packer will cancel the script if it takes more than
+5 minutes.
+
+Timeout has no effect in debug mode.
+
+## Build Contextual Variables
+
+Packer allows to access connection information and basic instance state information from a provisioner. These information are stored in the `build` variable.
+Check out the [Contextual Variables](/docs/from-1.5/contextual-variables) documentation to learn more about and see some examples of how to use them.

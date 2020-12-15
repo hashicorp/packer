@@ -1,0 +1,172 @@
+---
+description: |
+  The yandex Packer builder is able to create images for use with
+  Yandex.Cloud based on existing images.
+page_title: Yandex Compute - Builders
+sidebar_title: Yandex.Cloud
+---
+
+# Yandex Compute Builder
+
+Type: `yandex`
+
+The `yandex` Packer builder is able to create
+[images](https://cloud.yandex.com/docs/compute/concepts/images) for use with
+[Yandex Compute Cloud](https://cloud.yandex.com/docs/compute/)
+based on existing images.
+
+## Authentication
+
+Builder can authenticate with Yandex.Cloud using one of the following methods:
+
+- OAuth token
+- IAM token
+- File with Service Account Key
+- Service Account assigned to Compute Instance
+
+### Authentication Using Token
+
+To authenticate with an OAuth token or IAM token only `token` config key is needed.
+Or use the `YC_TOKEN` environment variable with proper value.
+Token you could get [here](https://oauth.yandex.ru/authorize?response_type=token&client_id=1a6990aa636648e9b2ef855fa7bec2fb).
+Check [documentation](https://cloud.yandex.ru/docs/iam/operations/iam-token/create) about how to create IAM token.
+
+### Authentication Using Service Account Key File
+
+To authenticate with a service account credential, only `service_account_key_file` is needed.
+Or use the `YC_SERVICE_ACCOUNT_KEY_FILE` environment variable.
+The parameter expects a value path to the service account file in json format. Check [documentation](https://cloud.yandex.com/docs/cli/operations/authentication/service-account#auth-as-sa)
+about how to create SA and its key.
+
+### Authentication Using a Compute Instance Service Account
+
+Authentication with a Service Account on an instance happens when neither the `token` nor the `service_account_key_file` parameter is set.
+To get more information about this kind of authentication check [documentaion](https://cloud.yandex.com/docs/compute/operations/vm-connect/auth-inside-vm).
+
+-> **NB** Do not forget to assigne proper roles to Service Account, if you use this type of auth.
+
+## Basic Example
+
+```json
+{
+  "type": "yandex",
+  "token": "YOUR OAUTH TOKEN",
+  "folder_id": "YOUR FOLDER ID",
+  "source_image_family": "ubuntu-1804-lts",
+  "ssh_username": "ubuntu",
+  "use_ipv4_nat": "true"
+}
+```
+
+## Configuration Reference
+
+Configuration options are organized below into two categories: required and
+optional. Within each category, the available options are alphabetized and
+described.
+
+In addition to the options listed here, a [communicator](/docs/templates/communicator)
+can be configured for this builder. In addition to the options defined there, a private key file
+can also be supplied to override the typical auto-generated key:
+
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
+
+### Required:
+
+#### Access
+
+@include 'builder/yandex/AccessConfig-required.mdx'
+
+#### Builder
+
+@include 'builder/yandex/Config-required.mdx'
+
+#### Common
+
+@include 'builder/yandex/CloudConfig-required.mdx'
+
+### Optional:
+
+#### Access
+
+@include 'builder/yandex/AccessConfig-not-required.mdx'
+
+#### Builder
+
+@include 'builder/yandex/Config-not-required.mdx'
+
+#### Common
+
+@include 'builder/yandex/CommonConfig-not-required.mdx'
+
+#### Instance
+
+@include 'builder/yandex/InstanceConfig-not-required.mdx'
+
+#### Disk
+
+@include 'builder/yandex/DiskConfig-not-required.mdx'
+
+#### Image
+
+@include 'builder/yandex/ImageConfig-not-required.mdx'
+
+#### Network
+
+@include 'builder/yandex/NetworkConfig-not-required.mdx'
+
+## Build template data
+
+In configuration directives the following variables are available:
+
+- `ImageID` - ID of the built image.
+- `ImageName` - Name of the built image.
+- `ImageFamily` - Family of the built image.
+- `ImageDescription` - Description of the built image.
+- `ImageFolderID` - Folder ID where the built image is stored.
+- `SourceImageID` - The source image ID (for example `fd8fjtn3mj2kfe7h6f0r`) used to build the image.
+- `SourceImageName` - The source image name (for example `ubuntu-1604-lts-1579200746`) used to build the image.
+- `SourceImageDescription` - The source image description (for example `ubuntu 16.04 lts`).
+- `SourceImageFamily` - The source image family (for example `ubuntu-1604-lts`).
+- `SourceImageFolderID` - The folder ID where source image located (for example `standard-images`).
+
+## Build Shared Information Variables
+
+This builder generates data that are shared with provisioner and post-processor via build function of
+[template engine](/docs/templates/engine) for JSON and [contextual variables](/docs/from-1.5/contextual-variables)
+for HCL2.
+
+The generated variables available for this builder see above
+
+Usage example:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+"post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest.json",
+      "strip_path": true,
+      "custom_data": {
+        "source_image_id": "{{ build `SourceImageID` }}"
+      }
+    }
+]
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "manifest" {
+    output = "manifest.json"
+    strip_path = true
+    custom_data = {
+        source_image_id = "${build.SourceImageID}"
+    }
+}
+```
+
+</Tab>
+</Tabs>

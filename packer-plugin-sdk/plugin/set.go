@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	pluginVersion "github.com/hashicorp/packer/packer-plugin-sdk/version"
 	"github.com/hashicorp/packer/version"
 )
 
@@ -46,6 +47,10 @@ func NewSet() *Set {
 	}
 }
 
+func (i *Set) SetVersion(version *pluginVersion.PluginVersion) {
+	i.version = version.String()
+}
+
 func (i *Set) RegisterBuilder(name string, builder packersdk.Builder) {
 	if _, found := i.Builders[name]; found {
 		panic(fmt.Errorf("registering duplicate %s builder", name))
@@ -73,10 +78,10 @@ func (i *Set) RegisterProvisioner(name string, provisioner packersdk.Provisioner
 //  * "start post-processor example" starts the post-processor "example"
 func (i *Set) Run() error {
 	args := os.Args[1:]
-	return i.run(args...)
+	return i.RunCommand(args...)
 }
 
-func (i *Set) run(args ...string) error {
+func (i *Set) RunCommand(args ...string) error {
 	if len(args) < 1 {
 		return fmt.Errorf("needs at least one argument")
 	}

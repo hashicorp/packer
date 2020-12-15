@@ -4,11 +4,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"path"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
+	"github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	pluginsdk "github.com/hashicorp/packer/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 
 func newConfig() Config {
@@ -133,4 +138,160 @@ func generateFakePlugins(dirname string, pluginNames []string) (string, []string
 	}
 
 	return dir, plugins, cleanUpFunc, nil
+}
+
+// TestHelperProcess isn't a real test. It's used as a helper process
+// for multiplugin-binary tests.
+func TestHelperPlugins(*testing.T) {
+	if os.Getenv("PKR_WANT_TEST_PLUGINS") != "1" {
+		return
+	}
+	defer os.Exit(0)
+
+	args := os.Args
+	for len(args) > 0 {
+		if args[0] == "--" {
+			args = args[1:]
+			break
+		}
+		args = args[1:]
+	}
+	if len(args) == 0 {
+		fmt.Fprintf(os.Stderr, "No command\n")
+		os.Exit(2)
+	}
+
+	pluginName, args := args[0], args[1:]
+	plugin, found := mockPlugins[pluginName]
+	if !found {
+		fmt.Fprintf(os.Stderr, "No %q plugin found\n", pluginName)
+		os.Exit(2)
+	}
+
+	err := plugin.RunCommand(args...)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+}
+
+// HasExec reports whether the current system can start new processes
+// using os.StartProcess or (more commonly) exec.Command.
+func HasExec() bool {
+	switch runtime.GOOS {
+	case "js":
+		return false
+	case "darwin":
+		if runtime.GOARCH == "arm64" {
+			return false
+		}
+	case "windows":
+		// TODO(azr): Fix this once versioning is added and we know more
+		return false
+	}
+	return true
+}
+
+// MustHaveExec checks that the current system can start new processes
+// using os.StartProcess or (more commonly) exec.Command.
+// If not, MustHaveExec calls t.Skip with an explanation.
+func MustHaveExec(t testing.TB) {
+	if !HasExec() {
+		t.Skipf("skipping test: cannot exec subprocess on %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+}
+
+func MustHaveCommand(t testing.TB, cmd string) string {
+	path, err := exec.LookPath(cmd)
+	if err != nil {
+		t.Skipf("skipping test: cannot find the %q command: %v", cmd, err)
+	}
+	return path
+}
+
+func helperCommand(t *testing.T, s ...string) []string {
+	MustHaveExec(t)
+
+	cmd := []string{os.Args[0], "-test.run=TestHelperPlugins", "--"}
+	return append(cmd, s...)
+}
+
+var (
+	mockPlugins = map[string]pluginsdk.Set{
+		"bird": pluginsdk.Set{
+			Builders: map[string]packer.Builder{
+				"feather":   nil,
+				"guacamole": nil,
+			},
+		},
+		"chimney": pluginsdk.Set{
+			PostProcessors: map[string]packer.PostProcessor{
+				"smoke": nil,
+			},
+		},
+	}
+)
+
+func Test_multiplugin_describe(t *testing.T) {
+
+	pluginDir, err := tmp.Dir("pkr-multiplugin-test-*")
+	{
+		// create an exectutable file with a `sh` sheebang
+		// this file will look like:
+		// #!/bin/sh
+		// PKR_WANT_TEST_PLUGINS=1 ...plugin/debug.test -test.run=TestHelperPlugins -- bird $@
+		// 'bird' is the mock plugin we want to start
+		// $@ just passes all passed arguments
+		// This will allow to run the fake plugin from go tests which in turn
+		// will run go tests callback to `TestHelperPlugins`, this one will be
+		// transparently calling our mock multiplugins `mockPlugins`.
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.RemoveAll(pluginDir)
+
+		t.Logf("putting temporary mock plugins in %s", pluginDir)
+		defer os.RemoveAll(pluginDir)
+
+		shPath := MustHaveCommand(t, "bash")
+		for name := range mockPlugins {
+			plugin := path.Join(pluginDir, "packer-plugin-"+name)
+			fileContent := ""
+			fileContent = fmt.Sprintf("#!%s\n", shPath)
+			fileContent += strings.Join(
+				append([]string{"PKR_WANT_TEST_PLUGINS=1"}, helperCommand(t, name, "$@")...),
+				" ")
+			if err := ioutil.WriteFile(plugin, []byte(fileContent), os.ModePerm); err != nil {
+				t.Fatalf("failed to create fake plugin binary: %v", err)
+			}
+		}
+	}
+	os.Setenv("PACKER_PLUGIN_PATH", pluginDir)
+
+	c := Config{}
+	err = c.Discover()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for mockPluginName, plugin := range mockPlugins {
+		for mockBuilderName := range plugin.Builders {
+			expectedBuilderName := mockPluginName + "-" + mockBuilderName
+			if _, found := c.builders[expectedBuilderName]; !found {
+				t.Fatalf("expected to find builder %q", expectedBuilderName)
+			}
+		}
+		for mockProvisionerName := range plugin.Provisioners {
+			expectedProvisionerName := mockPluginName + "-" + mockProvisionerName
+			if _, found := c.provisioners[expectedProvisionerName]; !found {
+				t.Fatalf("expected to find builder %q", expectedProvisionerName)
+			}
+		}
+		for mockPostProcessorName := range plugin.PostProcessors {
+			expectedPostProcessorName := mockPluginName + "-" + mockPostProcessorName
+			if _, found := c.postProcessors[expectedPostProcessorName]; !found {
+				t.Fatalf("expected to find post-processor %q", expectedPostProcessorName)
+			}
+		}
+	}
 }

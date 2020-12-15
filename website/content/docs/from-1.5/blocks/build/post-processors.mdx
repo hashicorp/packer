@@ -1,0 +1,86 @@
+---
+description: >
+  The post-processors block allows to define lists of post-processors to apply
+  to an artifact.
+page_title: post-processors - build - Blocks
+sidebar_title: <tt>post-processors</tt>
+---
+
+# The `post-processors` block
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+The `post-processors` block allows to define lists of
+[`post-processor`s](/docs/from-1.5/blocks/build/post-processor), that will run
+from the artifact of each build.
+
+```hcl
+# builds.pkr.hcl
+build {
+  # ...
+  post-processors {
+    post-processor "shell-local" { # create an artifice.txt file containing "hello"
+      inline = [ "echo hello > artifice.txt" ]
+    }
+    post-processor "artifice" { # tell packer this is now the new artifact
+      files = ["artifice.txt"]
+    }
+    post-processor "checksum" { # checksum artifice.txt
+      checksum_types = [ "md5", "sha512" ] # checksum the artifact
+      keep_input_artifact = true           # keep the artifact
+    }
+  }
+
+}
+```
+
+The [`post-processor` block](/docs/from-1.5/blocks/build/post-processor)
+allows to define multiple post-processors that will run from the `Artifact` of
+each build. Read the `post-processor` documentation to know how to use a
+post-processor.
+
+### Difference between a `post-processor` and a `post-processors` block
+
+These two templates are doing the same thing:
+
+```hcl
+# builds.pkr.hcl
+build {
+  # ... build image
+  post-processor "checksum" { # checksum image
+    checksum_types = [ "md5", "sha512" ] # checksum the artifact
+  }
+
+  post-processor "amazon-import" { # upload image to AWS
+  }
+
+  post-processor "googlecompute-import" { # upload image to GCP
+  }
+}
+```
+
+```hcl
+# builds.pkr.hcl
+build {
+  # ... build image
+  post-processors {
+    post-processor "checksum" { # checksum image
+      checksum_types = [ "md5", "sha512" ] # checksum the artifact
+    }
+  }
+
+  post-processors {
+    post-processor "amazon-import" { # upload image to AWS
+    }
+  }
+
+  post-processors {
+    post-processor "googlecompute-import" { # upload image to GCP
+    }
+  }
+}
+```
+
+Each of these `post-processors` will start after each build -- that is, after
+each privision step has run on each source --. In all cases the source image is
+going to be deleted.

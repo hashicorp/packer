@@ -1,0 +1,219 @@
+---
+modeline: |
+  vim: set ft=pandoc:
+description: |
+  The Qemu Packer builder is able to create KVM virtual machine images.
+page_title: QEMU - Builders
+sidebar_title: QEMU
+---
+
+# QEMU Builder
+
+Type: `qemu`
+
+The Qemu Packer builder is able to create [KVM](http://www.linux-kvm.org) virtual
+machine images.
+
+The builder builds a virtual machine by creating a new virtual machine from
+scratch, booting it, installing an OS, rebooting the machine with the boot media
+as the virtual hard drive, provisioning software within the OS, then shutting it
+down. The result of the Qemu builder is a directory containing the image file
+necessary to run the virtual machine on KVM.
+
+## Basic Example
+
+Here is a basic example. This example is functional so long as you fixup paths
+to files, URLS for ISOs and checksums.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+    {
+      "type": "qemu",
+      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.9-x86_64-minimal.iso",
+      "iso_checksum": "md5:af4a1640c0c6f348c6c41f1ea9e192a2",
+      "output_directory": "output_centos_tdhtest",
+      "shutdown_command": "echo 'packer' | sudo -S shutdown -P now",
+      "disk_size": "5000M",
+      "format": "qcow2",
+      "accelerator": "kvm",
+      "http_directory": "path/to/httpdir",
+      "ssh_username": "root",
+      "ssh_password": "s0m3password",
+      "ssh_timeout": "20m",
+      "vm_name": "tdhtest",
+      "net_device": "virtio-net",
+      "disk_interface": "virtio",
+      "boot_wait": "10s",
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter><wait>"
+      ]
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "qemu" "example" {
+  iso_url           = "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.9-x86_64-minimal.iso"
+  iso_checksum      = "md5:af4a1640c0c6f348c6c41f1ea9e192a2"
+  output_directory  = "output_centos_tdhtest"
+  shutdown_command  = "echo 'packer' | sudo -S shutdown -P now"
+  disk_size         = "5000M"
+  format            = "qcow2"
+  accelerator       = "kvm"
+  http_directory    = "path/to/httpdir"
+  ssh_username      = "root"
+  ssh_password      = "s0m3password"
+  ssh_timeout       = "20m"
+  vm_name           = "tdhtest"
+  net_device        = "virtio-net"
+  disk_interface    = "virtio"
+  boot_wait         = "10s"
+  boot_command      = ["<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter><wait>"]
+}
+
+build {
+  sources = ["source.qemu.example"]
+}
+```
+
+</Tab>
+</Tabs>
+
+This is an example only, and will time out waiting for SSH because we have not
+provided a kickstart file. You must add a valid kickstart file to the
+"http_directory" and then provide the file in the "boot_command" in order for
+this build to run. We recommend you check out the
+[Community Templates](/community-tools#templates)
+for a practical usage example.
+
+Note that you will need to set `"headless": true` if you are running Packer
+on a Linux server without X11; or if you are connected via ssh to a remote
+Linux server and have not enabled X11 forwarding (`ssh -X`).
+
+## Qemu Specific Configuration Reference
+
+There are many configuration options available for the builder. In addition to
+the items listed here, you will want to look at the general configuration
+references for [ISO](#iso-configuration),
+[HTTP](#http-directory-configuration),
+[Floppy](#floppy-configuration),
+[Boot](#boot-configuration),
+[Shutdown](#shutdown-configuration),
+[Communicator](#communicator-configuration)
+configuration references, which are
+necessary for this build to succeed and can be found further down the page.
+
+### Optional:
+
+@include 'builder/qemu/Config-not-required.mdx'
+
+## ISO Configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig.mdx'
+
+### Required:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-required.mdx'
+
+### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/ISOConfig-not-required.mdx'
+
+## Http directory configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig.mdx'
+
+### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig-not-required.mdx'
+
+## Floppy configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/FloppyConfig.mdx'
+
+### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/FloppyConfig-not-required.mdx'
+
+### CD configuration
+
+@include 'packer-plugin-sdk/multistep/commonsteps/CDConfig.mdx'
+
+#### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/CDConfig-not-required.mdx'
+
+## Shutdown configuration
+
+### Optional:
+
+@include 'packer-plugin-sdk/shutdowncommand/ShutdownConfig-not-required.mdx'
+
+## Communicator configuration
+
+### Optional common fields:
+
+@include 'packer-plugin-sdk/communicator/Config-not-required.mdx'
+
+@include 'builder/qemu/CommConfig-not-required.mdx'
+
+### Optional SSH fields:
+
+@include 'packer-plugin-sdk/communicator/SSH-not-required.mdx'
+
+@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
+
+### Optional WinRM fields:
+
+@include 'packer-plugin-sdk/communicator/WinRM-not-required.mdx'
+
+## Boot Configuration
+
+@include 'packer-plugin-sdk/bootcommand/VNCConfig.mdx'
+
+@include 'packer-plugin-sdk/bootcommand/BootConfig.mdx'
+
+### Optional:
+
+@include 'packer-plugin-sdk/bootcommand/VNCConfig-not-required.mdx'
+
+@include 'packer-plugin-sdk/bootcommand/BootConfig-not-required.mdx'
+
+### Communicator Configuration
+
+#### Optional:
+
+@include 'packer-plugin-sdk/communicator/Config-not-required.mdx'
+
+### Troubleshooting
+
+#### Invalid Keymaps
+
+Some users have experienced errors complaining about invalid keymaps. This
+seems to be related to having a `common` directory or file in the directory
+they've run Packer in, like the packer source directory. This appears to be an
+upstream bug with qemu, and the best solution for now is to remove the
+file/directory or run in another directory.
+
+Some users have reported issues with incorrect keymaps using qemu version 2.11.
+This is a bug with qemu, and the solution is to upgrade, or downgrade to 2.10.1
+or earlier.
+
+#### Corrupted image after Packer calls qemu-img convert on OSX
+
+Due to an upstream bug with `qemu-img convert` on OSX, sometimes the qemu-img
+convert call will create a corrupted image. If this is an issue for you, make
+sure that the the output format (provided using the option `format`) matches
+the input file's format and file extension, and Packer will
+perform a simple copy operation instead. You will also want to set
+`"skip_compaction": true,` and `"disk_compression": false` to skip a final
+image conversion at the end of the build. See
+https://bugs.launchpad.net/qemu/+bug/1776920 for more details.

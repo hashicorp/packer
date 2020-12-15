@@ -1,0 +1,119 @@
+---
+description: >
+  The Yandex.Cloud Compute Image Exporter post-processor exports an image from a
+  Packer
+
+  yandex builder run and uploads it to Yandex Object Storage. The exported
+
+  images can be easily shared and uploaded to other Yandex.Cloud Cloud folders.
+page_title: Yandex.Cloud Compute Image Exporter - Post-Processors
+sidebar_title: Yandex.Cloud Compute Export
+---
+
+# Yandex.Cloud Compute Image Exporter Post-Processor
+
+Type: `yandex-export`
+
+The Yandex.Cloud Compute Image Exporter post-processor exports the resultant image
+from a yandex build as a qcow2 file to Yandex Object Storage.
+
+The exporter uses the same Yandex.Cloud folder and
+authentication credentials as the yandex build that produced the image.
+A temporary VM is started in the folder using these credentials. The VM
+mounts the built image as a secondary disk, then dumps the image in qcow2 format.
+The VM then uploads the file to the provided Yandex Object Storage `paths` using the same
+credentials.
+
+As such, assigned Service Account must have write permissions to the Yandex Object Storage
+`paths`. A new temporary static access keys from assigned Service Account used to upload
+image.
+
+## Configuration
+
+### Required:
+
+#### Access
+
+@include 'builder/yandex/AccessConfig-required.mdx'
+
+#### Export
+
+@include 'post-processor/yandex-export/Config-required.mdx'
+
+#### Common
+
+@include 'builder/yandex/CloudConfig-required.mdx'
+
+@include 'post-processor/yandex-export/ExchangeConfig-required.mdx'
+
+### Optional:
+
+#### Access
+
+@include 'builder/yandex/AccessConfig-not-required.mdx'
+
+#### Export
+
+@include 'post-processor/yandex-export/Config-not-required.mdx'
+
+#### Common
+
+@include 'builder/yandex/CommonConfig-not-required.mdx'
+
+#### Instance
+
+@include 'builder/yandex/InstanceConfig-not-required.mdx'
+
+#### Disk
+
+@include 'builder/yandex/DiskConfig-not-required.mdx'
+
+#### Network
+
+@include 'builder/yandex/NetworkConfig-not-required.mdx'
+
+## Basic Example
+
+The following example builds a Compute image in the folder with id `b1g8jvfcgmitdrslcn86`, with an
+Service Account whose keyfile is `account.json`. After the image build, a temporary VM
+will be created to export the image as a qcow2 file to
+`s3://packer-export/my-exported-image.qcow2` and
+`s3://packer-export/image-number-two.qcow2`. `keep_input_artifact` is true, so the
+source Compute image won't be deleted after the export.
+
+In order for this example to work, the service account associated with builder
+must have write access to both `s3://packer-export/my-exported-image.qcow2` and
+`s3://packer-export/image-number-two.qcow2` and get permission to modify temporary instance
+(create new disk, attach to instance, etc).
+
+```json
+{
+  "builders": [
+    {
+      "type": "yandex",
+      "folder_id": "b1g8jvfcgmitdrslcn86",
+      "subnet_id": "e9bp6l8sa4q39yourxzq",
+      "zone": "ru-central1-a",
+
+      "source_image_family": "ubuntu-1604-lts",
+      "ssh_username": "ubuntu",
+      "use_ipv4_nat": true
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "yandex-export",
+      "folder_id": "b1g8jvfcgmitdrslcn86",
+      "subnet_id": "e9bp6l8sa4q39yourxzq",
+
+      "service_account_id": "ajeu0363240rrnn7xgen",
+
+      "paths": [
+        "s3://packer-export-bucket/my-exported-image.qcow2",
+        "s3://packer-export-bucket/template-supported-get-{{build `ImageID` }}-right-here.qcow2"
+      ],
+      "keep_input_artifact": true
+    }
+  ]
+}
+```

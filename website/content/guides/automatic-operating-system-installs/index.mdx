@@ -1,0 +1,25 @@
+---
+page_title: Automatic OS Installs
+sidebar_title: Automatic OS Installs
+description: |-
+  Learn how to use preseed, kickstart, and autounattend files to automatically
+  answer installation questions and enable Packer to connect to your instnace.
+---
+
+# Automatic OS Installs
+
+If you are building from a brand-new and unconfigured operating system
+image, Packer will need you to perform the operating system install before it
+can connect to and configure your image using its provisioners. Most operating
+system distributions have a mechanism for performing the normally-interactive
+installation in an automated way. For Debian operating systems, this is done
+using a preseed file; for Windows, it's done using an Autounattend.xml. We have
+compiled some simple guides here for common operating system distributions.
+
+These guides are meant to give you a quick introduction to how to use automated
+installation answer files in order to perfom those installs; we don't mean to
+be a comprehensive guide on each operating system, but we hope to give you
+enough context to be able to more easily find any further information you need.
+
+Please use the left-hand navigation to find instructions for the operating
+system that is relevant to you.

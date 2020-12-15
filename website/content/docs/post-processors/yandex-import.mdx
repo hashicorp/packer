@@ -1,0 +1,82 @@
+---
+description: >
+  The Yandex.Cloud Compute Image Import post-processor create an image from a
+  qcow2 image (or from provided Storage object in near future). It uploads qcow2
+  to Yandex Object Storage and create new one Compute Image in target folder.
+page_title: Yandex.Cloud Compute Image Import - Post-Processors
+sidebar_title: Yandex.Cloud Compute Import
+---
+
+# Yandex.Cloud Compute Image Import Post-Processor
+
+Type: `yandex-import`
+
+The Yandex.Cloud Compute Image Import post-processor create new Compute Image
+from a qcow2 file. As Compute service support image creation from Storage service object
+just before request to create its upload file into Storage service.
+
+Assigned Service Account must have write permissions to the Yandex Object Storage.
+A new temporary static access keys from assigned Service Account used to upload
+file.
+
+## Configuration
+
+### Required:
+
+#### Access
+
+@include 'builder/yandex/AccessConfig-required.mdx'
+
+#### Common
+
+@include 'builder/yandex/CloudConfig-required.mdx'
+
+@include 'post-processor/yandex-export/ExchangeConfig-required.mdx'
+
+### Optional:
+
+#### Access
+
+@include 'builder/yandex/AccessConfig-not-required.mdx'
+
+#### Import
+
+@include 'post-processor/yandex-import/Config-not-required.mdx'
+
+#### Image
+
+@include 'builder/yandex/ImageConfig-not-required.mdx'
+
+## Basic Example
+
+TBD
+
+```json
+{
+  "variables": {
+    "token": "{{env `YC_TOKEN`}}"
+  },
+  "sensitive-variables": ["token"],
+  "builders": [
+    {
+      "type": "file",
+      "source": "xenial-server-cloudimg-amd64-disk1.img",
+      "target": "test_artifact.qcow2"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "yandex-import",
+      "token": "{{user `token`}}",
+      "folder_id": "b1g8jvfcgmitdrslcn86",
+      "service_account_id": "ajeui8kdvg8qs44fbrbr",
+
+      "bucket": "bucket1",
+
+      "image_name": "my-first-imported-image-{{isotime \"02-Jan-06-03-04-05\" | lower }}",
+
+      "keep_input_artifact": false
+    }
+  ]
+}
+```

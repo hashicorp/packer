@@ -1,0 +1,80 @@
+---
+description: |
+  The `packer hcl2_upgrade` Packer command is used to transpile a JSON
+  configuration template to it's formatted HCL2 counterpart. The command will
+  return a zero exit status on success, and a non-zero exit status on failure.
+page_title: packer hcl2_upgrade - Commands
+sidebar_title: <tt>hcl2_upgrade</tt>
+---
+
+-> **Note:** This command is Beta, and currently being improved upon; do not
+hesitate [opening a new
+issue](https://github.com/hashicorp/packer/issues/new/choose) if you find
+something wrong.
+
+# `hcl2_upgrade` Command
+
+The `packer hcl2_upgrade` Packer command is used to transpile a JSON
+configuration template to it's formatted HCL2 counterpart. The command will
+return a zero exit status on success, and a non-zero exit status on failure.
+
+Example usage:
+
+```shell-session
+$ packer hcl2_upgrade my-template.json
+
+Successfully created my-template.json.pkr.hcl
+```
+
+## User variables using other user variables
+
+Packer JSON recently started allowing using user variables from variables. In
+HCL2, input variables cannot use functions nor other variables and are
+virtually static, local variables must be used instead to craft more dynamic
+variables. For that reason `hcl2_upgrade` cannot decide for you what local
+variables to create and the `hcl2_upgrade` command will simply output all seen
+variables as an input variable, it is now up to you to create a local variable.
+
+Here is an example of a local variable using a string input variables:
+
+```hcl
+variable "foo" {
+  default = "Hello,"
+}
+
+variable "bar" {
+  default = "World!"
+}
+
+locals {
+  baz = "${var.foo} ${var.bar}"
+}
+```
+
+## Go template functions
+
+`hcl2_upgrade` will do its best to transform your go _template calls_ to HCL2,
+here is the list of calls that should get transformed:
+
+- `` {{ user `my_var` }} `` becomes `${var.my_var}`.
+- `` {{ env `my_var` }} `` becomes `${var.my_var}`. Packer HCL2 supports
+  environment variables through input variables. See
+  [docs](http://packer.io/docs/from-1.5/variables#environment-variables)
+  for more info.
+- `{{ timestamp }}` becomes `${local.timestamp}`, the local variable
+  will be created for all generated files.
+- `` {{ build `ID` }} `` becomes `${build.ID}`.
+
+The rest of the calls should remain go template calls for now, this will be
+improved over time.
+
+-> **Note**: The `hcl2_upgrade` command does its best to transform template
+calls to their JSON counterpart, but it might fail. In that case the
+`hcl2_upgrade` command will simply output the local HCL2 block without
+transformation and with the error message in a comment. We are currently
+working on improving this part of the transformer.
+
+## Options
+
+- `-output-file` - File where to put the hcl2 generated config. Defaults to
+  JSON_TEMPLATE.pkr.hcl

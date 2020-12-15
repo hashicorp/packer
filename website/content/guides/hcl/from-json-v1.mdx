@@ -1,0 +1,194 @@
+---
+page_title: Transforming Packer v1 files for Packer v1.5.0
+sidebar_title: From JSON v1
+description: |-
+  Learn how to manually move from a Packer v1 working JSON build file to a
+  working v1.5.0 HCL file.
+---
+
+# Transforming Packer v1 config files to HCL2 for Packer v1.5
+
+-> **Note:** Starting from version **1.5.0** Packer can read HCL2 files.
+
+@include 'guides/hcl2-beta-note.mdx'
+
+As of v1.6.4, Packer provides a tool to help you convert legacy JSON files to
+HCL2 files. To run it, you can use the `hcl2_upgrade` command.
+
+for example,
+
+```sh
+packer hcl2_upgrade mytemplate.json
+```
+
+will convert your packer template to a new HCL2 file in your current working
+directory named mytemplate.json.pkr.hcl. It is not a perfect converter yet;
+please open an issue if you find a problem with the conversion. Packer will not
+destroy your legacy json template, so this is not a risky command to call.
+
+Following is an explanation of how to manually upgrade a JSON template to an
+HCL2 template.
+
+The following file :
+
+```json
+{
+  "builders": [
+    {
+      "ami_name": "packer-test",
+      "region": "us-east-1",
+      "instance_type": "t2.micro",
+
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+          "root-device-type": "ebs"
+        },
+        "owners": ["amazon"],
+        "most_recent": true
+      },
+
+      "ssh_username": "ubuntu",
+      "type": "amazon-ebs"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["sleep 5"]
+    }
+  ]
+}
+```
+
+Becomes:
+
+```hcl
+# the source block is what was defined in the builders section and represents a
+# reusable way to start a machine. You build your images from that source. All
+# sources have a 1:1 correspondance to what currently is a builder. The
+# argument name (ie: ami_name) must be unquoted and can be set using the equal
+# sign operator (=).
+source "amazon-ebs" "example" {
+    ami_name = "packer-test"
+    region = "us-east-1"
+    instance_type = "t2.micro"
+
+    source_ami_filter {
+        filters = {
+          virtualization-type = "hvm"
+          name =  "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*"
+          root-device-type = "ebs"
+        }
+        owners = ["amazon"]
+        most_recent = true
+    }
+
+    communicator = "ssh"
+    ssh_username = "ubuntu"
+}
+
+# A build starts sources and runs provisioning steps on those sources.
+build {
+  sources = [
+    # there can be multiple sources per build
+    "source.amazon-ebs.example"
+  ]
+
+  # All provisioners and post-processors have a 1:1 correspondence to their
+  # current layout. The argument name (ie: inline) must to be unquoted
+  # and can be set using the equal sign operator (=).
+  provisioner "shell" {
+    inline = ["sleep 5"]
+  }
+
+  # post-processors work too, example: `post-processor "shell-local" {}`.
+}
+
+```
+
+### 1:1 correspondence of components ... except :
+
+All fields of builders, provisioners and post-processors have a 1:1
+correspondance except for the following:
+
+- builders:
+
+  - aws ami_block_device_mappings
+  - aws launch_block_device_mappings
+  - aws run_volume_tags
+  - alicloud image_disk_mappings
+  - osc omi_block_device_mappings
+  - osc launch_block_device_mappings
+  - proxmox network_adapters
+  - proxmox disks
+  - tencentcloud data_disks
+  - ucloud image_copy_to_mappings
+
+- provisioner:
+
+  - converge module_dirs
+
+- post-processor:
+  - alicloud-import image_disk_mappings
+
+One could think that these are defined as "arrays of blocks" - they are in fact
+repeatable blocks with the same identifier. For example:
+
+```json
+"builders": [
+    {
+      "type": "amazon-ebs",
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/xvda",
+          "volume_size": "20",
+          "volume_type": "gp2",
+          "delete_on_termination": "true"
+        },
+        {
+          "device_name": "/dev/xvdf",
+          "volume_size": "500",
+          "volume_type": "gp2",
+          "delete_on_termination": "true",
+          "encrypted": true
+        }
+      ],
+    }
+]
+```
+
+Becomes:
+
+```hcl
+source "amazon-ebs" "example" {
+    launch_block_device_mappings {
+        device_name = "/dev/xvda"
+        volume_size = 20
+        volume_type = "gp2"
+        delete_on_termination = true
+    }
+    launch_block_device_mappings {
+        device_name = "/dev/xvdf"
+        volume_size = 500
+        volume_type = "gp2"
+        delete_on_termination = true
+        encrypted = true
+    }
+}
+```
+
+There is soon going to be a PR to drop the `s` at the end of these fields.
+
+### Deprecation
+
+As we become more confident in the new templates, we may begin to add new
+features that are HCL2-only; one of our major motivations to moving to the new
+template format is that HCL2 provides us with the flexibility to implement some
+features which would be very difficult to add to the legacy JSON templates.
+
+However, the Packer team will continue to support the main functionality of the
+current "legacy JSON" packer templates alongside the new HCL2 templates until
+we and the community love the new templates. Only then the v1 format will be
+deprecated. We do not anticipate this happening until late 2021 at the earliest.

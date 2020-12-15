@@ -1,0 +1,214 @@
+---
+description: |
+  The `ucloud-uhost` Packer builder plugin provides the capability to build
+  customized images based on an existing base image for use in UHost Instance.
+page_title: UCloud Image Builder
+sidebar_title: UCloud
+---
+
+# UCloud Image Builder
+
+Type: `ucloud-uhost`
+
+The `ucloud-uhost` Packer builder plugin provides the capability to build
+customized images based on an existing base image for use in UHost Instance.
+
+This builder builds an UCloud image by launching an UHost instance from a source image,
+provisioning that running machine, and then creating an image from that machine.
+
+## Configuration Reference
+
+The following configuration options are available for building UCloud images. They are
+segmented below into two categories: required and optional parameters.
+
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator) can be configured for this
+builder.
+
+~> **Note:** The builder doesn't support Windows images for now and only supports CentOS and Ubuntu images via SSH authentication with `ssh_username` (Required) and `ssh_password` (Optional). The `ssh_username` must be `root` for CentOS images and `ubuntu` for Ubuntu images. The `ssh_password` may contain 8-30 characters, and must consist of at least 2 items out of the capital letters, lower case letters, numbers and special characters. The special characters include `()~!@#\$%^&\*-+=\_|{}\[]:;'<>,.?/`.
+
+### Required:
+
+@include 'builder/ucloud/common/AccessConfig-required.mdx'
+
+@include 'builder/ucloud/common/RunConfig-required.mdx'
+
+@include 'builder/ucloud/common/ImageConfig-required.mdx'
+
+### Optional:
+
+@include 'builder/ucloud/common/AccessConfig-not-required.mdx'
+
+@include 'builder/ucloud/common/RunConfig-not-required.mdx'
+
+@include 'builder/ucloud/common/ImageConfig-not-required.mdx'
+
+## Examples
+
+Here is a basic example for build UCloud CentOS image:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "variables": {
+    "ucloud_public_key": "{{env `UCLOUD_PUBLIC_KEY`}}",
+    "ucloud_private_key": "{{env `UCLOUD_PRIVATE_KEY`}}",
+    "ucloud_project_id": "{{env `UCLOUD_PROJECT_ID`}}"
+  },
+
+  "builders": [
+    {
+      "type": "ucloud-uhost",
+      "public_key": "{{user `ucloud_public_key`}}",
+      "private_key": "{{user `ucloud_private_key`}}",
+      "project_id": "{{user `ucloud_project_id`}}",
+      "region": "cn-bj2",
+      "availability_zone": "cn-bj2-02",
+      "instance_type": "n-basic-2",
+      "source_image_id": "uimage-f1chxn",
+      "ssh_username": "root",
+      "image_name": "packer-test{{timestamp}}"
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+// .pkr.hcl file
+variable "ucloud_public_key" {
+  type = string
+  default = "xxx"
+}
+
+variable "ucloud_private_key" {
+  type = string
+  default = "xxx"
+}
+
+variable "ucloud_project_id" {
+  type = string
+  default = "xxx"
+}
+
+source "ucloud-uhost" "basic-example" {
+  public_key        =  var.ucloud_public_key
+  private_key       =  var.ucloud_private_key
+  project_id        =  var.ucloud_project_id
+  region            =  "cn-bj2"
+  availability_zone =  "cn-bj2-02"
+  instance_type     =  "n-basic-2"
+  source_image_id   =  "uimage-f1chxn"
+  ssh_username      =  "root"
+}
+
+build {
+  source "sources.ucloud-uhost.basic-example" {
+    image_name =  "packer-test-${timestamp()}"
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+Here is a example for build UCloud Ubuntu image:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "variables": {
+    "ucloud_public_key": "{{env `UCLOUD_PUBLIC_KEY`}}",
+    "ucloud_private_key": "{{env `UCLOUD_PRIVATE_KEY`}}",
+    "ucloud_project_id": "{{env `UCLOUD_PROJECT_ID`}}",
+    "password": "ucloud_2020"
+  },
+
+  "builders": [
+    {
+      "type": "ucloud-uhost",
+      "public_key": "{{user `ucloud_public_key`}}",
+      "private_key": "{{user `ucloud_private_key`}}",
+      "project_id": "{{user `ucloud_project_id`}}",
+      "region": "cn-bj2",
+      "availability_zone": "cn-bj2-02",
+      "instance_type": "n-basic-2",
+      "source_image_id": "uimage-irofn4",
+      "ssh_password": "{{user `password`}}",
+      "ssh_username": "ubuntu",
+      "image_name": "packer-test-ubuntu{{timestamp}}"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "echo '{{user `password`}}' | sudo -S '{{.Path}}'",
+      "inline": ["sleep 30", "sudo apt update", "sudo apt install nginx -y"]
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+// .pkr.hcl file
+variable "ucloud_public_key" {
+  type = string
+  default = "xxx"
+}
+
+variable "ucloud_private_key" {
+  type = string
+  default = "xxx"
+}
+
+variable "ucloud_project_id" {
+  type = string
+  default = "xxx"
+}
+
+variable "password" {
+  type  = string
+  default = "ucloud_2020"
+}
+
+source "ucloud-uhost" "basic-example" {
+  public_key        =  var.ucloud_public_key
+  private_key       =  var.ucloud_private_key
+  project_id        =  var.ucloud_project_id
+  region            =  "cn-bj2"
+  availability_zone =  "cn-bj2-02"
+  instance_type     =  "n-basic-2"
+  ssh_password      =  var.password
+  source_image_id   =  "uimage-irofn4"
+  ssh_username      =  "ubuntu"
+}
+
+build {
+  source "sources.ucloud-uhost.basic-example" {
+    image_name =  "packer-test-ubuntu-${timestamp()}"
+  }
+  provisioner "shell" {
+      execute_command = "echo '${var.password}' | sudo -S '{{.Path}}'"
+      inline          = ["sleep 30", "sudo apt update", "sudo apt install nginx -y"]
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+-> **Note:** Packer can also read the public key and private key from
+environmental variables. See the configuration reference in the section above
+for more information on what environmental variables Packer will look for.
+
+~> **Note:** Source image may be deprecated after a while, you can use the tools like [UCloud CLI](https://docs.ucloud.cn/cli/intro) to run `ucloud image list` to find one that exists.

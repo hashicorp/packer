@@ -1,0 +1,528 @@
+---
+description: >
+  The docker Packer builder builds Docker images using Docker. The builder
+  starts
+
+  a Docker container, runs provisioners within this container, then exports the
+
+  container for reuse or commits the image.
+page_title: Docker - Builders
+sidebar_title: Docker
+---
+
+# Docker Builder
+
+Type: `docker`
+
+The `docker` Packer builder builds [Docker](https://www.docker.io) images using
+Docker. The builder starts a Docker container, runs provisioners within this
+container, then exports the container for reuse or commits the image.
+
+Packer builds Docker containers _without_ the use of
+[Dockerfiles](https://docs.docker.com/engine/reference/builder/). By not using
+`Dockerfiles`, Packer is able to provision containers with portable scripts or
+configuration management systems that are not tied to Docker in any way. It
+also has a simple mental model: you provision containers much the same way you
+provision a normal virtualized or dedicated server. For more information, read
+the section on [Dockerfiles](#dockerfiles).
+
+The Docker builder must run on a machine that has Docker Engine installed.
+Therefore the builder only works on machines that support Docker and _does not
+support running on a Docker remote host_. You can learn about what [platforms
+Docker supports and how to install onto
+them](https://docs.docker.com/engine/installation/) in the Docker
+documentation.
+
+## Basic Example: Export
+
+Below is a fully functioning example. It doesn't do anything useful, since no
+provisioners are defined, but it will effectively repackage an image.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "docker",
+  "image": "ubuntu",
+  "export_path": "image.tar"
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "docker" "example" {
+    image = "ubuntu"
+    export_path = "image.tar"
+}
+
+build {
+  sources = ["source.docker.example"]
+}
+```
+
+</Tab>
+</Tabs>
+
+## Basic Example: Commit
+
+Below is another example, the same as above but instead of exporting the
+running container, this one commits the container to an image. The image can
+then be more easily tagged, pushed, etc.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "docker",
+  "image": "ubuntu",
+  "commit": true
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "docker" "example" {
+    image = "ubuntu"
+    commit = true
+}
+
+build {
+  sources = ["source.docker.example"]
+}
+```
+
+</Tab>
+</Tabs>
+
+## Basic Example: Changes to Metadata
+
+Below is an example using the changes argument of the builder. This feature
+allows the source images metadata to be changed when committed back into the
+Docker environment. It is derived from the `docker commit --change` command
+line [option to
+Docker](https://docs.docker.com/engine/reference/commandline/commit/).
+
+Example uses of all of the options, assuming one is building an NGINX image
+from ubuntu as an simple example:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "docker",
+  "image": "ubuntu",
+  "commit": true,
+  "changes": [
+    "USER www-data",
+    "WORKDIR /var/www",
+    "ENV HOSTNAME www.example.com",
+    "VOLUME /test1 /test2",
+    "EXPOSE 80 443",
+    "LABEL version=1.0",
+    "ONBUILD RUN date",
+    "CMD [\"nginx\", \"-g\", \"daemon off;\"]",
+    "ENTRYPOINT /var/www/start.sh"
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "docker" "example" {
+    image = "ubuntu"
+    commit = true
+      changes = [
+      "USER www-data",
+      "WORKDIR /var/www",
+      "ENV HOSTNAME www.example.com",
+      "VOLUME /test1 /test2",
+      "EXPOSE 80 443",
+      "LABEL version=1.0",
+      "ONBUILD RUN date",
+      "CMD [\"nginx\", \"-g\", \"daemon off;\"]",
+      "ENTRYPOINT /var/www/start.sh"
+    ]
+}
+```
+
+</Tab>
+</Tabs>
+
+Allowed metadata fields that can be changed are:
+
+- CMD
+  - String, supports both array (escaped) and string form
+  - EX: `"CMD [\"nginx\", \"-g\", \"daemon off;\"]"` corresponds to Docker exec form
+  - EX: `"CMD nginx -g daemon off;"` corresponds to Docker shell form, invokes a command shell first
+- ENTRYPOINT
+  - String, supports both array (escaped) and string form
+  - EX: `"ENTRYPOINT [\"/bin/sh\", \"-c\", \"/var/www/start.sh\"]"` corresponds to Docker exec form
+  - EX: `"ENTRYPOINT /var/www/start.sh"` corresponds to Docker shell form, invokes a command shell first
+- ENV
+  - String, note there is no equal sign:
+  - EX: `"ENV HOSTNAME www.example.com"` not
+    `"ENV HOSTNAME=www.example.com"`
+- EXPOSE
+  - String, space separated ports
+  - EX: `"EXPOSE 80 443"`
+- LABEL
+  - String, space separated key=value pairs
+  - EX: `"LABEL version=1.0"`
+- ONBUILD
+  - String
+  - EX: `"ONBUILD RUN date"`
+- MAINTAINER
+  - String, deprecated in Docker version 1.13.0
+  - EX: `"MAINTAINER NAME"`
+- USER
+  - String
+  - EX: `"USER USERNAME"`
+- VOLUME
+  - String
+  - EX: `"VOLUME FROM TO"`
+- WORKDIR
+  - String
+  - EX: `"WORKDIR PATH"`
+
+## Configuration Reference
+
+Configuration options are organized below into two categories: required and
+optional. Within each category, the available options are alphabetized and
+described.
+
+The Docker builder uses a special Docker communicator _and will not use_ the
+standard [communicators](/docs/templates/communicator).
+
+### Required:
+
+You must specify (only) one of `commit`, `discard`, or `export_path`.
+
+@include 'builder/docker/Config-required.mdx'
+
+### Optional:
+
+@include 'builder/docker/AwsAccessConfig-not-required.mdx'
+
+@include 'builder/docker/Config-not-required.mdx'
+
+## Build Shared Information Variables
+
+This build shares generated data with provisioners and post-processors via [template engines](/docs/templates/engine)
+for JSON and [contextual variables](/docs/from-1.5/contextual-variables) for HCL2.
+
+The generated variable available for this builder is:
+
+- `ImageSha256` - When committing a container to an image, this will give the image SHA256. Because the image is not available at the provision step,
+  this variable is only available for post-processors.
+
+## Using the Artifact: Export
+
+Once the tar artifact has been generated, you will likely want to import, tag,
+and push it to a container repository. Packer can do this for you automatically
+with the [docker-import](/docs/post-processors/docker-import) and
+[docker-push](/docs/post-processors/docker-push) post-processors.
+
+**Note:** This section is covering how to use an artifact that has been
+_exported_. More specifically, if you set `export_path` in your configuration.
+If you set `commit`, see the next section.
+
+The example below shows a full configuration that would import and push the
+created image. This is accomplished using a sequence definition (a collection
+of post-processors that are treated as as single pipeline, see
+[Post-Processors](/docs/templates/post-processors) for more information):
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "post-processors": [
+    [
+      {
+        "type": "docker-import",
+        "repository": "myrepo/myimage",
+        "tag": "0.7"
+      },
+      {
+        "type": "docker-push"
+      }
+    ]
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+  post-processors {
+    post-processor "docker-import" {
+        repository =  "myrepo/myimage"
+        tag = "0.7"
+      }
+    post-processor "docker-push" {}
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+In the above example, the result of each builder is passed through the defined
+sequence of post-processors starting first with the `docker-import`
+post-processor which will import the artifact as a docker image. The resulting
+docker image is then passed on to the `docker-push` post-processor which
+handles pushing the image to a container repository.
+
+If you want to do this manually, however, perhaps from a script, you can import
+the image using the process below:
+
+```shell-session
+$ docker import - registry.mydomain.com/mycontainer:latest < artifact.tar
+```
+
+You can then add additional tags and push the image as usual with `docker tag`
+and `docker push`, respectively.
+
+## Using the Artifact: Committed
+
+If you committed your container to an image, you probably want to tag, save,
+push, etc. Packer can do this automatically for you. An example is shown below
+which tags and pushes an image. This is accomplished using a sequence
+definition (a collection of post-processors that are treated as as single
+pipeline, see [Post-Processors](/docs/templates/post-processors) for more
+information):
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "post-processors": [
+    [
+      {
+        "type": "docker-tag",
+        "repository": "myrepo/myimage",
+        "tag": "0.7"
+      },
+      {
+        "type": "docker-push"
+      }
+    ]
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+  post-processors {
+    post-processor "docker-tag" {
+        repository =  "myrepo/myimage"
+        tag = "0.7"
+      }
+    post-processor "docker-push" {}
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+In the above example, the result of each builder is passed through the defined
+sequence of post-processors starting first with the `docker-tag` post-processor
+which tags the committed image with the supplied repository and tag
+information. Once tagged, the resulting artifact is then passed on to the
+`docker-push` post-processor which handles pushing the image to a container
+repository.
+
+Going a step further, if you wanted to tag and push an image to multiple
+container repositories, this could be accomplished by defining two,
+nearly-identical sequence definitions, as demonstrated by the example below:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "post-processors": [
+    [
+      {
+        "type": "docker-tag",
+        "repository": "myrepo/myimage1",
+        "tag": "0.7"
+      },
+      "docker-push"
+    ],
+    [
+      {
+        "type": "docker-tag",
+        "repository": "myrepo/myimage2",
+        "tag": "0.7"
+      },
+      "docker-push"
+    ]
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+  post-processors {
+    post-processor "docker-tag" {
+        repository =  "myrepo/myimage1"
+        tag = "0.7"
+      }
+    post-processor "docker-push" {}
+  }
+  post-processors {
+    post-processor "docker-tag" {
+        repository =  "myrepo/myimage2"
+        tag = "0.7"
+      }
+    post-processor "docker-push" {}
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+<span id="amazon-ec2-container-registry"></span>
+
+## Docker For Windows
+
+You should be able to run docker builds against both linux and Windows
+containers. Windows containers use a different communicator than linux
+containers, because Windows containers cannot use `docker cp`.
+
+If you are building a Windows container, you must set the template option
+`"windows_container": true`. Please note that docker cannot export Windows
+containers, so you must either commit or discard them.
+
+The following is a fully functional template for building a Windows
+container.
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+    {
+      "type": "docker",
+      "image": "microsoft/windowsservercore:1709",
+      "container_dir": "c:/app",
+      "windows_container": true,
+      "commit": true
+    }
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+source "docker" "windows" {
+    image = "ubuntu"
+    container_dir = "c:/app"
+    windows_container = true
+    commit = true
+}
+
+build {
+  sources = ["source.docker.example"]
+}
+```
+
+</Tab>
+</Tabs>
+
+## Amazon EC2 Container Registry
+
+Packer can tag and push images for use in [Amazon EC2 Container
+Registry](https://aws.amazon.com/ecr/). The post processors work as described
+above and example configuration properties are shown below:
+
+<Tabs>
+<Tab heading="JSON">
+
+```json
+{
+  "post-processors": [
+    [
+      {
+        "type": "docker-tag",
+        "repository": "12345.dkr.ecr.us-east-1.amazonaws.com/packer",
+        "tag": "0.7"
+      },
+      {
+        "type": "docker-push",
+        "ecr_login": true,
+        "aws_access_key": "YOUR KEY HERE",
+        "aws_secret_key": "YOUR SECRET KEY HERE",
+        "login_server": "https://12345.dkr.ecr.us-east-1.amazonaws.com/"
+      }
+    ]
+  ]
+}
+```
+
+</Tab>
+<Tab heading="HCL2">
+
+```hcl
+post-processors {
+  post-processor "docker-tag" {
+      repository = "12345.dkr.ecr.us-east-1.amazonaws.com/packer"
+      tag = "0.7"
+  }
+  post-processor "docker-push" {
+      ecr_login = true
+      aws_access_key = "YOUR KEY HERE"
+      aws_secret_key = "YOUR SECRET KEY HERE"
+      login_server = "https://12345.dkr.ecr.us-east-1.amazonaws.com/"
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+[Learn how to set Amazon AWS
+credentials.](/docs/builders/amazon#specifying-amazon-credentials)
+
+## Dockerfiles
+
+This builder allows you to build Docker images _without_ Dockerfiles.
+
+With this builder, you can repeatedly create Docker images without the use of a
+Dockerfile. You don't need to know the syntax or semantics of Dockerfiles.
+Instead, you can just provide shell scripts, Chef recipes, Puppet manifests,
+etc. to provision your Docker container just like you would a regular
+virtualized or dedicated machine.
+
+While Docker has many features, Packer views Docker simply as a container
+runner. To that end, Packer is able to repeatedly build these containers using
+portable provisioning scripts.
+
+## Overriding the host directory
+
+By default, Packer creates a temporary folder under your home directory, and
+uses that to stage files for uploading into the container. If you would like to
+change the path to this temporary folder, you can set the `PACKER_TMP_DIR`.
+This can be useful, for example, if you have your home directory permissions
+set up to disallow access from the docker daemon.

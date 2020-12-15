@@ -865,6 +865,208 @@ func TestParserReadDhcpdLeases(t *testing.T) {
 	}
 }
 
+func consumeAppleLeaseString(s string) chan byte {
+	sch := consumeString(s)
+	uncommentedch := uncomment(sch)
+	return filterOutCharacters([]byte{'\r', '\v'}, uncommentedch)
+}
+
+func TestParserReadAppleDhcpdLeaseEntry(t *testing.T) {
+	test_1 := `{
+		ip_address=192.168.111.3
+		hw_address=1,0:c:56:3c:e7:22
+		identifier=1,0:c:56:3c:e7:22
+		lease=0x5fd78ae2
+		name=vagrant-2019
+		fake=field
+	}`
+	expected_1 := map[string]string{
+		"ipAddress": "192.168.111.3",
+		"hwAddress": "000c563ce722",
+		"id":        "000c563ce722",
+		"lease":     "0x5fd78ae2",
+		"name":      "vagrant-2019",
+	}
+	expected_extra_1 := map[string]string{
+		"fake": "field",
+	}
+
+	result, err := readAppleDhcpdLeaseEntry(consumeAppleLeaseString(test_1))
+	if err != nil {
+		t.Errorf("error parsing entry: %v", err)
+	}
+	if result.ipAddress != expected_1["ipAddress"] {
+		t.Errorf("expected ipAddress %v, got %v", expected_1["ipAddress"], result.ipAddress)
+	}
+	if hex.EncodeToString(result.hwAddress) != expected_1["hwAddress"] {
+		t.Errorf("expected hwAddress %v, got %v", expected_1["hwAddress"], hex.EncodeToString(result.hwAddress))
+	}
+	if hex.EncodeToString(result.id) != expected_1["id"] {
+		t.Errorf("expected id %v, got %v", expected_1["id"], hex.EncodeToString(result.id))
+	}
+	if result.lease != expected_1["lease"] {
+		t.Errorf("expected lease %v, got %v", expected_1["lease"], result.lease)
+	}
+	if result.name != expected_1["name"] {
+		t.Errorf("expected name %v, got %v", expected_1["name"], result.name)
+	}
+	if result.extra["fake"] != expected_extra_1["fake"] {
+		t.Errorf("expected extra %v, got %v", expected_extra_1["fake"], result.extra["fake"])
+	}
+
+	test_2 := `{
+		ip_address=192.168.111.4
+		hw_address=1,0:c:56:3c:e7:23
+		identifier=1,0:c:56:3c:e7:23
+	}`
+	expected_2 := map[string]string{
+		"ipAddress": "192.168.111.4",
+		"hwAddress": "000c563ce723",
+		"id":        "000c563ce723",
+	}
+
+	result, err = readAppleDhcpdLeaseEntry(consumeAppleLeaseString(test_2))
+	if err != nil {
+		t.Errorf("error parsing entry: %v", err)
+	}
+	if result.ipAddress != expected_2["ipAddress"] {
+		t.Errorf("expected ipAddress %v, got %v", expected_2["ipAddress"], result.ipAddress)
+	}
+	if hex.EncodeToString(result.hwAddress) != expected_2["hwAddress"] {
+		t.Errorf("expected hwAddress %v, got %v", expected_2["hwAddress"], hex.EncodeToString(result.hwAddress))
+	}
+	if hex.EncodeToString(result.id) != expected_2["id"] {
+		t.Errorf("expected id %v, got %v", expected_2["id"], hex.EncodeToString(result.id))
+	}
+}
+
+func TestParserReadAppleDhcpdLeases(t *testing.T) {
+	f, err := os.Open(filepath.Join("testdata", "apple-dhcpd-example.leases"))
+	if err != nil {
+		t.Fatalf("Unable to open dhcpd.leases sample: %s", err)
+	}
+	defer f.Close()
+
+	results, err := ReadAppleDhcpdLeaseEntries(f)
+	if err != nil {
+		t.Fatalf("Error reading lease: %s", err)
+	}
+
+	// some simple utilities
+	filter_ipAddr := func(ipAddress string, items []appleDhcpLeaseEntry) (result []appleDhcpLeaseEntry) {
+		for _, item := range items {
+			if item.ipAddress == ipAddress {
+				result = append(result, item)
+			}
+		}
+		return
+	}
+
+	find_id := func(id string, items []appleDhcpLeaseEntry) *appleDhcpLeaseEntry {
+		for _, item := range items {
+			if id == hex.EncodeToString(item.id) {
+				return &item
+			}
+		}
+		return nil
+	}
+
+	find_hwAddr := func(hwAddr string, items []appleDhcpLeaseEntry) *appleDhcpLeaseEntry {
+		for _, item := range items {
+			if hwAddr == hex.EncodeToString(item.hwAddress) {
+				return &item
+			}
+		}
+		return nil
+	}
+
+	// actual unit tests
+	test_1 := map[string]string{
+		"ipAddress": "127.0.0.19",
+		"id":        "0dead099aabb",
+		"hwAddress": "0dead099aabb",
+	}
+	test_1_findings := filter_ipAddr(test_1["ipAddress"], results)
+	if len(test_1_findings) != 2 {
+		t.Errorf("expected %d matching entries, got %d", 2, len(test_1_findings))
+	} else {
+		res := find_hwAddr(test_1["hwAddress"], test_1_findings)
+		if res == nil {
+			t.Errorf("unable to find item with hwAddress %v", test_1["hwAddress"])
+		} else if hex.EncodeToString(res.id) != test_1["id"] {
+			t.Errorf("expected id %s, got %s", test_1["id"], hex.EncodeToString(res.id))
+		}
+	}
+
+	test_2 := map[string]string{
+		"ipAddress": "127.0.0.19",
+		"id":        "0dead0667788",
+		"hwAddress": "0dead0667788",
+	}
+	test_2_findings := filter_ipAddr(test_2["ipAddress"], results)
+	if len(test_2_findings) != 2 {
+		t.Errorf("expected %d matching entries, got %d", 2, len(test_2_findings))
+	} else {
+		res := find_hwAddr(test_2["hwAddress"], test_2_findings)
+		if res == nil {
+			t.Errorf("unable to find item with hwAddress %v", test_2["hwAddress"])
+		} else if hex.EncodeToString(res.id) != test_2["id"] {
+			t.Errorf("expected id %s, got %s", test_2["id"], hex.EncodeToString(res.id))
+		}
+	}
+
+	test_3 := map[string]string{
+		"ipAddress": "127.0.0.17",
+		"id":        "0dead0334455",
+		"hwAddress": "0dead0667788",
+	}
+	test_3_findings := filter_ipAddr(test_3["ipAddress"], results)
+	if len(test_3_findings) != 2 {
+		t.Errorf("expected %d matching entries, got %d", 2, len(test_3_findings))
+	} else {
+		res := find_id(test_3["id"], test_3_findings)
+		if res == nil {
+			t.Errorf("unable to find item with id %v", test_3["id"])
+		} else if hex.EncodeToString(res.hwAddress) != test_3["hwAddress"] {
+			t.Errorf("expected hardware address %s, got %s", test_3["hwAddress"], hex.EncodeToString(res.hwAddress))
+		}
+	}
+
+	test_4 := map[string]string{
+		"ipAddress": "127.0.0.17",
+		"id":        "0dead0001122",
+		"hwAddress": "0dead0667788",
+	}
+	test_4_findings := filter_ipAddr(test_4["ipAddress"], results)
+	if len(test_4_findings) != 2 {
+		t.Errorf("expected %d matching entries, got %d", 2, len(test_4_findings))
+	} else {
+		res := find_id(test_4["id"], test_4_findings)
+		if res == nil {
+			t.Errorf("unable to find item with id %v", test_4["id"])
+		} else if hex.EncodeToString(res.hwAddress) != test_4["hwAddress"] {
+			t.Errorf("expected hardware address %s, got %s", test_4["hwAddress"], hex.EncodeToString(res.hwAddress))
+		}
+	}
+
+	test_5 := map[string]string{
+		"ipAddress": "127.0.0.20",
+		"id":        "0dead099aabc",
+		"hwAddress": "0dead099aabc",
+	}
+	test_5_findings := filter_ipAddr(test_5["ipAddress"], results)
+	if len(test_5_findings) != 1 {
+		t.Errorf("expected %d matching entries, got %d", 1, len(test_5_findings))
+	} else {
+		res := find_id(test_5["id"], test_5_findings)
+		if res == nil {
+			t.Errorf("unable to find item with id %v", test_5["id"])
+		} else if hex.EncodeToString(res.hwAddress) != test_5["hwAddress"] {
+			t.Errorf("expected hardware address %s, got %s", test_5["hwAddress"], hex.EncodeToString(res.hwAddress))
+		}
+	}
+}
+
 func TestParserTokenizeNetworkingConfig(t *testing.T) {
 	tests := []string{
 		"words       words       words",

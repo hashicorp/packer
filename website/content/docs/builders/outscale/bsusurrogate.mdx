@@ -1,0 +1,309 @@
+---
+description: |
+  The osc-bsusurrogate Packer builder is like the chroot builder, but does not
+  require running inside an Outscale virtual machine.
+page_title: Outscale BSU Surrogate - Builders
+sidebar_title: BSU Surrogate
+---
+
+# BSU Surrogate Builder
+
+Type: `osc-bsusurrogate`
+
+The `osc-bsusurrogate` Packer builder is able to create Outscale OMIs by
+running a source virtual machine with an attached volume, provisioning the attached
+volume in such a way that it can be used as the root volume for the OMI, and
+then snapshotting and creating the OMI from that volume.
+
+This builder can therefore be used to bootstrap scratch-build images - for
+example FreeBSD or Ubuntu using ZFS as the root file system.
+
+This is all done in your own Outscale account. This builder will create temporary
+key pairs, security group rules, etc., that provide it temporary access to the
+virtual machine while the image is being created.
+
+## Configuration Reference
+
+There are many configuration options available for this builder. They are
+segmented below into two categories: required and optional parameters. Within
+each category, the available configuration keys are alphabetized.
+
+In addition to the options listed here, a
+[communicator](/docs/templates/communicator) can be configured for this
+builder.
+
+### Required:
+
+- `access_key` (string) - The access key used to communicate with OUTSCALE. [Learn how to set this](/docs/builders/outscale#authentication)
+
+- `omi_name` (string) - The name of the resulting OMIS that will appear when managing OMIs in the Outscale console or via APIs. This must be unique. To help make this unique, use a function like `timestamp` (see [template engine](/docs/templates/engine) for more info).
+
+- `vm_type` (string) - The Outscale VM type to use while building the OMI, such as `t2.small`.
+
+- `region` (string) - The name of the region, such as `us-east-1`, in which to launch the Outscale VM to create the OMI.
+
+- `secret_key` (string) - The secret key used to communicate with Outscale. [Learn how to set this](/docs/builders/outscale#authentication)
+
+- `source_omi` (string) - The initial OMI used as a base for the newly created machine. `source_omi_filter` may be used instead to populate this automatically.
+
+- `omi_root_device` (block device mapping) - A block device mapping
+  describing the root device of the OMI. This looks like the mappings in
+  `omi_block_device_mapping`, except with an additional field:
+
+  - `source_device_name` (string) - The device name of the block device on
+    the source virtual machine to be used as the root device for the OMI. This
+    must correspond to a block device in `launch_block_device_mapping`.
+
+### Optional:
+
+- `omi_block_device_mappings` (array of block device mappings) - Add one or more [block device mappings](https://wiki.outscale.net/display/EN/Defining+Block+Device+Mappings) to the OMI. These will be attached when booting a new VM from your OMI. To add a block device during the Packer build see `launch_block_device_mappings` below. Your options here may vary depending on the type of VM you use. The block device mappings allow for the following configuration:
+
+  - `delete_on_vm_deletion` (boolean) - Indicates whether the BSU volume is deleted on VM termination. Default `false`. **NOTE**: If this value is not explicitly set to `true` and volumes are not cleaned up by an alternative method, additional volumes will accumulate after every build.
+
+  - `device_name` (string) - The device name exposed to the VM (for example, `/dev/sdh` or `xvdh`). Required for every device in the block device mapping.
+
+  - `iops` (number) - The number of I/O operations per second (IOPS) that the volume supports. See the documentation on
+    [IOPs](https://wiki.outscale.net/display/EN/About+Volumes#AboutVolumes-VolumeTypesVolumeTypesandIOPS)
+    for more information.
+
+  - `no_device` (boolean) - Suppresses the specified device included in the
+    block device mapping of the OMI.
+
+  - `snapshot_id` (string) - The ID of the snapshot
+
+  - `virtual_name` (string) - The virtual device name. See the documentation on [Block Device Mapping](https://wiki.outscale.net/display/EN/Defining+Block+Device+Mappings) for more information.
+
+  - `volume_size` (number) - The size of the volume, in GiB. Required if not specifying a `snapshot_id`
+
+  - `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD) volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic volumes
+
+- `omi_description` (string) - The description to set for the resulting OMI(s). By default this description is empty. This is a [template engine](/docs/templates/engine), see [Build template
+  data](#build-template-data) for more information.
+
+- `omi_account_ids` (array of strings) - A list of account IDs that have access to launch the resulting OMI(s). By default no additional users other than the user creating the OMIS has permissions to launch it.
+
+- `omi_virtualization_type` (string) - The type of virtualization for the OMI you are building. This option must match the supported virtualization type of `source_omi`. Can be `paravirtual` or `hvm`.
+
+- `associate_public_ip_address` (boolean) - If using a non-default Net, public IP addresses are not provided by default. If this is toggled, your new VM will get a Public IP.
+
+- `subregion_name` (string) - Destination subregion to launch VM in. Leave this empty to allow Outscale to auto-assign.
+
+- `custom_endpoint_oapi` (string) - This option is useful if you use a cloud
+  provider whose API is compatible with Outscale OAPI. Specify another endpoint
+  like this `outscale.com/oapi/latest`.
+
+- `disable_stop_vm` (boolean) - Packer normally stops the build
+  VM after all provisioners have run. For Windows VMs, it is
+  sometimes desirable to [run Sysprep](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-vista/cc721940(v=ws.10)>) which will stop the VM for you. If this is set to `true`, Packer
+  _will not_ stop the VM but will assume that you will send the stop
+  signal yourself through your final provisioner. You can do this with a
+  [windows-shell provisioner](/docs/provisioners/windows-shell).
+
+  Note that Packer will still wait for the VM to be stopped, and
+  failing to send the stop signal yourself, when you have set this flag to
+  `true`, will cause a timeout.
+
+- `bsu_optimized` (boolean) - If true, the VM is created with optimized BSU I/O.
+
+- `force_deregister` (boolean) - Force Packer to first deregister an existing
+  OMI if one with the same name already exists. Default `false`.
+
+- `force_delete_snapshot` (boolean) - Force Packer to delete snapshots
+  associated with OMIs, which have been deregistered by `force_deregister`.
+  Default `false`.
+
+- `insecure_skip_tls_verify` (boolean) - This allows skipping TLS
+  verification of the OAPI endpoint. The default is `false`.
+
+- `launch_block_device_mappings` (array of block device mappings) - Add one
+  or more block devices before the Packer build starts. If you add VM
+  store volumes or BSU volumes in addition to the root device volume, the
+  created OMIS will contain block device mapping information for those
+  volumes. Outscale creates snapshots of the source VM's root volume and
+  any other BSU volumes described here. When you launch an VM from this
+  new OMI, the VM automatically launches with these additional volumes,
+  and will restore them from snapshots taken from the source VM.
+
+  - `delete_on_vm_deletion` (boolean) - Indicates whether the BSU volume is deleted on VM termination. Default `false`. **NOTE**: If this value is not explicitly set to `true` and volumes are not cleaned up by an alternative method, additional volumes will accumulate after every build.
+
+  - `device_name` (string) - The device name exposed to the VM (for example, `/dev/sdh` or `xvdh`). Required for every device in the block device mapping.
+
+  - `iops` (number) - The number of I/O operations per second (IOPS) that the volume supports. See the documentation on
+    [IOPs](https://wiki.outscale.net/display/EN/About+Volumes#AboutVolumes-VolumeTypesVolumeTypesandIOPS)
+    for more information.
+
+  - `volume_size` (number) - The size of the volume, in GiB. Required if not specifying a `snapshot_id`
+
+  - `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD) volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic volumes
+
+- `run_tags` (object of key/value strings) - Tags to apply to the VM
+  that is _launched_ to create the OMI. These tags are _not_ applied to the
+  resulting OMIS unless they're duplicated in `tags`. This is a [template
+  engine](/docs/templates/engine), see [Build template
+  data](#build-template-data) for more information.
+
+- `run_volume_tags` (object of key/value strings) - Tags to apply to the
+  volumes that are _launched_ to create the OMI. These tags are _not_ applied
+  to the resulting OMIS unless they're duplicated in `tags`. This is a
+  [template engine](/docs/templates/engine), see [Build template
+  data](#build-template-data) for more information.
+
+- `security_group_id` (string) - The ID (_not_ the name) of the security
+  group to assign to the VM. By default this is not set and Packer will
+  automatically create a new temporary security group to allow SSH access.
+  Note that if this is specified, you must be sure the security group allows
+  access to the `ssh_port` given below.
+
+- `security_group_ids` (array of strings) - A list of security groups as
+  described above. Note that if this is specified, you must omit the
+  `security_group_id`.
+
+- `shutdown_behavior` (string) - Automatically terminate VMs on
+  shutdown in case Packer exits ungracefully. Possible values are "stop" and
+  "terminate", default is `stop`.
+
+- `skip_region_validation` (boolean) - Set to true if you want to skip
+  validation of the region configuration option. Default `false`.
+
+- `snapshot_groups` (array of strings) - A list of groups that have access to
+  create volumes from the snapshot(s). By default no groups have permission
+  to create volumes from the snapshot(s). `all` will make the snapshot
+  publicly accessible.
+
+- `snapshot_users` (array of strings) - A list of account IDs that have
+  access to create volumes from the snapshot(s). By default no additional
+  users other than the user creating the OMIS has permissions to create
+  volumes from the backing snapshot(s).
+
+- `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
+  They will override OMIS tags if already applied to snapshot. This is a
+  [template engine](/docs/templates/engine), see [Build template
+  data](#build-template-data) for more information.
+
+- `source_omi_filter` (object) - Filters used to populate the `source_omi` field.
+
+  - `filters` (map of strings) - filters used to select a `source_omi`.
+  - `owners` (array of strings) - Filters the images by their owner. You may specify one or more Outscale account IDs, "self" (which will use the account whose credentials you are using to run Packer). This option is required for security reasons.
+
+    Example:
+
+    ```json
+    {
+      "source_omi_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "image-name": "image-name",
+          "root-device-type": "ebs"
+        },
+        "owners": ["099720109477"]
+      }
+    }
+    ```
+
+    This selects an Ubuntu 16.04 HVM BSU OMIS from Canonical. NOTE:
+    This will fail unless _exactly_ one OMIS is returned. In the above example,
+    `most_recent` will cause this to succeed by selecting the newest image.
+
+- `ssh_keypair_name` (string) - If specified, this is the key that will be used for SSH with the machine. The key must match a key pair name loaded up into Outscale. By default, this is blank, and Packer will generate a temporary keypair unless [`ssh_password`](/docs/communicators/ssh#ssh_password) is used. [`ssh_private_key_file`](/docs/communicators/ssh#ssh_private_key_file) or `ssh_agent_auth` must be specified when `ssh_keypair_name` is utilized.
+
+- `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to authenticate connections to the source VM. No temporary keypair will be created, and the values of `ssh_password` and `ssh_private_key_file` will be ignored. To use this option with a key pair already configured in the source OMI, leave the `ssh_keypair_name` blank. To associate an existing key pair in Outscale with the source VM, set the `ssh_keypair_name` field to the name of the key pair.
+
+- `ssh_interface` (string) - One of `public_ip`, `private_ip`, `public_dns`, or `private_dns`. If set, either the public IP address, private IP address, public DNS name or private DNS name will used as the host for SSH. The default behaviour if inside a Net is to use the public IP address if available, otherwise the private IP address will be used. If not in a Net the public DNS name will be used. Also works for WinRM.
+
+  Where Packer is configured for an outbound proxy but WinRM traffic should be direct, `ssh_interface` must be set to `private_dns` and `<region>.compute.internal` included in the `NO_PROXY` environment variable.
+
+- `subnet_id` (string) - If using Net, the ID of the subnet, such as `subnet-12345def`, where Packer will launch the VM. This field is required if you are using an non-default Net.
+
+- `tags` (object of key/value strings) - Tags applied to the OMIS and relevant snapshots. This is a [template engine](/docs/templates/engine), see [Build template data](#build-template-data) for more information.
+
+- `temporary_key_pair_name` (string) - The name of the temporary key pair to generate. By default, Packer generates a name that looks like `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
+
+- `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized access to the VM, when packer is creating a temporary security group. The default is `0.0.0.0/0` (i.e., allow any IPv4 source). This is only used when `security_group_id` or `security_group_ids` is not specified.
+
+- `user_data` (string) - User data to apply when launching the VM. Note that you need to be careful about escaping characters due to the templates being JSON. It is often more convenient to use `user_data_file`, instead. Packer will not automatically wait for a user script to finish before shutting down the VM this must be handled in a provisioner.
+
+- `user_data_file` (string) - Path to a file that will be used for the user data when launching the VM.
+
+- `net_id` (string) - If launching into a Net subnet, Packer needs the Net ID in order to create a temporary security group within the Net. Requires `subnet_id` to be set. If this field is left blank, Packer will try to get the Net ID from the `subnet_id`.
+
+- `net_filter` (object) - Filters used to populate the `net_id` field.
+  Example:
+
+  ```json
+  {
+    "net_filter": {
+      "filters": {
+        "is-default": "false",
+        "ip-range": "/24"
+      }
+    }
+  }
+  ```
+
+  This selects the Net with a IPv4 CIDR block of `/24`. NOTE: This will fail unless _exactly_ one Net is returned.
+
+  - `filters` (map of strings) - filters used to select a `vpc_id`. NOTE: This will fail unless _exactly_ one Net is returned.
+
+    `net_id` take precedence over this.
+
+- `windows_password_timeout` (string) - The timeout for waiting for a Windows password for Windows VMs. Defaults to 20 minutes. Example value: `10m`
+
+## Basic Example
+
+```json
+{
+  "type": "osc-bsusurrogate",
+  "secret_key": "YOUR SECRET KEY HERE",
+  "access_key": "YOUR KEY HERE",
+  "region": "eu-west-2",
+  "ssh_username": "outscale",
+  "vm_type": "t2.medium",
+  "source_omi": "ami-bcfc34e0",
+  "subregion_name": "eu-west-2a",
+  "launch_block_device_mappings": [
+    {
+      "volume_type": "io1",
+      "device_name": "/dev/xvdf",
+      "delete_on_vm_deletion": false,
+      "volume_size": 10,
+      "iops": 300
+    }
+  ],
+  "omi_root_device": {
+    "source_device_name": "/dev/xvdf",
+    "device_name": "/dev/sda1",
+    "delete_on_vm_deletion": true,
+    "volume_size": 10,
+    "volume_type": "standard"
+  }
+}
+```
+
+-> **Note:** Packer can also read the access key and secret access key from
+environmental variables. See the configuration reference in the section above
+for more information on what environmental variables Packer will look for.
+
+Further information on locating OMIS IDs and their relationship to VM
+types and regions can be found in the Outscale Documentation [reference](https://wiki.outscale.net/display/EN/Official+OMIs+Reference).
+
+## Accessing the Virtual Machine to Debug
+
+If you need to access the virtual machine to debug for some reason, run this builder
+with the `-debug` flag. In debug mode, the Outscale builder will save the private
+key in the current directory and will output the DNS or IP information as well.
+You can use this information to access the virtual machine as it is running.
+
+## Build template data
+
+In configuration directives marked as a template engine above, the following variables are available:
+
+- `BuildRegion` - The region (for example `eu-west-2`) where Packer is building the OMI.
+- `SourceOMI` - The source OMIS ID (for example ami-a2412fcd`) used to build the OMI.
+- `SourceOMIName` - The source OMIS Name (for example `ubutu-390`) used to build the OMI.
+- `SourceOMITags` - The source OMIS Tags, as a `map[string]string` object.
+
+-> **Note:** Packer uses pre-built OMIs as the source for building images.
+These source OMIs may include volumes that are not flagged to be destroyed on
+termination of the virtual machine building the new image. In addition to those
+volumes created by this builder, any volumes inn the source OMI which are not
+marked for deletion on termination will remain in your account.
