@@ -157,13 +157,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"source_ami":                    &hcldec.AttrSpec{Name: "source_ami", Type: cty.String, Required: false},
 		"source_ami_filter":             &hcldec.BlockSpec{TypeName: "source_ami_filter", Nested: hcldec.ObjectSpec((*common.FlatAmiFilterOptions)(nil).HCL2Spec())},
 		"root_volume_tags":              &hcldec.AttrSpec{Name: "root_volume_tags", Type: cty.Map(cty.String), Required: false},
-<<<<<<< HEAD
 		"root_volume_tag":               &hcldec.BlockListSpec{TypeName: "root_volume_tag", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
-=======
-		"root_volume_tag":               &hcldec.BlockListSpec{TypeName: "root_volume_tag", Nested: hcldec.ObjectSpec((*hcl2template.FlatKeyValue)(nil).HCL2Spec())},
 		"root_volume_encrypt_boot":      &hcldec.AttrSpec{Name: "root_volume_encrypt_boot", Type: cty.Bool, Required: false},
 		"root_volume_kms_key_id":        &hcldec.AttrSpec{Name: "root_volume_kms_key_id", Type: cty.String, Required: false},
->>>>>>> d2717fdcb (adding support for root volume encryption for amazon-chroot)
 		"ami_architecture":              &hcldec.AttrSpec{Name: "ami_architecture", Type: cty.String, Required: false},
 	}
 	return s

@@ -16,7 +16,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer-plugin-sdk/chroot"
 	"github.com/hashicorp/packer/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
@@ -347,10 +346,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 		if b.config.RootVolumeKmsKeyId != "" {
 			if b.config.RootVolumeEncryptBoot.False() {
-				errs = packer.MultiErrorAppend(
+				errs = packersdk.MultiErrorAppend(
 					errs, errors.New("If you have set root_volume_kms_key_id, root_volume_encrypt_boot must also be true."))
 			} else if b.config.RootVolumeEncryptBoot.True() && !awscommon.ValidateKmsKey(b.config.RootVolumeKmsKeyId) {
-				errs = packer.MultiErrorAppend(
+				errs = packersdk.MultiErrorAppend(
 					errs, fmt.Errorf("%q is not a valid KMS Key Id.", b.config.RootVolumeKmsKeyId))
 			}
 		}
