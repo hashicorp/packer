@@ -90,7 +90,8 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		if err != nil {
 			c.Ui.Error(err.Error())
 		}
-		installs = append(installs, newInstall...)
+		_ = newInstall
+
 	}
 	return ret
 }
