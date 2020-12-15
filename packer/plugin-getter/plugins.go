@@ -130,11 +130,14 @@ func (cerr *ChecksumError) Error() string {
 	)
 }
 
-// ListInstallations lists unique installed versions of Plugin p with opts as a filter.
+// ListInstallations lists unique installed versions of Plugin p with opts as a
+// filter.
 //
 // Installations are sorted by version and one binary per version is returned.
+// Last binary detected takes precedence: in the order 'FromFolders' option.
 //
-//
+// You must pass at least one option to Checksumers for a binary to be even
+// consider.
 func (r Requirement) ListInstallations(opts ListInstallationsOptions) (InstallList, error) {
 	res := InstallList{}
 	filenamePrefix := "packer-plugin-" + r.Identifier.Type + "_"
@@ -178,7 +181,7 @@ func (r Requirement) ListInstallations(opts ListInstallationsOptions) (InstallLi
 				break
 			}
 			if !checksumOk {
-				log.Printf("[TRACE]: No checksum found for %q ignoring binary", path)
+				log.Printf("[TRACE]: No checksum found for %q ignoring possibly unsafe binary", path)
 				continue
 			}
 
