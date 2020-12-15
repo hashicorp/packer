@@ -1,14 +1,7 @@
 package plugingetter
 
 import (
-	"bytes"
-	"encoding/hex"
-	"fmt"
-	"hash"
-	"io"
-	"io/ioutil"
 	"log"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -31,23 +24,6 @@ type Requirement struct {
 	VersionConstraints version.Constraints
 }
 
-// InstallList is a list of installs
-type InstallList []*Install
-
-// InsertSortedUniq inserts the installation in the right spot in the list by
-// comparing the version lexicographically.
-// A Duplicate version will replace any already present version.
-func (l *InstallList) InsertSortedUniq(install *Install) {
-	pos := sort.Search(len(*l), func(i int) bool { return (*l)[i].Version >= install.Version })
-	if len(*l) > pos && (*l)[pos].Version == install.Version {
-		(*l)[pos] = install
-		return
-	}
-	(*l) = append((*l), nil)
-	copy((*l)[pos+1:], (*l)[pos:])
-	(*l)[pos] = install
-}
-
 type ListInstallationsOptions struct {
 	// Put the folders where plugins could be installed in this list. Paths
 	// should be absolute for safety but can also be relative.
@@ -60,74 +36,6 @@ type ListInstallationsOptions struct {
 	OS, ARCH string
 
 	Checksummers []Checksummer
-}
-
-type Checksummer struct {
-	// Something like md5 or sha256
-	Type string
-	// Hash function
-	hash.Hash
-}
-
-func (c *Checksummer) FileExt() string {
-	return "_" + strings.ToUpper(c.Type) + "SUM"
-}
-
-// Checksum first reads the checksum in file `filePath + c.FileExt()`, then
-// compares it to the checksum of the file in filePath.
-func (c *Checksummer) Checksum(filePath string) error {
-	checksumFile := filePath + c.FileExt()
-	expected, err := ioutil.ReadFile(checksumFile)
-	if err != nil {
-		return fmt.Errorf("Checksum: failed to read checksum file: %s", err)
-	}
-	expected, err = hex.DecodeString(string(expected))
-	if err != nil {
-		return fmt.Errorf("Checksum(%q): invalid checksum: %s", checksumFile, err)
-	}
-
-	f, err := os.Open(filePath)
-	if err != nil {
-		return fmt.Errorf("Checksum: failed to open file for checksum: %s", err)
-	}
-	defer f.Close()
-
-	c.Hash.Reset()
-	if _, err := io.Copy(c.Hash, f); err != nil {
-		return fmt.Errorf("Failed to hash: %s", err)
-	}
-
-	if actual := c.Hash.Sum(nil); !bytes.Equal(actual, expected) {
-		return &ChecksumError{
-			Hash:     c.Hash,
-			Actual:   actual,
-			Expected: expected,
-			File:     filePath,
-		}
-	}
-
-	return nil
-}
-
-// A ChecksumError is returned when a checksum differs
-type ChecksumError struct {
-	Hash     hash.Hash
-	Actual   []byte
-	Expected []byte
-	File     string
-}
-
-func (cerr *ChecksumError) Error() string {
-	if cerr == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf(
-		"Checksums did not match for %s.\nExpected: %s\nGot: %s\n%T",
-		cerr.File,
-		hex.EncodeToString(cerr.Expected),
-		hex.EncodeToString(cerr.Actual),
-		cerr.Hash, // ex: *sha256.digest
-	)
 }
 
 // ListInstallations lists unique installed versions of Plugin p with opts as a
@@ -192,6 +100,23 @@ func (r Requirement) ListInstallations(opts ListInstallationsOptions) (InstallLi
 		}
 	}
 	return res, nil
+}
+
+// InstallList is a list of installs
+type InstallList []*Install
+
+// InsertSortedUniq inserts the installation in the right spot in the list by
+// comparing the version lexicographically.
+// A Duplicate version will replace any already present version.
+func (l *InstallList) InsertSortedUniq(install *Install) {
+	pos := sort.Search(len(*l), func(i int) bool { return (*l)[i].Version >= install.Version })
+	if len(*l) > pos && (*l)[pos].Version == install.Version {
+		(*l)[pos] = install
+		return
+	}
+	(*l) = append((*l), nil)
+	copy((*l)[pos+1:], (*l)[pos:])
+	(*l)[pos] = install
 }
 
 // Install describes a plugin installation
