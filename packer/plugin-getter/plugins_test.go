@@ -1,6 +1,7 @@
 package plugingetter
 
 import (
+	"crypto/sha256"
 	"path/filepath"
 	"testing"
 
@@ -37,6 +38,12 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				Extension: ".0_x4",
 				OS:        "darwin",
 				ARCH:      "amd64",
+				Checksummers: []Checksummer{
+					{
+						Type: "sha256",
+						Hash: sha256.New(),
+					},
+				},
 			},
 			false,
 			[]*Install{
@@ -66,6 +73,12 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				Extension: ".0_x4.exe",
 				OS:        "windows",
 				ARCH:      "amd64",
+				Checksummers: []Checksummer{
+					{
+						Type: "sha256",
+						Hash: sha256.New(),
+					},
+				},
 			},
 			false,
 			[]*Install{
@@ -96,6 +109,12 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				Extension: ".0_x4.exe",
 				OS:        "windows",
 				ARCH:      "amd64",
+				Checksummers: []Checksummer{
+					{
+						Type: "sha256",
+						Hash: sha256.New(),
+					},
+				},
 			},
 			false,
 			[]*Install{
