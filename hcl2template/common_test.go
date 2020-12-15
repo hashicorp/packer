@@ -25,7 +25,7 @@ func getBasicParser() *Parser {
 		CorePackerVersion:       version.Must(version.NewSemver(lockedVersion)),
 		CorePackerVersionString: lockedVersion,
 		Parser:                  hclparse.NewParser(),
-		BuilderSchemas: packer.MapOfBuilder{
+		BuilderSchemas: packersdk.MapOfBuilder{
 			"amazon-ebs":     func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
 			"virtualbox-iso": func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
 			"null":           func() (packersdk.Builder, error) { return &null.Builder{}, nil },
