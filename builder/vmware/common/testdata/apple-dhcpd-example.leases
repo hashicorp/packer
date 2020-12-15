@@ -1,0 +1,40 @@
+# this entry is normal
+{
+        ip_address=127.0.0.17
+        hw_address=1,d:ea:d0:66:77:88
+        identifier=1,d:ea:d0:0:11:22
+        lease=0x5fd78ae2
+        name=vagrant-2019
+}
+
+# this entry has tabs
+{
+			ip_address=127.0.0.17
+		hw_address=1,d:ea:d0:66:77:88
+	identifier=1,d:ea:d0:33:44:55
+				lease=0x5fd7b4e5
+        name=vagrant-2019
+}
+
+# These next two entries have the same address, but different uids
+{
+	ip_address=127.0.0.19
+	hw_address=1,d:ea:d0:66:77:88
+	identifier=1,d:ea:d0:66:77:88
+	lease=0x5fd72edc
+	name=vagrant-2019
+}
+{
+	ip_address=127.0.0.19
+	hw_address=1,d:ea:d0:99:aa:bb
+	identifier=1,d:ea:d0:99:aa:bb
+	lease=0x5fd72edc
+	name=vagrant-2019
+}
+
+# this entry does not have all fields
+{
+	ip_address=127.0.0.20
+	hw_address=1,d:ea:d0:99:aa:bc
+	identifier=1,d:ea:d0:99:aa:bc
+}
