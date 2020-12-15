@@ -25,7 +25,7 @@ func (c *CoreWrapper) Initialize() hcl.Diagnostics {
 	return nil
 }
 
-func (c *CoreWrapper) PluginRequirements() (plugingetter.InstallList, hcl.Diagnostics) {
+func (c *CoreWrapper) PluginRequirements() (plugingetter.Requirements, hcl.Diagnostics) {
 	return nil, hcl.Diagnostics{
 		&hcl.Diagnostic{
 			Summary:  "Packer init is not supported in Packer - JSON",

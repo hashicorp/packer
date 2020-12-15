@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/packer/hcl2template/addrs"
 )
 
-type RequirementList []*Requirement
+type Requirements []*Requirement
 
 // Requirement describes a required plugin and how it is installed. Usually a list
 // of required plugins is generated from a config file. From it we check what

@@ -8,10 +8,10 @@ import (
 )
 
 // PluginRequirements returns a sorted list of plugin requirements.
-func (cfg *PackerConfig) PluginRequirements() (plugingetter.List, hcl.Diagnostics) {
+func (cfg *PackerConfig) PluginRequirements() (plugingetter.Requirements, hcl.Diagnostics) {
 
 	var diags hcl.Diagnostics
-	var reqs plugingetter.List
+	var reqs plugingetter.Requirements
 	reqPluginsBlocks := cfg.Packer.RequiredPlugins
 
 	// Take all required plugins, make sure there are no conflicting blocks
