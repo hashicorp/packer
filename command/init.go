@@ -59,24 +59,28 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		return ret
 	}
 
+	opts := plugingetter.ListInstallationsOptions{
+		FromFolders: c.Meta.CoreConfig.Components.KnownPluginFolders,
+		OS:          runtime.GOOS,
+		ARCH:        runtime.GOARCH,
+		Extension:   plugin.FileExtension,
+		Checksummers: []plugingetter.Checksummer{
+			{Type: "sha256", Hash: sha256.New()},
+		},
+	}
+
+	log.Printf("[TRACE] init: %#v", opts)
+
 	for _, pluginRequirement := range reqs {
 		// Get installed plugins that match requirement
 
-		installs, err := pluginRequirement.ListInstallations(plugingetter.ListInstallationsOptions{
-			FromFolders: c.Meta.CoreConfig.Components.KnownPluginFolders,
-			OS:          runtime.GOOS,
-			ARCH:        runtime.GOARCH,
-			Extension:   plugin.FileExtension,
-			Checksummers: []plugingetter.Checksummer{
-				{Type: "sha256", Hash: sha256.New()},
-			},
-		})
+		installs, err := pluginRequirement.ListInstallations(opts)
 		if err != nil {
 			c.Ui.Error(err.Error())
 			return 1
 		}
 
-		log.Print("for plugin %s found installations %v", pluginRequirement.Identifier.String(), installs)
+		log.Printf("for plugin %s found installations %v", pluginRequirement.Identifier.String(), installs)
 	}
 	return ret
 }
