@@ -85,6 +85,8 @@ type PostProcessorStore interface {
 // pointers necessary to look up components of Packer such as builders,
 // commands, etc.
 type ComponentFinder struct {
+	KnownPluginFolders []string
+
 	Hook HookFunc
 
 	// For HCL2

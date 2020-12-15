@@ -2,9 +2,13 @@ package command
 
 import (
 	"context"
+	"crypto/sha256"
 	"log"
+	"runtime"
 	"strings"
 
+	"github.com/hashicorp/packer/packer-plugin-sdk/plugin"
+	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"github.com/posener/complete"
 )
 
@@ -47,14 +51,32 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 	if ret != 0 {
 		return ret
 	}
+
+	// Get plugins requirements
 	reqs, diags := packerStarter.PluginRequirements()
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
 	}
 
-	for _, req := range reqs {
-		log.Printf("req: %+v", req)
+	for _, pluginRequirement := range reqs {
+		// Get installed plugins that match requirement
+
+		installs, err := pluginRequirement.ListInstallations(plugingetter.ListInstallationsOptions{
+			FromFolders: c.Meta.CoreConfig.Components.KnownPluginFolders,
+			OS:          runtime.GOOS,
+			ARCH:        runtime.GOARCH,
+			Extension:   plugin.FileExtension,
+			Checksummers: []plugingetter.Checksummer{
+				{Type: "sha256", Hash: sha256.New()},
+			},
+		})
+		if err != nil {
+			c.Ui.Error(err.Error())
+			return 1
+		}
+
+		log.Print("for plugin %s found installations %v", pluginRequirement.Identifier.String(), installs)
 	}
 	return ret
 }

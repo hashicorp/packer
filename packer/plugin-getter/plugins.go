@@ -1,6 +1,7 @@
 package plugingetter
 
 import (
+	"fmt"
 	"log"
 	"path/filepath"
 	"sort"
@@ -55,7 +56,7 @@ func (r Requirement) ListInstallations(opts ListInstallationsOptions) (InstallLi
 
 		matches, err := filepath.Glob(glob)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("ListInstallations: %q failed to list binaries in folder: %v", r.Identifier.String(), err)
 		}
 		for _, path := range matches {
 			fname := filepath.Base(path)
