@@ -19,6 +19,7 @@ const (
 	DefaultHookEndpoint                 = "Hook"
 	DefaultPostProcessorEndpoint        = "PostProcessor"
 	DefaultProvisionerEndpoint          = "Provisioner"
+	DefaultDataStoreEndpoint            = "DataStore"
 	DefaultUiEndpoint                   = "Ui"
 )
 

@@ -29,6 +29,7 @@ type config struct {
 	Builders                   packersdk.MapOfBuilder       `json:"-"`
 	Provisioners               packersdk.MapOfProvisioner   `json:"-"`
 	PostProcessors             packersdk.MapOfPostProcessor `json:"-"`
+	DataSources                packersdk.MapOfDataSource    `json:"-"`
 	Plugins                    plugin.Config
 }
 
@@ -181,6 +182,18 @@ func (c *config) discoverInternalComponents() error {
 				bin := fmt.Sprintf("%s%splugin%spacker-post-processor-%s",
 					packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
 				return c.Plugins.Client(bin).PostProcessor()
+			}
+		}
+	}
+
+	for dataSource := range command.DataSources {
+		dataSource := dataSource
+		_, found := (c.DataSources)[dataSource]
+		if !found {
+			c.DataSources[dataSource] = func() (packersdk.DataSource, error) {
+				bin := fmt.Sprintf("%s%splugin%spacker-data-%s",
+					packerPath, PACKERSPACE, PACKERSPACE, dataSource)
+				return c.Plugins.Client(bin).DataSource()
 			}
 		}
 	}

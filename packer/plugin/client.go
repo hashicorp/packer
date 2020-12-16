@@ -173,6 +173,16 @@ func (c *Client) Provisioner() (packersdk.Provisioner, error) {
 	return &cmdProvisioner{client.Provisioner(), c}, nil
 }
 
+// Returns a data source implementation that is communicating over this
+// client. If the client hasn't been started, this will start it.
+func (c *Client) DataSource() (packersdk.DataSource, error) {
+	client, err := c.Client()
+	if err != nil {
+		return nil, err
+	}
+	return &cmdDataSource{client.DataSource(), c}, nil
+}
+
 // End the executing subprocess (if it is running) and perform any cleanup
 // tasks necessary such as capturing any remaining logs and so on.
 //
