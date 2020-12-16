@@ -19,6 +19,8 @@
 * builder/amazon: Add support for Amazon EBS gp3 volumes. [Gh-10338]
 * builder/amazon: Increase default max_retries to lessen throttling issues.
     [GH-10290]
+* builder/amazon: Support AWS gp3 volumes [GH-10338]
+* builder/amazon: Support root volume encryption for amazon-chroot. [GH-10243]
 * builder/amazon: Validate IOPS ratio. [GH-10199]
 * builder/azure-arm: Add Azure CLI authentication support to builder.
     [GH-10157]
@@ -27,6 +29,8 @@
     SSH configuration that may be disrupted during an instance boot sequence.
     [GH-10320]
 * builder/google: Add support for creating shielded VMs. [GH-10172]
+* builder/googlecompute-export: Add logging.write to service account scopes.
+    [GH-10316]
 * builder/oracle-oci: Support image launch mode. [GH-10212]
 * builder/outscale: Add outscale.hk endpoint support [GH-10207]
 * builder/proxmox: New config option for boot-order. [GH-10260]
@@ -34,8 +38,11 @@
     [GH-10181]
 * builder/virtualbox: Allow attaching guest additions with "none" communicator.
     [GH-10306]
+* builder/vmware: Make compatible with MacOS BigSur by using Apple DHCP leases
+    instead of VMWare leases [GH-10384]
 * builder/vsphere: New option to add additional storage to a cloned vm.
     [GH-10287]
+* builder/yandex: More resilient image mounting and initialization. [GH-10335]
 * builder/yandex: Update user-data to not use cloud-config fields to prevent
     possible user data collisions. [GH-10385]
 * core/hcl: Update to `hcl2_upgrade` command to support complex variable values
@@ -46,18 +53,26 @@
 * post-processor/yandex-export: Add retries and wait after disk attach
     operation. [GH-10303]
 * post-processor/yandex-export: Show progress on export. [GH-10368]
+* post-processor/yandex-export: Use ssh communicator in export. [GH-10352]
 * provisioner/salt-masterless: Call winrepo.update_git_repos and
     pkg.refresh_db. [GH-10201]
 
 ### BUG FIXES
+* builder/amazon: Fix retry logic in AWS spot instance tagging. [GH-10394]
 * builder/amazon: Fix single `tag` interpolation to allow for templating engine
     usage. [GH-10224]
 * builder/google: Fix crash when using the `-on-error` build flag. [GH-10247]
 * builder/google: Fix issue with service account detection when running Packer
     on a compute instance with `use_os_login` enabled. [GH-10360]
+* builder/qemu: Fix duplication of main disk when setting "disk_image: true".
+    [GH-10337]
 * builder/qemu: Fix nil pointer dereference when loading values from state.
     [GH-10249]
+* builder/qemu: Fix panic when disk_image=true and source image has no file
+    extension. [GH-10226]
 * builder/vagrant: Return error if ssh-config command fails. [GH-10213]
+* builder/vsphere: WaitForIP should not return an error if an IP is not found
+    [GH-10321]
 * builder/yandex: Change disk creation method to manual. [GH-10250]
 * builder/yandex: Fix issue with UserAgent string. [GH-10361]
 * builder/yandex: Fixed using cloud config when using IPv6. [GH-10297]
