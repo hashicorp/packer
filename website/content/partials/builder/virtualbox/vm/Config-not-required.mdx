@@ -1,27 +1,27 @@
 <!-- Code generated from the comments of the Config struct in builder/virtualbox/vm/config.go; DO NOT EDIT MANUALLY -->
 
 - `attach_snapshot` (string) - Default to `null/empty`. The name of an
-  **existing** snapshot to which the builder shall attach the VM before
-  starting it. If no snapshot is specified the builder will simply start the
-  VM from it's current state i.e. snapshot.
+   **existing** snapshot to which the builder shall attach the VM before
+   starting it. If no snapshot is specified the builder will simply start the
+   VM from it's current state i.e. snapshot.
 
 - `target_snapshot` (string) - Default to `null/empty`. The name of the
-  snapshot which shall be created after all provisioners has been run by the
-  builder. If no target snapshot is specified and `keep_registered` is set to
-  `false` the builder will revert to the snapshot to which the VM was attached
-  before the builder has been executed, which will revert all changes applied
-  by the provisioners. This is handy if only an export shall be created and no
-  further snapshot is required.
+    snapshot which shall be created after all provisioners has been run by the
+    builder. If no target snapshot is specified and `keep_registered` is set to
+    `false` the builder will revert to the snapshot to which the VM was attached
+    before the builder has been executed, which will revert all changes applied
+    by the provisioners. This is handy if only an export shall be created and no
+    further snapshot is required.
 
 - `force_delete_snapshot` (bool) - Defaults to `false`. If set to `true`,
-  overwrite an existing `target_snapshot`. Otherwise the builder will yield an
-  error if the specified target snapshot already exists.
+    overwrite an existing `target_snapshot`. Otherwise the builder will yield an
+    error if the specified target snapshot already exists.
 
 - `keep_registered` (bool) - Set this to `true` if you would like to keep
-  the VM attached to the snapshot specified by `attach_snapshot`. Otherwise
-  the builder will reset the VM to the snapshot to which the VM was attached
-  before the builder started. Defaults to `false`.
+    the VM attached to the snapshot specified by `attach_snapshot`. Otherwise
+    the builder will reset the VM to the snapshot to which the VM was attached
+    before the builder started. Defaults to `false`.
 
 - `skip_export` (bool) - Defaults to `false`. When enabled, Packer will
-  not export the VM. Useful if the builder should be applied again on the created
-  target snapshot.
+    not export the VM. Useful if the builder should be applied again on the created
+    target snapshot.

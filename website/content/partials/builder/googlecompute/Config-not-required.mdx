@@ -50,23 +50,22 @@
 - `image_description` (string) - The description of the resulting image.
 
 - `image_encryption_key` (\*CustomerEncryptionKey) - Image encryption key to apply to the created image. Possible values:
-
-  - kmsKeyName - The name of the encryption key that is stored in Google Cloud KMS.
-  - RawKey: - A 256-bit customer-supplied encryption key, encodes in RFC 4648 base64.
-
+  * kmsKeyName -  The name of the encryption key that is stored in Google Cloud KMS.
+  * RawKey: - A 256-bit customer-supplied encryption key, encodes in RFC 4648 base64.
+  
   examples:
-
-  ```json
-  {
-    "kmsKeyName": "projects/${project}/locations/${region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
-  }
-  ```
-
-  ```hcl
-   image_encryption_key {
-     kmsKeyName = "projects/${var.project}/locations/${var.region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
+  
+   ```json
+   {
+      "kmsKeyName": "projects/${project}/locations/${region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
    }
-  ```
+   ```
+  
+   ```hcl
+    image_encryption_key {
+      kmsKeyName = "projects/${var.project}/locations/${var.region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
+    }
+   ```
 
 - `image_family` (string) - The name of the image family to which the resulting image belongs. You
   can create disks by specifying an image family instead of a specific
@@ -80,22 +79,21 @@
 - `image_storage_locations` ([]string) - Storage location, either regional or multi-regional, where snapshot
   content is to be stored and only accepts 1 value. Always defaults to a nearby regional or multi-regional
   location.
-
+  
   multi-regional example:
-
-  ```json
-  {
-    "image_storage_locations": ["us"]
-  }
-  ```
-
+  
+   ```json
+   {
+      "image_storage_locations": ["us"]
+   }
+   ```
   regional example:
-
-  ```json
-  {
-    "image_storage_locations": ["us-east1"]
-  }
-  ```
+  
+   ```json
+   {
+      "image_storage_locations": ["us-east1"]
+   }
+   ```
 
 - `instance_name` (string) - A name to give the launched instance. Beware that this must be unique.
   Defaults to `packer-{{uuid}}`.
@@ -107,7 +105,7 @@
 - `metadata` (map[string]string) - Metadata applied to the launched instance.
   All metadata configuration values are expected to be of type string.
   Google metadata options that take a value of `TRUE` or `FALSE` should be
-  set as a string (i.e `"TRUE"` `"FALSE"` or `"true"` `"false"`).
+  set as a string (i.e  `"TRUE"` `"FALSE"` or `"true"` `"false"`).
 
 - `metadata_files` (map[string]string) - Metadata applied to the launched instance. Values are files.
 
@@ -131,7 +129,7 @@
 - `on_host_maintenance` (string) - Sets Host Maintenance Option. Valid choices are `MIGRATE` and
   `TERMINATE`. Please see [GCE Instance Scheduling
   Options](https://cloud.google.com/compute/docs/instances/setting-instance-scheduling-options),
-  as not all machine_types support `MIGRATE` (i.e. machines with GPUs).
+  as not all machine\_types support `MIGRATE` (i.e. machines with GPUs).
   If preemptible is true this can only be `TERMINATE`. If preemptible is
   false, it defaults to `MIGRATE`
 
@@ -144,7 +142,7 @@
 
 - `scopes` ([]string) - The service account scopes for launched
   instance. Defaults to:
-
+  
   ```json
   [
     "https://www.googleapis.com/auth/userinfo.email",
@@ -163,9 +161,8 @@
 - `startup_script_file` (string) - The path to a startup script to run on the launched instance from which the image will
   be made. When set, the contents of the startup script file will be added to the instance metadata
   under the `"startup_script"` metadata property. See [Providing startup script contents directly](https://cloud.google.com/compute/docs/startupscript#providing_startup_script_contents_directly) for more details.
-
+  
   When using `startup_script_file` the following rules apply:
-
   - The contents of the script file will overwrite the value of the `"startup_script"` metadata property at runtime.
   - The contents of the script file will be wrapped in Packer's startup script wrapper, unless `wrap_startup_script` is disabled. See `wrap_startup_script` for more details.
   - Not supported by Windows instances. See [Startup Scripts for Windows](https://cloud.google.com/compute/docs/startupscript#providing_a_startup_script_for_windows_instances) for more details.
@@ -174,9 +171,8 @@
   If "true", the contents of `startup_script_file` or `"startup_script"` in the instance metadata
   is wrapped in a Packer specific script that tracks the execution and completion of the provided
   startup script. The wrapper ensures that the builder will not continue until the startup script has been executed.
-
   - The use of the wrapped script file requires that the user or service account
-    running the build has the compute.instance.Metadata role.
+  running the build has the compute.instance.Metadata role.
 
 - `subnetwork` (string) - The Google Compute subnetwork id or URL to use for the launched
   instance. Only required if the network has been created with custom
@@ -195,12 +191,12 @@
   and setting the `enable-oslogin` to `TRUE` in the instance metadata.
   Optionally, `use_os_login` can be used with an existing `ssh_username` and `ssh_private_key_file`
   if a SSH key has already been added to the Google account's login profile - See [Adding SSH Keys](https://cloud.google.com/compute/docs/instances/managing-instance-access#add_oslogin_keys).
-
+  
   SSH keys can be added to an individual user account
-
+  
   ```shell-session
   $ gcloud compute os-login ssh-keys add --key-file=/home/user/.ssh/my-key.pub
-
+  
   $ gcloud compute os-login describe-profile
   PosixAccounts:
   - accountId: <project-id>
@@ -214,13 +210,12 @@
    000000000000000000000000000000000000000000000000000000000000000a:
      fingerprint: 000000000000000000000000000000000000000000000000000000000000000a
   ```
-
+  
   Or SSH keys can be added to an associated service account
-
   ```shell-session
   $ gcloud auth activate-service-account --key-file=<path to service account credentials file (e.g account.json)>
   $ gcloud compute os-login ssh-keys add --key-file=/home/user/.ssh/my-key.pub
-
+  
   $ gcloud compute os-login describe-profile
   PosixAccounts:
   - accountId: <project-id>

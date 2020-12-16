@@ -6,9 +6,9 @@
 
 - `shared_image_gallery` (SharedImageGallery) - Use a [Shared Gallery
   image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/)
-  as the source for this build. _VHD targets are incompatible with this
-  build type_ - the target must be a _Managed Image_.
-
+  as the source for this build. *VHD targets are incompatible with this
+  build type* - the target must be a *Managed Image*.
+  
   ```json
   "shared_image_gallery": {
       "subscription": "00000000-0000-0000-0000-00000000000",
@@ -22,9 +22,9 @@
   ```
 
 - `shared_image_gallery_destination` (SharedImageGalleryDestination) - The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
-
+  
   Following is an example.
-
+  
   ```json
   "shared_image_gallery_destination": {
       "resource_group": "ResourceGroup",
@@ -39,7 +39,8 @@
 
 - `shared_image_gallery_timeout` (duration string | ex: "1h5m2s") - How long to wait for an image to be published to the shared image
   gallery before timing out. If your Packer build is failing on the
-  Publishing to Shared Image Gallery step with the error `Original Error: context deadline exceeded`, but the image is present when you check your
+  Publishing to Shared Image Gallery step with the error `Original Error:
+  context deadline exceeded`, but the image is present when you check your
   Azure dashboard, then you probably need to increase this timeout from
   its default of "60m" (valid time units include `s` for seconds, `m` for
   minutes, and `h` for hours.)
@@ -47,20 +48,20 @@
 - `image_publisher` (string) - PublisherName for your base image. See
   [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
   for details.
-
+  
   CLI example `az vm image list-publishers --location westus`
 
 - `image_offer` (string) - Offer for your base image. See
   [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
   for details.
-
+  
   CLI example
   `az vm image list-offers --location westus --publisher Canonical`
 
 - `image_sku` (string) - SKU for your base image. See
   [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
   for details.
-
+  
   CLI example
   `az vm image list-skus --location westus --publisher Canonical --offer UbuntuServer`
 
@@ -69,7 +70,7 @@
   across regions due to image synchronization latency. To ensure a consistent
   version across regions set this value to one that is available in all
   regions where you are deploying.
-
+  
   CLI example
   `az vm image list --location westus --publisher Canonical --offer UbuntuServer --sku 16.04.0-LTS --all`
 
@@ -77,14 +78,14 @@
   not set image_publisher, image_offer, image_sku, or image_version.
 
 - `custom_managed_image_resource_group_name` (string) - Specify the source managed image's resource group used to use. If this
-  value is set, do not set image_publisher, image_offer, image_sku, or
-  image_version. If this value is set, the value
+  value is set, do not set image\_publisher, image\_offer, image\_sku, or
+  image\_version. If this value is set, the value
   `custom_managed_image_name` must also be set. See
   [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
   to learn more about managed images.
 
 - `custom_managed_image_name` (string) - Specify the source managed image's name to use. If this value is set, do
-  not set image_publisher, image_offer, image_sku, or image_version.
+  not set image\_publisher, image\_offer, image\_sku, or image\_version.
   If this value is set, the value
   `custom_managed_image_resource_group_name` must also be set. See
   [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
@@ -96,7 +97,7 @@
   VM from your VHD. See
   [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/)
   information. Defaults to `Standard_A1`.
-
+  
   CLI example `az vm list-sizes --location westus`
 
 - `managed_image_resource_group_name` (string) - Specify the managed image resource group name where the result of the
@@ -130,7 +131,8 @@
 - `polling_duration_timeout` (duration string | ex: "1h5m2s") - The default PollingDuration for azure is 15mins, this property will override
   that value. See [Azure DefaultPollingDuration](https://godoc.org/github.com/Azure/go-autorest/autorest#pkg-constants)
   If your Packer build is failing on the
-  ARM deployment step with the error `Original Error: context deadline exceeded`, then you probably need to increase this timeout from
+  ARM deployment step with the error `Original Error:
+  context deadline exceeded`, then you probably need to increase this timeout from
   its default of "15m" (valid time units include `s` for seconds, `m` for
   minutes, and `h` for hours.)
 

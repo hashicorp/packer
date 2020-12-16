@@ -5,7 +5,6 @@ Defines the disk storage for a VM.
 Example that will create a 15GB and a 20GB disk on the VM. The second disk will be thin provisioned:
 
 In JSON:
-
 ```json
   "storage": [
     {
@@ -17,9 +16,7 @@ In JSON:
     }
   ],
 ```
-
 In HCL2:
-
 ```hcl
   storage {
       disk_size = 15000
@@ -33,7 +30,6 @@ In HCL2:
 Example that creates 2 pvscsi controllers and adds 2 disks to each one:
 
 In JSON:
-
 ```json
   "disk_controller_type": ["pvscsi", "pvscsi"],
   "storage": [
@@ -57,7 +53,6 @@ In JSON:
 ```
 
 In HCL2:
-
 ```hcl
   disk_controller_type = ["pvscsi", "pvscsi"]
   storage {
