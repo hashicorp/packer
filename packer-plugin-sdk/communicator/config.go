@@ -24,8 +24,9 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 )
 
-// Config is the common configuration that communicators allow within
-// a builder.
+// Config is the common configuration a builder uses to define and configure a Packer
+// communicator. Embed this struct in your builder config to implement
+// communicator support.
 type Config struct {
 	// Packer currently supports three kinds of communicators:
 	//
@@ -59,6 +60,7 @@ type Config struct {
 	WinRM `mapstructure:",squash"`
 }
 
+// The SSH config defines configuration for the SSH communicator.
 type SSH struct {
 	// The address to SSH to. This usually is automatically configured by the
 	// builder.
@@ -189,7 +191,7 @@ type SSH struct {
 }
 
 // When no ssh credentials are specified, Packer will generate a temporary SSH
-// keypair for the instance, you can change the algorithm type and bits
+// keypair for the instance. You can change the algorithm type and bits
 // settings.
 type SSHTemporaryKeyPair struct {
 	// `dsa` | `ecdsa` | `ed25519` | `rsa` ( the default )
@@ -208,6 +210,7 @@ type SSHTemporaryKeyPair struct {
 	SSHTemporaryKeyPairBits int `mapstructure:"temporary_key_pair_bits"`
 }
 
+// The WinRM config defines configuration for the WinRM communicator.
 type WinRM struct {
 	// The username to use to connect to WinRM.
 	WinRMUser string `mapstructure:"winrm_username"`
@@ -244,14 +247,19 @@ type WinRM struct {
 	WinRMTransportDecorator func() winrm.Transporter
 }
 
-func (c *SSH) ConfigSpec() hcldec.ObjectSpec   { return c.FlatMapstructure().HCL2Spec() }
+// The ConfigSpec funcs are used by the Packer core to parse HCL2 templates.
+func (c *SSH) ConfigSpec() hcldec.ObjectSpec { return c.FlatMapstructure().HCL2Spec() }
+
+// The ConfigSpec funcs are used by the Packer core to parse HCL2 templates.
 func (c *WinRM) ConfigSpec() hcldec.ObjectSpec { return c.FlatMapstructure().HCL2Spec() }
 
+// Configure parses the json template into the Config structs
 func (c *SSH) Configure(raws ...interface{}) ([]string, error) {
 	err := config.Decode(c, nil, raws...)
 	return nil, err
 }
 
+// Configure parses the json template into the Config structs
 func (c *WinRM) Configure(raws ...interface{}) ([]string, error) {
 	err := config.Decode(c, nil, raws...)
 	return nil, err
@@ -262,6 +270,8 @@ var (
 	_ packersdk.ConfigurableCommunicator = new(WinRM)
 )
 
+// SSHInterface defines whether to use public or private, addresses, and whether
+// to use IPv4 or IPv6.
 type SSHInterface struct {
 	// One of `public_ip`, `private_ip`, `public_dns`, or `private_dns`. If
 	// set, either the public IP address, private IP address, public DNS name
@@ -282,7 +292,7 @@ type SSHInterface struct {
 	SSHIPVersion string `mapstructure:"ssh_ip_version"`
 }
 
-// ReadSSHPrivateKeyFile returns the SSH private key bytes
+// ReadSSHPrivateKeyFile returns the SSH private key bytes.
 func (c *Config) ReadSSHPrivateKeyFile() ([]byte, error) {
 	var privateKey []byte
 

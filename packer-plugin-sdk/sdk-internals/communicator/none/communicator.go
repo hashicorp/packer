@@ -1,3 +1,6 @@
+// Package none implements the 'none' communicator. Plugin maintainers should not
+// import this package directly, instead using the tooling in the
+// "packer-plugin-sdk/communicator" module.
 package none
 
 import (

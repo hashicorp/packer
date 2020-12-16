@@ -1,3 +1,5 @@
+// Package pathing determines where to put the Packer config directory based on
+// host OS architecture and user environment variables.
 package pathing
 
 import (

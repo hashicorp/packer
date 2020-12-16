@@ -1,3 +1,5 @@
+// Package testutils provides some simple ease-of-use tools for implementing
+// acceptance testing.
 package testutils
 
 import "os"

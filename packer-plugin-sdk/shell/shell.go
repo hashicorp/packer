@@ -1,4 +1,8 @@
-// Package shell defines code that is common in shells
+// Package shell defines configuration fields that are common to many different
+// kinds of shell. For example, this common configuration is imported by the
+// "shell", "shell-local", and "powershell" provisioners. This provides
+// consistency in the user experience and prevents provisioner maintainers from
+// having to reimplement common useful functions across various environments.
 package shell
 
 import "github.com/hashicorp/packer/packer-plugin-sdk/common"

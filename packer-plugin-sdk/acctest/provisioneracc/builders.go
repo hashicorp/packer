@@ -1,9 +1,8 @@
 /*
-The provisioneracc package creates a framework for provisioner acceptance
+Package provisioneracc creates a framework for provisioner acceptance
 testing. For builder acceptance testing, use the top level tooling in the
 acctest package.
 */
-
 package provisioneracc
 
 import (

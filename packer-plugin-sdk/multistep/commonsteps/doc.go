@@ -12,5 +12,4 @@ provisioners to run inside your builder.
 While it is possible to create a simple builder without using the multistep
 runner or step_provision, your builder will lack core Packer functionality.
 */
-
 package commonsteps

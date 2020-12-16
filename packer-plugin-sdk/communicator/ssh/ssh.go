@@ -1,3 +1,5 @@
+// Package SSH provides tooling for generating a temporary SSH keypair, and
+// provides tooling for connecting to an instance via a tunnel.
 package ssh
 
 import (

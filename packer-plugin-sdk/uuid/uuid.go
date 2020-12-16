@@ -1,3 +1,4 @@
+// Package uuid provides helper functions for creating time-ordered UUIDs.
 package uuid
 
 import (

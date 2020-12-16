@@ -7,7 +7,10 @@ import (
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
-// Generic commHost function that should work for most cloud builders.
+// CommHost determines the IP address of the cloud instance that Packer
+// should connect to. A custom CommHost function can be implemented in each
+// builder if need be; this is a generic function that should work for most
+// cloud builders.
 func CommHost(host string, statebagKey string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 		if host != "" {

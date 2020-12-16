@@ -21,5 +21,4 @@ The HashiCorp-maintained Amazon and Azure builder plugins have chroot builders
 which use this option and can serve as an example for how the chroot steps and
 communicator are used.
 */
-
 package chroot
