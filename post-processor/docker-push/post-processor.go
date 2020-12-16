@@ -120,9 +120,9 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	names = append(names, tags...)
 
 	// Get the name.
-	for _, name := range names {
-		ui.Message("Pushing: " + name)
-		if err := driver.Push(name); err != nil {
+	for _, tag := range tags {
+		ui.Message("Pushing: " + tag)
+		if err := driver.Push(tag); err != nil {
 			return nil, false, false, err
 		}
 	}
