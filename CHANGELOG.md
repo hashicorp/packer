@@ -16,7 +16,8 @@
     with the Terraform Core-Provider split. The Packer team is committed to
     making sure that this split is seamless for our users and for our community
     maintainers -- if you are a community maintainer, you may want to follow
-    along with some of the work by looking at the core-plugin-split github tag.
+    along with some of the work by looking at the
+    [core-plugin-split github tag.](https://github.com/hashicorp/packer/pulls?q=is%3Apr+label%3Acore-plugin-split)
     No one needs to do anything, yet, but we felt it was worth calling out all
     the work that isn't making it into the changelog. We will be following up
     with lots of documentation and communication in early 2021 with more
