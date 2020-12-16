@@ -8,17 +8,17 @@
   software must have already been installed on your build machine to use the
   accelerator you specified. When no accelerator is specified, Packer will try
   to use `kvm` if it is available but will default to `tcg` otherwise.
-
+  
   ~> The `hax` accelerator has issues attaching CDROM ISOs. This is an
   upstream issue which can be tracked
   [here](https://github.com/intel/haxm/issues/20).
-
+  
   ~> The `hvf` and `whpx` accelerator are new and experimental as of
   [QEMU 2.12.0](https://wiki.qemu.org/ChangeLog/2.12#Host_support).
-  You may encounter issues unrelated to Packer when using these. You may need to
+  You may encounter issues unrelated to Packer when using these.  You may need to
   add [ "-global", "virtio-pci.disable-modern=on" ] to `qemuargs` depending on the
   guest operating system.
-
+  
   ~> For `whpx`, note that [Stefan Weil's QEMU for Windows distribution](https://qemu.weilnetz.de/w64/)
   does not include WHPX support and users may need to compile or source a
   build of QEMU for Windows themselves with WHPX support.
@@ -28,22 +28,22 @@
   is the default disk. Each string represents the disk image size in bytes.
   Optional suffixes 'k' or 'K' (kilobyte, 1024), 'M' (megabyte, 1024k), 'G'
   (gigabyte, 1024M), 'T' (terabyte, 1024G), 'P' (petabyte, 1024T) and 'E'
-  (exabyte, 1024P) are supported. 'b' is ignored. Per qemu-img documentation.
+  (exabyte, 1024P)  are supported. 'b' is ignored. Per qemu-img documentation.
   Each additional disk uses the same disk parameters as the default disk.
   Unset by default.
 
 - `cpus` (int) - The number of cpus to use when building the VM.
-  The default is `1` CPU.
+   The default is `1` CPU.
 
 - `disk_interface` (string) - The interface to use for the disk. Allowed values include any of `ide`,
   `scsi`, `virtio` or `virtio-scsi`^\*. Note also that any boot commands
   or kickstart type scripts must have proper adjustments for resulting
   device names. The Qemu builder uses `virtio` by default.
-
+  
   ^\* Please be aware that use of the `scsi` disk interface has been
   disabled by Red Hat due to a bug described
   [here](https://bugzilla.redhat.com/show_bug.cgi?id=1019220). If you are
-  running Qemu on RHEL or a RHEL variant such as CentOS, you _must_ choose
+  running Qemu on RHEL or a RHEL variant such as CentOS, you *must* choose
   one of the other listed interfaces. Using the `scsi` interface under
   these circumstances will cause the build to fail.
 
@@ -54,7 +54,7 @@
   number is provided with no units, Packer will default to Megabytes.
 
 - `skip_resize_disk` (bool) - Packer resizes the QCOW2 image using
-  qemu-img resize. Set this option to true to disable resizing.
+  qemu-img resize.  Set this option to true to disable resizing.
   Defaults to false.
 
 - `disk_cache` (string) - The cache mode to use for disk. Allowed values include any of
@@ -70,7 +70,7 @@
   Packer still works with old versions of QEMU that don't have this option.
 
 - `skip_compaction` (bool) - Packer compacts the QCOW2 image using
-  qemu-img convert. Set this option to true to disable compacting.
+  qemu-img convert.  Set this option to true to disable compacting.
   Defaults to false.
 
 - `disk_compression` (bool) - Apply compression to the QCOW2 disk file
@@ -87,7 +87,7 @@
 - `headless` (bool) - Packer defaults to building QEMU virtual machines by
   launching a GUI that shows the console of the machine being built. When this
   value is set to `true`, the machine will start without a console.
-
+  
   You can still see the console if you make a note of the VNC display
   number chosen, and then connect using `vncviewer -Shared <host>:<display>`
 
@@ -121,12 +121,12 @@
 
 - `net_bridge` (string) - Connects the network to this bridge instead of using the user mode
   networking.
-
+  
   **NB** This bridge must already exist. You can use the `virbr0` bridge
   as created by vagrant-libvirt.
-
+  
   **NB** This will automatically enable the QMP socket (see QMPEnable).
-
+  
   **NB** This only works in Linux based OSes.
 
 - `output_directory` (string) - This is the path to the directory where the
@@ -141,7 +141,7 @@
   that overrides matching default switch/value pairs. Any value specified
   as an empty string is ignored. All values after the switch are
   concatenated with no separator.
-
+  
   ~> **Warning:** The qemu command line allows extreme flexibility, so
   beware of conflicting arguments causing failures of your run.
   For instance adding a "--drive" or "--device" override will mean that
@@ -152,16 +152,15 @@
   you can use those arguments along with the template engines allowed
   by qemu-args to set up a working configuration that includes both the
   Packer defaults and your extra arguments.
-
+  
   Another pitfall could be setting arguments like --no-acpi, which could
   break the ability to send power signal type commands
   (e.g., shutdown -P now) to the virtual machine, thus preventing proper
   shutdown.
-
+  
   The following shows a sample usage:
-
+  
   In JSON:
-
   ```json
     "qemuargs": [
       [ "-m", "1024M" ],
@@ -175,9 +174,8 @@
       [ "-device", "virtio-net,netdev=mynet0" ]
     ]
   ```
-
+  
   In HCL2:
-
   ```hcl
     qemuargs = [
       [ "-m", "1024M" ],
@@ -191,66 +189,61 @@
       [ "-device", "virtio-net,netdev=mynet0" ]
     ]
   ```
-
+  
   would produce the following (not including other defaults supplied by
   the builder and not otherwise conflicting with the qemuargs):
-
+  
   ```text
   qemu-system-x86 -m 1024m --no-acpi -netdev
   user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device
   virtio-net,netdev=mynet0"
   ```
-
+  
   ~> **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/)
   builds are available though an environmental variable does need to be
   set for QEMU for Windows to redirect stdout to the console instead of
   stdout.txt.
-
+  
   The following shows the environment variable that needs to be set for
   Windows QEMU support:
-
+  
   ```text
   setx SDL_STDIO_REDIRECT=0
   ```
-
+  
   You can also use the `SSHHostPort` template variable to produce a packer
   template that can be invoked by `make` in parallel:
-
+  
   In JSON:
-
   ```json
     "qemuargs": [
       [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
       [ "-device", "virtio-net,netdev=forward,id=net0"]
     ]
   ```
-
+  
   In HCL2:
-
   ```hcl
     qemuargs = [
       [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
       [ "-device", "virtio-net,netdev=forward,id=net0"]
     ]
-
+  
   `make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each
   of which will bind to their own SSH port as determined by each process.
   This will also work with WinRM, just change the port forward in
   `qemuargs` to map to WinRM's default port of `5985` or whatever value
   you have the service set to listen on.
-
+  
   This is a template engine and allows access to the following variables:
   `{{ .HTTPIP }}`, `{{ .HTTPPort }}`, `{{ .HTTPDir }}`,
   `{{ .OutputDir }}`, `{{ .Name }}`, and `{{ .SSHHostPort }}`
 
-  ```
-
 - `qemu_img_args` (QemuImgArgs) - A map of custom arguments to pass to qemu-img commands, where the key
   is the subcommand, and the values are lists of strings for each flag.
   Example:
-
+  
   In JSON:
-
   ```json
   {
    "qemu_img_args": {
@@ -258,25 +251,23 @@
   	  "resize": ["-foo", "bar"]
    }
   ```
-
   Please note
   that unlike qemuargs, these commands are not split into switch-value
-  sub-arrays, because the basic elements in qemu-img calls are unlikely
+  sub-arrays, because the basic elements in qemu-img calls are  unlikely
   to need an actual override.
   The arguments will be constructed as follows:
-
   - Convert:
-    Default is `qemu-img convert -O $format $sourcepath $targetpath`. Adding
-    arguments ["-foo", "bar"] to qemu_img_args.convert will change this to
-    `qemu-img convert -foo bar -O $format $sourcepath $targetpath`
+  	Default is `qemu-img convert -O $format $sourcepath $targetpath`. Adding
+  	arguments ["-foo", "bar"] to qemu_img_args.convert will change this to
+  	`qemu-img convert -foo bar -O $format $sourcepath $targetpath`
   - Create:
-    Default is `create -f $format $targetpath $size`. Adding arguments
-    ["-foo", "bar"] to qemu_img_args.create will change this to
-    "create -f qcow2 -foo bar target.qcow2 1234M"
+  	Default is `create -f $format $targetpath $size`. Adding arguments
+  	["-foo", "bar"] to qemu_img_args.create will change this to
+  	"create -f qcow2 -foo bar target.qcow2 1234M"
   - Resize:
-    Default is `qemu-img resize -f $format $sourcepath $size`. Adding
-    arguments ["-foo", "bar"] to qemu_img_args.resize will change this to
-    `qemu-img resize -f $format -foo bar $sourcepath $size`
+  	Default is `qemu-img resize -f $format $sourcepath $size`. Adding
+  	arguments ["-foo", "bar"] to qemu_img_args.resize will change this to
+  	`qemu-img resize -f $format -foo bar $sourcepath $size`
 
 - `qemu_binary` (string) - The name of the Qemu binary to look for. This
   defaults to qemu-system-x86_64, but may need to be changed for

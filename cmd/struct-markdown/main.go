@@ -152,7 +152,7 @@ func main() {
 			}
 		}
 
-		dir := filepath.Join(projectRoot, "website", "pages", "partials", builderName)
+		dir := filepath.Join(projectRoot, "website", "content", "partials", builderName)
 		os.MkdirAll(dir, 0755)
 
 		for _, str := range []Struct{header, required, notRequired} {

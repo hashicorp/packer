@@ -87,6 +87,11 @@ type AMIConfig struct {
 	// key and that key is the same as the one you want the image encrypted with
 	// at the end, then you don't need to set this field; leaving it empty will
 	// prevent an unnecessary extra copy step and save you some time.
+	//
+	// Please note that if you are using an account with the global "Always
+	// encrypt new EBS volumes" option set to `true`, Packer will be unable to
+	// override this setting, and the final image will be encryoted whether
+	// you set this value or not.
 	AMIEncryptBootVolume config.Trilean `mapstructure:"encrypt_boot" required:"false"`
 	// ID, alias or ARN of the KMS key to use for AMI encryption. This
 	// only applies to the main `region` -- any regions the AMI gets copied to
@@ -215,7 +220,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 
 	}
 	for _, kmsKey := range kmsKeys {
-		if !validateKmsKey(kmsKey) {
+		if !ValidateKmsKey(kmsKey) {
 			errs = append(errs, fmt.Errorf("%q is not a valid KMS Key Id.", kmsKey))
 		}
 	}
@@ -289,7 +294,7 @@ func (c *AMIConfig) prepareRegions(accessConfig *AccessConfig) (errs []error) {
 }
 
 // See https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html
-func validateKmsKey(kmsKey string) (valid bool) {
+func ValidateKmsKey(kmsKey string) (valid bool) {
 	kmsKeyIdPattern := `[a-f0-9-]+$`
 	aliasPattern := `alias/[a-zA-Z0-9:/_-]+$`
 	kmsArnStartPattern := `^arn:aws(-us-gov)?:kms:([a-z]{2}-(gov-)?[a-z]+-\d{1})?:(\d{12}):`

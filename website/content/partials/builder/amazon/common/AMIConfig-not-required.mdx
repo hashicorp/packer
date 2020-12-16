@@ -1,7 +1,7 @@
 <!-- Code generated from the comments of the AMIConfig struct in builder/amazon/common/ami_config.go; DO NOT EDIT MANUALLY -->
 
 - `ami_description` (string) - The description to set for the resulting
-  AMI(s). By default this description is empty. This is a
+  AMI(s). By default this description is empty.  This is a
   [template engine](/docs/templates/engine), see [Build template
   data](#build-template-data) for more information.
 
@@ -40,7 +40,7 @@
 - `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport) on
   HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your
   AWS IAM policy.
-
+  
   Note: you must make sure enhanced networking is enabled on your
   instance. See [Amazon's documentation on enabling enhanced
   networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
@@ -64,28 +64,33 @@
   the encryption setting to what it was in the source image. Setting false
   will result in an unencrypted image, and true will result in an encrypted
   one.
-
+  
   If you have used the `launch_block_device_mappings` to set an encryption
   key and that key is the same as the one you want the image encrypted with
   at the end, then you don't need to set this field; leaving it empty will
   prevent an unnecessary extra copy step and save you some time.
+  
+  Please note that if you are using an account with the global "Always
+  encrypt new EBS volumes" option set to `true`, Packer will be unable to
+  override this setting, and the final image will be encryoted whether
+  you set this value or not.
 
 - `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for AMI encryption. This
   only applies to the main `region` -- any regions the AMI gets copied to
   copied will be encrypted by the default EBS KMS key for that region,
   unless you set region-specific keys in AMIRegionKMSKeyIDs.
-
+  
   Set this value if you select `encrypt_boot`, but don't want to use the
   region's default KMS key.
-
+  
   If you have a custom kms key you'd like to apply to the launch volume,
   and are only building in one region, it is more efficient to leave this
   and `encrypt_boot` empty and to instead set the key id in the
   launch_block_device_mappings (you can find an example below). This saves
   potentially many minutes at the end of the build by preventing Packer
   from having to copy and re-encrypt the image at the end of the build.
-
-  For valid formats see _KmsKeyId_ in the [AWS API docs -
+  
+  For valid formats see *KmsKeyId* in the [AWS API docs -
   CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
   This field is validated by Packer, when using an alias, you will have to
   prefix `kms_key_id` with `alias/`.
@@ -95,11 +100,12 @@
   provided in `ami_regions`. If you just want to encrypt using a default
   ID, you can stick with `kms_key_id` and `ami_regions`. If you want a
   region to be encrypted with that region's default key ID, you can use an
-  empty string `""` instead of a key id in this map. (e.g. `"us-east-1": ""`) However, you cannot use default key IDs if you are using this in
+  empty string `""` instead of a key id in this map. (e.g. `"us-east-1":
+  ""`) However, you cannot use default key IDs if you are using this in
   conjunction with `snapshot_users` -- in that situation you must use
-  custom keys. For valid formats see _KmsKeyId_ in the [AWS API docs -
+  custom keys. For valid formats see *KmsKeyId* in the [AWS API docs -
   CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
-
+  
   This option supercedes the `kms_key_id` option -- if you set both, and
   they are different, Packer will respect the value in
   `region_kms_key_ids` for your build region and silently disregard the
