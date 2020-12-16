@@ -9,10 +9,18 @@
     the value of an environment variable. Please see [env function
     docs](https://www.packer.io/docs/from-1.5/functions/contextual/env") for
     more details. [GH-10240]
-* builder/azure-arm: Create keyvaults with SoftDelete enabled. [GH-10210]
-* builder/outscale: Add x509 certificate support. [GH-10161]
-* post-processor/yandex-export: Verify the access to a specific bucket.
-    [GH-10188]
+* **Future Scaffolding** This release contains a large number of no-op
+    refactoring changes. The Packer team at HashiCorp is preparing to split the
+    plugins and core to make it easier for our third party maintainers and
+    community members to release and maintain plugins, just like HashiCorp did
+    with the Terraform Core-Provider split. The Packer team is committed to
+    making sure that this split is seamless for our users and for our community
+    maintainers -- if you are a community maintainer, you may want to follow
+    along with some of the work by looking at the core-plugin-split github tag.
+    No one needs to do anything, yet, but we felt it was worth calling out all
+    the work that isn't making it into the changelog. We will be following up
+    with lots of documentation and communication in early 2021 with more
+    information.
 
 ### IMPROVEMENTS
 * builder/amazon-ebs: Add tags to launch templates. [GH-10203]
@@ -24,6 +32,7 @@
 * builder/amazon: Validate IOPS ratio. [GH-10199]
 * builder/azure-arm: Add Azure CLI authentication support to builder.
     [GH-10157]
+* builder/azure-arm: Create keyvaults with SoftDelete enabled. [GH-10210]
 * builder/digitalocean: New option to provision with private ip. [GH-10093]
 * builder/google: Add `wait_to_add_ssh_keys` option to delay the addition of
     SSH configuration that may be disrupted during an instance boot sequence.
@@ -33,6 +42,7 @@
     [GH-10316]
 * builder/oracle-oci: Support image launch mode. [GH-10212]
 * builder/outscale: Add outscale.hk endpoint support [GH-10207]
+* builder/outscale: Add x509 certificate support. [GH-10161]
 * builder/proxmox: New config option for boot-order. [GH-10260]
 * builder/scaleway: Use the SDK functions to load profile from file and env.
     [GH-10181]
@@ -54,6 +64,8 @@
     operation. [GH-10303]
 * post-processor/yandex-export: Show progress on export. [GH-10368]
 * post-processor/yandex-export: Use ssh communicator in export. [GH-10352]
+* post-processor/yandex-export: Verify the access to a specific bucket.
+    [GH-10188]
 * provisioner/salt-masterless: Call winrepo.update_git_repos and
     pkg.refresh_db. [GH-10201]
 
