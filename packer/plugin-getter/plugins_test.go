@@ -32,32 +32,34 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				Identifier: "amazon",
 			},
 			ListInstallationsOptions{
-				FromFolders: []string{
+				[]string{
 					pluginFolderOne,
 				},
-				Extension: ".0_x4",
-				OS:        "darwin",
-				ARCH:      "amd64",
-				Checksummers: []Checksummer{
-					{
-						Type: "sha256",
-						Hash: sha256.New(),
+				BinaryInstallationOptions{
+					Extension: ".0_x4",
+					OS:        "darwin",
+					ARCH:      "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
 					},
 				},
 			},
 			false,
-			[]*Install{
+			[]*Installation{
 				{
-					Version: "v1.2.3",
-					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_darwin_amd64.0_x4"),
+					Version:    "v1.2.3",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_darwin_amd64.0_x4"),
 				},
 				{
-					Version: "v1.2.4",
-					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.4_darwin_amd64.0_x4"),
+					Version:    "v1.2.4",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.4_darwin_amd64.0_x4"),
 				},
 				{
-					Version: "v1.2.5",
-					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_darwin_amd64.0_x4"),
+					Version:    "v1.2.5",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_darwin_amd64.0_x4"),
 				},
 			},
 		},
@@ -67,32 +69,34 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				Identifier: "amazon",
 			},
 			ListInstallationsOptions{
-				FromFolders: []string{
+				[]string{
 					pluginFolderOne,
 				},
-				Extension: ".0_x4.exe",
-				OS:        "windows",
-				ARCH:      "amd64",
-				Checksummers: []Checksummer{
-					{
-						Type: "sha256",
-						Hash: sha256.New(),
+				BinaryInstallationOptions{
+					Extension: ".0_x4.exe",
+					OS:        "windows",
+					ARCH:      "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
 					},
 				},
 			},
 			false,
-			[]*Install{
+			[]*Installation{
 				{
-					Version: "v1.2.3",
-					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_windows_amd64.0_x4.exe"),
+					Version:    "v1.2.3",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_windows_amd64.0_x4.exe"),
 				},
 				{
-					Version: "v1.2.4",
-					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.4_windows_amd64.0_x4.exe"),
+					Version:    "v1.2.4",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.4_windows_amd64.0_x4.exe"),
 				},
 				{
-					Version: "v1.2.5",
-					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_windows_amd64.0_x4.exe"),
+					Version:    "v1.2.5",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_windows_amd64.0_x4.exe"),
 				},
 			},
 		},
@@ -102,37 +106,39 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				Identifier: "hashicorp/google",
 			},
 			ListInstallationsOptions{
-				FromFolders: []string{
+				[]string{
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
-				Extension: ".0_x4.exe",
-				OS:        "windows",
-				ARCH:      "amd64",
-				Checksummers: []Checksummer{
-					{
-						Type: "sha256",
-						Hash: sha256.New(),
+				BinaryInstallationOptions{
+					Extension: ".0_x4.exe",
+					OS:        "windows",
+					ARCH:      "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
 					},
 				},
 			},
 			false,
-			[]*Install{
+			[]*Installation{
 				{
-					Version: "v4.5.6",
-					Path:    filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.6_windows_amd64.0_x4.exe"),
+					Version:    "v4.5.6",
+					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.6_windows_amd64.0_x4.exe"),
 				},
 				{
-					Version: "v4.5.7",
-					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.7_windows_amd64.0_x4.exe"),
+					Version:    "v4.5.7",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.7_windows_amd64.0_x4.exe"),
 				},
 				{
-					Version: "v4.5.8",
-					Path:    filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.8_windows_amd64.0_x4.exe"),
+					Version:    "v4.5.8",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.8_windows_amd64.0_x4.exe"),
 				},
 				{
-					Version: "v4.5.9",
-					Path:    filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.9_windows_amd64.0_x4.exe"),
+					Version:    "v4.5.9",
+					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.9_windows_amd64.0_x4.exe"),
 				},
 			},
 		},

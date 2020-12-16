@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"hash"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -32,6 +31,11 @@ func (cerr *ChecksumError) Error() string {
 	)
 }
 
+type Checksum struct {
+	Expected []byte
+	Checksummer
+}
+
 type Checksummer struct {
 	// Something like md5 or sha256
 	Type string
@@ -43,19 +47,30 @@ func (c *Checksummer) FileExt() string {
 	return "_" + strings.ToUpper(c.Type) + "SUM"
 }
 
-// Checksum first reads the checksum in file `filePath + c.FileExt()`, then
-// compares it to the checksum of the file in filePath.
-func (c *Checksummer) Checksum(filePath string) error {
+// GetChecksumOfFile will extract the checksum from file `filePath + c.FileExt()`.
+// It expects the checksum file to only contains the checksum and nothing else.
+func (c *Checksummer) GetChecksumOfFile(filePath string) ([]byte, error) {
 	checksumFile := filePath + c.FileExt()
-	expected, err := ioutil.ReadFile(checksumFile)
-	if err != nil {
-		return fmt.Errorf("Checksum: failed to read checksum file: %s", err)
-	}
-	expected, err = hex.DecodeString(string(expected))
-	if err != nil {
-		return fmt.Errorf("Checksum(%q): invalid checksum: %s", checksumFile, err)
-	}
 
+	f, err := os.Open(checksumFile)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return c.ParseChecksum(f)
+}
+
+// ParseChecksum expects the checksum reader to only contains the checksum and
+// nothing else.
+func (c *Checksummer) ParseChecksum(f io.Reader) ([]byte, error) {
+	res := make([]byte, c.Hash.Size())
+	_, err := hex.NewDecoder(f).Read(res)
+	return res, err
+}
+
+// ChecksumFile compares the expected checksum to the checksum of the file in
+// filePath using the hash function.
+func (c *Checksummer) ChecksumFile(expected []byte, filePath string) error {
 	f, err := os.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("Checksum: failed to open file for checksum: %s", err)

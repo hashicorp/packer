@@ -61,11 +61,13 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 
 	opts := plugingetter.ListInstallationsOptions{
 		FromFolders: c.Meta.CoreConfig.Components.KnownPluginFolders,
-		OS:          runtime.GOOS,
-		ARCH:        runtime.GOARCH,
-		Extension:   plugin.FileExtension,
-		Checksummers: []plugingetter.Checksummer{
-			{Type: "sha256", Hash: sha256.New()},
+		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
+			OS:        runtime.GOOS,
+			ARCH:      runtime.GOARCH,
+			Extension: plugin.FileExtension,
+			Checksummers: []plugingetter.Checksummer{
+				{Type: "sha256", Hash: sha256.New()},
+			},
 		},
 	}
 
@@ -86,7 +88,11 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 			continue
 		}
 
-		newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallLatestOptions{})
+		newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallOptions{
+			InFolders:                 c.Meta.CoreConfig.Components.KnownPluginFolders,
+			BinaryInstallationOptions: opts.BinaryInstallationOptions,
+			Version:                   "v1.2.3",
+		})
 		if err != nil {
 			c.Ui.Error(err.Error())
 		}

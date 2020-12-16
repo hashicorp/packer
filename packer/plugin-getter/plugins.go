@@ -1,7 +1,10 @@
 package plugingetter
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"path/filepath"
 	"sort"
@@ -25,10 +28,7 @@ type Requirement struct {
 	VersionConstraints version.Constraints
 }
 
-type ListInstallationsOptions struct {
-	// Put the folders where plugins could be installed in this list. Paths
-	// should be absolute for safety but can also be relative.
-	FromFolders []string
+type BinaryInstallationOptions struct {
 	// Usually ".0_x4" for the 4th API version protocol
 	// Should be ".0_x4.exe" on windows.
 	Extension string
@@ -37,6 +37,22 @@ type ListInstallationsOptions struct {
 	OS, ARCH string
 
 	Checksummers []Checksummer
+}
+
+type ListInstallationsOptions struct {
+	// FromFolders where plugins could be installed. Paths should be absolute for
+	// safety but can also be relative.
+	FromFolders []string
+
+	BinaryInstallationOptions
+}
+
+func (pr Requirement) filenamePrefix() string {
+	return "packer-plugin-" + pr.Identifier.Type + "_"
+}
+
+func (opts BinaryInstallationOptions) filenameSuffix() string {
+	return "_" + opts.OS + "_" + opts.ARCH + opts.Extension
 }
 
 // ListInstallations lists unique installed versions of plugin Requirement pr
@@ -49,8 +65,8 @@ type ListInstallationsOptions struct {
 // consider.
 func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallList, error) {
 	res := InstallList{}
-	filenamePrefix := "packer-plugin-" + pr.Identifier.Type + "_"
-	filenameSuffix := "_" + opts.OS + "_" + opts.ARCH + opts.Extension
+	filenamePrefix := pr.filenamePrefix()
+	filenameSuffix := opts.filenameSuffix()
 	for _, knownFolder := range opts.FromFolders {
 		glob := filepath.Join(knownFolder, pr.Identifier.Hostname, pr.Identifier.Namespace, pr.Identifier.Type, filenamePrefix+"*"+filenameSuffix)
 
@@ -82,8 +98,15 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 
 			checksumOk := false
 			for _, checksummer := range opts.Checksummers {
-				if err := checksummer.Checksum(path); err != nil {
-					log.Printf("[TRACE]: Checksum(%q) failed: %v", path, err)
+
+				cs, err := checksummer.GetChecksumOfFile(path)
+				if err != nil {
+					log.Printf("[TRACE]: GetChecksumOfFile(%q) failed: %v", path, err)
+					continue
+				}
+
+				if err := checksummer.ChecksumFile(cs, path); err != nil {
+					log.Printf("[TRACE]: ChecksumFile(%q) failed: %v", path, err)
 					continue
 				}
 				checksumOk = true
@@ -94,9 +117,9 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 				continue
 			}
 
-			res.InsertSortedUniq(&Install{
-				Path:    path,
-				Version: versionStr,
+			res.InsertSortedUniq(&Installation{
+				BinaryPath: path,
+				Version:    versionStr,
 			})
 		}
 	}
@@ -104,12 +127,12 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 }
 
 // InstallList is a list of installs
-type InstallList []*Install
+type InstallList []*Installation
 
 // InsertSortedUniq inserts the installation in the right spot in the list by
 // comparing the version lexicographically.
 // A Duplicate version will replace any already present version.
-func (l *InstallList) InsertSortedUniq(install *Install) {
+func (l *InstallList) InsertSortedUniq(install *Installation) {
 	pos := sort.Search(len(*l), func(i int) bool { return (*l)[i].Version >= install.Version })
 	if len(*l) > pos && (*l)[pos].Version == install.Version {
 		(*l)[pos] = install
@@ -120,11 +143,11 @@ func (l *InstallList) InsertSortedUniq(install *Install) {
 	(*l)[pos] = install
 }
 
-// Install describes a plugin installation
-type Install struct {
-	// Path to where it is installed, if installed.
+// Installation describes a plugin installation
+type Installation struct {
+	// path to where binary is installed, if installed.
 	// Ex: /usr/azr/.packer.d/plugins/github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_v1.2.3_darwin_amd64
-	Path string
+	BinaryPath string
 
 	// Version of this plugin, if installed and versionned. Ex:
 	//  * v1.2.3 for packer-plugin-amazon_v1.2.3_darwin_.0_x5
@@ -132,12 +155,160 @@ type Install struct {
 	Version string
 }
 
-// InstallLatestOptions describes the possible option for installing the latest
-// possible plugin that fits the plugin Requirement.
-type InstallLatestOptions struct {
+// InstallOptions describes the possible options for installing the plugin that
+// fits the plugin Requirement.
+type InstallOptions struct {
+	// Any downloaded binary and checksum file will be put in this folder.
+	//
+	InFolders []string
+
+	// If empty then we will try to fetch it.
+	Version string
+
+	BinaryInstallationOptions
 }
 
-func (pr *Requirement) InstallLatest(opts InstallLatestOptions) (InstallList, error) {
-	log.Printf("TODO: this is when we fetch all possible versions, the checksum and then the binary for a the %q plugin.", pr.Identifier.ForDisplay())
+type GetOptions struct {
+	PluginRequirement *Requirement
+
+	// If empty then we will try to fetch it.
+	Version string
+
+	BinaryInstallationOptions
+}
+
+// A Getter helps get the appropriate files to download a binary.
+type Getter interface {
+	// Get:
+	//  * 'releases'
+	//  * 'sha256'
+	//  * 'binary'
+	Get(what string, opts GetOptions) (io.ReadCloser, error)
+}
+
+type Release struct {
+	Version string `json:"version"`
+}
+
+type Releases []Release
+
+func (r Releases) Len() int           { return len(r) }
+func (r Releases) Less(i, j int) bool { return r[i].Version < r[j].Version }
+func (r Releases) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
+
+var _ sort.Interface = Releases{}
+
+func ParseReleases(f io.ReadCloser) (Releases, error) {
+	var releases []Release
+	defer f.Close()
+	return releases, json.NewDecoder(f).Decode(&releases)
+}
+
+func (pr *Requirement) InstallLatest(opts InstallOptions) (InstallList, error) {
+	log.Printf("[TRACE] Installing the %s plugin ...", pr.Identifier.ForDisplay())
+
+	var getters []Getter
+
+	getOpts := GetOptions{
+		pr,
+		opts.Version,
+		opts.BinaryInstallationOptions,
+	}
+
+	if getOpts.Version == "" {
+		for _, getter := range getters {
+			releasesFile, err := getter.Get("releases", getOpts)
+			if err != nil {
+				err := fmt.Errorf("%q getter could not get release: %w", getter, err)
+				log.Printf("[TRACE] %s", err.Error())
+				continue
+			}
+
+			releases, err := ParseReleases(releasesFile)
+			if err != nil {
+				err := fmt.Errorf("could not parse release: %w", err)
+				log.Printf("[TRACE] %s", err.Error())
+				continue
+			}
+			if len(releases) == 0 {
+				err := fmt.Errorf("no release found")
+				log.Printf("[TRACE] %s", err.Error())
+				continue
+			}
+			sort.Sort(releases)
+			getOpts.Version = releases[0].Version
+			break
+		}
+	}
+
+	if getOpts.Version == "" {
+		err := fmt.Errorf("no release version found")
+		return nil, err
+	}
+
+	folder := opts.InFolders[len(opts.InFolders)-1]
+	expectedFilename := filepath.Join(folder, pr.filenamePrefix()+getOpts.Version+getOpts.filenameSuffix())
+
+	log.Printf("[TRACE] Installing the %q version for the %s plugin in %q...", getOpts.Version, pr.Identifier.ForDisplay(), folder)
+
+	var checksum *Checksum
+	for _, checksummer := range opts.Checksummers {
+		// First check if checksum file is already here in the expected
+		// download folder. Here we want to download a binary so we only check
+		// for an existing checksum file from the folder we want to download
+		// into.
+		cs, err := checksummer.GetChecksumOfFile(expectedFilename)
+		if err == nil && len(cs) > 0 {
+			checksum = &Checksum{
+				Expected:    cs,
+				Checksummer: checksummer,
+			}
+			log.Printf("[TRACE] found a pre-exising %q checksum file", checksummer.Type)
+			break
+		}
+	}
+
+	for _, getter := range getters {
+		for _, checksummer := range opts.Checksummers {
+
+			// First check if checksum file is already here in the expected
+			// download folder. Here we want to download a binary so we only check
+			// for an existing checksum file from the folder we want to download
+			// into.
+			cs, err := checksummer.GetChecksumOfFile(expectedFilename)
+			if err == nil && len(cs) > 0 {
+				checksum = &Checksum{
+					Expected:    cs,
+					Checksummer: checksummer,
+				}
+				log.Printf("[TRACE] found a pre-exising %q checksum file", checksummer.Type)
+				break
+			}
+			log.Printf("[TRACE] no %q file found, downloading", expectedFilename+checksum.FileExt())
+
+			checksumFile, err := getter.Get(checksummer.Type, getOpts)
+			if err != nil {
+				return nil, err
+			}
+			cs, err = checksummer.ParseChecksum(checksumFile)
+			checksumFile.Close()
+			if err != nil {
+				log.Printf("[TRACE] could not parse %s checksum: %v", checksummer.Type, err)
+				continue
+			}
+			if err := ioutil.WriteFile(expectedFilename+checksum.FileExt(), cs, 0666); err != nil {
+				return nil, fmt.Errorf("Could write checksum file %w", err)
+			}
+			checksum = &Checksum{
+				Expected:    cs,
+				Checksummer: checksummer,
+			}
+		}
+	}
+
+	// binary, err := getter.Get("binary", getOpts)
+
+	// os.Open(name string)
+
 	return nil, fmt.Errorf("not implemented")
 }
