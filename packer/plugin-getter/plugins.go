@@ -212,10 +212,7 @@ func ParseReleases(f io.ReadCloser) (Releases, error) {
 
 func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error) {
 
-	getters := []Getter{
-		nil,
-	}
-	var err error
+	getters := opts.Getters
 
 	getOpts := GetOptions{
 		pr,
@@ -227,9 +224,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		log.Printf("[TRACE] getting available versions for the the %s plugin", pr.Identifier.ForDisplay())
 		for _, getter := range getters {
 
-			_ = getter
-			// releasesFile, err := getter.Get("releases", getOpts)
-			releasesFile := ioutil.NopCloser(strings.NewReader(`[{"version": "v1.2.3"}]`))
+			releasesFile, err := getter.Get("releases", getOpts)
 			if err != nil {
 				err := fmt.Errorf("%q getter could not get release: %w", getter, err)
 				log.Printf("[TRACE] %s", err.Error())
@@ -254,7 +249,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 	}
 
 	if getOpts.Version == "" {
-		err := fmt.Errorf("no release version found")
+		err := fmt.Errorf("no release version found for the %s plugin", pr.Identifier.ForDisplay())
 		return nil, err
 	}
 
@@ -268,7 +263,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 	)
 
 	// create directories if need be
-	if err = os.MkdirAll(filepath.Dir(outputFile), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(outputFile), 0755); err != nil {
 		err := fmt.Errorf("could not create plugin folder %q: %w", filepath.Dir(outputFile), err)
 		log.Printf("[TRACE] %s", err.Error())
 		return nil, err
@@ -298,10 +293,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		for _, getter := range getters {
 			for _, checksummer := range opts.Checksummers {
 
-				_ = getter
-				err = nil
-				// checksumFile, err := getter.Get(checksummer.Type, getOpts)
-				checksumFile := ioutil.NopCloser(strings.NewReader(`6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b`))
+				checksumFile, err := getter.Get(checksummer.Type, getOpts)
 				if err != nil {
 					err := fmt.Errorf("%q getter could not get %s: %w", getter, checksum.Type, err)
 					log.Printf("[TRACE] %s", err.Error())
@@ -340,10 +332,9 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		if err != nil {
 			return nil, fmt.Errorf("could not create temporary file to dowload plugin: %w", err)
 		}
-		_ = getter
+
 		// start fetching binary
-		// binary, err := getter.Get("binary", getOpts)
-		binary := ioutil.NopCloser(strings.NewReader("1"))
+		binary, err := getter.Get("binary", getOpts)
 		if err != nil {
 			err := fmt.Errorf("Get binary failed %w", err)
 			log.Printf("[TRACE] %v", err)
@@ -391,5 +382,5 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		}, nil
 	}
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, nil
 }
