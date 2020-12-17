@@ -82,7 +82,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 			return 1
 		}
 
-		log.Printf("[TRACE] for plugin %s found %d matching installation(s)", pluginRequirement.Identifier.String(), len(installs))
+		log.Printf("[TRACE] for plugin %s found %d matching installation(s)", pluginRequirement.Identifier.ForDisplay(), len(installs))
 
 		if len(installs) > 0 && cla.Upgrade == false {
 			continue
