@@ -31,8 +31,12 @@ func (cerr *ChecksumError) Error() string {
 	)
 }
 
-type Checksum struct {
-	Expected []byte
+type Checksum []byte
+
+func (c Checksum) String() string { return hex.EncodeToString(c) }
+
+type FileChecksum struct {
+	Expected Checksum
 	Checksummer
 }
 
@@ -62,7 +66,7 @@ func (c *Checksummer) GetChecksumOfFile(filePath string) ([]byte, error) {
 
 // ParseChecksum expects the checksum reader to only contains the checksum and
 // nothing else.
-func (c *Checksummer) ParseChecksum(f io.Reader) ([]byte, error) {
+func (c *Checksummer) ParseChecksum(f io.Reader) (Checksum, error) {
 	res := make([]byte, c.Hash.Size())
 	_, err := hex.NewDecoder(f).Read(res)
 	return res, err

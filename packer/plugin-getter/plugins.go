@@ -162,8 +162,10 @@ type Installation struct {
 // InstallOptions describes the possible options for installing the plugin that
 // fits the plugin Requirement.
 type InstallOptions struct {
+	// Different means to get releases, sha256 and binary files.
+	Getters []Getter
+
 	// Any downloaded binary and checksum file will be put in this folder.
-	//
 	InFolders []string
 
 	// If empty then we will try to fetch it.
@@ -274,7 +276,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 
 	log.Printf("[TRACE] selecting the %q version to install the %s plugin in %q...", getOpts.Version, pr.Identifier.ForDisplay(), outputFile)
 
-	var checksum *Checksum
+	var checksum *FileChecksum
 	for _, checksummer := range opts.Checksummers {
 		// First check if checksum file is already here in the expected
 		// download folder. Here we want to download a binary so we only check
@@ -282,7 +284,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		// into.
 		cs, err := checksummer.GetChecksumOfFile(outputFile)
 		if err == nil && len(cs) > 0 {
-			checksum = &Checksum{
+			checksum = &FileChecksum{
 				Expected:    cs,
 				Checksummer: checksummer,
 			}
@@ -311,13 +313,14 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 					log.Printf("[TRACE] could not parse %s checksum: %v", checksummer.Type, err)
 					continue
 				}
-				if err := ioutil.WriteFile(outputFile+checksummer.FileExt(), cs, 0666); err != nil {
+
+				if err := ioutil.WriteFile(outputFile+checksummer.FileExt(), []byte(cs.String()), 0666); err != nil {
 					err := fmt.Errorf("Could not write checksum file %w", err)
 					log.Printf("[TRACE] %s", err.Error())
 					return nil, err
 				}
 				log.Printf("[TRACE] wrote %q file", outputFile+checksummer.FileExt())
-				checksum = &Checksum{
+				checksum = &FileChecksum{
 					Expected:    cs,
 					Checksummer: checksummer,
 				}
