@@ -76,18 +76,26 @@ func (c *Checksummer) ChecksumFile(expected []byte, filePath string) error {
 		return fmt.Errorf("Checksum: failed to open file for checksum: %s", err)
 	}
 	defer f.Close()
+	err = c.Checksum(expected, f)
+	if cerr, ok := err.(*ChecksumError); ok {
+		cerr.File = filePath
+	}
+	return err
+}
 
+func (c *Checksummer) Checksum(expected []byte, f io.Reader) error {
 	c.Hash.Reset()
 	if _, err := io.Copy(c.Hash, f); err != nil {
 		return fmt.Errorf("Failed to hash: %s", err)
 	}
 
-	if actual := c.Hash.Sum(nil); !bytes.Equal(actual, expected) {
+	actual := c.Hash.Sum(nil)
+
+	if !bytes.Equal(actual, expected) {
 		return &ChecksumError{
 			Hash:     c.Hash,
 			Actual:   actual,
 			Expected: expected,
-			File:     filePath,
 		}
 	}
 

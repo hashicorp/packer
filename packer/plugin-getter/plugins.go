@@ -6,12 +6,14 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/packer/hcl2template/addrs"
+	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 
 type Requirements []*Requirement
@@ -204,8 +206,7 @@ func ParseReleases(f io.ReadCloser) (Releases, error) {
 	return releases, json.NewDecoder(f).Decode(&releases)
 }
 
-func (pr *Requirement) InstallLatest(opts InstallOptions) (InstallList, error) {
-	log.Printf("[TRACE] Installing the %s plugin ...", pr.Identifier.ForDisplay())
+func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error) {
 
 	var getters []Getter
 
@@ -216,6 +217,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (InstallList, error) {
 	}
 
 	if getOpts.Version == "" {
+		log.Printf("[TRACE] available versions for the the %s plugin ...", pr.Identifier.ForDisplay())
 		for _, getter := range getters {
 			releasesFile, err := getter.Get("releases", getOpts)
 			if err != nil {
@@ -246,10 +248,17 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (InstallList, error) {
 		return nil, err
 	}
 
-	folder := opts.InFolders[len(opts.InFolders)-1]
-	expectedFilename := filepath.Join(folder, pr.filenamePrefix()+getOpts.Version+getOpts.filenameSuffix())
+	outputFileName := pr.filenamePrefix() + getOpts.Version + getOpts.filenameSuffix()
+	outputFile := filepath.Join(
+		// Pick last folder as it's the one with the highest priority
+		opts.InFolders[len(opts.InFolders)-1],
+		// add expected full path
+		filepath.Join(pr.Identifier.Parts()...),
+		// Get expected file name
+		outputFileName,
+	)
 
-	log.Printf("[TRACE] Installing the %q version for the %s plugin in %q...", getOpts.Version, pr.Identifier.ForDisplay(), folder)
+	log.Printf("[TRACE] Installing the %q version for the %s plugin in %q...", getOpts.Version, pr.Identifier.ForDisplay(), outputFile)
 
 	var checksum *Checksum
 	for _, checksummer := range opts.Checksummers {
@@ -257,7 +266,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (InstallList, error) {
 		// download folder. Here we want to download a binary so we only check
 		// for an existing checksum file from the folder we want to download
 		// into.
-		cs, err := checksummer.GetChecksumOfFile(expectedFilename)
+		cs, err := checksummer.GetChecksumOfFile(outputFile)
 		if err == nil && len(cs) > 0 {
 			checksum = &Checksum{
 				Expected:    cs,
@@ -268,47 +277,105 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (InstallList, error) {
 		}
 	}
 
-	for _, getter := range getters {
-		for _, checksummer := range opts.Checksummers {
+	if checksum == nil {
+		for _, getter := range getters {
+			for _, checksummer := range opts.Checksummers {
 
-			// First check if checksum file is already here in the expected
-			// download folder. Here we want to download a binary so we only check
-			// for an existing checksum file from the folder we want to download
-			// into.
-			cs, err := checksummer.GetChecksumOfFile(expectedFilename)
-			if err == nil && len(cs) > 0 {
+				// First check if checksum file is already here in the expected
+				// download folder. Here we want to download a binary so we only check
+				// for an existing checksum file from the folder we want to download
+				// into.
+				cs, err := checksummer.GetChecksumOfFile(outputFile)
+				if err == nil && len(cs) > 0 {
+					checksum = &Checksum{
+						Expected:    cs,
+						Checksummer: checksummer,
+					}
+					log.Printf("[TRACE] found a pre-exising %q checksum file", checksummer.Type)
+					break
+				}
+				log.Printf("[TRACE] no %q file found, downloading. %v", outputFile+checksum.FileExt(), err)
+
+				checksumFile, err := getter.Get(checksummer.Type, getOpts)
+				if err != nil {
+					return nil, err
+				}
+				cs, err = checksummer.ParseChecksum(checksumFile)
+				checksumFile.Close()
+				if err != nil {
+					log.Printf("[TRACE] could not parse %s checksum: %v", checksummer.Type, err)
+					continue
+				}
+				if err := ioutil.WriteFile(outputFile+checksum.FileExt(), cs, 0666); err != nil {
+					return nil, fmt.Errorf("Could write checksum file %w", err)
+				}
 				checksum = &Checksum{
 					Expected:    cs,
 					Checksummer: checksummer,
 				}
-				log.Printf("[TRACE] found a pre-exising %q checksum file", checksummer.Type)
-				break
-			}
-			log.Printf("[TRACE] no %q file found, downloading", expectedFilename+checksum.FileExt())
-
-			checksumFile, err := getter.Get(checksummer.Type, getOpts)
-			if err != nil {
-				return nil, err
-			}
-			cs, err = checksummer.ParseChecksum(checksumFile)
-			checksumFile.Close()
-			if err != nil {
-				log.Printf("[TRACE] could not parse %s checksum: %v", checksummer.Type, err)
-				continue
-			}
-			if err := ioutil.WriteFile(expectedFilename+checksum.FileExt(), cs, 0666); err != nil {
-				return nil, fmt.Errorf("Could write checksum file %w", err)
-			}
-			checksum = &Checksum{
-				Expected:    cs,
-				Checksummer: checksummer,
 			}
 		}
 	}
+	getters = []Getter{
+		nil,
+	}
 
-	// binary, err := getter.Get("binary", getOpts)
+	for _, getter := range getters {
+		// create temporary file that will receive a temporary binary
+		f, err := tmp.File(outputFileName)
+		if err != nil {
+			return nil, fmt.Errorf("could not create temporary file to dowload plugin: %w", err)
+		}
+		_ = getter
+		// start fetching binary
+		// binary, err := getter.Get("binary", getOpts)
+		binary := ioutil.NopCloser(strings.NewReader("1"))
+		if err != nil {
+			err := fmt.Errorf("Get binary failed %w", err)
+			log.Printf("[TRACE] %v", err)
+			continue
+		}
+		defer binary.Close()
 
-	// os.Open(name string)
+		// write binary to tmp file
+		_, err = io.Copy(f, binary)
+		if err != nil {
+			err := fmt.Errorf("Error getting plugin: %w", err)
+			log.Printf("[TRACE] %v, trying another getter", err)
+			continue
+		}
+
+		if _, err := f.Seek(0, 0); err != nil {
+			err := fmt.Errorf("Error seeking begining of temporary file for checksumming: %w", err)
+			log.Printf("[TRACE] %v, continuing", err)
+			continue
+		}
+
+		// verify that the checksum for the file is what we expect.
+		if err := checksum.Checksum(checksum.Expected, f); err != nil {
+			log.Printf("[TRACE] %v, removing tmp file", err)
+			if err := os.Remove(f.Name()); err != nil {
+				log.Printf("[TRACE] %v, continuing", err)
+			}
+			continue
+		}
+
+		if err := f.Close(); err != nil {
+			err := fmt.Errorf("Failed to close tmp file %w", err)
+			log.Printf("[TRACE] %v, continuing", err)
+		}
+
+		if err := os.Rename(f.Name(), outputFile); err != nil {
+			err := fmt.Errorf("Failed to rename tmp file to correct location %w", err)
+			return nil, err
+		}
+
+		// Success !!
+		return &Installation{
+			BinaryPath: outputFile,
+			Version:    getOpts.Version,
+		}, nil
+	}
 
 	return nil, fmt.Errorf("not implemented")
 }

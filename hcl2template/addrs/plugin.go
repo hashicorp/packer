@@ -15,8 +15,12 @@ type Plugin struct {
 	Hostname  string
 }
 
+func (p Plugin) Parts() []string {
+	return []string{p.Hostname, p.Namespace, p.Type}
+}
+
 func (p Plugin) String() string {
-	return p.Hostname + "/" + p.Namespace + "/" + p.Type
+	return strings.Join(p.Parts(), "/")
 }
 
 // ForDisplay returns a user-friendly FQN string, simplified for readability. If

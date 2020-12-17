@@ -96,8 +96,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		if err != nil {
 			c.Ui.Error(err.Error())
 		}
-		_ = newInstall
-
+		log.Printf("Installed plugin %s %s in %q", pluginRequirement.Identifier.ForDisplay(), newInstall.Version, newInstall.BinaryPath)
 	}
 	return ret
 }
