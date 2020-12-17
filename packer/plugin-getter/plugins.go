@@ -308,7 +308,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 					return nil, err
 				}
 				cs, err := checksummer.ParseChecksum(checksumFile)
-				checksumFile.Close()
+				_ = checksumFile.Close()
 				if err != nil {
 					log.Printf("[TRACE] could not parse %s checksum: %v", checksummer.Type, err)
 					continue
