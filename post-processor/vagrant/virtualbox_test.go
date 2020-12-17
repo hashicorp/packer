@@ -18,7 +18,7 @@ func TestDecomressOVA(t *testing.T) {
 	assert.NoError(t, err)
 	defer os.RemoveAll(td)
 
-	fixture := "../../packer-plugin-sdk/test-fixtures/decompress-tar/outside_parent.tar"
+	fixture := "./test-fixtures/decompress-tar/outside_parent.tar"
 	err = DecompressOva(td, fixture)
 	assert.NoError(t, err)
 	_, err = os.Stat(filepath.Join(filepath.Base(td), "demo.poc"))
