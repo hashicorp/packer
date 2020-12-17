@@ -69,6 +69,9 @@ func (c *Checksummer) GetChecksumOfFile(filePath string) ([]byte, error) {
 func (c *Checksummer) ParseChecksum(f io.Reader) (Checksum, error) {
 	res := make([]byte, c.Hash.Size())
 	_, err := hex.NewDecoder(f).Read(res)
+	if err == io.EOF {
+		err = nil
+	}
 	return res, err
 }
 

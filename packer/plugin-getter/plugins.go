@@ -196,15 +196,7 @@ type Release struct {
 	Version string `json:"version"`
 }
 
-type Releases []Release
-
-func (r Releases) Len() int           { return len(r) }
-func (r Releases) Less(i, j int) bool { return r[i].Version < r[j].Version }
-func (r Releases) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
-
-var _ sort.Interface = Releases{}
-
-func ParseReleases(f io.ReadCloser) (Releases, error) {
+func ParseReleases(f io.ReadCloser) ([]Release, error) {
 	var releases []Release
 	defer f.Close()
 	return releases, json.NewDecoder(f).Decode(&releases)
@@ -242,8 +234,18 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 				log.Printf("[TRACE] %s", err.Error())
 				continue
 			}
-			sort.Sort(releases)
-			getOpts.Version = releases[0].Version
+			versions := version.Collection{}
+			for _, release := range releases {
+				v, err := version.NewVersion(release.Version)
+				if err != nil {
+					panic(err)
+				}
+				if pr.VersionConstraints.Check(v) {
+					versions = append(versions, v)
+				}
+			}
+			sort.Sort(versions)
+			getOpts.Version = "v" + versions[0].String()
 			break
 		}
 	}

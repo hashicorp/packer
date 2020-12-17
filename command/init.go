@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/packer/packer-plugin-sdk/plugin"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
+	 "github.com/hashicorp/packer/packer/plugin-getter/github"
 	"github.com/posener/complete"
 )
 
@@ -73,6 +74,10 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 
 	log.Printf("[TRACE] init: %#v", opts)
 
+	getters := []plugingetter.Getter{
+		new(github.Getter),
+	} 
+
 	for _, pluginRequirement := range reqs {
 		// Get installed plugins that match requirement
 
@@ -91,6 +96,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallOptions{
 			InFolders:                 c.Meta.CoreConfig.Components.KnownPluginFolders,
 			BinaryInstallationOptions: opts.BinaryInstallationOptions,
+			Getters:                   getters,
 		})
 		if err != nil {
 			c.Ui.Error(err.Error())
