@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"regexp"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // BuilderId is the common builder ID to all of these artifacts.

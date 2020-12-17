@@ -7,7 +7,7 @@ import (
 	"sort"
 	"time"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/joyent/triton-go/compute"
 	terrors "github.com/joyent/triton-go/errors"
 )

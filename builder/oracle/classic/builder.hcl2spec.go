@@ -4,7 +4,7 @@ package classic
 
 import (
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
+	"github.com/hashicorp/packer-plugin-sdk/communicator"
 	"github.com/zclconf/go-cty/cty"
 )
 

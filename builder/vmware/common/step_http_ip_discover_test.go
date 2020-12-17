@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
 )
 
 func TestStepHTTPIPDiscover_Run(t *testing.T) {

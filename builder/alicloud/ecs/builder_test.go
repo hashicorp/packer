@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	helperconfig "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	helperconfig "github.com/hashicorp/packer-plugin-sdk/template/config"
 )
 
 func testBuilderConfig() map[string]interface{} {

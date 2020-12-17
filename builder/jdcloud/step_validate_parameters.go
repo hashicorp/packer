@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/apis"
 	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/apis"
 )

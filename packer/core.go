@@ -15,9 +15,9 @@ import (
 	multierror "github.com/hashicorp/go-multierror"
 	version "github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 // Core is the main executor of Packer. If Packer is being used as a

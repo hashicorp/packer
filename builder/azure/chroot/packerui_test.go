@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // testUI returns a test ui plus a function to retrieve the errors written to the ui

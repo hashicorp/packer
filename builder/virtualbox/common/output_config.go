@@ -5,8 +5,8 @@ package common
 import (
 	"fmt"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 type OutputConfig struct {

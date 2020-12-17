@@ -6,11 +6,11 @@ import (
 	"io"
 	"os"
 
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template"
 	kvflag "github.com/hashicorp/packer/command/flag-kv"
 	"github.com/hashicorp/packer/helper/wrappedstreams"
 	"github.com/hashicorp/packer/packer"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 )
 
 // FlagSetFlags is an enum to define what flags are present in the

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	versionUtil "github.com/hashicorp/go-version"
-	"github.com/hashicorp/packer/packer-plugin-sdk/retry"
+	"github.com/hashicorp/packer-plugin-sdk/retry"
 )
 
 type VBox42Driver struct {

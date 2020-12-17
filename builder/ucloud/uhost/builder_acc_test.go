@@ -5,11 +5,11 @@ import (
 	"os"
 	"testing"
 
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/stretchr/testify/assert"
 
-	builderT "github.com/hashicorp/packer/packer-plugin-sdk/acctest"
+	builderT "github.com/hashicorp/packer-plugin-sdk/acctest"
 )
 
 func TestBuilderAcc_validateRegion(t *testing.T) {

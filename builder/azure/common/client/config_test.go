@@ -14,7 +14,7 @@ import (
 
 	"github.com/Azure/go-autorest/autorest/azure"
 	jwt "github.com/dgrijalva/jwt-go"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func Test_ClientConfig_RequiredParametersSet(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/template"
+	"github.com/hashicorp/packer-plugin-sdk/template"
 )
 
 func TestBasicExampleFromDocsIsValid(t *testing.T) {

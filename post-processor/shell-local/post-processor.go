@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	sl "github.com/hashicorp/packer/packer-plugin-sdk/shell-local"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	sl "github.com/hashicorp/packer-plugin-sdk/shell-local"
 )
 
 type PostProcessor struct {

@@ -7,8 +7,8 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/google/go-cmp/cmp"
+	sdkconfig "github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	sdkconfig "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 )
 
 // List of configuration parameters that are required by the ARM builder.

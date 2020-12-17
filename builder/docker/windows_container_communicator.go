@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // Windows containers are a special beast in Docker; you can't use docker cp

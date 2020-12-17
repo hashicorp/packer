@@ -1,1 +1,0 @@
-Echo I am a floppy with a batch file

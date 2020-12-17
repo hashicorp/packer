@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type Artifact struct {

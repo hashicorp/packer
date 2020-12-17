@@ -9,10 +9,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/net"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pssm "github.com/hashicorp/packer/builder/amazon/common/ssm"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer/packer-plugin-sdk/net"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepCreateSSMTunnel struct {

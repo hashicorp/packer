@@ -1,8 +1,0 @@
-{
-    "provisioners": [
-        {
-            "type": "something",
-            "only": ["foo"]
-        }
-    ]
-}

@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/fix"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template"
 
 	"github.com/posener/complete"
 )
