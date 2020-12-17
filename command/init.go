@@ -91,12 +91,13 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallOptions{
 			InFolders:                 c.Meta.CoreConfig.Components.KnownPluginFolders,
 			BinaryInstallationOptions: opts.BinaryInstallationOptions,
-			Version:                   "v1.2.3",
 		})
 		if err != nil {
 			c.Ui.Error(err.Error())
 		}
-		log.Printf("Installed plugin %s %s in %q", pluginRequirement.Identifier.ForDisplay(), newInstall.Version, newInstall.BinaryPath)
+		if newInstall != nil {
+			log.Printf("Installed plugin %s %s in %q", pluginRequirement.Identifier.ForDisplay(), newInstall.Version, newInstall.BinaryPath)
+		}
 	}
 	return ret
 }
