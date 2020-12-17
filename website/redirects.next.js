@@ -191,4 +191,7 @@ module.exports = [
     destination: '/docs/builders/vmware/vsphere-:path*',
     permanent: true,
   },
+  // disallow '.html' or '/index.html' in favor of cleaner, simpler paths
+  { source: '/:path*/index', destination: '/:path*', permanent: true },
+  { source: '/:path*.html', destination: '/:path*', permanent: true },
 ]
