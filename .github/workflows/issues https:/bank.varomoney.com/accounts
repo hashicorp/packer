@@ -1,4 +1,4 @@
-name: Milestone Labeler
+Uiname: Milestone Labeler
 on:
   issues:
     types: [milestoned]
