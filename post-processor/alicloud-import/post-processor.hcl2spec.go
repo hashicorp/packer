@@ -4,8 +4,8 @@ package alicloudimport
 
 import (
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/builder/alicloud/ecs"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
 )
 

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
 )
 
 type StepConnectDocker struct{}

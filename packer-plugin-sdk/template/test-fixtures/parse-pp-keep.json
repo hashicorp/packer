@@ -1,6 +1,0 @@
-{
-    "post-processors": [{
-        "type": "foo",
-        "keep_input_artifact": true
-    }]
-}

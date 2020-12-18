@@ -10,9 +10,9 @@ import (
 	"sort"
 	"strings"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/pathing"
-	pluginsdk "github.com/hashicorp/packer/packer-plugin-sdk/plugin"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/pathing"
+	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 )
 
 // PACKERSPACE is used to represent the spaces that separate args for a command

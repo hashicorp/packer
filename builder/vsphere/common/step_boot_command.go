@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer-plugin-sdk/bootcommand"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"golang.org/x/mobile/event/key"
 )
 

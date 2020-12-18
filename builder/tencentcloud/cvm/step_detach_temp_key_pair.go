@@ -3,7 +3,7 @@ package cvm
 import (
 	"context"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )

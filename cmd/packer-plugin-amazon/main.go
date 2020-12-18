@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer/builder/amazon/ebs"
 	"github.com/hashicorp/packer/builder/amazon/ebssurrogate"
 	"github.com/hashicorp/packer/builder/amazon/ebsvolume"
 	"github.com/hashicorp/packer/builder/osc/chroot"
-	"github.com/hashicorp/packer/packer-plugin-sdk/plugin"
 	amazonimport "github.com/hashicorp/packer/post-processor/amazon-import"
 )
 

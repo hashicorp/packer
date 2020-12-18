@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // TimeoutProvisioner is a Provisioner implementation that can timeout after a

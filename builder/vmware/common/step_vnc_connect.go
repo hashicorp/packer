@@ -8,8 +8,8 @@ import (
 	"net"
 	"net/url"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/mitchellh/go-vnc"
 	"golang.org/x/net/websocket"
 )

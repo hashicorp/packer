@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/vsphere/driver"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 // Defining this interface ensures that we use the common step download, or the

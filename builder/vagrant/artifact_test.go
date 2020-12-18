@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func TestArtifact_Impl(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
+	"github.com/hashicorp/packer-plugin-sdk/communicator"
 )
 
 func TestConfigPrepare(t *testing.T) {

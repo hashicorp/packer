@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // Lowercase a ascii letter.

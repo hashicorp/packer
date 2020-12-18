@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/common"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -66,7 +66,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 		t.Fatalf("bad: %#v", b.config.FloppyFiles)
 	}
 
-	floppies_path := "../../../packer-plugin-sdk/test-fixtures/floppies"
+	floppies_path := "../../test-fixtures/floppies"
 	config["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	b = Builder{}
 	_, warns, err = b.Prepare(config)

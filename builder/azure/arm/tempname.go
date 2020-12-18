@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/random"
+	"github.com/hashicorp/packer-plugin-sdk/random"
 )
 
 type TempName struct {

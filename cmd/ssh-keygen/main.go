@@ -8,7 +8,7 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/communicator/sshkey"
+	"github.com/hashicorp/packer-plugin-sdk/communicator/sshkey"
 )
 
 type options struct {

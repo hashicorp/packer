@@ -3,7 +3,7 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 // PrlctlPostConfig contains the configuration for running "prlctl" commands

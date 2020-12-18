@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/yandex"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1/awscompatibility"
 )
 

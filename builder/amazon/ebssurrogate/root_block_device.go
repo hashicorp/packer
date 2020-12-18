@@ -5,7 +5,7 @@ package ebssurrogate
 import (
 	"errors"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 type RootBlockDevice struct {

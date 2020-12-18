@@ -7,9 +7,9 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	confighelper "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	confighelper "github.com/hashicorp/packer-plugin-sdk/template/config"
 )
 
 type stepRegionCopyAlicloudImage struct {

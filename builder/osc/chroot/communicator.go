@@ -13,8 +13,8 @@ import (
 	"strings"
 	"syscall"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/tmp"
 )
 
 // Communicator is a special communicator that works by executing

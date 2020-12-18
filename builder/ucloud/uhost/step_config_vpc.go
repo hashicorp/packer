@@ -6,8 +6,8 @@ import (
 
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type stepConfigVPC struct {

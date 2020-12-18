@@ -3,7 +3,7 @@ package proxmox
 import (
 	"context"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
 )
 
 // stepSuccess runs after the full build has succeeded.

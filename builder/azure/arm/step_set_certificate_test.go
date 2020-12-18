@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
 )
 
 func TestStepSetCertificateShouldPassIfGetPasses(t *testing.T) {

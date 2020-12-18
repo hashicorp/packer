@@ -84,10 +84,6 @@ github.com/aliyun/alibaba-cloud-sdk-go/services/ecs
 github.com/aliyun/alibaba-cloud-sdk-go/services/ram
 # github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 github.com/aliyun/aliyun-oss-go-sdk/oss
-# github.com/antchfx/xpath v0.0.0-20170728053731-b5c552e1acbd
-github.com/antchfx/xpath
-# github.com/antchfx/xquery v0.0.0-20170730121040-eb8c3c172607
-github.com/antchfx/xquery/xml
 # github.com/antihax/optional v1.0.0
 github.com/antihax/optional
 # github.com/apparentlymart/go-cidr v1.0.1
@@ -189,8 +185,6 @@ github.com/digitalocean/godo
 github.com/dimchansky/utfbom
 # github.com/dylanmei/iso8601 v0.1.0
 github.com/dylanmei/iso8601
-# github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
-github.com/dylanmei/winrmtest
 # github.com/exoscale/egoscale v0.18.1
 github.com/exoscale/egoscale
 # github.com/fatih/camelcase v1.0.0
@@ -361,6 +355,45 @@ github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
+# github.com/hashicorp/packer-plugin-sdk v0.0.4
+github.com/hashicorp/packer-plugin-sdk/acctest
+github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
+github.com/hashicorp/packer-plugin-sdk/acctest/testutils
+github.com/hashicorp/packer-plugin-sdk/adapter
+github.com/hashicorp/packer-plugin-sdk/bootcommand
+github.com/hashicorp/packer-plugin-sdk/chroot
+github.com/hashicorp/packer-plugin-sdk/common
+github.com/hashicorp/packer-plugin-sdk/communicator
+github.com/hashicorp/packer-plugin-sdk/communicator/ssh
+github.com/hashicorp/packer-plugin-sdk/communicator/sshkey
+github.com/hashicorp/packer-plugin-sdk/filelock
+github.com/hashicorp/packer-plugin-sdk/guestexec
+github.com/hashicorp/packer-plugin-sdk/json
+github.com/hashicorp/packer-plugin-sdk/multistep
+github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps
+github.com/hashicorp/packer-plugin-sdk/net
+github.com/hashicorp/packer-plugin-sdk/packer
+github.com/hashicorp/packer-plugin-sdk/packerbuilderdata
+github.com/hashicorp/packer-plugin-sdk/pathing
+github.com/hashicorp/packer-plugin-sdk/plugin
+github.com/hashicorp/packer-plugin-sdk/random
+github.com/hashicorp/packer-plugin-sdk/retry
+github.com/hashicorp/packer-plugin-sdk/rpc
+github.com/hashicorp/packer-plugin-sdk/sdk-internals/communicator/none
+github.com/hashicorp/packer-plugin-sdk/sdk-internals/communicator/ssh
+github.com/hashicorp/packer-plugin-sdk/sdk-internals/communicator/winrm
+github.com/hashicorp/packer-plugin-sdk/shell
+github.com/hashicorp/packer-plugin-sdk/shell-local
+github.com/hashicorp/packer-plugin-sdk/shell-local/localexec
+github.com/hashicorp/packer-plugin-sdk/shutdowncommand
+github.com/hashicorp/packer-plugin-sdk/template
+github.com/hashicorp/packer-plugin-sdk/template/config
+github.com/hashicorp/packer-plugin-sdk/template/interpolate
+github.com/hashicorp/packer-plugin-sdk/template/interpolate/aws/secretsmanager
+github.com/hashicorp/packer-plugin-sdk/tmp
+github.com/hashicorp/packer-plugin-sdk/useragent
+github.com/hashicorp/packer-plugin-sdk/uuid
+github.com/hashicorp/packer-plugin-sdk/version
 # github.com/hashicorp/serf v0.9.2
 github.com/hashicorp/serf/coordinate
 # github.com/hashicorp/vault/api v1.0.4

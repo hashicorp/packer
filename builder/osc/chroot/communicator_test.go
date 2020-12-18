@@ -3,7 +3,7 @@ package chroot
 import (
 	"testing"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func TestCommunicator_ImplementsCommunicator(t *testing.T) {

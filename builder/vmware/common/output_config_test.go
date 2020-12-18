@@ -3,8 +3,8 @@ package common
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 func TestOutputConfigPrepare(t *testing.T) {

@@ -34,7 +34,7 @@ require (
 	github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
 	github.com/digitalocean/godo v1.11.1
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
-	github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08
+	github.com/dylanmei/winrmtest v0.0.0-20170819153634-c2fbb09e6c08 // indirect
 	github.com/exoscale/egoscale v0.18.1
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structtag v1.0.0
@@ -42,11 +42,11 @@ require (
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/gobwas/glob v0.2.3
-	github.com/gofrs/flock v0.7.3
+	github.com/gofrs/flock v0.7.3 // indirect
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/google/go-cmp v0.5.2
 	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
+	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/gophercloud/gophercloud v0.12.0
 	github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c
@@ -54,13 +54,13 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 	github.com/hashicorp/aws-sdk-go-base v0.6.0
-	github.com/hashicorp/consul/api v1.4.0
+	github.com/hashicorp/consul/api v1.4.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cleanhttp v0.5.1
 	github.com/hashicorp/go-cty-funcs v0.0.0-20200930094925-2721b1e36840
-	github.com/hashicorp/go-getter/gcs/v2 v2.0.0-20200604122502-a6995fa1edad
-	github.com/hashicorp/go-getter/s3/v2 v2.0.0-20200604122502-a6995fa1edad
+	github.com/hashicorp/go-getter/gcs/v2 v2.0.0-20200604122502-a6995fa1edad // indirect
+	github.com/hashicorp/go-getter/s3/v2 v2.0.0-20200604122502-a6995fa1edad // indirect
 	github.com/hashicorp/go-getter/v2 v2.0.0-20200604122502-a6995fa1edad
 	github.com/hashicorp/go-immutable-radix v1.1.0 // indirect
 	github.com/hashicorp/go-msgpack v0.5.5 // indirect
@@ -70,13 +70,14 @@ require (
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/hashicorp/hcl/v2 v2.6.0
+	github.com/hashicorp/packer-plugin-sdk v0.0.4
 	github.com/hashicorp/serf v0.9.2 // indirect
 	github.com/hashicorp/vault/api v1.0.4
-	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
+	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
 	github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
-	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
+	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
 	github.com/joyent/triton-go v0.0.0-20180628001255-830d2b111e62
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
@@ -90,12 +91,12 @@ require (
 	github.com/masterzen/winrm v0.0.0-20200615185753-c42b5136ff88
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
 	github.com/mitchellh/cli v1.1.0
-	github.com/mitchellh/go-fs v0.0.0-20180402234041-7b48fa161ea7
+	github.com/mitchellh/go-fs v0.0.0-20180402234041-7b48fa161ea7 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-testing-interface v1.0.3 // indirect
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
 	github.com/mitchellh/gox v1.0.1 // indirect
-	github.com/mitchellh/iochan v1.0.0
+	github.com/mitchellh/iochan v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.2.3
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
@@ -106,13 +107,13 @@ require (
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
 	github.com/oracle/oci-go-sdk v18.0.0+incompatible
 	github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699
-	github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
+	github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible
 	github.com/pkg/errors v0.9.1
-	github.com/pkg/sftp v0.0.0-20160118190721-e84cc8c755ca
+	github.com/pkg/sftp v0.0.0-20160118190721-e84cc8c755ca // indirect
 	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
-	github.com/ryanuber/go-glob v1.0.0
+	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
 	github.com/shirou/gopsutil v2.18.12+incompatible
@@ -124,7 +125,7 @@ require (
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible
 	github.com/ucloud/ucloud-sdk-go v0.16.3
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
-	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
+	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1 // indirect
 	github.com/ulikunitz/xz v0.5.5
 	github.com/vmware/govmomi v0.23.1
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0

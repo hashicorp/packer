@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/tmp"
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
-	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 
 type vmxTemplateData struct {

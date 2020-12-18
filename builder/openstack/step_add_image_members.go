@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/members"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type stepAddImageMembers struct{}

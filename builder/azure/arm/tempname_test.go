@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/random"
+	"github.com/hashicorp/packer-plugin-sdk/random"
 )
 
 func TestTempNameShouldCreatePrefixedRandomNames(t *testing.T) {

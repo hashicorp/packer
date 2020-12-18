@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 type StepCreateSnapshot struct {

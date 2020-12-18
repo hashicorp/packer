@@ -3,9 +3,9 @@ package hcl2template
 import (
 	"testing"
 
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 

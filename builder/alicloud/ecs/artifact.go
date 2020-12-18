@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type Artifact struct {

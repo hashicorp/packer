@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type stepSecurity struct {

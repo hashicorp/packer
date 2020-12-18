@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -214,7 +214,7 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 		t.Fatalf("bad: %#v", b.config.FloppyFiles)
 	}
 
-	floppiesPath := "../../../packer-plugin-sdk/test-fixtures/floppies"
+	floppiesPath := "../../test-fixtures/floppies"
 	config["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppiesPath), fmt.Sprintf("%s/foo.ps1", floppiesPath)}
 	b = Builder{}
 	_, warns, err = b.Prepare(config)

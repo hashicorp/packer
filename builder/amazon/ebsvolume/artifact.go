@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // map of region to list of volume IDs
