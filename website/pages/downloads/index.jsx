@@ -16,15 +16,11 @@ export default function DownloadsPage({ releases }) {
         productName="Packer"
         productId="packer"
         latestVersion={VERSION}
-        getStartedDescription="Follow step-by-step tutorials on AWS, Azure, GCP, and localhost."
+        getStartedDescription="Follow step-by-step tutorials to get hands on with Packer."
         getStartedLinks={[
           {
-            label: 'Placeholder',
-            href: '#',
-          },
-          {
-            label: 'Placeholder',
-            href: '#',
+            label: 'Get Started',
+            href: 'https://learn.hashicorp.com/packer',
           },
         ]}
         logo={<img className={styles.logo} alt="Packer" src={logo} />}
