@@ -9,8 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 type stepSnapshotEBSVolumes struct {
