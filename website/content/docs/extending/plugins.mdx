@@ -257,6 +257,39 @@ with "packer-builder-custom". Log output is _extremely_ helpful in debugging
 issues and you're encouraged to be as verbose as you need to be in order for
 the logs to be helpful.
 
+### Creating a GitHub Release
+
+To create a GitHub release with the assets that will be consumed by Packer, we provide a pre-defined release workflow configuration
+using [GitHub Actions](https://docs.github.com/en/free-pro-team@latest/actions). We strongly encourage maintainers to use this configuration
+to make sure the release contains the assets expected by Packer to load and use a plugin.
+[GitHub Actions](https://docs.github.com/en/free-pro-team@latest/actions) allow you to execute workflows when events on your repository occur.
+You can use this to create releases whenever a new version tag is created on your repository.
+
+Here's what you need to create releases using GitHub Actions:
+1. Generate a GPG key to be used when signing releases (See [GitHub's detailed instructions](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/generating-a-new-gpg-key)
+for help with this step)
+2. Copy the [GoReleaser configuration from the packer-plugin-scaffolding repository](https://github.com/hashicorp/packer-plugin-scaffolding) to the root of your repository.
+3. Copy the [GitHub Actions workflow from the packer-plugin-scaffolding repository](https://github.com/hashicorp/packer-plugin-scaffolding) to `.github/workflows/release.yml` in your repository.
+4. Go to Settings > Secrets in your repository, and add the following secrets:
+    - `GPG_PRIVATE_KEY` - Your ASCII-armored GPG private key. You can export this with `gpg --armor --export-secret-keys [key ID or email]`.
+    - `PASSPHRASE` - The passphrase for your GPG private key.
+5. Push a new valid version tag (e.g. `v1.2.3`) to test that the GitHub Actions releaser is working. The tag must be a valid [Semantic Version](https://semver.org/) preceded with a `v`.
+6. Make sure to [register your plugin](#registering-the-plugin) with us.
+
+~> **Important:** Avoid modifying or replacing an already-released version of a plugin. Instead, if changes are necessary,
+please release as a new version.
+
+### Registering the Plugin
+
+We like to keep all of our products and external plugins release assets together in the same place. To publish
+an external plugin to [releases.hashicorp.com](https://releases.hashicorp.com), we require the maintainer's GPG public key to validate the asset authenticity.
+To register your plugin with HashiCorp, send us your GPG public key and your plugin's GitHub repository via [maintainers@hashicorp.com](mailto://maintainers@hashicorp.com).
+
+To get you GPG public key in ASCII-armor format, use the following command, substituting the GPG key ID or email address:
+```bash
+$ gpg --armor --export "{Key ID or email address}"
+```
+
 ### Plugin Development Tips
 
 Here are some tips for developing plugins, often answering common questions or
