@@ -244,6 +244,7 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		}
 	}
+
 	if len(desc.Builders) > 0 {
 		log.Printf("found external %v builders from %s plugin", desc.Builders, pluginName)
 	}
@@ -258,6 +259,7 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
 		}
 	}
+
 	if len(desc.PostProcessors) > 0 {
 		log.Printf("found external %v post-processors from %s plugin", desc.PostProcessors, pluginName)
 	}

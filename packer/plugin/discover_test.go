@@ -142,7 +142,7 @@ func generateFakePlugins(dirname string, pluginNames []string) (string, []string
 
 // TestHelperProcess isn't a real test. It's used as a helper process
 // for multiplugin-binary tests.
-func TestHelperPlugins(*testing.T) {
+func TestHelperPlugins(t *testing.T) {
 	if os.Getenv("PKR_WANT_TEST_PLUGINS") != "1" {
 		return
 	}
@@ -162,17 +162,27 @@ func TestHelperPlugins(*testing.T) {
 	}
 
 	pluginName, args := args[0], args[1:]
-	plugin, found := mockPlugins[pluginName]
-	if !found {
-		fmt.Fprintf(os.Stderr, "No %q plugin found\n", pluginName)
-		os.Exit(2)
+
+	allMocks := []map[string]pluginsdk.Set{mockPlugins, defaultNameMock, doubleDefaultMock, badDefaultNameMock}
+	for _, mock := range allMocks {
+		t.Log("Megan 1")
+		plugin, found := mock[pluginName]
+		if found {
+			t.Log("Megan 2")
+			err := plugin.RunCommand(args...)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+				t.Log("Megan 3")
+				os.Exit(1)
+			}
+			t.Log("Megan 4")
+			os.Exit(0)
+		}
 	}
 
-	err := plugin.RunCommand(args...)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
-	}
+	t.Log("Megan 5")
+	fmt.Fprintf(os.Stderr, "No %q plugin found\n", pluginName)
+	os.Exit(2)
 }
 
 // HasExec reports whether the current system can start new processes
@@ -216,24 +226,7 @@ func helperCommand(t *testing.T, s ...string) []string {
 	return append(cmd, s...)
 }
 
-var (
-	mockPlugins = map[string]pluginsdk.Set{
-		"bird": pluginsdk.Set{
-			Builders: map[string]packer.Builder{
-				"feather":   nil,
-				"guacamole": nil,
-			},
-		},
-		"chimney": pluginsdk.Set{
-			PostProcessors: map[string]packer.PostProcessor{
-				"smoke": nil,
-			},
-		},
-	}
-)
-
-func Test_multiplugin_describe(t *testing.T) {
-
+func createMockPlugins(t *testing.T, plugins map[string]pluginsdk.Set) {
 	pluginDir, err := tmp.Dir("pkr-multiplugin-test-*")
 	{
 		// create an exectutable file with a `sh` sheebang
@@ -248,13 +241,11 @@ func Test_multiplugin_describe(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer os.RemoveAll(pluginDir)
 
 		t.Logf("putting temporary mock plugins in %s", pluginDir)
-		defer os.RemoveAll(pluginDir)
 
 		shPath := MustHaveCommand(t, "bash")
-		for name := range mockPlugins {
+		for name := range plugins {
 			plugin := path.Join(pluginDir, "packer-plugin-"+name)
 			fileContent := ""
 			fileContent = fmt.Sprintf("#!%s\n", shPath)
@@ -267,18 +258,78 @@ func Test_multiplugin_describe(t *testing.T) {
 		}
 	}
 	os.Setenv("PACKER_PLUGIN_PATH", pluginDir)
+}
+
+var (
+	mockPlugins = map[string]pluginsdk.Set{
+		"bird": pluginsdk.Set{
+			Builders: map[string]packer.Builder{
+				"feather":   nil,
+				"guacamole": nil,
+			},
+		},
+		"chimney": pluginsdk.Set{
+			PostProcessors: map[string]packer.PostProcessor{
+				"smoke": nil,
+			},
+		},
+	}
+
+	defaultNameMock = map[string]pluginsdk.Set{
+		"foo": pluginsdk.Set{
+			Builders: map[string]packer.Builder{
+				"bar":                  nil,
+				"baz":                  nil,
+				pluginsdk.DEFAULT_NAME: nil,
+			},
+		},
+	}
+
+	doubleDefaultMock = map[string]pluginsdk.Set{
+		"yolo": pluginsdk.Set{
+			Builders: map[string]packer.Builder{
+				"bar":                  nil,
+				"baz":                  nil,
+				pluginsdk.DEFAULT_NAME: nil,
+			},
+			PostProcessors: map[string]packer.PostProcessor{
+				pluginsdk.DEFAULT_NAME: nil,
+			},
+		},
+	}
+
+	badDefaultNameMock = map[string]pluginsdk.Set{
+		"foo": pluginsdk.Set{
+			Builders: map[string]packer.Builder{
+				"bar":                  nil,
+				"baz":                  nil,
+				pluginsdk.DEFAULT_NAME: nil,
+			},
+		},
+	}
+)
+
+func Test_multiplugin_describe(t *testing.T) {
+	createMockPlugins(t, mockPlugins)
+	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
+	defer os.RemoveAll(pluginDir)
+	t.Log("Megan 1")
 
 	c := Config{}
-	err = c.Discover()
+	t.Log("Megan 2")
+	err := c.Discover()
+	t.Log("Megan 3")
 	if err != nil {
-		t.Fatal(err)
+		t.Log("Megan 5")
+		t.Fatalf("error discovering plugins; %s", err.Error())
 	}
+	t.Log("Megan 4")
 
 	for mockPluginName, plugin := range mockPlugins {
 		for mockBuilderName := range plugin.Builders {
 			expectedBuilderName := mockPluginName + "-" + mockBuilderName
 			if _, found := c.builders[expectedBuilderName]; !found {
-				t.Fatalf("expected to find builder %q", expectedBuilderName)
+				t.Fatalf("expected to find builder %q; got %#v", expectedBuilderName, c.builders)
 			}
 		}
 		for mockProvisionerName := range plugin.Provisioners {
@@ -293,5 +344,36 @@ func Test_multiplugin_describe(t *testing.T) {
 				t.Fatalf("expected to find post-processor %q", expectedPostProcessorName)
 			}
 		}
+	}
+}
+
+func Test_multiplugin_defaultName(t *testing.T) {
+	createMockPlugins(t, defaultNameMock)
+	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
+	defer os.RemoveAll(pluginDir)
+
+	c := Config{}
+	err := c.Discover()
+	if err != nil {
+		t.Fatalf("error discovering plugins; %s ; mocks are %#v", err.Error(), defaultNameMock)
+	}
+
+	expectedBuilderNames := []string{"foo-bar", "foo-baz", "foo"}
+	for _, mockBuilderName := range expectedBuilderNames {
+		if _, found := c.builders[mockBuilderName]; !found {
+			t.Fatalf("expected to find builder %q; builders is %#v", mockBuilderName, c.builders)
+		}
+	}
+}
+
+func Test_only_one_multiplugin_defaultName_each_plugin_type(t *testing.T) {
+	createMockPlugins(t, doubleDefaultMock)
+	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
+	defer os.RemoveAll(pluginDir)
+
+	c := Config{}
+	err := c.Discover()
+	if err != nil {
+		t.Fatal("Should not have error because pluginsdk.DEFAULT_NAME is used twice but only once per plugin type.")
 	}
 }
