@@ -236,7 +236,11 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 
 	for _, builderName := range desc.Builders {
 		builderName := builderName // copy to avoid pointer overwrite issue
-		c.builders[pluginPrefix+builderName] = func() (packersdk.Builder, error) {
+		key := pluginPrefix + builderName
+		if builderName == "default" {
+			key = pluginName
+		}
+		c.builders[key] = func() (packersdk.Builder, error) {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		}
 	}
@@ -246,7 +250,11 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 
 	for _, postProcessorName := range desc.PostProcessors {
 		postProcessorName := postProcessorName // copy to avoid pointer overwrite issue
-		c.postProcessors[pluginPrefix+postProcessorName] = func() (packersdk.PostProcessor, error) {
+		key := pluginPrefix + postProcessorName
+		if postProcessorName == "default" {
+			key = pluginName
+		}
+		c.postProcessors[key] = func() (packersdk.PostProcessor, error) {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
 		}
 	}
@@ -256,7 +264,11 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 
 	for _, provisionerName := range desc.Provisioners {
 		provisionerName := provisionerName // copy to avoid pointer overwrite issue
-		c.provisioners[pluginPrefix+provisionerName] = func() (packersdk.Provisioner, error) {
+		key := pluginPrefix + provisionerName
+		if provisionerName == "default" {
+			key = pluginName
+		}
+		c.provisioners[key] = func() (packersdk.Provisioner, error) {
 			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
 		}
 	}
