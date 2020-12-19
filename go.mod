@@ -148,4 +148,6 @@ require (
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
+replace github.com/hashicorp/packer-plugin-sdk => /Users/mmarsh/Projects/packer-plugin-sdk
+
 go 1.13
