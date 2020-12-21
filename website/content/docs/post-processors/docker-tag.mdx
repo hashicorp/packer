@@ -50,6 +50,9 @@ settings are optional.
 
 An example is shown below, showing only the post-processor configuration:
 
+<Tabs>
+<Tab heading="JSON">
+
 ```json
 {
   "type": "docker-tag",
@@ -57,6 +60,20 @@ An example is shown below, showing only the post-processor configuration:
   "tag": "0.7,anothertag"
 }
 ```
+</Tab>
+
+<Tab heading="HCL2">
+
+```hcl
+post-processors "docker-tag" {
+  type = "docker-tag"
+  repository = "hashicorp/packer"
+  tag = "0.7,anothertag"
+}
+```
+</Tab>
+</Tabs>
+
 
 This example would take the image created by the Docker builder and tag it into
 the local Docker process with a name of `hashicorp/packer:0.7`.
