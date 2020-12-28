@@ -60,20 +60,48 @@ compress.
 Some minimal examples are shown below, showing only the post-processor
 configuration:
 
+<Tabs>
+<Tab heading="JSON">
 ```json
 {
   "type": "compress",
   "output": "archive.tar.lz4"
 }
 ```
+</Tab>
 
+<Tab heading="HCL2">
+```hcl
+post-processor "compress"
+{
+  output = "archive.tar.lz4"
+}
+```
+</Tab>
+</Tabs>
+
+<Tabs>
+<Tab heading="JSON">
 ```json
 {
   "type": "compress",
   "output": "{{.BuildName}}_bundle.zip"
 }
 ```
+</Tab>
 
+<Tab heading="HCL2">
+```hcl
+post-processor "compress"
+{
+  output = "{{.BuildName}}_bundle.zip"
+}
+```
+</Tab>
+</Tabs>
+
+<Tabs>
+<Tab heading="JSON">
 ```json
 {
   "type": "compress",
@@ -81,3 +109,16 @@ configuration:
   "compression_level": 9
 }
 ```
+</Tab>
+
+<Tab heading="HCL2">
+```hcl
+post-processor "compress"
+{
+  output = "log_{{.BuildName}}.gz"
+  compression_level = 9
+}
+```
+</Tab>
+</Tabs>
+
