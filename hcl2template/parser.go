@@ -133,6 +133,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		builderSchemas:          p.BuilderSchemas,
 		provisionersSchemas:     p.ProvisionersSchemas,
 		postProcessorsSchemas:   p.PostProcessorsSchemas,
+		dataStoreSchemas:        p.DataSourceSchemas,
 		parser:                  p,
 		files:                   files,
 	}
@@ -354,7 +355,7 @@ func (p *Parser) decodeDataSources(file *hcl.File, cfg *PackerConfig) hcl.Diagno
 				continue
 			}
 			ref := datasource.Ref()
-			if existing, found := cfg.DataSource[ref]; found {
+			if existing, found := cfg.DataSources[ref]; found {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Duplicate " + dataSourceLabel + " block",
@@ -367,10 +368,10 @@ func (p *Parser) decodeDataSources(file *hcl.File, cfg *PackerConfig) hcl.Diagno
 				continue
 			}
 
-			if cfg.DataSource == nil {
-				cfg.DataSource = map[DataSourceRef]DataSource{}
+			if cfg.DataSources == nil {
+				cfg.DataSources = DataSources{}
 			}
-			cfg.DataSource[ref] = *datasource
+			cfg.DataSources[ref] = *datasource
 		}
 	}
 	return diags

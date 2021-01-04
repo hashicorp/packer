@@ -4,7 +4,10 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/hashicorp/packer/packer"
+	"github.com/zclconf/go-cty/cty"
 )
 
 // DataBlock references an HCL 'data' block.
@@ -14,6 +17,8 @@ type DataSource struct {
 
 	block *hcl.Block
 }
+
+type DataSources map[DataSourceRef]DataSource
 
 func (data *DataSource) Ref() DataSourceRef {
 	return DataSourceRef{
@@ -81,4 +86,39 @@ func (r *DataSourceRef) Ref() DataSourceRef {
 		Type: r.Type,
 		Name: r.Name,
 	}
+}
+
+func (datasources DataSources) Values(dataSources packer.DataSourceStore) (map[string]cty.Value, hcl.Diagnostics) {
+	res := map[string]cty.Value{}
+	var diags hcl.Diagnostics
+	for ref, _ := range datasources {
+		d, err := dataSources.Start(ref.Type) // d cmdDataSource
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary:  err.Error(),
+				Detail:   fmt.Sprintf("failed to start plugin data.%s.%s", ref.Type, ref.Name),
+				Severity: hcl.DiagError,
+			})
+		}
+		if d == nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary:  err.Error(),
+				Detail:   fmt.Sprintf("failed to start plugin data.%s.%s", ref.Type, ref.Name),
+				Severity: hcl.DiagError,
+			})
+			continue
+		}
+		inner := map[string]cty.Value{}
+		inner[ref.Name] = getSpecValue(d.OutputSpec()[ref.Type])
+		res[ref.Type] = cty.MapVal(inner)
+	}
+	return res, diags
+}
+
+func getSpecValue(spec hcldec.Spec) cty.Value {
+	switch spec.(type) {
+	case *hcldec.LiteralSpec:
+		return spec.(*hcldec.LiteralSpec).Value
+	}
+	return cty.UnknownVal(hcldec.ImpliedType(spec))
 }

@@ -9,7 +9,7 @@ import (
 )
 
 type cmdDataSource struct {
-	p      packersdk.DataSource
+	d      packersdk.DataSource
 	client *Client
 }
 
@@ -19,7 +19,7 @@ func (d *cmdDataSource) ConfigSpec() hcldec.ObjectSpec {
 		d.checkExit(r, nil)
 	}()
 
-	return d.p.ConfigSpec()
+	return d.d.ConfigSpec()
 }
 
 func (d *cmdDataSource) Configure(configs ...interface{}) error {
@@ -28,7 +28,16 @@ func (d *cmdDataSource) Configure(configs ...interface{}) error {
 		d.checkExit(r, nil)
 	}()
 
-	return d.p.Configure(configs...)
+	return d.d.Configure(configs...)
+}
+
+func (d *cmdDataSource) OutputSpec() hcldec.ObjectSpec {
+	defer func() {
+		r := recover()
+		d.checkExit(r, nil)
+	}()
+
+	return d.d.OutputSpec()
 }
 
 func (d *cmdDataSource) Execute() (cty.Value, error) {
@@ -37,7 +46,7 @@ func (d *cmdDataSource) Execute() (cty.Value, error) {
 		d.checkExit(r, nil)
 	}()
 
-	return d.p.Execute()
+	return d.d.Execute()
 }
 
 func (d *cmdDataSource) checkExit(p interface{}, cb func()) {

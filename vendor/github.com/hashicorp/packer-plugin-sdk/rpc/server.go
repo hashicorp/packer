@@ -19,7 +19,7 @@ const (
 	DefaultHookEndpoint                 = "Hook"
 	DefaultPostProcessorEndpoint        = "PostProcessor"
 	DefaultProvisionerEndpoint          = "Provisioner"
-	DefaultDataStoreEndpoint            = "DataStore"
+	DefaultDatasourceEndpoint           = "Datasource"
 	DefaultUiEndpoint                   = "Ui"
 )
 
@@ -120,6 +120,16 @@ func (s *Server) RegisterProvisioner(p packersdk.Provisioner) error {
 			mux:              s.mux,
 		},
 		p: p,
+	})
+}
+
+func (s *Server) RegisterDatasource(d packersdk.DataSource) error {
+	return s.server.RegisterName(DefaultDatasourceEndpoint, &DataSourceServer{
+		commonServer: commonServer{
+			selfConfigurable: d,
+			mux:              s.mux,
+		},
+		d: d,
 	})
 }
 

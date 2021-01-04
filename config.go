@@ -191,7 +191,7 @@ func (c *config) discoverInternalComponents() error {
 		_, found := (c.DataSources)[dataSource]
 		if !found {
 			c.DataSources[dataSource] = func() (packersdk.DataSource, error) {
-				bin := fmt.Sprintf("%s%splugin%spacker-data-%s",
+				bin := fmt.Sprintf("%s%splugin%spacker-datasource-%s",
 					packerPath, PACKERSPACE, PACKERSPACE, dataSource)
 				return c.Plugins.Client(bin).DataSource()
 			}

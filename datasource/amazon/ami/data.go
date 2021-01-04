@@ -13,6 +13,12 @@ func (d *DataSource) ConfigSpec() hcldec.ObjectSpec {
 	return d.config.FlatMapstructure().HCL2Spec()
 }
 
+func (d *DataSource) OutputSpec() hcldec.ObjectSpec {
+	return hcldec.ObjectSpec{
+		"amazon-ami": &hcldec.LiteralSpec{Value: cty.StringVal("placeholder")},
+	}
+}
+
 func (d *DataSource) Configure(...interface{}) error {
 	// TODO sylviamoss datasource implement
 	return nil

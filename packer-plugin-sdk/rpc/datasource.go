@@ -1,8 +1,12 @@
 package rpc
 
 import (
+	"bytes"
 	"context"
+	"encoding/gob"
+	"fmt"
 
+	"github.com/hashicorp/hcl/v2/hcldec"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -26,13 +30,28 @@ func (d *datasource) Configure(configs ...interface{}) error {
 	return d.client.Call(d.endpoint+".Configure", args, new(interface{}))
 }
 
+type OutputSpecResponse struct {
+	OutputSpec []byte
+}
+
+func (d *datasource) OutputSpec() hcldec.ObjectSpec {
+	resp := new(OutputSpecResponse)
+	if err := d.client.Call(d.endpoint+".OutputSpec", new(interface{}), resp); err != nil {
+		err := fmt.Errorf("Datasource.OutputSpec failed: %v", err)
+		panic(err.Error())
+	}
+	res := hcldec.ObjectSpec{}
+	err := gob.NewDecoder(bytes.NewReader(resp.OutputSpec)).Decode(&res)
+	if err != nil {
+		panic("ici:" + err.Error())
+	}
+	return res
+}
+
 func (d *datasource) Execute() (cty.Value, error) {
 	nextId := d.mux.NextId()
 	server := newServerWithMux(d.mux, nextId)
 	go server.Serve()
-
-	done := make(chan interface{})
-	defer close(done)
 
 	var result cty.Value
 	if err := d.client.Call(d.endpoint+".Execute", nextId, &result); err != nil {
@@ -60,6 +79,14 @@ func (d *DataSourceServer) Configure(args *DataSourceConfigureArgs, reply *inter
 	return d.d.Configure(config...)
 }
 
+func (d *DataSourceServer) OutputSpec(args *DataSourceConfigureArgs, reply *OutputSpecResponse) error {
+	spec := d.d.OutputSpec()
+	b := bytes.NewBuffer(nil)
+	err := gob.NewEncoder(b).Encode(spec)
+	reply.OutputSpec = b.Bytes()
+	return err
+}
+
 func (d *DataSourceServer) Execute(streamId uint32, reply *interface{}) error {
 	client, err := newClientWithMux(d.mux, streamId)
 	if err != nil {
@@ -82,4 +109,8 @@ func (d *DataSourceServer) Cancel(args *interface{}, reply *interface{}) error {
 		d.contextCancel()
 	}
 	return nil
+}
+
+func init() {
+	gob.Register(new(cty.Value))
 }

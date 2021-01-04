@@ -42,18 +42,17 @@ type PackerConfig struct {
 
 	LocalBlocks []*LocalBlock
 
-	DataSource map[DataSourceRef]DataSource
+	DataSources DataSources
 
 	ValidationOptions
 
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
 
-	builderSchemas packer.BuilderStore
-
-	provisionersSchemas packer.ProvisionerStore
-
+	builderSchemas        packer.BuilderStore
+	provisionersSchemas   packer.ProvisionerStore
 	postProcessorsSchemas packer.PostProcessorStore
+	dataStoreSchemas      packer.DataSourceStore
 
 	except []glob.Glob
 	only   []glob.Glob
@@ -73,6 +72,7 @@ const (
 	sourcesAccessor        = "source"
 	buildAccessor          = "build"
 	packerAccessor         = "packer"
+	dataAccessor           = "data"
 )
 
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
@@ -81,6 +81,7 @@ const (
 func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalContext {
 	inputVariables, _ := cfg.InputVariables.Values()
 	localVariables, _ := cfg.LocalVariables.Values()
+	dataSources, _ := cfg.DataSources.Values(cfg.dataStoreSchemas)
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
@@ -98,6 +99,7 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
 				"root": cty.StringVal(strings.ReplaceAll(cfg.Basedir, `\`, `/`)),
 			}),
+			dataAccessor: cty.ObjectVal(dataSources),
 		},
 	}
 	for k, v := range variables {
@@ -334,6 +336,8 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocksLi
 func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics) {
 	res := []packersdk.Build{}
 	var diags hcl.Diagnostics
+
+	// TODO sylviamoss start/configure data store here
 
 	for _, build := range cfg.Builds {
 		for _, from := range build.Sources {
