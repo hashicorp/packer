@@ -27,9 +27,15 @@ type Evaluator interface {
 	EvaluateExpression(expr string) (output string, exit bool, diags hcl.Diagnostics)
 }
 
+type InitializeOptions struct {
+	// When set, GetBuilds will skip the execution of datasources and will use
+	// the placeholder provided by the datasource itself for validation purpose.
+	SkipDatasources bool
+}
+
 // The packer.Handler handles all Packer things.
 type Handler interface {
-	Initialize() hcl.Diagnostics
+	Initialize(InitializeOptions) hcl.Diagnostics
 	Evaluator
 	BuildGetter
 	ConfigFixer

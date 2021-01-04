@@ -129,11 +129,12 @@ func discoverAndLoad() error {
 	}
 
 	// TODO: validate correctness of plugins loaded by checking them against the output of the `describe` command.
-	builders, provisioners, postProcessors := config.GetPlugins()
+	builders, provisioners, postProcessors, datasources := config.GetPlugins()
 	if len(builders) == 0 &&
 		len(provisioners) == 0 &&
-		len(postProcessors) == 0 {
-		return fmt.Errorf("couldn't load any Builder/Provisioner/Post-Processor from the plugin binary")
+		len(postProcessors) == 0 &&
+		len(datasources) == 0 {
+		return fmt.Errorf("couldn't load any Builder/Provisioner/Post-Processor/Datasource from the plugin binary")
 	}
 
 	return checkHCL2ConfigSpec(builders, provisioners, postProcessors)

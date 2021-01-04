@@ -148,7 +148,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if ret != 0 {
 		return ret
 	}
-	diags := packerStarter.Initialize()
+	diags := packerStarter.Initialize(packer.InitializeOptions{})
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret

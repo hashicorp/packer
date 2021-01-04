@@ -257,8 +257,25 @@ func sniffCoreVersionRequirements(body hcl.Body) ([]VersionConstraint, hcl.Diagn
 	return constraints, diags
 }
 
-func (cfg *PackerConfig) Initialize() hcl.Diagnostics {
+func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
 	var diags hcl.Diagnostics
+
+	if cfg.DataSources != nil {
+		if opts.SkipDatasources {
+			placeholder := DataSourcesPlaceholder{}
+			for ref, datastore := range cfg.DataSources.(DataSourcesMap) {
+				placeholder[ref] = datastore
+			}
+			cfg.DataSources = placeholder
+		}
+
+		dataValues, morediags := cfg.DataSources.Values(cfg.dataStoreSchemas)
+		diags = append(diags, morediags...)
+		if cfg.datasources == nil {
+			cfg.datasources = map[string]cty.Value{}
+		}
+		cfg.datasources[dataAccessor] = cty.ObjectVal(dataValues)
+	}
 
 	_, moreDiags := cfg.InputVariables.Values()
 	diags = append(diags, moreDiags...)
@@ -346,6 +363,11 @@ func (p *Parser) decodeDataSources(file *hcl.File, cfg *PackerConfig) hcl.Diagno
 	content, moreDiags := body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 
+	datasources := DataSourcesMap{}
+	if cfg.DataSources != nil {
+		datasources = cfg.DataSources.(DataSourcesMap)
+	}
+
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case dataSourceLabel:
@@ -355,7 +377,7 @@ func (p *Parser) decodeDataSources(file *hcl.File, cfg *PackerConfig) hcl.Diagno
 				continue
 			}
 			ref := datasource.Ref()
-			if existing, found := cfg.DataSources[ref]; found {
+			if existing, found := datasources[ref]; found {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Duplicate " + dataSourceLabel + " block",
@@ -367,12 +389,11 @@ func (p *Parser) decodeDataSources(file *hcl.File, cfg *PackerConfig) hcl.Diagno
 				})
 				continue
 			}
-
-			if cfg.DataSources == nil {
-				cfg.DataSources = DataSources{}
-			}
-			cfg.DataSources[ref] = *datasource
+			datasources[ref] = *datasource
 		}
+	}
+	if len(datasources) > 0 {
+		cfg.DataSources = datasources
 	}
 	return diags
 }

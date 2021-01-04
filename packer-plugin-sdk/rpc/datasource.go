@@ -48,17 +48,23 @@ func (d *datasource) OutputSpec() hcldec.ObjectSpec {
 	return res
 }
 
+type ExecuteResponse struct {
+	Value []byte
+	Error *BasicError
+}
+
 func (d *datasource) Execute() (cty.Value, error) {
-	nextId := d.mux.NextId()
-	server := newServerWithMux(d.mux, nextId)
-	go server.Serve()
-
-	var result cty.Value
-	if err := d.client.Call(d.endpoint+".Execute", nextId, &result); err != nil {
-		return cty.NilVal, err
+	res := new(cty.Value)
+	resp := new(ExecuteResponse)
+	if err := d.client.Call(d.endpoint+".Execute", new(interface{}), resp); err != nil {
+		err := fmt.Errorf("Datasource.Execute failed: %v", err)
+		return *res, err
 	}
-
-	return result, nil
+	err := gob.NewDecoder(bytes.NewReader(resp.Value)).Decode(&res)
+	if err != nil {
+		return *res, err
+	}
+	return *res, nil
 }
 
 // DataSourceServer wraps a packersdk.DataSource implementation and makes it
@@ -87,21 +93,13 @@ func (d *DataSourceServer) OutputSpec(args *DataSourceConfigureArgs, reply *Outp
 	return err
 }
 
-func (d *DataSourceServer) Execute(streamId uint32, reply *interface{}) error {
-	client, err := newClientWithMux(d.mux, streamId)
-	if err != nil {
-		return NewBasicError(err)
-	}
-	defer client.Close()
-
-	if d.context == nil {
-		d.context, d.contextCancel = context.WithCancel(context.Background())
-	}
-	if _, err := d.d.Execute(); err != nil {
-		return NewBasicError(err)
-	}
-
-	return nil
+func (d *DataSourceServer) Execute(args *interface{}, reply *ExecuteResponse) error {
+	spec, err := d.d.Execute()
+	reply.Error = NewBasicError(err)
+	b := bytes.NewBuffer(nil)
+	err = gob.NewEncoder(b).Encode(spec)
+	reply.Value = b.Bytes()
+	return err
 }
 
 func (d *DataSourceServer) Cancel(args *interface{}, reply *interface{}) error {
