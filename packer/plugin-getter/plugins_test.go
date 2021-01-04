@@ -36,7 +36,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					pluginFolderOne,
 				},
 				BinaryInstallationOptions{
-					Extension: ".0_x4",
+					Extension: "_x4",
 					OS:        "darwin",
 					ARCH:      "amd64",
 					Checksummers: []Checksummer{
@@ -73,7 +73,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					pluginFolderOne,
 				},
 				BinaryInstallationOptions{
-					Extension: ".0_x4.exe",
+					Extension: "_x4.exe",
 					OS:        "windows",
 					ARCH:      "amd64",
 					Checksummers: []Checksummer{
@@ -111,7 +111,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					pluginFolderTwo,
 				},
 				BinaryInstallationOptions{
-					Extension: ".0_x4.exe",
+					Extension: "_x4.exe",
 					OS:        "windows",
 					ARCH:      "amd64",
 					Checksummers: []Checksummer{

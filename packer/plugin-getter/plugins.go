@@ -31,8 +31,9 @@ type Requirement struct {
 }
 
 type BinaryInstallationOptions struct {
-	// Usually ".0_x4" for the 4th API version protocol
-	// Should be ".0_x4.exe" on windows.
+	// Usually "_x4" for the 4th API version protocol
+	// Should be "_x4.exe" on windows.
+	// Extension is just a file suffix really.
 	Extension string
 	// OS and ARCH usually should be runtime.GOOS and runtime.ARCH, they allow
 	// to pick the correct binary.
@@ -243,6 +244,11 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 				if pr.VersionConstraints.Check(v) {
 					versions = append(versions, v)
 				}
+			}
+			if len(versions) == 0 {
+				err := fmt.Errorf("no matching version found in releases.")
+				log.Printf("[TRACE] %s", err.Error())
+				continue
 			}
 			sort.Sort(versions)
 			getOpts.Version = "v" + versions[0].String()
