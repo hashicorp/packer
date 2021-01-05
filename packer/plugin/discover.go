@@ -237,7 +237,7 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 	for _, builderName := range desc.Builders {
 		builderName := builderName // copy to avoid pointer overwrite issue
 		key := pluginPrefix + builderName
-		if builderName == "default" {
+		if builderName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
 		}
 		c.builders[key] = func() (packersdk.Builder, error) {
@@ -251,7 +251,7 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 	for _, postProcessorName := range desc.PostProcessors {
 		postProcessorName := postProcessorName // copy to avoid pointer overwrite issue
 		key := pluginPrefix + postProcessorName
-		if postProcessorName == "default" {
+		if postProcessorName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
 		}
 		c.postProcessors[key] = func() (packersdk.PostProcessor, error) {
@@ -265,7 +265,7 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 	for _, provisionerName := range desc.Provisioners {
 		provisionerName := provisionerName // copy to avoid pointer overwrite issue
 		key := pluginPrefix + provisionerName
-		if provisionerName == "default" {
+		if provisionerName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
 		}
 		c.provisioners[key] = func() (packersdk.Provisioner, error) {
