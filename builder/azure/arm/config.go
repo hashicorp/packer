@@ -196,20 +196,20 @@ type Config struct {
 	// Image Definition won't use this Image Version.
 	SharedGalleryImageVersionExcludeFromLatest bool `mapstructure:"shared_gallery_image_version_exclude_from_latest" required:"false"`
 	// Name of the publisher to use for your base image (Azure Marketplace Images only). See
-	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)
 	// for details.
 	//
 	// CLI example `az vm image list-publishers --location westus`
 	ImagePublisher string `mapstructure:"image_publisher" required:"true"`
 	// Name of the publisher's offer to use for your base image (Azure Marketplace Images only). See
-	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)
 	// for details.
 	//
 	// CLI example
 	// `az vm image list-offers --location westus --publisher Canonical`
 	ImageOffer string `mapstructure:"image_offer" required:"true"`
 	// SKU of the image offer to use for your base image (Azure Marketplace Images only). See
-	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)
 	// for details.
 	//
 	// CLI example

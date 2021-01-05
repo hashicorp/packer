@@ -16,7 +16,7 @@ import (
 
 type ConfigParamsConfig struct {
 	// configuration_parameters is a direct passthrough to the VSphere API's
-	// ConfigSpec: https://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.vm.ConfigSpec.html
+	// ConfigSpec: https://www.vmware.com/support/developer/vc-sdk/visdk41pubs/ApiReference/vim.vm.ConfigSpec.html
 	ConfigParams map[string]string `mapstructure:"configuration_parameters"`
 
 	// Enables time synchronization with the host. Defaults to false.

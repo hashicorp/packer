@@ -71,7 +71,7 @@ type Config struct {
 	//  * ebfb681885ddf1234c18094a45bbeafd91467911
 	//  * sha256:ed363350696a726b7932db864dda019bd2017365c9e299627830f06954643f93
 	//  * ed363350696a726b7932db864dda019bd2017365c9e299627830f06954643f93
-	//  * file:http://releases.ubuntu.com/20.04/MD5SUMS
+	//  * file:http://releases.ubuntu.com/20.04/SHA256SUMS
 	//  * file:file://./local/path/file.sum
 	//  * file:./local/path/file.sum
 	//  * none

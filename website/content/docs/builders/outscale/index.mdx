@@ -105,13 +105,13 @@ export OUTSCALE_X509KEY="the/path/to/your/x509key"
 ### Checking that system time is current
 
 Outscale uses the current time as part of the [request signing
-process](http://docs.aws.osc.com/general/latest/gr/sigv4_signing.html). If
+process](https://wiki.outscale.net/display/EN/About+Signatures+of+API+Requests). If
 your system clock is too skewed from the current time, your requests might
 fail. If that's the case, you might see an error like this:
 
     ==> osc-bsu: Error querying OMI: AuthFailure: OUTSCALE was not able to validate the provided access credentials
 
 If you suspect your system's date is wrong, you can compare it against
-<http://www.time.gov/>. On Linux/OS X, you can run the `date` command to get
+<https://www.time.gov/>. On Linux/OS X, you can run the `date` command to get
 the current time. If you're on Linux, you can try setting the time with ntp by
 running `sudo ntpd -q`.
