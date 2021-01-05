@@ -41,6 +41,12 @@ can also be supplied to override the typical auto-generated key:
 
 @include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
 
+<!--
+  Linode.com has DDOS protection that returns 403 for the markdown link checker
+  so the domain has been added to the ignorepatterns in mlc_config.json
+
+  See https://github.com/tcort/markdown-link-check/issues/109
+-->
 ### Required
 
 - `linode_token` (string) - The client TOKEN to use to access your account.
