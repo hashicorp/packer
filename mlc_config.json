@@ -1,0 +1,15 @@
+{
+   "ignorePatterns": [
+    {
+      "pattern": "^https://github.com/hashicorp/packer-plugin-scaffolding"
+    }
+  ],
+  "replacementPatterns": [
+    {
+      "pattern": "^/",
+      "replacement": "https://packer.io/"
+    }
+  ],
+  "timeout": "20s",
+  "retryOn429": true
+}
