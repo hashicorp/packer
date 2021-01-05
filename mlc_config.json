@@ -1,6 +1,15 @@
 {
    "ignorePatterns": [
     {
+      "pattern": "^https://example.com"
+    },
+    {
+      "pattern": "^https://ec2.custom.endpoint.com"
+    },
+    {
+      "pattern": "^https://www.linode.com"
+    },
+    {
       "pattern": "^https://github.com/hashicorp/packer-plugin-scaffolding"
     }
   ],

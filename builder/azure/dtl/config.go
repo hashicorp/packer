@@ -143,20 +143,20 @@ type Config struct {
 	SharedGalleryTimeout time.Duration `mapstructure:"shared_image_gallery_timeout"`
 
 	// PublisherName for your base image. See
-	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)
 	// for details.
 	//
 	// CLI example `az vm image list-publishers --location westus`
 	ImagePublisher string `mapstructure:"image_publisher"`
 	// Offer for your base image. See
-	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)
 	// for details.
 	//
 	// CLI example
 	// `az vm image list-offers --location westus --publisher Canonical`
 	ImageOffer string `mapstructure:"image_offer"`
 	// SKU for your base image. See
-	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)
 	// for details.
 	//
 	// CLI example
