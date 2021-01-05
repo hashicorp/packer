@@ -16,7 +16,7 @@ func TestParse_datasource(t *testing.T) {
 			parseTestArgs{"testdata/datasources/basic.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "datasources"),
-				DataSources: DataSourcesMap{
+				DataSources: DataSources{
 					{
 						Type: "amazon-ami",
 						Name: "test",
@@ -65,7 +65,7 @@ func TestParse_datasource(t *testing.T) {
 			parseTestArgs{"testdata/datasources/duplicate.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "datasources"),
-				DataSources: DataSourcesMap{
+				DataSources: DataSources{
 					{
 						Type: "amazon-ami",
 						Name: "test",

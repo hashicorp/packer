@@ -261,20 +261,8 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 	var diags hcl.Diagnostics
 
 	if cfg.DataSources != nil {
-		if opts.SkipDatasources {
-			placeholder := DataSourcesPlaceholder{}
-			for ref, datastore := range cfg.DataSources.(DataSourcesMap) {
-				placeholder[ref] = datastore
-			}
-			cfg.DataSources = placeholder
-		}
-
-		dataValues, morediags := cfg.DataSources.Values(cfg.dataStoreSchemas)
-		diags = append(diags, morediags...)
-		if cfg.datasources == nil {
-			cfg.datasources = map[string]cty.Value{}
-		}
-		cfg.datasources[dataAccessor] = cty.ObjectVal(dataValues)
+		moreDiags := cfg.evaluateDatasources(opts.ValidationOnly)
+		diags = append(diags, moreDiags...)
 	}
 
 	_, moreDiags := cfg.InputVariables.Values()
@@ -300,6 +288,47 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 	for _, file := range cfg.files {
 		diags = append(diags, cfg.parser.decodeConfig(file, cfg)...)
 	}
+
+	return diags
+}
+
+func (cfg *PackerConfig) evaluateDatasources(validationOnly bool) hcl.Diagnostics {
+	res := map[string]cty.Value{}
+	var diags hcl.Diagnostics
+
+	for ref, _ := range cfg.DataSources {
+		datasource, startDiags := cfg.startDatasource(cfg.dataStoreSchemas, ref)
+		diags = append(diags, startDiags...)
+		if diags.HasErrors() {
+			continue
+		}
+
+		value := cty.Value{}
+		if validationOnly {
+			placeholderValue := getSpecValue(datasource.OutputSpec()[ref.Type])
+			value = placeholderValue
+		} else {
+			realValue, err := datasource.Execute()
+			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Summary:  err.Error(),
+					Subject:  &cfg.DataSources[ref].block.DefRange,
+					Severity: hcl.DiagError,
+				})
+				continue
+			}
+			value = realValue
+		}
+
+		inner := map[string]cty.Value{}
+		inner[ref.Name] = value
+		res[ref.Type] = cty.MapVal(inner)
+	}
+
+	if cfg.datasources == nil {
+		cfg.datasources = map[string]cty.Value{}
+	}
+	cfg.datasources[dataAccessor] = cty.ObjectVal(res)
 
 	return diags
 }
@@ -363,11 +392,6 @@ func (p *Parser) decodeDataSources(file *hcl.File, cfg *PackerConfig) hcl.Diagno
 	content, moreDiags := body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 
-	datasources := DataSourcesMap{}
-	if cfg.DataSources != nil {
-		datasources = cfg.DataSources.(DataSourcesMap)
-	}
-
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case dataSourceLabel:
@@ -377,7 +401,7 @@ func (p *Parser) decodeDataSources(file *hcl.File, cfg *PackerConfig) hcl.Diagno
 				continue
 			}
 			ref := datasource.Ref()
-			if existing, found := datasources[ref]; found {
+			if existing, found := cfg.DataSources[ref]; found {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Duplicate " + dataSourceLabel + " block",
@@ -389,11 +413,12 @@ func (p *Parser) decodeDataSources(file *hcl.File, cfg *PackerConfig) hcl.Diagno
 				})
 				continue
 			}
-			datasources[ref] = *datasource
+			if cfg.DataSources == nil {
+				cfg.DataSources = DataSources{}
+			}
+			cfg.DataSources[ref] = *datasource
 		}
 	}
-	if len(datasources) > 0 {
-		cfg.DataSources = datasources
-	}
+
 	return diags
 }

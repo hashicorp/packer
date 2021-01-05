@@ -57,7 +57,7 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 	}
 
 	diags := packerStarter.Initialize(packer.InitializeOptions{
-		SkipDatasources: true,
+		ValidationOnly: true,
 	})
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {

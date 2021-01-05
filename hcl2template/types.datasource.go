@@ -2,11 +2,12 @@ package hcl2template
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -18,8 +19,7 @@ type DataSource struct {
 	block *hcl.Block
 }
 
-type DataSourcesPlaceholder map[DataSourceRef]DataSource
-type DataSourcesMap map[DataSourceRef]DataSource
+type DataSources map[DataSourceRef]DataSource
 
 func (data *DataSource) Ref() DataSourceRef {
 	return DataSourceRef{
@@ -28,71 +28,54 @@ func (data *DataSource) Ref() DataSourceRef {
 	}
 }
 
-type DataSources interface {
-	Values(dataSources packer.DataSourceStore) (map[string]cty.Value, hcl.Diagnostics)
+type DataSourceRef struct {
+	Type string
+	Name string
 }
 
-func (datasources DataSourcesMap) Values(dataSources packer.DataSourceStore) (map[string]cty.Value, hcl.Diagnostics) {
-	res := map[string]cty.Value{}
-	var diags hcl.Diagnostics
-	for ref, _ := range datasources {
-		d, err := dataSources.Start(ref.Type) // d cmdDataSource
-		if err != nil {
-			diags = append(diags, &hcl.Diagnostic{
-				Summary:  err.Error(),
-				Detail:   fmt.Sprintf("failed to start plugin data.%s.%s", ref.Type, ref.Name),
-				Severity: hcl.DiagError,
-			})
-		}
-		if d == nil {
-			diags = append(diags, &hcl.Diagnostic{
-				Summary:  err.Error(),
-				Detail:   fmt.Sprintf("failed to start plugin data.%s.%s", ref.Type, ref.Name),
-				Severity: hcl.DiagError,
-			})
-			continue
-		}
-		inner := map[string]cty.Value{}
-
-		value, err := d.Execute()
-		if err != nil {
-			diags = append(diags, &hcl.Diagnostic{
-				Summary:  err.Error(),
-				Detail:   fmt.Sprintf("failed to execute data.%s.%s", ref.Type, ref.Name),
-				Severity: hcl.DiagError,
-			})
-		}
-		inner[ref.Name] = value
-		res[ref.Type] = cty.MapVal(inner)
+// the 'addition' field makes of ref a different entry in the data sources map, so
+// Ref is here to make sure only one is returned.
+func (r *DataSourceRef) Ref() DataSourceRef {
+	return DataSourceRef{
+		Type: r.Type,
+		Name: r.Name,
 	}
-	return res, diags
 }
 
-func (datasources DataSourcesPlaceholder) Values(dataSources packer.DataSourceStore) (map[string]cty.Value, hcl.Diagnostics) {
-	res := map[string]cty.Value{}
+func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DataSourceStore, ref DataSourceRef) (packersdk.DataSource, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	for ref, _ := range datasources {
-		d, err := dataSources.Start(ref.Type) // d cmdDataSource
-		if err != nil {
-			diags = append(diags, &hcl.Diagnostic{
-				Summary:  err.Error(),
-				Detail:   fmt.Sprintf("failed to start plugin data.%s.%s", ref.Type, ref.Name),
-				Severity: hcl.DiagError,
-			})
-		}
-		if d == nil {
-			diags = append(diags, &hcl.Diagnostic{
-				Summary:  err.Error(),
-				Detail:   fmt.Sprintf("failed to start plugin data.%s.%s", ref.Type, ref.Name),
-				Severity: hcl.DiagError,
-			})
-			continue
-		}
-		inner := map[string]cty.Value{}
-		inner[ref.Name] = getSpecValue(d.OutputSpec()[ref.Type])
-		res[ref.Type] = cty.MapVal(inner)
+	block := cfg.DataSources[ref].block
+
+	datasource, err := dataSourceStore.Start(ref.Type)
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary:  err.Error(),
+			Subject:  &block.DefRange,
+			Severity: hcl.DiagError,
+		})
 	}
-	return res, diags
+	if datasource == nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary:  fmt.Sprintf("failed to start datasource plugin %q.%q", ref.Type, ref.Name),
+			Subject:  &block.DefRange,
+			Severity: hcl.DiagError,
+		})
+	}
+	body := block.Body
+	decoded, moreDiags := decodeHCL2Spec(body, cfg.EvalContext(nil), datasource)
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		return nil, diags
+	}
+
+	if err := datasource.Configure(decoded); err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary:  err.Error(),
+			Subject:  &block.DefRange,
+			Severity: hcl.DiagError,
+		})
+	}
+	return datasource, diags
 }
 
 func (p *Parser) decodeDataBlock(block *hcl.Block) (*DataSource, hcl.Diagnostics) {
@@ -140,20 +123,6 @@ func (p *Parser) decodeDataBlock(block *hcl.Block) (*DataSource, hcl.Diagnostics
 	}
 
 	return r, diags
-}
-
-type DataSourceRef struct {
-	Type string
-	Name string
-}
-
-// the 'addition' field makes of ref a different entry in the data sources map, so
-// Ref is here to make sure only one is returned.
-func (r *DataSourceRef) Ref() DataSourceRef {
-	return DataSourceRef{
-		Type: r.Type,
-		Name: r.Name,
-	}
 }
 
 func getSpecValue(spec hcldec.Spec) cty.Value {

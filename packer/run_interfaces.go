@@ -29,8 +29,8 @@ type Evaluator interface {
 
 type InitializeOptions struct {
 	// When set, GetBuilds will skip the execution of datasources and will use
-	// the placeholder provided by the datasource itself for validation purpose.
-	SkipDatasources bool
+	// the placeholder provided by the datasource itself for validation only.
+	ValidationOnly bool
 }
 
 // The packer.Handler handles all Packer things.

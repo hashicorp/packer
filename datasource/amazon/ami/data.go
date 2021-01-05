@@ -20,11 +20,9 @@ func (d *DataSource) OutputSpec() hcldec.ObjectSpec {
 }
 
 func (d *DataSource) Configure(...interface{}) error {
-	// TODO sylviamoss datasource implement
 	return nil
 }
 
 func (d *DataSource) Execute() (cty.Value, error) {
-	// TODO sylviamoss datasource implement
 	return cty.StringVal("ami-0568456c"), nil
 }
