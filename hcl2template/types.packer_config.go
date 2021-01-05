@@ -49,7 +49,6 @@ type PackerConfig struct {
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
 
-	datasources           map[string]cty.Value
 	builderSchemas        packer.BuilderStore
 	provisionersSchemas   packer.ProvisionerStore
 	postProcessorsSchemas packer.PostProcessorStore
@@ -82,6 +81,7 @@ const (
 func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalContext {
 	inputVariables, _ := cfg.InputVariables.Values()
 	localVariables, _ := cfg.LocalVariables.Values()
+	datasourceVariables, _ := cfg.DataSources.Values()
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
@@ -99,6 +99,7 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
 				"root": cty.StringVal(strings.ReplaceAll(cfg.Basedir, `\`, `/`)),
 			}),
+			dataAccessor: cty.ObjectVal(datasourceVariables),
 		},
 	}
 	for k, v := range variables {
@@ -220,7 +221,7 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	value, moreDiags := local.Expr.Value(c.EvalContext(c.datasources))
+	value, moreDiags := local.Expr.Value(c.EvalContext(nil))
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return diags
@@ -233,6 +234,41 @@ func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics 
 			From:  "default",
 		}},
 		Type: value.Type(),
+	}
+
+	return diags
+}
+
+func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	for ref, ds := range cfg.DataSources {
+		if ds.value != (cty.Value{}) {
+			continue
+		}
+
+		datasource, startDiags := cfg.startDatasource(cfg.dataStoreSchemas, ref)
+		diags = append(diags, startDiags...)
+		if diags.HasErrors() {
+			continue
+		}
+
+		if skipExecution {
+			placeholderValue := getSpecValue(datasource.OutputSpec()[ref.Type])
+			ds.value = placeholderValue
+		} else {
+			realValue, err := datasource.Execute()
+			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Summary:  err.Error(),
+					Subject:  &cfg.DataSources[ref].block.DefRange,
+					Severity: hcl.DiagError,
+				})
+				continue
+			}
+			ds.value = realValue
+		}
+		cfg.DataSources[ref] = ds
 	}
 
 	return diags
@@ -396,7 +432,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				}
 			}
 
-			builder, moreDiags, generatedVars := cfg.startBuilder(src, cfg.EvalContext(cfg.datasources), opts)
+			builder, moreDiags, generatedVars := cfg.startBuilder(src, cfg.EvalContext(nil), opts)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue

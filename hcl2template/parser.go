@@ -260,15 +260,11 @@ func sniffCoreVersionRequirements(body hcl.Body) ([]VersionConstraint, hcl.Diagn
 func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	if cfg.DataSources != nil {
-		moreDiags := cfg.evaluateDatasources(opts.ValidationOnly)
-		diags = append(diags, moreDiags...)
-	}
-
 	_, moreDiags := cfg.InputVariables.Values()
 	diags = append(diags, moreDiags...)
 	_, moreDiags = cfg.LocalVariables.Values()
 	diags = append(diags, moreDiags...)
+	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
 	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
 
 	for _, variable := range cfg.InputVariables {
@@ -288,47 +284,6 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 	for _, file := range cfg.files {
 		diags = append(diags, cfg.parser.decodeConfig(file, cfg)...)
 	}
-
-	return diags
-}
-
-func (cfg *PackerConfig) evaluateDatasources(validationOnly bool) hcl.Diagnostics {
-	res := map[string]cty.Value{}
-	var diags hcl.Diagnostics
-
-	for ref, _ := range cfg.DataSources {
-		datasource, startDiags := cfg.startDatasource(cfg.dataStoreSchemas, ref)
-		diags = append(diags, startDiags...)
-		if diags.HasErrors() {
-			continue
-		}
-
-		value := cty.Value{}
-		if validationOnly {
-			placeholderValue := getSpecValue(datasource.OutputSpec()[ref.Type])
-			value = placeholderValue
-		} else {
-			realValue, err := datasource.Execute()
-			if err != nil {
-				diags = append(diags, &hcl.Diagnostic{
-					Summary:  err.Error(),
-					Subject:  &cfg.DataSources[ref].block.DefRange,
-					Severity: hcl.DiagError,
-				})
-				continue
-			}
-			value = realValue
-		}
-
-		inner := map[string]cty.Value{}
-		inner[ref.Name] = value
-		res[ref.Type] = cty.MapVal(inner)
-	}
-
-	if cfg.datasources == nil {
-		cfg.datasources = map[string]cty.Value{}
-	}
-	cfg.datasources[dataAccessor] = cty.ObjectVal(res)
 
 	return diags
 }

@@ -16,6 +16,7 @@ type DataSource struct {
 	Type string
 	Name string
 
+	value cty.Value
 	block *hcl.Block
 }
 
@@ -26,6 +27,28 @@ func (data *DataSource) Ref() DataSourceRef {
 		Type: data.Type,
 		Name: data.Name,
 	}
+}
+
+func (ds *DataSources) Values() (map[string]cty.Value, hcl.Diagnostics) {
+	var diags hcl.Diagnostics
+	res := map[string]cty.Value{}
+
+	for ref, datasource := range *ds {
+		if datasource.value == (cty.Value{}) {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary:  fmt.Sprintf("empty value"),
+				Subject:  &datasource.block.DefRange,
+				Severity: hcl.DiagError,
+			})
+			continue
+		}
+
+		inner := map[string]cty.Value{}
+		inner[ref.Name] = datasource.value
+		res[ref.Type] = cty.MapVal(inner)
+	}
+
+	return res, diags
 }
 
 type DataSourceRef struct {
