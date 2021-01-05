@@ -149,9 +149,9 @@ func (p *Parser) decodeDataBlock(block *hcl.Block) (*DataSource, hcl.Diagnostics
 }
 
 func getSpecValue(spec hcldec.Spec) cty.Value {
-	switch spec.(type) {
+	switch spec := spec.(type) {
 	case *hcldec.LiteralSpec:
-		return spec.(*hcldec.LiteralSpec).Value
+		return spec.Value
 	}
 	return cty.UnknownVal(hcldec.ImpliedType(spec))
 }

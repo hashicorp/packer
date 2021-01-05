@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"bytes"
-	"context"
 	"encoding/gob"
 	"fmt"
 
@@ -70,7 +69,6 @@ func (d *datasource) Execute() (cty.Value, error) {
 // DataSourceServer wraps a packersdk.DataSource implementation and makes it
 // exportable as part of a Golang RPC server.
 type DataSourceServer struct {
-	context       context.Context
 	contextCancel func()
 
 	commonServer
