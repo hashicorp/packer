@@ -4,19 +4,30 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/google/go-github/v33/github"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
+	"golang.org/x/oauth2"
+)
+
+const (
+	ghTokenAccessor  = "PKR_GITHUB_API_TOKEN"
+	defaultUserAgent = "curl/7.64.1"
+	defaultMediaType = "application/octet-stream"
 )
 
 type Getter struct {
-	Client *http.Client
+	Client *github.Client
 }
 
 var _ plugingetter.Getter = &Getter{}
@@ -24,14 +35,18 @@ var _ plugingetter.Getter = &Getter{}
 // transformVersionStream get a stream from github tags and transforms it into
 // something Packer wants, namely a json list of Release.
 func transformVersionStream(in io.ReadCloser) (io.ReadCloser, error) {
+	if in == nil {
+		return nil, fmt.Errorf("transformVersionStream got nil body")
+	}
 	defer in.Close()
-
 	dec := json.NewDecoder(in)
 
 	m := []struct {
 		Ref string `json:"ref"`
 	}{}
-	dec.Decode(&m)
+	if err := dec.Decode(&m); err != nil {
+		return nil, err
+	}
 
 	out := []plugingetter.Release{}
 	for _, m := range m {
@@ -48,21 +63,75 @@ func transformVersionStream(in io.ReadCloser) (io.ReadCloser, error) {
 	return ioutil.NopCloser(buf), nil
 }
 
-func getPluginURL(opts plugingetter.GetOptions) string {
-	return "https://api." + opts.PluginRequirement.Identifier.Hostname + "/repos/" + opts.PluginRequirement.Identifier.Namespace + "/" + opts.PluginRequirement.Identifier.Type
+type HostSpecificTokenAuthTransport struct {
+	TokenSources map[string]oauth2.TokenSource
+
+	// Transport is the underlying HTTP transport to use when making requests.
+	// It will default to http.DefaultTransport if nil.
+	Transport http.RoundTripper
+
+	Base http.RoundTripper
+}
+
+// RoundTrip authorizes and authenticates the request with an
+// access token from Transport's Source.
+func (t *HostSpecificTokenAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	source, found := t.TokenSources[req.Host]
+	if found {
+		reqBodyClosed := false
+		if req.Body != nil {
+			defer func() {
+				if !reqBodyClosed {
+					req.Body.Close()
+				}
+			}()
+		}
+
+		if source == nil {
+			return nil, errors.New("transport's Source is nil")
+		}
+		token, err := source.Token()
+		if err != nil {
+			return nil, err
+		}
+
+		token.SetAuthHeader(req)
+
+		// req.Body is assumed to be closed by the base RoundTripper.
+		reqBodyClosed = true
+	}
+
+	return t.base().RoundTrip(req)
+}
+
+func (t *HostSpecificTokenAuthTransport) base() http.RoundTripper {
+	if t.Base != nil {
+		return t.Base
+	}
+	return http.DefaultTransport
 }
 
 func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, error) {
+	ctx := context.TODO()
+	log.Printf("[TRACE] github.get %s", what)
 	if g.Client == nil {
-		g.Client = &http.Client{}
+		var tc *http.Client
+		if tk := os.Getenv(ghTokenAccessor); tk != "" {
+			log.Printf("[TRACE] Using Github token")
+			ts := oauth2.StaticTokenSource(
+				&oauth2.Token{AccessToken: tk},
+			)
+			tc = &http.Client{
+				Transport: &HostSpecificTokenAuthTransport{
+					TokenSources: map[string]oauth2.TokenSource{
+						"api.github.com": ts,
+					},
+				},
+			}
+		}
+		g.Client = github.NewClient(tc)
+		g.Client.UserAgent = defaultUserAgent
 	}
-	ctx := context.Background()
-
-	sha256 := httptest.NewServer(
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"))
-		}),
-	)
 
 	binary := httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -70,48 +139,51 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 		}),
 	)
 
+	var req *http.Request
+	var err error
+	transform := func(in io.ReadCloser) (io.ReadCloser, error) {
+		return in, nil
+	}
+
 	switch what {
 	case "releases":
-		req, err := httpNewRequest(ctx, "GET", getPluginURL(opts)+"/git/matching-refs/tags", nil)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := g.Client.Do(req)
-		if err != nil {
-			return nil, err
-		}
-		return transformVersionStream(resp.Body)
+		req, err = g.Client.NewRequest("GET", filepath.Join("/repos/", opts.PluginRequirement.Identifier.RealRelativePath(), "/git/matching-refs/tags"), nil)
+		req.Header.Set("User-Agent", "Potato")
+		transform = transformVersionStream
 	case "sha256":
-		req, err := httpNewRequest(ctx, "GET", sha256.URL, nil)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := g.Client.Do(req)
-		if err != nil {
-			return nil, err
-		}
-		return resp.Body, nil
+		// something like https://github.com/azr/packer-plugin-amazon/releases/download/v0.0.1/sha256
+		req, err = g.Client.NewRequest("GET", "https://github.com/azr/packer-plugin-amazon/releases/download/v0.0.1/sha256", nil)
+		header := req.Header
+		header.Del("Authorization")
+		req.Header = header
 	case "binary":
-		req, err := httpNewRequest(ctx, "GET", binary.URL, nil)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := g.Client.Do(req)
-		if err != nil {
-			return nil, err
-		}
-		return resp.Body, nil
+		req, err = g.Client.NewRequest("GET", binary.URL, nil)
+		header := req.Header
+		header.Del("Authorization")
+		req.Header = header
+	default:
+		return nil, fmt.Errorf("%q not implemented", what)
 	}
-	return nil, fmt.Errorf("not implemented")
-}
-
-func httpNewRequest(ctx context.Context, method, url string, body io.Reader) (*http.Request, error) {
-	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
 		return nil, err
 	}
-	if tk := os.Getenv("HOMEBREW_GITHUB_API_TOKEN"); tk != "" {
-		req.SetBasicAuth("username", tk)
+	resp, err := g.Client.BareDo(ctx, req)
+	if err != nil {
+		b, _ := ioutil.ReadAll(resp.Body)
+		log.Printf("[TRACE] Request %#v failed: %#v. Resp: %s", req, err, string(b))
+		return nil, err
 	}
-	return req, nil
+
+	if c := resp.StatusCode; 200 <= c && c <= 299 {
+		return transform(resp.Body)
+	}
+
+	defer resp.Body.Close()
+	log.Printf("[TRACE] Request %#v failed: %v", req, resp.Status)
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("Request failed: %s", string(b))
+	return nil, err
 }

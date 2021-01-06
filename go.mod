@@ -45,6 +45,7 @@ require (
 	github.com/gofrs/flock v0.7.3
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/google/go-cmp v0.5.2
+	github.com/google/go-github/v33 v33.0.0
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
 	github.com/google/uuid v1.1.1
@@ -146,5 +147,7 @@ require (
 	gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
+
+replace github.com/google/go-github/v33 => /Users/azr/go/src/github.com/azr/go-github
 
 go 1.13

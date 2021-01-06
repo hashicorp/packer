@@ -70,7 +70,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 	res := InstallList{}
 	filenamePrefix := pr.filenamePrefix()
 	filenameSuffix := opts.filenameSuffix()
-	log.Printf("listing potential installations for %q", pr.Identifier.ForDisplay())
+	log.Printf("[TRACE] listing potential installations for %q that match %q", pr.Identifier.ForDisplay(), pr.VersionConstraints)
 	for _, knownFolder := range opts.FromFolders {
 		glob := filepath.Join(knownFolder, pr.Identifier.Hostname, pr.Identifier.Namespace, pr.Identifier.Type, filenamePrefix+"*"+filenameSuffix)
 
@@ -246,7 +246,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 				}
 			}
 			if len(versions) == 0 {
-				err := fmt.Errorf("no matching version found in releases.")
+				err := fmt.Errorf("no matching version found in releases. In %v", releases)
 				log.Printf("[TRACE] %s", err.Error())
 				continue
 			}
@@ -303,7 +303,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 
 				checksumFile, err := getter.Get(checksummer.Type, getOpts)
 				if err != nil {
-					err := fmt.Errorf("%q getter could not get %s: %w", getter, checksum.Type, err)
+					err := fmt.Errorf("could not get checksum file: %s", err.Error())
 					log.Printf("[TRACE] %s", err.Error())
 					return nil, err
 				}
@@ -326,6 +326,10 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 				}
 			}
 		}
+	}
+
+	if checksum == nil {
+		return nil, fmt.Errorf("Could not find a valid checksum for %s", outputFile)
 	}
 
 	// if outputFile is there and matches the checksum: do nothing

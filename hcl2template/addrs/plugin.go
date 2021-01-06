@@ -15,6 +15,14 @@ type Plugin struct {
 	Hostname  string
 }
 
+func (p Plugin) RealRelativePath() string {
+	ns := DefaultPluginNamespace
+	if p.Namespace != "" {
+		ns = p.Namespace
+	}
+	return "/" + ns + "/packer-plugin-" + p.Type
+}
+
 func (p Plugin) Parts() []string {
 	return []string{p.Hostname, p.Namespace, p.Type}
 }
