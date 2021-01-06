@@ -15,6 +15,7 @@ export default function GuidesLayout(props) {
       subpath={subpath}
       order={order}
       staticProps={props}
+      mainBranch="master"
     />
   )
 }
