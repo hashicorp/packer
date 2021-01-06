@@ -20,6 +20,7 @@ This subdirectory contains the entire source for the [Packer Website](https://pa
 - [Editing Markdown Content](#editing-markdown-content)
 - [Editing Navigation Sidebars](#editing-navigation-sidebars)
 - [Changing the Release Version](#changing-the-release-version)
+- [Link Validation](#link-validation)
 - [Redirects](#redirects)
 - [Browser Support](#browser-support)
 - [Deployment](#deployment)
@@ -148,7 +149,7 @@ $ curl ...
 </Tab>
 </Tabs>
 
-Contined normal markdown content
+Continued normal markdown content
 ````
 
 The intentionally skipped line is a limitation of the mdx parser which is being actively worked on. All tabs must have a heading, and there is no limit to the number of tabs, though it is recommended to go for a maximum of three or four.
@@ -375,6 +376,16 @@ You may customize the parameters in any way you'd like. To remove a prerelease f
 
 <!-- BEGIN: redirects -->
 <!-- Generated text, do not edit directly -->
+
+## Link Validation
+
+The Packer GitHub repository is configured to run a [Markdown Link Check](https://github.com/gaurav-nelson/github-action-markdown-link-check#github-action---markdown-link-check-%EF%B8%8F) on a nightly basis to check for potential broken links within the Packer documentation. There is also a GitHub action that will check any modified `.mdx` files on new pull-requests.
+
+The master configuration file for the markdown-link-checker is called `mlc_config.json` and is located under the project's root directory.
+The configuration helps with relative links in the documentation that will be valid once deployed, and configures a few ignored URLs which are valid but may not return a valid 200 HTTP response code due to permissions or DDoS protection settings on the domain.
+
+**Potential False Positives**
+The link checker will prepend the BASEURL `https://packer.io/` to any relative links found within the documentation, which can be an issue when adding new `/docs` or `/guides` documents as the pages have not been deployed. To help mitigate this issue check the site preview to ensure newly added documentation pages work as expected.
 
 ## Redirects
 
