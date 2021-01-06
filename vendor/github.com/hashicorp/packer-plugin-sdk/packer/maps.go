@@ -72,26 +72,3 @@ func (mob MapOfBuilder) List() []string {
 	}
 	return res
 }
-
-type MapOfDataSource map[string]func() (DataSource, error)
-
-func (mob MapOfDataSource) Has(dataSource string) bool {
-	_, res := mob[dataSource]
-	return res
-}
-
-func (mob MapOfDataSource) Start(dataSource string) (DataSource, error) {
-	d, found := mob[dataSource]
-	if !found {
-		return nil, fmt.Errorf("Unknown data source %s", dataSource)
-	}
-	return d()
-}
-
-func (mob MapOfDataSource) List() []string {
-	res := []string{}
-	for k := range mob {
-		res = append(res, k)
-	}
-	return res
-}

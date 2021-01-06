@@ -138,16 +138,6 @@ func (c *Client) Provisioner() packersdk.Provisioner {
 	}
 }
 
-func (c *Client) DataSource() packersdk.DataSource {
-	return &datasource{
-		commonClient: commonClient{
-			endpoint: DefaultDatasourceEndpoint,
-			client:   c.client,
-			mux:      c.mux,
-		},
-	}
-}
-
 func (c *Client) Ui() packersdk.Ui {
 	return &Ui{
 		commonClient: commonClient{
