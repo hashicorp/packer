@@ -1,3 +1,4 @@
+//go:generate mapstructure-to-hcl2 -type DataSourceOutput
 package ami
 
 import (
@@ -9,14 +10,21 @@ type DataSource struct {
 	config Config
 }
 
+type DataSourceOutput struct {
+	ID           string
+	Name         string
+	CreationDate string
+	Owner        string
+	OwnerName    string
+	Tags         map[string]string
+}
+
 func (d *DataSource) ConfigSpec() hcldec.ObjectSpec {
 	return d.config.FlatMapstructure().HCL2Spec()
 }
 
 func (d *DataSource) OutputSpec() hcldec.ObjectSpec {
-	return hcldec.ObjectSpec{
-		"amazon-ami": &hcldec.LiteralSpec{Value: cty.StringVal("placeholder")},
-	}
+	return (&DataSourceOutput{}).FlatMapstructure().HCL2Spec()
 }
 
 func (d *DataSource) Configure(...interface{}) error {
@@ -24,5 +32,7 @@ func (d *DataSource) Configure(...interface{}) error {
 }
 
 func (d *DataSource) Execute() (cty.Value, error) {
-	return cty.StringVal("ami-0568456c"), nil
+	return cty.ObjectVal(map[string]cty.Value{
+		"id": cty.StringVal("ami-0568456c"),
+	}), nil
 }

@@ -130,3 +130,90 @@ func HCL2ValueFromConfigValue(v interface{}) cty.Value {
 		panic(fmt.Errorf("can't convert %#v to cty.Value", v))
 	}
 }
+
+// WriteUnknownPlaceholderValues will replace every Unknown value with a equivalent placeholder.
+// This is useful to use before marshaling the value to JSON. The default values are:
+// - string: "<unknown>"
+// - number: 0
+// - bool: false
+// - objects/lists/tuples/sets/maps: empty
+func WriteUnknownPlaceholderValues(v cty.Value) cty.Value {
+	if v.IsNull() {
+		return v
+	}
+	t := v.Type()
+	switch {
+	case t.IsPrimitiveType():
+		if v.IsKnown() {
+			return v
+		}
+		switch t {
+		case cty.String:
+			return cty.StringVal("<unknown>")
+		case cty.Number:
+			return cty.MustParseNumberVal("0")
+		case cty.Bool:
+			return cty.BoolVal(false)
+		default:
+			panic("unsupported primitive type")
+		}
+	case t.IsListType():
+		arr := []cty.Value{}
+		it := v.ElementIterator()
+		for it.Next() {
+			_, ev := it.Element()
+			arr = append(arr, WriteUnknownPlaceholderValues(ev))
+		}
+		if len(arr) == 0 {
+			return cty.ListValEmpty(t.ElementType())
+		}
+		return cty.ListVal(arr)
+	case t.IsSetType():
+		arr := []cty.Value{}
+		it := v.ElementIterator()
+		for it.Next() {
+			_, ev := it.Element()
+			arr = append(arr, WriteUnknownPlaceholderValues(ev))
+		}
+		if len(arr) == 0 {
+			return cty.SetValEmpty(t.ElementType())
+		}
+		return cty.SetVal(arr)
+	case t.IsMapType():
+		obj := map[string]cty.Value{}
+		it := v.ElementIterator()
+		for it.Next() {
+			ek, ev := it.Element()
+			obj[ek.AsString()] = WriteUnknownPlaceholderValues(ev)
+		}
+		if len(obj) == 0 {
+			return cty.MapValEmpty(t.ElementType())
+		}
+		return cty.MapVal(obj)
+	case t.IsTupleType():
+		arr := []cty.Value{}
+		it := v.ElementIterator()
+		for it.Next() {
+			_, ev := it.Element()
+			arr = append(arr, WriteUnknownPlaceholderValues(ev))
+		}
+		if len(arr) == 0 {
+			return cty.EmptyTupleVal
+		}
+		return cty.TupleVal(arr)
+	case t.IsObjectType():
+		obj := map[string]cty.Value{}
+		it := v.ElementIterator()
+		for it.Next() {
+			ek, ev := it.Element()
+			obj[ek.AsString()] = WriteUnknownPlaceholderValues(ev)
+		}
+		if len(obj) == 0 {
+			return cty.EmptyObjectVal
+		}
+		return cty.ObjectVal(obj)
+	default:
+		// should never happen
+		panic("unknown type")
+	}
+}

@@ -239,7 +239,6 @@ func discoverBuilders() ([]plugin, error) {
 	return discoverTypesInPath(path, typeID)
 }
 
-
 func discoverDatasources() ([]plugin, error) {
 	path := "./datasource"
 	typeID := "DataSource"

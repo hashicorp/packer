@@ -28,8 +28,8 @@ type Evaluator interface {
 }
 
 type InitializeOptions struct {
-	// When set, GetBuilds will skip the execution of datasources and will use
-	// the placeholder provided by the datasource itself for validation only.
+	// When set, the execution of datasources will be skipped and the datasource will provide
+	// a output spec that will be used for validation only.
 	SkipDatasourcesExecution bool
 }
 

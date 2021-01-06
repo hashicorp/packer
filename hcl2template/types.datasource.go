@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/packer/packer"
 	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
@@ -32,6 +31,7 @@ func (data *DataSource) Ref() DataSourceRef {
 func (ds *DataSources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := map[string]cty.Value{}
+	valuesMap := map[string]map[string]cty.Value{}
 
 	for ref, datasource := range *ds {
 		if datasource.value == (cty.Value{}) {
@@ -42,10 +42,15 @@ func (ds *DataSources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 			})
 			continue
 		}
-
-		inner := map[string]cty.Value{}
+		inner := valuesMap[ref.Type]
+		if inner == nil {
+			inner = map[string]cty.Value{}
+		}
 		inner[ref.Name] = datasource.value
 		res[ref.Type] = cty.MapVal(inner)
+
+		// Keeps values of different datasources from same type
+		valuesMap[ref.Type] = inner
 	}
 
 	return res, diags
@@ -146,12 +151,4 @@ func (p *Parser) decodeDataBlock(block *hcl.Block) (*DataSource, hcl.Diagnostics
 	}
 
 	return r, diags
-}
-
-func getSpecValue(spec hcldec.Spec) cty.Value {
-	switch spec := spec.(type) {
-	case *hcldec.LiteralSpec:
-		return spec.Value
-	}
-	return cty.UnknownVal(hcldec.ImpliedType(spec))
 }

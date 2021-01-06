@@ -7,6 +7,7 @@ import (
 
 	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
@@ -254,7 +255,7 @@ func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics
 		}
 
 		if skipExecution {
-			placeholderValue := getSpecValue(datasource.OutputSpec()[ref.Type])
+			placeholderValue := cty.UnknownVal(hcldec.ImpliedType(datasource.OutputSpec()))
 			ds.value = placeholderValue
 		} else {
 			realValue, err := datasource.Execute()
