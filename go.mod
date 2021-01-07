@@ -148,6 +148,6 @@ require (
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
-replace github.com/google/go-github/v33 => /Users/azr/go/src/github.com/azr/go-github
+replace github.com/google/go-github/v33 => github.com/azr/go-github/v33 v33.0.1-0.20210106115353-f7773038d423
 
 go 1.13
