@@ -254,7 +254,8 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 				log.Printf("[TRACE] %s", err.Error())
 				continue
 			}
-			sort.Sort(versions)
+			sort.Sort(sort.Reverse(versions))
+			log.Printf("[DEBUG] found %s", versions)
 			getOpts.Version = "v" + versions[0].String()
 			break
 		}
@@ -314,7 +315,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 				cs, err := checksummer.ParseChecksum(checksumFile)
 				_ = checksumFile.Close()
 				if err != nil {
-					log.Printf("[TRACE] could not parse %s checksum: %v", checksummer.Type, err)
+					log.Printf("[TRACE] could not parse %s checksum: %v. Make sure the checksum file contains the checksum and only the checksum.", checksummer.Type, err)
 					continue
 				}
 
