@@ -20,13 +20,23 @@ type DatasourceConfigureArgs struct {
 	Configs []interface{}
 }
 
+type DatasourceConfigureResponse struct {
+	Error *BasicError
+}
+
 func (d *datasource) Configure(configs ...interface{}) error {
 	configs, err := encodeCTYValues(configs)
 	if err != nil {
 		return err
 	}
-	args := &DatasourceConfigureArgs{Configs: configs}
-	return d.client.Call(d.endpoint+".Configure", args, new(interface{}))
+	var resp DatasourceConfigureResponse
+	if err := d.client.Call(d.endpoint+".Configure", &DatasourceConfigureArgs{Configs: configs}, &resp); err != nil {
+		return err
+	}
+	if resp.Error != nil {
+		err = resp.Error
+	}
+	return err
 }
 
 type OutputSpecResponse struct {
@@ -75,12 +85,14 @@ type DatasourceServer struct {
 	d packer.Datasource
 }
 
-func (d *DatasourceServer) Configure(args *DatasourceConfigureArgs, reply *interface{}) error {
+func (d *DatasourceServer) Configure(args *DatasourceConfigureArgs, reply *DatasourceConfigureResponse) error {
 	config, err := decodeCTYValues(args.Configs)
 	if err != nil {
 		return err
 	}
-	return d.d.Configure(config...)
+	err = d.d.Configure(config...)
+	reply.Error = NewBasicError(err)
+	return nil
 }
 
 func (d *DatasourceServer) OutputSpec(args *DatasourceConfigureArgs, reply *OutputSpecResponse) error {

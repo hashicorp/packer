@@ -371,6 +371,17 @@ func TestBuild(t *testing.T) {
 			},
 			expectedCode: 1,
 		},
+		{
+			name: "hcl - execute and use datasource",
+			args: []string{
+				testFixture("hcl", "datasource.pkr.hcl"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"chocolate.txt": "chocolate",
+				},
+			},
+		},
 	}
 
 	for _, tt := range tc {
@@ -848,6 +859,9 @@ func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 		PostProcessorStore: packersdk.MapOfPostProcessor{
 			"shell-local": func() (packersdk.PostProcessor, error) { return &shell_local_pp.PostProcessor{}, nil },
 			"manifest":    func() (packersdk.PostProcessor, error) { return &manifest.PostProcessor{}, nil },
+		},
+		DatasourceStore: packersdk.MapOfDatasource{
+			"mock": func() (packersdk.Datasource, error) { return &packersdk.MockDatasource{}, nil },
 		},
 	}
 	return &packer.CoreConfig{

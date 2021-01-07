@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func TestValidateCommand(t *testing.T) {
@@ -42,6 +43,29 @@ func TestValidateCommand(t *testing.T) {
 				fatalCommand(t, c.Meta)
 			}
 		})
+	}
+}
+
+func TestValidateCommand_SkipDatasourceExecution(t *testing.T) {
+	datasourceMock := &packersdk.MockDatasource{}
+	meta := testMetaFile(t)
+	meta.CoreConfig.Components.DatasourceStore = packersdk.MapOfDatasource{
+		"mock": func() (packersdk.Datasource, error) {
+			return datasourceMock, nil
+		},
+	}
+	c := &ValidateCommand{
+		Meta: meta,
+	}
+	args := []string{filepath.Join(testFixture("validate"), "datasource.pkr.hcl")}
+	if code := c.Run(args); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+	if datasourceMock.ExecuteCalled {
+		t.Fatalf("Datasource should not be executed on validation")
+	}
+	if !datasourceMock.OutputSpecCalled {
+		t.Fatalf("Datasource OutPutSpec should be called on validation")
 	}
 }
 
