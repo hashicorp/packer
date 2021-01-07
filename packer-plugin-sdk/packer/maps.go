@@ -4,7 +4,11 @@ import (
 	"fmt"
 )
 
-type MapOfProvisioner map[string]func() (Provisioner, error)
+type MapOfProvisioner map[string]ProvisionerStarter
+
+func (mop MapOfProvisioner) Set(provisioner string, starter ProvisionerStarter) {
+	mop[provisioner] = starter
+}
 
 func (mop MapOfProvisioner) Has(provisioner string) bool {
 	_, res := mop[provisioner]
@@ -27,7 +31,11 @@ func (mop MapOfProvisioner) List() []string {
 	return res
 }
 
-type MapOfPostProcessor map[string]func() (PostProcessor, error)
+type MapOfPostProcessor map[string]PostProcessorStarter
+
+func (mopp MapOfPostProcessor) Set(postProcessor string, starter PostProcessorStarter) {
+	mopp[postProcessor] = starter
+}
 
 func (mopp MapOfPostProcessor) Has(postProcessor string) bool {
 	_, res := mopp[postProcessor]
@@ -50,7 +58,11 @@ func (mopp MapOfPostProcessor) List() []string {
 	return res
 }
 
-type MapOfBuilder map[string]func() (Builder, error)
+type MapOfBuilder map[string]BuilderStarter
+
+func (mob MapOfBuilder) Set(builder string, starter BuilderStarter) {
+	mob[builder] = starter
+}
 
 func (mob MapOfBuilder) Has(builder string) bool {
 	_, res := mob[builder]

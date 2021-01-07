@@ -48,11 +48,11 @@ func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl
 		return nil, diags
 	}
 
-	if !p.PostProcessorsSchemas.Has(postProcessor.PType) {
+	if !p.PluginConfig.PostProcessors.Has(postProcessor.PType) {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary:  fmt.Sprintf("Unknown "+buildPostProcessorLabel+" type %q", postProcessor.PType),
 			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("known "+buildPostProcessorLabel+"s: %v", p.PostProcessorsSchemas.List()),
+			Detail:   fmt.Sprintf("known "+buildPostProcessorLabel+"s: %v", p.PluginConfig.PostProcessors.List()),
 			Severity: hcl.DiagError,
 		})
 		return nil, diags
@@ -65,7 +65,7 @@ func (cfg *PackerConfig) startPostProcessor(source SourceBlock, pp *PostProcesso
 	// ProvisionerBlock represents a detected but unparsed provisioner
 	var diags hcl.Diagnostics
 
-	postProcessor, err := cfg.postProcessorsSchemas.Start(pp.PType)
+	postProcessor, err := cfg.parser.PluginConfig.PostProcessors.Start(pp.PType)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary: fmt.Sprintf("Failed loading %s", pp.PType),

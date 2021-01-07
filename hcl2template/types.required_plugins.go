@@ -40,6 +40,25 @@ func (cfg *PackerConfig) decodeRequiredPluginsBlock(f *hcl.File) hcl.Diagnostics
 	return diags
 }
 
+func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Diagnostics {
+	// when a plugin is used but not defined in the required plugin blocks, it
+	// is 'implicitly used'. Here we read common configuration blocks to try to
+	// guess plugins.
+
+	var diags hcl.Diagnostics
+
+	content, moreDiags := f.Body.Content(configSchema)
+	diags = append(diags, moreDiags...)
+
+	for _, block := range content.Blocks {
+		switch block.Type {
+		case sourceLabel:
+			// TODO
+		}
+	}
+	return diags
+}
+
 // RequiredPlugin represents a declaration of a dependency on a particular
 // Plugin version or source.
 type RequiredPlugin struct {

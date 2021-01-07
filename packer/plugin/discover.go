@@ -20,15 +20,16 @@ import (
 const PACKERSPACE = "-PACKERSPACE-"
 
 type Config struct {
-	PluginMinPort  int
-	PluginMaxPort  int
-	builders       packersdk.MapOfBuilder
-	provisioners   packersdk.MapOfProvisioner
-	postProcessors packersdk.MapOfPostProcessor
+	KnownPluginFolders []string
+	PluginMinPort      int
+	PluginMaxPort      int
+	Builders           packersdk.MapOfBuilder
+	Provisioners       packersdk.MapOfProvisioner
+	PostProcessors     packersdk.MapOfPostProcessor
 }
 
 func (c *Config) GetPlugins() (packersdk.MapOfBuilder, packersdk.MapOfProvisioner, packersdk.MapOfPostProcessor) {
-	return c.builders, c.provisioners, c.postProcessors
+	return c.Builders, c.Provisioners, c.PostProcessors
 }
 
 // Discover discovers plugins.
@@ -39,14 +40,14 @@ func (c *Config) GetPlugins() (packersdk.MapOfBuilder, packersdk.MapOfProvisione
 // Hence, the priority order is the reverse of the search order - i.e., the
 // CWD has the highest priority.
 func (c *Config) Discover() error {
-	if c.builders == nil {
-		c.builders = packersdk.MapOfBuilder{}
+	if c.Builders == nil {
+		c.Builders = packersdk.MapOfBuilder{}
 	}
-	if c.provisioners == nil {
-		c.provisioners = packersdk.MapOfProvisioner{}
+	if c.Provisioners == nil {
+		c.Provisioners = packersdk.MapOfProvisioner{}
 	}
-	if c.postProcessors == nil {
-		c.postProcessors = packersdk.MapOfPostProcessor{}
+	if c.PostProcessors == nil {
+		c.PostProcessors = packersdk.MapOfPostProcessor{}
 	}
 
 	// If we are already inside a plugin process we should not need to
@@ -54,6 +55,9 @@ func (c *Config) Discover() error {
 	if os.Getenv(pluginsdk.MagicCookieKey) == pluginsdk.MagicCookieValue {
 		return nil
 	}
+
+	// TODO: use KnownPluginFolders here. TODO probably after JSON is deprecated
+	// so that we can keep the current behavior just the way it is.
 
 	// Next, look in the same directory as the executable.
 	exePath, err := os.Executable()
@@ -116,9 +120,9 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.builders[pluginName] = func() (packersdk.Builder, error) {
+		c.Builders.Set(pluginName, func() (packersdk.Builder, error) {
 			return c.Client(newPath).Builder()
-		}
+		})
 		externallyUsed = append(externallyUsed, pluginName)
 	}
 	if len(externallyUsed) > 0 {
@@ -133,9 +137,9 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.postProcessors[pluginName] = func() (packersdk.PostProcessor, error) {
+		c.PostProcessors.Set(pluginName, func() (packersdk.PostProcessor, error) {
 			return c.Client(newPath).PostProcessor()
-		}
+		})
 		externallyUsed = append(externallyUsed, pluginName)
 	}
 	if len(externallyUsed) > 0 {
@@ -150,9 +154,9 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.provisioners[pluginName] = func() (packersdk.Provisioner, error) {
+		c.Provisioners.Set(pluginName, func() (packersdk.Provisioner, error) {
 			return c.Client(newPath).Provisioner()
-		}
+		})
 		externallyUsed = append(externallyUsed, pluginName)
 	}
 	if len(externallyUsed) > 0 {
@@ -166,7 +170,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 
 	for pluginName, pluginPath := range pluginPaths {
-		if err := c.discoverMultiPlugin(pluginName, pluginPath); err != nil {
+		if err := c.DiscoverMultiPlugin(pluginName, pluginPath); err != nil {
 			return err
 		}
 	}
@@ -215,14 +219,14 @@ func (c *Config) discoverSingle(glob string) (map[string]string, error) {
 	return res, nil
 }
 
-// discoverMultiPlugin takes the description from a multiplugin binary and
+// DiscoverMultiPlugin takes the description from a multiplugin binary and
 // makes the plugins available to use in Packer. Each plugin found in the
 // binary will be addressable using `${pluginName}-${builderName}` for example.
 // pluginName could be manually set. It usually is a cloud name like amazon.
 // pluginName can be extrapolated from the filename of the binary; so
 // if the "packer-plugin-amazon" binary had an "ebs" builder one could use
 // the "amazon-ebs" builder.
-func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
+func (c *Config) DiscoverMultiPlugin(pluginName, pluginPath string) error {
 	out, err := exec.Command(pluginPath, "describe").Output()
 	if err != nil {
 		return err
@@ -236,7 +240,7 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 
 	for _, builderName := range desc.Builders {
 		builderName := builderName // copy to avoid pointer overwrite issue
-		c.builders[pluginPrefix+builderName] = func() (packersdk.Builder, error) {
+		c.Builders[pluginPrefix+builderName] = func() (packersdk.Builder, error) {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		}
 	}
@@ -246,7 +250,7 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 
 	for _, postProcessorName := range desc.PostProcessors {
 		postProcessorName := postProcessorName // copy to avoid pointer overwrite issue
-		c.postProcessors[pluginPrefix+postProcessorName] = func() (packersdk.PostProcessor, error) {
+		c.PostProcessors[pluginPrefix+postProcessorName] = func() (packersdk.PostProcessor, error) {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
 		}
 	}
@@ -256,7 +260,7 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 
 	for _, provisionerName := range desc.Provisioners {
 		provisionerName := provisionerName // copy to avoid pointer overwrite issue
-		c.provisioners[pluginPrefix+provisionerName] = func() (packersdk.Provisioner, error) {
+		c.Provisioners[pluginPrefix+provisionerName] = func() (packersdk.Provisioner, error) {
 			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
 		}
 	}

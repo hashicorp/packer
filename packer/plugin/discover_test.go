@@ -34,7 +34,7 @@ func TestDiscoverReturnsIfMagicCookieSet(t *testing.T) {
 		t.Fatalf("Should not have errored: %s", err)
 	}
 
-	if len(config.builders) != 0 {
+	if len(config.Builders) != 0 {
 		t.Fatalf("Should not have tried to find builders")
 	}
 }
@@ -60,10 +60,10 @@ func TestEnvVarPackerPluginPath(t *testing.T) {
 		t.Fatalf("Should not have errored: %s", err)
 	}
 
-	if len(config.provisioners) == 0 {
+	if len(config.Provisioners) == 0 {
 		t.Fatalf("Should have found partyparrot provisioner")
 	}
-	if _, ok := config.provisioners["partyparrot"]; !ok {
+	if _, ok := config.Provisioners["partyparrot"]; !ok {
 		t.Fatalf("Should have found partyparrot provisioner.")
 	}
 }
@@ -103,10 +103,10 @@ func TestEnvVarPackerPluginPath_MultiplePaths(t *testing.T) {
 		t.Fatalf("Should not have errored: %s", err)
 	}
 
-	if len(config.provisioners) == 0 {
+	if len(config.Provisioners) == 0 {
 		t.Fatalf("Should have found partyparrot provisioner")
 	}
-	if _, ok := config.provisioners["partyparrot"]; !ok {
+	if _, ok := config.Provisioners["partyparrot"]; !ok {
 		t.Fatalf("Should have found partyparrot provisioner.")
 	}
 }
@@ -277,19 +277,19 @@ func Test_multiplugin_describe(t *testing.T) {
 	for mockPluginName, plugin := range mockPlugins {
 		for mockBuilderName := range plugin.Builders {
 			expectedBuilderName := mockPluginName + "-" + mockBuilderName
-			if _, found := c.builders[expectedBuilderName]; !found {
+			if _, found := c.Builders[expectedBuilderName]; !found {
 				t.Fatalf("expected to find builder %q", expectedBuilderName)
 			}
 		}
 		for mockProvisionerName := range plugin.Provisioners {
 			expectedProvisionerName := mockPluginName + "-" + mockProvisionerName
-			if _, found := c.provisioners[expectedProvisionerName]; !found {
+			if _, found := c.Provisioners[expectedProvisionerName]; !found {
 				t.Fatalf("expected to find builder %q", expectedProvisionerName)
 			}
 		}
 		for mockPostProcessorName := range plugin.PostProcessors {
 			expectedPostProcessorName := mockPluginName + "-" + mockPostProcessorName
-			if _, found := c.postProcessors[expectedPostProcessorName]; !found {
+			if _, found := c.PostProcessors[expectedPostProcessorName]; !found {
 				t.Fatalf("expected to find post-processor %q", expectedPostProcessorName)
 			}
 		}

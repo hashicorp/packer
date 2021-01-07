@@ -49,12 +49,6 @@ type PackerConfig struct {
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
 
-	builderSchemas packer.BuilderStore
-
-	provisionersSchemas packer.ProvisionerStore
-
-	postProcessorsSchemas packer.PostProcessorStore
-
 	except []glob.Glob
 	only   []glob.Glob
 

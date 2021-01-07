@@ -62,7 +62,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 	}
 
 	opts := plugingetter.ListInstallationsOptions{
-		FromFolders: c.Meta.CoreConfig.Components.KnownPluginFolders,
+		FromFolders: c.Meta.CoreConfig.Components.PluginConfig.KnownPluginFolders,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:        runtime.GOOS,
 			ARCH:      runtime.GOARCH,
@@ -95,7 +95,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		}
 
 		newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallOptions{
-			InFolders:                 c.Meta.CoreConfig.Components.KnownPluginFolders,
+			InFolders:                 c.Meta.CoreConfig.Components.PluginConfig.KnownPluginFolders,
 			BinaryInstallationOptions: opts.BinaryInstallationOptions,
 			Getters:                   getters,
 		})

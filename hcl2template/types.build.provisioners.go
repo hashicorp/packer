@@ -136,11 +136,11 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, cfg *PackerConfig) (*Provis
 		provisioner.Timeout = timeout
 	}
 
-	if !p.ProvisionersSchemas.Has(provisioner.PType) {
+	if !p.PluginConfig.Provisioners.Has(provisioner.PType) {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary:  fmt.Sprintf("Unknown "+buildProvisionerLabel+" type %q", provisioner.PType),
 			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("known "+buildProvisionerLabel+"s: %v", p.ProvisionersSchemas.List()),
+			Detail:   fmt.Sprintf("known "+buildProvisionerLabel+"s: %v", p.PluginConfig.Provisioners.List()),
 			Severity: hcl.DiagError,
 		})
 		return nil, diags
@@ -151,7 +151,7 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, cfg *PackerConfig) (*Provis
 func (cfg *PackerConfig) startProvisioner(source SourceBlock, pb *ProvisionerBlock, ectx *hcl.EvalContext) (packersdk.Provisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
-	provisioner, err := cfg.provisionersSchemas.Start(pb.PType)
+	provisioner, err := cfg.parser.PluginConfig.Provisioners.Start(pb.PType)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary: fmt.Sprintf("failed loading %s", pb.PType),

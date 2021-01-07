@@ -225,13 +225,8 @@ func wrappedMain() int {
 	CommandMeta = &command.Meta{
 		CoreConfig: &packer.CoreConfig{
 			Components: packer.ComponentFinder{
-				KnownPluginFolders: packersdk.PluginFolders("."),
-
-				Hook: config.StarHook,
-
-				BuilderStore:       config.Builders,
-				ProvisionerStore:   config.Provisioners,
-				PostProcessorStore: config.PostProcessors,
+				Hook:         config.StarHook,
+				PluginConfig: config.Plugins,
 			},
 			Version: version.Version,
 		},
@@ -303,19 +298,14 @@ func extractMachineReadable(args []string) ([]string, bool) {
 
 func loadConfig() (*config, error) {
 	var config config
-	config.Plugins = plugin.Config{
-		PluginMinPort: 10000,
-		PluginMaxPort: 25000,
+	config.Plugins = &plugin.Config{
+		PluginMinPort:      10000,
+		PluginMaxPort:      25000,
+		KnownPluginFolders: packersdk.PluginFolders("."),
 	}
 	if err := config.Plugins.Discover(); err != nil {
 		return nil, err
 	}
-
-	// Copy plugins to general list
-	builders, provisioners, postProcessors := config.Plugins.GetPlugins()
-	config.Builders = builders
-	config.Provisioners = provisioners
-	config.PostProcessors = postProcessors
 
 	// Finally, try to use an internal plugin. Note that this will not override
 	// any previously-loaded plugins.

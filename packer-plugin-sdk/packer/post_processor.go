@@ -26,3 +26,5 @@ type PostProcessor interface {
 	// PostProcess is cancellable using context
 	PostProcess(context.Context, Ui, Artifact) (a Artifact, keep bool, forceOverride bool, err error)
 }
+
+type PostProcessorStarter func() (PostProcessor, error)

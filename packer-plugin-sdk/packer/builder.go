@@ -37,3 +37,5 @@ type Builder interface {
 	// Run is where the actual build should take place. It takes a Build and a Ui.
 	Run(context.Context, Ui, Hook) (Artifact, error)
 }
+
+type BuilderStarter func() (Builder, error)

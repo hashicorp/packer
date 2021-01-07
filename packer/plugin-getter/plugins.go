@@ -22,6 +22,9 @@ type Requirements []*Requirement
 // of required plugins is generated from a config file. From it we check what
 // is actually installed and what needs to happen to get in the desired state.
 type Requirement struct {
+	// How the user named the plugin
+	Accessor string
+
 	// Something like github.com/hashicorp/packer-plugin-amazon
 	Identifier *addrs.Plugin
 
@@ -70,7 +73,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 	res := InstallList{}
 	filenamePrefix := pr.filenamePrefix()
 	filenameSuffix := opts.filenameSuffix()
-	log.Printf("[TRACE] listing potential installations for %q that match %q", pr.Identifier.ForDisplay(), pr.VersionConstraints)
+	log.Printf("[TRACE] listing potential installations for %q that match %q. %#v", pr.Identifier.ForDisplay(), pr.VersionConstraints, opts)
 	for _, knownFolder := range opts.FromFolders {
 		glob := filepath.Join(knownFolder, pr.Identifier.Hostname, pr.Identifier.Namespace, pr.Identifier.Type, filenamePrefix+"*"+filenameSuffix)
 
@@ -121,7 +124,6 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 				continue
 			}
 
-			log.Printf("found %q", path)
 			res.InsertSortedUniq(&Installation{
 				BinaryPath: path,
 				Version:    versionStr,
@@ -133,6 +135,19 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 
 // InstallList is a list of installs
 type InstallList []*Installation
+
+func (l InstallList) String() string {
+	v := &strings.Builder{}
+	v.Write([]byte("["))
+	for i, inst := range l {
+		if i > 0 {
+			v.Write([]byte(","))
+		}
+		fmt.Fprintf(v, "%v", *inst)
+	}
+	v.Write([]byte("]"))
+	return v.String()
+}
 
 // InsertSortedUniq inserts the installation in the right spot in the list by
 // comparing the version lexicographically.

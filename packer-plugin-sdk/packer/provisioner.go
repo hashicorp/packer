@@ -18,3 +18,5 @@ type Provisioner interface {
 	// machine so that provisioning can be done.
 	Provision(context.Context, Ui, Communicator, map[string]interface{}) error
 }
+
+type ProvisionerStarter func() (Provisioner, error)
