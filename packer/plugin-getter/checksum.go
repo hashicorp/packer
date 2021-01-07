@@ -23,11 +23,10 @@ func (cerr *ChecksumError) Error() string {
 		return "<nil>"
 	}
 	return fmt.Sprintf(
-		"Checksums did not match for %s.\nExpected: %s\nGot: %s\n%T",
-		cerr.File,
+		"Checksums (%T) did not match.\nExpected: %s\nGot     : %s\n",
+		cerr.Hash, // ex: *sha256.digest
 		hex.EncodeToString(cerr.Expected),
 		hex.EncodeToString(cerr.Actual),
-		cerr.Hash, // ex: *sha256.digest
 	)
 }
 

@@ -184,6 +184,10 @@ type GetOptions struct {
 	BinaryInstallationOptions
 }
 
+func (gp *GetOptions) ExpectedFilename() string {
+	return gp.PluginRequirement.filenamePrefix() + gp.Version + gp.BinaryInstallationOptions.filenameSuffix()
+}
+
 // A Getter helps get the appropriate files to download a binary.
 type Getter interface {
 	// Get:
@@ -267,7 +271,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		// add expected full path
 		filepath.Join(pr.Identifier.Parts()...),
 		// Get expected file name
-		pr.filenamePrefix()+getOpts.Version+getOpts.filenameSuffix(),
+		getOpts.ExpectedFilename(),
 	)
 
 	// create directories if need be
@@ -303,7 +307,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 
 				checksumFile, err := getter.Get(checksummer.Type, getOpts)
 				if err != nil {
-					err := fmt.Errorf("could not get checksum file: %s", err.Error())
+					err := fmt.Errorf("could not get checksum file for %s version %s. Is the file present on the release and correctly named ? %s", pr.Identifier.ForDisplay(), getOpts.Version, err)
 					log.Printf("[TRACE] %s", err.Error())
 					return nil, err
 				}
@@ -329,18 +333,18 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 	}
 
 	if checksum == nil {
-		return nil, fmt.Errorf("Could not find a valid checksum for %s", outputFile)
+		return nil, fmt.Errorf("Could not find a valid checksum for %s.", outputFile)
 	}
 
 	// if outputFile is there and matches the checksum: do nothing
 	if err := checksum.ChecksumFile(checksum.Expected, outputFile); err == nil {
-		log.Printf("[TRACE] %s %s is already correctly installed", pr.Identifier.ForDisplay(), getOpts.Version)
+		log.Printf("[TRACE] %s %s is already correctly installed in %q", pr.Identifier.ForDisplay(), getOpts.Version, outputFile)
 		return nil, nil
 	}
 
 	for _, getter := range getters {
 		// create temporary file that will receive a temporary binary
-		f, err := tmp.File(filepath.Base(outputFile))
+		tmpFile, err := tmp.File(getOpts.ExpectedFilename())
 		if err != nil {
 			return nil, fmt.Errorf("could not create temporary file to dowload plugin: %w", err)
 		}
@@ -348,41 +352,43 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		// start fetching binary
 		binary, err := getter.Get("binary", getOpts)
 		if err != nil {
-			err := fmt.Errorf("Get binary failed %w", err)
+			err := fmt.Errorf("could not get binary for %s version %s. Is the file present on the release and correctly named ? %s", pr.Identifier.ForDisplay(), getOpts.Version, err)
 			log.Printf("[TRACE] %v", err)
 			continue
 		}
 		defer binary.Close()
 
 		// write binary to tmp file
-		_, err = io.Copy(f, binary)
+		_, err = io.Copy(tmpFile, binary)
 		if err != nil {
 			err := fmt.Errorf("Error getting plugin: %w", err)
 			log.Printf("[TRACE] %v, trying another getter", err)
 			continue
 		}
 
-		if _, err := f.Seek(0, 0); err != nil {
+		if _, err := tmpFile.Seek(0, 0); err != nil {
 			err := fmt.Errorf("Error seeking begining of temporary file for checksumming: %w", err)
 			log.Printf("[TRACE] %v, continuing", err)
 			continue
 		}
 
 		// verify that the checksum for the file is what we expect.
-		if err := checksum.Checksum(checksum.Expected, f); err != nil {
-			log.Printf("[TRACE] %v, removing tmp file", err)
-			if err := os.Remove(f.Name()); err != nil {
+		if err := checksum.Checksum(checksum.Expected, tmpFile); err != nil {
+			err := fmt.Errorf("%w. Is the checksum file correct ? Is the binary file correct ?", err)
+			log.Printf("%s", err)
+			log.Printf("removing temporary plugin binary.")
+			if err := os.Remove(tmpFile.Name()); err != nil {
 				log.Printf("[TRACE] %v, continuing", err)
 			}
 			continue
 		}
 
-		if err := f.Close(); err != nil {
+		if err := tmpFile.Close(); err != nil {
 			err := fmt.Errorf("Failed to close tmp file %w", err)
 			log.Printf("[TRACE] %v, continuing", err)
 		}
 
-		if err := os.Rename(f.Name(), outputFile); err != nil {
+		if err := os.Rename(tmpFile.Name(), outputFile); err != nil {
 			err := fmt.Errorf("Failed to rename tmp file to correct location %w", err)
 			return nil, err
 		}

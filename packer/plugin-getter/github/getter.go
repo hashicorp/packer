@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,8 +21,7 @@ import (
 
 const (
 	ghTokenAccessor  = "PKR_GITHUB_API_TOKEN"
-	defaultUserAgent = "curl/7.64.1"
-	defaultMediaType = "application/octet-stream"
+	defaultUserAgent = "packer-plugin-getter"
 )
 
 type Getter struct {
@@ -133,12 +131,6 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 		g.Client.UserAgent = defaultUserAgent
 	}
 
-	binary := httptest.NewServer(
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("1"))
-		}),
-	)
-
 	var req *http.Request
 	var err error
 	transform := func(in io.ReadCloser) (io.ReadCloser, error) {
@@ -151,16 +143,19 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 		req.Header.Set("User-Agent", "Potato")
 		transform = transformVersionStream
 	case "sha256":
-		// something like https://github.com/azr/packer-plugin-amazon/releases/download/v0.0.1/sha256
-		req, err = g.Client.NewRequest("GET", "https://github.com/azr/packer-plugin-amazon/releases/download/v0.0.1/sha256", nil)
-		header := req.Header
-		header.Del("Authorization")
-		req.Header = header
+		// something like https://github.com/azr/packer-plugin-amazon/releases/download/v0.0.1/packer-plugin-amazon_darwin-amd64_v0.0.1_x5_sha256
+		req, err = g.Client.NewRequest(
+			"GET",
+			"https://github.com"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version+"/"+opts.ExpectedFilename()+"_SHA256SUM",
+			nil,
+		)
 	case "binary":
-		req, err = g.Client.NewRequest("GET", binary.URL, nil)
-		header := req.Header
-		header.Del("Authorization")
-		req.Header = header
+		req, err = g.Client.NewRequest(
+			"GET",
+			"https://github.com"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version+"/"+opts.ExpectedFilename(),
+			nil,
+		)
+
 	default:
 		return nil, fmt.Errorf("%q not implemented", what)
 	}
@@ -169,21 +164,12 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	}
 	resp, err := g.Client.BareDo(ctx, req)
 	if err != nil {
-		b, _ := ioutil.ReadAll(resp.Body)
-		log.Printf("[TRACE] Request %#v failed: %#v. Resp: %s", req, err, string(b))
+		// here BareDo will return an err if the request failed or if the
+		// status is not considered a valid http status.
+		resp.Body.Close()
+		log.Printf("[TRACE] Failed to request: %s.", err)
 		return nil, err
 	}
 
-	if c := resp.StatusCode; 200 <= c && c <= 299 {
-		return transform(resp.Body)
-	}
-
-	defer resp.Body.Close()
-	log.Printf("[TRACE] Request %#v failed: %v", req, resp.Status)
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	log.Printf("Request failed: %s", string(b))
-	return nil, err
+	return transform(resp.Body)
 }
