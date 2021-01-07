@@ -47,14 +47,14 @@ func NewOpenShellRequest(uri string, params *Parameters) *soap.SoapMessage {
 }
 
 // NewDeleteShellRequest ...
-func NewDeleteShellRequest(uri, shellId string, params *Parameters) *soap.SoapMessage {
+func NewDeleteShellRequest(uri, shellID string, params *Parameters) *soap.SoapMessage {
 	if params == nil {
 		params = DefaultParameters
 	}
 	message := soap.NewMessage()
 	defaultHeaders(message, uri, params).
 		Action("http://schemas.xmlsoap.org/ws/2004/09/transfer/Delete").
-		ShellId(shellId).
+		ShellId(shellID).
 		ResourceURI("http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd").
 		Build()
 
@@ -64,7 +64,7 @@ func NewDeleteShellRequest(uri, shellId string, params *Parameters) *soap.SoapMe
 }
 
 // NewExecuteCommandRequest exec command on specific shellID
-func NewExecuteCommandRequest(uri, shellId, command string, arguments []string, params *Parameters) *soap.SoapMessage {
+func NewExecuteCommandRequest(uri, shellID, command string, arguments []string, params *Parameters) *soap.SoapMessage {
 	if params == nil {
 		params = DefaultParameters
 	}
@@ -72,7 +72,7 @@ func NewExecuteCommandRequest(uri, shellId, command string, arguments []string, 
 	defaultHeaders(message, uri, params).
 		Action("http://schemas.microsoft.com/wbem/wsman/1/windows/shell/Command").
 		ResourceURI("http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd").
-		ShellId(shellId).
+		ShellId(shellID).
 		AddOption(soap.NewHeaderOption("WINRS_CONSOLEMODE_STDIN", "TRUE")).
 		AddOption(soap.NewHeaderOption("WINRS_SKIP_CMD_SHELL", "FALSE")).
 		Build()
@@ -93,7 +93,8 @@ func NewExecuteCommandRequest(uri, shellId, command string, arguments []string, 
 	return message
 }
 
-func NewGetOutputRequest(uri, shellId, commandId, streams string, params *Parameters) *soap.SoapMessage {
+//NewGetOutputRequest NewGetOutputRequest
+func NewGetOutputRequest(uri, shellID, commandID, streams string, params *Parameters) *soap.SoapMessage {
 	if params == nil {
 		params = DefaultParameters
 	}
@@ -101,18 +102,19 @@ func NewGetOutputRequest(uri, shellId, commandId, streams string, params *Parame
 	defaultHeaders(message, uri, params).
 		Action("http://schemas.microsoft.com/wbem/wsman/1/windows/shell/Receive").
 		ResourceURI("http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd").
-		ShellId(shellId).
+		ShellId(shellID).
 		Build()
 
 	receive := message.CreateBodyElement("Receive", soap.DOM_NS_WIN_SHELL)
 	desiredStreams := message.CreateElement(receive, "DesiredStream", soap.DOM_NS_WIN_SHELL)
-	desiredStreams.SetAttr("CommandId", commandId)
+	desiredStreams.SetAttr("CommandId", commandID)
 	desiredStreams.SetContent(streams)
 
 	return message
 }
 
-func NewSendInputRequest(uri, shellId, commandId string, input []byte, eof bool, params *Parameters) *soap.SoapMessage {
+//NewSendInputRequest NewSendInputRequest
+func NewSendInputRequest(uri, shellID, commandID string, input []byte, eof bool, params *Parameters) *soap.SoapMessage {
 	if params == nil {
 		params = DefaultParameters
 	}
@@ -121,7 +123,7 @@ func NewSendInputRequest(uri, shellId, commandId string, input []byte, eof bool,
 	defaultHeaders(message, uri, params).
 		Action("http://schemas.microsoft.com/wbem/wsman/1/windows/shell/Send").
 		ResourceURI("http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd").
-		ShellId(shellId).
+		ShellId(shellID).
 		Build()
 
 	content := base64.StdEncoding.EncodeToString(input)
@@ -129,7 +131,7 @@ func NewSendInputRequest(uri, shellId, commandId string, input []byte, eof bool,
 	send := message.CreateBodyElement("Send", soap.DOM_NS_WIN_SHELL)
 	streams := message.CreateElement(send, "Stream", soap.DOM_NS_WIN_SHELL)
 	streams.SetAttr("Name", "stdin")
-	streams.SetAttr("CommandId", commandId)
+	streams.SetAttr("CommandId", commandID)
 	streams.SetContent(content)
 	if eof {
 		streams.SetAttr("End", "true")
@@ -137,7 +139,8 @@ func NewSendInputRequest(uri, shellId, commandId string, input []byte, eof bool,
 	return message
 }
 
-func NewSignalRequest(uri string, shellId string, commandId string, params *Parameters) *soap.SoapMessage {
+//NewSignalRequest NewSignalRequest
+func NewSignalRequest(uri string, shellID string, commandID string, params *Parameters) *soap.SoapMessage {
 	if params == nil {
 		params = DefaultParameters
 	}
@@ -146,11 +149,11 @@ func NewSignalRequest(uri string, shellId string, commandId string, params *Para
 	defaultHeaders(message, uri, params).
 		Action("http://schemas.microsoft.com/wbem/wsman/1/windows/shell/Signal").
 		ResourceURI("http://schemas.microsoft.com/wbem/wsman/1/windows/shell/cmd").
-		ShellId(shellId).
+		ShellId(shellID).
 		Build()
 
 	signal := message.CreateBodyElement("Signal", soap.DOM_NS_WIN_SHELL)
-	signal.SetAttr("CommandId", commandId)
+	signal.SetAttr("CommandId", commandID)
 	code := message.CreateElement(signal, "Code", soap.DOM_NS_WIN_SHELL)
 	code.SetContent("http://schemas.microsoft.com/wbem/wsman/1/windows/shell/signal/terminate")
 

@@ -13,6 +13,16 @@ import (
 	"github.com/hashicorp/packer/version"
 )
 
+// Use this name to make the name of the plugin in the packer template match
+// the multiplugin suffix, instead of requiring a second part.
+// For example, calling :
+//  pps.RegisterProvisioner(plugin.DEFAULT_NAME, new(CommentProvisioner))
+// On a plugin named `packer-plugin-foo`, will make the `foo` provisioner available
+// with your CommentProvisioner doing that. There can only be one unnamed
+// plugin per plugin type.
+const DEFAULT_NAME = "-packer-default-plugin-name-"
+
+
 // Set is a plugin set. It's API is meant to be very close to what is returned
 // by plugin.Server
 // It can describe itself or run a single plugin using the CLI arguments.
@@ -113,7 +123,7 @@ func (i *Set) start(kind, name string) error {
 		err = server.RegisterBuilder(i.Builders[name])
 	case "post-processor":
 		err = server.RegisterPostProcessor(i.PostProcessors[name])
-	case "provisioners":
+	case "provisioner":
 		err = server.RegisterProvisioner(i.Provisioners[name])
 	default:
 		err = fmt.Errorf("Unknown plugin type: %s", kind)

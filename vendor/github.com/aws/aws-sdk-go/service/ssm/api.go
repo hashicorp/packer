@@ -963,6 +963,102 @@ func (c *SSM) CreateOpsItemWithContext(ctx aws.Context, input *CreateOpsItemInpu
 	return out, req.Send()
 }
 
+const opCreateOpsMetadata = "CreateOpsMetadata"
+
+// CreateOpsMetadataRequest generates a "aws/request.Request" representing the
+// client's request for the CreateOpsMetadata operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See CreateOpsMetadata for more information on using the CreateOpsMetadata
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the CreateOpsMetadataRequest method.
+//    req, resp := client.CreateOpsMetadataRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06/CreateOpsMetadata
+func (c *SSM) CreateOpsMetadataRequest(input *CreateOpsMetadataInput) (req *request.Request, output *CreateOpsMetadataOutput) {
+	op := &request.Operation{
+		Name:       opCreateOpsMetadata,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &CreateOpsMetadataInput{}
+	}
+
+	output = &CreateOpsMetadataOutput{}
+	req = c.newRequest(op, input, output)
+	return
+}
+
+// CreateOpsMetadata API operation for Amazon Simple Systems Manager (SSM).
+//
+// If you create a new application in AppManager, Systems Manager calls this
+// API action to specify information about the new application, including the
+// application type.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for Amazon Simple Systems Manager (SSM)'s
+// API operation CreateOpsMetadata for usage and error information.
+//
+// Returned Error Types:
+//   * OpsMetadataAlreadyExistsException
+//   An OpsMetadata object already exists for the selected resource.
+//
+//   * OpsMetadataTooManyUpdatesException
+//   The system is processing too many concurrent updates. Wait a few moments
+//   and try again.
+//
+//   * OpsMetadataInvalidArgumentException
+//   One of the arguments passed is invalid.
+//
+//   * OpsMetadataLimitExceededException
+//   Your account reached the maximum number of OpsMetadata objects allowed by
+//   AppManager. The maximum is 200 OpsMetadata objects. Delete one or more OpsMetadata
+//   object and try again.
+//
+//   * InternalServerError
+//   An error occurred on the server side.
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06/CreateOpsMetadata
+func (c *SSM) CreateOpsMetadata(input *CreateOpsMetadataInput) (*CreateOpsMetadataOutput, error) {
+	req, out := c.CreateOpsMetadataRequest(input)
+	return out, req.Send()
+}
+
+// CreateOpsMetadataWithContext is the same as CreateOpsMetadata with the addition of
+// the ability to pass a context and additional request options.
+//
+// See CreateOpsMetadata for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *SSM) CreateOpsMetadataWithContext(ctx aws.Context, input *CreateOpsMetadataInput, opts ...request.Option) (*CreateOpsMetadataOutput, error) {
+	req, out := c.CreateOpsMetadataRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
 const opCreatePatchBaseline = "CreatePatchBaseline"
 
 // CreatePatchBaselineRequest generates a "aws/request.Request" representing the
@@ -1637,6 +1733,92 @@ func (c *SSM) DeleteMaintenanceWindow(input *DeleteMaintenanceWindowInput) (*Del
 // for more information on using Contexts.
 func (c *SSM) DeleteMaintenanceWindowWithContext(ctx aws.Context, input *DeleteMaintenanceWindowInput, opts ...request.Option) (*DeleteMaintenanceWindowOutput, error) {
 	req, out := c.DeleteMaintenanceWindowRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
+const opDeleteOpsMetadata = "DeleteOpsMetadata"
+
+// DeleteOpsMetadataRequest generates a "aws/request.Request" representing the
+// client's request for the DeleteOpsMetadata operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See DeleteOpsMetadata for more information on using the DeleteOpsMetadata
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the DeleteOpsMetadataRequest method.
+//    req, resp := client.DeleteOpsMetadataRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06/DeleteOpsMetadata
+func (c *SSM) DeleteOpsMetadataRequest(input *DeleteOpsMetadataInput) (req *request.Request, output *DeleteOpsMetadataOutput) {
+	op := &request.Operation{
+		Name:       opDeleteOpsMetadata,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &DeleteOpsMetadataInput{}
+	}
+
+	output = &DeleteOpsMetadataOutput{}
+	req = c.newRequest(op, input, output)
+	req.Handlers.Unmarshal.Swap(jsonrpc.UnmarshalHandler.Name, protocol.UnmarshalDiscardBodyHandler)
+	return
+}
+
+// DeleteOpsMetadata API operation for Amazon Simple Systems Manager (SSM).
+//
+// Delete OpsMetadata related to an application.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for Amazon Simple Systems Manager (SSM)'s
+// API operation DeleteOpsMetadata for usage and error information.
+//
+// Returned Error Types:
+//   * OpsMetadataNotFoundException
+//   The OpsMetadata object does not exist.
+//
+//   * OpsMetadataInvalidArgumentException
+//   One of the arguments passed is invalid.
+//
+//   * InternalServerError
+//   An error occurred on the server side.
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06/DeleteOpsMetadata
+func (c *SSM) DeleteOpsMetadata(input *DeleteOpsMetadataInput) (*DeleteOpsMetadataOutput, error) {
+	req, out := c.DeleteOpsMetadataRequest(input)
+	return out, req.Send()
+}
+
+// DeleteOpsMetadataWithContext is the same as DeleteOpsMetadata with the addition of
+// the ability to pass a context and additional request options.
+//
+// See DeleteOpsMetadata for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *SSM) DeleteOpsMetadataWithContext(ctx aws.Context, input *DeleteOpsMetadataInput, opts ...request.Option) (*DeleteOpsMetadataOutput, error) {
+	req, out := c.DeleteOpsMetadataRequest(input)
 	req.SetContext(ctx)
 	req.ApplyOptions(opts...)
 	return out, req.Send()
@@ -6568,6 +6750,10 @@ func (c *SSM) DescribePatchPropertiesRequest(input *DescribePatchPropertiesInput
 //
 // Valid properties: PRODUCT, PRIORITY
 //
+// MACOS
+//
+// Valid properties: PRODUCT, CLASSIFICATION
+//
 // ORACLE_LINUX
 //
 // Valid properties: PRODUCT, CLASSIFICATION, SEVERITY
@@ -8267,6 +8453,91 @@ func (c *SSM) GetOpsItem(input *GetOpsItemInput) (*GetOpsItemOutput, error) {
 // for more information on using Contexts.
 func (c *SSM) GetOpsItemWithContext(ctx aws.Context, input *GetOpsItemInput, opts ...request.Option) (*GetOpsItemOutput, error) {
 	req, out := c.GetOpsItemRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
+const opGetOpsMetadata = "GetOpsMetadata"
+
+// GetOpsMetadataRequest generates a "aws/request.Request" representing the
+// client's request for the GetOpsMetadata operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See GetOpsMetadata for more information on using the GetOpsMetadata
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the GetOpsMetadataRequest method.
+//    req, resp := client.GetOpsMetadataRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06/GetOpsMetadata
+func (c *SSM) GetOpsMetadataRequest(input *GetOpsMetadataInput) (req *request.Request, output *GetOpsMetadataOutput) {
+	op := &request.Operation{
+		Name:       opGetOpsMetadata,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &GetOpsMetadataInput{}
+	}
+
+	output = &GetOpsMetadataOutput{}
+	req = c.newRequest(op, input, output)
+	return
+}
+
+// GetOpsMetadata API operation for Amazon Simple Systems Manager (SSM).
+//
+// View operational metadata related to an application in AppManager.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for Amazon Simple Systems Manager (SSM)'s
+// API operation GetOpsMetadata for usage and error information.
+//
+// Returned Error Types:
+//   * OpsMetadataNotFoundException
+//   The OpsMetadata object does not exist.
+//
+//   * OpsMetadataInvalidArgumentException
+//   One of the arguments passed is invalid.
+//
+//   * InternalServerError
+//   An error occurred on the server side.
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06/GetOpsMetadata
+func (c *SSM) GetOpsMetadata(input *GetOpsMetadataInput) (*GetOpsMetadataOutput, error) {
+	req, out := c.GetOpsMetadataRequest(input)
+	return out, req.Send()
+}
+
+// GetOpsMetadataWithContext is the same as GetOpsMetadata with the addition of
+// the ability to pass a context and additional request options.
+//
+// See GetOpsMetadata for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *SSM) GetOpsMetadataWithContext(ctx aws.Context, input *GetOpsMetadataInput, opts ...request.Option) (*GetOpsMetadataOutput, error) {
+	req, out := c.GetOpsMetadataRequest(input)
 	req.SetContext(ctx)
 	req.ApplyOptions(opts...)
 	return out, req.Send()
@@ -10582,6 +10853,89 @@ func (c *SSM) ListInventoryEntries(input *ListInventoryEntriesInput) (*ListInven
 // for more information on using Contexts.
 func (c *SSM) ListInventoryEntriesWithContext(ctx aws.Context, input *ListInventoryEntriesInput, opts ...request.Option) (*ListInventoryEntriesOutput, error) {
 	req, out := c.ListInventoryEntriesRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
+const opListOpsMetadata = "ListOpsMetadata"
+
+// ListOpsMetadataRequest generates a "aws/request.Request" representing the
+// client's request for the ListOpsMetadata operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See ListOpsMetadata for more information on using the ListOpsMetadata
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the ListOpsMetadataRequest method.
+//    req, resp := client.ListOpsMetadataRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06/ListOpsMetadata
+func (c *SSM) ListOpsMetadataRequest(input *ListOpsMetadataInput) (req *request.Request, output *ListOpsMetadataOutput) {
+	op := &request.Operation{
+		Name:       opListOpsMetadata,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &ListOpsMetadataInput{}
+	}
+
+	output = &ListOpsMetadataOutput{}
+	req = c.newRequest(op, input, output)
+	return
+}
+
+// ListOpsMetadata API operation for Amazon Simple Systems Manager (SSM).
+//
+// Systems Manager calls this API action when displaying all AppManager OpsMetadata
+// objects or blobs.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for Amazon Simple Systems Manager (SSM)'s
+// API operation ListOpsMetadata for usage and error information.
+//
+// Returned Error Types:
+//   * OpsMetadataInvalidArgumentException
+//   One of the arguments passed is invalid.
+//
+//   * InternalServerError
+//   An error occurred on the server side.
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06/ListOpsMetadata
+func (c *SSM) ListOpsMetadata(input *ListOpsMetadataInput) (*ListOpsMetadataOutput, error) {
+	req, out := c.ListOpsMetadataRequest(input)
+	return out, req.Send()
+}
+
+// ListOpsMetadataWithContext is the same as ListOpsMetadata with the addition of
+// the ability to pass a context and additional request options.
+//
+// See ListOpsMetadata for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *SSM) ListOpsMetadataWithContext(ctx aws.Context, input *ListOpsMetadataInput, opts ...request.Option) (*ListOpsMetadataOutput, error) {
+	req, out := c.ListOpsMetadataRequest(input)
 	req.SetContext(ctx)
 	req.ApplyOptions(opts...)
 	return out, req.Send()
@@ -13799,6 +14153,99 @@ func (c *SSM) UpdateOpsItemWithContext(ctx aws.Context, input *UpdateOpsItemInpu
 	return out, req.Send()
 }
 
+const opUpdateOpsMetadata = "UpdateOpsMetadata"
+
+// UpdateOpsMetadataRequest generates a "aws/request.Request" representing the
+// client's request for the UpdateOpsMetadata operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See UpdateOpsMetadata for more information on using the UpdateOpsMetadata
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the UpdateOpsMetadataRequest method.
+//    req, resp := client.UpdateOpsMetadataRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06/UpdateOpsMetadata
+func (c *SSM) UpdateOpsMetadataRequest(input *UpdateOpsMetadataInput) (req *request.Request, output *UpdateOpsMetadataOutput) {
+	op := &request.Operation{
+		Name:       opUpdateOpsMetadata,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &UpdateOpsMetadataInput{}
+	}
+
+	output = &UpdateOpsMetadataOutput{}
+	req = c.newRequest(op, input, output)
+	return
+}
+
+// UpdateOpsMetadata API operation for Amazon Simple Systems Manager (SSM).
+//
+// Systems Manager calls this API action when you edit OpsMetadata in AppManager.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for Amazon Simple Systems Manager (SSM)'s
+// API operation UpdateOpsMetadata for usage and error information.
+//
+// Returned Error Types:
+//   * OpsMetadataNotFoundException
+//   The OpsMetadata object does not exist.
+//
+//   * OpsMetadataInvalidArgumentException
+//   One of the arguments passed is invalid.
+//
+//   * OpsMetadataKeyLimitExceededException
+//   The OpsMetadata object exceeds the maximum number of OpsMetadata keys that
+//   you can assign to an application in AppManager.
+//
+//   * OpsMetadataTooManyUpdatesException
+//   The system is processing too many concurrent updates. Wait a few moments
+//   and try again.
+//
+//   * InternalServerError
+//   An error occurred on the server side.
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06/UpdateOpsMetadata
+func (c *SSM) UpdateOpsMetadata(input *UpdateOpsMetadataInput) (*UpdateOpsMetadataOutput, error) {
+	req, out := c.UpdateOpsMetadataRequest(input)
+	return out, req.Send()
+}
+
+// UpdateOpsMetadataWithContext is the same as UpdateOpsMetadata with the addition of
+// the ability to pass a context and additional request options.
+//
+// See UpdateOpsMetadata for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *SSM) UpdateOpsMetadataWithContext(ctx aws.Context, input *UpdateOpsMetadataInput, opts ...request.Option) (*UpdateOpsMetadataOutput, error) {
+	req, out := c.UpdateOpsMetadataRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
 const opUpdatePatchBaseline = "UpdatePatchBaseline"
 
 // UpdatePatchBaselineRequest generates a "aws/request.Request" representing the
@@ -14628,7 +15075,7 @@ type AssociationDescription struct {
 	// By default, when you create a new associations, the system runs it immediately
 	// after it is created and then according to the schedule you specified. Specify
 	// this option if you don't want an association to run immediately after you
-	// create it.
+	// create it. This parameter is not supported for rate expressions.
 	ApplyOnlyAtCronInterval *bool `type:"boolean"`
 
 	// The association ID.
@@ -15535,7 +15982,7 @@ type AssociationVersionInfo struct {
 	// By default, when you create a new associations, the system runs it immediately
 	// after it is created and then according to the schedule you specified. Specify
 	// this option if you don't want an association to run immediately after you
-	// create it.
+	// create it. This parameter is not supported for rate expressions.
 	ApplyOnlyAtCronInterval *bool `type:"boolean"`
 
 	// The ID created by the system when the association was created.
@@ -18396,7 +18843,7 @@ type CreateAssociationBatchRequestEntry struct {
 	// By default, when you create a new associations, the system runs it immediately
 	// after it is created and then according to the schedule you specified. Specify
 	// this option if you don't want an association to run immediately after you
-	// create it.
+	// create it. This parameter is not supported for rate expressions.
 	ApplyOnlyAtCronInterval *bool `type:"boolean"`
 
 	// Specify a descriptive name for the association.
@@ -18630,7 +19077,7 @@ type CreateAssociationInput struct {
 	// By default, when you create a new associations, the system runs it immediately
 	// after it is created and then according to the schedule you specified. Specify
 	// this option if you don't want an association to run immediately after you
-	// create it.
+	// create it. This parameter is not supported for rate expressions.
 	ApplyOnlyAtCronInterval *bool `type:"boolean"`
 
 	// Specify a descriptive name for the association.
@@ -19582,6 +20029,93 @@ func (s *CreateOpsItemOutput) SetOpsItemId(v string) *CreateOpsItemOutput {
 	return s
 }
 
+type CreateOpsMetadataInput struct {
+	_ struct{} `type:"structure"`
+
+	// Metadata for a new AppManager application.
+	Metadata map[string]*MetadataValue `min:"1" type:"map"`
+
+	// A resource ID for a new AppManager application.
+	//
+	// ResourceId is a required field
+	ResourceId *string `min:"1" type:"string" required:"true"`
+}
+
+// String returns the string representation
+func (s CreateOpsMetadataInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s CreateOpsMetadataInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *CreateOpsMetadataInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "CreateOpsMetadataInput"}
+	if s.Metadata != nil && len(s.Metadata) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("Metadata", 1))
+	}
+	if s.ResourceId == nil {
+		invalidParams.Add(request.NewErrParamRequired("ResourceId"))
+	}
+	if s.ResourceId != nil && len(*s.ResourceId) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("ResourceId", 1))
+	}
+	if s.Metadata != nil {
+		for i, v := range s.Metadata {
+			if v == nil {
+				continue
+			}
+			if err := v.Validate(); err != nil {
+				invalidParams.AddNested(fmt.Sprintf("%s[%v]", "Metadata", i), err.(request.ErrInvalidParams))
+			}
+		}
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetMetadata sets the Metadata field's value.
+func (s *CreateOpsMetadataInput) SetMetadata(v map[string]*MetadataValue) *CreateOpsMetadataInput {
+	s.Metadata = v
+	return s
+}
+
+// SetResourceId sets the ResourceId field's value.
+func (s *CreateOpsMetadataInput) SetResourceId(v string) *CreateOpsMetadataInput {
+	s.ResourceId = &v
+	return s
+}
+
+type CreateOpsMetadataOutput struct {
+	_ struct{} `type:"structure"`
+
+	// The Amazon Resource Name (ARN) of the OpsMetadata Object or blob created
+	// by the call.
+	OpsMetadataArn *string `min:"1" type:"string"`
+}
+
+// String returns the string representation
+func (s CreateOpsMetadataOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s CreateOpsMetadataOutput) GoString() string {
+	return s.String()
+}
+
+// SetOpsMetadataArn sets the OpsMetadataArn field's value.
+func (s *CreateOpsMetadataOutput) SetOpsMetadataArn(v string) *CreateOpsMetadataOutput {
+	s.OpsMetadataArn = &v
+	return s
+}
+
 type CreatePatchBaselineInput struct {
 	_ struct{} `type:"structure"`
 
@@ -20371,6 +20905,61 @@ func (s DeleteMaintenanceWindowOutput) GoString() string {
 func (s *DeleteMaintenanceWindowOutput) SetWindowId(v string) *DeleteMaintenanceWindowOutput {
 	s.WindowId = &v
 	return s
+}
+
+type DeleteOpsMetadataInput struct {
+	_ struct{} `type:"structure"`
+
+	// The Amazon Resource Name (ARN) of an OpsMetadata Object to delete.
+	//
+	// OpsMetadataArn is a required field
+	OpsMetadataArn *string `min:"1" type:"string" required:"true"`
+}
+
+// String returns the string representation
+func (s DeleteOpsMetadataInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s DeleteOpsMetadataInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *DeleteOpsMetadataInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "DeleteOpsMetadataInput"}
+	if s.OpsMetadataArn == nil {
+		invalidParams.Add(request.NewErrParamRequired("OpsMetadataArn"))
+	}
+	if s.OpsMetadataArn != nil && len(*s.OpsMetadataArn) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("OpsMetadataArn", 1))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetOpsMetadataArn sets the OpsMetadataArn field's value.
+func (s *DeleteOpsMetadataInput) SetOpsMetadataArn(v string) *DeleteOpsMetadataInput {
+	s.OpsMetadataArn = &v
+	return s
+}
+
+type DeleteOpsMetadataOutput struct {
+	_ struct{} `type:"structure"`
+}
+
+// String returns the string representation
+func (s DeleteOpsMetadataOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s DeleteOpsMetadataOutput) GoString() string {
+	return s.String()
 }
 
 type DeleteParameterInput struct {
@@ -24376,7 +24965,7 @@ type DescribePatchPropertiesInput struct {
 	OperatingSystem *string `type:"string" required:"true" enum:"OperatingSystem"`
 
 	// Indicates whether to list patches for the Windows operating system or for
-	// Microsoft applications. Not applicable for Linux operating systems.
+	// Microsoft applications. Not applicable for the Linux or macOS operating systems.
 	PatchSet *string `type:"string" enum:"PatchSet"`
 
 	// The patch property for which you want to view patch details.
@@ -28123,6 +28712,112 @@ func (s GetOpsItemOutput) GoString() string {
 // SetOpsItem sets the OpsItem field's value.
 func (s *GetOpsItemOutput) SetOpsItem(v *OpsItem) *GetOpsItemOutput {
 	s.OpsItem = v
+	return s
+}
+
+type GetOpsMetadataInput struct {
+	_ struct{} `type:"structure"`
+
+	// The maximum number of items to return for this call. The call also returns
+	// a token that you can specify in a subsequent call to get the next set of
+	// results.
+	MaxResults *int64 `min:"1" type:"integer"`
+
+	// A token to start the list. Use this token to get the next set of results.
+	NextToken *string `type:"string"`
+
+	// The Amazon Resource Name (ARN) of an OpsMetadata Object to view.
+	//
+	// OpsMetadataArn is a required field
+	OpsMetadataArn *string `min:"1" type:"string" required:"true"`
+}
+
+// String returns the string representation
+func (s GetOpsMetadataInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s GetOpsMetadataInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *GetOpsMetadataInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "GetOpsMetadataInput"}
+	if s.MaxResults != nil && *s.MaxResults < 1 {
+		invalidParams.Add(request.NewErrParamMinValue("MaxResults", 1))
+	}
+	if s.OpsMetadataArn == nil {
+		invalidParams.Add(request.NewErrParamRequired("OpsMetadataArn"))
+	}
+	if s.OpsMetadataArn != nil && len(*s.OpsMetadataArn) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("OpsMetadataArn", 1))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetMaxResults sets the MaxResults field's value.
+func (s *GetOpsMetadataInput) SetMaxResults(v int64) *GetOpsMetadataInput {
+	s.MaxResults = &v
+	return s
+}
+
+// SetNextToken sets the NextToken field's value.
+func (s *GetOpsMetadataInput) SetNextToken(v string) *GetOpsMetadataInput {
+	s.NextToken = &v
+	return s
+}
+
+// SetOpsMetadataArn sets the OpsMetadataArn field's value.
+func (s *GetOpsMetadataInput) SetOpsMetadataArn(v string) *GetOpsMetadataInput {
+	s.OpsMetadataArn = &v
+	return s
+}
+
+type GetOpsMetadataOutput struct {
+	_ struct{} `type:"structure"`
+
+	// OpsMetadata for an AppManager application.
+	Metadata map[string]*MetadataValue `min:"1" type:"map"`
+
+	// The token for the next set of items to return. Use this token to get the
+	// next set of results.
+	NextToken *string `type:"string"`
+
+	// The resource ID of the AppManager application.
+	ResourceId *string `min:"1" type:"string"`
+}
+
+// String returns the string representation
+func (s GetOpsMetadataOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s GetOpsMetadataOutput) GoString() string {
+	return s.String()
+}
+
+// SetMetadata sets the Metadata field's value.
+func (s *GetOpsMetadataOutput) SetMetadata(v map[string]*MetadataValue) *GetOpsMetadataOutput {
+	s.Metadata = v
+	return s
+}
+
+// SetNextToken sets the NextToken field's value.
+func (s *GetOpsMetadataOutput) SetNextToken(v string) *GetOpsMetadataOutput {
+	s.NextToken = &v
+	return s
+}
+
+// SetResourceId sets the ResourceId field's value.
+func (s *GetOpsMetadataOutput) SetResourceId(v string) *GetOpsMetadataOutput {
+	s.ResourceId = &v
 	return s
 }
 
@@ -35006,6 +35701,106 @@ func (s *ListInventoryEntriesOutput) SetTypeName(v string) *ListInventoryEntries
 	return s
 }
 
+type ListOpsMetadataInput struct {
+	_ struct{} `type:"structure"`
+
+	// One or more filters to limit the number of OpsMetadata objects returned by
+	// the call.
+	Filters []*OpsMetadataFilter `type:"list"`
+
+	// The maximum number of items to return for this call. The call also returns
+	// a token that you can specify in a subsequent call to get the next set of
+	// results.
+	MaxResults *int64 `min:"1" type:"integer"`
+
+	// A token to start the list. Use this token to get the next set of results.
+	NextToken *string `type:"string"`
+}
+
+// String returns the string representation
+func (s ListOpsMetadataInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s ListOpsMetadataInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *ListOpsMetadataInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "ListOpsMetadataInput"}
+	if s.MaxResults != nil && *s.MaxResults < 1 {
+		invalidParams.Add(request.NewErrParamMinValue("MaxResults", 1))
+	}
+	if s.Filters != nil {
+		for i, v := range s.Filters {
+			if v == nil {
+				continue
+			}
+			if err := v.Validate(); err != nil {
+				invalidParams.AddNested(fmt.Sprintf("%s[%v]", "Filters", i), err.(request.ErrInvalidParams))
+			}
+		}
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetFilters sets the Filters field's value.
+func (s *ListOpsMetadataInput) SetFilters(v []*OpsMetadataFilter) *ListOpsMetadataInput {
+	s.Filters = v
+	return s
+}
+
+// SetMaxResults sets the MaxResults field's value.
+func (s *ListOpsMetadataInput) SetMaxResults(v int64) *ListOpsMetadataInput {
+	s.MaxResults = &v
+	return s
+}
+
+// SetNextToken sets the NextToken field's value.
+func (s *ListOpsMetadataInput) SetNextToken(v string) *ListOpsMetadataInput {
+	s.NextToken = &v
+	return s
+}
+
+type ListOpsMetadataOutput struct {
+	_ struct{} `type:"structure"`
+
+	// The token for the next set of items to return. Use this token to get the
+	// next set of results.
+	NextToken *string `type:"string"`
+
+	// Returns a list of OpsMetadata objects.
+	OpsMetadataList []*OpsMetadata `min:"1" type:"list"`
+}
+
+// String returns the string representation
+func (s ListOpsMetadataOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s ListOpsMetadataOutput) GoString() string {
+	return s.String()
+}
+
+// SetNextToken sets the NextToken field's value.
+func (s *ListOpsMetadataOutput) SetNextToken(v string) *ListOpsMetadataOutput {
+	s.NextToken = &v
+	return s
+}
+
+// SetOpsMetadataList sets the OpsMetadataList field's value.
+func (s *ListOpsMetadataOutput) SetOpsMetadataList(v []*OpsMetadata) *ListOpsMetadataOutput {
+	s.OpsMetadataList = v
+	return s
+}
+
 type ListResourceComplianceSummariesInput struct {
 	_ struct{} `type:"structure"`
 
@@ -36614,6 +37409,43 @@ func (s *MaxDocumentSizeExceeded) RequestID() string {
 	return s.RespMetadata.RequestID
 }
 
+// Metadata to assign to an AppManager application.
+type MetadataValue struct {
+	_ struct{} `type:"structure"`
+
+	// Metadata value to assign to an AppManager application.
+	Value *string `min:"1" type:"string"`
+}
+
+// String returns the string representation
+func (s MetadataValue) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s MetadataValue) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *MetadataValue) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "MetadataValue"}
+	if s.Value != nil && len(*s.Value) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("Value", 1))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetValue sets the Value field's value.
+func (s *MetadataValue) SetValue(v string) *MetadataValue {
+	s.Value = &v
+	return s
+}
+
 type ModifyDocumentPermissionInput struct {
 	_ struct{} `type:"structure"`
 
@@ -37724,6 +38556,465 @@ func (s *OpsItemSummary) SetTitle(v string) *OpsItemSummary {
 	return s
 }
 
+// Operational metadata for an application in AppManager.
+type OpsMetadata struct {
+	_ struct{} `type:"structure"`
+
+	// The date the OpsMetadata objects was created.
+	CreationDate *time.Time `type:"timestamp"`
+
+	// The date the OpsMetadata object was last updated.
+	LastModifiedDate *time.Time `type:"timestamp"`
+
+	// The user name who last updated the OpsMetadata object.
+	LastModifiedUser *string `type:"string"`
+
+	// The Amazon Resource Name (ARN) of the OpsMetadata Object or blob.
+	OpsMetadataArn *string `min:"1" type:"string"`
+
+	// The ID of the AppManager application.
+	ResourceId *string `min:"1" type:"string"`
+}
+
+// String returns the string representation
+func (s OpsMetadata) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s OpsMetadata) GoString() string {
+	return s.String()
+}
+
+// SetCreationDate sets the CreationDate field's value.
+func (s *OpsMetadata) SetCreationDate(v time.Time) *OpsMetadata {
+	s.CreationDate = &v
+	return s
+}
+
+// SetLastModifiedDate sets the LastModifiedDate field's value.
+func (s *OpsMetadata) SetLastModifiedDate(v time.Time) *OpsMetadata {
+	s.LastModifiedDate = &v
+	return s
+}
+
+// SetLastModifiedUser sets the LastModifiedUser field's value.
+func (s *OpsMetadata) SetLastModifiedUser(v string) *OpsMetadata {
+	s.LastModifiedUser = &v
+	return s
+}
+
+// SetOpsMetadataArn sets the OpsMetadataArn field's value.
+func (s *OpsMetadata) SetOpsMetadataArn(v string) *OpsMetadata {
+	s.OpsMetadataArn = &v
+	return s
+}
+
+// SetResourceId sets the ResourceId field's value.
+func (s *OpsMetadata) SetResourceId(v string) *OpsMetadata {
+	s.ResourceId = &v
+	return s
+}
+
+// An OpsMetadata object already exists for the selected resource.
+type OpsMetadataAlreadyExistsException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"message" type:"string"`
+}
+
+// String returns the string representation
+func (s OpsMetadataAlreadyExistsException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s OpsMetadataAlreadyExistsException) GoString() string {
+	return s.String()
+}
+
+func newErrorOpsMetadataAlreadyExistsException(v protocol.ResponseMetadata) error {
+	return &OpsMetadataAlreadyExistsException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *OpsMetadataAlreadyExistsException) Code() string {
+	return "OpsMetadataAlreadyExistsException"
+}
+
+// Message returns the exception's message.
+func (s *OpsMetadataAlreadyExistsException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *OpsMetadataAlreadyExistsException) OrigErr() error {
+	return nil
+}
+
+func (s *OpsMetadataAlreadyExistsException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *OpsMetadataAlreadyExistsException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *OpsMetadataAlreadyExistsException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
+// A filter to limit the number of OpsMetadata objects displayed.
+type OpsMetadataFilter struct {
+	_ struct{} `type:"structure"`
+
+	// A filter key.
+	//
+	// Key is a required field
+	Key *string `min:"1" type:"string" required:"true"`
+
+	// A filter value.
+	//
+	// Values is a required field
+	Values []*string `min:"1" type:"list" required:"true"`
+}
+
+// String returns the string representation
+func (s OpsMetadataFilter) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s OpsMetadataFilter) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *OpsMetadataFilter) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "OpsMetadataFilter"}
+	if s.Key == nil {
+		invalidParams.Add(request.NewErrParamRequired("Key"))
+	}
+	if s.Key != nil && len(*s.Key) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("Key", 1))
+	}
+	if s.Values == nil {
+		invalidParams.Add(request.NewErrParamRequired("Values"))
+	}
+	if s.Values != nil && len(s.Values) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("Values", 1))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetKey sets the Key field's value.
+func (s *OpsMetadataFilter) SetKey(v string) *OpsMetadataFilter {
+	s.Key = &v
+	return s
+}
+
+// SetValues sets the Values field's value.
+func (s *OpsMetadataFilter) SetValues(v []*string) *OpsMetadataFilter {
+	s.Values = v
+	return s
+}
+
+// One of the arguments passed is invalid.
+type OpsMetadataInvalidArgumentException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"message" type:"string"`
+}
+
+// String returns the string representation
+func (s OpsMetadataInvalidArgumentException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s OpsMetadataInvalidArgumentException) GoString() string {
+	return s.String()
+}
+
+func newErrorOpsMetadataInvalidArgumentException(v protocol.ResponseMetadata) error {
+	return &OpsMetadataInvalidArgumentException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *OpsMetadataInvalidArgumentException) Code() string {
+	return "OpsMetadataInvalidArgumentException"
+}
+
+// Message returns the exception's message.
+func (s *OpsMetadataInvalidArgumentException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *OpsMetadataInvalidArgumentException) OrigErr() error {
+	return nil
+}
+
+func (s *OpsMetadataInvalidArgumentException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *OpsMetadataInvalidArgumentException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *OpsMetadataInvalidArgumentException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
+// The OpsMetadata object exceeds the maximum number of OpsMetadata keys that
+// you can assign to an application in AppManager.
+type OpsMetadataKeyLimitExceededException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"message" type:"string"`
+}
+
+// String returns the string representation
+func (s OpsMetadataKeyLimitExceededException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s OpsMetadataKeyLimitExceededException) GoString() string {
+	return s.String()
+}
+
+func newErrorOpsMetadataKeyLimitExceededException(v protocol.ResponseMetadata) error {
+	return &OpsMetadataKeyLimitExceededException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *OpsMetadataKeyLimitExceededException) Code() string {
+	return "OpsMetadataKeyLimitExceededException"
+}
+
+// Message returns the exception's message.
+func (s *OpsMetadataKeyLimitExceededException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *OpsMetadataKeyLimitExceededException) OrigErr() error {
+	return nil
+}
+
+func (s *OpsMetadataKeyLimitExceededException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *OpsMetadataKeyLimitExceededException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *OpsMetadataKeyLimitExceededException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
+// Your account reached the maximum number of OpsMetadata objects allowed by
+// AppManager. The maximum is 200 OpsMetadata objects. Delete one or more OpsMetadata
+// object and try again.
+type OpsMetadataLimitExceededException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"message" type:"string"`
+}
+
+// String returns the string representation
+func (s OpsMetadataLimitExceededException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s OpsMetadataLimitExceededException) GoString() string {
+	return s.String()
+}
+
+func newErrorOpsMetadataLimitExceededException(v protocol.ResponseMetadata) error {
+	return &OpsMetadataLimitExceededException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *OpsMetadataLimitExceededException) Code() string {
+	return "OpsMetadataLimitExceededException"
+}
+
+// Message returns the exception's message.
+func (s *OpsMetadataLimitExceededException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *OpsMetadataLimitExceededException) OrigErr() error {
+	return nil
+}
+
+func (s *OpsMetadataLimitExceededException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *OpsMetadataLimitExceededException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *OpsMetadataLimitExceededException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
+// The OpsMetadata object does not exist.
+type OpsMetadataNotFoundException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"message" type:"string"`
+}
+
+// String returns the string representation
+func (s OpsMetadataNotFoundException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s OpsMetadataNotFoundException) GoString() string {
+	return s.String()
+}
+
+func newErrorOpsMetadataNotFoundException(v protocol.ResponseMetadata) error {
+	return &OpsMetadataNotFoundException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *OpsMetadataNotFoundException) Code() string {
+	return "OpsMetadataNotFoundException"
+}
+
+// Message returns the exception's message.
+func (s *OpsMetadataNotFoundException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *OpsMetadataNotFoundException) OrigErr() error {
+	return nil
+}
+
+func (s *OpsMetadataNotFoundException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *OpsMetadataNotFoundException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *OpsMetadataNotFoundException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
+// The system is processing too many concurrent updates. Wait a few moments
+// and try again.
+type OpsMetadataTooManyUpdatesException struct {
+	_            struct{}                  `type:"structure"`
+	RespMetadata protocol.ResponseMetadata `json:"-" xml:"-"`
+
+	Message_ *string `locationName:"message" type:"string"`
+}
+
+// String returns the string representation
+func (s OpsMetadataTooManyUpdatesException) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s OpsMetadataTooManyUpdatesException) GoString() string {
+	return s.String()
+}
+
+func newErrorOpsMetadataTooManyUpdatesException(v protocol.ResponseMetadata) error {
+	return &OpsMetadataTooManyUpdatesException{
+		RespMetadata: v,
+	}
+}
+
+// Code returns the exception type name.
+func (s *OpsMetadataTooManyUpdatesException) Code() string {
+	return "OpsMetadataTooManyUpdatesException"
+}
+
+// Message returns the exception's message.
+func (s *OpsMetadataTooManyUpdatesException) Message() string {
+	if s.Message_ != nil {
+		return *s.Message_
+	}
+	return ""
+}
+
+// OrigErr always returns nil, satisfies awserr.Error interface.
+func (s *OpsMetadataTooManyUpdatesException) OrigErr() error {
+	return nil
+}
+
+func (s *OpsMetadataTooManyUpdatesException) Error() string {
+	return fmt.Sprintf("%s: %s", s.Code(), s.Message())
+}
+
+// Status code returns the HTTP status code for the request's response error.
+func (s *OpsMetadataTooManyUpdatesException) StatusCode() int {
+	return s.RespMetadata.StatusCode
+}
+
+// RequestID returns the service's response RequestID for request.
+func (s *OpsMetadataTooManyUpdatesException) RequestID() string {
+	return s.RespMetadata.RequestID
+}
+
 // The OpsItem data type to return.
 type OpsResultAttribute struct {
 	_ struct{} `type:"structure"`
@@ -38784,7 +40075,7 @@ type Patch struct {
 	BugzillaIds []*string `type:"list"`
 
 	// The Common Vulnerabilities and Exposures (CVE) ID of the patch. For example,
-	// CVE-1999-0067. Applies to Linux-based instances only.
+	// CVE-2011-3192. Applies to Linux-based instances only.
 	CVEIds []*string `type:"list"`
 
 	// The classification of the patch. For example, SecurityUpdates, Updates, or
@@ -45224,7 +46515,7 @@ type UpdateAssociationInput struct {
 	// By default, when you update an association, the system runs it immediately
 	// after it is updated and then according to the schedule you specified. Specify
 	// this option if you don't want an association to run immediately after you
-	// update it.
+	// update it. This parameter is not supported for rate expressions.
 	//
 	// Also, if you specified this option when you created the association, you
 	// can reset it. To do so, specify the no-apply-only-at-cron-interval parameter
@@ -46961,6 +48252,104 @@ func (s UpdateOpsItemOutput) GoString() string {
 	return s.String()
 }
 
+type UpdateOpsMetadataInput struct {
+	_ struct{} `type:"structure"`
+
+	// The metadata keys to delete from the OpsMetadata object.
+	KeysToDelete []*string `min:"1" type:"list"`
+
+	// Metadata to add to an OpsMetadata object.
+	MetadataToUpdate map[string]*MetadataValue `min:"1" type:"map"`
+
+	// The Amazon Resoure Name (ARN) of the OpsMetadata Object to update.
+	//
+	// OpsMetadataArn is a required field
+	OpsMetadataArn *string `min:"1" type:"string" required:"true"`
+}
+
+// String returns the string representation
+func (s UpdateOpsMetadataInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s UpdateOpsMetadataInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *UpdateOpsMetadataInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "UpdateOpsMetadataInput"}
+	if s.KeysToDelete != nil && len(s.KeysToDelete) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("KeysToDelete", 1))
+	}
+	if s.MetadataToUpdate != nil && len(s.MetadataToUpdate) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("MetadataToUpdate", 1))
+	}
+	if s.OpsMetadataArn == nil {
+		invalidParams.Add(request.NewErrParamRequired("OpsMetadataArn"))
+	}
+	if s.OpsMetadataArn != nil && len(*s.OpsMetadataArn) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("OpsMetadataArn", 1))
+	}
+	if s.MetadataToUpdate != nil {
+		for i, v := range s.MetadataToUpdate {
+			if v == nil {
+				continue
+			}
+			if err := v.Validate(); err != nil {
+				invalidParams.AddNested(fmt.Sprintf("%s[%v]", "MetadataToUpdate", i), err.(request.ErrInvalidParams))
+			}
+		}
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetKeysToDelete sets the KeysToDelete field's value.
+func (s *UpdateOpsMetadataInput) SetKeysToDelete(v []*string) *UpdateOpsMetadataInput {
+	s.KeysToDelete = v
+	return s
+}
+
+// SetMetadataToUpdate sets the MetadataToUpdate field's value.
+func (s *UpdateOpsMetadataInput) SetMetadataToUpdate(v map[string]*MetadataValue) *UpdateOpsMetadataInput {
+	s.MetadataToUpdate = v
+	return s
+}
+
+// SetOpsMetadataArn sets the OpsMetadataArn field's value.
+func (s *UpdateOpsMetadataInput) SetOpsMetadataArn(v string) *UpdateOpsMetadataInput {
+	s.OpsMetadataArn = &v
+	return s
+}
+
+type UpdateOpsMetadataOutput struct {
+	_ struct{} `type:"structure"`
+
+	// The Amazon Resource Name (ARN) of the OpsMetadata Object that was updated.
+	OpsMetadataArn *string `min:"1" type:"string"`
+}
+
+// String returns the string representation
+func (s UpdateOpsMetadataOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s UpdateOpsMetadataOutput) GoString() string {
+	return s.String()
+}
+
+// SetOpsMetadataArn sets the OpsMetadataArn field's value.
+func (s *UpdateOpsMetadataOutput) SetOpsMetadataArn(v string) *UpdateOpsMetadataOutput {
+	s.OpsMetadataArn = &v
+	return s
+}
+
 type UpdatePatchBaselineInput struct {
 	_ struct{} `type:"structure"`
 
@@ -48579,6 +49968,9 @@ const (
 
 	// OperatingSystemDebian is a OperatingSystem enum value
 	OperatingSystemDebian = "DEBIAN"
+
+	// OperatingSystemMacos is a OperatingSystem enum value
+	OperatingSystemMacos = "MACOS"
 )
 
 // OperatingSystem_Values returns all elements of the OperatingSystem enum
@@ -48593,6 +49985,7 @@ func OperatingSystem_Values() []string {
 		OperatingSystemCentos,
 		OperatingSystemOracleLinux,
 		OperatingSystemDebian,
+		OperatingSystemMacos,
 	}
 }
 

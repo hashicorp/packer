@@ -52,6 +52,11 @@ func (c *HTTPConfig) Prepare(ctx *interpolate.Context) []error {
 		c.HTTPPortMax = 9000
 	}
 
+	if c.HTTPInterface != "" && c.HTTPAddress != "" {
+		errs = append(errs,
+			errors.New("either http_interface or http_bind_address can be specified"))
+	}
+
 	if c.HTTPAddress == "" {
 		c.HTTPAddress = "0.0.0.0"
 	}
@@ -59,11 +64,6 @@ func (c *HTTPConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.HTTPPortMin > c.HTTPPortMax {
 		errs = append(errs,
 			errors.New("http_port_min must be less than http_port_max"))
-	}
-
-	if c.HTTPInterface != "" && c.HTTPAddress == "0.0.0.0" {
-		errs = append(errs,
-			errors.New("either http_interface of http_bind_address can be specified"))
 	}
 
 	return errs
