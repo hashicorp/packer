@@ -41,7 +41,7 @@ type PackerConfig struct {
 	InputVariables Variables
 	LocalVariables Variables
 
-	DataSources DataSources
+	Datasources Datasources
 
 	LocalBlocks []*LocalBlock
 
@@ -53,7 +53,7 @@ type PackerConfig struct {
 	builderSchemas        packer.BuilderStore
 	provisionersSchemas   packer.ProvisionerStore
 	postProcessorsSchemas packer.PostProcessorStore
-	dataStoreSchemas      packer.DataSourceStore
+	datasourceSchemas     packer.DatasourceStore
 
 	except []glob.Glob
 	only   []glob.Glob
@@ -82,7 +82,7 @@ const (
 func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalContext {
 	inputVariables, _ := cfg.InputVariables.Values()
 	localVariables, _ := cfg.LocalVariables.Values()
-	datasourceVariables, _ := cfg.DataSources.Values()
+	datasourceVariables, _ := cfg.Datasources.Values()
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
@@ -243,12 +243,12 @@ func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics 
 func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	for ref, ds := range cfg.DataSources {
+	for ref, ds := range cfg.Datasources {
 		if ds.value != (cty.Value{}) {
 			continue
 		}
 
-		datasource, startDiags := cfg.startDatasource(cfg.dataStoreSchemas, ref)
+		datasource, startDiags := cfg.startDatasource(cfg.datasourceSchemas, ref)
 		diags = append(diags, startDiags...)
 		if diags.HasErrors() {
 			continue
@@ -262,14 +262,14 @@ func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics
 			if err != nil {
 				diags = append(diags, &hcl.Diagnostic{
 					Summary:  err.Error(),
-					Subject:  &cfg.DataSources[ref].block.DefRange,
+					Subject:  &cfg.Datasources[ref].block.DefRange,
 					Severity: hcl.DiagError,
 				})
 				continue
 			}
 			ds.value = realValue
 		}
-		cfg.DataSources[ref] = ds
+		cfg.Datasources[ref] = ds
 	}
 
 	return diags

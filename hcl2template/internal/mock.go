@@ -104,28 +104,28 @@ func (b *MockProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm p
 }
 
 //////
-// MockDataSource
+// MockDatasource
 //////
 
-type MockDataSource struct {
+type MockDatasource struct {
 	Config MockConfig
 }
 
-var _ packersdk.DataSource = new(MockDataSource)
+var _ packersdk.Datasource = new(MockDatasource)
 
-func (d *MockDataSource) ConfigSpec() hcldec.ObjectSpec {
+func (d *MockDatasource) ConfigSpec() hcldec.ObjectSpec {
 	return d.Config.FlatMapstructure().HCL2Spec()
 }
 
-func (d *MockDataSource) OutputSpec() hcldec.ObjectSpec {
+func (d *MockDatasource) OutputSpec() hcldec.ObjectSpec {
 	return hcldec.ObjectSpec{}
 }
 
-func (d *MockDataSource) Configure(...interface{}) error {
+func (d *MockDatasource) Configure(...interface{}) error {
 	return nil
 }
 
-func (d *MockDataSource) Execute() (cty.Value, error) {
+func (d *MockDatasource) Execute() (cty.Value, error) {
 	return cty.EmptyObjectVal, nil
 }
 

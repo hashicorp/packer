@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type DataSourceOutput
+//go:generate mapstructure-to-hcl2 -type DatasourceOutput
 package ami
 
 import (
@@ -6,11 +6,11 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
-type DataSource struct {
+type Datasource struct {
 	config Config
 }
 
-type DataSourceOutput struct {
+type DatasourceOutput struct {
 	ID           string
 	Name         string
 	CreationDate string
@@ -19,19 +19,19 @@ type DataSourceOutput struct {
 	Tags         map[string]string
 }
 
-func (d *DataSource) ConfigSpec() hcldec.ObjectSpec {
+func (d *Datasource) ConfigSpec() hcldec.ObjectSpec {
 	return d.config.FlatMapstructure().HCL2Spec()
 }
 
-func (d *DataSource) OutputSpec() hcldec.ObjectSpec {
-	return (&DataSourceOutput{}).FlatMapstructure().HCL2Spec()
+func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
+	return (&DatasourceOutput{}).FlatMapstructure().HCL2Spec()
 }
 
-func (d *DataSource) Configure(...interface{}) error {
+func (d *Datasource) Configure(...interface{}) error {
 	return nil
 }
 
-func (d *DataSource) Execute() (cty.Value, error) {
+func (d *Datasource) Execute() (cty.Value, error) {
 	return cty.ObjectVal(map[string]cty.Value{
 		"id": cty.StringVal("ami-0568456c"),
 	}), nil

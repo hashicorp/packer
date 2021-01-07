@@ -5,13 +5,13 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
 // DataBlock references an HCL 'data' block.
-type DataSource struct {
+type Datasource struct {
 	Type string
 	Name string
 
@@ -19,16 +19,16 @@ type DataSource struct {
 	block *hcl.Block
 }
 
-type DataSources map[DataSourceRef]DataSource
+type Datasources map[DatasourceRef]Datasource
 
-func (data *DataSource) Ref() DataSourceRef {
-	return DataSourceRef{
+func (data *Datasource) Ref() DatasourceRef {
+	return DatasourceRef{
 		Type: data.Type,
 		Name: data.Name,
 	}
 }
 
-func (ds *DataSources) Values() (map[string]cty.Value, hcl.Diagnostics) {
+func (ds *Datasources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := map[string]cty.Value{}
 	valuesMap := map[string]map[string]cty.Value{}
@@ -56,23 +56,23 @@ func (ds *DataSources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	return res, diags
 }
 
-type DataSourceRef struct {
+type DatasourceRef struct {
 	Type string
 	Name string
 }
 
 // the 'addition' field makes of ref a different entry in the data sources map, so
 // Ref is here to make sure only one is returned.
-func (r *DataSourceRef) Ref() DataSourceRef {
-	return DataSourceRef{
+func (r *DatasourceRef) Ref() DatasourceRef {
+	return DatasourceRef{
 		Type: r.Type,
 		Name: r.Name,
 	}
 }
 
-func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DataSourceStore, ref DataSourceRef) (packersdk.DataSource, hcl.Diagnostics) {
+func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore, ref DatasourceRef) (packersdk.Datasource, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	block := cfg.DataSources[ref].block
+	block := cfg.Datasources[ref].block
 
 	datasource, err := dataSourceStore.Start(ref.Type)
 	if err != nil {
@@ -106,15 +106,15 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DataSourceStore,
 	return datasource, diags
 }
 
-func (p *Parser) decodeDataBlock(block *hcl.Block) (*DataSource, hcl.Diagnostics) {
+func (p *Parser) decodeDataBlock(block *hcl.Block) (*Datasource, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	r := &DataSource{
+	r := &Datasource{
 		Type:  block.Labels[0],
 		Name:  block.Labels[1],
 		block: block,
 	}
 
-	if p.DataSourceSchemas == nil {
+	if p.DatasourceSchemas == nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary:  "Unknown " + dataSourceLabel + " type " + r.Type,
 			Subject:  block.LabelRanges[0].Ptr(),
@@ -124,11 +124,11 @@ func (p *Parser) decodeDataBlock(block *hcl.Block) (*DataSource, hcl.Diagnostics
 		return r, diags
 	}
 
-	if !p.DataSourceSchemas.Has(r.Type) {
+	if !p.DatasourceSchemas.Has(r.Type) {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary:  "Unknown " + dataSourceLabel + " type " + r.Type,
 			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("known data sources: %v", p.DataSourceSchemas.List()),
+			Detail:   fmt.Sprintf("known data sources: %v", p.DatasourceSchemas.List()),
 			Severity: hcl.DiagError,
 		})
 		return r, diags

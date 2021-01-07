@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func TestParse_datasource(t *testing.T) {
@@ -16,7 +16,7 @@ func TestParse_datasource(t *testing.T) {
 			parseTestArgs{"testdata/datasources/basic.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "datasources"),
-				DataSources: DataSources{
+				Datasources: Datasources{
 					{
 						Type: "amazon-ami",
 						Name: "test",
@@ -65,7 +65,7 @@ func TestParse_datasource(t *testing.T) {
 			parseTestArgs{"testdata/datasources/duplicate.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "datasources"),
-				DataSources: DataSources{
+				Datasources: Datasources{
 					{
 						Type: "amazon-ami",
 						Name: "test",

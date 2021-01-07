@@ -4,16 +4,16 @@ import (
 	"log"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
-type cmdDataSource struct {
-	d      packersdk.DataSource
+type cmdDatasource struct {
+	d      packersdk.Datasource
 	client *Client
 }
 
-func (d *cmdDataSource) ConfigSpec() hcldec.ObjectSpec {
+func (d *cmdDatasource) ConfigSpec() hcldec.ObjectSpec {
 	defer func() {
 		r := recover()
 		d.checkExit(r, nil)
@@ -22,7 +22,7 @@ func (d *cmdDataSource) ConfigSpec() hcldec.ObjectSpec {
 	return d.d.ConfigSpec()
 }
 
-func (d *cmdDataSource) Configure(configs ...interface{}) error {
+func (d *cmdDatasource) Configure(configs ...interface{}) error {
 	defer func() {
 		r := recover()
 		d.checkExit(r, nil)
@@ -31,7 +31,7 @@ func (d *cmdDataSource) Configure(configs ...interface{}) error {
 	return d.d.Configure(configs...)
 }
 
-func (d *cmdDataSource) OutputSpec() hcldec.ObjectSpec {
+func (d *cmdDatasource) OutputSpec() hcldec.ObjectSpec {
 	defer func() {
 		r := recover()
 		d.checkExit(r, nil)
@@ -40,7 +40,7 @@ func (d *cmdDataSource) OutputSpec() hcldec.ObjectSpec {
 	return d.d.OutputSpec()
 }
 
-func (d *cmdDataSource) Execute() (cty.Value, error) {
+func (d *cmdDatasource) Execute() (cty.Value, error) {
 	defer func() {
 		r := recover()
 		d.checkExit(r, nil)
@@ -49,7 +49,7 @@ func (d *cmdDataSource) Execute() (cty.Value, error) {
 	return d.d.Execute()
 }
 
-func (d *cmdDataSource) checkExit(p interface{}, cb func()) {
+func (d *cmdDatasource) checkExit(p interface{}, cb func()) {
 	if d.client.Exited() && cb != nil {
 		cb()
 	} else if p != nil && !Killed {

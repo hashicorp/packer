@@ -63,7 +63,7 @@ type Parser struct {
 
 	PostProcessorsSchemas packer.PostProcessorStore
 
-	DataSourceSchemas packer.DataSourceStore
+	DatasourceSchemas packer.DatasourceStore
 }
 
 const (
@@ -133,7 +133,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		builderSchemas:          p.BuilderSchemas,
 		provisionersSchemas:     p.ProvisionersSchemas,
 		postProcessorsSchemas:   p.PostProcessorsSchemas,
-		dataStoreSchemas:        p.DataSourceSchemas,
+		datasourceSchemas:       p.DatasourceSchemas,
 		parser:                  p,
 		files:                   files,
 	}
@@ -161,7 +161,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		}
 
 		for _, file := range files {
-			morediags := p.decodeDataSources(file, cfg)
+			morediags := p.decodeDatasources(file, cfg)
 			diags = append(diags, morediags...)
 		}
 
@@ -340,7 +340,7 @@ func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	return diags
 }
 
-func (p *Parser) decodeDataSources(file *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+func (p *Parser) decodeDatasources(file *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	body := dynblock.Expand(file.Body, cfg.EvalContext(nil))
@@ -356,7 +356,7 @@ func (p *Parser) decodeDataSources(file *hcl.File, cfg *PackerConfig) hcl.Diagno
 				continue
 			}
 			ref := datasource.Ref()
-			if existing, found := cfg.DataSources[ref]; found {
+			if existing, found := cfg.Datasources[ref]; found {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Duplicate " + dataSourceLabel + " block",
@@ -368,10 +368,10 @@ func (p *Parser) decodeDataSources(file *hcl.File, cfg *PackerConfig) hcl.Diagno
 				})
 				continue
 			}
-			if cfg.DataSources == nil {
-				cfg.DataSources = DataSources{}
+			if cfg.Datasources == nil {
+				cfg.Datasources = Datasources{}
 			}
-			cfg.DataSources[ref] = *datasource
+			cfg.Datasources[ref] = *datasource
 		}
 	}
 

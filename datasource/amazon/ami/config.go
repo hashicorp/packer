@@ -2,7 +2,7 @@
 
 package ami
 
-import "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+import "github.com/hashicorp/packer-plugin-sdk/template/config"
 
 type Config struct {
 	config.KeyValueFilter `mapstructure:",squash"`

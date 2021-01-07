@@ -25,10 +25,10 @@ type Config struct {
 	builders       packersdk.MapOfBuilder
 	provisioners   packersdk.MapOfProvisioner
 	postProcessors packersdk.MapOfPostProcessor
-	dataSources    packersdk.MapOfDataSource
+	dataSources    packersdk.MapOfDatasource
 }
 
-func (c *Config) GetPlugins() (packersdk.MapOfBuilder, packersdk.MapOfProvisioner, packersdk.MapOfPostProcessor, packersdk.MapOfDataSource) {
+func (c *Config) GetPlugins() (packersdk.MapOfBuilder, packersdk.MapOfProvisioner, packersdk.MapOfPostProcessor, packersdk.MapOfDatasource) {
 	return c.builders, c.provisioners, c.postProcessors, c.dataSources
 }
 
@@ -50,7 +50,7 @@ func (c *Config) Discover() error {
 		c.postProcessors = packersdk.MapOfPostProcessor{}
 	}
 	if c.dataSources == nil {
-		c.dataSources = packersdk.MapOfDataSource{}
+		c.dataSources = packersdk.MapOfDatasource{}
 	}
 
 	// If we are already inside a plugin process we should not need to

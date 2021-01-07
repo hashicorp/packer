@@ -33,8 +33,8 @@ func getBasicParser() *Parser {
 			"amazon-import": func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
 			"manifest":      func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
 		},
-		DataSourceSchemas: packersdk.MapOfDataSource{
-			"amazon-ami": func() (packersdk.DataSource, error) { return &MockDataSource{}, nil },
+		DatasourceSchemas: packersdk.MapOfDatasource{
+			"amazon-ami": func() (packersdk.Datasource, error) { return &MockDatasource{}, nil },
 		},
 	}
 }
@@ -229,7 +229,7 @@ var cmpOpts = []cmp.Option{
 		PackerConfig{},
 		Variable{},
 		SourceBlock{},
-		DataSource{},
+		Datasource{},
 		ProvisionerBlock{},
 		PostProcessorBlock{},
 		packer.CoreBuild{},

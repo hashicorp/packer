@@ -65,6 +65,7 @@ import (
 	vsphereclonebuilder "github.com/hashicorp/packer/builder/vsphere/clone"
 	vsphereisobuilder "github.com/hashicorp/packer/builder/vsphere/iso"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
+	amazonamidatasource "github.com/hashicorp/packer/datasource/amazon/ami"
 	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
 	amazonimportpostprocessor "github.com/hashicorp/packer/post-processor/amazon-import"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
@@ -212,7 +213,11 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 	"yandex-import":        new(yandeximportpostprocessor.PostProcessor),
 }
 
-var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")
+var Datasources = map[string]packersdk.Datasource{
+	"amazon-ami": new(amazonamidatasource.Datasource),
+}
+
+var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner|datasource)-(.+)")
 
 func (c *PluginCommand) Run(args []string) int {
 	// This is an internal call (users should not call this directly) so we're
@@ -261,6 +266,13 @@ func (c *PluginCommand) Run(args []string) int {
 			return 1
 		}
 		server.RegisterPostProcessor(postProcessor)
+	case "datasource":
+		datasource, found := Datasources[pluginName]
+		if !found {
+			c.Ui.Error(fmt.Sprintf("Could not load datasource: %s", pluginName))
+			return 1
+		}
+		server.RegisterDatasource(datasource)
 	}
 
 	server.Serve()

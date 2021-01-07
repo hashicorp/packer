@@ -230,7 +230,7 @@ func wrappedMain() int {
 				BuilderStore:       config.Builders,
 				ProvisionerStore:   config.Provisioners,
 				PostProcessorStore: config.PostProcessors,
-				DataSourceStore:    config.DataSources,
+				DatasourceStore:    config.Datasources,
 			},
 			Version: version.Version,
 		},
@@ -315,7 +315,7 @@ func loadConfig() (*config, error) {
 	config.Builders = builders
 	config.Provisioners = provisioners
 	config.PostProcessors = postProcessors
-	config.DataSources = dataSources
+	config.Datasources = dataSources
 
 	// Finally, try to use an internal plugin. Note that this will not override
 	// any previously-loaded plugins.

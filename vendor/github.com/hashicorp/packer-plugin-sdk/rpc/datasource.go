@@ -6,17 +6,17 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
-// An implementation of packersdk.DataSource where the data source is actually
+// An implementation of packer.Datasource where the data source is actually
 // executed over an RPC connection.
 type datasource struct {
 	commonClient
 }
 
-type DataSourceConfigureArgs struct {
+type DatasourceConfigureArgs struct {
 	Configs []interface{}
 }
 
@@ -25,7 +25,7 @@ func (d *datasource) Configure(configs ...interface{}) error {
 	if err != nil {
 		return err
 	}
-	args := &DataSourceConfigureArgs{Configs: configs}
+	args := &DatasourceConfigureArgs{Configs: configs}
 	return d.client.Call(d.endpoint+".Configure", args, new(interface{}))
 }
 
@@ -66,16 +66,16 @@ func (d *datasource) Execute() (cty.Value, error) {
 	return *res, nil
 }
 
-// DataSourceServer wraps a packersdk.DataSource implementation and makes it
+// DatasourceServer wraps a packer.Datasource implementation and makes it
 // exportable as part of a Golang RPC server.
-type DataSourceServer struct {
+type DatasourceServer struct {
 	contextCancel func()
 
 	commonServer
-	d packersdk.DataSource
+	d packer.Datasource
 }
 
-func (d *DataSourceServer) Configure(args *DataSourceConfigureArgs, reply *interface{}) error {
+func (d *DatasourceServer) Configure(args *DatasourceConfigureArgs, reply *interface{}) error {
 	config, err := decodeCTYValues(args.Configs)
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func (d *DataSourceServer) Configure(args *DataSourceConfigureArgs, reply *inter
 	return d.d.Configure(config...)
 }
 
-func (d *DataSourceServer) OutputSpec(args *DataSourceConfigureArgs, reply *OutputSpecResponse) error {
+func (d *DatasourceServer) OutputSpec(args *DatasourceConfigureArgs, reply *OutputSpecResponse) error {
 	spec := d.d.OutputSpec()
 	b := bytes.NewBuffer(nil)
 	err := gob.NewEncoder(b).Encode(spec)
@@ -91,7 +91,7 @@ func (d *DataSourceServer) OutputSpec(args *DataSourceConfigureArgs, reply *Outp
 	return err
 }
 
-func (d *DataSourceServer) Execute(args *interface{}, reply *ExecuteResponse) error {
+func (d *DatasourceServer) Execute(args *interface{}, reply *ExecuteResponse) error {
 	spec, err := d.d.Execute()
 	reply.Error = NewBasicError(err)
 	b := bytes.NewBuffer(nil)
@@ -100,7 +100,7 @@ func (d *DataSourceServer) Execute(args *interface{}, reply *ExecuteResponse) er
 	return err
 }
 
-func (d *DataSourceServer) Cancel(args *interface{}, reply *interface{}) error {
+func (d *DatasourceServer) Cancel(args *interface{}, reply *interface{}) error {
 	if d.contextCancel != nil {
 		d.contextCancel()
 	}

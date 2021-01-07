@@ -45,7 +45,7 @@ func main() {
 
 	datasources, err := discoverDatasources()
 	if err != nil {
-		log.Fatalf("Failed to discover datasources: %s", err)
+		log.Fatalf("Failed to discover Datasources: %s", err)
 	}
 
 	// Do some simple code generation and templating
@@ -54,7 +54,7 @@ func main() {
 	output = strings.Replace(output, "BUILDERS", makeMap("Builders", "Builder", builders), 1)
 	output = strings.Replace(output, "PROVISIONERS", makeMap("Provisioners", "Provisioner", provisioners), 1)
 	output = strings.Replace(output, "POSTPROCESSORS", makeMap("PostProcessors", "PostProcessor", postProcessors), 1)
-	output = strings.Replace(output, "DATASOURCES", makeMap("DataSources", "DataSource", datasources), 1)
+	output = strings.Replace(output, "DATASOURCES", makeMap("Datasources", "Datasource", datasources), 1)
 
 	// TODO sort the lists of plugins so we are not subjected to random OS ordering of the plugin lists
 	// TODO format the file
@@ -111,7 +111,7 @@ func makeMap(varName, varType string, items []plugin) string {
 	return output
 }
 
-func makeImports(builders, provisioners, postProcessors, datasources []plugin) string {
+func makeImports(builders, provisioners, postProcessors, Datasources []plugin) string {
 	plugins := []string{}
 
 	for _, builder := range builders {
@@ -126,7 +126,7 @@ func makeImports(builders, provisioners, postProcessors, datasources []plugin) s
 		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/hashicorp/packer/%s\"\n", postProcessor.ImportName, filepath.ToSlash(postProcessor.Path)))
 	}
 
-	for _, datasource := range datasources {
+	for _, datasource := range Datasources {
 		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/hashicorp/packer/%s\"\n", datasource.ImportName, filepath.ToSlash(datasource.Path)))
 	}
 
@@ -241,7 +241,7 @@ func discoverBuilders() ([]plugin, error) {
 
 func discoverDatasources() ([]plugin, error) {
 	path := "./datasource"
-	typeID := "DataSource"
+	typeID := "Datasource"
 	return discoverTypesInPath(path, typeID)
 }
 
@@ -338,7 +338,7 @@ func (c *PluginCommand) Run(args []string) int {
 		}
 		server.RegisterPostProcessor(postProcessor)
 	case "datasource":
-		datasource, found := DataSources[pluginName]
+		datasource, found := Datasources[pluginName]
 		if !found {
 			c.Ui.Error(fmt.Sprintf("Could not load datasource: %s", pluginName))
 			return 1
