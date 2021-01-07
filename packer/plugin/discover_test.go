@@ -165,22 +165,17 @@ func TestHelperPlugins(t *testing.T) {
 
 	allMocks := []map[string]pluginsdk.Set{mockPlugins, defaultNameMock, doubleDefaultMock, badDefaultNameMock}
 	for _, mock := range allMocks {
-		t.Log("Megan 1")
 		plugin, found := mock[pluginName]
 		if found {
-			t.Log("Megan 2")
 			err := plugin.RunCommand(args...)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
-				t.Log("Megan 3")
 				os.Exit(1)
 			}
-			t.Log("Megan 4")
 			os.Exit(0)
 		}
 	}
 
-	t.Log("Megan 5")
 	fmt.Fprintf(os.Stderr, "No %q plugin found\n", pluginName)
 	os.Exit(2)
 }
@@ -313,17 +308,12 @@ func Test_multiplugin_describe(t *testing.T) {
 	createMockPlugins(t, mockPlugins)
 	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
 	defer os.RemoveAll(pluginDir)
-	t.Log("Megan 1")
 
 	c := Config{}
-	t.Log("Megan 2")
 	err := c.Discover()
-	t.Log("Megan 3")
 	if err != nil {
-		t.Log("Megan 5")
 		t.Fatalf("error discovering plugins; %s", err.Error())
 	}
-	t.Log("Megan 4")
 
 	for mockPluginName, plugin := range mockPlugins {
 		for mockBuilderName := range plugin.Builders {
