@@ -3,13 +3,14 @@ package command
 import (
 	"context"
 	"crypto/sha256"
+	"fmt"
 	"log"
 	"runtime"
 	"strings"
 
 	"github.com/hashicorp/packer/packer-plugin-sdk/plugin"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
-	 "github.com/hashicorp/packer/packer/plugin-getter/github"
+	"github.com/hashicorp/packer/packer/plugin-getter/github"
 	"github.com/posener/complete"
 )
 
@@ -76,7 +77,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 
 	getters := []plugingetter.Getter{
 		new(github.Getter),
-	} 
+	}
 
 	for _, pluginRequirement := range reqs {
 		// Get installed plugins that match requirement
@@ -102,7 +103,8 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 			c.Ui.Error(err.Error())
 		}
 		if newInstall != nil {
-			log.Printf("Installed plugin %s %s in %q", pluginRequirement.Identifier.ForDisplay(), newInstall.Version, newInstall.BinaryPath)
+			msg := fmt.Sprintf("Installed plugin %s %s in %q", pluginRequirement.Identifier.ForDisplay(), newInstall.Version, newInstall.BinaryPath)
+			c.Ui.Say(msg)
 		}
 	}
 	return ret
