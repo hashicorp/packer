@@ -599,6 +599,11 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 			errs, fmt.Errorf("vnc_port_min cannot be below 5900"))
 	}
 
+	if c.VNCPortMin > 65535 || c.VNCPortMax > 65535 {
+		errs = packersdk.MultiErrorAppend(
+			errs, fmt.Errorf("vmc_port_min and vnc_port_max must both be below 65535 to be valid TCP ports"))
+	}
+
 	if c.VNCPortMin > c.VNCPortMax {
 		errs = packersdk.MultiErrorAppend(
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
