@@ -93,19 +93,13 @@ func (c *config) loadSingleComponent(path string) (string, error) {
 	switch {
 	case strings.HasPrefix(pluginName, "packer-builder-"):
 		pluginName = pluginName[len("packer-builder-"):]
-		c.Plugins.Builders.Set(pluginName, func() (packersdk.Builder, error) {
-			return c.Plugins.Client(path).Builder()
-		})
+		c.Plugins.Builders.Set(pluginName, c.Plugins.Client(path).Builder)
 	case strings.HasPrefix(pluginName, "packer-post-processor-"):
 		pluginName = pluginName[len("packer-post-processor-"):]
-		c.Plugins.PostProcessors.Set(pluginName, func() (packersdk.PostProcessor, error) {
-			return c.Plugins.Client(path).PostProcessor()
-		})
+		c.Plugins.PostProcessors.Set(pluginName, c.Plugins.Client(path).PostProcessor)
 	case strings.HasPrefix(pluginName, "packer-provisioner-"):
 		pluginName = pluginName[len("packer-provisioner-"):]
-		c.Plugins.Provisioners.Set(pluginName, func() (packersdk.Provisioner, error) {
-			return c.Plugins.Client(path).Provisioner()
-		})
+		c.Plugins.Provisioners.Set(pluginName, c.Plugins.Client(path).Provisioner)
 	}
 
 	return pluginName, nil
@@ -150,33 +144,27 @@ func (c *config) discoverInternalComponents() error {
 	for builder := range command.Builders {
 		builder := builder
 		if !c.Plugins.Builders.Has(builder) {
-			c.Plugins.Builders.Set(builder, func() (packersdk.Builder, error) {
-				bin := fmt.Sprintf("%s%splugin%spacker-builder-%s",
-					packerPath, PACKERSPACE, PACKERSPACE, builder)
-				return c.Plugins.Client(bin).Builder()
-			})
+			bin := fmt.Sprintf("%s%splugin%spacker-builder-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, builder)
+			c.Plugins.Builders.Set(builder, c.Plugins.Client(bin).Builder)
 		}
 	}
 
 	for provisioner := range command.Provisioners {
 		provisioner := provisioner
 		if !c.Plugins.Provisioners.Has(provisioner) {
-			c.Plugins.Provisioners.Set(provisioner, func() (packersdk.Provisioner, error) {
-				bin := fmt.Sprintf("%s%splugin%spacker-provisioner-%s",
-					packerPath, PACKERSPACE, PACKERSPACE, provisioner)
-				return c.Plugins.Client(bin).Provisioner()
-			})
+			bin := fmt.Sprintf("%s%splugin%spacker-provisioner-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, provisioner)
+			c.Plugins.Provisioners.Set(provisioner, c.Plugins.Client(bin).Provisioner)
 		}
 	}
 
 	for postProcessor := range command.PostProcessors {
 		postProcessor := postProcessor
 		if !c.Plugins.PostProcessors.Has(postProcessor) {
-			c.Plugins.PostProcessors.Set(postProcessor, func() (packersdk.PostProcessor, error) {
-				bin := fmt.Sprintf("%s%splugin%spacker-post-processor-%s",
-					packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
-				return c.Plugins.Client(bin).PostProcessor()
-			})
+			bin := fmt.Sprintf("%s%splugin%spacker-post-processor-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
+			c.Plugins.PostProcessors.Set(postProcessor, c.Plugins.Client(bin).PostProcessor)
 		}
 	}
 

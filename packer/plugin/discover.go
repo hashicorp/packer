@@ -120,9 +120,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.Builders.Set(pluginName, func() (packersdk.Builder, error) {
-			return c.Client(newPath).Builder()
-		})
+		c.Builders.Set(pluginName, c.Client(newPath).Builder)
 		externallyUsed = append(externallyUsed, pluginName)
 	}
 	if len(externallyUsed) > 0 {
@@ -137,9 +135,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.PostProcessors.Set(pluginName, func() (packersdk.PostProcessor, error) {
-			return c.Client(newPath).PostProcessor()
-		})
+		c.PostProcessors.Set(pluginName, c.Client(newPath).PostProcessor)
 		externallyUsed = append(externallyUsed, pluginName)
 	}
 	if len(externallyUsed) > 0 {
@@ -154,9 +150,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.Provisioners.Set(pluginName, func() (packersdk.Provisioner, error) {
-			return c.Client(newPath).Provisioner()
-		})
+		c.Provisioners.Set(pluginName, c.Client(newPath).Provisioner)
 		externallyUsed = append(externallyUsed, pluginName)
 	}
 	if len(externallyUsed) > 0 {
