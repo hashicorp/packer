@@ -155,10 +155,15 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		}
 	}
 
-	diags = append(diags, cfg.detectPluginBinaries()...)
+	// enable packer to start plugins requested required_plugins.
+	moreDiags := cfg.detectPluginBinaries()
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		return cfg, diags
+	}
 
 	// Decode variable blocks so that they are available later on. Here locals
-	// can use input variables so we decode them firsthand.
+	// can use input variables so we decode input variables first.
 	{
 		for _, file := range files {
 			diags = append(diags, cfg.decodeInputVariables(file)...)

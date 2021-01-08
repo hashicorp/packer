@@ -63,7 +63,7 @@ func (c *Checksummer) GetChecksumOfFile(filePath string) ([]byte, error) {
 	return c.ParseChecksum(f)
 }
 
-// ParseChecksum expects the checksum reader to only contains the checksum and
+// ParseChecksum expects the checksum reader to only contain the checksum and
 // nothing else.
 func (c *Checksummer) ParseChecksum(f io.Reader) (Checksum, error) {
 	res := make([]byte, c.Hash.Size())

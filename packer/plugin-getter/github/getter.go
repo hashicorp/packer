@@ -25,7 +25,8 @@ const (
 )
 
 type Getter struct {
-	Client *github.Client
+	Client    *github.Client
+	UserAgent string
 }
 
 var _ plugingetter.Getter = &Getter{}
@@ -61,13 +62,16 @@ func transformVersionStream(in io.ReadCloser) (io.ReadCloser, error) {
 	return ioutil.NopCloser(buf), nil
 }
 
+// HostSpecificTokenAuthTransport makes sure the http roundtripper only sets an
+// auth token for requests aimed at a specific host.
+//
+// This helps for example to get release files from Github as Github will
+// redirect to s3 which will error if we give it a Github auth token.
 type HostSpecificTokenAuthTransport struct {
+	// Host to TokenSource map
 	TokenSources map[string]oauth2.TokenSource
 
-	// Transport is the underlying HTTP transport to use when making requests.
-	// It will default to http.DefaultTransport if nil.
-	Transport http.RoundTripper
-
+	// actual RoundTripper, nil means we use the default one from http.
 	Base http.RoundTripper
 }
 
@@ -129,6 +133,9 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 		}
 		g.Client = github.NewClient(tc)
 		g.Client.UserAgent = defaultUserAgent
+		if g.UserAgent != "" {
+			g.Client.UserAgent = g.UserAgent
+		}
 	}
 
 	var req *http.Request
@@ -140,10 +147,9 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	switch what {
 	case "releases":
 		req, err = g.Client.NewRequest("GET", filepath.Join("/repos/", opts.PluginRequirement.Identifier.RealRelativePath(), "/git/matching-refs/tags"), nil)
-		req.Header.Set("User-Agent", "Potato")
 		transform = transformVersionStream
 	case "sha256":
-		// something like https://github.com/azr/packer-plugin-amazon/releases/download/v0.0.1/packer-plugin-amazon_darwin-amd64_v0.0.1_x5_sha256
+		// something like https://github.com/azr/packer-plugin-amazon/releases/download/v0.0.1/packer-plugin-amazon_darwin-amd64_v0.0.1_x5_SHA256SUM
 		req, err = g.Client.NewRequest(
 			"GET",
 			"https://github.com"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version+"/"+opts.ExpectedFilename()+"_SHA256SUM",

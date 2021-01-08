@@ -87,7 +87,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 				continue
 			}
 
-			// base name could look like packer-plugin-amazon_v1.2.3_darwin_amd64.0_x4
+			// base name could look like packer-plugin-amazon_v1.2.3_darwin_amd64_x4
 			versionStr := strings.TrimPrefix(fname, filenamePrefix)
 			versionStr = strings.TrimSuffix(versionStr, filenameSuffix)
 			pv, err := version.NewVersion(versionStr)
@@ -97,7 +97,8 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 				continue
 			}
 
-			// no constraint means always pass
+			// no constraint means always pass, this will happen for implicit
+			// plugin requirements
 			if !pr.VersionConstraints.Check(pv) {
 				log.Printf("[TRACE] version %q of file %q does not match constraint %q", versionStr, path, pr.VersionConstraints.String())
 				continue
@@ -170,7 +171,7 @@ type Installation struct {
 	BinaryPath string
 
 	// Version of this plugin, if installed and versionned. Ex:
-	//  * v1.2.3 for packer-plugin-amazon_v1.2.3_darwin_.0_x5
+	//  * v1.2.3 for packer-plugin-amazon_v1.2.3_darwin_x5
 	//  * empty  for packer-plugin-amazon
 	Version string
 }

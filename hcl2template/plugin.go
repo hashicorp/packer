@@ -70,16 +70,30 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 	for _, pluginRequirement := range pluginReqs {
 		installs, err := pluginRequirement.ListInstallations(opts)
 		if err != nil {
-			panic(err) // fill diag error
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  fmt.Sprintf("Failed to list installation for %s", pluginRequirement.Identifier.ForDisplay()),
+				Detail:   err.Error(),
+			})
+			continue
 		}
 		if len(installs) == 0 {
-			panic("no plugin installed for " + pluginRequirement.Identifier.ForDisplay())
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  fmt.Sprintf("no plugin installed for %s", pluginRequirement.Identifier.ForDisplay()),
+				Detail:   "Did you run packer init for this project ?",
+			})
+			continue
 		}
 		log.Printf("[TRACE] Found the following %q installations: %v", pluginRequirement.Identifier.ForDisplay(), installs)
 		install := installs[len(installs)-1]
 		err = cfg.parser.PluginConfig.DiscoverMultiPlugin(pluginRequirement.Accessor, install.BinaryPath)
 		if err != nil {
-			panic(err)
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  fmt.Sprintf("Failed to discover plugin %s", pluginRequirement.Identifier.ForDisplay()),
+			})
+			continue
 		}
 	}
 
