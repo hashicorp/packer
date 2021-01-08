@@ -374,6 +374,8 @@ type Config struct {
 	// the initial boot_command. Because Packer generally runs in parallel,
 	// Packer uses a randomly chosen port in this range that appears available. By
 	// default this is 5900 to 6000. The minimum and maximum ports are inclusive.
+	// The minimum port cannot be set below 5900 due to a quirk in how QEMU parses
+	// vnc display address.
 	VNCPortMin int `mapstructure:"vnc_port_min" required:"false"`
 	VNCPortMax int `mapstructure:"vnc_port_max"`
 	// This is the name of the image (QCOW2 or IMG) file for
@@ -590,6 +592,11 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 				errs,
 				fmt.Errorf("Output directory '%s' already exists. It must not exist.", c.OutputDir))
 		}
+	}
+
+	if c.VNCPortMin < 5900 {
+		errs = packersdk.MultiErrorAppend(
+			errs, fmt.Errorf("vnc_port_min cannot be below 5900"))
 	}
 
 	if c.VNCPortMin > c.VNCPortMax {
