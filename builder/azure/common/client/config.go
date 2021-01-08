@@ -39,6 +39,8 @@ type Config struct {
 	// The path to a pem-encoded certificate that will be used to authenticate
 	// as the specified AAD SP.
 	ClientCertPath string `mapstructure:"client_cert_path"`
+	// The timeout for the JWT Token when using a client certificate
+	ClientCertExpireTimeout time.Duration `mapstructure:"client_cert_token_timeout" required:"false"`
 	// A JWT bearer token for client auth (RFC 7523, Sec. 2.2) that will be used
 	// to authenticate the AAD SP. Provides more control over token the expiration
 	// when using certificate authentication than when using `client_cert_path`.
@@ -259,7 +261,7 @@ func (c Config) GetServicePrincipalToken(
 		auth = NewSecretOAuthTokenProvider(*c.cloudEnvironment, c.ClientID, c.ClientSecret, c.TenantID)
 	case authTypeClientCert:
 		say("Getting tokens using client certificate")
-		auth, err = NewCertOAuthTokenProvider(*c.cloudEnvironment, c.ClientID, c.ClientCertPath, c.TenantID)
+		auth, err = NewCertOAuthTokenProvider(*c.cloudEnvironment, c.ClientID, c.ClientCertPath, c.TenantID, c.ClientCertExpireTimeout)
 		if err != nil {
 			return nil, err
 		}
@@ -334,6 +336,10 @@ func (c *Config) FillParameters() error {
 			return err
 		}
 		c.TenantID = tenantID
+	}
+
+	if c.ClientCertExpireTimeout == 0 {
+		c.ClientCertExpireTimeout = time.Hour
 	}
 
 	return nil
