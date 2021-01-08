@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
+	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/json"
 )
@@ -26,6 +27,7 @@ type NestedMockConfig struct {
 	NamedMapStringString NamedMapStringString `mapstructure:"named_map_string_string"`
 	NamedString          NamedString          `mapstructure:"named_string"`
 	Tags                 []MockTag            `mapstructure:"tag"`
+	Datasource           string               `mapstructure:"data_source"`
 }
 
 type MockTag struct {
@@ -118,15 +120,15 @@ func (d *MockDatasource) ConfigSpec() hcldec.ObjectSpec {
 }
 
 func (d *MockDatasource) OutputSpec() hcldec.ObjectSpec {
-	return hcldec.ObjectSpec{}
+	return d.Config.FlatMapstructure().HCL2Spec()
 }
 
-func (d *MockDatasource) Configure(...interface{}) error {
-	return nil
+func (d *MockDatasource) Configure(raws ...interface{}) error {
+	return d.Config.Prepare(raws...)
 }
 
 func (d *MockDatasource) Execute() (cty.Value, error) {
-	return cty.EmptyObjectVal, nil
+	return hcl2shim.HCL2ValueFromConfig(d.Config, d.OutputSpec()), nil
 }
 
 //////
