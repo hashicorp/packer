@@ -273,13 +273,16 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	// Tell EC2 to create the template
-	_, err = ec2conn.CreateLaunchTemplate(launchTemplate)
+	createLaunchTemplateOutput, err := ec2conn.CreateLaunchTemplate(launchTemplate)
 	if err != nil {
 		err := fmt.Errorf("Error creating launch template for spot instance: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
+	launchTemplateId := createLaunchTemplateOutput.LaunchTemplate.LaunchTemplateId
+	ui.Message(fmt.Sprintf("Created Spot Fleet launch template: %s", *launchTemplateId))
 
 	// Add overrides for each user-provided instance type
 	var overrides []*ec2.FleetLaunchTemplateOverridesRequest
