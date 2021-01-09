@@ -48,9 +48,10 @@ func (c *FormatCommand) RunContext(ctx context.Context, cla *FormatArgs) int {
 	}
 
 	formatter := hclutils.HCL2Formatter{
-		ShowDiff: cla.Diff,
-		Write:    cla.Write,
-		Output:   os.Stdout,
+		ShowDiff:  cla.Diff,
+		Write:     cla.Write,
+		Output:    os.Stdout,
+		Recursive: cla.Recursive,
 	}
 
 	bytesModified, diags := formatter.Format(cla.Path)
@@ -87,6 +88,8 @@ Options:
   -write=false  Don't write to source files
                 (always disabled if using -check)
 
+  -recursive     Also process files in subdirectories. By default, only the
+                 given directory (or current directory) is processed.
 `
 
 	return strings.TrimSpace(helpText)
@@ -102,8 +105,9 @@ func (*FormatCommand) AutocompleteArgs() complete.Predictor {
 
 func (*FormatCommand) AutocompleteFlags() complete.Flags {
 	return complete.Flags{
-		"-check": complete.PredictNothing,
-		"-diff":  complete.PredictNothing,
-		"-write": complete.PredictNothing,
+		"-check":     complete.PredictNothing,
+		"-diff":      complete.PredictNothing,
+		"-write":     complete.PredictNothing,
+		"-recursive": complete.PredictNothing,
 	}
 }
