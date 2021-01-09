@@ -260,6 +260,16 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 				Tags:         spotTags,
 			},
 		}
+		launchTemplate.LaunchTemplateData.TagSpecifications = []*ec2.LaunchTemplateTagSpecificationRequest{
+			{
+				ResourceType: aws.String("instance"),
+				Tags:         spotTags,
+			},
+			{
+				ResourceType: aws.String("volume"),
+				Tags:         spotTags,
+			},
+		}
 	}
 
 	// Tell EC2 to create the template
