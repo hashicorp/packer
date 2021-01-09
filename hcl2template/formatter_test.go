@@ -32,11 +32,18 @@ func TestHCL2Formatter_Format(t *testing.T) {
 		if diags.HasErrors() {
 			t.Fatalf("the call to Format failed unexpectedly %s", diags.Error())
 		}
-
 		if buf.String() != "" && tc.FormatExpected == false {
 			t.Errorf("Format(%q) should contain the name of the formatted file(s), but got %q", tc.Path, buf.String())
 		}
+	}
+}
 
+func TestHCL2Formatter_Recursive(t *testing.T) {
+	f := NewHCL2Formatter()
+	f.Recursive = true
+	_, diags := f.Format("testdata/format")
+	if diags.HasErrors() {
+		t.Fatalf("the call to Format failed unexpectedly %s", diags.Error())
 	}
 }
 

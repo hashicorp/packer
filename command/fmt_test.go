@@ -50,3 +50,15 @@ func TestFmt_unfomattedTemlateDirectory(t *testing.T) {
 		fatalCommand(t, c.Meta)
 	}
 }
+
+func TestFmt_Recursive(t *testing.T) {
+	c := &FormatCommand{
+		Meta: testMeta(t),
+	}
+
+	args := []string{"-check=true", "-recursive=true", filepath.Join(testFixture("fmt"), "")}
+
+	if code := c.Run(args); code != 3 {
+		fatalCommand(t, c.Meta)
+	}
+}

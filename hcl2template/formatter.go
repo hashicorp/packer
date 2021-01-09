@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
@@ -14,9 +16,9 @@ import (
 )
 
 type HCL2Formatter struct {
-	ShowDiff, Write bool
-	Output          io.Writer
-	parser          *hclparse.Parser
+	ShowDiff, Write, Recursive bool
+	Output                     io.Writer
+	parser                     *hclparse.Parser
 }
 
 // NewHCL2Formatter creates a new formatter, ready to format configuration files.
@@ -26,55 +28,88 @@ func NewHCL2Formatter() *HCL2Formatter {
 	}
 }
 
+func isHcl2FileOrVarFile(path string) bool {
+	if strings.HasSuffix(path, hcl2FileExt) || strings.HasSuffix(path, hcl2VarFileExt) {
+		return true
+	}
+	return false
+}
+
+func (f *HCL2Formatter) formatFile(path string, diags hcl.Diagnostics, bytesModified int) (int, hcl.Diagnostics) {
+	data, err := f.processFile(path)
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("encountered an error while formatting %s", path),
+			Detail:   err.Error(),
+		})
+	}
+	bytesModified += len(data)
+	return bytesModified, diags
+}
+
 // Format all HCL2 files in path and return the total bytes formatted.
 // If any error is encountered, zero bytes will be returned.
 //
 // Path can be a directory or a file.
 func (f *HCL2Formatter) Format(path string) (int, hcl.Diagnostics) {
+	var diags hcl.Diagnostics
+	var bytesModified int
 
-	var allHclFiles []string
-	var diags []*hcl.Diagnostic
-
-	if path == "-" {
-		allHclFiles = []string{"-"}
-	} else {
-		hclFiles, _, diags := GetHCL2Files(path, hcl2FileExt, hcl2JsonFileExt)
-		if diags.HasErrors() {
-			return 0, diags
-		}
-
-		hclVarFiles, _, diags := GetHCL2Files(path, hcl2VarFileExt, hcl2VarJsonFileExt)
-		if diags.HasErrors() {
-			return 0, diags
-		}
-
-		allHclFiles = append(hclFiles, hclVarFiles...)
-
-		if len(allHclFiles) == 0 {
-			diags = append(diags, &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  fmt.Sprintf("Cannot tell whether %s contains HCL2 configuration data", path),
-			})
-
-			return 0, diags
-		}
+	if path == "" {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "path is empty, cannot format",
+			Detail:   "path is empty, cannot format",
+		})
+		return bytesModified, diags
 	}
 
 	if f.parser == nil {
 		f.parser = hclparse.NewParser()
 	}
 
-	var bytesModified int
-	for _, fn := range allHclFiles {
-		data, err := f.processFile(fn)
+	isDir, err := isDir(path)
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Cannot tell wether " + path + " is a directory",
+			Detail:   err.Error(),
+		})
+		return bytesModified, diags
+	}
+
+	if !isDir {
+		bytesModified, diags = f.formatFile(path, diags, bytesModified)
+	} else {
+		fileInfos, err := ioutil.ReadDir(path)
 		if err != nil {
-			diags = append(diags, &hcl.Diagnostic{
+			diag := &hcl.Diagnostic{
 				Severity: hcl.DiagError,
-				Summary:  fmt.Sprintf("encountered an error while formatting %s", fn),
+				Summary:  "Cannot read hcl directory",
 				Detail:   err.Error(),
-			})
+			}
+			diags = append(diags, diag)
+			return bytesModified, diags
 		}
-		bytesModified += len(data)
+
+		for _, fileInfo := range fileInfos {
+			filename := filepath.Join(path, fileInfo.Name())
+			if fileInfo.IsDir() {
+				if f.Recursive {
+					var tempDiags hcl.Diagnostics
+					var tempBytesModified int
+					tempBytesModified, tempDiags = f.Format(filename)
+					bytesModified += tempBytesModified
+					diags = diags.Extend(tempDiags)
+				} else {
+					continue
+				}
+			}
+			if isHcl2FileOrVarFile(filename) {
+				bytesModified, diags = f.formatFile(filename, diags, bytesModified)
+			}
+		}
 	}
 
 	return bytesModified, diags
@@ -84,6 +119,7 @@ func (f *HCL2Formatter) Format(path string) (int, hcl.Diagnostics) {
 // overwriting the contents of the original when the f.Write is true; a diff of the changes
 // will be outputted if f.ShowDiff is true.
 func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
+
 	if f.Output == nil {
 		f.Output = os.Stdout
 	}
