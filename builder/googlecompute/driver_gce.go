@@ -149,14 +149,7 @@ func NewDriverGCE(config GCEDriverConfig) (Driver, error) {
 		return nil, err
 	}
 
-	if metadata.OnGCE() {
-		log.Printf("[INFO] On GCE, capture service account for OSLogin...")
-		thisGCEUser, err = metadata.NewClient(&http.Client{}).Email("")
-
-		if err != nil {
-			return nil, err
-		}
-	}
+	thisGCEUser = getGCEUser()
 
 	log.Printf("[INFO] Instantiating OS Login client...")
 	osLoginService, err := oslogin.NewService(context.TODO(), opts)
@@ -798,4 +791,32 @@ func (d *driverGCE) AddToInstanceMetadata(zone string, name string, metadata map
 	}
 
 	return nil
+}
+
+// getGCEUser determines if we're running packer on a GCE, and if we are, gets the associated service account email for subsequent use with OSLogin.
+// There are cases where we are running on a GCE, but the GCP metadata server isn't accessible. GitLab docker-engine runners are an edge case example of this.
+// It makes little sense to run packer on GCP in this way, however, we defensively timeout in those cases, rather than abort.
+func getGCEUser() string {
+
+	var thisGCEUser string
+
+	metadataCheckTimeout := 5 * time.Second
+	metadataCheckChl := make(chan string, 1)
+
+	go func() {
+		if metadata.OnGCE() {
+			log.Printf("[INFO] Attempt to capture the GCE service account for use with OSLogin...")
+			GCEUser, _ := metadata.NewClient(&http.Client{}).Email("")
+			metadataCheckChl <- GCEUser
+		}
+	}()
+
+	select {
+	case thisGCEUser := <-metadataCheckChl:
+		fmt.Printf("[INFO] GCE service account %s will be used for OSLogin", thisGCEUser)
+	case <-time.After(metadataCheckTimeout):
+		fmt.Printf("[INFO] Timeout after %s whilst waiting for google metadata server.", metadataCheckTimeout)
+	}
+
+	return thisGCEUser
 }
