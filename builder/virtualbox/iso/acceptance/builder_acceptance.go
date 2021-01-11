@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/packer/builder/virtualbox/iso"
 
 	"github.com/hashicorp/packer-plugin-sdk/acctest/testutils"
-	"github.com/hashicorp/packer-plugin-sdk/packer"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 type VirtualBoxISOAccTest struct{}

@@ -11,8 +11,8 @@ import (
 
 	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
 
-	"github.com/hashicorp/packer-plugin-sdk/packer"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 type AmazonEBSAccTest struct{}

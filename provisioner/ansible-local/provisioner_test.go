@@ -12,9 +12,9 @@ import (
 	"os/exec"
 
 	builderT "github.com/hashicorp/packer-plugin-sdk/acctest"
-	"github.com/hashicorp/packer-plugin-sdk/packer"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/docker"
+	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/provisioner/file"
 )
 

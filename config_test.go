@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestDecodeConfig(t *testing.T) {

@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/packer-plugin-sdk/packer"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 )
 

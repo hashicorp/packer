@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/yandex"
+	"github.com/hashicorp/packer/packer"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 )
 
