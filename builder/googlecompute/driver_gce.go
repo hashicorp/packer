@@ -136,8 +136,6 @@ func NewClientOptionGoogle(account *ServiceAccount, vaultOauth string, impersona
 
 func NewDriverGCE(config GCEDriverConfig) (Driver, error) {
 
-	var thisGCEUser string
-
 	opts, err := NewClientOptionGoogle(config.Account, config.VaultOauthEngineName, config.ImpersonateServiceAccountName)
 	if err != nil {
 		return nil, err
@@ -149,7 +147,7 @@ func NewDriverGCE(config GCEDriverConfig) (Driver, error) {
 		return nil, err
 	}
 
-	thisGCEUser = getGCEUser()
+	thisGCEUser := getGCEUser()
 
 	log.Printf("[INFO] Instantiating OS Login client...")
 	osLoginService, err := oslogin.NewService(context.TODO(), opts)
@@ -798,8 +796,6 @@ func (d *driverGCE) AddToInstanceMetadata(zone string, name string, metadata map
 // It makes little sense to run packer on GCP in this way, however, we defensively timeout in those cases, rather than abort.
 func getGCEUser() string {
 
-	var thisGCEUser string
-
 	metadataCheckTimeout := 5 * time.Second
 	metadataCheckChl := make(chan string, 1)
 
@@ -813,10 +809,10 @@ func getGCEUser() string {
 
 	select {
 	case thisGCEUser := <-metadataCheckChl:
-		fmt.Printf("[INFO] GCE service account %s will be used for OSLogin", thisGCEUser)
+		log.Printf("[INFO] GCE service account %s will be used for OSLogin", thisGCEUser)
+	    return thisGCEUser
 	case <-time.After(metadataCheckTimeout):
-		fmt.Printf("[INFO] Timeout after %s whilst waiting for google metadata server.", metadataCheckTimeout)
+		log.Printf("[INFO] Timeout after %s whilst waiting for google metadata server.", metadataCheckTimeout)
+	    return ""
 	}
-
-	return thisGCEUser
 }
