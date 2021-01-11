@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/yandex"
-	"github.com/hashicorp/packer/packer"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1/awscompatibility"
 )
 
@@ -26,7 +25,7 @@ type StepCreateS3Keys struct {
 
 func (c *StepCreateS3Keys) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(yandex.Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Create temporary storage Access Key")
 	// Create temporary storage Access Key
