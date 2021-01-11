@@ -202,7 +202,8 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	flattenedCmd := strings.Join(commandAndArgs, " ")
 	cmd := &packersdk.RemoteCmd{Command: flattenedCmd}
 	log.Printf("[INFO] (vsphere): starting ovftool command: %s", flattenedCmd)
-	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
+	err = cmd.RunWithUi(ctx, comm, ui)
+	if err != nil || cmd.ExitStatus() != 0 {
 		return nil, false, false, fmt.Errorf(
 			"Error uploading virtual machine: Please see output above for more information.")
 	}
