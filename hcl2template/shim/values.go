@@ -108,6 +108,9 @@ func WriteUnknownPlaceholderValues(v cty.Value) cty.Value {
 			panic("unsupported primitive type")
 		}
 	case t.IsListType():
+		if !v.IsKnown() {
+			return cty.ListValEmpty(t.ElementType())
+		}
 		arr := []cty.Value{}
 		it := v.ElementIterator()
 		for it.Next() {
@@ -119,6 +122,9 @@ func WriteUnknownPlaceholderValues(v cty.Value) cty.Value {
 		}
 		return cty.ListVal(arr)
 	case t.IsSetType():
+		if !v.IsKnown() {
+			return cty.SetValEmpty(t.ElementType())
+		}
 		arr := []cty.Value{}
 		it := v.ElementIterator()
 		for it.Next() {
@@ -130,6 +136,9 @@ func WriteUnknownPlaceholderValues(v cty.Value) cty.Value {
 		}
 		return cty.SetVal(arr)
 	case t.IsMapType():
+		if !v.IsKnown() {
+			return cty.MapValEmpty(t.ElementType())
+		}
 		obj := map[string]cty.Value{}
 		it := v.ElementIterator()
 		for it.Next() {
@@ -141,6 +150,9 @@ func WriteUnknownPlaceholderValues(v cty.Value) cty.Value {
 		}
 		return cty.MapVal(obj)
 	case t.IsTupleType():
+		if !v.IsKnown() {
+			return cty.EmptyTupleVal
+		}
 		arr := []cty.Value{}
 		it := v.ElementIterator()
 		for it.Next() {
@@ -152,6 +164,9 @@ func WriteUnknownPlaceholderValues(v cty.Value) cty.Value {
 		}
 		return cty.TupleVal(arr)
 	case t.IsObjectType():
+		if !v.IsKnown() {
+			return cty.EmptyObjectVal
+		}
 		obj := map[string]cty.Value{}
 		it := v.ElementIterator()
 		for it.Next() {
