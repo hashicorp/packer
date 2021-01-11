@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/builder/virtualbox/iso"
 
 	"github.com/hashicorp/packer-plugin-sdk/acctest/testutils"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
@@ -38,8 +39,8 @@ func (v *VirtualBoxISOAccTest) CleanUp() error {
 	return nil
 }
 
-func (v *VirtualBoxISOAccTest) GetBuilderStore() packersdk.MapOfBuilder {
-	return packersdk.MapOfBuilder{
+func (v *VirtualBoxISOAccTest) GetBuilderStore() packer.MapOfBuilder {
+	return packer.MapOfBuilder{
 		"virtualbox-iso": func() (packersdk.Builder, error) { return &iso.Builder{}, nil },
 	}
 }

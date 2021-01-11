@@ -12,6 +12,7 @@ import (
 	"os/exec"
 
 	builderT "github.com/hashicorp/packer-plugin-sdk/acctest"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/provisioner/file"
@@ -355,7 +356,7 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 			os.Remove("hello_world")
 			return nil
 		},
-		ProvisionerStore: packersdk.MapOfProvisioner{
+		ProvisionerStore: packer.MapOfProvisioner{
 			"ansible-local": func() (packersdk.Provisioner, error) { return &Provisioner{}, nil },
 			"file":          func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
 		},

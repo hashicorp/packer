@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	configHelper "github.com/hashicorp/packer-plugin-sdk/template/config"
@@ -800,7 +801,7 @@ func TestCoreBuild_provRetry(t *testing.T) {
 	b := TestBuilder(t, config, "test")
 	pString := new(packersdk.MockProvisioner)
 	pInt := new(packersdk.MockProvisioner)
-	config.Components.ProvisionerStore = packersdk.MapOfProvisioner{
+	config.Components.ProvisionerStore = packer.MapOfProvisioner{
 		"test-string": func() (packersdk.Provisioner, error) { return pString, nil },
 		// backwards compatibility
 		"test-integer": func() (packersdk.Provisioner, error) { return pInt, nil },
