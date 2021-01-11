@@ -47,7 +47,7 @@ func TestAccessConfigPrepare_RegionRestricted(t *testing.T) {
 		Region: aws.String("us-gov-west-1"),
 	}))
 
-	if err := c.Prepare(nil); err != nil {
+	if err := c.Prepare(); err != nil {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
 

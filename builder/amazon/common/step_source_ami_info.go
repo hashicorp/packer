@@ -26,20 +26,20 @@ type StepSourceAMIInfo struct {
 	AmiFilters               AmiFilterOptions
 }
 
-type imageSort []*ec2.Image
+type ImageSort []*ec2.Image
 
-func (a imageSort) Len() int      { return len(a) }
-func (a imageSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a imageSort) Less(i, j int) bool {
+func (a ImageSort) Len() int      { return len(a) }
+func (a ImageSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ImageSort) Less(i, j int) bool {
 	itime, _ := time.Parse(time.RFC3339, *a[i].CreationDate)
 	jtime, _ := time.Parse(time.RFC3339, *a[j].CreationDate)
 	return itime.Unix() < jtime.Unix()
 }
 
 // Returns the most recent AMI out of a slice of images.
-func mostRecentAmi(images []*ec2.Image) *ec2.Image {
+func MostRecentAmi(images []*ec2.Image) *ec2.Image {
 	sortedImages := images
-	sort.Sort(imageSort(sortedImages))
+	sort.Sort(ImageSort(sortedImages))
 	return sortedImages[len(sortedImages)-1]
 }
 
@@ -55,7 +55,7 @@ func (s *StepSourceAMIInfo) Run(ctx context.Context, state multistep.StateBag) m
 
 	// We have filters to apply
 	if len(s.AmiFilters.Filters) > 0 {
-		params.Filters = buildEc2Filters(s.AmiFilters.Filters)
+		params.Filters = BuildEc2Filters(s.AmiFilters.Filters)
 	}
 	if len(s.AmiFilters.Owners) > 0 {
 		params.Owners = s.AmiFilters.GetOwners()
@@ -86,7 +86,7 @@ func (s *StepSourceAMIInfo) Run(ctx context.Context, state multistep.StateBag) m
 
 	var image *ec2.Image
 	if s.AmiFilters.MostRecent {
-		image = mostRecentAmi(imageResp.Images)
+		image = MostRecentAmi(imageResp.Images)
 	} else {
 		image = imageResp.Images[0]
 	}
