@@ -311,11 +311,11 @@ func loadConfig() (*config, error) {
 	}
 
 	// Copy plugins to general list
-	builders, provisioners, postProcessors, dataSources := config.Plugins.GetPlugins()
-	config.Builders = builders
-	config.Provisioners = provisioners
-	config.PostProcessors = postProcessors
-	config.Datasources = dataSources
+	plugins := config.Plugins.GetPlugins()
+	config.Builders = plugins.Builders
+	config.Provisioners = plugins.Provisioners
+	config.PostProcessors = plugins.PostProcessors
+	config.Datasources = plugins.DataSources
 
 	// Finally, try to use an internal plugin. Note that this will not override
 	// any previously-loaded plugins.

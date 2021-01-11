@@ -257,18 +257,20 @@ func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics
 		if skipExecution {
 			placeholderValue := cty.UnknownVal(hcldec.ImpliedType(datasource.OutputSpec()))
 			ds.value = placeholderValue
-		} else {
-			realValue, err := datasource.Execute()
-			if err != nil {
-				diags = append(diags, &hcl.Diagnostic{
-					Summary:  err.Error(),
-					Subject:  &cfg.Datasources[ref].block.DefRange,
-					Severity: hcl.DiagError,
-				})
-				continue
-			}
-			ds.value = realValue
+			cfg.Datasources[ref] = ds
+			continue
 		}
+
+		realValue, err := datasource.Execute()
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary:  err.Error(),
+				Subject:  &cfg.Datasources[ref].block.DefRange,
+				Severity: hcl.DiagError,
+			})
+			continue
+		}
+		ds.value = realValue
 		cfg.Datasources[ref] = ds
 	}
 

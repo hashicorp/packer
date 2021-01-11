@@ -28,8 +28,20 @@ type Config struct {
 	dataSources    packersdk.MapOfDatasource
 }
 
-func (c *Config) GetPlugins() (packersdk.MapOfBuilder, packersdk.MapOfProvisioner, packersdk.MapOfPostProcessor, packersdk.MapOfDatasource) {
-	return c.builders, c.provisioners, c.postProcessors, c.dataSources
+type Plugins struct {
+	Builders       packersdk.MapOfBuilder
+	Provisioners   packersdk.MapOfProvisioner
+	PostProcessors packersdk.MapOfPostProcessor
+	DataSources    packersdk.MapOfDatasource
+}
+
+func (c *Config) GetPlugins() Plugins {
+	return Plugins{
+		Builders:       c.builders,
+		Provisioners:   c.provisioners,
+		PostProcessors: c.postProcessors,
+		DataSources:    c.dataSources,
+	}
 }
 
 // Discover discovers plugins.
