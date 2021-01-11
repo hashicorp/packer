@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer-plugin-sdk/hcl2"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
-	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/json"
 )
@@ -128,7 +128,7 @@ func (d *MockDatasource) Configure(raws ...interface{}) error {
 }
 
 func (d *MockDatasource) Execute() (cty.Value, error) {
-	return hcl2shim.HCL2ValueFromConfig(d.Config, d.OutputSpec()), nil
+	return hcl2.HCL2ValueFromConfig(d.Config, d.OutputSpec()), nil
 }
 
 //////
