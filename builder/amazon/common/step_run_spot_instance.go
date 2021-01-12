@@ -210,6 +210,15 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	// instance yet
 	ec2Tags.Report(ui)
 
+	volumeTags, err := TagMap(s.VolumeTags).EC2Tags(s.Ctx, s.Region, state)
+	if err != nil {
+		err := fmt.Errorf("Error generating volume tags: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	volumeTags.Report(ui)
+
 	spotOptions := ec2.LaunchTemplateSpotMarketOptionsRequest{}
 	// The default is to set the maximum price to the OnDemand price.
 	if s.SpotPrice != "auto" {
@@ -260,16 +269,26 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 				Tags:         spotTags,
 			},
 		}
-		launchTemplate.LaunchTemplateData.TagSpecifications = []*ec2.LaunchTemplateTagSpecificationRequest{
-			{
+	}
+
+	if len(ec2Tags) > 0 {
+		launchTemplate.LaunchTemplateData.TagSpecifications = append(
+			launchTemplate.LaunchTemplateData.TagSpecifications,
+			&ec2.LaunchTemplateTagSpecificationRequest{
 				ResourceType: aws.String("instance"),
-				Tags:         spotTags,
+				Tags:         ec2Tags,
 			},
-			{
+		)
+	}
+
+	if len(volumeTags) > 0 {
+		launchTemplate.LaunchTemplateData.TagSpecifications = append(
+			launchTemplate.LaunchTemplateData.TagSpecifications,
+			&ec2.LaunchTemplateTagSpecificationRequest{
 				ResourceType: aws.String("volume"),
-				Tags:         spotTags,
+				Tags:         volumeTags,
 			},
-		}
+		)
 	}
 
 	// Tell EC2 to create the template
@@ -450,16 +469,6 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 
 	if len(volumeIds) > 0 && len(s.VolumeTags) > 0 {
 		ui.Say("Adding tags to source EBS Volumes")
-
-		volumeTags, err := TagMap(s.VolumeTags).EC2Tags(s.Ctx, s.Region, state)
-		if err != nil {
-			err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		volumeTags.Report(ui)
-
 		_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
 			Resources: volumeIds,
 			Tags:      volumeTags,
