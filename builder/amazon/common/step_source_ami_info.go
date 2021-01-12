@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"fmt"
-	"log"
 	"sort"
 	"time"
 
@@ -26,20 +25,20 @@ type StepSourceAMIInfo struct {
 	AmiFilters               AmiFilterOptions
 }
 
-type ImageSort []*ec2.Image
+type imageSort []*ec2.Image
 
-func (a ImageSort) Len() int      { return len(a) }
-func (a ImageSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a ImageSort) Less(i, j int) bool {
+func (a imageSort) Len() int      { return len(a) }
+func (a imageSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a imageSort) Less(i, j int) bool {
 	itime, _ := time.Parse(time.RFC3339, *a[i].CreationDate)
 	jtime, _ := time.Parse(time.RFC3339, *a[j].CreationDate)
 	return itime.Unix() < jtime.Unix()
 }
 
 // Returns the most recent AMI out of a slice of images.
-func MostRecentAmi(images []*ec2.Image) *ec2.Image {
+func mostRecentAmi(images []*ec2.Image) *ec2.Image {
 	sortedImages := images
-	sort.Sort(ImageSort(sortedImages))
+	sort.Sort(imageSort(sortedImages))
 	return sortedImages[len(sortedImages)-1]
 }
 
@@ -53,42 +52,11 @@ func (s *StepSourceAMIInfo) Run(ctx context.Context, state multistep.StateBag) m
 		params.ImageIds = []*string{&s.SourceAmi}
 	}
 
-	// We have filters to apply
-	if len(s.AmiFilters.Filters) > 0 {
-		params.Filters = BuildEc2Filters(s.AmiFilters.Filters)
-	}
-	if len(s.AmiFilters.Owners) > 0 {
-		params.Owners = s.AmiFilters.GetOwners()
-	}
-
-	log.Printf("Using AMI Filters %v", params)
-	imageResp, err := ec2conn.DescribeImages(params)
+	image, err := s.AmiFilters.GetFilteredImage(params, ec2conn)
 	if err != nil {
-		err := fmt.Errorf("Error querying AMI: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
-	}
-
-	if len(imageResp.Images) == 0 {
-		err := fmt.Errorf("No AMI was found matching filters: %v", params)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	if len(imageResp.Images) > 1 && !s.AmiFilters.MostRecent {
-		err := fmt.Errorf("Your query returned more than one result. Please try a more specific search, or set most_recent to true.")
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	var image *ec2.Image
-	if s.AmiFilters.MostRecent {
-		image = MostRecentAmi(imageResp.Images)
-	} else {
-		image = imageResp.Images[0]
 	}
 
 	ui.Message(fmt.Sprintf("Found Image ID: %s", *image.ImageId))

@@ -5,7 +5,7 @@ import (
 )
 
 // Build a slice of EC2 (AMI/Subnet/VPC) filter options from the filters provided.
-func BuildEc2Filters(input map[string]string) []*ec2.Filter {
+func buildEc2Filters(input map[string]string) []*ec2.Filter {
 	var filters []*ec2.Filter
 	for k, v := range input {
 		a := k

@@ -11,7 +11,7 @@ func TestStepSourceAmiInfo_BuildFilter(t *testing.T) {
 	filter_value2 := "foo2"
 
 	inputFilter := map[string]string{filter_key: filter_value, filter_key2: filter_value2}
-	outputFilter := BuildEc2Filters(inputFilter)
+	outputFilter := buildEc2Filters(inputFilter)
 
 	// deconstruct filter back into things we can test
 	foundMap := map[string]bool{filter_key: false, filter_key2: false}
