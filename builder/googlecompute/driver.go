@@ -70,9 +70,6 @@ type Driver interface {
 	// DeleteOSLoginSSHKey deletes the SSH public key for OSLogin with the given key.
 	DeleteOSLoginSSHKey(user, fingerprint string) error
 
-	// If packer is running on a GCE, derives the user from it for use with OSLogin.
-	GetOSLoginUserFromGCE() string
-
 	// Add to the instance metadata for the existing instance
 	AddToInstanceMetadata(zone string, name string, metadata map[string]string) error
 }

@@ -10,11 +10,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"strings"
 	"time"
 
-	metadata "cloud.google.com/go/compute/metadata"
 	compute "google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
 	oslogin "google.golang.org/api/oslogin/v1"
@@ -34,7 +32,6 @@ import (
 type driverGCE struct {
 	projectId      string
 	service        *compute.Service
-	thisGCEUser    string
 	osLoginService *oslogin.Service
 	ui             packersdk.Ui
 }
@@ -147,8 +144,6 @@ func NewDriverGCE(config GCEDriverConfig) (Driver, error) {
 		return nil, err
 	}
 
-	thisGCEUser := getGCEUser()
-
 	log.Printf("[INFO] Instantiating OS Login client...")
 	osLoginService, err := oslogin.NewService(context.TODO(), opts)
 	if err != nil {
@@ -161,7 +156,6 @@ func NewDriverGCE(config GCEDriverConfig) (Driver, error) {
 	return &driverGCE{
 		projectId:      config.ProjectId,
 		service:        service,
-		thisGCEUser:    thisGCEUser,
 		osLoginService: osLoginService,
 		ui:             config.Ui,
 	}, nil
@@ -635,10 +629,6 @@ func (d *driverGCE) getPasswordResponses(zone, instance string) ([]windowsPasswo
 	return passwordResponses, nil
 }
 
-func (d *driverGCE) GetOSLoginUserFromGCE() string {
-	return d.thisGCEUser
-}
-
 func (d *driverGCE) ImportOSLoginSSHKey(user, sshPublicKey string) (*oslogin.LoginProfile, error) {
 	parent := fmt.Sprintf("users/%s", user)
 
@@ -789,30 +779,4 @@ func (d *driverGCE) AddToInstanceMetadata(zone string, name string, metadata map
 	}
 
 	return nil
-}
-
-// getGCEUser determines if we're running packer on a GCE, and if we are, gets the associated service account email for subsequent use with OSLogin.
-// There are cases where we are running on a GCE, but the GCP metadata server isn't accessible. GitLab docker-engine runners are an edge case example of this.
-// It makes little sense to run packer on GCP in this way, however, we defensively timeout in those cases, rather than abort.
-func getGCEUser() string {
-
-	metadataCheckTimeout := 5 * time.Second
-	metadataCheckChl := make(chan string, 1)
-
-	go func() {
-		if metadata.OnGCE() {
-			log.Printf("[INFO] Attempt to capture the GCE service account for use with OSLogin...")
-			GCEUser, _ := metadata.NewClient(&http.Client{}).Email("")
-			metadataCheckChl <- GCEUser
-		}
-	}()
-
-	select {
-	case thisGCEUser := <-metadataCheckChl:
-		log.Printf("[INFO] GCE service account %s will be used for OSLogin", thisGCEUser)
-	    return thisGCEUser
-	case <-time.After(metadataCheckTimeout):
-		log.Printf("[INFO] Timeout after %s whilst waiting for google metadata server.", metadataCheckTimeout)
-	    return ""
-	}
 }
