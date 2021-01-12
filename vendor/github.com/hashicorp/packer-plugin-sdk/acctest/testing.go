@@ -53,11 +53,11 @@ type TestCase struct {
 	// This can be useful for running acceptance tests for a particular
 	// provisioner using a specific builder.
 	// Default provisioner store:
-	// ProvisionerStore: packer.MapOfProvisioner{
+	// ProvisionerStore: packersdk.MapOfProvisioner{
 	// 	"shell": func() (packersdk.Provisioner, error) { return &shellprovisioner.Provisioner{}, nil },
 	// 	"file":  func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
 	// },
-	ProvisionerStore packer.MapOfProvisioner
+	ProvisionerStore packersdk.MapOfProvisioner
 }
 
 // TestCheckFunc is the callback used for Check in TestStep.
@@ -122,7 +122,7 @@ func Test(t TestT, c TestCase) {
 	}
 
 	if c.ProvisionerStore == nil {
-		c.ProvisionerStore = packer.MapOfProvisioner{
+		c.ProvisionerStore = packersdk.MapOfProvisioner{
 			"shell": func() (packersdk.Provisioner, error) { return &shellprovisioner.Provisioner{}, nil },
 			"file":  func() (packersdk.Provisioner, error) { return &file.Provisioner{}, nil },
 		}

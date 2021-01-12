@@ -355,7 +355,7 @@ github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
-# github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111170003-155673c1c418
+# github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111224258-fd30ebb797f0
 github.com/hashicorp/packer-plugin-sdk/acctest
 github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
 github.com/hashicorp/packer-plugin-sdk/acctest/testutils

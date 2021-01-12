@@ -142,7 +142,7 @@ func discoverAndLoad() error {
 
 // checkHCL2ConfigSpec checks if the hcl2spec config is present for the given plugins by validating that ConfigSpec() does not
 // return an empty map of specs.
-func checkHCL2ConfigSpec(builders packer.MapOfBuilder, provisioners packer.MapOfProvisioner, postProcessors packer.MapOfPostProcessor) error {
+func checkHCL2ConfigSpec(builders packer.BuilderStore, provisioners packer.ProvisionerStore, postProcessors packer.PostProcessorStore) error {
 	var errs *packersdk.MultiError
 	for _, b := range builders.List() {
 		builder, err := builders.Start(b)

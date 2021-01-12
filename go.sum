@@ -433,6 +433,8 @@ github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111155002-aa80a170ae8c h1:T
 github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111155002-aa80a170ae8c/go.mod h1:mb7iQrkX/e1m2KEC7TO8rCe9zvJbPl1GZNtB7Omi3bQ=
 github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111170003-155673c1c418 h1:7E2HjkmeXjaMdocm8FSOhnsoddeB3S88bWQNC9qSivE=
 github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111170003-155673c1c418/go.mod h1:KK8j3N4upv+IDn6DPzWC5qIDgdhGSeqLB9Wz2xTi8bM=
+github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111224258-fd30ebb797f0 h1:2GsORpJjcMQN84ZA1IEyHzx0zPY6QH6tNGbZc7CP6QE=
+github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111224258-fd30ebb797f0/go.mod h1:YdWTt5w6cYfaQG7IOi5iorL+3SXnz8hI0gJCi8Db/LI=
 github.com/hashicorp/serf v0.8.2 h1:YZ7UKsJv+hKjqGVUUbtE3HNj79Eln2oQ75tniF6iPt0=
 github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/JwenrHc=
 github.com/hashicorp/serf v0.9.2 h1:yJoyfZXo4Pk2p/M/viW+YLibBFiIbKoP79gu7kDAFP0=

@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	builderT "github.com/hashicorp/packer-plugin-sdk/acctest"
-	"github.com/hashicorp/packer/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // ProvisionerTestCase is a single set of tests to run for a provisioner.
@@ -325,7 +325,7 @@ type BuilderAcceptance interface {
 	GetConfigs() (map[string]string, error)
 	// GetBuilderStore() returns a MapOfBuilder that contains the actual builder
 	// struct definition being used for this test.
-	GetBuilderStore() packer.MapOfBuilder
+	GetBuilderStore() packersdk.MapOfBuilder
 	// CleanUp cleans up any side-effects of the builder not already cleaned up
 	// by the builderT framework.
 	CleanUp() error

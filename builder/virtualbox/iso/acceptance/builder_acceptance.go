@@ -13,7 +13,6 @@ import (
 
 	"github.com/hashicorp/packer-plugin-sdk/acctest/testutils"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer"
 )
 
 type VirtualBoxISOAccTest struct{}
@@ -39,8 +38,8 @@ func (v *VirtualBoxISOAccTest) CleanUp() error {
 	return nil
 }
 
-func (v *VirtualBoxISOAccTest) GetBuilderStore() packer.MapOfBuilder {
-	return packer.MapOfBuilder{
+func (v *VirtualBoxISOAccTest) GetBuilderStore() packersdk.MapOfBuilder {
+	return packersdk.MapOfBuilder{
 		"virtualbox-iso": func() (packersdk.Builder, error) { return &iso.Builder{}, nil },
 	}
 }

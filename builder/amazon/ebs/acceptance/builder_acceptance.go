@@ -12,7 +12,6 @@ import (
 	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer"
 )
 
 type AmazonEBSAccTest struct{}
@@ -53,8 +52,8 @@ func (s *AmazonEBSAccTest) CleanUp() error {
 	return helper.CleanUpAmi()
 }
 
-func (s *AmazonEBSAccTest) GetBuilderStore() packer.MapOfBuilder {
-	return packer.MapOfBuilder{
+func (s *AmazonEBSAccTest) GetBuilderStore() packersdk.MapOfBuilder {
+	return packersdk.MapOfBuilder{
 		"amazon-ebs": func() (packersdk.Builder, error) { return &amazonebsbuilder.Builder{}, nil },
 	}
 }
