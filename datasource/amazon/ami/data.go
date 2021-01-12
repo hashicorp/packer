@@ -2,6 +2,8 @@
 package ami
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -32,7 +34,16 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 	}
 
 	var errs *packersdk.MultiError
-	if errs := packersdk.MultiErrorAppend(errs, d.config.AccessConfig.Prepare()...); len(errs.Errors) > 0 {
+	errs = packersdk.MultiErrorAppend(errs, d.config.AccessConfig.Prepare()...)
+
+	if d.config.Empty() {
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The `filters` must be specified"))
+	}
+	if d.config.NoOwner() {
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("For security reasons, you must declare an owner."))
+	}
+
+	if errs != nil && len(errs.Errors) > 0 {
 		return errs
 	}
 	return nil
