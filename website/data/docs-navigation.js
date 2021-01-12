@@ -247,6 +247,7 @@ export default [
       'community-supported',
     ],
   },
+  { category: 'datasources', content: ['amazon-ami'] },
   {
     category: 'provisioners',
     content: [

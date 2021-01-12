@@ -1,3 +1,4 @@
+//go:generate struct-markdown
 package common
 
 import (
@@ -9,9 +10,19 @@ import (
 )
 
 type AmiFilterOptions struct {
+	// Filters used to select an AMI. Any filter described in the docs for
+	// [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
+	// is valid.
 	config.KeyValueFilter `mapstructure:",squash"`
-	Owners                []string
-	MostRecent            bool `mapstructure:"most_recent"`
+	// Filters the images by their owner. You
+	// may specify one or more AWS account IDs, "self" (which will use the
+	// account whose credentials you are using to run Packer), or an AWS owner
+	// alias: for example, `amazon`, `aws-marketplace`, or `microsoft`. This
+	// option is required for security reasons.
+	Owners []string `mapstructure:"owners"`
+	// Selects the newest created image when true.
+	// This is most useful for selecting a daily distro build.
+	MostRecent bool `mapstructure:"most_recent"`
 }
 
 func (d *AmiFilterOptions) GetOwners() []*string {

@@ -13,7 +13,7 @@ import (
 type FlatAmiFilterOptions struct {
 	Filters    map[string]string     `cty:"filters" hcl:"filters"`
 	Filter     []config.FlatKeyValue `cty:"filter" hcl:"filter"`
-	Owners     []string              `cty:"owners" hcl:"owners"`
+	Owners     []string              `mapstructure:"owners" cty:"owners" hcl:"owners"`
 	MostRecent *bool                 `mapstructure:"most_recent" cty:"most_recent" hcl:"most_recent"`
 }
 
