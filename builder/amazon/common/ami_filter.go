@@ -6,14 +6,13 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer-plugin-sdk/template/config"
 )
 
 type AmiFilterOptions struct {
 	// Filters used to select an AMI. Any filter described in the docs for
 	// [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
 	// is valid.
-	config.KeyValueFilter `mapstructure:",squash"`
+	Filters map[string]string `mapstructure:"filters"`
 	// Filters the images by their owner. You
 	// may specify one or more AWS account IDs, "self" (which will use the
 	// account whose credentials you are using to run Packer), or an AWS owner
@@ -35,7 +34,7 @@ func (d *AmiFilterOptions) GetOwners() []*string {
 }
 
 func (d *AmiFilterOptions) Empty() bool {
-	return len(d.Owners) == 0 && d.KeyValueFilter.Empty()
+	return len(d.Owners) == 0 && len(d.Filters) == 0
 }
 
 func (d *AmiFilterOptions) NoOwner() bool {

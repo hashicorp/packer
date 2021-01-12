@@ -4,7 +4,6 @@ package ami
 
 import (
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -28,9 +27,8 @@ type FlatConfig struct {
 	Token                 *string                           `mapstructure:"token" required:"false" cty:"token" hcl:"token"`
 	VaultAWSEngine        *common.FlatVaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false" cty:"vault_aws_engine" hcl:"vault_aws_engine"`
 	PollingConfig         *common.FlatAWSPollingConfig      `mapstructure:"aws_polling" required:"false" cty:"aws_polling" hcl:"aws_polling"`
-	Filters               map[string]string                 `cty:"filters" hcl:"filters"`
-	Filter                []config.FlatKeyValue             `cty:"filter" hcl:"filter"`
-	Owners                []string                          `cty:"owners" hcl:"owners"`
+	Filters               map[string]string                 `mapstructure:"filters" cty:"filters" hcl:"filters"`
+	Owners                []string                          `mapstructure:"owners" cty:"owners" hcl:"owners"`
 	MostRecent            *bool                             `mapstructure:"most_recent" cty:"most_recent" hcl:"most_recent"`
 }
 
@@ -63,7 +61,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vault_aws_engine":              &hcldec.BlockSpec{TypeName: "vault_aws_engine", Nested: hcldec.ObjectSpec((*common.FlatVaultAWSEngineOptions)(nil).HCL2Spec())},
 		"aws_polling":                   &hcldec.BlockSpec{TypeName: "aws_polling", Nested: hcldec.ObjectSpec((*common.FlatAWSPollingConfig)(nil).HCL2Spec())},
 		"filters":                       &hcldec.AttrSpec{Name: "filters", Type: cty.Map(cty.String), Required: false},
-		"filter":                        &hcldec.BlockListSpec{TypeName: "filter", Nested: hcldec.ObjectSpec((*config.FlatKeyValue)(nil).HCL2Spec())},
 		"owners":                        &hcldec.AttrSpec{Name: "owners", Type: cty.List(cty.String), Required: false},
 		"most_recent":                   &hcldec.AttrSpec{Name: "most_recent", Type: cty.Bool, Required: false},
 	}

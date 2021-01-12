@@ -492,7 +492,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	errs = append(errs, c.SpotTag.CopyOn(&c.SpotTags)...)
 
 	for _, preparer := range []interface{ Prepare() []error }{
-		&c.SourceAmiFilter,
 		&c.SecurityGroupFilter,
 		&c.SubnetFilter,
 		&c.VpcFilter,
