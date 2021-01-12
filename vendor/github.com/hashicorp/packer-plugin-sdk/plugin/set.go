@@ -10,6 +10,7 @@ import (
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pluginVersion "github.com/hashicorp/packer-plugin-sdk/version"
+	"github.com/hashicorp/packer/version"
 )
 
 // Use this name to make the name of the plugin in the packer template match
@@ -21,6 +22,7 @@ import (
 // plugin per plugin type.
 const DEFAULT_NAME = "-packer-default-plugin-name-"
 
+
 // Set is a plugin set. It's API is meant to be very close to what is returned
 // by plugin.Server
 // It can describe itself or run a single plugin using the CLI arguments.
@@ -30,7 +32,6 @@ type Set struct {
 	Builders       map[string]packersdk.Builder
 	PostProcessors map[string]packersdk.PostProcessor
 	Provisioners   map[string]packersdk.Provisioner
-	Datasources    map[string]packersdk.Datasource
 }
 
 // SetDescription describes a Set.
@@ -40,7 +41,6 @@ type SetDescription struct {
 	Builders       []string `json:"builders"`
 	PostProcessors []string `json:"post_processors"`
 	Provisioners   []string `json:"provisioners"`
-	Datasources    []string `json:"datasources"`
 }
 
 ////
@@ -48,13 +48,12 @@ type SetDescription struct {
 ////
 
 func NewSet() *Set {
-	sdkVersion := pluginVersion.InitializePluginVersion(pluginVersion.Version, pluginVersion.VersionPrerelease)
 	return &Set{
-		sdkVersion:     sdkVersion.String(),
+		version:        version.String(),
+		sdkVersion:     version.String(), // TODO: Set me after the split
 		Builders:       map[string]packersdk.Builder{},
 		PostProcessors: map[string]packersdk.PostProcessor{},
 		Provisioners:   map[string]packersdk.Provisioner{},
-		Datasources:    map[string]packersdk.Datasource{},
 	}
 }
 
@@ -81,13 +80,6 @@ func (i *Set) RegisterProvisioner(name string, provisioner packersdk.Provisioner
 		panic(fmt.Errorf("registering duplicate %s provisioner", name))
 	}
 	i.Provisioners[name] = provisioner
-}
-
-func (i *Set) RegisterDatasource(name string, datasource packersdk.Datasource) {
-	if _, found := i.Datasources[name]; found {
-		panic(fmt.Errorf("registering duplicate %s datasource", name))
-	}
-	i.Datasources[name] = datasource
 }
 
 // Run takes the os Args and runs a packer plugin command from it.
@@ -133,8 +125,6 @@ func (i *Set) start(kind, name string) error {
 		err = server.RegisterPostProcessor(i.PostProcessors[name])
 	case "provisioner":
 		err = server.RegisterProvisioner(i.Provisioners[name])
-	case "datasource":
-		err = server.RegisterDatasource(i.Datasources[name])
 	default:
 		err = fmt.Errorf("Unknown plugin type: %s", kind)
 	}
@@ -156,7 +146,6 @@ func (i *Set) description() SetDescription {
 		Builders:       i.buildersDescription(),
 		PostProcessors: i.postProcessorsDescription(),
 		Provisioners:   i.provisionersDescription(),
-		Datasources:    i.datasourceDescription(),
 	}
 }
 
@@ -185,15 +174,6 @@ func (i *Set) postProcessorsDescription() []string {
 func (i *Set) provisionersDescription() []string {
 	out := []string{}
 	for key := range i.Provisioners {
-		out = append(out, key)
-	}
-	sort.Strings(out)
-	return out
-}
-
-func (i *Set) datasourceDescription() []string {
-	out := []string{}
-	for key := range i.Datasources {
 		out = append(out, key)
 	}
 	sort.Strings(out)

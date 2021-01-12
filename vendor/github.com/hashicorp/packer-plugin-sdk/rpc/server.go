@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/rpc"
 
-	"github.com/hashicorp/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/ugorji/go/codec"
 )
 
@@ -19,7 +19,6 @@ const (
 	DefaultHookEndpoint                 = "Hook"
 	DefaultPostProcessorEndpoint        = "PostProcessor"
 	DefaultProvisionerEndpoint          = "Provisioner"
-	DefaultDatasourceEndpoint           = "Datasource"
 	DefaultUiEndpoint                   = "Ui"
 )
 
@@ -64,20 +63,20 @@ func (s *Server) Close() error {
 	return nil
 }
 
-func (s *Server) RegisterArtifact(a packer.Artifact) error {
+func (s *Server) RegisterArtifact(a packersdk.Artifact) error {
 	return s.server.RegisterName(DefaultArtifactEndpoint, &ArtifactServer{
 		artifact: a,
 	})
 }
 
-func (s *Server) RegisterBuild(b packer.Build) error {
+func (s *Server) RegisterBuild(b packersdk.Build) error {
 	return s.server.RegisterName(DefaultBuildEndpoint, &BuildServer{
 		build: b,
 		mux:   s.mux,
 	})
 }
 
-func (s *Server) RegisterBuilder(b packer.Builder) error {
+func (s *Server) RegisterBuilder(b packersdk.Builder) error {
 	return s.server.RegisterName(DefaultBuilderEndpoint, &BuilderServer{
 		commonServer: commonServer{
 			selfConfigurable: b,
@@ -87,7 +86,7 @@ func (s *Server) RegisterBuilder(b packer.Builder) error {
 	})
 }
 
-func (s *Server) RegisterCommunicator(c packer.Communicator) error {
+func (s *Server) RegisterCommunicator(c packersdk.Communicator) error {
 	return s.server.RegisterName(DefaultCommunicatorEndpoint, &CommunicatorServer{
 		c: c,
 		commonServer: commonServer{
@@ -96,14 +95,14 @@ func (s *Server) RegisterCommunicator(c packer.Communicator) error {
 	})
 }
 
-func (s *Server) RegisterHook(h packer.Hook) error {
+func (s *Server) RegisterHook(h packersdk.Hook) error {
 	return s.server.RegisterName(DefaultHookEndpoint, &HookServer{
 		hook: h,
 		mux:  s.mux,
 	})
 }
 
-func (s *Server) RegisterPostProcessor(p packer.PostProcessor) error {
+func (s *Server) RegisterPostProcessor(p packersdk.PostProcessor) error {
 	return s.server.RegisterName(DefaultPostProcessorEndpoint, &PostProcessorServer{
 		commonServer: commonServer{
 			selfConfigurable: p,
@@ -113,7 +112,7 @@ func (s *Server) RegisterPostProcessor(p packer.PostProcessor) error {
 	})
 }
 
-func (s *Server) RegisterProvisioner(p packer.Provisioner) error {
+func (s *Server) RegisterProvisioner(p packersdk.Provisioner) error {
 	return s.server.RegisterName(DefaultProvisionerEndpoint, &ProvisionerServer{
 		commonServer: commonServer{
 			selfConfigurable: p,
@@ -123,17 +122,7 @@ func (s *Server) RegisterProvisioner(p packer.Provisioner) error {
 	})
 }
 
-func (s *Server) RegisterDatasource(d packer.Datasource) error {
-	return s.server.RegisterName(DefaultDatasourceEndpoint, &DatasourceServer{
-		commonServer: commonServer{
-			selfConfigurable: d,
-			mux:              s.mux,
-		},
-		d: d,
-	})
-}
-
-func (s *Server) RegisterUi(ui packer.Ui) error {
+func (s *Server) RegisterUi(ui packersdk.Ui) error {
 	return s.server.RegisterName(DefaultUiEndpoint, &UiServer{
 		ui:       ui,
 		register: s.server.RegisterName,

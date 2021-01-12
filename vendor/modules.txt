@@ -175,10 +175,9 @@ github.com/chzyer/readline
 github.com/davecgh/go-spew/spew
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
-# github.com/digitalocean/go-libvirt v0.0.0-20210108193637-3a8ae49ba8cd
+# github.com/digitalocean/go-libvirt v0.0.0-20190626172931-4d226dd6c437
 github.com/digitalocean/go-libvirt
 github.com/digitalocean/go-libvirt/internal/constants
-github.com/digitalocean/go-libvirt/internal/event
 github.com/digitalocean/go-libvirt/internal/go-xdr/xdr2
 # github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
 github.com/digitalocean/go-qemu/qmp
@@ -360,7 +359,7 @@ github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
-# github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210112161930-9f23cd9736d7
+# github.com/hashicorp/packer-plugin-sdk v0.0.6
 github.com/hashicorp/packer-plugin-sdk/acctest
 github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
 github.com/hashicorp/packer-plugin-sdk/acctest/testutils

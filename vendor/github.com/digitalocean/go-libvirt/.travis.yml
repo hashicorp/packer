@@ -8,7 +8,7 @@ cache:
     - $HOME/.ccache
 
 go:
-  - "1.15"
+  - "1.12"
 
 env:
   global:
