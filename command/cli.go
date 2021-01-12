@@ -147,7 +147,7 @@ func (va *FormatArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&va.Check, "check", false, "check if the input is formatted")
 	flags.BoolVar(&va.Diff, "diff", false, "display the diff of formatting changes")
 	flags.BoolVar(&va.Write, "write", true, "overwrite source files instead of writing to stdout")
-	flags.BoolVar(&va.Recursive, "recursive", true, "Also process files in subdirectories")
+	flags.BoolVar(&va.Recursive, "recursive", false, "Also process files in subdirectories")
 	va.MetaArgs.AddFlagSets(flags)
 }
 

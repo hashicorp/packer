@@ -39,11 +39,72 @@ func TestHCL2Formatter_Format(t *testing.T) {
 }
 
 func TestHCL2Formatter_Recursive(t *testing.T) {
+	var buf bytes.Buffer
 	f := NewHCL2Formatter()
+	f.Output = &buf
+	f.Write = true
 	f.Recursive = true
-	_, diags := f.Format("testdata/format")
+
+	unformattedData, err := ioutil.ReadFile("testdata/format/unformatted.pkr.hcl")
+	if err != nil {
+		t.Fatalf("failed to open the unformatted fixture %s", err)
+	}
+
+	var subDir string
+	subDir, err = ioutil.TempDir("testdata/format", "sub_dir")
+	if err != nil {
+		t.Fatalf("failed to create sub level recurisve directory for test %s", err)
+	}
+	defer os.Remove(subDir)
+
+	var superSubDir string
+	superSubDir, err = ioutil.TempDir(subDir, "super_sub_dir")
+	if err != nil {
+		t.Fatalf("failed to create sub level recurisve directory for test %s", err)
+	}
+	defer os.Remove(superSubDir)
+
+	tf, err := ioutil.TempFile(subDir, "*.pkr.hcl")
+	if err != nil {
+		t.Fatalf("failed to create top level tempfile for test %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	_, _ = tf.Write(unformattedData)
+	tf.Close()
+
+	subTf, err := ioutil.TempFile(superSubDir, "*.pkr.hcl")
+	if err != nil {
+		t.Fatalf("failed to create sub level tempfile for test %s", err)
+	}
+	defer os.Remove(subTf.Name())
+
+	_, _ = subTf.Write(unformattedData)
+	subTf.Close()
+
+	_, diags := f.Format(subDir)
 	if diags.HasErrors() {
 		t.Fatalf("the call to Format failed unexpectedly %s", diags.Error())
+	}
+
+	formattedData, err := ioutil.ReadFile("testdata/format/formatted.pkr.hcl")
+	if err != nil {
+		t.Fatalf("failed to open the formatted fixture %s", err)
+	}
+
+	validateFileIsFormatted(t, formattedData, tf)
+	validateFileIsFormatted(t, formattedData, subTf)
+}
+
+func validateFileIsFormatted(t *testing.T, formattedData []byte, testFile *os.File) {
+	//lets re-read the tempfile which should now be formatted
+	data, err := ioutil.ReadFile(testFile.Name())
+	if err != nil {
+		t.Fatalf("failed to open the newly formatted fixture %s", err)
+	}
+
+	if diff := cmp.Diff(string(data), string(formattedData)); diff != "" {
+		t.Errorf("Unexpected format tfData output %s", diff)
 	}
 }
 
