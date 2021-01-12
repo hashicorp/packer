@@ -75,12 +75,12 @@ type TestT interface {
 	Skip(args ...interface{})
 }
 
-type TestBuilderStore struct {
-	packer.BuilderStore
+type TestBuilderSet struct {
+	packer.BuilderSet
 	StartFn func(name string) (packersdk.Builder, error)
 }
 
-func (tbs TestBuilderStore) Start(name string) (packersdk.Builder, error) { return tbs.StartFn(name) }
+func (tbs TestBuilderSet) Start(name string) (packersdk.Builder, error) { return tbs.StartFn(name) }
 
 // Test performs an acceptance test on a backend with the given test case.
 //
@@ -131,16 +131,18 @@ func Test(t TestT, c TestCase) {
 	log.Printf("[DEBUG] Initializing core...")
 	core := packer.NewCore(&packer.CoreConfig{
 		Components: packer.ComponentFinder{
-			BuilderStore: TestBuilderStore{
-				StartFn: func(n string) (packersdk.Builder, error) {
-					if n == "test" {
-						return c.Builder, nil
-					}
+			PluginConfig: &packer.PluginConfig{
+				Builders: TestBuilderSet{
+					StartFn: func(n string) (packersdk.Builder, error) {
+						if n == "test" {
+							return c.Builder, nil
+						}
 
-					return nil, nil
+						return nil, nil
+					},
 				},
+				Provisioners: c.ProvisionerStore,
 			},
-			ProvisionerStore: c.ProvisionerStore,
 		},
 		Template: tpl,
 	})

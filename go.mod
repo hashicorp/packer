@@ -10,7 +10,6 @@ require (
 	github.com/Azure/go-autorest/autorest/azure/cli v0.3.1
 	github.com/Azure/go-autorest/autorest/date v0.2.0
 	github.com/Azure/go-autorest/autorest/to v0.3.0
-	github.com/Azure/go-autorest/autorest/validation v0.3.1 // indirect
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022
 	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0
 	github.com/Telmate/proxmox-api-go v0.0.0-20200715182505-ec97c70ba887
@@ -24,10 +23,8 @@ require (
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/digitalocean/go-libvirt v0.0.0-20210108193637-3a8ae49ba8cd // indirect
 	github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
 	github.com/digitalocean/godo v1.11.1
-	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/exoscale/egoscale v0.18.1
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structtag v1.0.0
@@ -37,8 +34,6 @@ require (
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/google/go-cmp v0.5.2
 	github.com/google/go-github/v33 v33.0.0
-	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/google/shlex v0.0.0-20150127133951-6f45313302b9
 	github.com/google/uuid v1.1.2
 	github.com/gophercloud/gophercloud v0.12.0
 	github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c
@@ -55,17 +50,13 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/hcl/v2 v2.8.0
-	github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111224258-fd30ebb797f0
+	github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210112161930-9f23cd9736d7
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
 	github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
 	github.com/joyent/triton-go v0.0.0-20180628001255-830d2b111e62
-	github.com/json-iterator/go v1.1.10 // indirect
-	github.com/klauspost/compress v1.11.6 // indirect
-	github.com/klauspost/crc32 v1.2.0 // indirect
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
-	github.com/kr/fs v0.1.0 // indirect
 	github.com/linode/linodego v0.14.0
 	github.com/masterzen/winrm v0.0.0-20201030141608-56ca5c5f2380
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
@@ -76,7 +67,6 @@ require (
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/mitchellh/reflectwalk v1.0.0
-	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
 	github.com/oracle/oci-go-sdk v18.0.0+incompatible
 	github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699
@@ -84,7 +74,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
-	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
 	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/stretchr/testify v1.6.1
@@ -107,11 +96,8 @@ require (
 	golang.org/x/tools v0.0.0-20201111133315-69daaf961d65
 	google.golang.org/api v0.32.0
 	google.golang.org/grpc v1.32.0
-	gopkg.in/ini.v1 v1.62.0 // indirect
 )
 
 replace github.com/google/go-github/v33 => github.com/azr/go-github/v33 v33.0.1-0.20210106115353-f7773038d423
-
-replace github.com/hashicorp/packer-plugin-sdk => /Users/azr/go/src/github.com/hashicorp/packer-plugin-sdk
 
 go 1.13

@@ -23,6 +23,8 @@ github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources
 github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage
 github.com/Azure/azure-sdk-for-go/storage
 github.com/Azure/azure-sdk-for-go/version
+# github.com/Azure/go-autorest v14.2.0+incompatible
+github.com/Azure/go-autorest
 # github.com/Azure/go-autorest/autorest v0.10.0
 github.com/Azure/go-autorest/autorest
 github.com/Azure/go-autorest/autorest/azure
@@ -36,7 +38,7 @@ github.com/Azure/go-autorest/autorest/azure/cli
 github.com/Azure/go-autorest/autorest/date
 # github.com/Azure/go-autorest/autorest/to v0.3.0
 github.com/Azure/go-autorest/autorest/to
-# github.com/Azure/go-autorest/autorest/validation v0.2.0
+# github.com/Azure/go-autorest/autorest/validation v0.3.1
 github.com/Azure/go-autorest/autorest/validation
 # github.com/Azure/go-autorest/logger v0.1.0
 github.com/Azure/go-autorest/logger
@@ -173,9 +175,10 @@ github.com/chzyer/readline
 github.com/davecgh/go-spew/spew
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
-# github.com/digitalocean/go-libvirt v0.0.0-20190626172931-4d226dd6c437
+# github.com/digitalocean/go-libvirt v0.0.0-20210108193637-3a8ae49ba8cd
 github.com/digitalocean/go-libvirt
 github.com/digitalocean/go-libvirt/internal/constants
+github.com/digitalocean/go-libvirt/internal/event
 github.com/digitalocean/go-libvirt/internal/go-xdr/xdr2
 # github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
 github.com/digitalocean/go-qemu/qmp
@@ -357,7 +360,7 @@ github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
-# github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111224258-fd30ebb797f0
+# github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210112161930-9f23cd9736d7
 github.com/hashicorp/packer-plugin-sdk/acctest
 github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
 github.com/hashicorp/packer-plugin-sdk/acctest/testutils
@@ -436,23 +439,21 @@ github.com/joyent/triton-go/client
 github.com/joyent/triton-go/compute
 github.com/joyent/triton-go/errors
 github.com/joyent/triton-go/network
-# github.com/json-iterator/go v1.1.6
+# github.com/json-iterator/go v1.1.10
 github.com/json-iterator/go
 # github.com/jstemmer/go-junit-report v0.9.1
 github.com/jstemmer/go-junit-report
 github.com/jstemmer/go-junit-report/formatter
 github.com/jstemmer/go-junit-report/parser
-# github.com/klauspost/compress v0.0.0-20160131094358-f86d2e6d8a77
+# github.com/klauspost/compress v1.11.6
 github.com/klauspost/compress/flate
-# github.com/klauspost/cpuid v0.0.0-20160106104451-349c67577817
-github.com/klauspost/cpuid
-# github.com/klauspost/crc32 v0.0.0-20160114101742-999f3125931f
+# github.com/klauspost/crc32 v1.2.0
 github.com/klauspost/crc32
 # github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
 github.com/klauspost/pgzip
 # github.com/konsorten/go-windows-terminal-sequences v1.0.1
 github.com/konsorten/go-windows-terminal-sequences
-# github.com/kr/fs v0.0.0-20131111012553-2788f0dbd169
+# github.com/kr/fs v0.1.0
 github.com/kr/fs
 # github.com/linode/linodego v0.14.0
 github.com/linode/linodego
@@ -948,7 +949,7 @@ google.golang.org/protobuf/types/known/fieldmaskpb
 google.golang.org/protobuf/types/known/timestamppb
 google.golang.org/protobuf/types/known/wrapperspb
 google.golang.org/protobuf/types/pluginpb
-# gopkg.in/ini.v1 v1.42.0
+# gopkg.in/ini.v1 v1.62.0
 gopkg.in/ini.v1
 # gopkg.in/square/go-jose.v2 v2.3.1
 gopkg.in/square/go-jose.v2

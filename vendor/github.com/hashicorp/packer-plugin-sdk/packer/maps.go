@@ -4,15 +4,15 @@ import (
 	"fmt"
 )
 
-type MapOfProvisioner map[string]ProvisionerStarter
-
-func (mop MapOfProvisioner) Set(provisioner string, starter ProvisionerStarter) {
-	mop[provisioner] = starter
-}
+type MapOfProvisioner map[string]func() (Provisioner, error)
 
 func (mop MapOfProvisioner) Has(provisioner string) bool {
 	_, res := mop[provisioner]
 	return res
+}
+
+func (mop MapOfProvisioner) Set(provisioner string, starter func() (Provisioner, error)) {
+	mop[provisioner] = starter
 }
 
 func (mop MapOfProvisioner) Start(provisioner string) (Provisioner, error) {
@@ -31,9 +31,9 @@ func (mop MapOfProvisioner) List() []string {
 	return res
 }
 
-type MapOfPostProcessor map[string]PostProcessorStarter
+type MapOfPostProcessor map[string]func() (PostProcessor, error)
 
-func (mopp MapOfPostProcessor) Set(postProcessor string, starter PostProcessorStarter) {
+func (mopp MapOfPostProcessor) Set(postProcessor string, starter func() (PostProcessor, error)) {
 	mopp[postProcessor] = starter
 }
 
@@ -58,9 +58,9 @@ func (mopp MapOfPostProcessor) List() []string {
 	return res
 }
 
-type MapOfBuilder map[string]BuilderStarter
+type MapOfBuilder map[string]func() (Builder, error)
 
-func (mob MapOfBuilder) Set(builder string, starter BuilderStarter) {
+func (mob MapOfBuilder) Set(builder string, starter func() (Builder, error)) {
 	mob[builder] = starter
 }
 
@@ -86,6 +86,10 @@ func (mob MapOfBuilder) List() []string {
 }
 
 type MapOfDatasource map[string]func() (Datasource, error)
+
+func (mod MapOfDatasource) Set(dataSource string, starter func() (Datasource, error)) {
+	mod[dataSource] = starter
+}
 
 func (mod MapOfDatasource) Has(dataSource string) bool {
 	_, res := mod[dataSource]
