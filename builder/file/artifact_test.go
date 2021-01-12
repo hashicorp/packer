@@ -3,7 +3,7 @@ package file
 import (
 	"testing"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func TestNullArtifact(t *testing.T) {

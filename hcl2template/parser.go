@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/zclconf/go-cty/cty"
 )

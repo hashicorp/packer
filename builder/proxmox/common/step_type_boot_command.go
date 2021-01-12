@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/bootcommand"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 // stepTypeBootCommand takes the started VM, and sends the keystrokes required to start

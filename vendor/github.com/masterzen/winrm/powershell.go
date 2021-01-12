@@ -2,22 +2,26 @@ package winrm
 
 import (
 	"encoding/base64"
-	"fmt"
+
+	"golang.org/x/text/encoding/unicode"
 )
 
 // Powershell wraps a PowerShell script
 // and prepares it for execution by the winrm client
 func Powershell(psCmd string) string {
-	// 2 byte chars to make PowerShell happy
-	wideCmd := ""
-	for _, b := range []byte(psCmd) {
-		wideCmd += string(b) + "\x00"
+	// Disable unnecessary progress bars which considered as stderr.
+	psCmd = "$ProgressPreference = 'SilentlyContinue';" + psCmd
+
+	// Encode string to UTF16-LE
+	encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
+	encoded, err := encoder.String(psCmd)
+	if err != nil {
+		return ""
 	}
 
-	// Base64 encode the command
-	input := []uint8(wideCmd)
-	encodedCmd := base64.StdEncoding.EncodeToString(input)
+	// Finally make it base64 encoded which is required for powershell.
+	psCmd = base64.StdEncoding.EncodeToString([]byte(encoded))
 
-	// Create the powershell.exe command line to execute the script
-	return fmt.Sprintf("powershell.exe -EncodedCommand %s", encodedCmd)
+	// Specify powershell.exe to run encoded command
+	return "powershell.exe -EncodedCommand " + psCmd
 }

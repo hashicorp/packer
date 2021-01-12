@@ -8,8 +8,8 @@ import (
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type StepCreatePublicIPInstance struct {

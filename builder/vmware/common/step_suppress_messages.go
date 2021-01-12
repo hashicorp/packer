@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // This step suppresses any messages that VMware product might show.

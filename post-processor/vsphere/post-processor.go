@@ -15,11 +15,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer-plugin-sdk/common"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	shelllocal "github.com/hashicorp/packer/packer-plugin-sdk/shell-local"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	shelllocal "github.com/hashicorp/packer-plugin-sdk/shell-local"
+	"github.com/hashicorp/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 var ovftool string = "ovftool"

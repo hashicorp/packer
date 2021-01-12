@@ -1,8 +1,0 @@
-{
-    "post-processors": [
-        {
-            "type": "foo",
-            "except": ["bar"]
-        }
-    ]
-}

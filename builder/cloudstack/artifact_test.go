@@ -3,7 +3,7 @@ package cloudstack
 import (
 	"testing"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 

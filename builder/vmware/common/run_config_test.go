@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/bootcommand"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 func TestRunConfig_Prepare(t *testing.T) {

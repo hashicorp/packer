@@ -10,13 +10,13 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer-plugin-sdk/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/communicator"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 // The unique ID for this builder
@@ -104,13 +104,14 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			DebugKeyPath: fmt.Sprintf("os_%s.pem", b.config.PackerBuildName),
 		},
 		&StepSourceImageInfo{
-			SourceImage:               b.config.RunConfig.SourceImage,
-			SourceImageName:           b.config.RunConfig.SourceImageName,
-			ExternalSourceImageURL:    b.config.RunConfig.ExternalSourceImageURL,
-			ExternalSourceImageFormat: b.config.RunConfig.ExternalSourceImageFormat,
-			SourceImageOpts:           b.config.RunConfig.sourceImageOpts,
-			SourceMostRecent:          b.config.SourceImageFilters.MostRecent,
-			SourceProperties:          b.config.SourceImageFilters.Filters.Properties,
+			SourceImage:                   b.config.RunConfig.SourceImage,
+			SourceImageName:               b.config.RunConfig.SourceImageName,
+			ExternalSourceImageURL:        b.config.RunConfig.ExternalSourceImageURL,
+			ExternalSourceImageFormat:     b.config.RunConfig.ExternalSourceImageFormat,
+			ExternalSourceImageProperties: b.config.RunConfig.ExternalSourceImageProperties,
+			SourceImageOpts:               b.config.RunConfig.sourceImageOpts,
+			SourceMostRecent:              b.config.SourceImageFilters.MostRecent,
+			SourceProperties:              b.config.SourceImageFilters.Filters.Properties,
 		},
 		&StepDiscoverNetwork{
 			Networks:              b.config.Networks,

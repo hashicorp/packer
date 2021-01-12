@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/post-processor/vsphere"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"

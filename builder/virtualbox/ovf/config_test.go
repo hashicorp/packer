@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func testConfig(t *testing.T) map[string]interface{} {
@@ -32,7 +32,7 @@ func getTempFile(t *testing.T) *os.File {
 
 func TestNewConfig_FloppyFiles(t *testing.T) {
 	cfg := testConfig(t)
-	floppies_path := "../../../packer-plugin-sdk/test-fixtures/floppies"
+	floppies_path := "../../test-fixtures/floppies"
 	cfg["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	var c Config
 	_, err := c.Prepare(cfg)

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
-	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/bootcommand"
+	"github.com/hashicorp/packer-plugin-sdk/communicator"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 const KeyLeftShift uint32 = 0xFFE1

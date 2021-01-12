@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"regexp"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type VBoxProvider struct{}

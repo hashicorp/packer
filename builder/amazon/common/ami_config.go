@@ -7,8 +7,8 @@ import (
 	"log"
 	"regexp"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 // AMIConfig is for common configuration related to creating AMIs.

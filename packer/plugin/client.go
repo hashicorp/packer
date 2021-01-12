@@ -16,9 +16,9 @@ import (
 	"time"
 	"unicode"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	pluginsdk "github.com/hashicorp/packer/packer-plugin-sdk/plugin"
-	packerrpc "github.com/hashicorp/packer/packer-plugin-sdk/rpc"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
+	packerrpc "github.com/hashicorp/packer-plugin-sdk/rpc"
 )
 
 // If this is true, then the "unexpected EOF" panic will not be

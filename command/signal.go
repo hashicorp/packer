@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func handleTermInterrupt(ui packersdk.Ui) (context.Context, func()) {

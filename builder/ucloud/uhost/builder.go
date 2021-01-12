@@ -8,14 +8,14 @@ import (
 	"context"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/communicator"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 )
 
 // The unique ID for this builder

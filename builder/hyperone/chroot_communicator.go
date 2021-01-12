@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type CommandWrapper func(string) (string, error)

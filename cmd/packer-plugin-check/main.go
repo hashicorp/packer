@@ -11,7 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 )
 
@@ -141,7 +142,7 @@ func discoverAndLoad() error {
 
 // checkHCL2ConfigSpec checks if the hcl2spec config is present for the given plugins by validating that ConfigSpec() does not
 // return an empty map of specs.
-func checkHCL2ConfigSpec(builders packersdk.MapOfBuilder, provisioners packersdk.MapOfProvisioner, postProcessors packersdk.MapOfPostProcessor) error {
+func checkHCL2ConfigSpec(builders packer.BuilderStore, provisioners packer.ProvisionerStore, postProcessors packer.PostProcessorStore) error {
 	var errs *packersdk.MultiError
 	for _, b := range builders.List() {
 		builder, err := builders.Start(b)

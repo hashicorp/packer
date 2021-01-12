@@ -56,7 +56,7 @@ configuration, with later parameters overwriting any previous configuration.
 The exact semantics of the merge are left to the builder author.
 
 For decoding the `interface{}` into a meaningful structure, the
-[mapstructure](https://github.com/mitchellh/mapstructure) library is
+[mapstructure](https://godoc.org/github.com/mitchellh/mapstructure) library is
 recommended. Mapstructure will take an `interface{}` and decode it into an
 arbitrarily complex struct. If there are any errors, it generates very human
 friendly errors that can be returned directly from the prepare method.
@@ -88,8 +88,8 @@ And `packer.Cache` is used to store files between multiple Packer runs, and is
 covered in more detail in the cache section below.
 
 Because builder runs are typically a complex set of many steps, the
-[multistep](https://github.com/hashicorp/packer/blob/master/helper/multistep)
-helper is recommended to bring order to the complexity. Multistep is a library
+[multistep](https://godoc.org/github.com/hashicorp/packer-plugin-sdk/multistep)
+package is recommended to bring order to the complexity. Multistep is a library
 which allows you to separate your logic into multiple distinct "steps" and
 string them together. It fully supports cancellation mid-step and so on. Please
 check it out, it is how the built-in builders are all implemented.
@@ -137,7 +137,7 @@ about the artifact results, so it is important it never changes.
 
 Other than the builder ID, the rest should be self-explanatory by reading the
 [packer.Artifact interface
-documentation](https://github.com/hashicorp/packer/blob/master/packer/artifact.go).
+documentation](https://godoc.org/github.com/hashicorp/packer-plugin-sdk/packer#Artifact).
 
 ## Provisioning
 

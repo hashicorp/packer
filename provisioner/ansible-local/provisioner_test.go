@@ -11,9 +11,9 @@ import (
 	"fmt"
 	"os/exec"
 
+	builderT "github.com/hashicorp/packer-plugin-sdk/acctest"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/docker"
-	builderT "github.com/hashicorp/packer/packer-plugin-sdk/acctest"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/provisioner/file"
 )
 

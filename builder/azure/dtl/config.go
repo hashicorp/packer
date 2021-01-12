@@ -23,12 +23,12 @@ import (
 	"github.com/hashicorp/packer/builder/azure/common/client"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/communicator"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer/builder/azure/pkcs12"
-	"github.com/hashicorp/packer/packer-plugin-sdk/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -143,20 +143,20 @@ type Config struct {
 	SharedGalleryTimeout time.Duration `mapstructure:"shared_image_gallery_timeout"`
 
 	// PublisherName for your base image. See
-	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)
 	// for details.
 	//
 	// CLI example `az vm image list-publishers --location westus`
 	ImagePublisher string `mapstructure:"image_publisher"`
 	// Offer for your base image. See
-	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)
 	// for details.
 	//
 	// CLI example
 	// `az vm image list-offers --location westus --publisher Canonical`
 	ImageOffer string `mapstructure:"image_offer"`
 	// SKU for your base image. See
-	// [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
+	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)
 	// for details.
 	//
 	// CLI example

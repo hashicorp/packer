@@ -2,14 +2,14 @@ package version
 
 import (
 	"github.com/hashicorp/go-version"
-	pluginVersion "github.com/hashicorp/packer/packer-plugin-sdk/version"
+	pluginVersion "github.com/hashicorp/packer-plugin-sdk/version"
 )
 
 // The git commit that was compiled. This will be filled in by the compiler.
 var GitCommit string
 
 // The main version number that is being run at the moment.
-const Version = "1.6.6"
+const Version = "1.7.0"
 
 // A pre-release marker for the version. If this is "" (empty string)
 // then it means that it is a final release. Otherwise, this is a pre-release

@@ -3,7 +3,7 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 //In order to perform extra customization of the virtual machine, a template can

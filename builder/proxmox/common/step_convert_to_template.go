@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // stepConvertToTemplate takes the running VM configured in earlier steps, stops it, and

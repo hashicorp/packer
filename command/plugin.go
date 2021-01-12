@@ -10,8 +10,8 @@ import (
 	"regexp"
 	"strings"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/plugin"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/plugin"
 
 	alicloudecsbuilder "github.com/hashicorp/packer/builder/alicloud/ecs"
 	amazonchrootbuilder "github.com/hashicorp/packer/builder/amazon/chroot"

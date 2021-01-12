@@ -12,9 +12,9 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/packer"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/provisioner/sleep"
 )
 
@@ -68,12 +68,12 @@ func testMetaParallel(t *testing.T, builder *ParallelTestBuilder, locked *Locked
 	return Meta{
 		CoreConfig: &packer.CoreConfig{
 			Components: packer.ComponentFinder{
-				BuilderStore: packersdk.MapOfBuilder{
+				BuilderStore: packer.MapOfBuilder{
 					"parallel-test": func() (packersdk.Builder, error) { return builder, nil },
 					"file":          func() (packersdk.Builder, error) { return &file.Builder{}, nil },
 					"lock":          func() (packersdk.Builder, error) { return locked, nil },
 				},
-				ProvisionerStore: packersdk.MapOfProvisioner{
+				ProvisionerStore: packer.MapOfProvisioner{
 					"sleep": func() (packersdk.Provisioner, error) { return &sleep.Provisioner{}, nil },
 				},
 			},

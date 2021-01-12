@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func testConfig(t *testing.T) map[string]interface{} {
@@ -74,7 +74,7 @@ func TestNewConfig_sourcePath(t *testing.T) {
 
 func TestNewConfig_FloppyFiles(t *testing.T) {
 	c := testConfig(t)
-	floppies_path := "../../../packer-plugin-sdk/test-fixtures/floppies"
+	floppies_path := "../../test-fixtures/floppies"
 	c["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	_, err := (&Config{}).Prepare(c)
 	if err != nil {

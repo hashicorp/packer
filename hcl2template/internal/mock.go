@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/json"
 )

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/template"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type scalewayVagrantfileTemplate struct {

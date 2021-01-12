@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func testConfig() map[string]interface{} {

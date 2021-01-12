@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"testing"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template"
-	configHelper "github.com/hashicorp/packer/packer-plugin-sdk/template/config"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template"
+	configHelper "github.com/hashicorp/packer-plugin-sdk/template/config"
 )
 
 func TestCoreBuildNames(t *testing.T) {
@@ -800,7 +800,7 @@ func TestCoreBuild_provRetry(t *testing.T) {
 	b := TestBuilder(t, config, "test")
 	pString := new(packersdk.MockProvisioner)
 	pInt := new(packersdk.MockProvisioner)
-	config.Components.ProvisionerStore = packersdk.MapOfProvisioner{
+	config.Components.ProvisionerStore = MapOfProvisioner{
 		"test-string": func() (packersdk.Provisioner, error) { return pString, nil },
 		// backwards compatibility
 		"test-integer": func() (packersdk.Provisioner, error) { return pInt, nil },

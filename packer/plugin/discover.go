@@ -10,9 +10,10 @@ import (
 	"sort"
 	"strings"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/pathing"
-	pluginsdk "github.com/hashicorp/packer/packer-plugin-sdk/plugin"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/pathing"
+	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer/packer"
 )
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -23,12 +24,12 @@ type Config struct {
 	KnownPluginFolders []string
 	PluginMinPort      int
 	PluginMaxPort      int
-	Builders           packersdk.MapOfBuilder
-	Provisioners       packersdk.MapOfProvisioner
-	PostProcessors     packersdk.MapOfPostProcessor
+	Builders           packer.MapOfBuilder
+	Provisioners       packer.MapOfProvisioner
+	PostProcessors     packer.MapOfPostProcessor
 }
 
-func (c *Config) GetPlugins() (packersdk.MapOfBuilder, packersdk.MapOfProvisioner, packersdk.MapOfPostProcessor) {
+func (c *Config) GetPlugins() (packer.MapOfBuilder, packer.MapOfProvisioner, packer.MapOfPostProcessor) {
 	return c.Builders, c.Provisioners, c.PostProcessors
 }
 
@@ -41,13 +42,13 @@ func (c *Config) GetPlugins() (packersdk.MapOfBuilder, packersdk.MapOfProvisione
 // CWD has the highest priority.
 func (c *Config) Discover() error {
 	if c.Builders == nil {
-		c.Builders = packersdk.MapOfBuilder{}
+		c.Builders = packer.MapOfBuilder{}
 	}
 	if c.Provisioners == nil {
-		c.Provisioners = packersdk.MapOfProvisioner{}
+		c.Provisioners = packer.MapOfProvisioner{}
 	}
 	if c.PostProcessors == nil {
-		c.PostProcessors = packersdk.MapOfPostProcessor{}
+		c.PostProcessors = packer.MapOfPostProcessor{}
 	}
 
 	// If we are already inside a plugin process we should not need to
@@ -234,29 +235,43 @@ func (c *Config) DiscoverMultiPlugin(pluginName, pluginPath string) error {
 
 	for _, builderName := range desc.Builders {
 		builderName := builderName // copy to avoid pointer overwrite issue
-		c.Builders[pluginPrefix+builderName] = func() (packersdk.Builder, error) {
-			return c.Client(pluginPath, "start", "builder", builderName).Builder()
+		key := pluginPrefix + builderName
+		if builderName == pluginsdk.DEFAULT_NAME {
+			key = pluginName
 		}
+		c.Builders.Add(key, func() (packer.Builder, error) {
+			return c.Client(pluginPath, "start", "builder", builderName).Builder()
+		})
 	}
+
 	if len(desc.Builders) > 0 {
 		log.Printf("found external %v builders from %s plugin", desc.Builders, pluginName)
 	}
 
 	for _, postProcessorName := range desc.PostProcessors {
 		postProcessorName := postProcessorName // copy to avoid pointer overwrite issue
-		c.PostProcessors[pluginPrefix+postProcessorName] = func() (packersdk.PostProcessor, error) {
-			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
+		key := pluginPrefix + postProcessorName
+		if postProcessorName == pluginsdk.DEFAULT_NAME {
+			key = pluginName
 		}
+		c.PostProcessors.Add(key, func() (packersdk.PostProcessor, error) {
+			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
+		})
 	}
+
 	if len(desc.PostProcessors) > 0 {
 		log.Printf("found external %v post-processors from %s plugin", desc.PostProcessors, pluginName)
 	}
 
 	for _, provisionerName := range desc.Provisioners {
 		provisionerName := provisionerName // copy to avoid pointer overwrite issue
-		c.Provisioners[pluginPrefix+provisionerName] = func() (packersdk.Provisioner, error) {
-			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
+		key := pluginPrefix + provisionerName
+		if provisionerName == pluginsdk.DEFAULT_NAME {
+			key = pluginName
 		}
+		c.Provisioners.Add(key, func() (packersdk.Provisioner, error) {
+			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
+		})
 	}
 	if len(desc.Provisioners) > 0 {
 		log.Printf("found external %v provisioner from %s plugin", desc.Provisioners, pluginName)

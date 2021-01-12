@@ -7,7 +7,7 @@ import (
 	"unicode"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
-	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
+	"github.com/hashicorp/packer-plugin-sdk/bootcommand"
 )
 
 type proxmoxDriver struct {

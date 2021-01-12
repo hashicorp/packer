@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/packer"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
 	shell_local "github.com/hashicorp/packer/provisioner/shell-local"
 	"github.com/hashicorp/packer/provisioner/sleep"
 )
@@ -16,10 +16,10 @@ import (
 // available. This allows us to test a builder that writes files to disk.
 func testCoreConfigSleepBuilder(t *testing.T) *packer.CoreConfig {
 	components := packer.ComponentFinder{
-		BuilderStore: packersdk.MapOfBuilder{
+		BuilderStore: packer.MapOfBuilder{
 			"file": func() (packersdk.Builder, error) { return &file.Builder{}, nil },
 		},
-		ProvisionerStore: packersdk.MapOfProvisioner{
+		ProvisionerStore: packer.MapOfProvisioner{
 			"sleep":       func() (packersdk.Provisioner, error) { return &sleep.Provisioner{}, nil },
 			"shell-local": func() (packersdk.Provisioner, error) { return &shell_local.Provisioner{}, nil },
 		},

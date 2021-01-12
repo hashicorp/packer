@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer/packer-plugin-sdk/packerbuilderdata"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
 )
 
 // &awscommon.StepSetGeneratedData{

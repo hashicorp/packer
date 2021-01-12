@@ -9,11 +9,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
-	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/tmp"
 )
 
 var additionsVersionMap = map[string]string{

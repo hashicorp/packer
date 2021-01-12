@@ -3,7 +3,7 @@ package common
 import (
 	"context"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
 )
 
 type StepUpdateBSUBackedVm struct {

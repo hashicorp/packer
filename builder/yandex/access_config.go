@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"os"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	"github.com/yandex-cloud/go-sdk/iamkey"
 )
 

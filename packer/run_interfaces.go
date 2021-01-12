@@ -2,7 +2,7 @@ package packer
 
 import (
 	"github.com/hashicorp/hcl/v2"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 

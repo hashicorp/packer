@@ -569,6 +569,46 @@ const (
 	// The specified OpsItem ID doesn't exist. Verify the ID and try again.
 	ErrCodeOpsItemNotFoundException = "OpsItemNotFoundException"
 
+	// ErrCodeOpsMetadataAlreadyExistsException for service response error code
+	// "OpsMetadataAlreadyExistsException".
+	//
+	// An OpsMetadata object already exists for the selected resource.
+	ErrCodeOpsMetadataAlreadyExistsException = "OpsMetadataAlreadyExistsException"
+
+	// ErrCodeOpsMetadataInvalidArgumentException for service response error code
+	// "OpsMetadataInvalidArgumentException".
+	//
+	// One of the arguments passed is invalid.
+	ErrCodeOpsMetadataInvalidArgumentException = "OpsMetadataInvalidArgumentException"
+
+	// ErrCodeOpsMetadataKeyLimitExceededException for service response error code
+	// "OpsMetadataKeyLimitExceededException".
+	//
+	// The OpsMetadata object exceeds the maximum number of OpsMetadata keys that
+	// you can assign to an application in AppManager.
+	ErrCodeOpsMetadataKeyLimitExceededException = "OpsMetadataKeyLimitExceededException"
+
+	// ErrCodeOpsMetadataLimitExceededException for service response error code
+	// "OpsMetadataLimitExceededException".
+	//
+	// Your account reached the maximum number of OpsMetadata objects allowed by
+	// AppManager. The maximum is 200 OpsMetadata objects. Delete one or more OpsMetadata
+	// object and try again.
+	ErrCodeOpsMetadataLimitExceededException = "OpsMetadataLimitExceededException"
+
+	// ErrCodeOpsMetadataNotFoundException for service response error code
+	// "OpsMetadataNotFoundException".
+	//
+	// The OpsMetadata object does not exist.
+	ErrCodeOpsMetadataNotFoundException = "OpsMetadataNotFoundException"
+
+	// ErrCodeOpsMetadataTooManyUpdatesException for service response error code
+	// "OpsMetadataTooManyUpdatesException".
+	//
+	// The system is processing too many concurrent updates. Wait a few moments
+	// and try again.
+	ErrCodeOpsMetadataTooManyUpdatesException = "OpsMetadataTooManyUpdatesException"
+
 	// ErrCodeParameterAlreadyExists for service response error code
 	// "ParameterAlreadyExists".
 	//
@@ -882,6 +922,12 @@ var exceptionFromCode = map[string]func(protocol.ResponseMetadata) error{
 	"OpsItemInvalidParameterException":              newErrorOpsItemInvalidParameterException,
 	"OpsItemLimitExceededException":                 newErrorOpsItemLimitExceededException,
 	"OpsItemNotFoundException":                      newErrorOpsItemNotFoundException,
+	"OpsMetadataAlreadyExistsException":             newErrorOpsMetadataAlreadyExistsException,
+	"OpsMetadataInvalidArgumentException":           newErrorOpsMetadataInvalidArgumentException,
+	"OpsMetadataKeyLimitExceededException":          newErrorOpsMetadataKeyLimitExceededException,
+	"OpsMetadataLimitExceededException":             newErrorOpsMetadataLimitExceededException,
+	"OpsMetadataNotFoundException":                  newErrorOpsMetadataNotFoundException,
+	"OpsMetadataTooManyUpdatesException":            newErrorOpsMetadataTooManyUpdatesException,
 	"ParameterAlreadyExists":                        newErrorParameterAlreadyExists,
 	"ParameterLimitExceeded":                        newErrorParameterLimitExceeded,
 	"ParameterMaxVersionLimitExceeded":              newErrorParameterMaxVersionLimitExceeded,

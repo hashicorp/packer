@@ -14,7 +14,7 @@ import (
 	"unicode"
 
 	getter "github.com/hashicorp/go-getter/v2"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 var ErrInterrupted = errors.New("interrupted")

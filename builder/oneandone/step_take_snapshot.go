@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/1and1/oneandone-cloudserver-sdk-go"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type stepTakeSnapshot struct{}

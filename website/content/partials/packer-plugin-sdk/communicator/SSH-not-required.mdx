@@ -1,4 +1,4 @@
-<!-- Code generated from the comments of the SSH struct in packer-plugin-sdk/communicator/config.go; DO NOT EDIT MANUALLY -->
+<!-- Code generated from the comments of the SSH struct in communicator/config.go; DO NOT EDIT MANUALLY -->
 
 - `ssh_host` (string) - The address to SSH to. This usually is automatically configured by the
   builder.
@@ -11,11 +11,11 @@
 
 - `ssh_ciphers` ([]string) - This overrides the value of ciphers supported by default by golang.
   The default value is [
-  "aes128-gcm@openssh.com",
-  "chacha20-poly1305@openssh.com",
-  "aes128-ctr", "aes192-ctr", "aes256-ctr",
+    "aes128-gcm@openssh.com",
+    "chacha20-poly1305@openssh.com",
+    "aes128-ctr", "aes192-ctr", "aes256-ctr",
   ]
-
+  
   Valid options for ciphers include:
   "aes128-ctr", "aes192-ctr", "aes256-ctr", "aes128-gcm@openssh.com",
   "chacha20-poly1305@openssh.com",
@@ -89,6 +89,6 @@
   useful if, for example, packer hangs on a connection after a reboot.
   Example: `5m`. Disabled by default.
 
-- `ssh_remote_tunnels` ([]string) -
+- `ssh_remote_tunnels` ([]string) - 
 
-- `ssh_local_tunnels` ([]string) -
+- `ssh_local_tunnels` ([]string) - 

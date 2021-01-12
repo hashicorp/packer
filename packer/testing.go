@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 )
 
@@ -13,7 +13,7 @@ func TestCoreConfig(t *testing.T) *CoreConfig {
 	// Create some test components
 	components := ComponentFinder{
 		PluginConfig: &plugin.Config{
-			Builders: packersdk.MapOfBuilder{
+			Builders: MapOfBuilder{
 				"test": func() (packersdk.Builder, error) { return &packersdk.MockBuilder{}, nil },
 			},
 		},
@@ -48,7 +48,7 @@ func TestUi(t *testing.T) packersdk.Ui {
 func TestBuilder(t *testing.T, c *CoreConfig, n string) *packersdk.MockBuilder {
 	var b packersdk.MockBuilder
 
-	c.Components.PluginConfig.Builders = packersdk.MapOfBuilder{
+	c.Components.PluginConfig.Builders = MapOfBuilder{
 		n: func() (packersdk.Builder, error) { return &b, nil },
 	}
 
@@ -60,7 +60,7 @@ func TestBuilder(t *testing.T, c *CoreConfig, n string) *packersdk.MockBuilder {
 func TestProvisioner(t *testing.T, c *CoreConfig, n string) *packersdk.MockProvisioner {
 	var b packersdk.MockProvisioner
 
-	c.Components.PluginConfig.Provisioners = packersdk.MapOfProvisioner{
+	c.Components.PluginConfig.Provisioners = MapOfProvisioner{
 		n: func() (packersdk.Provisioner, error) { return &b, nil },
 	}
 
@@ -72,7 +72,7 @@ func TestProvisioner(t *testing.T, c *CoreConfig, n string) *packersdk.MockProvi
 func TestPostProcessor(t *testing.T, c *CoreConfig, n string) *MockPostProcessor {
 	var b MockPostProcessor
 
-	c.Components.PluginConfig.PostProcessors = packersdk.MapOfPostProcessor{
+	c.Components.PluginConfig.PostProcessors = MapOfPostProcessor{
 		n: func() (packersdk.PostProcessor, error) { return &b, nil },
 	}
 

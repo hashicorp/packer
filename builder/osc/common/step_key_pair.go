@@ -7,9 +7,9 @@ import (
 	"runtime"
 
 	"github.com/antihax/optional"
-	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/communicator"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/outscale/osc-sdk-go/osc"
 )
 

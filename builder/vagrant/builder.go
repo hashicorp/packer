@@ -14,14 +14,14 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/packer-plugin-sdk/bootcommand"
-	"github.com/hashicorp/packer/packer-plugin-sdk/common"
-	"github.com/hashicorp/packer/packer-plugin-sdk/communicator"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer/packer-plugin-sdk/multistep/commonsteps"
-	packersdk "github.com/hashicorp/packer/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/config"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/bootcommand"
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/communicator"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 // Builder implements packersdk.Builder and builds the actual VirtualBox
@@ -71,7 +71,7 @@ type Config struct {
 	//  * ebfb681885ddf1234c18094a45bbeafd91467911
 	//  * sha256:ed363350696a726b7932db864dda019bd2017365c9e299627830f06954643f93
 	//  * ed363350696a726b7932db864dda019bd2017365c9e299627830f06954643f93
-	//  * file:http://releases.ubuntu.com/20.04/MD5SUMS
+	//  * file:http://releases.ubuntu.com/20.04/SHA256SUMS
 	//  * file:file://./local/path/file.sum
 	//  * file:./local/path/file.sum
 	//  * none
