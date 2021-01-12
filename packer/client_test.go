@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 
 func TestClient(t *testing.T) {
 	process := helperProcess("mock")
-	c := NewClient(&ClientConfig{Cmd: process})
+	c := NewClient(&PluginClientConfig{Cmd: process})
 	defer c.Kill()
 
 	// Test that it parses the proper address
@@ -42,7 +42,7 @@ func TestClient(t *testing.T) {
 }
 
 func TestClientStart_badVersion(t *testing.T) {
-	config := &ClientConfig{
+	config := &PluginClientConfig{
 		Cmd:          helperProcess("bad-version"),
 		StartTimeout: 50 * time.Millisecond,
 	}
@@ -57,7 +57,7 @@ func TestClientStart_badVersion(t *testing.T) {
 }
 
 func TestClient_Start_Timeout(t *testing.T) {
-	config := &ClientConfig{
+	config := &PluginClientConfig{
 		Cmd:          helperProcess("start-timeout"),
 		StartTimeout: 50 * time.Millisecond,
 	}
@@ -74,7 +74,7 @@ func TestClient_Start_Timeout(t *testing.T) {
 func TestClient_Stderr(t *testing.T) {
 	stderr := new(bytes.Buffer)
 	process := helperProcess("stderr")
-	c := NewClient(&ClientConfig{
+	c := NewClient(&PluginClientConfig{
 		Cmd:    process,
 		Stderr: stderr,
 	})
@@ -123,7 +123,7 @@ func TestClient_Stdin(t *testing.T) {
 	os.Stdin = tf
 
 	process := helperProcess("stdin")
-	c := NewClient(&ClientConfig{Cmd: process})
+	c := NewClient(&PluginClientConfig{Cmd: process})
 	defer c.Kill()
 
 	_, err = c.Start()

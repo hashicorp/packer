@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 type cmdProvisioner struct {
 	p      packersdk.Provisioner
-	client *Client
+	client *PluginClient
 }
 
 func (p *cmdProvisioner) ConfigSpec() hcldec.ObjectSpec {

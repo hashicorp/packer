@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"context"
@@ -22,7 +22,7 @@ func (helperPostProcessor) PostProcess(context.Context, packersdk.Ui, packersdk.
 }
 
 func TestPostProcessor_NoExist(t *testing.T) {
-	c := NewClient(&ClientConfig{Cmd: exec.Command("i-should-not-exist")})
+	c := NewClient(&PluginClientConfig{Cmd: exec.Command("i-should-not-exist")})
 	defer c.Kill()
 
 	_, err := c.PostProcessor()
@@ -32,7 +32,7 @@ func TestPostProcessor_NoExist(t *testing.T) {
 }
 
 func TestPostProcessor_Good(t *testing.T) {
-	c := NewClient(&ClientConfig{Cmd: helperProcess("post-processor")})
+	c := NewClient(&PluginClientConfig{Cmd: helperProcess("post-processor")})
 	defer c.Kill()
 
 	_, err := c.PostProcessor()

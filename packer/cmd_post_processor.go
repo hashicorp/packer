@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 type cmdPostProcessor struct {
 	p      packersdk.PostProcessor
-	client *Client
+	client *PluginClient
 }
 
 func (b *cmdPostProcessor) ConfigSpec() hcldec.ObjectSpec {

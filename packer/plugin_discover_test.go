@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"fmt"
@@ -16,15 +16,15 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 )
 
-func newConfig() Config {
-	var conf Config
+func newPluginConfig() PluginConfig {
+	var conf PluginConfig
 	conf.PluginMinPort = 10000
 	conf.PluginMaxPort = 25000
 	return conf
 }
 
 func TestDiscoverReturnsIfMagicCookieSet(t *testing.T) {
-	config := newConfig()
+	config := newPluginConfig()
 
 	os.Setenv(pluginsdk.MagicCookieKey, pluginsdk.MagicCookieValue)
 	defer os.Unsetenv(pluginsdk.MagicCookieKey)
@@ -34,7 +34,7 @@ func TestDiscoverReturnsIfMagicCookieSet(t *testing.T) {
 		t.Fatalf("Should not have errored: %s", err)
 	}
 
-	if len(config.Builders) != 0 {
+	if len(config.Builders.List()) != 0 {
 		t.Fatalf("Should not have tried to find builders")
 	}
 }
@@ -53,17 +53,17 @@ func TestEnvVarPackerPluginPath(t *testing.T) {
 	os.Setenv("PACKER_PLUGIN_PATH", dir)
 	defer os.Unsetenv("PACKER_PLUGIN_PATH")
 
-	config := newConfig()
+	config := newPluginConfig()
 
 	err = config.Discover()
 	if err != nil {
 		t.Fatalf("Should not have errored: %s", err)
 	}
 
-	if len(config.Provisioners) == 0 {
+	if len(config.Provisioners.List()) == 0 {
 		t.Fatalf("Should have found partyparrot provisioner")
 	}
-	if _, ok := config.Provisioners["partyparrot"]; !ok {
+	if !config.Provisioners.Has("partyparrot") {
 		t.Fatalf("Should have found partyparrot provisioner.")
 	}
 }
@@ -96,17 +96,17 @@ func TestEnvVarPackerPluginPath_MultiplePaths(t *testing.T) {
 	os.Setenv("PACKER_PLUGIN_PATH", pluginPath)
 	defer os.Unsetenv("PACKER_PLUGIN_PATH")
 
-	config := newConfig()
+	config := newPluginConfig()
 
 	err = config.Discover()
 	if err != nil {
 		t.Fatalf("Should not have errored: %s", err)
 	}
 
-	if len(config.Provisioners) == 0 {
+	if len(config.Provisioners.List()) == 0 {
 		t.Fatalf("Should have found partyparrot provisioner")
 	}
-	if _, ok := config.Provisioners["partyparrot"]; !ok {
+	if !config.Provisioners.Has("partyparrot") {
 		t.Fatalf("Should have found partyparrot provisioner.")
 	}
 }
@@ -309,7 +309,7 @@ func Test_multiplugin_describe(t *testing.T) {
 	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
 	defer os.RemoveAll(pluginDir)
 
-	c := Config{}
+	c := PluginConfig{}
 	err := c.Discover()
 	if err != nil {
 		t.Fatalf("error discovering plugins; %s", err.Error())
@@ -325,13 +325,13 @@ func Test_multiplugin_describe(t *testing.T) {
 		}
 		for mockProvisionerName := range plugin.Provisioners {
 			expectedProvisionerName := mockPluginName + "-" + mockProvisionerName
-			if _, found := c.Provisioners[expectedProvisionerName]; !found {
+			if !c.Provisioners.Has(expectedProvisionerName) {
 				t.Fatalf("expected to find builder %q", expectedProvisionerName)
 			}
 		}
 		for mockPostProcessorName := range plugin.PostProcessors {
 			expectedPostProcessorName := mockPluginName + "-" + mockPostProcessorName
-			if _, found := c.PostProcessors[expectedPostProcessorName]; !found {
+			if !c.PostProcessors.Has(expectedPostProcessorName) {
 				t.Fatalf("expected to find post-processor %q", expectedPostProcessorName)
 			}
 		}
@@ -343,7 +343,7 @@ func Test_multiplugin_defaultName(t *testing.T) {
 	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
 	defer os.RemoveAll(pluginDir)
 
-	c := Config{}
+	c := PluginConfig{}
 	err := c.Discover()
 	if err != nil {
 		t.Fatalf("error discovering plugins; %s ; mocks are %#v", err.Error(), defaultNameMock)
@@ -351,8 +351,8 @@ func Test_multiplugin_defaultName(t *testing.T) {
 
 	expectedBuilderNames := []string{"foo-bar", "foo-baz", "foo"}
 	for _, mockBuilderName := range expectedBuilderNames {
-		if _, found := c.builders[mockBuilderName]; !found {
-			t.Fatalf("expected to find builder %q; builders is %#v", mockBuilderName, c.builders)
+		if !c.Builders.Has(mockBuilderName) {
+			t.Fatalf("expected to find builder %q; builders is %#v", mockBuilderName, c.Builders)
 		}
 	}
 }
@@ -362,7 +362,7 @@ func Test_only_one_multiplugin_defaultName_each_plugin_type(t *testing.T) {
 	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
 	defer os.RemoveAll(pluginDir)
 
-	c := Config{}
+	c := PluginConfig{}
 	err := c.Discover()
 	if err != nil {
 		t.Fatal("Should not have error because pluginsdk.DEFAULT_NAME is used twice but only once per plugin type.")

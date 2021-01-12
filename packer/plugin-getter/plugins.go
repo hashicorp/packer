@@ -12,8 +12,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/hcl2template/addrs"
-	"github.com/hashicorp/packer/packer-plugin-sdk/tmp"
 )
 
 type Requirements []*Requirement

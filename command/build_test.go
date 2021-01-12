@@ -836,18 +836,20 @@ func fileExists(filename string) bool {
 // available. This allows us to test a builder that writes files to disk.
 func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 	components := packer.ComponentFinder{
-		BuilderStore: packer.MapOfBuilder{
-			"file": func() (packersdk.Builder, error) { return &file.Builder{}, nil },
-			"null": func() (packersdk.Builder, error) { return &null.Builder{}, nil },
-		},
-		ProvisionerStore: packer.MapOfProvisioner{
-			"shell-local": func() (packersdk.Provisioner, error) { return &shell_local.Provisioner{}, nil },
-			"shell":       func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
-			"file":        func() (packersdk.Provisioner, error) { return &filep.Provisioner{}, nil },
-		},
-		PostProcessorStore: packer.MapOfPostProcessor{
-			"shell-local": func() (packersdk.PostProcessor, error) { return &shell_local_pp.PostProcessor{}, nil },
-			"manifest":    func() (packersdk.PostProcessor, error) { return &manifest.PostProcessor{}, nil },
+		PluginConfig: &packer.PluginConfig{
+			Builders: packer.MapOfBuilder{
+				"file": func() (packersdk.Builder, error) { return &file.Builder{}, nil },
+				"null": func() (packersdk.Builder, error) { return &null.Builder{}, nil },
+			},
+			Provisioners: packer.MapOfProvisioner{
+				"shell-local": func() (packersdk.Provisioner, error) { return &shell_local.Provisioner{}, nil },
+				"shell":       func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
+				"file":        func() (packersdk.Provisioner, error) { return &filep.Provisioner{}, nil },
+			},
+			PostProcessors: packer.MapOfPostProcessor{
+				"shell-local": func() (packersdk.PostProcessor, error) { return &shell_local_pp.PostProcessor{}, nil },
+				"manifest":    func() (packersdk.PostProcessor, error) { return &manifest.PostProcessor{}, nil },
+			},
 		},
 	}
 	return &packer.CoreConfig{

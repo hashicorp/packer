@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/packer/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
@@ -55,7 +55,7 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:        runtime.GOOS,
 			ARCH:      runtime.GOARCH,
-			Extension: plugin.FileExtension,
+			Extension: packer.PluginFileExtension,
 			Checksummers: []plugingetter.Checksummer{
 				{Type: "sha256", Hash: sha256.New()},
 			},

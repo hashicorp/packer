@@ -14,7 +14,6 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/packer/plugin"
 )
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -28,7 +27,7 @@ type config struct {
 	RawProvisioners            map[string]string `json:"provisioners"`
 	RawPostProcessors          map[string]string `json:"post-processors"`
 
-	Plugins *plugin.Config
+	Plugins *packer.PluginConfig
 }
 
 // decodeConfig decodes configuration in JSON format from the given io.Reader into

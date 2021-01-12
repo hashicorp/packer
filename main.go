@@ -22,7 +22,6 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/hashicorp/packer/version"
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/panicwrap"
@@ -180,7 +179,7 @@ func wrappedMain() int {
 	// the arguments...
 	args, machineReadable := extractMachineReadable(os.Args[1:])
 
-	defer plugin.CleanupClients()
+	defer packer.CleanupClients()
 
 	var ui packersdk.Ui
 	if machineReadable {
@@ -298,10 +297,10 @@ func extractMachineReadable(args []string) ([]string, bool) {
 
 func loadConfig() (*config, error) {
 	var config config
-	config.Plugins = &plugin.Config{
+	config.Plugins = &packer.PluginConfig{
 		PluginMinPort:      10000,
 		PluginMaxPort:      25000,
-		KnownPluginFolders: packersdk.PluginFolders("."),
+		KnownPluginFolders: packer.PluginFolders("."),
 	}
 	if err := config.Plugins.Discover(); err != nil {
 		return nil, err

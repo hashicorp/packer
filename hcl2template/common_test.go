@@ -25,18 +25,20 @@ func getBasicParser() *Parser {
 		CorePackerVersion:       version.Must(version.NewSemver(lockedVersion)),
 		CorePackerVersionString: lockedVersion,
 		Parser:                  hclparse.NewParser(),
-		BuilderSchemas: packer.MapOfBuilder{
-			"amazon-ebs":     func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
-			"virtualbox-iso": func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
-			"null":           func() (packersdk.Builder, error) { return &null.Builder{}, nil },
-		},
-		ProvisionersSchemas: packer.MapOfProvisioner{
-			"shell": func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
-			"file":  func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
-		},
-		PostProcessorsSchemas: packer.MapOfPostProcessor{
-			"amazon-import": func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
-			"manifest":      func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
+		PluginConfig: &packer.PluginConfig{
+			Builders: packer.MapOfBuilder{
+				"amazon-ebs":     func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
+				"virtualbox-iso": func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
+				"null":           func() (packersdk.Builder, error) { return &null.Builder{}, nil },
+			},
+			Provisioners: packer.MapOfProvisioner{
+				"shell": func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
+				"file":  func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
+			},
+			PostProcessors: packer.MapOfPostProcessor{
+				"amazon-import": func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
+				"manifest":      func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
+			},
 		},
 	}
 }

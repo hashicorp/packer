@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"encoding/json"
@@ -13,25 +13,21 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/pathing"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
-	"github.com/hashicorp/packer/packer"
 )
+
+// PluginConfig helps load and use packer plugins
+type PluginConfig struct {
+	KnownPluginFolders []string
+	PluginMinPort      int
+	PluginMaxPort      int
+	Builders           BuilderSet
+	Provisioners       ProvisionerSet
+	PostProcessors     PostProcessorSet
+}
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
 // without being confused with spaces in the path to the command itself.
 const PACKERSPACE = "-PACKERSPACE-"
-
-type Config struct {
-	KnownPluginFolders []string
-	PluginMinPort      int
-	PluginMaxPort      int
-	Builders           packer.MapOfBuilder
-	Provisioners       packer.MapOfProvisioner
-	PostProcessors     packer.MapOfPostProcessor
-}
-
-func (c *Config) GetPlugins() (packer.MapOfBuilder, packer.MapOfProvisioner, packer.MapOfPostProcessor) {
-	return c.Builders, c.Provisioners, c.PostProcessors
-}
 
 // Discover discovers plugins.
 //
@@ -40,15 +36,15 @@ func (c *Config) GetPlugins() (packer.MapOfBuilder, packer.MapOfProvisioner, pac
 // found plugins, in that order.
 // Hence, the priority order is the reverse of the search order - i.e., the
 // CWD has the highest priority.
-func (c *Config) Discover() error {
+func (c *PluginConfig) Discover() error {
 	if c.Builders == nil {
-		c.Builders = packer.MapOfBuilder{}
+		c.Builders = MapOfBuilder{}
 	}
 	if c.Provisioners == nil {
-		c.Provisioners = packer.MapOfProvisioner{}
+		c.Provisioners = MapOfProvisioner{}
 	}
 	if c.PostProcessors == nil {
-		c.PostProcessors = packer.MapOfPostProcessor{}
+		c.PostProcessors = MapOfPostProcessor{}
 	}
 
 	// If we are already inside a plugin process we should not need to
@@ -70,7 +66,7 @@ func (c *Config) Discover() error {
 		}
 	}
 
-	// Next, look in the default plugins directory inside the configdir/.packer.d/plugins.
+	// Next, look in the default plugins directory inside the configdir/.d/plugins.
 	dir, err := pathing.ConfigDir()
 	if err != nil {
 		log.Printf("[ERR] Error loading config directory: %s", err)
@@ -104,7 +100,7 @@ func (c *Config) Discover() error {
 	return nil
 }
 
-func (c *Config) discoverExternalComponents(path string) error {
+func (c *PluginConfig) discoverExternalComponents(path string) error {
 	var err error
 
 	if !filepath.IsAbs(path) {
@@ -173,7 +169,7 @@ func (c *Config) discoverExternalComponents(path string) error {
 	return nil
 }
 
-func (c *Config) discoverSingle(glob string) (map[string]string, error) {
+func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 	matches, err := filepath.Glob(glob)
 	if err != nil {
 		return nil, err
@@ -221,7 +217,7 @@ func (c *Config) discoverSingle(glob string) (map[string]string, error) {
 // pluginName can be extrapolated from the filename of the binary; so
 // if the "packer-plugin-amazon" binary had an "ebs" builder one could use
 // the "amazon-ebs" builder.
-func (c *Config) DiscoverMultiPlugin(pluginName, pluginPath string) error {
+func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error {
 	out, err := exec.Command(pluginPath, "describe").Output()
 	if err != nil {
 		return err
@@ -239,7 +235,7 @@ func (c *Config) DiscoverMultiPlugin(pluginName, pluginPath string) error {
 		if builderName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
 		}
-		c.Builders.Add(key, func() (packer.Builder, error) {
+		c.Builders.Set(key, func() (packersdk.Builder, error) {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		})
 	}
@@ -254,7 +250,7 @@ func (c *Config) DiscoverMultiPlugin(pluginName, pluginPath string) error {
 		if postProcessorName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
 		}
-		c.PostProcessors.Add(key, func() (packersdk.PostProcessor, error) {
+		c.PostProcessors.Set(key, func() (packersdk.PostProcessor, error) {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
 		})
 	}
@@ -269,7 +265,7 @@ func (c *Config) DiscoverMultiPlugin(pluginName, pluginPath string) error {
 		if provisionerName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
 		}
-		c.Provisioners.Add(key, func() (packersdk.Provisioner, error) {
+		c.Provisioners.Set(key, func() (packersdk.Provisioner, error) {
 			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
 		})
 	}
@@ -280,7 +276,7 @@ func (c *Config) DiscoverMultiPlugin(pluginName, pluginPath string) error {
 	return nil
 }
 
-func (c *Config) Client(path string, args ...string) *Client {
+func (c *PluginConfig) Client(path string, args ...string) *PluginClient {
 	originalPath := path
 
 	// Check for special case using `packer plugin PLUGIN`
@@ -312,7 +308,7 @@ func (c *Config) Client(path string, args ...string) *Client {
 	}
 
 	log.Printf("Creating plugin client for path: %s", path)
-	var config ClientConfig
+	var config PluginClientConfig
 	config.Cmd = exec.Command(path, args...)
 	config.Managed = true
 	config.MinPort = c.PluginMinPort

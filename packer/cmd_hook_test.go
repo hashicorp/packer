@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"os/exec"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestHook_NoExist(t *testing.T) {
-	c := NewClient(&ClientConfig{Cmd: exec.Command("i-should-not-exist")})
+	c := NewClient(&PluginClientConfig{Cmd: exec.Command("i-should-not-exist")})
 	defer c.Kill()
 
 	_, err := c.Hook()
@@ -16,7 +16,7 @@ func TestHook_NoExist(t *testing.T) {
 }
 
 func TestHook_Good(t *testing.T) {
-	c := NewClient(&ClientConfig{Cmd: helperProcess("hook")})
+	c := NewClient(&PluginClientConfig{Cmd: helperProcess("hook")})
 	defer c.Kill()
 
 	_, err := c.Hook()

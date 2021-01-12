@@ -6,13 +6,12 @@ import (
 	"testing"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer/plugin"
 )
 
 func TestCoreConfig(t *testing.T) *CoreConfig {
 	// Create some test components
 	components := ComponentFinder{
-		PluginConfig: &plugin.Config{
+		PluginConfig: &PluginConfig{
 			Builders: MapOfBuilder{
 				"test": func() (packersdk.Builder, error) { return &packersdk.MockBuilder{}, nil },
 			},

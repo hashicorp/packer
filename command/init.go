@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/hashicorp/packer/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"github.com/hashicorp/packer/packer/plugin-getter/github"
 	"github.com/posener/complete"
@@ -66,7 +66,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:        runtime.GOOS,
 			ARCH:      runtime.GOARCH,
-			Extension: plugin.FileExtension,
+			Extension: packer.PluginFileExtension,
 			Checksummers: []plugingetter.Checksummer{
 				{Type: "sha256", Hash: sha256.New()},
 			},

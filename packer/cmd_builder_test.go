@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"os/exec"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestBuilder_NoExist(t *testing.T) {
-	c := NewClient(&ClientConfig{Cmd: exec.Command("i-should-not-exist")})
+	c := NewClient(&PluginClientConfig{Cmd: exec.Command("i-should-not-exist")})
 	defer c.Kill()
 
 	_, err := c.Builder()
@@ -16,7 +16,7 @@ func TestBuilder_NoExist(t *testing.T) {
 }
 
 func TestBuilder_Good(t *testing.T) {
-	c := NewClient(&ClientConfig{Cmd: helperProcess("builder")})
+	c := NewClient(&PluginClientConfig{Cmd: helperProcess("builder")})
 	defer c.Kill()
 
 	_, err := c.Builder()

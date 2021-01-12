@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 
 type cmdHook struct {
 	hook   packersdk.Hook
-	client *Client
+	client *PluginClient
 }
 
 func (c *cmdHook) Run(ctx context.Context, name string, ui packersdk.Ui, comm packersdk.Communicator, data interface{}) error {

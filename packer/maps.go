@@ -13,6 +13,10 @@ func (mop MapOfProvisioner) Has(provisioner string) bool {
 	return res
 }
 
+func (mop MapOfProvisioner) Set(provisioner string, starter func() (packersdk.Provisioner, error)) {
+	mop[provisioner] = starter
+}
+
 func (mop MapOfProvisioner) Start(provisioner string) (packersdk.Provisioner, error) {
 	p, found := mop[provisioner]
 	if !found {
@@ -34,6 +38,10 @@ type MapOfPostProcessor map[string]func() (packersdk.PostProcessor, error)
 func (mopp MapOfPostProcessor) Has(postProcessor string) bool {
 	_, res := mopp[postProcessor]
 	return res
+}
+
+func (mopp MapOfPostProcessor) Set(postProcessor string, starter func() (packersdk.PostProcessor, error)) {
+	mopp[postProcessor] = starter
 }
 
 func (mopp MapOfPostProcessor) Start(postProcessor string) (packersdk.PostProcessor, error) {
@@ -59,6 +67,10 @@ func (mob MapOfBuilder) Has(builder string) bool {
 	return res
 }
 
+func (mob MapOfBuilder) Set(builder string, starter func() (packersdk.Builder, error)) {
+	mob[builder] = starter
+}
+
 func (mob MapOfBuilder) Start(builder string) (packersdk.Builder, error) {
 	d, found := mob[builder]
 	if !found {
@@ -81,6 +93,10 @@ func (mod MapOfDatasource) Has(dataSource string) bool {
 	_, res := mod[dataSource]
 	return res
 }
+
+// func (mod MapOfDatasource) Set(dataSource string, starter func() (packersdk.Datasource,error)) {
+// 	mod[dataSource] = starter
+// }
 
 func (mod MapOfDatasource) Start(dataSource string) (packersdk.Datasource, error) {
 	d, found := mod[dataSource]

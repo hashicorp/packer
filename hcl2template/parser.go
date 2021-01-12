@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer/plugin"
+	packer "github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -58,7 +58,7 @@ type Parser struct {
 
 	*hclparse.Parser
 
-	PluginConfig *plugin.Config
+	PluginConfig *packer.PluginConfig
 }
 
 const (

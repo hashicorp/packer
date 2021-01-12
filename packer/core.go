@@ -18,9 +18,6 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template"
-	"github.com/hashicorp/packer/packer-plugin-sdk/template/interpolate"
-	"github.com/hashicorp/packer/packer/plugin"
 )
 
 // Core is the main executor of Packer. If Packer is being used as a
@@ -74,10 +71,9 @@ type BuilderStore interface {
 	Start(name string) (packersdk.Builder, error)
 }
 
-type BuilderStarter func() (packersdk.Builder, error)
 type BuilderSet interface {
 	BuilderStore
-	Set(name string, starter packersdk.BuilderStarter)
+	Set(name string, starter func() (packersdk.Builder, error))
 }
 
 type ProvisionerStore interface {
@@ -87,7 +83,7 @@ type ProvisionerStore interface {
 
 type ProvisionerSet interface {
 	ProvisionerStore
-	Set(name string, starter packersdk.ProvisionerStarter)
+	Set(name string, starter func() (packersdk.Provisioner, error))
 }
 
 type PostProcessorStore interface {
@@ -95,10 +91,9 @@ type PostProcessorStore interface {
 	Start(name string) (packersdk.PostProcessor, error)
 }
 
-type PostProcessorStarter func() (packersdk.PostProcessor, error)
 type PostProcessorSet interface {
 	PostProcessorStore
-	Set(name string, starter packersdk.PostProcessorStarter)
+	Set(name string, starter func() (packersdk.PostProcessor, error))
 }
 
 // ComponentFinder is a struct that contains the various function
@@ -106,7 +101,7 @@ type PostProcessorSet interface {
 // commands, etc.
 type ComponentFinder struct {
 	Hook         HookFunc
-	PluginConfig *plugin.Config
+	PluginConfig *PluginConfig
 }
 
 // NewCore creates a new Core.

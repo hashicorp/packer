@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 type cmdBuilder struct {
 	builder packersdk.Builder
-	client  *Client
+	client  *PluginClient
 }
 
 func (b *cmdBuilder) ConfigSpec() hcldec.ObjectSpec {

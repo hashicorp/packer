@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"bufio"
@@ -27,23 +27,23 @@ var Killed = false
 
 // This is a slice of the "managed" clients which are cleaned up when
 // calling Cleanup
-var managedClients = make([]*Client, 0, 5)
+var managedClients = make([]*PluginClient, 0, 5)
 
 // Client handles the lifecycle of a plugin application, determining its
 // RPC address, and returning various types of packer interface implementations
 // across the multi-process communication layer.
-type Client struct {
-	config      *ClientConfig
+type PluginClient struct {
+	config      *PluginClientConfig
 	exited      bool
 	doneLogging chan struct{}
 	l           sync.Mutex
 	address     net.Addr
 }
 
-// ClientConfig is the configuration used to initialize a new
+// PluginClientConfig is the configuration used to initialize a new
 // plugin client. After being used to initialize a plugin client,
 // that configuration must not be modified again.
-type ClientConfig struct {
+type PluginClientConfig struct {
 	// The unstarted subprocess for starting the plugin.
 	Cmd *exec.Cmd
 
@@ -83,7 +83,7 @@ func CleanupClients() {
 	for _, client := range managedClients {
 		wg.Add(1)
 
-		go func(client *Client) {
+		go func(client *PluginClient) {
 			client.Kill()
 			wg.Done()
 		}(client)
@@ -100,7 +100,7 @@ func CleanupClients() {
 // the client is a managed client (created with NewManagedClient) you
 // can just call CleanupClients at the end of your program and they will
 // be properly cleaned.
-func NewClient(config *ClientConfig) (c *Client) {
+func NewClient(config *PluginClientConfig) (c *PluginClient) {
 	if config.MinPort == 0 && config.MaxPort == 0 {
 		config.MinPort = 10000
 		config.MaxPort = 25000
@@ -114,7 +114,7 @@ func NewClient(config *ClientConfig) (c *Client) {
 		config.Stderr = ioutil.Discard
 	}
 
-	c = &Client{config: config}
+	c = &PluginClient{config: config}
 	if config.Managed {
 		managedClients = append(managedClients, c)
 	}
@@ -123,7 +123,7 @@ func NewClient(config *ClientConfig) (c *Client) {
 }
 
 // Tells whether or not the underlying process has exited.
-func (c *Client) Exited() bool {
+func (c *PluginClient) Exited() bool {
 	c.l.Lock()
 	defer c.l.Unlock()
 	return c.exited
@@ -131,7 +131,7 @@ func (c *Client) Exited() bool {
 
 // Returns a builder implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *Client) Builder() (packersdk.Builder, error) {
+func (c *PluginClient) Builder() (packersdk.Builder, error) {
 	client, err := c.Client()
 	if err != nil {
 		return nil, err
@@ -142,7 +142,7 @@ func (c *Client) Builder() (packersdk.Builder, error) {
 
 // Returns a hook implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *Client) Hook() (packersdk.Hook, error) {
+func (c *PluginClient) Hook() (packersdk.Hook, error) {
 	client, err := c.Client()
 	if err != nil {
 		return nil, err
@@ -153,7 +153,7 @@ func (c *Client) Hook() (packersdk.Hook, error) {
 
 // Returns a post-processor implementation that is communicating over
 // this client. If the client hasn't been started, this will start it.
-func (c *Client) PostProcessor() (packersdk.PostProcessor, error) {
+func (c *PluginClient) PostProcessor() (packersdk.PostProcessor, error) {
 	client, err := c.Client()
 	if err != nil {
 		return nil, err
@@ -164,7 +164,7 @@ func (c *Client) PostProcessor() (packersdk.PostProcessor, error) {
 
 // Returns a provisioner implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *Client) Provisioner() (packersdk.Provisioner, error) {
+func (c *PluginClient) Provisioner() (packersdk.Provisioner, error) {
 	client, err := c.Client()
 	if err != nil {
 		return nil, err
@@ -179,7 +179,7 @@ func (c *Client) Provisioner() (packersdk.Provisioner, error) {
 // This method blocks until the process successfully exits.
 //
 // This method can safely be called multiple times.
-func (c *Client) Kill() {
+func (c *PluginClient) Kill() {
 	cmd := c.config.Cmd
 
 	if cmd.Process == nil {
@@ -198,7 +198,7 @@ func (c *Client) Kill() {
 // This method is safe to call multiple times. Subsequent calls have no effect.
 // Once a client has been started once, it cannot be started again, even if
 // it was killed.
-func (c *Client) Start() (addr net.Addr, err error) {
+func (c *PluginClient) Start() (addr net.Addr, err error) {
 	c.l.Lock()
 	defer c.l.Unlock()
 
@@ -341,7 +341,7 @@ func (c *Client) Start() (addr net.Addr, err error) {
 	return
 }
 
-func (c *Client) logStderr(r io.Reader) {
+func (c *PluginClient) logStderr(r io.Reader) {
 	logPrefix := filepath.Base(c.config.Cmd.Path)
 	if logPrefix == "packer" {
 		// we just called the normal packer binary with the plugin arg.
@@ -369,7 +369,7 @@ func (c *Client) logStderr(r io.Reader) {
 	close(c.doneLogging)
 }
 
-func (c *Client) Client() (*packerrpc.Client, error) {
+func (c *PluginClient) Client() (*packerrpc.Client, error) {
 	addr, err := c.Start()
 	if err != nil {
 		return nil, err
