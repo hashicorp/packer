@@ -145,7 +145,7 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 					diags = append(diags, &hcl.Diagnostic{
 						Severity: hcl.DiagError,
 						Summary:  "Invalid source",
-						Detail:   "Source must be specified as a string.",
+						Detail:   "Source must be specified as a string. For example: " + `source = "amazon"`,
 						Subject:  attr.Expr.Range().Ptr(),
 					})
 				} else {
