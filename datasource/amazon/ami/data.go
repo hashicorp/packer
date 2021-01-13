@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer-plugin-sdk/hcl2"
+	"github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
@@ -86,5 +86,5 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		OwnerName:    aws.StringValue(image.ImageOwnerAlias),
 		Tags:         imageTags,
 	}
-	return hcl2.HCL2ValueFromConfig(output, d.OutputSpec()), nil
+	return hcl2helper.HCL2ValueFromConfig(output, d.OutputSpec()), nil
 }
