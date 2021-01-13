@@ -134,7 +134,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 	return res, nil
 }
 
-// InstallList is a list of installed plugins with their versions,
+// InstallList is a list of installed plugins (binaries) with their versions,
 // ListInstallations should be used to get an InstallList.
 //
 // ListInstallations sorts binaries by version and one binary per version is
