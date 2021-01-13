@@ -62,15 +62,15 @@ func TestLoadExternalComponentsFromConfig(t *testing.T) {
 
 	cfg.LoadExternalComponentsFromConfig()
 
-	if len(cfg.Plugins.Builders) != 1 || !cfg.Plugins.Builders.Has("cloud-xyz") {
+	if len(cfg.Plugins.Builders.List()) != 1 || !cfg.Plugins.Builders.Has("cloud-xyz") {
 		t.Errorf("failed to load external builders; got %v as the resulting config", cfg.Plugins.Builders)
 	}
 
-	if len(cfg.Plugins.PostProcessors) != 1 || !cfg.Plugins.PostProcessors.Has("noop") {
+	if len(cfg.Plugins.PostProcessors.List()) != 1 || !cfg.Plugins.PostProcessors.Has("noop") {
 		t.Errorf("failed to load external post-processors; got %v as the resulting config", cfg.Plugins.PostProcessors)
 	}
 
-	if len(cfg.Plugins.Provisioners) != 1 || !cfg.Plugins.Provisioners.Has("super-shell") {
+	if len(cfg.Plugins.Provisioners.List()) != 1 || !cfg.Plugins.Provisioners.Has("super-shell") {
 		t.Errorf("failed to load external provisioners; got %v as the resulting config", cfg.Plugins.Provisioners)
 	}
 
