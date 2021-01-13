@@ -130,7 +130,7 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 						diags = append(diags, &hcl.Diagnostic{
 							Severity: hcl.DiagError,
 							Summary:  "Invalid version constraint",
-							Detail:   "This string does not use correct version constraint syntax.",
+							Detail:   "This string does not use correct version constraint syntax. See https://www.packer.io/docs/from-1.5/blocks/packer#version-constraint-syntax for docs.",
 							Subject:  attr.Expr.Range().Ptr(),
 						})
 					} else {
