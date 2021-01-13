@@ -83,7 +83,7 @@ func ParsePluginPart(given string) (string, error) {
 	}
 
 	// We don't allow names containing multiple consecutive dashes, just as
-	// a matter of preference: they look weird, confusing, or incorrect.
+	// a matter of preference: they look confusing, or incorrect.
 	// This also, as a side-effect, prevents the use of the "punycode"
 	// indicator prefix "xn--" that would cause the IDNA library to interpret
 	// the given name as punycode, because that would be weird and unexpected.
