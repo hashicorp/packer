@@ -172,7 +172,9 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	if err != nil {
 		// here BareDo will return an err if the request failed or if the
 		// status is not considered a valid http status.
-		resp.Body.Close()
+		if resp != nil {
+			resp.Body.Close()
+		}
 		log.Printf("[TRACE] Failed to request: %s.", err)
 		return nil, err
 	}
