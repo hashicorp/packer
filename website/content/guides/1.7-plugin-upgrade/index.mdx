@@ -15,13 +15,13 @@ Packer is currently backwards compatible with the old API because the plugin API
 
 ### How to update plugins to use the packer-plugin-SDK
 
-In a best-case scenario, all you'll have to do is replace all the places you import
+In a best-case scenario, all you'll have to do is update the packer imports to use the packer-plugin-sdk import path
 
 github.com/hashicorp/packer with github.com/hashicorp/packer-plugin-sdk.
 
-But some of the import paths have changed more than that because we've refactored the SDK some to make it easier to discover and use helpful modules. Here are a few common paths below:
+But some of the import paths have changed more than that because we've refactored the SDK some to make it easier to discover and use helpful modules. Below are a few common import paths. For a full list of available imports see [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/)```
 
-github.com/hashicorp/packer-plugin-sdk/template/config => github.com/hashicorp/packer-plugin-sdk/template/config
+github.com/hashicorp/packer/template/config => github.com/hashicorp/packer-plugin-sdk/template/config
 github.com/hashicorp/packer/packer => github.com/hashicorp/packer-plugin-sdk/packer
 github.com/hashicorp/packer/template/interpolate => github.com/hashicorp/packer-plugin-sdk/template/interpolate
 
@@ -63,7 +63,7 @@ github.com/hashicorp/packer/common/uuid => github.com/hashicorp/packer-plugin-sd
 **new** github.com/hashicorp/packer-plugin-sdk/version
 
 
-When in doubt you can search the packer-plugin-sdk repo for the name of your imported structs or functions to see where they exist in the sdk now; we have not changed struct or function names.
+When in doubt you can search the packer-plugin-sdk repo for the name of your imported structs or functions to see where they exist in the SDK now; we have not changed struct or function names. Or refer to the [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/) for help.
 
 ## Upgrade plugins to use new multi-plugin rpc server
 
@@ -73,13 +73,13 @@ The goal of this server is to enable multiple related plugins, for example plugi
 
 ### Do I have to upgrade?
 
-For now, you do to have to upgrade your plugin. Packer will continue to understand how to discover and launch old-style plugins. However, you will not be able to register your plugin with HashiCorp until you have upgraded the plugin.
+For now, you do not have to upgrade your plugin, but we recommend doing it. Packer will continue to understand how to discover and launch old-style plugins. However, you will not be able to register your plugin with HashiCorp until you have upgraded the plugin.
 
 ### How to upgrade the plugin
 
-We've created a scaffolding repository over at https://github.com/hashicorp/packer-plugin-scaffolding/tree/main/builder/scaffolding
+We've created a scaffolding repository over at https://github.com/hashicorp/packer-plugin-scaffolding/
 
-If you already have a working plugin, this should look pretty familiar. You'll notice that there are some changes to main.go.
+If you already have a working plugin, the [builder plugin scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding/tree/main/builder/scaffolding) should look pretty familiar. You'll notice that there are some changes to main.go.
 
 Previously, you may have had a main.go that looks something like:
 
