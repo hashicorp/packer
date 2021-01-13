@@ -138,6 +138,13 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 						rp.Requirement = vc
 					}
 				}
+			} else {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "No version constraint was set",
+					Detail:   "The version field must be specified as a string. Ex: `version = \">= 1.2.0, < 2.0.0\". See https://www.packer.io/docs/from-1.5/blocks/packer#version-constraints for docs",
+					Subject:  attr.Expr.Range().Ptr(),
+				})
 			}
 			if expr.Type().HasAttribute("source") {
 				source := expr.GetAttr("source")
