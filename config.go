@@ -13,6 +13,7 @@ import (
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/command"
+	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 )
 
@@ -21,14 +22,14 @@ import (
 const PACKERSPACE = "-PACKERSPACE-"
 
 type config struct {
-	DisableCheckpoint          bool                         `json:"disable_checkpoint"`
-	DisableCheckpointSignature bool                         `json:"disable_checkpoint_signature"`
-	RawBuilders                map[string]string            `json:"builders"`
-	RawProvisioners            map[string]string            `json:"provisioners"`
-	RawPostProcessors          map[string]string            `json:"post-processors"`
-	Builders                   packersdk.MapOfBuilder       `json:"-"`
-	Provisioners               packersdk.MapOfProvisioner   `json:"-"`
-	PostProcessors             packersdk.MapOfPostProcessor `json:"-"`
+	DisableCheckpoint          bool                      `json:"disable_checkpoint"`
+	DisableCheckpointSignature bool                      `json:"disable_checkpoint_signature"`
+	RawBuilders                map[string]string         `json:"builders"`
+	RawProvisioners            map[string]string         `json:"provisioners"`
+	RawPostProcessors          map[string]string         `json:"post-processors"`
+	Builders                   packer.MapOfBuilder       `json:"-"`
+	Provisioners               packer.MapOfProvisioner   `json:"-"`
+	PostProcessors             packer.MapOfPostProcessor `json:"-"`
 	Plugins                    plugin.Config
 }
 

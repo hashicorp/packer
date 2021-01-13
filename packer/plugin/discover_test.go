@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 )
@@ -258,13 +258,13 @@ func createMockPlugins(t *testing.T, plugins map[string]pluginsdk.Set) {
 var (
 	mockPlugins = map[string]pluginsdk.Set{
 		"bird": pluginsdk.Set{
-			Builders: map[string]packer.Builder{
+			Builders: map[string]packersdk.Builder{
 				"feather":   nil,
 				"guacamole": nil,
 			},
 		},
 		"chimney": pluginsdk.Set{
-			PostProcessors: map[string]packer.PostProcessor{
+			PostProcessors: map[string]packersdk.PostProcessor{
 				"smoke": nil,
 			},
 		},
@@ -272,7 +272,7 @@ var (
 
 	defaultNameMock = map[string]pluginsdk.Set{
 		"foo": pluginsdk.Set{
-			Builders: map[string]packer.Builder{
+			Builders: map[string]packersdk.Builder{
 				"bar":                  nil,
 				"baz":                  nil,
 				pluginsdk.DEFAULT_NAME: nil,
@@ -282,12 +282,12 @@ var (
 
 	doubleDefaultMock = map[string]pluginsdk.Set{
 		"yolo": pluginsdk.Set{
-			Builders: map[string]packer.Builder{
+			Builders: map[string]packersdk.Builder{
 				"bar":                  nil,
 				"baz":                  nil,
 				pluginsdk.DEFAULT_NAME: nil,
 			},
-			PostProcessors: map[string]packer.PostProcessor{
+			PostProcessors: map[string]packersdk.PostProcessor{
 				pluginsdk.DEFAULT_NAME: nil,
 			},
 		},
@@ -295,7 +295,7 @@ var (
 
 	badDefaultNameMock = map[string]pluginsdk.Set{
 		"foo": pluginsdk.Set{
-			Builders: map[string]packer.Builder{
+			Builders: map[string]packersdk.Builder{
 				"bar":                  nil,
 				"baz":                  nil,
 				pluginsdk.DEFAULT_NAME: nil,

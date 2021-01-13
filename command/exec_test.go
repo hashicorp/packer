@@ -118,17 +118,17 @@ func commandMeta() Meta {
 
 func getBareComponentFinder() packer.ComponentFinder {
 	return packer.ComponentFinder{
-		BuilderStore: packersdk.MapOfBuilder{
+		BuilderStore: packer.MapOfBuilder{
 			"file":       func() (packersdk.Builder, error) { return &file.Builder{}, nil },
 			"null":       func() (packersdk.Builder, error) { return &null.Builder{}, nil },
 			"amazon-ebs": func() (packersdk.Builder, error) { return &ebs.Builder{}, nil },
 		},
-		ProvisionerStore: packersdk.MapOfProvisioner{
+		ProvisionerStore: packer.MapOfProvisioner{
 			"shell-local": func() (packersdk.Provisioner, error) { return &shell_local.Provisioner{}, nil },
 			"shell":       func() (packersdk.Provisioner, error) { return &shell.Provisioner{}, nil },
 			"file":        func() (packersdk.Provisioner, error) { return &filep.Provisioner{}, nil },
 		},
-		PostProcessorStore: packersdk.MapOfPostProcessor{
+		PostProcessorStore: packer.MapOfPostProcessor{
 			"shell-local": func() (packersdk.PostProcessor, error) { return &shell_local_pp.PostProcessor{}, nil },
 			"manifest":    func() (packersdk.PostProcessor, error) { return &manifest.PostProcessor{}, nil },
 		},

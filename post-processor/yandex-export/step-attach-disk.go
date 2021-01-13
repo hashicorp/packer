@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 )
@@ -17,7 +17,7 @@ type StepAttachDisk struct {
 
 func (c *StepAttachDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(yandex.Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	instanceID := state.Get("instance_id").(string)
 
 	ui.Say("Create secondary disk from image for export...")
@@ -82,7 +82,7 @@ func (c *StepAttachDisk) Run(ctx context.Context, state multistep.StateBag) mult
 }
 
 func (s *StepAttachDisk) Cleanup(state multistep.StateBag) {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	driver := state.Get("driver").(yandex.Driver)
 	if diskID, ok := state.GetOk("secondary_disk_id"); ok {
 		ui.Say("Remove the secondary disk...")
