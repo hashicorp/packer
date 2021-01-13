@@ -241,7 +241,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 	}
 
 	if len(desc.Builders) > 0 {
-		log.Printf("found external %v builders from %s plugin", desc.Builders, pluginName)
+		log.Printf("[INFO] found external %v builders from %s plugin", desc.Builders, pluginName)
 	}
 
 	for _, postProcessorName := range desc.PostProcessors {
@@ -256,7 +256,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 	}
 
 	if len(desc.PostProcessors) > 0 {
-		log.Printf("found external %v post-processors from %s plugin", desc.PostProcessors, pluginName)
+		log.Printf("[INFO] found external %v post-processors from %s plugin", desc.PostProcessors, pluginName)
 	}
 
 	for _, provisionerName := range desc.Provisioners {
