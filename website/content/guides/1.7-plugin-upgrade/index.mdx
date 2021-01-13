@@ -3,7 +3,10 @@ page_title: Upgrading your plugin to use the Packer plugin sdk
 sidebar_title: Upgrade Your Plugin to use the Packer plugin sdk
 ---
 
-# Upgrading your plugin to be compatible with Packer v1.7.0
+# Upgrading your plugin to be compatible with Packer v1.7.0 and later
+
+In version v1.7.0 the Packer plugin development model was split into two separate packages: the Packer core
+and the Packer plugin SDK. Prior to version 1.7.0, the Packer core repository (https://github.com/hashicorp/packer) contained the libraries and interfaces used by Packer plugins. In version 1.7.0, these libraries were moved into their own repository (https://github.com/hashicorp/packer-plugin-sdk). If you authored a plugin prior to the v1.7.0 release using the API version 4, you should switch to the Packer Plugin SDK.
 
 ## Update plugins to use the new SDK
 
