@@ -186,7 +186,8 @@ type InstallOptions struct {
 	// Different means to get releases, sha256 and binary files.
 	Getters []Getter
 
-	// Any downloaded binary and checksum file will be put in this folder.
+	// Any downloaded binary and checksum file will be put in the last possible
+	// folder of this list.
 	InFolders []string
 
 	// If empty then we will try to fetch it.
