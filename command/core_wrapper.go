@@ -28,7 +28,7 @@ func (c *CoreWrapper) Initialize() hcl.Diagnostics {
 func (c *CoreWrapper) PluginRequirements() (plugingetter.Requirements, hcl.Diagnostics) {
 	return nil, hcl.Diagnostics{
 		&hcl.Diagnostic{
-			Summary:  "Packer init is not supported in Packer - JSON",
+			Summary:  "Packer init is supported for HCL2 configuration templates only",
 			Detail:   "Please manually install plugins or use a HCL2 configuration that will do that for you.",
 			Severity: hcl.DiagError,
 		},
