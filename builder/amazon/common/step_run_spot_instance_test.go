@@ -190,7 +190,7 @@ func (m *runSpotEC2ConnMock) CreateTags(req *ec2.CreateTagsInput) (*ec2.CreateTa
 	}
 }
 
-func defaultEc2Mock(instanceId, spotRequestId, volumeId *string) *runSpotEC2ConnMock {
+func defaultEc2Mock(instanceId, spotRequestId, volumeId, launchTemplateId *string) *runSpotEC2ConnMock {
 	instance := &ec2.Instance{
 		InstanceId:            instanceId,
 		SpotInstanceRequestId: spotRequestId,
@@ -205,8 +205,10 @@ func defaultEc2Mock(instanceId, spotRequestId, volumeId *string) *runSpotEC2Conn
 	return &runSpotEC2ConnMock{
 		CreateLaunchTemplateFn: func(in *ec2.CreateLaunchTemplateInput) (*ec2.CreateLaunchTemplateOutput, error) {
 			return &ec2.CreateLaunchTemplateOutput{
-				LaunchTemplate: nil,
-				Warning:        nil,
+				LaunchTemplate: &ec2.LaunchTemplate{
+					LaunchTemplateId: launchTemplateId,
+				},
+				Warning: nil,
 			}, nil
 		},
 		CreateFleetFn: func(*ec2.CreateFleetInput) (*ec2.CreateFleetOutput, error) {
@@ -237,7 +239,8 @@ func TestRun(t *testing.T) {
 	instanceId := aws.String("test-instance-id")
 	spotRequestId := aws.String("spot-id")
 	volumeId := aws.String("volume-id")
-	ec2Mock := defaultEc2Mock(instanceId, spotRequestId, volumeId)
+	launchTemplateId := aws.String("launchTemplateId")
+	ec2Mock := defaultEc2Mock(instanceId, spotRequestId, volumeId, launchTemplateId)
 
 	uiMock := packersdk.TestUi(t)
 
@@ -329,7 +332,8 @@ func TestRun_NoSpotTags(t *testing.T) {
 	instanceId := aws.String("test-instance-id")
 	spotRequestId := aws.String("spot-id")
 	volumeId := aws.String("volume-id")
-	ec2Mock := defaultEc2Mock(instanceId, spotRequestId, volumeId)
+	launchTemplateId := aws.String("lt-id")
+	ec2Mock := defaultEc2Mock(instanceId, spotRequestId, volumeId, launchTemplateId)
 
 	uiMock := packersdk.TestUi(t)
 
