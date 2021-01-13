@@ -20,7 +20,7 @@ func (p Plugin) RealRelativePath() string {
 	if p.Namespace != "" {
 		ns = p.Namespace
 	}
-	return "/" + ns + "/packer-plugin-" + p.Type
+	return ns + "/packer-plugin-" + p.Type
 }
 
 func (p Plugin) Parts() []string {
