@@ -122,7 +122,7 @@ func (c *PluginConfig) discoverExternalComponents(path string) error {
 	}
 	if len(externallyUsed) > 0 {
 		sort.Strings(externallyUsed)
-		log.Printf("using external builders %v", externallyUsed)
+		log.Printf("[INFO] using external builders: %v", externallyUsed)
 		externallyUsed = nil
 	}
 
@@ -291,7 +291,7 @@ func (c *PluginConfig) Client(path string, args ...string) *PluginClient {
 	if err != nil {
 		// If that doesn't work, look for it in the same directory
 		// as the `packer` executable (us).
-		log.Printf("Plugin could not be found at %s (%v). Checking same directory as executable.", originalPath, err)
+		log.Printf("[INFO] exec.LookPath: %s : %v. Checking same directory as executable.", path, err)
 		exePath, err := os.Executable()
 		if err != nil {
 			log.Printf("Couldn't get current exe path: %s", err)
@@ -307,7 +307,11 @@ func (c *PluginConfig) Client(path string, args ...string) *PluginClient {
 		path = originalPath
 	}
 
-	log.Printf("Creating plugin client for path: %s", path)
+	if strings.Contains(originalPath, PACKERSPACE) {
+		log.Printf("[TRACE] Starting internal plugin %s", args[len(args)-1])
+	} else {
+		log.Printf("[TRACE] Starting external plugin %s %s", path, strings.Join(args, " "))
+	}
 	var config PluginClientConfig
 	config.Cmd = exec.Command(path, args...)
 	config.Managed = true

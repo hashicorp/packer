@@ -173,7 +173,7 @@ func wrappedMain() int {
 		fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
 		return 1
 	}
-	log.Printf("Setting cache directory: %s", cacheDir)
+	log.Printf("[INFO] Setting cache directory: %s", cacheDir)
 
 	// Determine if we're in machine-readable mode by mucking around with
 	// the arguments...
@@ -313,23 +313,19 @@ func loadConfig() (*config, error) {
 	}
 
 	// start by loading from PACKER_CONFIG if available
-	log.Print("Checking 'PACKER_CONFIG' for a config file path")
 	configFilePath := os.Getenv("PACKER_CONFIG")
-
 	if configFilePath == "" {
 		var err error
-		log.Print("'PACKER_CONFIG' not set; checking the default config file path")
+		log.Print("[INFO] ${PACKER_CONFIG} not set; checking the default config file path")
 		configFilePath, err = pathing.ConfigFile()
 		if err != nil {
 			log.Printf("Error detecting default config file path: %s", err)
 		}
 	}
-
 	if configFilePath == "" {
 		return &config, nil
 	}
-
-	log.Printf("Attempting to open config file: %s", configFilePath)
+	log.Printf("[INFO] ${PACKER_CONFIG}' set; attempting to open config file: %s", configFilePath)
 	f, err := os.Open(configFilePath)
 	if err != nil {
 		if !os.IsNotExist(err) {
