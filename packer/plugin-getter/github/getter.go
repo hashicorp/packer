@@ -152,13 +152,13 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 		// something like https://github.com/azr/packer-plugin-amazon/releases/download/v0.0.1/packer-plugin-amazon_darwin-amd64_v0.0.1_x5_SHA256SUM
 		req, err = g.Client.NewRequest(
 			"GET",
-			"https://github.com"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version+"/"+opts.ExpectedFilename()+"_SHA256SUM",
+			"https://github.com/"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version+"/"+opts.ExpectedFilename()+"_SHA256SUM",
 			nil,
 		)
 	case "binary":
 		req, err = g.Client.NewRequest(
 			"GET",
-			"https://github.com"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version+"/"+opts.ExpectedFilename(),
+			"https://github.com/"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version+"/"+opts.ExpectedFilename(),
 			nil,
 		)
 
