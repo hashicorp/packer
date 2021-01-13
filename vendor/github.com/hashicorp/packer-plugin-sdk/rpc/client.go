@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/rpc"
 
-	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/ugorji/go/codec"
 )
 
@@ -69,7 +69,7 @@ func (c *Client) Close() error {
 	return nil
 }
 
-func (c *Client) Artifact() packersdk.Artifact {
+func (c *Client) Artifact() packer.Artifact {
 	return &artifact{
 		commonClient: commonClient{
 			endpoint: DefaultArtifactEndpoint,
@@ -78,7 +78,7 @@ func (c *Client) Artifact() packersdk.Artifact {
 	}
 }
 
-func (c *Client) Build() packersdk.Build {
+func (c *Client) Build() packer.Build {
 	return &build{
 		commonClient: commonClient{
 			endpoint: DefaultBuildEndpoint,
@@ -88,7 +88,7 @@ func (c *Client) Build() packersdk.Build {
 	}
 }
 
-func (c *Client) Builder() packersdk.Builder {
+func (c *Client) Builder() packer.Builder {
 	return &builder{
 		commonClient: commonClient{
 			endpoint: DefaultBuilderEndpoint,
@@ -98,7 +98,7 @@ func (c *Client) Builder() packersdk.Builder {
 	}
 }
 
-func (c *Client) Communicator() packersdk.Communicator {
+func (c *Client) Communicator() packer.Communicator {
 	return &communicator{
 		commonClient: commonClient{
 			endpoint: DefaultCommunicatorEndpoint,
@@ -108,7 +108,7 @@ func (c *Client) Communicator() packersdk.Communicator {
 	}
 }
 
-func (c *Client) Hook() packersdk.Hook {
+func (c *Client) Hook() packer.Hook {
 	return &hook{
 		commonClient: commonClient{
 			endpoint: DefaultHookEndpoint,
@@ -118,7 +118,7 @@ func (c *Client) Hook() packersdk.Hook {
 	}
 }
 
-func (c *Client) PostProcessor() packersdk.PostProcessor {
+func (c *Client) PostProcessor() packer.PostProcessor {
 	return &postProcessor{
 		commonClient: commonClient{
 			endpoint: DefaultPostProcessorEndpoint,
@@ -128,7 +128,7 @@ func (c *Client) PostProcessor() packersdk.PostProcessor {
 	}
 }
 
-func (c *Client) Provisioner() packersdk.Provisioner {
+func (c *Client) Provisioner() packer.Provisioner {
 	return &provisioner{
 		commonClient: commonClient{
 			endpoint: DefaultProvisionerEndpoint,
@@ -138,7 +138,17 @@ func (c *Client) Provisioner() packersdk.Provisioner {
 	}
 }
 
-func (c *Client) Ui() packersdk.Ui {
+func (c *Client) Datasource() packer.Datasource {
+	return &datasource{
+		commonClient: commonClient{
+			endpoint: DefaultDatasourceEndpoint,
+			client:   c.client,
+			mux:      c.mux,
+		},
+	}
+}
+
+func (c *Client) Ui() packer.Ui {
 	return &Ui{
 		commonClient: commonClient{
 			endpoint: DefaultUiEndpoint,

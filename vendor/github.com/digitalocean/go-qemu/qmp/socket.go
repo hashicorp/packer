@@ -16,6 +16,7 @@ package qmp
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"io"
 	"net"
@@ -149,7 +150,7 @@ func (mon *SocketMonitor) Connect() error {
 // Events streams QEMU QMP Events.
 // Events should only be called once per Socket.  If used with a qemu.Domain,
 // qemu.Domain.Events should be called to retrieve events instead.
-func (mon *SocketMonitor) Events() (<-chan Event, error) {
+func (mon *SocketMonitor) Events(context.Context) (<-chan Event, error) {
 	atomic.AddInt32(mon.listeners, 1)
 	return mon.events, nil
 }

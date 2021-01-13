@@ -22,89 +22,19 @@ package libvirt
 
 import (
 	"bytes"
-	"fmt"
 	"io"
-	"reflect"
 
 	"github.com/digitalocean/go-libvirt/internal/constants"
 	"github.com/digitalocean/go-libvirt/internal/go-xdr/xdr2"
 )
 
-const (
-	VirUUIDBuflen = 16
+// References to prevent "imported and not used" errors.
+var (
+	_ = bytes.Buffer{}
+	_ = io.Copy
+	_ = constants.Program
+	_ = xdr.Unmarshal
 )
-
-type typedParamDecoder struct {}
-
-// Decode decodes a TypedParam. These are part of the libvirt spec, and not xdr
-// proper. TypedParams contain a name, which is called Field for some reason,
-// and a Value, which itself has a "discriminant" - an integer enum encoding the
-// actual type, and a value, the length of which varies based on the actual
-// type.
-func (tpd typedParamDecoder) Decode(d *xdr.Decoder, v reflect.Value) (int, error) {
-	// Get the name of the typed param first
-	name, n, err := d.DecodeString()
-	if err != nil {
-		return n, err
-	}
-	val, n2, err := tpd.decodeTypedParamValue(d)
-	n += n2
-	if err != nil {
-		return n, err
-	}
-	tp := &TypedParam{Field: name, Value: *val}
-	v.Set(reflect.ValueOf(*tp))
-
-	return n, nil
-}
-
-// decodeTypedParamValue decodes the Value part of a TypedParam.
-func (typedParamDecoder) decodeTypedParamValue(d *xdr.Decoder) (*TypedParamValue, int, error) {
-	// All TypedParamValues begin with a uint32 discriminant that tells us what
-	// type they are.
-	discriminant, n, err := d.DecodeUint()
-	if err != nil {
-		return nil, n, err
-	}
-	var n2 int
-	var tpv *TypedParamValue
-	switch discriminant {
-	case 1:
-		var val int32
-		n2, err = d.Decode(&val)
-		tpv = &TypedParamValue{D: discriminant, I: val}
-	case 2:
-		var val uint32
-		n2, err = d.Decode(&val)
-		tpv = &TypedParamValue{D: discriminant, I: val}
-	case 3:
-		var val int64
-		n2, err = d.Decode(&val)
-		tpv = &TypedParamValue{D: discriminant, I: val}
-	case 4:
-		var val uint64
-		n2, err = d.Decode(&val)
-		tpv = &TypedParamValue{D: discriminant, I: val}
-	case 5:
-		var val float64
-		n2, err = d.Decode(&val)
-		tpv = &TypedParamValue{D: discriminant, I: val}
-	case 6:
-		var val int32
-		n2, err = d.Decode(&val)
-		tpv = &TypedParamValue{D: discriminant, I: val}
-	case 7:
-		var val string
-		n2, err = d.Decode(&val)
-		tpv = &TypedParamValue{D: discriminant, I: val}
-
-	default:
-		err = fmt.Errorf("invalid parameter type %v", discriminant)
-	}
-	n += n2
-
-	return tpv, n, err
-}
 
 //
 // Typedefs:
@@ -112,11 +42,13 @@ func (typedParamDecoder) decodeTypedParamValue(d *xdr.Decoder) (*TypedParamValue
 // OptString is libvirt's remote_string
 type OptString []string
 // UUID is libvirt's remote_uuid
-type UUID [VirUUIDBuflen]byte
+type UUID [UUIDBuflen]byte
 // OptDomain is libvirt's remote_domain
 type OptDomain []Domain
 // OptNetwork is libvirt's remote_network
 type OptNetwork []Network
+// OptNetworkPort is libvirt's remote_network_port
+type OptNetworkPort []NetworkPort
 // OptNwfilter is libvirt's remote_nwfilter
 type OptNwfilter []Nwfilter
 // OptNwfilterBinding is libvirt's remote_nwfilter_binding
@@ -151,6 +83,12 @@ type Domain struct {
 // Network is libvirt's remote_nonnull_network
 type Network struct {
 	Name string
+	UUID UUID
+}
+
+// NetworkPort is libvirt's remote_nonnull_network_port
+type NetworkPort struct {
+	Net Network
 	UUID UUID
 }
 
@@ -195,6 +133,12 @@ type Secret struct {
 	UUID UUID
 	UsageType int32
 	UsageID string
+}
+
+// DomainCheckpoint is libvirt's remote_nonnull_domain_checkpoint
+type DomainCheckpoint struct {
+	Name string
+	Dom Domain
 }
 
 // DomainSnapshot is libvirt's remote_nonnull_domain_snapshot
@@ -3788,6 +3732,15 @@ type DomainEventCallbackMetadataChangeMsg struct {
 	Nsuri OptString
 }
 
+// DomainEventMemoryFailureMsg is libvirt's remote_domain_event_memory_failure_msg
+type DomainEventMemoryFailureMsg struct {
+	CallbackID int32
+	Dom Domain
+	Recipient int32
+	Action int32
+	Flags uint32
+}
+
 // ConnectSecretEventRegisterAnyArgs is libvirt's remote_connect_secret_event_register_any_args
 type ConnectSecretEventRegisterAnyArgs struct {
 	EventID int32
@@ -3936,6 +3889,235 @@ type ConnectListAllNwfilterBindingsRet struct {
 	Ret uint32
 }
 
+// ConnectGetStoragePoolCapabilitiesArgs is libvirt's remote_connect_get_storage_pool_capabilities_args
+type ConnectGetStoragePoolCapabilitiesArgs struct {
+	Flags uint32
+}
+
+// ConnectGetStoragePoolCapabilitiesRet is libvirt's remote_connect_get_storage_pool_capabilities_ret
+type ConnectGetStoragePoolCapabilitiesRet struct {
+	Capabilities string
+}
+
+// NetworkListAllPortsArgs is libvirt's remote_network_list_all_ports_args
+type NetworkListAllPortsArgs struct {
+	OptNetwork Network
+	NeedResults int32
+	Flags uint32
+}
+
+// NetworkListAllPortsRet is libvirt's remote_network_list_all_ports_ret
+type NetworkListAllPortsRet struct {
+	Ports []NetworkPort
+	Ret uint32
+}
+
+// NetworkPortLookupByUUIDArgs is libvirt's remote_network_port_lookup_by_uuid_args
+type NetworkPortLookupByUUIDArgs struct {
+	OptNetwork Network
+	UUID UUID
+}
+
+// NetworkPortLookupByUUIDRet is libvirt's remote_network_port_lookup_by_uuid_ret
+type NetworkPortLookupByUUIDRet struct {
+	Port NetworkPort
+}
+
+// NetworkPortCreateXMLArgs is libvirt's remote_network_port_create_xml_args
+type NetworkPortCreateXMLArgs struct {
+	OptNetwork Network
+	XML string
+	Flags uint32
+}
+
+// NetworkPortCreateXMLRet is libvirt's remote_network_port_create_xml_ret
+type NetworkPortCreateXMLRet struct {
+	Port NetworkPort
+}
+
+// NetworkPortSetParametersArgs is libvirt's remote_network_port_set_parameters_args
+type NetworkPortSetParametersArgs struct {
+	Port NetworkPort
+	Params []TypedParam
+	Flags uint32
+}
+
+// NetworkPortGetParametersArgs is libvirt's remote_network_port_get_parameters_args
+type NetworkPortGetParametersArgs struct {
+	Port NetworkPort
+	Nparams int32
+	Flags uint32
+}
+
+// NetworkPortGetParametersRet is libvirt's remote_network_port_get_parameters_ret
+type NetworkPortGetParametersRet struct {
+	Params []TypedParam
+	Nparams int32
+}
+
+// NetworkPortGetXMLDescArgs is libvirt's remote_network_port_get_xml_desc_args
+type NetworkPortGetXMLDescArgs struct {
+	Port NetworkPort
+	Flags uint32
+}
+
+// NetworkPortGetXMLDescRet is libvirt's remote_network_port_get_xml_desc_ret
+type NetworkPortGetXMLDescRet struct {
+	XML string
+}
+
+// NetworkPortDeleteArgs is libvirt's remote_network_port_delete_args
+type NetworkPortDeleteArgs struct {
+	Port NetworkPort
+	Flags uint32
+}
+
+// DomainCheckpointCreateXMLArgs is libvirt's remote_domain_checkpoint_create_xml_args
+type DomainCheckpointCreateXMLArgs struct {
+	Dom Domain
+	XMLDesc string
+	Flags uint32
+}
+
+// DomainCheckpointCreateXMLRet is libvirt's remote_domain_checkpoint_create_xml_ret
+type DomainCheckpointCreateXMLRet struct {
+	Checkpoint DomainCheckpoint
+}
+
+// DomainCheckpointGetXMLDescArgs is libvirt's remote_domain_checkpoint_get_xml_desc_args
+type DomainCheckpointGetXMLDescArgs struct {
+	Checkpoint DomainCheckpoint
+	Flags uint32
+}
+
+// DomainCheckpointGetXMLDescRet is libvirt's remote_domain_checkpoint_get_xml_desc_ret
+type DomainCheckpointGetXMLDescRet struct {
+	XML string
+}
+
+// DomainListAllCheckpointsArgs is libvirt's remote_domain_list_all_checkpoints_args
+type DomainListAllCheckpointsArgs struct {
+	Dom Domain
+	NeedResults int32
+	Flags uint32
+}
+
+// DomainListAllCheckpointsRet is libvirt's remote_domain_list_all_checkpoints_ret
+type DomainListAllCheckpointsRet struct {
+	Checkpoints []DomainCheckpoint
+	Ret int32
+}
+
+// DomainCheckpointListAllChildrenArgs is libvirt's remote_domain_checkpoint_list_all_children_args
+type DomainCheckpointListAllChildrenArgs struct {
+	Checkpoint DomainCheckpoint
+	NeedResults int32
+	Flags uint32
+}
+
+// DomainCheckpointListAllChildrenRet is libvirt's remote_domain_checkpoint_list_all_children_ret
+type DomainCheckpointListAllChildrenRet struct {
+	Checkpoints []DomainCheckpoint
+	Ret int32
+}
+
+// DomainCheckpointLookupByNameArgs is libvirt's remote_domain_checkpoint_lookup_by_name_args
+type DomainCheckpointLookupByNameArgs struct {
+	Dom Domain
+	Name string
+	Flags uint32
+}
+
+// DomainCheckpointLookupByNameRet is libvirt's remote_domain_checkpoint_lookup_by_name_ret
+type DomainCheckpointLookupByNameRet struct {
+	Checkpoint DomainCheckpoint
+}
+
+// DomainCheckpointGetParentArgs is libvirt's remote_domain_checkpoint_get_parent_args
+type DomainCheckpointGetParentArgs struct {
+	Checkpoint DomainCheckpoint
+	Flags uint32
+}
+
+// DomainCheckpointGetParentRet is libvirt's remote_domain_checkpoint_get_parent_ret
+type DomainCheckpointGetParentRet struct {
+	Parent DomainCheckpoint
+}
+
+// DomainCheckpointDeleteArgs is libvirt's remote_domain_checkpoint_delete_args
+type DomainCheckpointDeleteArgs struct {
+	Checkpoint DomainCheckpoint
+	Flags DomainCheckpointDeleteFlags
+}
+
+// DomainGetGuestInfoArgs is libvirt's remote_domain_get_guest_info_args
+type DomainGetGuestInfoArgs struct {
+	Dom Domain
+	Types uint32
+	Flags uint32
+}
+
+// DomainGetGuestInfoRet is libvirt's remote_domain_get_guest_info_ret
+type DomainGetGuestInfoRet struct {
+	Params []TypedParam
+}
+
+// ConnectSetIdentityArgs is libvirt's remote_connect_set_identity_args
+type ConnectSetIdentityArgs struct {
+	Params []TypedParam
+	Flags uint32
+}
+
+// DomainAgentSetResponseTimeoutArgs is libvirt's remote_domain_agent_set_response_timeout_args
+type DomainAgentSetResponseTimeoutArgs struct {
+	Dom Domain
+	Timeout int32
+	Flags uint32
+}
+
+// DomainAgentSetResponseTimeoutRet is libvirt's remote_domain_agent_set_response_timeout_ret
+type DomainAgentSetResponseTimeoutRet struct {
+	Result int32
+}
+
+// DomainBackupBeginArgs is libvirt's remote_domain_backup_begin_args
+type DomainBackupBeginArgs struct {
+	Dom Domain
+	BackupXML string
+	CheckpointXML OptString
+	Flags DomainBackupBeginFlags
+}
+
+// DomainBackupGetXMLDescArgs is libvirt's remote_domain_backup_get_xml_desc_args
+type DomainBackupGetXMLDescArgs struct {
+	Dom Domain
+	Flags uint32
+}
+
+// DomainBackupGetXMLDescRet is libvirt's remote_domain_backup_get_xml_desc_ret
+type DomainBackupGetXMLDescRet struct {
+	XML string
+}
+
+// DomainAuthorizedSshKeysGetArgs is libvirt's remote_domain_authorized_ssh_keys_get_args
+type DomainAuthorizedSshKeysGetArgs struct {
+	Dom Domain
+	User string
+	Flags uint32
+}
+
+// DomainAuthorizedSshKeysGetRet is libvirt's remote_domain_authorized_ssh_keys_get_ret
+type DomainAuthorizedSshKeysGetRet struct {
+	Keys []string
+}
+
+// DomainAuthorizedSshKeysSetArgs is libvirt's remote_domain_authorized_ssh_keys_set_args
+type DomainAuthorizedSshKeysSetArgs struct {
+	Dom Domain
+	User string
+	Keys []string
+	Flags uint32
+}
 
 
 // TypedParamValue is a discriminated union.
@@ -15529,6 +15711,735 @@ func (l *Libvirt) DomainSetIothreadParams(Dom Domain, IothreadID uint32, Params 
 
 
 	_, err = l.requestStream(402, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// ConnectGetStoragePoolCapabilities is the go wrapper for REMOTE_PROC_CONNECT_GET_STORAGE_POOL_CAPABILITIES.
+func (l *Libvirt) ConnectGetStoragePoolCapabilities(Flags uint32) (rCapabilities string, err error) {
+	var buf []byte
+
+	args := ConnectGetStoragePoolCapabilitiesArgs {
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(403, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Capabilities: string
+	_, err = dec.Decode(&rCapabilities)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// NetworkListAllPorts is the go wrapper for REMOTE_PROC_NETWORK_LIST_ALL_PORTS.
+func (l *Libvirt) NetworkListAllPorts(OptNetwork Network, NeedResults int32, Flags uint32) (rPorts []NetworkPort, rRet uint32, err error) {
+	var buf []byte
+
+	args := NetworkListAllPortsArgs {
+		OptNetwork: OptNetwork,
+		NeedResults: NeedResults,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(404, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Ports: []NetworkPort
+	_, err = dec.Decode(&rPorts)
+	if err != nil {
+		return
+	}
+	// Ret: uint32
+	_, err = dec.Decode(&rRet)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// NetworkPortLookupByUUID is the go wrapper for REMOTE_PROC_NETWORK_PORT_LOOKUP_BY_UUID.
+func (l *Libvirt) NetworkPortLookupByUUID(OptNetwork Network, UUID UUID) (rPort NetworkPort, err error) {
+	var buf []byte
+
+	args := NetworkPortLookupByUUIDArgs {
+		OptNetwork: OptNetwork,
+		UUID: UUID,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(405, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Port: NetworkPort
+	_, err = dec.Decode(&rPort)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// NetworkPortCreateXML is the go wrapper for REMOTE_PROC_NETWORK_PORT_CREATE_XML.
+func (l *Libvirt) NetworkPortCreateXML(OptNetwork Network, XML string, Flags uint32) (rPort NetworkPort, err error) {
+	var buf []byte
+
+	args := NetworkPortCreateXMLArgs {
+		OptNetwork: OptNetwork,
+		XML: XML,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(406, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Port: NetworkPort
+	_, err = dec.Decode(&rPort)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// NetworkPortGetParameters is the go wrapper for REMOTE_PROC_NETWORK_PORT_GET_PARAMETERS.
+func (l *Libvirt) NetworkPortGetParameters(Port NetworkPort, Nparams int32, Flags uint32) (rParams []TypedParam, rNparams int32, err error) {
+	var buf []byte
+
+	args := NetworkPortGetParametersArgs {
+		Port: Port,
+		Nparams: Nparams,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(407, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Params: []TypedParam
+	_, err = dec.Decode(&rParams)
+	if err != nil {
+		return
+	}
+	// Nparams: int32
+	_, err = dec.Decode(&rNparams)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// NetworkPortSetParameters is the go wrapper for REMOTE_PROC_NETWORK_PORT_SET_PARAMETERS.
+func (l *Libvirt) NetworkPortSetParameters(Port NetworkPort, Params []TypedParam, Flags uint32) (err error) {
+	var buf []byte
+
+	args := NetworkPortSetParametersArgs {
+		Port: Port,
+		Params: Params,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+
+	_, err = l.requestStream(408, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// NetworkPortGetXMLDesc is the go wrapper for REMOTE_PROC_NETWORK_PORT_GET_XML_DESC.
+func (l *Libvirt) NetworkPortGetXMLDesc(Port NetworkPort, Flags uint32) (rXML string, err error) {
+	var buf []byte
+
+	args := NetworkPortGetXMLDescArgs {
+		Port: Port,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(409, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// XML: string
+	_, err = dec.Decode(&rXML)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// NetworkPortDelete is the go wrapper for REMOTE_PROC_NETWORK_PORT_DELETE.
+func (l *Libvirt) NetworkPortDelete(Port NetworkPort, Flags uint32) (err error) {
+	var buf []byte
+
+	args := NetworkPortDeleteArgs {
+		Port: Port,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+
+	_, err = l.requestStream(410, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainCheckpointCreateXML is the go wrapper for REMOTE_PROC_DOMAIN_CHECKPOINT_CREATE_XML.
+func (l *Libvirt) DomainCheckpointCreateXML(Dom Domain, XMLDesc string, Flags uint32) (rCheckpoint DomainCheckpoint, err error) {
+	var buf []byte
+
+	args := DomainCheckpointCreateXMLArgs {
+		Dom: Dom,
+		XMLDesc: XMLDesc,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(411, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Checkpoint: DomainCheckpoint
+	_, err = dec.Decode(&rCheckpoint)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainCheckpointGetXMLDesc is the go wrapper for REMOTE_PROC_DOMAIN_CHECKPOINT_GET_XML_DESC.
+func (l *Libvirt) DomainCheckpointGetXMLDesc(Checkpoint DomainCheckpoint, Flags uint32) (rXML string, err error) {
+	var buf []byte
+
+	args := DomainCheckpointGetXMLDescArgs {
+		Checkpoint: Checkpoint,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(412, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// XML: string
+	_, err = dec.Decode(&rXML)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainListAllCheckpoints is the go wrapper for REMOTE_PROC_DOMAIN_LIST_ALL_CHECKPOINTS.
+func (l *Libvirt) DomainListAllCheckpoints(Dom Domain, NeedResults int32, Flags uint32) (rCheckpoints []DomainCheckpoint, rRet int32, err error) {
+	var buf []byte
+
+	args := DomainListAllCheckpointsArgs {
+		Dom: Dom,
+		NeedResults: NeedResults,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(413, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Checkpoints: []DomainCheckpoint
+	_, err = dec.Decode(&rCheckpoints)
+	if err != nil {
+		return
+	}
+	// Ret: int32
+	_, err = dec.Decode(&rRet)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainCheckpointListAllChildren is the go wrapper for REMOTE_PROC_DOMAIN_CHECKPOINT_LIST_ALL_CHILDREN.
+func (l *Libvirt) DomainCheckpointListAllChildren(Checkpoint DomainCheckpoint, NeedResults int32, Flags uint32) (rCheckpoints []DomainCheckpoint, rRet int32, err error) {
+	var buf []byte
+
+	args := DomainCheckpointListAllChildrenArgs {
+		Checkpoint: Checkpoint,
+		NeedResults: NeedResults,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(414, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Checkpoints: []DomainCheckpoint
+	_, err = dec.Decode(&rCheckpoints)
+	if err != nil {
+		return
+	}
+	// Ret: int32
+	_, err = dec.Decode(&rRet)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainCheckpointLookupByName is the go wrapper for REMOTE_PROC_DOMAIN_CHECKPOINT_LOOKUP_BY_NAME.
+func (l *Libvirt) DomainCheckpointLookupByName(Dom Domain, Name string, Flags uint32) (rCheckpoint DomainCheckpoint, err error) {
+	var buf []byte
+
+	args := DomainCheckpointLookupByNameArgs {
+		Dom: Dom,
+		Name: Name,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(415, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Checkpoint: DomainCheckpoint
+	_, err = dec.Decode(&rCheckpoint)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainCheckpointGetParent is the go wrapper for REMOTE_PROC_DOMAIN_CHECKPOINT_GET_PARENT.
+func (l *Libvirt) DomainCheckpointGetParent(Checkpoint DomainCheckpoint, Flags uint32) (rParent DomainCheckpoint, err error) {
+	var buf []byte
+
+	args := DomainCheckpointGetParentArgs {
+		Checkpoint: Checkpoint,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(416, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Parent: DomainCheckpoint
+	_, err = dec.Decode(&rParent)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainCheckpointDelete is the go wrapper for REMOTE_PROC_DOMAIN_CHECKPOINT_DELETE.
+func (l *Libvirt) DomainCheckpointDelete(Checkpoint DomainCheckpoint, Flags DomainCheckpointDeleteFlags) (err error) {
+	var buf []byte
+
+	args := DomainCheckpointDeleteArgs {
+		Checkpoint: Checkpoint,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+
+	_, err = l.requestStream(417, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainGetGuestInfo is the go wrapper for REMOTE_PROC_DOMAIN_GET_GUEST_INFO.
+func (l *Libvirt) DomainGetGuestInfo(Dom Domain, Types uint32, Flags uint32) (rParams []TypedParam, err error) {
+	var buf []byte
+
+	args := DomainGetGuestInfoArgs {
+		Dom: Dom,
+		Types: Types,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(418, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Params: []TypedParam
+	_, err = dec.Decode(&rParams)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// ConnectSetIdentity is the go wrapper for REMOTE_PROC_CONNECT_SET_IDENTITY.
+func (l *Libvirt) ConnectSetIdentity(Params []TypedParam, Flags uint32) (err error) {
+	var buf []byte
+
+	args := ConnectSetIdentityArgs {
+		Params: Params,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+
+	_, err = l.requestStream(419, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainAgentSetResponseTimeout is the go wrapper for REMOTE_PROC_DOMAIN_AGENT_SET_RESPONSE_TIMEOUT.
+func (l *Libvirt) DomainAgentSetResponseTimeout(Dom Domain, Timeout int32, Flags uint32) (rResult int32, err error) {
+	var buf []byte
+
+	args := DomainAgentSetResponseTimeoutArgs {
+		Dom: Dom,
+		Timeout: Timeout,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(420, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Result: int32
+	_, err = dec.Decode(&rResult)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainBackupBegin is the go wrapper for REMOTE_PROC_DOMAIN_BACKUP_BEGIN.
+func (l *Libvirt) DomainBackupBegin(Dom Domain, BackupXML string, CheckpointXML OptString, Flags DomainBackupBeginFlags) (err error) {
+	var buf []byte
+
+	args := DomainBackupBeginArgs {
+		Dom: Dom,
+		BackupXML: BackupXML,
+		CheckpointXML: CheckpointXML,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+
+	_, err = l.requestStream(421, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainBackupGetXMLDesc is the go wrapper for REMOTE_PROC_DOMAIN_BACKUP_GET_XML_DESC.
+func (l *Libvirt) DomainBackupGetXMLDesc(Dom Domain, Flags uint32) (rXML string, err error) {
+	var buf []byte
+
+	args := DomainBackupGetXMLDescArgs {
+		Dom: Dom,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(422, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// XML: string
+	_, err = dec.Decode(&rXML)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainEventMemoryFailure is the go wrapper for REMOTE_PROC_DOMAIN_EVENT_MEMORY_FAILURE.
+func (l *Libvirt) DomainEventMemoryFailure() (err error) {
+	var buf []byte
+
+
+	_, err = l.requestStream(423, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainAuthorizedSshKeysGet is the go wrapper for REMOTE_PROC_DOMAIN_AUTHORIZED_SSH_KEYS_GET.
+func (l *Libvirt) DomainAuthorizedSshKeysGet(Dom Domain, User string, Flags uint32) (rKeys []string, err error) {
+	var buf []byte
+
+	args := DomainAuthorizedSshKeysGetArgs {
+		Dom: Dom,
+		User: User,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+	var r response
+	r, err = l.requestStream(424, constants.Program, buf, nil, nil)
+	if err != nil {
+		return
+	}
+
+	// Return value unmarshaling
+	tpd := typedParamDecoder{}
+	ct := map[string]xdr.TypeDecoder{"libvirt.TypedParam": tpd}
+	rdr := bytes.NewReader(r.Payload)
+	dec := xdr.NewDecoderCustomTypes(rdr, 0, ct)
+	// Keys: []string
+	_, err = dec.Decode(&rKeys)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// DomainAuthorizedSshKeysSet is the go wrapper for REMOTE_PROC_DOMAIN_AUTHORIZED_SSH_KEYS_SET.
+func (l *Libvirt) DomainAuthorizedSshKeysSet(Dom Domain, User string, Keys []string, Flags uint32) (err error) {
+	var buf []byte
+
+	args := DomainAuthorizedSshKeysSetArgs {
+		Dom: Dom,
+		User: User,
+		Keys: Keys,
+		Flags: Flags,
+	}
+
+	buf, err = encode(&args)
+	if err != nil {
+		return
+	}
+
+
+	_, err = l.requestStream(425, constants.Program, buf, nil, nil)
 	if err != nil {
 		return
 	}
