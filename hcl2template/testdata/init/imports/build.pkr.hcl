@@ -1,6 +1,36 @@
 
 packer {
     required_version = ">= v1"
+
+    required_plugins {
+        amazon = ">= v0"
+
+        amazon-v1 = {
+            source  = "amazon"
+            version = ">= v1"
+        }
+
+        amazon-v2 = {
+            source  = "amazon"
+            version = ">= v2"
+        }
+
+
+        amazon-v3 = {
+            source  = "hashicorp/amazon"
+            version = ">= v3"
+        }
+
+        amazon-v3-azr = {
+            source  = "azr/amazon"
+            version = ">= v3"
+        }
+
+        amazon-v4 = {
+            source  = "github.com/hashicorp/amazon"
+            version = ">= v4"
+        }
+    }
 }
 
 // starts resources to provision them.
@@ -9,7 +39,7 @@ build {
         "source.virtualbox-iso.ubuntu-1204",
     ]
 
-    source "source.amazon-ebs.ubuntu-1604" {
+    source "source.amazon-v3-ebs.ubuntu-1604" {
         string = "setting from build section"
     }
 

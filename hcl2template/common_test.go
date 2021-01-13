@@ -106,6 +106,47 @@ func testParse(t *testing.T, tests []parseTest) {
 	}
 }
 
+func testParse_no_init(t *testing.T, tests []parseTest) {
+	t.Helper()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotCfg, gotDiags := tt.parser.Parse(tt.args.filename, tt.args.varFiles, tt.args.vars)
+			if tt.parseWantDiags == (gotDiags == nil) {
+				t.Fatalf("Parser.parse() unexpected %q diagnostics.", gotDiags)
+			}
+			if tt.parseWantDiagHasErrors != gotDiags.HasErrors() {
+				t.Fatalf("Parser.parse() unexpected diagnostics HasErrors. %s", gotDiags)
+			}
+			if diff := cmp.Diff(tt.parseWantCfg, gotCfg, cmpOpts...); diff != "" {
+				t.Fatalf("Parser.parse() wrong packer config. %s", diff)
+			}
+
+			if gotCfg != nil && !tt.parseWantDiagHasErrors {
+				if diff := cmp.Diff(tt.parseWantCfg.InputVariables, gotCfg.InputVariables, cmpOpts...); diff != "" {
+					t.Fatalf("Parser.parse() unexpected input vars. %s", diff)
+				}
+
+				if diff := cmp.Diff(tt.parseWantCfg.LocalVariables, gotCfg.LocalVariables, cmpOpts...); diff != "" {
+					t.Fatalf("Parser.parse() unexpected local vars. %s", diff)
+				}
+			}
+
+			if gotDiags.HasErrors() {
+				return
+			}
+
+			gotBuilds, gotDiags := gotCfg.GetBuilds(packer.GetBuildsOptions{})
+			if tt.getBuildsWantDiags == (gotDiags == nil) {
+				t.Fatalf("Parser.getBuilds() unexpected diagnostics. %s", gotDiags)
+			}
+			if diff := cmp.Diff(tt.getBuildsWantBuilds, gotBuilds, cmpOpts...); diff != "" {
+				t.Fatalf("Parser.getBuilds() wrong packer builds. %s", diff)
+			}
+		})
+	}
+}
+
 var (
 	// everything in the tests is a basicNestedMockConfig this allow to test
 	// each known type to packer ( and embedding ) in one go.
