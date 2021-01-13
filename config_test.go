@@ -103,15 +103,15 @@ func TestLoadExternalComponentsFromConfig_onlyProvisioner(t *testing.T) {
 
 	cfg.LoadExternalComponentsFromConfig()
 
-	if len(cfg.Plugins.Builders) != 0 {
+	if len(cfg.Plugins.Builders.List()) != 0 {
 		t.Errorf("loaded external builders when it wasn't supposed to; got %v as the resulting config", cfg.Plugins.Builders)
 	}
 
-	if len(cfg.Plugins.PostProcessors) != 0 {
+	if len(cfg.Plugins.PostProcessors.List()) != 0 {
 		t.Errorf("loaded external post-processors when it wasn't supposed to; got %v as the resulting config", cfg.Plugins.PostProcessors)
 	}
 
-	if len(cfg.Plugins.Provisioners) != 1 || !cfg.Plugins.Provisioners.Has("super-shell") {
+	if len(cfg.Plugins.Provisioners.List()) != 1 || !cfg.Plugins.Provisioners.Has("super-shell") {
 		t.Errorf("failed to load external provisioners; got %v as the resulting config", cfg.Plugins.Provisioners)
 	}
 }
