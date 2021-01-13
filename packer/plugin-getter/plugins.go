@@ -67,8 +67,8 @@ func (opts BinaryInstallationOptions) filenameSuffix() string {
 // Installations are sorted by version and one binary per version is returned.
 // Last binary detected takes precedence: in the order 'FromFolders' option.
 //
-// You must pass at least one option to Checksumers for a binary to be even
-// consider.
+// At least one opts.Checksumers must be given for a binary to be even
+// considered.
 func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallList, error) {
 	res := InstallList{}
 	filenamePrefix := pr.filenamePrefix()
