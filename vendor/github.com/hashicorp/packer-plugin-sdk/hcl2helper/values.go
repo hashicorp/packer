@@ -1,4 +1,4 @@
-package hcl2
+package hcl2helper
 
 import (
 	"fmt"
@@ -17,8 +17,7 @@ import (
 // unknown keys.
 const UnknownVariableValue = "74D93920-ED26-11E3-AC10-0800200C9A66"
 
-// HCL2ValueFromConfigValue is the opposite of ConfigValueFromHCL2: it takes
-// a value as would be returned from the old interpolator and turns it into
+// HCL2ValueFromConfigValue takes a value turns it into
 // a cty.Value so it can be used within, for example, an HCL2 EvalContext.
 func HCL2ValueFromConfigValue(v interface{}) cty.Value {
 	if v == nil {

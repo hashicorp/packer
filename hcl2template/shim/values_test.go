@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/packer-plugin-sdk/hcl2"
+	"github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -82,7 +82,7 @@ func TestConfigValueFromHCL2(t *testing.T) {
 		},
 		{
 			cty.UnknownVal(cty.String),
-			hcl2.UnknownVariableValue,
+			hcl2helper.UnknownVariableValue,
 		},
 	}
 

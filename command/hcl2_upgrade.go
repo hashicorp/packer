@@ -12,7 +12,7 @@ import (
 	texttemplate "text/template"
 
 	"github.com/hashicorp/hcl/v2/hclwrite"
-	hcl2shim "github.com/hashicorp/packer-plugin-sdk/hcl2"
+	hcl2shim "github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/posener/complete"
 	"github.com/zclconf/go-cty/cty"

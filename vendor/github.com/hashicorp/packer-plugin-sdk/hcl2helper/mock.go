@@ -1,6 +1,6 @@
 //go:generate mapstructure-to-hcl2 -type MockConfig,NestedMockConfig,MockTag
 
-package hcl2
+package hcl2helper
 
 import (
 	"time"

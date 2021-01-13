@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/hashicorp/packer-plugin-sdk/hcl2"
+	"github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -17,7 +17,7 @@ import (
 // need to detect and reject any null values.
 func ConfigValueFromHCL2(v cty.Value) interface{} {
 	if !v.IsKnown() {
-		return hcl2.UnknownVariableValue
+		return hcl2helper.UnknownVariableValue
 	}
 	if v.IsNull() {
 		return nil
