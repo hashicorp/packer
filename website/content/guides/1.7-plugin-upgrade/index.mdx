@@ -21,46 +21,50 @@ github.com/hashicorp/packer with github.com/hashicorp/packer-plugin-sdk.
 
 But some of the import paths have changed more than that because we've refactored the SDK some to make it easier to discover and use helpful modules. Below are a few common import paths. For a full list of available imports see [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/)```
 
-github.com/hashicorp/packer/template/config => github.com/hashicorp/packer-plugin-sdk/template/config
-github.com/hashicorp/packer/packer => github.com/hashicorp/packer-plugin-sdk/packer
-github.com/hashicorp/packer/template/interpolate => github.com/hashicorp/packer-plugin-sdk/template/interpolate
+| Old Path | New Path |
+| ---------| -------- |
+| github.com/hashicorp/packer/template/config | github.com/hashicorp/packer-plugin-sdk/template/config |
+| github.com/hashicorp/packer/packer | github.com/hashicorp/packer-plugin-sdk/packer |
+| github.com/hashicorp/packer/template/interpolate | github.com/hashicorp/packer-plugin-sdk/template/interpolate |
 
 Here is a more comprehensive list of old imports and their new replacements:
 
-github.com/hashicorp/packer/helper/builder/testing => github.com/hashicorp/packer-plugin-sdk/acctest
-**new** github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
-github.com/hashicorp/packer/helper/tests => github.com/hashicorp/packer-plugin-sdk/acctest/testutils
-github.com/hashicorp/packer/common/adapter => github.com/hashicorp/packer-plugin-sdk/adapter
-github.com/hashicorp/packer/common/bootcommand => github.com/hashicorp/packer-plugin-sdk/bootcommand
-github.com/hashicorp/packer/common/chroot => github.com/hashicorp/packer-plugin-sdk/chroot
-github.com/hashicorp/packer/common => github.com/hashicorp/packer-plugin-sdk/common
-github.com/hashicorp/packer/helper/communicator => github.com/hashicorp/packer-plugin-sdk/communicator
-github.com/hashicorp/packer/helper/config => github.com/hashicorp/packer-plugin-sdk/template/config
-github.com/hashicorp/packer/template/interpolate => github.com/hashicorp/packer-plugin-sdk/template/interpolate
-github.com/hashicorp/packer/communicator/ssh => github.com/hashicorp/packer-plugin-sdk/communicator/ssh
-github.com/hashicorp/packer/helper/communicator/sshkey => github.com/hashicorp/packer-plugin-sdk/communicator/sshkey
-github.com/hashicorp/packer/provisioner => github.com/hashicorp/packer-plugin-sdk/guestexec
-github.com/hashicorp/packer/common/json => github.com/hashicorp/packer-plugin-sdk/json
-github.com/hashicorp/packer/helper/multistep => github.com/hashicorp/packer-plugin-sdk/multistep
-steps from github.com/hashicorp/packer/common => github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps
-github.com/hashicorp/packer/common/net => github.com/hashicorp/packer-plugin-sdk/net
-github.com/hashicorp/packer/packer => github.com/hashicorp/packer-plugin-sdk/packer
-github.com/hashicorp/packer/builder => github.com/hashicorp/packer-plugin-sdk/packerbuilderdata
-github.com/hashicorp/packer/packer => github.com/hashicorp/packer-plugin-sdk/pathing
-github.com/hashicorp/packer/packer/plugin => github.com/hashicorp/packer-plugin-sdk/plugin
-github.com/hashicorp/packer/common/random => github.com/hashicorp/packer-plugin-sdk/random
-github.com/hashicorp/packer/common => github.com/hashicorp/packer-plugin-sdk/retry
-github.com/hashicorp/packer/packer/rpc => github.com/hashicorp/packer-plugin-sdk/rpc
-github.com/hashicorp/packer/communicator => github.com/hashicorp/packer-plugin-sdk/sdk-internals/communicator
-github.com/hashicorp/packer/common/shell => github.com/hashicorp/packer-plugin-sdk/shell
-github.com/hashicorp/packer/common/shell-local => github.com/hashicorp/packer-plugin-sdk/shell-local
-github.com/hashicorp/packer/helper/builder/localexec => github.com/hashicorp/packer-plugin-sdk/shell-local/localexec
-github.com/hashicorp/packer/common/shutdowncommand => github.com/hashicorp/packer-plugin-sdk/shutdowncommand
-github.com/hashicorp/packer/template => github.com/hashicorp/packer-plugin-sdk/template
-github.com/hashicorp/packer/packer/tmp => github.com/hashicorp/packer-plugin-sdk/tmp
-github.com/hashicorp/packer/helper/useragent => github.com/hashicorp/packer-plugin-sdk/useragent
-github.com/hashicorp/packer/common/uuid => github.com/hashicorp/packer-plugin-sdk/uuid
-**new** github.com/hashicorp/packer-plugin-sdk/version
+| Old Path | New Path |
+| ---------| -------- |
+| github.com/hashicorp/packer/helper/builder/testing | github.com/hashicorp/packer-plugin-sdk/acctest |
+| **new** | github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
+| github.com/hashicorp/packer/helper/tests | github.com/hashicorp/packer-plugin-sdk/acctest/testutils |
+| github.com/hashicorp/packer/common/adapter | github.com/hashicorp/packer-plugin-sdk/adapter |
+| github.com/hashicorp/packer/common/bootcommand | github.com/hashicorp/packer-plugin-sdk/bootcommand |
+| github.com/hashicorp/packer/common/chroot | github.com/hashicorp/packer-plugin-sdk/chroot |
+| github.com/hashicorp/packer/common | github.com/hashicorp/packer-plugin-sdk/common |
+| github.com/hashicorp/packer/helper/communicator | github.com/hashicorp/packer-plugin-sdk/communicator |
+| github.com/hashicorp/packer/helper/config | github.com/hashicorp/packer-plugin-sdk/template/config |
+| github.com/hashicorp/packer/template/interpolate | github.com/hashicorp/packer-plugin-sdk/template/interpolate |
+| github.com/hashicorp/packer/communicator/ssh | github.com/hashicorp/packer-plugin-sdk/communicator/ssh |
+| github.com/hashicorp/packer/helper/communicator/sshkey | github.com/hashicorp/packer-plugin-sdk/communicator/sshkey |
+| github.com/hashicorp/packer/provisioner | github.com/hashicorp/packer-plugin-sdk/guestexec |
+| github.com/hashicorp/packer/common/json | github.com/hashicorp/packer-plugin-sdk/json |
+| github.com/hashicorp/packer/helper/multistep | github.com/hashicorp/packer-plugin-sdk/multistep |
+| steps from github.com/hashicorp/packer/common | github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps |
+| github.com/hashicorp/packer/common/net | github.com/hashicorp/packer-plugin-sdk/net |
+| github.com/hashicorp/packer/packer | github.com/hashicorp/packer-plugin-sdk/packer |
+| github.com/hashicorp/packer/builder | github.com/hashicorp/packer-plugin-sdk/packerbuilderdata |
+| github.com/hashicorp/packer/packer | github.com/hashicorp/packer-plugin-sdk/pathing |
+| github.com/hashicorp/packer/packer/plugin | github.com/hashicorp/packer-plugin-sdk/plugin |
+| github.com/hashicorp/packer/common/random | github.com/hashicorp/packer-plugin-sdk/random |
+| github.com/hashicorp/packer/common | github.com/hashicorp/packer-plugin-sdk/retry |
+| github.com/hashicorp/packer/packer/rpc | github.com/hashicorp/packer-plugin-sdk/rpc |
+| github.com/hashicorp/packer/communicator | github.com/hashicorp/packer-plugin-sdk/sdk-internals/communicator |
+| github.com/hashicorp/packer/common/shell | github.com/hashicorp/packer-plugin-sdk/shell |
+| github.com/hashicorp/packer/common/shell-local | github.com/hashicorp/packer-plugin-sdk/shell-local |
+| github.com/hashicorp/packer/helper/builder/localexec | github.com/hashicorp/packer-plugin-sdk/shell-local/localexec |
+| github.com/hashicorp/packer/common/shutdowncommand | github.com/hashicorp/packer-plugin-sdk/shutdowncommand |
+| github.com/hashicorp/packer/template | github.com/hashicorp/packer-plugin-sdk/template |
+| github.com/hashicorp/packer/packer/tmp | github.com/hashicorp/packer-plugin-sdk/tmp |
+| github.com/hashicorp/packer/helper/useragent | github.com/hashicorp/packer-plugin-sdk/useragent |
+| github.com/hashicorp/packer/common/uuid | github.com/hashicorp/packer-plugin-sdk/uuid |
+| **new** | github.com/hashicorp/packer-plugin-sdk/version
 
 
 When in doubt you can search the packer-plugin-sdk repo for the name of your imported structs or functions to see where they exist in the SDK now; we have not changed struct or function names. Or refer to the [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/) for help.
