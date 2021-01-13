@@ -68,7 +68,7 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 	}
 
 	for _, pluginRequirement := range pluginReqs {
-		installs, err := pluginRequirement.ListInstallations(opts)
+		sortedInstalls, err := pluginRequirement.ListInstallations(opts)
 		if err != nil {
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
@@ -77,7 +77,7 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 			})
 			continue
 		}
-		if len(installs) == 0 {
+		if len(sortedInstalls) == 0 {
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  fmt.Sprintf("no plugin installed for %s", pluginRequirement.Identifier.ForDisplay()),
@@ -85,8 +85,8 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 			})
 			continue
 		}
-		log.Printf("[TRACE] Found the following %q installations: %v", pluginRequirement.Identifier.ForDisplay(), installs)
-		install := installs[len(installs)-1]
+		log.Printf("[TRACE] Found the following %q installations: %v", pluginRequirement.Identifier.ForDisplay(), sortedInstalls)
+		install := sortedInstalls[len(sortedInstalls)-1]
 		err = cfg.parser.PluginConfig.DiscoverMultiPlugin(pluginRequirement.Accessor, install.BinaryPath)
 		if err != nil {
 			diags = append(diags, &hcl.Diagnostic{
