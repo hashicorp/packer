@@ -32,7 +32,7 @@ Here is a more comprehensive list of old imports and their new replacements:
 | Old Path | New Path |
 | ---------| -------- |
 | github.com/hashicorp/packer/helper/builder/testing | github.com/hashicorp/packer-plugin-sdk/acctest |
-| **new** github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
+| **new** | github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
 | github.com/hashicorp/packer/helper/tests | github.com/hashicorp/packer-plugin-sdk/acctest/testutils |
 | github.com/hashicorp/packer/common/adapter | github.com/hashicorp/packer-plugin-sdk/adapter |
 | github.com/hashicorp/packer/common/bootcommand | github.com/hashicorp/packer-plugin-sdk/bootcommand |
@@ -64,7 +64,7 @@ Here is a more comprehensive list of old imports and their new replacements:
 | github.com/hashicorp/packer/packer/tmp | github.com/hashicorp/packer-plugin-sdk/tmp |
 | github.com/hashicorp/packer/helper/useragent | github.com/hashicorp/packer-plugin-sdk/useragent |
 | github.com/hashicorp/packer/common/uuid | github.com/hashicorp/packer-plugin-sdk/uuid |
-| **new** github.com/hashicorp/packer-plugin-sdk/version
+| **new** | github.com/hashicorp/packer-plugin-sdk/version
 
 
 When in doubt you can search the packer-plugin-sdk repo for the name of your imported structs or functions to see where they exist in the SDK now; we have not changed struct or function names. Or refer to the [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/) for help.
