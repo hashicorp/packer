@@ -15,7 +15,7 @@ import (
 	"github.com/hashicorp/packer/packer/plugin"
 )
 
-const packerPluginCheck = "packer-plugin-check"
+const packerPluginsCheck = "packer-plugins-check"
 
 var (
 	docs = flag.Bool("docs", false, "flag to indicate that documentation files should be checked.")
@@ -24,15 +24,15 @@ var (
 
 // Usage is a replacement usage function for the flags package.
 func Usage() {
-	fmt.Fprintf(os.Stderr, "Usage of "+packerPluginCheck+":\n")
-	fmt.Fprintf(os.Stderr, "\t"+packerPluginCheck+" [flags]\n")
+	fmt.Fprintf(os.Stderr, "Usage of "+packerPluginsCheck+":\n")
+	fmt.Fprintf(os.Stderr, "\t"+packerPluginsCheck+" [flags]\n")
 	fmt.Fprintf(os.Stderr, "Flags:\n")
 	flag.PrintDefaults()
 }
 
 func main() {
 	log.SetFlags(0)
-	log.SetPrefix(packerPluginCheck + ": ")
+	log.SetPrefix(packerPluginsCheck + ": ")
 	flag.Usage = Usage
 	flag.Parse()
 
