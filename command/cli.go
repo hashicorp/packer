@@ -94,7 +94,7 @@ type BuildArgs struct {
 }
 
 func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
-	flags.BoolVar(&ia.Upgrade, "upgrade", false, "Wether to upgrade any already present binary.")
+	flags.BoolVar(&ia.Upgrade, "upgrade", false, "upgrade any present plugin to the highest allowed version.")
 
 	ia.MetaArgs.AddFlagSets(flags)
 }
