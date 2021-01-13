@@ -106,7 +106,7 @@ func testParse(t *testing.T, tests []parseTest) {
 	}
 }
 
-func testParse_no_init(t *testing.T, tests []parseTest) {
+func testParse_only_Parse(t *testing.T, tests []parseTest) {
 	t.Helper()
 
 	for _, tt := range tests {
@@ -134,14 +134,6 @@ func testParse_no_init(t *testing.T, tests []parseTest) {
 
 			if gotDiags.HasErrors() {
 				return
-			}
-
-			gotBuilds, gotDiags := gotCfg.GetBuilds(packer.GetBuildsOptions{})
-			if tt.getBuildsWantDiags == (gotDiags == nil) {
-				t.Fatalf("Parser.getBuilds() unexpected diagnostics. %s", gotDiags)
-			}
-			if diff := cmp.Diff(tt.getBuildsWantBuilds, gotBuilds, cmpOpts...); diff != "" {
-				t.Fatalf("Parser.getBuilds() wrong packer builds. %s", diff)
 			}
 		})
 	}

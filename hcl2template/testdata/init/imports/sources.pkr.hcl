@@ -1,5 +1,5 @@
 
-source "amazon-ebs" "ubuntu-1604" {
+source "amazon-v3-ebs" "my-image" {
     int = 42
 }
 

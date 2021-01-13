@@ -136,15 +136,6 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, cfg *PackerConfig) (*Provis
 		provisioner.Timeout = timeout
 	}
 
-	if !p.PluginConfig.Provisioners.Has(provisioner.PType) {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  fmt.Sprintf("Unknown "+buildProvisionerLabel+" type %q", provisioner.PType),
-			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("known "+buildProvisionerLabel+"s: %v", p.PluginConfig.Provisioners.List()),
-			Severity: hcl.DiagError,
-		})
-		return nil, diags
-	}
 	return provisioner, diags
 }
 

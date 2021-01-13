@@ -48,16 +48,6 @@ func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl
 		return nil, diags
 	}
 
-	if !p.PluginConfig.PostProcessors.Has(postProcessor.PType) {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  fmt.Sprintf("Unknown "+buildPostProcessorLabel+" type %q", postProcessor.PType),
-			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("known "+buildPostProcessorLabel+"s: %v", p.PluginConfig.PostProcessors.List()),
-			Severity: hcl.DiagError,
-		})
-		return nil, diags
-	}
-
 	return postProcessor, diags
 }
 

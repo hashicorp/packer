@@ -14,6 +14,7 @@ import (
 var (
 	refVBIsoUbuntu1204  = SourceRef{Type: "virtualbox-iso", Name: "ubuntu-1204"}
 	refAWSEBSUbuntu1604 = SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604"}
+	refAWSV3MyImage     = SourceRef{Type: "amazon-v3-ebs", Name: "my-image"}
 	pTrue               = pointerToBool(true)
 )
 
@@ -34,72 +35,7 @@ func TestParser_complete(t *testing.T) {
 							Required: mustVersionConstraints(version.NewConstraint(">= v1")),
 						},
 					},
-					RequiredPlugins: []*RequiredPlugins{
-						&RequiredPlugins{
-							RequiredPlugins: map[string]*RequiredPlugin{
-								"amazon": &RequiredPlugin{
-									Name:   "amazon",
-									Source: "",
-									Type: &addrs.Plugin{
-										Type:      "amazon",
-										Namespace: "hashicorp",
-										Hostname:  "github.com",
-									},
-									Requirement: VersionConstraint{
-										Required: mustVersionConstraints(version.NewConstraint(">= v0")),
-									},
-								},
-								"amazon-v1": &RequiredPlugin{
-									Name:   "amazon-v1",
-									Source: "amazon",
-									Type: &addrs.Plugin{
-										Type:      "amazon",
-										Namespace: "hashicorp",
-										Hostname:  "github.com",
-									},
-									Requirement: VersionConstraint{
-										Required: mustVersionConstraints(version.NewConstraint(">= v1")),
-									},
-								},
-								"amazon-v2": &RequiredPlugin{
-									Name:   "amazon-v2",
-									Source: "amazon",
-									Type: &addrs.Plugin{
-										Type:      "amazon",
-										Namespace: "hashicorp",
-										Hostname:  "github.com",
-									},
-									Requirement: VersionConstraint{
-										Required: mustVersionConstraints(version.NewConstraint(">= v2")),
-									},
-								},
-								"amazon-v3": &RequiredPlugin{
-									Name:   "amazon-v3",
-									Source: "hashicorp/amazon",
-									Type: &addrs.Plugin{
-										Type:      "amazon",
-										Namespace: "hashicorp",
-										Hostname:  "github.com",
-									},
-									Requirement: VersionConstraint{
-										Required: mustVersionConstraints(version.NewConstraint(">= v3")),
-									},
-								},
-								"amazon-v4": &RequiredPlugin{
-									Name:   "amazon-v4",
-									Source: "github.com/hashicorp/amazon",
-									Type: &addrs.Plugin{
-										Type:      "amazon",
-										Namespace: "hashicorp",
-										Hostname:  "github.com",
-									},
-									Requirement: VersionConstraint{
-										Required: mustVersionConstraints(version.NewConstraint(">= v4")),
-									},
-								},
-							},
-						},
-					},
+					RequiredPlugins: nil,
 				},
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 "testdata/complete",
@@ -418,7 +354,7 @@ func TestParser_ValidateFilterOption(t *testing.T) {
 	}
 }
 
-func TestParser_init(t *testing.T) {
+func TestParser_no_init(t *testing.T) {
 	defaultParser := getBasicParser()
 
 	tests := []parseTest{
@@ -546,14 +482,68 @@ func TestParser_init(t *testing.T) {
 						Type: cty.List(cty.String),
 					},
 				},
-				Sources: nil,
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+					refAWSV3MyImage:    {Type: "amazon-v3-ebs", Name: "my-image"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources: []SourceRef{
+							refVBIsoUbuntu1204,
+							refAWSV3MyImage,
+						},
+						ProvisionerBlocks: []*ProvisionerBlock{
+							{
+								PType: "shell",
+								PName: "provisioner that does something",
+							},
+							{
+								PType: "file",
+							},
+						},
+						PostProcessorsLists: [][]*PostProcessorBlock{
+							{
+								{
+									PType:             "amazon-import",
+									PName:             "something",
+									KeepInputArtifact: pTrue,
+								},
+							},
+							{
+								{
+									PType: "amazon-import",
+								},
+							},
+							{
+								{
+									PType: "amazon-import",
+									PName: "first-nested-post-processor",
+								},
+								{
+									PType: "amazon-import",
+									PName: "second-nested-post-processor",
+								},
+							},
+							{
+								{
+									PType: "amazon-import",
+									PName: "third-nested-post-processor",
+								},
+								{
+									PType: "amazon-import",
+									PName: "fourth-nested-post-processor",
+								},
+							},
+						},
+					},
+				},
 			},
 			false, false,
 			[]packersdk.Build{},
 			false,
 		},
 	}
-	testParse_no_init(t, tests)
+	testParse_only_Parse(t, tests)
 }
 
 func pointerToBool(b bool) *bool {

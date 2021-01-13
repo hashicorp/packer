@@ -218,6 +218,11 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 
 		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, argVars)...)
 	}
+
+	// parse the actual content // rest
+	for _, file := range cfg.files {
+		diags = append(diags, cfg.parser.parseConfig(file, cfg)...)
+	}
 	return cfg, diags
 }
 
@@ -294,18 +299,12 @@ func (cfg *PackerConfig) Initialize() hcl.Diagnostics {
 		})
 	}
 
-	// decode the actual content
-	for _, file := range cfg.files {
-		diags = append(diags, cfg.parser.decodeConfig(file, cfg)...)
-	}
-
 	return diags
 }
 
-// decodeConfig looks in the found blocks for everything that is not a variable
-// block. It should be called after parsing input variables and locals so that
-// they can be referenced.
-func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+// parseConfig looks in the found blocks for everything that is not a variable
+// block.
+func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	body := dynblock.Expand(f.Body, cfg.EvalContext(nil))

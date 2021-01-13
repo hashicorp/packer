@@ -39,7 +39,7 @@ build {
         "source.virtualbox-iso.ubuntu-1204",
     ]
 
-    source "source.amazon-v3-ebs.ubuntu-1604" {
+    source "source.amazon-v3-ebs.my-image" {
         string = "setting from build section"
     }
 

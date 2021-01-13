@@ -76,16 +76,6 @@ func (p *Parser) decodeSource(block *hcl.Block) (SourceBlock, hcl.Diagnostics) {
 	}
 	var diags hcl.Diagnostics
 
-	if !p.PluginConfig.Builders.Has(source.Type) {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "Unknown " + buildSourceLabel + " type " + source.Type,
-			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("known builders: %v", p.PluginConfig.Builders.List()),
-			Severity: hcl.DiagError,
-		})
-		return source, diags
-	}
-
 	return source, diags
 }
 
