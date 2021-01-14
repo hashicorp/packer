@@ -101,9 +101,6 @@ func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalConte
 	}
 
 	body := source.Body
-	if body == nil {
-		panic("body is nil")
-	}
 	decoded, moreDiags := decodeHCL2Spec(body, ectx, builder)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
