@@ -200,6 +200,39 @@ var (
 			},
 		},
 	}
+	basicMockPostProcessorDynamicTags = &MockPostProcessor{
+		Config: MockConfig{
+			NotSquashed: "value <UNKNOWN>",
+			NestedMockConfig: NestedMockConfig{
+				String:   "string",
+				Int:      42,
+				Int64:    43,
+				Bool:     true,
+				Trilean:  config.TriTrue,
+				Duration: 10 * time.Second,
+				MapStringString: map[string]string{
+					"a": "b",
+					"c": "d",
+				},
+				SliceString: []string{
+					"a",
+					"b",
+					"c",
+				},
+				SliceSliceString: [][]string{
+					{"a", "b"},
+					{"c", "d"},
+				},
+				Tags: []MockTag{
+					{Key: "first_tag_key", Value: "first_tag_value"},
+					{Key: "Component", Value: "user-service"},
+					{Key: "Environment", Value: "production"},
+				},
+			},
+			Nested:      basicNestedMockConfig,
+			NestedSlice: []NestedMockConfig{},
+		},
+	}
 	basicMockCommunicator = &MockCommunicator{
 		Config: MockConfig{
 			NestedMockConfig: basicNestedMockConfig,

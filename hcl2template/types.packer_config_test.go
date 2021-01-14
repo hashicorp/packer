@@ -197,7 +197,7 @@ func TestParser_complete(t *testing.T) {
 								PType: "amazon-import",
 								PName: "something",
 								PostProcessor: &HCL2PostProcessor{
-									PostProcessor: basicMockPostProcessor,
+									PostProcessor: basicMockPostProcessorDynamicTags,
 								},
 								KeepInputArtifact: pTrue,
 							},
@@ -278,7 +278,7 @@ func TestParser_complete(t *testing.T) {
 								PType: "amazon-import",
 								PName: "something",
 								PostProcessor: &HCL2PostProcessor{
-									PostProcessor: basicMockPostProcessor,
+									PostProcessor: basicMockPostProcessorDynamicTags,
 								},
 								KeepInputArtifact: pTrue,
 							},
