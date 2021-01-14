@@ -81,7 +81,7 @@
   if building based on top of a source_ami which is also io1.
 
 - `source_ami_filter` (awscommon.AmiFilterOptions) - Filters used to populate the source_ami field. Example:
-
+  
   ```json
   {
   	 "source_ami_filter": {
@@ -95,26 +95,26 @@
   	 }
   }
   ```
-
+  
   This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
   This will fail unless *exactly* one AMI is returned. In the above example,
   `most_recent` will cause this to succeed by selecting the newest image.
-
+  
   -   `filters` (map of strings) - filters used to select a `source_ami`.
   	NOTE: This will fail unless *exactly* one AMI is returned. Any filter
   	described in the docs for
   	[DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
   	is valid.
-
+  
   -   `owners` (array of strings) - Filters the images by their owner. You
   	may specify one or more AWS account IDs, "self" (which will use the
   	account whose credentials you are using to run Packer), or an AWS owner
   	alias: for example, "amazon", "aws-marketplace", or "microsoft". This
   	option is required for security reasons.
-
+  
   -   `most_recent` (boolean) - Selects the newest created image when true.
   	This is most useful for selecting a daily distro build.
-
+  
   You may set this in place of `source_ami` or in conjunction with it. If you
   set this in conjunction with `source_ami`, the `source_ami` will be added
   to the filter. The provided `source_ami` must meet all of the filtering
@@ -135,16 +135,16 @@
   always result in an encrypted one.
 
 - `root_volume_kms_key_id` (string) - ID, alias or ARN of the KMS key to use for *launched* volumes encryption.
-
+  
   Set this value if you select `root_volume_encrypt_boot`, but don't want to use the
   region's default KMS key.
-
+  
   If you have a custom kms key you'd like to apply to the launch volume,
   and are only building in one region, it is more efficient to set this
   and `root_volume_encrypt_boot` to `true` and not use `encrypt_boot` and `kms_key_id`. This saves
   potentially many minutes at the end of the build by preventing Packer
   from having to copy and re-encrypt the image at the end of the build.
-
+  
   For valid formats see *KmsKeyId* in the [AWS API docs -
   CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
   This field is validated by Packer, when using an alias, you will have to
