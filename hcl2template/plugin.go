@@ -129,6 +129,7 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 				})
 			}
 			// Allow rest of the body to have dynamic blocks
+			provBlock.HCL2Ref.Rest = dynblock.Expand(provBlock.HCL2Ref.Rest, cfg.EvalContext(nil))
 		}
 
 		for _, ppList := range build.PostProcessorsLists {
@@ -142,6 +143,7 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 					})
 				}
 				// Allow the rest of the body to have dynamic blocks
+				ppBlock.HCL2Ref.Rest = dynblock.Expand(ppBlock.HCL2Ref.Rest, cfg.EvalContext(nil))
 			}
 		}
 
