@@ -66,7 +66,7 @@ func (c *PluginConfig) Discover() error {
 		}
 	}
 
-	// Next, look in the default plugins directory inside the configdir/.d/plugins.
+	// Next, look in the default plugins directory inside the configdir/.packer.d/plugins.
 	dir, err := pathing.ConfigDir()
 	if err != nil {
 		log.Printf("[ERR] Error loading config directory: %s", err)
