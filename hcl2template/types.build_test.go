@@ -68,11 +68,21 @@ func TestParse_build(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "build"),
-				Builds:                  nil,
+				Builds: Builds{
+					&BuildBlock{
+						ProvisionerBlocks: []*ProvisionerBlock{
+							{
+								PType: "inexistant",
+							},
+						},
+					},
+				},
 			},
-			true, true,
-			[]packersdk.Build{&packer.CoreBuild{}},
-			false,
+			false, false,
+			[]packersdk.Build{&packer.CoreBuild{
+				Provisioners: []packer.CoreBuildProvisioner{},
+			}},
+			true,
 		},
 		{"untyped post-processor",
 			defaultParser,
@@ -92,11 +102,23 @@ func TestParse_build(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "build"),
-				Builds:                  nil,
+				Builds: Builds{
+					&BuildBlock{
+						PostProcessorsLists: [][]*PostProcessorBlock{
+							{
+								{
+									PType: "inexistant",
+								},
+							},
+						},
+					},
+				},
 			},
-			true, true,
-			[]packersdk.Build{},
-			false,
+			false, false,
+			[]packersdk.Build{&packer.CoreBuild{
+				PostProcessors: [][]packer.CoreBuildPostProcessor{},
+			}},
+			true,
 		},
 		{"invalid source",
 			defaultParser,
