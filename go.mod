@@ -49,7 +49,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/hcl/v2 v2.8.0
-	github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210113092521-f29f9958afe4
+	github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210113192617-8a28198491f7
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
