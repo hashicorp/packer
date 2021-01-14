@@ -5,16 +5,16 @@ import (
 	"os/exec"
 	"testing"
 
-	amazon_acc "github.com/hashicorp/packer/builder/amazon/ebs/acceptance"
-	"github.com/hashicorp/packer/datasource/amazon/ami/acceptance"
+	"github.com/hashicorp/packer-plugin-sdk/acctest"
+	amazonacc "github.com/hashicorp/packer/builder/amazon/ebs/acceptance"
 )
 
 func TestAmazonAmi(t *testing.T) {
-	testCase := &acceptance.DatasourceTestCase{
+	testCase := &acctest.DatasourceTestCase{
 		Name: "amazon_ami_datasource_basic_test",
 		Teardown: func() error {
-			helper := amazon_acc.AWSHelper{
-				Region:  "us-east-1",
+			helper := amazonacc.AWSHelper{
+				Region:  "us-west-2",
 				AMIName: "packer-amazon-ami-test",
 			}
 			return helper.CleanUpAmi()
@@ -30,7 +30,7 @@ func TestAmazonAmi(t *testing.T) {
 			return nil
 		},
 	}
-	acceptance.TestDatasource(t, testCase)
+	acctest.TestDatasource(t, testCase)
 }
 
 const testDatasourceBasic = `
@@ -46,7 +46,7 @@ data "amazon-ami" "test" {
 
 source "amazon-ebs" "basic-example" {
   user_data_file = "./test-fixtures/configure-source-ssh.ps1"
-  region = "us-east-1"
+  region = "us-west-2"
   source_ami = data.amazon-ami.test.id
   instance_type =  "t2.small"
   ssh_agent_auth = false
