@@ -137,22 +137,17 @@ module.exports = [
     permanent: true,
   },
   {
-    source: '/docs/configuration/hcl2/:path*',
-    destination: '/docs/hcl2/:path*',
-    permanent: true,
-  },
-  {
-    source: '/docs/configuration/hcl2/:path*/overview',
-    destination: '/docs/hcl2/:path*',
-    permanent: true,
-  },
-  {
     source: '/docs/configuration/from-1.5/:path*',
     destination: '/docs/hcl2/:path*',
     permanent: true,
   },
   {
     source: '/docs/configuration/from-1.5/:path*/overview',
+    destination: '/docs/hcl2/:path*',
+    permanent: true,
+  },
+  {
+    source: '/docs/from-1.5/:path*',
     destination: '/docs/hcl2/:path*',
     permanent: true,
   },
