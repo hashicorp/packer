@@ -534,6 +534,8 @@ type Contributor struct {
 	Type              *string `json:"type,omitempty"`
 	SiteAdmin         *bool   `json:"site_admin,omitempty"`
 	Contributions     *int    `json:"contributions,omitempty"`
+	Name              *string `json:"name,omitempty"`
+	Email             *string `json:"email,omitempty"`
 }
 
 // ListContributorsOptions specifies the optional parameters to the

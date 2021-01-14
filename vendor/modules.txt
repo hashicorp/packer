@@ -243,7 +243,7 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/go-github/v33 v33.0.0 => github.com/azr/go-github/v33 v33.0.1-0.20210106115353-f7773038d423
+# github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69
 github.com/google/go-github/v33/github
 # github.com/google/go-querystring v1.0.0
 github.com/google/go-querystring/query

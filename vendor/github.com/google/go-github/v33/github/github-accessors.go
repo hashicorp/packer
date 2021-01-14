@@ -2100,6 +2100,14 @@ func (c *Contributor) GetContributions() int {
 	return *c.Contributions
 }
 
+// GetEmail returns the Email field if it's non-nil, zero value otherwise.
+func (c *Contributor) GetEmail() string {
+	if c == nil || c.Email == nil {
+		return ""
+	}
+	return *c.Email
+}
+
 // GetEventsURL returns the EventsURL field if it's non-nil, zero value otherwise.
 func (c *Contributor) GetEventsURL() string {
 	if c == nil || c.EventsURL == nil {
@@ -2162,6 +2170,14 @@ func (c *Contributor) GetLogin() string {
 		return ""
 	}
 	return *c.Login
+}
+
+// GetName returns the Name field if it's non-nil, zero value otherwise.
+func (c *Contributor) GetName() string {
+	if c == nil || c.Name == nil {
+		return ""
+	}
+	return *c.Name
 }
 
 // GetNodeID returns the NodeID field if it's non-nil, zero value otherwise.

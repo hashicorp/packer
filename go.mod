@@ -34,7 +34,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/google/go-cmp v0.5.2
-	github.com/google/go-github/v33 v33.0.0
+	github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69
 	github.com/google/uuid v1.1.2
 	github.com/gophercloud/gophercloud v0.12.0
 	github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c
@@ -98,7 +98,5 @@ require (
 	google.golang.org/api v0.32.0
 	google.golang.org/grpc v1.32.0
 )
-
-replace github.com/google/go-github/v33 => github.com/azr/go-github/v33 v33.0.1-0.20210106115353-f7773038d423
 
 go 1.13

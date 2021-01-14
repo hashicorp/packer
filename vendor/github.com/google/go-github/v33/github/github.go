@@ -512,12 +512,14 @@ func parseRate(r *http.Response) Rate {
 	return rate
 }
 
-// BareDo sends an API request and lets you handle the api response. If an
-// error or API Error occurs, the error will contain more information.
-// Otherwise you are supposed to read and close the response's Body.
+// BareDo sends an API request and lets you handle the api response. If an error
+// or API Error occurs, the error will contain more information. Otherwise you
+// are supposed to read and close the response's Body. If rate limit is exceeded
+// and reset time is in the future, BareDo returns *RateLimitError immediately
+// without making a network API call.
 //
-// The provided ctx must be non-nil, if it is nil an error is returned. If it
-// is canceled or times out, ctx.Err() will be returned.
+// The provided ctx must be non-nil, if it is nil an error is returned. If it is
+// canceled or times out, ctx.Err() will be returned.
 func (c *Client) BareDo(ctx context.Context, req *http.Request) (*Response, error) {
 	if ctx == nil {
 		return nil, errors.New("context must be non-nil")
@@ -603,7 +605,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*Res
 	switch v := v.(type) {
 	case nil:
 	case io.Writer:
-		_, _ = io.Copy(v, resp.Body)
+		_, err = io.Copy(v, resp.Body)
 	default:
 		decErr := json.NewDecoder(resp.Body).Decode(v)
 		if decErr == io.EOF {
