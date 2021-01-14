@@ -22,10 +22,14 @@ type Requirements []*Requirement
 // of required plugins is generated from a config file. From it we check what
 // is actually installed and what needs to happen to get in the desired state.
 type Requirement struct {
-	// How the user named the plugin
+	// Plugin accessor as defined in the config file.
+	// For Packer, using :
+	//  required_plugins { amazon = ">= v0" }
+	// Will set Accessor to `amazon`.
 	Accessor string
 
-	// Something like github.com/hashicorp/packer-plugin-amazon
+	// Something like github.com/hashicorp/packer-plugin-amazon, from the
+	// previous example.
 	Identifier *addrs.Plugin
 
 	// VersionConstraints as defined by user. Empty ( to be avoided ) means
