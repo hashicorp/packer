@@ -516,7 +516,7 @@ func (p *PackerConfig) printBuilds() string {
 			fmt.Fprintf(out, "\n      <no source>\n")
 		}
 		for _, source := range build.Sources {
-			fmt.Fprintf(out, "\n      %s\n", source)
+			fmt.Fprintf(out, "\n      %s\n", source.String())
 		}
 		fmt.Fprintf(out, "\n    provisioners:\n\n")
 		if len(build.ProvisionerBlocks) == 0 {
