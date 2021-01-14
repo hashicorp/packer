@@ -384,7 +384,7 @@ The Packer GitHub repository is configured to run a [Markdown Link Check](https:
 The master configuration file for the markdown-link-checker is called `mlc_config.json` and is located under the project's root directory.
 The configuration helps with relative links in the documentation that will be valid once deployed, and configures a few ignored URLs which are valid but may not return a valid 200 HTTP response code due to permissions or DDoS protection settings on the domain.
 
-**Potential False Positives**
+**Potential False Negatives**
 The link checker will prepend the BASEURL `https://packer.io/` to any relative links found within the documentation, which can be an issue when adding new `/docs` or `/guides` documents as the pages have not been deployed. To help mitigate this issue check the site preview to ensure newly added documentation pages work as expected.
 
 ## Redirects
