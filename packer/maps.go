@@ -11,7 +11,7 @@ type MapOfProvisioner map[string]func() (packersdk.Provisioner, error)
 func (mop MapOfProvisioner) Has(provisioner string) bool {
 	_, res := mop[provisioner]
 	return res
-}
+} 
 
 func (mop MapOfProvisioner) Set(provisioner string, starter func() (packersdk.Provisioner, error)) {
 	mop[provisioner] = starter
@@ -87,29 +87,29 @@ func (mob MapOfBuilder) List() []string {
 	return res
 }
 
-// type MapOfDatasource map[string]func() (packersdk.Datasource, error)
+type MapOfDatasource map[string]func() (packersdk.Datasource, error)
 
-// func (mod MapOfDatasource) Has(dataSource string) bool {
-// 	_, res := mod[dataSource]
-// 	return res
-// }
+func (mod MapOfDatasource) Has(dataSource string) bool {
+	_, res := mod[dataSource]
+	return res
+}
 
-// func (mod MapOfDatasource) Set(dataSource string, starter func() (packersdk.Datasource,error)) {
-// 	mod[dataSource] = starter
-// }
+func (mod MapOfDatasource) Set(dataSource string, starter func() (packersdk.Datasource,error)) {
+	mod[dataSource] = starter
+}
 
-// func (mod MapOfDatasource) Start(dataSource string) (packersdk.Datasource, error) {
-// 	d, found := mod[dataSource]
-// 	if !found {
-// 		return nil, fmt.Errorf("Unknown data source %s", dataSource)
-// 	}
-// 	return d()
-// }
+func (mod MapOfDatasource) Start(dataSource string) (packersdk.Datasource, error) {
+	d, found := mod[dataSource]
+	if !found {
+		return nil, fmt.Errorf("Unknown data source %s", dataSource)
+	}
+	return d()
+}
 
-// func (mod MapOfDatasource) List() []string {
-// 	res := []string{}
-// 	for k := range mod {
-// 		res = append(res, k)
-// 	}
-// 	return res
-// }
+func (mod MapOfDatasource) List() []string {
+	res := []string{}
+	for k := range mod {
+		res = append(res, k)
+	}
+	return res
+}

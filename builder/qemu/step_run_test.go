@@ -105,7 +105,7 @@ func Test_UserOverrides(t *testing.T) {
 			"-fda", "fake_floppy_path",
 			"-name", "myvm",
 			"-netdev", "user,id=user.0,hostfwd=tcp::5000-:0",
-			"-vnc", ":5905",
+			"-vnc", ":5",
 			"-machine", "type=,accel="},
 			tc.Expected...)
 
@@ -416,7 +416,7 @@ func Test_DriveAndDeviceArgs(t *testing.T) {
 			"-fda", "fake_floppy_path",
 			"-name", "",
 			"-netdev", "user,id=user.0,hostfwd=tcp::5000-:0",
-			"-vnc", ":5905",
+			"-vnc", ":5",
 			"-machine", "type=,accel=",
 			"-device", ",netdev=user.0"},
 			tc.Expected...)
@@ -453,7 +453,7 @@ func Test_OptionalConfigOptionsGetSet(t *testing.T) {
 		"-fda", "fake_floppy_path",
 		"-name", "MyFancyName",
 		"-netdev", "user,id=user.0,hostfwd=tcp::5000-:0",
-		"-vnc", ":5905,password",
+		"-vnc", ":5,password",
 		"-machine", "type=pc,accel=hvf",
 		"-device", ",netdev=user.0",
 		"-drive", "file=/path/to/test.iso,index=0,media=cdrom",
@@ -596,7 +596,7 @@ func Test_Defaults(t *testing.T) {
 				"vnc_port": 5959,
 			},
 			&stepRun{ui: packersdk.TestUi(t)},
-			[]string{"-vnc", "1.1.1.1:5959"},
+			[]string{"-vnc", "1.1.1.1:59"},
 			"no VNC password should be set",
 		},
 		{
@@ -608,7 +608,7 @@ func Test_Defaults(t *testing.T) {
 				"vnc_port": 5959,
 			},
 			&stepRun{ui: packersdk.TestUi(t)},
-			[]string{"-vnc", "1.1.1.1:5959,password"},
+			[]string{"-vnc", "1.1.1.1:59,password"},
 			"VNC password should be set",
 		},
 		{
