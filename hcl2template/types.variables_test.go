@@ -217,8 +217,10 @@ func TestParse_variables(t *testing.T) {
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Sources: []SourceRef{
-							{Type: "null", Name: "null-builder"},
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: SourceRef{Type: "null", Name: "null-builder"},
+							},
 						},
 					},
 				},
@@ -365,8 +367,10 @@ func TestParse_variables(t *testing.T) {
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Sources: []SourceRef{
-							{Type: "null", Name: "null-builder"},
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: SourceRef{Type: "null", Name: "null-builder"},
+							},
 						},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{

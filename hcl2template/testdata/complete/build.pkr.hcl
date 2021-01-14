@@ -11,6 +11,15 @@ build {
 
     source "source.amazon-ebs.ubuntu-1604" {
         string = "setting from build section"
+        nested {
+            dynamic "tag" {
+            for_each = local.standard_tags
+                content {
+                    key                 = tag.key
+                    value               = tag.value
+                }
+            }
+        }
     }
 
     provisioner "shell" {

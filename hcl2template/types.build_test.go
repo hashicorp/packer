@@ -21,12 +21,16 @@ func TestParse_build(t *testing.T) {
 				Basedir:                 filepath.Join("testdata", "build"),
 				Builds: Builds{
 					&BuildBlock{
-						Sources: []SourceRef{
+						Sources: []SourceUseBlock{
 							{
-								Type: "amazon-ebs",
-								Name: "ubuntu-1604",
+								SourceRef: SourceRef{
+									Type: "amazon-ebs",
+									Name: "ubuntu-1604",
+								},
 							},
-							refVBIsoUbuntu1204,
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
 						},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
@@ -46,7 +50,7 @@ func TestParse_build(t *testing.T) {
 					},
 				},
 			},
-			false, false,
+			true, true,
 			[]packersdk.Build{},
 			true,
 		},
@@ -141,17 +145,21 @@ func TestParse_build(t *testing.T) {
 				Builds: Builds{
 					&BuildBlock{
 						Name: "somebuild",
-						Sources: []SourceRef{
+						Sources: []SourceUseBlock{
 							{
-								Type: "amazon-ebs",
-								Name: "ubuntu-1604",
+								SourceRef: SourceRef{
+									Type: "amazon-ebs",
+									Name: "ubuntu-1604",
+								},
 							},
-							refVBIsoUbuntu1204,
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
 						},
 					},
 				},
 			},
-			false, false,
+			true, true,
 			[]packersdk.Build{},
 			true,
 		},
@@ -167,9 +175,13 @@ func TestParse_build(t *testing.T) {
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Sources: []SourceRef{
-							refVBIsoUbuntu1204,
-							SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604", LocalName: "aws-ubuntu-16.04"},
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+							{
+								SourceRef: SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604", LocalName: "aws-ubuntu-16.04"},
+							},
 						},
 						ProvisionerBlocks: nil,
 						PostProcessorsLists: [][]*PostProcessorBlock{
@@ -286,9 +298,13 @@ func TestParse_build(t *testing.T) {
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Sources: []SourceRef{
-							refVBIsoUbuntu1204,
-							SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604", LocalName: "aws-ubuntu-16.04"},
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+							{
+								SourceRef: SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604", LocalName: "aws-ubuntu-16.04"},
+							},
 						},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{

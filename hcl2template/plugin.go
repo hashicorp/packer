@@ -106,10 +106,13 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	for _, build := range cfg.Builds {
-		for _, srcRef := range build.Sources {
-			if !cfg.parser.PluginConfig.Builders.Has(srcRef.Type) {
+		for i := range build.Sources {
+			// here we grab a pointer to the source usage because we will set
+			// its body.
+			srcUsage := &(build.Sources[i])
+			if !cfg.parser.PluginConfig.Builders.Has(srcUsage.Type) {
 				diags = append(diags, &hcl.Diagnostic{
-					Summary:  "Unknown " + buildSourceLabel + " type " + srcRef.Type,
+					Summary:  "Unknownz " + buildSourceLabel + " type " + srcUsage.Type,
 					Subject:  &build.HCL2Ref.DefRange,
 					Detail:   fmt.Sprintf("known builders: %v", cfg.parser.PluginConfig.Builders.List()),
 					Severity: hcl.DiagError,
@@ -117,6 +120,27 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 				continue
 			}
 
+			sourceDefinition, found := cfg.Sources[srcUsage.SourceRef.Ref()]
+			if !found {
+				diags = append(diags, &hcl.Diagnostic{
+					Summary:  "Unknown " + sourceLabel + " " + srcUsage.String(),
+					Subject:  build.HCL2Ref.DefRange.Ptr(),
+					Severity: hcl.DiagError,
+					Detail:   fmt.Sprintf("Known: %v", cfg.Sources),
+					// TODO: show known sources as a string slice here ^.
+				})
+				continue
+			}
+
+			body := sourceDefinition.block.Body
+			if srcUsage.Body != nil {
+				// merge additions into source definition to get a new body.
+				body = hcl.MergeBodies([]hcl.Body{body, srcUsage.Body})
+			}
+			// expand any dynamic block.
+			body = dynblock.Expand(body, cfg.EvalContext(nil))
+
+			srcUsage.Body = body
 		}
 
 		for _, provBlock := range build.ProvisionerBlocks {

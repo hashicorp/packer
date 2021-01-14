@@ -78,8 +78,10 @@ func TestParse_source(t *testing.T) {
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Sources: []SourceRef{
-							{Type: "inexistant", Name: "ubuntu-1204"},
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: SourceRef{Type: "inexistant", Name: "ubuntu-1204"},
+							},
 						},
 					},
 				},

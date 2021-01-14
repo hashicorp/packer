@@ -7,6 +7,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 	. "github.com/hashicorp/packer/hcl2template/internal"
+	hcl2template "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -122,9 +123,13 @@ func TestParser_complete(t *testing.T) {
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Sources: []SourceRef{
-							refVBIsoUbuntu1204,
-							refAWSEBSUbuntu1604,
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+							{
+								SourceRef: refAWSEBSUbuntu1604,
+							},
 						},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
@@ -254,7 +259,20 @@ func TestParser_complete(t *testing.T) {
 								Int:    42,
 								Tags:   []MockTag{},
 							},
-							NestedSlice: []NestedMockConfig{},
+							Nested: hcl2template.NestedMockConfig{
+								Tags: []hcl2template.MockTag{
+									{Key: "Component", Value: "user-service"},
+									{Key: "Environment", Value: "production"},
+								},
+							},
+							NestedSlice: []NestedMockConfig{
+								hcl2template.NestedMockConfig{
+									Tags: []hcl2template.MockTag{
+										{Key: "Component", Value: "user-service"},
+										{Key: "Environment", Value: "production"},
+									},
+								},
+							},
 						},
 					},
 					Provisioners: []packer.CoreBuildProvisioner{
@@ -488,9 +506,13 @@ func TestParser_no_init(t *testing.T) {
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Sources: []SourceRef{
-							refVBIsoUbuntu1204,
-							refAWSV3MyImage,
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+							{
+								SourceRef: refAWSV3MyImage,
+							},
 						},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
