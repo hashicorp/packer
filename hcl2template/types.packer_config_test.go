@@ -564,6 +564,15 @@ func TestParser_no_init(t *testing.T) {
 			[]packersdk.Build{},
 			false,
 		},
+
+		{"duplicate required plugin accessor fails",
+			defaultParser,
+			parseTestArgs{"testdata/init/duplicate_required_plugins", nil, nil},
+			nil,
+			true, true,
+			[]packersdk.Build{},
+			false,
+		},
 	}
 	testParse_only_Parse(t, tests)
 }
