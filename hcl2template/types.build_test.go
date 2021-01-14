@@ -78,11 +78,11 @@ func TestParse_build(t *testing.T) {
 					},
 				},
 			},
-			false, false,
+			true, true,
 			[]packersdk.Build{&packer.CoreBuild{
 				Provisioners: []packer.CoreBuildProvisioner{},
 			}},
-			true,
+			false,
 		},
 		{"untyped post-processor",
 			defaultParser,
@@ -114,7 +114,7 @@ func TestParse_build(t *testing.T) {
 					},
 				},
 			},
-			false, false,
+			true, true,
 			[]packersdk.Build{&packer.CoreBuild{
 				PostProcessors: [][]packer.CoreBuildPostProcessor{},
 			}},

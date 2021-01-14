@@ -134,8 +134,11 @@ func (source *SourceBlock) Ref() SourceRef {
 	}
 }
 
+// SourceRef is a nice way to put `virtualbox-iso.source_name`
 type SourceRef struct {
+	// Type of the source, for example `virtualbox-iso`
 	Type string
+	// Name of the source, for example `source_name`
 	Name string
 
 	// The content of this body will be merged into a new block to allow to

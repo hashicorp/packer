@@ -7,6 +7,7 @@ import (
 	"runtime"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
@@ -95,6 +96,55 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 			})
 			continue
 		}
+	}
+
+	return diags
+}
+
+func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
+	// verify that all used plugins do exist and expand dynamic bodies
+	var diags hcl.Diagnostics
+
+	for _, build := range cfg.Builds {
+		for _, srcRef := range build.Sources {
+			if !cfg.parser.PluginConfig.Builders.Has(srcRef.Type) {
+				diags = append(diags, &hcl.Diagnostic{
+					Summary:  "Unknown " + buildSourceLabel + " type " + srcRef.Type,
+					Subject:  &build.HCL2Ref.DefRange,
+					Detail:   fmt.Sprintf("known builders: %v", cfg.parser.PluginConfig.Builders.List()),
+					Severity: hcl.DiagError,
+				})
+				continue
+			}
+
+		}
+
+		for _, provBlock := range build.ProvisionerBlocks {
+			if !cfg.parser.PluginConfig.Provisioners.Has(provBlock.PType) {
+				diags = append(diags, &hcl.Diagnostic{
+					Summary:  fmt.Sprintf("Unknown "+buildProvisionerLabel+" type %q", provBlock.PType),
+					Subject:  provBlock.HCL2Ref.TypeRange.Ptr(),
+					Detail:   fmt.Sprintf("known "+buildProvisionerLabel+"s: %v", cfg.parser.PluginConfig.Provisioners.List()),
+					Severity: hcl.DiagError,
+				})
+			}
+			// Allow rest of the body to have dynamic blocks
+		}
+
+		for _, ppList := range build.PostProcessorsLists {
+			for _, ppBlock := range ppList {
+				if !cfg.parser.PluginConfig.PostProcessors.Has(ppBlock.PType) {
+					diags = append(diags, &hcl.Diagnostic{
+						Summary:  fmt.Sprintf("Unknown "+buildPostProcessorLabel+" type %q", ppBlock.PType),
+						Subject:  ppBlock.HCL2Ref.TypeRange.Ptr(),
+						Detail:   fmt.Sprintf("known "+buildPostProcessorLabel+"s: %v", cfg.parser.PluginConfig.Provisioners.List()),
+						Severity: hcl.DiagError,
+					})
+				}
+				// Allow the rest of the body to have dynamic blocks
+			}
+		}
+
 	}
 
 	return diags

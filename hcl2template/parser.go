@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	packer "github.com/hashicorp/packer/packer"
@@ -299,6 +298,8 @@ func (cfg *PackerConfig) Initialize() hcl.Diagnostics {
 		})
 	}
 
+	diags = append(diags, cfg.initializeBlocks()...)
+
 	return diags
 }
 
@@ -307,7 +308,7 @@ func (cfg *PackerConfig) Initialize() hcl.Diagnostics {
 func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	body := dynblock.Expand(f.Body, cfg.EvalContext(nil))
+	body := f.Body
 	content, moreDiags := body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 
