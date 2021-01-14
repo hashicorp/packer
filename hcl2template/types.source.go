@@ -26,13 +26,16 @@ type SourceBlock struct {
 	LocalName string
 }
 
-// SourceBlock references an HCL 'source' block usage.
+// SourceUseBlock is a SourceBlock 'usage' from a config stand point.
+// For example when one uses `build.sources = ["..."]` or
+// `build.source "..." {...}`.
 type SourceUseBlock struct {
 	// reference to an actual source block definition, or SourceBlock.
 	SourceRef
 
 	// Rest of the body, in case the build.source block has more specific
 	// content
+	// Body can be expanded by a dynamic tag.
 	Body hcl.Body
 }
 
