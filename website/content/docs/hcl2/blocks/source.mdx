@@ -1,0 +1,51 @@
+---
+description: |
+  The top-level source block defines reusable builder configuration blocks
+page_title: source - Blocks
+sidebar_title: <tt>source</tt>
+---
+
+# The `source` block
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+The top-level `source` block defines reusable builder configuration blocks:
+
+`@include 'from-1.5/sources/example-block.mdx'`
+
+You can start builders by refering to those source blocks form a [`build`
+block](/docs/from-1.5/blocks/build), for example :
+
+```hcl
+build {
+  sources = [
+    # Here Packer will use a default ami_name when saving the image.
+    "source.amazon-ebs.example",
+    "source.amazon-ebs.foo",
+  ]
+}
+```
+
+The build-level [`source` block](/docs/from-1.5/blocks/build/source) allows to
+set specific source fields.
+
+```hcl
+build {
+  source "source.amazon-ebs.example" {
+    # Here Packer will use the provided ami_name instead of defaulting it.
+    ami_name = "specific"
+  }
+}
+```
+
+`@include 'from-1.5/contextual-source-variables.mdx'`
+
+## Related
+
+- The list of available builders can be found in the [builders](/docs/builders)
+  section.
+
+- A list of [community
+  builders](/community-tools#community-builders) is available.
+
+- Create your own [custom builder](/docs/extending/custom-builders) !

@@ -1,0 +1,100 @@
+---
+page_title: packer - Blocks
+sidebar_title: <tt>packer</tt>
+description: |-
+  The "packer" configuration section is used to configure some behaviors
+  of Packer itself.
+---
+
+# Packer Settings
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+-> **Note:** The Packer block is only available in Packer v1.6.5 and later.
+
+The `packer` configuration block type is used to configure some
+behaviors of Packer itself, such as the minimum required Packer version needed to
+apply your configuration.
+
+## Packer Block Syntax
+
+Packer settings are gathered together into `packer` blocks:
+
+```hcl
+packer {
+  # ...
+}
+```
+
+Each `packer` block can contain a number of settings related to Packer's
+behavior. Within a `packer` block, only constant values can be used;
+arguments may not refer to named objects such as resources, input variables,
+etc, and may not use any of the Packer language built-in functions.
+
+The various options supported within a `packer` block are described in the
+following sections.
+
+## Specifying a Required Packer Version
+
+The `required_version` setting accepts a [version constraint
+string,](#version-constraints) which specifies which versions of Packer
+can be used with your configuration.
+
+If the running version of Packer doesn't match the constraints specified,
+Packer will produce an error and exit without taking any further actions.
+
+Use Packer version constraints in a collaborative environment to
+ensure that everyone is using a specific Packer version, or using at least
+a minimum Packer version that has behavior expected by the configuration.
+
+## Version Constraints
+
+Anywhere that Packer lets you specify a range of acceptable versions for
+something, it expects a specially formatted string known as a version
+constraint.
+
+### Version Constraint Syntax
+
+Packer's syntax for version constraints is very similar to the syntax used by
+other dependency management systems like Bundler and NPM.
+
+```hcl
+required_version = ">= 1.2.0, < 2.0.0"
+```
+
+A version constraint is a [string literal](/docs/from-1.5/expressions#string-literals)
+containing one or more conditions, which are separated by commas.
+
+Each condition consists of an operator and a version number.
+
+Version numbers should be a series of numbers separated by periods (like
+`1.2.0`), optionally with a suffix to indicate a beta release.
+
+The following operators are valid:
+
+- `=` (or no operator): Allows only one exact version number. Cannot be combined
+  with other conditions.
+
+- `!=`: Excludes an exact version number.
+
+- `>`, `>=`, `<`, `<=`: Comparisons against a specified version, allowing
+  versions for which the comparison is true. "Greater-than" requests newer
+  versions, and "less-than" requests older versions.
+
+- `~>`: Allows the specified version, plus newer versions that only
+  increase the _most specific_ segment of the specified version number. For
+  example, `~> 0.9` is equivalent to `>= 0.9, < 1.0`, and `~> 0.8.4`, is
+  equivalent to `>= 0.8.4, < 0.9`. This is usually called the pessimistic
+  constraint operator.
+
+### Version Constraint Behavior
+
+A version number that meets every applicable constraint is considered acceptable.
+
+Packer consults version constraints to determine whether it has acceptable
+versions of itself.
+
+A prerelease version is a version number that contains a suffix introduced by
+a dash, like `1.2.0-beta`. A prerelease version can be selected only by an
+_exact_ version constraint (the `=` operator or no operator). Prerelease
+versions do not match inexact operators such as `>=`, `~>`, etc.

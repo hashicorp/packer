@@ -1,0 +1,39 @@
+---
+page_title: Path Variables - HCL Configuration Language
+sidebar_title: Path Variables
+description: |-
+  Special variables provide directory information. This page covers all path
+  variables.
+---
+
+# Path variables
+
+- `path.cwd`: the directory from where Packer was started.
+
+- `path.root`: the directory of the input HCL file or the input folder.
+
+## Examples
+
+```HCL
+locals {
+  settings_file  = "${path.cwd}/settings.txt"
+  scripts_folder = "${path.root}/scripts"
+  root           = path.root
+}
+```
+
+## Related Functions
+
+- [`abspath`](/docs/from-1.5/functions/file/abspath) takes a string containing
+  a filesystem path and converts it to an absolute path.
+
+- [`basename`](/docs/from-1.5/functions/file/basename) returns _only_ the last
+  portion of a filesystem path, discarding the portion that would be returned
+  by `dirname`.
+
+- [`fileset`](/docs/from-1.5/functions/file/fileset) enumerates a set of
+  regular file names given a path and pattern.
+
+- [`dirname`](/docs/from-1.5/functions/file/dirname) returns all of the
+  segments of a filesystem path _except_ the last, discarding the portion that
+  would be returned by `basename`.

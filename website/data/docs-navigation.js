@@ -7,7 +7,7 @@
 
 export default [
   {
-    category: 'from-1.5',
+    category: 'hcl2',
     content: [
       {
         category: 'blocks',

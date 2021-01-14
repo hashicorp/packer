@@ -1,0 +1,23 @@
+## A variable can be sensitive
+
+When a variable is sensitive all string-values from that variable will be
+obfuscated from Packer's output :
+
+```hcl
+# var-foo.pkr.hcl
+variable "foo" {
+    sensitive = true
+    default   = {
+        key = "SECR3TP4SSW0RD"
+    }
+}
+```
+
+```shell-session
+$ packer inspect var-foo.pkr.hcl
+Packer Inspect: HCL2 mode
+
+> input-variables:
+var.foo: "{\n  \"key\" = \"<sensitive>\"\n }"
+...
+```

@@ -1,0 +1,9 @@
+```hcl
+# locals.pkr.hcl
+locals {
+    # locals can be bare values like:
+    wee = local.baz
+    # locals can also be set with other variables :
+    baz = "Foo is '${var.foo}' but not '${local.wee}'"
+}
+```
