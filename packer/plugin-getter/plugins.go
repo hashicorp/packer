@@ -326,35 +326,37 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		}
 	}
 
-	if checksum == nil {
-		log.Printf("[TRACE] no checksum file found locally, getting one")
-		for _, getter := range getters {
-			for _, checksummer := range opts.Checksummers {
+	log.Printf("[TRACE] no checksum file found locally, getting one")
+	for _, getter := range getters {
+		if checksum != nil {
+			break
+		}
+		for _, checksummer := range opts.Checksummers {
 
-				checksumFile, err := getter.Get(checksummer.Type, getOpts)
-				if err != nil {
-					err := fmt.Errorf("could not get checksum file for %s version %s. Is the file present on the release and correctly named ? %s", pr.Identifier.ForDisplay(), getOpts.Version, err)
-					log.Printf("[TRACE] %s", err.Error())
-					return nil, err
-				}
-				cs, err := checksummer.ParseChecksum(checksumFile)
-				_ = checksumFile.Close()
-				if err != nil {
-					log.Printf("[TRACE] could not parse %s checksum: %v. Make sure the checksum file contains the checksum and only the checksum.", checksummer.Type, err)
-					continue
-				}
-
-				if err := ioutil.WriteFile(outputFile+checksummer.FileExt(), []byte(cs.String()), 0666); err != nil {
-					err := fmt.Errorf("Could not write checksum file %w", err)
-					log.Printf("[TRACE] %s", err.Error())
-					return nil, err
-				}
-				log.Printf("[TRACE] wrote %q file", outputFile+checksummer.FileExt())
-				checksum = &FileChecksum{
-					Expected:    cs,
-					Checksummer: checksummer,
-				}
+			checksumFile, err := getter.Get(checksummer.Type, getOpts)
+			if err != nil {
+				err := fmt.Errorf("could not get checksum file for %s version %s. Is the file present on the release and correctly named ? %s", pr.Identifier.ForDisplay(), getOpts.Version, err)
+				log.Printf("[TRACE] %s", err.Error())
+				return nil, err
 			}
+			cs, err := checksummer.ParseChecksum(checksumFile)
+			_ = checksumFile.Close()
+			if err != nil {
+				log.Printf("[TRACE] could not parse %s checksum: %v. Make sure the checksum file contains the checksum and only the checksum.", checksummer.Type, err)
+				continue
+			}
+
+			if err := ioutil.WriteFile(outputFile+checksummer.FileExt(), []byte(cs.String()), 0666); err != nil {
+				err := fmt.Errorf("Could not write checksum file %w", err)
+				log.Printf("[TRACE] %s", err.Error())
+				return nil, err
+			}
+			log.Printf("[TRACE] wrote %q file", outputFile+checksummer.FileExt())
+			checksum = &FileChecksum{
+				Expected:    cs,
+				Checksummer: checksummer,
+			}
+			break
 		}
 	}
 
