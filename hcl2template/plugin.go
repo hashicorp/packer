@@ -120,7 +120,7 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 				continue
 			}
 
-			sourceDefinition, found := cfg.Sources[srcUsage.SourceRef.Ref()]
+			sourceDefinition, found := cfg.Sources[srcUsage.SourceRef]
 			if !found {
 				diags = append(diags, &hcl.Diagnostic{
 					Summary:  "Unknown " + sourceLabel + " " + srcUsage.String(),

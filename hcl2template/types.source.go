@@ -33,6 +33,10 @@ type SourceUseBlock struct {
 	// reference to an actual source block definition, or SourceBlock.
 	SourceRef
 
+	// LocalName can be set in a singular source block from a build block, it
+	// allows to give a special name to a build in the logs.
+	LocalName string
+
 	// Rest of the body, in case the build.source block has more specific
 	// content
 	// Body can be expanded by a dynamic tag.
@@ -75,7 +79,7 @@ func (p *Parser) decodeBuildSource(block *hcl.Block) (SourceUseBlock, hcl.Diagno
 	if diags.HasErrors() {
 		return out, diags
 	}
-	out.SourceRef.LocalName = b.Name
+	out.LocalName = b.Name
 	out.Body = b.Rest
 	return out, nil
 }
@@ -121,7 +125,7 @@ func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalConte
 	builderVars["packer_on_error"] = opts.OnError
 
 	generatedVars, warning, err := builder.Prepare(builderVars, decoded)
-	moreDiags = warningErrorsToDiags(cfg.Sources[source.SourceRef.Ref()].block, warning, err)
+	moreDiags = warningErrorsToDiags(cfg.Sources[source.SourceRef].block, warning, err)
 	diags = append(diags, moreDiags...)
 	return builder, diags, generatedVars
 }
@@ -148,18 +152,8 @@ type SourceRef struct {
 	// Name of the source, for example `source_name`
 	Name string
 
-	// LocalName can be set in a singular source block from a build block, it
-	// allows to give a special name to a build in the logs.
-	LocalName string
-}
-
-// the 'addition' field makes of ref a different entry in the sources map, so
-// Ref is here to make sure only one is returned.
-func (r *SourceRef) Ref() SourceRef {
-	return SourceRef{
-		Type: r.Type,
-		Name: r.Name,
-	}
+	// No other field should be added to the SourceRef because we used that
+	// struct as a map accessor in many places.
 }
 
 // NoSource is the zero value of sourceRef, representing the absense of an

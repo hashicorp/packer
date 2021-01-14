@@ -331,7 +331,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 
 	for _, build := range cfg.Builds {
 		for _, srcUsage := range build.Sources {
-			src, found := cfg.Sources[srcUsage.SourceRef.Ref()]
+			src, found := cfg.Sources[srcUsage.SourceRef]
 			if !found {
 				diags = append(diags, &hcl.Diagnostic{
 					Summary:  "Unknown " + sourceLabel + " " + srcUsage.String(),

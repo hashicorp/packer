@@ -180,7 +180,8 @@ func TestParse_build(t *testing.T) {
 								SourceRef: refVBIsoUbuntu1204,
 							},
 							{
-								SourceRef: SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604", LocalName: "aws-ubuntu-16.04"},
+								SourceRef: SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604"},
+								LocalName: "aws-ubuntu-16.04",
 							},
 						},
 						ProvisionerBlocks: nil,
@@ -303,7 +304,8 @@ func TestParse_build(t *testing.T) {
 								SourceRef: refVBIsoUbuntu1204,
 							},
 							{
-								SourceRef: SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604", LocalName: "aws-ubuntu-16.04"},
+								SourceRef: SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604"},
+								LocalName: "aws-ubuntu-16.04",
 							},
 						},
 						ProvisionerBlocks: []*ProvisionerBlock{
