@@ -13,6 +13,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/pathing"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer/packer"
 )
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -22,17 +23,17 @@ const PACKERSPACE = "-PACKERSPACE-"
 type Config struct {
 	PluginMinPort  int
 	PluginMaxPort  int
-	builders       packersdk.MapOfBuilder
-	provisioners   packersdk.MapOfProvisioner
-	postProcessors packersdk.MapOfPostProcessor
-	dataSources    packersdk.MapOfDatasource
+	builders       packer.MapOfBuilder
+	provisioners   packer.MapOfProvisioner
+	postProcessors packer.MapOfPostProcessor
+	dataSources    packer.MapOfDatasource
 }
 
 type Plugins struct {
-	Builders       packersdk.MapOfBuilder
-	Provisioners   packersdk.MapOfProvisioner
-	PostProcessors packersdk.MapOfPostProcessor
-	DataSources    packersdk.MapOfDatasource
+	Builders       packer.MapOfBuilder
+	Provisioners   packer.MapOfProvisioner
+	PostProcessors packer.MapOfPostProcessor
+	DataSources    packer.MapOfDatasource
 }
 
 func (c *Config) GetPlugins() Plugins {
@@ -53,16 +54,16 @@ func (c *Config) GetPlugins() Plugins {
 // CWD has the highest priority.
 func (c *Config) Discover() error {
 	if c.builders == nil {
-		c.builders = packersdk.MapOfBuilder{}
+		c.builders = packer.MapOfBuilder{}
 	}
 	if c.provisioners == nil {
-		c.provisioners = packersdk.MapOfProvisioner{}
+		c.provisioners = packer.MapOfProvisioner{}
 	}
 	if c.postProcessors == nil {
-		c.postProcessors = packersdk.MapOfPostProcessor{}
+		c.postProcessors = packer.MapOfPostProcessor{}
 	}
 	if c.dataSources == nil {
-		c.dataSources = packersdk.MapOfDatasource{}
+		c.dataSources = packer.MapOfDatasource{}
 	}
 
 	// If we are already inside a plugin process we should not need to

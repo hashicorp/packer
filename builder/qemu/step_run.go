@@ -120,17 +120,18 @@ func (s *stepRun) getDefaultArgs(config *Config, state multistep.StateBag) map[s
 	vncPort := state.Get("vnc_port").(int)
 	vncIP := config.VNCBindAddress
 
-	vncPort = vncPort - config.VNCPortMin
-	vnc := fmt.Sprintf("%s:%d", vncIP, vncPort)
+	vncRealAddress := fmt.Sprintf("%s:%d", vncIP, vncPort)
+	vncPort = vncPort - 5900
+	vncArgs := fmt.Sprintf("%s:%d", vncIP, vncPort)
 	if config.VNCUsePassword {
-		vnc = fmt.Sprintf("%s:%d,password", vncIP, vncPort)
+		vncArgs = fmt.Sprintf("%s:%d,password", vncIP, vncPort)
 	}
-	defaultArgs["-vnc"] = vnc
+	defaultArgs["-vnc"] = vncArgs
 
 	// Track the connection for the user
 	vncPass, _ := state.Get("vnc_password").(string)
 
-	message = getVncConnectionMessage(config.Headless, vnc, vncPass)
+	message = getVncConnectionMessage(config.Headless, vncRealAddress, vncPass)
 	if message != "" {
 		s.ui.Message(message)
 	}

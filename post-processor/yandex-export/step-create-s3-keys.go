@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
-	"github.com/hashicorp/packer-plugin-sdk/packer"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1/awscompatibility"
 )
@@ -25,7 +25,7 @@ type StepCreateS3Keys struct {
 
 func (c *StepCreateS3Keys) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(yandex.Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	ui.Say("Create temporary storage Access Key")
 	// Create temporary storage Access Key
@@ -48,7 +48,7 @@ func (c *StepCreateS3Keys) Run(ctx context.Context, state multistep.StateBag) mu
 
 func (s *StepCreateS3Keys) Cleanup(state multistep.StateBag) {
 	driver := state.Get("driver").(yandex.Driver)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if val, ok := state.GetOk("s3_secret"); ok {
 		ui.Say("S3 secrets have been found")

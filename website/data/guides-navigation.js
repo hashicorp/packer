@@ -14,7 +14,10 @@ export default [
     category: 'automatic-operating-system-installs',
     content: ['autounattend_windows', 'preseed_ubuntu'],
   },
-
+  {
+    category: '1.7-plugin-upgrade',
+    content: [],
+  },
   {
     category: 'workflow-tips-and-tricks',
     content: [
