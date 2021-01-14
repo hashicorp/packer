@@ -32,7 +32,7 @@ can be found in the [post-processors](/docs/post-processors) section.
 
 A `post-processor` can also take the `Artifact` from another post-processor
 when it is defined in a [`post-processors`
-block](/docs/from-1.5/blocks/build/post-processor) list, that is a list of
+block](//docs/templates/hcl_templates/blocks/build/post-processor) list, that is a list of
 chained post processors.
 
 -> Note: The input 'artifact' received by a post-processor will be automatically
@@ -84,11 +84,11 @@ The values within `only` or `except` are _source names_, not builder types.
 Packer allows to access connection information and basic instance state
 information from a post-processor. These information are stored in the `build`
 variable. Check out the [Contextual
-Variables](/docs/from-1.5/contextual-variables) documentation to learn more
+Variables](//docs/templates/hcl_templates/contextual-variables) documentation to learn more
 about and see some examples of how to use them.
 
 ### Related
 
-- The [`post-processors` block](/docs/from-1.5/blocks/build/post-processor)
+- The [`post-processors` block](//docs/templates/hcl_templates/blocks/build/post-processor)
   allows to define one or more chain of `post-processor`s that will take the
   output from the build and provision steps.

@@ -16,7 +16,7 @@
   as the source for this build. *VHD targets are incompatible with this
   build type* - the target must be a *Managed Image*. When using shared_image_gallery as a source, image_publisher,
   image_offer, image_sku, image_version, and custom_managed_image_name should not be set.
-  
+
   In JSON
   ```json
   "shared_image_gallery": {
@@ -43,9 +43,9 @@
   ```
 
 - `shared_image_gallery_destination` (SharedImageGalleryDestination) - The name of the Shared Image Gallery under which the managed image will be published as Shared Gallery Image version.
-  
+
   Following is an example.
-  
+
   In JSON
   ```json
   "shared_image_gallery_destination": {
@@ -96,7 +96,7 @@
   across regions due to image synchronization latency. To ensure a consistent
   version across regions set this value to one that is available in all
   regions where you are deploying.
-  
+
   CLI example
   `az vm image list --location westus --publisher Canonical --offer UbuntuServer --sku 16.04.0-LTS --all`
 
@@ -106,7 +106,7 @@
   VM from your VHD. See
   [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/)
   information. Defaults to `Standard_A1`.
-  
+
   CLI example `az vm list-sizes --location westus`
 
 - `managed_image_resource_group_name` (string) - Specify the managed image resource group name where the result of the
@@ -144,7 +144,7 @@
 
 - `azure_tag` ([]{name string, value string}) - Same as [`azure_tags`](#azure_tags) but defined as a singular repeatable block
   containing a `name` and a `value` field. In HCL2 mode the
-  [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+  [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
   will allow you to create those programatically.
 
 - `resource_group_name` (string) - Resource group under which the final artifact will be stored.
@@ -203,9 +203,9 @@
   terms](https://aka.ms/azuremarketplaceapideployment) for more details.
   Not all Marketplace images support programmatic deployment, and support
   is controlled by the image publisher.
-  
+
   An example plan\_info object is defined below.
-  
+
   ```json
   {
     "plan_info": {
@@ -215,17 +215,17 @@
     }
   }
   ```
-  
+
   `plan_name` (string) - The plan name, required. `plan_product` (string) -
   The plan product, required. `plan_publisher` (string) - The plan publisher,
   required. `plan_promotion_code` (string) - Some images accept a promotion
   code, optional.
-  
+
   Images created from the Marketplace with `plan_info` **must** specify
   `plan_info` whenever the image is deployed. The builder automatically adds
   tags to the image to ensure this information is not lost. The following
   tags are added.
-  
+
   ```text
   1.  PlanName
   2.  PlanProduct
@@ -257,12 +257,12 @@
   or
   [Linux](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds)
   for more information.
-  
+
   For VHD builds the final artifacts will be named
   `PREFIX-dataDisk-<n>.UUID.vhd` and stored in the specified capture
   container along side the OS disk. The additional disks are included in
   the deployment template `PREFIX-vmTemplate.UUID`.
-  
+
   For Managed build the final artifacts are included in the managed image.
   The additional disk will have the same storage account type as the OS
   disk, as specified with the `managed_image_storage_account_type`

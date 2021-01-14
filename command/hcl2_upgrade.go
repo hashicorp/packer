@@ -72,23 +72,23 @@ const (
 # All generated input variables will be of 'string' type as this is how Packer JSON
 # views them; you can change their type later on. Read the variables type
 # constraints documentation
-# https://www.packer.io/docs/from-1.5/variables#type-constraints for more info.
+# https://www.packer.io//docs/templates/hcl_templates/variables#type-constraints for more info.
 `
 
 	packerBlockHeader = `
-# See https://www.packer.io/docs/from-1.5/blocks/packer for more info
+# See https://www.packer.io//docs/templates/hcl_templates/blocks/packer for more info
 `
 
 	sourcesHeader = `
 # source blocks are generated from your builders; a source can be referenced in
 # build blocks. A build block runs provisioner and post-processors on a
 # source. Read the documentation for source blocks here:
-# https://www.packer.io/docs/from-1.5/blocks/source`
+# https://www.packer.io//docs/templates/hcl_templates/blocks/source`
 
 	buildHeader = `
 # a build block invokes sources and runs provisioning steps on them. The
 # documentation for build blocks can be found here:
-# https://www.packer.io/docs/from-1.5/blocks/build
+# https://www.packer.io//docs/templates/hcl_templates/blocks/build
 build {
 `
 )
@@ -343,44 +343,44 @@ func transposeTemplatingCalls(s []byte) []byte {
 			return "", UnhandleableArgumentError{
 				"lower",
 				"`lower(var.example)`",
-				"https://www.packer.io/docs/from-1.5/functions/string/lower",
+				"https://www.packer.io//docs/templates/hcl_templates/functions/string/lower",
 			}
 		},
 		"upper": func(_ string) (string, error) {
 			return "", UnhandleableArgumentError{
 				"upper",
 				"`upper(var.example)`",
-				"https://www.packer.io/docs/from-1.5/functions/string/upper",
+				"https://www.packer.io//docs/templates/hcl_templates/functions/string/upper",
 			}
 		},
 		"split": func(_, _ string, _ int) (string, error) {
 			return "", UnhandleableArgumentError{
 				"split",
 				"`split(separator, string)`",
-				"https://www.packer.io/docs/from-1.5/functions/string/split",
+				"https://www.packer.io//docs/templates/hcl_templates/functions/string/split",
 			}
 		},
 		"replace": func(_, _, _ string, _ int) (string, error) {
 			return "", UnhandleableArgumentError{
 				"replace",
 				"`replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
-				"https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",
+				"https://www.packer.io//docs/templates/hcl_templates/functions/string/replace or https://www.packer.io//docs/templates/hcl_templates/functions/string/regex_replace",
 			}
 		},
 		"replace_all": func(_, _, _ string) (string, error) {
 			return "", UnhandleableArgumentError{
 				"replace_all",
 				"`replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
-				"https://www.packer.io/docs/from-1.5/functions/string/replace or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",
+				"https://www.packer.io//docs/templates/hcl_templates/functions/string/replace or https://www.packer.io//docs/templates/hcl_templates/functions/string/regex_replace",
 			}
 		},
 		"clean_resource_name": func(_ string) (string, error) {
 			return "", UnhandleableArgumentError{
 				"clean_resource_name",
 				"use custom validation rules, `replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
-				"https://packer.io/docs/from-1.5/variables#custom-validation-rules" +
-					" , https://www.packer.io/docs/from-1.5/functions/string/replace" +
-					" or https://www.packer.io/docs/from-1.5/functions/string/regex_replace",
+				"https://packer.io//docs/templates/hcl_templates/variables#custom-validation-rules" +
+					" , https://www.packer.io//docs/templates/hcl_templates/functions/string/replace" +
+					" or https://www.packer.io//docs/templates/hcl_templates/functions/string/regex_replace",
 			}
 		},
 		"build_name": func() string {

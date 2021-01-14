@@ -137,13 +137,13 @@ module.exports = [
     permanent: true,
   },
   {
-    source: '/docs/configuration/from-1.5/:path*',
-    destination: '/docs/from-1.5/:path*',
+    source: '/docs/templates/hcl_templates/:path*',
+    destination: '//docs/templates/hcl_templates/:path*',
     permanent: true,
   },
   {
-    source: '/docs/configuration/from-1.5/:path*/overview',
-    destination: '/docs/from-1.5/:path*',
+    source: '/docs/templates/hcl_templates/:path*/overview',
+    destination: '//docs/templates/hcl_templates/:path*',
     permanent: true,
   },
   {

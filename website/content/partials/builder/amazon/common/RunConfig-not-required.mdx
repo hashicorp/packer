@@ -23,7 +23,7 @@
   Packer will still wait for the instance to be stopped, and failing to
   send the stop signal yourself, when you have set this flag to `true`,
   will cause a timeout.
-  
+
   An example of a valid windows shutdown command in a `windows-shell`
   provisioner is :
   ```shell-session
@@ -54,12 +54,12 @@
   up a [T2
   Standard](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-std.html)
   instance instead.
-  
+
   To use T2 Unlimited you must use a T2 instance type, e.g. `t2.micro`.
   Additionally, T2 Unlimited cannot be used in conjunction with Spot
   Instances, e.g. when the `spot_price` option has been configured.
   Attempting to do so will cause an error.
-  
+
   !&gt; **Warning!** Additional costs may be incurred by enabling T2
   Unlimited - even for instances that would usually qualify for the
   [AWS Free Tier](https://aws.amazon.com/free/).
@@ -72,7 +72,7 @@
 
 - `temporary_iam_instance_profile_policy_document` (\*PolicyDocument) - Temporary IAM instance profile policy document
   If IamInstanceProfile is specified it will be used instead. Example:
-  
+
   ```json
   {
   	"Version": "2012-10-17",
@@ -93,7 +93,7 @@
   terminate. Defaults to stop.
 
 - `security_group_filter` (SecurityGroupFilterOptions) - Filters used to populate the `security_group_ids` field. JSON Example:
-  
+
   ```json
   {
     "security_group_filter": {
@@ -103,9 +103,9 @@
     }
   }
   ```
-  
+
   HCL2 Example:
-  
+
   ```hcl
     security_group_filter {
       filters = {
@@ -113,14 +113,14 @@
       }
     }
   ```
-  
+
   This selects the SG's with tag `Class` with the value `packer`.
-  
+
   -   `filters` (map of strings) - filters used to select a
       `security_group_ids`. Any filter described in the docs for
       [DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html)
       is valid.
-  
+
   `security_group_ids` take precedence over this.
 
 - `run_tags` (map[string]string) - Key/value pair tags to apply to the instance that is that is *launched*
@@ -130,7 +130,7 @@
 
 - `run_tag` ([]{key string, value string}) - Same as [`run_tags`](#run_tags) but defined as a singular repeatable
   block containing a `key` and a `value` field. In HCL2 mode the
-  [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+  [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
   will allow you to create those programatically.
 
 - `security_group_id` (string) - The ID (not the name) of the security
@@ -145,7 +145,7 @@
 
 - `source_ami_filter` (AmiFilterOptions) - Filters used to populate the `source_ami`
   field. JSON Example:
-  
+
   ```json
   "builders" [
     {
@@ -163,7 +163,7 @@
   ]
   ```
   HCL2 example:
-  
+
   ```hcl
   source "amazon-ebs" "basic-example" {
     source_ami_filter {
@@ -177,26 +177,26 @@
     }
   }
   ```
-  
+
     This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
     This will fail unless *exactly* one AMI is returned. In the above example,
     `most_recent` will cause this to succeed by selecting the newest image.
-  
+
     -   `filters` (map of strings) - filters used to select a `source_ami`.
         NOTE: This will fail unless *exactly* one AMI is returned. Any filter
         described in the docs for
         [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
         is valid.
-  
+
     -   `owners` (array of strings) - Filters the images by their owner. You
         may specify one or more AWS account IDs, "self" (which will use the
         account whose credentials you are using to run Packer), or an AWS owner
         alias: for example, `amazon`, `aws-marketplace`, or `microsoft`. This
         option is required for security reasons.
-  
+
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
-  
+
     You may set this in place of `source_ami` or in conjunction with it. If you
     set this in conjunction with `source_ami`, the `source_ami` will be added
     to the filter. The provided `source_ami` must meet all of the filtering
@@ -217,7 +217,7 @@
   time period your instances are running. Spot Instance prices are set by
   Amazon EC2 and adjust gradually based on long-term trends in supply and
   demand for Spot Instance capacity.
-  
+
   When this field is set, it represents the maximum hourly price you are
   willing to pay for a spot instance. If you do not set this value, it
   defaults to a maximum price equal to the on demand price of the
@@ -234,12 +234,12 @@
 
 - `spot_tag` ([]{key string, value string}) - Same as [`spot_tags`](#spot_tags) but defined as a singular repeatable block
   containing a `key` and a `value` field. In HCL2 mode the
-  [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+  [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
   will allow you to create those programatically.
 
 - `subnet_filter` (SubnetFilterOptions) - Filters used to populate the `subnet_id` field.
   JSON Example:
-  
+
   ```json
   "builders" [
     {
@@ -255,7 +255,7 @@
   ]
   ```
   HCL2 example:
-  
+
   ```hcl
   source "amazon-ebs" "basic-example" {
     subnet_filter {
@@ -267,24 +267,24 @@
     }
   }
   ```
-  
+
     This selects the Subnet with tag `Class` with the value `build`, which has
     the most free IP addresses. NOTE: This will fail unless *exactly* one
     Subnet is returned. By using `most_free` or `random` one will be selected
     from those matching the filter.
-  
+
     -   `filters` (map of strings) - filters used to select a `subnet_id`.
         NOTE: This will fail unless *exactly* one Subnet is returned. Any
         filter described in the docs for
         [DescribeSubnets](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSubnets.html)
         is valid.
-  
+
     -   `most_free` (boolean) - The Subnet with the most free IPv4 addresses
         will be used if multiple Subnets matches the filter.
-  
+
     -   `random` (boolean) - A random Subnet will be used if multiple Subnets
         matches the filter. `most_free` have precendence over this.
-  
+
     `subnet_id` take precedence over this.
 
 - `subnet_id` (string) - If using VPC, the ID of the subnet, such as
@@ -293,13 +293,13 @@
 
 - `tenancy` (string) - [Tenancy](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-instance.html) used
   when Packer launches the EC2 instance, allowing it to be launched on dedicated hardware.
-  
+
   The default is "default", meaning shared tenancy. Allowed values are "default",
   "dedicated" and "host".
 
 - `temporary_security_group_source_cidrs` ([]string) - A list of IPv4 CIDR blocks to be authorized access to the instance, when
   packer is creating a temporary security group.
-  
+
   The default is [`0.0.0.0/0`] (i.e., allow any IPv4 source). This is only
   used when `security_group_id` or `security_group_ids` is not specified.
 
@@ -314,7 +314,7 @@
 
 - `vpc_filter` (VpcFilterOptions) - Filters used to populate the `vpc_id` field.
   JSON Example:
-  
+
   ```json
   "builders" [
     {
@@ -330,7 +330,7 @@
   ]
   ```
   HCL2 example:
-  
+
   ```hcl
   source "amazon-ebs" "basic-example" {
     vpc_filter {
@@ -342,17 +342,17 @@
     }
   }
   ```
-  
+
   This selects the VPC with tag `Class` with the value `build`, which is not
   the default VPC, and have a IPv4 CIDR block of `/24`. NOTE: This will fail
   unless *exactly* one VPC is returned.
-  
+
   -   `filters` (map of strings) - filters used to select a `vpc_id`. NOTE:
       This will fail unless *exactly* one VPC is returned. Any filter
       described in the docs for
       [DescribeVpcs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html)
       is valid.
-  
+
   `vpc_id` take precedence over this.
 
 - `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID
@@ -370,12 +370,12 @@
      if inside a VPC is to use the public IP address if available, otherwise
      the private IP address will be used. If not in a VPC the public DNS name
      will be used. Also works for WinRM.
-  
+
      Where Packer is configured for an outbound proxy but WinRM traffic
      should be direct, `ssh_interface` must be set to `private_dns` and
      `<region>.compute.internal` included in the `NO_PROXY` environment
      variable.
-  
+
      When using `session_manager` the machine running Packer must have
   	  the AWS Session Manager Plugin installed and within the users' system path.
      Connectivity via the `session_manager` interface establishes a secure tunnel
