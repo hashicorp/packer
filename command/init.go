@@ -112,14 +112,23 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 
 func (*InitCommand) Help() string {
 	helpText := `
-Usage: packer init [options] TEMPLATE
+Usage: packer init [options] CONFIG
 
-  TODO
-  TODO
+  Install all the missing plugins required in a Packer config. Note that Packer
+  does not have a state.
+
+  This is the first command that should be executed when working with a new
+  or existing template.
+
+  This command is always safe to run multiple times. Though subsequent runs may
+  give errors, this command will never delete anything.
 
 Options:
-
-  -upgrade=false          Do you want to try upgrading the plugin if it is already present ? (default: false)
+  -upgrade                     On top of installing missing plugins, update
+                               installed plugins to the latest available
+                               version, if there is a new higher one. Note that
+                               this still takes into consideration the version
+                               constraint of the config.
 `
 
 	return strings.TrimSpace(helpText)
