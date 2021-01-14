@@ -11,7 +11,7 @@ type MapOfProvisioner map[string]func() (packersdk.Provisioner, error)
 func (mop MapOfProvisioner) Has(provisioner string) bool {
 	_, res := mop[provisioner]
 	return res
-} 
+}
 
 func (mop MapOfProvisioner) Set(provisioner string, starter func() (packersdk.Provisioner, error)) {
 	mop[provisioner] = starter
@@ -94,7 +94,7 @@ func (mod MapOfDatasource) Has(dataSource string) bool {
 	return res
 }
 
-func (mod MapOfDatasource) Set(dataSource string, starter func() (packersdk.Datasource,error)) {
+func (mod MapOfDatasource) Set(dataSource string, starter func() (packersdk.Datasource, error)) {
 	mod[dataSource] = starter
 }
 
