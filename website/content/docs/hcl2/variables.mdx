@@ -8,7 +8,7 @@ description: |-
 
 # Input Variables
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+`@include 'hcl2/beta-hcl2-note.mdx'`
 
 Input variables serve as parameters for a Packer build, allowing aspects of the
 build to be customized without altering the build's own source code.
@@ -24,7 +24,7 @@ Guide_](/guides/hcl/variables).
 variable is being discussed. Other kinds of variables in Packer include
 _environment variables_ (set by the shell where Packer runs) and _expression
 variables_ (used to indirectly represent a value in an
-[expression](/docs/from-1.5/expressions)).
+[expression](/docs/hcl2/expressions)).
 
 ## Declaring an Input Variable
 
@@ -84,7 +84,7 @@ configuration.
 ## Using Input Variable Values
 
 Within the build that declared a variable, its value can be accessed from
-within [expressions](/docs/from-1.5/expressions) as `var.<NAME>`, where `<NAME>`
+within [expressions](/docs/hcl2/expressions) as `var.<NAME>`, where `<NAME>`
 matches the label given in the declaration block:
 
 ```hcl
@@ -100,7 +100,7 @@ the folder where it was declared.
 ## Type Constraints
 
 The `type` argument in a `variable` block allows you to restrict the [type of
-value](/docs/from-1.5/expressions#types-and-values) that will be accepted as the value
+value](/docs/hcl2/expressions#types-and-values) that will be accepted as the value
 for a variable. If no type constraint is set then a value of any type is
 accepted.
 
@@ -157,11 +157,11 @@ documentation about the build, and so it should be written from the perspective
 of the user of the build rather than its maintainer. For commentary for build
 maintainers, use comments.
 
-`@include 'from-1.5/variables/assignment.mdx'`
+`@include 'hcl2/variables/assignment.mdx'`
 
 The following sections describe these options in more detail.
 
-`@include 'from-1.5/variables/custom-validation.mdx'`
+`@include 'hcl2/variables/custom-validation.mdx'`
 
 ### Variables on the Command Line
 
@@ -242,7 +242,7 @@ case letters as in the above example.
 ### Complex-typed Values
 
 When variable values are provided in a variable definitions file, Packer's
-[usual syntax](/docs/from-1.5/expressions) can be used to assign
+[usual syntax](/docs/hcl2/expressions) can be used to assign
 complex-typed values, like lists and maps.
 
 Some special rules apply to the `-var` command line option and to environment
@@ -288,7 +288,7 @@ that the same variable cannot be assigned multiple values within a single source
 ~> **Important:** Variables with map and object values behave the same way as
 other variables: the last value found overrides the previous values.
 
-`@include 'from-1.5/variables/must-be-set.mdx'`
+`@include 'hcl2/variables/must-be-set.mdx'`
 
 ### Setting an unknown variable will not always fail:
 
@@ -299,4 +299,4 @@ other variables: the last value found overrides the previous values.
 |     `-var bar=yz` argument     | error, "bar undeclared" |  error, "bar undeclared"  |
 |    `export PKR_VAR_bar=yz`     |            -            |             -             |
 
-`@include 'from-1.5/variables/sensitive.mdx'`
+`@include 'hcl2/variables/sensitive.mdx'`

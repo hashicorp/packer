@@ -9,7 +9,7 @@
     [GH-10377]
 * **New function** `env` allows users to set the default value of a variable to
     the value of an environment variable. Please see [env function
-    docs](https://www.packer.io/docs/from-1.5/functions/contextual/env") for
+    docs](https://www.packer.io/docs/hcl2/functions/contextual/env") for
     more details. [GH-10240]
 * **Future Scaffolding** This release contains a large number of no-op
     refactoring changes. The Packer team at HashiCorp is preparing to split the
