@@ -145,7 +145,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 
 	// Decode required_plugins blocks and create implicit required_plugins
 	// blocks. Implicit required_plugins blocks happen when a builder or another
-	// plugin cannot be found, for example in the if one uses :
+	// plugin cannot be found, for example if one uses :
 	//  source "amazon-ebs" "example" { ... }
 	// And no `amazon-ebs` builder can be found. This will then be the
 	// equivalent of having :
@@ -272,7 +272,7 @@ func sniffCoreVersionRequirements(body hcl.Body) ([]VersionConstraint, hcl.Diagn
 func (cfg *PackerConfig) Initialize() hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	// enable packer to start plugins requested required_plugins.
+	// enable packer to start plugins requested in required_plugins.
 	moreDiags := cfg.detectPluginBinaries()
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
