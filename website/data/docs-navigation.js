@@ -45,6 +45,7 @@ export default [
               'source',
               'variable',
               'packer',
+              'data'
             ],
           },
           {
@@ -179,6 +180,7 @@ export default [
           'variables',
           'locals',
           'contextual-variables',
+          'datasources',
           'path-variables',
           'syntax',
           'onlyexcept',
@@ -306,6 +308,7 @@ export default [
       'custom-builders',
       'custom-post-processors',
       'custom-provisioners',
+      'custom-datasources',
     ],
   },
   '---------',
