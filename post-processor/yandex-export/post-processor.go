@@ -67,8 +67,9 @@ type Config struct {
 	// source_image_family must be specified.
 	SourceImageID string `mapstructure:"source_image_id" required:"false"`
 	// The extra size of the source disk in GB. This defaults to `0GB`.
-	// Requires `losetup` utility on the instance. Careful! Increases payment cost.
-	// See [perfomance](https://cloud.yandex.com/docs/compute/concepts/disk#performance).
+	// Requires `losetup` utility on the instance.
+	// > **Careful!** Increases payment cost.
+	// > See [perfomance](https://cloud.yandex.com/docs/compute/concepts/disk#performance).
 	SourceDiskExtraSize int `mapstructure:"source_disk_extra_size" required:"false"`
 	ctx                 interpolate.Context
 }
