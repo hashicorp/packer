@@ -1,28 +1,26 @@
 ---
 description: >
-  The legacy JSON templates are JSON files that configure the various components
+  The JSON templates are JSON files that configure the various components
   of Packer in order to create one or more machine images. Templates are
   portable, static, and readable and writable by both humans and computers.
   This has the added benefit of being able to not only create and modify
   templates by hand, but also write scripts to dynamically create or modify
   templates.
-page_title: Legacy JSON Templates
-sidebar_title: Legacy JSON Templates
+page_title: JSON Templates
+sidebar_title: JSON Templates
 ---
 
-# Legacy JSON Templates
+# JSON Templates
 
-The Legacy Packer templates are JSON files that configure the various components
+These Packer templates are JSON files that configure the various components
 of Packer in order to create one or more machine images. Templates are portable,
-static, and readable and writable by both humans and computers. This has the
-added benefit of being able to not only create and modify templates by hand,
-but also write scripts to dynamically create or modify templates.
+static, and readable and writable by both humans and computers.
 
 Templates are given to commands such as `packer build`, which will take the
 template and actually run the builds within it, producing any resulting machine
 images.
 
-## Legacy JSON Template Structure
+## JSON Template Structure
 
 The template is a JSON object that has a set of keys configuring various
 components of Packer. The available keys within a template are listed below.
