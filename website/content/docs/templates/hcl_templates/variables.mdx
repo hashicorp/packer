@@ -24,7 +24,7 @@ Guide_](/guides/hcl/variables).
 variable is being discussed. Other kinds of variables in Packer include
 _environment variables_ (set by the shell where Packer runs) and _expression
 variables_ (used to indirectly represent a value in an
-[expression](//docs/templates/hcl_templates/expressions)).
+[expression](/docs/templates/hcl_templates/expressions)).
 
 ## Declaring an Input Variable
 
@@ -84,7 +84,7 @@ configuration.
 ## Using Input Variable Values
 
 Within the build that declared a variable, its value can be accessed from
-within [expressions](//docs/templates/hcl_templates/expressions) as `var.<NAME>`, where `<NAME>`
+within [expressions](/docs/templates/hcl_templates/expressions) as `var.<NAME>`, where `<NAME>`
 matches the label given in the declaration block:
 
 ```hcl
@@ -100,7 +100,7 @@ the folder where it was declared.
 ## Type Constraints
 
 The `type` argument in a `variable` block allows you to restrict the [type of
-value](//docs/templates/hcl_templates/expressions#types-and-values) that will be accepted as the value
+value](/docs/templates/hcl_templates/expressions#types-and-values) that will be accepted as the value
 for a variable. If no type constraint is set then a value of any type is
 accepted.
 
@@ -242,7 +242,7 @@ case letters as in the above example.
 ### Complex-typed Values
 
 When variable values are provided in a variable definitions file, Packer's
-[usual syntax](//docs/templates/hcl_templates/expressions) can be used to assign
+[usual syntax](/docs/templates/hcl_templates/expressions) can be used to assign
 complex-typed values, like lists and maps.
 
 Some special rules apply to the `-var` command line option and to environment
