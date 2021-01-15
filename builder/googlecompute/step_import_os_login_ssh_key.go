@@ -5,7 +5,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log"
+	"net/http"
+	"time"
 
+	metadata "cloud.google.com/go/compute/metadata"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"google.golang.org/api/oauth2/v2"
@@ -37,7 +41,7 @@ func (s *StepImportOSLoginSSHKey) Run(ctx context.Context, state multistep.State
 	}
 
 	// Are we running packer on a GCE ?
-	s.accountEmail = driver.GetOSLoginUserFromGCE()
+	s.accountEmail = getGCEUser()
 
 	if s.TokeninfoFunc == nil && s.accountEmail == "" {
 		s.TokeninfoFunc = tokeninfo
@@ -139,4 +143,29 @@ func tokeninfo(ctx context.Context) (*oauth2.Tokeninfo, error) {
 	}
 
 	return svc.Tokeninfo().Context(ctx).Do()
+}
+
+// getGCEUser determines if we're running packer on a GCE, and if we are, gets the associated service account email for subsequent use with OSLogin.
+// There are cases where we are running on a GCE, but the GCP metadata server isn't accessible. GitLab docker-engine runners are an edge case example of this.
+// It makes little sense to run packer on GCP in this way, however, we defensively timeout in those cases, rather than abort.
+func getGCEUser() string {
+
+	metadataCheckTimeout := 5 * time.Second
+	metadataCheckChl := make(chan string, 1)
+
+	go func() {
+		if metadata.OnGCE() {
+			GCEUser, _ := metadata.NewClient(&http.Client{}).Email("")
+			metadataCheckChl <- GCEUser
+		}
+	}()
+
+	select {
+	case thisGCEUser := <-metadataCheckChl:
+		log.Printf("[INFO] OSLogin: GCE service account %s will be used for identity", thisGCEUser)
+		return thisGCEUser
+	case <-time.After(metadataCheckTimeout):
+		log.Printf("[INFO] OSLogin: Could not derive a GCE service account from google metadata server after %s", metadataCheckTimeout)
+		return ""
+	}
 }
