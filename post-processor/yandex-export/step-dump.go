@@ -62,8 +62,8 @@ func (s *StepDump) Run(ctx context.Context, state multistep.StateBag) multistep.
 	defer wg.Wait()
 	ctxWithCancel, cancel := context.WithCancel(ctx)
 	defer cancel()
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
 		defer wg.Done()
 		cmd := &packersdk.RemoteCmd{
 			Command: "while true ; do sleep 3; sudo kill -s SIGUSR1 $(pidof qemu-img); done",
