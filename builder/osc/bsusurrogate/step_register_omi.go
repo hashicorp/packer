@@ -114,7 +114,7 @@ func (s *StepRegisterOMI) Cleanup(state multistep.StateBag) {
 	}
 }
 
-func (s *StepRegisterOMI) combineDevices(snapshotIds map[string]string) []osc.BlockDeviceMappingImage {
+func (s *StepRegisterOMI) combineDevices(snapshotIDs map[string]string) []osc.BlockDeviceMappingImage {
 	devices := map[string]osc.BlockDeviceMappingImage{}
 
 	for _, device := range s.OMIDevices {
@@ -125,12 +125,20 @@ func (s *StepRegisterOMI) combineDevices(snapshotIds map[string]string) []osc.Bl
 	// the same name in ami_block_device_mappings, except for the
 	// one designated as the root device in ami_root_device
 	for _, device := range s.LaunchDevices {
-		snapshotId, ok := snapshotIds[device.DeviceName]
+		snapshotID, ok := snapshotIDs[device.DeviceName]
 		if ok {
-			device.Bsu.SnapshotId = snapshotId
+			device.Bsu.SnapshotId = snapshotID
 		}
 		if device.DeviceName == s.RootDevice.SourceDeviceName {
 			device.DeviceName = s.RootDevice.DeviceName
+
+			if device.Bsu.VolumeType != "" {
+				device.Bsu.VolumeType = s.RootDevice.VolumeType
+				if device.Bsu.VolumeType != "io1" {
+					device.Bsu.Iops = 0
+				}
+			}
+
 		}
 		devices[device.DeviceName] = copyToDeviceMappingImage(device)
 	}
