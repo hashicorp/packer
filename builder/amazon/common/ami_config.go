@@ -52,7 +52,7 @@ type AMIConfig struct {
 	AMITags map[string]string `mapstructure:"tags" required:"false"`
 	// Same as [`tags`](#tags) but defined as a singular repeatable block
 	// containing a `key` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	AMITag config.KeyValues `mapstructure:"tag" required:"false"`
 	// Enable enhanced networking (ENA but not SriovNetSupport) on
@@ -142,7 +142,7 @@ type AMIConfig struct {
 	SnapshotTags map[string]string `mapstructure:"snapshot_tags" required:"false"`
 	// Same as [`snapshot_tags`](#snapshot_tags) but defined as a singular
 	// repeatable block containing a `key` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	SnapshotTag config.KeyValues `mapstructure:"snapshot_tag" required:"false"`
 	// A list of account IDs that have

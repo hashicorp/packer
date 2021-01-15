@@ -64,7 +64,7 @@ type Config struct {
 	ImageTags map[string]string `mapstructure:"image_tags" required:"false"`
 	// Same as [`image_tags`](#image_tags) but defined as a singular repeatable
 	// block containing a `key` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	ImageTag config.KeyValues `mapstructure:"image_tag" required:"false"`
 	// The service of the resulting image.
@@ -77,7 +77,7 @@ type Config struct {
 	VmTags map[string]string `mapstructure:"vm_tags" required:"false"`
 	// Same as [`vm_tags`](#vm_tags) but defined as a singular repeatable block
 	// containing a `key` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	VmTag config.NameValues `mapstructure:"vm_tag" required:"false"`
 	// The name of the created disk.

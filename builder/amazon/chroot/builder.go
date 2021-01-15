@@ -167,7 +167,7 @@ type Config struct {
 	RootVolumeTags map[string]string `mapstructure:"root_volume_tags" required:"false"`
 	// Same as [`root_volume_tags`](#root_volume_tags) but defined as a
 	// singular block containing a `key` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	RootVolumeTag config.KeyValues `mapstructure:"root_volume_tag" required:"false"`
 	// Whether or not to encrypt the volumes that are *launched*. By default, Packer will keep

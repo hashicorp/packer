@@ -70,7 +70,7 @@ type Config struct {
 	// Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular
 	// repeatable block containing a `key` and a `value` field. In HCL2 mode
 	// the
-	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	VolumeRunTag config.KeyValues `mapstructure:"run_volume_tag"`
 
