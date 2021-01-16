@@ -33,6 +33,8 @@ type ImageConfig struct {
 	ImageTags []string `mapstructure:"image_tags" required:"false"`
 	// Minimum disk size needed to boot image, in gigabytes.
 	ImageMinDisk int `mapstructure:"image_min_disk" required:"false"`
+	// Skip creating the image. Useful for setting to `true` during a build test stage. Defaults to `false`.
+	SkipCreateImage bool `mapstructure:"skip_create_image" required:"false"`
 }
 
 func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {

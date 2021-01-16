@@ -24,6 +24,11 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	server := state.Get("server").(*servers.Server)
 	ui := state.Get("ui").(packersdk.Ui)
 
+	if config.SkipCreateImage {
+		ui.Say("Skipping image creation...")
+		return multistep.ActionContinue
+	}
+
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()
 	if err != nil {
