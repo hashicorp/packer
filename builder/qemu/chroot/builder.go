@@ -174,7 +174,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	if runtime.GOOS != "linux" {
-		return nil, errors.New("The qeum-chroot builder only works on Linux environments.")
+		return nil, errors.New("The qemu-chroot builder only works on Linux environments.")
 	}
 
 	wrappedCommand := func(command string) (string, error) {
