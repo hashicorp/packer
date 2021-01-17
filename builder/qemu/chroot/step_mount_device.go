@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/packer/common/packerbuilderdata"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 // StepMountDevice mounts the mapped device.
@@ -32,7 +32,7 @@ type StepMountDevice struct {
 
 func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	device := state.Get("device").(string)
 
 	ctx := config.ctx
@@ -75,7 +75,7 @@ func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multi
 }
 
 func (s *StepMountDevice) CleanupFunc(state multistep.StateBag) error {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.mountPath == "" {
 		return nil

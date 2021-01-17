@@ -7,9 +7,9 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/common/packerbuilderdata"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
 )
 
 // StepPrepareSourceImage process the source image.
@@ -24,7 +24,7 @@ type StepPrepareSourceImage struct {
 
 func (s *StepPrepareSourceImage) prepareOutputDir(state multistep.StateBag) error {
 	config := state.Get("config").(*Config)
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if _, err := os.Stat(config.OutputDir); err == nil {
 		if !config.PackerForce {
@@ -85,7 +85,7 @@ func (s *StepPrepareSourceImage) Run(_ context.Context, state multistep.StateBag
 }
 
 func (s *StepPrepareSourceImage) Cleanup(state multistep.StateBag) {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if s.rawImage == "" {
 		return

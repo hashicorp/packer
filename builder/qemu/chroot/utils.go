@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func Halt(state multistep.StateBag, err error) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	state.Put("error", err)
 	ui.Error(err.Error())
 	return multistep.ActionHalt
@@ -24,7 +24,7 @@ func RunCommand(state multistep.StateBag, cmd string) (string, error) {
 		return "", err
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say(fmt.Sprintf("Running command \"%s\"...", cmd))
 
 	shell := common.ShellCommand(cmd)

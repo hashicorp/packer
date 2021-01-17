@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/packer/common/packerbuilderdata"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
 )
 
 // StepAttachVolume mapping source image to device
@@ -71,7 +71,7 @@ func (s *StepAttachVolume) Run(_ context.Context, state multistep.StateBag) mult
 		return Halt(state, fmt.Errorf("Failed to map device: %s", err))
 	}
 
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 	ui.Say(fmt.Sprintf("Device is ready \"%s\"", s.device))
 
 	state.Put("attach_cleanup", s)
@@ -86,7 +86,7 @@ func (s *StepAttachVolume) Cleanup(state multistep.StateBag) {
 }
 
 func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
-	ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packersdk.Ui)
 
 	if !s.deviceMapped {
 		return nil

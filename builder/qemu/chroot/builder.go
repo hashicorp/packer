@@ -15,13 +15,14 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/chroot"
-	"github.com/hashicorp/packer/common/packerbuilderdata"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/chroot"
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
+	"github.com/hashicorp/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 // Config is the configuration that is chained through the steps and settable
@@ -152,16 +153,16 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	// Accumulate any errors or warnings
-	var errs *packer.MultiError
+	var errs *packersdk.MultiError
 	var warns []string
 
 	if b.config.SourceImage == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("source_image is required."))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("source_image is required."))
 	}
 
 	for _, mounts := range b.config.ChrootMounts {
 		if len(mounts) != 3 {
-			errs = packer.MultiErrorAppend(
+			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("Each chroot_mounts entry should be three elements."))
 			break
 		}
@@ -174,7 +175,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	return []string{"Device", "MountPath"}, warns, nil
 }
 
-func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	if runtime.GOOS != "linux" {
 		return nil, errors.New("The qemu-chroot builder only works on Linux environments.")
 	}
@@ -221,7 +222,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	}
 
 	// Run!
-	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
 
 	// If there was an error, return that
