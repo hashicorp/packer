@@ -38,7 +38,7 @@ type Config struct {
 	// By default this is output-BUILDNAME where "BUILDNAME" is the
 	// name of the build.
 	OutputDir string `mapstructure:"output_directory"`
-	// The output image file name
+	// The output image file name, ".qcow2" suffix will be added automatically.
 	ImageName string `mapstructure:"image_name"`
 	// Options to supply the mount command when mounting devices. Each option
 	// will be prefixed with -o and supplied to the mount command ran by
@@ -135,6 +135,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	if b.config.ImageName == "" {
 		b.config.ImageName = fmt.Sprintf("packer-%s.qcow2", b.config.PackerBuildName)
+	} else {
+		b.config.ImageName += ".qcow2"
 	}
 
 	if b.config.CommandWrapper == "" {
