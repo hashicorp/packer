@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -97,17 +96,7 @@ func TestFmt_Recursive(t *testing.T) {
 	_, _ = subTf.Write(unformattedData)
 	subTf.Close()
 
-	var directoryDelimiter string
-	if runtime.GOOS == "windows" {
-		directoryDelimiter = "\\"
-	} else {
-		directoryDelimiter = "/"
-	}
-
-	dirSplit := strings.Split(subDir, directoryDelimiter)
-	// Need just last bit to of top level temp directory to call command
-	subDirIsolated := dirSplit[len(dirSplit)-1]
-	args := []string{"-recursive=true", filepath.Join(testFixture("fmt"), subDirIsolated)}
+	args := []string{"-recursive=true", subDir}
 
 	if code := c.Run(args); code != 0 {
 		fatalCommand(t, c.Meta)
@@ -120,6 +109,34 @@ func TestFmt_Recursive(t *testing.T) {
 
 	validateFileIsFormatted(t, formattedData, tf)
 	validateFileIsFormatted(t, formattedData, subTf)
+
+	//Testing with recursive flag off that sub directories are not formatted
+	tf, err = ioutil.TempFile(subDir, "*.pkrvars.hcl")
+	if err != nil {
+		t.Fatalf("failed to create top level tempfile for test %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	_, _ = tf.Write(unformattedData)
+	tf.Close()
+
+	subTf, err = ioutil.TempFile(superSubDir, "*.pkrvars.hcl")
+	if err != nil {
+		t.Fatalf("failed to create sub level tempfile for test %s", err)
+	}
+	defer os.Remove(subTf.Name())
+
+	_, _ = subTf.Write(unformattedData)
+	subTf.Close()
+
+	args = []string{subDir}
+
+	if code := c.Run(args); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+
+	validateFileIsFormatted(t, formattedData, tf)
+	validateFileIsFormatted(t, unformattedData, subTf)
 }
 
 func validateFileIsFormatted(t *testing.T, formattedData []byte, testFile *os.File) {
