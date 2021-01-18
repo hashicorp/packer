@@ -105,7 +105,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		}
 
 		newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallOptions{
-			InFolders:                 c.Meta.CoreConfig.Components.PluginConfig.KnownPluginFolders,
+			InFolders:                 opts.FromFolders,
 			BinaryInstallationOptions: opts.BinaryInstallationOptions,
 			Getters:                   getters,
 		})
