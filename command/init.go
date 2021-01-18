@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"github.com/hashicorp/packer/packer/plugin-getter/github"
+	"github.com/hashicorp/packer/version"
 	"github.com/posener/complete"
 )
 
@@ -76,7 +77,16 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 	log.Printf("[TRACE] init: %#v", opts)
 
 	getters := []plugingetter.Getter{
-		new(github.Getter),
+		&github.Getter{
+			// In the past some terraform plugins downloads were blocked from a
+			// specific aws region by s3. Changing the user agent unblocked the
+			// downloads so having one user agent per version will help mitigate
+			// that a little more. Especially in the case someone forks this
+			// code to make it more aggressive or something.
+			// TODO: allow to set this from the config file or an environment
+			// variable.
+			UserAgent: "packer-getter-github-" + version.String(),
+		},
 	}
 
 	for _, pluginRequirement := range reqs {
