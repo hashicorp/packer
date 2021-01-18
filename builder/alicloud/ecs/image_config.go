@@ -153,7 +153,7 @@ type AlicloudImageConfig struct {
 	AlicloudImageTags map[string]string `mapstructure:"tags" required:"false"`
 	// Same as [`tags`](#tags) but defined as a singular repeatable block
 	// containing a `key` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](/docs/configuration/from-1.5/expressions#dynamic-blocks)
+	// [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
 	// will allow you to create those programatically.
 	AlicloudImageTag    config.KeyValues `mapstructure:"tag" required:"false"`
 	AlicloudDiskDevices `mapstructure:",squash"`
