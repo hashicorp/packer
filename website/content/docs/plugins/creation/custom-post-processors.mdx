@@ -22,7 +22,7 @@ those files, and returning an artifact with a single ID: the URL of the upload.
 Prior to reading this page, it is assumed you have read the page on [plugin
 development basics](/docs/extending/plugins).
 
-Post-processor plugins implement the `packer.PostProcessor` interface and are
+Post-processor plugins implement the [`packer.PostProcessor`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer#PostProcessor) interface and are
 served using the `plugin.ServePostProcessor` function.
 
 ~> **Warning!** This is an advanced topic. If you're new to Packer, we
@@ -31,7 +31,7 @@ recommend getting a bit more comfortable before you dive into writing plugins.
 ## The Interface
 
 The interface that must be implemented for a post-processor is the
-`packer.PostProcessor` interface. It is reproduced below for reference. The
+[`packer.PostProcessor`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer#PostProcessor) interface. It is reproduced below for reference. The
 actual interface in the source code contains some basic documentation as well
 explaining what each method should do.
 

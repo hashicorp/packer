@@ -30,7 +30,7 @@ assumes that you have some familiarity with that programming language.
 ## The Interface
 
 To create your own builder, you must create a struct that implements the
-`packer.Builder` interface. It is reproduced below for reference.
+[`packer.Builder`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer#Builder) interface. It is reproduced below for reference.
 
 ```go
 type Builder interface {
@@ -200,11 +200,15 @@ provide to procisioners (see below for more details on generatedData.)
 
 ## Template Engine
 
+~> Note: In HCL2 The JSON template engine and generated data is slowly going to
+be deprecated in favor of using HCL2 objects, we will keep on supporting those
+but it is recomended to avoid using them if you can.
+
 ### Build variables
 
-Packer makes it possible to provide custom template engine variables to be
+Packer JSON makes it possible to provide custom template engine variables to be
 shared with provisioners and post-processors using the `build` function.
-Json template `build` docs are [here](/docs/templates/engine#build)
+JSON template `build` docs are [here](/docs/templates/legacy_json_templates/engine#build)
 and HCL template build docs are [here](/docs/templates/hcl_templates/contextual-variables#build-variables).
 
 As of Packer v1.5.0, builder Prepare() methods return a list of custom variables

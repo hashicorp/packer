@@ -1,100 +1,25 @@
 ---
 description: |
-  Packer Plugins allow new functionality to be added to Packer without modifying
-  the core source code. Packer plugins are able to add new builders,
-  provisioners, hooks, and more.
-page_title: Plugins - Extending
-sidebar_title: Plugins
+  Packer is designed to be extensible. Because the surface area for workloads is
+  infinite, Packer supports plugins for builders, provisioners, and
+  post-processors.
+page_title: Extending
+sidebar_title: Extending Packer
 ---
 
-# Plugins
+# Extending Packer
 
-Packer Plugins allow new functionality to be added to Packer without modifying
-the core source code. Packer plugins are able to add new builders,
-provisioners, hooks, and more. In fact, much of Packer itself is implemented by
-writing plugins that are simply distributed with Packer. For example, all the
-builders, provisioners, and more that ship with Packer are implemented as
-Plugins that are simply hardcoded to load with Packer.
-
-This section will cover how to install and use plugins. If you're interested in
-developing plugins, the documentation for that is available below, in the
-[developing plugins](#developing-plugins) section.
-
-The current official listing of available Packer plugins can be found
-[here](/community-tools#third-party-plugins). This is an incomplete list,
-and more plugins can be found by searching. Typically, searching "packer plugin
-_x_" will find what you're looking for if it exists. We hope to create an
-offical registry for third party plugins in the future.
-
-## How Plugins Work
-
-Packer plugins are completely separate, standalone applications that the core
-of Packer starts and communicates with.
-
-These plugin applications aren't meant to be run manually. Instead, Packer core
-executes them as a sub-process, run as a sub-command (`packer plugin`) and
-communicates with them. For example, the Shell provisioner is actually run as
-`packer plugin packer-provisioner-shell`. The next time you run a Packer build,
-look at your process list and you should see a handful of `packer-` prefixed
-applications running.
-
-## Installing Plugins
-
-The easiest way to install a plugin is to name it correctly, then place it in
-the proper directory. To name a plugin correctly, make sure the binary is named
-`packer-plugin-NAME`. For example, `packer-plugin-amazon` for a "plugin"
-binary named "amazon". This binary will make one or more plugins
-available to use. Valid types for plugins are down this page.
-
-Once the plugin is named properly, Packer automatically discovers plugins in
-the following directories in the given order. If a conflicting plugin is found
-later, it will take precedence over one found earlier.
-
-1.  The directory where `packer` is, or the executable directory.
-
-2.  The `$HOME/.packer.d/plugins` directory, if `$HOME` is defined (unix)
-
-3.  The `%APPDATA%/packer.d/plugins` if `%APPDATA%` is defined (windows)
-
-4.  The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined
-    (windows)
-
-5.  The current working directory.
-
-6.  The directory defined in the env var `PACKER_PLUGIN_PATH`. There can be more
-    than one directory defined; for example, `~/custom-dir-1:~/custom-dir-2`.
-    Separate directories in the PATH string using a colon (`:`) on posix systems and
-    a semicolon (`;`) on windows systems. The above example path would be able to
-    find a provisioner named `packer-provisioner-foo` in either
-    `~/custom-dir-1/packer-provisioner-foo` or
-    `~/custom-dir-2/packer-provisioner-foo`.
-
-The valid types for plugins are:
-
-- `plugin` - A plugin binary that can contain one or more of each Packer plugin
-  type.
-
-- `builder` - Plugins responsible for building images for a specific
-  platform.
-
-- `post-processor` - A post-processor responsible for taking an artifact from
-  a builder and turning it into something else.
-
-- `provisioner` - A provisioner to install software on images created by a
-  builder.
-
-~> **Note**: Only _multi-plugin binaries_ -- that is plugins named
-packer-plugin-*, like the `packer-plugin-amazon` described before -- are
-expected to work with Packer's plugin manager. The legacy `builder`,
-`post-processor` and `provisioner` plugin types will keep on being detected but
-Packer cannot install them automatically.
+Packer is designed to be extensible. Because the surface area for workloads is
+infinite, Packer supports plugins for builders, provisioners, and
+post-processors. To learn more about the different customizations, please
+choose a link from the sidebar.
 
 
 ## Developing Plugins
 
 This page will document how you can develop your own Packer plugins. Prior to
 reading this, it is assumed that you're comfortable with Packer and also know
-the [basics of how Plugins work](/docs/extending/plugins), from a user
+the [basics of how Plugins work](/docs/plugins), from a user
 standpoint.
 
 Packer plugins must be written in [Go](https://golang.org/), so it is also
@@ -136,18 +61,18 @@ than the following two packages, you're encouraged to use whatever packages you
 want. Because plugins are their own processes, there is no danger of colliding
 dependencies.
 
-- `github.com/hashicorp/packer` - Contains all the interfaces that you have
+- [`github.com/hashicorp/packer-plugin-sdk/packer`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer) - Contains all the interfaces that you have
   to implement for any given plugin.
 
-- `github.com/hashicorp/packer/packer/plugin` - Contains the code to serve
+- [`github.com/hashicorp/packer-plugin-sdk/plugin`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/plugin) - Contains the code to serve
   the plugin. This handles all the inter-process communication stuff.
 
 There are two steps involved in creating a plugin:
 
 1.  Implement the desired interface. For example, if you're building a builder
-    plugin, implement the `packer.Builder` interface.
+    plugin, implement the [packer.Builder](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer#Builder) interface.
 
-2.  Serve the interface by calling the appropriate plugin serving method in
+2.  Serve the interface by calling the appropriate [plugin](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/plugin#Set.RegisterBuilder) serving method in
     your main method.
 
 Basic examples are shown below. Note that if you can define a multi-plugin
@@ -240,7 +165,7 @@ plugins will continue to work with the version of Packer you lock to.
 
 Plugins can use the standard Go `log` package to log. Anything logged using
 this will be available in the Packer log files automatically. The Packer log is
-visible on stderr when the `PACKER_LOG` environmental is set.
+visible on stderr when the `PACKER_LOG` environment var is set.
 
 Packer will prefix any logs from plugins with the path to that plugin to make
 it identifiable where the logs come from. Some example logs are shown below:

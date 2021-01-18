@@ -300,14 +300,19 @@ export default [
   'install',
   '----------',
   {
-    category: 'extending',
+    category: 'plugins',
     content: [
-      'plugins',
-      'custom-builders',
-      'custom-post-processors',
-      'custom-provisioners',
+      {
+        category: 'creation',
+        content: [
+          'custom-builders',
+          'custom-post-processors',
+          'custom-provisioners',
+        ],
+      },
     ],
   },
+  
   '---------',
   'environment-variables',
   'core-configuration',

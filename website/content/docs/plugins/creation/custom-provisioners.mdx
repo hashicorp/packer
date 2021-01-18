@@ -23,7 +23,7 @@ the machines.
 Prior to reading this page, it is assumed you have read the page on [plugin
 development basics](/docs/extending/plugins).
 
-Provisioner plugins implement the `packer.Provisioner` interface and are served
+Provisioner plugins implement the [`packer.Provisioner`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer#Provisioner) interface and are served
 using the `plugin.ServeProvisioner` function.
 
 ~> **Warning!** This is an advanced topic. If you're new to Packer, we
@@ -32,7 +32,7 @@ recommend getting a bit more comfortable before you dive into writing plugins.
 ## The Interface
 
 The interface that must be implemented for a provisioner is the
-`packer.Provisioner` interface. It is reproduced below for reference. The
+[`packer.Provisioner`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer#Provisioner) interface. It is reproduced below for reference. The
 actual interface in the source code contains some basic documentation as well
 explaining what each method should do.
 
