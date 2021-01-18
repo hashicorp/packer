@@ -55,6 +55,15 @@ func TestParse_datasource(t *testing.T) {
 			parseTestArgs{"testdata/datasources/inexistent.pkr.hcl", nil, nil},
 			&PackerConfig{
 				Basedir: filepath.Join("testdata", "datasources"),
+				Datasources: Datasources{
+					{
+						Type: "inexistant",
+						Name: "test",
+					}: {
+						Type: "inexistant",
+						Name: "test",
+					},
+				},
 			},
 			true, true,
 			nil,

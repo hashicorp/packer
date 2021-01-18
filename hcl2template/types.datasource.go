@@ -74,6 +74,26 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 	var diags hcl.Diagnostics
 	block := cfg.Datasources[ref].block
 
+	if dataSourceStore == nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary:  "Unknown " + dataSourceLabel + " type " + ref.Type,
+			Subject:  block.LabelRanges[0].Ptr(),
+			Detail:   fmt.Sprintf("packer does not currently know any data source."),
+			Severity: hcl.DiagError,
+		})
+		return nil, diags
+	}
+
+	if !dataSourceStore.Has(ref.Type) {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary:  "Unknown " + dataSourceLabel + " type " + ref.Type,
+			Subject:  block.LabelRanges[0].Ptr(),
+			Detail:   fmt.Sprintf("known data sources: %v", dataSourceStore.List()),
+			Severity: hcl.DiagError,
+		})
+		return nil, diags
+	}
+
 	datasource, err := dataSourceStore.Start(ref.Type)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
@@ -114,25 +134,6 @@ func (p *Parser) decodeDataBlock(block *hcl.Block) (*Datasource, hcl.Diagnostics
 		block: block,
 	}
 
-	if p.DatasourceSchemas == nil {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "Unknown " + dataSourceLabel + " type " + r.Type,
-			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("packer does not currently know any data source."),
-			Severity: hcl.DiagError,
-		})
-		return r, diags
-	}
-
-	if !p.DatasourceSchemas.Has(r.Type) {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "Unknown " + dataSourceLabel + " type " + r.Type,
-			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("known data sources: %v", p.DatasourceSchemas.List()),
-			Severity: hcl.DiagError,
-		})
-		return r, diags
-	}
 	if !hclsyntax.ValidIdentifier(r.Type) {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
