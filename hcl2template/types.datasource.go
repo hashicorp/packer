@@ -19,6 +19,11 @@ type Datasource struct {
 	block *hcl.Block
 }
 
+type DatasourceRef struct {
+	Type string
+	Name string
+}
+
 type Datasources map[DatasourceRef]Datasource
 
 func (data *Datasource) Ref() DatasourceRef {
@@ -54,20 +59,6 @@ func (ds *Datasources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	}
 
 	return res, diags
-}
-
-type DatasourceRef struct {
-	Type string
-	Name string
-}
-
-// the 'addition' field makes of ref a different entry in the data sources map, so
-// Ref is here to make sure only one is returned.
-func (r *DatasourceRef) Ref() DatasourceRef {
-	return DatasourceRef{
-		Type: r.Type,
-		Name: r.Name,
-	}
 }
 
 func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore, ref DatasourceRef) (packersdk.Datasource, hcl.Diagnostics) {
