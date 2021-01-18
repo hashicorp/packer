@@ -20,6 +20,12 @@
     },
     {
       "pattern": "^/docs/templates/hcl_templates/"
+    },
+    {
+      "pattern": "^/docs/templates/legacy_json_templates"
+    },
+    {
+      "pattern": "^https://packer.io/docs/templates/legacy_json_templates"
     }
   ],
   "replacementPatterns": [
