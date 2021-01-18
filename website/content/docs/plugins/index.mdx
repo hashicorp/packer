@@ -39,11 +39,60 @@ applications running.
 
 ## Installing Plugins
 
-The easiest way to install a plugin is to name it correctly, then place it in
-the proper directory. To name a plugin correctly, make sure the binary is named
-`packer-plugin-NAME`. For example, `packer-plugin-amazon` for a "plugin"
-binary named "amazon". This binary will make one or more plugins
-available to use. Valid types for plugins are down this page.
+
+<Tabs>
+<Tab heading="With `packer init`">
+
+~> **Note**: Only _multi-plugin binaries_ -- that is plugins named
+packer-plugin-*, like the `packer-plugin-amazon` -- are expected to work with
+Packer init. The legacy `builder`, `post-processor` and `provisioner` plugin
+types will keep on being detected but Packer cannot install them automatically.
+
+
+1. Add a [`required_plugin`](http://localhost:3000/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
+block to your `packer` block, each block will tell packer what version to use,
+make sure to set a correct [version constraint
+string](http://localhost:3000/docs/templates/hcl_templates/blocks/packer#version-constraints). For example:
+
+  ```hcl
+  packer {
+    required_plugins {
+      aws = {
+        version = ">= 2.7.0"
+        source = "azr/aws"
+      }
+      azure = ">= 2.7.0"
+    }
+  }
+  ```
+
+2. Run `packer init` to install all missing plugin binaries.
+
+### Auto-resolver
+
+In the previous examples, the getter will look for plugins located at:
+* github.com/azr/packer-plugin-aws
+* github.com/hashicorp/packer-plugin-azure
+
+Plugins should always be addressed using this dns resolvable form. The plugin
+getter defaults the domain to `github.com` and the account to `hashicorp` if
+unspecified. The plugin name should always skip the `packer-plugin-` prefix that
+will be automatically added.
+
+Packer will install these plugins in your prefered folder, so here for example
+on a `darwin_amd64` :
+
+* `${PLUGIN_DIR}/github.com/azr/aws/packer-plugin-aws.2.7.0_darwin_amd64_x5`
+* `${PLUGIN_DIR}/github.com/hashicorp/azure/packer-plugin-azure.2.7.0_darwin_amd64_x5`
+
+</Tab>
+<Tab heading="Manually">
+
+The easiest way to manually install a plugin is to name it correctly, then place
+it in the proper directory. To name a plugin correctly, make sure the binary is
+named `packer-plugin-NAME`. For example, `packer-plugin-amazon` for a "plugin"
+binary named "amazon". This binary will make one or more plugins available to
+use. Valid types for plugins are down this page.
 
 Once the plugin is named properly, Packer automatically discovers plugins in
 the following directories in the given order. If a conflicting plugin is found
@@ -82,9 +131,5 @@ The valid types for plugins are:
 - `provisioner` - A provisioner to install software on images created by a
   builder.
 
-~> **Note**: Only _multi-plugin binaries_ -- that is plugins named
-packer-plugin-*, like the `packer-plugin-amazon` described before -- are
-expected to work with Packer's plugin manager. The legacy `builder`,
-`post-processor` and `provisioner` plugin types will keep on being detected but
-Packer cannot install them automatically.
-
+</Tab>
+</Tabs>

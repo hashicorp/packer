@@ -10,7 +10,7 @@ export default [
   'terminology',
   {
     category: 'commands',
-    content: ['build', 'console', 'fix', 'fmt', 'inspect', 'validate', 'hcl2_upgrade'],
+    content: ['init', 'build', 'console', 'fix', 'fmt', 'inspect', 'validate', 'hcl2_upgrade'],
   },
   {
     category: 'templates',
