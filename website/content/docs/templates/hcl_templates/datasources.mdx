@@ -45,6 +45,20 @@ identifier, like `data.<TYPE>.<NAME>.<ATTRIBUTE>`.
 
 The output from the `amazon-ami.example` above can be accessed as follows:
 
+Output data:
+```
+"data.amazon-ami.example" {
+  id = "ami12345"
+  name = "MyAMI"
+  creation_date = "01/01/2021"
+  owner = "123456789"
+  owner_name = "Some Name"
+  tags = {"tag1": "value"}
+}
+```
+
+Usage:
+
 ```hcl
 // in a local
 locals {
