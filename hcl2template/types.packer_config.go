@@ -154,6 +154,10 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*LocalBlock, hcl.Diag
 
 	for _, block := range content.Blocks {
 		switch block.Type {
+		case localLabel:
+			l, diags := decodeLocalBlock(locals, block)
+			diags = append(diags, moreDiags...)
+			locals = append(locals, l)
 		case localsLabel:
 			attrs, moreDiags := block.Body.JustAttributes()
 			diags = append(diags, moreDiags...)
@@ -228,7 +232,8 @@ func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics 
 		return diags
 	}
 	c.LocalVariables[local.Name] = &Variable{
-		Name: local.Name,
+		Name:      local.Name,
+		Sensitive: local.Sensitive,
 		Values: []VariableAssignment{{
 			Value: value,
 			Expr:  local.Expr,

@@ -24,6 +24,9 @@ const badIdentifierDetail = "A name must start with a letter or underscore and m
 type LocalBlock struct {
 	Name string
 	Expr hcl.Expression
+	// When Sensitive is set to true Packer will try it best to hide/obfuscate
+	// the variable from the output stream. By replacing the text.
+	Sensitive bool
 }
 
 // VariableAssignment represents a way a variable was set: the expression
@@ -244,6 +247,58 @@ var variableBlockSchema = &hcl.BodySchema{
 			Type: "validation",
 		},
 	},
+}
+
+var localBlockSchema = &hcl.BodySchema{
+	Attributes: []hcl.AttributeSchema{
+		{
+			Name: "sensitive",
+		},
+	},
+}
+
+func decodeLocalBlock(locals []*LocalBlock, block *hcl.Block) (*LocalBlock, hcl.Diagnostics) {
+	for _, local := range locals {
+		if local.Name == block.Labels[0] {
+			return nil, []*hcl.Diagnostic{{
+				Severity: hcl.DiagError,
+				Summary:  "Duplicate variable",
+				Detail:   "Duplicate " + block.Labels[0] + " variable definition found.",
+				Context:  block.DefRange.Ptr(),
+			}}
+		}
+	}
+
+	name := block.Labels[0]
+
+	var diags hcl.Diagnostics
+
+	attrs, moreDiags := block.Body.JustAttributes()
+	diags = append(diags, moreDiags...)
+	if !hclsyntax.ValidIdentifier(name) {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Invalid local name",
+			Detail:   badIdentifierDetail,
+			Subject:  &block.LabelRanges[0],
+		})
+	}
+
+	l := &LocalBlock{
+		Name: name,
+	}
+
+	for name, attr := range attrs {
+		if name == "sensitive" {
+			valDiags := gohcl.DecodeExpression(attr.Expr, nil, &l.Sensitive)
+			diags = append(diags, valDiags...)
+		}
+		if name == "expression" {
+			l.Expr = attr.Expr
+		}
+	}
+
+	return l, nil
 }
 
 // decodeVariableBlock decodes a "variable" block
