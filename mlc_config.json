@@ -22,6 +22,12 @@
       "pattern": "^/docs/templates/hcl_templates/"
     },
     {
+      "pattern": "^/docs/datasources"
+    },
+    {
+      "pattern": "^/docs/extending/custom-datasources"
+    },
+    {
       "pattern": "^/docs/templates/legacy_json_templates"
     },
     {

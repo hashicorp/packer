@@ -1,0 +1,96 @@
+---
+description: >
+  Packer Data Sources are the components of Packer that allow data to be fetched for use within the Packer configuration.
+  Use of data sources allows a build to use information defined outside of Packer.
+page_title: Custom Data Sources - Extending
+sidebar_title: Custom Data Sources
+---
+
+# Custom Data Sources
+
+Packer Data Sources are the components of Packer that allow data to be fetched for use within the configuration.
+Use of data sources allows a build to use information defined outside of Packer. An example of
+data source is the [amazon-ami data source](/docs/datasources/amazon-ami), which outputs the data of a fetched Amazon AMI.
+
+Prior to reading this page, it is assumed you have read the page on [plugin
+development basics](/docs/extending/plugins).
+
+Data Source plugins implement the `packersdk.Datasource` interface and are registered within a plugin Set
+with `set.RegisterDatasource(...)` function and served using the `set.Run()`.
+
+~> **Warning!** This is an advanced topic. If you're new to Packer, we
+recommend getting a bit more comfortable before you dive into writing plugins.
+
+## The Interface
+
+The interface that must be implemented for a datasource is the
+`packersdk.Datasource` interface. It is reproduced below for reference. The
+actual interface in the source code contains some basic documentation as well
+explaining what each method should do.
+
+```go
+type Datasource interface {
+    ConfigSpec() hcldec.ObjectSpec
+    OutputSpec() hcldec.ObjectSpec
+    Configure(...interface{}) error
+    Execute() (cty.Value, error)
+}
+```
+
+### The "ConfigSpec" Method
+
+This method returns a hcldec.ObjectSpec, which is a spec necessary for using
+HCL2 templates with Packer. For information on how to use and implement this
+function, check our
+[object spec docs](/guides/hcl/component-object-spec)
+
+### The "OutputSpec" Method
+
+This method returns a [hcldec.ObjectSpec](/guides/hcl/component-object-spec) of the data source output.
+The object spec can be generated using the command [`mapstructure-to-hcl2`](https://github.com/hashicorp/packer/tree/master/cmd/mapstructure-to-hcl2)
+just like the configuration spec for the `ConfigSpec` method.
+
+This method is used in `packer validate` command. Packer will use the spec to assign
+unknown values to the data source, instead of executing it and fetching real values.
+
+### The "Configure" Method
+
+The `Configure` method is called prior to any runs with the configuration that was given in the template.
+This is passed in as an array of `interface{}` types, but is generally `map[string]interface{}`. The Configure
+method is responsible for translating this configuration into an internal structure, validating it,
+and returning any errors.
+
+For multiple parameters, they should be merged together into the final
+configuration, with later parameters overwriting any previous configuration.
+The exact semantics of the merge are left to the builder author.
+
+For decoding the `interface{}` into a meaningful structure, the
+[mapstructure](https://github.com/mitchellh/mapstructure) library is
+recommended. Mapstructure will take an `interface{}` and decode it into an
+arbitrarily complex struct. If there are any errors, it generates very human
+friendly errors that can be returned directly from the Configure method.
+
+While it is not actively enforced, **no side effects** should occur from
+running the `Configure` method. Specifically, don't create files, don't launch
+virtual machines, etc. Configure's purpose is solely to configure the data source and
+validate the configuration.
+
+The `Configure` method is called very early in the build process so that errors
+may be displayed to the user before anything actually happens.
+
+### The "Execute" Method
+
+This method returns an HCL cty.Value and an error. Packer will run the Execute method on `packer build` command
+so that the data source output will be available prior to evaluating build and locals blocks. Is expected that the
+Execute command will fetch the data and return it as a cty.Value.
+
+To get the equivalent cty.Value from an output config, we suggest using our
+[packer-plugin-sdk hcl2helper functions](https://github.com/hashicorp/packer-plugin-sdk/blob/v0.0.7/hcl2helper/values.go).
+
+
+## Scaffolding template
+
+To make your experience easier when developing your new data source plugin, we provide you a
+[Packer plugin scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding)
+to use as a template to your plugin repository. The template is structure with the basics and contain the necessary
+configuration to start creating your own plugin.
