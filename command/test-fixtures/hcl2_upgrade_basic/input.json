@@ -61,6 +61,55 @@
                 ]
             },
             "ssh_interface": "session_manager"
+        },
+        {
+            "type": "amazon-ebs",
+            "name": "named_builder",
+            "region": "{{ user `aws_region` }}",
+            "secret_key": "{{ user `aws_secret_key` }}",
+            "access_key": "{{ user `aws_access_key` }}",
+            "ami_name": "ubuntu-16-04-test-{{ timestamp }}",
+            "ami_description": "Ubuntu 16.04 LTS - expand root partition",
+            "source_ami_filter": {
+                "filters": {
+                    "virtualization-type": "hvm",
+                    "name": "ubuntu/images/*/ubuntu-xenial-16.04-amd64-server-*",
+                    "root-device-type": "ebs"
+                },
+                "owners": [
+                    "099720109477"
+                ],
+                "most_recent": true
+            },
+            "launch_block_device_mappings": [
+                {
+                    "delete_on_termination": true,
+                    "device_name": "/dev/sda1",
+                    "volume_type": "gp2",
+                    "volume_size": 48
+                }
+            ],
+            "spot_price": "0.0075",
+            "spot_instance_types": [
+                "t2.small",
+                "t2.medium",
+                "t2.large"
+            ],
+            "encrypt_boot": true,
+            "ssh_username": "ubuntu",
+            "temporary_iam_instance_profile_policy_document": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "*"
+                        ],
+                        "Resource": ["*"]
+                    }
+                ]
+            },
+            "ssh_interface": "session_manager"
         }
     ],
     "provisioners": [

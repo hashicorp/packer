@@ -26,6 +26,12 @@
     },
     {
       "pattern": "^/docs/extending/custom-datasources"
+    },
+    {
+      "pattern": "^/docs/templates/legacy_json_templates"
+    },
+    {
+      "pattern": "^https://packer.io/docs/templates/legacy_json_templates"
     }
   ],
   "replacementPatterns": [
