@@ -39,17 +39,16 @@ communicates with them. For example, the Shell provisioner is actually run as
 look at your process list and you should see a handful of `packer-` prefixed
 applications running.
 
-## Installing Plugins
-
 
 <Tabs>
-<Tab heading="With `packer init` (available from Packer v1.7.0 )">
+<Tab heading="Plugins installed with Packer init (from Packer v1.7.0)">
 
 ~> **Note**: Only _multi-plugin binaries_ -- that is plugins named
 packer-plugin-*, like the `packer-plugin-amazon` -- are expected to work with
 Packer init. The legacy `builder`, `post-processor` and `provisioner` plugin
 types will keep on being detected but Packer cannot install them automatically.
 
+## Installing Plugins
 
 1. Add a
 [`required_plugin`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
@@ -72,14 +71,14 @@ string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
 
 2. Run [`packer init`](/docs/commands/init) to install all missing plugin binaries.
 
-### Names and Addresses
+## Names and Addresses
 Each plugin has two identifiers:
 
 * A `source` address, which is only used when requiring a plugin.
 * A unique **local name**, which is used everywhere else in a Packer 
   configuration.
 
-#### Local Names
+### Local Names
 
 Local names allow you to access the components of a plugin and must be unique
 per configuration.
@@ -92,7 +91,7 @@ source defined an `ebs` builder, this builder will be made available by using a
 source "aws-ebs" "example" {...}
 ```
 
-### Source Addresses
+## Source Addresses
 
 A plugin's source address is its global identifier. It also specifies the
 primary location where Packer can download it.
@@ -107,11 +106,11 @@ follows:
   `github.com`, we recommend explicitly setting the hostname.
 
 * **Namespace:** An organizational namespace within the specified host.
-  This often is the organization that publishes the provider. If omitted, this
+  This often is the organization that publishes the plugin. If omitted, this
   defaults to `hashicorp`, we recommend explicitly setting the namespace.
 
-* **Type:** A short name for the platform or system the provider manages. The
-  type is usually the provider's preferred local name.
+* **Type:** A short name for the platform or system the plugin manages. The
+  type is usually the plugin's preferred local name.
 
 For example, [the `amazon`
 plugin](https://github.com/hashicorp/packer-plugin-amazon) belongs to the
@@ -119,7 +118,7 @@ plugin](https://github.com/hashicorp/packer-plugin-amazon) belongs to the
 `github.com/hashicorp/amazon`, this could also be `hashicorp/amazon` or `amazon`.
 
 The source address with all three components given explicitly is called the
-provider's _fully-qualified address_. You will see fully-qualified address in
+plugin's _fully-qualified address_. You will see fully-qualified address in
 various outputs, like error messages, but in most cases a simplified display
 version is used. This display version omits the source host when it is the
 public registry, so you may see the shortened version `"amazon"` instead
@@ -127,28 +126,11 @@ of `"github.com/hashicorp/amazon"`.
 
 -> **Note:** We recommend using explicit source addresses for all plugins.
 
-### Plugin location
+## Plugin location
 
 @include "plugins/plugin-location.mdx"
 
-Using the following example :
-```hcl
-    required_plugins {
-      aws = {
-        version = ">= 2.7.0"
-        source = "azr/aws"
-      }
-      azure = ">= 2.7.0"
-    }
-```
-
-The plugin getter will then install the binaries in the following location for a
-`darwin_amd64` system, using the full source path.
-
-* `${PLUGIN_DIR}/github.com/azr/aws/packer-plugin-aws_2.7.0_darwin_amd64_x5`
-* `${PLUGIN_DIR}/github.com/hashicorp/azure/packer-plugin-azure_2.7.0_darwin_amd64_x5`
-
-### Implicit Github urls
+## Implicit Github urls
 
 Using the following example :
 ```hcl
@@ -169,7 +151,7 @@ Packer will error if you set the `packer-plugin-` prefix in a `source`. This
 will avoid conflicting with other plugins for other tools, like Terraform.
 
 </Tab>
-<Tab heading="Manually">
+<Tab heading="Manually installed legacy plugins">
 
 The easiest way to manually install a plugin is to name it correctly, then place
 it in the proper directory. To name a plugin correctly, make sure the binary is

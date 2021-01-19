@@ -1,11 +1,11 @@
-* [`packer init`](/commands/init) will install plugins in the last directory set
--- that is, where the used variable is set -- in the following list.
+* [`packer init`](/commands/init) will install plugins in the last directory in
+the following list.
 
-* During the initialization of Packer, any **required** plugin will be looked up
-in all entries of the following list; in the fully addressable place it is
-expected to be, for example:
-`${PACKER_HOME_DIR}/plugins/github.com/azr/amazon/packer-plugin-amazon_v0.0.6_darwin_amd64_x5`. 
-First plugin found takes precedence.
+* During the initialization of Packer, any plugin required in the
+**`required_plugins`** section will be looked up in all entries of the following
+list. First plugin found takes precedence. Two binaries of the same plugin with
+two different version will be considered as two different plugins. Highest
+version matching `required_plugins` will be taken into consideration, if found.
 
 1. The directory where `packer` is, or the executable directory.
 1. The current working directory. (`"."`)
@@ -16,4 +16,35 @@ is set.
 
 ~> **Note**: There can be more than one directory in the `PACKER_PLUGIN_PATH`
 env var, it will be seperated by a semicolon (`;`) on Windows systems and a
-colon (`:`) on other systems. The last one found will be the one used.
+colon (`:`) on other systems. The order priority will be kept.
+
+Using the following example :
+```hcl
+    required_plugins {
+      aws = {
+        version = ">= 2.7.0"
+        source = "azr/aws"
+      }
+      azure = ">= 2.7.0"
+    }
+```
+
+The plugin getter will then install the binaries in the following location for a
+system with no `PACKER_PLUGIN_PATH` env var set.
+
+* `PACKER_HOME_DIR/plugins/github.com/azr/aws/`
+* `PACKER_HOME_DIR/plugins/github.com/hashicorp/azure/`
+
+During initialization, on a `darwin_amd64` system, Packer will look-up for the
+following files:
+
+* `PACKER_EXEC_DIR/github.com/azr/aws/packer-plugin-aws_*_darwin_amd64_x5`
+* `./github.com/azr/aws/packer-plugin-aws_*_darwin_amd64_x5`
+* `PACKER_HOME_DIR/plugins/github.com/azr/aws/packer-plugin-aws_*_darwin_amd64_x5`
+* `PACKER_PLUGIN_PATH/github.com/azr/aws/packer-plugin-aws_*_darwin_amd64_x5`
+
+The first plugin-name/version files found will take precedence.
+
+-> Note: `PACKER_HOME_DIR` is not an actual env var and refers to [Packer's home
+directory](#packer-s-home-directory). `PACKER_EXEC_DIR` is not an actual env var
+and refers to the directory wher `packer` is, or the executable directory.
