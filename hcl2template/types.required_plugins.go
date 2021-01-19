@@ -118,7 +118,7 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 					diags = append(diags, &hcl.Diagnostic{
 						Severity: hcl.DiagError,
 						Summary:  "Invalid version constraint",
-						Detail:   "Version must be specified as a string. See https://www.packer.io/docs/from-1.5/blocks/packer#version-constraint-syntax for docs.",
+						Detail:   "Version must be specified as a string. See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraint-syntax for docs.",
 						Subject:  attr.Expr.Range().Ptr(),
 					})
 				} else {
@@ -130,7 +130,7 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 						diags = append(diags, &hcl.Diagnostic{
 							Severity: hcl.DiagError,
 							Summary:  "Invalid version constraint",
-							Detail:   "This string does not use correct version constraint syntax. See https://www.packer.io/docs/from-1.5/blocks/packer#version-constraint-syntax for docs.",
+							Detail:   "This string does not use correct version constraint syntax. See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraint-syntax for docs.",
 							Subject:  attr.Expr.Range().Ptr(),
 						})
 					} else {
@@ -142,7 +142,7 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "No version constraint was set",
-					Detail:   "The version field must be specified as a string. Ex: `version = \">= 1.2.0, < 2.0.0\". See https://www.packer.io/docs/from-1.5/blocks/packer#version-constraints for docs",
+					Detail:   "The version field must be specified as a string. Ex: `version = \">= 1.2.0, < 2.0.0\". See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraints for docs",
 					Subject:  attr.Expr.Range().Ptr(),
 				})
 			}
