@@ -126,7 +126,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 			[]*Installation{
 				{
 					Version:    "v4.5.6",
-					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.6_windows_amd64_x4.exe"),
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.6_windows_amd64_x4.exe"),
 				},
 				{
 					Version:    "v4.5.7",

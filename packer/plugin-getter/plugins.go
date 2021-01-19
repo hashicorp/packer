@@ -164,7 +164,9 @@ func (l InstallList) String() string {
 func (l *InstallList) InsertSortedUniq(install *Installation) {
 	pos := sort.Search(len(*l), func(i int) bool { return (*l)[i].Version >= install.Version })
 	if len(*l) > pos && (*l)[pos].Version == install.Version {
-		(*l)[pos] = install
+		// already detected, let's ignore any new foundings, this way any plugin
+		// close to cwd or the packer exec takes precedence; this will be better
+		// for plugin development/tests.
 		return
 	}
 	(*l) = append((*l), nil)
