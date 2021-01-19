@@ -16,9 +16,9 @@ core configuration for now.
 
 # Packer's home directory
 
-Plugins and core configuration files can exist in the home directory of
-Packer. The home directory of packer will be the first one of the following
-values to be set:
+Plugins and core configuration files can exist in the home directory of Packer.
+The home directory of packer will be in the `/.packer.d/` directory of the first
+one of the following env values to be set :
 
 | unix                   | windows               |
 |------------------------|-----------------------|
@@ -27,8 +27,15 @@ values to be set:
 | `${HOME}`              | `%HOME%`              |
 | user dir of `${USER}`  | user dir of `${USER}` |
 
--> Note: On this page this directory will be referenced as the
- `PACKER_HOME_DIR` env variable.
+Examples: 
+* On a 'unix' system, if `PACKER_CONFIG_DIR` is set to `/home/packer`,
+`PACKER_HOME_DIR` will be: `/home/packer/.packer.d/` and other values will not
+be checked.
+* On a 'unix' system, if `HOME` is `/home/azr` or `USER` is `azr`, then
+`PACKER_HOME_DIR` will default to `/home/azr/.packer.d/`.
+
+-> Note: On this page "Packer's home directory" will be referenced as
+`PACKER_HOME_DIR`.
 
 # Packer's plugin directory
 
@@ -42,9 +49,9 @@ is not an error if no config file was found :
 | unix                               | windows                           |
 |------------------------------------|-----------------------------------|
 | `${PACKER_CONFIG}`                 | `%PACKER_CONFIG%`                 |
-| `${PACKER_HOME_DIR}/.packerconfig` | `%PACKER_HOME_DIR%/.packerconfig` |
+| `${PACKER_HOME_DIR}/.packerconfig` | `%PACKER_HOME_DIR%/packer.config` |
 
--> Note: On this page, `PACKER_HOME_DIR` is the [Packer's home
+-> Note: On this page, `PACKER_HOME_DIR` is [Packer's home
 directory](#packer-s-home-directory).
 
 The format of the configuration file is basic JSON.

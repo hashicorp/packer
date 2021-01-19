@@ -315,6 +315,5 @@ export default [
   },
   
   '---------',
-  'core-configuration',
   'debugging',
 ]
