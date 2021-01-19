@@ -49,10 +49,12 @@ Packer init. The legacy `builder`, `post-processor` and `provisioner` plugin
 types will keep on being detected but Packer cannot install them automatically.
 
 
-1. Add a [`required_plugin`](http://localhost:3000/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
-block to your `packer` block, each block will tell packer what version to use,
-make sure to set a correct [version constraint
-string](http://localhost:3000/docs/templates/hcl_templates/blocks/packer#version-constraints). For example:
+1. Add a
+[`required_plugin`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
+block to your `packer` block, each block will tell Packer what versions can be
+installed, make sure to set a correct [version constraint
+string](/docs/templates/hcl_templates/blocks/packer#version-constraints). For
+example:
 
   ```hcl
   packer {
@@ -66,7 +68,7 @@ string](http://localhost:3000/docs/templates/hcl_templates/blocks/packer#version
   }
   ```
 
-2. Run `packer init` to install all missing plugin binaries.
+2. Run [`packer init`](/docs/commands/init) to install all missing plugin binaries.
 
 ### Auto-resolver
 
