@@ -98,11 +98,11 @@ type FlatConfig struct {
 	ImageLabels               map[string]string `mapstructure:"image_labels" required:"false" cty:"image_labels" hcl:"image_labels"`
 	ImageMinDiskSizeGb        *int              `mapstructure:"image_min_disk_size_gb" required:"false" cty:"image_min_disk_size_gb" hcl:"image_min_disk_size_gb"`
 	ImageProductIDs           []string          `mapstructure:"image_product_ids" required:"false" cty:"image_product_ids" hcl:"image_product_ids"`
-	ServiceAccountID          *string           `mapstructure:"service_account_id" required:"false" cty:"service_account_id" hcl:"service_account_id"`
 	SourceImageFamily         *string           `mapstructure:"source_image_family" required:"true" cty:"source_image_family" hcl:"source_image_family"`
 	SourceImageFolderID       *string           `mapstructure:"source_image_folder_id" required:"false" cty:"source_image_folder_id" hcl:"source_image_folder_id"`
 	SourceImageID             *string           `mapstructure:"source_image_id" required:"false" cty:"source_image_id" hcl:"source_image_id"`
 	SourceImageName           *string           `mapstructure:"source_image_name" cty:"source_image_name" hcl:"source_image_name"`
+	ServiceAccountID          *string           `mapstructure:"service_account_id" required:"false" cty:"service_account_id" hcl:"service_account_id"`
 	TargetImageFolderID       *string           `mapstructure:"target_image_folder_id" required:"false" cty:"target_image_folder_id" hcl:"target_image_folder_id"`
 }
 
@@ -206,11 +206,11 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"image_labels":                 &hcldec.AttrSpec{Name: "image_labels", Type: cty.Map(cty.String), Required: false},
 		"image_min_disk_size_gb":       &hcldec.AttrSpec{Name: "image_min_disk_size_gb", Type: cty.Number, Required: false},
 		"image_product_ids":            &hcldec.AttrSpec{Name: "image_product_ids", Type: cty.List(cty.String), Required: false},
-		"service_account_id":           &hcldec.AttrSpec{Name: "service_account_id", Type: cty.String, Required: false},
 		"source_image_family":          &hcldec.AttrSpec{Name: "source_image_family", Type: cty.String, Required: false},
 		"source_image_folder_id":       &hcldec.AttrSpec{Name: "source_image_folder_id", Type: cty.String, Required: false},
 		"source_image_id":              &hcldec.AttrSpec{Name: "source_image_id", Type: cty.String, Required: false},
 		"source_image_name":            &hcldec.AttrSpec{Name: "source_image_name", Type: cty.String, Required: false},
+		"service_account_id":           &hcldec.AttrSpec{Name: "service_account_id", Type: cty.String, Required: false},
 		"target_image_folder_id":       &hcldec.AttrSpec{Name: "target_image_folder_id", Type: cty.String, Required: false},
 	}
 	return s

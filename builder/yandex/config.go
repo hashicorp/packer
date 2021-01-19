@@ -4,7 +4,6 @@
 package yandex
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/hashicorp/packer-plugin-sdk/common"
@@ -22,20 +21,10 @@ type Config struct {
 	CommonConfig `mapstructure:",squash"`
 	ImageConfig  `mapstructure:",squash"`
 
+	SourceImageConfig `mapstructure:",squash"`
 	// Service account identifier to assign to instance.
 	ServiceAccountID string `mapstructure:"service_account_id" required:"false"`
 
-	// The source image family to create the new image
-	// from. You can also specify source_image_id instead. Just one of a source_image_id or
-	// source_image_family must be specified. Example: `ubuntu-1804-lts`.
-	SourceImageFamily string `mapstructure:"source_image_family" required:"true"`
-	// The ID of the folder containing the source image.
-	SourceImageFolderID string `mapstructure:"source_image_folder_id" required:"false"`
-	// The source image ID to use to create the new image from.
-	SourceImageID string `mapstructure:"source_image_id" required:"false"`
-	// The source image name to use to create the new image
-	// from. Name will be looked up in `source_image_folder_id`.
-	SourceImageName string `mapstructure:"source_image_name"`
 	// The ID of the folder to save built image in.
 	// This defaults to value of 'folder_id'.
 	TargetImageFolderID string `mapstructure:"target_image_folder_id" required:"false"`
@@ -60,6 +49,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	errs = c.CommonConfig.Prepare(errs)
 	errs = c.ImageConfig.Prepare(errs)
+	errs = c.SourceImageConfig.Prepare(errs)
 
 	if c.ImageMinDiskSizeGb == 0 {
 		c.ImageMinDiskSizeGb = c.DiskSizeGb
@@ -77,18 +67,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 
 	if es := c.Communicator.Prepare(&c.ctx); len(es) > 0 {
 		errs = packersdk.MultiErrorAppend(errs, es...)
-	}
-
-	// Process required parameters.
-	if c.SourceImageID == "" {
-		if c.SourceImageFamily == "" && c.SourceImageName == "" {
-			errs = packersdk.MultiErrorAppend(
-				errs, errors.New("a source_image_name or source_image_family must be specified"))
-		}
-		if c.SourceImageFamily != "" && c.SourceImageName != "" {
-			errs = packersdk.MultiErrorAppend(
-				errs, errors.New("one of source_image_name or source_image_family must be specified, not both"))
-		}
 	}
 
 	if c.TargetImageFolderID == "" {

@@ -16,7 +16,7 @@ const (
 
 const (
 	cloudInitIPv6Config = `#!/usr/bin/env bash
-dhclient -6 -D LL -nw -pf /run/dhclient_ipv6.eth0.pid -lf /var/lib/dhcp/dhclient_ipv6.eth0.leases eth0
+dhclient -6 eth0
 `
 )
 
