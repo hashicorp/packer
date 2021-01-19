@@ -31,25 +31,33 @@ func NewHCL2Formatter() *HCL2Formatter {
 //
 // Path can be a directory or a file.
 func (f *HCL2Formatter) Format(path string) (int, hcl.Diagnostics) {
-	hclFiles, _, diags := GetHCL2Files(path, hcl2FileExt, hcl2JsonFileExt)
-	if diags.HasErrors() {
-		return 0, diags
-	}
 
-	hclVarFiles, _, diags := GetHCL2Files(path, hcl2VarFileExt, hcl2VarJsonFileExt)
-	if diags.HasErrors() {
-		return 0, diags
-	}
+	var allHclFiles []string
+	var diags []*hcl.Diagnostic
 
-	allHclFiles := append(hclFiles, hclVarFiles...)
+	if path == "-" {
+		allHclFiles = []string{"-"}
+	} else {
+		hclFiles, _, diags := GetHCL2Files(path, hcl2FileExt, hcl2JsonFileExt)
+		if diags.HasErrors() {
+			return 0, diags
+		}
 
-	if len(allHclFiles) == 0 {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  fmt.Sprintf("Cannot tell whether %s contains HCL2 configuration data", path),
-		})
+		hclVarFiles, _, diags := GetHCL2Files(path, hcl2VarFileExt, hcl2VarJsonFileExt)
+		if diags.HasErrors() {
+			return 0, diags
+		}
 
-		return 0, diags
+		allHclFiles = append(hclFiles, hclVarFiles...)
+
+		if len(allHclFiles) == 0 {
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  fmt.Sprintf("Cannot tell whether %s contains HCL2 configuration data", path),
+			})
+
+			return 0, diags
+		}
 	}
 
 	if f.parser == nil {
@@ -80,9 +88,17 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 		f.Output = os.Stdout
 	}
 
-	in, err := os.Open(filename)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open %s: %s", filename, err)
+	var in io.Reader
+	var err error
+
+	if filename == "-" {
+		in = os.Stdin
+		f.ShowDiff = false
+	} else {
+		in, err = os.Open(filename)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open %s: %s", filename, err)
+		}
 	}
 
 	inSrc, err := ioutil.ReadAll(in)
@@ -105,8 +121,12 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 	_, _ = f.Output.Write(s)
 
 	if f.Write {
-		if err := ioutil.WriteFile(filename, outSrc, 0644); err != nil {
-			return nil, err
+		if filename == "-" {
+			f.Output.Write(outSrc)
+		} else {
+			if err := ioutil.WriteFile(filename, outSrc, 0644); err != nil {
+				return nil, err
+			}
 		}
 	}
 
