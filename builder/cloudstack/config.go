@@ -121,14 +121,14 @@ type Config struct {
 	// provisioners should connect to the local IP address of the instance.
 	UseLocalIPAddress bool `mapstructure:"use_local_ip_address" required:"false"`
 	// User data to launch with the instance. This is a
-	// template engine; see "User Data" bellow for
+	// template engine; see "User Data" below for
 	// more details. Packer will not automatically wait for a user script to
 	// finish before shutting down the instance this must be handled in a
 	// provisioner.
 	UserData string `mapstructure:"user_data" required:"false"`
 	// Path to a file that will be used for the user
 	// data when launching the instance. This file will be parsed as a template
-	// engine see User Data bellow for more
+	// engine see User Data below for more
 	// details.
 	UserDataFile string `mapstructure:"user_data_file" required:"false"`
 	// The name or ID of the zone where the instance will be
