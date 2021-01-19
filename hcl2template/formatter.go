@@ -122,7 +122,7 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 
 	if f.Write {
 		if filename == "-" {
-			f.Output.Write(outSrc)
+			_, _ = f.Output.Write(outSrc)
 		} else {
 			if err := ioutil.WriteFile(filename, outSrc, 0644); err != nil {
 				return nil, err
