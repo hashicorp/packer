@@ -1,0 +1,16 @@
+* [`packer init`](/commands/init) will install plugins in the last directory set
+-- that is, where the used variable is set -- in the following list.
+
+* At startup, Packer will load any `required_plugin` from the following list, the
+last found plugins take precedence.
+
+1. The directory where `packer` is, or the executable directory.
+1. The current working directory. (`"."`)
+1. The `/packer.d/plugins` directory under *[Packer's home 
+ directory](/docs/configure#packer-s-home-directory)*, if it could be found.
+1. The `/packer.d/plugins` directory under the env var `PACKER_PLUGIN_PATH`, if 
+ `PACKER_PLUGIN_PATH` is set.
+
+~> **Note**: There can be more than one directory in the `PACKER_PLUGIN_PATH`
+env var, it will be seperated by a semicolon (`;`) on Windows systems and a
+colon (`:`) on other systems. The last one found will be the one used.

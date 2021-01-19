@@ -298,6 +298,7 @@ export default [
   },
   '----------',
   'install',
+  'configure',
   '----------',
   {
     category: 'plugins',

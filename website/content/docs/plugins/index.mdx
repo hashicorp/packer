@@ -127,7 +127,28 @@ of `"github.com/hashicorp/amazon"`.
 
 -> **Note:** We recommend using explicit source addresses for all plugins.
 
-### Implicit Github urls:
+### Plugin location
+
+@include "plugins/plugin-location.mdx"
+
+Using the following example :
+```hcl
+    required_plugins {
+      aws = {
+        version = ">= 2.7.0"
+        source = "azr/aws"
+      }
+      azure = ">= 2.7.0"
+    }
+```
+
+The plugin getter will then install the binaries in the following location for a
+`darwin_amd64` system, using the full source path.
+
+* `${PLUGIN_DIR}/github.com/azr/aws/packer-plugin-aws_2.7.0_darwin_amd64_x5`
+* `${PLUGIN_DIR}/github.com/hashicorp/azure/packer-plugin-azure_2.7.0_darwin_amd64_x5`
+
+### Implicit Github urls
 
 Using the following example :
 ```hcl
@@ -144,27 +165,8 @@ The plugin getter will look for plugins located at:
 * github.com/azr/packer-plugin-aws
 * github.com/hashicorp/packer-plugin-azure
 
-Packer will error if you set the `packer-plugin-` prefix in a `source`.
-
-### Installation location :
-
-Packer's prefered plugin directory for installation is the last one set in the
-following list:
-
-| unix                                                                                       | windows                                                                                           |
-|--------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
-| The directory where `packer` binary is                                                     | The directory where `packer` binary is                                                            |
-| The current working directory.                                                             | The current working directory                                                                     |
-| The `$PACKER_CONFIG_DIR`, if set                                                           | The `$PACKER_CONFIG_DIR`, if set                                                                  |
-| The `$HOME/.packer.d/plugins` directory, if `HOME` is set                                  | The `%APPDATA%/packer.d/plugins`, if `APPDATA` is set                                             |
-|                                                                                            | The `%USERPROFILE%/packer.d/plugins` if `USERPROFILE` is set                                      |
-| The directories defined in the env var `PACKER_PLUGIN_PATH`. Separated using a colon (`:`) | The directories defined in the env var  `PACKER_PLUGIN_PATH` . Separated using a semicolon  (`;`) |
-
-The plugin getter will then install the binaries from the previous example in
-the following location for a `darwin_amd64` system.
-
-* `${PLUGIN_DIR}/github.com/azr/aws/packer-plugin-aws.2.7.0_darwin_amd64_x5`
-* `${PLUGIN_DIR}/github.com/hashicorp/azure/packer-plugin-azure.2.7.0_darwin_amd64_x5`
+Packer will error if you set the `packer-plugin-` prefix in a `source`. This
+will avoid conflicting with other plugins for other tools, like Terraform.
 
 </Tab>
 <Tab heading="Manually">

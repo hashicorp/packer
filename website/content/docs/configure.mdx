@@ -1,0 +1,68 @@
+---
+description: |
+  There are various ways to configure Packer. You can not set anything an Packer
+  will use known folders, or you can change things using environment variables.
+page_title: Configuring Packer
+sidebar_title: Configuring Packer
+---
+
+# Configuring Packer
+
+-> **Note:** There are a few configuration settings that affect Packer globally
+by configuring the core of Packer. These settings all have reasonable defaults,
+so you generally don't have to worry about it until you want to tweak a
+configuration. If you're just getting started with Packer, don't worry about
+core configuration for now.
+
+# Packer's home directory
+
+Plugins and core configuration files can exist in the home directory of
+Packer. The home directory of packer will be the first one of the following
+values to be set:
+
+| unix                   | windows               |
+|------------------------|-----------------------|
+| `${PACKER_CONFIG_DIR}` | `%PACKER_CONFIG_DIR%` |
+| `${APPDATA}`           | `%APPDATA%`           |
+| `${HOME}`              | `%HOME%`              |
+| user dir of `${USER}`  | user dir of `${USER}` |
+
+-> Note: On this page this directory will be referenced as the
+ `PACKER_HOME_DIR` env variable.
+
+# Packer's plugin directory
+
+@include "plugins/plugin-location.mdx"
+
+# Packer's config file
+
+The first value set of the following list will be parsed as the config file, it
+is not an error if no config file was found :
+
+| unix                               | windows                           |
+|------------------------------------|-----------------------------------|
+| `${PACKER_CONFIG}`                 | `%PACKER_CONFIG%`                 |
+| `${PACKER_HOME_DIR}/.packerconfig` | `%PACKER_HOME_DIR%/.packerconfig` |
+
+-> Note: On this page, `PACKER_HOME_DIR` is the [Packer's home
+directory](#packer-s-home-directory).
+
+The format of the configuration file is basic JSON.
+
+## Packer config file configuration Reference
+
+Below is the list of all available configuration parameters for the core
+configuration file. None of these are required, since all have defaults.
+
+- `plugin_min_port` and `plugin_max_port` (number) - These are the minimum
+  and maximum ports that Packer uses for communication with plugins, since
+  plugin communication happens over TCP connections on your local host. By
+  default these are 10,000 and 25,000, respectively. Be sure to set a fairly
+  wide range here, since Packer can easily use over 25 ports on a single run.
+
+- `builders`, `commands`, `post-processors`, and `provisioners` are objects
+  that are used to install plugins. The details of how exactly these are set is
+  covered in more detail in the [installing plugins documentation
+  page](/docs/extending/plugins). It is recommend to use [HCL2
+  `required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
+  and the [`packer init`](/docs/commands/init) command to install plugins.
