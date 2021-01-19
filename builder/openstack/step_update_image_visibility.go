@@ -12,9 +12,15 @@ import (
 type stepUpdateImageVisibility struct{}
 
 func (s *stepUpdateImageVisibility) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	imageId := state.Get("image").(string)
 	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
+
+	if config.SkipCreateImage {
+		ui.Say("Skipping image update visibility...")
+		return multistep.ActionContinue
+	}
+
+	imageId := state.Get("image").(string)
 
 	if config.ImageVisibility == "" {
 		return multistep.ActionContinue

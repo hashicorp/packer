@@ -12,9 +12,15 @@ import (
 type stepUpdateImageMinDisk struct{}
 
 func (s *stepUpdateImageMinDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	imageId := state.Get("image").(string)
 	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
+
+	if config.SkipCreateImage {
+		ui.Say("Skipping image update mindisk...")
+		return multistep.ActionContinue
+	}
+
+	imageId := state.Get("image").(string)
 
 	if config.ImageMinDisk == 0 {
 		return multistep.ActionContinue
