@@ -16,9 +16,10 @@ plugins that are simply distributed with Packer. For example, many of the
 builders, provisioners, and more that ship with Packer are implemented as
 Plugins that are simply hardcoded to load with Packer.
 
-This section will cover how to install and use plugins. If you're interested in
-developing plugins, the documentation for that is available in the [developing
-plugins](/docs/plugins/creation#developing-plugins) section.
+* This page documents how to install plugins.
+* Plugins cannot be configured yet.
+* If you're interested in developing plugins, see the [developing 
+plugins](/docs/plugins/creation#developing-plugins) page.
 
 The current official listing of available Packer plugins can be found
 [here](/community-tools#third-party-plugins). This is an incomplete list, and
@@ -52,10 +53,10 @@ types will keep on being detected but Packer cannot install them automatically.
 
 1. Add a
 [`required_plugin`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
-block to your `packer` block, each block will tell Packer what versions can be
+block to your `packer` block, each block will tell Packer what version(s) can be
 installed, make sure to set a correct [version constraint
-string](/docs/templates/hcl_templates/blocks/packer#version-constraints). For
-example:
+string](/docs/templates/hcl_templates/blocks/packer#version-constraints). 
+  Example `required_plugins` block :
 
   ```hcl
   packer {
@@ -71,19 +72,96 @@ example:
 
 2. Run [`packer init`](/docs/commands/init) to install all missing plugin binaries.
 
-### Auto-resolver
+### Names and Addresses
+Each plugin has two identifiers:
 
-In the previous examples, the getter will look for plugins located at:
+* A `source` address, which is only used when requiring a plugin.
+* A unique **local name**, which is used everywhere else in a Packer 
+  configuration.
+
+#### Local Names
+
+Local names allow you to access the components of a plugin and must be unique
+per configuration.
+
+Here using the previous example if the plugin behing the required `azr/aws`
+source defined an `ebs` builder, this builder will be made available by using a
+`aws-ebs` source :
+
+```hcl
+source "aws-ebs" "example" {...}
+```
+
+### Source Addresses
+
+A plugin's source address is its global identifier. It also specifies the
+primary location where Packer can download it.
+
+Source addresses consist of three parts delimited by slashes (`/`), as
+follows:
+
+`[<HOSTNAME>/]<NAMESPACE>/<TYPE>`
+
+* **Hostname** (optional): The hostname of the location/service that
+  distributes the plugin. If omitted, this defaults to
+  `github.com`, we recommend explicitly setting the hostname.
+
+* **Namespace:** An organizational namespace within the specified host.
+  This often is the organization that publishes the provider. If omitted, this
+  defaults to `hashicorp`, we recommend explicitly setting the namespace.
+
+* **Type:** A short name for the platform or system the provider manages. The
+  type is usually the provider's preferred local name.
+
+For example, [the `amazon`
+plugin](https://github.com/hashicorp/packer-plugin-amazon) belongs to the
+`hashicorp` namespace on `github.com`, so its source address is
+`github.com/hashicorp/amazon`, this could also be `hashicorp/amazon` or `amazon`.
+
+The source address with all three components given explicitly is called the
+provider's _fully-qualified address_. You will see fully-qualified address in
+various outputs, like error messages, but in most cases a simplified display
+version is used. This display version omits the source host when it is the
+public registry, so you may see the shortened version `"amazon"` instead
+of `"github.com/hashicorp/amazon"`.
+
+-> **Note:** We recommend using explicit source addresses for all plugins.
+
+### Implicit Github urls:
+
+Using the following example :
+```hcl
+    required_plugins {
+      aws = {
+        version = ">= 2.7.0"
+        source = "azr/aws"
+      }
+      azure = ">= 2.7.0"
+    }
+```
+
+The plugin getter will look for plugins located at:
 * github.com/azr/packer-plugin-aws
 * github.com/hashicorp/packer-plugin-azure
 
-Plugins should always be addressed using this dns resolvable form. The plugin
-getter defaults the domain to `github.com` and the account to `hashicorp` if
-unspecified. The plugin name should always skip the `packer-plugin-` prefix that
-will be automatically added.
+Packer will error if you set the `packer-plugin-` prefix in a `source`.
 
-Packer will install these plugins in your prefered folder, so here for example
-on a `darwin_amd64` :
+### Installation location :
+
+Packer's prefered plugin directory for installation is the last one set in the
+following list:
+
+| unix                                                                                       | windows                                                                                           |
+|--------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| The directory where `packer` binary is                                                     | The directory where `packer` binary is                                                            |
+| The current working directory.                                                             | The current working directory                                                                     |
+| The `$PACKER_CONFIG_DIR`, if set                                                           | The `$PACKER_CONFIG_DIR`, if set                                                                  |
+| The `$HOME/.packer.d/plugins` directory, if `HOME` is set                                  | The `%APPDATA%/packer.d/plugins`, if `APPDATA` is set                                             |
+|                                                                                            | The `%USERPROFILE%/packer.d/plugins` if `USERPROFILE` is set                                      |
+| The directories defined in the env var `PACKER_PLUGIN_PATH`. Separated using a colon (`:`) | The directories defined in the env var  `PACKER_PLUGIN_PATH` . Separated using a semicolon  (`;`) |
+
+The plugin getter will then install the binaries from the previous example in
+the following location for a `darwin_amd64` system.
 
 * `${PLUGIN_DIR}/github.com/azr/aws/packer-plugin-aws.2.7.0_darwin_amd64_x5`
 * `${PLUGIN_DIR}/github.com/hashicorp/azure/packer-plugin-azure.2.7.0_darwin_amd64_x5`
