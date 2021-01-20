@@ -52,13 +52,13 @@ Packer files. The config dir of packer will be looked up on the following paths:
 | `PACKER_HOME_DIR/.packer.d` | `PACKER_HOME_DIR/packer.d/` |
 
 Examples: 
-* On a 'unix' system, if `PACKER_CONFIG_DIR` is set to `/home/packer`,
-the config directory will be: `/home/packer/.packer.d/` and other values will not
-be checked.
-* On a 'unix' system, if `HOME` is `/home/azr` or `USER` is `azr`, then
-the config directory will default to `/home/azr/.packer.d/`.
-* On a 'windows' system, if `PACKER_CONFIG_DIR` is set to `C:/`,the config
-directory will be: `C:/packer.d/` and other values will not be checked.
+* On a 'unix' system, if the `$PACKER_CONFIG_DIR` env var is set to
+`/home/packer`, the config directory will be: `/home/packer/.packer.d/` and
+other values will not be checked.
+* On a 'unix' system, if the `HOME` env var is `/home/azr` or the `USER` env var
+is `azr`, then the config directory will default to `/home/azr/.packer.d/`.
+* On a 'windows' system, if the `PACKER_CONFIG_DIR` env var is set to `C:/`,the
+config directory will be: `C:/packer.d/` and other values will not be checked.
 
 # Packer's plugin directory
 
