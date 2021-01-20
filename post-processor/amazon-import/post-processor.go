@@ -90,7 +90,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// Check we have AWS access variables defined somewhere
-	errs = packersdk.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, p.config.AccessConfig.Prepare()...)
 
 	// define all our required parameters
 	templates := map[string]*string{
