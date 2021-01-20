@@ -23,6 +23,7 @@ type FlatMockConfig struct {
 	NamedMapStringString NamedMapStringString   `mapstructure:"named_map_string_string" cty:"named_map_string_string" hcl:"named_map_string_string"`
 	NamedString          *NamedString           `mapstructure:"named_string" cty:"named_string" hcl:"named_string"`
 	Tags                 []FlatMockTag          `mapstructure:"tag" cty:"tag" hcl:"tag"`
+	Datasource           *string                `mapstructure:"data_source" cty:"data_source" hcl:"data_source"`
 	Nested               *FlatNestedMockConfig  `mapstructure:"nested" cty:"nested" hcl:"nested"`
 	NestedSlice          []FlatNestedMockConfig `mapstructure:"nested_slice" cty:"nested_slice" hcl:"nested_slice"`
 }
@@ -52,6 +53,7 @@ func (*FlatMockConfig) HCL2Spec() map[string]hcldec.Spec {
 		"named_map_string_string": &hcldec.AttrSpec{Name: "named_map_string_string", Type: cty.Map(cty.String), Required: false},
 		"named_string":            &hcldec.AttrSpec{Name: "named_string", Type: cty.String, Required: false},
 		"tag":                     &hcldec.BlockListSpec{TypeName: "tag", Nested: hcldec.ObjectSpec((*FlatMockTag)(nil).HCL2Spec())},
+		"data_source":             &hcldec.AttrSpec{Name: "data_source", Type: cty.String, Required: false},
 		"nested":                  &hcldec.BlockSpec{TypeName: "nested", Nested: hcldec.ObjectSpec((*FlatNestedMockConfig)(nil).HCL2Spec())},
 		"nested_slice":            &hcldec.BlockListSpec{TypeName: "nested_slice", Nested: hcldec.ObjectSpec((*FlatNestedMockConfig)(nil).HCL2Spec())},
 	}
@@ -98,6 +100,7 @@ type FlatNestedMockConfig struct {
 	NamedMapStringString NamedMapStringString `mapstructure:"named_map_string_string" cty:"named_map_string_string" hcl:"named_map_string_string"`
 	NamedString          *NamedString         `mapstructure:"named_string" cty:"named_string" hcl:"named_string"`
 	Tags                 []FlatMockTag        `mapstructure:"tag" cty:"tag" hcl:"tag"`
+	Datasource           *string              `mapstructure:"data_source" cty:"data_source" hcl:"data_source"`
 }
 
 // FlatMapstructure returns a new FlatNestedMockConfig.
@@ -124,6 +127,7 @@ func (*FlatNestedMockConfig) HCL2Spec() map[string]hcldec.Spec {
 		"named_map_string_string": &hcldec.AttrSpec{Name: "named_map_string_string", Type: cty.Map(cty.String), Required: false},
 		"named_string":            &hcldec.AttrSpec{Name: "named_string", Type: cty.String, Required: false},
 		"tag":                     &hcldec.BlockListSpec{TypeName: "tag", Nested: hcldec.ObjectSpec((*FlatMockTag)(nil).HCL2Spec())},
+		"data_source":             &hcldec.AttrSpec{Name: "data_source", Type: cty.String, Required: false},
 	}
 	return s
 }

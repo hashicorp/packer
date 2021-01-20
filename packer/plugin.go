@@ -23,6 +23,7 @@ type PluginConfig struct {
 	Builders           BuilderSet
 	Provisioners       ProvisionerSet
 	PostProcessors     PostProcessorSet
+	DataSources        DatasourceSet
 }
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -45,6 +46,9 @@ func (c *PluginConfig) Discover() error {
 	}
 	if c.PostProcessors == nil {
 		c.PostProcessors = MapOfPostProcessor{}
+	}
+	if c.DataSources == nil {
+		c.DataSources = MapOfDatasource{}
 	}
 
 	// If we are already inside a plugin process we should not need to
@@ -153,6 +157,22 @@ func (c *PluginConfig) discoverExternalComponents(path string) error {
 	if len(externallyUsed) > 0 {
 		sort.Strings(externallyUsed)
 		log.Printf("using external provisioners %v", externallyUsed)
+	}
+
+	pluginPaths, err = c.discoverSingle(filepath.Join(path, "packer-datasource-*"))
+	if err != nil {
+		return err
+	}
+	for pluginName, pluginPath := range pluginPaths {
+		newPath := pluginPath // this needs to be stored in a new variable for the func below
+		c.dataSources[pluginName] = func() (packersdk.Datasource, error) {
+			return c.Client(newPath).Datasource()
+		}
+		externallyUsed = append(externallyUsed, pluginName)
+	}
+	if len(externallyUsed) > 0 {
+		sort.Strings(externallyUsed)
+		log.Printf("using external datasource %v", externallyUsed)
 	}
 
 	pluginPaths, err = c.discoverSingle(filepath.Join(path, "packer-plugin-*"))
@@ -271,6 +291,16 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 	}
 	if len(desc.Provisioners) > 0 {
 		log.Printf("found external %v provisioner from %s plugin", desc.Provisioners, pluginName)
+	}
+
+	for _, datasourceName := range desc.Datasources {
+		datasourceName := datasourceName // copy to avoid pointer overwrite issue
+		c.dataSources[pluginPrefix+datasourceName] = func() (packersdk.Datasource, error) {
+			return c.Client(pluginPath, "start", "datasource", datasourceName).Datasource()
+		}
+	}
+	if len(desc.Datasources) > 0 {
+		log.Printf("found external %v datasource from %s plugin", desc.Datasources, pluginName)
 	}
 
 	return nil

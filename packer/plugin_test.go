@@ -108,6 +108,18 @@ func TestHelperProcess(*testing.T) {
 			os.Exit(1)
 		}
 		server.Serve()
+	case "datasource":
+		server, err := pluginsdk.Server()
+		if err != nil {
+			log.Printf("[ERR] %s", err)
+			os.Exit(1)
+		}
+		err = server.RegisterDatasource(new(packersdk.MockDatasource))
+		if err != nil {
+			log.Printf("[ERR] %s", err)
+			os.Exit(1)
+		}
+		server.Serve()
 	case "start-timeout":
 		time.Sleep(1 * time.Minute)
 		os.Exit(1)

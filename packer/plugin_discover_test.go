@@ -111,6 +111,49 @@ func TestEnvVarPackerPluginPath_MultiplePaths(t *testing.T) {
 	}
 }
 
+func TestDiscoverDatasource(t *testing.T) {
+	// Create a temporary directory to store plugins in
+	dir, _, cleanUpFunc, err := generateFakePlugins("custom_plugin_dir",
+		[]string{"packer-datasource-partyparrot"})
+	if err != nil {
+		t.Fatalf("Error creating fake custom plugins: %s", err)
+	}
+
+	defer cleanUpFunc()
+
+	pathsep := ":"
+	if runtime.GOOS == "windows" {
+		pathsep = ";"
+	}
+
+	// Create a second dir to look in that will be empty
+	decoyDir, err := ioutil.TempDir("", "decoy")
+	if err != nil {
+		t.Fatalf("Failed to create a temporary test dir.")
+	}
+	defer os.Remove(decoyDir)
+
+	pluginPath := dir + pathsep + decoyDir
+
+	// Add temp dir to path.
+	os.Setenv("PACKER_PLUGIN_PATH", pluginPath)
+	defer os.Unsetenv("PACKER_PLUGIN_PATH")
+
+	config := newConfig()
+
+	err = config.Discover()
+	if err != nil {
+		t.Fatalf("Should not have errored: %s", err)
+	}
+
+	if len(config.dataSources) == 0 {
+		t.Fatalf("Should have found partyparrot datasource")
+	}
+	if _, ok := config.dataSources["partyparrot"]; !ok {
+		t.Fatalf("Should have found partyparrot datasource.")
+	}
+}
+
 func generateFakePlugins(dirname string, pluginNames []string) (string, []string, func(), error) {
 	dir, err := ioutil.TempDir("", dirname)
 	if err != nil {
@@ -268,6 +311,11 @@ var (
 				"smoke": nil,
 			},
 		},
+		"data": pluginsdk.Set{
+			Datasources: map[string]packersdk.Datasource{
+				"source": nil,
+			},
+		},
 	}
 
 	defaultNameMock = map[string]pluginsdk.Set{
@@ -333,6 +381,12 @@ func Test_multiplugin_describe(t *testing.T) {
 			expectedPostProcessorName := mockPluginName + "-" + mockPostProcessorName
 			if !c.PostProcessors.Has(expectedPostProcessorName) {
 				t.Fatalf("expected to find post-processor %q", expectedPostProcessorName)
+			}
+		}
+		for mockDatasourceName := range plugin.Datasources {
+			expectedDatasourceName := mockPluginName + "-" + mockDatasourceName
+			if _, found := c.dataSources[expectedDatasourceName]; !found {
+				t.Fatalf("expected to find datasource %q", expectedDatasourceName)
 			}
 		}
 	}

@@ -46,7 +46,11 @@ type FlatConfig struct {
 	ServiceAccountID      *string           `mapstructure:"service_account_id" required:"true" cty:"service_account_id" hcl:"service_account_id"`
 	Paths                 []string          `mapstructure:"paths" required:"true" cty:"paths" hcl:"paths"`
 	SSHPrivateKeyFile     *string           `mapstructure:"ssh_private_key_file" required:"false" cty:"ssh_private_key_file" hcl:"ssh_private_key_file"`
-	Tries                 *int              `mapstructure:"tries" required:"false" cty:"tries" hcl:"tries"`
+	SSHUsername           *string           `mapstructure:"ssh_username" required:"false" cty:"ssh_username" hcl:"ssh_username"`
+	SourceImageFolderID   *string           `mapstructure:"source_image_folder_id" required:"false" cty:"source_image_folder_id" hcl:"source_image_folder_id"`
+	SourceImageFamily     *string           `mapstructure:"source_image_family" required:"false" cty:"source_image_family" hcl:"source_image_family"`
+	SourceImageID         *string           `mapstructure:"source_image_id" required:"false" cty:"source_image_id" hcl:"source_image_id"`
+	SourceDiskExtraSize   *int              `mapstructure:"source_disk_extra_size" required:"false" cty:"source_disk_extra_size" hcl:"source_disk_extra_size"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -97,7 +101,11 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"service_account_id":         &hcldec.AttrSpec{Name: "service_account_id", Type: cty.String, Required: false},
 		"paths":                      &hcldec.AttrSpec{Name: "paths", Type: cty.List(cty.String), Required: false},
 		"ssh_private_key_file":       &hcldec.AttrSpec{Name: "ssh_private_key_file", Type: cty.String, Required: false},
-		"tries":                      &hcldec.AttrSpec{Name: "tries", Type: cty.Number, Required: false},
+		"ssh_username":               &hcldec.AttrSpec{Name: "ssh_username", Type: cty.String, Required: false},
+		"source_image_folder_id":     &hcldec.AttrSpec{Name: "source_image_folder_id", Type: cty.String, Required: false},
+		"source_image_family":        &hcldec.AttrSpec{Name: "source_image_family", Type: cty.String, Required: false},
+		"source_image_id":            &hcldec.AttrSpec{Name: "source_image_id", Type: cty.String, Required: false},
+		"source_disk_extra_size":     &hcldec.AttrSpec{Name: "source_disk_extra_size", Type: cty.Number, Required: false},
 	}
 	return s
 }

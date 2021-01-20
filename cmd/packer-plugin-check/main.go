@@ -13,6 +13,7 @@ import (
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/plugin"
 )
 
 const packerPluginCheck = "packer-plugin-check"
@@ -140,10 +141,10 @@ func discoverAndLoad() error {
 
 // checkHCL2ConfigSpec checks if the hcl2spec config is present for the given plugins by validating that ConfigSpec() does not
 // return an empty map of specs.
-func checkHCL2ConfigSpec(builders packer.BuilderStore, provisioners packer.ProvisionerStore, postProcessors packer.PostProcessorStore) error {
+func checkHCL2ConfigSpec(plugins plugin.Plugins) error {
 	var errs *packersdk.MultiError
-	for _, b := range builders.List() {
-		builder, err := builders.Start(b)
+	for _, b := range plugins.Builders.List() {
+		builder, err := plugins.Builders.Start(b)
 		if err != nil {
 			return packersdk.MultiErrorAppend(err, errs)
 		}
@@ -151,8 +152,8 @@ func checkHCL2ConfigSpec(builders packer.BuilderStore, provisioners packer.Provi
 			errs = packersdk.MultiErrorAppend(fmt.Errorf("builder %q does not contain the required hcl2spec configuration", b), errs)
 		}
 	}
-	for _, p := range provisioners.List() {
-		provisioner, err := provisioners.Start(p)
+	for _, p := range plugins.Provisioners.List() {
+		provisioner, err := plugins.Provisioners.Start(p)
 		if err != nil {
 			return packersdk.MultiErrorAppend(err, errs)
 		}
@@ -160,13 +161,22 @@ func checkHCL2ConfigSpec(builders packer.BuilderStore, provisioners packer.Provi
 			errs = packersdk.MultiErrorAppend(fmt.Errorf("provisioner %q does not contain the required hcl2spec configuration", p), errs)
 		}
 	}
-	for _, pp := range postProcessors.List() {
-		postProcessor, err := postProcessors.Start(pp)
+	for _, pp := range plugins.PostProcessors.List() {
+		postProcessor, err := plugins.PostProcessors.Start(pp)
 		if err != nil {
 			return packersdk.MultiErrorAppend(err, errs)
 		}
 		if len(postProcessor.ConfigSpec()) == 0 {
 			errs = packersdk.MultiErrorAppend(fmt.Errorf("post-processor %q does not contain the required hcl2spec configuration", pp), errs)
+		}
+	}
+	for _, d := range plugins.DataSources.List() {
+		datasource, err := plugins.DataSources.Start(d)
+		if err != nil {
+			return packersdk.MultiErrorAppend(err, errs)
+		}
+		if len(datasource.ConfigSpec()) == 0 {
+			errs = packersdk.MultiErrorAppend(fmt.Errorf("datasource %q does not contain the required hcl2spec configuration", d), errs)
 		}
 	}
 	if errs != nil && len(errs.Errors) > 0 {

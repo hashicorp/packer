@@ -232,3 +232,32 @@ func (c *InstanceConfig) Prepare(errs *packersdk.MultiError) *packersdk.MultiErr
 	}
 	return errs
 }
+
+type SourceImageConfig struct {
+	// The source image family to create the new image
+	// from. You can also specify source_image_id instead. Just one of a source_image_id or
+	// source_image_family must be specified. Example: `ubuntu-1804-lts`.
+	SourceImageFamily string `mapstructure:"source_image_family" required:"true"`
+	// The ID of the folder containing the source image.
+	SourceImageFolderID string `mapstructure:"source_image_folder_id" required:"false"`
+	// The source image ID to use to create the new image from.
+	SourceImageID string `mapstructure:"source_image_id" required:"false"`
+	// The source image name to use to create the new image
+	// from. Name will be looked up in `source_image_folder_id`.
+	SourceImageName string `mapstructure:"source_image_name"`
+}
+
+func (c *SourceImageConfig) Prepare(errs *packersdk.MultiError) *packersdk.MultiError {
+	// Process required parameters.
+	if c.SourceImageID == "" {
+		if c.SourceImageFamily == "" && c.SourceImageName == "" {
+			errs = packersdk.MultiErrorAppend(
+				errs, errors.New("a source_image_name or source_image_family must be specified"))
+		}
+		if c.SourceImageFamily != "" && c.SourceImageName != "" {
+			errs = packersdk.MultiErrorAppend(
+				errs, errors.New("one of source_image_name or source_image_family must be specified, not both"))
+		}
+	}
+	return errs
+}

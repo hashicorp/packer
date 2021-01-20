@@ -1,0 +1,82 @@
+---
+page_title: Data Sources
+sidebar_title: Data Sources
+description: >-
+  Data sources allow data to be fetched or computed for use elsewhere in local variables and
+  build sources configuration. Use of data sources
+  allows a Builder to make use of information defined outside of Packer.
+---
+
+# Data Sources
+
+-> **Note:** Data Sources is a feature included in Packer 1.7 and later.
+
+Data sources allow data to be fetched or computed for use elsewhere in [locals](/docs/templates/hcl_templates/blocks/locals) and
+[sources](/docs/templates/hcl_templates/blocks/source) configuration.
+Use of data sources allows a Builder to make use of information defined outside of Packer.
+
+# Using Data Sources
+
+A data source is declared using a data block, and the configuration looks like the following:
+
+```hcl
+data "amazon-ami" "example" {
+    filters = {
+        virtualization-type = "hvm"
+        name = "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*"
+        root-device-type = "ebs"
+    }
+    owners = ["099720109477"]
+    most_recent = true
+}
+```
+
+A data block requests that Packer read from a given data source ("amazon-ami") and export the result under the given
+local name ("example"). The name is used to refer to this data source from elsewhere in the same Packer configuration.
+
+The data block creates a data instance of the given _type_ (first block label) and _name_ (second block label).
+The combination of the type and name must be unique within a configuration.
+
+Within the block (the `{ }`) is the configuration for the data instance. The configuration is dependent on the type,
+and is documented for each data source in the [data sources](/docs/datasources) section.
+
+A data source can output one or more attributes, which can be used by adding their key name to the data source unique
+identifier, like `data.<TYPE>.<NAME>.<ATTRIBUTE>`.
+
+The output from the `amazon-ami.example` above can be accessed as follows:
+
+Output data:
+```
+"data.amazon-ami.example" {
+  id = "ami12345"
+  name = "MyAMI"
+  creation_date = "01/01/2021"
+  owner = "123456789"
+  owner_name = "Some Name"
+  tags = {"tag1": "value"}
+}
+```
+
+Usage:
+
+```hcl
+// in a local
+locals {
+  source_ami_id = data.amazon-ami.example.id
+  source_ami_name = data.amazon-ami.example.name
+ }
+```
+
+```hcl
+// in a source
+source "amazon-ebs" "basic-example" {
+  source_ami = locals.source_ami
+  // ...
+}
+```
+
+## Related
+
+- The list of available data sources can be found in the [data sources](/docs/datasources)
+  section.
+- Create your own [custom data source](/docs/extending/custom-datasources) !

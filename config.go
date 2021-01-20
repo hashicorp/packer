@@ -168,5 +168,17 @@ func (c *config) discoverInternalComponents() error {
 		}
 	}
 
+	for dataSource := range command.Datasources {
+		dataSource := dataSource
+		_, found := (c.Datasources)[dataSource]
+		if !found {
+			c.Datasources[dataSource] = func() (packersdk.Datasource, error) {
+				bin := fmt.Sprintf("%s%splugin%spacker-datasource-%s",
+					packerPath, PACKERSPACE, PACKERSPACE, dataSource)
+				return c.Plugins.Client(bin).Datasource()
+			}
+		}
+	}
+
 	return nil
 }

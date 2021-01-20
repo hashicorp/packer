@@ -40,6 +40,9 @@ func getBasicParser() *Parser {
 				"manifest":      func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
 			},
 		},
+		DatasourceSchemas: packersdk.MapOfDatasource{
+			"amazon-ami": func() (packersdk.Datasource, error) { return &MockDatasource{}, nil },
+		},
 	}
 }
 
@@ -69,7 +72,7 @@ func testParse(t *testing.T, tests []parseTest) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotCfg, gotDiags := tt.parser.Parse(tt.args.filename, tt.args.varFiles, tt.args.vars)
-			moreDiags := gotCfg.Initialize()
+			moreDiags := gotCfg.Initialize(packer.InitializeOptions{})
 			gotDiags = append(gotDiags, moreDiags...)
 			if tt.parseWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.parse() unexpected %q diagnostics.", gotDiags)
@@ -165,13 +168,39 @@ var (
 		Tags: []MockTag{},
 	}
 
+	// everything in the tests is a basicNestedMockConfig this allow to test
+	// each known type to packer ( and embedding ) in one go.
+	builderBasicNestedMockConfig = NestedMockConfig{
+		String:   "string",
+		Int:      42,
+		Int64:    43,
+		Bool:     true,
+		Trilean:  config.TriTrue,
+		Duration: 10 * time.Second,
+		MapStringString: map[string]string{
+			"a": "b",
+			"c": "d",
+		},
+		SliceString: []string{
+			"a",
+			"b",
+			"c",
+		},
+		SliceSliceString: [][]string{
+			{"a", "b"},
+			{"c", "d"},
+		},
+		Tags:       []MockTag{},
+		Datasource: "string",
+	}
+
 	basicMockBuilder = &MockBuilder{
 		Config: MockConfig{
-			NestedMockConfig: basicNestedMockConfig,
-			Nested:           basicNestedMockConfig,
+			NestedMockConfig: builderBasicNestedMockConfig,
+			Nested:           builderBasicNestedMockConfig,
 			NestedSlice: []NestedMockConfig{
-				basicNestedMockConfig,
-				basicNestedMockConfig,
+				builderBasicNestedMockConfig,
+				builderBasicNestedMockConfig,
 			},
 		},
 	}
@@ -309,6 +338,7 @@ var cmpOpts = []cmp.Option{
 		PackerConfig{},
 		Variable{},
 		SourceBlock{},
+		Datasource{},
 		ProvisionerBlock{},
 		PostProcessorBlock{},
 		packer.CoreBuild{},

@@ -361,6 +361,7 @@ github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
 # github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210112161930-9f23cd9736d7
+# github.com/hashicorp/packer-plugin-sdk v0.0.7
 github.com/hashicorp/packer-plugin-sdk/acctest
 github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
 github.com/hashicorp/packer-plugin-sdk/acctest/testutils
@@ -373,6 +374,7 @@ github.com/hashicorp/packer-plugin-sdk/communicator/ssh
 github.com/hashicorp/packer-plugin-sdk/communicator/sshkey
 github.com/hashicorp/packer-plugin-sdk/filelock
 github.com/hashicorp/packer-plugin-sdk/guestexec
+github.com/hashicorp/packer-plugin-sdk/hcl2helper
 github.com/hashicorp/packer-plugin-sdk/json
 github.com/hashicorp/packer-plugin-sdk/multistep
 github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps

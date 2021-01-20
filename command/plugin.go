@@ -212,7 +212,9 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 	"yandex-import":        new(yandeximportpostprocessor.PostProcessor),
 }
 
-var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")
+var Datasources = map[string]packersdk.Datasource{}
+
+var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner|datasource)-(.+)")
 
 func (c *PluginCommand) Run(args []string) int {
 	// This is an internal call (users should not call this directly) so we're
@@ -261,6 +263,13 @@ func (c *PluginCommand) Run(args []string) int {
 			return 1
 		}
 		server.RegisterPostProcessor(postProcessor)
+	case "datasource":
+		datasource, found := Datasources[pluginName]
+		if !found {
+			c.Ui.Error(fmt.Sprintf("Could not load datasource: %s", pluginName))
+			return 1
+		}
+		server.RegisterDatasource(datasource)
 	}
 
 	server.Serve()

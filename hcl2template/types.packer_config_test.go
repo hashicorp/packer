@@ -76,6 +76,11 @@ func TestParser_complete(t *testing.T) {
 						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("value_image-id-default")}},
 						Type:   cty.String,
 					},
+					"data_source": &Variable{
+						Name:   "data_source",
+						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("string")}},
+						Type:   cty.String,
+					},
 					"standard_tags": &Variable{
 						Name: "standard_tags",
 						Values: []VariableAssignment{{From: "default",
@@ -115,6 +120,13 @@ func TestParser_complete(t *testing.T) {
 								"id": cty.String,
 							}),
 						}),
+					},
+				},
+				Datasources: Datasources{
+					DatasourceRef{Type: "amazon-ami", Name: "test"}: Datasource{
+						Type:  "amazon-ami",
+						Name:  "test",
+						value: cty.StringVal("foo"),
 					},
 				},
 				Sources: map[SourceRef]SourceBlock{

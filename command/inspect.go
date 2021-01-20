@@ -46,7 +46,7 @@ func (c *InspectCommand) RunContext(ctx context.Context, cla *InspectArgs) int {
 	}
 
 	// here we ignore init diags to allow unknown variables to be used
-	_ = packerStarter.Initialize()
+	_ = packerStarter.Initialize(packer.InitializeOptions{})
 
 	return packerStarter.InspectConfig(packer.InspectConfigOptions{
 		Ui: c.Ui,

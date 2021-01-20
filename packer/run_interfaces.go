@@ -28,9 +28,15 @@ type Evaluator interface {
 	EvaluateExpression(expr string) (output string, exit bool, diags hcl.Diagnostics)
 }
 
+type InitializeOptions struct {
+	// When set, the execution of datasources will be skipped and the datasource will provide
+	// a output spec that will be used for validation only.
+	SkipDatasourcesExecution bool
+}
+
 // The packer.Handler handles all Packer things.
 type Handler interface {
-	Initialize() hcl.Diagnostics
+	Initialize(InitializeOptions) hcl.Diagnostics
 	PluginRequirements() (plugingetter.Requirements, hcl.Diagnostics)
 	Evaluator
 	BuildGetter

@@ -96,6 +96,16 @@ type PostProcessorSet interface {
 	Set(name string, starter func() (packersdk.PostProcessor, error))
 }
 
+type DatasourceStore interface {
+	BasicStore
+	Start(name string) (packersdk.Datasource, error)
+}
+
+type DatasourceSet interface {
+	DatasourceStore
+	Set(name string, starter func() (packersdk.Datasource, error))
+}
+
 // ComponentFinder is a struct that contains the various function
 // pointers necessary to look up components of Packer such as builders,
 // commands, etc.
