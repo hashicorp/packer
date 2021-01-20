@@ -103,16 +103,12 @@ func TestAmazonSecretsManagerSecretVersion(t *testing.T) {
 			logsString := string(logsBytes)
 
 			arnLog := fmt.Sprintf("null.basic-example: secret arn: %s", aws.StringValue(secret.ARN))
-			idLog := fmt.Sprintf("null.basic-example: secret id: %s", secretName)
 			secretStringLog := fmt.Sprintf("null.basic-example: secret secret_string: %s", fmt.Sprintf("{%s:%s}", secretKey, secretValue))
 			versionIdLog := fmt.Sprintf("null.basic-example: secret version_id: %s", aws.StringValue(secret.VersionId))
 			secretValueLog := fmt.Sprintf("null.basic-example: secret value: %s", secretValue)
 
 			if matched, _ := regexp.MatchString(arnLog+".*", logsString); !matched {
 				t.Fatalf("logs doesn't contain expected arn %q", logsString)
-			}
-			if matched, _ := regexp.MatchString(idLog+".*", logsString); !matched {
-				t.Fatalf("logs doesn't contain expected id %q", logsString)
 			}
 			if matched, _ := regexp.MatchString(secretStringLog+".*", logsString); !matched {
 				t.Fatalf("logs doesn't contain expected secret_string %q", logsString)
@@ -136,7 +132,6 @@ data "amazon-secretsmanager-secret-version" "test" {
 
 locals {
   arn           = data.amazon-secretsmanager-secret-version.test.arn
-  id            = data.amazon-secretsmanager-secret-version.test.id
   secret_string = data.amazon-secretsmanager-secret-version.test.secret_string
   version_id    = data.amazon-secretsmanager-secret-version.test.version_id
   secret_value  = jsondecode(data.amazon-secretsmanager-secret-version.test.secret_string)["packer_test_key"]
@@ -154,7 +149,6 @@ build {
   provisioner "shell-local" {
     inline = [
       "echo secret arn: ${local.arn}",
-      "echo secret id: ${local.id}",
       "echo secret secret_string: ${local.secret_string}",
       "echo secret version_id: ${local.version_id}",
  	  "echo secret value: ${local.secret_value}"

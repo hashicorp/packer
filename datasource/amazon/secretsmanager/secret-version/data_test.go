@@ -13,6 +13,20 @@ func TestDatasourceConfigure_EmptySecretId(t *testing.T) {
 	}
 }
 
+func TestDatasourceConfigure_Dafaults(t *testing.T) {
+	datasource := Datasource{
+		config: Config{
+			SecretId: "arn:1223",
+		},
+	}
+	if err := datasource.Configure(nil); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if datasource.config.VersionStage != "AWSCURRENT" {
+		t.Fatalf("VersionStage not set correctly")
+	}
+}
+
 func TestDatasourceConfigure(t *testing.T) {
 	datasource := Datasource{
 		config: Config{

@@ -1,3 +1,4 @@
+//go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type DatasourceOutput,Config
 package secret_version
 
@@ -20,9 +21,15 @@ type Datasource struct {
 }
 
 type Config struct {
-	SecretId               string `mapstructure:"secret_id" required:"true"`
-	VersionId              string `mapstructure:"version_id"`
-	VersionState           string `mapstructure:"version_stage"`
+	// Specifies the secret containing the version that you want to retrieve.
+	// You can specify either the Amazon Resource Name (ARN) or the friendly name of the secret.
+	SecretId string `mapstructure:"secret_id" required:"true"`
+	// Specifies the unique identifier of the version of the secret that you want to retrieve.
+	// Overrides version_stage.
+	VersionId string `mapstructure:"version_id"`
+	// Specifies the secret version that you want to retrieve by the staging label attached to the version.
+	// Defaults to AWSCURRENT.
+	VersionStage           string `mapstructure:"version_stage"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 }
 
@@ -43,6 +50,10 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("a 'secret_id' must be provided"))
 	}
 
+	if d.config.VersionStage == "" {
+		d.config.VersionStage = "AWSCURRENT"
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
 	}
@@ -50,11 +61,16 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 }
 
 type DatasourceOutput struct {
-	Arn          string `mapstructure:"arn"`
-	Id           string `mapstructure:"id"`
+	// The Amazon Resource Name (ARN) of the secret.
+	Arn string `mapstructure:"arn"`
+	// The decrypted part of the protected secret information that
+	// was originally provided as a string.
 	SecretString string `mapstructure:"secret_string"`
+	// The decrypted part of the protected secret information that
+	// was originally provided as a binary. Base64 encoded.
 	SecretBinary string `mapstructure:"secret_binary"`
-	VersionId    string `mapstructure:"version_id"`
+	// The unique identifier of this version of the secret.
+	VersionId string `mapstructure:"version_id"`
 }
 
 func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
@@ -75,9 +91,9 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	if d.config.VersionId != "" {
 		input.VersionId = aws.String(d.config.VersionId)
 		version = d.config.VersionId
-	} else if d.config.VersionState != "" {
-		input.VersionStage = aws.String(d.config.VersionState)
-		version = d.config.VersionState
+	} else {
+		input.VersionStage = aws.String(d.config.VersionStage)
+		version = d.config.VersionStage
 	}
 
 	secretsApi := secretsmanager.New(session)
@@ -92,12 +108,12 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf("error reading Secrets Manager Secret Version: %s", err)
 	}
 
+	versionId := aws.StringValue(secret.VersionId)
 	output := DatasourceOutput{
 		Arn:          aws.StringValue(secret.ARN),
-		Id:           d.config.SecretId,
 		SecretString: aws.StringValue(secret.SecretString),
 		SecretBinary: fmt.Sprintf("%s", secret.SecretBinary),
-		VersionId:    aws.StringValue(secret.VersionId),
+		VersionId:    versionId,
 	}
 	return hcl2helper.HCL2ValueFromConfig(output, d.OutputSpec()), nil
 }
