@@ -84,10 +84,10 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	secret, err := secretsApi.GetSecretValue(input)
 	if err != nil {
 		if awserrors.Matches(err, secretsmanager.ErrCodeResourceNotFoundException, "") {
-			return cty.NullVal(cty.EmptyObject), fmt.Errorf("Secrets Manager Secret %q Version %q not found", input.SecretId, version)
+			return cty.NullVal(cty.EmptyObject), fmt.Errorf("Secrets Manager Secret %q Version %q not found", d.config.SecretId, version)
 		}
 		if awserrors.Matches(err, secretsmanager.ErrCodeInvalidRequestException, "You can’t perform this operation on the secret because it was deleted") {
-			return cty.NullVal(cty.EmptyObject), fmt.Errorf("Secrets Manager Secret %q Version %q not found", input.SecretId, version)
+			return cty.NullVal(cty.EmptyObject), fmt.Errorf("Secrets Manager Secret %q Version %q not found", d.config.SecretId, version)
 		}
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf("error reading Secrets Manager Secret Version: %s", err)
 	}

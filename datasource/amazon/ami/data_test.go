@@ -17,7 +17,7 @@ func TestDatasourceConfigure_FilterBlank(t *testing.T) {
 	}
 }
 
-func TestRunConfigPrepare_SourceAmiFilterOwnersBlank(t *testing.T) {
+func TestDatasourceConfigure_SourceAmiFilterOwnersBlank(t *testing.T) {
 	datasource := Datasource{
 		config: Config{
 			AmiFilterOptions: awscommon.AmiFilterOptions{
@@ -30,7 +30,7 @@ func TestRunConfigPrepare_SourceAmiFilterOwnersBlank(t *testing.T) {
 	}
 }
 
-func TestRunConfigPrepare_SourceAmiFilterGood(t *testing.T) {
+func TestDatasourceConfigure_SourceAmiFilterGood(t *testing.T) {
 	datasource := Datasource{
 		config: Config{
 			AmiFilterOptions: awscommon.AmiFilterOptions{

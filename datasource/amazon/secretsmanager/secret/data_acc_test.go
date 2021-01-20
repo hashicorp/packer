@@ -1,24 +1,83 @@
 package secret
 
 import (
+	"context"
 	"fmt"
-	"os/exec"
-	"testing"
-
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
+	"github.com/hashicorp/packer-plugin-sdk/retry"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
+	"io/ioutil"
+	"os"
+	"os/exec"
+	"regexp"
+	"testing"
+	"time"
 )
 
-func TestAmazonAmi(t *testing.T) {
-	// create secret
+func TestAmazonSecretsManagerSecret(t *testing.T) {
+	secretName := "packer_datasource_secret_test_secret"
+	secretDescription := "this is a secret used in a packer acc test"
+	secret := new(secretsmanager.CreateSecretOutput)
 
 	testCase := &acctest.DatasourceTestCase{
 		Name: "amazon_secretsmanager-secret_datasource_basic_test",
+		Setup: func() error {
+			accessConfig := &awscommon.AccessConfig{}
+			session, err := accessConfig.Session()
+			if err != nil {
+				return fmt.Errorf("Unable to create aws session %s", err.Error())
+			}
+
+			api := secretsmanager.New(session)
+			newSecret := &secretsmanager.CreateSecretInput{
+				Description:  aws.String(secretDescription),
+				Name:         aws.String(secretName),
+				SecretString: aws.String("{packer_test_key:this_is_the_packer_test_secret_value}"),
+			}
+
+			err = retry.Config{
+				Tries: 11,
+				ShouldRetry: func(error) bool {
+					if awserrors.Matches(err, "ResourceExistsException", "") {
+						oldSecret := &secretsmanager.DeleteSecretInput{
+							ForceDeleteWithoutRecovery: aws.Bool(true),
+							SecretId:                   aws.String(secretName),
+						}
+						_, _ = api.DeleteSecret(oldSecret)
+						return true
+					}
+					if awserrors.Matches(err, "InvalidRequestException", "already scheduled for deletion") {
+						return true
+					}
+					return false
+				},
+				RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
+			}.Run(context.TODO(), func(_ context.Context) error {
+				secret, err = api.CreateSecret(newSecret)
+				return err
+			})
+			return err
+		},
 		Teardown: func() error {
-			// remove secret
-			return nil
+			accessConfig := &awscommon.AccessConfig{}
+			session, err := accessConfig.Session()
+			if err != nil {
+				return fmt.Errorf("Unable to create aws session %s", err.Error())
+			}
+
+			api := secretsmanager.New(session)
+			secret := &secretsmanager.DeleteSecretInput{
+				ForceDeleteWithoutRecovery: aws.Bool(true),
+				SecretId:                   aws.String(secretName),
+			}
+			_, err = api.DeleteSecret(secret)
+			return err
 		},
 		Template: testDatasourceBasic,
-		Type:     "amazon-ami",
+		Type:     "amazon-secrestmanager-secret",
 		Check: func(buildCommand *exec.Cmd, logfile string) error {
 			if buildCommand.ProcessState != nil {
 				if buildCommand.ProcessState.ExitCode() != 0 {
@@ -26,7 +85,35 @@ func TestAmazonAmi(t *testing.T) {
 				}
 			}
 
-			// check if log contains the secret
+			logs, err := os.Open(logfile)
+			if err != nil {
+				return fmt.Errorf("Unable find %s", logfile)
+			}
+			defer logs.Close()
+
+			logsBytes, err := ioutil.ReadAll(logs)
+			if err != nil {
+				return fmt.Errorf("Unable to read %s", logfile)
+			}
+			logsString := string(logsBytes)
+
+			arnLog := fmt.Sprintf("null.basic-example: secret arn: %s", aws.StringValue(secret.ARN))
+			idLog := fmt.Sprintf("null.basic-example: secret id: %s", aws.StringValue(secret.ARN))
+			nameLog := fmt.Sprintf("null.basic-example: secret name: %s", aws.StringValue(secret.Name))
+			descriptionLog := fmt.Sprintf("null.basic-example: secret description: %s", secretDescription)
+
+			if matched, _ := regexp.MatchString(arnLog+".*", logsString); !matched {
+				t.Fatalf("logs doesn't contain expected arn %q", logsString)
+			}
+			if matched, _ := regexp.MatchString(idLog+".*", logsString); !matched {
+				t.Fatalf("logs doesn't contain expected id %q", logsString)
+			}
+			if matched, _ := regexp.MatchString(nameLog+".*", logsString); !matched {
+				t.Fatalf("logs doesn't contain expected name %q", logsString)
+			}
+			if matched, _ := regexp.MatchString(descriptionLog+".*", logsString); !matched {
+				t.Fatalf("logs doesn't contain expected description %q", logsString)
+			}
 			return nil
 		},
 	}
@@ -34,15 +121,16 @@ func TestAmazonAmi(t *testing.T) {
 }
 
 const testDatasourceBasic = `
-data "amazon-secretsmanager-secret" "secret" {
-    name = "packer_test_secret"
+data "amazon-secretsmanager-secret" "test" {
+    name = "packer_datasource_secret_test_secret"
 }
 
-data "amazon-secretsmanager-secret-version" "by-version" {
-    secret_id = data.amazon-secretsmanager-secret.secret.id
+locals { 
+	arn = data.amazon-secretsmanager-secret.test.arn
+	id = data.amazon-secretsmanager-secret.test.id
+	name = data.amazon-secretsmanager-secret.test.name
+	description = data.amazon-secretsmanager-secret.test.description
 }
-
-locals { password = jsondecode(data.amazon-secretsmanager-secret-version.by-version.secret_string)["packer_test_key"] }
 
 source "null" "basic-example" {
   communicator = "none"
@@ -54,7 +142,12 @@ build {
   ]
 
   provisioner "shell-local" {
-    inline  = ["echo the password is: ${local.password}"]
+    inline  = [
+		"echo secret arn: ${local.arn}",
+		"echo secret id: ${local.id}",
+		"echo secret name: ${local.name}",
+		"echo secret description: ${local.description}",
+	]
   }
 }
 `
