@@ -89,7 +89,9 @@ configuration file. None of these are required, since all have defaults.
 Packer uses a variety of environmental variables. A listing and description of
 each can be found below:
 
-- `PACKER_CACHE_DIR` - The location of the packer cache.
+- `PACKER_CACHE_DIR` - The location of the Packer cache. This defaults to
+  `./packer_cache/`. Relative paths can be used. Some plugins can cache large
+  files like ISOs in the cache dir.
 
 - `PACKER_CONFIG` - The location of the core configuration file. The format
   of the configuration file is basic JSON. See [Packer's Config
