@@ -25,7 +25,13 @@
       "pattern": "^/docs/templates/legacy_json_templates"
     },
     {
+      "pattern": "^/commands/init"
+    },
+    {
       "pattern": "^https://packer.io/docs/templates/legacy_json_templates"
+    },
+    {
+      "pattern": "^/docs/configure#packer-s-home-directory"
     }
   ],
   "replacementPatterns": [
