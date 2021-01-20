@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -106,6 +107,12 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 	if moreDiags.HasErrors() {
 		return nil, diags
 	}
+
+	// In case of cty.Unknown values, this will write a equivalent placeholder of the same type
+	// Unknown types are not recognized by the json marshal during the RPC call and we have to do this here
+	// to avoid json parsing failures when running the validate command.
+	// We don't do this before so we can validate if variable types matches correctly on decodeHCL2Spec.
+	decoded = hcl2shim.WriteUnknownPlaceholderValues(decoded)
 
 	if err := datasource.Configure(decoded); err != nil {
 		diags = append(diags, &hcl.Diagnostic{
