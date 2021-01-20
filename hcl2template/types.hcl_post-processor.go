@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -55,6 +56,13 @@ func (p *HCL2PostProcessor) HCL2Prepare(buildVars map[string]interface{}) error 
 	if diags.HasErrors() {
 		return diags
 	}
+
+	// In case of cty.Unknown values, this will write a equivalent placeholder of the same type
+	// Unknown types are not recognized by the json marshal during the RPC call and we have to do this here
+	// to avoid json parsing failures when running the validate command.
+	// We don't do this before so we can validate if variable types matches correctly on decodeHCL2Spec.
+	flatPostProcessorCfg = hcl2shim.WriteUnknownPlaceholderValues(flatPostProcessorCfg)
+
 	return p.PostProcessor.Configure(p.builderVariables, flatPostProcessorCfg)
 }
 
