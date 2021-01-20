@@ -1,10 +1,10 @@
-* [`packer init`](/commands/init) will install plugins in the last directory in
-the following list.
+* [`packer init`](/commands/init) will install plugins in the **last** directory
+in the following list.
 
 * During the initialization of Packer, any plugin required in the
 **`required_plugins`** section will be looked up in all entries of the following
-list. First plugin found takes precedence. Two binaries of the same plugin with
-two different version will be considered as two different plugins. Highest
+list. **First** plugin found takes precedence. Two binaries of the same plugin
+with two different version will be considered as two different plugins. Highest
 version matching `required_plugins` will be taken into consideration, if found.
 
 1. The directory where `packer` is, or the executable directory.
