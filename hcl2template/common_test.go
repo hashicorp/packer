@@ -39,9 +39,9 @@ func getBasicParser() *Parser {
 				"amazon-import": func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
 				"manifest":      func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
 			},
-		},
-		DatasourceSchemas: packersdk.MapOfDatasource{
-			"amazon-ami": func() (packersdk.Datasource, error) { return &MockDatasource{}, nil },
+			DataSources: packer.MapOfDatasource{
+				"amazon-ami": func() (packersdk.Datasource, error) { return &MockDatasource{}, nil },
+			},
 		},
 	}
 }

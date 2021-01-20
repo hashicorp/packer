@@ -245,7 +245,7 @@ func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics
 			continue
 		}
 
-		datasource, startDiags := cfg.startDatasource(cfg.datasourceSchemas, ref)
+		datasource, startDiags := cfg.startDatasource(cfg.parser.PluginConfig.DataSources, ref)
 		diags = append(diags, startDiags...)
 		if diags.HasErrors() {
 			continue

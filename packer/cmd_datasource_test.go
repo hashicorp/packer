@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"os/exec"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestDatasource_NoExist(t *testing.T) {
-	c := NewClient(&ClientConfig{Cmd: exec.Command("i-should-not-exist")})
+	c := NewClient(&PluginClientConfig{Cmd: exec.Command("i-should-not-exist")})
 	defer c.Kill()
 
 	_, err := c.Datasource()
@@ -16,7 +16,7 @@ func TestDatasource_NoExist(t *testing.T) {
 }
 
 func TestDatasource_Good(t *testing.T) {
-	c := NewClient(&ClientConfig{Cmd: helperProcess("datasource")})
+	c := NewClient(&PluginClientConfig{Cmd: helperProcess("datasource")})
 	defer c.Kill()
 
 	_, err := c.Datasource()

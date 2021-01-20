@@ -13,7 +13,6 @@ import (
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/packer/plugin"
 )
 
 const packerPluginsCheck = "packer-plugins-check"
@@ -136,12 +135,12 @@ func discoverAndLoad() error {
 		return fmt.Errorf("couldn't load any Builder/Provisioner/Post-Processor from the plugin binary")
 	}
 
-	return checkHCL2ConfigSpec(config.Builders, config.Provisioners, config.PostProcessors)
+	return checkHCL2ConfigSpec(config)
 }
 
 // checkHCL2ConfigSpec checks if the hcl2spec config is present for the given plugins by validating that ConfigSpec() does not
 // return an empty map of specs.
-func checkHCL2ConfigSpec(plugins plugin.Plugins) error {
+func checkHCL2ConfigSpec(plugins packer.PluginConfig) error {
 	var errs *packersdk.MultiError
 	for _, b := range plugins.Builders.List() {
 		builder, err := plugins.Builders.Start(b)

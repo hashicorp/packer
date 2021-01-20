@@ -1,4 +1,4 @@
-package plugin
+package packer
 
 import (
 	"log"
@@ -10,7 +10,7 @@ import (
 
 type cmdDatasource struct {
 	d      packersdk.Datasource
-	client *Client
+	client *PluginClient
 }
 
 func (d *cmdDatasource) ConfigSpec() hcldec.ObjectSpec {

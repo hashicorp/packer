@@ -175,7 +175,7 @@ func (c *PluginClient) Provisioner() (packersdk.Provisioner, error) {
 
 // Returns a data source implementation that is communicating over this
 // client. If the client hasn't been started, this will start it.
-func (c *Client) Datasource() (packersdk.Datasource, error) {
+func (c *PluginClient) Datasource() (packersdk.Datasource, error) {
 	client, err := c.Client()
 	if err != nil {
 		return nil, err

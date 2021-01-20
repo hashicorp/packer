@@ -139,17 +139,17 @@ func TestDiscoverDatasource(t *testing.T) {
 	os.Setenv("PACKER_PLUGIN_PATH", pluginPath)
 	defer os.Unsetenv("PACKER_PLUGIN_PATH")
 
-	config := newConfig()
+	config := newPluginConfig()
 
 	err = config.Discover()
 	if err != nil {
 		t.Fatalf("Should not have errored: %s", err)
 	}
 
-	if len(config.dataSources) == 0 {
+	if len(config.DataSources.List()) == 0 {
 		t.Fatalf("Should have found partyparrot datasource")
 	}
-	if _, ok := config.dataSources["partyparrot"]; !ok {
+	if !config.DataSources.Has("partyparrot") {
 		t.Fatalf("Should have found partyparrot datasource.")
 	}
 }
@@ -385,7 +385,7 @@ func Test_multiplugin_describe(t *testing.T) {
 		}
 		for mockDatasourceName := range plugin.Datasources {
 			expectedDatasourceName := mockPluginName + "-" + mockDatasourceName
-			if _, found := c.dataSources[expectedDatasourceName]; !found {
+			if !c.DataSources.Has(expectedDatasourceName) {
 				t.Fatalf("expected to find datasource %q", expectedDatasourceName)
 			}
 		}

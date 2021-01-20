@@ -861,9 +861,9 @@ func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 				"shell-local": func() (packersdk.PostProcessor, error) { return &shell_local_pp.PostProcessor{}, nil },
 				"manifest":    func() (packersdk.PostProcessor, error) { return &manifest.PostProcessor{}, nil },
 			},
-		},
-		DatasourceStore: packersdk.MapOfDatasource{
-			"mock": func() (packersdk.Datasource, error) { return &packersdk.MockDatasource{}, nil },
+			DataSources: packer.MapOfDatasource{
+				"mock": func() (packersdk.Datasource, error) { return &packersdk.MockDatasource{}, nil },
+			},
 		},
 	}
 	return &packer.CoreConfig{
