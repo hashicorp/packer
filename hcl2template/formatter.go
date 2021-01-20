@@ -117,8 +117,10 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 		return nil, nil
 	}
 
-	s := []byte(fmt.Sprintf("%s\n", filename))
-	_, _ = f.Output.Write(s)
+	if filename != "-" {
+		s := []byte(fmt.Sprintf("%s\n", filename))
+		_, _ = f.Output.Write(s)
+	}
 
 	if f.Write {
 		if filename == "-" {
