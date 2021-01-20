@@ -379,7 +379,9 @@ You may customize the parameters in any way you'd like. To remove a prerelease f
 
 ## Link Validation
 
-The Packer GitHub repository is configured to run a [Markdown Link Check](https://github.com/gaurav-nelson/github-action-markdown-link-check#github-action---markdown-link-check-%EF%B8%8F) on a nightly basis to check for potential broken links within the Packer documentation. There is also a GitHub action that will check any modified `.mdx` files on new pull-requests.
+The Packer GitHub repository is configured to run a [Markdown Link Check](https://github.com/gaurav-nelson/github-action-markdown-link-check#github-action---markdown-link-check-%EF%B8%8F) on a nightly basis to check for potential broken links within the Packer documentation. All checks on master will be executed using the BASE_URL set to https://packer.io/.
+
+There is also a GitHub action that will check any modified `.mdx` files on new pull-requests. The link checker action for pull-requests will only run when there is a new Vercel deployment; checks will be executed against the Vercel deployment URL. If no deployment is made the check will run but will timeout after 3 minutes since it needs a valid Vercel deployment URL.
 
 The master configuration file for the markdown-link-checker is called `mlc_config.json` and is located under the project's root directory.
 The configuration helps with relative links in the documentation that will be valid once deployed, and configures a few ignored URLs which are valid but may not return a valid 200 HTTP response code due to permissions or DDoS protection settings on the domain.
