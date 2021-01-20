@@ -98,6 +98,8 @@ type Config struct {
 	// available.
 	// Deprecated, use Zone instead
 	Region string `mapstructure:"region" required:"false"`
+
+	Timeout string `mapstructure:"timeout" required:"false"`
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {

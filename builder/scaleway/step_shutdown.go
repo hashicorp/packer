@@ -3,6 +3,7 @@ package scaleway
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -30,9 +31,22 @@ func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 		return multistep.ActionHalt
 	}
 
-	instanceResp, err := instanceAPI.WaitForServer(&instance.WaitForServerRequest{
+	waitRequest := &instance.WaitForServerRequest{
 		ServerID: serverID,
-	})
+	}
+	timeout := state.Get("timeout").(string)
+	duration, err := time.ParseDuration(timeout)
+	if err != nil {
+		err := fmt.Errorf("error: %s could not parse string %s as a duration", err, timeout)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	if timeout != "" {
+		waitRequest.Timeout = scw.TimeDurationPtr(duration)
+	}
+
+	instanceResp, err := instanceAPI.WaitForServer(waitRequest)
 	if err != nil {
 		err := fmt.Errorf("Error shutting down server: %s", err)
 		state.Put("error", err)
