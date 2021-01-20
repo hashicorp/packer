@@ -34,11 +34,13 @@ func (a *AWSHelper) CleanUpAmi() error {
 		return fmt.Errorf("AWSAMICleanUp: Unable to find Image %s: %s", a.AMIName, err.Error())
 	}
 
-	_, err = regionconn.DeregisterImage(&ec2.DeregisterImageInput{
-		ImageId: resp.Images[0].ImageId,
-	})
-	if err != nil {
-		return fmt.Errorf("AWSAMICleanUp: Unable to Deregister Image %s", err.Error())
+	if resp != nil && len(resp.Images) > 0 {
+		_, err = regionconn.DeregisterImage(&ec2.DeregisterImageInput{
+			ImageId: resp.Images[0].ImageId,
+		})
+		if err != nil {
+			return fmt.Errorf("AWSAMICleanUp: Unable to Deregister Image %s", err.Error())
+		}
 	}
 	return nil
 }

@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"fmt"
-	"log"
 	"sort"
 	"time"
 
@@ -53,42 +52,11 @@ func (s *StepSourceAMIInfo) Run(ctx context.Context, state multistep.StateBag) m
 		params.ImageIds = []*string{&s.SourceAmi}
 	}
 
-	// We have filters to apply
-	if len(s.AmiFilters.Filters) > 0 {
-		params.Filters = buildEc2Filters(s.AmiFilters.Filters)
-	}
-	if len(s.AmiFilters.Owners) > 0 {
-		params.Owners = s.AmiFilters.GetOwners()
-	}
-
-	log.Printf("Using AMI Filters %v", params)
-	imageResp, err := ec2conn.DescribeImages(params)
+	image, err := s.AmiFilters.GetFilteredImage(params, ec2conn)
 	if err != nil {
-		err := fmt.Errorf("Error querying AMI: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
-	}
-
-	if len(imageResp.Images) == 0 {
-		err := fmt.Errorf("No AMI was found matching filters: %v", params)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	if len(imageResp.Images) > 1 && !s.AmiFilters.MostRecent {
-		err := fmt.Errorf("Your query returned more than one result. Please try a more specific search, or set most_recent to true.")
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	var image *ec2.Image
-	if s.AmiFilters.MostRecent {
-		image = mostRecentAmi(imageResp.Images)
-	} else {
-		image = imageResp.Images[0]
 	}
 
 	ui.Message(fmt.Sprintf("Found Image ID: %s", *image.ImageId))
