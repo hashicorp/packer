@@ -18,7 +18,7 @@ mode on the remote/guest VM using Playbook and Role files that exist on the
 guest VM. This means ansible must be installed on the remote/guest VM.
 Playbooks and Roles can be uploaded from your build machine (the one running
 Packer) to the vm. Ansible is then run on the guest machine in [local
-mode](https://docs.ansible.com/ansible/playbooks_delegation.html#local-playbooks)
+mode](https://docs.ansible.com/ansible/latest/playbooks_delegation.html#local-playbooks)
 via the `ansible-playbook` command.
 
 -> **Note:** Ansible will _not_ be installed automatically by this
@@ -187,7 +187,7 @@ Optional:
 
 - `galaxy_file` (string) - A requirements file which provides a way to
   install roles with the [ansible-galaxy
-  cli](http://docs.ansible.com/ansible/galaxy.html#the-ansible-galaxy-command-line-tool)
+  cli](http://docs.ansible.com/ansible/latest/galaxy.html#the-ansible-galaxy-command-line-tool)
   on the remote machine. By default, this is empty.
 
 - `galaxy_command` (string) - The command to invoke ansible-galaxy. By
