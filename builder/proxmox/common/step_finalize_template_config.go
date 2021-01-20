@@ -72,6 +72,11 @@ func (s *stepFinalizeTemplateConfig) Run(ctx context.Context, state multistep.St
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
+		} else {
+			err := fmt.Errorf("cloud_init is set to true, but cloud_init_storage_pool is empty and could not be set automatically. set cloud_init_storage_pool in your configuration")
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
 	}
 

@@ -128,7 +128,7 @@ To run the build, call `packer build example_virtualbox_iso.json`.
 This example does not set the output_directory or output_filename, so the file
 will be placed in a default name of "output-virtualbox-iso/vbox-example.ovf" --
 the builder will print this file name to the UI output, but in this example the
-[manifest](https://www.packer.io/docs/post-processors/manifest) post-processor
+[manifest](/docs/post-processors/manifest) post-processor
 to will store build information, including the names of the output files, in a
 json file named "stage-1-manifest.json". From there, you can programmatically
 look up the output file information.
@@ -136,7 +136,7 @@ look up the output file information.
 ## Customizing the iso using the virtualbox-ovf builder
 
 That output filename generated in the first stage can be used as the
-[source_path](https://www.packer.io/docs/builders/virtualbox/ovf#source_path)
+[source_path](/docs/builders/virtualbox/ovf#source_path)
 for the virtualbox-ovf builder.
 
 <Tabs>

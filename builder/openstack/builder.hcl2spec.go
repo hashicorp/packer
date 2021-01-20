@@ -46,6 +46,7 @@ type FlatConfig struct {
 	ImageDiskFormat               *string                 `mapstructure:"image_disk_format" required:"false" cty:"image_disk_format" hcl:"image_disk_format"`
 	ImageTags                     []string                `mapstructure:"image_tags" required:"false" cty:"image_tags" hcl:"image_tags"`
 	ImageMinDisk                  *int                    `mapstructure:"image_min_disk" required:"false" cty:"image_min_disk" hcl:"image_min_disk"`
+	SkipCreateImage               *bool                   `mapstructure:"skip_create_image" required:"false" cty:"skip_create_image" hcl:"skip_create_image"`
 	Type                          *string                 `mapstructure:"communicator" cty:"communicator" hcl:"communicator"`
 	PauseBeforeConnect            *string                 `mapstructure:"pause_before_connecting" cty:"pause_before_connecting" hcl:"pause_before_connecting"`
 	SSHHost                       *string                 `mapstructure:"ssh_host" cty:"ssh_host" hcl:"ssh_host"`
@@ -177,6 +178,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"image_disk_format":                &hcldec.AttrSpec{Name: "image_disk_format", Type: cty.String, Required: false},
 		"image_tags":                       &hcldec.AttrSpec{Name: "image_tags", Type: cty.List(cty.String), Required: false},
 		"image_min_disk":                   &hcldec.AttrSpec{Name: "image_min_disk", Type: cty.Number, Required: false},
+		"skip_create_image":                &hcldec.AttrSpec{Name: "skip_create_image", Type: cty.Bool, Required: false},
 		"communicator":                     &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
 		"pause_before_connecting":          &hcldec.AttrSpec{Name: "pause_before_connecting", Type: cty.String, Required: false},
 		"ssh_host":                         &hcldec.AttrSpec{Name: "ssh_host", Type: cty.String, Required: false},

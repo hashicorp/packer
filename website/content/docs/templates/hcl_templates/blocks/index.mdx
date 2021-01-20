@@ -1,0 +1,63 @@
+---
+page_title: Blocks - Configuration Language
+sidebar_title: Blocks
+description: The HCL language has a number of blocks that can be used to configure builds.
+---
+
+# Built-in Blocks
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+The Packer - HCL2 language includes a number of built-in blocks that you can
+use to configure builds. A block is a container for configuration.
+
+The most important blocks can be broken into a couple of major types:
+ * `build` blocks contain configuration for a specific combination of builders,
+ 	provisioners, and post-processors used to create a specific image artifact.
+ * `source` blocks contain configuration for builder plugins. Once defined,
+ 	sources can be used and further configured by the "build" block.
+ * `provisioner` blocks contain configuration for provisioner plugins. These
+ 	blocks are nested inside of a build block.
+ * `post-processor` and `post-processors` blocks contain configuration for
+ 	post-processor plugins and post-processor plugin sequences. They are also
+ 	nested within `build` blocks.
+ * `variable` blocks contain configuration for variables that can either be
+ 	defaulted in configuration or set by the user at runtime.
+ * `locals` blocks contain configuration for variables that can be created using
+ 	HCL functions or data sources, or composited from variables created in the
+ 	variables blocks.
+
+Use the sidebar to navigate to detailed documentation for each of these blocks.
+
+Other blocks, such as the "packer" block, provide information to the Packer core
+about what version it is allowed to run. The "required_plugins" block helps the
+Packer core
+
+Blocks can be defined in multiple files and `packer build folder` will build
+using solely the files from a directory named `folder`.
+
+Packer does not support user-defined blocks and so only the blocks built in to
+the language are available for use. The navigation for this section includes a
+list of all of the available built-in HCL2 blocks.
+
+## Config example:
+
+`@include 'from-1.5/variables/foo-block.mdx'`
+
+- [Variable block documentation](/docs/templates/hcl_templates/blocks/variable).
+
+`@include 'from-1.5/locals/example-block.mdx'`
+
+- [Locals block documentation](/docs/templates/hcl_templates/blocks/locals).
+
+`@include 'from-1.5/sources/example-block.mdx'`
+
+- [source block documentation](/docs/templates/hcl_templates/blocks/source).
+
+`@include 'from-1.5/builds/example-block.mdx'`
+
+- [build block documentation](/docs/templates/hcl_templates/blocks/build).
+
+`@include 'from-1.5/datasources/example-block.mdx'`
+
+- [data block documentation](/docs/templates/hcl_templates/blocks/data).

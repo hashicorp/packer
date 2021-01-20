@@ -64,7 +64,7 @@ type Config struct {
 	VolumeRunTags map[string]string `mapstructure:"run_volume_tags"`
 	// Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular
 	// block containing a `name` and a `value` field. In HCL2 mode the
-	// [`dynamic_block`](https://packer.io/docs/configuration/from-1.5/expressions.html#dynamic-blocks)
+	// [`dynamic_block`](https://packer.io/docs/templates/hcl_templates/expressions.html#dynamic-blocks)
 	// will allow you to create those programatically.
 	VolumeRunTag config.NameValues `mapstructure:"run_volume_tag" required:"false"`
 	// what architecture to use when registering the

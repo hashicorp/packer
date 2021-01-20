@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/c2h5oh/datasize"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/yandex"
@@ -12,7 +13,8 @@ import (
 
 type StepAttachDisk struct {
 	yandex.CommonConfig
-	ImageID string
+	ImageID   string
+	ExtraSize int
 }
 
 func (c *StepAttachDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -34,7 +36,7 @@ func (c *StepAttachDisk) Run(ctx context.Context, state multistep.StateBag) mult
 			ImageId: c.ImageID,
 		},
 		Name:        fmt.Sprintf("export-%s-disk", instanceID),
-		Size:        imageDesc.GetMinDiskSize(),
+		Size:        int64(datasize.ByteSize(c.ExtraSize)*datasize.GB) + imageDesc.GetMinDiskSize(),
 		ZoneId:      c.Zone,
 		FolderId:    c.FolderID,
 		TypeId:      c.DiskType,
