@@ -13,7 +13,7 @@ import (
 type FlatConfig struct {
 	SecretId              *string                           `mapstructure:"secret_id" required:"true" cty:"secret_id" hcl:"secret_id"`
 	VersionId             *string                           `mapstructure:"version_id" cty:"version_id" hcl:"version_id"`
-	VersionState          *string                           `mapstructure:"version_stage" cty:"version_stage" hcl:"version_stage"`
+	VersionStage          *string                           `mapstructure:"version_stage" cty:"version_stage" hcl:"version_stage"`
 	AccessKey             *string                           `mapstructure:"access_key" required:"true" cty:"access_key" hcl:"access_key"`
 	AssumeRole            *common.FlatAssumeRoleConfig      `mapstructure:"assume_role" required:"false" cty:"assume_role" hcl:"assume_role"`
 	CustomEndpointEc2     *string                           `mapstructure:"custom_endpoint_ec2" required:"false" cty:"custom_endpoint_ec2" hcl:"custom_endpoint_ec2"`
@@ -71,7 +71,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatDatasourceOutput struct {
 	Arn          *string `mapstructure:"arn" cty:"arn" hcl:"arn"`
-	Id           *string `mapstructure:"id" cty:"id" hcl:"id"`
 	SecretString *string `mapstructure:"secret_string" cty:"secret_string" hcl:"secret_string"`
 	SecretBinary *string `mapstructure:"secret_binary" cty:"secret_binary" hcl:"secret_binary"`
 	VersionId    *string `mapstructure:"version_id" cty:"version_id" hcl:"version_id"`
@@ -90,7 +89,6 @@ func (*DatasourceOutput) FlatMapstructure() interface{ HCL2Spec() map[string]hcl
 func (*FlatDatasourceOutput) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"arn":           &hcldec.AttrSpec{Name: "arn", Type: cty.String, Required: false},
-		"id":            &hcldec.AttrSpec{Name: "id", Type: cty.String, Required: false},
 		"secret_string": &hcldec.AttrSpec{Name: "secret_string", Type: cty.String, Required: false},
 		"secret_binary": &hcldec.AttrSpec{Name: "secret_binary", Type: cty.String, Required: false},
 		"version_id":    &hcldec.AttrSpec{Name: "version_id", Type: cty.String, Required: false},

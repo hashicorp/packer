@@ -1,3 +1,4 @@
+//go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type DatasourceOutput,Config
 package secret
 
@@ -22,7 +23,10 @@ type Datasource struct {
 }
 
 type Config struct {
-	Arn                    string `mapstructure:"arn"`
+	// The complete Amazon Resource Name (ARN) of the secret whose details you want to retrieve
+	Arn string `mapstructure:"arn"`
+	// The name of the secret whose details you want to retrieve.
+	// Specify either an `arn` or a `name`, both should not be set together.
 	Name                   string `mapstructure:"name"`
 	awscommon.AccessConfig `mapstructure:",squash"`
 
@@ -62,13 +66,20 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 }
 
 type DatasourceOutput struct {
-	Arn         string            `mapstructure:"arn"`
-	Name        string            `mapstructure:"name"`
-	Description string            `mapstructure:"description"`
-	KmsKeyId    string            `mapstructure:"kms_key_id"`
-	Id          string            `mapstructure:"id"`
-	Tags        map[string]string `mapstructure:"tags"`
-	Policy      string            `mapstructure:"policy"`
+	// The Amazon Resource Name (ARN) of the secret.
+	Arn string `mapstructure:"arn"`
+	// The user-provided friendly name of the secret.
+	Name string `mapstructure:"name"`
+	// The user-provided description of the secret.
+	Description string `mapstructure:"description"`
+	// The Key Management Service (KMS) Customer Master Key (CMK) associated with the secret.
+	KmsKeyId string `mapstructure:"kms_key_id"`
+	// The Amazon Resource Name (ARN) of the secret.
+	Id string `mapstructure:"id"`
+	// The list of user-defined tags that are associated with the secret.
+	Tags map[string]string `mapstructure:"tags"`
+	// The resource-based policy document that's attached to the secret.
+	Policy string `mapstructure:"policy"`
 }
 
 func (d *Datasource) OutputSpec() hcldec.ObjectSpec {

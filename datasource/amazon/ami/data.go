@@ -1,3 +1,4 @@
+//go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type DatasourceOutput,Config
 package ami
 
@@ -50,12 +51,18 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 }
 
 type DatasourceOutput struct {
-	ID           string            `mapstructure:"id"`
-	Name         string            `mapstructure:"name"`
-	CreationDate string            `mapstructure:"creation_date"`
-	Owner        string            `mapstructure:"owner"`
-	OwnerName    string            `mapstructure:"owner_name"`
-	Tags         map[string]string `mapstructure:"tags"`
+	// The ID of the AMI.
+	ID string `mapstructure:"id"`
+	// The name of the AMI.
+	Name string `mapstructure:"name"`
+	// The date of creation of the AMI.
+	CreationDate string `mapstructure:"creation_date"`
+	// The AWS account ID of the owner.
+	Owner string `mapstructure:"owner"`
+	// The owner alias.
+	OwnerName string `mapstructure:"owner_name"`
+	// The key/value combination of the tags assigned to the AMI.
+	Tags map[string]string `mapstructure:"tags"`
 }
 
 func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
