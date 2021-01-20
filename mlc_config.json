@@ -37,7 +37,7 @@
   "replacementPatterns": [
     {
       "pattern": "^/",
-      "replacement": "https://packer.io/"
+      "replacement": "{{env.DEPLOYMENT_URL}}/"
     }
   ],
   "timeout": "20s",
