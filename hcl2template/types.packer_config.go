@@ -7,6 +7,7 @@ import (
 
 	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
@@ -40,6 +41,8 @@ type PackerConfig struct {
 	InputVariables Variables
 	LocalVariables Variables
 
+	Datasources Datasources
+
 	LocalBlocks []*LocalBlock
 
 	ValidationOptions
@@ -47,11 +50,10 @@ type PackerConfig struct {
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
 
-	builderSchemas packer.BuilderStore
-
-	provisionersSchemas packer.ProvisionerStore
-
+	builderSchemas        packer.BuilderStore
+	provisionersSchemas   packer.ProvisionerStore
 	postProcessorsSchemas packer.PostProcessorStore
+	datasourceSchemas     packer.DatasourceStore
 
 	except []glob.Glob
 	only   []glob.Glob
@@ -71,6 +73,7 @@ const (
 	sourcesAccessor        = "source"
 	buildAccessor          = "build"
 	packerAccessor         = "packer"
+	dataAccessor           = "data"
 )
 
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
@@ -79,6 +82,7 @@ const (
 func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalContext {
 	inputVariables, _ := cfg.InputVariables.Values()
 	localVariables, _ := cfg.LocalVariables.Values()
+	datasourceVariables, _ := cfg.Datasources.Values()
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
@@ -96,6 +100,7 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
 				"root": cty.StringVal(strings.ReplaceAll(cfg.Basedir, `\`, `/`)),
 			}),
+			dataAccessor: cty.ObjectVal(datasourceVariables),
 		},
 	}
 	for k, v := range variables {
@@ -230,6 +235,43 @@ func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics 
 			From:  "default",
 		}},
 		Type: value.Type(),
+	}
+
+	return diags
+}
+
+func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	for ref, ds := range cfg.Datasources {
+		if ds.value != (cty.Value{}) {
+			continue
+		}
+
+		datasource, startDiags := cfg.startDatasource(cfg.datasourceSchemas, ref)
+		diags = append(diags, startDiags...)
+		if diags.HasErrors() {
+			continue
+		}
+
+		if skipExecution {
+			placeholderValue := cty.UnknownVal(hcldec.ImpliedType(datasource.OutputSpec()))
+			ds.value = placeholderValue
+			cfg.Datasources[ref] = ds
+			continue
+		}
+
+		realValue, err := datasource.Execute()
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary:  err.Error(),
+				Subject:  &cfg.Datasources[ref].block.DefRange,
+				Severity: hcl.DiagError,
+			})
+			continue
+		}
+		ds.value = realValue
+		cfg.Datasources[ref] = ds
 	}
 
 	return diags

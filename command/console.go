@@ -60,7 +60,7 @@ func (c *ConsoleCommand) RunContext(ctx context.Context, cla *ConsoleArgs) int {
 		return ret
 	}
 
-	_ = packerStarter.Initialize()
+	_ = packerStarter.Initialize(packer.InitializeOptions{})
 
 	// Determine if stdin is a pipe. If so, we evaluate directly.
 	if c.StdinPiped() {

@@ -43,12 +43,18 @@ func main() {
 		log.Fatalf("Failed to discover post processors: %s", err)
 	}
 
+	datasources, err := discoverDatasources()
+	if err != nil {
+		log.Fatalf("Failed to discover Datasources: %s", err)
+	}
+
 	// Do some simple code generation and templating
 	output := source
-	output = strings.Replace(output, "IMPORTS", makeImports(builders, provisioners, postProcessors), 1)
+	output = strings.Replace(output, "IMPORTS", makeImports(builders, provisioners, postProcessors, datasources), 1)
 	output = strings.Replace(output, "BUILDERS", makeMap("Builders", "Builder", builders), 1)
 	output = strings.Replace(output, "PROVISIONERS", makeMap("Provisioners", "Provisioner", provisioners), 1)
 	output = strings.Replace(output, "POSTPROCESSORS", makeMap("PostProcessors", "PostProcessor", postProcessors), 1)
+	output = strings.Replace(output, "DATASOURCES", makeMap("Datasources", "Datasource", datasources), 1)
 
 	// TODO sort the lists of plugins so we are not subjected to random OS ordering of the plugin lists
 	// TODO format the file
@@ -105,7 +111,7 @@ func makeMap(varName, varType string, items []plugin) string {
 	return output
 }
 
-func makeImports(builders, provisioners, postProcessors []plugin) string {
+func makeImports(builders, provisioners, postProcessors, Datasources []plugin) string {
 	plugins := []string{}
 
 	for _, builder := range builders {
@@ -118,6 +124,10 @@ func makeImports(builders, provisioners, postProcessors []plugin) string {
 
 	for _, postProcessor := range postProcessors {
 		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/hashicorp/packer/%s\"\n", postProcessor.ImportName, filepath.ToSlash(postProcessor.Path)))
+	}
+
+	for _, datasource := range Datasources {
+		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/hashicorp/packer/%s\"\n", datasource.ImportName, filepath.ToSlash(datasource.Path)))
 	}
 
 	// Make things pretty
@@ -229,6 +239,12 @@ func discoverBuilders() ([]plugin, error) {
 	return discoverTypesInPath(path, typeID)
 }
 
+func discoverDatasources() ([]plugin, error) {
+	path := "./datasource"
+	typeID := "Datasource"
+	return discoverTypesInPath(path, typeID)
+}
+
 func discoverProvisioners() ([]plugin, error) {
 	path := "./provisioner"
 	typeID := "Provisioner"
@@ -270,7 +286,9 @@ PROVISIONERS
 
 POSTPROCESSORS
 
-var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")
+DATASOURCES
+
+var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner|datasource)-(.+)")
 
 func (c *PluginCommand) Run(args []string) int {
 	// This is an internal call (users should not call this directly) so we're
@@ -319,6 +337,13 @@ func (c *PluginCommand) Run(args []string) int {
 			return 1
 		}
 		server.RegisterPostProcessor(postProcessor)
+	case "datasource":
+		datasource, found := Datasources[pluginName]
+		if !found {
+			c.Ui.Error(fmt.Sprintf("Could not load datasource: %s", pluginName))
+			return 1
+		}
+		server.RegisterDatasource(datasource)
 	}
 
 	server.Serve()

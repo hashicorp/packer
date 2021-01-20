@@ -230,6 +230,7 @@ func wrappedMain() int {
 				BuilderStore:       config.Builders,
 				ProvisionerStore:   config.Provisioners,
 				PostProcessorStore: config.PostProcessors,
+				DatasourceStore:    config.Datasources,
 			},
 			Version: version.Version,
 		},
@@ -310,10 +311,11 @@ func loadConfig() (*config, error) {
 	}
 
 	// Copy plugins to general list
-	builders, provisioners, postProcessors := config.Plugins.GetPlugins()
-	config.Builders = builders
-	config.Provisioners = provisioners
-	config.PostProcessors = postProcessors
+	plugins := config.Plugins.GetPlugins()
+	config.Builders = plugins.Builders
+	config.Provisioners = plugins.Provisioners
+	config.PostProcessors = plugins.PostProcessors
+	config.Datasources = plugins.DataSources
 
 	// Finally, try to use an internal plugin. Note that this will not override
 	// any previously-loaded plugins.

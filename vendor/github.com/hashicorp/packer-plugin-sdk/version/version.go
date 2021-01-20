@@ -13,12 +13,12 @@ import (
 var GitCommit string
 
 // Package version helps plugin creators set and track the sdk version using
-const Version = "0.0.6"
+const Version = "0.0.7"
 
 // A pre-release marker for the version. If this is "" (empty string)
 // then it means that it is a final release. Otherwise, this is a pre-release
 // such as "dev" (in development), "beta", "rc1", etc.
-const VersionPrerelease = "dev"
+const VersionPrerelease = ""
 
 // InitializePluginVersion initializes the SemVer and returns a version var.
 // If the provided "version" string is not valid, the call to version.Must

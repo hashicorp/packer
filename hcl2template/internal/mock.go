@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/zclconf/go-cty/cty"
@@ -26,6 +27,7 @@ type NestedMockConfig struct {
 	NamedMapStringString NamedMapStringString `mapstructure:"named_map_string_string"`
 	NamedString          NamedString          `mapstructure:"named_string"`
 	Tags                 []MockTag            `mapstructure:"tag"`
+	Datasource           string               `mapstructure:"data_source"`
 }
 
 type MockTag struct {
@@ -101,6 +103,32 @@ func (b *MockProvisioner) Prepare(raws ...interface{}) error {
 
 func (b *MockProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, _ map[string]interface{}) error {
 	return nil
+}
+
+//////
+// MockDatasource
+//////
+
+type MockDatasource struct {
+	Config MockConfig
+}
+
+var _ packersdk.Datasource = new(MockDatasource)
+
+func (d *MockDatasource) ConfigSpec() hcldec.ObjectSpec {
+	return d.Config.FlatMapstructure().HCL2Spec()
+}
+
+func (d *MockDatasource) OutputSpec() hcldec.ObjectSpec {
+	return d.Config.FlatMapstructure().HCL2Spec()
+}
+
+func (d *MockDatasource) Configure(raws ...interface{}) error {
+	return d.Config.Prepare(raws...)
+}
+
+func (d *MockDatasource) Execute() (cty.Value, error) {
+	return hcl2helper.HCL2ValueFromConfig(d.Config, d.OutputSpec()), nil
 }
 
 //////

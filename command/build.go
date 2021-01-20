@@ -70,6 +70,7 @@ func (m *Meta) GetConfigFromHCL(cla *MetaArgs) (*hcl2template.PackerConfig, int)
 		BuilderSchemas:          m.CoreConfig.Components.BuilderStore,
 		ProvisionersSchemas:     m.CoreConfig.Components.ProvisionerStore,
 		PostProcessorsSchemas:   m.CoreConfig.Components.PostProcessorStore,
+		DatasourceSchemas:       m.CoreConfig.Components.DatasourceStore,
 	}
 	cfg, diags := parser.Parse(cla.Path, cla.VarFiles, cla.Vars)
 	return cfg, writeDiags(m.Ui, parser.Files(), diags)
@@ -147,7 +148,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if ret != 0 {
 		return ret
 	}
-	diags := packerStarter.Initialize()
+	diags := packerStarter.Initialize(packer.InitializeOptions{})
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret

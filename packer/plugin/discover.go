@@ -26,10 +26,23 @@ type Config struct {
 	builders       packer.MapOfBuilder
 	provisioners   packer.MapOfProvisioner
 	postProcessors packer.MapOfPostProcessor
+	dataSources    packer.MapOfDatasource
 }
 
-func (c *Config) GetPlugins() (packer.MapOfBuilder, packer.MapOfProvisioner, packer.MapOfPostProcessor) {
-	return c.builders, c.provisioners, c.postProcessors
+type Plugins struct {
+	Builders       packer.MapOfBuilder
+	Provisioners   packer.MapOfProvisioner
+	PostProcessors packer.MapOfPostProcessor
+	DataSources    packer.MapOfDatasource
+}
+
+func (c *Config) GetPlugins() Plugins {
+	return Plugins{
+		Builders:       c.builders,
+		Provisioners:   c.provisioners,
+		PostProcessors: c.postProcessors,
+		DataSources:    c.dataSources,
+	}
 }
 
 // Discover discovers plugins.
@@ -48,6 +61,9 @@ func (c *Config) Discover() error {
 	}
 	if c.postProcessors == nil {
 		c.postProcessors = packer.MapOfPostProcessor{}
+	}
+	if c.dataSources == nil {
+		c.dataSources = packer.MapOfDatasource{}
 	}
 
 	// If we are already inside a plugin process we should not need to
@@ -159,6 +175,22 @@ func (c *Config) discoverExternalComponents(path string) error {
 	if len(externallyUsed) > 0 {
 		sort.Strings(externallyUsed)
 		log.Printf("using external provisioners %v", externallyUsed)
+	}
+
+	pluginPaths, err = c.discoverSingle(filepath.Join(path, "packer-datasource-*"))
+	if err != nil {
+		return err
+	}
+	for pluginName, pluginPath := range pluginPaths {
+		newPath := pluginPath // this needs to be stored in a new variable for the func below
+		c.dataSources[pluginName] = func() (packersdk.Datasource, error) {
+			return c.Client(newPath).Datasource()
+		}
+		externallyUsed = append(externallyUsed, pluginName)
+	}
+	if len(externallyUsed) > 0 {
+		sort.Strings(externallyUsed)
+		log.Printf("using external datasource %v", externallyUsed)
 	}
 
 	pluginPaths, err = c.discoverSingle(filepath.Join(path, "packer-plugin-*"))
@@ -277,6 +309,16 @@ func (c *Config) discoverMultiPlugin(pluginName, pluginPath string) error {
 	}
 	if len(desc.Provisioners) > 0 {
 		log.Printf("found external %v provisioner from %s plugin", desc.Provisioners, pluginName)
+	}
+
+	for _, datasourceName := range desc.Datasources {
+		datasourceName := datasourceName // copy to avoid pointer overwrite issue
+		c.dataSources[pluginPrefix+datasourceName] = func() (packersdk.Datasource, error) {
+			return c.Client(pluginPath, "start", "datasource", datasourceName).Datasource()
+		}
+	}
+	if len(desc.Datasources) > 0 {
+		log.Printf("found external %v datasource from %s plugin", desc.Datasources, pluginName)
 	}
 
 	return nil
