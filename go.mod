@@ -10,7 +10,6 @@ require (
 	github.com/Azure/go-autorest/autorest/azure/cli v0.3.1
 	github.com/Azure/go-autorest/autorest/date v0.2.0
 	github.com/Azure/go-autorest/autorest/to v0.3.0
-	github.com/Azure/go-autorest/autorest/validation v0.3.1 // indirect
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022
 	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0
 	github.com/Telmate/proxmox-api-go v0.0.0-20200715182505-ec97c70ba887
@@ -54,17 +53,13 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/hcl/v2 v2.8.0
-	github.com/hashicorp/packer-plugin-sdk v0.0.7
+	github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210120105339-f6fd68d2570a
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
 	github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
 	github.com/joyent/triton-go v0.0.0-20180628001255-830d2b111e62
-	github.com/json-iterator/go v1.1.10 // indirect
-	github.com/klauspost/compress v1.11.6 // indirect
-	github.com/klauspost/crc32 v1.2.0 // indirect
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
-	github.com/kr/fs v0.1.0 // indirect
 	github.com/linode/linodego v0.14.0
 	github.com/masterzen/winrm v0.0.0-20201030141608-56ca5c5f2380
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
@@ -104,7 +99,6 @@ require (
 	golang.org/x/tools v0.0.0-20201111133315-69daaf961d65
 	google.golang.org/api v0.32.0
 	google.golang.org/grpc v1.32.0
-	gopkg.in/ini.v1 v1.62.0 // indirect
 )
 
 go 1.13
