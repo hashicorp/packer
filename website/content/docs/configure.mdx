@@ -17,15 +17,15 @@ core configuration for now.
 # Packer's home directory
 
 Plugins and core configuration files can exist in the home directory of Packer.
-The home directory of packer will be in the `/.packer.d/` directory of the first
-one of the following env values to be set :
+The home directory of packer will be the first one of the following env values
+to be set :
 
-| unix                   | windows               |
-|------------------------|-----------------------|
-| `${PACKER_CONFIG_DIR}` | `%PACKER_CONFIG_DIR%` |
-| `${APPDATA}`           | `%APPDATA%`           |
-| `${HOME}`              | `%HOME%`              |
-| user dir of `${USER}`  | user dir of `${USER}` |
+| unix                                  | windows                              |
+|---------------------------------------|--------------------------------------|
+| `${PACKER_CONFIG_DIR}/.packer.d/`     | `%PACKER_CONFIG_DIR%/packer.d/`      |
+| `${APPDATA}/.packer.d/`               | `%APPDATA%/packer.d/`                |
+| `${HOME}/.packer.d/`                  | `%HOME%/packer.d/`                   |
+| user dir of `${USER}` + `/.packer.d/` | user dir of `${USER}` + `/packer.d/` |
 
 Examples: 
 * On a 'unix' system, if `PACKER_CONFIG_DIR` is set to `/home/packer`,
@@ -33,6 +33,8 @@ Examples:
 be checked.
 * On a 'unix' system, if `HOME` is `/home/azr` or `USER` is `azr`, then
 `PACKER_HOME_DIR` will default to `/home/azr/.packer.d/`.
+* On a 'windows' system, if `PACKER_CONFIG_DIR` is set to `C:/`,
+`PACKER_HOME_DIR` will be: `C:/packer.d/` and other values will not be checked.
 
 -> Note: On this page "Packer's home directory" will be referenced as
 `PACKER_HOME_DIR`.
@@ -43,16 +45,16 @@ be checked.
 
 # Packer's config file
 
-The first value set of the following list will be parsed as the config file, it
-is not an error if no config file was found :
+Packer can optionally read a JSON file to set some core settings. The config
+file of packer will be in the `/.packer.d/` directory of the first one of the
+following env values to be set :
 
-| unix                               | windows                           |
-|------------------------------------|-----------------------------------|
-| `${PACKER_CONFIG}`                 | `%PACKER_CONFIG%`                 |
-| `${PACKER_HOME_DIR}/.packerconfig` | `%PACKER_HOME_DIR%/packer.config` |
-
--> Note: On this page, `PACKER_HOME_DIR` is [Packer's home
-directory](#packer-s-home-directory).
+| unix                                     | windows                                   |
+|------------------------------------------|-------------------------------------------|
+| `${PACKER_CONFIG_DIR}/.packerconfig`     | `%PACKER_CONFIG_DIR%/packer.config/`      |
+| `${APPDATA}/.packerconfig`               | `%APPDATA%/packer.config/`                |
+| `${HOME}/.packerconfig`                  | `%HOME%/packer.config/`                   |
+| user dir of `${USER}` + `/.packerconfig` | user dir of `${USER}` + `/packer.config/` |
 
 The format of the configuration file is basic JSON.
 

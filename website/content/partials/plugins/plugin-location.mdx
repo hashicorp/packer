@@ -1,11 +1,13 @@
+Plugins will usually be located in the PACKER_HOME_DIR.
+
 * [`packer init`](/commands/init) will install plugins in the **last** directory
-in the following list.
+in the following numbered list.
 
 * During the initialization of Packer, any plugin required in the
 **`required_plugins`** section will be looked up in all entries of the following
 list. **First** plugin found takes precedence. Two binaries of the same plugin
 with two different version will be considered as two different plugins. Highest
-version matching `required_plugins` will be taken into consideration, if found.
+found version matching `required_plugins` will be taken into consideration.
 
 1. The directory where `packer` is, or the executable directory.
 1. The current working directory. (`"."`)
@@ -47,4 +49,4 @@ The first plugin-name/version files found will take precedence.
 
 -> Note: `PACKER_HOME_DIR` is not an actual env var and refers to [Packer's home
 directory](#packer-s-home-directory). `PACKER_EXEC_DIR` is not an actual env var
-and refers to the directory wher `packer` is, or the executable directory.
+and refers to the directory where `packer` is, or the executable directory.
