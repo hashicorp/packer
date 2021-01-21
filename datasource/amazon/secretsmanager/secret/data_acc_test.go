@@ -1,81 +1,33 @@
 package secret
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
 	"testing"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
-	"github.com/hashicorp/packer-plugin-sdk/retry"
-	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
+	"github.com/hashicorp/packer/datasource/amazon/secretsmanager/acceptance"
 )
 
 func TestAmazonSecretsManagerSecret(t *testing.T) {
-	secretName := "packer_datasource_secret_test_secret"
-	secretDescription := "this is a secret used in a packer acc test"
-	secret := new(secretsmanager.CreateSecretOutput)
+	secret := &acceptance.AmazonSecret{
+		Name:        "packer_datasource_secret_test_secret",
+		Key:         "packer_test_key",
+		Value:       "this_is_the_packer_test_secret_value",
+		Description: "this is a secret used in a packer acc test",
+	}
 
 	testCase := &acctest.DatasourceTestCase{
 		Name: "amazon_secretsmanager-secret_datasource_basic_test",
 		Setup: func() error {
-			accessConfig := &awscommon.AccessConfig{}
-			session, err := accessConfig.Session()
-			if err != nil {
-				return fmt.Errorf("Unable to create aws session %s", err.Error())
-			}
-
-			api := secretsmanager.New(session)
-			newSecret := &secretsmanager.CreateSecretInput{
-				Description:  aws.String(secretDescription),
-				Name:         aws.String(secretName),
-				SecretString: aws.String("{packer_test_key:this_is_the_packer_test_secret_value}"),
-			}
-
-			err = retry.Config{
-				Tries: 11,
-				ShouldRetry: func(error) bool {
-					if awserrors.Matches(err, "ResourceExistsException", "") {
-						oldSecret := &secretsmanager.DeleteSecretInput{
-							ForceDeleteWithoutRecovery: aws.Bool(true),
-							SecretId:                   aws.String(secretName),
-						}
-						_, _ = api.DeleteSecret(oldSecret)
-						return true
-					}
-					if awserrors.Matches(err, "InvalidRequestException", "already scheduled for deletion") {
-						return true
-					}
-					return false
-				},
-				RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
-			}.Run(context.TODO(), func(_ context.Context) error {
-				secret, err = api.CreateSecret(newSecret)
-				return err
-			})
-			return err
+			return secret.Create()
 		},
 		Teardown: func() error {
-			accessConfig := &awscommon.AccessConfig{}
-			session, err := accessConfig.Session()
-			if err != nil {
-				return fmt.Errorf("Unable to create aws session %s", err.Error())
-			}
-
-			api := secretsmanager.New(session)
-			secret := &secretsmanager.DeleteSecretInput{
-				ForceDeleteWithoutRecovery: aws.Bool(true),
-				SecretId:                   aws.String(secretName),
-			}
-			_, err = api.DeleteSecret(secret)
-			return err
+			return secret.Delete()
 		},
 		Template: testDatasourceBasic,
 		Type:     "amazon-secrestmanager-secret",
@@ -98,10 +50,10 @@ func TestAmazonSecretsManagerSecret(t *testing.T) {
 			}
 			logsString := string(logsBytes)
 
-			arnLog := fmt.Sprintf("null.basic-example: secret arn: %s", aws.StringValue(secret.ARN))
-			idLog := fmt.Sprintf("null.basic-example: secret id: %s", aws.StringValue(secret.ARN))
-			nameLog := fmt.Sprintf("null.basic-example: secret name: %s", aws.StringValue(secret.Name))
-			descriptionLog := fmt.Sprintf("null.basic-example: secret description: %s", secretDescription)
+			arnLog := fmt.Sprintf("null.basic-example: secret arn: %s", aws.StringValue(secret.Info.ARN))
+			idLog := fmt.Sprintf("null.basic-example: secret id: %s", aws.StringValue(secret.Info.ARN))
+			nameLog := fmt.Sprintf("null.basic-example: secret name: %s", aws.StringValue(secret.Info.Name))
+			descriptionLog := fmt.Sprintf("null.basic-example: secret description: %s", secret.Description)
 
 			if matched, _ := regexp.MatchString(arnLog+".*", logsString); !matched {
 				t.Fatalf("logs doesn't contain expected arn %q", logsString)

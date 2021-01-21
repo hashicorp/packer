@@ -1,85 +1,33 @@
 package secret_version
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
 	"testing"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
-	"github.com/hashicorp/packer-plugin-sdk/retry"
-	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
+	"github.com/hashicorp/packer/datasource/amazon/secretsmanager/acceptance"
 )
 
 func TestAmazonSecretsManagerSecretVersion(t *testing.T) {
-	secretName := "packer_datasource_secret_version_test_secret"
-	secretKey := "packer_test_key"
-	secretValue := "this_is_the_packer_test_secret_value"
-	secretString := fmt.Sprintf(`{%q:%q}`, secretKey, secretValue)
-	secret := new(secretsmanager.CreateSecretOutput)
+	secret := &acceptance.AmazonSecret{
+		Name:        "packer_datasource_secret_version_test_secret",
+		Key:         "packer_test_key",
+		Value:       "this_is_the_packer_test_secret_value",
+		Description: "this is a secret used in a packer acc test",
+	}
 
 	testCase := &acctest.DatasourceTestCase{
 		Name: "amazon_secretsmanager-secret-version_datasource_basic_test",
 		Setup: func() error {
-			// Create a secret
-			accessConfig := &awscommon.AccessConfig{}
-			session, err := accessConfig.Session()
-			if err != nil {
-				return fmt.Errorf("Unable to create aws session %s", err.Error())
-			}
-
-			api := secretsmanager.New(session)
-			newSecret := &secretsmanager.CreateSecretInput{
-				Description:  aws.String("this is a secret used in a packer acc test"),
-				Name:         aws.String(secretName),
-				SecretString: aws.String(secretString),
-			}
-
-			err = retry.Config{
-				Tries: 11,
-				ShouldRetry: func(error) bool {
-					if awserrors.Matches(err, "ResourceExistsException", "") {
-						oldSecret := &secretsmanager.DeleteSecretInput{
-							ForceDeleteWithoutRecovery: aws.Bool(true),
-							SecretId:                   aws.String(secretName),
-						}
-						_, _ = api.DeleteSecret(oldSecret)
-						return true
-					}
-					if awserrors.Matches(err, "InvalidRequestException", "already scheduled for deletion") {
-						return true
-					}
-					return false
-				},
-				RetryDelay: (&retry.Backoff{InitialBackoff: 200 * time.Millisecond, MaxBackoff: 30 * time.Second, Multiplier: 2}).Linear,
-			}.Run(context.TODO(), func(_ context.Context) error {
-				secret, err = api.CreateSecret(newSecret)
-				return err
-			})
-			return err
+			return secret.Create()
 		},
 		Teardown: func() error {
-			// Remove the created secret
-			accessConfig := &awscommon.AccessConfig{}
-			session, err := accessConfig.Session()
-			if err != nil {
-				return fmt.Errorf("Unable to create aws session %s", err.Error())
-			}
-
-			api := secretsmanager.New(session)
-			secret := &secretsmanager.DeleteSecretInput{
-				ForceDeleteWithoutRecovery: aws.Bool(true),
-				SecretId:                   aws.String(secretName),
-			}
-			_, err = api.DeleteSecret(secret)
-			return err
+			return secret.Delete()
 		},
 		Template: testDatasourceBasic,
 		Type:     "amazon-secrestmanager-secret-version",
@@ -102,10 +50,10 @@ func TestAmazonSecretsManagerSecretVersion(t *testing.T) {
 			}
 			logsString := string(logsBytes)
 
-			arnLog := fmt.Sprintf("null.basic-example: secret arn: %s", aws.StringValue(secret.ARN))
-			secretStringLog := fmt.Sprintf("null.basic-example: secret secret_string: %s", fmt.Sprintf("{%s:%s}", secretKey, secretValue))
-			versionIdLog := fmt.Sprintf("null.basic-example: secret version_id: %s", aws.StringValue(secret.VersionId))
-			secretValueLog := fmt.Sprintf("null.basic-example: secret value: %s", secretValue)
+			arnLog := fmt.Sprintf("null.basic-example: secret arn: %s", aws.StringValue(secret.Info.ARN))
+			secretStringLog := fmt.Sprintf("null.basic-example: secret secret_string: %s", fmt.Sprintf("{%s:%s}", secret.Key, secret.Value))
+			versionIdLog := fmt.Sprintf("null.basic-example: secret version_id: %s", aws.StringValue(secret.Info.VersionId))
+			secretValueLog := fmt.Sprintf("null.basic-example: secret value: %s", secret.Value)
 
 			if matched, _ := regexp.MatchString(arnLog+".*", logsString); !matched {
 				t.Fatalf("logs doesn't contain expected arn %q", logsString)
