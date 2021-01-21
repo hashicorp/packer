@@ -16,6 +16,7 @@ jobs:
        max_timeout: 600 # in seconds, set really high to leverage job timeout-minutes values
   markdown-link-check:
     needs: vercel-deployment-poll
+    if: ${{ needs.vercel-deployment-poll.outputs.url != '' }}
     runs-on: ubuntu-latest
     steps:
     - name: Set Deployment URL Env
