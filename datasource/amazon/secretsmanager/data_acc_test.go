@@ -3,7 +3,6 @@ package secretsmanager
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/packer-plugin-sdk/retry"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -14,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
+	"github.com/hashicorp/packer-plugin-sdk/retry"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/builder/amazon/common/awserrors"
 )

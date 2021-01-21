@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/datasource/amazon/secretsmanager"
 	"os"
 
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
@@ -11,6 +10,7 @@ import (
 	"github.com/hashicorp/packer/builder/amazon/ebsvolume"
 	"github.com/hashicorp/packer/builder/osc/chroot"
 	amazonami "github.com/hashicorp/packer/datasource/amazon/ami"
+	"github.com/hashicorp/packer/datasource/amazon/secretsmanager"
 	amazonimport "github.com/hashicorp/packer/post-processor/amazon-import"
 )
 
