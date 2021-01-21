@@ -1,20 +1,29 @@
 on: [pull_request]
 name: Check Markdown links for modified files
 jobs:
-  markdown-link-check:
+  vercel-deployment-poll:
     runs-on: ubuntu-latest
+    timeout-minutes: 1 #cancel job if no deployment is found
+    outputs:
+      url: ${{ steps.waitForVercelPreviewDeployment.outputs.url }}
     steps:
     - name: Wait for Vercel preview deployment to be ready
       uses: patrickedqvist/wait-for-vercel-preview@master
       id: waitForVercelPreviewDeployment
       with:
        token: ${{ secrets.GITHUB_TOKEN }}
-       max_timeout: 180 #seconds
+       max_timeout: 600 # in seconds, set really high to leverage job timeout-minutes values
+  markdown-link-check:
+    needs: vercel-deployment-poll
+    runs-on: ubuntu-latest
+    steps:
     - name: Set Deployment URL Env
       run:
-        echo "DEPLOYMENT_URL=${{ steps.waitForVercelPreviewDeployment.outputs.url }}" >> $GITHUB_ENV
-    - uses: actions/checkout@master
-    - uses: gaurav-nelson/github-action-markdown-link-check@v1
+        echo "DEPLOYMENT_URL=${{ needs.vercel-deployment-poll.outputs.url }}" >> $GITHUB_ENV
+    - name: Checkout source branch
+      uses: actions/checkout@master
+    - name: Check links
+      uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:
         use-quiet-mode: 'yes'
         file-extension: 'mdx'
