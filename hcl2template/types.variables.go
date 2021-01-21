@@ -249,14 +249,6 @@ var variableBlockSchema = &hcl.BodySchema{
 	},
 }
 
-var localBlockSchema = &hcl.BodySchema{
-	Attributes: []hcl.AttributeSchema{
-		{
-			Name: "sensitive",
-		},
-	},
-}
-
 func decodeLocalBlock(locals []*LocalBlock, block *hcl.Block) (*LocalBlock, hcl.Diagnostics) {
 	for _, local := range locals {
 		if local.Name == block.Labels[0] {
