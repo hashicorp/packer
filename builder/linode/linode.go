@@ -22,8 +22,8 @@ func newLinodeClient(pat string) linodego.Client {
 	client := linodego.NewClient(oauth2Client)
 
 	projectURL := "https://www.packer.io"
-	userAgent := fmt.Sprintf("Packer/%s (+%s) linodego/%s",
-		version.LinodePluginVersion.FormattedVersion(), projectURL, linodego.Version)
+	userAgent := fmt.Sprintf("Packer/%s (+%s)",
+		version.LinodePluginVersion.FormattedVersion(), projectURL)
 
 	client.SetUserAgent(userAgent)
 	return client

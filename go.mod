@@ -56,7 +56,7 @@ require (
 	github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
 	github.com/joyent/triton-go v0.0.0-20180628001255-830d2b111e62
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
-	github.com/linode/linodego v0.14.0
+	github.com/linode/linodego v0.24.3
 	github.com/masterzen/winrm v0.0.0-20201030141608-56ca5c5f2380
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
 	github.com/mitchellh/cli v1.1.0
