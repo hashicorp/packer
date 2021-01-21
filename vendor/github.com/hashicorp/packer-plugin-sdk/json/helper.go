@@ -45,11 +45,10 @@ func Unmarshal(data []byte, i interface{}) error {
 func NormalizeJsonString(jsonString interface{}) (string, error) {
 	var j interface{}
 
-	if jsonString == nil || jsonString.(string) == "" {
-		return "", nil
+	s, _ := jsonString.(string)
+	if s == "" {
+	  return "", nil
 	}
-
-	s := jsonString.(string)
 
 	err := json.Unmarshal([]byte(s), &j)
 	if err != nil {
