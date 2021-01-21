@@ -254,10 +254,7 @@ export default [
         category: 'amazon',
         content: [
           'ami',
-          {
-            category: 'secretsmanager',
-            content: ['secret', 'secret-version'],
-          },
+          'secretsmanager'
         ],
       },
     ]

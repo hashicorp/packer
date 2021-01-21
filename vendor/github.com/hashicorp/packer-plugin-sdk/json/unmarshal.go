@@ -38,23 +38,3 @@ func Unmarshal(data []byte, i interface{}) error {
 
 	return nil
 }
-
-// Takes a value containing JSON string and passes it through
-// the JSON parser to normalize it, returns either a parsing
-// error or normalized JSON string.
-func NormalizeJsonString(jsonString interface{}) (string, error) {
-	var j interface{}
-
-	s, _ := jsonString.(string)
-	if s == "" {
-	  return "", nil
-	}
-
-	err := json.Unmarshal([]byte(s), &j)
-	if err != nil {
-		return s, err
-	}
-
-	bytes, _ := json.Marshal(j)
-	return string(bytes[:]), nil
-}

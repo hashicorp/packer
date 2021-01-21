@@ -1,9 +1,11 @@
 //go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type DatasourceOutput,Config
-package secret_version
+package secretsmanager
 
 import (
+	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
@@ -23,7 +25,10 @@ type Datasource struct {
 type Config struct {
 	// Specifies the secret containing the version that you want to retrieve.
 	// You can specify either the Amazon Resource Name (ARN) or the friendly name of the secret.
-	SecretId string `mapstructure:"secret_id" required:"true"`
+	Name string `mapstructure:"name" required:"true"`
+	// Optional key for JSON secrets that contain more than one value. When set, the `value` output will
+	// contain the value for the provided key.
+	Key string `mapstructure:"key"`
 	// Specifies the unique identifier of the version of the secret that you want to retrieve.
 	// Overrides version_stage.
 	VersionId string `mapstructure:"version_id"`
@@ -46,7 +51,7 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 	var errs *packersdk.MultiError
 	errs = packersdk.MultiErrorAppend(errs, d.config.AccessConfig.Prepare()...)
 
-	if d.config.SecretId == "" {
+	if d.config.Name == "" {
 		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("a 'secret_id' must be provided"))
 	}
 
@@ -61,8 +66,9 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 }
 
 type DatasourceOutput struct {
-	// The Amazon Resource Name (ARN) of the secret.
-	Arn string `mapstructure:"arn"`
+	// When a [key](#key) is provided, this will be the value for that key. If a key is not provided,
+	// `value` will contain the first value found in the secret string.
+	Value string `mapstructure:"value"`
 	// The decrypted part of the protected secret information that
 	// was originally provided as a string.
 	SecretString string `mapstructure:"secret_string"`
@@ -84,7 +90,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	}
 
 	input := &secretsmanager.GetSecretValueInput{
-		SecretId: aws.String(d.config.SecretId),
+		SecretId: aws.String(d.config.Name),
 	}
 
 	version := ""
@@ -100,20 +106,63 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	secret, err := secretsApi.GetSecretValue(input)
 	if err != nil {
 		if awserrors.Matches(err, secretsmanager.ErrCodeResourceNotFoundException, "") {
-			return cty.NullVal(cty.EmptyObject), fmt.Errorf("Secrets Manager Secret %q Version %q not found", d.config.SecretId, version)
+			return cty.NullVal(cty.EmptyObject), fmt.Errorf("Secrets Manager Secret %q Version %q not found", d.config.Name, version)
 		}
 		if awserrors.Matches(err, secretsmanager.ErrCodeInvalidRequestException, "You can’t perform this operation on the secret because it was deleted") {
-			return cty.NullVal(cty.EmptyObject), fmt.Errorf("Secrets Manager Secret %q Version %q not found", d.config.SecretId, version)
+			return cty.NullVal(cty.EmptyObject), fmt.Errorf("Secrets Manager Secret %q Version %q not found", d.config.Name, version)
 		}
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf("error reading Secrets Manager Secret Version: %s", err)
 	}
 
+	value, err := getSecretValue(aws.StringValue(secret.SecretString), d.config.Key)
+	if err != nil {
+		return cty.NullVal(cty.EmptyObject), fmt.Errorf("error to get secret value: %q", err.Error())
+	}
+
 	versionId := aws.StringValue(secret.VersionId)
 	output := DatasourceOutput{
-		Arn:          aws.StringValue(secret.ARN),
+		Value:        value,
 		SecretString: aws.StringValue(secret.SecretString),
 		SecretBinary: fmt.Sprintf("%s", secret.SecretBinary),
 		VersionId:    versionId,
 	}
 	return hcl2helper.HCL2ValueFromConfig(output, d.OutputSpec()), nil
+}
+
+func getSecretValue(secretString string, key string) (string, error) {
+	var secretValue map[string]interface{}
+	blob := []byte(secretString)
+
+	//For those plaintext secrets just return the value
+	if json.Valid(blob) != true {
+		return secretString, nil
+	}
+
+	err := json.Unmarshal(blob, &secretValue)
+	if err != nil {
+		return "", err
+	}
+
+	if key == "" {
+		for _, v := range secretValue {
+			return getStringSecretValue(v)
+		}
+	}
+
+	if v, ok := secretValue[key]; ok {
+		return getStringSecretValue(v)
+	}
+
+	return "", nil
+}
+
+func getStringSecretValue(v interface{}) (string, error) {
+	switch valueType := v.(type) {
+	case string:
+		return valueType, nil
+	case float64:
+		return strconv.FormatFloat(valueType, 'f', 0, 64), nil
+	default:
+		return "", fmt.Errorf("Unsupported secret value type: %T", valueType)
+	}
 }
