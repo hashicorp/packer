@@ -9,7 +9,7 @@ jobs:
       id: waitForVercelPreviewDeployment
       with:
        token: ${{ secrets.GITHUB_TOKEN }}
-       max_timeout: 180
+       max_timeout: 180 #seconds
     - name: Set Deployment URL Env
       run:
         echo "DEPLOYMENT_URL=${{ steps.waitForVercelPreviewDeployment.outputs.url }}" >> $GITHUB_ENV
