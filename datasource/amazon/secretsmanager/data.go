@@ -52,7 +52,7 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 	errs = packersdk.MultiErrorAppend(errs, d.config.AccessConfig.Prepare()...)
 
 	if d.config.Name == "" {
-		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("a 'secret_id' must be provided"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("a 'name' must be provided"))
 	}
 
 	if d.config.VersionStage == "" {
