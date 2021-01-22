@@ -41,7 +41,7 @@ func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]interface{}) error {
 			case string:
 				buildValues[k] = cty.StringVal(v)
 			case uint8:
-				buildValues[k] = cty.NumberUIntVal(v)
+				buildValues[k] = cty.NumberUIntVal(uint64(v))
 			case int64:
 				buildValues[k] = cty.NumberIntVal(v)
 			case uint64:
