@@ -1,10 +1,13 @@
-on: [pull_request]
-name: Check Markdown links for modified files
+on:
+  pull_request:
+    paths:
+      - 'website/content/**'
+
+name: Check markdown links on modified website files
 jobs:
   vercel-deployment-poll:
     runs-on: ubuntu-latest
     timeout-minutes: 3 #cancel job if no deployment is found
-    continue-on-error: true
     outputs:
       url: ${{ steps.waitForVercelPreviewDeployment.outputs.url }}
     steps:
@@ -19,7 +22,7 @@ jobs:
     if: ${{ needs.vercel-deployment-poll.outputs.url != '' }}
     runs-on: ubuntu-latest
     steps:
-    - name: Set Deployment URL Env
+    - name: Get Deployment URL
       run:
         echo "DEPLOYMENT_URL=${{ needs.vercel-deployment-poll.outputs.url }}" >> $GITHUB_ENV
     - name: Checkout source branch
