@@ -260,7 +260,7 @@ func (s *stepRun) getDeviceAndDriveArgs(config *Config, state multistep.StateBag
 	}
 	for i, cdPath := range cdPaths {
 		if config.CDROMInterface == "" {
-			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,index=%d,media=cdrom", cdPath, i))
+			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,media=cdrom", cdPath))
 		} else if config.CDROMInterface == "virtio-scsi" {
 			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=none,index=%d,id=cdrom%d,media=cdrom", cdPath, i, i))
 			deviceArgs = append(deviceArgs, "virtio-scsi-device", fmt.Sprintf("scsi-cd,drive=cdrom%d", i))
