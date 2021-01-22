@@ -34,7 +34,8 @@ func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 	waitRequest := &instance.WaitForServerRequest{
 		ServerID: serverID,
 	}
-	timeout := state.Get("timeout").(string)
+	c := state.Get("config").(*Config)
+	timeout := c.Timeout
 	duration, err := time.ParseDuration(timeout)
 	if err != nil {
 		err := fmt.Errorf("error: %s could not parse string %s as a duration", err, timeout)

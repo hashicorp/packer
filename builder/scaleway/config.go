@@ -257,6 +257,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("image is required"))
 	}
 
+	if c.Timeout == "" {
+		c.Timeout = "5m"
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return warnings, errs
 	}

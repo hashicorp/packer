@@ -83,6 +83,7 @@ type FlatConfig struct {
 	Token                     *string           `mapstructure:"api_token" required:"false" cty:"api_token" hcl:"api_token"`
 	Organization              *string           `mapstructure:"organization_id" required:"false" cty:"organization_id" hcl:"organization_id"`
 	Region                    *string           `mapstructure:"region" required:"false" cty:"region" hcl:"region"`
+	Timeout                   *string           `mapstructure:"timeout" required:"false" cty:"timeout" hcl:"timeout"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -170,6 +171,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"api_token":                    &hcldec.AttrSpec{Name: "api_token", Type: cty.String, Required: false},
 		"organization_id":              &hcldec.AttrSpec{Name: "organization_id", Type: cty.String, Required: false},
 		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
+		"timeout":                      &hcldec.AttrSpec{Name: "timeout", Type: cty.String, Required: false},
 	}
 	return s
 }
