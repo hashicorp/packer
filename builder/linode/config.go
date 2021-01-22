@@ -25,17 +25,18 @@ type Config struct {
 
 	PersonalAccessToken string `mapstructure:"linode_token"`
 
-	Region       string        `mapstructure:"region"`
-	InstanceType string        `mapstructure:"instance_type"`
-	Label        string        `mapstructure:"instance_label"`
-	Tags         []string      `mapstructure:"instance_tags"`
-	Image        string        `mapstructure:"image"`
-	SwapSize     int           `mapstructure:"swap_size"`
-	RootPass     string        `mapstructure:"root_pass"`
-	RootSSHKey   string        `mapstructure:"root_ssh_key"`
-	ImageLabel   string        `mapstructure:"image_label"`
-	Description  string        `mapstructure:"image_description"`
-	StateTimeout time.Duration `mapstructure:"state_timeout" required:"false"`
+	Region            string        `mapstructure:"region"`
+	InstanceType      string        `mapstructure:"instance_type"`
+	Label             string        `mapstructure:"instance_label"`
+	Tags              []string      `mapstructure:"instance_tags"`
+	Image             string        `mapstructure:"image"`
+	SwapSize          int           `mapstructure:"swap_size"`
+	RootPass          string        `mapstructure:"root_pass"`
+	RootSSHKey        string        `mapstructure:"root_ssh_key"`
+	ImageLabel        string        `mapstructure:"image_label"`
+	Description       string        `mapstructure:"image_description"`
+	StateTimeout      time.Duration `mapstructure:"state_timeout" required:"false"`
+	AccountImageLimit int           `mapstructure:"account_image_limit" required:"false"`
 }
 
 func createRandomRootPassword() (string, error) {

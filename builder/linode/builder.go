@@ -52,6 +52,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	state.Put("ui", ui)
 
 	steps := []multistep.Step{
+		&stepCheckAccountImageLimit{ client },
 		&StepCreateSSHKey{
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("linode_%s.pem", b.config.PackerBuildName),

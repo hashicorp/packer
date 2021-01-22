@@ -86,6 +86,10 @@ can also be supplied to override the typical auto-generated key:
   Linode instance to enter a desired state (such as "running") before timing
   out. The default state timeout is "5m".
 
+- `account_image_limit` (int) - If provided, halt before building if the
+  number of images for the account exceeds the limit. Recommended to
+  be set at 3.
+
 ## Basic Example
 
 Here is a Linode builder example. The `linode_token` should be replaced with an
@@ -100,10 +104,9 @@ Token](https://www.linode.com/docs/platform/api/getting-started-with-the-linode-
   "region": "us-east",
   "instance_type": "g6-nanode-1",
   "instance_label": "temporary-linode-{{timestamp}}",
-
   "image_label": "private-image-{{timestamp}}",
   "image_description": "My Private Image",
-
-  "ssh_username": "root"
+  "ssh_username": "root",
+  "account_image_limit": 3
 }
 ```
