@@ -196,8 +196,7 @@ type RunConfig struct {
 	SecurityGroupIds []string `mapstructure:"security_group_ids" required:"false"`
 	// The source AMI whose root volume will be copied and
 	// provisioned on the currently running instance. This must be an EBS-backed
-	// AMI with a root volume snapshot that you have access to. Note: this is not
-	// used when from_scratch is set to true.
+	// AMI with a root volume snapshot that you have access to.
 	SourceAmi string `mapstructure:"source_ami" required:"true"`
 	// Filters used to populate the `source_ami`
 	// field. JSON Example:
