@@ -19,29 +19,6 @@ import (
 
 var reShutdownBehavior = regexp.MustCompile("^(stop|terminate)$")
 
-type AmiFilterOptions struct {
-	config.KeyValueFilter `mapstructure:",squash"`
-	Owners                []string
-	MostRecent            bool `mapstructure:"most_recent"`
-}
-
-func (d *AmiFilterOptions) GetOwners() []*string {
-	res := make([]*string, 0, len(d.Owners))
-	for _, owner := range d.Owners {
-		i := owner
-		res = append(res, &i)
-	}
-	return res
-}
-
-func (d *AmiFilterOptions) Empty() bool {
-	return len(d.Owners) == 0 && d.KeyValueFilter.Empty()
-}
-
-func (d *AmiFilterOptions) NoOwner() bool {
-	return len(d.Owners) == 0
-}
-
 type SubnetFilterOptions struct {
 	config.NameValueFilter `mapstructure:",squash"`
 	MostFree               bool `mapstructure:"most_free"`
@@ -515,7 +492,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	errs = append(errs, c.SpotTag.CopyOn(&c.SpotTags)...)
 
 	for _, preparer := range []interface{ Prepare() []error }{
-		&c.SourceAmiFilter,
 		&c.SecurityGroupFilter,
 		&c.SubnetFilter,
 		&c.VpcFilter,

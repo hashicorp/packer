@@ -11,7 +11,7 @@ type CoreWrapper struct {
 	*packer.Core
 }
 
-func (c *CoreWrapper) Initialize() hcl.Diagnostics {
+func (c *CoreWrapper) Initialize(_ packer.InitializeOptions) hcl.Diagnostics {
 	err := c.Core.Initialize()
 	if err != nil {
 		return hcl.Diagnostics{

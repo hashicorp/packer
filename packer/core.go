@@ -81,6 +81,11 @@ type PostProcessorStore interface {
 	Start(name string) (packersdk.PostProcessor, error)
 }
 
+type DatasourceStore interface {
+	BasicStore
+	Start(name string) (packersdk.Datasource, error)
+}
+
 // ComponentFinder is a struct that contains the various function
 // pointers necessary to look up components of Packer such as builders,
 // commands, etc.
@@ -91,6 +96,7 @@ type ComponentFinder struct {
 	BuilderStore       BuilderStore
 	ProvisionerStore   ProvisionerStore
 	PostProcessorStore PostProcessorStore
+	DatasourceStore    DatasourceStore
 }
 
 // NewCore creates a new Core.

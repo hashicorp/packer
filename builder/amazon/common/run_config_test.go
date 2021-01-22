@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/communicator"
-	"github.com/hashicorp/packer-plugin-sdk/template/config"
 )
 
 func init() {
@@ -86,10 +85,8 @@ func TestRunConfigPrepare_SourceAmiFilterGood(t *testing.T) {
 	filter_key := "name"
 	filter_value := "foo"
 	goodFilter := AmiFilterOptions{
-		Owners: []string{owner},
-		KeyValueFilter: config.KeyValueFilter{
-			Filters: map[string]string{filter_key: filter_value},
-		},
+		Owners:  []string{owner},
+		Filters: map[string]string{filter_key: filter_value},
 	}
 	c.SourceAmiFilter = goodFilter
 	if err := c.Prepare(nil); len(err) != 0 {

@@ -15,19 +15,19 @@ export default [
   {
     category: 'templates',
     content: [
-    {
-      category: "legacy_json_templates",
-      content: [
-        'builders',
-        'communicator',
-        'engine',
-        'post-processors',
-        'provisioners',
-        'user-variables',
-      ]
-    },
-    {
-    category: 'hcl_templates',
+      {
+        category: "legacy_json_templates",
+        content: [
+          'builders',
+          'communicator',
+          'engine',
+          'post-processors',
+          'provisioners',
+          'user-variables',
+        ]
+      },
+      {
+        category: 'hcl_templates',
         content: [
           {
             category: 'blocks',
@@ -45,6 +45,7 @@ export default [
               'source',
               'variable',
               'packer',
+              'data'
             ],
           },
           {
@@ -179,6 +180,7 @@ export default [
           'variables',
           'locals',
           'contextual-variables',
+          'datasources',
           'path-variables',
           'syntax',
           'onlyexcept',
@@ -189,7 +191,7 @@ export default [
     ],
   },
   '----------',
-  { category: 'communicators', content: ['ssh', 'winrm'] },
+  {category: 'communicators', content: ['ssh', 'winrm']},
   {
     category: 'builders',
     content: [
@@ -209,7 +211,7 @@ export default [
       'googlecompute',
       'hetzner-cloud',
       'hyperone',
-      { category: 'hyperv', content: ['iso', 'vmcx'] },
+      {category: 'hyperv', content: ['iso', 'vmcx']},
       'linode',
       'lxc',
       'lxd',
@@ -217,14 +219,14 @@ export default [
       'null',
       'oneandone',
       'openstack',
-      { category: 'oracle', content: ['classic', 'oci'] },
+      {category: 'oracle', content: ['classic', 'oci']},
       {
         category: 'outscale',
         content: ['chroot', 'bsu', 'bsusurrogate', 'bsuvolume'],
       },
-      { category: 'parallels', content: ['iso', 'pvm'] },
+      {category: 'parallels', content: ['iso', 'pvm']},
       'profitbricks',
-      { category: 'proxmox', content: ['iso', 'clone'] },
+      {category: 'proxmox', content: ['iso', 'clone']},
       'qemu',
       'scaleway',
       'tencentcloud-cvm',
@@ -244,6 +246,18 @@ export default [
       'custom',
       'community-supported',
     ],
+  },
+  {
+    category: 'datasources',
+    content: [
+      {
+        category: 'amazon',
+        content: [
+          'ami',
+          'secretsmanager'
+        ],
+      },
+    ]
   },
   {
     category: 'provisioners',
@@ -306,6 +320,7 @@ export default [
       'custom-builders',
       'custom-post-processors',
       'custom-provisioners',
+      'custom-datasources',
     ],
   },
   '---------',

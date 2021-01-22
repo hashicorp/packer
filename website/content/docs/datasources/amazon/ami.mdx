@@ -1,0 +1,41 @@
+---
+description: |
+  The Amazon AMI data source provides information from an AMI that will be fetched based
+  on the filter options provided in the configuration.
+
+page_title: Amazon AMI - Data Source
+sidebar_title: Amazon AMI
+---
+
+# Amazon AMI Data Source
+
+Type: `amazon-ami`
+
+The Amazon AMI data source will filter and fetch an Amazon AMI, and output all the AMI information that will
+be then available to use in the [Amazon builders](/docs/builders/amazon/instance).
+
+-> **Note:** Data sources is a feature exclusively to HCL2 templates.
+
+Basic example of usage:
+
+```hcl
+data "amazon-ami" "basic-example" {
+    filters = {
+        virtualization-type = "hvm"
+        name = "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*"
+        root-device-type = "ebs"
+    }
+    owners = ["099720109477"]
+    most_recent = true
+}
+```
+This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. Note that the data source will fail unless
+*exactly* one AMI is returned. In the above example, `most_recent` will cause this to succeed by selecting the newest image.
+
+## Configuration Reference
+
+@include 'builder/amazon/common/AmiFilterOptions-not-required.mdx'
+
+## Output Data
+
+@include 'datasource/amazon/ami/DatasourceOutput.mdx'

@@ -1,33 +1,39 @@
 //go:generate struct-markdown
 //go:generate mapstructure-to-hcl2 -type Config
-//go:generate go run ./scripts/script-to-var.go ./scripts/export.sh CloudInitScript cloud-init-script.go
 
 package yandexexport
 
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"math"
 	"strings"
 
+	"github.com/c2h5oh/datasize"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/yandex"
 	"github.com/hashicorp/packer/post-processor/artifice"
+	"github.com/yandex-cloud/go-genproto/yandex/cloud/compute/v1"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/iam/v1"
 	ycsdk "github.com/yandex-cloud/go-sdk"
 )
 
 const (
-	defaultStorageEndpoint = "storage.yandexcloud.net"
-	defaultStorageRegion   = "ru-central1"
+	defaultStorageEndpoint   = "storage.yandexcloud.net"
+	defaultStorageRegion     = "ru-central1"
+	defaultSourceImageFamily = "ubuntu-1604-lts"
 )
 
 type Config struct {
@@ -45,11 +51,27 @@ type Config struct {
 
 	// Path to a PEM encoded private key file to use to authenticate with SSH.
 	// The `~` can be used in path and will be expanded to the home directory
-	// of current user. Login for attach: `ubuntu`
+	// of current user.
 	SSHPrivateKeyFile string `mapstructure:"ssh_private_key_file" required:"false"`
-	// Number of attempts to wait for export (must be greater than 0). Default: 1000
-	Tries int `mapstructure:"tries" required:"false"`
-	ctx   interpolate.Context
+	// The username to connect to SSH with. Default `ubuntu`
+	SSHUsername string `mapstructure:"ssh_username" required:"false"`
+	// The ID of the folder containing the source image. Default `standard-images`.
+	SourceImageFolderID string `mapstructure:"source_image_folder_id" required:"false"`
+	// The source image family to start export process. Default `ubuntu-1604-lts`.
+	// Image must contains utils or supported package manager: `apt` or `yum` -
+	// requires `root` or `sudo` without password.
+	// Utils: `qemu-img`, `aws`. The `qemu-img` utility requires `root` user or
+	// `sudo` access without password.
+	SourceImageFamily string `mapstructure:"source_image_family" required:"false"`
+	// The source image ID to use to create the new image from. Just one of a source_image_id or
+	// source_image_family must be specified.
+	SourceImageID string `mapstructure:"source_image_id" required:"false"`
+	// The extra size of the source disk in GB. This defaults to `0GB`.
+	// Requires `losetup` utility on the instance.
+	// > **Careful!** Increases payment cost.
+	// > See [perfomance](https://cloud.yandex.com/docs/compute/concepts/disk#performance).
+	SourceDiskExtraSize int `mapstructure:"source_disk_extra_size" required:"false"`
+	ctx                 interpolate.Context
 }
 
 type PostProcessor struct {
@@ -83,8 +105,19 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if p.config.DiskSizeGb == 0 {
 		p.config.DiskSizeGb = 100
 	}
-	if p.config.Tries <= 0 {
-		p.config.Tries = 1000
+	if p.config.SSHUsername == "" {
+		p.config.SSHUsername = "ubuntu"
+	}
+	if p.config.SourceImageID == "" {
+		if p.config.SourceImageFamily == "" {
+			p.config.SourceImageFamily = defaultSourceImageFamily
+		}
+		if p.config.SourceImageFolderID == "" {
+			p.config.SourceImageFolderID = yandex.StandardImagesFolderID
+		}
+	}
+	if p.config.SourceDiskExtraSize < 0 {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_disk_extra_size must be greater than zero"))
 	}
 
 	errs = p.config.CommonConfig.Prepare(errs)
@@ -131,12 +164,20 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
+	imageID := ""
 	switch artifact.BuilderId() {
 	case yandex.BuilderID, artifice.BuilderId:
-		break
+		imageID = artifact.State("ImageID").(string)
+	case file.BuilderId:
+		fileName := artifact.Files()[0]
+		if content, err := ioutil.ReadFile(fileName); err == nil {
+			imageID = strings.TrimSpace(string(content))
+		} else {
+			return nil, false, false, err
+		}
 	default:
 		err := fmt.Errorf(
-			"Unknown artifact type: %s\nCan only export from Yandex Cloud builder artifact or Artifice post-processor artifact.",
+			"Unknown artifact type: %s\nCan only export from Yandex Cloud builder artifact or File builder or Artifice post-processor artifact.",
 			artifact.BuilderId())
 		return nil, false, false, err
 	}
@@ -166,25 +207,23 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 
 	log.Printf("Rendered path items: %v", p.config.Paths)
 
-	imageID := artifact.State("ImageID").(string)
 	ui.Say(fmt.Sprintf("Exporting image %v to destination: %v", imageID, p.config.Paths))
 
 	driver, err := yandex.NewDriverYC(ui, &p.config.AccessConfig)
 	if err != nil {
 		return nil, false, false, err
 	}
+	imageDescription, err := driver.SDK().Compute().Image().Get(ctx, &compute.GetImageRequest{
+		ImageId: imageID,
+	})
+	if err != nil {
+		return nil, false, false, err
+	}
+	p.config.DiskConfig.DiskSizeGb = chooseBetterDiskSize(ctx, int(imageDescription.GetMinDiskSize()), p.config.DiskConfig.DiskSizeGb)
 
 	// Set up exporter instance configuration.
-	exporterName := fmt.Sprintf("%s-exporter", artifact.Id())
-	yandexConfig := ycSaneDefaults(&p.config,
-		map[string]string{
-			"image_id":  imageID,
-			"name":      exporterName,
-			"paths":     strings.Join(p.config.Paths, " "),
-			"user-data": CloudInitScript,
-			"zone":      p.config.Zone,
-		},
-	)
+	exporterName := strings.ToLower(fmt.Sprintf("%s-exporter", artifact.Id()))
+	yandexConfig := ycSaneDefaults(&p.config, nil)
 	if yandexConfig.InstanceConfig.InstanceName == "" {
 		yandexConfig.InstanceConfig.InstanceName = exporterName
 	}
@@ -234,10 +273,16 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		&StepAttachDisk{
 			CommonConfig: p.config.CommonConfig,
 			ImageID:      imageID,
+			ExtraSize:    p.config.SourceDiskExtraSize,
 		},
 		new(StepUploadSecrets),
-		&StepWaitCloudInitScript{
-			Tries: p.config.Tries,
+		new(StepPrepareTools),
+		&StepDump{
+			ExtraSize: p.config.SourceDiskExtraSize != 0,
+			SizeLimit: imageDescription.GetMinDiskSize(),
+		},
+		&StepUploadToS3{
+			Paths: p.config.Paths,
 		},
 		&yandex.StepTeardownInstance{
 			SerialLogFile: yandexConfig.SerialLogFile,
@@ -267,12 +312,10 @@ func ycSaneDefaults(c *Config, md map[string]string) yandex.Config {
 		Communicator: communicator.Config{
 			Type: "ssh",
 			SSH: communicator.SSH{
-				SSHUsername: "ubuntu",
+				SSHUsername:       c.SSHUsername,
+				SSHPrivateKeyFile: c.SSHPrivateKeyFile,
 			},
 		},
-	}
-	if c.SSHPrivateKeyFile != "" {
-		yandexConfig.Communicator.SSH.SSHPrivateKeyFile = c.SSHPrivateKeyFile
 	}
 	if yandexConfig.Metadata == nil {
 		yandexConfig.Metadata = md
@@ -282,9 +325,9 @@ func ycSaneDefaults(c *Config, md map[string]string) yandex.Config {
 		}
 	}
 
-	yandexConfig.SourceImageFamily = "ubuntu-1604-lts"
-	yandexConfig.SourceImageFolderID = yandex.StandardImagesFolderID
-
+	yandexConfig.SourceImageFamily = c.SourceImageFamily
+	yandexConfig.SourceImageFolderID = c.SourceImageFolderID
+	yandexConfig.SourceImageID = c.SourceImageID
 	yandexConfig.ServiceAccountID = c.ServiceAccountID
 
 	return yandexConfig
@@ -304,4 +347,9 @@ func validateServiceAccount(ctx context.Context, ycsdk *ycsdk.SDK, serviceAccoun
 		ServiceAccountId: serviceAccountID,
 	})
 	return err
+}
+
+func chooseBetterDiskSize(ctx context.Context, minSizeBytes, oldSizeGB int) int {
+	max := math.Max(float64(minSizeBytes), float64((datasize.GB * datasize.ByteSize(oldSizeGB)).Bytes()))
+	return int(math.Ceil(datasize.ByteSize(max).GBytes()))
 }

@@ -13,9 +13,15 @@ import (
 type stepUpdateImageTags struct{}
 
 func (s *stepUpdateImageTags) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	imageId := state.Get("image").(string)
 	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
+
+	if config.SkipCreateImage {
+		ui.Say("Skipping image update tags...")
+		return multistep.ActionContinue
+	}
+
+	imageId := state.Get("image").(string)
 
 	if len(config.ImageTags) == 0 {
 		return multistep.ActionContinue

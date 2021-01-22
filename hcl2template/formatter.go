@@ -124,9 +124,17 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 		f.Output = os.Stdout
 	}
 
-	in, err := os.Open(filename)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open %s: %s", filename, err)
+	var in io.Reader
+	var err error
+
+	if filename == "-" {
+		in = os.Stdin
+		f.ShowDiff = false
+	} else {
+		in, err = os.Open(filename)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open %s: %s", filename, err)
+		}
 	}
 
 	inSrc, err := ioutil.ReadAll(in)
@@ -145,12 +153,18 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 		return nil, nil
 	}
 
-	s := []byte(fmt.Sprintf("%s\n", filename))
-	_, _ = f.Output.Write(s)
+	if filename != "-" {
+		s := []byte(fmt.Sprintf("%s\n", filename))
+		_, _ = f.Output.Write(s)
+	}
 
 	if f.Write {
-		if err := ioutil.WriteFile(filename, outSrc, 0644); err != nil {
-			return nil, err
+		if filename == "-" {
+			_, _ = f.Output.Write(outSrc)
+		} else {
+			if err := ioutil.WriteFile(filename, outSrc, 0644); err != nil {
+				return nil, err
+			}
 		}
 	}
 

@@ -4,14 +4,9 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	"github.com/zclconf/go-cty/cty"
 )
-
-// UnknownVariableValue is a sentinel value that can be used
-// to denote that the value of a variable is unknown at this time.
-// RawConfig uses this information to build up data about
-// unknown keys.
-const UnknownVariableValue = "74D93920-ED26-11E3-AC10-0800200C9A66"
 
 // ConfigValueFromHCL2 converts a value from HCL2 (really, from the cty dynamic
 // types library that HCL2 uses) to a value type that matches what would've
@@ -22,7 +17,7 @@ const UnknownVariableValue = "74D93920-ED26-11E3-AC10-0800200C9A66"
 // need to detect and reject any null values.
 func ConfigValueFromHCL2(v cty.Value) interface{} {
 	if !v.IsKnown() {
-		return UnknownVariableValue
+		return hcl2helper.UnknownVariableValue
 	}
 	if v.IsNull() {
 		return nil
@@ -86,47 +81,104 @@ func ConfigValueFromHCL2(v cty.Value) interface{} {
 	panic(fmt.Errorf("can't convert %#v to config value", v))
 }
 
-// HCL2ValueFromConfigValue is the opposite of ConfigValueFromHCL2: it takes
-// a value as would be returned from the old interpolator and turns it into
-// a cty.Value so it can be used within, for example, an HCL2 EvalContext.
-func HCL2ValueFromConfigValue(v interface{}) cty.Value {
-	if v == nil {
-		return cty.NullVal(cty.DynamicPseudoType)
+// WriteUnknownPlaceholderValues will replace every Unknown value with a equivalent placeholder.
+// This is useful to use before marshaling the value to JSON. The default values are:
+// - string: "<unknown>"
+// - number: 0
+// - bool: false
+// - objects/lists/tuples/sets/maps: empty
+func WriteUnknownPlaceholderValues(v cty.Value) cty.Value {
+	if v.IsNull() {
+		return v
 	}
-	if v == UnknownVariableValue {
-		return cty.DynamicVal
-	}
-
-	switch tv := v.(type) {
-	case bool:
-		return cty.BoolVal(tv)
-	case string:
-		return cty.StringVal(tv)
-	case int:
-		return cty.NumberIntVal(int64(tv))
-	case float64:
-		return cty.NumberFloatVal(tv)
-	case []interface{}:
-		vals := make([]cty.Value, len(tv))
-		for i, ev := range tv {
-			vals[i] = HCL2ValueFromConfigValue(ev)
+	t := v.Type()
+	switch {
+	case t.IsPrimitiveType():
+		if v.IsKnown() {
+			return v
 		}
-		return cty.TupleVal(vals)
-	case []string:
-		vals := make([]cty.Value, len(tv))
-		for i, ev := range tv {
-			vals[i] = cty.StringVal(ev)
+		switch t {
+		case cty.String:
+			return cty.StringVal("<unknown>")
+		case cty.Number:
+			return cty.MustParseNumberVal("0")
+		case cty.Bool:
+			return cty.BoolVal(false)
+		default:
+			panic("unsupported primitive type")
 		}
-		return cty.ListVal(vals)
-	case map[string]interface{}:
-		vals := map[string]cty.Value{}
-		for k, ev := range tv {
-			vals[k] = HCL2ValueFromConfigValue(ev)
+	case t.IsListType():
+		if !v.IsKnown() {
+			return cty.ListValEmpty(t.ElementType())
 		}
-		return cty.ObjectVal(vals)
+		arr := []cty.Value{}
+		it := v.ElementIterator()
+		for it.Next() {
+			_, ev := it.Element()
+			arr = append(arr, WriteUnknownPlaceholderValues(ev))
+		}
+		if len(arr) == 0 {
+			return cty.ListValEmpty(t.ElementType())
+		}
+		return cty.ListVal(arr)
+	case t.IsSetType():
+		if !v.IsKnown() {
+			return cty.SetValEmpty(t.ElementType())
+		}
+		arr := []cty.Value{}
+		it := v.ElementIterator()
+		for it.Next() {
+			_, ev := it.Element()
+			arr = append(arr, WriteUnknownPlaceholderValues(ev))
+		}
+		if len(arr) == 0 {
+			return cty.SetValEmpty(t.ElementType())
+		}
+		return cty.SetVal(arr)
+	case t.IsMapType():
+		if !v.IsKnown() {
+			return cty.MapValEmpty(t.ElementType())
+		}
+		obj := map[string]cty.Value{}
+		it := v.ElementIterator()
+		for it.Next() {
+			ek, ev := it.Element()
+			obj[ek.AsString()] = WriteUnknownPlaceholderValues(ev)
+		}
+		if len(obj) == 0 {
+			return cty.MapValEmpty(t.ElementType())
+		}
+		return cty.MapVal(obj)
+	case t.IsTupleType():
+		if !v.IsKnown() {
+			return cty.EmptyTupleVal
+		}
+		arr := []cty.Value{}
+		it := v.ElementIterator()
+		for it.Next() {
+			_, ev := it.Element()
+			arr = append(arr, WriteUnknownPlaceholderValues(ev))
+		}
+		if len(arr) == 0 {
+			return cty.EmptyTupleVal
+		}
+		return cty.TupleVal(arr)
+	case t.IsObjectType():
+		if !v.IsKnown() {
+			return cty.EmptyObjectVal
+		}
+		obj := map[string]cty.Value{}
+		it := v.ElementIterator()
+		for it.Next() {
+			ek, ev := it.Element()
+			obj[ek.AsString()] = WriteUnknownPlaceholderValues(ev)
+		}
+		if len(obj) == 0 {
+			return cty.EmptyObjectVal
+		}
+		return cty.ObjectVal(obj)
 	default:
-		// HCL/HIL should never generate anything that isn't caught by
-		// the above, so if we get here something has gone very wrong.
-		panic(fmt.Errorf("can't convert %#v to cty.Value", v))
+		// should never happen
+		panic("unknown type")
 	}
 }

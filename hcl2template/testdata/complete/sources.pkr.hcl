@@ -26,6 +26,8 @@ source "virtualbox-iso" "ubuntu-1204" {
         ["c","d"]
     ]
 
+    data_source = data.amazon-ami.test.string
+
     nested {
         string   = "string"
         int      = 42
@@ -46,6 +48,7 @@ source "virtualbox-iso" "ubuntu-1204" {
             ["a","b"],
             ["c","d"]
         ]
+        data_source = data.amazon-ami.test.string
     }
 
     nested_slice {
@@ -68,6 +71,7 @@ source "virtualbox-iso" "ubuntu-1204" {
             ["a","b"],
             ["c","d"]
         ]
+        data_source = data.amazon-ami.test.string
     }
 
     nested_slice {
@@ -90,5 +94,6 @@ source "virtualbox-iso" "ubuntu-1204" {
             ["a","b"],
             ["c","d"]
         ]
+        data_source = data.amazon-ami.test.string
     }
 }

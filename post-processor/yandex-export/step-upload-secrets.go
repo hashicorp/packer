@@ -13,6 +13,10 @@ import (
 
 type StepUploadSecrets struct{}
 
+const (
+	sharedAWSCredFile = "/tmp/aws-credentials"
+)
+
 // Run reads the instance metadata and looks for the log entry
 // indicating the cloud-init script finished.
 func (s *StepUploadSecrets) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -28,7 +32,7 @@ func (s *StepUploadSecrets) Run(ctx context.Context, state multistep.StateBag) m
 		s3Secret.GetAccessKey().GetKeyId(),
 		s3Secret.GetSecret())
 
-	err := comm.Upload("/tmp/aws-credentials", strings.NewReader(creds), nil)
+	err := comm.Upload(sharedAWSCredFile, strings.NewReader(creds), nil)
 	if err != nil {
 		return yandex.StepHaltWithError(state, err)
 	}
