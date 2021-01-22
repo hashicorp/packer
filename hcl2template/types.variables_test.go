@@ -89,6 +89,15 @@ func TestParse_variables(t *testing.T) {
 						}},
 						Type: cty.String,
 					},
+					"supersecret": &Variable{
+						Name: "supersecret",
+						Values: []VariableAssignment{{
+							From:  "default",
+							Value: cty.StringVal("secretvar"),
+						}},
+						Type:      cty.String,
+						Sensitive: true,
+					},
 				},
 			},
 			false, false,

@@ -38,3 +38,8 @@ locals {
     {id = "c"},
   ]
 }
+
+local "supersecret" {
+  expression = "${var.image_id}-password"
+  sensitive = true
+}
