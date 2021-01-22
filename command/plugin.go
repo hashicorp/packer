@@ -66,6 +66,7 @@ import (
 	vsphereisobuilder "github.com/hashicorp/packer/builder/vsphere/iso"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
 	amazonamidatasource "github.com/hashicorp/packer/datasource/amazon/ami"
+	amazonsecretsmanagerdatasource "github.com/hashicorp/packer/datasource/amazon/secretsmanager"
 	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
 	amazonimportpostprocessor "github.com/hashicorp/packer/post-processor/amazon-import"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
@@ -214,7 +215,8 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 }
 
 var Datasources = map[string]packersdk.Datasource{
-	"amazon-ami": new(amazonamidatasource.Datasource),
+	"amazon-ami":            new(amazonamidatasource.Datasource),
+	"amazon-secretsmanager": new(amazonsecretsmanagerdatasource.Datasource),
 }
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner|datasource)-(.+)")

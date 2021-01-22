@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/packer/builder/amazon/ebsvolume"
 	"github.com/hashicorp/packer/builder/osc/chroot"
 	amazonami "github.com/hashicorp/packer/datasource/amazon/ami"
+	"github.com/hashicorp/packer/datasource/amazon/secretsmanager"
 	amazonimport "github.com/hashicorp/packer/post-processor/amazon-import"
 )
 
@@ -21,6 +22,7 @@ func main() {
 	pps.RegisterBuilder("ebsvolume", new(ebsvolume.Builder))
 	pps.RegisterPostProcessor("import", new(amazonimport.PostProcessor))
 	pps.RegisterDatasource("ami", new(amazonami.Datasource))
+	pps.RegisterDatasource("secretsmanager", new(secretsmanager.Datasource))
 	err := pps.Run()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())

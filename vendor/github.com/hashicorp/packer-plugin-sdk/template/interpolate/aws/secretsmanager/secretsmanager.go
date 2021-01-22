@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -76,7 +77,7 @@ func (c *Client) GetSecret(spec *SecretSpec) (string, error) {
 }
 
 func getSecretValue(s *SecretString, spec *SecretSpec) (string, error) {
-	var secretValue map[string]string
+	var secretValue map[string]interface{}
 	blob := []byte(s.SecretString)
 
 	//For those plaintext secrets just return the value
@@ -96,13 +97,24 @@ func getSecretValue(s *SecretString, spec *SecretSpec) (string, error) {
 
 	if spec.Key == "" {
 		for _, v := range secretValue {
-			return v, nil
+			return getStringSecretValue(v)
 		}
 	}
 
 	if v, ok := secretValue[spec.Key]; ok {
-		return v, nil
+		return getStringSecretValue(v)
 	}
 
 	return "", fmt.Errorf("No secret found for key %q", spec.Key)
+}
+
+func getStringSecretValue(v interface{}) (string, error) {
+	switch valueType := v.(type) {
+	case string:
+		return valueType, nil
+	case float64:
+		return strconv.FormatFloat(valueType, 'f', 0, 64), nil
+	default:
+		return "", fmt.Errorf("Unsupported secret value type: %T", valueType)
+	}
 }
