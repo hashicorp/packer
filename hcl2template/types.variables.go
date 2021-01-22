@@ -249,9 +249,21 @@ var variableBlockSchema = &hcl.BodySchema{
 	},
 }
 
-func decodeLocalBlock(locals []*LocalBlock, block *hcl.Block) (*LocalBlock, hcl.Diagnostics) {
-	for _, local := range locals {
-		if local.Name == block.Labels[0] {
+var localBlockSchema = &hcl.BodySchema{
+	Attributes: []hcl.AttributeSchema{
+		{
+			Name: "expression",
+		},
+		{
+			Name: "sensitive",
+		},
+	},
+}
+
+func decodeLocalBlock(block *hcl.Block, locals []*LocalBlock) (*LocalBlock, hcl.Diagnostics) {
+	name := block.Labels[0]
+	for _, loc := range locals {
+		if loc.Name == name {
 			return nil, []*hcl.Diagnostic{{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate variable",
@@ -261,12 +273,7 @@ func decodeLocalBlock(locals []*LocalBlock, block *hcl.Block) (*LocalBlock, hcl.
 		}
 	}
 
-	name := block.Labels[0]
-
-	var diags hcl.Diagnostics
-
-	attrs, moreDiags := block.Body.JustAttributes()
-	diags = append(diags, moreDiags...)
+	content, diags := block.Body.Content(localBlockSchema)
 	if !hclsyntax.ValidIdentifier(name) {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
@@ -280,17 +287,16 @@ func decodeLocalBlock(locals []*LocalBlock, block *hcl.Block) (*LocalBlock, hcl.
 		Name: name,
 	}
 
-	for name, attr := range attrs {
-		if name == "sensitive" {
-			valDiags := gohcl.DecodeExpression(attr.Expr, nil, &l.Sensitive)
-			diags = append(diags, valDiags...)
-		}
-		if name == "expression" {
-			l.Expr = attr.Expr
-		}
+	if attr, exists := content.Attributes["sensitive"]; exists {
+		valDiags := gohcl.DecodeExpression(attr.Expr, nil, &l.Sensitive)
+		diags = append(diags, valDiags...)
 	}
 
-	return l, nil
+	if def, ok := content.Attributes["expression"]; ok {
+		l.Expr = def.Expr
+	}
+
+	return l, diags
 }
 
 // decodeVariableBlock decodes a "variable" block
@@ -301,7 +307,6 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 	}
 
 	if _, found := (*variables)[block.Labels[0]]; found {
-
 		return []*hcl.Diagnostic{{
 			Severity: hcl.DiagError,
 			Summary:  "Duplicate variable",
