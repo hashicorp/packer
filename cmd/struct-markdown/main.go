@@ -75,6 +75,11 @@ func main() {
 			Filename:   typeSpec.Name.Name + ".mdx",
 			Header:     strings.TrimSpace(typeDecl.Doc.Text()),
 		}
+		dataSourceOutput := Struct{
+			SourcePath: sourcePath,
+			Name:       typeSpec.Name.Name,
+			Filename:   typeSpec.Name.Name + ".mdx",
+		}
 		required := Struct{
 			SourcePath: sourcePath,
 			Name:       typeSpec.Name.Name,
@@ -145,6 +150,12 @@ func main() {
 				Type: fieldType,
 				Docs: docs,
 			}
+
+			if typeSpec.Name.Name == "DatasourceOutput" {
+				dataSourceOutput.Fields = append(dataSourceOutput.Fields, field)
+				continue
+			}
+
 			if req, err := tags.Get("required"); err == nil && req.Value() == "true" {
 				required.Fields = append(required.Fields, field)
 			} else {
@@ -155,7 +166,7 @@ func main() {
 		dir := filepath.Join(projectRoot, "website", "content", "partials", builderName)
 		os.MkdirAll(dir, 0755)
 
-		for _, str := range []Struct{header, required, notRequired} {
+		for _, str := range []Struct{header, dataSourceOutput, required, notRequired} {
 			if len(str.Fields) == 0 && len(str.Header) == 0 {
 				continue
 			}
