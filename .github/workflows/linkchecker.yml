@@ -12,11 +12,12 @@ jobs:
       url: ${{ steps.waitForVercelPreviewDeployment.outputs.url }}
     steps:
     - name: Wait for Vercel preview deployment to be ready
-      uses: patrickedqvist/wait-for-vercel-preview@master
+      uses: nywilken/wait-for-vercel-preview@master
       id: waitForVercelPreviewDeployment
       with:
        token: ${{ secrets.GITHUB_TOKEN }}
        max_timeout: 600 # in seconds, set really high to leverage job timeout-minutes values
+       allow_inactive: true # needed to ensure we get a URL for a previously released deployment
   markdown-link-check:
     needs: vercel-deployment-poll
     if: ${{ needs.vercel-deployment-poll.outputs.url != '' }}
