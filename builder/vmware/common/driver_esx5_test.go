@@ -92,3 +92,13 @@ func TestESX5Driver_CommHost(t *testing.T) {
 		t.Errorf("bad vm_address: %s", address.(string))
 	}
 }
+
+func TestESX5Driver_VerifyOvfTool(t *testing.T) {
+	driver := ESX5Driver{}
+	// should always skip validation if export is skipped, so this should always
+	// pass even when ovftool is not installed.
+	err := driver.VerifyOvfTool(true, false)
+	if err != nil {
+		t.Fatalf("shouldn't fail ever because should always skip check")
+	}
+}
