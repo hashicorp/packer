@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"testing"
 	"time"
 
@@ -129,11 +130,8 @@ func TestPausedProvisionerProvision(t *testing.T) {
 	}
 }
 
-func TestPausedProvisionerProvision_waits(t *testing.T) {
-	startTime := time.Now()
-	waitTime := 50 * time.Millisecond
-
-	prov := &PausedProvisioner{
+func pausedTestProvisionor(startTime time.Time, waitTime time.Duration) *PausedProvisioner {
+	return &PausedProvisioner{
 		PauseBefore: waitTime,
 		Provisioner: &packersdk.MockProvisioner{
 			ProvFunc: func(context.Context) error {
@@ -145,11 +143,62 @@ func TestPausedProvisionerProvision_waits(t *testing.T) {
 			},
 		},
 	}
+}
 
+func TestPausedProvisionerProvision_waits(t *testing.T) {
+	startTime := time.Now()
+	waitTime := 50 * time.Millisecond
+
+	prov := pausedTestProvisionor(startTime, waitTime)
 	err := prov.Provision(context.Background(), testUi(), new(packersdk.MockCommunicator), make(map[string]interface{}))
 
 	if err != nil {
 		t.Fatalf("prov failed: %v", err)
+	}
+}
+
+func TestPausedProvisionerProvision_waits_with_updates(t *testing.T) {
+	startTime := time.Now()
+	waitTime := 30 * time.Second
+
+	prov := pausedTestProvisionor(startTime, waitTime)
+	ui := new(packersdk.MockUi)
+	currentTime := time.Now()
+	err := prov.Provision(context.Background(), ui, new(packersdk.MockCommunicator), make(map[string]interface{}))
+
+	if err != nil {
+		t.Fatalf("prov failed: %v", err)
+	}
+
+	// TODO have to put check to get timestamp of when these messages were posted and verify that this is working as intended
+	expectedMessages := []string{
+		fmt.Sprintf("Pausing %s before the next provisioner...", waitTime),
+		"20 seconds left until the next provisioner",
+		"10 seconds left until the next provisioner",
+	}
+
+	if ui.SayMessages[0].Message != expectedMessages[0] {
+		t.Fatalf("expected: %s, got: %s", expectedMessages[0], ui.SayMessages[0].Message)
+	}
+
+	lastTime := currentTime
+	for index, message := range expectedMessages {
+		// Skiping first message as this has already been verified
+		if index == 0 {
+			continue
+		}
+
+		if ui.SayMessages[index].Message != message {
+			t.Fatalf("expected: %s, got: %s", message, ui.SayMessages[index].Message)
+		}
+
+		waitTimeBetweenMessages := math.Round(ui.SayMessages[index].SayTime.Sub(lastTime).Seconds())
+		if waitTimeBetweenMessages != 10 {
+			t.Fatalf("Did not wait the appropriate amount of time message: %v", ui.SayMessages[index].Message)
+		}
+
+		// setting last time to current SayTime
+		lastTime = ui.SayMessages[index].SayTime
 	}
 }
 
