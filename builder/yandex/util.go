@@ -31,13 +31,14 @@ func writeSerialLogFile(ctx context.Context, state multistep.StateBag, serialLog
 	sdk := state.Get("sdk").(*ycsdk.SDK)
 	ui := state.Get("ui").(packersdk.Ui)
 
-	instanceID := state.Get("instance_id").(string)
-	if instanceID == "" {
+	instanceID, ok := state.GetOk("instance_id")
+
+	if !ok || instanceID.(string) == "" {
 		return nil
 	}
 	ui.Say("Try get instance's serial port output and write to file " + serialLogFile)
 	serialOutput, err := sdk.Compute().Instance().GetSerialPortOutput(ctx, &compute.GetInstanceSerialPortOutputRequest{
-		InstanceId: instanceID,
+		InstanceId: instanceID.(string),
 	})
 	if err != nil {
 		return fmt.Errorf("Failed to get serial port output for instance (id: %s): %s", instanceID, err)
