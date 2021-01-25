@@ -191,6 +191,7 @@ export default [
     ],
   },
   '----------',
+  'plugins',
   {category: 'communicators', content: ['ssh', 'winrm']},
   {
     category: 'builders',
@@ -316,7 +317,6 @@ export default [
   {
     category: 'extending',
     content: [
-      'plugins',
       'custom-builders',
       'custom-post-processors',
       'custom-provisioners',
