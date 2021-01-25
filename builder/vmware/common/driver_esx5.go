@@ -328,9 +328,19 @@ func (d *ESX5Driver) Verify() error {
 }
 
 func (d *ESX5Driver) VerifyOvfTool(SkipExport, skipValidateCredentials bool) error {
+	// We don't use ovftool if we aren't exporting a VM; return without error
+	// if ovftool isn't on path.
+	if SkipExport {
+		return nil
+	}
+
 	err := d.base.VerifyOvfTool(SkipExport, skipValidateCredentials)
 	if err != nil {
 		return err
+	}
+
+	if skipValidateCredentials {
+		return nil
 	}
 
 	log.Printf("Verifying that ovftool credentials are valid...")
@@ -338,10 +348,6 @@ func (d *ESX5Driver) VerifyOvfTool(SkipExport, skipValidateCredentials bool) err
 	// now, so that we don't fail for a simple mistake after a long
 	// build
 	ovftool := GetOVFTool()
-
-	if skipValidateCredentials {
-		return nil
-	}
 
 	if d.Password == "" {
 		return fmt.Errorf("exporting the vm from esxi with ovftool requires " +
