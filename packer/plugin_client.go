@@ -208,7 +208,7 @@ func (c *PluginClient) Kill() {
 // This method is safe to call multiple times. Subsequent calls have no effect.
 // Once a client has been started once, it cannot be started again, even if
 // it was killed.
-func (c *PluginClient) Start() (addr net.Addr, err error) {
+func (c *PluginClient) Start() (net.Addr, error) {
 	c.l.Lock()
 	defer c.l.Unlock()
 
@@ -235,9 +235,9 @@ func (c *PluginClient) Start() (addr net.Addr, err error) {
 	cmd.Stdout = stdout_w
 
 	log.Printf("Starting plugin: %s %#v", cmd.Path, cmd.Args)
-	err = cmd.Start()
+	err := cmd.Start()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	// Make sure the command is properly cleaned up if there is an error
@@ -322,33 +322,43 @@ func (c *PluginClient) Start() (addr net.Addr, err error) {
 		// Trim the line and split by "|" in order to get the parts of
 		// the output.
 		line := strings.TrimSpace(string(lineBytes))
-		parts := strings.SplitN(line, "|", 3)
-		if len(parts) < 3 {
+		parts := strings.SplitN(line, "|", 4)
+		if len(parts) == 3 {
+			// In protocol version 4 and before, the protocol only had a Major
+			// version
+			err = fmt.Errorf("This plugin protocol was deprecated, please use a newer version of this plugin. Or an older version of Packer with this plugin.")
+			return nil, err
+		}
+		if len(parts) < 4 {
 			err = fmt.Errorf("Unrecognized remote plugin message: %s", line)
-			return
+			return nil, err
+		}
+		pluginMajorAPIVersion, pluginMinorAPIVersion, network, netAddr := parts[0], parts[1], parts[2], parts[3]
+
+		// Test the API versions
+		if pluginMajorAPIVersion != pluginsdk.APIVersionMajor {
+			err = fmt.Errorf("Incompatible API MAJOR version with plugin. "+
+				"plugin MINOR API version: %s, Ours: %s", pluginMajorAPIVersion, pluginsdk.APIVersionMajor)
+			return nil, err
+		}
+		if pluginMinorAPIVersion > pluginsdk.APIVersionMinor {
+			err = fmt.Errorf("Incompatible API MINOR version with plugin. "+
+				"plugin MINOR API version: %s, Ours: %s. Please upgrade Packer.", pluginMinorAPIVersion, pluginsdk.APIVersionMinor)
+			return nil, err
 		}
 
-		// Test the API version
-		if parts[0] != pluginsdk.APIVersion {
-			err = fmt.Errorf("Incompatible API version with plugin. "+
-				"Plugin version: %s, Ours: %s", parts[0], pluginsdk.APIVersion)
-			return
-		}
-
-		switch parts[1] {
+		switch network {
 		case "tcp":
-			addr, err = net.ResolveTCPAddr("tcp", parts[2])
-			log.Printf("Received tcp RPC address for %s: addr is %s", cmd.Path, addr)
+			c.address, err = net.ResolveTCPAddr("tcp", netAddr)
 		case "unix":
-			addr, err = net.ResolveUnixAddr("unix", parts[2])
-			log.Printf("Received unix RPC address for %s: addr is %s", cmd.Path, addr)
+			c.address, err = net.ResolveUnixAddr("unix", netAddr)
 		default:
-			err = fmt.Errorf("Unknown address type: %s", parts[1])
+			return nil, fmt.Errorf("Unknown address type: %s", network)
 		}
+		log.Printf("Received %s RPC address for %s: addr is %s", network, cmd.Path, c.address)
 	}
 
-	c.address = addr
-	return
+	return c.address, err
 }
 
 func (c *PluginClient) logStderr(r io.Reader) {
