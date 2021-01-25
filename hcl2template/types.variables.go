@@ -24,7 +24,7 @@ const badIdentifierDetail = "A name must start with a letter or underscore and m
 type LocalBlock struct {
 	Name string
 	Expr hcl.Expression
-	// When Sensitive is set to true Packer will try it best to hide/obfuscate
+	// When Sensitive is set to true Packer will try its best to hide/obfuscate
 	// the variable from the output stream. By replacing the text.
 	Sensitive bool
 }
