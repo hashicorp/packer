@@ -1,6 +1,7 @@
 package github
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -30,6 +31,45 @@ type Getter struct {
 }
 
 var _ plugingetter.Getter = &Getter{}
+
+func tranformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
+	return func(in io.ReadCloser) (io.ReadCloser, error) {
+		defer in.Close()
+		rd := bufio.NewReader(in)
+		buffer := bytes.NewBufferString("[")
+		json := json.NewEncoder(buffer)
+		for i := 0; ; i++ {
+			line, err := rd.ReadString('\n')
+			if err != nil {
+				if err != io.EOF {
+					return nil, fmt.Errorf(
+						"Error reading checksum file: %s", err)
+				}
+				break
+			}
+			parts := strings.Fields(line)
+			switch len(parts) {
+			case 2: // nominal case
+				checksumString, checksumFilename := parts[0], parts[1]
+
+				if i > 0 {
+					_, _ = buffer.WriteString(",")
+				}
+				if err := json.Encode(struct {
+					Checksum string `json:"checksum"`
+					Filename string `json:"filename"`
+				}{
+					Checksum: checksumString,
+					Filename: checksumFilename,
+				}); err != nil {
+					return nil, err
+				}
+			}
+		}
+		_, _ = buffer.WriteString("]")
+		return ioutil.NopCloser(buffer), nil
+	}
+}
 
 // transformVersionStream get a stream from github tags and transforms it into
 // something Packer wants, namely a json list of Release.
@@ -115,11 +155,10 @@ func (t *HostSpecificTokenAuthTransport) base() http.RoundTripper {
 
 func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, error) {
 	ctx := context.TODO()
-	log.Printf("[TRACE] github.get %s", what)
 	if g.Client == nil {
 		var tc *http.Client
 		if tk := os.Getenv(ghTokenAccessor); tk != "" {
-			log.Printf("[TRACE] Using Github token")
+			log.Printf("[DEBUG] github-getter: using %s", ghTokenAccessor)
 			ts := oauth2.StaticTokenSource(
 				&oauth2.Token{AccessToken: tk},
 			)
@@ -149,16 +188,17 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 		req, err = g.Client.NewRequest("GET", filepath.Join("/repos/", opts.PluginRequirement.Identifier.RealRelativePath(), "/git/matching-refs/tags"), nil)
 		transform = transformVersionStream
 	case "sha256":
-		// something like https://github.com/azr/packer-plugin-amazon/releases/download/v0.0.1/packer-plugin-amazon_darwin-amd64_v0.0.1_x5_SHA256SUM
+		// something like https://github.com/sylviamoss/packer-plugin-comment/releases/download/v0.2.11/packer-plugin-comment_v0.2.11_x5_SHA256SUMS
 		req, err = g.Client.NewRequest(
 			"GET",
-			"https://github.com/"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version+"/"+opts.ExpectedFilename()+"_SHA256SUM",
+			"https://github.com/"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version()+"/"+opts.PluginRequirement.FilenamePrefix()+opts.Version()+"_SHA256SUMS",
 			nil,
 		)
-	case "binary":
+		transform = tranformChecksumStream()
+	case "zip":
 		req, err = g.Client.NewRequest(
 			"GET",
-			"https://github.com/"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version+"/"+opts.ExpectedFilename(),
+			"https://github.com/"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version()+"/"+opts.ExpectedFilename()+".zip",
 			nil,
 		)
 
@@ -168,6 +208,7 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("[DEBUG] github-getter: getting %q", req.URL)
 	resp, err := g.Client.BareDo(ctx, req)
 	if err != nil {
 		// here BareDo will return an err if the request failed or if the
@@ -175,7 +216,6 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 		if resp != nil {
 			resp.Body.Close()
 		}
-		log.Printf("[TRACE] Failed to request: %s.", err)
 		return nil, err
 	}
 

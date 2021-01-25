@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
-	"github.com/hashicorp/packer/packer"
+	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
@@ -54,9 +54,10 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 	opts := plugingetter.ListInstallationsOptions{
 		FromFolders: cfg.parser.PluginConfig.KnownPluginFolders,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
-			OS:        runtime.GOOS,
-			ARCH:      runtime.GOARCH,
-			Extension: packer.PluginFileExtension,
+			OS:              runtime.GOOS,
+			ARCH:            runtime.GOARCH,
+			APIVersionMajor: pluginsdk.APIVersionMajor,
+			APIVersionMinor: pluginsdk.APIVersionMinor,
 			Checksummers: []plugingetter.Checksummer{
 				{Type: "sha256", Hash: sha256.New()},
 			},

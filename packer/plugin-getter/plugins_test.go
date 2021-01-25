@@ -36,9 +36,9 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					pluginFolderOne,
 				},
 				BinaryInstallationOptions{
-					Extension: "_x4",
-					OS:        "darwin",
-					ARCH:      "amd64",
+					APIVersion: "x4",
+					OS:         "darwin",
+					ARCH:       "amd64",
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
@@ -73,9 +73,9 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					pluginFolderOne,
 				},
 				BinaryInstallationOptions{
-					Extension: "_x4.exe",
-					OS:        "windows",
-					ARCH:      "amd64",
+					APIVersion: "x4.exe",
+					OS:         "windows",
+					ARCH:       "amd64",
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
@@ -111,9 +111,9 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					pluginFolderTwo,
 				},
 				BinaryInstallationOptions{
-					Extension: "_x4.exe",
-					OS:        "windows",
-					ARCH:      "amd64",
+					APIVersion: "x4.exe",
+					OS:         "windows",
+					ARCH:       "amd64",
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",

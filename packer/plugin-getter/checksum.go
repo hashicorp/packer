@@ -35,6 +35,7 @@ type Checksum []byte
 func (c Checksum) String() string { return hex.EncodeToString(c) }
 
 type FileChecksum struct {
+	Filename string
 	Expected Checksum
 	Checksummer
 }
@@ -89,13 +90,19 @@ func (c *Checksummer) ChecksumFile(expected []byte, filePath string) error {
 	return err
 }
 
-func (c *Checksummer) Checksum(expected []byte, f io.Reader) error {
+func (c *Checksummer) Sum(f io.Reader) ([]byte, error) {
 	c.Hash.Reset()
 	if _, err := io.Copy(c.Hash, f); err != nil {
-		return fmt.Errorf("Failed to hash: %s", err)
+		return nil, fmt.Errorf("Failed to hash: %s", err)
 	}
+	return c.Hash.Sum(nil), nil
+}
 
-	actual := c.Hash.Sum(nil)
+func (c *Checksummer) Checksum(expected []byte, f io.Reader) error {
+	actual, err := c.Sum(f)
+	if err != nil {
+		return err
+	}
 
 	if !bytes.Equal(actual, expected) {
 		return &ChecksumError{
