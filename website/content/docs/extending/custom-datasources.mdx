@@ -13,7 +13,7 @@ Use of data sources allows a build to use information defined outside of Packer.
 data source is the [amazon-ami data source](/docs/datasources/amazon-ami), which outputs the data of a fetched Amazon AMI.
 
 Prior to reading this page, it is assumed you have read the page on [plugin
-development basics](/docs/extending/plugins).
+development basics](/docs/extending).
 
 Data Source plugins implement the `packersdk.Datasource` interface and are registered within a plugin Set
 with `set.RegisterDatasource(...)` function and served using the `set.Run()`.
