@@ -77,72 +77,74 @@ binary as it will allow to add more that one plugin per binary.
 
 
 <Tabs>
-    <Tab heading="Multi-plugin Binary">
+<Tab heading="Multi-plugin Binary">
 
-        ```go
-        import (
-        "github.com/hashicorp/packer-plugin-sdk/plugin"
-        )
+```go
+import (
+    "github.com/hashicorp/packer-plugin-sdk/plugin"
+)
 
-        // Assume this implements packer.Builder
-        type ExampleBuilder struct{}
+// Assume this implements packer.Builder
+type ExampleBuilder struct{}
 
-        // Assume this implements packer.PostProcessor
-        type FooPostProcessor struct{}
+// Assume this implements packer.PostProcessor
+type FooPostProcessor struct{}
 
-        // Assume this implements packer.Provisioner
-        type BarProvisioner struct{}
+// Assume this implements packer.Provisioner
+type BarProvisioner struct{}
 
-        func main() {
-        pps := plugin.NewSet()
-        pps.RegisterBuilder("example", new(ExampleBuilder))
-        pps.RegisterPostProcessor("foo", new(FooPostProcessor))
-        pps.RegisterProvisioner("bar", new(BarProvisioner))
-        err := pps.Run()
-        if err != nil {
+func main() {
+    pps := plugin.NewSet()
+    pps.RegisterBuilder("example", new(ExampleBuilder))
+    pps.RegisterPostProcessor("foo", new(FooPostProcessor))
+    pps.RegisterProvisioner("bar", new(BarProvisioner))
+    err := pps.Run()
+    if err != nil {
         fmt.Fprintln(os.Stderr, err.Error())
         os.Exit(1)
     }
-    }
-        ```
+}
+```
 
-        **That's it!** `plugin.NewSet` handles all the nitty gritty of
-        communicating with Packer core and serving your builder over RPC. It can't get
-        much easier than that.
+**That's it!** `plugin.NewSet` handles all the nitty gritty of
+communicating with Packer core and serving your builder over RPC. It can't get
+much easier than that.
 
-        Here the name of the plugin will be used to use each plugin, so if your plugin
-        is named `packer-plugin-my`, this would make the following parts available:
+Here the name of the plugin will be used to use each plugin, so if your plugin
+is named `packer-plugin-my`, this would make the following parts available:
 
-        * the `my-example` builder
-        * the `my-foo` post-processor
-        * the `my-bar` provisioner
+* the `my-example` builder
+* the `my-foo` post-processor
+* the `my-bar` provisioner
 
-    </Tab>
-    <Tab heading="Single Plugin Binary">
+</Tab>
 
-        ```go
-        import (
-        "github.com/hashicorp/packer/packer/plugin"
-        )
+<Tab heading="Single Plugin Binary">
 
-        // Assume this implements packer.Builder
-        type Builder struct{}
+```go
+import (
+    "github.com/hashicorp/packer/packer/plugin"
+)
 
-        func main() {
-        server, err := plugin.Server()
-        if err != nil {
+// Assume this implements packer.Builder
+type Builder struct{}
+
+func main() {
+    server, err := plugin.Server()
+    if err != nil {
         panic(err)
     }
-        server.RegisterBuilder(new(Builder))
-        server.Serve()
-    }
-        ```
+    server.RegisterBuilder(new(Builder))
+    server.Serve()
+}
+```
 
-        **That's it!** `plugin.Server` handles all the nitty gritty of communicating with
-        Packer core and serving your builder over RPC. It can't get much easier than
-        that.
+**That's it!** `plugin.Server` handles all the nitty gritty of communicating with
+Packer core and serving your builder over RPC. It can't get much easier than
+that.
 
-    </Tab>
+</Tab>
+
 </Tabs>
 
 
