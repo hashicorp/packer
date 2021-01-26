@@ -228,7 +228,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 		want    *Installation
 		wantErr bool
 	}{
-		{"already-installed",
+		{"already-installed-same-api-version",
 			fields{"amazon", "v1.2.3"},
 			args{InstallOptions{
 				[]Getter{
@@ -238,8 +238,12 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 						ChecksumFileEntries: []ChecksumFileEntry{
 							{
+								// here the checksum file tells us what zipfiles
+								// to expect. maybe we could cache the zip file
+								// ? but then the plugin is present on the drive
+								// twice.
 								Filename: "packer-plugin-amazon_v1.2.3_x5.0_darwin_amd64.zip",
-								Checksum: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 							},
 						},
 					},
@@ -250,6 +254,41 @@ func TestRequirement_InstallLatest(t *testing.T) {
 				},
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "0",
+					OS: "darwin", ARCH: "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			}},
+			nil, false},
+
+		{"already-installed-compatible-api-version",
+			// here 'packer' uses the procol version 5.1 which is compatible
+			// with the 5.0 one.
+			fields{"amazon", "v1.2.3"},
+			args{InstallOptions{
+				[]Getter{
+					&mockPluginGetter{
+						Releases: []Release{
+							{Version: "v1.2.3"},
+						},
+						ChecksumFileEntries: []ChecksumFileEntry{
+							{
+								Filename: "packer-plugin-amazon_v1.2.3_x5.0_darwin_amd64.zip",
+								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+							},
+						},
+					},
+				},
+				[]string{
+					pluginFolderOne,
+					pluginFolderTwo,
+				},
+				BinaryInstallationOptions{
+					APIVersionMajor: "5", APIVersionMinor: "1",
 					OS: "darwin", ARCH: "amd64",
 					Checksummers: []Checksummer{
 						{
