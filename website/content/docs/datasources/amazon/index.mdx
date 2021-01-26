@@ -1,0 +1,42 @@
+---
+description: |
+  Packer is able to fetch data from AWS. To achieve this, Packer comes with
+  data sources to retrieve AMI and secrets information.
+page_title: Amazon - Data Sources
+sidebar_title: Amazon
+---
+
+# Amazon Data Sources
+
+Packer is able to fetch data from AWS. To achieve this, Packer comes with data sources to retrieve AMI and secrets information.
+Packer supports the following data sources at the moment:
+
+- [amazon-ami](/docs/datasources/amazon/ami) - Filter and fetch an Amazon AMI to output all the AMI information.
+
+- [amazon-secretsmanager](/docs/datasources/amazon/secretsmanager) - Retrieve information
+about a Secrets Manager secret version, including its secret value.
+
+
+## Authentication
+
+The Amazon Data Sources authentication works just like for the [Amazon Builders](/docs/builders/amazon). Both
+have the same authentication options and you can refer to the [Amazon Builders authentication](/docs/builders/amazon#authentication)
+to learn the options to authenticate for data sources.
+
+-> **Note:** A data source will start and execute in your own authentication session. The authentication in the data source
+doesn't relate with the authentication on Amazon Builders.
+
+Basic example of an Amazon data source authentication using `assume_role`:
+
+```hcl
+data "amazon-secretsmanager" "basic-example" {
+  name = "packer_test_secret"
+  key  = "packer_test_key"
+
+  assume_role {
+      role_arn     = "arn:aws:iam::ACCOUNT_ID:role/ROLE_NAME"
+      session_name = "SESSION_NAME"
+      external_id  = "EXTERNAL_ID"
+  }
+}
+```

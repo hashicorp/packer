@@ -20,6 +20,7 @@ const (
 	variablesLabel    = "variables"
 	variableLabel     = "variable"
 	localsLabel       = "locals"
+	localLabel        = "local"
 	dataSourceLabel   = "data"
 	buildLabel        = "build"
 	communicatorLabel = "communicator"
@@ -32,6 +33,7 @@ var configSchema = &hcl.BodySchema{
 		{Type: variablesLabel},
 		{Type: variableLabel, LabelNames: []string{"name"}},
 		{Type: localsLabel},
+		{Type: localLabel, LabelNames: []string{"name"}},
 		{Type: dataSourceLabel, LabelNames: []string{"type", "name"}},
 		{Type: buildLabel},
 		{Type: communicatorLabel, LabelNames: []string{"type", "name"}},
@@ -277,24 +279,8 @@ func sniffCoreVersionRequirements(body hcl.Body) ([]VersionConstraint, hcl.Diagn
 	return constraints, diags
 }
 
-func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	// enable packer to start plugins requested in required_plugins.
-	moreDiags := cfg.detectPluginBinaries()
-	diags = append(diags, moreDiags...)
-	if moreDiags.HasErrors() {
-		return diags
-	}
-
-	_, moreDiags = cfg.InputVariables.Values()
-	diags = append(diags, moreDiags...)
-	_, moreDiags = cfg.LocalVariables.Values()
-	diags = append(diags, moreDiags...)
-	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
-	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
-
-	for _, variable := range cfg.InputVariables {
+func filterVarsFromLogs(inputOrLocal Variables) {
+	for _, variable := range inputOrLocal {
 		if !variable.Sensitive {
 			continue
 		}
@@ -306,6 +292,27 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 			return true, nil
 		})
 	}
+}
+
+func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	// enable packer to start plugins requested in required_plugins.
+	moreDiags := cfg.detectPluginBinaries()
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		return diags
+	}
+
+	_, moreDiags := cfg.InputVariables.Values()
+	diags = append(diags, moreDiags...)
+	_, moreDiags = cfg.LocalVariables.Values()
+	diags = append(diags, moreDiags...)
+	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
+	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
+
+	filterVarsFromLogs(cfg.InputVariables)
+	filterVarsFromLogs(cfg.LocalVariables)
 
 	diags = append(diags, cfg.initializeBlocks()...)
 

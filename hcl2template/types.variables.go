@@ -24,6 +24,9 @@ const badIdentifierDetail = "A name must start with a letter or underscore and m
 type LocalBlock struct {
 	Name string
 	Expr hcl.Expression
+	// When Sensitive is set to true Packer will try its best to hide/obfuscate
+	// the variable from the output stream. By replacing the text.
+	Sensitive bool
 }
 
 // VariableAssignment represents a way a variable was set: the expression
@@ -246,6 +249,56 @@ var variableBlockSchema = &hcl.BodySchema{
 	},
 }
 
+var localBlockSchema = &hcl.BodySchema{
+	Attributes: []hcl.AttributeSchema{
+		{
+			Name: "expression",
+		},
+		{
+			Name: "sensitive",
+		},
+	},
+}
+
+func decodeLocalBlock(block *hcl.Block, locals []*LocalBlock) (*LocalBlock, hcl.Diagnostics) {
+	name := block.Labels[0]
+	for _, loc := range locals {
+		if loc.Name == name {
+			return nil, []*hcl.Diagnostic{{
+				Severity: hcl.DiagError,
+				Summary:  "Duplicate variable",
+				Detail:   "Duplicate " + block.Labels[0] + " variable definition found.",
+				Context:  block.DefRange.Ptr(),
+			}}
+		}
+	}
+
+	content, diags := block.Body.Content(localBlockSchema)
+	if !hclsyntax.ValidIdentifier(name) {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Invalid local name",
+			Detail:   badIdentifierDetail,
+			Subject:  &block.LabelRanges[0],
+		})
+	}
+
+	l := &LocalBlock{
+		Name: name,
+	}
+
+	if attr, exists := content.Attributes["sensitive"]; exists {
+		valDiags := gohcl.DecodeExpression(attr.Expr, nil, &l.Sensitive)
+		diags = append(diags, valDiags...)
+	}
+
+	if def, ok := content.Attributes["expression"]; ok {
+		l.Expr = def.Expr
+	}
+
+	return l, diags
+}
+
 // decodeVariableBlock decodes a "variable" block
 // ectx is passed only in the evaluation of the default value.
 func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.EvalContext) hcl.Diagnostics {
@@ -254,7 +307,6 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 	}
 
 	if _, found := (*variables)[block.Labels[0]]; found {
-
 		return []*hcl.Diagnostic{{
 			Severity: hcl.DiagError,
 			Summary:  "Duplicate variable",

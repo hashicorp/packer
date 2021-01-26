@@ -34,16 +34,18 @@ func MergeCloudUserMetaData(usersData ...string) (string, error) {
 	}
 
 	for i, userData := range usersData {
-		w, err := data.CreatePart(textproto.MIMEHeader{
-			"Content-Disposition": {fmt.Sprintf("attachment; filename=\"user-data-%d\"", i)},
-			"Content-Type":        {detectContentType(userData)},
-		})
-		if err != nil {
-			return "", err
-		}
-		_, err = w.Write([]byte(userData))
-		if err != nil {
-			return "", err
+		if len(userData) != 0 {
+			w, err := data.CreatePart(textproto.MIMEHeader{
+				"Content-Disposition": {fmt.Sprintf("attachment; filename=\"user-data-%d\"", i)},
+				"Content-Type":        {detectContentType(userData)},
+			})
+			if err != nil {
+				return "", err
+			}
+			_, err = w.Write([]byte(userData))
+			if err != nil {
+				return "", err
+			}
 		}
 	}
 	return buff.String(), nil

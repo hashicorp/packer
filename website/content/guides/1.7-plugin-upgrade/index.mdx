@@ -20,9 +20,10 @@ Packer is currently backwards compatible with the old API because the plugin API
 
 In a best-case scenario, all you'll have to do is update the packer imports to use the packer-plugin-sdk import path
 
-github.com/hashicorp/packer with github.com/hashicorp/packer-plugin-sdk.
+`github.com/hashicorp/packer` with `github.com/hashicorp/packer-plugin-sdk`.
 
-But some of the import paths have changed more than that because we've refactored the SDK some to make it easier to discover and use helpful modules. Below are a few common import paths. For a full list of available imports see [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/)```
+But some of the import paths have changed more than that because we've refactored the SDK some to make it easier to discover and use helpful modules. Below are a few common import paths. For a full list of available imports see [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/)
+
 
 | Old Path | New Path |
 | ---------| -------- |
@@ -145,7 +146,7 @@ In the single binary setup, this you'd have used the name "bar" in your packer t
 
 ## Using the Set Architecture for Single Plugins
 
-*** THIS IS ON THE PACKER MASTER BRANCH AND WILL BE AVAILABLE IN V1.7.0
+***THIS IS ON THE PACKER MASTER BRANCH AND WILL BE AVAILABLE IN V1.7.0***
 
 The naming described above could be awkward for users who have given plugins singular names. For example, in a prior world, you may have created a provisioner saved as `packer-provisioner-foo` and accessed it in your template using `"type": "foo"`; Now, if you install a plugin named `packer-plugin-foo`, and register it using NewSet() and RegisterProvisioner() with the name "foo", you'll have to access it in your template using `"type": "foo-foo"` which stutters and breaks backwards compatibility.
 

@@ -1,0 +1,12 @@
+<!-- Code generated from the comments of the DatasourceOutput struct in datasource/amazon/secretsmanager/data.go; DO NOT EDIT MANUALLY -->
+
+- `value` (string) - When a [key](#key) is provided, this will be the value for that key. If a key is not provided,
+  `value` will contain the first value found in the secret string.
+
+- `secret_string` (string) - The decrypted part of the protected secret information that
+  was originally provided as a string.
+
+- `secret_binary` (string) - The decrypted part of the protected secret information that
+  was originally provided as a binary. Base64 encoded.
+
+- `version_id` (string) - The unique identifier of this version of the secret.

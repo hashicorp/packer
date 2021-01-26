@@ -41,6 +41,8 @@ type Config struct {
 	yandex.AccessConfig `mapstructure:",squash"`
 	yandex.CommonConfig `mapstructure:",squash"`
 	ExchangeConfig      `mapstructure:",squash"`
+	communicator.SSH    `mapstructure:",squash"`
+	communicator.Config `mapstructure:"-"`
 
 	// List of paths to Yandex Object Storage where exported image will be uploaded.
 	// Please be aware that use of space char inside path not supported.
@@ -49,12 +51,6 @@ type Config struct {
 	// Paths to Yandex Object Storage where exported image will be uploaded.
 	Paths []string `mapstructure:"paths" required:"true"`
 
-	// Path to a PEM encoded private key file to use to authenticate with SSH.
-	// The `~` can be used in path and will be expanded to the home directory
-	// of current user.
-	SSHPrivateKeyFile string `mapstructure:"ssh_private_key_file" required:"false"`
-	// The username to connect to SSH with. Default `ubuntu`
-	SSHUsername string `mapstructure:"ssh_username" required:"false"`
 	// The ID of the folder containing the source image. Default `standard-images`.
 	SourceImageFolderID string `mapstructure:"source_image_folder_id" required:"false"`
 	// The source image family to start export process. Default `ubuntu-1604-lts`.
@@ -105,9 +101,15 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if p.config.DiskSizeGb == 0 {
 		p.config.DiskSizeGb = 100
 	}
-	if p.config.SSHUsername == "" {
-		p.config.SSHUsername = "ubuntu"
+	if p.config.SSH.SSHUsername == "" {
+		p.config.SSH.SSHUsername = "ubuntu"
 	}
+	p.config.Config = communicator.Config{
+		Type: "ssh",
+		SSH:  p.config.SSH,
+	}
+	errs = packersdk.MultiErrorAppend(errs, p.config.Config.Prepare(&p.config.ctx)...)
+
 	if p.config.SourceImageID == "" {
 		if p.config.SourceImageFamily == "" {
 			p.config.SourceImageFamily = defaultSourceImageFamily
@@ -231,12 +233,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		yandexConfig.DiskName = exporterName
 	}
 
-	errs := yandexConfig.Communicator.Prepare(interpolate.NewContext())
-	if len(errs) > 0 {
-		err := &packersdk.MultiError{Errors: errs}
-		return nil, false, false, err
-	}
-
 	ui.Say(fmt.Sprintf("Validating service_account_id: '%s'...", yandexConfig.ServiceAccountID))
 	if err := validateServiceAccount(ctx, driver.SDK(), yandexConfig.ServiceAccountID); err != nil {
 		return nil, false, false, err
@@ -309,13 +305,7 @@ func ycSaneDefaults(c *Config, md map[string]string) yandex.Config {
 	yandexConfig := yandex.Config{
 		CommonConfig: c.CommonConfig,
 		AccessConfig: c.AccessConfig,
-		Communicator: communicator.Config{
-			Type: "ssh",
-			SSH: communicator.SSH{
-				SSHUsername:       c.SSHUsername,
-				SSHPrivateKeyFile: c.SSHPrivateKeyFile,
-			},
-		},
+		Communicator: c.Config,
 	}
 	if yandexConfig.Metadata == nil {
 		yandexConfig.Metadata = md

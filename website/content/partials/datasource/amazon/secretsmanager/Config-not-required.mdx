@@ -1,0 +1,10 @@
+<!-- Code generated from the comments of the Config struct in datasource/amazon/secretsmanager/data.go; DO NOT EDIT MANUALLY -->
+
+- `key` (string) - Optional key for JSON secrets that contain more than one value. When set, the `value` output will
+  contain the value for the provided key.
+
+- `version_id` (string) - Specifies the unique identifier of the version of the secret that you want to retrieve.
+  Overrides version_stage.
+
+- `version_stage` (string) - Specifies the secret version that you want to retrieve by the staging label attached to the version.
+  Defaults to AWSCURRENT.
