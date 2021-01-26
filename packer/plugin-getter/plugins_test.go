@@ -2,7 +2,11 @@ package plugingetter
 
 import (
 	"crypto/sha256"
+	"encoding/json"
+	"io"
+	"io/ioutil"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -10,10 +14,12 @@ import (
 	"github.com/hashicorp/packer/hcl2template/addrs"
 )
 
-func TestPlugin_ListInstallations(t *testing.T) {
+var (
+	pluginFolderOne = filepath.Join("testdata", "plugins")
+	pluginFolderTwo = filepath.Join("testdata", "plugins_2")
+)
 
-	pluginFolderOne := filepath.Join("testdata", "plugins")
-	pluginFolderTwo := filepath.Join("testdata", "plugins_2")
+func TestPlugin_ListInstallations(t *testing.T) {
 
 	type fields struct {
 		Identifier         string
@@ -37,10 +43,8 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					pluginFolderTwo,
 				},
 				BinaryInstallationOptions{
-					APIVersionMajor: "5",
-					APIVersionMinor: "0",
-					OS:              "darwin",
-					ARCH:            "amd64",
+					APIVersionMajor: "5", APIVersionMinor: "0",
+					OS: "darwin", ARCH: "amd64",
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
@@ -76,10 +80,8 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					pluginFolderTwo,
 				},
 				BinaryInstallationOptions{
-					APIVersionMajor: "5",
-					APIVersionMinor: "1",
-					OS:              "darwin",
-					ARCH:            "amd64",
+					APIVersionMajor: "5", APIVersionMinor: "1",
+					OS: "darwin", ARCH: "amd64",
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
@@ -119,11 +121,9 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					pluginFolderTwo,
 				},
 				BinaryInstallationOptions{
-					APIVersionMajor: "5",
-					APIVersionMinor: "0",
-					Ext:             ".exe",
-					OS:              "windows",
-					ARCH:            "amd64",
+					APIVersionMajor: "5", APIVersionMinor: "0",
+					OS: "windows", ARCH: "amd64",
+					Ext: ".exe",
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
@@ -159,11 +159,9 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					pluginFolderTwo,
 				},
 				BinaryInstallationOptions{
-					APIVersionMajor: "5",
-					APIVersionMinor: "0",
-					Ext:             ".exe",
-					OS:              "windows",
-					ARCH:            "amd64",
+					APIVersionMajor: "5", APIVersionMinor: "0",
+					OS: "windows", ARCH: "amd64",
+					Ext: ".exe",
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
@@ -214,3 +212,102 @@ func TestPlugin_ListInstallations(t *testing.T) {
 		})
 	}
 }
+
+func TestRequirement_InstallLatest(t *testing.T) {
+	type fields struct {
+		Identifier         string
+		VersionConstraints string
+	}
+	type args struct {
+		opts InstallOptions
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *Installation
+		wantErr bool
+	}{
+		{"already-installed",
+			fields{"amazon", "v1.2.3"},
+			args{InstallOptions{
+				[]Getter{
+					&mockPluginGetter{
+						Releases: []Release{
+							{Version: "v1.2.3"},
+						},
+						ChecksumFileEntries: []ChecksumFileEntry{
+							{
+								Filename: "packer-plugin-amazon_v1.2.3_x5.0_darwin_amd64.zip",
+								Checksum: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+							},
+						},
+					},
+				},
+				[]string{
+					pluginFolderOne,
+					pluginFolderTwo,
+				},
+				BinaryInstallationOptions{
+					APIVersionMajor: "5", APIVersionMinor: "0",
+					OS: "darwin", ARCH: "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			}},
+			nil, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			identifier, diags := addrs.ParsePluginSourceString(tt.fields.Identifier)
+			if len(diags) != 0 {
+				t.Fatalf("ParsePluginSourceString(%q): %v", tt.fields.Identifier, diags)
+			}
+			cts, err := version.NewConstraint(tt.fields.VersionConstraints)
+			if err != nil {
+				t.Fatalf("version.NewConstraint(%q): %v", tt.fields.Identifier, err)
+			}
+			pr := &Requirement{
+				Identifier:         identifier,
+				VersionConstraints: cts,
+			}
+			got, err := pr.InstallLatest(tt.args.opts)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Requirement.InstallLatest() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Requirement.InstallLatest() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+type mockPluginGetter struct {
+	Releases            []Release
+	ChecksumFileEntries []ChecksumFileEntry
+}
+
+func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, error) {
+
+	var toEncode interface{}
+	switch what {
+	case "releases":
+		toEncode = g.Releases
+	case "sha256":
+		toEncode = g.ChecksumFileEntries
+	default:
+		panic("Don't know how to get " + what)
+	}
+
+	read, write := io.Pipe()
+	go json.NewEncoder(write).Encode(toEncode)
+	return ioutil.NopCloser(read), nil
+}
+
+var _ Getter = &mockPluginGetter{}

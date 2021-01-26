@@ -51,9 +51,9 @@ func (c *Checksummer) FileExt() string {
 	return "_" + strings.ToUpper(c.Type) + "SUM"
 }
 
-// GetChecksumOfFile will extract the checksum from file `filePath + c.FileExt()`.
+// GetCacheChecksumOfFile will extract the checksum from file `filePath + c.FileExt()`.
 // It expects the checksum file to only contains the checksum and nothing else.
-func (c *Checksummer) GetChecksumOfFile(filePath string) ([]byte, error) {
+func (c *Checksummer) GetCacheChecksumOfFile(filePath string) ([]byte, error) {
 	checksumFile := filePath + c.FileExt()
 
 	f, err := os.Open(checksumFile)

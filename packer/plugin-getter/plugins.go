@@ -125,7 +125,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			checksumOk := false
 			for _, checksummer := range opts.Checksummers {
 
-				cs, err := checksummer.GetChecksumOfFile(path)
+				cs, err := checksummer.GetCacheChecksumOfFile(path)
 				if err != nil {
 					log.Printf("[TRACE] GetChecksumOfFile(%q) failed: %v", path, err)
 					continue
@@ -312,7 +312,7 @@ func (e *ChecksumFileEntry) init(getOpts GetOptions) (err error) {
 	parts := strings.Split(res, "_")
 	// ["v0.2.12", "x5.0", "freebsd", "amd64"]
 	if len(parts) < 4 {
-		return fmt.Errorf("malformed filename expected %s_{version}_x{protocol-version}_{os}_{arch}", getOpts.PluginRequirement.FilenamePrefix())
+		return fmt.Errorf("malformed filename expected %s{version}_x{protocol-version}_{os}_{arch}", getOpts.PluginRequirement.FilenamePrefix())
 	}
 
 	e.binVersion, e.protVersion, e.os, e.arch = parts[0], parts[1], parts[2], parts[3]
@@ -371,7 +371,9 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		for _, release := range releases {
 			v, err := version.NewVersion(release.Version)
 			if err != nil {
-				panic(err)
+				err := fmt.Errorf("Could not parse release version %s. %w", release.Version, err)
+				log.Printf("[TRACE] %s, ignoring it", err.Error())
+				continue
 			}
 			if pr.VersionConstraints.Check(v) {
 				versions = append(versions, v)
@@ -408,7 +410,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 			return nil, err
 		}
 
-		log.Printf("[TRACE] trying the %q version to install the %s plugin in %q...", getOpts.version, pr.Identifier.ForDisplay(), outputFolder)
+		log.Printf("[TRACE] trying to install the %q version of the %s plugin in %q...", getOpts.version, pr.Identifier.ForDisplay(), outputFolder)
 
 		var checksum *FileChecksum
 		for _, getter := range getters {
@@ -466,28 +468,37 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		}
 
 		outputFileName := strings.TrimSuffix(checksum.Filename, filepath.Ext(checksum.Filename))
-		outputFileName = filepath.Join(outputFolder, outputFileName)
 
-		for _, potentialChecksumer := range opts.Checksummers {
-			// First check if a local checksum file is already here in the expected
-			// download folder. Here we want to download a binary so we only check
-			// for an existing checksum file from the folder we want to download
-			// into.
-			cs, err := potentialChecksumer.GetChecksumOfFile(outputFileName)
-			if err == nil && len(cs) > 0 {
-				localChecksum := &FileChecksum{
-					Expected:    cs,
-					Checksummer: potentialChecksumer,
-				}
+		for _, outputFolder := range opts.InFolders {
+			potentialOutputFilename := filepath.Join(
+				outputFolder,
+				filepath.Join(pr.Identifier.Parts()...),
+				outputFileName,
+			)
+			for _, potentialChecksumer := range opts.Checksummers {
+				// First check if a local checksum file is already here in the expected
+				// download folder. Here we want to download a binary so we only check
+				// for an existing checksum file from the folder we want to download
+				// into.
+				cs, err := potentialChecksumer.GetCacheChecksumOfFile(potentialOutputFilename)
+				if err == nil && len(cs) > 0 {
+					localChecksum := &FileChecksum{
+						Expected:    cs,
+						Checksummer: potentialChecksumer,
+					}
 
-				log.Printf("[TRACE] found a pre-exising %q checksum file", potentialChecksumer.Type)
-				// if outputFile is there and matches the checksum: do nothing more.
-				if err := localChecksum.ChecksumFile(localChecksum.Expected, outputFileName); err == nil {
-					log.Printf("[INFO] %s %s is already correctly installed in %q", pr.Identifier.ForDisplay(), getOpts.version, outputFileName)
-					return nil, nil
+					log.Printf("[TRACE] found a pre-exising %q checksum file", potentialChecksumer.Type)
+					// if outputFile is there and matches the checksum: do nothing more.
+					if err := localChecksum.ChecksumFile(localChecksum.Expected, potentialOutputFilename); err == nil {
+						log.Printf("[INFO] %s v%s plugin is already correctly installed in %q", pr.Identifier.ForDisplay(), getOpts.version, potentialOutputFilename)
+						return nil, nil
+					}
 				}
 			}
 		}
+
+		// The last folder from the installation list is where we will install.
+		outputFileName = filepath.Join(outputFolder, outputFileName)
 
 		for _, getter := range getters {
 			// create temporary file that will receive a temporary binary.zip
