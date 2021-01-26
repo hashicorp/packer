@@ -170,7 +170,6 @@ func ConvertPluginConfigValueToHCLValue(v interface{}) (cty.Value, error) {
 		} else {
 			buildValue = cty.ListVal(vals)
 		}
-		buildValue = cty.ListVal(vals)
 	case []uint64:
 		vals := make([]cty.Value, len(v))
 		for i, ev := range v {
