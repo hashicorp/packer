@@ -464,7 +464,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		}
 
 		if checksum == nil {
-			return nil, fmt.Errorf("could not find a local nor a remote checksum for plugin %q", pr.Identifier)
+			return nil, fmt.Errorf("could not find a local nor a remote checksum for plugin %q %q", pr.Identifier, pr.VersionConstraints)
 		}
 
 		outputFileName := strings.TrimSuffix(checksum.Filename, filepath.Ext(checksum.Filename))
