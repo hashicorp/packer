@@ -22,8 +22,11 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 
 	profitbricks.SetAuth(c.PBUsername, c.PBPassword)
 	profitbricks.SetDepth("5")
-	if sshkey, ok := state.GetOk("publicKey"); ok {
-		c.SSHKey = sshkey.(string)
+	if c.Comm.SSHPublicKey != nil {
+		c.SSHKey = string(c.Comm.SSHPublicKey)
+    } else {
+		ui.Error("No ssh private key set; ssh authentication won't be possible. Please specify your private key in the ssh_private_key_file configuration key.")
+		return multistep.ActionHalt
 	}
 	ui.Say("Creating Virtual Data Center...")
 	img := s.getImageId(c.Image, c)
