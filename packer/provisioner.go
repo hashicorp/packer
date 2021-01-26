@@ -168,7 +168,6 @@ func (p *PausedProvisioner) updatesWhilePausing(ctx context.Context, ui packersd
 	updateTime := 10
 	timeTicker := time.NewTicker(time.Duration(updateTime) * time.Second)
 	TotalTime := p.PauseBefore.Seconds()
-	tickerChannel := make(chan bool)
 	var err error
 	go func() {
 		for {
@@ -176,22 +175,18 @@ func (p *PausedProvisioner) updatesWhilePausing(ctx context.Context, ui packersd
 			case <-timeTicker.C:
 				TotalTime -= float64(updateTime)
 				ui.Say(fmt.Sprintf("%v seconds left until the next provisioner", TotalTime))
+				if TotalTime < float64(updateTime) {
+					return
+				}
 			case <-ctx.Done():
 				err = ctx.Err()
-				return
-			case <-tickerChannel:
 				return
 			}
 		}
 	}()
 	time.Sleep(p.PauseBefore)
 	timeTicker.Stop()
-	if err != nil {
-		return err
-	}
-	tickerChannel <- true
-
-	return nil
+	return err
 }
 
 // RetriedProvisioner is a Provisioner implementation that retries
