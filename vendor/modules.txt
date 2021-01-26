@@ -200,7 +200,7 @@ github.com/fatih/structtag
 github.com/ghodss/yaml
 # github.com/go-ini/ini v1.25.4
 github.com/go-ini/ini
-# github.com/go-ole/go-ole v1.2.4
+# github.com/go-ole/go-ole v1.2.5
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
 # github.com/go-resty/resty/v2 v2.3.0
@@ -360,7 +360,7 @@ github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
-# github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210120105339-f6fd68d2570a
+# github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210126103513-cfe023f04717
 github.com/hashicorp/packer-plugin-sdk/acctest
 github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
 github.com/hashicorp/packer-plugin-sdk/acctest/testutils
@@ -446,7 +446,7 @@ github.com/json-iterator/go
 github.com/jstemmer/go-junit-report
 github.com/jstemmer/go-junit-report/formatter
 github.com/jstemmer/go-junit-report/parser
-# github.com/klauspost/compress v1.11.6
+# github.com/klauspost/compress v1.11.7
 github.com/klauspost/compress/flate
 # github.com/klauspost/crc32 v1.2.0
 github.com/klauspost/crc32
@@ -469,7 +469,7 @@ github.com/masterzen/winrm/soap
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
-# github.com/mattn/go-runewidth v0.0.4
+# github.com/mattn/go-runewidth v0.0.10
 github.com/mattn/go-runewidth
 # github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
 github.com/mattn/go-tty
@@ -527,6 +527,8 @@ github.com/posener/complete/cmd
 github.com/posener/complete/cmd/install
 # github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 github.com/profitbricks/profitbricks-sdk-go
+# github.com/rivo/uniseg v0.1.0
+github.com/rivo/uniseg
 # github.com/ryanuber/go-glob v1.0.0
 github.com/ryanuber/go-glob
 # github.com/satori/go.uuid v1.2.0

@@ -23,11 +23,11 @@ const (
 	DefaultUiEndpoint                   = "Ui"
 )
 
-// Server represents an RPC server for Packer. This must be paired on
-// the other side with a Client. In Packer, each "plugin" (builder, provisioner,
-// and post-processor) creates and launches a server. The client created and
-// used by the packer "core"
-type Server struct {
+// PluginServer represents an RPC server for Packer. This must be paired on the
+// other side with a PluginClient. In Packer, each "plugin" (builder,
+// provisioner, and post-processor) creates and launches a server. The client
+// created and used by the packer "core"
+type PluginServer struct {
 	mux      *muxBroker
 	streamId uint32
 	server   *rpc.Server
@@ -35,7 +35,7 @@ type Server struct {
 }
 
 // NewServer returns a new Packer RPC server.
-func NewServer(conn io.ReadWriteCloser) (*Server, error) {
+func NewServer(conn io.ReadWriteCloser) (*PluginServer, error) {
 	mux, err := newMuxBrokerServer(conn)
 	if err != nil {
 		return nil, err
@@ -46,8 +46,8 @@ func NewServer(conn io.ReadWriteCloser) (*Server, error) {
 	return result, nil
 }
 
-func newServerWithMux(mux *muxBroker, streamId uint32) *Server {
-	return &Server{
+func newServerWithMux(mux *muxBroker, streamId uint32) *PluginServer {
+	return &PluginServer{
 		mux:      mux,
 		streamId: streamId,
 		server:   rpc.NewServer(),
@@ -55,7 +55,7 @@ func newServerWithMux(mux *muxBroker, streamId uint32) *Server {
 	}
 }
 
-func (s *Server) Close() error {
+func (s *PluginServer) Close() error {
 	if s.closeMux {
 		log.Printf("[WARN] Shutting down mux conn in Server")
 		return s.mux.Close()
@@ -64,20 +64,20 @@ func (s *Server) Close() error {
 	return nil
 }
 
-func (s *Server) RegisterArtifact(a packer.Artifact) error {
+func (s *PluginServer) RegisterArtifact(a packer.Artifact) error {
 	return s.server.RegisterName(DefaultArtifactEndpoint, &ArtifactServer{
 		artifact: a,
 	})
 }
 
-func (s *Server) RegisterBuild(b packer.Build) error {
+func (s *PluginServer) RegisterBuild(b packer.Build) error {
 	return s.server.RegisterName(DefaultBuildEndpoint, &BuildServer{
 		build: b,
 		mux:   s.mux,
 	})
 }
 
-func (s *Server) RegisterBuilder(b packer.Builder) error {
+func (s *PluginServer) RegisterBuilder(b packer.Builder) error {
 	return s.server.RegisterName(DefaultBuilderEndpoint, &BuilderServer{
 		commonServer: commonServer{
 			selfConfigurable: b,
@@ -87,7 +87,7 @@ func (s *Server) RegisterBuilder(b packer.Builder) error {
 	})
 }
 
-func (s *Server) RegisterCommunicator(c packer.Communicator) error {
+func (s *PluginServer) RegisterCommunicator(c packer.Communicator) error {
 	return s.server.RegisterName(DefaultCommunicatorEndpoint, &CommunicatorServer{
 		c: c,
 		commonServer: commonServer{
@@ -96,14 +96,14 @@ func (s *Server) RegisterCommunicator(c packer.Communicator) error {
 	})
 }
 
-func (s *Server) RegisterHook(h packer.Hook) error {
+func (s *PluginServer) RegisterHook(h packer.Hook) error {
 	return s.server.RegisterName(DefaultHookEndpoint, &HookServer{
 		hook: h,
 		mux:  s.mux,
 	})
 }
 
-func (s *Server) RegisterPostProcessor(p packer.PostProcessor) error {
+func (s *PluginServer) RegisterPostProcessor(p packer.PostProcessor) error {
 	return s.server.RegisterName(DefaultPostProcessorEndpoint, &PostProcessorServer{
 		commonServer: commonServer{
 			selfConfigurable: p,
@@ -113,7 +113,7 @@ func (s *Server) RegisterPostProcessor(p packer.PostProcessor) error {
 	})
 }
 
-func (s *Server) RegisterProvisioner(p packer.Provisioner) error {
+func (s *PluginServer) RegisterProvisioner(p packer.Provisioner) error {
 	return s.server.RegisterName(DefaultProvisionerEndpoint, &ProvisionerServer{
 		commonServer: commonServer{
 			selfConfigurable: p,
@@ -123,7 +123,7 @@ func (s *Server) RegisterProvisioner(p packer.Provisioner) error {
 	})
 }
 
-func (s *Server) RegisterDatasource(d packer.Datasource) error {
+func (s *PluginServer) RegisterDatasource(d packer.Datasource) error {
 	return s.server.RegisterName(DefaultDatasourceEndpoint, &DatasourceServer{
 		commonServer: commonServer{
 			selfConfigurable: d,
@@ -133,7 +133,7 @@ func (s *Server) RegisterDatasource(d packer.Datasource) error {
 	})
 }
 
-func (s *Server) RegisterUi(ui packer.Ui) error {
+func (s *PluginServer) RegisterUi(ui packer.Ui) error {
 	return s.server.RegisterName(DefaultUiEndpoint, &UiServer{
 		ui:       ui,
 		register: s.server.RegisterName,
@@ -142,7 +142,7 @@ func (s *Server) RegisterUi(ui packer.Ui) error {
 
 // ServeConn serves a single connection over the RPC server. It is up
 // to the caller to obtain a proper io.ReadWriteCloser.
-func (s *Server) Serve() {
+func (s *PluginServer) Serve() {
 	// Accept a connection on stream ID 0, which is always used for
 	// normal client to server connections.
 	stream, err := s.mux.Accept(s.streamId)

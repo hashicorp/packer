@@ -46,6 +46,13 @@ func TestDatasource(t *testing.T, testCase *DatasourceTestCase) {
 		return
 	}
 
+	if testCase.Setup != nil {
+		err := testCase.Setup()
+		if err != nil {
+			t.Fatalf("test %s setup failed: %s", testCase.Name, err)
+		}
+	}
+
 	logfile := fmt.Sprintf("packer_log_%s.txt", testCase.Name)
 	templatePath := fmt.Sprintf("./%s.pkr.hcl", testCase.Name)
 
