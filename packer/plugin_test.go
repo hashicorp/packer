@@ -53,7 +53,7 @@ func TestHelperProcess(*testing.T) {
 	cmd, _ := args[0], args[1:]
 	switch cmd {
 	case "bad-version":
-		fmt.Printf("%s1|tcp|:1234\n", pluginsdk.APIVersion)
+		fmt.Printf("%s1|%s|tcp|:1234\n", pluginsdk.APIVersionMajor, pluginsdk.APIVersionMinor)
 		<-make(chan int)
 	case "builder":
 		server, err := pluginsdk.Server()
@@ -82,7 +82,7 @@ func TestHelperProcess(*testing.T) {
 	case "invalid-rpc-address":
 		fmt.Println("lolinvalid")
 	case "mock":
-		fmt.Printf("%s|tcp|:1234\n", pluginsdk.APIVersion)
+		fmt.Printf("%s|%s|tcp|:1234\n", pluginsdk.APIVersionMajor, pluginsdk.APIVersionMinor)
 		<-make(chan int)
 	case "post-processor":
 		server, err := pluginsdk.Server()
@@ -124,11 +124,11 @@ func TestHelperProcess(*testing.T) {
 		time.Sleep(1 * time.Minute)
 		os.Exit(1)
 	case "stderr":
-		fmt.Printf("%s|tcp|:1234\n", pluginsdk.APIVersion)
+		fmt.Printf("%s|%s|tcp|:1234\n", pluginsdk.APIVersionMajor, pluginsdk.APIVersionMinor)
 		log.Println("HELLO")
 		log.Println("WORLD")
 	case "stdin":
-		fmt.Printf("%s|tcp|:1234\n", pluginsdk.APIVersion)
+		fmt.Printf("%s|%s|tcp|:1234\n", pluginsdk.APIVersionMajor, pluginsdk.APIVersionMinor)
 		data := make([]byte, 5)
 		if _, err := os.Stdin.Read(data); err != nil {
 			log.Printf("stdin read error: %s", err)
