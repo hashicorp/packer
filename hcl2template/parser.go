@@ -304,7 +304,7 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 		return diags
 	}
 
-	_, moreDiags := cfg.InputVariables.Values()
+	_, moreDiags = cfg.InputVariables.Values()
 	diags = append(diags, moreDiags...)
 	_, moreDiags = cfg.LocalVariables.Values()
 	diags = append(diags, moreDiags...)
