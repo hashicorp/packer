@@ -34,6 +34,9 @@ type Config struct {
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
+	// If true, Packer will not create the AMI. Useful for setting to `true`
+	// during a build test stage. Default `false`.
+	AMISkipCreateImage bool `mapstructure:"skip_create_ami" required:"false"`
 	// Add one or more block device mappings to the AMI. These will be attached
 	// when booting a new instance from your AMI. To add a block device during
 	// the Packer build see `launch_block_device_mappings` below. Your options
@@ -319,6 +322,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Regions:             b.config.AMIRegions,
 		},
 		&stepCreateAMI{
+			AMISkipCreateImage: b.config.AMISkipCreateImage,
 			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
 			PollingConfig:      b.config.PollingConfig,
 		},
@@ -330,22 +334,25 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			EncryptBootVolume:  b.config.AMIEncryptBootVolume,
 			Name:               b.config.AMIName,
 			OriginalRegion:     *ec2conn.Config.Region,
+			AMISkipCreateImage: b.config.AMISkipCreateImage,
 			AMISkipBuildRegion: b.config.AMISkipBuildRegion,
 		},
 		&awscommon.StepModifyAMIAttributes{
-			Description:    b.config.AMIDescription,
-			Users:          b.config.AMIUsers,
-			Groups:         b.config.AMIGroups,
-			ProductCodes:   b.config.AMIProductCodes,
-			SnapshotUsers:  b.config.SnapshotUsers,
-			SnapshotGroups: b.config.SnapshotGroups,
-			Ctx:            b.config.ctx,
-			GeneratedData:  generatedData,
+			AMISkipCreateImage: b.config.AMISkipCreateImage,
+			Description:        b.config.AMIDescription,
+			Users:              b.config.AMIUsers,
+			Groups:             b.config.AMIGroups,
+			ProductCodes:       b.config.AMIProductCodes,
+			SnapshotUsers:      b.config.SnapshotUsers,
+			SnapshotGroups:     b.config.SnapshotGroups,
+			Ctx:                b.config.ctx,
+			GeneratedData:      generatedData,
 		},
 		&awscommon.StepCreateTags{
-			Tags:         b.config.AMITags,
-			SnapshotTags: b.config.SnapshotTags,
-			Ctx:          b.config.ctx,
+			AMISkipCreateImage: b.config.AMISkipCreateImage,
+			Tags:               b.config.AMITags,
+			SnapshotTags:       b.config.SnapshotTags,
+			Ctx:                b.config.ctx,
 		},
 	}
 

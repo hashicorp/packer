@@ -19,6 +19,7 @@ import (
 type stepCreateAMI struct {
 	PollingConfig      *awscommon.AWSPollingConfig
 	image              *ec2.Image
+	AMISkipCreateImage bool
 	AMISkipBuildRegion bool
 }
 
@@ -27,6 +28,11 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packersdk.Ui)
+
+	if s.AMISkipCreateImage {
+		ui.Say("Skipping AMI creation...")
+		return multistep.ActionContinue
+	}
 
 	// Create the image
 	amiName := config.AMIName
