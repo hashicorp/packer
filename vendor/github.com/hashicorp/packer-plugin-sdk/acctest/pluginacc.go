@@ -2,6 +2,7 @@ package acctest
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -10,13 +11,13 @@ import (
 	"testing"
 )
 
-// DatasourceTestCase is a single set of tests to run for a data source.
-// A DatasourceTestCase should generally map 1:1 to each test method for your
+// PluginTestCase is a single set of tests to run for a plugin.
+// A PluginTestCase should generally map 1:1 to each test method for your
 // acceptance tests.
 // Requirements:
 // - The plugin to be tested must be previously installed so that Packer can discover it.
-// - Packer must be installed
-type DatasourceTestCase struct {
+// - Packer must also be installed
+type PluginTestCase struct {
 	// Check is called after this step is executed in order to test that
 	// the step executed successfully. If this is not set, then the next
 	// step will be called
@@ -36,12 +37,12 @@ type DatasourceTestCase struct {
 	Teardown TestTeardownFunc
 	// Template is the testing HCL2 template to use.
 	Template string
-	// Type is the type of data source.
+	// Type is the type of the plugin.
 	Type string
 }
 
 //nolint:errcheck
-func TestDatasource(t *testing.T, testCase *DatasourceTestCase) {
+func TestPlugin(t *testing.T, testCase *PluginTestCase) {
 	if os.Getenv(TestEnvVar) == "" {
 		t.Skip(fmt.Sprintf(
 			"Acceptance tests skipped unless env '%s' set",
@@ -57,7 +58,12 @@ func TestDatasource(t *testing.T, testCase *DatasourceTestCase) {
 	}
 
 	logfile := fmt.Sprintf("packer_log_%s.txt", testCase.Name)
-	templatePath := fmt.Sprintf("./%s.pkr.hcl", testCase.Name)
+
+	extension := ".pkr.hcl"
+	if err := json.Unmarshal([]byte(testCase.Template), &(map[string]interface{}{})); err == nil {
+		extension = ".json"
+	}
+	templatePath := fmt.Sprintf("./%s%s", testCase.Name, extension)
 
 	// Write config hcl2 template
 	out := bytes.NewBuffer(nil)
@@ -89,7 +95,7 @@ func TestDatasource(t *testing.T, testCase *DatasourceTestCase) {
 	if testCase.Check != nil {
 		checkErr = testCase.Check(buildCommand, logfile)
 	}
-	// Clean up anything created in data source run
+	// Clean up anything created in the plugin run
 	if testCase.Teardown != nil {
 		cleanErr := testCase.Teardown()
 		if cleanErr != nil {
@@ -100,7 +106,7 @@ func TestDatasource(t *testing.T, testCase *DatasourceTestCase) {
 	// Fail test if check failed.
 	if checkErr != nil {
 		cwd, _ := os.Getwd()
-		t.Fatalf(fmt.Sprintf("Error running data source acceptance"+
+		t.Fatalf(fmt.Sprintf("Error running plugin acceptance"+
 			" tests: %s\nLogs can be found at %s\nand the "+
 			"acceptance test template can be found at %s",
 			checkErr.Error(), filepath.Join(cwd, logfile),
