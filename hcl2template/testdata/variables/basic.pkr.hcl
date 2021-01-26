@@ -36,3 +36,8 @@ locals {
   service_name = "forum"
   owner        = "Community Team"
 }
+
+local "supersecret" {
+  sensitive = true
+  expression = "secretvar"
+}

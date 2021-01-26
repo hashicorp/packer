@@ -104,6 +104,13 @@ func TestParser_complete(t *testing.T) {
 							}),
 						}),
 					},
+					"supersecret": &Variable{
+						Name: "supersecret",
+						Values: []VariableAssignment{{From: "default",
+							Value: cty.StringVal("image-id-default-password")}},
+						Type:      cty.String,
+						Sensitive: true,
+					},
 				},
 				Datasources: Datasources{
 					DatasourceRef{Type: "amazon-ami", Name: "test"}: Datasource{

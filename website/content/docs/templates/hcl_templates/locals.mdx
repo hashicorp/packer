@@ -21,9 +21,17 @@ Guide_](/guides/hcl/variables).
 
 ## Examples
 
-Local values are defined in `locals` blocks:
+Local values are defined in `local` or `locals` blocks:
 
 ```hcl
+# Using the local block allows you to mark locals as sensitive, which will
+# filter their values from logs.
+local "mylocal" {
+  expression = "${var.secret_api_key}"
+  sensitive  = true
+}
+
+# Using the locals block is more compact and efficient for declaring many locals
 # Ids for multiple sets of EC2 instances, merged together
 locals {
   instance_ids = "${concat(aws_instance.blue.*.id, aws_instance.green.*.id)}"
@@ -71,6 +79,12 @@ source "amazon-ebs" "server" {
 ```
 
 ## Description
+
+The `local` block defines exactly one local variable within a folder. The block
+label is the name of the local, and the "expression" is the expression that
+should be evaluated to create the local. Using this block, you can optionally
+supply a "sensitive" boolean to mark the variable as sensitive and filter it
+from logs.
 
 The `locals` block defines one or more local variables within a folder.
 
