@@ -167,34 +167,10 @@ func (p *PausedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm
 }
 
 func (p *PausedProvisioner) updatesWhilePausing(ctx context.Context, ui packersdk.Ui) error {
-	updateTime := 1
-	timeTicker := time.NewTicker(time.Duration(updateTime) * time.Second)
 	TotalTime := int64(math.Round(p.PauseBefore.Seconds()))
 	ElapsedTime := int64(0)
-	tickerChannel := make(chan bool)
-	var err error
-	go func() {
-		for {
-			select {
-			case <-timeTicker.C:
-				ElapsedTime += int64(updateTime)
-				ui.TrackProgress("Pausing...", ElapsedTime, TotalTime, ioutil.NopCloser(nil))
-				// ui.Say(fmt.Sprintf("%v seconds left until the next provisioner", TotalTime))
-			case <-ctx.Done():
-				err = ctx.Err()
-				return
-			case <-tickerChannel:
-				return
-			}
-		}
-	}()
-	time.Sleep(p.PauseBefore)
-	timeTicker.Stop()
-	if err != nil {
-		return err
-	}
-	tickerChannel <- true
-
+	pbCloser := ui.TrackProgress("-packerwaiter-Pausing...", ElapsedTime, TotalTime, ioutil.NopCloser(nil))
+	pbCloser.Close() // this is blocking
 	return nil
 }
 
