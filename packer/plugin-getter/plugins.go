@@ -66,7 +66,7 @@ func (pr Requirement) FilenamePrefix() string {
 }
 
 func (opts BinaryInstallationOptions) filenameSuffix() string {
-	return "_x" + opts.APIVersionMajor + "." + opts.APIVersionMinor + "_" + opts.OS + "_" + opts.ARCH + opts.Ext
+	return "_" + opts.OS + "_" + opts.ARCH + opts.Ext
 }
 
 // ListInstallations lists unique installed versions of plugin Requirement pr
@@ -95,20 +95,30 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 				continue
 			}
 
-			// base name could look like packer-plugin-amazon_v1.2.3_darwin_amd64_x4
-			versionStr := strings.TrimPrefix(fname, FilenamePrefix)
-			versionStr = strings.TrimSuffix(versionStr, filenameSuffix)
-			pv, err := version.NewVersion(versionStr)
+			// base name could look like packer-plugin-amazon_v1.2.3_x5.1_darwin_amd64.exe
+			versionsStr := strings.TrimPrefix(fname, FilenamePrefix)
+			versionsStr = strings.TrimSuffix(versionsStr, filenameSuffix)
+
+			// versionsStr now looks like v1.2.3_x5.1
+			parts := strings.SplitN(versionsStr, "_", 2)
+			pluginVersionStr, protocolVerionStr := parts[0], parts[1]
+			pv, err := version.NewVersion(pluginVersionStr)
 			if err != nil {
 				// could not be parsed, ignoring the file
-				log.Printf("found %q with an incorrect %q version, ignoring it. %v", path, versionStr, err)
+				log.Printf("found %q with an incorrect %q version, ignoring it. %v", path, pluginVersionStr, err)
 				continue
 			}
 
 			// no constraint means always pass, this will happen for implicit
 			// plugin requirements
 			if !pr.VersionConstraints.Check(pv) {
-				log.Printf("[TRACE] version %q of file %q does not match constraint %q", versionStr, path, pr.VersionConstraints.String())
+				log.Printf("[TRACE] version %q of file %q does not match constraint %q", pluginVersionStr, path, pr.VersionConstraints.String())
+				continue
+			}
+
+			if err := opts.CheckProtocolVersion(protocolVerionStr); err != nil {
+				log.Printf("[NOTICE] binary %s requires protocol version %s that is incompatible "+
+					"with this version of Packer. %s", path, protocolVerionStr, err)
 				continue
 			}
 
@@ -135,7 +145,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 
 			res.InsertSortedUniq(&Installation{
 				BinaryPath: path,
-				Version:    versionStr,
+				Version:    pluginVersionStr,
 			})
 		}
 	}
@@ -211,20 +221,20 @@ type GetOptions struct {
 	version *version.Version
 }
 
-func (gp *GetOptions) CheckProtocolVersion(remoteProt string) error {
+func (binOpts *BinaryInstallationOptions) CheckProtocolVersion(remoteProt string) error {
 	remoteProt = strings.TrimPrefix(remoteProt, "x")
 	parts := strings.Split(remoteProt, ".")
 	if len(parts) < 2 {
-		return fmt.Errorf("Invalid remote protocol: %q, expected something like '%s.%s'", remoteProt, gp.APIVersionMajor, gp.APIVersionMinor)
+		return fmt.Errorf("Invalid remote protocol: %q, expected something like '%s.%s'", remoteProt, binOpts.APIVersionMajor, binOpts.APIVersionMinor)
 	}
 	vMajor, vMinor := parts[0], parts[1]
 
-	if vMajor != gp.APIVersionMajor {
+	if vMajor != binOpts.APIVersionMajor {
 		return fmt.Errorf("Unsupported remote protocol MAJOR version %q. The current MAJOR protocol version is %q."+
-			" This version of Packer can only communicate with plugins using that version.", vMajor, gp.APIVersionMajor)
+			" This version of Packer can only communicate with plugins using that version.", vMajor, binOpts.APIVersionMajor)
 	}
 
-	if vMinor == gp.APIVersionMinor {
+	if vMinor == binOpts.APIVersionMinor {
 		return nil
 	}
 
@@ -233,15 +243,14 @@ func (gp *GetOptions) CheckProtocolVersion(remoteProt string) error {
 		return err
 	}
 
-	APIVersoinMinori, err := strconv.Atoi(gp.APIVersionMinor)
+	APIVersoinMinori, err := strconv.Atoi(binOpts.APIVersionMinor)
 	if err != nil {
 		return err
 	}
 
 	if vMinori > APIVersoinMinori {
-		return fmt.Errorf("Unsupported remote protocol MINOR version %q. The current MINOR protocol version is %q."+
-			" This version of Packer can only communicate with plugins using that version. "+
-			"Please upgrade Packer or use an older version of the plugin.", vMinor, gp.APIVersionMinor)
+		return fmt.Errorf("Unsupported remote protocol MINOR version %q. The supported MINOR protocol versions are version %q and bellow."+
+			"Please upgrade Packer or use an older version of the plugin if possible.", vMinor, binOpts.APIVersionMinor)
 	}
 
 	return nil

@@ -29,6 +29,7 @@ require (
 	github.com/digitalocean/go-libvirt v0.0.0-20210112203132-25518eb2c840 // indirect
 	github.com/digitalocean/go-qemu v0.0.0-20201211181942-d361e7b4965f
 	github.com/digitalocean/godo v1.11.1
+	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/exoscale/egoscale v0.18.1
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structtag v1.0.0
@@ -64,8 +65,10 @@ require (
 	github.com/klauspost/compress v1.11.7 // indirect
 	github.com/klauspost/crc32 v1.2.0 // indirect
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
+	github.com/kr/fs v0.1.0 // indirect
 	github.com/linode/linodego v0.14.0
 	github.com/masterzen/winrm v0.0.0-20201030141608-56ca5c5f2380
+	github.com/mattn/go-runewidth v0.0.10 // indirect
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
 	github.com/mitchellh/cli v1.1.0
 	github.com/mitchellh/go-homedir v1.1.0
@@ -74,6 +77,7 @@ require (
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/mitchellh/reflectwalk v1.0.0
+	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
 	github.com/oracle/oci-go-sdk v18.0.0+incompatible
 	github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699
@@ -81,6 +85,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
+	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
 	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/stretchr/testify v1.6.1
