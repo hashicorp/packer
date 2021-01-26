@@ -3,7 +3,9 @@ package packer
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"math"
 	"sync"
 	"time"
 
@@ -165,17 +167,19 @@ func (p *PausedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm
 }
 
 func (p *PausedProvisioner) updatesWhilePausing(ctx context.Context, ui packersdk.Ui) error {
-	updateTime := 10
+	updateTime := 1
 	timeTicker := time.NewTicker(time.Duration(updateTime) * time.Second)
-	TotalTime := p.PauseBefore.Seconds()
+	TotalTime := int64(math.Round(p.PauseBefore.Seconds()))
+	ElapsedTime := int64(0)
 	tickerChannel := make(chan bool)
 	var err error
 	go func() {
 		for {
 			select {
 			case <-timeTicker.C:
-				TotalTime -= float64(updateTime)
-				ui.Say(fmt.Sprintf("%v seconds left until the next provisioner", TotalTime))
+				ElapsedTime += int64(updateTime)
+				ui.TrackProgress("Pausing...", ElapsedTime, TotalTime, ioutil.NopCloser(nil))
+				// ui.Say(fmt.Sprintf("%v seconds left until the next provisioner", TotalTime))
 			case <-ctx.Done():
 				err = ctx.Err()
 				return
