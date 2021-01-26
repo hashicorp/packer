@@ -145,17 +145,30 @@ func ConvertPluginConfigValueToHCLValue(v interface{}) (cty.Value, error) {
 		for i, ev := range v {
 			vals[i] = cty.StringVal(ev)
 		}
-		buildValue = cty.ListVal(vals)
+		if len(vals) == 0 {
+			buildValue = cty.ListValEmpty(cty.String)
+		} else {
+			buildValue = cty.ListVal(vals)
+		}
 	case []uint8:
 		vals := make([]cty.Value, len(v))
 		for i, ev := range v {
 			vals[i] = cty.NumberUIntVal(uint64(ev))
 		}
-		buildValue = cty.ListVal(vals)
+		if len(vals) == 0 {
+			buildValue = cty.ListValEmpty(cty.Number)
+		} else {
+			buildValue = cty.ListVal(vals)
+		}
 	case []int64:
 		vals := make([]cty.Value, len(v))
 		for i, ev := range v {
 			vals[i] = cty.NumberIntVal(ev)
+		}
+		if len(vals) == 0 {
+			buildValue = cty.ListValEmpty(cty.Number)
+		} else {
+			buildValue = cty.ListVal(vals)
 		}
 		buildValue = cty.ListVal(vals)
 	case []uint64:
@@ -163,7 +176,11 @@ func ConvertPluginConfigValueToHCLValue(v interface{}) (cty.Value, error) {
 		for i, ev := range v {
 			vals[i] = cty.NumberUIntVal(ev)
 		}
-		buildValue = cty.ListVal(vals)
+		if len(vals) == 0 {
+			buildValue = cty.ListValEmpty(cty.Number)
+		} else {
+			buildValue = cty.ListVal(vals)
+		}
 	default:
 		return cty.Value{}, fmt.Errorf("unhandled buildvar type: %T", v)
 	}
