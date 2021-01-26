@@ -345,7 +345,11 @@ func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, 
 	}
 
 	read, write := io.Pipe()
-	go json.NewEncoder(write).Encode(toEncode)
+	go func() {
+		if err := json.NewEncoder(write).Encode(toEncode); err != nil {
+			panic(err)
+		}
+	}()
 	return ioutil.NopCloser(read), nil
 }
 
