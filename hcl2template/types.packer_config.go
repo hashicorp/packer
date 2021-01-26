@@ -157,12 +157,13 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*LocalBlock, hcl.Diag
 		switch block.Type {
 		case localLabel:
 			l, moreDiags := decodeLocalBlock(block, locals)
-			if l == nil {
-				diags = append(diags, moreDiags...)
-				return nil, diags
+			diags = append(diags, moreDiags...)
+			if l != nil {
+				locals = append(locals, l)
 			}
-			locals = append(locals, l)
-
+			if moreDiags.HasErrors() {
+				return locals, diags
+			}
 		case localsLabel:
 			attrs, moreDiags := block.Body.JustAttributes()
 			diags = append(diags, moreDiags...)
@@ -175,7 +176,7 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*LocalBlock, hcl.Diag
 						Subject:  attr.NameRange.Ptr(),
 						Context:  block.DefRange.Ptr(),
 					})
-					return nil, diags
+					return locals, diags
 				}
 				locals = append(locals, &LocalBlock{
 					Name: name,
