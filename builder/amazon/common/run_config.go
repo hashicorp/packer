@@ -176,7 +176,7 @@ type RunConfig struct {
 	SecurityGroupFilter SecurityGroupFilterOptions `mapstructure:"security_group_filter" required:"false"`
 	// Key/value pair tags to apply to the instance that is that is *launched*
 	// to create the EBS volumes. This is a [template
-	// engine](/docs/templates/engine), see [Build template
+	// engine](/docs/templates/legacy_json_templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
 	// Same as [`run_tags`](#run_tags) but defined as a singular repeatable

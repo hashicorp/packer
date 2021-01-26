@@ -64,8 +64,8 @@ type Config struct {
 	OSSBucket string `mapstructure:"oss_bucket_name" required:"true"`
 	// The name of the object key in `oss_bucket_name` where the RAW or VHD
 	// file will be copied to for import. This is treated as a [template
-	// engine](/docs/templates/engine), and you may access any of the variables
-	// stored in the generated data using the [build](/docs/templates/engine)
+	// engine](/docs/templates/legacy_json_templates/engine), and you may access any of the variables
+	// stored in the generated data using the [build](/docs/templates/legacy_json_templates/engine)
 	// template function.
 	OSSKey string `mapstructure:"oss_key_name"`
 	// Whether we should skip removing the RAW or VHD file uploaded to OSS

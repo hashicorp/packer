@@ -22,7 +22,7 @@ Packer to automatically create arbitrarily complex Vagrant boxes, and is in
 fact how the official boxes distributed by Vagrant are created.
 
 If you've never used a post-processor before, please read the documentation on
-[using post-processors](/docs/templates/post-processors) in templates.
+[using post-processors](/docs/templates/legacy_json_templates/post-processors) in templates.
 This knowledge will be expected for the remainder of this document.
 
 Because Vagrant boxes are
@@ -82,7 +82,7 @@ more details about certain options in following sections.
 
 - `output` (string) - The full path to the box file that will be created by
   this post-processor. This is a
-  [template engine](/docs/templates/engine). Therefore, you may use user
+  [template engine](/docs/templates/legacy_json_templates/engine). Therefore, you may use user
   variables and template functions in this field. The following extra
   variables are also avilable in this engine:
 
@@ -101,7 +101,7 @@ more details about certain options in following sections.
   `lxc`, `scaleway`, `hyperv`, `parallels`, `aws`, or `google`.
 
 - `vagrantfile_template` (string) - Path to a template to use for the
-  Vagrantfile that is packaged with the box. This option supports the usage of the [template engine](/docs/templates/engine)
+  Vagrantfile that is packaged with the box. This option supports the usage of the [template engine](/docs/templates/legacy_json_templates/engine)
   for JSON and the [contextual variables](/docs/templates/hcl_templates/contextual-variables) for HCL2.
 
 - `vagrantfile_template_generated` (boolean) - By default, Packer will
@@ -238,7 +238,7 @@ artifact (the raw virtual machine, for example), then you must configure Packer
 to keep it.
 
 Please see the [documentation on input
-artifacts](/docs/templates/post-processors#input-artifacts) for more information.
+artifacts](/docs/templates/legacy_json_templates/post-processors#input-artifacts) for more information.
 
 ### Docker
 

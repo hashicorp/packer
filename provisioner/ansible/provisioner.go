@@ -76,7 +76,7 @@ type Config struct {
 	//     "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
 	//   ```
 	//
-	//   This is a [template engine](/docs/templates/engine). Therefore, you
+	//   This is a [template engine](/docs/templates/legacy_json_templates/engine). Therefore, you
 	//   may use user variables and template functions in this field.
 	//
 	//   For example, if you are running a Windows build on AWS, Azure,
