@@ -151,7 +151,8 @@ func TestParse_variables(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/variables/duplicate_locals", nil, nil},
 			&PackerConfig{
-				Basedir: "testdata/variables/duplicate_locals",
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 "testdata/variables/duplicate_locals",
 				LocalVariables: Variables{
 					"sensible": &Variable{
 						Values: []VariableAssignment{
