@@ -113,7 +113,7 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 			srcUsage := &(build.Sources[i])
 			if !cfg.parser.PluginConfig.Builders.Has(srcUsage.Type) {
 				diags = append(diags, &hcl.Diagnostic{
-					Summary:  "Unknownz " + buildSourceLabel + " type " + srcUsage.Type,
+					Summary:  "Unknown " + buildSourceLabel + " type " + srcUsage.Type,
 					Subject:  &build.HCL2Ref.DefRange,
 					Detail:   fmt.Sprintf("known builders: %v", cfg.parser.PluginConfig.Builders.List()),
 					Severity: hcl.DiagError,
