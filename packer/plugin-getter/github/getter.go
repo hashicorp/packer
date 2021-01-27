@@ -198,7 +198,7 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	case "zip":
 		req, err = g.Client.NewRequest(
 			"GET",
-			"https://github.com/"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version()+"/"+opts.ExpectedFilename()+".zip",
+			"https://github.com/"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version()+"/"+opts.ExpectedZipFilename(),
 			nil,
 		)
 

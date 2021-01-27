@@ -1,13 +1,17 @@
 package plugingetter
 
 import (
+	"archive/zip"
+	"bytes"
 	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
-	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -344,6 +348,55 @@ func TestRequirement_InstallLatest(t *testing.T) {
 				},
 			}},
 			nil, false},
+
+		{"upgrade-with-diff-protocol-version",
+			// here we have something locally and test that a newer version will
+			// be installed, the newer version has a lower minor protocol
+			// version than the one we support.
+			fields{"amazon", ">= v2"},
+			args{InstallOptions{
+				[]Getter{
+					&mockPluginGetter{
+						Releases: []Release{
+							{Version: "v1.2.3"},
+							{Version: "v1.2.4"},
+							{Version: "v1.2.5"},
+							{Version: "v2.0.0"},
+							{Version: "v2.1.0"},
+							{Version: "v2.10.0"},
+						},
+						ChecksumFileEntries: map[string][]ChecksumFileEntry{
+							"2.10.0": {{
+								Filename: "packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64.zip",
+								Checksum: "43156b1900dc09b026b54610c4a152edd277366a7f71ff3812583e4a35dd0d4a",
+							}},
+						},
+						Zips: map[string]io.ReadCloser{
+							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64.zip": zipFile(map[string]string{
+								"packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64": "v2.10.0_x6.0_darwin_amd64",
+							}),
+						},
+					},
+				},
+				[]string{
+					pluginFolderOne,
+					pluginFolderTwo,
+				},
+				BinaryInstallationOptions{
+					APIVersionMajor: "6", APIVersionMinor: "1",
+					OS: "darwin", ARCH: "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			}},
+			&Installation{
+				BinaryPath: "testdata/plugins_2/github.com/hashicorp/amazon/packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64",
+				Version:    "v2.10.0",
+			}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -366,8 +419,19 @@ func TestRequirement_InstallLatest(t *testing.T) {
 				t.Errorf("Requirement.InstallLatest() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Requirement.InstallLatest() = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Errorf("Requirement.InstallLatest() %s", diff)
+			}
+			if tt.want != nil && tt.want.BinaryPath != "" {
+				// Cleanup.
+				// These two files should be here by now and os.Remove will fail if
+				// they aren't.
+				if err := os.Remove(tt.want.BinaryPath); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Remove(tt.want.BinaryPath + "_SHA256SUM"); err != nil {
+					t.Fatal(err)
+				}
 			}
 		})
 	}
@@ -376,6 +440,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 type mockPluginGetter struct {
 	Releases            []Release
 	ChecksumFileEntries map[string][]ChecksumFileEntry
+	Zips                map[string]io.ReadCloser
 }
 
 func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, error) {
@@ -386,6 +451,16 @@ func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, 
 		toEncode = g.Releases
 	case "sha256":
 		toEncode = g.ChecksumFileEntries[options.version.String()]
+	case "zip":
+		acc := options.PluginRequirement.Identifier.Hostname + "/" +
+			options.PluginRequirement.Identifier.RealRelativePath() + "/" +
+			options.ExpectedZipFilename()
+
+		zip, found := g.Zips[acc]
+		if found == false {
+			panic(fmt.Sprintf("could not find zipfile %s. %v", acc, g.Zips))
+		}
+		return zip, nil
 	default:
 		panic("Don't know how to get " + what)
 	}
@@ -397,6 +472,30 @@ func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, 
 		}
 	}()
 	return ioutil.NopCloser(read), nil
+}
+
+func zipFile(content map[string]string) io.ReadCloser {
+	buff := bytes.NewBuffer(nil)
+	zipWriter := zip.NewWriter(buff)
+	for fileName, content := range content {
+		header := &zip.FileHeader{
+			Name:             fileName,
+			UncompressedSize: uint32(len([]byte(content))),
+		}
+		fWriter, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			panic(err)
+		}
+		_, err = io.Copy(fWriter, strings.NewReader(content))
+		if err != nil {
+			panic(err)
+		}
+	}
+	err := zipWriter.Close()
+	if err != nil {
+		panic(err)
+	}
+	return ioutil.NopCloser(buff)
 }
 
 var _ Getter = &mockPluginGetter{}

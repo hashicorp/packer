@@ -219,6 +219,14 @@ type GetOptions struct {
 	BinaryInstallationOptions
 
 	version *version.Version
+
+	expectedZipFilename string
+}
+
+// ExpectedZipFilename is the filename of the zip we expect to find, the
+// value is known only after parsing the checksum file file.
+func (gp *GetOptions) ExpectedZipFilename() string {
+	return gp.expectedZipFilename
 }
 
 func (binOpts *BinaryInstallationOptions) CheckProtocolVersion(remoteProt string) error {
@@ -254,10 +262,6 @@ func (binOpts *BinaryInstallationOptions) CheckProtocolVersion(remoteProt string
 	}
 
 	return nil
-}
-
-func (gp *GetOptions) ExpectedFilename() string {
-	return gp.PluginRequirement.FilenamePrefix() + gp.Version() + gp.BinaryInstallationOptions.filenameSuffix()
 }
 
 func (gp *GetOptions) Version() string {
@@ -346,9 +350,8 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 	for _, getter := range getters {
 
 		releasesFile, err := getter.Get("releases", GetOptions{
-			pr,
-			opts.BinaryInstallationOptions,
-			nil,
+			PluginRequirement:         pr,
+			BinaryInstallationOptions: opts.BinaryInstallationOptions,
 		})
 		if err != nil {
 			err := fmt.Errorf("%q getter could not get release: %w", getter, err)
@@ -418,9 +421,9 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 					break
 				}
 				checksumFile, err := getter.Get(checksummer.Type, GetOptions{
-					pr,
-					opts.BinaryInstallationOptions,
-					version,
+					PluginRequirement:         pr,
+					BinaryInstallationOptions: opts.BinaryInstallationOptions,
+					version:                   version,
 				})
 				if err != nil {
 					err := fmt.Errorf("could not get %s checksum file for %s version %s. Is the file present on the release and correctly named ? %s", checksummer, pr.Identifier.ForDisplay(), version, err)
@@ -457,14 +460,14 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 						Expected:    cs,
 						Checksummer: checksummer,
 					}
-
-					outputFileName := strings.TrimSuffix(checksum.Filename, filepath.Ext(checksum.Filename))
+					expectedZipFilename := checksum.Filename
+					expectedBinaryFilename := strings.TrimSuffix(expectedZipFilename, filepath.Ext(expectedZipFilename))
 
 					for _, outputFolder := range opts.InFolders {
 						potentialOutputFilename := filepath.Join(
 							outputFolder,
 							filepath.Join(pr.Identifier.Parts()...),
-							outputFileName,
+							expectedBinaryFilename,
 						)
 						for _, potentialChecksumer := range opts.Checksummers {
 							// First check if a local checksum file is already here in the expected
@@ -489,7 +492,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 					}
 
 					// The last folder from the installation list is where we will install.
-					outputFileName = filepath.Join(outputFolder, outputFileName)
+					outputFileName := filepath.Join(outputFolder, expectedBinaryFilename)
 
 					for _, getter := range getters {
 						// create temporary file that will receive a temporary binary.zip
@@ -501,9 +504,10 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 
 						// start fetching binary
 						remoteZipFile, err := getter.Get("zip", GetOptions{
-							pr,
-							opts.BinaryInstallationOptions,
-							version,
+							PluginRequirement:         pr,
+							BinaryInstallationOptions: opts.BinaryInstallationOptions,
+							version:                   version,
+							expectedZipFilename:       expectedZipFilename,
 						})
 						if err != nil {
 							err := fmt.Errorf("could not get binary for %s version %s. Is the file present on the release and correctly named ? %s", pr.Identifier.ForDisplay(), version, err)
@@ -550,7 +554,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 
 						var copyFrom io.ReadCloser
 						for _, f := range zr.File {
-							if f.Name != filepath.Base(outputFileName) {
+							if f.Name != expectedBinaryFilename {
 								continue
 							}
 							copyFrom, err = f.Open()
