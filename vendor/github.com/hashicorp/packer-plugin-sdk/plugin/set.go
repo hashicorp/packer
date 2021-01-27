@@ -52,7 +52,7 @@ type SetDescription struct {
 func NewSet() *Set {
 	return &Set{
 		sdkVersion:     pluginVersion.SDKVersion.String(),
-		apiVersion:     "x" + APIVersionMajor + "_" + APIVersionMinor,
+		apiVersion:     "x" + APIVersionMajor + "." + APIVersionMinor,
 		Builders:       map[string]packersdk.Builder{},
 		PostProcessors: map[string]packersdk.PostProcessor{},
 		Provisioners:   map[string]packersdk.Provisioner{},

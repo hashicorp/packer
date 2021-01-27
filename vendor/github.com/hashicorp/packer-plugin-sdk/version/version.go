@@ -13,7 +13,7 @@ import (
 var GitCommit string
 
 // Package version helps plugin creators set and track the sdk version using
-var Version = "0.0.9"
+var Version = "0.0.11"
 
 // A pre-release marker for the version. If this is "" (empty string)
 // then it means that it is a final release. Otherwise, this is a pre-release

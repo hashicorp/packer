@@ -29,7 +29,6 @@ require (
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structtag v1.0.0
 	github.com/go-ini/ini v1.25.4
-	github.com/go-ole/go-ole v1.2.5 // indirect
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
@@ -51,7 +50,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/hcl/v2 v2.8.0
-	github.com/hashicorp/packer-plugin-sdk v0.0.10-0.20210126105622-8e1648006d93
+	github.com/hashicorp/packer-plugin-sdk v0.0.11-0.20210127164048-448d64e93ee6
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
@@ -60,7 +59,6 @@ require (
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
 	github.com/linode/linodego v0.14.0
 	github.com/masterzen/winrm v0.0.0-20201030141608-56ca5c5f2380
-	github.com/mattn/go-runewidth v0.0.10 // indirect
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
 	github.com/mitchellh/cli v1.1.0
 	github.com/mitchellh/go-homedir v1.1.0
