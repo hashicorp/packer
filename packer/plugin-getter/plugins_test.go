@@ -566,10 +566,10 @@ func TestRequirement_InstallLatest(t *testing.T) {
 				// Cleanup.
 				// These two files should be here by now and os.Remove will fail if
 				// they aren't.
-				if err := os.Remove(tt.want.BinaryPath); err != nil {
+				if err := os.Remove(filepath.Clean(tt.want.BinaryPath)); err != nil {
 					t.Fatal(err)
 				}
-				if err := os.Remove(tt.want.BinaryPath + "_SHA256SUM"); err != nil {
+				if err := os.Remove(filepath.Clean(tt.want.BinaryPath + "_SHA256SUM")); err != nil {
 					t.Fatal(err)
 				}
 			}
