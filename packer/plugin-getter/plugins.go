@@ -494,6 +494,13 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 					// The last folder from the installation list is where we will install.
 					outputFileName := filepath.Join(outputFolder, expectedBinaryFilename)
 
+					// create directories if need be
+					if err := os.MkdirAll(outputFolder, 0755); err != nil {
+						err := fmt.Errorf("could not create plugin folder %q: %w", outputFolder, err)
+						log.Printf("[TRACE] %s", err.Error())
+						return nil, err
+					}
+
 					for _, getter := range getters {
 						// create temporary file that will receive a temporary binary.zip
 						tmpFile, err := tmp.File("packer-plugin-*.zip")
