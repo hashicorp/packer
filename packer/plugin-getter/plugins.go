@@ -299,9 +299,9 @@ func (e ChecksumFileEntry) Arch() string        { return e.arch }
 // a file inside will look like so:
 //  packer-plugin-comment_v0.2.12_x5.0_freebsd_amd64.zip
 //
-func (e *ChecksumFileEntry) init(getOpts GetOptions) (err error) {
+func (e *ChecksumFileEntry) init(req *Requirement) (err error) {
 	filename := e.Filename
-	res := strings.TrimLeft(filename, getOpts.PluginRequirement.FilenamePrefix())
+	res := strings.TrimLeft(filename, req.FilenamePrefix())
 	// res now looks like v0.2.12_x5.0_freebsd_amd64.zip
 
 	e.ext = filepath.Ext(res)
@@ -312,7 +312,7 @@ func (e *ChecksumFileEntry) init(getOpts GetOptions) (err error) {
 	parts := strings.Split(res, "_")
 	// ["v0.2.12", "x5.0", "freebsd", "amd64"]
 	if len(parts) < 4 {
-		return fmt.Errorf("malformed filename expected %s{version}_x{protocol-version}_{os}_{arch}", getOpts.PluginRequirement.FilenamePrefix())
+		return fmt.Errorf("malformed filename expected %s{version}_x{protocol-version}_{os}_{arch}", req.FilenamePrefix())
 	}
 
 	e.binVersion, e.protVersion, e.os, e.arch = parts[0], parts[1], parts[2], parts[3]
@@ -320,15 +320,15 @@ func (e *ChecksumFileEntry) init(getOpts GetOptions) (err error) {
 	return err
 }
 
-func (e *ChecksumFileEntry) validate(getOpts GetOptions) error {
-	if e.binVersion != getOpts.Version() {
-		return fmt.Errorf("wrong version, expected %s ", e.binVersion)
+func (e *ChecksumFileEntry) validate(expectedVersion string, installOpts BinaryInstallationOptions) error {
+	if e.binVersion != expectedVersion {
+		return fmt.Errorf("wrong version, expected %s ", expectedVersion)
 	}
-	if e.os != getOpts.OS || e.arch != getOpts.ARCH {
-		return fmt.Errorf("wrong system, expected %s_%s ", getOpts.OS, getOpts.ARCH)
+	if e.os != installOpts.OS || e.arch != installOpts.ARCH {
+		return fmt.Errorf("wrong system, expected %s_%s ", installOpts.OS, installOpts.ARCH)
 	}
 
-	return getOpts.CheckProtocolVersion(e.protVersion)
+	return installOpts.CheckProtocolVersion(e.protVersion)
 }
 
 func ParseChecksumFileEntries(f io.Reader) ([]ChecksumFileEntry, error) {
@@ -339,18 +339,17 @@ func ParseChecksumFileEntries(f io.Reader) ([]ChecksumFileEntry, error) {
 func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error) {
 
 	getters := opts.Getters
-
-	getOpts := GetOptions{
-		pr,
-		opts.BinaryInstallationOptions,
-		nil,
-	}
+	fail := fmt.Errorf("could not find a local nor a remote checksum for plugin %q %q", pr.Identifier, pr.VersionConstraints)
 
 	log.Printf("[TRACE] getting available versions for the the %s plugin", pr.Identifier.ForDisplay())
 	versions := version.Collection{}
 	for _, getter := range getters {
 
-		releasesFile, err := getter.Get("releases", getOpts)
+		releasesFile, err := getter.Get("releases", GetOptions{
+			pr,
+			opts.BinaryInstallationOptions,
+			nil,
+		})
 		if err != nil {
 			err := fmt.Errorf("%q getter could not get release: %w", getter, err)
 			log.Printf("[TRACE] %s", err.Error())
@@ -384,10 +383,15 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 			log.Printf("[TRACE] %s", err.Error())
 			continue
 		}
-		sort.Sort(sort.Reverse(versions))
-		log.Printf("[DEBUG] found %s", versions)
+
 		break
 	}
+
+	// Here we want to try every relese in order, starting from the highest one
+	// that matches the requirements.
+	// The system and protocol version need to match too.
+	sort.Sort(sort.Reverse(versions))
+	log.Printf("[DEBUG] found %s", versions)
 
 	if len(versions) == 0 {
 		err := fmt.Errorf("no release version found for the %s plugin matching the constraint(s): %q", pr.Identifier.ForDisplay(), pr.VersionConstraints.String())
@@ -395,7 +399,6 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 	}
 
 	for _, version := range versions {
-		getOpts.version = version
 		outputFolder := filepath.Join(
 			// Pick last folder as it's the one with the highest priority
 			opts.InFolders[len(opts.InFolders)-1],
@@ -403,14 +406,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 			filepath.Join(pr.Identifier.Parts()...),
 		)
 
-		// create directories if need be
-		if err := os.MkdirAll(filepath.Dir(outputFolder), 0755); err != nil {
-			err := fmt.Errorf("could not create plugin folder %q: %w", filepath.Dir(outputFolder), err)
-			log.Printf("[TRACE] %s", err.Error())
-			return nil, err
-		}
-
-		log.Printf("[TRACE] trying to install the %q version of the %s plugin in %q...", getOpts.version, pr.Identifier.ForDisplay(), outputFolder)
+		log.Printf("[TRACE] fetching checksums file for the %q version of the %s plugin in %q...", version, pr.Identifier.ForDisplay(), outputFolder)
 
 		var checksum *FileChecksum
 		for _, getter := range getters {
@@ -421,9 +417,13 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 				if checksum != nil {
 					break
 				}
-				checksumFile, err := getter.Get(checksummer.Type, getOpts)
+				checksumFile, err := getter.Get(checksummer.Type, GetOptions{
+					pr,
+					opts.BinaryInstallationOptions,
+					version,
+				})
 				if err != nil {
-					err := fmt.Errorf("could not get checksum file for %s version %s. Is the file present on the release and correctly named ? %s", pr.Identifier.ForDisplay(), getOpts.version, err)
+					err := fmt.Errorf("could not get %s checksum file for %s version %s. Is the file present on the release and correctly named ? %s", checksummer, pr.Identifier.ForDisplay(), version, err)
 					log.Printf("[TRACE] %s", err.Error())
 					return nil, err
 				}
@@ -435,12 +435,12 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 				}
 
 				for _, entry := range entries {
-					if err := entry.init(getOpts); err != nil {
+					if err := entry.init(pr); err != nil {
 						log.Printf("[TRACE] could not parse checksum filename %s. Is it correctly formatted ? %s", entry.Filename, err)
 						continue
 					}
-					if err := entry.validate(getOpts); err != nil {
-						log.Printf("[TRACE] Ignoring binary %s, %s", entry.Filename, err)
+					if err := entry.validate("v"+version.String(), opts.BinaryInstallationOptions); err != nil {
+						log.Printf("[TRACE] Ignoring remote binary %s, %s", entry.Filename, err)
 						continue
 					}
 
@@ -457,152 +457,152 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 						Expected:    cs,
 						Checksummer: checksummer,
 					}
-					break
-				}
 
-			}
-		}
+					outputFileName := strings.TrimSuffix(checksum.Filename, filepath.Ext(checksum.Filename))
 
-		if checksum == nil {
-			return nil, fmt.Errorf("could not find a local nor a remote checksum for plugin %q %q", pr.Identifier, pr.VersionConstraints)
-		}
+					for _, outputFolder := range opts.InFolders {
+						potentialOutputFilename := filepath.Join(
+							outputFolder,
+							filepath.Join(pr.Identifier.Parts()...),
+							outputFileName,
+						)
+						for _, potentialChecksumer := range opts.Checksummers {
+							// First check if a local checksum file is already here in the expected
+							// download folder. Here we want to download a binary so we only check
+							// for an existing checksum file from the folder we want to download
+							// into.
+							cs, err := potentialChecksumer.GetCacheChecksumOfFile(potentialOutputFilename)
+							if err == nil && len(cs) > 0 {
+								localChecksum := &FileChecksum{
+									Expected:    cs,
+									Checksummer: potentialChecksumer,
+								}
 
-		outputFileName := strings.TrimSuffix(checksum.Filename, filepath.Ext(checksum.Filename))
-
-		for _, outputFolder := range opts.InFolders {
-			potentialOutputFilename := filepath.Join(
-				outputFolder,
-				filepath.Join(pr.Identifier.Parts()...),
-				outputFileName,
-			)
-			for _, potentialChecksumer := range opts.Checksummers {
-				// First check if a local checksum file is already here in the expected
-				// download folder. Here we want to download a binary so we only check
-				// for an existing checksum file from the folder we want to download
-				// into.
-				cs, err := potentialChecksumer.GetCacheChecksumOfFile(potentialOutputFilename)
-				if err == nil && len(cs) > 0 {
-					localChecksum := &FileChecksum{
-						Expected:    cs,
-						Checksummer: potentialChecksumer,
+								log.Printf("[TRACE] found a pre-exising %q checksum file", potentialChecksumer.Type)
+								// if outputFile is there and matches the checksum: do nothing more.
+								if err := localChecksum.ChecksumFile(localChecksum.Expected, potentialOutputFilename); err == nil {
+									log.Printf("[INFO] %s v%s plugin is already correctly installed in %q", pr.Identifier.ForDisplay(), version, potentialOutputFilename)
+									return nil, nil
+								}
+							}
+						}
 					}
 
-					log.Printf("[TRACE] found a pre-exising %q checksum file", potentialChecksumer.Type)
-					// if outputFile is there and matches the checksum: do nothing more.
-					if err := localChecksum.ChecksumFile(localChecksum.Expected, potentialOutputFilename); err == nil {
-						log.Printf("[INFO] %s v%s plugin is already correctly installed in %q", pr.Identifier.ForDisplay(), getOpts.version, potentialOutputFilename)
-						return nil, nil
+					// The last folder from the installation list is where we will install.
+					outputFileName = filepath.Join(outputFolder, outputFileName)
+
+					for _, getter := range getters {
+						// create temporary file that will receive a temporary binary.zip
+						tmpFile, err := tmp.File("packer-plugin-*.zip")
+						if err != nil {
+							return nil, fmt.Errorf("could not create temporary file to dowload plugin: %w", err)
+						}
+						defer tmpFile.Close()
+
+						// start fetching binary
+						remoteZipFile, err := getter.Get("zip", GetOptions{
+							pr,
+							opts.BinaryInstallationOptions,
+							version,
+						})
+						if err != nil {
+							err := fmt.Errorf("could not get binary for %s version %s. Is the file present on the release and correctly named ? %s", pr.Identifier.ForDisplay(), version, err)
+							log.Printf("[TRACE] %v", err)
+							continue
+						}
+
+						// write binary to tmp file
+						_, err = io.Copy(tmpFile, remoteZipFile)
+						_ = remoteZipFile.Close()
+						if err != nil {
+							err := fmt.Errorf("Error getting plugin: %w", err)
+							log.Printf("[TRACE] %v, trying another getter", err)
+							continue
+						}
+
+						if _, err := tmpFile.Seek(0, 0); err != nil {
+							err := fmt.Errorf("Error seeking begining of temporary file for checksumming: %w", err)
+							log.Printf("[TRACE] %v, continuing", err)
+							continue
+						}
+
+						// verify that the checksum for the zip is what we expect.
+						if err := checksum.Checksummer.Checksum(checksum.Expected, tmpFile); err != nil {
+							err := fmt.Errorf("%w. Is the checksum file correct ? Is the binary file correct ?", err)
+							log.Printf("%s, truncating the zipfile", err)
+							if err := tmpFile.Truncate(0); err != nil {
+								log.Printf("[TRACE] %v", err)
+							}
+							continue
+						}
+
+						tmpFileStat, err := tmpFile.Stat()
+						if err != nil {
+							err := fmt.Errorf("failed to stat: %v", err)
+							return nil, err
+						}
+
+						zr, err := zip.NewReader(tmpFile, tmpFileStat.Size())
+						if err != nil {
+							err := fmt.Errorf("zip : %v", err)
+							return nil, err
+						}
+
+						var copyFrom io.ReadCloser
+						for _, f := range zr.File {
+							if f.Name != filepath.Base(outputFileName) {
+								continue
+							}
+							copyFrom, err = f.Open()
+							if err != nil {
+								return nil, err
+							}
+							break
+						}
+						if copyFrom == nil {
+							err := fmt.Errorf("could not find a %s file in zipfile", checksum.Filename)
+							return nil, err
+						}
+
+						outputFile, err := os.OpenFile(outputFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+						if err != nil {
+							err := fmt.Errorf("Failed to create %s: %v", outputFileName, err)
+							return nil, err
+						}
+
+						if _, err := io.Copy(outputFile, copyFrom); err != nil {
+							err := fmt.Errorf("Extract file: %v", err)
+							return nil, err
+						}
+
+						if _, err := outputFile.Seek(0, 0); err != nil {
+							err := fmt.Errorf("Error seeking begining of binary file for checksumming: %w", err)
+							log.Printf("[WARNING] %v, ignoring", err)
+						}
+
+						cs, err := checksum.Checksummer.Sum(outputFile)
+						if err != nil {
+							err := fmt.Errorf("failed to checksum binary file: %s", err)
+							log.Printf("[WARNING] %v, ignoring", err)
+						}
+
+						if err := ioutil.WriteFile(outputFileName+checksum.Checksummer.FileExt(), []byte(hex.EncodeToString(cs)), 0555); err != nil {
+							err := fmt.Errorf("failed to write local binary checksum file: %s", err)
+							log.Printf("[WARNING] %v, ignoring", err)
+						}
+
+						// Success !!
+						return &Installation{
+							BinaryPath: outputFileName,
+							Version:    "v" + version.String(),
+						}, nil
 					}
+
 				}
 			}
-		}
 
-		// The last folder from the installation list is where we will install.
-		outputFileName = filepath.Join(outputFolder, outputFileName)
-
-		for _, getter := range getters {
-			// create temporary file that will receive a temporary binary.zip
-			tmpFile, err := tmp.File("packer-plugin-*.zip")
-			if err != nil {
-				return nil, fmt.Errorf("could not create temporary file to dowload plugin: %w", err)
-			}
-			defer tmpFile.Close()
-
-			// start fetching binary
-			remoteZipFile, err := getter.Get("zip", getOpts)
-			if err != nil {
-				err := fmt.Errorf("could not get binary for %s version %s. Is the file present on the release and correctly named ? %s", pr.Identifier.ForDisplay(), getOpts.version, err)
-				log.Printf("[TRACE] %v", err)
-				continue
-			}
-
-			// write binary to tmp file
-			_, err = io.Copy(tmpFile, remoteZipFile)
-			_ = remoteZipFile.Close()
-			if err != nil {
-				err := fmt.Errorf("Error getting plugin: %w", err)
-				log.Printf("[TRACE] %v, trying another getter", err)
-				continue
-			}
-
-			if _, err := tmpFile.Seek(0, 0); err != nil {
-				err := fmt.Errorf("Error seeking begining of temporary file for checksumming: %w", err)
-				log.Printf("[TRACE] %v, continuing", err)
-				continue
-			}
-
-			// verify that the checksum for the zip is what we expect.
-			if err := checksum.Checksummer.Checksum(checksum.Expected, tmpFile); err != nil {
-				err := fmt.Errorf("%w. Is the checksum file correct ? Is the binary file correct ?", err)
-				log.Printf("%s, truncating the zipfile", err)
-				if err := tmpFile.Truncate(0); err != nil {
-					log.Printf("[TRACE] %v", err)
-				}
-				continue
-			}
-
-			tmpFileStat, err := tmpFile.Stat()
-			if err != nil {
-				err := fmt.Errorf("failed to stat: %v", err)
-				return nil, err
-			}
-
-			zr, err := zip.NewReader(tmpFile, tmpFileStat.Size())
-			if err != nil {
-				err := fmt.Errorf("zip : %v", err)
-				return nil, err
-			}
-
-			var copyFrom io.ReadCloser
-			for _, f := range zr.File {
-				if f.Name != filepath.Base(outputFileName) {
-					continue
-				}
-				copyFrom, err = f.Open()
-				if err != nil {
-					return nil, err
-				}
-				break
-			}
-			if copyFrom == nil {
-				err := fmt.Errorf("could not find a %s file in zipfile", checksum.Filename)
-				return nil, err
-			}
-
-			outputFile, err := os.OpenFile(outputFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
-			if err != nil {
-				err := fmt.Errorf("Failed to create %s: %v", outputFileName, err)
-				return nil, err
-			}
-
-			if _, err := io.Copy(outputFile, copyFrom); err != nil {
-				err := fmt.Errorf("Extract file: %v", err)
-				return nil, err
-			}
-
-			if _, err := outputFile.Seek(0, 0); err != nil {
-				err := fmt.Errorf("Error seeking begining of binary file for checksumming: %w", err)
-				log.Printf("[WARNING] %v, ignoring", err)
-			}
-
-			cs, err := checksum.Checksummer.Sum(outputFile)
-			if err != nil {
-				err := fmt.Errorf("failed to checksum binary file: %s", err)
-				log.Printf("[WARNING] %v, ignoring", err)
-			}
-
-			if err := ioutil.WriteFile(outputFileName+checksum.Checksummer.FileExt(), []byte(hex.EncodeToString(cs)), 0555); err != nil {
-				err := fmt.Errorf("failed to write local binary checksum file: %s", err)
-				log.Printf("[WARNING] %v, ignoring", err)
-			}
-
-			// Success !!
-			return &Installation{
-				BinaryPath: outputFileName,
-				Version:    "v" + version.String(),
-			}, nil
 		}
 	}
 
-	return nil, nil
+	return nil, fail
 }

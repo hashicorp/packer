@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"log"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -236,15 +237,15 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						Releases: []Release{
 							{Version: "v1.2.3"},
 						},
-						ChecksumFileEntries: []ChecksumFileEntry{
-							{
+						ChecksumFileEntries: map[string][]ChecksumFileEntry{
+							"1.2.3": {{
 								// here the checksum file tells us what zipfiles
 								// to expect. maybe we could cache the zip file
 								// ? but then the plugin is present on the drive
 								// twice.
 								Filename: "packer-plugin-amazon_v1.2.3_x5.0_darwin_amd64.zip",
 								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-							},
+							}},
 						},
 					},
 				},
@@ -265,7 +266,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 			}},
 			nil, false},
 
-		{"already-installed-compatible-api-version",
+		{"already-installed-compatible-api-minor-version",
 			// here 'packer' uses the procol version 5.1 which is compatible
 			// with the 5.0 one.
 			fields{"amazon", "v1.2.3"},
@@ -275,11 +276,11 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						Releases: []Release{
 							{Version: "v1.2.3"},
 						},
-						ChecksumFileEntries: []ChecksumFileEntry{
-							{
+						ChecksumFileEntries: map[string][]ChecksumFileEntry{
+							"1.2.3": {{
 								Filename: "packer-plugin-amazon_v1.2.3_x5.0_darwin_amd64.zip",
 								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-							},
+							}},
 						},
 					},
 				},
@@ -299,9 +300,54 @@ func TestRequirement_InstallLatest(t *testing.T) {
 				},
 			}},
 			nil, false},
+
+		{"ignore-incompatible-higher-protocol-version",
+			// here 'packer' needs a binary with protocol version 5.0, and a
+			// working plugin is already installed; but a plugin with version
+			// 6.0 is available locally and remotely. It simply needs to be
+			// ignored.
+			fields{"amazon", ">= v1"},
+			args{InstallOptions{
+				[]Getter{
+					&mockPluginGetter{
+						Releases: []Release{
+							{Version: "v1.2.3"},
+							{Version: "v1.2.4"},
+							{Version: "v1.2.5"},
+							{Version: "v2.0.0"},
+						},
+						ChecksumFileEntries: map[string][]ChecksumFileEntry{
+							"2.0.0": {{
+								Filename: "packer-plugin-amazon_v2.0.0_x6.0_darwin_amd64.zip",
+								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+							}},
+							"1.2.5": {{
+								Filename: "packer-plugin-amazon_v1.2.5_x5.0_darwin_amd64.zip",
+								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+							}},
+						},
+					},
+				},
+				[]string{
+					pluginFolderOne,
+					pluginFolderTwo,
+				},
+				BinaryInstallationOptions{
+					APIVersionMajor: "5", APIVersionMinor: "0",
+					OS: "darwin", ARCH: "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			}},
+			nil, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			log.Printf("starting %s test", tt.name)
 
 			identifier, diags := addrs.ParsePluginSourceString(tt.fields.Identifier)
 			if len(diags) != 0 {
@@ -329,7 +375,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 
 type mockPluginGetter struct {
 	Releases            []Release
-	ChecksumFileEntries []ChecksumFileEntry
+	ChecksumFileEntries map[string][]ChecksumFileEntry
 }
 
 func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, error) {
@@ -339,7 +385,7 @@ func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, 
 	case "releases":
 		toEncode = g.Releases
 	case "sha256":
-		toEncode = g.ChecksumFileEntries
+		toEncode = g.ChecksumFileEntries[options.version.String()]
 	default:
 		panic("Don't know how to get " + what)
 	}
