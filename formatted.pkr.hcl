@@ -10,7 +10,7 @@ packer {
   required_plugins {
     comment = {
       source  = "sylviamoss/comment"
-      version = "v0.2.13"
+      version = "v0.2.14"
     }
   }
 }

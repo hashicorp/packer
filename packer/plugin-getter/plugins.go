@@ -426,7 +426,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 					version:                   version,
 				})
 				if err != nil {
-					err := fmt.Errorf("could not get %s checksum file for %s version %s. Is the file present on the release and correctly named ? %s", checksummer, pr.Identifier.ForDisplay(), version, err)
+					err := fmt.Errorf("could not get %s checksum file for %s version %s. Is the file present on the release and correctly named ? %s", checksummer.Type, pr.Identifier.ForDisplay(), version, err)
 					log.Printf("[TRACE] %s", err.Error())
 					return nil, err
 				}
