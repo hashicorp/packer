@@ -394,7 +394,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 	// that matches the requirements.
 	// The system and protocol version need to match too.
 	sort.Sort(sort.Reverse(versions))
-	log.Printf("[DEBUG] found %s", versions)
+	log.Printf("[DEBUG] will try to install: %s", versions)
 
 	if len(versions) == 0 {
 		err := fmt.Errorf("no release version found for the %s plugin matching the constraint(s): %q", pr.Identifier.ForDisplay(), pr.VersionConstraints.String())
