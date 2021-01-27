@@ -580,6 +580,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							err := fmt.Errorf("Failed to create %s: %v", outputFileName, err)
 							return nil, err
 						}
+						defer outputFile.Close()
 
 						if _, err := io.Copy(outputFile, copyFrom); err != nil {
 							err := fmt.Errorf("Extract file: %v", err)
