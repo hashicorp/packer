@@ -21,7 +21,10 @@ import (
 
 var (
 	pluginFolderOne = filepath.Join("testdata", "plugins")
+
 	pluginFolderTwo = filepath.Join("testdata", "plugins_2")
+
+	pluginFolderWrongChecksums = filepath.Join("testdata", "wrong_checksums")
 )
 
 func TestPlugin_ListInstallations(t *testing.T) {
@@ -254,6 +257,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					},
 				},
 				[]string{
+					pluginFolderWrongChecksums,
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
@@ -289,6 +293,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					},
 				},
 				[]string{
+					pluginFolderWrongChecksums,
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
@@ -333,6 +338,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					},
 				},
 				[]string{
+					pluginFolderWrongChecksums,
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
@@ -379,6 +385,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					},
 				},
 				[]string{
+					pluginFolderWrongChecksums,
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
@@ -428,6 +435,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					},
 				},
 				[]string{
+					pluginFolderWrongChecksums,
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
@@ -471,6 +479,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					},
 				},
 				[]string{
+					pluginFolderWrongChecksums,
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
@@ -485,6 +494,47 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					},
 				},
 			}},
+
+			nil, true},
+
+		{"wrong-local-checksum",
+			// here we have something locally and test that a newer version with
+			// a wrong checksum will not be installed and error.
+			fields{"amazon", ">= v1"},
+			args{InstallOptions{
+				[]Getter{
+					&mockPluginGetter{
+						Releases: []Release{
+							{Version: "v2.10.0"},
+						},
+						ChecksumFileEntries: map[string][]ChecksumFileEntry{
+							"2.10.0": {{
+								Filename: "packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64.zip",
+								Checksum: "133713371337133713371337c4a152edd277366a7f71ff3812583e4a35dd0d4a",
+							}},
+						},
+						Zips: map[string]io.ReadCloser{
+							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64.zip": zipFile(map[string]string{
+								"packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64": "h4xx",
+							}),
+						},
+					},
+				},
+				[]string{
+					pluginFolderWrongChecksums,
+				},
+				BinaryInstallationOptions{
+					APIVersionMajor: "6", APIVersionMinor: "1",
+					OS: "darwin", ARCH: "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			}},
+
 			nil, true},
 	}
 	for _, tt := range tests {
