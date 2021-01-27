@@ -400,8 +400,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 
 		{"upgrade-with-same-protocol-version",
 			// here we have something locally and test that a newer version will
-			// be installed, the newer version has a lower minor protocol
-			// version than the one we support.
+			// be installed.
 			fields{"amazon", ">= v2"},
 			args{InstallOptions{
 				[]Getter{
