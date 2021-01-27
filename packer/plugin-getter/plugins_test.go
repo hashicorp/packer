@@ -498,8 +498,9 @@ func TestRequirement_InstallLatest(t *testing.T) {
 			nil, true},
 
 		{"wrong-local-checksum",
-			// here we have something locally and test that a newer version with
-			// a wrong checksum will not be installed and error.
+			// here we have something wrong locally and test that a newer
+			// version with a wrong checksum will not be installed
+			// this should totally error.
 			fields{"amazon", ">= v1"},
 			args{InstallOptions{
 				[]Getter{
