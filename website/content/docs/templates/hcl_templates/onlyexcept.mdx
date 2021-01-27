@@ -32,12 +32,12 @@ build {
   }
 
   provisioner "shell-local" {
-    only = ["source.amazon-ebs.first-example"]
+    only = ["amazon-ebs.first-example"]
     inline = ["echo I will only run for the second example source"]
   }
 
   provisioner "shell-local" {
-    except = ["source.amazon-ebs.second-example-local-name"]
+    except = ["amazon-ebs.second-example-local-name"]
     inline = ["echo I will never run for the second example source"]
   }
 }
