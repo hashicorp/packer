@@ -597,7 +597,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 
 						// Success !!
 						return &Installation{
-							BinaryPath: outputFileName,
+							BinaryPath: strings.ReplaceAll(outputFileName, "\\", "/"),
 							Version:    "v" + version.String(),
 						}, nil
 					}
