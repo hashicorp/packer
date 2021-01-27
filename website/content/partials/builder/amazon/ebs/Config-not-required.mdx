@@ -1,5 +1,8 @@
 <!-- Code generated from the comments of the Config struct in builder/amazon/ebs/builder.go; DO NOT EDIT MANUALLY -->
 
+- `skip_create_ami` (bool) - If true, Packer will not create the AMI. Useful for setting to `true`
+  during a build test stage. Default `false`.
+
 - `ami_block_device_mappings` (awscommon.BlockDevices) - Add one or more block device mappings to the AMI. These will be attached
   when booting a new instance from your AMI. To add a block device during
   the Packer build see `launch_block_device_mappings` below. Your options
