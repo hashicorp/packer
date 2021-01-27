@@ -394,7 +394,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 				},
 			}},
 			&Installation{
-				BinaryPath: "testdata/plugins_2/github.com/hashicorp/amazon/packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64",
+				BinaryPath: filepath.Clean("testdata/plugins_2/github.com/hashicorp/amazon/packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64"),
 				Version:    "v2.10.0",
 			}, false},
 
@@ -444,7 +444,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 				},
 			}},
 			&Installation{
-				BinaryPath: "testdata/plugins_2/github.com/hashicorp/amazon/packer-plugin-amazon_v2.10.1_x6.1_darwin_amd64",
+				BinaryPath: filepath.Clean("testdata/plugins_2/github.com/hashicorp/amazon/packer-plugin-amazon_v2.10.1_x6.1_darwin_amd64"),
 				Version:    "v2.10.1",
 			}, false},
 
