@@ -56,7 +56,7 @@ type Config struct {
 	// Tags to apply to the volumes that are *launched* to create the AMI.
 	// These tags are *not* applied to the resulting AMI unless they're
 	// duplicated in `tags`. This is a [template
-	// engine](/docs/templates/engine), see [Build template
+	// engine](/docs/templates/legacy_json_templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	VolumeRunTags map[string]string `mapstructure:"run_volume_tags"`
 	// Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular

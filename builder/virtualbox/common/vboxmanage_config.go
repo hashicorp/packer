@@ -37,7 +37,7 @@ type VBoxManageConfig struct {
 	// followed by the CPUs.
 	// Each command itself is an array of strings, where each string is an argument to
 	// `VBoxManage`. Each argument is treated as a [configuration
-	// template](/docs/templates/engine). The only available
+	// template](/docs/templates/legacy_json_templates/engine). The only available
 	// variable is `Name` which is replaced with the unique name of the VM, which is
 	// required for many VBoxManage calls.
 	VBoxManage [][]string `mapstructure:"vboxmanage" required:"false"`

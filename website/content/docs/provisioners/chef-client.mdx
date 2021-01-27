@@ -55,7 +55,7 @@ configuration is actually required.
   `accept-silent` and `accept-no-persist`. For details see [Accepting the
   Chef License](https://docs.chef.io/chef_license_accept.html).
 
-  This is a [template engine](/docs/templates/engine.html). Therefore, you
+  This is a [template engine](/docs/templates/legacy_json_templates/engine.html). Therefore, you
   may use user variables and template functions in this field.
 
 - `config_template` (string) - Path to a template that will be used for the
@@ -75,7 +75,7 @@ configuration is actually required.
   will be available.
 
 - `execute_command` (string) - The command used to execute Chef. This has
-  various [configuration template variables](/docs/templates/engine)
+  various [configuration template variables](/docs/templates/legacy_json_templates/engine)
   available. See below for more information.
 
 - `guest_os_type` (string) - The target guest OS type, either "unix" or
@@ -83,7 +83,7 @@ configuration is actually required.
   Windows friendly paths and commands. By default, this is "unix".
 
 - `install_command` (string) - The command used to install Chef. This has
-  various [configuration template variables](/docs/templates/engine)
+  various [configuration template variables](/docs/templates/legacy_json_templates/engine)
   available. See below for more information.
 
 - `json` (object) - An arbitrary mapping of JSON that will be available as
@@ -91,7 +91,7 @@ configuration is actually required.
 
 - `knife_command` (string) - The command used to run Knife during node
   clean-up. This has various [configuration template
-  variables](/docs/templates/engine) available. See below for more
+  variables](/docs/templates/legacy_json_templates/engine) available. See below for more
   information.
 
 - `node_name` (string) - The name of the node to register with the Chef
@@ -206,7 +206,7 @@ trusted_certs_dir :{{.TrustedCertsDir}}
 {{end}}
 ```
 
-This template is a [configuration template](/docs/templates/engine) and
+This template is a [configuration template](/docs/templates/legacy_json_templates/engine) and
 has a set of variables available to use:
 
 - `ChefEnvironment` - The Chef environment name.
@@ -321,7 +321,7 @@ mode.
 **Packer variables**
 
 Set the necessary Packer variables using environment variables or provide a
-[var file](/docs/templates/user-variables).
+[var file](/docs/templates/legacy_json_templates/user-variables).
 
 ```json
 "variables": {
@@ -386,7 +386,7 @@ mode, while passing a `run_list` using a variable.
 **Packer variables**
 
 Set the necessary Packer variables using environment variables or provide a
-[var file](/docs/templates/user-variables).
+[var file](/docs/templates/legacy_json_templates/user-variables).
 
 ```json
 "variables": {
