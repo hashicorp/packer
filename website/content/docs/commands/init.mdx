@@ -9,10 +9,16 @@ sidebar_title: <tt>init</tt>
 
 -> **Note:** Packer does not currently have the notion of a state.
 
--> **Note:** Currently, the plugin getter only fetches binaries using Github's API,
-which [limits the number of requests per hour one can
+
+-> **Note:** Currently, the plugin getter can only fetch binaries from public
+projects on *Github*.
+
+-> **Note:** Downlading from *Github*, set the `PKR_GITHUB_API_TOKEN` env var in
+order to get more requests per hour. Currently, the plugin getter only fetches
+binaries using Github's public API, which [limits the number of requests per
+hour one can
 do](https://docs.github.com/en/developers/apps/rate-limits-for-github-apps#normal-user-to-server-rate-limits),
-set the `PKR_GITHUB_API_TOKEN` in order to get more requests per hour.
+
 
 The `packer init` command is used to download Packer plugin binaries.
 This is the first command that should be executed when working with a new or
