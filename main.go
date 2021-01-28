@@ -316,7 +316,7 @@ func loadConfig() (*config, error) {
 	configFilePath := os.Getenv("PACKER_CONFIG")
 	if configFilePath == "" {
 		var err error
-		log.Print("[INFO] ${PACKER_CONFIG} not set; checking the default config file path")
+		log.Print("[INFO] PACKER_CONFIG env var not set; checking the default config file path")
 		configFilePath, err = pathing.ConfigFile()
 		if err != nil {
 			log.Printf("Error detecting default config file path: %s", err)
@@ -325,7 +325,7 @@ func loadConfig() (*config, error) {
 	if configFilePath == "" {
 		return &config, nil
 	}
-	log.Printf("[INFO] ${PACKER_CONFIG}' set; attempting to open config file: %s", configFilePath)
+	log.Printf("[INFO] PACKER_CONFIG env var set; attempting to open config file: %s", configFilePath)
 	f, err := os.Open(configFilePath)
 	if err != nil {
 		if !os.IsNotExist(err) {
