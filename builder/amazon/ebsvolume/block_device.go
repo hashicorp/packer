@@ -12,7 +12,7 @@ import (
 type BlockDevice struct {
 	awscommon.BlockDevice `mapstructure:",squash"`
 	// Key/value pair tags to apply to the volume. These are retained after the builder
-	// completes. This is a [template engine](/docs/templates/engine), see
+	// completes. This is a [template engine](/docs/templates/legacy_json_templates/engine), see
 	// [Build template data](#build-template-data) for more information.
 	Tags map[string]string `mapstructure:"tags" required:"false"`
 	// Same as [`tags`](#tags) but defined as a singular repeatable block

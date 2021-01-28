@@ -72,7 +72,7 @@ provisioner "shell" {
   default this is `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`, unless the
   user has set `"use_env_var_file": true` -- in that case, the default
   `execute_command` is `chmod +x {{.Path}}; . {{.EnvVarFile}} && {{.Path}}`.
-  This is a [template engine](/docs/templates/engine). Therefore, you may
+  This is a [template engine](/docs/templates/legacy_json_templates/engine). Therefore, you may
   use user variables and template functions in this field. In addition, there
   are three available extra variables:
 
@@ -167,7 +167,7 @@ In addition to being able to specify custom environmental variables using the
 commonly useful environmental variables:
 
 - `PACKER_BUILD_NAME` is set to the [name of the
-  build](/docs/templates/builders#named-builds) that Packer is running.
+  build](/docs/templates/legacy_json_templates/builders#named-builds) that Packer is running.
   This is most useful when Packer is making multiple builds and you want to
   distinguish them slightly from a common provisioning script.
 

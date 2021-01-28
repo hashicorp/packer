@@ -49,7 +49,7 @@ type Config struct {
 	UFileBucket string `mapstructure:"ufile_bucket_name" required:"true"`
 	// The name of the object key in
 	//  `ufile_bucket_name` where the RAW, VHD, VMDK, or qcow2 file will be copied
-	//  to import. This is a [template engine](/docs/templates/engine).
+	//  to import. This is a [template engine](/docs/templates/legacy_json_templates/engine).
 	//  Therefore, you may use user variables and template functions in this field.
 	UFileKey string `mapstructure:"ufile_key_name" required:"false"`
 	// Whether we should skip removing the RAW, VHD, VMDK, or qcow2 file uploaded to

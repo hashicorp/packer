@@ -2,7 +2,6 @@ package hcl2template
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -33,18 +32,12 @@ func (p *HCL2PostProcessor) HCL2Prepare(buildVars map[string]interface{}) error 
 		ectx = p.evalContext.NewChild()
 		buildValues := map[string]cty.Value{}
 		for k, v := range buildVars {
-			switch v := v.(type) {
-			case string:
-				buildValues[k] = cty.StringVal(v)
-			case int64:
-				buildValues[k] = cty.NumberIntVal(v)
-			case uint64:
-				buildValues[k] = cty.NumberUIntVal(v)
-			case bool:
-				buildValues[k] = cty.BoolVal(v)
-			default:
-				return fmt.Errorf("unhandled buildvar type: %T", v)
+			val, err := ConvertPluginConfigValueToHCLValue(v)
+			if err != nil {
+				return err
 			}
+
+			buildValues[k] = val
 		}
 		ectx.Variables = map[string]cty.Value{
 			buildAccessor: cty.ObjectVal(buildValues),

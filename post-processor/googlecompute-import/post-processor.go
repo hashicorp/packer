@@ -43,7 +43,7 @@ type Config struct {
 	Bucket string `mapstructure:"bucket" required:"true"`
 	//The name of the GCS object in `bucket` where
 	//the RAW disk image will be copied for import. This is treated as a
-	//[template engine](/docs/templates/engine). Therefore, you
+	//[template engine](/docs/templates/legacy_json_templates/engine). Therefore, you
 	//may use user variables and template functions in this field. Defaults to
 	//`packer-import-{{timestamp}}.tar.gz`.
 	GCSObjectName string `mapstructure:"gcs_object_name"`

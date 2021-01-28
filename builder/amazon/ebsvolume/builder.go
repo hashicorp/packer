@@ -58,7 +58,7 @@ type Config struct {
 	// *launched* to create EBS Volumes. These tags will *not* appear in the
 	// tags of the resulting EBS volumes unless they're duplicated under `tags`
 	// in the `ebs_volumes` setting. This is a [template
-	// engine](/docs/templates/engine), see [Build template
+	// engine](/docs/templates/legacy_json_templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	//
 	//  Note: The tags specified here will be *temporarily* applied to volumes

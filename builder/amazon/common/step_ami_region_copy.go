@@ -24,6 +24,7 @@ type StepAMIRegionCopy struct {
 
 	toDelete           string
 	getRegionConn      func(*AccessConfig, string) (ec2iface.EC2API, error)
+	AMISkipCreateImage bool
 	AMISkipBuildRegion bool
 }
 
@@ -63,6 +64,12 @@ func (s *StepAMIRegionCopy) DeduplicateRegions(intermediary bool) {
 
 func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packersdk.Ui)
+
+	if s.AMISkipCreateImage {
+		ui.Say("Skipping AMI region copy...")
+		return multistep.ActionContinue
+	}
+
 	amis := state.Get("amis").(map[string]string)
 	snapshots := state.Get("snapshots").(map[string][]string)
 	intermediary, _ := state.Get("intermediary_image").(bool)
