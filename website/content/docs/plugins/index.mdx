@@ -64,7 +64,7 @@ string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
         version = ">= 2.7.0"
         source = "azr/myawesomecloud"
       }
-      otherawesomecloud = ">= 2.7.0"
+      happycloud = ">= 2.7.0"
     }
   }
   ```
@@ -139,13 +139,13 @@ Using the following example :
         version = ">= 2.7.0"
         source = "azr/myawesomecloud"
       }
-      otherawesomecloud = ">= 2.7.0"
+      happycloud = ">= 2.7.0"
     }
 ```
 
 The plugin getter will look for plugins located at:
 * github.com/azr/packer-plugin-myawesomecloud
-* github.com/hashicorp/packer-plugin-otherawesomecloud
+* github.com/hashicorp/packer-plugin-happycloud
 
 Packer will error if you set the `packer-plugin-` prefix in a `source`. This
 will avoid conflicting with other plugins for other tools, like Terraform.

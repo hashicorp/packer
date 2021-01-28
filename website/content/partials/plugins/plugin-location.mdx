@@ -28,7 +28,7 @@ Using the following example :
         version = ">= 2.7.0"
         source = "azr/myawesomecloud"
       }
-      otherawesomecloud = ">= 2.7.0"
+      happycloud = ">= 2.7.0"
     }
 ```
 
@@ -36,7 +36,7 @@ The plugin getter will then install the binaries in the following location for a
 system with no `PACKER_PLUGIN_PATH` env var set.
 
 * `PACKER_HOME_DIR/plugins/github.com/azr/myawesomecloud/`
-* `PACKER_HOME_DIR/plugins/github.com/hashicorp/otherawesomecloud/`
+* `PACKER_HOME_DIR/plugins/github.com/hashicorp/happycloud/`
 
 During initialization, on a `darwin_amd64` system, Packer will look-up for the
 following files:
