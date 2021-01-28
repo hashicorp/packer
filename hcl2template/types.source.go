@@ -112,7 +112,7 @@ func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalConte
 	decoded, moreDiags := decodeHCL2Spec(body, ectx, builder)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
-		return nil, diags, nil
+		return builder, diags, nil
 	}
 
 	// In case of cty.Unknown values, this will write a equivalent placeholder of the same type
