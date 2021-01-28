@@ -1,23 +1,25 @@
-source "null" "example" {
+source "amazon-ebs" "example" {
   communicator = "none"
+  ami_name = "potato"
 }
 
 build {
-  sources = ["source.null.example"]
+  sources = ["source.amazon-ebs.example"]
 }
 
 packer {
   required_plugins {
     comment = {
       source  = "sylviamoss/comment"
-      version = "v0.2.14"
+      version = "v0.2.15"
     }
   }
 }
 
 build {
-  sources = ["source.null.example"]
+  sources = ["source.amazon-ebs.example"]
 
-  provisioner "comment-my-provisioner" {
+  provisioner "shell-local" {
+    inline = ["yo"]
   }
 }
