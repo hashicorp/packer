@@ -1,6 +1,8 @@
 source "amazon-ebs" "example" {
   communicator = "none"
+  source_ami = "potato"
   ami_name = "potato"
+  instance_type = "potato"
 }
 
 build {
@@ -19,6 +21,9 @@ packer {
 build {
   sources = ["source.amazon-ebs.example"]
 
+  provisioner "comment-my-provisioner" {
+
+  }
   provisioner "shell-local" {
     inline = ["yo"]
   }
