@@ -147,11 +147,6 @@ module.exports = [
     permanent: true,
   },
   {
-    source: '/docs/templates/hcl_templates/:path*',
-    destination: '/docs/templates/hcl_templates/:path*',
-    permanent: true,
-  },
-  {
     source: '/docs/templates/hcl_templates/:path*/overview',
     destination: '/docs/templates/hcl_templates/:path*',
     permanent: true,

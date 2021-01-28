@@ -146,52 +146,60 @@ func (p *PausedProvisioner) Prepare(raws ...interface{}) error {
 func (p *PausedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 
 	ui.Say(fmt.Sprintf("Pausing %s before the next provisioner...", p.PauseBefore))
-	minimumTimeForPauseUpdate := float64(10)
-	if p.PauseBefore.Seconds() < minimumTimeForPauseUpdate {
-		// Use a select to determine if we get cancelled during the wait
-		select {
-		case <-time.After(p.PauseBefore):
-		case <-ctx.Done():
-			return ctx.Err()
+
+	var err error
+	switch ui.(type) {
+	case *MachineReadableUi:
+		err = p.pausingNoUpdate(ctx)
+	default:
+		minimumTimeForPauseUpdate := float64(10)
+		if p.PauseBefore.Seconds() < minimumTimeForPauseUpdate {
+			err = p.pausingNoUpdate(ctx)
+		} else {
+			err = p.pausingWithUpdates(ctx, ui)
 		}
-	} else {
-		err := p.updatesWhilePausing(ctx, ui)
-		if err != nil {
-			return err
-		}
+	}
+	if err != nil {
+		return err
 	}
 
 	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
 }
 
-func (p *PausedProvisioner) updatesWhilePausing(ctx context.Context, ui packersdk.Ui) error {
+func (p *PausedProvisioner) pausingNoUpdate(ctx context.Context) error {
+	select {
+	case <-time.After(p.PauseBefore):
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+	return nil
+}
+
+func (p *PausedProvisioner) pausingWithUpdates(ctx context.Context, ui packersdk.Ui) error {
 	updateTime := 10
 	timeTicker := time.NewTicker(time.Duration(updateTime) * time.Second)
 	TotalTime := p.PauseBefore.Seconds()
-	tickerChannel := make(chan bool)
 	var err error
 	go func() {
 		for {
 			select {
 			case <-timeTicker.C:
 				TotalTime -= float64(updateTime)
-				ui.Say(fmt.Sprintf("%v seconds left until the next provisioner", TotalTime))
+				if TotalTime != 0 {
+					ui.Say(fmt.Sprintf("%v seconds left until the next provisioner", TotalTime))
+				}
+				if TotalTime < float64(updateTime) {
+					return
+				}
 			case <-ctx.Done():
 				err = ctx.Err()
-				return
-			case <-tickerChannel:
 				return
 			}
 		}
 	}()
 	time.Sleep(p.PauseBefore)
 	timeTicker.Stop()
-	if err != nil {
-		return err
-	}
-	tickerChannel <- true
-
-	return nil
+	return err
 }
 
 // RetriedProvisioner is a Provisioner implementation that retries

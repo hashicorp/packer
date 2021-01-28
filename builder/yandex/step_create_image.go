@@ -53,6 +53,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	if err != nil {
 		return StepHaltWithError(state, err)
 	}
+	ui.Say("Success image create...")
 
 	image, ok := resp.(*compute.Image)
 	if !ok {

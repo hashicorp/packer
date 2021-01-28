@@ -89,6 +89,15 @@ func TestParse_variables(t *testing.T) {
 						}},
 						Type: cty.String,
 					},
+					"supersecret": &Variable{
+						Name: "supersecret",
+						Values: []VariableAssignment{{
+							From:  "default",
+							Value: cty.StringVal("secretvar"),
+						}},
+						Type:      cty.String,
+						Sensitive: true,
+					},
 				},
 			},
 			false, false,
@@ -128,6 +137,28 @@ func TestParse_variables(t *testing.T) {
 							Value: cty.BoolVal(false),
 						}},
 						Type: cty.Bool,
+					},
+				},
+			},
+			true, true,
+			[]packersdk.Build{},
+			false,
+		},
+		{"duplicate local block",
+			defaultParser,
+			parseTestArgs{"testdata/variables/duplicate_locals", nil, nil},
+			&PackerConfig{
+				Basedir: "testdata/variables/duplicate_locals",
+				LocalVariables: Variables{
+					"sensible": &Variable{
+						Values: []VariableAssignment{
+							{
+								From:  "default",
+								Value: cty.StringVal("something"),
+							},
+						},
+						Type: cty.String,
+						Name: "sensible",
 					},
 				},
 			},

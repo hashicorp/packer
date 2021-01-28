@@ -150,10 +150,20 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*LocalBlock, hcl.Diag
 
 	content, moreDiags := f.Body.Content(configSchema)
 	diags = append(diags, moreDiags...)
-	var locals []*LocalBlock
+
+	locals := c.LocalBlocks
 
 	for _, block := range content.Blocks {
 		switch block.Type {
+		case localLabel:
+			l, moreDiags := decodeLocalBlock(block, locals)
+			diags = append(diags, moreDiags...)
+			if l != nil {
+				locals = append(locals, l)
+			}
+			if moreDiags.HasErrors() {
+				return locals, diags
+			}
 		case localsLabel:
 			attrs, moreDiags := block.Body.JustAttributes()
 			diags = append(diags, moreDiags...)
@@ -166,7 +176,7 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*LocalBlock, hcl.Diag
 						Subject:  attr.NameRange.Ptr(),
 						Context:  block.DefRange.Ptr(),
 					})
-					return nil, diags
+					return locals, diags
 				}
 				locals = append(locals, &LocalBlock{
 					Name: name,
@@ -176,6 +186,7 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*LocalBlock, hcl.Diag
 		}
 	}
 
+	c.LocalBlocks = locals
 	return locals, diags
 }
 
@@ -221,14 +232,14 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 
 func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
-
 	value, moreDiags := local.Expr.Value(c.EvalContext(nil))
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return diags
 	}
 	c.LocalVariables[local.Name] = &Variable{
-		Name: local.Name,
+		Name:      local.Name,
+		Sensitive: local.Sensitive,
 		Values: []VariableAssignment{{
 			Value: value,
 			Expr:  local.Expr,

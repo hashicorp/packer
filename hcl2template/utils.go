@@ -124,3 +124,64 @@ func PrintableCtyValue(v cty.Value) string {
 	str := repl.FormatResult(gval)
 	return str
 }
+
+func ConvertPluginConfigValueToHCLValue(v interface{}) (cty.Value, error) {
+	var buildValue cty.Value
+	switch v := v.(type) {
+	case bool:
+		buildValue = cty.BoolVal(v)
+	case string:
+		buildValue = cty.StringVal(v)
+	case uint8:
+		buildValue = cty.NumberUIntVal(uint64(v))
+	case float64:
+		buildValue = cty.NumberFloatVal(v)
+	case int64:
+		buildValue = cty.NumberIntVal(v)
+	case uint64:
+		buildValue = cty.NumberUIntVal(v)
+	case []string:
+		vals := make([]cty.Value, len(v))
+		for i, ev := range v {
+			vals[i] = cty.StringVal(ev)
+		}
+		if len(vals) == 0 {
+			buildValue = cty.ListValEmpty(cty.String)
+		} else {
+			buildValue = cty.ListVal(vals)
+		}
+	case []uint8:
+		vals := make([]cty.Value, len(v))
+		for i, ev := range v {
+			vals[i] = cty.NumberUIntVal(uint64(ev))
+		}
+		if len(vals) == 0 {
+			buildValue = cty.ListValEmpty(cty.Number)
+		} else {
+			buildValue = cty.ListVal(vals)
+		}
+	case []int64:
+		vals := make([]cty.Value, len(v))
+		for i, ev := range v {
+			vals[i] = cty.NumberIntVal(ev)
+		}
+		if len(vals) == 0 {
+			buildValue = cty.ListValEmpty(cty.Number)
+		} else {
+			buildValue = cty.ListVal(vals)
+		}
+	case []uint64:
+		vals := make([]cty.Value, len(v))
+		for i, ev := range v {
+			vals[i] = cty.NumberUIntVal(ev)
+		}
+		if len(vals) == 0 {
+			buildValue = cty.ListValEmpty(cty.Number)
+		} else {
+			buildValue = cty.ListVal(vals)
+		}
+	default:
+		return cty.Value{}, fmt.Errorf("unhandled buildvar type: %T", v)
+	}
+	return buildValue, nil
+}

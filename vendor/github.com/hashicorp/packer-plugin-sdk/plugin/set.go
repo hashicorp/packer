@@ -27,6 +27,7 @@ const DEFAULT_NAME = "-packer-default-plugin-name-"
 type Set struct {
 	version        string
 	sdkVersion     string
+	apiVersion     string
 	Builders       map[string]packersdk.Builder
 	PostProcessors map[string]packersdk.PostProcessor
 	Provisioners   map[string]packersdk.Provisioner
@@ -37,6 +38,7 @@ type Set struct {
 type SetDescription struct {
 	Version        string   `json:"version"`
 	SDKVersion     string   `json:"sdk_version"`
+	APIVersion     string   `json:"api_version"`
 	Builders       []string `json:"builders"`
 	PostProcessors []string `json:"post_processors"`
 	Provisioners   []string `json:"provisioners"`
@@ -48,9 +50,9 @@ type SetDescription struct {
 ////
 
 func NewSet() *Set {
-	sdkVersion := pluginVersion.InitializePluginVersion(pluginVersion.Version, pluginVersion.VersionPrerelease)
 	return &Set{
-		sdkVersion:     sdkVersion.String(),
+		sdkVersion:     pluginVersion.SDKVersion.String(),
+		apiVersion:     APIVersion,
 		Builders:       map[string]packersdk.Builder{},
 		PostProcessors: map[string]packersdk.PostProcessor{},
 		Provisioners:   map[string]packersdk.Provisioner{},
@@ -153,6 +155,7 @@ func (i *Set) description() SetDescription {
 	return SetDescription{
 		Version:        i.version,
 		SDKVersion:     i.sdkVersion,
+		APIVersion:     i.apiVersion,
 		Builders:       i.buildersDescription(),
 		PostProcessors: i.postProcessorsDescription(),
 		Provisioners:   i.provisionersDescription(),

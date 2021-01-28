@@ -76,7 +76,7 @@ type BlockDevice struct {
 	// See the documentation on
 	// [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
 	// for more information
-	IOPS int64 `mapstructure:"iops" required:"false"`
+	IOPS *int64 `mapstructure:"iops" required:"false"`
 	// Suppresses the specified device included in the block device mapping of
 	// the AMI.
 	NoDevice bool `mapstructure:"no_device" required:"false"`
@@ -86,7 +86,7 @@ type BlockDevice struct {
 	// See the documentation on
 	// [Throughput](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
 	// for more information
-	Throughput int64 `mapstructure:"throughput" required:"false"`
+	Throughput *int64 `mapstructure:"throughput" required:"false"`
 	// The virtual device name. See the documentation on Block Device Mapping
 	// for more information.
 	VirtualName string `mapstructure:"virtual_name" required:"false"`
@@ -150,12 +150,12 @@ func (blockDevice BlockDevice) BuildEC2BlockDeviceMapping() *ec2.BlockDeviceMapp
 
 	switch blockDevice.VolumeType {
 	case "io1", "io2", "gp3":
-		ebsBlockDevice.Iops = aws.Int64(blockDevice.IOPS)
+		ebsBlockDevice.Iops = blockDevice.IOPS
 	}
 
 	// Throughput is only valid for gp3 types
 	if blockDevice.VolumeType == "gp3" {
-		ebsBlockDevice.Throughput = aws.Int64(blockDevice.Throughput)
+		ebsBlockDevice.Throughput = blockDevice.Throughput
 	}
 
 	// You cannot specify Encrypted if you specify a Snapshot ID
@@ -191,28 +191,28 @@ func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
 	}
 
 	if ratio, ok := iopsRatios[b.VolumeType]; b.VolumeSize != 0 && ok {
-		if b.IOPS/b.VolumeSize > ratio {
+		if b.IOPS != nil && (*b.IOPS/b.VolumeSize > ratio) {
 			return fmt.Errorf("%s: the maximum ratio of provisioned IOPS to requested volume size "+
 				"(in GiB) is %v:1 for %s volumes", b.DeviceName, ratio, b.VolumeType)
 		}
 
-		if b.IOPS < minIops || b.IOPS > maxIops {
+		if b.IOPS != nil && (*b.IOPS < minIops || *b.IOPS > maxIops) {
 			return fmt.Errorf("IOPS must be between %d and %d for device %s",
 				minIops, maxIops, b.DeviceName)
 		}
 	}
 
 	if b.VolumeType == "gp3" {
-		if b.Throughput < minThroughput || b.Throughput > maxThroughput {
+		if b.Throughput != nil && (*b.Throughput < minThroughput || *b.Throughput > maxThroughput) {
 			return fmt.Errorf("Throughput must be between %d and %d for device %s",
 				minThroughput, maxThroughput, b.DeviceName)
 		}
 
-		if b.IOPS < minIopsGp3 || b.IOPS > maxIopsGp3 {
+		if b.IOPS != nil && (*b.IOPS < minIopsGp3 || *b.IOPS > maxIopsGp3) {
 			return fmt.Errorf("IOPS must be between %d and %d for device %s",
 				minIopsGp3, maxIopsGp3, b.DeviceName)
 		}
-	} else if b.Throughput > 0 {
+	} else if b.Throughput != nil {
 		return fmt.Errorf("Throughput is not available for device %s",
 			b.DeviceName)
 	}

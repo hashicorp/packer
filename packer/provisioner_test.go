@@ -1,10 +1,14 @@
+// +build !race
+
 package packer
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"testing"
 	"time"
 
@@ -145,18 +149,74 @@ func pausedTestProvisionor(startTime time.Time, waitTime time.Duration) *PausedP
 	}
 }
 
+// TODO update this test as well to make sure that updates are not happening when less than 10 seconds
 func TestPausedProvisionerProvision_waits(t *testing.T) {
 	startTime := time.Now()
 	waitTime := 50 * time.Millisecond
 
+	ui := new(packersdk.MockUi)
 	prov := pausedTestProvisionor(startTime, waitTime)
-	err := prov.Provision(context.Background(), testUi(), new(packersdk.MockCommunicator), make(map[string]interface{}))
+	err := prov.Provision(context.Background(), ui, new(packersdk.MockCommunicator), make(map[string]interface{}))
 
 	if err != nil {
 		t.Fatalf("prov failed: %v", err)
 	}
+
+	expectedMessages := []string{
+		fmt.Sprintf("Pausing %s before the next provisioner...", waitTime),
+	}
+
+	if ui.SayMessages[0].Message != expectedMessages[0] {
+		t.Fatalf("expected: %s, got: %s", expectedMessages[0], ui.SayMessages[0].Message)
+	}
+
+	if len(ui.SayMessages) != len(expectedMessages) {
+		t.Fatalf(
+			"length of expected messages different than messages sent. Expected: %v, got: %v, messages: %v",
+			len(ui.SayMessages),
+			len(expectedMessages),
+			ui.SayMessages)
+	}
 }
 
+func TestPausedProvisionerProvision_waits_MachineReadableUi(t *testing.T) {
+	startTime := time.Now()
+	waitTime := 15 * time.Second
+
+	var buffer bytes.Buffer
+	prov := pausedTestProvisionor(startTime, waitTime)
+	ui := MachineReadableUi{
+		Writer: &buffer,
+	}
+	err := prov.Provision(context.Background(), &ui, new(packersdk.MockCommunicator), make(map[string]interface{}))
+
+	if err != nil {
+		t.Fatalf("prov failed: %v", err)
+	}
+
+	bufferString := buffer.String()
+	splitByLine := strings.Split(bufferString, "\n")
+	fmt.Println(fmt.Sprintf("length of splitByLine: %v", len(splitByLine)))
+
+	if len(splitByLine) != 2 {
+		t.Fatalf(fmt.Sprintf("Too many lines in buffer: %v, expected: %v,  buffer: %v, ", len(splitByLine), 2, bufferString))
+	}
+
+	// First message should be the default message
+	splitByComma := strings.Split(splitByLine[0], ",")
+	// because of the messages coming in via ui.Say function, the message is the 4th entry per line in buffer
+	message := splitByComma[4]
+	firstMessage := "Pausing 15s before the next provisioner..."
+	if message != firstMessage {
+		t.Fatalf(fmt.Sprintf("First message does not match what is expected. Expected: %v, got: %v", firstMessage, message))
+	}
+
+	if splitByLine[1] != "" {
+		t.Fatalf(fmt.Sprintf("Second message in buffer is not empty:  %v", splitByLine[1]))
+	}
+}
+
+// The test contains a data race.
 func TestPausedProvisionerProvision_waits_with_updates(t *testing.T) {
 	startTime := time.Now()
 	waitTime := 30 * time.Second
@@ -170,7 +230,6 @@ func TestPausedProvisionerProvision_waits_with_updates(t *testing.T) {
 		t.Fatalf("prov failed: %v", err)
 	}
 
-	// TODO have to put check to get timestamp of when these messages were posted and verify that this is working as intended
 	expectedMessages := []string{
 		fmt.Sprintf("Pausing %s before the next provisioner...", waitTime),
 		"20 seconds left until the next provisioner",
@@ -179,6 +238,14 @@ func TestPausedProvisionerProvision_waits_with_updates(t *testing.T) {
 
 	if ui.SayMessages[0].Message != expectedMessages[0] {
 		t.Fatalf("expected: %s, got: %s", expectedMessages[0], ui.SayMessages[0].Message)
+	}
+
+	if len(ui.SayMessages) != len(expectedMessages) {
+		t.Fatalf(
+			"length of expected messages different than messages sent. Expected: %v, got: %v, messages: %v",
+			len(ui.SayMessages),
+			len(expectedMessages),
+			ui.SayMessages)
 	}
 
 	lastTime := currentTime
