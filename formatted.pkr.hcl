@@ -6,7 +6,12 @@ source "amazon-ebs" "example" {
 }
 
 build {
+  name = "my-provisioners-are-cooler"
   sources = ["source.amazon-ebs.example"]
+
+  provisioner "comment-that-works" {
+
+  }
 }
 
 packer {
@@ -14,6 +19,10 @@ packer {
     comment = {
       source  = "sylviamoss/comment"
       version = "v0.2.15"
+    }
+    comment-that-works = {
+      source  = "sylviamoss/comment"
+      version = "v0.2.19"
     }
   }
 }
