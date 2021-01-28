@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/pathing"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 )
@@ -252,7 +253,9 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		if builderName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
 		}
-		c.Builders.Set(key, c.Client(pluginPath, "start", "builder", builderName).Builder)
+		c.Builders.Set(key, func() (packersdk.Builder, error) {
+			return c.Client(pluginPath, "start", "builder", builderName).Builder()
+		})
 	}
 
 	if len(desc.Builders) > 0 {
@@ -265,7 +268,9 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		if postProcessorName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
 		}
-		c.PostProcessors.Set(key, c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor)
+		c.PostProcessors.Set(key, func() (packersdk.PostProcessor, error) {
+			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
+		})
 	}
 
 	if len(desc.PostProcessors) > 0 {
@@ -278,7 +283,9 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		if provisionerName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
 		}
-		c.Provisioners.Set(key, c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner)
+		c.Provisioners.Set(key, func() (packersdk.Provisioner, error) {
+			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
+		})
 	}
 	if len(desc.Provisioners) > 0 {
 		log.Printf("found external %v provisioner from %s plugin", desc.Provisioners, pluginName)
@@ -286,7 +293,9 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 
 	for _, datasourceName := range desc.Datasources {
 		datasourceName := datasourceName // copy to avoid pointer overwrite issue
-		c.DataSources.Set(pluginPrefix+datasourceName, c.Client(pluginPath, "start", "datasource", datasourceName).Datasource)
+		c.DataSources.Set(pluginPrefix+datasourceName, func() (packersdk.Datasource, error) {
+			return c.Client(pluginPath, "start", "datasource", datasourceName).Datasource()
+		})
 	}
 	if len(desc.Datasources) > 0 {
 		log.Printf("found external %v datasource from %s plugin", desc.Datasources, pluginName)

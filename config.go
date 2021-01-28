@@ -93,13 +93,19 @@ func (c *config) loadSingleComponent(path string) (string, error) {
 	switch {
 	case strings.HasPrefix(pluginName, "packer-builder-"):
 		pluginName = pluginName[len("packer-builder-"):]
-		c.Plugins.Builders.Set(pluginName, c.Plugins.Client(path).Builder)
+		c.Plugins.Builders.Set(pluginName, func() (packersdk.Builder, error) {
+			return c.Plugins.Client(path).Builder()
+		})
 	case strings.HasPrefix(pluginName, "packer-post-processor-"):
 		pluginName = pluginName[len("packer-post-processor-"):]
-		c.Plugins.PostProcessors.Set(pluginName, c.Plugins.Client(path).PostProcessor)
+		c.Plugins.PostProcessors.Set(pluginName, func() (packersdk.PostProcessor, error) {
+			return c.Plugins.Client(path).PostProcessor()
+		})
 	case strings.HasPrefix(pluginName, "packer-provisioner-"):
 		pluginName = pluginName[len("packer-provisioner-"):]
-		c.Plugins.Provisioners.Set(pluginName, c.Plugins.Client(path).Provisioner)
+		c.Plugins.Provisioners.Set(pluginName, func() (packersdk.Provisioner, error) {
+			return c.Plugins.Client(path).Provisioner()
+		})
 	}
 
 	return pluginName, nil
@@ -146,7 +152,9 @@ func (c *config) discoverInternalComponents() error {
 		if !c.Plugins.Builders.Has(builder) {
 			bin := fmt.Sprintf("%s%splugin%spacker-builder-%s",
 				packerPath, PACKERSPACE, PACKERSPACE, builder)
-			c.Plugins.Builders.Set(builder, c.Plugins.Client(bin).Builder)
+			c.Plugins.Builders.Set(builder, func() (packersdk.Builder, error) {
+				return c.Plugins.Client(bin).Builder()
+			})
 		}
 	}
 
@@ -155,7 +163,9 @@ func (c *config) discoverInternalComponents() error {
 		if !c.Plugins.Provisioners.Has(provisioner) {
 			bin := fmt.Sprintf("%s%splugin%spacker-provisioner-%s",
 				packerPath, PACKERSPACE, PACKERSPACE, provisioner)
-			c.Plugins.Provisioners.Set(provisioner, c.Plugins.Client(bin).Provisioner)
+			c.Plugins.Provisioners.Set(provisioner, func() (packersdk.Provisioner, error) {
+				return c.Plugins.Client(bin).Provisioner()
+			})
 		}
 	}
 
@@ -164,7 +174,9 @@ func (c *config) discoverInternalComponents() error {
 		if !c.Plugins.PostProcessors.Has(postProcessor) {
 			bin := fmt.Sprintf("%s%splugin%spacker-post-processor-%s",
 				packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
-			c.Plugins.PostProcessors.Set(postProcessor, c.Plugins.Client(bin).PostProcessor)
+			c.Plugins.PostProcessors.Set(postProcessor, func() (packersdk.PostProcessor, error) {
+				return c.Plugins.Client(bin).PostProcessor()
+			})
 		}
 	}
 
@@ -173,7 +185,9 @@ func (c *config) discoverInternalComponents() error {
 		if !c.Plugins.DataSources.Has(dataSource) {
 			bin := fmt.Sprintf("%s%splugin%spacker-datasource-%s",
 				packerPath, PACKERSPACE, PACKERSPACE, dataSource)
-			c.Plugins.DataSources.Set(dataSource, c.Plugins.Client(bin).Datasource)
+			c.Plugins.DataSources.Set(dataSource, func() (packersdk.Datasource, error) {
+				return c.Plugins.Client(bin).Datasource()
+			})
 		}
 	}
 
