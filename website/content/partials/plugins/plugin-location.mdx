@@ -24,27 +24,28 @@ colon (`:`) on other systems. The order priority will be kept.
 Using the following example :
 ```hcl
     required_plugins {
-      aws = {
+      myawesomecloud = {
         version = ">= 2.7.0"
-        source = "azr/aws"
+        source = "azr/myawesomecloud"
       }
-      azure = ">= 2.7.0"
+      otherawesomecloud = ">= 2.7.0"
     }
 ```
 
 The plugin getter will then install the binaries in the following location for a
 system with no `PACKER_PLUGIN_PATH` env var set.
 
-* `PACKER_HOME_DIR/plugins/github.com/azr/aws/`
-* `PACKER_HOME_DIR/plugins/github.com/hashicorp/azure/`
+* `PACKER_HOME_DIR/plugins/github.com/azr/myawesomecloud/`
+* `PACKER_HOME_DIR/plugins/github.com/hashicorp/otherawesomecloud/`
 
 During initialization, on a `darwin_amd64` system, Packer will look-up for the
 following files:
 
-* `PACKER_EXEC_DIR/github.com/azr/aws/packer-plugin-aws_*_darwin_amd64_x5`
-* `./github.com/azr/aws/packer-plugin-aws_*_darwin_amd64_x5`
-* `PACKER_HOME_DIR/plugins/github.com/azr/aws/packer-plugin-aws_*_darwin_amd64_x5`
-* `PACKER_PLUGIN_PATH/github.com/azr/aws/packer-plugin-aws_*_darwin_amd64_x5`
+* `PACKER_EXEC_DIR/github.com/azr/myawesomecloud/packer-plugin-myawesomecloud_*_darwin_amd64_x5`
+* `./github.com/azr/myawesomecloud/packer-plugin-myawesomecloud_*_darwin_amd64_x5`
+* `PACKER_HOME_DIR/plugins/github.com/azr/myawesomecloud/packer-plugin-myawesomecloud_*_darwin_amd64_x5`
+* `PACKER_PLUGIN_PATH/github.com/azr/myawesomecloud/packer-plugin-myawesomecloud_*_darwin_amd64_x5`
+* `./packer-plugin-myawesomecloud`
 
 The first plugin-name/version files found will take precedence.
 
