@@ -83,9 +83,8 @@ Each plugin has two identifiers:
 Local names allow you to access the components of a plugin and must be unique
 per configuration.
 
-Here using the previous example if the plugin behing the required `azr/aws`
-source defined an `ebs` builder, this builder will be made available by using a
-`aws-ebs` source :
+Here using the previous example if the required plugin `azr/aws` defined an 
+`ebs` builder, this builder will be made available by using a `aws-ebs` source block :
 
 ```hcl
 source "aws-ebs" "example" {...}
