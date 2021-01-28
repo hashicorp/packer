@@ -402,6 +402,8 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 	}
 
 	for _, version := range versions {
+		//TODO(azr): split in its own InstallVersion(version, opts) function
+
 		outputFolder := filepath.Join(
 			// Pick last folder as it's the one with the highest priority
 			opts.InFolders[len(opts.InFolders)-1],
