@@ -14,3 +14,10 @@ packer {
     }
   }
 }
+
+build {
+  sources = ["source.null.example"]
+
+  provisioner "comment-my-provisioner" {
+  }
+}
