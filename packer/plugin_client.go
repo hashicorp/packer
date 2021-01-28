@@ -326,7 +326,9 @@ func (c *PluginClient) Start() (net.Addr, error) {
 		if len(parts) == 3 {
 			// In protocol version 4 and before, the protocol only had a Major
 			// version
-			err = fmt.Errorf("This plugin protocol was deprecated, please use a newer version of this plugin. Or an older version of Packer with this plugin.")
+			err = fmt.Errorf("The protocol of this plugin (protocol version 4 " +
+				"and lower) was deprecated, please use a newer version of this plugin." +
+				"Or use an older version of Packer (pre 1.7) with this plugin.")
 			return nil, err
 		}
 		if len(parts) < 4 {
