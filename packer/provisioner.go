@@ -177,29 +177,35 @@ func (p *PausedProvisioner) pausingNoUpdate(ctx context.Context) error {
 
 func (p *PausedProvisioner) pausingWithUpdates(ctx context.Context, ui packersdk.Ui) error {
 	updateTime := 10
-	timeTicker := time.NewTicker(time.Duration(updateTime) * time.Second)
-	TotalTime := p.PauseBefore.Seconds()
+	ticker := time.NewTicker(time.Duration(updateTime) * time.Second)
+	defer ticker.Stop()
+	totalTime := p.PauseBefore.Seconds()
+
+	ctx, cancel := context.WithTimeout(context.Background(), p.PauseBefore)
+	defer cancel()
+
 	var err error
-	go func() {
-		for {
-			select {
-			case <-timeTicker.C:
-				TotalTime -= float64(updateTime)
-				if TotalTime != 0 {
-					ui.Say(fmt.Sprintf("%v seconds left until the next provisioner", TotalTime))
-				}
-				if TotalTime < float64(updateTime) {
-					return
-				}
-			case <-ctx.Done():
-				err = ctx.Err()
-				return
+	for {
+		select {
+		case <-ctx.Done():
+			err = ctx.Err()
+			if err != nil && isTimeRemaining(totalTime) {
+				return err
+			}
+			return nil
+		case <-ticker.C:
+			totalTime -= float64(updateTime)
+			_, ok := ctx.Deadline()
+			if ok && isTimeRemaining(totalTime) {
+				ui.Say(fmt.Sprintf("%v seconds left until the next provisioner", totalTime))
 			}
 		}
-	}()
-	time.Sleep(p.PauseBefore)
-	timeTicker.Stop()
-	return err
+	}
+}
+
+func isTimeRemaining(totalTime float64) bool {
+	result := totalTime != 0
+	return result
 }
 
 // RetriedProvisioner is a Provisioner implementation that retries

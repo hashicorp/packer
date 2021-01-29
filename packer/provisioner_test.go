@@ -1,5 +1,3 @@
-// +build !race
-
 package packer
 
 import (
@@ -196,7 +194,6 @@ func TestPausedProvisionerProvision_waits_MachineReadableUi(t *testing.T) {
 
 	bufferString := buffer.String()
 	splitByLine := strings.Split(bufferString, "\n")
-	fmt.Println(fmt.Sprintf("length of splitByLine: %v", len(splitByLine)))
 
 	if len(splitByLine) != 2 {
 		t.Fatalf(fmt.Sprintf("Too many lines in buffer: %v, expected: %v,  buffer: %v, ", len(splitByLine), 2, bufferString))
