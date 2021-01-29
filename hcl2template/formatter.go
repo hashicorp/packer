@@ -102,9 +102,8 @@ func (f *HCL2Formatter) Format(path string) (int, hcl.Diagnostics) {
 					tempBytesModified, tempDiags = f.Format(filename)
 					bytesModified += tempBytesModified
 					diags = diags.Extend(tempDiags)
-				} else {
-					continue
 				}
+				continue
 			}
 			if isHcl2FileOrVarFile(filename) {
 				bytesModified, diags = f.formatFile(filename, diags, bytesModified)
