@@ -76,7 +76,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 	}
 
 	if runtime.GOOS == "windows" && opts.Ext == "" {
-		opts.Ext = ".exe"
+		opts.BinaryInstallationOptions.Ext = ".exe"
 	}
 
 	log.Printf("[TRACE] init: %#v", opts)

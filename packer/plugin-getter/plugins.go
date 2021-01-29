@@ -463,7 +463,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 						Checksummer: checksummer,
 					}
 					expectedZipFilename := checksum.Filename
-					expectedBinaryFilename := strings.TrimSuffix(expectedZipFilename, filepath.Ext(expectedZipFilename))
+					expectedBinaryFilename := strings.TrimSuffix(expectedZipFilename, filepath.Ext(expectedZipFilename)) + opts.BinaryInstallationOptions.Ext
 
 					for _, outputFolder := range opts.InFolders {
 						potentialOutputFilename := filepath.Join(

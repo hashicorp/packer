@@ -64,6 +64,10 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 		},
 	}
 
+	if runtime.GOOS == "windows" && opts.Ext == "" {
+		opts.BinaryInstallationOptions.Ext = ".exe"
+	}
+
 	pluginReqs, diags := cfg.PluginRequirements()
 	if diags.HasErrors() {
 		return diags
