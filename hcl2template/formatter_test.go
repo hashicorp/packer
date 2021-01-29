@@ -38,20 +38,352 @@ func TestHCL2Formatter_Format(t *testing.T) {
 	}
 }
 
+type FormatterRecursiveTestCase struct {
+	TestCaseName             string
+	Recursion                bool
+	TopLevelFilePreFormat    []byte
+	LowerLevelFilePreFormat  []byte
+	TopLevelFilePostFormat   []byte
+	LowerLevelFilePostFormat []byte
+}
+
 func TestHCL2Formatter_Recursive(t *testing.T) {
+	unformattedData := []byte(`
+// starts resources to provision them.
+build {
+    sources = [
+        "source.amazon-ebs.ubuntu-1604",
+        "source.virtualbox-iso.ubuntu-1204",
+    ]
+
+    provisioner "shell" {
+        string  = coalesce(null, "", "string")
+        int     = "${41 + 1}"
+        int64   = "${42 + 1}"
+        bool    = "true"
+        trilean = true
+        duration = "${9 + 1}s"
+        map_string_string = {
+            a = "b"
+            c = "d"
+        }
+        slice_string = [
+            "a",
+            "b",
+            "c",
+        ]
+        slice_slice_string = [
+            ["a","b"],
+            ["c","d"]
+        ]
+
+        nested {
+            string  = "string"
+            int     = 42
+            int64   = 43
+            bool    = true
+            trilean = true
+            duration = "10s"
+            map_string_string = {
+                a = "b"
+                c = "d"
+            }
+            slice_string = [
+                "a",
+                "b",
+                "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
+            ]
+        }
+
+        nested_slice {
+        }
+    }
+
+    provisioner "file" {
+        string  = "string"
+        int     = 42
+        int64   = 43
+        bool    = true
+        trilean = true
+        duration          = "10s"
+        map_string_string = {
+            a = "b"
+            c = "d"
+        }
+        slice_string = [
+            "a",
+            "b",
+            "c",
+        ]
+        slice_slice_string = [
+            ["a","b"],
+            ["c","d"]
+        ]
+
+        nested {
+            string   = "string"
+            int      = 42
+            int64    = 43
+            bool     = true
+            trilean  = true
+            duration = "10s"
+            map_string_string = {
+                a = "b"
+                c = "d"
+            }
+            slice_string = [
+                "a",
+                "b",
+                "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
+            ]
+        }
+
+        nested_slice {
+        }
+    }
+
+    post-processor "amazon-import" {
+        string   = "string"
+        int      = 42
+        int64    = 43
+        bool     = true
+        trilean  = true
+        duration = "10s"
+        map_string_string = {
+            a = "b"
+            c = "d"
+        }
+        slice_string = [
+            "a",
+            "b",
+            "c",
+        ]
+        slice_slice_string = [
+            ["a","b"],
+            ["c","d"]
+        ]
+
+        nested {
+            string   = "string"
+            int      = 42
+            int64    = 43
+            bool     = true
+            trilean  = true
+            duration = "10s"
+            map_string_string = {
+                a = "b"
+                c = "d"
+            }
+            slice_string = [
+                "a",
+                "b",
+                "c",
+            ]
+            slice_slice_string = [
+                ["a","b"],
+                ["c","d"]
+            ]
+        }
+
+        nested_slice {
+        }
+    }
+}
+`)
+
+	formattedData := []byte(`
+// starts resources to provision them.
+build {
+  sources = [
+    "source.amazon-ebs.ubuntu-1604",
+    "source.virtualbox-iso.ubuntu-1204",
+  ]
+
+  provisioner "shell" {
+    string   = coalesce(null, "", "string")
+    int      = "${41 + 1}"
+    int64    = "${42 + 1}"
+    bool     = "true"
+    trilean  = true
+    duration = "${9 + 1}s"
+    map_string_string = {
+      a = "b"
+      c = "d"
+    }
+    slice_string = [
+      "a",
+      "b",
+      "c",
+    ]
+    slice_slice_string = [
+      ["a", "b"],
+      ["c", "d"]
+    ]
+
+    nested {
+      string   = "string"
+      int      = 42
+      int64    = 43
+      bool     = true
+      trilean  = true
+      duration = "10s"
+      map_string_string = {
+        a = "b"
+        c = "d"
+      }
+      slice_string = [
+        "a",
+        "b",
+        "c",
+      ]
+      slice_slice_string = [
+        ["a", "b"],
+        ["c", "d"]
+      ]
+    }
+
+    nested_slice {
+    }
+  }
+
+  provisioner "file" {
+    string   = "string"
+    int      = 42
+    int64    = 43
+    bool     = true
+    trilean  = true
+    duration = "10s"
+    map_string_string = {
+      a = "b"
+      c = "d"
+    }
+    slice_string = [
+      "a",
+      "b",
+      "c",
+    ]
+    slice_slice_string = [
+      ["a", "b"],
+      ["c", "d"]
+    ]
+
+    nested {
+      string   = "string"
+      int      = 42
+      int64    = 43
+      bool     = true
+      trilean  = true
+      duration = "10s"
+      map_string_string = {
+        a = "b"
+        c = "d"
+      }
+      slice_string = [
+        "a",
+        "b",
+        "c",
+      ]
+      slice_slice_string = [
+        ["a", "b"],
+        ["c", "d"]
+      ]
+    }
+
+    nested_slice {
+    }
+  }
+
+  post-processor "amazon-import" {
+    string   = "string"
+    int      = 42
+    int64    = 43
+    bool     = true
+    trilean  = true
+    duration = "10s"
+    map_string_string = {
+      a = "b"
+      c = "d"
+    }
+    slice_string = [
+      "a",
+      "b",
+      "c",
+    ]
+    slice_slice_string = [
+      ["a", "b"],
+      ["c", "d"]
+    ]
+
+    nested {
+      string   = "string"
+      int      = 42
+      int64    = 43
+      bool     = true
+      trilean  = true
+      duration = "10s"
+      map_string_string = {
+        a = "b"
+        c = "d"
+      }
+      slice_string = [
+        "a",
+        "b",
+        "c",
+      ]
+      slice_slice_string = [
+        ["a", "b"],
+        ["c", "d"]
+      ]
+    }
+
+    nested_slice {
+    }
+  }
+}
+`)
+
 	var buf bytes.Buffer
 	f := NewHCL2Formatter()
 	f.Output = &buf
 	f.Write = true
-	f.Recursive = true
 
-	unformattedData, err := ioutil.ReadFile("testdata/format/unformatted.pkr.hcl")
-	if err != nil {
-		t.Fatalf("failed to open the unformatted fixture %s", err)
+	recursiveTestCases := []FormatterRecursiveTestCase{
+		{
+			TestCaseName:             "With Recursive flag on",
+			Recursion:                true,
+			TopLevelFilePreFormat:    unformattedData,
+			LowerLevelFilePreFormat:  unformattedData,
+			TopLevelFilePostFormat:   formattedData,
+			LowerLevelFilePostFormat: formattedData,
+		},
+		{
+			TestCaseName:             "With Recursive flag off",
+			Recursion:                false,
+			TopLevelFilePreFormat:    unformattedData,
+			LowerLevelFilePreFormat:  unformattedData,
+			TopLevelFilePostFormat:   formattedData,
+			LowerLevelFilePostFormat: unformattedData,
+		},
 	}
 
+	for _, tc := range recursiveTestCases {
+		executeRecursiveTestCase(t, tc, f)
+	}
+}
+
+func executeRecursiveTestCase(t *testing.T, tc FormatterRecursiveTestCase, f *HCL2Formatter) {
+	f.Recursive = tc.Recursion
+
 	var subDir string
-	subDir, err = ioutil.TempDir("testdata/format", "sub_dir")
+	subDir, err := ioutil.TempDir("testdata/format", "sub_dir")
 	if err != nil {
 		t.Fatalf("failed to create sub level recurisve directory for test %s", err)
 	}
@@ -70,7 +402,7 @@ func TestHCL2Formatter_Recursive(t *testing.T) {
 	}
 	defer os.Remove(tf.Name())
 
-	_, _ = tf.Write(unformattedData)
+	_, _ = tf.Write(tc.TopLevelFilePreFormat)
 	tf.Close()
 
 	subTf, err := ioutil.TempFile(superSubDir, "*.pkr.hcl")
@@ -79,7 +411,7 @@ func TestHCL2Formatter_Recursive(t *testing.T) {
 	}
 	defer os.Remove(subTf.Name())
 
-	_, _ = subTf.Write(unformattedData)
+	_, _ = subTf.Write(tc.LowerLevelFilePreFormat)
 	subTf.Close()
 
 	_, diags := f.Format(subDir)
@@ -87,17 +419,11 @@ func TestHCL2Formatter_Recursive(t *testing.T) {
 		t.Fatalf("the call to Format failed unexpectedly %s", diags.Error())
 	}
 
-	formattedData, err := ioutil.ReadFile("testdata/format/formatted.pkr.hcl")
-	if err != nil {
-		t.Fatalf("failed to open the formatted fixture %s", err)
-	}
-
-	validateFileIsFormatted(t, formattedData, tf)
-	validateFileIsFormatted(t, formattedData, subTf)
+	validateFileIsFormatted(t, tc.TopLevelFilePostFormat, tf)
+	validateFileIsFormatted(t, tc.LowerLevelFilePostFormat, subTf)
 }
 
 func validateFileIsFormatted(t *testing.T, formattedData []byte, testFile *os.File) {
-	//lets re-read the tempfile which should now be formatted
 	data, err := ioutil.ReadFile(testFile.Name())
 	if err != nil {
 		t.Fatalf("failed to open the newly formatted fixture %s", err)

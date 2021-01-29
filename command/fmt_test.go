@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -54,25 +55,63 @@ func TestFmt_unfomattedTemlateDirectory(t *testing.T) {
 	}
 }
 
+type RecursiveTestCase struct {
+	TestCaseName             string
+	Recursion                bool
+	TopLevelFilePreFormat    []byte
+	LowerLevelFilePreFormat  []byte
+	TopLevelFilePostFormat   []byte
+	LowerLevelFilePostFormat []byte
+}
+
 func TestFmt_Recursive(t *testing.T) {
+	unformattedData := []byte(`ami_filter_name ="amzn2-ami-hvm-*-x86_64-gp2"
+ami_filter_owners =[ "137112412989" ]
+
+`)
+
+	formattedData := []byte(`ami_filter_name   = "amzn2-ami-hvm-*-x86_64-gp2"
+ami_filter_owners = ["137112412989"]
+
+`)
+
+	recursiveTestCases := []RecursiveTestCase{
+		{
+			TestCaseName:             "With Recursive flag on",
+			Recursion:                true,
+			TopLevelFilePreFormat:    unformattedData,
+			LowerLevelFilePreFormat:  unformattedData,
+			TopLevelFilePostFormat:   formattedData,
+			LowerLevelFilePostFormat: formattedData,
+		},
+		{
+			TestCaseName:             "With Recursive flag off",
+			Recursion:                false,
+			TopLevelFilePreFormat:    unformattedData,
+			LowerLevelFilePreFormat:  unformattedData,
+			TopLevelFilePostFormat:   formattedData,
+			LowerLevelFilePostFormat: unformattedData,
+		},
+	}
+
 	c := &FormatCommand{
 		Meta: testMeta(t),
 	}
 
-	unformattedData, err := ioutil.ReadFile("test-fixtures/fmt/unformatted.pkrvars.hcl")
-	if err != nil {
-		t.Fatalf("failed to open the unformatted fixture %s", err)
+	for _, tc := range recursiveTestCases {
+		executeRecursiveTestCase(t, tc, c)
 	}
+}
 
-	var subDir string
-	subDir, err = ioutil.TempDir("test-fixtures/fmt", "sub_dir")
+func executeRecursiveTestCase(t *testing.T, tc RecursiveTestCase, c *FormatCommand) {
+	// Creating temp directories and files
+	subDir, err := ioutil.TempDir("test-fixtures/fmt", "sub_dir")
 	if err != nil {
 		t.Fatalf("failed to create sub level recurisve directory for test %s", err)
 	}
 	defer os.Remove(subDir)
 
-	var superSubDir string
-	superSubDir, err = ioutil.TempDir(subDir, "super_sub_dir")
+	superSubDir, err := ioutil.TempDir(subDir, "super_sub_dir")
 	if err != nil {
 		t.Fatalf("failed to create sub level recurisve directory for test %s", err)
 	}
@@ -84,8 +123,14 @@ func TestFmt_Recursive(t *testing.T) {
 	}
 	defer os.Remove(tf.Name())
 
-	_, _ = tf.Write(unformattedData)
+	_, _ = tf.Write(tc.TopLevelFilePreFormat)
 	tf.Close()
+
+	data, err := ioutil.ReadFile(tf.Name())
+	if err != nil {
+		t.Fatalf("failed to open the newly formatted fixture %s", err)
+	}
+	fmt.Println(fmt.Sprintf("top level data: %v", data))
 
 	subTf, err := ioutil.TempFile(superSubDir, "*.pkrvars.hcl")
 	if err != nil {
@@ -93,60 +138,31 @@ func TestFmt_Recursive(t *testing.T) {
 	}
 	defer os.Remove(subTf.Name())
 
-	_, _ = subTf.Write(unformattedData)
+	_, _ = subTf.Write(tc.LowerLevelFilePreFormat)
 	subTf.Close()
 
-	args := []string{"-recursive=true", subDir}
+	var args []string
+	if tc.Recursion {
+		args = []string{"-recursive=true", subDir}
+	} else {
+		args = []string{subDir}
+	}
 
 	if code := c.Run(args); code != 0 {
 		fatalCommand(t, c.Meta)
 	}
 
-	formattedData, err := ioutil.ReadFile("test-fixtures/fmt/formatted.pkrvars.hcl")
-	if err != nil {
-		t.Fatalf("failed to open the formatted fixture %s", err)
-	}
-
-	validateFileIsFormatted(t, formattedData, tf)
-	validateFileIsFormatted(t, formattedData, subTf)
-
-	//Testing with recursive flag off that sub directories are not formatted
-	tf, err = ioutil.TempFile(subDir, "*.pkrvars.hcl")
-	if err != nil {
-		t.Fatalf("failed to create top level tempfile for test %s", err)
-	}
-	defer os.Remove(tf.Name())
-
-	_, _ = tf.Write(unformattedData)
-	tf.Close()
-
-	subTf, err = ioutil.TempFile(superSubDir, "*.pkrvars.hcl")
-	if err != nil {
-		t.Fatalf("failed to create sub level tempfile for test %s", err)
-	}
-	defer os.Remove(subTf.Name())
-
-	_, _ = subTf.Write(unformattedData)
-	subTf.Close()
-
-	args = []string{subDir}
-
-	if code := c.Run(args); code != 0 {
-		fatalCommand(t, c.Meta)
-	}
-
-	validateFileIsFormatted(t, formattedData, tf)
-	validateFileIsFormatted(t, unformattedData, subTf)
+	validateFileIsFormatted(t, tc.TopLevelFilePostFormat, tf, tc)
+	validateFileIsFormatted(t, tc.LowerLevelFilePostFormat, subTf, tc)
 }
 
-func validateFileIsFormatted(t *testing.T, formattedData []byte, testFile *os.File) {
-	//lets re-read the tempfile which should now be formatted
+func validateFileIsFormatted(t *testing.T, formattedData []byte, testFile *os.File, tc RecursiveTestCase) {
 	data, err := ioutil.ReadFile(testFile.Name())
 	if err != nil {
 		t.Fatalf("failed to open the newly formatted fixture %s", err)
 	}
 
 	if diff := cmp.Diff(string(data), string(formattedData)); diff != "" {
-		t.Errorf("Unexpected format tfData output %s", diff)
+		t.Errorf("Unexpected format tfData output on tc: %v, diff:  %s", tc.TestCaseName, diff)
 	}
 }
