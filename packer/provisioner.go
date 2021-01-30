@@ -181,21 +181,21 @@ func (p *PausedProvisioner) pausingWithUpdates(ctx context.Context, ui packersdk
 	defer ticker.Stop()
 	totalTime := p.PauseBefore.Seconds()
 
-	ctx, cancel := context.WithTimeout(context.Background(), p.PauseBefore)
+	pausingCtx, cancel := context.WithTimeout(context.Background(), p.PauseBefore)
 	defer cancel()
 
 	var err error
 	for {
 		select {
-		case <-ctx.Done():
-			err = ctx.Err()
+		case <-pausingCtx.Done():
+			err = pausingCtx.Err()
 			if err != nil && isTimeRemaining(totalTime) {
 				return err
 			}
 			return nil
 		case <-ticker.C:
 			totalTime -= float64(updateTime)
-			_, ok := ctx.Deadline()
+			_, ok := pausingCtx.Deadline()
 			if ok && isTimeRemaining(totalTime) {
 				ui.Say(fmt.Sprintf("%v seconds left until the next provisioner", totalTime))
 			}
