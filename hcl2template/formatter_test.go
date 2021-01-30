@@ -382,55 +382,55 @@ build {
 func executeRecursiveTestCase(t *testing.T, tc FormatterRecursiveTestCase, f *HCL2Formatter) {
 	f.Recursive = tc.Recursion
 
-	var subDir string
-	subDir, err := ioutil.TempDir("testdata/format", "sub_dir")
+	var topDir string
+	topDir, err := ioutil.TempDir("testdata/format", "top-dir")
 	if err != nil {
-		t.Fatalf("failed to create sub level recurisve directory for test %s", err)
+		t.Fatalf("failed to create sub level recurisve directory for test case: %s, errors: %s", tc.TestCaseName, err)
+	}
+	defer os.Remove(topDir)
+
+	var subDir string
+	subDir, err = ioutil.TempDir(topDir, "sub-dir")
+	if err != nil {
+		t.Fatalf("failed to create sub level recurisve directory for test case: %s, errors: %s", tc.TestCaseName, err)
 	}
 	defer os.Remove(subDir)
 
-	var superSubDir string
-	superSubDir, err = ioutil.TempDir(subDir, "super_sub_dir")
+	topTempFile, err := ioutil.TempFile(topDir, "*.pkr.hcl")
 	if err != nil {
-		t.Fatalf("failed to create sub level recurisve directory for test %s", err)
+		t.Fatalf("failed to create top level tempfile for test case: %s, errors: %s", tc.TestCaseName, err)
 	}
-	defer os.Remove(superSubDir)
+	defer os.Remove(topTempFile.Name())
 
-	tf, err := ioutil.TempFile(subDir, "*.pkr.hcl")
+	_, _ = topTempFile.Write(tc.TopLevelFilePreFormat)
+	topTempFile.Close()
+
+	subTempFile, err := ioutil.TempFile(subDir, "*.pkr.hcl")
 	if err != nil {
-		t.Fatalf("failed to create top level tempfile for test %s", err)
+		t.Fatalf("failed to create sub level tempfile for test case: %s, errors: %s", tc.TestCaseName, err)
 	}
-	defer os.Remove(tf.Name())
+	defer os.Remove(subTempFile.Name())
 
-	_, _ = tf.Write(tc.TopLevelFilePreFormat)
-	tf.Close()
+	_, _ = subTempFile.Write(tc.LowerLevelFilePreFormat)
+	subTempFile.Close()
 
-	subTf, err := ioutil.TempFile(superSubDir, "*.pkr.hcl")
-	if err != nil {
-		t.Fatalf("failed to create sub level tempfile for test %s", err)
-	}
-	defer os.Remove(subTf.Name())
-
-	_, _ = subTf.Write(tc.LowerLevelFilePreFormat)
-	subTf.Close()
-
-	_, diags := f.Format(subDir)
+	_, diags := f.Format(topDir)
 	if diags.HasErrors() {
-		t.Fatalf("the call to Format failed unexpectedly %s", diags.Error())
+		t.Fatalf("the call to Format failed unexpectedly for test case: %s, errors: %s", tc.TestCaseName, diags.Error())
 	}
 
-	validateFileIsFormatted(t, tc.TopLevelFilePostFormat, tf)
-	validateFileIsFormatted(t, tc.LowerLevelFilePostFormat, subTf)
+	validateFileIsFormatted(t, tc.TopLevelFilePostFormat, topTempFile, tc.TestCaseName)
+	validateFileIsFormatted(t, tc.LowerLevelFilePostFormat, subTempFile, tc.TestCaseName)
 }
 
-func validateFileIsFormatted(t *testing.T, formattedData []byte, testFile *os.File) {
+func validateFileIsFormatted(t *testing.T, formattedData []byte, testFile *os.File, testCaseName string) {
 	data, err := ioutil.ReadFile(testFile.Name())
 	if err != nil {
-		t.Fatalf("failed to open the newly formatted fixture %s", err)
+		t.Fatalf("failed to open the newly formatted fixture for test case: %s, errors: %s", testCaseName, err)
 	}
 
 	if diff := cmp.Diff(string(data), string(formattedData)); diff != "" {
-		t.Errorf("Unexpected format tfData output %s", diff)
+		t.Errorf("Unexpected format tfData output for test case: %s, errors: %s", testCaseName, diff)
 	}
 }
 
