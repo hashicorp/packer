@@ -29,7 +29,10 @@ type StepRunSourceInstance struct {
 	EbsOptimized                      bool
 	EnableT2Unlimited                 bool
 	ExpectedRootDevice                string
-	InstanceInitiatedShutdownBehavior string
+  HttpEndpoint                      string
+  HttpTokens                        string
+  HttpPutResponseHopLimit           int32
+  InstanceInitiatedShutdownBehavior string
 	InstanceType                      string
 	IsRestricted                      bool
 	SourceAMI                         string
