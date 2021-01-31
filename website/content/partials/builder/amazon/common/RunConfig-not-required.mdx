@@ -364,13 +364,16 @@
   password for Windows instances. Defaults to 20 minutes. Example value:
   10m
 
-- `http_endpoint` (string) - Http Endpoint
-
-- `http_tokens` (string) - A string to enable or disble the IMDS endpoint for an instance. Defaults to enabled.
+- `http_endpoint` (string) - Metadata Options
+  See [Configure IMDS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html) for details.
+  A string to enable or disble the IMDS endpoint for an instance. Defaults to enabled.
   Accepts either "enabled" or "disabled"
 
-- `http_put_response_hop_limit` (int64) - A string to either set the use of IMDSv2 for the instance to optional or required. Defaults to "optional".
+- `http_tokens` (string) - A string to either set the use of IMDSv2 for the instance to optional or required. Defaults to "optional".
   Accepts either "optional" or "required"
+
+- `http_put_response_hop_limit` (int64) - A numerical value to set an upper limit for the amount of hops allowed when communicating with IMDS endpoints.
+  Defaults to 1.
 
 - `ssh_interface` (string) - One of `public_ip`, `private_ip`, `public_dns`, `private_dns` or `session_manager`.
      If set, either the public IP address, private IP address, public DNS name
