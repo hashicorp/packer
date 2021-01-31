@@ -34,6 +34,9 @@ type StepRunSpotInstance struct {
 	Comm                              *communicator.Config
 	EbsOptimized                      bool
 	ExpectedRootDevice                string
+  HttpEndpoint                      string
+  HttpTokens                        string
+  HttpPutResponseHopLimit           int32
 	InstanceInitiatedShutdownBehavior string
 	InstanceType                      string
 	Region                            string

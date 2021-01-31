@@ -426,6 +426,18 @@ type RunConfig struct {
 	// 10m
 	WindowsPasswordTimeout time.Duration `mapstructure:"windows_password_timeout" required:"false"`
 
+  // Metadata settings
+  // See [Configure IMDS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html) for details.
+  HttpEndpoint string `mapstructure:"http_endpoint" required:"false"`
+  // A string to enable or disble the IMDS endpoint for an instance. Defaults to enabled.
+  // Accepts either "enabled" or "disabled"
+  HttpTokens string `mapstructure:"http_tokens" required:"false"`
+  // A string to either set the use of IMDSv2 for the instance to optional or required. Defaults to "optional".
+  // Accepts either "optional" or "required"
+  HttpPutResponseHopLimit int32 `mapstructure:"http_put_response_hop_limit" required:"false"`
+  // A numerical value to set an upper limit for the amount of hops allowed when communicating with IMDS endpoints.
+  // Defaults to 1.
+
 	// Communicator settings
 	Comm communicator.Config `mapstructure:",squash"`
 
