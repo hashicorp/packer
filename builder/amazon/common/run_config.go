@@ -428,6 +428,7 @@ type RunConfig struct {
 
 	// Metadata settings
 	// See [Configure IMDS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html) for details.
+
 	HttpEndpoint string `mapstructure:"http_endpoint" required:"false"`
 	// A string to enable or disble the IMDS endpoint for an instance. Defaults to enabled.
 	// Accepts either "enabled" or "disabled"
