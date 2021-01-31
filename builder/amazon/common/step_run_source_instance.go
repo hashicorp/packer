@@ -29,10 +29,10 @@ type StepRunSourceInstance struct {
 	EbsOptimized                      bool
 	EnableT2Unlimited                 bool
 	ExpectedRootDevice                string
-  HttpEndpoint                      string
-  HttpTokens                        string
-  HttpPutResponseHopLimit           int32
-  InstanceInitiatedShutdownBehavior string
+	HttpEndpoint                      string
+	HttpTokens                        string
+	HttpPutResponseHopLimit           int64
+	InstanceInitiatedShutdownBehavior string
 	InstanceType                      string
 	IsRestricted                      bool
 	SourceAMI                         string
@@ -117,6 +117,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		UserData:            &userData,
 		MaxCount:            aws.Int64(1),
 		MinCount:            aws.Int64(1),
+		MetadataOptions:     &ec2.InstanceMetadataOptionsRequest{HttpEndpoint: &s.HttpEndpoint, HttpTokens: &s.HttpTokens, HttpPutResponseHopLimit: &s.HttpPutResponseHopLimit},
 		IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: iamInstanceProfile},
 		BlockDeviceMappings: s.LaunchMappings.BuildEC2BlockDeviceMappings(),
 		Placement:           &ec2.Placement{AvailabilityZone: &az},
