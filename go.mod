@@ -15,7 +15,6 @@ require (
 	github.com/Telmate/proxmox-api-go v0.0.0-20200715182505-ec97c70ba887
 	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
-	github.com/alvaroloes/enumer v1.1.3-0.20190902102152-455e9a94796c // indirect
 	github.com/antihax/optional v1.0.0
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
 	github.com/aws/aws-sdk-go v1.36.5
