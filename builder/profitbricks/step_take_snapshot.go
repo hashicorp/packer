@@ -106,15 +106,15 @@ func (s *stepTakeSnapshot) waitForRequest(path string, config Config, ui packers
 			break
 		}
 		if request.Metadata.Status == "FAILED" {
-			return errors.New(fmt.Sprintf("Request failed: %s", request.Response))
+			return fmt.Errorf("Request failed: %s", request.Response)
 		}
 		time.Sleep(waitInterval)
 		i++
 	}
 
 	if done == false {
-		return errors.New(fmt.Sprintf("request not fulfilled after waiting %d seconds",
-			int64(waitCount)*int64(waitInterval)/int64(time.Second)))
+		return fmt.Errorf("request not fulfilled after waiting %d seconds",
+			int64(waitCount)*int64(waitInterval)/int64(time.Second))
 	}
 	return nil
 }
@@ -132,7 +132,7 @@ func (s *stepTakeSnapshot) waitTillSnapshotAvailable(id string, config Config, u
 		snap := profitbricks.GetSnapshot(id)
 		ui.Say(fmt.Sprintf("snapshot status = %s", snap.Metadata.State))
 		if snap.StatusCode != 200 {
-			return errors.New(fmt.Sprintf("%s", snap.Response))
+			return fmt.Errorf("%s", snap.Response)
 		}
 		if snap.Metadata.State == "AVAILABLE" {
 			done = true
@@ -144,8 +144,8 @@ func (s *stepTakeSnapshot) waitTillSnapshotAvailable(id string, config Config, u
 	}
 
 	if done == false {
-		return errors.New(fmt.Sprintf("snapshot not created after waiting %d seconds",
-			int64(waitCount)*int64(waitInterval)/int64(time.Second)))
+		return fmt.Errorf("snapshot not created after waiting %d seconds",
+			int64(waitCount)*int64(waitInterval)/int64(time.Second))
 	}
 
 	ui.Say("snapshot created")
@@ -160,7 +160,7 @@ func (s *stepTakeSnapshot) syncFs(ctx context.Context, comm packersdk.Communicat
 		return err
 	}
 	if cmd.Wait() != 0 {
-		return errors.New(fmt.Sprintf("sync command exited with code %d", cmd.ExitStatus()))
+		return fmt.Errorf("sync command exited with code %d", cmd.ExitStatus())
 	}
 	return nil
 }

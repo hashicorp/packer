@@ -207,7 +207,7 @@ func (d *stepCreateServer) setPB(username string, password string, url string) {
 
 func (d *stepCreateServer) checkForErrors(instance profitbricks.Resp) error {
 	if instance.StatusCode > 299 {
-		return errors.New(fmt.Sprintf("Error occurred %s", string(instance.Body)))
+		return fmt.Errorf("Error occurred %s", string(instance.Body))
 	}
 	return nil
 }
@@ -264,7 +264,9 @@ func (d *stepCreateServer) getImageAlias(imageAlias string, location string, ui 
 
 func parseErrorMessage(raw string) (toreturn string) {
 	var tmp map[string]interface{}
-	json.Unmarshal([]byte(raw), &tmp)
+	if json.Unmarshal([]byte(raw), &tmp) != nil {
+		return ""
+	}
 
 	for _, v := range tmp["messages"].([]interface{}) {
 		for index, i := range v.(map[string]interface{}) {
