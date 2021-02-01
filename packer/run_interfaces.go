@@ -34,9 +34,14 @@ type InitializeOptions struct {
 	SkipDatasourcesExecution bool
 }
 
-// The packer.Handler handles all Packer things.
+// The Handler handles all Packer things. This interface reflects the Packer
+// commands, ex: init, console ( evaluate ), fix config, inspect config, etc. To
+// run a build we will start the builds and then the core of Packer handles
+// execution.
 type Handler interface {
 	Initialize(InitializeOptions) hcl.Diagnostics
+	// PluginRequirements returns the list of plugin Requirements from the
+	// config file.
 	PluginRequirements() (plugingetter.Requirements, hcl.Diagnostics)
 	Evaluator
 	BuildGetter
