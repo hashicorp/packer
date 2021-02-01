@@ -13,13 +13,15 @@ sidebar_title: <tt>init</tt>
 -> **Note:** Currently, the plugin getter can only fetch binaries from public
 projects on *Github*.
 
--> **Note:** Downlading from *Github*, set the `PKR_GITHUB_API_TOKEN` env var in
-order to get more requests per hour. Currently, the plugin getter only fetches
-binaries using Github's public API, which [limits the number of requests per
-hour one can
+-> **Note:** Currently, the plugin getter only fetches binaries using Github's
+public API, which [limits the number of unauthenticated requests per hour one IP
+can
 do](https://docs.github.com/en/developers/apps/rate-limits-for-github-apps#normal-user-to-server-rate-limits).
-Packer will do its best to avoid hitting those limits. Go to your personal
-[access token page](https://github.com/settings/tokens) to generate a new token.
+Packer will do its best to avoid hitting those limits and in an average local
+usage this should not be an issue. Otherwise you can set the
+`PKR_GITHUB_API_TOKEN` env var in order to get more requests per hour. Go to
+your personal [access token page](https://github.com/settings/tokens) to
+generate a new token.
 
 
 The `packer init` command is used to download Packer plugin binaries.
