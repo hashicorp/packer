@@ -109,69 +109,80 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 			}
 
 		case expr.Type().IsObjectType():
-			if expr.Type().HasAttribute("version") {
-				vc := VersionConstraint{
-					DeclRange: attr.Range,
-				}
-				constraint := expr.GetAttr("version")
-				if !constraint.Type().Equals(cty.String) || constraint.IsNull() {
-					diags = append(diags, &hcl.Diagnostic{
-						Severity: hcl.DiagError,
-						Summary:  "Invalid version constraint",
-						Detail:   "Version must be specified as a string. See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraint-syntax for docs.",
-						Subject:  attr.Expr.Range().Ptr(),
-					})
-				} else {
-					constraintStr := constraint.AsString()
-					constraints, err := version.NewConstraint(constraintStr)
-					if err != nil {
-						// NewConstraint doesn't return user-friendly errors, so we'll just
-						// ignore the provided error and produce our own generic one.
-						diags = append(diags, &hcl.Diagnostic{
-							Severity: hcl.DiagError,
-							Summary:  "Invalid version constraint",
-							Detail:   "This string does not use correct version constraint syntax. See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraint-syntax for docs.",
-							Subject:  attr.Expr.Range().Ptr(),
-						})
-					} else {
-						vc.Required = constraints
-						rp.Requirement = vc
-					}
-				}
-			} else {
+			if !expr.Type().HasAttribute("version") {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "No version constraint was set",
 					Detail:   "The version field must be specified as a string. Ex: `version = \">= 1.2.0, < 2.0.0\". See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraints for docs",
 					Subject:  attr.Expr.Range().Ptr(),
 				})
+				continue
 			}
-			if expr.Type().HasAttribute("source") {
-				source := expr.GetAttr("source")
-				if !source.Type().Equals(cty.String) || source.IsNull() {
-					diags = append(diags, &hcl.Diagnostic{
-						Severity: hcl.DiagError,
-						Summary:  "Invalid source",
-						Detail:   "Source must be specified as a string. For example: " + `source = "amazon"`,
-						Subject:  attr.Expr.Range().Ptr(),
-					})
-				} else {
-					rp.Source = source.AsString()
 
-					p, sourceDiags := addrs.ParsePluginSourceString(rp.Source)
+			vc := VersionConstraint{
+				DeclRange: attr.Range,
+			}
+			constraint := expr.GetAttr("version")
+			if !constraint.Type().Equals(cty.String) || constraint.IsNull() {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid version constraint",
+					Detail:   "Version must be specified as a string. See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraint-syntax for docs.",
+					Subject:  attr.Expr.Range().Ptr(),
+				})
+				continue
+			}
+			constraintStr := constraint.AsString()
+			constraints, err := version.NewConstraint(constraintStr)
+			if err != nil {
+				// NewConstraint doesn't return user-friendly errors, so we'll just
+				// ignore the provided error and produce our own generic one.
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid version constraint",
+					Detail:   "This string does not use correct version constraint syntax. See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraint-syntax for docs.",
+					Subject:  attr.Expr.Range().Ptr(),
+				})
+				continue
+			}
+			vc.Required = constraints
+			rp.Requirement = vc
 
-					if sourceDiags.HasErrors() {
-						for _, diag := range sourceDiags {
-							if diag.Subject == nil {
-								diag.Subject = attr.Expr.Range().Ptr()
-							}
-						}
-						diags = append(diags, sourceDiags...)
-					} else {
-						rp.Type = p
+			if !expr.Type().HasAttribute("source") {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "No source was set",
+					Detail:   "The source field must be specified as a string. Ex: `source = \"coolcloud\". See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements for docs",
+					Subject:  attr.Expr.Range().Ptr(),
+				})
+				continue
+			}
+			source := expr.GetAttr("source")
+
+			if !source.Type().Equals(cty.String) || source.IsNull() {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid source",
+					Detail:   "Source must be specified as a string. For example: " + `source = "coolcloud"`,
+					Subject:  attr.Expr.Range().Ptr(),
+				})
+				continue
+			}
+
+			rp.Source = source.AsString()
+			p, sourceDiags := addrs.ParsePluginSourceString(rp.Source)
+
+			if sourceDiags.HasErrors() {
+				for _, diag := range sourceDiags {
+					if diag.Subject == nil {
+						diag.Subject = attr.Expr.Range().Ptr()
 					}
 				}
+				diags = append(diags, sourceDiags...)
+			} else {
+				rp.Type = p
 			}
+
 			attrTypes := expr.Type().AttributeTypes()
 			for name := range attrTypes {
 				if name == "version" || name == "source" {
