@@ -114,11 +114,10 @@ func (s *stepTakeSnapshot) waitForRequest(path string, config Config, ui packers
 
 	if done == false {
 		return errors.New(fmt.Sprintf("request not fulfilled after waiting %d seconds",
-			int64(waitCount) * int64(waitInterval) / int64(time.Second)))
+			int64(waitCount)*int64(waitInterval)/int64(time.Second)))
 	}
 	return nil
 }
-
 
 func (s *stepTakeSnapshot) waitTillSnapshotAvailable(id string, config Config, ui packersdk.Ui) error {
 	s.setPB(config.PBUsername, config.PBPassword, config.PBUrl)
@@ -139,19 +138,14 @@ func (s *stepTakeSnapshot) waitTillSnapshotAvailable(id string, config Config, u
 			done = true
 			break
 		}
-		/*
-		request := profitbricks.GetRequestStatus(path)
-		if request.Metadata.Status == "DONE" {
-			break
-		} */
 		time.Sleep(waitInterval)
 		i++
-		ui.Say(fmt.Sprintf("... still waiting, %d seconds have passed", int64(waitInterval) * int64(i)))
+		ui.Say(fmt.Sprintf("... still waiting, %d seconds have passed", int64(waitInterval)*int64(i)))
 	}
 
 	if done == false {
 		return errors.New(fmt.Sprintf("snapshot not created after waiting %d seconds",
-			int64(waitCount) * int64(waitInterval) / int64(time.Second)))
+			int64(waitCount)*int64(waitInterval)/int64(time.Second)))
 	}
 
 	ui.Say("snapshot created")
