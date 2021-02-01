@@ -80,9 +80,10 @@ configuration file. None of these are required, since all have defaults.
 - `builders`, `commands`, `post-processors`, and `provisioners` are objects
   that are used to install plugins. The details of how exactly these are set is
   covered in more detail in the [installing plugins documentation
-  page](/docs/extending/plugins). It is recommend to use [HCL2
+  page](/docs/extending/plugins). It is instead recommended to use [HCL2
   `required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
-  and the [`packer init`](/docs/commands/init) command to install plugins.
+  and the [`packer init`](/docs/commands/init) command to install plugins; if
+  you are using both, the `required_plugin` config will take precedence.
 
 # Full list of Environment Variables usable for Packer
 
