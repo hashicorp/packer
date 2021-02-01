@@ -185,20 +185,23 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 
 	switch what {
 	case "releases":
-		req, err = g.Client.NewRequest("GET", filepath.Join("/repos/", opts.PluginRequirement.Identifier.RealRelativePath(), "/git/matching-refs/tags"), nil)
+		u := filepath.ToSlash("/repos/" + opts.PluginRequirement.Identifier.RealRelativePath() + "/git/matching-refs/tags")
+		req, err = g.Client.NewRequest("GET", u, nil)
 		transform = transformVersionStream
 	case "sha256":
 		// something like https://github.com/sylviamoss/packer-plugin-comment/releases/download/v0.2.11/packer-plugin-comment_v0.2.11_x5_SHA256SUMS
+		u := filepath.ToSlash("https://github.com/" + opts.PluginRequirement.Identifier.RealRelativePath() + "/releases/download/" + opts.Version() + "/" + opts.PluginRequirement.FilenamePrefix() + opts.Version() + "_SHA256SUMS")
 		req, err = g.Client.NewRequest(
 			"GET",
-			"https://github.com/"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version()+"/"+opts.PluginRequirement.FilenamePrefix()+opts.Version()+"_SHA256SUMS",
+			u,
 			nil,
 		)
 		transform = tranformChecksumStream()
 	case "zip":
+		u := filepath.ToSlash("https://github.com/" + opts.PluginRequirement.Identifier.RealRelativePath() + "/releases/download/" + opts.Version() + "/" + opts.ExpectedZipFilename())
 		req, err = g.Client.NewRequest(
 			"GET",
-			"https://github.com/"+opts.PluginRequirement.Identifier.RealRelativePath()+"/releases/download/"+opts.Version()+"/"+opts.ExpectedZipFilename(),
+			u,
 			nil,
 		)
 
