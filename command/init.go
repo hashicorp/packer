@@ -127,7 +127,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 
 func (*InitCommand) Help() string {
 	helpText := `
-Usage: packer init [options] CONFIG
+Usage: packer init [options] [config.pkr.hcl|folder/]
 
   Install all the missing plugins required in a Packer config. Note that Packer
   does not have a state.
