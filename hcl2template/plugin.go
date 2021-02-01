@@ -86,7 +86,7 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 		if len(sortedInstalls) == 0 {
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
-				Summary:  fmt.Sprintf("no plugin installed for %s", pluginRequirement.Identifier.ForDisplay()),
+				Summary:  fmt.Sprintf("no plugin installed for %s %v", pluginRequirement.Identifier.ForDisplay(), pluginRequirement.VersionConstraints.String()),
 				Detail:   "Did you run packer init for this project ?",
 			})
 			continue
