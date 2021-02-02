@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"github.com/hashicorp/packer/packer/plugin-getter/github"
 	"github.com/hashicorp/packer/version"
@@ -94,6 +95,11 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		},
 	}
 
+	ui := &packer.ColoredUi{
+		Color: packer.UiColorCyan,
+		Ui:    c.Ui,
+	}
+
 	for _, pluginRequirement := range reqs {
 		// Get installed plugins that match requirement
 
@@ -119,7 +125,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		}
 		if newInstall != nil {
 			msg := fmt.Sprintf("Installed plugin %s %s in %q", pluginRequirement.Identifier.ForDisplay(), newInstall.Version, newInstall.BinaryPath)
-			c.Ui.Say(msg)
+			ui.Say(msg)
 		}
 	}
 	return ret
