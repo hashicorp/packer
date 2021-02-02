@@ -22,6 +22,9 @@
       "pattern": "^/docs/templates/hcl_templates/"
     },
     {
+      "pattern": "^/commands/init"
+    },
+    {
       "pattern": "^/docs/datasources"
     },
     {

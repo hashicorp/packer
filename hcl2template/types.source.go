@@ -12,7 +12,8 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
-// SourceBlock references an HCL 'source' block.
+// SourceBlock references an HCL 'source' block to be used in a build for
+// example.
 type SourceBlock struct {
 	// Type of source; ex: virtualbox-iso
 	Type string
@@ -21,27 +22,41 @@ type SourceBlock struct {
 
 	block *hcl.Block
 
-	// addition will be merged into block to allow user to override builder settings
-	// per build.source block.
-	addition hcl.Body
 	// LocalName can be set in a singular source block from a build block, it
 	// allows to give a special name to a build in the logs.
 	LocalName string
 }
 
-func (b *SourceBlock) name() string {
+// SourceUseBlock is a SourceBlock 'usage' from a config stand point.
+// For example when one uses `build.sources = ["..."]` or
+// `build.source "..." {...}`.
+type SourceUseBlock struct {
+	// reference to an actual source block definition, or SourceBlock.
+	SourceRef
+
+	// LocalName can be set in a singular source block from a build block, it
+	// allows to give a special name to a build in the logs.
+	LocalName string
+
+	// Rest of the body, in case the build.source block has more specific
+	// content
+	// Body can be expanded by a dynamic tag.
+	Body hcl.Body
+}
+
+func (b *SourceUseBlock) name() string {
 	if b.LocalName != "" {
 		return b.LocalName
 	}
 	return b.Name
 }
 
-func (b *SourceBlock) String() string {
+func (b *SourceUseBlock) String() string {
 	return fmt.Sprintf("%s.%s", b.Type, b.name())
 }
 
 // EvalContext adds the values of the source to the passed eval context.
-func (b *SourceBlock) ctyValues() map[string]cty.Value {
+func (b *SourceUseBlock) ctyValues() map[string]cty.Value {
 	return map[string]cty.Value{
 		"type": cty.StringVal(b.Type),
 		"name": cty.StringVal(b.name()),
@@ -54,19 +69,20 @@ func (b *SourceBlock) ctyValues() map[string]cty.Value {
 //      name = "local_name"
 //    }
 //  }
-func (p *Parser) decodeBuildSource(block *hcl.Block) (SourceRef, hcl.Diagnostics) {
+func (p *Parser) decodeBuildSource(block *hcl.Block) (SourceUseBlock, hcl.Diagnostics) {
 	ref := sourceRefFromString(block.Labels[0])
+	out := SourceUseBlock{SourceRef: ref}
 	var b struct {
 		Name string   `hcl:"name,optional"`
 		Rest hcl.Body `hcl:",remain"`
 	}
 	diags := gohcl.DecodeBody(block.Body, nil, &b)
 	if diags.HasErrors() {
-		return ref, diags
+		return out, diags
 	}
-	ref.addition = b.Rest
-	ref.LocalName = b.Name
-	return ref, nil
+	out.LocalName = b.Name
+	out.Body = b.Rest
+	return out, nil
 }
 
 func (p *Parser) decodeSource(block *hcl.Block) (SourceBlock, hcl.Diagnostics) {
@@ -77,41 +93,26 @@ func (p *Parser) decodeSource(block *hcl.Block) (SourceBlock, hcl.Diagnostics) {
 	}
 	var diags hcl.Diagnostics
 
-	if !p.BuilderSchemas.Has(source.Type) {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "Unknown " + buildSourceLabel + " type " + source.Type,
-			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("known builders: %v", p.BuilderSchemas.List()),
-			Severity: hcl.DiagError,
-		})
-		return source, diags
-	}
-
 	return source, diags
 }
 
-func (cfg *PackerConfig) startBuilder(source SourceBlock, ectx *hcl.EvalContext, opts packer.GetBuildsOptions) (packersdk.Builder, hcl.Diagnostics, []string) {
+func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalContext, opts packer.GetBuildsOptions) (packersdk.Builder, hcl.Diagnostics, []string) {
 	var diags hcl.Diagnostics
 
-	builder, err := cfg.builderSchemas.Start(source.Type)
+	builder, err := cfg.parser.PluginConfig.Builders.Start(source.Type)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary: "Failed to load " + sourceLabel + " type",
 			Detail:  err.Error(),
-			Subject: &source.block.LabelRanges[0],
 		})
 		return builder, diags, nil
 	}
 
-	body := source.block.Body
-	if source.addition != nil {
-		body = hcl.MergeBodies([]hcl.Body{source.block.Body, source.addition})
-	}
-
+	body := source.Body
 	decoded, moreDiags := decodeHCL2Spec(body, ectx, builder)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
-		return nil, diags, nil
+		return builder, diags, nil
 	}
 
 	// In case of cty.Unknown values, this will write a equivalent placeholder of the same type
@@ -131,13 +132,13 @@ func (cfg *PackerConfig) startBuilder(source SourceBlock, ectx *hcl.EvalContext,
 	builderVars["packer_on_error"] = opts.OnError
 
 	generatedVars, warning, err := builder.Prepare(builderVars, decoded)
-	moreDiags = warningErrorsToDiags(source.block, warning, err)
+	moreDiags = warningErrorsToDiags(cfg.Sources[source.SourceRef].block, warning, err)
 	diags = append(diags, moreDiags...)
 	return builder, diags, generatedVars
 }
 
 // These variables will populate the PackerConfig inside of the builders.
-func (source *SourceBlock) builderVariables() map[string]string {
+func (source *SourceUseBlock) builderVariables() map[string]string {
 	return map[string]string{
 		"packer_build_name":   source.Name,
 		"packer_builder_type": source.Type,
@@ -151,25 +152,15 @@ func (source *SourceBlock) Ref() SourceRef {
 	}
 }
 
+// SourceRef is a nice way to put `virtualbox-iso.source_name`
 type SourceRef struct {
+	// Type of the source, for example `virtualbox-iso`
 	Type string
+	// Name of the source, for example `source_name`
 	Name string
 
-	// The content of this body will be merged into a new block to allow to
-	// override builder settings per build section.
-	addition hcl.Body
-	// LocalName can be set in a singular source block from a build block, it
-	// allows to give a special name to a build in the logs.
-	LocalName string
-}
-
-// the 'addition' field makes of ref a different entry in the sources map, so
-// Ref is here to make sure only one is returned.
-func (r *SourceRef) Ref() SourceRef {
-	return SourceRef{
-		Type: r.Type,
-		Name: r.Name,
-	}
+	// No other field should be added to the SourceRef because we used that
+	// struct as a map accessor in many places.
 }
 
 // NoSource is the zero value of sourceRef, representing the absense of an

@@ -72,14 +72,14 @@
   provisioners should connect to the local IP address of the instance.
 
 - `user_data` (string) - User data to launch with the instance. This is a
-  template engine; see "User Data" bellow for
+  template engine; see "User Data" below for
   more details. Packer will not automatically wait for a user script to
   finish before shutting down the instance this must be handled in a
   provisioner.
 
 - `user_data_file` (string) - Path to a file that will be used for the user
   data when launching the instance. This file will be parsed as a template
-  engine see User Data bellow for more
+  engine see User Data below for more
   details.
 
 - `template_name` (string) - The name of the new template. Defaults to

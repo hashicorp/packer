@@ -14,7 +14,6 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/packer/plugin"
 )
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -22,16 +21,13 @@ import (
 const PACKERSPACE = "-PACKERSPACE-"
 
 type config struct {
-	DisableCheckpoint          bool                      `json:"disable_checkpoint"`
-	DisableCheckpointSignature bool                      `json:"disable_checkpoint_signature"`
-	RawBuilders                map[string]string         `json:"builders"`
-	RawProvisioners            map[string]string         `json:"provisioners"`
-	RawPostProcessors          map[string]string         `json:"post-processors"`
-	Builders                   packer.MapOfBuilder       `json:"-"`
-	Provisioners               packer.MapOfProvisioner   `json:"-"`
-	PostProcessors             packer.MapOfPostProcessor `json:"-"`
-	Datasources                packer.MapOfDatasource    `json:"-"`
-	Plugins                    plugin.Config
+	DisableCheckpoint          bool              `json:"disable_checkpoint"`
+	DisableCheckpointSignature bool              `json:"disable_checkpoint_signature"`
+	RawBuilders                map[string]string `json:"builders"`
+	RawProvisioners            map[string]string `json:"provisioners"`
+	RawPostProcessors          map[string]string `json:"post-processors"`
+
+	Plugins *packer.PluginConfig
 }
 
 // decodeConfig decodes configuration in JSON format from the given io.Reader into
@@ -97,19 +93,19 @@ func (c *config) loadSingleComponent(path string) (string, error) {
 	switch {
 	case strings.HasPrefix(pluginName, "packer-builder-"):
 		pluginName = pluginName[len("packer-builder-"):]
-		c.Builders[pluginName] = func() (packersdk.Builder, error) {
+		c.Plugins.Builders.Set(pluginName, func() (packersdk.Builder, error) {
 			return c.Plugins.Client(path).Builder()
-		}
+		})
 	case strings.HasPrefix(pluginName, "packer-post-processor-"):
 		pluginName = pluginName[len("packer-post-processor-"):]
-		c.PostProcessors[pluginName] = func() (packersdk.PostProcessor, error) {
+		c.Plugins.PostProcessors.Set(pluginName, func() (packersdk.PostProcessor, error) {
 			return c.Plugins.Client(path).PostProcessor()
-		}
+		})
 	case strings.HasPrefix(pluginName, "packer-provisioner-"):
 		pluginName = pluginName[len("packer-provisioner-"):]
-		c.Provisioners[pluginName] = func() (packersdk.Provisioner, error) {
+		c.Plugins.Provisioners.Set(pluginName, func() (packersdk.Provisioner, error) {
 			return c.Plugins.Client(path).Provisioner()
-		}
+		})
 	}
 
 	return pluginName, nil
@@ -119,7 +115,7 @@ func (c *config) loadSingleComponent(path string) (string, error) {
 // implementations from the defined plugins.
 func (c *config) StartBuilder(name string) (packersdk.Builder, error) {
 	log.Printf("Loading builder: %s\n", name)
-	return c.Builders.Start(name)
+	return c.Plugins.Builders.Start(name)
 }
 
 // This is a proper implementation of packer.HookFunc that can be used
@@ -133,14 +129,14 @@ func (c *config) StarHook(name string) (packersdk.Hook, error) {
 // packersdk.PostProcessor implementations from defined plugins.
 func (c *config) StartPostProcessor(name string) (packersdk.PostProcessor, error) {
 	log.Printf("Loading post-processor: %s", name)
-	return c.PostProcessors.Start(name)
+	return c.Plugins.PostProcessors.Start(name)
 }
 
 // This is a proper packer.ProvisionerFunc that can be used to load
 // packer.Provisioner implementations from defined plugins.
 func (c *config) StartProvisioner(name string) (packersdk.Provisioner, error) {
 	log.Printf("Loading provisioner: %s\n", name)
-	return c.Provisioners.Start(name)
+	return c.Plugins.Provisioners.Start(name)
 }
 
 func (c *config) discoverInternalComponents() error {
@@ -153,49 +149,45 @@ func (c *config) discoverInternalComponents() error {
 
 	for builder := range command.Builders {
 		builder := builder
-		_, found := (c.Builders)[builder]
-		if !found {
-			c.Builders[builder] = func() (packersdk.Builder, error) {
-				bin := fmt.Sprintf("%s%splugin%spacker-builder-%s",
-					packerPath, PACKERSPACE, PACKERSPACE, builder)
+		if !c.Plugins.Builders.Has(builder) {
+			bin := fmt.Sprintf("%s%splugin%spacker-builder-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, builder)
+			c.Plugins.Builders.Set(builder, func() (packersdk.Builder, error) {
 				return c.Plugins.Client(bin).Builder()
-			}
+			})
 		}
 	}
 
 	for provisioner := range command.Provisioners {
 		provisioner := provisioner
-		_, found := (c.Provisioners)[provisioner]
-		if !found {
-			c.Provisioners[provisioner] = func() (packersdk.Provisioner, error) {
-				bin := fmt.Sprintf("%s%splugin%spacker-provisioner-%s",
-					packerPath, PACKERSPACE, PACKERSPACE, provisioner)
+		if !c.Plugins.Provisioners.Has(provisioner) {
+			bin := fmt.Sprintf("%s%splugin%spacker-provisioner-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, provisioner)
+			c.Plugins.Provisioners.Set(provisioner, func() (packersdk.Provisioner, error) {
 				return c.Plugins.Client(bin).Provisioner()
-			}
+			})
 		}
 	}
 
 	for postProcessor := range command.PostProcessors {
 		postProcessor := postProcessor
-		_, found := (c.PostProcessors)[postProcessor]
-		if !found {
-			c.PostProcessors[postProcessor] = func() (packersdk.PostProcessor, error) {
-				bin := fmt.Sprintf("%s%splugin%spacker-post-processor-%s",
-					packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
+		if !c.Plugins.PostProcessors.Has(postProcessor) {
+			bin := fmt.Sprintf("%s%splugin%spacker-post-processor-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
+			c.Plugins.PostProcessors.Set(postProcessor, func() (packersdk.PostProcessor, error) {
 				return c.Plugins.Client(bin).PostProcessor()
-			}
+			})
 		}
 	}
 
 	for dataSource := range command.Datasources {
 		dataSource := dataSource
-		_, found := (c.Datasources)[dataSource]
-		if !found {
-			c.Datasources[dataSource] = func() (packersdk.Datasource, error) {
-				bin := fmt.Sprintf("%s%splugin%spacker-datasource-%s",
-					packerPath, PACKERSPACE, PACKERSPACE, dataSource)
+		if !c.Plugins.DataSources.Has(dataSource) {
+			bin := fmt.Sprintf("%s%splugin%spacker-datasource-%s",
+				packerPath, PACKERSPACE, PACKERSPACE, dataSource)
+			c.Plugins.DataSources.Set(dataSource, func() (packersdk.Datasource, error) {
 				return c.Plugins.Client(bin).Datasource()
-			}
+			})
 		}
 	}
 

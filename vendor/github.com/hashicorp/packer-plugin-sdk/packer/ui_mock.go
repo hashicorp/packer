@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"testing"
+	"time"
 )
 
 // TestUi creates a simple UI for use in testing.
@@ -19,6 +20,11 @@ func TestUi(t *testing.T) Ui {
 	}
 }
 
+type SayMessage struct {
+	Message string
+	SayTime time.Time
+}
+
 type MockUi struct {
 	AskCalled      bool
 	AskQuery       string
@@ -30,7 +36,7 @@ type MockUi struct {
 	MessageCalled  bool
 	MessageMessage string
 	SayCalled      bool
-	SayMessage     string
+	SayMessages    []SayMessage
 
 	TrackProgressCalled    bool
 	ProgressBarAddCalled   bool
@@ -61,7 +67,11 @@ func (u *MockUi) Message(message string) {
 
 func (u *MockUi) Say(message string) {
 	u.SayCalled = true
-	u.SayMessage = message
+	sayMessage := SayMessage{
+		Message: message,
+		SayTime: time.Now(),
+	}
+	u.SayMessages = append(u.SayMessages, sayMessage)
 }
 
 func (u *MockUi) TrackProgress(_ string, _, _ int64, stream io.ReadCloser) (body io.ReadCloser) {

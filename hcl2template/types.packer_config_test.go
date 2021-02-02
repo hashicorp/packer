@@ -3,8 +3,11 @@ package hcl2template
 import (
 	"testing"
 
+	"github.com/hashicorp/go-version"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/hcl2template/addrs"
 	. "github.com/hashicorp/packer/hcl2template/internal"
+	hcl2template "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -12,6 +15,7 @@ import (
 var (
 	refVBIsoUbuntu1204  = SourceRef{Type: "virtualbox-iso", Name: "ubuntu-1204"}
 	refAWSEBSUbuntu1604 = SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604"}
+	refAWSV3MyImage     = SourceRef{Type: "amazon-v3-ebs", Name: "my-image"}
 	pTrue               = pointerToBool(true)
 )
 
@@ -23,7 +27,20 @@ func TestParser_complete(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/complete", nil, nil},
 			&PackerConfig{
-				Basedir: "testdata/complete",
+				Packer: struct {
+					VersionConstraints []VersionConstraint
+					RequiredPlugins    []*RequiredPlugins
+				}{
+					VersionConstraints: []VersionConstraint{
+						{
+							Required: mustVersionConstraints(version.NewConstraint(">= v1")),
+						},
+					},
+					RequiredPlugins: nil,
+				},
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 "testdata/complete",
+
 				InputVariables: Variables{
 					"foo": &Variable{
 						Name:   "foo",
@@ -125,9 +142,13 @@ func TestParser_complete(t *testing.T) {
 				},
 				Builds: Builds{
 					&BuildBlock{
-						Sources: []SourceRef{
-							refVBIsoUbuntu1204,
-							refAWSEBSUbuntu1604,
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+							{
+								SourceRef: refAWSEBSUbuntu1604,
+							},
 						},
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
@@ -200,7 +221,7 @@ func TestParser_complete(t *testing.T) {
 								PType: "amazon-import",
 								PName: "something",
 								PostProcessor: &HCL2PostProcessor{
-									PostProcessor: basicMockPostProcessor,
+									PostProcessor: basicMockPostProcessorDynamicTags,
 								},
 								KeepInputArtifact: pTrue,
 							},
@@ -257,7 +278,20 @@ func TestParser_complete(t *testing.T) {
 								Int:    42,
 								Tags:   []MockTag{},
 							},
-							NestedSlice: []NestedMockConfig{},
+							Nested: hcl2template.NestedMockConfig{
+								Tags: []hcl2template.MockTag{
+									{Key: "Component", Value: "user-service"},
+									{Key: "Environment", Value: "production"},
+								},
+							},
+							NestedSlice: []NestedMockConfig{
+								hcl2template.NestedMockConfig{
+									Tags: []hcl2template.MockTag{
+										{Key: "Component", Value: "user-service"},
+										{Key: "Environment", Value: "production"},
+									},
+								},
+							},
 						},
 					},
 					Provisioners: []packer.CoreBuildProvisioner{
@@ -281,7 +315,7 @@ func TestParser_complete(t *testing.T) {
 								PType: "amazon-import",
 								PName: "something",
 								PostProcessor: &HCL2PostProcessor{
-									PostProcessor: basicMockPostProcessor,
+									PostProcessor: basicMockPostProcessorDynamicTags,
 								},
 								KeepInputArtifact: pTrue,
 							},
@@ -357,6 +391,218 @@ func TestParser_ValidateFilterOption(t *testing.T) {
 	}
 }
 
+func TestParser_no_init(t *testing.T) {
+	defaultParser := getBasicParser()
+
+	tests := []parseTest{
+		{"working build with imports",
+			defaultParser,
+			parseTestArgs{"testdata/init/imports", nil, nil},
+			&PackerConfig{
+				Packer: struct {
+					VersionConstraints []VersionConstraint
+					RequiredPlugins    []*RequiredPlugins
+				}{
+					VersionConstraints: []VersionConstraint{
+						{
+							Required: mustVersionConstraints(version.NewConstraint(">= v1")),
+						},
+					},
+					RequiredPlugins: []*RequiredPlugins{
+						{
+							RequiredPlugins: map[string]*RequiredPlugin{
+								"amazon": {
+									Name:   "amazon",
+									Source: "",
+									Type: &addrs.Plugin{
+										Type:      "amazon",
+										Namespace: "hashicorp",
+										Hostname:  "github.com",
+									},
+									Requirement: VersionConstraint{
+										Required: mustVersionConstraints(version.NewConstraint(">= v0")),
+									},
+								},
+								"amazon-v1": {
+									Name:   "amazon-v1",
+									Source: "amazon",
+									Type: &addrs.Plugin{
+										Type:      "amazon",
+										Namespace: "hashicorp",
+										Hostname:  "github.com",
+									},
+									Requirement: VersionConstraint{
+										Required: mustVersionConstraints(version.NewConstraint(">= v1")),
+									},
+								},
+								"amazon-v2": {
+									Name:   "amazon-v2",
+									Source: "amazon",
+									Type: &addrs.Plugin{
+										Type:      "amazon",
+										Namespace: "hashicorp",
+										Hostname:  "github.com",
+									},
+									Requirement: VersionConstraint{
+										Required: mustVersionConstraints(version.NewConstraint(">= v2")),
+									},
+								},
+								"amazon-v3": {
+									Name:   "amazon-v3",
+									Source: "hashicorp/amazon",
+									Type: &addrs.Plugin{
+										Type:      "amazon",
+										Namespace: "hashicorp",
+										Hostname:  "github.com",
+									},
+									Requirement: VersionConstraint{
+										Required: mustVersionConstraints(version.NewConstraint(">= v3")),
+									},
+								},
+								"amazon-v3-azr": {
+									Name:   "amazon-v3-azr",
+									Source: "azr/amazon",
+									Type: &addrs.Plugin{
+										Type:      "amazon",
+										Namespace: "azr",
+										Hostname:  "github.com",
+									},
+									Requirement: VersionConstraint{
+										Required: mustVersionConstraints(version.NewConstraint(">= v3")),
+									},
+								},
+								"amazon-v4": {
+									Name:   "amazon-v4",
+									Source: "github.com/hashicorp/amazon",
+									Type: &addrs.Plugin{
+										Type:      "amazon",
+										Namespace: "hashicorp",
+										Hostname:  "github.com",
+									},
+									Requirement: VersionConstraint{
+										Required: mustVersionConstraints(version.NewConstraint(">= v4")),
+									},
+								},
+							},
+						},
+					},
+				},
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 "testdata/init/imports",
+
+				InputVariables: Variables{
+					"foo": &Variable{
+						Name:   "foo",
+						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("value")}},
+						Type:   cty.String,
+					},
+					"image_id": &Variable{
+						Name:   "image_id",
+						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("image-id-default")}},
+						Type:   cty.String,
+					},
+					"port": &Variable{
+						Name:   "port",
+						Values: []VariableAssignment{{From: "default", Value: cty.NumberIntVal(42)}},
+						Type:   cty.Number,
+					},
+					"availability_zone_names": &Variable{
+						Name: "availability_zone_names",
+						Values: []VariableAssignment{{
+							From: "default",
+							Value: cty.ListVal([]cty.Value{
+								cty.StringVal("A"),
+								cty.StringVal("B"),
+								cty.StringVal("C"),
+							}),
+						}},
+						Type: cty.List(cty.String),
+					},
+				},
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+					refAWSV3MyImage:    {Type: "amazon-v3-ebs", Name: "my-image"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+							{
+								SourceRef: refAWSV3MyImage,
+							},
+						},
+						ProvisionerBlocks: []*ProvisionerBlock{
+							{
+								PType: "shell",
+								PName: "provisioner that does something",
+							},
+							{
+								PType: "file",
+							},
+						},
+						PostProcessorsLists: [][]*PostProcessorBlock{
+							{
+								{
+									PType:             "amazon-import",
+									PName:             "something",
+									KeepInputArtifact: pTrue,
+								},
+							},
+							{
+								{
+									PType: "amazon-import",
+								},
+							},
+							{
+								{
+									PType: "amazon-import",
+									PName: "first-nested-post-processor",
+								},
+								{
+									PType: "amazon-import",
+									PName: "second-nested-post-processor",
+								},
+							},
+							{
+								{
+									PType: "amazon-import",
+									PName: "third-nested-post-processor",
+								},
+								{
+									PType: "amazon-import",
+									PName: "fourth-nested-post-processor",
+								},
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packersdk.Build{},
+			false,
+		},
+
+		{"duplicate required plugin accessor fails",
+			defaultParser,
+			parseTestArgs{"testdata/init/duplicate_required_plugins", nil, nil},
+			nil,
+			true, true,
+			[]packersdk.Build{},
+			false,
+		},
+	}
+	testParse_only_Parse(t, tests)
+}
+
 func pointerToBool(b bool) *bool {
 	return &b
+}
+
+func mustVersionConstraints(vs version.Constraints, err error) version.Constraints {
+	if err != nil {
+		panic(err)
+	}
+	return vs
 }

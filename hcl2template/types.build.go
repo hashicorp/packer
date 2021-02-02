@@ -52,7 +52,7 @@ type BuildBlock struct {
 	Description string
 
 	// Sources is the list of sources that we want to start in this build block.
-	Sources []SourceRef
+	Sources []SourceUseBlock
 
 	// ProvisionerBlocks references a list of HCL provisioner block that will
 	// will be ran against the sources.
@@ -105,7 +105,8 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			continue
 		}
 
-		build.Sources = append(build.Sources, ref)
+		// source with no body
+		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
 	}
 
 	content, moreDiags := b.Config.Content(buildSchema)

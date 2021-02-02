@@ -23,7 +23,7 @@ require (
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
+	github.com/digitalocean/go-qemu v0.0.0-20201211181942-d361e7b4965f
 	github.com/digitalocean/godo v1.11.1
 	github.com/exoscale/egoscale v0.18.1
 	github.com/fatih/camelcase v1.0.0
@@ -33,6 +33,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/google/go-cmp v0.5.2
+	github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69
 	github.com/google/uuid v1.1.2
 	github.com/gophercloud/gophercloud v0.12.0
 	github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c
@@ -49,7 +50,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/hcl/v2 v2.8.0
-	github.com/hashicorp/packer-plugin-sdk v0.0.9
+	github.com/hashicorp/packer-plugin-sdk v0.0.11-0.20210127164048-448d64e93ee6
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
@@ -75,6 +76,7 @@ require (
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
 	github.com/shirou/gopsutil v2.18.12+incompatible
+	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/stretchr/testify v1.6.1
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible
 	github.com/ucloud/ucloud-sdk-go v0.16.3
@@ -96,5 +98,7 @@ require (
 	google.golang.org/api v0.32.0
 	google.golang.org/grpc v1.32.0
 )
+
+// replace github.com/hashicorp/packer-plugin-sdk => /Users/azr/go/src/github.com/hashicorp/packer-plugin-sdk
 
 go 1.13

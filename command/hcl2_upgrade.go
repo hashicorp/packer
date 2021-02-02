@@ -202,7 +202,7 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		body := sourcesContent.Body()
 
 		body.AppendNewline()
-		if !c.Meta.CoreConfig.Components.BuilderStore.Has(builderCfg.Type) {
+		if !c.Meta.CoreConfig.Components.PluginConfig.Builders.Has(builderCfg.Type) {
 			c.Ui.Error(fmt.Sprintf("unknown builder type: %q\n", builderCfg.Type))
 			return 1
 		}

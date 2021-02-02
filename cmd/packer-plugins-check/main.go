@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer/plugin"
+	"github.com/hashicorp/packer/packer"
 )
 
 const packerPluginsCheck = "packer-plugins-check"
@@ -119,7 +119,7 @@ func checkPluginName(name string) error {
 // in the plugin configuration. At least one builder, provisioner, or post-processor should be found to validate the plugin's
 // compatibility with Packer.
 func discoverAndLoad() error {
-	config := plugin.Config{
+	config := packer.PluginConfig{
 		PluginMinPort: 10000,
 		PluginMaxPort: 25000,
 	}
@@ -129,20 +129,18 @@ func discoverAndLoad() error {
 	}
 
 	// TODO: validate correctness of plugins loaded by checking them against the output of the `describe` command.
-	plugins := config.GetPlugins()
-	if len(plugins.Builders) == 0 &&
-		len(plugins.Provisioners) == 0 &&
-		len(plugins.PostProcessors) == 0 &&
-		len(plugins.DataSources) == 0 {
-		return fmt.Errorf("couldn't load any Builder/Provisioner/Post-Processor/Datasource from the plugin binary")
+	if len(config.Builders.List()) == 0 &&
+		len(config.Provisioners.List()) == 0 &&
+		len(config.PostProcessors.List()) == 0 {
+		return fmt.Errorf("couldn't load any Builder/Provisioner/Post-Processor from the plugin binary")
 	}
 
-	return checkHCL2ConfigSpec(plugins)
+	return checkHCL2ConfigSpec(config)
 }
 
 // checkHCL2ConfigSpec checks if the hcl2spec config is present for the given plugins by validating that ConfigSpec() does not
 // return an empty map of specs.
-func checkHCL2ConfigSpec(plugins plugin.Plugins) error {
+func checkHCL2ConfigSpec(plugins packer.PluginConfig) error {
 	var errs *packersdk.MultiError
 	for _, b := range plugins.Builders.List() {
 		builder, err := plugins.Builders.Start(b)

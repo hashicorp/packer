@@ -17,6 +17,7 @@
 package qmp
 
 import (
+	"context"
 	"errors"
 	"fmt"
 )
@@ -31,7 +32,7 @@ type Monitor interface {
 	Connect() error
 	Disconnect() error
 	Run(command []byte) (out []byte, err error)
-	Events() (events <-chan Event, err error)
+	Events(context.Context) (events <-chan Event, err error)
 }
 
 // Command represents a QMP command.
