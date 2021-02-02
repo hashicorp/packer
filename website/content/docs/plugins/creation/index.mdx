@@ -208,21 +208,6 @@ for help with this step)
     - `GPG_PRIVATE_KEY` - Your ASCII-armored GPG private key. You can export this with `gpg --armor --export-secret-keys [key ID or email]`.
     - `PASSPHRASE` - The passphrase for your GPG private key.
 5. Push a new valid version tag (e.g. `v1.2.3`) to test that the GitHub Actions releaser is working. The tag must be a valid [Semantic Version](https://semver.org/) preceded with a `v`.
-6. Make sure to [register your plugin](#registering-the-plugin) with us.
-
-~> **Important:** Avoid modifying or replacing an already-released version of a plugin. Instead, if changes are necessary,
-please release as a new version.
-
-### Registering the Plugin
-
-We like to keep all of our products and external plugins release assets together in the same place. To publish
-an external plugin to [releases.hashicorp.com](https://releases.hashicorp.com), we require the maintainer's GPG public key to validate the asset authenticity.
-To register your plugin with HashiCorp, send us your GPG public key and your plugin's GitHub repository via [maintainers@hashicorp.com](mailto://maintainers@hashicorp.com).
-
-To get you GPG public key in ASCII-armor format, use the following command, substituting the GPG key ID or email address:
-```bash
-$ gpg --armor --export "{Key ID or email address}"
-```
 
 ### Plugin Development Tips
 
