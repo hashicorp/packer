@@ -5,7 +5,9 @@
         "aws_region": null,
         "aws_secondary_region": "{{ env `AWS_DEFAULT_REGION` }}",
         "aws_secret_key": "",
-        "aws_access_key": ""
+        "aws_access_key": "",
+        "password": "{{ aws_secretsmanager `sample/app/password` }}",
+        "password_key": "{{ aws_secretsmanager `sample/app/passwords` `api_key` }}"
     },
     "sensitive-variables": [
         "aws_secret_key",
@@ -126,6 +128,22 @@
                 "echo {{ template_dir }} is not {{ pwd }}",
                 "echo {{ packer_version }}",
                 "echo {{ uuid }}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo {{ user  `password` }}",
+                "echo {{ aws_secretsmanager `sample/app/password` }}",
+                "echo {{ user  `password_key` }}",
+                "echo {{ aws_secretsmanager `sample/app/passwords` `api_key` }}"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo {{ aws_secretsmanager `some_secret` }}",
+                "echo {{ aws_secretsmanager `some_secret` `with_key` }}"
             ]
         },
         {
