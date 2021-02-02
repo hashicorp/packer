@@ -177,11 +177,14 @@ func (p *PausedProvisioner) pausingNoUpdate(ctx context.Context) error {
 
 func (p *PausedProvisioner) pausingWithUpdates(ctx context.Context, ui packersdk.Ui) error {
 	updateTime := 10
-	ticker := time.NewTicker(time.Duration(updateTime) * time.Second)
-	defer ticker.Stop()
+	var C <-chan time.Time
+	if updateTime > 0 {
+		ticker := time.NewTicker(time.Duration(updateTime) * time.Second)
+		defer ticker.Stop()
+	}
 	totalTime := p.PauseBefore.Seconds()
 
-	pausingCtx, cancel := context.WithTimeout(context.Background(), p.PauseBefore)
+	pausingCtx, cancel := context.WithTimeout(ctx, p.PauseBefore)
 	defer cancel()
 
 	var err error
