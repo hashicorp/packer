@@ -267,7 +267,7 @@ of post-processors that are treated as as single pipeline, see
   post-processors {
     post-processor "docker-import" {
         repository =  "myrepo/myimage"
-        tag = "0.7"
+        tag = ["0.7"]
       }
     post-processor "docker-push" {}
   }
@@ -329,7 +329,7 @@ information):
   post-processors {
     post-processor "docker-tag" {
         repository =  "myrepo/myimage"
-        tag = "0.7"
+        tag = ["0.7"]
       }
     post-processor "docker-push" {}
   }
@@ -383,14 +383,14 @@ nearly-identical sequence definitions, as demonstrated by the example below:
   post-processors {
     post-processor "docker-tag" {
         repository =  "myrepo/myimage1"
-        tag = "0.7"
+        tag = ["0.7"]
       }
     post-processor "docker-push" {}
   }
   post-processors {
     post-processor "docker-tag" {
         repository =  "myrepo/myimage2"
-        tag = "0.7"
+        tag = ["0.7"]
       }
     post-processor "docker-push" {}
   }
@@ -488,7 +488,7 @@ above and example configuration properties are shown below:
 post-processors {
   post-processor "docker-tag" {
       repository = "12345.dkr.ecr.us-east-1.amazonaws.com/packer"
-      tag = "0.7"
+      tag = ["0.7"]
   }
   post-processor "docker-push" {
       ecr_login = true
