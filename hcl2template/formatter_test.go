@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -38,17 +39,8 @@ func TestHCL2Formatter_Format(t *testing.T) {
 	}
 }
 
-type FormatterRecursiveTestCase struct {
-	TestCaseName             string
-	Recursion                bool
-	TopLevelFilePreFormat    []byte
-	LowerLevelFilePreFormat  []byte
-	TopLevelFilePostFormat   []byte
-	LowerLevelFilePostFormat []byte
-}
-
 func TestHCL2Formatter_Recursive(t *testing.T) {
-	unformattedData := []byte(`
+	unformattedData := `
 // starts resources to provision them.
 build {
     sources = [
@@ -197,9 +189,9 @@ build {
         }
     }
 }
-`)
+`
 
-	formattedData := []byte(`
+	formattedData := `
 // starts resources to provision them.
 build {
   sources = [
@@ -348,90 +340,127 @@ build {
     }
   }
 }
-`)
+`
+
+	tests := []struct {
+		name                  string
+		recursive             bool
+		alreadyPresentContent map[string]string
+		expectedContent       map[string]string
+	}{
+		{
+			name:      "nested formats recursively",
+			recursive: true,
+			alreadyPresentContent: map[string]string{
+				"foo/bar/baz":     unformattedData,
+				"foo/bar/baz/woo": unformattedData,
+				"":                unformattedData,
+			},
+			expectedContent: map[string]string{
+				"foo/bar/baz":     formattedData,
+				"foo/bar/baz/woo": formattedData,
+				"":                formattedData,
+			},
+		},
+		{
+			name:      "nested no recursive format",
+			recursive: false,
+			alreadyPresentContent: map[string]string{
+				"foo/bar/baz":     unformattedData,
+				"foo/bar/baz/woo": unformattedData,
+				"":                unformattedData,
+			},
+			expectedContent: map[string]string{
+				"foo/bar/baz":     unformattedData,
+				"foo/bar/baz/woo": unformattedData,
+				"":                formattedData,
+			},
+		},
+	}
 
 	var buf bytes.Buffer
 	f := NewHCL2Formatter()
 	f.Output = &buf
 	f.Write = true
 
-	recursiveTestCases := []FormatterRecursiveTestCase{
-		{
-			TestCaseName:             "With Recursive flag on",
-			Recursion:                true,
-			TopLevelFilePreFormat:    unformattedData,
-			LowerLevelFilePreFormat:  unformattedData,
-			TopLevelFilePostFormat:   formattedData,
-			LowerLevelFilePostFormat: formattedData,
-		},
-		{
-			TestCaseName:             "With Recursive flag off",
-			Recursion:                false,
-			TopLevelFilePreFormat:    unformattedData,
-			LowerLevelFilePreFormat:  unformattedData,
-			TopLevelFilePostFormat:   formattedData,
-			LowerLevelFilePostFormat: unformattedData,
-		},
+	testFileName := "test.pkrvars.hcl"
+
+	for _, tt := range tests {
+		// TODO update this
+		topDir, err := ioutil.TempDir("testdata/format", "temp-dir")
+		if err != nil {
+			t.Fatalf("Failed to create TopDir for test case: %s, error: %v", tt.name, err)
+		}
+		defer os.Remove(topDir)
+
+		for testDir, content := range tt.alreadyPresentContent {
+			dir := filepath.Join(topDir, testDir)
+			err := os.MkdirAll(dir, 0700)
+			if err != nil {
+				os.RemoveAll(topDir)
+				t.Fatalf(
+					"Failed to create subDir: %s\n\n, for test case: %s\n\n, error: %v",
+					testDir,
+					tt.name,
+					err)
+			}
+
+			file, err := os.Create(filepath.Join(dir, testFileName))
+			if err != nil {
+				os.RemoveAll(topDir)
+				t.Fatalf("failed to create testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
+					testDir,
+					tt.name,
+					err)
+			}
+
+			_, err = file.Write([]byte(content))
+			if err != nil {
+				os.RemoveAll(topDir)
+				t.Fatalf("failed to write to testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
+					testDir,
+					tt.name,
+					err)
+			}
+
+			file.Close()
+		}
+
+		// TODO reformat this
+		f.Recursive = tt.recursive
+		_, diags := f.Format(topDir)
+		if diags.HasErrors() {
+			os.RemoveAll(topDir)
+			t.Fatalf("the call to Format failed unexpectedly for test case: %s, errors: %s", tt.name, diags.Error())
+		}
+
+		for expectedPath, expectedContent := range tt.expectedContent {
+			b, err := ioutil.ReadFile(filepath.Join(topDir, expectedPath, testFileName))
+			if err != nil {
+				os.RemoveAll(topDir)
+				t.Fatalf("ReadFile failed for test case: %s, error : %v", tt.name, err)
+			}
+			got := string(b)
+			if diff := cmp.Diff(got, expectedContent); diff != "" {
+				os.RemoveAll(topDir)
+				t.Errorf(
+					"format dir, unexpected result for test case: %s, path: %s,  Expected: %s, Got: %s",
+					tt.name,
+					expectedPath,
+					expectedContent,
+					got)
+			}
+		}
+
+		err = os.RemoveAll(topDir)
+		if err != nil {
+			t.Errorf(
+				"Failed to delete top level test directory for test case: %s, please clean before another test run. Error: %s",
+				tt.name,
+				err)
+		}
 	}
 
-	for _, tc := range recursiveTestCases {
-		executeRecursiveTestCase(t, tc, f)
-	}
-}
-
-func executeRecursiveTestCase(t *testing.T, tc FormatterRecursiveTestCase, f *HCL2Formatter) {
-	f.Recursive = tc.Recursion
-
-	var topDir string
-	topDir, err := ioutil.TempDir("testdata/format", "top-dir")
-	if err != nil {
-		t.Fatalf("failed to create sub level recurisve directory for test case: %s, errors: %s", tc.TestCaseName, err)
-	}
-	defer os.Remove(topDir)
-
-	var subDir string
-	subDir, err = ioutil.TempDir(topDir, "sub-dir")
-	if err != nil {
-		t.Fatalf("failed to create sub level recurisve directory for test case: %s, errors: %s", tc.TestCaseName, err)
-	}
-	defer os.Remove(subDir)
-
-	topTempFile, err := ioutil.TempFile(topDir, "*.pkr.hcl")
-	if err != nil {
-		t.Fatalf("failed to create top level tempfile for test case: %s, errors: %s", tc.TestCaseName, err)
-	}
-	defer os.Remove(topTempFile.Name())
-
-	_, _ = topTempFile.Write(tc.TopLevelFilePreFormat)
-	topTempFile.Close()
-
-	subTempFile, err := ioutil.TempFile(subDir, "*.pkr.hcl")
-	if err != nil {
-		t.Fatalf("failed to create sub level tempfile for test case: %s, errors: %s", tc.TestCaseName, err)
-	}
-	defer os.Remove(subTempFile.Name())
-
-	_, _ = subTempFile.Write(tc.LowerLevelFilePreFormat)
-	subTempFile.Close()
-
-	_, diags := f.Format(topDir)
-	if diags.HasErrors() {
-		t.Fatalf("the call to Format failed unexpectedly for test case: %s, errors: %s", tc.TestCaseName, diags.Error())
-	}
-
-	validateFileIsFormatted(t, tc.TopLevelFilePostFormat, topTempFile, tc.TestCaseName)
-	validateFileIsFormatted(t, tc.LowerLevelFilePostFormat, subTempFile, tc.TestCaseName)
-}
-
-func validateFileIsFormatted(t *testing.T, formattedData []byte, testFile *os.File, testCaseName string) {
-	data, err := ioutil.ReadFile(testFile.Name())
-	if err != nil {
-		t.Fatalf("failed to open the newly formatted fixture for test case: %s, errors: %s", testCaseName, err)
-	}
-
-	if diff := cmp.Diff(string(data), string(formattedData)); diff != "" {
-		t.Errorf("Unexpected format tfData output for test case: %s, errors: %s", testCaseName, diff)
-	}
 }
 
 func TestHCL2Formatter_Format_Write(t *testing.T) {
