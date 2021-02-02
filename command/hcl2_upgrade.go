@@ -294,7 +294,6 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		postProcessorsOut = append(postProcessorsOut, transposeTemplatingCalls(postProcessorContent.Bytes())...)
 	}
 
-
 	// Output amazon-secretsmanager data source section
 	keys := make([]string, 0, len(amazonSecretsManagerMap))
 	for k := range amazonSecretsManagerMap {
@@ -592,14 +591,14 @@ func variableTransposeTemplatingCalls(s []byte, variableName string) []byte {
 	funcMap["aws_secretsmanager"] = func(a ...string) string {
 		if len(a) == 2 {
 			amazonSecretsManagerMap[variableName] = map[string]interface{}{
-				"name" : a[0],
-				"key": a[1],
+				"name": a[0],
+				"key":  a[1],
 			}
 			return fmt.Sprintf("${data.amazon-secretsmanager.%s.value}", variableName)
 		}
 
 		amazonSecretsManagerMap[variableName] = map[string]interface{}{
-			"name" : a[0],
+			"name": a[0],
 		}
 		return fmt.Sprintf("${data.amazon-secretsmanager.%s.value}", variableName)
 	}
@@ -626,7 +625,6 @@ func variableTransposeTemplatingCalls(s []byte, variableName string) []byte {
 
 	return str.Bytes()
 }
-
 
 func jsonBodyToHCL2Body(out *hclwrite.Body, kvs map[string]interface{}) {
 	ks := []string{}
