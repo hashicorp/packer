@@ -26,6 +26,10 @@ generate a new token.
 -> **Note:** Packer init does not work with legacy JSON template. You can
 upgrade your JSON configfiles to HCL using the hcl2ugprade command.
 
+-> **Note:** Packer init will only work with multiplugins -- that is plugins
+that are named `packer-plugin-*` -- to install a single plugin binary -- that is
+`packer-provisioner-*`, `packer-builder-*`, etc. -- nothing changes, you will
+have to install the plugin manually.
 
 The `packer init` command is used to download Packer plugin binaries.
 This is the first command that should be executed when working with a new or
