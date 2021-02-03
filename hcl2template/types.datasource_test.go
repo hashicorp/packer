@@ -53,6 +53,33 @@ func TestParse_datasource(t *testing.T) {
 			nil,
 			false,
 		},
+		{"not allowed usage of data source within another data source",
+			defaultParser,
+			parseTestArgs{"testdata/datasources/not-allowed.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "datasources"),
+				Datasources: Datasources{
+					{
+						Type: "amazon-ami",
+						Name: "test_0",
+					}: {
+						Type: "amazon-ami",
+						Name: "test_0",
+					},
+					{
+						Type: "amazon-ami",
+						Name: "test_1",
+					}: {
+						Type: "amazon-ami",
+						Name: "test_1",
+					},
+				},
+			},
+			true, true,
+			nil,
+			false,
+		},
 		{"inexistent source",
 			defaultParser,
 			parseTestArgs{"testdata/datasources/inexistent.pkr.hcl", nil, nil},
