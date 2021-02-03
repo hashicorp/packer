@@ -73,10 +73,20 @@ const (
 	dataAccessor           = "data"
 )
 
+type BlockContext string
+
+var (
+	InputVariableContext BlockContext = "InputVariableContext"
+	LocalContext         BlockContext = "LocalContext"
+	BuildContext         BlockContext = "BuildContext"
+	DatasourceContext    BlockContext = "DatasourceContext"
+	NilContext           BlockContext = "NilContext"
+)
+
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
 // decoder in order to tell what is the actual value of a var or a local and
 // the list of defined functions.
-func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalContext {
+func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.Value) *hcl.EvalContext {
 	inputVariables, _ := cfg.InputVariables.Values()
 	localVariables, _ := cfg.LocalVariables.Values()
 	ectx := &hcl.EvalContext{
@@ -98,6 +108,13 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 			}),
 		},
 	}
+
+	switch ctx {
+	case LocalContext, BuildContext:
+		datasourceVariables, _ := cfg.Datasources.Values()
+		ectx.Variables[dataAccessor] = cty.ObjectVal(datasourceVariables)
+	}
+
 	for k, v := range variables {
 		ectx.Variables[k] = v
 	}
@@ -227,12 +244,7 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 
 func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
-	datasourceVariables, moreDiags := c.Datasources.Values()
-	diags = append(diags, moreDiags...)
-	if moreDiags.HasErrors() {
-		return diags
-	}
-	value, moreDiags := local.Expr.Value(c.EvalContext(datasourceVariables))
+	value, moreDiags := local.Expr.Value(c.EvalContext(LocalContext, nil))
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return diags
@@ -444,12 +456,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				}
 			}
 
-			datasourceVariables, moreDiags := cfg.Datasources.Values()
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
-			builder, moreDiags, generatedVars := cfg.startBuilder(srcUsage, cfg.EvalContext(datasourceVariables), opts)
+			builder, moreDiags, generatedVars := cfg.startBuilder(srcUsage, cfg.EvalContext(BuildContext, nil), opts)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -471,12 +478,12 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				buildAccessor:   cty.ObjectVal(unknownBuildValues),
 			}
 
-			provisioners, moreDiags := cfg.getCoreBuildProvisioners(srcUsage, build.ProvisionerBlocks, cfg.EvalContext(variables))
+			provisioners, moreDiags := cfg.getCoreBuildProvisioners(srcUsage, build.ProvisionerBlocks, cfg.EvalContext(BuildContext, variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			pps, moreDiags := cfg.getCoreBuildPostProcessors(srcUsage, build.PostProcessorsLists, cfg.EvalContext(variables))
+			pps, moreDiags := cfg.getCoreBuildPostProcessors(srcUsage, build.PostProcessorsLists, cfg.EvalContext(BuildContext, variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -618,7 +625,7 @@ func (p *PackerConfig) handleEval(line string) (out string, exit bool, diags hcl
 		return "", false, diags
 	}
 
-	val, valueDiags := expr.Value(p.EvalContext(nil))
+	val, valueDiags := expr.Value(p.EvalContext(NilContext, nil))
 	diags = append(diags, valueDiags...)
 	if valueDiags.HasErrors() {
 		return "", false, diags

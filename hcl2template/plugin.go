@@ -143,7 +143,7 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 				body = hcl.MergeBodies([]hcl.Body{body, srcUsage.Body})
 			}
 			// expand any dynamic block.
-			body = dynblock.Expand(body, cfg.EvalContext(nil))
+			body = dynblock.Expand(body, cfg.EvalContext(BuildContext, nil))
 
 			srcUsage.Body = body
 		}
@@ -158,7 +158,7 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 				})
 			}
 			// Allow rest of the body to have dynamic blocks
-			provBlock.HCL2Ref.Rest = dynblock.Expand(provBlock.HCL2Ref.Rest, cfg.EvalContext(nil))
+			provBlock.HCL2Ref.Rest = dynblock.Expand(provBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
 		}
 
 		for _, ppList := range build.PostProcessorsLists {
@@ -172,7 +172,7 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 					})
 				}
 				// Allow the rest of the body to have dynamic blocks
-				ppBlock.HCL2Ref.Rest = dynblock.Expand(ppBlock.HCL2Ref.Rest, cfg.EvalContext(nil))
+				ppBlock.HCL2Ref.Rest = dynblock.Expand(ppBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
 			}
 		}
 

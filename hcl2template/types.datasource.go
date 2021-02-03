@@ -59,9 +59,7 @@ func (ds *Datasources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 		valuesMap[ref.Type] = inner
 	}
 
-	return map[string]cty.Value{
-		dataAccessor: cty.ObjectVal(res),
-	}, diags
+	return res, diags
 }
 
 func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore, ref DatasourceRef) (packersdk.Datasource, hcl.Diagnostics) {
@@ -104,7 +102,7 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 		})
 	}
 	body := block.Body
-	decoded, moreDiags := decodeHCL2Spec(body, cfg.EvalContext(nil), datasource)
+	decoded, moreDiags := decodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return nil, diags
