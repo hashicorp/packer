@@ -112,5 +112,6 @@ func (m *CreateInstanceConfigurationDetails) UnmarshalJSON(data []byte) (e error
 	} else {
 		m.InstanceDetails = nil
 	}
+
 	return
 }

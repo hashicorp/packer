@@ -22,7 +22,6 @@ type UpdateIpSecConnectionTunnelSharedSecretDetails struct {
 
 	// The shared secret (pre-shared key) to use for the tunnel. Only numbers, letters, and spaces
 	// are allowed.
-	// Example: `EXAMPLEToUis6j1cp8GdVQxcmdfMO0yXMLilZTbYCMDGu4V8o`
 	SharedSecret *string `mandatory:"false" json:"sharedSecret"`
 }
 

@@ -17,7 +17,8 @@ import (
 	"github.com/oracle/oci-go-sdk/common"
 )
 
-// ShapeMaxVnicAttachmentOptions The possible configurations for the number of VNIC attachments available to an instance of this shape. If this field is null, then all instances of this shape have a fixed maximum number of VNIC attachments equal to `maxVnicAttachments`.
+// ShapeMaxVnicAttachmentOptions For a flexible shape, the number of VNIC attachments that are available for instances that use this shape.
+// If this field is null, then this shape has a fixed maximum number of VNIC attachments equal to `maxVnicAttachments`.
 type ShapeMaxVnicAttachmentOptions struct {
 
 	// The lowest maximum value of VNIC attachments.

@@ -64,6 +64,9 @@ type CreateBootVolumeDetails struct {
 	//   * `10`: Represents Balanced option.
 	//   * `20`: Represents Higher Performance option.
 	VpusPerGB *int64 `mandatory:"false" json:"vpusPerGB"`
+
+	// Specifies whether the auto-tune performance is enabled for this boot volume.
+	IsAutoTuneEnabled *bool `mandatory:"false" json:"isAutoTuneEnabled"`
 }
 
 func (m CreateBootVolumeDetails) String() string {
@@ -80,6 +83,7 @@ func (m *CreateBootVolumeDetails) UnmarshalJSON(data []byte) (e error) {
 		KmsKeyId           *string                           `json:"kmsKeyId"`
 		SizeInGBs          *int64                            `json:"sizeInGBs"`
 		VpusPerGB          *int64                            `json:"vpusPerGB"`
+		IsAutoTuneEnabled  *bool                             `json:"isAutoTuneEnabled"`
 		AvailabilityDomain *string                           `json:"availabilityDomain"`
 		CompartmentId      *string                           `json:"compartmentId"`
 		SourceDetails      bootvolumesourcedetails           `json:"sourceDetails"`
@@ -104,6 +108,8 @@ func (m *CreateBootVolumeDetails) UnmarshalJSON(data []byte) (e error) {
 
 	m.VpusPerGB = model.VpusPerGB
 
+	m.IsAutoTuneEnabled = model.IsAutoTuneEnabled
+
 	m.AvailabilityDomain = model.AvailabilityDomain
 
 	m.CompartmentId = model.CompartmentId
@@ -117,5 +123,6 @@ func (m *CreateBootVolumeDetails) UnmarshalJSON(data []byte) (e error) {
 	} else {
 		m.SourceDetails = nil
 	}
+
 	return
 }

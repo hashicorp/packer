@@ -33,6 +33,9 @@ type ListPrivateIpsRequest struct {
 	// The OCID of the VNIC.
 	VnicId *string `mandatory:"false" contributesTo:"query" name:"vnicId"`
 
+	// The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the VLAN.
+	VlanId *string `mandatory:"false" contributesTo:"query" name:"vlanId"`
+
 	// Unique Oracle-assigned identifier for the request.
 	// If you need to contact Oracle about a particular request, please provide the request ID.
 	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`

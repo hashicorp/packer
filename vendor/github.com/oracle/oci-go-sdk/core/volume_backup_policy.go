@@ -34,10 +34,11 @@ type VolumeBackupPolicy struct {
 	// The collection of schedules that this policy will apply.
 	Schedules []VolumeBackupSchedule `mandatory:"true" json:"schedules"`
 
-	// The date and time the volume backup policy was created. Format defined by RFC3339.
+	// The date and time the volume backup policy was created. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
-	// The paired destination region (pre-defined by oracle) for scheduled cross region backup calls. Example `us-ashburn-1`
+	// The paired destination region for copying scheduled backups to. Example `us-ashburn-1`.
+	// See Region Pairs (https://docs.cloud.oracle.com/iaas/Content/Block/Tasks/schedulingvolumebackups.htm#RegionPairs) for details about paired regions.
 	DestinationRegion *string `mandatory:"false" json:"destinationRegion"`
 
 	// The OCID of the compartment that contains the volume backup.

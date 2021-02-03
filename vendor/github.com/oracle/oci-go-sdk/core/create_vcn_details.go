@@ -21,7 +21,7 @@ import (
 type CreateVcnDetails struct {
 
 	// The CIDR IP address block of the VCN.
-	// Example: `172.16.0.0/16`
+	// Example: `10.0.0.0/16`
 	CidrBlock *string `mandatory:"true" json:"cidrBlock"`
 
 	// The OCID of the compartment to contain the VCN.

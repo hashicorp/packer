@@ -27,7 +27,9 @@ type UpdateVolumeBackupPolicyDetails struct {
 	// Avoid entering confidential information.
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
-	// The paired destination region (pre-defined by oracle) for scheduled cross region backup calls. Example: `us-ashburn-1`
+	// The paired destination region for copying scheduled backups to. Example: `us-ashburn-1`.
+	// Specify `none` to reset the `destinationRegion` parameter.
+	// See Region Pairs (https://docs.cloud.oracle.com/iaas/Content/Block/Tasks/schedulingvolumebackups.htm#RegionPairs) for details about paired regions.
 	DestinationRegion *string `mandatory:"false" json:"destinationRegion"`
 
 	// The collection of schedules for the volume backup policy. See

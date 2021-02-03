@@ -24,34 +24,34 @@ type InstanceShapeConfig struct {
 	// The total number of OCPUs available to the instance.
 	Ocpus *float32 `mandatory:"false" json:"ocpus"`
 
-	// The total amount of memory, in gigabytes, available to the instance.
+	// The total amount of memory available to the instance, in gigabytes.
 	MemoryInGBs *float32 `mandatory:"false" json:"memoryInGBs"`
 
-	// A short description of the processors available to the instance.
+	// A short description of the instance's processor (CPU).
 	ProcessorDescription *string `mandatory:"false" json:"processorDescription"`
 
-	// The networking bandwidth, in gigabits per second, available to the instance.
+	// The networking bandwidth available to the instance, in gigabits per second.
 	NetworkingBandwidthInGbps *float32 `mandatory:"false" json:"networkingBandwidthInGbps"`
 
 	// The maximum number of VNIC attachments for the instance.
 	MaxVnicAttachments *int `mandatory:"false" json:"maxVnicAttachments"`
 
-	// The number of GPUs available to this instance.
+	// The number of GPUs available to the instance.
 	Gpus *int `mandatory:"false" json:"gpus"`
 
-	// A short description of the GPUs available to this instance.
-	// This field is `null` if `gpus` is `0`.
+	// A short description of the instance's graphics processing unit (GPU).
+	// If the instance does not have any GPUs, this field is `null`.
 	GpuDescription *string `mandatory:"false" json:"gpuDescription"`
 
 	// The number of local disks available to the instance.
 	LocalDisks *int `mandatory:"false" json:"localDisks"`
 
-	// The size of the local disks, aggregated, in gigabytes.
-	// This field is `null` if `localDisks` is equal to `0`.
+	// The aggregate size of all local disks, in gigabytes.
+	// If the instance does not have any local disks, this field is `null`.
 	LocalDisksTotalSizeInGBs *float32 `mandatory:"false" json:"localDisksTotalSizeInGBs"`
 
 	// A short description of the local disks available to this instance.
-	// This field is `null` if `localDisks` is equal to `0`.
+	// If the instance does not have any local disks, this field is `null`.
 	LocalDiskDescription *string `mandatory:"false" json:"localDiskDescription"`
 }
 

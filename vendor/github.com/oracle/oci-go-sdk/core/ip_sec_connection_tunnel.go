@@ -32,11 +32,11 @@ type IpSecConnectionTunnel struct {
 	LifecycleState IpSecConnectionTunnelLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 
 	// The IP address of Oracle's VPN headend.
-	// Example: `192.0.2.5`
+	// Example: `203.0.113.21`
 	VpnIp *string `mandatory:"false" json:"vpnIp"`
 
 	// The IP address of the CPE's VPN headend.
-	// Example: `192.0.2.157`
+	// Example: `203.0.113.22`
 	CpeIp *string `mandatory:"false" json:"cpeIp"`
 
 	// The status of the tunnel based on IPSec protocol characteristics.
@@ -55,11 +55,11 @@ type IpSecConnectionTunnel struct {
 	// The type of routing used for this tunnel (either BGP dynamic routing or static routing).
 	Routing IpSecConnectionTunnelRoutingEnum `mandatory:"false" json:"routing,omitempty"`
 
-	// The date and time the IPSec connection tunnel was created, in the format defined by RFC3339.
+	// The date and time the IPSec connection tunnel was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
 
-	// When the status of the tunnel last changed, in the format defined by RFC3339.
+	// When the status of the tunnel last changed, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeStatusUpdated *common.SDKTime `mandatory:"false" json:"timeStatusUpdated"`
 }

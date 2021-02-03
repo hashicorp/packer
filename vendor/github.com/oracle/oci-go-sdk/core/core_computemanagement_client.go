@@ -1304,6 +1304,11 @@ func (client ComputeManagementClient) terminateClusterNetwork(ctx context.Contex
 }
 
 // TerminateInstancePool Terminate the specified instance pool.
+// **Warning:** When you delete an instance pool, the resources that were created by the pool are permanently
+// deleted, including associated instances, attached boot volumes, and block volumes.
+// If an autoscaling configuration applies to the instance pool, the autoscaling configuration will be deleted
+// asynchronously after the pool is deleted. You can also manually delete the autoscaling configuration using
+// the `DeleteAutoScalingConfiguration` operation in the Autoscaling API.
 func (client ComputeManagementClient) TerminateInstancePool(ctx context.Context, request TerminateInstancePoolRequest) (response TerminateInstancePoolResponse, err error) {
 	var ociResponse common.OCIResponse
 	policy := common.NoRetryPolicy()

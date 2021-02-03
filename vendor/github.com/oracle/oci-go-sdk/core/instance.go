@@ -53,7 +53,7 @@ type Instance struct {
 	// ListShapes.
 	Shape *string `mandatory:"true" json:"shape"`
 
-	// The date and time the instance was created, in the format defined by RFC3339.
+	// The date and time the instance was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
@@ -70,8 +70,10 @@ type Instance struct {
 	// Example: `My bare metal instance`
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
-	// Additional metadata key/value pairs that you provide. They serve the same purpose and functionality as fields in the 'metadata' object.
-	// They are distinguished from 'metadata' fields in that these can be nested JSON objects (whereas 'metadata' fields are string/string maps only).
+	// Additional metadata key/value pairs that you provide. They serve the same purpose and functionality
+	// as fields in the `metadata` object.
+	// They are distinguished from `metadata` fields in that these can be nested JSON objects (whereas `metadata`
+	// fields are string/string maps only).
 	ExtendedMetadata map[string]interface{} `mandatory:"false" json:"extendedMetadata"`
 
 	// The name of the fault domain the instance is running in.
@@ -80,8 +82,7 @@ type Instance struct {
 	// instances so that they are not on the same physical hardware within a single availability domain.
 	// A hardware failure or Compute hardware maintenance that affects one fault domain does not affect
 	// instances in other fault domains.
-	// If you do not specify the fault domain, the system selects one for you. To change the fault
-	// domain for an instance, terminate it and launch a new instance in the preferred fault domain.
+	// If you do not specify the fault domain, the system selects one for you.
 	// Example: `FAULT-DOMAIN-1`
 	FaultDomain *string `mandatory:"false" json:"faultDomain"`
 
@@ -116,11 +117,14 @@ type Instance struct {
 	// Specifies the configuration mode for launching virtual machine (VM) instances. The configuration modes are:
 	// * `NATIVE` - VM instances launch with iSCSI boot and VFIO devices. The default value for Oracle-provided images.
 	// * `EMULATED` - VM instances launch with emulated devices, such as the E1000 network driver and emulated SCSI disk controller.
-	// * `PARAVIRTUALIZED` - VM instances launch with paravirtualized devices using virtio drivers.
+	// * `PARAVIRTUALIZED` - VM instances launch with paravirtualized devices using VirtIO drivers.
 	// * `CUSTOM` - VM instances launch with custom configuration settings specified in the `LaunchOptions` parameter.
 	LaunchMode InstanceLaunchModeEnum `mandatory:"false" json:"launchMode,omitempty"`
 
+	// Options for tuning the compatibility and performance of VM shapes. The values that you specify override any default values.
 	LaunchOptions *LaunchOptions `mandatory:"false" json:"launchOptions"`
+
+	AvailabilityConfig *InstanceAvailabilityConfig `mandatory:"false" json:"availabilityConfig"`
 
 	// Custom metadata that you provide.
 	Metadata map[string]string `mandatory:"false" json:"metadata"`
@@ -136,7 +140,7 @@ type Instance struct {
 
 	AgentConfig *InstanceAgentConfig `mandatory:"false" json:"agentConfig"`
 
-	// The date and time the instance is expected to be stopped / started,  in the format defined by RFC3339.
+	// The date and time the instance is expected to be stopped / started,  in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// After that time if instance hasn't been rebooted, Oracle will reboot the instance within 24 hours of the due time.
 	// Regardless of how the instance was stopped, the flag will be reset to empty as soon as instance reaches Stopped state.
 	// Example: `2018-05-25T21:10:29.600Z`
@@ -160,6 +164,7 @@ func (m *Instance) UnmarshalJSON(data []byte) (e error) {
 		IpxeScript               *string                           `json:"ipxeScript"`
 		LaunchMode               InstanceLaunchModeEnum            `json:"launchMode"`
 		LaunchOptions            *LaunchOptions                    `json:"launchOptions"`
+		AvailabilityConfig       *InstanceAvailabilityConfig       `json:"availabilityConfig"`
 		Metadata                 map[string]string                 `json:"metadata"`
 		ShapeConfig              *InstanceShapeConfig              `json:"shapeConfig"`
 		SourceDetails            instancesourcedetails             `json:"sourceDetails"`
@@ -200,6 +205,8 @@ func (m *Instance) UnmarshalJSON(data []byte) (e error) {
 
 	m.LaunchOptions = model.LaunchOptions
 
+	m.AvailabilityConfig = model.AvailabilityConfig
+
 	m.Metadata = model.Metadata
 
 	m.ShapeConfig = model.ShapeConfig
@@ -233,6 +240,7 @@ func (m *Instance) UnmarshalJSON(data []byte) (e error) {
 	m.Shape = model.Shape
 
 	m.TimeCreated = model.TimeCreated
+
 	return
 }
 

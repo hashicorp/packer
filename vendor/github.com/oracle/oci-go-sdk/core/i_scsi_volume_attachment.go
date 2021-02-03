@@ -34,7 +34,7 @@ type IScsiVolumeAttachment struct {
 	// The OCID of the instance the volume is attached to.
 	InstanceId *string `mandatory:"true" json:"instanceId"`
 
-	// The date and time the volume was created, in the format defined by RFC3339.
+	// The date and time the volume was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
@@ -45,11 +45,11 @@ type IScsiVolumeAttachment struct {
 	// Example: `169.254.0.2`
 	Ipv4 *string `mandatory:"true" json:"ipv4"`
 
-	// The target volume's iSCSI Qualified Name in the format defined by RFC 3720.
-	// Example: `iqn.2015-12.us.oracle.com:456b0391-17b8-4122-bbf1-f85fc0bb97d9`
+	// The target volume's iSCSI Qualified Name in the format defined by RFC 3720 (https://tools.ietf.org/html/rfc3720#page-32).
+	// Example: `iqn.2015-12.us.oracle.com:<CHAP_username>`
 	Iqn *string `mandatory:"true" json:"iqn"`
 
-	// The volume's iSCSI port.
+	// The volume's iSCSI port, usually port 860 or 3260.
 	// Example: `3260`
 	Port *int `mandatory:"true" json:"port"`
 
@@ -72,11 +72,10 @@ type IScsiVolumeAttachment struct {
 
 	// The Challenge-Handshake-Authentication-Protocol (CHAP) secret valid for the associated CHAP user name.
 	// (Also called the "CHAP password".)
-	// Example: `d6866c0d-298b-48ba-95af-309b4faux45e`
 	ChapSecret *string `mandatory:"false" json:"chapSecret"`
 
-	// The volume's system-generated Challenge-Handshake-Authentication-Protocol (CHAP) user name.
-	// Example: `ocid1.volume.oc1.phx.abyhqljrgvttnlx73nmrwfaux7kcvzfs3s66izvxf2h4lgvyndsdsnoiwr5q`
+	// The volume's system-generated Challenge-Handshake-Authentication-Protocol (CHAP) user name. See RFC 1994 (https://tools.ietf.org/html/rfc1994) for more on CHAP.
+	// Example: `ocid1.volume.oc1.phx.<unique_ID>`
 	ChapUsername *string `mandatory:"false" json:"chapUsername"`
 
 	// The current state of the volume attachment.

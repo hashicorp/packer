@@ -34,7 +34,6 @@ type CreateIpSecConnectionTunnelDetails struct {
 	// spaces are allowed. If you don't provide a value,
 	// Oracle generates a value for you. You can specify your own shared secret later if
 	// you like with UpdateIPSecConnectionTunnelSharedSecret.
-	// Example: `EXAMPLEToUis6j1cp8GdVQxcmdfMO0yXMLilZTbYCMDGu4V8o`
 	SharedSecret *string `mandatory:"false" json:"sharedSecret"`
 
 	// Information for establishing a BGP session for the IPSec tunnel. Required if the tunnel uses

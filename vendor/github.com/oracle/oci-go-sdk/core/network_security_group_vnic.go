@@ -28,7 +28,7 @@ type NetworkSecurityGroupVnic struct {
 	ResourceId *string `mandatory:"false" json:"resourceId"`
 
 	// The date and time the VNIC was added to the network security group, in the format
-	// defined by RFC3339.
+	// defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeAssociated *common.SDKTime `mandatory:"false" json:"timeAssociated"`
 }

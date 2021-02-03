@@ -58,5 +58,6 @@ func (m *InstanceConfigurationBlockVolumeDetails) UnmarshalJSON(data []byte) (e 
 	m.CreateDetails = model.CreateDetails
 
 	m.VolumeId = model.VolumeId
+
 	return
 }
