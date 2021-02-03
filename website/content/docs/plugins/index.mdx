@@ -40,9 +40,10 @@ communicates with them. For example, the Shell provisioner is actually run as
 look at your process list and you should see a handful of `packer-` prefixed
 applications running.
 
+## Installing Plugins
 
 <Tabs>
-<Tab heading="Plugins installed with Packer init (from Packer v1.7.0)">
+<Tab heading="with Packer init (from Packer v1.7.0)">
 
 ~> **Note**: Only _multi-plugin binaries_ -- that is plugins named
 packer-plugin-*, like the `packer-plugin-amazon` -- are expected to work with
@@ -152,7 +153,7 @@ Packer will error if you set the `packer-plugin-` prefix in a `source`. This
 will avoid conflicting with other plugins for other tools, like Terraform.
 
 </Tab>
-<Tab heading="Manually installed legacy plugins">
+<Tab heading="manually">
 
 The easiest way to manually install a plugin is to name it correctly, then place
 it in the proper directory. To name a plugin correctly, make sure the binary is
