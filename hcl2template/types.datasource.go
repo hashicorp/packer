@@ -59,7 +59,9 @@ func (ds *Datasources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 		valuesMap[ref.Type] = inner
 	}
 
-	return res, diags
+	return map[string]cty.Value{
+		dataAccessor: cty.ObjectVal(res),
+	}, diags
 }
 
 func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore, ref DatasourceRef) (packersdk.Datasource, hcl.Diagnostics) {

@@ -79,7 +79,6 @@ const (
 func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalContext {
 	inputVariables, _ := cfg.InputVariables.Values()
 	localVariables, _ := cfg.LocalVariables.Values()
-	datasourceVariables, _ := cfg.Datasources.Values()
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
@@ -97,7 +96,6 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
 				"root": cty.StringVal(strings.ReplaceAll(cfg.Basedir, `\`, `/`)),
 			}),
-			dataAccessor: cty.ObjectVal(datasourceVariables),
 		},
 	}
 	for k, v := range variables {
@@ -229,7 +227,12 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 
 func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
-	value, moreDiags := local.Expr.Value(c.EvalContext(nil))
+	datasourceVariables, moreDiags := c.Datasources.Values()
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		return diags
+	}
+	value, moreDiags := local.Expr.Value(c.EvalContext(datasourceVariables))
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return diags
@@ -441,7 +444,12 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				}
 			}
 
-			builder, moreDiags, generatedVars := cfg.startBuilder(srcUsage, cfg.EvalContext(nil), opts)
+			datasourceVariables, moreDiags := cfg.Datasources.Values()
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
+			builder, moreDiags, generatedVars := cfg.startBuilder(srcUsage, cfg.EvalContext(datasourceVariables), opts)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
