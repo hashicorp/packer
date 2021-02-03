@@ -196,7 +196,7 @@ func (p *PausedProvisioner) pausingWithUpdates(ctx context.Context, ui packersdk
 				return err
 			}
 			return nil
-		case <-ticker.C:
+		case <- C:
 			totalTime -= float64(updateTime)
 			_, ok := pausingCtx.Deadline()
 			if ok && isTimeRemaining(totalTime) {
