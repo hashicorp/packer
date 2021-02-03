@@ -2,6 +2,7 @@ package command
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -22,6 +23,7 @@ func createFiles(dir string, content map[string]string) {
 		if err := ioutil.WriteFile(contentPath, []byte(content), 0666); err != nil {
 			panic(err)
 		}
+		log.Printf("created tmp file: %s", contentPath)
 	}
 }
 
