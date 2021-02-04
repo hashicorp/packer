@@ -71,13 +71,11 @@ import (
 	amazonimportpostprocessor "github.com/hashicorp/packer/post-processor/amazon-import"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
-	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
 	digitaloceanimportpostprocessor "github.com/hashicorp/packer/post-processor/digitalocean-import"
 	dockerimportpostprocessor "github.com/hashicorp/packer/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer/post-processor/docker-push"
 	dockersavepostprocessor "github.com/hashicorp/packer/post-processor/docker-save"
 	dockertagpostprocessor "github.com/hashicorp/packer/post-processor/docker-tag"
-	exoscaleimportpostprocessor "github.com/hashicorp/packer/post-processor/exoscale-import"
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-import"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
@@ -190,17 +188,17 @@ var Provisioners = map[string]packersdk.Provisioner{
 }
 
 var PostProcessors = map[string]packersdk.PostProcessor{
-	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
-	"amazon-import":        new(amazonimportpostprocessor.PostProcessor),
-	"artifice":             new(artificepostprocessor.PostProcessor),
-	"checksum":             new(checksumpostprocessor.PostProcessor),
-	"compress":             new(compresspostprocessor.PostProcessor),
-	"digitalocean-import":  new(digitaloceanimportpostprocessor.PostProcessor),
-	"docker-import":        new(dockerimportpostprocessor.PostProcessor),
-	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
-	"docker-save":          new(dockersavepostprocessor.PostProcessor),
-	"docker-tag":           new(dockertagpostprocessor.PostProcessor),
-	"exoscale-import":      new(exoscaleimportpostprocessor.PostProcessor),
+	"alicloud-import": new(alicloudimportpostprocessor.PostProcessor),
+	"amazon-import":   new(amazonimportpostprocessor.PostProcessor),
+	"artifice":        new(artificepostprocessor.PostProcessor),
+	"checksum":        new(checksumpostprocessor.PostProcessor),
+	//	"compress":             new(compresspostprocessor.PostProcessor),
+	"digitalocean-import": new(digitaloceanimportpostprocessor.PostProcessor),
+	"docker-import":       new(dockerimportpostprocessor.PostProcessor),
+	"docker-push":         new(dockerpushpostprocessor.PostProcessor),
+	"docker-save":         new(dockersavepostprocessor.PostProcessor),
+	"docker-tag":          new(dockertagpostprocessor.PostProcessor),
+	// "exoscale-import":      new(exoscaleimportpostprocessor.PostProcessor),
 	"googlecompute-export": new(googlecomputeexportpostprocessor.PostProcessor),
 	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
 	"manifest":             new(manifestpostprocessor.PostProcessor),
