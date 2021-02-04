@@ -3,12 +3,14 @@ package command
 import (
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"runtime"
 	"sort"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/packer-plugin-sdk/acctest"
 	"golang.org/x/mod/sumdb/dirhash"
 )
 
@@ -18,11 +20,8 @@ func TestInitCommand_Run(t *testing.T) {
 	// don't require a GH token just yet. Acc tests are run on linux, darwin and
 	// windows, so requests are done 3 times.
 
-	// if os.Getenv(acctest.TestEnvVar) == "" {
-	// 	t.Skip(fmt.Sprintf("Acceptance tests skipped unless env '%s' set", acctest.TestEnvVar))
-	// }
-
 	type testCase struct {
+		checkSkip                             func(*testing.T)
 		name                                  string
 		inPluginFolder                        map[string]string
 		expectedPackerConfigDirHashBeforeInit string
@@ -37,6 +36,7 @@ func TestInitCommand_Run(t *testing.T) {
 
 	tests := []testCase{
 		{
+			nil,
 			// here we pre-write plugins with valid checksums, Packer will
 			// see those as valid installations it did.
 			// the directory hash before and after init should be the same,
@@ -66,6 +66,11 @@ func TestInitCommand_Run(t *testing.T) {
 			"h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
 		},
 		{
+			func(t *testing.T) {
+				if os.Getenv(acctest.TestEnvVar) == "" {
+					t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
+				}
+			},
 			// here we pre-write plugins with valid checksums, Packer will
 			// see those as valid installations it did.
 			// But because we require version 0.2.19, we will upgrade.
@@ -117,6 +122,12 @@ func TestInitCommand_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.checkSkip != nil {
+				tt.checkSkip(t)
+				if t.Skipped() {
+					return
+				}
+			}
 			log.Printf("starting %s", tt.name)
 			createFiles(tt.packerConfigDir, tt.inPluginFolder)
 
