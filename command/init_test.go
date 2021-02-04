@@ -3,14 +3,12 @@ package command
 import (
 	"io/ioutil"
 	"log"
-	"os"
 	"path/filepath"
 	"runtime"
 	"sort"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/packer-plugin-sdk/acctest"
 	"golang.org/x/mod/sumdb/dirhash"
 )
 
@@ -67,9 +65,9 @@ func TestInitCommand_Run(t *testing.T) {
 		},
 		{
 			func(t *testing.T) {
-				if os.Getenv(acctest.TestEnvVar) == "" {
-					t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
-				}
+				// if os.Getenv(acctest.TestEnvVar) == "" {
+				// 	t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
+				// }
 			},
 			// here we pre-write plugins with valid checksums, Packer will
 			// see those as valid installations it did.
@@ -93,7 +91,7 @@ func TestInitCommand_Run(t *testing.T) {
 					}
 				}
 			}`,
-			cfg.dir("1"),
+			cfg.dir("2"),
 			0,
 			[]string{
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64",
@@ -118,6 +116,29 @@ func TestInitCommand_Run(t *testing.T) {
 				"linux":   "h1:CGym0+Nd0LEANgzqL0wx/LDjRL8bYwlpZ0HajPJo/hs=",
 				"windows": "h1:ag0/C1YjP7KoEDYOiJHE0K+lhFgs0tVgjriWCXVT1fg=",
 			}[runtime.GOOS],
+		},
+		{
+			func(t *testing.T) {
+				// if os.Getenv(acctest.TestEnvVar) == "" {
+				// 	t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
+				// }
+			},
+			"release-with-no-binary",
+			nil,
+			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+			`# cfg.pkr.hcl
+			packer {
+				required_plugins {
+					comment = {
+						source  = "github.com/sylviamoss/comment"
+						version = "v0.2.20"
+					}
+				}
+			}`,
+			cfg.dir("3"),
+			1,
+			nil,
+			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 		},
 	}
 	for _, tt := range tests {
