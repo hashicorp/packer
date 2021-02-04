@@ -112,7 +112,7 @@ func NewESX5Driver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Dri
 	}, nil
 }
 
-func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
+func (d *ESX5Driver) Clone(dst, src string, linked bool, snapshot string) error {
 
 	linesToArray := func(lines string) []string { return strings.Split(strings.Trim(lines, "\r\n"), "\n") }
 

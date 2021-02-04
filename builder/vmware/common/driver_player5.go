@@ -31,7 +31,7 @@ func NewPlayer5Driver(config *SSHConfig) Driver {
 	}
 }
 
-func (d *Player5Driver) Clone(dst, src string, linked bool) error {
+func (d *Player5Driver) Clone(dst, src string, linked bool, snapshot string) error {
 	return errors.New("Cloning is not supported with VMWare Player version 5. Please use VMWare Player version 6, or greater.")
 }
 

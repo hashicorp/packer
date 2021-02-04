@@ -30,7 +30,7 @@ func NewWorkstation9Driver(config *SSHConfig) Driver {
 	}
 }
 
-func (d *Workstation9Driver) Clone(dst, src string, linked bool) error {
+func (d *Workstation9Driver) Clone(dst, src string, linked bool, snapshot string) error {
 	return errors.New("Cloning is not supported with VMware WS version 9. Please use VMware WS version 10, or greater.")
 }
 

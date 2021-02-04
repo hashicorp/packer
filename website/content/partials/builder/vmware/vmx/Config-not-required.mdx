@@ -14,6 +14,11 @@
   scenarios. Most users will wish to create a full clone instead. Defaults
   to false.
 
+- `attach_snapshot` (string) - Default to `null/empty`. The name of an
+  **existing** snapshot to which the builder shall attach the VM before
+  starting it. If no snapshot is specified the builder will simply start the
+  VM from it's current state i.e. snapshot.
+
 - `vm_name` (string) - This is the name of the VMX file for the new virtual
   machine, without the file extension. By default this is packer-BUILDNAME,
   where "BUILDNAME" is the name of the build.

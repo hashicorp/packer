@@ -47,6 +47,11 @@ type Config struct {
 	// scenarios. Most users will wish to create a full clone instead. Defaults
 	// to false.
 	Linked bool `mapstructure:"linked" required:"false"`
+	// Default to `null/empty`. The name of an
+	// **existing** snapshot to which the builder shall attach the VM before
+	// starting it. If no snapshot is specified the builder will simply start the
+	// VM from it's current state i.e. snapshot.
+	AttachSnapshot string `mapstructure:"attach_snapshot" required:"false"`
 	// Path to the source VMX file to clone. If
 	// remote_type is enabled then this specifies a path on the remote_host.
 	SourcePath string `mapstructure:"source_path" required:"true"`
