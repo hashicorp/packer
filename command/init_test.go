@@ -3,12 +3,14 @@ package command
 import (
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"runtime"
 	"sort"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/packer-plugin-sdk/acctest"
 	"golang.org/x/mod/sumdb/dirhash"
 )
 
@@ -65,9 +67,9 @@ func TestInitCommand_Run(t *testing.T) {
 		},
 		{
 			func(t *testing.T) {
-				// if os.Getenv(acctest.TestEnvVar) == "" {
-				// 	t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
-				// }
+				if os.Getenv(acctest.TestEnvVar) == "" {
+					t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
+				}
 			},
 			// here we pre-write plugins with valid checksums, Packer will
 			// see those as valid installations it did.
@@ -119,9 +121,9 @@ func TestInitCommand_Run(t *testing.T) {
 		},
 		{
 			func(t *testing.T) {
-				// if os.Getenv(acctest.TestEnvVar) == "" {
-				// 	t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
-				// }
+				if os.Getenv(acctest.TestEnvVar) == "" {
+					t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
+				}
 			},
 			"release-with-no-binary",
 			nil,
