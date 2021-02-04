@@ -40,7 +40,8 @@ func TestInitCommand_Run(t *testing.T) {
 			// here we pre-write plugins with valid checksums, Packer will
 			// see those as valid installations it did.
 			// the directory hash before and after init should be the same,
-			// that's a no-op
+			// that's a no-op. This also should do no GH query, so it is best
+			// to always run it.
 			"already-installed-no-op",
 			map[string]string{
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
