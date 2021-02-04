@@ -73,13 +73,22 @@ const (
 	dataAccessor           = "data"
 )
 
+type BlockContext int
+
+const (
+	InputVariableContext BlockContext = iota
+	LocalContext
+	BuildContext
+	DatasourceContext
+	NilContext
+)
+
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
 // decoder in order to tell what is the actual value of a var or a local and
 // the list of defined functions.
-func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalContext {
+func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.Value) *hcl.EvalContext {
 	inputVariables, _ := cfg.InputVariables.Values()
 	localVariables, _ := cfg.LocalVariables.Values()
-	datasourceVariables, _ := cfg.Datasources.Values()
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
@@ -97,9 +106,25 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
 				"root": cty.StringVal(strings.ReplaceAll(cfg.Basedir, `\`, `/`)),
 			}),
-			dataAccessor: cty.ObjectVal(datasourceVariables),
 		},
 	}
+
+	// Currently the places where you can make references to other blocks
+	// from one is very 'procedural', and in this specific case, we could make
+	// the data sources available to other datasources, but this would be
+	// order dependant, meaning that if you define two datasources in two
+	// different blocks, the second one can use the first one, but not the
+	// other way around; which would be totally confusing; so - for now -
+	// datasources can't use other datasources.
+	// In the future we'd like to load and execute HCL blocks using a graph
+	// dependency tree, so that any block can use any block whatever the
+	// order.
+	switch ctx {
+	case LocalContext, BuildContext:
+		datasourceVariables, _ := cfg.Datasources.Values()
+		ectx.Variables[dataAccessor] = cty.ObjectVal(datasourceVariables)
+	}
+
 	for k, v := range variables {
 		ectx.Variables[k] = v
 	}
@@ -229,7 +254,7 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 
 func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
-	value, moreDiags := local.Expr.Value(c.EvalContext(nil))
+	value, moreDiags := local.Expr.Value(c.EvalContext(LocalContext, nil))
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return diags
@@ -441,7 +466,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				}
 			}
 
-			builder, moreDiags, generatedVars := cfg.startBuilder(srcUsage, cfg.EvalContext(nil), opts)
+			builder, moreDiags, generatedVars := cfg.startBuilder(srcUsage, cfg.EvalContext(BuildContext, nil), opts)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -463,12 +488,12 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				buildAccessor:   cty.ObjectVal(unknownBuildValues),
 			}
 
-			provisioners, moreDiags := cfg.getCoreBuildProvisioners(srcUsage, build.ProvisionerBlocks, cfg.EvalContext(variables))
+			provisioners, moreDiags := cfg.getCoreBuildProvisioners(srcUsage, build.ProvisionerBlocks, cfg.EvalContext(BuildContext, variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			pps, moreDiags := cfg.getCoreBuildPostProcessors(srcUsage, build.PostProcessorsLists, cfg.EvalContext(variables))
+			pps, moreDiags := cfg.getCoreBuildPostProcessors(srcUsage, build.PostProcessorsLists, cfg.EvalContext(BuildContext, variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -610,7 +635,7 @@ func (p *PackerConfig) handleEval(line string) (out string, exit bool, diags hcl
 		return "", false, diags
 	}
 
-	val, valueDiags := expr.Value(p.EvalContext(nil))
+	val, valueDiags := expr.Value(p.EvalContext(NilContext, nil))
 	diags = append(diags, valueDiags...)
 	if valueDiags.HasErrors() {
 		return "", false, diags

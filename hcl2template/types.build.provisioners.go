@@ -84,7 +84,7 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, cfg *PackerConfig) (*Provis
 		Override    cty.Value `hcl:"override,optional"`
 		Rest        hcl.Body  `hcl:",remain"`
 	}
-	diags := gohcl.DecodeBody(block.Body, cfg.EvalContext(nil), &b)
+	diags := gohcl.DecodeBody(block.Body, cfg.EvalContext(BuildContext, nil), &b)
 	if diags.HasErrors() {
 		return nil, diags
 	}
