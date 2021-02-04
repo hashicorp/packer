@@ -154,6 +154,9 @@ func TestInitCommand_Run(t *testing.T) {
 			}
 			log.Printf("starting %s", tt.name)
 			createFiles(tt.packerConfigDir, tt.inPluginFolder)
+			t.Cleanup(func() {
+				_ = os.RemoveAll(tt.packerConfigDir)
+			})
 
 			hash, err := dirhash.HashDir(tt.packerConfigDir, "", dirhash.DefaultHash)
 			if err != nil {
@@ -170,6 +173,9 @@ func TestInitCommand_Run(t *testing.T) {
 			if err := ioutil.WriteFile(filepath.Join(cfgDir, "cfg.pkr.hcl"), []byte(tt.hclFile), 0666); err != nil {
 				t.Fatalf("WriteFile: %v", err)
 			}
+			t.Cleanup(func() {
+				_ = os.RemoveAll(cfgDir)
+			})
 
 			args := []string{cfgDir}
 
