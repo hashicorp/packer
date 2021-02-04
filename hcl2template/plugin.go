@@ -167,7 +167,7 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 					diags = append(diags, &hcl.Diagnostic{
 						Summary:  fmt.Sprintf("Unknown "+buildPostProcessorLabel+" type %q", ppBlock.PType),
 						Subject:  ppBlock.HCL2Ref.TypeRange.Ptr(),
-						Detail:   fmt.Sprintf("known "+buildPostProcessorLabel+"s: %v", cfg.parser.PluginConfig.Provisioners.List()),
+						Detail:   fmt.Sprintf("known "+buildPostProcessorLabel+"s: %v", cfg.parser.PluginConfig.PostProcessors.List()),
 						Severity: hcl.DiagError,
 					})
 				}
