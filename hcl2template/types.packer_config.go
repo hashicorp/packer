@@ -73,14 +73,14 @@ const (
 	dataAccessor           = "data"
 )
 
-type BlockContext string
+type BlockContext int
 
-var (
-	InputVariableContext BlockContext = "InputVariableContext"
-	LocalContext         BlockContext = "LocalContext"
-	BuildContext         BlockContext = "BuildContext"
-	DatasourceContext    BlockContext = "DatasourceContext"
-	NilContext           BlockContext = "NilContext"
+const (
+	InputVariableContext BlockContext = iota
+	LocalContext
+	BuildContext
+	DatasourceContext
+	NilContext
 )
 
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
