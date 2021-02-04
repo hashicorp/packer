@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/hcl/v2"
@@ -152,11 +153,16 @@ func (cfg *PackerConfig) startProvisioner(source SourceUseBlock, pb *Provisioner
 		return nil, diags
 	}
 
+	builderVars := source.builderVariables()
+	builderVars["packer_debug"] = strconv.FormatBool(cfg.debug)
+	builderVars["packer_force"] = strconv.FormatBool(cfg.force)
+	builderVars["packer_on_error"] = cfg.onError
+
 	hclProvisioner := &HCL2Provisioner{
 		Provisioner:      provisioner,
 		provisionerBlock: pb,
 		evalContext:      ectx,
-		builderVariables: source.builderVariables(),
+		builderVariables: builderVars,
 	}
 
 	if pb.Override != nil {

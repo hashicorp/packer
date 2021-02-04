@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/go-uuid"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/null"
@@ -693,6 +694,79 @@ func testHCLOnlyExceptFlags(t *testing.T, args, present, notPresent []string) {
 			t.Errorf("Expected to find %s", f)
 		}
 	}
+}
+
+func TestHCL2PostProcessorForceFlag(t *testing.T) {
+	t.Helper()
+
+	UUID, _ := uuid.GenerateUUID()
+	// Manifest will only clean with force if the build's PACKER_RUN_UUID are different
+	os.Setenv("PACKER_RUN_UUID", UUID)
+	defer os.Unsetenv("PACKER_RUN_UUID")
+
+	args := []string{
+		filepath.Join(testFixture("hcl"), "force.pkr.hcl"),
+	}
+	fCheck := fileCheck{
+		expectedContent: map[string]string{
+			"manifest.json": fmt.Sprintf(`{
+  "builds": [
+    {
+      "name": "potato",
+      "builder_type": "null",
+      "files": null,
+      "artifact_id": "Null",
+      "packer_run_uuid": %q,
+      "custom_data": null
+    }
+  ],
+  "last_run_uuid": %q
+}`, UUID, UUID),
+		},
+	}
+	defer fCheck.cleanup(t)
+
+	c := &BuildCommand{
+		Meta: testMetaFile(t),
+	}
+	if code := c.Run(args); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+	fCheck.verify(t)
+
+	// Second build should override previous manifest
+	UUID, _ = uuid.GenerateUUID()
+	os.Setenv("PACKER_RUN_UUID", UUID)
+
+	args = []string{
+		"-force",
+		filepath.Join(testFixture("hcl"), "force.pkr.hcl"),
+	}
+	fCheck = fileCheck{
+		expectedContent: map[string]string{
+			"manifest.json": fmt.Sprintf(`{
+  "builds": [
+    {
+      "name": "potato",
+      "builder_type": "null",
+      "files": null,
+      "artifact_id": "Null",
+      "packer_run_uuid": %q,
+      "custom_data": null
+    }
+  ],
+  "last_run_uuid": %q
+}`, UUID, UUID),
+		},
+	}
+
+	c = &BuildCommand{
+		Meta: testMetaFile(t),
+	}
+	if code := c.Run(args); code != 0 {
+		fatalCommand(t, c.Meta)
+	}
+	fCheck.verify(t)
 }
 
 func TestBuildCommand_HCLOnlyExceptOptions(t *testing.T) {

@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/hcl/v2/gohcl"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
-	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -96,7 +95,7 @@ func (p *Parser) decodeSource(block *hcl.Block) (SourceBlock, hcl.Diagnostics) {
 	return source, diags
 }
 
-func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalContext, opts packer.GetBuildsOptions) (packersdk.Builder, hcl.Diagnostics, []string) {
+func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalContext) (packersdk.Builder, hcl.Diagnostics, []string) {
 	var diags hcl.Diagnostics
 
 	builder, err := cfg.parser.PluginConfig.Builders.Start(source.Type)
@@ -127,9 +126,9 @@ func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalConte
 	// prepare at a later step, to make builds from different template types
 	// easier to reason about.
 	builderVars := source.builderVariables()
-	builderVars["packer_debug"] = strconv.FormatBool(opts.Debug)
-	builderVars["packer_force"] = strconv.FormatBool(opts.Force)
-	builderVars["packer_on_error"] = opts.OnError
+	builderVars["packer_debug"] = strconv.FormatBool(cfg.debug)
+	builderVars["packer_force"] = strconv.FormatBool(cfg.force)
+	builderVars["packer_on_error"] = cfg.onError
 
 	generatedVars, warning, err := builder.Prepare(builderVars, decoded)
 	moreDiags = warningErrorsToDiags(cfg.Sources[source.SourceRef].block, warning, err)
