@@ -755,6 +755,7 @@ golang.org/x/mobile/event/key
 # golang.org/x/mod v0.3.0
 golang.org/x/mod/module
 golang.org/x/mod/semver
+golang.org/x/mod/sumdb/dirhash
 # golang.org/x/net v0.0.0-20201209123823-ac852fbbde11
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp

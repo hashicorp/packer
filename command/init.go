@@ -122,6 +122,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		})
 		if err != nil {
 			c.Ui.Error(err.Error())
+			ret = 1
 		}
 		if newInstall != nil {
 			msg := fmt.Sprintf("Installed plugin %s %s in %q", pluginRequirement.Identifier.ForDisplay(), newInstall.Version, newInstall.BinaryPath)

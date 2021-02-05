@@ -90,6 +90,7 @@ require (
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9
 	golang.org/x/mobile v0.0.0-20201208152944-da85bec010a2
+	golang.org/x/mod v0.3.0
 	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
