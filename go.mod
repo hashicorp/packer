@@ -39,7 +39,6 @@ require (
 	github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
-	github.com/hashicorp/aws-sdk-go-base v0.6.0
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cleanhttp v0.5.1

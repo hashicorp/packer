@@ -134,7 +134,6 @@ github.com/aws/aws-sdk-go/internal/strings
 github.com/aws/aws-sdk-go/internal/sync/singleflight
 github.com/aws/aws-sdk-go/private/checksum
 github.com/aws/aws-sdk-go/private/protocol
-github.com/aws/aws-sdk-go/private/protocol/ec2query
 github.com/aws/aws-sdk-go/private/protocol/eventstream
 github.com/aws/aws-sdk-go/private/protocol/eventstream/eventstreamapi
 github.com/aws/aws-sdk-go/private/protocol/json/jsonutil
@@ -144,17 +143,11 @@ github.com/aws/aws-sdk-go/private/protocol/query/queryutil
 github.com/aws/aws-sdk-go/private/protocol/rest
 github.com/aws/aws-sdk-go/private/protocol/restxml
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
-github.com/aws/aws-sdk-go/service/ec2
-github.com/aws/aws-sdk-go/service/ec2/ec2iface
-github.com/aws/aws-sdk-go/service/ecr
-github.com/aws/aws-sdk-go/service/iam
 github.com/aws/aws-sdk-go/service/s3
 github.com/aws/aws-sdk-go/service/s3/s3iface
 github.com/aws/aws-sdk-go/service/s3/s3manager
 github.com/aws/aws-sdk-go/service/secretsmanager
 github.com/aws/aws-sdk-go/service/secretsmanager/secretsmanageriface
-github.com/aws/aws-sdk-go/service/ssm
-github.com/aws/aws-sdk-go/service/ssm/ssmiface
 github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/service/sts/stsiface
 # github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d
@@ -289,9 +282,6 @@ github.com/gophercloud/utils/openstack/compute/v2/flavors
 github.com/grpc-ecosystem/go-grpc-middleware
 # github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 github.com/hako/durafmt
-# github.com/hashicorp/aws-sdk-go-base v0.6.0
-github.com/hashicorp/aws-sdk-go-base
-github.com/hashicorp/aws-sdk-go-base/tfawserr
 # github.com/hashicorp/consul/api v1.4.0
 github.com/hashicorp/consul/api
 # github.com/hashicorp/errwrap v1.0.0
