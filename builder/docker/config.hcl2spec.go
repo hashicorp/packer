@@ -92,10 +92,6 @@ type FlatConfig struct {
 	LoginServer               *string           `mapstructure:"login_server" required:"false" cty:"login_server" hcl:"login_server"`
 	LoginUsername             *string           `mapstructure:"login_username" required:"false" cty:"login_username" hcl:"login_username"`
 	EcrLogin                  *bool             `mapstructure:"ecr_login" required:"false" cty:"ecr_login" hcl:"ecr_login"`
-	AccessKey                 *string           `mapstructure:"aws_access_key" required:"false" cty:"aws_access_key" hcl:"aws_access_key"`
-	SecretKey                 *string           `mapstructure:"aws_secret_key" required:"false" cty:"aws_secret_key" hcl:"aws_secret_key"`
-	Token                     *string           `mapstructure:"aws_token" required:"false" cty:"aws_token" hcl:"aws_token"`
-	Profile                   *string           `mapstructure:"aws_profile" required:"false" cty:"aws_profile" hcl:"aws_profile"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -192,10 +188,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"login_server":                 &hcldec.AttrSpec{Name: "login_server", Type: cty.String, Required: false},
 		"login_username":               &hcldec.AttrSpec{Name: "login_username", Type: cty.String, Required: false},
 		"ecr_login":                    &hcldec.AttrSpec{Name: "ecr_login", Type: cty.Bool, Required: false},
-		"aws_access_key":               &hcldec.AttrSpec{Name: "aws_access_key", Type: cty.String, Required: false},
-		"aws_secret_key":               &hcldec.AttrSpec{Name: "aws_secret_key", Type: cty.String, Required: false},
-		"aws_token":                    &hcldec.AttrSpec{Name: "aws_token", Type: cty.String, Required: false},
-		"aws_profile":                  &hcldec.AttrSpec{Name: "aws_profile", Type: cty.String, Required: false},
 	}
 	return s
 }

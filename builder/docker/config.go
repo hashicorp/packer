@@ -114,8 +114,7 @@ type Config struct {
 	// for the duration of the pull. If true login_server is required and
 	// login, login_username, and login_password will be ignored. For more
 	// information see the section on ECR.
-	EcrLogin        bool `mapstructure:"ecr_login" required:"false"`
-	AwsAccessConfig `mapstructure:",squash"`
+	EcrLogin bool `mapstructure:"ecr_login" required:"false"`
 
 	ctx interpolate.Context
 }
