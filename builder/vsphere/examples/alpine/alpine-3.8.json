@@ -2,34 +2,9 @@
   "builders": [
     {
       "type": "vsphere-iso",
-
-      "vcenter_server": "vcenter.vsphere65.test",
-      "username": "root",
-      "password": "jetbrains",
-      "insecure_connection": true,
-
-      "vm_name": "alpine-{{timestamp}}",
-      "host": "esxi-1.vsphere65.test",
-
-      "CPUs":             1,
-      "RAM":              512,
+      "CPUs": 1,
+      "RAM": 512,
       "RAM_reserve_all": true,
-      "disk_controller_type":  "pvscsi",
-      "disk_size":        1024,
-      "disk_thin_provisioned": true,
-      "network_card": "vmxnet3",
-
-      "guest_os_type": "other3xLinux64Guest",
-
-      "iso_paths": [
-        "[datastore1] ISO/alpine-standard-3.8.2-x86_64.iso"
-      ],
-      "floppy_files": [
-        "{{template_dir}}/answerfile",
-        "{{template_dir}}/setup.sh"
-      ],
-
-      "boot_wait": "15s",
       "boot_command": [
         "root<enter><wait>",
         "mount -t vfat /dev/fd0 /media/floppy<enter><wait>",
@@ -47,16 +22,43 @@
         "mount -t vfat /dev/fd0 /media/floppy<enter><wait>",
         "/media/floppy/SETUP.SH<enter>"
       ],
-
+      "boot_wait": "15s",
+      "disk_controller_type": "pvscsi",
+      "floppy_files": [
+        "{{template_dir}}/answerfile",
+        "{{template_dir}}/setup.sh"
+      ],
+      "guest_os_type": "other3xLinux64Guest",
+      "host": "esxi-1.vsphere65.test",
+      "insecure_connection": true,
+      "iso_paths": [
+        "[datastore1] ISO/alpine-standard-3.8.2-x86_64.iso"
+      ],
+      "network_adapters": [
+        {
+          "network_card": "vmxnet3"
+        }
+      ],
+      "password": "jetbrains",
+      "ssh_password": "jetbrains",
       "ssh_username": "root",
-      "ssh_password": "jetbrains"
+      "storage": [
+        {
+          "disk_size": 1024,
+          "disk_thin_provisioned": true
+        }
+      ],
+      "username": "root",
+      "vcenter_server": "vcenter.vsphere65.test",
+      "vm_name": "alpine-{{timestamp}}"
     }
   ],
-
   "provisioners": [
     {
-      "type": "shell",
-      "inline": ["ls /"]
+      "inline": [
+        "ls /"
+      ],
+      "type": "shell"
     }
   ]
 }
