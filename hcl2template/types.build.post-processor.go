@@ -59,9 +59,10 @@ func (cfg *PackerConfig) startPostProcessor(source SourceUseBlock, pp *PostProce
 	postProcessor, err := cfg.parser.PluginConfig.PostProcessors.Start(pp.PType)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary: fmt.Sprintf("Failed loading %s", pp.PType),
-			Subject: pp.DefRange.Ptr(),
-			Detail:  err.Error(),
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("Failed loading %s", pp.PType),
+			Subject:  pp.DefRange.Ptr(),
+			Detail:   err.Error(),
 		})
 		return nil, diags
 	}

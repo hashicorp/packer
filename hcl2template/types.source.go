@@ -101,8 +101,9 @@ func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalConte
 	builder, err := cfg.parser.PluginConfig.Builders.Start(source.Type)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary: "Failed to load " + sourceLabel + " type",
-			Detail:  err.Error(),
+			Severity: hcl.DiagError,
+			Summary:  "Failed to load " + sourceLabel + " type",
+			Detail:   err.Error(),
 		})
 		return builder, diags, nil
 	}
