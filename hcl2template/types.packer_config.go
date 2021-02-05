@@ -52,12 +52,12 @@ type PackerConfig struct {
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
 
-	except []glob.Glob
-	only   []glob.Glob
-
 	parser *Parser
 	files  []*hcl.File
 
+	// Fields passed as command line flags
+	except  []glob.Glob
+	only    []glob.Glob
 	force   bool
 	debug   bool
 	onError string
