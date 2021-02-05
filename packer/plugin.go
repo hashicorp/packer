@@ -178,7 +178,6 @@ func (c *PluginConfig) discoverExternalComponents(path string) error {
 	if len(externallyUsed) > 0 {
 		sort.Strings(externallyUsed)
 		log.Printf("using external datasource %v", externallyUsed)
-		externallyUsed = nil
 	}
 
 	pluginPaths, err = c.discoverSingle(filepath.Join(path, "packer-plugin-*"))
