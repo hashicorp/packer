@@ -147,19 +147,6 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		runOpts.CreditSpecification = &ec2.CreditSpecificationRequest{CpuCredits: &creditOption}
 	}
 
-	// Set Metadata defaults if not defined at all
-	if s.HttpEndpoint == "" {
-		s.HttpEndpoint = "enabled"
-	}
-
-	if s.HttpTokens == "" {
-		s.HttpTokens = "optional"
-	}
-
-	if s.HttpPutResponseHopLimit == 0 {
-		s.HttpPutResponseHopLimit = 1
-	}
-
 	if s.HttpEndpoint == "enabled" {
 		runOpts.MetadataOptions = &ec2.InstanceMetadataOptionsRequest{HttpEndpoint: &s.HttpEndpoint, HttpTokens: &s.HttpTokens, HttpPutResponseHopLimit: &s.HttpPutResponseHopLimit}
 	}

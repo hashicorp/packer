@@ -44,7 +44,7 @@ type SecurityGroupFilterOptions struct {
 	config.NameValueFilter `mapstructure:",squash"`
 }
 
-// Metadata Options
+// [Metadata Options](#metadata-settings)
 // See [Configure IMDS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html) for details.
 type MetadataOptions struct {
 	// A string to enable or disble the IMDS endpoint for an instance. Defaults to enabled.
@@ -503,22 +503,29 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// Validation
 	errs := c.Comm.Prepare(ctx)
 
-	if c.Metadata.HttpEndpoint != "enabled" &&
-		c.Metadata.HttpEndpoint != "disabled" &&
-		c.Metadata.HttpEndpoint != "" {
+	if c.Metadata.HttpEndpoint == "" {
+		c.Metadata.HttpEndpoint = "enabled"
+	}
+
+	if c.Metadata.HttpTokens == "" {
+		c.Metadata.HttpTokens = "optional"
+	}
+
+	if c.Metadata.HttpPutResponseHopLimit == 0 {
+		c.Metadata.HttpPutResponseHopLimit = 1
+	}
+
+	if c.Metadata.HttpEndpoint != "enabled" && c.Metadata.HttpEndpoint != "disabled" {
 		msg := fmt.Errorf("http_endpoint requires either disabled or enabled as its value")
 		errs = append(errs, msg)
 	}
 
-	if c.Metadata.HttpTokens != "optional" &&
-		c.Metadata.HttpTokens != "required" &&
-		c.Metadata.HttpTokens != "" {
+	if c.Metadata.HttpTokens != "optional" && c.Metadata.HttpTokens != "required" {
 		msg := fmt.Errorf("http_tokens requires either optional or required as its value")
 		errs = append(errs, msg)
 	}
 
-	if c.Metadata.HttpPutResponseHopLimit < 0 ||
-		c.Metadata.HttpPutResponseHopLimit > 64 {
+	if c.Metadata.HttpPutResponseHopLimit < 1 || c.Metadata.HttpPutResponseHopLimit > 64 {
 		msg := fmt.Errorf("http_put_response_hop_limit requires a number between 1 and 64")
 		errs = append(errs, msg)
 	}
