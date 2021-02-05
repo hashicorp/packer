@@ -100,6 +100,4 @@ require (
 	google.golang.org/grpc v1.32.0
 )
 
-// replace github.com/hashicorp/packer-plugin-sdk => /Users/azr/go/src/github.com/hashicorp/packer-plugin-sdk
-
 go 1.13
