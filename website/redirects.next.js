@@ -31,17 +31,37 @@ module.exports = [
   },
   {
     source: '/docs/extend/developing-plugins',
-    destination: '/docs/extending/plugins',
+    destination: '/docs/plugins',
     permanent: true,
   },
   {
     source: '/docs/extending/developing-plugins',
-    destination: '/docs/extending/plugins',
+    destination: '/docs/plugins',
+    permanent: true,
+  },
+  {
+    source: '/docs/extending/plugins',
+    destination: '/docs/plugins',
     permanent: true,
   },
   {
     source: '/docs/extend/builder',
     destination: '/docs/extending/custom-builders',
+    permanent: true,
+  },
+  {
+    source: '/docs/extending/custom-builders',
+    destination: '/docs/plugins/creation/custom-builders',
+    permanent: true,
+  },
+  {
+    source: '/docs/extending/custom-provisioners',
+    destination: '/docs/plugins/creation/custom-provisioners',
+    permanent: true,
+  },
+  {
+    source: '/docs/extending/custom-post-processors',
+    destination: '/docs/plugins/creation/custom-post-processors',
     permanent: true,
   },
   {
@@ -82,11 +102,6 @@ module.exports = [
   {
     source: '/docs/command-line/:path*',
     destination: '/docs/commands/:path*',
-    permanent: true,
-  },
-  {
-    source: '/docs/extend/:path*',
-    destination: '/docs/extending/:path*',
     permanent: true,
   },
   {
