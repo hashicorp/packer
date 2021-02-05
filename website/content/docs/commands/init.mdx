@@ -7,13 +7,14 @@ sidebar_title: <tt>init</tt>
 
 # `init` Command
 
--> **Note:** Packer does not currently have the notion of a state.
+-> **Note:** Packer does not currently have the notion of a state like Terraform
+has. In other words, currently `packer init` is only in charge of installing
+packer plugins.
 
-
--> **Note:** Currently, the plugin getter can only fetch binaries from public
+-> **Note:** Currently, `packer init` can only fetch binaries from public
 projects on *Github*.
 
--> **Note:** Currently, the plugin getter only fetches binaries using Github's
+-> **Note:** Currently, `packer init` only fetches binaries using Github's
 public API, which [limits the number of unauthenticated requests per hour one IP
 can
 do](https://docs.github.com/en/developers/apps/rate-limits-for-github-apps#normal-user-to-server-rate-limits).
@@ -23,6 +24,13 @@ usage this should not be an issue. Otherwise you can set the
 your personal [access token page](https://github.com/settings/tokens) to
 generate a new token.
 
+-> **Note:** Packer init does not work with legacy JSON templates. You can
+upgrade your JSON config files to HCL using the hcl2ugprade command.
+
+-> **Note:** Packer init will only work with multiplugins -- that is plugins
+that are named `packer-plugin-*` -- to install a single plugin binary -- that is
+`packer-provisioner-*`, `packer-builder-*`, etc. -- nothing changes, you will
+have to [install the plugin manually](/docs/plugins#installing-plugins).
 
 The `packer init` command is used to download Packer plugin binaries.
 This is the first command that should be executed when working with a new or
@@ -51,8 +59,11 @@ packer {
 ```
 
 Packer init will install the latest found version matching the version selection
-in the `required_plugins` section. Make sure to set a correct [version constraint
-string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
+in the `required_plugins` section. Make sure to set a correct [version
+constraint
+string](/docs/templates/hcl_templates/blocks/packer#version-constraints). The
+plugins will be installed in the [Plugin
+Directory](/docs/configure#packer-s-plugin-directory).
 
 
 ## Options
