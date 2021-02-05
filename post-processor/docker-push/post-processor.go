@@ -21,12 +21,11 @@ const BuilderIdImport = "packer.post-processor.docker-import"
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Login                  bool
-	LoginUsername          string `mapstructure:"login_username"`
-	LoginPassword          string `mapstructure:"login_password"`
-	LoginServer            string `mapstructure:"login_server"`
-	EcrLogin               bool   `mapstructure:"ecr_login"`
-	docker.AwsAccessConfig `mapstructure:",squash"`
+	Login         bool
+	LoginUsername string `mapstructure:"login_username"`
+	LoginPassword string `mapstructure:"login_password"`
+	LoginServer   string `mapstructure:"login_server"`
+	EcrLogin      bool   `mapstructure:"ecr_login"`
 
 	ctx interpolate.Context
 }
@@ -74,15 +73,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 	}
 
 	if p.config.EcrLogin {
-		ui.Message("Fetching ECR credentials...")
-
-		username, password, err := p.config.EcrGetLogin(p.config.LoginServer)
-		if err != nil {
-			return nil, false, false, err
-		}
-
-		p.config.LoginUsername = username
-		p.config.LoginPassword = password
+		panic("to re-implement")
 	}
 
 	if p.config.Login || p.config.EcrLogin {
