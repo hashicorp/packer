@@ -101,7 +101,6 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 		BlockDeviceMappings:   launchMappingRequests,
 		DisableApiTermination: aws.Bool(false),
 		EbsOptimized:          &s.EbsOptimized,
-		MetadataOptions:       &ec2.LaunchTemplateInstanceMetadataOptionsRequest{HttpEndpoint: &s.HttpEndpoint, HttpTokens: &s.HttpTokens, HttpPutResponseHopLimit: &s.HttpPutResponseHopLimit},
 		IamInstanceProfile:    &ec2.LaunchTemplateIamInstanceProfileSpecificationRequest{Name: iamInstanceProfile},
 		ImageId:               &s.SourceAMI,
 		InstanceMarketOptions: marketOptions,
@@ -129,6 +128,23 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 	} else {
 		templateData.SetSecurityGroupIds(securityGroupIds)
 
+	}
+
+	// Set Metadata defaults if not defined at all
+	if s.HttpEndpoint == "" {
+		s.HttpEndpoint = "enabled"
+	}
+
+	if s.HttpTokens == "" {
+		s.HttpTokens = "optional"
+	}
+
+	if s.HttpPutResponseHopLimit == 0 {
+		s.HttpPutResponseHopLimit = 1
+	}
+
+	if s.HttpEndpoint == "enabled" {
+		templateData.MetadataOptions = &ec2.InstanceMetadataOptionsRequest{HttpEndpoint: &s.HttpEndpoint, HttpTokens: &s.HttpTokens, HttpPutResponseHopLimit: &s.HttpPutResponseHopLimit}
 	}
 
 	// If instance type is not set, we'll just pick the lowest priced instance
