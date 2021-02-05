@@ -14,7 +14,7 @@ so you generally don't have to worry about it until you want to tweak a
 configuration. If you're just getting started with Packer, don't worry about
 core configuration for now.
 
-# Packer's home directory
+## Packer's home directory
 
 Plugins and core configuration files can exist in the home directory of Packer.
 The home directory of packer will be the first one of the following env values
@@ -30,7 +30,7 @@ to be set :
 -> Note: On this page "Packer's home directory" will be referenced as
 `PACKER_HOME_DIR`.
 
-# Packer's config file
+## Packer's config file
 
 Packer can optionally read a JSON file for the end user to set core settings.
 The config file of packer will be looked up on the following paths:
@@ -42,7 +42,7 @@ The config file of packer will be looked up on the following paths:
 
 It is not an error if no config file was found.
 
-# Packer's config directory
+## Packer's config directory
 
 Packer's configuration directory can potentialy contain plugins and internal
 Packer files. The config dir of packer will be looked up on the following paths:
@@ -60,11 +60,20 @@ is `azr`, then the config directory will default to `/home/azr/.packer.d/`.
 * On a 'windows' system, if the `PACKER_CONFIG_DIR` env var is set to `C:/`,the
 config directory will be: `C:/packer.d/` and other values will not be checked.
 
-# Packer's plugin directory
+## Packer's plugin directory
 
 @include "plugins/plugin-location.mdx"
 
 The format of the configuration file is basic JSON.
+
+## Packer's cache directory
+
+Packer uses a cache directory to download large files and for logistics around
+large file download. By default, Packer caches things in the curret directory,
+under: `./packer_cache/`. This can be changed by setting the `PACKER_CACHE_DIR`
+env var. It is recommended to share the same packer cache dir accross your
+builds if you have multiple builds doing similar things to avoid downloading the
+same ISO twice for example.
 
 ## Packer config file configuration Reference
 
@@ -85,7 +94,7 @@ configuration file. None of these are required, since all have defaults.
   and the [`packer init`](/docs/commands/init) command to install plugins; if
   you are using both, the `required_plugin` config will take precedence.
 
-# Full list of Environment Variables usable for Packer
+## Full list of Environment Variables usable for Packer
 
 Packer uses a variety of environmental variables. A listing and description of
 each can be found below:
