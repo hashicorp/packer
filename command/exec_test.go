@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/builder/amazon/ebs"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
@@ -120,9 +119,8 @@ func getBareComponentFinder() packer.ComponentFinder {
 	return packer.ComponentFinder{
 		PluginConfig: &packer.PluginConfig{
 			Builders: packer.MapOfBuilder{
-				"file":       func() (packersdk.Builder, error) { return &file.Builder{}, nil },
-				"null":       func() (packersdk.Builder, error) { return &null.Builder{}, nil },
-				"amazon-ebs": func() (packersdk.Builder, error) { return &ebs.Builder{}, nil },
+				"file": func() (packersdk.Builder, error) { return &file.Builder{}, nil },
+				"null": func() (packersdk.Builder, error) { return &null.Builder{}, nil },
 			},
 			Provisioners: packer.MapOfProvisioner{
 				"shell-local": func() (packersdk.Provisioner, error) { return &shell_local.Provisioner{}, nil },
