@@ -52,11 +52,15 @@ type PackerConfig struct {
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
 
-	except []glob.Glob
-	only   []glob.Glob
-
 	parser *Parser
 	files  []*hcl.File
+
+	// Fields passed as command line flags
+	except  []glob.Glob
+	only    []glob.Glob
+	force   bool
+	debug   bool
+	onError string
 }
 
 type ValidationOptions struct {
@@ -408,6 +412,10 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 	res := []packersdk.Build{}
 	var diags hcl.Diagnostics
 
+	cfg.debug = opts.Debug
+	cfg.force = opts.Force
+	cfg.onError = opts.OnError
+
 	for _, build := range cfg.Builds {
 		for _, srcUsage := range build.Sources {
 			src, found := cfg.Sources[srcUsage.SourceRef]
@@ -466,7 +474,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				}
 			}
 
-			builder, moreDiags, generatedVars := cfg.startBuilder(srcUsage, cfg.EvalContext(BuildContext, nil), opts)
+			builder, moreDiags, generatedVars := cfg.startBuilder(srcUsage, cfg.EvalContext(BuildContext, nil))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue

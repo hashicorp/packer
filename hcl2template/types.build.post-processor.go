@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
@@ -64,11 +65,17 @@ func (cfg *PackerConfig) startPostProcessor(source SourceUseBlock, pp *PostProce
 		})
 		return nil, diags
 	}
+
+	builderVars := source.builderVariables()
+	builderVars["packer_debug"] = strconv.FormatBool(cfg.debug)
+	builderVars["packer_force"] = strconv.FormatBool(cfg.force)
+	builderVars["packer_on_error"] = cfg.onError
+
 	hclPostProcessor := &HCL2PostProcessor{
 		PostProcessor:      postProcessor,
 		postProcessorBlock: pp,
 		evalContext:        ectx,
-		builderVariables:   source.builderVariables(),
+		builderVariables:   builderVars,
 	}
 	err = hclPostProcessor.HCL2Prepare(nil)
 	if err != nil {
