@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -391,7 +390,6 @@ build {
 		if err != nil {
 			t.Fatalf("Failed to create TopDir for test case: %s, error: %v", tt.name, err)
 		}
-		defer os.Remove(topDir)
 
 		for testDir, content := range tt.alreadyPresentContent {
 			dir := filepath.Join(topDir, testDir)
@@ -457,8 +455,6 @@ build {
 					got)
 			}
 		}
-
-		time.Sleep(5 * time.Second)
 
 		err = os.RemoveAll(topDir)
 		if err != nil {
