@@ -106,11 +106,13 @@ ami_filter_owners = ["137112412989"]
 		Meta: testMeta(t),
 	}
 
-	// testFileName := "test.pkrvars.hcl"
+	testFileName := "test.pkrvars.hcl"
 
 	for _, tt := range tests {
-		testFilePaths := make(map[string]string)
-		topDir, err := ioutil.TempDir("test-fixtures/fmt", "temp-dir")
+		// testFilePaths := make(map[string]string)
+		topDir := filepath.Join("test-fixtures/fmt", "temp-dir")
+		err := os.Mkdir(topDir, 0777)
+		//topDir, err := ioutil.TempDir("test-fixtures/fmt", "temp-dir")
 		if err != nil {
 			t.Fatalf("Failed to create TopDir for test case: %s, error: %v", tt.name, err)
 		}
@@ -127,7 +129,8 @@ ami_filter_owners = ["137112412989"]
 					err)
 			}
 
-			file, err := ioutil.TempFile(dir, "*.pkrvars.hcl")
+			//file, err := ioutil.TempFile(dir, "*.pkrvars.hcl")
+			file, err := os.Create(filepath.Join(dir, testFileName))
 			if err != nil {
 				os.RemoveAll(topDir)
 				t.Fatalf("failed to create testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
@@ -135,7 +138,7 @@ ami_filter_owners = ["137112412989"]
 					tt.name,
 					err)
 			}
-			testFilePaths[testDir] = file.Name()
+			//testFilePaths[testDir] = file.Name()
 
 			_, err = file.Write([]byte(content))
 			if err != nil {
@@ -170,8 +173,8 @@ ami_filter_owners = ["137112412989"]
 		}
 
 		for expectedPath, expectedContent := range tt.expectedContent {
-			testFilePath := testFilePaths[expectedPath]
-			// testFilePath := filepath.Join(topDir, expectedPath, testFileName)
+			// testFilePath := testFilePaths[expectedPath]
+			testFilePath := filepath.Join(topDir, expectedPath, testFileName)
 			b, err := ioutil.ReadFile(testFilePath)
 			if err != nil {
 				os.RemoveAll(topDir)
