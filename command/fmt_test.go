@@ -113,7 +113,7 @@ ami_filter_owners = ["137112412989"]
 		if err != nil {
 			t.Fatalf("Failed to create TopDir for test case: %s, error: %v", tt.name, err)
 		}
-		defer os.Remove(topDir)
+		// defer os.Remove(topDir)
 
 		for testDir, content := range tt.alreadyPresentContent {
 			dir := filepath.Join(topDir, testDir)
