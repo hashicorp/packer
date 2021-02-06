@@ -17,6 +17,7 @@ sidebar_title: OpenStack
 # OpenStack Builder
 
 Type: `openstack`
+Artifact BuilderId: `mitchellh.openstack`
 
 The `openstack` Packer builder is able to create new images for use with
 [OpenStack](http://www.openstack.org). The builder takes a source image, runs
@@ -51,7 +52,7 @@ segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
 In addition to the options listed here, a
-[communicator](/docs/templates/legacy_json_templates/communicators) can be configured for this
+[communicator](/docs/templates/legacy_json_templates/communicator) can be configured for this
 builder.
 
 ### Required:
@@ -140,7 +141,7 @@ Here is a basic example. This is a working example to build a Ubuntu 12.04 LTS
 (Precise Pangolin) on Rackspace OpenStack cloud offering.
 
 <Tabs>
-<Tab heading="JSON"> 
+<Tab heading="JSON">
 
 ```json
 {

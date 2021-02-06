@@ -11,6 +11,7 @@ sidebar_title: Clone
 # Proxmox Builder (from an image)
 
 Type: `proxmox-clone`
+Artifact BuilderId: `proxmox.clone`
 
 The `proxmox-clone` Packer builder is able to create new images for use with
 [Proxmox](https://www.proxmox.com/en/proxmox-ve). The builder takes a virtual
@@ -28,7 +29,7 @@ segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
 In addition to the options listed here, a
-[communicator](/docs/templates/legacy_json_templates/communicators) can be configured for this
+[communicator](/docs/templates/legacy_json_templates/communicator) can be configured for this
 builder.
 
 If no communicator is defined, an SSH key is generated for use, and is used
