@@ -117,7 +117,7 @@ ami_filter_owners = ["137112412989"]
 
 		for testDir, content := range tt.alreadyPresentContent {
 			dir := filepath.Join(topDir, testDir)
-			err := os.MkdirAll(dir, 0700)
+			err := os.MkdirAll(dir, 0777)
 			if err != nil {
 				os.RemoveAll(topDir)
 				t.Fatalf(
