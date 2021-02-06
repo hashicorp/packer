@@ -173,7 +173,9 @@ builder, followed by the platform it is building for. For example, the builder
 ID of the VMware builder is "hashicorp.vmware".
 
 Post-processors use the builder ID value in order to make some assumptions
-about the artifact results, so it is important it never changes.
+about the artifact results and to determine whether they are even able to run
+against a given artifact, so it is important that this ID never changes once
+the builder is published.
 
 ## Provisioning
 
