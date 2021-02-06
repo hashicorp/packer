@@ -386,7 +386,6 @@ build {
 	testFileName := "test.pkrvars.hcl"
 
 	for _, tt := range tests {
-		// TODO update this
 		topDir, err := ioutil.TempDir("testdata/format", "temp-dir")
 		if err != nil {
 			t.Fatalf("Failed to create TopDir for test case: %s, error: %v", tt.name, err)
@@ -426,7 +425,6 @@ build {
 			file.Close()
 		}
 
-		// TODO reformat this
 		f.Recursive = tt.recursive
 		_, diags := f.Format(topDir)
 		if diags.HasErrors() {
