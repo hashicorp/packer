@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path/filepath"
+	// "path/filepath"
 	"strings"
 	"testing"
 
@@ -39,448 +39,442 @@ func TestHCL2Formatter_Format(t *testing.T) {
 	}
 }
 
-func TestHCL2Formatter_Recursive(t *testing.T) {
-	unformattedData := `
-// starts resources to provision them.
-build {
-    sources = [
-        "source.amazon-ebs.ubuntu-1604",
-        "source.virtualbox-iso.ubuntu-1204",
-    ]
-
-    provisioner "shell" {
-        string  = coalesce(null, "", "string")
-        int     = "${41 + 1}"
-        int64   = "${42 + 1}"
-        bool    = "true"
-        trilean = true
-        duration = "${9 + 1}s"
-        map_string_string = {
-            a = "b"
-            c = "d"
-        }
-        slice_string = [
-            "a",
-            "b",
-            "c",
-        ]
-        slice_slice_string = [
-            ["a","b"],
-            ["c","d"]
-        ]
-
-        nested {
-            string  = "string"
-            int     = 42
-            int64   = 43
-            bool    = true
-            trilean = true
-            duration = "10s"
-            map_string_string = {
-                a = "b"
-                c = "d"
-            }
-            slice_string = [
-                "a",
-                "b",
-                "c",
-            ]
-            slice_slice_string = [
-                ["a","b"],
-                ["c","d"]
-            ]
-        }
-
-        nested_slice {
-        }
-    }
-
-    provisioner "file" {
-        string  = "string"
-        int     = 42
-        int64   = 43
-        bool    = true
-        trilean = true
-        duration          = "10s"
-        map_string_string = {
-            a = "b"
-            c = "d"
-        }
-        slice_string = [
-            "a",
-            "b",
-            "c",
-        ]
-        slice_slice_string = [
-            ["a","b"],
-            ["c","d"]
-        ]
-
-        nested {
-            string   = "string"
-            int      = 42
-            int64    = 43
-            bool     = true
-            trilean  = true
-            duration = "10s"
-            map_string_string = {
-                a = "b"
-                c = "d"
-            }
-            slice_string = [
-                "a",
-                "b",
-                "c",
-            ]
-            slice_slice_string = [
-                ["a","b"],
-                ["c","d"]
-            ]
-        }
-
-        nested_slice {
-        }
-    }
-
-    post-processor "amazon-import" {
-        string   = "string"
-        int      = 42
-        int64    = 43
-        bool     = true
-        trilean  = true
-        duration = "10s"
-        map_string_string = {
-            a = "b"
-            c = "d"
-        }
-        slice_string = [
-            "a",
-            "b",
-            "c",
-        ]
-        slice_slice_string = [
-            ["a","b"],
-            ["c","d"]
-        ]
-
-        nested {
-            string   = "string"
-            int      = 42
-            int64    = 43
-            bool     = true
-            trilean  = true
-            duration = "10s"
-            map_string_string = {
-                a = "b"
-                c = "d"
-            }
-            slice_string = [
-                "a",
-                "b",
-                "c",
-            ]
-            slice_slice_string = [
-                ["a","b"],
-                ["c","d"]
-            ]
-        }
-
-        nested_slice {
-        }
-    }
-}
-`
-
-	formattedData := `
-// starts resources to provision them.
-build {
-  sources = [
-    "source.amazon-ebs.ubuntu-1604",
-    "source.virtualbox-iso.ubuntu-1204",
-  ]
-
-  provisioner "shell" {
-    string   = coalesce(null, "", "string")
-    int      = "${41 + 1}"
-    int64    = "${42 + 1}"
-    bool     = "true"
-    trilean  = true
-    duration = "${9 + 1}s"
-    map_string_string = {
-      a = "b"
-      c = "d"
-    }
-    slice_string = [
-      "a",
-      "b",
-      "c",
-    ]
-    slice_slice_string = [
-      ["a", "b"],
-      ["c", "d"]
-    ]
-
-    nested {
-      string   = "string"
-      int      = 42
-      int64    = 43
-      bool     = true
-      trilean  = true
-      duration = "10s"
-      map_string_string = {
-        a = "b"
-        c = "d"
-      }
-      slice_string = [
-        "a",
-        "b",
-        "c",
-      ]
-      slice_slice_string = [
-        ["a", "b"],
-        ["c", "d"]
-      ]
-    }
-
-    nested_slice {
-    }
-  }
-
-  provisioner "file" {
-    string   = "string"
-    int      = 42
-    int64    = 43
-    bool     = true
-    trilean  = true
-    duration = "10s"
-    map_string_string = {
-      a = "b"
-      c = "d"
-    }
-    slice_string = [
-      "a",
-      "b",
-      "c",
-    ]
-    slice_slice_string = [
-      ["a", "b"],
-      ["c", "d"]
-    ]
-
-    nested {
-      string   = "string"
-      int      = 42
-      int64    = 43
-      bool     = true
-      trilean  = true
-      duration = "10s"
-      map_string_string = {
-        a = "b"
-        c = "d"
-      }
-      slice_string = [
-        "a",
-        "b",
-        "c",
-      ]
-      slice_slice_string = [
-        ["a", "b"],
-        ["c", "d"]
-      ]
-    }
-
-    nested_slice {
-    }
-  }
-
-  post-processor "amazon-import" {
-    string   = "string"
-    int      = 42
-    int64    = 43
-    bool     = true
-    trilean  = true
-    duration = "10s"
-    map_string_string = {
-      a = "b"
-      c = "d"
-    }
-    slice_string = [
-      "a",
-      "b",
-      "c",
-    ]
-    slice_slice_string = [
-      ["a", "b"],
-      ["c", "d"]
-    ]
-
-    nested {
-      string   = "string"
-      int      = 42
-      int64    = 43
-      bool     = true
-      trilean  = true
-      duration = "10s"
-      map_string_string = {
-        a = "b"
-        c = "d"
-      }
-      slice_string = [
-        "a",
-        "b",
-        "c",
-      ]
-      slice_slice_string = [
-        ["a", "b"],
-        ["c", "d"]
-      ]
-    }
-
-    nested_slice {
-    }
-  }
-}
-`
-
-	tests := []struct {
-		name                  string
-		recursive             bool
-		alreadyPresentContent map[string]string
-		expectedContent       map[string]string
-	}{
-		{
-			name:      "nested formats recursively",
-			recursive: true,
-			alreadyPresentContent: map[string]string{
-				"foo/bar/baz":     unformattedData,
-				"foo/bar/baz/woo": unformattedData,
-				"":                unformattedData,
-			},
-			expectedContent: map[string]string{
-				"foo/bar/baz":     formattedData,
-				"foo/bar/baz/woo": formattedData,
-				"":                formattedData,
-			},
-		},
-		{
-			name:      "nested no recursive format",
-			recursive: false,
-			alreadyPresentContent: map[string]string{
-				"foo/bar/baz":     unformattedData,
-				"foo/bar/baz/woo": unformattedData,
-				"":                unformattedData,
-			},
-			expectedContent: map[string]string{
-				"foo/bar/baz":     unformattedData,
-				"foo/bar/baz/woo": unformattedData,
-				"":                formattedData,
-			},
-		},
-	}
-
-	var buf bytes.Buffer
-	f := NewHCL2Formatter()
-	f.Output = &buf
-	f.Write = true
-
-	testFileName := "test.pkrvars.hcl"
-
-	for _, tt := range tests {
-		// testFilePaths := make(map[string]string)
-		topDir := filepath.Join("testdata/format", "temp-dir")
-		err := os.Mkdir(topDir, 0777)
-		// topDir, err := ioutil.TempDir("testdata/format", "temp-dir")
-		if err != nil {
-			t.Fatalf("Failed to create TopDir for test case: %s, error: %v", tt.name, err)
-		}
-
-		for testDir, content := range tt.alreadyPresentContent {
-			dir := filepath.Join(topDir, testDir)
-			err := os.MkdirAll(dir, 0777)
-			if err != nil {
-				os.RemoveAll(topDir)
-				t.Fatalf(
-					"Failed to create subDir: %s\n\n, for test case: %s\n\n, error: %v",
-					testDir,
-					tt.name,
-					err)
-			}
-
-			file, err := os.Create(filepath.Join(dir, testFileName))
-			//file, err := ioutil.TempFile(dir, "*.pkrvars.hcl")
-			if err != nil {
-				os.RemoveAll(topDir)
-				t.Fatalf("failed to create testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
-					testDir,
-					tt.name,
-					err)
-			}
-			//testFilePaths[testDir] = file.Name()
-
-			_, err = file.Write([]byte(content))
-			if err != nil {
-				os.RemoveAll(topDir)
-				t.Fatalf("failed to write to testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
-					testDir,
-					tt.name,
-					err)
-			}
-
-			err = file.Close()
-			if err != nil {
-				os.RemoveAll(topDir)
-				t.Fatalf("failed to close testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
-					testDir,
-					tt.name,
-					err)
-			}
-		}
-
-		f.Recursive = tt.recursive
-		_, diags := f.Format(topDir)
-		if diags.HasErrors() {
-			os.RemoveAll(topDir)
-			t.Fatalf("the call to Format failed unexpectedly for test case: %s, errors: %s", tt.name, diags.Error())
-		}
-
-		for expectedPath, expectedContent := range tt.expectedContent {
-			//testFilePath := testFilePaths[expectedPath]
-			testFilePath := filepath.Join(topDir, expectedPath, testFileName)
-			b, err := ioutil.ReadFile(testFilePath)
-			if err != nil {
-				os.RemoveAll(topDir)
-				t.Fatalf("ReadFile failed for test case: %s, error : %v", tt.name, err)
-			}
-			got := string(b)
-			if diff := cmp.Diff(got, expectedContent); diff != "" {
-				os.RemoveAll(topDir)
-				t.Errorf(
-					"format dir, unexpected result for test case: %s, path: %s,  Expected: %s, Got: %s",
-					tt.name,
-					expectedPath,
-					expectedContent,
-					got)
-			}
-			err = os.Remove(testFilePath)
-			if err != nil {
-				t.Errorf(
-					"Failed to delete test file: %s for test case: %s, please clean before another test run. Error: %s",
-					testFilePath,
-					tt.name,
-					err)
-			}
-		}
-
-		err = os.RemoveAll(topDir)
-		if err != nil {
-			t.Errorf(
-				"Failed to delete top level test directory for test case: %s, please clean before another test run. Error: %s",
-				tt.name,
-				err)
-		}
-	}
-
-}
+// func TestHCL2Formatter_Recursive(t *testing.T) {
+// 	unformattedData := `
+// // starts resources to provision them.
+// build {
+//     sources = [
+//         "source.amazon-ebs.ubuntu-1604",
+//         "source.virtualbox-iso.ubuntu-1204",
+//     ]
+//
+//     provisioner "shell" {
+//         string  = coalesce(null, "", "string")
+//         int     = "${41 + 1}"
+//         int64   = "${42 + 1}"
+//         bool    = "true"
+//         trilean = true
+//         duration = "${9 + 1}s"
+//         map_string_string = {
+//             a = "b"
+//             c = "d"
+//         }
+//         slice_string = [
+//             "a",
+//             "b",
+//             "c",
+//         ]
+//         slice_slice_string = [
+//             ["a","b"],
+//             ["c","d"]
+//         ]
+//
+//         nested {
+//             string  = "string"
+//             int     = 42
+//             int64   = 43
+//             bool    = true
+//             trilean = true
+//             duration = "10s"
+//             map_string_string = {
+//                 a = "b"
+//                 c = "d"
+//             }
+//             slice_string = [
+//                 "a",
+//                 "b",
+//                 "c",
+//             ]
+//             slice_slice_string = [
+//                 ["a","b"],
+//                 ["c","d"]
+//             ]
+//         }
+//
+//         nested_slice {
+//         }
+//     }
+//
+//     provisioner "file" {
+//         string  = "string"
+//         int     = 42
+//         int64   = 43
+//         bool    = true
+//         trilean = true
+//         duration          = "10s"
+//         map_string_string = {
+//             a = "b"
+//             c = "d"
+//         }
+//         slice_string = [
+//             "a",
+//             "b",
+//             "c",
+//         ]
+//         slice_slice_string = [
+//             ["a","b"],
+//             ["c","d"]
+//         ]
+//
+//         nested {
+//             string   = "string"
+//             int      = 42
+//             int64    = 43
+//             bool     = true
+//             trilean  = true
+//             duration = "10s"
+//             map_string_string = {
+//                 a = "b"
+//                 c = "d"
+//             }
+//             slice_string = [
+//                 "a",
+//                 "b",
+//                 "c",
+//             ]
+//             slice_slice_string = [
+//                 ["a","b"],
+//                 ["c","d"]
+//             ]
+//         }
+//
+//         nested_slice {
+//         }
+//     }
+//
+//     post-processor "amazon-import" {
+//         string   = "string"
+//         int      = 42
+//         int64    = 43
+//         bool     = true
+//         trilean  = true
+//         duration = "10s"
+//         map_string_string = {
+//             a = "b"
+//             c = "d"
+//         }
+//         slice_string = [
+//             "a",
+//             "b",
+//             "c",
+//         ]
+//         slice_slice_string = [
+//             ["a","b"],
+//             ["c","d"]
+//         ]
+//
+//         nested {
+//             string   = "string"
+//             int      = 42
+//             int64    = 43
+//             bool     = true
+//             trilean  = true
+//             duration = "10s"
+//             map_string_string = {
+//                 a = "b"
+//                 c = "d"
+//             }
+//             slice_string = [
+//                 "a",
+//                 "b",
+//                 "c",
+//             ]
+//             slice_slice_string = [
+//                 ["a","b"],
+//                 ["c","d"]
+//             ]
+//         }
+//
+//         nested_slice {
+//         }
+//     }
+// }
+// `
+//
+// 	formattedData := `
+// // starts resources to provision them.
+// build {
+//   sources = [
+//     "source.amazon-ebs.ubuntu-1604",
+//     "source.virtualbox-iso.ubuntu-1204",
+//   ]
+//
+//   provisioner "shell" {
+//     string   = coalesce(null, "", "string")
+//     int      = "${41 + 1}"
+//     int64    = "${42 + 1}"
+//     bool     = "true"
+//     trilean  = true
+//     duration = "${9 + 1}s"
+//     map_string_string = {
+//       a = "b"
+//       c = "d"
+//     }
+//     slice_string = [
+//       "a",
+//       "b",
+//       "c",
+//     ]
+//     slice_slice_string = [
+//       ["a", "b"],
+//       ["c", "d"]
+//     ]
+//
+//     nested {
+//       string   = "string"
+//       int      = 42
+//       int64    = 43
+//       bool     = true
+//       trilean  = true
+//       duration = "10s"
+//       map_string_string = {
+//         a = "b"
+//         c = "d"
+//       }
+//       slice_string = [
+//         "a",
+//         "b",
+//         "c",
+//       ]
+//       slice_slice_string = [
+//         ["a", "b"],
+//         ["c", "d"]
+//       ]
+//     }
+//
+//     nested_slice {
+//     }
+//   }
+//
+//   provisioner "file" {
+//     string   = "string"
+//     int      = 42
+//     int64    = 43
+//     bool     = true
+//     trilean  = true
+//     duration = "10s"
+//     map_string_string = {
+//       a = "b"
+//       c = "d"
+//     }
+//     slice_string = [
+//       "a",
+//       "b",
+//       "c",
+//     ]
+//     slice_slice_string = [
+//       ["a", "b"],
+//       ["c", "d"]
+//     ]
+//
+//     nested {
+//       string   = "string"
+//       int      = 42
+//       int64    = 43
+//       bool     = true
+//       trilean  = true
+//       duration = "10s"
+//       map_string_string = {
+//         a = "b"
+//         c = "d"
+//       }
+//       slice_string = [
+//         "a",
+//         "b",
+//         "c",
+//       ]
+//       slice_slice_string = [
+//         ["a", "b"],
+//         ["c", "d"]
+//       ]
+//     }
+//
+//     nested_slice {
+//     }
+//   }
+//
+//   post-processor "amazon-import" {
+//     string   = "string"
+//     int      = 42
+//     int64    = 43
+//     bool     = true
+//     trilean  = true
+//     duration = "10s"
+//     map_string_string = {
+//       a = "b"
+//       c = "d"
+//     }
+//     slice_string = [
+//       "a",
+//       "b",
+//       "c",
+//     ]
+//     slice_slice_string = [
+//       ["a", "b"],
+//       ["c", "d"]
+//     ]
+//
+//     nested {
+//       string   = "string"
+//       int      = 42
+//       int64    = 43
+//       bool     = true
+//       trilean  = true
+//       duration = "10s"
+//       map_string_string = {
+//         a = "b"
+//         c = "d"
+//       }
+//       slice_string = [
+//         "a",
+//         "b",
+//         "c",
+//       ]
+//       slice_slice_string = [
+//         ["a", "b"],
+//         ["c", "d"]
+//       ]
+//     }
+//
+//     nested_slice {
+//     }
+//   }
+// }
+// `
+//
+// 	tests := []struct {
+// 		name                  string
+// 		recursive             bool
+// 		alreadyPresentContent map[string]string
+// 		expectedContent       map[string]string
+// 	}{
+// 		{
+// 			name:      "nested formats recursively",
+// 			recursive: true,
+// 			alreadyPresentContent: map[string]string{
+// 				"foo/bar/baz":     unformattedData,
+// 				"foo/bar/baz/woo": unformattedData,
+// 				"":                unformattedData,
+// 			},
+// 			expectedContent: map[string]string{
+// 				"foo/bar/baz":     formattedData,
+// 				"foo/bar/baz/woo": formattedData,
+// 				"":                formattedData,
+// 			},
+// 		},
+// 		{
+// 			name:      "nested no recursive format",
+// 			recursive: false,
+// 			alreadyPresentContent: map[string]string{
+// 				"foo/bar/baz":     unformattedData,
+// 				"foo/bar/baz/woo": unformattedData,
+// 				"":                unformattedData,
+// 			},
+// 			expectedContent: map[string]string{
+// 				"foo/bar/baz":     unformattedData,
+// 				"foo/bar/baz/woo": unformattedData,
+// 				"":                formattedData,
+// 			},
+// 		},
+// 	}
+//
+// 	var buf bytes.Buffer
+// 	f := NewHCL2Formatter()
+// 	f.Output = &buf
+// 	f.Write = true
+//
+// 	for _, tt := range tests {
+// 		testFilePaths := make(map[string]string)
+// 		topDir, err := ioutil.TempDir("testdata/format", "temp-dir")
+// 		if err != nil {
+// 			t.Fatalf("Failed to create TopDir for test case: %s, error: %v", tt.name, err)
+// 		}
+//
+// 		for testDir, content := range tt.alreadyPresentContent {
+// 			dir := filepath.Join(topDir, testDir)
+// 			err := os.MkdirAll(dir, 0777)
+// 			if err != nil {
+// 				os.RemoveAll(topDir)
+// 				t.Fatalf(
+// 					"Failed to create subDir: %s\n\n, for test case: %s\n\n, error: %v",
+// 					testDir,
+// 					tt.name,
+// 					err)
+// 			}
+//
+// 			file, err := ioutil.TempFile(dir, "*.pkrvars.hcl")
+// 			if err != nil {
+// 				os.RemoveAll(topDir)
+// 				t.Fatalf("failed to create testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
+// 					testDir,
+// 					tt.name,
+// 					err)
+// 			}
+// 			testFilePaths[testDir] = file.Name()
+//
+// 			_, err = file.Write([]byte(content))
+// 			if err != nil {
+// 				os.RemoveAll(topDir)
+// 				t.Fatalf("failed to write to testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
+// 					testDir,
+// 					tt.name,
+// 					err)
+// 			}
+//
+// 			err = file.Close()
+// 			if err != nil {
+// 				os.RemoveAll(topDir)
+// 				t.Fatalf("failed to close testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
+// 					testDir,
+// 					tt.name,
+// 					err)
+// 			}
+// 		}
+//
+// 		f.Recursive = tt.recursive
+// 		_, diags := f.Format(topDir)
+// 		if diags.HasErrors() {
+// 			os.RemoveAll(topDir)
+// 			t.Fatalf("the call to Format failed unexpectedly for test case: %s, errors: %s", tt.name, diags.Error())
+// 		}
+//
+// 		for expectedPath, expectedContent := range tt.expectedContent {
+// 			testFilePath := testFilePaths[expectedPath]
+// 			b, err := ioutil.ReadFile(testFilePath)
+// 			if err != nil {
+// 				os.RemoveAll(topDir)
+// 				t.Fatalf("ReadFile failed for test case: %s, error : %v", tt.name, err)
+// 			}
+// 			got := string(b)
+// 			if diff := cmp.Diff(got, expectedContent); diff != "" {
+// 				os.RemoveAll(topDir)
+// 				t.Errorf(
+// 					"format dir, unexpected result for test case: %s, path: %s,  Expected: %s, Got: %s",
+// 					tt.name,
+// 					expectedPath,
+// 					expectedContent,
+// 					got)
+// 			}
+// 			err = os.Remove(testFilePath)
+// 			if err != nil {
+// 				t.Errorf(
+// 					"Failed to delete test file: %s for test case: %s, please clean before another test run. Error: %s",
+// 					testFilePath,
+// 					tt.name,
+// 					err)
+// 			}
+// 		}
+//
+// 		err = os.RemoveAll(topDir)
+// 		if err != nil {
+// 			t.Errorf(
+// 				"Failed to delete top level test directory for test case: %s, please clean before another test run. Error: %s",
+// 				tt.name,
+// 				err)
+// 		}
+// 	}
+//
+// }
 
 func TestHCL2Formatter_Format_Write(t *testing.T) {
 
