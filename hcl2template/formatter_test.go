@@ -414,7 +414,6 @@ build {
 					err)
 			}
 			// TODO determine if this this allowed?
-			defer os.Remove(file.Name())
 			testFilePaths[testDir] = file.Name()
 
 			_, err = file.Write([]byte(content))

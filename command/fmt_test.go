@@ -135,7 +135,6 @@ ami_filter_owners = ["137112412989"]
 					tt.name,
 					err)
 			}
-			defer os.Remove(file.Name())
 			testFilePaths[testDir] = file.Name()
 
 			_, err = file.Write([]byte(content))
