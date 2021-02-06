@@ -439,7 +439,8 @@ build {
 		}
 
 		for expectedPath, expectedContent := range tt.expectedContent {
-			b, err := ioutil.ReadFile(filepath.Join(topDir, expectedPath, testFileName))
+			testFilePath := filepath.Join(topDir, expectedPath, testFileName)
+			b, err := ioutil.ReadFile(testFilePath)
 			if err != nil {
 				os.RemoveAll(topDir)
 				t.Fatalf("ReadFile failed for test case: %s, error : %v", tt.name, err)
@@ -453,6 +454,14 @@ build {
 					expectedPath,
 					expectedContent,
 					got)
+			}
+			err = os.Remove(testFilePath)
+			if err != nil {
+				t.Errorf(
+					"Failed to delete test file: %s for test case: %s, please clean before another test run. Error: %s",
+					testFilePath,
+					tt.name,
+					err)
 			}
 		}
 

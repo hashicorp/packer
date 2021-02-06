@@ -169,7 +169,8 @@ ami_filter_owners = ["137112412989"]
 		}
 
 		for expectedPath, expectedContent := range tt.expectedContent {
-			b, err := ioutil.ReadFile(filepath.Join(topDir, expectedPath, testFileName))
+			testFilePath := filepath.Join(topDir, expectedPath, testFileName)
+			b, err := ioutil.ReadFile(testFilePath)
 			if err != nil {
 				os.RemoveAll(topDir)
 				t.Fatalf("ReadFile failed for test case: %s, error : %v", tt.name, err)
@@ -184,6 +185,16 @@ ami_filter_owners = ["137112412989"]
 					expectedContent,
 					got)
 			}
+			// TODO remove the file here
+			err = os.Remove(testFilePath)
+			if err != nil {
+				t.Errorf(
+					"Failed to delete test file: %s for test case: %s, please clean before another test run. Error: %s",
+					testFilePath,
+					tt.name,
+					err)
+			}
+
 		}
 
 		err = os.RemoveAll(topDir)
