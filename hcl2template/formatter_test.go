@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -456,6 +457,8 @@ build {
 					got)
 			}
 		}
+
+		time.Sleep(5 * time.Second)
 
 		err = os.RemoveAll(topDir)
 		if err != nil {
