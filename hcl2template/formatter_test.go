@@ -422,7 +422,14 @@ build {
 					err)
 			}
 
-			file.Close()
+			err = file.Close()
+			if err != nil {
+				os.RemoveAll(topDir)
+				t.Fatalf("failed to close testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
+					testDir,
+					tt.name,
+					err)
+			}
 		}
 
 		f.Recursive = tt.recursive
