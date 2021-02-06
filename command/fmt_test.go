@@ -106,14 +106,14 @@ ami_filter_owners = ["137112412989"]
 		Meta: testMeta(t),
 	}
 
-	testFileName := "test.pkrvars.hcl"
+	// testFileName := "test.pkrvars.hcl"
 
 	for _, tt := range tests {
+		testFilePaths := make(map[string]string)
 		topDir, err := ioutil.TempDir("test-fixtures/fmt", "temp-dir")
 		if err != nil {
 			t.Fatalf("Failed to create TopDir for test case: %s, error: %v", tt.name, err)
 		}
-		// defer os.Remove(topDir)
 
 		for testDir, content := range tt.alreadyPresentContent {
 			dir := filepath.Join(topDir, testDir)
@@ -127,7 +127,7 @@ ami_filter_owners = ["137112412989"]
 					err)
 			}
 
-			file, err := os.Create(filepath.Join(dir, testFileName))
+			file, err := ioutil.TempFile(dir, "*.pkrvars.hcl")
 			if err != nil {
 				os.RemoveAll(topDir)
 				t.Fatalf("failed to create testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
@@ -135,6 +135,8 @@ ami_filter_owners = ["137112412989"]
 					tt.name,
 					err)
 			}
+			defer os.Remove(file.Name())
+			testFilePaths[testDir] = file.Name()
 
 			_, err = file.Write([]byte(content))
 			if err != nil {
@@ -169,7 +171,8 @@ ami_filter_owners = ["137112412989"]
 		}
 
 		for expectedPath, expectedContent := range tt.expectedContent {
-			testFilePath := filepath.Join(topDir, expectedPath, testFileName)
+			testFilePath := testFilePaths[expectedPath]
+			// testFilePath := filepath.Join(topDir, expectedPath, testFileName)
 			b, err := ioutil.ReadFile(testFilePath)
 			if err != nil {
 				os.RemoveAll(topDir)
@@ -185,7 +188,6 @@ ami_filter_owners = ["137112412989"]
 					expectedContent,
 					got)
 			}
-			// TODO remove the file here
 			err = os.Remove(testFilePath)
 			if err != nil {
 				t.Errorf(

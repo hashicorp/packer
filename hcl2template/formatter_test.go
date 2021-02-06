@@ -383,9 +383,10 @@ build {
 	f.Output = &buf
 	f.Write = true
 
-	testFileName := "test.pkrvars.hcl"
+	// testFileName := "test.pkrvars.hcl"
 
 	for _, tt := range tests {
+		testFilePaths := make(map[string]string)
 		topDir, err := ioutil.TempDir("testdata/format", "temp-dir")
 		if err != nil {
 			t.Fatalf("Failed to create TopDir for test case: %s, error: %v", tt.name, err)
@@ -403,7 +404,8 @@ build {
 					err)
 			}
 
-			file, err := os.Create(filepath.Join(dir, testFileName))
+			//file, err := os.Create(filepath.Join(dir, testFileName))
+			file, err := ioutil.TempFile(dir, "*.pkrvars.hcl")
 			if err != nil {
 				os.RemoveAll(topDir)
 				t.Fatalf("failed to create testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
@@ -411,6 +413,9 @@ build {
 					tt.name,
 					err)
 			}
+			// TODO determine if this this allowed?
+			defer os.Remove(file.Name())
+			testFilePaths[testDir] = file.Name()
 
 			_, err = file.Write([]byte(content))
 			if err != nil {
@@ -439,7 +444,8 @@ build {
 		}
 
 		for expectedPath, expectedContent := range tt.expectedContent {
-			testFilePath := filepath.Join(topDir, expectedPath, testFileName)
+			testFilePath := testFilePaths[expectedPath]
+			// testFilePath := filepath.Join(topDir, expectedPath, testFileName)
 			b, err := ioutil.ReadFile(testFilePath)
 			if err != nil {
 				os.RemoveAll(topDir)
