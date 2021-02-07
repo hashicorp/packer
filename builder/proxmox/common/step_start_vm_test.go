@@ -1,6 +1,7 @@
 package proxmox
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -102,6 +103,83 @@ func TestCleanupStartVM(t *testing.T) {
 			}
 			if c.expectCallDeleteVM && !deleteWasCalled {
 				t.Error("Expected DeleteVm to be called, but it wasn't")
+			}
+		})
+	}
+}
+
+type startVMMock struct {
+	create      func(*proxmox.VmRef, proxmox.ConfigQemu, multistep.StateBag) error
+	startVm     func(*proxmox.VmRef) (string, error)
+	setVmConfig func(*proxmox.VmRef, map[string]interface{}) (interface{}, error)
+}
+
+func (m *startVMMock) Create(vmRef *proxmox.VmRef, config proxmox.ConfigQemu, state multistep.StateBag) error {
+	return m.create(vmRef, config, state)
+}
+func (m *startVMMock) StartVm(vmRef *proxmox.VmRef) (string, error) {
+	return m.startVm(vmRef)
+}
+func (m *startVMMock) SetVmConfig(vmRef *proxmox.VmRef, config map[string]interface{}) (interface{}, error) {
+	return m.setVmConfig(vmRef, config)
+}
+func (m *startVMMock) GetNextID(int) (int, error) {
+	return 1, nil
+}
+
+func TestStartVM(t *testing.T) {
+	// TODO: proxmox-api-go does a lot of manipulation on the input and does not
+	// give any way to access the actual data it sends to the Proxmox server,
+	// which means writing good tests here is quite hard. This test is mainly a
+	// stub to revisit when we can write better tests.
+	cs := []struct {
+		name           string
+		config         *Config
+		expectedAction multistep.StepAction
+	}{
+		{
+			name: "Example config from documentation works",
+			config: &Config{
+				Disks: []diskConfig{
+					{
+						Type:            "sata",
+						Size:            "10G",
+						StoragePool:     "local",
+						StoragePoolType: "lvm",
+					},
+				},
+				NICs: []nicConfig{
+					{
+						Bridge: "vmbr0",
+					},
+				},
+			},
+			expectedAction: multistep.ActionContinue,
+		},
+	}
+
+	for _, c := range cs {
+		t.Run(c.name, func(t *testing.T) {
+			mock := &startVMMock{
+				create: func(vmRef *proxmox.VmRef, config proxmox.ConfigQemu, state multistep.StateBag) error {
+					return nil
+				},
+				startVm: func(*proxmox.VmRef) (string, error) {
+					return "", nil
+				},
+				setVmConfig: func(*proxmox.VmRef, map[string]interface{}) (interface{}, error) {
+					return nil, nil
+				},
+			}
+			state := new(multistep.BasicStateBag)
+			state.Put("ui", packersdk.TestUi(t))
+			state.Put("config", c.config)
+			state.Put("proxmoxClient", mock)
+			s := stepStartVM{vmCreator: mock}
+
+			action := s.Run(context.TODO(), state)
+			if action != c.expectedAction {
+				t.Errorf("Expected action %s, got %s", c.expectedAction, action)
 			}
 		})
 	}
