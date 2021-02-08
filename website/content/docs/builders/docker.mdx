@@ -13,6 +13,7 @@ sidebar_title: Docker
 # Docker Builder
 
 Type: `docker`
+Artifact BuilderId: `packer.docker`
 
 The `docker` Packer builder builds [Docker](https://www.docker.io) images using
 Docker. The builder starts a Docker container, runs provisioners within this
@@ -200,7 +201,7 @@ optional. Within each category, the available options are alphabetized and
 described.
 
 The Docker builder uses a special Docker communicator _and will not use_ the
-standard [communicators](/docs/templates/legacy_json_templates/communicators).
+standard [communicators](/docs/templates/legacy_json_templates/communicator).
 
 ### Required:
 

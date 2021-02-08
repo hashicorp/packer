@@ -146,9 +146,10 @@ func (cfg *PackerConfig) startProvisioner(source SourceUseBlock, pb *Provisioner
 	provisioner, err := cfg.parser.PluginConfig.Provisioners.Start(pb.PType)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary: fmt.Sprintf("failed loading %s", pb.PType),
-			Subject: pb.HCL2Ref.LabelsRanges[0].Ptr(),
-			Detail:  err.Error(),
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("failed loading %s", pb.PType),
+			Subject:  pb.HCL2Ref.LabelsRanges[0].Ptr(),
+			Detail:   err.Error(),
 		})
 		return nil, diags
 	}
