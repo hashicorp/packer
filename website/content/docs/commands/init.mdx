@@ -18,11 +18,12 @@ have to [install the plugin manually](/docs/plugins#installing-plugins).
 The `packer init` command is used to download Packer plugin binaries. This is
 the first command that should be executed when working with a new or existing
 template. This command is always safe to run multiple times. Though subsequent
-runs may give errors, this command will never delete anything. Packer does not
-currently have the notion of a state like Terraform has. In other words,
-currently `packer init` is only in charge of installing packer
-plugins.Currently, `packer init` can only fetch binaries from public projects on
-*Github*. Github's public API, [limits the number of unauthenticated requests
+runs may give errors, this command will never delete anything.   
+
+Packer does not currently have the notion of a state like Terraform has. In other words,
+currently `packer init` is only in charge of installing packer plugins.   
+
+Currently, `packer init` can only fetch binaries from public projects on *Github*. Github's public API, [limits the number of unauthenticated requests
 per hour one IP can
 do](https://docs.github.com/en/developers/apps/rate-limits-for-github-apps#normal-user-to-server-rate-limits).
 Packer will do its best to avoid hitting those limits and in an average local
