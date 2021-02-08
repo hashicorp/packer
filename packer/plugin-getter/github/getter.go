@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	ghTokenAccessor  = "PKR_GITHUB_API_TOKEN"
+	ghTokenAccessor  = "PACKER_GITHUB_API_TOKEN"
 	defaultUserAgent = "packer-plugin-getter"
 )
 
