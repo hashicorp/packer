@@ -172,7 +172,9 @@ func (c *PluginConfig) discoverExternalComponents(path string) error {
 	}
 	for pluginName, pluginPath := range pluginPaths {
 		newPath := pluginPath // this needs to be stored in a new variable for the func below
-		c.DataSources.Set(pluginName, c.Client(newPath).Datasource)
+		c.DataSources.Set(pluginName, func() (packersdk.Datasource, error) {
+			return c.Client(newPath).Datasource()
+		})
 		externallyUsed = append(externallyUsed, pluginName)
 	}
 	if len(externallyUsed) > 0 {
