@@ -100,6 +100,24 @@ necessary for this build to succeed and can be found further down the page.
 Usage Example
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebs" "basic-example" {
+  region        =  "us-east-1"
+  source_ami    =  "ami-fce3c696"
+  instance_type =  "t2.micro"
+  ssh_username  =  "ubuntu"
+  ami_name      =  "packer_AWS_example_{{timestamp}}"
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens = "required"
+    http_put_response_hop_limit = 1
+  }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -117,7 +135,7 @@ Usage Example
       "source_ami": "ami-fce3c696",
       "instance_type": "t2.micro",
       "ssh_username": "ubuntu",
-      "ami_name": "packer_AWS {{timestamp}}"
+      "ami_name": "packer_AWS {{timestamp}}",
       "metadata_options": {
         "http_endpoint": "enabled",
         "http_tokens": "required",
@@ -125,24 +143,6 @@ Usage Example
       }
     }
   ]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "amazon-ebs" "basic-example" {
-  region        =  "us-east-1"
-  source_ami    =  "ami-fce3c696"
-  instance_type =  "t2.micro"
-  ssh_username  =  "ubuntu"
-  ami_name      =  "packer_AWS_example_{{timestamp}}"
-  metadata_options {
-    http_endpoint = enabled
-    http_tokens = required
-    http_put_response_hop_limit = 1
-  }
 }
 ```
 

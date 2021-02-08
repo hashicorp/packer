@@ -44,7 +44,7 @@ type SecurityGroupFilterOptions struct {
 	config.NameValueFilter `mapstructure:",squash"`
 }
 
-// [Metadata Options](#metadata-settings)
+// Configures the metadata options.
 // See [Configure IMDS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html) for details.
 type MetadataOptions struct {
 	// A string to enable or disble the IMDS endpoint for an instance. Defaults to enabled.
