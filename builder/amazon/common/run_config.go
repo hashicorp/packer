@@ -440,7 +440,7 @@ type RunConfig struct {
 	// 10m
 	WindowsPasswordTimeout time.Duration `mapstructure:"windows_password_timeout" required:"false"`
 
-	// Metadata Settings
+	// [Metadata Settings](#metadata-settings) 
 	Metadata MetadataOptions `mapstructure:"metadata_options" required:"false"`
 
 	// Communicator settings
