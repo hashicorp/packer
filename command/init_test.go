@@ -13,6 +13,13 @@ import (
 	"golang.org/x/mod/sumdb/dirhash"
 )
 
+type testBuild struct {
+}
+
+func (tb testBuild) fn(t *testing.T, m Meta) {
+
+}
+
 func TestInitCommand_Run(t *testing.T) {
 	// These tests will try to optimise for doing the least amount of github api
 	// requests whilst testing the max amount of things at once. Hopefully they
@@ -73,7 +80,8 @@ func TestInitCommand_Run(t *testing.T) {
 			"h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
 			[]func(t *testing.T, tc testCase){
 				func(t *testing.T, tc testCase) {
-					// test that a build will not work since plugins are broken.
+					// test that a build will not work since plugins are broken
+					// for this tests (they are not binaries).
 					bc := BuildCommand{
 						Meta: tc.Meta,
 					}
