@@ -97,7 +97,8 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 		if err != nil {
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
-				Summary:  fmt.Sprintf("Failed to discover plugin %s", pluginRequirement.Identifier.ForDisplay()),
+				Summary:  fmt.Sprintf("Error discovering plugin %s", pluginRequirement.Identifier.ForDisplay()),
+				Detail:   err.Error(),
 			})
 			continue
 		}
