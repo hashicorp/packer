@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/oracle/oci-go-sdk/common"
 	core "github.com/oracle/oci-go-sdk/core"
 )
 
@@ -17,6 +18,22 @@ type driverOCI struct {
 	vcnClient     core.VirtualNetworkClient
 	cfg           *Config
 	context       context.Context
+}
+
+var retryPolicy = &common.RetryPolicy{
+	MaximumNumberAttempts: 10,
+	ShouldRetryOperation: func(res common.OCIOperationResponse) bool {
+		if res.Error != nil {
+			return true
+		}
+		return false
+	},
+	NextDuration: func(common.OCIOperationResponse) time.Duration {
+		return 2 * time.Second
+	},
+}
+var requestMetadata = common.RequestMetadata{
+	RetryPolicy: retryPolicy,
 }
 
 // NewDriverOCI Creates a new driverOCI with a connected compute client and a connected vcn client.
@@ -80,6 +97,7 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 			LifecycleState:         "AVAILABLE",
 			SortBy:                 "TIMECREATED",
 			SortOrder:              "DESC",
+			RequestMetadata:        requestMetadata,
 		})
 		if err != nil {
 			return "", err
@@ -127,7 +145,10 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 		Metadata:           metadata,
 	}
 
-	instance, err := d.computeClient.LaunchInstance(context.TODO(), core.LaunchInstanceRequest{LaunchInstanceDetails: instanceDetails})
+	instance, err := d.computeClient.LaunchInstance(context.TODO(), core.LaunchInstanceRequest{
+		LaunchInstanceDetails: instanceDetails,
+		RequestMetadata:       requestMetadata,
+	})
 
 	if err != nil {
 		return "", err
@@ -145,7 +166,9 @@ func (d *driverOCI) CreateImage(ctx context.Context, id string) (core.Image, err
 		FreeformTags:  d.cfg.Tags,
 		DefinedTags:   d.cfg.DefinedTags,
 		LaunchMode:    core.CreateImageDetailsLaunchModeEnum(d.cfg.LaunchMode),
-	}})
+	},
+		RequestMetadata: requestMetadata,
+	})
 
 	if err != nil {
 		return core.Image{}, err
@@ -156,15 +179,19 @@ func (d *driverOCI) CreateImage(ctx context.Context, id string) (core.Image, err
 
 // DeleteImage deletes a custom image.
 func (d *driverOCI) DeleteImage(ctx context.Context, id string) error {
-	_, err := d.computeClient.DeleteImage(ctx, core.DeleteImageRequest{ImageId: &id})
+	_, err := d.computeClient.DeleteImage(ctx, core.DeleteImageRequest{
+		ImageId:         &id,
+		RequestMetadata: requestMetadata,
+	})
 	return err
 }
 
 // GetInstanceIP returns the public or private IP corresponding to the given instance id.
 func (d *driverOCI) GetInstanceIP(ctx context.Context, id string) (string, error) {
 	vnics, err := d.computeClient.ListVnicAttachments(ctx, core.ListVnicAttachmentsRequest{
-		InstanceId:    &id,
-		CompartmentId: &d.cfg.CompartmentID,
+		InstanceId:      &id,
+		CompartmentId:   &d.cfg.CompartmentID,
+		RequestMetadata: requestMetadata,
 	})
 	if err != nil {
 		return "", err
@@ -174,7 +201,10 @@ func (d *driverOCI) GetInstanceIP(ctx context.Context, id string) (string, error
 		return "", errors.New("instance has zero VNICs")
 	}
 
-	vnic, err := d.vcnClient.GetVnic(ctx, core.GetVnicRequest{VnicId: vnics.Items[0].VnicId})
+	vnic, err := d.vcnClient.GetVnic(ctx, core.GetVnicRequest{
+		VnicId:          vnics.Items[0].VnicId,
+		RequestMetadata: requestMetadata,
+	})
 	if err != nil {
 		return "", fmt.Errorf("Error getting VNIC details: %s", err)
 	}
@@ -192,7 +222,8 @@ func (d *driverOCI) GetInstanceIP(ctx context.Context, id string) (string, error
 
 func (d *driverOCI) GetInstanceInitialCredentials(ctx context.Context, id string) (string, string, error) {
 	credentials, err := d.computeClient.GetWindowsInstanceInitialCredentials(ctx, core.GetWindowsInstanceInitialCredentialsRequest{
-		InstanceId: &id,
+		InstanceId:      &id,
+		RequestMetadata: requestMetadata,
 	})
 	if err != nil {
 		return "", "", err
@@ -204,7 +235,8 @@ func (d *driverOCI) GetInstanceInitialCredentials(ctx context.Context, id string
 // TerminateInstance terminates a compute instance.
 func (d *driverOCI) TerminateInstance(ctx context.Context, id string) error {
 	_, err := d.computeClient.TerminateInstance(ctx, core.TerminateInstanceRequest{
-		InstanceId: &id,
+		InstanceId:      &id,
+		RequestMetadata: requestMetadata,
 	})
 	return err
 }
@@ -214,7 +246,10 @@ func (d *driverOCI) TerminateInstance(ctx context.Context, id string) error {
 func (d *driverOCI) WaitForImageCreation(ctx context.Context, id string) error {
 	return waitForResourceToReachState(
 		func(string) (string, error) {
-			image, err := d.computeClient.GetImage(ctx, core.GetImageRequest{ImageId: &id})
+			image, err := d.computeClient.GetImage(ctx, core.GetImageRequest{
+				ImageId:         &id,
+				RequestMetadata: requestMetadata,
+			})
 			if err != nil {
 				return "", err
 			}
@@ -233,7 +268,10 @@ func (d *driverOCI) WaitForImageCreation(ctx context.Context, id string) error {
 func (d *driverOCI) WaitForInstanceState(ctx context.Context, id string, waitStates []string, terminalState string) error {
 	return waitForResourceToReachState(
 		func(string) (string, error) {
-			instance, err := d.computeClient.GetInstance(ctx, core.GetInstanceRequest{InstanceId: &id})
+			instance, err := d.computeClient.GetInstance(ctx, core.GetInstanceRequest{
+				InstanceId:      &id,
+				RequestMetadata: requestMetadata,
+			})
 			if err != nil {
 				return "", err
 			}
