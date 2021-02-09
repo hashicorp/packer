@@ -22,8 +22,11 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 
 	profitbricks.SetAuth(c.PBUsername, c.PBPassword)
 	profitbricks.SetDepth("5")
-	if sshkey, ok := state.GetOk("publicKey"); ok {
-		c.SSHKey = sshkey.(string)
+	if c.Comm.SSHPublicKey != nil {
+		c.SSHKey = string(c.Comm.SSHPublicKey)
+	} else {
+		ui.Error("No ssh private key set; ssh authentication won't be possible. Please specify your private key in the ssh_private_key_file configuration key.")
+		return multistep.ActionHalt
 	}
 	ui.Say("Creating Virtual Data Center...")
 	img := s.getImageId(c.Image, c)
@@ -204,7 +207,7 @@ func (d *stepCreateServer) setPB(username string, password string, url string) {
 
 func (d *stepCreateServer) checkForErrors(instance profitbricks.Resp) error {
 	if instance.StatusCode > 299 {
-		return errors.New(fmt.Sprintf("Error occurred %s", string(instance.Body)))
+		return fmt.Errorf("Error occurred %s", string(instance.Body))
 	}
 	return nil
 }
@@ -261,7 +264,9 @@ func (d *stepCreateServer) getImageAlias(imageAlias string, location string, ui 
 
 func parseErrorMessage(raw string) (toreturn string) {
 	var tmp map[string]interface{}
-	json.Unmarshal([]byte(raw), &tmp)
+	if json.Unmarshal([]byte(raw), &tmp) != nil {
+		return ""
+	}
 
 	for _, v := range tmp["messages"].([]interface{}) {
 		for index, i := range v.(map[string]interface{}) {
