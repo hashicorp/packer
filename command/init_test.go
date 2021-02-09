@@ -125,6 +125,21 @@ func TestInitCommand_Run(t *testing.T) {
 							}
 						}
 					}`,
+				`source.pkr.hcl`: `
+				source "null" "test" {
+					communicator = "none"
+				}
+				`,
+				`build.pkr.hcl`: `
+				build {
+					sources = ["source.null.test"]
+					provisioner "comment" {
+						comment		= "Begin ¡"
+						ui			= true
+						bubble_text	= true
+					}
+				}
+				`,
 			},
 			cfg.dir("2_pkr_config"),
 			cfg.dir("2_pkr_user_folder"),
@@ -152,7 +167,22 @@ func TestInitCommand_Run(t *testing.T) {
 				"linux":   "h1:CGym0+Nd0LEANgzqL0wx/LDjRL8bYwlpZ0HajPJo/hs=",
 				"windows": "h1:ag0/C1YjP7KoEDYOiJHE0K+lhFgs0tVgjriWCXVT1fg=",
 			}[runtime.GOOS],
-			nil,
+			[]func(t *testing.T, tc testCase){
+				func(t *testing.T, tc testCase) {
+					// test that a build will work as the plugin was freshly
+					// installed;
+					bc := BuildCommand{
+						Meta: tc.Meta,
+					}
+
+					args := []string{tc.packerUserFolder}
+					want := 0
+					if got := bc.Run(args); got != want {
+						t.Errorf("InitCommand.Run() = %v, want %v", got, want)
+					}
+
+				},
+			},
 		},
 		{
 			func(t *testing.T) {
