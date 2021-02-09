@@ -18,11 +18,12 @@ Packer is currently backwards compatible with the old API because the plugin API
 
 ### How to update plugins to use the packer-plugin-SDK
 
-In a best-case scenario, all you'll have to do is update the packer imports to use the packer-plugin-sdk import path
+In a best-case scenario, all you'll have to do is update the packer imports to use the packer-plugin-sdk import path. Replacing  `github.com/hashicorp/packer` with `github.com/hashicorp/packer-plugin-sdk`.
 
-`github.com/hashicorp/packer` with `github.com/hashicorp/packer-plugin-sdk`.
+To help with the migration of existing plugins the [packer-sdk-migrator](https://github.com/hashicorp/packer-sdk-migrator#packer-sdk-migrator) CLI tool is available to automatically rewrite all of the import paths to use to `packer-plugin-sdk` module. The migration CLI provides an [eligibility check](https://github.com/hashicorp/packer-sdk-migrator#packer-sdk-migrator-check-check-eligibility-for-migration) that can be used to determine if a plugin can be migrated with the tool.
 
-But some of the import paths have changed more than that because we've refactored the SDK some to make it easier to discover and use helpful modules. Below are a few common import paths. For a full list of available imports see [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/)
+
+With the creation of the SDK the import paths may not map directly to the paths within Packer core, as they have been refactored to make it easier to discover and use helpful modules. Below are a few common import paths. For a full list of available imports see [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/)
 
 
 | Old Path | New Path |
@@ -111,10 +112,11 @@ func main() {
 
 ```
 
-With this single-plugin binary you'd install it by putting it into the plugin directory with the name `packer-provisioner-foo`.
+With this single-plugin binary you'd install it by putting it into the plugin directory with the name
+`packer-provisioner-foo`.
 
 
-Now, you'll want to use the NewSet() function to create a server. so,
+In the new multi-plugin binary you'll want to use the NewSet() function to create a server.
 
 ```golang
 package main
@@ -138,11 +140,22 @@ func main() {
 
 ```
 
-So the implementation is extremely similar, but now we use the "NewSet" function, and call Run() instead of Serve().
+The implementation is extremely similar, but now we use the "NewSet" function to create the plugin Server, and call Run() instead of Serve().
 
-With this example, you'd install it by putting it into the plugin directory with the name `packer-plugin-bar`.
+With the multi-plugin binary example, it is important to not that the name of the binary must be in the form of `packer-pluign-bar`. Otherwise Packer will not register it as a multiple plugin.
 
-In the single binary setup, this you'd have used the name "bar" in your packer template. Now, you need to use the name "bar-foo" in the template.
+```go
+go build -o packer-plugin-bar
+```
+
+Then you'd install it by putting it into the plugin directory with the name `packer-plugin-bar`.
+
+With the multi-plugin binary you would then refer to your newly installed plugin as `bar-foo` within your Packer template. Whereas, in the single binary setup, you'd have used the name "bar" in your Packer template.
+
+At this point it is important to note that multi-plugins are to Packer, what providers are to Terraform. Multi-plugin binaries are meant to provide one or more plugin types to Packer. See [Registering multiple plugins](#registering-multiple-plugins)
+
+If your plugin providers a single plugin type please continue reading for instruction on using the Set architecture for single plugins.
+
 
 ## Using the Set Architecture for Single Plugins
 
