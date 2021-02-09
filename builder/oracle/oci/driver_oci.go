@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
+	"math/rand"
 	"regexp"
+	"sync/atomic"
 	"time"
 
 	"github.com/oracle/oci-go-sdk/common"
@@ -23,15 +26,23 @@ type driverOCI struct {
 var retryPolicy = &common.RetryPolicy{
 	MaximumNumberAttempts: 10,
 	ShouldRetryOperation: func(res common.OCIOperationResponse) bool {
-		if res.Error != nil {
-			return true
+		var e common.ServiceError
+		if errors.As(res.Error, &e) {
+			if e.GetHTTPStatusCode() == 429 || e.GetHTTPStatusCode() == 500 || e.GetHTTPStatusCode() == 503 {
+				return true
+			}
 		}
 		return false
 	},
-	NextDuration: func(common.OCIOperationResponse) time.Duration {
-		return 2 * time.Second
+	NextDuration: func(res common.OCIOperationResponse) time.Duration {
+		x := uint64(res.AttemptNumber)
+		d := time.Duration(math.Pow(2, float64(atomic.LoadUint64(&x)))) * time.Second
+		j := time.Duration(rand.Float64()*(2000)) * time.Millisecond
+		w := d + j
+		return w
 	},
 }
+
 var requestMetadata = common.RequestMetadata{
 	RetryPolicy: retryPolicy,
 }
