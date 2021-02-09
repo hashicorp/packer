@@ -91,6 +91,64 @@ necessary for this build to succeed and can be found further down the page.
 
 @include 'builder/amazon/common/RunConfig-not-required.mdx'
 
+#### Metadata Settings
+
+@include 'builder/amazon/common/MetadataOptions.mdx'
+
+@include 'builder/amazon/common/MetadataOptions-not-required.mdx'
+
+Usage Example
+
+<Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebs" "basic-example" {
+  region        =  "us-east-1"
+  source_ami    =  "ami-fce3c696"
+  instance_type =  "t2.micro"
+  ssh_username  =  "ubuntu"
+  ami_name      =  "packer_AWS_example_{{timestamp}}"
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens = "required"
+    http_put_response_hop_limit = 1
+  }
+}
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "us-east-1",
+      "source_ami": "ami-fce3c696",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "packer_AWS {{timestamp}}",
+      "metadata_options": {
+        "http_endpoint": "enabled",
+        "http_tokens": "required",
+        "http_put_response_hop_limit": 1
+      }
+    }
+  ]
+}
+```
+
+</Tab>
+</Tabs>
+
 @include 'builders/aws-session-manager.mdx'
 
 ### Block Devices Configuration

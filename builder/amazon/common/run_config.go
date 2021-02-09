@@ -1,5 +1,5 @@
 //go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type AmiFilterOptions,SecurityGroupFilterOptions,SubnetFilterOptions,VpcFilterOptions,PolicyDocument,Statement
+//go:generate mapstructure-to-hcl2 -type AmiFilterOptions,SecurityGroupFilterOptions,SubnetFilterOptions,VpcFilterOptions,PolicyDocument,Statement,MetadataOptions
 
 package common
 
@@ -42,6 +42,20 @@ type PolicyDocument struct {
 
 type SecurityGroupFilterOptions struct {
 	config.NameValueFilter `mapstructure:",squash"`
+}
+
+// Configures the metadata options.
+// See [Configure IMDS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html) for details.
+type MetadataOptions struct {
+	// A string to enable or disble the IMDS endpoint for an instance. Defaults to enabled.
+	// Accepts either "enabled" or "disabled"
+	HttpEndpoint string `mapstructure:"http_endpoint" required:"false"`
+	// A string to either set the use of IMDSv2 for the instance to optional or required. Defaults to "optional".
+	// Accepts either "optional" or "required"
+	HttpTokens string `mapstructure:"http_tokens" required:"false"`
+	// A numerical value to set an upper limit for the amount of hops allowed when communicating with IMDS endpoints.
+	// Defaults to 1.
+	HttpPutResponseHopLimit int64 `mapstructure:"http_put_response_hop_limit" required:"false"`
 }
 
 // RunConfig contains configuration for running an instance from a source
@@ -426,6 +440,9 @@ type RunConfig struct {
 	// 10m
 	WindowsPasswordTimeout time.Duration `mapstructure:"windows_password_timeout" required:"false"`
 
+	// [Metadata Settings](#metadata-settings)
+	Metadata MetadataOptions `mapstructure:"metadata_options" required:"false"`
+
 	// Communicator settings
 	Comm communicator.Config `mapstructure:",squash"`
 
@@ -485,6 +502,33 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	errs := c.Comm.Prepare(ctx)
+
+	if c.Metadata.HttpEndpoint == "" {
+		c.Metadata.HttpEndpoint = "enabled"
+	}
+
+	if c.Metadata.HttpTokens == "" {
+		c.Metadata.HttpTokens = "optional"
+	}
+
+	if c.Metadata.HttpPutResponseHopLimit == 0 {
+		c.Metadata.HttpPutResponseHopLimit = 1
+	}
+
+	if c.Metadata.HttpEndpoint != "enabled" && c.Metadata.HttpEndpoint != "disabled" {
+		msg := fmt.Errorf("http_endpoint requires either disabled or enabled as its value")
+		errs = append(errs, msg)
+	}
+
+	if c.Metadata.HttpTokens != "optional" && c.Metadata.HttpTokens != "required" {
+		msg := fmt.Errorf("http_tokens requires either optional or required as its value")
+		errs = append(errs, msg)
+	}
+
+	if c.Metadata.HttpPutResponseHopLimit < 1 || c.Metadata.HttpPutResponseHopLimit > 64 {
+		msg := fmt.Errorf("http_put_response_hop_limit requires a number between 1 and 64")
+		errs = append(errs, msg)
+	}
 
 	// Copy singular tag maps
 	errs = append(errs, c.RunTag.CopyOn(&c.RunTags)...)

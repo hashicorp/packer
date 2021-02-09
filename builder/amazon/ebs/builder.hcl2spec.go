@@ -90,6 +90,7 @@ type FlatConfig struct {
 	VpcFilter                                 *common.FlatVpcFilterOptions           `mapstructure:"vpc_filter" required:"false" cty:"vpc_filter" hcl:"vpc_filter"`
 	VpcId                                     *string                                `mapstructure:"vpc_id" required:"false" cty:"vpc_id" hcl:"vpc_id"`
 	WindowsPasswordTimeout                    *string                                `mapstructure:"windows_password_timeout" required:"false" cty:"windows_password_timeout" hcl:"windows_password_timeout"`
+	Metadata                                  *common.FlatMetadataOptions            `mapstructure:"metadata_options" required:"false" cty:"metadata_options" hcl:"metadata_options"`
 	Type                                      *string                                `mapstructure:"communicator" cty:"communicator" hcl:"communicator"`
 	PauseBeforeConnect                        *string                                `mapstructure:"pause_before_connecting" cty:"pause_before_connecting" hcl:"pause_before_connecting"`
 	SSHHost                                   *string                                `mapstructure:"ssh_host" cty:"ssh_host" hcl:"ssh_host"`
@@ -240,6 +241,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vpc_filter":                            &hcldec.BlockSpec{TypeName: "vpc_filter", Nested: hcldec.ObjectSpec((*common.FlatVpcFilterOptions)(nil).HCL2Spec())},
 		"vpc_id":                                &hcldec.AttrSpec{Name: "vpc_id", Type: cty.String, Required: false},
 		"windows_password_timeout":              &hcldec.AttrSpec{Name: "windows_password_timeout", Type: cty.String, Required: false},
+		"metadata_options":                      &hcldec.BlockSpec{TypeName: "metadata_options", Nested: hcldec.ObjectSpec((*common.FlatMetadataOptions)(nil).HCL2Spec())},
 		"communicator":                          &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
 		"pause_before_connecting":               &hcldec.AttrSpec{Name: "pause_before_connecting", Type: cty.String, Required: false},
 		"ssh_host":                              &hcldec.AttrSpec{Name: "ssh_host", Type: cty.String, Required: false},
