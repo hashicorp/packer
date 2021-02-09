@@ -13,11 +13,35 @@ import (
 	"golang.org/x/mod/sumdb/dirhash"
 )
 
-type testBuild struct {
+type testCaseInit struct {
+	checkSkip                             func(*testing.T)
+	name                                  string
+	Meta                                  Meta
+	inPluginFolder                        map[string]string
+	expectedPackerConfigDirHashBeforeInit string
+	inConfigFolder                        map[string]string
+	packerConfigDir                       string
+	packerUserFolder                      string
+	want                                  int
+	dirFiles                              []string
+	expectedPackerConfigDirHashAfterInit  string
+	moreTests                             []func(*testing.T, testCaseInit)
 }
 
-func (tb testBuild) fn(t *testing.T, m Meta) {
+type testBuild struct {
+	want int
+}
 
+func (tb testBuild) fn(t *testing.T, tc testCaseInit) {
+	bc := BuildCommand{
+		Meta: tc.Meta,
+	}
+
+	args := []string{tc.packerUserFolder}
+	want := tb.want
+	if got := bc.Run(args); got != want {
+		t.Errorf("BuildCommand.Run() = %v, want %v", got, want)
+	}
 }
 
 func TestInitCommand_Run(t *testing.T) {
@@ -26,24 +50,9 @@ func TestInitCommand_Run(t *testing.T) {
 	// don't require a GH token just yet. Acc tests are run on linux, darwin and
 	// windows, so requests are done 3 times.
 
-	type testCase struct {
-		checkSkip                             func(*testing.T)
-		name                                  string
-		Meta                                  Meta
-		inPluginFolder                        map[string]string
-		expectedPackerConfigDirHashBeforeInit string
-		inConfigFolder                        map[string]string
-		packerConfigDir                       string
-		packerUserFolder                      string
-		want                                  int
-		dirFiles                              []string
-		expectedPackerConfigDirHashAfterInit  string
-		moreTests                             []func(*testing.T, testCase)
-	}
-
 	cfg := &configDirSingleton{map[string]string{}}
 
-	tests := []testCase{
+	tests := []testCaseInit{
 		{
 			nil,
 			// here we pre-write plugins with valid checksums, Packer will
@@ -78,21 +87,10 @@ func TestInitCommand_Run(t *testing.T) {
 			0,
 			nil,
 			"h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
-			[]func(t *testing.T, tc testCase){
-				func(t *testing.T, tc testCase) {
-					// test that a build will not work since plugins are broken
-					// for this tests (they are not binaries).
-					bc := BuildCommand{
-						Meta: tc.Meta,
-					}
-
-					args := []string{tc.packerUserFolder}
-					want := 1
-					if got := bc.Run(args); got != want {
-						t.Errorf("InitCommand.Run() = %v, want %v", got, want)
-					}
-
-				},
+			[]func(t *testing.T, tc testCaseInit){
+				// test that a build will not work since plugins are broken for
+				// this tests (they are not binaries).
+				testBuild{want: 1}.fn,
 			},
 		},
 		{
@@ -167,21 +165,9 @@ func TestInitCommand_Run(t *testing.T) {
 				"linux":   "h1:CGym0+Nd0LEANgzqL0wx/LDjRL8bYwlpZ0HajPJo/hs=",
 				"windows": "h1:ag0/C1YjP7KoEDYOiJHE0K+lhFgs0tVgjriWCXVT1fg=",
 			}[runtime.GOOS],
-			[]func(t *testing.T, tc testCase){
-				func(t *testing.T, tc testCase) {
-					// test that a build will work as the plugin was freshly
-					// installed;
-					bc := BuildCommand{
-						Meta: tc.Meta,
-					}
-
-					args := []string{tc.packerUserFolder}
-					want := 0
-					if got := bc.Run(args); got != want {
-						t.Errorf("InitCommand.Run() = %v, want %v", got, want)
-					}
-
-				},
+			[]func(t *testing.T, tc testCaseInit){
+				// test that a build will work as the plugin was just installed
+				testBuild{want: 0}.fn,
 			},
 		},
 		{
