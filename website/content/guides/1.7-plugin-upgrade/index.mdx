@@ -142,17 +142,17 @@ func main() {
 
 The implementation is extremely similar, but now we use the "NewSet" function to create the plugin Server, and call Run() instead of Serve().
 
-With the multi-plugin binary example, it is important to not that the name of the binary must be in the form of `packer-pluign-bar`. Otherwise Packer will not register it as a multiple plugin.
+With the multi-plugin binary example, it is important to note that the name of the binary must be in the form of `packer-pluign-name`. Otherwise Packer will not register it as a multi-plugin, nor to download it.
 
 ```go
 go build -o packer-plugin-bar
 ```
 
-Then you'd install it by putting it into the plugin directory with the name `packer-plugin-bar`.
+Then you'd install it by putting it into the plugin directory with the name `packer-plugin-name`.
 
 With the multi-plugin binary you would then refer to your newly installed plugin as `bar-foo` within your Packer template. Whereas, in the single binary setup, you'd have used the name "bar" in your Packer template.
 
-At this point it is important to note that multi-plugins are to Packer, what providers are to Terraform. Multi-plugin binaries are meant to provide one or more plugin types to Packer. See [registering multiple plugins](#registering-multiple-plugins) for details on how to register more than one plugin type.
+At this point it is important to note that multi-plugins are to Packer, what providers are to Terraform. Multi-plugin binaries are meant to provide one or more plugin types to Packer which depend on the same cloud or other APIs. See [registering multiple plugins](#registering-multiple-plugins) for details on how to register more than one plugin type.
 
 If your plugin providers a single plugin type please continue reading for instruction on using the Set architecture for single plugins.
 
