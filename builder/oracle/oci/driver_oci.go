@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"net/http"
 	"regexp"
 	"sync/atomic"
 	"time"
@@ -28,7 +29,8 @@ var retryPolicy = &common.RetryPolicy{
 	ShouldRetryOperation: func(res common.OCIOperationResponse) bool {
 		var e common.ServiceError
 		if errors.As(res.Error, &e) {
-			if e.GetHTTPStatusCode() == 429 || e.GetHTTPStatusCode() == 500 || e.GetHTTPStatusCode() == 503 {
+			switch e.GetHTTPStatusCode() {
+			case http.StatusTooManyRequests, http.StatusInternalServerError, http.StatusServiceUnavailable:
 				return true
 			}
 		}
