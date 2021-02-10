@@ -46,6 +46,9 @@ var packerBlockSchema = &hcl.BodySchema{
 	Attributes: []hcl.AttributeSchema{
 		{Name: "required_version"},
 	},
+	Blocks: []hcl.BlockHeaderSchema{
+		{Type: "required_plugins"},
+	},
 }
 
 // Parser helps you parse HCL folders. It will parse an hcl file or directory
@@ -59,13 +62,7 @@ type Parser struct {
 
 	*hclparse.Parser
 
-	BuilderSchemas packer.BuilderStore
-
-	ProvisionersSchemas packer.ProvisionerStore
-
-	PostProcessorsSchemas packer.PostProcessorStore
-
-	DatasourceSchemas packer.DatasourceStore
+	PluginConfig *packer.PluginConfig
 }
 
 const (
@@ -132,10 +129,6 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		Basedir:                 basedir,
 		Cwd:                     wd,
 		CorePackerVersionString: p.CorePackerVersionString,
-		builderSchemas:          p.BuilderSchemas,
-		provisionersSchemas:     p.ProvisionersSchemas,
-		postProcessorsSchemas:   p.PostProcessorsSchemas,
-		datasourceSchemas:       p.DatasourceSchemas,
 		parser:                  p,
 		files:                   files,
 	}
@@ -147,7 +140,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	}
 
 	// Before we go further, we'll check to make sure this version can read
-	// that file, so we can produce a version-related error message rather than
+	// all files, so we can produce a version-related error message rather than
 	// potentially-confusing downstream errors.
 	versionDiags := cfg.CheckCoreVersionRequirements(p.CorePackerVersion)
 	diags = append(diags, versionDiags...)
@@ -155,8 +148,30 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		return cfg, diags
 	}
 
+	// Decode required_plugins blocks and create implicit required_plugins
+	// blocks. Implicit required_plugins blocks happen when a builder or another
+	// plugin cannot be found, for example if one uses :
+	//  source "amazon-ebs" "example" { ... }
+	// And no `amazon-ebs` builder can be found. This will then be the
+	// equivalent of having :
+	//  packer {
+	//    required_plugins {
+	//      amazon = "latest"
+	//    }
+	//  }
+	// Note: using `latest` ( or actually an empty string ) in a config file
+	// does not work and packer will ask you to pick a version
+	{
+		for _, file := range files {
+			diags = append(diags, cfg.decodeRequiredPluginsBlock(file)...)
+		}
+		for _, file := range files {
+			diags = append(diags, cfg.decodeImplicitRequiredPluginsBlocks(file)...)
+		}
+	}
+
 	// Decode variable blocks so that they are available later on. Here locals
-	// can use input variables so we decode them firsthand.
+	// can use input variables so we decode input variables first.
 	{
 		for _, file := range files {
 			diags = append(diags, cfg.decodeInputVariables(file)...)
@@ -211,6 +226,11 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		}
 
 		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, argVars)...)
+	}
+
+	// parse the actual content // rest
+	for _, file := range cfg.files {
+		diags = append(diags, cfg.parser.parseConfig(file, cfg)...)
 	}
 	return cfg, diags
 }
@@ -277,7 +297,14 @@ func filterVarsFromLogs(inputOrLocal Variables) {
 func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	_, moreDiags := cfg.InputVariables.Values()
+	// enable packer to start plugins requested in required_plugins.
+	moreDiags := cfg.detectPluginBinaries()
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		return diags
+	}
+
+	_, moreDiags = cfg.InputVariables.Values()
 	diags = append(diags, moreDiags...)
 	_, moreDiags = cfg.LocalVariables.Values()
 	diags = append(diags, moreDiags...)
@@ -287,21 +314,17 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 	filterVarsFromLogs(cfg.InputVariables)
 	filterVarsFromLogs(cfg.LocalVariables)
 
-	// decode the actual content
-	for _, file := range cfg.files {
-		diags = append(diags, cfg.parser.decodeConfig(file, cfg)...)
-	}
+	diags = append(diags, cfg.initializeBlocks()...)
 
 	return diags
 }
 
-// decodeConfig looks in the found blocks for everything that is not a variable
-// block. It should be called after parsing input variables and locals so that
-// they can be referenced.
-func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+// parseConfig looks in the found blocks for everything that is not a variable
+// block.
+func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	body := dynblock.Expand(f.Body, cfg.EvalContext(nil))
+	body := f.Body
 	content, moreDiags := body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 
@@ -350,7 +373,7 @@ func (p *Parser) decodeConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 func (p *Parser) decodeDatasources(file *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	body := dynblock.Expand(file.Body, cfg.EvalContext(nil))
+	body := dynblock.Expand(file.Body, cfg.EvalContext(DatasourceContext, nil))
 	content, moreDiags := body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 

@@ -9,6 +9,7 @@ sidebar_title: Google Compute Import
 # Google Compute Image Import Post-Processor
 
 Type: `googlecompute-import`
+Artifact BuilderId: `packer.post-processor.googlecompute-import`
 
 The Google Compute Image Import post-processor takes a compressed raw disk
 image and imports it to a GCE image available to Google Compute Engine.
@@ -29,7 +30,7 @@ see the [GCE import documentation](https://cloud.google.com/compute/docs/images/
 for details.
 
 ~> **Note**: To prevent Packer from deleting the compressed RAW disk image set the `keep_input_artifact` configuration option to `true`.
-See [Post-Processor Input Artifacts](/docs/templates/post-processors#input-artifacts) for more details.
+See [Post-Processor Input Artifacts](/docs/templates/legacy_json_templates/post-processors#input-artifacts) for more details.
 
 ## Configuration
 

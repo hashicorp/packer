@@ -73,7 +73,10 @@ func (d *datasource) Execute() (cty.Value, error) {
 	if err != nil {
 		return *res, err
 	}
-	return *res, nil
+	if resp.Error != nil {
+		err = resp.Error
+	}
+	return *res, err
 }
 
 // DatasourceServer wraps a packer.Datasource implementation and makes it
@@ -92,7 +95,7 @@ func (d *DatasourceServer) Configure(args *DatasourceConfigureArgs, reply *Datas
 	}
 	err = d.d.Configure(config...)
 	reply.Error = NewBasicError(err)
-	return nil
+	return err
 }
 
 func (d *DatasourceServer) OutputSpec(args *DatasourceConfigureArgs, reply *OutputSpecResponse) error {
@@ -109,6 +112,9 @@ func (d *DatasourceServer) Execute(args *interface{}, reply *ExecuteResponse) er
 	b := bytes.NewBuffer(nil)
 	err = gob.NewEncoder(b).Encode(spec)
 	reply.Value = b.Bytes()
+	if reply.Error != nil {
+		err = reply.Error
+	}
 	return err
 }
 

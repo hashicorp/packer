@@ -93,6 +93,18 @@ type BuildArgs struct {
 	OnError                                           string
 }
 
+func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
+	flags.BoolVar(&ia.Upgrade, "upgrade", false, "upgrade any present plugin to the highest allowed version.")
+
+	ia.MetaArgs.AddFlagSets(flags)
+}
+
+// InitArgs represents a parsed cli line for a `packer build`
+type InitArgs struct {
+	MetaArgs
+	Upgrade bool
+}
+
 // ConsoleArgs represents a parsed cli line for a `packer console`
 type ConsoleArgs struct {
 	MetaArgs

@@ -58,7 +58,7 @@ build {
   ]
   provisioner "shell" {
     # This provisioner only runs for the 'first-example' source.
-    only = ["source.amazon-ebs.first-example"]
+    only = ["amazon-ebs.first-example"]
 
     inline = [
       "echo provisioning all the things",

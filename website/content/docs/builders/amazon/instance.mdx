@@ -15,6 +15,7 @@ sidebar_title: Instance
 # AMI Builder (instance-store)
 
 Type: `amazon-instance`
+Artifact BuilderId: `mitchellh.amazon.instance`
 
 The `amazon-instance` Packer builder is able to create Amazon AMIs backed by
 instance storage as the root device. For more information on the difference
@@ -220,7 +221,7 @@ variables are available:
 
 ## Build Shared Information Variables
 
-This builder generates data that are shared with provisioner and post-processor via build function of [template engine](/docs/templates/engine) for JSON and [contextual variables](/docs/templates/hcl_templates/contextual-variables) for HCL2.
+This builder generates data that are shared with provisioner and post-processor via build function of [template engine](/docs/templates/legacy_json_templates/engine) for JSON and [contextual variables](/docs/templates/hcl_templates/contextual-variables) for HCL2.
 
 The generated variables available for this builder are:
 
@@ -299,7 +300,7 @@ upload the AMI.
 
 These are configured with `bundle_vol_command` and `bundle_upload_command`.
 Both of these configurations are [configuration
-templates](/docs/templates/engine) and have support for their own set of
+templates](/docs/templates/legacy_json_templates/engine) and have support for their own set of
 template variables.
 
 ### Bundle Volume Command

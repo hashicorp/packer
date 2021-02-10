@@ -1,5 +1,10 @@
+# Not needed!
+
+If you use Go 1.7 or later, there is no reason to use this package any more, since optimizations have been merged into the standard library.
+
+The following reposiitory and documentation is left for historical reasons (and to not break exisiting code).
+
 # crc32
-CRC32 hash with x64 optimizations
 
 This package is a drop-in replacement for the standard library `hash/crc32` package, that features SSE 4.2 optimizations on x64 platforms, for a 10x speedup.
 
@@ -12,11 +17,14 @@ Install using `go get github.com/klauspost/crc32`. This library is based on Go 1
 Replace `import "hash/crc32"` with `import "github.com/klauspost/crc32"` and you are good to go.
 
 # changes
-
+* Oct 20, 2016: Changes have been merged to upstream Go. Package updated to match.
 * Dec 4, 2015: Uses the "slice-by-8" trick more extensively, which gives a 1.5 to 2.5x speedup if assembler is unavailable.
 
 
 # performance
+
+For *Go 1.7* performance is equivalent to the standard library. So if you use this package for Go 1.7 you can switch back.
+
 
 For IEEE tables (the most common), there is approximately a factor 10 speedup with "CLMUL" (Carryless multiplication) instruction:
 ```

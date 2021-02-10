@@ -9,6 +9,7 @@ sidebar_title: Yandex.Cloud
 # Yandex Compute Builder
 
 Type: `yandex`
+Artifact BuilderId: `packer.yandex`
 
 The `yandex` Packer builder is able to create
 [images](https://cloud.yandex.com/docs/compute/concepts/images) for use with
@@ -64,7 +65,7 @@ Configuration options are organized below into two categories: required and
 optional. Within each category, the available options are alphabetized and
 described.
 
-In addition to the options listed here, a [communicator](/docs/templates/communicator)
+In addition to the options listed here, a [communicator](/docs/templates/legacy_json_templates/communicator)
 can be configured for this builder. In addition to the options defined there, a private key file
 can also be supplied to override the typical auto-generated key:
 
@@ -136,7 +137,7 @@ In configuration directives the following variables are available:
 ## Build Shared Information Variables
 
 This builder generates data that are shared with provisioner and post-processor via build function of
-[template engine](/docs/templates/engine) for JSON and [contextual variables](/docs/templates/hcl_templates/contextual-variables)
+[template engine](/docs/templates/legacy_json_templates/engine) for JSON and [contextual variables](/docs/templates/hcl_templates/contextual-variables)
 for HCL2.
 
 The generated variables available for this builder see above

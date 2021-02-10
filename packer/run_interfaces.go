@@ -3,6 +3,7 @@ package packer
 import (
 	"github.com/hashicorp/hcl/v2"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
 type GetBuildsOptions struct {
@@ -33,9 +34,15 @@ type InitializeOptions struct {
 	SkipDatasourcesExecution bool
 }
 
-// The packer.Handler handles all Packer things.
+// The Handler handles all Packer things. This interface reflects the Packer
+// commands, ex: init, console ( evaluate ), fix config, inspect config, etc. To
+// run a build we will start the builds and then the core of Packer handles
+// execution.
 type Handler interface {
 	Initialize(InitializeOptions) hcl.Diagnostics
+	// PluginRequirements returns the list of plugin Requirements from the
+	// config file.
+	PluginRequirements() (plugingetter.Requirements, hcl.Diagnostics)
 	Evaluator
 	BuildGetter
 	ConfigFixer

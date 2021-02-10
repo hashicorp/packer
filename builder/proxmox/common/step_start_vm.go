@@ -3,7 +3,6 @@ package proxmox
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
@@ -22,10 +21,15 @@ type stepStartVM struct {
 type ProxmoxVMCreator interface {
 	Create(*proxmox.VmRef, proxmox.ConfigQemu, multistep.StateBag) error
 }
+type vmStarter interface {
+	GetNextID(int) (int, error)
+	StartVm(*proxmox.VmRef) (string, error)
+	SetVmConfig(*proxmox.VmRef, map[string]interface{}) (interface{}, error)
+}
 
 func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packersdk.Ui)
-	client := state.Get("proxmoxClient").(*proxmox.Client)
+	client := state.Get("proxmoxClient").(vmStarter)
 	c := state.Get("config").(*Config)
 
 	agent := 1
@@ -59,21 +63,14 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 
 	if c.VMID == 0 {
 		ui.Say("No VM ID given, getting next free from Proxmox")
-		for n := 0; n < 5; n++ {
-			id, err := proxmox.MaxVmId(client)
-			if err != nil {
-				log.Printf("Error getting max used VM ID: %v (attempt %d/5)", err, n+1)
-				continue
-			}
-			c.VMID = id + 1
-			break
-		}
-		if c.VMID == 0 {
-			err := fmt.Errorf("Failed to get free VM ID")
+		id, err := client.GetNextID(0)
+		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+		c.VMID = id
+		config.VmID = id
 	}
 	vmRef := proxmox.NewVmRef(c.VMID)
 	vmRef.SetNode(c.Node)
@@ -87,6 +84,22 @@ func (s *stepStartVM) Run(ctx context.Context, state multistep.StateBag) multist
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
+	}
+
+	// proxmox-api-go assumes all QemuDisks are actually hard disks, not cd
+	// drives, so we need to add them via a config update
+	if len(c.AdditionalISOFiles) > 0 {
+		addISOConfig := make(map[string]interface{})
+		for _, iso := range c.AdditionalISOFiles {
+			addISOConfig[iso.Device] = fmt.Sprintf("%s,media=cdrom", iso.ISOFile)
+		}
+		_, err := client.SetVmConfig(vmRef, addISOConfig)
+		if err != nil {
+			err := fmt.Errorf("Error updating template: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	// Store the vm id for later

@@ -11,6 +11,7 @@ sidebar_title: Google Compute Export
 # Google Compute Image Exporter Post-Processor
 
 Type: `googlecompute-export`
+Artifact BuilderId: `packer.post-processor.googlecompute-export`
 
 The Google Compute Image Exporter post-processor exports the resultant image
 from a googlecompute build as a gzipped tarball to Google Cloud Storage (GCS).
@@ -26,7 +27,7 @@ As such, the authentication credentials that built the image must have write
 permissions to the GCS `paths`.
 
 ~> **Note**: By default the GCE image being exported will be deleted once the image has been exported.
-To prevent Packer from deleting the image set the `keep_input_artifact` configuration option to `true`. See [Post-Processor Input Artifacts](/docs/templates/post-processors#input-artifacts) for more details.
+To prevent Packer from deleting the image set the `keep_input_artifact` configuration option to `true`. See [Post-Processor Input Artifacts](/docs/templates/legacy_json_templates/post-processors#input-artifacts) for more details.
 
 ## Configuration
 

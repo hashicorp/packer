@@ -13,6 +13,9 @@ import (
 // DatasourceTestCase is a single set of tests to run for a data source.
 // A DatasourceTestCase should generally map 1:1 to each test method for your
 // acceptance tests.
+// Requirements:
+// - The plugin to be tested must be previously installed so that Packer can discover it.
+// - Packer must be installed
 type DatasourceTestCase struct {
 	// Check is called after this step is executed in order to test that
 	// the step executed successfully. If this is not set, then the next

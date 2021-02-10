@@ -15,7 +15,8 @@ func TestParse_datasource(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/datasources/basic.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "datasources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "datasources"),
 				Datasources: Datasources{
 					{
 						Type: "amazon-ami",
@@ -34,7 +35,8 @@ func TestParse_datasource(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/datasources/untyped.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "datasources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "datasources"),
 			},
 			true, true,
 			nil,
@@ -44,7 +46,35 @@ func TestParse_datasource(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/datasources/unnamed.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "datasources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "datasources"),
+			},
+			true, true,
+			nil,
+			false,
+		},
+		{"not allowed usage of data source within another data source",
+			defaultParser,
+			parseTestArgs{"testdata/datasources/not-allowed.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "datasources"),
+				Datasources: Datasources{
+					{
+						Type: "amazon-ami",
+						Name: "test_0",
+					}: {
+						Type: "amazon-ami",
+						Name: "test_0",
+					},
+					{
+						Type: "amazon-ami",
+						Name: "test_1",
+					}: {
+						Type: "amazon-ami",
+						Name: "test_1",
+					},
+				},
 			},
 			true, true,
 			nil,
@@ -54,7 +84,8 @@ func TestParse_datasource(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/datasources/inexistent.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "datasources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "datasources"),
 				Datasources: Datasources{
 					{
 						Type: "inexistant",
@@ -73,7 +104,8 @@ func TestParse_datasource(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/datasources/duplicate.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "datasources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "datasources"),
 				Datasources: Datasources{
 					{
 						Type: "amazon-ami",

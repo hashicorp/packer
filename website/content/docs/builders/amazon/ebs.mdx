@@ -11,6 +11,7 @@ sidebar_title: EBS
 # AMI Builder (EBS backed)
 
 Type: `amazon-ebs`
+Artifact BuilderId: `mitchellh.amazonebs`
 
 The `amazon-ebs` Packer builder is able to create Amazon AMIs backed by EBS
 volumes for use in [EC2](https://aws.amazon.com/ec2/). For more information on
@@ -89,6 +90,64 @@ necessary for this build to succeed and can be found further down the page.
 #### Optional:
 
 @include 'builder/amazon/common/RunConfig-not-required.mdx'
+
+#### Metadata Settings
+
+@include 'builder/amazon/common/MetadataOptions.mdx'
+
+@include 'builder/amazon/common/MetadataOptions-not-required.mdx'
+
+Usage Example
+
+<Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebs" "basic-example" {
+  region        =  "us-east-1"
+  source_ami    =  "ami-fce3c696"
+  instance_type =  "t2.micro"
+  ssh_username  =  "ubuntu"
+  ami_name      =  "packer_AWS_example_{{timestamp}}"
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens = "required"
+    http_put_response_hop_limit = 1
+  }
+}
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "us-east-1",
+      "source_ami": "ami-fce3c696",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "packer_AWS {{timestamp}}",
+      "metadata_options": {
+        "http_endpoint": "enabled",
+        "http_tokens": "required",
+        "http_put_response_hop_limit": 1
+      }
+    }
+  ]
+}
+```
+
+</Tab>
+</Tabs>
 
 @include 'builders/aws-session-manager.mdx'
 
@@ -323,7 +382,7 @@ variables are available:
 
 ## Build Shared Information Variables
 
-This builder generates data that are shared with provisioner and post-processor via build function of [template engine](/docs/templates/engine) for JSON and [contextual variables](/docs/templates/hcl_templates/contextual-variables) for HCL2.
+This builder generates data that are shared with provisioner and post-processor via build function of [template engine](/docs/templates/legacy_json_templates/engine) for JSON and [contextual variables](/docs/templates/hcl_templates/contextual-variables) for HCL2.
 
 The generated variables available for this builder are:
 

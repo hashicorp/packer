@@ -15,7 +15,8 @@ func TestParse_source(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/sources/basic.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "sources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]SourceBlock{
 					{
 						Type: "virtualbox-iso",
@@ -34,7 +35,8 @@ func TestParse_source(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/sources/untyped.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "sources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "sources"),
 			},
 			true, true,
 			nil,
@@ -44,17 +46,45 @@ func TestParse_source(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/sources/unnamed.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "sources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "sources"),
 			},
 			true, true,
 			nil,
 			false,
 		},
-		{"inexistent source",
+		{"unused source with unknown type fails",
 			defaultParser,
 			parseTestArgs{"testdata/sources/inexistent.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "sources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "sources"),
+				Sources: map[SourceRef]SourceBlock{
+					{Type: "inexistant", Name: "ubuntu-1204"}: {Type: "inexistant", Name: "ubuntu-1204"},
+				},
+			},
+			false, false,
+			[]packersdk.Build{},
+			false,
+		},
+		{"used source with unknown type fails",
+			defaultParser,
+			parseTestArgs{"testdata/sources/inexistent_used.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "sources"),
+				Sources: map[SourceRef]SourceBlock{
+					{Type: "inexistant", Name: "ubuntu-1204"}: {Type: "inexistant", Name: "ubuntu-1204"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: SourceRef{Type: "inexistant", Name: "ubuntu-1204"},
+							},
+						},
+					},
+				},
 			},
 			true, true,
 			nil,
@@ -64,7 +94,8 @@ func TestParse_source(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/sources/duplicate.pkr.hcl", nil, nil},
 			&PackerConfig{
-				Basedir: filepath.Join("testdata", "sources"),
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]SourceBlock{
 					{
 						Type: "virtualbox-iso",

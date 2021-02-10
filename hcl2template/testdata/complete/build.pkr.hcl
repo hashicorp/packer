@@ -1,4 +1,8 @@
 
+packer {
+    required_version = ">= v1"
+}
+
 // starts resources to provision them.
 build {
     sources = [ 
@@ -7,6 +11,15 @@ build {
 
     source "source.amazon-ebs.ubuntu-1604" {
         string = "setting from build section"
+        nested {
+            dynamic "tag" {
+            for_each = local.standard_tags
+                content {
+                    key                 = tag.key
+                    value               = tag.value
+                }
+            }
+        }
     }
 
     provisioner "shell" {
@@ -162,7 +175,16 @@ build {
             ]
         }
 
-        nested_slice {
+        tag {
+            key = "first_tag_key"
+            value = "first_tag_value"
+        }
+        dynamic "tag" {
+            for_each = local.standard_tags
+            content {
+                key                 = tag.key
+                value               = tag.value
+            }
         }
     }
 

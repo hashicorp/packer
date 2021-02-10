@@ -58,7 +58,7 @@ type Config struct {
 	// *launched* to create EBS Volumes. These tags will *not* appear in the
 	// tags of the resulting EBS volumes unless they're duplicated under `tags`
 	// in the `ebs_volumes` setting. This is a [template
-	// engine](/docs/templates/engine), see [Build template
+	// engine](/docs/templates/legacy_json_templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	//
 	//  Note: The tags specified here will be *temporarily* applied to volumes
@@ -195,6 +195,9 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Debug:                             b.config.PackerDebug,
 			EbsOptimized:                      b.config.EbsOptimized,
 			ExpectedRootDevice:                "ebs",
+			HttpEndpoint:                      b.config.Metadata.HttpEndpoint,
+			HttpTokens:                        b.config.Metadata.HttpTokens,
+			HttpPutResponseHopLimit:           b.config.Metadata.HttpPutResponseHopLimit,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
 			Region:                            *ec2conn.Config.Region,
@@ -218,6 +221,9 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			EbsOptimized:                      b.config.EbsOptimized,
 			EnableT2Unlimited:                 b.config.EnableT2Unlimited,
 			ExpectedRootDevice:                "ebs",
+			HttpEndpoint:                      b.config.Metadata.HttpEndpoint,
+			HttpTokens:                        b.config.Metadata.HttpTokens,
+			HttpPutResponseHopLimit:           b.config.Metadata.HttpPutResponseHopLimit,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
 			IsRestricted:                      b.config.IsChinaCloud() || b.config.IsGovCloud(),

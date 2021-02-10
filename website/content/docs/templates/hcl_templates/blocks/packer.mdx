@@ -10,7 +10,7 @@ description: |-
 
 `@include 'from-1.5/beta-hcl2-note.mdx'`
 
--> **Note:** The Packer block is only available in Packer v1.6.5 and later.
+-> **Note:** The `packer` block is only available in Packer v1.6.5 and later.
 
 The `packer` configuration block type is used to configure some
 behaviors of Packer itself, such as the minimum required Packer version needed to
@@ -46,6 +46,29 @@ Packer will produce an error and exit without taking any further actions.
 Use Packer version constraints in a collaborative environment to
 ensure that everyone is using a specific Packer version, or using at least
 a minimum Packer version that has behavior expected by the configuration.
+
+## Specifying Plugin Requirements
+
+-> **Note:** The `required_plugins` block is only available in Packer v1.7.0 and
+later.
+
+The `required_plugins` block specifies all of the plugins required by the
+current config, mapping each local plugin name to a source address and a
+version constraint.
+
+```hcl
+packer {
+  required_plugins {
+    myawesomecloud = {
+      version = ">= 2.7.0"
+      source = "hashicorp/myawesomecloud"
+    }
+    happycloud = ">= 2.7.0"
+  }
+}
+```
+
+For more information, see [Plugins](/docs/plugins).
 
 ## Version Constraints
 

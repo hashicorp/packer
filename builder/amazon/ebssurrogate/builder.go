@@ -59,7 +59,7 @@ type Config struct {
 	// Tags to apply to the volumes that are *launched* to create the AMI.
 	// These tags are *not* applied to the resulting AMI unless they're
 	// duplicated in `tags`. This is a [template
-	// engine](/docs/templates/engine), see [Build template
+	// engine](/docs/templates/legacy_json_templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	VolumeRunTags map[string]string `mapstructure:"run_volume_tags"`
 	// Same as [`run_volume_tags`](#run_volume_tags) but defined as a singular
@@ -207,6 +207,9 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Debug:                             b.config.PackerDebug,
 			EbsOptimized:                      b.config.EbsOptimized,
 			ExpectedRootDevice:                "ebs",
+			HttpEndpoint:                      b.config.Metadata.HttpEndpoint,
+			HttpTokens:                        b.config.Metadata.HttpTokens,
+			HttpPutResponseHopLimit:           b.config.Metadata.HttpPutResponseHopLimit,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
 			Region:                            *ec2conn.Config.Region,
@@ -230,6 +233,9 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			EbsOptimized:                      b.config.EbsOptimized,
 			EnableT2Unlimited:                 b.config.EnableT2Unlimited,
 			ExpectedRootDevice:                "ebs",
+			HttpEndpoint:                      b.config.Metadata.HttpEndpoint,
+			HttpTokens:                        b.config.Metadata.HttpTokens,
+			HttpPutResponseHopLimit:           b.config.Metadata.HttpPutResponseHopLimit,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
 			IsRestricted:                      b.config.IsChinaCloud() || b.config.IsGovCloud(),

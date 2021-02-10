@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestValidateCommand(t *testing.T) {
@@ -49,7 +50,7 @@ func TestValidateCommand(t *testing.T) {
 func TestValidateCommand_SkipDatasourceExecution(t *testing.T) {
 	datasourceMock := &packersdk.MockDatasource{}
 	meta := testMetaFile(t)
-	meta.CoreConfig.Components.DatasourceStore = packersdk.MapOfDatasource{
+	meta.CoreConfig.Components.PluginConfig.DataSources = packer.MapOfDatasource{
 		"mock": func() (packersdk.Datasource, error) {
 			return datasourceMock, nil
 		},

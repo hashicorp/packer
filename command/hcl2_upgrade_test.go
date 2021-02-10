@@ -19,14 +19,16 @@ func Test_hcl2_upgrade(t *testing.T) {
 	tc := []struct {
 		folder string
 	}{
-		{"hcl2_upgrade_basic"},
+		{"complete"},
+		{"minimal"},
+		{"source-name"},
 	}
 
 	for _, tc := range tc {
 		t.Run(tc.folder, func(t *testing.T) {
-			inputPath := filepath.Join(testFixture(tc.folder, "input.json"))
+			inputPath := filepath.Join(testFixture("hcl2_upgrade", tc.folder, "input.json"))
 			outputPath := inputPath + ".pkr.hcl"
-			expectedPath := filepath.Join(testFixture(tc.folder, "expected.pkr.hcl"))
+			expectedPath := filepath.Join(testFixture("hcl2_upgrade", tc.folder, "expected.pkr.hcl"))
 			p := helperCommand(t, "hcl2_upgrade", inputPath)
 			bs, err := p.CombinedOutput()
 			if err != nil {

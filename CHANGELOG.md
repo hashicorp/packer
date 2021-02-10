@@ -1,8 +1,57 @@
 ## 1.7.0 (Upcoming)
 
+### FEATURES
+** New Command** (HCL only) `packer init` command will download plugins defined
+    in a new `required_plugins` block [GH-10304]
+** New Plugin Type** Data sources can be implemented (blog post forthcoming).
+    [GH-10440]
+** New Plugin** Aws Secrets Manager data source [GH-10505] [GH-10467]
+
+### IMPROVEMENTS
+* builder/amazon: Add `skip_create_ami` option for testing and situations where
+    artifact is not the ami. [GH-10531]
+* builder/amazon: Add IMDSv2 support for AWS EBS builder [GH-10546]
+* builder/amazon: Add resource tags in the launch template used to request spot
+    instances. [GH-10456]
+* builder/openstack:  Add `skip_create_image` option for testing and situations
+    where artifact is not the image. [GH-10496]
+* core/fmt: The `packer fmt` can now read from stdin. [GH-10500]
+* core/hcl: Templates now support "sensitive" locals [GH-10509]
+* hcl2_upgrade: Command will convert amazon filters to use the ami data source.
+    [GH-10491]
+
+### BUG FIXES
+* amazon/ebssurrogate: Apply snapshot tags at same time as when taking
+    snapshot. [GH-10150]
+* builder/amazon: Fix bug where validation fails if optional iops value is
+    unset. [GH-10518]
+* builder/bsusurrogate: override bsu when omi root device is set [GH-10490]
+* builder/google: Fix bug where Packer would fail when run by users who do not
+    have permission to access the metadata, even though the metadata is not
+    necessary to the run. [GH-10458]
+* builder/profitbricks: Profitbricks builder could not connect using SSH
+    communicator [GH-10549]
+* builder/proxmox: Improve cloud init error logging for proxmox builder
+    [GH-10499]
+* builder/qemu: Fix bug where vnc_min_port set to value greater then 5900 could
+    prevent Packer from connecting to QEMU. [GH-10450]
+* builder/qemu: Fix regression with cd indexing when disk_interface is `ide`.
+    [GH-10519]
+* builder/vmware-esx: Skip credential validation, which requires ovftool to be
+    installed, if we are not exporting an image. [GH-10520]
+* builder/yandex: Fix cloud-init config for ubuntu 20.04. [GH-10522]
+* builder/yandex: Fix incorrect access to `instance_id`. [GH-10522]
+* core/hcl: Fix bug where []uint8 types could not be passed to plugins.
+* core/hcl: Fix force flag for hcl2 provisioners and post-processors [GH-10571]
+* post-processor/vsphere: Fix regression where Packer would not check the exit
+    status after streaming UI from the ovftool command. [GH-10468]
+* post-processor/yandex-export: Changed dhclient command and supported
+    configuring disk for exportupdate-dump-method. Also added support for
+    `file` builder. [GH-10488]
+
 ## 1.6.6 (December 16, 2020)
 
-### FEATURES:
+### FEATURES
 * **New command** `fmt` allows users to format existing HCL2 configuration
     files into a canonical style. Please see [fmt command
     docs](https://packer.io/docs/commands/fmt) for more details. [GH-10225]

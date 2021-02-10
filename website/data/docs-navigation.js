@@ -10,7 +10,7 @@ export default [
   'terminology',
   {
     category: 'commands',
-    content: ['build', 'console', 'fix', 'fmt', 'inspect', 'validate', 'hcl2_upgrade'],
+    content: ['init', 'build', 'console', 'fix', 'fmt', 'inspect', 'validate', 'hcl2_upgrade'],
   },
   {
     category: 'templates',
@@ -85,6 +85,8 @@ export default [
                   'lower',
                   'replace',
                   'regex_replace',
+                  'regex',
+                  'regexall',
                   'split',
                   'strrev',
                   'substr',
@@ -312,19 +314,23 @@ export default [
   },
   '----------',
   'install',
+  'configure',
   '----------',
   {
-    category: 'extending',
+    category: 'plugins',
     content: [
-      'plugins',
-      'custom-builders',
-      'custom-post-processors',
-      'custom-provisioners',
-      'custom-datasources',
+      {
+        category: 'creation',
+        content: [
+          'custom-builders',
+          'custom-post-processors',
+          'custom-provisioners',
+          'custom-datasources',
+        ],
+      },
     ],
   },
+
   '---------',
-  'environment-variables',
-  'core-configuration',
   'debugging',
 ]

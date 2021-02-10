@@ -14,6 +14,8 @@ sidebar_title: VMWare ISO
 # VMware Builder (from ISO)
 
 Type: `vmware-iso`
+Artifact BuilderId: `mitchellh.vmware`
+If remote_type is esx: Artifact BuilderId: `mitchellh.vmware-esx`
 
 This VMware Packer builder is able to create VMware virtual machines from an ISO
 file as a source. It currently supports building virtual machines on hosts

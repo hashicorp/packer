@@ -34,6 +34,9 @@ type StepRunSpotInstance struct {
 	Comm                              *communicator.Config
 	EbsOptimized                      bool
 	ExpectedRootDevice                string
+	HttpEndpoint                      string
+	HttpTokens                        string
+	HttpPutResponseHopLimit           int64
 	InstanceInitiatedShutdownBehavior string
 	InstanceType                      string
 	Region                            string
@@ -125,6 +128,10 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 	} else {
 		templateData.SetSecurityGroupIds(securityGroupIds)
 
+	}
+
+	if s.HttpEndpoint == "enabled" {
+		templateData.MetadataOptions = &ec2.LaunchTemplateInstanceMetadataOptionsRequest{HttpEndpoint: &s.HttpEndpoint, HttpTokens: &s.HttpTokens, HttpPutResponseHopLimit: &s.HttpPutResponseHopLimit}
 	}
 
 	// If instance type is not set, we'll just pick the lowest priced instance

@@ -21,7 +21,9 @@ import (
 type PackerConfig struct {
 	Packer struct {
 		VersionConstraints []VersionConstraint
+		RequiredPlugins    []*RequiredPlugins
 	}
+
 	// Directory where the config files are defined
 	Basedir string
 
@@ -50,16 +52,15 @@ type PackerConfig struct {
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
 
-	builderSchemas        packer.BuilderStore
-	provisionersSchemas   packer.ProvisionerStore
-	postProcessorsSchemas packer.PostProcessorStore
-	datasourceSchemas     packer.DatasourceStore
-
-	except []glob.Glob
-	only   []glob.Glob
-
 	parser *Parser
 	files  []*hcl.File
+
+	// Fields passed as command line flags
+	except  []glob.Glob
+	only    []glob.Glob
+	force   bool
+	debug   bool
+	onError string
 }
 
 type ValidationOptions struct {
@@ -76,13 +77,22 @@ const (
 	dataAccessor           = "data"
 )
 
+type BlockContext int
+
+const (
+	InputVariableContext BlockContext = iota
+	LocalContext
+	BuildContext
+	DatasourceContext
+	NilContext
+)
+
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
 // decoder in order to tell what is the actual value of a var or a local and
 // the list of defined functions.
-func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalContext {
+func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.Value) *hcl.EvalContext {
 	inputVariables, _ := cfg.InputVariables.Values()
 	localVariables, _ := cfg.LocalVariables.Values()
-	datasourceVariables, _ := cfg.Datasources.Values()
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
@@ -100,9 +110,25 @@ func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalCo
 				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
 				"root": cty.StringVal(strings.ReplaceAll(cfg.Basedir, `\`, `/`)),
 			}),
-			dataAccessor: cty.ObjectVal(datasourceVariables),
 		},
 	}
+
+	// Currently the places where you can make references to other blocks
+	// from one is very 'procedural', and in this specific case, we could make
+	// the data sources available to other datasources, but this would be
+	// order dependant, meaning that if you define two datasources in two
+	// different blocks, the second one can use the first one, but not the
+	// other way around; which would be totally confusing; so - for now -
+	// datasources can't use other datasources.
+	// In the future we'd like to load and execute HCL blocks using a graph
+	// dependency tree, so that any block can use any block whatever the
+	// order.
+	switch ctx {
+	case LocalContext, BuildContext:
+		datasourceVariables, _ := cfg.Datasources.Values()
+		ectx.Variables[dataAccessor] = cty.ObjectVal(datasourceVariables)
+	}
+
 	for k, v := range variables {
 		ectx.Variables[k] = v
 	}
@@ -232,7 +258,7 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 
 func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
-	value, moreDiags := local.Expr.Value(c.EvalContext(nil))
+	value, moreDiags := local.Expr.Value(c.EvalContext(LocalContext, nil))
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return diags
@@ -259,7 +285,7 @@ func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics
 			continue
 		}
 
-		datasource, startDiags := cfg.startDatasource(cfg.datasourceSchemas, ref)
+		datasource, startDiags := cfg.startDatasource(cfg.parser.PluginConfig.DataSources, ref)
 		diags = append(diags, startDiags...)
 		if diags.HasErrors() {
 			continue
@@ -290,7 +316,7 @@ func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics
 
 // getCoreBuildProvisioners takes a list of provisioner block, starts according
 // provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceUseBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
@@ -333,7 +359,7 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceBlock, blocks []*
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
 // according provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceBlock, blocksList [][]*PostProcessorBlock, ectx *hcl.EvalContext) ([][]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, blocksList [][]*PostProcessorBlock, ectx *hcl.EvalContext) ([][]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := [][]packer.CoreBuildPostProcessor{}
 	for _, blocks := range blocksList {
@@ -386,24 +412,26 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 	res := []packersdk.Build{}
 	var diags hcl.Diagnostics
 
+	cfg.debug = opts.Debug
+	cfg.force = opts.Force
+	cfg.onError = opts.OnError
+
 	for _, build := range cfg.Builds {
-		for _, from := range build.Sources {
-			src, found := cfg.Sources[from.Ref()]
+		for _, srcUsage := range build.Sources {
+			src, found := cfg.Sources[srcUsage.SourceRef]
 			if !found {
 				diags = append(diags, &hcl.Diagnostic{
-					Summary:  "Unknown " + sourceLabel + " " + from.String(),
+					Summary:  "Unknown " + sourceLabel + " " + srcUsage.String(),
 					Subject:  build.HCL2Ref.DefRange.Ptr(),
 					Severity: hcl.DiagError,
 					Detail:   fmt.Sprintf("Known: %v", cfg.Sources),
 				})
 				continue
 			}
-			src.addition = from.addition
-			src.LocalName = from.LocalName
 
 			pcb := &packer.CoreBuild{
 				BuildName: build.Name,
-				Type:      src.String(),
+				Type:      srcUsage.String(),
 			}
 
 			// Apply the -only and -except command-line options to exclude matching builds.
@@ -446,7 +474,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				}
 			}
 
-			builder, moreDiags, generatedVars := cfg.startBuilder(src, cfg.EvalContext(nil), opts)
+			builder, moreDiags, generatedVars := cfg.startBuilder(srcUsage, cfg.EvalContext(BuildContext, nil))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -464,16 +492,16 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			unknownBuildValues["name"] = cty.StringVal(build.Name)
 
 			variables := map[string]cty.Value{
-				sourcesAccessor: cty.ObjectVal(src.ctyValues()),
+				sourcesAccessor: cty.ObjectVal(srcUsage.ctyValues()),
 				buildAccessor:   cty.ObjectVal(unknownBuildValues),
 			}
 
-			provisioners, moreDiags := cfg.getCoreBuildProvisioners(src, build.ProvisionerBlocks, cfg.EvalContext(variables))
+			provisioners, moreDiags := cfg.getCoreBuildProvisioners(srcUsage, build.ProvisionerBlocks, cfg.EvalContext(BuildContext, variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			pps, moreDiags := cfg.getCoreBuildPostProcessors(src, build.PostProcessorsLists, cfg.EvalContext(variables))
+			pps, moreDiags := cfg.getCoreBuildPostProcessors(srcUsage, build.PostProcessorsLists, cfg.EvalContext(BuildContext, variables))
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -575,7 +603,7 @@ func (p *PackerConfig) printBuilds() string {
 			fmt.Fprintf(out, "\n      <no source>\n")
 		}
 		for _, source := range build.Sources {
-			fmt.Fprintf(out, "\n      %s\n", source)
+			fmt.Fprintf(out, "\n      %s\n", source.String())
 		}
 		fmt.Fprintf(out, "\n    provisioners:\n\n")
 		if len(build.ProvisionerBlocks) == 0 {
@@ -615,7 +643,7 @@ func (p *PackerConfig) handleEval(line string) (out string, exit bool, diags hcl
 		return "", false, diags
 	}
 
-	val, valueDiags := expr.Value(p.EvalContext(nil))
+	val, valueDiags := expr.Value(p.EvalContext(NilContext, nil))
 	diags = append(diags, valueDiags...)
 	if valueDiags.HasErrors() {
 		return "", false, diags

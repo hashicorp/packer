@@ -74,9 +74,12 @@ const (
 # All generated input variables will be of 'string' type as this is how Packer JSON
 # views them; you can change their type later on. Read the variables type
 # constraints documentation
-# https://www.packer.io/docs/templates/hcl_templates/variables#type-constraints for more info.
-`
-
+# https://www.packer.io/docs/templates/hcl_templates/variables#type-constraints for more info.`
+	localsVarHeader = `
+# All locals variables are generated from variables that uses expressions
+# that are not allowed in HCL2 variables.
+# Read the documentation for locals blocks here:
+# https://www.packer.io/docs/templates/hcl_templates/blocks/locals`
 	packerBlockHeader = `
 # See https://www.packer.io/docs/templates/hcl_templates/blocks/packer for more info
 `
@@ -93,15 +96,31 @@ const (
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
 build {
 `
+
 	amazonAmiDataHeader = `
 # The amazon-ami data block is generated from your amazon builder source_ami_filter; a data
 # from this block can be referenced in source and locals blocks.
 # Read the documentation for data blocks here:
-# https://www.packer.io/docs/templates/hcl_templates/blocks/data`
+# https://www.packer.io/docs/templates/hcl_templates/blocks/data
+# Read the documentation for the Amazon AMI Data Source here:
+# https://www.packer.io/docs/datasources/amazon/ami`
+
+	amazonSecretsManagerDataHeader = `
+# The amazon-secretsmanager data block is generated from your aws_secretsmanager template function; a data
+# from this block can be referenced in source and locals blocks.
+# Read the documentation for data blocks here:
+# https://www.packer.io/docs/templates/hcl_templates/blocks/data
+# Read the documentation for the Amazon Secrets Manager Data Source here:
+# https://www.packer.io/docs/datasources/amazon/secretsmanager`
 )
 
-func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2UpgradeArgs) int {
-	out := &bytes.Buffer{}
+var (
+	amazonSecretsManagerMap = map[string]map[string]interface{}{}
+	localsVariableMap       = map[string]string{}
+	timestamp               = false
+)
+
+func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs) int {
 	var output io.Writer
 	if err := os.MkdirAll(filepath.Dir(cla.OutputFile), 0); err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to create output directory: %v", err))
@@ -131,24 +150,19 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	}
 	tpl := core.Template
 
-	// Packer section
-	if tpl.MinVersion != "" {
-		out.Write([]byte(packerBlockHeader))
-		fileContent := hclwrite.NewEmptyFile()
-		body := fileContent.Body()
-		packerBody := body.AppendNewBlock("packer", nil).Body()
-		packerBody.SetAttributeValue("required_version", cty.StringVal(fmt.Sprintf(">= %s", tpl.MinVersion)))
-		out.Write(fileContent.Bytes())
-	}
+	// OutPut Locals and Local blocks
+	localsContent := hclwrite.NewEmptyFile()
+	localsBody := localsContent.Body()
+	localsBody.AppendNewline()
+	localBody := localsBody.AppendNewBlock("locals", nil).Body()
 
-	out.Write([]byte(inputVarHeader))
+	localsOut := []byte{}
 
 	// Output variables section
-
+	variablesOut := []byte{}
 	variables := []*template.Variable{}
 	{
 		// sort variables to avoid map's randomness
-
 		for _, variable := range tpl.Variables {
 			variables = append(variables, variable)
 		}
@@ -157,27 +171,47 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		})
 	}
 
+	hasLocals := false
 	for _, variable := range variables {
 		variablesContent := hclwrite.NewEmptyFile()
 		variablesBody := variablesContent.Body()
-
+		variablesBody.AppendNewline()
 		variableBody := variablesBody.AppendNewBlock("variable", []string{variable.Key}).Body()
 		variableBody.SetAttributeRaw("type", hclwrite.Tokens{&hclwrite.Token{Bytes: []byte("string")}})
 
 		if variable.Default != "" || !variable.Required {
 			variableBody.SetAttributeValue("default", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
 		}
+		sensitive := false
 		if isSensitiveVariable(variable.Key, tpl.SensitiveVariables) {
+			sensitive = true
 			variableBody.SetAttributeValue("sensitive", cty.BoolVal(true))
 		}
-		variablesBody.AppendNewline()
-		out.Write(transposeTemplatingCalls(variablesContent.Bytes()))
+		isLocal, out := variableTransposeTemplatingCalls(variablesContent.Bytes())
+		if isLocal {
+			if sensitive {
+				// Create Local block because this is sensitive
+				localContent := hclwrite.NewEmptyFile()
+				body := localContent.Body()
+				body.AppendNewline()
+				localBody := body.AppendNewBlock("local", []string{variable.Key}).Body()
+				localBody.SetAttributeValue("sensitive", cty.BoolVal(true))
+				localBody.SetAttributeValue("expression", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
+				localsOut = append(localsOut, transposeTemplatingCalls(localContent.Bytes())...)
+				localsVariableMap[variable.Key] = "local"
+				continue
+			}
+			localBody.SetAttributeValue(variable.Key, hcl2shim.HCL2ValueFromConfigValue(variable.Default))
+			localsVariableMap[variable.Key] = "locals"
+			hasLocals = true
+			continue
+		}
+		variablesOut = append(variablesOut, out...)
 	}
 
-	fmt.Fprintln(out, `# "timestamp" template function replacement`)
-	fmt.Fprintln(out, `locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }`)
-
-	// Output sources section
+	if hasLocals {
+		localsOut = append(localsOut, transposeTemplatingCalls(localsContent.Bytes())...)
+	}
 
 	builders := []*template.Builder{}
 	{
@@ -187,7 +221,9 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		}
 	}
 
-	if err := c.writeAmazonAmiDatasource(builders, out); err != nil {
+	// Output amazon-ami data source section
+	amazonAmiOut, err := c.writeAmazonAmiDatasource(builders)
+	if err != nil {
 		return 1
 	}
 
@@ -195,30 +231,30 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		return builders[i].Type+builders[i].Name < builders[j].Type+builders[j].Name
 	})
 
-	out.Write([]byte(sourcesHeader))
-
+	// Output sources section
+	sourcesOut := []byte{}
 	for i, builderCfg := range builders {
 		sourcesContent := hclwrite.NewEmptyFile()
 		body := sourcesContent.Body()
 
 		body.AppendNewline()
-		if !c.Meta.CoreConfig.Components.BuilderStore.Has(builderCfg.Type) {
+		if !c.Meta.CoreConfig.Components.PluginConfig.Builders.Has(builderCfg.Type) {
 			c.Ui.Error(fmt.Sprintf("unknown builder type: %q\n", builderCfg.Type))
 			return 1
 		}
 		if builderCfg.Name == "" || builderCfg.Name == builderCfg.Type {
 			builderCfg.Name = fmt.Sprintf("autogenerated_%d", i+1)
 		}
+		builderCfg.Name = strings.ReplaceAll(strings.TrimSpace(builderCfg.Name), " ", "_")
+
 		sourceBody := body.AppendNewBlock("source", []string{builderCfg.Type, builderCfg.Name}).Body()
 
 		jsonBodyToHCL2Body(sourceBody, builderCfg.Config)
 
-		_, _ = out.Write(transposeTemplatingCalls(sourcesContent.Bytes()))
+		sourcesOut = append(sourcesOut, transposeTemplatingCalls(sourcesContent.Bytes())...)
 	}
 
 	// Output build section
-	out.Write([]byte(buildHeader))
-
 	buildContent := hclwrite.NewEmptyFile()
 	buildBody := buildContent.Body()
 	if tpl.Description != "" {
@@ -232,8 +268,10 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	}
 	buildBody.SetAttributeValue("sources", hcl2shim.HCL2ValueFromConfigValue(sourceNames))
 	buildBody.AppendNewline()
-	_, _ = buildContent.WriteTo(out)
+	buildOut := buildContent.Bytes()
 
+	// Output provisioners section
+	provisionersOut := []byte{}
 	for _, provisioner := range tpl.Provisioners {
 		provisionerContent := hclwrite.NewEmptyFile()
 		body := provisionerContent.Body()
@@ -255,8 +293,11 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		}
 		jsonBodyToHCL2Body(block.Body(), cfg)
 
-		out.Write(transposeTemplatingCalls(provisionerContent.Bytes()))
+		provisionersOut = append(provisionersOut, transposeTemplatingCalls(provisionerContent.Bytes())...)
 	}
+
+	// Output post-processors section
+	postProcessorsOut := []byte{}
 	for _, pps := range tpl.PostProcessors {
 		postProcessorContent := hclwrite.NewEmptyFile()
 		body := postProcessorContent.Body()
@@ -286,8 +327,70 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 			jsonBodyToHCL2Body(ppBody, cfg)
 		}
 
-		_, _ = out.Write(transposeTemplatingCalls(postProcessorContent.Bytes()))
+		postProcessorsOut = append(postProcessorsOut, transposeTemplatingCalls(postProcessorContent.Bytes())...)
 	}
+
+	// Output amazon-secretsmanager data source section
+	keys := make([]string, 0, len(amazonSecretsManagerMap))
+	for k := range amazonSecretsManagerMap {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	amazonSecretsDataOut := []byte{}
+	for _, dataSourceName := range keys {
+		datasourceContent := hclwrite.NewEmptyFile()
+		body := datasourceContent.Body()
+		body.AppendNewline()
+		datasourceBody := body.AppendNewBlock("data", []string{"amazon-secretsmanager", dataSourceName}).Body()
+		jsonBodyToHCL2Body(datasourceBody, amazonSecretsManagerMap[dataSourceName])
+		amazonSecretsDataOut = append(amazonSecretsDataOut, datasourceContent.Bytes()...)
+	}
+
+	// Write file
+	out := &bytes.Buffer{}
+
+	// Packer section
+	if tpl.MinVersion != "" {
+		out.Write([]byte(packerBlockHeader))
+		fileContent := hclwrite.NewEmptyFile()
+		body := fileContent.Body()
+		packerBody := body.AppendNewBlock("packer", nil).Body()
+		packerBody.SetAttributeValue("required_version", cty.StringVal(fmt.Sprintf(">= %s", tpl.MinVersion)))
+		out.Write(fileContent.Bytes())
+	}
+
+	out.Write([]byte(inputVarHeader))
+	out.Write(variablesOut)
+
+	if len(amazonSecretsManagerMap) > 0 {
+		out.Write([]byte(amazonSecretsManagerDataHeader))
+		out.Write(amazonSecretsDataOut)
+	}
+
+	if len(amazonAmiOut) > 0 {
+		out.Write([]byte(amazonAmiDataHeader))
+		out.Write(amazonAmiOut)
+	}
+
+	if timestamp {
+		_, _ = out.Write([]byte("\n"))
+		fmt.Fprintln(out, `# "timestamp" template function replacement`)
+		fmt.Fprintln(out, `locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }`)
+	}
+
+	if len(localsOut) > 0 {
+		out.Write([]byte(localsVarHeader))
+		out.Write(localsOut)
+	}
+
+	out.Write([]byte(sourcesHeader))
+	out.Write(sourcesOut)
+
+	out.Write([]byte(buildHeader))
+	out.Write(buildOut)
+	out.Write(provisionersOut)
+	out.Write(postProcessorsOut)
 
 	_, _ = out.Write([]byte("}\n"))
 
@@ -298,9 +401,9 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	return 0
 }
 
-func (c *HCL2UpgradeCommand) writeAmazonAmiDatasource(builders []*template.Builder, out *bytes.Buffer) error {
+func (c *HCL2UpgradeCommand) writeAmazonAmiDatasource(builders []*template.Builder) ([]byte, error) {
+	amazonAmiOut := []byte{}
 	amazonAmiFilters := []map[string]interface{}{}
-	first := true
 	i := 1
 	for _, builder := range builders {
 		if strings.HasPrefix(builder.Type, "amazon-") {
@@ -308,7 +411,7 @@ func (c *HCL2UpgradeCommand) writeAmazonAmiDatasource(builders []*template.Build
 				sourceAmiFilterCfg := map[string]interface{}{}
 				if err := mapstructure.Decode(sourceAmiFilter, &sourceAmiFilterCfg); err != nil {
 					c.Ui.Error(fmt.Sprintf("Failed to write amazon-ami data source: %v", err))
-					return err
+					return nil, err
 				}
 
 				duplicate := false
@@ -336,21 +439,17 @@ func (c *HCL2UpgradeCommand) writeAmazonAmiDatasource(builders []*template.Build
 				builder.Config["source_ami"] = sourceAmiDataRef
 				i++
 
-				if first {
-					out.Write([]byte(amazonAmiDataHeader))
-					first = false
-				}
 				datasourceContent := hclwrite.NewEmptyFile()
 				body := datasourceContent.Body()
 				body.AppendNewline()
 				sourceBody := body.AppendNewBlock("data", []string{"amazon-ami", dataSourceName}).Body()
 				jsonBodyToHCL2Body(sourceBody, sourceAmiFilterCfg)
-				_, _ = out.Write(transposeTemplatingCalls(datasourceContent.Bytes()))
+				amazonAmiOut = append(amazonAmiOut, transposeTemplatingCalls(datasourceContent.Bytes())...)
 			}
 		}
 	}
 
-	return nil
+	return amazonAmiOut, nil
 }
 
 type UnhandleableArgumentError struct {
@@ -377,14 +476,73 @@ func transposeTemplatingCalls(s []byte) []byte {
 
 		return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
 	}
-	funcMap := texttemplate.FuncMap{
-		"timestamp": func() string {
+	funcMap := templateCommonFunctionMap()
+
+	tpl, err := texttemplate.New("hcl2_upgrade").
+		Funcs(funcMap).
+		Parse(string(s))
+
+	if err != nil {
+		return fallbackReturn(err)
+	}
+
+	str := &bytes.Buffer{}
+	v := struct {
+		HTTPIP   string
+		HTTPPort string
+	}{
+		HTTPIP:   "{{ .HTTPIP }}",
+		HTTPPort: "{{ .HTTPPort }}",
+	}
+	if err := tpl.Execute(str, v); err != nil {
+		return fallbackReturn(err)
+	}
+
+	return str.Bytes()
+}
+
+func templateCommonFunctionMap() texttemplate.FuncMap {
+	return texttemplate.FuncMap{
+		"aws_secretsmanager": func(a ...string) string {
+			if len(a) == 2 {
+				for key, config := range amazonSecretsManagerMap {
+					nameOk := config["name"] == a[0]
+					keyOk := config["key"] == a[1]
+					if nameOk && keyOk {
+						return fmt.Sprintf("${data.amazon-secretsmanager.%s.value}", key)
+					}
+				}
+				id := fmt.Sprintf("autogenerated_%d", len(amazonSecretsManagerMap)+1)
+				amazonSecretsManagerMap[id] = map[string]interface{}{
+					"name": a[0],
+					"key":  a[1],
+				}
+				return fmt.Sprintf("${data.amazon-secretsmanager.%s.value}", id)
+			}
+			for key, config := range amazonSecretsManagerMap {
+				nameOk := config["name"] == a[0]
+				if nameOk {
+					return fmt.Sprintf("${data.amazon-secretsmanager.%s.value}", key)
+				}
+			}
+			id := fmt.Sprintf("autogenerated_%d", len(amazonSecretsManagerMap)+1)
+			amazonSecretsManagerMap[id] = map[string]interface{}{
+				"name": a[0],
+			}
+			return fmt.Sprintf("${data.amazon-secretsmanager.%s.value}", id)
+		}, "timestamp": func() string {
+			timestamp = true
 			return "${local.timestamp}"
 		},
 		"isotime": func() string {
+			timestamp = true
 			return "${local.timestamp}"
 		},
 		"user": func(in string) string {
+			if _, ok := localsVariableMap[in]; ok {
+				// variable is now a local
+				return fmt.Sprintf("${local.%s}", in)
+			}
 			return fmt.Sprintf("${var.%s}", in)
 		},
 		"env": func(in string) string {
@@ -459,13 +617,34 @@ func transposeTemplatingCalls(s []byte) []byte {
 			return fmt.Sprintf("${build.type}")
 		},
 	}
+}
+
+// variableTransposeTemplatingCalls executes parts of blocks as go template files and replaces
+// their result with their hcl2 variant for variables block only. If something goes wrong the template
+// containing the go template string is returned.
+// In variableTransposeTemplatingCalls the definition of aws_secretsmanager function will create a data source
+// with the same name as the variable.
+func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
+	fallbackReturn := func(err error) []byte {
+		if strings.Contains(err.Error(), "unhandled") {
+			return append([]byte(fmt.Sprintf("\n# %s\n", err)), s...)
+		}
+
+		return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
+	}
+
+	funcMap := templateCommonFunctionMap()
+	funcMap["aws_secretsmanager"] = func(a ...string) string {
+		isLocal = true
+		return ""
+	}
 
 	tpl, err := texttemplate.New("hcl2_upgrade").
 		Funcs(funcMap).
 		Parse(string(s))
 
 	if err != nil {
-		return fallbackReturn(err)
+		return isLocal, fallbackReturn(err)
 	}
 
 	str := &bytes.Buffer{}
@@ -477,10 +656,10 @@ func transposeTemplatingCalls(s []byte) []byte {
 		HTTPPort: "{{ .HTTPPort }}",
 	}
 	if err := tpl.Execute(str, v); err != nil {
-		return fallbackReturn(err)
+		return isLocal, fallbackReturn(err)
 	}
 
-	return str.Bytes()
+	return isLocal, str.Bytes()
 }
 
 func jsonBodyToHCL2Body(out *hclwrite.Body, kvs map[string]interface{}) {

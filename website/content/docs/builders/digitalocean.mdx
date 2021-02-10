@@ -17,6 +17,7 @@ sidebar_title: DigitalOcean
 # DigitalOcean Builder
 
 Type: `digitalocean`
+Artifact BuilderId: `pearkes.digitalocean`
 
 The `digitalocean` Packer builder is able to create new images for use with
 [DigitalOcean](https://www.digitalocean.com). The builder takes a source image,
@@ -36,7 +37,7 @@ each category, the available configuration keys are alphabetized.
 ### Communicator Config
 
 In addition to the builder options, a
-[communicator](/docs/templates/communicator) can be configured for this builder.
+[communicator](/docs/templates/legacy_json_templates/communicator) can be configured for this builder.
 
 @include 'packer-plugin-sdk/communicator/Config-not-required.mdx'
 
@@ -84,7 +85,7 @@ In addition to the builder options, a
 
 - `snapshot_name` (string) - The name of the resulting snapshot that will
   appear in your account. Defaults to `packer-{{timestamp}}` (see
-  [configuration templates](/docs/templates/engine) for more info).
+  [configuration templates](/docs/templates/legacy_json_templates/engine) for more info).
 
 - `snapshot_regions` (array of strings) - The regions of the resulting
   snapshot that will appear in your account.

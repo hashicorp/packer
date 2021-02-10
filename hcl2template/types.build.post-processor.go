@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
@@ -48,37 +49,34 @@ func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl
 		return nil, diags
 	}
 
-	if !p.PostProcessorsSchemas.Has(postProcessor.PType) {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  fmt.Sprintf("Unknown "+buildPostProcessorLabel+" type %q", postProcessor.PType),
-			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("known "+buildPostProcessorLabel+"s: %v", p.PostProcessorsSchemas.List()),
-			Severity: hcl.DiagError,
-		})
-		return nil, diags
-	}
-
 	return postProcessor, diags
 }
 
-func (cfg *PackerConfig) startPostProcessor(source SourceBlock, pp *PostProcessorBlock, ectx *hcl.EvalContext) (packersdk.PostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) startPostProcessor(source SourceUseBlock, pp *PostProcessorBlock, ectx *hcl.EvalContext) (packersdk.PostProcessor, hcl.Diagnostics) {
 	// ProvisionerBlock represents a detected but unparsed provisioner
 	var diags hcl.Diagnostics
 
-	postProcessor, err := cfg.postProcessorsSchemas.Start(pp.PType)
+	postProcessor, err := cfg.parser.PluginConfig.PostProcessors.Start(pp.PType)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary: fmt.Sprintf("Failed loading %s", pp.PType),
-			Subject: pp.DefRange.Ptr(),
-			Detail:  err.Error(),
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("Failed loading %s", pp.PType),
+			Subject:  pp.DefRange.Ptr(),
+			Detail:   err.Error(),
 		})
 		return nil, diags
 	}
+
+	builderVars := source.builderVariables()
+	builderVars["packer_debug"] = strconv.FormatBool(cfg.debug)
+	builderVars["packer_force"] = strconv.FormatBool(cfg.force)
+	builderVars["packer_on_error"] = cfg.onError
+
 	hclPostProcessor := &HCL2PostProcessor{
 		PostProcessor:      postProcessor,
 		postProcessorBlock: pp,
 		evalContext:        ectx,
-		builderVariables:   source.builderVariables(),
+		builderVariables:   builderVars,
 	}
 	err = hclPostProcessor.HCL2Prepare(nil)
 	if err != nil {
