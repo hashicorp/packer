@@ -85,6 +85,8 @@ export default [
                   'lower',
                   'replace',
                   'regex_replace',
+                  'regex',
+                  'regexall',
                   'split',
                   'strrev',
                   'substr',
@@ -328,7 +330,7 @@ export default [
       },
     ],
   },
-  
+
   '---------',
   'debugging',
 ]
