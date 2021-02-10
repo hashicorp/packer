@@ -152,7 +152,7 @@ Then you'd install it by putting it into the plugin directory with the name `pac
 
 With the multi-plugin binary you would then refer to your newly installed plugin as `bar-foo` within your Packer template. Whereas, in the single binary setup, you'd have used the name "bar" in your Packer template.
 
-At this point it is important to note that multi-plugins are to Packer, what providers are to Terraform. Multi-plugin binaries are meant to provide one or more plugin types to Packer which depend on the same cloud or other APIs. See [registering multiple plugins](#registering-multiple-plugins) for details on how to register more than one plugin type.
+At this point it is important to note that multi-plugins are to Packer, what providers are to Terraform. Multi-plugin binaries provide one or more plugin types to Packer which depend on the same cloud or other APIs. See [registering multiple plugins](#registering-multiple-plugins) for details on how to register more than one plugin type.
 
 If your plugin providers a single plugin type please continue reading for instruction on using the Set architecture for single plugins.
 
@@ -203,4 +203,4 @@ You can still use the `DEFAULT_NAME` constant with a set implementation; in this
 ## Distributing migrated plugins
 Once a plugin has been migrated to use the `packer-plugin-sdk` it can be released as it normally would and used by Packer by [installing the plugin](/docs/plugins#installing-plugins) manually into the respective Packer plugin directory.
 
-If however, you would like to take advantage of Packer's automated plugin installation process via `packer init` -- the preferred method of installation -- you will need to make the plugin available on GitHub and in a repository named after the multi-plugin `https://github.com/<yourorg>/packer-plugin-<name>`. See [Creating a GitHub Release](/docs/plugins/creation#creating-a-github-release) for details on the recommended practice for releasing Packer plugins on GitHub.
+If however, you would like to take advantage of Packer's automated plugin installation process via `packer init` -- the preferred method of installation -- you will need to make the plugin available on GitHub and in a repository named after the multi-plugin `https://github.com/<yourorg>/packer-plugin-name`. See [Creating a GitHub Release](/docs/plugins/creation#creating-a-github-release) for details on the recommended practice for releasing Packer plugins on GitHub.
