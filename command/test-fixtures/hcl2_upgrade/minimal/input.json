@@ -11,7 +11,7 @@
             "region": "{{ user `aws_region` }}",
             "secret_key": "{{ user `aws_secret_key` }}",
             "access_key": "{{ user `aws_access_key` }}",
-            "ami_name": "ubuntu-16-04-test-{{ timestamp }}",
+            "ami_name": "ubuntu-16-04-test",
             "ami_description": "Ubuntu 16.04 LTS - expand root partition",
             "source_ami": "ami1234567",
             "launch_block_device_mappings": [
