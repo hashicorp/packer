@@ -61,8 +61,8 @@ type BuildBlock struct {
 	// will be ran against the sources.
 	ProvisionerBlocks []*ProvisionerBlock
 
-	// ErrorCleanupProvisionerBlock references a special provisioner block that will
-	// will be ran only the provision step fails.
+	// ErrorCleanupProvisionerBlock references a special provisioner block that
+	// will be ran only if the provision step fails.
 	ErrorCleanupProvisionerBlock *ProvisionerBlock
 
 	// PostProcessorLists references the lists of lists of HCL post-processors
