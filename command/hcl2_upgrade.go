@@ -114,10 +114,13 @@ build {
 # https://www.packer.io/docs/datasources/amazon/secretsmanager`
 )
 
-var amazonSecretsManagerMap = map[string]map[string]interface{}{}
-var localsVariableMap = map[string]string{}
+var (
+	amazonSecretsManagerMap = map[string]map[string]interface{}{}
+	localsVariableMap       = map[string]string{}
+	timestamp               = false
+)
 
-func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2UpgradeArgs) int {
+func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs) int {
 	var output io.Writer
 	if err := os.MkdirAll(filepath.Dir(cla.OutputFile), 0); err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to create output directory: %v", err))
@@ -160,7 +163,6 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 	variables := []*template.Variable{}
 	{
 		// sort variables to avoid map's randomness
-
 		for _, variable := range tpl.Variables {
 			variables = append(variables, variable)
 		}
@@ -371,9 +373,11 @@ func (c *HCL2UpgradeCommand) RunContext(buildCtx context.Context, cla *HCL2Upgra
 		out.Write(amazonAmiOut)
 	}
 
-	_, _ = out.Write([]byte("\n"))
-	fmt.Fprintln(out, `# "timestamp" template function replacement`)
-	fmt.Fprintln(out, `locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }`)
+	if timestamp {
+		_, _ = out.Write([]byte("\n"))
+		fmt.Fprintln(out, `# "timestamp" template function replacement`)
+		fmt.Fprintln(out, `locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }`)
+	}
 
 	if len(localsOut) > 0 {
 		out.Write([]byte(localsVarHeader))
@@ -527,9 +531,11 @@ func templateCommonFunctionMap() texttemplate.FuncMap {
 			}
 			return fmt.Sprintf("${data.amazon-secretsmanager.%s.value}", id)
 		}, "timestamp": func() string {
+			timestamp = true
 			return "${local.timestamp}"
 		},
 		"isotime": func() string {
+			timestamp = true
 			return "${local.timestamp}"
 		},
 		"user": func(in string) string {

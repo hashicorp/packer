@@ -19,7 +19,7 @@ func Test_hcl2_upgrade(t *testing.T) {
 	tc := []struct {
 		folder string
 	}{
-		{"basic"},
+		{"complete"},
 		{"minimal"},
 		{"source-name"},
 	}
