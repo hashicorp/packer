@@ -162,6 +162,17 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 			provBlock.HCL2Ref.Rest = dynblock.Expand(provBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
 		}
 
+		if !cfg.parser.PluginConfig.Provisioners.Has(build.ErrorCleanupProvisionerBlock.PType) {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary:  fmt.Sprintf("Unknown "+buildErrorCleanupProvisionerLabel+" type %q", build.ErrorCleanupProvisionerBlock.PType),
+				Subject:  build.ErrorCleanupProvisionerBlock.HCL2Ref.TypeRange.Ptr(),
+				Detail:   fmt.Sprintf("known "+buildErrorCleanupProvisionerLabel+"s: %v", cfg.parser.PluginConfig.Provisioners.List()),
+				Severity: hcl.DiagError,
+			})
+		}
+		// Allow rest of the body to have dynamic blocks
+		build.ErrorCleanupProvisionerBlock.HCL2Ref.Rest = dynblock.Expand(build.ErrorCleanupProvisionerBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
+
 		for _, ppList := range build.PostProcessorsLists {
 			for _, ppBlock := range ppList {
 				if !cfg.parser.PluginConfig.PostProcessors.Has(ppBlock.PType) {

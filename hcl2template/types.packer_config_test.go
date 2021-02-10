@@ -157,6 +157,10 @@ func TestParser_complete(t *testing.T) {
 							},
 							{PType: "file"},
 						},
+						ErrorCleanupProvisionerBlock: &ProvisionerBlock{
+							PType: "shell",
+							PName: "error-cleanup-provisioner that does something",
+						},
 						PostProcessorsLists: [][]*PostProcessorBlock{
 							{
 								{
@@ -213,6 +217,13 @@ func TestParser_complete(t *testing.T) {
 							Provisioner: &HCL2Provisioner{
 								Provisioner: basicMockProvisioner,
 							},
+						},
+					},
+					CleanupProvisioner: packer.CoreBuildProvisioner{
+						PType: "shell",
+						PName: "error-cleanup-provisioner that does something",
+						Provisioner: &HCL2Provisioner{
+							Provisioner: basicMockProvisioner,
 						},
 					},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{
@@ -307,6 +318,13 @@ func TestParser_complete(t *testing.T) {
 							Provisioner: &HCL2Provisioner{
 								Provisioner: basicMockProvisioner,
 							},
+						},
+					},
+					CleanupProvisioner: packer.CoreBuildProvisioner{
+						PType: "shell",
+						PName: "error-cleanup-provisioner that does something",
+						Provisioner: &HCL2Provisioner{
+							Provisioner: basicMockProvisioner,
 						},
 					},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{
