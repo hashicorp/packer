@@ -320,9 +320,13 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceUseBlock, blocks 
 	var diags hcl.Diagnostics
 	res := []packer.CoreBuildProvisioner{}
 	for _, pb := range blocks {
-		skip, coreBuildProv, moreDiags := cfg.getCoreBuildProvisioner(source, pb, ectx)
+		if pb.OnlyExcept.Skip(source.String()) {
+			continue
+		}
+
+		coreBuildProv, moreDiags := cfg.getCoreBuildProvisioner(source, pb, ectx)
 		diags = append(diags, moreDiags...)
-		if moreDiags.HasErrors() || skip {
+		if moreDiags.HasErrors() {
 			continue
 		}
 		res = append(res, coreBuildProv)
@@ -330,16 +334,12 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceUseBlock, blocks 
 	return res, diags
 }
 
-func (cfg *PackerConfig) getCoreBuildProvisioner(source SourceUseBlock, pb *ProvisionerBlock, ectx *hcl.EvalContext) (skip bool, coreBuildProv packer.CoreBuildProvisioner, diags hcl.Diagnostics) {
-	if pb.OnlyExcept.Skip(source.String()) {
-		skip = true
-		return
-	}
-
+func (cfg *PackerConfig) getCoreBuildProvisioner(source SourceUseBlock, pb *ProvisionerBlock, ectx *hcl.EvalContext) (packer.CoreBuildProvisioner, hcl.Diagnostics) {
+	var diags hcl.Diagnostics
 	provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
-		return
+		return packer.CoreBuildProvisioner{}, diags
 	}
 
 	// If we're pausing, we wrap the provisioner in a special pauser.
@@ -361,12 +361,11 @@ func (cfg *PackerConfig) getCoreBuildProvisioner(source SourceUseBlock, pb *Prov
 		}
 	}
 
-	coreBuildProv = packer.CoreBuildProvisioner{
+	return packer.CoreBuildProvisioner{
 		PType:       pb.PType,
 		PName:       pb.PName,
 		Provisioner: provisioner,
-	}
-	return
+	}, diags
 }
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
@@ -520,12 +519,14 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			}
 
 			if build.ErrorCleanupProvisionerBlock != nil {
-				skip, errorCleanupProv, moreDiags := cfg.getCoreBuildProvisioner(srcUsage, build.ErrorCleanupProvisionerBlock, cfg.EvalContext(BuildContext, variables))
-				diags = append(diags, moreDiags...)
-				if moreDiags.HasErrors() || skip {
-					continue
+				if !build.ErrorCleanupProvisionerBlock.OnlyExcept.Skip(srcUsage.String()) {
+					errorCleanupProv, moreDiags := cfg.getCoreBuildProvisioner(srcUsage, build.ErrorCleanupProvisionerBlock, cfg.EvalContext(BuildContext, variables))
+					diags = append(diags, moreDiags...)
+					if moreDiags.HasErrors() {
+						continue
+					}
+					pcb.CleanupProvisioner = errorCleanupProv
 				}
-				pcb.CleanupProvisioner = errorCleanupProv
 			}
 
 			pcb.Builder = builder

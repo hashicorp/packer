@@ -1,6 +1,7 @@
 package hcl2template
 
 import (
+	"fmt"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
@@ -138,6 +139,14 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			}
 			build.ProvisionerBlocks = append(build.ProvisionerBlocks, p)
 		case buildErrorCleanupProvisionerLabel:
+			if build.ErrorCleanupProvisionerBlock != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  fmt.Sprintf("Only one " + buildErrorCleanupProvisionerLabel + " is allowed"),
+					Subject:  block.DefRange.Ptr(),
+				})
+				continue
+			}
 			p, moreDiags := p.decodeProvisioner(block, cfg)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {

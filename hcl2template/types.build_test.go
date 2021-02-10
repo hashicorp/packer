@@ -88,6 +88,33 @@ func TestParse_build(t *testing.T) {
 			}},
 			false,
 		},
+		{"two error-cleanup-provisioner",
+			defaultParser,
+			parseTestArgs{"testdata/build/two-error-cleanup-provisioner.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "build"),
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+				},
+			},
+			true, true,
+			[]packersdk.Build{&packer.CoreBuild{
+				Builder: emptyMockBuilder,
+				CleanupProvisioner: packer.CoreBuildProvisioner{
+					PType: "shell-local",
+					Provisioner: &HCL2Provisioner{
+						Provisioner: &MockProvisioner{
+							Config: MockConfig{
+								NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
+								NestedSlice:      []NestedMockConfig{},
+							},
+						},
+					},
+				},
+			}},
+			false,
+		},
 		{"untyped post-processor",
 			defaultParser,
 			parseTestArgs{"testdata/build/post-processor_untyped.pkr.hcl", nil, nil},
