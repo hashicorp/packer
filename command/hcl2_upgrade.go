@@ -273,27 +273,15 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	// Output provisioners section
 	provisionersOut := []byte{}
 	for _, provisioner := range tpl.Provisioners {
-		provisionerContent := hclwrite.NewEmptyFile()
-		body := provisionerContent.Body()
-
 		buildBody.AppendNewline()
-		block := body.AppendNewBlock("provisioner", []string{provisioner.Type})
-		cfg := provisioner.Config
-		if len(provisioner.Except) > 0 {
-			cfg["except"] = provisioner.Except
-		}
-		if len(provisioner.Only) > 0 {
-			cfg["only"] = provisioner.Only
-		}
-		if provisioner.MaxRetries != "" {
-			cfg["max_retries"] = provisioner.MaxRetries
-		}
-		if provisioner.Timeout > 0 {
-			cfg["timeout"] = provisioner.Timeout.String()
-		}
-		jsonBodyToHCL2Body(block.Body(), cfg)
+		contentBytes := c.writeProvisioner("provisioner", provisioner)
+		provisionersOut = append(provisionersOut, transposeTemplatingCalls(contentBytes)...)
+	}
 
-		provisionersOut = append(provisionersOut, transposeTemplatingCalls(provisionerContent.Bytes())...)
+	if tpl.CleanupProvisioner != nil {
+		buildBody.AppendNewline()
+		contentBytes := c.writeProvisioner("error-cleanup-provisioner", tpl.CleanupProvisioner)
+		provisionersOut = append(provisionersOut, transposeTemplatingCalls(contentBytes)...)
 	}
 
 	// Output post-processors section
@@ -360,8 +348,10 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 		out.Write(fileContent.Bytes())
 	}
 
-	out.Write([]byte(inputVarHeader))
-	out.Write(variablesOut)
+	if len(variablesOut) > 0 {
+		out.Write([]byte(inputVarHeader))
+		out.Write(variablesOut)
+	}
 
 	if len(amazonSecretsManagerMap) > 0 {
 		out.Write([]byte(amazonSecretsManagerDataHeader))
@@ -399,6 +389,27 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	c.Ui.Say(fmt.Sprintf("Successfully created %s ", cla.OutputFile))
 
 	return 0
+}
+
+func (c *HCL2UpgradeCommand) writeProvisioner(typeName string, provisioner *template.Provisioner) []byte {
+	provisionerContent := hclwrite.NewEmptyFile()
+	body := provisionerContent.Body()
+	block := body.AppendNewBlock(typeName, []string{provisioner.Type})
+	cfg := provisioner.Config
+	if len(provisioner.Except) > 0 {
+		cfg["except"] = provisioner.Except
+	}
+	if len(provisioner.Only) > 0 {
+		cfg["only"] = provisioner.Only
+	}
+	if provisioner.MaxRetries != "" {
+		cfg["max_retries"] = provisioner.MaxRetries
+	}
+	if provisioner.Timeout > 0 {
+		cfg["timeout"] = provisioner.Timeout.String()
+	}
+	jsonBodyToHCL2Body(block.Body(), cfg)
+	return provisionerContent.Bytes()
 }
 
 func (c *HCL2UpgradeCommand) writeAmazonAmiDatasource(builders []*template.Builder) ([]byte, error) {

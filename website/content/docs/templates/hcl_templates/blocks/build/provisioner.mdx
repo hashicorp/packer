@@ -30,7 +30,7 @@ machine image after booting. Provisioners prepare the system for use.
 The list of available provisioners can be found in the
 [provisioners](/docs/provisioners) section.
 
-# Run on Specific Builds
+## Run on Specific Builds
 
 You can use the `only` or `except` configurations to run a provisioner only
 with specific builds. These two configurations do what you expect: `only` will
@@ -75,6 +75,39 @@ build {
 ```
 
 The values within `only` or `except` are _build names_, not builder types.
+
+## On Error Provisioner
+
+You can optionally create a single specialized provisioner called an
+`error-cleanup-provisioner`. This provisioner will not run unless the normal
+provisioning run fails. If the normal provisioning run does fail, this special
+error provisioner will run _before the instance is shut down_. This allows you
+to make last minute changes and clean up behaviors that Packer may not be able
+to clean up on its own.
+
+For examples, users may use this provisioner to make sure that the instance is
+properly unsubscribed from any services that it connected to during the build
+run.
+
+Toy usage example for the error cleanup script:
+
+```hcl
+source "null" "example" {
+  communicator = "none"
+}
+
+build {
+  sources = ["source.null.example"]
+
+  provisioner "shell-local" {
+    inline = ["exit 2"]
+  }
+
+  error-cleanup-provisioner "shell-local" {
+    inline = ["echo 'rubber ducky'> ducky.txt"]
+  }
+}
+```
 
 ## Pausing Before Running
 
