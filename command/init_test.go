@@ -213,8 +213,8 @@ func TestInitCommand_Run(t *testing.T) {
 						}
 					}`,
 			},
-			cfg.dir("3_pkr_config"),
-			cfg.dir("3_pkr_user_folder"),
+			cfg.dir("4_pkr_config"),
+			cfg.dir("4_pkr_user_folder"),
 			1,
 			nil,
 			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
@@ -223,6 +223,12 @@ func TestInitCommand_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				_ = os.RemoveAll(tt.packerConfigDir)
+			})
+			t.Cleanup(func() {
+				_ = os.RemoveAll(tt.packerUserFolder)
+			})
 			for _, init := range tt.init {
 				init(t, tt)
 				if t.Skipped() {
@@ -231,13 +237,7 @@ func TestInitCommand_Run(t *testing.T) {
 			}
 			log.Printf("starting %s", tt.name)
 			createFiles(tt.packerConfigDir, tt.inPluginFolder)
-			t.Cleanup(func() {
-				_ = os.RemoveAll(tt.packerConfigDir)
-			})
 			createFiles(tt.packerUserFolder, tt.inConfigFolder)
-			t.Cleanup(func() {
-				_ = os.RemoveAll(tt.packerUserFolder)
-			})
 
 			hash, err := dirhash.HashDir(tt.packerConfigDir, "", dirhash.DefaultHash)
 			if err != nil {

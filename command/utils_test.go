@@ -15,9 +15,6 @@ func mustString(s string, e error) string {
 }
 
 func createFiles(dir string, content map[string]string) {
-	if err := os.MkdirAll(dir, 0777); err != nil {
-		panic(err)
-	}
 	for relPath, content := range content {
 		contentPath := filepath.Join(dir, relPath)
 		if err := os.MkdirAll(filepath.Dir(contentPath), 0777); err != nil {
