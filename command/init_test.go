@@ -198,6 +198,41 @@ func TestInitCommand_Run(t *testing.T) {
 			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 			nil,
 		},
+		{
+			func(t *testing.T) {
+				if os.Getenv(acctest.TestEnvVar) == "" {
+					t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
+				}
+				tc := testCaseInit{}
+				if err := getBinary(getBinaryOptions{
+					GetZip:  "https://github.com/azr/packer-provisioner-comment/releases/download/v1.0.0/packer-provisioner-comment_v1.0.0_" + runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz",
+					UnzipIn: tc.inPluginFolder,
+				}); err != nil {
+					t.Fatal("getBinary: %v", err)
+				}
+			},
+			"release-with-no-binary",
+			testMetaFile(t),
+			nil,
+			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+			map[string]string{
+				`cfg.pkr.hcl`: `
+					packer {
+						required_plugins {
+							comment = {
+								source  = "github.com/sylviamoss/comment"
+								version = "v0.2.20"
+							}
+						}
+					}`,
+			},
+			cfg.dir("3_pkr_config"),
+			cfg.dir("3_pkr_user_folder"),
+			1,
+			nil,
+			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+			nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
