@@ -341,6 +341,10 @@ build {
   }
 }
 `
+	var buf bytes.Buffer
+	f := NewHCL2Formatter()
+	f.Output = &buf
+	f.Write = true
 
 	tests := []struct {
 		name                  string
@@ -378,75 +382,50 @@ build {
 		},
 	}
 
-	var buf bytes.Buffer
-	f := NewHCL2Formatter()
-	f.Output = &buf
-	f.Write = true
-
-	testFileName := "test.pkrvars.hcl"
+	testDir := "testdata/format"
 
 	for _, tt := range tests {
-		topDir, err := ioutil.TempDir("testdata/format", "temp-dir")
+		tempFileNames := make(map[string]string)
+
+		tempDirectory, err := ioutil.TempDir(testDir, "test-dir-*")
 		if err != nil {
-			t.Fatalf("Failed to create TopDir for test case: %s, error: %v", tt.name, err)
+			t.Fatalf("Failed to create temp dir for test case: %s, error: %v", tt.name, err)
 		}
+		defer os.RemoveAll(tempDirectory)
 
-		for testDir, content := range tt.alreadyPresentContent {
-			dir := filepath.Join(topDir, testDir)
-			err := os.MkdirAll(dir, 0777)
+		for subDir, content := range tt.alreadyPresentContent {
+			dir := filepath.Join(tempDirectory, subDir)
+			err = os.MkdirAll(dir, 0700)
 			if err != nil {
-				os.RemoveAll(topDir)
-				t.Fatalf(
-					"Failed to create subDir: %s\n\n, for test case: %s\n\n, error: %v",
-					testDir,
-					tt.name,
-					err)
+				t.Fatalf("Failed to create directory for test case: %s, error: %v", tt.name, err)
 			}
 
-			file, err := os.Create(filepath.Join(dir, testFileName))
+			tempFile, err := ioutil.TempFile(dir, "*.pkrvars.hcl")
 			if err != nil {
-				os.RemoveAll(topDir)
-				t.Fatalf("failed to create testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
-					testDir,
-					tt.name,
-					err)
+				t.Fatalf("Failed to create temp file for test case: %s, error: %v", tt.name, err)
 			}
 
-			_, err = file.Write([]byte(content))
+			_, err = tempFile.Write([]byte(content))
 			if err != nil {
-				os.RemoveAll(topDir)
-				t.Fatalf("failed to write to testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
-					testDir,
-					tt.name,
-					err)
+				t.Fatalf("Failed to write temp file for test case: %s, error: %v", tt.name, err)
 			}
-
-			err = file.Close()
-			if err != nil {
-				os.RemoveAll(topDir)
-				t.Fatalf("failed to close testfile at directory: %s\n\n, for test case: %s\n\n, error: %s",
-					testDir,
-					tt.name,
-					err)
-			}
+			tempFileNames[subDir] = tempFile.Name()
+			tempFile.Close()
 		}
 
 		f.Recursive = tt.recursive
-		_, diags := f.Format(topDir)
+		_, diags := f.Format(tempDirectory)
 		if diags.HasErrors() {
-			os.RemoveAll(topDir)
-			t.Fatalf("the call to Format failed unexpectedly for test case: %s, errors: %s", tt.name, diags.Error())
+			t.Fatalf("Call to Format failed unexpectedly for test case: %s, errors: %s", tt.name, diags.Error())
 		}
 
 		for expectedPath, expectedContent := range tt.expectedContent {
-			b, err := ioutil.ReadFile(filepath.Join(topDir, expectedPath, testFileName))
+			b, err := ioutil.ReadFile(tempFileNames[expectedPath])
 			if err != nil {
-				os.RemoveAll(topDir)
 				t.Fatalf("ReadFile failed for test case: %s, error : %v", tt.name, err)
 			}
 			got := string(b)
 			if diff := cmp.Diff(got, expectedContent); diff != "" {
-				os.RemoveAll(topDir)
 				t.Errorf(
 					"format dir, unexpected result for test case: %s, path: %s,  Expected: %s, Got: %s",
 					tt.name,
@@ -455,16 +434,7 @@ build {
 					got)
 			}
 		}
-
-		err = os.RemoveAll(topDir)
-		if err != nil {
-			t.Errorf(
-				"Failed to delete top level test directory for test case: %s, please clean before another test run. Error: %s",
-				tt.name,
-				err)
-		}
 	}
-
 }
 
 func TestHCL2Formatter_Format_Write(t *testing.T) {
