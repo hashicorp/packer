@@ -33,6 +33,8 @@ set specific source fields.
 build {
   source "source.amazon-ebs.example" {
     # Here Packer will use the provided ami_name instead of defaulting it.
+    # Note that fields cannot be overwritten, in other words, you cannot
+    # set the 'ami_name' field in the top-level source block.
     ami_name = "specific"
   }
 }
