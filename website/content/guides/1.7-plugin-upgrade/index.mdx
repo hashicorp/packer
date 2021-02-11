@@ -18,11 +18,12 @@ Packer is currently backwards compatible with the old API because the plugin API
 
 ### How to update plugins to use the packer-plugin-SDK
 
-In a best-case scenario, all you'll have to do is update the packer imports to use the packer-plugin-sdk import path
+In a best-case scenario, all you'll have to do is update the packer imports to use the packer-plugin-sdk import path. Replacing  `github.com/hashicorp/packer` with `github.com/hashicorp/packer-plugin-sdk`.
 
-`github.com/hashicorp/packer` with `github.com/hashicorp/packer-plugin-sdk`.
+To help with the migration of existing plugins the [packer-sdk-migrator](https://github.com/hashicorp/packer-sdk-migrator#packer-sdk-migrator) CLI tool is available to automatically rewrite all of the import paths to use to `packer-plugin-sdk` module. The migration CLI provides an [eligibility check](https://github.com/hashicorp/packer-sdk-migrator#packer-sdk-migrator-check-check-eligibility-for-migration) that can be used to determine if a plugin can be migrated with the tool.
 
-But some of the import paths have changed more than that because we've refactored the SDK some to make it easier to discover and use helpful modules. Below are a few common import paths. For a full list of available imports see [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/)
+
+With the creation of the SDK the import paths may not map directly to the paths within Packer core, as they have been refactored to make it easier to discover and use helpful modules. Below are a few common import paths. For a full list of available imports see [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/)
 
 
 | Old Path | New Path |
@@ -111,10 +112,11 @@ func main() {
 
 ```
 
-With this single-plugin binary you'd install it by putting it into the plugin directory with the name `packer-provisioner-foo`.
+With this single-plugin binary you'd install it by putting it into the plugin directory with the name
+`packer-provisioner-foo`.
 
 
-Now, you'll want to use the NewSet() function to create a server. so,
+In the new multi-plugin binary you'll want to use the NewSet() function to create a server.
 
 ```golang
 package main
@@ -138,11 +140,22 @@ func main() {
 
 ```
 
-So the implementation is extremely similar, but now we use the "NewSet" function, and call Run() instead of Serve().
+The implementation is extremely similar, but now we use the "NewSet" function to create the plugin Server, and call Run() instead of Serve().
 
-With this example, you'd install it by putting it into the plugin directory with the name `packer-plugin-bar`.
+With the multi-plugin binary example, it is important to note that the name of the binary must be in the form of `packer-pluign-name`. Otherwise Packer will not register it as a multi-plugin, nor to download it.
 
-In the single binary setup, this you'd have used the name "bar" in your packer template. Now, you need to use the name "bar-foo" in the template.
+```go
+go build -o packer-plugin-bar
+```
+
+Then you'd install it by putting it into the plugin directory with the name `packer-plugin-name`.
+
+With the multi-plugin binary you would then refer to your newly installed plugin as `bar-foo` within your Packer template. Whereas, in the single binary setup, you'd have used the name "bar" in your Packer template.
+
+At this point it is important to note that multi-plugins are to Packer, what providers are to Terraform. Multi-plugin binaries provide one or more plugin types to Packer which depend on the same cloud or other APIs. See [registering multiple plugins](#registering-multiple-plugins) for details on how to register more than one plugin type.
+
+If your plugin providers a single plugin type please continue reading for instruction on using the Set architecture for single plugins.
+
 
 ## Using the Set Architecture for Single Plugins
 
@@ -187,4 +200,7 @@ And then reference your plugin in the Packer template using "vsphere-iso" and "v
 
 You can still use the `DEFAULT_NAME` constant with a set implementation; in this example, whatever you register with the DEFAULT_NAME will be referenced in the Packer template as "vsphere". You can only register one plugin per plugin set using the DEFAULT_NAME
 
-We will soon write a follow-up guide explaining how to register you new plugin set with HashiCorp.
+## Distributing migrated plugins
+Once a plugin has been migrated to use the `packer-plugin-sdk` it can be released as it normally would and used by Packer by [installing the plugin](/docs/plugins#installing-plugins) manually into the respective Packer plugin directory.
+
+If however, you would like to take advantage of Packer's automated plugin installation process via `packer init` -- the preferred method of installation -- you will need to make the plugin available on GitHub and in a repository named after the multi-plugin `https://github.com/<yourorg>/packer-plugin-name`. See [Creating a GitHub Release](/docs/plugins/creation#creating-a-github-release) for details on the recommended practice for releasing Packer plugins on GitHub.
