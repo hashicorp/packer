@@ -14,8 +14,6 @@ and the Packer plugin SDK. Prior to version 1.7.0, the Packer core repository (h
 
 The goal of the SDK is to clearly separate the Packer core from the Packer plugins; as a plugin maintainer, you should only have to import the SDK and not the core. The SDK will allow us to use semantic versioning to express the changes to the API that our maintainers are expected to use, and will help us keep a clearer promise to you about the location and functionality of our helper tools.
 
-Packer is currently backwards compatible with the old API because the plugin API itself has not changed yet, so if you choose to continue using the old Packer imports, you will be able to do so until you need to upgrade the version of Packer you are importing to create your plugin.
-
 ### How to update plugins to use the packer-plugin-SDK
 
 We have created a [packer-sdk-migrator](https://github.com/hashicorp/packer-sdk-migrator) cli tool to help you migrate your plugin to use the new import paths. To use it, follow the installation instructions for the migration tool, then call `packer-sdk-migrator migrate` from the root of your plugin directory. More details can be found in the migrator's [README](https://github.com/hashicorp/packer-sdk-migrator/blob/main/README.md).
