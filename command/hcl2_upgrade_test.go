@@ -22,6 +22,7 @@ func Test_hcl2_upgrade(t *testing.T) {
 		{"complete"},
 		{"minimal"},
 		{"source-name"},
+		{"error-cleanup-provisioner"},
 	}
 
 	for _, tc := range tc {
