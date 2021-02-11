@@ -109,7 +109,7 @@ func checkPluginName(name string) error {
 		strings.HasPrefix(name, "packer-post-processor-") {
 		fmt.Printf("\n[WARNING] Plugin is named with old prefix `packer-[builder|provisioner|post-processor]-{name})`. " +
 			"These will be detected but Packer cannot install them automatically. " +
-			"The plugin must be a multi-plugin named packer-plugin-{name} to be installable through the `packer init` command.\n")
+			"The plugin must be a multi-component plugin named packer-plugin-{name} to be installable through the `packer init` command.\n")
 		return nil
 	}
 	return fmt.Errorf("plugin's name is not valid")

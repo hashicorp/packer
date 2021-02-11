@@ -18,7 +18,7 @@ Plugins that are simply hardcoded to load with Packer.
 
 * This page documents how to install plugins.
 * Plugins cannot be configured yet.
-* If you're interested in developing plugins, see the [developing 
+* If you're interested in developing plugins, see the [developing
 plugins](/docs/plugins/creation#developing-plugins) page.
 
 The current official listing of available Packer plugins can be found
@@ -45,7 +45,7 @@ applications running.
 <Tabs>
 <Tab heading="with Packer init (from Packer v1.7.0)">
 
-~> **Note**: Only _multi-plugin binaries_ -- that is plugins named
+~> **Note**: Only _multi-component plugin binaries_ -- that is plugins named
 packer-plugin-*, like the `packer-plugin-amazon` -- are expected to work with
 Packer init. The legacy `builder`, `post-processor` and `provisioner` plugin
 types will keep on being detected but Packer cannot install them automatically.
@@ -56,7 +56,7 @@ types will keep on being detected but Packer cannot install them automatically.
 [`required_plugin`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
 block to your `packer` block, each block will tell Packer what version(s) can be
 installed, make sure to set a correct [version constraint
-string](/docs/templates/hcl_templates/blocks/packer#version-constraints). 
+string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
   Example `required_plugins` block :
 
   ```hcl
@@ -77,7 +77,7 @@ string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
 Each plugin has two identifiers:
 
 * A `source` address, which is only used when requiring a plugin outside the HashiCorp domain.
-* A unique **local name**, which is used everywhere else in a Packer 
+* A unique **local name**, which is used everywhere else in a Packer
   configuration.
 
 ### Local Names
