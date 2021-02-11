@@ -14,8 +14,8 @@ import (
 )
 
 type testCaseInit struct {
-	init                                  []func(*testing.T, testCaseInit)
 	name                                  string
+	init                                  []func(*testing.T, testCaseInit)
 	Meta                                  Meta
 	inPluginFolder                        map[string]string
 	expectedPackerConfigDirHashBeforeInit string
@@ -54,13 +54,13 @@ func TestInitCommand_Run(t *testing.T) {
 
 	tests := []testCaseInit{
 		{
-			nil,
 			// here we pre-write plugins with valid checksums, Packer will
 			// see those as valid installations it did.
 			// the directory hash before and after init should be the same,
 			// that's a no-op. This also should do no GH query, so it is best
 			// to always run it.
 			"already-installed-no-op",
+			nil,
 			testMetaFile(t),
 			map[string]string{
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
@@ -94,13 +94,13 @@ func TestInitCommand_Run(t *testing.T) {
 			},
 		},
 		{
-			[]func(t *testing.T, tc testCaseInit){
-				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
-			},
 			// here we pre-write plugins with valid checksums, Packer will
 			// see those as valid installations it did.
 			// But because we require version 0.2.19, we will upgrade.
 			"already-installed-upgrade",
+			[]func(t *testing.T, tc testCaseInit){
+				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
+			},
 			testMetaFile(t),
 			map[string]string{
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
@@ -169,10 +169,10 @@ func TestInitCommand_Run(t *testing.T) {
 			},
 		},
 		{
+			"release-with-no-binary",
 			[]func(t *testing.T, tc testCaseInit){
 				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
 			},
-			"release-with-no-binary",
 			testMetaFile(t),
 			nil,
 			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
@@ -195,10 +195,10 @@ func TestInitCommand_Run(t *testing.T) {
 			nil,
 		},
 		{
+			"release-with-no-binary",
 			[]func(t *testing.T, tc testCaseInit){
 				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
 			},
-			"release-with-no-binary",
 			testMetaFile(t),
 			nil,
 			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
