@@ -106,6 +106,7 @@ func (c *PluginConfig) Discover() error {
 
 func (c *PluginConfig) discoverExternalComponents(path string) error {
 	var err error
+	log.Printf("[TRACE] discovering plugins in %s", path)
 
 	if !filepath.IsAbs(path) {
 		path, err = filepath.Abs(path)

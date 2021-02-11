@@ -1,14 +1,17 @@
 package command
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"sort"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
 	"golang.org/x/mod/sumdb/dirhash"
 )
@@ -220,6 +223,53 @@ func TestInitCommand_Run(t *testing.T) {
 			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 			nil,
 		},
+		{
+			"manually-installed-single-component-plugin-works",
+			[]func(t *testing.T, tc testCaseInit){
+				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
+				initTestGoGetPlugin{
+					Src: "https://github.com/azr/packer-provisioner-comment/releases/download/v1.0.0/" +
+						"packer-provisioner-comment_v1.0.0_" + runtime.GOOS + "_" + runtime.GOARCH + ".zip",
+					Dst: filepath.Join(cfg.dir("5_pkr_config"), defaultConfigDir, "plugins"),
+				}.fn,
+			},
+			testMetaFile(t),
+			nil,
+			map[string]string{
+				"darwin":  "h1:nVebbXToeehPUASRbvV9M4qaA9+UgoR5AMp7LjTrSBk=",
+				"linux":   "h1:/U5vdeMtOpRKNu0ld8+qf4t6WC+BsfCQ6JRo9Dh/khI=",
+				"windows": "h1:0nkdNCjtTHTgBNkzVKG++/VYmWAvq/o236GGTxrIf/Q=",
+			}[runtime.GOOS],
+			map[string]string{
+				`source.pkr.hcl`: `
+				source "null" "test" {
+					communicator = "none"
+				}
+				`,
+				`build.pkr.hcl`: `
+				build {
+					sources = ["source.null.test"]
+					provisioner "comment" {
+						comment		= "Begin ¡"
+						ui			= true
+						bubble_text	= true
+					}
+				}
+				`,
+			},
+			cfg.dir("5_pkr_config"),
+			cfg.dir("5_pkr_user_folder"),
+			0,
+			nil,
+			map[string]string{
+				"darwin":  "h1:nVebbXToeehPUASRbvV9M4qaA9+UgoR5AMp7LjTrSBk=",
+				"linux":   "h1:/U5vdeMtOpRKNu0ld8+qf4t6WC+BsfCQ6JRo9Dh/khI=",
+				"windows": "h1:0nkdNCjtTHTgBNkzVKG++/VYmWAvq/o236GGTxrIf/Q=",
+			}[runtime.GOOS],
+			[]func(*testing.T, testCaseInit){
+				testBuild{want: 0}.fn,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -231,6 +281,7 @@ func TestInitCommand_Run(t *testing.T) {
 			t.Cleanup(func() {
 				_ = os.RemoveAll(tt.packerUserFolder)
 			})
+			os.Setenv("PACKER_CONFIG_DIR", tt.packerConfigDir)
 			for _, init := range tt.init {
 				init(t, tt)
 				if t.Skipped() {
@@ -245,13 +296,17 @@ func TestInitCommand_Run(t *testing.T) {
 				t.Fatalf("HashDir: %v", err)
 			}
 			if diff := cmp.Diff(tt.expectedPackerConfigDirHashBeforeInit, hash); diff != "" {
-				t.Errorf("unexpected dir hash before init: %s", diff)
+				t.Errorf("unexpected dir hash before init: +found -expected %s", diff)
 			}
 
 			args := []string{tt.packerUserFolder}
 
 			c := &InitCommand{
 				Meta: tt.Meta,
+			}
+
+			if err := c.CoreConfig.Components.PluginConfig.Discover(); err != nil {
+				t.Fatalf("Failed to discover plugins: %s", err)
 			}
 
 			c.CoreConfig.Components.PluginConfig.KnownPluginFolders = []string{tt.packerConfigDir}
@@ -291,8 +346,19 @@ func TestInitCommand_Run(t *testing.T) {
 type skipInitTestUnlessEnVar string
 
 func (key skipInitTestUnlessEnVar) fn(t *testing.T, tc testCaseInit) {
-	return // always run acc tests for now
-	if os.Getenv(string(key)) == "" {
-		t.Skipf("Acceptance test skipped unless env '%s' set", key)
+	// always run acc tests for now
+	// if os.Getenv(string(key)) == "" {
+	// 	t.Skipf("Acceptance test skipped unless env '%s' set", key)
+	// }
+}
+
+type initTestGoGetPlugin struct {
+	Src string
+	Dst string
+}
+
+func (opts initTestGoGetPlugin) fn(t *testing.T, _ testCaseInit) {
+	if _, err := getter.Get(context.Background(), opts.Dst, opts.Src); err != nil {
+		t.Fatalf("get: %v", err)
 	}
 }
