@@ -18,61 +18,10 @@ Packer is currently backwards compatible with the old API because the plugin API
 
 ### How to update plugins to use the packer-plugin-SDK
 
-In a best-case scenario, all you'll have to do is update the packer imports to use the packer-plugin-sdk import path. Replacing  `github.com/hashicorp/packer` with `github.com/hashicorp/packer-plugin-sdk`.
-
-To help with the migration of existing plugins the [packer-sdk-migrator](https://github.com/hashicorp/packer-sdk-migrator#packer-sdk-migrator) CLI tool is available to automatically rewrite all of the import paths to use to `packer-plugin-sdk` module. The migration CLI provides an [eligibility check](https://github.com/hashicorp/packer-sdk-migrator#packer-sdk-migrator-check-check-eligibility-for-migration) that can be used to determine if a plugin can be migrated with the tool.
+We have created a [packer-sdk-migrator](https://github.com/hashicorp/packer-sdk-migrator) cli tool to help you migrate your plugin to use the new import paths. To use it, follow the installation instructions for the migration tool, then call `packer-sdk-migrator migrate` from the root of your plugin directory. More details can be found in the migrator's [README](https://github.com/hashicorp/packer-sdk-migrator/blob/main/README.md).
 
 
-With the creation of the SDK the import paths may not map directly to the paths within Packer core, as they have been refactored to make it easier to discover and use helpful modules. Below are a few common import paths. For a full list of available imports see [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/)
-
-
-| Old Path | New Path |
-| ---------| -------- |
-| github.com/hashicorp/packer/template/config | github.com/hashicorp/packer-plugin-sdk/template/config |
-| github.com/hashicorp/packer/packer | github.com/hashicorp/packer-plugin-sdk/packer |
-| github.com/hashicorp/packer/template/interpolate | github.com/hashicorp/packer-plugin-sdk/template/interpolate |
-
-Here is a more comprehensive list of old imports and their new replacements:
-
-| Old Path | New Path |
-| ---------| -------- |
-| github.com/hashicorp/packer/helper/builder/testing | github.com/hashicorp/packer-plugin-sdk/acctest |
-| **new** | github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
-| github.com/hashicorp/packer/helper/tests | github.com/hashicorp/packer-plugin-sdk/acctest/testutils |
-| github.com/hashicorp/packer/common/adapter | github.com/hashicorp/packer-plugin-sdk/adapter |
-| github.com/hashicorp/packer/common/bootcommand | github.com/hashicorp/packer-plugin-sdk/bootcommand |
-| github.com/hashicorp/packer/common/chroot | github.com/hashicorp/packer-plugin-sdk/chroot |
-| github.com/hashicorp/packer/common | github.com/hashicorp/packer-plugin-sdk/common |
-| github.com/hashicorp/packer/helper/communicator | github.com/hashicorp/packer-plugin-sdk/communicator |
-| github.com/hashicorp/packer/helper/config | github.com/hashicorp/packer-plugin-sdk/template/config |
-| github.com/hashicorp/packer/template/interpolate | github.com/hashicorp/packer-plugin-sdk/template/interpolate |
-| github.com/hashicorp/packer/communicator/ssh | github.com/hashicorp/packer-plugin-sdk/communicator/ssh |
-| github.com/hashicorp/packer/helper/communicator/sshkey | github.com/hashicorp/packer-plugin-sdk/communicator/sshkey |
-| github.com/hashicorp/packer/provisioner | github.com/hashicorp/packer-plugin-sdk/guestexec |
-| github.com/hashicorp/packer/common/json | github.com/hashicorp/packer-plugin-sdk/json |
-| github.com/hashicorp/packer/helper/multistep | github.com/hashicorp/packer-plugin-sdk/multistep |
-| steps from github.com/hashicorp/packer/common | github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps |
-| github.com/hashicorp/packer/common/net | github.com/hashicorp/packer-plugin-sdk/net |
-| github.com/hashicorp/packer/packer | github.com/hashicorp/packer-plugin-sdk/packer |
-| github.com/hashicorp/packer/builder | github.com/hashicorp/packer-plugin-sdk/packerbuilderdata |
-| github.com/hashicorp/packer/packer | github.com/hashicorp/packer-plugin-sdk/pathing |
-| github.com/hashicorp/packer/packer/plugin | github.com/hashicorp/packer-plugin-sdk/plugin |
-| github.com/hashicorp/packer/common/random | github.com/hashicorp/packer-plugin-sdk/random |
-| github.com/hashicorp/packer/common | github.com/hashicorp/packer-plugin-sdk/retry |
-| github.com/hashicorp/packer/packer/rpc | github.com/hashicorp/packer-plugin-sdk/rpc |
-| github.com/hashicorp/packer/communicator | github.com/hashicorp/packer-plugin-sdk/sdk-internals/communicator |
-| github.com/hashicorp/packer/common/shell | github.com/hashicorp/packer-plugin-sdk/shell |
-| github.com/hashicorp/packer/common/shell-local | github.com/hashicorp/packer-plugin-sdk/shell-local |
-| github.com/hashicorp/packer/helper/builder/localexec | github.com/hashicorp/packer-plugin-sdk/shell-local/localexec |
-| github.com/hashicorp/packer/common/shutdowncommand | github.com/hashicorp/packer-plugin-sdk/shutdowncommand |
-| github.com/hashicorp/packer/template | github.com/hashicorp/packer-plugin-sdk/template |
-| github.com/hashicorp/packer/packer/tmp | github.com/hashicorp/packer-plugin-sdk/tmp |
-| github.com/hashicorp/packer/helper/useragent | github.com/hashicorp/packer-plugin-sdk/useragent |
-| github.com/hashicorp/packer/common/uuid | github.com/hashicorp/packer-plugin-sdk/uuid |
-| **new** | github.com/hashicorp/packer-plugin-sdk/version
-
-
-When in doubt you can search the packer-plugin-sdk repo for the name of your imported structs or functions to see where they exist in the SDK now; we have not changed struct or function names. Or refer to the [Packer Plugin SDK Docs](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/) for help.
+We have created a [migration CLI tool](https://github.com/hashicorp/packer-sdk-migrator#packer-sdk-migrator) to automatically rewrite all of the import paths to use to `packer-plugin-sdk` module. The migration tool also provides an [eligibility check](https://github.com/hashicorp/packer-sdk-migrator#packer-sdk-migrator-check-check-eligibility-for-migration) that can be used to determine if a plugin can be migrated with the tool.
 
 ## Upgrade plugins to use new multi-plugin rpc server
 
@@ -152,7 +101,7 @@ Then you'd install it by putting it into the plugin directory with the name `pac
 
 With the multi-plugin binary you would then refer to your newly installed plugin as `bar-foo` within your Packer template. Whereas, in the single binary setup, you'd have used the name "bar" in your Packer template.
 
-At this point it is important to note that multi-plugins are to Packer, what providers are to Terraform. Multi-plugin binaries provide one or more plugin types to Packer which depend on the same cloud or other APIs. See [registering multiple plugins](#registering-multiple-plugins) for details on how to register more than one plugin type.
+At this point it is important to note that multi-plugins are to Packer, what providers are to Terraform. Multi-plugin binaries provide one or more plugin types to Packer which depend on the same cloud or other APIs. See [registering multiple components](#registering-multiple-components) for details on how to register more than one plugin type.
 
 If your plugin providers a single plugin type please continue reading for instruction on using the Set architecture for single plugins.
 
@@ -177,9 +126,9 @@ you can register it using
 pps.RegisterProvisioner(plugin.DEFAULT_NAME, new(MyProvisioner))
 ```
 
-This will tell the Packer core that  when consuming this plugin set, the given plugin should just use the root plugin name, rather than a compound name. Therefore, when accessing a plugin registered this way, you can again reference it in your Packer template using `"type": "foo"`.
+This will tell the Packer core that when consuming this plugin, the given component should just use the root plugin name, rather than a compound name. Therefore, when accessing a component registered this way, you can again reference it in your Packer template using `"type": "foo"`.
 
-## Registering multiple plugins
+## Registering multiple components
 
 This is useful where "bar" is the name of the hypervisor or environment, and "foo" is the specific plugin type. Many Packer plugins already follow this naming convention. To use an example from the Packer core; if you were writing a custom VSphere plugin, you could now name the plugin `packer-plugin-vsphere`, and register different VSphere builder plugins using:
 
@@ -204,3 +153,4 @@ You can still use the `DEFAULT_NAME` constant with a set implementation; in this
 Once a plugin has been migrated to use the `packer-plugin-sdk` it can be released as it normally would and used by Packer by [installing the plugin](/docs/plugins#installing-plugins) manually into the respective Packer plugin directory.
 
 If however, you would like to take advantage of Packer's automated plugin installation process via `packer init` -- the preferred method of installation -- you will need to make the plugin available on GitHub and in a repository named after the multi-plugin `https://github.com/<yourorg>/packer-plugin-name`. See [Creating a GitHub Release](/docs/plugins/creation#creating-a-github-release) for details on the recommended practice for releasing Packer plugins on GitHub.
+
