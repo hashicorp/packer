@@ -393,6 +393,7 @@ github.com/hashicorp/packer v1.6.7-0.20210112155033-1bc89e34714f/go.mod h1:sKsux
 github.com/hashicorp/packer v1.6.7-0.20210120105538-140685fb4f8b/go.mod h1:Yaw0q8brThFN2PKMWMRcuhQBuwPVDJRHHioNuMJTS7Q=
 github.com/hashicorp/packer v1.6.7-0.20210125170305-539638b0f951/go.mod h1:Z3eunaxVQ3XgQ+rW7TEH0T/PRQzCUSyCBUTkm/VL7io=
 github.com/hashicorp/packer v1.6.7-0.20210126105722-aef4ced967ec/go.mod h1:2+Vo/c/fA+TD9yFc/h9jQMFm4yG+IymQIr0OdJJOPiE=
+github.com/hashicorp/packer v1.6.7-0.20210208125835-f616955ebcb6/go.mod h1:7f5ZpTTRG53rQ58BcTADuTnpiBcB3wapuxl4sF2sGMM=
 github.com/hashicorp/packer-plugin-sdk v0.0.6 h1:BN2G4APXSMvDURFdnk+6DspwsU83pZeMsbEur7NmGsA=
 github.com/hashicorp/packer-plugin-sdk v0.0.6/go.mod h1:Nvh28f+Jmpp2rcaN79bULTouNkGNDRfHckhHKTAXtyU=
 github.com/hashicorp/packer-plugin-sdk v0.0.6/go.mod h1:Nvh28f+Jmpp2rcaN79bULTouNkGNDRfHckhHKTAXtyU=
@@ -405,6 +406,8 @@ github.com/hashicorp/packer-plugin-sdk v0.0.10-0.20210126105622-8e1648006d93 h1:
 github.com/hashicorp/packer-plugin-sdk v0.0.10-0.20210126105622-8e1648006d93/go.mod h1:AtWQLNfpn7cgH2SmZ1PTedwqNOhiPvzcuKfH5sDvIQ0=
 github.com/hashicorp/packer-plugin-sdk v0.0.11 h1:nUurEGaJtpVDyg94bKC2xOXWf1TqQ+++GovFUnP5REI=
 github.com/hashicorp/packer-plugin-sdk v0.0.11/go.mod h1:GNb0WNs7zibb8vzUZce1As64z2AW0FEMwhe2J7/NW5I=
+github.com/hashicorp/packer-plugin-sdk v0.0.12 h1:eagxsrborfhc0E8zvDVCiRE9pQkjBw/6jm23jp0D8RU=
+github.com/hashicorp/packer-plugin-sdk v0.0.12/go.mod h1:hs82OYeufirGG6KRENMpjBWomnIlte99X6wXAPThJ5I=
 github.com/hashicorp/serf v0.8.2 h1:YZ7UKsJv+hKjqGVUUbtE3HNj79Eln2oQ75tniF6iPt0=
 github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/JwenrHc=
 github.com/hashicorp/serf v0.9.2 h1:yJoyfZXo4Pk2p/M/viW+YLibBFiIbKoP79gu7kDAFP0=
@@ -638,6 +641,10 @@ github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6 h1:FAWNiq
 github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6/go.mod h1:R5FMQxkQ+QK/9Vz+jfnJP4rZIktYrRcWmuAnbOSkROI=
 github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1 h1:U6ufy3mLDgg9RYupntOvAF7xCmNNquyKaYaaVHo1Nnk=
 github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1/go.mod h1:hnLbHMwcvSihnDhEfx2/BzKp2xb0Y+ErdfYcrs9tkJQ=
+github.com/ugorji/go v1.2.4 h1:cTciPbZ/VSOzCLKclmssnfQ/jyoVyOcJ3aoJyUV1Urc=
+github.com/ugorji/go v1.2.4/go.mod h1:EuaSCk8iZMdIspsu6HXH7X2UGKw1ezO4wCfGszGmmo4=
+github.com/ugorji/go/codec v1.2.4 h1:C5VurWRRCKjuENsbM6GYVw8W++WVW9rSxoACKIvxzz8=
+github.com/ugorji/go/codec v1.2.4/go.mod h1:bWBu1+kIRWcF8uMklKaJrR6fTWQOwAlrIzX22pHwryA=
 github.com/ulikunitz/xz v0.5.5 h1:pFrO0lVpTBXLpYw+pnLj6TbvHuyjXMfjGeCwSqCVwok=
 github.com/ulikunitz/xz v0.5.5/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
 github.com/vmihailenco/msgpack v3.3.3+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=

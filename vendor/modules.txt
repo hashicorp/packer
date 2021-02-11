@@ -360,7 +360,7 @@ github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
-# github.com/hashicorp/packer-plugin-sdk v0.0.11
+# github.com/hashicorp/packer-plugin-sdk v0.0.12
 github.com/hashicorp/packer-plugin-sdk/acctest
 github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
 github.com/hashicorp/packer-plugin-sdk/acctest/testutils
@@ -585,7 +585,7 @@ github.com/ucloud/ucloud-sdk-go/ucloud/response
 github.com/ucloud/ucloud-sdk-go/ucloud/version
 # github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
 github.com/ufilesdk-dev/ufile-gosdk
-# github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
+# github.com/ugorji/go/codec v1.2.4
 github.com/ugorji/go/codec
 # github.com/ulikunitz/xz v0.5.5
 github.com/ulikunitz/xz
