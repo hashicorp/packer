@@ -6,6 +6,8 @@
 //   the landing page for the category
 
 export default [
+  '1.7-plugin-upgrade',
+  '1.7-template-upgrade',
   {
     category: 'hcl',
     content: ['from-json-v1', 'variables', 'component-object-spec'],
@@ -13,10 +15,6 @@ export default [
   {
     category: 'automatic-operating-system-installs',
     content: ['autounattend_windows', 'preseed_ubuntu'],
-  },
-  {
-    category: '1.7-plugin-upgrade',
-    content: [],
   },
   {
     category: 'workflow-tips-and-tricks',
