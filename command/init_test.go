@@ -223,6 +223,8 @@ func TestInitCommand_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			log.Printf("starting %s", tt.name)
+			log.Printf("%#v", tt)
 			t.Cleanup(func() {
 				_ = os.RemoveAll(tt.packerConfigDir)
 			})
@@ -235,7 +237,6 @@ func TestInitCommand_Run(t *testing.T) {
 					return
 				}
 			}
-			log.Printf("starting %s", tt.name)
 			createFiles(tt.packerConfigDir, tt.inPluginFolder)
 			createFiles(tt.packerUserFolder, tt.inConfigFolder)
 
