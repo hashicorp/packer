@@ -9,22 +9,20 @@ sidebar_title: Extending Packer
 
 # Extending Packer
 
-Packer is designed to be extensible. Because the surface area for workloads is
-infinite, Packer supports plugins that allow you to create and use custom
-builders, provisioners, and post-processors. To learn more about the different
-customizations, please choose a link from the sidebar.
+Packer is designed to be extensible, and supports plugins that allow you to
+create and use custom builders, provisioners, post-processors, and data sources.
+To learn more about developing these different types of components, please
+choose a link from the sidebar. To learn more about the general plugin
+architecture, stay on this page.
 
 ## Developing Plugins
 
 This page will document how you can develop your own Packer plugins. Prior to
-reading this, it is assumed that you're comfortable with Packer and also know
-the [basics of how Plugins work](/docs/plugins), from a user
-standpoint.
+reading this, you should be comfortable with Packer and know the
+basics of [how plugins work from a user standpoint](/docs/plugins).
 
-Packer plugins must be written in [Go](https://golang.org/), so it is also
-assumed that you're familiar with the language. This page will not be a Go
-language tutorial. Thankfully, if you are familiar with Go, the Go toolchain
-provides many conveniences to help to develop Packer plugins.
+Packer plugins must be written in [Go](https://golang.org/), so you should also
+be familiar with the language.
 
 ~> **Warning!** This is an advanced topic. If you're new to Packer, we
 recommend getting a bit more comfortable before you dive into writing plugins.
@@ -35,67 +33,59 @@ A Packer plugin is just a go binary. Instead of loading plugins directly into a
 running application, Packer runs each plugin as a _separate application_.
 The multiple separate Packer plugin processes communicate with the Core using
 an RPC defined in the packer-plugin SDK. The Packer core itself is responsible
-for orchestrating the processes and handles cleanup.
-
-The beauty of this is that your plugin can have any dependencies it wants.
-Your dependencies don't need to line up with what the Packer core or any other
-plugin uses, because they're completely isolated into the process space of the
-plugin itself.
-
-And, thanks to Go's
-[interfaces](https://golang.org/doc/effective_go.html#interfaces_and_types), it
-doesn't even look like inter-process communication is occurring. You just use
-the interfaces like normal, and Packer handles all the details around executing
-them in a remote process.
+launching and cleaning up the plugin processes.
 
 ### Plugin Development Basics
 
-Developing a plugin allows you to create additional functionality for Packer.
-All the various kinds of plugins have a corresponding interface. The plugin
-needs to implement this interface and expose it using the Packer
-packer-plugin-sdk (covered here shortly), and that's it!
+The components that can be created and used in a Packer plugin are builders,
+provisioners, post-processors, and data sources.
 
-There are two packages that really matter that every plugin must use. Other
-than the following two packages, you're encouraged to use whatever packages you
-want. Because plugins are their own processes, there is no danger of colliding
-dependencies.
+Each of these components has a corresponding [interface](https://golang.org/doc/effective_go.html#interfaces_and_types).
+
+All you need to do to create a plugin is:
+  1. create an implementation of the desired interface, and
+  2. serve it using the server provided in the [packer-plugin-sdk](https://github.com/hashicorp/packer-plugin-sdk).
+
+The core and the SDK handle all of the communication details inside the server.
+
+Your plugin must use two packages from the SDK to implement the server and
+interfaces. You're encouraged to use whatever other packages you want in your
+plugin implementation. Because plugins are their own processes, there is no
+danger of colliding dependencies.
 
 - [`github.com/hashicorp/packer-plugin-sdk/packer`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer) - Contains all the interfaces that you have to implement for any given plugin.
 
 - [`github.com/hashicorp/packer-plugin-sdk/plugin`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/plugin) - Contains the code to serve the plugin. This handles all the inter-process communication.
 
-There are two steps involved in creating a plugin:
-
-1.  Implement the desired interface. For example, if you're building a builder
-    plugin, implement the [packer.Builder](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer#Builder) interface.
-
-2.  Serve the interface by calling the appropriate [plugin](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/plugin#Set.RegisterBuilder) serving method in your main method.
-
-Basic examples are shown below. Note that if you define a multi-component
-plugin,you can add more than one component per plugin binary.
-
+Basic examples of serving your component are shown below. Note that if you
+define a multi-component plugin, you can (but do not need to) add more than one
+component per plugin binary. The multi-component plugin is also compatible with
+download and installation via `packer init`, whereas the single-component plugin
+is not.
 
 <Tabs>
-<Tab heading="Multi-component Plugin">
+<Tab heading="Multi-component Plugin (recommended) ">
 
 ```go
+// main.go
+
 import (
   "github.com/hashicorp/packer-plugin-sdk/plugin"
 )
 
-// Assume this implements packer.Builder
+// Assume this implements the packer.Builder interface
 type ExampleBuilder struct{}
 
-// Assume this implements packer.PostProcessor
+// Assume this implements the packer.PostProcessor interface
 type FooPostProcessor struct{}
 
-// Assume this implements packer.Provisioner
+// Assume this implements the packer.Provisioner interface
 type BarProvisioner struct{}
 
 func main() {
 	pps := plugin.NewSet()
 	pps.RegisterBuilder("example", new(ExampleBuilder))
-  pps.RegisterBuilder(plugin.DEFAULT_NAME, new(AnotherBuilder))
+	pps.RegisterBuilder(plugin.DEFAULT_NAME, new(AnotherBuilder))
 	pps.RegisterPostProcessor("foo", new(FooPostProcessor))
 	pps.RegisterProvisioner("bar", new(BarProvisioner))
 	err := pps.Run()
@@ -106,12 +96,14 @@ func main() {
 }
 ```
 
-**That's it!** `plugin.NewSet` handles all the nitty gritty of
-communicating with Packer core and serving your builder over RPC.
+This `plugin.NewSet` invocation handles all the details of communicating with
+Packer core and serving your component over RPC. As long as your struct being
+registered implements one of the component interfaces, Packer will now be able
+to launch your plugin and use it.
 
 If you register a component with its own name, the component name will be
 appended to the plugin name to create a unique name. If you register a component
-using the special string constant `plugin.DEFAULT_NAME`, then the component can
+using the special string constant `plugin.DEFAULT_NAME`, then the component will
 be referenced by using only the plugin name. For example:
 
 If your plugin is named `packer-plugin-my`, the above set definition would make
@@ -123,7 +115,7 @@ the following components available:
 * the `my-bar` provisioner
 
 </Tab>
-<Tab heading="Single Component Plugin">
+<Tab heading="Single Component Plugin (deprecated)">
 
 ```go
 import (
@@ -155,9 +147,9 @@ because the packer init command only supports multi-component plugins.
 </Tabs>
 
 
-Next, build your plugin as you would any other Go application, using `go build`
-or however you please. The resulting binary is the plugin that can be installed
-using standard installation procedures.
+Next, build your plugin as you would any other Go application. The resulting
+binary is the plugin that can be installed using
+[standard installation procedures](/docs/plugins#installing-plugins).
 
 The specifics of how to implement each type of interface are covered in the
 relevant subsections available in the navigation to the left.
@@ -190,30 +182,42 @@ the logs to be helpful.
 
 ### Creating a GitHub Release
 
-To create a GitHub release with the assets that will be consumed by Packer, we provide a pre-defined release workflow configuration
-using [GitHub Actions](https://docs.github.com/en/free-pro-team@latest/actions). We strongly encourage maintainers to use this configuration
-to make sure the release contains the assets expected by Packer to load and use a plugin.
-[GitHub Actions](https://docs.github.com/en/free-pro-team@latest/actions) allow you to execute workflows when events on your repository occur.
-You can use this to create releases whenever a new version tag is created on your repository.
+`packer init` does not work using a centralized registry. Instead, it requires
+you to publish your plugin in a GitHub repo with the name
+`packer-plugin-*` where * represents the name of your plugin. You also need to
+create a GitHub release of your plugin with specific assets for the
+`packer init` download to work. We provide a pre-defined release workflow
+configuration using
+[GitHub Actions](https://docs.github.com/en/free-pro-team@latest/actions). We
+strongly encourage maintainers to use this configuration to make sure the
+release contains the right assets with the right names for Packer to leverage
+`packer init` installation.
 
 Here's what you need to create releases using GitHub Actions:
 1. Generate a GPG key to be used when signing releases (See [GitHub's detailed instructions](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/generating-a-new-gpg-key)
 for help with this step)
 2. Copy the [GoReleaser configuration from the packer-plugin-scaffolding repository](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/.goreleaser.yml) to the root of your repository.
+	```sh
+	curl -L -o .goreleaser.yml \
+	https://raw.githubusercontent.com/hashicorp/packer-plugin-scaffolding/main/.goreleaser.yml
+	```
 3. Copy the [GitHub Actions workflow from the packer-plugin-scaffolding repository](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/.github/workflows/release.yml) to `.github/workflows/release.yml` in your repository.
-
-    An easier way to execute steps 1 and 2, is by running the following command in the root folder of your plugin to download
-    and place both files in their expected place:
-    ```shell
-    curl -L -o .goreleaser.yml https://raw.githubusercontent.com/hashicorp/packer-plugin-scaffolding/main/.goreleaser.yml &&
-    mkdir -p .github/workflows &&
-    curl -L -o .github/workflows/release.yml https://raw.githubusercontent.com/hashicorp/packer-plugin-scaffolding/main/.github/workflows/release.yml
-    ```
-
-4. Go to Settings > Secrets in your repository, and add the following secrets:
+	```sh
+  mkdir -p .github/workflows &&
+  curl -L -o .github/workflows/release.yml \
+  https://raw.githubusercontent.com/hashicorp/packer-plugin-scaffolding/main/.github/workflows/release.yml
+	```
+4. Go to your repository page on GitHub and navigate to Settings > Secrets. Add
+	the following secrets:
     - `GPG_PRIVATE_KEY` - Your ASCII-armored GPG private key. You can export this with `gpg --armor --export-secret-keys [key ID or email]`.
     - `PASSPHRASE` - The passphrase for your GPG private key.
-5. Push a new valid version tag (e.g. `v1.2.3`) to test that the GitHub Actions releaser is working. The tag must be a valid [Semantic Version](https://semver.org/) preceded with a `v`.
+5. Push a new valid version tag (e.g. `v1.2.3`) to test that the GitHub Actions
+releaser is working. The tag must be a valid
+[Semantic Version](https://semver.org/) preceded with a `v`. Once the tag is
+pushed, the github actions you just configured will automatically build release
+binaries that Packer can download using `packer init`. For more details on how
+to install a plugin using `packer init`, see the
+[init docs](/docs/commands/init).
 
 ### Plugin Development Tips and FAQs
 
@@ -222,7 +226,7 @@ for help with this step)
 It is standard practice to name the resulting plugin application in the format
 of `packer-plugin-NAME`. For example, if you're building a new builder for
 CustomCloud, it would be standard practice to name the resulting plugin
-`packer-plugin-custom-cloud`. This naming convention helps users identify the
+`packer-plugin-customcloud`. This naming convention helps users identify the
 scope of a plugin.
 
 #### Testing Plugins
@@ -240,9 +244,9 @@ This is extremely useful during development.
 
 #### Distributing Plugins
 
-It is recommended you use a tool like the GoReleaser in order to cross-compile
+We recommend that you use a tool like the GoReleaser in order to cross-compile
 your plugin for every platform that Packer supports, since Go applications are
 platform-specific. If you have created your plugin from the
 [packer-plugin-scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding)
-repo, simply tagging a commit will correctly build and release the binaries
-using GoReleaser.
+repo, simply tagging a commit and pushing the tag to GitHub will correctly build
+and release the binaries using GoReleaser.
