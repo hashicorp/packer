@@ -18,7 +18,7 @@ import (
 
 type testCaseInit struct {
 	name                                  string
-	init                                  []func(*testing.T, testCaseInit)
+	setup                                 []func(*testing.T, testCaseInit)
 	Meta                                  Meta
 	inPluginFolder                        map[string]string
 	expectedPackerConfigDirHashBeforeInit string
@@ -303,7 +303,7 @@ func TestInitCommand_Run(t *testing.T) {
 				_ = os.RemoveAll(tt.packerUserFolder)
 			})
 			os.Setenv("PACKER_CONFIG_DIR", tt.packerConfigDir)
-			for _, init := range tt.init {
+			for _, init := range tt.setup {
 				init(t, tt)
 				if t.Skipped() {
 					return
