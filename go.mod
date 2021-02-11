@@ -50,7 +50,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/hcl/v2 v2.8.0
-	github.com/hashicorp/packer-plugin-sdk v0.0.11
+	github.com/hashicorp/packer-plugin-sdk v0.0.12
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
@@ -76,7 +76,6 @@ require (
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
 	github.com/shirou/gopsutil v2.18.12+incompatible
-	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/stretchr/testify v1.6.1
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible
 	github.com/ucloud/ucloud-sdk-go v0.16.3
