@@ -118,11 +118,13 @@ the following components available:
 <Tab heading="Single Component Plugin (deprecated)">
 
 ```go
+// main.go
+
 import (
   "github.com/hashicorp/packer-plugin-sdk/plugin"
 )
 
-// Assume this implements packer.Builder
+// Assume this implements the packer.Builder interface
 type Builder struct{}
 
 func main() {
@@ -135,13 +137,15 @@ func main() {
 }
 ```
 
-**That's it!** `plugin.Server` handles all the nitty gritty of communicating with
-Packer core and serving your builder over RPC.
+This `server.Serve()` invocation handles all the details of communicating with
+Packer core and serving your component over RPC. As long as your struct being
+registered implements one of the component interfaces, Packer will now be able
+to launch your plugin and use it.
 
 Please note that single-component plugins exist for backwards-compatability. We
 would rather you register your component using the multi-component method shown
 in the other tab, even if you only have one component in your binary. This is
-because the packer init command only supports multi-component plugins.
+because the `packer init` command only supports multi-component plugins.
 
 </Tab>
 </Tabs>
