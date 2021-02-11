@@ -1,0 +1,154 @@
+---
+page_title: Upgrading your template to use Packer init
+sidebar_title: Upgrade Your Template to use Packer init
+---
+
+# Upgrading your template to be compatible with `packer init`
+
+The `packer init` command is introduced in version v1.7.0 at the same time the [Packer Plugin SDK](https://github.com/hashicorp/packer-plugin-sdk)
+is officially released. The Packer Plugin SDK is a change that benefits plugins maintainers, whilst the `init` command
+benefits Packer users by providing a better control of plugin usage within a Packer template configuration.
+
+In short words, `packer init` will look at the `required_plugins` block definition within a template, take the required
+plugins specifications and download the correct binaries for that template. For details about how the command works and
+where the plugins will be installed, please refer to the [`packer init`](/docs/commands/init) documentation.
+
+-> **Note:** `packer init` does not work with legacy JSON templates. You can
+upgrade your JSON config files to HCL using the [hcl2_upgrade](/docs/commands/hcl2_upgrade) command.
+
+## Updating your template with the `required_plugins` block
+
+### Why do I need to upgrade my template?
+
+To use the new released `packer init` command and have all the winnings that it is supposed to bring, you must upgrade
+your template to use the `required_plugins` block. The `init` command won't work if no `required_plugins` is provided.
+
+We strongly encourage you to upgrade and start using `required_plugins` template, but if you are not confident on doing
+this now you can still install plugins manually like the old times.
+
+### When to upgrade my template?
+
+The `packer init` can only install plugins that are upgraded to use our brand new [Plugin SDK](https://github.com/hashicorp/packer-plugin-sdk),
+and that fits in the requirements of a multi-component plugin. The easiest way to know if the plugin you use fits those
+requirements, is by looking for SDK migration in their CHANGELOG, and noticing if the plugin repository is named as
+`packer-plugin-*` (e.g. `packer-plugin-comment`).
+If the plugin you use is a multi-component plugin, you are ready to upgrade your template.
+
+#### The plugin I need is not a multi-component plugin yet
+
+With the SDK released at the same time as the `init` command, plugin users may face a gap between the release and the
+plugin upgrade. Maintainers will have to upgrade their plugins and the process is a little bit more complicated than this one.
+The Packer team is getting in touch with all currently known plugin maintainers to provide support during their upgrade process.
+
+If you are willing to upgrade your template but found out that the plugin you are using hasn't been upgraded yet,
+we suggest you reach out to the plugin maintainers and ask for an upgrade.
+
+Check it out the table below to better understand what behavior to expect from a Packer version with the current state
+of your template, and the plugins you are using.
+
+| Single Component Plugin - API v4 | Single Component Plugin API v5.0 | Multi Component Plugin API v5.0 | Packer Version |
+| -------------------------------- | -------------------------------- | --------------------------------| -------------- |
+| Manual Installation | Not Compatible | Not Compatible | v1.5.0 to v1.6.6|
+| Not Compatible | Manual and `packer init` Installation  | Manual and `packer init`  Installation | v1.7.6|
+
+### How to upgrade my template
+
+Let's use the following template as an example:
+
+```hcl
+# file: example.pkr.hcl
+
+source "null" "basic-example" {
+  communicator = "none"
+}
+
+build {
+  sources = ["sources.null.basic-example"]
+
+  provisioner "comment" {
+    comment = "Hello from comment plugin"
+    ui = true
+    bubble_text =  true
+  }
+}
+```
+
+This template uses the `packer-provisioner-comment` plugin and, until Packer v1.7.0, the binaries were installed manually.
+
+From Packer v1.7.0, the plugin has been upgraded by its maintainers and now is called `packer-plugin-comment` and the
+latest version is v0.2.23. Knowing that, our example template can be upgraded.
+
+```hcl
+# file: example.pkr.hcl
+
+packer {
+    required_plugins {
+        comment = {
+            version = ">=v0.2.23"
+            source = "sylviamoss/comment"
+        }
+    }
+}
+
+source "null" "basic-example" {
+  communicator = "none"
+}
+
+build {
+  sources = ["sources.null.basic-example"]
+
+  provisioner "comment" {
+    comment = "Hello from comment plugin"
+    ui = true
+    bubble_text =  true
+  }
+}
+```
+
+The upgraded template is now telling Packer that it requires a plugin from the source `sylviamoss/comment`
+of the version equals or greater `v0.2.23`. It also tells that the plugin should be referred in the rest of the template as `comment`.
+
+Here it is a brief explanation of each field:
+- `version` - Should follow the [version constraints](/docs/templates/hcl_templates/blocks/packer#version-constraints).
+- `source` - Should have the plugin's organizational namespace on GitHub and its short name. Packer will be responsible
+to write the full GitHub address.
+  For example, if the source is `sylviamoss/comment`, Packer will download the binaries from `github.com/sylviamoss/packer-plugin-comment`.
+  To learn more about the source field, check out the [Source Address](/docs/plugins#source-addresses) documentation.
+- `comment`- Can be replaced with whatever you want, and the new value will become the name of the plugin.
+  For example:
+    ```hcl
+    packer {
+        required_plugins {
+            bubbled_up = {
+                # ...
+            }
+        }
+    }
+
+    # ...
+
+    build {
+        # ...
+
+        provisioner "bubbled_up" {
+            # ...
+        }
+    }
+    ```
+
+Once the template is upgraded, you can run `packer init example.pkr.hcl` and the output should tell you the installed
+plugin, and the place where it was installed.
+
+```shell
+➜ packerdev init example.pkr.hcl
+Installed plugin sylviamoss/comment v0.2.23 in "/Users/<user>/.packer.d/plugins/github.com/sylviamoss/comment/packer-plugin-comment_v0.2.23_x5.0_darwin_amd64"
+```
+
+`packer init` will only download plugins binary and never delete existing ones. If all the required_plugins are installed,
+the command won't do anything unless you set the `-upgrade` flag to force download newer versions of the existing plugins.
+
+Now that the required comment plugin is installed via `packer init`, you can run `packer build example.pkr.hcl` as usual
+and won't need to run `init` again unless you want to upgrade the plugin version.
+
+
+
