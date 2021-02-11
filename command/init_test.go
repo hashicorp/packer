@@ -14,7 +14,7 @@ import (
 )
 
 type testCaseInit struct {
-	checkSkip                             func(*testing.T)
+	init                                  []func(*testing.T, testCaseInit)
 	name                                  string
 	Meta                                  Meta
 	inPluginFolder                        map[string]string
@@ -94,10 +94,8 @@ func TestInitCommand_Run(t *testing.T) {
 			},
 		},
 		{
-			func(t *testing.T) {
-				if os.Getenv(acctest.TestEnvVar) == "" {
-					t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
-				}
+			[]func(t *testing.T, tc testCaseInit){
+				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
 			},
 			// here we pre-write plugins with valid checksums, Packer will
 			// see those as valid installations it did.
@@ -171,10 +169,34 @@ func TestInitCommand_Run(t *testing.T) {
 			},
 		},
 		{
-			func(t *testing.T) {
-				if os.Getenv(acctest.TestEnvVar) == "" {
-					t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
-				}
+			[]func(t *testing.T, tc testCaseInit){
+				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
+			},
+			"release-with-no-binary",
+			testMetaFile(t),
+			nil,
+			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+			map[string]string{
+				`cfg.pkr.hcl`: `
+					packer {
+						required_plugins {
+							comment = {
+								source  = "github.com/sylviamoss/comment"
+								version = "v0.2.20"
+							}
+						}
+					}`,
+			},
+			cfg.dir("3_pkr_config"),
+			cfg.dir("3_pkr_user_folder"),
+			1,
+			nil,
+			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+			nil,
+		},
+		{
+			[]func(t *testing.T, tc testCaseInit){
+				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
 			},
 			"release-with-no-binary",
 			testMetaFile(t),
@@ -201,8 +223,8 @@ func TestInitCommand_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.checkSkip != nil {
-				tt.checkSkip(t)
+			for _, init := range tt.init {
+				init(t, tt)
 				if t.Skipped() {
 					return
 				}
@@ -262,5 +284,14 @@ func TestInitCommand_Run(t *testing.T) {
 				})
 			}
 		})
+	}
+}
+
+type skipInitTestUnlessEnVar string
+
+func (key skipInitTestUnlessEnVar) fn(t *testing.T, tc testCaseInit) {
+	return // always run acc tests for now
+	if os.Getenv(string(key)) == "" {
+		t.Skipf("Acceptance test skipped unless env '%s' set", key)
 	}
 }
