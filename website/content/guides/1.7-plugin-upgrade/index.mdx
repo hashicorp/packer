@@ -18,24 +18,21 @@ The goal of the SDK is to clearly separate the Packer core from the Packer plugi
 
 We have created a [packer-sdk-migrator](https://github.com/hashicorp/packer-sdk-migrator) cli tool to help you migrate your plugin to use the new import paths. To use it, follow the installation instructions for the migration tool, then call `packer-sdk-migrator migrate` from the root of your plugin directory. More details can be found in the migrator's [README](https://github.com/hashicorp/packer-sdk-migrator/blob/main/README.md).
 
+Once you have migrated your plugin to the new SDK, your users can continue using your plugin as they always have, manually installing it in their plugins directories. However, Packer v1.7 also introduced the `packer init` command, and since you're here anyway it's a great time to upgrade your plugin so it can be found by `packer init`. Keep reading for more details!
 
-We have created a [migration CLI tool](https://github.com/hashicorp/packer-sdk-migrator#packer-sdk-migrator) to automatically rewrite all of the import paths to use to `packer-plugin-sdk` module. The migration tool also provides an [eligibility check](https://github.com/hashicorp/packer-sdk-migrator#packer-sdk-migrator-check-check-eligibility-for-migration) that can be used to determine if a plugin can be migrated with the tool.
+## Upgrade Plugins to use The New Multi-Component RPC Server
 
-## Upgrade plugins to use new multi-plugin rpc server
+### Why is there a new RPC server?
 
-### Why upgrade to the new rpc server?
+There are two main reasons we wrote the new server type.
 
-The goal of this server is to enable multiple related plugins, for example plugins that share a hypervisor or cloud, to rely on shared libraries without having to submodule common code. The helps maintainers who are experts in a specific technology to focus on that technology without having to maintain several repositories. Having a single global plugin wrapper also helps the Packer core register, download, and install plugins. Finally, it allows more clarity in the plugin binary naming and name-usage within a template.
+First, it enables multiple related components, for example a builder and a post-processor that share a hypervisor or cloud, to live together in the same plugin. This helps maintainers who are experts in a specific technology to focus on that technology without having to maintain several repositories that submodule the same common code. You can think of a multi-component plugin as being in some ways analogous to Terraform providers, in the sense that both frequently bundle common resources or components by hypervisor or cloud.
 
-### Do I have to upgrade?
-
-For now, you do not have to upgrade your plugin, but we recommend doing it. Packer will continue to understand how to discover and launch old-style plugins. However, you will not be able to register your plugin with HashiCorp until you have upgraded the plugin.
+Second, the new server provides the Packer core with structured metadata that allows it to check the plugin's semantic versioning and use that in conjunction with `packer init` and the `required_plugins` block to make sure that users are using not only the correct plugin, but the correct _version_ of that plugin.
 
 ### How to upgrade the plugin
 
-We've created a scaffolding repository over at https://github.com/hashicorp/packer-plugin-scaffolding/
-
-If you already have a working plugin, the [builder plugin scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding/tree/main/builder/scaffolding) should look pretty familiar. You'll notice that there are some changes to main.go.
+We've created a [scaffolding repository](https://github.com/hashicorp/packer-plugin-scaffolding/) that you can either clone or use as a reference example. If you already have a working plugin, it should look pretty familiar. You'll notice, however, that there are some changes to main.go.
 
 Previously, you may have had a main.go that looks something like:
 
@@ -59,11 +56,10 @@ func main() {
 
 ```
 
-With this single-plugin binary you'd install it by putting it into the plugin directory with the name
-`packer-provisioner-foo`.
+With this single-component plugin binary you'd install it by putting it into the plugin directory with the name `packer-provisioner-foo`, and to access your provisioner in your Packer template, you would use the type `foo`.
 
 
-In the new multi-plugin binary you'll want to use the NewSet() function to create a server.
+To use the new multi-component server, you'll want to use the NewSet() function to create a server:
 
 ```golang
 package main
@@ -77,7 +73,7 @@ import (
 
 func main() {
   pps := plugin.NewSet()
-  pps.RegisterProvisioner("foo", new(CommentProvisioner))
+  pps.RegisterProvisioner(plugin.DEFAULT_NAME, new(MyProvisioner))
   err := pps.Run()
   if err != nil {
     fmt.Fprintln(os.Stderr, err.Error())
@@ -87,48 +83,33 @@ func main() {
 
 ```
 
-The implementation is extremely similar, but now we use the "NewSet" function to create the plugin Server, and call Run() instead of Serve().
+The implementation is similar, but now we use the "NewSet" function to create the component Server, and call Run() instead of Serve().
 
-With the multi-plugin binary example, it is important to note that the name of the binary must be in the form of `packer-pluign-name`. Otherwise Packer will not register it as a multi-plugin, nor to download it.
+With the multi-component plugin example, it is important to note that the name of the binary must be in the form `packer-pluign-name`. Otherwise Packer will not register it as a multi-component plugin, nor download it.
+
+You build it as you would any go binary:
 
 ```go
 go build -o packer-plugin-bar
 ```
 
-Then you'd install it by putting it into the plugin directory with the name `packer-plugin-name`.
+Then you install it by putting it into the plugin directory with the name `packer-plugin-foo`, and reference it in your template using the type "foo".
 
-With the multi-plugin binary you would then refer to your newly installed plugin as `bar-foo` within your Packer template. Whereas, in the single binary setup, you'd have used the name "bar" in your Packer template.
+What does that `plugin.DEFAULT_NAME` do? It tells the Packer core that in your template you'll be using the root plugin name instead of a compound name composed of the plugin name and the component name. If you are only serving a single component, you may want to use `plugin.DEFAULT_NAME` to prevent your templates from stuttering.
 
-At this point it is important to note that multi-plugins are to Packer, what providers are to Terraform. Multi-plugin binaries provide one or more plugin types to Packer which depend on the same cloud or other APIs. See [registering multiple components](#registering-multiple-components) for details on how to register more than one plugin type.
+Here's an example using a custom string instead of `plugin.DEFAULT_NAME`:
 
-If your plugin providers a single plugin type please continue reading for instruction on using the Set architecture for single plugins.
-
-
-## Using the Set Architecture for Single Plugins
-
-***THIS IS ON THE PACKER MASTER BRANCH AND WILL BE AVAILABLE IN V1.7.0***
-
-The naming described above could be awkward for users who have given plugins singular names. For example, in a prior world, you may have created a provisioner saved as `packer-provisioner-foo` and accessed it in your template using `"type": "foo"`; Now, if you install a plugin named `packer-plugin-foo`, and register it using NewSet() and RegisterProvisioner() with the name "foo", you'll have to access it in your template using `"type": "foo-foo"` which stutters and breaks backwards compatibility.
-
-To solve this we have a specialized string constant you can use to register your plugins instead:
-
-instead of registering your plugin using
-
-```golang
-pps.RegisterProvisioner("foo", new(MyProvisioner))
+```
+pps.RegisterProvisioner("bar", new(MyProvisioner))
 ```
 
-you can register it using
-
-```golang
-pps.RegisterProvisioner(plugin.DEFAULT_NAME, new(MyProvisioner))
-```
-
-This will tell the Packer core that when consuming this plugin, the given component should just use the root plugin name, rather than a compound name. Therefore, when accessing a component registered this way, you can again reference it in your Packer template using `"type": "foo"`.
+When you do this, if you install your plugin as `packer-plugin-foo`, the Packer core expects you to access the provisioner in your template using the type `foo-bar`, where "foo" is the last portion of the plugin name as installed and "bar" is the name of the provisioner that you registered.
 
 ## Registering multiple components
 
-This is useful where "bar" is the name of the hypervisor or environment, and "foo" is the specific plugin type. Many Packer plugins already follow this naming convention. To use an example from the Packer core; if you were writing a custom VSphere plugin, you could now name the plugin `packer-plugin-vsphere`, and register different VSphere builder plugins using:
+The intention of multi-component plugins is to enable maintainers to serve related components together. A good naming convention is to name the plugin itself after your hypervisor or cloud environment, and the individual components after their specific functions.
+
+Many Packer plugins already follow this naming convention. To use an example from the Packer core; if you were writing a custom VSphere plugin, you could now name the plugin `packer-plugin-vsphere`, and register different VSphere builders using:
 
 ```golang
 func main() {
@@ -143,12 +124,15 @@ func main() {
 }
 ```
 
-And then reference your plugin in the Packer template using "vsphere-iso" and "vsphere-clone" just like Packer currently does.
+And then reference your desired component in the Packer template using "vsphere-iso" and "vsphere-clone" just like Packer currently does.
 
-You can still use the `DEFAULT_NAME` constant with a set implementation; in this example, whatever you register with the DEFAULT_NAME will be referenced in the Packer template as "vsphere". You can only register one plugin per plugin set using the DEFAULT_NAME
+You can still use the `DEFAULT_NAME` constant with a set implementation; in this example, whatever you register with the `DEFAULT_NAME` will be referenced in the Packer template as "vsphere". You can only register one component of each type (i.e. one builder, one provisioner, and one post-processor) per plugin using the `DEFAULT_NAME`.
 
 ## Distributing migrated plugins
+
 Once a plugin has been migrated to use the `packer-plugin-sdk` it can be released as it normally would and used by Packer by [installing the plugin](/docs/plugins#installing-plugins) manually into the respective Packer plugin directory.
 
-If however, you would like to take advantage of Packer's automated plugin installation process via `packer init` -- the preferred method of installation -- you will need to make the plugin available on GitHub and in a repository named after the multi-plugin `https://github.com/<yourorg>/packer-plugin-name`. See [Creating a GitHub Release](/docs/plugins/creation#creating-a-github-release) for details on the recommended practice for releasing Packer plugins on GitHub.
+If however, you would like to take advantage of Packer's automated plugin installation process via `packer init` -- the preferred method of installation -- you will need to make the plugin available on GitHub and in a repository named after the multi-component plugin.  `https://github.com/<yourorg>/packer-plugin-name`. We recognize that this may require you to rename or fork your plugin repository, but we think that it is worth the inconvenience to reduce ambiguity in the init call.
+
+See our documentation on [Creating a GitHub Release](/docs/plugins/creation#creating-a-github-release) for details on the recommended practice for releasing Packer plugins on GitHub.
 
