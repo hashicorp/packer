@@ -10,28 +10,24 @@ sidebar_title: Packer Plugins
 # Packer Plugins
 
 Packer Plugins allow new functionality to be added to Packer without modifying
-the core source code. Packer plugins are able to add new builders, provisioners,
-hooks, and more. In fact, much of Packer itself is implemented by writing
-plugins that are simply distributed with Packer. For example, many of the
-builders, provisioners, and more that ship with Packer are implemented as
-Plugins that are simply hardcoded to load with Packer.
+the core source code. Packer plugins are able to add new components to Packer,
+such as builders, provisioners, hooks, and more.
 
-* This page documents how to install plugins.
-* Plugins cannot be configured yet.
-* If you're interested in developing plugins, see the [developing
+This page documents how to install plugins.
+
+If you're interested in developing plugins, see the [developing
 plugins](/docs/plugins/creation#developing-plugins) page.
 
-The current official listing of available Packer plugins can be found
-[here](/community-tools#third-party-plugins). These plugins will need to be
-manually installed. This is an incomplete list, and more plugins can be found by
-searching. Typically, searching "packer plugin _x_" will find what you're
-looking for if it exists. We hope to create an offical registry for third party
-plugins in the future.
+The current official listing of community-written plugins can ve found
+[here](/community-tools#third-party-plugins); if you have written a Packer
+plugin, please reach out to us so we can add your plugin to the website.
 
 ## How Plugins Work
 
 Packer plugins are completely separate, standalone applications that the core
-of Packer starts and communicates with.
+of Packer starts and communicates with. Even the components that ship with the
+Packer core (core builders, provisioners, and post-processors) are implemented
+in a similar way and treated as plugins.
 
 These plugin applications aren't meant to be run manually. Instead, Packer core
 executes them as a sub-process, run as a sub-command (`packer plugin`) and
@@ -49,15 +45,18 @@ applications running.
 packer-plugin-*, like the `packer-plugin-amazon` -- are expected to work with
 Packer init. The legacy `builder`, `post-processor` and `provisioner` plugin
 types will keep on being detected but Packer cannot install them automatically.
+If a plugin you use has not been upgraded to use the multi-component plugin
+architecture, contact your maintainer to request an upgrade.
 
 ## Installing Plugins
 
 1. Add a
 [`required_plugin`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
-block to your `packer` block, each block will tell Packer what version(s) can be
-installed, make sure to set a correct [version constraint
-string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
-  Example `required_plugins` block :
+block to your `packer` block. Each block will tell Packer what version(s) of a
+particular plugin can be installed. Make sure to set a correct [version
+constraint string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
+
+Here is an example `required_plugins` block :
 
   ```hcl
   packer {
@@ -66,17 +65,24 @@ string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
         version = ">= 2.7.0"
         source = "azr/myawesomecloud"
       }
-      happycloud = ">= 2.7.0"
+      happycloud = {
+        version = ">= 1.1.3"
+        source = "azr/happycloud"
+      }
     }
   }
   ```
 
-2. Run [`packer init`](/docs/commands/init) to install all missing plugin binaries.
+2. Run [`packer init`](/docs/commands/init) from your project directory (the
+directory containing your Packer templates) to install all missing plugin
+binaries. Given the above example, Packer will try to look for a GitHub
+repository owned by user or organization `azr` named
+`packer-plugin-myawesomecloud` and `packer-plugin-happycloud`.
 
 ## Names and Addresses
 Each plugin has two identifiers:
 
-* A `source` address, which is only used when requiring a plugin outside the HashiCorp domain.
+* A `source` address, which is only necessary when requiring a plugin outside the HashiCorp domain.
 * A unique **local name**, which is used everywhere else in a Packer
   configuration.
 
