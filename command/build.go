@@ -145,7 +145,10 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if ret != 0 {
 		return ret
 	}
-	diags := packerStarter.Initialize(packer.InitializeOptions{})
+
+	diags := packerStarter.Initialize(packer.InitializeOptions{
+		SkipPluginRequirements: cla.SkipPluginCheck,
+	})
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
@@ -388,6 +391,7 @@ Options:
   -only=foo,bar,baz             Build only the specified builds.
   -force                        Force a build to continue if artifacts exist, deletes existing artifacts.
   -machine-readable             Produce machine-readable output.
+  -skip-plugin-check            Skip check for required plugins and continue with any manually installed version of the plugins.
   -on-error=[cleanup|abort|ask|run-cleanup-provisioner] If the build fails do: clean up (default), abort, ask, or run-cleanup-provisioner.
   -parallel-builds=1            Number of builds to run in parallel. 1 disables parallelization. 0 means no limit (Default: 0)
   -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.

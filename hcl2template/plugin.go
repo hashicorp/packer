@@ -50,7 +50,13 @@ func (cfg *PackerConfig) PluginRequirements() (plugingetter.Requirements, hcl.Di
 	return reqs, diags
 }
 
-func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
+func (cfg *PackerConfig) detectPluginBinaries(useLocalInstallations bool) hcl.Diagnostics {
+
+	if useLocalInstallations {
+		log.Print("[DEBUG] Running with plugin detection off; continuing with currently installed plugins.")
+		return nil
+	}
+
 	opts := plugingetter.ListInstallationsOptions{
 		FromFolders: cfg.parser.PluginConfig.KnownPluginFolders,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{

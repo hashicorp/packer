@@ -76,6 +76,7 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&ba.Force, "force", false, "")
 	flags.BoolVar(&ba.TimestampUi, "timestamp-ui", false, "")
 	flags.BoolVar(&ba.MachineReadable, "machine-readable", false, "")
+	flags.BoolVar(&ba.SkipPluginCheck, "skip-plugin-check", false, "")
 
 	flags.Int64Var(&ba.ParallelBuilds, "parallel-builds", 0, "")
 
@@ -88,9 +89,9 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 // BuildArgs represents a parsed cli line for a `packer build`
 type BuildArgs struct {
 	MetaArgs
-	Color, Debug, Force, TimestampUi, MachineReadable bool
-	ParallelBuilds                                    int64
-	OnError                                           string
+	Color, Debug, Force, TimestampUi, MachineReadable, SkipPluginCheck bool
+	ParallelBuilds                                                     int64
+	OnError                                                            string
 }
 
 func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {

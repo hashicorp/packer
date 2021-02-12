@@ -32,6 +32,7 @@ type InitializeOptions struct {
 	// When set, the execution of datasources will be skipped and the datasource will provide
 	// a output spec that will be used for validation only.
 	SkipDatasourcesExecution bool
+	SkipPluginRequirements   bool
 }
 
 // The Handler handles all Packer things. This interface reflects the Packer

@@ -298,7 +298,7 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 	var diags hcl.Diagnostics
 
 	// enable packer to start plugins requested in required_plugins.
-	moreDiags := cfg.detectPluginBinaries()
+	moreDiags := cfg.detectPluginBinaries(opts.SkipPluginRequirements)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return diags
