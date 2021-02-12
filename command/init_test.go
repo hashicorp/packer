@@ -1,21 +1,24 @@
 package command
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"sort"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
 	"golang.org/x/mod/sumdb/dirhash"
 )
 
 type testCaseInit struct {
-	checkSkip                             func(*testing.T)
 	name                                  string
+	setup                                 []func(*testing.T, testCaseInit)
 	Meta                                  Meta
 	inPluginFolder                        map[string]string
 	expectedPackerConfigDirHashBeforeInit string
@@ -54,13 +57,13 @@ func TestInitCommand_Run(t *testing.T) {
 
 	tests := []testCaseInit{
 		{
-			nil,
 			// here we pre-write plugins with valid checksums, Packer will
 			// see those as valid installations it did.
 			// the directory hash before and after init should be the same,
 			// that's a no-op. This also should do no GH query, so it is best
 			// to always run it.
 			"already-installed-no-op",
+			nil,
 			testMetaFile(t),
 			map[string]string{
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
@@ -94,15 +97,13 @@ func TestInitCommand_Run(t *testing.T) {
 			},
 		},
 		{
-			func(t *testing.T) {
-				if os.Getenv(acctest.TestEnvVar) == "" {
-					t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
-				}
-			},
 			// here we pre-write plugins with valid checksums, Packer will
 			// see those as valid installations it did.
 			// But because we require version 0.2.19, we will upgrade.
 			"already-installed-upgrade",
+			[]func(t *testing.T, tc testCaseInit){
+				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
+			},
 			testMetaFile(t),
 			map[string]string{
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
@@ -171,12 +172,10 @@ func TestInitCommand_Run(t *testing.T) {
 			},
 		},
 		{
-			func(t *testing.T) {
-				if os.Getenv(acctest.TestEnvVar) == "" {
-					t.Skipf("Acceptance test skipped unless env '%s' set", acctest.TestEnvVar)
-				}
-			},
 			"release-with-no-binary",
+			[]func(t *testing.T, tc testCaseInit){
+				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
+			},
 			testMetaFile(t),
 			nil,
 			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
@@ -198,37 +197,137 @@ func TestInitCommand_Run(t *testing.T) {
 			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 			nil,
 		},
+		{
+			"manually-installed-single-component-plugin-works",
+			[]func(t *testing.T, tc testCaseInit){
+				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
+				initTestGoGetPlugin{
+					Src: "https://github.com/azr/packer-provisioner-comment/releases/download/v1.0.0/" +
+						"packer-provisioner-comment_v1.0.0_" + runtime.GOOS + "_" + runtime.GOARCH + ".zip",
+					Dst: filepath.Join(cfg.dir("4_pkr_config"), defaultConfigDir, "plugins"),
+				}.fn,
+			},
+			testMetaFile(t),
+			nil,
+			map[string]string{
+				"darwin":  "h1:nVebbXToeehPUASRbvV9M4qaA9+UgoR5AMp7LjTrSBk=",
+				"linux":   "h1:/U5vdeMtOpRKNu0ld8+qf4t6WC+BsfCQ6JRo9Dh/khI=",
+				"windows": "h1:0nkdNCjtTHTgBNkzVKG++/VYmWAvq/o236GGTxrIf/Q=",
+			}[runtime.GOOS],
+			map[string]string{
+				`source.pkr.hcl`: `
+				source "null" "test" {
+					communicator = "none"
+				}
+				`,
+				`build.pkr.hcl`: `
+				build {
+					sources = ["source.null.test"]
+					provisioner "comment" {
+						comment		= "Begin ¡"
+						ui			= true
+						bubble_text	= true
+					}
+				}
+				`,
+			},
+			cfg.dir("4_pkr_config"),
+			cfg.dir("4_pkr_user_folder"),
+			0,
+			nil,
+			map[string]string{
+				"darwin":  "h1:nVebbXToeehPUASRbvV9M4qaA9+UgoR5AMp7LjTrSBk=",
+				"linux":   "h1:/U5vdeMtOpRKNu0ld8+qf4t6WC+BsfCQ6JRo9Dh/khI=",
+				"windows": "h1:0nkdNCjtTHTgBNkzVKG++/VYmWAvq/o236GGTxrIf/Q=",
+			}[runtime.GOOS],
+			[]func(*testing.T, testCaseInit){
+				testBuild{want: 0}.fn,
+			},
+		},
+		{
+			"manually-installed-single-component-plugin-old-api-fails",
+			[]func(t *testing.T, tc testCaseInit){
+				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
+				initTestGoGetPlugin{
+					Src: "https://github.com/azr/packer-provisioner-comment/releases/download/v0.0.0/" +
+						"packer-provisioner-comment_v0.0.0_" + runtime.GOOS + "_" + runtime.GOARCH + ".zip",
+					Dst: filepath.Join(cfg.dir("5_pkr_config"), defaultConfigDir, "plugins"),
+				}.fn,
+			},
+			testMetaFile(t),
+			nil,
+			map[string]string{
+				"darwin":  "h1:gW4gzpDXeu3cDrXgHJj9iWAN7Pyak626Gq8Bu2LG1kY=",
+				"linux":   "h1:wQ2H5+J7VXwQzqR9DgpWtjhw9OVEFbcKQL6dgm/+zwo=",
+				"windows": "h1:BqRdW3c5H1PZ2Q4DOaKWja21v3nDlY5Nn8kqahhHGSw=",
+			}[runtime.GOOS],
+			map[string]string{
+				`source.pkr.hcl`: `
+				source "null" "test" {
+					communicator = "none"
+				}
+				`,
+				`build.pkr.hcl`: `
+				build {
+					sources = ["source.null.test"]
+					provisioner "comment" {
+						comment		= "Begin ¡"
+						ui			= true
+						bubble_text	= true
+					}
+				}
+				`,
+			},
+			cfg.dir("5_pkr_config"),
+			cfg.dir("5_pkr_user_folder"),
+			0,
+			nil,
+			map[string]string{
+				"darwin":  "h1:gW4gzpDXeu3cDrXgHJj9iWAN7Pyak626Gq8Bu2LG1kY=",
+				"linux":   "h1:wQ2H5+J7VXwQzqR9DgpWtjhw9OVEFbcKQL6dgm/+zwo=",
+				"windows": "h1:BqRdW3c5H1PZ2Q4DOaKWja21v3nDlY5Nn8kqahhHGSw=",
+			}[runtime.GOOS],
+			[]func(*testing.T, testCaseInit){
+				testBuild{want: 1}.fn,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.checkSkip != nil {
-				tt.checkSkip(t)
+			log.Printf("starting %s", tt.name)
+			log.Printf("%#v", tt)
+			t.Cleanup(func() {
+				_ = os.RemoveAll(tt.packerConfigDir)
+			})
+			t.Cleanup(func() {
+				_ = os.RemoveAll(tt.packerUserFolder)
+			})
+			os.Setenv("PACKER_CONFIG_DIR", tt.packerConfigDir)
+			for _, init := range tt.setup {
+				init(t, tt)
 				if t.Skipped() {
 					return
 				}
 			}
-			log.Printf("starting %s", tt.name)
 			createFiles(tt.packerConfigDir, tt.inPluginFolder)
-			t.Cleanup(func() {
-				_ = os.RemoveAll(tt.packerConfigDir)
-			})
 			createFiles(tt.packerUserFolder, tt.inConfigFolder)
-			t.Cleanup(func() {
-				_ = os.RemoveAll(tt.packerUserFolder)
-			})
 
 			hash, err := dirhash.HashDir(tt.packerConfigDir, "", dirhash.DefaultHash)
 			if err != nil {
 				t.Fatalf("HashDir: %v", err)
 			}
 			if diff := cmp.Diff(tt.expectedPackerConfigDirHashBeforeInit, hash); diff != "" {
-				t.Errorf("unexpected dir hash before init: %s", diff)
+				t.Errorf("unexpected dir hash before init: +found -expected %s", diff)
 			}
 
 			args := []string{tt.packerUserFolder}
 
 			c := &InitCommand{
 				Meta: tt.Meta,
+			}
+
+			if err := c.CoreConfig.Components.PluginConfig.Discover(); err != nil {
+				t.Fatalf("Failed to discover plugins: %s", err)
 			}
 
 			c.CoreConfig.Components.PluginConfig.KnownPluginFolders = []string{tt.packerConfigDir}
@@ -262,5 +361,25 @@ func TestInitCommand_Run(t *testing.T) {
 				})
 			}
 		})
+	}
+}
+
+type skipInitTestUnlessEnVar string
+
+func (key skipInitTestUnlessEnVar) fn(t *testing.T, tc testCaseInit) {
+	// always run acc tests for now
+	// if os.Getenv(string(key)) == "" {
+	// 	t.Skipf("Acceptance test skipped unless env '%s' set", key)
+	// }
+}
+
+type initTestGoGetPlugin struct {
+	Src string
+	Dst string
+}
+
+func (opts initTestGoGetPlugin) fn(t *testing.T, _ testCaseInit) {
+	if _, err := getter.Get(context.Background(), opts.Dst, opts.Src); err != nil {
+		t.Fatalf("get: %v", err)
 	}
 }
