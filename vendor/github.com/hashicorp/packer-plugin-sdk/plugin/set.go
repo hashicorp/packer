@@ -13,7 +13,7 @@ import (
 )
 
 // Use this name to make the name of the plugin in the packer template match
-// the multi-component plugin suffix, instead of requiring a second part.
+// the multiplugin suffix, instead of requiring a second part.
 // For example, calling :
 //  pps.RegisterProvisioner(plugin.DEFAULT_NAME, new(CommentProvisioner))
 // On a plugin named `packer-plugin-foo`, will make the `foo` provisioner available
