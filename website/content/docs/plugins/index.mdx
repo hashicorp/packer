@@ -11,7 +11,7 @@ sidebar_title: Packer Plugins
 
 Packer Plugins allow new functionality to be added to Packer without modifying
 the core source code. Packer plugins are able to add new components to Packer,
-such as builders, provisioners, hooks, and more.
+such as builders, provisioners, post-processors, and data sources.
 
 This page documents how to install plugins.
 
@@ -27,19 +27,32 @@ plugin, please reach out to us so we can add your plugin to the website.
 Packer plugins are completely separate, standalone applications that the core
 of Packer starts and communicates with. Even the components that ship with the
 Packer core (core builders, provisioners, and post-processors) are implemented
-in a similar way and treated as plugins.
+in a similar way and run as though they are standalone plugins.
 
 These plugin applications aren't meant to be run manually. Instead, Packer core
-executes them as a sub-process, run as a sub-command (`packer plugin`) and
-communicates with them. For example, the Shell provisioner is actually run as
-`packer plugin packer-provisioner-shell`. The next time you run a Packer build,
+launches and communicates with them. The next time you run a Packer build,
 look at your process list and you should see a handful of `packer-` prefixed
-applications running.
+applications running. One of those applications is the core; the rest are
+plugins -- one plugin process is launched for each component used in a Packer
+build.
 
 ## Installing Plugins
 
+Currently, you do not need to install plugins for builder, provisioner, or
+post-processor components documented on the Packer website; these components
+ship with the Packer core and Packer automatically knows how to find and launch
+them. These instructions are for installing custom components that are not
+bundled with the Packer core.
+
+The below tabs reference "multi-component" and "single-component" plugins. If
+you are not sure what kind of plugin you are trying to install, the easiest way
+to find out is to check the name. If the name starts with `packer-plugin-`, then
+it is a multi-component plugin. If the name starts with a prefix that actually
+says the component type (e.g. `packer-provisioner-` or `packer-builder`), then
+it is a single-component plugin.
+
 <Tabs>
-<Tab heading="with Packer init (from Packer v1.7.0)">
+<Tab heading="Packer init (from Packer v1.7.0)">
 
 ~> **Note**: Only _multi-component plugin binaries_ -- that is plugins named
 packer-plugin-*, like the `packer-plugin-amazon` -- are expected to work with
@@ -48,15 +61,15 @@ types will keep on being detected but Packer cannot install them automatically.
 If a plugin you use has not been upgraded to use the multi-component plugin
 architecture, contact your maintainer to request an upgrade.
 
-## Installing Plugins
+### Create a required_plugins block
 
 1. Add a
-[`required_plugin`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
-block to your `packer` block. Each block will tell Packer what version(s) of a
-particular plugin can be installed. Make sure to set a correct [version
+[`required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
+block to your [packer block](/docs/templates/hcl_templates/blocks/packer). Each block will tell Packer what version(s) of a
+particular plugin can be installed. Make sure to set a valid [version
 constraint string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
 
-Here is an example `required_plugins` block :
+Here is an example `required_plugins` block:
 
   ```hcl
   packer {
@@ -91,18 +104,49 @@ Each plugin has two identifiers:
 Local names allow you to access the components of a plugin and must be unique
 per configuration.
 
-Here using the previous example if the required plugin `azr/myawesomecloud`
-defined an `ebs` builder, this builder will be made available by using a
-`myawesomecloud-ebs` source block :
+This is best explained using an example. In the above `required_plugins` block,
+we declared the local name "myawesomecloud" for the plugin `azr/myawesomecloud`.
+If the "myawesomecloud" plugin contains both an "ebs" builder and a "import"
+post-processor, then the builder will be accessed in a source block by using:
 
 ```hcl
-source "myawesomecloud-ebs" "example" {...}
+source "myawesomecloud-ebs" "example" {
+  // builder configuration...
+}
+```
+
+similarly, the import post-processor would be accessed by declaring the
+post-processor block:
+
+```hcl
+post-processor "myawesomecloud-import" {
+  // post-processor configuration...
+}
+```
+
+If we change the required_plugins block to use a different local name "foo":
+
+```hcl
+  required_plugins {
+    foo = {
+      version = ">= 2.7.0"
+      source = "azr/myawesomecloud"
+    }
+  }
+```
+
+Then we'd instead access that builder using the source:
+
+```hcl
+source "foo-ebs" "example" {
+  // builder configuration...
+}
 ```
 
 ## Source Addresses
 
-A plugin's source address is its global identifier. It also specifies the
-primary location where Packer can download it.
+A plugin's source address is its global identifier. It also tells Packer where
+to download it.
 
 Source addresses consist of three parts delimited by slashes (`/`), as
 follows:
@@ -111,11 +155,13 @@ follows:
 
 * **Hostname** (optional): The hostname of the location/service that
   distributes the plugin. If omitted, this defaults to
-  `github.com`, we recommend explicitly setting the hostname.
+  `github.com`, we recommend explicitly setting the hostname. Currently, the
+  only valid "hostname" is github.com, but we plan to eventually support plugins
+  downloaded from other domains.
 
 * **Namespace:** An organizational namespace within the specified host.
   This often is the organization that publishes the plugin. If omitted, this
-  defaults to `hashicorp`, we recommend explicitly setting the namespace.
+  defaults to `hashicorp`. We recommend explicitly setting the namespace.
 
 * **Type:** A short name for the platform or system the plugin manages. The
   type is usually the plugin's preferred local name.
@@ -123,14 +169,17 @@ follows:
 For example, the fictional `myawesomecloud` plugin could belong to the
 `hashicorp` namespace on `github.com`, so its `source` could be
 `github.com/hashicorp/myawesomecloud`, `hashicorp/myawesomecloud` or
-`myawesomecloud`.
+`myawesomecloud`. Note: the actual _repository_ that myawesomecloud comes from
+must always have the name format
+`www.github.com/hashicorp/packer-plugin-myawesomecloud`, but the
+`required_plugins` block omits the redundant `packer-plugin-` repository prefix
+for brevity.
 
 The source address with all three components given explicitly is called the
 plugin's _fully-qualified address_. You will see fully-qualified address in
 various outputs, like error messages, but in most cases a simplified display
-version is used. This display version omits the source host when it is the
-public registry, so you may see the shortened version `"myawesomecloud"` instead
-of `"github.com/hashicorp/myawesomecloud"`.
+version is used. Therefore you may see the shortened version `"myawesomecloud"`
+instead of `"github.com/hashicorp/myawesomecloud"`.
 
 -> **Note:** We recommend using explicit source addresses for all plugins.
 
@@ -159,7 +208,7 @@ Packer will error if you set the `packer-plugin-` prefix in a `source`. This
 will avoid conflicting with other plugins for other tools, like Terraform.
 
 </Tab>
-<Tab heading="manually">
+<Tab heading="manually (multi-component plugin)">
 
 The easiest way to manually install a plugin is to name it correctly, then place
 it in the proper directory. To name a plugin correctly, make sure the binary is
@@ -203,6 +252,9 @@ The valid types for plugins are:
 
 - `provisioner` - A provisioner to install software on images created by a
   builder.
+
+</Tab>
+<Tab heading="manually (single-component plugin)">
 
 </Tab>
 </Tabs>
