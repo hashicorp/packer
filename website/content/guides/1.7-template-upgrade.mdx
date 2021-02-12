@@ -29,15 +29,15 @@ this now you can still install plugins manually like the old times.
 ### When to upgrade my template?
 
 The `packer init` can only install plugins that are upgraded to use our brand new [Plugin SDK](https://github.com/hashicorp/packer-plugin-sdk),
-and that fits in the requirements of a multi-component plugin. The easiest way to know if the plugin you use fits those
+and therefore compatible with our API version v5.0. The easiest way to know if the plugin you use fits those
 requirements, is by looking for SDK migration in their CHANGELOG, and noticing if the plugin repository is named as
 `packer-plugin-*` (e.g. `packer-plugin-comment`).
-If the plugin you use is a multi-component plugin, you are ready to upgrade your template.
+If the plugin you use is upgraded, you are ready to upgrade your template.
 
-#### The plugin I need is not a multi-component plugin yet
+#### The plugin I need is not upgraded to API v5.0
 
-With the SDK released at the same time as the `init` command, plugin users may face a gap between the release and the
-plugin upgrade. Maintainers will have to upgrade their plugins and the process is a little bit more complicated than this one.
+With the SDK released at the same time as the `init` command, plugin users may face a gap between the release and
+plugins upgrade. Maintainers will have to upgrade their plugins, and the process is a little more complicated than this one.
 The Packer team is getting in touch with all currently known plugin maintainers to provide support during their upgrade process.
 
 If you are willing to upgrade your template but found out that the plugin you are using hasn't been upgraded yet,
@@ -46,10 +46,10 @@ we suggest you reach out to the plugin maintainers and ask for an upgrade.
 Check it out the table below to better understand what behavior to expect from a Packer version with the current state
 of your template, and the plugins you are using.
 
-| Single Component Plugin - API v4 | Single Component Plugin API v5.0 | Multi Component Plugin API v5.0 | Packer Version |
-| -------------------------------- | -------------------------------- | --------------------------------| -------------- |
-| Manual Installation | Not Compatible | Not Compatible | v1.5.0 to v1.6.6|
-| Not Compatible | Manual and `packer init` Installation  | Manual and `packer init`  Installation | v1.7.6|
+| Single Component Plugin - API v4 | Single Component Plugin API v5.0       | Multi Component Plugin API v5.0        | Packer Version   |
+| -------------------------------- | -------------------------------------- | ---------------------------------------| ---------------- |
+| Manual Installation              | Not Compatible                         | Not Compatible                         | v1.5.0 to v1.6.6 |
+| Not Compatible                   | Manual and `packer init` Installation  | Manual and `packer init`  Installation | v1.7.0           |
 
 ### How to upgrade my template
 
