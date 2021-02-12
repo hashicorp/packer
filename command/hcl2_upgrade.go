@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	hcl2shim "github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	"github.com/hashicorp/packer-plugin-sdk/template"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/mapstructure"
 	"github.com/posener/complete"
 	"github.com/zclconf/go-cty/cty"
@@ -94,7 +95,6 @@ const (
 # a build block invokes sources and runs provisioning steps on them. The
 # documentation for build blocks can be found here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
-build {
 `
 
 	amazonAmiDataHeader = `
@@ -120,6 +120,11 @@ var (
 	timestamp               = false
 )
 
+type BlockParser interface {
+	Parse(*template.Template) error
+	Write(*bytes.Buffer)
+}
+
 func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs) int {
 	var output io.Writer
 	if err := os.MkdirAll(filepath.Dir(cla.OutputFile), 0); err != nil {
@@ -134,9 +139,11 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 		return 1
 	}
 
-	if _, err := output.Write([]byte(hcl2UpgradeFileHeader)); err != nil {
-		c.Ui.Error(fmt.Sprintf("Failed to write to file: %v", err))
-		return 1
+	if cla.WithAnnotations {
+		if _, err := output.Write([]byte(hcl2UpgradeFileHeader)); err != nil {
+			c.Ui.Error(fmt.Sprintf("Failed to write to file: %v", err))
+			return 1
+		}
 	}
 
 	hdl, ret := c.GetConfigFromJSON(&cla.MetaArgs)
@@ -150,67 +157,31 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	}
 	tpl := core.Template
 
-	// OutPut Locals and Local blocks
-	localsContent := hclwrite.NewEmptyFile()
-	localsBody := localsContent.Body()
-	localsBody.AppendNewline()
-	localBody := localsBody.AppendNewBlock("locals", nil).Body()
+	// Parse blocks
 
-	localsOut := []byte{}
-
-	// Output variables section
-	variablesOut := []byte{}
-	variables := []*template.Variable{}
-	{
-		// sort variables to avoid map's randomness
-		for _, variable := range tpl.Variables {
-			variables = append(variables, variable)
-		}
-		sort.Slice(variables, func(i, j int) bool {
-			return variables[i].Key < variables[j].Key
-		})
+	packerBlock := &PackerParser{
+		WithAnnotations: cla.WithAnnotations,
+	}
+	if err := packerBlock.Parse(tpl); err != nil {
+		c.Ui.Error(err.Error())
+		return 1
 	}
 
-	hasLocals := false
-	for _, variable := range variables {
-		variablesContent := hclwrite.NewEmptyFile()
-		variablesBody := variablesContent.Body()
-		variablesBody.AppendNewline()
-		variableBody := variablesBody.AppendNewBlock("variable", []string{variable.Key}).Body()
-		variableBody.SetAttributeRaw("type", hclwrite.Tokens{&hclwrite.Token{Bytes: []byte("string")}})
-
-		if variable.Default != "" || !variable.Required {
-			variableBody.SetAttributeValue("default", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
-		}
-		sensitive := false
-		if isSensitiveVariable(variable.Key, tpl.SensitiveVariables) {
-			sensitive = true
-			variableBody.SetAttributeValue("sensitive", cty.BoolVal(true))
-		}
-		isLocal, out := variableTransposeTemplatingCalls(variablesContent.Bytes())
-		if isLocal {
-			if sensitive {
-				// Create Local block because this is sensitive
-				localContent := hclwrite.NewEmptyFile()
-				body := localContent.Body()
-				body.AppendNewline()
-				localBody := body.AppendNewBlock("local", []string{variable.Key}).Body()
-				localBody.SetAttributeValue("sensitive", cty.BoolVal(true))
-				localBody.SetAttributeValue("expression", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
-				localsOut = append(localsOut, transposeTemplatingCalls(localContent.Bytes())...)
-				localsVariableMap[variable.Key] = "local"
-				continue
-			}
-			localBody.SetAttributeValue(variable.Key, hcl2shim.HCL2ValueFromConfigValue(variable.Default))
-			localsVariableMap[variable.Key] = "locals"
-			hasLocals = true
-			continue
-		}
-		variablesOut = append(variablesOut, out...)
+	variables := &VariableParser{
+		WithAnnotations: cla.WithAnnotations,
+	}
+	if err := variables.Parse(tpl); err != nil {
+		c.Ui.Error(err.Error())
+		return 1
 	}
 
-	if hasLocals {
-		localsOut = append(localsOut, transposeTemplatingCalls(localsContent.Bytes())...)
+	locals := &LocalsParser{
+		LocalsOut:       variables.localsOut,
+		WithAnnotations: cla.WithAnnotations,
+	}
+	if err := locals.Parse(tpl); err != nil {
+		c.Ui.Error(err.Error())
+		return 1
 	}
 
 	builders := []*template.Builder{}
@@ -221,9 +192,12 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 		}
 	}
 
-	// Output amazon-ami data source section
-	amazonAmiOut, err := c.writeAmazonAmiDatasource(builders)
-	if err != nil {
+	amazonAmiDatasource := &AmazonAmiDatasourceParser{
+		Builders:        builders,
+		WithAnnotations: cla.WithAnnotations,
+	}
+	if err := amazonAmiDatasource.Parse(tpl); err != nil {
+		c.Ui.Error(err.Error())
 		return 1
 	}
 
@@ -231,236 +205,56 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 		return builders[i].Type+builders[i].Name < builders[j].Type+builders[j].Name
 	})
 
-	// Output sources section
-	sourcesOut := []byte{}
-	for i, builderCfg := range builders {
-		sourcesContent := hclwrite.NewEmptyFile()
-		body := sourcesContent.Body()
-
-		body.AppendNewline()
-		if !c.Meta.CoreConfig.Components.PluginConfig.Builders.Has(builderCfg.Type) {
-			c.Ui.Error(fmt.Sprintf("unknown builder type: %q\n", builderCfg.Type))
-			return 1
-		}
-		if builderCfg.Name == "" || builderCfg.Name == builderCfg.Type {
-			builderCfg.Name = fmt.Sprintf("autogenerated_%d", i+1)
-		}
-		builderCfg.Name = strings.ReplaceAll(strings.TrimSpace(builderCfg.Name), " ", "_")
-
-		sourceBody := body.AppendNewBlock("source", []string{builderCfg.Type, builderCfg.Name}).Body()
-
-		jsonBodyToHCL2Body(sourceBody, builderCfg.Config)
-
-		sourcesOut = append(sourcesOut, transposeTemplatingCalls(sourcesContent.Bytes())...)
+	sources := &SourceParser{
+		Builders:        builders,
+		BuilderPlugins:  c.Meta.CoreConfig.Components.PluginConfig.Builders,
+		WithAnnotations: cla.WithAnnotations,
+	}
+	if err := sources.Parse(tpl); err != nil {
+		c.Ui.Error(err.Error())
+		return 1
 	}
 
-	// Output build section
-	buildContent := hclwrite.NewEmptyFile()
-	buildBody := buildContent.Body()
-	if tpl.Description != "" {
-		buildBody.SetAttributeValue("description", cty.StringVal(tpl.Description))
-		buildBody.AppendNewline()
+	build := &BuildParser{
+		Builders:        builders,
+		WithAnnotations: cla.WithAnnotations,
+	}
+	if err := build.Parse(tpl); err != nil {
+		c.Ui.Error(err.Error())
+		return 1
 	}
 
-	sourceNames := []string{}
-	for _, builder := range builders {
-		sourceNames = append(sourceNames, fmt.Sprintf("source.%s.%s", builder.Type, builder.Name))
+	amazonSecretsDatasource := &AmazonSecretsDatasourceParser{
+		WithAnnotations: cla.WithAnnotations,
 	}
-	buildBody.SetAttributeValue("sources", hcl2shim.HCL2ValueFromConfigValue(sourceNames))
-	buildBody.AppendNewline()
-	buildOut := buildContent.Bytes()
-
-	// Output provisioners section
-	provisionersOut := []byte{}
-	for _, provisioner := range tpl.Provisioners {
-		buildBody.AppendNewline()
-		contentBytes := c.writeProvisioner("provisioner", provisioner)
-		provisionersOut = append(provisionersOut, transposeTemplatingCalls(contentBytes)...)
-	}
-
-	if tpl.CleanupProvisioner != nil {
-		buildBody.AppendNewline()
-		contentBytes := c.writeProvisioner("error-cleanup-provisioner", tpl.CleanupProvisioner)
-		provisionersOut = append(provisionersOut, transposeTemplatingCalls(contentBytes)...)
-	}
-
-	// Output post-processors section
-	postProcessorsOut := []byte{}
-	for _, pps := range tpl.PostProcessors {
-		postProcessorContent := hclwrite.NewEmptyFile()
-		body := postProcessorContent.Body()
-
-		switch len(pps) {
-		case 0:
-			continue
-		case 1:
-		default:
-			body = body.AppendNewBlock("post-processors", nil).Body()
-		}
-		for _, pp := range pps {
-			ppBody := body.AppendNewBlock("post-processor", []string{pp.Type}).Body()
-			if pp.KeepInputArtifact != nil {
-				ppBody.SetAttributeValue("keep_input_artifact", cty.BoolVal(*pp.KeepInputArtifact))
-			}
-			cfg := pp.Config
-			if len(pp.Except) > 0 {
-				cfg["except"] = pp.Except
-			}
-			if len(pp.Only) > 0 {
-				cfg["only"] = pp.Only
-			}
-			if pp.Name != "" && pp.Name != pp.Type {
-				cfg["name"] = pp.Name
-			}
-			jsonBodyToHCL2Body(ppBody, cfg)
-		}
-
-		postProcessorsOut = append(postProcessorsOut, transposeTemplatingCalls(postProcessorContent.Bytes())...)
-	}
-
-	// Output amazon-secretsmanager data source section
-	keys := make([]string, 0, len(amazonSecretsManagerMap))
-	for k := range amazonSecretsManagerMap {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	amazonSecretsDataOut := []byte{}
-	for _, dataSourceName := range keys {
-		datasourceContent := hclwrite.NewEmptyFile()
-		body := datasourceContent.Body()
-		body.AppendNewline()
-		datasourceBody := body.AppendNewBlock("data", []string{"amazon-secretsmanager", dataSourceName}).Body()
-		jsonBodyToHCL2Body(datasourceBody, amazonSecretsManagerMap[dataSourceName])
-		amazonSecretsDataOut = append(amazonSecretsDataOut, datasourceContent.Bytes()...)
+	if err := amazonSecretsDatasource.Parse(tpl); err != nil {
+		c.Ui.Error(err.Error())
+		return 1
 	}
 
 	// Write file
 	out := &bytes.Buffer{}
 
-	// Packer section
-	if tpl.MinVersion != "" {
-		out.Write([]byte(packerBlockHeader))
-		fileContent := hclwrite.NewEmptyFile()
-		body := fileContent.Body()
-		packerBody := body.AppendNewBlock("packer", nil).Body()
-		packerBody.SetAttributeValue("required_version", cty.StringVal(fmt.Sprintf(">= %s", tpl.MinVersion)))
-		out.Write(fileContent.Bytes())
+	blocks := map[int]BlockParser{
+		1: packerBlock,
+		2: variables,
+		3: amazonSecretsDatasource,
+		4: amazonAmiDatasource,
+		5: locals,
+		6: sources,
+		7: build,
+	}
+	for i := 1; i <= len(blocks); i++ {
+		blocks[i].Write(out)
 	}
 
-	if len(variablesOut) > 0 {
-		out.Write([]byte(inputVarHeader))
-		out.Write(variablesOut)
+	if _, err := output.Write(hclwrite.Format(out.Bytes())); err != nil {
+		c.Ui.Error(fmt.Sprintf("Failed to write to file: %v", err))
+		return 1
 	}
-
-	if len(amazonSecretsManagerMap) > 0 {
-		out.Write([]byte(amazonSecretsManagerDataHeader))
-		out.Write(amazonSecretsDataOut)
-	}
-
-	if len(amazonAmiOut) > 0 {
-		out.Write([]byte(amazonAmiDataHeader))
-		out.Write(amazonAmiOut)
-	}
-
-	if timestamp {
-		_, _ = out.Write([]byte("\n"))
-		fmt.Fprintln(out, `# "timestamp" template function replacement`)
-		fmt.Fprintln(out, `locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }`)
-	}
-
-	if len(localsOut) > 0 {
-		out.Write([]byte(localsVarHeader))
-		out.Write(localsOut)
-	}
-
-	out.Write([]byte(sourcesHeader))
-	out.Write(sourcesOut)
-
-	out.Write([]byte(buildHeader))
-	out.Write(buildOut)
-	out.Write(provisionersOut)
-	out.Write(postProcessorsOut)
-
-	_, _ = out.Write([]byte("}\n"))
-
-	_, _ = output.Write(hclwrite.Format(out.Bytes()))
 
 	c.Ui.Say(fmt.Sprintf("Successfully created %s ", cla.OutputFile))
-
 	return 0
-}
-
-func (c *HCL2UpgradeCommand) writeProvisioner(typeName string, provisioner *template.Provisioner) []byte {
-	provisionerContent := hclwrite.NewEmptyFile()
-	body := provisionerContent.Body()
-	block := body.AppendNewBlock(typeName, []string{provisioner.Type})
-	cfg := provisioner.Config
-	if len(provisioner.Except) > 0 {
-		cfg["except"] = provisioner.Except
-	}
-	if len(provisioner.Only) > 0 {
-		cfg["only"] = provisioner.Only
-	}
-	if provisioner.MaxRetries != "" {
-		cfg["max_retries"] = provisioner.MaxRetries
-	}
-	if provisioner.Timeout > 0 {
-		cfg["timeout"] = provisioner.Timeout.String()
-	}
-	jsonBodyToHCL2Body(block.Body(), cfg)
-	return provisionerContent.Bytes()
-}
-
-func (c *HCL2UpgradeCommand) writeAmazonAmiDatasource(builders []*template.Builder) ([]byte, error) {
-	amazonAmiOut := []byte{}
-	amazonAmiFilters := []map[string]interface{}{}
-	i := 1
-	for _, builder := range builders {
-		if strings.HasPrefix(builder.Type, "amazon-") {
-			if sourceAmiFilter, ok := builder.Config["source_ami_filter"]; ok {
-				sourceAmiFilterCfg := map[string]interface{}{}
-				if err := mapstructure.Decode(sourceAmiFilter, &sourceAmiFilterCfg); err != nil {
-					c.Ui.Error(fmt.Sprintf("Failed to write amazon-ami data source: %v", err))
-					return nil, err
-				}
-
-				duplicate := false
-				dataSourceName := fmt.Sprintf("autogenerated_%d", i)
-				for j, filter := range amazonAmiFilters {
-					if reflect.DeepEqual(filter, sourceAmiFilter) {
-						duplicate = true
-						dataSourceName = fmt.Sprintf("autogenerated_%d", j+1)
-						continue
-					}
-				}
-
-				// This is a hack...
-				// Use templating so that it could be correctly transformed later into a data resource
-				sourceAmiDataRef := fmt.Sprintf("{{ data `amazon-ami.%s.id` }}", dataSourceName)
-
-				if duplicate {
-					delete(builder.Config, "source_ami_filter")
-					builder.Config["source_ami"] = sourceAmiDataRef
-					continue
-				}
-
-				amazonAmiFilters = append(amazonAmiFilters, sourceAmiFilterCfg)
-				delete(builder.Config, "source_ami_filter")
-				builder.Config["source_ami"] = sourceAmiDataRef
-				i++
-
-				datasourceContent := hclwrite.NewEmptyFile()
-				body := datasourceContent.Body()
-				body.AppendNewline()
-				sourceBody := body.AppendNewBlock("data", []string{"amazon-ami", dataSourceName}).Body()
-				jsonBodyToHCL2Body(sourceBody, sourceAmiFilterCfg)
-				amazonAmiOut = append(amazonAmiOut, transposeTemplatingCalls(datasourceContent.Bytes())...)
-			}
-		}
-	}
-
-	return amazonAmiOut, nil
 }
 
 type UnhandleableArgumentError struct {
@@ -788,4 +582,442 @@ func (*HCL2UpgradeCommand) AutocompleteArgs() complete.Predictor {
 
 func (*HCL2UpgradeCommand) AutocompleteFlags() complete.Flags {
 	return complete.Flags{}
+}
+
+// Specific blocks parser responsible to parse and write the block
+
+type PackerParser struct {
+	WithAnnotations bool
+	out             []byte
+}
+
+func (p *PackerParser) Parse(tpl *template.Template) error {
+	if tpl.MinVersion != "" {
+		fileContent := hclwrite.NewEmptyFile()
+		body := fileContent.Body()
+		packerBody := body.AppendNewBlock("packer", nil).Body()
+		packerBody.SetAttributeValue("required_version", cty.StringVal(fmt.Sprintf(">= %s", tpl.MinVersion)))
+		p.out = fileContent.Bytes()
+	}
+	return nil
+}
+
+func (p *PackerParser) Write(out *bytes.Buffer) {
+	if len(p.out) > 0 {
+		if p.WithAnnotations {
+			out.Write([]byte(packerBlockHeader))
+		}
+		out.Write(p.out)
+	}
+}
+
+type VariableParser struct {
+	WithAnnotations bool
+	variablesOut    []byte
+	localsOut       []byte
+}
+
+func (p *VariableParser) Parse(tpl *template.Template) error {
+	// OutPut Locals and Local blocks
+	localsContent := hclwrite.NewEmptyFile()
+	localsBody := localsContent.Body()
+	localsBody.AppendNewline()
+	localBody := localsBody.AppendNewBlock("locals", nil).Body()
+
+	if len(p.variablesOut) == 0 {
+		p.variablesOut = []byte{}
+	}
+	if len(p.localsOut) == 0 {
+		p.localsOut = []byte{}
+	}
+
+	variables := []*template.Variable{}
+	{
+		// sort variables to avoid map's randomness
+		for _, variable := range tpl.Variables {
+			variables = append(variables, variable)
+		}
+		sort.Slice(variables, func(i, j int) bool {
+			return variables[i].Key < variables[j].Key
+		})
+	}
+
+	hasLocals := false
+	for _, variable := range variables {
+		variablesContent := hclwrite.NewEmptyFile()
+		variablesBody := variablesContent.Body()
+		variablesBody.AppendNewline()
+		variableBody := variablesBody.AppendNewBlock("variable", []string{variable.Key}).Body()
+		variableBody.SetAttributeRaw("type", hclwrite.Tokens{&hclwrite.Token{Bytes: []byte("string")}})
+
+		if variable.Default != "" || !variable.Required {
+			variableBody.SetAttributeValue("default", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
+		}
+		sensitive := false
+		if isSensitiveVariable(variable.Key, tpl.SensitiveVariables) {
+			sensitive = true
+			variableBody.SetAttributeValue("sensitive", cty.BoolVal(true))
+		}
+		isLocal, out := variableTransposeTemplatingCalls(variablesContent.Bytes())
+		if isLocal {
+			if sensitive {
+				// Create Local block because this is sensitive
+				localContent := hclwrite.NewEmptyFile()
+				body := localContent.Body()
+				body.AppendNewline()
+				localBody := body.AppendNewBlock("local", []string{variable.Key}).Body()
+				localBody.SetAttributeValue("sensitive", cty.BoolVal(true))
+				localBody.SetAttributeValue("expression", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
+				p.localsOut = append(p.localsOut, transposeTemplatingCalls(localContent.Bytes())...)
+				localsVariableMap[variable.Key] = "local"
+				continue
+			}
+			localBody.SetAttributeValue(variable.Key, hcl2shim.HCL2ValueFromConfigValue(variable.Default))
+			localsVariableMap[variable.Key] = "locals"
+			hasLocals = true
+			continue
+		}
+		p.variablesOut = append(p.variablesOut, out...)
+	}
+
+	if hasLocals {
+		p.localsOut = append(p.localsOut, transposeTemplatingCalls(localsContent.Bytes())...)
+	}
+	return nil
+}
+
+func (p *VariableParser) Write(out *bytes.Buffer) {
+	if len(p.variablesOut) > 0 {
+		if p.WithAnnotations {
+			out.Write([]byte(inputVarHeader))
+		}
+		out.Write(p.variablesOut)
+	}
+}
+
+type LocalsParser struct {
+	WithAnnotations bool
+	LocalsOut       []byte
+}
+
+func (p *LocalsParser) Parse(tpl *template.Template) error {
+	// Locals where parsed with Variables
+	return nil
+}
+
+func (p *LocalsParser) Write(out *bytes.Buffer) {
+	if timestamp {
+		_, _ = out.Write([]byte("\n"))
+		if p.WithAnnotations {
+			fmt.Fprintln(out, `# "timestamp" template function replacement`)
+		}
+		fmt.Fprintln(out, `locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }`)
+	}
+	if len(p.LocalsOut) > 0 {
+		if p.WithAnnotations {
+			out.Write([]byte(localsVarHeader))
+		}
+		out.Write(p.LocalsOut)
+	}
+}
+
+type AmazonSecretsDatasourceParser struct {
+	WithAnnotations bool
+	out             []byte
+}
+
+func (p *AmazonSecretsDatasourceParser) Parse(_ *template.Template) error {
+	if p.out == nil {
+		p.out = []byte{}
+	}
+
+	keys := make([]string, 0, len(amazonSecretsManagerMap))
+	for k := range amazonSecretsManagerMap {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, dataSourceName := range keys {
+		datasourceContent := hclwrite.NewEmptyFile()
+		body := datasourceContent.Body()
+		body.AppendNewline()
+		datasourceBody := body.AppendNewBlock("data", []string{"amazon-secretsmanager", dataSourceName}).Body()
+		jsonBodyToHCL2Body(datasourceBody, amazonSecretsManagerMap[dataSourceName])
+		p.out = append(p.out, datasourceContent.Bytes()...)
+	}
+
+	return nil
+}
+
+func (p *AmazonSecretsDatasourceParser) Write(out *bytes.Buffer) {
+	if len(p.out) > 0 {
+		if p.WithAnnotations {
+			out.Write([]byte(amazonSecretsManagerDataHeader))
+		}
+		out.Write(p.out)
+	}
+}
+
+type AmazonAmiDatasourceParser struct {
+	Builders        []*template.Builder
+	WithAnnotations bool
+	out             []byte
+}
+
+func (p *AmazonAmiDatasourceParser) Parse(_ *template.Template) error {
+	if p.out == nil {
+		p.out = []byte{}
+	}
+
+	amazonAmiFilters := []map[string]interface{}{}
+	i := 1
+	for _, builder := range p.Builders {
+		if strings.HasPrefix(builder.Type, "amazon-") {
+			if sourceAmiFilter, ok := builder.Config["source_ami_filter"]; ok {
+				sourceAmiFilterCfg := map[string]interface{}{}
+				if err := mapstructure.Decode(sourceAmiFilter, &sourceAmiFilterCfg); err != nil {
+					return fmt.Errorf("Failed to write amazon-ami data source: %v", err)
+				}
+
+				duplicate := false
+				dataSourceName := fmt.Sprintf("autogenerated_%d", i)
+				for j, filter := range amazonAmiFilters {
+					if reflect.DeepEqual(filter, sourceAmiFilter) {
+						duplicate = true
+						dataSourceName = fmt.Sprintf("autogenerated_%d", j+1)
+						continue
+					}
+				}
+
+				// This is a hack...
+				// Use templating so that it could be correctly transformed later into a data resource
+				sourceAmiDataRef := fmt.Sprintf("{{ data `amazon-ami.%s.id` }}", dataSourceName)
+
+				if duplicate {
+					delete(builder.Config, "source_ami_filter")
+					builder.Config["source_ami"] = sourceAmiDataRef
+					continue
+				}
+
+				amazonAmiFilters = append(amazonAmiFilters, sourceAmiFilterCfg)
+				delete(builder.Config, "source_ami_filter")
+				builder.Config["source_ami"] = sourceAmiDataRef
+				i++
+
+				datasourceContent := hclwrite.NewEmptyFile()
+				body := datasourceContent.Body()
+				body.AppendNewline()
+				sourceBody := body.AppendNewBlock("data", []string{"amazon-ami", dataSourceName}).Body()
+				jsonBodyToHCL2Body(sourceBody, sourceAmiFilterCfg)
+				p.out = append(p.out, transposeTemplatingCalls(datasourceContent.Bytes())...)
+			}
+		}
+	}
+	return nil
+}
+
+func (p *AmazonAmiDatasourceParser) Write(out *bytes.Buffer) {
+	if len(p.out) > 0 {
+		if p.WithAnnotations {
+			out.Write([]byte(amazonAmiDataHeader))
+		}
+		out.Write(p.out)
+	}
+}
+
+type SourceParser struct {
+	Builders        []*template.Builder
+	BuilderPlugins  packer.BuilderSet
+	WithAnnotations bool
+	out             []byte
+}
+
+func (p *SourceParser) Parse(tpl *template.Template) error {
+	if p.out == nil {
+		p.out = []byte{}
+	}
+	for i, builderCfg := range p.Builders {
+		sourcesContent := hclwrite.NewEmptyFile()
+		body := sourcesContent.Body()
+
+		body.AppendNewline()
+		if !p.BuilderPlugins.Has(builderCfg.Type) {
+			return fmt.Errorf("unknown builder type: %q\n", builderCfg.Type)
+		}
+		if builderCfg.Name == "" || builderCfg.Name == builderCfg.Type {
+			builderCfg.Name = fmt.Sprintf("autogenerated_%d", i+1)
+		}
+		builderCfg.Name = strings.ReplaceAll(strings.TrimSpace(builderCfg.Name), " ", "_")
+
+		sourceBody := body.AppendNewBlock("source", []string{builderCfg.Type, builderCfg.Name}).Body()
+
+		jsonBodyToHCL2Body(sourceBody, builderCfg.Config)
+
+		p.out = append(p.out, transposeTemplatingCalls(sourcesContent.Bytes())...)
+	}
+	return nil
+}
+
+func (p *SourceParser) Write(out *bytes.Buffer) {
+	if len(p.out) > 0 {
+		if p.WithAnnotations {
+			out.Write([]byte(sourcesHeader))
+		}
+		out.Write(p.out)
+	}
+}
+
+type BuildParser struct {
+	Builders        []*template.Builder
+	WithAnnotations bool
+
+	provisioners   BlockParser
+	postProcessors BlockParser
+	out            []byte
+}
+
+func (p *BuildParser) Parse(tpl *template.Template) error {
+	buildContent := hclwrite.NewEmptyFile()
+	buildBody := buildContent.Body()
+	if tpl.Description != "" {
+		buildBody.SetAttributeValue("description", cty.StringVal(tpl.Description))
+		buildBody.AppendNewline()
+	}
+
+	sourceNames := []string{}
+	for _, builder := range p.Builders {
+		sourceNames = append(sourceNames, fmt.Sprintf("source.%s.%s", builder.Type, builder.Name))
+	}
+	buildBody.SetAttributeValue("sources", hcl2shim.HCL2ValueFromConfigValue(sourceNames))
+	buildBody.AppendNewline()
+	p.out = buildContent.Bytes()
+
+	p.provisioners = &ProvisionerParser{
+		WithAnnotations: p.WithAnnotations,
+	}
+	if err := p.provisioners.Parse(tpl); err != nil {
+		return err
+	}
+
+	p.postProcessors = &PostProcessorParser{
+		WithAnnotations: p.WithAnnotations,
+	}
+	if err := p.postProcessors.Parse(tpl); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *BuildParser) Write(out *bytes.Buffer) {
+	if len(p.out) > 0 {
+		if p.WithAnnotations {
+			out.Write([]byte(buildHeader))
+		} else {
+			_, _ = out.Write([]byte("\n"))
+		}
+		_, _ = out.Write([]byte("build {\n"))
+		out.Write(p.out)
+		p.provisioners.Write(out)
+		p.postProcessors.Write(out)
+		_, _ = out.Write([]byte("}\n"))
+	}
+}
+
+type ProvisionerParser struct {
+	WithAnnotations bool
+	out             []byte
+}
+
+func (p *ProvisionerParser) Parse(tpl *template.Template) error {
+	if p.out == nil {
+		p.out = []byte{}
+	}
+	for _, provisioner := range tpl.Provisioners {
+		contentBytes := writeProvisioner("provisioner", provisioner)
+		p.out = append(p.out, transposeTemplatingCalls(contentBytes)...)
+	}
+
+	if tpl.CleanupProvisioner != nil {
+		contentBytes := writeProvisioner("error-cleanup-provisioner", tpl.CleanupProvisioner)
+		p.out = append(p.out, transposeTemplatingCalls(contentBytes)...)
+	}
+	return nil
+}
+
+func writeProvisioner(typeName string, provisioner *template.Provisioner) []byte {
+	provisionerContent := hclwrite.NewEmptyFile()
+	body := provisionerContent.Body()
+	block := body.AppendNewBlock(typeName, []string{provisioner.Type})
+	cfg := provisioner.Config
+	if len(provisioner.Except) > 0 {
+		cfg["except"] = provisioner.Except
+	}
+	if len(provisioner.Only) > 0 {
+		cfg["only"] = provisioner.Only
+	}
+	if provisioner.MaxRetries != "" {
+		cfg["max_retries"] = provisioner.MaxRetries
+	}
+	if provisioner.Timeout > 0 {
+		cfg["timeout"] = provisioner.Timeout.String()
+	}
+	body.AppendNewline()
+	jsonBodyToHCL2Body(block.Body(), cfg)
+	return provisionerContent.Bytes()
+}
+
+func (p *ProvisionerParser) Write(out *bytes.Buffer) {
+	if len(p.out) > 0 {
+		out.Write(p.out)
+	}
+}
+
+type PostProcessorParser struct {
+	WithAnnotations bool
+	out             []byte
+}
+
+func (p *PostProcessorParser) Parse(tpl *template.Template) error {
+	if p.out == nil {
+		p.out = []byte{}
+	}
+	for _, pps := range tpl.PostProcessors {
+		postProcessorContent := hclwrite.NewEmptyFile()
+		body := postProcessorContent.Body()
+
+		switch len(pps) {
+		case 0:
+			continue
+		case 1:
+		default:
+			body = body.AppendNewBlock("post-processors", nil).Body()
+		}
+		for _, pp := range pps {
+			ppBody := body.AppendNewBlock("post-processor", []string{pp.Type}).Body()
+			if pp.KeepInputArtifact != nil {
+				ppBody.SetAttributeValue("keep_input_artifact", cty.BoolVal(*pp.KeepInputArtifact))
+			}
+			cfg := pp.Config
+			if len(pp.Except) > 0 {
+				cfg["except"] = pp.Except
+			}
+			if len(pp.Only) > 0 {
+				cfg["only"] = pp.Only
+			}
+			if pp.Name != "" && pp.Name != pp.Type {
+				cfg["name"] = pp.Name
+			}
+			jsonBodyToHCL2Body(ppBody, cfg)
+		}
+
+		p.out = append(p.out, transposeTemplatingCalls(postProcessorContent.Bytes())...)
+	}
+	return nil
+}
+
+func (p *PostProcessorParser) Write(out *bytes.Buffer) {
+	if len(p.out) > 0 {
+		out.Write(p.out)
+	}
 }
