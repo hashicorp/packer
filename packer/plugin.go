@@ -238,8 +238,8 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 	return res, nil
 }
 
-// DiscoverMultiPlugin takes the description from a multiplugin binary and
-// makes the plugins available to use in Packer. Each plugin found in the
+// DiscoverMultiPlugin takes the description from a multi-component plugin
+// binary and makes the plugins available to use in Packer. Each plugin found in the
 // binary will be addressable using `${pluginName}-${builderName}` for example.
 // pluginName could be manually set. It usually is a cloud name like amazon.
 // pluginName can be extrapolated from the filename of the binary; so

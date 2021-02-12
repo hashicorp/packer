@@ -184,7 +184,7 @@ func generateFakePlugins(dirname string, pluginNames []string) (string, []string
 }
 
 // TestHelperProcess isn't a real test. It's used as a helper process
-// for multiplugin-binary tests.
+// for multi-component plugin tests.
 func TestHelperPlugins(t *testing.T) {
 	if os.Getenv("PKR_WANT_TEST_PLUGINS") != "1" {
 		return
@@ -265,7 +265,7 @@ func helperCommand(t *testing.T, s ...string) []string {
 }
 
 func createMockPlugins(t *testing.T, plugins map[string]pluginsdk.Set) {
-	pluginDir, err := tmp.Dir("pkr-multiplugin-test-*")
+	pluginDir, err := tmp.Dir("pkr-multi-component-plugin-test-*")
 	{
 		// create an exectutable file with a `sh` sheebang
 		// this file will look like:
@@ -275,7 +275,7 @@ func createMockPlugins(t *testing.T, plugins map[string]pluginsdk.Set) {
 		// $@ just passes all passed arguments
 		// This will allow to run the fake plugin from go tests which in turn
 		// will run go tests callback to `TestHelperPlugins`, this one will be
-		// transparently calling our mock multiplugins `mockPlugins`.
+		// transparently calling our mock multi-component plugins `mockPlugins`.
 		if err != nil {
 			t.Fatal(err)
 		}
