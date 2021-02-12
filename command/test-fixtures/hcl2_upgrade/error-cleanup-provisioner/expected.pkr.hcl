@@ -28,7 +28,9 @@ build {
   provisioner "shell-local" {
     inline = ["exit 2"]
   }
+
   error-cleanup-provisioner "shell-local" {
     inline = ["echo 'rubber ducky'> ducky.txt"]
   }
+
 }
