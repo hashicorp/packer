@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"io"
 	"os"
 	"path/filepath"
@@ -16,6 +15,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	hcl2shim "github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	"github.com/hashicorp/packer-plugin-sdk/template"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/mapstructure"
 	"github.com/posener/complete"
 	"github.com/zclconf/go-cty/cty"
@@ -160,7 +160,7 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	// Parse blocks
 
 	packerBlock := &PackerParser{
-		withAnnotations: cla.WithAnnotations,
+		WithAnnotations: cla.WithAnnotations,
 	}
 	if err := packerBlock.Parse(tpl); err != nil {
 		c.Ui.Error(err.Error())
@@ -168,7 +168,7 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	}
 
 	variables := &VariableParser{
-		withAnnotations: cla.WithAnnotations,
+		WithAnnotations: cla.WithAnnotations,
 	}
 	if err := variables.Parse(tpl); err != nil {
 		c.Ui.Error(err.Error())
@@ -177,7 +177,7 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 
 	locals := &LocalsParser{
 		LocalsOut:       variables.localsOut,
-		withAnnotations: cla.WithAnnotations,
+		WithAnnotations: cla.WithAnnotations,
 	}
 	if err := locals.Parse(tpl); err != nil {
 		c.Ui.Error(err.Error())
@@ -193,8 +193,8 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	}
 
 	amazonAmiDatasource := &AmazonAmiDatasourceParser{
-		builders:        builders,
-		withAnnotations: cla.WithAnnotations,
+		Builders:        builders,
+		WithAnnotations: cla.WithAnnotations,
 	}
 	if err := amazonAmiDatasource.Parse(tpl); err != nil {
 		c.Ui.Error(err.Error())
@@ -208,7 +208,7 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	sources := &SourceParser{
 		Builders:        builders,
 		BuilderPlugins:  c.Meta.CoreConfig.Components.PluginConfig.Builders,
-		withAnnotations: cla.WithAnnotations,
+		WithAnnotations: cla.WithAnnotations,
 	}
 	if err := sources.Parse(tpl); err != nil {
 		c.Ui.Error(err.Error())
@@ -217,7 +217,7 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 
 	build := &BuildParser{
 		Builders:        builders,
-		withAnnotations: cla.WithAnnotations,
+		WithAnnotations: cla.WithAnnotations,
 	}
 	if err := build.Parse(tpl); err != nil {
 		c.Ui.Error(err.Error())
@@ -225,7 +225,7 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	}
 
 	amazonSecretsDatasource := &AmazonSecretsDatasourceParser{
-		withAnnotations: cla.WithAnnotations,
+		WithAnnotations: cla.WithAnnotations,
 	}
 	if err := amazonSecretsDatasource.Parse(tpl); err != nil {
 		c.Ui.Error(err.Error())
@@ -584,11 +584,11 @@ func (*HCL2UpgradeCommand) AutocompleteFlags() complete.Flags {
 	return complete.Flags{}
 }
 
-// Specific blocks parser
+// Specific blocks parser responsible to parse and write the block
 
 type PackerParser struct {
+	WithAnnotations bool
 	out             []byte
-	withAnnotations bool
 }
 
 func (p *PackerParser) Parse(tpl *template.Template) error {
@@ -604,7 +604,7 @@ func (p *PackerParser) Parse(tpl *template.Template) error {
 
 func (p *PackerParser) Write(out *bytes.Buffer) {
 	if len(p.out) > 0 {
-		if p.withAnnotations {
+		if p.WithAnnotations {
 			out.Write([]byte(packerBlockHeader))
 		}
 		out.Write(p.out)
@@ -612,9 +612,9 @@ func (p *PackerParser) Write(out *bytes.Buffer) {
 }
 
 type VariableParser struct {
+	WithAnnotations bool
 	variablesOut    []byte
 	localsOut       []byte
-	withAnnotations bool
 }
 
 func (p *VariableParser) Parse(tpl *template.Template) error {
@@ -688,7 +688,7 @@ func (p *VariableParser) Parse(tpl *template.Template) error {
 
 func (p *VariableParser) Write(out *bytes.Buffer) {
 	if len(p.variablesOut) > 0 {
-		if p.withAnnotations {
+		if p.WithAnnotations {
 			out.Write([]byte(inputVarHeader))
 		}
 		out.Write(p.variablesOut)
@@ -696,8 +696,8 @@ func (p *VariableParser) Write(out *bytes.Buffer) {
 }
 
 type LocalsParser struct {
+	WithAnnotations bool
 	LocalsOut       []byte
-	withAnnotations bool
 }
 
 func (p *LocalsParser) Parse(tpl *template.Template) error {
@@ -708,13 +708,13 @@ func (p *LocalsParser) Parse(tpl *template.Template) error {
 func (p *LocalsParser) Write(out *bytes.Buffer) {
 	if timestamp {
 		_, _ = out.Write([]byte("\n"))
-		if p.withAnnotations {
+		if p.WithAnnotations {
 			fmt.Fprintln(out, `# "timestamp" template function replacement`)
 		}
 		fmt.Fprintln(out, `locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }`)
 	}
 	if len(p.LocalsOut) > 0 {
-		if p.withAnnotations {
+		if p.WithAnnotations {
 			out.Write([]byte(localsVarHeader))
 		}
 		out.Write(p.LocalsOut)
@@ -722,8 +722,8 @@ func (p *LocalsParser) Write(out *bytes.Buffer) {
 }
 
 type AmazonSecretsDatasourceParser struct {
+	WithAnnotations bool
 	out             []byte
-	withAnnotations bool
 }
 
 func (p *AmazonSecretsDatasourceParser) Parse(_ *template.Template) error {
@@ -751,7 +751,7 @@ func (p *AmazonSecretsDatasourceParser) Parse(_ *template.Template) error {
 
 func (p *AmazonSecretsDatasourceParser) Write(out *bytes.Buffer) {
 	if len(p.out) > 0 {
-		if p.withAnnotations {
+		if p.WithAnnotations {
 			out.Write([]byte(amazonSecretsManagerDataHeader))
 		}
 		out.Write(p.out)
@@ -759,9 +759,9 @@ func (p *AmazonSecretsDatasourceParser) Write(out *bytes.Buffer) {
 }
 
 type AmazonAmiDatasourceParser struct {
+	Builders        []*template.Builder
+	WithAnnotations bool
 	out             []byte
-	builders        []*template.Builder
-	withAnnotations bool
 }
 
 func (p *AmazonAmiDatasourceParser) Parse(_ *template.Template) error {
@@ -771,7 +771,7 @@ func (p *AmazonAmiDatasourceParser) Parse(_ *template.Template) error {
 
 	amazonAmiFilters := []map[string]interface{}{}
 	i := 1
-	for _, builder := range p.builders {
+	for _, builder := range p.Builders {
 		if strings.HasPrefix(builder.Type, "amazon-") {
 			if sourceAmiFilter, ok := builder.Config["source_ami_filter"]; ok {
 				sourceAmiFilterCfg := map[string]interface{}{}
@@ -818,7 +818,7 @@ func (p *AmazonAmiDatasourceParser) Parse(_ *template.Template) error {
 
 func (p *AmazonAmiDatasourceParser) Write(out *bytes.Buffer) {
 	if len(p.out) > 0 {
-		if p.withAnnotations {
+		if p.WithAnnotations {
 			out.Write([]byte(amazonAmiDataHeader))
 		}
 		out.Write(p.out)
@@ -826,11 +826,10 @@ func (p *AmazonAmiDatasourceParser) Write(out *bytes.Buffer) {
 }
 
 type SourceParser struct {
-	Builders       []*template.Builder
-	BuilderPlugins packer.BuilderSet
-
+	Builders        []*template.Builder
+	BuilderPlugins  packer.BuilderSet
+	WithAnnotations bool
 	out             []byte
-	withAnnotations bool
 }
 
 func (p *SourceParser) Parse(tpl *template.Template) error {
@@ -861,7 +860,7 @@ func (p *SourceParser) Parse(tpl *template.Template) error {
 
 func (p *SourceParser) Write(out *bytes.Buffer) {
 	if len(p.out) > 0 {
-		if p.withAnnotations {
+		if p.WithAnnotations {
 			out.Write([]byte(sourcesHeader))
 		}
 		out.Write(p.out)
@@ -869,13 +868,12 @@ func (p *SourceParser) Write(out *bytes.Buffer) {
 }
 
 type BuildParser struct {
-	Builders []*template.Builder
+	Builders        []*template.Builder
+	WithAnnotations bool
 
 	provisioners   BlockParser
 	postProcessors BlockParser
-
-	out             []byte
-	withAnnotations bool
+	out            []byte
 }
 
 func (p *BuildParser) Parse(tpl *template.Template) error {
@@ -895,14 +893,14 @@ func (p *BuildParser) Parse(tpl *template.Template) error {
 	p.out = buildContent.Bytes()
 
 	p.provisioners = &ProvisionerParser{
-		withAnnotations: p.withAnnotations,
+		WithAnnotations: p.WithAnnotations,
 	}
 	if err := p.provisioners.Parse(tpl); err != nil {
 		return err
 	}
 
 	p.postProcessors = &PostProcessorParser{
-		withAnnotations: p.withAnnotations,
+		WithAnnotations: p.WithAnnotations,
 	}
 	if err := p.postProcessors.Parse(tpl); err != nil {
 		return err
@@ -913,7 +911,7 @@ func (p *BuildParser) Parse(tpl *template.Template) error {
 
 func (p *BuildParser) Write(out *bytes.Buffer) {
 	if len(p.out) > 0 {
-		if p.withAnnotations {
+		if p.WithAnnotations {
 			out.Write([]byte(buildHeader))
 		} else {
 			_, _ = out.Write([]byte("\n"))
@@ -927,8 +925,8 @@ func (p *BuildParser) Write(out *bytes.Buffer) {
 }
 
 type ProvisionerParser struct {
+	WithAnnotations bool
 	out             []byte
-	withAnnotations bool
 }
 
 func (p *ProvisionerParser) Parse(tpl *template.Template) error {
@@ -976,8 +974,8 @@ func (p *ProvisionerParser) Write(out *bytes.Buffer) {
 }
 
 type PostProcessorParser struct {
+	WithAnnotations bool
 	out             []byte
-	withAnnotations bool
 }
 
 func (p *PostProcessorParser) Parse(tpl *template.Template) error {
