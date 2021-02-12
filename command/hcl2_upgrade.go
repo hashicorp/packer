@@ -292,14 +292,9 @@ func transposeTemplatingCalls(s []byte) []byte {
 	}
 
 	str := &bytes.Buffer{}
-	v := struct {
-		HTTPIP   string
-		HTTPPort string
-	}{
-		HTTPIP:   "{{ .HTTPIP }}",
-		HTTPPort: "{{ .HTTPPort }}",
-	}
-	if err := tpl.Execute(str, v); err != nil {
+	// PASSTHROUGHS is a map of variable-specific golang text template fields
+	// that should remain in the text template format.
+	if err := tpl.Execute(str, PASSTHROUGHS); err != nil {
 		return fallbackReturn(err)
 	}
 
@@ -453,14 +448,9 @@ func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
 	}
 
 	str := &bytes.Buffer{}
-	v := struct {
-		HTTPIP   string
-		HTTPPort string
-	}{
-		HTTPIP:   "{{ .HTTPIP }}",
-		HTTPPort: "{{ .HTTPPort }}",
-	}
-	if err := tpl.Execute(str, v); err != nil {
+	// PASSTHROUGHS is a map of variable-specific golang text template fields
+	// that should remain in the text template format.
+	if err := tpl.Execute(str, PASSTHROUGHS); err != nil {
 		return isLocal, fallbackReturn(err)
 	}
 
@@ -1020,4 +1010,108 @@ func (p *PostProcessorParser) Write(out *bytes.Buffer) {
 	if len(p.out) > 0 {
 		out.Write(p.out)
 	}
+}
+
+var PASSTHROUGHS = map[string]string{"NVME_Present": "{{ .NVME_Present }}",
+	"Usb_Present":                "{{ .Usb_Present }}",
+	"Serial_Type":                "{{ .Serial_Type }}",
+	"MapKey":                     "{{ .MapKey }}",
+	"HostAlias":                  "{{ .HostAlias }}",
+	"BoxName":                    "{{ .BoxName }}",
+	"Port":                       "{{ .Port }}",
+	"Header":                     "{{ .Header }}",
+	"HTTPIP":                     "{{ .HTTPIP }}",
+	"Host":                       "{{ .Host }}",
+	"PACKER_TEST_TEMP":           "{{ .PACKER_TEST_TEMP }}",
+	"SCSI_diskAdapterType":       "{{ .SCSI_diskAdapterType }}",
+	"VHDBlockSizeBytes":          "{{ .VHDBlockSizeBytes }}",
+	"Parallel_Auto":              "{{ .Parallel_Auto }}",
+	"KTyp":                       "{{ .KTyp }}",
+	"MemorySize":                 "{{ .MemorySize }}",
+	"APIURL":                     "{{ .APIURL }}",
+	"SourcePath":                 "{{ .SourcePath }}",
+	"CDROMType":                  "{{ .CDROMType }}",
+	"Parallel_Present":           "{{ .Parallel_Present }}",
+	"HTTPPort":                   "{{ .HTTPPort }}",
+	"BuildName":                  "{{ .BuildName }}",
+	"Network_Device":             "{{ .Network_Device }}",
+	"Flavor":                     "{{ .Flavor }}",
+	"Image":                      "{{ .Image }}",
+	"Os":                         "{{ .Os }}",
+	"Network_Type":               "{{ .Network_Type }}",
+	"SourceOMIName":              "{{ .SourceOMIName }}",
+	"Serial_Yield":               "{{ .Serial_Yield }}",
+	"SourceAMI":                  "{{ .SourceAMI }}",
+	"SSHHostPort":                "{{ .SSHHostPort }}",
+	"Vars":                       "{{ .Vars }}",
+	"Slice":                      "{{ .Slice }}",
+	"Version":                    "{{ .Version }}",
+	"Parallel_Bidirectional":     "{{ .Parallel_Bidirectional }}",
+	"Serial_Auto":                "{{ .Serial_Auto }}",
+	"VHDX":                       "{{ .VHDX }}",
+	"WinRMPassword":              "{{ .WinRMPassword }}",
+	"DefaultOrganizationID":      "{{ .DefaultOrganizationID }}",
+	"HTTPDir":                    "{{ .HTTPDir }}",
+	"SegmentPath":                "{{ .SegmentPath }}",
+	"NewVHDSizeBytes":            "{{ .NewVHDSizeBytes }}",
+	"CTyp":                       "{{ .CTyp }}",
+	"VMName":                     "{{ .VMName }}",
+	"Serial_Present":             "{{ .Serial_Present }}",
+	"Varname":                    "{{ .Varname }}",
+	"DiskNumber":                 "{{ .DiskNumber }}",
+	"SecondID":                   "{{ .SecondID }}",
+	"Typ":                        "{{ .Typ }}",
+	"SourceAMIName":              "{{ .SourceAMIName }}",
+	"ActiveProfile":              "{{ .ActiveProfile }}",
+	"Primitive":                  "{{ .Primitive }}",
+	"Elem":                       "{{ .Elem }}",
+	"Network_Adapter":            "{{ .Network_Adapter }}",
+	"Minor":                      "{{ .Minor }}",
+	"ProjectName":                "{{ .ProjectName }}",
+	"Generation":                 "{{ .Generation }}",
+	"User":                       "{{ .User }}",
+	"Size":                       "{{ .Size }}",
+	"Parallel_Filename":          "{{ .Parallel_Filename }}",
+	"ID":                         "{{ .ID }}",
+	"FastpathLen":                "{{ .FastpathLen }}",
+	"Tag":                        "{{ .Tag }}",
+	"Serial_Endpoint":            "{{ .Serial_Endpoint }}",
+	"GuestOS":                    "{{ .GuestOS }}",
+	"Major":                      "{{ .Major }}",
+	"Serial_Filename":            "{{ .Serial_Filename }}",
+	"Name":                       "{{ .Name }}",
+	"SourceOMI":                  "{{ .SourceOMI }}",
+	"SCSI_Present":               "{{ .SCSI_Present }}",
+	"CpuCount":                   "{{ .CpuCount }}",
+	"DefaultProjectID":           "{{ .DefaultProjectID }}",
+	"CDROMType_PrimarySecondary": "{{ .CDROMType_PrimarySecondary }}",
+	"Arch":                       "{{ .Arch }}",
+	"ImageFile":                  "{{ .ImageFile }}",
+	"SATA_Present":               "{{ .SATA_Present }}",
+	"Serial_Host":                "{{ .Serial_Host }}",
+	"BuildRegion":                "{{ .BuildRegion }}",
+	"Id":                         "{{ .Id }}",
+	"SyncedFolder":               "{{ .SyncedFolder }}",
+	"Network_Name":               "{{ .Network_Name }}",
+	"AccountID":                  "{{ .AccountID }}",
+	"OPTION":                     "{{ .OPTION }}",
+	"Type":                       "{{ .Type }}",
+	"CustomVagrantfile":          "{{ .CustomVagrantfile }}",
+	"SendTelemetry":              "{{ .SendTelemetry }}",
+	"DiskType":                   "{{ .DiskType }}",
+	"Password":                   "{{ .Password }}",
+	"HardDrivePath":              "{{ .HardDrivePath }}",
+	"ISOPath":                    "{{ .ISOPath }}",
+	"Insecure":                   "{{ .Insecure }}",
+	"Region":                     "{{ .Region }}",
+	"SecretKey":                  "{{ .SecretKey }}",
+	"DefaultRegion":              "{{ .DefaultRegion }}",
+	"MemoryStartupBytes":         "{{ .MemoryStartupBytes }}",
+	"SwitchName":                 "{{ .SwitchName }}",
+	"Path":                       "{{ .Path }}",
+	"Username":                   "{{ .Username }}",
+	"OutputDir":                  "{{ .OutputDir }}",
+	"DiskName":                   "{{ .DiskName }}",
+	"ProviderVagrantfile":        "{{ .ProviderVagrantfile }}",
+	"Sound_Present":              "{{ .Sound_Present }}",
 }
