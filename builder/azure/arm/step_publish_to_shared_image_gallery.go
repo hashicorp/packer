@@ -13,7 +13,7 @@ import (
 
 type StepPublishToSharedImageGallery struct {
 	client  *AzureClient
-	publish func(ctx context.Context, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion string, miSigReplicationRegions []string, miSGImageVersionEndOfLifeDate string, miSGImageVersionExcludeFromLatest bool, miSigReplicaCount int32, location string, tags map[string]*string) (string, error)
+	publish func(ctx context.Context, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion string, miSigReplicationRegions []string, miSGImageVersionEndOfLifeDate string, miSGImageVersionExcludeFromLatest bool, miSigReplicaCount int32, miSigImageVersionAddAsync bool, location string, tags map[string]*string) (string, error)
 	say     func(message string)
 	error   func(e error)
 	toSIG   func() bool
@@ -37,7 +37,7 @@ func NewStepPublishToSharedImageGallery(client *AzureClient, ui packersdk.Ui, co
 	return step
 }
 
-func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiID string, miSigPubRg string, miSIGalleryName string, miSGImageName string, miSGImageVersion string, miSigReplicationRegions []string, miSGImageVersionEndOfLifeDate string, miSGImageVersionExcludeFromLatest bool, miSigReplicaCount int32, location string, tags map[string]*string) (string, error) {
+func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiID string, miSigPubRg string, miSIGalleryName string, miSGImageName string, miSGImageVersion string, miSigReplicationRegions []string, miSGImageVersionEndOfLifeDate string, miSGImageVersionExcludeFromLatest bool, miSigReplicaCount int32, miSigImageVersionAddAsync bool, location string, tags map[string]*string) (string, error) {
 
 	replicationRegions := make([]compute.TargetRegion, len(miSigReplicationRegions))
 	for i, v := range miSigReplicationRegions {
@@ -79,6 +79,11 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiI
 	if err != nil {
 		s.say(s.client.LastError.Error())
 		return "", err
+	}
+
+	if miSigImageVersionAddAsync == true {
+		s.say(fmt.Sprintf("\n Not waiting for Image Gallery Version creation as requested by user."))
+		return "", nil
 	}
 
 	err = f.WaitForCompletionRef(ctx, s.client.GalleryImageVersionsClient.Client)
@@ -123,7 +128,9 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 
 	miSGImageVersionEndOfLifeDate, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionEndOfLifeDate).(string)
 	miSGImageVersionExcludeFromLatest, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionExcludeFromLatest).(bool)
+	miSigImageVersionAddAsync, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionAddAsync).(bool)
 	miSigReplicaCount, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionReplicaCount).(int32)
+
 	// Replica count must be between 1 and 10 inclusive.
 	if miSigReplicaCount <= 0 {
 		miSigReplicaCount = constants.SharedImageGalleryImageVersionDefaultMinReplicaCount
@@ -141,7 +148,7 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 	s.say(fmt.Sprintf(" -> SIG image version exclude from latest : '%t'", miSGImageVersionExcludeFromLatest))
 	s.say(fmt.Sprintf(" -> SIG replica count [1, 10]             : '%d'", miSigReplicaCount))
 
-	createdGalleryImageVersionID, err := s.publish(ctx, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion, miSigReplicationRegions, miSGImageVersionEndOfLifeDate, miSGImageVersionExcludeFromLatest, miSigReplicaCount, location, tags)
+	createdGalleryImageVersionID, err := s.publish(ctx, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion, miSigReplicationRegions, miSGImageVersionEndOfLifeDate, miSGImageVersionExcludeFromLatest, miSigReplicaCount, miSigImageVersionAddAsync, location, tags)
 
 	if err != nil {
 		stateBag.Put(constants.Error, err)

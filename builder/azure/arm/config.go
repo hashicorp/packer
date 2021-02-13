@@ -200,6 +200,9 @@ type Config struct {
 	// for details.
 	//
 	// CLI example `az vm image list-publishers --location westus`
+	SharedGalleryImageVersionAddAsync bool `mapstructure:"shared_gallery_image_version_add_async" required:"false"`
+	// add comment here
+
 	ImagePublisher string `mapstructure:"image_publisher" required:"true"`
 	// Name of the publisher's offer to use for your base image (Azure Marketplace Images only). See
 	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)

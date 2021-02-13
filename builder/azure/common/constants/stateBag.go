@@ -50,6 +50,7 @@ const (
 	ArmManagedImageSharedGalleryImageVersionEndOfLifeDate     string = "arm.ArmManagedImageSharedGalleryImageVersionEndOfLifeDate"
 	ArmManagedImageSharedGalleryImageVersionReplicaCount      string = "arm.ArmManagedImageSharedGalleryImageVersionReplicaCount"
 	ArmManagedImageSharedGalleryImageVersionExcludeFromLatest string = "arm.ArmManagedImageSharedGalleryImageVersionExcludeFromLatest"
+	ArmManagedImageSharedGalleryImageVersionAddAsync          string = "arm.ArmManagedImageSharedGalleryImageVersionAddAsync"
 	ArmManagedImageSubscription                               string = "arm.ArmManagedImageSubscription"
 	ArmAsyncResourceGroupDelete                               string = "arm.AsyncResourceGroupDelete"
 	ArmManagedImageOSDiskSnapshotName                         string = "arm.ManagedImageOSDiskSnapshotName"
