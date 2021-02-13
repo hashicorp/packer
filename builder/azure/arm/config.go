@@ -195,14 +195,15 @@ type Config struct {
 	// If set to true, Virtual Machines deployed from the latest version of the
 	// Image Definition won't use this Image Version.
 	SharedGalleryImageVersionExcludeFromLatest bool `mapstructure:"shared_gallery_image_version_exclude_from_latest" required:"false"`
+	// If you don't want packer to wait for Azure to finish uploading the managed
+	// image to the Shared Gallery, set this to true.  Be aware that errors during
+	// upload to the Shared Gallery may not be reported.
+	SharedGalleryImageVersionAddAsync bool `mapstructure:"shared_gallery_image_version_add_async" required:"false"`
 	// Name of the publisher to use for your base image (Azure Marketplace Images only). See
 	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)
 	// for details.
 	//
 	// CLI example `az vm image list-publishers --location westus`
-	SharedGalleryImageVersionAddAsync bool `mapstructure:"shared_gallery_image_version_add_async" required:"false"`
-	// add comment here
-
 	ImagePublisher string `mapstructure:"image_publisher" required:"true"`
 	// Name of the publisher's offer to use for your base image (Azure Marketplace Images only). See
 	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)

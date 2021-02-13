@@ -37,7 +37,7 @@ type FlatConfig struct {
 	SharedGalleryImageVersionEndOfLifeDate     *string                            `mapstructure:"shared_gallery_image_version_end_of_life_date" required:"false" cty:"shared_gallery_image_version_end_of_life_date" hcl:"shared_gallery_image_version_end_of_life_date"`
 	SharedGalleryImageVersionReplicaCount      *int32                             `mapstructure:"shared_image_gallery_replica_count" required:"false" cty:"shared_image_gallery_replica_count" hcl:"shared_image_gallery_replica_count"`
 	SharedGalleryImageVersionExcludeFromLatest *bool                              `mapstructure:"shared_gallery_image_version_exclude_from_latest" required:"false" cty:"shared_gallery_image_version_exclude_from_latest" hcl:"shared_gallery_image_version_exclude_from_latest"`
-	SharedGalleryImageVersionAddAsync          *bool 							  `mapstructure:"shared_gallery_image_version_add_async" required:"false" cty:"shared_gallery_image_version_add_async" hcl:"shared_gallery_image_version_add_async"`
+	SharedGalleryImageVersionAddAsync          *bool                              `mapstructure:"shared_gallery_image_version_add_async" required:"false" cty:"shared_gallery_image_version_add_async" hcl:"shared_gallery_image_version_add_async"`
 	ImagePublisher                             *string                            `mapstructure:"image_publisher" required:"true" cty:"image_publisher" hcl:"image_publisher"`
 	ImageOffer                                 *string                            `mapstructure:"image_offer" required:"true" cty:"image_offer" hcl:"image_offer"`
 	ImageSku                                   *string                            `mapstructure:"image_sku" required:"true" cty:"image_sku" hcl:"image_sku"`
