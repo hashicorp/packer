@@ -48,7 +48,7 @@ func (c *StorageConfig) AddStorageDevices(existingDevices object.VirtualDeviceLi
 	for _, dc := range c.Storage {
 		disk := &types.VirtualDisk{
 			VirtualDevice: types.VirtualDevice{
-				Key: existingDevices.NewKey(),
+				Key: newDevices.NewKey(),
 				Backing: &types.VirtualDiskFlatVer2BackingInfo{
 					DiskMode:        string(types.VirtualDiskModePersistent),
 					ThinProvisioned: types.NewBool(dc.DiskThinProvisioned),
@@ -58,7 +58,7 @@ func (c *StorageConfig) AddStorageDevices(existingDevices object.VirtualDeviceLi
 			CapacityInKB: dc.DiskSize * 1024,
 		}
 
-		existingDevices.AssignController(disk, controllers[dc.ControllerIndex])
+		newDevices.AssignController(disk, controllers[dc.ControllerIndex])
 		newDevices = append(newDevices, disk)
 	}
 
