@@ -66,15 +66,20 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 		}
 	}
 
-	if config.HardDriveInterface == "scsi" {
-		if err := driver.CreateSCSIController(vmName, "SCSI Controller"); err != nil {
+	// Add a VirtIO controller if we were asked to use VirtIO. We still attach
+	// the VirtIO controller above because some other things (disks) require
+	// that.
+	if config.HardDriveInterface == "virtio" || config.ISOInterface == "virtio" {
+		if err := driver.CreateVirtIOController(vmName, "VirtIO Controller"); err != nil {
 			err := fmt.Errorf("Error creating disk controller: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-	} else if config.HardDriveInterface == "virtio" {
-		if err := driver.CreateVirtIOController(vmName, "VirtIO Controller"); err != nil {
+	}
+
+	if config.HardDriveInterface == "scsi" {
+		if err := driver.CreateSCSIController(vmName, "SCSI Controller"); err != nil {
 			err := fmt.Errorf("Error creating disk controller: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())

@@ -80,6 +80,10 @@ func (s *StepAttachISOs) Run(ctx context.Context, state multistep.StateBag) mult
 				controllerName = "SATA Controller"
 				port = "1"
 				device = "0"
+			} else if s.ISOInterface == "virtio" {
+				controllerName = "VirtIO Controller"
+				port = "1"
+				device = "0"
 			}
 			ui.Message("Mounting boot ISO...")
 		case "guest_additions":
@@ -88,6 +92,10 @@ func (s *StepAttachISOs) Run(ctx context.Context, state multistep.StateBag) mult
 			device = "0"
 			if s.GuestAdditionsInterface == "sata" {
 				controllerName = "SATA Controller"
+				port = "2"
+				device = "0"
+			} else if s.GuestAdditionsInterface == "virtio" {
+				controllerName = "VirtIO Controller"
 				port = "2"
 				device = "0"
 			}
@@ -100,7 +108,11 @@ func (s *StepAttachISOs) Run(ctx context.Context, state multistep.StateBag) mult
 				controllerName = "SATA Controller"
 				port = "3"
 				device = "0"
-			}
+			} else if s.ISOInterface == "virtio" {
+				controllerName = "VirtIO Controller"
+				port = "3"
+				device = "0"
+         }
 			ui.Message("Mounting cd_files ISO...")
 		}
 

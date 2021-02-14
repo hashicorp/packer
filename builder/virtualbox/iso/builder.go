@@ -211,9 +211,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			errs, errors.New("nvme_port_count cannot be greater than 255"))
 	}
 
-	if b.config.ISOInterface != "ide" && b.config.ISOInterface != "sata" {
+	if b.config.ISOInterface != "ide" && b.config.ISOInterface != "sata" && b.config.ISOInterface != "virtio" {
 		errs = packersdk.MultiErrorAppend(
-			errs, errors.New("iso_interface can only be ide or sata"))
+			errs, errors.New("iso_interface can only be ide, sata or virtio"))
 	}
 
 	// Warnings
