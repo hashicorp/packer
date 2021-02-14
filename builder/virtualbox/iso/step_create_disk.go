@@ -73,6 +73,13 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+	} else if config.HardDriveInterface == "virtio" {
+		if err := driver.CreateVirtIOController(vmName, "VirtIO Controller"); err != nil {
+			err := fmt.Errorf("Error creating disk controller: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	} else if config.HardDriveInterface == "pcie" {
 		if err := driver.CreateNVMeController(vmName, "NVMe Controller", config.NVMePortCount); err != nil {
 			err := fmt.Errorf("Error creating NVMe controller: %s", err)
@@ -86,13 +93,11 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 	controllerName := "IDE Controller"
 	if config.HardDriveInterface == "sata" {
 		controllerName = "SATA Controller"
-	}
-
-	if config.HardDriveInterface == "scsi" {
+	} else if config.HardDriveInterface == "scsi" {
 		controllerName = "SCSI Controller"
-	}
-
-	if config.HardDriveInterface == "pcie" {
+	} else if config.HardDriveInterface == "virtio" {
+		controllerName = "VirtIO Controller"
+	} else if config.HardDriveInterface == "pcie" {
 		controllerName = "NVMe Controller"
 	}
 

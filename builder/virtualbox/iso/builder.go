@@ -186,11 +186,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	switch b.config.HardDriveInterface {
-	case "ide", "sata", "scsi", "pcie":
+	case "ide", "sata", "scsi", "pcie", "virtio":
 		// do nothing
 	default:
 		errs = packersdk.MultiErrorAppend(
-			errs, errors.New("hard_drive_interface can only be ide, sata, pcie or scsi"))
+			errs, errors.New("hard_drive_interface can only be ide, sata, pcie, scsi or virtio"))
 	}
 
 	if b.config.SATAPortCount == 0 {
