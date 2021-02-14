@@ -112,7 +112,7 @@ func (s *StepAttachISOs) Run(ctx context.Context, state multistep.StateBag) mult
 				controllerName = "VirtIO Controller"
 				port = "3"
 				device = "0"
-         }
+			}
 			ui.Message("Mounting cd_files ISO...")
 		}
 
