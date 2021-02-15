@@ -27,26 +27,6 @@ func (p Plugin) String() string {
 	return strings.Join(p.Parts(), "/")
 }
 
-// ForDisplay returns a user-friendly FQN string, simplified for readability. If
-// the plugin is using the default hostname, the hostname is omitted.
-func (p *Plugin) ForDisplay() string {
-	const (
-		// These will be hidden if they are a prefix
-		DefaultHashicorpPluginHost      = "github.com"
-		DefaultHashicorpPluginNamespace = "hashicorp"
-	)
-
-	parts := []string{}
-	if p.Hostname != DefaultHashicorpPluginHost {
-		parts = append(parts, p.Hostname)
-	}
-	if p.Namespace != DefaultHashicorpPluginNamespace && len(parts) == 0 {
-		parts = append(parts, p.Namespace)
-	}
-	parts = append(parts, p.Type)
-	return strings.Join(parts, "/")
-}
-
 // ParsePluginPart processes an addrs.Plugin namespace or type string
 // provided by an end-user, producing a normalized version if possible or
 // an error if the string contains invalid characters.
@@ -204,7 +184,10 @@ func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
 				diags = diags.Append(&hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Invalid plugin type",
-					Detail:   fmt.Sprintf("Plugin source %q has a type with the prefix %q, which isn't valid. Although that prefix is often used in the names of version control repositories for Packer plugins, plugin source strings should not include it.\n\nDid you mean %q?", ret.ForDisplay(), userErrorPrefix, suggestedAddr.ForDisplay()),
+					Detail: fmt.Sprintf("Plugin source %q has a type with the prefix %q, which isn't valid. "+
+						"Although that prefix is often used in the names of version control repositories for Packer plugins, "+
+						"plugin source strings should not include it.\n"+
+						"\nDid you mean %q?", ret, userErrorPrefix, suggestedAddr),
 				})
 				return nil, diags
 			}
