@@ -96,17 +96,22 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 
 		switch {
 		case expr.Type().IsPrimitiveType():
-			vc, reqDiags := decodeVersionConstraint(attr)
-			diags = append(diags, reqDiags...)
-			rp.Requirement = vc
-			rp.Type, err = addrs.ParsePluginSourceString(name)
-			if err != nil {
-				diags = diags.Append(&hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Invalid plugin type",
-					Detail:   fmt.Sprintf(`Invalid plugin type %q: %s"`, name, err),
-				})
+			c := "version"
+			if cs, _ := decodeVersionConstraint(attr); len(cs.Required) > 0 {
+				c = cs.Required.String()
 			}
+
+			diags = diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Invalid plugin requirement",
+				Detail: fmt.Sprintf(`'%s = "%s"' plugin requirement calls are not possible.`+
+					` You must define a whole block. For example:`+"\n"+
+					`%[1]s = {`+"\n"+
+					`  source  = github.com/hashicorp/%[1]s`+"\n"+
+					`  version = %[2]s`+"\n"+`}`,
+					name, c),
+				Subject: attr.Range.Ptr(),
+			})
 
 		case expr.Type().IsObjectType():
 			if !expr.Type().HasAttribute("version") {
