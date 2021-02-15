@@ -135,8 +135,8 @@ in the rest of the template.
 
 Here it is a brief explanation of each field:
 - `version` - Should follow the [version constraints](/docs/templates/hcl_templates/blocks/packer#version-constraints).
-- `source` - Should have the plugin's organizational namespace on GitHub and its
-  short name. Packer will be responsible for determining the full GitHub
+- `source` - Should have the GitHub hostname, the plugin's organizational namespace, and its short name. 
+Packer will be responsible for determining the full GitHub
   address. For example, if the source is `github.com/sylviamoss/comment`, Packer
   will download the binaries from `github.com/sylviamoss/packer-plugin-comment`.
   To learn more about the source field, check out the [Source
@@ -181,5 +181,4 @@ and won't need to run `init` again unless you want to upgrade the plugin version
 
 A template with a `required_plugins` block should **always** be initialised at least once with `packer init` before
 `packer build`. If the template is built before init, Packer will fail and ask for initialisation.
-
 
