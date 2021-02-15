@@ -111,8 +111,8 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 				Detail: fmt.Sprintf(`'%s = "%s"' plugin requirement calls are not possible.`+
 					` You must define a whole block. For example:`+"\n"+
 					`%[1]s = {`+"\n"+
-					`  source  = github.com/hashicorp/%[1]s`+"\n"+
-					`  version = %[2]s`+"\n"+`}`,
+					`  source  = "github.com/hashicorp/%[1]s"`+"\n"+
+					`  version = "%[2]s"`+"\n"+`}`,
 					name, c),
 				Subject: attr.Range.Ptr(),
 			})
