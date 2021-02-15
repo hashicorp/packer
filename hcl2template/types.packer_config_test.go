@@ -431,7 +431,7 @@ func TestParser_no_init(t *testing.T) {
 							RequiredPlugins: map[string]*RequiredPlugin{
 								"amazon": {
 									Name:   "amazon",
-									Source: "",
+									Source: "github.com/hashicorp/amazon",
 									Type: &addrs.Plugin{
 										Type:      "amazon",
 										Namespace: "hashicorp",
@@ -443,7 +443,7 @@ func TestParser_no_init(t *testing.T) {
 								},
 								"amazon-v1": {
 									Name:   "amazon-v1",
-									Source: "amazon",
+									Source: "github.com/hashicorp/amazon",
 									Type: &addrs.Plugin{
 										Type:      "amazon",
 										Namespace: "hashicorp",
@@ -455,7 +455,7 @@ func TestParser_no_init(t *testing.T) {
 								},
 								"amazon-v2": {
 									Name:   "amazon-v2",
-									Source: "amazon",
+									Source: "github.com/hashicorp/amazon",
 									Type: &addrs.Plugin{
 										Type:      "amazon",
 										Namespace: "hashicorp",
@@ -467,7 +467,7 @@ func TestParser_no_init(t *testing.T) {
 								},
 								"amazon-v3": {
 									Name:   "amazon-v3",
-									Source: "hashicorp/amazon",
+									Source: "github.com/hashicorp/amazon",
 									Type: &addrs.Plugin{
 										Type:      "amazon",
 										Namespace: "hashicorp",
@@ -479,7 +479,7 @@ func TestParser_no_init(t *testing.T) {
 								},
 								"amazon-v3-azr": {
 									Name:   "amazon-v3-azr",
-									Source: "azr/amazon",
+									Source: "github.com/azr/amazon",
 									Type: &addrs.Plugin{
 										Type:      "amazon",
 										Namespace: "azr",
@@ -606,6 +606,66 @@ func TestParser_no_init(t *testing.T) {
 			defaultParser,
 			parseTestArgs{"testdata/init/duplicate_required_plugins", nil, nil},
 			nil,
+			true, true,
+			[]packersdk.Build{},
+			false,
+		},
+		{"invalid_inexplicit_source.pkr.hcl",
+			defaultParser,
+			parseTestArgs{"testdata/init/invalid_inexplicit_source.pkr.hcl", nil, nil},
+			&PackerConfig{
+				Packer: struct {
+					VersionConstraints []VersionConstraint
+					RequiredPlugins    []*RequiredPlugins
+				}{
+					VersionConstraints: nil,
+					RequiredPlugins: []*RequiredPlugins{
+						{},
+					},
+				},
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 "testdata/init",
+			},
+			true, true,
+			[]packersdk.Build{},
+			false,
+		},
+		{"invalid_short_source.pkr.hcl",
+			defaultParser,
+			parseTestArgs{"testdata/init/invalid_short_source.pkr.hcl", nil, nil},
+			&PackerConfig{
+				Packer: struct {
+					VersionConstraints []VersionConstraint
+					RequiredPlugins    []*RequiredPlugins
+				}{
+					VersionConstraints: nil,
+					RequiredPlugins: []*RequiredPlugins{
+						{},
+					},
+				},
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 "testdata/init",
+			},
+			true, true,
+			[]packersdk.Build{},
+			false,
+		},
+		{"invalid_short_source_2.pkr.hcl",
+			defaultParser,
+			parseTestArgs{"testdata/init/invalid_inexplicit_source_2.pkr.hcl", nil, nil},
+			&PackerConfig{
+				Packer: struct {
+					VersionConstraints []VersionConstraint
+					RequiredPlugins    []*RequiredPlugins
+				}{
+					VersionConstraints: nil,
+					RequiredPlugins: []*RequiredPlugins{
+						{},
+					},
+				},
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 "testdata/init",
+			},
 			true, true,
 			[]packersdk.Build{},
 			false,
