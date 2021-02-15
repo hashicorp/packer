@@ -1,6 +1,7 @@
 package hcl2template
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/go-version"
@@ -624,7 +625,7 @@ func TestParser_no_init(t *testing.T) {
 					},
 				},
 				CorePackerVersionString: lockedVersion,
-				Basedir:                 "testdata/init",
+				Basedir:                 filepath.Clean("testdata/init"),
 			},
 			true, true,
 			[]packersdk.Build{},
@@ -644,7 +645,7 @@ func TestParser_no_init(t *testing.T) {
 					},
 				},
 				CorePackerVersionString: lockedVersion,
-				Basedir:                 "testdata/init",
+				Basedir:                 filepath.Clean("testdata/init"),
 			},
 			true, true,
 			[]packersdk.Build{},
@@ -664,7 +665,7 @@ func TestParser_no_init(t *testing.T) {
 					},
 				},
 				CorePackerVersionString: lockedVersion,
-				Basedir:                 "testdata/init",
+				Basedir:                 filepath.Clean("testdata/init"),
 			},
 			true, true,
 			[]packersdk.Build{},
