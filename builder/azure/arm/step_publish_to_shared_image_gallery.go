@@ -130,7 +130,6 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 	miSGImageVersionExcludeFromLatest, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionExcludeFromLatest).(bool)
 	miSigImageVersionAddAsync, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionAddAsync).(bool)
 	miSigReplicaCount, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionReplicaCount).(int32)
-
 	// Replica count must be between 1 and 10 inclusive.
 	if miSigReplicaCount <= 0 {
 		miSigReplicaCount = constants.SharedImageGalleryImageVersionDefaultMinReplicaCount
