@@ -135,10 +135,12 @@ in the rest of the template.
 
 Here it is a brief explanation of each field:
 - `version` - Should follow the [version constraints](/docs/templates/hcl_templates/blocks/packer#version-constraints).
-- `source` - Should have the plugin's organizational namespace on GitHub and its short name. Packer will be responsible
-for determining the full GitHub address.
-  For example, if the source is `sylviamoss/comment`, Packer will download the binaries from `github.com/sylviamoss/packer-plugin-comment`.
-  To learn more about the source field, check out the [Source Address](/docs/plugins#source-addresses) documentation.
+- `source` - Should have the plugin's organizational namespace on GitHub and its
+  short name. Packer will be responsible for determining the full GitHub
+  address. For example, if the source is `github.com/sylviamoss/comment`, Packer
+  will download the binaries from `github.com/sylviamoss/packer-plugin-comment`.
+  To learn more about the source field, check out the [Source
+  Address](/docs/plugins#source-addresses) documentation.
 - `local_name`- Can be replaced with whatever you want, and the new value will become the name of the plugin.
   For example:
     ```hcl
