@@ -192,6 +192,9 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 			builders = append(builders, builder)
 		}
 	}
+	sort.Slice(builders, func(i, j int) bool {
+		return builders[i].Type+builders[i].Name < builders[j].Type+builders[j].Name
+	})
 
 	amazonAmiDatasource := &AmazonAmiDatasourceParser{
 		Builders:        builders,
@@ -201,10 +204,6 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 		c.Ui.Error(err.Error())
 		return 1
 	}
-
-	sort.Slice(builders, func(i, j int) bool {
-		return builders[i].Type+builders[i].Name < builders[j].Type+builders[j].Name
-	})
 
 	sources := &SourceParser{
 		Builders:        builders,
