@@ -7,10 +7,11 @@ description: Learn how to generate the HCL2 configuration of your component easi
 # Auto Generate the HCL2 code of a plugin
 
 From v1.5, Packer can be configured using HCL2. Because Packer has so many
-builders, provisioner & post-processors, we relied on code generation to iterate
-more easily. The good news is that you can benefit from this code generator to
-get the HCL2 spec code of your component simply. It's a Go binary package and is
-located in [`cmd/mapstructure-to-hcl2`](https://github.com/hashicorp/packer/tree/master/cmd/mapstructure-to-hcl2).
+builders, provisioners, and post-processors, we created a on code generation
+tool to add the HCL2-enabling code more easily. You can use this code generator
+to create the HCL2 spec code of your custom plugin simply. It's a Go binary
+package and is located in
+[`cmd/mapstructure-to-hcl2`](https://github.com/hashicorp/packer/tree/master/cmd/mapstructure-to-hcl2).
 
 Say you want to configure the `Config` struct of a `Builder` in a package
 located in `my/example-plugin/config.go`. Here are some simple steps you can
@@ -29,7 +30,7 @@ follow to make it HCL2 enabled:
 - Make sure that all the nested structs of `Config` are also auto generated the
   same way.
 
-- Now we only need to make Builder implement the interface by adding the
+- Now we only need to make your Builder implement the interface by adding the
   following snippet:
 
   ```go
