@@ -554,9 +554,18 @@ func isSensitiveVariable(key string, vars []*template.Variable) bool {
 
 func (*HCL2UpgradeCommand) Help() string {
 	helpText := `
-Usage: packer hcl2_upgrade -output-file=JSON_TEMPLATE.pkr.hcl JSON_TEMPLATE...
+Usage: packer hcl2_upgrade [options] TEMPLATE
 
   Will transform your JSON template into an HCL2 configuration.
+
+Options:
+
+  -output-file=path    Set output file name. By default this will be the
+                       TEMPLATE name with ".pkr.hcl" appended to it. To be a
+                       valid Packer HCL template, it must have the suffix
+                       ".pkr.hcl"
+  -with-annotations    Add helper annotation comments to the file to help new
+                       HCL2 users understand the template format.
 `
 
 	return strings.TrimSpace(helpText)
