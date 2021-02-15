@@ -76,11 +76,11 @@ Here is an example `required_plugins` block:
     required_plugins {
       myawesomecloud = {
         version = ">= 2.7.0"
-        source = "azr/myawesomecloud"
+        source = "github.com/azr/myawesomecloud"
       }
       happycloud = {
         version = ">= 1.1.3"
-        source = "azr/happycloud"
+        source = "github.com/azr/happycloud"
       }
     }
   }
@@ -130,7 +130,7 @@ If we change the required_plugins block to use a different local name "foo":
   required_plugins {
     foo = {
       version = ">= 2.7.0"
-      source = "azr/myawesomecloud"
+      source = "github.com/azr/myawesomecloud"
     }
   }
 ```
@@ -151,27 +151,23 @@ to download it.
 Source addresses consist of three parts delimited by slashes (`/`), as
 follows:
 
-`[<HOSTNAME>/]<NAMESPACE>/<TYPE>`
+`<HOSTNAME>/<NAMESPACE>/<TYPE>`
 
-* **Hostname** (optional): The hostname of the location/service that
-  distributes the plugin. If omitted, this defaults to
-  `github.com`, we recommend explicitly setting the hostname. Currently, the
-  only valid "hostname" is github.com, but we plan to eventually support plugins
-  downloaded from other domains.
+* **Hostname:** The hostname of the location/service that
+  distributes the plugin. Currently, the only valid "hostname" is github.com,
+  but we plan to eventually support plugins downloaded from other domains.
 
 * **Namespace:** An organizational namespace within the specified host.
-  This often is the organization that publishes the plugin. If omitted, this
-  defaults to `hashicorp`. We recommend explicitly setting the namespace.
+  This often is the organization that publishes the plugin.
 
 * **Type:** A short name for the platform or system the plugin manages. The
   type is usually the plugin's preferred local name.
 
 For example, the fictional `myawesomecloud` plugin could belong to the
 `hashicorp` namespace on `github.com`, so its `source` could be
-`github.com/hashicorp/myawesomecloud`, `hashicorp/myawesomecloud` or
-`myawesomecloud`. Note: the actual _repository_ that myawesomecloud comes from
-must always have the name format
-`www.github.com/hashicorp/packer-plugin-myawesomecloud`, but the
+`github.com/hashicorp/myawesomecloud`,
+Note: the actual _repository_ that myawesomecloud comes from must always have
+the name format `github.com/hashicorp/packer-plugin-myawesomecloud`, but the
 `required_plugins` block omits the redundant `packer-plugin-` repository prefix
 for brevity.
 
@@ -179,9 +175,8 @@ The source address with all three components given explicitly is called the
 plugin's _fully-qualified address_. You will see fully-qualified address in
 various outputs, like error messages, but in most cases a simplified display
 version is used. Therefore you may see the shortened version `"myawesomecloud"`
-instead of `"github.com/hashicorp/myawesomecloud"`.
-
--> **Note:** We recommend using explicit source addresses for all plugins.
+instead of `"github.com/hashicorp/myawesomecloud"`. This will happen only when
+the prefix is `github.com/hashicorp`.
 
 ## Plugin location
 
@@ -192,17 +187,15 @@ instead of `"github.com/hashicorp/myawesomecloud"`.
 Using the following example :
 ```hcl
     required_plugins {
-      myawesomecloud = {
+      happycloud = {
         version = ">= 2.7.0"
-        source = "azr/myawesomecloud"
+        source = "github.com/azr/happycloud"
       }
-      happycloud = ">= 2.7.0"
     }
 ```
 
 The plugin getter will look for plugins located at:
-* github.com/azr/packer-plugin-myawesomecloud
-* github.com/hashicorp/packer-plugin-happycloud
+* github.com/azr/packer-plugin-happycloud
 
 Packer will error if you set the `packer-plugin-` prefix in a `source`. This
 will avoid conflicting with other plugins for other tools, like Terraform.

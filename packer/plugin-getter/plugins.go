@@ -27,7 +27,7 @@ type Requirements []*Requirement
 type Requirement struct {
 	// Plugin accessor as defined in the config file.
 	// For Packer, using :
-	//  required_plugins { amazon = ">= v0" }
+	//  required_plugins { amazon = {...} }
 	// Will set Accessor to `amazon`.
 	Accessor string
 

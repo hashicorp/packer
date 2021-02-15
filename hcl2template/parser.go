@@ -156,7 +156,9 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	// equivalent of having :
 	//  packer {
 	//    required_plugins {
-	//      amazon = "latest"
+	//      amazon = {
+	//        version = "latest"
+	//        source  = "github.com/hashicorp/amazon"
 	//    }
 	//  }
 	// Note: using `latest` ( or actually an empty string ) in a config file
