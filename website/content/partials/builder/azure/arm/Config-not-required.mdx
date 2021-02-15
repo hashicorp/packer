@@ -91,6 +91,10 @@
 - `shared_gallery_image_version_exclude_from_latest` (bool) - If set to true, Virtual Machines deployed from the latest version of the
   Image Definition won't use this Image Version.
 
+- `shared_gallery_image_version_add_async` (bool) - If you don't want packer to wait for Azure to finish uploading the managed
+  image to the Shared Gallery, set this to true.  Be aware that errors during
+  upload to the Shared Gallery may not be reported.
+
 - `image_version` (string) - Specify a specific version of an OS to boot from.
   Defaults to `latest`. There may be a difference in versions available
   across regions due to image synchronization latency. To ensure a consistent
