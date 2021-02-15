@@ -650,7 +650,7 @@ func TestParser_no_init(t *testing.T) {
 			[]packersdk.Build{},
 			false,
 		},
-		{"invalid_short_source_2.pkr.hcl",
+		{"invalid_inexplicit_source_2.pkr.hcl",
 			defaultParser,
 			parseTestArgs{"testdata/init/invalid_inexplicit_source_2.pkr.hcl", nil, nil},
 			&PackerConfig{

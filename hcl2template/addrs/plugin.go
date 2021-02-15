@@ -40,7 +40,7 @@ func (p *Plugin) ForDisplay() string {
 	if p.Hostname != DefaultHashicorpPluginHost {
 		parts = append(parts, p.Hostname)
 	}
-	if p.Namespace != DefaultHashicorpPluginNamespace {
+	if p.Namespace != DefaultHashicorpPluginNamespace && len(parts) == 0 {
 		parts = append(parts, p.Namespace)
 	}
 	parts = append(parts, p.Type)
