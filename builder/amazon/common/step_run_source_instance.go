@@ -258,7 +258,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		if resp, e := ec2conn.DescribeInstances(describeInstance); e == nil {
 			if len(resp.Reservations) > 0 && len(resp.Reservations[0].Instances) > 0 {
 				instance := resp.Reservations[0].Instances[0]
-				if instance.StateTransitionReason != nil && instance.StateReason.Message != nil {
+				if instance.StateTransitionReason != nil && instance.StateReason != nil && instance.StateReason.Message != nil {
 					ui.Error(fmt.Sprintf("Instance state change details: %s: %s",
 						*instance.StateTransitionReason, *instance.StateReason.Message))
 				}
