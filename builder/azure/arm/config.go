@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/random"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
+	newCompute "github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/masterzen/winrm"
 
@@ -195,6 +196,9 @@ type Config struct {
 	// If set to true, Virtual Machines deployed from the latest version of the
 	// Image Definition won't use this Image Version.
 	SharedGalleryImageVersionExcludeFromLatest bool `mapstructure:"shared_gallery_image_version_exclude_from_latest" required:"false"`
+	// add comment
+	SharedGalleryImageVersionStorageAccountType string `mapstructure:"shared_gallery_image_version_storage_account_type" required:"false"`
+	sharedGalleryImageVersionStorageAccountType newCompute.StorageAccountType
 	// Name of the publisher to use for your base image (Azure Marketplace Images only). See
 	// [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)
 	// for details.
@@ -1029,6 +1033,14 @@ func assertRequiredParametersSet(c *Config, errs *packersdk.MultiError) {
 		}
 		if c.SharedGalleryDestination.SigDestinationSubscription == "" {
 			c.SharedGalleryDestination.SigDestinationSubscription = c.ClientConfig.SubscriptionID
+		}
+		switch c.SharedGalleryImageVersionStorageAccountType {
+		case "", string(newCompute.StorageAccountTypeStandardLRS):
+			c.sharedGalleryImageVersionStorageAccountType = newCompute.StorageAccountTypeStandardLRS
+		case string(newCompute.StorageAccountTypeStandardZRS):
+			c.sharedGalleryImageVersionStorageAccountType = newCompute.StorageAccountTypeStandardZRS
+		default:
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The storage_account_type for shared_image_gallery_destination %q is invalid", c.SharedGalleryImageVersionStorageAccountType))
 		}
 	}
 	if c.SharedGalleryTimeout == 0 {

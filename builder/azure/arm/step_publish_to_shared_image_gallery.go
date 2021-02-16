@@ -13,7 +13,7 @@ import (
 
 type StepPublishToSharedImageGallery struct {
 	client  *AzureClient
-	publish func(ctx context.Context, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion string, miSigReplicationRegions []string, miSGImageVersionEndOfLifeDate string, miSGImageVersionExcludeFromLatest bool, miSigReplicaCount int32, location string, tags map[string]*string) (string, error)
+	publish func(ctx context.Context, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion string, miSigReplicationRegions []string, miSGImageVersionEndOfLifeDate string, miSGImageVersionExcludeFromLatest bool, miSigReplicaCount int32, miSigStorageType string, location string, tags map[string]*string) (string, error)
 	say     func(message string)
 	error   func(e error)
 	toSIG   func() bool
@@ -37,7 +37,7 @@ func NewStepPublishToSharedImageGallery(client *AzureClient, ui packersdk.Ui, co
 	return step
 }
 
-func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiID string, miSigPubRg string, miSIGalleryName string, miSGImageName string, miSGImageVersion string, miSigReplicationRegions []string, miSGImageVersionEndOfLifeDate string, miSGImageVersionExcludeFromLatest bool, miSigReplicaCount int32, location string, tags map[string]*string) (string, error) {
+func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiID string, miSigPubRg string, miSIGalleryName string, miSGImageName string, miSGImageVersion string, miSigReplicationRegions []string, miSGImageVersionEndOfLifeDate string, miSGImageVersionExcludeFromLatest bool, miSigReplicaCount int32, miSigStorageType string, location string, tags map[string]*string) (string, error) {
 
 	replicationRegions := make([]compute.TargetRegion, len(miSigReplicationRegions))
 	for i, v := range miSigReplicationRegions {
@@ -56,6 +56,15 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiI
 	} else {
 		endOfLifeDate = (*date.Time)(nil)
 	}
+
+	var storageAcccountType compute.StorageAccountType
+	switch string(miSigStorageType) {
+	case "", string(compute.StorageAccountTypeStandardLRS):
+		storageAcccountType = compute.StorageAccountTypeStandardLRS
+	case string(compute.StorageAccountTypeStandardZRS):
+		storageAcccountType = compute.StorageAccountTypeStandardZRS
+	}
+
 	galleryImageVersion := compute.GalleryImageVersion{
 		Location: &location,
 		Tags:     tags,
@@ -66,10 +75,11 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiI
 						ID: &mdiID,
 					},
 				},
-				TargetRegions:     &replicationRegions,
-				EndOfLifeDate:     endOfLifeDate,
-				ExcludeFromLatest: &miSGImageVersionExcludeFromLatest,
-				ReplicaCount:      &miSigReplicaCount,
+				TargetRegions:      &replicationRegions,
+				EndOfLifeDate:      endOfLifeDate,
+				ExcludeFromLatest:  &miSGImageVersionExcludeFromLatest,
+				ReplicaCount:       &miSigReplicaCount,
+				StorageAccountType: storageAcccountType,
 			},
 		},
 	}
@@ -121,6 +131,7 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 	managedImageSubscription := stateBag.Get(constants.ArmManagedImageSubscription).(string)
 	mdiID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/images/%s", managedImageSubscription, targetManagedImageResourceGroupName, targetManagedImageName)
 
+	miSGImageVersionStorageType, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionStorageType).(string)
 	miSGImageVersionEndOfLifeDate, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionEndOfLifeDate).(string)
 	miSGImageVersionExcludeFromLatest, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionExcludeFromLatest).(bool)
 	miSigReplicaCount, _ := stateBag.Get(constants.ArmManagedImageSharedGalleryImageVersionReplicaCount).(int32)
@@ -140,8 +151,9 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 	s.say(fmt.Sprintf(" -> SIG image version endoflife date      : '%s'", miSGImageVersionEndOfLifeDate))
 	s.say(fmt.Sprintf(" -> SIG image version exclude from latest : '%t'", miSGImageVersionExcludeFromLatest))
 	s.say(fmt.Sprintf(" -> SIG replica count [1, 10]             : '%d'", miSigReplicaCount))
+	s.say(fmt.Sprintf(" -> SIG image version storage type        : '%s'", miSGImageVersionStorageType))
 
-	createdGalleryImageVersionID, err := s.publish(ctx, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion, miSigReplicationRegions, miSGImageVersionEndOfLifeDate, miSGImageVersionExcludeFromLatest, miSigReplicaCount, location, tags)
+	createdGalleryImageVersionID, err := s.publish(ctx, mdiID, miSigPubRg, miSIGalleryName, miSGImageName, miSGImageVersion, miSigReplicationRegions, miSGImageVersionEndOfLifeDate, miSGImageVersionExcludeFromLatest, miSigReplicaCount, miSGImageVersionStorageType, location, tags)
 
 	if err != nil {
 		stateBag.Put(constants.Error, err)
