@@ -10,7 +10,7 @@ import (
 
 func TestStepPublishToSharedImageGalleryShouldNotPublishForVhd(t *testing.T) {
 	var testSubject = &StepPublishToSharedImageGallery{
-		publish: func(context.Context, string, string, string, string, string, []string, string, bool, int32, string, map[string]*string) (string, error) {
+		publish: func(context.Context, string, string, string, string, string, []string, string, bool, int32, string, string, map[string]*string) (string, error) {
 			return "test", nil
 		},
 		say:   func(message string) {},
@@ -31,7 +31,7 @@ func TestStepPublishToSharedImageGalleryShouldNotPublishForVhd(t *testing.T) {
 
 func TestStepPublishToSharedImageGalleryShouldPublishForManagedImageWithSig(t *testing.T) {
 	var testSubject = &StepPublishToSharedImageGallery{
-		publish: func(context.Context, string, string, string, string, string, []string, string, bool, int32, string, map[string]*string) (string, error) {
+		publish: func(context.Context, string, string, string, string, string, []string, string, bool, int32, string, string, map[string]*string) (string, error) {
 			return "", nil
 		},
 		say:   func(message string) {},
