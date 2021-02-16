@@ -62,7 +62,11 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 // RequiredPlugin represents a declaration of a dependency on a particular
 // Plugin version or source.
 type RequiredPlugin struct {
-	Name        string
+	Name string
+	// Source used to be able to tell how the template referenced this source,
+	// for example, "awesomecloud" instead of github.com/awesome/awesomecloud.
+	// This one is left here in case we want to go back to allowing inexplicit
+	// source url definitions.
 	Source      string
 	Type        *addrs.Plugin
 	Requirement VersionConstraint
@@ -77,7 +81,7 @@ type RequiredPlugins struct {
 func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnostics) {
 	attrs, diags := block.Body.JustAttributes()
 	ret := &RequiredPlugins{
-		RequiredPlugins: make(map[string]*RequiredPlugin),
+		RequiredPlugins: nil,
 		DeclRange:       block.DefRange,
 	}
 	for name, attr := range attrs {
@@ -96,17 +100,23 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 
 		switch {
 		case expr.Type().IsPrimitiveType():
-			vc, reqDiags := decodeVersionConstraint(attr)
-			diags = append(diags, reqDiags...)
-			rp.Requirement = vc
-			rp.Type, err = addrs.ParsePluginSourceString(name)
-			if err != nil {
-				diags = diags.Append(&hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Invalid plugin type",
-					Detail:   fmt.Sprintf(`Invalid plugin type %q: %s"`, name, err),
-				})
+			c := "version"
+			if cs, _ := decodeVersionConstraint(attr); len(cs.Required) > 0 {
+				c = cs.Required.String()
 			}
+
+			diags = diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Invalid plugin requirement",
+				Detail: fmt.Sprintf(`'%s = "%s"' plugin requirement calls are not possible.`+
+					` You must define a whole block. For example:`+"\n"+
+					`%[1]s = {`+"\n"+
+					`  source  = "github.com/hashicorp/%[1]s"`+"\n"+
+					`  version = "%[2]s"`+"\n"+`}`,
+					name, c),
+				Subject: attr.Range.Ptr(),
+			})
+			continue
 
 		case expr.Type().IsObjectType():
 			if !expr.Type().HasAttribute("version") {
@@ -140,8 +150,10 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Invalid version constraint",
-					Detail:   "This string does not use correct version constraint syntax. See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraint-syntax for docs.",
-					Subject:  attr.Expr.Range().Ptr(),
+					Detail: "This string does not use correct version constraint syntax. " +
+						"See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraint-syntax for docs.\n" +
+						err.Error(),
+					Subject: attr.Expr.Range().Ptr(),
 				})
 				continue
 			}
@@ -179,6 +191,7 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 					}
 				}
 				diags = append(diags, sourceDiags...)
+				continue
 			} else {
 				rp.Type = p
 			}
@@ -207,6 +220,9 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 			})
 		}
 
+		if ret.RequiredPlugins == nil {
+			ret.RequiredPlugins = make(map[string]*RequiredPlugin)
+		}
 		ret.RequiredPlugins[rp.Name] = rp
 	}
 

@@ -10,17 +10,13 @@ import (
 
 // Plugin encapsulates a single plugin type.
 type Plugin struct {
-	Type      string
-	Namespace string
 	Hostname  string
+	Namespace string
+	Type      string
 }
 
 func (p Plugin) RealRelativePath() string {
-	ns := DefaultPluginNamespace
-	if p.Namespace != "" {
-		ns = p.Namespace
-	}
-	return ns + "/packer-plugin-" + p.Type
+	return p.Namespace + "/packer-plugin-" + p.Type
 }
 
 func (p Plugin) Parts() []string {
@@ -30,23 +26,6 @@ func (p Plugin) Parts() []string {
 func (p Plugin) String() string {
 	return strings.Join(p.Parts(), "/")
 }
-
-// ForDisplay returns a user-friendly FQN string, simplified for readability. If
-// the plugin is using the default hostname, the hostname is omitted.
-func (p *Plugin) ForDisplay() string {
-	parts := []string{}
-	if p.Hostname != DefaultPluginHost {
-		parts = append(parts, p.Hostname)
-	}
-	if p.Namespace != DefaultPluginNamespace {
-		parts = append(parts, p.Namespace)
-	}
-	parts = append(parts, p.Type)
-	return strings.Join(parts, "/")
-}
-
-const DefaultPluginHost = "github.com"
-const DefaultPluginNamespace = "hashicorp"
 
 // ParsePluginPart processes an addrs.Plugin namespace or type string
 // provided by an end-user, producing a normalized version if possible or
@@ -120,18 +99,18 @@ func IsPluginPartNormalized(str string) (bool, error) {
 // 		hostname/namespace/name
 func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
 	ret := &Plugin{
-		Hostname:  DefaultPluginHost,
-		Namespace: DefaultPluginNamespace,
+		Hostname:  "",
+		Namespace: "",
 	}
 	var diags hcl.Diagnostics
 
 	// split the source string into individual components
 	parts := strings.Split(str, "/")
-	if len(parts) == 0 || len(parts) > 3 {
+	if len(parts) != 3 {
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid plugin source string",
-			Detail:   `The "source" attribute must be in the format "[hostname/][namespace/]name"`,
+			Detail:   `The "source" attribute must be in the format "hostname/namespace/name"`,
 		})
 		return nil, diags
 	}
@@ -142,7 +121,7 @@ func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
 			diags = diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Invalid plugin source string",
-				Detail:   `The "source" attribute must be in the format "[hostname/][namespace/]name"`,
+				Detail:   `The "source" attribute must be in the format "hostname/namespace/name"`,
 			})
 			return nil, diags
 		}
@@ -161,33 +140,21 @@ func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
 	}
 	ret.Type = name
 
-	if len(parts) == 1 {
-		return ret, diags
+	// the namespace is always the second-to-last part
+	givenNamespace := parts[len(parts)-2]
+	namespace, err := ParsePluginPart(givenNamespace)
+	if err != nil {
+		diags = diags.Append(&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Invalid plugin namespace",
+			Detail:   fmt.Sprintf(`Invalid plugin namespace %q in source %q: %s"`, namespace, str, err),
+		})
+		return nil, diags
 	}
+	ret.Namespace = namespace
 
-	if len(parts) >= 2 {
-		// the namespace is always the second-to-last part
-		givenNamespace := parts[len(parts)-2]
-		namespace, err := ParsePluginPart(givenNamespace)
-		if err != nil {
-			diags = diags.Append(&hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Invalid plugin namespace",
-				Detail:   fmt.Sprintf(`Invalid plugin namespace %q in source %q: %s"`, namespace, str, err),
-			})
-			return nil, diags
-		}
-		ret.Namespace = namespace
-	}
-
-	// Final Case: 3 parts
-	if len(parts) == 3 {
-		// the hostname is always the first part in a three-part source string
-		hostname := parts[0]
-		// TODO(azr): validate host ? Can this be something else than a
-		// github.com host for now?
-		ret.Hostname = hostname
-	}
+	// the hostname is always the first part in a three-part source string
+	ret.Hostname = parts[0]
 
 	// Due to how plugin executables are named and plugin git repositories
 	// are conventionally named, it's a reasonable and
@@ -217,7 +184,10 @@ func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
 				diags = diags.Append(&hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Invalid plugin type",
-					Detail:   fmt.Sprintf("Plugin source %q has a type with the prefix %q, which isn't valid. Although that prefix is often used in the names of version control repositories for Packer plugins, plugin source strings should not include it.\n\nDid you mean %q?", ret.ForDisplay(), userErrorPrefix, suggestedAddr.ForDisplay()),
+					Detail: fmt.Sprintf("Plugin source %q has a type with the prefix %q, which isn't valid. "+
+						"Although that prefix is often used in the names of version control repositories for Packer plugins, "+
+						"plugin source strings should not include it.\n"+
+						"\nDid you mean %q?", ret, userErrorPrefix, suggestedAddr),
 				})
 				return nil, diags
 			}

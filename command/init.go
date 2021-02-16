@@ -109,7 +109,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 			return 1
 		}
 
-		log.Printf("[TRACE] for plugin %s found %d matching installation(s)", pluginRequirement.Identifier.ForDisplay(), len(installs))
+		log.Printf("[TRACE] for plugin %s found %d matching installation(s)", pluginRequirement.Identifier, len(installs))
 
 		if len(installs) > 0 && cla.Upgrade == false {
 			continue
@@ -125,7 +125,7 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 			ret = 1
 		}
 		if newInstall != nil {
-			msg := fmt.Sprintf("Installed plugin %s %s in %q", pluginRequirement.Identifier.ForDisplay(), newInstall.Version, newInstall.BinaryPath)
+			msg := fmt.Sprintf("Installed plugin %s %s in %q", pluginRequirement.Identifier, newInstall.Version, newInstall.BinaryPath)
 			ui.Say(msg)
 		}
 	}
