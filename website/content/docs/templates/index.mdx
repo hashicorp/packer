@@ -1,6 +1,6 @@
 ---
 description: |
-  This section describes the configruation language used to create Packer
+  This section describes the configuration language used to create Packer
   templates.
 page_title: Templates
 ---
@@ -9,7 +9,7 @@ page_title: Templates
 
 Packer's behavior is determined by the Packer template, which consists of a
 series of declarations and commands for Packer to follow. This template tells
-Packer what plugins (builders, provisioners, post-proecssors) to use, how to
+Packer what plugins (builders, provisioners, post-processors) to use, how to
 configure each of those plugins, and what order to run them in.
 
 The template contains flexible variable injection tools, as well as built-in
@@ -23,6 +23,9 @@ JSON template format. While the JSON format is still supported, certain
 new features in the Packer core will only be implemented for the newer HCL
 format. Please use the side bar to find documentation for the different
 template formats.
+
+From version **1.7.0**, HCL2 becomes officially the preferred way to write Packer
+configuration(s).
 
 If you need help upgrading a JSON template to an HCL template, check
 our upgrade guide [here](/guides/hcl/from-json-v1).
