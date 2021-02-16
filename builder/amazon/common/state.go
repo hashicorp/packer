@@ -42,17 +42,8 @@ type StateChangeConf struct {
 
 // Polling configuration for the AWS waiter. Configures the waiter for resources creation or actions like attaching
 // volumes or importing image.
-// Usage example:
 //
-// In JSON:
-// ```json
-// "aws_polling" : {
-// 	 "delay_seconds": 30,
-// 	 "max_attempts": 50
-// }
-// ```
-//
-// In HCL2:
+// HCL2 example:
 // ```hcl
 // aws_polling {
 //	 delay_seconds = 30
@@ -60,6 +51,13 @@ type StateChangeConf struct {
 // }
 // ```
 //
+// JSON example:
+// ```json
+// "aws_polling" : {
+// 	 "delay_seconds": 30,
+// 	 "max_attempts": 50
+// }
+// ```
 type AWSPollingConfig struct {
 	// Specifies the maximum number of attempts the waiter will check for resource state.
 	// This value can also be set via the AWS_MAX_ATTEMPTS.

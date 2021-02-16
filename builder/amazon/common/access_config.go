@@ -174,6 +174,16 @@ type AccessConfig struct {
 	//     credential types) and GetFederationToken (for federation\_token
 	//     credential types) for more details.
 	//
+	// HCL2 example:
+	//
+	// ```hcl
+	// vault_aws_engine {
+	//     name = "myrole"
+	//     role_arn = "myarn"
+	//     ttl = "3600s"
+	// }
+	// ```
+	//
 	// JSON example:
 	//
 	// ```json
@@ -184,16 +194,6 @@ type AccessConfig struct {
 	//         "ttl": "3600s"
 	//     }
 	// }
-	// ```
-	//
-	// HCL2 example:
-	//
-	// ```hcl
-	//   vault_aws_engine {
-	//       name = "myrole"
-	//       role_arn = "myarn"
-	//       ttl = "3600s"
-	//   }
 	// ```
 	VaultAWSEngine VaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false"`
 	// [Polling configuration](#polling-configuration) for the AWS waiter. Configures the waiter that checks
