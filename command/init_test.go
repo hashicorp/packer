@@ -291,6 +291,32 @@ func TestInitCommand_Run(t *testing.T) {
 				testBuild{want: 1}.fn,
 			},
 		},
+		{
+			"unsupported-non-github-source-address",
+			[]func(t *testing.T, tc testCaseInit){
+				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
+			},
+			testMetaFile(t),
+			nil,
+			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+			map[string]string{
+				`cfg.pkr.hcl`: `
+					packer {
+						required_plugins {
+							comment = {
+								source  = "example.com/sylviamoss/comment"
+								version = "v0.2.19"
+							}
+						}
+					}`,
+			},
+			cfg.dir("6_pkr_config"),
+			cfg.dir("6_pkr_user_folder"),
+			1,
+			nil,
+			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+			nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
