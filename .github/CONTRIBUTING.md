@@ -91,7 +91,7 @@ The instructions below are for go 1.7. or later.
 4. After running building Packer successfully, use
    `$GOPATH/src/github.com/hashicorp/packer/bin/packer` to build a machine and
    verify your changes work. For instance:
-   `$GOPATH/src/github.com/hashicorp/packer/bin/packer build template.json`.
+   `$GOPATH/src/github.com/hashicorp/packer/bin/packer build template.pkr.hcl`.
 
 5. If everything works well and the tests pass, run `go fmt` on your code before
    submitting a pull-request.
