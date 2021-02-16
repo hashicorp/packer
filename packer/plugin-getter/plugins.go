@@ -345,7 +345,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 	getters := opts.Getters
 	fail := fmt.Errorf("could not find a local nor a remote checksum for plugin %q %q", pr.Identifier, pr.VersionConstraints)
 
-	log.Printf("[TRACE] getting available versions for the the %s plugin", pr.Identifier)
+	log.Printf("[TRACE] getting available versions for the %s plugin", pr.Identifier)
 	versions := version.Collection{}
 	for _, getter := range getters {
 
