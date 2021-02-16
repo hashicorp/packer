@@ -23,6 +23,7 @@ import (
 const (
 	ghTokenAccessor  = "PACKER_GITHUB_API_TOKEN"
 	defaultUserAgent = "packer-plugin-getter"
+	defaultHostname  = "github.com"
 )
 
 type Getter struct {
@@ -154,6 +155,11 @@ func (t *HostSpecificTokenAuthTransport) base() http.RoundTripper {
 }
 
 func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, error) {
+	if opts.PluginRequirement.Identifier.Hostname != defaultHostname {
+		s := opts.PluginRequirement.Identifier.String() + " doesn't appear to be a valid " + defaultHostname + " source address; check source and try again."
+		return nil, errors.New(s)
+	}
+
 	ctx := context.TODO()
 	if g.Client == nil {
 		var tc *http.Client
