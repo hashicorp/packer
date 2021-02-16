@@ -16,17 +16,6 @@ export default [
     category: 'templates',
     content: [
       {
-        category: "legacy_json_templates",
-        content: [
-          'builders',
-          'communicator',
-          'engine',
-          'post-processors',
-          'provisioners',
-          'user-variables',
-        ]
-      },
-      {
         category: 'hcl_templates',
         content: [
           {
@@ -189,6 +178,17 @@ export default [
           'expressions',
           'syntax-json',
         ],
+      },
+      {
+        category: "legacy_json_templates",
+        content: [
+          'builders',
+          'communicator',
+          'engine',
+          'post-processors',
+          'provisioners',
+          'user-variables',
+        ]
       },
     ],
   },
