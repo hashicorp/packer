@@ -19,7 +19,7 @@ can quickly merge or address your contributions.
   already fixed the bug you're experiencing.
 
 - Run the command with debug output with the environment variable `PACKER_LOG`.
-  For example: `PACKER_LOG=1 packer build template.json`. Take the _entire_
+  For example: `PACKER_LOG=1 packer build template.pkr.hcl`. Take the _entire_
   output and create a [gist](https://gist.github.com) for linking to in your
   issue. Packer should strip sensitive keys from the output, but take a look
   through just in case.
