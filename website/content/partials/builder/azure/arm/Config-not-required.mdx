@@ -91,7 +91,9 @@
 - `shared_gallery_image_version_exclude_from_latest` (bool) - If set to true, Virtual Machines deployed from the latest version of the
   Image Definition won't use this Image Version.
 
-- `shared_gallery_image_version_storage_account_type` (string) - add comment
+- `shared_gallery_image_version_storage_account_type` (string) - Specify the storage account type for gallery image version.
+  Valid values are Standard_LRS and Standard_ZRS.
+  The default is Standard_LRS.
 
 - `image_version` (string) - Specify a specific version of an OS to boot from.
   Defaults to `latest`. There may be a difference in versions available
