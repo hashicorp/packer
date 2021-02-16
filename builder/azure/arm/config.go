@@ -196,7 +196,9 @@ type Config struct {
 	// If set to true, Virtual Machines deployed from the latest version of the
 	// Image Definition won't use this Image Version.
 	SharedGalleryImageVersionExcludeFromLatest bool `mapstructure:"shared_gallery_image_version_exclude_from_latest" required:"false"`
-	// add comment
+	// Specify the storage account type for gallery image version.
+	// Valid values are Standard_LRS and Standard_ZRS.
+	// The default is Standard_LRS.
 	SharedGalleryImageVersionStorageAccountType string `mapstructure:"shared_gallery_image_version_storage_account_type" required:"false"`
 	sharedGalleryImageVersionStorageAccountType newCompute.StorageAccountType
 	// Name of the publisher to use for your base image (Azure Marketplace Images only). See
