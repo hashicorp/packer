@@ -1040,7 +1040,7 @@ func assertRequiredParametersSet(c *Config, errs *packersdk.MultiError) {
 		case string(newCompute.StorageAccountTypeStandardZRS):
 			c.sharedGalleryImageVersionStorageAccountType = newCompute.StorageAccountTypeStandardZRS
 		default:
-			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The storage_account_type for shared_image_gallery_destination %q is invalid", c.SharedGalleryImageVersionStorageAccountType))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The shared_gallery_image_version_storage_account_type %q is invalid", c.SharedGalleryImageVersionStorageAccountType))
 		}
 	}
 	if c.SharedGalleryTimeout == 0 {

@@ -58,7 +58,7 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiI
 	}
 
 	var storageAcccountType compute.StorageAccountType
-	switch string(miSigStorageType) {
+	switch miSigStorageType {
 	case "", string(compute.StorageAccountTypeStandardLRS):
 		storageAcccountType = compute.StorageAccountTypeStandardLRS
 	case string(compute.StorageAccountTypeStandardZRS):
