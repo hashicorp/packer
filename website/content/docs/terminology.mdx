@@ -38,13 +38,16 @@ for quick referencing.
   for a single platform. Builders read in some configuration and use that to
   run and generate a machine image. A builder is invoked as part of a build
   in order to create the actual resulting images. Example builders include
-  VirtualBox, VMware, and Amazon EC2. Builders can be created and added to
-  Packer in the form of plugins.
+  VirtualBox, VMware, and Amazon EC2.
 
 - `Commands` are sub-commands for the `packer` program that perform some job.
   An example command is "build", which is invoked as `packer build`. Packer
   ships with a set of commands out of the box in order to define its
   command-line interface.
+
+- `Data Sources` are components of Packer that fetch data from outside Packer
+  and make it available to use within the template.
+  Example of data sources include Amazon AMI, and Amazon Secrets Manager.
 
 - `Post-processors` are components of Packer that take the result of a
   builder or another post-processor and process that to create a new

@@ -19,7 +19,7 @@ can quickly merge or address your contributions.
   already fixed the bug you're experiencing.
 
 - Run the command with debug output with the environment variable `PACKER_LOG`.
-  For example: `PACKER_LOG=1 packer build template.json`. Take the _entire_
+  For example: `PACKER_LOG=1 packer build template.pkr.hcl`. Take the _entire_
   output and create a [gist](https://gist.github.com) for linking to in your
   issue. Packer should strip sensitive keys from the output, but take a look
   through just in case.
@@ -91,7 +91,7 @@ The instructions below are for go 1.7. or later.
 4. After running building Packer successfully, use
    `$GOPATH/src/github.com/hashicorp/packer/bin/packer` to build a machine and
    verify your changes work. For instance:
-   `$GOPATH/src/github.com/hashicorp/packer/bin/packer build template.json`.
+   `$GOPATH/src/github.com/hashicorp/packer/bin/packer build template.pkr.hcl`.
 
 5. If everything works well and the tests pass, run `go fmt` on your code before
    submitting a pull-request.

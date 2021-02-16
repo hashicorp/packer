@@ -14,7 +14,7 @@ and the Packer plugin SDK. Prior to version 1.7.0, the Packer core repository (h
 
 The goal of the SDK is to clearly separate the Packer core from the Packer plugins; as a plugin maintainer, you should only have to import the SDK and not the core. The SDK will allow us to use semantic versioning to express the changes to the API that our maintainers are expected to use, and will help us keep a clearer promise to you about the location and functionality of our helper tools.
 
-### How to update plugins to use the packer-plugin-SDK
+### How to update plugins to use the Packer plugin SDK
 
 We have created a [packer-sdk-migrator](https://github.com/hashicorp/packer-sdk-migrator) cli tool to help you migrate your plugin to use the new import paths. To use it, follow the installation instructions for the migration tool, then call `packer-sdk-migrator migrate` from the root of your plugin directory. More details can be found in the migrator's [README](https://github.com/hashicorp/packer-sdk-migrator/blob/main/README.md).
 
@@ -28,7 +28,7 @@ There are two main reasons we wrote the new server type.
 
 First, it enables multiple related components, for example a builder and a post-processor that share a hypervisor or cloud, to live together in the same plugin. This helps maintainers who are experts in a specific technology to focus on that technology without having to maintain several repositories that submodule the same common code. You can think of a multi-component plugin as being in some ways analogous to Terraform providers, in the sense that both frequently bundle common resources or components by hypervisor or cloud.
 
-Second, the new server provides the Packer core with structured metadata that allows the new `packer init` feature to work. This data includes semantic versioning that we need to implement the new `required_plugins` block, which allows us to ensure that users are using the correct _version_ of their plugin for a given Packer template. If you don't upgrade, your users cannot take advantage of the `packer init` tooling.
+Second, the new server provides the Packer core with structured metadata that allows the new `packer init` feature to work. This data includes semantic versioning that we need to implement the new [`required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements) block, which allows us to ensure that users are using the correct _version_ of their plugin for a given Packer template. If you don't upgrade, your users cannot take advantage of the `packer init` tooling.
 
 ### How to upgrade the plugin
 

@@ -30,7 +30,7 @@ export default function Homepage() {
             <span></span>
             <span></span>
           </div>
-          $ packer build template.json
+          $ packer build template.pkr.hcl
           <span className="green">
             ==&gt; virtualbox: virtualbox output will be in this color.
           </span>
