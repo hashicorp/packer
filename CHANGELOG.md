@@ -50,7 +50,7 @@
 * builder/proxmox: Improve cloud init error logging for proxmox builder.
     [GH-10499]
 * builder/qemu: Fix bug where vnc_min_port set to value greater then 5900 could
-    prevent Packer from connecting to QEMU. [GH-10450]
+    prevent Packer from connecting to QEMU. [GH-10450] [GH-10451]
 * builder/qemu: Fix regression with cd indexing when disk_interface is `ide`.
     [GH-10519]
 * builder/vmware-esx: Skip credential validation, which requires ovftool to be
