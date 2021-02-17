@@ -7,7 +7,7 @@
     [GH-10440]
 ** New Plugin** Aws Secrets Manager data source [GH-10505] [GH-10467]
 
-### BACKWARDS INCOMPATABILITIES
+### BACKWARDS INCOMPATIBILITIES
 * core: The API that the Packer core uses to communicate with community plugins
     has changed; maintainers of community plugins will need to upgrade their
     plugins in order to make them compatible with v1.7.0. An upgrade guide will
