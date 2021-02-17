@@ -7,7 +7,7 @@
     [GH-10440]
 ** New Plugin** Aws Secrets Manager data source [GH-10505] [GH-10467]
 
-### BACKWARDS INCOMPATABILITIES
+### BACKWARDS INCOMPATIBILITIES
 * core: The API that the Packer core uses to communicate with community plugins
     has changed; maintainers of community plugins will need to upgrade their
     plugins in order to make them compatible with v1.7.0. An upgrade guide will
@@ -25,7 +25,7 @@
 * core/fmt: The `packer fmt` can now read from stdin. [GH-10500]
 * core/hcl: Add regex and regexall hcl2 template functions. [GH-10601]
 * core/hcl: Templates now support "sensitive" locals. [GH-10509]
-* core/hcl: Templates now support error-cleanup-provisioner. [GH-]10604]
+* core/hcl: Templates now support error-cleanup-provisioner. [GH-10604]
 * hcl2_upgrade: Command now comes with a flag so you can control whether output
     templates are annotated with helpful comments. [GH-10619]
 * hcl2_upgrade: Command now gracefully handles options with template engine
@@ -50,7 +50,7 @@
 * builder/proxmox: Improve cloud init error logging for proxmox builder.
     [GH-10499]
 * builder/qemu: Fix bug where vnc_min_port set to value greater then 5900 could
-    prevent Packer from connecting to QEMU. [GH-10450]
+    prevent Packer from connecting to QEMU. [GH-10450] [GH-10451]
 * builder/qemu: Fix regression with cd indexing when disk_interface is `ide`.
     [GH-10519]
 * builder/vmware-esx: Skip credential validation, which requires ovftool to be
