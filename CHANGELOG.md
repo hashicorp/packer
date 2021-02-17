@@ -1,11 +1,11 @@
 ## 1.7.0 (Upcoming)
 
 ### FEATURES
-** New Command** (HCL only) `packer init` command will download plugins defined
+**New Command** (HCL only) `packer init` command will download plugins defined
     in a new `required_plugins` block [GH-10304] [GH-10633].
-** New Plugin Type** Data sources can be implemented (blog post forthcoming).
+**New Plugin Type** Data sources can be implemented (blog post forthcoming).
     [GH-10440]
-** New Plugin** Aws Secrets Manager data source [GH-10505] [GH-10467]
+**New Plugin** Aws Secrets Manager data source [GH-10505] [GH-10467]
 
 ### BACKWARDS INCOMPATIBILITIES
 * core: The API that the Packer core uses to communicate with community plugins
