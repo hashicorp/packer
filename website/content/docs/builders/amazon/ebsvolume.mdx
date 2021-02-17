@@ -185,51 +185,6 @@ source "amazon-ebs" "basic-example" {
 ## Basic Example
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "type": "amazon-ebsvolume",
-  "region": "us-east-1",
-  "ssh_username": "ubuntu",
-  "instance_type": "t2.medium",
-  "source_ami": "ami-40d28157",
-  "ebs_volumes": [
-    {
-      "volume_type": "gp2",
-      "device_name": "/dev/xvdf",
-      "delete_on_termination": false,
-      "tags": {
-        "zpool": "data",
-        "Name": "Data1"
-      },
-      "volume_size": 10
-    },
-    {
-      "volume_type": "gp2",
-      "device_name": "/dev/xvdg",
-      "tags": {
-        "zpool": "data",
-        "Name": "Data2"
-      },
-      "delete_on_termination": false,
-      "volume_size": 10
-    },
-    {
-      "volume_size": 10,
-      "tags": {
-        "Name": "Data3",
-        "zpool": "data"
-      },
-      "delete_on_termination": false,
-      "device_name": "/dev/xvdh",
-      "volume_type": "gp2"
-    }
-  ]
-}
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -275,6 +230,55 @@ source "amazon-ebsvolume" "basic-example" {
 
 build {
   sources = ["sources.amazon-ebsvolume.basic-example"]
+}
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+    {
+      "type": "amazon-ebsvolume",
+      "region": "us-east-1",
+      "ssh_username": "ubuntu",
+      "instance_type": "t2.medium",
+      "source_ami": "ami-40d28157",
+      "ebs_volumes": [
+        {
+          "volume_type": "gp2",
+          "device_name": "/dev/xvdf",
+          "delete_on_termination": false,
+          "tags": {
+            "zpool": "data",
+            "Name": "Data1"
+          },
+          "volume_size": 10
+        },
+        {
+          "volume_type": "gp2",
+          "device_name": "/dev/xvdg",
+          "tags": {
+            "zpool": "data",
+            "Name": "Data2"
+          },
+          "delete_on_termination": false,
+          "volume_size": 10
+        },
+        {
+          "volume_size": 10,
+          "tags": {
+            "Name": "Data3",
+            "zpool": "data"
+          },
+          "delete_on_termination": false,
+          "device_name": "/dev/xvdh",
+          "volume_type": "gp2"
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -351,22 +355,6 @@ The generated variables available for this builder are:
 Usage example:
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-"post-processors": [
-    {
-      "type": "manifest",
-      "output": "manifest.json",
-      "strip_path": true,
-      "custom_data": {
-        "source_ami_name": "{{ build `SourceAMIName` }}"
-      }
-    }
-]
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -393,6 +381,22 @@ post-processor "manifest" {
         source_ami_name = "${build.SourceAMIName}"
     }
 }
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+"post-processors": [
+  {
+    "type": "manifest",
+    "output": "manifest.json",
+    "strip_path": true,
+    "custom_data": {
+      "source_ami_name": "{{ build `SourceAMIName` }}"
+    }
+  }
+]
 ```
 
 </Tab>
