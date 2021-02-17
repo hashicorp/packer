@@ -25,7 +25,7 @@
 * core/fmt: The `packer fmt` can now read from stdin. [GH-10500]
 * core/hcl: Add regex and regexall hcl2 template functions. [GH-10601]
 * core/hcl: Templates now support "sensitive" locals. [GH-10509]
-* core/hcl: Templates now support error-cleanup-provisioner. [GH-]10604]
+* core/hcl: Templates now support error-cleanup-provisioner. [GH-10604]
 * hcl2_upgrade: Command now comes with a flag so you can control whether output
     templates are annotated with helpful comments. [GH-10619]
 * hcl2_upgrade: Command now gracefully handles options with template engine
