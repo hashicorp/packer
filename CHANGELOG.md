@@ -7,16 +7,29 @@
     [GH-10440]
 ** New Plugin** Aws Secrets Manager data source [GH-10505] [GH-10467]
 
+### BACKWARDS INCOMPATABILITIES
+* core: The API that the Packer core uses to communicate with community plugins
+    has changed; maintainers of community plugins will need to upgrade their
+    plugins in order to make them compatible with v1.7.0. An upgrade guide will
+    be available on our guides page https://www.packer.io/guides.
+
 ### IMPROVEMENTS
 * builder/amazon: Add `skip_create_ami` option for testing and situations where
     artifact is not the ami. [GH-10531]
-* builder/amazon: Add IMDSv2 support for AWS EBS builder [GH-10546]
+* builder/amazon: Add IMDSv2 support for AWS EBS builder. [GH-10546]
 * builder/amazon: Add resource tags in the launch template used to request spot
     instances. [GH-10456]
 * builder/openstack:  Add `skip_create_image` option for testing and situations
     where artifact is not the image. [GH-10496]
+* builder/oracle-oci: Add retry strategies to oci calls [GH-10591]
 * core/fmt: The `packer fmt` can now read from stdin. [GH-10500]
-* core/hcl: Templates now support "sensitive" locals [GH-10509]
+* core/hcl: Add regex and regexall hcl2 template functions. [GH-10601]
+* core/hcl: Templates now support "sensitive" locals. [GH-10509]
+* core/hcl: Templates now support error-cleanup-provisioner. [GH-]10604]
+* hcl2_upgrade: Command now comes with a flag so you can control whether output
+    templates are annotated with helpful comments. [GH-10619]
+* hcl2_upgrade: Command now gracefully handles options with template engine
+    interpolations. [GH-10625]
 * hcl2_upgrade: Command will convert amazon filters to use the ami data source.
     [GH-10491]
 
@@ -25,13 +38,16 @@
     snapshot. [GH-10150]
 * builder/amazon: Fix bug where validation fails if optional iops value is
     unset. [GH-10518]
-* builder/bsusurrogate: override bsu when omi root device is set [GH-10490]
+* builder/amazon: Wrap API call to get filtered image in a retry. [GH-10610]
+* builder/bsusurrogate: override bsu when omi root device is set. [GH-10490]
 * builder/google: Fix bug where Packer would fail when run by users who do not
     have permission to access the metadata, even though the metadata is not
     necessary to the run. [GH-10458]
 * builder/profitbricks: Profitbricks builder could not connect using SSH
-    communicator [GH-10549]
-* builder/proxmox: Improve cloud init error logging for proxmox builder
+    communicator. [GH-10549]
+* builder/proxmox: Ensure ISOs in additional_iso_files are mounted during VM
+    creation. [GH-10586]
+* builder/proxmox: Improve cloud init error logging for proxmox builder.
     [GH-10499]
 * builder/qemu: Fix bug where vnc_min_port set to value greater then 5900 could
     prevent Packer from connecting to QEMU. [GH-10450]
@@ -42,7 +58,10 @@
 * builder/yandex: Fix cloud-init config for ubuntu 20.04. [GH-10522]
 * builder/yandex: Fix incorrect access to `instance_id`. [GH-10522]
 * core/hcl: Fix bug where []uint8 types could not be passed to plugins.
-* core/hcl: Fix force flag for hcl2 provisioners and post-processors [GH-10571]
+* core/hcl: fix bug where HCL core could not handle passing []uint8 to plugins.
+    [GH-10516]
+* core/hcl: Fix force flag for hcl2 provisioners and post-processors.
+    [GH-10571]
 * post-processor/vsphere: Fix regression where Packer would not check the exit
     status after streaming UI from the ovftool command. [GH-10468]
 * post-processor/yandex-export: Changed dhclient command and supported
