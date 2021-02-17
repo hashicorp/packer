@@ -1,4 +1,4 @@
-## 1.7.0 (Upcoming)
+## 1.7.0 (February 17, 2021)
 
 ### FEATURES
 * **New Command** (HCL only) `packer init` command will download plugins defined
