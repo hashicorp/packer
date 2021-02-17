@@ -123,19 +123,6 @@ Block devices can be nested in the
 Here is a basic example. It is completely valid except for the access keys:
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "type": "amazon-chroot",
-  "access_key": "YOUR KEY HERE",
-  "secret_key": "YOUR SECRET KEY HERE",
-  "source_ami": "ami-e81d5881",
-  "ami_name": "packer-amazon-chroot {{timestamp}}"
-}
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -173,6 +160,19 @@ build {
 ```
 
 </Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "amazon-chroot",
+  "access_key": "YOUR KEY HERE",
+  "secret_key": "YOUR SECRET KEY HERE",
+  "source_ami": "ami-e81d5881",
+  "ami_name": "packer-amazon-chroot {{timestamp}}"
+}
+```
+
+</Tab>
 </Tabs>
 
 ## Chroot Mounts
@@ -193,6 +193,19 @@ the `chroot_mounts` configuration. Here is an example configuration which only
 mounts `/proc` and `/dev`:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-chroot" "basic-example" {
+  // ... other builder options
+  chroot_mounts = [
+    ["proc", "proc", "/proc"],
+    ["bind", "/dev", "/dev"]
+  ]
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -205,19 +218,6 @@ mounts `/proc` and `/dev`:
     ["bind", "/dev", "/dev"]
   ]
 }]
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "amazon-chroot" "basic-example" {
-  // ... other builder options
-  chroot_mounts = [
-    ["proc", "proc", "/proc"],
-    ["bind", "/dev", "/dev"]
-  ]
-}
 ```
 
 </Tab>
@@ -257,26 +257,6 @@ file which will prevent packages installed by your provisioners from starting
 services:
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-"provisioners": [
-  {
-    "type": "shell",
-    "inline": [
-      "echo '#!/bin/sh' > /usr/sbin/policy-rc.d",
-      "echo 'exit 101' >> /usr/sbin/policy-rc.d",
-      "chmod a+x /usr/sbin/policy-rc.d"
-    ]
-  },
-  {
-    "type": "shell",
-    "inline": ["rm -f /usr/sbin/policy-rc.d"]
-  }
-]
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -303,6 +283,26 @@ build {
 ```
 
 </Tab>
+<Tab heading="JSON">
+
+```json
+"provisioners": [
+  {
+    "type": "shell",
+    "inline": [
+      "echo '#!/bin/sh' > /usr/sbin/policy-rc.d",
+      "echo 'exit 101' >> /usr/sbin/policy-rc.d",
+      "chmod a+x /usr/sbin/policy-rc.d"
+    ]
+  },
+  {
+    "type": "shell",
+    "inline": ["rm -f /usr/sbin/policy-rc.d"]
+  }
+]
+```
+
+</Tab>
 </Tabs>
 
 ### Ansible provisioner
@@ -321,6 +321,57 @@ involving the `nvme_device_path` option above. Read that for more information.
 A working example for mounting an NVMe device is below:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+// export PKR_VAR_aws_access_key=$YOURKEY
+variable "aws_access_key" {
+  type = string
+}
+
+// export PKR_VAR_aws_secret_key=$YOURSECRETKEY
+variable "aws_secret_key" {
+  type = string
+}
+
+data "amazon-ami" "example" {
+  filters = {
+    virtualization-type = "hvm"
+    name                = "amzn-ami-hvm-*"
+    root-device-type    = "ebs"
+  }
+  owners      = ["137112412989"]
+  most_recent = true
+
+  # Access Configuration
+  region      = "us-east-1"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+}
+
+source "amazon-chroot" "basic-example" {
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+  region     = "us-east-1"
+  source_ami = data.amazon-ami.example.id
+  ena_support = true
+  ami_name = "amazon-chroot-test-{{timestamp}}"
+  nvme_device_path = "/dev/nvme1n1p"
+  device_path = "/dev/sdf"
+}
+
+build {
+  sources = [
+    "source.amazon-chroot.basic-example"
+  ]
+
+  provisioner "shell" {
+    inline = ["echo Test > /tmp/test.txt"]
+  }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -358,57 +409,6 @@ A working example for mounting an NVMe device is below:
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-// export PKR_VAR_aws_access_key=$YOURKEY
-variable "aws_access_key" {
-  type = string
-}
-
-// export PKR_VAR_aws_secret_key=$YOURSECRETKEY
-variable "aws_secret_key" {
-  type = string
-}
-
-source "amazon-chroot" "basic-example" {
-  access_key = var.aws_access_key
-  secret_key = var.aws_secret_key
-  region     = "us-east-1"
-  source_ami_filter {
-    filter {
-      key = "virtualization-type"
-      value = "hvm"
-    }
-    filter {
-      key = "name"
-      value = "amzn-ami-hvm-*"
-    }
-    filter {
-      key = "root-device-type"
-      value = "ebs"
-    }
-    owners = ["137112412989"]
-    most_recent = true
-  }
-  ena_support = true
-  ami_name = "amazon-chroot-test-{{timestamp}}"
-  nvme_device_path = "/dev/nvme1n1p"
-  device_path = "/dev/sdf"
-}
-
-build {
-  sources = [
-    "source.amazon-chroot.basic-example"
-  ]
-
-  provisioner "shell" {
-    inline = ["echo Test > /tmp/test.txt"]
-  }
-}
-```
-
-</Tab>
 </Tabs>
 
 Note that in the `nvme_device_path` you must end with the `p`; if you try to
@@ -425,31 +425,6 @@ HVM image and format it ext4. This builder block should be followed by
 provisioning commands to install the os and bootloader.
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "type": "amazon-chroot",
-  "ami_name": "packer-from-scratch {{timestamp}}",
-  "from_scratch": true,
-  "ami_virtualization_type": "hvm",
-  "pre_mount_commands": [
-    "parted {{.Device}} mklabel msdos mkpart primary 1M 100% set 1 boot on print",
-    "mkfs.ext4 {{.Device}}1"
-  ],
-  "root_volume_size": 15,
-  "root_device_name": "xvda",
-  "ami_block_device_mappings": [
-    {
-      "device_name": "xvda",
-      "delete_on_termination": true,
-      "volume_type": "gp2"
-    }
-  ]
-}
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -490,6 +465,31 @@ build {
   provisioner "shell" {
     inline = ["rm -f /usr/sbin/policy-rc.d"]
   }
+}
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "amazon-chroot",
+  "ami_name": "packer-from-scratch {{timestamp}}",
+  "from_scratch": true,
+  "ami_virtualization_type": "hvm",
+  "pre_mount_commands": [
+    "parted {{.Device}} mklabel msdos mkpart primary 1M 100% set 1 boot on print",
+    "mkfs.ext4 {{.Device}}1"
+  ],
+  "root_volume_size": 15,
+  "root_device_name": "xvda",
+  "ami_block_device_mappings": [
+    {
+      "device_name": "xvda",
+      "delete_on_termination": true,
+      "volume_type": "gp2"
+    }
+  ]
 }
 ```
 
@@ -535,24 +535,6 @@ The generated variables available for this builder are:
 Usage example:
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-"post-processors": [
-    {
-      "type": "manifest",
-      "output": "manifest.json",
-      "strip_path": true,
-      "custom_data": {
-        "source_ami_name": "{{ build `SourceAMIName` }}",
-        "device": "{{ build `Device` }}",
-        "mount_path": "{{ build `MountPath` }}"
-      }
-    }
-]
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -581,6 +563,24 @@ post-processor "manifest" {
         mount_path = "${build.MountPath}"
     }
 }
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+"post-processors": [
+  {
+    "type": "manifest",
+    "output": "manifest.json",
+    "strip_path": true,
+    "custom_data": {
+      "source_ami_name": "{{ build `SourceAMIName` }}",
+      "device": "{{ build `Device` }}",
+      "mount_path": "{{ build `MountPath` }}"
+    }
+  }
+]
 ```
 
 </Tab>

@@ -186,30 +186,6 @@ change the AMI IDs according to what images exist at the time the template is
 run:
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "variables": {
-    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
-    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
-  },
-  "builders": [
-    {
-      "type": "amazon-ebs",
-      "access_key": "{{user `aws_access_key`}}",
-      "secret_key": "{{user `aws_secret_key`}}",
-      "region": "us-east-1",
-      "source_ami": "ami-fce3c696",
-      "instance_type": "t2.micro",
-      "ssh_username": "ubuntu",
-      "ami_name": "packer_AWS {{timestamp}}"
-    }
-  ]
-}
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -250,6 +226,30 @@ build {
 ```
 
 </Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "variables": {
+  "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+  "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
+},
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "us-east-1",
+      "source_ami": "ami-fce3c696",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "packer_AWS {{timestamp}}"
+    }
+  ]
+}
+```
+
+</Tab>
 </Tabs>
 
 -> **Note:** Packer can also read the access key and secret access key directly
@@ -279,6 +279,41 @@ configuration of `launch_block_device_mappings` will expand the root volume
 `/dev/sdc` when we boot a new instance of our AMI.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-ebs" "basic-example" {
+  region        =  "us-east-1"
+  source_ami    =  "ami-fce3c696"
+  instance_type =  "t2.micro"
+  ssh_username  =  "ubuntu"
+  ami_name      =  "packer_AWS_example_{{timestamp}}"
+  launch_block_device_mappings {
+    device_name = "/dev/sda1"
+    volume_size = 40
+    volume_type = "gp2"
+    delete_on_termination = true
+  }
+  // Notice that instead of providing a list of mappings, you are just providing
+  // multiple mappings in a row. This diverges from the JSON template format.
+  ami_block_device_mappings {
+    device_name  = "/dev/sdb"
+    virtual_name = "ephemeral0"
+  }
+  ami_block_device_mappings {
+    device_name  = "/dev/sdc"
+    virtual_name = "ephemeral1"
+  }
+}
+
+build {
+  sources = [
+    "source.amazon-ebs.basic-example"
+  ]
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -310,41 +345,6 @@ configuration of `launch_block_device_mappings` will expand the root volume
         }
       ]
     }
-  ]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "amazon-ebs" "basic-example" {
-  region        =  "us-east-1"
-  source_ami    =  "ami-fce3c696"
-  instance_type =  "t2.micro"
-  ssh_username  =  "ubuntu"
-  ami_name      =  "packer_AWS_example_{{timestamp}}"
-  launch_block_device_mappings {
-    device_name = "/dev/sda1"
-    volume_size = 40
-    volume_type = "gp2"
-    delete_on_termination = true
-  }
-  // Notice that instead of providing a list of mappings, you are just providing
-  // multiple mappings in a row. This diverges from the JSON template format.
-  ami_block_device_mappings {
-    device_name  = "/dev/sdb"
-    virtual_name = "ephemeral0"
-  }
-  ami_block_device_mappings {
-    device_name  = "/dev/sdc"
-    virtual_name = "ephemeral1"
-  }
-}
-
-build {
-  sources = [
-    "source.amazon-ebs.basic-example"
   ]
 }
 ```
@@ -400,6 +400,34 @@ The generated variables available for this builder are:
 Usage example:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+# When accessing one of these variables from inside the builder, you need to
+# use the golang templating syntax. This is due to an architectural quirk that
+# won't be easily resolvable until legacy json templates are deprecated:
+build {
+  source "amazon-ebs" "basic-example" {
+    tags = {
+    OS_Version = "Ubuntu"
+    Release = "Latest"
+    Base_AMI_ID = "{{ .SourceAMI }}"
+    Base_AMI_Name = "{{ .SourceAMIName }}"
+    }
+  }
+
+  // when accessing one of the variables from a provisioner or post-processor, use
+  // hcl-syntax
+  post-processor "manifest" {
+    output = "manifest.json"
+    strip_path = true
+    custom_data = {
+    source_ami_name = "${build.SourceAMIName}"
+  }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -416,35 +444,6 @@ Usage example:
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-// When accessing one of these variables from inside the builder, you need to
-// use the golang templating syntax. This is due to an architectural quirk that
-// won't be easily resolvable until legacy json templates are deprecated:
-
-{
-source "amazon-ebs" "basic-example" {
-  tags = {
-        OS_Version = "Ubuntu"
-        Release = "Latest"
-        Base_AMI_ID = "{{ .SourceAMI }}"
-        Base_AMI_Name = "{{ .SourceAMIName }}"
-    }
-}
-
-// when accessing one of the variables from a provisioner or post-processor, use
-// hcl-syntax
-post-processor "manifest" {
-    output = "manifest.json"
-    strip_path = true
-    custom_data = {
-        source_ami_name = "${build.SourceAMIName}"
-    }
-}
-```
-
-</Tab>
 </Tabs>
 
 ## Tag Example
@@ -455,30 +454,6 @@ provide your access keys, and may need to change the source AMI ID based on
 what images exist when this template is run:
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "builders": [
-    {
-      "type": "amazon-ebs",
-      "region": "us-east-1",
-      "source_ami": "ami-fce3c696",
-      "instance_type": "t2.micro",
-      "ssh_username": "ubuntu",
-      "ami_name": "packer-tag-example {{timestamp}}",
-      "tags": {
-        "OS_Version": "Ubuntu",
-        "Release": "Latest",
-        "Base_AMI_Name": "{{ .SourceAMIName }}",
-        "Extra": "{{ .SourceAMITags.TagName }}"
-      }
-    }
-  ]
-}
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -499,6 +474,30 @@ source "amazon-ebs" "basic-example" {
 build {
   sources = [
     "source.amazon-ebs.basic-example"
+  ]
+}
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "builders": [
+      {
+      "type": "amazon-ebs",
+      "region": "us-east-1",
+      "source_ami": "ami-fce3c696",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "packer-tag-example {{timestamp}}",
+      "tags": {
+        "OS_Version": "Ubuntu",
+        "Release": "Latest",
+        "Base_AMI_Name": "{{ .SourceAMIName }}",
+        "Extra": "{{ .SourceAMITags.TagName }}"
+      }
+    }
   ]
 }
 ```
@@ -573,6 +572,48 @@ Packer will ask AWS to provide a random password that it generates
 automatically. The following config will work with the above template:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+# This example uses a amazon-ami data source rather than a specific AMI.
+# this allows us to use the same filter regardless of what region we're in,
+# among other benefits.
+data "amazon-ami" "example" {
+  filters = {
+    virtualization-type = "hvm"
+    name                = "*Windows_Server-2012*English-64Bit-Base*"
+    root-device-type    = "ebs"
+  }
+  owners      = ["amazon"]
+  most_recent = true
+  # Access Region Configuration
+  region      = "us-east-1"
+}
+
+source "amazon-ebs" "winrm-example" {
+  region =  "us-east-1"
+  source_ami = data.amazon-ami.example.id
+  instance_type =  "t2.micro"
+  ami_name =  "packer_winrm_example {{timestamp}}"
+  # This user data file sets up winrm and configures it so that the connection
+  # from Packer is allowed. Without this file being set, Packer will not
+  # connect to the instance.
+  user_data_file = "../boot_config/winrm_bootstrap.txt"
+  communicator = "winrm"
+  force_deregister = true
+  winrm_insecure = true
+  winrm_username = "Administrator"
+  winrm_use_ssl = true
+}
+
+build {
+  sources = [
+    "source.amazon-ebs.winrm-example"
+  ]
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -604,51 +645,6 @@ automatically. The following config will work with the above template:
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "amazon-ebs" "winrm-example" {
-  region =  "us-east-1"
-  // This example uses a source_ami_filter rather than a specific AMI.
-  // this allows us to use the same filter regardless of what region we're in,
-  // among other benefits.
-  source_ami_filter {
-    filter {
-      key = "virtualization-type"
-      value = "hvm"
-    }
-    filter {
-      key = "name"
-      value = "*Windows_Server-2012*English-64Bit-Base*"
-    }
-    filter {
-      key = "root-device-type"
-      value = "ebs"
-    }
-    most_recent = true
-    owners = ["amazon"]
-  }
-  instance_type =  "t2.micro"
-  ami_name =  "packer_winrm_example {{timestamp}}"
-  // This user data file sets up winrm and configures it so that the connection
-  // from Packer is allowed. Without this file being set, Packer will not
-  // connect to the instance.
-  user_data_file = "../boot_config/winrm_bootstrap.txt"
-  communicator = "winrm"
-  force_deregister = true
-  winrm_insecure = true
-  winrm_username = "Administrator"
-  winrm_use_ssl = true
-}
-
-build {
-  sources = [
-    "source.amazon-ebs.winrm-example"
-  ]
-}
-```
-
-</Tab>
 </Tabs>
 
 ## Windows 2016 Sysprep Commands - For Amazon Windows AMIs Only
@@ -657,12 +653,11 @@ For Amazon Windows 2016 AMIs it is necessary to run Sysprep commands which can
 be easily added to the provisioner section.
 
 <Tabs>
-<Tab heading="JSON">
+<Tab heading="HCL2">
 
-```json
-{
-  "type": "powershell",
-  "inline": [
+```hcl
+provisioner "powershell" {
+  inline = [
     "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/InitializeInstance.ps1 -Schedule",
     "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/SysprepInstance.ps1 -NoShutdown"
   ]
@@ -670,11 +665,12 @@ be easily added to the provisioner section.
 ```
 
 </Tab>
-<Tab heading="HCL2">
+<Tab heading="JSON">
 
-```hcl
-provisioner "powershell" {
-  inline = [
+```json
+{
+  "type": "powershell",
+  "inline": [
     "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/InitializeInstance.ps1 -Schedule",
     "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/SysprepInstance.ps1 -NoShutdown"
   ]
