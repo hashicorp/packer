@@ -17,12 +17,14 @@ import (
 	"github.com/oracle/oci-go-sdk/common"
 )
 
-// LaunchInstanceShapeConfigDetails The shape configuration requested for the instance. If provided, the instance will be created
-// with the resources specified. In the case where some properties are missing or
-// the entire parameter is not provided, the instance will be created with the default
-// configuration values for the provided `shape`.
-// Each shape only supports certain configurable values. If the values provided are invalid for the
-// provided `shape`, an error will be returned.
+// LaunchInstanceShapeConfigDetails The shape configuration requested for the instance.
+// If the parameter is provided, the instance is created with the resources that you specify. If some
+// properties are missing or the entire parameter is not provided, the instance is created
+// with the default configuration values for the `shape` that you specify.
+// Each shape only supports certain configurable values. If the values that you provide are not valid for the
+// specified `shape`, an error is returned.
+// For more information about customizing the resources that are allocated to a flexible shapes,
+// see Flexible Shapes (https://docs.cloud.oracle.com/Content/Compute/References/computeshapes.htm#flexible).
 type LaunchInstanceShapeConfigDetails struct {
 
 	// The total number of OCPUs available to the instance.

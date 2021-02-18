@@ -41,7 +41,7 @@ type AppCatalogSubscriptionSummary struct {
 	// The compartmentID of the subscription.
 	CompartmentId *string `mandatory:"false" json:"compartmentId"`
 
-	// Date and time at which the subscription was created, in RFC3339 format.
+	// Date and time at which the subscription was created, in RFC3339 (https://tools.ietf.org/html/rfc3339) format.
 	// Example: `2018-03-20T12:32:53.532Z`
 	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
 }

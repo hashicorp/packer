@@ -31,7 +31,7 @@ type VolumeBackupPolicyAssignment struct {
 	// The OCID of the volume backup policy that has been assigned to the volume.
 	PolicyId *string `mandatory:"true" json:"policyId"`
 
-	// The date and time the volume backup policy was assigned to the volume. The format is defined by RFC3339.
+	// The date and time the volume backup policy was assigned to the volume. The format is defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 }
 

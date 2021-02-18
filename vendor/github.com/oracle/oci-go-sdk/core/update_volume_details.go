@@ -45,6 +45,9 @@ type UpdateVolumeDetails struct {
 
 	// The size to resize the volume to in GBs. Has to be larger than the current size.
 	SizeInGBs *int64 `mandatory:"false" json:"sizeInGBs"`
+
+	// Specifies whether the auto-tune performance is enabled for this volume.
+	IsAutoTuneEnabled *bool `mandatory:"false" json:"isAutoTuneEnabled"`
 }
 
 func (m UpdateVolumeDetails) String() string {

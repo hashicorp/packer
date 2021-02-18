@@ -42,7 +42,7 @@ type VolumeGroup struct {
 	// The aggregate size of the volume group in MBs.
 	SizeInMBs *int64 `mandatory:"true" json:"sizeInMBs"`
 
-	// The date and time the volume group was created. Format defined by RFC3339.
+	// The date and time the volume group was created. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
 	// OCIDs for the volumes in this volume group.
@@ -132,6 +132,7 @@ func (m *VolumeGroup) UnmarshalJSON(data []byte) (e error) {
 	for i, n := range model.VolumeIds {
 		m.VolumeIds[i] = n
 	}
+
 	return
 }
 

@@ -449,8 +449,17 @@ func addToHeader(request *http.Request, value reflect.Value, field reflect.Struc
 		return
 	}
 
-	request.Header.Add(headerName, headerValue)
+	if isUniqueHeaderRequired(headerName) {
+		request.Header.Set(headerName, headerValue)
+	} else {
+		request.Header.Add(headerName, headerValue)
+	}
 	return
+}
+
+// Check if the header is required to be unique
+func isUniqueHeaderRequired(headerName string) bool {
+	return strings.EqualFold(headerName, requestHeaderContentType)
 }
 
 // Header collection is a map of string to string that gets rendered as individual headers with a given prefix

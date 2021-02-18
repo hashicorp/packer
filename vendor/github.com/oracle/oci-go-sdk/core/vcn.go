@@ -91,7 +91,7 @@ type Vcn struct {
 	// Example: `2001:0db8:0123::/48`
 	Ipv6PublicCidrBlock *string `mandatory:"false" json:"ipv6PublicCidrBlock"`
 
-	// The date and time the VCN was created, in the format defined by RFC3339.
+	// The date and time the VCN was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
 

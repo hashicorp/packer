@@ -24,7 +24,7 @@ type CreateCpeDetails struct {
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	// The public IP address of the on-premises router.
-	// Example: `143.19.23.16`
+	// Example: `203.0.113.2`
 	IpAddress *string `mandatory:"true" json:"ipAddress"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a
