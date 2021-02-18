@@ -981,6 +981,9 @@ func writeProvisioner(typeName string, provisioner *template.Provisioner) []byte
 	if provisioner.Timeout > 0 {
 		cfg["timeout"] = provisioner.Timeout.String()
 	}
+	if provisioner.PauseBefore > 0 {
+		cfg["pause_before"] = provisioner.PauseBefore.String()
+	}
 	body.AppendNewline()
 	jsonBodyToHCL2Body(block.Body(), cfg)
 	return provisionerContent.Bytes()

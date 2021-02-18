@@ -241,9 +241,10 @@ build {
   }
 
   provisioner "shell-local" {
-    inline  = ["sleep 100000"]
-    only    = ["amazon-ebs"]
-    timeout = "5s"
+    inline       = ["sleep 100000"]
+    only         = ["amazon-ebs"]
+    pause_before = "5s"
+    timeout      = "5s"
   }
 
   post-processor "amazon-import" {
