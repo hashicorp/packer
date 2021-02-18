@@ -80,10 +80,6 @@ func realMain() int {
 	defer os.Remove(logTempFile.Name())
 	defer logTempFile.Close()
 
-	// Tell the logger to log to this file
-	os.Setenv(EnvLog, "")
-	os.Setenv(EnvLogFile, "")
-
 	// Setup the prefixed readers that send data properly to
 	// stdout/stderr.
 	doneCh := make(chan struct{})
