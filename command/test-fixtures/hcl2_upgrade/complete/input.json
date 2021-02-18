@@ -189,6 +189,7 @@
                 "amazon-ebs"
             ],
             "timeout": "5s",
+            "pause_before": "5s",
             "inline": [
                 "sleep 100000"
             ]
