@@ -401,14 +401,22 @@ func addCtyTagToStruct(s *types.Struct) *types.Struct {
 	for i := range tags {
 		field, tag := vars[i], tags[i]
 		ctyAccessor := ToSnakeCase(field.Name())
+		hclAccessor := ToSnakeCase(field.Name())
 		st, err := structtag.Parse(tag)
 		if err == nil {
 			if ms, err := st.Get("mapstructure"); err == nil && ms.Name != "" {
 				ctyAccessor = ms.Name
 			}
+			if ms, err := st.Get("cty"); err == nil && ms.Name != "" {
+				ctyAccessor = ms.Name
+			}
+			hclAccessor = ctyAccessor
+			if ms, err := st.Get("hcl"); err == nil && ms.Name != "" {
+				hclAccessor = ms.Name
+			}
 		}
 		st.Set(&structtag.Tag{Key: "cty", Name: ctyAccessor})
-		_ = st.Set(&structtag.Tag{Key: "hcl", Name: ctyAccessor})
+		_ = st.Set(&structtag.Tag{Key: "hcl", Name: hclAccessor})
 		tags[i] = st.String()
 	}
 	return types.NewStruct(uniqueTags("cty", vars, tags))

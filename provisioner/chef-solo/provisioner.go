@@ -21,6 +21,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	"github.com/zclconf/go-cty/cty"
 )
 
 type guestOSTypeConfig struct {
@@ -56,13 +57,18 @@ type Config struct {
 	ExecuteCommand             string   `mapstructure:"execute_command"`
 	InstallCommand             string   `mapstructure:"install_command"`
 	RemoteCookbookPaths        []string `mapstructure:"remote_cookbook_paths"`
-	Json                       map[string]interface{}
-	PreventSudo                bool     `mapstructure:"prevent_sudo"`
-	RunList                    []string `mapstructure:"run_list"`
-	SkipInstall                bool     `mapstructure:"skip_install"`
-	StagingDir                 string   `mapstructure:"staging_directory"`
-	GuestOSType                string   `mapstructure:"guest_os_type"`
-	Version                    string   `mapstructure:"version"`
+	// This is for internal usage. It is used to write the hcl2spec struct.
+	// HCL cannot decode into interface so we write it as a cty.Value
+	// ref: https://github.com/hashicorp/hcl/issues/291#issuecomment-496347585
+	InternalJson map[string]cty.Value `cty:"json"`
+	// We keep this one to write back from cty.Value on Prepare
+	Json        map[string]interface{} `mapstructure:"json" mapstructure-to-hcl2:",skip"`
+	PreventSudo bool                   `mapstructure:"prevent_sudo"`
+	RunList     []string               `mapstructure:"run_list"`
+	SkipInstall bool                   `mapstructure:"skip_install"`
+	StagingDir  string                 `mapstructure:"staging_directory"`
+	GuestOSType string                 `mapstructure:"guest_os_type"`
+	Version     string                 `mapstructure:"version"`
 
 	ctx interpolate.Context
 }
@@ -398,12 +404,10 @@ func (p *Provisioner) createJson(ui packersdk.Ui, comm packersdk.Communicator) (
 	ui.Message("Creating JSON attribute file")
 
 	jsonData := make(map[string]interface{})
-
 	// Copy the configured JSON
 	for k, v := range p.config.Json {
 		jsonData[k] = v
 	}
-
 	// Set the run list if it was specified
 	if len(p.config.RunList) > 0 {
 		jsonData["run_list"] = p.config.RunList
