@@ -28,14 +28,6 @@ func HCL2ValueFromConfigValue(v interface{}) cty.Value {
 	}
 
 	switch tv := v.(type) {
-	case bool:
-		return cty.BoolVal(tv)
-	case string:
-		return cty.StringVal(tv)
-	case int:
-		return cty.NumberIntVal(int64(tv))
-	case float64:
-		return cty.NumberFloatVal(tv)
 	case []interface{}:
 		vals := make([]cty.Value, len(tv))
 		for i, ev := range tv {
@@ -47,6 +39,9 @@ func HCL2ValueFromConfigValue(v interface{}) cty.Value {
 		for i, ev := range tv {
 			vals[i] = cty.StringVal(ev)
 		}
+		if len(vals) == 0 {
+			return cty.ListValEmpty(cty.String)
+		}
 		return cty.ListVal(vals)
 	case map[string]interface{}:
 		vals := map[string]cty.Value{}
@@ -54,11 +49,21 @@ func HCL2ValueFromConfigValue(v interface{}) cty.Value {
 			vals[k] = HCL2ValueFromConfigValue(ev)
 		}
 		return cty.ObjectVal(vals)
-	default:
+	}
+
+	impliedValType, err := gocty.ImpliedType(v)
+	if err != nil {
 		// HCL/HIL should never generate anything that isn't caught by
 		// the above, so if we get here something has gone very wrong.
-		panic(fmt.Errorf("can't convert %#v to cty.Value", v))
+		panic(fmt.Errorf("can't convert %#v to cty.Value: %s", v, err.Error()))
 	}
+	value, err := gocty.ToCtyValue(v, impliedValType)
+	if err != nil {
+		// HCL/HIL should never generate anything that isn't caught by
+		// the above, so if we get here something has gone very wrong.
+		panic(fmt.Errorf("can't convert %#v to cty.Value %s", v, err.Error()))
+	}
+	return value
 }
 
 // HCL2ValueFromConfig takes a struct with it's map of hcldec.Spec, and turns it into

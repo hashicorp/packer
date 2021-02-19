@@ -36,6 +36,7 @@ func TestProvisionerPrepare_chefEnvironment(t *testing.T) {
 		t.Fatalf("unexpected: %#v", p.config.ChefEnvironment)
 	}
 }
+
 func TestProvisionerPrepare_chefLicense(t *testing.T) {
 	var p Provisioner
 
@@ -313,22 +314,22 @@ func TestProvisionerPrepare_json(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.Json["foo"] != `"bar\baz"` {
-		t.Fatalf("bad: %#v", p.config.Json)
+	if p.config.JsonJson["foo"] != `"bar\baz"` {
+		t.Fatalf("bad: %#v", p.config.JsonJson)
 	}
 }
 
 func TestProvisionerPrepare_jsonNested(t *testing.T) {
 	config := testConfig()
 	config["json"] = map[string]interface{}{
-		"foo": map[interface{}]interface{}{
-			"bar": []uint8("baz"),
+		"foo": map[string]interface{}{
+			"bar": "baz",
 		},
 
 		"bar": []interface{}{
 			"foo",
 
-			map[interface{}]interface{}{
+			map[string]interface{}{
 				"bar": "baz",
 			},
 		},
@@ -336,7 +337,7 @@ func TestProvisionerPrepare_jsonNested(t *testing.T) {
 		"bFalse": false,
 		"bTrue":  true,
 		"bNil":   nil,
-		"bStr":   []uint8("bar"),
+		"bStr":   "bar",
 
 		"bInt":   1,
 		"bFloat": 4.5,
@@ -348,11 +349,11 @@ func TestProvisionerPrepare_jsonNested(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	fooMap := p.config.Json["foo"].(map[string]interface{})
+	fooMap := p.config.JsonJson["foo"].(map[string]interface{})
 	if fooMap["bar"] != "baz" {
 		t.Fatalf("nope: %#v", fooMap["bar"])
 	}
-	if p.config.Json["bStr"] != "bar" {
+	if p.config.JsonJson["bStr"] != "bar" {
 		t.Fatalf("nope: %#v", fooMap["bar"])
 	}
 }

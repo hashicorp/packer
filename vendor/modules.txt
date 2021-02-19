@@ -364,7 +364,7 @@ github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
-# github.com/hashicorp/packer-plugin-sdk v0.1.1-0.20210219113128-e9d73547895c
+# github.com/hashicorp/packer-plugin-sdk v0.1.1-0.20210219144004-fd384f7bfa2a
 github.com/hashicorp/packer-plugin-sdk/acctest
 github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
 github.com/hashicorp/packer-plugin-sdk/acctest/testutils
@@ -398,6 +398,7 @@ github.com/hashicorp/packer-plugin-sdk/shell-local/localexec
 github.com/hashicorp/packer-plugin-sdk/shutdowncommand
 github.com/hashicorp/packer-plugin-sdk/template
 github.com/hashicorp/packer-plugin-sdk/template/config
+github.com/hashicorp/packer-plugin-sdk/template/config/internal
 github.com/hashicorp/packer-plugin-sdk/template/interpolate
 github.com/hashicorp/packer-plugin-sdk/template/interpolate/aws/secretsmanager
 github.com/hashicorp/packer-plugin-sdk/tmp
