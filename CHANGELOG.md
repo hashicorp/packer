@@ -1,5 +1,19 @@
 ## 1.7.1 (Upcoming)
 
+### FEATURES
+### IMPROVEMENTS
+* core: Change template parsing error to include warning about file extensions.
+    [GH-10652]
+
+### BUG FIXES
+* builder/azure: Don't overwrite subscription id if unset. [GH-10659]
+* builder/oracle-oci: Update Oracle Go SDK to fix issue with reading key file.
+    [GH-10560]
+* core/hcl2_upgrade: Make hcl2_upgrade command correctly translate
+    pause_before. [GH-10654]
+* core: Templates previously could not interpolate the environment variable
+    PACKER_LOG_PATH. [GH-10660]
+
 ## 1.7.0 (February 17, 2021)
 
 ### FEATURES
