@@ -17,7 +17,7 @@ require (
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 	github.com/antihax/optional v1.0.0
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
-	github.com/aws/aws-sdk-go v1.36.5
+	github.com/aws/aws-sdk-go v1.37.15
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
 	github.com/cheggaaa/pb v1.0.27
