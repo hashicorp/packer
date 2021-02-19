@@ -42,6 +42,7 @@ type DecodeOpts struct {
 var DefaultDecodeHookFuncs = []mapstructure.DecodeHookFunc{
 	uint8ToStringHook,
 	stringToTrilean,
+	mapOfCTYToMapOfInterface,
 	mapstructure.StringToSliceHookFunc(","),
 	mapstructure.StringToTimeDurationHookFunc(),
 }
@@ -324,6 +325,27 @@ func stringToTrilean(f reflect.Type, t reflect.Type, v interface{}) (interface{}
 			}
 		}
 
+	}
+	return v, nil
+}
+
+func mapOfCTYToMapOfInterface(f reflect.Type, t reflect.Type, v interface{}) (interface{}, error) {
+	if t == reflect.TypeOf(map[string]cty.Value{}) {
+		to := map[string]cty.Value{}
+		if from, ok := v.(map[string]interface{}); ok {
+			for key, val := range from {
+				impliedValType, err := gocty.ImpliedType(val)
+				if err != nil {
+					return val, err
+				}
+				value, err := gocty.ToCtyValue(val, impliedValType)
+				if err != nil {
+					return val, err
+				}
+				to[key] = value
+			}
+		}
+		return to, nil
 	}
 	return v, nil
 }

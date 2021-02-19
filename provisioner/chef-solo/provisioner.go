@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	"github.com/zclconf/go-cty/cty"
+	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
 
 type guestOSTypeConfig struct {
@@ -46,31 +47,27 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	ChefEnvironment            string   `mapstructure:"chef_environment"`
-	ChefLicense                string   `mapstructure:"chef_license"`
-	ConfigTemplate             string   `mapstructure:"config_template"`
-	CookbookPaths              []string `mapstructure:"cookbook_paths"`
-	RolesPath                  string   `mapstructure:"roles_path"`
-	DataBagsPath               string   `mapstructure:"data_bags_path"`
-	EncryptedDataBagSecretPath string   `mapstructure:"encrypted_data_bag_secret_path"`
-	EnvironmentsPath           string   `mapstructure:"environments_path"`
-	ExecuteCommand             string   `mapstructure:"execute_command"`
-	InstallCommand             string   `mapstructure:"install_command"`
-	RemoteCookbookPaths        []string `mapstructure:"remote_cookbook_paths"`
-	// This is for internal usage. It is used to write the hcl2spec struct.
-	// HCL cannot decode into interface so we write it as a cty.Value
-	// ref: https://github.com/hashicorp/hcl/issues/291#issuecomment-496347585
-	InternalJson map[string]cty.Value `cty:"json"`
-	// We keep this one to write back from cty.Value on Prepare
-	Json        map[string]interface{} `mapstructure:"json" mapstructure-to-hcl2:",skip"`
-	PreventSudo bool                   `mapstructure:"prevent_sudo"`
-	RunList     []string               `mapstructure:"run_list"`
-	SkipInstall bool                   `mapstructure:"skip_install"`
-	StagingDir  string                 `mapstructure:"staging_directory"`
-	GuestOSType string                 `mapstructure:"guest_os_type"`
-	Version     string                 `mapstructure:"version"`
+	ChefEnvironment            string               `mapstructure:"chef_environment"`
+	ChefLicense                string               `mapstructure:"chef_license"`
+	ConfigTemplate             string               `mapstructure:"config_template"`
+	CookbookPaths              []string             `mapstructure:"cookbook_paths"`
+	RolesPath                  string               `mapstructure:"roles_path"`
+	DataBagsPath               string               `mapstructure:"data_bags_path"`
+	EncryptedDataBagSecretPath string               `mapstructure:"encrypted_data_bag_secret_path"`
+	EnvironmentsPath           string               `mapstructure:"environments_path"`
+	ExecuteCommand             string               `mapstructure:"execute_command"`
+	InstallCommand             string               `mapstructure:"install_command"`
+	RemoteCookbookPaths        []string             `mapstructure:"remote_cookbook_paths"`
+	Json                       map[string]cty.Value `mapstructure:"json"`
+	PreventSudo                bool                 `mapstructure:"prevent_sudo"`
+	RunList                    []string             `mapstructure:"run_list"`
+	SkipInstall                bool                 `mapstructure:"skip_install"`
+	StagingDir                 string               `mapstructure:"staging_directory"`
+	GuestOSType                string               `mapstructure:"guest_os_type"`
+	Version                    string               `mapstructure:"version"`
 
-	ctx interpolate.Context
+	ctx          interpolate.Context
+	internalJson map[string]interface{}
 }
 
 type Provisioner struct {
@@ -124,6 +121,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}, raws...)
 	if err != nil {
 		return err
+	}
+
+	b, err := ctyjson.SimpleJSONValue{Value: cty.MapVal(p.config.Json)}.MarshalJSON()
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(b, &p.config.internalJson); err != nil {
+		return fmt.Errorf("Failed to unmarshal 'json': %s", err.Error())
 	}
 
 	if p.config.GuestOSType == "" {
@@ -222,8 +227,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	jsonValid := true
-	for k, v := range p.config.Json {
-		p.config.Json[k], err = p.deepJsonFix(k, v)
+	for k, v := range p.config.internalJson {
+		p.config.internalJson[k], err = p.deepJsonFix(k, v)
 		if err != nil {
 			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing JSON: %s", err))
@@ -234,7 +239,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if jsonValid {
 		// Process the user variables within the JSON and set the JSON.
 		// Do this early so that we can validate and show errors.
-		p.config.Json, err = p.processJsonUserVars()
+		p.config.internalJson, err = p.processJsonUserVars()
 		if err != nil {
 			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing user variables in JSON: %s", err))
@@ -405,7 +410,7 @@ func (p *Provisioner) createJson(ui packersdk.Ui, comm packersdk.Communicator) (
 
 	jsonData := make(map[string]interface{})
 	// Copy the configured JSON
-	for k, v := range p.config.Json {
+	for k, v := range p.config.internalJson {
 		jsonData[k] = v
 	}
 	// Set the run list if it was specified
@@ -547,7 +552,7 @@ func (p *Provisioner) deepJsonFix(key string, current interface{}) (interface{},
 }
 
 func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
-	jsonBytes, err := json.Marshal(p.config.Json)
+	jsonBytes, err := json.Marshal(p.config.internalJson)
 	if err != nil {
 		// This really shouldn't happen since we literally just unmarshalled
 		panic(err)

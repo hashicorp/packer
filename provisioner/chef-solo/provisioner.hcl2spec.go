@@ -29,7 +29,7 @@ type FlatConfig struct {
 	ExecuteCommand             *string              `mapstructure:"execute_command" cty:"execute_command" hcl:"execute_command"`
 	InstallCommand             *string              `mapstructure:"install_command" cty:"install_command" hcl:"install_command"`
 	RemoteCookbookPaths        []string             `mapstructure:"remote_cookbook_paths" cty:"remote_cookbook_paths" hcl:"remote_cookbook_paths"`
-	InternalJson               map[string]cty.Value `cty:"json" hcl:"json"`
+	Json                       map[string]cty.Value `mapstructure:"json" cty:"json" hcl:"json"`
 	PreventSudo                *bool                `mapstructure:"prevent_sudo" cty:"prevent_sudo" hcl:"prevent_sudo"`
 	RunList                    []string             `mapstructure:"run_list" cty:"run_list" hcl:"run_list"`
 	SkipInstall                *bool                `mapstructure:"skip_install" cty:"skip_install" hcl:"skip_install"`
