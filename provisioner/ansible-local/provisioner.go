@@ -357,12 +357,11 @@ func (p *Provisioner) provisionPlaybookFile(ui packersdk.Ui, comm packersdk.Comm
 
 func (p *Provisioner) executeGalaxy(ui packersdk.Ui, comm packersdk.Communicator) error {
 	ctx := context.TODO()
-	rolesDir := filepath.ToSlash(filepath.Join(p.config.StagingDir, "roles"))
 	galaxyFile := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.GalaxyFile)))
 
 	// ansible-galaxy install -r requirements.yml -p roles/
-	command := fmt.Sprintf("cd %s && %s install -r %s -p %s",
-		p.config.StagingDir, p.config.GalaxyCommand, galaxyFile, rolesDir)
+	command := fmt.Sprintf("cd %s && %s install -r %s",
+		p.config.StagingDir, p.config.GalaxyCommand, galaxyFile)
 	ui.Message(fmt.Sprintf("Executing Ansible Galaxy: %s", command))
 	cmd := &packersdk.RemoteCmd{
 		Command: command,
