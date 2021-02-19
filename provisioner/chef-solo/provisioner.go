@@ -61,7 +61,7 @@ type Config struct {
 	// HCL cannot decode into interface so we write it as a cty.Value
 	// ref: https://github.com/hashicorp/hcl/issues/291#issuecomment-496347585
 	HclJson map[string]cty.Value `mapstructure:"json" cty:"json" hcl:"hcl"`
-	// To work to JSON we keep the map[string]interface{}
+	// For JSON templates we keep the map[string]interface{}
 	// TODO(@sylviamoss) remove in v2.0.0
 	JsonJson    map[string]interface{} `mapstructure:"json" mapstructure-to-hcl2:",skip"`
 	PreventSudo bool                   `mapstructure:"prevent_sudo"`
