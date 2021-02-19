@@ -55,10 +55,7 @@ func InterfaceToCTY(v interface{}) cty.Value {
 		for k, ev := range tv {
 			vals[k] = InterfaceToCTY(ev)
 		}
-		if len(vals) == 0 {
-			return cty.MapValEmpty(cty.String)
-		}
-		return cty.MapVal(vals)
+		return cty.ObjectVal(vals)
 	}
 
 	impliedValType, err := gocty.ImpliedType(v)
