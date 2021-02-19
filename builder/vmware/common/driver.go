@@ -23,7 +23,7 @@ type Driver interface {
 	// Clone clones the VMX and the disk to the destination path. The
 	// destination is a path to the VMX file. The disk will be copied
 	// to that same directory.
-	Clone(dst string, src string, cloneType bool) error
+	Clone(dst string, src string, cloneType bool, snapshot string) error
 
 	// CompactDisk compacts a virtual disk.
 	CompactDisk(string) error

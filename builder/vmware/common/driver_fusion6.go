@@ -27,7 +27,7 @@ func NewFusion6Driver(dconfig *DriverConfig, config *SSHConfig) Driver {
 	}
 }
 
-func (d *Fusion6Driver) Clone(dst, src string, linked bool) error {
+func (d *Fusion6Driver) Clone(dst, src string, linked bool, snapshot string) error {
 
 	var cloneType string
 	if linked {
@@ -36,10 +36,11 @@ func (d *Fusion6Driver) Clone(dst, src string, linked bool) error {
 		cloneType = "full"
 	}
 
-	cmd := exec.Command(d.vmrunPath(),
-		"-T", "fusion",
-		"clone", src, dst,
-		cloneType)
+	args := []string{"-T", "fusion", "clone", src, dst, cloneType}
+	if snapshot != "" {
+		args = append(args, "-snapshot", snapshot)
+	}
+	cmd := exec.Command(d.vmrunPath(), args...)
 	if _, _, err := runAndLog(cmd); err != nil {
 		if strings.Contains(err.Error(), "parameters was invalid") {
 			return fmt.Errorf(

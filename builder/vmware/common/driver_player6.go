@@ -21,7 +21,7 @@ func NewPlayer6Driver(config *SSHConfig) Driver {
 	}
 }
 
-func (d *Player6Driver) Clone(dst, src string, linked bool) error {
+func (d *Player6Driver) Clone(dst, src string, linked bool, snapshot string) error {
 	// TODO(rasa) check if running player+, not just player
 
 	var cloneType string
@@ -31,11 +31,11 @@ func (d *Player6Driver) Clone(dst, src string, linked bool) error {
 		cloneType = "full"
 	}
 
-	cmd := exec.Command(d.Player5Driver.VmrunPath,
-		"-T", "ws",
-		"clone", src, dst,
-		cloneType)
-
+	args := []string{"-T", "ws", "clone", src, dst, cloneType}
+	if snapshot != "" {
+		args = append(args, "-snapshot", snapshot)
+	}
+	cmd := exec.Command(d.Player5Driver.VmrunPath, args...)
 	if _, _, err := runAndLog(cmd); err != nil {
 		return err
 	}

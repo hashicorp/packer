@@ -123,6 +123,7 @@ type FlatConfig struct {
 	DiskName                  *string           `mapstructure:"vmdk_name" required:"false" cty:"vmdk_name" hcl:"vmdk_name"`
 	DiskTypeId                *string           `mapstructure:"disk_type_id" required:"false" cty:"disk_type_id" hcl:"disk_type_id"`
 	Linked                    *bool             `mapstructure:"linked" required:"false" cty:"linked" hcl:"linked"`
+	AttachSnapshot            *string           `mapstructure:"attach_snapshot" required:"false" cty:"attach_snapshot" hcl:"attach_snapshot"`
 	SourcePath                *string           `mapstructure:"source_path" required:"true" cty:"source_path" hcl:"source_path"`
 	VMName                    *string           `mapstructure:"vm_name" required:"false" cty:"vm_name" hcl:"vm_name"`
 }
@@ -252,6 +253,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vmdk_name":                      &hcldec.AttrSpec{Name: "vmdk_name", Type: cty.String, Required: false},
 		"disk_type_id":                   &hcldec.AttrSpec{Name: "disk_type_id", Type: cty.String, Required: false},
 		"linked":                         &hcldec.AttrSpec{Name: "linked", Type: cty.Bool, Required: false},
+		"attach_snapshot":                &hcldec.AttrSpec{Name: "attach_snapshot", Type: cty.String, Required: false},
 		"source_path":                    &hcldec.AttrSpec{Name: "source_path", Type: cty.String, Required: false},
 		"vm_name":                        &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
 	}
