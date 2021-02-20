@@ -55,6 +55,15 @@ type Config struct {
 	// The size, in megabytes, of the hard disk to create for the VM. By
 	// default, this is 40000 (about 40 GB).
 	DiskSize uint `mapstructure:"disk_size" required:"false"`
+	// The NIC type to be used for the network interfaces.
+	// When set to 82540EM, the NICs are Intel PRO/1000 MT Desktop (82540EM). This is the default.
+	// When set to 82543GC, the NICs are Intel PRO/1000 T Server (82543GC).
+	// When set to 82545EM, the NICs are Intel PRO/1000 MT Server (82545EM).
+	// When set to Am79C970A, the NICs are AMD PCNet-PCI II network card (Am79C970A).
+	// When set to Am79C973, the NICs are AMD PCNet-FAST III network card (Am79C973).
+	// When set to Am79C960, the NICs are AMD PCnet-ISA/NE2100 (Am79C960).
+	// When set to virtio, the NICs are VirtIO.
+	NICType string `mapstructure:"nic_type" required:"false"`
 	// The guest OS type being installed. By default this is other, but you can
 	// get dramatic performance improvements by setting this to the proper
 	// value. To view all available values for this run VBoxManage list
@@ -198,6 +207,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	if b.config.HardDriveInterface == "" {
 		b.config.HardDriveInterface = "ide"
+	}
+
+	if b.config.NICType == "" {
+		b.config.NICType = "82540EM"
+	}
+	switch b.config.NICType {
+	case "82540EM", "82543GC", "82545EM", "Am79C970A", "Am79C973",  "Am79C960", "virtio":
+		// do nothing
+	default:
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("NIC type can only be 82540EM, 82543GC, 82545EM, Am79C970A, Am79C973, Am79C960 or virtio"))
 	}
 
 	if b.config.GuestOSType == "" {
