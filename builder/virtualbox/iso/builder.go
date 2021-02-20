@@ -62,6 +62,7 @@ type Config struct {
 	// defaults to ide. When set to sata, the drive is attached to an AHCI SATA
 	// controller. When set to scsi, the drive is attached to an LsiLogic SCSI
 	// controller. When set to pcie, the drive is attached to an NVMe
+	// controller. When set to virtio, the drive is attached to a VirtIO
 	// controller. Please note that when you use "pcie", you'll need to have
 	// Virtualbox 6, install an [extension
 	// pack](https://www.virtualbox.org/wiki/Downloads#VirtualBox6.0.14OracleVMVirtualBoxExtensionPack)
@@ -98,6 +99,7 @@ type Config struct {
 	HardDriveNonrotational bool `mapstructure:"hard_drive_nonrotational" required:"false"`
 	// The type of controller that the ISO is attached to, defaults to ide.
 	// When set to sata, the drive is attached to an AHCI SATA controller.
+	// When set to virtio, the drive is attached to a VirtIO controller.
 	ISOInterface string `mapstructure:"iso_interface" required:"false"`
 	// Set this to true if you would like to keep the VM registered with
 	// virtualbox. Defaults to false.
