@@ -44,6 +44,14 @@ type Config struct {
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 	vboxcommon.VBoxBundleConfig     `mapstructure:",squash"`
 	vboxcommon.GuestAdditionsConfig `mapstructure:",squash"`
+	// The chipset to be used: PIIX3 or ICH9.
+	// When set to piix3, the firmare is PIIX3. This is the default.
+	// When set to ich9, the firmare is ICH9.
+	Chipset string `mapstructure:"chipset" required:"false"`
+	// The firmware to be used: BIOS or EFI.
+	// When set to bios, the firmare is BIOS. This is the default.
+	// When set to efi, the firmare is EFI.
+	Firmware string `mapstructure:"firmware" required:"false"`
 	// The size, in megabytes, of the hard disk to create for the VM. By
 	// default, this is 40000 (about 40 GB).
 	DiskSize uint `mapstructure:"disk_size" required:"false"`
@@ -161,6 +169,28 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	errs = packersdk.MultiErrorAppend(errs, b.config.VBoxVersionConfig.Prepare(b.config.CommConfig.Comm.Type)...)
 	errs = packersdk.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
 	errs = packersdk.MultiErrorAppend(errs, b.config.GuestAdditionsConfig.Prepare(b.config.CommConfig.Comm.Type)...)
+
+	if b.config.Chipset == "" {
+		b.config.Chipset = "piix3"
+	}
+	switch b.config.Chipset {
+	case "piix3", "ich9":
+		// do nothing
+	default:
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("chipset can only be piix3 or ich9"))
+	}
+
+	if b.config.Firmware == "" {
+		b.config.Firmware = "bios"
+	}
+	switch b.config.Firmware {
+	case "bios", "efi":
+		// do nothing
+	default:
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("firmware can only be bios or efi"))
+	}
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000

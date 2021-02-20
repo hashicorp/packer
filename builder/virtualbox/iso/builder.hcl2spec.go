@@ -117,6 +117,8 @@ type FlatConfig struct {
 	GuestAdditionsPath        *string           `mapstructure:"guest_additions_path" cty:"guest_additions_path" hcl:"guest_additions_path"`
 	GuestAdditionsSHA256      *string           `mapstructure:"guest_additions_sha256" cty:"guest_additions_sha256" hcl:"guest_additions_sha256"`
 	GuestAdditionsURL         *string           `mapstructure:"guest_additions_url" required:"false" cty:"guest_additions_url" hcl:"guest_additions_url"`
+	Chipset                   *string           `mapstructure:"chipset" required:"false" cty:"chipset" hcl:"chipset"`
+	Firmware                  *string           `mapstructure:"firmware" required:"false" cty:"firmware" hcl:"firmware"`
 	DiskSize                  *uint             `mapstructure:"disk_size" required:"false" cty:"disk_size" hcl:"disk_size"`
 	GuestOSType               *string           `mapstructure:"guest_os_type" required:"false" cty:"guest_os_type" hcl:"guest_os_type"`
 	HardDriveDiscard          *bool             `mapstructure:"hard_drive_discard" required:"false" cty:"hard_drive_discard" hcl:"hard_drive_discard"`
@@ -249,6 +251,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"guest_additions_path":         &hcldec.AttrSpec{Name: "guest_additions_path", Type: cty.String, Required: false},
 		"guest_additions_sha256":       &hcldec.AttrSpec{Name: "guest_additions_sha256", Type: cty.String, Required: false},
 		"guest_additions_url":          &hcldec.AttrSpec{Name: "guest_additions_url", Type: cty.String, Required: false},
+		"chipset":                      &hcldec.AttrSpec{Name: "chipset", Type: cty.String, Required: false},
+		"firmware":                     &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
 		"disk_size":                    &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
 		"guest_os_type":                &hcldec.AttrSpec{Name: "guest_os_type", Type: cty.String, Required: false},
 		"hard_drive_discard":           &hcldec.AttrSpec{Name: "hard_drive_discard", Type: cty.Bool, Required: false},
