@@ -224,7 +224,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		b.config.NICType = "82540EM"
 	}
 	switch b.config.NICType {
-	case "82540EM", "82543GC", "82545EM", "Am79C970A", "Am79C973",  "Am79C960", "virtio":
+	case "82540EM", "82543GC", "82545EM", "Am79C970A", "Am79C973", "Am79C960", "virtio":
 		// do nothing
 	default:
 		errs = packersdk.MultiErrorAppend(
