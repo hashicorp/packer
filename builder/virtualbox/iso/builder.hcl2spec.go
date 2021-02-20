@@ -120,6 +120,9 @@ type FlatConfig struct {
 	Chipset                   *string           `mapstructure:"chipset" required:"false" cty:"chipset" hcl:"chipset"`
 	Firmware                  *string           `mapstructure:"firmware" required:"false" cty:"firmware" hcl:"firmware"`
 	DiskSize                  *uint             `mapstructure:"disk_size" required:"false" cty:"disk_size" hcl:"disk_size"`
+	NICType                   *string           `mapstructure:"nic_type" required:"false" cty:"nic_type" hcl:"nic_type"`
+	AudioController           *string           `mapstructure:"audio_controller" required:"false" cty:"audio_controller" hcl:"audio_controller"`
+	GfxController             *string           `mapstructure:"gfx_controller" required:"false" cty:"gfx_controller" hcl:"gfx_controller"`
 	GuestOSType               *string           `mapstructure:"guest_os_type" required:"false" cty:"guest_os_type" hcl:"guest_os_type"`
 	HardDriveDiscard          *bool             `mapstructure:"hard_drive_discard" required:"false" cty:"hard_drive_discard" hcl:"hard_drive_discard"`
 	HardDriveInterface        *string           `mapstructure:"hard_drive_interface" required:"false" cty:"hard_drive_interface" hcl:"hard_drive_interface"`
@@ -254,6 +257,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"chipset":                      &hcldec.AttrSpec{Name: "chipset", Type: cty.String, Required: false},
 		"firmware":                     &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
 		"disk_size":                    &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
+		"nic_type":                     &hcldec.AttrSpec{Name: "nic_type", Type: cty.String, Required: false},
+		"audio_controller":             &hcldec.AttrSpec{Name: "audio_controller", Type: cty.String, Required: false},
+		"gfx_controller":               &hcldec.AttrSpec{Name: "gfx_controller", Type: cty.String, Required: false},
 		"guest_os_type":                &hcldec.AttrSpec{Name: "guest_os_type", Type: cty.String, Required: false},
 		"hard_drive_discard":           &hcldec.AttrSpec{Name: "hard_drive_discard", Type: cty.Bool, Required: false},
 		"hard_drive_interface":         &hcldec.AttrSpec{Name: "hard_drive_interface", Type: cty.String, Required: false},
