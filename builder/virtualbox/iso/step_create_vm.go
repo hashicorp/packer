@@ -40,9 +40,11 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 	commands[4] = []string{"modifyvm", name, "--usb", map[bool]string{true: "on", false: "off"}[config.HWConfig.USB]}
 
 	if strings.ToLower(config.HWConfig.Sound) == "none" {
-		commands[5] = []string{"modifyvm", name, "--audio", config.HWConfig.Sound}
+		commands[5] = []string{"modifyvm", name, "--audio", config.HWConfig.Sound,
+                             "--audiocontroller", config.AudioController}
 	} else {
-		commands[5] = []string{"modifyvm", name, "--audio", config.HWConfig.Sound, "--audioin", "on", "--audioout", "on"}
+		commands[5] = []string{"modifyvm", name, "--audio", config.HWConfig.Sound, "--audioin", "on", "--audioout", "on",
+                             "--audiocontroller", config.AudioController}
 	}
 
 	commands[6] = []string{"modifyvm", name, "--chipset", config.Chipset}

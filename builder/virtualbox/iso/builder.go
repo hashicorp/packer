@@ -64,6 +64,11 @@ type Config struct {
 	// When set to Am79C960, the NICs are AMD PCnet-ISA/NE2100 (Am79C960).
 	// When set to virtio, the NICs are VirtIO.
 	NICType string `mapstructure:"nic_type" required:"false"`
+	// The audio controller type to be used.
+	// When set to ac97, the audio controller is ICH AC97 (default).
+	// When set to hda, the audio controller is Intel HD Audio.
+	// When set to sb16, the audio controller is SoundBlaster 16.
+	AudioController string `mapstructure:"audio_controller" required:"false"`
 	// The guest OS type being installed. By default this is other, but you can
 	// get dramatic performance improvements by setting this to the proper
 	// value. To view all available values for this run VBoxManage list
@@ -218,6 +223,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	default:
 		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("NIC type can only be 82540EM, 82543GC, 82545EM, Am79C970A, Am79C973, Am79C960 or virtio"))
+	}
+
+	switch b.config.AudioController {
+	case "ac97", "hda", "sb16":
+		// do nothing
+	default:
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("Audio controller type can only be ac97, hda or sb16"))
 	}
 
 	if b.config.GuestOSType == "" {
