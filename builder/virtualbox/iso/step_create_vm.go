@@ -26,7 +26,7 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 
 	name := config.VMName
 
-	commands := make([][]string, 9)
+	commands := make([][]string, 10)
 	commands[0] = []string{
 		"createvm", "--name", name,
 		"--ostype", config.GuestOSType, "--register",
@@ -59,6 +59,7 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
                           "--nictype6", config.NICType,
                           "--nictype7", config.NICType,
                           "--nictype8", config.NICType}
+	commands[9] = []string{"modifyvm", name, "--graphicscontroller", config.GfxController}
 
 	ui.Say("Creating virtual machine...")
 	for _, command := range commands {
