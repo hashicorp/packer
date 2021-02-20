@@ -56,6 +56,14 @@ func TestBuild(t *testing.T) {
 			fileCheck: fileCheck{expected: []string{"apple.txt"}},
 		},
 		{
+			name: "var-args: pkr json - arg sets an apple env var",
+			args: []string{
+				"-var", "fruit=apple",
+				filepath.Join(testFixture("var-arg"), "fruit_builder.pkr.json"),
+			},
+			fileCheck: fileCheck{expected: []string{"apple.txt"}},
+		},
+		{
 			name: "json - json varfile sets an apple env var, " +
 				"override with banana cli var",
 			args: []string{

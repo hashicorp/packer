@@ -1,0 +1,20 @@
+{
+    "variables": {
+        "fruit": null
+    },
+    "builders": [
+        {
+            "communicator": "none",
+            "type": "null"
+        }
+    ],
+    "post-processors": [
+        [
+            {
+                "name": "apple",
+                "type": "shell-local",
+                "inline": [ "echo {{ user `fruit` }} > {{ user `fruit` }}.txt" ]
+            }
+        ]
+    ]
+}

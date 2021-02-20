@@ -38,8 +38,7 @@ func (ma *MetaArgs) GetConfigType() (configType, error) {
 		// will need to add a setting that says "this is an HCL config".
 		return ma.ConfigType, nil
 	}
-	if strings.HasSuffix(name, ".pkr.hcl") ||
-		strings.HasSuffix(name, ".pkr.json") {
+	if strings.HasSuffix(name, ".pkr.hcl") {
 		return ConfigTypeHCL2, nil
 	}
 	isDir, err := isDir(name)
