@@ -43,7 +43,7 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 
 	// Create all required disks
 	for i := range diskFullPaths {
-		ui.Say(fmt.Sprintf("Creating hard drive %s with size %u MiB...", diskFullPaths[i], diskSizes[i]))
+		ui.Say(fmt.Sprintf("Creating hard drive %s with size %d MiB...", diskFullPaths[i], diskSizes[i]))
 
 		command := []string{
 			"createhd",
