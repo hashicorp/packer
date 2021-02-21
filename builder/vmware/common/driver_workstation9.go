@@ -165,6 +165,9 @@ func (d *Workstation9Driver) Verify() error {
 
 	d.VmwareDriver.NetworkMapper = func() (NetworkNameMapper, error) {
 		pathNetmap := workstationNetmapConfPath()
+
+		// Check that the file for the networkmapper configuration exists. If there's no
+		// error, then the file exists and we can proceed to read the configuration out of it.
 		if _, err := os.Stat(pathNetmap); err == nil {
 			log.Printf("Located networkmapper configuration file using Workstation: %s", pathNetmap)
 			return ReadNetmapConfig(pathNetmap)

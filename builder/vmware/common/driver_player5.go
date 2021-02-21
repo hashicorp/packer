@@ -204,7 +204,10 @@ func (d *Player5Driver) Verify() error {
 
 	d.VmwareDriver.NetworkMapper = func() (NetworkNameMapper, error) {
 		pathNetmap := playerNetmapConfPath()
-		if _, err := os.Stat(pathNetmap); err != nil {
+
+		// If we were able to find the file (no error), then we can proceed with reading
+		// the networkmapper configuration.
+		if _, err := os.Stat(pathNetmap); err == nil {
 			log.Printf("Located networkmapper configuration file using Player: %s", pathNetmap)
 			return ReadNetmapConfig(pathNetmap)
 		}
