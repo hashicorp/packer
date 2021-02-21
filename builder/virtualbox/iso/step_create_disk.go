@@ -30,12 +30,12 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 	if len(config.AdditionalDiskSize) == 0 {
 		// If there are no additional disks, use disk naming as before
 		diskFullPaths = append(diskFullPaths, filepath.Join(config.OutputDir, fmt.Sprintf("%s.%s", config.VMName, strings.ToLower(format))))
-   } else {
+	} else {
 		// If there are additional disks, use consistent naming with numbers
 		diskFullPaths = append(diskFullPaths, filepath.Join(config.OutputDir, fmt.Sprintf("%s-0.%s", config.VMName, strings.ToLower(format))))
 
 		for i, diskSize := range config.AdditionalDiskSize {
-			path := filepath.Join(config.OutputDir, fmt.Sprintf("%s-%d.%s", config.VMName, i + 1, strings.ToLower(format)))
+			path := filepath.Join(config.OutputDir, fmt.Sprintf("%s-%d.%s", config.VMName, i+1, strings.ToLower(format)))
 			diskFullPaths = append(diskFullPaths, path)
 			diskSizes = append(diskSizes, diskSize)
 		}
@@ -152,7 +152,7 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-   }
+	}
 
 	return multistep.ActionContinue
 }
