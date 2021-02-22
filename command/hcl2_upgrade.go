@@ -436,6 +436,10 @@ func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
 		isLocal = true
 		return ""
 	}
+	funcMap["user"] = func(a ...string) string {
+		isLocal = true
+		return ""
+	}
 
 	tpl, err := texttemplate.New("hcl2_upgrade").
 		Funcs(funcMap).
@@ -896,6 +900,10 @@ type BuildParser struct {
 }
 
 func (p *BuildParser) Parse(tpl *template.Template) error {
+	if len(p.Builders) == 0 {
+		return nil
+	}
+
 	buildContent := hclwrite.NewEmptyFile()
 	buildBody := buildContent.Body()
 	if tpl.Description != "" {
