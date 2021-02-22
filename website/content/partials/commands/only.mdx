@@ -1,4 +1,5 @@
 - `-only=foo,bar,baz` - Only run the builds with the given comma-separated
-  names. Build names by default are their type, unless a specific `name`
-  attribute is specified within the configuration. `-only` does not apply to
-  post-processors.
+  names. Name is a required block label in HCL, but in legacy
+  JSON, build names default to the types of their builders (e.g. `docker` or
+  `amazon-ebs` or `virtualbox-iso`, unless a specific `name` attribute is
+  specified within the configuration.
