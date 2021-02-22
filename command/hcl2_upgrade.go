@@ -436,6 +436,10 @@ func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
 		isLocal = true
 		return ""
 	}
+	funcMap["user"] = func(a ...string) string {
+		isLocal = true
+		return ""
+	}
 
 	tpl, err := texttemplate.New("hcl2_upgrade").
 		Funcs(funcMap).
