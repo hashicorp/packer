@@ -26,12 +26,28 @@ installed, using the official Chef installers provided by Chef Inc.
 The example below is fully functional and expects cookbooks in the "cookbooks"
 directory relative to your working directory.
 
-```json
-{
-  "type": "chef-solo",
-  "cookbook_paths": ["cookbooks"]
+<Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "chef-solo" {
+  cookbook_paths = ["cookbooks"]
 }
 ```
+
+</Tab>
+
+<Tab heading="JSON">
+
+```json
+"provisioners":[{
+  "type": "chef-solo",
+  "cookbook_paths": ["cookbooks"]
+}]
+```
+
+</Tab>
+</Tabs>
 
 ## Configuration Reference
 
@@ -83,9 +99,6 @@ configuration is actually required, but at least `run_list` is recommended.
   various [configuration template variables](/docs/templates/legacy_json_templates/engine)
   available. See below for more information.
 
-- `json` (object) - An arbitrary mapping of JSON that will be available as
-  node attributes while running Chef.
-
 - `prevent_sudo` (boolean) - By default, the configured commands that are
   executed to install and run Chef are executed with `sudo`. If this is true,
   then the sudo will be omitted. This has no effect when guest_os_type is
@@ -115,10 +128,55 @@ configuration is actually required, but at least `run_list` is recommended.
   able to create directories and write into this folder. If the permissions
   are not correct, use a shell provisioner prior to this to configure it
   properly.
+
 - `version` (string) - The version of Chef to be installed. By default this
   is empty which will install the latest version of Chef.
 
 @include 'provisioners/common-config.mdx'
+
+#####  Node Attribute Mapping
+
+An arbitrary mapping of JSON that will be available as node attributes while running Chef.
+
+<Tabs>
+<Tab heading="HCL2">
+
+- `json_string` (string) - The JSON string can be encoded using the [jsonencode](/docs/templates/hcl_templates/functions/encoding/jsonencode)
+template function.
+
+```hcl
+provisioner "chef-solo" {
+  json_string = jsonencode({
+    "a" = "b"
+    "foo" = {
+      "bar" = "val"
+      "number" = 1
+    }
+  })
+}
+```
+
+</Tab>
+
+<Tab heading="JSON">
+
+- `json` (object) - This option is only available to old-style JSON templates.
+
+```json
+"provisioners":[{
+  "type": "chef-solo",
+  "json": {
+    "a": "b",
+    "foo": {
+      "bar": "val",
+      "number": 1
+    }
+  }
+}]
+```
+
+</Tab>
+</Tabs>
 
 ## Chef Configuration
 
