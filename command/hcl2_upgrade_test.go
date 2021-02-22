@@ -26,6 +26,7 @@ func Test_hcl2_upgrade(t *testing.T) {
 		{folder: "source-name", flags: []string{"-with-annotations"}},
 		{folder: "error-cleanup-provisioner", flags: []string{"-with-annotations"}},
 		{folder: "aws-access-config", flags: []string{}},
+		{folder: "variables-only", flags: []string{}},
 	}
 
 	for _, tc := range tc {

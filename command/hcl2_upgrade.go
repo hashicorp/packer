@@ -896,6 +896,10 @@ type BuildParser struct {
 }
 
 func (p *BuildParser) Parse(tpl *template.Template) error {
+	if len(p.Builders) == 0 {
+		return nil
+	}
+
 	buildContent := hclwrite.NewEmptyFile()
 	buildBody := buildContent.Body()
 	if tpl.Description != "" {
