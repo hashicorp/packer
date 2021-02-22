@@ -51,6 +51,57 @@ locals {
 }
 ```
 
+## Upgrading variables file
+
+From **v1.7.1**, the `hcl2_upgrade` command can upgrade a variables file.
+
+<Tabs>
+<Tab heading="Original file (variables.json)">
+
+```json
+{
+    "variables": {
+        "aws_region": null,
+        "aws_secondary_region": "{{ env `AWS_DEFAULT_REGION` }}",
+        "aws_secret_key": "",
+        "aws_access_key": "",
+    },
+    "sensitive-variables": [
+        "aws_secret_key",
+        "aws_access_key",
+    ]
+}
+```
+
+</Tab>
+<Tab heading="Result file (variables.pkr.hcl)">
+
+```hcl
+variable "aws_access_key" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+
+variable "aws_region" {
+  type = string
+}
+
+variable "aws_secondary_region" {
+  type    = string
+  default = "${env("AWS_DEFAULT_REGION")}"
+}
+
+variable "aws_secret_key" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+```
+
+</Tab>
+</Tabs>
+
 ## Go template functions
 
 `hcl2_upgrade` will do its best to transform your go _template calls_ to HCL2,
