@@ -35,7 +35,7 @@ func (s *stepShutdown) Run(ctx context.Context, state multistep.StateBag) multis
 		ServerID: serverID,
 	}
 	c := state.Get("config").(*Config)
-	timeout := c.Timeout
+	timeout := c.ShutdownTimeout
 	duration, err := time.ParseDuration(timeout)
 	if err != nil {
 		err := fmt.Errorf("error: %s could not parse string %s as a duration", err, timeout)

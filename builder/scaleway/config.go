@@ -74,8 +74,10 @@ type Config struct {
 
 	RemoveVolume bool `mapstructure:"remove_volume"`
 
-	UserAgent string `mapstructure-to-hcl2:",skip"`
-	ctx       interpolate.Context
+	// Shutdown timeout. Default to 5m
+	ShutdownTimeout string `mapstructure:"shutdown_timeout" required:"false"`
+	UserAgent       string `mapstructure-to-hcl2:",skip"`
+	ctx             interpolate.Context
 
 	// Deprecated configs
 
@@ -98,8 +100,6 @@ type Config struct {
 	// available.
 	// Deprecated, use Zone instead
 	Region string `mapstructure:"region" required:"false"`
-
-	Timeout string `mapstructure:"timeout" required:"false"`
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
@@ -257,8 +257,8 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("image is required"))
 	}
 
-	if c.Timeout == "" {
-		c.Timeout = "5m"
+	if c.ShutdownTimeout == "" {
+		c.ShutdownTimeout = "5m"
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
