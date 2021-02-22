@@ -44,9 +44,37 @@ type Config struct {
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 	vboxcommon.VBoxBundleConfig     `mapstructure:",squash"`
 	vboxcommon.GuestAdditionsConfig `mapstructure:",squash"`
+	// The chipset to be used: PIIX3 or ICH9.
+	// When set to piix3, the firmare is PIIX3. This is the default.
+	// When set to ich9, the firmare is ICH9.
+	Chipset string `mapstructure:"chipset" required:"false"`
+	// The firmware to be used: BIOS or EFI.
+	// When set to bios, the firmare is BIOS. This is the default.
+	// When set to efi, the firmare is EFI.
+	Firmware string `mapstructure:"firmware" required:"false"`
 	// The size, in megabytes, of the hard disk to create for the VM. By
 	// default, this is 40000 (about 40 GB).
 	DiskSize uint `mapstructure:"disk_size" required:"false"`
+	// The NIC type to be used for the network interfaces.
+	// When set to 82540EM, the NICs are Intel PRO/1000 MT Desktop (82540EM). This is the default.
+	// When set to 82543GC, the NICs are Intel PRO/1000 T Server (82543GC).
+	// When set to 82545EM, the NICs are Intel PRO/1000 MT Server (82545EM).
+	// When set to Am79C970A, the NICs are AMD PCNet-PCI II network card (Am79C970A).
+	// When set to Am79C973, the NICs are AMD PCNet-FAST III network card (Am79C973).
+	// When set to Am79C960, the NICs are AMD PCnet-ISA/NE2100 (Am79C960).
+	// When set to virtio, the NICs are VirtIO.
+	NICType string `mapstructure:"nic_type" required:"false"`
+	// The audio controller type to be used.
+	// When set to ac97, the audio controller is ICH AC97. This is the default.
+	// When set to hda, the audio controller is Intel HD Audio.
+	// When set to sb16, the audio controller is SoundBlaster 16.
+	AudioController string `mapstructure:"audio_controller" required:"false"`
+	// The graphics controller type to be used.
+	// When set to vboxvga, the graphics controller is VirtualBox VGA. This is the default.
+	// When set to vboxsvga, the graphics controller is VirtualBox SVGA.
+	// When set to vmsvga, the graphics controller is VMware SVGA.
+	// When set to none, the graphics controller is disabled.
+	GfxController string `mapstructure:"gfx_controller" required:"false"`
 	// The guest OS type being installed. By default this is other, but you can
 	// get dramatic performance improvements by setting this to the proper
 	// value. To view all available values for this run VBoxManage list
@@ -162,12 +190,67 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	errs = packersdk.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
 	errs = packersdk.MultiErrorAppend(errs, b.config.GuestAdditionsConfig.Prepare(b.config.CommConfig.Comm.Type)...)
 
+	if b.config.Chipset == "" {
+		b.config.Chipset = "piix3"
+	}
+	switch b.config.Chipset {
+	case "piix3", "ich9":
+		// do nothing
+	default:
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("chipset can only be piix3 or ich9"))
+	}
+
+	if b.config.Firmware == "" {
+		b.config.Firmware = "bios"
+	}
+	switch b.config.Firmware {
+	case "bios", "efi":
+		// do nothing
+	default:
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("firmware can only be bios or efi"))
+	}
+
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
 	}
 
 	if b.config.HardDriveInterface == "" {
 		b.config.HardDriveInterface = "ide"
+	}
+
+	if b.config.NICType == "" {
+		b.config.NICType = "82540EM"
+	}
+	switch b.config.NICType {
+	case "82540EM", "82543GC", "82545EM", "Am79C970A", "Am79C973", "Am79C960", "virtio":
+		// do nothing
+	default:
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("NIC type can only be 82540EM, 82543GC, 82545EM, Am79C970A, Am79C973, Am79C960 or virtio"))
+	}
+
+	if b.config.GfxController == "" {
+		b.config.GfxController = "vboxvga"
+	}
+	switch b.config.GfxController {
+	case "vboxvga", "vboxsvga", "vmsvga", "none":
+		// do nothing
+	default:
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("Graphics controller type can only be vboxvga, vboxsvga, vmsvga, none"))
+	}
+
+	if b.config.AudioController == "" {
+		b.config.AudioController = "ac97"
+	}
+	switch b.config.AudioController {
+	case "ac97", "hda", "sb16":
+		// do nothing
+	default:
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("Audio controller type can only be ac97, hda or sb16"))
 	}
 
 	if b.config.GuestOSType == "" {
