@@ -21,8 +21,6 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-	"github.com/zclconf/go-cty/cty"
-	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
 
 type guestOSTypeConfig struct {
@@ -58,12 +56,12 @@ type Config struct {
 	ExecuteCommand             string   `mapstructure:"execute_command"`
 	InstallCommand             string   `mapstructure:"install_command"`
 	RemoteCookbookPaths        []string `mapstructure:"remote_cookbook_paths"`
-	// HCL cannot decode into interface so we write it as a cty.Value
+	// HCL cannot decode into interface so we add an option to write the JSON as string.
+	// To be used with https://www.packer.io/docs/templates/hcl_templates/functions/encoding/jsonencode
 	// ref: https://github.com/hashicorp/hcl/issues/291#issuecomment-496347585
-	HclJson map[string]cty.Value `mapstructure:"json" cty:"json" hcl:"hcl"`
+	JsonString string `mapstructure:"json_string"`
 	// For JSON templates we keep the map[string]interface{}
-	// TODO(@sylviamoss) remove in v2.0.0
-	JsonJson    map[string]interface{} `mapstructure:"json" mapstructure-to-hcl2:",skip"`
+	Json        map[string]interface{} `mapstructure:"json" mapstructure-to-hcl2:",skip"`
 	PreventSudo bool                   `mapstructure:"prevent_sudo"`
 	RunList     []string               `mapstructure:"run_list"`
 	SkipInstall bool                   `mapstructure:"skip_install"`
@@ -127,17 +125,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
-	if len(p.config.JsonJson) == 0 && len(p.config.HclJson) > 0 {
-		objVal := cty.MapValEmpty(cty.String)
-		if len(p.config.HclJson) > 0 {
-			objVal = cty.ObjectVal(p.config.HclJson)
-		}
-		b, err := ctyjson.SimpleJSONValue{Value: objVal}.MarshalJSON()
-		if err != nil {
-			return err
-		}
-		if err := json.Unmarshal(b, &p.config.JsonJson); err != nil {
-			return fmt.Errorf("Failed to unmarshal 'json': %s", err.Error())
+	if p.config.JsonString != "" {
+		if err := json.Unmarshal([]byte(p.config.JsonString), &p.config.Json); err != nil {
+			return fmt.Errorf("Failed to unmarshal 'json_string': %s", err.Error())
 		}
 	}
 
@@ -237,8 +227,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	jsonValid := true
-	for k, v := range p.config.JsonJson {
-		p.config.JsonJson[k], err = p.deepJsonFix(k, v)
+	for k, v := range p.config.Json {
+		p.config.Json[k], err = p.deepJsonFix(k, v)
 		if err != nil {
 			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing JSON: %s", err))
@@ -249,7 +239,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if jsonValid {
 		// Process the user variables within the JSON and set the JSON.
 		// Do this early so that we can validate and show errors.
-		p.config.JsonJson, err = p.processJsonUserVars()
+		p.config.Json, err = p.processJsonUserVars()
 		if err != nil {
 			errs = packersdk.MultiErrorAppend(
 				errs, fmt.Errorf("Error processing user variables in JSON: %s", err))
@@ -420,7 +410,7 @@ func (p *Provisioner) createJson(ui packersdk.Ui, comm packersdk.Communicator) (
 
 	jsonData := make(map[string]interface{})
 	// Copy the configured JSON
-	for k, v := range p.config.JsonJson {
+	for k, v := range p.config.Json {
 		jsonData[k] = v
 	}
 	// Set the run list if it was specified
@@ -562,7 +552,7 @@ func (p *Provisioner) deepJsonFix(key string, current interface{}) (interface{},
 }
 
 func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
-	jsonBytes, err := json.Marshal(p.config.JsonJson)
+	jsonBytes, err := json.Marshal(p.config.Json)
 	if err != nil {
 		// This really shouldn't happen since we literally just unmarshalled
 		panic(err)

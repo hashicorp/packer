@@ -1,16 +1,12 @@
 package chefsolo
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/zclconf/go-cty/cty"
-	ctyjson "github.com/zclconf/go-cty/cty/json"
 )
 
 func testConfig() map[string]interface{} {
@@ -40,7 +36,6 @@ func TestProvisionerPrepare_chefEnvironment(t *testing.T) {
 		t.Fatalf("unexpected: %#v", p.config.ChefEnvironment)
 	}
 }
-
 func TestProvisionerPrepare_chefLicense(t *testing.T) {
 	var p Provisioner
 
@@ -318,34 +313,22 @@ func TestProvisionerPrepare_json(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.JsonJson["foo"] != `"bar\baz"` {
-		t.Fatalf("bad: %#v", p.config.JsonJson)
-	}
-
-	hclJson := map[string]interface{}{}
-	b, err := ctyjson.SimpleJSONValue{Value: cty.ObjectVal(p.config.HclJson)}.MarshalJSON()
-	if err != nil {
-		t.Fatalf("bad: %#v", p.config.JsonJson)
-	}
-	if err := json.Unmarshal(b, &hclJson); err != nil {
-		t.Fatalf("bad: %#v", p.config.JsonJson)
-	}
-	if diff := cmp.Diff(p.config.JsonJson, hclJson); diff != "" {
-		t.Fatalf("HCL and JSON jsons should be the same: %s", diff)
+	if p.config.Json["foo"] != `"bar\baz"` {
+		t.Fatalf("bad: %#v", p.config.Json)
 	}
 }
 
 func TestProvisionerPrepare_jsonNested(t *testing.T) {
 	config := testConfig()
 	config["json"] = map[string]interface{}{
-		"foo": map[string]interface{}{
-			"bar": "baz",
+		"foo": map[interface{}]interface{}{
+			"bar": []uint8("baz"),
 		},
 
 		"bar": []interface{}{
 			"foo",
 
-			map[string]interface{}{
+			map[interface{}]interface{}{
 				"bar": "baz",
 			},
 		},
@@ -353,7 +336,7 @@ func TestProvisionerPrepare_jsonNested(t *testing.T) {
 		"bFalse": false,
 		"bTrue":  true,
 		"bNil":   nil,
-		"bStr":   "bar",
+		"bStr":   []uint8("bar"),
 
 		"bInt":   1,
 		"bFloat": 4.5,
@@ -365,23 +348,43 @@ func TestProvisionerPrepare_jsonNested(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	fooMap := p.config.JsonJson["foo"].(map[string]interface{})
+	fooMap := p.config.Json["foo"].(map[string]interface{})
 	if fooMap["bar"] != "baz" {
 		t.Fatalf("nope: %#v", fooMap["bar"])
 	}
-	if p.config.JsonJson["bStr"] != "bar" {
+	if p.config.Json["bStr"] != "bar" {
 		t.Fatalf("nope: %#v", fooMap["bar"])
 	}
+}
 
-	hclJson := map[string]interface{}{}
-	b, err := ctyjson.SimpleJSONValue{Value: cty.ObjectVal(p.config.HclJson)}.MarshalJSON()
+func TestProvisionerPrepare_jsonstring(t *testing.T) {
+	config := testConfig()
+	config["json_string"] = `{
+			"foo": {
+				"bar": "baz"
+			},
+			"bar": {
+				"bar": "baz"
+			},	
+			"bFalse": false,
+			"bTrue": true,
+			"bStr": "bar",
+			"bNil": null,
+			"bInt": 1,
+			"bFloat": 4.5
+		}`
+
+	var p Provisioner
+	err := p.Prepare(config)
 	if err != nil {
-		t.Fatalf("bad: %#v", p.config.JsonJson)
+		t.Fatalf("err: %s", err)
 	}
-	if err := json.Unmarshal(b, &hclJson); err != nil {
-		t.Fatalf("bad: %#v", p.config.JsonJson)
+
+	fooMap := p.config.Json["foo"].(map[string]interface{})
+	if fooMap["bar"] != "baz" {
+		t.Fatalf("nope: %#v", fooMap["bar"])
 	}
-	if diff := cmp.Diff(p.config.JsonJson, hclJson); diff != "" {
-		t.Fatalf("HCL and JSON jsons should be the same: %s", diff)
+	if p.config.Json["bStr"] != "bar" {
+		t.Fatalf("nope: %#v", fooMap["bar"])
 	}
 }

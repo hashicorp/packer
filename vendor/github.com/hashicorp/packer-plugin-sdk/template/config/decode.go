@@ -10,7 +10,6 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer-plugin-sdk/template/config/internal"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	"github.com/mitchellh/mapstructure"
 	"github.com/ryanuber/go-glob"
@@ -43,7 +42,6 @@ type DecodeOpts struct {
 var DefaultDecodeHookFuncs = []mapstructure.DecodeHookFunc{
 	uint8ToStringHook,
 	stringToTrilean,
-	internal.MapOfInterfaceToMapOfCTY,
 	mapstructure.StringToSliceHookFunc(","),
 	mapstructure.StringToTimeDurationHookFunc(),
 }
