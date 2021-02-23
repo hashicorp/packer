@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"sync"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -22,15 +21,6 @@ import (
 type mockEC2Conn struct {
 	ec2iface.EC2API
 	Config *aws.Config
-
-	// Counters to figure out what code path was taken
-	copyImageCount       int
-	describeImagesCount  int
-	deregisterImageCount int
-	deleteSnapshotCount  int
-	waitCount            int
-
-	lock sync.Mutex
 }
 
 func (m *mockEC2Conn) CreateSnapshot(input *ec2.CreateSnapshotInput) (*ec2.Snapshot, error) {
