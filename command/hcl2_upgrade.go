@@ -328,11 +328,12 @@ func templateCommonFunctionMap() texttemplate.FuncMap {
 				"name": a[0],
 			}
 			return fmt.Sprintf("${data.amazon-secretsmanager.%s.value}", id)
-		}, "timestamp": func() string {
+		},
+		"timestamp": func() string {
 			timestamp = true
 			return "${local.timestamp}"
 		},
-		"isotime": func() string {
+		"isotime": func(a ...string) string {
 			timestamp = true
 			return "${local.timestamp}"
 		},
@@ -431,14 +432,35 @@ func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
 		return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
 	}
 
-	funcMap := templateCommonFunctionMap()
-	funcMap["aws_secretsmanager"] = func(a ...string) string {
+	setIsLocal := func(a ...string) string {
 		isLocal = true
 		return ""
 	}
-	funcMap["user"] = func(a ...string) string {
+
+	// Make locals from variables using valid template engine,
+	// expect the ones using only 'env'
+	// ref: https://www.packer.io/docs/templates/legacy_json_templates/engine#template-engine
+	funcMap := templateCommonFunctionMap()
+	funcMap["aws_secretsmanager"] = setIsLocal
+	funcMap["user"] = setIsLocal
+	funcMap["isotime"] = setIsLocal
+	funcMap["timestamp"] = setIsLocal
+	funcMap["template_dir"] = setIsLocal
+	funcMap["lower"] = setIsLocal
+	funcMap["upper"] = setIsLocal
+	funcMap["uuid"] = setIsLocal
+	funcMap["pwd"] = setIsLocal
+	funcMap["split"] = func(_, _ string, _ int) (string, error) {
 		isLocal = true
-		return ""
+		return "", nil
+	}
+	funcMap["replace"] = func(_, _, _ string, _ int) (string, error) {
+		isLocal = true
+		return "", nil
+	}
+	funcMap["replace_all"] = func(_, _, _ string) (string, error) {
+		isLocal = true
+		return "", nil
 	}
 
 	tpl, err := texttemplate.New("hcl2_upgrade").
