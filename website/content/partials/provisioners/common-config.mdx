@@ -10,6 +10,30 @@ Parameters common to all provisioners:
 - `override` (object) - Override the builder with different settings for a
   specific builder, eg :
 
+  In HCL2:
+
+  ```hcl
+  source "null" "example1" {
+    communicator = "none"
+  }
+
+  source "null" "example2" {
+    communicator = "none"
+  }
+
+  build {
+    sources = ["source.null.example1", "source.null.example2"]
+    provisioner "shell-local" {
+      inline = ["echo not overridden"]
+      override = {
+        example1 = {
+          inline = ["echo yes overridden"]
+        }
+      }
+    }
+  }
+  ```
+
   In JSON:
 
   ```json
@@ -37,30 +61,6 @@ Parameters common to all provisioners:
         }
       }
     ]
-  }
-  ```
-
-  In HCL2:
-
-  ```hcl
-  source "null" "example1" {
-    communicator = "none"
-  }
-
-  source "null" "example2" {
-    communicator = "none"
-  }
-
-  build {
-    sources = ["source.null.example1", "source.null.example2"]
-    provisioner "shell-local" {
-      inline = ["echo not overridden"]
-      override = {
-        example1 = {
-          inline = ["echo yes overridden"]
-        }
-      }
-    }
   }
   ```
 
