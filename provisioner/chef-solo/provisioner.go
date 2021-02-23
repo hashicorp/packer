@@ -56,7 +56,7 @@ type Config struct {
 	ExecuteCommand             string   `mapstructure:"execute_command"`
 	InstallCommand             string   `mapstructure:"install_command"`
 	RemoteCookbookPaths        []string `mapstructure:"remote_cookbook_paths"`
-	// HCL cannot decode into interface so we add an option to write the JSON as string.
+	// HCL cannot be decoded into an interface so for HCL templates you must use the JsonString option,
 	// To be used with https://www.packer.io/docs/templates/hcl_templates/functions/encoding/jsonencode
 	// ref: https://github.com/hashicorp/hcl/issues/291#issuecomment-496347585
 	JsonString string `mapstructure:"json_string"`
