@@ -29,19 +29,19 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 
 	s.snapshotMap = make(map[string]*BlockDevice)
 
-	for _, instanceBlockDevices := range instance.BlockDeviceMappings {
+	for _, instanceBlockDevice := range instance.BlockDeviceMappings {
 		for _, configVolumeMapping := range s.VolumeMapping {
 			//Find the config entry for the instance blockDevice
-			if configVolumeMapping.DeviceName == *instanceBlockDevices.DeviceName {
+			if configVolumeMapping.DeviceName == *instanceBlockDevice.DeviceName {
 				//Skip Volumes that are not set to create snapshot
 				if configVolumeMapping.SnapshotVolume != true {
 					continue
 				}
 
-				ui.Message(fmt.Sprintf("Compiling list of tags to apply to snapshot from Volume %s...", *instanceBlockDevices.DeviceName))
+				ui.Message(fmt.Sprintf("Compiling list of tags to apply to snapshot from Volume %s...", *instanceBlockDevice.DeviceName))
 				tags, err := awscommon.TagMap(configVolumeMapping.SnapshotTags).EC2Tags(s.Ctx, s.AccessConfig.SessionRegion(), state)
 				if err != nil {
-					err := fmt.Errorf("Error generating tags for snapshot %s: %s", *instanceBlockDevices.DeviceName, err)
+					err := fmt.Errorf("Error generating tags for snapshot %s: %s", *instanceBlockDevice.DeviceName, err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
@@ -54,7 +54,7 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 				}
 
 				input := &ec2.CreateSnapshotInput{
-					VolumeId:          aws.String(*instanceBlockDevices.Ebs.VolumeId),
+					VolumeId:          aws.String(*instanceBlockDevice.Ebs.VolumeId),
 					TagSpecifications: []*ec2.TagSpecification{tagSpec},
 				}
 
@@ -63,15 +63,15 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 					input.TagSpecifications = nil
 				}
 
-				ui.Message(fmt.Sprintf("Requesting snapshot of volume: %s...", *instanceBlockDevices.Ebs.VolumeId))
+				ui.Message(fmt.Sprintf("Requesting snapshot of volume: %s...", *instanceBlockDevice.Ebs.VolumeId))
 				snapshot, err := ec2conn.CreateSnapshot(input)
 				if err != nil || snapshot == nil {
-					err := fmt.Errorf("Error generating snapsot for volume %s: %s", *instanceBlockDevices.Ebs.VolumeId, err)
+					err := fmt.Errorf("Error generating snapsot for volume %s: %s", *instanceBlockDevice.Ebs.VolumeId, err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
 				}
-				ui.Message(fmt.Sprintf("Requested Snapshot of Volume %s: %s", *instanceBlockDevices.Ebs.VolumeId, *snapshot.SnapshotId))
+				ui.Message(fmt.Sprintf("Requested Snapshot of Volume %s: %s", *instanceBlockDevice.Ebs.VolumeId, *snapshot.SnapshotId))
 				s.snapshotMap[*snapshot.SnapshotId] = &configVolumeMapping
 			}
 		}
