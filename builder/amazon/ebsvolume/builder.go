@@ -317,7 +317,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		&stepSnapshotEBSVolumes{
 			PollingConfig: b.config.PollingConfig,
 			VolumeMapping: b.config.VolumeMappings,
-			AccessConfig:  b.config.AccessConfig,
+			AccessConfig:  &b.config.AccessConfig,
 			Ctx:           b.config.ctx,
 		},
 	}

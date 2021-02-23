@@ -7,11 +7,13 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
+
 	//"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/builder/amazon/common"
 )
 
 // Define a mock struct to be used in unit tests for common aws steps.
@@ -76,17 +78,43 @@ func TestStepSnapshot_run_simple(t *testing.T) {
 	}
 
 	state := tState(t)
+	state.Put("instance", &ec2.Instance{
+		InstanceId: aws.String("instance-id"),
+	})
+
+	accessConfig := common.FakeAccessConfig()
+
+	volMap := BlockDevices{
+		{
+	awscommon.BlockDevice `mapstructure:",squash"`
+	// Key/value pair tags to apply to the volume. These are retained after the builder
+	// completes. This is a [template engine](/docs/templates/legacy_json_templates/engine), see
+	// [Build template data](#build-template-data) for more information.
+	Tags map[string]string `mapstructure:"tags" required:"false"`
+	// Same as [`tags`](#tags) but defined as a singular repeatable block
+	// containing a `key` and a `value` field. In HCL2 mode the
+	// [`dynamic_block`](/docs/templates/hcl_templates/expressions#dynamic-blocks)
+	// will allow you to create those programatically.
+	Tag config.KeyValues `mapstructure:"tag" required:"false"`
+
+	// Create a Snapshot of this Volume.
+	SnapshotVolume bool `mapstructure:"snapshot_volume" required:"false"`
+
+	awscommon.SnapshotConfig `mapstructure:",squash"`
+}
+}
 	//Todo add fake volumes, for the snap shot step to Snapshot
 
 	step := stepSnapshotEBSVolumes{
 		PollingConfig: new(common.AWSPollingConfig), //Dosnt look like builder sets this up
+		AccessConfig:  accessConfig,
 		VolumeMapping: b.config.VolumeMappings,
 		Ctx:           b.config.ctx,
 	}
 
 	step.Run(context.Background(), state)
 
-	if len(step.SnapshotMap) != 1 {
+	if len(step.snapshotMap) != 1 {
 		t.Fatalf("Missing Snapshot from step")
 	}
 }

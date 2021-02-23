@@ -7,18 +7,18 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 )
 
 type stepSnapshotEBSVolumes struct {
 	PollingConfig *awscommon.AWSPollingConfig
-	AccessConfig  awscommon.AccessConfig
+	AccessConfig  *awscommon.AccessConfig
 	VolumeMapping []BlockDevice
 	//Map of SnapshotID: BlockDevice, Where *BlockDevice is in VolumeMapping
-	SnapshotMap map[string]*BlockDevice
+	snapshotMap map[string]*BlockDevice
 	Ctx         interpolate.Context
 }
 
@@ -27,7 +27,7 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
 
-	s.SnapshotMap = make(map[string]*BlockDevice)
+	s.snapshotMap = make(map[string]*BlockDevice)
 
 	for _, instanceBlockDevices := range instance.BlockDeviceMappings {
 		for _, configVolumeMapping := range s.VolumeMapping {
@@ -72,13 +72,13 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 					return multistep.ActionHalt
 				}
 				ui.Message(fmt.Sprintf("Requested Snapshot of Volume %s: %s", *instanceBlockDevices.Ebs.VolumeId, *snapshot.SnapshotId))
-				s.SnapshotMap[*snapshot.SnapshotId] = &configVolumeMapping
+				s.snapshotMap[*snapshot.SnapshotId] = &configVolumeMapping
 			}
 		}
 	}
 
 	ui.Say("Waiting for Snapshots to become ready...")
-	for snapID := range s.SnapshotMap {
+	for snapID := range s.snapshotMap {
 		ui.Message(fmt.Sprintf("Waiting for %s to be ready.", snapID))
 		err := s.PollingConfig.WaitUntilSnapshotDone(ctx, ec2conn, snapID)
 		if err != nil {
@@ -93,7 +93,7 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 
 	//Attach User and Group permissions to snapshots
 	ui.Say("Setting User/Group Permissions for Snapshots...")
-	for snapID, bd := range s.SnapshotMap {
+	for snapID, bd := range s.snapshotMap {
 		snapshotOptions := make(map[string]*ec2.ModifySnapshotAttributeInput)
 
 		if len(bd.SnapshotGroups) > 0 {
@@ -151,7 +151,7 @@ func (s *stepSnapshotEBSVolumes) Run(ctx context.Context, state multistep.StateB
 	snapshots := make(EbsSnapshots)
 	currentregion := s.AccessConfig.SessionRegion()
 
-	for snapID := range s.SnapshotMap {
+	for snapID := range s.snapshotMap {
 		snapshots[currentregion] = append(
 			snapshots[currentregion],
 			snapID)
