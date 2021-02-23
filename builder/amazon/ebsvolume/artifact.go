@@ -13,11 +13,15 @@ import (
 // map of region to list of volume IDs
 type EbsVolumes map[string][]string
 
+// map of region to list of snapshot IDs
+type EbsSnapshots map[string][]string
+
 // Artifact is an artifact implementation that contains built AMIs.
 type Artifact struct {
 	// A map of regions to EBS Volume IDs.
 	Volumes EbsVolumes
-
+	// A map of regions to EBS Snapshot IDs.
+	Snapshots EbsSnapshots
 	// BuilderId is the unique ID for the builder that created this AMI
 	BuilderIdValue string
 
@@ -40,10 +44,18 @@ func (*Artifact) Files() []string {
 
 // returns a sorted list of region:ID pairs
 func (a *Artifact) idList() []string {
-	parts := make([]string, 0, len(a.Volumes))
+
+	parts := make([]string, 0, len(a.Volumes)+len(a.Snapshots))
+
 	for region, volumeIDs := range a.Volumes {
 		for _, volumeID := range volumeIDs {
 			parts = append(parts, fmt.Sprintf("%s:%s", region, volumeID))
+		}
+	}
+
+	for region, snapshotIDs := range a.Snapshots {
+		for _, snapshotID := range snapshotIDs {
+			parts = append(parts, fmt.Sprintf("%s:%s", region, snapshotID))
 		}
 	}
 

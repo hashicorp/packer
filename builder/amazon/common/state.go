@@ -149,15 +149,22 @@ func (w *AWSPollingConfig) WaitUntilVolumeAvailable(ctx aws.Context, conn *ec2.E
 	return err
 }
 
-func (w *AWSPollingConfig) WaitUntilSnapshotDone(ctx aws.Context, conn *ec2.EC2, snapshotID string) error {
+func (w *AWSPollingConfig) WaitUntilSnapshotDone(ctx aws.Context, conn ec2iface.EC2API, snapshotID string) error {
 	snapInput := ec2.DescribeSnapshotsInput{
 		SnapshotIds: []*string{&snapshotID},
+	}
+
+	waitOpts := w.getWaiterOptions()
+	if len(waitOpts) == 0 {
+		// Bump this default to 30 minutes.
+		// Large snapshots can take a long time for the copy to s3
+		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(120))
 	}
 
 	err := conn.WaitUntilSnapshotCompletedWithContext(
 		ctx,
 		&snapInput,
-		w.getWaiterOptions()...)
+		waitOpts...)
 	return err
 }
 
