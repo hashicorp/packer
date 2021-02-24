@@ -1,6 +1,6 @@
 //go:generate struct-markdown
 
-package commonsteps
+package wim
 
 import (
 	"context"
@@ -15,6 +15,10 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
+var defaultGetterClient = getter.Client{
+	Getters: getter.Getters,
+}
+
 // By default, Packer will symlink, download or copy image files to the Packer
 // cache into a "`hash($wim_url+$wim_checksum).$wim_target_extension`" file.
 // Packer uses [hashicorp/go-getter](https://github.com/hashicorp/go-getter) in
@@ -26,7 +30,6 @@ import (
 // * Git
 // * Mercurial
 // * HTTP
-// * Amazon S3
 //
 // Examples:
 // go-getter can guess the checksum type based on `wim_checksum` length, and it is
