@@ -12,7 +12,7 @@ found version matching `required_plugins` will be taken into consideration.
 
 1. The directory where `packer` is, or the executable directory.
 1. The current working directory. (`"."`)
-1. The `PACKER_HOME_DIR/plugins` directory. PACKER_HOME_DIR refers to *[Packer's home 
+1. The `PACKER_HOME_DIR/plugins` directory. PACKER_HOME_DIR refers to *[Packer's home
 directory](/docs/configure#packer-s-home-directory)*, if it could be found.
 1. The director(y/ies) under the `PACKER_PLUGIN_PATH` env var, if `PACKER_PLUGIN_PATH`
 is set.
@@ -39,13 +39,19 @@ system with no `PACKER_PLUGIN_PATH` env var set.
 During initialization, on a `darwin_amd64` system, Packer will look-up for the
 following files:
 
-* `PACKER_EXEC_DIR/github.com/azr/happycloud/packer-plugin-happycloud_*_darwin_amd64_x5.0`
-* `./github.com/azr/happycloud/packer-plugin-happycloud_*_darwin_amd64_x5.0`
-* `PACKER_HOME_DIR/plugins/github.com/azr/happycloud/packer-plugin-happycloud_*_darwin_amd64_x5.0`
-* `PACKER_PLUGIN_PATH/github.com/azr/happycloud/packer-plugin-happycloud_*_darwin_amd64_x5.0`
+* `PACKER_EXEC_DIR/github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64`
+* `./github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64`
+* `PACKER_HOME_DIR/plugins/github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64`
+* `PACKER_PLUGIN_PATH/github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64`
 * `./packer-plugin-happycloud`
 
 The first plugin-name/version files found will take precedence.
+
+For plugins located under the `github.com/azr/happycloud/` directory structure an accompanying SHA256SUM file
+will be required in order for `packer init` to ensure the plugin being loaded has not been tampered with.
+The SHA256SUM file will be automatically generated when a plugin is installed via `packer init` if the plugin
+was installed manually into `PACKER_HOME_DIR/plugins/github.com/azr/happycloud/` then the file
+`PACKER_HOME_DIR/plugins/github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64_SHA256SUM` must be generated manually as well.
 
 -> Note: `PACKER_HOME_DIR` is not an actual env var and refers to [Packer's home
 directory](#packer-s-home-directory). `PACKER_EXEC_DIR` is not an actual env var
