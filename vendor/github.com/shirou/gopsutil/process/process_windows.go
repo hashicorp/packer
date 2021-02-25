@@ -12,7 +12,7 @@ import (
 	"unsafe"
 
 	"github.com/StackExchange/wmi"
-	cpu "github.com/shirou/gopsutil/cpu"
+	cpu "github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/internal/common"
 	net "github.com/shirou/gopsutil/net"
 	"github.com/shirou/w32"

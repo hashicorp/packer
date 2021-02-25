@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/internal/common"
 	"github.com/shirou/gopsutil/net"

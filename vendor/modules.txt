@@ -624,8 +624,7 @@ github.com/scaleway/scaleway-sdk-go/namegenerator
 github.com/scaleway/scaleway-sdk-go/scw
 github.com/scaleway/scaleway-sdk-go/validation
 # github.com/shirou/gopsutil v2.18.12+incompatible
-## explicit
-github.com/shirou/gopsutil/cpu
+github.com/shirou/gopsutil/v3/cpu
 github.com/shirou/gopsutil/host
 github.com/shirou/gopsutil/internal/common
 github.com/shirou/gopsutil/mem

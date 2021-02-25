@@ -63,6 +63,7 @@ require (
 	github.com/mitchellh/cli v1.1.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
+	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.4.0
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
@@ -75,7 +76,7 @@ require (
 	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
-	github.com/shirou/gopsutil v2.18.12+incompatible
+	github.com/shirou/gopsutil v3.21.1+incompatible
 	github.com/stretchr/testify v1.6.1
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible
 	github.com/ucloud/ucloud-sdk-go v0.16.3
