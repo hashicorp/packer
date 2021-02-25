@@ -50,6 +50,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/hcl/v2 v2.8.0
+	github.com/hashicorp/packer-plugin-docker v0.0.2
 	github.com/hashicorp/packer-plugin-sdk v0.0.14
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1

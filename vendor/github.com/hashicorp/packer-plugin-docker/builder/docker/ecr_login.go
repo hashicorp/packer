@@ -6,12 +6,16 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"net/http"
 	"regexp"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	awsCredentials "github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecr"
-	"github.com/hashicorp/packer/builder/amazon/common"
+	awsbase "github.com/hashicorp/aws-sdk-go-base"
+	"github.com/hashicorp/go-cleanhttp"
 )
 
 type AwsAccessConfig struct {
@@ -32,7 +36,7 @@ type AwsAccessConfig struct {
 	// communicate with AWS. Learn how to set
 	// this.
 	Profile string `mapstructure:"aws_profile" required:"false"`
-	cfg     *common.AccessConfig
+	cfg     *awsbase.Config
 }
 
 // Get a login token for Amazon AWS ECR. Returns username and password
@@ -49,21 +53,49 @@ func (c *AwsAccessConfig) EcrGetLogin(ecrUrl string) (string, string, error) {
 
 	log.Println(fmt.Sprintf("Getting ECR token for account: %s in %s..", accountId, region))
 
-	c.cfg = &common.AccessConfig{
-		AccessKey:   c.AccessKey,
-		ProfileName: c.Profile,
-		RawRegion:   region,
-		SecretKey:   c.SecretKey,
-		Token:       c.Token,
+	// Create new AWS config
+	config := aws.NewConfig().WithCredentialsChainVerboseErrors(true)
+	config = config.WithRegion(region)
+
+	config = config.WithHTTPClient(cleanhttp.DefaultClient())
+	transport := config.HTTPClient.Transport.(*http.Transport)
+	transport.Proxy = http.ProxyFromEnvironment
+
+	// Figure out which possible credential providers are valid; test that we
+	// can get credentials via the selected providers, and set the providers in
+	// the config.
+	creds, err := c.GetCredentials(config)
+	if err != nil {
+		return "", "", fmt.Errorf(err.Error())
+	}
+	config.WithCredentials(creds)
+
+	// Create session options based on our AWS config
+	opts := session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+		Config:            *config,
 	}
 
-	session, err := c.cfg.Session()
+	if c.Profile != "" {
+		opts.Profile = c.Profile
+	}
+
+	sess, err := session.NewSessionWithOptions(opts)
+	if err != nil {
+		return "", "", err
+	}
+	log.Printf("Found region %s", *sess.Config.Region)
+	session := sess
+
+	cp, err := session.Config.Credentials.Get()
+
 	if err != nil {
 		return "", "", fmt.Errorf("failed to create session: %s", err)
 	}
 
-	service := ecr.New(session)
+	log.Printf("[INFO] AWS authentication used: %q", cp.ProviderName)
 
+	service := ecr.New(session)
 	params := &ecr.GetAuthorizationTokenInput{
 		RegistryIds: []*string{
 			aws.String(accountId),
@@ -83,4 +115,21 @@ func (c *AwsAccessConfig) EcrGetLogin(ecrUrl string) (string, string, error) {
 	log.Printf("Successfully got login for ECR: %s", ecrUrl)
 
 	return authParts[0], authParts[1], nil
+}
+
+// GetCredentials gets credentials from the environment, shared credentials,
+// the session (which may include a credential process), or ECS/EC2 metadata
+// endpoints. GetCredentials also validates the credentials and the ability to
+// assume a role or will return an error if unsuccessful.
+func (c *AwsAccessConfig) GetCredentials(config *aws.Config) (*awsCredentials.Credentials, error) {
+	// Reload values into the config used by the Packer-Terraform shared SDK
+	awsbaseConfig := &awsbase.Config{
+		AccessKey:    c.AccessKey,
+		DebugLogging: false,
+		Profile:      c.Profile,
+		SecretKey:    c.SecretKey,
+		Token:        c.Token,
+	}
+
+	return awsbase.GetCredentials(awsbaseConfig)
 }
