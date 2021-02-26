@@ -726,10 +726,6 @@
         "path": "builders/digitalocean"
       },
       {
-        "title": "Docker",
-        "path": "builders/docker"
-      },
-      {
         "title": "File",
         "path": "builders/file"
       },
@@ -1095,22 +1091,6 @@
       {
         "title": "DigitalOcean Import",
         "path": "post-processors/digitalocean-import"
-      },
-      {
-        "title": "Docker Import",
-        "path": "post-processors/docker-import"
-      },
-      {
-        "title": "Docker Push",
-        "path": "post-processors/docker-push"
-      },
-      {
-        "title": "Docker Save",
-        "path": "post-processors/docker-save"
-      },
-      {
-        "title": "Docker Tag",
-        "path": "post-processors/docker-tag"
       },
       {
         "title": "Exoscale Import",
