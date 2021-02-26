@@ -7,7 +7,7 @@ version: 2.1
 executors:
   golang:
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.15
+      - image: docker.mirror.hashicorp.services/circleci/golang:1.16
     resource_class: medium+
   darwin:
     macos:
@@ -61,13 +61,11 @@ jobs:
           file: coverage.txt
   test-darwin:
     executor: darwin
-    working_directory: ~/go/src/github.com/hashicorp/packer
-    environment:
-      GO111MODULE: "off"
+    working_directory: ~/go/github.com/hashicorp/packer
     steps:
       - install-go-run-tests-unix:
           GOOS: darwin
-          GOVERSION: "1.15"
+          GOVERSION: "1.16"
       - codecov/upload:
           file: coverage.txt
   test-windows:
@@ -76,7 +74,7 @@ jobs:
       shell: bash.exe
     steps:
       - install-go-run-tests-windows:
-          GOVERSION: "1.15"
+          GOVERSION: "1.16"
       - codecov/upload:
           file: coverage.txt
   check-lint:
