@@ -132,6 +132,26 @@ func TestPausedProvisionerProvision(t *testing.T) {
 	}
 }
 
+func TestPausedProvisionerProvision_cancel(t *testing.T) {
+	pausingCtx, cancel := context.WithTimeout(context.Background(), 25*time.Millisecond)
+	defer cancel()
+
+	startTime := time.Now()
+	waitTime := 50 * time.Millisecond
+
+	ui := new(packersdk.MockUi)
+	prov := pausedTestProvisionor(startTime, waitTime)
+	err := prov.Provision(pausingCtx, ui, new(packersdk.MockCommunicator), make(map[string]interface{}))
+	if err == nil {
+		t.Fatalf("No error occurred")
+	}
+
+	expectedError := "context deadline exceeded"
+	if err.Error() != expectedError {
+		t.Fatalf("Unexpected error, expected: %v, got: %v", expectedError, err)
+	}
+}
+
 func pausedTestProvisionor(startTime time.Time, waitTime time.Duration) *PausedProvisioner {
 	return &PausedProvisioner{
 		PauseBefore: waitTime,
@@ -213,7 +233,6 @@ func TestPausedProvisionerProvision_waits_MachineReadableUi(t *testing.T) {
 	}
 }
 
-// The test contains a data race.
 func TestPausedProvisionerProvision_waits_with_updates(t *testing.T) {
 	startTime := time.Now()
 	waitTime := 30 * time.Second

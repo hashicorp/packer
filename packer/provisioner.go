@@ -146,19 +146,7 @@ func (p *PausedProvisioner) Prepare(raws ...interface{}) error {
 func (p *PausedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 
 	ui.Say(fmt.Sprintf("Pausing %s before the next provisioner...", p.PauseBefore))
-
-	var err error
-	switch ui.(type) {
-	case *MachineReadableUi:
-		err = p.pausingNoUpdate(ctx)
-	default:
-		minimumTimeForPauseUpdate := float64(10)
-		if p.PauseBefore.Seconds() < minimumTimeForPauseUpdate {
-			err = p.pausingNoUpdate(ctx)
-		} else {
-			err = p.pausingWithUpdates(ctx, ui)
-		}
-	}
+	err := p.pause(ctx, ui)
 	if err != nil {
 		return err
 	}
@@ -166,40 +154,45 @@ func (p *PausedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm
 	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
 }
 
-func (p *PausedProvisioner) pausingNoUpdate(ctx context.Context) error {
-	select {
-	case <-time.After(p.PauseBefore):
-	case <-ctx.Done():
-		return ctx.Err()
+func (p *PausedProvisioner) pause(ctx context.Context, ui packersdk.Ui) error {
+	if p.PauseBefore == time.Duration(0) {
+		return nil
 	}
-	return nil
-}
 
-func (p *PausedProvisioner) pausingWithUpdates(ctx context.Context, ui packersdk.Ui) error {
 	updateTime := 10
 	var C <-chan time.Time
-	if updateTime > 0 {
-		ticker := time.NewTicker(time.Duration(updateTime) * time.Second)
-		defer ticker.Stop()
-	}
-	totalTime := p.PauseBefore.Seconds()
 
+	// If ui is MachineReadableUi, then we don't make ticker that prints updates
+	switch ui.(type) {
+	case *MachineReadableUi:
+	default:
+		// only if pause time is greater than ticker interval, then we create ticker
+		if p.PauseBefore.Seconds() > float64(updateTime) {
+			ticker := time.NewTicker(time.Duration(updateTime) * time.Second)
+			defer ticker.Stop()
+			C = ticker.C
+		}
+	}
+
+	totalTime := p.PauseBefore.Seconds()
 	pausingCtx, cancel := context.WithTimeout(ctx, p.PauseBefore)
 	defer cancel()
 
-	var err error
+	startTime := time.Now()
+
 	for {
 		select {
 		case <-pausingCtx.Done():
-			err = pausingCtx.Err()
-			if err != nil && isTimeRemaining(totalTime) {
-				return err
+			currentTime := time.Now()
+			endTime := startTime.Add(p.PauseBefore)
+			if currentTime.After(endTime) {
+				return nil
+			} else {
+				return pausingCtx.Err()
 			}
-			return nil
-		case <- C:
+		case <-C:
 			totalTime -= float64(updateTime)
-			_, ok := pausingCtx.Deadline()
-			if ok && isTimeRemaining(totalTime) {
+			if isTimeRemaining(totalTime) {
 				ui.Say(fmt.Sprintf("%v seconds left until the next provisioner", totalTime))
 			}
 		}
