@@ -3,7 +3,7 @@
 package common
 
 import (
-	"io/fs"
+	"os"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/zclconf/go-cty/cty"
@@ -17,7 +17,7 @@ type FlatExportConfig struct {
 	Images    *bool        `mapstructure:"images" cty:"images" hcl:"images"`
 	Manifest  *string      `mapstructure:"manifest" cty:"manifest" hcl:"manifest"`
 	OutputDir *string      `mapstructure:"output_directory" required:"false" cty:"output_directory" hcl:"output_directory"`
-	DirPerm   *fs.FileMode `mapstructure:"directory_permission" required:"false" cty:"directory_permission" hcl:"directory_permission"`
+	DirPerm   *os.FileMode `mapstructure:"directory_permission" required:"false" cty:"directory_permission" hcl:"directory_permission"`
 	Options   []string     `mapstructure:"options" cty:"options" hcl:"options"`
 }
 
