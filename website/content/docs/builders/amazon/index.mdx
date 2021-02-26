@@ -257,6 +257,17 @@ work, but specifics will depend on your use-case.
 }
 ```
 
+If using an existing instance profile with spot instances/spot pricing, the `iam:CreateServiceLinkedRole` action is also required:
+
+```json
+{
+  "Sid": "PackerIAMPassRole",
+  "Effect": "Allow",
+  "Action": ["iam:PassRole", "iam:GetInstanceProfile", "iam:CreateServiceLinkedRole"],
+  "Resource": ["*"]
+}
+```
+
 In case when you're creating a temporary instance profile you will require to have following
 IAM policies.
 
