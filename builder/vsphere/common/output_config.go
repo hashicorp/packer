@@ -5,7 +5,7 @@ package common
 
 import (
 	"fmt"
-	"os"
+	"io/fs"
 	"path/filepath"
 
 	"github.com/hashicorp/packer-plugin-sdk/common"
@@ -27,7 +27,7 @@ type OutputConfig struct {
 	// leading zero such as "0755" in JSON file, because JSON does not support
 	// octal value. In Unix-like OS, the actual permission may differ from
 	// this value because of umask.
-	DirPerm os.FileMode `mapstructure:"directory_permission" required:"false"`
+	DirPerm fs.FileMode `mapstructure:"directory_permission" required:"false"`
 }
 
 func (c *OutputConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig) []error {
@@ -45,7 +45,7 @@ func (c *OutputConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig
 func (c *OutputConfig) ListFiles() ([]string, error) {
 	files := make([]string, 0, 10)
 
-	visit := func(path string, info os.FileInfo, err error) error {
+	visit := func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
