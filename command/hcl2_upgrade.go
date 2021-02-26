@@ -12,6 +12,7 @@ import (
 	"strings"
 	texttemplate "text/template"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	hcl2shim "github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	"github.com/hashicorp/packer-plugin-sdk/template"
@@ -279,28 +280,29 @@ func transposeTemplatingCalls(s []byte) []byte {
 
 		return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
 	}
-	funcMap := templateCommonFunctionMap()
 
-	tpl, err := texttemplate.New("hcl2_upgrade").
-		Funcs(funcMap).
-		Parse(string(s))
+	funcErrors := &multierror.Error{
+		ErrorFormat: func(es []error) string {
+			if len(es) == 1 {
+				return fmt.Sprintf("# 1 error occurred upgrading the following block:\n\t# %s\n", es[0])
+			}
 
-	if err != nil {
-		return fallbackReturn(err)
+			points := make([]string, len(es))
+			for i, err := range es {
+				if i == len(es)-1 {
+					points[i] = fmt.Sprintf("# %s", err)
+					continue
+				}
+				points[i] = fmt.Sprintf("# %s\n", err)
+			}
+
+			return fmt.Sprintf(
+				"# %d errors occurred upgrading the following block:\n\t%s",
+				len(es), strings.Join(points, "\n\t"))
+		},
 	}
 
-	str := &bytes.Buffer{}
-	// PASSTHROUGHS is a map of variable-specific golang text template fields
-	// that should remain in the text template format.
-	if err := tpl.Execute(str, PASSTHROUGHS); err != nil {
-		return fallbackReturn(err)
-	}
-
-	return str.Bytes()
-}
-
-func templateCommonFunctionMap() texttemplate.FuncMap {
-	return texttemplate.FuncMap{
+	funcMap := texttemplate.FuncMap{
 		"aws_secretsmanager": func(a ...string) string {
 			if len(a) == 2 {
 				for key, config := range amazonSecretsManagerMap {
@@ -328,11 +330,12 @@ func templateCommonFunctionMap() texttemplate.FuncMap {
 				"name": a[0],
 			}
 			return fmt.Sprintf("${data.amazon-secretsmanager.%s.value}", id)
-		}, "timestamp": func() string {
+		},
+		"timestamp": func() string {
 			timestamp = true
 			return "${local.timestamp}"
 		},
-		"isotime": func() string {
+		"isotime": func(a ...string) string {
 			timestamp = true
 			return "${local.timestamp}"
 		},
@@ -364,49 +367,55 @@ func templateCommonFunctionMap() texttemplate.FuncMap {
 		"uuid": func() string {
 			return fmt.Sprintf("${uuidv4()}")
 		},
-		"lower": func(_ string) (string, error) {
-			return "", UnhandleableArgumentError{
+		"lower": func(a string) (string, error) {
+			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"lower",
 				"`lower(var.example)`",
 				"https://www.packer.io/docs/templates/hcl_templates/functions/string/lower",
-			}
+			})
+			return fmt.Sprintf("{{ lower `%s` }}", a), nil
 		},
-		"upper": func(_ string) (string, error) {
-			return "", UnhandleableArgumentError{
+		"upper": func(a string) (string, error) {
+			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"upper",
 				"`upper(var.example)`",
 				"https://www.packer.io/docs/templates/hcl_templates/functions/string/upper",
-			}
+			})
+			return fmt.Sprintf("{{ upper `%s` }}", a), nil
 		},
-		"split": func(_, _ string, _ int) (string, error) {
-			return "", UnhandleableArgumentError{
+		"split": func(a, b string, n int) (string, error) {
+			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"split",
 				"`split(separator, string)`",
 				"https://www.packer.io/docs/templates/hcl_templates/functions/string/split",
-			}
+			})
+			return fmt.Sprintf("{{ split `%s` `%s` %d }}", a, b, n), nil
 		},
-		"replace": func(_, _, _ string, _ int) (string, error) {
-			return "", UnhandleableArgumentError{
+		"replace": func(a, b string, n int, c string) (string, error) {
+			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"replace",
 				"`replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
 				"https://www.packer.io/docs/templates/hcl_templates/functions/string/replace or https://www.packer.io/docs/templates/hcl_templates/functions/string/regex_replace",
-			}
+			})
+			return fmt.Sprintf("{{ replace `%s` `%s` `%s` %d }}", a, b, c, n), nil
 		},
-		"replace_all": func(_, _, _ string) (string, error) {
-			return "", UnhandleableArgumentError{
+		"replace_all": func(a, b, c string) (string, error) {
+			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"replace_all",
 				"`replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
 				"https://www.packer.io/docs/templates/hcl_templates/functions/string/replace or https://www.packer.io/docs/templates/hcl_templates/functions/string/regex_replace",
-			}
+			})
+			return fmt.Sprintf("{{ replace_all `%s` `%s` `%s` }}", a, b, c), nil
 		},
-		"clean_resource_name": func(_ string) (string, error) {
-			return "", UnhandleableArgumentError{
+		"clean_resource_name": func(a string) (string, error) {
+			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"clean_resource_name",
 				"use custom validation rules, `replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
 				"https://packer.io/docs/templates/hcl_templates/variables#custom-validation-rules" +
 					" , https://www.packer.io/docs/templates/hcl_templates/functions/string/replace" +
 					" or https://www.packer.io/docs/templates/hcl_templates/functions/string/regex_replace",
-			}
+			})
+			return fmt.Sprintf("{{ clean_resource_name `%s` }}", a), nil
 		},
 		"build_name": func() string {
 			return fmt.Sprintf("${build.name}")
@@ -415,6 +424,28 @@ func templateCommonFunctionMap() texttemplate.FuncMap {
 			return fmt.Sprintf("${build.type}")
 		},
 	}
+
+	tpl, err := texttemplate.New("hcl2_upgrade").
+		Funcs(funcMap).
+		Parse(string(s))
+
+	if err != nil {
+		return fallbackReturn(err)
+	}
+
+	str := &bytes.Buffer{}
+	// PASSTHROUGHS is a map of variable-specific golang text template fields
+	// that should remain in the text template format.
+	if err := tpl.Execute(str, PASSTHROUGHS); err != nil {
+		return fallbackReturn(err)
+	}
+
+	out := str.Bytes()
+
+	if funcErrors.Len() > 0 {
+		return append([]byte(fmt.Sprintf("\n%s", funcErrors)), out...)
+	}
+	return out
 }
 
 // variableTransposeTemplatingCalls executes parts of blocks as go template files and replaces
@@ -431,14 +462,40 @@ func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
 		return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
 	}
 
-	funcMap := templateCommonFunctionMap()
-	funcMap["aws_secretsmanager"] = func(a ...string) string {
+	setIsLocal := func(a ...string) string {
 		isLocal = true
 		return ""
 	}
-	funcMap["user"] = func(a ...string) string {
-		isLocal = true
-		return ""
+
+	// Make locals from variables using valid template engine,
+	// expect the ones using only 'env'
+	// ref: https://www.packer.io/docs/templates/legacy_json_templates/engine#template-engine
+	funcMap := texttemplate.FuncMap{
+		"aws_secretsmanager": setIsLocal,
+		"timestamp":          setIsLocal,
+		"isotime":            setIsLocal,
+		"user":               setIsLocal,
+		"env": func(in string) string {
+			return fmt.Sprintf("${env(%q)}", in)
+		},
+		"template_dir":   setIsLocal,
+		"pwd":            setIsLocal,
+		"packer_version": setIsLocal,
+		"uuid":           setIsLocal,
+		"lower":          setIsLocal,
+		"upper":          setIsLocal,
+		"split": func(_, _ string, _ int) (string, error) {
+			isLocal = true
+			return "", nil
+		},
+		"replace": func(_, _ string, _ int, _ string) (string, error) {
+			isLocal = true
+			return "", nil
+		},
+		"replace_all": func(_, _, _ string) (string, error) {
+			isLocal = true
+			return "", nil
+		},
 	}
 
 	tpl, err := texttemplate.New("hcl2_upgrade").
