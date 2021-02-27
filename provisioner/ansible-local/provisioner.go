@@ -359,10 +359,32 @@ func (p *Provisioner) executeGalaxy(ui packersdk.Ui, comm packersdk.Communicator
 	ctx := context.TODO()
 	galaxyFile := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.GalaxyFile)))
 
-	// ansible-galaxy install -r requirements.yml -p roles/
+	// ansible-galaxy install -r requirements.yml
 	command := fmt.Sprintf("cd %s && %s install -r %s",
 		p.config.StagingDir, p.config.GalaxyCommand, galaxyFile)
 	ui.Message(fmt.Sprintf("Executing Ansible Galaxy: %s", command))
+	cmd := &packersdk.RemoteCmd{
+		Command: command,
+	}
+	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
+		return err
+	}
+	if cmd.ExitStatus() != 0 {
+		// ansible-galaxy version 2.0.0.2 doesn't return exit codes on error..
+		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus())
+	}
+	return nil
+}
+
+func (p *Provisioner) executeGalaxyRoleInstall(ui packersdk.Ui, comm packersdk.Communicator) error {
+	ctx := context.TODO()
+	rolesDir := filepath.ToSlash(filepath.Join(p.config.StagingDir, "roles"))
+	galaxyFile := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.GalaxyFile)))
+
+	// ansible-galaxy role install -r requirements.yml -p roles/
+	command := fmt.Sprintf("cd %s && %s role install -r %s -p %s",
+		p.config.StagingDir, p.config.GalaxyCommand, galaxyFile, rolesDir)
+	ui.Message(fmt.Sprintf("Executing Ansible Galaxy Role Install: %s", command))
 	cmd := &packersdk.RemoteCmd{
 		Command: command,
 	}
@@ -387,6 +409,9 @@ func (p *Provisioner) executeAnsible(ui packersdk.Ui, comm packersdk.Communicato
 
 	// Fetch external dependencies
 	if len(p.config.GalaxyFile) > 0 {
+		if err := p.executeGalaxyRoleInstall(ui, comm); err != nil {
+			return fmt.Errorf("Error executing Ansible Galaxy: %s", err)
+		}
 		if err := p.executeGalaxy(ui, comm); err != nil {
 			return fmt.Errorf("Error executing Ansible Galaxy: %s", err)
 		}
