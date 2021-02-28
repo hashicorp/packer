@@ -103,6 +103,9 @@ type FlatConfig struct {
 	CloudInitStoragePool      *string                    `mapstructure:"cloud_init_storage_pool" cty:"cloud_init_storage_pool" hcl:"cloud_init_storage_pool"`
 	AdditionalISOFiles        []FlatadditionalISOsConfig `mapstructure:"additional_iso_files" cty:"additional_iso_files" hcl:"additional_iso_files"`
 	VMInterface               *string                    `mapstructure:"vm_interface" cty:"vm_interface" hcl:"vm_interface"`
+	CDFiles                   []string                   `mapstructure:"cd_files" cty:"cd_files" hcl:"cd_files"`
+	CDLabel                   *string                    `mapstructure:"cd_label" cty:"cd_label" hcl:"cd_label"`
+	CDFilesConf               *FlatcdFilesConfig         `mapstructure:",cd_files_config" cty:"cd_files_conf" hcl:"cd_files_conf"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -210,6 +213,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"cloud_init_storage_pool":      &hcldec.AttrSpec{Name: "cloud_init_storage_pool", Type: cty.String, Required: false},
 		"additional_iso_files":         &hcldec.BlockListSpec{TypeName: "additional_iso_files", Nested: hcldec.ObjectSpec((*FlatadditionalISOsConfig)(nil).HCL2Spec())},
 		"vm_interface":                 &hcldec.AttrSpec{Name: "vm_interface", Type: cty.String, Required: false},
+		"cd_files":                     &hcldec.AttrSpec{Name: "cd_files", Type: cty.List(cty.String), Required: false},
+		"cd_label":                     &hcldec.AttrSpec{Name: "cd_label", Type: cty.String, Required: false},
+		"cd_files_conf":                &hcldec.BlockSpec{TypeName: "cd_files_conf", Nested: hcldec.ObjectSpec((*FlatcdFilesConfig)(nil).HCL2Spec())},
 	}
 	return s
 }

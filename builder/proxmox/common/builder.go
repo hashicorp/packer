@@ -85,6 +85,11 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook,
 		&stepSuccess{},
 	}
 	preSteps := b.preSteps
+	preSteps = append(preSteps,
+		&commonsteps.StepCreateCD{
+			Files: b.config.CDConfig.CDFiles,
+			Label: b.config.CDConfig.CDLabel,
+		})
 	for idx := range b.config.AdditionalISOFiles {
 		preSteps = append(preSteps, &commonsteps.StepDownload{
 			Checksum:    b.config.AdditionalISOFiles[idx].ISOChecksum,

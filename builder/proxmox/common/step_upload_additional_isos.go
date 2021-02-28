@@ -27,6 +27,16 @@ func (s *stepUploadAdditionalISOs) Run(ctx context.Context, state multistep.Stat
 	client := state.Get("proxmoxClient").(uploader)
 	c := state.Get("config").(*Config)
 
+	// Add our custom CD, if it exists
+	if cd_path, _ := state.Get("cd_path").(string); cd_path != "" {
+		var cd_conf additionalISOsConfig
+		cd_conf.Device = c.CDFilesConf.Device
+		cd_conf.ISOFile = cd_path
+		cd_conf.ISOStoragePool = c.CDFilesConf.ISOStoragePool
+		cd_conf.Unmount = c.CDFilesConf.Unmount
+		c.AdditionalISOFiles = append(c.AdditionalISOFiles, cd_conf)
+	}
+
 	for idx := range c.AdditionalISOFiles {
 		if !c.AdditionalISOFiles[idx].ShouldUploadISO {
 			state.Put("additional_iso_files", c.AdditionalISOFiles)

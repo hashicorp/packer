@@ -65,6 +65,15 @@ type Config struct {
 	VMInterface        string                 `mapstructure:"vm_interface"`
 
 	Ctx interpolate.Context `mapstructure-to-hcl2:",skip"`
+
+	commonsteps.CDConfig `mapstructure:",squash"`
+	CDFilesConf          cdFilesConfig `mapstructure:",cd_files_config"`
+}
+
+type cdFilesConfig struct {
+	Device         string `mapstructure:"device"`
+	ISOStoragePool string `mapstructure:"iso_storage_pool"`
+	Unmount        bool   `mapstructure:"unmount"`
 }
 
 type additionalISOsConfig struct {
@@ -215,6 +224,8 @@ func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []st
 	errs = packersdk.MultiErrorAppend(errs, c.Comm.Prepare(&c.Ctx)...)
 	errs = packersdk.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.Ctx)...)
 	errs = packersdk.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.Ctx)...)
+	errs = packersdk.MultiErrorAppend(errs, c.CDConfig.Prepare(&c.Ctx)...)
+	//TODO either create new step for uploading the cdfiles iso or use uploadaddtionalisofiles
 
 	// Required configurations that will display errors if not set
 	if c.Username == "" {
