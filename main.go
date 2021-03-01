@@ -1,6 +1,5 @@
 // This is the main package for the `packer` application.
 
-//go:generate go run ./scripts/generate-plugins.go
 package main
 
 import (
