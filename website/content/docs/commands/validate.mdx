@@ -33,12 +33,20 @@ Errors validating build 'vmware'. 1 error(s) occurred:
   configuration is not validated.
 
 - `-except=foo,bar,baz` - Validates all the builds except those with the
-  comma-separated names. Build names by default are the names of their
-  builders, unless a specific `name` attribute is specified within the configuration.
+  comma-separated names. In legacy JSON templates, build names default to the
+  types of their builders (e.g. `docker` or
+  `amazon-ebs` or `virtualbox-iso`, unless a specific `name` attribute is
+  specified within the configuration. In HCL2 templates, the "name" is the
+  source block's "name" label, unless an in-build source definition adds the
+  "name" configuration option.
 
 - `-only=foo,bar,baz` - Only validate the builds with the given comma-separated
-  names. Build names by default are the names of their builders, unless a
-  specific `name` attribute is specified within the configuration.
+  names. In legacy JSON templates, build names default to the
+  types of their builders (e.g. `docker` or
+  `amazon-ebs` or `virtualbox-iso`, unless a specific `name` attribute is
+  specified within the configuration. In HCL2 templates, the "name" is the
+  source block's "name" label, unless an in-build source definition adds the
+  "name" configuration option.
 
 - `-machine-readable` Sets all output to become machine-readable on stdout.
   Logging, if enabled, continues to appear on stderr.
