@@ -198,6 +198,9 @@ github.com/cheggaaa/pb
 github.com/chzyer/readline
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
+# github.com/deepmap/oapi-codegen v1.5.1
+github.com/deepmap/oapi-codegen/pkg/runtime
+github.com/deepmap/oapi-codegen/pkg/types
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 ## explicit
 github.com/dgrijalva/jwt-go
@@ -216,8 +219,15 @@ github.com/digitalocean/godo
 github.com/dimchansky/utfbom
 # github.com/dylanmei/iso8601 v0.1.0
 github.com/dylanmei/iso8601
+# github.com/exoscale/egoscale v0.43.1
+github.com/exoscale/egoscale
+github.com/exoscale/egoscale/v2
+github.com/exoscale/egoscale/v2/api
+github.com/exoscale/egoscale/v2/internal/public-api
+# github.com/exoscale/packer-plugin-exoscale v0.1.0
 ## explicit
- github.com/fatih/camelcase v1.0.0
+github.com/exoscale/packer-plugin-exoscale/post-processor/exoscale-import
+# github.com/fatih/camelcase v1.0.0
 ## explicit
 github.com/fatih/camelcase
 # github.com/fatih/color v1.9.0
@@ -248,7 +258,7 @@ github.com/gobwas/glob/util/runes
 github.com/gobwas/glob/util/strings
 # github.com/gofrs/flock v0.7.3
 github.com/gofrs/flock
-# github.com/gofrs/uuid v3.2.0+incompatible
+# github.com/gofrs/uuid v4.0.0+incompatible
 github.com/gofrs/uuid
 # github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 ## explicit
@@ -480,6 +490,9 @@ github.com/hetznercloud/hcloud-go/hcloud/schema
 # github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
 ## explicit
 github.com/hyperonecom/h1-client-go
+# github.com/jarcoal/httpmock v1.0.8
+github.com/jarcoal/httpmock
+github.com/jarcoal/httpmock/internal
 # github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
 ## explicit
 github.com/jdcloud-api/jdcloud-sdk-go/core
@@ -532,7 +545,7 @@ github.com/masterzen/simplexml/dom
 ## explicit
 github.com/masterzen/winrm
 github.com/masterzen/winrm/soap
-# github.com/mattn/go-colorable v0.1.6
+# github.com/mattn/go-colorable v0.1.8
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
@@ -637,9 +650,12 @@ github.com/shirou/gopsutil/net
 github.com/shirou/gopsutil/process
 # github.com/sirupsen/logrus v1.4.2
 github.com/sirupsen/logrus
-# github.com/stretchr/testify v1.6.1
+# github.com/stretchr/objx v0.3.0
+github.com/stretchr/objx
+# github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
+github.com/stretchr/testify/mock
 github.com/stretchr/testify/require
 # github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible
 ## explicit
@@ -815,7 +831,7 @@ go.opencensus.io/trace
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/propagation
 go.opencensus.io/trace/tracestate
-# golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9
+# golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 ## explicit
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
@@ -851,7 +867,7 @@ golang.org/x/mobile/event/key
 golang.org/x/mod/module
 golang.org/x/mod/semver
 golang.org/x/mod/sumdb/dirhash
-# golang.org/x/net v0.0.0-20201209123823-ac852fbbde11
+# golang.org/x/net v0.0.0-20210119194325-5f4716e94777
 ## explicit
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
@@ -880,7 +896,7 @@ golang.org/x/oauth2/jwt
 ## explicit
 golang.org/x/sync/errgroup
 golang.org/x/sync/semaphore
-# golang.org/x/sys v0.0.0-20201119102817-f84b799fce68
+# golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c
 ## explicit
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader
@@ -889,7 +905,7 @@ golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1
 golang.org/x/term
-# golang.org/x/text v0.3.3
+# golang.org/x/text v0.3.5
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
 golang.org/x/text/encoding/htmlindex
@@ -1064,5 +1080,5 @@ gopkg.in/square/go-jose.v2/json
 gopkg.in/square/go-jose.v2/jwt
 # gopkg.in/yaml.v2 v2.3.0
 gopkg.in/yaml.v2
-# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 gopkg.in/yaml.v3

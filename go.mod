@@ -25,6 +25,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/digitalocean/go-qemu v0.0.0-20201211181942-d361e7b4965f
 	github.com/digitalocean/godo v1.11.1
+	github.com/exoscale/packer-plugin-exoscale v0.1.0
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structtag v1.0.0
 	github.com/go-ini/ini v1.25.4
@@ -76,7 +77,7 @@ require (
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
 	github.com/shirou/gopsutil v3.21.1+incompatible
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible
 	github.com/ucloud/ucloud-sdk-go v0.16.3
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
@@ -87,13 +88,13 @@ require (
 	github.com/yandex-cloud/go-sdk v0.0.0-20200921111412-ef15ded2014c
 	github.com/zclconf/go-cty v1.7.0
 	github.com/zclconf/go-cty-yaml v1.0.1
-	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9
+	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/mobile v0.0.0-20201208152944-da85bec010a2
 	golang.org/x/mod v0.3.0
-	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11
+	golang.org/x/net v0.0.0-20210119194325-5f4716e94777
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
-	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68
+	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c
 	golang.org/x/tools v0.0.0-20201111133315-69daaf961d65
 	google.golang.org/api v0.32.0
 	google.golang.org/grpc v1.32.0
