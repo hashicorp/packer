@@ -9,7 +9,6 @@
 [circleci-badge]: https://circleci.com/gh/hashicorp/packer.svg?style=svg
 [circleci]: https://app.circleci.com/pipelines/github/hashicorp/packer
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/miavlgnp989e5obc/branch/master?svg=true
-[appveyor]: https://ci.appveyor.com/project/hashicorp/packer 
 [godoc-badge]: https://godoc.org/github.com/hashicorp/packer?status.svg
 [godoc]: https://godoc.org/github.com/hashicorp/packer	
 [report-badge]: https://goreportcard.com/badge/github.com/hashicorp/packer	
@@ -17,7 +16,7 @@
 
 <p align="center" style="text-align:center;">
   <a href="https://www.packer.io">
-    <img alt="HashiCorp Nomad logo" src="website/public/img/logo-hashicorp.svg" width="500" />
+    <img alt="HashiCorp Packer logo" src="website/public/img/logo-hashicorp.svg" width="500" />
   </a>
 </p>
 
@@ -49,33 +48,43 @@ yourself](https://github.com/hashicorp/packer/blob/master/.github/CONTRIBUTING.m
 
 After Packer is installed, create your first template, which tells Packer
 what platforms to build images for and how you want to build them. In our
-case, we'll create a simple AMI that has Redis pre-installed. Save this
-file as `quick-start.json`. Export your AWS credentials as the
+case, we'll create a simple AMI that has Redis pre-installed. 
+
+Save this file as `quick-start.pkr.hcl`. Export your AWS credentials as the
 `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
 
-```json
-{
-  "variables": {
-    "access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
-    "secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
-  },
-  "builders": [{
-    "type": "amazon-ebs",
-    "access_key": "{{user `access_key`}}",
-    "secret_key": "{{user `secret_key`}}",
-    "region": "us-east-1",
-    "source_ami": "ami-af22d9b9",
-    "instance_type": "t2.micro",
-    "ssh_username": "ubuntu",
-    "ami_name": "packer-example {{timestamp}}"
-  }]
+```hcl
+variable "access_key" {
+  type    = string
+  default = "${env("AWS_ACCESS_KEY_ID")}"
+}
+
+variable "secret_key" {
+  type    = string
+  default = "${env("AWS_SECRET_ACCESS_KEY")}"
+}
+
+locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
+
+source "amazon-ebs" "quick-start" {
+  access_key    = "${var.access_key}"
+  ami_name      = "packer-example ${local.timestamp}"
+  instance_type = "t2.micro"
+  region        = "us-east-1"
+  secret_key    = "${var.secret_key}"
+  source_ami    = "ami-af22d9b9"
+  ssh_username  = "ubuntu"
+}
+
+build {
+  sources = ["source.amazon-ebs.quick-start"]
 }
 ```
 
 Next, tell Packer to build the image:
 
 ```
-$ packer build quick-start.json
+$ packer build quick-start.pkr.hcl
 ...
 ```
 
@@ -87,11 +96,9 @@ they're run, etc., is up to you.
 
 ## Documentation
 
-Comprehensive documentation is viewable on the Packer website:
+Comprehensive documentation is viewable on the Packer website at https://www.packer.io/docs.
 
-https://www.packer.io/docs
-
-## Developing Packer
+## Contributing to Packer
 
 See
 [CONTRIBUTING.md](https://github.com/hashicorp/packer/blob/master/.github/CONTRIBUTING.md)
