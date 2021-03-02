@@ -9,15 +9,17 @@
 [circleci-badge]: https://circleci.com/gh/hashicorp/packer.svg?style=svg
 [circleci]: https://app.circleci.com/pipelines/github/hashicorp/packer
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/miavlgnp989e5obc/branch/master?svg=true
-[appveyor]: https://ci.appveyor.com/project/hashicorp/packer
+[appveyor]: https://ci.appveyor.com/project/hashicorp/packer 
 [godoc-badge]: https://godoc.org/github.com/hashicorp/packer?status.svg
-[godoc]: https://godoc.org/github.com/hashicorp/packer
-[report-badge]: https://goreportcard.com/badge/github.com/hashicorp/packer
+[godoc]: https://godoc.org/github.com/hashicorp/packer	
+[report-badge]: https://goreportcard.com/badge/github.com/hashicorp/packer	
 [report]: https://goreportcard.com/report/github.com/hashicorp/packer
 
-* Website: https://www.packer.io
-* IRC: `#packer-tool` on Freenode
-* Mailing list: [Google Groups](https://groups.google.com/forum/#!forum/packer-tool)
+<p align="center" style="text-align:center;">
+  <a href="https://www.packer.io">
+    <img alt="HashiCorp Nomad logo" src="website/public/img/logo-hashicorp.svg" width="500" />
+  </a>
+</p>
 
 Packer is a tool for building identical machine images for multiple platforms
 from a single source configuration.
