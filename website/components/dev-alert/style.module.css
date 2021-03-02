@@ -1,0 +1,14 @@
+.root {
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+  border-color: var(--danger-d1);
+  padding: 1rem;
+  font-size: 1rem;
+  background: var(--danger-l2);
+  font-family: var(--font-monospace);
+  color: var(--danger-d1);
+}
+
+.inner {
+  composes: g-grid-container from global;
+}
