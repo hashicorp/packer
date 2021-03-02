@@ -70,13 +70,30 @@ func (s *StepDeleteAdditionalDisk) Run(ctx context.Context, state multistep.Stat
 	var isExistingResourceGroup = state.Get(constants.ArmIsExistingResourceGroup).(bool)
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
 
-	if dataDisks == nil {
-		s.say(fmt.Sprintf(" -> No Additional Disks specified"))
+	if isManagedDisk && !isExistingResourceGroup {
+		s.say(fmt.Sprintf(" -> Additional Disk : skipping, will "))
 		return multistep.ActionContinue
 	}
 
-	if isManagedDisk && !isExistingResourceGroup {
-		s.say(fmt.Sprintf(" -> Additional Disk : skipping, managed disk was used..."))
+	if isManagedDisk {
+		s.say("Deleting the temporary managed OS disk ...")
+		var vhdUri interface{}
+		var ok bool
+		if vhdUri, ok = state.GetOk(constants.ArmOSDiskVhd); ok == false {
+			msg := "Failed to find VHD URI in state bag!"
+			s.say(msg)
+			return processStepResult(errors.New(msg), s.error, state)
+		}
+		vhdUriString := vhdUri.(string)
+
+		if err := s.deleteManaged(ctx, resourceGroupName, vhdUriString); err != nil {
+			s.say("Failed to delete the temporary managed OS Disk!")
+			return processStepResult(err, s.error, state)
+		}
+	}
+
+	if dataDisks == nil {
+		s.say(fmt.Sprintf(" -> No Additional Disks specified"))
 		return multistep.ActionContinue
 	}
 

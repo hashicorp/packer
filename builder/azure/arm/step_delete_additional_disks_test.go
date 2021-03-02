@@ -192,19 +192,26 @@ func TestStepDeleteAdditionalDiskShouldFailIfManagedDiskInExistingResourceGroupF
 	}
 }
 
-func TestStepDeleteAdditionalDiskShouldFailIfManagedDiskInExistingResourceGroupIsDeleted(t *testing.T) {
+func TestStepDeleteAdditionalDiskShouldPassIfManagedOsDiskInExistingResourceGroupIsDeleted(t *testing.T) {
+	var count int
+	deleteManaged := func(context.Context, string, string) error {
+		count++
+		return nil
+	}
+
 	var testSubject = &StepDeleteAdditionalDisk{
 		delete:        func(string, string) error { return nil },
 		say:           func(message string) {},
 		error:         func(e error) {},
-		deleteManaged: func(context.Context, string, string) error { return nil },
+		deleteManaged: deleteManaged,
 	}
 
 	stateBag := new(multistep.BasicStateBag)
-	stateBag.Put(constants.ArmAdditionalDiskVhds, []string{"subscriptions/123-456-789/resourceGroups/existingresourcegroup/providers/Microsoft.Compute/disks/osdisk"})
+	stateBag.Put(constants.ArmAdditionalDiskVhds, []string{"subscriptions/123-456-789/resourceGroups/existingresourcegroup/providers/Microsoft.Compute/disks/datadisk"})
 	stateBag.Put(constants.ArmIsManagedImage, true)
 	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
 	stateBag.Put(constants.ArmResourceGroupName, "testgroup")
+	stateBag.Put(constants.ArmOSDiskVhd, "subscriptions/123-456-789/resourceGroups/existingresourcegroup/providers/Microsoft.Compute/disks/osdisk")
 
 	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
@@ -213,6 +220,10 @@ func TestStepDeleteAdditionalDiskShouldFailIfManagedDiskInExistingResourceGroupI
 
 	if _, ok := stateBag.GetOk(constants.Error); ok == true {
 		t.Fatalf("Expected the step to not set stateBag['%s'], but it was.", constants.Error)
+	}
+
+	if count != 2 {
+		t.Fatalf("Expected to delete OS and data disk in existing resource group, but only deleted %d disks.", count)
 	}
 }
 
