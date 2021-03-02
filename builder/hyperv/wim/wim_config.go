@@ -116,6 +116,11 @@ type WIMConfig struct {
 	TargetPath string `mapstructure:"wim_target_path"`
 	// The extension of the wim file after download. This defaults to `wim`.
 	TargetExtension string `mapstructure:"wim_target_extension"`
+
+	// Specifies the index number of a Windows image in a WIM.
+	ImageIndex uint32 `mapstructure:"wim_image_index"`
+	// Specifies the name of an image in a WIM.
+	ImageName string `mapstructure:"wim_image_name"`
 }
 
 func (c *WIMConfig) Prepare(*interpolate.Context) (warnings []string, errs []error) {

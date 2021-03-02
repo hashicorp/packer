@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -55,7 +56,7 @@ type Builder struct {
 type Config struct {
 	common.PackerConfig            `mapstructure:",squash"`
 	commonsteps.HTTPConfig         `mapstructure:",squash"`
-	commonsteps.ISOConfig          `mapstructure:",squash"`
+	WIMConfig                      `mapstructure:",squash"`
 	bootcommand.BootConfig         `mapstructure:",squash"`
 	hypervcommon.OutputConfig      `mapstructure:",squash"`
 	hypervcommon.SSHConfig         `mapstructure:",squash"`
@@ -83,6 +84,20 @@ type Config struct {
 	// Azure.
 	FixedVHD bool `mapstructure:"use_fixed_vhd_format" required:"false"`
 
+	// A URL to the Windows configuration document for offline image provisioning.
+	WindowsConfigUrl string `mapstructure:"windows_config_url"`
+	// The location where DISM will log to. If not specified, the default is
+	// "%windir%/logs/dism/dism.log".
+	WindowsConfigLogPath string `mapstructure:"windows_config_log_path"`
+	// The location where a temporary directory will be used by DISM when extracting
+	// files for use during servicing. The directory must exist locally. If not
+	// specified, %temp% will be used with a subdirectory name of a randomly
+	// generated hexadecimal value for each run of DISM. Network share locations
+	// should not be used to expand a package for installation.
+	WindowsConfigScratchDir string `mapstructure:"windows_config_scratch_dir"`
+	// The location to mount the Windows image.
+	MountDir string `mapstructure:"mount_dir"`
+
 	ctx interpolate.Context
 }
 
@@ -107,9 +122,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	var errs *packersdk.MultiError
 	warnings := make([]string, 0)
 
-	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
-	warnings = append(warnings, isoWarnings...)
-	errs = packersdk.MultiErrorAppend(errs, isoErrs...)
+	wimWarnings, wimErrs := b.config.WIMConfig.Prepare(&b.config.ctx)
+	warnings = append(warnings, wimWarnings...)
+	errs = packersdk.MultiErrorAppend(errs, wimErrs...)
 
 	errs = packersdk.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
 	errs = packersdk.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
@@ -121,9 +136,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	errs = packersdk.MultiErrorAppend(errs, commonErrs...)
 	warnings = append(warnings, commonWarns...)
 
-	if len(b.config.ISOConfig.ISOUrls) < 1 ||
-		(strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhd" &&
-			strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhdx") {
+	if len(b.config.WIMConfig.WIMUrls) < 1 ||
+		(strings.ToLower(filepath.Ext(b.config.WIMConfig.WIMUrls[0])) != ".vhd" &&
+			strings.ToLower(filepath.Ext(b.config.WIMConfig.WIMUrls[0])) != ".vhdx") {
 		//We only create a new hard drive if an existing one to copy from does not exist
 		err = b.checkDiskSize()
 		if err != nil {
@@ -142,6 +157,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		}
 	}
 
+	if b.config.WindowsConfigUrl != "" {
+		if b.config.MountDir == "" {
+			b.config.MountDir = path.Join(b.config.TempPath, "mount")
+		}
+	}
+
 	// Errors
 
 	if b.config.Generation > 1 && b.config.FixedVHD {
@@ -156,6 +177,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 	if b.config.DifferencingDisk && b.config.FixedVHD {
 		err = errors.New("Fixed VHD disks are not supported with differencing disks.")
+		errs = packersdk.MultiErrorAppend(errs, err)
+	}
+
+	if (b.config.ImageIndex == 0 && b.config.ImageName == "") || (b.config.ImageIndex != 0 && b.config.ImageName != "") {
+		err = errors.New("Either image index or image name needs to be specified.")
 		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
@@ -199,12 +225,22 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Path:  b.config.OutputDir,
 		},
 		&commonsteps.StepDownload{
-			Checksum:    b.config.ISOChecksum,
-			Description: "ISO",
+			Checksum:    b.config.WIMChecksum,
+			Description: "WIM",
 			ResultKey:   "iso_path",
-			Url:         b.config.ISOUrls,
+			Url:         b.config.WIMUrls,
 			Extension:   b.config.TargetExtension,
 			TargetPath:  b.config.TargetPath,
+		},
+		&StepConfigureWIM{
+			//WimPath:          b.config.RawSingleWIMUrl,
+			WimPath:          "d:/install.wim",
+			ImageIndex:       b.config.ImageIndex,
+			ImageName:        b.config.ImageName,
+			MountDir:         b.config.MountDir,
+			LogPath:          b.config.WindowsConfigLogPath,
+			ScratchDir:       b.config.WindowsConfigScratchDir,
+			WindowsConfigUrl: b.config.WindowsConfigUrl,
 		},
 		&commonsteps.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,

@@ -1,0 +1,15 @@
+{
+    "contentVersion": "0.0.0.1",
+    "features": [
+        {
+            "action": "enable",
+            "name": "WorkFolders-Client"
+        },
+        {
+            "action": "disable",
+            "name": "WorkFolders-Client"
+        }
+    ],
+    "productKey": "NPPR9-FWDCX-D2C8J-H872K-2YT43",
+    "unattend": "d:/Autounattend.xml"
+}
