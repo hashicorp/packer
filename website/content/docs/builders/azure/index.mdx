@@ -94,6 +94,8 @@ way to authenticate the SP to AAD:
   for the AAD SP.
 - `client_cert_path` - allows usage of a certificate to be used to
   authenticate as the specified AAD SP.
+- `client_cert_token_timeout` - How long to set the expire time on the token created when using
+  `client_cert_path`.
 - `client_jwt` - For advanced scenario's where the used cannot provide Packer
   the full certificate, they can provide a JWT bearer token for client auth
   (RFC 7523, Sec. 2.2). These bearer tokens are created and signed using a

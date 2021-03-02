@@ -61,6 +61,9 @@ you should specify `subscription_id`, `client_id` and one of `client_secret`,
 - `client_cert_path` (string) - The location of a PEM file containing a
   certificate and private key for service principal.
 
+- `client_cert_token_timeout` (duration string | ex: "1h30m12s") - How long to set the expire time on the token created when using
+  `client_cert_path`.
+
 - `client_jwt` (string) - The bearer JWT assertion signed using a certificate
   associated with your service principal principal. See [Azure Active
   Directory docs](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials)

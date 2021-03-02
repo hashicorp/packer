@@ -18,14 +18,14 @@ import (
 	"github.com/hashicorp/packer/builder/azure/pkcs12"
 )
 
-func NewCertOAuthTokenProvider(env azure.Environment, clientID, clientCertPath, tenantID string) (oAuthTokenProvider, error) {
+func NewCertOAuthTokenProvider(env azure.Environment, clientID, clientCertPath, tenantID string, certExpireTimeout time.Duration) (oAuthTokenProvider, error) {
 	cert, key, err := readCert(clientCertPath)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading certificate: %v", err)
 	}
 
 	audience := fmt.Sprintf("%s%s/oauth2/token", env.ActiveDirectoryEndpoint, tenantID)
-	jwt, err := makeJWT(clientID, audience, cert, key, time.Hour, true)
+	jwt, err := makeJWT(clientID, audience, cert, key, certExpireTimeout, true)
 	if err != nil {
 		return nil, fmt.Errorf("Error generating JWT: %v", err)
 	}
