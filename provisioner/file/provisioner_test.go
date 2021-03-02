@@ -272,6 +272,69 @@ func TestProvisionerProvision_SendsFileMultipleDirs(t *testing.T) {
 	}
 }
 
+func TestProvisionerProvision_DownloadsMultipleFilesToFolder(t *testing.T) {
+	var p Provisioner
+
+	tf1, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf1.Name())
+
+	if _, err = tf1.Write([]byte("hello")); err != nil {
+		t.Fatalf("error writing tempfile: %s", err)
+	}
+
+	tf2, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf2.Name())
+
+	if _, err = tf2.Write([]byte("hello")); err != nil {
+		t.Fatalf("error writing tempfile: %s", err)
+	}
+
+	config := map[string]interface{}{
+		"sources":     []string{tf1.Name(), tf2.Name()},
+		"destination": "something/",
+		"direction":   "download",
+	}
+
+	if err := p.Prepare(config); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	b := bytes.NewBuffer(nil)
+	ui := &packersdk.BasicUi{
+		Writer: b,
+		PB:     &packersdk.NoopProgressTracker{},
+	}
+	comm := &packersdk.MockCommunicator{}
+	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err != nil {
+		t.Fatalf("should successfully provision: %s", err)
+	}
+
+	if !strings.Contains(b.String(), tf1.Name()) {
+		t.Errorf("should print source filenam '%s'e; output: \n%s", tf1.Name(), b.String())
+	}
+
+	if !strings.Contains(b.String(), tf2.Name()) {
+		t.Errorf("should second source filename '%s'; output: \n%s", tf2.Name(), b.String())
+	}
+
+	dst1 := filepath.Join("something", filepath.Base(tf1.Name()))
+	if !strings.Contains(b.String(), dst1) {
+		t.Errorf("should print destination filename '%s'; output: \n%s", dst1, b.String())
+	}
+
+	dst2 := filepath.Join("something", filepath.Base(tf2.Name()))
+	if !strings.Contains(b.String(), dst2) {
+		t.Errorf("should print destination filename '%s'; output: \n%s", dst2, b.String())
+	}
+}
+
 func TestProvisionerProvision_SendsFileMultipleFilesToFolder(t *testing.T) {
 	var p Provisioner
 
