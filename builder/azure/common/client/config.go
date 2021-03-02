@@ -39,7 +39,7 @@ type Config struct {
 	// The path to a pem-encoded certificate that will be used to authenticate
 	// as the specified AAD SP.
 	ClientCertPath string `mapstructure:"client_cert_path"`
-	// The timeout for the JWT Token when using a [client certificate](client_cert_path). Defaults to 1 hour.
+	// The timeout for the JWT Token when using a [client certificate](#client_cert_path). Defaults to 1 hour.
 	ClientCertExpireTimeout time.Duration `mapstructure:"client_cert_token_timeout" required:"false"`
 	// A JWT bearer token for client auth (RFC 7523, Sec. 2.2) that will be used
 	// to authenticate the AAD SP. Provides more control over token the expiration
