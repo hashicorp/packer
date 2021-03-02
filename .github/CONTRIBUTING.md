@@ -64,7 +64,9 @@ can quickly merge or address your contributions.
 If you have never worked with Go before, you will have to install its
 runtime in order to build packer.
 
-1. This project always releases from the latest version of golang. [Install go](https://golang.org/doc/install#install)
+1. This project always releases from the latest version of golang.
+[Install go](https://golang.org/doc/install#install) To properly build from
+source, you need to have golang >= v1.16
 
 ## Setting up Packer for dev
 
@@ -72,7 +74,6 @@ If/when you have go installed you can already `go get` packer and `make` in
 order to compile and test Packer. These instructions target
 POSIX-like environments (macOS, Linux, Cygwin, etc.) so you may need to
 adjust them for Windows or other shells.
-The instructions below are for go 1.7. or later.
 
 1. Download the Packer source (and its dependencies) by running
    `go get github.com/hashicorp/packer`. This will download the Packer source to
