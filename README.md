@@ -1,7 +1,7 @@
 # Packer
 
 [![Build Status][circleci-badge]][circleci]
-[![Windows Build Status][appveyor-badge]][appveyor]
+[![Discuss](https://img.shields.io/badge/discuss-packer-1563ff?style=flat)](https://discuss.hashicorp.com/c/packer)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/hashicorp/packer)](https://pkg.go.dev/github.com/hashicorp/packer)
 [![GoReportCard][report-badge]][report]
 [![codecov](https://codecov.io/gh/hashicorp/packer/branch/master/graph/badge.svg)](https://codecov.io/gh/hashicorp/packer)
