@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
@@ -45,6 +46,9 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 	// is 'implicitly used'. Here we read common configuration blocks to try to
 	// guess plugins.
 
+	// decodeRequiredPluginsBlock needs to be called first; otherwise all
+	// required plugins will be implicitly required too.
+
 	var diags hcl.Diagnostics
 
 	content, moreDiags := f.Body.Content(configSchema)
@@ -52,10 +56,93 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 
 	for _, block := range content.Blocks {
 		switch block.Type {
-		case sourceLabel:
-			// TODO
+		case sourceLabel, dataSourceLabel:
+			moreDiags := cfg.inferImplicitRequiredPluginFromBlocks(block)
+			diags = append(diags, moreDiags...)
+		case buildLabel:
+			content, moreDiags := block.Body.Content(buildSchema)
+			diags = append(diags, moreDiags...)
+			for _, block := range content.Blocks {
+				switch block.Type {
+				case buildProvisionerLabel, buildPostProcessorLabel:
+					moreDiags := cfg.inferImplicitRequiredPluginFromBlocks(block)
+					diags = append(diags, moreDiags...)
+				case buildPostProcessorsLabel:
+					content, moreDiags := block.Body.Content(postProcessorsSchema)
+					diags = append(diags, moreDiags...)
+					for _, block := range content.Blocks {
+						moreDiags := cfg.inferImplicitRequiredPluginFromBlocks(block)
+						diags = append(diags, moreDiags...)
+					}
+				}
+			}
+
 		}
 	}
+	return diags
+}
+
+// This function will infer an implicitly required plugin block. For plugins
+// that are not present. Usually the plugin name is the first part of a plugin
+// call, before the first dash.
+//
+// Exampes:
+//  * data           "amazon-ami"      "..." adds implictly requried "github.com/hashicorp/amazon"
+//  * source         "amazon-ebs"      "..." adds implictly requried "github.com/hashicorp/amazon"
+//  * source         "google"          "..." adds implictly requried "github.com/hashicorp/google"
+//  * provisioner    "windos-restart"  "..." adds implictly requried "github.com/hashicorp/windows"
+//  * post-processor "exoscale-import" "..." adds implictly requried "github.com/hashicorp/exoscale"
+//  * source         "amazon-v2-ebs"   "..." adds implictly requried "github.com/hashicorp/exoscale"
+//
+// For now this function will only work with hashicorp plugins, and therefore
+// pretend the user meant using an official hashicorp plugin if the plugin could
+// not be found.
+//
+// Plugin name will stop at first dash found, so that means that if a users uses
+// an "amazon-v2" plugin, this won't work.
+func (cfg *PackerConfig) inferImplicitRequiredPluginFromBlocks(block *hcl.Block) hcl.Diagnostics {
+	labels := block.Labels
+	if len(labels) == 0 {
+		return nil
+	}
+	var diags hcl.Diagnostics
+	probablePluginNames := strings.Split(labels[0], "-")
+	if len(probablePluginNames) == 0 || probablePluginNames[0] == "" {
+		// probably a WIP config, return now to avoid panics.
+		return nil
+	}
+	probablePluginName := probablePluginNames[0]
+
+	for _, requiredPluginBlock := range cfg.Packer.RequiredPlugins {
+		for _, requiredPlugin := range requiredPluginBlock.RequiredPlugins {
+			if requiredPlugin.Name == probablePluginName {
+				// Found a plugin that matches this name. No implicitly required
+				// plugin needed.
+				return nil
+			}
+		}
+	}
+	fullImportPath := "github.com/hashicorp/" + probablePluginName
+	pType, diags := addrs.ParsePluginSourceString(fullImportPath)
+	if diags.HasErrors() {
+		return diags
+	}
+
+	cfg.Packer.RequiredPlugins = append(cfg.Packer.RequiredPlugins, &RequiredPlugins{
+		RequiredPlugins: map[string]*RequiredPlugin{
+			probablePluginName: {
+				Name:   probablePluginName,
+				Source: fullImportPath,
+				Type:   pType,
+				Requirement: VersionConstraint{
+					Required: nil, // means latest
+				},
+				PluginDependencyReason: PluginDependencyImplicit,
+			},
+		},
+		DeclRange: block.DefRange,
+	})
+
 	return diags
 }
 
@@ -71,7 +158,23 @@ type RequiredPlugin struct {
 	Type        *addrs.Plugin
 	Requirement VersionConstraint
 	DeclRange   hcl.Range
+	PluginDependencyReason
 }
+
+// PluginDependencyReason is an enumeration of reasons why a dependency might be
+// present.
+type PluginDependencyReason int
+
+const (
+	// PluginDependencyExplicit means that there is an explicit
+	// "required_plugin" block in the configuration.
+	PluginDependencyExplicit PluginDependencyReason = iota
+
+	// PluginDependencyImplicit means that there is no explicit
+	// "required_plugin" block but there is at least one resource that uses this
+	// plugin.
+	PluginDependencyImplicit
+)
 
 type RequiredPlugins struct {
 	RequiredPlugins map[string]*RequiredPlugin
