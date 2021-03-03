@@ -62,6 +62,10 @@ If you pull down new code from github, you should run `npm install` again. Other
 
 <!-- END: local-development -->
 
+### Previewing Plugin Documentation
+
+The Packer documentation site contains plugin documentation pulled from separate repositories. In order to preview these docs, the `GITHUB_API_TOKEN` environment variable must be set and valid. The recommended approach is to create a [personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) and add it to `website/.env.local`.
+
 <!-- BEGIN: editing-markdown -->
 <!-- Generated text, do not edit directly -->
 
