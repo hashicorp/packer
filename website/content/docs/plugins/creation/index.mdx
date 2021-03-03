@@ -64,6 +64,7 @@ download and installation via `packer init`, whereas the single-component plugin
 is not.
 
 <Tabs>
+
 <Tab heading="Multi-component Plugin (recommended) ">
 
 ```go
@@ -115,6 +116,7 @@ the following components available:
 * the `my-bar` provisioner
 
 </Tab>
+
 <Tab heading="Single Component Plugin (deprecated)">
 
 ```go
@@ -217,11 +219,114 @@ for help with this step)
     - `PASSPHRASE` - The passphrase for your GPG private key.
 5. Push a new valid version tag (e.g. `v1.2.3`) to test that the GitHub Actions
 releaser is working. The tag must be a valid
-[Semantic Version](https://semver.org/) preceded with a `v`. Once the tag is
-pushed, the github actions you just configured will automatically build release
-binaries that Packer can download using `packer init`. For more details on how
+[Semantic Version](https://semver.org/) preceded with a `v`. Once the tag is pushed, the github actions you just configured will automatically build release binaries that Packer can download using `packer init`. For more details on how
 to install a plugin using `packer init`, see the
 [init docs](/docs/commands/init).
+
+### Registering Plugin Documentation
+
+~> Note: Registering a remote plugin's plugin documentation requires the use of [Packer's plugin docs configuration](https://github.com/hashicorp/packer-plugin-scaffolding/tree/main/docs).
+
+`packer init` allows users to require and install remote Packer plugins, those not bundled with Packer core, that have been published to GitHub automatically.
+To help with the discovery of remote Packer plugins on GitHub, plugins maintainers can choose to register plugin documentation for each component directly on the [Packer Documentation Page](https://packer.io/docs).
+
+The registration process requires the creation of a `.docs-artifacts` directory and a sidebar navigation file `docs-nav.json` for each of the plugin
+components in the remote plugin's repository. A working example can be seen at the [packer-plugin-docker repository](https://github.com/hashicorp/packer-plugin-docker/tree/main/.docs-artifacts).
+
+Once in place the remote plugin can be added to Packer's website builds by opening a pull-request against [hashicorp/packer](https://github.com/packer), which the needed configuration pulling in the remote documentation.
+
+Remote plugins will have their components listed under the respected types (i.e builders, provisioners, etc) using the names specified in the remote block configuration, and labeled with their respective [tier and namespace](/docs/plugins#tiers-and-namespaces).
+
+To register a plugin follow one of the following setups
+
+<Tabs>
+<Tab heading="Registering Using GitHub Actions">
+
+Documentation for a plugin is maintained within the `docs` directory and served on GitHub.
+
+A GitHub workflow has been added to [packer-plugin-scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding) that
+can be used generate a documentation structure that can be consumed remotely by https://packer.io.  See the full workflow at [generated-docs-artifacts.yml](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/.github/workflows/generate-docs-artifacts.yml)
+
+The GitHub workflow will automatically create the `.docs-artifacts` directory with the generated sidebar navigation file, and open a new pull-request against the default configured branch to be merged by the maintainer.
+
+By default the workflow is configured to trigger on the creation of tags beginning with `'v*` to ensure that documentation gets updated for each release. Updates to the plugin documentation will get pulled in at the time of the next Packer website deployment.
+
+After merging the generated files to the default branch for the plugin repository.
+
+Open a one time pull-request against [hashicorp/packer](https://github.com/hashicorp/packer) to register the plugin docs.
+This is done by adding the block below for the respective plugin to the file [docs-remote-navigation.js](https://github.com/hashicorp/packer/blob/master/website/data/docs-remote-plugins.json).
+
+```json
+{
+   "title": "Docker",
+   "path": "docker",
+   "repo": "hashicorp/packer-plugin-docker",
+ }
+```
+
+#### Required fields
+
+`title`: The name of the plugin to be displayed in the sidebar - See [naming conventions](#naming-conventions)
+
+`path`:  The path name for the documentation page, which is usually the lower case version of `title` (e.g https
+
+`repo`:  The full name of the GitHub repository (i.e org/repo-name)
+
+#### Optional fields
+
+`branch`: The name of the default branch of the repository. Defaults to main.
+
+`artifactDir`: The location of the docs artifacts directory in the remote repository. Defaults to `.doc-artifacts`.
+
+
+</Tab>
+<Tab heading="Registering Manually">
+
+
+The documentation structure needed for registering a plugin's documentation can be generated manually, but it is
+encouraged to use the action on release events so that documentation stays up to date.
+
+If your local development environment has a supported version (v10.0.0+) of [node](https://nodejs.org/en/) and a
+supported version (>=5.2.0) [npm](https://www.npmjs.com/) installed, in the plugin root directory, you can run:
+
+
+```shell-session
+> npx -p @hashicorp/packer-docs-artifacts generate
+```
+
+The generated files will be placed under `PLUGIN_ROOT/.doc-artifacts`; this directory contains all the docs
+and respective navigation information needed for including the plugin docs under [packer.io/docs/](https://packer.io/docs).
+
+After merging the generated files to the default branch for the plugin repository.
+
+Open a one time pull-request against [hashicorp/packer](https://github.com/hashicorp/packer) to register the plugin docs.
+This is done by adding the block below for the respective plugin to the file [docs-remote-navigation.js](https://github.com/hashicorp/packer/blob/master/website/data/docs-remote-plugins.json).
+
+```json
+{
+   "title": "Docker",
+   "path": "docker",
+   "repo": "hashicorp/packer-plugin-docker",
+ }
+```
+
+#### Required fields
+
+`title`: The name of the plugin to be displayed in the sidebar - See [naming conventions](#naming-conventions)
+
+`path`:  The path name for the documentation page, which is usually the lower case version of `title` (e.g https
+
+`repo`:  The full name of the GitHub repository (i.e org/repo-name)
+
+#### Optional fields
+
+`branch`: The name of the default branch of the repository. Defaults to main.
+
+`artifactDir`: The location of the docs artifacts directory in the remote repository. Defaults to `.doc-artifacts`.
+
+
+</Tab>
+</Tabs>
 
 ### Plugin Development Tips and FAQs
 
