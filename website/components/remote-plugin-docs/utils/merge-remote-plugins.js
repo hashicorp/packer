@@ -9,7 +9,6 @@ const COMPONENT_TYPES = [
 ]
 
 async function gatherRemotePlugins(pluginsData, navData, isDev = true) {
-  //
   const allPluginData = await Promise.all(
     pluginsData.map(async (pluginEntry) => {
       const componentEntries = await Promise.all(
