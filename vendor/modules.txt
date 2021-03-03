@@ -414,6 +414,7 @@ github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
 # github.com/hashicorp/packer-plugin-docker v0.0.2
+## explicit
 github.com/hashicorp/packer-plugin-docker/builder/docker
 github.com/hashicorp/packer-plugin-docker/post-processor/docker-import
 github.com/hashicorp/packer-plugin-docker/post-processor/docker-push
