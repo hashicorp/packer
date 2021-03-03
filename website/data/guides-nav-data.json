@@ -1,0 +1,98 @@
+[
+  {
+    "title": "Upgrade Your Plugin to use the Packer plugin sdk",
+    "path": "1.7-plugin-upgrade"
+  },
+  {
+    "title": "Upgrade Your Template to use Packer init",
+    "path": "1.7-template-upgrade"
+  },
+  {
+    "title": "HCL guides",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "hcl"
+      },
+      {
+        "title": "From JSON v1",
+        "path": "hcl/from-json-v1"
+      },
+      {
+        "title": "Variables",
+        "path": "hcl/variables"
+      },
+      {
+        "title": "Making a plugin HCL2 enabled",
+        "path": "hcl/component-object-spec"
+      }
+    ]
+  },
+  {
+    "title": "Automatic OS Installs",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "automatic-operating-system-installs"
+      },
+      {
+        "title": "Unattended Installation for Windows",
+        "path": "automatic-operating-system-installs/autounattend_windows"
+      },
+      {
+        "title": "Unattended Installation for Debian",
+        "path": "automatic-operating-system-installs/preseed_ubuntu"
+      }
+    ]
+  },
+  {
+    "title": "Workflow Tips and Tricks",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "workflow-tips-and-tricks"
+      },
+      {
+        "title": "Isotime Template Function",
+        "path": "workflow-tips-and-tricks/isotime-template-function"
+      },
+      {
+        "title": "Veewee to Packer",
+        "path": "workflow-tips-and-tricks/veewee-to-packer"
+      },
+      {
+        "title": "Use jq to strip comments from a Packer template",
+        "path": "workflow-tips-and-tricks/use-packer-with-comment"
+      }
+    ]
+  },
+  {
+    "title": "Build Immutable Infrastructure with Packer in CI/CD",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "packer-on-cicd"
+      },
+      {
+        "title": "Build Images in CI/CD",
+        "path": "packer-on-cicd/build-image-in-cicd"
+      },
+      {
+        "title": "Build a VirtualBox Image with Packer in TeamCity",
+        "path": "packer-on-cicd/build-virtualbox-image"
+      },
+      {
+        "title": "Pipelineing Builds",
+        "path": "packer-on-cicd/pipelineing-builds"
+      },
+      {
+        "title": "Trigger Terraform Enterprise runs",
+        "path": "packer-on-cicd/trigger-tfe"
+      },
+      {
+        "title": "Upload a VirtualBox Image to S3",
+        "path": "packer-on-cicd/upload-images-to-artifact"
+      }
+    ]
+  }
+]
