@@ -29,7 +29,7 @@ import (
 // HCL config example:
 //
 // ```HCL
-// source "example" "amazon-ebs"{
+// source "amazon-ebs" "example" {
 // 	assume_role {
 // 		role_arn     = "arn:aws:iam::ACCOUNT_ID:role/ROLE_NAME"
 // 		session_name = "SESSION_NAME"
