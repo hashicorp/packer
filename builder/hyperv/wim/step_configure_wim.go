@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+    "github.com/hashicorp/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/builder/hyperv/common/powershell"
 	"github.com/mitchellh/mapstructure"
 )
@@ -18,7 +19,6 @@ import (
 // This step configures a WIM offline.
 //
 type StepConfigureWIM struct {
-	WimPath          string
 	ImageIndex       uint32
 	ImageName        string
 	MountDir         string
@@ -26,9 +26,8 @@ type StepConfigureWIM struct {
 	ScratchDir       string
 	WindowsConfigUrl string
 
-	active bool
-	ui     packersdk.Ui
-	debug  bool
+	// It's only set when the WIM is mounted, and unset when it's dismounted.
+	wimPath string
 }
 
 type winConfig struct {
@@ -72,18 +71,28 @@ type feature struct {
 }
 
 func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packersdk.Ui)
+	ui := state.Get("ui").(packersdk.Ui)	
 	debug := state.Get("debug").(bool)
-
-	s.ui = ui
-	s.debug = debug
+	wimPath := state.Get("wim_path").(string)
 
 	// If no WindowsConfigUrl is specified, return
 	if s.WindowsConfigUrl == "" {
 		return multistep.ActionContinue
 	}
 
-	_, err := os.Stat(s.MountDir)
+	var err error
+
+	if s.MountDir == "" {
+		s.MountDir, err = tmp.Dir("mount")
+		if err != nil {
+			err = fmt.Errorf("Error creating mount directory: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}	
+
+	_, err = os.Stat(s.MountDir)
 	if os.IsNotExist(err) {
 		err = os.Mkdir(s.MountDir, 0777)
 		if err != nil {
@@ -143,15 +152,13 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 	log.Printf("Mount directory: %s", s.MountDir)
 
 	// Mount WIM
-	_, err = s.mountWindowsImage(true)
+	_, err = s.mountWindowsImage(wimPath, true)
 	if err != nil {
 		err = fmt.Errorf("Error mounting WIM: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	s.active = true
 
 	// Remove AppX packages
 	for _, appX := range config.AppXPackages {
@@ -405,7 +412,7 @@ func (s *StepConfigureWIM) disableWindowsOptionalFeature(name string) (string, e
 
 // dismountWindowsImage dismounts a Windows image from the directory it is mapped to
 func (s *StepConfigureWIM) dismountWindowsImage(discard bool) (string, error) {
-	if !s.active {
+	if s.wimPath == "" {
 		return "", nil
 	}
 
@@ -418,7 +425,7 @@ func (s *StepConfigureWIM) dismountWindowsImage(discard bool) (string, error) {
 
 	cmdOut, err := s.execPSCmd(cmd)
 	if err == nil {
-		s.active = false
+		s.wimPath = ""
 	}
 	return cmdOut, err
 }
@@ -440,25 +447,17 @@ func (s *StepConfigureWIM) execPSCmd(cmd string) (string, error) {
 		cmd = fmt.Sprintf("%s -ScratchDirectory \"%s\"", cmd, filepath.FromSlash(s.ScratchDir))
 	}
 
-	if s.debug {
-		s.ui.Say(cmd)
-	}
-
 	var ps powershell.PowerShellCmd
 	return ps.Output(cmd)
 }
 
 // mountWindowsImage mounts a Windows image in a WIM to a directory on the local computer
-func (s *StepConfigureWIM) mountWindowsImage(optimize bool) (string, error) {
-	if s.active {
-		return "", nil
-	}
-
+func (s *StepConfigureWIM) mountWindowsImage(wimPath string, optimize bool) (string, error) {
 	var cmd string
 	if s.ImageIndex > 0 {
-		cmd = fmt.Sprintf("Mount-WindowsImage -Path \"%s\" -ImagePath \"%s\" -Index %d", filepath.FromSlash(s.MountDir), filepath.FromSlash(s.WimPath), s.ImageIndex)
+		cmd = fmt.Sprintf("Mount-WindowsImage -Path \"%s\" -ImagePath \"%s\" -Index %d", filepath.FromSlash(s.MountDir), filepath.FromSlash(wimPath), s.ImageIndex)
 	} else {
-		cmd = fmt.Sprintf("Mount-WindowsImage -Path \"%s\" -ImagePath \"%s\" -Name \"%s\"", filepath.FromSlash(s.MountDir), filepath.FromSlash(s.WimPath), s.ImageName)
+		cmd = fmt.Sprintf("Mount-WindowsImage -Path \"%s\" -ImagePath \"%s\" -Name \"%s\"", filepath.FromSlash(s.MountDir), filepath.FromSlash(wimPath), s.ImageName)
 	}
 	if optimize {
 		cmd = cmd + " -Optimize"
@@ -466,7 +465,7 @@ func (s *StepConfigureWIM) mountWindowsImage(optimize bool) (string, error) {
 
 	cmdOut, err := s.execPSCmd(cmd)
 	if err == nil {
-		s.active = true
+		s.wimPath = wimPath
 	}
 	return cmdOut, err
 }

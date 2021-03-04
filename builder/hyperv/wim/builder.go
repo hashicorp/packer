@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -56,7 +55,7 @@ type Builder struct {
 type Config struct {
 	common.PackerConfig            `mapstructure:",squash"`
 	commonsteps.HTTPConfig         `mapstructure:",squash"`
-	WIMConfig                      `mapstructure:",squash"`
+	commonsteps.ISOConfig          `mapstructure:",squash"`
 	bootcommand.BootConfig         `mapstructure:",squash"`
 	hypervcommon.OutputConfig      `mapstructure:",squash"`
 	hypervcommon.SSHConfig         `mapstructure:",squash"`
@@ -84,6 +83,10 @@ type Config struct {
 	// Azure.
 	FixedVHD bool `mapstructure:"use_fixed_vhd_format" required:"false"`
 
+	// Specifies the index number of a Windows image in a WIM.
+	ImageIndex uint32 `mapstructure:"wim_image_index"`
+	// Specifies the name of an image in a WIM.
+	ImageName string `mapstructure:"wim_image_name"`
 	// A URL to the Windows configuration document for offline image provisioning.
 	WindowsConfigUrl string `mapstructure:"windows_config_url"`
 	// The location where DISM will log to. If not specified, the default is
@@ -122,9 +125,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	var errs *packersdk.MultiError
 	warnings := make([]string, 0)
 
-	wimWarnings, wimErrs := b.config.WIMConfig.Prepare(&b.config.ctx)
-	warnings = append(warnings, wimWarnings...)
-	errs = packersdk.MultiErrorAppend(errs, wimErrs...)
+	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
+	warnings = append(warnings, isoWarnings...)
+	errs = packersdk.MultiErrorAppend(errs, isoErrs...)
 
 	errs = packersdk.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
 	errs = packersdk.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
@@ -136,9 +139,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	errs = packersdk.MultiErrorAppend(errs, commonErrs...)
 	warnings = append(warnings, commonWarns...)
 
-	if len(b.config.WIMConfig.WIMUrls) < 1 ||
-		(strings.ToLower(filepath.Ext(b.config.WIMConfig.WIMUrls[0])) != ".vhd" &&
-			strings.ToLower(filepath.Ext(b.config.WIMConfig.WIMUrls[0])) != ".vhdx") {
+	if len(b.config.ISOConfig.ISOUrls) < 1 ||
+		(strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhd" &&
+			strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhdx") {
 		//We only create a new hard drive if an existing one to copy from does not exist
 		err = b.checkDiskSize()
 		if err != nil {
@@ -157,10 +160,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 		}
 	}
 
-	if b.config.WindowsConfigUrl != "" {
-		if b.config.MountDir == "" {
-			b.config.MountDir = path.Join(b.config.TempPath, "mount")
-		}
+	if b.config.ImageIndex == 0 && b.config.ImageName == "" {
+		b.config.ImageIndex = 1
 	}
 
 	// Errors
@@ -225,16 +226,19 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Path:  b.config.OutputDir,
 		},
 		&commonsteps.StepDownload{
-			Checksum:    b.config.WIMChecksum,
-			Description: "WIM",
+			Checksum:    b.config.ISOChecksum,
+			Description: "ISO",
 			ResultKey:   "iso_path",
-			Url:         b.config.WIMUrls,
+			Url:         b.config.ISOUrls,
 			Extension:   b.config.TargetExtension,
 			TargetPath:  b.config.TargetPath,
 		},
+		&StepExtractWIM{
+			TempPath:   b.config.TempPath,
+			ISOPathKey: "iso_path",
+			ResultKey:  "wim_path",
+		},
 		&StepConfigureWIM{
-			//WimPath:          b.config.RawSingleWIMUrl,
-			WimPath:          "d:/install.wim",
 			ImageIndex:       b.config.ImageIndex,
 			ImageName:        b.config.ImageName,
 			MountDir:         b.config.MountDir,
