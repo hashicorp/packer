@@ -18,16 +18,30 @@ func Test_hcl2_upgrade(t *testing.T) {
 
 	tc := []struct {
 		folder string
+		flags  []string
 	}{
-		{"hcl2_upgrade_basic"},
+		{folder: "complete", flags: []string{"-with-annotations"}},
+		{folder: "without-annotations", flags: []string{}},
+		{folder: "minimal", flags: []string{"-with-annotations"}},
+		{folder: "source-name", flags: []string{"-with-annotations"}},
+		{folder: "error-cleanup-provisioner", flags: []string{"-with-annotations"}},
+		{folder: "aws-access-config", flags: []string{}},
+		{folder: "variables-only", flags: []string{}},
+		{folder: "variables-with-variables", flags: []string{}},
+		{folder: "complete-variables-with-template-engine", flags: []string{}},
 	}
 
 	for _, tc := range tc {
 		t.Run(tc.folder, func(t *testing.T) {
-			inputPath := filepath.Join(testFixture(tc.folder, "input.json"))
+			inputPath := filepath.Join(testFixture("hcl2_upgrade", tc.folder, "input.json"))
 			outputPath := inputPath + ".pkr.hcl"
-			expectedPath := filepath.Join(testFixture(tc.folder, "expected.pkr.hcl"))
-			p := helperCommand(t, "hcl2_upgrade", inputPath)
+			expectedPath := filepath.Join(testFixture("hcl2_upgrade", tc.folder, "expected.pkr.hcl"))
+			args := []string{"hcl2_upgrade"}
+			if len(tc.flags) > 0 {
+				args = append(args, tc.flags...)
+			}
+			args = append(args, inputPath)
+			p := helperCommand(t, args...)
 			bs, err := p.CombinedOutput()
 			if err != nil {
 				t.Fatalf("%v %s", err, bs)

@@ -3,7 +3,7 @@
 package common
 
 import (
-	"os"
+	"io/fs"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/zclconf/go-cty/cty"
@@ -13,7 +13,7 @@ import (
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatOutputConfig struct {
 	OutputDir *string      `mapstructure:"output_directory" required:"false" cty:"output_directory" hcl:"output_directory"`
-	DirPerm   *os.FileMode `mapstructure:"directory_permission" required:"false" cty:"directory_permission" hcl:"directory_permission"`
+	DirPerm   *fs.FileMode `mapstructure:"directory_permission" required:"false" cty:"directory_permission" hcl:"directory_permission"`
 }
 
 // FlatMapstructure returns a new FlatOutputConfig.

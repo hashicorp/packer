@@ -90,6 +90,7 @@ type FlatConfig struct {
 	VpcFilter                                 *common.FlatVpcFilterOptions           `mapstructure:"vpc_filter" required:"false" cty:"vpc_filter" hcl:"vpc_filter"`
 	VpcId                                     *string                                `mapstructure:"vpc_id" required:"false" cty:"vpc_id" hcl:"vpc_id"`
 	WindowsPasswordTimeout                    *string                                `mapstructure:"windows_password_timeout" required:"false" cty:"windows_password_timeout" hcl:"windows_password_timeout"`
+	Metadata                                  *common.FlatMetadataOptions            `mapstructure:"metadata_options" required:"false" cty:"metadata_options" hcl:"metadata_options"`
 	Type                                      *string                                `mapstructure:"communicator" cty:"communicator" hcl:"communicator"`
 	PauseBeforeConnect                        *string                                `mapstructure:"pause_before_connecting" cty:"pause_before_connecting" hcl:"pause_before_connecting"`
 	SSHHost                                   *string                                `mapstructure:"ssh_host" cty:"ssh_host" hcl:"ssh_host"`
@@ -142,6 +143,7 @@ type FlatConfig struct {
 	SSHInterface                              *string                                `mapstructure:"ssh_interface" cty:"ssh_interface" hcl:"ssh_interface"`
 	PauseBeforeSSM                            *string                                `mapstructure:"pause_before_ssm" cty:"pause_before_ssm" hcl:"pause_before_ssm"`
 	SessionManagerPort                        *int                                   `mapstructure:"session_manager_port" cty:"session_manager_port" hcl:"session_manager_port"`
+	AMISkipCreateImage                        *bool                                  `mapstructure:"skip_create_ami" required:"false" cty:"skip_create_ami" hcl:"skip_create_ami"`
 	AMIMappings                               []common.FlatBlockDevice               `mapstructure:"ami_block_device_mappings" required:"false" cty:"ami_block_device_mappings" hcl:"ami_block_device_mappings"`
 	LaunchMappings                            []common.FlatBlockDevice               `mapstructure:"launch_block_device_mappings" required:"false" cty:"launch_block_device_mappings" hcl:"launch_block_device_mappings"`
 	VolumeRunTags                             map[string]string                      `mapstructure:"run_volume_tags" cty:"run_volume_tags" hcl:"run_volume_tags"`
@@ -239,6 +241,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vpc_filter":                            &hcldec.BlockSpec{TypeName: "vpc_filter", Nested: hcldec.ObjectSpec((*common.FlatVpcFilterOptions)(nil).HCL2Spec())},
 		"vpc_id":                                &hcldec.AttrSpec{Name: "vpc_id", Type: cty.String, Required: false},
 		"windows_password_timeout":              &hcldec.AttrSpec{Name: "windows_password_timeout", Type: cty.String, Required: false},
+		"metadata_options":                      &hcldec.BlockSpec{TypeName: "metadata_options", Nested: hcldec.ObjectSpec((*common.FlatMetadataOptions)(nil).HCL2Spec())},
 		"communicator":                          &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
 		"pause_before_connecting":               &hcldec.AttrSpec{Name: "pause_before_connecting", Type: cty.String, Required: false},
 		"ssh_host":                              &hcldec.AttrSpec{Name: "ssh_host", Type: cty.String, Required: false},
@@ -291,6 +294,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"ssh_interface":                         &hcldec.AttrSpec{Name: "ssh_interface", Type: cty.String, Required: false},
 		"pause_before_ssm":                      &hcldec.AttrSpec{Name: "pause_before_ssm", Type: cty.String, Required: false},
 		"session_manager_port":                  &hcldec.AttrSpec{Name: "session_manager_port", Type: cty.Number, Required: false},
+		"skip_create_ami":                       &hcldec.AttrSpec{Name: "skip_create_ami", Type: cty.Bool, Required: false},
 		"ami_block_device_mappings":             &hcldec.BlockListSpec{TypeName: "ami_block_device_mappings", Nested: hcldec.ObjectSpec((*common.FlatBlockDevice)(nil).HCL2Spec())},
 		"launch_block_device_mappings":          &hcldec.BlockListSpec{TypeName: "launch_block_device_mappings", Nested: hcldec.ObjectSpec((*common.FlatBlockDevice)(nil).HCL2Spec())},
 		"run_volume_tags":                       &hcldec.AttrSpec{Name: "run_volume_tags", Type: cty.Map(cty.String), Required: false},

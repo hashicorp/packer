@@ -105,7 +105,7 @@ func TestStepAMIRegionCopy_duplicates(t *testing.T) {
 	// ------------------------------------------------------------------------
 
 	stepAMIRegionCopy := StepAMIRegionCopy{
-		AccessConfig: testAccessConfig(),
+		AccessConfig: FakeAccessConfig(),
 		Regions:      []string{"us-east-1"},
 		AMIKmsKeyId:  "12345",
 		// Original region key in regionkeyids is different than in amikmskeyid
@@ -131,7 +131,7 @@ func TestStepAMIRegionCopy_duplicates(t *testing.T) {
 
 	// the ami is only copied once.
 	stepAMIRegionCopy = StepAMIRegionCopy{
-		AccessConfig:   testAccessConfig(),
+		AccessConfig:   FakeAccessConfig(),
 		Regions:        []string{"us-east-1"},
 		Name:           "fake-ami-name",
 		OriginalRegion: "us-east-1",
@@ -152,7 +152,7 @@ func TestStepAMIRegionCopy_duplicates(t *testing.T) {
 
 	// the ami is only copied once.
 	stepAMIRegionCopy = StepAMIRegionCopy{
-		AccessConfig:      testAccessConfig(),
+		AccessConfig:      FakeAccessConfig(),
 		Regions:           []string{"us-east-1"},
 		EncryptBootVolume: config.TriFalse,
 		Name:              "fake-ami-name",
@@ -174,7 +174,7 @@ func TestStepAMIRegionCopy_duplicates(t *testing.T) {
 	// ------------------------------------------------------------------------
 
 	stepAMIRegionCopy = StepAMIRegionCopy{
-		AccessConfig: testAccessConfig(),
+		AccessConfig: FakeAccessConfig(),
 		// Many duplicates for only 3 actual values
 		Regions:     []string{"us-east-1", "us-west-2", "us-west-2", "ap-east-1", "ap-east-1", "ap-east-1"},
 		AMIKmsKeyId: "IlikePancakes",
@@ -203,7 +203,7 @@ func TestStepAMIRegionCopy_duplicates(t *testing.T) {
 	// ------------------------------------------------------------------------
 
 	stepAMIRegionCopy = StepAMIRegionCopy{
-		AccessConfig: testAccessConfig(),
+		AccessConfig: FakeAccessConfig(),
 		// Many duplicates for only 3 actual values
 		Regions:        []string{"us-east-1", "us-west-2", "us-west-2", "ap-east-1", "ap-east-1", "ap-east-1"},
 		Name:           "fake-ami-name",
@@ -223,7 +223,7 @@ func TestStepAMIRegionCopy_duplicates(t *testing.T) {
 func TestStepAmiRegionCopy_nil_encryption(t *testing.T) {
 	// create step
 	stepAMIRegionCopy := StepAMIRegionCopy{
-		AccessConfig:      testAccessConfig(),
+		AccessConfig:      FakeAccessConfig(),
 		Regions:           make([]string, 0),
 		AMIKmsKeyId:       "",
 		RegionKeyIds:      make(map[string]string),
@@ -249,7 +249,7 @@ func TestStepAmiRegionCopy_nil_encryption(t *testing.T) {
 func TestStepAmiRegionCopy_true_encryption(t *testing.T) {
 	// create step
 	stepAMIRegionCopy := StepAMIRegionCopy{
-		AccessConfig:      testAccessConfig(),
+		AccessConfig:      FakeAccessConfig(),
 		Regions:           make([]string, 0),
 		AMIKmsKeyId:       "",
 		RegionKeyIds:      make(map[string]string),
@@ -275,7 +275,7 @@ func TestStepAmiRegionCopy_true_encryption(t *testing.T) {
 func TestStepAmiRegionCopy_nil_intermediary(t *testing.T) {
 	// create step
 	stepAMIRegionCopy := StepAMIRegionCopy{
-		AccessConfig:      testAccessConfig(),
+		AccessConfig:      FakeAccessConfig(),
 		Regions:           make([]string, 0),
 		AMIKmsKeyId:       "",
 		RegionKeyIds:      make(map[string]string),
@@ -303,7 +303,7 @@ func TestStepAmiRegionCopy_AMISkipBuildRegion(t *testing.T) {
 	// ------------------------------------------------------------------------
 
 	stepAMIRegionCopy := StepAMIRegionCopy{
-		AccessConfig:       testAccessConfig(),
+		AccessConfig:       FakeAccessConfig(),
 		Regions:            []string{"us-west-1"},
 		AMIKmsKeyId:        "",
 		RegionKeyIds:       map[string]string{"us-west-1": "abcde"},
@@ -329,7 +329,7 @@ func TestStepAmiRegionCopy_AMISkipBuildRegion(t *testing.T) {
 	// skip build region is false.
 	// ------------------------------------------------------------------------
 	stepAMIRegionCopy = StepAMIRegionCopy{
-		AccessConfig:       testAccessConfig(),
+		AccessConfig:       FakeAccessConfig(),
 		Regions:            []string{"us-west-1"},
 		AMIKmsKeyId:        "",
 		RegionKeyIds:       make(map[string]string),
@@ -354,7 +354,7 @@ func TestStepAmiRegionCopy_AMISkipBuildRegion(t *testing.T) {
 	// skip build region is false, but encrypt is true
 	// ------------------------------------------------------------------------
 	stepAMIRegionCopy = StepAMIRegionCopy{
-		AccessConfig:       testAccessConfig(),
+		AccessConfig:       FakeAccessConfig(),
 		Regions:            []string{"us-west-1"},
 		AMIKmsKeyId:        "",
 		RegionKeyIds:       map[string]string{"us-west-1": "abcde"},
@@ -380,7 +380,7 @@ func TestStepAmiRegionCopy_AMISkipBuildRegion(t *testing.T) {
 	// skip build region is true, and encrypt is true
 	// ------------------------------------------------------------------------
 	stepAMIRegionCopy = StepAMIRegionCopy{
-		AccessConfig:       testAccessConfig(),
+		AccessConfig:       FakeAccessConfig(),
 		Regions:            []string{"us-west-1"},
 		AMIKmsKeyId:        "",
 		RegionKeyIds:       map[string]string{"us-west-1": "abcde"},

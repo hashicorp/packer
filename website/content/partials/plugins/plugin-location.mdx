@@ -1,0 +1,58 @@
+Plugins will usually be located in the
+[PACKER_HOME_DIR](/docs/configure#packer-s-home-directory).
+
+* [`packer init`](/docs/commands/init) will install plugins in the **last** directory
+in the following numbered list.
+
+* During the initialization of Packer, any plugin required in the
+**`required_plugins`** section will be looked up in all entries of the following
+list. **First** plugin found takes precedence. Two binaries of the same plugin
+with two different version will be considered as two different plugins. Highest
+found version matching `required_plugins` will be taken into consideration.
+
+1. The directory where `packer` is, or the executable directory.
+1. The current working directory. (`"."`)
+1. The `PACKER_HOME_DIR/plugins` directory. PACKER_HOME_DIR refers to *[Packer's home
+directory](/docs/configure#packer-s-home-directory)*, if it could be found.
+1. The director(y/ies) under the `PACKER_PLUGIN_PATH` env var, if `PACKER_PLUGIN_PATH`
+is set.
+
+~> **Note**: There can be more than one directory in the `PACKER_PLUGIN_PATH`
+env var, it will be seperated by a semicolon (`;`) on Windows systems and a
+colon (`:`) on other systems. The order priority will be kept.
+
+Using the following example :
+```hcl
+    required_plugins {
+      happycloud = {
+        version = ">= 2.7.0"
+        source = "github.com/azr/happycloud"
+      }
+    }
+```
+
+The plugin getter will then install the binaries in the following location for a
+system with no `PACKER_PLUGIN_PATH` env var set.
+
+* `PACKER_HOME_DIR/plugins/github.com/hashicorp/happycloud/`
+
+During initialization, on a `darwin_amd64` system, Packer will look-up for the
+following files:
+
+* `PACKER_EXEC_DIR/github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64`
+* `./github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64`
+* `PACKER_HOME_DIR/plugins/github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64`
+* `PACKER_PLUGIN_PATH/github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64`
+* `./packer-plugin-happycloud`
+
+The first plugin-name/version files found will take precedence.
+
+For plugins located under the `github.com/azr/happycloud/` directory structure an accompanying SHA256SUM file
+will be required in order for `packer init` to ensure the plugin being loaded has not been tampered with.
+The SHA256SUM file will be automatically generated when a plugin is installed via `packer init` if the plugin
+was installed manually into `PACKER_HOME_DIR/plugins/github.com/azr/happycloud/` then the file
+`PACKER_HOME_DIR/plugins/github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64_SHA256SUM` must be generated manually as well.
+
+-> Note: `PACKER_HOME_DIR` is not an actual env var and refers to [Packer's home
+directory](#packer-s-home-directory). `PACKER_EXEC_DIR` is not an actual env var
+and refers to the directory where `packer` is, or the executable directory.

@@ -22,6 +22,9 @@ type Driver interface {
 	// Create a SCSI controller.
 	CreateSCSIController(vm string, controller string) error
 
+	// Create a VirtIO controller.
+	CreateVirtIOController(vm string, controller string) error
+
 	// Create an NVME controller
 	CreateNVMeController(vm string, controller string, portcount int) error
 

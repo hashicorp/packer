@@ -31,7 +31,7 @@ func NewFusion5Driver(dconfig *DriverConfig, config *SSHConfig) Driver {
 	}
 }
 
-func (d *Fusion5Driver) Clone(dst, src string, linked bool) error {
+func (d *Fusion5Driver) Clone(dst, src string, linked bool, snapshot string) error {
 	return errors.New("Cloning is not supported with Fusion 5. Please use Fusion 6+.")
 }
 

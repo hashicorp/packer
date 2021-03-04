@@ -38,7 +38,7 @@ type LaunchInstanceDetails struct {
 	// the instance is launched.
 	CreateVnicDetails *CreateVnicDetails `mandatory:"false" json:"createVnicDetails"`
 
-	// The OCID of dedicated VM host.
+	// The OCID of the dedicated VM host.
 	DedicatedVmHostId *string `mandatory:"false" json:"dedicatedVmHostId"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a
@@ -51,8 +51,12 @@ type LaunchInstanceDetails struct {
 	// Example: `My bare metal instance`
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
-	// Additional metadata key/value pairs that you provide. They serve the same purpose and functionality as fields in the 'metadata' object.
-	// They are distinguished from 'metadata' fields in that these can be nested JSON objects (whereas 'metadata' fields are string/string maps only).
+	// Additional metadata key/value pairs that you provide. They serve the same purpose and
+	// functionality as fields in the `metadata` object.
+	// They are distinguished from `metadata` fields in that these can be nested JSON objects
+	// (whereas `metadata` fields are string/string maps only).
+	// The combined size of the `metadata` and `extendedMetadata` objects can be a maximum of
+	// 32,000 bytes.
 	ExtendedMetadata map[string]interface{} `mandatory:"false" json:"extendedMetadata"`
 
 	// A fault domain is a grouping of hardware and infrastructure within an availability domain.
@@ -60,8 +64,8 @@ type LaunchInstanceDetails struct {
 	// instances so that they are not on the same physical hardware within a single availability domain.
 	// A hardware failure or Compute hardware maintenance that affects one fault domain does not affect
 	// instances in other fault domains.
-	// If you do not specify the fault domain, the system selects one for you. To change the fault
-	// domain for an instance, terminate it and launch a new instance in the preferred fault domain.
+	// If you do not specify the fault domain, the system selects one for you.
+	//
 	// To get a list of fault domains, use the
 	// ListFaultDomains operation in the
 	// Identity and Access Management Service API.
@@ -103,7 +107,11 @@ type LaunchInstanceDetails struct {
 	// For more information about iPXE, see http://ipxe.org.
 	IpxeScript *string `mandatory:"false" json:"ipxeScript"`
 
+	// Options for tuning the compatibility and performance of VM shapes. The values that you specify override any
+	// default values.
 	LaunchOptions *LaunchOptions `mandatory:"false" json:"launchOptions"`
+
+	AvailabilityConfig *LaunchInstanceAvailabilityConfigDetails `mandatory:"false" json:"availabilityConfig"`
 
 	// Custom metadata key/value pairs that you provide, such as the SSH public key
 	// required to connect to the instance.
@@ -125,29 +133,21 @@ type LaunchInstanceDetails struct {
 	//  Cloud-Init to run custom scripts or provide custom Cloud-Init configuration. For
 	//  information about how to take advantage of user data, see the
 	//  Cloud-Init Documentation (http://cloudinit.readthedocs.org/en/latest/topics/format.html).
-	//  **Note:** Cloud-Init does not pull this data from the `http://169.254.169.254/opc/v1/instance/metadata/`
-	//  path. When the instance launches and either of these keys are provided, the key values are formatted as
-	//  OpenStack metadata and copied to the following locations, which are recognized by Cloud-Init:
-	//  `http://169.254.169.254/openstack/latest/meta_data.json` - This JSON blob
-	//  contains, among other things, the SSH keys that you provided for
-	//   **"ssh_authorized_keys"**.
-	//  `http://169.254.169.254/openstack/latest/user_data` - Contains the
-	//  base64-decoded data that you provided for **"user_data"**.
 	//  **Metadata Example**
 	//       "metadata" : {
 	//          "quake_bot_level" : "Severe",
-	//          "ssh_authorized_keys" : "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCZ06fccNTQfq+xubFlJ5ZR3kt+uzspdH9tXL+lAejSM1NXM+CFZev7MIxfEjas06y80ZBZ7DUTQO0GxJPeD8NCOb1VorF8M4xuLwrmzRtkoZzU16umt4y1W0Q4ifdp3IiiU0U8/WxczSXcUVZOLqkz5dc6oMHdMVpkimietWzGZ4LBBsH/LjEVY7E0V+a0sNchlVDIZcm7ErReBLcdTGDq0uLBiuChyl6RUkX1PNhusquTGwK7zc8OBXkRuubn5UKXhI3Ul9Nyk4XESkVWIGNKmw8mSpoJSjR8P9ZjRmcZVo8S+x4KVPMZKQEor== ryan.smith@company.com
-	//          ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAzJSAtwEPoB3Jmr58IXrDGzLuDYkWAYg8AsLYlo6JZvKpjY1xednIcfEVQJm4T2DhVmdWhRrwQ8DmayVZvBkLt+zs2LdoAJEVimKwXcJFD/7wtH8Lnk17HiglbbbNXsemjDY0hea4JUE5CfvkIdZBITuMrfqSmA4n3VNoorXYdvtTMoGG8fxMub46RPtuxtqi9bG9Zqenordkg5FJt2mVNfQRqf83CWojcOkklUWq4CjyxaeLf5i9gv1fRoBo4QhiA8I6NCSppO8GnoV/6Ox6TNoh9BiifqGKC9VGYuC89RvUajRBTZSK2TK4DPfaT+2R+slPsFrwiT/oPEhhEK1S5Q== rsa-key-20160227",
-	//          "user_data" : "SWYgeW91IGNhbiBzZWUgdGhpcywgdGhlbiBpdCB3b3JrZWQgbWF5YmUuCg=="
+	//          "ssh_authorized_keys" : "ssh-rsa <your_public_SSH_key>== rsa-key-20160227",
+	//          "user_data" : "<your_public_SSH_key>=="
 	//       }
 	//  **Getting Metadata on the Instance**
 	//  To get information about your instance, connect to the instance using SSH and issue any of the
 	//  following GET requests:
-	//      curl http://169.254.169.254/opc/v1/instance/
-	//      curl http://169.254.169.254/opc/v1/instance/metadata/
-	//      curl http://169.254.169.254/opc/v1/instance/metadata/<any-key-name>
+	//      curl -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/
+	//      curl -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/metadata/
+	//      curl -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/metadata/<any-key-name>
 	//  You'll get back a response that includes all the instance information; only the metadata information; or
 	//  the metadata information for the specified key name, respectively.
+	//  The combined size of the `metadata` and `extendedMetadata` objects can be a maximum of 32,000 bytes.
 	Metadata map[string]string `mandatory:"false" json:"metadata"`
 
 	AgentConfig *LaunchInstanceAgentConfigDetails `mandatory:"false" json:"agentConfig"`
@@ -174,26 +174,27 @@ func (m LaunchInstanceDetails) String() string {
 // UnmarshalJSON unmarshals from json
 func (m *LaunchInstanceDetails) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
-		CreateVnicDetails              *CreateVnicDetails                `json:"createVnicDetails"`
-		DedicatedVmHostId              *string                           `json:"dedicatedVmHostId"`
-		DefinedTags                    map[string]map[string]interface{} `json:"definedTags"`
-		DisplayName                    *string                           `json:"displayName"`
-		ExtendedMetadata               map[string]interface{}            `json:"extendedMetadata"`
-		FaultDomain                    *string                           `json:"faultDomain"`
-		FreeformTags                   map[string]string                 `json:"freeformTags"`
-		HostnameLabel                  *string                           `json:"hostnameLabel"`
-		ImageId                        *string                           `json:"imageId"`
-		IpxeScript                     *string                           `json:"ipxeScript"`
-		LaunchOptions                  *LaunchOptions                    `json:"launchOptions"`
-		Metadata                       map[string]string                 `json:"metadata"`
-		AgentConfig                    *LaunchInstanceAgentConfigDetails `json:"agentConfig"`
-		ShapeConfig                    *LaunchInstanceShapeConfigDetails `json:"shapeConfig"`
-		SourceDetails                  instancesourcedetails             `json:"sourceDetails"`
-		SubnetId                       *string                           `json:"subnetId"`
-		IsPvEncryptionInTransitEnabled *bool                             `json:"isPvEncryptionInTransitEnabled"`
-		AvailabilityDomain             *string                           `json:"availabilityDomain"`
-		CompartmentId                  *string                           `json:"compartmentId"`
-		Shape                          *string                           `json:"shape"`
+		CreateVnicDetails              *CreateVnicDetails                       `json:"createVnicDetails"`
+		DedicatedVmHostId              *string                                  `json:"dedicatedVmHostId"`
+		DefinedTags                    map[string]map[string]interface{}        `json:"definedTags"`
+		DisplayName                    *string                                  `json:"displayName"`
+		ExtendedMetadata               map[string]interface{}                   `json:"extendedMetadata"`
+		FaultDomain                    *string                                  `json:"faultDomain"`
+		FreeformTags                   map[string]string                        `json:"freeformTags"`
+		HostnameLabel                  *string                                  `json:"hostnameLabel"`
+		ImageId                        *string                                  `json:"imageId"`
+		IpxeScript                     *string                                  `json:"ipxeScript"`
+		LaunchOptions                  *LaunchOptions                           `json:"launchOptions"`
+		AvailabilityConfig             *LaunchInstanceAvailabilityConfigDetails `json:"availabilityConfig"`
+		Metadata                       map[string]string                        `json:"metadata"`
+		AgentConfig                    *LaunchInstanceAgentConfigDetails        `json:"agentConfig"`
+		ShapeConfig                    *LaunchInstanceShapeConfigDetails        `json:"shapeConfig"`
+		SourceDetails                  instancesourcedetails                    `json:"sourceDetails"`
+		SubnetId                       *string                                  `json:"subnetId"`
+		IsPvEncryptionInTransitEnabled *bool                                    `json:"isPvEncryptionInTransitEnabled"`
+		AvailabilityDomain             *string                                  `json:"availabilityDomain"`
+		CompartmentId                  *string                                  `json:"compartmentId"`
+		Shape                          *string                                  `json:"shape"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
@@ -223,6 +224,8 @@ func (m *LaunchInstanceDetails) UnmarshalJSON(data []byte) (e error) {
 
 	m.LaunchOptions = model.LaunchOptions
 
+	m.AvailabilityConfig = model.AvailabilityConfig
+
 	m.Metadata = model.Metadata
 
 	m.AgentConfig = model.AgentConfig
@@ -248,5 +251,6 @@ func (m *LaunchInstanceDetails) UnmarshalJSON(data []byte) (e error) {
 	m.CompartmentId = model.CompartmentId
 
 	m.Shape = model.Shape
+
 	return
 }

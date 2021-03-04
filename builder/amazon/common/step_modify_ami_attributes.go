@@ -14,6 +14,8 @@ import (
 )
 
 type StepModifyAMIAttributes struct {
+	AMISkipCreateImage bool
+
 	Users          []string
 	Groups         []string
 	SnapshotUsers  []string
@@ -29,6 +31,12 @@ func (s *StepModifyAMIAttributes) Run(ctx context.Context, state multistep.State
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	session := state.Get("awsSession").(*session.Session)
 	ui := state.Get("ui").(packersdk.Ui)
+
+	if s.AMISkipCreateImage {
+		ui.Say("Skipping AMI modify attributes...")
+		return multistep.ActionContinue
+	}
+
 	amis := state.Get("amis").(map[string]string)
 	snapshots := state.Get("snapshots").(map[string][]string)
 

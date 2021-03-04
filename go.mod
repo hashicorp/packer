@@ -17,13 +17,13 @@ require (
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 	github.com/antihax/optional v1.0.0
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
-	github.com/aws/aws-sdk-go v1.36.5
+	github.com/aws/aws-sdk-go v1.37.15
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8
+	github.com/digitalocean/go-qemu v0.0.0-20201211181942-d361e7b4965f
 	github.com/digitalocean/godo v1.11.1
 	github.com/exoscale/egoscale v0.18.1
 	github.com/fatih/camelcase v1.0.0
@@ -33,6 +33,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
 	github.com/google/go-cmp v0.5.2
+	github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69
 	github.com/google/uuid v1.1.2
 	github.com/gophercloud/gophercloud v0.12.0
 	github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c
@@ -49,7 +50,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/hcl/v2 v2.8.0
-	github.com/hashicorp/packer-plugin-sdk v0.0.10
+	github.com/hashicorp/packer-plugin-sdk v0.0.14
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
@@ -62,19 +63,20 @@ require (
 	github.com/mitchellh/cli v1.1.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
+	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.4.0
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/mitchellh/reflectwalk v1.0.0
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
-	github.com/oracle/oci-go-sdk v18.0.0+incompatible
+	github.com/oracle/oci-go-sdk v24.3.0+incompatible
 	github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699
 	github.com/pierrec/lz4 v2.0.5+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
-	github.com/shirou/gopsutil v2.18.12+incompatible
+	github.com/shirou/gopsutil v3.21.1+incompatible
 	github.com/stretchr/testify v1.6.1
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible
 	github.com/ucloud/ucloud-sdk-go v0.16.3
@@ -88,6 +90,7 @@ require (
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9
 	golang.org/x/mobile v0.0.0-20201208152944-da85bec010a2
+	golang.org/x/mod v0.3.0
 	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
@@ -97,4 +100,4 @@ require (
 	google.golang.org/grpc v1.32.0
 )
 
-go 1.13
+go 1.16

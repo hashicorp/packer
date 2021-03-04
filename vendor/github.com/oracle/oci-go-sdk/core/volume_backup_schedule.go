@@ -224,7 +224,7 @@ const (
 )
 
 var mappingVolumeBackupScheduleTimeZone = map[string]VolumeBackupScheduleTimeZoneEnum{
-	"UTC":                       VolumeBackupScheduleTimeZoneUtc,
+	"UTC": VolumeBackupScheduleTimeZoneUtc,
 	"REGIONAL_DATA_CENTER_TIME": VolumeBackupScheduleTimeZoneRegionalDataCenterTime,
 }
 

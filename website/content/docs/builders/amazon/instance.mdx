@@ -15,6 +15,7 @@ sidebar_title: Instance
 # AMI Builder (instance-store)
 
 Type: `amazon-instance`
+Artifact BuilderId: `mitchellh.amazon.instance`
 
 The `amazon-instance` Packer builder is able to create Amazon AMIs backed by
 instance storage as the root device. For more information on the difference
@@ -141,29 +142,6 @@ Block devices can be nested in the
 Here is a basic example. It is completely valid except for the access keys:
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "type": "amazon-instance",
-  "access_key": "YOUR KEY HERE",
-  "secret_key": "YOUR SECRET KEY HERE",
-  "region": "us-east-1",
-  "source_ami": "ami-d9d6a6b0",
-  "instance_type": "m1.small",
-  "ssh_username": "ubuntu",
-
-  "account_id": "0123-4567-0890",
-  "s3_bucket": "packer-images",
-  "x509_cert_path": "x509.cert",
-  "x509_key_path": "x509.key",
-  "x509_upload_path": "/tmp",
-
-  "ami_name": "packer-quick-start {{timestamp}}"
-}
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -184,6 +162,29 @@ build {
   source "sources.amazon-instance.basic-example" {
     ami_name = "packer-quick-start {{timestamp}}"
   }
+}
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "amazon-instance",
+  "access_key": "YOUR KEY HERE",
+  "secret_key": "YOUR SECRET KEY HERE",
+  "region": "us-east-1",
+  "source_ami": "ami-d9d6a6b0",
+  "instance_type": "m1.small",
+  "ssh_username": "ubuntu",
+
+  "account_id": "0123-4567-0890",
+  "s3_bucket": "packer-images",
+  "x509_cert_path": "x509.cert",
+  "x509_key_path": "x509.key",
+  "x509_upload_path": "/tmp",
+
+  "ami_name": "packer-quick-start {{timestamp}}"
 }
 ```
 
@@ -220,7 +221,7 @@ variables are available:
 
 ## Build Shared Information Variables
 
-This builder generates data that are shared with provisioner and post-processor via build function of [template engine](/docs/templates/engine) for JSON and [contextual variables](/docs/templates/hcl_templates/contextual-variables) for HCL2.
+This builder generates data that are shared with provisioner and post-processor via build function of [template engine](/docs/templates/legacy_json_templates/engine) for JSON and [contextual variables](/docs/templates/hcl_templates/contextual-variables) for HCL2.
 
 The generated variables available for this builder are:
 
@@ -238,22 +239,6 @@ The generated variables available for this builder are:
 Usage example:
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-"post-processors": [
-    {
-      "type": "manifest",
-      "output": "manifest.json",
-      "strip_path": true,
-      "custom_data": {
-        "source_ami_name": "{{ build `SourceAMIName` }}"
-      }
-    }
-]
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -283,6 +268,22 @@ post-processor "manifest" {
 ```
 
 </Tab>
+<Tab heading="JSON">
+
+```json
+"post-processors": [
+  {
+    "type": "manifest",
+    "output": "manifest.json",
+    "strip_path": true,
+    "custom_data": {
+      "source_ami_name": "{{ build `SourceAMIName` }}"
+    }
+  }
+]
+```
+
+</Tab>
 </Tabs>
 
 ## Custom Bundle Commands
@@ -299,7 +300,7 @@ upload the AMI.
 
 These are configured with `bundle_vol_command` and `bundle_upload_command`.
 Both of these configurations are [configuration
-templates](/docs/templates/engine) and have support for their own set of
+templates](/docs/templates/legacy_json_templates/engine) and have support for their own set of
 template variables.
 
 ### Bundle Volume Command

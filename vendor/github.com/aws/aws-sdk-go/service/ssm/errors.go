@@ -53,6 +53,13 @@ const (
 	// Each association has a limit of 1,000 versions.
 	ErrCodeAssociationVersionLimitExceeded = "AssociationVersionLimitExceeded"
 
+	// ErrCodeAutomationDefinitionNotApprovedException for service response error code
+	// "AutomationDefinitionNotApprovedException".
+	//
+	// Indicates that the Change Manager change template used in the change request
+	// was rejected or is still in a pending state.
+	ErrCodeAutomationDefinitionNotApprovedException = "AutomationDefinitionNotApprovedException"
+
 	// ErrCodeAutomationDefinitionNotFoundException for service response error code
 	// "AutomationDefinitionNotFoundException".
 	//
@@ -585,15 +592,15 @@ const (
 	// "OpsMetadataKeyLimitExceededException".
 	//
 	// The OpsMetadata object exceeds the maximum number of OpsMetadata keys that
-	// you can assign to an application in AppManager.
+	// you can assign to an application in Application Manager.
 	ErrCodeOpsMetadataKeyLimitExceededException = "OpsMetadataKeyLimitExceededException"
 
 	// ErrCodeOpsMetadataLimitExceededException for service response error code
 	// "OpsMetadataLimitExceededException".
 	//
 	// Your account reached the maximum number of OpsMetadata objects allowed by
-	// AppManager. The maximum is 200 OpsMetadata objects. Delete one or more OpsMetadata
-	// object and try again.
+	// Application Manager. The maximum is 200 OpsMetadata objects. Delete one or
+	// more OpsMetadata object and try again.
 	ErrCodeOpsMetadataLimitExceededException = "OpsMetadataLimitExceededException"
 
 	// ErrCodeOpsMetadataNotFoundException for service response error code
@@ -846,6 +853,7 @@ var exceptionFromCode = map[string]func(protocol.ResponseMetadata) error{
 	"AssociationExecutionDoesNotExist":              newErrorAssociationExecutionDoesNotExist,
 	"AssociationLimitExceeded":                      newErrorAssociationLimitExceeded,
 	"AssociationVersionLimitExceeded":               newErrorAssociationVersionLimitExceeded,
+	"AutomationDefinitionNotApprovedException":      newErrorAutomationDefinitionNotApprovedException,
 	"AutomationDefinitionNotFoundException":         newErrorAutomationDefinitionNotFoundException,
 	"AutomationDefinitionVersionNotFoundException":  newErrorAutomationDefinitionVersionNotFoundException,
 	"AutomationExecutionLimitExceededException":     newErrorAutomationExecutionLimitExceededException,

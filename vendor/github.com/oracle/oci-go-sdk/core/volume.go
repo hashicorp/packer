@@ -48,7 +48,7 @@ type Volume struct {
 	// The size of the volume in MBs. This field is deprecated. Use sizeInGBs instead.
 	SizeInMBs *int64 `mandatory:"true" json:"sizeInMBs"`
 
-	// The date and time the volume was created. Format defined by RFC3339.
+	// The date and time the volume was created. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
 	// Defined tags for this resource. Each key is predefined and scoped to a
@@ -89,6 +89,12 @@ type Volume struct {
 
 	// The OCID of the source volume group.
 	VolumeGroupId *string `mandatory:"false" json:"volumeGroupId"`
+
+	// Specifies whether the auto-tune performance is enabled for this volume.
+	IsAutoTuneEnabled *bool `mandatory:"false" json:"isAutoTuneEnabled"`
+
+	// The number of Volume Performance Units per GB that this volume is effectively tuned to when it's idle.
+	AutoTunedVpusPerGB *int64 `mandatory:"false" json:"autoTunedVpusPerGB"`
 }
 
 func (m Volume) String() string {
@@ -107,6 +113,8 @@ func (m *Volume) UnmarshalJSON(data []byte) (e error) {
 		SizeInGBs          *int64                            `json:"sizeInGBs"`
 		SourceDetails      volumesourcedetails               `json:"sourceDetails"`
 		VolumeGroupId      *string                           `json:"volumeGroupId"`
+		IsAutoTuneEnabled  *bool                             `json:"isAutoTuneEnabled"`
+		AutoTunedVpusPerGB *int64                            `json:"autoTunedVpusPerGB"`
 		AvailabilityDomain *string                           `json:"availabilityDomain"`
 		CompartmentId      *string                           `json:"compartmentId"`
 		DisplayName        *string                           `json:"displayName"`
@@ -147,6 +155,10 @@ func (m *Volume) UnmarshalJSON(data []byte) (e error) {
 
 	m.VolumeGroupId = model.VolumeGroupId
 
+	m.IsAutoTuneEnabled = model.IsAutoTuneEnabled
+
+	m.AutoTunedVpusPerGB = model.AutoTunedVpusPerGB
+
 	m.AvailabilityDomain = model.AvailabilityDomain
 
 	m.CompartmentId = model.CompartmentId
@@ -160,6 +172,7 @@ func (m *Volume) UnmarshalJSON(data []byte) (e error) {
 	m.SizeInMBs = model.SizeInMBs
 
 	m.TimeCreated = model.TimeCreated
+
 	return
 }
 

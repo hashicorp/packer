@@ -44,6 +44,9 @@ type UpdateBootVolumeDetails struct {
 	//   * `10`: Represents Balanced option.
 	//   * `20`: Represents Higher Performance option.
 	VpusPerGB *int64 `mandatory:"false" json:"vpusPerGB"`
+
+	// Specifies whether the auto-tune performance is enabled for this boot volume.
+	IsAutoTuneEnabled *bool `mandatory:"false" json:"isAutoTuneEnabled"`
 }
 
 func (m UpdateBootVolumeDetails) String() string {

@@ -10,6 +10,15 @@ description: >-
 
 `@include 'from-1.5/beta-hcl2-note.mdx'`
 
+There are two kinds of variables in HCL Packer templates: Input variables,
+sometimes simply called "variables", and Local variables, also known as
+"locals". Input variables may have defaults, but those defaults can
+be overridden from the command line or special variable files. Local variables
+can be thought of as constants, and are not able to be overridden at runtime.
+
+This page is about local variables. To learn about input variables, see the
+[input variables](/docs/templates/hcl_templates/variables) page.
+
 Local values assign a name to an expression, that can then be used multiple
 times within a folder.
 

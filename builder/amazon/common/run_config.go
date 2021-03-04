@@ -1,5 +1,5 @@
 //go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type AmiFilterOptions,SecurityGroupFilterOptions,SubnetFilterOptions,VpcFilterOptions,PolicyDocument,Statement
+//go:generate mapstructure-to-hcl2 -type AmiFilterOptions,SecurityGroupFilterOptions,SubnetFilterOptions,VpcFilterOptions,PolicyDocument,Statement,MetadataOptions
 
 package common
 
@@ -42,6 +42,20 @@ type PolicyDocument struct {
 
 type SecurityGroupFilterOptions struct {
 	config.NameValueFilter `mapstructure:",squash"`
+}
+
+// Configures the metadata options.
+// See [Configure IMDS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html) for details.
+type MetadataOptions struct {
+	// A string to enable or disble the IMDS endpoint for an instance. Defaults to enabled.
+	// Accepts either "enabled" or "disabled"
+	HttpEndpoint string `mapstructure:"http_endpoint" required:"false"`
+	// A string to either set the use of IMDSv2 for the instance to optional or required. Defaults to "optional".
+	// Accepts either "optional" or "required"
+	HttpTokens string `mapstructure:"http_tokens" required:"false"`
+	// A numerical value to set an upper limit for the amount of hops allowed when communicating with IMDS endpoints.
+	// Defaults to 1.
+	HttpPutResponseHopLimit int64 `mapstructure:"http_put_response_hop_limit" required:"false"`
 }
 
 // RunConfig contains configuration for running an instance from a source
@@ -118,8 +132,21 @@ type RunConfig struct {
 	// Whether or not to check if the IAM instance profile exists. Defaults to false
 	SkipProfileValidation bool `mapstructure:"skip_profile_validation" required:"false"`
 	// Temporary IAM instance profile policy document
-	// If IamInstanceProfile is specified it will be used instead. Example:
+	// If IamInstanceProfile is specified it will be used instead.
 	//
+	// HCL2 example:
+	// ```hcl
+	//temporary_iam_instance_profile_policy_document {
+	//	Statement {
+	//		Action   = ["logs:*"]
+	//		Effect   = "Allow"
+	//		Resource = "*"
+	//	}
+	//	Version = "2012-10-17"
+	//}
+	// ```
+	//
+	// JSON example:
 	// ```json
 	//{
 	//	"Version": "2012-10-17",
@@ -143,17 +170,7 @@ type RunConfig struct {
 	// The EC2 instance type to use while building the
 	// AMI, such as t2.small.
 	InstanceType string `mapstructure:"instance_type" required:"true"`
-	// Filters used to populate the `security_group_ids` field. JSON Example:
-	//
-	// ```json
-	// {
-	//   "security_group_filter": {
-	//     "filters": {
-	//       "tag:Class": "packer"
-	//     }
-	//   }
-	// }
-	// ```
+	// Filters used to populate the `security_group_ids` field.
 	//
 	// HCL2 Example:
 	//
@@ -163,6 +180,17 @@ type RunConfig struct {
 	//       "tag:Class": "packer"
 	//     }
 	//   }
+	// ```
+	//
+	// JSON Example:
+	// ```json
+	// {
+	//   "security_group_filter": {
+	//     "filters": {
+	//       "tag:Class": "packer"
+	//     }
+	//   }
+	// }
 	// ```
 	//
 	// This selects the SG's with tag `Class` with the value `packer`.
@@ -176,7 +204,7 @@ type RunConfig struct {
 	SecurityGroupFilter SecurityGroupFilterOptions `mapstructure:"security_group_filter" required:"false"`
 	// Key/value pair tags to apply to the instance that is that is *launched*
 	// to create the EBS volumes. This is a [template
-	// engine](/docs/templates/engine), see [Build template
+	// engine](/docs/templates/legacy_json_templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	RunTags map[string]string `mapstructure:"run_tags" required:"false"`
 	// Same as [`run_tags`](#run_tags) but defined as a singular repeatable
@@ -199,8 +227,24 @@ type RunConfig struct {
 	// AMI with a root volume snapshot that you have access to.
 	SourceAmi string `mapstructure:"source_ami" required:"true"`
 	// Filters used to populate the `source_ami`
-	// field. JSON Example:
+	// field.
 	//
+	// HCL2 example:
+	// ```hcl
+	// source "amazon-ebs" "basic-example" {
+	//   source_ami_filter {
+	//     filters = {
+	//        virtualization-type = "hvm"
+	//        name = "ubuntu/images/\*ubuntu-xenial-16.04-amd64-server-\*"
+	//        root-device-type = "ebs"
+	//     }
+	//     owners = ["099720109477"]
+	//     most_recent = true
+	//   }
+	// }
+	// ```
+	//
+	// JSON Example:
 	// ```json
 	// "builders" [
 	//   {
@@ -216,21 +260,6 @@ type RunConfig struct {
 	//     }
 	//   }
 	// ]
-	// ```
-	// HCL2 example:
-	//
-	// ```hcl
-	// source "amazon-ebs" "basic-example" {
-	//   source_ami_filter {
-	//     filters = {
-	//        virtualization-type = "hvm"
-	//        name = "ubuntu/images/\*ubuntu-xenial-16.04-amd64-server-\*"
-	//        root-device-type = "ebs"
-	//     }
-	//     owners = ["099720109477"]
-	//     most_recent = true
-	//   }
-	// }
 	// ```
 	//
 	//   This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
@@ -299,8 +328,22 @@ type RunConfig struct {
 	// will allow you to create those programatically.
 	SpotTag config.KeyValues `mapstructure:"spot_tag" required:"false"`
 	// Filters used to populate the `subnet_id` field.
-	// JSON Example:
 	//
+	// HCL2 example:
+	//
+	// ```hcl
+	// source "amazon-ebs" "basic-example" {
+	//   subnet_filter {
+	//     filters = {
+	//           "tag:Class": "build"
+	//     }
+	//     most_free = true
+	//     random = false
+	//   }
+	// }
+	// ```
+	//
+	// JSON Example:
 	// ```json
 	// "builders" [
 	//   {
@@ -314,19 +357,6 @@ type RunConfig struct {
 	//     }
 	//   }
 	// ]
-	// ```
-	// HCL2 example:
-	//
-	// ```hcl
-	// source "amazon-ebs" "basic-example" {
-	//   subnet_filter {
-	//     filters = {
-	//           "tag:Class": "build"
-	//     }
-	//     most_free = true
-	//     random = false
-	//   }
-	// }
 	// ```
 	//
 	//   This selects the Subnet with tag `Class` with the value `build`, which has
@@ -374,8 +404,21 @@ type RunConfig struct {
 	// data when launching the instance.
 	UserDataFile string `mapstructure:"user_data_file" required:"false"`
 	// Filters used to populate the `vpc_id` field.
-	// JSON Example:
 	//
+	// HCL2 example:
+	// ```hcl
+	// source "amazon-ebs" "basic-example" {
+	//   vpc_filter {
+	//     filters = {
+	//       "tag:Class": "build",
+	//       "isDefault": "false",
+	//       "cidr": "/24"
+	//     }
+	//   }
+	// }
+	// ```
+	//
+	// JSON Example:
 	// ```json
 	// "builders" [
 	//   {
@@ -389,19 +432,6 @@ type RunConfig struct {
 	//     }
 	//   }
 	// ]
-	// ```
-	// HCL2 example:
-	//
-	// ```hcl
-	// source "amazon-ebs" "basic-example" {
-	//   vpc_filter {
-	//     filters = {
-	//       "tag:Class": "build",
-	//       "isDefault": "false",
-	//       "cidr": "/24"
-	//     }
-	//   }
-	// }
 	// ```
 	//
 	// This selects the VPC with tag `Class` with the value `build`, which is not
@@ -425,6 +455,9 @@ type RunConfig struct {
 	// password for Windows instances. Defaults to 20 minutes. Example value:
 	// 10m
 	WindowsPasswordTimeout time.Duration `mapstructure:"windows_password_timeout" required:"false"`
+
+	// [Metadata Settings](#metadata-settings)
+	Metadata MetadataOptions `mapstructure:"metadata_options" required:"false"`
 
 	// Communicator settings
 	Comm communicator.Config `mapstructure:",squash"`
@@ -485,6 +518,33 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	errs := c.Comm.Prepare(ctx)
+
+	if c.Metadata.HttpEndpoint == "" {
+		c.Metadata.HttpEndpoint = "enabled"
+	}
+
+	if c.Metadata.HttpTokens == "" {
+		c.Metadata.HttpTokens = "optional"
+	}
+
+	if c.Metadata.HttpPutResponseHopLimit == 0 {
+		c.Metadata.HttpPutResponseHopLimit = 1
+	}
+
+	if c.Metadata.HttpEndpoint != "enabled" && c.Metadata.HttpEndpoint != "disabled" {
+		msg := fmt.Errorf("http_endpoint requires either disabled or enabled as its value")
+		errs = append(errs, msg)
+	}
+
+	if c.Metadata.HttpTokens != "optional" && c.Metadata.HttpTokens != "required" {
+		msg := fmt.Errorf("http_tokens requires either optional or required as its value")
+		errs = append(errs, msg)
+	}
+
+	if c.Metadata.HttpPutResponseHopLimit < 1 || c.Metadata.HttpPutResponseHopLimit > 64 {
+		msg := fmt.Errorf("http_put_response_hop_limit requires a number between 1 and 64")
+		errs = append(errs, msg)
+	}
 
 	// Copy singular tag maps
 	errs = append(errs, c.RunTag.CopyOn(&c.RunTags)...)

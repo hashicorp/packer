@@ -84,7 +84,20 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook,
 		&stepFinalizeTemplateConfig{},
 		&stepSuccess{},
 	}
-	steps := append(b.preSteps, coreSteps...)
+	preSteps := b.preSteps
+	for idx := range b.config.AdditionalISOFiles {
+		preSteps = append(preSteps, &commonsteps.StepDownload{
+			Checksum:    b.config.AdditionalISOFiles[idx].ISOChecksum,
+			Description: "additional ISO",
+			Extension:   b.config.AdditionalISOFiles[idx].TargetExtension,
+			ResultKey:   b.config.AdditionalISOFiles[idx].DownloadPathKey,
+			TargetPath:  b.config.AdditionalISOFiles[idx].DownloadPathKey,
+			Url:         b.config.AdditionalISOFiles[idx].ISOUrls,
+		})
+	}
+	preSteps = append(preSteps, &stepUploadAdditionalISOs{})
+
+	steps := append(preSteps, coreSteps...)
 	steps = append(steps, b.postSteps...)
 	// Run the steps
 	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)

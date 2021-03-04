@@ -45,7 +45,7 @@ type DhcpOptions struct {
 	// The collection of individual DHCP options.
 	Options []DhcpOption `mandatory:"true" json:"options"`
 
-	// Date and time the set of DHCP options was created, in the format defined by RFC3339.
+	// Date and time the set of DHCP options was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
@@ -118,6 +118,7 @@ func (m *DhcpOptions) UnmarshalJSON(data []byte) (e error) {
 	m.TimeCreated = model.TimeCreated
 
 	m.VcnId = model.VcnId
+
 	return
 }
 

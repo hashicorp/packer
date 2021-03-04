@@ -16,6 +16,8 @@ import (
 )
 
 type StepCreateTags struct {
+	AMISkipCreateImage bool
+
 	Tags         map[string]string
 	SnapshotTags map[string]string
 	Ctx          interpolate.Context
@@ -25,6 +27,12 @@ func (s *StepCreateTags) Run(ctx context.Context, state multistep.StateBag) mult
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	session := state.Get("awsSession").(*session.Session)
 	ui := state.Get("ui").(packersdk.Ui)
+
+	if s.AMISkipCreateImage {
+		ui.Say("Skipping AMI create tags...")
+		return multistep.ActionContinue
+	}
+
 	amis := state.Get("amis").(map[string]string)
 
 	if len(s.Tags) == 0 && len(s.SnapshotTags) == 0 {

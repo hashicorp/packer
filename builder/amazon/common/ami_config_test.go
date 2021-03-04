@@ -7,7 +7,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 )
 
@@ -18,14 +17,14 @@ func testAMIConfig() *AMIConfig {
 }
 
 func getFakeAccessConfig(region string) *AccessConfig {
-	c := testAccessConfig()
+	c := FakeAccessConfig()
 	c.RawRegion = region
 	return c
 }
 
 func TestAMIConfigPrepare_name(t *testing.T) {
 	c := testAMIConfig()
-	accessConf := testAccessConfig()
+	accessConf := FakeAccessConfig()
 	if err := c.Prepare(accessConf, nil); err != nil {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
@@ -34,10 +33,6 @@ func TestAMIConfigPrepare_name(t *testing.T) {
 	if err := c.Prepare(accessConf, nil); err == nil {
 		t.Fatal("should have error")
 	}
-}
-
-type mockEC2Client struct {
-	ec2iface.EC2API
 }
 
 func (m *mockEC2Client) DescribeRegions(*ec2.DescribeRegionsInput) (*ec2.DescribeRegionsOutput, error) {
@@ -56,7 +51,7 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 
 	var errs []error
 	var err error
-	accessConf := testAccessConfig()
+	accessConf := FakeAccessConfig()
 	mockConn := &mockEC2Client{}
 	if errs = c.prepareRegions(accessConf); len(errs) > 0 {
 		t.Fatalf("shouldn't have err: %#v", errs)
@@ -163,7 +158,7 @@ func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 	c.AMIUsers = []string{"testAccountID"}
 	c.AMIEncryptBootVolume = config.TriTrue
 
-	accessConf := testAccessConfig()
+	accessConf := FakeAccessConfig()
 
 	c.AMIKmsKeyId = ""
 	if err := c.Prepare(accessConf, nil); err == nil {
@@ -179,7 +174,7 @@ func TestAMIConfigPrepare_ValidateKmsKey(t *testing.T) {
 	c := testAMIConfig()
 	c.AMIEncryptBootVolume = config.TriTrue
 
-	accessConf := testAccessConfig()
+	accessConf := FakeAccessConfig()
 
 	validCases := []string{
 		"abcd1234-e567-890f-a12b-a123b4cd56ef",
@@ -215,7 +210,7 @@ func TestAMIConfigPrepare_ValidateKmsKey(t *testing.T) {
 func TestAMINameValidation(t *testing.T) {
 	c := testAMIConfig()
 
-	accessConf := testAccessConfig()
+	accessConf := FakeAccessConfig()
 
 	c.AMIName = "aa"
 	if err := c.Prepare(accessConf, nil); err == nil {

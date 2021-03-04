@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -17,24 +18,30 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
+const lockedVersion = "v1.5.0"
+
 func getBasicParser() *Parser {
 	return &Parser{
-		Parser: hclparse.NewParser(),
-		BuilderSchemas: packer.MapOfBuilder{
-			"amazon-ebs":     func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
-			"virtualbox-iso": func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
-			"null":           func() (packersdk.Builder, error) { return &null.Builder{}, nil },
-		},
-		ProvisionersSchemas: packer.MapOfProvisioner{
-			"shell": func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
-			"file":  func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
-		},
-		PostProcessorsSchemas: packer.MapOfPostProcessor{
-			"amazon-import": func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
-			"manifest":      func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
-		},
-		DatasourceSchemas: packersdk.MapOfDatasource{
-			"amazon-ami": func() (packersdk.Datasource, error) { return &MockDatasource{}, nil },
+		CorePackerVersion:       version.Must(version.NewSemver(lockedVersion)),
+		CorePackerVersionString: lockedVersion,
+		Parser:                  hclparse.NewParser(),
+		PluginConfig: &packer.PluginConfig{
+			Builders: packer.MapOfBuilder{
+				"amazon-ebs":     func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
+				"virtualbox-iso": func() (packersdk.Builder, error) { return &MockBuilder{}, nil },
+				"null":           func() (packersdk.Builder, error) { return &null.Builder{}, nil },
+			},
+			Provisioners: packer.MapOfProvisioner{
+				"shell": func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
+				"file":  func() (packersdk.Provisioner, error) { return &MockProvisioner{}, nil },
+			},
+			PostProcessors: packer.MapOfPostProcessor{
+				"amazon-import": func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
+				"manifest":      func() (packersdk.PostProcessor, error) { return &MockPostProcessor{}, nil },
+			},
+			DataSources: packer.MapOfDatasource{
+				"amazon-ami": func() (packersdk.Datasource, error) { return &MockDatasource{}, nil },
+			},
 		},
 	}
 }
@@ -97,6 +104,39 @@ func testParse(t *testing.T, tests []parseTest) {
 			}
 			if diff := cmp.Diff(tt.getBuildsWantBuilds, gotBuilds, cmpOpts...); diff != "" {
 				t.Fatalf("Parser.getBuilds() wrong packer builds. %s", diff)
+			}
+		})
+	}
+}
+
+func testParse_only_Parse(t *testing.T, tests []parseTest) {
+	t.Helper()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotCfg, gotDiags := tt.parser.Parse(tt.args.filename, tt.args.varFiles, tt.args.vars)
+			if tt.parseWantDiags == (gotDiags == nil) {
+				t.Fatalf("Parser.parse() unexpected %q diagnostics.", gotDiags)
+			}
+			if tt.parseWantDiagHasErrors != gotDiags.HasErrors() {
+				t.Fatalf("Parser.parse() unexpected diagnostics HasErrors. %s", gotDiags)
+			}
+			if diff := cmp.Diff(tt.parseWantCfg, gotCfg, cmpOpts...); diff != "" {
+				t.Fatalf("Parser.parse() wrong packer config. %s", diff)
+			}
+
+			if gotCfg != nil && !tt.parseWantDiagHasErrors {
+				if diff := cmp.Diff(tt.parseWantCfg.InputVariables, gotCfg.InputVariables, cmpOpts...); diff != "" {
+					t.Fatalf("Parser.parse() unexpected input vars. %s", diff)
+				}
+
+				if diff := cmp.Diff(tt.parseWantCfg.LocalVariables, gotCfg.LocalVariables, cmpOpts...); diff != "" {
+					t.Fatalf("Parser.parse() unexpected local vars. %s", diff)
+				}
+			}
+
+			if gotDiags.HasErrors() {
+				return
 			}
 		})
 	}
@@ -189,6 +229,39 @@ var (
 			},
 		},
 	}
+	basicMockPostProcessorDynamicTags = &MockPostProcessor{
+		Config: MockConfig{
+			NotSquashed: "value <UNKNOWN>",
+			NestedMockConfig: NestedMockConfig{
+				String:   "string",
+				Int:      42,
+				Int64:    43,
+				Bool:     true,
+				Trilean:  config.TriTrue,
+				Duration: 10 * time.Second,
+				MapStringString: map[string]string{
+					"a": "b",
+					"c": "d",
+				},
+				SliceString: []string{
+					"a",
+					"b",
+					"c",
+				},
+				SliceSliceString: [][]string{
+					{"a", "b"},
+					{"c", "d"},
+				},
+				Tags: []MockTag{
+					{Key: "first_tag_key", Value: "first_tag_value"},
+					{Key: "Component", Value: "user-service"},
+					{Key: "Environment", Value: "production"},
+				},
+			},
+			Nested:      basicNestedMockConfig,
+			NestedSlice: []NestedMockConfig{},
+		},
+	}
 	basicMockCommunicator = &MockCommunicator{
 		Config: MockConfig{
 			NestedMockConfig: basicNestedMockConfig,
@@ -248,9 +321,19 @@ var ctyTypeComparer = cmp.Comparer(func(x, y cty.Type) bool {
 	return x.Equals(y)
 })
 
+var versionComparer = cmp.Comparer(func(x, y *version.Version) bool {
+	return x.Equal(y)
+})
+
+var versionConstraintComparer = cmp.Comparer(func(x, y *version.Constraint) bool {
+	return x.String() == y.String()
+})
+
 var cmpOpts = []cmp.Option{
 	ctyValueComparer,
 	ctyTypeComparer,
+	versionComparer,
+	versionConstraintComparer,
 	cmpopts.IgnoreUnexported(
 		PackerConfig{},
 		Variable{},

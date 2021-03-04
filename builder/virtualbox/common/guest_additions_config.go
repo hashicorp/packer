@@ -33,7 +33,7 @@ type GuestAdditionsConfig struct {
 	//  where the VirtualBox guest additions ISO will be uploaded. By default this
 	//  is `VBoxGuestAdditions.iso` which should upload into the login directory of
 	//  the user. This is a [configuration
-	//  template](/docs/templates/engine) where the `Version`
+	//  template](/docs/templates/legacy_json_templates/engine) where the `Version`
 	//  variable is replaced with the VirtualBox version.
 	GuestAdditionsPath string `mapstructure:"guest_additions_path"`
 	// The SHA256 checksum of the guest

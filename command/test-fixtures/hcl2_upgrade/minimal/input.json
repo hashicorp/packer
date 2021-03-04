@@ -1,0 +1,48 @@
+{
+    "min_packer_version": "1.6.0",
+    "variables": {
+        "aws_region": null,
+        "aws_secret_key": "",
+        "aws_access_key": ""
+    },
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "region": "{{ user `aws_region` }}",
+            "secret_key": "{{ user `aws_secret_key` }}",
+            "access_key": "{{ user `aws_access_key` }}",
+            "ami_name": "ubuntu-16-04-test",
+            "ami_description": "Ubuntu 16.04 LTS - expand root partition",
+            "source_ami": "ami1234567",
+            "launch_block_device_mappings": [
+                {
+                    "delete_on_termination": true,
+                    "device_name": "/dev/sda1",
+                    "volume_type": "gp2",
+                    "volume_size": 48
+                }
+            ],
+            "spot_price": "0.0075",
+            "spot_instance_types": [
+                "t2.small",
+                "t2.medium",
+                "t2.large"
+            ],
+            "encrypt_boot": true,
+            "ssh_username": "ubuntu",
+            "temporary_iam_instance_profile_policy_document": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "*"
+                        ],
+                        "Resource": ["*"]
+                    }
+                ]
+            },
+            "ssh_interface": "session_manager"
+        }
+    ]
+}

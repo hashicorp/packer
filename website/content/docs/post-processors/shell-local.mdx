@@ -116,11 +116,11 @@ Optional parameters:
   ["cmd", "/V", "/C", "{{.Vars}}", "call", "{{.Script}}"]
   ```
 
-  This is treated as a [template engine](/docs/templates/engine).
+  This is treated as a [template engine](/docs/templates/legacy_json_templates/engine).
   There are several available variables: `Script`, which is the path to the
   script to run, and `Vars`, which is the list of `environment_vars`, if
   configured. In addition, you may access any of the variables stored in the
-  generated data using the [build](/docs/templates/engine) template
+  generated data using the [build](/docs/templates/legacy_json_templates/engine) template
   function. If you choose to set this option, make sure that the first
   element in the array is the shell program you want to use (for example,
   "sh" or "/usr/local/bin/zsh" or even "powershell.exe" although anything
@@ -277,7 +277,7 @@ In addition to being able to specify custom environmental variables using the
 commonly useful environmental variables:
 
 - `PACKER_BUILD_NAME` is set to the [name of the
-  build](/docs/templates/builders#named-builds) that Packer is running.
+  build](/docs/templates/legacy_json_templates/builders#named-builds) that Packer is running.
   This is most useful when Packer is making multiple builds and you want to
   distinguish them slightly from a common provisioning script.
 

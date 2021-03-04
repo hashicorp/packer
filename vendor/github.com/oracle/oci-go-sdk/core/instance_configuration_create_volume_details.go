@@ -119,5 +119,6 @@ func (m *InstanceConfigurationCreateVolumeDetails) UnmarshalJSON(data []byte) (e
 	} else {
 		m.SourceDetails = nil
 	}
+
 	return
 }

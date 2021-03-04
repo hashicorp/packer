@@ -82,7 +82,6 @@ func (v *Variable) GoString() string {
 
 // validateValue ensures that all of the configured custom validations for a
 // variable value are passing.
-//
 func (v *Variable) validateValue(val VariableAssignment) (diags hcl.Diagnostics) {
 	if len(v.Validations) == 0 {
 		log.Printf("[TRACE] validateValue: not active for %s, so skipping", v.Name)

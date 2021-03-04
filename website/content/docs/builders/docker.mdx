@@ -13,6 +13,7 @@ sidebar_title: Docker
 # Docker Builder
 
 Type: `docker`
+Artifact BuilderId: `packer.docker`
 
 The `docker` Packer builder builds [Docker](https://www.docker.io) images using
 Docker. The builder starts a Docker container, runs provisioners within this
@@ -200,7 +201,7 @@ optional. Within each category, the available options are alphabetized and
 described.
 
 The Docker builder uses a special Docker communicator _and will not use_ the
-standard [communicators](/docs/templates/communicator).
+standard [communicators](/docs/templates/legacy_json_templates/communicator).
 
 ### Required:
 
@@ -216,7 +217,7 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 
 ## Build Shared Information Variables
 
-This build shares generated data with provisioners and post-processors via [template engines](/docs/templates/engine)
+This build shares generated data with provisioners and post-processors via [template engines](/docs/templates/legacy_json_templates/engine)
 for JSON and [contextual variables](/docs/templates/hcl_templates/contextual-variables) for HCL2.
 
 The generated variable available for this builder is:
@@ -238,7 +239,7 @@ If you set `commit`, see the next section.
 The example below shows a full configuration that would import and push the
 created image. This is accomplished using a sequence definition (a collection
 of post-processors that are treated as as single pipeline, see
-[Post-Processors](/docs/templates/post-processors) for more information):
+[Post-Processors](/docs/templates/legacy_json_templates/post-processors) for more information):
 
 <Tabs>
 <Tab heading="JSON">
@@ -267,7 +268,7 @@ of post-processors that are treated as as single pipeline, see
   post-processors {
     post-processor "docker-import" {
         repository =  "myrepo/myimage"
-        tag = "0.7"
+        tag = ["0.7"]
       }
     post-processor "docker-push" {}
   }
@@ -299,7 +300,7 @@ If you committed your container to an image, you probably want to tag, save,
 push, etc. Packer can do this automatically for you. An example is shown below
 which tags and pushes an image. This is accomplished using a sequence
 definition (a collection of post-processors that are treated as as single
-pipeline, see [Post-Processors](/docs/templates/post-processors) for more
+pipeline, see [Post-Processors](/docs/templates/legacy_json_templates/post-processors) for more
 information):
 
 <Tabs>
@@ -329,7 +330,7 @@ information):
   post-processors {
     post-processor "docker-tag" {
         repository =  "myrepo/myimage"
-        tag = "0.7"
+        tag = ["0.7"]
       }
     post-processor "docker-push" {}
   }
@@ -383,14 +384,14 @@ nearly-identical sequence definitions, as demonstrated by the example below:
   post-processors {
     post-processor "docker-tag" {
         repository =  "myrepo/myimage1"
-        tag = "0.7"
+        tag = ["0.7"]
       }
     post-processor "docker-push" {}
   }
   post-processors {
     post-processor "docker-tag" {
         repository =  "myrepo/myimage2"
-        tag = "0.7"
+        tag = ["0.7"]
       }
     post-processor "docker-push" {}
   }
@@ -488,7 +489,7 @@ above and example configuration properties are shown below:
 post-processors {
   post-processor "docker-tag" {
       repository = "12345.dkr.ecr.us-east-1.amazonaws.com/packer"
-      tag = "0.7"
+      tag = ["0.7"]
   }
   post-processor "docker-push" {
       ecr_login = true

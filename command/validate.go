@@ -92,6 +92,7 @@ Options:
 
   -syntax-only           Only check syntax. Do not verify config of the template.
   -except=foo,bar,baz    Validate all builds other than these.
+  -machine-readable      Produce machine-readable output.
   -only=foo,bar,baz      Validate only these builds.
   -var 'key=value'       Variable for templates, can be used multiple times.
   -var-file=path         JSON or HCL2 file containing user variables.
@@ -110,10 +111,11 @@ func (*ValidateCommand) AutocompleteArgs() complete.Predictor {
 
 func (*ValidateCommand) AutocompleteFlags() complete.Flags {
 	return complete.Flags{
-		"-syntax-only": complete.PredictNothing,
-		"-except":      complete.PredictNothing,
-		"-only":        complete.PredictNothing,
-		"-var":         complete.PredictNothing,
-		"-var-file":    complete.PredictNothing,
+		"-syntax-only":      complete.PredictNothing,
+		"-except":           complete.PredictNothing,
+		"-only":             complete.PredictNothing,
+		"-var":              complete.PredictNothing,
+		"-machine-readable": complete.PredictNothing,
+		"-var-file":         complete.PredictNothing,
 	}
 }

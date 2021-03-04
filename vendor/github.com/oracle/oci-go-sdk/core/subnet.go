@@ -30,7 +30,7 @@ import (
 type Subnet struct {
 
 	// The subnet's CIDR block.
-	// Example: `172.16.1.0/24`
+	// Example: `10.0.1.0/24`
 	CidrBlock *string `mandatory:"true" json:"cidrBlock"`
 
 	// The OCID of the compartment containing the subnet.
@@ -53,7 +53,7 @@ type Subnet struct {
 	VirtualRouterIp *string `mandatory:"true" json:"virtualRouterIp"`
 
 	// The MAC address of the virtual router.
-	// Example: `00:00:17:B6:4D:DD`
+	// Example: `00:00:00:00:00:01`
 	VirtualRouterMac *string `mandatory:"true" json:"virtualRouterMac"`
 
 	// The subnet's availability domain. This attribute will be null if this is a regional subnet
@@ -131,7 +131,7 @@ type Subnet struct {
 	// Example: `subnet123.vcn1.oraclevcn.com`
 	SubnetDomainName *string `mandatory:"false" json:"subnetDomainName"`
 
-	// The date and time the subnet was created, in the format defined by RFC3339.
+	// The date and time the subnet was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
 }

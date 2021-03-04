@@ -13,6 +13,8 @@ sidebar_title: VMWare VMX
 # VMware Builder (from VMX)
 
 Type: `vmware-vmx`
+Artifact BuilderId: `mitchellh.vmware`
+If remote_type is esx: Artifact BuilderId: `mitchellh.vmware-esx`
 
 This VMware Packer builder is able to create VMware virtual machines from an
 existing VMware virtual machine (a VMX file). It currently supports building

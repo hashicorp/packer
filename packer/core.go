@@ -71,9 +71,19 @@ type BuilderStore interface {
 	Start(name string) (packersdk.Builder, error)
 }
 
+type BuilderSet interface {
+	BuilderStore
+	Set(name string, starter func() (packersdk.Builder, error))
+}
+
 type ProvisionerStore interface {
 	BasicStore
 	Start(name string) (packersdk.Provisioner, error)
+}
+
+type ProvisionerSet interface {
+	ProvisionerStore
+	Set(name string, starter func() (packersdk.Provisioner, error))
 }
 
 type PostProcessorStore interface {
@@ -81,22 +91,27 @@ type PostProcessorStore interface {
 	Start(name string) (packersdk.PostProcessor, error)
 }
 
+type PostProcessorSet interface {
+	PostProcessorStore
+	Set(name string, starter func() (packersdk.PostProcessor, error))
+}
+
 type DatasourceStore interface {
 	BasicStore
 	Start(name string) (packersdk.Datasource, error)
+}
+
+type DatasourceSet interface {
+	DatasourceStore
+	Set(name string, starter func() (packersdk.Datasource, error))
 }
 
 // ComponentFinder is a struct that contains the various function
 // pointers necessary to look up components of Packer such as builders,
 // commands, etc.
 type ComponentFinder struct {
-	Hook HookFunc
-
-	// For HCL2
-	BuilderStore       BuilderStore
-	ProvisionerStore   ProvisionerStore
-	PostProcessorStore PostProcessorStore
-	DatasourceStore    DatasourceStore
+	Hook         HookFunc
+	PluginConfig *PluginConfig
 }
 
 // NewCore creates a new Core.
@@ -168,7 +183,7 @@ func (c *Core) BuildNames(only, except []string) []string {
 func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName string) (CoreBuildProvisioner, error) {
 	// Get the provisioner
 	cbp := CoreBuildProvisioner{}
-	provisioner, err := c.components.ProvisionerStore.Start(rawP.Type)
+	provisioner, err := c.components.PluginConfig.Provisioners.Start(rawP.Type)
 	if err != nil {
 		return cbp, fmt.Errorf(
 			"error initializing provisioner '%s': %s",
@@ -287,7 +302,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 
 	// the Start command launches the builder plugin of the given type without
 	// calling Prepare() or passing any build-specific details.
-	builder, err := c.components.BuilderStore.Start(configBuilder.Type)
+	builder, err := c.components.PluginConfig.Builders.Start(configBuilder.Type)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"error initializing builder '%s': %s",
@@ -347,7 +362,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 			}
 
 			// Get the post-processor
-			postProcessor, err := c.components.PostProcessorStore.Start(rawP.Type)
+			postProcessor, err := c.components.PluginConfig.PostProcessors.Start(rawP.Type)
 			if err != nil {
 				return nil, fmt.Errorf(
 					"error initializing post-processor '%s': %s",
@@ -813,7 +828,6 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 		for _, k := range deleteKeys {
 			for ind, kv := range sortedMap {
 				if kv.Key == k {
-					log.Printf("Deleting kv.Value: %s", kv.Value)
 					sortedMap = append(sortedMap[:ind], sortedMap[ind+1:]...)
 					break
 				}

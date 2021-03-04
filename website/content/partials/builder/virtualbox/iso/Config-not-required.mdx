@@ -1,7 +1,35 @@
 <!-- Code generated from the comments of the Config struct in builder/virtualbox/iso/builder.go; DO NOT EDIT MANUALLY -->
 
+- `chipset` (string) - The chipset to be used: PIIX3 or ICH9.
+  When set to piix3, the firmare is PIIX3. This is the default.
+  When set to ich9, the firmare is ICH9.
+
+- `firmware` (string) - The firmware to be used: BIOS or EFI.
+  When set to bios, the firmare is BIOS. This is the default.
+  When set to efi, the firmare is EFI.
+
 - `disk_size` (uint) - The size, in megabytes, of the hard disk to create for the VM. By
   default, this is 40000 (about 40 GB).
+
+- `nic_type` (string) - The NIC type to be used for the network interfaces.
+  When set to 82540EM, the NICs are Intel PRO/1000 MT Desktop (82540EM). This is the default.
+  When set to 82543GC, the NICs are Intel PRO/1000 T Server (82543GC).
+  When set to 82545EM, the NICs are Intel PRO/1000 MT Server (82545EM).
+  When set to Am79C970A, the NICs are AMD PCNet-PCI II network card (Am79C970A).
+  When set to Am79C973, the NICs are AMD PCNet-FAST III network card (Am79C973).
+  When set to Am79C960, the NICs are AMD PCnet-ISA/NE2100 (Am79C960).
+  When set to virtio, the NICs are VirtIO.
+
+- `audio_controller` (string) - The audio controller type to be used.
+  When set to ac97, the audio controller is ICH AC97. This is the default.
+  When set to hda, the audio controller is Intel HD Audio.
+  When set to sb16, the audio controller is SoundBlaster 16.
+
+- `gfx_controller` (string) - The graphics controller type to be used.
+  When set to vboxvga, the graphics controller is VirtualBox VGA. This is the default.
+  When set to vboxsvga, the graphics controller is VirtualBox SVGA.
+  When set to vmsvga, the graphics controller is VMware SVGA.
+  When set to none, the graphics controller is disabled.
 
 - `guest_os_type` (string) - The guest OS type being installed. By default this is other, but you can
   get dramatic performance improvements by setting this to the proper
@@ -18,6 +46,7 @@
   defaults to ide. When set to sata, the drive is attached to an AHCI SATA
   controller. When set to scsi, the drive is attached to an LsiLogic SCSI
   controller. When set to pcie, the drive is attached to an NVMe
+  controller. When set to virtio, the drive is attached to a VirtIO
   controller. Please note that when you use "pcie", you'll need to have
   Virtualbox 6, install an [extension
   pack](https://www.virtualbox.org/wiki/Downloads#VirtualBox6.0.14OracleVMVirtualBoxExtensionPack)
@@ -53,6 +82,7 @@
 
 - `iso_interface` (string) - The type of controller that the ISO is attached to, defaults to ide.
   When set to sata, the drive is attached to an AHCI SATA controller.
+  When set to virtio, the drive is attached to a VirtIO controller.
 
 - `keep_registered` (bool) - Set this to true if you would like to keep the VM registered with
   virtualbox. Defaults to false.

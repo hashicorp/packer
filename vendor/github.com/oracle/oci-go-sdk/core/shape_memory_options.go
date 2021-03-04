@@ -17,9 +17,8 @@ import (
 	"github.com/oracle/oci-go-sdk/common"
 )
 
-// ShapeMemoryOptions The possible configurations for the amount of memory available to an instance of this shape.
-// If this field is null, then all instances of this shape have a fixed
-// amount of memory equivalent to `memoryInGBs`.
+// ShapeMemoryOptions For a flexible shape, the amount of memory available for instances that use this shape.
+// If this field is null, then this shape has a fixed amount of memory equivalent to `memoryInGBs`.
 type ShapeMemoryOptions struct {
 
 	// The minimum amount of memory, in gigabytes.
@@ -28,8 +27,7 @@ type ShapeMemoryOptions struct {
 	// The maximum amount of memory, in gigabytes.
 	MaxInGBs *float32 `mandatory:"false" json:"maxInGBs"`
 
-	// The default amount of memory, in gigabytes, per OCPU available to an instance
-	// of this shape.
+	// The default amount of memory per OCPU available for this shape, in gigabytes.
 	DefaultPerOcpuInGBs *float32 `mandatory:"false" json:"defaultPerOcpuInGBs"`
 }
 

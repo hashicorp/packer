@@ -56,13 +56,18 @@ type Config struct {
 	ExecuteCommand             string   `mapstructure:"execute_command"`
 	InstallCommand             string   `mapstructure:"install_command"`
 	RemoteCookbookPaths        []string `mapstructure:"remote_cookbook_paths"`
-	Json                       map[string]interface{}
-	PreventSudo                bool     `mapstructure:"prevent_sudo"`
-	RunList                    []string `mapstructure:"run_list"`
-	SkipInstall                bool     `mapstructure:"skip_install"`
-	StagingDir                 string   `mapstructure:"staging_directory"`
-	GuestOSType                string   `mapstructure:"guest_os_type"`
-	Version                    string   `mapstructure:"version"`
+	// HCL cannot be decoded into an interface so for HCL templates you must use the JsonString option,
+	// To be used with https://www.packer.io/docs/templates/hcl_templates/functions/encoding/jsonencode
+	// ref: https://github.com/hashicorp/hcl/issues/291#issuecomment-496347585
+	JsonString string `mapstructure:"json_string"`
+	// For JSON templates we keep the map[string]interface{}
+	Json        map[string]interface{} `mapstructure:"json" mapstructure-to-hcl2:",skip"`
+	PreventSudo bool                   `mapstructure:"prevent_sudo"`
+	RunList     []string               `mapstructure:"run_list"`
+	SkipInstall bool                   `mapstructure:"skip_install"`
+	StagingDir  string                 `mapstructure:"staging_directory"`
+	GuestOSType string                 `mapstructure:"guest_os_type"`
+	Version     string                 `mapstructure:"version"`
 
 	ctx interpolate.Context
 }
@@ -118,6 +123,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}, raws...)
 	if err != nil {
 		return err
+	}
+
+	if p.config.JsonString != "" {
+		if err := json.Unmarshal([]byte(p.config.JsonString), &p.config.Json); err != nil {
+			return fmt.Errorf("Failed to unmarshal 'json_string': %s", err.Error())
+		}
 	}
 
 	if p.config.GuestOSType == "" {
@@ -398,12 +409,10 @@ func (p *Provisioner) createJson(ui packersdk.Ui, comm packersdk.Communicator) (
 	ui.Message("Creating JSON attribute file")
 
 	jsonData := make(map[string]interface{})
-
 	// Copy the configured JSON
 	for k, v := range p.config.Json {
 		jsonData[k] = v
 	}
-
 	// Set the run list if it was specified
 	if len(p.config.RunList) > 0 {
 		jsonData["run_list"] = p.config.RunList

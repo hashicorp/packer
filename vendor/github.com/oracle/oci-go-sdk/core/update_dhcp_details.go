@@ -74,5 +74,6 @@ func (m *UpdateDhcpDetails) UnmarshalJSON(data []byte) (e error) {
 			m.Options[i] = nil
 		}
 	}
+
 	return
 }

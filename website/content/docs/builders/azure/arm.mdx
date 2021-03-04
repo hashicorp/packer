@@ -7,6 +7,7 @@ sidebar_title: ARM
 # Azure Resource Manager Builder
 
 Type: `azure-arm`
+Artifact BuilderId: `Azure.ResourceManagement.VMImage`
 
 Packer supports building Virtual Hard Disks (VHDs) and Managed Images in [Azure Resource
 Manager](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/).
@@ -25,7 +26,7 @@ CLI](https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-install/
 
 There are many configuration options available for the builder. We'll start
 with authentication parameters, then go over the Azure ARM builder specific
-options. In addition to the options listed here, a [communicator](/docs/templates/communicator) can be configured for this builder.
+options. In addition to the options listed here, a [communicator](/docs/templates/legacy_json_templates/communicator) can be configured for this builder.
 
 ### Authentication options
 
@@ -59,6 +60,9 @@ you should specify `subscription_id`, `client_id` and one of `client_secret`,
 
 - `client_cert_path` (string) - The location of a PEM file containing a
   certificate and private key for service principal.
+
+- `client_cert_token_timeout` (duration string | ex: "1h30m12s") - How long to set the expire time on the token created when using
+  `client_cert_path`.
 
 - `client_jwt` (string) - The bearer JWT assertion signed using a certificate
   associated with your service principal principal. See [Azure Active
@@ -161,37 +165,6 @@ In addition to the builder options, a communicator may also be defined:
 Here is a basic example for Azure.
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "type": "azure-arm",
-
-  "client_id": "fe354398-d7sf-4dc9-87fd-c432cd8a7e09",
-  "client_secret": "keepitsecret&#*$",
-  "resource_group_name": "packerdemo",
-  "storage_account": "virtualmachines",
-  "subscription_id": "44cae533-4247-4093-42cf-897ded6e7823",
-  "tenant_id": "de39842a-caba-497e-a798-7896aea43218",
-
-  "capture_container_name": "images",
-  "capture_name_prefix": "packer",
-
-  "os_type": "Linux",
-  "image_publisher": "Canonical",
-  "image_offer": "UbuntuServer",
-  "image_sku": "14.04.4-LTS",
-
-  "azure_tags": {
-    "dept": "engineering"
-  },
-
-  "location": "West US",
-  "vm_size": "Standard_A2"
-}
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -221,6 +194,37 @@ source "azure-arm" "basic-example" {
 
 build {
   sources = ["sources.azure-arm.basic-example"]
+}
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "azure-arm",
+
+  "client_id": "fe354398-d7sf-4dc9-87fd-c432cd8a7e09",
+  "client_secret": "keepitsecret&#*$",
+  "resource_group_name": "packerdemo",
+  "storage_account": "virtualmachines",
+  "subscription_id": "44cae533-4247-4093-42cf-897ded6e7823",
+  "tenant_id": "de39842a-caba-497e-a798-7896aea43218",
+
+  "capture_container_name": "images",
+  "capture_name_prefix": "packer",
+
+  "os_type": "Linux",
+  "image_publisher": "Canonical",
+  "image_offer": "UbuntuServer",
+  "image_sku": "14.04.4-LTS",
+
+  "azure_tags": {
+    "dept": "engineering"
+  },
+
+  "location": "West US",
+  "vm_size": "Standard_A2"
 }
 ```
 

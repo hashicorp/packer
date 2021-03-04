@@ -1,0 +1,55 @@
+{
+    "min_packer_version": "1.6.0",
+    "variables": {
+        "aws_region": null,
+        "aws_secret_key": "",
+        "aws_access_key": ""
+    },
+    "sensitive-variables": [
+        "aws_secret_key",
+        "aws_access_key"
+    ],
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "region": "us-west-2",
+            "secret_key": "ASEfewdsfAWASTT51874",
+            "access_key": "NJDBFASJDbsajhbda5487",
+            "ami_name": "ubuntu-16-04-test-{{ timestamp }}",
+            "source_ami_filter": {
+                "filters": {
+                    "virtualization-type": "hvm",
+                    "name": "ubuntu/images/*/ubuntu-xenial-16.04-amd64-server-*",
+                    "root-device-type": "ebs"
+                },
+                "owners": [
+                    "099720109477"
+                ],
+                "most_recent": true
+            },
+            "ssh_username": "ubuntu",
+            "ssh_interface": "session_manager"
+        },
+        {
+            "type": "amazon-ebs",
+            "name": "named_builder",
+            "region": "{{ user `aws_region` }}",
+            "secret_key": "{{ user `aws_secret_key` }}",
+            "access_key": "{{ user `aws_access_key` }}",
+            "ami_name": "ubuntu-16-04-test-{{ timestamp }}",
+            "source_ami_filter": {
+                "filters": {
+                    "virtualization-type": "hvm",
+                    "name": "ubuntu/images/*/ubuntu-xenial-16.04-amd64-server-*",
+                    "root-device-type": "ebs"
+                },
+                "owners": [
+                    "099720109477"
+                ],
+                "most_recent": true
+            },
+            "ssh_username": "ubuntu",
+            "ssh_interface": "session_manager"
+        }
+    ]
+}

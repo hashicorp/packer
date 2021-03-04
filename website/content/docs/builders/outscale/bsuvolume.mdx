@@ -9,6 +9,7 @@ sidebar_title: BSU Volume
 # BSU Volume Builder
 
 Type: `osc-bsuvolume`
+Artifact BuilderId: `oapi.outscale.bsuvolume`
 
 The `osc-bsuvolume` Packer builder is able to create Ouscale Block Stogate Unit
 volumes which are prepopulated with filesystems or data.
@@ -35,7 +36,7 @@ segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
 In addition to the options listed here, a
-[communicator](/docs/templates/communicator) can be configured for this
+[communicator](/docs/templates/legacy_json_templates/communicator) can be configured for this
 builder.
 
 ### Required:
@@ -74,7 +75,7 @@ builder.
 
   - `tags` (map) - Tags to apply to the volume. These are retained after
     the builder completes. This is a [template
-    engine](/docs/templates/engine), see [Build template
+    engine](/docs/templates/legacy_json_templates/engine), see [Build template
     data](#build-template-data) for more information.
 
 - `associate_public_ip_address` (boolean) - If using a non-default Net, public IP addresses are not provided by default. If this is toggled, your new VM will get a Public IP.
@@ -104,7 +105,7 @@ builder.
 - `run_tags` (object of key/value strings) - Tags to apply to the instance
   that is _launched_ to create the OMI. These tags are _not_ applied to the
   resulting OMI unless they're duplicated in `tags`. This is a [template
-  engine](/docs/templates/engine), see [Build template
+  engine](/docs/templates/legacy_json_templates/engine), see [Build template
   data](#build-template-data) for more information.
 
 - `security_group_id` (string) - The ID (_not_ the name) of the security

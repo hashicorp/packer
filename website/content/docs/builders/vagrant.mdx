@@ -8,6 +8,9 @@ sidebar_title: Vagrant
 
 # Vagrant Builder
 
+Type: `vagrant`
+Artifact BuilderId: `vagrant`
+
 The Vagrant builder is intended for building new boxes from already-existing
 boxes. Your source should be a URL or path to a .box file or a Vagrant Cloud
 box name such as `hashicorp/precise64`.
@@ -179,6 +182,25 @@ build {
 
 </Tab>
 </Tabs>
+
+## Regarding output directory and new box
+
+After Packer completes building and provisioning a new Vagrant Box file, it is worth 
+noting that the new box file will need to be added to Vagrant. For a beginner to Packer 
+and Vagrant, it may seem as if a simple 'vagrant up' in the output directory will run the
+the newly created Box. This is not the case. 
+
+Rather, create a new directory (to avoid Vagarant init collisions), add the new 
+package.box to Vagrant and init. Then run vagrant up to bring up the new box created 
+by Packer. You will now be able to connect to the new box with provisioned changes.
+
+```
+'mkdir output2'
+'cp package.box ./output2'
+'vagrant box add new-box name-of-the-packer-box.box'
+'vagrant init new-box'
+'vagrant up'
+```
 
 ## A note on SSH connections
 

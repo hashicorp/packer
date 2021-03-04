@@ -162,7 +162,7 @@ type Config struct {
 	//filter, but will cause Packer to fail if the `source_ami` does not exist.
 	SourceAmiFilter awscommon.AmiFilterOptions `mapstructure:"source_ami_filter" required:"false"`
 	// Key/value pair tags to apply to the volumes that are *launched*. This is
-	// a [template engine](/docs/templates/engine), see [Build template
+	// a [template engine](/docs/templates/legacy_json_templates/engine), see [Build template
 	// data](#build-template-data) for more information.
 	RootVolumeTags map[string]string `mapstructure:"root_volume_tags" required:"false"`
 	// Same as [`root_volume_tags`](#root_volume_tags) but defined as a

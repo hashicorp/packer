@@ -93,6 +93,18 @@ type BuildArgs struct {
 	OnError                                           string
 }
 
+func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
+	flags.BoolVar(&ia.Upgrade, "upgrade", false, "upgrade any present plugin to the highest allowed version.")
+
+	ia.MetaArgs.AddFlagSets(flags)
+}
+
+// InitArgs represents a parsed cli line for a `packer build`
+type InitArgs struct {
+	MetaArgs
+	Upgrade bool
+}
+
 // ConsoleArgs represents a parsed cli line for a `packer console`
 type ConsoleArgs struct {
 	MetaArgs
@@ -133,6 +145,7 @@ type InspectArgs struct {
 
 func (va *HCL2UpgradeArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.StringVar(&va.OutputFile, "output-file", "", "File where to put the hcl2 generated config. Defaults to JSON_TEMPLATE.pkr.hcl")
+	flags.BoolVar(&va.WithAnnotations, "with-annotations", false, "Adds helper annotations with information about the generated HCL2 blocks.")
 
 	va.MetaArgs.AddFlagSets(flags)
 }
@@ -140,7 +153,8 @@ func (va *HCL2UpgradeArgs) AddFlagSets(flags *flag.FlagSet) {
 // HCL2UpgradeArgs represents a parsed cli line for a `packer hcl2_upgrade`
 type HCL2UpgradeArgs struct {
 	MetaArgs
-	OutputFile string
+	OutputFile      string
+	WithAnnotations bool
 }
 
 func (va *FormatArgs) AddFlagSets(flags *flag.FlagSet) {

@@ -62,7 +62,7 @@ Required parameters:
 Optional parameters:
 
 - `execute_command` (string) - The command-line to execute Puppet. This is a
-  [template engine](/docs/templates/engine). Therefore, you
+  [template engine](/docs/templates/legacy_json_templates/engine). Therefore, you
   may use user variables and template functions in this field. In addition,
   you may use the following extra variables:
   - FacterVars: Additional facts to set when executing Puppet, joined for
@@ -142,7 +142,7 @@ multiple manifests you should use `manifest_file` instead.
 - `elevated_user` and `elevated_password` (string) - If specified, Puppet
   will be run with elevated privileges using the given Windows user. See the
   [powershell](/docs/provisioners/powershell) provisioner for the full
-  details. This is a [template engine](/docs/templates/engine).
+  details. This is a [template engine](/docs/templates/legacy_json_templates/engine).
   Therefore, you may use user variables and template functions in this
   field, including `` {{ build `Password`}} `` to use the password being used
   by the communicator to connect to your instance.

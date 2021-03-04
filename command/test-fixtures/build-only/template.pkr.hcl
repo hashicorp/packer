@@ -42,13 +42,13 @@ build {
   }
 
   post-processor "shell-local" {
-    only = ["sources.file.vanilla"]
+    only = ["file.vanilla"]
     name = "tomato"
     inline = [ "echo apple > tomato.txt" ]
   }
 
   post-processor "shell-local" {
-    only = ["sources.file.chocolate"]
+    only = ["file.chocolate"]
     inline = [ "echo apple > unnamed.txt" ]
   }
 }

@@ -33,17 +33,33 @@ var Interrupts int32 = 0
 const MagicCookieKey = "PACKER_PLUGIN_MAGIC_COOKIE"
 const MagicCookieValue = "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d6991ca9872b2"
 
-// The APIVersion is outputted along with the RPC address. The plugin
-// client validates this API version and will show an error if it doesn't
-// know how to speak it.
-const APIVersion = "5"
+const (
+	// APIVersionMajor and APIVersionMinor are outputted along with the RPC
+	// address. The plugin client validates this API version and will show an
+	// error if it doesn't know how to speak it. Bumping APIVersionMajor, means
+	// some endpoint was removed or an api was changed. It would be best if that
+	// number never changed. Usually only APIVersionMinor should change when for
+	// example we introduce a new plugin type, plugins that don't use that new
+	// entrypoint don't need to update the SDK, but Packer will need to be
+	// updated in order to communicate with these. Example Matrix:
+	//   | Api Version \ Can Read  | old plugin-type                | datasources | new plugin type |
+	//   |-------------------------|--------------------------------|-------------|-----------------|
+	//   | 4                       | yes                            | No          | No              |
+	//   | 5.0                     | yes                            | yes         | No              |
+	//   | 5.1                     | yes                            | yes         | yes             |
+	//   | 6.0                     | no (deprecated, so major bump) | yes         | yes             |
+	//
+	// Api version 4 did not have the notion of a minor version, so Packer will
+	// error with a weird error message.
+	APIVersionMajor, APIVersionMinor = "5", "0"
+)
 
 var ErrManuallyStartedPlugin = errors.New(
 	"Please do not execute plugins directly. Packer will execute these for you.")
 
 // Server waits for a connection to this plugin and returns a Packer
 // RPC server that you can use to register components and serve them.
-func Server() (*packrpc.Server, error) {
+func Server() (*packrpc.PluginServer, error) {
 	if os.Getenv(MagicCookieKey) != MagicCookieValue {
 		return nil, ErrManuallyStartedPlugin
 	}
@@ -62,8 +78,9 @@ func Server() (*packrpc.Server, error) {
 	// Output the address to stdout
 	log.Printf("Plugin address: %s %s\n",
 		listener.Addr().Network(), listener.Addr().String())
-	fmt.Printf("%s|%s|%s\n",
-		APIVersion,
+	fmt.Printf("%s|%s|%s|%s\n",
+		APIVersionMajor,
+		APIVersionMinor,
 		listener.Addr().Network(),
 		listener.Addr().String())
 	os.Stdout.Sync()

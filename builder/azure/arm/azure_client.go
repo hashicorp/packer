@@ -233,7 +233,9 @@ func NewAzureClient(subscriptionID, sigSubscriptionID, resourceGroupName, storag
 	azureClient.GalleryImageVersionsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.GalleryImageVersionsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(version.AzurePluginVersion.FormattedVersion()), azureClient.GalleryImageVersionsClient.UserAgent)
 	azureClient.GalleryImageVersionsClient.Client.PollingDuration = sharedGalleryTimeout
-	azureClient.GalleryImageVersionsClient.SubscriptionID = sigSubscriptionID
+	if sigSubscriptionID != "" {
+		azureClient.GalleryImageVersionsClient.SubscriptionID = sigSubscriptionID
+	}
 
 	azureClient.GalleryImagesClient = newCompute.NewGalleryImagesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.GalleryImagesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
@@ -241,7 +243,9 @@ func NewAzureClient(subscriptionID, sigSubscriptionID, resourceGroupName, storag
 	azureClient.GalleryImagesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.GalleryImagesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(version.AzurePluginVersion.FormattedVersion()), azureClient.GalleryImagesClient.UserAgent)
 	azureClient.GalleryImagesClient.Client.PollingDuration = pollingDuration
-	azureClient.GalleryImagesClient.SubscriptionID = sigSubscriptionID
+	if sigSubscriptionID != "" {
+		azureClient.GalleryImagesClient.SubscriptionID = sigSubscriptionID
+	}
 
 	keyVaultURL, err := url.Parse(cloud.KeyVaultEndpoint)
 	if err != nil {

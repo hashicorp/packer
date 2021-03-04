@@ -72,7 +72,7 @@ build {
   post-processor "checksum" {
     checksum_types = [ "md5", "sha512" ]
     keep_input_artifact = true
-    only = ["source.amazon-ebs.example"]
+    only = ["amazon-ebs.example"]
   }
 }
 ```
@@ -89,6 +89,6 @@ about and see some examples of how to use them.
 
 ### Related
 
-- The [`post-processors` block](/docs/templates/hcl_templates/blocks/build/post-processor)
+- The [`post-processors` block](/docs/templates/hcl_templates/blocks/build/post-processors)
   allows to define one or more chain of `post-processor`s that will take the
   output from the build and provision steps.

@@ -51,7 +51,10 @@ func (d *AmiFilterOptions) GetFilteredImage(params *ec2.DescribeImagesInput, ec2
 	}
 
 	log.Printf("Using AMI Filters %v", params)
-	imageResp, err := ec2conn.DescribeImages(params)
+	req, imageResp := ec2conn.DescribeImagesRequest(params)
+	req.RetryCount = 11
+
+	err := req.Send()
 	if err != nil {
 		err := fmt.Errorf("Error querying AMI: %s", err)
 		return nil, err

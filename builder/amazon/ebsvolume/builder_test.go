@@ -104,9 +104,6 @@ func TestBuilderPrepare_ReturnGeneratedData(t *testing.T) {
 	if len(generatedData) == 0 {
 		t.Fatalf("Generated data should not be empty")
 	}
-	if len(generatedData) == 0 {
-		t.Fatalf("Generated data should not be empty")
-	}
 	if generatedData[0] != "SourceAMIName" {
 		t.Fatalf("Generated data should contain SourceAMIName")
 	}
@@ -125,4 +122,45 @@ func TestBuilderPrepare_ReturnGeneratedData(t *testing.T) {
 	if generatedData[5] != "SourceAMIOwnerName" {
 		t.Fatalf("Generated data should contain SourceAMIOwnerName")
 	}
+}
+
+func TestBuidler_ConfigBlockdevicemapping(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	//Set some snapshot settings
+	config["ebs_volumes"] = []map[string]interface{}{
+		{
+			"device_name":           "/dev/xvdb",
+			"volume_size":           "32",
+			"delete_on_termination": true,
+		},
+		{
+			"device_name":           "/dev/xvdc",
+			"volume_size":           "32",
+			"delete_on_termination": true,
+			"snapshot_tags": map[string]string{
+				"Test_Tag":    "tag_value",
+				"another tag": "another value",
+			},
+			"snapshot_users": []string{
+				"123", "456",
+			},
+		},
+	}
+
+	generatedData, warnings, err := b.Prepare(config)
+
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+	if len(generatedData) == 0 {
+		t.Fatalf("Generated data should not be empty")
+	}
+
+	t.Logf("Test gen %+v", b.config.VolumeMappings)
+
 }

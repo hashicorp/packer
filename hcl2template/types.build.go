@@ -1,6 +1,8 @@
 package hcl2template
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
@@ -13,6 +15,8 @@ const (
 
 	buildProvisionerLabel = "provisioner"
 
+	buildErrorCleanupProvisionerLabel = "error-cleanup-provisioner"
+
 	buildPostProcessorLabel = "post-processor"
 
 	buildPostProcessorsLabel = "post-processors"
@@ -23,6 +27,7 @@ var buildSchema = &hcl.BodySchema{
 		{Type: buildFromLabel, LabelNames: []string{"type"}},
 		{Type: sourceLabel, LabelNames: []string{"reference"}},
 		{Type: buildProvisionerLabel, LabelNames: []string{"type"}},
+		{Type: buildErrorCleanupProvisionerLabel, LabelNames: []string{"type"}},
 		{Type: buildPostProcessorLabel, LabelNames: []string{"type"}},
 		{Type: buildPostProcessorsLabel, LabelNames: []string{}},
 	},
@@ -52,11 +57,15 @@ type BuildBlock struct {
 	Description string
 
 	// Sources is the list of sources that we want to start in this build block.
-	Sources []SourceRef
+	Sources []SourceUseBlock
 
 	// ProvisionerBlocks references a list of HCL provisioner block that will
 	// will be ran against the sources.
 	ProvisionerBlocks []*ProvisionerBlock
+
+	// ErrorCleanupProvisionerBlock references a special provisioner block that
+	// will be ran only if the provision step fails.
+	ErrorCleanupProvisionerBlock *ProvisionerBlock
 
 	// PostProcessorLists references the lists of lists of HCL post-processors
 	// block that will be run against the artifacts from the provisioning
@@ -105,7 +114,8 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			continue
 		}
 
-		build.Sources = append(build.Sources, ref)
+		// source with no body
+		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
 	}
 
 	content, moreDiags := b.Config.Content(buildSchema)
@@ -129,6 +139,21 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				continue
 			}
 			build.ProvisionerBlocks = append(build.ProvisionerBlocks, p)
+		case buildErrorCleanupProvisionerLabel:
+			if build.ErrorCleanupProvisionerBlock != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  fmt.Sprintf("Only one " + buildErrorCleanupProvisionerLabel + " is allowed"),
+					Subject:  block.DefRange.Ptr(),
+				})
+				continue
+			}
+			p, moreDiags := p.decodeProvisioner(block, cfg)
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
+			build.ErrorCleanupProvisionerBlock = p
 		case buildPostProcessorLabel:
 			pp, moreDiags := p.decodePostProcessor(block)
 			diags = append(diags, moreDiags...)

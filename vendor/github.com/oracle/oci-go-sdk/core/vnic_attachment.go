@@ -40,10 +40,7 @@ type VnicAttachment struct {
 	// The current state of the VNIC attachment.
 	LifecycleState VnicAttachmentLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 
-	// The OCID of the subnet to create the VNIC in.
-	SubnetId *string `mandatory:"true" json:"subnetId"`
-
-	// The date and time the VNIC attachment was created, in the format defined by RFC3339.
+	// The date and time the VNIC attachment was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
@@ -58,8 +55,20 @@ type VnicAttachment struct {
 	// Virtual Network Interface Cards (VNICs) (https://docs.cloud.oracle.com/Content/Network/Tasks/managingVNICs.htm).
 	NicIndex *int `mandatory:"false" json:"nicIndex"`
 
+	// The OCID of the subnet to create the VNIC in.
+	SubnetId *string `mandatory:"false" json:"subnetId"`
+
+	// The OCID of the VLAN to create the VNIC in. Creating the VNIC in a VLAN (instead
+	// of a subnet) is possible only if you are an Oracle Cloud VMware Solution customer.
+	// See Vlan.
+	// An error is returned if the instance already has a VNIC attached to it from this VLAN.
+	VlanId *string `mandatory:"false" json:"vlanId"`
+
 	// The Oracle-assigned VLAN tag of the attached VNIC. Available after the
 	// attachment process is complete.
+	// However, if the VNIC belongs to a VLAN as part of the Oracle Cloud VMware Solution,
+	// the `vlanTag` value is instead the value of the `vlanTag` attribute for the VLAN.
+	// See Vlan.
 	// Example: `0`
 	VlanTag *int `mandatory:"false" json:"vlanTag"`
 

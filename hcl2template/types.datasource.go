@@ -102,7 +102,7 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 		})
 	}
 	body := block.Body
-	decoded, moreDiags := decodeHCL2Spec(body, cfg.EvalContext(nil), datasource)
+	decoded, moreDiags := decodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return nil, diags

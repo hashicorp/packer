@@ -8,7 +8,13 @@ description: |-
 
 # How to use jq to strip unsupported comments from a Packer template
 
-One of the biggest complaints we get about packer is that json doesn't use comments. We're in the process of moving to HCL2, the same config language used by Terraform, which does allow comments. But in the meantime, you can add detailed comments beyond the root-level underscore-prefixed field supported by Packer, and remove them using jq.
+
+-> **Note:** Packer supports HCL2 from version 1.6.0, the Hashicorp Configuration
+Language allows to comment directly in template files. Consider upgrading your
+JSON template to HCL2 using the `packer hcl2_upgrade` command.
+
+One of the biggest complaints we get about Packer is that JSON doesn't use comments.
+For Packer JSON templates, you can add detailed comments beyond the root-level underscore-prefixed field supported by Packer, and remove them using jq.
 
 Let's say we have a file named `commented_template.json`
 

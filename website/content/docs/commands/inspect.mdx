@@ -5,7 +5,7 @@ description: >
   components a template defines. This can help you quickly learn about a
   template
 
-  without having to dive into the JSON itself. The command will tell you things
+  without having to dive into the HCL itself. The command will tell you things
 
   like what variables a template accepts, the builders it defines, the
 
@@ -18,7 +18,7 @@ sidebar_title: <tt>inspect</tt>
 
 The `packer inspect` command takes a template and outputs the various
 components a template defines. This can help you quickly learn about a template
-without having to dive into the JSON itself. The command will tell you things
+without having to dive into the HCL itself. The command will tell you things
 like what variables a template accepts, the builders it defines, the
 provisioners it defines and the order they'll run, and more.
 
@@ -35,19 +35,29 @@ of your template by necessity.
 Given a basic template, here is an example of what the output might look like:
 
 ```shell-session
-$ packer inspect template.json
-Variables and their defaults:
+$ packer inspect template.pkr.hcl
+> input-variables:
 
-  aws_access_key =
-  aws_secret_key =
+var.aws_access_key: "<sensitive>"
+var.aws_secret_key: "<sensitive>"
 
-Builders:
+> local-variables:
 
-  amazon-ebs
-  amazon-instance
-  virtualbox-iso
+> builds:
 
-Provisioners:
+  > <unnamed build 0>:
 
-  shell
+    sources:
+
+      amazon-ebs.foo
+      amazon-instance.bar
+      virtualbox-iso.basic
+
+    provisioners:
+
+      shell
+
+    post-processors:
+
+      <no post-processor>
 ```

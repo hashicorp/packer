@@ -10,6 +10,7 @@ sidebar_title: HyperOne
 # HyperOne Builder
 
 Type: `hyperone`
+Artifact BuilderId: `hyperone.builder`
 
 The `hyperone` Packer builder is able to create new images on the [HyperOne
 platform](http://www.hyperone.com/). The builder takes a source image, runs
@@ -86,7 +87,7 @@ segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
 In addition to the options listed here, a
-[communicator](/docs/templates/communicator) can be configured for this
+[communicator](/docs/templates/legacy_json_templates/communicator) can be configured for this
 builder.
 
 ### Required:
@@ -122,7 +123,7 @@ builder.
 
 - `image_name` (string) - The name of the resulting image. Defaults to
   `packer-{{timestamp}}`
-  (see [configuration templates](/docs/templates/engine) for more info).
+  (see [configuration templates](/docs/templates/legacy_json_templates/engine) for more info).
 
 - `image_service` (string) - The service of the resulting image.
 

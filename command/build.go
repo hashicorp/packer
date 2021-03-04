@@ -67,10 +67,7 @@ func (m *Meta) GetConfigFromHCL(cla *MetaArgs) (*hcl2template.PackerConfig, int)
 		CorePackerVersion:       version.SemVer,
 		CorePackerVersionString: version.FormattedVersion(),
 		Parser:                  hclparse.NewParser(),
-		BuilderSchemas:          m.CoreConfig.Components.BuilderStore,
-		ProvisionersSchemas:     m.CoreConfig.Components.ProvisionerStore,
-		PostProcessorsSchemas:   m.CoreConfig.Components.PostProcessorStore,
-		DatasourceSchemas:       m.CoreConfig.Components.DatasourceStore,
+		PluginConfig:            m.CoreConfig.Components.PluginConfig,
 	}
 	cfg, diags := parser.Parse(cla.Path, cla.VarFiles, cla.Vars)
 	return cfg, writeDiags(m.Ui, parser.Files(), diags)
@@ -129,7 +126,11 @@ func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (packer.Handler, int) {
 	}
 
 	if err != nil {
-		m.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
+		m.Ui.Error(fmt.Sprintf("Failed to parse file as legacy JSON template: "+
+			"if you are using an HCL template, check your file extensions; they "+
+			"should be either *.pkr.hcl or *.pkr.json; see the docs for more "+
+			"details: https://www.packer.io/docs/templates/hcl_templates. \n"+
+			"Original error: %s", err))
 		return nil, 1
 	}
 

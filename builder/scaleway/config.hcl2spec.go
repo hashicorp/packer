@@ -80,6 +80,7 @@ type FlatConfig struct {
 	Bootscript                *string           `mapstructure:"bootscript" required:"false" cty:"bootscript" hcl:"bootscript"`
 	BootType                  *string           `mapstructure:"boottype" required:"false" cty:"boottype" hcl:"boottype"`
 	RemoveVolume              *bool             `mapstructure:"remove_volume" cty:"remove_volume" hcl:"remove_volume"`
+	ShutdownTimeout           *string           `mapstructure:"shutdown_timeout" required:"false" cty:"shutdown_timeout" hcl:"shutdown_timeout"`
 	Token                     *string           `mapstructure:"api_token" required:"false" cty:"api_token" hcl:"api_token"`
 	Organization              *string           `mapstructure:"organization_id" required:"false" cty:"organization_id" hcl:"organization_id"`
 	Region                    *string           `mapstructure:"region" required:"false" cty:"region" hcl:"region"`
@@ -167,6 +168,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"bootscript":                   &hcldec.AttrSpec{Name: "bootscript", Type: cty.String, Required: false},
 		"boottype":                     &hcldec.AttrSpec{Name: "boottype", Type: cty.String, Required: false},
 		"remove_volume":                &hcldec.AttrSpec{Name: "remove_volume", Type: cty.Bool, Required: false},
+		"shutdown_timeout":             &hcldec.AttrSpec{Name: "shutdown_timeout", Type: cty.String, Required: false},
 		"api_token":                    &hcldec.AttrSpec{Name: "api_token", Type: cty.String, Required: false},
 		"organization_id":              &hcldec.AttrSpec{Name: "organization_id", Type: cty.String, Required: false},
 		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},

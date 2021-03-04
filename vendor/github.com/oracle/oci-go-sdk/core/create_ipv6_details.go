@@ -42,7 +42,7 @@ type CreateIpv6Details struct {
 	// the subnet's CIDR. If you don't specify a value, Oracle automatically
 	// assigns an IPv6 address from the subnet. The subnet is the one that
 	// contains the VNIC you specify in `vnicId`.
-	// Example: `2001:0db8:0123:1111:abcd:ef01:2345:6789`
+	// Example: `2001:DB8::`
 	IpAddress *string `mandatory:"false" json:"ipAddress"`
 
 	// Whether the IPv6 can be used for internet communication. Allowed by default for an IPv6 in

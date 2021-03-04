@@ -17,9 +17,8 @@ import (
 	"github.com/oracle/oci-go-sdk/common"
 )
 
-// ShapeOcpuOptions The possible configurations for the number of OCPUs available to an instance of this shape.
-// If this field is null, then all instances of this shape have a fixed
-// number of OCPUs equal to `ocpus`.
+// ShapeOcpuOptions For a flexible shape, the number of OCPUs available for instances that use this shape.
+// If this field is null, then this shape has a fixed number of OCPUs equal to `ocpus`.
 type ShapeOcpuOptions struct {
 
 	// The minimum number of OCPUs.

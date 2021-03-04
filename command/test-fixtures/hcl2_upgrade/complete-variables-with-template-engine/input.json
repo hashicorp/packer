@@ -1,0 +1,35 @@
+{
+    "variables": {
+        "build_timestamp": "{{timestamp}}",
+        "temp_directory": "{{template_dir}}",
+        "uuid": "{{uuid}}",
+        "env_test": "{{env `TEST_ENV`}}",
+        "lower": "{{lower `HELLO`}}",
+        "upper": "{{upper `hello`}}",
+        "pwd": "{{pwd}}",
+        "replace": "{{replace `b` `c` 2 `ababa`}}",
+        "replace_all": "{{replace_all `b` `c` `ababa`}}",
+        "split": "{{split `aba` `b` 1}}",
+        "iso_datetime": "{{isotime `2006-01-02T15:04:05Z07:00`}}"
+    },
+    "builders": [{
+        "type": "null",
+        "communicator": "none"
+    }],
+    "provisioners": [{
+        "type": "shell-local",
+        "inline": [
+            "echo {{ user `build_timestamp`}}",
+            "echo {{ user `temp_directory`}}",
+            "echo {{ user `iso_datetime`}}",
+            "echo {{ user `uuid`}}",
+            "echo {{ user `env_test`}}",
+            "echo {{ user `lower`}}",
+            "echo {{ user `upper`}}",
+            "echo {{ user `pwd`}}",
+            "echo {{ user `replace`}}",
+            "echo {{ user `replace_all`}}",
+            "echo {{ user `split`}}"
+        ]
+    }]
+}

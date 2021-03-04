@@ -1,22 +1,20 @@
-// Copyright (c) 2012-2015 Ugorji Nwoke. All rights reserved.
+// Copyright (c) 2012-2020 Ugorji Nwoke. All rights reserved.
 // Use of this source code is governed by a MIT license found in the LICENSE file.
 
 package codec
 
 import (
 	"bufio"
+	"errors"
 	"io"
 	"net/rpc"
-	"sync"
 )
 
-// rpcEncodeTerminator allows a handler specify a []byte terminator to send after each Encode.
-//
-// Some codecs like json need to put a space after each encoded value, to serve as a
-// delimiter for things like numbers (else json codec will continue reading till EOF).
-type rpcEncodeTerminator interface {
-	rpcEncodeTerminate() []byte
-}
+var (
+	errRpcJsonNeedsTermWhitespace = errors.New("rpc - requires JsonHandle with TermWhitespace=true")
+	errRpcIsClosed                = errors.New("rpc - connection has been closed")
+	errRpcNoConn                  = errors.New("rpc - no connection")
+)
 
 // Rpc provides a rpc Server or Client Codec for rpc communication.
 type Rpc interface {
@@ -24,104 +22,124 @@ type Rpc interface {
 	ClientCodec(conn io.ReadWriteCloser, h Handle) rpc.ClientCodec
 }
 
-// RpcCodecBuffered allows access to the underlying bufio.Reader/Writer
-// used by the rpc connection. It accomodates use-cases where the connection
-// should be used by rpc and non-rpc functions, e.g. streaming a file after
-// sending an rpc response.
-type RpcCodecBuffered interface {
-	BufferedReader() *bufio.Reader
-	BufferedWriter() *bufio.Writer
+// RPCOptions holds options specific to rpc functionality
+type RPCOptions struct {
+	// RPCNoBuffer configures whether we attempt to buffer reads and writes during RPC calls.
+	//
+	// Set RPCNoBuffer=true to turn buffering off.
+	// Buffering can still be done if buffered connections are passed in, or
+	// buffering is configured on the handle.
+	RPCNoBuffer bool
 }
-
-// -------------------------------------
 
 // rpcCodec defines the struct members and common methods.
 type rpcCodec struct {
-	rwc io.ReadWriteCloser
+	c io.Closer
+	r io.Reader
+	w io.Writer
+	f ioFlusher
+
 	dec *Decoder
 	enc *Encoder
-	bw  *bufio.Writer
-	br  *bufio.Reader
-	mu  sync.Mutex
 	h   Handle
 
-	cls   bool
-	clsmu sync.RWMutex
+	cls atomicClsErr
 }
 
 func newRPCCodec(conn io.ReadWriteCloser, h Handle) rpcCodec {
-	bw := bufio.NewWriter(conn)
-	br := bufio.NewReader(conn)
+	return newRPCCodec2(conn, conn, conn, h)
+}
+
+func newRPCCodec2(r io.Reader, w io.Writer, c io.Closer, h Handle) rpcCodec {
+	// defensive: ensure that jsonH has TermWhitespace turned on.
+	jsonH, ok := h.(*JsonHandle)
+	if ok && !jsonH.TermWhitespace {
+		halt.onerror(errRpcJsonNeedsTermWhitespace)
+	}
+	var f ioFlusher
+	bh := h.getBasicHandle()
+	if !bh.RPCNoBuffer {
+		f, ok = w.(ioFlusher)
+		if bh.WriterBufferSize <= 0 {
+			if !ok {
+				bw := bufio.NewWriter(w)
+				f, w = bw, bw
+			}
+		}
+		if bh.ReaderBufferSize <= 0 {
+			if _, ok = w.(ioBuffered); !ok {
+				r = bufio.NewReader(r)
+			}
+		}
+	}
 	return rpcCodec{
-		rwc: conn,
-		bw:  bw,
-		br:  br,
-		enc: NewEncoder(bw, h),
-		dec: NewDecoder(br, h),
+		c:   c,
+		w:   w,
+		r:   r,
+		f:   f,
 		h:   h,
+		enc: NewEncoder(w, h),
+		dec: NewDecoder(r, h),
 	}
 }
 
-func (c *rpcCodec) BufferedReader() *bufio.Reader {
-	return c.br
-}
-
-func (c *rpcCodec) BufferedWriter() *bufio.Writer {
-	return c.bw
-}
-
-func (c *rpcCodec) write(obj1, obj2 interface{}, writeObj2, doFlush bool) (err error) {
-	if c.isClosed() {
-		return io.EOF
-	}
-	if err = c.enc.Encode(obj1); err != nil {
-		return
-	}
-	t, tOk := c.h.(rpcEncodeTerminator)
-	if tOk {
-		c.bw.Write(t.rpcEncodeTerminate())
-	}
-	if writeObj2 {
-		if err = c.enc.Encode(obj2); err != nil {
-			return
+func (c *rpcCodec) write(obj1, obj2 interface{}, writeObj2 bool) (err error) {
+	err = c.ready()
+	if err == nil {
+		err = c.enc.Encode(obj1)
+		if err == nil && writeObj2 {
+			err = c.enc.Encode(obj2)
 		}
-		if tOk {
-			c.bw.Write(t.rpcEncodeTerminate())
+		if c.f != nil {
+			flushErr := c.f.Flush()
+			if err == nil {
+				// ignore flush error if prior error occurred during Encode
+				err = flushErr
+			}
 		}
-	}
-	if doFlush {
-		return c.bw.Flush()
 	}
 	return
 }
 
 func (c *rpcCodec) read(obj interface{}) (err error) {
-	if c.isClosed() {
-		return io.EOF
+	err = c.ready()
+	if err == nil {
+		//If nil is passed in, we should read and discard
+		if obj == nil {
+			// return c.dec.Decode(&obj)
+			err = c.dec.swallowErr()
+		} else {
+			err = c.dec.Decode(obj)
+		}
 	}
-	//If nil is passed in, we should still attempt to read content to nowhere.
-	if obj == nil {
-		var obj2 interface{}
-		return c.dec.Decode(&obj2)
-	}
-	return c.dec.Decode(obj)
+	return
 }
 
-func (c *rpcCodec) isClosed() bool {
-	c.clsmu.RLock()
-	x := c.cls
-	c.clsmu.RUnlock()
-	return x
+func (c *rpcCodec) Close() (err error) {
+	if c.c != nil {
+		cls := c.cls.load()
+		if !cls.closed {
+			cls.err = c.c.Close()
+			cls.closed = true
+			c.cls.store(cls)
+		}
+		err = cls.err
+	}
+	return
 }
 
-func (c *rpcCodec) Close() error {
-	if c.isClosed() {
-		return io.EOF
+func (c *rpcCodec) ready() (err error) {
+	if c.c == nil {
+		err = errRpcNoConn
+	} else {
+		cls := c.cls.load()
+		if cls.closed {
+			if err = cls.err; err == nil {
+				err = errRpcIsClosed
+			}
+		}
 	}
-	c.clsmu.Lock()
-	c.cls = true
-	c.clsmu.Unlock()
-	return c.rwc.Close()
+	return
 }
 
 func (c *rpcCodec) ReadResponseBody(body interface{}) error {
@@ -135,16 +153,11 @@ type goRpcCodec struct {
 }
 
 func (c *goRpcCodec) WriteRequest(r *rpc.Request, body interface{}) error {
-	// Must protect for concurrent access as per API
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return c.write(r, body, true, true)
+	return c.write(r, body, true)
 }
 
 func (c *goRpcCodec) WriteResponse(r *rpc.Response, body interface{}) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return c.write(r, body, true, true)
+	return c.write(r, body, true)
 }
 
 func (c *goRpcCodec) ReadResponseHeader(r *rpc.Response) error {
@@ -166,7 +179,36 @@ func (c *goRpcCodec) ReadRequestBody(body interface{}) error {
 type goRpc struct{}
 
 // GoRpc implements Rpc using the communication protocol defined in net/rpc package.
-// Its methods (ServerCodec and ClientCodec) return values that implement RpcCodecBuffered.
+//
+// Note: network connection (from net.Dial, of type io.ReadWriteCloser) is not buffered.
+//
+// For performance, you should configure WriterBufferSize and ReaderBufferSize on the handle.
+// This ensures we use an adequate buffer during reading and writing.
+// If not configured, we will internally initialize and use a buffer during reads and writes.
+// This can be turned off via the RPCNoBuffer option on the Handle.
+//   var handle codec.JsonHandle
+//   handle.RPCNoBuffer = true // turns off attempt by rpc module to initialize a buffer
+//
+// Example 1: one way of configuring buffering explicitly:
+//   var handle codec.JsonHandle // codec handle
+//   handle.ReaderBufferSize = 1024
+//   handle.WriterBufferSize = 1024
+//   var conn io.ReadWriteCloser // connection got from a socket
+//   var serverCodec = GoRpc.ServerCodec(conn, handle)
+//   var clientCodec = GoRpc.ClientCodec(conn, handle)
+//
+// Example 2: you can also explicitly create a buffered connection yourself,
+// and not worry about configuring the buffer sizes in the Handle.
+//   var handle codec.Handle     // codec handle
+//   var conn io.ReadWriteCloser // connection got from a socket
+//   var bufconn = struct {      // bufconn here is a buffered io.ReadWriteCloser
+//       io.Closer
+//       *bufio.Reader
+//       *bufio.Writer
+//   }{conn, bufio.NewReader(conn), bufio.NewWriter(conn)}
+//   var serverCodec = GoRpc.ServerCodec(bufconn, handle)
+//   var clientCodec = GoRpc.ClientCodec(bufconn, handle)
+//
 var GoRpc goRpc
 
 func (x goRpc) ServerCodec(conn io.ReadWriteCloser, h Handle) rpc.ServerCodec {
@@ -176,5 +218,3 @@ func (x goRpc) ServerCodec(conn io.ReadWriteCloser, h Handle) rpc.ServerCodec {
 func (x goRpc) ClientCodec(conn io.ReadWriteCloser, h Handle) rpc.ClientCodec {
 	return &goRpcCodec{newRPCCodec(conn, h)}
 }
-
-var _ RpcCodecBuffered = (*rpcCodec)(nil) // ensure *rpcCodec implements RpcCodecBuffered

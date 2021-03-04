@@ -22,7 +22,6 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/hashicorp/packer/version"
 	"github.com/mitchellh/cli"
 	"github.com/mitchellh/panicwrap"
@@ -80,10 +79,6 @@ func realMain() int {
 	}
 	defer os.Remove(logTempFile.Name())
 	defer logTempFile.Close()
-
-	// Tell the logger to log to this file
-	os.Setenv(EnvLog, "")
-	os.Setenv(EnvLogFile, "")
 
 	// Setup the prefixed readers that send data properly to
 	// stdout/stderr.
@@ -174,13 +169,13 @@ func wrappedMain() int {
 		fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
 		return 1
 	}
-	log.Printf("Setting cache directory: %s", cacheDir)
+	log.Printf("[INFO] Setting cache directory: %s", cacheDir)
 
 	// Determine if we're in machine-readable mode by mucking around with
 	// the arguments...
 	args, machineReadable := extractMachineReadable(os.Args[1:])
 
-	defer plugin.CleanupClients()
+	defer packer.CleanupClients()
 
 	var ui packersdk.Ui
 	if machineReadable {
@@ -225,12 +220,8 @@ func wrappedMain() int {
 	CommandMeta = &command.Meta{
 		CoreConfig: &packer.CoreConfig{
 			Components: packer.ComponentFinder{
-				Hook: config.StarHook,
-
-				BuilderStore:       config.Builders,
-				ProvisionerStore:   config.Provisioners,
-				PostProcessorStore: config.PostProcessors,
-				DatasourceStore:    config.Datasources,
+				Hook:         config.StarHook,
+				PluginConfig: config.Plugins,
 			},
 			Version: version.Version,
 		},
@@ -302,20 +293,14 @@ func extractMachineReadable(args []string) ([]string, bool) {
 
 func loadConfig() (*config, error) {
 	var config config
-	config.Plugins = plugin.Config{
-		PluginMinPort: 10000,
-		PluginMaxPort: 25000,
+	config.Plugins = &packer.PluginConfig{
+		PluginMinPort:      10000,
+		PluginMaxPort:      25000,
+		KnownPluginFolders: packer.PluginFolders("."),
 	}
 	if err := config.Plugins.Discover(); err != nil {
 		return nil, err
 	}
-
-	// Copy plugins to general list
-	plugins := config.Plugins.GetPlugins()
-	config.Builders = plugins.Builders
-	config.Provisioners = plugins.Provisioners
-	config.PostProcessors = plugins.PostProcessors
-	config.Datasources = plugins.DataSources
 
 	// Finally, try to use an internal plugin. Note that this will not override
 	// any previously-loaded plugins.
@@ -324,23 +309,19 @@ func loadConfig() (*config, error) {
 	}
 
 	// start by loading from PACKER_CONFIG if available
-	log.Print("Checking 'PACKER_CONFIG' for a config file path")
 	configFilePath := os.Getenv("PACKER_CONFIG")
-
 	if configFilePath == "" {
 		var err error
-		log.Print("'PACKER_CONFIG' not set; checking the default config file path")
+		log.Print("[INFO] PACKER_CONFIG env var not set; checking the default config file path")
 		configFilePath, err = pathing.ConfigFile()
 		if err != nil {
 			log.Printf("Error detecting default config file path: %s", err)
 		}
 	}
-
 	if configFilePath == "" {
 		return &config, nil
 	}
-
-	log.Printf("Attempting to open config file: %s", configFilePath)
+	log.Printf("[INFO] PACKER_CONFIG env var set; attempting to open config file: %s", configFilePath)
 	f, err := os.Open(configFilePath)
 	if err != nil {
 		if !os.IsNotExist(err) {

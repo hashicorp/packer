@@ -42,17 +42,8 @@ type StateChangeConf struct {
 
 // Polling configuration for the AWS waiter. Configures the waiter for resources creation or actions like attaching
 // volumes or importing image.
-// Usage example:
 //
-// In JSON:
-// ```json
-// "aws_polling" : {
-// 	 "delay_seconds": 30,
-// 	 "max_attempts": 50
-// }
-// ```
-//
-// In HCL2:
+// HCL2 example:
 // ```hcl
 // aws_polling {
 //	 delay_seconds = 30
@@ -60,6 +51,13 @@ type StateChangeConf struct {
 // }
 // ```
 //
+// JSON example:
+// ```json
+// "aws_polling" : {
+// 	 "delay_seconds": 30,
+// 	 "max_attempts": 50
+// }
+// ```
 type AWSPollingConfig struct {
 	// Specifies the maximum number of attempts the waiter will check for resource state.
 	// This value can also be set via the AWS_MAX_ATTEMPTS.
@@ -151,15 +149,22 @@ func (w *AWSPollingConfig) WaitUntilVolumeAvailable(ctx aws.Context, conn *ec2.E
 	return err
 }
 
-func (w *AWSPollingConfig) WaitUntilSnapshotDone(ctx aws.Context, conn *ec2.EC2, snapshotID string) error {
+func (w *AWSPollingConfig) WaitUntilSnapshotDone(ctx aws.Context, conn ec2iface.EC2API, snapshotID string) error {
 	snapInput := ec2.DescribeSnapshotsInput{
 		SnapshotIds: []*string{&snapshotID},
+	}
+
+	waitOpts := w.getWaiterOptions()
+	if len(waitOpts) == 0 {
+		// Bump this default to 30 minutes.
+		// Large snapshots can take a long time for the copy to s3
+		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(120))
 	}
 
 	err := conn.WaitUntilSnapshotCompletedWithContext(
 		ctx,
 		&snapInput,
-		w.getWaiterOptions()...)
+		waitOpts...)
 	return err
 }
 

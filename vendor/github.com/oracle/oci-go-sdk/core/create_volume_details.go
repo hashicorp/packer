@@ -75,6 +75,9 @@ type CreateVolumeDetails struct {
 	// This field is deprecated. Use the sourceDetails field instead to specify the
 	// backup for the volume.
 	VolumeBackupId *string `mandatory:"false" json:"volumeBackupId"`
+
+	// Specifies whether the auto-tune performance is enabled for this volume.
+	IsAutoTuneEnabled *bool `mandatory:"false" json:"isAutoTuneEnabled"`
 }
 
 func (m CreateVolumeDetails) String() string {
@@ -94,6 +97,7 @@ func (m *CreateVolumeDetails) UnmarshalJSON(data []byte) (e error) {
 		SizeInMBs          *int64                            `json:"sizeInMBs"`
 		SourceDetails      volumesourcedetails               `json:"sourceDetails"`
 		VolumeBackupId     *string                           `json:"volumeBackupId"`
+		IsAutoTuneEnabled  *bool                             `json:"isAutoTuneEnabled"`
 		AvailabilityDomain *string                           `json:"availabilityDomain"`
 		CompartmentId      *string                           `json:"compartmentId"`
 	}{}
@@ -131,8 +135,11 @@ func (m *CreateVolumeDetails) UnmarshalJSON(data []byte) (e error) {
 
 	m.VolumeBackupId = model.VolumeBackupId
 
+	m.IsAutoTuneEnabled = model.IsAutoTuneEnabled
+
 	m.AvailabilityDomain = model.AvailabilityDomain
 
 	m.CompartmentId = model.CompartmentId
+
 	return
 }
