@@ -78,12 +78,30 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 
 	deploymentName := s.name
 	resourceGroupName := state.Get(constants.ArmResourceGroupName).(string)
-	err := s.deleteDeploymentResources(context.TODO(), deploymentName, resourceGroupName)
+	// Get image disk details before deleting the image; otherwise we won't be able to
+	// delete the disk as the image request will return a 404
+	computeName := state.Get(constants.ArmComputeName).(string)
+	imageType, imageName, err := s.disk(context.TODO(), resourceGroupName, computeName)
+
+	if err != nil && !strings.Contains(err.Error(), "ResourceNotFound") {
+		ui.Error(fmt.Sprintf("Could not retrieve OS Image details: %s", err))
+	}
+	err = s.deleteDeploymentResources(context.TODO(), deploymentName, resourceGroupName)
 	if err != nil {
 		s.reportIfError(err, resourceGroupName)
 	}
+	// The disk is not defined as an operation in the template so it has to be deleted separately
+	if imageType == "" && imageName == "" {
+		return
+	}
 
-	NewStepDeleteAdditionalDisks(s.client, ui).Run(context.TODO(), state)
+	ui.Say(fmt.Sprintf(" -> %s : '%s'", imageType, imageName))
+	err = s.deleteDisk(context.TODO(), imageType, imageName, resourceGroupName)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error deleting resource.  Please delete manually.\n\n"+
+			"Name: %s\n"+
+			"Error: %s", imageName, err))
+	}
 }
 
 func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupName string, deploymentName string) error {
