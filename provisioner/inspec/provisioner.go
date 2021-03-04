@@ -60,7 +60,7 @@ type Config struct {
 	LocalPort            int      `mapstructure:"local_port"`
 	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
-  ValidExitCodes       []int    `mapstructure:"valid_exit_codes"`
+	ValidExitCodes       []int    `mapstructure:"valid_exit_codes"`
 }
 
 type Provisioner struct {
@@ -159,7 +159,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))
 	}
 
-  if p.config.ValidExitCodes == nil {
+	if p.config.ValidExitCodes == nil {
 		p.config.ValidExitCodes = []int{0}
 	}
 
@@ -419,7 +419,7 @@ func (p *Provisioner) executeInspec(ui packersdk.Ui, comm packersdk.Communicator
 	}
 	wg.Wait()
 
-  if err := cmd.Wait(); err != nil {
+	if err := cmd.Wait(); err != nil {
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			// The program has exited with an exit code != 0
 
