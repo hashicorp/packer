@@ -34,7 +34,7 @@ func (s *StepExtractWIM) Run(ctx context.Context, state multistep.StateBag) mult
 	ui.Say("Extracting WIM...")
 
 	// Mount ISO
-	res, err := s.mountDiskImage(isoPath)
+	devicePath, err := s.mountDiskImage(isoPath)
 	if err != nil {
 		err = fmt.Errorf("Error mounting ISO: %s", err)
 		state.Put("error", err)
@@ -42,15 +42,8 @@ func (s *StepExtractWIM) Run(ctx context.Context, state multistep.StateBag) mult
 		return multistep.ActionHalt
 	}
 
-	if res["DevicePath"] == "" {
-		err = fmt.Errorf("Error reading DevicePath")
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
 	// Copy WIM out
-	srcWimPath := fmt.Sprintf("%s\\%s", res["DevicePath"], installWIMPath)
+	srcWimPath := fmt.Sprintf("%s\\%s", devicePath, installWIMPath)
 
 	_, err = os.Stat(srcWimPath)
 	if os.IsNotExist(err) {
@@ -103,7 +96,7 @@ func (s *StepExtractWIM) Cleanup(state multistep.StateBag) {
 	dstWimPath := path.Join(s.TempPath, installWIM)
 	_ = os.Remove(dstWimPath)
 
-	_, err := s.dismountDiskImage()
+	err := s.dismountDiskImage()
 	if err != nil {
 		err = fmt.Errorf("Error mounting ISO: %s", err)
 		state.Put("error", err)
@@ -111,43 +104,38 @@ func (s *StepExtractWIM) Cleanup(state multistep.StateBag) {
 	}
 }
 
-func (s *StepExtractWIM) dismountDiskImage() (map[string]string, error) {
-	if s.isoPath != "" {
-		cmd := fmt.Sprintf("Dismount-DiskImage -ImagePath %s", s.isoPath)
-		res, err := s.execPSCmd(cmd)
-		if err != nil {
-			s.isoPath = ""
-		}
-		return res, err
+func (s *StepExtractWIM) dismountDiskImage() error {
+	if s.isoPath == "" {
+		return nil
 	}
-	return nil, nil
-}
 
-// TODO: dedup
-func (s *StepExtractWIM) execPSCmd(cmd string) (map[string]string, error) {
+	var script = `
+param([string]$imagePath)
+Dismount-DiskImage -ImagePath $imagePath
+`
+
 	var ps powershell.PowerShellCmd
-
-	cmdOut, err := ps.Output(cmd)
-	if err == nil {
-		res := make(map[string]string)
-		source := strings.Split(cmdOut, "\n")
-		for _, line := range source {
-			kv := strings.SplitN(line, ":", 2)
-			if len(kv) > 1 {
-				res[strings.Trim(kv[0], " ")] = strings.Trim(kv[1], " \n\r")
-			}
-		}
-		return res, err
-	} else {
-		return nil, err
-	}
+	err := ps.Run(script, s.isoPath)
+	return err
 }
 
-func (s *StepExtractWIM) mountDiskImage(isoPath string) (map[string]string, error) {
-	cmd := fmt.Sprintf("Mount-DiskImage -ImagePath %s", isoPath)
-	res, err := s.execPSCmd(cmd)
-	if err == nil {
-		s.isoPath = isoPath
+func (s *StepExtractWIM) mountDiskImage(isoPath string) (string, error) {
+
+	var script = `
+param([string]$imagePath)
+$diskImage = Mount-DiskImage -ImagePath $imagePath
+if ($diskImage -ne $null) {
+    $diskImage.DevicePath
+}
+`
+
+	var ps powershell.PowerShellCmd
+	cmdOut, err := ps.Output(script, isoPath)
+
+	if err != nil {
+		return "", err
 	}
-	return res, err
+
+	var devicePath = strings.TrimSpace(cmdOut)
+	return devicePath, err
 }

@@ -11,7 +11,7 @@ import (
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-    "github.com/hashicorp/packer-plugin-sdk/tmp"
+	"github.com/hashicorp/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/builder/hyperv/common/powershell"
 	"github.com/mitchellh/mapstructure"
 )
@@ -71,7 +71,7 @@ type feature struct {
 }
 
 func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packersdk.Ui)	
+	ui := state.Get("ui").(packersdk.Ui)
 	debug := state.Get("debug").(bool)
 	wimPath := state.Get("wim_path").(string)
 
@@ -90,7 +90,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-	}	
+	}
 
 	_, err = os.Stat(s.MountDir)
 	if os.IsNotExist(err) {
@@ -152,7 +152,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 	log.Printf("Mount directory: %s", s.MountDir)
 
 	// Mount WIM
-	_, err = s.mountWindowsImage(wimPath, true)
+	err = s.mountWindowsImage(wimPath, true)
 	if err != nil {
 		err = fmt.Errorf("Error mounting WIM: %s", err)
 		state.Put("error", err)
@@ -165,7 +165,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		if appX.Action == "remove" {
 			ui.Say(fmt.Sprintf("Removing AppX package: %s", filepath.ToSlash(appX.Name)))
 
-			_, err = s.removeAppxPackage(appX.Name)
+			err = s.removeAppxPackage(appX.Name)
 			if err != nil {
 				err = fmt.Errorf("Error removing AppX package %s: %s", filepath.ToSlash(appX.Path), err)
 				state.Put("error", err)
@@ -180,7 +180,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		if capability.Action == "remove" {
 			ui.Say(fmt.Sprintf("Removing capability: %s", capability.Name))
 
-			_, err = s.removeWindowsCapability(capability.Name)
+			err = s.removeWindowsCapability(capability.Name)
 			if err != nil {
 				err = fmt.Errorf("Error removing capability %s: %s", capability.Name, err)
 				state.Put("error", err)
@@ -195,7 +195,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		if driver.Action == "remove" {
 			ui.Say(fmt.Sprintf("Removing driver: %s", filepath.ToSlash(driver.Path)))
 
-			_, err = s.removeWindowsDriver(driver.Path)
+			err = s.removeWindowsDriver(driver.Path)
 			if err != nil {
 				err = fmt.Errorf("Error removing driver %s: %s", filepath.ToSlash(driver.Path), err)
 				state.Put("error", err)
@@ -210,7 +210,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		if winPackage.Action == "remove" {
 			ui.Say(fmt.Sprintf("Removing package: %s", filepath.ToSlash(winPackage.Path)))
 
-			_, err = s.removeWindowsPackageByPath(winPackage.Path)
+			err = s.removeWindowsPackageByPath(winPackage.Path)
 			if err != nil {
 				err = fmt.Errorf("Error removing package %s: %s", filepath.ToSlash(winPackage.Path), err)
 				state.Put("error", err)
@@ -225,7 +225,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		if feature.Action == "disable" {
 			ui.Say(fmt.Sprintf("Disabling feature: %s", feature.Name))
 
-			_, err = s.disableWindowsOptionalFeature(feature.Name)
+			err = s.disableWindowsOptionalFeature(feature.Name)
 			if err != nil {
 				err = fmt.Errorf("Error disabling feature %s: %s", feature.Name, err)
 				state.Put("error", err)
@@ -240,7 +240,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		if appX.Action == "add" {
 			ui.Say(fmt.Sprintf("Adding AppX package: %s", filepath.ToSlash(appX.Path)))
 
-			_, err = s.addAppxProvisionedPackage(appX.Path, appX.DependencyPath, appX.LicensePath)
+			err = s.addAppxProvisionedPackage(appX.Path, appX.DependencyPath, appX.LicensePath)
 			if err != nil {
 				err = fmt.Errorf("Error adding AppX package %s: %s", filepath.ToSlash(appX.Path), err)
 				state.Put("error", err)
@@ -255,7 +255,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		if capability.Action == "add" {
 			ui.Say(fmt.Sprintf("Adding capability: %s", capability.Name))
 
-			_, err = s.addWindowsCapability(capability.Name, capability.Path)
+			err = s.addWindowsCapability(capability.Name, capability.Path)
 			if err != nil {
 				err = fmt.Errorf("Error adding capability %s: %s", capability.Name, err)
 				state.Put("error", err)
@@ -270,7 +270,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		if driver.Action == "add" {
 			ui.Say(fmt.Sprintf("Adding driver: %s", filepath.ToSlash(driver.Path)))
 
-			_, err = s.addWindowsDriver(driver.Path, true)
+			err = s.addWindowsDriver(driver.Path, true)
 			if err != nil {
 				err = fmt.Errorf("Error adding driver %s: %s", filepath.ToSlash(driver.Path), err)
 				state.Put("error", err)
@@ -285,7 +285,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		if winPackage.Action == "add" {
 			ui.Say(fmt.Sprintf("Adding package: %s", filepath.ToSlash(winPackage.Path)))
 
-			_, err = s.addWindowsPackage(winPackage.Path)
+			err = s.addWindowsPackage(winPackage.Path)
 			if err != nil {
 				err = fmt.Errorf("Error adding package %s: %s", filepath.ToSlash(winPackage.Path), err)
 				state.Put("error", err)
@@ -300,7 +300,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		if feature.Action == "enable" {
 			ui.Say(fmt.Sprintf("Enabling feature: %s", feature.Name))
 
-			_, err = s.enableWindowsOptionalFeature(feature.Name, true)
+			err = s.enableWindowsOptionalFeature(feature.Name, true)
 			if err != nil {
 				err = fmt.Errorf("Error enabling feature %s: %s", feature.Name, err)
 				state.Put("error", err)
@@ -314,7 +314,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 	if config.ProductKey != "" {
 		ui.Say(fmt.Sprintf("Setting product key..."))
 
-		_, err = s.setWindowsProductKey(config.ProductKey)
+		err = s.setWindowsProductKey(config.ProductKey)
 		if err != nil {
 			err = fmt.Errorf("Error setting product key: %s", err)
 			state.Put("error", err)
@@ -327,7 +327,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 	if config.Unattend != "" {
 		ui.Say(fmt.Sprintf("Using unattend..."))
 
-		_, err = s.useWindowsUnattend(config.Unattend)
+		err = s.useWindowsUnattend(config.Unattend)
 		if err != nil {
 			err = fmt.Errorf("Error using unattend: %s", err)
 			state.Put("error", err)
@@ -339,7 +339,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 	ui.Say("Unmounting WIM...")
 
 	// Unmount WIM
-	_, err = s.dismountWindowsImage(false)
+	err = s.dismountWindowsImage(false)
 	if err != nil {
 		err = fmt.Errorf("Error dismounting WIM: %s", err)
 		state.Put("error", err)
@@ -353,7 +353,7 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 func (s *StepConfigureWIM) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packersdk.Ui)
 
-	_, err := s.dismountWindowsImage(true)
+	err := s.dismountWindowsImage(true)
 	if err != nil {
 		err = fmt.Errorf("Error dismounting WIM: %s", err)
 		state.Put("error", err)
@@ -369,7 +369,7 @@ func (s *StepConfigureWIM) Cleanup(state multistep.StateBag) {
 }
 
 // addAppxProvisionedPackage adds an app package (.appx) that will install for each new user to a Windows image
-func (s *StepConfigureWIM) addAppxProvisionedPackage(packagePath string, dependencyPackagePath string, licensePath string) (string, error) {
+func (s *StepConfigureWIM) addAppxProvisionedPackage(packagePath string, dependencyPackagePath string, licensePath string) error {
 	cmd := fmt.Sprintf("Add-AppxProvisionedPackage -Path \"%s\" -PackagePath \"%s\"", filepath.FromSlash(s.MountDir), filepath.FromSlash(packagePath))
 	if dependencyPackagePath != "" {
 		cmd = fmt.Sprintf("%s -DependencyPackagePath \"%s\"", cmd, filepath.FromSlash(dependencyPackagePath))
@@ -381,7 +381,7 @@ func (s *StepConfigureWIM) addAppxProvisionedPackage(packagePath string, depende
 }
 
 // addWindowsCapability installs a Windows capability package on the specified operating system image
-func (s *StepConfigureWIM) addWindowsCapability(name string, source string) (string, error) {
+func (s *StepConfigureWIM) addWindowsCapability(name string, source string) error {
 	cmd := fmt.Sprintf("Add-WindowsCapability -Path \"%s\" -Name \"%s\"", filepath.FromSlash(s.MountDir), name)
 	if source != "" {
 		cmd = fmt.Sprintf("%s -Source \"%s\"", cmd, filepath.FromSlash(source))
@@ -390,7 +390,7 @@ func (s *StepConfigureWIM) addWindowsCapability(name string, source string) (str
 }
 
 // addWindowsDriver adds a driver to an offline Windows image
-func (s *StepConfigureWIM) addWindowsDriver(driver string, recurse bool) (string, error) {
+func (s *StepConfigureWIM) addWindowsDriver(driver string, recurse bool) error {
 	cmd := fmt.Sprintf("Add-WindowsDriver -Path \"%s\" -Driver \"%s\"", filepath.FromSlash(s.MountDir), driver)
 	if recurse {
 		cmd = cmd + " -Recurse"
@@ -399,21 +399,21 @@ func (s *StepConfigureWIM) addWindowsDriver(driver string, recurse bool) (string
 }
 
 // addWindowsPackage adds a single .cab or .msu file to a Windows image
-func (s *StepConfigureWIM) addWindowsPackage(packagePath string) (string, error) {
+func (s *StepConfigureWIM) addWindowsPackage(packagePath string) error {
 	cmd := fmt.Sprintf("Add-WindowsPackage -Path \"%s\" -PackagePath \"%s\"", filepath.FromSlash(s.MountDir), filepath.FromSlash(packagePath))
 	return s.execPSCmd(cmd)
 }
 
 // disableWindowsOptionalFeature disables a feature in a Windows image
-func (s *StepConfigureWIM) disableWindowsOptionalFeature(name string) (string, error) {
+func (s *StepConfigureWIM) disableWindowsOptionalFeature(name string) error {
 	cmd := fmt.Sprintf("Disable-WindowsOptionalFeature -Path \"%s\" -FeatureName \"%s\"", filepath.FromSlash(s.MountDir), name)
 	return s.execPSCmd(cmd)
 }
 
 // dismountWindowsImage dismounts a Windows image from the directory it is mapped to
-func (s *StepConfigureWIM) dismountWindowsImage(discard bool) (string, error) {
+func (s *StepConfigureWIM) dismountWindowsImage(discard bool) error {
 	if s.wimPath == "" {
-		return "", nil
+		return nil
 	}
 
 	cmd := fmt.Sprintf("Dismount-WindowsImage -Path \"%s\"", filepath.FromSlash(s.MountDir))
@@ -423,15 +423,15 @@ func (s *StepConfigureWIM) dismountWindowsImage(discard bool) (string, error) {
 		cmd = cmd + " -Save"
 	}
 
-	cmdOut, err := s.execPSCmd(cmd)
+	err := s.execPSCmd(cmd)
 	if err == nil {
 		s.wimPath = ""
 	}
-	return cmdOut, err
+	return err
 }
 
 // enableWindowsOptionalFeature enables a feature in a Windows image
-func (s *StepConfigureWIM) enableWindowsOptionalFeature(featureName string, all bool) (string, error) {
+func (s *StepConfigureWIM) enableWindowsOptionalFeature(featureName string, all bool) error {
 	cmd := fmt.Sprintf("Enable-WindowsOptionalFeature -Path \"%s\" -FeatureName \"%s\"", filepath.FromSlash(s.MountDir), featureName)
 	if all {
 		cmd = cmd + " -All"
@@ -439,7 +439,7 @@ func (s *StepConfigureWIM) enableWindowsOptionalFeature(featureName string, all 
 	return s.execPSCmd(cmd)
 }
 
-func (s *StepConfigureWIM) execPSCmd(cmd string) (string, error) {
+func (s *StepConfigureWIM) execPSCmd(cmd string) error {
 	if s.LogPath != "" {
 		cmd = fmt.Sprintf("%s -LogPath \"%s\"", cmd, filepath.FromSlash(s.LogPath))
 	}
@@ -448,11 +448,11 @@ func (s *StepConfigureWIM) execPSCmd(cmd string) (string, error) {
 	}
 
 	var ps powershell.PowerShellCmd
-	return ps.Output(cmd)
+	return ps.Run(cmd)
 }
 
 // mountWindowsImage mounts a Windows image in a WIM to a directory on the local computer
-func (s *StepConfigureWIM) mountWindowsImage(wimPath string, optimize bool) (string, error) {
+func (s *StepConfigureWIM) mountWindowsImage(wimPath string, optimize bool) error {
 	var cmd string
 	if s.ImageIndex > 0 {
 		cmd = fmt.Sprintf("Mount-WindowsImage -Path \"%s\" -ImagePath \"%s\" -Index %d", filepath.FromSlash(s.MountDir), filepath.FromSlash(wimPath), s.ImageIndex)
@@ -463,45 +463,45 @@ func (s *StepConfigureWIM) mountWindowsImage(wimPath string, optimize bool) (str
 		cmd = cmd + " -Optimize"
 	}
 
-	cmdOut, err := s.execPSCmd(cmd)
+	err := s.execPSCmd(cmd)
 	if err == nil {
 		s.wimPath = wimPath
 	}
-	return cmdOut, err
+	return err
 }
 
 // removeAppxPackage removes an app package from one or more user accounts
-func (s *StepConfigureWIM) removeAppxPackage(pkg string) (string, error) {
+func (s *StepConfigureWIM) removeAppxPackage(pkg string) error {
 	cmd := fmt.Sprintf("Remove-AppxPackage -Path \"%s\" -Package \"%s\"", filepath.FromSlash(s.MountDir), pkg)
 	return s.execPSCmd(cmd)
 }
 
 // removeWindowsCapability uninstalls a Windows capability package from an image
-func (s *StepConfigureWIM) removeWindowsCapability(name string) (string, error) {
+func (s *StepConfigureWIM) removeWindowsCapability(name string) error {
 	cmd := fmt.Sprintf("Remove-WindowsCapability -Path \"%s\" -Name \"%s\"", filepath.FromSlash(s.MountDir), name)
 	return s.execPSCmd(cmd)
 }
 
 // removeWindowsDriver removes a driver from an offline Windows image
-func (s *StepConfigureWIM) removeWindowsDriver(driver string) (string, error) {
+func (s *StepConfigureWIM) removeWindowsDriver(driver string) error {
 	cmd := fmt.Sprintf("Remove-WindowsDriver -Path \"%s\" -Driver \"%s\"", filepath.FromSlash(s.MountDir), driver)
 	return s.execPSCmd(cmd)
 }
 
 // removeWindowsPackageByPath removes a package from a Windows image by package path
-func (s *StepConfigureWIM) removeWindowsPackageByPath(path string) (string, error) {
+func (s *StepConfigureWIM) removeWindowsPackageByPath(path string) error {
 	cmd := fmt.Sprintf("Remove-WindowsPackage -Path \"%s\" -PackagePath \"%s\"", filepath.FromSlash(s.MountDir), filepath.FromSlash(path))
 	return s.execPSCmd(cmd)
 }
 
 // setWindowsProductKey sets the product key for the Windows image
-func (s *StepConfigureWIM) setWindowsProductKey(productKey string) (string, error) {
+func (s *StepConfigureWIM) setWindowsProductKey(productKey string) error {
 	cmd := fmt.Sprintf("Set-WindowsProductKey -Path \"%s\" -ProductKey \"%s\"", filepath.FromSlash(s.MountDir), productKey)
 	return s.execPSCmd(cmd)
 }
 
 // useWindowsUnattend applies an unattended answer file to a Windows image
-func (s *StepConfigureWIM) useWindowsUnattend(unattendPath string) (string, error) {
+func (s *StepConfigureWIM) useWindowsUnattend(unattendPath string) error {
 	cmd := fmt.Sprintf("Use-WindowsUnattend -Path \"%s\" -UnattendPath \"%s\"", filepath.FromSlash(s.MountDir), filepath.FromSlash(unattendPath))
 	return s.execPSCmd(cmd)
 }
