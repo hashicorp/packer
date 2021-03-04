@@ -371,6 +371,51 @@ Sometimes you may have a need to include a link that is not directly to a file w
 
 If the link provided in the `href` property is external, it will display a small icon indicating this. If it's internal, it will appear the same way as any other direct file link.
 
+### Plugin Docs
+
+Plugin documentation may be located within the `packer` repository, or split out into separate `packer-plugin-` repositories. For plugin docs within the `packer` repository, the process for authoring files and managing sidebar data is identical to the process for other documentation.
+
+For plugins in separate repositories, additional configuration is required.
+
+#### Setting up remote plugin docs
+
+Some setup is required to include docs from remote plugin repositories on the [packer.io/docs](https://www.packer.io/docs) site.
+
+1. The plugin repository needs to have a `.docs-artifacts` folder on a stable branch, such as `main`.
+2. The `packer` repository must have a corresponding entry in `website/data/docs-remote-plugins.json` which points to the plugin repository.
+
+The `.docs-artifacts` folder can be generated in the plugin repository using `npx @hashicorp/packer-docs-artifacts generate`. Additional details on this process can be found in [the `packer-plugin-scaffolding` `README`](https://github.com/hashicorp/packer-plugin-scaffolding#registering-documentation-on-packerio).
+
+The `docs-remote-plugins.json` file contains an array of entries. Each entry points to a plugin repository. The `{ title, path, repo }` properties are required for each entry, all other properties are optional.
+
+```json5
+[
+  {
+    // the human-readable title shown in navigation
+    title: 'Scaffolding',
+    // set the URL subpath under `docs/builders`, `docs/datasources`, etc
+    // (must not conflict with paths in `docs-nav-data.json`)
+    path: 'scaffolding',
+    // user/repo-name for the plugin repository
+    // (if user === hashicorp, plugin docs will be labelled "official")
+    repo: 'hashicorp/packer-plugin-scaffolding',
+    // (optional) branch on which `.docs-artifacts` are stable.
+    // defaults to "main"
+    branch: 'main',
+    // (optional) path from the root of the repo to the docs artifacts folder
+    // defaults to ".docs-artifacts"
+    artifactDir: '.doc-artifacts',
+  },
+]
+```
+
+#### Updating remote plugin docs
+
+Documentation from plugin repositories is fetched and rendered every time the Packer website builds. So, to update plugin documentation on the live site:
+
+1. Update the `.docs-artifacts` on the `main` branch of the plugin repository (artifacts folder and branch may vary, these are the defaults)
+2. Rebuild the website (happens automatically on commits to `stable-website`, or can be [manually re-deployed](https://vercel.com/hashicorp/packer))
+
 <!-- BEGIN: releases -->
 <!-- Generated text, do not edit directly -->
 
