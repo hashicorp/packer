@@ -42,7 +42,7 @@ const (
 //
 // JSON example:
 // ```json
-// launch_block_device_mappings: [
+// "launch_block_device_mappings": [
 //   {
 //      "device_name": "/dev/sda1",
 //      "encrypted": true,
