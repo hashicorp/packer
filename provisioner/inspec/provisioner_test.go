@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -296,9 +297,16 @@ func TestInspecGetVersionError(t *testing.T) {
 
 func TestInspecValidExitCodes(t *testing.T) {
 	var p Provisioner
-	p.config.Command = "./test-fixtures/valid_exit_codes.sh"
-	p.config.Profile = "test-profile"
-	p.config.ValidExitCodes = []int{100}
+	if runtime.GOOS == "windows" {
+		if os.Getenv("PACKER_ACC") == "" {
+			t.Skip("This test is only run with PACKER_ACC=1 and it requires InSpec to be installed")
+		}
+		p.config.Command = "inspec exec"
+	} else {
+		p.config.Command = "./test-fixtures/valid_exit_codes.sh"
+	}
+	p.config.Profile = "test-fixtures/skip_control.rb"
+	p.config.ValidExitCodes = []int{101}
 	err := p.Prepare()
 	if err != nil {
 		t.Fatalf("err: %s", err)
