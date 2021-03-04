@@ -107,13 +107,14 @@ type InstanceConfig struct {
 // WindowsPasswordConfig is the data structure that GCE needs to encrypt the created
 // windows password.
 type WindowsPasswordConfig struct {
-	key      *rsa.PrivateKey
-	password string
-	UserName string    `json:"userName"`
-	Modulus  string    `json:"modulus"`
-	Exponent string    `json:"exponent"`
-	Email    string    `json:"email"`
-	ExpireOn time.Time `json:"expireOn"`
+	key                    *rsa.PrivateKey
+	password               string
+	UserName               string        `json:"userName"`
+	Modulus                string        `json:"modulus"`
+	Exponent               string        `json:"exponent"`
+	Email                  string        `json:"email"`
+	ExpireOn               time.Time     `json:"expireOn"`
+	WindowsPasswordTimeout time.Duration `json:"timeout"`
 }
 
 type windowsPasswordResponse struct {
