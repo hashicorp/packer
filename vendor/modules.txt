@@ -554,6 +554,8 @@ github.com/mitchellh/go-vnc
 github.com/mitchellh/go-wordwrap
 # github.com/mitchellh/gox v1.0.1
 ## explicit
+# github.com/mitchellh/gox v1.0.1
+## explicit
 # github.com/mitchellh/iochan v1.0.0
 github.com/mitchellh/iochan
 # github.com/mitchellh/mapstructure v1.4.0
