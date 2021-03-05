@@ -271,13 +271,16 @@ func TestProvisionerPrepare_LocalPort(t *testing.T) {
 }
 
 func TestInspecGetVersion(t *testing.T) {
-	if os.Getenv("PACKER_ACC") == "" {
-		t.Skip("This test is only run with PACKER_ACC=1 and it requires InSpec to be installed")
-	}
-	t.Skip("This test is broken! getVersion won't match a legitimate version string")
-
 	var p Provisioner
-	p.config.Command = "inspec"
+	if os.Getenv("PACKER_ACC") == "1" {
+		p.config.Command = "inspec"
+	} else {
+		p.config.Command = "./test-fixtures/inspec_version.sh"
+		if runtime.GOOS == "windows" {
+			t.Skip("This test is only run with PACKER_ACC=1 and it requires InSpec to be installed")
+		}
+	}
+
 	p.config.Backend = "local"
 	err := p.getVersion()
 	if err != nil {

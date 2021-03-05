@@ -1,7 +1,5 @@
 #!/bin/sh
 
-echo $*
-
 cat <<EOB
 Profile: tests from test-fixtures/skip_control.rb (tests from test-fixtures/valid_exit_codes.sh)
 Version: (not specified)
