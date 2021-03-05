@@ -45,8 +45,9 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 	// is 'implicitly used'. Here we read common configuration blocks to try to
 	// guess plugins.
 
-	// decodeRequiredPluginsBlock needs to be called first; otherwise all
-	// required plugins will be implicitly required too.
+	// decodeRequiredPluginsBlock needs to be called before
+	// decodeImplicitRequiredPluginsBlocks; otherwise all required plugins will
+	// be implicitly required too.
 
 	var diags hcl.Diagnostics
 
