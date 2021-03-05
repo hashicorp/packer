@@ -12,14 +12,13 @@ cloud.google.com/go/storage
 # github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1
 ## explicit
 github.com/1and1/oneandone-cloudserver-sdk-go
-# github.com/Azure/azure-sdk-for-go v45.0.0+incompatible
+# github.com/Azure/azure-sdk-for-go v40.5.0+incompatible
+## explicit
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute
 github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-12-01/compute/computeapi
 github.com/Azure/azure-sdk-for-go/services/devtestlabs/mgmt/2018-09-15/dtl
-github.com/Azure/azure-sdk-for-go/services/graphrbac/1.6/graphrbac
-github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault
 github.com/Azure/azure-sdk-for-go/services/keyvault/mgmt/2018-02-14/keyvault
 github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network
 github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2016-06-01/subscriptions
@@ -29,25 +28,30 @@ github.com/Azure/azure-sdk-for-go/storage
 github.com/Azure/azure-sdk-for-go/version
 # github.com/Azure/go-autorest v14.2.0+incompatible
 github.com/Azure/go-autorest
-# github.com/Azure/go-autorest/autorest v0.11.3
+# github.com/Azure/go-autorest/autorest v0.10.0
+## explicit
 github.com/Azure/go-autorest/autorest
 github.com/Azure/go-autorest/autorest/azure
-# github.com/Azure/go-autorest/autorest/adal v0.9.0
+# github.com/Azure/go-autorest/autorest/adal v0.8.2
+## explicit
 github.com/Azure/go-autorest/autorest/adal
 # github.com/Azure/go-autorest/autorest/azure/auth v0.4.2
 ## explicit
 github.com/Azure/go-autorest/autorest/azure/auth
-# github.com/Azure/go-autorest/autorest/azure/cli v0.4.0
+# github.com/Azure/go-autorest/autorest/azure/cli v0.3.1
+## explicit
 github.com/Azure/go-autorest/autorest/azure/cli
-# github.com/Azure/go-autorest/autorest/date v0.3.0
+# github.com/Azure/go-autorest/autorest/date v0.2.0
+## explicit
 github.com/Azure/go-autorest/autorest/date
-# github.com/Azure/go-autorest/autorest/to v0.4.0
+# github.com/Azure/go-autorest/autorest/to v0.3.0
+## explicit
 github.com/Azure/go-autorest/autorest/to
-# github.com/Azure/go-autorest/autorest/validation v0.3.0
+# github.com/Azure/go-autorest/autorest/validation v0.3.1
 github.com/Azure/go-autorest/autorest/validation
-# github.com/Azure/go-autorest/logger v0.2.0
+# github.com/Azure/go-autorest/logger v0.1.0
 github.com/Azure/go-autorest/logger
-# github.com/Azure/go-autorest/tracing v0.6.0
+# github.com/Azure/go-autorest/tracing v0.5.0
 github.com/Azure/go-autorest/tracing
 # github.com/Azure/go-ntlmssp v0.0.0-20191115201650-bad6df29494a
 github.com/Azure/go-ntlmssp
@@ -336,9 +340,6 @@ github.com/hashicorp/consul/api
 # github.com/hashicorp/errwrap v1.0.0
 ## explicit
 github.com/hashicorp/errwrap
-# github.com/hashicorp/go-azure-helpers v0.12.0
-github.com/hashicorp/go-azure-helpers/authentication
-github.com/hashicorp/go-azure-helpers/sender
 # github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 ## explicit
 github.com/hashicorp/go-checkpoint
