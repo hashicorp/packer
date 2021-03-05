@@ -19,7 +19,6 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 		wantDiags      bool
 		wantConfig     PackerConfig
 	}{
-		// {"empty source labels", PackerConfig{parser: defaultParser}, ``, `source "" "" {}`, false, PackerConfig{}},
 		{"required_plugin", PackerConfig{parser: defaultParser}, `
 		packer {
 			required_plugins {
