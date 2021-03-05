@@ -99,7 +99,7 @@ func (cfg *PackerConfig) requirePluginImplicitly(block *hcl.Block, componentRedi
 	}
 	componentName := block.Labels[0]
 
-	redirect, _ := componentRedirects[componentName]
+	redirect := componentRedirects[componentName]
 	if redirect == "" {
 		// no known redirect for this component
 		return nil

@@ -40,7 +40,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 						"amazon": {
 							Name:   "amazon",
 							Source: "github.com/hashicorp/amazon",
-							Type:   &addrs.Plugin{"github.com", "hashicorp", "amazon"},
+							Type:   &addrs.Plugin{Hostname: "github.com", Namespace: "hashicorp", Type: "amazon"},
 							Requirement: VersionConstraint{
 								Required: mustVersionConstraints(version.NewConstraint("~> v1.2.3")),
 							},
@@ -74,7 +74,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 							"amazon": {
 								Name:   "amazon",
 								Source: "github.com/hashicorp/amazon",
-								Type:   &addrs.Plugin{"github.com", "hashicorp", "amazon"},
+								Type:   &addrs.Plugin{Hostname: "github.com", Namespace: "hashicorp", Type: "amazon"},
 								Requirement: VersionConstraint{
 									Required: nil,
 								},
@@ -109,7 +109,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 							"ansible": {
 								Name:   "ansible",
 								Source: "github.com/ansible/ansible",
-								Type:   &addrs.Plugin{"github.com", "ansible", "ansible"},
+								Type:   &addrs.Plugin{Hostname: "github.com", Namespace: "ansible", Type: "ansible"},
 								Requirement: VersionConstraint{
 									Required: nil,
 								},
@@ -144,7 +144,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 							"docker": {
 								Name:   "docker",
 								Source: "github.com/hashicorp/docker",
-								Type:   &addrs.Plugin{"github.com", "hashicorp", "docker"},
+								Type:   &addrs.Plugin{Hostname: "github.com", Namespace: "hashicorp", Type: "docker"},
 								Requirement: VersionConstraint{
 									Required: nil,
 								},
@@ -182,7 +182,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 							"docker": {
 								Name:   "docker",
 								Source: "github.com/hashicorp/docker",
-								Type:   &addrs.Plugin{"github.com", "hashicorp", "docker"},
+								Type:   &addrs.Plugin{Hostname: "github.com", Namespace: "hashicorp", Type: "docker"},
 								Requirement: VersionConstraint{
 									Required: nil,
 								},
@@ -225,7 +225,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 							"amazon-v1": {
 								Name:   "amazon-v1",
 								Source: "github.com/hashicorp/amazon",
-								Type:   &addrs.Plugin{"github.com", "hashicorp", "amazon"},
+								Type:   &addrs.Plugin{Hostname: "github.com", Namespace: "hashicorp", Type: "amazon"},
 								Requirement: VersionConstraint{
 									Required: mustVersionConstraints(version.NewConstraint("~> v1.0")),
 								},
@@ -236,7 +236,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 							"amazon": {
 								Name:   "amazon",
 								Source: "github.com/hashicorp/amazon",
-								Type:   &addrs.Plugin{"github.com", "hashicorp", "amazon"},
+								Type:   &addrs.Plugin{Hostname: "github.com", Namespace: "hashicorp", Type: "amazon"},
 								Requirement: VersionConstraint{
 									Required: nil,
 								},
