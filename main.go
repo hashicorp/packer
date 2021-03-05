@@ -297,6 +297,19 @@ func loadConfig() (*config, error) {
 		PluginMinPort:      10000,
 		PluginMaxPort:      25000,
 		KnownPluginFolders: packer.PluginFolders("."),
+
+		BuilderRedirects: map[string]string{
+			//
+		},
+		DatasourceRedirects: map[string]string{
+			//
+		},
+		ProvisionerRedirects: map[string]string{
+			//
+		},
+		PostProcessorRedirects: map[string]string{
+			//
+		},
 	}
 	if err := config.Plugins.Discover(); err != nil {
 		return nil, err
