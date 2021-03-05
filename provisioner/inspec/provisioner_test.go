@@ -276,7 +276,7 @@ func TestInspecGetVersion(t *testing.T) {
 	}
 
 	var p Provisioner
-	p.config.Command = "inspec exec"
+	p.config.Command = "inspec"
 	err := p.getVersion()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -297,14 +297,15 @@ func TestInspecGetVersionError(t *testing.T) {
 
 func TestInspecValidExitCodes(t *testing.T) {
 	var p Provisioner
-	if runtime.GOOS == "windows" {
-		if os.Getenv("PACKER_ACC") == "" {
-			t.Skip("This test is only run with PACKER_ACC=1 and it requires InSpec to be installed")
-		}
-		p.config.Command = "inspec exec"
+	if os.Getenv("PACKER_ACC") == "1" {
+		p.config.Command = "inspec"
 	} else {
 		p.config.Command = "./test-fixtures/valid_exit_codes.sh"
+		if runtime.GOOS == "windows" {
+			t.Skip("This test is only run with PACKER_ACC=1 and it requires InSpec to be installed")
+		}
 	}
+	p.config.Backend = "local"
 	p.config.Profile = "test-fixtures/skip_control.rb"
 	p.config.ValidExitCodes = []int{101}
 	err := p.Prepare()

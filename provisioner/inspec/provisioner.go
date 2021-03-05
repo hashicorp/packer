@@ -176,7 +176,7 @@ func (p *Provisioner) getVersion() error {
 			"Error running \"%s version\": %s", p.config.Command, err.Error())
 	}
 
-	versionRe := regexp.MustCompile(`\w (\d+\.\d+[.\d+]*)`)
+	versionRe := regexp.MustCompile(`\s+(\d+\.\d+[.\d+]*)`)
 	matches := versionRe.FindStringSubmatch(string(out))
 	if matches == nil {
 		return fmt.Errorf(
