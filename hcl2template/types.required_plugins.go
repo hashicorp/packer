@@ -42,8 +42,10 @@ func (cfg *PackerConfig) decodeRequiredPluginsBlock(f *hcl.File) hcl.Diagnostics
 
 func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Diagnostics {
 	// when a plugin is used but not defined in the required plugin blocks, it
-	// is 'implicitly used'. Here we read common configuration blocks to try to
-	// guess plugins.
+	// should 'implicitly required', when we want. Here we read common
+	// configuration blocks to try to guess plugins.
+
+	// Then
 
 	// decodeRequiredPluginsBlock needs to be called before
 	// decodeImplicitRequiredPluginsBlocks; otherwise all required plugins will
