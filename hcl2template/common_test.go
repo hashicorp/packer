@@ -20,8 +20,8 @@ import (
 
 const lockedVersion = "v1.5.0"
 
-func getBasicParser() *Parser {
-	return &Parser{
+func getBasicParser(opts ...getParserOption) *Parser {
+	parser := &Parser{
 		CorePackerVersion:       version.Must(version.NewSemver(lockedVersion)),
 		CorePackerVersionString: lockedVersion,
 		Parser:                  hclparse.NewParser(),
@@ -44,7 +44,13 @@ func getBasicParser() *Parser {
 			},
 		},
 	}
+	for _, configure := range opts {
+		configure(parser)
+	}
+	return parser
 }
+
+type getParserOption func(*Parser)
 
 type parseTestArgs struct {
 	filename string

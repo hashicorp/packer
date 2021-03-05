@@ -24,6 +24,11 @@ type PluginConfig struct {
 	Provisioners       ProvisionerSet
 	PostProcessors     PostProcessorSet
 	DataSources        DatasourceSet
+
+	BuilderRedirects       map[string]string
+	DatasourceRedirects    map[string]string
+	ProvisionerRedirects   map[string]string
+	PostProcessorRedirects map[string]string
 }
 
 // PACKERSPACE is used to represent the spaces that separate args for a command

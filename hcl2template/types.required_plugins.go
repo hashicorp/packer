@@ -2,7 +2,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
@@ -55,24 +54,32 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 	diags = append(diags, moreDiags...)
 
 	for _, block := range content.Blocks {
+
 		switch block.Type {
-		case sourceLabel, dataSourceLabel:
-			moreDiags := cfg.inferImplicitRequiredPluginFromBlocks(block)
-			diags = append(diags, moreDiags...)
+		case sourceLabel:
+			diags = append(diags, cfg.requirePluginImplicitly(block, cfg.parser.PluginConfig.BuilderRedirects)...)
+		case dataSourceLabel:
+			diags = append(diags, cfg.requirePluginImplicitly(block, cfg.parser.PluginConfig.DatasourceRedirects)...)
+
 		case buildLabel:
-			content, moreDiags := block.Body.Content(buildSchema)
+			content, _, moreDiags := block.Body.PartialContent(buildSchema)
 			diags = append(diags, moreDiags...)
 			for _, block := range content.Blocks {
+
 				switch block.Type {
-				case buildProvisionerLabel, buildPostProcessorLabel:
-					moreDiags := cfg.inferImplicitRequiredPluginFromBlocks(block)
-					diags = append(diags, moreDiags...)
+				case buildProvisionerLabel:
+					diags = append(diags, cfg.requirePluginImplicitly(block, cfg.parser.PluginConfig.ProvisionerRedirects)...)
+				case buildPostProcessorLabel:
+					diags = append(diags, cfg.requirePluginImplicitly(block, cfg.parser.PluginConfig.PostProcessorRedirects)...)
 				case buildPostProcessorsLabel:
-					content, moreDiags := block.Body.Content(postProcessorsSchema)
+					content, _, moreDiags := block.Body.PartialContent(postProcessorsSchema)
 					diags = append(diags, moreDiags...)
 					for _, block := range content.Blocks {
-						moreDiags := cfg.inferImplicitRequiredPluginFromBlocks(block)
-						diags = append(diags, moreDiags...)
+
+						switch block.Type {
+						case buildPostProcessorLabel:
+							diags = append(diags, cfg.requirePluginImplicitly(block, cfg.parser.PluginConfig.PostProcessorRedirects)...)
+						}
 					}
 				}
 			}
@@ -82,68 +89,59 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 	return diags
 }
 
-// This function will infer an implicitly required plugin block. For plugins
-// that are not present. Usually the plugin name is the first part of a plugin
-// call, before the first dash.
-//
-// Exampes:
-//  * data           "amazon-ami"      "..." adds implictly requried "github.com/hashicorp/amazon"
-//  * source         "amazon-ebs"      "..." adds implictly requried "github.com/hashicorp/amazon"
-//  * source         "google"          "..." adds implictly requried "github.com/hashicorp/google"
-//  * provisioner    "windos-restart"  "..." adds implictly requried "github.com/hashicorp/windows"
-//  * post-processor "exoscale-import" "..." adds implictly requried "github.com/hashicorp/exoscale"
-//  * source         "amazon-v2-ebs"   "..." adds implictly requried "github.com/hashicorp/exoscale"
-//
-// For now this function will only work with hashicorp plugins, and therefore
-// pretend the user meant using an official hashicorp plugin if the plugin could
-// not be found.
-//
-// Plugin name will stop at first dash found, so that means that if a users uses
-// an "amazon-v2" plugin, this won't work.
-func (cfg *PackerConfig) inferImplicitRequiredPluginFromBlocks(block *hcl.Block) hcl.Diagnostics {
-	labels := block.Labels
-	if len(labels) == 0 {
+func (cfg *PackerConfig) requirePluginImplicitly(block *hcl.Block, componentRedirects map[string]string) hcl.Diagnostics {
+	if len(block.Labels) == 0 {
+		// malformed block ? Let's not panic :)
 		return nil
 	}
-	var diags hcl.Diagnostics
-	probablePluginNames := strings.Split(labels[0], "-")
-	if len(probablePluginNames) == 0 || probablePluginNames[0] == "" {
-		// probably a WIP config, return now to avoid panics.
-		return nil
-	}
-	probablePluginName := probablePluginNames[0]
+	componentName := block.Labels[0]
 
-	for _, requiredPluginBlock := range cfg.Packer.RequiredPlugins {
-		for _, requiredPlugin := range requiredPluginBlock.RequiredPlugins {
-			if requiredPlugin.Name == probablePluginName {
-				// Found a plugin that matches this name. No implicitly required
-				// plugin needed.
-				return nil
-			}
-		}
+	redirect, _ := componentRedirects[componentName]
+	if redirect == "" {
+		// no known redirect for this component
+		return nil
 	}
-	fullImportPath := "github.com/hashicorp/" + probablePluginName
-	pType, diags := addrs.ParsePluginSourceString(fullImportPath)
+	redirectAddr, diags := addrs.ParsePluginSourceString(redirect)
 	if diags.HasErrors() {
 		return diags
 	}
 
+	if cfg.pluginRequired(redirectAddr) {
+		// this plugin is already required
+		return nil
+	}
+	cfg.implicitlyRequirePlugin(redirectAddr)
+	return nil
+}
+
+// pluginRequired tells if a plugin is already required
+func (cfg *PackerConfig) pluginRequired(plugin *addrs.Plugin) bool {
+	for _, requiredPluginsBlock := range cfg.Packer.RequiredPlugins {
+		for _, requiredPlugin := range requiredPluginsBlock.RequiredPlugins {
+			if plugin != requiredPlugin.Type {
+				continue
+			}
+
+			return true
+		}
+	}
+	return false
+}
+
+func (cfg *PackerConfig) implicitlyRequirePlugin(plugin *addrs.Plugin) {
 	cfg.Packer.RequiredPlugins = append(cfg.Packer.RequiredPlugins, &RequiredPlugins{
 		RequiredPlugins: map[string]*RequiredPlugin{
-			probablePluginName: {
-				Name:   probablePluginName,
-				Source: fullImportPath,
-				Type:   pType,
+			plugin.Type: {
+				Name:   plugin.Type,
+				Source: plugin.String(),
+				Type:   plugin,
 				Requirement: VersionConstraint{
 					Required: nil, // means latest
 				},
 				PluginDependencyReason: PluginDependencyImplicit,
 			},
 		},
-		DeclRange: block.DefRange,
 	})
-
-	return diags
 }
 
 // RequiredPlugin represents a declaration of a dependency on a particular
