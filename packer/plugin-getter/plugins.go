@@ -38,6 +38,9 @@ type Requirement struct {
 	// VersionConstraints as defined by user. Empty ( to be avoided ) means
 	// highest found version.
 	VersionConstraints version.Constraints
+
+	// was this require implicitly guessed ?
+	Implicit bool
 }
 
 type BinaryInstallationOptions struct {

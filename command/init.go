@@ -125,9 +125,37 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 			ret = 1
 		}
 		if newInstall != nil {
-			msg := fmt.Sprintf("Installed plugin %s %s in %q", pluginRequirement.Identifier, newInstall.Version, newInstall.BinaryPath)
-			ui.Say(msg)
+			if pluginRequirement.Implicit {
+				msg := fmt.Sprintf("Installed implicitly required plugin %s %s in %q", pluginRequirement.Identifier, newInstall.Version, newInstall.BinaryPath)
+				ui.Say(msg)
+
+				warn := fmt.Sprintf(`
+Warning, init with implicitly required plugin is always going to install the 
+latest possible plugin, if a latest version is backward incompatible with your
+config file or your version of Packer, a build will fail. To avoid this, lock
+the plugin version by pasting the following to your configuration:
+
+packer {
+  required_plugins {
+    %s = {
+      source  = "%s"
+      version = "~> %s"
+    }
+  }
+}
+`,
+					pluginRequirement.Identifier.Type,
+					pluginRequirement.Identifier,
+					newInstall.Version,
+				)
+				ui.Error(warn)
+			} else {
+				msg := fmt.Sprintf("Installed plugin %s %s in %q", pluginRequirement.Identifier, newInstall.Version, newInstall.BinaryPath)
+				ui.Say(msg)
+			}
+
 		}
+
 	}
 	return ret
 }
