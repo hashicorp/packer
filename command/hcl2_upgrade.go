@@ -1033,7 +1033,12 @@ func writeProvisioner(typeName string, provisioner *template.Provisioner) []byte
 	provisionerContent := hclwrite.NewEmptyFile()
 	body := provisionerContent.Body()
 	block := body.AppendNewBlock(typeName, []string{provisioner.Type})
+
 	cfg := provisioner.Config
+	if cfg == nil {
+		cfg = map[string]interface{}{}
+	}
+
 	if len(provisioner.Except) > 0 {
 		cfg["except"] = provisioner.Except
 	}
@@ -1086,6 +1091,10 @@ func (p *PostProcessorParser) Parse(tpl *template.Template) error {
 				ppBody.SetAttributeValue("keep_input_artifact", cty.BoolVal(*pp.KeepInputArtifact))
 			}
 			cfg := pp.Config
+			if cfg == nil {
+				cfg = map[string]interface{}{}
+			}
+
 			if len(pp.Except) > 0 {
 				cfg["except"] = pp.Except
 			}
