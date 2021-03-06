@@ -13,15 +13,18 @@ import (
 	dockertagpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-tag"
 )
 
-// VendoredBuilders are builder components that were once bundle with Packer core, but are now being shim with there multi-component counterparts.
+// VendoredBuilders are builder components that were once bundled with the
+// Packer core, but are now being imported from their counterpart plugin repos
 var VendoredBuilders = map[string]packersdk.Builder{
 	"docker": new(dockerbuilder.Builder),
 }
 
-// VendoredProvisioners are components that were once bundle with Packer core, but are now being shim with there multi-component counterparts.
+// VendoredProvisioners are provisioner components that were once bundled with the
+// Packer core, but are now being imported from their counterpart plugin repos
 var VendoredProvisioners = map[string]packersdk.Provisioner{}
 
-// VendoredPostProcessors are components that were once bundle with Packer core, but are now being shim with there multi-component counterparts.
+// VendoredPostProcessors are post-processor components that were once bundled with the
+// Packer core, but are now being imported from their counterpart plugin repos
 var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"docker-import": new(dockerimportpostprocessor.PostProcessor),
 	"docker-push":   new(dockerpushpostprocessor.PostProcessor),
@@ -29,8 +32,8 @@ var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"docker-tag":    new(dockertagpostprocessor.PostProcessor),
 }
 
-// Upon init lets load up any plugins that were vendored manually into the default
-// set of plugins.
+// Upon init lets us load up any plugins that were vendored manually into the
+// default set of plugins.
 func init() {
 	for k, v := range VendoredBuilders {
 		if _, ok := Builders[k]; ok {
