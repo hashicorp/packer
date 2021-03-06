@@ -7,12 +7,11 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer-plugin-docker/builder/docker"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-	"github.com/hashicorp/packer/builder/docker"
-	"github.com/hashicorp/packer/post-processor/artifice"
 )
 
 const BuilderId = "packer.post-processor.docker-import"
@@ -52,7 +51,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
 	switch artifact.BuilderId() {
-	case docker.BuilderId, artifice.BuilderId:
+	case docker.BuilderId, "packer.post-processor.artifice":
 		break
 	default:
 		err := fmt.Errorf(

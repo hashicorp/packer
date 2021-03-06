@@ -50,6 +50,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/hcl/v2 v2.8.0
+	github.com/hashicorp/packer-plugin-docker v0.0.2
 	github.com/hashicorp/packer-plugin-sdk v0.0.14
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
@@ -63,7 +64,6 @@ require (
 	github.com/mitchellh/cli v1.1.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
-	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.4.0
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784

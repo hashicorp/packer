@@ -413,6 +413,13 @@ github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
+# github.com/hashicorp/packer-plugin-docker v0.0.2
+## explicit
+github.com/hashicorp/packer-plugin-docker/builder/docker
+github.com/hashicorp/packer-plugin-docker/post-processor/docker-import
+github.com/hashicorp/packer-plugin-docker/post-processor/docker-push
+github.com/hashicorp/packer-plugin-docker/post-processor/docker-save
+github.com/hashicorp/packer-plugin-docker/post-processor/docker-tag
 # github.com/hashicorp/packer-plugin-sdk v0.0.14
 ## explicit
 github.com/hashicorp/packer-plugin-sdk/acctest
@@ -552,8 +559,6 @@ github.com/mitchellh/go-testing-interface
 github.com/mitchellh/go-vnc
 # github.com/mitchellh/go-wordwrap v1.0.0
 github.com/mitchellh/go-wordwrap
-# github.com/mitchellh/gox v1.0.1
-## explicit
 # github.com/mitchellh/iochan v1.0.0
 github.com/mitchellh/iochan
 # github.com/mitchellh/mapstructure v1.4.0
