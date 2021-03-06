@@ -21,7 +21,8 @@ async function generateStaticProps(
   navDataFile,
   localContentDir,
   params,
-  { productName, remotePluginsFile, additionalComponents } = {}
+  product,
+  { remotePluginsFile, additionalComponents, mainBranch = 'main' } = {}
 ) {
   const navData = await resolveNavData(navDataFile, localContentDir, {
     remotePluginsFile,
@@ -36,6 +37,14 @@ async function generateStaticProps(
     : // Fetch remote content using GitHub's API
       await fetchGithubFile(remoteFile)
   if (err) throw new Error(err)
+  // Construct the githubFileUrl, used for "Edit this page" link
+  // Note: for custom ".docs-artifacts" directories, the "Edit this page"
+  // link will lead to the artifact file rather than the "docs" source file
+  const githubFileUrl = filePath
+    ? `https://github.com/hashicorp/${product.slug}/blob/${mainBranch}/website/${filePath}`
+    : `https://github.com/${remoteFile.repo}/blob/${
+        remoteFile.branch
+      }/${remoteFile.filePath.replace('\b.docs-artifacts', 'docs')}`
   // For plugin pages, prefix the MDX content with a
   // label that reflects the plugin tier
   // (current options are "Official" or "Community")
@@ -48,11 +57,12 @@ async function generateStaticProps(
   }
   const { mdxSource, frontMatter } = await renderPageMdx(mdxString, {
     additionalComponents,
-    productName,
+    productName: product.name,
     mdxContentHook,
   })
   // Build the currentPath from page parameters
   const currentPath = !params.page ? '' : params.page.join('/')
+
   // In development, set a flag if there is no GITHUB_API_TOKEN,
   // as this means dev is seeing only local content, and we want to flag that
   const isDevMissingRemotePlugins = IS_DEV && !process.env.GITHUB_API_TOKEN
@@ -62,6 +72,7 @@ async function generateStaticProps(
     isDevMissingRemotePlugins,
     mdxSource,
     mdxString,
+    githubFileUrl,
     navData,
     navNode,
   }

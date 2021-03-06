@@ -10,15 +10,12 @@ import {
 const BASE_ROUTE = 'intro'
 const NAV_DATA = 'data/intro-nav-data.json'
 const CONTENT_DIR = 'content/intro'
+const MAIN_BRANCH = 'master'
+const PRODUCT = { name: productName, slug: productSlug }
 
 export default function IntroLayout(props) {
   return (
-    <DocsPage
-      baseRoute={BASE_ROUTE}
-      mainBranch="master" // used for "edit on this page", default "main"
-      product={{ name: productName, slug: productSlug }}
-      staticProps={props}
-    />
+    <DocsPage baseRoute={BASE_ROUTE} product={PRODUCT} staticProps={props} />
   )
 }
 
@@ -28,6 +25,12 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const props = await generateStaticProps(NAV_DATA, CONTENT_DIR, params)
+  const props = await generateStaticProps(
+    NAV_DATA,
+    CONTENT_DIR,
+    params,
+    PRODUCT,
+    { mainBranch: MAIN_BRANCH }
+  )
   return { props }
 }
