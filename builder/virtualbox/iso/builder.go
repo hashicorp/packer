@@ -151,7 +151,7 @@ type Config struct {
 	ISOInterface string `mapstructure:"iso_interface" required:"false"`
 	// Additional disks to create. Uses `vm_name` as the disk name template and
 	// appends `-#` where `#` is the position in the array. `#` starts at 1 since 0
-	// is the default disk. Each string represents the disk image size in MiB.
+	// is the default disk. Each value represents the disk image size in MiB.
 	// Each additional disk uses the same disk parameters as the default disk.
 	// Unset by default.
 	AdditionalDiskSize []uint `mapstructure:"disk_additional_size" required:"false"`
