@@ -44,7 +44,7 @@ a third-party post-processor.
 <Tab heading="HCL2">
 
 ```hcl
-post-processors "checksum" {
+post-processor "checksum" {
   checksum_types = ["sha1", "sha256"]
   output = "packer_{{.BuildName}}_{{.ChecksumType}}.checksum"
 }
