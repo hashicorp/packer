@@ -1,3 +1,4 @@
+require('dotenv').config()
 const fs = require('fs')
 const path = require('path')
 const {
@@ -6,40 +7,40 @@ const {
 } = require('@hashicorp/react-search/tools')
 const resolveNavData = require('../components/remote-plugin-docs/utils/resolve-nav-data')
 const fetchGithubFile = require('../components/remote-plugin-docs/utils/fetch-github-file')
-const dotenv = require('dotenv')
 
-// Read in envs (need GITHUB_API_TOKEN from .env.local when running locally)
-dotenv.config()
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })
+// Run indexing
+indexContent({ getSearchObjects })
 
 async function getSearchObjects() {
-  // Resolve /docs, /guides, and /intro nav data,
-  // which corresponds to all the content we will
-  // actually render (this avoids indexing non-rendered content, and partials)
-  // `docs`
+  // Resolve /docs, /guides, and /intro nav data, which
+  // corresponds to all the content we will actually render
+  // (this avoids indexing non-rendered content, and partials)
+  // `docs` content
   const docsNav = await resolveNavData(
     'data/docs-nav-data.json',
     'content/docs',
     { remotePluginsFile: 'data/docs-remote-plugins.json' }
   )
   const docsObjects = await searchObjectsFromNavData(docsNav, 'docs')
-  // `guides`
+  // `guides` content
   const guidesNav = await resolveNavData(
     'data/guides-nav-data.json',
     'content/guides'
   )
   const guidesObjects = await searchObjectsFromNavData(guidesNav, 'guides')
-  // `intro`
+  // `intro` content
   const introNav = await resolveNavData(
     'data/intro-nav-data.json',
     'content/intro'
   )
   const introObjects = await searchObjectsFromNavData(introNav, 'intro')
-  // Collect all search objects
+  // Concat all search objects, and return them
   const searchObjects = [].concat(docsObjects, guidesObjects, introObjects)
   return searchObjects
 }
 
+// Given navData, return a flat array of search objects
+// for each content file reference in the navData nodes
 async function searchObjectsFromNavData(navData, baseRoute = '') {
   const searchObjectsFromNodes = await Promise.all(
     navData.map((n) => searchObjectsFromNavNode(n, baseRoute))
@@ -51,6 +52,11 @@ async function searchObjectsFromNavData(navData, baseRoute = '') {
   return flattenedSearchObjects
 }
 
+// Given a navData node, return a flat array of search objects
+// for each content file referenced in the node.
+// For "leaf" nodes, this will yield an array with a single object.
+// For "branch" nodes, this may yield an array with zero or more search objects.
+// For all other nodes, this will yield an empty array.
 async function searchObjectsFromNavNode(node, baseRoute) {
   // If this is a node, build a search object
   if (node.path) {
@@ -73,6 +79,3 @@ async function searchObjectsFromNavNode(node, baseRoute) {
   // (for direct link nodes, divider nodes)
   return []
 }
-
-// Run indexing
-indexContent({ getSearchObjects })

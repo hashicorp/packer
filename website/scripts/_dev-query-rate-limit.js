@@ -1,4 +1,3 @@
-require('dotenv').config()
 const fetch = require('isomorphic-unfetch')
 
 const GITHUB_API_TOKEN = process.env.GITHUB_API_TOKEN
