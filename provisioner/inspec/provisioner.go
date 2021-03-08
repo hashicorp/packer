@@ -438,7 +438,7 @@ func (p *Provisioner) executeInspec(ui packersdk.Ui, comm packersdk.Communicator
 				}
 				if !validExitCode {
 					return fmt.Errorf(
-						"Inspec exited with non-zero exit status: %d. Allowed exit codes are: %v",
+						"Inspec exited with non-zero exit status: %d. Expected exit codes are: %v",
 						exitStatus, p.config.ValidExitCodes)
 				}
 			}
