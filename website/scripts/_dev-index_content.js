@@ -1,3 +1,4 @@
+require('dotenv').config()
 const fs = require('fs')
 const path = require('path')
 const {
@@ -6,11 +7,10 @@ const {
 } = require('@hashicorp/react-search/tools')
 const resolveNavData = require('../components/remote-plugin-docs/utils/resolve-nav-data')
 const fetchGithubFile = require('../components/remote-plugin-docs/utils/fetch-github-file')
-const dotenv = require('dotenv')
 
-// Read in envs (need GITHUB_API_TOKEN from .env.local when running locally)
-dotenv.config()
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })
+// const NAV_DATA = 'data/docs-nav-data.json'
+// const REMOTE_PLUGINS = 'data/docs-remote-plugins.json'
+const CONTENT_DIR = 'content'
 
 async function getSearchObjects() {
   // Resolve /docs, /guides, and /intro nav data,
@@ -37,6 +37,16 @@ async function getSearchObjects() {
   const introObjects = await searchObjectsFromNavData(introNav, 'intro')
   // Collect all search objects
   const searchObjects = [].concat(docsObjects, guidesObjects, introObjects)
+  // Get local files
+  const projectRoot = process.cwd()
+  // Get a single test object
+  const contentDir = path.join(projectRoot, CONTENT_DIR)
+  const fullPath = path.join(contentDir, 'docs', 'commands', 'build.mdx')
+  const fileString = fs.readFileSync(fullPath, 'utf8')
+  const urlPath = fullPath.replace(`${contentDir}/`, '').replace('.mdx', '')
+  const testObject = await getDocsSearchObject(urlPath, fileString)
+  console.log({ testObject })
+  //
   return searchObjects
 }
 
@@ -74,5 +84,4 @@ async function searchObjectsFromNavNode(node, baseRoute) {
   return []
 }
 
-// Run indexing
 indexContent({ getSearchObjects })

@@ -3,16 +3,18 @@ import path from 'path'
 import {
   getNodeFromPath,
   getPathsFromNavData,
-  validateNavData,
 } from '@hashicorp/react-docs-page/server'
 import renderPageMdx from '@hashicorp/react-docs-page/render-page-mdx'
 import fetchGithubFile from './utils/fetch-github-file'
-import mergeRemotePlugins from './utils/merge-remote-plugins'
+import resolveNavData from './utils/resolve-nav-data'
 
 const IS_DEV = process.env.VERCEL_ENV !== 'production'
 
 async function generateStaticPaths(navDataFile, contentDir, options = {}) {
-  const navData = await resolveNavData(navDataFile, contentDir, options)
+  const navData = await resolveNavData(navDataFile, contentDir, {
+    ...options,
+    isDev: IS_DEV,
+  })
   const paths = await getPathsFromNavData(navData)
   return paths
 }
@@ -26,6 +28,7 @@ async function generateStaticProps(
 ) {
   const navData = await resolveNavData(navDataFile, localContentDir, {
     remotePluginsFile,
+    isDev: IS_DEV,
   })
   const pathToMatch = params.page ? params.page.join('/') : ''
   const navNode = getNodeFromPath(pathToMatch, navData, localContentDir)
@@ -76,23 +79,6 @@ async function generateStaticProps(
     navData,
     navNode,
   }
-}
-
-async function resolveNavData(navDataFile, localContentDir, options = {}) {
-  const { remotePluginsFile } = options
-  // Read in files
-  const navDataPath = path.join(process.cwd(), navDataFile)
-  const navData = JSON.parse(fs.readFileSync(navDataPath, 'utf8'))
-  const remotePluginsPath = path.join(process.cwd(), remotePluginsFile)
-  const remotePlugins = JSON.parse(fs.readFileSync(remotePluginsPath, 'utf-8'))
-  // Resolve plugins, this yields branches with NavLeafRemote nodes
-  const withPlugins = await mergeRemotePlugins(remotePlugins, navData, IS_DEV)
-  // Resolve local filePaths for NavLeaf nodes
-  const withFilePaths = await validateNavData(withPlugins, localContentDir)
-  // Return the nav data with:
-  // 1. Plugins merged, transformed into navData structures with NavLeafRemote nodes
-  // 2. filePaths added to all local NavLeaf nodes
-  return withFilePaths
 }
 
 export default { generateStaticPaths, generateStaticProps }
