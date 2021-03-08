@@ -119,10 +119,15 @@ type FlatConfig struct {
 	GuestAdditionsURL         *string           `mapstructure:"guest_additions_url" required:"false" cty:"guest_additions_url" hcl:"guest_additions_url"`
 	Chipset                   *string           `mapstructure:"chipset" required:"false" cty:"chipset" hcl:"chipset"`
 	Firmware                  *string           `mapstructure:"firmware" required:"false" cty:"firmware" hcl:"firmware"`
+	NestedVirt                *bool             `mapstructure:"nested_virt" required:"false" cty:"nested_virt" hcl:"nested_virt"`
+	RTCTimeBase               *string           `mapstructure:"rtc_time_base" required:"false" cty:"rtc_time_base" hcl:"rtc_time_base"`
 	DiskSize                  *uint             `mapstructure:"disk_size" required:"false" cty:"disk_size" hcl:"disk_size"`
 	NICType                   *string           `mapstructure:"nic_type" required:"false" cty:"nic_type" hcl:"nic_type"`
 	AudioController           *string           `mapstructure:"audio_controller" required:"false" cty:"audio_controller" hcl:"audio_controller"`
 	GfxController             *string           `mapstructure:"gfx_controller" required:"false" cty:"gfx_controller" hcl:"gfx_controller"`
+	GfxVramSize               *uint             `mapstructure:"gfx_vram_size" required:"false" cty:"gfx_vram_size" hcl:"gfx_vram_size"`
+	GfxAccelerate3D           *bool             `mapstructure:"gfx_accelerate_3d" required:"false" cty:"gfx_accelerate_3d" hcl:"gfx_accelerate_3d"`
+	GfxEFIResolution          *string           `mapstructure:"gfx_efi_resolution" required:"false" cty:"gfx_efi_resolution" hcl:"gfx_efi_resolution"`
 	GuestOSType               *string           `mapstructure:"guest_os_type" required:"false" cty:"guest_os_type" hcl:"guest_os_type"`
 	HardDriveDiscard          *bool             `mapstructure:"hard_drive_discard" required:"false" cty:"hard_drive_discard" hcl:"hard_drive_discard"`
 	HardDriveInterface        *string           `mapstructure:"hard_drive_interface" required:"false" cty:"hard_drive_interface" hcl:"hard_drive_interface"`
@@ -256,10 +261,15 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"guest_additions_url":          &hcldec.AttrSpec{Name: "guest_additions_url", Type: cty.String, Required: false},
 		"chipset":                      &hcldec.AttrSpec{Name: "chipset", Type: cty.String, Required: false},
 		"firmware":                     &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
+		"nested_virt":                  &hcldec.AttrSpec{Name: "nested_virt", Type: cty.Bool, Required: false},
+		"rtc_time_base":                &hcldec.AttrSpec{Name: "rtc_time_base", Type: cty.String, Required: false},
 		"disk_size":                    &hcldec.AttrSpec{Name: "disk_size", Type: cty.Number, Required: false},
 		"nic_type":                     &hcldec.AttrSpec{Name: "nic_type", Type: cty.String, Required: false},
 		"audio_controller":             &hcldec.AttrSpec{Name: "audio_controller", Type: cty.String, Required: false},
 		"gfx_controller":               &hcldec.AttrSpec{Name: "gfx_controller", Type: cty.String, Required: false},
+		"gfx_vram_size":                &hcldec.AttrSpec{Name: "gfx_vram_size", Type: cty.Number, Required: false},
+		"gfx_accelerate_3d":            &hcldec.AttrSpec{Name: "gfx_accelerate_3d", Type: cty.Bool, Required: false},
+		"gfx_efi_resolution":           &hcldec.AttrSpec{Name: "gfx_efi_resolution", Type: cty.String, Required: false},
 		"guest_os_type":                &hcldec.AttrSpec{Name: "guest_os_type", Type: cty.String, Required: false},
 		"hard_drive_discard":           &hcldec.AttrSpec{Name: "hard_drive_discard", Type: cty.Bool, Required: false},
 		"hard_drive_interface":         &hcldec.AttrSpec{Name: "hard_drive_interface", Type: cty.String, Required: false},
