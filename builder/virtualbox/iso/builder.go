@@ -52,6 +52,14 @@ type Config struct {
 	// When set to bios, the firmare is BIOS. This is the default.
 	// When set to efi, the firmare is EFI.
 	Firmware string `mapstructure:"firmware" required:"false"`
+	// Nested virtualization: false or true.
+	// When set to true, nested virtualisation (VT-x/AMD-V) is enabled.
+	// When set to false, nested virtualisation is disabled. This is the default.
+	NestedVirt bool `mapstructure:"nested_virt" required:"false"`
+	// RTC time base: UTC or local.
+	// When set to true, the RTC is set as UTC time.
+	// When set to false, the RTC is set as local time. This is the default.
+	RTCTimeBase string `mapstructure:"rtc_time_base" required:"false"`
 	// The size, in megabytes, of the hard disk to create for the VM. By
 	// default, this is 40000 (about 40 GB).
 	DiskSize uint `mapstructure:"disk_size" required:"false"`
@@ -210,6 +218,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	default:
 		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("firmware can only be bios or efi"))
+	}
+
+	if b.config.RTCTimeBase == "" {
+		b.config.RTCTimeBase = "local"
+	}
+	switch b.config.RTCTimeBase {
+	case "UTC", "local":
+		// do nothing
+	default:
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("rtc_time_base can only be UTC or local"))
 	}
 
 	if b.config.DiskSize == 0 {

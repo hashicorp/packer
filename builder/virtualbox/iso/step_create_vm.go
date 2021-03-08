@@ -26,7 +26,7 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 
 	name := config.VMName
 
-	commands := make([][]string, 10)
+	commands := make([][]string, 12)
 	commands[0] = []string{
 		"createvm", "--name", name,
 		"--ostype", config.GuestOSType, "--register",
@@ -60,6 +60,16 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 		"--nictype7", config.NICType,
 		"--nictype8", config.NICType}
 	commands[9] = []string{"modifyvm", name, "--graphicscontroller", config.GfxController}
+	if config.RTCTimeBase == "UTC" {
+		commands[10] = []string{"modifyvm", name, "--rtcuseutc", "on"}
+	} else {
+		commands[10] = []string{"modifyvm", name, "--rtcuseutc", "off"}
+	}
+	if config.NestedVirt == true {
+		commands[11] = []string{"modifyvm", name, "--nested-hw-virt", "on"}
+	} else {
+		commands[11] = []string{"modifyvm", name, "--nested-hw-virt", "off"}
+	}
 
 	ui.Say("Creating virtual machine...")
 	for _, command := range commands {
