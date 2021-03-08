@@ -75,7 +75,7 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 		commands[12] = []string{"modifyvm", name, "--accelerate3d", "on"}
 	} else {
 		commands[12] = []string{"modifyvm", name, "--accelerate3d", "off"}
-   }
+	}
 	if config.GfxEFIResolution != "" {
 		commands[13] = []string{"setextradata", name, "VBoxInternal2/EfiGraphicsResolution", config.GfxEFIResolution}
 	}
