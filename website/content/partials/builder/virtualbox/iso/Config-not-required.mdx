@@ -8,6 +8,14 @@
   When set to bios, the firmare is BIOS. This is the default.
   When set to efi, the firmare is EFI.
 
+- `nested_virt` (bool) - Nested virtualization: false or true.
+  When set to true, nested virtualisation (VT-x/AMD-V) is enabled.
+  When set to false, nested virtualisation is disabled. This is the default.
+
+- `rtc_time_base` (string) - RTC time base: UTC or local.
+  When set to true, the RTC is set as UTC time.
+  When set to false, the RTC is set as local time. This is the default.
+
 - `disk_size` (uint) - The size, in megabytes, of the hard disk to create for the VM. By
   default, this is 40000 (about 40 GB).
 
@@ -30,6 +38,17 @@
   When set to vboxsvga, the graphics controller is VirtualBox SVGA.
   When set to vmsvga, the graphics controller is VMware SVGA.
   When set to none, the graphics controller is disabled.
+
+- `gfx_vram_size` (uint) - The VRAM size to be used. By default, this is 4 MiB.
+
+- `gfx_accelerate_3d` (bool) - 3D acceleration: true or false.
+  When set to true, 3D acceleration is enabled.
+  When set to false, 3D acceleration is disabled. This is the default.
+
+- `gfx_efi_resolution` (string) - Screen resolution in EFI mode: WIDTHxHEIGHT.
+  When set to WIDTHxHEIGHT, it provides the given width and height as screen resolution
+  to EFI, for example 1920x1080 for Full-HD resolution. By default, no screen resolution
+  is set. Note, that this option only affects EFI boot, not the (default) BIOS boot.
 
 - `guest_os_type` (string) - The guest OS type being installed. By default this is other, but you can
   get dramatic performance improvements by setting this to the proper
