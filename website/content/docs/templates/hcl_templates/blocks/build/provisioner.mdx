@@ -52,7 +52,7 @@ source "amazon-ebs" "second-example" {
 }
 
 build {
-  source = [
+  sources = [
     "source.amazon-ebs.first-example",
     "source.amazon-ebs.second-example",
   ]
