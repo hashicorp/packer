@@ -65,13 +65,15 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 		ui.Message(fmt.Sprintf("Using image %s with ID %d", image.Description, image.ID))
 	}
 
+	myFalse := false
 	serverCreateResult, _, err := client.Server.Create(ctx, hcloud.ServerCreateOpts{
-		Name:       c.ServerName,
-		ServerType: &hcloud.ServerType{Name: c.ServerType},
-		Image:      image,
-		SSHKeys:    sshKeys,
-		Location:   &hcloud.Location{Name: c.Location},
-		UserData:   userData,
+		Name:             c.ServerName,
+		ServerType:       &hcloud.ServerType{Name: c.ServerType},
+		Image:            image,
+		SSHKeys:          sshKeys,
+		Location:         &hcloud.Location{Name: c.Location},
+		UserData:         userData,
+		StartAfterCreate: &myFalse,
 	})
 	if err != nil {
 		err := fmt.Errorf("Error creating server: %s", err)
@@ -113,25 +115,45 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		ui.Say("Reboot server...")
-		action, _, err := client.Server.Reset(ctx, serverCreateResult.Server)
-		if err != nil {
-			err := fmt.Errorf("Error rebooting server: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		if err := waitForAction(ctx, client, action); err != nil {
-			err := fmt.Errorf("Error rebooting server: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
 		if c.RescueMode == "freebsd64" {
 			// We will set this only on freebsd
 			ui.Say("Using Root Password instead of SSH Keys...")
 			c.Comm.SSHPassword = rootPassword
 		}
+	}
+
+	if c.ScaleServerType != "" {
+		ui.Say(fmt.Sprintf("Scale server from %s to %s...", c.ServerType, c.ScaleServerType))
+		action, _, err := client.Server.ChangeType(ctx, serverCreateResult.Server, hcloud.ServerChangeTypeOpts{
+			ServerType:  &hcloud.ServerType{Name: c.ScaleServerType},
+			UpgradeDisk: false,
+		})
+		if err != nil {
+			err := fmt.Errorf("Error scaling server: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		if err := waitForAction(ctx, client, action); err != nil {
+			err := fmt.Errorf("Error scaling server: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
+	serverStartAction, _, err := client.Server.Poweron(ctx, serverCreateResult.Server)
+	if err != nil {
+		err := fmt.Errorf("Error starting server: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	if err := waitForAction(ctx, client, serverStartAction); err != nil {
+		err := fmt.Errorf("Error starting server: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	return multistep.ActionContinue

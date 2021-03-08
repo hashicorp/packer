@@ -28,11 +28,12 @@ type Config struct {
 
 	PollInterval time.Duration `mapstructure:"poll_interval"`
 
-	ServerName  string       `mapstructure:"server_name"`
-	Location    string       `mapstructure:"location"`
-	ServerType  string       `mapstructure:"server_type"`
-	Image       string       `mapstructure:"image"`
-	ImageFilter *imageFilter `mapstructure:"image_filter"`
+	ServerName      string       `mapstructure:"server_name"`
+	Location        string       `mapstructure:"location"`
+	ServerType      string       `mapstructure:"server_type"`
+	ScaleServerType string       `mapstructure:"scale_server_type"`
+	Image           string       `mapstructure:"image"`
+	ImageFilter     *imageFilter `mapstructure:"image_filter"`
 
 	SnapshotName   string            `mapstructure:"snapshot_name"`
 	SnapshotLabels map[string]string `mapstructure:"snapshot_labels"`
