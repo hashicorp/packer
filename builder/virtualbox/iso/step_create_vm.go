@@ -26,7 +26,7 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 
 	name := config.VMName
 
-	commands := make([][]string, 12)
+	commands := make([][]string, 14)
 	commands[0] = []string{
 		"createvm", "--name", name,
 		"--ostype", config.GuestOSType, "--register",
@@ -59,7 +59,7 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 		"--nictype6", config.NICType,
 		"--nictype7", config.NICType,
 		"--nictype8", config.NICType}
-	commands[9] = []string{"modifyvm", name, "--graphicscontroller", config.GfxController}
+	commands[9] = []string{"modifyvm", name, "--graphicscontroller", config.GfxController, "--vram", strconv.FormatUint(uint64(config.GfxVramSize), 10)}
 	if config.RTCTimeBase == "UTC" {
 		commands[10] = []string{"modifyvm", name, "--rtcuseutc", "on"}
 	} else {
@@ -69,6 +69,15 @@ func (s *stepCreateVM) Run(ctx context.Context, state multistep.StateBag) multis
 		commands[11] = []string{"modifyvm", name, "--nested-hw-virt", "on"}
 	} else {
 		commands[11] = []string{"modifyvm", name, "--nested-hw-virt", "off"}
+	}
+
+	if config.GfxAccelerate3D {
+		commands[12] = []string{"modifyvm", name, "--accelerate3d", "on"}
+	} else {
+		commands[12] = []string{"modifyvm", name, "--accelerate3d", "off"}
+   }
+	if config.GfxEFIResolution != "" {
+		commands[13] = []string{"setextradata", name, "VBoxInternal2/EfiGraphicsResolution", config.GfxEFIResolution}
 	}
 
 	ui.Say("Creating virtual machine...")

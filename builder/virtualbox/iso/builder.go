@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer-plugin-sdk/bootcommand"
@@ -83,6 +84,17 @@ type Config struct {
 	// When set to vmsvga, the graphics controller is VMware SVGA.
 	// When set to none, the graphics controller is disabled.
 	GfxController string `mapstructure:"gfx_controller" required:"false"`
+	// The VRAM size to be used. By default, this is 4 MiB.
+	GfxVramSize uint `mapstructure:"gfx_vram_size" required:"false"`
+	// 3D acceleration: true or false.
+	// When set to true, 3D acceleration is enabled.
+	// When set to false, 3D acceleration is disabled. This is the default.
+	GfxAccelerate3D bool `mapstructure:"gfx_accelerate_3d" required:"false"`
+	// Screen resolution in EFI mode: WIDTHxHEIGHT.
+	// When set to WIDTHxHEIGHT, it provides the given width and height as screen resolution
+	// to EFI, for example 1920x1080 for Full-HD resolution. By default, no screen resolution
+	// is set. Note, that this option only affects EFI boot, not the (default) BIOS boot.
+	GfxEFIResolution string `mapstructure:"gfx_efi_resolution" required:"false"`
 	// The guest OS type being installed. By default this is other, but you can
 	// get dramatic performance improvements by setting this to the proper
 	// value. To view all available values for this run VBoxManage list
@@ -259,6 +271,24 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	default:
 		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("Graphics controller type can only be vboxvga, vboxsvga, vmsvga, none"))
+	}
+
+	if b.config.GfxVramSize == 0 {
+		b.config.GfxVramSize = 4
+	} else {
+		if b.config.GfxVramSize < 1 || b.config.GfxVramSize > 128 {
+			errs = packersdk.MultiErrorAppend(
+				errs, errors.New("VGRAM size must be from 0 (use default) to 128"))
+		}
+	}
+
+	if b.config.GfxEFIResolution != "" {
+		re := regexp.MustCompile(`^[\d]+x[\d]+$`)
+		matched := re.MatchString(b.config.GfxEFIResolution)
+		if !matched {
+			errs = packersdk.MultiErrorAppend(
+				errs, errors.New("EFI resolution must be in the format WIDTHxHEIGHT, e.g. 1920x1080"))
+		}
 	}
 
 	if b.config.AudioController == "" {
