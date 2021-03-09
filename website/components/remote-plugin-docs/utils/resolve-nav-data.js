@@ -13,7 +13,7 @@ const validateRouteStructure = require('@hashicorp/react-docs-sidenav/utils/vali
  * @param {object} options optional configuration object
  * @param {string} options.isDev if true, then will NOT throw errors if remote fetches fail
  * @param {string} options.remotePluginsFile path to a remote-plugins.json file, relative to the cwd. Example: "data/docs-remote-plugins.json".
- * @returns {object} the resolved navData. This includes NavBranch nodes pulled from remote plugin repositories, as well as filePath properties on all local NavLeaf nodes, and remoteFile properties on all remote NavLeaf nodes.
+ * @returns {object} the resolved navData. This includes NavBranch nodes pulled from remote plugin repositories, as well as filePath properties on all local NavLeaf nodes, and remoteFile properties on all NavLeafRemote nodes.
  */
 async function resolveNavData(navDataFile, localContentDir, options = {}) {
   const { remotePluginsFile, isDev } = options
