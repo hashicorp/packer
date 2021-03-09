@@ -52,7 +52,7 @@ async function getSearchObjects() {
  * Given navData, return a flat array of search objects
  * for each content file referenced in the navData nodes
  * @param {Object[]} navData - an array of nav-data nodes, as detailed in [mktg-032](https://docs.google.com/document/d/1kYvbyd6njHFSscoE1dtDNHQ3U8IzaMdcjOS0jg87rHg)
- * @param {*} baseRoute - the base route where the navData will be rendered. For example, "docs".
+ * @param {string} baseRoute - the base route where the navData will be rendered. For example, "docs".
  * @returns {Object[]} - an array of searchObjects to pass to Algolia. Must include an objectID property. See https://www.algolia.com/doc/api-reference/api-methods/add-objects/?client=javascript#examples.
  */
 async function searchObjectsFromNavData(navData, baseRoute = '') {
@@ -72,7 +72,7 @@ async function searchObjectsFromNavData(navData, baseRoute = '') {
  * For "branch" nodes, this may yield an array with zero or more search objects.
  * For all other nodes, this will yield an empty array.
  * @param {object} node - a nav-data nodes, as detailed in [mktg-032](https://docs.google.com/document/d/1kYvbyd6njHFSscoE1dtDNHQ3U8IzaMdcjOS0jg87rHg)
- * @param {*} baseRoute - the base route where the navData will be rendered. For example, "docs".
+ * @param {string} baseRoute - the base route where the navData will be rendered. For example, "docs".
  * @returns {Object[]} - an array of searchObjects to pass to Algolia. Must include an objectID property. See https://www.algolia.com/doc/api-reference/api-methods/add-objects/?client=javascript#examples.
  */
 async function searchObjectsFromNavNode(node, baseRoute) {
