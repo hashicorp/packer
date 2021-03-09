@@ -12,7 +12,7 @@ async function mergeRemotePlugins(
   pluginsData,
   navData,
   githubApiToken,
-  ignoreFetchError = true
+  ignoreFetchError = false
 ) {
   const allPluginData = await Promise.all(
     pluginsData.map(async (pluginEntry) => {
