@@ -149,10 +149,10 @@ packer {
 					newInstall.Version,
 				)
 				ui.Error(warn)
-			} else {
-				msg := fmt.Sprintf("Installed plugin %s %s in %q", pluginRequirement.Identifier, newInstall.Version, newInstall.BinaryPath)
-				ui.Say(msg)
+				continue
 			}
+			msg := fmt.Sprintf("Installed plugin %s %s in %q", pluginRequirement.Identifier, newInstall.Version, newInstall.BinaryPath)
+			ui.Say(msg)
 
 		}
 
