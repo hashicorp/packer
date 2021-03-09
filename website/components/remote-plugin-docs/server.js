@@ -8,7 +8,8 @@ import renderPageMdx from '@hashicorp/react-docs-page/render-page-mdx'
 import fetchGithubFile from './utils/fetch-github-file'
 import resolveNavData from './utils/resolve-nav-data'
 
-const IS_DEV_ENV = process.env.VERCEL_ENV !== 'production'
+const VERCEL_ENV = process.env.VERCEL_ENV
+const IS_DEV_ENV = !VERCEL_ENV || VERCEL_ENV === 'development'
 const GITHUB_API_TOKEN = process.env.GITHUB_API_TOKEN
 
 async function generateStaticPaths(navDataFile, contentDir, options = {}) {
