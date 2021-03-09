@@ -14,37 +14,42 @@ const GITHUB_API_TOKEN = process.env.CI_GITHUB_TOKEN
 indexContent({ getSearchObjects })
 
 async function getSearchObjects() {
-  // Set up an array to collect all search objects
-  const searchObjects = []
   // Resolve /docs, /guides, and /intro nav data, which
   // corresponds to all the content we will actually render
   // This avoids indexing non-rendered content, and partials.
-  // `docs` content
-  const docsNav = await resolveNavData(
-    'data/docs-nav-data.json',
-    'content/docs',
-    {
+  // Fetch objects for `docs` content
+  async function fetchDocsObjects() {
+    const navFile = 'data/docs-nav-data.json'
+    const contentDir = 'content/docs'
+    const opts = {
       remotePluginsFile: 'data/docs-remote-plugins.json',
       githubToken: GITHUB_API_TOKEN,
     }
-  )
-  const docsObjects = await searchObjectsFromNavData(docsNav, 'docs')
-  searchObjects.push(...docsObjects)
-  // `guides` content
-  const guidesNav = await resolveNavData(
-    'data/guides-nav-data.json',
-    'content/guides'
-  )
-  const guidesObjects = await searchObjectsFromNavData(guidesNav, 'guides')
-  searchObjects.push(...guidesObjects)
-  // `intro` content
-  const introNav = await resolveNavData(
-    'data/intro-nav-data.json',
-    'content/intro'
-  )
-  const introObjects = await searchObjectsFromNavData(introNav, 'intro')
-  searchObjects.push(...introObjects)
-  // Return the collected search objects
+    const navData = await resolveNavData(navFile, contentDir, opts)
+    return await searchObjectsFromNavData(navData, 'docs')
+  }
+  // Fetch objects for `guides` content
+  async function fetchGuidesObjects() {
+    const navFile = 'data/guides-nav-data.json'
+    const contentDir = 'content/guides'
+    const navData = await resolveNavData(navFile, contentDir)
+    return await searchObjectsFromNavData(navData, 'guides')
+  }
+  // Fetch objects for `intro` content
+  async function fetchIntroObjects() {
+    const navFile = 'data/intro-nav-data.json'
+    const contentDir = 'content/intro'
+    const navData = await resolveNavData(navFile, contentDir)
+    return await searchObjectsFromNavData(navData, 'intro')
+  }
+  // Collect, flatten and return the collected search objects
+  const searchObjects = (
+    await Promise.all([
+      fetchDocsObjects(),
+      fetchGuidesObjects(),
+      fetchIntroObjects(),
+    ])
+  ).reduce((acc, array) => acc.concat(array), [])
   return searchObjects
 }
 
