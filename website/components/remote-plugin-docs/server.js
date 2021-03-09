@@ -8,12 +8,14 @@ import renderPageMdx from '@hashicorp/react-docs-page/render-page-mdx'
 import fetchGithubFile from './utils/fetch-github-file'
 import resolveNavData from './utils/resolve-nav-data'
 
-const IS_DEV = process.env.VERCEL_ENV !== 'production'
+const IS_DEV_ENV = process.env.VERCEL_ENV !== 'production'
+const GITHUB_API_TOKEN = process.env.GITHUB_API_TOKEN
 
 async function generateStaticPaths(navDataFile, contentDir, options = {}) {
   const navData = await resolveNavData(navDataFile, contentDir, {
     ...options,
-    isDev: IS_DEV,
+    ignoreFetchError: IS_DEV_ENV,
+    githubToken: GITHUB_API_TOKEN,
   })
   const paths = await getPathsFromNavData(navData)
   return paths
@@ -28,7 +30,8 @@ async function generateStaticProps(
 ) {
   const navData = await resolveNavData(navDataFile, localContentDir, {
     remotePluginsFile,
-    isDev: IS_DEV,
+    ignoreFetchError: IS_DEV_ENV,
+    githubToken: GITHUB_API_TOKEN,
   })
   const pathToMatch = params.page ? params.page.join('/') : ''
   const navNode = getNodeFromPath(pathToMatch, navData, localContentDir)
@@ -38,7 +41,7 @@ async function generateStaticProps(
     ? //  Read local content from the filesystem
       [null, fs.readFileSync(path.join(process.cwd(), filePath), 'utf8')]
     : // Fetch remote content using GitHub's API
-      await fetchGithubFile(remoteFile)
+      await fetchGithubFile(remoteFile, GITHUB_API_TOKEN)
   if (err) throw new Error(err)
   // Construct the githubFileUrl, used for "Edit this page" link
   // Note: for custom ".docs-artifacts" directories, the "Edit this page"
@@ -68,7 +71,7 @@ async function generateStaticProps(
 
   // In development, set a flag if there is no GITHUB_API_TOKEN,
   // as this means dev is seeing only local content, and we want to flag that
-  const isDevMissingRemotePlugins = IS_DEV && !process.env.GITHUB_API_TOKEN
+  const isDevMissingRemotePlugins = IS_DEV_ENV && !process.env.GITHUB_API_TOKEN
   return {
     currentPath,
     frontMatter,

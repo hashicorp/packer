@@ -8,12 +8,21 @@ const COMPONENT_TYPES = [
   'provisioners',
 ]
 
-async function gatherRemotePlugins(pluginsData, navData, isDev = true) {
+async function mergeRemotePlugins(
+  pluginsData,
+  navData,
+  githubApiToken,
+  ignoreFetchError = true
+) {
   const allPluginData = await Promise.all(
     pluginsData.map(async (pluginEntry) => {
       const componentEntries = await Promise.all(
         COMPONENT_TYPES.map(async (type) => {
-          const routes = await gatherPluginBranch(pluginEntry, type)
+          const routes = await gatherPluginBranch(
+            pluginEntry,
+            type,
+            githubApiToken
+          )
           if (!routes) return false
           const isSingleLeaf =
             routes.length === 1 && typeof routes[0].path !== 'undefined'
@@ -26,7 +35,7 @@ async function gatherRemotePlugins(pluginsData, navData, isDev = true) {
       const validComponents = componentEntries.filter(Boolean)
       if (validComponents.length === 0) {
         const errMsg = `Could not fetch any component documentation for remote plugin from ${pluginEntry.repo}. This may be a GitHub credential issue at build time, or it may be an issue with missing docs in the source repository. Please ensure you have a valid GITHUB_API_TOKEN set in .env.local at the root of the project.`
-        if (isDev) {
+        if (ignoreFetchError) {
           console.warn(errMsg)
         } else {
           throw new Error(errMsg)
@@ -84,15 +93,18 @@ async function gatherRemotePlugins(pluginsData, navData, isDev = true) {
   return navDataWithPlugins
 }
 
-async function gatherPluginBranch(pluginEntry, component) {
+async function gatherPluginBranch(pluginEntry, component, githubApiToken) {
   const artifactDir = pluginEntry.artifactDir || '.docs-artifacts'
   const branch = pluginEntry.branch || 'main'
   const navDataFilePath = `${artifactDir}/${component}/nav-data.json`
-  const [err, fileResult] = await fetchGithubFile({
-    repo: pluginEntry.repo,
-    branch,
-    filePath: navDataFilePath,
-  })
+  const [err, fileResult] = await fetchGithubFile(
+    {
+      repo: pluginEntry.repo,
+      branch,
+      filePath: navDataFilePath,
+    },
+    githubApiToken
+  )
   // If one component errors, that's expected - we try all components.
   // We'll check one level up to see if ALL components fail.
   if (err) return false
@@ -163,4 +175,4 @@ async function prefixNavDataPath(
   )
 }
 
-module.exports = gatherRemotePlugins
+module.exports = mergeRemotePlugins

@@ -11,12 +11,13 @@ const validateRouteStructure = require('@hashicorp/react-docs-sidenav/utils/vali
  * @param {string} navDataFile path to the nav-data.json file, relative to the cwd. Example: "data/docs-nav-data.json".
  * @param {string} localContentDir path to the content root, relative to the cwd. Example: "content/docs".
  * @param {object} options optional configuration object
- * @param {string} options.isDev if true, then will NOT throw errors if remote fetches fail
+ * @param {string} options.ignoreFetchError if true, then will NOT throw errors if remote fetches fail
  * @param {string} options.remotePluginsFile path to a remote-plugins.json file, relative to the cwd. Example: "data/docs-remote-plugins.json".
+ * @param {string} options.githubToken GitHub API token used to fetch files
  * @returns {object} the resolved navData. This includes NavBranch nodes pulled from remote plugin repositories, as well as filePath properties on all local NavLeaf nodes, and remoteFile properties on all NavLeafRemote nodes.
  */
 async function resolveNavData(navDataFile, localContentDir, options = {}) {
-  const { remotePluginsFile, isDev } = options
+  const { remotePluginsFile, ignoreFetchError, githubToken } = options
   // Read in files
   const navDataPath = path.join(process.cwd(), navDataFile)
   const navData = JSON.parse(fs.readFileSync(navDataPath, 'utf8'))
@@ -28,7 +29,12 @@ async function resolveNavData(navDataFile, localContentDir, options = {}) {
       fs.readFileSync(remotePluginsPath, 'utf-8')
     )
     // Resolve plugins, this yields branches with NavLeafRemote nodes
-    withPlugins = await mergeRemotePlugins(remotePlugins, navData, isDev)
+    withPlugins = await mergeRemotePlugins(
+      remotePlugins,
+      navData,
+      githubToken,
+      ignoreFetchError
+    )
   }
   // Resolve local filePaths for NavLeaf nodes
   const withFilePaths = await validateFilePaths(withPlugins, localContentDir)

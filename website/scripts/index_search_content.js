@@ -8,34 +8,43 @@ const {
 const resolveNavData = require('../components/remote-plugin-docs/utils/resolve-nav-data')
 const fetchGithubFile = require('../components/remote-plugin-docs/utils/fetch-github-file')
 
+const GITHUB_API_TOKEN = process.env.CI_GITHUB_TOKEN
+
 // Run indexing
 indexContent({ getSearchObjects })
 
 async function getSearchObjects() {
+  // Set up an array to collect all search objects
+  const searchObjects = []
   // Resolve /docs, /guides, and /intro nav data, which
   // corresponds to all the content we will actually render
-  // (this avoids indexing non-rendered content, and partials)
+  // This avoids indexing non-rendered content, and partials.
   // `docs` content
   const docsNav = await resolveNavData(
     'data/docs-nav-data.json',
     'content/docs',
-    { remotePluginsFile: 'data/docs-remote-plugins.json' }
+    {
+      remotePluginsFile: 'data/docs-remote-plugins.json',
+      githubToken: GITHUB_API_TOKEN,
+    }
   )
   const docsObjects = await searchObjectsFromNavData(docsNav, 'docs')
+  searchObjects.push(...docsObjects)
   // `guides` content
   const guidesNav = await resolveNavData(
     'data/guides-nav-data.json',
     'content/guides'
   )
   const guidesObjects = await searchObjectsFromNavData(guidesNav, 'guides')
+  searchObjects.push(...guidesObjects)
   // `intro` content
   const introNav = await resolveNavData(
     'data/intro-nav-data.json',
     'content/intro'
   )
   const introObjects = await searchObjectsFromNavData(introNav, 'intro')
-  // Concat all search objects, and return them
-  const searchObjects = [].concat(docsObjects, guidesObjects, introObjects)
+  searchObjects.push(...introObjects)
+  // Return the collected search objects
   return searchObjects
 }
 
@@ -65,7 +74,7 @@ async function searchObjectsFromNavNode(node, baseRoute) {
       ? //  Read local content from the filesystem
         [null, fs.readFileSync(path.join(process.cwd(), node.filePath), 'utf8')]
       : // Fetch remote content using GitHub's API
-        await fetchGithubFile(node.remoteFile)
+        await fetchGithubFile(node.remoteFile, GITHUB_API_TOKEN)
     if (err) throw new Error(err)
     const searchObject = await getDocsSearchObject(
       path.join(baseRoute, node.path),

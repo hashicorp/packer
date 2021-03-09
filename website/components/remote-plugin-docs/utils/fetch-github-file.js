@@ -1,7 +1,5 @@
 const fetch = require('isomorphic-unfetch')
 
-const GITHUB_API_TOKEN = process.env.GITHUB_API_TOKEN
-
 async function githubQuery(body, token) {
   const result = await fetch('https://api.github.com/graphql', {
     method: 'POST',
@@ -15,7 +13,7 @@ async function githubQuery(body, token) {
 }
 
 //  Fetch a file from GitHub using the GraphQL API
-async function getGithubFile({ repo, branch, filePath }) {
+async function getGithubFile({ repo, branch, filePath }, token) {
   const [repo_owner, repo_name] = repo.split('/')
   //  Set up the GraphQL query
   // (usually we can keep this in a separate file, and rely on a
@@ -40,7 +38,7 @@ query($repo_name: String!, $repo_owner: String!, $object_expression: String!) {
     object_expression: `${branch}:${filePath}`,
   }
   // Query the GitHub API, and parse the navigation data
-  const result = await githubQuery({ query, variables }, GITHUB_API_TOKEN)
+  const result = await githubQuery({ query, variables }, token)
   try {
     const fileText = result.data.repository.object.text
     return [null, fileText]
