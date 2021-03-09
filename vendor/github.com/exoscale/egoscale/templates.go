@@ -5,6 +5,7 @@ type Template struct {
 	Account               string            `json:"account,omitempty" doc:"the account name to which the template belongs"`
 	AccountID             *UUID             `json:"accountid,omitempty" doc:"the account id to which the template belongs"`
 	Bootable              bool              `json:"bootable,omitempty" doc:"true if the ISO is bootable, false otherwise"`
+	BootMode              string            `json:"bootmode" doc:"the template boot mode (legacy/uefi)"`
 	Checksum              string            `json:"checksum,omitempty" doc:"checksum of the template"`
 	Created               string            `json:"created,omitempty" doc:"the date this template was created"`
 	CrossZones            bool              `json:"crossZones,omitempty" doc:"true if the template is managed across all Zones, false otherwise"`
@@ -70,14 +71,14 @@ func (template Template) ListRequest() (ListCommand, error) {
 
 // ListTemplates represents a template query filter
 type ListTemplates struct {
-	TemplateFilter string        `json:"templatefilter" doc:"Possible values are \"featured\", \"self\", \"selfexecutable\",\"sharedexecutable\",\"executable\", and \"community\". * featured : templates that have been marked as featured and public. * self : templates that have been registered or created by the calling user. * selfexecutable : same as self, but only returns templates that can be used to deploy a new VM. * sharedexecutable : templates ready to be deployed that have been granted to the calling user by another user. * executable : templates that are owned by the calling user, or public templates, that can be used to deploy a VM. * community : templates that have been marked as public but not featured."`
+	TemplateFilter string        `json:"templatefilter,omitempty" doc:"Possible values are \"featured\", \"self\", \"selfexecutable\",\"sharedexecutable\",\"executable\", and \"community\". * featured : templates that have been marked as featured and public. * self : templates that have been registered or created by the calling user. * selfexecutable : same as self, but only returns templates that can be used to deploy a new VM. * sharedexecutable : templates ready to be deployed that have been granted to the calling user by another user. * executable : templates that are owned by the calling user, or public templates, that can be used to deploy a VM. * community : templates that have been marked as public but not featured."`
 	ID             *UUID         `json:"id,omitempty" doc:"the template ID"`
 	Keyword        string        `json:"keyword,omitempty" doc:"List by keyword"`
 	Name           string        `json:"name,omitempty" doc:"the template name"`
 	Page           int           `json:"page,omitempty"`
 	PageSize       int           `json:"pagesize,omitempty"`
 	ShowRemoved    *bool         `json:"showremoved,omitempty" doc:"Show removed templates as well"`
-	Tags           []ResourceTag `json:"tags,omitempty" doc:"List resources by tags (key/value pairs)"`
+	Tags           []ResourceTag `json:"tags,omitempty" doc:"List resources by tags (key/value pairs). Note: multiple tags are OR'ed, not AND'ed."`
 	ZoneID         *UUID         `json:"zoneid,omitempty" doc:"list templates by zoneid"`
 	_              bool          `name:"listTemplates" description:"List all public, private, and privileged templates."`
 }
@@ -141,9 +142,10 @@ func (DeleteTemplate) AsyncResponse() interface{} {
 // RegisterCustomTemplate registers a new template
 type RegisterCustomTemplate struct {
 	_               bool              `name:"registerCustomTemplate" description:"Register a new template."`
+	BootMode        string            `json:"bootmode" doc:"the template boot mode (legacy/uefi)"`
 	Checksum        string            `json:"checksum" doc:"the MD5 checksum value of this template"`
 	Details         map[string]string `json:"details,omitempty" doc:"Template details in key/value pairs"`
-	Displaytext     string            `json:"displaytext" doc:"the display text of the template"`
+	Displaytext     string            `json:"displaytext,omitempty" doc:"the display text of the template"`
 	Name            string            `json:"name" doc:"the name of the template"`
 	PasswordEnabled *bool             `json:"passwordenabled,omitempty" doc:"true if the template supports the password reset feature; default is false"`
 	SSHKeyEnabled   *bool             `json:"sshkeyenabled,omitempty" doc:"true if the template supports the sshkey upload feature; default is false"`

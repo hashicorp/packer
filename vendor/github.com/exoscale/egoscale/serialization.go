@@ -12,7 +12,9 @@ import (
 )
 
 func csQuotePlus(s string) string {
-	s = strings.Replace(s, "+", "%20", -1)
+	s = strings.ReplaceAll(s, "+", "%20")
+	// This line is used to safeguard the "*" when producing the signature
+	s = strings.ReplaceAll(s, "%2A", "*")
 	return s
 }
 

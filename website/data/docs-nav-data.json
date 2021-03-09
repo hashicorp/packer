@@ -1093,10 +1093,6 @@
         "path": "post-processors/digitalocean-import"
       },
       {
-        "title": "Exoscale Import",
-        "path": "post-processors/exoscale-import"
-      },
-      {
         "title": "Google Compute Export",
         "path": "post-processors/googlecompute-export"
       },

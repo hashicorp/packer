@@ -4,6 +4,42 @@ package egoscale
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[CloudRuntimeException-4250]
+	_ = x[ExecutionException-4260]
+	_ = x[HypervisorVersionChangedException-4265]
+	_ = x[CloudException-4275]
+	_ = x[AccountLimitException-4280]
+	_ = x[AgentUnavailableException-4285]
+	_ = x[CloudAuthenticationException-4290]
+	_ = x[ConcurrentOperationException-4300]
+	_ = x[ConflictingNetworkSettingsException-4305]
+	_ = x[DiscoveredWithErrorException-4310]
+	_ = x[HAStateException-4315]
+	_ = x[InsufficientAddressCapacityException-4320]
+	_ = x[InsufficientCapacityException-4325]
+	_ = x[InsufficientNetworkCapacityException-4330]
+	_ = x[InsufficientServerCapacityException-4335]
+	_ = x[InsufficientStorageCapacityException-4340]
+	_ = x[InternalErrorException-4345]
+	_ = x[InvalidParameterValueException-4350]
+	_ = x[ManagementServerException-4355]
+	_ = x[NetworkRuleConflictException-4360]
+	_ = x[PermissionDeniedException-4365]
+	_ = x[ResourceAllocationException-4370]
+	_ = x[ResourceInUseException-4375]
+	_ = x[ResourceUnavailableException-4380]
+	_ = x[StorageUnavailableException-4385]
+	_ = x[UnsupportedServiceException-4390]
+	_ = x[VirtualMachineMigrationException-4395]
+	_ = x[AsyncCommandQueued-4540]
+	_ = x[RequestLimitException-4545]
+	_ = x[ServerAPIException-9999]
+}
+
 const _CSErrorCode_name = "CloudRuntimeExceptionExecutionExceptionHypervisorVersionChangedExceptionCloudExceptionAccountLimitExceptionAgentUnavailableExceptionCloudAuthenticationExceptionConcurrentOperationExceptionConflictingNetworkSettingsExceptionDiscoveredWithErrorExceptionHAStateExceptionInsufficientAddressCapacityExceptionInsufficientCapacityExceptionInsufficientNetworkCapacityExceptionInsufficientServerCapacityExceptionInsufficientStorageCapacityExceptionInternalErrorExceptionInvalidParameterValueExceptionManagementServerExceptionNetworkRuleConflictExceptionPermissionDeniedExceptionResourceAllocationExceptionResourceInUseExceptionResourceUnavailableExceptionStorageUnavailableExceptionUnsupportedServiceExceptionVirtualMachineMigrationExceptionAsyncCommandQueuedRequestLimitExceptionServerAPIException"
 
 var _CSErrorCode_map = map[CSErrorCode]string{

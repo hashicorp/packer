@@ -63,7 +63,7 @@ Debugging and traces
 
 As this library is mostly an HTTP client, you can reuse all the existing tools around it.
 
-	cs := egoscale.NewClient("https://api.exoscale.com/compute", "EXO...", "...")
+	cs := egoscale.NewClient("https://api.exoscale.com/v1", "EXO...", "...")
 	// sets a logger on stderr
 	cs.Logger = log.New(os.Stderr, "prefix", log.LstdFlags)
 	// activates the HTTP traces
@@ -76,7 +76,7 @@ APIs
 
 All the available APIs on the server and provided by the API Discovery plugin.
 
-	cs := egoscale.NewClient("https://api.exoscale.com/compute", "EXO...", "...")
+	cs := egoscale.NewClient("https://api.exoscale.com/v1", "EXO...", "...")
 
 	resp, err := cs.Request(&egoscale.ListAPIs{})
 	if err != nil {

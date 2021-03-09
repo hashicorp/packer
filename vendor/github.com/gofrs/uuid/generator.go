@@ -30,7 +30,6 @@ import (
 	"hash"
 	"io"
 	"net"
-	"os"
 	"sync"
 	"time"
 )
@@ -47,19 +46,9 @@ type HWAddrFunc func() (net.HardwareAddr, error)
 // DefaultGenerator is the default UUID Generator used by this package.
 var DefaultGenerator Generator = NewGen()
 
-var (
-	posixUID = uint32(os.Getuid())
-	posixGID = uint32(os.Getgid())
-)
-
 // NewV1 returns a UUID based on the current timestamp and MAC address.
 func NewV1() (UUID, error) {
 	return DefaultGenerator.NewV1()
-}
-
-// NewV2 returns a DCE Security UUID based on the POSIX UID/GID.
-func NewV2(domain byte) (UUID, error) {
-	return DefaultGenerator.NewV2(domain)
 }
 
 // NewV3 returns a UUID based on the MD5 hash of the namespace UUID and name.
@@ -80,7 +69,6 @@ func NewV5(ns UUID, name string) UUID {
 // Generator provides an interface for generating UUIDs.
 type Generator interface {
 	NewV1() (UUID, error)
-	NewV2(domain byte) (UUID, error)
 	NewV3(ns UUID, name string) UUID
 	NewV4() (UUID, error)
 	NewV5(ns UUID, name string) UUID
@@ -164,28 +152,6 @@ func (g *Gen) NewV1() (UUID, error) {
 	return u, nil
 }
 
-// NewV2 returns a DCE Security UUID based on the POSIX UID/GID.
-func (g *Gen) NewV2(domain byte) (UUID, error) {
-	u, err := g.NewV1()
-	if err != nil {
-		return Nil, err
-	}
-
-	switch domain {
-	case DomainPerson:
-		binary.BigEndian.PutUint32(u[:], posixUID)
-	case DomainGroup:
-		binary.BigEndian.PutUint32(u[:], posixGID)
-	}
-
-	u[9] = domain
-
-	u.SetVersion(V2)
-	u.SetVariant(VariantRFC4122)
-
-	return u, nil
-}
-
 // NewV3 returns a UUID based on the MD5 hash of the namespace UUID and name.
 func (g *Gen) NewV3(ns UUID, name string) UUID {
 	u := newFromHash(md5.New(), ns, name)
@@ -216,7 +182,7 @@ func (g *Gen) NewV5(ns UUID, name string) UUID {
 	return u
 }
 
-// Returns the epoch and clock sequence.
+// getClockSequence returns the epoch and clock sequence.
 func (g *Gen) getClockSequence() (uint64, uint16, error) {
 	var err error
 	g.clockSequenceOnce.Do(func() {

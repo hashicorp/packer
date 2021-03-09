@@ -6,6 +6,7 @@ import (
 	// Previously core-bundled components, split into their own plugins but
 	// still vendored with Packer for now. Importing as library instead of
 	// forcing use of packer init, until packer v1.8.0
+	exoscaleimportpostprocessor "github.com/exoscale/packer-plugin-exoscale/post-processor/exoscale-import"
 	dockerbuilder "github.com/hashicorp/packer-plugin-docker/builder/docker"
 	dockerimportpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-push"
@@ -26,14 +27,15 @@ var VendoredProvisioners = map[string]packersdk.Provisioner{}
 // VendoredPostProcessors are post-processor components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
 var VendoredPostProcessors = map[string]packersdk.PostProcessor{
-	"docker-import": new(dockerimportpostprocessor.PostProcessor),
-	"docker-push":   new(dockerpushpostprocessor.PostProcessor),
-	"docker-save":   new(dockersavepostprocessor.PostProcessor),
-	"docker-tag":    new(dockertagpostprocessor.PostProcessor),
+	"docker-import":   new(dockerimportpostprocessor.PostProcessor),
+	"docker-push":     new(dockerpushpostprocessor.PostProcessor),
+	"docker-save":     new(dockersavepostprocessor.PostProcessor),
+	"docker-tag":      new(dockertagpostprocessor.PostProcessor),
+	"exoscale-import": new(exoscaleimportpostprocessor.PostProcessor),
 }
 
-// Upon init lets us load up any plugins that were vendored manually into the
-// default set of plugins.
+// Upon init lets load up any plugins that were vendored manually into the default
+// set of plugins.
 func init() {
 	for k, v := range VendoredBuilders {
 		if _, ok := Builders[k]; ok {
