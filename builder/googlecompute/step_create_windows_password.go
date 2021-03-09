@@ -60,12 +60,13 @@ func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.Sta
 	}
 
 	data := WindowsPasswordConfig{
-		key:      priv,
-		UserName: c.Comm.WinRMUser,
-		Modulus:  base64.StdEncoding.EncodeToString(priv.N.Bytes()),
-		Exponent: base64.StdEncoding.EncodeToString(buf[1:]),
-		Email:    email,
-		ExpireOn: time.Now().Add(time.Minute * 5),
+		key:                    priv,
+		UserName:               c.Comm.WinRMUser,
+		Modulus:                base64.StdEncoding.EncodeToString(priv.N.Bytes()),
+		Exponent:               base64.StdEncoding.EncodeToString(buf[1:]),
+		Email:                  email,
+		ExpireOn:               time.Now().Add(time.Minute * 5),
+		WindowsPasswordTimeout: c.WindowsPasswordTimeout,
 	}
 
 	if s.Debug {
@@ -98,7 +99,7 @@ func (s *StepCreateWindowsPassword) Run(ctx context.Context, state multistep.Sta
 		ui.Message("Waiting for windows password to complete...")
 		select {
 		case err = <-errCh:
-		case <-time.After(c.StateTimeout):
+		case <-time.After(c.WindowsPasswordTimeout):
 			err = errors.New("time out while waiting for the password to be created")
 		}
 	}

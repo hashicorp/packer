@@ -568,7 +568,7 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 		return
 	}
 
-	timeout := time.Now().Add(time.Minute * 3)
+	timeout := time.Now().Add(c.WindowsPasswordTimeout)
 	hash := sha1.New()
 	random := rand.Reader
 

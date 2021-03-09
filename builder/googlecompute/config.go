@@ -210,6 +210,8 @@ type Config struct {
 	// - The contents of the script file will be wrapped in Packer's startup script wrapper, unless `wrap_startup_script` is disabled. See `wrap_startup_script` for more details.
 	// - Not supported by Windows instances. See [Startup Scripts for Windows](https://cloud.google.com/compute/docs/startupscript#providing_a_startup_script_for_windows_instances) for more details.
 	StartupScriptFile string `mapstructure:"startup_script_file" required:"false"`
+	// The time to wait for windows password to be retrieved. Defaults to "3m".
+	WindowsPasswordTimeout time.Duration `mapstructure:"windows_password_timeout" required:"false"`
 	// For backwards compatibility this option defaults to `"true"` in the future it will default to `"false"`.
 	// If "true", the contents of `startup_script_file` or `"startup_script"` in the instance metadata
 	// is wrapped in a Packer specific script that tracks the execution and completion of the provided
@@ -541,6 +543,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		if c.WrapStartupScriptFile == config.TriUnset {
 			c.WrapStartupScriptFile = config.TriTrue
 		}
+	}
+	// Check windows password timeout is provided
+	if c.WindowsPasswordTimeout == 0 {
+		c.WindowsPasswordTimeout = 3 * time.Minute
 	}
 
 	// Check for any errors.
