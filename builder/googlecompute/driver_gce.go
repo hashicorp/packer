@@ -253,7 +253,6 @@ func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
 		"ubuntu-os-cloud",
 		"windows-cloud",
 		"windows-sql-cloud",
-		"gce-uefi-images",
 		"gce-nvme",
 		// misc
 		"google-containers",
