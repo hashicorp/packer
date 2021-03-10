@@ -238,7 +238,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
-			Host:      parallelscommon.CommHost(b.config.SSHConfig.Comm.SSHHost),
+			Host:      parallelscommon.CommHost(b.config.SSHConfig.Comm.Host()),
 			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 		},
 		&parallelscommon.StepUploadVersion{
