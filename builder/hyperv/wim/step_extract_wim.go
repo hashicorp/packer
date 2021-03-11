@@ -5,12 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
-	"strings"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/builder/hyperv/common/powershell"
 )
 
 const (
@@ -19,123 +16,89 @@ const (
 )
 
 type StepExtractWIM struct {
-	TempPath   string
-	ISOPathKey string
-	ResultKey  string
-
-	// Set only when an ISO has been mounted. It's unset when the ISO is dismounted
-	isoPath string
+	DevicePathKey string
+	SkipOperation bool
+	WIMPathKey    string
 }
 
 func (s *StepExtractWIM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	if s.SkipOperation {
+		return multistep.ActionContinue
+	}
+
 	ui := state.Get("ui").(packersdk.Ui)
-	isoPath := state.Get(s.ISOPathKey).(string)
+	buildDir := state.Get("build_dir").(string)
+	devicePath := state.Get(s.DevicePathKey).(string)
 
 	ui.Say("Extracting WIM...")
 
-	// Mount ISO
-	devicePath, err := s.mountDiskImage(isoPath)
-	if err != nil {
-		err = fmt.Errorf("Error mounting ISO: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
+	// Copy WIM to the temp directory
 
-	// Copy WIM out
-	srcWimPath := fmt.Sprintf("%s\\%s", devicePath, installWIMPath)
+	srcWIMPath := fmt.Sprintf("%s\\%s", devicePath, installWIMPath)
 
-	_, err = os.Stat(srcWimPath)
+	_, err := os.Stat(srcWIMPath)
 	if os.IsNotExist(err) {
-		err = fmt.Errorf("Error copying ISO: %s", srcWimPath)
+		err = fmt.Errorf("Error gathering informabout about WIM: %s", srcWIMPath)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	srcWim, err := os.Open(srcWimPath)
+	srcWIM, err := os.Open(srcWIMPath)
 	if err != nil {
+		err = fmt.Errorf("Error opening source WIM: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	defer srcWIM.Close()
+
+	dstWIMPath := fmt.Sprintf("%s/%s", buildDir, installWIM)
+
+	dstWIM, err := os.Create(dstWIMPath)
+	if err != nil {
+		err = fmt.Errorf("Error opening destination WIM: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	defer dstWIM.Close()
+
+	if _, err = io.Copy(dstWIM, srcWIM); err != nil {
 		err = fmt.Errorf("Error copying WIM: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	defer srcWim.Close()
+	ui.Say(fmt.Sprintf("Copied WIM from %s to %s", srcWIMPath, dstWIMPath))
 
-	dstWimPath := fmt.Sprintf("%s/%s", s.TempPath, installWIM)
-
-	dstWim, err := os.Create(dstWimPath)
-	if err != nil {
-		err = fmt.Errorf("Error copying WIM: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	defer dstWim.Close()
-
-	_, err = io.Copy(dstWim, srcWim)
-	if err != nil {
-		err = fmt.Errorf("Error copying WIM: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	state.Put(s.ResultKey, dstWimPath)
-
-	// Dismount ISO
+	// Update state bag
+	state.Put(s.WIMPathKey, dstWIMPath)
 
 	return multistep.ActionContinue
 }
 
 func (s *StepExtractWIM) Cleanup(state multistep.StateBag) {
+	if s.SkipOperation {
+		return
+	}
+
 	ui := state.Get("ui").(packersdk.Ui)
 
-	dstWimPath := path.Join(s.TempPath, installWIM)
-	_ = os.Remove(dstWimPath)
+	// Remove copied WIM
+	if wimPath, ok := state.GetOk(s.WIMPathKey); ok {
+		if err := os.Remove(wimPath.(string)); err != nil {
+			err = fmt.Errorf("Error deleting WIM: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+		} else {
+			ui.Say(fmt.Sprintf("Removed WIM %s", wimPath))
 
-	err := s.dismountDiskImage()
-	if err != nil {
-		err = fmt.Errorf("Error mounting ISO: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
+			// Update state bag
+			state.Remove(s.WIMPathKey)
+		}
 	}
-}
-
-func (s *StepExtractWIM) dismountDiskImage() error {
-	if s.isoPath == "" {
-		return nil
-	}
-
-	var script = `
-param([string]$imagePath)
-Dismount-DiskImage -ImagePath $imagePath
-`
-
-	var ps powershell.PowerShellCmd
-	err := ps.Run(script, s.isoPath)
-	return err
-}
-
-func (s *StepExtractWIM) mountDiskImage(isoPath string) (string, error) {
-
-	var script = `
-param([string]$imagePath)
-$diskImage = Mount-DiskImage -ImagePath $imagePath
-if ($diskImage -ne $null) {
-    $diskImage.DevicePath
-}
-`
-
-	var ps powershell.PowerShellCmd
-	cmdOut, err := ps.Output(script, isoPath)
-
-	if err != nil {
-		return "", err
-	}
-
-	var devicePath = strings.TrimSpace(cmdOut)
-	return devicePath, err
 }

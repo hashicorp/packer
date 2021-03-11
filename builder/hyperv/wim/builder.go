@@ -217,6 +217,11 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
+	skipConfigureWIM := true
+	if b.config.WindowsConfigUrl != "" {
+		skipConfigureWIM = false
+	}
+
 	steps := []multistep.Step{
 		&hypervcommon.StepCreateBuildDir{
 			TempPath: b.config.TempPath,
@@ -233,19 +238,47 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Extension:   b.config.TargetExtension,
 			TargetPath:  b.config.TargetPath,
 		},
+
+		// These steps are only required if offline image customization is required, i.e.
+		// b.config.WindowsConfigUrl is specified (or skipConfigureWIM is false). The
+		// way it works is that it'll mount the ISO, extract install.wim to a temp folder,
+		// offline customize the image, copy ISO content to another directory and
+		// overwrite install.wim with the updated image, create another ISO and update
+		// iso_path in the state bag to point to the new ISO, and clean up all inter-
+		// mediate files and folders.
+		&StepMountISO{
+			DevicePathKey: "iso_device_path",
+			ISOPathKey:    "iso_path",
+			SkipOperation: skipConfigureWIM,
+		},
 		&StepExtractWIM{
-			TempPath:   b.config.TempPath,
-			ISOPathKey: "iso_path",
-			ResultKey:  "wim_path",
+			DevicePathKey: "iso_device_path",
+			SkipOperation: skipConfigureWIM,
+			WIMPathKey:    "wim_path",
 		},
 		&StepConfigureWIM{
 			ImageIndex:       b.config.ImageIndex,
 			ImageName:        b.config.ImageName,
-			MountDir:         b.config.MountDir,
 			LogPath:          b.config.WindowsConfigLogPath,
+			MountDir:         b.config.MountDir,
 			ScratchDir:       b.config.WindowsConfigScratchDir,
+			SkipOperation:    skipConfigureWIM,
+			WIMPathKey:       "wim_path",
 			WindowsConfigUrl: b.config.WindowsConfigUrl,
 		},
+		&StepUpdateISO{
+			DevicePathKey: "iso_device_path",
+			ISOPathKey:    "iso_path",
+			SkipOperation: skipConfigureWIM,
+			UseEfiBoot:    b.config.Generation == 2,
+			WIMPathKey:    "wim_path",
+		},
+		&StepUnmountISO{
+			DevicePathKey: "iso_device_path",
+			ISOPathKey:    "iso_path",
+			SkipOperation: skipConfigureWIM,
+		},
+
 		&commonsteps.StepCreateFloppy{
 			Files:       b.config.FloppyConfig.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
@@ -369,7 +402,8 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			OutputDir:  b.config.OutputDir,
 			SkipExport: b.config.SkipExport,
 		},
-		&hypervcommon.StepCollateArtifacts{
+
+		&StepCollateArtifacts{
 			OutputDir:  b.config.OutputDir,
 			SkipExport: b.config.SkipExport,
 		},
