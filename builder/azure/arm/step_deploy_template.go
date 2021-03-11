@@ -15,16 +15,17 @@ import (
 )
 
 type StepDeployTemplate struct {
-	client     *AzureClient
-	deploy     func(ctx context.Context, resourceGroupName string, deploymentName string) error
-	delete     func(ctx context.Context, deploymentName, resourceGroupName string) error
-	disk       func(ctx context.Context, resourceGroupName string, computeName string) (string, string, error)
-	deleteDisk func(ctx context.Context, imageType string, imageName string, resourceGroupName string) error
-	say        func(message string)
-	error      func(e error)
-	config     *Config
-	factory    templateFactoryFunc
-	name       string
+	client           *AzureClient
+	deploy           func(ctx context.Context, resourceGroupName string, deploymentName string) error
+	delete           func(ctx context.Context, deploymentName, resourceGroupName string) error
+	disk             func(ctx context.Context, resourceGroupName string, computeName string) (string, string, error)
+	deleteDisk       func(ctx context.Context, imageType string, imageName string, resourceGroupName string) error
+	deleteDeployment func(ctx context.Context, state multistep.StateBag) error
+	say              func(message string)
+	error            func(e error)
+	config           *Config
+	factory          templateFactoryFunc
+	name             string
 }
 
 func NewStepDeployTemplate(client *AzureClient, ui packersdk.Ui, config *Config, deploymentName string, factory templateFactoryFunc) *StepDeployTemplate {
@@ -41,6 +42,7 @@ func NewStepDeployTemplate(client *AzureClient, ui packersdk.Ui, config *Config,
 	step.delete = step.deleteDeploymentResources
 	step.disk = step.getImageDetails
 	step.deleteDisk = step.deleteImage
+	step.deleteDeployment = step.deleteDeploymentObject
 	return step
 }
 
@@ -58,9 +60,9 @@ func (s *StepDeployTemplate) Run(ctx context.Context, state multistep.StateBag) 
 
 func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 	defer func() {
-		err := s.deleteTemplate(context.Background(), state)
+		err := s.deleteDeployment(context.Background(), state)
 		if err != nil {
-			s.say(s.client.LastError.Error())
+			s.say(err.Error())
 		}
 	}()
 
@@ -86,12 +88,16 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 	if err != nil && !strings.Contains(err.Error(), "ResourceNotFound") {
 		ui.Error(fmt.Sprintf("Could not retrieve OS Image details: %s", err))
 	}
-	err = s.deleteDeploymentResources(context.TODO(), deploymentName, resourceGroupName)
+	err = s.delete(context.TODO(), deploymentName, resourceGroupName)
 	if err != nil {
 		s.reportIfError(err, resourceGroupName)
 	}
-	// The disk is not defined as an operation in the template so it has to be deleted separately
+
+	// The disk was not found on the VM, this is an error.
 	if imageType == "" && imageName == "" {
+		ui.Error(fmt.Sprintf("Failed to find temporary OS disk on VM.  Please delete manually.\n\n"+
+			"VM Name: %s\n"+
+			"Error: %s", computeName, err))
 		return
 	}
 
@@ -124,7 +130,7 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 	return err
 }
 
-func (s *StepDeployTemplate) deleteTemplate(ctx context.Context, state multistep.StateBag) error {
+func (s *StepDeployTemplate) deleteDeploymentObject(ctx context.Context, state multistep.StateBag) error {
 	deploymentName := s.name
 	resourceGroupName := state.Get(constants.ArmResourceGroupName).(string)
 	ui := state.Get("ui").(packersdk.Ui)
