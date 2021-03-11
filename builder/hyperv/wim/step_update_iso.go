@@ -13,13 +13,12 @@ import (
 )
 
 type StepUpdateISO struct {
-	DevicePathKey string
-	ISOPathKey    string
-	SkipOperation bool
-	UseEfiBoot    bool
-	WIMPathKey    string
-
-	backupISOPathKey string
+	DevicePathKey      string
+	ISOPathKey         string
+	OriginalISOPathKey string
+	SkipOperation      bool
+	UseEfiBoot         bool
+	WIMPathKey         string
 }
 
 func (s *StepUpdateISO) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -92,9 +91,7 @@ func (s *StepUpdateISO) Run(ctx context.Context, state multistep.StateBag) multi
 	ui.Say(fmt.Sprintf("Created ISO at %s", dstISOPath))
 
 	// Update state bag with the new backup ISO
-	s.backupISOPathKey = fmt.Sprintf("backup_%s", s.ISOPathKey)
-
-	state.Put(s.backupISOPathKey, srcISOPath)
+	state.Put(s.OriginalISOPathKey, srcISOPath)
 	state.Put(s.ISOPathKey, dstISOPath)
 
 	return multistep.ActionContinue
@@ -107,7 +104,7 @@ func (s *StepUpdateISO) Cleanup(state multistep.StateBag) {
 
 	ui := state.Get("ui").(packersdk.Ui)
 
-	if _, ok := state.GetOk(s.backupISOPathKey); ok {
+	if originalISOPath, ok := state.GetOk(s.OriginalISOPathKey); ok {
 		// Remove ISO
 		isoPath := state.Get(s.ISOPathKey).(string)
 		_ = os.Remove(isoPath)
@@ -115,8 +112,8 @@ func (s *StepUpdateISO) Cleanup(state multistep.StateBag) {
 		ui.Say(fmt.Sprintf("Removed ISO at %s", isoPath))
 
 		// Revert back to the original state
-		state.Put(s.ISOPathKey, s.backupISOPathKey)
-		state.Remove(s.backupISOPathKey)
+		state.Put(s.ISOPathKey, originalISOPath)
+		state.Remove(s.OriginalISOPathKey)
 	}
 }
 

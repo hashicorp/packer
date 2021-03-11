@@ -267,15 +267,16 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			WindowsConfigUrl: b.config.WindowsConfigUrl,
 		},
 		&StepUpdateISO{
-			DevicePathKey: "iso_device_path",
-			ISOPathKey:    "iso_path",
-			SkipOperation: skipConfigureWIM,
-			UseEfiBoot:    b.config.Generation == 2,
-			WIMPathKey:    "wim_path",
+			DevicePathKey:      "iso_device_path",
+			ISOPathKey:         "iso_path",
+			OriginalISOPathKey: "original_iso_path",
+			SkipOperation:      skipConfigureWIM,
+			UseEfiBoot:         b.config.Generation == 2,
+			WIMPathKey:         "wim_path",
 		},
 		&StepUnmountISO{
 			DevicePathKey: "iso_device_path",
-			ISOPathKey:    "iso_path",
+			ISOPathKey:    "original_iso_path",
 			SkipOperation: skipConfigureWIM,
 		},
 
