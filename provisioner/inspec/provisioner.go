@@ -160,7 +160,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ValidExitCodes == nil {
-		p.config.ValidExitCodes = []int{0}
+		p.config.ValidExitCodes = []int{0,101}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

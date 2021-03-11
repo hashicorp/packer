@@ -312,7 +312,6 @@ func TestInspecValidExitCodes(t *testing.T) {
 	}
 	p.config.Backend = "local"
 	p.config.Profile = "test-fixtures/skip_control.rb"
-	p.config.ValidExitCodes = []int{101}
 	err := p.Prepare()
 	if err != nil {
 		t.Fatalf("err: %s", err)
