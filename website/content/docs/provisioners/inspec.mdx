@@ -159,6 +159,11 @@ Optional Parameters:
 
 - `user` (string) - The `--user` to use. Defaults to the user running Packer.
 
+- `valid_exit_codes` (list of ints) - A list of valid exit codes returned by 
+  inspec to be accepted by the provisioner. The default is (0,101) (accept
+  skipped tests). See [inspec exit codes](https://docs.chef.io/inspec/cli/#exec)
+  for a list and explanation of inspec exit codes.
+
 @include 'provisioners/common-config.mdx'
 
 ## Accepting the InSpec license
