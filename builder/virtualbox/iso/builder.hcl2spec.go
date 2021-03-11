@@ -135,6 +135,7 @@ type FlatConfig struct {
 	NVMePortCount             *int              `mapstructure:"nvme_port_count" required:"false" cty:"nvme_port_count" hcl:"nvme_port_count"`
 	HardDriveNonrotational    *bool             `mapstructure:"hard_drive_nonrotational" required:"false" cty:"hard_drive_nonrotational" hcl:"hard_drive_nonrotational"`
 	ISOInterface              *string           `mapstructure:"iso_interface" required:"false" cty:"iso_interface" hcl:"iso_interface"`
+	AdditionalDiskSize        []uint            `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size" hcl:"disk_additional_size"`
 	KeepRegistered            *bool             `mapstructure:"keep_registered" required:"false" cty:"keep_registered" hcl:"keep_registered"`
 	SkipExport                *bool             `mapstructure:"skip_export" required:"false" cty:"skip_export" hcl:"skip_export"`
 	VMName                    *string           `mapstructure:"vm_name" required:"false" cty:"vm_name" hcl:"vm_name"`
@@ -277,6 +278,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"nvme_port_count":              &hcldec.AttrSpec{Name: "nvme_port_count", Type: cty.Number, Required: false},
 		"hard_drive_nonrotational":     &hcldec.AttrSpec{Name: "hard_drive_nonrotational", Type: cty.Bool, Required: false},
 		"iso_interface":                &hcldec.AttrSpec{Name: "iso_interface", Type: cty.String, Required: false},
+		"disk_additional_size":         &hcldec.AttrSpec{Name: "disk_additional_size", Type: cty.List(cty.Number), Required: false},
 		"keep_registered":              &hcldec.AttrSpec{Name: "keep_registered", Type: cty.Bool, Required: false},
 		"skip_export":                  &hcldec.AttrSpec{Name: "skip_export", Type: cty.Bool, Required: false},
 		"vm_name":                      &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
