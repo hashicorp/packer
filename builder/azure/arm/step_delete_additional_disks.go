@@ -70,13 +70,13 @@ func (s *StepDeleteAdditionalDisk) Run(ctx context.Context, state multistep.Stat
 	var isExistingResourceGroup = state.Get(constants.ArmIsExistingResourceGroup).(bool)
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
 
-	if isManagedDisk && !isExistingResourceGroup {
-		s.say(fmt.Sprintf(" -> Additional Disk : skipping, as they will be deleted along with the temporary resource group."))
+	if dataDisks == nil {
+		s.say(fmt.Sprintf(" -> No Additional Disks specified"))
 		return multistep.ActionContinue
 	}
 
-	if dataDisks == nil {
-		s.say(fmt.Sprintf(" -> No Additional Disks specified"))
+	if isManagedDisk && !isExistingResourceGroup {
+		s.say(fmt.Sprintf(" -> Additional Disk : skipping, managed disk was used..."))
 		return multistep.ActionContinue
 	}
 
