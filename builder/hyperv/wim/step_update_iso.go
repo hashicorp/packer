@@ -58,8 +58,6 @@ func (s *StepUpdateISO) Run(ctx context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Copied directory from %s to %s", devicePath, dstDir))
-
 	// Replace install.wim
 	if err := s.replaceInstallWIM(srcWIMPath, dstWIMPath); err != nil {
 		err = fmt.Errorf("Error replacing WIM: %s", err)
@@ -68,10 +66,7 @@ func (s *StepUpdateISO) Run(ctx context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Replaced WIM at %s", dstWIMPath))
-
 	// Create ISO
-
 	var bootFile string
 	if s.UseEfiBoot {
 		bootFile = filepath.Join(dstDir, "efi", "microsoft", "boot", "efisys.bin")
@@ -79,16 +74,12 @@ func (s *StepUpdateISO) Run(ctx context.Context, state multistep.StateBag) multi
 		bootFile = filepath.Join(dstDir, "boot", "etfsboot.com")
 	}
 
-	ui.Say(fmt.Sprintf("Boot file: %s", bootFile))
-
 	if err := s.createISO(dstDir, dstISOPath, bootFile); err != nil {
 		err = fmt.Errorf("Error creating ISO: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	ui.Say(fmt.Sprintf("Created ISO at %s", dstISOPath))
 
 	// Update state bag with the new backup ISO
 	state.Put(s.OriginalISOPathKey, srcISOPath)

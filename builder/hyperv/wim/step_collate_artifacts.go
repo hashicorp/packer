@@ -101,8 +101,6 @@ func (s *StepCollateArtifacts) Run(ctx context.Context, state multistep.StateBag
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Mounted VHDX %s to %s", files[0], driveLetter))
-
 	s.vhdPath = files[0]
 
 	defer s.dismountVhd(s.vhdPath)
@@ -116,8 +114,6 @@ func (s *StepCollateArtifacts) Run(ctx context.Context, state multistep.StateBag
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	ui.Say(fmt.Sprintf("Created WIM %s from %s", wimPath, capturePath))
 
 	return multistep.ActionContinue
 }

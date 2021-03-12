@@ -32,8 +32,6 @@ func (s *StepUnmountISO) Run(ctx context.Context, state multistep.StateBag) mult
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Dismounted ISO %s", isoPath))
-
 	// Update state bag
 	state.Remove(s.DevicePathKey)
 

@@ -334,8 +334,6 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Dismounted WIM in %s", s.MountDir))
-
 	return multistep.ActionContinue
 }
 

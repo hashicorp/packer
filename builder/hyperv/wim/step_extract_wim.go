@@ -73,8 +73,6 @@ func (s *StepExtractWIM) Run(ctx context.Context, state multistep.StateBag) mult
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Copied WIM from %s to %s", srcWIMPath, dstWIMPath))
-
 	// Update state bag
 	state.Put(s.WIMPathKey, dstWIMPath)
 

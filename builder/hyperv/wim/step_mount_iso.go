@@ -35,8 +35,6 @@ func (s *StepMountISO) Run(ctx context.Context, state multistep.StateBag) multis
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Mounted ISO %s to %s", isoPath, devicePath))
-
 	// Update state bag
 	state.Put(s.DevicePathKey, devicePath)
 
@@ -59,8 +57,6 @@ func (s *StepMountISO) Cleanup(state multistep.StateBag) {
 			state.Put("error", err)
 			ui.Error(err.Error())
 		} else {
-			ui.Say(fmt.Sprintf("Dismounted ISO %s", isoPath))
-
 			// Update state bag
 			state.Remove(s.DevicePathKey)
 		}
